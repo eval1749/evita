@@ -8,52 +8,65 @@
 #include "base/memory/discardable_memory_manager.h"
 
 namespace base {
-
 namespace {
 
-base::LazyInstance<internal::DiscardableMemoryManager>::Leaky g_manager =
-    LAZY_INSTANCE_INITIALIZER;
+// This is admittedly pretty magical.
+const size_t kEmulatedMemoryLimit = 512 * 1024 * 1024;
+const size_t kEmulatedSoftMemoryLimit = 32 * 1024 * 1024;
+const size_t kEmulatedHardMemoryLimitExpirationTimeMs = 1000;
+
+struct SharedState {
+  SharedState()
+      : manager(kEmulatedMemoryLimit,
+                kEmulatedSoftMemoryLimit,
+                TimeDelta::FromMilliseconds(
+                    kEmulatedHardMemoryLimitExpirationTimeMs)) {}
+
+  internal::DiscardableMemoryManager manager;
+};
+LazyInstance<SharedState>::Leaky g_shared_state = LAZY_INSTANCE_INITIALIZER;
 
 }  // namespace
 
 namespace internal {
 
-DiscardableMemoryEmulated::DiscardableMemoryEmulated(size_t size)
-    : is_locked_(false) {
-  g_manager.Pointer()->Register(this, size);
+DiscardableMemoryEmulated::DiscardableMemoryEmulated(size_t bytes)
+    : bytes_(bytes),
+      is_locked_(false) {
+  g_shared_state.Pointer()->manager.Register(this, bytes);
 }
 
 DiscardableMemoryEmulated::~DiscardableMemoryEmulated() {
   if (is_locked_)
     Unlock();
-  g_manager.Pointer()->Unregister(this);
+  g_shared_state.Pointer()->manager.Unregister(this);
 }
 
 // static
-void DiscardableMemoryEmulated::RegisterMemoryPressureListeners() {
-  g_manager.Pointer()->RegisterMemoryPressureListener();
+bool DiscardableMemoryEmulated::ReduceMemoryUsage() {
+  return g_shared_state.Pointer()->manager.ReduceMemoryUsage();
 }
 
 // static
-void DiscardableMemoryEmulated::UnregisterMemoryPressureListeners() {
-  g_manager.Pointer()->UnregisterMemoryPressureListener();
+void DiscardableMemoryEmulated::ReduceMemoryUsageUntilWithinLimit(
+    size_t bytes) {
+  g_shared_state.Pointer()->manager.ReduceMemoryUsageUntilWithinLimit(bytes);
 }
 
 // static
 void DiscardableMemoryEmulated::PurgeForTesting() {
-  g_manager.Pointer()->PurgeAll();
+  g_shared_state.Pointer()->manager.PurgeAll();
 }
 
 bool DiscardableMemoryEmulated::Initialize() {
-  return Lock() == DISCARDABLE_MEMORY_LOCK_STATUS_PURGED;
+  return Lock() != DISCARDABLE_MEMORY_LOCK_STATUS_FAILED;
 }
 
 DiscardableMemoryLockStatus DiscardableMemoryEmulated::Lock() {
   DCHECK(!is_locked_);
 
   bool purged = false;
-  memory_ = g_manager.Pointer()->Acquire(this, &purged);
-  if (!memory_)
+  if (!g_shared_state.Pointer()->manager.AcquireLock(this, &purged))
     return DISCARDABLE_MEMORY_LOCK_STATUS_FAILED;
 
   is_locked_ = true;
@@ -63,13 +76,26 @@ DiscardableMemoryLockStatus DiscardableMemoryEmulated::Lock() {
 
 void DiscardableMemoryEmulated::Unlock() {
   DCHECK(is_locked_);
-  g_manager.Pointer()->Release(this, memory_.Pass());
+  g_shared_state.Pointer()->manager.ReleaseLock(this);
   is_locked_ = false;
 }
 
 void* DiscardableMemoryEmulated::Memory() const {
+  DCHECK(is_locked_);
   DCHECK(memory_);
   return memory_.get();
+}
+
+bool DiscardableMemoryEmulated::AllocateAndAcquireLock() {
+  if (memory_)
+    return true;
+
+  memory_.reset(new uint8[bytes_]);
+  return false;
+}
+
+void DiscardableMemoryEmulated::Purge() {
+  memory_.reset();
 }
 
 }  // namespace internal

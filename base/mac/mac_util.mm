@@ -20,22 +20,13 @@
 #include "base/mac/scoped_cftyperef.h"
 #include "base/mac/scoped_ioobject.h"
 #include "base/mac/scoped_nsobject.h"
+#include "base/mac/sdk_forward_declarations.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_piece.h"
 #include "base/strings/sys_string_conversions.h"
 
 namespace base {
 namespace mac {
-
-// Replicate specific 10.7 SDK declarations for building with prior SDKs.
-#if !defined(MAC_OS_X_VERSION_10_7) || \
-    MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7
-
-enum {
-  NSApplicationPresentationFullScreen = 1 << 10
-};
-
-#endif  // MAC_OS_X_VERSION_10_7
 
 namespace {
 
@@ -365,24 +356,40 @@ void RemoveFromLoginItems() {
 
 bool WasLaunchedAsLoginOrResumeItem() {
   ProcessSerialNumber psn = { 0, kCurrentProcess };
+  ProcessInfoRec info = {};
+  info.processInfoLength = sizeof(info);
 
-  base::scoped_nsobject<NSDictionary> process_info(
-      CFToNSCast(ProcessInformationCopyDictionary(
-          &psn, kProcessDictionaryIncludeAllInformationMask)));
+  if (GetProcessInformation(&psn, &info) == noErr) {
+    ProcessInfoRec parent_info = {};
+    parent_info.processInfoLength = sizeof(parent_info);
+    if (GetProcessInformation(&info.processLauncher, &parent_info) == noErr)
+      return parent_info.processSignature == 'lgnw';
+  }
+  return false;
+}
 
-  long long temp = [[process_info objectForKey:@"ParentPSN"] longLongValue];
-  ProcessSerialNumber parent_psn =
-      { (temp >> 32) & 0x00000000FFFFFFFFLL, temp & 0x00000000FFFFFFFFLL };
+bool WasLaunchedAsLoginItemRestoreState() {
+  // "Reopen windows..." option was added for Lion.  Prior OS versions should
+  // not have this behavior.
+  if (IsOSSnowLeopard() || !WasLaunchedAsLoginOrResumeItem())
+    return false;
 
-  base::scoped_nsobject<NSDictionary> parent_info(
-      CFToNSCast(ProcessInformationCopyDictionary(
-          &parent_psn, kProcessDictionaryIncludeAllInformationMask)));
+  CFStringRef app = CFSTR("com.apple.loginwindow");
+  CFStringRef save_state = CFSTR("TALLogoutSavesState");
+  ScopedCFTypeRef<CFPropertyListRef> plist(
+      CFPreferencesCopyAppValue(save_state, app));
+  // According to documentation, com.apple.loginwindow.plist does not exist on a
+  // fresh installation until the user changes a login window setting.  The
+  // "reopen windows" option is checked by default, so the plist would exist had
+  // the user unchecked it.
+  // https://developer.apple.com/library/mac/documentation/macosx/conceptual/bpsystemstartup/chapters/CustomLogin.html
+  if (!plist)
+    return true;
 
-  // Check that creator process code is that of loginwindow.
-  BOOL result =
-      [[parent_info objectForKey:@"FileCreator"] isEqualToString:@"lgnw"];
+  if (CFBooleanRef restore_state = base::mac::CFCast<CFBooleanRef>(plist))
+    return CFBooleanGetValue(restore_state);
 
-  return result == YES;
+  return false;
 }
 
 bool WasLaunchedAsHiddenLoginItem() {
@@ -469,7 +476,7 @@ int MacOSXMinorVersionInternal() {
   // immediate death.
   CHECK(darwin_major_version >= 6);
   int mac_os_x_minor_version = darwin_major_version - 4;
-  DLOG_IF(WARNING, darwin_major_version > 13) << "Assuming Darwin "
+  DLOG_IF(WARNING, darwin_major_version > 14) << "Assuming Darwin "
       << base::IntToString(darwin_major_version) << " is Mac OS X 10."
       << base::IntToString(mac_os_x_minor_version);
 
@@ -488,6 +495,7 @@ enum {
   LION_MINOR_VERSION = 7,
   MOUNTAIN_LION_MINOR_VERSION = 8,
   MAVERICKS_MINOR_VERSION = 9,
+  YOSEMITE_MINOR_VERSION = 10,
 };
 
 }  // namespace
@@ -534,9 +542,21 @@ bool IsOSMavericksOrLater() {
 }
 #endif
 
-#if !defined(BASE_MAC_MAC_UTIL_H_INLINED_GT_10_9)
-bool IsOSLaterThanMavericks_DontCallThis() {
-  return MacOSXMinorVersion() > MAVERICKS_MINOR_VERSION;
+#if !defined(BASE_MAC_MAC_UTIL_H_INLINED_GT_10_10)
+bool IsOSYosemite() {
+  return MacOSXMinorVersion() == YOSEMITE_MINOR_VERSION;
+}
+#endif
+
+#if !defined(BASE_MAC_MAC_UTIL_H_INLINED_GE_10_10)
+bool IsOSYosemiteOrLater() {
+  return MacOSXMinorVersion() >= YOSEMITE_MINOR_VERSION;
+}
+#endif
+
+#if !defined(BASE_MAC_MAC_UTIL_H_INLINED_GT_10_10)
+bool IsOSLaterThanYosemite_DontCallThis() {
+  return MacOSXMinorVersion() > YOSEMITE_MINOR_VERSION;
 }
 #endif
 

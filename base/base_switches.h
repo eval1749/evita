@@ -11,10 +11,10 @@
 
 namespace switches {
 
-extern const char kDebugOnStart[];
 extern const char kDisableBreakpad[];
 extern const char kEnableCrashReporter[];
 extern const char kFullMemoryCrashReport[];
+extern const char kLowEndDeviceMode[];
 extern const char kNoErrorDialogs[];
 extern const char kProfilerTiming[];
 extern const char kProfilerTimingDisabledValue[];
@@ -26,11 +26,6 @@ extern const char kWaitForDebugger[];
 
 #if defined(OS_POSIX)
 extern const char kEnableCrashReporterForTesting[];
-#endif
-
-#if defined(OS_ANDROID)
-extern const char kDisableLowEndDeviceMode[];
-extern const char kEnableLowEndDeviceMode[];
 #endif
 
 }  // namespace switches

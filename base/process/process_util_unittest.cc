@@ -50,6 +50,7 @@
 #if defined(OS_MACOSX)
 #include <mach/vm_param.h>
 #include <malloc/malloc.h>
+#include "base/mac/mac_util.h"
 #endif
 
 using base::FilePath;
@@ -106,12 +107,7 @@ base::TerminationStatus WaitForChildTermination(base::ProcessHandle handle,
     base::PlatformThread::Sleep(kInterval);
     waited += kInterval;
   } while (status == base::TERMINATION_STATUS_STILL_RUNNING &&
-// Waiting for more time for process termination on android devices.
-#if defined(OS_ANDROID)
-           waited < TestTimeouts::large_test_timeout());
-#else
            waited < TestTimeouts::action_max_timeout());
-#endif
 
   return status;
 }
@@ -469,6 +465,72 @@ int GetMaxFilesOpenInProcess() {
 
 const int kChildPipe = 20;  // FD # for write end of pipe in child process.
 
+#if defined(OS_MACOSX)
+
+// <http://opensource.apple.com/source/xnu/xnu-2422.1.72/bsd/sys/guarded.h>
+#if !defined(_GUARDID_T)
+#define _GUARDID_T
+typedef __uint64_t guardid_t;
+#endif  // _GUARDID_T
+
+// From .../MacOSX10.9.sdk/usr/include/sys/syscall.h
+#if !defined(SYS_change_fdguard_np)
+#define SYS_change_fdguard_np 444
+#endif
+
+// <http://opensource.apple.com/source/xnu/xnu-2422.1.72/bsd/sys/guarded.h>
+#if !defined(GUARD_DUP)
+#define GUARD_DUP (1u << 1)
+#endif
+
+// <http://opensource.apple.com/source/xnu/xnu-2422.1.72/bsd/kern/kern_guarded.c?txt>
+//
+// Atomically replaces |guard|/|guardflags| with |nguard|/|nguardflags| on |fd|.
+int change_fdguard_np(int fd,
+                      const guardid_t *guard, u_int guardflags,
+                      const guardid_t *nguard, u_int nguardflags,
+                      int *fdflagsp) {
+  return syscall(SYS_change_fdguard_np, fd, guard, guardflags,
+                 nguard, nguardflags, fdflagsp);
+}
+
+// Attempt to set a file-descriptor guard on |fd|.  In case of success, remove
+// it and return |true| to indicate that it can be guarded.  Returning |false|
+// means either that |fd| is guarded by some other code, or more likely EBADF.
+//
+// Starting with 10.9, libdispatch began setting GUARD_DUP on a file descriptor.
+// Unfortunately, it is spun up as part of +[NSApplication initialize], which is
+// not really something that Chromium can avoid using on OSX.  See
+// <http://crbug.com/338157>.  This function allows querying whether the file
+// descriptor is guarded before attempting to close it.
+bool CanGuardFd(int fd) {
+  // The syscall is first provided in 10.9/Mavericks.
+  if (!base::mac::IsOSMavericksOrLater())
+    return true;
+
+  // Saves the original flags to reset later.
+  int original_fdflags = 0;
+
+  // This can be any value at all, it just has to match up between the two
+  // calls.
+  const guardid_t kGuard = 15;
+
+  // Attempt to change the guard.  This can fail with EBADF if the file
+  // descriptor is bad, or EINVAL if the fd already has a guard set.
+  int ret =
+      change_fdguard_np(fd, NULL, 0, &kGuard, GUARD_DUP, &original_fdflags);
+  if (ret == -1)
+    return false;
+
+  // Remove the guard.  It should not be possible to fail in removing the guard
+  // just added.
+  ret = change_fdguard_np(fd, &kGuard, GUARD_DUP, NULL, 0, &original_fdflags);
+  DPCHECK(ret == 0);
+
+  return true;
+}
+#endif  // OS_MACOSX
+
 }  // namespace
 
 MULTIPROCESS_TEST_MAIN(ProcessUtilsLeakFDChildProcess) {
@@ -478,6 +540,12 @@ MULTIPROCESS_TEST_MAIN(ProcessUtilsLeakFDChildProcess) {
   int write_pipe = kChildPipe;
   int max_files = GetMaxFilesOpenInProcess();
   for (int i = STDERR_FILENO + 1; i < max_files; i++) {
+#if defined(OS_MACOSX)
+    // Ignore guarded or invalid file descriptors.
+    if (!CanGuardFd(i))
+      continue;
+#endif
+
     if (i != kChildPipe) {
       int fd;
       if ((fd = HANDLE_EINTR(dup(i))) != -1) {
@@ -562,14 +630,11 @@ TEST_F(ProcessUtilTest, MAYBE_FDRemapping) {
 
 namespace {
 
-std::string TestLaunchProcess(const base::EnvironmentMap& env_changes,
+std::string TestLaunchProcess(const std::vector<std::string>& args,
+                              const base::EnvironmentMap& env_changes,
+                              const bool clear_environ,
                               const int clone_flags) {
-  std::vector<std::string> args;
   base::FileHandleMappingVector fds_to_remap;
-
-  args.push_back(kPosixShell);
-  args.push_back("-c");
-  args.push_back("echo $BASE_TEST");
 
   int fds[2];
   PCHECK(pipe(fds) == 0);
@@ -578,6 +643,7 @@ std::string TestLaunchProcess(const base::EnvironmentMap& env_changes,
   base::LaunchOptions options;
   options.wait = true;
   options.environ = env_changes;
+  options.clear_environ = clear_environ;
   options.fds_to_remap = &fds_to_remap;
 #if defined(OS_LINUX)
   options.clone_flags = clone_flags;
@@ -589,7 +655,6 @@ std::string TestLaunchProcess(const base::EnvironmentMap& env_changes,
 
   char buf[512];
   const ssize_t n = HANDLE_EINTR(read(fds[0], buf, sizeof(buf)));
-  PCHECK(n > 0);
 
   PCHECK(IGNORE_EINTR(close(fds[0])) == 0);
 
@@ -609,37 +674,69 @@ const char kLargeString[] =
 
 TEST_F(ProcessUtilTest, LaunchProcess) {
   base::EnvironmentMap env_changes;
+  std::vector<std::string> echo_base_test;
+  echo_base_test.push_back(kPosixShell);
+  echo_base_test.push_back("-c");
+  echo_base_test.push_back("echo $BASE_TEST");
+
+  std::vector<std::string> print_env;
+  print_env.push_back("/usr/bin/env");
   const int no_clone_flags = 0;
+  const bool no_clear_environ = false;
 
   const char kBaseTest[] = "BASE_TEST";
 
   env_changes[kBaseTest] = "bar";
-  EXPECT_EQ("bar\n", TestLaunchProcess(env_changes, no_clone_flags));
+  EXPECT_EQ("bar\n",
+            TestLaunchProcess(
+                echo_base_test, env_changes, no_clear_environ, no_clone_flags));
   env_changes.clear();
 
   EXPECT_EQ(0, setenv(kBaseTest, "testing", 1 /* override */));
-  EXPECT_EQ("testing\n", TestLaunchProcess(env_changes, no_clone_flags));
+  EXPECT_EQ("testing\n",
+            TestLaunchProcess(
+                echo_base_test, env_changes, no_clear_environ, no_clone_flags));
 
   env_changes[kBaseTest] = std::string();
-  EXPECT_EQ("\n", TestLaunchProcess(env_changes, no_clone_flags));
+  EXPECT_EQ("\n",
+            TestLaunchProcess(
+                echo_base_test, env_changes, no_clear_environ, no_clone_flags));
 
   env_changes[kBaseTest] = "foo";
-  EXPECT_EQ("foo\n", TestLaunchProcess(env_changes, no_clone_flags));
+  EXPECT_EQ("foo\n",
+            TestLaunchProcess(
+                echo_base_test, env_changes, no_clear_environ, no_clone_flags));
 
   env_changes.clear();
   EXPECT_EQ(0, setenv(kBaseTest, kLargeString, 1 /* override */));
   EXPECT_EQ(std::string(kLargeString) + "\n",
-            TestLaunchProcess(env_changes, no_clone_flags));
+            TestLaunchProcess(
+                echo_base_test, env_changes, no_clear_environ, no_clone_flags));
 
   env_changes[kBaseTest] = "wibble";
-  EXPECT_EQ("wibble\n", TestLaunchProcess(env_changes, no_clone_flags));
+  EXPECT_EQ("wibble\n",
+            TestLaunchProcess(
+                echo_base_test, env_changes, no_clear_environ, no_clone_flags));
 
 #if defined(OS_LINUX)
   // Test a non-trival value for clone_flags.
   // Don't test on Valgrind as it has limited support for clone().
   if (!RunningOnValgrind()) {
-    EXPECT_EQ("wibble\n", TestLaunchProcess(env_changes, CLONE_FS | SIGCHLD));
+    EXPECT_EQ(
+        "wibble\n",
+        TestLaunchProcess(
+            echo_base_test, env_changes, no_clear_environ, CLONE_FS | SIGCHLD));
   }
+
+  EXPECT_EQ(
+      "BASE_TEST=wibble\n",
+      TestLaunchProcess(
+          print_env, env_changes, true /* clear_environ */, no_clone_flags));
+  env_changes.clear();
+  EXPECT_EQ(
+      "",
+      TestLaunchProcess(
+          print_env, env_changes, true /* clear_environ */, no_clone_flags));
 #endif
 }
 
@@ -677,7 +774,13 @@ TEST_F(ProcessUtilTest, GetAppOutput) {
 #endif  // defined(OS_ANDROID)
 }
 
-TEST_F(ProcessUtilTest, GetAppOutputRestricted) {
+// Flakes on Android, crbug.com/375840
+#if defined(OS_ANDROID)
+#define MAYBE_GetAppOutputRestricted DISABLED_GetAppOutputRestricted
+#else
+#define MAYBE_GetAppOutputRestricted GetAppOutputRestricted
+#endif
+TEST_F(ProcessUtilTest, MAYBE_GetAppOutputRestricted) {
   // Unfortunately, since we can't rely on the path, we need to know where
   // everything is. So let's use /bin/sh, which is on every POSIX system, and
   // its built-ins.

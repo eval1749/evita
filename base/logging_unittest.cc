@@ -32,7 +32,6 @@ class LogStateSaver {
   ~LogStateSaver() {
     SetMinLogLevel(old_min_log_level_);
     SetLogAssertHandler(NULL);
-    SetLogReportHandler(NULL);
     log_sink_call_count = 0;
   }
 
@@ -54,11 +53,7 @@ class MockLogSource {
 
 TEST_F(LoggingTest, BasicLogging) {
   MockLogSource mock_log_source;
-  const int kExpectedDebugOrReleaseCalls = 6;
-  const int kExpectedDebugCalls = 6;
-  const int kExpectedCalls =
-      kExpectedDebugOrReleaseCalls + (DEBUG_MODE ? kExpectedDebugCalls : 0);
-  EXPECT_CALL(mock_log_source, Log()).Times(kExpectedCalls).
+  EXPECT_CALL(mock_log_source, Log()).Times(DEBUG_MODE ? 16 : 8).
       WillRepeatedly(Return("log message"));
 
   SetMinLogLevel(LOG_INFO);
@@ -76,6 +71,8 @@ TEST_F(LoggingTest, BasicLogging) {
   PLOG_IF(INFO, true) << mock_log_source.Log();
   VLOG(0) << mock_log_source.Log();
   VLOG_IF(0, true) << mock_log_source.Log();
+  VPLOG(0) << mock_log_source.Log();
+  VPLOG_IF(0, true) << mock_log_source.Log();
 
   DLOG(INFO) << mock_log_source.Log();
   DLOG_IF(INFO, true) << mock_log_source.Log();
@@ -83,6 +80,8 @@ TEST_F(LoggingTest, BasicLogging) {
   DPLOG_IF(INFO, true) << mock_log_source.Log();
   DVLOG(0) << mock_log_source.Log();
   DVLOG_IF(0, true) << mock_log_source.Log();
+  DVPLOG(0) << mock_log_source.Log();
+  DVPLOG_IF(0, true) << mock_log_source.Log();
 }
 
 TEST_F(LoggingTest, LogIsOn) {
@@ -96,7 +95,6 @@ TEST_F(LoggingTest, LogIsOn) {
   EXPECT_TRUE(LOG_IS_ON(INFO));
   EXPECT_TRUE(LOG_IS_ON(WARNING));
   EXPECT_TRUE(LOG_IS_ON(ERROR));
-  EXPECT_TRUE(LOG_IS_ON(ERROR_REPORT));
   EXPECT_TRUE(LOG_IS_ON(FATAL));
   EXPECT_TRUE(LOG_IS_ON(DFATAL));
 
@@ -104,7 +102,6 @@ TEST_F(LoggingTest, LogIsOn) {
   EXPECT_FALSE(LOG_IS_ON(INFO));
   EXPECT_TRUE(LOG_IS_ON(WARNING));
   EXPECT_TRUE(LOG_IS_ON(ERROR));
-  EXPECT_TRUE(LOG_IS_ON(ERROR_REPORT));
   EXPECT_TRUE(LOG_IS_ON(FATAL));
   EXPECT_TRUE(LOG_IS_ON(DFATAL));
 
@@ -112,33 +109,14 @@ TEST_F(LoggingTest, LogIsOn) {
   EXPECT_FALSE(LOG_IS_ON(INFO));
   EXPECT_FALSE(LOG_IS_ON(WARNING));
   EXPECT_TRUE(LOG_IS_ON(ERROR));
-  EXPECT_TRUE(LOG_IS_ON(ERROR_REPORT));
   EXPECT_TRUE(LOG_IS_ON(FATAL));
   EXPECT_TRUE(LOG_IS_ON(DFATAL));
 
-  SetMinLogLevel(LOG_ERROR_REPORT);
-  EXPECT_FALSE(LOG_IS_ON(INFO));
-  EXPECT_FALSE(LOG_IS_ON(WARNING));
-  EXPECT_FALSE(LOG_IS_ON(ERROR));
-  EXPECT_TRUE(LOG_IS_ON(ERROR_REPORT));
-  EXPECT_TRUE(LOG_IS_ON(FATAL));
-  EXPECT_TRUE(kDfatalIsFatal == LOG_IS_ON(DFATAL));
-
-  // LOG_IS_ON(ERROR_REPORT) should always be true.
-  SetMinLogLevel(LOG_FATAL);
-  EXPECT_FALSE(LOG_IS_ON(INFO));
-  EXPECT_FALSE(LOG_IS_ON(WARNING));
-  EXPECT_FALSE(LOG_IS_ON(ERROR));
-  EXPECT_TRUE(LOG_IS_ON(ERROR_REPORT));
-  EXPECT_TRUE(LOG_IS_ON(FATAL));
-  EXPECT_TRUE(kDfatalIsFatal == LOG_IS_ON(DFATAL));
-
-  // So should LOG_IS_ON(FATAL).
+  // LOG_IS_ON(FATAL) should always be true.
   SetMinLogLevel(LOG_FATAL + 1);
   EXPECT_FALSE(LOG_IS_ON(INFO));
   EXPECT_FALSE(LOG_IS_ON(WARNING));
   EXPECT_FALSE(LOG_IS_ON(ERROR));
-  EXPECT_TRUE(LOG_IS_ON(ERROR_REPORT));
   EXPECT_TRUE(LOG_IS_ON(FATAL));
   EXPECT_TRUE(kDfatalIsFatal == LOG_IS_ON(DFATAL));
 }
@@ -159,6 +137,8 @@ TEST_F(LoggingTest, LoggingIsLazy) {
   PLOG_IF(INFO, false) << mock_log_source.Log();
   VLOG(1) << mock_log_source.Log();
   VLOG_IF(1, true) << mock_log_source.Log();
+  VPLOG(1) << mock_log_source.Log();
+  VPLOG_IF(1, true) << mock_log_source.Log();
 
   DLOG(INFO) << mock_log_source.Log();
   DLOG_IF(INFO, true) << mock_log_source.Log();
@@ -166,6 +146,8 @@ TEST_F(LoggingTest, LoggingIsLazy) {
   DPLOG_IF(INFO, true) << mock_log_source.Log();
   DVLOG(1) << mock_log_source.Log();
   DVLOG_IF(1, true) << mock_log_source.Log();
+  DVPLOG(1) << mock_log_source.Log();
+  DVPLOG_IF(1, true) << mock_log_source.Log();
 }
 
 // Official builds have CHECKs directly call BreakDebugger.
@@ -250,6 +232,24 @@ TEST_F(LoggingTest, DcheckReleaseBehavior) {
   DPCHECK(some_variable) << "test";
   DCHECK_EQ(some_variable, 1) << "test";
 }
+
+// Test that defining an operator<< for a type in a namespace doesn't prevent
+// other code in that namespace from calling the operator<<(ostream, wstring)
+// defined by logging.h. This can fail if operator<<(ostream, wstring) can't be
+// found by ADL, since defining another operator<< prevents name lookup from
+// looking in the global namespace.
+namespace nested_test {
+  class Streamable {};
+  ALLOW_UNUSED std::ostream& operator<<(std::ostream& out, const Streamable&) {
+    return out << "Streamable";
+  }
+  TEST_F(LoggingTest, StreamingWstringFindsCorrectOperator) {
+    std::wstring wstr = L"Hello World";
+    std::ostringstream ostr;
+    ostr << wstr;
+    EXPECT_EQ("Hello World", ostr.str());
+  }
+}  // namespace nested_test
 
 }  // namespace
 

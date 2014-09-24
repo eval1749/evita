@@ -27,7 +27,7 @@ namespace win {
 
 // Generic wrapper for raw handles that takes care of closing handles
 // automatically. The class interface follows the style of
-// the ScopedStdioHandle class with one addition:
+// the ScopedFILE class with one addition:
 //   - IsValid() method can tolerate multiple invalid handle values such as NULL
 //     and INVALID_HANDLE_VALUE (-1) for Win32 handles.
 template <class Traits, class Verifier>
@@ -101,9 +101,7 @@ class GenericScopedHandle {
       Verifier::StopTracking(handle_, this, BASE_WIN_GET_CALLER,
                              tracked_objects::GetProgramCounter());
 
-      if (!Traits::CloseHandle(handle_))
-        CHECK(false);
-
+      Traits::CloseHandle(handle_);
       handle_ = Traits::NullHandle();
     }
   }
@@ -120,9 +118,7 @@ class HandleTraits {
   typedef HANDLE Handle;
 
   // Closes the handle.
-  static bool CloseHandle(HANDLE handle) {
-    return ::CloseHandle(handle) != FALSE;
-  }
+  static bool BASE_EXPORT CloseHandle(HANDLE handle);
 
   // Returns true if the handle value is valid.
   static bool IsHandleValid(HANDLE handle) {
@@ -143,10 +139,13 @@ class DummyVerifierTraits {
  public:
   typedef HANDLE Handle;
 
+#pragma warning(push)
+#pragma warning(disable: 4100)
   static void StartTracking(HANDLE handle, const void* owner,
                             const void* pc1, const void* pc2) {}
   static void StopTracking(HANDLE handle, const void* owner,
                            const void* pc1, const void* pc2) {}
+#pragma warning(pop)
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(DummyVerifierTraits);
@@ -167,6 +166,17 @@ class BASE_EXPORT VerifierTraits {
 };
 
 typedef GenericScopedHandle<HandleTraits, VerifierTraits> ScopedHandle;
+
+// This function may be called by the embedder to disable the use of
+// VerifierTraits at runtime. It has no effect if DummyVerifierTraits is used
+// for ScopedHandle.
+void BASE_EXPORT DisableHandleVerifier();
+
+// This should be called whenever the OS is closing a handle, if extended
+// verification of improper handle closing is desired. If |handle| is being
+// tracked by the handle verifier and ScopedHandle is not the one closing it,
+// a CHECK is generated.
+void BASE_EXPORT OnHandleBeingClosed(HANDLE handle);
 
 }  // namespace win
 }  // namespace base

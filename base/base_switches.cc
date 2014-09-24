@@ -6,12 +6,6 @@
 
 namespace switches {
 
-// If the program includes base/debug/debug_on_start_win.h, the process will
-// (on Windows only) start the JIT system-registered debugger on itself and
-// will wait for 60 seconds for the debugger to attach to itself. Then a break
-// point will be hit.
-const char kDebugOnStart[]                  = "debug-on-start";
-
 // Disables the crash reporting.
 const char kDisableBreakpad[]               = "disable-breakpad";
 
@@ -22,6 +16,11 @@ const char kEnableCrashReporter[]           = "enable-crash-reporter";
 
 // Generates full memory crash dump.
 const char kFullMemoryCrashReport[]         = "full-memory-crash-report";
+
+// Force low-end device when set to 1;
+// Auto-detect low-end device when set to 2;
+// Force non-low-end device when set to other values or empty;
+const char kLowEndDeviceMode[]              = "low-end-device-mode";
 
 // Suppresses all error dialogs when present.
 const char kNoErrorDialogs[]                = "noerrdialogs";
@@ -64,14 +63,6 @@ const char kProfilerTimingDisabledValue[]   = "0";
 // crash reporting is typically compiled but disabled.
 const char kEnableCrashReporterForTesting[] =
     "enable-crash-reporter-for-testing";
-#endif
-
-#if defined(OS_ANDROID)
-// Overrides low-end device detection, disabling low-end device optimizations.
-const char kDisableLowEndDeviceMode[]       = "disable-low-end-device-mode";
-
-// Overrides low-end device detection, enabling low-end device optimizations.
-const char kEnableLowEndDeviceMode[]        = "enable-low-end-device-mode";
 #endif
 
 }  // namespace switches

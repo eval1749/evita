@@ -24,6 +24,7 @@
     # Relative path to icu.gyp from this file.
     'icu_gyp_path%': '<(DEPTH)/third_party/icu/icu.gyp',
     'icu_use_data_file_flag%': 0,
+    'incremental_chrome_dll%': '0',
     'os_posix': 0,
     'target_arch%': '<(target_arch)',
     'use_custom_libcxx%': 0,

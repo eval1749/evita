@@ -8,8 +8,6 @@
 
 #include "base/bind.h"
 #include "base/compiler_specific.h"
-#include "base/debug/alias.h"
-#include "base/debug/trace_event.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
@@ -31,6 +29,9 @@
 #endif
 #if defined(OS_ANDROID)
 #include "base/message_loop/message_pump_android.h"
+#endif
+#if defined(USE_GLIB)
+#include "base/message_loop/message_pump_glib.h"
 #endif
 
 namespace base {
@@ -89,10 +90,24 @@ MessageLoop::MessagePumpFactory* message_pump_for_ui_factory_ = NULL;
 // time for every task that is added to the MessageLoop incoming queue.
 bool AlwaysNotifyPump(MessageLoop::Type type) {
 #if defined(OS_ANDROID)
+  // The Android UI message loop needs to get notified each time a task is added
+  // to the incoming queue.
   return type == MessageLoop::TYPE_UI || type == MessageLoop::TYPE_JAVA;
 #else
   return false;
 #endif
+}
+
+#if defined(OS_IOS)
+typedef MessagePumpIOSForIO MessagePumpForIO;
+#elif defined(OS_NACL)
+typedef MessagePumpDefault MessagePumpForIO;
+#elif defined(OS_POSIX)
+typedef MessagePumpLibevent MessagePumpForIO;
+#endif
+
+MessagePumpForIO* ToPumpIO(MessagePump* pump) {
+  return static_cast<MessagePumpForIO*>(pump);
 }
 
 }  // namespace
@@ -112,6 +127,8 @@ MessageLoop::DestructionObserver::~DestructionObserver() {
 
 MessageLoop::MessageLoop(Type type)
     : type_(type),
+      pending_high_res_tasks_(0),
+      in_high_res_mode_(false),
       nestable_tasks_allowed_(true),
 #if defined(OS_WIN)
       os_modal_loop_(false),
@@ -126,6 +143,8 @@ MessageLoop::MessageLoop(Type type)
 MessageLoop::MessageLoop(scoped_ptr<MessagePump> pump)
     : pump_(pump.Pass()),
       type_(TYPE_CUSTOM),
+      pending_high_res_tasks_(0),
+      in_high_res_mode_(false),
       nestable_tasks_allowed_(true),
 #if defined(OS_WIN)
       os_modal_loop_(false),
@@ -140,7 +159,10 @@ MessageLoop::~MessageLoop() {
   DCHECK_EQ(this, current());
 
   DCHECK(!run_loop_);
-
+#if defined(OS_WIN)
+  if (in_high_res_mode_)
+    Time::ActivateHighResolutionTimer(false);
+#endif
   // Clean up any unprocessed tasks, but take care: deleting a task could
   // result in the addition of more tasks (e.g., via DeleteSoon).  We set a
   // limit on the number of times we will allow a deleted task to generate more
@@ -198,30 +220,28 @@ bool MessageLoop::InitMessagePumpForUIFactory(MessagePumpFactory* factory) {
 // static
 scoped_ptr<MessagePump> MessageLoop::CreateMessagePumpForType(Type type) {
 // TODO(rvargas): Get rid of the OS guards.
-#if defined(OS_WIN)
-#define MESSAGE_PUMP_UI scoped_ptr<MessagePump>(new MessagePumpForUI())
-#define MESSAGE_PUMP_IO scoped_ptr<MessagePump>(new MessagePumpForIO())
-#elif defined(OS_IOS)
+#if defined(USE_GLIB) && !defined(OS_NACL)
+  typedef MessagePumpGlib MessagePumpForUI;
+#elif defined(OS_LINUX) && !defined(OS_NACL)
+  typedef MessagePumpLibevent MessagePumpForUI;
+#endif
+
+#if defined(OS_IOS) || defined(OS_MACOSX)
 #define MESSAGE_PUMP_UI scoped_ptr<MessagePump>(MessagePumpMac::Create())
-#define MESSAGE_PUMP_IO scoped_ptr<MessagePump>(new MessagePumpIOSForIO())
-#elif defined(OS_MACOSX)
-#define MESSAGE_PUMP_UI scoped_ptr<MessagePump>(MessagePumpMac::Create())
-#define MESSAGE_PUMP_IO scoped_ptr<MessagePump>(new MessagePumpLibevent())
 #elif defined(OS_NACL)
 // Currently NaCl doesn't have a UI MessageLoop.
 // TODO(abarth): Figure out if we need this.
 #define MESSAGE_PUMP_UI scoped_ptr<MessagePump>()
-// ipc_channel_nacl.cc uses a worker thread to do socket reads currently, and
-// doesn't require extra support for watching file descriptors.
-#define MESSAGE_PUMP_IO scoped_ptr<MessagePump>(new MessagePumpDefault())
-#elif defined(USE_OZONE)
-#define MESSAGE_PUMP_UI scoped_ptr<MessagePump>(new MessagePumpLibevent())
-#define MESSAGE_PUMP_IO scoped_ptr<MessagePump>(new MessagePumpLibevent())
-#elif defined(OS_POSIX)  // POSIX but not MACOSX.
-#define MESSAGE_PUMP_UI scoped_ptr<MessagePump>(new MessagePumpForUI())
-#define MESSAGE_PUMP_IO scoped_ptr<MessagePump>(new MessagePumpLibevent())
 #else
-#error Not implemented
+#define MESSAGE_PUMP_UI scoped_ptr<MessagePump>(new MessagePumpForUI())
+#endif
+
+#if defined(OS_MACOSX)
+  // Use an OS native runloop on Mac to support timer coalescing.
+  #define MESSAGE_PUMP_DEFAULT \
+      scoped_ptr<MessagePump>(new MessagePumpCFRunLoop())
+#else
+  #define MESSAGE_PUMP_DEFAULT scoped_ptr<MessagePump>(new MessagePumpDefault())
 #endif
 
   if (type == MessageLoop::TYPE_UI) {
@@ -230,13 +250,15 @@ scoped_ptr<MessagePump> MessageLoop::CreateMessagePumpForType(Type type) {
     return MESSAGE_PUMP_UI;
   }
   if (type == MessageLoop::TYPE_IO)
-    return MESSAGE_PUMP_IO;
+    return scoped_ptr<MessagePump>(new MessagePumpForIO());
+
 #if defined(OS_ANDROID)
   if (type == MessageLoop::TYPE_JAVA)
-    return MESSAGE_PUMP_UI;
+    return scoped_ptr<MessagePump>(new MessagePumpForUI());
 #endif
+
   DCHECK_EQ(MessageLoop::TYPE_DEFAULT, type);
-  return scoped_ptr<MessagePump>(new MessagePumpDefault());
+  return MESSAGE_PUMP_DEFAULT;
 }
 
 void MessageLoop::AddDestructionObserver(
@@ -354,8 +376,8 @@ bool MessageLoop::is_running() const {
   return run_loop_ != NULL;
 }
 
-bool MessageLoop::IsHighResolutionTimerEnabledForTesting() {
-  return incoming_task_queue_->IsHighResolutionTimerEnabledForTesting();
+bool MessageLoop::HasHighResolutionTasks() {
+  return incoming_task_queue_->HasHighResolutionTasks();
 }
 
 bool MessageLoop::IsIdleForTesting() {
@@ -408,44 +430,23 @@ bool MessageLoop::ProcessNextDelayedNonNestableTask() {
 }
 
 void MessageLoop::RunTask(const PendingTask& pending_task) {
-  tracked_objects::TrackedTime start_time =
-      tracked_objects::ThreadData::NowForStartOfRun(pending_task.birth_tally);
-
-  TRACE_EVENT_FLOW_END1(TRACE_DISABLED_BY_DEFAULT("toplevel.flow"),
-      "MessageLoop::PostTask", TRACE_ID_MANGLE(GetTaskTraceID(pending_task)),
-      "queue_duration",
-      (start_time - pending_task.EffectiveTimePosted()).InMilliseconds());
-  // When tracing memory for posted tasks it's more valuable to attribute the
-  // memory allocations to the source function than generically to "RunTask".
-  TRACE_EVENT_WITH_MEMORY_TAG2(
-      "toplevel", "MessageLoop::RunTask",
-      pending_task.posted_from.function_name(),  // Name for memory tracking.
-      "src_file", pending_task.posted_from.file_name(),
-      "src_func", pending_task.posted_from.function_name());
-
   DCHECK(nestable_tasks_allowed_);
+
+  if (pending_task.is_high_res) {
+    pending_high_res_tasks_--;
+    CHECK(pending_high_res_tasks_ >= 0);
+  }
   // Execute the task and assume the worst: It is probably not reentrant.
   nestable_tasks_allowed_ = false;
-
-  // Before running the task, store the program counter where it was posted
-  // and deliberately alias it to ensure it is on the stack if the task
-  // crashes. Be careful not to assume that the variable itself will have the
-  // expected value when displayed by the optimizer in an optimized build.
-  // Look at a memory dump of the stack.
-  const void* program_counter =
-      pending_task.posted_from.program_counter();
-  debug::Alias(&program_counter);
 
   HistogramEvent(kTaskRunEvent);
 
   FOR_EACH_OBSERVER(TaskObserver, task_observers_,
                     WillProcessTask(pending_task));
-  pending_task.task.Run();
+  task_annotator_.RunTask(
+      "MessageLoop::PostTask", "MessageLoop::RunTask", pending_task);
   FOR_EACH_OBSERVER(TaskObserver, task_observers_,
                     DidProcessTask(pending_task));
-
-  tracked_objects::ThreadData::TallyRunOnNamedThreadIfTracking(pending_task,
-      start_time, tracked_objects::ThreadData::NowForEndOfRun());
 
   nestable_tasks_allowed_ = true;
 }
@@ -498,23 +499,18 @@ bool MessageLoop::DeletePendingTasks() {
   return did_work;
 }
 
-uint64 MessageLoop::GetTaskTraceID(const PendingTask& task) {
-  return (static_cast<uint64>(task.sequence_num) << 32) |
-         ((static_cast<uint64>(reinterpret_cast<intptr_t>(this)) << 32) >> 32);
-}
-
 void MessageLoop::ReloadWorkQueue() {
   // We can improve performance of our loading tasks from the incoming queue to
   // |*work_queue| by waiting until the last minute (|*work_queue| is empty) to
   // load. That reduces the number of locks-per-task significantly when our
   // queues get large.
-  if (work_queue_.empty())
-    incoming_task_queue_->ReloadWorkQueue(&work_queue_);
+  if (work_queue_.empty()) {
+    pending_high_res_tasks_ +=
+        incoming_task_queue_->ReloadWorkQueue(&work_queue_);
+  }
 }
 
 void MessageLoop::ScheduleWork(bool was_empty) {
-  // The Android UI message loop needs to get notified each time
-  // a task is added to the incoming queue.
   if (was_empty || AlwaysNotifyPump(type_))
     pump_->ScheduleWork();
 }
@@ -614,21 +610,19 @@ bool MessageLoop::DoIdleWork() {
   if (run_loop_->quit_when_idle_received_)
     pump_->Quit();
 
-  return false;
-}
-
-void MessageLoop::GetQueueingInformation(size_t* queue_size,
-                                         TimeDelta* queueing_delay) {
-  *queue_size = work_queue_.size();
-  if (*queue_size == 0) {
-    *queueing_delay = TimeDelta();
-    return;
+  // When we return we will do a kernel wait for more tasks.
+#if defined(OS_WIN)
+  // On Windows we activate the high resolution timer so that the wait
+  // _if_ triggered by the timer happens with good resolution. If we don't
+  // do this the default resolution is 15ms which might not be acceptable
+  // for some tasks.
+  bool high_res = pending_high_res_tasks_ > 0;
+  if (high_res != in_high_res_mode_) {
+    in_high_res_mode_ = high_res;
+    Time::ActivateHighResolutionTimer(in_high_res_mode_);
   }
-
-  const PendingTask& next_to_run = work_queue_.front();
-  tracked_objects::Duration duration =
-      tracked_objects::TrackedTime::Now() - next_to_run.EffectiveTimePosted();
-  *queueing_delay = TimeDelta::FromMilliseconds(duration.InMilliseconds());
+#endif
+  return false;
 }
 
 void MessageLoop::DeleteSoonInternal(const tracked_objects::Location& from_here,
@@ -644,6 +638,7 @@ void MessageLoop::ReleaseSoonInternal(
   PostNonNestableTask(from_here, Bind(releaser, object));
 }
 
+#if !defined(OS_NACL)
 //------------------------------------------------------------------------------
 // MessageLoopForUI
 
@@ -660,24 +655,14 @@ void MessageLoopForUI::Attach() {
 }
 #endif
 
-#if !defined(OS_NACL) && defined(OS_WIN)
-void MessageLoopForUI::AddObserver(Observer* observer) {
-  pump_ui()->AddObserver(observer);
-}
-
-void MessageLoopForUI::RemoveObserver(Observer* observer) {
-  pump_ui()->RemoveObserver(observer);
-}
-#endif  // !defined(OS_NACL) && defined(OS_WIN)
-
-#if defined(USE_OZONE) && !defined(OS_NACL)
+#if defined(USE_OZONE) || (defined(USE_X11) && !defined(USE_GLIB))
 bool MessageLoopForUI::WatchFileDescriptor(
     int fd,
     bool persistent,
     MessagePumpLibevent::Mode mode,
     MessagePumpLibevent::FileDescriptorWatcher *controller,
     MessagePumpLibevent::Watcher *delegate) {
-  return pump_libevent()->WatchFileDescriptor(
+  return static_cast<MessagePumpLibevent*>(pump_.get())->WatchFileDescriptor(
       fd,
       persistent,
       mode,
@@ -685,54 +670,50 @@ bool MessageLoopForUI::WatchFileDescriptor(
       delegate);
 }
 #endif
+
+#endif  // !defined(OS_NACL)
 
 //------------------------------------------------------------------------------
 // MessageLoopForIO
 
-#if defined(OS_WIN)
+#if !defined(OS_NACL)
+void MessageLoopForIO::AddIOObserver(
+    MessageLoopForIO::IOObserver* io_observer) {
+  ToPumpIO(pump_.get())->AddIOObserver(io_observer);
+}
 
+void MessageLoopForIO::RemoveIOObserver(
+    MessageLoopForIO::IOObserver* io_observer) {
+  ToPumpIO(pump_.get())->RemoveIOObserver(io_observer);
+}
+
+#if defined(OS_WIN)
 void MessageLoopForIO::RegisterIOHandler(HANDLE file, IOHandler* handler) {
-  pump_io()->RegisterIOHandler(file, handler);
+  ToPumpIO(pump_.get())->RegisterIOHandler(file, handler);
 }
 
 bool MessageLoopForIO::RegisterJobObject(HANDLE job, IOHandler* handler) {
-  return pump_io()->RegisterJobObject(job, handler);
+  return ToPumpIO(pump_.get())->RegisterJobObject(job, handler);
 }
 
 bool MessageLoopForIO::WaitForIOCompletion(DWORD timeout, IOHandler* filter) {
-  return pump_io()->WaitForIOCompletion(timeout, filter);
+  return ToPumpIO(pump_.get())->WaitForIOCompletion(timeout, filter);
 }
-
-#elif defined(OS_IOS)
-
+#elif defined(OS_POSIX)
 bool MessageLoopForIO::WatchFileDescriptor(int fd,
                                            bool persistent,
                                            Mode mode,
                                            FileDescriptorWatcher *controller,
                                            Watcher *delegate) {
-  return pump_io()->WatchFileDescriptor(
+  return ToPumpIO(pump_.get())->WatchFileDescriptor(
       fd,
       persistent,
       mode,
       controller,
       delegate);
 }
-
-#elif defined(OS_POSIX) && !defined(OS_NACL)
-
-bool MessageLoopForIO::WatchFileDescriptor(int fd,
-                                           bool persistent,
-                                           Mode mode,
-                                           FileDescriptorWatcher *controller,
-                                           Watcher *delegate) {
-  return pump_libevent()->WatchFileDescriptor(
-      fd,
-      persistent,
-      mode,
-      controller,
-      delegate);
-}
-
 #endif
+
+#endif  // !defined(OS_NACL)
 
 }  // namespace base

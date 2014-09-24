@@ -6,7 +6,6 @@
 
 #include <algorithm>
 
-#include "base/run_loop.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 #if defined(OS_ANDROID)
@@ -19,12 +18,8 @@ namespace {
 class DiscardableMemoryTest
     : public testing::TestWithParam<DiscardableMemoryType> {
  public:
-  DiscardableMemoryTest() : message_loop_(MessageLoop::TYPE_IO) {
-    // Register memory pressure listeners now that we have a message loop.
-    DiscardableMemory::RegisterMemoryPressureListeners();
-  }
+  DiscardableMemoryTest() {}
   virtual ~DiscardableMemoryTest() {
-    DiscardableMemory::UnregisterMemoryPressureListeners();
   }
 
  protected:
@@ -32,9 +27,6 @@ class DiscardableMemoryTest
     return DiscardableMemory::CreateLockedMemoryWithType(
         GetParam(), size).Pass();
   }
-
- private:
-  MessageLoop message_loop_;
 };
 
 const size_t kSize = 1024;
@@ -47,7 +39,7 @@ TEST_P(DiscardableMemoryTest, IsNamed) {
 
 bool IsNativeType(DiscardableMemoryType type) {
   return
-      type == DISCARDABLE_MEMORY_TYPE_ANDROID ||
+      type == DISCARDABLE_MEMORY_TYPE_ASHMEM ||
       type == DISCARDABLE_MEMORY_TYPE_MAC;
 }
 
@@ -91,11 +83,8 @@ TEST_P(DiscardableMemoryTest, DeleteWhileLocked) {
   ASSERT_TRUE(memory);
 }
 
-#if !defined(OS_ANDROID)
 // Test forced purging.
 TEST_P(DiscardableMemoryTest, Purge) {
-  ASSERT_TRUE(DiscardableMemory::PurgeForTestingSupported());
-
   const scoped_ptr<DiscardableMemory> memory(CreateLockedMemory(kSize));
   ASSERT_TRUE(memory);
   memory->Unlock();
@@ -103,7 +92,6 @@ TEST_P(DiscardableMemoryTest, Purge) {
   DiscardableMemory::PurgeForTesting();
   EXPECT_EQ(DISCARDABLE_MEMORY_LOCK_STATUS_PURGED, memory->Lock());
 }
-#endif  // !OS_ANDROID
 
 #if !defined(NDEBUG) && !defined(OS_ANDROID)
 // Death tests are not supported with Android APKs.

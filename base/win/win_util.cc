@@ -6,6 +6,7 @@
 
 #include <aclapi.h>
 #include <lm.h>
+#include <powrprof.h>
 #include <shellapi.h>
 #include <shlobj.h>
 #include <shobjidl.h>  // Must be before propkey.
@@ -221,14 +222,29 @@ void SetAbortBehaviorForCrashReporting() {
   signal(SIGABRT, ForceCrashOnSigAbort);
 }
 
-bool IsTouchEnabledDevice() {
-  if (base::win::GetVersion() < base::win::VERSION_WIN7)
+bool IsTabletDevice() {
+  if (GetSystemMetrics(SM_MAXIMUMTOUCHES) == 0)
     return false;
-  const int kMultiTouch = NID_INTEGRATED_TOUCH | NID_MULTI_INPUT | NID_READY;
-  int sm = GetSystemMetrics(SM_DIGITIZER);
-  if ((sm & kMultiTouch) == kMultiTouch) {
-    return true;
-  }
+
+  base::win::Version version = base::win::GetVersion();
+  if (version == base::win::VERSION_XP)
+    return (GetSystemMetrics(SM_TABLETPC) != 0);
+
+  // If the device is docked, the user is treating the device as a PC.
+  if (GetSystemMetrics(SM_SYSTEMDOCKED) != 0)
+    return false;
+
+  // PlatformRoleSlate was only added in Windows 8, but prior to Win8 it is
+  // still possible to check for a mobile power profile.
+  POWER_PLATFORM_ROLE role = PowerDeterminePlatformRole();
+  bool mobile_power_profile = (role == PlatformRoleMobile);
+  bool slate_power_profile = false;
+  if (version >= base::win::VERSION_WIN8)
+    slate_power_profile = (role == PlatformRoleSlate);
+
+  if (mobile_power_profile || slate_power_profile)
+    return (GetSystemMetrics(SM_CONVERTIBLESLATEMODE) == 0);
+
   return false;
 }
 
@@ -352,6 +368,25 @@ bool IsEnrolledToDomain() {
 
 void SetDomainStateForTesting(bool state) {
   g_domain_state = state ? ENROLLED : NOT_ENROLLED;
+}
+
+bool MaybeHasSHA256Support() {
+  const base::win::OSInfo* os_info = base::win::OSInfo::GetInstance();
+
+  if (os_info->version() == base::win::VERSION_PRE_XP)
+    return false;  // Too old to have it and this OS is not supported anyway.
+
+  if (os_info->version() == base::win::VERSION_XP)
+    return os_info->service_pack().major >= 3;  // Windows XP SP3 has it.
+
+  // Assume it is missing in this case, although it may not be. This category
+  // includes Windows XP x64, and Windows Server, where a hotfix could be
+  // deployed.
+  if (os_info->version() == base::win::VERSION_SERVER_2003)
+    return false;
+
+  DCHECK(os_info->version() >= base::win::VERSION_VISTA);
+  return true;  // New enough to have SHA-256 support.
 }
 
 }  // namespace win

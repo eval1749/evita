@@ -12,6 +12,11 @@
 #define BASE_MAC_SDK_FORWARD_DECLARATIONS_H_
 
 #import <AppKit/AppKit.h>
+#import <CoreWLAN/CoreWLAN.h>
+#import <ImageCaptureCore/ImageCaptureCore.h>
+#import <IOBluetooth/IOBluetooth.h>
+
+#include "base/base_export.h"
 
 #if !defined(MAC_OS_X_VERSION_10_7) || \
     MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7
@@ -25,6 +30,19 @@ enum {
   NSEventPhaseCancelled   = 0x1 << 4
 };
 typedef NSUInteger NSEventPhase;
+
+enum {
+  NSFullScreenWindowMask = 1 << 14,
+};
+
+enum {
+  NSApplicationPresentationFullScreen = 1 << 10,
+};
+
+enum {
+  NSWindowCollectionBehaviorFullScreenPrimary = 1 << 7,
+  NSWindowCollectionBehaviorFullScreenAuxiliary = 1 << 8,
+};
 
 enum {
   NSEventSwipeTrackingLockDirection = 0x1 << 0,
@@ -41,11 +59,18 @@ enum {
 };
 typedef NSInteger NSWindowAnimationBehavior;
 
+enum {
+  NSWindowDocumentVersionsButton = 6,
+  NSWindowFullScreenButton,
+};
+typedef NSUInteger NSWindowButton;
+
 @interface NSEvent (LionSDK)
 + (BOOL)isSwipeTrackingFromScrollEventsEnabled;
 
 - (NSEventPhase)momentumPhase;
 - (NSEventPhase)phase;
+- (BOOL)hasPreciseScrollingDeltas;
 - (CGFloat)scrollingDeltaX;
 - (CGFloat)scrollingDeltaY;
 - (void)trackSwipeEventWithOptions:(NSEventSwipeTrackingOptions)options
@@ -60,7 +85,11 @@ typedef NSInteger NSWindowAnimationBehavior;
 
 @end
 
-@interface CALayer (LionAPI)
+@interface NSApplication (LionSDK)
+- (void)disableRelaunchOnLogin;
+@end
+
+@interface CALayer (LionSDK)
 - (CGFloat)contentsScale;
 - (void)setContentsScale:(CGFloat)contentsScale;
 @end
@@ -74,20 +103,213 @@ typedef NSInteger NSWindowAnimationBehavior;
 - (CGFloat)backingScaleFactor;
 - (NSWindowAnimationBehavior)animationBehavior;
 - (void)setAnimationBehavior:(NSWindowAnimationBehavior)newAnimationBehavior;
+- (void)toggleFullScreen:(id)sender;
+- (void)setRestorable:(BOOL)flag;
+@end
+
+@interface NSCursor (LionSDKDeclarations)
++ (NSCursor*)IBeamCursorForVerticalLayout;
 @end
 
 @interface NSAnimationContext (LionSDK)
 + (void)runAnimationGroup:(void (^)(NSAnimationContext *context))changes
         completionHandler:(void (^)(void))completionHandler;
+@property(copy) void(^completionHandler)(void);
 @end
+
+@interface NSView (LionSDK)
+- (NSSize)convertSizeFromBacking:(NSSize)size;
+- (void)setWantsBestResolutionOpenGLSurface:(BOOL)flag;
+@end
+
+@interface NSObject (ICCameraDeviceDelegateLionSDK)
+- (void)deviceDidBecomeReadyWithCompleteContentCatalog:(ICDevice*)device;
+- (void)didDownloadFile:(ICCameraFile*)file
+                  error:(NSError*)error
+                options:(NSDictionary*)options
+            contextInfo:(void*)contextInfo;
+@end
+
+@interface NSScroller (LionSDK)
++ (NSInteger)preferredScrollerStyle;
+@end
+
+@interface CWInterface (LionSDK)
+- (BOOL)associateToNetwork:(CWNetwork*)network
+                  password:(NSString*)password
+                     error:(NSError**)error;
+- (NSSet*)scanForNetworksWithName:(NSString*)networkName
+                            error:(NSError**)error;
+@end
+
+enum CWChannelBand {
+  kCWChannelBandUnknown = 0,
+  kCWChannelBand2GHz = 1,
+  kCWChannelBand5GHz = 2,
+};
+
+@interface CWChannel : NSObject
+@property(readonly) CWChannelBand channelBand;
+@end
+
+enum {
+   kCWSecurityNone = 0,
+   kCWSecurityWEP = 1,
+   kCWSecurityWPAPersonal = 2,
+   kCWSecurityWPAPersonalMixed = 3,
+   kCWSecurityWPA2Personal = 4,
+   kCWSecurityPersonal = 5,
+   kCWSecurityDynamicWEP = 6,
+   kCWSecurityWPAEnterprise = 7,
+   kCWSecurityWPAEnterpriseMixed = 8,
+   kCWSecurityWPA2Enterprise = 9,
+   kCWSecurityEnterprise = 10,
+   kCWSecurityUnknown = NSIntegerMax,
+};
+
+typedef NSInteger CWSecurity;
+
+@interface CWNetwork (LionSDK)
+@property(readonly) CWChannel* wlanChannel;
+@property(readonly) NSInteger rssiValue;
+- (BOOL)supportsSecurity:(CWSecurity)security;
+@end
+
+@interface IOBluetoothHostController (LionSDK)
+- (NSString*)nameAsString;
+- (BluetoothHCIPowerState)powerState;
+@end
+
+enum {
+  kBluetoothFeatureLESupportedController = (1 << 6L),
+};
+
+@protocol IOBluetoothDeviceInquiryDelegate
+- (void)deviceInquiryStarted:(IOBluetoothDeviceInquiry*)sender;
+- (void)deviceInquiryDeviceFound:(IOBluetoothDeviceInquiry*)sender
+                          device:(IOBluetoothDevice*)device;
+- (void)deviceInquiryComplete:(IOBluetoothDeviceInquiry*)sender
+                        error:(IOReturn)error
+                      aborted:(BOOL)aborted;
+@end
+
+@interface IOBluetoothL2CAPChannel (LionSDK)
+@property(readonly) BluetoothL2CAPMTU outgoingMTU;
+@end
+
+@interface IOBluetoothDevice (LionSDK)
+- (NSString*)addressString;
+- (unsigned int)classOfDevice;
+- (BluetoothConnectionHandle)connectionHandle;
+- (BluetoothHCIRSSIValue)rawRSSI;
+- (NSArray*)services;
+- (IOReturn)performSDPQuery:(id)target uuids:(NSArray*)uuids;
+@end
+
+BASE_EXPORT extern "C" NSString* const NSWindowWillEnterFullScreenNotification;
 
 #endif  // MAC_OS_X_VERSION_10_7
 
 #if !defined(MAC_OS_X_VERSION_10_8) || \
     MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_8
+
 enum {
   NSEventPhaseMayBegin    = 0x1 << 5
 };
+
+@interface NSColor (MountainLionSDK)
+- (CGColorRef)CGColor;
+@end
+
 #endif  // MAC_OS_X_VERSION_10_8
+
+
+#if !defined(MAC_OS_X_VERSION_10_9) || \
+    MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_9
+
+// NSProgress is public API in 10.9, but a version of it exists and is usable
+// in 10.8.
+
+@interface NSProgress : NSObject
+
+- (instancetype)initWithParent:(NSProgress*)parentProgressOrNil
+                      userInfo:(NSDictionary*)userInfoOrNil;
+@property (copy) NSString* kind;
+
+@property int64_t totalUnitCount;
+@property int64_t completedUnitCount;
+
+@property (getter=isCancellable) BOOL cancellable;
+@property (getter=isPausable) BOOL pausable;
+@property (readonly, getter=isCancelled) BOOL cancelled;
+@property (readonly, getter=isPaused) BOOL paused;
+@property (copy) void (^cancellationHandler)(void);
+@property (copy) void (^pausingHandler)(void);
+- (void)cancel;
+- (void)pause;
+
+- (void)setUserInfoObject:(id)objectOrNil forKey:(NSString*)key;
+- (NSDictionary*)userInfo;
+
+@property (readonly, getter=isIndeterminate) BOOL indeterminate;
+@property (readonly) double fractionCompleted;
+
+- (void)publish;
+- (void)unpublish;
+
+@end
+
+@interface NSScreen (MavericksSDK)
++ (BOOL)screensHaveSeparateSpaces;
+@end
+
+@interface NSView (MavericksSDK)
+- (void)setCanDrawSubviewsIntoLayer:(BOOL)flag;
+@end
+
+enum {
+  NSWindowOcclusionStateVisible = 1UL << 1,
+};
+typedef NSUInteger NSWindowOcclusionState;
+
+@interface NSWindow (MavericksSDK)
+- (NSWindowOcclusionState)occlusionState;
+@end
+
+#else  // !MAC_OS_X_VERSION_10_9
+
+typedef enum {
+   kCWSecurityModeOpen = 0,
+   kCWSecurityModeWEP,
+   kCWSecurityModeWPA_PSK,
+   kCWSecurityModeWPA2_PSK,
+   kCWSecurityModeWPA_Enterprise,
+   kCWSecurityModeWPA2_Enterprise,
+   kCWSecurityModeWPS,
+   kCWSecurityModeDynamicWEP
+} CWSecurityMode;
+
+@interface CWNetwork (SnowLeopardSDK)
+@property(readonly) NSNumber* rssi;
+@property(readonly) NSNumber* securityMode;
+@end
+
+BASE_EXPORT extern "C" NSString* const kCWSSIDDidChangeNotification;
+
+#endif  // MAC_OS_X_VERSION_10_9
+
+#if !defined(MAC_OS_X_VERSION_10_10) || \
+    MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_10
+
+@interface NSUserActivity : NSObject
+
+@property (readonly, copy) NSString* activityType;
+@property (copy) NSURL* webPageURL;
+
+@end
+
+BASE_EXPORT extern "C" NSString* const NSUserActivityTypeBrowsingWeb;
+
+#endif  // MAC_OS_X_VERSION_10_10
 
 #endif  // BASE_MAC_SDK_FORWARD_DECLARATIONS_H_

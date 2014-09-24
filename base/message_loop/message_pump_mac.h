@@ -37,10 +37,9 @@
 #include <CoreFoundation/CoreFoundation.h>
 
 #include "base/memory/weak_ptr.h"
+#include "base/message_loop/timer_slack.h"
 
-#if !defined(__OBJC__)
-class NSAutoreleasePool;
-#else  // !defined(__OBJC__)
+#if defined(__OBJC__)
 #if defined(OS_IOS)
 #import <Foundation/Foundation.h>
 #else
@@ -55,13 +54,28 @@ class NSAutoreleasePool;
 - (BOOL)isHandlingSendEvent;
 @end
 #endif  // !defined(OS_IOS)
-#endif  // !defined(__OBJC__)
+#endif  // defined(__OBJC__)
 
 namespace base {
 
-class MessagePumpInstrumentation;
 class RunLoop;
 class TimeTicks;
+
+// AutoreleasePoolType is a proxy type for autorelease pools. Its definition
+// depends on the translation unit (TU) in which this header appears. In pure
+// C++ TUs, it is defined as a forward C++ class declaration (that is never
+// defined), because autorelease pools are an Objective-C concept. In Automatic
+// Reference Counting (ARC) Objective-C TUs, it is similarly defined as a
+// forward C++ class declaration, because clang will not allow the type
+// "NSAutoreleasePool" in such TUs. Finally, in Manual Retain Release (MRR)
+// Objective-C TUs, it is a type alias for NSAutoreleasePool. In all cases, a
+// method that takes or returns an NSAutoreleasePool* can use
+// AutoreleasePoolType* instead.
+#if !defined(__OBJC__) || __has_feature(objc_arc)
+class AutoreleasePoolType;
+#else   // !defined(__OBJC__) || __has_feature(objc_arc)
+typedef NSAutoreleasePool AutoreleasePoolType;
+#endif  // !defined(__OBJC__) || __has_feature(objc_arc)
 
 class MessagePumpCFRunLoopBase : public MessagePump {
   // Needs access to CreateAutoreleasePool.
@@ -79,6 +93,7 @@ class MessagePumpCFRunLoopBase : public MessagePump {
 
   virtual void ScheduleWork() OVERRIDE;
   virtual void ScheduleDelayedWork(const TimeTicks& delayed_work_time) OVERRIDE;
+  virtual void SetTimerSlack(TimerSlack timer_slack) OVERRIDE;
 
  protected:
   // Accessors for private data members to be used by subclasses.
@@ -94,12 +109,7 @@ class MessagePumpCFRunLoopBase : public MessagePump {
   // In some cases, CreateAutoreleasePool may return nil intentionally to
   // preventing an autorelease pool from being created, allowing any
   // objects autoreleased by work to fall into the current autorelease pool.
-  virtual NSAutoreleasePool* CreateAutoreleasePool();
-
-  // Enables instrumentation of the MessagePump. See MessagePumpInstrumentation
-  // in the implementation for details.
-  void EnableInstrumentation();
-  WeakPtr<MessagePumpInstrumentation> instrumentation_;
+  virtual AutoreleasePoolType* CreateAutoreleasePool();
 
  private:
   // Timer callback scheduled by ScheduleDelayedWork.  This does not do any
@@ -114,11 +124,11 @@ class MessagePumpCFRunLoopBase : public MessagePump {
   static void RunWorkSource(void* info);
   bool RunWork();
 
-  // Perform idle-priority work.  This is normally called by
-  // StartOrEndWaitObserver, but is also associated with idle_work_source_. When
-  // this function actually does perform idle work, it will resignal that
-  // source.  The static method calls the instance method; the instance method
-  // returns true if idle work was done.
+  // Perform idle-priority work.  This is normally called by PreWaitObserver,
+  // but is also associated with idle_work_source_.  When this function
+  // actually does perform idle work, it will resignal that source.  The
+  // static method calls the instance method; the instance method returns
+  // true if idle work was done.
   static void RunIdleWorkSource(void* info);
   bool RunIdleWork();
 
@@ -140,8 +150,8 @@ class MessagePumpCFRunLoopBase : public MessagePump {
 
   // Observer callback responsible for performing idle-priority work, before
   // the run loop goes to sleep.  Associated with idle_work_observer_.
-  static void StartOrEndWaitObserver(CFRunLoopObserverRef observer,
-                                     CFRunLoopActivity activity, void* info);
+  static void PreWaitObserver(CFRunLoopObserverRef observer,
+                              CFRunLoopActivity activity, void* info);
 
   // Observer callback called before the run loop processes any sources.
   // Associated with pre_source_observer_.
@@ -181,6 +191,8 @@ class MessagePumpCFRunLoopBase : public MessagePump {
   // See PowerStateNotification.
   CFAbsoluteTime delayed_work_fire_time_;
 
+  base::TimerSlack timer_slack_;
+
   // The recursion depth of the currently-executing CFRunLoopRun loop on the
   // run loop's thread.  0 if no run loops are running inside of whatever scope
   // the object was created in.
@@ -205,7 +217,7 @@ class MessagePumpCFRunLoopBase : public MessagePump {
   DISALLOW_COPY_AND_ASSIGN(MessagePumpCFRunLoopBase);
 };
 
-class MessagePumpCFRunLoop : public MessagePumpCFRunLoopBase {
+class BASE_EXPORT MessagePumpCFRunLoop : public MessagePumpCFRunLoopBase {
  public:
   MessagePumpCFRunLoop();
   virtual ~MessagePumpCFRunLoop();
@@ -224,9 +236,9 @@ class MessagePumpCFRunLoop : public MessagePumpCFRunLoopBase {
   DISALLOW_COPY_AND_ASSIGN(MessagePumpCFRunLoop);
 };
 
-class MessagePumpNSRunLoop : public MessagePumpCFRunLoopBase {
+class BASE_EXPORT MessagePumpNSRunLoop : public MessagePumpCFRunLoopBase {
  public:
-  BASE_EXPORT MessagePumpNSRunLoop();
+  MessagePumpNSRunLoop();
   virtual ~MessagePumpNSRunLoop();
 
   virtual void DoRun(Delegate* delegate) OVERRIDE;
@@ -296,14 +308,14 @@ class MessagePumpCrApplication : public MessagePumpNSApplication {
  protected:
   // Returns nil if NSApp is currently in the middle of calling
   // -sendEvent.  Requires NSApp implementing CrAppProtocol.
-  virtual NSAutoreleasePool* CreateAutoreleasePool() OVERRIDE;
+  virtual AutoreleasePoolType* CreateAutoreleasePool() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(MessagePumpCrApplication);
 };
 #endif  // !defined(OS_IOS)
 
-class MessagePumpMac {
+class BASE_EXPORT MessagePumpMac {
  public:
   // If not on the main thread, returns a new instance of
   // MessagePumpNSRunLoop.
@@ -321,16 +333,20 @@ class MessagePumpMac {
   // UsingCrApp() returns false if the message pump was created before
   // NSApp was initialized, or if NSApp does not implement
   // CrAppProtocol.  NSApp must be initialized before calling.
-  BASE_EXPORT static bool UsingCrApp();
+  static bool UsingCrApp();
 
   // Wrapper to query -[NSApp isHandlingSendEvent] from C++ code.
   // Requires NSApp to implement CrAppProtocol.
-  BASE_EXPORT static bool IsHandlingSendEvent();
+  static bool IsHandlingSendEvent();
 #endif  // !defined(OS_IOS)
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(MessagePumpMac);
 };
+
+// Tasks posted to the message loop are posted under this mode, as well
+// as kCFRunLoopCommonModes.
+extern const CFStringRef BASE_EXPORT kMessageLoopExclusiveRunLoopMode;
 
 }  // namespace base
 

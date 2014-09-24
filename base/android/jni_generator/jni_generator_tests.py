@@ -42,7 +42,7 @@ class TestOptions(object):
     self.eager_called_by_natives = False
     self.cpp = 'cpp'
     self.javap = 'javap'
-
+    self.native_exports = False
 
 class TestGenerator(unittest.TestCase):
   def assertObjEquals(self, first, second):
@@ -148,6 +148,8 @@ class TestGenerator(unittest.TestCase):
             int nativeDataFetcherImplAndroid,
             double alpha, double beta, double gamma);
     """
+    jni_generator.JniParams.SetFullyQualifiedClass(
+        'org/chromium/example/jni_generator/SampleForTests')
     jni_generator.JniParams.ExtractImportsAndInnerClasses(test_data)
     natives = jni_generator.ExtractNatives(test_data, 'int')
     golden_natives = [
@@ -835,13 +837,22 @@ public boolean add(E);
 
     import org.chromium.example2.Test;
 
+    import org.chromium.example3.PrefixFoo;
+    import org.chromium.example3.Prefix;
+    import org.chromium.example3.Bar$Inner;
+
     class Example {
       private static native void nativeTest(Test t);
+      private static native void nativeTest2(PrefixFoo t);
+      private static native void nativeTest3(Prefix t);
+      private static native void nativeTest4(Bar$Inner t);
     }
     """
     jni_generator.JniParams.SetJarJarMappings(
         """rule org.chromium.example.** com.test.@1
-        rule org.chromium.example2.** org.test2.@0""")
+        rule org.chromium.example2.** org.test2.@1
+        rule org.chromium.example3.Prefix org.test3.Test
+        rule org.chromium.example3.Bar$** org.test3.TestBar$@1""")
     jni_from_java = jni_generator.JNIFromJavaSource(
         test_data, 'org/chromium/example/jni_generator/Example', TestOptions())
     jni_generator.JniParams.SetJarJarMappings('')
@@ -994,6 +1005,45 @@ class Foo {
         test_data, 'org/chromium/example/jni_generator/Test', options)
     self.assertGoldenTextEquals(jni_from_java.GetContent())
 
+  def testNativeExportsOption(self):
+    test_data = """
+    package org.chromium.example.jni_generator;
+
+    /** The pointer to the native Test. */
+    long nativeTest;
+
+    class Test {
+        private static native boolean nativeInitNativeClass();
+        private static native int nativeStaticMethod(long nativeTest, int arg1);
+        private native int nativeMethod(long nativeTest, int arg1);
+        @CalledByNative
+        private void testMethodWithParam(int iParam);
+        @CalledByNative
+        private String testMethodWithParamAndReturn(int iParam);
+        @CalledByNative
+        private static int testStaticMethodWithParam(int iParam);
+        @CalledByNative
+        private static double testMethodWithNoParam();
+        @CalledByNative
+        private static String testStaticMethodWithNoParam();
+
+        class MyInnerClass {
+          @NativeCall("MyInnerClass")
+          private native int nativeInit();
+        }
+        class MyOtherInnerClass {
+          @NativeCall("MyOtherInnerClass")
+          private native int nativeInit();
+        }
+    }
+    """
+    options = TestOptions()
+    options.jni_init_native_name = 'nativeInitNativeClass'
+    options.native_exports = True
+    jni_from_java = jni_generator.JNIFromJavaSource(
+        test_data, 'org/chromium/example/jni_generator/SampleForTests', options)
+    self.assertGoldenTextEquals(jni_from_java.GetContent())
+
   def testOuterInnerRaises(self):
     test_data = """
     package org.chromium.media;
@@ -1009,6 +1059,69 @@ class Foo {
           'org/chromium/media/VideoCaptureFactory',
           TestOptions())
     self.assertRaises(SyntaxError, willRaise)
+
+  def testImplicitImport(self):
+    test_data = """
+    package org.chromium.android_webview;
+
+    %(IMPORT)s
+
+    @CalledByNative
+    private static void clientCertificatesCleared(Runnable callback) {
+        if (callbaback == null) return;
+        callback.run();
+    }
+    """
+    def generate(import_clause):
+      jni_generator.JNIFromJavaSource(
+          test_data % {'IMPORT': import_clause},
+          'org/chromium/android_webview/AwContentStatics',
+          TestOptions())
+    # Ensure it raises without the import.
+    self.assertRaises(SyntaxError, lambda: generate(''))
+
+    # Ensure it's fine with the import.
+    generate('import java.lang.Runnable;')
+
+  def testSingleJNIAdditionalImport(self):
+    test_data = """
+    package org.chromium.foo;
+
+    @JNIAdditionalImport(Bar.class)
+    class Foo {
+
+    @CalledByNative
+    private static void calledByNative(Bar.Callback callback) {
+    }
+
+    private static native void nativeDoSomething(Bar.Callback callback);
+    }
+    """
+    jni_from_java = jni_generator.JNIFromJavaSource(test_data,
+                                                    'org/chromium/foo/Foo',
+                                                    TestOptions())
+    self.assertGoldenTextEquals(jni_from_java.GetContent())
+
+  def testMultipleJNIAdditionalImport(self):
+    test_data = """
+    package org.chromium.foo;
+
+    @JNIAdditionalImport({Bar1.class, Bar2.class})
+    class Foo {
+
+    @CalledByNative
+    private static void calledByNative(Bar1.Callback callback1,
+                                       Bar2.Callback callback2) {
+    }
+
+    private static native void nativeDoSomething(Bar1.Callback callback1,
+                                                 Bar2.Callback callback2);
+    }
+    """
+    jni_from_java = jni_generator.JNIFromJavaSource(test_data,
+                                                    'org/chromium/foo/Foo',
+                                                    TestOptions())
+    self.assertGoldenTextEquals(jni_from_java.GetContent())
 
 
 if __name__ == '__main__':

@@ -20,13 +20,14 @@ class Pickle;
 // while the PickleIterator object is in use.
 class BASE_EXPORT PickleIterator {
  public:
-  PickleIterator() : read_ptr_(NULL), read_end_ptr_(NULL) {}
+  PickleIterator() : payload_(NULL), read_index_(0), end_index_(0) {}
   explicit PickleIterator(const Pickle& pickle);
 
   // Methods for reading the payload of the Pickle. To read from the start of
   // the Pickle, create a PickleIterator from a Pickle. If successful, these
   // methods return true. Otherwise, false is returned to indicate that the
-  // result could not be extracted.
+  // result could not be extracted. It is not possible to read from iterator
+  // after that.
   bool ReadBool(bool* result) WARN_UNUSED_RESULT;
   bool ReadInt(int* result) WARN_UNUSED_RESULT;
   bool ReadLong(long* result) WARN_UNUSED_RESULT;
@@ -35,6 +36,7 @@ class BASE_EXPORT PickleIterator {
   bool ReadInt64(int64* result) WARN_UNUSED_RESULT;
   bool ReadUInt64(uint64* result) WARN_UNUSED_RESULT;
   bool ReadFloat(float* result) WARN_UNUSED_RESULT;
+  bool ReadDouble(double* result) WARN_UNUSED_RESULT;
   bool ReadString(std::string* result) WARN_UNUSED_RESULT;
   bool ReadWString(std::wstring* result) WARN_UNUSED_RESULT;
   bool ReadString16(base::string16* result) WARN_UNUSED_RESULT;
@@ -61,11 +63,15 @@ class BASE_EXPORT PickleIterator {
 
   // Read Type from Pickle.
   template <typename Type>
-  inline bool ReadBuiltinType(Type* result);
+  bool ReadBuiltinType(Type* result);
+
+  // Advance read_index_ but do not allow it to exceed end_index_.
+  // Keeps read_index_ aligned.
+  void Advance(size_t size);
 
   // Get read pointer for Type and advance read pointer.
   template<typename Type>
-  inline const char* GetReadPointerAndAdvance();
+  const char* GetReadPointerAndAdvance();
 
   // Get read pointer for |num_bytes| and advance read pointer. This method
   // checks num_bytes for negativity and wrapping.
@@ -73,12 +79,12 @@ class BASE_EXPORT PickleIterator {
 
   // Get read pointer for (num_elements * size_element) bytes and advance read
   // pointer. This method checks for int overflow, negativity and wrapping.
-  inline const char* GetReadPointerAndAdvance(int num_elements,
-                                              size_t size_element);
+  const char* GetReadPointerAndAdvance(int num_elements,
+                                       size_t size_element);
 
-  // Pointers to the Pickle data.
-  const char* read_ptr_;
-  const char* read_end_ptr_;
+  const char* payload_;  // Start of our pickle's payload.
+  size_t read_index_;  // Offset of the next readable byte in payload.
+  size_t end_index_;  // Payload size.
 
   FRIEND_TEST_ALL_PREFIXES(PickleTest, GetReadPointerAndAdvance);
 };
@@ -170,6 +176,10 @@ class BASE_EXPORT Pickle {
                  float* result) const WARN_UNUSED_RESULT {
     return iter->ReadFloat(result);
   }
+  bool ReadDouble(PickleIterator* iter,
+                  double* result) const WARN_UNUSED_RESULT {
+    return iter->ReadDouble(result);
+  }
   bool ReadString(PickleIterator* iter,
                   std::string* result) const WARN_UNUSED_RESULT {
     return iter->ReadString(result);
@@ -241,6 +251,9 @@ class BASE_EXPORT Pickle {
   bool WriteFloat(float value) {
     return WritePOD(value);
   }
+  bool WriteDouble(double value) {
+    return WritePOD(value);
+  }
   bool WriteString(const std::string& value);
   bool WriteWString(const std::wstring& value);
   bool WriteString16(const base::string16& value);
@@ -277,7 +290,9 @@ class BASE_EXPORT Pickle {
   }
 
   // The payload is the pickle data immediately following the header.
-  size_t payload_size() const { return header_->payload_size; }
+  size_t payload_size() const {
+    return header_ ? header_->payload_size : 0;
+  }
 
   const char* payload() const {
     return reinterpret_cast<const char*>(header_) + header_size_;
@@ -330,7 +345,7 @@ class BASE_EXPORT Pickle {
   size_t write_offset_;
 
   // Just like WriteBytes, but with a compile-time size, for performance.
-  template<size_t length> void WriteBytesStatic(const void* data);
+  template<size_t length> void BASE_EXPORT WriteBytesStatic(const void* data);
 
   // Writes a POD by copying its bytes.
   template <typename T> bool WritePOD(const T& data) {

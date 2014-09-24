@@ -127,18 +127,13 @@
 // GetLastError() on Windows and errno on POSIX).
 //
 // The supported severity levels for macros that allow you to specify one
-// are (in increasing order of severity) INFO, WARNING, ERROR, ERROR_REPORT,
-// and FATAL.
+// are (in increasing order of severity) INFO, WARNING, ERROR, and FATAL.
 //
 // Very important: logging a message at the FATAL severity level causes
 // the program to terminate (after the message is logged).
 //
-// Note the special severity of ERROR_REPORT only available/relevant in normal
-// mode, which displays error dialog without terminating the program. There is
-// no error dialog for severity ERROR or below in normal mode.
-//
-// There is also the special severity of DFATAL, which logs FATAL in
-// debug mode, ERROR in normal mode.
+// There is the special severity of DFATAL, which logs FATAL in debug mode,
+// ERROR in normal mode.
 
 namespace logging {
 
@@ -276,13 +271,6 @@ BASE_EXPORT void SetShowErrorDialogs(bool enable_dialogs);
 typedef void (*LogAssertHandlerFunction)(const std::string& str);
 BASE_EXPORT void SetLogAssertHandler(LogAssertHandlerFunction handler);
 
-// Sets the Log Report Handler that will be used to notify of check failures
-// in non-debug mode. The default handler shows a dialog box and continues
-// the execution, however clients can use this function to override with their
-// own handling.
-typedef void (*LogReportHandlerFunction)(const std::string& str);
-BASE_EXPORT void SetLogReportHandler(LogReportHandlerFunction handler);
-
 // Sets the Log Message Handler that gets passed every log message before
 // it's sent to other log destinations (if any).
 // Returns true to signal that it handled the message and the message
@@ -299,9 +287,8 @@ const LogSeverity LOG_VERBOSE = -1;  // This is level 1 verbosity
 const LogSeverity LOG_INFO = 0;
 const LogSeverity LOG_WARNING = 1;
 const LogSeverity LOG_ERROR = 2;
-const LogSeverity LOG_ERROR_REPORT = 3;
-const LogSeverity LOG_FATAL = 4;
-const LogSeverity LOG_NUM_SEVERITIES = 5;
+const LogSeverity LOG_FATAL = 3;
+const LogSeverity LOG_NUM_SEVERITIES = 4;
 
 // LOG_DFATAL is LOG_FATAL in debug mode, ERROR in normal mode
 #ifdef NDEBUG
@@ -319,9 +306,6 @@ const LogSeverity LOG_DFATAL = LOG_FATAL;
   logging::ClassName(__FILE__, __LINE__, logging::LOG_WARNING , ##__VA_ARGS__)
 #define COMPACT_GOOGLE_LOG_EX_ERROR(ClassName, ...) \
   logging::ClassName(__FILE__, __LINE__, logging::LOG_ERROR , ##__VA_ARGS__)
-#define COMPACT_GOOGLE_LOG_EX_ERROR_REPORT(ClassName, ...) \
-  logging::ClassName(__FILE__, __LINE__, \
-                     logging::LOG_ERROR_REPORT , ##__VA_ARGS__)
 #define COMPACT_GOOGLE_LOG_EX_FATAL(ClassName, ...) \
   logging::ClassName(__FILE__, __LINE__, logging::LOG_FATAL , ##__VA_ARGS__)
 #define COMPACT_GOOGLE_LOG_EX_DFATAL(ClassName, ...) \
@@ -333,8 +317,6 @@ const LogSeverity LOG_DFATAL = LOG_FATAL;
   COMPACT_GOOGLE_LOG_EX_WARNING(LogMessage)
 #define COMPACT_GOOGLE_LOG_ERROR \
   COMPACT_GOOGLE_LOG_EX_ERROR(LogMessage)
-#define COMPACT_GOOGLE_LOG_ERROR_REPORT \
-  COMPACT_GOOGLE_LOG_EX_ERROR_REPORT(LogMessage)
 #define COMPACT_GOOGLE_LOG_FATAL \
   COMPACT_GOOGLE_LOG_EX_FATAL(LogMessage)
 #define COMPACT_GOOGLE_LOG_DFATAL \
@@ -354,10 +336,9 @@ const LogSeverity LOG_DFATAL = LOG_FATAL;
 const LogSeverity LOG_0 = LOG_ERROR;
 #endif
 
-// As special cases, we can assume that LOG_IS_ON(ERROR_REPORT) and
-// LOG_IS_ON(FATAL) always hold.  Also, LOG_IS_ON(DFATAL) always holds
-// in debug mode.  In particular, CHECK()s will always fire if they
-// fail.
+// As special cases, we can assume that LOG_IS_ON(FATAL) always holds. Also,
+// LOG_IS_ON(DFATAL) always holds in debug mode. In particular, CHECK()s will
+// always fire if they fail.
 #define LOG_IS_ON(severity) \
   ((::logging::LOG_ ## severity) >= ::logging::GetMinLogLevel())
 
@@ -426,29 +407,13 @@ const LogSeverity LOG_0 = LOG_ERROR;
   SYSLOG_IF(FATAL, !(condition)) << "Assert failed: " #condition ". "
 
 #if defined(OS_WIN)
-#define LOG_GETLASTERROR_STREAM(severity) \
+#define PLOG_STREAM(severity) \
   COMPACT_GOOGLE_LOG_EX_ ## severity(Win32ErrorLogMessage, \
       ::logging::GetLastSystemErrorCode()).stream()
-#define LOG_GETLASTERROR(severity) \
-  LAZY_STREAM(LOG_GETLASTERROR_STREAM(severity), LOG_IS_ON(severity))
-#define LOG_GETLASTERROR_MODULE_STREAM(severity, module) \
-  COMPACT_GOOGLE_LOG_EX_ ## severity(Win32ErrorLogMessage, \
-      ::logging::GetLastSystemErrorCode(), module).stream()
-#define LOG_GETLASTERROR_MODULE(severity, module)                       \
-  LAZY_STREAM(LOG_GETLASTERROR_STREAM(severity, module),                \
-              LOG_IS_ON(severity))
-// PLOG_STREAM is used by PLOG, which is the usual error logging macro
-// for each platform.
-#define PLOG_STREAM(severity) LOG_GETLASTERROR_STREAM(severity)
 #elif defined(OS_POSIX)
-#define LOG_ERRNO_STREAM(severity) \
+#define PLOG_STREAM(severity) \
   COMPACT_GOOGLE_LOG_EX_ ## severity(ErrnoLogMessage, \
       ::logging::GetLastSystemErrorCode()).stream()
-#define LOG_ERRNO(severity) \
-  LAZY_STREAM(LOG_ERRNO_STREAM(severity), LOG_IS_ON(severity))
-// PLOG_STREAM is used by PLOG, which is the usual error logging macro
-// for each platform.
-#define PLOG_STREAM(severity) LOG_ERRNO_STREAM(severity)
 #endif
 
 #define PLOG(severity)                                          \
@@ -468,7 +433,7 @@ const LogSeverity LOG_0 = LOG_ERROR;
 // We make sure CHECK et al. always evaluates their arguments, as
 // doing CHECK(FunctionWithSideEffect()) is a common idiom.
 
-#if defined(OFFICIAL_BUILD) && defined(NDEBUG)
+#if defined(OFFICIAL_BUILD) && defined(NDEBUG) && !defined(OS_ANDROID)
 
 // Make all CHECK functions discard their log strings to reduce code
 // bloat for official release builds.
@@ -622,17 +587,6 @@ enum { DEBUG_MODE = ENABLE_DLOG };
 #define DLOG(severity)                                          \
   LAZY_STREAM(LOG_STREAM(severity), DLOG_IS_ON(severity))
 
-#if defined(OS_WIN)
-#define DLOG_GETLASTERROR(severity) \
-  LAZY_STREAM(LOG_GETLASTERROR_STREAM(severity), DLOG_IS_ON(severity))
-#define DLOG_GETLASTERROR_MODULE(severity, module)                      \
-  LAZY_STREAM(LOG_GETLASTERROR_STREAM(severity, module),                \
-              DLOG_IS_ON(severity))
-#elif defined(OS_POSIX)
-#define DLOG_ERRNO(severity)                                    \
-  LAZY_STREAM(LOG_ERRNO_STREAM(severity), DLOG_IS_ON(severity))
-#endif
-
 #define DPLOG(severity)                                         \
   LAZY_STREAM(PLOG_STREAM(severity), DLOG_IS_ON(severity))
 
@@ -730,32 +684,14 @@ const LogSeverity LOG_DCHECK = LOG_INFO;
 // above.
 class BASE_EXPORT LogMessage {
  public:
-  LogMessage(const char* file, int line, LogSeverity severity, int ctr);
-
-  // Two special constructors that generate reduced amounts of code at
-  // LOG call sites for common cases.
-  //
-  // Used for LOG(INFO): Implied are:
-  // severity = LOG_INFO, ctr = 0
-  //
-  // Using this constructor instead of the more complex constructor above
-  // saves a couple of bytes per call site.
-  LogMessage(const char* file, int line);
-
-  // Used for LOG(severity) where severity != INFO.  Implied
-  // are: ctr = 0
-  //
-  // Using this constructor instead of the more complex constructor above
-  // saves a couple of bytes per call site.
+  // Used for LOG(severity).
   LogMessage(const char* file, int line, LogSeverity severity);
 
-  // A special constructor used for check failures.  Takes ownership
-  // of the given string.
-  // Implied severity = LOG_FATAL
+  // Used for CHECK_EQ(), etc. Takes ownership of the given string.
+  // Implied severity = LOG_FATAL.
   LogMessage(const char* file, int line, std::string* result);
 
-  // A special constructor used for check failures, with the option to
-  // specify severity.  Takes ownership of the given string.
+  // Used for DCHECK_EQ(), etc. Takes ownership of the given string.
   LogMessage(const char* file, int line, LogSeverity severity,
              std::string* result);
 
@@ -823,17 +759,12 @@ typedef int SystemErrorCode;
 // Alias for ::GetLastError() on Windows and errno on POSIX. Avoids having to
 // pull in windows.h just for GetLastError() and DWORD.
 BASE_EXPORT SystemErrorCode GetLastSystemErrorCode();
+BASE_EXPORT std::string SystemErrorCodeToString(SystemErrorCode error_code);
 
 #if defined(OS_WIN)
 // Appends a formatted system message of the GetLastError() type.
 class BASE_EXPORT Win32ErrorLogMessage {
  public:
-  Win32ErrorLogMessage(const char* file,
-                       int line,
-                       LogSeverity severity,
-                       SystemErrorCode err,
-                       const char* module);
-
   Win32ErrorLogMessage(const char* file,
                        int line,
                        LogSeverity severity,
@@ -846,8 +777,6 @@ class BASE_EXPORT Win32ErrorLogMessage {
 
  private:
   SystemErrorCode err_;
-  // Optional name of the module defining the error.
-  const char* module_;
   LogMessage log_message_;
 
   DISALLOW_COPY_AND_ASSIGN(Win32ErrorLogMessage);
@@ -898,6 +827,15 @@ BASE_EXPORT std::wstring GetLogFileFullPath();
 
 }  // namespace logging
 
+// Note that "The behavior of a C++ program is undefined if it adds declarations
+// or definitions to namespace std or to a namespace within namespace std unless
+// otherwise specified." --C++11[namespace.std]
+//
+// We've checked that this particular definition has the intended behavior on
+// our implementations, but it's prone to breaking in the future, and please
+// don't imitate this in your own definitions without checking with some
+// standard library experts.
+namespace std {
 // These functions are provided as a convenience for logging, which is where we
 // use streams (it is against Google style to use streams in other places). It
 // is designed to allow you to emit non-ASCII Unicode strings to the log file,
@@ -908,6 +846,7 @@ BASE_EXPORT std::ostream& operator<<(std::ostream& out, const wchar_t* wstr);
 inline std::ostream& operator<<(std::ostream& out, const std::wstring& wstr) {
   return out << wstr.c_str();
 }
+}  // namespace std
 
 // The NOTIMPLEMENTED() macro annotates codepaths which have
 // not been implemented yet.

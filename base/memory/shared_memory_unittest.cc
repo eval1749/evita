@@ -373,7 +373,11 @@ TEST(SharedMemoryTest, ShareReadOnly) {
   StringPiece contents = "Hello World";
 
   SharedMemory writable_shmem;
-  ASSERT_TRUE(writable_shmem.CreateAndMapAnonymous(contents.size()));
+  SharedMemoryCreateOptions options;
+  options.size = contents.size();
+  options.share_read_only = true;
+  ASSERT_TRUE(writable_shmem.Create(options));
+  ASSERT_TRUE(writable_shmem.Map(options.size));
   memcpy(writable_shmem.memory(), contents.data(), contents.size());
   EXPECT_TRUE(writable_shmem.Unmap());
 
@@ -430,13 +434,24 @@ TEST(SharedMemoryTest, ShareReadOnly) {
   HANDLE temp_handle;
   BOOL rv = ::DuplicateHandle(GetCurrentProcess(),
                               handle,
-                              GetCurrentProcess,
+                              GetCurrentProcess(),
                               &temp_handle,
                               FILE_MAP_ALL_ACCESS,
                               false,
                               0);
   EXPECT_EQ(FALSE, rv)
       << "Shouldn't be able to duplicate the handle into a writable one.";
+  if (rv)
+    base::win::ScopedHandle writable_handle(temp_handle);
+  rv = ::DuplicateHandle(GetCurrentProcess(),
+                         handle,
+                         GetCurrentProcess(),
+                         &temp_handle,
+                         FILE_MAP_READ,
+                         false,
+                         0);
+  EXPECT_EQ(TRUE, rv)
+      << "Should be able to duplicate the handle into a readable one.";
   if (rv)
     base::win::ScopedHandle writable_handle(temp_handle);
 #else
@@ -510,6 +525,8 @@ TEST(SharedMemoryTest, MapTwice) {
 }
 
 #if defined(OS_POSIX)
+// This test is not applicable for iOS (crbug.com/399384).
+#if !defined(OS_IOS)
 // Create a shared memory object, mmap it, and mprotect it to PROT_EXEC.
 TEST(SharedMemoryTest, AnonymousExecutable) {
   const uint32 kTestSize = 1 << 16;
@@ -525,6 +542,7 @@ TEST(SharedMemoryTest, AnonymousExecutable) {
   EXPECT_EQ(0, mprotect(shared_memory.memory(), shared_memory.requested_size(),
                         PROT_READ | PROT_EXEC));
 }
+#endif  // !defined(OS_IOS)
 
 // Android supports a different permission model than POSIX for its "ashmem"
 // shared memory implementation. So the tests about file permissions are not

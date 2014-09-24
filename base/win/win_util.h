@@ -107,9 +107,10 @@ BASE_EXPORT bool ShouldCrashOnProcessDetach();
 // process is aborted.
 BASE_EXPORT void SetAbortBehaviorForCrashReporting();
 
-// A touch enabled device by this definition is something that has
-// integrated multi-touch ready to use and has Windows version > Windows7.
-BASE_EXPORT bool IsTouchEnabledDevice();
+// A tablet is a device that is touch enabled and also is being used
+// "like a tablet".  This is used primarily for metrics in order to gain some
+// insight into how users use Chrome.
+BASE_EXPORT bool IsTabletDevice();
 
 // Get the size of a struct up to and including the specified member.
 // This is necessary to set compatible struct sizes for different versions
@@ -132,6 +133,13 @@ BASE_EXPORT bool IsEnrolledToDomain();
 // Used by tests to mock any wanted state. Call with |state| set to true to
 // simulate being in a domain and false otherwise.
 BASE_EXPORT void SetDomainStateForTesting(bool state);
+
+// Returns true if the current operating system has support for SHA-256
+// certificates. As its name indicates, this function provides a best-effort
+// answer, which is solely based on comparing version numbers. The function
+// may be re-implemented in the future to return a reliable value, based on
+// run-time detection of this capability.
+BASE_EXPORT bool MaybeHasSHA256Support();
 
 }  // namespace win
 }  // namespace base

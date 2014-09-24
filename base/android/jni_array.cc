@@ -167,6 +167,19 @@ void JavaIntArrayToIntVector(JNIEnv* env,
   env->ReleaseIntArrayElements(int_array, ints, JNI_ABORT);
 }
 
+void JavaLongArrayToLongVector(JNIEnv* env,
+                               jlongArray long_array,
+                               std::vector<long>* out) {
+  DCHECK(out);
+  out->clear();
+  jsize len = env->GetArrayLength(long_array);
+  jlong* longs = env->GetLongArrayElements(long_array, NULL);
+  for (jsize i = 0; i < len; ++i) {
+    out->push_back(static_cast<long>(longs[i]));
+  }
+  env->ReleaseLongArrayElements(long_array, longs, JNI_ABORT);
+}
+
 void JavaFloatArrayToFloatVector(JNIEnv* env,
                                  jfloatArray float_array,
                                  std::vector<float>* out) {
@@ -189,12 +202,13 @@ void JavaArrayOfByteArrayToStringVector(
   jsize len = env->GetArrayLength(array);
   out->resize(len);
   for (jsize i = 0; i < len; ++i) {
-    jbyteArray bytes_array = static_cast<jbyteArray>(
-        env->GetObjectArrayElement(array, i));
-    jsize bytes_len = env->GetArrayLength(bytes_array);
-    jbyte* bytes = env->GetByteArrayElements(bytes_array, NULL);
+    ScopedJavaLocalRef<jbyteArray> bytes_array(
+        env, static_cast<jbyteArray>(
+            env->GetObjectArrayElement(array, i)));
+    jsize bytes_len = env->GetArrayLength(bytes_array.obj());
+    jbyte* bytes = env->GetByteArrayElements(bytes_array.obj(), NULL);
     (*out)[i].assign(reinterpret_cast<const char*>(bytes), bytes_len);
-    env->ReleaseByteArrayElements(bytes_array, bytes, JNI_ABORT);
+    env->ReleaseByteArrayElements(bytes_array.obj(), bytes, JNI_ABORT);
   }
 }
 

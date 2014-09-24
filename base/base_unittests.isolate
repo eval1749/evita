@@ -6,7 +6,6 @@
     ['OS=="android" or OS=="linux" or OS=="mac" or OS=="win"', {
       'variables': {
         'isolate_dependency_untracked': [
-          'data/',
           'test/data/',
         ],
       },
@@ -45,9 +44,10 @@
         ],
       },
     }],
-    ['OS=="win"', {
+    ['OS=="win" and (fastbuild==0 or fastbuild==1)', {
       'variables': {
-        'isolate_dependency_tracked': [
+        'isolate_dependency_untracked': [
+          '<(PRODUCT_DIR)/base_unittests.exe.pdb',
         ],
       },
     }],

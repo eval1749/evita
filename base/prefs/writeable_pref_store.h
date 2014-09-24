@@ -26,6 +26,22 @@ class BASE_PREFS_EXPORT WriteablePrefStore : public PrefStore {
   // Removes the value for |key|.
   virtual void RemoveValue(const std::string& key) = 0;
 
+  // Equivalent to PrefStore::GetValue but returns a mutable value.
+  virtual bool GetMutableValue(const std::string& key,
+                               base::Value** result) = 0;
+
+  // Triggers a value changed notification. This function needs to be called
+  // if one retrieves a list or dictionary with GetMutableValue and change its
+  // value. SetValue takes care of notifications itself. Note that
+  // ReportValueChanged will trigger notifications even if nothing has changed.
+  virtual void ReportValueChanged(const std::string& key) = 0;
+
+  // Same as SetValue, but doesn't generate notifications. This is used by
+  // PrefService::GetMutableUserPref() in order to put empty entries
+  // into the user pref store. Using SetValue is not an option since existing
+  // tests rely on the number of notifications generated.
+  virtual void SetValueSilently(const std::string& key, base::Value* value) = 0;
+
  protected:
   virtual ~WriteablePrefStore() {}
 

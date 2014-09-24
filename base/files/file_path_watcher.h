@@ -62,7 +62,7 @@ class BASE_EXPORT FilePathWatcher {
       return message_loop_;
     }
 
-    void set_message_loop(base::MessageLoopProxy* loop) {
+    void set_message_loop(const scoped_refptr<base::MessageLoopProxy>& loop) {
       message_loop_ = loop;
     }
 
@@ -88,12 +88,15 @@ class BASE_EXPORT FilePathWatcher {
   // shutdown.
   static void CancelWatch(const scoped_refptr<PlatformDelegate>& delegate);
 
+  // Returns true if the platform and OS version support recursive watches.
+  static bool RecursiveWatchAvailable();
+
   // Invokes |callback| whenever updates to |path| are detected. This should be
   // called at most once, and from a MessageLoop of TYPE_IO. Set |recursive| to
   // true, to watch |path| and its children. The callback will be invoked on
   // the same loop. Returns true on success.
   //
-  // NOTE: Recursive watch is not supported on all platforms and file systems.
+  // Recursive watch is not supported on all platforms and file systems.
   // Watch() will return false in the case of failure.
   bool Watch(const FilePath& path, bool recursive, const Callback& callback);
 

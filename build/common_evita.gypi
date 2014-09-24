@@ -100,6 +100,9 @@
                   # L1 warning C4530: C++ exception handler used, but unwind
                   # semantics are not enabled. Specify /EHsc
                   4530,
+                  # L3 warning C4640: 'instance' : construction of local static
+                  # object is not thread-safe
+                  4640,
                   # L4 C4668: 'symbol' is not defined as a preprocessor macro,
                   # replacing with '0' for 'directives'
                   4668,

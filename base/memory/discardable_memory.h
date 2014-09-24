@@ -17,7 +17,7 @@ namespace base {
 
 enum DiscardableMemoryType {
   DISCARDABLE_MEMORY_TYPE_NONE,
-  DISCARDABLE_MEMORY_TYPE_ANDROID,
+  DISCARDABLE_MEMORY_TYPE_ASHMEM,
   DISCARDABLE_MEMORY_TYPE_MAC,
   DISCARDABLE_MEMORY_TYPE_EMULATED,
   DISCARDABLE_MEMORY_TYPE_MALLOC
@@ -64,14 +64,6 @@ class BASE_EXPORT DiscardableMemory {
  public:
   virtual ~DiscardableMemory() {}
 
-  // Call this on a thread with a MessageLoop current to allow discardable
-  // memory implementations to respond to memory pressure signals.
-  static void RegisterMemoryPressureListeners();
-
-  // Call this to prevent discardable memory implementations from responding
-  // to memory pressure signals.
-  static void UnregisterMemoryPressureListeners();
-
   // Gets the discardable memory type with a given name.
   static DiscardableMemoryType GetNamedType(const std::string& name);
 
@@ -97,6 +89,16 @@ class BASE_EXPORT DiscardableMemory {
   // Create a DiscardableMemory instance with preferred type and |size|.
   static scoped_ptr<DiscardableMemory> CreateLockedMemory(size_t size);
 
+  // Discardable memory implementations might allow an elevated usage level
+  // while in frequent use. Call this to have the usage reduced to the base
+  // level. Returns true if there's no need to call this again until
+  // memory instances have been used. This indicates that all discardable
+  // memory implementations have reduced usage to the base level or below.
+  // Note: calling this too often or while discardable memory is in frequent
+  // use can hurt performance, whereas calling it too infrequently can result
+  // in memory bloat.
+  static bool ReduceMemoryUsage();
+
   // Locks the memory so that it will not be purged by the system. Returns
   // DISCARDABLE_MEMORY_LOCK_STATUS_SUCCESS on success. If the return value is
   // DISCARDABLE_MEMORY_LOCK_STATUS_FAILED then this object should be
@@ -114,10 +116,6 @@ class BASE_EXPORT DiscardableMemory {
   virtual void* Memory() const = 0;
 
   // Testing utility calls.
-
-  // Check whether a purge of all discardable memory in the system is supported.
-  // Use only for testing!
-  static bool PurgeForTestingSupported();
 
   // Purge all discardable memory in the system. This call has global effects
   // across all running processes, so it should only be used for testing!

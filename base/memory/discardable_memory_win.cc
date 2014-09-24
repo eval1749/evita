@@ -11,13 +11,8 @@
 namespace base {
 
 // static
-void DiscardableMemory::RegisterMemoryPressureListeners() {
-  internal::DiscardableMemoryEmulated::RegisterMemoryPressureListeners();
-}
-
-// static
-void DiscardableMemory::UnregisterMemoryPressureListeners() {
-  internal::DiscardableMemoryEmulated::UnregisterMemoryPressureListeners();
+bool DiscardableMemory::ReduceMemoryUsage() {
+  return internal::DiscardableMemoryEmulated::ReduceMemoryUsage();
 }
 
 // static
@@ -35,7 +30,7 @@ scoped_ptr<DiscardableMemory> DiscardableMemory::CreateLockedMemoryWithType(
     DiscardableMemoryType type, size_t size) {
   switch (type) {
     case DISCARDABLE_MEMORY_TYPE_NONE:
-    case DISCARDABLE_MEMORY_TYPE_ANDROID:
+    case DISCARDABLE_MEMORY_TYPE_ASHMEM:
     case DISCARDABLE_MEMORY_TYPE_MAC:
       return scoped_ptr<DiscardableMemory>();
     case DISCARDABLE_MEMORY_TYPE_EMULATED: {
@@ -58,11 +53,6 @@ scoped_ptr<DiscardableMemory> DiscardableMemory::CreateLockedMemoryWithType(
 
   NOTREACHED();
   return scoped_ptr<DiscardableMemory>();
-}
-
-// static
-bool DiscardableMemory::PurgeForTestingSupported() {
-  return true;
 }
 
 // static

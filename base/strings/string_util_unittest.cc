@@ -57,7 +57,8 @@ static const struct trim_case_ascii {
 namespace {
 
 // Helper used to test TruncateUTF8ToByteSize.
-bool Truncated(const std::string& input, const size_t byte_size,
+bool Truncated(const std::string& input,
+               const size_t byte_size,
                std::string* output) {
     size_t prev = input.length();
     TruncateUTF8ToByteSize(input, byte_size, output);
@@ -74,7 +75,7 @@ TEST(StringUtilTest, TruncateUTF8ToByteSize) {
   EXPECT_EQ(output, "");
   EXPECT_TRUE(Truncated("\xe1\x80\xbf", 0, &output));
   EXPECT_EQ(output, "");
-  EXPECT_FALSE(Truncated("\xe1\x80\xbf", -1, &output));
+  EXPECT_FALSE(Truncated("\xe1\x80\xbf", static_cast<size_t>(-1), &output));
   EXPECT_FALSE(Truncated("\xe1\x80\xbf", 4, &output));
 
   // Testing the truncation of valid UTF8 correctly
@@ -1011,13 +1012,8 @@ TEST(StringUtilTest, LcpyTest) {
     EXPECT_EQ(1, dst[0]);
     EXPECT_EQ(2, dst[1]);
     EXPECT_EQ(7U, base::wcslcpy(wdst, L"abcdefg", 0));
-#if defined(WCHAR_T_IS_UNSIGNED)
-    EXPECT_EQ(1U, wdst[0]);
-    EXPECT_EQ(2U, wdst[1]);
-#else
-    EXPECT_EQ(1, wdst[0]);
-    EXPECT_EQ(2, wdst[1]);
-#endif
+    EXPECT_EQ(static_cast<wchar_t>(1), wdst[0]);
+    EXPECT_EQ(static_cast<wchar_t>(2), wdst[1]);
   }
 
   // Test the case were we _just_ competely fit including the null.

@@ -5,8 +5,8 @@
 #include "base/path_service.h"
 
 #include "base/basictypes.h"
-#include "base/file_util.h"
 #include "base/files/file_path.h"
+#include "base/files/file_util.h"
 #include "base/files/scoped_temp_dir.h"
 #include "base/strings/string_util.h"
 #include "build/build_config.h"
@@ -15,10 +15,7 @@
 #include "testing/platform_test.h"
 
 #if defined(OS_WIN)
-#include <userenv.h>
 #include "base/win/windows_version.h"
-// userenv.dll is required for GetDefaultUserProfileDirectory().
-#pragma comment(lib, "userenv.lib")
 #endif
 
 namespace {
@@ -45,18 +42,7 @@ bool ReturnsValidPath(int dir_type) {
     check_path_exists = false;
 #endif
 #if defined(OS_WIN)
-  if (dir_type == base::DIR_DEFAULT_USER_QUICK_LAUNCH) {
-    // On Windows XP, the Quick Launch folder for the "Default User" doesn't
-    // exist by default. At least confirm that the path returned begins with the
-    // Default User's profile path.
-    if (base::win::GetVersion() < base::win::VERSION_VISTA) {
-      wchar_t default_profile_path[MAX_PATH];
-      DWORD size = arraysize(default_profile_path);
-      return (result &&
-              ::GetDefaultUserProfileDirectory(default_profile_path, &size) &&
-              StartsWith(path.value(), default_profile_path, false));
-    }
-  } else if (dir_type == base::DIR_TASKBAR_PINS) {
+  if (dir_type == base::DIR_TASKBAR_PINS) {
     // There is no pinned-to-taskbar shortcuts prior to Win7.
     if (base::win::GetVersion() < base::win::VERSION_WIN7)
       check_path_exists = false;
@@ -147,7 +133,7 @@ TEST_F(PathServiceTest, Get) {
 #endif
 }
 
-// test that all versions of the Override function of PathService do what they
+// Test that all versions of the Override function of PathService do what they
 // are supposed to do.
 TEST_F(PathServiceTest, Override) {
   int my_special_key = 666;
@@ -163,12 +149,41 @@ TEST_F(PathServiceTest, Override) {
   // PathService::OverrideAndCreateIfNeeded should obey the |create| parameter.
   PathService::OverrideAndCreateIfNeeded(my_special_key,
                                          fake_cache_dir2,
+                                         false,
                                          false);
   EXPECT_FALSE(base::PathExists(fake_cache_dir2));
   EXPECT_TRUE(PathService::OverrideAndCreateIfNeeded(my_special_key,
                                                      fake_cache_dir2,
+                                                     false,
                                                      true));
   EXPECT_TRUE(base::PathExists(fake_cache_dir2));
+
+#if defined(OS_POSIX)
+  base::FilePath non_existent(
+      base::MakeAbsoluteFilePath(temp_dir.path()).AppendASCII("non_existent"));
+  EXPECT_TRUE(non_existent.IsAbsolute());
+  EXPECT_FALSE(base::PathExists(non_existent));
+#if !defined(OS_ANDROID)
+  // This fails because MakeAbsoluteFilePath fails for non-existent files.
+  // Earlier versions of Bionic libc don't fail for non-existent files, so
+  // skip this check on Android.
+  EXPECT_FALSE(PathService::OverrideAndCreateIfNeeded(my_special_key,
+                                                      non_existent,
+                                                      false,
+                                                      false));
+#endif
+  // This works because indicating that |non_existent| is absolute skips the
+  // internal MakeAbsoluteFilePath call.
+  EXPECT_TRUE(PathService::OverrideAndCreateIfNeeded(my_special_key,
+                                                     non_existent,
+                                                     true,
+                                                     false));
+  // Check that the path has been overridden and no directory was created.
+  EXPECT_FALSE(base::PathExists(non_existent));
+  base::FilePath path;
+  EXPECT_TRUE(PathService::Get(my_special_key, &path));
+  EXPECT_EQ(non_existent, path);
+#endif
 }
 
 // Check if multiple overrides can co-exist.

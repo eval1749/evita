@@ -10,6 +10,8 @@
 #ifndef BASE_BIND_H_
 #define BASE_BIND_H_
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
 #include "base/bind_internal.h"
 #include "base/callback_internal.h"
 
@@ -507,5 +509,7 @@ Bind(Functor functor, const P1& p1, const P2& p2, const P3& p3, const P4& p4,
 }
 
 }  // namespace base
+
+#pragma warning(pop)
 
 #endif  // BASE_BIND_H_

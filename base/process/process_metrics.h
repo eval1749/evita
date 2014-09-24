@@ -154,12 +154,6 @@ class BASE_EXPORT ProcessMetrics {
   // usage in bytes, as per definition of WorkingSetBytes.
   bool GetWorkingSetKBytes(WorkingSetKBytes* ws_usage) const;
 
-  // Computes the current process available memory for allocation.
-  // It does a linear scan of the address space querying each memory region
-  // for its free (unallocated) status. It is useful for estimating the memory
-  // load and fragmentation.
-  bool CalculateFreeMemory(FreeMBytes* free) const;
-
   // Returns the CPU usage in percent since the last time this method or
   // GetPlatformIndependentCPUUsage() was called. The first time this method
   // is called it returns 0 and will return the actual CPU info on subsequent
@@ -199,6 +193,10 @@ class BASE_EXPORT ProcessMetrics {
   bool GetWorkingSetKBytesTotmaps(WorkingSetKBytes *ws_usage) const;
 #endif
 
+#if defined(OS_MACOSX) || defined(OS_LINUX)
+  int CalculateIdleWakeupsPerSecond(uint64 absolute_idle_wakeups);
+#endif
+
   ProcessHandle process_;
 
   int processor_count_;
@@ -208,9 +206,11 @@ class BASE_EXPORT ProcessMetrics {
   TimeTicks last_cpu_time_;
   int64 last_system_time_;
 
+#if defined(OS_MACOSX) || defined(OS_LINUX)
   // Same thing for idle wakeups.
   TimeTicks last_idle_wakeups_time_;
-  int64 last_absolute_idle_wakeups_;
+  uint64 last_absolute_idle_wakeups_;
+#endif
 
 #if !defined(OS_IOS)
 #if defined(OS_MACOSX)
@@ -235,6 +235,10 @@ BASE_EXPORT size_t GetSystemCommitCharge();
 // Returns the maximum number of file descriptors that can be open by a process
 // at once. If the number is unavailable, a conservative best guess is returned.
 size_t GetMaxFds();
+
+// Sets the file descriptor soft limit to |max_descriptors| or the OS hard
+// limit, whichever is lower.
+BASE_EXPORT void SetFdLimit(unsigned int max_descriptors);
 #endif  // defined(OS_POSIX)
 
 #if defined(OS_LINUX) || defined(OS_ANDROID)
@@ -322,7 +326,7 @@ struct BASE_EXPORT SystemDiskInfo {
   uint64 weighted_io_time;
 };
 
-// Checks whether the candidate string is a valid disk name, [sh]d[a-z]+
+// Checks whether the candidate string is a valid disk name, [hsv]d[a-z]+
 // for a generic disk or mmcblk[0-9]+ for the MMC case.
 // Names of disk partitions (e.g. sda1) are not valid.
 BASE_EXPORT bool IsValidDiskName(const std::string& candidate);

@@ -9,10 +9,13 @@
 #include "base/android/command_line_android.h"
 #include "base/android/content_uri_utils.h"
 #include "base/android/cpu_features.h"
+#include "base/android/event_log.h"
+#include "base/android/field_trial_list.h"
 #include "base/android/important_file_writer_android.h"
 #include "base/android/java_handler_thread.h"
 #include "base/android/jni_android.h"
 #include "base/android/jni_registrar.h"
+#include "base/android/jni_utils.h"
 #include "base/android/memory_pressure_listener_android.h"
 #include "base/android/path_service_android.h"
 #include "base/android/path_utils.h"
@@ -34,8 +37,11 @@ static RegistrationMethod kBaseRegisteredMethods[] = {
   { "CommandLine", base::android::RegisterCommandLine },
   { "ContentUriUtils", base::RegisterContentUriUtils },
   { "CpuFeatures", base::android::RegisterCpuFeatures },
+  { "EventLog", base::android::RegisterEventLog },
+  { "FieldTrialList", base::android::RegisterFieldTrialList },
   { "ImportantFileWriterAndroid",
     base::android::RegisterImportantFileWriterAndroid },
+  { "JNIUtils", base::android::RegisterJNIUtils },
   { "MemoryPressureListenerAndroid",
       base::android::MemoryPressureListenerAndroid::Register },
   { "JavaHandlerThread", base::android::JavaHandlerThread::RegisterBindings },

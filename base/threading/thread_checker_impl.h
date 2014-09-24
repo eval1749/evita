@@ -37,7 +37,7 @@ class BASE_EXPORT ThreadCheckerImpl {
   mutable base::Lock lock_;
   // This is mutable so that CalledOnValidThread can set it.
   // It's guarded by |lock_|.
-  mutable PlatformThreadId valid_thread_id_;
+  mutable PlatformThreadRef valid_thread_id_;
 };
 #pragma warning(pop)
 

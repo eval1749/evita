@@ -150,10 +150,10 @@ BASE_EXPORT extern const char kUtf8ByteOrderMark[];
 // if any characters were removed.  |remove_chars| must be null-terminated.
 // NOTE: Safe to use the same variable for both |input| and |output|.
 BASE_EXPORT bool RemoveChars(const string16& input,
-                             const char16 remove_chars[],
+                             const base::StringPiece16& remove_chars,
                              string16* output);
 BASE_EXPORT bool RemoveChars(const std::string& input,
-                             const char remove_chars[],
+                             const base::StringPiece& remove_chars,
                              std::string* output);
 
 // Replaces characters in |replace_chars| from anywhere in |input| with
@@ -162,11 +162,11 @@ BASE_EXPORT bool RemoveChars(const std::string& input,
 // |replace_chars| must be null-terminated.
 // NOTE: Safe to use the same variable for both |input| and |output|.
 BASE_EXPORT bool ReplaceChars(const string16& input,
-                              const char16 replace_chars[],
+                              const base::StringPiece16& replace_chars,
                               const string16& replace_with,
                               string16* output);
 BASE_EXPORT bool ReplaceChars(const std::string& input,
-                              const char replace_chars[],
+                              const base::StringPiece& replace_chars,
                               const std::string& replace_with,
                               std::string* output);
 
@@ -174,10 +174,10 @@ BASE_EXPORT bool ReplaceChars(const std::string& input,
 // |trim_chars| must be null-terminated.
 // NOTE: Safe to use the same variable for both |input| and |output|.
 BASE_EXPORT bool TrimString(const string16& input,
-                            const char16 trim_chars[],
+                            const base::StringPiece16& trim_chars,
                             string16* output);
 BASE_EXPORT bool TrimString(const std::string& input,
-                            const char trim_chars[],
+                            const base::StringPiece& trim_chars,
                             std::string* output);
 
 // Truncates a string to the nearest UTF-8 character that will leave
@@ -234,16 +234,6 @@ BASE_EXPORT bool ContainsOnlyChars(const StringPiece& input,
 BASE_EXPORT bool ContainsOnlyChars(const StringPiece16& input,
                                    const StringPiece16& characters);
 
-}  // namespace base
-
-#if defined(OS_WIN)
-#include "base/strings/string_util_win.h"
-#elif defined(OS_POSIX)
-#include "base/strings/string_util_posix.h"
-#else
-#error Define string operations appropriately for your platform
-#endif
-
 // Returns true if the specified string matches the criteria. How can a wide
 // string be 8-bit or UTF8? It contains only characters that are < 256 (in the
 // first case) or characters that use only 8-bits and whose 8-bit
@@ -256,14 +246,14 @@ BASE_EXPORT bool ContainsOnlyChars(const StringPiece16& input,
 // there's a use case for just checking the structural validity, we have to
 // add a new function for that.
 BASE_EXPORT bool IsStringUTF8(const std::string& str);
-BASE_EXPORT bool IsStringASCII(const base::StringPiece& str);
-BASE_EXPORT bool IsStringASCII(const base::string16& str);
+BASE_EXPORT bool IsStringASCII(const StringPiece& str);
+BASE_EXPORT bool IsStringASCII(const string16& str);
 
 // Converts the elements of the given string.  This version uses a pointer to
 // clearly differentiate it from the non-pointer variant.
 template <class str> inline void StringToLowerASCII(str* s) {
   for (typename str::iterator i = s->begin(); i != s->end(); ++i)
-    *i = base::ToLowerASCII(*i);
+    *i = ToLowerASCII(*i);
 }
 
 template <class str> inline str StringToLowerASCII(const str& s) {
@@ -272,6 +262,16 @@ template <class str> inline str StringToLowerASCII(const str& s) {
   StringToLowerASCII(&output);
   return output;
 }
+
+}  // namespace base
+
+#if defined(OS_WIN)
+#include "base/strings/string_util_win.h"
+#elif defined(OS_POSIX)
+#include "base/strings/string_util_posix.h"
+#else
+#error Define string operations appropriately for your platform
+#endif
 
 // Converts the elements of the given string.  This version uses a pointer to
 // clearly differentiate it from the non-pointer variant.
@@ -378,12 +378,12 @@ BASE_EXPORT base::string16 FormatBytesUnlocalized(int64 bytes);
 // |find_this| with |replace_with|.
 BASE_EXPORT void ReplaceFirstSubstringAfterOffset(
     base::string16* str,
-    base::string16::size_type start_offset,
+    size_t start_offset,
     const base::string16& find_this,
     const base::string16& replace_with);
 BASE_EXPORT void ReplaceFirstSubstringAfterOffset(
     std::string* str,
-    std::string::size_type start_offset,
+    size_t start_offset,
     const std::string& find_this,
     const std::string& replace_with);
 
@@ -395,14 +395,13 @@ BASE_EXPORT void ReplaceFirstSubstringAfterOffset(
 //   std::replace(str.begin(), str.end(), 'a', 'b');
 BASE_EXPORT void ReplaceSubstringsAfterOffset(
     base::string16* str,
-    base::string16::size_type start_offset,
+    size_t start_offset,
     const base::string16& find_this,
     const base::string16& replace_with);
-BASE_EXPORT void ReplaceSubstringsAfterOffset(
-    std::string* str,
-    std::string::size_type start_offset,
-    const std::string& find_this,
-    const std::string& replace_with);
+BASE_EXPORT void ReplaceSubstringsAfterOffset(std::string* str,
+                                              size_t start_offset,
+                                              const std::string& find_this,
+                                              const std::string& replace_with);
 
 // Reserves enough memory in |str| to accommodate |length_with_null| characters,
 // sets the size of |str| to |length_with_null - 1| characters, and returns a

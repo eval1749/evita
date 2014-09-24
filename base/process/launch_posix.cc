@@ -24,8 +24,8 @@
 #include "base/compiler_specific.h"
 #include "base/debug/debugger.h"
 #include "base/debug/stack_trace.h"
-#include "base/file_util.h"
 #include "base/files/dir_reader_posix.h"
+#include "base/files/file_util.h"
 #include "base/files/scoped_file.h"
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
@@ -292,8 +292,12 @@ bool LaunchProcess(const std::vector<std::string>& argv,
 
   scoped_ptr<char*[]> argv_cstr(new char*[argv.size() + 1]);
   scoped_ptr<char*[]> new_environ;
+  char* const empty_environ = NULL;
+  char* const* old_environ = GetEnvironment();
+  if (options.clear_environ)
+    old_environ = &empty_environ;
   if (!options.environ.empty())
-    new_environ = AlterEnvironment(GetEnvironment(), options.environ);
+    new_environ = AlterEnvironment(old_environ, options.environ);
 
   sigset_t full_sigset;
   sigfillset(&full_sigset);
@@ -381,6 +385,8 @@ bool LaunchProcess(const std::vector<std::string>& argv,
 
 #if defined(OS_MACOSX)
     RestoreDefaultExceptionHandler();
+    if (!options.replacement_bootstrap_name.empty())
+      ReplaceBootstrapPort(options.replacement_bootstrap_name);
 #endif  // defined(OS_MACOSX)
 
     ResetChildSignalHandlersToDefaults();
@@ -419,7 +425,7 @@ bool LaunchProcess(const std::vector<std::string>& argv,
       }
     }
 
-    if (!options.environ.empty())
+    if (!options.environ.empty() || options.clear_environ)
       SetEnvironment(new_environ.get());
 
     // fd_shuffle1 is mutated by this call because it cannot malloc.
@@ -435,8 +441,9 @@ bool LaunchProcess(const std::vector<std::string>& argv,
 #define PR_SET_NO_NEW_PRIVS 38
 #endif
     if (!options.allow_new_privs) {
-      if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)) {
-        DCHECK_EQ(EINVAL, errno);
+      if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) && errno != EINVAL) {
+        // Only log if the error is not EINVAL (i.e. not supported).
+        RAW_LOG(FATAL, "prctl(PR_SET_NO_NEW_PRIVS) failed");
       }
     }
 #endif

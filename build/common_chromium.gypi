@@ -79,6 +79,7 @@
             'AdditionalDependencies': [
               'advapi32.lib',
               'dbghelp.lib',
+              'delayimp.lib', # __delayLoadHelper2@8
               'dnsapi.lib',
               'gdi32.lib', # CreateDIBSecion
               'msimg32.lib',

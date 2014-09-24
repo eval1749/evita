@@ -5,6 +5,7 @@
 package org.chromium.base;
 
 import android.os.Build;
+import android.os.StrictMode;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -31,14 +32,10 @@ public class SysUtils {
 
     /**
      * Return the amount of physical memory on this device in kilobytes.
-     * Note: the only reason this is public is for testability reason.
      * @return Amount of physical memory in kilobytes, or 0 if there was
      *         an error trying to access the information.
-     *
-     * Note that this is CalledByNative for testing purpose only.
      */
-    @CalledByNative
-    public static int amountOfPhysicalMemoryKB() {
+    private static int amountOfPhysicalMemoryKB() {
         // Extract total memory RAM size by parsing /proc/meminfo, note that
         // this is exactly what the implementation of sysconf(_SC_PHYS_PAGES)
         // does. However, it can't be called because this method must be
@@ -52,6 +49,8 @@ public class SysUtils {
         // complicated.
 
         Pattern pattern = Pattern.compile("^MemTotal:\\s+([0-9]+) kB$");
+        // Synchronously reading files in /proc in the UI thread is safe.
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
         try {
             FileReader fileReader = new FileReader("/proc/meminfo");
             try {
@@ -85,6 +84,8 @@ public class SysUtils {
             }
         } catch (Exception e) {
             Log.w(TAG, "Cannot get total physical size from /proc/meminfo", e);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
         }
 
         return 0;
@@ -101,20 +102,15 @@ public class SysUtils {
         return sLowEndDevice.booleanValue();
     }
 
-    /**
-     * @return Whether isLowEndDevice() has ever been called.
-     */
-    public static boolean isLowEndStateInitialized() {
-        return (sLowEndDevice != null);
-    }
-
     private static boolean detectLowEndDevice() {
         if (CommandLine.isInitialized()) {
-            if (CommandLine.getInstance().hasSwitch(BaseSwitches.ENABLE_LOW_END_DEVICE_MODE)) {
-                return true;
-            }
-            if (CommandLine.getInstance().hasSwitch(BaseSwitches.DISABLE_LOW_END_DEVICE_MODE)) {
-                return false;
+            if (CommandLine.getInstance().hasSwitch(BaseSwitches.LOW_END_DEVICE_MODE)) {
+                int mode = Integer.parseInt(CommandLine.getInstance().getSwitchValue(
+                  BaseSwitches.LOW_END_DEVICE_MODE));
+                if (mode == 1)
+                    return true;
+                if (mode == 0)
+                    return false;
             }
         }
 

@@ -69,13 +69,25 @@ class TestLauncherDelegate {
 // Launches tests using a TestLauncherDelegate.
 class TestLauncher {
  public:
+  // Flags controlling behavior of LaunchChildGTestProcess.
+  enum LaunchChildGTestProcessFlags {
+    // Allows usage of job objects on Windows. Helps properly clean up child
+    // processes.
+    USE_JOB_OBJECTS = (1 << 0),
+
+    // Allows breakaway from job on Windows. May result in some child processes
+    // not being properly terminated after launcher dies if these processes
+    // fail to cooperate.
+    ALLOW_BREAKAWAY_FROM_JOB = (1 << 1),
+  };
+
   // Constructor. |parallel_jobs| is the limit of simultaneous parallel test
   // jobs.
   TestLauncher(TestLauncherDelegate* launcher_delegate, size_t parallel_jobs);
   ~TestLauncher();
 
   // Runs the launcher. Must be called at most once.
-  bool Run(int argc, char** argv) WARN_UNUSED_RESULT;
+  bool Run() WARN_UNUSED_RESULT;
 
   // Callback called after a child process finishes. First argument is the exit
   // code, second one is child process elapsed time, third one is true if
@@ -92,10 +104,15 @@ class TestLauncher {
   void LaunchChildGTestProcess(const CommandLine& command_line,
                                const std::string& wrapper,
                                base::TimeDelta timeout,
+                               int flags,
                                const LaunchChildGTestProcessCallback& callback);
 
   // Called when a test has finished running.
   void OnTestFinished(const TestResult& result);
+
+  // Constructs a full test name given a test case name and a test name.
+  static std::string FormatFullTestName(const std::string& test_case_name,
+                                        const std::string& test_name);
 
  private:
   bool Init() WARN_UNUSED_RESULT;
@@ -183,28 +200,6 @@ class TestLauncher {
 // Extract part from |full_output| that applies to |result|.
 std::string GetTestOutputSnippet(const TestResult& result,
                                  const std::string& full_output);
-
-// Launches a child process (assumed to be gtest-based binary)
-// using |command_line|. If |wrapper| is not empty, it is prepended
-// to the final command line. If the child process is still running
-// after |timeout|, it is terminated and |*was_timeout| is set to true.
-int LaunchChildGTestProcess(const CommandLine& command_line,
-                            const std::string& wrapper,
-                            base::TimeDelta timeout,
-                            bool* was_timeout);
-
-// Returns command line command line after gtest-specific processing
-// and applying |wrapper|.
-CommandLine PrepareCommandLineForGTest(const CommandLine& command_line,
-                                       const std::string& wrapper);
-
-// Launches a child process using |command_line|. If the child process is still
-// running after |timeout|, it is terminated and |*was_timeout| is set to true.
-// Returns exit code of the process.
-int LaunchChildTestProcessWithOptions(const CommandLine& command_line,
-                                      const LaunchOptions& options,
-                                      base::TimeDelta timeout,
-                                      bool* was_timeout);
 
 }  // namespace base
 

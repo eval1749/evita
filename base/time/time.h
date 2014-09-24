@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Time represents an absolute point in time, internally represented as
-// microseconds (s/1,000,000) since the Windows epoch (1601-01-01 00:00:00 UTC)
-// (See http://crbug.com/14734).  System-dependent clock interface routines are
-// defined in time_PLATFORM.cc.
+// Time represents an absolute point in coordinated universal time (UTC),
+// internally represented as microseconds (s/1,000,000) since the Windows epoch
+// (1601-01-01 00:00:00 UTC) (See http://crbug.com/14734).  System-dependent
+// clock interface routines are defined in time_PLATFORM.cc.
 //
 // TimeDelta represents a duration of time, internally represented in
 // microseconds.
@@ -66,6 +66,8 @@ class BASE_EXPORT TimeDelta {
   static TimeDelta FromMinutes(int minutes);
   static TimeDelta FromSeconds(int64 secs);
   static TimeDelta FromMilliseconds(int64 ms);
+  static TimeDelta FromSecondsD(double secs);
+  static TimeDelta FromMillisecondsD(double ms);
   static TimeDelta FromMicroseconds(int64 us);
 #if defined(OS_WIN)
   static TimeDelta FromQPCValue(LONGLONG qpc_value);
@@ -206,7 +208,7 @@ inline TimeDelta operator*(int64 a, TimeDelta td) {
 
 // Time -----------------------------------------------------------------------
 
-// Represents a wall clock time.
+// Represents a wall clock time in UTC.
 class BASE_EXPORT Time {
  public:
   static const int64 kMillisecondsPerSecond = 1000;
@@ -228,6 +230,11 @@ class BASE_EXPORT Time {
   // this global header and put in the platform-specific ones when we remove the
   // migration code.
   static const int64 kWindowsEpochDeltaMicroseconds;
+#else
+  // To avoid overflow in QPC to Microseconds calculations, since we multiply
+  // by kMicrosecondsPerSecond, then the QPC value should not exceed
+  // (2^63 - 1) / 1E6. If it exceeds that threshold, we divide then multiply.
+  static const int64 kQPCOverflowThreshold = 0x8637BD05AF7;
 #endif
 
   // Represents an exploded time that can be formatted nicely. This is kind of
@@ -333,13 +340,7 @@ class BASE_EXPORT Time {
   // treat it as static across all windows versions.
   static const int kMinLowResolutionThresholdMs = 16;
 
-  // Enable or disable Windows high resolution timer. If the high resolution
-  // timer is not enabled, calls to ActivateHighResolutionTimer will fail.
-  // When disabling the high resolution timer, this function will not cause
-  // the high resolution timer to be deactivated, but will prevent future
-  // activations.
-  // Must be called from the main thread.
-  // For more details see comments in time_win.cc.
+  // Enable or disable Windows high resolution timer.
   static void EnableHighResolutionTimer(bool enable);
 
   // Activates or deactivates the high resolution timer based on the |activate|
@@ -486,16 +487,6 @@ class BASE_EXPORT Time {
   // platform-dependent epoch.
   static const int64 kTimeTToMicrosecondsOffset;
 
-#if defined(OS_WIN)
-  // Indicates whether fast timers are usable right now.  For instance,
-  // when using battery power, we might elect to prevent high speed timers
-  // which would draw more power.
-  static bool high_resolution_timer_enabled_;
-  // Count of activations on the high resolution timer.  Only use in tests
-  // which are single threaded.
-  static int high_resolution_timer_activated_;
-#endif
-
   // Time in microseconds in UTC.
   int64 us_;
 };
@@ -543,6 +534,24 @@ inline TimeDelta TimeDelta::FromMilliseconds(int64 ms) {
 }
 
 // static
+inline TimeDelta TimeDelta::FromSecondsD(double secs) {
+  // Preserve max to prevent overflow.
+  if (secs == std::numeric_limits<double>::infinity())
+    return Max();
+  #pragma warning(suppress: 4244)
+  return TimeDelta(secs * Time::kMicrosecondsPerSecond);
+}
+
+// static
+inline TimeDelta TimeDelta::FromMillisecondsD(double ms) {
+  // Preserve max to prevent overflow.
+  if (ms == std::numeric_limits<double>::infinity())
+    return Max();
+  #pragma warning(suppress: 4244)
+  return TimeDelta(ms * Time::kMicrosecondsPerMillisecond);
+}
+
+// static
 inline TimeDelta TimeDelta::FromMicroseconds(int64 us) {
   // Preserve max to prevent overflow.
   if (us == std::numeric_limits<int64>::max())
@@ -558,6 +567,14 @@ inline Time TimeDelta::operator+(Time t) const {
 
 class BASE_EXPORT TimeTicks {
  public:
+  // We define this even without OS_CHROMEOS for seccomp sandbox testing.
+#if defined(OS_LINUX)
+  // Force definition of the system trace clock; it is a chromeos-only api
+  // at the moment and surfacing it in the right place requires mucking
+  // with glibc et al.
+  static const clockid_t kClockSystemTrace = 11;
+#endif
+
   TimeTicks() : ticks_(0) {
   }
 
@@ -607,14 +624,6 @@ class BASE_EXPORT TimeTicks {
   // Returns true if the high resolution clock is working on this system.
   // This is only for testing.
   static bool IsHighResClockWorking();
-
-  // Enable high resolution time for TimeTicks::Now(). This function will
-  // test for the availability of a working implementation of
-  // QueryPerformanceCounter(). If one is not available, this function does
-  // nothing and the resolution of Now() remains 1ms. Otherwise, all future
-  // calls to TimeTicks::Now() will have the higher resolution provided by QPC.
-  // Returns true if high resolution time was successfully enabled.
-  static bool SetNowIsHighResNowIfSupported();
 
   // Returns a time value that is NOT rollover protected.
   static TimeTicks UnprotectedNow();

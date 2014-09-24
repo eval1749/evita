@@ -25,17 +25,20 @@ DWORD CALLBACK WorkItemCallback(void* param) {
                "src_file", pending_task->posted_from.file_name(),
                "src_func", pending_task->posted_from.function_name());
 
-  tracked_objects::TrackedTime start_time =
-      tracked_objects::ThreadData::NowForStartOfRun(pending_task->birth_tally);
+  tracked_objects::ThreadData::PrepareForStartOfRun(pending_task->birth_tally);
 
   g_worker_pool_running_on_this_thread.Get().Set(true);
+
+  tracked_objects::TaskStopwatch stopwatch;
   pending_task->task.Run();
+  stopwatch.Stop();
+
   g_worker_pool_running_on_this_thread.Get().Set(false);
 
   tracked_objects::ThreadData::TallyRunOnWorkerThreadIfTracking(
       pending_task->birth_tally,
-      tracked_objects::TrackedTime(pending_task->time_posted), start_time,
-      tracked_objects::ThreadData::NowForEndOfRun());
+      tracked_objects::TrackedTime(pending_task->time_posted),
+      stopwatch);
 
   delete pending_task;
   return 0;
@@ -48,7 +51,7 @@ bool PostTaskInternal(PendingTask* pending_task, bool task_is_slow) {
     flags |= WT_EXECUTELONGFUNCTION;
 
   if (!QueueUserWorkItem(WorkItemCallback, pending_task, flags)) {
-    DLOG_GETLASTERROR(ERROR) << "QueueUserWorkItem failed";
+    DPLOG(ERROR) << "QueueUserWorkItem failed";
     delete pending_task;
     return false;
   }

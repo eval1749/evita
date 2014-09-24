@@ -11,6 +11,7 @@
 #include "base/base_export.h"
 #include "base/basictypes.h"
 #include "base/callback_forward.h"
+#include "base/debug/task_annotator.h"
 #include "base/location.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
@@ -18,6 +19,7 @@
 #include "base/message_loop/message_loop_proxy.h"
 #include "base/message_loop/message_loop_proxy_impl.h"
 #include "base/message_loop/message_pump.h"
+#include "base/message_loop/timer_slack.h"
 #include "base/observer_list.h"
 #include "base/pending_task.h"
 #include "base/sequenced_task_runner_helpers.h"
@@ -32,28 +34,13 @@
 #include "base/message_loop/message_pump_io_ios.h"
 #elif defined(OS_POSIX)
 #include "base/message_loop/message_pump_libevent.h"
-#if !defined(OS_MACOSX) && !defined(OS_ANDROID)
-
-#if defined(USE_GLIB) && !defined(OS_NACL)
-#include "base/message_loop/message_pump_glib.h"
-#elif !defined(OS_ANDROID_HOST)
-#include "base/message_loop/message_pump_glib.h"
-#endif
-
-#endif
 #endif
 
 namespace base {
 
 class HistogramBase;
-class MessagePumpObserver;
 class RunLoop;
 class ThreadTaskRunnerHandle;
-#if defined(OS_ANDROID)
-class MessagePumpForUI;
-#elif defined(OS_ANDROID_HOST)
-typedef MessagePumpLibevent MessagePumpForUI;
-#endif
 class WaitableEvent;
 
 // A MessageLoop is used to process events for a particular thread.  There is
@@ -89,10 +76,6 @@ class WaitableEvent;
 //
 class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
  public:
-#if defined(OS_WIN)
-  typedef MessagePumpObserver Observer;
-#endif
-
   // A MessageLoop has a particular type, which indicates the set of
   // asynchronous events it may process in addition to tasks and timers.
   //
@@ -225,6 +208,18 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
   // live until the next run of the MessageLoop, or if the object needs to be
   // released on a particular thread.
   //
+  // A common pattern is to manually increment the object's reference count
+  // (AddRef), clear the pointer, then issue a ReleaseSoon.  The reference count
+  // is incremented manually to ensure clearing the pointer does not trigger a
+  // delete and to account for the upcoming decrement (ReleaseSoon).  For
+  // example:
+  //
+  // scoped_refptr<Foo> foo = ...
+  // foo->AddRef();
+  // Foo* raw_foo = foo.get();
+  // foo = NULL;
+  // message_loop->ReleaseSoon(raw_foo);
+  //
   // NOTE: This method may be called on any thread.  The object will be
   // released (and thus possibly deleted) on the thread that executes
   // MessageLoop::Run().  If this is not the same as the thread that calls
@@ -280,6 +275,11 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
   // arbitrary MessageLoop to QuitWhenIdle.
   static Closure QuitWhenIdleClosure();
 
+  // Set the timer slack for this message loop.
+  void SetTimerSlack(TimerSlack timer_slack) {
+    pump_->SetTimerSlack(timer_slack);
+  }
+
   // Returns true if this loop is |type|. This allows subclasses (especially
   // those in tests) to specialize how they are identified.
   virtual bool IsType(Type type) const;
@@ -295,7 +295,14 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
   const std::string& thread_name() const { return thread_name_; }
 
   // Gets the message loop proxy associated with this message loop.
+  //
+  // NOTE: Deprecated; prefer task_runner() and the TaskRunner interfaces
   scoped_refptr<MessageLoopProxy> message_loop_proxy() {
+    return message_loop_proxy_;
+  }
+
+  // Gets the TaskRunner associated with this message loop.
+  scoped_refptr<SingleThreadTaskRunner> task_runner() {
     return message_loop_proxy_;
   }
 
@@ -364,10 +371,6 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
   void AddTaskObserver(TaskObserver* task_observer);
   void RemoveTaskObserver(TaskObserver* task_observer);
 
-  // When we go into high resolution timer mode, we will stay in hi-res mode
-  // for at least 1s.
-  static const int kHighResolutionTimerModeLeaseTimeMs = 1000;
-
 #if defined(OS_WIN)
   void set_os_modal_loop(bool os_modal_loop) {
     os_modal_loop_ = os_modal_loop;
@@ -383,24 +386,13 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
 
   // Returns true if the message loop has high resolution timers enabled.
   // Provided for testing.
-  bool IsHighResolutionTimerEnabledForTesting();
+  bool HasHighResolutionTasks();
 
   // Returns true if the message loop is "idle". Provided for testing.
   bool IsIdleForTesting();
 
   //----------------------------------------------------------------------------
  protected:
-
-#if defined(OS_WIN)
-  MessagePumpWin* pump_win() {
-    return static_cast<MessagePumpWin*>(pump_.get());
-  }
-#elif defined(OS_POSIX) && !defined(OS_IOS)
-  MessagePumpLibevent* pump_libevent() {
-    return static_cast<MessagePumpLibevent*>(pump_.get());
-  }
-#endif
-
   scoped_ptr<MessagePump> pump_;
 
  private:
@@ -431,10 +423,9 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
   // true if some work was done.
   bool DeletePendingTasks();
 
-  // Creates a process-wide unique ID to represent this task in trace events.
-  // This will be mangled with a Process ID hash to reduce the likelyhood of
-  // colliding with MessageLoop pointers on other processes.
-  uint64 GetTaskTraceID(const PendingTask& task);
+  // Returns the TaskAnnotator which is used to add debug information to posted
+  // tasks.
+  debug::TaskAnnotator* task_annotator() { return &task_annotator_; }
 
   // Loads tasks from the incoming queue to |work_queue_| if the latter is
   // empty.
@@ -457,14 +448,20 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
   virtual bool DoWork() OVERRIDE;
   virtual bool DoDelayedWork(TimeTicks* next_delayed_work_time) OVERRIDE;
   virtual bool DoIdleWork() OVERRIDE;
-  virtual void GetQueueingInformation(size_t* queue_size,
-                                      TimeDelta* queueing_delay) OVERRIDE;
 
   const Type type_;
 
   // A list of tasks that need to be processed by this instance.  Note that
   // this queue is only accessed (push/pop) by our current thread.
   TaskQueue work_queue_;
+
+  // How many high resolution tasks are in the pending task queue. This value
+  // increases by N every time we call ReloadWorkQueue() and decreases by 1
+  // every time we call RunTask() if the task needs a high resolution timer.
+  int pending_high_res_tasks_;
+  // Tracks if we have requested high resolution timers. Its only use is to
+  // turn off the high resolution timer upon loop destruction.
+  bool in_high_res_mode_;
 
   // Contains delayed tasks, sorted by their 'delayed_run_time' property.
   DelayedTaskQueue delayed_work_queue_;
@@ -497,6 +494,8 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
 
   ObserverList<TaskObserver> task_observers_;
 
+  debug::TaskAnnotator task_annotator_;
+
   scoped_refptr<internal::IncomingTaskQueue> incoming_task_queue_;
 
   // The message loop proxy associated with this message loop.
@@ -515,6 +514,8 @@ class BASE_EXPORT MessageLoop : public MessagePump::Delegate {
 
   DISALLOW_COPY_AND_ASSIGN(MessageLoop);
 };
+
+#if !defined(OS_NACL)
 
 //-----------------------------------------------------------------------------
 // MessageLoopForUI extends MessageLoop with methods that are particular to a
@@ -555,13 +556,7 @@ class BASE_EXPORT MessageLoopForUI : public MessageLoop {
   void Start();
 #endif
 
-#if !defined(OS_NACL) && defined(OS_WIN)
-  // Please see message_pump_win for definitions of these methods.
-  void AddObserver(Observer* observer);
-  void RemoveObserver(Observer* observer);
-#endif
-
-#if defined(USE_OZONE) && !defined(OS_NACL)
+#if defined(USE_OZONE) || (defined(USE_X11) && !defined(USE_GLIB))
   // Please see MessagePumpLibevent for definition.
   bool WatchFileDescriptor(
       int fd,
@@ -570,14 +565,6 @@ class BASE_EXPORT MessageLoopForUI : public MessageLoop {
       MessagePumpLibevent::FileDescriptorWatcher* controller,
       MessagePumpLibevent::Watcher* delegate);
 #endif
-
- protected:
-#if !defined(OS_MACOSX) && !defined(OS_ANDROID)
-  // TODO(rvargas): Make this platform independent.
-  MessagePumpForUI* pump_ui() {
-    return static_cast<MessagePumpForUI*>(pump_.get());
-  }
-#endif
 };
 
 // Do not add any member variables to MessageLoopForUI!  This is important b/c
@@ -585,6 +572,8 @@ class BASE_EXPORT MessageLoopForUI : public MessageLoop {
 // data that you need should be stored on the MessageLoop's pump_ instance.
 COMPILE_ASSERT(sizeof(MessageLoop) == sizeof(MessageLoopForUI),
                MessageLoopForUI_should_not_have_extra_member_variables);
+
+#endif  // !defined(OS_NACL)
 
 //-----------------------------------------------------------------------------
 // MessageLoopForIO extends MessageLoop with methods that are particular to a
@@ -595,6 +584,23 @@ COMPILE_ASSERT(sizeof(MessageLoop) == sizeof(MessageLoopForUI),
 //
 class BASE_EXPORT MessageLoopForIO : public MessageLoop {
  public:
+  MessageLoopForIO() : MessageLoop(TYPE_IO) {
+  }
+
+  // Returns the MessageLoopForIO of the current thread.
+  static MessageLoopForIO* current() {
+    MessageLoop* loop = MessageLoop::current();
+    DCHECK_EQ(MessageLoop::TYPE_IO, loop->type());
+    return static_cast<MessageLoopForIO*>(loop);
+  }
+
+  static bool IsCurrent() {
+    MessageLoop* loop = MessageLoop::current();
+    return loop && loop->type() == MessageLoop::TYPE_IO;
+  }
+
+#if !defined(OS_NACL)
+
 #if defined(OS_WIN)
   typedef MessagePumpForIO::IOHandler IOHandler;
   typedef MessagePumpForIO::IOContext IOContext;
@@ -621,70 +627,25 @@ class BASE_EXPORT MessageLoopForIO : public MessageLoop {
     WATCH_WRITE = MessagePumpLibevent::WATCH_WRITE,
     WATCH_READ_WRITE = MessagePumpLibevent::WATCH_READ_WRITE
   };
-
 #endif
 
-  MessageLoopForIO() : MessageLoop(TYPE_IO) {
-  }
-
-  // Returns the MessageLoopForIO of the current thread.
-  static MessageLoopForIO* current() {
-    MessageLoop* loop = MessageLoop::current();
-    DCHECK_EQ(MessageLoop::TYPE_IO, loop->type());
-    return static_cast<MessageLoopForIO*>(loop);
-  }
-
-  static bool IsCurrent() {
-    MessageLoop* loop = MessageLoop::current();
-    return loop && loop->type() == MessageLoop::TYPE_IO;
-  }
-
-  void AddIOObserver(IOObserver* io_observer) {
-    pump_io()->AddIOObserver(io_observer);
-  }
-
-  void RemoveIOObserver(IOObserver* io_observer) {
-    pump_io()->RemoveIOObserver(io_observer);
-  }
+  void AddIOObserver(IOObserver* io_observer);
+  void RemoveIOObserver(IOObserver* io_observer);
 
 #if defined(OS_WIN)
   // Please see MessagePumpWin for definitions of these methods.
   void RegisterIOHandler(HANDLE file, IOHandler* handler);
   bool RegisterJobObject(HANDLE job, IOHandler* handler);
   bool WaitForIOCompletion(DWORD timeout, IOHandler* filter);
-
- protected:
-  // TODO(rvargas): Make this platform independent.
-  MessagePumpForIO* pump_io() {
-    return static_cast<MessagePumpForIO*>(pump_.get());
-  }
-
-#elif defined(OS_IOS)
-  // Please see MessagePumpIOSForIO for definition.
+#elif defined(OS_POSIX)
+  // Please see MessagePumpIOSForIO/MessagePumpLibevent for definition.
   bool WatchFileDescriptor(int fd,
                            bool persistent,
                            Mode mode,
                            FileDescriptorWatcher *controller,
                            Watcher *delegate);
-
- private:
-  MessagePumpIOSForIO* pump_io() {
-    return static_cast<MessagePumpIOSForIO*>(pump_.get());
-  }
-
-#elif defined(OS_POSIX)
-  // Please see MessagePumpLibevent for definition.
-  bool WatchFileDescriptor(int fd,
-                           bool persistent,
-                           Mode mode,
-                           FileDescriptorWatcher* controller,
-                           Watcher* delegate);
-
- private:
-  MessagePumpLibevent* pump_io() {
-    return static_cast<MessagePumpLibevent*>(pump_.get());
-  }
-#endif  // defined(OS_POSIX)
+#endif  // defined(OS_IOS) || defined(OS_POSIX)
+#endif  // !defined(OS_NACL)
 };
 
 // Do not add any member variables to MessageLoopForIO!  This is important b/c

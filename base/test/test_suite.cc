@@ -9,11 +9,10 @@
 #include "base/base_switches.h"
 #include "base/bind.h"
 #include "base/command_line.h"
-#include "base/debug/debug_on_start_win.h"
 #include "base/debug/debugger.h"
 #include "base/debug/stack_trace.h"
-#include "base/file_util.h"
 #include "base/files/file_path.h"
+#include "base/files/file_util.h"
 #include "base/i18n/icu_util.h"
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
@@ -91,12 +90,22 @@ int RunUnitTestsUsingBaseTestSuite(int argc, char **argv) {
 }  // namespace base
 
 TestSuite::TestSuite(int argc, char** argv) : initialized_command_line_(false) {
-  PreInitialize(argc, argv, true);
+  PreInitialize(true);
+  InitializeFromCommandLine(argc, argv);
 }
+
+#if defined(OS_WIN)
+TestSuite::TestSuite(int argc, wchar_t** argv)
+    : initialized_command_line_(false) {
+  PreInitialize(true);
+  InitializeFromCommandLine(argc, argv);
+}
+#endif  // defined(OS_WIN)
 
 TestSuite::TestSuite(int argc, char** argv, bool create_at_exit_manager)
     : initialized_command_line_(false) {
-  PreInitialize(argc, argv, create_at_exit_manager);
+  PreInitialize(create_at_exit_manager);
+  InitializeFromCommandLine(argc, argv);
 }
 
 TestSuite::~TestSuite() {
@@ -104,16 +113,30 @@ TestSuite::~TestSuite() {
     CommandLine::Reset();
 }
 
-void TestSuite::PreInitialize(int argc, char** argv,
-                              bool create_at_exit_manager) {
-#if defined(OS_WIN)
-  testing::GTEST_FLAG(catch_exceptions) = false;
-  base::TimeTicks::SetNowIsHighResNowIfSupported();
-#endif
-  base::EnableTerminationOnHeapCorruption();
+void TestSuite::InitializeFromCommandLine(int argc, char** argv) {
   initialized_command_line_ = CommandLine::Init(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   testing::InitGoogleMock(&argc, argv);
+
+#if defined(OS_IOS)
+  InitIOSRunHook(this, argc, argv);
+#endif
+}
+
+#if defined(OS_WIN)
+void TestSuite::InitializeFromCommandLine(int argc, wchar_t** argv) {
+  // Windows CommandLine::Init ignores argv anyway.
+  initialized_command_line_ = CommandLine::Init(argc, NULL);
+  testing::InitGoogleTest(&argc, argv);
+  testing::InitGoogleMock(&argc, argv);
+}
+#endif  // defined(OS_WIN)
+
+void TestSuite::PreInitialize(bool create_at_exit_manager) {
+#if defined(OS_WIN)
+  testing::GTEST_FLAG(catch_exceptions) = false;
+#endif
+  base::EnableTerminationOnHeapCorruption();
 #if defined(OS_LINUX) && defined(USE_AURA)
   // When calling native char conversion functions (e.g wrctomb) we need to
   // have the locale set. In the absence of such a call the "C" locale is the
@@ -126,10 +149,6 @@ void TestSuite::PreInitialize(int argc, char** argv,
 #if !defined(OS_ANDROID)
   if (create_at_exit_manager)
     at_exit_manager_.reset(new base::AtExitManager);
-#endif
-
-#if defined(OS_IOS)
-  InitIOSRunHook(this, argc, argv);
 #endif
 
   // Don't add additional code to this function.  Instead add it to
@@ -261,6 +280,13 @@ void TestSuite::SuppressErrorDialogs() {
 }
 
 void TestSuite::Initialize() {
+#if !defined(OS_IOS)
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kWaitForDebugger)) {
+    base::debug::WaitForDebugger(60, true);
+  }
+#endif
+
 #if defined(OS_MACOSX) && !defined(OS_IOS)
   // Some of the app unit tests spin runloops.
   mock_cr_app::RegisterMockCrApp();

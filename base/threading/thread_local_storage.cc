@@ -18,7 +18,7 @@ namespace {
 // Chromium consumers.
 
 // g_native_tls_key is the one native TLS that we use.  It stores our table.
-base::subtle::AtomicWord g_native_tls_key =
+base::subtle::Atomic32 g_native_tls_key =
     PlatformThreadLocalStorage::TLS_KEY_OUT_OF_INDEXES;
 
 // g_last_used_tls_key is the high-water-mark of allocated thread local storage.
@@ -31,7 +31,7 @@ base::subtle::AtomicWord g_native_tls_key =
 base::subtle::Atomic32 g_last_used_tls_key = 0;
 
 // The maximum number of 'slots' in our thread local storage stack.
-const int kThreadLocalStorageSize = 64;
+const int kThreadLocalStorageSize = 256;
 
 // The maximum number of times to try to clear slots by calling destructors.
 // Use pthread naming convention for clarity.

@@ -4,16 +4,14 @@
 
 #include "base/files/file_proxy.h"
 
-#include <map>
-
 #include "base/bind.h"
-#include "base/file_util.h"
 #include "base/files/file.h"
+#include "base/files/file_util.h"
 #include "base/files/scoped_temp_dir.h"
-#include "base/logging.h"
 #include "base/memory/weak_ptr.h"
 #include "base/message_loop/message_loop.h"
 #include "base/threading/thread.h"
+#include "base/threading/thread_restrictions.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 namespace base {
@@ -143,6 +141,21 @@ TEST_F(FileProxyTest, CreateOrOpen_OpenNonExistent) {
   EXPECT_FALSE(PathExists(test_path()));
 }
 
+TEST_F(FileProxyTest, CreateOrOpen_AbandonedCreate) {
+  bool prev = ThreadRestrictions::SetIOAllowed(false);
+  {
+    FileProxy proxy(file_task_runner());
+    proxy.CreateOrOpen(
+        test_path(),
+        File::FLAG_CREATE | File::FLAG_READ,
+        Bind(&FileProxyTest::DidCreateOrOpen, weak_factory_.GetWeakPtr()));
+  }
+  MessageLoop::current()->Run();
+  ThreadRestrictions::SetIOAllowed(prev);
+
+  EXPECT_TRUE(PathExists(test_path()));
+}
+
 TEST_F(FileProxyTest, Close) {
   // Creates a file.
   FileProxy proxy(file_task_runner());
@@ -189,6 +202,20 @@ TEST_F(FileProxyTest, CreateTemporary) {
 
   // Make sure we can & do delete the created file to prevent leaks on the bots.
   EXPECT_TRUE(base::DeleteFile(path_, false));
+}
+
+TEST_F(FileProxyTest, SetAndTake) {
+  File file(test_path(), File::FLAG_CREATE | File::FLAG_READ);
+  ASSERT_TRUE(file.IsValid());
+  FileProxy proxy(file_task_runner());
+  EXPECT_FALSE(proxy.IsValid());
+  proxy.SetFile(file.Pass());
+  EXPECT_TRUE(proxy.IsValid());
+  EXPECT_FALSE(file.IsValid());
+
+  file = proxy.TakeFile();
+  EXPECT_FALSE(proxy.IsValid());
+  EXPECT_TRUE(file.IsValid());
 }
 
 TEST_F(FileProxyTest, GetInfo) {

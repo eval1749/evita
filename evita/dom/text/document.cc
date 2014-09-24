@@ -71,8 +71,8 @@ class DocumentClass
   private: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override;
 
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override;
+  private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override;
 
   DISALLOW_COPY_AND_ASSIGN(DocumentClass);
 };
@@ -118,7 +118,10 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
       .Build();
 }
 
-void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
+v8::Handle<v8::ObjectTemplate>
+DocumentClass::SetupInstanceTemplate(v8::Isolate* isolate,
+                                     v8::Handle<v8::ObjectTemplate> templ) {
+  gin::ObjectTemplateBuilder builder(isolate, templ);
   builder
       .SetProperty("length", &Document::length)
       .SetProperty("modified", &Document::modified, &Document::set_modified)
@@ -138,6 +141,7 @@ void DocumentClass::SetupInstanceTemplate(ObjectTemplateBuilder& builder) {
       .SetMethod("styleAt", &Document::style_at)
       .SetMethod("syntaxAt", &Document::syntax_at)
       .SetMethod("undo", &Document::Undo);
+  return builder.Build();
 }
 
 }  // namespace bindings

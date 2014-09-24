@@ -103,8 +103,8 @@ class {{class_name}} final :
       CreateConstructorTemplate(v8::Isolate* isolate) override;
 {% endif %}
 {% if need_instance_template %}
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override;
+  private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override;
 {% endif %}
 
   DISALLOW_COPY_AND_ASSIGN({{class_name}});

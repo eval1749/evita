@@ -59,14 +59,15 @@ class SampleEventTargetClass :
     return new SampleEventTarget();
   }
 
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    BaseClass::SetupInstanceTemplate(builder);
+private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override {
+    auto const base_templ = BaseClass::SetupInstanceTemplate(isolate, templ);
+    gin::ObjectTemplateBuilder builder(isolate, base_templ);
     builder
       .SetProperty("handled", &SampleEventTarget::handled,
                    &SampleEventTarget::set_handled)
       .SetMethod("handleEvent", &SampleEventTarget::HandleEvent);
-
+    return builder.Build();
   }
 };
 

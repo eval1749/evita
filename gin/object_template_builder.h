@@ -78,11 +78,6 @@ class GIN_EXPORT ObjectTemplateBuilder {
                         v8::Handle<v8::ObjectTemplate> templ);
   ~ObjectTemplateBuilder();
 
-  v8::Isolate* isolate() const { return isolate_; }
-  v8::Local<v8::ObjectTemplate> GetTemplate() {
-    return v8::Local<v8::ObjectTemplate>(template_);
-  }
-
   // It's against Google C++ style to return a non-const ref, but we take some
   // poetic license here in order that all calls to Set() can be via the '.'
   // operator and line up nicely.

@@ -55,8 +55,9 @@ class RangeClass : public v8_glue::WrapperInfo {
     return new Range(document, range->start(), range->end());
   }
 
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
+  private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override {
+    gin::ObjectTemplateBuilder builder(isolate, templ);
     builder
         .SetProperty("collapsed", &Range::collapsed)
         .SetProperty("document", &Range::document)
@@ -68,6 +69,7 @@ class RangeClass : public v8_glue::WrapperInfo {
         .SetMethod("setSpelling", &Range::SetSpelling)
         .SetMethod("setStyle", &Range::SetStyle)
         .SetMethod("setSyntax", &Range::SetSyntax);
+    return builder.Build();
   }
 
   DISALLOW_COPY_AND_ASSIGN(RangeClass);

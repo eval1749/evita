@@ -56,11 +56,13 @@ class SampleWindowClass :
         &SampleWindow::NewSampleWindow);
   }
 
-  private: virtual void SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) override {
-    BaseClass::SetupInstanceTemplate(builder);
+  private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override {
+    auto const base_templ = BaseClass::SetupInstanceTemplate(isolate, templ);
+    gin::ObjectTemplateBuilder builder(isolate, templ);
     builder
       .SetProperty("name", &SampleWindow::name, &SampleWindow::set_name);
+    return builder.Build();
   }
 };
 

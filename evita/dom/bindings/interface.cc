@@ -331,10 +331,9 @@ v8::Handle<v8::FunctionTemplate>
  #
  # Interface template
  #}
-void {{class_name}}:: SetupInstanceTemplate(
-      ObjectTemplateBuilder& builder) {
-  auto const isolate = builder.isolate();
-  auto const templ = builder.GetTemplate();
+v8::Handle<v8::ObjectTemplate> {{class_name}}:: SetupInstanceTemplate(
+      v8::Isolate* isolate,
+      v8::Handle<v8::ObjectTemplate> templ) {
 {% for attribute in attributes if not attribute.is_static %}
 {% if loop.first %}
   // attributes
@@ -355,6 +354,7 @@ void {{class_name}}:: SetupInstanceTemplate(
   templ->Set(gin::StringToSymbol(isolate, "{{method.name}}"),
       v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cpp_name}}));
 {% endfor %}
+  return templ;
 }
 
 {% endif %}

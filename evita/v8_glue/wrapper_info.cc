@@ -70,14 +70,12 @@ v8::Handle<v8::FunctionTemplate> WrapperInfo::CreateConstructorTemplate(
   return templ;
 }
 
-gin::ObjectTemplateBuilder WrapperInfo::CreateInstanceTemplateBuilder(
+v8::Handle<v8::ObjectTemplate> WrapperInfo::CreateInstanceTemplate(
     v8::Isolate* isolate) {
   if (!class_name())
-    return gin::ObjectTemplateBuilder(isolate);
+    return v8::ObjectTemplate::New(isolate);
   auto class_templ = GetOrCreateConstructorTemplate(isolate);
-  gin::ObjectTemplateBuilder builder(isolate, class_templ->PrototypeTemplate());
-  SetupInstanceTemplate(builder);
-  return builder;
+  return SetupInstanceTemplate(isolate, class_templ->PrototypeTemplate());
 }
 
 WrapperInfo* WrapperInfo::From(v8::Handle<v8::Object> object) {
@@ -132,7 +130,7 @@ v8::Handle<v8::ObjectTemplate> WrapperInfo::GetOrCreateInstanceTemplate(
   if (!present.IsEmpty())
     return present;
 
-  auto const templ = CreateInstanceTemplateBuilder(isolate).Build();
+  auto const templ = CreateInstanceTemplate(isolate);
   CHECK(!templ.IsEmpty());
   data->SetObjectTemplate(gin_wrapper_info(), templ);
   return templ;
@@ -145,7 +143,9 @@ v8::Handle<v8::FunctionTemplate> WrapperInfo::Install(v8::Isolate* isolate,
   return constructor;
 }
 
-void WrapperInfo::SetupInstanceTemplate(ObjectTemplateBuilder&) {
+v8::Handle<v8::ObjectTemplate> WrapperInfo::SetupInstanceTemplate(
+    v8::Isolate*, v8::Handle<v8::ObjectTemplate> templ) {
+  return templ;
 }
 
 void WrapperInfo::ThrowArityError(v8::Isolate* isolate,

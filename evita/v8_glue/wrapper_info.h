@@ -24,7 +24,6 @@ class AbstractScriptable;
 // Note: The |WrapperInfo| class was called |ScriptWrapperInfo|. Although, it
 // is too long to fit in line. So, we renamed shorter name.
 class WrapperInfo {
-  protected: typedef gin::ObjectTemplateBuilder ObjectTemplateBuilder;
   protected: typedef v8_glue::AbstractScriptable AbstractScriptable;
 
   private: gin::GinEmbedder const embedder_;
@@ -44,8 +43,8 @@ class WrapperInfo {
 
   protected: virtual v8::Handle<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate);
-  protected: ObjectTemplateBuilder
-      CreateInstanceTemplateBuilder(v8::Isolate* isolate);
+  protected: v8::Handle<v8::ObjectTemplate>
+      CreateInstanceTemplate(v8::Isolate* isolate);
   public: static WrapperInfo* From(v8::Handle<v8::Object> object);
   public: v8::Handle<v8::FunctionTemplate> GetOrCreateConstructorTemplate(
       v8::Isolate* isolate);
@@ -53,8 +52,8 @@ class WrapperInfo {
       v8::Isolate* isolate);
   public: v8::Handle<v8::FunctionTemplate> Install(v8::Isolate* isolate,
                        v8::Handle<v8::ObjectTemplate> global);
-  protected: virtual void SetupInstanceTemplate(
-    ObjectTemplateBuilder& builder);
+protected: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+    v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ);
 
   // Throw arity error in generated code from IDL.
   protected: static void ThrowArityError(v8::Isolate* isolate,

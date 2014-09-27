@@ -21,6 +21,7 @@
 #include "evita/gfx/text_layout.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/compositor/layer.h"
+#include "evita/ui/controls/arrow_button.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/system_metrics.h"
 #include "evita/ui/system_metrics_observer.h"
@@ -66,229 +67,7 @@ const auto kScrollWidth = 10.0f;
 //  SM_CYSIZEFRAME = 4
 auto const kTabHeight = 28; // SM_CYCAPTION + SM_CYEDGE + 1
 
-class Button;
 class Tab;
-
-//////////////////////////////////////////////////////////////////////
-//
-// ButtonListener
-//
-class ButtonListener {
-  protected: ButtonListener() = default;
-  protected: virtual ~ButtonListener() = default;
-
-  public: virtual void DidPressButton(Button* sender,
-                                      const ui::Event& event) = 0;
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// Button
-//
-class Button : public ui::Widget {
-  DECLARE_CASTABLE_CLASS(Button, ui::Widget);
-
-  public: enum class State {
-    Normal,
-    Disabled,
-    Hovered,
-    Pressed,
-  };
-
-  private: int canvas_bitmap_id_;
-  private: bool dirty_;
-  private: ButtonListener* listener_;
-  private: State state_;
-
-  protected: Button(ButtonListener* listener);
-  public: virtual ~Button();
-
-  public: State state() const { return state_; }
-
-  protected: bool IsDirty(const gfx::Canvas* canvas) const;
-  private: void MarkDirty();
-  protected: void SetState(State new_state);
-
-  // ui::Widget
-  protected: virtual void DidChangeBounds() override;
-  protected: virtual void DidShow() override;
-  protected: void OnDraw(gfx::Canvas* canvas) override;
-  protected: void OnMouseExited(const ui::MouseEvent& event) override;
-  protected: void OnMouseMoved(const ui::MouseEvent& event) override;
-  protected: void OnMousePressed(const ui::MouseEvent& event) override;
-  protected: void OnMouseReleased(const ui::MouseEvent& event) override;
-
-  DISALLOW_COPY_AND_ASSIGN(Button);
-};
-
-Button::Button(ButtonListener* listener)
-    : canvas_bitmap_id_(0), dirty_(true), listener_(listener), state_(State::Normal) {
-}
-
-Button::~Button() {
-}
-
-bool Button::IsDirty(const gfx::Canvas* canvas) const {
-  return dirty_ || canvas_bitmap_id_ != canvas->bitmap_id();
-}
-
-void Button::MarkDirty() {
-  if (!visible())
-    return;
-  SchedulePaint();
-  dirty_ = true;
-}
-
-void Button::SetState(State new_state) {
-  if (state_ == new_state)
-    return;
-  state_ = new_state;
-  MarkDirty();
-}
-
-// ui::Widget
-void Button::DidChangeBounds() {
-  ui::Widget::DidChangeBounds();
-  MarkDirty();
-}
-
-void Button::DidShow() {
-  ui::Widget::DidShow();
-  MarkDirty();
-}
-
-void Button::OnDraw(gfx::Canvas* canvas) {
-  DCHECK(dirty_ || canvas_bitmap_id_ != canvas->bitmap_id());
-  canvas_bitmap_id_ = canvas->bitmap_id();
-  dirty_ = false;
-}
-
-void Button::OnMouseExited(const ui::MouseEvent&) {
-  SetState(State::Normal);
-}
-
-void Button::OnMouseMoved(const ui::MouseEvent&) {
-  SetState(State::Hovered);
-}
-
-void Button::OnMousePressed(const ui::MouseEvent& event) {
-  if (event.button() != ui::MouseButton::Left)
-    return;
-  SetState(State::Pressed);
-  listener_->DidPressButton(this, event);
-}
-
-void Button::OnMouseReleased(const ui::MouseEvent& event) {
-  if (event.button() != ui::MouseButton::Left)
-    return;
-  SetState(State::Hovered);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// ArrowButton
-//
-enum class Direction {
-  Down,
-  Left,
-  Right,
-  Up,
-};
-
-class ArrowButton final : public Button {
-  DECLARE_CASTABLE_CLASS(ArrowButton, Button);
-
-  private: Direction direction_;
-
-  public: ArrowButton(Direction direction, ButtonListener* listener);
-  public: virtual ~ArrowButton() = default;
-
-  private: gfx::ColorF ComputeColor() const;
-  private: void DrawArrow(gfx::Canvas* canvas) const;
-
-  // ui::Widget
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
-
-  DISALLOW_COPY_AND_ASSIGN(ArrowButton);
-};
-
-ArrowButton::ArrowButton(Direction direction, ButtonListener* listener)
-    : Button(listener), direction_(direction) {
-}
-
-gfx::ColorF ArrowButton::ComputeColor() const {
-  switch (state()) {
-  case State::Disabled:
-    return gfx::ColorF(0, 0, 0, 0.1f);
-  case State::Hovered:
-    return gfx::ColorF(0, 0, 0, 0.5f);
-  case State::Normal:
-    return gfx::ColorF(0, 0, 0, 0.3f);
-  case State::Pressed:
-    return gfx::ColorF(0, 0, 0, 1.0f);
-  }
-  NOTREACHED();
-  return gfx::ColorF(0, 0, 1, 1.0f);
-}
-
-void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
-  float factors[4] = {0.0f};
-  switch (direction_) {
-    case Direction::Down:
-      factors[0] = -1.0f;
-      factors[1] = -1.0f;
-      factors[2] = 1.0f;
-      factors[3] = -1.0f;
-      break;
-    case Direction::Left:
-      factors[0] = 1.0f;
-      factors[1] = -1.0f;
-      factors[2] = 1.0f;
-      factors[3] = 1.0f;
-      break;
-    case Direction::Right:
-      factors[0] = -1.0f;
-      factors[1] = -1.0f;
-      factors[2] = -1.0f;
-      factors[3] = 1.0f;
-      break;
-    case Direction::Up:
-      factors[0] = -1.0f;
-      factors[1] = 1.0f;
-      factors[2] = 1.0f;
-      factors[3] = 1.0f;
-      break;
-     default:
-       NOTREACHED();
-  }
-
-  auto const bounds = GetContentsBounds();
-  auto const center_x = bounds.left + bounds.width() / 2;
-  auto const center_y = bounds.top + bounds.height() / 2;
-  auto const wing_size = bounds.width() / 4;
-  auto const pen_width = 2.0f;
-
-  gfx::Brush arrow_brush(canvas, ComputeColor());
-  canvas->DrawLine(arrow_brush,
-                   gfx::PointF(center_x + factors[0] * wing_size,
-                               center_y + factors[1] * wing_size),
-                   gfx::PointF(center_x, center_y), pen_width);
-  canvas->DrawLine(arrow_brush,
-                   gfx::PointF(center_x + factors[2] * wing_size,
-                               center_y + factors[3] * wing_size),
-                   gfx::PointF(center_x, center_y), pen_width);
-}
-
-// ui::Widget
-void ArrowButton::OnDraw(gfx::Canvas* canvas) {
-  if (!IsDirty(canvas))
-    return;
-  Button::OnDraw(canvas);
-  canvas->AddDirtyRect(GetContentsBounds());
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, GetContentsBounds());
-  canvas->Clear(gfx::ColorF());
-  DrawArrow(canvas);
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1380,13 +1159,14 @@ void TabListMenu::Show() {
 //
 // TabStrip::View class
 //
-class TabStrip::View final : private ButtonListener, private ModelObserver,
+class TabStrip::View final : private ui::ButtonListener,
+                             private ModelObserver,
                              private ViewDelegate {
   private: std::unique_ptr<gfx::Canvas> canvas_;
   private: bool dirty_;
-  private: const std::unique_ptr<ArrowButton> list_button_;
-  private: const std::unique_ptr<ArrowButton> scroll_left_button_;
-  private: const std::unique_ptr<ArrowButton> scroll_right_button_;
+  private: const std::unique_ptr<ui::ArrowButton> list_button_;
+  private: const std::unique_ptr<ui::ArrowButton> scroll_left_button_;
+  private: const std::unique_ptr<ui::ArrowButton> scroll_right_button_;
   private: Tab* selected_tab_;
   private: bool should_selected_tab_visible_;
   private: const std::unique_ptr<TabCollection> tab_collection_;
@@ -1418,7 +1198,7 @@ class TabStrip::View final : private ButtonListener, private ModelObserver,
   private: void UpdateLayout();
 
   // ButtonListner
-  private: virtual void DidPressButton(Button* sender,
+  private: virtual void DidPressButton(ui::Button* sender,
                                        const ui::Event& event) override;
   // ModelObserver
   private: void DidDeleteTab(Tab* tab) override;
@@ -1439,9 +1219,12 @@ class TabStrip::View final : private ButtonListener, private ModelObserver,
 };
 
 TabStrip::View::View(TabStrip* widget, TabStripDelegate* delegate)
-    : dirty_(true), list_button_(new ArrowButton(Direction::Down, this)),
-      scroll_left_button_(new ArrowButton(Direction::Left, this)),
-      scroll_right_button_(new ArrowButton(Direction::Right, this)),
+    : dirty_(true), list_button_(new ui::ArrowButton(
+          ui::ArrowButton::Direction::Down, this)),
+      scroll_left_button_(new ui::ArrowButton(
+          ui::ArrowButton::Direction::Left, this)),
+      scroll_right_button_(new ui::ArrowButton(
+          ui::ArrowButton::Direction::Right, this)),
       tab_collection_(new TabCollection(this)),
       tab_list_menu_(list_button_.get(), tab_collection_.get()),
       tab_strip_delegate_(delegate),
@@ -1583,7 +1366,7 @@ void TabStrip::View::UpdateLayout() {
 }
 
 // ButtonListener
-void TabStrip::View::DidPressButton(Button* sender, const ui::Event&) {
+void TabStrip::View::DidPressButton(ui::Button* sender, const ui::Event&) {
   if (sender == list_button_.get()) {
     tab_list_menu_.Show();
     return;

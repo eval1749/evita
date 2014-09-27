@@ -70,6 +70,10 @@
         'compositor/root_layer.cc',
         'compositor/root_layer.h',
 
+        'controls/arrow_button.cc',
+        'controls/arrow_button.h',
+        'controls/button.cc',
+        'controls/button.h',
         'controls/button_control.cc',
         'controls/checkbox_control.cc',
         'controls/control.cc',

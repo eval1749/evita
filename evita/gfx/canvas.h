@@ -42,8 +42,8 @@ class Canvas : public Object, public DpiHandler {
   friend class DrawingScope;
 
   public: class ScopedState final {
+    private: gfx::RectF bounds_;
     private: Canvas* const canvas_;
-    private: gfx::PointF offset_;
     private: D2D1::Matrix3x2F transform_;
 
     public: ScopedState(Canvas* canvas);
@@ -55,10 +55,9 @@ class Canvas : public Object, public DpiHandler {
 
   private: int batch_nesting_level_;
   private: int bitmap_id_;
-  private: RectF bounds_;
+  private: gfx::RectF bounds_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: ObserverList<CanvasObserver> observers_;
-  private: gfx::PointF offset_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
   private: bool should_clear_;
 
@@ -121,6 +120,7 @@ class Canvas : public Object, public DpiHandler {
   public: void Flush();
 
   // [G]
+  public: gfx::RectF GetLocalBounds() const;
   public: virtual ID2D1RenderTarget* GetRenderTarget() const = 0;
 
   // [R]
@@ -130,11 +130,10 @@ class Canvas : public Object, public DpiHandler {
   public: bool Canvas::SaveScreenImage(const RectF& bounds);
   public: void SetBounds(const RectF& bounds);
   protected: void SetInitialBounds(const RectF& bounds);
+  public: void SetOffsetBounds(const gfx::RectF& bounds);
 
-  // Set canvas origin to |new_origin| in current coordinate. This function is
-  // used for setting canvas coordinate for child window.
-  // See |ui::Widget::OnDraw()| for example usage.
-  public: void SetOrigin(const gfx::PointF new_origin);
+  // [T]
+  public: bool TryAddDirtyRect(const gfx::RectF& bounds);
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);
 };

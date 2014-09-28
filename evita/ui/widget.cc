@@ -448,7 +448,7 @@ void Widget::OnDraw(gfx::Canvas* canvas) {
     if (!child->visible())
       continue;
     gfx::Canvas::ScopedState child_canvas(canvas);
-    canvas->SetOrigin(gfx::PointF(child->origin()));
+    canvas->SetOffsetBounds(gfx::RectF(child->bounds()));
     child->OnDraw(canvas);
   }
 }

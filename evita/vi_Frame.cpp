@@ -356,8 +356,7 @@ void Frame::DidRealize() {
       GetPreferredSize().height();
   const auto close_button_height = ::GetSystemMetrics(SM_CYSIZE);
   tab_strip_->SetBounds(gfx::Point(0, close_button_height),
-                        gfx::Point(bounds().width(),
-                                   close_button_height + 4 + tab_strip_height));
+                        gfx::Size(bounds().width(), tab_strip_height));
 
   SetLayer(new ui::RootLayer(this));
   tab_content_layer_.reset(new ui::Layer());

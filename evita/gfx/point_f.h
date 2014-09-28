@@ -96,6 +96,10 @@ class Point_ : public BaseType {
   public: Point_ operator/(UnitType divisor) const {
     return Point_(x / divisor, y / divisor);
   }
+
+  public: Point_ Offset(UnitType delta_x, UnitType delta_y) const {
+    return Point_(x + delta_x, y + delta_y);
+  }
 };
 typedef Point_<D2D1_POINT_2F, SizeF> PointF;
 typedef Point_<D2D1_POINT_2U, SizeU> PointU;

@@ -45,16 +45,11 @@ class TextFieldControl final : public Control {
 
   public: int MapPointToOffset(const gfx::PointF& point) const;
 
-  // ui::AnimatableWindow
-  private: virtual void DidBeginAnimationFrame(base::Time time) override;
-
   // ui::Control
   private: virtual void DidChangeState() override;
 
   // ui::Widget
-  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
   private: virtual void DidChangeBounds() override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
 

@@ -6,14 +6,14 @@
 #define INCLUDE_evita_ui_controls_control_h
 
 #include "evita/gfx/color_f.h"
-#include "evita/ui/animation/animatable_window.h"
+#include "evita/ui/widget.h"
 
 namespace ui {
 
 class ControlController;
 class TextInputDelegate;
 
-class Control : public AnimatableWindow {
+class Control : public Widget {
   DECLARE_CASTABLE_CLASS(Control, Widget);
 
   public: enum class State {

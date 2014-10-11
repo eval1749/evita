@@ -61,7 +61,7 @@ void Control::DidChangeState() {
 
 // ui::WIdget
 void Control::DidKillFocus(ui::Widget* focused_widget) {
-  AnimatableWindow::DidKillFocus(focused_widget);
+  Widget::DidKillFocus(focused_widget);
   if (disabled()) {
     return;
   }
@@ -76,12 +76,12 @@ void Control::DidKillFocus(ui::Widget* focused_widget) {
 }
 
 void Control::DidRealize() {
-  AnimatableWindow::DidRealize();
+  Widget::DidRealize();
   controller_->DidRealize(this);
 }
 
 void Control::DidSetFocus(ui::Widget* last_focused_widget) {
-  AnimatableWindow::DidSetFocus(last_focused_widget);
+  Widget::DidSetFocus(last_focused_widget);
   if (disabled())
     return;
   state_ = State::Highlight;
@@ -150,7 +150,7 @@ void Control::OnMouseWheel(const MouseWheelEvent& event) {
 }
 
 void Control::WillDestroyWidget() {
-  AnimatableWindow::WillDestroyWidget();
+  Widget::WillDestroyWidget();
   auto const controller = controller_;
   controller_ = nullptr;
   controller->WillDestroyControl(this);

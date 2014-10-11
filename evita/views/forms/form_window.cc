@@ -415,6 +415,7 @@ void FormWindow::FormViewModel::Update() {
 
 // dom::FormObserver
 void FormWindow::FormViewModel::DidChangeForm() {
+  // TODO(eval1749) Schedule animation for FrameWindow.
   ASSERT_DOM_LOCKED();
   dirty_ = true;
 }
@@ -465,40 +466,35 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
   // TODO(eval1749) We should call |RequestAnimationFrame()| only if needed.
   RequestAnimationFrame();
 
-  if (!model_->dirty()) {
-    TransferFocusIfNeeded();
-    return;
-  }
+  if (model_->dirty()) {
+    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+    if (lock_scope.locked()) {
+      model_->Update();
 
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (!lock_scope.locked())
-    return;
+      if (form_size_ != model_->size()) {
+        form_size_ = model_->size();
+        RECT window_rect;
+        ::GetWindowRect(AssociatedHwnd(), &window_rect);
+        window_rect.right = window_rect.left + form_size_.width();
+        window_rect.bottom = window_rect.top + form_size_.height();
+        auto const extended_window_style = static_cast<DWORD>(
+            ::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
+        auto const window_style = static_cast<DWORD>(
+            ::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
+        auto const has_menu = false;
+        WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
+                                          extended_window_style));
+        SetBounds(window_rect);
+      }
 
-  model_->Update();
-
-  if (form_size_ != model_->size()) {
-    form_size_ = model_->size();
-    RECT window_rect;
-    ::GetWindowRect(AssociatedHwnd(), &window_rect);
-    window_rect.right = window_rect.left + form_size_.width();
-    window_rect.bottom = window_rect.top + form_size_.height();
-    auto const extended_window_style = static_cast<DWORD>(
-        ::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
-    auto const window_style = static_cast<DWORD>(
-        ::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
-    auto const has_menu = false;
-    WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
-                                      extended_window_style));
-    SetBounds(window_rect);
-  }
-
-  if (title_ != model_->title()) {
-    title_ = model_->title();
-    ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
+      if (title_ != model_->title()) {
+        title_ = model_->title();
+        ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
+      }
+    }
   }
 
   TransferFocusIfNeeded();
-
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   Window::OnDraw(canvas_.get());
 }

@@ -436,14 +436,6 @@ int TextFieldControl::MapPointToOffset(const gfx::PointF& point) const {
   return view_->MapPointToOffset(point);
 }
 
-// ui::AnimatableWindow
-void TextFieldControl::DidBeginAnimationFrame(base::Time) {
-  if (!has_focus())
-    return;
-  SchedulePaint();
-  RequestAnimationFrame();
-}
-
 // ui::Control
 void TextFieldControl::DidChangeState() {
   view_->set_state(state());
@@ -451,19 +443,8 @@ void TextFieldControl::DidChangeState() {
 }
 
 // ui::Widget
-void TextFieldControl::DidKillFocus(ui::Widget* focused_widget) {
-  CancelAnimationFrameRequest();
-  SchedulePaint();
-  Control::DidKillFocus(focused_widget);
-}
-
 void TextFieldControl::DidChangeBounds() {
   view_->SetBounds(GetContentsBounds());
-}
-
-void TextFieldControl::DidSetFocus(ui::Widget* last_focused_widget) {
-  RequestAnimationFrame();
-  Control::DidSetFocus(last_focused_widget);
 }
 
 HCURSOR TextFieldControl::GetCursorAt(const gfx::Point&) const {

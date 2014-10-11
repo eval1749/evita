@@ -77,7 +77,7 @@ Canvas::DrawingScope::~DrawingScope() {
 // Canvas::ScopedState
 //
 Canvas::ScopedState::ScopedState(Canvas* canvas)
-    : bounds_(canvas->bounds()), canvas_(canvas) {
+    : bounds_(canvas->bounds_), canvas_(canvas) {
   (*canvas_)->GetTransform(&transform_);
 }
 

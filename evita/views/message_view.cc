@@ -106,7 +106,7 @@ Painter::Painter() : original_main_part_width_(0) {
 
 void Painter::Paint(gfx::Canvas* canvas,
                     const std::vector<PartView>& new_parts) {
-  auto const new_bounds = canvas->bounds();
+  auto const new_bounds = canvas->GetLocalBounds();
   auto dirty = bounds_ != new_bounds;
   if (parts_.size() != new_parts.size()) {
     parts_.clear();
@@ -250,7 +250,7 @@ void MessageView::View::Animate(base::Time now) {
 
   if (!canvas_)
     canvas_.reset(animator_->layer()->CreateCanvas());
-  else if (canvas_->bounds() != animator_->GetContentsBounds())
+  else if (canvas_->GetLocalBounds() != animator_->GetContentsBounds())
     canvas_->SetBounds(animator_->GetContentsBounds());
 
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());

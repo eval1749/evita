@@ -77,13 +77,13 @@ class Canvas : public Object, public DpiHandler {
   // Id of current backing bitmap. Each time we change canvas bounds, we have
   // new backing bitmap.
   public: int bitmap_id() const { return bitmap_id_; }
-  // Bounds of |this| canvas.
-  public: const gfx::RectF bounds() const { return bounds_; }
   // |drawing()| is for debugging.
   public: bool drawing() const { return batch_nesting_level_; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
+  public: float height() const { return bounds_.height(); }
   public: Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
   public: bool should_clear() const { return should_clear_; }
+  public: float width() const { return bounds_.width(); }
 
   // [A]
   public: virtual void AddDirtyRect(const RectF& new_dirty_rect);

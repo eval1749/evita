@@ -1250,7 +1250,7 @@ void TabStrip::View::DidBeginAnimationFrame(base::Time) {
   UpdateLayout();
   if (!canvas_)
     canvas_.reset(widget_->layer()->CreateCanvas());
-  else if (widget_->GetContentsBounds() != canvas_->bounds())
+  else if (widget_->GetContentsBounds() != canvas_->GetLocalBounds())
     canvas_->SetBounds(widget_->GetContentsBounds());
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   widget_->OnDraw(canvas_.get());

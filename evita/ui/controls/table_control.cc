@@ -150,7 +150,7 @@ void CanvasWindow::DidBeginAnimationFrame(base::Time) {
   if (!canvas_) {
     canvas_.reset(layer()->CreateCanvas());
     DidChangeCanvas();
-  } else if (GetContentsBounds() != canvas_->bounds()) {
+  } else if (GetContentsBounds() != canvas_->GetLocalBounds()) {
     canvas_->SetBounds(GetContentsBounds());
     DidChangeCanvas();
   }
@@ -955,7 +955,7 @@ void RowCollection::OnDraw(gfx::Canvas* canvas) {
     RequestAnimationFrame();
     return;
   }
-  if (header_->canvas_width() != canvas->bounds().width()) {
+  if (header_->canvas_width() != canvas->width()) {
     // |TableControl| is changed but |ColumnCollection| isn't update yet,
     // We'll update |RowCollection| in next animation frame.
     RequestAnimationFrame();

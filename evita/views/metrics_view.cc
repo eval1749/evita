@@ -87,11 +87,11 @@ MetricsView::View::View(ui::Widget* widget)
 void MetricsView::View::Animate(base::Time) {
   if (!canvas_)
     canvas_.reset(widget_->layer()->CreateCanvas());
-  else if (canvas_->bounds() != widget_->GetContentsBounds())
+  else if (canvas_->GetLocalBounds() != widget_->GetContentsBounds())
     canvas_->SetBounds(widget_->GetContentsBounds());
 
   auto const canvas = canvas_.get();
-  auto const bounds = canvas->bounds();
+  auto const bounds = canvas->GetLocalBounds();
 
   std::basic_ostringstream<base::char16> stream;
   stream << L"Frame latency=" << frame_latency_data_.minimum() << L" " <<

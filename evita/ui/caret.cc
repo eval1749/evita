@@ -56,7 +56,7 @@ void Caret::Hide(gfx::Canvas* canvas) {
   if (!visible_)
     return;
   visible_ = false;
-  auto const bounds = bounds_.Intersect(canvas->bounds());
+  auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
   if (bounds.empty())
     return;
   gfx::Canvas::DrawingScope drawing_scope(canvas);
@@ -67,7 +67,7 @@ void Caret::Hide(gfx::Canvas* canvas) {
 void Caret::Show(gfx::Canvas* canvas) {
   if (visible_)
     return;
-  auto const bounds = bounds_.Intersect(canvas->bounds());
+  auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
   if (bounds.empty())
     return;
   visible_ = true;

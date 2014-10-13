@@ -83,6 +83,8 @@
         'text/scoped_undo_group.h',
         'text/selection.cc',
         'text/selection.h',
+        'text/selection_change_observer.cc',
+        'text/selection_change_observer.h',
         'text/undo_stack.cc',
         'text/undo_step.cc',
         'z_debug.cpp',

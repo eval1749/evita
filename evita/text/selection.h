@@ -5,15 +5,19 @@
 #if !defined(INCLUDE_evita_text_selection_h)
 #define INCLUDE_evita_text_selection_h
 
+#include <memory>
+
 #include "evita/css/style.h"
 
 namespace text {
-class Range;
 class Buffer;
+class Range;
+class SelectionChangeObserver;
 
 class Selection {
-  private: Range* const range_;
-  private: bool start_is_active_;
+  private: class Model;
+
+  private: std::unique_ptr<Model> model_;
 
   public: Selection(const Range* range);
   public: ~Selection();
@@ -22,13 +26,13 @@ class Selection {
   public: Buffer* buffer() const;
   public: Posn end() const;
   public: Posn focus_offset() const;
-  public: Range* range() const { return range_; }
+  public: Range* range() const;
   public: Posn start() const;
 
-  public: bool IsStartActive() const { return start_is_active_; }
-  public: void SetStartIsActive(bool new_start_is_active) {
-    start_is_active_ = new_start_is_active;
-  }
+  public: void AddObserver(SelectionChangeObserver* observer);
+  public: bool IsStartActive() const;
+  public: void RemoveObserver(SelectionChangeObserver* observer);
+  public: void SetStartIsActive(bool new_start_is_active);
 
   DISALLOW_COPY_AND_ASSIGN(Selection);
 };

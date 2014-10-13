@@ -105,6 +105,7 @@ class Widget : public common::Castable,
   protected: virtual void DidRealize();
   protected: virtual void DidRealizeChildWidget(Widget* new_child);
   protected: virtual void DidRemoveChildWidget(Widget* old_child);
+  protected: virtual void DidRequestDestroy();
   protected: virtual void DidSetFocus(Widget* last_focused);
   protected: virtual void DidShow();
   private: void DispatchMouseExited();

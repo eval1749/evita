@@ -395,6 +395,10 @@ void Frame::DidRemoveChildWidget(ui::Widget* old_child) {
   DestroyWidget();
 }
 
+void Frame::DidRequestDestroy() {
+  Application::instance()->view_event_handler()->QueryClose(window_id());
+}
+
 void Frame::DidSetFocus(ui::Widget* widget) {
   views::Window::DidSetFocus(widget);
   FOR_EACH_OBSERVER(views::FrameObserver, observers_, DidActivateFrame(this));
@@ -420,10 +424,6 @@ LRESULT Frame::OnMessage(uint32_t message, WPARAM const wParam,
       COM_VERIFY(::DwmExtendFrameIntoClientArea(*native_window(), &margins));
       break;
     }
-
-    case WM_CLOSE:
-      Application::instance()->view_event_handler()->QueryClose(window_id());
-      return 0;
 
     case WM_DROPFILES:
       OnDropFiles(reinterpret_cast<HDROP>(wParam));

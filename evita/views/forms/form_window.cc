@@ -590,19 +590,14 @@ void FormWindow::DidRealize() {
   Window::DidRealize();
 }
 
+void FormWindow::DidRequestDestroy() {
+  // TODO(eval1749) Should we dispatch "close" event to JavaScript?
+  Hide();
+}
+
 void FormWindow::DidSetFocus(ui::Widget* last_focused) {
   Window::DidSetFocus(last_focused);
   TransferFocusIfNeeded();
-}
-
-LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,
-                              LPARAM const lParam) {
-  if (message == WM_CLOSE) {
-    // TODO(eval1749) Should we dispatch "close" event to JavaScript?
-    Hide();
-    return 0;
-  }
-  return Widget::OnMessage(message, wParam, lParam);
 }
 
 void FormWindow::RealizeWidget() {

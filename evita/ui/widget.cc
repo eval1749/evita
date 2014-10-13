@@ -201,6 +201,10 @@ void Widget::DidRealizeChildWidget(Widget*) {
 void Widget::DidRemoveChildWidget(Widget*) {
 }
 
+void Widget::DidRequestDestroy() {
+  ::DestroyWindow(AssociatedHwnd());
+}
+
 void Widget::DidChangeBounds() {
   SchedulePaint();
   if (!layer())
@@ -669,6 +673,10 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         capture_widget = nullptr;
       return 0;
     }
+    case WM_CLOSE:
+      DidRequestDestroy();
+      return 0;
+
     case WM_CREATE: {
       auto const create_data = reinterpret_cast<const CREATESTRUCT*>(lParam);
       if (create_data->hwndParent) {

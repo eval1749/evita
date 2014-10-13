@@ -418,7 +418,7 @@ void FormWindow::FormViewModel::Update() {
 // dom::FormObserver
 void FormWindow::FormViewModel::DidChangeForm() {
   ASSERT_DOM_LOCKED();
-  window_->SchedulePaint();
+  window_->RequestAnimationFrame();
   dirty_ = true;
 }
 
@@ -490,6 +490,8 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
         title_ = model_->title();
         ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
       }
+    } else {
+      RequestAnimationFrame();
     }
     TransferFocusIfNeeded();
   }

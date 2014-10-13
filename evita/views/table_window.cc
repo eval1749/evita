@@ -63,10 +63,12 @@ TableWindow::TableWindow(WindowId window_id, dom::Document* document)
       document_(document),
       model_(new TableViewModel()),
       should_update_model_(true) {
+  UI_DOM_AUTO_LOCK_SCOPE();
   document_->buffer()->AddObserver(this);
 }
 
 TableWindow::~TableWindow() {
+  UI_DOM_AUTO_LOCK_SCOPE();
   document_->buffer()->RemoveObserver(this);
 }
 

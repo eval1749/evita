@@ -173,10 +173,12 @@ TextBlock::TextBlock(text::Buffer* text_buffer)
       lines_height_(0), text_buffer_(text_buffer),
       text_line_cache_(new TextLineCache(text_buffer)), view_start_(0),
       zoom_(1.0f) {
+  UI_DOM_AUTO_LOCK_SCOPE();
   text_buffer->AddObserver(this);
 }
 
 TextBlock::~TextBlock() {
+  UI_DOM_AUTO_LOCK_SCOPE();
   text_buffer_->RemoveObserver(this);
 }
 

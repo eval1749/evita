@@ -198,6 +198,8 @@ bool TextWindow::LargeScroll(int, int iDy) {
       scrolled = true;
     }
   }
+  if (scrolled)
+    RequestAnimationFrame();
   return scrolled;
 }
 
@@ -294,8 +296,10 @@ bool TextWindow::SmallScroll(int, int y_count) {
         break;
       scrolled = true;
     }
- }
+  }
 
+  if (scrolled)
+   RequestAnimationFrame();
   return scrolled;
 }
 
@@ -421,6 +425,7 @@ void TextWindow::DidClickPageUp() {
 void TextWindow::DidMoveThumb(int value) {
   UI_DOM_AUTO_LOCK_SCOPE();
   text_renderer_->Format(value);
+  RequestAnimationFrame();
 }
 
 // ui::TextInputDelegate

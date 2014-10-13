@@ -751,6 +751,7 @@ void ScrollBar::ResetHover() {
   }
   hover_part_->set_state(Part::State::Normal);
   hover_part_ = nullptr;
+  SchedulePaint();
 }
 
 void ScrollBar::SetData(const Data& data) {
@@ -762,9 +763,9 @@ void ScrollBar::SetData(const Data& data) {
 
 void ScrollBar::UpdateLayout() {
   auto const contents_bounds = GetContentsBounds();
-  for (auto part : parts_) {
+  for (auto part : parts_)
     part->UpdateLayout(contents_bounds, data_);
-  }
+  SchedulePaint();
 }
 
 // ui::Widget
@@ -809,13 +810,15 @@ void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
     return;
   auto const result = HitTest(gfx::PointF(event.location()));
   auto const new_hover_part = result.part();
-  if (hover_part_ && hover_part_ != new_hover_part)
+  if (hover_part_ && hover_part_ != new_hover_part) {
     hover_part_->set_state(Part::State::Normal);
+    SchedulePaint();
+  }
   hover_part_ = new_hover_part;
-  if (!hover_part_)
+  if (!hover_part_ || !hover_part_->is_normal())
     return;
-  if (hover_part_->is_normal())
-    hover_part_->set_state(Part::State::Hover);
+  hover_part_->set_state(Part::State::Hover);
+  SchedulePaint();
 }
 
 void ScrollBar::OnMousePressed(const ui::MouseEvent& event) {

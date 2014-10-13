@@ -361,6 +361,23 @@
   };
 
   /**
+   * @this {!Document}
+   *
+   * Returns generator object which returns line, including newline character,
+   * in a document.
+   */
+  function* lines() {
+    var range = new Range(this);
+    while (range.start < this.length) {
+      range.moveEnd(Unit.LINE);
+      yield range.text;
+      range.collapseTo(range.end);
+    }
+  }
+
+  Object.defineProperty(Document.prototype, 'lines', {get: lines});
+
+  /**
    * @return {Array.<!DocumentWindow>}
    */
   Document.prototype.listWindows = function() {

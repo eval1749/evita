@@ -12,6 +12,14 @@
 #include "evita/gfx/rect_f.h"
 #include "evita/views/text/render_selection.h"
 
+namespace base {
+class Time;
+}
+
+namespace ui {
+class CaretOwner;
+}
+
 namespace views {
 
 namespace rendering {
@@ -42,7 +50,7 @@ class TextRenderer final {
   private: std::unique_ptr<TextBlock> text_block_;
   private: float zoom_;
 
-  public: TextRenderer(text::Buffer* buffer);
+  public: TextRenderer(text::Buffer* buffer, ui::CaretOwner* caret_owner);
   public: ~TextRenderer();
 
   public: text::Buffer* buffer() const { return buffer_; }
@@ -68,10 +76,12 @@ class TextRenderer final {
   public: text::Posn MapPointToPosition(gfx::PointF point);
   public: text::Posn MapPointXToOffset(text::Posn text_offset,
                                        float point_x) const;
-  public: void Render(gfx::Canvas* canvas, const TextSelectionModel& selection);
+  public: void Render(gfx::Canvas* canvas, const TextSelectionModel& selection,
+                      base::Time now);
   private: void RenderRuler(gfx::Canvas* canvas);
   public: void RenderSelectionIfNeeded(gfx::Canvas* canvas,
-                                       const TextSelectionModel& selection);
+                                       const TextSelectionModel& selection,
+                                       base::Time now);
   public: bool ScrollDown();
   public: bool ScrollToPosition(text::Posn offset);
   public: bool ScrollUp();

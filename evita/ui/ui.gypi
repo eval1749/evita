@@ -88,6 +88,9 @@
         'controls/text_field_control.cc',
 
         'caret.cc',
+        'caret.h',
+        'caret_owner.cc',
+        'caret_owner.h',
         'focus_controller.cc',
         'focus_controller.h',
         'root_widget.cc',

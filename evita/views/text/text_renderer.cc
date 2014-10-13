@@ -30,9 +30,10 @@ using namespace rendering;
 //
 // TextRenderer
 //
-TextRenderer::TextRenderer(text::Buffer* buffer)
+TextRenderer::TextRenderer(text::Buffer* buffer, ui::CaretOwner* caret_owner)
     : buffer_(buffer), format_counter_(0),
-      screen_text_block_(new ScreenTextBlock()), should_render_(true),
+      screen_text_block_(new ScreenTextBlock(caret_owner)),
+      should_render_(true),
       text_block_(new TextBlock(buffer)), zoom_(1.0f) {
 }
 
@@ -113,11 +114,12 @@ text::Posn TextRenderer::MapPointXToOffset(text::Posn text_offset,
 }
 
 void TextRenderer::Render(gfx::Canvas* canvas,
-                          const TextSelectionModel& selection_model) {
+                          const TextSelectionModel& selection_model,
+                          base::Time now) {
   DCHECK(!ShouldFormat());
   const auto selection = TextFormatter::FormatSelection(buffer_,
                                                         selection_model);
-  screen_text_block_->Render(canvas, text_block_.get(), selection);
+  screen_text_block_->Render(canvas, text_block_.get(), selection, now);
   RenderRuler(canvas);
   format_counter_ = text_block_->format_counter();
   should_render_ = false;
@@ -143,11 +145,11 @@ void TextRenderer::RenderRuler(gfx::Canvas* canvas) {
 
 void TextRenderer::RenderSelectionIfNeeded(
     gfx::Canvas* canvas,
-    const TextSelectionModel& new_selection_model) {
+    const TextSelectionModel& new_selection_model, base::Time now) {
   DCHECK(!ShouldFormat());
   DCHECK(!should_render_);
   screen_text_block_->RenderSelectionIfNeeded(canvas,
-      TextFormatter::FormatSelection(buffer_, new_selection_model));
+      TextFormatter::FormatSelection(buffer_, new_selection_model), now);
 }
 
 bool TextRenderer::ScrollDown() {

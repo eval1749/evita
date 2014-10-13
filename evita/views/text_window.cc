@@ -60,7 +60,7 @@ TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
     : ContentWindow(window_id),
       caret_offset_(-1),
       metrics_view_(new MetricsView()),
-      text_renderer_(new TextRenderer(selection->buffer())),
+      text_renderer_(new TextRenderer(selection->buffer(), this)),
       selection_(selection),
       vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
                                              this)) {
@@ -205,7 +205,7 @@ Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
   return std::min(text_renderer_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
-void TextWindow::Redraw() {
+void TextWindow::Redraw(base::Time now) {
   UI_ASSERT_DOM_LOCKED();
 
   if (!visible())
@@ -221,7 +221,7 @@ void TextWindow::Redraw() {
       text_renderer_->ScrollToPosition(new_caret_offset);
       caret_offset_ = new_caret_offset;
     }
-    Render(selection);
+    Render(selection, now);
     return;
   }
 
@@ -229,34 +229,34 @@ void TextWindow::Redraw() {
     caret_offset_ = new_caret_offset;
     if (text_renderer_->IsPositionFullyVisible(new_caret_offset)) {
       if (ShouldRender()) {
-        Render(selection);
+        Render(selection, now);
       } else {
         gfx::Canvas::DrawingScope drawing_scope(canvas());
-        text_renderer_->RenderSelectionIfNeeded(canvas(), selection);
+        text_renderer_->RenderSelectionIfNeeded(canvas(), selection, now);
       }
       return;
     }
     text_renderer_->ScrollToPosition(new_caret_offset);
-    Render(selection);
+    Render(selection, now);
     return;
   }
 
   if (ShouldRender()) {
-    Render(selection);
+    Render(selection, now);
     return;
   }
 
   // The screen is clean.
-  text_renderer_->RenderSelectionIfNeeded(canvas(), selection);
+  text_renderer_->RenderSelectionIfNeeded(canvas(), selection, now);
 }
 
-void TextWindow::Render(const TextSelectionModel& selection) {
+void TextWindow::Render(const TextSelectionModel& selection, base::Time now) {
   UI_ASSERT_DOM_LOCKED();
   if (!visible())
     return;
 
   gfx::Canvas::DrawingScope drawing_scope(canvas());
-  text_renderer_->Render(canvas(), selection);
+  text_renderer_->Render(canvas(), selection, now);
 
   // Update scroll bar
   {
@@ -375,11 +375,16 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
   {
     MetricsView::TimingScope timing_scope(metrics_view_);
     gfx::Canvas::DrawingScope drawing_scope(canvas());
-    Redraw();
+    Redraw(now);
     OnDraw(canvas());
   }
   metrics_view_->Animate(now);
   NotifyUpdateContent();
+}
+
+// ui::CaretOwner
+void TextWindow::DidFireCaretTimer() {
+  RequestAnimationFrame();
 }
 
 // ui::LayerOwnerDelegate

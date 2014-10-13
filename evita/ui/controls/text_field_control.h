@@ -12,10 +12,15 @@
 #include "base/strings/string16.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/ui/caret_owner.h"
 
 namespace ui {
 
-class TextFieldControl final : public Control {
+//////////////////////////////////////////////////////////////////////
+//
+// TextFieldControl
+//
+class TextFieldControl final : public Control, private CaretOwner  {
   private: class View;
   public: struct Selection {
     size_t anchor_offset;
@@ -44,6 +49,9 @@ class TextFieldControl final : public Control {
   public: void set_text(const base::string16& text);
 
   public: int MapPointToOffset(const gfx::PointF& point) const;
+
+  // ui::CaretOwner
+  private: virtual void DidFireCaretTimer() override;
 
   // ui::Control
   private: virtual void DidChangeState() override;

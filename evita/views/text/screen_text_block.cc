@@ -93,11 +93,7 @@ typedef std::list<TextLine*>::const_iterator FormatLineIterator;
 // ScreenTextBlock::Caret
 //
 class ScreenTextBlock::Caret final : public ui::Caret {
-  private: gfx::RectF bounds_;
-  private: base::Time last_blink_time_;
-  private: bool visible_;
-
-  public: Caret() = default;
+  public: Caret(ui::CaretOwner* owner);
   public: virtual ~Caret() = default;
 
   private: virtual void Paint(gfx::Canvas* canvas,
@@ -106,14 +102,22 @@ class ScreenTextBlock::Caret final : public ui::Caret {
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };
 
+ScreenTextBlock::Caret::Caret(ui::CaretOwner* owner) : ui::Caret(owner) {
+}
+
 void ScreenTextBlock::Caret::Paint(gfx::Canvas* canvas,
                                    const gfx::RectF& bounds) {
   if (visible()) {
-    gfx::Brush fill_brush(canvas, gfx::ColorF::Black);
-    canvas->FillRectangle(fill_brush, bounds);
+    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
+    canvas->AddDirtyRect(bounds);
+    canvas->Clear(gfx::ColorF::Black);
     return;
   }
-  canvas->DrawBitmap(*canvas->screen_bitmap(), bounds, bounds);
+  if (!canvas->screen_bitmap())
+    return;
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
+  canvas->AddDirtyRect(bounds);
+  canvas->RestoreScreenImage(bounds);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -362,7 +366,7 @@ void ScreenTextBlock::RenderContext::RestoreSkipRect(
       gfx::SizeF(bounds_.width(), rect.height())).Intersect(bounds_);
   if (line_rect.empty())
     return;
-  canvas_->DrawBitmap(*canvas_->screen_bitmap(), line_rect, line_rect);
+  canvas_->RestoreScreenImage(line_rect);
   canvas_->AddDirtyRect(line_rect);
 }
 
@@ -420,8 +424,9 @@ FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
 //
 // ScreenTextBlock
 //
-ScreenTextBlock::ScreenTextBlock()
-    : caret_(new Caret()), dirty_(true), has_screen_bitmap_(false) {
+ScreenTextBlock::ScreenTextBlock(ui::CaretOwner* caret_owner)
+    : caret_(new Caret(caret_owner)), dirty_(true),
+      has_screen_bitmap_(false) {
 }
 
 ScreenTextBlock::~ScreenTextBlock() {
@@ -442,7 +447,7 @@ gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
 
 void ScreenTextBlock::Render(gfx::Canvas* canvas,
                              const TextBlock* text_block,
-                             const TextSelection& selection) {
+                             const TextSelection& selection, base::Time now) {
   DCHECK(!text_block->dirty());
   DCHECK(!has_screen_bitmap_ || canvas->screen_bitmap());
   RenderContext render_context(this, canvas, text_block);
@@ -459,7 +464,7 @@ void ScreenTextBlock::Render(gfx::Canvas* canvas,
       }
       ++runner;
     }
-    RenderSelection(canvas, selection);
+    RenderSelection(canvas, selection, now);
     return;
   }
 
@@ -474,28 +479,13 @@ void ScreenTextBlock::Render(gfx::Canvas* canvas,
     }
   }
   render_context.Finish();
-  RenderSelection(canvas, selection);
+  RenderSelection(canvas, selection, now);
   dirty_ = false;
 }
 
-void ScreenTextBlock::RenderCaret(gfx::Canvas* canvas) {
-  if (!selection_.has_focus()) {
-    caret_->Update(canvas, gfx::RectF());
-    return;
-  }
-  auto const char_rect = HitTestTextPosition(selection_.focus_offset());
-  if (char_rect.empty()) {
-    caret_->Update(canvas, gfx::RectF());
-    return;
-  }
-  auto const caret_width = 2;
-  gfx::RectF caret_bounds(char_rect.left, char_rect.top,
-                          char_rect.left + caret_width, char_rect.bottom);
-  caret_->Update(canvas, caret_bounds);
-}
-
 void ScreenTextBlock::RenderSelection(gfx::Canvas* canvas,
-                                      const TextSelection& selection) {
+                                      const TextSelection& selection,
+                                      base::Time now) {
   selection_ = selection;
   if (selection_.start() >= lines_.back()->text_end()) {
     caret_->Hide(canvas);
@@ -514,16 +504,15 @@ void ScreenTextBlock::RenderSelection(gfx::Canvas* canvas,
       canvas->FillRectangle(fill_brush, rect);
     }
   }
-  RenderCaret(canvas);
+  UpdateCaret(canvas, now);
 }
 
 void ScreenTextBlock::RenderSelectionIfNeeded(
-    gfx::Canvas* canvas,
-    const TextSelection& new_selection) {
+    gfx::Canvas* canvas, const TextSelection& new_selection, base::Time now) {
   if (selection_ == new_selection) {
     if (!selection_.has_focus())
       return;
-    caret_->Blink(canvas);
+    caret_->Blink(canvas, now);
     return;
   }
   auto new_selection_rects = CalculateSelectionRects(lines_, new_selection,
@@ -537,7 +526,7 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
     if (new_selection_rects.find(old_rect) != new_selection_rects.end())
       continue;
     canvas->AddDirtyRect(old_rect);
-    canvas->DrawBitmap(*canvas->screen_bitmap(), old_rect, old_rect);
+    canvas->RestoreScreenImage(old_rect);
     caret_->DidPaint(old_rect);
   }
 
@@ -549,7 +538,7 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
       if (old_selection_rects.find(new_rect) != old_selection_rects.end())
         continue;
       canvas->AddDirtyRect(new_rect);
-      canvas->DrawBitmap(*canvas->screen_bitmap(), new_rect, new_rect);
+      canvas->RestoreScreenImage(new_rect);
       canvas->FillRectangle(fill_brush, new_rect);
       caret_->DidPaint(new_rect);
     }
@@ -557,7 +546,7 @@ void ScreenTextBlock::RenderSelectionIfNeeded(
 
   selection_ = new_selection;
   caret_->Hide(canvas);
-  RenderCaret(canvas);
+  UpdateCaret(canvas, now);
 }
 
 void ScreenTextBlock::Reset() {
@@ -574,6 +563,18 @@ void ScreenTextBlock::Reset() {
 void ScreenTextBlock::SetBounds(const gfx::RectF& new_bounds) {
   Reset();
   bounds_ = new_bounds;
+}
+
+void ScreenTextBlock::UpdateCaret(gfx::Canvas* canvas, base::Time now) {
+  if (!selection_.has_focus())
+    return;
+  auto const char_rect = HitTestTextPosition(selection_.focus_offset());
+  if (char_rect.empty())
+    return;
+  auto const caret_width = 2;
+  gfx::RectF caret_bounds(char_rect.left, char_rect.top,
+                          char_rect.left + caret_width, char_rect.bottom);
+  caret_->Update(canvas, now, caret_bounds);
 }
 
 } // namespace rendering

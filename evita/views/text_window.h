@@ -11,6 +11,7 @@
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/selection_change_observer.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
+#include "evita/ui/caret_owner.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
 
@@ -38,6 +39,7 @@ class TextWindow final : public ContentWindow,
                          private gfx::CanvasObserver,
                          private text::BufferMutationObserver,
                          private text::SelectionChangeObserver,
+                         private ui::CaretOwner,
                          public ui::ScrollBarObserver,
                          public ui::TextInputDelegate {
   DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
@@ -64,8 +66,8 @@ class TextWindow final : public ContentWindow,
   public: gfx::RectF HitTestTextPosition(text::Posn offset);
   private: bool LargeScroll(int x_count, int y_count);
   public: text::Posn MapPointToPosition(const gfx::PointF point);
-  private: void Redraw();
-  private: void Render(const TextSelectionModel& selection);
+  private: void Redraw(base::Time now);
+  private: void Render(const TextSelectionModel& selection, base::Time now);
   public: void SetZoom(float new_zoom);
   private: bool ShouldRender() const;
   public: bool SmallScroll(int x_count, int y_count);
@@ -85,6 +87,9 @@ class TextWindow final : public ContentWindow,
 
   // ui::AnimationFrameHandler
   private: virtual void DidBeginAnimationFrame(base::Time time) override;
+
+  // ui::CaretOwner
+  private: virtual void DidFireCaretTimer() override;
 
   // ui::LayerOwnerDelegate
   private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;

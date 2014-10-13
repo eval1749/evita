@@ -63,8 +63,10 @@ void Caret::DidPaint(const gfx::RectF& paint_bounds) {
 }
 
 void Caret::Hide(gfx::Canvas* canvas) {
-  if (!visible_)
+  if (!visible_) {
+    timer_.Stop();
     return;
+  }
   visible_ = false;
   auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
   if (!bounds.empty())
@@ -83,6 +85,7 @@ void Caret::MakeEmpty() {
 void Caret::Update(gfx::Canvas* canvas, base::Time now,
                    const gfx::RectF& new_bounds) {
   DCHECK(!visible_);
+  DCHECK(!new_bounds.empty());
   if (bounds_ != new_bounds) {
     bounds_ = new_bounds;
     timer_.Start(FROM_HERE, base::TimeDelta::FromMilliseconds(kBlinkInterval),

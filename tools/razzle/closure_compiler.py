@@ -20,12 +20,28 @@ ES6_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6.js')
 # https://code.google.com/p/closure-compiler/wiki/Warnings
 CLOSURE_ERRORS = [
   'accessControls',
+  'ambiguousFunctionDecl',
   'checkDebuggerStatement',
   'checkRegExp',
+  'checkStructDictInheritance',
   'checkTypes',
+  'checkVars',
   'const',
   'constantProperty',
+  'deprecated',
+  'externsValidation',
+  'globalThis',
+  'invalidCasts',
+  'misplacedTypeAnnotation',
+  'missingProperties',
+  'missingReturn',
+  'nonStandardJsDocs',
   'strictModuleDepCheck',
+  'suspiciousCode',
+  'undefinedNames',
+  'undefinedVars',
+  'unknownDefines',
+  'uselessCode',
   'visibility',
 ];
 
@@ -33,9 +49,11 @@ CLOSURE_WARNINGS = [
 ];
 
 CLOSURE_OPTIONS = [
+  '--accept_const_keyword',
   '--compilation_level=SIMPLE',
   '--formatting=PRETTY_PRINT',
   '--language_in=ECMASCRIPT5_STRICT',
+  '--language_out=ECMASCRIPT5_STRICT',
   '--summary_detail_level=3',
   '--use_only_custom_externs',
   '--warning_level=VERBOSE',

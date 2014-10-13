@@ -17,11 +17,6 @@ var EventListener;
 var FilePath;
 
 /**
- * @constructor
- */
-var JsConsole = function() {};
-
-/**
  * Note: Since, Closure compiler doesn't support recursive type, we use
  * |!Map| instead of |!Keymap|.
  * @typedef {Map.<number, !Function|!Map>}

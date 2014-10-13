@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 /**
+ * @constructor
+ * @struct
+ * @return {undefined}
+ */
+function JsConsole() {};
+
+/**
  * @param {*} reason
  */
 JsConsole.errorHandler = function(reason) {};
@@ -16,8 +23,8 @@ JsConsole.prototype.backwardHistory;
 /** @type {!Document} */
 JsConsole.prototype.document;
 
-/** @type {function(string)} */
-JsConsole.prototype.emit;
+/** @param {string} text */
+JsConsole.prototype.emit = function(text) {};
 
 /** @type {function()} */
 JsConsole.prototype.emitPrompt;
@@ -32,21 +39,6 @@ JsConsole.prototype.evalLastLine;
 
 /** @type {function()} */
 JsConsole.prototype.forwardHistory;
-
-/** @type {Array.<string>} */
-JsConsole.prototype.history;
-
-/** @type {number} */
-JsConsole.prototype.historyIndex;
-
-/** @type {number} */
-JsConsole.prototype.lineNumber;
-
-/** @type {function()} */
-JsConsole.prototype.newWindow;
-
-/** @type {!Range} */
-JsConsole.prototype.range;
 
 /** @type {function()} */
 JsConsole.prototype.useHistory;

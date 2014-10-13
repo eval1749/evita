@@ -39,8 +39,10 @@
      case Event.Names.FOCUS:
        break;
      case Event.Names.DROPWINDOW: {
-       var window_event = /** @type{WindowEvent} */(event);
-       handleDropWindow(window_event.sourceWindow, this);
+       var windowEvent = /** @type {!WindowEvent} */(event);
+       var editorWindow = /** @type {!EditorWindow} */(
+          windowEvent.sourceWindow);
+       handleDropWindow(editorWindow, this);
        break;
      }
      case Event.Names.QUERYCLOSE:

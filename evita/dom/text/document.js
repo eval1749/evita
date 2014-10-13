@@ -219,7 +219,7 @@
             for (;;) {
               ++position;
               if (position == document.length)
-                return position;
+                break;
               var word_class2 = wordClassAt(document, position);
               if (word_class == word_class2)
                 continue;
@@ -229,7 +229,7 @@
                   return position;
                 word_class2 = wordClassAt(document, position);
               }
-              return position;
+              break;
             }
           }
           return position;

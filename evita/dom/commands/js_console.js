@@ -20,212 +20,262 @@ var $0;
  *  Ctrl+L Clear console.
  *  Ctlr+Up Backward history
  *
- * @constructor
  */
 global.JsConsole = (function() {
+  function installKeyBindings(jsConsole) {
+    /** @const @type {!Document} */ var document = jsConsole.document_;
+    // JavaScript console specific key bindings.
+    document.bindKey('Ctrl+ArrowDown', function() {
+      jsConsole.forwardHistory();
+      this.selection.range.collapseTo(jsConsole.document_.length);
+    });
+    document.bindKey('Ctrl+L', function() {
+      jsConsole.range_.startOf(Unit.DOCUMENT);
+      jsConsole.range_.endOf(Unit.DOCUMENT, Alter.EXTEND);
+      jsConsole.range_.text = '';
+      jsConsole.emitPrompt();
+      this.selection.range.collapseTo(jsConsole.document_.length);
+    });
+    document.bindKey('Ctrl+ArrowUp', function() {
+      jsConsole.backwardHistory();
+      this.selection.range.collapseTo(jsConsole.document_.length);
+    });
+    document.bindKey('Enter', function() {
+      this.selection.range.collapseTo(jsConsole.document_.length);
+      jsConsole.evalLastLine();
+    });
+  }
+
+  /**
+   * @constructor
+   * @final
+   * @struct
+   */
   function JsConsole() {
+    /** @const @type {!Document} */
+    var document = console.document;
     // TODO(yosi) We should make |*javascript*| document with JavaScript
     // syntax coloring.
-    this.document = console.document;
-    this.historyIndex = 0;
-    this.history = [];
-    this.lineNumber = 0;
-    this.range = new Range(this.document);
-    var self = /** @type {JsConsole} */(this);
-
-    // JavaScript console specific key bindings.
-    this.document.bindKey('Ctrl+ArrowDown', function() {
-      self.forwardHistory();
-      this.selection.range.collapseTo(self.document.length);
-    });
-    this.document.bindKey('Ctrl+L', function() {
-      self.range.startOf(Unit.DOCUMENT);
-      self.range.endOf(Unit.DOCUMENT, Alter.EXTEND);
-      self.range.text = '';
-      self.emitPrompt();
-      this.selection.range.collapseTo(self.document.length);
-    });
-    this.document.bindKey('Ctrl+ArrowUp', function() {
-      self.backwardHistory();
-      this.selection.range.collapseTo(self.document.length);
-    });
-    this.document.bindKey('Enter', function() {
-      this.selection.range.collapseTo(self.document.length);
-      self.evalLastLine();
-    });
-  }
-  return JsConsole;
-})();
-
-/** @type {number} */ JsConsole.MAX_HISTORY_LINES = 20;
-/** @type {?JsConsole} */ JsConsole.instance = null;
-
-global.JsConsole.errorHandler = function(reason) {
-  JsConsole.instance.errorHandler(reason);
-};
-
-/**
- * @this {!JsConsole}
- * @param {Window} activeWindow
- */
-global.JsConsole.prototype.activate = function(activeWindow) {
-  if (!activeWindow) {
-    this.newWindow();
-    return;
+    /** @type {!Document} */
+    this.document_ = document;
+    /** @type {number} */
+    this.historyIndex_ = 0;
+    /** @type {!Array.<string>} */
+    this.history_ = [];
+    /** @type {number} */
+    this.lineNumber_ = 0;
+    /** @const @type {!Range} */
+    this.range_ = new Range(document);
+    installKeyBindings(this);
+    Object.seal(this);
   }
 
-  var activeEditor_window = activeWindow instanceof EditorWindow ?
-    activeWindow : activeWindow.parent;
-  var document = this.document;
-  var present = null;
-  activeEditor_window.children.forEach(function(window) {
-    if (window.document == document)
-      present = window;
+  /** @const @type {number} */ var MAX_HISTORY_LINES = 20;
+  /** @type {JsConsole} */ var instance = null;
+
+  /**
+   * @return {!JsConsole}
+   */
+  function ensureJsConsole() {
+    if (instance)
+      return instance;
+    instance = new JsConsole();
+    instance.emit('\x2F/ JavaScript Console\n');
+    instance.emitPrompt();
+    return instance;
+  }
+
+  Object.defineProperties(JsConsole, {
+    errorHandler: {value: function(reason) {
+      return errorHandler.call(ensureJsConsole(), reason);
+    }}
   });
 
-  if (present) {
-    present.selection.range.collapseTo(document.length);
-    present.focus();
-    return;
-  }
-
-  var newWindow = new TextWindow(new Range(document));
-  activeEditor_window.appendChild(newWindow);
-  newWindow.selection.range.collapseTo(document.length);
-};
-
-/**
- * @private
- * @param {string} line
- */
-JsConsole.prototype.addToHistory_ = function(line) {
-  if (this.history.length && this.history[this.history.length - 1] == line)
-    return;
-  if (this.history.length > JsConsole.MAX_HISTORY_LINES)
-    this.history.shift();
-  this.history.push(line);
-};
-
-JsConsole.prototype.backwardHistory = function() {
-  if (this.historyIndex == this.history.length)
-    return;
-  ++this.historyIndex;
-  this.useHistory();
-};
-
-/**
- * @param {string} text
- */
-JsConsole.prototype.emit = function(text) {
-  this.document.readonly = false;
-  //this.range.move(Unit.DOCUMENT, 1);
-  this.range.collapseTo(this.document.length);
-  this.range.insertBefore(text);
-  this.document.readonly = true;
-};
-
-JsConsole.prototype.emitPrompt = function() {
-  ++this.lineNumber;
-  this.emit('\njs:' + this.lineNumber + '> ');
-  // Off by one to keep |this.range.end| before user input.
-  this.range.collapseTo(this.document.length - 1);
-  this.document.readonly = false;
-};
-
-/**
- * @this {!JsConsole}
- * @param {*} reason
- */
-global.JsConsole.prototype.errorHandler = function(reason) {
-  $0 = reason;
-  if (reason instanceof Error) {
-    var stack = reason['stack'];
-    if (stack) {
-      this.emit('\x2F*\n' + stack + '\n*\x2F\n');
+  /**
+   * @this {!JsConsole}
+   * @param {Window} activeWindow
+   */
+  function activate(activeWindow) {
+    if (!activeWindow) {
+      newConsoleWindow(this);
       return;
     }
-    var message = reason['message'];
-    if (message) {
-      this.emit('\x2F*\nException: ' + message + '\n*\x2F\n');
+
+    var activeEditor_window = activeWindow instanceof EditorWindow ?
+      activeWindow : activeWindow.parent;
+    var document = this.document_;
+    var present = null;
+    activeEditor_window.children.forEach(function(window) {
+      if (window.document === document)
+        present = window;
+    });
+
+    if (present) {
+      present.selection.range.collapseTo(document.length);
+      present.focus();
       return;
     }
-  }
-  this.emit('JsConsole.errorHandler: ' + Editor.stringify(reason));
-};
 
-JsConsole.prototype.evalLastLine = function() {
-  var range = this.range;
-  range.end = this.document.length;
-  var line = range.text.trim();
-  if (line == '') {
+    var newWindow = new TextWindow(new Range(document));
+    activeEditor_window.appendChild(newWindow);
+    newWindow.selection.range.collapseTo(document.length);
+  };
+
+  /**
+   * @param {!JsConsole} historyOwner
+   * @param {string} line
+   */
+  function addToHistory(historyOwner, line) {
+    var history = historyOwner.history_;
+    if (history.length && history[history.length - 1] === line)
+      return;
+    if (history.length > MAX_HISTORY_LINES)
+      history.shift();
+    history.push(line);
+  };
+
+  /**
+   * @this {!JsConsole}
+   */
+  function backwardHistory() {
+    if (this.historyIndex_ === this.history_.length)
+      return;
+    ++this.historyIndex_;
+    this.useHistory();
+  };
+
+  /**
+   * @this {!JsConsole}
+   * @param {string} text
+   */
+  function emit(text) {
+    this.document_.readonly = false;
+    //this.range_.move(Unit.DOCUMENT, 1);
+    this.range_.collapseTo(this.document_.length);
+    this.range_.insertBefore(text);
+    this.document_.readonly = true;
+  };
+
+  /**
+   * @this {!JsConsole}
+   */
+  function emitPrompt() {
+    ++this.lineNumber_;
+    this.emit('\njs:' + this.lineNumber_ + '> ');
+    // Off by one to keep |this.range_.end| before user input.
+    this.range_.collapseTo(this.document_.length - 1);
+    this.document_.readonly = false;
+  };
+
+  /**
+   * @this {!JsConsole}
+   * @param {*} reason
+   */
+  function errorHandler(reason) {
+    $0 = reason;
+    if (reason instanceof Error) {
+      var stack = reason['stack'];
+      if (stack) {
+        this.emit('\x2F*\n' + stack + '\n*\x2F\n');
+        return;
+      }
+      var message = reason['message'];
+      if (message) {
+        this.emit('\x2F*\nException: ' + message + '\n*\x2F\n');
+        return;
+      }
+    }
+    this.emit('JsConsole.errorHandler: ' + Editor.stringify(reason));
+  };
+
+  /**
+   * @this {!JsConsole}
+   */
+  function evalLastLine() {
+    var range = this.range_;
+    range.end = this.document_.length;
+    var line = range.text.trim();
+    if (line === '') {
+      this.emitPrompt();
+      return;
+    }
+    addToHistory(this, line);
+    this.historyIndex_ = 0;
+    range.collapseTo(range.end);
+    range.text = '\n';
+
+    var result = Editor.runScript(line, console.DOCUMENT_NAME);
+    range.collapseTo(range.end);
+    if (result.exception) {
+      $0 = result.exception;
+      if (result.stackTraceString === '') {
+        result.stackTraceString = result.exception +
+          result.stackTrace.map(function(stackFrame) {
+            return '\n  at ' + stackFrame.functionName + ' (' +
+                stackFrame.scriptName + '(' + stackFrame.lineNumber + ':' +
+                stackFrame.column + ')';
+          }).join('');
+      }
+      this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
+    } else {
+      if (result.value !== undefined)
+        $0 = result.value;
+      this.emit(Editor.stringify(result.value));
+    }
     this.emitPrompt();
-    return;
-  }
-  this.addToHistory_(line);
-  this.historyIndex = 0;
-  range.collapseTo(range.end);
-  range.text = '\n';
+  };
 
-  var result = Editor.runScript(line, console.DOCUMENT_NAME);
-  JsConsole.result = result;
-  range.collapseTo(range.end);
-  if (result.exception) {
-    $0 = result.exception;
-    if (result.stackTraceString == '') {
-      result.stackTraceString = result.exception +
-        result.stackTrace.map(function(stackFrame) {
-          return '\n  at ' + stackFrame.functionName + ' (' +
-              stackFrame.scriptName + '(' + stackFrame.lineNumber + ':' +
-              stackFrame.column + ')';
-        }).join('');
-    }
-    this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
-  } else {
-    if (result.value !== undefined)
-      $0 = result.value;
-    this.emit(Editor.stringify(result.value));
-  }
-  this.emitPrompt();
-};
+  /**
+   * @this {!JsConsole}
+   */
+  function forwardHistory() {
+    if (this.historyIndex_ <= 1)
+      return;
+    --this.historyIndex_;
+    this.useHistory();
+  };
 
-JsConsole.prototype.forwardHistory = function() {
-  if (this.historyIndex <= 1)
-    return;
-  --this.historyIndex;
-  this.useHistory();
-};
+  /**
+   * @param {!JsConsole} jsConsole
+   */
+  function newConsoleWindow(jsConsole) {
+    var editorWindow = new EditorWindow();
+    var textWindow = new TextWindow(new Range(jsConsole.document_));
+    editorWindow.appendChild(textWindow);
+    editorWindow.realize();
+  };
 
-JsConsole.prototype.newWindow = function() {
-  var editorWindow = new EditorWindow();
-  var textWindow = new TextWindow(new Range(this.document));
-  editorWindow.appendChild(textWindow);
-  editorWindow.realize();
-};
+  /**
+   * @this {!JsConsole}
+   */
+  function useHistory() {
+    var range = this.range_;
+    range.end = this.document_.length;
+    range.text = ' ' + this.history_[this.history_.length - this.historyIndex_];
+  };
 
-JsConsole.prototype.useHistory = function() {
-  var range = this.range;
-  range.end = this.document.length;
-  range.text = ' ' + this.history[this.history.length - this.historyIndex];
-};
-
-(function() {
   /**
    * Switch to JavaScript command.
    * @this {Window}
    */
   function switchToJsConsoleCommand() {
-    var activeWindow = this.selection.window;
-    if (JsConsole.instance) {
-      JsConsole.instance.activate(activeWindow);
-      return;
-    }
-    var instance = new JsConsole();
-    JsConsole.instance = instance;
-    instance.emit('\x2F/ JavaScript Console\n');
-    instance.emitPrompt();
-    instance.activate(activeWindow);
+     ensureJsConsole().activate(this.selection.window);
   }
 
   Editor.bindKey(Window, 'Ctrl+Shift+I', switchToJsConsoleCommand);
   Editor.bindKey(Window, 'Ctrl+Shift+J', switchToJsConsoleCommand);
+
+  Object.defineProperties(JsConsole.prototype, {
+    activate: {value: activate},
+    backwardHistory: {value: backwardHistory},
+    constructor: {value: JsConsole},
+    emit: {value: emit},
+    emitPrompt: {value: emitPrompt},
+    errorHandler: {value: errorHandler},
+    evalLastLine: {value: evalLastLine},
+    useHistory: {value: useHistory}
+  });
+  Object.freeze(JsConsole.prototype);
+  Object.seal(JsConsole);
+  return JsConsole;
 })();

@@ -27,6 +27,9 @@ Range::~Range() {
   buffer_->ranges()->RemoveRange(this);
 }
 
+void Range::DidChangeRange() {
+}
+
 Posn Range::EnsureOffset(Posn offset) const {
   if (offset < 0)
     return 0;
@@ -43,16 +46,16 @@ void Range::set_end(Posn offset) {
   SetRange(start_, offset);
 }
 
-void Range::SetRange(Posn start, Posn end) {
-  start = EnsureOffset(start);
-  end = EnsureOffset(end);
-  if (start <= end) {
-    start_ = start;
-    end_ = end;
-  } else {
-    start_ = end;
-    end_ = start;
+void Range::SetRange(Posn new_start, Posn new_end) {
+  new_start = EnsureOffset(new_start);
+  new_end = EnsureOffset(new_end);
+  if (new_start > new_end) {
+    std::swap(new_start, new_end);
   }
+  if (start_ == new_start && end_ == new_end)
+    return;
+  start_ = new_start;
+  end_ = new_end;
 }
 
 void Range::set_start(Posn offset) {
@@ -74,8 +77,7 @@ void Range::set_text(const base::string16& text) {
     buffer_->Delete(start_, end_);
     buffer_->InsertBefore(start_, text);
   }
-  start_ = start;
-  end_ = EnsureOffset(static_cast<Posn>(start_ + text.length()));
+  SetRange(start, EnsureOffset(static_cast<Posn>(start + text.length())));
 }
 
 Buffer::EnumChar::EnumChar(const Range* range)

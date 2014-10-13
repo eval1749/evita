@@ -19,7 +19,7 @@ class Range {
   private: Posn start_;
 
   public: Range(Buffer* buffer, Posn start, Posn end);
-  public: ~Range();
+  public: virtual ~Range();
 
   public: Buffer* buffer() const { return buffer_; }
   public: Posn end() const { return end_; }
@@ -29,6 +29,7 @@ class Range {
   public: base::string16 text() const;
   public: void set_text(const base::string16& new_text);
 
+  protected: virtual void DidChangeRange();
   private: Posn EnsureOffset(Posn offset) const;
   public: void SetRange(Posn start, Posn end);
 

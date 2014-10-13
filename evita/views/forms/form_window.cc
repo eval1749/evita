@@ -337,10 +337,12 @@ class FormWindow::FormViewModel final : private dom::FormObserver  {
 FormWindow::FormViewModel::FormViewModel(const dom::Form* form,
                                          FormWindow* window)
     : dirty_(true), focus_control_(nullptr), form_(form), window_(window) {
+  UI_DOM_AUTO_LOCK_SCOPE();
   form_->AddObserver(this);
 }
 
 FormWindow::FormViewModel::~FormViewModel() {
+  UI_DOM_AUTO_LOCK_SCOPE();
   form_->RemoveObserver(this);
 }
 

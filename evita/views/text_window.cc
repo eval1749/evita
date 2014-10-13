@@ -11,6 +11,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_data.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/metrics/time_scope.h"
@@ -65,9 +66,15 @@ TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
                                              this)) {
   AppendChild(vertical_scroll_bar_);
   AppendChild(metrics_view_);
+  UI_DOM_AUTO_LOCK_SCOPE();
+  buffer()->AddObserver(this);
+  selection_->AddObserver(this);
 }
 
 TextWindow::~TextWindow() {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  buffer()->RemoveObserver(this);
+  selection_->RemoveObserver(this);
 }
 
 text::Buffer* TextWindow::buffer() const {
@@ -331,14 +338,39 @@ void TextWindow::DidRecreateCanvas() {
   text_renderer_->DidRecreateCanvas();
 }
 
+// text::BufferMutationObserver
+void TextWindow::DidChangeStyle(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  text_renderer_->DidChangeStyle(offset, length);
+  RequestAnimationFrame();
+}
+
+void TextWindow::DidDeleteAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  text_renderer_->DidDeleteAt(offset, length);
+  RequestAnimationFrame();
+}
+
+void TextWindow::DidInsertAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  text_renderer_->DidInsertAt(offset, length);
+  RequestAnimationFrame();
+}
+
+// text::SelectionChangeObserver
+void TextWindow::DidChangeSelection() {
+  RequestAnimationFrame();
+}
+
 // ui::AnimationFrameHandler
 void TextWindow::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
-  RequestAnimationFrame();
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (!lock_scope.locked())
+  if (!lock_scope.locked()) {
+    RequestAnimationFrame();
     return;
+  }
   metrics_view_->RecordTime();
   {
     MetricsView::TimingScope timing_scope(metrics_view_);
@@ -431,6 +463,7 @@ void TextWindow::DidKillFocus(ui::Widget* focused_widget) {
   ui::TextInputClient::Get()->CommitComposition(this);
   ui::TextInputClient::Get()->CancelComposition(this);
   ui::TextInputClient::Get()->set_delegate(nullptr);
+  RequestAnimationFrame();
 }
 
 void TextWindow::DidRealize() {
@@ -443,6 +476,7 @@ void TextWindow::DidSetFocus(ui::Widget* last_focused) {
   // Note: It is OK to set focus to hidden window.
   ContentWindow::DidSetFocus(last_focused);
   ui::TextInputClient::Get()->set_delegate(this);
+  RequestAnimationFrame();
 }
 
 void TextWindow::DidShow() {
@@ -458,6 +492,7 @@ HCURSOR TextWindow::GetCursorAt(const gfx::Point&) const {
 void TextWindow::MakeSelectionVisible() {
   // Redraw() will format text buffer to place caret on center of screen.
   caret_offset_ = -1;
+  RequestAnimationFrame();
 }
 
 }  // namespace views

@@ -48,7 +48,10 @@ class TextRenderer final {
   public: text::Buffer* buffer() const { return buffer_; }
   public: float zoom() const { return zoom_; }
 
+  public: void DidChangeStyle(Posn offset, size_t length);
+  public: void DidDeleteAt(Posn offset, size_t length);
   public: void DidHide();
+  public: void DidInsertAt(Posn offset, size_t length);
   public: void DidRecreateCanvas();
   // Returns end of line offset containing |text_offset|.
   public: text::Posn EndOfLine(text::Posn text_offset) const;

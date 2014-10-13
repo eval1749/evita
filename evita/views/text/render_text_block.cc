@@ -173,13 +173,9 @@ TextBlock::TextBlock(text::Buffer* text_buffer)
       lines_height_(0), text_buffer_(text_buffer),
       text_line_cache_(new TextLineCache(text_buffer)), view_start_(0),
       zoom_(1.0f) {
-  UI_DOM_AUTO_LOCK_SCOPE();
-  text_buffer->AddObserver(this);
 }
 
 TextBlock::~TextBlock() {
-  UI_DOM_AUTO_LOCK_SCOPE();
-  text_buffer_->RemoveObserver(this);
 }
 
 void TextBlock::Append(TextLine* line) {
@@ -196,6 +192,28 @@ void TextBlock::Append(TextLine* line) {
   }
   lines_.push_back(line);
   lines_height_ += line->GetHeight();
+}
+
+void TextBlock::DidChangeStyle(text::Posn offset, size_t) {
+  ASSERT_DOM_LOCKED();
+  InvalidateLines(offset);
+}
+
+void TextBlock::DidDeleteAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  InvalidateLines(offset);
+  if (view_start_ <= offset)
+    return;
+  view_start_ = std::max(static_cast<text::Posn>(view_start_ - length),
+                         offset);
+}
+
+void TextBlock::DidInsertAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  InvalidateLines(offset);
+  if (view_start_ <= offset)
+    return;
+  view_start_ += length;
 }
 
 bool TextBlock::DiscardFirstLine() {
@@ -608,29 +626,6 @@ text::Posn TextBlock::StartOfLine(text::Posn text_offset) {
     if (text_offset < start_offset)
       return line->GetStart();
   }
-}
-
-// text::BufferMutationObserver
-void TextBlock::DidChangeStyle(text::Posn offset, size_t) {
-  ASSERT_DOM_LOCKED();
-  InvalidateLines(offset);
-}
-
-void TextBlock::DidDeleteAt(text::Posn offset, size_t length) {
-  ASSERT_DOM_LOCKED();
-  InvalidateLines(offset);
-  if (view_start_ <= offset)
-    return;
-  view_start_ = std::max(static_cast<text::Posn>(view_start_ - length),
-                         offset);
-}
-
-void TextBlock::DidInsertAt(text::Posn offset, size_t length) {
-  ASSERT_DOM_LOCKED();
-  InvalidateLines(offset);
-  if (view_start_ <= offset)
-    return;
-  view_start_ += length;
 }
 
 }  // namespace rendering

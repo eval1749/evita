@@ -8,6 +8,8 @@
 #include <memory>
 
 #include "evita/gfx/canvas_observer.h"
+#include "evita/text/buffer_mutation_observer.h"
+#include "evita/text/selection_change_observer.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/content_window.h"
@@ -32,10 +34,12 @@ class TextSelectionModel;
 //
 // TextWindow
 //
-class TextWindow final : private gfx::CanvasObserver,
+class TextWindow final : public ContentWindow,
+                         private gfx::CanvasObserver,
+                         private text::BufferMutationObserver,
+                         private text::SelectionChangeObserver,
                          public ui::ScrollBarObserver,
-                         public ui::TextInputDelegate,
-                         public ContentWindow {
+                         public ui::TextInputDelegate {
   DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
 
   private: typedef rendering::TextSelectionModel TextSelectionModel;
@@ -70,6 +74,14 @@ class TextWindow final : private gfx::CanvasObserver,
 
   // gfx::CanvasObserver
   private: virtual void DidRecreateCanvas() override;
+
+  // text::BufferMutationObserver
+  private: virtual void DidChangeStyle(Posn offset, size_t length) override;
+  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
+  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+
+  // text::SelectionChangeObserver
+  private: virtual void DidChangeSelection() override;
 
   // ui::AnimationFrameHandler
   private: virtual void DidBeginAnimationFrame(base::Time time) override;

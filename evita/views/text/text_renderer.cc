@@ -39,8 +39,23 @@ TextRenderer::TextRenderer(text::Buffer* buffer)
 TextRenderer::~TextRenderer() {
 }
 
+void TextRenderer::DidChangeStyle(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  text_block_->DidChangeStyle(offset, length);
+}
+
+void TextRenderer::DidDeleteAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  text_block_->DidDeleteAt(offset, length);
+}
+
 void TextRenderer::DidHide() {
   screen_text_block_->Reset();
+}
+
+void TextRenderer::DidInsertAt(text::Posn offset, size_t length) {
+  ASSERT_DOM_LOCKED();
+  text_block_->DidInsertAt(offset, length);
 }
 
 void TextRenderer::DidRecreateCanvas() {

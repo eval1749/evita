@@ -49,13 +49,13 @@ void Range::set_end(Posn offset) {
 void Range::SetRange(Posn new_start, Posn new_end) {
   new_start = EnsureOffset(new_start);
   new_end = EnsureOffset(new_end);
-  if (new_start > new_end) {
+  if (new_start > new_end)
     std::swap(new_start, new_end);
-  }
   if (start_ == new_start && end_ == new_end)
     return;
   start_ = new_start;
   end_ = new_end;
+  DidChangeRange();
 }
 
 void Range::set_start(Posn offset) {

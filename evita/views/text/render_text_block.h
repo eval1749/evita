@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "evita/gfx_base.h"
-#include "evita/text/buffer_mutation_observer.h"
 #include "evita/views/text/render_style.h"
 
 namespace views {
@@ -19,7 +18,7 @@ class RenderStyle;
 class TextFormatter;
 class TextLine;
 
-class TextBlock final : public text::BufferMutationObserver {
+class TextBlock final {
   private: class TextLineCache;
 
   private: gfx::RectF bounds_;
@@ -43,6 +42,9 @@ class TextBlock final : public text::BufferMutationObserver {
   public: const std::list<TextLine*>& lines() const { return lines_; }
 
   private: void Append(TextLine* line);
+  public: void DidChangeStyle(Posn offset, size_t length);
+  public: void DidDeleteAt(Posn offset, size_t length);
+  public: void DidInsertAt(Posn offset, size_t length);
   // Returns true if discarded the first line.
   private: bool DiscardFirstLine();
   // Returns true if discarded the last line.
@@ -76,11 +78,6 @@ class TextBlock final : public text::BufferMutationObserver {
   public: bool ShouldFormat() const;
   // Returns start of line offset containing |text_offset|.
   public: text::Posn StartOfLine(text::Posn text_offset);
-
-  // text::BufferMutationObserver
-  private: virtual void DidChangeStyle(Posn offset, size_t length) override;
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
 
   DISALLOW_COPY_AND_ASSIGN(TextBlock);
 };

@@ -125,6 +125,7 @@ class Canvas : public Object, public DpiHandler {
 
   // [R]
   public: void RemoveObserver(CanvasObserver* observer);
+  public: void RestoreScreenImage(const RectF& bounds);
 
   // [S]
   public: bool Canvas::SaveScreenImage(const RectF& bounds);

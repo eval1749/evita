@@ -213,10 +213,20 @@ void Canvas::RemoveObserver(CanvasObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-bool Canvas::SaveScreenImage(const RectF& rect) {
+void Canvas::RestoreScreenImage(const RectF& bounds) {
+  DCHECK(!bounds_.empty());
+  DCHECK(screen_bitmap_);
+  auto const source_bounds = gfx::RectF(bounds.origin() + bounds_.origin(),
+                                        bounds.size());
+  DrawBitmap(*screen_bitmap_, bounds, source_bounds);
+}
+
+bool Canvas::SaveScreenImage(const RectF& rect_in) {
   DCHECK(!bounds_.empty());
   if (!screen_bitmap_)
     screen_bitmap_ = std::make_unique<Bitmap>(this);
+  auto const rect = gfx::RectF(rect_in.origin() + bounds_.origin(),
+                               rect_in.size());
   auto const enclosing_rect = ToEnclosingRect(rect);
   const RectU source_rect(static_cast<uint32_t>(enclosing_rect.left()),
                           static_cast<uint32_t>(enclosing_rect.top()),

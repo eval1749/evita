@@ -5,12 +5,14 @@
 #if !defined(INCLUDE_evita_ui_animation_animation_scheduler_h)
 #define INCLUDE_evita_ui_animation_animation_scheduler_h
 
+#include <memory>
+#include <unordered_set>
+
 #include "base/basictypes.h"
 #include "common/memory/singleton.h"
 
-#include <unordered_set>
-
 namespace base {
+class Lock;
 class Time;
 }
 
@@ -26,6 +28,7 @@ class AnimationScheduler final : public common::Singleton<AnimationScheduler> {
   DECLARE_SINGLETON_CLASS(AnimationScheduler);
 
   private: std::unordered_set<AnimationFrameHandler*> canceled_handlers_;
+  private: std::unique_ptr<base::Lock> lock_;
   private: std::unordered_set<AnimationFrameHandler*> pending_handlers_;
 
   private: AnimationScheduler();

@@ -415,8 +415,8 @@ void FormWindow::FormViewModel::Update() {
 
 // dom::FormObserver
 void FormWindow::FormViewModel::DidChangeForm() {
-  // TODO(eval1749) Schedule animation for FrameWindow.
   ASSERT_DOM_LOCKED();
+  window_->SchedulePaint();
   dirty_ = true;
 }
 
@@ -463,9 +463,6 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
   if (!visible())
     return;
 
-  // TODO(eval1749) We should call |RequestAnimationFrame()| only if needed.
-  RequestAnimationFrame();
-
   if (model_->dirty()) {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
     if (lock_scope.locked()) {
@@ -492,9 +489,9 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
         ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
       }
     }
+    TransferFocusIfNeeded();
   }
 
-  TransferFocusIfNeeded();
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   Window::OnDraw(canvas_.get());
 }
@@ -591,6 +588,11 @@ void FormWindow::DidRealize() {
   canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
   ui::SystemMetrics::instance()->AddObserver(this);
   Window::DidRealize();
+}
+
+void FormWindow::DidSetFocus(ui::Widget* last_focused) {
+  Window::DidSetFocus(last_focused);
+  TransferFocusIfNeeded();
 }
 
 LRESULT FormWindow::OnMessage(uint32_t const message, WPARAM const wParam,

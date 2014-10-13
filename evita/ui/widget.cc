@@ -483,9 +483,6 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
 void Widget::OnPaint(const Rect) {
 }
 
-void Widget::OnScroll(int) {
-}
-
 void Widget::RealizeWidget() {
   DCHECK(!is_realized());
   if (!parent_node()) {
@@ -757,13 +754,6 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
        return 0;
      }
      break;
-
-    case WM_VSCROLL: {
-      auto const widget = reinterpret_cast<Widget*>(::GetWindowLongPtr(
-          reinterpret_cast<HWND>(lParam), GWLP_ID));
-      widget->OnScroll(static_cast<int>(LOWORD(wParam)));
-      return 0;
-    }
 
     case WM_WINDOWPOSCHANGED: {
       // DefWindowProc sents WM_SIZE and WM_MOVE, so handling

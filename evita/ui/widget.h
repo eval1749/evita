@@ -146,9 +146,6 @@ class Widget : public common::Castable,
   protected: virtual void OnMouseReleased(const MouseEvent& event);
   protected: virtual void OnMouseWheel(const MouseWheelEvent& event);
   public: virtual void OnPaint(const gfx::Rect rect);
-  // TODO(eval1749) |Widget::OnScroll| is used for handling |WM_VSCROLL|, Once
-  // we implement scroll bar, we should remove this.
-  protected: virtual void OnScroll(int request);
 
   // [R]
   // Realize widget, top-level widget must be a native window.

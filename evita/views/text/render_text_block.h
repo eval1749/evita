@@ -34,7 +34,7 @@ class TextBlock final {
   private: float zoom_;
 
   public: explicit TextBlock(text::Buffer* buffer);
-  public: virtual ~TextBlock();
+  public: ~TextBlock();
 
   public: const RenderStyle& default_style() const { return default_style_; }
   public: bool dirty() const { return dirty_; }

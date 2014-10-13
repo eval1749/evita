@@ -9,9 +9,9 @@
     /** @param {string} name */
     function wordClass(name) {
       var word_class = name.charAt(0);
-      if (word_class == 'L' || word_class == 'N')
+      if (word_class === 'L' || word_class === 'N')
         return 'w';
-      if (word_class == 'S')
+      if (word_class === 'S')
         return 'P';
       return word_class;
     }
@@ -124,7 +124,7 @@
         return document.length;
       case Unit.LINE:
         while (position < document.length) {
-          if (document.charCodeAt_(position) == Unicode.LF)
+          if (document.charCodeAt_(position) === Unicode.LF)
             return position;
           ++position;
         }
@@ -140,10 +140,10 @@
       case Unit.WINDOW:
         throwUnsupportedUnit('endOf', 'WINDOW');
       case Unit.WORD: {
-        if (position == document.length)
+        if (position === document.length)
           return position;
         var word_class = wordClassAt(document, position);
-        if (word_class == WordClass.BLANK) {
+        if (word_class === WordClass.BLANK) {
           if (position &&
               wordClassBefore(document, position) != WordClass.BLANK) {
             // We're already at end of word
@@ -195,7 +195,7 @@
         if (count > 0) {
           for (var k = 0; k < count; ++k) {
             position = document.computeEndOf_(unit, position);
-            if (position == document.length)
+            if (position === document.length)
               return position;
             ++position;
           }
@@ -212,20 +212,20 @@
         return position;
       case Unit.WORD:
         if (count > 0) {
-          if (position == document.length)
+          if (position === document.length)
             return position;
           for (var k = 0; k < count; ++k) {
             var word_class = wordClassAt(document, position);
             for (;;) {
               ++position;
-              if (position == document.length)
+              if (position === document.length)
                 break;
               var word_class2 = wordClassAt(document, position);
-              if (word_class == word_class2)
+              if (word_class === word_class2)
                 continue;
-              while (word_class2 == WordClass.BLANK) {
+              while (word_class2 === WordClass.BLANK) {
                 ++position;
-                if (position == document.length)
+                if (position === document.length)
                   return position;
                 word_class2 = wordClassAt(document, position);
               }
@@ -246,10 +246,10 @@
                 return position;
               --position;
               var word_class2 = wordClassAt(document, position);
-              if (word_class == word_class2)
+              if (word_class === word_class2)
                 continue;
-              if (word_class == WordClass.BLANK) {
-                while (word_class2 == WordClass.BLANK) {
+              if (word_class === WordClass.BLANK) {
+                while (word_class2 === WordClass.BLANK) {
                   if (!position)
                     return position;
                   --position;
@@ -282,7 +282,7 @@
       case Unit.LINE:
         while (position > 0) {
           --position;
-          if (document.charCodeAt_(position) == Unicode.LF)
+          if (document.charCodeAt_(position) === Unicode.LF)
             return position + 1;
         }
         return position;
@@ -299,38 +299,38 @@
       case Unit.WORD: {
         if (!position)
           return position;
-        var word_class = position == document.length ?
+        var word_class = position === document.length ?
             WordClass.BLANK : wordClassAt(document, position);
         // Find character class of word
-        while (word_class == WordClass.BLANK) {
+        while (word_class === WordClass.BLANK) {
           --position;
           if (!position)
             return position;
           word_class = wordClassAt(document, position);
         }
         // Skip word
-        while (position && wordClassAt(document, position - 1) == word_class) {
+        while (position && wordClassAt(document, position - 1) === word_class)
           --position;
-        }
         return position;
       }
       default:
         throwInvalidUnit(unit);
         return 0;
     }
-  };
+  }
 
   /**
+   * @this {!Document}
    * @param {string} char_set
    * @param {number} count
    * @param {number} start
    * @return {number}
    */
-  Document.prototype.computeWhile_ = function(char_set, count, start) {
+  function computeWhile_(char_set, count, start) {
     var char_code_set = new Set();
-    for (var i = 0; i < char_set.length; ++i) {
+    for (var i = 0; i < char_set.length; ++i)
       char_code_set.add(char_set.charCodeAt(i));
-    }
+
     if (count > 0) {
       var end = Math.min(start + count, this.length);
       for (var position = start; position < end; ++position) {
@@ -348,17 +348,17 @@
         return position;
     }
     return end;
-  };
+  }
 
   /**
    * @this {!Document}
    * @param {number} hint
    */
-  Document.prototype.doColor_ = function(hint) {
+  function doColor_(hint) {
     if (!this.mode)
       return;
     this.mode.doColor(this, hint);
-  };
+  }
 
   /**
    * @this {!Document}
@@ -375,36 +375,43 @@
     }
   }
 
-  Object.defineProperty(Document.prototype, 'lines', {get: lines});
-
   /**
+   * @this {!Document}
    * @return {Array.<!DocumentWindow>}
    */
-  Document.prototype.listWindows = function() {
-    var document = this;
+  function listWindows() {
     var windows = [];
-    EditorWindow.list.forEach(function(editorWindow) {
-      editorWindow.children.forEach(function(window) {
-        if ((window instanceof DocumentWindow) && window.document == document)
+    for (var editorWindow of EditorWindow.list) {
+      for (var window of editorWindow.children) {
+        if ((window instanceof DocumentWindow) && window.document === this)
           windows.push(window);
-      });
-    });
+      }
+    }
     return windows;
   };
 
   /**
+   * @this {!Document}
    * @param {string} name
    * @param {function()} callback
    * @param {!Object=} opt_receiver
    */
-  Document.prototype.undoGroup = function(name, callback, opt_receiver) {
+  function undoGroup(name, callback, opt_receiver) {
     var document = this;
-    var receiver = arguments.length >= 3 ? opt_receiver : document;
+    var receiver = opt_receiver === undefined ? document : opt_receiver;
     try {
       document.startUndoGroup_(name);
       callback.call(receiver);
     } finally {
       document.endUndoGroup_(name);
     }
-  };
+  }
+
+  Object.defineProperties(Document.prototype, {
+    computeWhile_: {value: computeWhile_},
+    doColor_: {value: doColor_},
+    lines: {get: lines},
+    listWindows: {value: listWindows},
+    undoGroup: {value: undoGroup}
+  });
 })();

@@ -301,11 +301,14 @@ v8::Handle<v8::FunctionTemplate>
 {% endif %}
 {%   if attribute.is_read_only %}
   templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}));
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
+      v8::Local<v8::FunctionTemplate>(),
+      static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum | v8::ReadOnly));
 {%    else %}
   templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
       v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cpp_name}}));
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cpp_name}}),
+      static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum));
 {%    endif %}
 {%  endfor %}
 {###############################
@@ -317,7 +320,8 @@ v8::Handle<v8::FunctionTemplate>
   // static methods
 {% endif %}
   templ->Set(gin::StringToSymbol(isolate, "{{method.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cpp_name}}));
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cpp_name}}),
+      static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum | v8::ReadOnly));
 {% endfor %}
   return builder.Build();
 {% else %}
@@ -340,11 +344,14 @@ v8::Handle<v8::ObjectTemplate> {{class_name}}:: SetupInstanceTemplate(
 {% endif %}
 {%   if attribute.is_read_only %}
   templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}));
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
+      v8::Local<v8::FunctionTemplate>(),
+      static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum | v8::ReadOnly));
 {%   else %}
   templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
       v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cpp_name}}));
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cpp_name}}),
+      static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum));
 {%   endif %}
 {%  endfor %}
 {% for method in methods if not method.is_static %}
@@ -352,7 +359,8 @@ v8::Handle<v8::ObjectTemplate> {{class_name}}:: SetupInstanceTemplate(
   // methods
 {% endif %}
   templ->Set(gin::StringToSymbol(isolate, "{{method.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cpp_name}}));
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cpp_name}}),
+      static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum | v8::ReadOnly));
 {% endfor %}
   return templ;
 }

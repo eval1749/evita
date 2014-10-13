@@ -17,8 +17,8 @@ namespace dom {
 //
 TextSelection::TextSelection(TextWindow* text_window, Range* range)
     : ScriptableBase(text_window, range->document()),
-      range_(new Range(range->document(), range->start(), range->end())),
-      text_selection_(new text::Selection(range_->text_range())) {
+      text_selection_(new text::Selection(range->text_range())),
+      range_(new Range(range->document(), text_selection_->range())) {
 }
 
 TextSelection::~TextSelection() {

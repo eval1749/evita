@@ -31,8 +31,8 @@ class TextSelection : public v8_glue::Scriptable<TextSelection, Selection> {
   DECLARE_SCRIPTABLE_OBJECT(TextSelection);
   friend class bindings::TextSelectionClass;
 
+  private: text::Selection* const text_selection_;
   private: gc::Member<Range> range_;
-  private: text::Selection* text_selection_;
 
   public: TextSelection(TextWindow* text_window, Range* range);
   public: virtual ~TextSelection();

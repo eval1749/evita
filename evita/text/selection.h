@@ -12,16 +12,17 @@ class Range;
 class Buffer;
 
 class Selection {
-  private: Range* range_;
+  private: Range* const range_;
   private: bool start_is_active_;
 
-  public: Selection(Range* range);
+  public: Selection(const Range* range);
   public: ~Selection();
 
   public: Posn anchor_offset() const;
   public: Buffer* buffer() const;
   public: Posn end() const;
   public: Posn focus_offset() const;
+  public: Range* range() const { return range_; }
   public: Posn start() const;
 
   public: bool IsStartActive() const { return start_is_active_; }

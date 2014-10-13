@@ -9,8 +9,9 @@
 
 namespace text {
 
-Selection::Selection(Range* range)
-    : range_(range), start_is_active_(false) {
+Selection::Selection(const Range* range)
+    : range_(new Range(range->buffer(), range->start(), range->end())),
+      start_is_active_(false) {
 }
 
 Selection::~Selection() {

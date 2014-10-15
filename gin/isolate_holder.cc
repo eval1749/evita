@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "base/logging.h"
+#include "base/message_loop/message_loop.h"
 #include "base/rand_util.h"
 #include "base/sys_info.h"
 #include "gin/array_buffer.h"
@@ -15,6 +16,7 @@
 #include "gin/function_template.h"
 #include "gin/per_isolate_data.h"
 #include "gin/public/v8_platform.h"
+#include "gin/run_microtasks_observer.h"
 
 namespace gin {
 
@@ -40,9 +42,33 @@ IsolateHolder::IsolateHolder() {
                                        base::SysInfo::NumberOfProcessors());
   isolate_ = v8::Isolate::New(params);
   isolate_data_.reset(new PerIsolateData(isolate_, g_array_buffer_allocator));
+#if defined(OS_WIN)
+  {
+    void* code_range;
+    size_t size;
+    isolate_->GetCodeRange(&code_range, &size);
+    Debug::CodeRangeCreatedCallback callback =
+        DebugImpl::GetCodeRangeCreatedCallback();
+    if (code_range && size && callback)
+      callback(code_range, size);
+  }
+#endif
 }
 
 IsolateHolder::~IsolateHolder() {
+  if (task_observer_.get())
+    base::MessageLoop::current()->RemoveTaskObserver(task_observer_.get());
+#if defined(OS_WIN)
+  {
+    void* code_range;
+    size_t size;
+    isolate_->GetCodeRange(&code_range, &size);
+    Debug::CodeRangeDeletedCallback callback =
+        DebugImpl::GetCodeRangeDeletedCallback();
+    if (code_range && callback)
+      callback(code_range);
+  }
+#endif
   isolate_data_.reset();
   isolate_->Dispose();
 }
@@ -58,12 +84,24 @@ void IsolateHolder::Initialize(ScriptMode mode,
   v8::V8::SetArrayBufferAllocator(allocator);
   g_array_buffer_allocator = allocator;
   if (mode == gin::IsolateHolder::kStrictMode) {
-    static const char v8_flags[] = "--use_strict --harmony";
+    static const char v8_flags[] = "--use_strict";
     v8::V8::SetFlagsFromString(v8_flags, sizeof(v8_flags) - 1);
   }
   v8::V8::SetEntropySource(&GenerateEntropy);
   v8::V8::Initialize();
   v8_is_initialized = true;
+}
+
+void IsolateHolder::AddRunMicrotasksObserver() {
+  DCHECK(!task_observer_.get());
+  task_observer_.reset(new RunMicrotasksObserver(isolate_));;
+  base::MessageLoop::current()->AddTaskObserver(task_observer_.get());
+}
+
+void IsolateHolder::RemoveRunMicrotasksObserver() {
+  DCHECK(task_observer_.get());
+  base::MessageLoop::current()->RemoveTaskObserver(task_observer_.get());
+  task_observer_.reset();
 }
 
 }  // namespace gin

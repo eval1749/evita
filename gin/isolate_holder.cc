@@ -84,7 +84,7 @@ void IsolateHolder::Initialize(ScriptMode mode,
   v8::V8::SetArrayBufferAllocator(allocator);
   g_array_buffer_allocator = allocator;
   if (mode == gin::IsolateHolder::kStrictMode) {
-    static const char v8_flags[] = "--use_strict";
+    static const char v8_flags[] = "--use_strict --harmony";
     v8::V8::SetFlagsFromString(v8_flags, sizeof(v8_flags) - 1);
   }
   v8::V8::SetEntropySource(&GenerateEntropy);

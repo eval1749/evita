@@ -53,7 +53,6 @@ class FormWindow final : public views::Window,
   public: virtual ~FormWindow();
 
   private: void DoRealizeWidget();
-  private: void TransferFocusIfNeeded();
 
   // ui::AnimationFrameHandler
   private: virtual void DidBeginAnimationFrame(base::Time time) override;
@@ -69,7 +68,6 @@ class FormWindow final : public views::Window,
   private: virtual void DidDestroyWidget() override;
   private: virtual void DidRealize() override;
   private: virtual void DidRequestDestroy() override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void RealizeWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);

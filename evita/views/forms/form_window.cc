@@ -357,7 +357,7 @@ void FormWindow::FormViewModel::Update() {
                     std::max(static_cast<int>(form_->height()), kMinHeight));
   title_ = form_->title();
 
-  // Temporary remove controls from window.
+  // We assume existing controls are removed.
   std::unordered_set<ui::Control*> controls_to_remove;
   auto current_focus = static_cast<ui::Control*>(nullptr);
   while (auto const child = window_->first_child()) {
@@ -383,6 +383,7 @@ void FormWindow::FormViewModel::Update() {
       map_[control->event_target_id()] = widget;
       widget->SetParentWidget(window_);
     } else {
+      // Existing control is still alive. So, we use existing control.
       widget = it->second;
       window_->AppendChild(widget);
       importer->UpdateWidget(widget);
@@ -398,17 +399,11 @@ void FormWindow::FormViewModel::Update() {
     }
   }
 
-  // Move focus if needed
   if (!focus_control_)
     focus_control_ = focusable;
-  if (focus_control_ && focus_control_ != current_focus &&
-      (current_focus || window_->has_focus())) {
-    focus_control_->RequestFocus();
-  }
 
   // Destroy removed controls
   for (auto child : controls_to_remove) {
-
     window_->SchedulePaintInRect(child->bounds());
     child->DestroyWidget();
   }
@@ -450,15 +445,6 @@ void FormWindow::DoRealizeWidget() {
   views::Window::RealizeWidget();
 }
 
-void FormWindow::TransferFocusIfNeeded() {
-  auto const focus_control = model_->focus_control();
-  if (!focus_control)
-    return;
-  if (!has_focus())
-    return;
-  focus_control->RequestFocus();
-}
-
 // ui::Animatable
 void FormWindow::DidBeginAnimationFrame(base::Time) {
   DCHECK(is_realized());
@@ -467,33 +453,39 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
 
   if (model_->dirty()) {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-    if (lock_scope.locked()) {
-      model_->Update();
-
-      if (form_size_ != model_->size()) {
-        form_size_ = model_->size();
-        RECT window_rect;
-        ::GetWindowRect(AssociatedHwnd(), &window_rect);
-        window_rect.right = window_rect.left + form_size_.width();
-        window_rect.bottom = window_rect.top + form_size_.height();
-        auto const extended_window_style = static_cast<DWORD>(
-            ::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
-        auto const window_style = static_cast<DWORD>(
-            ::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
-        auto const has_menu = false;
-        WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
-                                          extended_window_style));
-        SetBounds(window_rect);
-      }
-
-      if (title_ != model_->title()) {
-        title_ = model_->title();
-        ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
-      }
-    } else {
+    if (!lock_scope.locked()) {
       RequestAnimationFrame();
+      return;
     }
-    TransferFocusIfNeeded();
+
+    model_->Update();
+    if (form_size_ != model_->size()) {
+      form_size_ = model_->size();
+      RECT window_rect;
+      ::GetWindowRect(AssociatedHwnd(), &window_rect);
+      window_rect.right = window_rect.left + form_size_.width();
+      window_rect.bottom = window_rect.top + form_size_.height();
+      auto const extended_window_style = static_cast<DWORD>(
+          ::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
+      auto const window_style = static_cast<DWORD>(
+          ::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
+      auto const has_menu = false;
+      WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
+                                        extended_window_style));
+      SetBounds(window_rect);
+    }
+
+    if (title_ != model_->title()) {
+      title_ = model_->title();
+      ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
+    }
+
+    if (auto focus_control = model_->focus_control()) {
+      // TODO(eval1749) Should we make |RequestFocus()| to check focused
+      // window rather than here?
+      if (!focus_control->has_focus() && has_native_focus())
+        focus_control->RequestFocus();
+    }
   }
 
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
@@ -597,11 +589,6 @@ void FormWindow::DidRealize() {
 void FormWindow::DidRequestDestroy() {
   // TODO(eval1749) Should we dispatch "close" event to JavaScript?
   Hide();
-}
-
-void FormWindow::DidSetFocus(ui::Widget* last_focused) {
-  Window::DidSetFocus(last_focused);
-  TransferFocusIfNeeded();
 }
 
 void FormWindow::RealizeWidget() {

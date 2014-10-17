@@ -387,7 +387,6 @@ void FormWindow::FormViewModel::Update() {
       widget = it->second;
       window_->AppendChild(widget);
       importer->UpdateWidget(widget);
-      window_->SchedulePaintInRect(widget->bounds());
       controls_to_remove.erase(widget);
     }
     DCHECK(!widget->bounds().empty());
@@ -399,14 +398,16 @@ void FormWindow::FormViewModel::Update() {
     }
   }
 
-  if (!focus_control_)
+  if (!focus_control_) {
+    // We set focus to first focusable control since DOM Form doesn't specify
+    // focus control.
     focus_control_ = focusable;
+  }
 
   // Destroy removed controls
-  for (auto child : controls_to_remove) {
-    window_->SchedulePaintInRect(child->bounds());
+  for (auto child : controls_to_remove)
     child->DestroyWidget();
-  }
+
   dirty_ = false;
 }
 

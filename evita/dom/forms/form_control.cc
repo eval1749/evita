@@ -77,6 +77,12 @@ void FormControl::set_disabled(bool new_disabled) {
   NotifyControlChange();
 }
 
+void FormControl::DidKillFocus() {
+  if (!form_)
+    return;
+  form_->DidKillFocusFromFormControl(this);
+}
+
 void FormControl::DidSetFocus() {
   if (!form_)
     return;

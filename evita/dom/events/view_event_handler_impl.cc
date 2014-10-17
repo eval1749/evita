@@ -206,11 +206,14 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
   auto const target = FromEventTargetId(api_event.target_id);
   if (!target)
     return;
-  if (api_event.event_type == domapi::EventType::Focus) {
-    if (auto const window = target->as<Window>())
-      window->DidSetFocus();
-    else if (auto const form_control = target->as<FormControl>())
+  if (auto const form_control = target->as<FormControl>()) {
+    if (api_event.event_type == domapi::EventType::Focus)
       form_control->DidSetFocus();
+    else
+      form_control->DidKillFocus();
+  } else if (auto const window = target->as<Window>()) {
+    if (api_event.event_type == domapi::EventType::Focus)
+      window->DidSetFocus();
   }
   FocusEventInit event_init;
   event_init.set_related_target(MaybeEventTarget(api_event.related_target_id));

@@ -64,6 +64,7 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   // Exposed for |RadioButton|.
   public: const base::string16& name() const { return name_; }
 
+  public: void DidKillFocus();
   public: void DidSetFocus();
   public: void DispatchChangeEvent();
   protected: void NotifyControlChange();

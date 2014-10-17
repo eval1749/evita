@@ -49,6 +49,7 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   private: void AddFormControl(FormControl* control);
   public: void AddObserver(FormObserver* observer) const;
   public: void DidChangeFormControl(FormControl* control);
+  public: void DidKillFocusFromFormControl(FormControl* control);
   public: void DidSetFocusToFormControl(FormControl* control);
   public: void RemoveObserver(FormObserver* observer) const;
 

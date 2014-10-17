@@ -71,6 +71,12 @@ void Form::DidChangeFormControl(FormControl*) {
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
+void Form::DidKillFocusFromFormControl(FormControl* control) {
+  if (focus_control_ != control)
+    return;
+  focus_control_ = nullptr;
+}
+
 void Form::DidSetFocusToFormControl(FormControl* control) {
   focus_control_ = control;
 }

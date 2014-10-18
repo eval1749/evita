@@ -15,25 +15,45 @@
 
 namespace ui {
 
-static const auto kBlinkInterval = 16 * 30; // milliseconds
+static const auto kBlinkInterval = 16 * 20; // milliseconds
+
+namespace {
+base::TimeDelta GetCaretBlinkInterval() {
+  auto const interval = ::GetCaretBlinkTime();
+  if (!interval)
+    return base::TimeDelta::FromMilliseconds(kBlinkInterval);
+  if (interval == INFINITE)
+    return base::TimeDelta();
+  return base::TimeDelta::FromMilliseconds(interval);
+}
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // Caret
 //
-Caret::Caret(CaretOwner* owner) : owner_(owner), visible_(false) {
+Caret::Caret(CaretOwner* owner)
+    : blink_interval_(GetCaretBlinkInterval()),
+      owner_(owner), visible_(false) {
+  if (blink_interval_ == base::TimeDelta())
+    return;
+  timer_.Start(FROM_HERE, blink_interval_,
+               base::Bind(&Caret::DidFireTimer, base::Unretained(this)));
 }
 
 Caret::~Caret() {
+  timer_.Stop();
 }
 
 void Caret::Blink(gfx::Canvas* canvas, base::Time now) {
   auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
-  if (bounds.empty())
+  if (bounds.empty()) {
+    Reset();
     return;
+  }
 
   auto const delta = now - last_blink_time_;
-  auto const shape = delta / base::TimeDelta::FromMilliseconds(kBlinkInterval);
+  auto const shape = delta / blink_interval_;
   auto const new_visible = !(shape & 1);
 
   if (visible_ == new_visible)
@@ -62,14 +82,12 @@ void Caret::DidPaint(const gfx::RectF& paint_bounds) {
 }
 
 void Caret::Hide(gfx::Canvas* canvas) {
-  if (!visible_) {
-    timer_.Stop();
-    return;
+  if (visible_) {
+    visible_ = false;
+    auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
+    if (!bounds.empty())
+      Paint(canvas, bounds);
   }
-  visible_ = false;
-  auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
-  if (!bounds.empty())
-    Paint(canvas, bounds);
   Reset();
 }
 
@@ -87,14 +105,15 @@ void Caret::Update(gfx::Canvas* canvas, base::Time now,
   DCHECK(!new_bounds.empty());
   if (bounds_ != new_bounds) {
     bounds_ = new_bounds;
-    timer_.Start(FROM_HERE, base::TimeDelta::FromMilliseconds(kBlinkInterval),
-                 base::Bind(&Caret::DidFireTimer, base::Unretained(this)));
     ui::TextInputClient::Get()->set_caret_bounds(bounds_);
+    timer_.Stop();
     DidChangeCaret();
   }
   auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
   if (bounds.empty())
     return;
+  if (!timer_.IsRunning())
+    timer_.Reset();
   last_blink_time_ = now;
   visible_ = true;
   Paint(canvas, bounds);

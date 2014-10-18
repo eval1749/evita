@@ -27,6 +27,7 @@ class CaretOwner;
 // Caret
 //
 class Caret {
+  private: base::TimeDelta blink_interval_;
   private: gfx::RectF bounds_;
   private: base::Time last_blink_time_;
   private: CaretOwner* const owner_;

@@ -566,6 +566,7 @@ void ScreenTextBlock::SetBounds(const gfx::RectF& new_bounds) {
 }
 
 void ScreenTextBlock::UpdateCaret(gfx::Canvas* canvas, base::Time now) {
+  DCHECK(!caret_->visible());
   if (!selection_.has_focus())
     return;
   auto const char_rect = HitTestTextPosition(selection_.focus_offset());

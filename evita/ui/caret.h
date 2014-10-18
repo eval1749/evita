@@ -44,9 +44,9 @@ class Caret {
   private: void DidFireTimer();
   public: void DidPaint(const gfx::RectF& paint_bounds);
   public: void Hide(gfx::Canvas* canvas);
-  public: void MakeEmpty();
   protected: virtual void Paint(gfx::Canvas* canvas,
                                 const gfx::RectF& bounds) = 0;
+  public: void Reset();
   public: void Update(gfx::Canvas* canvas, base::Time time,
                       const gfx::RectF& new_bounds);
 

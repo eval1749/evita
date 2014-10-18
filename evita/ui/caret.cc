@@ -58,8 +58,7 @@ void Caret::DidPaint(const gfx::RectF& paint_bounds) {
     return;
   // We'll soon update caret bounds. So, we don't reset caret position for
   // |ui::TextInputClient|.
-  visible_ = false;
-  MakeEmpty();
+  Reset();
 }
 
 void Caret::Hide(gfx::Canvas* canvas) {
@@ -71,14 +70,14 @@ void Caret::Hide(gfx::Canvas* canvas) {
   auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
   if (!bounds.empty())
     Paint(canvas, bounds);
-  MakeEmpty();
+  Reset();
 }
 
-void Caret::MakeEmpty() {
-  DCHECK(!visible_);
+void Caret::Reset() {
   bounds_ = gfx::RectF();
   last_blink_time_ = base::Time();
   timer_.Stop();
+  visible_ = false;
   DidChangeCaret();
 }
 

@@ -3,97 +3,122 @@
 // found in the LICENSE file.
 
 (function() {
-  /**
-   * @constructor
-   * @param {!TextFieldControl} control
-   */
-  function TextFieldLogger(control) {
-    this.control = control;
-    this.cursor = 0;
-    this.texts = [];
-  }
-
-  /** @const @type {number} */
-  TextFieldLogger.MAX_ENTRIES = 7;
-
-  /**
-   * @param {string} value
-   */
-  TextFieldLogger.prototype.add = function(value) {
-    var length = this.texts.length;
-    if (length && this.texts[length - 1] == value)
-      return;
-    if (length >= TextFieldLogger.MAX_ENTRIES)
-      this.texts.shift();
-    this.texts.push(value);
-    this.cursor = this.texts.length;
-  };
-
-  TextFieldLogger.prototype.resetCursor = function() {
-    this.cursor = this.texts.length;
-  };
-
-  /**
-   * @param {number} direction
-   */
-  TextFieldLogger.prototype.retrieve = function(direction) {
-    var length = this.texts.length;
-    if (!length)
-      return;
-    var newCursor = this.cursor + direction;
-    if (newCursor < 0 || newCursor >= length)
-      return;
-    var control = this.control;
-    if (this.cursor == length) {
-      this.add(control.value);
-      --this.cursor;
+  let TextFieldLogger = (function() {
+    /**
+     * @constructor
+     * @final
+     * @struct
+     * @param {!TextFieldControl} control
+     */
+    function TextFieldLogger(control) {
+      /** @private @const @type {!TextFieldControl} */
+      this.control_ = control;
+      /** @private @type {number} */
+      this.cursor_ = 0;
+      /** @private @type {!Array.<string>} */
+      this.texts_ = [];
+      Object.seal(TextFieldLogger);
     }
-    this.cursor = newCursor;
-    control.value = this.texts[this.cursor];
-    control.selection.collapseTo(control.value.length);
-  };
 
-  /** @type {?CheckboxControl} */
-  var casePreserveReplaceCheckbox;
+    /** @const @type {number} */
+    let MAX_ENTRIES = 7;
 
-  /** @type {?Form} */
-  var form = null;
+    // Forward declaration for closure compiler
+    /** @this {!TextFieldLogger} @param {string} value */
+    TextFieldLogger.prototype.add = function(value) {};
 
-  /** @type {?FormWindow} */
-  var formWindow = null;
+    /**
+     * @this {!TextFieldLogger}
+     * @param {string} value
+     */
+    function add(value) {
+      let length = this.texts_.length;
+      if (length && this.texts_[length - 1] === value)
+        return;
+      if (length >= MAX_ENTRIES)
+        this.texts_.shift();
+      this.texts_.push(value);
+      this.cursor_ = this.texts_.length;
+    }
 
-  /** @type {?CheckboxControl} */
-  var matchCaseCheckbox;
+    /**
+     * @this {!TextFieldLogger}
+     */
+    function resetCursor() {
+      this.cursor_ = this.texts_.length;
+    }
 
-  /** @type {?CheckboxControl} */
-  var matchWholeWordCheckbox;
+    /**
+     * @this {!TextFieldLogger}
+     * @param {number} direction
+     */
+    function retrieve(direction) {
+      let length = this.texts_.length;
+      if (!length)
+        return;
+      let newCursor = this.cursor_ + direction;
+      if (newCursor < 0 || newCursor >= length)
+        return;
+      let control = this.control_;
+      if (this.cursor_ === length) {
+        this.add(control.value);
+        --this.cursor_;
+      }
+      this.cursor_ = newCursor;
+      control.value = this.texts_[this.cursor_];
+      control.selection.collapseTo(control.value.length);
+    }
 
-  /** @type {?ButtonControl} */
-  var findNextButton;
+    Object.defineProperties(TextFieldLogger.prototype, {
+      add: {value: add},
+      resetCursor: {value: resetCursor},
+      retrieve: {value: retrieve}
+    });
+    Object.freeze(TextFieldLogger.prototype);
+    return TextFieldLogger;
+  })();
 
-  /** @type {?ButtonControl} */
-  var findPreviousButton;
+  /** @type {CheckboxControl} */
+  let casePreserveReplaceCheckbox = null;
 
-  /** @type {?TextFieldControl} */
-  var findWhatText;
+  /** @type {Form} */
+  let form = null;
 
-  /** @type {?ButtonControl} */
-  var replaceAllButton;
+  /** @type {FormWindow} */
+  let formWindow = null;
 
-  /** @type {?ButtonControl} */
-  var replaceOneButton;
+  /** @type {CheckboxControl} */
+  let matchCaseCheckbox = null;
 
-  /** @type {?TextFieldControl} */
-  var replaceWithText;
+  /** @type {CheckboxControl} */
+  let matchWholeWordCheckbox = null;
 
-  /** @type {?CheckboxControl} */
-  var useRegexpCheckbox;
+  /** @type {ButtonControl} */
+  let findNextButton = null;
+
+  /** @type {ButtonControl} */
+  let findPreviousButton = null;
+
+  /** @type {TextFieldControl} */
+  let findWhatText = null;
+
+  /** @type {ButtonControl} */
+  let replaceAllButton = null;
+
+  /** @type {ButtonControl} */
+  let replaceOneButton = null;
+
+  /** @type {TextFieldControl} */
+  let replaceWithText = null;
+
+  /** @type {CheckboxControl} */
+  let useRegexpCheckbox = null;
 
   /**
    * @param {!Window} window
    */
   function doFindNext(window) {
-    var textWindow = ensureTextWindow(window);
+    let textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
     FindAndReplace.find(textWindow, findWhatText.value,
@@ -104,7 +129,7 @@
    * @param {!Window} window
    */
   function doFindPrevious(window) {
-    var textWindow = ensureTextWindow(window);
+    let textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
     FindAndReplace.find(textWindow, findWhatText.value,
@@ -115,7 +140,7 @@
    * @param {!Window} window
    */
   function doReplaceOne(window) {
-    var textWindow = ensureTextWindow(window);
+    let textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
     FindAndReplace.replaceOne(textWindow, findWhatText.value,
@@ -127,7 +152,7 @@
    * @param {!Window} window
    */
   function doReplaceAll(window) {
-    var textWindow = ensureTextWindow(window);
+    let textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
     FindAndReplace.replaceAll(textWindow, findWhatText.value,
@@ -141,14 +166,14 @@
 
     form = new Form();
 
-    var BUTTON_MARGIN = 5;
-    var CONTROL_HEIGHT = 26;
-    var LINE_MARGIN = 5;
-    var PADDING_LEFT = 5;
-    var PADDING_TOP = 5;
+    let BUTTON_MARGIN = 5;
+    let CONTROL_HEIGHT = 26;
+    let LINE_MARGIN = 5;
+    let PADDING_LEFT = 5;
+    let PADDING_TOP = 5;
 
-    var controlLeft = PADDING_LEFT;
-    var controlTop = PADDING_TOP;
+    let controlLeft = PADDING_LEFT;
+    let controlTop = PADDING_TOP;
 
     function add(control, width) {
       control.clientLeft = controlLeft;
@@ -182,7 +207,7 @@
 
     // Checkboxes
     function addCheckbox(text, accessKey) {
-      var checkbox = new CheckboxControl();
+      let checkbox = new CheckboxControl();
       checkbox.accessKey = accessKey;
       add(checkbox, 20);
       add(new LabelControl(text), text.length * 10);
@@ -203,7 +228,7 @@
     // Buttons
     CONTROL_HEIGHT = 26;
     function addButton(text, accessKey) {
-      var button = new ButtonControl(text);
+      let button = new ButtonControl(text);
       button.accessKey = accessKey;
       add(button, 100);
       controlLeft += BUTTON_MARGIN;
@@ -219,7 +244,7 @@
 
     function updateUiByFindWhat() {
       findWhatText.logger.resetCursor();
-      var canFind = findWhatText.value != '';
+      let canFind = findWhatText.value !== '';
       findNextButton.disabled = !canFind;
       findPreviousButton.disabled = !canFind;
       replaceOneButton.disabled = !canFind;
@@ -229,7 +254,7 @@
     findWhatText.addEventListener(Event.Names.INPUT, updateUiByFindWhat);
 
     function setupTextField(textField) {
-      textField.addEventListener(Event.Names.CHANGE, function() {
+      textField.addEventListener(Event.Names.CHANGE, () => {
         textField.logger.add(textField.value);
       });
       textField.addEventListener(Event.Names.KEYDOWN, handleTextFieldKeyDown);
@@ -242,7 +267,7 @@
     form.addEventListener(Event.Names.KEYDOWN, handleGlobalKeyDown);
 
     function installButton(button, handler) {
-      button.addEventListener('click', function(event) {
+      button.addEventListener('click', (event) => {
         if (!Window.focus)
           return;
         handler(/**@type{!Window}*/(Window.focus));
@@ -256,32 +281,25 @@
 
     updateUiByFindWhat();
     formWindow = new FormWindow(form);
-
-    // Set focus on |findWhatText| control when find dialog box is activated.
-    formWindow.addEventListener(Event.Names.FOCUS, function() {
-      findWhatText.focus();
-    });
     formWindow.realize();
-    // TODO(yosi) |global.findForm| is only for debugging purpose.
-    global.findFormWindow = formWindow;
   }
 
   /**
-   * @param {!Window} window
-   * @return {?TextWindow}
+   * @param {!Window} windowIn
+   * @return {TextWindow}
    */
-  function ensureTextWindow(window) {
-    if (window instanceof TextWindow)
-      return window;
-    var textWindow = null;
-    EditorWindow.list.forEach(function(editorWindow) {
-      editorWindow.children.forEach(function(window) {
-        if (!(window instanceof TextWindow))
-          return;
-        if (!textWindow || textWindow.focusTick_ < window.focusTick_)
+  function ensureTextWindow(windowIn) {
+    if (windowIn instanceof TextWindow)
+      return windowIn;
+    let textWindow = null;
+    for (let editorWindow of EditorWindow.list) {
+      for (let window of editorWindow.children) {
+        if ((window instanceof TextWindow) &&
+            (!textWindow || textWindow.focusTick_ < window.focusTick_)) {
           textWindow = window;
-      });
-    });
+        }
+      }
+    }
     return textWindow;
   }
 
@@ -303,7 +321,7 @@
    * @param {!KeyboardEvent} event
    */
   function handleTextFieldKeyDown(event) {
-    var textField = /** @type {!TextFieldControl} */(event.target);
+    let textField = /** @type {!TextFieldControl} */(event.target);
     switch (event.keyCode) {
       case 0x126: // arrowUp
         textField.logger.retrieve(-1);
@@ -323,10 +341,10 @@
    * @return {boolean}
    */
   function hasUpperCase(text) {
-    for (var i = 0; i < text.length; ++i) {
-      var data = Unicode.UCD[text.charCodeAt(i)];
-      if (data.category == Unicode.Category.Lu ||
-          data.category == Unicode.Category.Lt) {
+    for (let i = 0; i < text.length; ++i) {
+      let data = Unicode.UCD[text.charCodeAt(i)];
+      if (data.category === Unicode.Category.Lu ||
+          data.category === Unicode.Category.Lt) {
         return true;
       }
     }
@@ -339,23 +357,12 @@
    */
   function makeFindOptions(direction) {
     return {
-      backward: direction == Direction.BACKWARD,
+      backward: direction === Direction.BACKWARD,
       casePreserveReplacement: casePreserveReplaceCheckbox.checked,
       ignoreCase: shouldIgnoreCase(findWhatText.value),
       matchWholeWord: matchWholeWordCheckbox.checked,
       useRegExp: useRegexpCheckbox.checked
    };
-  }
-
-  /**
-   * @this {!Window}
-   */
-  function showFindFormCommand() {
-    ensureForm();
-    if (formWindow.state != Window.State.REALIZED)
-      return;
-    formWindow.show();
-    formWindow.focus();
   }
 
   /**
@@ -366,16 +373,40 @@
     return !hasUpperCase(text) && !matchCaseCheckbox.checked;
   }
 
-  Editor.bindKey(TextWindow, 'Ctrl+F', showFindFormCommand);
-  Editor.bindKey(TextWindow, 'Ctrl+H', showFindFormCommand);
+  ////////////////////////////////////////////////////////////
+  //
+  // Commands
+  //
 
-  Editor.bindKey(TextWindow, 'F3', function() {
+  /**
+   * @this {!Window}
+   */
+  function findNextCommand() {
     ensureForm();
     doFindNext(this);
-  });
+  }
 
-  Editor.bindKey(TextWindow, 'Shift+F3', function() {
+  /**
+   * @this {!Window}
+   */
+  function findPreviousCommand() {
     ensureForm();
     doFindPrevious(this);
-  });
+  }
+
+  /**
+   * @this {!Window}
+   */
+  function showFindFormCommand() {
+    ensureForm();
+    if (formWindow.state !== Window.State.REALIZED)
+      return;
+    formWindow.show();
+    formWindow.focus();
+  }
+
+  Editor.bindKey(TextWindow, 'Ctrl+F', showFindFormCommand);
+  Editor.bindKey(TextWindow, 'Ctrl+H', showFindFormCommand);
+  Editor.bindKey(TextWindow, 'F3', findNextCommand);
+  Editor.bindKey(TextWindow, 'Shift+F3', findPreviousCommand);
 })();

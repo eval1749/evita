@@ -40,63 +40,63 @@
     var length = this.texts.length;
     if (!length)
       return;
-    var new_cursor = this.cursor + direction;
-    if (new_cursor < 0 || new_cursor >= length)
+    var newCursor = this.cursor + direction;
+    if (newCursor < 0 || newCursor >= length)
       return;
     var control = this.control;
     if (this.cursor == length) {
       this.add(control.value);
       --this.cursor;
     }
-    this.cursor = new_cursor;
+    this.cursor = newCursor;
     control.value = this.texts[this.cursor];
     control.selection.collapseTo(control.value.length);
   };
 
   /** @type {?CheckboxControl} */
-  var case_preserve_replace_checkbox;
+  var casePreserve_replaceCheckbox;
 
   /** @type {?Form} */
   var form = null;
 
   /** @type {?FormWindow} */
-  var form_window = null;
+  var formWindow = null;
 
   /** @type {?CheckboxControl} */
-  var match_case_checkbox;
+  var matchCase_checkbox;
 
   /** @type {?CheckboxControl} */
-  var match_whole_word_checkbox;
+  var matchWhole_wordCheckbox;
 
   /** @type {?ButtonControl} */
-  var find_next_button;
+  var findNext_button;
 
   /** @type {?ButtonControl} */
-  var find_previous_button;
+  var findPrevious_button;
 
   /** @type {?TextFieldControl} */
-  var find_what_text;
+  var findWhat_text;
 
   /** @type {?ButtonControl} */
-  var replace_all_button;
+  var replaceAll_button;
 
   /** @type {?ButtonControl} */
-  var replace_one_button;
+  var replaceOne_button;
 
   /** @type {?TextFieldControl} */
-  var replace_with_text;
+  var replaceWith_text;
 
   /** @type {?CheckboxControl} */
-  var use_regexp_checkbox;
+  var useRegexp_checkbox;
 
   /**
    * @param {!Window} window
    */
   function doFindNext(window) {
-    var text_window = ensureTextWindow(window);
-    if (!text_window)
+    var textWindow = ensureTextWindow(window);
+    if (!textWindow)
       return;
-    FindAndReplace.find(text_window, find_what_text.value,
+    FindAndReplace.find(textWindow, findWhat_text.value,
                         makeFindOptions(Direction.FORWARD));
   }
 
@@ -104,10 +104,10 @@
    * @param {!Window} window
    */
   function doFindPrevious(window) {
-    var text_window = ensureTextWindow(window);
-    if (!text_window)
+    var textWindow = ensureTextWindow(window);
+    if (!textWindow)
       return;
-    FindAndReplace.find(text_window, find_what_text.value,
+    FindAndReplace.find(textWindow, findWhat_text.value,
                         makeFindOptions(Direction.BACKWARD));
   }
 
@@ -115,11 +115,11 @@
    * @param {!Window} window
    */
   function doReplaceOne(window) {
-    var text_window = ensureTextWindow(window);
-    if (!text_window)
+    var textWindow = ensureTextWindow(window);
+    if (!textWindow)
       return;
-    FindAndReplace.replaceOne(text_window, find_what_text.value,
-                              replace_with_text.value,
+    FindAndReplace.replaceOne(textWindow, findWhat_text.value,
+                              replaceWith_text.value,
                               makeFindOptions(Direction.FORWARD));
   }
 
@@ -127,16 +127,16 @@
    * @param {!Window} window
    */
   function doReplaceAll(window) {
-    var text_window = ensureTextWindow(window);
-    if (!text_window)
+    var textWindow = ensureTextWindow(window);
+    if (!textWindow)
       return;
-    FindAndReplace.replaceAll(text_window, find_what_text.value,
-                              replace_with_text.value,
+    FindAndReplace.replaceAll(textWindow, findWhat_text.value,
+                              replaceWith_text.value,
                               makeFindOptions(Direction.FORWARD));
   }
 
   function ensureForm() {
-    if (form_window)
+    if (formWindow)
       return;
 
     form = new Form();
@@ -147,22 +147,22 @@
     var PADDING_LEFT = 5;
     var PADDING_TOP = 5;
 
-    var control_left = PADDING_LEFT;
-    var control_top = PADDING_TOP;
+    var controlLeft = PADDING_LEFT;
+    var controlTop = PADDING_TOP;
 
     function add(control, width) {
-      control.clientLeft = control_left;
-      control.clientTop = control_top;
+      control.clientLeft = controlLeft;
+      control.clientTop = controlTop;
       control.clientWidth = width;
       control.clientHeight = CONTROL_HEIGHT;
-      control_left += control.clientWidth;
+      controlLeft += control.clientWidth;
       form.add(control);
       return control;
     }
 
     function newline() {
-      control_left = PADDING_LEFT;
-      control_top += CONTROL_HEIGHT + LINE_MARGIN;
+      controlLeft = PADDING_LEFT;
+      controlTop += CONTROL_HEIGHT + LINE_MARGIN;
     }
 
     form.title = 'Find and Replace - evita';
@@ -171,13 +171,13 @@
 
     // Text fields
     add(new LabelControl('Find what:'), 75);
-    find_what_text = add(new TextFieldControl(), 265);
-    find_what_text.accessKey = 'N';
+    findWhat_text = add(new TextFieldControl(), 265);
+    findWhat_text.accessKey = 'N';
     newline();
     add(new LabelControl('Replace with:'), 75);
-    replace_with_text = add(new TextFieldControl(), 265);
-    replace_with_text.accessKey = 'P';
-    replace_with_text.disabled = true;
+    replaceWith_text = add(new TextFieldControl(), 265);
+    replaceWith_text.accessKey = 'P';
+    replaceWith_text.disabled = true;
     newline();
 
     // Checkboxes
@@ -189,15 +189,15 @@
       return checkbox;
     }
     CONTROL_HEIGHT = 20;
-    match_case_checkbox = addCheckbox('Match case', 'C');
+    matchCase_checkbox = addCheckbox('Match case', 'C');
     newline();
-    match_whole_word_checkbox = addCheckbox('Match whole word', 'W');
+    matchWhole_wordCheckbox = addCheckbox('Match whole word', 'W');
     newline();
-    use_regexp_checkbox = addCheckbox('Use regular expression', 'E');
+    useRegexp_checkbox = addCheckbox('Use regular expression', 'E');
     newline();
-    case_preserve_replace_checkbox = addCheckbox('Case preserve replacement',
+    casePreserve_replaceCheckbox = addCheckbox('Case preserve replacement',
                                                  'M');
-    case_preserve_replace_checkbox.checked = true;
+    casePreserve_replaceCheckbox.checked = true;
     newline();
 
     // Buttons
@@ -206,38 +206,38 @@
       var button = new ButtonControl(text);
       button.accessKey = accessKey;
       add(button, 100);
-      control_left += BUTTON_MARGIN;
+      controlLeft += BUTTON_MARGIN;
       return button;
     }
-    control_left = 140;
-    replace_one_button = addButton('Replace', 'R');
-    find_previous_button = addButton('Find Previous', 'I');
+    controlLeft = 140;
+    replaceOne_button = addButton('Replace', 'R');
+    findPrevious_button = addButton('Find Previous', 'I');
     newline();
-    control_left = 140;
-    replace_all_button = addButton('Replace All', 'A');
-    find_next_button = addButton('Find Next', 'F');
+    controlLeft = 140;
+    replaceAll_button = addButton('Replace All', 'A');
+    findNext_button = addButton('Find Next', 'F');
 
     function updateUiByFindWhat() {
-      find_what_text.logger.resetCursor();
-      var can_find = find_what_text.value != '';
-      find_next_button.disabled = !can_find;
-      find_previous_button.disabled = !can_find;
-      replace_one_button.disabled = !can_find;
-      replace_all_button.disabled = !can_find;
-      replace_with_text.disabled = !can_find;
+      findWhat_text.logger.resetCursor();
+      var canFind = findWhat_text.value != '';
+      findNext_button.disabled = !canFind;
+      findPrevious_button.disabled = !canFind;
+      replaceOne_button.disabled = !canFind;
+      replaceAll_button.disabled = !canFind;
+      replaceWith_text.disabled = !canFind;
     }
-    find_what_text.addEventListener(Event.Names.INPUT, updateUiByFindWhat);
+    findWhat_text.addEventListener(Event.Names.INPUT, updateUiByFindWhat);
 
-    function setupTextField(text_field) {
-      text_field.addEventListener(Event.Names.CHANGE, function() {
-        text_field.logger.add(text_field.value);
+    function setupTextField(textField) {
+      textField.addEventListener(Event.Names.CHANGE, function() {
+        textField.logger.add(textField.value);
       });
-      text_field.addEventListener(Event.Names.KEYDOWN, handleTextFieldKeyDown);
-      text_field.logger = new TextFieldLogger(text_field);
+      textField.addEventListener(Event.Names.KEYDOWN, handleTextFieldKeyDown);
+      textField.logger = new TextFieldLogger(textField);
     }
 
-    setupTextField(find_what_text);
-    setupTextField(replace_with_text);
+    setupTextField(findWhat_text);
+    setupTextField(replaceWith_text);
 
     form.addEventListener(Event.Names.KEYDOWN, handleGlobalKeyDown);
 
@@ -249,21 +249,21 @@
       });
     }
 
-    installButton(find_next_button, doFindNext);
-    installButton(find_previous_button, doFindPrevious);
-    installButton(replace_one_button, doReplaceOne);
-    installButton(replace_all_button, doReplaceAll);
+    installButton(findNext_button, doFindNext);
+    installButton(findPrevious_button, doFindPrevious);
+    installButton(replaceOne_button, doReplaceOne);
+    installButton(replaceAll_button, doReplaceAll);
 
     updateUiByFindWhat();
-    form_window = new FormWindow(form);
+    formWindow = new FormWindow(form);
 
-    // Set focus on |find_what_text| control when find dialog box is activated.
-    form_window.addEventListener(Event.Names.FOCUS, function() {
-      find_what_text.focus();
+    // Set focus on |findWhat_text| control when find dialog box is activated.
+    formWindow.addEventListener(Event.Names.FOCUS, function() {
+      findWhat_text.focus();
     });
-    form_window.realize();
+    formWindow.realize();
     // TODO(yosi) |global.findForm| is only for debugging purpose.
-    global.findFormWindow = form_window;
+    global.findFormWindow = formWindow;
   }
 
   /**
@@ -273,16 +273,16 @@
   function ensureTextWindow(window) {
     if (window instanceof TextWindow)
       return window;
-    var text_window = null;
-    EditorWindow.list.forEach(function(editor_window) {
-      editor_window.children.forEach(function(window) {
+    var textWindow = null;
+    EditorWindow.list.forEach(function(editorWindow) {
+      editorWindow.children.forEach(function(window) {
         if (!(window instanceof TextWindow))
           return;
-        if (!text_window || text_window.focusTick_ < window.focusTick_)
-          text_window = window;
+        if (!textWindow || textWindow.focusTick_ < window.focusTick_)
+          textWindow = window;
       });
     });
-    return text_window;
+    return textWindow;
   }
 
   /**
@@ -291,10 +291,10 @@
   function handleGlobalKeyDown(event) {
     switch (event.keyCode) {
       case 0x10D: // Enter
-        doFindNext(/** @type {!FormWindow} */(form_window));
+        doFindNext(/** @type {!FormWindow} */(formWindow));
         break;
       case 0x11B: // Escape
-        form_window.hide();
+        formWindow.hide();
         break;
     }
   }
@@ -303,15 +303,15 @@
    * @param {!KeyboardEvent} event
    */
   function handleTextFieldKeyDown(event) {
-    var text_field = /** @type {!TextFieldControl} */(event.target);
+    var textField = /** @type {!TextFieldControl} */(event.target);
     switch (event.keyCode) {
       case 0x126: // arrowUp
-        text_field.logger.retrieve(-1);
+        textField.logger.retrieve(-1);
         event.stopPropagation();
         event.preventDefault();
         break;
       case 0x128: // arrowDown
-        text_field.logger.retrieve(1);
+        textField.logger.retrieve(1);
         event.stopPropagation();
         event.preventDefault();
         break;
@@ -340,19 +340,19 @@
   function makeFindOptions(direction) {
     return {
       backward: direction == Direction.BACKWARD,
-      casePreserveReplacement: case_preserve_replace_checkbox.checked,
-      ignoreCase: shouldIgnoreCase(find_what_text.value),
-      matchWholeWord: match_whole_word_checkbox.checked,
-      useRegExp: use_regexp_checkbox.checked
+      casePreserveReplacement: casePreserve_replaceCheckbox.checked,
+      ignoreCase: shouldIgnoreCase(findWhat_text.value),
+      matchWholeWord: matchWhole_wordCheckbox.checked,
+      useRegExp: useRegexp_checkbox.checked
    };
   }
 
   function showFindFormCommand() {
     ensureForm();
-    if (form_window.state != Window.State.REALIZED)
+    if (formWindow.state != Window.State.REALIZED)
       return;
-    form_window.show();
-    form_window.focus();
+    formWindow.show();
+    formWindow.focus();
   }
 
   /**
@@ -360,7 +360,7 @@
    * @return {boolean}
    */
   function shouldIgnoreCase(text) {
-    return !hasUpperCase(text) && !match_case_checkbox.checked;
+    return !hasUpperCase(text) && !matchCase_checkbox.checked;
   }
 
   Editor.bindKey(TextWindow, 'Ctrl+F', showFindFormCommand);

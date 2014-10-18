@@ -16,7 +16,7 @@ EventHandler::~EventHandler() {
 }
 
 void EventHandler::OnEvent(Event* event) {
-  if (auto const key_event = event->as<KeyboardEvent>()) {
+  if (auto const key_event = event->as<KeyEvent>()) {
     OnKeyEvent(key_event);
     return;
   }
@@ -27,7 +27,7 @@ void EventHandler::OnEvent(Event* event) {
   NOTREACHED();
 }
 
-void EventHandler::OnKeyEvent(KeyboardEvent*) {
+void EventHandler::OnKeyEvent(KeyEvent*) {
 }
 
 void EventHandler::OnMouseEvent(MouseEvent*) {

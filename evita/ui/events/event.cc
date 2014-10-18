@@ -106,22 +106,22 @@ void Event::PreventDefault() {
 
 //////////////////////////////////////////////////////////////////////
 //
-// KeyboardEvent
+// KeyEvent
 //
-KeyboardEvent::KeyboardEvent(EventType event_type, int raw_key_code,
+KeyEvent::KeyEvent(EventType event_type, int raw_key_code,
                              bool repeat)
     : Event(event_type, 0), raw_key_code_(raw_key_code),
       repeat_(repeat) {
 }
 
-KeyboardEvent::KeyboardEvent()
-    : KeyboardEvent(EventType::Invalid, 0, false) {
+KeyEvent::KeyEvent()
+    : KeyEvent(EventType::Invalid, 0, false) {
 }
 
-KeyboardEvent::~KeyboardEvent() {
+KeyEvent::~KeyEvent() {
 }
 
-EventType KeyboardEvent::ConvertToEventType(uint32_t message) {
+EventType KeyEvent::ConvertToEventType(uint32_t message) {
   switch (message) {
     case WM_CHAR:
     case WM_KEYDOWN:
@@ -134,11 +134,11 @@ EventType KeyboardEvent::ConvertToEventType(uint32_t message) {
   return EventType::Invalid;
 }
 
-int KeyboardEvent::ConvertToKeyCode(WPARAM wParam) {
+int KeyEvent::ConvertToKeyCode(WPARAM wParam) {
   return KeyCodeMapper::instance()->Map(static_cast<int>(wParam));
 }
 
-bool KeyboardEvent::ConvertToRepeat(LPARAM lParam) {
+bool KeyEvent::ConvertToRepeat(LPARAM lParam) {
   return HIWORD(lParam) & KF_REPEAT;
 }
 
@@ -362,13 +362,13 @@ std::ostream& operator<<(std::ostream& out, const ui::Event* event) {
   return out << *event;
 }
 
-std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent& event) {
+std::ostream& operator<<(std::ostream& out, const ui::KeyEvent& event) {
   return out << event.event_type() << "Event" <<
       "(key_code=" << event.key_code() <<
       " repeate=" << event.repeat() << ")";
 }
 
-std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent* event) {
+std::ostream& operator<<(std::ostream& out, const ui::KeyEvent* event) {
   return out << *event;
 }
 

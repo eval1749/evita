@@ -100,17 +100,17 @@ class Event : public common::Castable {
 
 //////////////////////////////////////////////////////////////////////
 //
-// KeyboardEvent
+// KeyEvent
 //
-class KeyboardEvent : public Event {
-  DECLARE_CASTABLE_CLASS(KeyboardEvent, Event);
+class KeyEvent : public Event {
+  DECLARE_CASTABLE_CLASS(KeyEvent, Event);
 
   private: int raw_key_code_;
   private: bool repeat_;
 
-  public: KeyboardEvent(EventType type, int key_code, bool repeat);
-  public: KeyboardEvent();
-  public: virtual ~KeyboardEvent();
+  public: KeyEvent(EventType type, int key_code, bool repeat);
+  public: KeyEvent();
+  public: virtual ~KeyEvent();
 
   public: const bool alt_key() const {
     return raw_key_code_ & static_cast<int>(Modifier::Alt);
@@ -220,8 +220,8 @@ class MouseWheelEvent : public MouseEvent {
 std::ostream& operator<<(std::ostream& out, ui::EventType event_type);
 std::ostream& operator<<(std::ostream& out, const ui::Event& event);
 std::ostream& operator<<(std::ostream& out, const ui::Event* event);
-std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent& event);
-std::ostream& operator<<(std::ostream& out, const ui::KeyboardEvent* event);
+std::ostream& operator<<(std::ostream& out, const ui::KeyEvent& event);
+std::ostream& operator<<(std::ostream& out, const ui::KeyEvent* event);
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent& event);
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent* event);
 std::ostream& operator<<(std::ostream& out, const ui::MouseWheelEvent& event);

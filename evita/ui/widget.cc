@@ -278,16 +278,16 @@ gfx::Size Widget::GetPreferredSize() const {
 LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
                                       LPARAM lParam) {
   if (message == WM_CHAR) {
-    KeyboardEvent event(EventType::KeyPressed, static_cast<int>(wParam),
-                        KeyboardEvent::ConvertToRepeat(lParam));
+    KeyEvent event(EventType::KeyPressed, static_cast<int>(wParam),
+                        KeyEvent::ConvertToRepeat(lParam));
     if (event.raw_key_code() >= 0x20)
       OnEvent(&event);
     return 0;
   }
 
-  KeyboardEvent event(KeyboardEvent::ConvertToEventType(message),
-                      KeyboardEvent::ConvertToKeyCode(wParam),
-                      KeyboardEvent::ConvertToRepeat(lParam));
+  KeyEvent event(KeyEvent::ConvertToEventType(message),
+                      KeyEvent::ConvertToKeyCode(wParam),
+                      KeyEvent::ConvertToRepeat(lParam));
 
   if (message == WM_KEYDOWN && event.key_code() <= 0x7E && !event.alt_key() &&
       !event.control_key()) {
@@ -451,10 +451,10 @@ void Widget::OnDraw(gfx::Canvas* canvas) {
   }
 }
 
-void Widget::OnKeyPressed(const KeyboardEvent&) {
+void Widget::OnKeyPressed(const KeyEvent&) {
 }
 
-void Widget::OnKeyReleased(const KeyboardEvent&) {
+void Widget::OnKeyReleased(const KeyEvent&) {
 }
 
 void Widget::OnMouseExited(const MouseEvent&) {
@@ -821,7 +821,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 }
 
 // EventTarget
-void Widget::OnKeyEvent(KeyboardEvent* event) {
+void Widget::OnKeyEvent(KeyEvent* event) {
   if (event->event_type() == EventType::KeyPressed) {
     OnKeyPressed(*event);
     return;

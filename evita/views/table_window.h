@@ -62,7 +62,7 @@ class TableWindow final : public text::BufferMutationObserver,
   private: virtual void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::TableControlObserver
-  private: virtual void OnKeyPressed(const ui::KeyboardEvent&) override;
+  private: virtual void OnKeyPressed(const ui::KeyEvent&) override;
   private: virtual void OnMousePressed(const ui::MouseEvent&) override;
   private: virtual void OnSelectionChanged() override;
 

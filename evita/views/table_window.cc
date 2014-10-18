@@ -222,7 +222,7 @@ void TableWindow::DidBeginAnimationFrame(base::Time) {
 }
 
 // ui::TableControlObserver
-void TableWindow::OnKeyPressed(const ui::KeyboardEvent& event) {
+void TableWindow::OnKeyPressed(const ui::KeyEvent& event) {
   ContentWindow::OnKeyPressed(event);
 }
 

@@ -20,7 +20,7 @@ domapi::ViewEventHandler* view_event_handler() {
   return Application::instance()->view_event_handler();
 }
 
-domapi::EventType ConvertEventType(const ui::KeyboardEvent event) {
+domapi::EventType ConvertEventType(const ui::KeyEvent event) {
   auto const event_type = event.event_type();
   if (event_type == ui::EventType::KeyPressed)
     return domapi::EventType::KeyDown;
@@ -78,7 +78,7 @@ void EventSource::DispatchFocusEvent(domapi::EventType event_type,
   view_event_handler()->DispatchFocusEvent(api_event);
 }
 
-void EventSource::DispatchKeyboardEvent(const ui::KeyboardEvent& event) {
+void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
   domapi::KeyboardEvent api_event;
   api_event.alt_key = event.alt_key();
   api_event.control_key = event.control_key();

@@ -42,12 +42,12 @@ void FormControlController::DidSetFocus(ui::Control*,
 }
 
 void FormControlController::OnKeyPressed(ui::Control*,
-                                         const ui::KeyboardEvent& event) {
+                                         const ui::KeyEvent& event) {
   DispatchKeyboardEvent(event);
 }
 
 void FormControlController::OnKeyReleased(ui::Control*,
-                                          const ui::KeyboardEvent& event) {
+                                          const ui::KeyEvent& event) {
   DispatchKeyboardEvent(event);
 }
 

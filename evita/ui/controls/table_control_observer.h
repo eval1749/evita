@@ -7,7 +7,7 @@
 
 namespace ui {
 
-class KeyboardEvent;
+class KeyEvent;
 class MouseEvent;
 class TableControlObserver;
 
@@ -15,7 +15,7 @@ class TableControlObserver {
   public: TableControlObserver();
   public: virtual ~TableControlObserver();
 
-  public: virtual void OnKeyPressed(const KeyboardEvent&);
+  public: virtual void OnKeyPressed(const KeyEvent&);
   public: virtual void OnMousePressed(const MouseEvent&);
   public: virtual void OnSelectionChanged();
 };

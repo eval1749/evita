@@ -24,7 +24,7 @@ namespace ui {
 
 using common::win::NativeWindow;
 class FocusController;
-class KeyboardEvent;
+class KeyEvent;
 class Layer;
 class MouseEvent;
 class MouseWheelEvent;
@@ -137,8 +137,8 @@ class Widget : public EventTarget,
   // Note: We expose |OnDraw| for real time content resizing during toplevel
   // window resizing.
   public: virtual void OnDraw(gfx::Canvas* canvas);
-  protected: virtual void OnKeyPressed(const KeyboardEvent& event);
-  protected: virtual void OnKeyReleased(const KeyboardEvent& event);
+  protected: virtual void OnKeyPressed(const KeyEvent& event);
+  protected: virtual void OnKeyReleased(const KeyEvent& event);
   public: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
                                     LPARAM lParam);
   protected: virtual void OnMouseExited(const MouseEvent& event);
@@ -179,7 +179,7 @@ class Widget : public EventTarget,
                                         LPARAM lParam) override;
 
   // EventTarget
-  protected: virtual void OnKeyEvent(KeyboardEvent* event) override;
+  protected: virtual void OnKeyEvent(KeyEvent* event) override;
   protected: virtual void OnMouseEvent(MouseEvent* event) override;
 
   DISALLOW_COPY_AND_ASSIGN(Widget);

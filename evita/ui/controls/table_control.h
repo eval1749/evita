@@ -18,7 +18,7 @@ class Canvas;
 
 namespace ui {
 
-class KeyboardEvent;
+class KeyEvent;
 class MouseEvent;
 struct TableColumn;
 class TableControlObserver;

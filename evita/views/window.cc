@@ -161,11 +161,11 @@ void Window::DidShow() {
                                                   domapi::Visibility::Visible);
 }
 
-void Window::OnKeyPressed(const ui::KeyboardEvent& event) {
+void Window::OnKeyPressed(const ui::KeyEvent& event) {
   DispatchKeyboardEvent(event);
 }
 
-void Window::OnKeyReleased(const ui::KeyboardEvent& event) {
+void Window::OnKeyReleased(const ui::KeyEvent& event) {
   DispatchKeyboardEvent(event);
 }
 

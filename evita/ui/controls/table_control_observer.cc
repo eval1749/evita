@@ -11,7 +11,7 @@ TableControlObserver::TableControlObserver() {
 TableControlObserver::~TableControlObserver() {
 }
 
-void TableControlObserver::OnKeyPressed(const KeyboardEvent&) {
+void TableControlObserver::OnKeyPressed(const KeyEvent&) {
 }
 
 void TableControlObserver::OnMousePressed(const MouseEvent&) {

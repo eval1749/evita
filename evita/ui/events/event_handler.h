@@ -10,7 +10,7 @@
 namespace ui {
 
 class Event;
-class KeyboardEvent;
+class KeyEvent;
 class MouseEvent;
 
 //////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ class EventHandler {
   public: virtual ~EventHandler();
 
   public: virtual void OnEvent(Event* event);
-  public: virtual void OnKeyEvent(KeyboardEvent* event);
+  public: virtual void OnKeyEvent(KeyEvent* event);
   public: virtual void OnMouseEvent(MouseEvent* event);
 
   DISALLOW_COPY_AND_ASSIGN(EventHandler);

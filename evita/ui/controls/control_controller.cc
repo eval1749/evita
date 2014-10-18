@@ -25,10 +25,10 @@ void ControlController::DidRealize(Control*) {
 void ControlController::DidSetFocus(Control*, Widget*) {
 }
 
-void ControlController::OnKeyPressed(Control*, const KeyboardEvent&) {
+void ControlController::OnKeyPressed(Control*, const KeyEvent&) {
 }
 
-void ControlController::OnKeyReleased(Control*, const KeyboardEvent&) {
+void ControlController::OnKeyReleased(Control*, const KeyEvent&) {
 }
 
 void ControlController::OnMouseExited(Control*, const MouseEvent&) {

@@ -92,14 +92,14 @@ void Control::DidSetFocus(ui::Widget* last_focused_widget) {
   controller_->DidSetFocus(this, last_focused_widget);
 }
 
-void Control::OnKeyPressed(const KeyboardEvent& event) {
+void Control::OnKeyPressed(const KeyEvent& event) {
   DCHECK(controller_);
   if (disabled())
     return;
   controller_->OnKeyPressed(this, event);
 }
 
-void Control::OnKeyReleased(const KeyboardEvent& event) {
+void Control::OnKeyReleased(const KeyEvent& event) {
   DCHECK(controller_);
   if (disabled())
     return;

@@ -681,7 +681,7 @@ class RowCollection final : public CanvasWindow, public TableModelObserver {
   private: virtual void DidRealize() override;
   private: virtual void DidSetFocus(ui::Widget* last_focused) override;
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
-  private: virtual void OnKeyPressed(const KeyboardEvent& event) override;
+  private: virtual void OnKeyPressed(const KeyEvent& event) override;
   private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
@@ -978,7 +978,7 @@ void RowCollection::OnDraw(gfx::Canvas* canvas) {
     row->Paint(canvas);
 }
 
-void RowCollection::OnKeyPressed(const ui::KeyboardEvent& event) {
+void RowCollection::OnKeyPressed(const ui::KeyEvent& event) {
   switch (event.key_code()) {
     case KeyCode::ArrowDown:
       if (event.shift_key())

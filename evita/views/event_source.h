@@ -13,7 +13,7 @@ struct TextCompositionData;
 }
 
 namespace ui {
-class KeyboardEvent;
+class KeyEvent;
 class MouseEvent;
 class MouseWheelEvent;
 class TextComposition;
@@ -33,7 +33,7 @@ class EventSource {
 
   public: void DispatchFocusEvent(domapi::EventType event_type,
                                   domapi::EventTargetId related_target_id);
-  public: void DispatchKeyboardEvent(const ui::KeyboardEvent& event);
+  public: void DispatchKeyboardEvent(const ui::KeyEvent& event);
   public: void DispatchMouseEvent(const ui::MouseEvent& event);
   public: void DispatchTextCompositionEvent(
       domapi::EventType event_type, const ui::TextComposition& composition);

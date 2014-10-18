@@ -24,9 +24,9 @@ class FormControlController : public ui::ControlController,
   public: virtual void DidSetFocus(ui::Control* control,
                                    ui::Widget* last_focused_widget) override;
   private: virtual void OnKeyPressed(ui::Control* control,
-                                     const ui::KeyboardEvent& event) override;
+                                     const ui::KeyEvent& event) override;
   private: virtual void OnKeyReleased(ui::Control* control,
-                                      const ui::KeyboardEvent& event) override;
+                                      const ui::KeyEvent& event) override;
   private: virtual void OnMouseMoved(ui::Control* control,
                                      const ui::MouseEvent& event) override;
   private: virtual void OnMousePressed(ui::Control* control,

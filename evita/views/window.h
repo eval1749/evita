@@ -40,9 +40,9 @@ class Window : public ui::AnimatableWindow,
   protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
   protected: virtual void DidShow() override;
   protected: virtual void OnKeyPressed(
-      const ui::KeyboardEvent& event) override;
+      const ui::KeyEvent& event) override;
   protected: virtual void OnKeyReleased(
-      const ui::KeyboardEvent& event) override;
+      const ui::KeyEvent& event) override;
   protected: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   protected: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   protected: virtual void OnMouseReleased(const ui::MouseEvent& event) override;

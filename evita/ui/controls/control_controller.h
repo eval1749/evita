@@ -10,7 +10,7 @@
 namespace ui {
 
 class Control;
-class KeyboardEvent;
+class KeyEvent;
 class MouseEvent;
 class MouseWheelEvent;
 class Widget;
@@ -25,9 +25,9 @@ class ControlController {
   public: virtual void DidSetFocus(Control* control,
                                    Widget* last_focused_widget);
   public: virtual void OnKeyPressed(Control* control,
-                                    const KeyboardEvent& event);
+                                    const KeyEvent& event);
   public: virtual void OnKeyReleased(Control* control,
-                                     const KeyboardEvent& event);
+                                     const KeyEvent& event);
   public: virtual void OnMouseExited(Control* control,
                                      const MouseEvent& event);
   public: virtual void OnMouseMoved(Control* control,

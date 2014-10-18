@@ -1,9 +1,11 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/editor.h"
 
 #include "base/bind.h"
+#include "base/strings/utf_string_conversions.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/script_host.h"
@@ -150,6 +152,10 @@ Editor::Editor() {
 }
 
 Editor::~Editor() {
+}
+
+base::string16 Editor::v8_version() {
+  return base::ASCIIToUTF16(v8::V8::GetVersion());
 }
 
 base::string16 Editor::version() {

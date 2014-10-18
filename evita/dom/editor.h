@@ -1,5 +1,7 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_dom_editor_h)
 #define INCLUDE_evita_dom_editor_h
 
@@ -22,15 +24,14 @@ class Editor : public v8_glue::Scriptable<Editor> {
   private: Editor();
   public: virtual ~Editor();
 
+  private: static base::string16 v8_version();
   private: static base::string16 version();
 
   private: static v8::Handle<v8::Promise> Editor::CheckSpelling(
       const base::string16& word_to_check);
 
-  /*
-   * |hint| is 1 to 1000: |v8::V8::IdelNotification(|hint|)|
-   * otherwise call |v8::V8::LowMemoryNotification()|
-   */
+  // |hint| is 1 to 1000: |v8::V8::IdelNotification(|hint|)| otherwise call
+  // |v8::V8::LowMemoryNotification()|
   private: static bool CollectGarbage(int hint);
   private: static bool CollectGarbage();
 

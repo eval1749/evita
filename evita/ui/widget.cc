@@ -328,15 +328,21 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       track.dwFlags = static_cast<DWORD>(
           message == WM_NCMOUSEMOVE ? TME_NONCLIENT | TME_LEAVE : TME_LEAVE);
       track.hwndTrack = *native_window();
-      if (::TrackMouseEvent(&track))
-        hover_widget = result.widget();
-      else
-        DVLOG(0) << "TrackMouseEvent last_error=" << ::GetLastError();
+      WIN32_VERIFY(::TrackMouseEvent(&track));
+      hover_widget = result.widget();
+      MouseEvent event(EventType::MouseEntered, MouseButton::None, 0, 0,
+                       hover_widget, result.local_point(), screen_point);
+      hover_widget->OnEvent(&event);
     } else if (hover_widget != result.widget()) {
       MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
                        hover_widget, result.local_point(), screen_point);
       hover_widget->OnEvent(&event);
       hover_widget = result.widget();
+      if (hover_widget) {
+        MouseEvent event(EventType::MouseEntered, MouseButton::None, 0, 0,
+                         hover_widget, result.local_point(), screen_point);
+        hover_widget->OnEvent(&event);
+      }
     }
   }
 
@@ -455,6 +461,9 @@ void Widget::OnKeyPressed(const KeyEvent&) {
 }
 
 void Widget::OnKeyReleased(const KeyEvent&) {
+}
+
+void Widget::OnMouseEntered(const MouseEvent&) {
 }
 
 void Widget::OnMouseExited(const MouseEvent&) {
@@ -834,6 +843,10 @@ void Widget::OnKeyEvent(KeyEvent* event) {
 }
 
 void Widget::OnMouseEvent(MouseEvent* event) {
+  if (event->event_type() == EventType::MouseEntered) {
+    OnMouseEntered(*event);
+    return;
+  }
   if (event->event_type() == EventType::MouseExited) {
     OnMouseExited(*event);
     return;

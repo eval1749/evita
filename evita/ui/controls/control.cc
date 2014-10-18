@@ -106,6 +106,17 @@ void Control::OnKeyReleased(const KeyEvent& event) {
   controller_->OnKeyReleased(this, event);
 }
 
+void Control::OnMouseEntered(const MouseEvent& event) {
+  DCHECK(controller_);
+  if (disabled())
+    return;
+  controller_->OnMouseEntered(this, event);
+  if (state_ != State::Normal || !focusable())
+    return;
+  state_ = State::Hover;
+  DidChangeState();
+}
+
 void Control::OnMouseExited(const MouseEvent& event) {
   DCHECK(controller_);
   if (disabled())
@@ -122,10 +133,6 @@ void Control::OnMouseMoved(const MouseEvent& event) {
   if (disabled())
     return;
   controller_->OnMouseMoved(this, event);
-  if (state_ != State::Normal || !focusable())
-    return;
-  state_ = State::Hover;
-  DidChangeState();
 }
 
 void Control::OnMousePressed(const MouseEvent& event) {

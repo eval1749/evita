@@ -375,8 +375,8 @@ class ColumnCollection : public ui::Widget, private PaintScheduler {
   // ui::Widget
   private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  private: virtual void OnMouseEntered(const ui::MouseEvent& event) override;
   private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
 
   DISALLOW_COPY_AND_ASSIGN(ColumnCollection);
 };
@@ -470,7 +470,7 @@ void ColumnCollection::OnMouseExited(const ui::MouseEvent&) {
   UpdateHover(nullptr);
 }
 
-void ColumnCollection::OnMouseMoved(const ui::MouseEvent& event) {
+void ColumnCollection::OnMouseEntered(const ui::MouseEvent& event) {
   UpdateHover(HitTest(gfx::PointF(event.location())));
 }
 

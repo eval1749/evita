@@ -59,6 +59,7 @@ class Control : public Widget {
   protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
   protected: virtual void OnKeyPressed(const KeyEvent& event) override;
   protected: virtual void OnKeyReleased(const KeyEvent& event) override;
+  protected: virtual void OnMouseEntered(const MouseEvent& event) override;
   protected: virtual void OnMouseExited(const MouseEvent& event) override;
   protected: virtual void OnMouseMoved(const MouseEvent& event) override;
   protected: virtual void OnMousePressed(const MouseEvent& event) override;

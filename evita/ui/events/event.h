@@ -33,7 +33,7 @@ enum class EventType {
   Invalid,
   KeyPressed,
   KeyReleased,
-  // Note: We don't have MouseEntered event, because Windows doesn't have it.
+  MouseEntered,
   MouseExited,
   MouseMoved,
   MousePressed,

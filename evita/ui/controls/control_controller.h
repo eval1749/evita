@@ -28,6 +28,8 @@ class ControlController {
                                     const KeyEvent& event);
   public: virtual void OnKeyReleased(Control* control,
                                      const KeyEvent& event);
+  public: virtual void OnMouseEntered(Control* control,
+                                      const MouseEvent& event);
   public: virtual void OnMouseExited(Control* control,
                                      const MouseEvent& event);
   public: virtual void OnMouseMoved(Control* control,

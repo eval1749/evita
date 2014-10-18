@@ -141,6 +141,7 @@ class Widget : public EventTarget,
   protected: virtual void OnKeyReleased(const KeyEvent& event);
   public: virtual LRESULT OnMessage(uint32_t uMsg, WPARAM wParam,
                                     LPARAM lParam);
+  protected: virtual void OnMouseEntered(const MouseEvent& event);
   protected: virtual void OnMouseExited(const MouseEvent& event);
   protected: virtual void OnMouseMoved(const MouseEvent& event);
   protected: virtual void OnMousePressed(const MouseEvent& event);

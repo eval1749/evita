@@ -8,12 +8,12 @@
 #include "base/basictypes.h"
 #include "base/event_types.h"
 #include "base/logging.h"
-#include "common/castable.h"
 #include "common/tree/node.h"
 #include "common/win/native_window.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/ui/compositor/layer_owner.h"
+#include "evita/ui/events/event_target.h"
 #include "evita/ui/focus_controller.h"
 
 namespace gfx {
@@ -33,11 +33,11 @@ class MouseWheelEvent;
 //
 // Widget
 //
-class Widget : public common::Castable,
+class Widget : public EventTarget,
                public common::tree::Node<Widget>,
                public common::win::MessageDelegate,
                public LayerOwner {
-  DECLARE_CASTABLE_CLASS(Widget, Castable);
+  DECLARE_CASTABLE_CLASS(Widget, EventTarget);
 
   // For |DidKillFocuns()| and |DidSetFocus()|.
   friend class FocusController;
@@ -177,6 +177,11 @@ class Widget : public common::Castable,
   protected: virtual void WillRemoveChildWidget(Widget* old_child);
   protected: virtual LRESULT WindowProc(UINT uMsg, WPARAM wParam,
                                         LPARAM lParam) override;
+
+  // EventTarget
+  protected: virtual void OnKeyEvent(KeyboardEvent* event) override;
+  protected: virtual void OnMouseEvent(MouseEvent* event) override;
+
   DISALLOW_COPY_AND_ASSIGN(Widget);
 };
 

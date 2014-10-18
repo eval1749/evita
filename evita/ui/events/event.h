@@ -7,6 +7,7 @@
 
 #include "base/event_types.h"
 #include "base/time/time.h"
+#include "common/castable.h"
 #include "common/win/rect.h"
 
 namespace ui {
@@ -77,7 +78,9 @@ enum class MouseButton {
 //
 // Event
 //
-class Event {
+class Event : public common::Castable {
+  DECLARE_CASTABLE_CLASS(Event, Castable);
+
   private: bool default_prevented_;
   private: EventType event_type_;
   private: int flags_;
@@ -85,7 +88,7 @@ class Event {
 
   protected: Event(EventType event_type, int flags);
   protected: Event();
-  public: ~Event();
+  public: virtual ~Event();
 
   public: bool default_prevented() const { return default_prevented_; }
   public: EventType event_type() const { return event_type_; }
@@ -100,12 +103,14 @@ class Event {
 // KeyboardEvent
 //
 class KeyboardEvent : public Event {
+  DECLARE_CASTABLE_CLASS(KeyboardEvent, Event);
+
   private: int raw_key_code_;
   private: bool repeat_;
 
   public: KeyboardEvent(EventType type, int key_code, bool repeat);
   public: KeyboardEvent();
-  public: ~KeyboardEvent();
+  public: virtual ~KeyboardEvent();
 
   public: const bool alt_key() const {
     return raw_key_code_ & static_cast<int>(Modifier::Alt);
@@ -131,6 +136,8 @@ class KeyboardEvent : public Event {
 // MouseEvent
 //
 class MouseEvent : public Event {
+  DECLARE_CASTABLE_CLASS(MouseEvent, Event);
+
   friend class MouseWheelEvent;
 
   private: MouseButton button_;
@@ -146,7 +153,7 @@ class MouseEvent : public Event {
   public: MouseEvent(const base::NativeEvent& native_event, Widget* widget,
                      const Point& client_point, const Point& screen_point);
   public: MouseEvent();
-  public: ~MouseEvent();
+  public: virtual ~MouseEvent();
 
   public: bool alt_key() const {
     return flags() & static_cast<int>(EventFlags::AltKey);
@@ -192,6 +199,8 @@ class MouseEvent : public Event {
 // MouseWheelEvent
 //
 class MouseWheelEvent : public MouseEvent {
+  DECLARE_CASTABLE_CLASS(MouseEvent, MouseEvent);
+
   friend class MouseEvent;
 
   private: int delta_;
@@ -199,7 +208,7 @@ class MouseWheelEvent : public MouseEvent {
   public: MouseWheelEvent(Widget* widget, const Point& client_point,
                           const Point& screen_point, int flags,
                           int delta);
-  public: ~MouseWheelEvent();
+  public: virtual ~MouseWheelEvent();
 
   public: int delta() const { return delta_; }
 };

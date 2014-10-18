@@ -48,6 +48,10 @@
 
         'events/event.cc',
         'events/event.h',
+        'events/event_handler.cc',
+        'events/event_handler.h',
+        'events/event_target.cc',
+        'events/event_target.h',
         'events/mouse_click_tracker.cc',
         'events/mouse_click_tracker.h',
         'events/native_event_win.cc',

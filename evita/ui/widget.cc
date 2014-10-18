@@ -281,7 +281,7 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
     KeyboardEvent event(EventType::KeyPressed, static_cast<int>(wParam),
                         KeyboardEvent::ConvertToRepeat(lParam));
     if (event.raw_key_code() >= 0x20)
-      OnKeyPressed(event);
+      OnEvent(&event);
     return 0;
   }
 
@@ -295,16 +295,10 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
     return OnMessage(message, wParam, lParam);
   }
 
-  if (event.event_type() == EventType::KeyPressed) {
-    OnKeyPressed(event);
+  if (event.event_type() != EventType::Invalid) {
+    OnEvent(&event);
     return 0;
   }
-
-  if (event.event_type() == EventType::KeyReleased) {
-    OnKeyReleased(event);
-    return 0;
-  }
-
   return OnMessage(message, wParam, lParam);
 }
 
@@ -321,7 +315,7 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
     MouseWheelEvent event(result.widget(), result.local_point(), screen_point,
                           MouseEvent::ConvertToEventFlags(native_event),
                           GET_WHEEL_DELTA_WPARAM(native_event.wParam));
-    result.widget()->OnMouseWheel(event);
+    result.widget()->OnEvent(&event);
     return !event.default_prevented();
   }
 
@@ -341,7 +335,7 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
     } else if (hover_widget != result.widget()) {
       MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
                        hover_widget, result.local_point(), screen_point);
-      hover_widget->OnMouseExited(event);
+      hover_widget->OnEvent(&event);
       hover_widget = result.widget();
     }
   }
@@ -349,19 +343,19 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
   MouseEvent event(native_event, result.widget(), result.local_point(),
                    screen_point);
   if (event.event_type() == EventType::MouseMoved) {
-    result.widget()->OnMouseMoved(event);
+    result.widget()->OnEvent(&event);
     return !event.default_prevented();
   }
 
   if (event.event_type() == EventType::MousePressed) {
     MouseClickTracker::instance()->OnMousePressed(event);
-    result.widget()->OnMousePressed(event);
+    result.widget()->OnEvent(&event);
     return !event.default_prevented();
   }
 
   if (event.event_type() == EventType::MouseReleased) {
     MouseClickTracker::instance()->OnMouseReleased(event);
-    result.widget()->OnMouseReleased(event);
+    result.widget()->OnEvent(&event);
     auto const click_count  = MouseClickTracker::instance()->click_count();
     if (!click_count)
       return !event.default_prevented();
@@ -372,7 +366,7 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
                            MouseEvent::ConvertToEventFlags(native_event),
                            click_count, result.widget(), result.local_point(),
                            screen_point);
-    result.widget()->OnMousePressed(click_event);
+    result.widget()->OnEvent(&click_event);
     return !click_event.default_prevented();
   }
 
@@ -824,6 +818,43 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   }
 
   return OnMessage(message, wParam, lParam);
+}
+
+// EventTarget
+void Widget::OnKeyEvent(KeyboardEvent* event) {
+  if (event->event_type() == EventType::KeyPressed) {
+    OnKeyPressed(*event);
+    return;
+  }
+  if (event->event_type() == EventType::KeyReleased) {
+    OnKeyReleased(*event);
+    return;
+  }
+  NOTREACHED();
+}
+
+void Widget::OnMouseEvent(MouseEvent* event) {
+  if (event->event_type() == EventType::MouseExited) {
+    OnMouseExited(*event);
+    return;
+  }
+  if (event->event_type() == EventType::MouseMoved) {
+    OnMouseMoved(*event);
+    return;
+  }
+  if (event->event_type() == EventType::MousePressed) {
+    OnMousePressed(*event);
+    return;
+  }
+  if (event->event_type() == EventType::MouseReleased) {
+    OnMouseReleased(*event);
+    return;
+  }
+  if (event->event_type() == EventType::MouseWheel) {
+    OnMouseWheel(*(event->as<MouseWheelEvent>()));
+    return;
+  }
+  NOTREACHED();
 }
 
 } // namespace ui

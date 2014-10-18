@@ -14,7 +14,7 @@ namespace ui {
 
 using common::win::Point;
 using common::win::Rect;
-class Widget;
+class EventTarget;
 
 enum class EventFlags {
   None = 0,
@@ -145,12 +145,12 @@ class MouseEvent : public Event {
   private: int click_count_;
   private: Point client_point_;
   private: Point screen_point_;
-  private: Widget* target_;
+  private: EventTarget* target_;
 
   public: MouseEvent(EventType type, MouseButton button, int flags,
-                     int click_count, Widget* widget,
+                     int click_count, EventTarget* widget,
                      const Point& client_point, const Point& screen_point);
-  public: MouseEvent(const base::NativeEvent& native_event, Widget* widget,
+  public: MouseEvent(const base::NativeEvent& native_event, EventTarget* widget,
                      const Point& client_point, const Point& screen_point);
   public: MouseEvent();
   public: virtual ~MouseEvent();
@@ -183,7 +183,7 @@ class MouseEvent : public Event {
   public: bool shift_key() const {
     return flags() & static_cast<int>(EventFlags::ShiftKey);
   }
-  public: Widget* target() const { return target_; }
+  public: EventTarget* target() const { return target_; }
 
   public: static MouseButton ConvertToButton(
       const base::NativeEvent& native_event);
@@ -205,7 +205,7 @@ class MouseWheelEvent : public MouseEvent {
 
   private: int delta_;
 
-  public: MouseWheelEvent(Widget* widget, const Point& client_point,
+  public: MouseWheelEvent(EventTarget* widget, const Point& client_point,
                           const Point& screen_point, int flags,
                           int delta);
   public: virtual ~MouseWheelEvent();

@@ -147,7 +147,7 @@ bool KeyEvent::ConvertToRepeat(LPARAM lParam) {
 // MouseEvent
 //
 MouseEvent::MouseEvent(EventType event_type, MouseButton button, int flags,
-                       int click_count, Widget* widget,
+                       int click_count, EventTarget* event_target,
                        const gfx::Point& client_point,
                        const gfx::Point& screen_point)
     : Event(event_type, flags),
@@ -156,16 +156,17 @@ MouseEvent::MouseEvent(EventType event_type, MouseButton button, int flags,
       click_count_(click_count),
       client_point_(client_point),
       screen_point_(screen_point),
-      target_(widget) {
+      target_(event_target) {
 }
 
-MouseEvent::MouseEvent(const base::NativeEvent& native_event, Widget* widget,
+MouseEvent::MouseEvent(const base::NativeEvent& native_event,
+                       EventTarget* event_target,
                        const gfx::Point& client_point,
                        const gfx::Point& screen_point)
     : MouseEvent(ConvertToEventType(native_event),
                  ConvertToButton(native_event),
                  ConvertToEventFlags(native_event),
-                 0, widget, client_point, screen_point) {
+                 0, event_target, client_point, screen_point) {
 }
 
 MouseEvent::MouseEvent()
@@ -299,10 +300,10 @@ EventType MouseEvent::ConvertToEventType(
 //
 // MouseWheelEvent
 //
-MouseWheelEvent::MouseWheelEvent(Widget* widget, const gfx::Point& client_point,
+MouseWheelEvent::MouseWheelEvent(EventTarget* event_target, const gfx::Point& client_point,
                                  const gfx::Point& screen_point, int flags,
                                  int delta)
-    : MouseEvent(EventType::MouseWheel, MouseButton::None, flags, 0, widget,
+    : MouseEvent(EventType::MouseWheel, MouseButton::None, flags, 0, event_target,
                  client_point, screen_point), delta_(delta) {
 }
 

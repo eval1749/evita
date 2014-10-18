@@ -85,7 +85,7 @@ void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
           frame_rect);
       canvas->DrawRectangle(gfx::Brush(canvas, style_.highlight), frame_rect);
       break;
-    case Control::State::Hover:
+    case Control::State::Hovered:
       canvas->FillRectangle(
           gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)),
           frame_rect);

@@ -6,6 +6,7 @@
 
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/controls/control_controller.h"
+#include "evita/ui/events/event.h"
 
 namespace ui {
 //////////////////////////////////////////////////////////////////////
@@ -59,7 +60,39 @@ void Control::DidChangeState() {
   SchedulePaint();
 }
 
-// ui::WIdget
+// ui::EventTarget
+void Control::OnKeyEvent(ui::KeyEvent* event) {
+  DCHECK(controller_);
+  if (disabled())
+    return;
+  controller_->OnKeyEvent(this, *event);
+}
+
+void Control::OnMouseEvent(ui::MouseEvent* event) {
+  DCHECK(controller_);
+  if (disabled())
+    return;
+  controller_->OnMouseEvent(this, *event);
+  ui::EventTarget::OnMouseEvent(event);
+  if (!focusable())
+    return;
+  if (event->event_type() == ui::EventType::MouseEntered) {
+    if (state_ == State::Normal) {
+      state_ = State::Hovered;
+      DidChangeState();
+    }
+    return;
+  }
+  if (event->event_type() == ui::EventType::MouseExited) {
+    if (state_ == State::Hovered) {
+      state_ = State::Normal;
+      DidChangeState();
+    }
+    return;
+  }
+}
+
+// ui::Widget
 void Control::DidKillFocus(ui::Widget* focused_widget) {
   Widget::DidKillFocus(focused_widget);
   if (disabled()) {
@@ -90,70 +123,6 @@ void Control::DidSetFocus(ui::Widget* last_focused_widget) {
   }
   DidChangeState();
   controller_->DidSetFocus(this, last_focused_widget);
-}
-
-void Control::OnKeyPressed(const KeyEvent& event) {
-  DCHECK(controller_);
-  if (disabled())
-    return;
-  controller_->OnKeyPressed(this, event);
-}
-
-void Control::OnKeyReleased(const KeyEvent& event) {
-  DCHECK(controller_);
-  if (disabled())
-    return;
-  controller_->OnKeyReleased(this, event);
-}
-
-void Control::OnMouseEntered(const MouseEvent& event) {
-  DCHECK(controller_);
-  if (disabled())
-    return;
-  controller_->OnMouseEntered(this, event);
-  if (state_ != State::Normal || !focusable())
-    return;
-  state_ = State::Hover;
-  DidChangeState();
-}
-
-void Control::OnMouseExited(const MouseEvent& event) {
-  DCHECK(controller_);
-  if (disabled())
-    return;
-  controller_->OnMouseExited(this, event);
-  if (state_ != State::Hover || !focusable())
-    return;
-  state_ = State::Normal;
-  DidChangeState();
-}
-
-void Control::OnMouseMoved(const MouseEvent& event) {
-  DCHECK(controller_);
-  if (disabled())
-    return;
-  controller_->OnMouseMoved(this, event);
-}
-
-void Control::OnMousePressed(const MouseEvent& event) {
-  DCHECK(controller_);
-  if (disabled())
-    return;
-  controller_->OnMousePressed(this, event);
-}
-
-void Control::OnMouseReleased(const MouseEvent& event) {
-  DCHECK(controller_);
-  if (disabled())
-    return;
-  controller_->OnMouseReleased(this, event);
-}
-
-void Control::OnMouseWheel(const MouseWheelEvent& event) {
-  DCHECK(controller_);
-  if (disabled())
-    return;
-  controller_->OnMouseWheel(this, event);
 }
 
 void Control::WillDestroyWidget() {

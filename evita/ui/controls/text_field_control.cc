@@ -251,7 +251,7 @@ void TextFieldControl::View::Animate(gfx::Canvas* canvas, base::Time now) {
       canvas->DrawRectangle(highlight_brush, frame_rect - 1.0f, 2.0f);
       break;
     }
-    case Control::State::Hover:
+    case Control::State::Hovered:
       canvas->DrawRectangle(gfx::Brush(canvas, style_.hotlight), frame_rect);
       break;
   }

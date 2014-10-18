@@ -73,7 +73,7 @@ void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
         gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)),
         frame_rect);
       break;
-    case Control::State::Hover:
+    case Control::State::Hovered:
       canvas->FillRectangle(
           gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)),
           frame_rect);

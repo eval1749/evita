@@ -20,7 +20,7 @@ class Control : public Widget {
     Normal,
     Disabled,
     Highlight,
-    Hover,
+    Hovered,
   };
   public: struct Style {
     gfx::ColorF bgcolor;
@@ -47,24 +47,20 @@ class Control : public Widget {
   public: void set_disabled(bool new_disabled);
   public: virtual bool focusable() const;
   public: ControlController* controller() const { return controller_; }
-  protected: bool hover() const { return state_ == State::Hover; }
+  protected: bool hover() const { return state_ == State::Hovered; }
   protected: State state() const { return state_; }
   public: void set_text_input_delegate(TextInputDelegate* delegate);
 
   protected: virtual void DidChangeState();
 
+  // ui::EventTarget
+  protected: virtual void OnKeyEvent(ui::KeyEvent* event) override;
+  protected: virtual void OnMouseEvent(ui::MouseEvent* event) override;
+
   // ui::Widget
   protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
   protected: virtual void DidRealize() override;
   protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  protected: virtual void OnKeyPressed(const KeyEvent& event) override;
-  protected: virtual void OnKeyReleased(const KeyEvent& event) override;
-  protected: virtual void OnMouseEntered(const MouseEvent& event) override;
-  protected: virtual void OnMouseExited(const MouseEvent& event) override;
-  protected: virtual void OnMouseMoved(const MouseEvent& event) override;
-  protected: virtual void OnMousePressed(const MouseEvent& event) override;
-  protected: virtual void OnMouseReleased(const MouseEvent& event) override;
-  protected: virtual void OnMouseWheel(const MouseWheelEvent& event) override;
   protected: virtual void WillDestroyWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(Control);

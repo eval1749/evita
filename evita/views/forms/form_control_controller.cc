@@ -41,34 +41,14 @@ void FormControlController::DidSetFocus(ui::Control*,
     FormControlSet::instance()->MaybeControlId(related_widget));
 }
 
-void FormControlController::OnKeyPressed(ui::Control*,
-                                         const ui::KeyEvent& event) {
+void FormControlController::OnKeyEvent(ui::Control*,
+                                       const ui::KeyEvent& event) {
   DispatchKeyboardEvent(event);
 }
 
-void FormControlController::OnKeyReleased(ui::Control*,
-                                          const ui::KeyEvent& event) {
-  DispatchKeyboardEvent(event);
-}
-
-void FormControlController::OnMouseMoved(ui::Control*,
+void FormControlController::OnMouseEvent(ui::Control*,
                                          const ui::MouseEvent& event) {
   DispatchMouseEvent(event);
-}
-
-void FormControlController::OnMousePressed(ui::Control*,
-                                           const ui::MouseEvent& event) {
-  DispatchMouseEvent(event);
-}
-
-void FormControlController::OnMouseReleased(ui::Control*,
-                                            const ui::MouseEvent& event) {
-  DispatchMouseEvent(event);
-}
-
-void FormControlController::OnMouseWheel(ui::Control*,
-                                         const ui::MouseWheelEvent& event) {
-  DispatchWheelEvent(event);
 }
 
 void FormControlController::WillDestroyControl(ui::Control* control) {

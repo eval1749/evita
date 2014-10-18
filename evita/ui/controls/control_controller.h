@@ -12,7 +12,6 @@ namespace ui {
 class Control;
 class KeyEvent;
 class MouseEvent;
-class MouseWheelEvent;
 class Widget;
 
 class ControlController {
@@ -24,22 +23,8 @@ class ControlController {
   public: virtual void DidRealize(Control* control);
   public: virtual void DidSetFocus(Control* control,
                                    Widget* last_focused_widget);
-  public: virtual void OnKeyPressed(Control* control,
-                                    const KeyEvent& event);
-  public: virtual void OnKeyReleased(Control* control,
-                                     const KeyEvent& event);
-  public: virtual void OnMouseEntered(Control* control,
-                                      const MouseEvent& event);
-  public: virtual void OnMouseExited(Control* control,
-                                     const MouseEvent& event);
-  public: virtual void OnMouseMoved(Control* control,
-                                    const MouseEvent& event);
-  public: virtual void OnMousePressed(Control* control,
-                                      const MouseEvent& event);
-  public: virtual void OnMouseReleased(Control* control,
-                                       const MouseEvent& event);
-  public: virtual void OnMouseWheel(Control* control,
-                                    const MouseWheelEvent& event);
+  public: virtual void OnKeyEvent(Control* control, const KeyEvent& event);
+  public: virtual void OnMouseEvent(Control* control, const MouseEvent& event);
   public: virtual void WillDestroyControl(Control* control);
 
   DISALLOW_COPY_AND_ASSIGN(ControlController);

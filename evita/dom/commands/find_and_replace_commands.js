@@ -54,7 +54,7 @@
   };
 
   /** @type {?CheckboxControl} */
-  var casePreserve_replaceCheckbox;
+  var casePreserveReplaceCheckbox;
 
   /** @type {?Form} */
   var form = null;
@@ -63,31 +63,31 @@
   var formWindow = null;
 
   /** @type {?CheckboxControl} */
-  var matchCase_checkbox;
+  var matchCaseCheckbox;
 
   /** @type {?CheckboxControl} */
-  var matchWhole_wordCheckbox;
+  var matchWholeWordCheckbox;
 
   /** @type {?ButtonControl} */
-  var findNext_button;
+  var findNextButton;
 
   /** @type {?ButtonControl} */
-  var findPrevious_button;
+  var findPreviousButton;
 
   /** @type {?TextFieldControl} */
-  var findWhat_text;
+  var findWhatText;
 
   /** @type {?ButtonControl} */
-  var replaceAll_button;
+  var replaceAllButton;
 
   /** @type {?ButtonControl} */
-  var replaceOne_button;
+  var replaceOneButton;
 
   /** @type {?TextFieldControl} */
-  var replaceWith_text;
+  var replaceWithText;
 
   /** @type {?CheckboxControl} */
-  var useRegexp_checkbox;
+  var useRegexpCheckbox;
 
   /**
    * @param {!Window} window
@@ -96,7 +96,7 @@
     var textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
-    FindAndReplace.find(textWindow, findWhat_text.value,
+    FindAndReplace.find(textWindow, findWhatText.value,
                         makeFindOptions(Direction.FORWARD));
   }
 
@@ -107,7 +107,7 @@
     var textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
-    FindAndReplace.find(textWindow, findWhat_text.value,
+    FindAndReplace.find(textWindow, findWhatText.value,
                         makeFindOptions(Direction.BACKWARD));
   }
 
@@ -118,8 +118,8 @@
     var textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
-    FindAndReplace.replaceOne(textWindow, findWhat_text.value,
-                              replaceWith_text.value,
+    FindAndReplace.replaceOne(textWindow, findWhatText.value,
+                              replaceWithText.value,
                               makeFindOptions(Direction.FORWARD));
   }
 
@@ -130,8 +130,8 @@
     var textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
-    FindAndReplace.replaceAll(textWindow, findWhat_text.value,
-                              replaceWith_text.value,
+    FindAndReplace.replaceAll(textWindow, findWhatText.value,
+                              replaceWithText.value,
                               makeFindOptions(Direction.FORWARD));
   }
 
@@ -171,13 +171,13 @@
 
     // Text fields
     add(new LabelControl('Find what:'), 75);
-    findWhat_text = add(new TextFieldControl(), 265);
-    findWhat_text.accessKey = 'N';
+    findWhatText = add(new TextFieldControl(), 265);
+    findWhatText.accessKey = 'N';
     newline();
     add(new LabelControl('Replace with:'), 75);
-    replaceWith_text = add(new TextFieldControl(), 265);
-    replaceWith_text.accessKey = 'P';
-    replaceWith_text.disabled = true;
+    replaceWithText = add(new TextFieldControl(), 265);
+    replaceWithText.accessKey = 'P';
+    replaceWithText.disabled = true;
     newline();
 
     // Checkboxes
@@ -189,15 +189,15 @@
       return checkbox;
     }
     CONTROL_HEIGHT = 20;
-    matchCase_checkbox = addCheckbox('Match case', 'C');
+    matchCaseCheckbox = addCheckbox('Match case', 'C');
     newline();
-    matchWhole_wordCheckbox = addCheckbox('Match whole word', 'W');
+    matchWholeWordCheckbox = addCheckbox('Match whole word', 'W');
     newline();
-    useRegexp_checkbox = addCheckbox('Use regular expression', 'E');
+    useRegexpCheckbox = addCheckbox('Use regular expression', 'E');
     newline();
-    casePreserve_replaceCheckbox = addCheckbox('Case preserve replacement',
+    casePreserveReplaceCheckbox = addCheckbox('Case preserve replacement',
                                                  'M');
-    casePreserve_replaceCheckbox.checked = true;
+    casePreserveReplaceCheckbox.checked = true;
     newline();
 
     // Buttons
@@ -210,23 +210,23 @@
       return button;
     }
     controlLeft = 140;
-    replaceOne_button = addButton('Replace', 'R');
-    findPrevious_button = addButton('Find Previous', 'I');
+    replaceOneButton = addButton('Replace', 'R');
+    findPreviousButton = addButton('Find Previous', 'I');
     newline();
     controlLeft = 140;
-    replaceAll_button = addButton('Replace All', 'A');
-    findNext_button = addButton('Find Next', 'F');
+    replaceAllButton = addButton('Replace All', 'A');
+    findNextButton = addButton('Find Next', 'F');
 
     function updateUiByFindWhat() {
-      findWhat_text.logger.resetCursor();
-      var canFind = findWhat_text.value != '';
-      findNext_button.disabled = !canFind;
-      findPrevious_button.disabled = !canFind;
-      replaceOne_button.disabled = !canFind;
-      replaceAll_button.disabled = !canFind;
-      replaceWith_text.disabled = !canFind;
+      findWhatText.logger.resetCursor();
+      var canFind = findWhatText.value != '';
+      findNextButton.disabled = !canFind;
+      findPreviousButton.disabled = !canFind;
+      replaceOneButton.disabled = !canFind;
+      replaceAllButton.disabled = !canFind;
+      replaceWithText.disabled = !canFind;
     }
-    findWhat_text.addEventListener(Event.Names.INPUT, updateUiByFindWhat);
+    findWhatText.addEventListener(Event.Names.INPUT, updateUiByFindWhat);
 
     function setupTextField(textField) {
       textField.addEventListener(Event.Names.CHANGE, function() {
@@ -236,8 +236,8 @@
       textField.logger = new TextFieldLogger(textField);
     }
 
-    setupTextField(findWhat_text);
-    setupTextField(replaceWith_text);
+    setupTextField(findWhatText);
+    setupTextField(replaceWithText);
 
     form.addEventListener(Event.Names.KEYDOWN, handleGlobalKeyDown);
 
@@ -249,17 +249,17 @@
       });
     }
 
-    installButton(findNext_button, doFindNext);
-    installButton(findPrevious_button, doFindPrevious);
-    installButton(replaceOne_button, doReplaceOne);
-    installButton(replaceAll_button, doReplaceAll);
+    installButton(findNextButton, doFindNext);
+    installButton(findPreviousButton, doFindPrevious);
+    installButton(replaceOneButton, doReplaceOne);
+    installButton(replaceAllButton, doReplaceAll);
 
     updateUiByFindWhat();
     formWindow = new FormWindow(form);
 
-    // Set focus on |findWhat_text| control when find dialog box is activated.
+    // Set focus on |findWhatText| control when find dialog box is activated.
     formWindow.addEventListener(Event.Names.FOCUS, function() {
-      findWhat_text.focus();
+      findWhatText.focus();
     });
     formWindow.realize();
     // TODO(yosi) |global.findForm| is only for debugging purpose.
@@ -340,13 +340,16 @@
   function makeFindOptions(direction) {
     return {
       backward: direction == Direction.BACKWARD,
-      casePreserveReplacement: casePreserve_replaceCheckbox.checked,
-      ignoreCase: shouldIgnoreCase(findWhat_text.value),
-      matchWholeWord: matchWhole_wordCheckbox.checked,
-      useRegExp: useRegexp_checkbox.checked
+      casePreserveReplacement: casePreserveReplaceCheckbox.checked,
+      ignoreCase: shouldIgnoreCase(findWhatText.value),
+      matchWholeWord: matchWholeWordCheckbox.checked,
+      useRegExp: useRegexpCheckbox.checked
    };
   }
 
+  /**
+   * @this {!Window}
+   */
   function showFindFormCommand() {
     ensureForm();
     if (formWindow.state != Window.State.REALIZED)
@@ -360,7 +363,7 @@
    * @return {boolean}
    */
   function shouldIgnoreCase(text) {
-    return !hasUpperCase(text) && !matchCase_checkbox.checked;
+    return !hasUpperCase(text) && !matchCaseCheckbox.checked;
   }
 
   Editor.bindKey(TextWindow, 'Ctrl+F', showFindFormCommand);

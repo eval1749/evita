@@ -8,7 +8,7 @@
 #include "base/basictypes.h"
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
-#include "evita/ui/animation/animatable_window.h"
+#include "evita/ui/widget.h"
 
 namespace domapi {
 struct TabData;
@@ -23,8 +23,8 @@ class Window;
 //
 // TabContent
 //
-class TabContent : public ui::AnimatableWindow {
-  DECLARE_CASTABLE_CLASS(TabContent, ui::AnimatableWindow);
+class TabContent : public ui::Widget {
+  DECLARE_CASTABLE_CLASS(TabContent, ui::Widget);
 
   private: int active_tick_;
   private: ObserverList<TabContentObserver> observers_;

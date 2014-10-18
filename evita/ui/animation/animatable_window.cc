@@ -19,11 +19,6 @@ AnimatableWindow::AnimatableWindow() {
 AnimatableWindow::~AnimatableWindow() {
 }
 
-// AnimationFrameHandler
-void AnimatableWindow::DidBeginAnimationFrame(base::Time) {
-  // default implementation does nothing.
-}
-
 // Widget
 void AnimatableWindow::DidChangeBounds() {
   Widget::DidChangeBounds();

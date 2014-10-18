@@ -11,7 +11,7 @@
 namespace views {
 
 TabContent::TabContent()
-    : ui::AnimatableWindow(), active_tick_(0) {
+    : active_tick_(0) {
 }
 
 TabContent::~TabContent() {
@@ -43,18 +43,18 @@ void TabContent::RemoveObserver(TabContentObserver* observer) {
 
 // ui::Widget
 void TabContent::DidHide() {
-  ui::AnimatableWindow::DidHide();
+  ui::Widget::DidHide();
   if (auto const parent_layer = layer()->parent_layer())
     parent_layer->RemoveLayer(layer());
 }
 
 void TabContent::DidRealize() {
   SetLayer(new ui::Layer());
-  ui::AnimatableWindow::DidRealize();
+  ui::Widget::DidRealize();
 }
 
 void TabContent::DidShow() {
-  ui::AnimatableWindow::DidShow();
+  ui::Widget::DidShow();
   DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
   ++static_active_tick;
   active_tick_ = static_active_tick;

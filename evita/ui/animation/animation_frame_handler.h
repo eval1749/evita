@@ -27,7 +27,7 @@ class AnimationFrameHandler {
   public: void HandleAnimationFrame(base::Time time);
 
   // Called when animation frame started at |time|.
-  public: virtual void DidBeginAnimationFrame(base::Time time) = 0;
+  protected: virtual void DidBeginAnimationFrame(base::Time time) = 0;
 
   // Request animation frame.
   public: void RequestAnimationFrame();

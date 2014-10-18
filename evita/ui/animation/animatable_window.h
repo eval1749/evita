@@ -18,9 +18,6 @@ class AnimatableWindow : public AnimationFrameHandler, public Widget {
   protected: AnimatableWindow();
   protected: virtual ~AnimatableWindow();
 
-  // AnimationFrameHanndler
-  protected: virtual void DidBeginAnimationFrame(base::Time time) override;
-
   // Widget
   protected: virtual void DidChangeBounds() override;
   protected: virtual void DidRealize() override;

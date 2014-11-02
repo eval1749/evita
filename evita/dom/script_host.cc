@@ -253,8 +253,10 @@ void ScriptHost::ResetForTesting() {
 // This function is called by |PromiseResolver::ScheduleRunMicrotasks|.
 void ScriptHost::RunMicrotasks() {
   v8_glue::Runner::Scope runner_scope(runner());
+  v8::TryCatch try_catch;
   DOM_AUTO_LOCK_SCOPE();
   runner()->isolate()->RunMicrotasks();
+  runner()->HandleTryCatch(try_catch);
 }
 
 ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
@@ -317,18 +319,21 @@ ScriptHost* ScriptHost::StartForTesting(
 }
 
 void ScriptHost::ThrowError(const std::string& message) {
-  auto isolate = isolate_holder_.isolate();
-  ThrowException(v8::Exception::Error(gin::StringToV8(isolate, message)));
+  v8_glue::Runner::Scope runner_scope(runner());
+  auto exception = v8::Exception::Error(gin::StringToV8(isolate(), message));
+  isolate()->ThrowException(exception);
 }
 
 void ScriptHost::ThrowRangeError(const std::string& message) {
-  auto isolate = isolate_holder_.isolate();
-  ThrowException(v8::Exception::RangeError(gin::StringToV8(isolate, message)));
+  v8_glue::Runner::Scope runner_scope(runner());
+  auto exception = v8::Exception::RangeError(
+      gin::StringToV8(isolate(), message));
+  isolate()->ThrowException(exception);
 }
 
 void ScriptHost::ThrowException(v8::Handle<v8::Value> exception) {
-  auto isolate = isolate_holder_.isolate();
-  isolate->ThrowException(exception);
+  v8_glue::Runner::Scope runner_scope(runner());
+  isolate()->ThrowException(exception);
 }
 
 void ScriptHost::WillDestroyHost() {
@@ -341,7 +346,8 @@ v8::Handle<v8::ObjectTemplate> ScriptHost::GetGlobalTemplate(
 }
 
 void ScriptHost::UnhandledException(v8_glue::Runner*,
-                                          const v8::TryCatch& try_catch) {
+                                    const v8::TryCatch& try_catch) {
+  ASSERT_DOM_LOCKED();
   base::string16 text;
   auto const error = try_catch.Exception();
   auto const message = try_catch.Message();

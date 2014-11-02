@@ -120,8 +120,7 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
       static_cast<int>(args.size()),
       const_cast<v8::Handle<v8::Value>*>(args.data()));
   delegate_->DidRunScript(this);
-  if (try_catch.HasCaught())
-    delegate_->UnhandledException(this, try_catch);
+  HandleTryCatch(try_catch);
   return value;
 }
 
@@ -136,8 +135,7 @@ v8::Handle<v8::Value> Runner::CallAsConstructor(
       static_cast<int>(args.size()),
       const_cast<v8::Handle<v8::Value>*>(args.data()));
   delegate_->DidRunScript(this);
-  if (try_catch.HasCaught())
-    delegate_->UnhandledException(this, try_catch);
+  HandleTryCatch(try_catch);
   return value;
 }
 
@@ -162,6 +160,12 @@ base::WeakPtr<Runner> Runner::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
+void Runner::HandleTryCatch(const v8::TryCatch& try_catch) {
+  if (!try_catch.HasCaught())
+    return;
+  delegate_->UnhandledException(this, try_catch);
+}
+
 v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
     const base::string16& script_name) {
   #if defined(_DEBUG)
@@ -173,8 +177,7 @@ v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
   auto const script = v8::Script::Compile(
       gin::StringToV8(isolate(), script_text)->ToString(),
       &script_origin);
-  if (try_catch.HasCaught())
-    delegate_->UnhandledException(this, try_catch);
+  HandleTryCatch(try_catch);
   return Run(script);
 }
 
@@ -189,8 +192,7 @@ v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {
   v8::TryCatch try_catch;
   auto const value = script->Run();
   delegate_->DidRunScript(this);
-  if (try_catch.HasCaught())
-    delegate_->UnhandledException(this, try_catch);
+  HandleTryCatch(try_catch);
   delegate_->DidRunScript(this);
   return value;
 }

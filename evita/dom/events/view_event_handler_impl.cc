@@ -121,6 +121,7 @@ v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
   }
   return value->ToObject();
 }
+
 }  // namespace
 
 ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptHost* host)
@@ -130,16 +131,11 @@ ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptHost* host)
 ViewEventHandlerImpl::~ViewEventHandlerImpl() {
 }
 
-void ViewEventHandlerImpl::DispatchEvent(EventTarget* event_target,
-                                         Event* event) {
-  if (!event_target->DispatchEvent(event))
-    return;
-
-  // Call |handleEvent| function in the class of event target.
+// Call |handleEvent| function in the class of event target.
+void ViewEventHandlerImpl::CallClassEventHandler(EventTarget* event_target,
+                                                 Event* event) {
   auto const runner = host_->runner();
   auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
-
   auto const js_target = event_target->GetWrapper(isolate);
   auto const js_class = GetClassObject(isolate, js_target);
   if (js_class.IsEmpty())
@@ -154,10 +150,15 @@ void ViewEventHandlerImpl::DispatchEvent(EventTarget* event_target,
   runner->Call(js_method, js_target, js_event);
 }
 
-void ViewEventHandlerImpl::DispatchEventWithInLock(
-    EventTarget* event_target, Event* event) {
+void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
+                                                   Event* event) {
+  auto const runner = host_->runner();
+  v8_glue::Runner::Scope runner_scope(runner);
+  v8::TryCatch try_catch;
   DOM_AUTO_LOCK_SCOPE();
-  DispatchEvent(event_target, event);
+  if (event_target->DispatchEvent(event))
+    CallClassEventHandler(event_target, event);
+  runner->HandleTryCatch(try_catch);
 }
 
 // domapi::ViewEventHandler

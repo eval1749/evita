@@ -86,6 +86,7 @@ class Runner : public gin::ContextHolder {
   public: v8::Handle<v8::Value> GetGlobalProperty(
       const base::StringPiece& name);
   public: base::WeakPtr<Runner> GetWeakPtr();
+  public: void HandleTryCatch(const v8::TryCatch& try_catch);
   public: v8::Handle<v8::Value> Run(const base::string16& script_text,
       const base::string16& script_name);
   public: v8::Handle<v8::Value> Run(v8::Handle<v8::Script> script);

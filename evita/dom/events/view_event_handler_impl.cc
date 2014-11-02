@@ -60,6 +60,19 @@ Window* FromWindowId(WindowId window_id) {
   return window;
 }
 
+EventTarget* GetFocusWindow(v8_glue::Runner* runner) {
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
+  auto const window_class = runner->global()->
+      Get(v8Strings::Window.Get(isolate));
+  auto const focus_window = window_class->ToObject()->
+      Get(v8Strings::focus.Get(isolate));
+  auto event_target = static_cast<EventTarget*>(nullptr);
+  if (!gin::ConvertFromV8(isolate, focus_window, &event_target))
+    return nullptr;
+  return event_target;
+}
+
 v8::Handle<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
                                          WindowId window_id) {
   auto const isolate = runner->isolate();
@@ -238,7 +251,6 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
   DispatchEventWithInLock(window, new MouseEvent(api_event));
 }
 
-
 void ViewEventHandlerImpl::DispatchTextCompositionEvent(
     const domapi::TextCompositionEvent& api_event) {
   auto const window = FromEventTargetId(api_event.target_id);
@@ -248,28 +260,17 @@ void ViewEventHandlerImpl::DispatchTextCompositionEvent(
 }
 
 void ViewEventHandlerImpl::DispatchViewIdleEvent(int hint) {
-  {
-    DOM_AUTO_LOCK_SCOPE();
-    auto const runner = ScriptHost::instance()->runner();
-    auto const isolate = runner->isolate();
-    v8_glue::Runner::Scope runner_scope(runner);
-    auto const window_class = runner->global()->
-        Get(v8Strings::Window.Get(isolate));
-    auto const focus_window = window_class->ToObject()->
-        Get(v8Strings::focus.Get(isolate));
-    auto event_target = static_cast<EventTarget*>(nullptr);
-    if (gin::ConvertFromV8(isolate, focus_window, &event_target)) {
-      UiEventInit init_dict;
-      init_dict.set_bubbles(true);
-      init_dict.set_cancelable(true);
-      init_dict.set_detail(hint);
-      DispatchEvent(event_target, new UiEvent(L"idle", init_dict));
-    }
-    isolate->RunMicrotasks();
+  if (auto const event_target = GetFocusWindow(host_->runner())) {
+    UiEventInit init_dict;
+    init_dict.set_bubbles(true);
+    init_dict.set_cancelable(true);
+    init_dict.set_detail(hint);
+    DispatchEventWithInLock(event_target, new UiEvent(L"idle", init_dict));
   }
-  // TODO(yosi) We should ask view host to stop dispatching idle event, if
+  host_->RunMicrotasks();
+  // TODO(eval1749) We should ask view host to stop dispatching idle event, if
   // idle event handler throws an exception.
-  ScriptHost::instance()->view_delegate()->DidHandleViewIdelEvent(hint);
+  host_->view_delegate()->DidHandleViewIdelEvent(hint);
 }
 
 void ViewEventHandlerImpl::DispatchWheelEvent(
@@ -311,6 +312,7 @@ void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
 }
 
 void ViewEventHandlerImpl::RunCallback(base::Closure callback) {
+  v8_glue::Runner::Scope runner_scope(host_->runner());
   DOM_AUTO_LOCK_SCOPE();
   callback.Run();
 }

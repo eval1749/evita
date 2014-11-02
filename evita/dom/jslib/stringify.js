@@ -3,6 +3,20 @@
 // found in the LICENSE file.
 
 Editor.stringify = (function() {
+  // TODO(yosi) Once v8 provide |TypedArray| class, we can replace this
+  // |isTypedArray()|.
+  function isTypedArray(object) {
+    return object instanceof Float32Array ||
+           object instanceof Float64Array ||
+           object instanceof Int16Array ||
+           object instanceof Int32Array ||
+           object instanceof Int8Array ||
+           object instanceof Uint16Array ||
+           object instanceof Uint32Array ||
+           object instanceof Uint8Array ||
+           object instanceof Uint8ClampedArray;
+  }
+
   /** @interface */
   function Visitor() {}
 
@@ -48,8 +62,8 @@ Editor.stringify = (function() {
     /** @param {!Array} array @param {boolean} limited */
   Visitor.prototype.endArray = function(array, limited) {};
 
-    /** @param {!Object} props @param {string} ctor_name */
-  Visitor.prototype.startObject = function(ctor_name, props) {};
+    /** @param {!Object} props @param {string} ctorName */
+  Visitor.prototype.startObject = function(ctorName, props) {};
 
     /** @param {boolean} limited */
   Visitor.prototype.endObject = function(limited) {};
@@ -59,10 +73,10 @@ Editor.stringify = (function() {
    * @implements {Visitor}
    */
   function Labeler() {
-    var label_map = new Map();
-    var doNothing = function() {};
+    let labelMap = new Map();
+    let doNothing = function() {};
     this.labelOf = function(value) {
-      return label_map.get(value);
+      return labelMap.get(value);
     };
     this.visitArrayElement = doNothing;
     this.visitAtom = doNothing;
@@ -75,9 +89,9 @@ Editor.stringify = (function() {
     this.visitSymbol = doNothing;
     this.visitTypedArray = doNothing;
     this.visitVisited = function(value) {
-      if (label_map.has(value))
+      if (labelMap.has(value))
         return;
-      label_map.set(value, (label_map.size + 1).toString());
+      labelMap.set(value, (labelMap.size + 1).toString());
     };
     this.startArray = doNothing;
     this.endArray = doNothing;
@@ -95,35 +109,36 @@ Editor.stringify = (function() {
   function stringify(value, MAX_LEVEL, MAX_LENGTH) {
     MAX_LEVEL = arguments.length >= 1 ? MAX_LEVEL : 10;
     MAX_LENGTH = arguments.length >= 2 ? MAX_LENGTH : 10;
-    var visited_map = new Map();
-    var num_of_labels = 0;
+    let visitedMap = new Map();
+    let numOf_labels = 0;
 
     /**
      * @param {!Object} object
      * @return {!Array}
      */
     function collectProperties(object) {
-      var override = object['stringifyProperties'];
-      if (typeof(override) == 'function')
+      let override = object['stringifyProperties'];
+      if (typeof(override) === 'function')
         return override.call(object);
-      var props = [];
-      var remove_function = object.constructor != Object;
-      for (var runner = object; runner;
+      let props = [];
+      let removeFunction = object.constructor !== Object;
+      for (let runner = object; runner;
            runner = Object.getPrototypeOf(runner)) {
         if (runner === Object.prototype)
           break;
-        var current = /** @type{!Object} */(runner);
+        let current = /** @type {!Object} */(runner);
         props = props.concat(
             Object.getOwnPropertyNames(current).map(function(name) {
-              var desc = Object.getOwnPropertyDescriptor(current, name);
+              let desc = Object.getOwnPropertyDescriptor(
+                /** @type {!Object} */(current), name);
               desc['name'] = name;
               return desc;
             }).filter(function(desc) {
-              var name = desc['name'];
-              if (name.charCodeAt(name.length - 1) == Unicode.LOW_LINE)
+              let name = desc['name'];
+              if (name.charCodeAt(name.length - 1) === Unicode.LOW_LINE)
                 return false;
-              var value = desc['value'];
-              if (remove_function && typeof(value) == 'function')
+              let value = desc['value'];
+              if (removeFunction && typeof(value) === 'function')
                 return false;
               return value !== undefined;
             }))
@@ -136,13 +151,13 @@ Editor.stringify = (function() {
     /** @param {!Object} object @return {string|undefined} */
     function getObjectIdLikeThing(object) {
       try {
-        var key = ['id', 'name'].find(function(key) {
-          var value = object[key];
-          return value != undefined && value.toString().length;
+        let key = ['id', 'name'].find(function(key) {
+          let value = object[key];
+          return value !== undefined && value.toString().length;
         });
         return key ? object[key] : undefined;
       } catch (e) {
-        // We can't acccess |Window.prototype.id|, because it has no C++
+        // We can't access |Window.prototype.id|, because it has no C++
         // object associated it.
         return undefined;
       }
@@ -182,42 +197,28 @@ Editor.stringify = (function() {
           return visitor.visitSymbol(/** @type{!Symbol} */(value));
       }
 
-      var object = /** @type{!Object} */(value);
+      let object = /** @type{!Object} */(value);
 
-      if (visited_map.has(object))
+      if (visitedMap.has(object))
         return visitor.visitVisited(object);
-      visited_map.set(object, 0);
+      visitedMap.set(object, 0);
 
       ++level;
       if (level > MAX_LEVEL)
         return visitor.visitAtom('#');
 
       visitor.visitFirstTime(object);
-      visited_map.set(object, 0);
+      visitedMap.set(object, 0);
 
       if (Array.isArray(object)) {
-        var array = /** @type{!Array} */(object);
+        let array = /** @type{!Array} */(object);
         visitor.startArray(array);
-        var length = Math.min(array.length, MAX_LENGTH);
+        let length = Math.min(array.length, MAX_LENGTH);
         for (var index = 0; index < length; ++index) {
           visitor.visitArrayElement(index);
           visit(array[index], level, visitor);
         }
         return visitor.endArray(array, array.length >= MAX_LENGTH);
-      }
-
-      // TODO(yosi) Once v8 provide |TypedArray| class, we can replace this
-      // |isTypedArray()|.
-      function isTypedArray(object) {
-        return object instanceof Float32Array ||
-               object instanceof Float64Array ||
-               object instanceof Int16Array ||
-               object instanceof Int32Array ||
-               object instanceof Int8Array ||
-               object instanceof Uint16Array ||
-               object instanceof Uint32Array ||
-               object instanceof Uint8Array ||
-               object instanceof Uint8ClampedArray;
       }
 
       if (isTypedArray(object)) {
@@ -227,16 +228,16 @@ Editor.stringify = (function() {
       if (object instanceof Date)
         return visitor.visitDate(/** @type{!Date} */(object));
 
-      var real_ctor_name = object.constructor.name;
-      var ctor_name = real_ctor_name == 'Object' ? '' : real_ctor_name;
-      if (ctor_name) {
-        var id = getObjectIdLikeThing(object);
+      let realCtorName = object.constructor ? object.constructor.name : '';
+      let ctorName = realCtorName === 'Object' ? '' : realCtorName;
+      if (ctorName) {
+        let id = getObjectIdLikeThing(object);
         if (id !== undefined)
           return visitor.visitConstructed(object, id);
       }
-      var props = collectProperties(object);
-      visitor.startObject(ctor_name, props);
-      var count = 0;
+      let props = collectProperties(object);
+      visitor.startObject(ctorName, props);
+      let count = 0;
       props.forEach(function(prop) {
         if (count > MAX_LENGTH)
           return;
@@ -248,7 +249,7 @@ Editor.stringify = (function() {
     }
 
     /** @const @type{{9: string, 10: string, 13:string}} */
-    var ESCAPE_MAP = {
+    let ESCAPE_MAP = {
       0x09: 't',
       0x0A: 'n',
       0x0D: 'r'
@@ -261,23 +262,23 @@ Editor.stringify = (function() {
      */
     function Printer(labeler) {
       this.result = '';
-      /** @param {...} var_args */
-      this.emit = function(var_args) {
+      /** @param {...} varArgs */
+      this.emit = function(varArgs) {
         this.result += Array.prototype.slice.call(arguments, 0).join('');
       };
       this.visitAtom = function(x) {
         this.emit(x);
       };
       this.visitConstructed = function(object, id) {
-        var ctor = object.constructor;
-        var ctor_name = ctor && ctor.name != '' ? ctor.name : '(anonymous)';
-        this.emit('#{', ctor_name, ' ' , id, '}');
+        let ctor = object.constructor;
+        let ctorName = ctor && ctor.name !== '' ? ctor.name : '(anonymous)';
+        this.emit('#{', ctorName, ' ' , id, '}');
       };
       this.visitDate = function(date) {
         this.emit('#{Date ', date.toString(), '}');
       };
       this.visitFirstTime = function(object) {
-        var label = labeler.labelOf(object);
+        let label = labeler.labelOf(object);
         if (label)
           this.emit('#', label, '=');
       };
@@ -299,18 +300,18 @@ Editor.stringify = (function() {
       this.visitString = function(str) {
         this.emit('"');
         for (var index = 0; index < str.length; ++index) {
-          var code = str.charCodeAt(index);
+          let code = str.charCodeAt(index);
           if (code < 0x20 || (code >= 0x7F && code <= 0x9F)) {
-            var escape = ESCAPE_MAP[code];
+            let escape = ESCAPE_MAP[code];
             if (escape) {
               this.emit('\\', escape);
             } else {
-              var hex = ('0' + code.toString(16)).substr(code >= 0x10 ? 1 : 0);
+              let hex = ('0' + code.toString(16)).substr(code >= 0x10 ? 1 : 0);
               this.emit('\\0x', hex);
             }
-          } else if (code == 0x22) {
+          } else if (code === 0x22) {
             this.emit('\\"');
-          } else if (code == 0x5C) {
+          } else if (code === 0x5C) {
             this.emit('\\\\');
           } else {
             this.emit(String.fromCharCode(code));
@@ -325,7 +326,7 @@ Editor.stringify = (function() {
         this.emit('#{', array.constructor.name, ' ', array.length, '}');
       };
       this.visitVisited = function(value) {
-        var label = labeler.labelOf(value);
+        let label = labeler.labelOf(value);
         this.emit('#', label, '#');
       };
       this.startArray = function() {
@@ -338,9 +339,9 @@ Editor.stringify = (function() {
         if (index)
           this.emit(', ');
       };
-      this.startObject = function(ctor_name, props) {
-        if (ctor_name)
-          this.emit('#{', ctor_name, props.length ? ' ' : '');
+      this.startObject = function(ctorName, props) {
+        if (ctorName)
+          this.emit('#{', ctorName, props.length ? ' ' : '');
         else
           this.emit('{');
       };
@@ -349,10 +350,10 @@ Editor.stringify = (function() {
       };
     }
 
-    var labeler = new Labeler();
+    let labeler = new Labeler();
     visit(value, 0, labeler);
-    visited_map.clear();
-    var printer = new Printer(labeler);
+    visitedMap.clear();
+    let printer = new Printer(labeler);
     visit(value, 0, printer);
     return printer.result;
   }

@@ -10,14 +10,14 @@
    * @return {!Document}
    */
   function openFile(absoluteFileName) {
-    var document = Document.open(absoluteFileName);
+    let document = Document.open(absoluteFileName);
     if (!document.length) {
-      document.load(absoluteFileName).catch(function(error_code) {
-        console.log('Load error', error_code);
+      document.load(absoluteFileName).catch(function(errorCode) {
+        console.log('Load error', errorCode);
         Editor.messageBox(null, 'Failed to load ' + absoluteFileName + '\n' +
-            'error=' + error_code,
+            'error=' + errorCode,
             MessageBox.ICONERROR);
-      }).catch(JsConsole.errorHandler);
+      });
     }
     return document;
   }
@@ -27,17 +27,17 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+N', function(arg) {
-    var editorWindow = this.parent;
-    if (arguments.length >= 1) {
+    let editorWindow = this.parent;
+    if (arg !== undefined) {
       windows.newTextWindow(editorWindow, new Document('untitled.txt'));
       return;
     }
 
     Editor.getFileNameForSave(this, this.selection.document.fileName)
         .then(function(fileName) {
-          var document = Document.open(fileName);
+          let document = Document.open(fileName);
           windows.newTextWindow(editorWindow, document)
-        }).catch(JsConsole.errorHandler);
+        });
   });
 
   /**
@@ -45,11 +45,11 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+O', function() {
-    var editorWindow = this.parent;
+    let editorWindow = this.parent;
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
         .then(function(fileName) {
           windows.activate(editorWindow, openFile(fileName));
-        }).catch(JsConsole.errorHandler);
+        });
   });
 
   /**
@@ -65,7 +65,7 @@
    *   Ctrl+Shift sequence.
    */
   Editor.bindKey(Window, 'Ctrl+Shift+0', function() {
-    var nextFocus = windows.nextWindow(this) || windows.previousWindow(this);
+    let nextFocus = windows.nextWindow(this) || windows.previousWindow(this);
     if (!nextFocus) {
       Editor.messageBox(this,
           Editor.localizeText(Strings.IDS_NO_OTHER_WINDOWS),
@@ -113,10 +113,10 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+9', function() {
-    var this_editor_window = this.parent;
-    EditorWindow.list.forEach(function(editor_window) {
-      if (editor_window != this_editor_window)
-        editor_window.destroy();
+    let thisEditor_window = this.parent;
+    EditorWindow.list.forEach(function(editorWindow) {
+      if (editorWindow !== thisEditor_window)
+        editorWindow.destroy();
     });
   });
 
@@ -125,16 +125,16 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+N', function(arg) {
-    if (arguments.length >= 1) {
+    if (arg !== undefined) {
       windows.newEditorWindow(new Document('untitled.txt'));
       return;
     }
 
     Editor.getFileNameForSave(this, this.selection.document.fileName)
         .then(function(fileName) {
-          var document = Document.open(fileName);
+          let document = Document.open(fileName);
           windows.newEditorWindow(document);
-        }).catch(JsConsole.errorHandler);
+        });
   });
 
   /**
@@ -145,7 +145,7 @@
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
         .then(function(fileName) {
           windows.newEditorWindow(openFile(fileName));
-        }).catch(JsConsole.errorHandler);
+        });
   });
 
   /**
@@ -153,12 +153,12 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+Tab', function() {
-    var previousWindow = windows.previousWindow(this);
+    let previousWindow = windows.previousWindow(this);
     if (previousWindow) {
       previousWindow.focus();
       return;
     }
-    var lastWindow = windows.lastWindow();
+    let lastWindow = windows.lastWindow();
     if (lastWindow === this)
       return;
     lastWindow.focus();
@@ -179,12 +179,12 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Tab', function() {
-    var nextWindow = windows.nextWindow(this);
+    let nextWindow = windows.nextWindow(this);
     if (nextWindow) {
       nextWindow.focus();
       return;
     }
-    var firstWindow = windows.firstWindow();
+    let firstWindow = windows.firstWindow();
     if (firstWindow === this)
       return;
     firstWindow.focus();

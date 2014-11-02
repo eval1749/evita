@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-'use strict';
-
 var $0;
 
 /**
@@ -22,6 +20,8 @@ var $0;
  *
  */
 global.JsConsole = (function() {
+  'use strict';
+
   function installKeyBindings(jsConsole) {
     /** @const @type {!Document} */ let document = jsConsole.document_;
     // JavaScript console specific key bindings.
@@ -221,6 +221,17 @@ global.JsConsole = (function() {
         }
       }
       this.emit('JsConsole.errorHandler: ' + Editor.stringify(reason));
+      this.emit('\n');
+    }
+
+    /**
+     * @param {!Promise} promise
+     * @param {*} reason
+     */
+    static handleRejectedPromise(promise, reason) {
+      let jsConsole = ensureJsConsole();
+      jsConsole.emit('\n\x2F/Unhandled promise rejection:\n');
+      jsConsole.handleError(reason);
     }
 
     /**

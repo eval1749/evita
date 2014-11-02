@@ -27,6 +27,7 @@
 #include "evita/v8_glue/per_isolate_data.h"
 #include "evita/v8_glue/v8_platform.h"
 #include "evita/v8_glue/runner.h"
+#include "v8_strings.h"
 
 namespace dom {
 
@@ -44,28 +45,27 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
 
 namespace {
 
-void DidRejectPromise(v8::PromiseRejectMessage message) {
-  if (message.GetEvent() != v8::kPromiseRejectWithNoHandler)
+void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
+  if (reject_message.GetEvent() != v8::kPromiseRejectWithNoHandler)
     return;
-  auto const promise = message.GetPromise();
+  auto const promise = reject_message.GetPromise();
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
-  auto const js_console = runner->GetGlobalProperty("console");
-  if (js_console.IsEmpty() || !js_console->IsObject()) {
-    DVLOG(0) << "No console object. Why?";
+  auto const js_console =  runner->GetGlobalProperty("JsConsole");
+  if (js_console.IsEmpty()) {
+    DVLOG(0) << "No JsConsole";
     return;
   }
-  auto const console = js_console->ToObject();
-  auto const log = console->Get(gin::StringToV8(isolate, "log"));
-  auto const stack_trace = message.GetStackTrace();
-  runner->Call(log, console,
-               gin::StringToV8(isolate, "Unhandled promise rejection"),
-               promise,
-               message.GetValue(),
-               stack_trace.IsEmpty() ?
-                    static_cast<v8::Handle<v8::Value>>(v8::Undefined(isolate)) :
-                    static_cast<v8::Handle<v8::Value>>(stack_trace->AsArray()));
+  auto const handler = js_console->ToObject()->Get(
+      v8Strings::handleRejectedPromise.Get(isolate));
+  if (handler.IsEmpty() || !handler->IsObject() ||
+      !handler->ToObject()->IsFunction()) {
+    DVLOG(0) << "No JsConsole.handleRejectedPromise";
+    return;
+  }
+  runner->Call(handler, v8::Undefined(isolate), promise,
+               reject_message.GetValue());
 }
 
 void MessageBoxCallback(int) {

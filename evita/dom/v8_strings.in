@@ -96,6 +96,9 @@ italic
 normal
 bold
 
+# JsConsole
+handleRejectedPromise
+
 # KeyboardEventInit
 keyCode
 

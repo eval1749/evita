@@ -17,86 +17,75 @@ Editor.stringify = (function() {
            object instanceof Uint8ClampedArray;
   }
 
-  /** @interface */
-  function Visitor() {}
-
+  class Visitor {
     /** @param {number} index */
-  Visitor.prototype.visitArrayElement = function(index) {};
+    visitArrayElement(index) {}
 
     /** @param {*} atom */
-  Visitor.prototype.visitAtom = function(atom) {};
+    visitAtom(atom) {}
 
-  /**
-   * @param {!Object} object
-   * @param {*} id
-   */
-  Visitor.prototype.visitConstructed = function(object, id) {};
+    /**
+     * @param {!Object} object
+     * @param {*} id
+     */
+    visitConstructed(object, id) {}
 
     /** @param {!Date} date*/
-  Visitor.prototype.visitDate = function(date) {};
+    visitDate(date) {}
 
-    /** @param {!Object} object */
-  Visitor.prototype.visitFirstTime = function(object) {};
+      /** @param {!Object} object */
+    visitFirstTime(object) {}
 
-    /** @param {!Function} fun @param {number} level */
-  Visitor.prototype.visitFunction = function(fun, level) {};
+      /** @param {!Function} fun @param {number} level */
+    visitFunction(fun, level) {}
 
-    /** @param {*} key @param {number} index */
-  Visitor.prototype.visitKey = function(key, index) {};
+      /** @param {*} key @param {number} index */
+    visitKey(key, index) {}
 
-  /** @param {string} string */
-  Visitor.prototype.visitString = function(string) {};
+    /** @param {string} string */
+    visitString(string) {}
 
-  /** @param {!Symbol} symbol */
-  Visitor.prototype.visitSymbol = function(symbol) {};
+    /** @param {!Symbol} symbol */
+    visitSymbol(symbol) {}
 
-  /** @param {!TypedArray} array */
-  Visitor.prototype.visitTypedArray = function(array) {};
+    /** @param {!TypedArray} array */
+    visitTypedArray(array) {}
 
-    /** @param {!Object} object */
-  Visitor.prototype.visitVisited = function(object) {};
+      /** @param {!Object} object */
+    visitVisited(object) {}
 
-    /** @param {!Array} array */
-  Visitor.prototype.startArray = function(array) {};
+      /** @param {!Array} array */
+    startArray(array) {}
 
-    /** @param {!Array} array @param {boolean} limited */
-  Visitor.prototype.endArray = function(array, limited) {};
+      /** @param {!Array} array @param {boolean} limited */
+    endArray(array, limited) {}
 
-    /** @param {!Object} props @param {string} ctorName */
-  Visitor.prototype.startObject = function(ctorName, props) {};
+      /** @param {!Object} props @param {string} ctorName */
+    startObject(ctorName, props) {}
 
-    /** @param {boolean} limited */
-  Visitor.prototype.endObject = function(limited) {};
+      /** @param {boolean} limited */
+    endObject(limited) {}
+  }
 
-  /**
-   * @constructor
-   * @implements {Visitor}
-   */
-  function Labeler() {
-    let labelMap = new Map();
-    let doNothing = function() {};
-    this.labelOf = function(value) {
-      return labelMap.get(value);
-    };
-    this.visitArrayElement = doNothing;
-    this.visitAtom = doNothing;
-    this.visitConstructed = doNothing;
-    this.visitDate= doNothing;
-    this.visitFirstTime = doNothing;
-    this.visitFunction = doNothing;
-    this.visitKey = doNothing;
-    this.visitString = doNothing;
-    this.visitSymbol = doNothing;
-    this.visitTypedArray = doNothing;
-    this.visitVisited = function(value) {
-      if (labelMap.has(value))
+  ////////////////////////////////////////////////////////////
+  //
+  // Labeler
+  //
+  class Labeler extends Visitor {
+    constructor() {
+      /** @private @const */
+      this.labelMap_ = new Map();
+    }
+
+    labelOf(value) {
+      return this.labelMap_.get(value);
+    }
+
+    visitVisited(value) {
+      if (this.labelMap_.has(value))
         return;
-      labelMap.set(value, (labelMap.size + 1).toString());
-    };
-    this.startArray = doNothing;
-    this.endArray = doNothing;
-    this.startObject = doNothing;
-    this.endObject = doNothing;
+      this.labelMap_.set(value, (this.labelMap_.size + 1).toString());
+    }
   }
 
   /**
@@ -141,7 +130,7 @@ Editor.stringify = (function() {
               if (removeFunction && typeof(value) === 'function')
                 return false;
               return value !== undefined;
-            }))
+            }));
       }
       return props.sort(function(a, b) {
         return a.name.localeCompare(b.name);
@@ -221,9 +210,8 @@ Editor.stringify = (function() {
         return visitor.endArray(array, array.length >= MAX_LENGTH);
       }
 
-      if (isTypedArray(object)) {
+      if (isTypedArray(object))
         return visitor.visitTypedArray(/** @type{!TypedArray}*/(object));
-      }
 
       if (object instanceof Date)
         return visitor.visitDate(/** @type{!Date} */(object));
@@ -238,13 +226,13 @@ Editor.stringify = (function() {
       let props = collectProperties(object);
       visitor.startObject(ctorName, props);
       let count = 0;
-      props.forEach(function(prop) {
+      for (let prop of props) {
         if (count > MAX_LENGTH)
-          return;
+          break;
         visitor.visitKey(prop.name, count);
         visit(prop.value, level, visitor);
         ++count;
-      });
+      }
       visitor.endObject(count > props.length);
     }
 
@@ -255,49 +243,61 @@ Editor.stringify = (function() {
       0x0D: 'r'
     };
 
-    /**
-     * @constructor
-     * @implements {Visitor}
-     * @param {!Labeler} labeler
-     */
-    function Printer(labeler) {
-      this.result = '';
+    //////////////////////////////////////////////////////////////////////
+    //
+    // Printer
+    //
+    class Printer extends Visitor {
+      constructor(labeler) {
+        this.labeler_ = labeler;
+        this.result = '';
+      }
+
       /** @param {...} varArgs */
-      this.emit = function(varArgs) {
+      emit(varArgs) {
         this.result += Array.prototype.slice.call(arguments, 0).join('');
-      };
-      this.visitAtom = function(x) {
+      }
+
+      visitAtom(x) {
         this.emit(x);
-      };
-      this.visitConstructed = function(object, id) {
+      }
+
+      visitConstructed(object, id) {
         let ctor = object.constructor;
         let ctorName = ctor && ctor.name !== '' ? ctor.name : '(anonymous)';
         this.emit('#{', ctorName, ' ' , id, '}');
-      };
-      this.visitDate = function(date) {
+      }
+
+      visitDate(date) {
         this.emit('#{Date ', date.toString(), '}');
-      };
-      this.visitFirstTime = function(object) {
-        let label = labeler.labelOf(object);
-        if (label)
-          this.emit('#', label, '=');
-      };
-      this.visitFunction = function(fun, level) {
+      }
+
+      visitFirstTime(object) {
+        let label = this.labeler_.labelOf(object);
+        if (!label)
+          return;
+        this.emit('#', label, '=');
+      }
+
+      visitFunction(fun, level) {
         if (!level) {
           this.emit('(', fun.toString(), ')');
           return;
         }
-        if (fun.name)
+        if (fun.name) {
           this.emit('#{Function ' + fun.name + '}');
-        else
-          this.emit('#{Function}');
-      };
-      this.visitKey = function(key, index) {
+          return;
+        }
+        this.emit('#{Function}');
+      }
+
+      visitKey(key, index) {
         if (index)
           this.emit(', ');
         this.emit(key.toString(), ': ');
-      };
-      this.visitString = function(str) {
+      }
+
+      visitString(str) {
         this.emit('"');
         for (var index = 0; index < str.length; ++index) {
           let code = str.charCodeAt(index);
@@ -318,36 +318,46 @@ Editor.stringify = (function() {
           }
         }
         this.emit('"');
-      };
-      this.visitSymbol = function(sym) {
+      }
+
+      visitSymbol(sym) {
         this.emit(sym.toString());
-      };
-      this.visitTypedArray = function(array) {
+      }
+
+      visitTypedArray(array) {
         this.emit('#{', array.constructor.name, ' ', array.length, '}');
-      };
-      this.visitVisited = function(value) {
-        let label = labeler.labelOf(value);
+      }
+
+      visitVisited(value) {
+        let label = this.labeler_.labelOf(value);
         this.emit('#', label, '#');
-      };
-      this.startArray = function() {
+      }
+
+      startArray() {
         this.emit('[');
-      };
-      this.endArray = function(array, limited) {
+      }
+
+      endArray(array, limited) {
         this.emit(limited ? ', ...' + array.length + ']' : ']');
-      };
-      this.visitArrayElement = function(index) {
-        if (index)
-          this.emit(', ');
-      };
-      this.startObject = function(ctorName, props) {
-        if (ctorName)
+      }
+
+      visitArrayElement(index) {
+        if (!index)
+          return;
+        this.emit(', ');
+      }
+
+      startObject(ctorName, props) {
+        if (ctorName) {
           this.emit('#{', ctorName, props.length ? ' ' : '');
-        else
-          this.emit('{');
-      };
-      this.endObject = function(limited) {
+          return;
+        }
+        this.emit('{');
+      }
+
+      endObject(limited) {
         this.emit(limited ? ', ...}' : '}');
-      };
+      }
     }
 
     let labeler = new Labeler();

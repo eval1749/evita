@@ -24,6 +24,8 @@ Event.Names = {
   KEYUP: 'keyup',
   LOAD: 'load',
   MOUSEDOWN: 'mousedown',
+  MOUSEENTER: 'mouseenter',
+  MOUSELEAVE: 'mouseleave',
   MOUSEMOVE: 'mousemove',
   MOUSEUP: 'mouseup',
   QUERYCLOSE: 'queryclose',

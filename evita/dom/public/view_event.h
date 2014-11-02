@@ -21,6 +21,8 @@ enum class EventType {
   KeyUp,
   Load,
   MouseDown,
+  MouseEnter,
+  MouseLeave,
   MouseMove,
   MouseUp,
   TextCompositionCancel,

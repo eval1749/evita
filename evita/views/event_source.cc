@@ -47,6 +47,12 @@ domapi::EventType ConvertEventType(const ui::MouseEvent event) {
   if (event_type == ui::EventType::MouseMoved)
     return domapi::EventType::MouseMove;
 
+  if (event_type == ui::EventType::MouseEntered)
+    return domapi::EventType::MouseEnter;
+
+  if (event_type == ui::EventType::MouseExited)
+    return domapi::EventType::MouseLeave;
+
   if (event_type == ui::EventType::MouseWheel)
     return domapi::EventType::Wheel;
 

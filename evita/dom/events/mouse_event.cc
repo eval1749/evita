@@ -24,6 +24,10 @@ base::string16 ConvertEventType(const domapi::MouseEvent& event) {
     return L"dblclick";
   if (event.event_type == domapi::EventType::MouseDown)
     return L"mousedown";
+  if (event.event_type == domapi::EventType::MouseEnter)
+    return L"mouseenter";
+  if (event.event_type == domapi::EventType::MouseLeave)
+    return L"mouseleave";
   if (event.event_type == domapi::EventType::MouseMove)
     return L"mousemove";
   if (event.event_type == domapi::EventType::MouseUp)

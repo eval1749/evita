@@ -12,6 +12,10 @@
 #include "evita/dom/public/event_target_id.h"
 #include "evita/v8_glue/scriptable.h"
 
+namespace v8_glue {
+class Runner;
+}
+
 namespace dom {
 
 class Event;
@@ -46,7 +50,7 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
   private: virtual EventPath BuildEventPath() const;
   public: virtual bool DispatchEvent(Event* event);
   private: void DispatchEventWithInLock(Event* event);
-  private: void InvokeEventListeners(Event* event);
+  private: void InvokeEventListeners(v8_glue::Runner* runner, Event* event);
   private: void RemoveEventListener(const base::string16& type,
                                     EventListener callback,
                                     bool capture);

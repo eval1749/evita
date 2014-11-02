@@ -130,6 +130,8 @@ EventTarget::EventPath EventTarget::BuildEventPath() const {
 }
 
 bool EventTarget::DispatchEvent(Event* event) {
+  auto const runner = ScriptHost::instance()->runner();
+
   if (event->dispatched() || event->event_phase() != Event::kNone ||
       event->type().empty()) {
     ScriptHost::instance()->ThrowError("InvalidStateError");
@@ -142,14 +144,14 @@ bool EventTarget::DispatchEvent(Event* event) {
   for (auto target : event_path) {
     DCHECK(target != this);
     dispatch_scope.set_current_target(target);
-    target->InvokeEventListeners(event);
+    target->InvokeEventListeners(runner, event);
     if (event->stop_propagation())
       break;
   }
 
   dispatch_scope.StartAtTarget();
   dispatch_scope.set_current_target(this);
-  InvokeEventListeners(event);
+  InvokeEventListeners(runner, event);
 
   if (event->bubbles()) {
     dispatch_scope.StartBubbling();
@@ -158,19 +160,23 @@ bool EventTarget::DispatchEvent(Event* event) {
       if (event->stop_propagation())
         break;
       dispatch_scope.set_current_target(target);
-      target->InvokeEventListeners(event);
+      target->InvokeEventListeners(runner, event);
     }
   }
   return !event->default_prevented();
 }
 
 void EventTarget::DispatchEventWithInLock(Event* event) {
+  auto const runner = ScriptHost::instance()->runner();
+  v8_glue::Runner::Scope runner_scope(runner);
+  v8::TryCatch try_catch;
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
   DispatchEvent(event);
+  runner->HandleTryCatch(try_catch);
 }
 
-void EventTarget::InvokeEventListeners(Event* event) {
+void EventTarget::InvokeEventListeners(v8_glue::Runner* runner, Event* event) {
   auto listeners = event_listener_map_->Find(event->type());
   if (!listeners)
     return;
@@ -187,11 +193,9 @@ void EventTarget::InvokeEventListeners(Event* event) {
         continue;
     }
 
-    auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
-    v8_glue::Runner::Scope runner_scope(runner);
     auto const callee = GetCallee(isolate,
-        listener->callback.NewLocal(isolate));
+                                  listener->callback.NewLocal(isolate));
     if (callee.IsEmpty())
       continue;
     runner->Call(callee, GetWrapper(isolate), event->GetWrapper(isolate));

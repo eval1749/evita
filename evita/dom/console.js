@@ -2,109 +2,113 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-global.console = new Object();
+Object.defineProperty(/** @type {!Object} */(global), 'console', (function() {
+  'use strict';
 
-Object.defineProperties(console, {
-  DOCUMENT_NAME: {
-    value: '*javascript*'
-  },
+  const DOCUMENT_NAME = '*javascript*';
 
-  assert: {value:
+  ////////////////////////////////////////////////////////////
+  //
+  // Console
+  //
+  class Console {
     /**
      * @param {*} expression
      * @param {...} args
      */
-    function(expression, args) {
+    assert(expression, args) {
       if (expression)
         return;
-      if (arguments.length == 1)
+      if (arguments.length === 1)
         throw new Error('Assertion failed');
-      var message = Array.prototype.slice.call(arguments, 1).map(function(arg) {
-        if (typeof(arg) == 'string')
+      let message = Array.prototype.slice.call(arguments, 1).map(function(arg) {
+        if (typeof(arg) === 'string')
           return arg;
         return Editor.stringify(arg);
       }).join(' ');
       throw new Error('Assertion failed: ' + message);
     }
-  },
 
-  /*
-   * Clear console log contents.
-   */
-  clear: {
-    value: function() {
-      var document = console.document;
-      var range = new Range(document, 0, document.length);
+    /*
+     * Clear console log contents.
+     */
+    clear() {
+      let document = this.ensureDocument();
+      let range = new Range(document, 0, document.length);
       range.text = '';
       console.update();
     }
-  },
 
-  document: {
-    /** @type {!function(): !Document} */
-    get: function() {
-      var present = Document.find(console.DOCUMENT_NAME);
+    /** @return {!Document} */
+    ensureDocument() {
+      let present = Document.find(DOCUMENT_NAME);
       if (present)
         return present;
-      var document = new Document(console.DOCUMENT_NAME);
+      let document = new Document(DOCUMENT_NAME);
       document.mode = Mode.chooseModeByFileName('foo.js');
       return document;
     }
-  },
 
-  // Output arguments to console log.
-  log: {
+    // Output arguments to console log.
     /**
-     * @param {...} var_args
+     * @param {...} varArgs
      */
-    value: function(var_args) {
-      var message = Array.prototype.slice.call(arguments, 0).map(function(arg) {
+    log(varArgs) {
+      let message = Array.prototype.slice.call(arguments, 0).map(function(arg) {
         try {
-          if (typeof(arg) == 'string')
+          if (typeof(arg) === 'string')
             return arg;
           return Editor.stringify(arg);
         } catch (e) {
           return Editor.stringify(e);
         }
       }).join(' ');
-      var document = console.document;
-      var range = new Range(document);
+      let document = this.ensureDocument();
+      let range = new Range(document);
       range.collapseTo(document.length);
-      var start = range.start;
+      let start = range.start;
       range.startOf(Unit.LINE, Alter.EXTEND);
-      if (start != range.start) {
+      if (start !== range.start) {
         range.collapseTo(range.end);
         message = '\n' + message;
       }
-      var readonly = document.readonly;
+      let readonly = document.readonly;
       document.readonly = false;
       range.insertBefore(message + '\n');
       document.readonly = readonly;
       console.update();
     }
-  },
 
-  // Active or create window to show console log.
-  show: {
-    value: function() {
-      var document = console.document;
-      var windows = document.listWindows();
+    // Active or create window to show console log.
+    show() {
+      let document = this.ensureDocument();
+      let windows = document.listWindows();
       if (windows.length) {
         windows[0].focus();
         return;
       }
-      var editorWindow = new EditorWindow();
-      var window = new TextWindow(new Range(console.document));
+      let editorWindow = new EditorWindow();
+      let window = new TextWindow(new Range(document));
       editorWindow.appendChild(window);
       editorWindow.realize();
     }
-  },
 
-  update: {
-    value: function() {
-      console.document.listWindows().forEach(function(window) {
+    update() {
+      for (let window of this.ensureDocument().listWindows()) {
         window.update();
-      });
+      }
     }
   }
-});
+  Object.seal(Console.prototype);
+  Object.seal(Console);
+
+  let console = new Console();
+  // TODO(eval1749) Once closure compiler supports getter in class, we should
+  // use getter syntax.
+  Object.defineProperties(console, {
+    document: { get: () => this.ensureDocument() }
+  });
+  Object.seal(console);
+
+  return {value: console};
+})())

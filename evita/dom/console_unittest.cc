@@ -19,7 +19,7 @@ class ConsoleTest : public dom::AbstractDomTest {
 
 TEST_F(ConsoleTest, log) {
   EXPECT_SCRIPT_VALID("function consoleContents() {"
-                      "  var doc = Document.find(console.DOCUMENT_NAME);"
+                      "  var doc = console.document;"
                       "  var range = new Range(doc, 0, doc.length);"
                       "  return range.text;"
                       "}");

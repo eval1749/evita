@@ -166,7 +166,7 @@ global.JsConsole = (function() {
       range.collapseTo(range.end);
       range.text = '\n';
 
-      let result = Editor.runScript(line, console.DOCUMENT_NAME);
+      let result = Editor.runScript(line, console.document.name);
       range.collapseTo(range.end);
       if (result.exception) {
         $0 = result.exception;

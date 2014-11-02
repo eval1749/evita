@@ -1,5 +1,6 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/script_host.h"
 
@@ -42,6 +43,30 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
 }
 
 namespace {
+
+void DidRejectPromise(v8::PromiseRejectMessage message) {
+  if (message.GetEvent() != v8::kPromiseRejectWithNoHandler)
+    return;
+  auto const promise = message.GetPromise();
+  auto const runner = ScriptHost::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
+  auto const js_console = runner->GetGlobalProperty("console");
+  if (js_console.IsEmpty() || !js_console->IsObject()) {
+    DVLOG(0) << "No console object. Why?";
+    return;
+  }
+  auto const console = js_console->ToObject();
+  auto const log = console->Get(gin::StringToV8(isolate, "log"));
+  auto const stack_trace = message.GetStackTrace();
+  runner->Call(log, console,
+               gin::StringToV8(isolate, "Unhandled promise rejection"),
+               promise,
+               message.GetValue(),
+               stack_trace.IsEmpty() ?
+                    static_cast<v8::Handle<v8::Value>>(v8::Undefined(isolate)) :
+                    static_cast<v8::Handle<v8::Value>>(stack_trace->AsArray()));
+}
 
 void MessageBoxCallback(int) {
 }
@@ -271,6 +296,7 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   // |Editor.RegExp| object.
   // Note: We run micro tasks in |ViewEventHandlerImpl::DispatchViewIdleEvent|.
   isolate->SetAutorunMicrotasks(false);
+  isolate->SetPromiseRejectCallback(DidRejectPromise);
   v8Strings::Init(isolate);
   return script_host;
 }

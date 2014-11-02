@@ -30,6 +30,7 @@
 #define END_V8_INCLUDE __pragma(warning(pop))
 
 BEGIN_V8_INCLUDE
+#undef GetMessage
 #include "v8/include/v8.h"
 END_V8_INCLUDE
 

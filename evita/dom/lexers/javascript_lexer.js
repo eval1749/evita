@@ -68,6 +68,9 @@ global.JavaScriptLexer = (function(options) {
       'NaN',
       'undefined',
 
+      // Special function name
+      'constructor',
+
       // Function properties
       'eval',
       'uneval',

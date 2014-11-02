@@ -223,7 +223,7 @@
     findNextButton = addButton('Find Next', 'F');
 
     function updateUiByFindWhat() {
-      findWhatText.logger.resetCursor();
+      findWhatText.logger_.resetCursor();
       let canFind = findWhatText.value !== '';
       findNextButton.disabled = !canFind;
       findPreviousButton.disabled = !canFind;
@@ -235,10 +235,10 @@
 
     function setupTextField(textField) {
       textField.addEventListener(Event.Names.CHANGE, () => {
-        textField.logger.add(textField.value);
+        textField.logger_.add(textField.value);
       });
       textField.addEventListener(Event.Names.KEYDOWN, handleTextFieldKeyDown);
-      textField.logger = new TextFieldLogger(textField);
+      textField.logger_ = new TextFieldLogger(textField);
     }
 
     setupTextField(findWhatText);
@@ -304,12 +304,12 @@
     let textField = /** @type {!TextFieldControl} */(event.target);
     switch (event.keyCode) {
       case 0x126: // arrowUp
-        textField.logger.retrieve(-1);
+        textField.logger_.retrieve(-1);
         event.stopPropagation();
         event.preventDefault();
         break;
       case 0x128: // arrowDown
-        textField.logger.retrieve(1);
+        textField.logger_.retrieve(1);
         event.stopPropagation();
         event.preventDefault();
         break;

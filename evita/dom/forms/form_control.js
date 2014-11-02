@@ -2,23 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/** @type {string} */
-global.FormControl.prototype.accessKey = '';
+Object.defineProperties(global.FormControl.prototype, (function() {
+  /**
+   * @this {!FormControl}
+   * @return {boolean}
+   */
+  function canFocus() {
+    return !this.disabled;
+  }
 
+  /**
+   * @this {!FormControl}
+   */
+  function focus() {
+    if (!this.form)
+      return;
+    this.form.focusControl = this;
+  }
 
-/**
- * @return {boolean}
- */
-global.FormControl.prototype.canFocus = function() {
-  return !this.disabled;
-};
-
-/** @type {!function()} */
-global.FormControl.prototype.focus = function() {
-  if (!this.form)
-    return;
-  this.form.focusControl = this;
-};
+  return {
+    accessKey_: {value: '', writable: true},
+    get accessKey() { return this.accessKey_; },
+    set accessKey(key) { this.accessKey_ = key; },
+    canFocus: {value: canFocus, writable: true},
+    focus: {value: focus}
+  };
+})());
 
 /**
  * @param {!Event} event

@@ -176,7 +176,7 @@ Document.prototype.forceClose = function() {};
 Document.prototype.getLineAndColumn_ = function(offset) {};
 
 /**
- * @return {Array.<!DocumentWindow>}
+ * @return {!Array.<!DocumentWindow>}
  */
 Document.prototype.listWindows = function() {};
 

@@ -150,11 +150,6 @@ global.JsConsole = (function() {
       this.document_.readonly = false;
     }
 
-    /** @param {*} reason */
-    static errorHandler(reason) {
-        return ensureJsConsole().handleError(reason);
-    }
-
     /**
      * @this {!JsConsole}
      */

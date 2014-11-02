@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 (function() {
-  let TextFieldLogger = (function() {
+  /** @const @type {number} */
+  const MAX_ENTRIES = 7;
+
+  class TextFieldLogger {
     /**
-     * @constructor
-     * @final
-     * @struct
      * @param {!TextFieldControl} control
      */
-    function TextFieldLogger(control) {
+    constructor(control) {
       /** @private @const @type {!TextFieldControl} */
       this.control_ = control;
       /** @private @type {number} */
@@ -20,18 +20,10 @@
       Object.seal(TextFieldLogger);
     }
 
-    /** @const @type {number} */
-    let MAX_ENTRIES = 7;
-
-    // Forward declaration for closure compiler
-    /** @this {!TextFieldLogger} @param {string} value */
-    TextFieldLogger.prototype.add = function(value) {};
-
     /**
-     * @this {!TextFieldLogger}
      * @param {string} value
      */
-    function add(value) {
+    add(value) {
       let length = this.texts_.length;
       if (length && this.texts_[length - 1] === value)
         return;
@@ -41,18 +33,14 @@
       this.cursor_ = this.texts_.length;
     }
 
-    /**
-     * @this {!TextFieldLogger}
-     */
-    function resetCursor() {
+    resetCursor() {
       this.cursor_ = this.texts_.length;
     }
 
     /**
-     * @this {!TextFieldLogger}
      * @param {number} direction
      */
-    function retrieve(direction) {
+    retrieve(direction) {
       let length = this.texts_.length;
       if (!length)
         return;
@@ -68,15 +56,7 @@
       control.value = this.texts_[this.cursor_];
       control.selection.collapseTo(control.value.length);
     }
-
-    Object.defineProperties(TextFieldLogger.prototype, {
-      add: {value: add},
-      resetCursor: {value: resetCursor},
-      retrieve: {value: retrieve}
-    });
-    Object.freeze(TextFieldLogger.prototype);
-    return TextFieldLogger;
-  })();
+  }
 
   /** @type {CheckboxControl} */
   let casePreserveReplaceCheckbox = null;

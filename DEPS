@@ -5,7 +5,7 @@
 vars = {
   'googlecode_url': 'http://%s.googlecode.com/svn',
   'chromium_git': 'https://chromium.googlesource.com',
-  'v8_revision': '78b694ed1084696cb7b8c01ec78e79ff24e255e8', # from svn revision 25034
+  'v8_revision': '731b3e5a9965e4fd3118dc9c882fd89cd5308204', # from svn revision 25122
 }
 
 deps = {
@@ -22,7 +22,7 @@ deps = {
     Var('chromium_git') + '/external/googletest.git@4650552ff637bb44ecf7784060091cbed3252211', # from svn revision 692
 
   'src/tools/gyp':
-    Var('chromium_git') + '/external/gyp.git' + '@' + 'b13d8f243da15ded051e87e663c4f2c2fcc5804c', # from svn revision 1994
+    Var('chromium_git') + '/external/gyp.git' + '@' + '487c0b6ae8b44932e45347211bca0e8387718436', # from svn revision 1998
 
   'src/third_party/hunspell':
     Var('chromium_git') + '/chromium/deps/hunspell.git' + '@' + 'c956c0e97af00ef789afb2f64d02c9a5a50e6eb1',

@@ -92,7 +92,8 @@ void IsolateHolder::Initialize(ScriptMode mode,
         " --harmony_regexps"
         " --harmony_arrow_functions"
         " --harmony_tostring"
-        " --harmony_proxies";
+        " --harmony_proxies"
+        " --harmony_templates";
     v8::V8::SetFlagsFromString(v8_flags, sizeof(v8_flags) - 1);
   }
   v8::V8::SetEntropySource(&GenerateEntropy);

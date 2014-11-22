@@ -24,6 +24,7 @@ class COMMON_EXPORT Point {
   public: Point& operator=(const Point& other);
   public: bool operator==(const Point& other) const;
   public: bool operator!=(const Point& other) const;
+  public: Point operator+(const Point& other) const;
   public: Point operator+(const Size& size) const;
   public: Point operator-(const Size& size) const;
   public: Size operator-(const Point& other) const;

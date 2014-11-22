@@ -44,6 +44,10 @@ bool Point::operator!=(const Point& other) const {
   return !operator==(other);
 }
 
+Point Point::operator+(const Point& other) const {
+  return Point(x() + other.x(), y() + other.y());
+}
+
 Point Point::operator+(const Size& size) const {
   return Point(x() + size.width(), y() + size.height());
 }

@@ -27,11 +27,15 @@ class AnimationFloat final {
 
   public: AnimationFloat(base::Time start_time, base::TimeDelta duration,
                          float start_value, float end_value);
+  public: AnimationFloat(base::TimeDelta duration,
+                         float start_value, float end_value);
   public: ~AnimationFloat();
 
   public: float end_value() const { return end_value_; }
+  public: bool is_started() const { return !start_time_.is_null(); }
 
   public: float Compute(base::Time current_time) const;
+  public: void Start(base::Time start_Time);
 
   DISALLOW_COPY_AND_ASSIGN(AnimationFloat);
 };

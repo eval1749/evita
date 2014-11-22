@@ -32,15 +32,26 @@ AnimationFloat::AnimationFloat(base::Time start_time, base::TimeDelta duration,
       start_value_(start_value) {
 }
 
+AnimationFloat::AnimationFloat(base::TimeDelta duration,
+                               float start_value, float end_value)
+    : AnimationFloat(base::Time(), duration, start_value, end_value) {
+}
+
 AnimationFloat::~AnimationFloat() {
 }
 
 float AnimationFloat::Compute(base::Time current_time) const {
+  DCHECK(!start_time_.is_null());
   auto const delta = (current_time - start_time_).InMillisecondsF();
   auto const factor = static_cast<float>(std::min(
       delta / duration_.InMillisecondsF(), 1.0));
   DCHECK_GE(factor, 0.0f);
   return ComputeValue(start_value_, end_value_, factor);
+}
+
+void AnimationFloat::Start(base::Time start_time) {
+  DCHECK(start_time_.is_null());
+  start_time_ = start_time;
 }
 
 //////////////////////////////////////////////////////////////////////

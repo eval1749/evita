@@ -26,7 +26,7 @@ bool Button::IsDirty(const gfx::Canvas* canvas) const {
 }
 
 void Button::MarkDirty() {
-  if (!visible())
+  if (dirty_ || !visible())
     return;
   SchedulePaint();
   dirty_ = true;

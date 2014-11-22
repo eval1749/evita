@@ -77,12 +77,13 @@ Canvas::DrawingScope::~DrawingScope() {
 // Canvas::ScopedState
 //
 Canvas::ScopedState::ScopedState(Canvas* canvas)
-    : bounds_(canvas->bounds_), canvas_(canvas) {
+    : bounds_(canvas->bounds_), canvas_(canvas), offset_(canvas->offset_) {
   (*canvas_)->GetTransform(&transform_);
 }
 
 Canvas::ScopedState::~ScopedState() {
   canvas_->bounds_ = bounds_;
+  canvas_->offset_ = offset_;
   (*canvas_)->SetTransform(transform_);
 }
 
@@ -99,8 +100,11 @@ Canvas::~Canvas() {
 }
 
 void Canvas::AddDirtyRect(const RectF& local_bounds) {
-  AddDirtyRectImpl(gfx::RectF(local_bounds.origin() + bounds_.origin(),
-                              local_bounds.size()));
+  auto const bounds = gfx::RectF(local_bounds.origin() + bounds_.origin(),
+                                 local_bounds.size()).Intersect(bounds_);
+  if (bounds_.empty())
+    return;
+  AddDirtyRectImpl(bounds);
 }
 
 void Canvas::AddDirtyRectImpl(const RectF&) {
@@ -262,12 +266,11 @@ void Canvas::SetInitialBounds(const RectF& bounds) {
   AddDirtyRect(bounds_);
 }
 
-void Canvas::SetOffsetBounds(const gfx::RectF& clip_bounds) {
-  DCHECK(GetLocalBounds().Contains(clip_bounds));
-  bounds_ = gfx::RectF(bounds_.origin() + clip_bounds.origin(),
-                       clip_bounds.size());
-  auto transform = D2D1::Matrix3x2F::Translation(bounds_.origin().x,
-                                                 bounds_.origin().y);
+void Canvas::SetOffsetBounds(const gfx::RectF& bounds) {
+  offset_ += bounds.origin();
+  bounds_ = bounds_.Intersect(gfx::RectF(offset_, bounds.size()));
+  DCHECK(!bounds_.empty());
+  auto transform = D2D1::Matrix3x2F::Translation(offset_.x, offset_.y);
   GetRenderTarget()->SetTransform(transform);
 }
 

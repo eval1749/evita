@@ -44,6 +44,7 @@ class Canvas : public Object, public DpiHandler {
   public: class ScopedState final {
     private: gfx::RectF bounds_;
     private: Canvas* const canvas_;
+    private: gfx::PointF offset_;
     private: D2D1::Matrix3x2F transform_;
 
     public: ScopedState(Canvas* canvas);
@@ -58,6 +59,7 @@ class Canvas : public Object, public DpiHandler {
   private: gfx::RectF bounds_;
   private: scoped_refptr<FactorySet> factory_set_;
   private: ObserverList<CanvasObserver> observers_;
+  private: gfx::PointF offset_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
   private: bool should_clear_;
 

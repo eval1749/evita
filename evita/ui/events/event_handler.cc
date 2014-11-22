@@ -6,6 +6,7 @@
 
 #include "base/logging.h"
 #include "evita/ui/events/event.h"
+#include "evita/ui/events/event_dispatcher.h"
 
 namespace ui {
 
@@ -13,6 +14,7 @@ EventHandler::EventHandler() {
 }
 
 EventHandler::~EventHandler() {
+  EventDispatcher::instance()->DidDestroyEventHandler(this);
 }
 
 void EventHandler::OnEvent(Event* event) {

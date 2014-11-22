@@ -48,6 +48,8 @@
 
         'events/event.cc',
         'events/event.h',
+        'events/event_dispatcher.cc',
+        'events/event_dispatcher.h',
         'events/event_handler.cc',
         'events/event_handler.h',
         'events/event_target.cc',

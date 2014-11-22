@@ -20,6 +20,8 @@ class EventTarget : public common::Castable, public EventHandler {
   protected: EventTarget();
   public: virtual ~EventTarget();
 
+  public: bool DispatchEvent(Event* event);
+
   DISALLOW_COPY_AND_ASSIGN(EventTarget);
 };
 

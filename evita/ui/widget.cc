@@ -315,8 +315,7 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
     MouseWheelEvent event(result.widget(), result.local_point(), screen_point,
                           MouseEvent::ConvertToEventFlags(native_event),
                           GET_WHEEL_DELTA_WPARAM(native_event.wParam));
-    result.widget()->OnEvent(&event);
-    return !event.default_prevented();
+    return result.widget()->DispatchEvent(&event);
   }
 
   auto const result = HitTestForMouseEventTarget(client_point);
@@ -332,36 +331,34 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       hover_widget = result.widget();
       MouseEvent event(EventType::MouseEntered, MouseButton::None, 0, 0,
                        hover_widget, result.local_point(), screen_point);
-      hover_widget->OnEvent(&event);
+      hover_widget->DispatchEvent(&event);
     } else if (hover_widget != result.widget()) {
       MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
                        hover_widget, result.local_point(), screen_point);
-      hover_widget->OnEvent(&event);
+      hover_widget->DispatchEvent(&event);
       hover_widget = result.widget();
       if (hover_widget) {
         MouseEvent event(EventType::MouseEntered, MouseButton::None, 0, 0,
                          hover_widget, result.local_point(), screen_point);
-        hover_widget->OnEvent(&event);
+        hover_widget->DispatchEvent(&event);
       }
     }
   }
 
   MouseEvent event(native_event, result.widget(), result.local_point(),
                    screen_point);
-  if (event.event_type() == EventType::MouseMoved) {
-    result.widget()->OnEvent(&event);
-    return !event.default_prevented();
-  }
+  if (event.event_type() == EventType::MouseMoved)
+    return result.widget()->DispatchEvent(&event);
 
   if (event.event_type() == EventType::MousePressed) {
     MouseClickTracker::instance()->OnMousePressed(event);
-    result.widget()->OnEvent(&event);
-    return !event.default_prevented();
+    return result.widget()->DispatchEvent(&event);
   }
 
   if (event.event_type() == EventType::MouseReleased) {
     MouseClickTracker::instance()->OnMouseReleased(event);
-    result.widget()->OnEvent(&event);
+    if (!result.widget()->DispatchEvent(&event))
+      return false;
     auto const click_count  = MouseClickTracker::instance()->click_count();
     if (!click_count)
       return !event.default_prevented();
@@ -372,8 +369,7 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
                            MouseEvent::ConvertToEventFlags(native_event),
                            click_count, result.widget(), result.local_point(),
                            screen_point);
-    result.widget()->OnEvent(&click_event);
-    return !click_event.default_prevented();
+    return result.widget()->DispatchEvent(&click_event);
   }
 
   return true;

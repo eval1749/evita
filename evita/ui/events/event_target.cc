@@ -4,6 +4,8 @@
 
 #include "evita/ui/events/event_target.h"
 
+#include "evita/ui/events/event_dispatcher.h"
+
 namespace ui {
 
 EventTarget::EventTarget() {
@@ -12,5 +14,8 @@ EventTarget::EventTarget() {
 EventTarget::~EventTarget() {
 }
 
+bool EventTarget::DispatchEvent(Event* event) {
+  return EventDispatcher::instance()->DispatchEvent(this, event);
+}
 
 }  // namespace ui

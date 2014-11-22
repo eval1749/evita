@@ -5,14 +5,21 @@
 #if !defined(INCLUDE_evita_views_tabs_tab_h)
 #define INCLUDE_evita_views_tabs_tab_h
 
+#include <memory>
+
 #include "evita/dom/public/tab_data.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/gfx/text_format.h"
+#include "evita/ui/animation/animation_group_member.h"
 #include "evita/ui/tooltip.h"
 #include "evita/ui/widget.h"
 
 namespace gfx {
 class TextLayout;
+}
+
+namespace ui {
+class AnimationFloat;
 }
 
 namespace views {
@@ -28,9 +35,11 @@ class TabOwner {
   protected: TabOwner();
   protected: virtual ~TabOwner();
 
+  public: virtual void AddAnimation(ui::AnimationGroupMember* member) = 0;
   public: virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
   public: virtual void DidSelectTab(Tab* tab) = 0;
   public: virtual base::string16 GetTooltipTextForTab(Tab* tab) = 0;
+  public: virtual void RemoveAnimation(ui::AnimationGroupMember* member) = 0;
   public: virtual void RequestCloseTab(Tab* tab) = 0;
   public: virtual void RequestSelectTab(Tab* tab) = 0;
   public: virtual void SetToolBounds(Tab* tab, const gfx::Rect& bounds) = 0;
@@ -43,7 +52,9 @@ class TabOwner {
 // Tab
 //  Represents a tab.
 //
-class Tab final : public ui::Widget, public ui::Tooltip::ToolDelegate {
+class Tab final : public ui::Widget,
+                  private ui::AnimationGroupMember,
+                  public ui::Tooltip::ToolDelegate {
   public: enum class Part {
     None,
     CloseMark,
@@ -70,12 +81,14 @@ class Tab final : public ui::Widget, public ui::Tooltip::ToolDelegate {
     public: Tab* tab() const { return tab_; }
   };
 
-  public: enum class State {
+  private: enum class State {
     Normal,
     Hovered,
     Selected,
   };
 
+  private: float animated_alpha_;
+  private: std::unique_ptr<ui::AnimationFloat> animation_alpha_;
   private: gfx::RectF close_mark_bounds_;
   private: State close_mark_state_;
   private: bool dirty_visual_;
@@ -94,7 +107,7 @@ class Tab final : public ui::Widget, public ui::Tooltip::ToolDelegate {
 
   public: Tab(TabOwner* view_delegate, TabContent* tab_content,
               gfx::TextFormat* text_format);
-  public: virtual ~Tab();
+  public: virtual ~Tab() override;
 
   public: bool is_selected() const { return state_ == State::Selected; }
   public: const base::string16& label_text() const { return label_text_; }
@@ -103,6 +116,7 @@ class Tab final : public ui::Widget, public ui::Tooltip::ToolDelegate {
 
   public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
 
+  private: static float ComputeAlpha(State state);
   private: gfx::ColorF ComputeBackgroundColor() const;
   private: void DrawCloseMark(gfx::Canvas* canvas) const;
   private: void DrawLabel(gfx::Canvas* canvas) const;
@@ -112,15 +126,20 @@ class Tab final : public ui::Widget, public ui::Tooltip::ToolDelegate {
   public: State GetState(Part part) const;
   public: HitTestResult HitTest(const gfx::PointF& point);
   public: void MarkDirty();
+  public: void Select();
   private: void SetCloseMarkState(State new_state);
   private: void SetLabelState(State new_state);
-  public: void SetState(Part part, State new_state);
+  private: void SetState(Part part, State new_state);
   public: void SetTabData(const domapi::TabData& tab_data);
   public: void SetTextFormat(gfx::TextFormat* text_format_);
+  public: void Unselect();
   private: void UpdateLayout();
 
+  // ui::AnimationGroupMember
+  private: virtual void Animate(base::Time time) override;
+
   // ui::Tooltip::ToolDelegate
-  private: base::string16 GetTooltipText() override;
+  private: virtual base::string16 GetTooltipText() override;
 
   // ui::Widget
   private: virtual void DidChangeBounds() override;

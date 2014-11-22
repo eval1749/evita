@@ -19,6 +19,7 @@
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/ui/animation/animatable_window.h"
+#include "evita/ui/animation/animation_group.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/controls/arrow_button.h"
 #include "evita/ui/events/event.h"
@@ -458,10 +459,10 @@ void TabCollection::SelectTab(Tab* tab) {
   DCHECK(tab);
   if (selected_tab_ != tab) {
     if (selected_tab_)
-      selected_tab_->SetState(Tab::Part::Label, Tab::State::Normal);
+      selected_tab_->Unselect();
     selected_tab_ = tab;
     if (tab)
-      tab->SetState(Tab::Part::Label, Tab::State::Selected);
+      tab->Select();
     NotifySelectTab();
   }
   MakeSelectionVisible();
@@ -719,6 +720,7 @@ void TabListMenu::Show() {
 class TabStrip::View final : private ui::ButtonListener,
                              private ModelObserver,
                              private TabOwner {
+  private: ui::AnimationGroup animations_;
   private: std::unique_ptr<gfx::Canvas> canvas_;
   private: bool dirty_;
   private: const std::unique_ptr<ui::ArrowButton> list_button_;
@@ -762,10 +764,14 @@ class TabStrip::View final : private ui::ButtonListener,
   private: void DidInsertTab(Tab* tab) override;
 
   // TabOwner
+  private: virtual void AddAnimation(
+      ui::AnimationGroupMember* member) override;
   private: virtual void DidDropTab(Tab* tab,
                                    const gfx::Point& screen_point) override;
   private: virtual void DidSelectTab(Tab* tab) override;
   private: virtual base::string16 GetTooltipTextForTab(Tab* tab) override;
+  private: virtual void RemoveAnimation(
+      ui::AnimationGroupMember* member) override;
   private: virtual void RequestCloseTab(Tab* tab) override;
   private: virtual void RequestSelectTab(Tab* tab) override;
   private: virtual void SetToolBounds(Tab* tab,
@@ -802,8 +808,10 @@ void TabStrip::View::DeleteTab(size_t tab_index) {
   tab_collection_->DeleteTab(tab);
 }
 
-void TabStrip::View::DidBeginAnimationFrame(base::Time) {
+void TabStrip::View::DidBeginAnimationFrame(base::Time time) {
   UpdateLayout();
+  if (animations_.Animate(time))
+    widget_->RequestAnimationFrame();
   if (!canvas_)
     canvas_.reset(widget_->layer()->CreateCanvas());
   else if (widget_->GetContentsBounds() != canvas_->GetLocalBounds())
@@ -955,6 +963,10 @@ void TabStrip::View::DidInsertTab(Tab* tab) {
 }
 
 // TabOwner
+void TabStrip::View::AddAnimation(ui::AnimationGroupMember* member) {
+  animations_.AddMember(member);
+}
+
 void TabStrip::View::DidDropTab(Tab* tab, const gfx::Point& screen_point) {
   tab_strip_delegate_->DidDropTab(tab->tab_content(), screen_point);
 }
@@ -965,6 +977,10 @@ void TabStrip::View::DidSelectTab(Tab* tab) {
 
 base::string16 TabStrip::View::GetTooltipTextForTab(Tab* tab) {
   return tab_strip_delegate_->GetTooltipTextForTab(tab->tab_index());
+}
+
+void TabStrip::View::RemoveAnimation(ui::AnimationGroupMember* member) {
+  animations_.RemoveMember(member);
 }
 
 void TabStrip::View::RequestCloseTab(Tab* tab) {

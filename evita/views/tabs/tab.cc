@@ -5,6 +5,7 @@
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_layout.h"
+#include "evita/ui/animation/animation_value.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/tabs/tab.h"
@@ -12,9 +13,13 @@
 
 namespace views {
 
+namespace {
+
 const auto kLabelHeight = 16.0f;
 const auto kMaxTabWidth = 200.0f;
 const auto kMinTabWidth = 140.0f;
+
+}   // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -61,7 +66,8 @@ bool Tab::HitTestResult::operator!=(const HitTestResult& other) const {
 //
 Tab::Tab(TabOwner* view_delegate, TabContent* tab_content,
          gfx::TextFormat* text_format)
-    : close_mark_state_(State::Normal),
+    : animated_alpha_(ComputeAlpha(State::Normal)),
+      close_mark_state_(State::Normal),
       dirty_visual_(true),
       dirty_layout_(true),
       image_index_(-1),
@@ -82,14 +88,26 @@ Tab::Tab(TabOwner* view_delegate, TabContent* tab_content,
 Tab::~Tab() {
 }
 
+float Tab::ComputeAlpha(State state) {
+  switch (state) {
+    case State::Hovered:
+      return 0.8f;
+    case State::Normal:
+      return 0.5f;
+    case State::Selected:
+      return 1.0f;
+  }
+  NOTREACHED();
+  return 1.0f;
+}
+
 gfx::ColorF Tab::ComputeBackgroundColor() const {
   switch (state_) {
-  case State::Hovered:
-    return gfx::ColorF(1.0f, 1.0f, 1.0f, 0.8f);
-  case State::Normal:
-    return gfx::ColorF(1.0f, 1.0f, 1.0f, 0.5f);
-  case State::Selected:
-    return gfx::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
+    case State::Hovered:
+    case State::Normal:
+      return gfx::ColorF(1.0f, 1.0f, 1.0f, animated_alpha_);
+    case State::Selected:
+      return gfx::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
   }
   NOTREACHED();
   return gfx::ColorF(1, 0, 0, 1);
@@ -174,6 +192,10 @@ void Tab::MarkDirty() {
   SchedulePaint();
 }
 
+void Tab::Select() {
+  SetState(Tab::Part::Label, Tab::State::Selected);
+}
+
 void Tab::SetCloseMarkState(State new_state) {
   if (close_mark_state_ == new_state)
     return;
@@ -184,6 +206,14 @@ void Tab::SetCloseMarkState(State new_state) {
 void Tab::SetLabelState(State new_state) {
   if (state_ == new_state)
     return;
+  animation_alpha_.reset();
+  if (state_ != State::Selected && new_state != State::Selected) {
+    view_delegate_->AddAnimation(this);
+    animation_alpha_.reset(new ui::AnimationFloat(
+        base::TimeDelta::FromMilliseconds(16 * 20),
+        ComputeAlpha(state_),
+        ComputeAlpha(new_state)));
+  }
   state_ = new_state;
   MarkDirty();
 }
@@ -241,6 +271,10 @@ void Tab::SetTextFormat(gfx::TextFormat* text_format) {
   dirty_layout_ = true;
 }
 
+void Tab::Unselect() {
+  SetState(Tab::Part::Label, Tab::State::Normal);
+}
+
 void Tab::UpdateLayout() {
   DCHECK(!GetContentsBounds().empty());
   DCHECK(text_format_);
@@ -256,6 +290,21 @@ void Tab::UpdateLayout() {
                              gfx::PointF(close_mark_bounds_.left - 2,
                                          icon_bounds_.bottom));
   text_layout_ = text_format_->CreateLayout(label_text_, label_bounds_.size());
+}
+
+// ui::AnimationGroupMember
+void Tab::Animate(base::Time time) {
+  if (!animation_alpha_)
+    return;
+  if (!animation_alpha_->is_started())
+    animation_alpha_->Start(time);
+  MarkDirty();
+  animated_alpha_ = animation_alpha_->Compute(time);
+  if (animated_alpha_  == animation_alpha_->end_value()) {
+    animation_alpha_.reset();
+    return;
+  }
+  view_delegate_->AddAnimation(this);
 }
 
 // ui::Tooltip::ToolDelegate

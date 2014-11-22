@@ -5,6 +5,7 @@
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_layout.h"
+#include "evita/ui/events/event.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/tabs/tab.h"
 #include "evita/views/tab_content.h"
@@ -68,6 +69,9 @@ Tab::Tab(ViewDelegate* view_delegate, TabContent* tab_content,
   SetTabData(*tab_data);
 }
 
+Tab::~Tab() {
+}
+
 gfx::ColorF Tab::ComputeBackgroundColor() const {
   switch (state_) {
   case State::Hovered:
@@ -79,29 +83,6 @@ gfx::ColorF Tab::ComputeBackgroundColor() const {
   }
   NOTREACHED();
   return gfx::ColorF(1, 0, 0, 1);
-}
-
-void Tab::Draw(gfx::Canvas* canvas, const gfx::RectF& content_bounds) {
-  UpdateLayout();
-  if (!dirty_visual_)
-    return;
-  dirty_visual_ = false;
-  auto const bounds = gfx::RectF(bounds_.origin(),
-                                 bounds_.size() + gfx::SizeF(1, 0));
-  auto const dirty_bounds = content_bounds.Intersect(bounds);
-  if (dirty_bounds.empty())
-    return;
-  canvas->AddDirtyRect(dirty_bounds);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, dirty_bounds);
-  canvas->Clear(ComputeBackgroundColor());
-  {
-    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.7f));
-    canvas->DrawRectangle(strokeBrush, bounds);
-  }
-  DrawIcon(canvas);
-  DrawLabel(canvas);
-  DrawCloseMark(canvas);
-  DrawTabDataState(canvas);
 }
 
 void Tab::DrawCloseMark(gfx::Canvas* canvas) const {
@@ -146,10 +127,11 @@ void Tab::DrawTabDataState(gfx::Canvas* canvas) const {
         gfx::ColorF(56.0f / 255, 219.0f / 255, 74.0f / 255);
   auto const marker_height = 4.0f;
   auto const marker_width = 4.0f;
-  DCHECK_GT(bounds_.width(), marker_width);
+  DCHECK_GT(GetContentsBounds().width(), marker_width);
   canvas->FillRectangle(
       gfx::Brush(canvas, marker_color),
-      gfx::RectF(gfx::PointF(bounds_.right - marker_width, bounds_.top),
+      gfx::RectF(gfx::PointF(GetContentsBounds().right - marker_width,
+                             GetContentsBounds().top),
                  gfx::SizeF(marker_width, marker_height)));
 }
 
@@ -170,7 +152,7 @@ Tab::State Tab::GetState(Part part) const {
 
 Tab::HitTestResult Tab::HitTest(const gfx::PointF& point) {
   UpdateLayout();
-  if (!bounds_.Contains(point))
+  if (!GetContentsBounds().Contains(point))
     return HitTestResult();
   if (state_ != State::Normal && close_mark_bounds_.Contains(point))
     return HitTestResult(const_cast<Tab*>(this), Part::CloseMark);
@@ -179,15 +161,7 @@ Tab::HitTestResult Tab::HitTest(const gfx::PointF& point) {
 
 void Tab::MarkDirty() {
   dirty_visual_ = true;
-  view_delegate_->RequestAnimationFrame();
-}
-
-void Tab::SetBounds(const gfx::RectF& new_bounds) {
-  if (bounds_ == new_bounds)
-    return;
-  bounds_ = new_bounds;
-  MarkDirty();
-  dirty_layout_ = true;
+  SchedulePaint();
 }
 
 void Tab::SetCloseMarkState(State new_state) {
@@ -258,14 +232,13 @@ void Tab::SetTextFormat(gfx::TextFormat* text_format) {
 }
 
 void Tab::UpdateLayout() {
-  DCHECK(!bounds_.empty());
+  DCHECK(!GetContentsBounds().empty());
   DCHECK(text_format_);
   if (!dirty_layout_)
     return;
   dirty_layout_ = false;
-  dirty_visual_ = true;
-  view_delegate_->RequestAnimationFrame();
-  auto const bounds = bounds_ - gfx::SizeF(6, 6);
+  MarkDirty();
+  auto const bounds = GetContentsBounds() - gfx::SizeF(6, 6);
   close_mark_bounds_ = gfx::RectF(bounds.top_right() + gfx::SizeF(-9, 5),
                                   gfx::SizeF(8, 8));
   icon_bounds_ = gfx::RectF(bounds.origin(), gfx::SizeF(16, 16));
@@ -278,6 +251,79 @@ void Tab::UpdateLayout() {
 // ui::Tooltip::ToolDelegate
 base::string16 Tab::GetTooltipText() {
   return view_delegate_->GetTooltipTextForTab(this);
+}
+
+// ui::Widget
+void Tab::DidChangeBounds() {
+  auto const new_bounds = GetContentsBounds();
+  if (GetContentsBounds() != new_bounds) {
+    GetContentsBounds() = new_bounds;
+    dirty_layout_ = true;
+  }
+  // Since, tab is paint into parent's canvas, we should paint tab event if it
+  // moved.
+  MarkDirty();
+}
+
+void Tab::OnDraw(gfx::Canvas* canvas) {
+  UpdateLayout();
+  if (!dirty_visual_)
+    return;
+  dirty_visual_ = false;
+  canvas->AddDirtyRect(GetContentsBounds());
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, GetContentsBounds());
+  canvas->Clear(ComputeBackgroundColor());
+  {
+    gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.7f));
+    canvas->DrawRectangle(strokeBrush, GetContentsBounds());
+  }
+  DrawIcon(canvas);
+  DrawLabel(canvas);
+  DrawCloseMark(canvas);
+  DrawTabDataState(canvas);
+}
+
+void Tab::OnMouseEntered(const ui::MouseEvent& event) {
+  if (state_ == State::Normal)
+    SetLabelState(State::Hovered);
+  auto const result = HitTest(gfx::PointF(event.location()));
+  if (result.part() == Part::CloseMark)
+    SetCloseMarkState(State::Hovered);
+}
+
+void Tab::OnMouseExited(const ui::MouseEvent&) {
+  if (is_selected())
+    return;
+  SetLabelState(State::Normal);
+  SetCloseMarkState(State::Normal);
+}
+
+void Tab::OnMouseMoved(const ui::MouseEvent& event) {
+  if (state_ == State::Normal)
+    SetLabelState(State::Hovered);
+  auto const result = HitTest(gfx::PointF(event.location()));
+  SetCloseMarkState(result.part() == Part::CloseMark ? State::Hovered :
+                                                       State::Normal);
+}
+
+void Tab::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.is_left_button() || event.click_count())
+    return;
+  auto const result = HitTest(gfx::PointF(event.location()));
+  if (result.part() != Part::Label)
+    return;
+  if (!is_selected())
+    view_delegate_->RequestSelectTab(this);
+  // TODO(eval1749) start tab dragging
+}
+
+void Tab::OnMouseReleased(const ui::MouseEvent& event) {
+  if (!event.is_left_button() || event.click_count())
+    return;
+  // TODO(eval1749) stop tab dragging
+  auto const result = HitTest(gfx::PointF(event.location()));
+  if (result.part() == Part::CloseMark)
+    view_delegate_->RequestCloseTab(this);
 }
 
 }  // namespace views

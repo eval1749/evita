@@ -55,7 +55,7 @@ const auto kIconHeight = 16.0f;
 // |kLabelFontSize| depends on |kIconHeight|. If you change this value,
 // please make sure "g" and "y" characters are fully displayed in a tab.
 const auto kLabelFontSize = 13.0f;
-const auto kScrollWidth = 10.0f;
+const auto kScrollWidth = 10;
 // On Win8.1
 //  SM_CYSIZE = 22
 //  SM_CYCAPTION = 23
@@ -259,69 +259,6 @@ void DragController::DidInsertTab(Tab* tab) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// HoverController
-//
-class HoverController final : private ModelObserver {
-  private: Tab::HitTestResult hovered_;
-  private: ModelDelegate* model_;
-
-  public: HoverController(ModelDelegate* model);
-  public: ~HoverController();
-
-  public: void OnMouseExited(const ui::MouseEvent& event);
-  public: void OnMouseMoved(const ui::MouseEvent& event);
-  private: void UpdateHover(const Tab::HitTestResult& hitTestResult);
-
-  // ModelObserver
-  private: void DidDeleteTab(Tab* tab) override;
-  private: void DidInsertTab(Tab* tab) override;
-
-  DISALLOW_COPY_AND_ASSIGN(HoverController);
-};
-
-HoverController::HoverController(ModelDelegate* model)
-    : model_(model) {
-  model_->AddObserver(this);
-}
-
-HoverController::~HoverController() {
-  model_->RemoveObserver(this);
-}
-
-void HoverController::OnMouseExited(const ui::MouseEvent&) {
-  UpdateHover(Tab::HitTestResult());
-}
-
-void HoverController::OnMouseMoved(const ui::MouseEvent& event) {
-  UpdateHover(model_->HitTest(gfx::PointF(event.location())));
-}
-
-void HoverController::UpdateHover(const Tab::HitTestResult& hitTestResult) {
-  if (hovered_ == hitTestResult)
-      return;
-  if (hovered_ &&
-      hovered_.tab()->GetState(hovered_.part()) == Tab::State::Hovered) {
-    hovered_.tab()->SetState(hovered_.part(), Tab::State::Normal);
-  }
-  hovered_ = hitTestResult;
-  if (!hovered_)
-    return;
-  hovered_.tab()->SetState(hovered_.part(), Tab::State::Hovered);
-}
-
-// ModelObserver
-void HoverController::DidDeleteTab(Tab* tab) {
-  if (hovered_.tab() != tab)
-    return;
-  UpdateHover(Tab::HitTestResult());
-}
-
-void HoverController::DidInsertTab(Tab*) {
-  UpdateHover(Tab::HitTestResult());
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // TabCollection
 //
 class TabCollection final : public ui::Widget,
@@ -331,13 +268,12 @@ class TabCollection final : public ui::Widget,
 
   private: DragController drag_controller_;
   private: bool dirty_;
-  private: HoverController hover_controller_;
   // Last bounds used for layout tabs.
-  private: gfx::RectF layout_bounds_;
+  private: gfx::Rect layout_bounds_;
   private: Tab* selected_tab_;
   private: bool should_selected_tab_visible_;
   private: std::vector<Tab*> tabs_;
-  private: float tabs_origin_;
+  private: int tabs_origin_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
   private: ViewDelegate* const view_delegate_;
 
@@ -359,7 +295,7 @@ class TabCollection final : public ui::Widget,
   public: void ScrollLeft();
   public: void ScrollRight();
   public: void SelectTab(Tab* tab);
-  private: void UpdateBoundsForAllTabs(float tab_width);
+  private: void UpdateBoundsForAllTabs(int tab_width);
   private: void UpdateLayout();
   private: void UpdateTextFont();
 
@@ -377,7 +313,6 @@ class TabCollection final : public ui::Widget,
   private: virtual void DidRealize() override;
   private: virtual gfx::Size GetPreferredSize() const override;
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
-  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
   private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
@@ -387,7 +322,7 @@ class TabCollection final : public ui::Widget,
 
 TabCollection::TabCollection(ViewDelegate* view_delegate)
     : drag_controller_(this, this, view_delegate), dirty_(true),
-      hover_controller_(this), selected_tab_(nullptr),
+      selected_tab_(nullptr),
       should_selected_tab_visible_(true), tabs_origin_(0),
       view_delegate_(view_delegate) {
 }
@@ -412,11 +347,12 @@ void TabCollection::DeleteTab(Tab* tab) {
     RenumberTabIndex();
   }
 
+  tab->DestroyWidget();
+
   if (selection_changed)
     NotifySelectTab();
 
   FOR_EACH_OBSERVER(ModelObserver, observers_, DidDeleteTab(tab));
-  delete tab;
 }
 
 int TabCollection::GetPreferredTabWidth() const {
@@ -436,16 +372,17 @@ Tab* TabCollection::GetTab(size_t tab_index) const {
   return tabs_[tab_index];
 }
 
-void TabCollection::MarkDirty() {
-  dirty_ = true;
-}
-
 void TabCollection::InsertTab(TabContent* tab_content, size_t tab_index_in) {
   MarkDirty();
   DCHECK(text_format_);
   auto const tab_index = std::min(tab_index_in, tabs_.size());
   auto const new_tab = new Tab(view_delegate_, tab_content, text_format_.get());
   tabs_.insert(tabs_.begin() + static_cast<ptrdiff_t>(tab_index), new_tab);
+  // TODO(eval1749) Should we allow to realize empty bounds widget?
+  new_tab->SetBounds(gfx::Rect(gfx::Size(1, 1)));
+  AppendChild(new_tab);
+  if (is_realized())
+    new_tab->RealizeWidget();
   RenumberTabIndex();
   FOR_EACH_OBSERVER(ModelObserver, observers_, DidInsertTab(new_tab));
 }
@@ -459,9 +396,16 @@ void TabCollection::MakeSelectionVisible() {
     return;
   }
   UpdateLayout();
-  if (GetContentsBounds().Contains(selected_tab_->bounds()))
+  if (bounds().Contains(selected_tab_->bounds()))
     return;
   MarkDirty();
+}
+
+void TabCollection::MarkDirty() {
+  if (dirty_)
+    return;
+  SchedulePaint();
+  dirty_ = true;
 }
 
 int TabCollection::NonClientHitTest(const gfx::Point& screen_point) {
@@ -489,8 +433,7 @@ void TabCollection::RenumberTabIndex() {
 }
 
 void TabCollection::ScrollLeft() {
-  auto const new_tabs_origin = std::min(tabs_origin_ + kScrollWidth,
-                                        0.0f);
+  auto const new_tabs_origin = std::min(tabs_origin_ + kScrollWidth, 0);
   if (tabs_origin_ == new_tabs_origin)
     return;
   tabs_origin_ = new_tabs_origin;
@@ -499,9 +442,9 @@ void TabCollection::ScrollLeft() {
 }
 
 void TabCollection::ScrollRight() {
-  auto const bounds = GetContentsBounds();
+  auto const bounds = gfx::ToEnclosingRect(GetContentsBounds());
   auto const min_tabs_origin = bounds.width() -
-      tabs_.size() * tabs_.front()->bounds().width();
+      static_cast<int>(tabs_.size() * tabs_.front()->bounds().width());
   auto const new_tabs_origin = std::max(tabs_origin_ - kScrollWidth,
                                         min_tabs_origin);
   if (tabs_origin_ == new_tabs_origin)
@@ -524,19 +467,24 @@ void TabCollection::SelectTab(Tab* tab) {
   MakeSelectionVisible();
 }
 
-void TabCollection::UpdateBoundsForAllTabs(float tab_width) {
-  auto const bounds = GetContentsBounds();
-  auto tab_origin = gfx::PointF(tabs_origin_ + bounds.left, bounds.top);
-  auto const tab_size = gfx::SizeF(tab_width, bounds.bottom - tab_origin.y);
+void TabCollection::UpdateBoundsForAllTabs(int tab_width) {
+  auto const bounds = gfx::ToEnclosingRect(GetContentsBounds());
+  auto tab_origin = gfx::Point(tabs_origin_ + bounds.left(), bounds.top());
+  auto const tab_size = gfx::Size(tab_width, bounds.bottom() - tab_origin.y());
   for (auto const tab : tabs_) {
-    tab->SetBounds(gfx::RectF(tab_origin, tab_size));
-    tab_origin.x += tab_width;
+    tab->SetBounds(gfx::Rect(tab_origin, tab_size));
+    tab_origin = tab_origin.Offset(tab_width, 0);
     // Pass tool bounds in |TabCollection| coordinate.
-    auto const visible_bounds = gfx::ToEnclosingRect(
-        bounds.Intersect(tab->bounds()));
+    auto const visible_bounds = bounds.Intersect(tab->bounds());
+    if (visible_bounds.empty()) {
+      tab->Hide();
+      view_delegate_->SetToolBounds(tab, gfx::Rect());
+      continue;
+    }
     view_delegate_->SetToolBounds(tab, gfx::Rect(
-        visible_bounds.origin().Offset(origin().x(), origin().y()),
+        visible_bounds.origin() + origin(),
         visible_bounds.size()));
+    tab->Show();
   }
 }
 
@@ -544,13 +492,14 @@ void TabCollection::UpdateLayout() {
   if (!dirty_)
     return;
   dirty_ = false;
-  auto const bounds = GetContentsBounds();
+  auto const bounds = gfx::ToEnclosingRect(GetContentsBounds());
   if (tabs_.empty()) {
     tabs_origin_ = 0;
     return;
   }
-  auto const tab_width = static_cast<float>(GetPreferredTabWidth());
-  auto const tabs_width = tabs_.size() * tab_width + 1; // +1 for last edge
+  auto const tab_width = GetPreferredTabWidth();
+  // +1 for last edge
+  auto const tabs_width = static_cast<int>(tabs_.size() * tab_width + 1);
 
   if (layout_bounds_ == bounds) {
     if (tabs_width < bounds.width())
@@ -574,11 +523,11 @@ void TabCollection::UpdateLayout() {
   auto const selected_right = selected_left + tab_width;
   if (selected_right < bounds.width()) {
     // |selected_tab_| is in left most part.
-    tabs_origin_ = 0.0f;
+    tabs_origin_ = 0;
   } else if (selected_left >= last_view_port_left) {
     // |selected_tab_| is in right most part.
     tabs_origin_ = -last_view_port_left;
-  } else if (selected_tab_->left() < bounds.left) {
+  } else if (selected_tab_->bounds().left() < bounds.left()) {
     // |selected_tab_| is left of view port.
     tabs_origin_ = -selected_left;
   } else {
@@ -615,7 +564,8 @@ void TabCollection::AddObserver(ModelObserver* observer) {
 
 Tab::HitTestResult TabCollection::HitTest(const gfx::PointF& point) const {
   for (auto const tab : tabs_) {
-    auto const result = tab->HitTest(point);
+    auto const point_in_tab = point - gfx::PointF(tab->origin());
+    auto const result = tab->HitTest(point_in_tab);
     if (result)
       return result;
   }
@@ -641,9 +591,8 @@ void TabCollection::DidChangeIconFont() {
 
 // ui::Widget
 void TabCollection::DidChangeBounds() {
-  view_delegate_->RequestAnimationFrame();
+  MarkDirty();
   should_selected_tab_visible_ = true;
-  dirty_ = true;
   // Since canvas is empty, we should paint all tabs.
   for (auto const tab : tabs_)
     tab->MarkDirty();
@@ -660,32 +609,20 @@ gfx::Size TabCollection::GetPreferredSize() const {
 
 void TabCollection::OnDraw(gfx::Canvas* canvas) {
   UpdateLayout();
-  auto const content_bounds = GetContentsBounds();
-  auto right = content_bounds.left;
   {
-    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, content_bounds);
-    for (auto const tab : tabs_) {
-      if (tab->right() < 0)
-        continue;
-      if (tab->left() >= content_bounds.right)
-        break;
-      tab->Draw(canvas, content_bounds);
-      right = tab->right();
-    }
+    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, GetContentsBounds());
+    ui::Widget::OnDraw(canvas);
   }
-
-  // Paint right edge.
-  // +1 for right edge
-  auto const rest = gfx::RectF(gfx::PointF(right + 1, content_bounds.top),
-                               content_bounds.bottom_right());
-  if (rest.empty())
+  auto const bounds = GetContentsBounds();
+  auto const background = gfx::RectF(
+      gfx::PointF(static_cast<float>(tabs_.back()->bounds().right()),
+                  bounds.top),
+      bounds.bottom_right());
+  if (background.empty())
     return;
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, rest);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, background);
+  canvas->AddDirtyRect(background);
   canvas->Clear(gfx::ColorF());
-}
-
-void TabCollection::OnMouseExited(const ui::MouseEvent& event) {
-  hover_controller_.OnMouseExited(event);
 }
 
 void TabCollection::OnMouseMoved(const ui::MouseEvent& event) {
@@ -695,7 +632,6 @@ void TabCollection::OnMouseMoved(const ui::MouseEvent& event) {
     drag_controller_.OnMouseMoved(event);
     return;
   }
-  hover_controller_.OnMouseMoved(event);
 }
 
 void TabCollection::OnMousePressed(const ui::MouseEvent& event) {
@@ -760,8 +696,10 @@ void TabListMenu::Show() {
   for (auto const tab : tab_collection_->tabs()) {
     auto const flags = tab->is_selected() ? MF_STRING | MF_CHECKED :
                                             MF_STRING;
-    if (last_tab && last_tab->right() < 0 != tab->right() < 0)
+    if (last_tab &&
+        last_tab->bounds().right() < 0 != tab->bounds().right() < 0) {
       ::AppendMenu(menu_handle_, MF_SEPARATOR, 0, nullptr);
+    }
     last_tab = tab;
     ::AppendMenu(menu_handle_, static_cast<DWORD>(flags),
                  static_cast<DWORD>(tab->tab_index()),
@@ -828,7 +766,6 @@ class TabStrip::View final : private ui::ButtonListener,
                                    const gfx::Point& screen_point) override;
   private: virtual void DidSelectTab(Tab* tab) override;
   private: virtual base::string16 GetTooltipTextForTab(Tab* tab) override;
-  private: virtual void RequestAnimationFrame() override;
   private: virtual void RequestCloseTab(Tab* tab) override;
   private: virtual void RequestSelectTab(Tab* tab) override;
   private: virtual void SetToolBounds(Tab* tab,
@@ -920,7 +857,9 @@ void TabStrip::View::InsertTab(TabContent* tab_content, size_t tab_index) {
 }
 
 void TabStrip::View::MarkDirty() {
-  RequestAnimationFrame();
+  if (dirty_)
+    return;
+  widget_->RequestAnimationFrame();
   dirty_ = true;
 }
 
@@ -1026,10 +965,6 @@ void TabStrip::View::DidSelectTab(Tab* tab) {
 
 base::string16 TabStrip::View::GetTooltipTextForTab(Tab* tab) {
   return tab_strip_delegate_->GetTooltipTextForTab(tab->tab_index());
-}
-
-void TabStrip::View::RequestAnimationFrame() {
-  widget_->RequestAnimationFrame();
 }
 
 void TabStrip::View::RequestCloseTab(Tab* tab) {

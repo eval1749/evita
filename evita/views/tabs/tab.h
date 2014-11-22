@@ -9,6 +9,7 @@
 #include "evita/gfx/rect_f.h"
 #include "evita/gfx/text_format.h"
 #include "evita/ui/tooltip.h"
+#include "evita/ui/widget.h"
 
 namespace gfx {
 class TextLayout;
@@ -30,7 +31,6 @@ class ViewDelegate {
   public: virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
   public: virtual void DidSelectTab(Tab* tab) = 0;
   public: virtual base::string16 GetTooltipTextForTab(Tab* tab) = 0;
-  public: virtual void RequestAnimationFrame() = 0;
   public: virtual void RequestCloseTab(Tab* tab) = 0;
   public: virtual void RequestSelectTab(Tab* tab) = 0;
   public: virtual void SetToolBounds(Tab* tab, const gfx::Rect& bounds) = 0;
@@ -43,7 +43,7 @@ class ViewDelegate {
 // Tab
 //  Represents a tab.
 //
-class Tab final : public ui::Tooltip::ToolDelegate {
+class Tab final : public ui::Widget, public ui::Tooltip::ToolDelegate {
   public: enum class Part {
     None,
     CloseMark,
@@ -76,7 +76,6 @@ class Tab final : public ui::Tooltip::ToolDelegate {
     Selected,
   };
 
-  private: gfx::RectF bounds_;
   private: gfx::RectF close_mark_bounds_;
   private: State close_mark_state_;
   private: bool dirty_visual_;
@@ -95,22 +94,16 @@ class Tab final : public ui::Tooltip::ToolDelegate {
 
   public: Tab(ViewDelegate* view_delegate, TabContent* tab_content,
               gfx::TextFormat* text_format);
-  public: virtual ~Tab() = default;
+  public: virtual ~Tab();
 
-  public: float bottom() const { return bounds_.bottom; }
-  public: const gfx::RectF bounds() const { return bounds_; }
   public: bool is_selected() const { return state_ == State::Selected; }
   public: const base::string16& label_text() const { return label_text_; }
-  public: float left() const { return bounds_.left; }
-  public: float right() const { return bounds_.right; }
   public: int tab_index() const { return tab_index_; }
-  public: float top() const { return bounds_.top; }
   public: TabContent* tab_content() const { return tab_content_; }
 
   public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
 
   private: gfx::ColorF ComputeBackgroundColor() const;
-  public: void Draw(gfx::Canvas* canvas, const gfx::RectF& content_bounds);
   private: void DrawCloseMark(gfx::Canvas* canvas) const;
   private: void DrawLabel(gfx::Canvas* canvas) const;
   private: void DrawIcon(gfx::Canvas* canvas) const;
@@ -119,7 +112,6 @@ class Tab final : public ui::Tooltip::ToolDelegate {
   public: State GetState(Part part) const;
   public: HitTestResult HitTest(const gfx::PointF& point);
   public: void MarkDirty();
-  public: void SetBounds(const gfx::RectF& new_bounds);
   private: void SetCloseMarkState(State new_state);
   private: void SetLabelState(State new_state);
   public: void SetState(Part part, State new_state);
@@ -129,6 +121,15 @@ class Tab final : public ui::Tooltip::ToolDelegate {
 
   // ui::Tooltip::ToolDelegate
   private: base::string16 GetTooltipText() override;
+
+  // ui::Widget
+  private: virtual void DidChangeBounds() override;
+  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  private: virtual void OnMouseEntered(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
+  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
+  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
 
   DISALLOW_COPY_AND_ASSIGN(Tab);
 };

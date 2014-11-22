@@ -117,6 +117,8 @@
         'metrics/time_scope.cc',
         'views/frame_list.cc',
         'views/frame_observer.cc',
+        'views/tabs/tab.cc',
+        'views/tabs/tab.h',
         'views/tab_data_set.cc',
         'views/tab_content.cc',
         'views/tab_content.h',

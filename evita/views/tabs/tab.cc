@@ -18,6 +18,16 @@ const auto kMinTabWidth = 140.0f;
 
 //////////////////////////////////////////////////////////////////////
 //
+// TabOwner
+//
+TabOwner::TabOwner() {
+}
+
+TabOwner::~TabOwner() {
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Tab::HitTestResult
 //
 Tab::HitTestResult::HitTestResult(Tab* tab, Part part)
@@ -49,7 +59,7 @@ bool Tab::HitTestResult::operator!=(const HitTestResult& other) const {
 //
 // Tab
 //
-Tab::Tab(ViewDelegate* view_delegate, TabContent* tab_content,
+Tab::Tab(TabOwner* view_delegate, TabContent* tab_content,
          gfx::TextFormat* text_format)
     : close_mark_state_(State::Normal),
       dirty_visual_(true),

@@ -22,11 +22,11 @@ class TabContent;
 
 //////////////////////////////////////////////////////////////////////
 //
-// ViewDelegate
+// TabOwner
 //
-class ViewDelegate {
-  protected: ViewDelegate() = default;
-  protected: virtual ~ViewDelegate() = default;
+class TabOwner {
+  protected: TabOwner();
+  protected: virtual ~TabOwner();
 
   public: virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
   public: virtual void DidSelectTab(Tab* tab) = 0;
@@ -35,7 +35,7 @@ class ViewDelegate {
   public: virtual void RequestSelectTab(Tab* tab) = 0;
   public: virtual void SetToolBounds(Tab* tab, const gfx::Rect& bounds) = 0;
 
-  DISALLOW_COPY_AND_ASSIGN(ViewDelegate);
+  DISALLOW_COPY_AND_ASSIGN(TabOwner);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -90,9 +90,9 @@ class Tab final : public ui::Widget, public ui::Tooltip::ToolDelegate {
   private: int tab_index_;
   private: gfx::TextFormat* text_format_;
   private: std::unique_ptr<gfx::TextLayout> text_layout_;
-  private: ViewDelegate* const view_delegate_;
+  private: TabOwner* const view_delegate_;
 
-  public: Tab(ViewDelegate* view_delegate, TabContent* tab_content,
+  public: Tab(TabOwner* view_delegate, TabContent* tab_content,
               gfx::TextFormat* text_format);
   public: virtual ~Tab();
 

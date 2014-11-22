@@ -155,11 +155,11 @@ class DragController final : private ModelObserver {
   private: Tab* dragging_tab_;
   private: ModelDelegate* const model_;
   private: ui::Widget* const owner_;
-  private: ViewDelegate* const view_delegate_;
+  private: TabOwner* const view_delegate_;
 
   public: DragController(ui::Widget* owner,
                          ModelDelegate* model,
-                         ViewDelegate* view_delegate);
+                         TabOwner* view_delegate);
   public: ~DragController();
 
   public: bool is_dragging() const { return dragging_tab_; }
@@ -177,7 +177,7 @@ class DragController final : private ModelObserver {
 };
 
 DragController::DragController(ui::Widget* owner, ModelDelegate* model,
-                               ViewDelegate* view_delegate)
+                               TabOwner* view_delegate)
     : dragging_tab_(nullptr), model_(model), owner_(owner),
       state_(State::Normal), view_delegate_(view_delegate) {
   model_->AddObserver(this);
@@ -275,9 +275,9 @@ class TabCollection final : public ui::Widget,
   private: std::vector<Tab*> tabs_;
   private: int tabs_origin_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
-  private: ViewDelegate* const view_delegate_;
+  private: TabOwner* const view_delegate_;
 
-  public: TabCollection(ViewDelegate* view_delegate);
+  public: TabCollection(TabOwner* view_delegate);
   public: virtual ~TabCollection();
 
   public: const std::vector<Tab*> tabs() const { return tabs_; }
@@ -320,7 +320,7 @@ class TabCollection final : public ui::Widget,
   DISALLOW_COPY_AND_ASSIGN(TabCollection);
 };
 
-TabCollection::TabCollection(ViewDelegate* view_delegate)
+TabCollection::TabCollection(TabOwner* view_delegate)
     : drag_controller_(this, this, view_delegate), dirty_(true),
       selected_tab_(nullptr),
       should_selected_tab_visible_(true), tabs_origin_(0),
@@ -718,7 +718,7 @@ void TabListMenu::Show() {
 //
 class TabStrip::View final : private ui::ButtonListener,
                              private ModelObserver,
-                             private ViewDelegate {
+                             private TabOwner {
   private: std::unique_ptr<gfx::Canvas> canvas_;
   private: bool dirty_;
   private: const std::unique_ptr<ui::ArrowButton> list_button_;
@@ -761,7 +761,7 @@ class TabStrip::View final : private ui::ButtonListener,
   private: void DidDeleteTab(Tab* tab) override;
   private: void DidInsertTab(Tab* tab) override;
 
-  // ViewDelegate
+  // TabOwner
   private: virtual void DidDropTab(Tab* tab,
                                    const gfx::Point& screen_point) override;
   private: virtual void DidSelectTab(Tab* tab) override;
@@ -954,7 +954,7 @@ void TabStrip::View::DidInsertTab(Tab* tab) {
  MarkDirty();
 }
 
-// ViewDelegate
+// TabOwner
 void TabStrip::View::DidDropTab(Tab* tab, const gfx::Point& screen_point) {
   tab_strip_delegate_->DidDropTab(tab->tab_content(), screen_point);
 }

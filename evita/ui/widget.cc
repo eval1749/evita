@@ -657,6 +657,7 @@ void Widget::WillDestroyNativeWindow() {
   }
   for (auto const child : non_native_children)
     child->DestroyWidget();
+  WillDestroyWidget();
 }
 
 void Widget::WillRemoveChildWidget(Widget*) {

@@ -94,6 +94,11 @@ bool Rect::operator>=(const Rect& other) const {
   return area() >= other.area();
 }
 
+Rect Rect::operator-(const Size& size) const {
+  return Rect(left() + size.width(), top() + size.height(),
+              right() - size.width(), bottom() - size.height());
+}
+
 inline void Rect::set_origin(const Point& new_origin) {
   auto const width = this->width();
   auto const height = this->height();

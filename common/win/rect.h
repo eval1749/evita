@@ -33,6 +33,7 @@ class COMMON_EXPORT Rect final {
   public: bool operator>(const Rect& other) const;
   public: bool operator>=(const Rect& other) const;
   public: Rect operator+(const Rect& other) const { return Union(other); }
+  public: Rect operator-(const Size& size) const;
 
   public: int area() const { return width() * height(); }
   public: int bottom() const { return data_.bottom; }

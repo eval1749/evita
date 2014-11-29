@@ -163,11 +163,9 @@ class DragController final : private ModelObserver {
                          TabOwner* view_delegate);
   public: ~DragController();
 
-  public: bool is_dragging() const { return dragging_tab_; }
-
-  public: void OnMouseMoved(const ui::MouseEvent& event);
-  public: void OnMousePressed(const ui::MouseEvent& event);
-  public: void OnMouseReleased(const ui::MouseEvent& event);
+  public: void ContinueDragging(const gfx::Point& point);
+  public: void EndDragging(const gfx::Point& point);
+  public: void MaybeStartDrag(Tab* tab, const gfx::Point& location);
   public: void StopDragging();
 
   // ModelObserver
@@ -188,10 +186,9 @@ DragController::~DragController() {
   model_->RemoveObserver(this);
 }
 
-void DragController::OnMouseMoved(const ui::MouseEvent& event) {
+void DragController::ContinueDragging(const gfx::Point& point) {
   if (!dragging_tab_)
     return;
-  auto const point = event.location();
   if (state_ == State::Pending) {
     if (point.x() - drag_start_point_.x() >= -5 &&
         point.x() - drag_start_point_.x() <= 5) {
@@ -208,34 +205,26 @@ void DragController::OnMouseMoved(const ui::MouseEvent& event) {
   ::SetCursor(DragTabCursor::instance()->GetCursor());
 }
 
-void DragController::OnMousePressed(const ui::MouseEvent& event) {
-  if (!event.is_left_button() || event.click_count())
+void DragController::EndDragging(const gfx::Point& point) {
+  if (!dragging_tab_)
     return;
-  auto const result = model_->HitTest(gfx::PointF(event.location()));
-  if (!result || result.part() != Tab::Part::Label)
-    return;
-  auto const tab = result.tab();
-  if (!tab->is_selected())
-    view_delegate_->RequestSelectTab(tab);
-  dragging_tab_ = tab;
-  state_ = State::Pending;
-  drag_start_point_ = event.location();
-  owner_->SetCapture();
-}
-
-void DragController::OnMouseReleased(const ui::MouseEvent& event) {
-  if (!event.is_left_button() || state_ == State::Normal)
-    return;
-
   auto const dragging_tab = dragging_tab_;
   StopDragging();
 
-  auto const result = model_->HitTest(gfx::PointF(event.location()));
+  auto const result = model_->HitTest(gfx::PointF(point));
   if (!result) {
-    view_delegate_->DidDropTab(dragging_tab, event.screen_location());
+    auto screen_point = owner_->MapToDesktopPoint(point);
+    view_delegate_->DidDropTab(dragging_tab, screen_point);
     return;
   }
   model_->InsertBefore(dragging_tab, result.tab());
+}
+
+void DragController::MaybeStartDrag(Tab* tab, const gfx::Point& location) {
+  dragging_tab_ = tab;
+  state_ = State::Pending;
+  drag_start_point_ = location;
+  owner_->SetCapture();
 }
 
 void DragController::StopDragging() {
@@ -290,6 +279,7 @@ class TabCollection final : public ui::Widget,
   public: void InsertTab(TabContent* tab_content, size_t tab_index);
   private: void MakeSelectionVisible();
   private: void MarkDirty();
+  public: void MaybeStartDrag(Tab* tab, const gfx::Point& location);
   public: int NonClientHitTest(const gfx::Point& screen_point);
   private: void NotifySelectTab();
   private: void RenumberTabIndex();
@@ -315,7 +305,6 @@ class TabCollection final : public ui::Widget,
   private: virtual gfx::Size GetPreferredSize() const override;
   private: virtual void OnDraw(gfx::Canvas* canvas) override;
   private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
   private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
 
   DISALLOW_COPY_AND_ASSIGN(TabCollection);
@@ -407,6 +396,10 @@ void TabCollection::MarkDirty() {
     return;
   SchedulePaint();
   dirty_ = true;
+}
+
+void TabCollection::MaybeStartDrag(Tab* tab, const gfx::Point& location) {
+  drag_controller_.MaybeStartDrag(tab, location);
 }
 
 int TabCollection::NonClientHitTest(const gfx::Point& screen_point) {
@@ -629,25 +622,13 @@ void TabCollection::OnDraw(gfx::Canvas* canvas) {
 void TabCollection::OnMouseMoved(const ui::MouseEvent& event) {
   if (event.flags() & static_cast<int>(ui::EventFlags::NonClient))
     return;
-  if (drag_controller_.is_dragging()) {
-    drag_controller_.OnMouseMoved(event);
-    return;
-  }
-}
-
-void TabCollection::OnMousePressed(const ui::MouseEvent& event) {
-  if (event.flags() & static_cast<int>(ui::EventFlags::NonClient))
-    return;
-  drag_controller_.OnMousePressed(event);
+  drag_controller_.ContinueDragging(event.location());
 }
 
 void TabCollection::OnMouseReleased(const ui::MouseEvent& event) {
   if (event.flags() & static_cast<int>(ui::EventFlags::NonClient))
     return;
-  if (drag_controller_.is_dragging()) {
-    drag_controller_.OnMouseReleased(event);
-    return;
-  }
+  drag_controller_.EndDragging(event.location());
   // Close tab when left button is released on tab close mark.
   auto const result = HitTest(gfx::PointF(event.location()));
   if (!result || result.part() != Tab::Part::CloseMark)
@@ -770,6 +751,8 @@ class TabStrip::View final : private ui::ButtonListener,
                                    const gfx::Point& screen_point) override;
   private: virtual void DidSelectTab(Tab* tab) override;
   private: virtual base::string16 GetTooltipTextForTab(Tab* tab) override;
+  private: virtual void MaybeStartDrag(Tab* tab,
+                                       const gfx::Point& location) override;
   private: virtual void RemoveAnimation(
       ui::AnimationGroupMember* member) override;
   private: virtual void RequestCloseTab(Tab* tab) override;
@@ -977,6 +960,10 @@ void TabStrip::View::DidSelectTab(Tab* tab) {
 
 base::string16 TabStrip::View::GetTooltipTextForTab(Tab* tab) {
   return tab_strip_delegate_->GetTooltipTextForTab(tab->tab_index());
+}
+
+void TabStrip::View::MaybeStartDrag(Tab* tab, const gfx::Point& location) {
+  tab_collection_->MaybeStartDrag(tab, location);
 }
 
 void TabStrip::View::RemoveAnimation(ui::AnimationGroupMember* member) {

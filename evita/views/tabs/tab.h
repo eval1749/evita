@@ -39,6 +39,8 @@ class TabOwner {
   public: virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
   public: virtual void DidSelectTab(Tab* tab) = 0;
   public: virtual base::string16 GetTooltipTextForTab(Tab* tab) = 0;
+  public: virtual void MaybeStartDrag(Tab* tab,
+                                      const gfx::Point& location) = 0;
   public: virtual void RemoveAnimation(ui::AnimationGroupMember* member) = 0;
   public: virtual void RequestCloseTab(Tab* tab) = 0;
   public: virtual void RequestSelectTab(Tab* tab) = 0;

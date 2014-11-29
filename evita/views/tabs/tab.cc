@@ -189,6 +189,8 @@ Tab::HitTestResult Tab::HitTest(const gfx::PointF& point) {
 
 void Tab::MarkDirty() {
   dirty_visual_ = true;
+  if (!is_realized())
+    return;
   SchedulePaint();
 }
 
@@ -373,7 +375,7 @@ void Tab::OnMousePressed(const ui::MouseEvent& event) {
     return;
   if (!is_selected())
     view_delegate_->RequestSelectTab(this);
-  // TODO(eval1749) start tab dragging
+  view_delegate_->MaybeStartDrag(this, event.location());
 }
 
 void Tab::OnMouseReleased(const ui::MouseEvent& event) {

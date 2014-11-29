@@ -156,11 +156,11 @@ class DragController final : private ModelObserver {
   private: Tab* dragging_tab_;
   private: ModelDelegate* const model_;
   private: ui::Widget* const owner_;
-  private: TabOwner* const view_delegate_;
+  private: TabController* const tab_controller_;
 
   public: DragController(ui::Widget* owner,
                          ModelDelegate* model,
-                         TabOwner* view_delegate);
+                         TabController* tab_controller);
   public: ~DragController();
 
   public: void ContinueDragging(const gfx::Point& point);
@@ -176,9 +176,9 @@ class DragController final : private ModelObserver {
 };
 
 DragController::DragController(ui::Widget* owner, ModelDelegate* model,
-                               TabOwner* view_delegate)
+                               TabController* tab_controller)
     : dragging_tab_(nullptr), model_(model), owner_(owner),
-      state_(State::Normal), view_delegate_(view_delegate) {
+      state_(State::Normal), tab_controller_(tab_controller) {
   model_->AddObserver(this);
 }
 
@@ -214,7 +214,7 @@ void DragController::EndDragging(const gfx::Point& point) {
   auto const result = model_->HitTest(gfx::PointF(point));
   if (!result) {
     auto screen_point = owner_->MapToDesktopPoint(point);
-    view_delegate_->DidDropTab(dragging_tab, screen_point);
+    tab_controller_->DidDropTab(dragging_tab, screen_point);
     return;
   }
   model_->InsertBefore(dragging_tab, result.tab());
@@ -255,7 +255,6 @@ class TabCollection final : public ui::Widget,
                             public ModelDelegate,
                             private ui::SystemMetricsObserver {
   private: ObserverList<ModelObserver> observers_;
-
   private: DragController drag_controller_;
   private: bool dirty_;
   // Last bounds used for layout tabs.
@@ -264,10 +263,10 @@ class TabCollection final : public ui::Widget,
   private: bool should_selected_tab_visible_;
   private: std::vector<Tab*> tabs_;
   private: int tabs_origin_;
+  private: TabController* const tab_controller_;
   private: std::unique_ptr<gfx::TextFormat> text_format_;
-  private: TabOwner* const view_delegate_;
 
-  public: TabCollection(TabOwner* view_delegate);
+  public: TabCollection(TabController* tab_controller);
   public: virtual ~TabCollection();
 
   public: const std::vector<Tab*> tabs() const { return tabs_; }
@@ -310,11 +309,11 @@ class TabCollection final : public ui::Widget,
   DISALLOW_COPY_AND_ASSIGN(TabCollection);
 };
 
-TabCollection::TabCollection(TabOwner* view_delegate)
-    : drag_controller_(this, this, view_delegate), dirty_(true),
+TabCollection::TabCollection(TabController* tab_controller)
+    : drag_controller_(this, this, tab_controller), dirty_(true),
       selected_tab_(nullptr),
       should_selected_tab_visible_(true), tabs_origin_(0),
-      view_delegate_(view_delegate) {
+      tab_controller_(tab_controller) {
 }
 
 TabCollection::~TabCollection() {
@@ -366,7 +365,8 @@ void TabCollection::InsertTab(TabContent* tab_content, size_t tab_index_in) {
   MarkDirty();
   DCHECK(text_format_);
   auto const tab_index = std::min(tab_index_in, tabs_.size());
-  auto const new_tab = new Tab(view_delegate_, tab_content, text_format_.get());
+  auto const new_tab = new Tab(tab_controller_, tab_content,
+                               text_format_.get());
   tabs_.insert(tabs_.begin() + static_cast<ptrdiff_t>(tab_index), new_tab);
   // TODO(eval1749) Should we allow to realize empty bounds widget?
   new_tab->SetBounds(gfx::Rect(gfx::Size(1, 1)));
@@ -415,7 +415,7 @@ int TabCollection::NonClientHitTest(const gfx::Point& screen_point) {
 }
 
 void TabCollection::NotifySelectTab() {
-  view_delegate_->DidSelectTab(selected_tab_);
+  tab_controller_->DidSelectTab(selected_tab_);
 }
 
 void TabCollection::RenumberTabIndex() {
@@ -468,16 +468,11 @@ void TabCollection::UpdateBoundsForAllTabs(int tab_width) {
   for (auto const tab : tabs_) {
     tab->SetBounds(gfx::Rect(tab_origin, tab_size));
     tab_origin = tab_origin.Offset(tab_width, 0);
-    // Pass tool bounds in |TabCollection| coordinate.
     auto const visible_bounds = bounds.Intersect(tab->bounds());
-    if (visible_bounds.empty()) {
+    if (visible_bounds.empty()){
       tab->Hide();
-      view_delegate_->SetToolBounds(tab, gfx::Rect());
       continue;
     }
-    view_delegate_->SetToolBounds(tab, gfx::Rect(
-        visible_bounds.origin() + origin(),
-        visible_bounds.size()));
     tab->Show();
   }
 }
@@ -634,7 +629,7 @@ void TabCollection::OnMouseReleased(const ui::MouseEvent& event) {
   if (!result || result.part() != Tab::Part::CloseMark)
     return;
   auto const tab = result.tab();
-  view_delegate_->RequestCloseTab(tab);
+  tab_controller_->RequestCloseTab(tab);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -700,7 +695,7 @@ void TabListMenu::Show() {
 //
 class TabStrip::View final : private ui::ButtonListener,
                              private ModelObserver,
-                             private TabOwner {
+                             private TabController {
   private: ui::AnimationGroup animations_;
   private: std::unique_ptr<gfx::Canvas> canvas_;
   private: bool dirty_;
@@ -744,21 +739,19 @@ class TabStrip::View final : private ui::ButtonListener,
   private: void DidDeleteTab(Tab* tab) override;
   private: void DidInsertTab(Tab* tab) override;
 
-  // TabOwner
-  private: virtual void AddAnimation(
+  // TabController
+  private: virtual void AddTabAnimation(
       ui::AnimationGroupMember* member) override;
+  private: virtual void DidChangeTabBounds(Tab* tab) override;
   private: virtual void DidDropTab(Tab* tab,
                                    const gfx::Point& screen_point) override;
   private: virtual void DidSelectTab(Tab* tab) override;
-  private: virtual base::string16 GetTooltipTextForTab(Tab* tab) override;
   private: virtual void MaybeStartDrag(Tab* tab,
                                        const gfx::Point& location) override;
-  private: virtual void RemoveAnimation(
+  private: virtual void RemoveTabAnimation(
       ui::AnimationGroupMember* member) override;
   private: virtual void RequestCloseTab(Tab* tab) override;
   private: virtual void RequestSelectTab(Tab* tab) override;
-  private: virtual void SetToolBounds(Tab* tab,
-                                      const gfx::Rect& bounds) override;
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };
@@ -945,9 +938,19 @@ void TabStrip::View::DidInsertTab(Tab* tab) {
  MarkDirty();
 }
 
-// TabOwner
-void TabStrip::View::AddAnimation(ui::AnimationGroupMember* member) {
+// TabController
+void TabStrip::View::AddTabAnimation(ui::AnimationGroupMember* member) {
   animations_.AddMember(member);
+}
+
+void TabStrip::View::DidChangeTabBounds(Tab* tab) {
+  const auto tab_bounds = tab_collection_->GetLocalBounds().Intersect(
+      tab->bounds());
+  // Note: We should pass bounds in HWND's coordinate rather than |TabStrip|
+  // coordinate.
+  tooltip_.SetToolBounds(tab, gfx::Rect(
+    tab_bounds.origin() + tab_collection_->origin() + widget_->origin(),
+    tab_bounds.size()));
 }
 
 void TabStrip::View::DidDropTab(Tab* tab, const gfx::Point& screen_point) {
@@ -958,15 +961,11 @@ void TabStrip::View::DidSelectTab(Tab* tab) {
   tab_strip_delegate_->DidSelectTab(tab ? tab->tab_index() : -1);
 }
 
-base::string16 TabStrip::View::GetTooltipTextForTab(Tab* tab) {
-  return tab_strip_delegate_->GetTooltipTextForTab(tab->tab_index());
-}
-
 void TabStrip::View::MaybeStartDrag(Tab* tab, const gfx::Point& location) {
   tab_collection_->MaybeStartDrag(tab, location);
 }
 
-void TabStrip::View::RemoveAnimation(ui::AnimationGroupMember* member) {
+void TabStrip::View::RemoveTabAnimation(ui::AnimationGroupMember* member) {
   animations_.RemoveMember(member);
 }
 
@@ -976,14 +975,6 @@ void TabStrip::View::RequestCloseTab(Tab* tab) {
 
 void TabStrip::View::RequestSelectTab(Tab* tab) {
   tab_strip_delegate_->RequestSelectTab(tab->tab_index());
-}
-
-void TabStrip::View::SetToolBounds(Tab* tab, const gfx::Rect& bounds) {
-  // Note: We should pass bounds in HWND's coordinate rather than |TabStrip|
-  // coordinate.
-  tooltip_.SetToolBounds(tab, gfx::Rect(
-    bounds.origin().Offset(widget_->origin().x(), widget_->origin().y()),
-    bounds.size()));
 }
 
 //////////////////////////////////////////////////////////////////////

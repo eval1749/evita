@@ -617,16 +617,6 @@ void Frame::DidSelectTab(int selected_index) {
   tab_content->RequestFocus();
 }
 
-base::string16 Frame::GetTooltipTextForTab(int tab_index) {
-  auto const tab_content = GetTabContentByTabIndex(static_cast<int>(tab_index));
-  if (!tab_content)
-    return base::string16();
-  auto const tab_data = tab_content->GetTabData();
-  if (!tab_data)
-    return base::string16();
-  return tab_data->tooltip;
-}
-
 void Frame::RequestCloseTab(int tab_index) {
   if (tab_contents_.size() == 1u) {
     // If this window has only one tab_content, we destroy this window.

@@ -29,24 +29,23 @@ class TabContent;
 
 //////////////////////////////////////////////////////////////////////
 //
-// TabOwner
+// TabController
 //
-class TabOwner {
-  protected: TabOwner();
-  protected: virtual ~TabOwner();
+class TabController {
+  protected: TabController();
+  protected: virtual ~TabController();
 
-  public: virtual void AddAnimation(ui::AnimationGroupMember* member) = 0;
+  public: virtual void AddTabAnimation(ui::AnimationGroupMember* member) = 0;
+  public: virtual void DidChangeTabBounds(Tab* tab) = 0;
   public: virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
   public: virtual void DidSelectTab(Tab* tab) = 0;
-  public: virtual base::string16 GetTooltipTextForTab(Tab* tab) = 0;
   public: virtual void MaybeStartDrag(Tab* tab,
                                       const gfx::Point& location) = 0;
-  public: virtual void RemoveAnimation(ui::AnimationGroupMember* member) = 0;
+  public: virtual void RemoveTabAnimation(ui::AnimationGroupMember* member) = 0;
   public: virtual void RequestCloseTab(Tab* tab) = 0;
   public: virtual void RequestSelectTab(Tab* tab) = 0;
-  public: virtual void SetToolBounds(Tab* tab, const gfx::Rect& bounds) = 0;
 
-  DISALLOW_COPY_AND_ASSIGN(TabOwner);
+  DISALLOW_COPY_AND_ASSIGN(TabController);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -101,20 +100,20 @@ class Tab final : public ui::Widget,
   private: base::string16 label_text_;
   private: State state_;
   private: TabContent* const tab_content_;
+  private: TabController* const tab_controller_;
   private: domapi::TabData::State tab_data_state_;
   private: int tab_index_;
   private: gfx::TextFormat* text_format_;
   private: std::unique_ptr<gfx::TextLayout> text_layout_;
-  private: TabOwner* const view_delegate_;
 
-  public: Tab(TabOwner* view_delegate, TabContent* tab_content,
+  public: Tab(TabController* tab_controller, TabContent* tab_content,
               gfx::TextFormat* text_format);
   public: virtual ~Tab() override;
 
   public: bool is_selected() const { return state_ == State::Selected; }
   public: const base::string16& label_text() const { return label_text_; }
-  public: int tab_index() const { return tab_index_; }
   public: TabContent* tab_content() const { return tab_content_; }
+  public: int tab_index() const { return tab_index_; }
 
   public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
 

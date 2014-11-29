@@ -23,12 +23,12 @@ const auto kMinTabWidth = 140.0f;
 
 //////////////////////////////////////////////////////////////////////
 //
-// TabOwner
+// TabController
 //
-TabOwner::TabOwner() {
+TabController::TabController() {
 }
 
-TabOwner::~TabOwner() {
+TabController::~TabController() {
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ bool Tab::HitTestResult::operator!=(const HitTestResult& other) const {
 //
 // Tab
 //
-Tab::Tab(TabOwner* view_delegate, TabContent* tab_content,
+Tab::Tab(TabController* tab_controller, TabContent* tab_content,
          gfx::TextFormat* text_format)
     : animated_alpha_(ComputeAlpha(State::Normal)),
       close_mark_state_(State::Normal),
@@ -76,7 +76,7 @@ Tab::Tab(TabOwner* view_delegate, TabContent* tab_content,
       tab_content_(tab_content),
       tab_index_(0),
       text_format_(text_format),
-      view_delegate_(view_delegate) {
+      tab_controller_(tab_controller) {
   auto const tab_data = tab_content->GetTabData();
   if (!tab_data) {
     label_text_ = L"?";
@@ -210,7 +210,7 @@ void Tab::SetLabelState(State new_state) {
     return;
   animation_alpha_.reset();
   if (state_ != State::Selected && new_state != State::Selected) {
-    view_delegate_->AddAnimation(this);
+    tab_controller_->AddTabAnimation(this);
     animation_alpha_.reset(new ui::AnimationFloat(
         base::TimeDelta::FromMilliseconds(16 * 20),
         ComputeAlpha(state_),
@@ -306,12 +306,15 @@ void Tab::Animate(base::Time time) {
     animation_alpha_.reset();
     return;
   }
-  view_delegate_->AddAnimation(this);
+  tab_controller_->AddTabAnimation(this);
 }
 
 // ui::Tooltip::ToolDelegate
 base::string16 Tab::GetTooltipText() {
-  return view_delegate_->GetTooltipTextForTab(this);
+  auto const tab_data = tab_content_->GetTabData();
+  if (!tab_data)
+    return base::string16();
+  return tab_data->tooltip;
 }
 
 // ui::Widget
@@ -324,6 +327,7 @@ void Tab::DidChangeBounds() {
   // Since, tab is paint into parent's canvas, we should paint tab event if it
   // moved.
   MarkDirty();
+  tab_controller_->DidChangeTabBounds(this);
 }
 
 void Tab::OnDraw(gfx::Canvas* canvas) {
@@ -374,8 +378,8 @@ void Tab::OnMousePressed(const ui::MouseEvent& event) {
   if (result.part() != Part::Label)
     return;
   if (!is_selected())
-    view_delegate_->RequestSelectTab(this);
-  view_delegate_->MaybeStartDrag(this, event.location());
+    tab_controller_->RequestSelectTab(this);
+  tab_controller_->MaybeStartDrag(this, event.location());
 }
 
 void Tab::OnMouseReleased(const ui::MouseEvent& event) {
@@ -384,7 +388,7 @@ void Tab::OnMouseReleased(const ui::MouseEvent& event) {
   // TODO(eval1749) stop tab dragging
   auto const result = HitTest(gfx::PointF(event.location()));
   if (result.part() == Part::CloseMark)
-    view_delegate_->RequestCloseTab(this);
+    tab_controller_->RequestCloseTab(this);
 }
 
 }  // namespace views

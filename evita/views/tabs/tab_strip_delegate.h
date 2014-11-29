@@ -23,7 +23,6 @@ class TabStripDelegate {
   public: virtual void DidDropTab(TabContent* tab_content,
                                   const gfx::Point& screen_point) = 0;
   public: virtual void DidSelectTab(int new_selected_index) = 0;
-  public: virtual base::string16 GetTooltipTextForTab(int tab_index) = 0;
   public: virtual void RequestCloseTab(int tab_index) = 0;
   public: virtual void RequestSelectTab(int new_selected_index) = 0;
 

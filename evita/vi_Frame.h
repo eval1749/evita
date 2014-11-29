@@ -127,7 +127,6 @@ class Frame final : public views::Window,
   private: virtual void DidDropTab(TabContent* tab_content,
                                    const gfx::Point& screen_point) override;
   private: virtual void DidSelectTab(int new_selected_index) override;
-  private: virtual base::string16 GetTooltipTextForTab(int tab_index) override;
   private: virtual void RequestCloseTab(int tab_index) override;
   private: virtual void RequestSelectTab(
       int new_selected_index) override;

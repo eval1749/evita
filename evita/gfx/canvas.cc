@@ -102,7 +102,7 @@ Canvas::~Canvas() {
 void Canvas::AddDirtyRect(const RectF& local_bounds) {
   auto const bounds = gfx::RectF(local_bounds.origin() + bounds_.origin(),
                                  local_bounds.size()).Intersect(bounds_);
-  if (bounds_.empty())
+  if (bounds.empty())
     return;
   AddDirtyRectImpl(bounds);
 }

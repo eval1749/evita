@@ -119,7 +119,7 @@ global.PythonLexer = (function(keywords) {
   // TODO(eval1749) Once closure compiler support |static get|, we should use
   // it.
   Object.defineProperty(PythonLexer, 'keywords', {
-    get: function() { return options.keywords; }
+    get: function() { return keywords; }
   });
   return PythonLexer;
 })(Lexer.createKeywords([

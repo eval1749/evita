@@ -897,7 +897,7 @@ global.XmlLexer = (function(xmlOptions) {
   // TODO(eval1749) Once closure compiler support |static get|, we should use
   // it.
   Object.defineProperty(XmlLexer, 'keywords', {
-    get: function() { return options.keywords; }
+    get: function() { return xmlOptions.keywords; }
   });
   return XmlLexer;
 })({

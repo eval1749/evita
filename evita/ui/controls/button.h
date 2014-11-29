@@ -47,16 +47,17 @@ class Button : public ui::Widget {
 
   public: State state() const { return state_; }
 
-  protected: bool IsDirty(const gfx::Canvas* canvas) const;
+  private: bool IsDirty(const gfx::Canvas* canvas) const;
   private: void MarkDirty();
+  protected: virtual void PaintButton(gfx::Canvas* canvas);
   protected: void SetState(State new_state);
 
   // ui::Widget
   protected: virtual void DidChangeBounds() override;
   protected: virtual void DidShow() override;
   protected: void OnDraw(gfx::Canvas* canvas) override;
+  protected: void OnMouseEntered(const ui::MouseEvent& event) override;
   protected: void OnMouseExited(const ui::MouseEvent& event) override;
-  protected: void OnMouseMoved(const ui::MouseEvent& event) override;
   protected: void OnMousePressed(const ui::MouseEvent& event) override;
   protected: void OnMouseReleased(const ui::MouseEvent& event) override;
 

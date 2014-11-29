@@ -32,6 +32,9 @@ void Button::MarkDirty() {
   dirty_ = true;
 }
 
+void Button::PaintButton(gfx::Canvas*) {
+}
+
 void Button::SetState(State new_state) {
   if (state_ == new_state)
     return;
@@ -51,17 +54,19 @@ void Button::DidShow() {
 }
 
 void Button::OnDraw(gfx::Canvas* canvas) {
-  DCHECK(dirty_ || canvas_bitmap_id_ != canvas->bitmap_id());
+  if (!IsDirty(canvas))
+    return;
   canvas_bitmap_id_ = canvas->bitmap_id();
   dirty_ = false;
+  PaintButton(canvas);
+}
+
+void Button::OnMouseEntered(const ui::MouseEvent&) {
+  SetState(State::Hovered);
 }
 
 void Button::OnMouseExited(const ui::MouseEvent&) {
   SetState(State::Normal);
-}
-
-void Button::OnMouseMoved(const ui::MouseEvent&) {
-  SetState(State::Hovered);
 }
 
 void Button::OnMousePressed(const ui::MouseEvent& event) {

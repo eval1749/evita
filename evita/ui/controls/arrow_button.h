@@ -35,8 +35,8 @@ class ArrowButton final : public ui::Button {
   private: gfx::ColorF ComputeColor() const;
   private: void DrawArrow(gfx::Canvas* canvas) const;
 
-  // ui::Widget
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  // ui::Button
+  private: virtual void PaintButton(gfx::Canvas* canvas) override;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowButton);
 };

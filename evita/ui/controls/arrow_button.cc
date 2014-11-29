@@ -79,12 +79,10 @@ void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
 }
 
 // ui::Widget
-void ArrowButton::OnDraw(gfx::Canvas* canvas) {
-  if (!IsDirty(canvas))
-    return;
-  Button::OnDraw(canvas);
-  canvas->AddDirtyRect(GetContentsBounds());
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, GetContentsBounds());
+void ArrowButton::PaintButton(gfx::Canvas* canvas) {
+  auto const bounds = GetContentsBounds();
+  canvas->AddDirtyRect(bounds);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   canvas->Clear(gfx::ColorF());
   DrawArrow(canvas);
 }

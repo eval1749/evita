@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import os, re, sys
+import string
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 evita_src = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 
-sys.path.insert(0, os.path.join(evita_src, 'v8', 'tools'))
-import jsmin
+#sys.path.insert(0, os.path.join(evita_src, 'v8', 'tools'))
+#import jsmin
 
 SOURCE = """\
 // L4 C4127: conditional expression is constant
@@ -46,36 +47,51 @@ kMaxCharsInLine = 80
 kIndent = '  '
 
 def ConvertToCString(script_text):
-  lines = script_text.split('\n')
-  result = ''
-  for line in lines:
-    line = re.sub(r'\\', '\\\\\\\\', line)
-    line = re.sub(r'"', '\\"', line)
-    result += kIndent + '"' + line + '\\n"' + '\n'
-  return result;
+    lines = script_text.split('\n')
+    result = ''
+    for line in lines:
+        line = re.sub(r'\\', '\\\\\\\\', line)
+        line = re.sub(r'"', '\\"', line)
+        result += kIndent + '"' + line + '\\n"' + '\n'
+    return result
+
+
+def handleMultipleLineComment(match_obj):
+    return '\n' * string.count(match_obj.group(0), '\n')
+
+
+def minify(script_text):
+    result = script_text
+    result = re.sub(r'/[*][^\n]+?[*]/', '', result)
+    result = re.sub(r'/[*].+?[*]/', handleMultipleLineComment, result,
+                    flags=re.DOTALL)
+    result = re.sub(r'\n +', '\n', result)
+    result = re.sub(r'//.*?\n', '\n', result)
+    return result
 
 def main():
-  output_file = sys.argv[1]
-  minifier = jsmin.JavaScriptMinifier()
+    output_file = sys.argv[1]
+    #minifier = jsmin.JavaScriptMinifier()
 
-  entries = []
+    entries = []
 
-  entries.append('{"(global)", "var global = this;"},');
+    entries.append('{"(global)", "var global = this;"},')
 
-  for input_file in sys.argv[2:]:
-    lines = open(input_file, 'rt').readlines()
-    script_text = ''.join(lines)
-    script_text = minifier.JSMinify(script_text);
-    entries.append('{"%(file_name)s", \n%(script_text)s},' % {
-      'file_name': input_file,
-      'script_text': ConvertToCString(script_text)
+    for input_file in sys.argv[2:]:
+        lines = open(input_file, 'rt').readlines()
+        script_text = ''.join(lines)
+        # script_text = minifier.JSMinify(script_text)
+        script_text = minify(script_text)
+        entries.append('{"%(file_name)s", \n%(script_text)s},' % {
+            'file_name': input_file,
+            'script_text': ConvertToCString(script_text)
+        })
+
+    output = open(output_file, 'w');
+    output.write(SOURCE % {
+        'entries': '\n'.join(entries)
     })
-
-  output = open(output_file, 'w');
-  output.write(SOURCE % {
-    'entries': '\n'.join(entries)
-  })
-  output.close()
+    output.close()
 
 if __name__ == '__main__':
-  main()
+    main()

@@ -2,62 +2,65 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/**
-* @constructor
-* @param {string} name
-* @param {!function()} lexerConstructor
-*/
 global.Mode = (function() {
-  function Mode(name, lexerConstructor) {
-    this.keymap_ = new Map();
-    this.lexerConstructor_ = lexerConstructor;
-    this.name_ = name;
-  }
-  return Mode;
-})();
+  class Mode {
+    /**
+     * @param {string} name
+     * @param {!Function} lexerConstructor
+     */
+    constructor(name, lexerConstructor) {
+      /** @type {!Map} */
+      this.keymap_ = new Map();
+      /** @type {Lexer} */
+      this.lexer_ = null;
+      /** @type {!Function} */
+      this.lexerConstructor_ = lexerConstructor;
+      /** @type {string} */
+      this.name_ = name;
+    }
 
-Mode.prototype = Object.defineProperties(Mode.prototype, {
-  attach: {value:
     /**
      * @this {!Mode}
      * @param {!Document} document
      */
-    function(document) {
+    attach(document) {
       if (this.document_)
         throw new Error(this + ' is already attached to ' + this.document_);
       this.document_ = document;
       this.lexer_ = new this.lexerConstructor_(document);
     }
-  },
-  detach: {value:
+
     /**
      * @this {!Mode}
      */
-    function() {
+    detach() {
       if (!this.document_)
         throw new Error(this + ' is already attached to ' + this.document_);
       this.lexer_.detach();
     }
-  },
-  document: {get: function() { return this.document_; }},
-  document_: {value: null, writable: true},
-  doColor: {value:
+
     /**
      * @this {!Mode}
      * @param {!Document} document
      * @param {number} hint
      * @return {number}
      */
-    function(document, hint) {
+    doColor(document, hint) {
       if (!this.document_)
         throw new Error(this + ' is detached.');
       return this.lexer_.doColor(hint);
     }
-  },
-  keymap: { get: function() { return this.keymap_; } },
-  keymap_: {writable: true},
-  lexer_: {value: null, writable: true},
-  lexerConstructor_: {writable: true},
-  name: { get: function() { return this.name_; } },
-  name_: {writable: true},
-});
+
+    //get document() { return this.document_; }
+    //get keymap() { return this.keymap_; }
+    //get name() { return this.name_; }
+  }
+
+  Object.defineProperties(Mode.prototype, {
+    document: {get: function() { return this.document_; }},
+    keymap: {get: function() { return this.keymap_; }},
+    name: {get: function() { return this.name_; }},
+  });
+
+  return Mode;
+})();

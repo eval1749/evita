@@ -40,6 +40,8 @@
 {% endfor %}
 {% if return_type %}
  * @return {{ '{' }}{{return_type}}{{ '}' }}
+{% elif kind == 'constructor' %}
+ * @return {{ '{undefined}' }}
 {% endif %}
  */
 {% if kind == 'constructor' %}

@@ -5,7 +5,7 @@
 #if !defined(INCLUDE_evita_vi_EditPane_h)
 #define INCLUDE_evita_vi_EditPane_h
 
-#include "evita/views/tab_content.h"
+#include "evita/views/tabs/tab_content.h"
 
 class Frame;
 

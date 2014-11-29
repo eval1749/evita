@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/tab_strip.h"
+#include "evita/views/tabs/tab_strip.h"
 
 #include <algorithm>
 #include <memory>
@@ -28,8 +28,8 @@
 #include "evita/ui/tooltip.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/tabs/tab.h"
-#include "evita/views/tab_content.h"
-#include "evita/views/tab_strip_delegate.h"
+#include "evita/views/tabs/tab_content.h"
+#include "evita/views/tabs/tab_strip_delegate.h"
 #include "evita/vi_Frame.h"
 
 namespace views {

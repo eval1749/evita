@@ -9,7 +9,7 @@
 #include "evita/ui/events/event.h"
 #include "evita/views/icon_cache.h"
 #include "evita/views/tabs/tab.h"
-#include "evita/views/tab_content.h"
+#include "evita/views/tabs/tab_content.h"
 
 namespace views {
 

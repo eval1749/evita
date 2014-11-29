@@ -15,9 +15,9 @@
 #include <vector>
 
 #include "base/observer_list.h"
-#include "evita/views/tab_content_observer.h"
-#include "evita/views/tab_data_set.h"
-#include "evita/views/tab_strip_delegate.h"
+#include "evita/views/tabs/tab_content_observer.h"
+#include "evita/views/tabs/tab_data_set.h"
+#include "evita/views/tabs/tab_strip_delegate.h"
 #include "evita/views/window.h"
 
 namespace gfx {

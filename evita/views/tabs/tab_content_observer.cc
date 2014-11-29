@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/tab_content_observer.h"
+#include "evita/views/tabs/tab_content_observer.h"
 
 namespace views {
 

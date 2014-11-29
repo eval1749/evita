@@ -11,7 +11,7 @@
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/events/event.h"
-#include "evita/views/tab_data_set.h"
+#include "evita/views/tabs/tab_data_set.h"
 #include "evita/views/window_set.h"
 
 namespace views {

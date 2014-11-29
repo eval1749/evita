@@ -5,7 +5,7 @@
 vars = {
   'googlecode_url': 'http://%s.googlecode.com/svn',
   'chromium_git': 'https://chromium.googlesource.com',
-  'v8_revision': '470c87fca260551fc2aec6ffa9cc38bef286de69'
+  'v8_revision': 'd6c371b24ce332c80cdef3c73af8c113d268df5c'
 }
 
 deps = {

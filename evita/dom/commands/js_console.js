@@ -262,7 +262,8 @@ global.JsConsole = (function() {
     if (instance)
       return instance;
     instance = new JsConsole();
-    instance.emit('\x2F/ JavaScript Console\n');
+    instance.emit(`\x2F/ JavaScript Console ${Editor.version},\u00A0` +
+                  `v8:${Editor.v8Version}\n`);
     instance.emitPrompt();
     return instance;
   }

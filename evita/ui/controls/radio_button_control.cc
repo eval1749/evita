@@ -62,7 +62,7 @@ void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
       break;
     case Control::State::Highlight:
       (*canvas)->FillEllipse(ellipse,
-          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1)));
+          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)));
       (*canvas)->DrawEllipse(ellipse,
           gfx::Brush(canvas, style_.highlight));
       break;

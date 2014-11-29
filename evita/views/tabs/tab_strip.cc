@@ -598,6 +598,8 @@ gfx::Size TabCollection::GetPreferredSize() const {
 
 void TabCollection::OnDraw(gfx::Canvas* canvas) {
   UpdateLayout();
+  if (tabs_.empty())
+    return;
   {
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, GetContentsBounds());
     ui::Widget::OnDraw(canvas);

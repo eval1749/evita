@@ -128,15 +128,13 @@ void Widget::CreateNativeWindow() const {
 }
 
 void Widget::DestroyWidget() {
-  if (state_ == kBeingDestroyed) {
-    DCHECK(!native_window_);
+  if (state_ == kBeingDestroyed)
     return;
-  }
+  state_ = kBeingDestroyed;
   if (native_window_) {
     ::DestroyWindow(*native_window_.get());
     return;
   }
-  state_ = kBeingDestroyed;
   WillDestroyWidget();
   auto parent_widget = container_widget();
   parent_widget->WillRemoveChildWidget(this);
@@ -653,6 +651,7 @@ void Widget::WillDestroyWidget() {
 void Widget::WillDestroyNativeWindow() {
   std::vector<Widget*> non_native_children;
   for (auto const child : child_nodes()) {
+    DCHECK_NE(child->state_, kBeingDestroyed);
     if (!child->native_window())
       non_native_children.push_back(child);
   }

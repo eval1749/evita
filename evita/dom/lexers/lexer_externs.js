@@ -39,6 +39,9 @@ Lexer.STRING1_CHAR;
 Lexer.STRING2_CHAR;
 
 /** @const @type {!Symbol} */
+Lexer.STRING3_CHAR;
+
+/** @const @type {!Symbol} */
 Lexer.WHITESPACE_CHAR;
 
 /** @typedef {!Symbol} */
@@ -113,7 +116,7 @@ Lexer.createKeywords;
 Lexer.prototype.changeOffset;
 
 /**
- * @type {!Map.<number, number>}
+ * @type {!Map.<number, !Symbol>}
  */
 Lexer.prototype.characters_;
 
@@ -254,13 +257,6 @@ Lexer.prototype.isNameChar = function(charCode) {};
  * @return {boolean}
  */
 Lexer.prototype.isNameStartChar = function(charCode) {};
-
-/**
- * @this {!Lexer}
- * @param {number} charCode
- * @return {boolean}
- */
-Lexer.prototype.isOperatorChar = function(charCode) {};
 
 /**
  * @this {!Lexer}

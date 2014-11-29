@@ -23,7 +23,12 @@ global.JavaScriptLexer = (function(options) {
   return JavaScriptLexer;
 })({
   useDot: true,
-  characters: ClikeLexer.newCharacters(),
+  characters: (function() {
+    let map = ClikeLexer.newCharacters();
+    // Template string, e.g. `foo${bar + baz}`
+    map.set(Unicode.GRAVE_ACCENT, Lexer.STRING3_CHAR);
+    return map;
+  })(),
   keywords: (function() {
     var map = Lexer.createKeywords([
       'break',
@@ -127,13 +132,13 @@ global.JavaScriptLexer = (function(options) {
 
       // Text processing
       'String',
-        'String.fromCharCode', 'String.fromCodePoint',
+        'String.fromCharCode', 'String.fromCodePoint', 'String.raw',
       'RegExp',
         'RegExp.lastIndex',
 
       // Indexed collections
       'Array',
-        'Array.isArray', 'Array.length',
+        'Array.from', 'Array.isArray', 'Array.of',
       'Float32Array',
       'Float64Array',
       'Int16Array',

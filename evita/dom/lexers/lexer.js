@@ -82,7 +82,7 @@ global.Lexer = (function() {
         mutationCallback.bind(this));
     this.eventHandlers_ = new Map();
     function installEventHandler(eventType, lexer, callback) {
-      var handler = callback.bind(lexer);
+      let handler = callback.bind(lexer);
       lexer.eventHandlers_.set(eventType, handler);
       document.addEventListener(eventType, handler);
     }
@@ -98,6 +98,7 @@ global.Lexer = (function() {
   Lexer.WHITESPACE_CHAR = Symbol('whitespace');
   Lexer.STRING1_CHAR = Symbol('string1');
   Lexer.STRING2_CHAR = Symbol('string2');
+  Lexer.STRING3_CHAR = Symbol('string3');
 
   Lexer.State = {
     DOT: Symbol('.'),
@@ -111,6 +112,9 @@ global.Lexer = (function() {
     STRING2: Symbol('string2'),
     STRING2_END: Symbol('string2_end'),
     STRING2_ESCAPE: Symbol('string2_escape'),
+    STRING3: Symbol('string3'),
+    STRING3_END: Symbol('string3_end'),
+    STRING3_ESCAPE: Symbol('string3_escape'),
     WORD: Symbol('word'),
     ZERO: Symbol('zero'),
   };
@@ -134,7 +138,7 @@ global.Lexer = (function() {
    * @return {!Map.<string, string>}
    */
   Lexer.createKeywords = function(keywords) {
-    var map = new Map();
+    let map = new Map();
     keywords.forEach(function(keyword) {
       map.set(keyword, 'keyword');
     });
@@ -145,10 +149,10 @@ global.Lexer = (function() {
    * @this {!Lexer}
    */
   function adjustScanOffset() {
-    if (!this.lastToken || this.changedOffset == Count.FORWARD)
+    if (!this.lastToken || this.changedOffset === Count.FORWARD)
       return;
-    var document = this.range.document;
-    var newScanOffset = Math.min(this.changedOffset, this.lastToken.end,
+    let document = this.range.document;
+    let newScanOffset = Math.min(this.changedOffset, this.lastToken.end,
                                  document.length);
     if (this.debug_ > 0)
       console.log('adjustScanOffset', newScanOffset, this);
@@ -161,8 +165,8 @@ global.Lexer = (function() {
       return;
     }
 
-    var dummyToken = new Lexer.Token(Lexer.State.ZERO, newScanOffset - 1);
-    var it = this.tokens.lowerBound(dummyToken);
+    let dummyToken = new Lexer.Token(Lexer.State.ZERO, newScanOffset - 1);
+    let it = this.tokens.lowerBound(dummyToken);
     console.assert(it, newScanOffset);
 
     if (this.debug_ > 1)
@@ -170,13 +174,13 @@ global.Lexer = (function() {
 
     // Case 1: <ss|ss> middle of token
     // Case 2: ssss| end of token
-    var lastToken = it.data;
+    let lastToken = it.data;
     it = it.next();
 
     // Remove dirty tokens
     if (it) {
       // Collect dirty tokens
-      var tokensToRemove = new Array();
+      let tokensToRemove = new Array();
       while (it) {
         tokensToRemove.push(it.data);
         it = it.next();
@@ -190,11 +194,11 @@ global.Lexer = (function() {
     }
 
     // Shrink last clean token
-    if (lastToken.end != newScanOffset) {
+    if (lastToken.end !== newScanOffset) {
       console.assert(lastToken.start < newScanOffset, lastToken);
       lastToken.end = newScanOffset;
-      var newState = this.didShrinkLastToken(lastToken);
-      if (lastToken.state != newState)
+      let newState = this.didShrinkLastToken(lastToken);
+      if (lastToken.state !== newState)
         lastToken.state = newState;
     }
 
@@ -223,16 +227,16 @@ global.Lexer = (function() {
    * @return {!Array.<!Lexer.Token>}
    */
   function collectTokens(itDelimiter, token) {
-    var delimiter = itDelimiter.data;
-    var tokens = [token];
-    var it = itDelimiter;
-    while (it && it.data.state == delimiter.state &&
+    let delimiter = itDelimiter.data;
+    let tokens = [token];
+    let it = itDelimiter;
+    while (it && it.data.state === delimiter.state &&
            tokens.length < this.maxChainWords_) {
       tokens.unshift(it.data);
       do {
         it = it.previous();
-      } while (it && it.data.state == Lexer.State.SPACE);
-      if (!it || it.data.state != Lexer.State.WORD)
+      } while (it && it.data.state === Lexer.State.SPACE);
+      if (!it || it.data.state !== Lexer.State.WORD)
         break;
       tokens.unshift(it.data);
       it = it.previous();
@@ -244,7 +248,7 @@ global.Lexer = (function() {
    * @this {!Lexer}
    */
   function colorLastToken() {
-    var token = this.lastToken;
+    let token = this.lastToken;
     if (!token)
       return;
     this.colorToken(token);
@@ -255,13 +259,13 @@ global.Lexer = (function() {
    * @param {!Lexer.Token} token
    */
   function colorToken(token) {
-    var range = this.range;
+    let range = this.range;
     range.collapseTo(token.start);
     range.end = token.end;
-    var syntax = this.syntaxOfToken(range, token) || '';
+    let syntax = this.syntaxOfToken(range, token) || '';
     if (this.debug_ > 4)
       console.log('setSyntax', '"' + syntax + '"', token);
-    range.setSyntax(syntax == 'identifier' ? '' : syntax);
+    range.setSyntax(syntax === 'identifier' ? '' : syntax);
   }
 
   /**
@@ -270,7 +274,7 @@ global.Lexer = (function() {
   function detach() {
     if (!this.range)
       throw new Error(this + ' isn\'t attached to document.');
-    var document = this.range.document;
+    let document = this.range.document;
     this.eventHandlers_.forEach(function(handler, eventType) {
         document.removeEventListener(eventType, handler);
     });
@@ -296,14 +300,14 @@ global.Lexer = (function() {
       throw new Error("Can't use disconnected lexer.");
 
     this.adjustScanOffset();
-    var document = this.range.document;
-    var maxOffset = Math.min(this.scanOffset + maxCount, document.length);
-    var startOffset = this.scanOffset;
+    let document = this.range.document;
+    let maxOffset = Math.min(this.scanOffset + maxCount, document.length);
+    let startOffset = this.scanOffset;
     while (this.scanOffset < maxOffset) {
-      var charCode = document.charCodeAt_(this.scanOffset);
+      let charCode = document.charCodeAt_(this.scanOffset);
       this.feedCharacter(charCode);
     }
-    var count = this.scanOffset - startOffset;
+    let count = this.scanOffset - startOffset;
     if (count && this.lastToken)
       this.colorLastToken();
     return maxCount - count;
@@ -342,8 +346,8 @@ global.Lexer = (function() {
    * @return {boolean}
    */
   function isNameChar(charCode) {
-    var type = this.characters_.get(charCode);
-    return type == Lexer.NAMESTART_CHAR || type == Lexer.NAME_CHAR;
+    let type = this.characters_.get(charCode);
+    return type === Lexer.NAMESTART_CHAR || type === Lexer.NAME_CHAR;
   }
 
   /**
@@ -352,16 +356,7 @@ global.Lexer = (function() {
    * @return {boolean}
    */
   function isNameStartChar(charCode) {
-    return this.characters_.get(charCode) == Lexer.NAMESTART_CHAR;
-  }
-
-  /**
-   * @this {!Lexer}
-   * @param {number} charCode
-   * @return {boolean}
-   */
-  function isOperatorChar(charCode) {
-    return this.characters_.get(charCode) == Lexer.OPERATOR_CHAR;
+    return this.characters_.get(charCode) === Lexer.NAMESTART_CHAR;
   }
 
   /**
@@ -379,7 +374,7 @@ global.Lexer = (function() {
    * @return {boolean}
    */
   function isWhitespaceChar(charCode) {
-    return this.characters_.get(charCode) == Lexer.WHITESPACE_CHAR;
+    return this.characters_.get(charCode) === Lexer.WHITESPACE_CHAR;
   }
 
   /**
@@ -388,8 +383,8 @@ global.Lexer = (function() {
    * @return {boolean}
    */
   function isWordChar(charCode) {
-    var type = this.characters_.get(charCode);
-    return type == Lexer.NAMESTART_CHAR || type == Lexer.NAME_CHAR;
+    let type = this.characters_.get(charCode);
+    return type === Lexer.NAMESTART_CHAR || type === Lexer.NAME_CHAR;
   }
 
   /**
@@ -397,7 +392,7 @@ global.Lexer = (function() {
    * @param {!Lexer.State} newState
    */
   function restartToken(newState) {
-    console.assert(newState != Lexer.State.ZERO,
+    console.assert(newState !== Lexer.State.ZERO,
                    'newState must not be zero.');
     this.extendToken();
     if (this.debug_ > 2)
@@ -412,10 +407,10 @@ global.Lexer = (function() {
    * @param {!Lexer.State} state
    */
   function startToken(state) {
-    console.assert(state != Lexer.State.ZERO, 'state must not be zero.');
+    console.assert(state !== Lexer.State.ZERO, 'state must not be zero.');
     if (this.debug_ > 2)
       console.log('startToken', state, this.scanOffset);
-    var token = new Lexer.Token(state, this.scanOffset);
+    let token = new Lexer.Token(state, this.scanOffset);
     token.data = this.tokenData;
     if (this.debug_ > 0)
       console.assert(!this.tokens.find(token));
@@ -425,8 +420,8 @@ global.Lexer = (function() {
     ++this.scanOffset;
   }
 
-  var syntaxOfToken = (function() {
-    var map = new Map();
+  let syntaxOfToken = (function() {
+    let map = new Map();
     map.set(Lexer.State.DOT, 'operators');
     map.set(Lexer.State.LINE_COMMENT, 'comment');
     map.set(Lexer.State.OPERATOR, 'operators');
@@ -438,6 +433,9 @@ global.Lexer = (function() {
     map.set(Lexer.State.STRING2, 'string_literal');
     map.set(Lexer.State.STRING2_END, 'string_literal');
     map.set(Lexer.State.STRING2_ESCAPE, 'string_literal');
+    map.set(Lexer.State.STRING3, 'string_literal');
+    map.set(Lexer.State.STRING3_END, 'string_literal');
+    map.set(Lexer.State.STRING3_ESCAPE, 'string_literal');
     map.set(Lexer.State.WORD, 'identifier');
 
     /**
@@ -457,13 +455,13 @@ global.Lexer = (function() {
    * @return {string}
    */
   function syntaxOfTokens(range, tokens) {
-    var lexer = this;
-    var document = range.document;
-    var words = tokens.map(function(token) {
+    let lexer = this;
+    let document = range.document;
+    let words = tokens.map(function(token) {
       return document.slice(token.start, token.end);
     });
     while (words.length) {
-      var syntax = lexer.keywords.get(words.join(''));
+      let syntax = lexer.keywords.get(words.join(''));
       if (syntax) {
         range.start = tokens[0].start;
         return syntax;
@@ -492,20 +490,21 @@ global.Lexer = (function() {
    *    - line comment
    */
   function updateState(charCode) {
-    var lexer = this;
+    let lexer = this;
+    let charSyntax = lexer.characters_.get(charCode);
     switch (lexer.state){
      case Lexer.State.DOT:
        lexer.state = Lexer.State.ZERO;
        break;
      case Lexer.State.LINE_COMMENT:
-       if (charCode == Unicode.LF)
+       if (charCode === Unicode.LF)
          lexer.endToken();
        else
          lexer.extendToken();
        break;
 
      case Lexer.State.OPERATOR:
-       if (lexer.isOperatorChar(charCode))
+       if (charSyntax === Lexer.OPERATOR_CHAR)
          lexer.extendToken();
        else
          lexer.endToken();
@@ -519,16 +518,16 @@ global.Lexer = (function() {
        break;
 
      case Lexer.State.SPACE:
-       if (charCode == Unicode.SPACE || charCode == Unicode.TAB)
+       if (charCode === Unicode.SPACE || charCode === Unicode.TAB)
          lexer.extendToken();
        else
          lexer.endToken();
        break;
 
      case Lexer.State.STRING1:
-       if (charCode == Unicode.APOSTROPHE)
+       if (charSyntax === Lexer.STRING1_CHAR)
          lexer.finishToken(Lexer.State.STRING1_END);
-       else if (charCode == Unicode.REVERSE_SOLIDUS)
+       else if (charCode === Unicode.REVERSE_SOLIDUS)
          lexer.finishToken(Lexer.State.STRING1_ESCAPE);
        else
          lexer.extendToken();
@@ -541,9 +540,9 @@ global.Lexer = (function() {
        break;
 
      case Lexer.State.STRING2:
-       if (charCode == Unicode.QUOTATION_MARK)
+       if (charSyntax === Lexer.STRING2_CHAR)
          lexer.finishToken(Lexer.State.STRING2_END);
-       else if (charCode == Unicode.REVERSE_SOLIDUS)
+       else if (charCode === Unicode.REVERSE_SOLIDUS)
          lexer.finishToken(Lexer.State.STRING2_ESCAPE);
        else
          lexer.extendToken();
@@ -555,40 +554,60 @@ global.Lexer = (function() {
        lexer.finishToken(Lexer.State.STRING2);
        break;
 
-     case Lexer.State.WORD:
-       if (lexer.isWordChar(charCode))
-         lexer.extendToken();
+     case Lexer.State.STRING3:
+       if (charSyntax === Lexer.STRING3_CHAR)
+         lexer.finishToken(Lexer.State.STRING3_END);
+       else if (charCode === Unicode.REVERSE_SOLIDUS)
+         lexer.finishToken(Lexer.State.STRING3_ESCAPE);
        else
-         lexer.endToken();
+         lexer.extendToken();
+       break;
+     case Lexer.State.STRING3_END:
+       lexer.endToken();
+       break;
+     case Lexer.State.STRING3_ESCAPE:
+       lexer.finishToken(Lexer.State.STRING3);
+       break;
+
+     case Lexer.State.WORD:
+       if (charSyntax === Lexer.NAMESTART_CHAR ||
+           charSyntax === Lexer.NAME_CHAR) {
+         lexer.extendToken();
+         break;
+       }
+       lexer.endToken();
        break;
 
      case Lexer.State.ZERO:
-       switch (charCode) {
-         case Unicode.APOSTROPHE:
+       switch (charSyntax) {
+         case Lexer.NAMESTART_CHAR:
+         case Lexer.NAME_CHAR:
+           lexer.startToken(Lexer.State.WORD);
+           break;
+         case Lexer.OPERATOR_CHAR:
+           lexer.startToken(Lexer.State.OPERATOR);
+           break;
+         case Lexer.STRING1_CHAR:
            lexer.startToken(Lexer.State.STRING1);
            break;
-         case Unicode.LF:
-         case Unicode.SPACE:
-         case Unicode.TAB:
-           lexer.startToken(Lexer.State.SPACE);
-           break;
-         case Unicode.QUOTATION_MARK:
+         case Lexer.STRING2_CHAR:
            lexer.startToken(Lexer.State.STRING2);
            break;
+         case Lexer.STRING3_CHAR:
+           lexer.startToken(Lexer.State.STRING3);
+           break;
+         case Lexer.WHITESPACE_CHAR:
+           lexer.startToken(Lexer.State.SPACE);
+           break;
          default:
-           if (lexer.isWordChar(charCode))
-             lexer.startToken(Lexer.State.WORD);
-           else if (lexer.isOperatorChar(charCode))
-             lexer.startToken(Lexer.State.OPERATOR);
-           else
-             lexer.startToken(Lexer.State.OTHER);
+           lexer.startToken(Lexer.State.OTHER);
            break;
        }
        break;
 
      default:
        console.log(lexer);
-       throw new Error('Invalid state ' + lexer.state.toString());
+       throw new Error(`Invalid state ${lexer.state}`);
     }
   }
 
@@ -612,7 +631,6 @@ global.Lexer = (function() {
     finishToken: {value: finishToken},
     isNameChar: {value: isNameChar},
     isNameStartChar: {value: isNameStartChar},
-    isOperatorChar: {value: isOperatorChar},
     isOtherChar: {value: isOtherChar},
     isWhitespaceChar: {value: isWhitespaceChar},
     isWordChar: {value: isWordChar},

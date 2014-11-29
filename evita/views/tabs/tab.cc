@@ -335,12 +335,27 @@ void Tab::OnDraw(gfx::Canvas* canvas) {
   if (!dirty_visual_)
     return;
   dirty_visual_ = false;
-  canvas->AddDirtyRect(GetContentsBounds());
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, GetContentsBounds());
+  auto const bounds = GetContentsBounds();
+  canvas->AddDirtyRect(bounds);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   canvas->Clear(ComputeBackgroundColor());
   {
+    common::ComPtr<ID2D1PathGeometry> geometry;
+    gfx::FactorySet::d2d1().CreatePathGeometry(&geometry);
+    {
+      common::ComPtr<ID2D1GeometrySink> sink;
+      geometry->Open(&sink);
+      sink->BeginFigure(bounds.origin(), D2D1_FIGURE_BEGIN_HOLLOW);
+      sink->AddLine(bounds.top_right());
+      sink->AddLine(bounds.bottom_right());
+      sink->AddLine(bounds.bottom_left());
+      sink->EndFigure(previous_sibling() ? D2D1_FIGURE_END_OPEN :
+                                           D2D1_FIGURE_END_CLOSED);
+      sink->Close();
+    }
+
     gfx::Brush strokeBrush(canvas, gfx::ColorF(0, 0, 0, 0.7f));
-    canvas->DrawRectangle(strokeBrush, GetContentsBounds());
+    (*canvas)->DrawGeometry(geometry, strokeBrush);
   }
   DrawIcon(canvas);
   DrawLabel(canvas);

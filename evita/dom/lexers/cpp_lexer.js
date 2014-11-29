@@ -3,20 +3,19 @@
 // found in the LICENSE file.
 
 global.CppLexer = (function(options) {
-  /**
-   * @constructor
-   * @extends Lexer
-   * @param {!Document} document
-   */
-  function CppLexer(document) {
-    ClikeLexer.call(this, document, options);
+  class CppLexer extends ClikeLexer {
+    /**
+     * @param {!Document} document
+     */
+    constructor(document) {
+      ClikeLexer.call(this, document, options);
+    }
   }
-
-  CppLexer.keywords = options.keywords;
-  CppLexer.prototype = Object.create(ClikeLexer.prototype, {
-    constructor: {value: CppLexer},
+  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // it.
+  Object.defineProperty(CppLexer, 'keywords', {
+    get: function() { return options.keywords; }
   });
-
   return CppLexer;
 })({
   hasCpp: true,

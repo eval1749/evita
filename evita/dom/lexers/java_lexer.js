@@ -3,20 +3,19 @@
 // found in the LICENSE file.
 
 global.JavaLexer = (function(options) {
-  /**
-   * @constructor
-   * @extends Lexer
-   * @param {!Document} document
-   */
-  function JavaLexer(document) {
-    ClikeLexer.call(this, document, options);
+  class JavaLexer extends ClikeLexer {
+    /**
+     * @param {!Document} document
+     */
+    constructor(document) {
+      ClikeLexer.call(this, document, options);
+    }
   }
-
-  JavaLexer.keywords = options.keywords;
-  JavaLexer.prototype = Object.create(ClikeLexer.prototype, {
-    constructor: {value: JavaLexer},
+  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // it.
+  Object.defineProperty(JavaLexer, 'keywords', {
+    get: function() { return options.keywords; }
   });
-
   return JavaLexer;
 })({
   useDot: true,

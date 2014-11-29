@@ -3,20 +3,19 @@
 // found in the LICENSE file.
 
 global.HtmlLexer = (function(options) {
-  /**
-   * @constructor
-   * @extends {XmlLexer}
-   * @param {!Document} document
-   */
-  function HtmlLexer(document) {
-    XmlLexer.call(this, document, options);
+  class HtmlLexer extends XmlLexer {
+    /**
+     * @param {!Document} document
+     */
+    constructor(document) {
+      XmlLexer.call(this, document, options);
+    }
   }
-
-  HtmlLexer.keywords = options.keywords;
-  HtmlLexer.prototype = Object.create(XmlLexer.prototype, {
-    constructor: {value: HtmlLexer},
+  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // it.
+  Object.defineProperty(HtmlLexer, 'keywords', {
+    get: function() { return options.keywords; }
   });
-
   return HtmlLexer;
 })({
   childLexers: {

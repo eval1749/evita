@@ -894,7 +894,11 @@ global.XmlLexer = (function(xmlOptions) {
     syntaxOfToken: {value: syntaxOfToken}
   });
 
-  XmlLexer.keywords = xmlOptions.keywords;
+  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // it.
+  Object.defineProperty(XmlLexer, 'keywords', {
+    get: function() { return options.keywords; }
+  });
   return XmlLexer;
 })({
   keywords: Lexer.createKeywords([

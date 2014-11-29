@@ -3,23 +3,22 @@
 // found in the LICENSE file.
 
 global.JavaScriptLexer = (function(options) {
-  /**
-   * @constructor
-   * @extends Lexer
-   * @param {!Document} document
-   * @param {!Lexer=} opt_parentLexer
-   */
-  function JavaScriptLexer(document, opt_parentLexer) {
-    this.parentLexer_ = arguments.length >= 2 ?
-        /** @type {!Lexer} */(opt_parentLexer) : null;
-    ClikeLexer.call(this, document, options);
+  class JavaScriptLexer extends ClikeLexer {
+    /**
+     * @param {!Document} document
+     * @param {!Lexer=} opt_parentLexer
+     */
+    constructor(document, opt_parentLexer) {
+      this.parentLexer_ = opt_parentLexer !== undefined ?
+          /** @type {!Lexer} */(opt_parentLexer) : null;
+      ClikeLexer.call(this, document, options);
+    }
   }
-
-  JavaScriptLexer.keywords = options.keywords;
-  JavaScriptLexer.prototype = Object.create(ClikeLexer.prototype, {
-    constructor: {value: JavaScriptLexer},
+  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // it.
+  Object.defineProperty(JavaScriptLexer, 'keywords', {
+    get: function() { return options.keywords; }
   });
-
   return JavaScriptLexer;
 })({
   useDot: true,

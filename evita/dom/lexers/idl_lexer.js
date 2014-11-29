@@ -3,20 +3,19 @@
 // found in the LICENSE file.
 
 global.IdlLexer = (function(options) {
-  /**
-   * @constructor
-   * @extends Lexer
-   * @param {!Document} document
-   */
-  function IdlLexer(document) {
-    ClikeLexer.call(this, document, options);
+  class IdlLexer extends ClikeLexer {
+    /**
+     * @param {!Document} document
+     */
+    constructor(document) {
+      ClikeLexer.call(this, document, options);
+    }
   }
-
-  IdlLexer.keywords = options.keywords;
-  IdlLexer.prototype = Object.create(ClikeLexer.prototype, {
-    constructor: {value: IdlLexer},
+  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // it.
+  Object.defineProperty(IdlLexer, 'keywords', {
+    get: function() { return options.keywords; }
   });
-
   return IdlLexer;
 })({
   characters: ClikeLexer.newCharacters(),

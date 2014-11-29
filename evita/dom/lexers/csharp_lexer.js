@@ -3,20 +3,19 @@
 // found in the LICENSE file.
 
 global.CsharpLexer = (function(options) {
-  /**
-   * @constructor
-   * @extends Lexer
-   * @param {!Document} document
-   */
-  function CsharpLexer(document) {
-    ClikeLexer.call(this, document, options);
+  class CsharpLexer extends ClikeLexer {
+    /**
+     * @param {!Document} document
+     */
+    constructor(document) {
+      ClikeLexer.call(this, document, options);
+    }
   }
-
-  CsharpLexer.keywords = options.keywords;
-  CsharpLexer.prototype = Object.create(ClikeLexer.prototype, {
-    constructor: {value: CsharpLexer},
+  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // it.
+  Object.defineProperty(CsharpLexer, 'keywords', {
+    get: function() { return options.keywords; }
   });
-
   return CsharpLexer;
 })({
   useDot: true,

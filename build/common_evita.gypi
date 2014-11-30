@@ -110,6 +110,9 @@
                   # L1 C4711: function 'function' selected for inline
                   # expansion
                   4711,
+                  # L3: C4738: storing 32-bit float result in memory, possible
+                  # loss of performance
+                  4738,
                   # L4 C4820: 'bytes' bytes padding added after construct
                   # 'member_name'
                   4820,

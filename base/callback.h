@@ -397,6 +397,7 @@ class Callback<R(void)> : public internal::CallbackBase {
 
   R Run() const {
     PolymorphicInvoke f =
+        #pragma warning(suppress: 4191)
         reinterpret_cast<PolymorphicInvoke>(polymorphic_invoke_);
 
     return f(bind_state_.get());

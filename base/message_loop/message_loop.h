@@ -565,6 +565,8 @@ class BASE_EXPORT MessageLoopForUI : public MessageLoop {
       MessagePumpLibevent::FileDescriptorWatcher* controller,
       MessagePumpLibevent::Watcher* delegate);
 #endif
+
+  DISALLOW_COPY_AND_ASSIGN(MessageLoopForUI);
 };
 
 // Do not add any member variables to MessageLoopForUI!  This is important b/c
@@ -646,6 +648,7 @@ class BASE_EXPORT MessageLoopForIO : public MessageLoop {
                            Watcher *delegate);
 #endif  // defined(OS_IOS) || defined(OS_POSIX)
 #endif  // !defined(OS_NACL)
+  DISALLOW_COPY_AND_ASSIGN(MessageLoopForIO);
 };
 
 // Do not add any member variables to MessageLoopForIO!  This is important b/c

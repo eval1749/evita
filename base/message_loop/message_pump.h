@@ -14,6 +14,8 @@ namespace base {
 
 class TimeTicks;
 
+#pragma warning(push)
+#pragma warning(disable: 4625 4626)
 class BASE_EXPORT MessagePump : public NonThreadSafe {
  public:
   // Please see the comments above the Run method for an illustration of how
@@ -126,6 +128,7 @@ class BASE_EXPORT MessagePump : public NonThreadSafe {
   // Sets the timer slack to the specified value.
   virtual void SetTimerSlack(TimerSlack timer_slack);
 };
+#pragma warning(pop)
 
 }  // namespace base
 

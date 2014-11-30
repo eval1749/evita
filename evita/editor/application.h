@@ -5,13 +5,6 @@
 
 #include <memory>
 
-// L4 C4625: 'derived class' : copy constructor could not be generated because
-// a base class copy constructor is inaccessible
-// L4 C4626: 'derived class' : assignment operator could not be generated
-// because a base class assignment operator is inaccessible
-
-#include <memory>
-
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 
@@ -35,7 +28,6 @@ class TimeScope;
 }
 
 namespace ui {
-class AnimationFrameHandler;
 class AnimationScheduler;
 }
 
@@ -73,8 +65,8 @@ class Application : public common::Singleton<Application> {
   public: bool CalledOnValidThread() const;
 
   // [D]
-  public: void DidStartScriptHost(domapi::ScriptHostState state);
   public: void DidHandleViewIdelEvent(int hint);
+  public: void DidStartScriptHost(domapi::ScriptHostState state);
   private: void DispatchViewIdelEvent();
   private: void DoIdle();
 

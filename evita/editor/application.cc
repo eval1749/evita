@@ -5,12 +5,9 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
-#pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
 #include "base/message_loop/message_pump_observer.h"
 #include "base/run_loop.h"
-#pragma warning(pop)
 #include "base/strings/string16.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
@@ -93,6 +90,12 @@ bool Application::CalledOnValidThread() const {
   return message_loop_.get() == base::MessageLoop::current();
 }
 
+void Application::DidHandleViewIdelEvent(int) {
+  view_idle_time_scope_.reset();
+  view_idle_hint_ = view_idle_count_;
+  view_idle_count_ = 0;
+}
+
 void Application::DidStartScriptHost(domapi::ScriptHostState state) {
   if (state != domapi::ScriptHostState::Running) {
     // TODO(yosi) We should set exit code other than EXIT_SUCCESS.
@@ -100,12 +103,6 @@ void Application::DidStartScriptHost(domapi::ScriptHostState state) {
     return;
   }
   DispatchViewIdelEvent();
-}
-
-void Application::DidHandleViewIdelEvent(int) {
-  view_idle_time_scope_.reset();
-  view_idle_hint_ = view_idle_count_;
-  view_idle_count_ = 0;
 }
 
 void Application::DispatchViewIdelEvent() {

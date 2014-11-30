@@ -35,7 +35,7 @@ void FrameList::RemoveFrame(Frame* frame) {
 
   if (frames_.empty()) {
     active_frame_ = nullptr;
-    Application::instance()->Quit();
+    editor::Application::instance()->Quit();
     return;
   }
 

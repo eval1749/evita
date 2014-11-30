@@ -235,7 +235,7 @@ ApplicationProxy::~ApplicationProxy() {
 
 void ApplicationProxy::DidCopyData(const COPYDATASTRUCT* data) {
   auto const file_name = reinterpret_cast<base::char16*>(data->lpData);
-  Application::instance()->view_event_handler()->OpenFile(
+  editor::Application::instance()->view_event_handler()->OpenFile(
       dom::kInvalidWindowId, file_name);
 }
 
@@ -248,7 +248,7 @@ void ApplicationProxy::DidStartChannel(HWND hwnd) {
 
 int ApplicationProxy::Run() {
   if (!event_ || !event_->is_existing()) {
-    Application::instance()->Run();
+    editor::Application::instance()->Run();
     return 0;
   }
 

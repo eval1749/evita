@@ -174,11 +174,11 @@ void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
 }
 
 void ViewDelegateImpl::DidStartScriptHost(domapi::ScriptHostState state) {
-  Application::instance()->DidStartScriptHost(state);
+  editor::Application::instance()->DidStartScriptHost(state);
 }
 
 void ViewDelegateImpl::DidHandleViewIdelEvent(int hint) {
-  Application::instance()->DidHandleViewIdelEvent(hint);
+  editor::Application::instance()->DidHandleViewIdelEvent(hint);
 }
 
 void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
@@ -367,7 +367,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   auto safe_title = title;
   if (!safe_title.empty())
     safe_title += L" - ";
-  safe_title += Application::instance()->title();
+  safe_title += editor::Application::instance()->title();
   auto const hwnd = frame ? frame->AssociatedHwnd() : nullptr;
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
   auto const response= ::MessageBoxW(hwnd, message.c_str(), title.c_str(),

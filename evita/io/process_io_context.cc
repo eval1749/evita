@@ -22,7 +22,7 @@ namespace io {
 
 void Resolve(const base::Callback<void(domapi::ProcessId)>& resolve,
              domapi::ProcessId context_id) {
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(resolve , context_id));
 }
 

@@ -43,6 +43,8 @@ namespace views {
 class ViewDelegateImpl;
 }
 
+namespace editor {
+
 class Application : public common::Singleton<Application> {
   DECLARE_SINGLETON_CLASS(Application);
 
@@ -92,8 +94,10 @@ class Application : public common::Singleton<Application> {
   DISALLOW_COPY_AND_ASSIGN(Application);
 };
 
+}  // namespace editor
+
 #define ASSERT_CALLED_ON_UI_THREAD() \
-  DCHECK(Application::instance()->CalledOnValidThread())
+  DCHECK(::editor::Application::instance()->CalledOnValidThread())
 
 
 #endif //!defined(INCLUDE_evita_editor_application_h)

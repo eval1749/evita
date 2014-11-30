@@ -56,7 +56,7 @@ HANDLE OpenFile(const base::string16& file_name,
 
 void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
              domapi::FileId context_id) {
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(resolve , context_id));
 }
 
@@ -69,7 +69,7 @@ FileIoContext::FileIoContext(const base::string16& file_name,
     return;
   overlapped = {0};
   handler = this;
-  Application::instance()->GetIoManager()->RegisterIoHandler(
+  editor::Application::instance()->GetIoManager()->RegisterIoHandler(
       file_handle_.get(), this);
 }
 

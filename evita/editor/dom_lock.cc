@@ -57,7 +57,7 @@ DomLock::~DomLock() {
 }
 
 DomLock* DomLock::instance() {
-  return Application::instance()->dom_lock();
+  return editor::Application::instance()->dom_lock();
 }
 
 const tracked_objects::Location& DomLock::location() const {

@@ -261,9 +261,9 @@ void ScriptHost::RunMicrotasks() {
 
 ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
                               domapi::IoDelegate* io_deleage) {
-  // Node: Using Application::instance() starts thread. So, we don't
+  // Node: Using editor::Application::instance() starts thread. So, we don't
   // start |ScriptHost| in testing. Although, we should remove
-  // all |Application::instance()| in DOM world.
+  // all |editor::Application::instance()| in DOM world.
   if (script_host && script_host->testing_)
     return script_host;
   DCHECK(!script_host);

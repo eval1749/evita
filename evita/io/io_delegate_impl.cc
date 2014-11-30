@@ -50,7 +50,7 @@ class scoped_find_handle {
 
 void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
              domapi::FileId context_id) {
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(resolve , context_id));
 }
 }  // namespace
@@ -68,7 +68,7 @@ IoDelegateImpl::~IoDelegateImpl() {
 // domapi::IoDelegate
 void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
     const CheckSpellingResolver& deferred) {
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(deferred.resolve,
           spellchecker::SpellingEngine::GetSpellingEngine()->
               CheckSpelling(word_to_check)));
@@ -86,7 +86,7 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
 
 void IoDelegateImpl::GetSpellingSuggestions(const base::string16& wrong_word,
     const GetSpellingSuggestionsResolver& deferred) {
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(deferred.resolve,
           spellchecker::SpellingEngine::GetSpellingEngine()->
               GetSpellingSuggestions(wrong_word)));
@@ -107,7 +107,7 @@ void IoDelegateImpl::MakeTempFileName(
   auto const nul_pos = file_name.find(static_cast<base::char16>(0));
   if (nul_pos != base::string16::npos)
     file_name.resize(nul_pos);
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(resolver.resolve, file_name));
 }
 
@@ -126,7 +126,7 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
     Reject(resolver.reject, last_error);
     return;
   }
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(resolver.resolve, true));
 }
 
@@ -173,7 +173,7 @@ void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,
   data.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
   data.readonly = find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY;
 
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(deferred.resolve , data));
 }
 
@@ -197,7 +197,7 @@ void IoDelegateImpl::RemoveFile(const base::string16& file_name,
     Reject(resolver.reject, last_error);
     return;
   }
-  Application::instance()->view_event_handler()->RunCallback(
+  editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(resolver.resolve, true));
 }
 

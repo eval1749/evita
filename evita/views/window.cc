@@ -74,7 +74,7 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
 };
 
 domapi::ViewEventHandler* view_event_handler() {
-  return Application::instance()->view_event_handler();
+  return editor::Application::instance()->view_event_handler();
 }
 
 domapi::EventTargetId MaybeEventTarget(ui::Widget* widget) {

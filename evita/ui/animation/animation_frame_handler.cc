@@ -18,8 +18,8 @@ AnimationFrameHandler::~AnimationFrameHandler() {
 }
 
 void AnimationFrameHandler::CancelAnimationFrameRequest() {
-  Application::instance()->animation_scheduler()->CancelAnimationFrameRequest(
-      this);
+  editor::Application::instance()->animation_scheduler()->
+    CancelAnimationFrameRequest(this);
 }
 
 void AnimationFrameHandler::HandleAnimationFrame(base::Time time) {
@@ -27,7 +27,8 @@ void AnimationFrameHandler::HandleAnimationFrame(base::Time time) {
 }
 
 void AnimationFrameHandler::RequestAnimationFrame() {
-  Application::instance()->animation_scheduler()->RequestAnimationFrame(this);
+  editor::Application::instance()->animation_scheduler()->
+    RequestAnimationFrame(this);
 }
 
 }  // namespace ui

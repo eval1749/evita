@@ -43,11 +43,11 @@
 #endif
 #define APP_VERSION L"5.0"
 
-// TODO(yosi) We should move |Application| class into namespace |editor|.
-using namespace editor;
 
 HINSTANCE g_hInstance;
 HINSTANCE g_hResource;
+
+namespace editor {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -96,7 +96,7 @@ bool Application::CalledOnValidThread() const {
 void Application::DidStartScriptHost(domapi::ScriptHostState state) {
   if (state != domapi::ScriptHostState::Running) {
     // TODO(yosi) We should set exit code other than EXIT_SUCCESS.
-    Application::instance()->Quit();
+    editor::Application::instance()->Quit();
     return;
   }
   DispatchViewIdelEvent();
@@ -189,3 +189,5 @@ void Application::Run() {
   // |ui::Compositor|.
   delete ui::Compositor::instance();
 }
+
+}  // namespace editor

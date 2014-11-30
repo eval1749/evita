@@ -17,7 +17,7 @@ namespace views {
 namespace {
 
 domapi::ViewEventHandler* view_event_handler() {
-  return Application::instance()->view_event_handler();
+  return editor::Application::instance()->view_event_handler();
 }
 
 domapi::EventType ConvertEventType(const ui::KeyEvent event) {

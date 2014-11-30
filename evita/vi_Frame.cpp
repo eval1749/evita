@@ -193,7 +193,7 @@ void Frame::OnDropFiles(HDROP const drop_handle) {
     if (!length)
       break;
     file_name.resize(length);
-    Application::instance()->view_event_handler()->OpenFile(
+    editor::Application::instance()->view_event_handler()->OpenFile(
         window_id(), file_name);
     ++index;
   }
@@ -224,7 +224,7 @@ void Frame::UpdateTitleBar() {
 
   auto const window_title = title +
       (tab_data->state == domapi::TabData::State::Modified ? L" * " : L" - ") +
-      Application::instance()->title();
+      editor::Application::instance()->title();
   title_bar_->SetText(window_title);
 }
 
@@ -396,7 +396,7 @@ void Frame::DidRemoveChildWidget(ui::Widget* old_child) {
 }
 
 void Frame::DidRequestDestroy() {
-  Application::instance()->view_event_handler()->QueryClose(window_id());
+  editor::Application::instance()->view_event_handler()->QueryClose(window_id());
 }
 
 void Frame::DidSetFocus(ui::Widget* widget) {
@@ -593,14 +593,14 @@ void Frame::DidDropTab(TabContent* tab_content,
     return;
 
   if (!frame) {
-    Application::instance()->view_event_handler()->DidDropWidget(
+    editor::Application::instance()->view_event_handler()->DidDropWidget(
         edit_tab_content->GetActiveContent()->window_id(),
         views::kInvalidWindowId);
     return;
   }
 
   DCHECK_NE(frame, tab_content->parent_node());
-  Application::instance()->view_event_handler()->DidDropWidget(
+  editor::Application::instance()->view_event_handler()->DidDropWidget(
       edit_tab_content->GetActiveContent()->window_id(),
       frame->window_id());
 }
@@ -620,7 +620,7 @@ void Frame::DidSelectTab(int selected_index) {
 void Frame::RequestCloseTab(int tab_index) {
   if (tab_contents_.size() == 1u) {
     // If this window has only one tab_content, we destroy this window.
-    Application::instance()->view_event_handler()->QueryClose(
+    editor::Application::instance()->view_event_handler()->QueryClose(
         window_id());
     return;
   }

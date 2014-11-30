@@ -5,10 +5,7 @@
 #include "evita/ui/animation/animation_scheduler.h"
 
 #include "base/bind.h"
-#pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
-#pragma warning(pop)
 #include "base/synchronization/lock.h"
 #include "base/time/time.h"
 #include "evita/ui/animation/animation_frame_handler.h"
@@ -18,13 +15,13 @@ namespace ui {
 
 enum class AnimationScheduler::State {
   Running,
-  Sleep,
+  Sleeping,
   Waiting,
 };
 
 AnimationScheduler::AnimationScheduler(base::MessageLoop* message_loop)
     : lock_(new base::Lock()), message_loop_(message_loop),
-      state_(State::Sleep)  {
+      state_(State::Sleeping)  {
 }
 
 AnimationScheduler::~AnimationScheduler() {
@@ -62,7 +59,7 @@ void AnimationScheduler::Run() {
   ui::Compositor::instance()->CommitIfNeeded();
   {
     base::AutoLock lock_scope(*lock_);
-    state_ = State::Sleep;
+    state_ = State::Sleeping;
     if (pending_handlers_.empty())
       return;
     // TODO(eval1749) We should run next frame once composition finished.
@@ -74,13 +71,13 @@ void AnimationScheduler::RequestAnimationFrame(
     AnimationFrameHandler* handler) {
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.insert(handler);
-  if (state_ != State::Sleep)
+  if (state_ != State::Sleeping)
     return;
   Wait();
 }
 
 void AnimationScheduler::Wait() {
-  DCHECK_EQ(static_cast<int>(state_), static_cast<int>(State::Sleep));
+  DCHECK_EQ(static_cast<int>(state_), static_cast<int>(State::Sleeping));
   state_ = State::Waiting;
   message_loop_->PostNonNestableDelayedTask(FROM_HERE,
       base::Bind(&AnimationScheduler::Run, base::Unretained(this)),

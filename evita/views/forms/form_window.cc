@@ -436,18 +436,22 @@ FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form)
 FormWindow::~FormWindow() {
 }
 
-void FormWindow::DoRealizeWidget() {
-  UI_ASSERT_DOM_LOCKED();
-  DCHECK(!is_realized());
-  DCHECK(form_size_.empty());
-  model_->Update();
-  form_size_ = model_->size();
-  title_ = model_->title();
-  views::Window::RealizeWidget();
-}
-
 // ui::Animatable
 void FormWindow::DidBeginAnimationFrame(base::Time) {
+  if (!is_realized()) {
+    if (form_size_.empty()) {
+      UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+      if (!lock_scope.locked()) {
+        RequestAnimationFrame();
+        return;
+      }
+      model_->Update();
+      form_size_ = model_->size();
+      title_ = model_->title();
+    }
+    RealizeWidget();
+  }
+
   DCHECK(is_realized());
   if (!visible())
     return;
@@ -508,8 +512,6 @@ void FormWindow::DidChangeSystemMetrics() {
 
 // ui::Widget
 void FormWindow::CreateNativeWindow() const {
-  DCHECK(!form_size_.empty());
-
   struct Local {
     static gfx::Rect GetDefaultBounds(const gfx::Size& form_size) {
       return gfx::Rect(gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
@@ -594,11 +596,9 @@ void FormWindow::DidRequestDestroy() {
 
 void FormWindow::RealizeWidget() {
   if (form_size_.empty()) {
-    Application::instance()->RegisterTaskWithinDomLock(
-        base::Bind(&FormWindow::DoRealizeWidget, base::Unretained(this)));
+    RequestAnimationFrame();
     return;
   }
   views::Window::RealizeWidget();
 }
-
 }  // namespace views

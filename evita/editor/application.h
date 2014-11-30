@@ -11,13 +11,7 @@
 // because a base class assignment operator is inaccessible
 
 #include <memory>
-#include <vector>
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
-#include "base/callback.h"
-#pragma warning(pop)
-#include "base/location.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 
@@ -40,27 +34,34 @@ namespace metrics {
 class TimeScope;
 }
 
+namespace ui {
+class AnimationFrameHandler;
+class AnimationScheduler;
+}
+
 namespace views {
 class ViewDelegateImpl;
 }
 
 class Application : public common::Singleton<Application> {
+  DECLARE_SINGLETON_CLASS(Application);
+
   private: std::unique_ptr<editor::DomLock> dom_lock_;
-  private: std::vector<base::Closure> tasks_within_dom_lock_;
-  private: int idle_count_;
   private: std::unique_ptr<IoManager> io_manager_;
   private: bool is_quit_;
   private: std::unique_ptr<base::MessageLoop> message_loop_;
+  private: std::unique_ptr<ui::AnimationScheduler> animation_scheduler_;
   private: std::unique_ptr<metrics::TimeScope> view_idle_time_scope_;
   private: int view_idle_count_;
   private: int view_idle_hint_;
   private: std::unique_ptr<views::ViewDelegateImpl> view_delegate_impl_;
 
-  // ctor/dtor
-  friend class common::Singleton<Application>;
   private: Application();
   public: ~Application();
 
+  public: ui::AnimationScheduler* animation_scheduler() const {
+    return animation_scheduler_.get();
+  }
   public: editor::DomLock* dom_lock() const { return dom_lock_.get(); }
   public: const base::string16& title() const;
   public: const base::string16& version() const;
@@ -77,7 +78,7 @@ class Application : public common::Singleton<Application> {
 
   // [G]
   public: IoManager* GetIoManager() const { return io_manager_.get(); }
-  public: const char16* GetTitle() const;
+  private: const base::char16* GetTitle() const;
 
   // [O]
   private: bool OnIdle(int hint);
@@ -85,9 +86,7 @@ class Application : public common::Singleton<Application> {
   // [Q]
   public: void Quit();
 
-
   // [R]
-  public: void RegisterTaskWithinDomLock(const base::Closure& task);
   public: void Run();
 
   DISALLOW_COPY_AND_ASSIGN(Application);

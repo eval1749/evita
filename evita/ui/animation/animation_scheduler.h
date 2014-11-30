@@ -9,10 +9,10 @@
 #include <unordered_set>
 
 #include "base/basictypes.h"
-#include "common/memory/singleton.h"
 
 namespace base {
 class Lock;
+class MessageLoop;
 class Time;
 }
 
@@ -24,23 +24,25 @@ class AnimationFrameHandler;
 //
 // AnimationScheduler
 //
-class AnimationScheduler final : public common::Singleton<AnimationScheduler> {
-  DECLARE_SINGLETON_CLASS(AnimationScheduler);
+class AnimationScheduler final {
+  private: enum class State;
 
   private: std::unordered_set<AnimationFrameHandler*> canceled_handlers_;
   private: std::unique_ptr<base::Lock> lock_;
+  private: base::MessageLoop* const message_loop_;
+  private: State state_;
   private: std::unordered_set<AnimationFrameHandler*> pending_handlers_;
 
-  private: AnimationScheduler();
-  public: virtual ~AnimationScheduler();
+  public: explicit AnimationScheduler(base::MessageLoop* message_loop);
+  public: ~AnimationScheduler();
 
   // Request animation frame.
   public: void CancelAnimationFrameRequest(AnimationFrameHandler* handler);
-
-  public: void HandleAnimationFrame(base::Time time);
-
+  private: void HandleAnimationFrame(base::Time time);
   // Request animation frame.
   public: void RequestAnimationFrame(AnimationFrameHandler* handler);
+  private: void Run();
+  private: void Wait();
 
   DISALLOW_COPY_AND_ASSIGN(AnimationScheduler);
 };

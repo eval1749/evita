@@ -54,11 +54,11 @@ HINSTANCE g_hResource;
 // Application
 //
 Application::Application()
-    : idle_count_(0),
-            is_quit_(false),
-      dom_lock_(new editor::DomLock()),
+    : dom_lock_(new editor::DomLock()),
+      is_quit_(false),
       io_manager_(new IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
+      animation_scheduler_(new ui::AnimationScheduler(message_loop_.get())),
       view_idle_count_(0),
       view_idle_hint_(0),
       view_delegate_impl_(new views::ViewDelegateImpl()) {
@@ -99,7 +99,6 @@ void Application::DidStartScriptHost(domapi::ScriptHostState state) {
     Application::instance()->Quit();
     return;
   }
-  DoIdle();
   DispatchViewIdelEvent();
 }
 
@@ -135,52 +134,9 @@ void Application::DispatchViewIdelEvent() {
       base::TimeDelta::FromMilliseconds(100));
 }
 
-// Note: We don't need to check ::GetQueueStatus (QS_INPUT), because |DoIdle()|
-// is called after processing Windows message.
-void Application::DoIdle() {
-  base::TimeDelta wait_time;
-  if (message_loop_->os_modal_loop()) {
-    METRICS_COUNT("os_modal_loop");
-    wait_time = base::TimeDelta::FromMilliseconds(100);
-  } else if (OnIdle(idle_count_)) {
-    METRICS_COUNT("OnIdle");
-    ++idle_count_;
-    wait_time = base::TimeDelta::FromMilliseconds(1000 / 60);
-  } else {
-    METRICS_COUNT("nothing");
-    // Nothing to do.
-    idle_count_= 0;
-    wait_time = base::TimeDelta::FromMilliseconds(1000 / 60);
-  }
-  message_loop_->PostNonNestableDelayedTask(FROM_HERE,
-      base::Bind(&Application::DoIdle, base::Unretained(this)),
-      wait_time);
-}
-
-bool Application::OnIdle(int) {
-  METRICS_TIME_SCOPE();
-  if (!tasks_within_dom_lock_.empty()) {
-    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-    if (lock_scope.locked()) {
-      for (auto task : tasks_within_dom_lock_) {
-        task.Run();
-      }
-      tasks_within_dom_lock_.clear();
-    }
-  }
-  auto const now = base::Time::Now();
-  ui::AnimationScheduler::instance()->HandleAnimationFrame(now);
-  ui::Compositor::instance()->CommitIfNeeded();
-  return false;
-}
-
 void Application::Quit() {
   is_quit_ = true;
   message_loop_->QuitWhenIdle();
-}
-
-void Application::RegisterTaskWithinDomLock(const base::Closure& task) {
-  tasks_within_dom_lock_.push_back(task);
 }
 
 void Application::Run() {

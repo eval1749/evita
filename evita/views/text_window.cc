@@ -6,7 +6,10 @@
 
 #include <algorithm>
 
+#include "base/bind.h"
+#include "base/callback.h"
 #include "base/logging.h"
+#include "base/message_loop/message_loop.h"
 #include "base/strings/string16.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
@@ -19,6 +22,7 @@
 #include "evita/text/selection.h"
 #include "evita/ui/base/ime/text_composition.h"
 #include "evita/ui/base/ime/text_input_client.h"
+#include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/controls/scroll_bar.h"
 #include "evita/ui/focus_controller.h"
@@ -207,11 +211,26 @@ Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
   return std::min(text_renderer_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
-void TextWindow::Redraw(base::Time now) {
-  UI_ASSERT_DOM_LOCKED();
+void TextWindow::Paint(const TextSelectionModel& selection, base::Time now) {
+  DCHECK(visible());
+  // Update scroll bar
+  {
+    ui::ScrollBar::Data data;
+    data.minimum = 0;
+    data.thumb_size = text_renderer_->GetVisibleEnd() -
+          text_renderer_->GetStart();
+    data.thumb_value = text_renderer_->GetStart();
+    data.maximum = buffer()->GetEnd() + 1;;
+    vertical_scroll_bar_->SetData(data);
+  }
+  gfx::Canvas::DrawingScope drawing_scope(canvas());
+  text_renderer_->Paint(canvas(), selection, now);
+  OnDraw(canvas());
+}
 
-  if (!visible())
-    return;
+void TextWindow::Redraw(base::Time now) {
+  DCHECK(visible());
+  UI_ASSERT_DOM_LOCKED();
 
   auto const selection = GetTextSelectionModel(this, *selection_);
   auto const new_caret_offset = GetCaretOffset(buffer(), selection,
@@ -223,61 +242,26 @@ void TextWindow::Redraw(base::Time now) {
       text_renderer_->ScrollToPosition(new_caret_offset);
       caret_offset_ = new_caret_offset;
     }
-    Render(selection, now);
+    Paint(selection, now);
     return;
   }
 
   if (caret_offset_ != new_caret_offset) {
     caret_offset_ = new_caret_offset;
     if (text_renderer_->IsPositionFullyVisible(new_caret_offset)) {
-      if (ShouldRender()) {
-        Render(selection, now);
-      } else {
-        gfx::Canvas::DrawingScope drawing_scope(canvas());
-        text_renderer_->RenderSelectionIfNeeded(canvas(), selection, now);
-      }
+      Paint(selection, now);
       return;
     }
     text_renderer_->ScrollToPosition(new_caret_offset);
-    Render(selection, now);
+    Paint(selection, now);
     return;
   }
 
-  if (ShouldRender()) {
-    Render(selection, now);
-    return;
-  }
-
-  // The screen is clean.
-  text_renderer_->RenderSelectionIfNeeded(canvas(), selection, now);
-}
-
-void TextWindow::Render(const TextSelectionModel& selection, base::Time now) {
-  UI_ASSERT_DOM_LOCKED();
-  if (!visible())
-    return;
-
-  gfx::Canvas::DrawingScope drawing_scope(canvas());
-  text_renderer_->Render(canvas(), selection, now);
-
-  // Update scroll bar
-  {
-    ui::ScrollBar::Data data;
-    data.minimum = 0;
-    data.thumb_size = text_renderer_->GetVisibleEnd() -
-          text_renderer_->GetStart();
-    data.thumb_value = text_renderer_->GetStart();
-    data.maximum = buffer()->GetEnd() + 1;;
-    vertical_scroll_bar_->SetData(data);
-  }
+  Paint(selection, now);
 }
 
 void TextWindow::SetZoom(float new_zoom) {
   text_renderer_->SetZoom(new_zoom);
-}
-
-bool TextWindow::ShouldRender() const {
-  return !canvas()->screen_bitmap() || text_renderer_->ShouldRender();
 }
 
 bool TextWindow::SmallScroll(int, int y_count) {
@@ -370,18 +354,18 @@ void TextWindow::DidChangeSelection() {
 void TextWindow::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  if (!lock_scope.locked()) {
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock_scope);
+  if (!dom_lock_scope.locked()) {
     RequestAnimationFrame();
     return;
   }
+
   metrics_view_->RecordTime();
   {
     MetricsView::TimingScope timing_scope(metrics_view_);
-    gfx::Canvas::DrawingScope drawing_scope(canvas());
     Redraw(now);
-    OnDraw(canvas());
   }
+
   metrics_view_->Animate(now);
   NotifyUpdateContent();
 }

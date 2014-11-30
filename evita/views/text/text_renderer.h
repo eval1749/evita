@@ -76,14 +76,11 @@ class TextRenderer final {
   public: text::Posn MapPointToPosition(gfx::PointF point);
   public: text::Posn MapPointXToOffset(text::Posn text_offset,
                                        float point_x) const;
-  public: void Render(gfx::Canvas* canvas, const TextSelectionModel& selection,
-                      base::Time now);
+  public: void Paint(gfx::Canvas* canvas, const TextSelectionModel& selection,
+                     base::Time now);
   private: void RenderRuler(gfx::Canvas* canvas);
-  public: void RenderSelectionIfNeeded(gfx::Canvas* canvas,
-                                       const TextSelectionModel& selection,
-                                       base::Time now);
   public: bool ScrollDown();
-  public: bool ScrollToPosition(text::Posn offset);
+  public: void ScrollToPosition(text::Posn offset);
   public: bool ScrollUp();
   public: void SetBounds(const gfx::RectF& new_bounds);
   public: void SetZoom(float new_zoom);

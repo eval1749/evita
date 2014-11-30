@@ -113,12 +113,16 @@ text::Posn TextRenderer::MapPointXToOffset(text::Posn text_offset,
   return text_block_->MapPointXToOffset(text_offset, point_x);
 }
 
-void TextRenderer::Render(gfx::Canvas* canvas,
-                          const TextSelectionModel& selection_model,
-                          base::Time now) {
+void TextRenderer::Paint(gfx::Canvas* canvas,
+                         const TextSelectionModel& selection_model,
+                         base::Time now) {
   DCHECK(!ShouldFormat());
   const auto selection = TextFormatter::FormatSelection(buffer_,
                                                         selection_model);
+  if (!should_render_ && canvas->screen_bitmap()) {
+    screen_text_block_->RenderSelectionIfNeeded(canvas, selection, now);
+    return;
+  }
   screen_text_block_->Render(canvas, text_block_.get(), selection, now);
   RenderRuler(canvas);
   format_counter_ = text_block_->format_counter();
@@ -143,15 +147,6 @@ void TextRenderer::RenderRuler(gfx::Canvas* canvas) {
   canvas->DrawRectangle(brush, ruler_bounds);
 }
 
-void TextRenderer::RenderSelectionIfNeeded(
-    gfx::Canvas* canvas,
-    const TextSelectionModel& new_selection_model, base::Time now) {
-  DCHECK(!ShouldFormat());
-  DCHECK(!should_render_);
-  screen_text_block_->RenderSelectionIfNeeded(canvas,
-      TextFormatter::FormatSelection(buffer_, new_selection_model), now);
-}
-
 bool TextRenderer::ScrollDown() {
   if (!text_block_->ScrollDown())
     return false;
@@ -159,8 +154,10 @@ bool TextRenderer::ScrollDown() {
   return true;
 }
 
-bool TextRenderer::ScrollToPosition(text::Posn offset) {
-  return text_block_->ScrollToPosition(offset);
+void TextRenderer::ScrollToPosition(text::Posn offset) {
+  if (!text_block_->ScrollToPosition(offset))
+    return;
+  should_render_ = true;
 }
 
 bool TextRenderer::ScrollUp() {

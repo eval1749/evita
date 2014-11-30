@@ -66,10 +66,9 @@ class TextWindow final : public ContentWindow,
   public: gfx::RectF HitTestTextPosition(text::Posn offset);
   private: bool LargeScroll(int x_count, int y_count);
   public: text::Posn MapPointToPosition(const gfx::PointF point);
+  private: void Paint(const TextSelectionModel& selection, base::Time now);
   private: void Redraw(base::Time now);
-  private: void Render(const TextSelectionModel& selection, base::Time now);
   public: void SetZoom(float new_zoom);
-  private: bool ShouldRender() const;
   public: bool SmallScroll(int x_count, int y_count);
   public: text::Posn StartOfLine(text::Posn offset);
   private: void UpdateLayout();

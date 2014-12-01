@@ -31,6 +31,9 @@ class BASE_EXPORT MessageLoopProxy : public SingleThreadTaskRunner {
  protected:
   MessageLoopProxy();
   ~MessageLoopProxy() override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MessageLoopProxy);
 };
 
 }  // namespace base

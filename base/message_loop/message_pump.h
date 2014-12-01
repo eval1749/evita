@@ -125,6 +125,9 @@ class BASE_EXPORT MessagePump : public NonThreadSafe {
 
   // Sets the timer slack to the specified value.
   virtual void SetTimerSlack(TimerSlack timer_slack);
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MessagePump);
 };
 
 }  // namespace base

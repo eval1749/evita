@@ -226,6 +226,8 @@ class ObserverList : public ObserverListBase<ObserverType> {
   bool might_have_observers() const {
     return ObserverListBase<ObserverType>::size() != 0;
   }
+
+  DISALLOW_COPY_AND_ASSIGN(ObserverList);
 };
 
 #define FOR_EACH_OBSERVER(ObserverType, observer_list, func)               \

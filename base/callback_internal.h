@@ -29,7 +29,9 @@ namespace internal {
 class BindStateBase : public RefCountedThreadSafe<BindStateBase> {
  protected:
   friend class RefCountedThreadSafe<BindStateBase>;
+  BindStateBase() = default;
   virtual ~BindStateBase() {}
+  DISALLOW_COPY_AND_ASSIGN(BindStateBase);
 };
 
 // Holds the Callback methods that don't require specialization to reduce

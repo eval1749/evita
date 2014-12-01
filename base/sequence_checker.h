@@ -49,6 +49,9 @@ class SequenceCheckerDoNothing {
 // In Release mode, CalledOnValidSequencedThread() will always return true.
 #if ENABLE_SEQUENCE_CHECKER
 class SequenceChecker : public SequenceCheckerImpl {
+ public:
+  SequenceChecker() = default;
+  DISALLOW_COPY_AND_ASSIGN(SequenceChecker);
 };
 #else
 class SequenceChecker : public SequenceCheckerDoNothing {

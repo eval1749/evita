@@ -36,6 +36,8 @@ class BASE_EXPORT ThreadCheckerImpl {
   // This is mutable so that CalledOnValidThread can set it.
   // It's guarded by |lock_|.
   mutable PlatformThreadRef valid_thread_id_;
+
+  DISALLOW_COPY_AND_ASSIGN(ThreadCheckerImpl);
 };
 
 }  // namespace base

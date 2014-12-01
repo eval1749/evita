@@ -135,10 +135,10 @@ class DummyVerifierTraits {
  public:
   typedef HANDLE Handle;
 
-  static void StartTracking(HANDLE handle, const void* owner,
-                            const void* pc1, const void* pc2) {}
-  static void StopTracking(HANDLE handle, const void* owner,
-                           const void* pc1, const void* pc2) {}
+  static void StartTracking(HANDLE, const void*,
+                            const void*, const void*) {}
+  static void StopTracking(HANDLE, const void*,
+                           const void*, const void*) {}
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(DummyVerifierTraits);

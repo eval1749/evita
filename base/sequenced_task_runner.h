@@ -139,6 +139,7 @@ class BASE_EXPORT SequencedTaskRunner : public TaskRunner {
   }
 
  protected:
+  SequencedTaskRunner() = default;
   ~SequencedTaskRunner() override {}
 
  private:
@@ -152,6 +153,8 @@ class BASE_EXPORT SequencedTaskRunner : public TaskRunner {
   bool ReleaseSoonInternal(const tracked_objects::Location& from_here,
                            void(*releaser)(const void*),
                            const void* object);
+
+  DISALLOW_COPY_AND_ASSIGN(SequencedTaskRunner);
 };
 
 }  // namespace base

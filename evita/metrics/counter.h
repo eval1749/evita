@@ -7,8 +7,8 @@
 
 #include <unordered_map>
 
+#include "base/strings/string_piece.h"
 #include "common/memory/singleton.h"
-#include "common/strings/string_piece.h"
 
 namespace metrics {
 

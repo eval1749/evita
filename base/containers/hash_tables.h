@@ -260,6 +260,8 @@ inline std::size_t HashPair(Type1 value1, Type2 value2) { \
   return HashInts32(value1, value2); \
 }
 
+#pragma warning(push)
+#pragma warning(disable: 4365)
 DEFINE_32BIT_PAIR_HASH(int16, int16);
 DEFINE_32BIT_PAIR_HASH(int16, uint16);
 DEFINE_32BIT_PAIR_HASH(int16, int32);
@@ -304,6 +306,7 @@ DEFINE_64BIT_PAIR_HASH(uint64, int32);
 DEFINE_64BIT_PAIR_HASH(uint64, uint32);
 DEFINE_64BIT_PAIR_HASH(uint64, int64);
 DEFINE_64BIT_PAIR_HASH(uint64, uint64);
+#pragma warning(pop)
 
 #undef DEFINE_64BIT_PAIR_HASH
 }  // namespace base

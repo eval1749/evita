@@ -381,6 +381,7 @@ class Callback<R(Args...)> : public internal::CallbackBase {
     PolymorphicInvoke invoke_func =
         &internal::BindState<Runnable, BindRunType, BoundArgsType>
             ::InvokerType::Run;
+    #pragma warning(suppress: 4191)
     polymorphic_invoke_ = reinterpret_cast<InvokeFuncStorage>(invoke_func);
   }
 
@@ -391,6 +392,7 @@ class Callback<R(Args...)> : public internal::CallbackBase {
   R Run(typename internal::CallbackParamTraits<Args>::ForwardType... args)
       const {
     PolymorphicInvoke f =
+        #pragma warning(suppress: 4191)
         reinterpret_cast<PolymorphicInvoke>(polymorphic_invoke_);
 
     return f(bind_state_.get(), internal::CallbackForward(args)...);

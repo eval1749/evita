@@ -48,11 +48,8 @@ class SequenceCheckerDoNothing {
 //
 // In Release mode, CalledOnValidSequencedThread() will always return true.
 #if ENABLE_SEQUENCE_CHECKER
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 class SequenceChecker : public SequenceCheckerImpl {
 };
-#pragma warning(pop)
 #else
 class SequenceChecker : public SequenceCheckerDoNothing {
 };

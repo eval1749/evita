@@ -22,8 +22,6 @@ namespace base {
 // MessagePumpWin serves as the base for specialized versions of the MessagePump
 // for Windows. It provides basic functionality like handling of observers and
 // controlling the lifetime of the message pump.
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 class BASE_EXPORT MessagePumpWin : public MessagePump {
  public:
   MessagePumpWin() : have_work_(0), state_(NULL) {}
@@ -337,7 +335,6 @@ class BASE_EXPORT MessagePumpForIO : public MessagePumpWin {
 
   ObserverList<IOObserver> io_observers_;
 };
-#pragma warning(pop)
 
 }  // namespace base
 

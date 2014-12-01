@@ -55,8 +55,6 @@ struct TaskRunnerTraits;
 //
 //   - A TaskRunner that stores the list of posted tasks and has a
 //     method Run() that runs each runnable task in random order.
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 class BASE_EXPORT TaskRunner
     : public RefCountedThreadSafe<TaskRunner, TaskRunnerTraits> {
  public:
@@ -145,7 +143,6 @@ class BASE_EXPORT TaskRunner
   // delete on a certain thread.
   virtual void OnDestruct() const;
 };
-#pragma warning(pop)
 
 struct BASE_EXPORT TaskRunnerTraits {
   static void Destruct(const TaskRunner* task_runner);

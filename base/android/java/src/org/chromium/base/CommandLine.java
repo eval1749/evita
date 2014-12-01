@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Java mirror of base/command_line.h.
  * Android applications don't have command line arguments. Instead, they're "simulated" by reading a
  * file at a specific location early during startup. Applications each define their own files, e.g.,
- * ContentShellActivity.COMMAND_LINE_FILE or ChromeShellApplication.COMMAND_LINE_FILE.
+ * ContentShellApplication.COMMAND_LINE_FILE or ChromeShellApplication.COMMAND_LINE_FILE.
 **/
 public abstract class CommandLine {
     // Public abstract interface, implemented in derived classes.
@@ -86,7 +86,7 @@ public abstract class CommandLine {
     }
 
     private static final AtomicReference<CommandLine> sCommandLine =
-        new AtomicReference<CommandLine>();
+            new AtomicReference<CommandLine>();
 
     /**
      * @returns true if the command line has already been initialized.
@@ -149,8 +149,8 @@ public abstract class CommandLine {
         char currentQuote = noQuote;
         for (char c : buffer) {
             // Detect start or end of quote block.
-            if ((currentQuote == noQuote && (c == singleQuote || c == doubleQuote)) ||
-                c == currentQuote) {
+            if ((currentQuote == noQuote && (c == singleQuote || c == doubleQuote))
+                    || c == currentQuote) {
                 if (arg != null && arg.length() > 0 && arg.charAt(arg.length() - 1) == '\\') {
                     // Last char was a backslash; pop it, and treat c as a literal.
                     arg.setCharAt(arg.length() - 1, c);

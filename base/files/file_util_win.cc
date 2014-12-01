@@ -210,7 +210,7 @@ bool CopyDirectory(const FilePath& from_path, const FilePath& to_path,
                     << target_path.value().c_str();
         success = false;
       }
-    } else if (!internal::CopyFileUnsafe(current, target_path)) {
+    } else if (!CopyFile(current, target_path)) {
       DLOG(ERROR) << "CopyDirectory() couldn't create file: "
                   << target_path.value().c_str();
       success = false;
@@ -644,7 +644,7 @@ int WriteFile(const FilePath& filename, const char* data, int size) {
   return -1;
 }
 
-int AppendToFile(const FilePath& filename, const char* data, int size) {
+bool AppendToFile(const FilePath& filename, const char* data, int size) {
   ThreadRestrictions::AssertIOAllowed();
   base::win::ScopedHandle file(CreateFile(filename.value().c_str(),
                                           FILE_APPEND_DATA,
@@ -654,26 +654,24 @@ int AppendToFile(const FilePath& filename, const char* data, int size) {
                                           0,
                                           NULL));
   if (!file.IsValid()) {
-    DPLOG(WARNING) << "CreateFile failed for path "
-                   << UTF16ToUTF8(filename.value());
-    return -1;
+    VPLOG(1) << "CreateFile failed for path " << UTF16ToUTF8(filename.value());
+    return false;
   }
 
   DWORD written;
   BOOL result = ::WriteFile(file.Get(), data, size, &written, NULL);
   if (result && static_cast<int>(written) == size)
-    return written;
+    return true;
 
   if (!result) {
     // WriteFile failed.
-    DPLOG(WARNING) << "writing file " << UTF16ToUTF8(filename.value())
-                   << " failed";
+    VPLOG(1) << "Writing file " << UTF16ToUTF8(filename.value()) << " failed";
   } else {
     // Didn't write all the bytes.
-    DLOG(WARNING) << "wrote" << written << " bytes to "
-                  << UTF16ToUTF8(filename.value()) << " expected " << size;
+    VPLOG(1) << "Only wrote " << written << " out of " << size << " byte(s) to "
+             << UTF16ToUTF8(filename.value());
   }
-  return -1;
+  return false;
 }
 
 // Gets the current working directory for the process.
@@ -724,6 +722,37 @@ int GetMaximumPathComponentLength(const FilePath& path) {
   return std::min(whole_path_limit, static_cast<int>(max_length));
 }
 
+bool CopyFile(const FilePath& from_path, const FilePath& to_path) {
+  ThreadRestrictions::AssertIOAllowed();
+  if (from_path.ReferencesParent() || to_path.ReferencesParent())
+    return false;
+
+  // NOTE: I suspect we could support longer paths, but that would involve
+  // analyzing all our usage of files.
+  if (from_path.value().length() >= MAX_PATH ||
+      to_path.value().length() >= MAX_PATH) {
+    return false;
+  }
+
+  // Unlike the posix implementation that copies the file manually and discards
+  // the ACL bits, CopyFile() copies the complete SECURITY_DESCRIPTOR and access
+  // bits, which is usually not what we want. We can't do much about the
+  // SECURITY_DESCRIPTOR but at least remove the read only bit.
+  const wchar_t* dest = to_path.value().c_str();
+  if (!::CopyFile(from_path.value().c_str(), dest, false)) {
+    // Copy failed.
+    return false;
+  }
+  DWORD attrs = GetFileAttributes(dest);
+  if (attrs == INVALID_FILE_ATTRIBUTES) {
+    return false;
+  }
+  if (attrs & FILE_ATTRIBUTE_READONLY) {
+    SetFileAttributes(dest, attrs & ~FILE_ATTRIBUTE_READONLY);
+  }
+  return true;
+}
+
 // -----------------------------------------------------------------------------
 
 namespace internal {
@@ -760,35 +789,6 @@ bool MoveUnsafe(const FilePath& from_path, const FilePath& to_path) {
   }
 
   return ret;
-}
-
-bool CopyFileUnsafe(const FilePath& from_path, const FilePath& to_path) {
-  ThreadRestrictions::AssertIOAllowed();
-
-  // NOTE: I suspect we could support longer paths, but that would involve
-  // analyzing all our usage of files.
-  if (from_path.value().length() >= MAX_PATH ||
-      to_path.value().length() >= MAX_PATH) {
-    return false;
-  }
-
-  // Unlike the posix implementation that copies the file manually and discards
-  // the ACL bits, CopyFile() copies the complete SECURITY_DESCRIPTOR and access
-  // bits, which is usually not what we want. We can't do much about the
-  // SECURITY_DESCRIPTOR but at least remove the read only bit.
-  const wchar_t* dest = to_path.value().c_str();
-  if (!::CopyFile(from_path.value().c_str(), dest, false)) {
-    // Copy failed.
-    return false;
-  }
-  DWORD attrs = GetFileAttributes(dest);
-  if (attrs == INVALID_FILE_ATTRIBUTES) {
-    return false;
-  }
-  if (attrs & FILE_ATTRIBUTE_READONLY) {
-    SetFileAttributes(dest, attrs & ~FILE_ATTRIBUTE_READONLY);
-  }
-  return true;
 }
 
 bool CopyAndDeleteDirectory(const FilePath& from_path,

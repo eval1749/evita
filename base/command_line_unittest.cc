@@ -11,7 +11,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
-using base::FilePath;
+namespace base {
 
 // To test Windows quoting behavior, we use a string that has some backslashes
 // and quotes.
@@ -190,27 +190,27 @@ TEST(CommandLineTest, GetArgumentsString) {
   static const char kSecondArgName[] = "arg2";
   static const char kThirdArgName[] = "arg with space";
   static const char kFourthArgName[] = "nospace";
+  static const char kFifthArgName[] = "%1";
 
   CommandLine cl(CommandLine::NO_PROGRAM);
   cl.AppendSwitchPath(kFirstArgName, FilePath(kPath1));
   cl.AppendSwitchPath(kSecondArgName, FilePath(kPath2));
   cl.AppendArg(kThirdArgName);
   cl.AppendArg(kFourthArgName);
+  cl.AppendArg(kFifthArgName);
 
 #if defined(OS_WIN)
-  CommandLine::StringType expected_first_arg(
-      base::UTF8ToUTF16(kFirstArgName));
-  CommandLine::StringType expected_second_arg(
-      base::UTF8ToUTF16(kSecondArgName));
-  CommandLine::StringType expected_third_arg(
-      base::UTF8ToUTF16(kThirdArgName));
-  CommandLine::StringType expected_fourth_arg(
-      base::UTF8ToUTF16(kFourthArgName));
+  CommandLine::StringType expected_first_arg(UTF8ToUTF16(kFirstArgName));
+  CommandLine::StringType expected_second_arg(UTF8ToUTF16(kSecondArgName));
+  CommandLine::StringType expected_third_arg(UTF8ToUTF16(kThirdArgName));
+  CommandLine::StringType expected_fourth_arg(UTF8ToUTF16(kFourthArgName));
+  CommandLine::StringType expected_fifth_arg(UTF8ToUTF16(kFifthArgName));
 #elif defined(OS_POSIX)
   CommandLine::StringType expected_first_arg(kFirstArgName);
   CommandLine::StringType expected_second_arg(kSecondArgName);
   CommandLine::StringType expected_third_arg(kThirdArgName);
   CommandLine::StringType expected_fourth_arg(kFourthArgName);
+  CommandLine::StringType expected_fifth_arg(kFifthArgName);
 #endif
 
 #if defined(OS_WIN)
@@ -238,8 +238,21 @@ TEST(CommandLineTest, GetArgumentsString) {
               .append(expected_third_arg)
               .append(QUOTE_ON_WIN)
               .append(FILE_PATH_LITERAL(" "))
-              .append(expected_fourth_arg);
-  EXPECT_EQ(expected_str, cl.GetArgumentsString());
+              .append(expected_fourth_arg)
+              .append(FILE_PATH_LITERAL(" "));
+
+  CommandLine::StringType expected_str_no_quote_placeholders(expected_str);
+  expected_str_no_quote_placeholders.append(expected_fifth_arg);
+  EXPECT_EQ(expected_str_no_quote_placeholders, cl.GetArgumentsString());
+
+#if defined(OS_WIN)
+  CommandLine::StringType expected_str_quote_placeholders(expected_str);
+  expected_str_quote_placeholders.append(QUOTE_ON_WIN)
+                                 .append(expected_fifth_arg)
+                                 .append(QUOTE_ON_WIN);
+  EXPECT_EQ(expected_str_quote_placeholders,
+            cl.GetArgumentsStringWithPlaceholders());
+#endif
 }
 
 // Test methods for appending switches to a command line.
@@ -348,10 +361,13 @@ TEST(CommandLineTest, ProgramQuotes) {
 
   // Check that quotes are added to command line string paths containing spaces.
   CommandLine::StringType cmd_string(cl_program_path.GetCommandLineString());
-  CommandLine::StringType program_string(cl_program_path.GetProgram().value());
-  EXPECT_EQ('"', cmd_string[0]);
-  EXPECT_EQ(program_string, cmd_string.substr(1, program_string.length()));
-  EXPECT_EQ('"', cmd_string[program_string.length() + 1]);
+  EXPECT_EQ(L"\"Program Path\"", cmd_string);
+
+  // Check the optional quoting of placeholders in programs.
+  CommandLine cl_quote_placeholder(FilePath(L"%1"));
+  EXPECT_EQ(L"%1", cl_quote_placeholder.GetCommandLineString());
+  EXPECT_EQ(L"\"%1\"",
+            cl_quote_placeholder.GetCommandLineStringWithPlaceholders());
 }
 #endif
 
@@ -362,3 +378,5 @@ TEST(CommandLineTest, Init) {
   CommandLine* current = CommandLine::ForCurrentProcess();
   EXPECT_EQ(initial, current);
 }
+
+} // namespace base

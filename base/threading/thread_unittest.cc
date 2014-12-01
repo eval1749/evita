@@ -31,11 +31,9 @@ class SleepInsideInitThread : public Thread {
     ANNOTATE_BENIGN_RACE(
         this, "Benign test-only data race on vptr - http://crbug.com/98219");
   }
-  virtual ~SleepInsideInitThread() {
-    Stop();
-  }
+  ~SleepInsideInitThread() override { Stop(); }
 
-  virtual void Init() OVERRIDE {
+  void Init() override {
     base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(500));
     init_called_ = true;
   }
@@ -70,17 +68,11 @@ class CaptureToEventList : public Thread {
         event_list_(event_list) {
   }
 
-  virtual ~CaptureToEventList() {
-    Stop();
-  }
+  ~CaptureToEventList() override { Stop(); }
 
-  virtual void Init() OVERRIDE {
-    event_list_->push_back(THREAD_EVENT_INIT);
-  }
+  void Init() override { event_list_->push_back(THREAD_EVENT_INIT); }
 
-  virtual void CleanUp() OVERRIDE {
-    event_list_->push_back(THREAD_EVENT_CLEANUP);
-  }
+  void CleanUp() override { event_list_->push_back(THREAD_EVENT_CLEANUP); }
 
  private:
   EventList* event_list_;
@@ -97,7 +89,7 @@ class CapturingDestructionObserver
   }
 
   // DestructionObserver implementation:
-  virtual void WillDestroyCurrentMessageLoop() OVERRIDE {
+  void WillDestroyCurrentMessageLoop() override {
     event_list_->push_back(THREAD_EVENT_MESSAGE_LOOP_DESTROYED);
     event_list_ = NULL;
   }
@@ -141,7 +133,12 @@ TEST_F(ThreadTest, StartWithOptions_StackSize) {
   // Ensure that the thread can work with only 12 kb and still process a
   // message.
   Thread::Options options;
+#if defined(ADDRESS_SANITIZER) && defined(OS_MACOSX)
+  // ASan bloats the stack variables and overflows the 12 kb stack on OSX.
+  options.stack_size = 24*1024;
+#else
   options.stack_size = 12*1024;
+#endif
   EXPECT_TRUE(a.StartWithOptions(options));
   EXPECT_TRUE(a.message_loop());
   EXPECT_TRUE(a.IsRunning());

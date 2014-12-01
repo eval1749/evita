@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "base/basictypes.h"
+#include "base/compiler_specific.h"
 #include "base/logging.h"
 
 #include "testing/gmock/include/gmock/gmock.h"
@@ -240,7 +241,8 @@ TEST_F(LoggingTest, DcheckReleaseBehavior) {
 // looking in the global namespace.
 namespace nested_test {
   class Streamable {};
-  ALLOW_UNUSED std::ostream& operator<<(std::ostream& out, const Streamable&) {
+  ALLOW_UNUSED_TYPE std::ostream& operator<<(std::ostream& out,
+                                             const Streamable&) {
     return out << "Streamable";
   }
   TEST_F(LoggingTest, StreamingWstringFindsCorrectOperator) {

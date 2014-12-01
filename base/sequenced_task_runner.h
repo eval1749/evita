@@ -93,8 +93,6 @@ namespace base {
 //     has a method Run() that runs each runnable task in FIFO order
 //     that can be called from any thread, but only if another
 //     (non-nested) Run() call isn't already happening.
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 class BASE_EXPORT SequencedTaskRunner : public TaskRunner {
  public:
   // The two PostNonNestable*Task methods below are like their
@@ -141,7 +139,7 @@ class BASE_EXPORT SequencedTaskRunner : public TaskRunner {
   }
 
  protected:
-  virtual ~SequencedTaskRunner() {}
+  ~SequencedTaskRunner() override {}
 
  private:
   template <class T, class R> friend class subtle::DeleteHelperInternal;
@@ -155,7 +153,6 @@ class BASE_EXPORT SequencedTaskRunner : public TaskRunner {
                            void(*releaser)(const void*),
                            const void* object);
 };
-#pragma warning(pop)
 
 }  // namespace base
 

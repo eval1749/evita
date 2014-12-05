@@ -3,16 +3,13 @@
 	url = https://chromium.googlesource.com/chromium/tools/deps2git.git
 [submodule "tools/gyp"]
 	path = tools/gyp
-	url = https://chromium.googlesource.com/external/gyp
+	url = https://chromium.googlesource.com/external/gyp.git
 [submodule "third_party/icu"]
 	path = third_party/icu
-	url = https://chromium.googlesource.com/chromium/deps/icu46
-#[submodule "third_party/v8"]
-#	path = third_party/v8
-#	url = https://chromium.googlesource.com/external/v8
+	url = https://chromium.googlesource.com/chromium/deps/icu.git
 [submodule "testing/gtest"]
 	path = testing/gtest
-	url = https://chromium.googlesource.com/chromium/testing/gtest
+	url = https://chromium.googlesource.com//external/googletest.git
 [submodule "third_party/cygwin"]
 	path = third_party/cygwin
 	url = https://chromium.googlesource.com/chromium/deps/cygwin.git
@@ -21,7 +18,7 @@
 	url = https://chromium.googlesource.com/external/googlemock.git
 [submodule "v8"]
 	path = v8
-	url = https://chromium.googlesource.com/external/v8
+	url = https://chromium.googlesource.com/v8/v8.git
 [submodule "third_party/hunspell"]
 	path = third_party/hunspell
-	url = https://chromium.googlesource.com/chromium/deps/hunspell/
+	url = https://chromium.googlesource.com/chromium/deps/hunspell.git

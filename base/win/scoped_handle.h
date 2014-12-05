@@ -80,10 +80,6 @@ class GenericScopedHandle {
     return handle_;
   }
 
-  operator Handle() const {
-    return handle_;
-  }
-
   // Transfers ownership away from this object.
   Handle Take() {
     Handle temp = handle_;
@@ -139,13 +135,10 @@ class DummyVerifierTraits {
  public:
   typedef HANDLE Handle;
 
-#pragma warning(push)
-#pragma warning(disable: 4100)
-  static void StartTracking(HANDLE handle, const void* owner,
-                            const void* pc1, const void* pc2) {}
-  static void StopTracking(HANDLE handle, const void* owner,
-                           const void* pc1, const void* pc2) {}
-#pragma warning(pop)
+  static void StartTracking(HANDLE, const void*,
+                            const void*, const void*) {}
+  static void StopTracking(HANDLE, const void*,
+                           const void*, const void*) {}
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(DummyVerifierTraits);

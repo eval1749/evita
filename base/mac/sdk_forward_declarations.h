@@ -207,6 +207,16 @@ enum {
 @end
 
 BASE_EXPORT extern "C" NSString* const NSWindowWillEnterFullScreenNotification;
+BASE_EXPORT extern "C" NSString* const NSWindowWillExitFullScreenNotification;
+BASE_EXPORT extern "C" NSString* const NSWindowDidEnterFullScreenNotification;
+BASE_EXPORT extern "C" NSString* const NSWindowDidExitFullScreenNotification;
+BASE_EXPORT extern "C" NSString* const
+    NSWindowDidChangeBackingPropertiesNotification;
+
+@protocol NSWindowDelegateFullScreenAdditions
+- (void)windowDidFailToEnterFullScreen:(NSWindow*)window;
+- (void)windowDidFailToExitFullScreen:(NSWindow*)window;
+@end
 
 #endif  // MAC_OS_X_VERSION_10_7
 
@@ -263,8 +273,17 @@ enum {
 + (BOOL)screensHaveSeparateSpaces;
 @end
 
+// NSAppearance is a new class in the 10.9 SDK. New classes cannot be
+// forward-declared because they also require an @implementation, which would
+// produce conflicting linkage. Instead, just declare the necessary pieces of
+// the interface as a protocol, and treat objects of this type as id.
+@protocol CrNSAppearance<NSObject>
++ (id<NSObject>)appearanceNamed:(NSString*)name;
+@end
+
 @interface NSView (MavericksSDK)
 - (void)setCanDrawSubviewsIntoLayer:(BOOL)flag;
+- (id<CrNSAppearance>)effectiveAppearance;
 @end
 
 enum {
@@ -275,6 +294,14 @@ typedef NSUInteger NSWindowOcclusionState;
 @interface NSWindow (MavericksSDK)
 - (NSWindowOcclusionState)occlusionState;
 @end
+
+
+BASE_EXPORT extern "C" NSString* const
+    NSWindowDidChangeOcclusionStateNotification;
+
+enum {
+  NSWorkspaceLaunchWithErrorPresentation = 0x00000040
+};
 
 #else  // !MAC_OS_X_VERSION_10_9
 
@@ -304,11 +331,14 @@ BASE_EXPORT extern "C" NSString* const kCWSSIDDidChangeNotification;
 @interface NSUserActivity : NSObject
 
 @property (readonly, copy) NSString* activityType;
+@property (copy) NSDictionary* userInfo;
 @property (copy) NSURL* webPageURL;
 
 @end
 
 BASE_EXPORT extern "C" NSString* const NSUserActivityTypeBrowsingWeb;
+
+BASE_EXPORT extern "C" NSString* const NSAppearanceNameVibrantDark;
 
 #endif  // MAC_OS_X_VERSION_10_10
 

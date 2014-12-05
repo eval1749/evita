@@ -7,9 +7,9 @@
 #include <unordered_map>
 
 #include "base/logging.h"
+#include "base/strings/string_piece.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/synchronization/lock.h"
-#include "common/strings/string_piece.h"
 #include "evita/gc/collectable.h"
 #include "evita/gc/visitor.h"
 #include "evita/editor/dom_lock.h"

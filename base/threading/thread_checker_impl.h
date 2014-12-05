@@ -17,8 +17,6 @@ namespace base {
 //
 // Note: You should almost always use the ThreadChecker class to get the
 // right version for your build configuration.
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 class BASE_EXPORT ThreadCheckerImpl {
  public:
   ThreadCheckerImpl();
@@ -38,8 +36,9 @@ class BASE_EXPORT ThreadCheckerImpl {
   // This is mutable so that CalledOnValidThread can set it.
   // It's guarded by |lock_|.
   mutable PlatformThreadRef valid_thread_id_;
+
+  DISALLOW_COPY_AND_ASSIGN(ThreadCheckerImpl);
 };
-#pragma warning(pop)
 
 }  // namespace base
 

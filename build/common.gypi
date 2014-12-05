@@ -28,6 +28,9 @@
     'os_posix': 0,
     'target_arch%': '<(target_arch)',
     'use_custom_libcxx%': 0,
+    # See http://crbug.com/407544
+    'use_lto': 0,
+    'use_lto_o2': 0,
     'v8_enable_i18n_support': 1,
     'v8_optimized_debug%': '(<v8_optimized_debug)',
   }, # variables

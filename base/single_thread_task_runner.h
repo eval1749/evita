@@ -21,8 +21,6 @@ namespace base {
 //   - Add tasks to a FIFO and signal to a non-MessageLoop thread for them to
 //     be processed. This allows TaskRunner-oriented code run on threads
 //     running other kinds of message loop, e.g. Jingle threads.
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 class BASE_EXPORT SingleThreadTaskRunner : public SequencedTaskRunner {
  public:
   // A more explicit alias to RunsTasksOnCurrentThread().
@@ -31,9 +29,12 @@ class BASE_EXPORT SingleThreadTaskRunner : public SequencedTaskRunner {
   }
 
  protected:
-  virtual ~SingleThreadTaskRunner() {}
+  SingleThreadTaskRunner() = default;
+  ~SingleThreadTaskRunner() override {}
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SingleThreadTaskRunner);
 };
-#pragma warning(pop)
 
 }  // namespace base
 

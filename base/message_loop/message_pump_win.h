@@ -22,8 +22,6 @@ namespace base {
 // MessagePumpWin serves as the base for specialized versions of the MessagePump
 // for Windows. It provides basic functionality like handling of observers and
 // controlling the lifetime of the message pump.
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 class BASE_EXPORT MessagePumpWin : public MessagePump {
  public:
   MessagePumpWin() : have_work_(0), state_(NULL) {}
@@ -61,6 +59,9 @@ class BASE_EXPORT MessagePumpWin : public MessagePump {
 
   // State for the current invocation of Run.
   RunState* state_;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MessagePumpWin);
 };
 
 //-----------------------------------------------------------------------------
@@ -142,6 +143,8 @@ class BASE_EXPORT MessagePumpForUI : public MessagePumpWin {
 
   // A hidden message-only window.
   HWND message_hwnd_;
+
+  DISALLOW_COPY_AND_ASSIGN(MessagePumpForUI);
 };
 
 //-----------------------------------------------------------------------------
@@ -336,8 +339,9 @@ class BASE_EXPORT MessagePumpForIO : public MessagePumpWin {
   std::list<IOItem> completed_io_;
 
   ObserverList<IOObserver> io_observers_;
+
+  DISALLOW_COPY_AND_ASSIGN(MessagePumpForIO);
 };
-#pragma warning(pop)
 
 }  // namespace base
 

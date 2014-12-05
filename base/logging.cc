@@ -359,7 +359,7 @@ bool BaseInitLoggingImpl(const LoggingSettings& settings) {
   // Can log only to the system debug log.
   CHECK_EQ(settings.logging_dest & ~LOG_TO_SYSTEM_DEBUG_LOG, 0);
 #endif
-  CommandLine* command_line = CommandLine::ForCurrentProcess();
+  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
   // Don't bother initializing g_vlog_info unless we use one of the
   // vlog switches.
   if (command_line->HasSwitch(switches::kV) ||
@@ -444,8 +444,6 @@ LogMessageHandlerFunction GetLogMessageHandler() {
   return log_message_handler;
 }
 
-// MSVC doesn't like complex extern templates and DLLs.
-#if !defined(COMPILER_MSVC)
 // Explicit instantiations for commonly used comparisons.
 template std::string* MakeCheckOpString<int, int>(
     const int&, const int&, const char* names);
@@ -457,7 +455,6 @@ template std::string* MakeCheckOpString<unsigned int, unsigned long>(
     const unsigned int&, const unsigned long&, const char* names);
 template std::string* MakeCheckOpString<std::string, std::string>(
     const std::string&, const std::string&, const char* name);
-#endif
 
 #if !defined(NDEBUG)
 // Displays a message box to the user with the error message in it.
@@ -687,7 +684,7 @@ void LogMessage::Init(const char* file, int line) {
 
   stream_ << ":" << filename << "(" << line << ")] ";
 
-  message_start_ = stream_.tellp();
+  message_start_ = stream_.str().length();
 }
 
 #if defined(OS_WIN)

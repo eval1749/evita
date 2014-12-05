@@ -158,8 +158,8 @@ public class TraceEvent {
     // Holder for monitor avoids unnecessary construction on non-debug runs
     private static final class LooperMonitorHolder {
         private static final BasicLooperMonitor sInstance =
-                CommandLine.getInstance().hasSwitch(BaseSwitches.ENABLE_IDLE_TRACING) ?
-                        new IdleTracingLooperMonitor() : new BasicLooperMonitor();
+                CommandLine.getInstance().hasSwitch(BaseSwitches.ENABLE_IDLE_TRACING)
+                ? new IdleTracingLooperMonitor() : new BasicLooperMonitor();
     }
 
 
@@ -175,9 +175,9 @@ public class TraceEvent {
      */
     @CalledByNative
     public static void setEnabled(boolean enabled) {
-       sEnabled = enabled;
-       ThreadUtils.getUiThreadLooper().setMessageLogging(
-           enabled ? LooperMonitorHolder.sInstance : null);
+        sEnabled = enabled;
+        ThreadUtils.getUiThreadLooper().setMessageLogging(
+                enabled ? LooperMonitorHolder.sInstance : null);
     }
 
     /**

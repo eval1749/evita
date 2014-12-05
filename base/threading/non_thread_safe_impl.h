@@ -16,13 +16,12 @@ namespace base {
 //
 // Note: You should almost always use the NonThreadSafe class to get
 // the right version of the class for your build configuration.
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 class BASE_EXPORT NonThreadSafeImpl {
  public:
   bool CalledOnValidThread() const;
 
  protected:
+  NonThreadSafeImpl() = default;
   ~NonThreadSafeImpl();
 
   // Changes the thread that is checked for in CalledOnValidThread. The next
@@ -34,8 +33,9 @@ class BASE_EXPORT NonThreadSafeImpl {
 
  private:
   ThreadCheckerImpl thread_checker_;
+
+  DISALLOW_COPY_AND_ASSIGN(NonThreadSafeImpl);
 };
-#pragma warning(pop)
 
 }  // namespace base
 

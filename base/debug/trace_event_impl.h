@@ -23,7 +23,6 @@
 #include "base/synchronization/lock.h"
 #include "base/threading/thread.h"
 #include "base/threading/thread_local.h"
-#include "base/timer/timer.h"
 
 // Older style trace macros with explicit id and extra data
 // Only these macros result in publishing data to ETW as currently implemented.
@@ -44,17 +43,6 @@
 
 template <typename Type>
 struct DefaultSingletonTraits;
-
-#if defined(COMPILER_GCC)
-namespace BASE_HASH_NAMESPACE {
-template <>
-struct hash<base::MessageLoop*> {
-  std::size_t operator()(base::MessageLoop* value) const {
-    return reinterpret_cast<std::size_t>(value);
-  }
-};
-}  // BASE_HASH_NAMESPACE
-#endif
 
 namespace base {
 
@@ -190,7 +178,7 @@ class BASE_EXPORT TraceEvent {
 // TraceBufferChunk is the basic unit of TraceBuffer.
 class BASE_EXPORT TraceBufferChunk {
  public:
-  TraceBufferChunk(uint32 seq)
+  explicit TraceBufferChunk(uint32 seq)
       : next_free_(0),
         seq_(seq) {
   }
@@ -292,7 +280,7 @@ class BASE_EXPORT CategoryFilter {
   // The default category filter, used when none is provided.
   // Allows all categories through, except if they end in the suffix 'Debug' or
   // 'Test'.
-  static const char* kDefaultCategoryFilterString;
+  static const char kDefaultCategoryFilterString[];
 
   // |filter_string| is a comma-delimited list of category wildcards.
   // A category can have an optional '-' prefix to make it an excluded category.
@@ -391,13 +379,12 @@ enum TraceRecordMode {
 };
 
 struct BASE_EXPORT TraceOptions {
-
   TraceOptions()
       : record_mode(RECORD_UNTIL_FULL),
         enable_sampling(false),
         enable_systrace(false) {}
 
-  TraceOptions(TraceRecordMode record_mode)
+  explicit TraceOptions(TraceRecordMode record_mode)
       : record_mode(record_mode),
         enable_sampling(false),
         enable_systrace(false) {}
@@ -431,6 +418,13 @@ struct BASE_EXPORT TraceOptions {
   TraceRecordMode record_mode;
   bool enable_sampling;
   bool enable_systrace;
+};
+
+struct BASE_EXPORT TraceLogStatus {
+  TraceLogStatus();
+  ~TraceLogStatus();
+  size_t event_capacity;
+  size_t event_count;
 };
 
 class BASE_EXPORT TraceLog {
@@ -508,7 +502,7 @@ class BASE_EXPORT TraceLog {
   void RemoveEnabledStateObserver(EnabledStateObserver* listener);
   bool HasEnabledStateObserver(EnabledStateObserver* listener) const;
 
-  float GetBufferPercentFull() const;
+  TraceLogStatus GetStatus() const;
   bool BufferIsFull() const;
 
   // Not using base::Callback because of its limited by 7 parameters.
@@ -616,7 +610,6 @@ class BASE_EXPORT TraceLog {
   static void DeleteForTesting();
 
   // Allow tests to inspect TraceEvents.
-  size_t GetEventsSize() const { return logged_events_->Size(); }
   TraceEvent* GetEventByHandle(TraceEventHandle handle);
 
   void SetProcessID(int process_id);

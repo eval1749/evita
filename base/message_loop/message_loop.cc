@@ -100,15 +100,17 @@ bool AlwaysNotifyPump(MessageLoop::Type type) {
 
 #if defined(OS_IOS)
 typedef MessagePumpIOSForIO MessagePumpForIO;
-#elif defined(OS_NACL)
+#elif defined(OS_NACL_SFI)
 typedef MessagePumpDefault MessagePumpForIO;
 #elif defined(OS_POSIX)
 typedef MessagePumpLibevent MessagePumpForIO;
 #endif
 
+#if !defined(OS_NACL_SFI)
 MessagePumpForIO* ToPumpIO(MessagePump* pump) {
   return static_cast<MessagePumpForIO*>(pump);
 }
+#endif  // !defined(OS_NACL_SFI)
 
 }  // namespace
 
@@ -676,7 +678,7 @@ bool MessageLoopForUI::WatchFileDescriptor(
 //------------------------------------------------------------------------------
 // MessageLoopForIO
 
-#if !defined(OS_NACL)
+#if !defined(OS_NACL_SFI)
 void MessageLoopForIO::AddIOObserver(
     MessageLoopForIO::IOObserver* io_observer) {
   ToPumpIO(pump_.get())->AddIOObserver(io_observer);
@@ -714,6 +716,6 @@ bool MessageLoopForIO::WatchFileDescriptor(int fd,
 }
 #endif
 
-#endif  // !defined(OS_NACL)
+#endif  // !defined(OS_NACL_SFI)
 
 }  // namespace base

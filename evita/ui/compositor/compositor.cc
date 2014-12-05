@@ -42,6 +42,7 @@ void Compositor::CommitIfNeeded() {
   DCHECK(is_valid);
 #endif
   COM_VERIFY(composition_device_->Commit());
+  COM_VERIFY(composition_device_->WaitForCommitCompletion());
   need_commit_ = false;
 }
 

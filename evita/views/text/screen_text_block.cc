@@ -298,7 +298,6 @@ void ScreenTextBlock::RenderContext::Finish() {
     DrawDirtyRect(rect, 219.0f / 255, 68.0f / 255, 55.0f / 255);
     canvas_->AddDirtyRect(bounds_.Intersect(rect));
   }
-  canvas_->Flush();
 }
 
 bool ScreenTextBlock::RenderContext::Render() {

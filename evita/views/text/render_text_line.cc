@@ -145,7 +145,6 @@ void TextLine::Render(gfx::Canvas* canvas) const {
     cell->Render(canvas, rect);
     x = rect.right;
   }
-  canvas->Flush();
 }
 
 }  // namespace rendering

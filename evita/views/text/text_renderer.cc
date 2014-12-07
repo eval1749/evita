@@ -85,8 +85,10 @@ void TextRenderer::Format(text::Posn text_offset) {
 }
 
 bool TextRenderer::FormatIfNeeded() {
-  if (!text_block_->FormatIfNeeded())
-    return format_counter_ != text_block_->format_counter();
+  if (!text_block_->FormatIfNeeded() &&
+      format_counter_ == text_block_->format_counter()) {
+    return false;
+  }
   should_render_ = true;
   return true;
 }

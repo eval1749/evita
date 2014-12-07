@@ -46,7 +46,6 @@ void PaintSamples(gfx::Canvas* canvas, const gfx::Brush& brush,
   (*canvas)->DrawLine(gfx::PointF(bounds.left, avg_y),
                       gfx::PointF(bounds.right, avg_y),
                       brush, 2.0f);
-  canvas->Flush();
 }
 
 }  // namespace

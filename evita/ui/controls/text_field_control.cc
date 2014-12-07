@@ -255,7 +255,6 @@ void TextFieldControl::View::Animate(gfx::Canvas* canvas, base::Time now) {
       canvas->DrawRectangle(gfx::Brush(canvas, style_.hotlight), frame_rect);
       break;
   }
-  canvas->Flush();
 }
 
 void TextFieldControl::View::MakeSelectionVisible() {

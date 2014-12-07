@@ -61,7 +61,6 @@ void LabelControl::Renderer::Render(gfx::Canvas* canvas) const {
   gfx::Brush text_brush(canvas, style_.color);
   (*canvas)->DrawTextLayout(text_origin_, *text_layout_, text_brush,
                             D2D1_DRAW_TEXT_OPTIONS_CLIP);
-  canvas->Flush();
   canvas->AddDirtyRect(bounds_);
 }
 

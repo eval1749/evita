@@ -82,7 +82,6 @@ void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
           frame_rect);
       break;
   }
-  canvas->Flush();
   canvas->AddDirtyRect(bounds);
 }
 

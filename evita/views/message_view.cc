@@ -53,7 +53,6 @@ void PaintResizeButton(gfx::Canvas* canvas, const gfx::RectF& bounds,
         canvas->Clear(gfx::sysColor(COLOR_SCROLLBAR, alpha));
      }
   }
-  canvas->Flush();
 }
 
 //////////////////////////////////////////////////////////////////////

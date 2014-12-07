@@ -169,8 +169,9 @@ void Canvas::EndDraw() {
   DCHECK(drawing());
   DCHECK(GetRenderTarget());
   --batch_nesting_level_;
-  auto const hr = batch_nesting_level_ ? GetRenderTarget()->Flush() :
-                                         GetRenderTarget()->EndDraw();
+  if (batch_nesting_level_)
+    return;
+  auto const hr = GetRenderTarget()->EndDraw();
   if (SUCCEEDED(hr)) {
     if (!batch_nesting_level_) {
       DidCallEndDraw();

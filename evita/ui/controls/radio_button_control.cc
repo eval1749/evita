@@ -73,7 +73,6 @@ void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
           gfx::Brush(canvas, style_.hotlight));
       break;
   }
-  canvas->Flush();
   canvas->AddDirtyRect(bounds);
 }
 

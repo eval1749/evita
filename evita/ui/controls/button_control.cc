@@ -92,7 +92,6 @@ void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
       canvas->DrawRectangle(gfx::Brush(canvas, style_.hotlight), frame_rect);
       break;
   }
-  canvas->Flush();
   canvas->AddDirtyRect(bounds_);
 }
 

@@ -120,6 +120,17 @@ void TextBlock::TextLineCache::Register(TextLine* line) {
   UI_ASSERT_DOM_LOCKED();
   DCHECK_GE(line->GetEnd(), line->GetStart());
   lines_[line->GetStart()] = line;
+  #if _DEBUG
+    auto it = lines_.find(line->GetStart());
+    if (it != lines_.begin()) {
+      --it;
+      DCHECK_LE(it->second->GetEnd(), line->GetStart());
+      ++it;
+    }
+    ++it;
+    if (it != lines_.end())
+      DCHECK_GE(it->second->GetStart(), line->GetEnd());
+  #endif
 }
 
 void TextBlock::TextLineCache::RemoveDirtyLines() {
@@ -127,19 +138,25 @@ void TextBlock::TextLineCache::RemoveDirtyLines() {
   dirty_start_ = std::numeric_limits<text::Posn>::max();
   if (lines_.empty() || dirty_start >= lines_.rbegin()->second->GetEnd())
     return;
-  auto it = dirty_start ? lines_.lower_bound(dirty_start - 1) : lines_.begin();
-  if (it == lines_.end())
+  auto it = lines_.lower_bound(dirty_start);
+  if (it == lines_.end()) {
     it = lines_.find(lines_.rbegin()->first);
-  while (it != lines_.begin()) {
-    if (it->second->GetStart() < dirty_start)
-      break;
-    --it;
+    if (it->second->GetEnd() < dirty_start)
+      return;
+  } else {
+    DCHECK_GE(it->second->GetStart(), dirty_start);
   }
+  while (it != lines_.begin() && it->second->GetStart() > dirty_start)
+    --it;
+  ASSERT(it != lines_.end());
 
   if (it == lines_.begin()) {
     RemoveAllLines();
     return;
   }
+
+  DCHECK_GE(dirty_start, it->second->GetStart());
+  DCHECK_LE(dirty_start, it->second->GetEnd());
 
   std::vector<text::Posn> dirty_offsets;
   while (it != lines_.end()) {
@@ -305,12 +322,11 @@ void TextBlock::Format(text::Posn text_offset) {
   }
 
   // Scroll up until we have |text_offset| in this |TextBlock|.
-  while (text_offset > lines_.front()->GetEnd()) {
+  while (lines_.back()->GetEnd() < text_buffer_->GetEnd() &&
+         text_offset > lines_.front()->GetEnd()) {
     DiscardFirstLine();
     auto const line = FormatLine(&formatter);
     Append(line);
-    if (line->GetEnd() >= text_buffer_->GetEnd())
-      break;
   }
   EnsureLinePoints();
   view_start_ = lines_.front()->GetStart();

@@ -78,12 +78,12 @@ FileIoContext::~FileIoContext() {
 
 // base::MessagePumpForIO::FileIoContext
 void FileIoContext::OnIOCompleted(IOContext*,
-                                  DWORD bytes_transfered,
+                                  DWORD bytes_transferred,
                                   DWORD error) {
-  overlapped.Offset += bytes_transfered;
+  overlapped.Offset += bytes_transferred;
   running_ = false;
   if (!error || error == ERROR_HANDLE_EOF)
-    Resolve(deferred_.resolve, bytes_transfered);
+    Resolve(deferred_.resolve, bytes_transferred);
   else
     Reject(deferred_.reject, error);
   if (!file_handle_.is_valid())

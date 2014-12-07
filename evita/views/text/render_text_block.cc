@@ -127,16 +127,13 @@ void TextBlock::TextLineCache::RemoveDirtyLines() {
   dirty_start_ = std::numeric_limits<text::Posn>::max();
   if (lines_.empty() || dirty_start >= lines_.rbegin()->second->GetEnd())
     return;
-  auto it = lines_.lower_bound(dirty_start);
+  auto it = dirty_start ? lines_.lower_bound(dirty_start - 1) : lines_.begin();
   if (it == lines_.end())
     it = lines_.find(lines_.rbegin()->first);
   while (it != lines_.begin()) {
-    --it;
-    if (it->second->GetEnd() <= dirty_start) {
-      if (!IsEndWithNewline(it->second))
-        ++it;
+    if (it->second->GetStart() < dirty_start)
       break;
-    }
+    --it;
   }
 
   if (it == lines_.begin()) {

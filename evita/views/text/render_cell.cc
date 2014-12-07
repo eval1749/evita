@@ -17,7 +17,6 @@ void DrawText(gfx::Canvas* canvas, const Font& font,
               const gfx::Brush& text_brush, const gfx::RectF& rect,
               const base::string16& string) {
   font.DrawText(canvas, text_brush, rect, string);
-  canvas->Flush();
 }
 
 inline void FillRect(gfx::Canvas* canvas, const gfx::RectF& rect,

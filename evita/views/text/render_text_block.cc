@@ -156,13 +156,18 @@ void TextBlock::TextLineCache::RemoveDirtyLines() {
   }
 
   DCHECK_GE(dirty_start, it->second->GetStart());
-  DCHECK_LE(dirty_start, it->second->GetEnd());
+  while (it != lines_.end() &&
+         it->second->GetStart() < dirty_start &&
+         it->second->GetEnd() < dirty_start) {
+    ++it;
+  }
 
   std::vector<text::Posn> dirty_offsets;
   while (it != lines_.end()) {
     dirty_offsets.push_back(it->first);
     ++it;
   }
+
   for (auto offset : dirty_offsets) {
     const auto it = lines_.find(offset);
     DCHECK(it != lines_.end());

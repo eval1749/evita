@@ -313,7 +313,6 @@ void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
 }
 
 void ViewEventHandlerImpl::RunCallback(base::Closure callback) {
-  v8_glue::Runner::Scope runner_scope(host_->runner());
   DOM_AUTO_LOCK_SCOPE();
   callback.Run();
 }

@@ -247,7 +247,7 @@
     form.addEventListener(Event.Names.KEYDOWN, handleGlobalKeyDown);
 
     function installButton(button, handler) {
-      button.addEventListener('click', (event) => {
+      button.addEventListener('click', function(event) {
         if (!Window.focus)
           return;
         handler(/**@type{!Window}*/(Window.focus));

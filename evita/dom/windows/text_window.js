@@ -205,7 +205,7 @@ global.TextWindow.prototype.clone = function() {
         }
         reloadDocument(window, document);
       });
-    }).catch(reason => {
+    }).catch(function(reason){
       console.log('Os.File.stat', document.fileName, reason);
       document.lastStatTime_ = new Date();
       document.obsolete = Document.Obsolete.UNKNOWN;
@@ -334,7 +334,7 @@ global.TextWindow.prototype.clone = function() {
       let selection = window.selection;
       selectionMap.set(selection, selection.range.start);
     }
-    document.load().then(zero => {
+    document.load().then(function(zero) {
       textWindow.status = 'Reloaded';
       for (let window of document.listWindows()) {
         let selection = window.selection;

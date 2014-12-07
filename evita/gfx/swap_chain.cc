@@ -161,12 +161,8 @@ void SwapChain::Present() {
     parameters.pScrollRect = nullptr;
     parameters.pScrollOffset = nullptr;
   }
-  if (IsReady()) {
-    auto const flags = DXGI_PRESENT_DO_NOT_WAIT;
-    COM_VERIFY(swap_chain_->Present1(0, flags, &parameters));
-  } else {
-    COM_VERIFY(swap_chain_->Present1(1, 0, &parameters));
-  }
+  auto const flags = DXGI_PRESENT_DO_NOT_WAIT;
+  COM_VERIFY(swap_chain_->Present1(0, flags, &parameters));
   dirty_rects_.clear();
   is_ready_ = false;
   is_first_present_ = false;

@@ -73,7 +73,7 @@ class Frame final : public views::Window,
   private: const std::unique_ptr<views::TitleBar> title_bar_;
 
   public: explicit Frame(views::WindowId window_id);
-  private: virtual ~Frame();
+  private: ~Frame() final;
 
   // [A]
   public: bool Activate();
@@ -101,35 +101,35 @@ class Frame final : public views::Window,
   private: void UpdateTitleBar();
 
   // ui::AnimationFrameHandler
-  private: virtual void DidBeginAnimationFrame(base::Time time) override;
+  private: void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::Widget
-  private: virtual void CreateNativeWindow() const override;
-  private: virtual void DidAddChildWidget(ui::Widget* new_child) override;
-  private: virtual void DidRealize() override;
-  private: virtual void DidRemoveChildWidget(ui::Widget* old_child) override;
-  private: virtual void DidRequestDestroy() override;
-  private: virtual void DidChangeBounds() override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  private: virtual LRESULT OnMessage(uint, WPARAM, LPARAM) override;
-  private: virtual void OnPaint(const gfx::Rect paint_rect) override;
-  private: virtual void WillDestroyWidget() override;
-  private: virtual void WillRemoveChildWidget(ui::Widget* old_child) override;
+  private: void CreateNativeWindow() const final;
+  private: void DidAddChildWidget(ui::Widget* new_child) final;
+  private: void DidRealize() final;
+  private: void DidRemoveChildWidget(ui::Widget* old_child) final;
+  private: void DidRequestDestroy() final;
+  private: void DidChangeBounds() final;
+  private: void DidSetFocus(ui::Widget* last_focused) final;
+  private: LRESULT OnMessage(uint, WPARAM, LPARAM) final;
+  private: void OnPaint(const gfx::Rect paint_rect) final;
+  private: void WillDestroyWidget() final;
+  private: void WillRemoveChildWidget(ui::Widget* old_child) final;
 
   // views::TabContentObserver
-  private: virtual void DidActivateTabContent(TabContent* tab_content);
+  private: void DidActivateTabContent(TabContent* tab_content);
 
   // views::TabDataSet::Observer
-  private: virtual void DidSetTabData(dom::WindowId window_id,
-                                      const domapi::TabData& tab_data) override;
+  private: void DidSetTabData(dom::WindowId window_id,
+                                      const domapi::TabData& tab_data) final;
 
   // views::TabStripDelegate
-  private: virtual void DidDropTab(TabContent* tab_content,
-                                   const gfx::Point& screen_point) override;
-  private: virtual void DidSelectTab(int new_selected_index) override;
-  private: virtual void RequestCloseTab(int tab_index) override;
-  private: virtual void RequestSelectTab(
-      int new_selected_index) override;
+  private: void DidDropTab(TabContent* tab_content,
+                                   const gfx::Point& screen_point) final;
+  private: void DidSelectTab(int new_selected_index) final;
+  private: void RequestCloseTab(int tab_index) final;
+  private: void RequestSelectTab(
+      int new_selected_index) final;
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };

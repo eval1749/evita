@@ -30,7 +30,7 @@ class TabContent : public ui::Widget {
   private: ObserverList<TabContentObserver> observers_;
 
   protected: TabContent();
-  public: virtual ~TabContent();
+  public: ~TabContent() override;
 
   public: int active_tick() const { return active_tick_; }
 
@@ -43,9 +43,9 @@ class TabContent : public ui::Widget {
   public: void RemoveObserver(TabContentObserver* observer);
 
   // ui::Widget
-  protected: virtual void DidHide() override;
-  protected: virtual void DidRealize() override;
-  protected: virtual void DidShow() override;
+  protected: void DidHide() override;
+  protected: void DidRealize() override;
+  protected: void DidShow() override;
 
   DISALLOW_COPY_AND_ASSIGN(TabContent);
 };

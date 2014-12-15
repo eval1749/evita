@@ -16,13 +16,13 @@ class AnimatableWindow : public AnimationFrameHandler, public Widget {
   protected: explicit AnimatableWindow(
       std::unique_ptr<NativeWindow> native_window);
   protected: AnimatableWindow();
-  protected: virtual ~AnimatableWindow();
+  protected: ~AnimatableWindow() override;
 
   // Widget
-  protected: virtual void DidChangeBounds() override;
-  protected: virtual void DidRealize() override;
-  protected: virtual void DidShow() override;
-  protected: virtual void WillDestroyWidget() override;
+  protected: void DidChangeBounds() override;
+  protected: void DidRealize() override;
+  protected: void DidShow() override;
+  protected: void WillDestroyWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(AnimatableWindow);
 };

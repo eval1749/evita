@@ -33,7 +33,7 @@ class ContentWindow : public Window, protected ui::LayerOwnerDelegate {
   private: ObserverList<ContentObserver> observers_;
 
   protected: explicit ContentWindow(views::WindowId window_id);
-  public: virtual ~ContentWindow();
+  public: ~ContentWindow() override;
 
   protected: gfx::Canvas* canvas() { return canvas_.get(); }
   protected: const gfx::Canvas* canvas() const { return canvas_.get(); }
@@ -45,15 +45,15 @@ class ContentWindow : public Window, protected ui::LayerOwnerDelegate {
   public: void RemoveObserver(ContentObserver* observer);
 
   // ui::LayerOwnerDelegate
-  protected: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
+  protected: void DidRecreateLayer(ui::Layer* old_layer) override;
 
   // ui::Widget
-  protected: virtual void DidChangeBounds() override;
-  protected: virtual void DidChangeHierarchy() override;
-  protected: virtual void DidHide() override;
-  protected: virtual void DidRealize() override;
-  protected: virtual void DidSetFocus(ui::Widget*) override;
-  protected: virtual void DidShow() override;
+  protected: void DidChangeBounds() override;
+  protected: void DidChangeHierarchy() override;
+  protected: void DidHide() override;
+  protected: void DidRealize() override;
+  protected: void DidSetFocus(ui::Widget*) override;
+  protected: void DidShow() override;
 
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };

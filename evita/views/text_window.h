@@ -54,7 +54,7 @@ class TextWindow final : public ContentWindow,
   private: ui::ScrollBar* const vertical_scroll_bar_;
 
   public: TextWindow(WindowId window_id, text::Selection* selection);
-  public: virtual ~TextWindow();
+  public: ~TextWindow() final;
 
   private: text::Buffer* buffer() const;
 
@@ -74,52 +74,52 @@ class TextWindow final : public ContentWindow,
   private: void UpdateLayout();
 
   // gfx::CanvasObserver
-  private: virtual void DidRecreateCanvas() override;
+  private: void DidRecreateCanvas() final;
 
   // text::BufferMutationObserver
-  private: virtual void DidChangeStyle(Posn offset, size_t length) override;
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+  private: void DidChangeStyle(Posn offset, size_t length) final;
+  private: void DidDeleteAt(Posn offset, size_t length) final;
+  private: void DidInsertAt(Posn offset, size_t length) final;
 
   // text::SelectionChangeObserver
-  private: virtual void DidChangeSelection() override;
+  private: void DidChangeSelection() final;
 
   // ui::AnimationFrameHandler
-  private: virtual void DidBeginAnimationFrame(base::Time time) override;
+  private: void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::CaretOwner
-  private: virtual void DidFireCaretTimer() override;
+  private: void DidFireCaretTimer() final;
 
   // ui::LayerOwnerDelegate
-  private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
+  private: void DidRecreateLayer(ui::Layer* old_layer) final;
 
   // ui::ScrollBarObserver
-  private: virtual void DidClickLineDown() override;
-  private: virtual void DidClickLineUp() override;
-  private: virtual void DidClickPageDown() override;
-  private: virtual void DidClickPageUp() override;
-  private: virtual void DidMoveThumb(int value) override;
+  private: void DidClickLineDown() final;
+  private: void DidClickLineUp() final;
+  private: void DidClickPageDown() final;
+  private: void DidClickPageUp() final;
+  private: void DidMoveThumb(int value) final;
 
   // ui::TextInputDelegate
-  private: virtual void DidCommitComposition(
-      const ui::TextComposition& composition) override;
-  private: virtual void DidFinishComposition() override;
-  private: virtual void DidStartComposition() override;
-  private: virtual void DidUpdateComposition(
-      const ui::TextComposition& composition) override;
-  private: virtual Widget* GetClientWindow() override;
+  private: void DidCommitComposition(
+      const ui::TextComposition& composition) final;
+  private: void DidFinishComposition() final;
+  private: void DidStartComposition() final;
+  private: void DidUpdateComposition(
+      const ui::TextComposition& composition) final;
+  private: Widget* GetClientWindow() final;
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
-  private: virtual void DidHide() override;
-  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
-  private: virtual void DidRealize() override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  private: virtual void DidShow() override;
-  private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
+  private: void DidChangeBounds() final;
+  private: void DidHide() final;
+  private: void DidKillFocus(ui::Widget* focused_window) final;
+  private: void DidRealize() final;
+  private: void DidSetFocus(ui::Widget* last_focused) final;
+  private: void DidShow() final;
+  private: HCURSOR GetCursorAt(const gfx::Point& point) const final;
 
   // views::ContentWindow
-  private: virtual void MakeSelectionVisible() override;
+  private: void MakeSelectionVisible() final;
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);
 };

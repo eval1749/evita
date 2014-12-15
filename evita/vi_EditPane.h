@@ -35,7 +35,7 @@ class EditPane final : public views::TabContent {
   private: const std::unique_ptr<SplitterController> splitter_controller_;
 
   public: EditPane();
-  public: virtual ~EditPane();
+  public: ~EditPane() final;
 
   public: bool has_more_than_one_child() const;
 
@@ -49,24 +49,24 @@ class EditPane final : public views::TabContent {
                                ContentWindow* new_below_window);
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
-  private: virtual void DidHide() override;
-  private: virtual void DidRealize() override;
-  private: virtual void DidRealizeChildWidget(Widget* new_child) override;
-  private: virtual void DidRemoveChildWidget(Widget* old_child) override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  private: virtual void DidShow() override;
-  private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
-  private: virtual void OnMouseMoved(const ui::MouseEvent&) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
-  private: virtual void WillDestroyWidget() override;
-  private: virtual void WillRemoveChildWidget(Widget* old_child) override;
+  private: void DidChangeBounds() final;
+  private: void DidHide() final;
+  private: void DidRealize() final;
+  private: void DidRealizeChildWidget(Widget* new_child) final;
+  private: void DidRemoveChildWidget(Widget* old_child) final;
+  private: void DidSetFocus(ui::Widget* last_focused) final;
+  private: void DidShow() final;
+  private: HCURSOR GetCursorAt(const gfx::Point& point) const final;
+  private: void OnMouseMoved(const ui::MouseEvent&) final;
+  private: void OnMousePressed(const ui::MouseEvent& event) final;
+  private: void OnMouseReleased(const ui::MouseEvent& event) final;
+  private: void WillDestroyWidget() final;
+  private: void WillRemoveChildWidget(Widget* old_child) final;
 
   // views::TabContent
-  private: virtual void DidEnterSizeMove() override;
-  private: virtual void DidExitSizeMove() override;
-  private: virtual const domapi::TabData* GetTabData() const override;
+  private: void DidEnterSizeMove() final;
+  private: void DidExitSizeMove() final;
+  private: const domapi::TabData* GetTabData() const final;
 
   DISALLOW_COPY_AND_ASSIGN(EditPane);
 };

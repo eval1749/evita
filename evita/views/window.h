@@ -24,7 +24,7 @@ class Window : public ui::AnimatableWindow,
   protected: Window(
       std::unique_ptr<NativeWindow> native_window, WindowId window_id);
   protected: explicit Window(WindowId window_id = kInvalidWindowId);
-  protected: virtual ~Window();
+  protected: ~Window() override;
 
   public: int active_tick() const { return active_tick_; }
   public: WindowId window_id() const { return window_id_; }
@@ -33,22 +33,19 @@ class Window : public ui::AnimatableWindow,
   public: static Window* FromWindowId(WindowId window_id);
 
   // ui::Widget
-  protected: virtual void DidChangeBounds() override;
-  protected: virtual void DidHide() override;
-  protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
-  protected: virtual void DidRealize() override;
-  protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  protected: virtual void DidShow() override;
-  protected: virtual void OnKeyPressed(
-      const ui::KeyEvent& event) override;
-  protected: virtual void OnKeyReleased(
-      const ui::KeyEvent& event) override;
-  protected: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  protected: virtual void OnMousePressed(const ui::MouseEvent& event) override;
-  protected: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
-  protected: virtual void OnMouseWheel(
-      const ui::MouseWheelEvent& event) override;
-  protected: virtual void WillDestroyWidget() override;
+  protected: void DidChangeBounds() override;
+  protected: void DidHide() override;
+  protected: void DidKillFocus(ui::Widget* focused_window) override;
+  protected: void DidRealize() override;
+  protected: void DidSetFocus(ui::Widget* last_focused) override;
+  protected: void DidShow() override;
+  protected: void OnKeyPressed(const ui::KeyEvent& event) override;
+  protected: void OnKeyReleased(const ui::KeyEvent& event) override;
+  protected: void OnMouseMoved(const ui::MouseEvent& event) override;
+  protected: void OnMousePressed(const ui::MouseEvent& event) override;
+  protected: void OnMouseReleased(const ui::MouseEvent& event) override;
+  protected: void OnMouseWheel(const ui::MouseWheelEvent& event) override;
+  protected: void WillDestroyWidget() override;
 
   DISALLOW_COPY_AND_ASSIGN(Window);
 };

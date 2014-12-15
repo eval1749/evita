@@ -33,6 +33,7 @@
     'use_lto_o2': 0,
     'v8_enable_i18n_support': 1,
     'v8_optimized_debug%': '(<v8_optimized_debug)',
+    'v8_use_external_startup_data': 0,
   }, # variables
 
   'includes': [

@@ -4,7 +4,7 @@
 
 [ImplementedAs=JavaScript, Constructor(Document document, object options)]
 interface Lexer {
-  attribute long changeOffset;
+  attribute long changedOffset;
   attribute long debug;
   attribute MutationObserver mutationObserver_;
   attribute Range? range;

@@ -113,7 +113,7 @@ Lexer.createKeywords;
 /**
  * @type {number}
  */
-Lexer.prototype.changeOffset;
+Lexer.prototype.changedOffset;
 
 /**
  * @type {!Map.<number, !Symbol>}

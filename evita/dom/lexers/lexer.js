@@ -35,7 +35,11 @@ global.Lexer = (function() {
    * Resets |changedOffset| to minimal changed offset.
    */
   function mutationCallback(mutations, observer) {
-    updateChangedOffset(this, mutations);
+    let lexer = this;
+    lexer.changedOffset = mutations.reduce(function(previousValue, mutation) {
+      return Math.min(previousValue, mutation.offset);
+    }, lexer.changedOffset);
+    lexer.doColor(100);
   }
 
   /**
@@ -43,17 +47,6 @@ global.Lexer = (function() {
    */
   function setupMutationObserver(lexer) {
     lexer.mutationObserver_.observe(lexer.range.document, {summary: true});
-  }
-
-  /**
-   * @param {!Lexer} lexer
-   * @param {!Array.<!MutationRecord>} mutations
-   */
-  function updateChangedOffset(lexer, mutations) {
-    /** @type {number} */
-    lexer.changedOffset = mutations.reduce(function(previousValue, mutation) {
-      return Math.min(previousValue, mutation.offset);
-    }, lexer.changedOffset);
   }
 
   /**
@@ -144,6 +137,34 @@ global.Lexer = (function() {
     });
     return map;
   }
+
+  // Scheduler
+  // Runs |doColor(100)| ever 100ms.
+  class Scheduler {
+    constructor() {
+      this.pendingSet_ = new Set();
+      this.timer_ = new RepeatingTimer();
+    }
+
+    /** @private */
+    didFireTimer_() {
+      let runningSet = Array.from(this.pendingSet_);
+      this.pendingSet_.clear();
+      this.timer_.stop();
+      for (let runnable of runningSet)
+        runnable.doColor(100);
+    }
+
+    /** @param {!Lexer} scheduleable */
+    schedule(scheduleable) {
+      this.pendingSet_.add(scheduleable);
+      if (this.timer_.isRunning)
+        return;
+      this.timer_.start(100, this.didFireTimer_, this);
+    }
+  }
+
+  const scheduler = new Scheduler();
 
   /**
    * @this {!Lexer}
@@ -310,6 +331,8 @@ global.Lexer = (function() {
     let count = this.scanOffset - startOffset;
     if (count && this.lastToken)
       this.colorLastToken();
+    if (this.scanOffset < document.length)
+      scheduler.schedule(this);
     return maxCount - count;
   }
 

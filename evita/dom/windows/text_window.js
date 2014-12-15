@@ -220,7 +220,6 @@ global.TextWindow.prototype.clone = function() {
     updateStatusBar(window);
     let document = window.document;
     DocumentState.update(document);
-    document.doColor_(300);
   }
 
   /**

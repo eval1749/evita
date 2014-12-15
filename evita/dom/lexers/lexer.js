@@ -285,7 +285,7 @@ global.Lexer = (function() {
     range.end = token.end;
     let syntax = this.syntaxOfToken(range, token) || '';
     if (this.debug_ > 4)
-      console.log('setSyntax', '"' + syntax + '"', token);
+      console.log(`setSyntax "${syntax}"`, token);
     range.setSyntax(syntax === 'identifier' ? '' : syntax);
   }
 
@@ -294,7 +294,7 @@ global.Lexer = (function() {
    */
   function detach() {
     if (!this.range)
-      throw new Error(this + ' isn\'t attached to document.');
+      throw new Error(`${this} isn't attached to document.`);
     let document = this.range.document;
     this.eventHandlers_.forEach(function(handler, eventType) {
         document.removeEventListener(eventType, handler);

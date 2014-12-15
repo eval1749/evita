@@ -5,20 +5,20 @@
 global.FindAndReplace = (function() {
   /**
    * @param {string} string
-   * @param {!Range.Case} string_case
+   * @param {!Range.Case} stringCase
    * @return string
    */
-  function caseReplace(string, string_case) {
+  function caseReplace(string, stringCase) {
     if (!string.length)
       return string;
-    switch (string_case) {
+    switch (stringCase) {
       case Range.Case.CAPITALIZED_TEXT: {
-        for (var index = 0; index < string.length; ++index) {
-          var char_code = string.charCodeAt(index);
-          var ucd = Unicode.UCD[char_code];
-          if (ucd.category == Unicode.Category.Lu ||
-              ucd.category == Unicode.Category.Ll ||
-              ucd.category == Unicode.Category.Lt) {
+        for (let index = 0; index < string.length; ++index) {
+          let charCode = string.charCodeAt(index);
+          let ucd = Unicode.UCD[charCode];
+          if (ucd.category === Unicode.Category.Lu ||
+              ucd.category === Unicode.Category.Ll ||
+              ucd.category === Unicode.Category.Lt) {
             return string.substr(0, index) +
                    string.substr(index, 1).toLocaleUpperCase() +
                    string.substr(index + 1);
@@ -27,32 +27,38 @@ global.FindAndReplace = (function() {
         return string;
       }
       case Range.Case.CAPITALIZED_WORDS: {
-        var new_string = '';
-        var in_word = false;
-        for (var index = 0; index < string.length; ++index) {
-          var char_code = string.charCodeAt(index);
-          var ucd = Unicode.UCD[char_code];
-          var upper_case = ucd.category == Unicode.Category.Lu ||
-                           ucd.category == Unicode.Category.Lt;
-          var lower_case = ucd.category == Unicode.Category.Ll;
-          var new_char_code = char_code;
-          if (in_word) {
-            if (upper_case) {
-              new_char_code = String.fromCharCode(char_code).toLocaleLowerCase()
+        /** @type {string} */
+        let newString = '';
+        /** @type {boolean}*/
+        let inWord = false;
+        for (let index = 0; index < string.length; ++index) {
+          /** @type {number} */
+          const charCode = string.charCodeAt(index);
+          const ucd = Unicode.UCD[charCode];
+          /** @type {boolean} */
+          const upperCase = ucd.category === Unicode.Category.Lu ||
+                          ucd.category === Unicode.Category.Lt;
+          /** @type {boolean} */
+          const lowerCase = ucd.category === Unicode.Category.Ll;
+          /** @type {number} */
+          let newCharCode = charCode;
+          if (inWord) {
+            if (upperCase) {
+              newCharCode = String.fromCharCode(charCode).toLocaleLowerCase()
                   .charCodeAt(0);
-            } else if (!lower_case) {
-              in_word = false;
+            } else if (!lowerCase) {
+              inWord = false;
             }
-          } else if (upper_case) {
-            in_word = true;
-          } else if (lower_case) {
-            new_char_code = String.fromCharCode(char_code).toLocaleUpperCase()
+          } else if (upperCase) {
+            inWord = true;
+          } else if (lowerCase) {
+            newCharCode = String.fromCharCode(charCode).toLocaleUpperCase()
                 .charCodeAt(0);
-            in_word = true;
+            inWord = true;
           }
-          new_string += String.fromCharCode(new_char_code);
+          newString += String.fromCharCode(newCharCode);
         }
-        return new_string;
+        return newString;
       }
       case Range.Case.LOWER:
         return string.toLocaleLowerCase()
@@ -63,25 +69,25 @@ global.FindAndReplace = (function() {
       case Range.Case.UPPER:
         return string.toLocaleUpperCase()
     }
-    throw 'Invalid Range.Case ' + string_case;
+    throw `Invalid Range.Case ${stringCase}`;
   }
 
   /**
    * @param {!Window} window
-   * @param {string} search_text
-   * @param {!FindAndReplaceOptions} find_options
-   * @return {?Editor.RegExp}
+   * @param {string} searchText
+   * @param {!FindAndReplaceOptions} findOptions
+   * @return {Editor.RegExp}
    */
-  function createRegExp(window, search_text, find_options) {
-    if (search_text == '')
+  function createRegExp(window, searchText, findOptions) {
+    if (searchText === '')
       return null;
     try {
-      return new Editor.RegExp(search_text, {
-        backward: find_options.backward,
-        ignoreCase: find_options.ignoreCase,
-        matchExact: !find_options.useRegExp,
-        matchWord: find_options.matchWholeWord,
-        multiline: !find_options.useRegExp,
+      return new Editor.RegExp(searchText, {
+        backward: findOptions.backward,
+        ignoreCase: findOptions.ignoreCase,
+        matchExact: !findOptions.useRegExp,
+        matchWord: findOptions.matchWholeWord,
+        multiline: !findOptions.useRegExp,
       });
     } catch (error) {
       window.status = error.toString();
@@ -91,19 +97,23 @@ global.FindAndReplace = (function() {
 
   /**
    * @param {!Window} window
-   * @param {string} search_text
-   * @param {!FindAndReplaceOptions} find_options
-   * @return {?Editor.RegExp}
+   * @param {string} searchText
+   * @param {!FindAndReplaceOptions} findOptions
+   * @return {Editor.RegExp}
    */
-  function find(window, search_text, find_options) {
-    var regexp = createRegExp(window, search_text, find_options);
+  function find(window, searchText, findOptions) {
+    /** @type {Editor.RegExp} */
+    const regexp = createRegExp(window, searchText, findOptions);
     if (!regexp)
       return null;
-    /** @type{!Document} */var document = window.document;
-    /** @type{!Range} */var range = window.selection.range;
+
+    /** @type{!Document} */
+    const document = window.document;
+    /** @type{!Range} */
+    const range = window.selection.range;
 
     /**
-     * @param {?Array.<!Editor.RegExp.Match>} matches
+     * @param {Array.<!Editor.RegExp.Match>} matches
      */
     function finish(matches) {
       if (!matches) {
@@ -111,8 +121,9 @@ global.FindAndReplace = (function() {
                                             {text: regexp.source});
         return regexp;
       }
-      var match = matches[0];
-      if (match.start == range.start && match.end == range.end) {
+      /** @type {!Editor.RegExp.Match} */
+      const match = matches[0];
+      if (match.start === range.start && match.end === range.end) {
         window.status = Strings.IDS_PASSED_END;
         return regexp;
       }
@@ -124,24 +135,29 @@ global.FindAndReplace = (function() {
       return regexp;
     }
 
-    if (shouldFindInSelection(find_options, range)) {
-      var matches = document.match_(regexp, range.start, range.end);
+    if (shouldFindInSelection(findOptions, range)) {
+     /** @type {Array.<!Editor.RegExp.Match>} */
+      const matches = document.match_(regexp, range.start, range.end);
       if (!matches)
         return finish(matches);
-      var match = matches[0];
-      if (match.start != range.start || match.end != range.end)
+      /** @type {!Editor.RegExp.Match} */
+      const match = matches[0];
+      if (match.start !== range.start || match.end !== range.end)
         return finish(matches);
     }
 
-    var end = document.length;
+    /** @type {number} */
+    const end = document.length;
     if (regexp.backward) {
-      var matches = document.match_(regexp, 0, range.start);
+     /** @type {Array.<!Editor.RegExp.Match>} */
+      const matches = document.match_(regexp, 0, range.start);
       if (matches)
         return finish(matches);
       return finish(document.match_(regexp, range.start, end));
     }
 
-    var matches = document.match_(regexp, range.end, end);
+     /** @type {Array.<!Editor.RegExp.Match>} */
+    const matches = document.match_(regexp, range.end, end);
     if (matches)
       return finish(matches);
     return finish(document.match_(regexp, 0, range.end));
@@ -152,83 +168,88 @@ global.FindAndReplace = (function() {
    * @return {boolean}
    */
   function hasUpperCase(text) {
-    for (var i = 0; i < text.length; ++i) {
-      var data = Unicode.UCD[text.charCodeAt(i)];
-      if (data.category == Unicode.Category.Lu ||
-          data.category == Unicode.Category.Lt) {
+    for (let i = 0; i < text.length; ++i) {
+      const data = Unicode.UCD[text.charCodeAt(i)];
+      if (data.category === Unicode.Category.Lu ||
+          data.category === Unicode.Category.Lt) {
         return true;
       }
     }
     return false;
   }
 
+  /** @enum {!Symbol} */
+  const State = {
+    BACKSLASH: Symbol('BACKSLASH'),
+    BACKSLASH_C: Symbol('BACKSLASH_C'), // \cC = control character
+    BACKSLASH_DIGIT: Symbol('BACKSLASH_DIGIT'), // \ooo = octal
+    BACKSLASH_U: Symbol('BACKSLASH_U'), // \uUUUU = unicode code point
+    BACKSLASH_X: Symbol('BACKSLASH_X'), // \xXX = hexadecimal
+    DOLLAR: Symbol('DOLLAR'),
+    DOLLAR_BRACKET: Symbol('DOLLAR_BRACKET'), // ${name}
+    DOLLAR_DIGIT: Symbol('DOLLAR_DIGIT'), // $<digit>+
+    START: Symbol('START')
+  };
+
   /**
    * @param {!Document} document
-   * @param {string} new_source
+   * @param {string} newSource
    * @param {!Array.<Editor.RegExp.Match>} matches
    * @return string
    */
-  function parseReplacement(document, new_source, matches) {
-    /** @enum {string} */
-    var State = {
-      BACKSLASH: 'BACKSLASH',
-      BACKSLASH_C: 'BACKSLASH_C', // \cC = control character
-      BACKSLASH_DIGIT: 'BACKSLASH_DIGIT', // \ooo = octal
-      BACKSLASH_U: 'BACKSLASH_U', // \uUUUU = unicode code point
-      BACKSLASH_X: 'BACKSLASH_X', // \xXX = hexadecimal
-      DOLLAR: 'DOLLAR',
-      DOLLAR_BRACKET: 'DOLLAR_BRACKET', // ${name}
-      DOLLAR_DIGIT: 'DOLLAR_DIGIT', // $<digit>+
-      START: 'START',
-    };
-
-    function parseHexDigit(char_code) {
-      if (char_code >= Unicode.DIGIT_ZERO &&
-          char_code <= Unicode.DIGIT_NINE) {
-        return char_code - Unicode.DIGIT_ZERO;
+  function parseReplacement(document, newSource, matches) {
+    function parseHexDigit(charCode) {
+      if (charCode >= Unicode.DIGIT_ZERO &&
+          charCode <= Unicode.DIGIT_NINE) {
+        return charCode - Unicode.DIGIT_ZERO;
       }
-      if (char_code >= Unicode.LATIN_CAPITAL_LETTER_A &&
-          char_code >= Unicode.LATIN_CAPITAL_LETTER_F) {
-        return char_code - Unicode.LATIN_CAPITAL_LETTER_A + 10;
+      if (charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
+          charCode >= Unicode.LATIN_CAPITAL_LETTER_F) {
+        return charCode - Unicode.LATIN_CAPITAL_LETTER_A + 10;
       }
-      if (char_code >= Unicode.LATIN_SMALL_LETTER_A &&
-          char_code >= Unicode.LATIN_SMALL_LETTER_F) {
-        return char_code - Unicode.LATIN_SMALL_LETTER_A + 10;
+      if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
+          charCode >= Unicode.LATIN_SMALL_LETTER_F) {
+        return charCode - Unicode.LATIN_SMALL_LETTER_A + 10;
       }
       return -1;
     }
 
-    var new_text = '';
+    /** @type {string} */
+    let newText = '';
 
-    function addChar(char_code) {
-      new_text += String.fromCharCode(char_code);
+    function addChar(charCode) {
+      newText += String.fromCharCode(charCode);
     }
 
     function addMatch(nth) {
-      var match = matches[nth];
+      let match = matches[nth];
       if (!match)
         return;
-      new_text += document.slice(match.start, match.end);
+      newText += document.slice(match.start, match.end);
     }
 
     function addNamedMatch(name) {
-      var match = matches.find(function(match) {
-        return match.name == name;
+      const match = matches.find(function(match) {
+        return match.name === name;
       });
       if (!match)
         return;
-      new_text += document.slice(match.start, match.end);
+      newText += document.slice(match.start, match.end);
     }
 
-    var accumulatr = 0;
-    var match_name = '';
-    var num_digits = 0;
-    var state = State.START;
-    for (var index = 0; index < new_source.length; ++index) {
-      var char_code = new_source.charCodeAt(index);
+    /** @type {number} */
+    let accumulator = 0;
+    /** @type {string} */
+    let matchName = '';
+    /** @type {number} */
+    let digitCount = 0;
+    /** @type {!State} */
+    let state = State.START;
+    for (let index = 0; index < newSource.length; ++index) {
+      let charCode = newSource.charCodeAt(index);
       switch (state) {
         case State.START:
-          switch (char_code) {
+          switch (charCode) {
             case Unicode.DOLLAR_SIGN:
               state = State.DOLLAR;
               break;
@@ -236,98 +257,99 @@ global.FindAndReplace = (function() {
               state = State.BACKSLASH;
               break;
             default:
-              addChar(char_code);
+              addChar(charCode);
               break;
           }
           break;
         case State.BACKSLASH:
           state = State.START;
-          switch (char_code) {
+          switch (charCode) {
             case Unicode.DIGIT_ZERO: case Unicode.DIGIT_ONE:
             case Unicode.DIGIT_TWO: case Unicode.DIGIT_THREE:
             case Unicode.DIGIT_FOUR: case Unicode.DIGIT_FIVE:
             case Unicode.DIGIT_SIX: case Unicode.DIGIT_SEVEN:
-              accumulatr = char_code - Unicode.DIGIT_ZERO;
-              num_digits = 1;
+              accumulator = charCode - Unicode.DIGIT_ZERO;
+              digitCount = 1;
               state = State.BACKSLASH_DIGIT;
               break;
             case Unicode.LATIN_SMALL_LETTER_A:
-              new_text += '\a';
+              newText += '\a';
               break;
             case Unicode.LATIN_SMALL_LETTER_B:
-              new_text += '\b';
+              newText += '\b';
               break;
             case Unicode.LATIN_SMALL_LETTER_C:
               state = State.BACKSLASH_C;
               break;
             case Unicode.LATIN_SMALL_LETTER_E:
-              new_text += '\x1B';
+              newText += '\x1B';
               break;
             case Unicode.LATIN_SMALL_LETTER_F:
-              new_text += '\f';
+              newText += '\f';
               break;
             case Unicode.LATIN_SMALL_LETTER_N:
-              new_text += '\n';
+              newText += '\n';
               break;
             case Unicode.LATIN_SMALL_LETTER_R:
-              new_text += '\r';
+              newText += '\r';
               break;
             case Unicode.LATIN_SMALL_LETTER_T:
-              new_text += '\t';
+              newText += '\t';
               break;
             case Unicode.LATIN_SMALL_LETTER_U:
               state = State.BACKSLASH_U;
               break;
             case Unicode.LATIN_SMALL_LETTER_V:
-              new_text += '\v';
+              newText += '\v';
               break;
             case Unicode.REVERSE_SOLIDUS:
-              new_text += '\\';
+              newText += '\\';
               break;
             default:
               // Insert a character instead of throwing an exception.
-              addChar(char_code);
+              addChar(charCode);
               break;
           }
           break;
         case State.BACKSLASH_DIGIT:
-          if (char_code >= Unicode.DIGIT_ZERO &&
-              char_code <= Unicode.DIGIT_SEVEN) {
-            accumulatr *= 8;
-            accumulatr += char_code - Unicode.DIGIT_ZERO;
-            ++num_digits;
+          if (charCode >= Unicode.DIGIT_ZERO &&
+              charCode <= Unicode.DIGIT_SEVEN) {
+            accumulator *= 8;
+            accumulator += charCode - Unicode.DIGIT_ZERO;
+            ++digitCount;
           } else {
-            num_digits = 3;
+            digitCount = 3;
             --index;
           }
 
-          if (num_digits == 3) {
-            addChar(accumulatr);
+          if (digitCount === 3) {
+            addChar(accumulator);
             state = State.START;
           }
           break;
         case State.BACKSLASH_C:
-          if (char_code >= Unicode.COMMERCIAL_AT &&
-              char_code <= Unicode.LOW_LINE) {
-            addChar(char_code - Unicode.COMMERCIAL_AT);
-          } else if (char_code >= Unicode.LATIN_SMALL_LETTER_A &&
-                     char_code >= Unicode.LATIN_SMALL_LETTER_Z) {
-            addChar(char_code - Unicode.LATIN_SMALL_LETTER_A + 1);
+          if (charCode >= Unicode.COMMERCIAL_AT &&
+              charCode <= Unicode.LOW_LINE) {
+            addChar(charCode - Unicode.COMMERCIAL_AT);
+          } else if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
+                     charCode >= Unicode.LATIN_SMALL_LETTER_Z) {
+            addChar(charCode - Unicode.LATIN_SMALL_LETTER_A + 1);
           } else {
             // ignore invalid \cX
           }
           state = State.START;
           break;
         case State.BACKSLASH_U: {
-          var digit = parseHexDigit(char_code);
+          /** @type {number} */
+          let digit = parseHexDigit(charCode);
           if (digit >= 0) {
-            ++num_digits;
-            accumulatr *= 16;
-            accumulatr += digit;
-            if (num_digits == 4) {
-              addChar(accumulatr);
-              num_digits = 0;
-              accumulatr = 0;
+            ++digitCount;
+            accumulator *= 16;
+            accumulator += digit;
+            if (digitCount === 4) {
+              addChar(accumulator);
+              digitCount = 0;
+              accumulator = 0;
               state = State.START;
             }
             break;
@@ -337,15 +359,16 @@ global.FindAndReplace = (function() {
           break;
         }
         case State.BACKSLASH_X: {
-          var digit = parseHexDigit(char_code);
+          /** @type {number} */
+          let digit = parseHexDigit(charCode);
           if (digit >= 0) {
-            ++num_digits;
-            accumulatr *= 16;
-            accumulatr += digit;
-            if (num_digits == 2) {
-              addChar(accumulatr);
-              num_digits = 0;
-              accumulatr = 0;
+            ++digitCount;
+            accumulator *= 16;
+            accumulator += digit;
+            if (digitCount === 2) {
+              addChar(accumulator);
+              digitCount = 0;
+              accumulator = 0;
               state = State.START;
             }
             break;
@@ -355,69 +378,71 @@ global.FindAndReplace = (function() {
           break;
         }
         case State.DOLLAR:
-          if (char_code >= Unicode.DIGIT_ZERO &&
-              char_code <= Unicode.DIGIT_NINE) {
-            accumulatr = char_code - Unicode.DIGIT_ZERO;
+          if (charCode >= Unicode.DIGIT_ZERO &&
+              charCode <= Unicode.DIGIT_NINE) {
+            accumulator = charCode - Unicode.DIGIT_ZERO;
             state = State.DOLLAR_DIGIT;
-          } else if (char_code == Unicode.AMPERSAND) {
+          } else if (charCode === Unicode.AMPERSAND) {
             addMatch(0);
             state = State.START;
-          } else if (char_code == Unicode.LEFT_CURLY_BRACKET) {
+          } else if (charCode === Unicode.LEFT_CURLY_BRACKET) {
             state = State.DOLLAR_BRACKET;
           } else {
             addChar(Unicode.DOLLAR_SIGN);
-            addChar(char_code);
+            addChar(charCode);
             state = State.START;
           }
           break;
         case State.DOLLAR_DIGIT:
-          if (char_code >= Unicode.DIGIT_ZERO &&
-              char_code <= Unicode.DIGIT_NINE) {
-            accumulatr *= 10;
-            accumulatr += char_code - Unicode.DIGIT_ZERO;
+          if (charCode >= Unicode.DIGIT_ZERO &&
+              charCode <= Unicode.DIGIT_NINE) {
+            accumulator *= 10;
+            accumulator += charCode - Unicode.DIGIT_ZERO;
             break;
           }
-          addMatch(accumulatr);
-          accumulatr = 0;
-          if (char_code == Unicode.REVERSE_SOLIDUS) {
+          addMatch(accumulator);
+          accumulator = 0;
+          if (charCode === Unicode.REVERSE_SOLIDUS) {
             state = State.BACKSLASH;
             break;
           }
-          addChar(char_code);
+          addChar(charCode);
           state = State.START;
           break;
         case State.DOLLAR_BRACKET:
-          if (char_code == Unicode.RIGHT_CURLY_BRACKET) {
-            addNamedMatch(match_name);
-            match_name = '';
+          if (charCode === Unicode.RIGHT_CURLY_BRACKET) {
+            addNamedMatch(matchName);
+            matchName = '';
             state = State.START;
             break;
           }
-          match_name += String.fromCharCode(char_code);
+          matchName += String.fromCharCode(charCode);
           break;
         default:
-          throw 'Unknown state ' + state;
+          throw `Unknown state ${state}`;
       }
     }
-    if (state == State.DOLLAR_DIGIT)
-      addMatch(accumulatr);
-    return new_text;
+    if (state === State.DOLLAR_DIGIT)
+      addMatch(accumulator);
+    return newText;
   }
 
   /**
    * @param {!Window} window
-   * @param {string} search_text
-   * @param {string} replace_text
-   * @param {!FindAndReplaceOptions} find_options
+   * @param {string} searchText
+   * @param {string} replaceText
+   * @param {!FindAndReplaceOptions} findOptions
+   * @return {Editor.RegExp}
    */
-  function replaceOne(window, search_text, replace_text, find_options) {
-    var regexp = createRegExp(window, search_text, find_options);
+  function replaceOne(window, searchText, replaceText, findOptions) {
+    /** @type {Editor.RegExp} */
+    const regexp = createRegExp(window, searchText, findOptions);
     if (!regexp)
-      return;
-    var selection = window.selection;
-    var range = selection.range;
-    var document = range.document;
-    var matches = shouldFindInSelection(find_options, range) ?
+      return null;
+    const selection = window.selection;
+    const range = selection.range;
+    const document = range.document;
+    const matches = shouldFindInSelection(findOptions, range) ?
         document.match_(regexp, range.start, range.end) :
         document.match_(regexp, 0, document.length);
     if (!matches) {
@@ -427,12 +452,13 @@ global.FindAndReplace = (function() {
     }
     range.collapseTo(matches[0].start);
     range.end = matches[0].end;
-    var case_preserve = shouldPreserveCase(find_options, replace_text);
+    /** @type {boolean} */
+    const casePreserve = shouldPreserveCase(findOptions, replaceText);
     if (!regexp.matchExact)
-      replace_text = parseReplacement(document, replace_text, matches);
-    if (case_preserve)
-      replace_text = caseReplace(replace_text, range.analyzeCase());
-    range.text = replace_text;
+      replaceText = parseReplacement(document, replaceText, matches);
+    if (casePreserve)
+      replaceText = caseReplace(replaceText, range.analyzeCase());
+    range.text = replaceText;
     selection.startIsActive = false;
     window.status = Editor.localizeText(Strings.IDS_REPLACED,
                                         {count: 1, text: regexp.source});
@@ -442,47 +468,52 @@ global.FindAndReplace = (function() {
 
   /**
    * @param {!Window} window
-   * @param {string} search_text
-   * @param {string} replace_text
-   * @param {!FindAndReplaceOptions} find_options
+   * @param {string} searchText
+   * @param {string} replaceText
+   * @param {!FindAndReplaceOptions} findOptions
+   * @return {Editor.RegExp}
    */
-  function replaceAll(window, search_text, replace_text, find_options) {
-    var regexp = createRegExp(window, search_text, find_options);
+  function replaceAll(window, searchText, replaceText, findOptions) {
+    /** @type {Editor.RegExp} */
+    let regexp = createRegExp(window, searchText, findOptions);
     if (!regexp)
-      return;
-    var document = window.document;
-    var selection = window.selection;
-    var selection_range = selection.range;
-    var replace_range = new Range(selection_range);
-    if (!shouldFindInSelection(find_options, replace_range)) {
-      replace_range.start = 0;
-      replace_range.end = document.length;
+      return null;
+    const document = window.document;
+    const selection = window.selection;
+    const selection_range = selection.range;
+    const replaceRange = new Range(selection_range);
+    if (!shouldFindInSelection(findOptions, replaceRange)) {
+      replaceRange.start = 0;
+      replaceRange.end = document.length;
     }
-    var case_preserve = shouldPreserveCase(find_options, replace_text);
-    var num_replaced = 0;
-    var range = new Range(document);
+    /** @type {boolean} */
+    const casePreserve = shouldPreserveCase(findOptions, replaceText);
+    /** @type {!Range} */
+    const range = new Range(document);
+    /** @type {number} */
+    let replacedCount = 0;
     document.undoGroup('replace all', function() {
-      while (!replace_range.collapsed) {
-        var matches = document.match_(regexp, replace_range.start,
-                                      replace_range.end);
+      while (!replaceRange.collapsed) {
+        const matches = document.match_(regexp, replaceRange.start,
+                                        replaceRange.end);
         if (!matches)
           break;
-        ++num_replaced;
+        ++replacedCount;
         range.collapseTo(matches[0].start);
         range.end = matches[0].end;
-        var new_text = replace_text;
+        let newText = replaceText;
         if (!regexp.matchExact)
-          new_text = parseReplacement(document, new_text, matches);
-        if (case_preserve)
-          new_text = caseReplace(new_text, range.analyzeCase());
-        range.text = new_text;
-        replace_range.start = range.end;
+          newText = parseReplacement(document, newText, matches);
+        if (casePreserve)
+          newText = caseReplace(newText, range.analyzeCase());
+        range.text = newText;
+        replaceRange.start = range.end;
       }
     });
-    if (num_replaced) {
+    if (replacedCount) {
       selection.startIsActive = false;
       window.status = Editor.localizeText(Strings.IDS_REPLACED,
-                                          {count: num_replaced,
+                                          {count: replacedCount,
                                            text: regexp.source});
       window.makeSelectionVisible();
     } else {
@@ -493,32 +524,36 @@ global.FindAndReplace = (function() {
   }
 
   /**
-   * @param {!FindAndReplaceOptions} find_options
+   * @param {!FindAndReplaceOptions} findOptions
    * @param {!Range} range
    * @return {boolean}
    */
-  function shouldFindInSelection(find_options, range) {
+  function shouldFindInSelection(findOptions, range) {
     if (range.collapsed)
       return false;
-    var document = range.document;
-    for (var offset = range.start; offset < range.end; ++offset) {
-      if (document.charCodeAt_(offset) == Unicode.LF)
+    /** @type {!Document} */
+    const document = range.document;
+    for (let offset = range.start; offset < range.end; ++offset) {
+      if (document.charCodeAt_(offset) === Unicode.LF)
         return true;
     }
     return false;
   }
 
   /**
-   * @param {!FindAndReplaceOptions} find_options
+   * @param {!FindAndReplaceOptions} findOptions
    * @param {string} text
+   * @return {boolean}
    */
-  function shouldPreserveCase(find_options, text) {
-    return !hasUpperCase(text) && find_options.casePreserveReplacement;
+  function shouldPreserveCase(findOptions, text) {
+    return !hasUpperCase(text) && findOptions.casePreserveReplacement;
   }
 
-  return {
-    find: find,
-    replaceOne: replaceOne,
-    replaceAll: replaceAll
-  };
+  let FindAndReplace = Object.defineProperties({}, {
+    find: {value: find},
+    replaceOne: {value: replaceOne},
+    replaceAll: {value: replaceAll}
+  });
+  Object.freeze(FindAndReplace);
+  return FindAndReplace;
 })();

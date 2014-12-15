@@ -27,6 +27,21 @@
 var Iterator;
 
 /**
+ * @typedef {Array|Map|Set}
+ */
+var Iterable;
+
+/**
+ * @template T
+ * @param {Iterable} thing
+ * @param {(function(*): T)=} opt_mapper
+ * @param {*=} opt_this
+ * @return {!Array.<T>}
+ *
+ */
+Array.from = function(thing, opt_mapper, opt_this) {};
+
+/**
  * @template T
  * @this {Array.<T>}
  * @param {T} value
@@ -50,11 +65,6 @@ Array.prototype.find = function(callback, opt_thisArg) {};
  * @return {number}
  */
 Array.prototype.findIndex = function(callback, opt_thisArg) {};
-
-/**
- * @typedef {Array|Map|Set}
- */
-var Iterable;
 
 //////////////////////////////////////////////////////////////////////
 //

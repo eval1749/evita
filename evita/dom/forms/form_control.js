@@ -41,12 +41,4 @@ global.FormControl.handleEvent = function(event) {
     Form.handleEvent.call(form, event);
     return;
   }
-  switch (event.type) {
-    case Event.Names.IDLE:
-    case Event.Names.MOUSEMOVE:
-      break;
-    default:
-      console.log('FormControl.handleEvent', event);
-      break;
-  }
 };

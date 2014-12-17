@@ -122,7 +122,6 @@
       case Event.Names.BLUR:
       case Event.Names.CLICK:
       case Event.Names.DBLCLICK:
-      case Event.Names.IDLE:
       case Event.Names.KEYUP:
       case Event.Names.MOUSEDOWN:
       case Event.Names.MOUSEMOVE:

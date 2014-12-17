@@ -15,12 +15,10 @@
   }
 
   /**
-   * Dispalys number of selected rows in status bar.
+   * Displays number of selected rows in status bar.
    * @param {!TableWindow} window
    */
-  function handleIdle(window) {
-    // TODO(yosi) We should not count selected rows every time, we should
-    // count when selection changed, e.g. handle "selectionchange" event.
+  function handleSelectionChange(window) {
     /**
      * @param {!TableSelection} selection
      * @return {number}
@@ -36,11 +34,11 @@
       return selected_keys.length;
     }
     var selection = /** @type{!TableSelection}*/(window.selection);
-    var num_selected = countSelectedRows(selection);
-    if (selection.lastSelectedRowCount_ == num_selected)
+    var selectedCount = countSelectedRows(selection);
+    if (selection.lastSelectedRowCount_ == selectedCount)
       return;
-    selection.lastSelectedRowCount_ = num_selected;
-    window.parent.setStatusBar([num_selected + ' documents']);
+    selection.lastSelectedRowCount_ = selectedCount;
+    window.parent.setStatusBar([`${selectedCount} documents`]);
   }
 
   /**
@@ -53,8 +51,9 @@
       case Event.Names.DBLCLICK:
         handleDoubleClick(this, /** @type{!MouseEvent}*/(event));
         break;
-      case Event.Names.IDLE:
-        handleIdle(this);
+      case Event.Names.FOCUS:
+      case Event.Names.SELECTIONCHANGE:
+        handleSelectionChange(this);
         break;
     }
     Window.handleEvent.call(this, event);

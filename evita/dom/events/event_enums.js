@@ -18,7 +18,6 @@ Event.Names = {
   DETACH: 'detach', // DocumentEvent
   DROPWINDOW: 'dropwindow',
   FOCUS: 'focus',
-  IDLE: 'idle',
   INPUT: 'input',
   KEYDOWN: 'keydown',
   KEYUP: 'keyup',

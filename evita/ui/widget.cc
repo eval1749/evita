@@ -166,10 +166,10 @@ void Widget::DidDestroyWidget() {
   DCHECK_EQ(kDestroyed, state_);
   while (first_child())
     first_child()->DestroyWidget();
+  DestroyLayer();
   auto const parent_widget = container_widget();
   parent_widget->RemoveChild(this);
   parent_widget->DidRemoveChildWidget(this);
-  DestroyLayer();
   if (owned_by_client_)
     return;
   delete this;

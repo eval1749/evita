@@ -1,5 +1,6 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 /** @type {function() : !TextWindow} */
 global.TextWindow.prototype.clone = function() {
@@ -7,17 +8,19 @@ global.TextWindow.prototype.clone = function() {
 };
 
 (function() {
-  /** @const @type {number} */
-  let AUTOSCROLL_INTERVAL_MS = 50;
+  'use strict';
 
   /** @const @type {number} */
-  let AUTOSCROLL_MAX_MOVE = 20;
+  const AUTOSCROLL_INTERVAL_MS = 50;
 
   /** @const @type {number} */
-  let AUTOSCROLL_SPEED_MS = 100;
+  const AUTOSCROLL_MAX_MOVE = 20;
 
   /** @const @type {number} */
-  let AUTOSCROLL_ZONE_SIZE = 20;
+  const AUTOSCROLL_SPEED_MS = 100;
+
+  /** @const @type {number} */
+  const AUTOSCROLL_ZONE_SIZE = 20;
 
   //////////////////////////////////////////////////////////////////////
   //
@@ -42,8 +45,8 @@ global.TextWindow.prototype.clone = function() {
      * @param {number} amount
      */
     scroll(amount) {
-      let selection = this.window.selection;
-      let current = amount > 0 ? selection.range.end : selection.range.end;
+      const selection = this.window.selection;
+      const current = amount > 0 ? selection.range.end : selection.range.end;
       selection.modify(Unit.WINDOW_LINE, amount, Alter.EXTEND);
       return amount > 0 ? current !== selection.range.end :
                           current !== selection.range.start;
@@ -67,8 +70,8 @@ global.TextWindow.prototype.clone = function() {
       this.direction = direction;
       this.startedAt = Date.now();
       this.timer.start(AUTOSCROLL_INTERVAL_MS, () => {
-        let duration = Date.now() - this.startedAt;
-        let amount = Math.floor(
+        const duration = Date.now() - this.startedAt;
+        const amount = Math.floor(
                         Math.min(Math.max(duration / AUTOSCROLL_SPEED_MS, 1),
                                  AUTOSCROLL_MAX_MOVE));
         if (!this.scroll(amount * this.direction))
@@ -117,14 +120,27 @@ global.TextWindow.prototype.clone = function() {
 
   /**
    * @param {!TextWindow} window
+   * @return {!Autoscroller}
+   */
+  function ensureAutoscroller(window) {
+    const autoscroller = window.autoscroller_;
+    if (autoscroller)
+      return autoscroller;
+    const newAutoscroller = new Autoscroller(window);
+    window.autoscroller_ = newAutoscroller;
+    return newAutoscroller;
+  }
+
+  /**
+   * @param {!TextWindow} window
    * @param {!CompositionEvent} event
    */
   function handleCompositionEvent(window, event) {
     if (!window.textCompositionRange)
       window.textCompositionRange = new Range(window.document);
-    let range = window.textCompositionRange;
-    let selection = window.selection;
-    let selectionRange = selection.range;
+    const range = window.textCompositionRange;
+    const selection = window.selection;
+    const selectionRange = selection.range;
 
     if (event.type === Event.Names.COMPOSITIONSTART) {
       range.collapseTo(selectionRange.start);
@@ -143,8 +159,8 @@ global.TextWindow.prototype.clone = function() {
     range.text = event.data;
     // Decorate composition text.
     for (let span of event.spans) {
-      let start = span.start;
-      let end = span.end;
+      const start = span.start;
+      const end = span.end;
       if (start === end)
         continue;
       selectionRange.collapseTo(range.start + start);
@@ -171,7 +187,155 @@ global.TextWindow.prototype.clone = function() {
    * @param {!TextWindow} window
    */
   function handleFocus(window) {
-    let document = window.document;
+    updateObsolete(window);
+  }
+
+  /**
+   * @param {!TextWindow} window
+   * @param {!UiEvent} event
+   */
+  function handleIdle(window, event) {
+    updateStatusBar(window);
+    const document = window.document;
+    DocumentState.update(document);
+  }
+
+  /**
+   * @param {!TextWindow} window
+   * @param {!MouseEvent} event
+   */
+  function handleMouseDown(window, event) {
+    if (event.button)
+      return;
+    const position = window.mapPointToPosition_(event.clientX, event.clientY);
+    if (position < 0)
+      return;
+    if (Window.focus !== window) {
+      window.focus();
+      if (position >= window.selection.range.start &&
+          position < window.selection.range.end) {
+        return
+      }
+    }
+
+    if (event.shiftKey) {
+      if (window.selection.startIsActive)
+        window.selection.range.start = position;
+      else
+        window.selection.range.end = position;
+    } else {
+      window.selection.range.collapseTo(position);
+    }
+
+    if (event.ctrlKey) {
+      selectWord(window);
+      return;
+    }
+
+    if (!window.dragController_)
+      window.dragController_ = new DragController(window);
+    window.dragController_.start();
+  }
+
+  /**
+   * @param {!TextWindow} window
+   * @param {!MouseEvent} event
+   */
+  function handleMouseMove(window, event) {
+    const dragController = window.dragController_;
+    if (!dragController || !dragController.dragging)
+      return;
+    const position = window.mapPointToPosition_(event.clientX, event.clientY);
+    if (position < 0)
+      return;
+
+    const selection = window.selection;
+    if (position <= selection.range.start) {
+      selection.range.start = position;
+      selection.startIsActive = true;
+    } else if (position >= selection.range.end) {
+      selection.range.end = position;
+      selection.startIsActive = false;
+    } else if (selection.startIsActive) {
+      selection.range.start = position;
+    } else {
+      selection.range.end = position;
+    }
+
+    const autoscroller = ensureAutoscroller(window);
+    if (event.clientY < AUTOSCROLL_ZONE_SIZE)
+      autoscroller.start(-1);
+    else if (event.clientY > window.clientHeight - AUTOSCROLL_ZONE_SIZE)
+      autoscroller.start(1);
+    else
+      autoscroller.stop();
+  }
+
+  /**
+   * @param {!TextWindow} window
+   * @param {!MouseEvent} event
+   */
+  function handleMouseUp(window, event) {
+    if (event.button)
+     return;
+    stopControllers(window);
+  }
+
+  /**
+   * @param {!TextWindow} window
+   * @param {!WheelEvent} event
+   */
+  function handleWheel(window, event) {
+    window.scroll(event.deltaY > 0 ? -2 : 2);
+  }
+
+  /**
+   * @param {!TextWindow} textWindow
+   * @param {!Document} document
+   */
+  function reloadDocument(textWindow, document) {
+    const selectionMap = new Map();
+    for (let window of document.listWindows()) {
+      const selection = window.selection;
+      selectionMap.set(selection, selection.range.start);
+    }
+    document.load().then(function(zero) {
+      textWindow.status = 'Reloaded';
+      for (let window of document.listWindows()) {
+        const selection = window.selection;
+        const present = selectionMap.get(selection);
+        selection.range.collapseTo(present ? present : 0);
+      }
+    });
+  }
+
+  /** @param {!TextWindow} window */
+  function selectWord(window) {
+    const selection = window.selection;
+    selection.startOf(Unit.WORD);
+    selection.endOf(Unit.WORD, Alter.EXTEND);
+    selection.startIsActive = false;
+  }
+
+  /** @param {!TextWindow} window */
+  function stopControllers(window) {
+    if (window.autoscroller_)
+      window.autoscroller_.stop();
+    if (window.dragController_)
+      window.dragController_.stop();
+  }
+
+  /** @const @type {!Array.<string>} */
+  const DOCUMENT_STATE_TEXTS = [
+    'Ready', 'Loading...', 'Saving...'
+  ];
+
+  /** @const @type {!Array.<string>} */
+  const NEWLINE_MODES = [
+    '--', 'LF', 'CR', 'CRLF'
+  ];
+  function updateObsolete(window) {
+    const document = window.document;
     if (document.fileName === '')
       return;
     if (document.obsolete === Document.Obsolete.CHECKING) {
@@ -213,155 +377,6 @@ global.TextWindow.prototype.clone = function() {
   }
 
   /**
-   * @param {!TextWindow} window
-   * @param {!UiEvent} event
-   */
-  function handleIdle(window, event) {
-    updateStatusBar(window);
-    let document = window.document;
-    DocumentState.update(document);
-  }
-
-  /**
-   * @param {!TextWindow} window
-   * @param {!MouseEvent} event
-   */
-  function handleMouseDown(window, event) {
-    if (event.button)
-      return;
-    let position = window.mapPointToPosition_(event.clientX, event.clientY);
-    if (position < 0)
-      return;
-    if (Window.focus !== window) {
-      window.focus();
-      if (position >= window.selection.range.start &&
-          position < window.selection.range.end) {
-        return
-      }
-    }
-
-    if (event.shiftKey) {
-      if (window.selection.startIsActive)
-        window.selection.range.start = position;
-      else
-        window.selection.range.end = position;
-    } else {
-      window.selection.range.collapseTo(position);
-    }
-
-    if (event.ctrlKey) {
-      selectWord(window);
-      return;
-    }
-
-    if (!window.dragController_)
-      window.dragController_ = new DragController(window);
-    window.dragController_.start();
-  }
-
-  /**
-   * @param {!TextWindow} window
-   * @param {!MouseEvent} event
-   */
-  function handleMouseMove(window, event) {
-    let dragController = window.dragController_;
-    if (!dragController || !dragController.dragging)
-      return;
-    let position = window.mapPointToPosition_(event.clientX, event.clientY);
-    if (position < 0)
-      return;
-
-    let selection = window.selection;
-    if (position <= selection.range.start) {
-      selection.range.start = position;
-      selection.startIsActive = true;
-    } else if (position >= selection.range.end) {
-      selection.range.end = position;
-      selection.startIsActive = false;
-    } else if (selection.startIsActive) {
-      selection.range.start = position;
-    } else {
-      selection.range.end = position;
-    }
-
-    let autoscroller = window.autoscroller_;
-    if (!autoscroller) {
-      autoscroller = new Autoscroller(window);
-      window.autoscroller_ = autoscroller;
-    }
-    if (event.clientY < AUTOSCROLL_ZONE_SIZE)
-      autoscroller.start(-1);
-    else if (event.clientY > window.clientHeight - AUTOSCROLL_ZONE_SIZE)
-      autoscroller.start(1);
-    else
-      autoscroller.stop();
-  }
-
-  /**
-   * @param {!TextWindow} window
-   * @param {!MouseEvent} event
-   */
-  function handleMouseUp(window, event) {
-    if (event.button)
-     return;
-    stopControllers(window);
-  }
-
-  /**
-   * @param {!TextWindow} window
-   * @param {!WheelEvent} event
-   */
-  function handleWheel(window, event) {
-    window.scroll(event.deltaY > 0 ? -2 : 2);
-  }
-
-  /** @param {!TextWindow} window */
-  function selectWord(window) {
-    let selection = window.selection;
-    selection.startOf(Unit.WORD);
-    selection.endOf(Unit.WORD, Alter.EXTEND);
-    selection.startIsActive = false;
-  }
-
-  /**
-   * @param {!TextWindow} textWindow
-   * @param {!Document} document
-   */
-  function reloadDocument(textWindow, document) {
-    let selectionMap = new Map();
-    for (let window of document.listWindows()) {
-      let selection = window.selection;
-      selectionMap.set(selection, selection.range.start);
-    }
-    document.load().then(function(zero) {
-      textWindow.status = 'Reloaded';
-      for (let window of document.listWindows()) {
-        let selection = window.selection;
-        let present = selectionMap.get(selection);
-        selection.range.collapseTo(present ? present : 0);
-      }
-    });
-  }
-
-  /** @param {!TextWindow} window */
-  function stopControllers(window) {
-    if (window.autoscroller_)
-      window.autoscroller_.stop();
-    if (window.dragController_)
-      window.dragController_.stop();
-  }
-
-  /** @const @type {!Array.<string>} */
-  let DOCUMENT_STATE_TEXTS = [
-    'Ready', 'Loading...', 'Saving...'
-  ];
-
-  /** @const @type {!Array.<string>} */
-  let NEWLINE_MODES = [
-    '--', 'LF', 'CR', 'CRLF'
-  ];
-
-  /**
    * Updates status bar with TextWindow.
    * @param {!TextWindow} window
    */
@@ -376,11 +391,11 @@ global.TextWindow.prototype.clone = function() {
       });
     }
 
-    let document = window.document;
-    let selection = window.selection;
-    let textOffset = selection.focusOffset;
-    let lineAndColumn = document.getLineAndColumn_(textOffset);
-    let newTexts = [
+    const document = window.document;
+    const selection = window.selection;
+    const textOffset = selection.focusOffset;
+    const lineAndColumn = document.getLineAndColumn_(textOffset);
+    const newTexts = [
       DOCUMENT_STATE_TEXTS[document.state],
       document.mode ? document.mode.name : '--',
       document.encoding ? document.encoding : 'n/a',
@@ -398,43 +413,33 @@ global.TextWindow.prototype.clone = function() {
     window.parent.setStatusBar(newTexts);
   };
 
+  /** @type {!Map.<string, !function(!TextWindow, !Event)>} */
+  const handlerMap = new Map([
+    [ Event.Names.BLUR, stopControllers ],
+    [ Event.Names.DBLCLICK, selectWord ],
+    [ Event.Names.FOCUS, handleFocus ],
+    [ Event.Names.IDLE, handleIdle ],
+    [ Event.Names.MOUSEDOWN, handleMouseDown ],
+    [ Event.Names.MOUSEMOVE, handleMouseMove ],
+    [ Event.Names.MOUSEUP, handleMouseUp ],
+    [ Event.Names.WHEEL, handleWheel ]
+  ]);
+
   /**
    * Default event handler.
    * @this {!TextWindow}
    * @param {!Event} event
    */
   TextWindow.handleEvent = function(event) {
-    switch (event.type) {
-      case Event.Names.BLUR:
-        stopControllers(this);
-        break;
-      case Event.Names.DBLCLICK:
-        selectWord(this);
-        break;
-      case Event.Names.FOCUS:
-        handleFocus(this);
-        break;
-      case Event.Names.IDLE:
-        handleIdle(this, /** @type {!UiEvent} */(event));
-        break;
-      case Event.Names.MOUSEDOWN:
-        handleMouseDown(this, /** @type {!MouseEvent} */(event));
-        break;
-      case Event.Names.MOUSEMOVE:
-        handleMouseMove(this, /** @type {!MouseEvent} */(event));
-        break;
-      case Event.Names.MOUSEUP:
-        handleMouseUp(this, /** @type {!MouseEvent} */(event));
-        break;
-      case Event.Names.WHEEL:
-        handleWheel(this, /** @type {!WheelEvent} */(event));
-        break;
-      default:
-        if (event instanceof CompositionEvent)
-          handleCompositionEvent(this, event);
-        else
-          Window.handleEvent.call(this, event);
-        break;
+    let handler = handlerMap.get(event.type);
+    if (handler) {
+      handler(this, event);
+      return;
     }
+    if (event instanceof CompositionEvent) {
+      handleCompositionEvent(this, event);
+      return
+    }
+    Window.handleEvent.call(this, event);
   };
 })();

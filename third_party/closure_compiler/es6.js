@@ -27,8 +27,7 @@
 var Iterator;
 
 /**
- * @template T
- * @typedef {($jscomp.Iterable<T>|Array)}
+ * @typedef {($jscomp.Iterable|Array|Map|Set)}
  */
 var Iterable;
 
@@ -394,7 +393,7 @@ Map.prototype.has = function(key) {};
 
 /**
  * @template T
- * @return {!Iterable.<T>}
+ * @return {!$jscomp.Iterable.<T>}
  */
 Map.prototype.keys = function() {};
 
@@ -411,7 +410,7 @@ Map.prototype.size;
 
 /**
  * @template T
- * @return {!Iterable.<T>}
+ * @return {!$jscomp.Iterable.<T>}
  */
 Map.prototype.values = function() {};
 
@@ -524,7 +523,7 @@ Set.prototype.has = function(key) {};
 
 /**
  * @template T
- * @return {!Iterable.<T>}
+ * @return {!$jscomp.Iterable.<T>}
  */
 Set.prototype.keys = function() {};
 
@@ -533,7 +532,7 @@ Set.prototype.size;
 
 /**
  * @template T
- * @return {!Iterable.<T>}
+ * @return {!$jscomp.Iterable.<T>}
  */
 Set.prototype.values = function() {};
 

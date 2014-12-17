@@ -483,7 +483,6 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchMouseEvent, const domapi::MouseEvent&)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchTextCompositionEvent,
                             const domapi::TextCompositionEvent&)
-DEFINE_VIEW_EVENT_HANDLER_1(DispatchViewIdleEvent, int)
 DEFINE_VIEW_EVENT_HANDLER_1(DispatchWheelEvent,
     const domapi::WheelEvent&)
 DEFINE_VIEW_EVENT_HANDLER_2(OpenFile, WindowId, const base::string16&)

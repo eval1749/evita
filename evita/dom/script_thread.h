@@ -162,7 +162,6 @@ class ScriptThread final : public domapi::IoDelegate,
       const domapi::MouseEvent& event) override;
   private: virtual void DispatchTextCompositionEvent(
       const domapi::TextCompositionEvent& event) override;
-  private: void DispatchViewIdleEvent(int hint) override;
   private: virtual void DispatchWheelEvent(
       const domapi::WheelEvent& event) override;
   private: virtual void OpenFile(WindowId window_id,

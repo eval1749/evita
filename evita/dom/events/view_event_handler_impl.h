@@ -38,7 +38,6 @@ class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
   private: void DispatchMouseEvent(const domapi::MouseEvent& event) final;
   private: void DispatchTextCompositionEvent(
       const domapi::TextCompositionEvent& event) final;
-  private: void DispatchViewIdleEvent(int hint) final;
   private: void DispatchWheelEvent(const domapi::WheelEvent& event) final;
   private: void OpenFile(WindowId window_id,
                          const base::string16& file_name) final;

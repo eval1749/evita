@@ -119,7 +119,6 @@ void Application::DispatchViewIdelEvent() {
     view_idle_count_ = 1;
     view_idle_time_scope_.reset(new ::metrics::TimeScope(
         "Application::DispatchViewIdelEvent"));
-    view_event_handler()->DispatchViewIdleEvent(view_idle_hint_);
   } else {
     // We are in active.
     METRICS_COUNT("view_idle_hint");

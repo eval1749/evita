@@ -274,20 +274,6 @@ void ViewEventHandlerImpl::DispatchTextCompositionEvent(
   CheckEventId(api_event);
 }
 
-void ViewEventHandlerImpl::DispatchViewIdleEvent(int hint) {
-  if (auto const event_target = GetFocusWindow(host_->runner())) {
-    UiEventInit init_dict;
-    init_dict.set_bubbles(true);
-    init_dict.set_cancelable(true);
-    init_dict.set_detail(hint);
-    DispatchEventWithInLock(event_target, new UiEvent(L"idle", init_dict));
-  }
-  host_->RunMicrotasks();
-  // TODO(eval1749) We should ask view host to stop dispatching idle event, if
-  // idle event handler throws an exception.
-  host_->view_delegate()->DidHandleViewIdelEvent(hint);
-}
-
 void ViewEventHandlerImpl::DispatchWheelEvent(
     const domapi::WheelEvent& api_event) {
   auto const window = FromEventTargetId(api_event.target_id);

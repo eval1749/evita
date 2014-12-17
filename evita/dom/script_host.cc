@@ -301,7 +301,6 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   // doesn't have |v8_glue::WrapperInfo| at zeroth internal field.
   // See "985a73d2cce5", same thing is happened in spell checker with
   // |Editor.RegExp| object.
-  // Note: We run micro tasks in |ViewEventHandlerImpl::DispatchViewIdleEvent|.
   isolate->SetAutorunMicrotasks(false);
   isolate->SetPromiseRejectCallback(DidRejectPromise);
   v8Strings::Init(isolate);

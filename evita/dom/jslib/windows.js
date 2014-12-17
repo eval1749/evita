@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 global.windows = Object.create({}, (function() {
+  'use strict';
+
   /**
    * @param {!Window} parent
    * @param {!Document} document
    */
   function activate(parent, document) {
-    var present = parent.children.find(function(window) {
+    const present = parent.children.find(function(window) {
       return window instanceof TextWindow && window.document == document;
     });
     if (present) {
@@ -22,7 +24,7 @@ global.windows = Object.create({}, (function() {
    * @return {?Window}
    */
   function firstWindow() {
-    var editorWindow = EditorWindow.list[0];
+    const editorWindow = EditorWindow.list[0];
     return editorWindow ? editorWindow.firstChild : null;
   }
 
@@ -30,10 +32,10 @@ global.windows = Object.create({}, (function() {
    * @return {?Window}
    */
   function lastWindow() {
-    var editorWindows = EditorWindow.list;
+    const editorWindows = EditorWindow.list;
     if (!editorWindows.length)
       return null;
-    var editorWindow = editorWindows[editorWindows.length - 1];
+    const editorWindow = editorWindows[editorWindows.length - 1];
     return editorWindows ? editorWindow.lastChild : null;
   }
 
@@ -41,7 +43,7 @@ global.windows = Object.create({}, (function() {
    * @param {!Document} document
    */
   function newEditorWindow(document) {
-    var editorWindow = new EditorWindow();
+    const editorWindow = new EditorWindow();
     windows.newTextWindow(editorWindow, document);
     editorWindow.realize();
   }
@@ -61,11 +63,11 @@ global.windows = Object.create({}, (function() {
   function nextWindow(current) {
     if (current.nextSibling)
       return current.nextSibling;
-    var editorWindows = EditorWindow.list;
-    var index = editorWindows.findIndex(function(window) {
+    const editorWindows = EditorWindow.list;
+    const index = editorWindows.findIndex(function(window) {
       return window === current.parent;
     });
-    var editorWindow = editorWindows[index + 1];
+    const editorWindow = editorWindows[index + 1];
     return editorWindow ? editorWindow.firstChild : null;
   }
 
@@ -76,11 +78,11 @@ global.windows = Object.create({}, (function() {
   function previousWindow(current) {
     if (current.previousSibling)
       return current.previousSibling;
-    var editorWindows = EditorWindow.list;
-    var index = editorWindows.findIndex(function(window) {
+    const editorWindows = EditorWindow.list;
+    const index = editorWindows.findIndex(function(window) {
       return window === current.parent;
     });
-    var editorWindow = editorWindows[index - 1];
+    const editorWindow = editorWindows[index - 1];
     return editorWindow ? editorWindow.lastChild : null;
   }
 

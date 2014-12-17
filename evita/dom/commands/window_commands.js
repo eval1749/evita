@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-'use strict';
-
 (function() {
+  'use strict';
+
   /**
    * @param {string} absoluteFileName
    * @return {!Document}
    */
   function openFile(absoluteFileName) {
-    let document = Document.open(absoluteFileName);
+    const document = Document.open(absoluteFileName);
     if (!document.length) {
       document.load(absoluteFileName).catch(function(errorCode) {
         console.log('Load error', errorCode);
@@ -27,7 +27,7 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+N', function(arg) {
-    let editorWindow = this.parent;
+    const editorWindow = this.parent;
     if (arg !== undefined) {
       windows.newTextWindow(editorWindow, new Document('untitled.txt'));
       return;
@@ -35,7 +35,7 @@
 
     Editor.getFileNameForSave(this, this.selection.document.fileName)
         .then(function(fileName) {
-          let document = Document.open(fileName);
+          const document = Document.open(fileName);
           windows.newTextWindow(editorWindow, document)
         });
   });
@@ -45,7 +45,7 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+O', function() {
-    let editorWindow = this.parent;
+    const editorWindow = this.parent;
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
         .then(function(fileName) {
           windows.activate(editorWindow, openFile(fileName));
@@ -65,7 +65,7 @@
    *   Ctrl+Shift sequence.
    */
   Editor.bindKey(Window, 'Ctrl+Shift+0', function() {
-    let nextFocus = windows.nextWindow(this) || windows.previousWindow(this);
+    const nextFocus = windows.nextWindow(this) || windows.previousWindow(this);
     if (!nextFocus) {
       Editor.messageBox(this,
           Editor.localizeText(Strings.IDS_NO_OTHER_WINDOWS),
@@ -113,7 +113,7 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+9', function() {
-    let thisEditor_window = this.parent;
+    const thisEditor_window = this.parent;
     EditorWindow.list.forEach(function(editorWindow) {
       if (editorWindow !== thisEditor_window)
         editorWindow.destroy();
@@ -132,7 +132,7 @@
 
     Editor.getFileNameForSave(this, this.selection.document.fileName)
         .then(function(fileName) {
-          let document = Document.open(fileName);
+          const document = Document.open(fileName);
           windows.newEditorWindow(document);
         });
   });
@@ -153,12 +153,12 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Shift+Tab', function() {
-    let previousWindow = windows.previousWindow(this);
+    const previousWindow = windows.previousWindow(this);
     if (previousWindow) {
       previousWindow.focus();
       return;
     }
-    let lastWindow = windows.lastWindow();
+    const lastWindow = windows.lastWindow();
     if (lastWindow === this)
       return;
     lastWindow.focus();
@@ -179,12 +179,12 @@
    * @this {!Window}
    */
   Editor.bindKey(Window, 'Ctrl+Tab', function() {
-    let nextWindow = windows.nextWindow(this);
+    const nextWindow = windows.nextWindow(this);
     if (nextWindow) {
       nextWindow.focus();
       return;
     }
-    let firstWindow = windows.firstWindow();
+    const firstWindow = windows.firstWindow();
     if (firstWindow === this)
       return;
     firstWindow.focus();

@@ -141,9 +141,6 @@ void Frame::DrawForResize() {
 }
 
 TabContent* Frame::GetRecentTabContent() {
-  if (auto const tab_content = tab_strip_animator_->active_tab_content())
-    return tab_content;
-
   auto recent_tab_content = static_cast<TabContent*>(nullptr);
   for (auto tab_content : tab_contents_) {
     if (!recent_tab_content ||

@@ -136,18 +136,6 @@ void Widget::DestroyWidget() {
     return;
   }
   WillDestroyWidget();
-  auto parent_widget = container_widget();
-  parent_widget->WillRemoveChildWidget(this);
-  if (hover_widget == this)
-    hover_widget = nullptr;
-  if (capture_widget == this)
-    ReleaseCapture();
-  FocusController::instance()->WillDestroyWidget(this);
-  while (first_child())
-    first_child()->DestroyWidget();
-  DestroyLayer();
-  parent_widget->RemoveChild(this);
-  parent_widget->DidRemoveChildWidget(this);
   state_ = kDestroyed;
   DidDestroyWidget();
 }
@@ -164,14 +152,24 @@ void Widget::DidChangeChildVisibility(Widget*) {
 }
 
 void Widget::DidDestroyNativeWindow() {
-  DCHECK(!native_window_);
+  DCHECK_EQ(kBeingDestroyed, state_);
+  DCHECK(native_window_);
+  // NativeWidget will be deleted by itself.
+  native_window_.release();
+  state_ = kDestroyed;
   // Since native window, which handles UI, is destroyed, this widget should
   // be destroyed too.
-  DestroyWidget();
+  DidDestroyWidget();
 }
 
 void Widget::DidDestroyWidget() {
   DCHECK_EQ(kDestroyed, state_);
+  while (first_child())
+    first_child()->DestroyWidget();
+  auto const parent_widget = container_widget();
+  parent_widget->RemoveChild(this);
+  parent_widget->DidRemoveChildWidget(this);
+  DestroyLayer();
   if (owned_by_client_)
     return;
   delete this;
@@ -646,6 +644,14 @@ void Widget::UpdateBounds() {
 }
 
 void Widget::WillDestroyWidget() {
+  DCHECK_EQ(kBeingDestroyed, state_);
+  auto const parent_widget = container_widget();
+  parent_widget->WillRemoveChildWidget(this);
+  if (hover_widget == this)
+    hover_widget = nullptr;
+  if (capture_widget == this)
+    ReleaseCapture();
+  FocusController::instance()->WillDestroyWidget(this);
 }
 
 void Widget::WillDestroyNativeWindow() {
@@ -702,9 +708,6 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       return 0;
 
     case WM_NCDESTROY:
-      DCHECK(native_window_);
-      // NativeWidget will be deleted by itself.
-      native_window_.release();
       DidDestroyNativeWindow();
       return 0;
 

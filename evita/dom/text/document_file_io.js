@@ -3,14 +3,6 @@
 // found in the LICENSE file.
 
 (function() {
-  /** @enum{number} */
-  global.Document.Obsolete = {
-    CHECKING: -2,
-    UNKNOWN: -1,
-    NO: 0,
-    YES: 1,
-  };
-
   Object.defineProperty(Document.prototype, 'lastStatTime_', {
     value: new Date(0),
     writable: true
@@ -26,10 +18,10 @@
    * @return {Document}
    */
   Document.findFile = function(absoluteFileName) {
-    var canonical_fileName = absoluteFileName.toLocaleLowerCase();
-    return /** @type{Document} */ (Document.list.find(
+    const canonicalFileName = absoluteFileName.toLocaleLowerCase();
+    return /** @type {Document} */ (Document.list.find(
         function(document) {
-          return document.fileName.toLocaleLowerCase() == canonical_fileName;
+          return document.fileName.toLocaleLowerCase() === canonicalFileName;
         }));
   }
 
@@ -37,7 +29,7 @@
    * @type {!function()}
    */
   Document.prototype.close = function() {
-    var document = this;
+    const document = this;
     if (!document.needSave()) {
       document.forceClose();
       return;
@@ -45,8 +37,8 @@
     Editor.messageBox(null,
         Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
         MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
-      .then(function(response_code) {
-        switch (response_code) {
+      .then(function(responseCode) {
+        switch (responseCode) {
           case DialogItemId.NO:
             document.forceClose();
             break;
@@ -77,11 +69,11 @@
    * @return {!Document} A Document bound to fileName
    */
   Document.open = function(fileName) {
-    var absoluteFileName = FilePath.fullPath(fileName);
-    var present = Document.findFile(absoluteFileName);
+    const absoluteFileName = FilePath.fullPath(fileName);
+    const present = Document.findFile(absoluteFileName);
     if (present)
       return present;
-    var document = new Document(FilePath.basename(fileName));
+    const document = new Document(FilePath.basename(fileName));
     document.fileName = absoluteFileName;
     document.mode = Mode.chooseModeByFileName(fileName);
     return document;
@@ -91,24 +83,24 @@
    * @return {boolean}
    */
   Document.prototype.needSave = function() {
-    // TODO: We should use |document.notForSave|.
+    // TODO(eval1749) We should use |document.notForSave|.
     return this.modified && !this.name.startsWith('*') &&
            FilePath.isValidFileName(this.fileName);
   };
 
   /**
    * This function handles Emacs "File Variables" in the first line.
-   * TODO(yosi) Support "Local Variables: ... End:".
+   * TODO(eval1749) Support "Local Variables: ... End:".
    */
   Document.prototype.parseFileProperties = function() {
-    var document = this;
-    var first_line = new Range(document);
-    first_line.endOf(Unit.LINE, Alter.EXTEND);
-    var file_vars_matches = /-\*-\s+(.+?)\s+-\*-/.exec(first_line.text);
-    if (!file_vars_matches)
+    const document = this;
+    const firstLine = new Range(document);
+    firstLine.endOf(Unit.LINE, Alter.EXTEND);
+    const fileVars_matches = /-\*-\s+(.+?)\s+-\*-/.exec(firstLine.text);
+    if (!fileVars_matches)
       return;
-    file_vars_matches[1].split(';').forEach(function(var_def) {
-      var matches = /^\s*([^:\s]+)\s*:\s*(.+?)\s*$/.exec(var_def);
+    fileVars_matches[1].split(';').forEach(function(varDef) {
+      let matches = /^\s*([^:\s]+)\s*:\s*(.+?)\s*$/.exec(varDef);
       if (!matches)
         return;
       document.properties.set(matches[1], matches[2]);

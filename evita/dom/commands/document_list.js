@@ -1,70 +1,72 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file
 
 (function() {
+  'use strict';
+
   /**
    * @type {?Document}
    */
-  var document_list_document = null;
+  let documentListDocument = null;
 
   /**
    * @param {!TableSelection} selection
-   * @param {number} state_mask
-   * @return {!Object.<string, number>}
+   * @param {number} stateMask
+   * @return {!Map.<string, number>}
    */
-  function queryRows(selection, state_mask) {
-    var keys = Document.list.map(function(document) {
+  function queryRows(selection, stateMask) {
+    const keys = Document.list.map(function(document) {
       return document.name;
     });
-    var map = new Object();
+    const resultSet = new Map();
     selection.getRowStates(keys).forEach(function(state, index) {
-      if (state & state_mask)
-        map[keys[index]] = state;
+      if (state & stateMask)
+        resultSet.set(keys[index], state);
     });
-    return map;
+    return resultSet;
   }
 
   /**
-   * @this {TableWindow}
+   * @this {!TableWindow}
    */
   function closeSelectedDocuments() {
-    var selection = /** @type{!TableSelection}*/(this.selection);
-    var result_set = queryRows(selection, TableViewRowState.SELECTED);
-    var need_update = false;
-    Object.keys(result_set).forEach(function(name) {
-      var document = Document.find(name);
+    const selection = /** @type{!TableSelection}*/(this.selection);
+    const resultSet = queryRows(selection, TableViewRowState.SELECTED);
+    let needUpdate = false;
+    for (let name of resultSet.keys()) {
+      let document = Document.find(name);
       if (!document)
         return;
       document.close();
-      // TODO(yosi) We should handle Document event rather than using
-      // |need_update| variable. Because |close()| is asynchronous operation
+      // TODO(eval1749) We should handle Document event rather than using
+      // |needUpdate| variable. Because |close()| is asynchronous operation
       // and document may not be closed yet or canceled.
-      need_update = true;
-    });
-    if (need_update)
+      needUpdate = true;
+    }
+    if (needUpdate)
       ensureDocumentList();
   }
 
   /**
-   * @this {TableWindow}
+   * @this {!TableWindow}
    */
   function openSelectedDocuments() {
-    var selection = /** @type{!TableSelection}*/(this.selection);
-    var result_set = queryRows(selection, TableViewRowState.SELECTED);
-    var parent = /** @type {!Window} */(this.parent);
-    var open_count = 0;
-    Object.keys(result_set).forEach(function(name) {
-      var document = Document.find(name);
+    const selection = /** @type{!TableSelection}*/(this.selection);
+    const resultSet = queryRows(selection, TableViewRowState.SELECTED);
+    const parent = /** @type {!Window} */(this.parent);
+    let openCount = 0;
+    for (let name of resultSet.keys()) {
+      const document = Document.find(name);
       if (!document)
         return;
-
-      if (!open_count)
+      if (!openCount)
         windows.activate(parent, document);
       else
         windows.newEditorWindow(document);
-      ++open_count;
-    });
-    if (open_count)
+      ++openCount;
+    }
+    if (openCount)
       ensureDocumentList();
   }
 
@@ -72,9 +74,9 @@
    * @return {!Document}
    */
   function ensureDocumentList() {
-    if (document_list_document)
-      return document_list_document;
-    var document = new Document('*document list*');
+    if (documentListDocument)
+      return documentListDocument;
+    const document = new Document('*document list*');
     document.bindKey('Delete', closeSelectedDocuments);
     document.bindKey('Enter', openSelectedDocuments);
     Document.list.forEach(function(document) {
@@ -86,27 +88,29 @@
       document.addEventListener(Event.Names.DETACH, updateDocumentList);
       updateDocumentList();
     });
-    document_list_document = document;
+    documentListDocument = document;
     updateDocumentList();
     return document;
   }
 
-  var OBSOLETE_MARK_MAP = {};
-  OBSOLETE_MARK_MAP[Document.Obsolete.NO] = '-';
-  OBSOLETE_MARK_MAP[Document.Obsolete.CHECKING] = '.';
-  OBSOLETE_MARK_MAP[Document.Obsolete.IGNORE] = '%';
-  OBSOLETE_MARK_MAP[Document.Obsolete.UNKNOWN] = '?';
-  OBSOLETE_MARK_MAP[Document.Obsolete.YES] = '*';
+  /** @type {!Map.<!Symbol, string>} */
+  const OBSOLETE_MARK_MAP = new Map([
+    [Document.Obsolete.NO, '-'],
+    [Document.Obsolete.CHECKING, '.'],
+    [Document.Obsolete.IGNORE, '%'],
+    [Document.Obsolete.UNKNOWN, '?'],
+    [Document.Obsolete.YES, '*']
+  ]);
 
   function updateDocumentList() {
-    var document_window_count_map = new Map();
+    const documentWindowCountMap = new Map();
     EditorWindow.list.forEach(function(editorWindow) {
       editorWindow.children.forEach(function(window) {
         if (!(window instanceof DocumentWindow))
           return;
-        var document = window.document;
-        var count = document_window_count_map.get(document);
-        document_window_count_map.set(document, count ?  count + 1 : 1);
+        const document = window.document;
+        const count = documentWindowCountMap.get(document);
+        documentWindowCountMap.set(document, count ?  count + 1 : 1);
       });
     });
 
@@ -118,19 +122,19 @@
       return [
         document.modified ? '*' : '-',
         document.readonly ? '%' : '-',
-        document.fileName ? OBSOLETE_MARK_MAP[document.obsolete] : '-',
+        document.fileName ? OBSOLETE_MARK_MAP.get(document.obsolete) : '-',
         (function(count) { return count > 9 ? 'm' : (count || '-'); })(
-            document_window_count_map.get(document))
+            documentWindowCountMap.get(document))
       ].join('');
     }
 
-    var document = ensureDocumentList();
-    var range = new Range(document, 0, document.length);
+    const document = ensureDocumentList();
+    const range = new Range(document, 0, document.length);
     range.text = '';
     range.text = 'Name\tSize\tState\t\Saved At\tFile\n';
     Document.list.forEach(function(document) {
       range.collapseTo(range.end);
-      var fields = [
+      const fields = [
         document.name,
         document.length,
         stateString(document),
@@ -147,25 +151,25 @@
    * @this {!Window}
    */
   function listDocumentCommand() {
-    var document = ensureDocumentList();
-    var window = this.parent.children.find(function(window) {
+    const document = ensureDocumentList();
+    const window = this.parent.children.find(function(window) {
       if (!(window instanceof TableWindow))
         return false;
-      var table_window = /** @type(!TableWindow) */(window);
-      return table_window.document == document;
+      const tableWindow = /** @type(!TableWindow) */(window);
+      return tableWindow.document === document;
     });
     if (window) {
       window.focus();
       return;
     }
-    var table_window = new TableWindow(document);
-    var tab_data = new TabData();
-    tab_data.icon = 0;
-    tab_data.state = 0;
-    tab_data.title = 'Document List';
-    tab_data.tooltip = '';
-    Editor.setTabData(table_window, tab_data);
-    this.parent.appendChild(table_window);
+    const tableWindow = new TableWindow(document);
+    const tabData = new TabData();
+    tabData.icon = 0;
+    tabData.state = 0;
+    tabData.title = 'Document List';
+    tabData.tooltip = '';
+    Editor.setTabData(tableWindow, tabData);
+    this.parent.appendChild(tableWindow);
   }
 
   Editor.bindKey(Window, 'Ctrl+B', listDocumentCommand);

@@ -14,17 +14,6 @@
 function Document(name) {}
 
 /**
- * @enum {number}
- */
-Document.Obsolete = {
-  NO: 0,
-  CHECKING: 1,
-  IGNORE: 2,
-  UNKNOWN: 3,
-  YES: 4
-};
-
-/**
  * @typedef {!function(string, !Document)}
  */
 Document.Observer;
@@ -99,7 +88,7 @@ Document.prototype.name;
 /** @type {number} */
 Document.prototype.newline;
 
-/** @expose @type {number} */
+/** @expose @type {!Document.Obsolete} */
 Document.prototype.obsolete;
 
 /** @expose  @type {!Map.<string, *>} */

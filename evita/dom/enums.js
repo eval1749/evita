@@ -37,6 +37,17 @@ var Direction = {
   RIGHT: 'RIGHT'
 };
 
+/**
+ * @enum {!Symbol}
+ */
+Document.Obsolete = {
+  CHECKING: Symbol('CHECKING'),
+  IGNORE: Symbol('IGNORE'),
+  NO: Symbol('NO'),
+  UNKNOWN: Symbol('UNKNOWN'),
+  YES: Symbol('YES')
+};
+
 /** @enum{number} */
 var MessageBox = {
   ABORTRETRYIGNORE: 0x2,

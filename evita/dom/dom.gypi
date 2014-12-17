@@ -236,8 +236,8 @@
             '<(DEPTH)/tools/razzle/closure_compiler.py',
             '--js_output_file=<@(_outputs)',
             '<(RULE_INPUT_PATH)',
-            '--extern',
             '<@(js_defs_files)',
+            '--extern',
             '<(js_externs_dir)/evita_js_externs.js',
           ], # action
         } # closure_compiler

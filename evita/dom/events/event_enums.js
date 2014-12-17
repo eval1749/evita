@@ -30,6 +30,7 @@ Event.Names = {
   MOUSEUP: 'mouseup',
   QUERYCLOSE: 'queryclose',
   SAVE: 'save',
+  SELECTIONCHANGE: 'selectionchange',
   WHEEL: 'wheel'
 };
 

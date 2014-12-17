@@ -7,6 +7,7 @@
 
 #include "evita/dom/windows/selection.h"
 #include "evita/gc/member.h"
+#include "evita/text/selection_change_observer.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace text {
@@ -27,7 +28,9 @@ class TextSelectionClass;
 //
 // TextSelection
 //
-class TextSelection : public v8_glue::Scriptable<TextSelection, Selection> {
+class TextSelection final
+    : public v8_glue::Scriptable<TextSelection, Selection>,
+      private text::SelectionChangeObserver {
   DECLARE_SCRIPTABLE_OBJECT(TextSelection);
   friend class bindings::TextSelectionClass;
 
@@ -35,7 +38,7 @@ class TextSelection : public v8_glue::Scriptable<TextSelection, Selection> {
   private: gc::Member<Range> range_;
 
   public: TextSelection(TextWindow* text_window, Range* range);
-  public: virtual ~TextSelection();
+  public: ~TextSelection() final;
 
   public: Posn anchor_offset() const;
   public: Posn focus_offset() const;
@@ -43,6 +46,9 @@ class TextSelection : public v8_glue::Scriptable<TextSelection, Selection> {
   public: bool start_is_active() const;
   public: void set_start_is_active(bool start_is_active);
   public: text::Selection* text_selection() const { return text_selection_; }
+
+  // text::SelectionChangeObserver
+  private: void DidChangeSelection() final;
 
   DISALLOW_COPY_AND_ASSIGN(TextSelection);
 };

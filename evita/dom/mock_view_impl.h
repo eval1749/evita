@@ -1,5 +1,7 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_dom_mock_view_impl_h)
 #define INCLUDE_evita_dom_mock_view_impl_h
 
@@ -17,12 +19,12 @@
 
 namespace dom {
 
-class MockViewImpl : public dom::ViewDelegate {
+class MockViewImpl final : public dom::ViewDelegate {
   private: bool check_spelling_result_;
   private: std::vector<base::string16> spelling_suggestions_;
 
   public: MockViewImpl();
-  public: virtual ~MockViewImpl();
+  public: ~MockViewImpl() final;
 
   // ViewDelegate
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
@@ -36,28 +38,27 @@ class MockViewImpl : public dom::ViewDelegate {
   MOCK_METHOD2(CreateTextWindow, void(WindowId, text::Selection*));
   MOCK_METHOD1(DestroyWindow, void(WindowId));
   MOCK_METHOD1(DidStartScriptHost, void(ScriptHostState));
-  MOCK_METHOD1(DidHandleViewIdelEvent, void(int));
   MOCK_METHOD1(FocusWindow, void(WindowId));
-  public: virtual void GetFileNameForLoad(WindowId window_id,
+  public: void GetFileNameForLoad(WindowId window_id,
     const base::string16& dir_path,
-    const GetFileNameForLoadResolver& resolver) override;
-  public: virtual void GetFileNameForSave(WindowId window_id,
+    const GetFileNameForLoadResolver& resolver) final;
+  public: void GetFileNameForSave(WindowId window_id,
     const base::string16& dir_path,
-    const GetFileNameForSaveResolver& resolver) override;
+    const GetFileNameForSaveResolver& resolver) final;
   MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
   MOCK_METHOD1(GetSwitch, domapi::SwitchValue(const base::string16& name));
   MOCK_METHOD0(GetSwitchNames, std::vector<base::string16>());
   public: std::vector<int> GetTableRowStates(WindowId window_id,
-      const std::vector<base::string16>& keys) override;
+      const std::vector<base::string16>& keys) final;
   MOCK_METHOD1(HideWindow, void(WindowId));
   MOCK_METHOD2(HitTestTextPosition,
                domapi::FloatRect(WindowId, text::Posn));
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
   MOCK_METHOD3(MapPointToPosition,
       text::Posn(domapi::EventTargetId, float x, float y));
-  public: virtual void MessageBox(WindowId window_id,
+  public: void MessageBox(WindowId window_id,
       const base::string16& message, const base::string16& title, int flags,
-      const MessageBoxResolver& resolver) override;
+      const MessageBoxResolver& resolver) final;
   MOCK_METHOD2(Reconvert, void(WindowId, const base::string16&));
   MOCK_METHOD1(RealizeWindow, void(WindowId));
   MOCK_METHOD1(RegisterViewEventHandler, void(domapi::ViewEventHandler*));

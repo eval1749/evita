@@ -1,5 +1,7 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_dom_view_delegate_h)
 #define INCLUDE_evita_dom_view_delegate_h
 
@@ -89,8 +91,6 @@ class ViewDelegate {
   // script.
   public: virtual void DidStartScriptHost(ScriptHostState state) = 0;
 
-  // |DidHandleViewIdelEvent| is called when "idle" event handler returns.
-  public: virtual void DidHandleViewIdelEvent(int hint) = 0;
   public: virtual void FocusWindow(WindowId window_id) = 0;
 
   // Get file name for load by using open file modal dialog box.

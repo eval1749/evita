@@ -1,5 +1,6 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/editor/application.h"
 
@@ -89,44 +90,12 @@ bool Application::CalledOnValidThread() const {
   return message_loop_.get() == base::MessageLoop::current();
 }
 
-void Application::DidHandleViewIdelEvent(int) {
-  view_idle_time_scope_.reset();
-  view_idle_hint_ = view_idle_count_;
-  view_idle_count_ = 0;
-}
-
 void Application::DidStartScriptHost(domapi::ScriptHostState state) {
   if (state != domapi::ScriptHostState::Running) {
     // TODO(yosi) We should set exit code other than EXIT_SUCCESS.
     editor::Application::instance()->Quit();
     return;
   }
-  DispatchViewIdelEvent();
-}
-
-void Application::DispatchViewIdelEvent() {
-  #if DEBUG_IDLE
-    DVLOG(0) << "view_idle_count_=" << view_idle_count_ << " active_focus=" <<
-            ui::FocusController::instance()->has_active_focus();
-  #endif
-  if (view_idle_count_) {
-    // DOM is still processing "view idle" vent.
-    METRICS_COUNT("view_idle_count");
-    ++view_idle_count_;
-  } else if (ui::FocusController::instance()->has_active_focus()) {
-    // We are active. Notify DOM to do something.
-    METRICS_COUNT("view_idle_event");
-    view_idle_count_ = 1;
-    view_idle_time_scope_.reset(new ::metrics::TimeScope(
-        "Application::DispatchViewIdelEvent"));
-  } else {
-    // We are in active.
-    METRICS_COUNT("view_idle_hint");
-    ++view_idle_hint_;
-  }
-  message_loop_->PostNonNestableDelayedTask(FROM_HERE,
-      base::Bind(&Application::DispatchViewIdelEvent, base::Unretained(this)),
-      base::TimeDelta::FromMilliseconds(100));
 }
 
 void Application::Quit() {

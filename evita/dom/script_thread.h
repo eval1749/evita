@@ -1,5 +1,7 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_dom_script_thread_h)
 #define INCLUDE_evita_dom_script_thread_h
 
@@ -34,7 +36,7 @@ class ScriptThread final : public domapi::IoDelegate,
                         ViewDelegate* view_delegate,
                         base::MessageLoop* io_message_loop,
                         domapi::IoDelegate* io_delegate);
-  public: virtual ~ScriptThread();
+  public: ~ScriptThread() final;
 
   public: static void Start(base::MessageLoop* host_message_loop,
                             ViewDelegate* view_delegate,
@@ -42,133 +44,115 @@ class ScriptThread final : public domapi::IoDelegate,
                             domapi::IoDelegate* io_delegate);
 
   // domapi::IoDelegate
-  private: virtual void CheckSpelling(const base::string16& word_to_check,
-        const CheckSpellingResolver& deferred) override;
-  private: virtual void CloseFile(domapi::IoContextId context_id,
-      const domapi::FileIoDeferred& deferred) override;
-  private: virtual void GetSpellingSuggestions(
+  private: void CheckSpelling(const base::string16& word_to_check,
+        const CheckSpellingResolver& deferred) final;
+  private: void CloseFile(domapi::IoContextId context_id,
+      const domapi::FileIoDeferred& deferred) final;
+  private: void GetSpellingSuggestions(
       const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& deferred) override;
-  private: virtual void MakeTempFileName(
+      const GetSpellingSuggestionsResolver& deferred) final;
+  private: void MakeTempFileName(
       const base::string16& dir_name, const base::string16& prefix,
-      const domapi::MakeTempFileNameResolver& resolver) override;
-  private: virtual void MoveFile(
+      const domapi::MakeTempFileNameResolver& resolver) final;
+  private: void MoveFile(
       const base::string16& src_path, const base::string16& dst_path,
       const domapi::MoveFileOptions& options,
-      const domapi::IoResolver& resolver) override;
-  private: virtual void OpenFile(const base::string16& file_name,
+      const domapi::IoResolver& resolver) final;
+  private: void OpenFile(const base::string16& file_name,
       const base::string16& mode,
-      const domapi::OpenFileDeferred& deferred) override;
-  private: virtual void OpenProcess(
-      const base::string16& command_line,
-      const domapi::OpenProcessDeferred& deferred) override;
-  private: virtual void QueryFileStatus(const base::string16& file_name,
-      const domapi::QueryFileStatusDeferred& deferred) override;
-  private: virtual void ReadFile(domapi::IoContextId context_id,
+      const domapi::OpenFileDeferred& deferred) final;
+  private: void OpenProcess(const base::string16& command_line,
+      const domapi::OpenProcessDeferred& deferred) final;
+  private: void QueryFileStatus(const base::string16& file_name,
+      const domapi::QueryFileStatusDeferred& deferred) final;
+  private: void ReadFile(domapi::IoContextId context_id,
       void* buffer, size_t num_read,
-      const domapi::FileIoDeferred& deferred) override;
-  private: virtual void RemoveFile(
+      const domapi::FileIoDeferred& deferred) final;
+  private: void RemoveFile(
       const base::string16& file_name,
-      const domapi::IoResolver& resolver) override;
-  private: virtual void WriteFile(domapi::IoContextId context_id,
+      const domapi::IoResolver& resolver) final;
+  private: void WriteFile(domapi::IoContextId context_id,
       void* buffer, size_t num_write,
-      const domapi::FileIoDeferred& deferred) override;
+      const domapi::FileIoDeferred& deferred) final;
 
   // ViewDelegate
-  private: virtual void AddWindow(WindowId parent_id,
-                                  WindowId child_id) override;
-  public: virtual void ChangeParentWindow(WindowId window_id,
-    WindowId new_parent_window_id) override;
-  private: virtual text::Posn ComputeOnTextWindow(
-      WindowId window_id, const TextWindowCompute& data) override;
-  private: virtual void CreateEditorWindow(
-      const EditorWindow* window) override;
-  private: virtual void CreateFormWindow(
-      WindowId window_id, Form* form,
-      const domapi::PopupWindowInit& init) override;
-  private: virtual void CreateTableWindow(
-      WindowId window_id, Document* document) override;
-  private: virtual void CreateTextWindow(WindowId window_id,
-                                         text::Selection* selection) override;
-  private: virtual void DestroyWindow(WindowId window_id) override;
-  private: virtual void DidStartScriptHost(
-      domapi::ScriptHostState state) override;
-  private: virtual void DidHandleViewIdelEvent(int hint) override;
-  private: virtual void FocusWindow(WindowId window_id) override;
-  private: virtual void GetFileNameForLoad(
+  private: void AddWindow(WindowId parent_id, WindowId child_id) final;
+  public: void ChangeParentWindow(WindowId window_id,
+                                  WindowId new_parent_window_id) final;
+  private: text::Posn ComputeOnTextWindow(WindowId window_id,
+                                          const TextWindowCompute& data) final;
+  private: void CreateEditorWindow(const EditorWindow* window) final;
+  private: void CreateFormWindow(WindowId window_id, Form* form,
+                                 const domapi::PopupWindowInit& init) final;
+  private: void CreateTableWindow(WindowId window_id, Document* document) final;
+  private: void CreateTextWindow(WindowId window_id,
+                                 text::Selection* selection) final;
+  private: void DestroyWindow(WindowId window_id) final;
+  private: void DidStartScriptHost(domapi::ScriptHostState state) final;
+  private: void FocusWindow(WindowId window_id) final;
+  private: void GetFileNameForLoad(
       WindowId window_id, const base::string16& dir_path,
-      const GetFileNameForLoadResolver& callback) override;
-  private: virtual base::string16 GetMetrics(
-      const base::string16& name) override;
-  private: virtual void GetFileNameForSave(
-      WindowId window_id, const base::string16& dir_path,
-      const GetFileNameForSaveResolver& resolver) override;
-  private: virtual domapi::SwitchValue GetSwitch(
-      const base::string16& name) override;
-  private: virtual std::vector<base::string16> GetSwitchNames() override;
-  private: virtual std::vector<int> GetTableRowStates(WindowId window_id,
-      const std::vector<base::string16>& keys) override;
-  private: virtual void HideWindow(WindowId window_id) override;
-  private: virtual domapi::FloatRect HitTestTextPosition(
+      const GetFileNameForLoadResolver& callback) final;
+  private: base::string16 GetMetrics(const base::string16& name) final;
+  private: void GetFileNameForSave(WindowId window_id,
+                                   const base::string16& dir_path,
+      const GetFileNameForSaveResolver& resolver) final;
+  private: domapi::SwitchValue GetSwitch(const base::string16& name) final;
+  private: std::vector<base::string16> GetSwitchNames() final;
+  private: std::vector<int> GetTableRowStates(WindowId window_id,
+      const std::vector<base::string16>& keys) final;
+  private: void HideWindow(WindowId window_id) final;
+  private: domapi::FloatRect HitTestTextPosition(
       WindowId window_id, text::Posn position);
-  private: virtual void MakeSelectionVisible(WindowId window_id) override;
-  private: virtual text::Posn MapPointToPosition(
-      domapi::EventTargetId event_target_id, float x, float y) override;
-  private: virtual void MessageBox(WindowId window_id,
-      const base::string16& message, const base::string16& title, int flags,
-      const MessageBoxResolver& resolver) override;
-  private: virtual void Reconvert(WindowId window_id,
-                                  const base::string16& text) override;
-  private: virtual void RealizeWindow(WindowId window_id) override;
-  private: virtual void RegisterViewEventHandler(
-      domapi::ViewEventHandler* event_handler) override;
-  private: virtual void ReleaseCapture(
-      domapi::EventTargetId event_target_id) override;
-  private: virtual void ScrollTextWindow(WindowId window_id,
-                                         int direction) override;
-  private: virtual void SetCapture(
-      domapi::EventTargetId event_target_id) override;
-  private: virtual void SetStatusBar(WindowId window_id,
-      const std::vector<base::string16>& texts) override;
-  private: virtual void SetSwitch(
-      const base::string16& name,
-      const domapi::SwitchValue& new_value) override;
-  private: virtual void SetTabData(WindowId window_id,
-                                   const domapi::TabData& tab_data) override;
-  private: virtual void SetTextWindowZoom(WindowId window_id,
-                                          float zoom) override;
-  private: virtual void ShowWindow(WindowId window_id) override;
-  private: virtual void SplitHorizontally(WindowId left_window_id,
-      WindowId new_right_window_id) override;
-  private: virtual void SplitVertically(WindowId above_window_id,
-      WindowId new_below_window_id) override;
-  private: virtual void UpdateWindow(WindowId window_id) override;
+  private: void MakeSelectionVisible(WindowId window_id) final;
+  private: text::Posn MapPointToPosition(domapi::EventTargetId event_target_id,
+                                         float x, float y) final;
+  private: void MessageBox(WindowId window_id,
+                           const base::string16& message,
+                           const base::string16& title, int flags,
+                           const MessageBoxResolver& resolver) final;
+  private: void Reconvert(WindowId window_id, const base::string16& text) final;
+  private: void RealizeWindow(WindowId window_id) final;
+  private: void RegisterViewEventHandler(
+      domapi::ViewEventHandler* event_handler) final;
+  private: void ReleaseCapture(domapi::EventTargetId event_target_id) final;
+  private: void ScrollTextWindow(WindowId window_id, int direction) final;
+  private: void SetCapture(domapi::EventTargetId event_target_id) final;
+  private: void SetStatusBar(WindowId window_id,
+      const std::vector<base::string16>& texts) final;
+  private: void SetSwitch(const base::string16& name,
+                          const domapi::SwitchValue& new_value) final;
+  private: void SetTabData(WindowId window_id,
+                           const domapi::TabData& tab_data) final;
+  private: void SetTextWindowZoom(WindowId window_id,
+                                          float zoom) final;
+  private: void ShowWindow(WindowId window_id) final;
+  private: void SplitHorizontally(WindowId left_window_id,
+      WindowId new_right_window_id) final;
+  private: void SplitVertically(WindowId above_window_id,
+      WindowId new_below_window_id) final;
+  private: void UpdateWindow(WindowId window_id) final;
 
   // domapi::ViewEventHandler
-  private: virtual void DidChangeWindowBounds(
-      WindowId window_id, int left, int top, int right, int bottom) override;
-  private: virtual void DidChangeWindowVisibility(
-      WindowId window_id, domapi::Visibility visibility) override;
-  private: virtual void DidDestroyWidget(WindowId window_id) override;
-  private: virtual void DidDropWidget(WindowId source_id,
-                                      WindowId target_id) override;
-  private: virtual void DidRealizeWidget(WindowId window_id) override;
-  private: virtual void DidStartViewHost() override;
-  private: virtual void DispatchFocusEvent(
-      const domapi::FocusEvent& event) override;
-  private: virtual void DispatchKeyboardEvent(
-      const domapi::KeyboardEvent& event) override;
-  private: virtual void DispatchMouseEvent(
-      const domapi::MouseEvent& event) override;
-  private: virtual void DispatchTextCompositionEvent(
-      const domapi::TextCompositionEvent& event) override;
-  private: virtual void DispatchWheelEvent(
-      const domapi::WheelEvent& event) override;
-  private: virtual void OpenFile(WindowId window_id,
-                                 const base::string16& file_name) override;
-  private: virtual void QueryClose(WindowId window_id) override;
-  private: virtual void RunCallback(base::Closure callback) override;
-  private: virtual void WillDestroyHost() override;
+  private: void DidChangeWindowBounds(
+      WindowId window_id, int left, int top, int right, int bottom) final;
+  private: void DidChangeWindowVisibility(
+      WindowId window_id, domapi::Visibility visibility) final;
+  private: void DidDestroyWidget(WindowId window_id) final;
+  private: void DidDropWidget(WindowId source_id, WindowId target_id) final;
+  private: void DidRealizeWidget(WindowId window_id) final;
+  private: void DidStartViewHost() final;
+  private: void DispatchFocusEvent(const domapi::FocusEvent& event) final;
+  private: void DispatchKeyboardEvent(const domapi::KeyboardEvent& event) final;
+  private: void DispatchMouseEvent(const domapi::MouseEvent& event) final;
+  private: void DispatchTextCompositionEvent(
+      const domapi::TextCompositionEvent& event) final;
+  private: void DispatchWheelEvent(const domapi::WheelEvent& event) final;
+  private: void OpenFile(WindowId window_id,
+                         const base::string16& file_name) final;
+  private: void QueryClose(WindowId window_id) final;
+  private: void RunCallback(base::Closure callback) final;
+  private: void WillDestroyHost() final;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);
 };

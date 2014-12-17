@@ -1,5 +1,7 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_view_delegate_impl_h)
 #define INCLUDE_evita_view_delegate_impl_h
 
@@ -36,7 +38,6 @@ class ViewDelegateImpl : public dom::ViewDelegate {
   private: virtual void DestroyWindow(dom::WindowId window_id) override;
   private: virtual void DidStartScriptHost(
       domapi::ScriptHostState state) override;
-  private: virtual void DidHandleViewIdelEvent(int hint) override;
   private: virtual void FocusWindow(dom::WindowId window_id) override;
   private: virtual void GetFileNameForLoad(
       dom::WindowId window_id, const base::string16& dir_path,

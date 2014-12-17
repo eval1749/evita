@@ -1,5 +1,7 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_editor_application_h)
 #define INCLUDE_evita_editor_application_h
 
@@ -37,7 +39,7 @@ class ViewDelegateImpl;
 
 namespace editor {
 
-class Application : public common::Singleton<Application> {
+class Application final : public common::Singleton<Application> {
   DECLARE_SINGLETON_CLASS(Application);
 
   private: std::unique_ptr<editor::DomLock> dom_lock_;
@@ -65,9 +67,7 @@ class Application : public common::Singleton<Application> {
   public: bool CalledOnValidThread() const;
 
   // [D]
-  public: void DidHandleViewIdelEvent(int hint);
   public: void DidStartScriptHost(domapi::ScriptHostState state);
-  private: void DispatchViewIdelEvent();
   private: void DoIdle();
 
   // [G]

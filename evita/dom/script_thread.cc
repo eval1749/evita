@@ -1,5 +1,6 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/script_thread.h"
 
@@ -273,7 +274,6 @@ DEFINE_VIEW_DELEGATE_2(CreateTableWindow, WindowId, Document*)
 DEFINE_VIEW_DELEGATE_2(CreateTextWindow, WindowId, text::Selection*)
 DEFINE_VIEW_DELEGATE_1(DestroyWindow, WindowId)
 DEFINE_VIEW_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
-DEFINE_VIEW_DELEGATE_1(DidHandleViewIdelEvent, int);
 DEFINE_VIEW_DELEGATE_1(FocusWindow, WindowId)
 DEFINE_VIEW_DELEGATE_3(GetFileNameForLoad, WindowId, const base::string16&,
                        const GetFileNameForLoadResolver&)

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 (function() {
+  'use strict';
+
   /** @type {string} */
   Window.prototype.status_;
 
@@ -17,6 +19,7 @@
   function handleEvent(event) {
     switch (event.type) {
       case 'hide':
+        this.status_ = '';
         this.visible_ = false;
         return;
       case 'show':
@@ -38,7 +41,7 @@
    * @this {!Window}
    */
   function statusSet(newStatus) {
-    if (this.status_ == newStatus)
+    if (this.status_ === newStatus)
       return;
     this.status_ = newStatus;
     Editor.messageBox(this, this.status_, MessageBox.ICONINFORMATION);

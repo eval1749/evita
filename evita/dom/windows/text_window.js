@@ -188,16 +188,10 @@ global.TextWindow.prototype.clone = function() {
    */
   function handleFocus(window) {
     updateObsolete(window);
-  }
-
-  /**
-   * @param {!TextWindow} window
-   * @param {!UiEvent} event
-   */
-  function handleIdle(window, event) {
-    updateStatusBar(window);
     const document = window.document;
     DocumentState.update(document);
+    updateStatusBar(window);
+    window.status = `Switch to ${document.name}`;
   }
 
   /**
@@ -279,6 +273,13 @@ global.TextWindow.prototype.clone = function() {
     if (event.button)
      return;
     stopControllers(window);
+  }
+
+  /**
+   * @param {!TextWindow} window
+   */
+  function handleSelectionChange(window) {
+    updateStatusBar(window);
   }
 
   /**
@@ -418,10 +419,10 @@ global.TextWindow.prototype.clone = function() {
     [ Event.Names.BLUR, stopControllers ],
     [ Event.Names.DBLCLICK, selectWord ],
     [ Event.Names.FOCUS, handleFocus ],
-    [ Event.Names.IDLE, handleIdle ],
     [ Event.Names.MOUSEDOWN, handleMouseDown ],
     [ Event.Names.MOUSEMOVE, handleMouseMove ],
     [ Event.Names.MOUSEUP, handleMouseUp ],
+    [ Event.Names.SELECTIONCHANGE, handleSelectionChange ],
     [ Event.Names.WHEEL, handleWheel ]
   ]);
 
@@ -432,10 +433,8 @@ global.TextWindow.prototype.clone = function() {
    */
   TextWindow.handleEvent = function(event) {
     let handler = handlerMap.get(event.type);
-    if (handler) {
+    if (handler)
       handler(this, event);
-      return;
-    }
     if (event instanceof CompositionEvent) {
       handleCompositionEvent(this, event);
       return

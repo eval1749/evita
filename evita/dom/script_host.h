@@ -1,5 +1,7 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_dom_script_host_h)
 #define INCLUDE_evita_dom_script_host_h
 
@@ -32,6 +34,8 @@ class Runner;
 
 namespace dom {
 
+class Event;
+class EventTarget;
 class ViewDelegate;
 class ViewEventHandlerImpl;
 
@@ -48,7 +52,7 @@ class SuppressMessageBoxScope {
 //
 // ScriptHost
 //
-class ScriptHost : public v8_glue::RunnerDelegate {
+class ScriptHost final : public v8_glue::RunnerDelegate {
   private: v8_glue::IsolateHolder isolate_holder_;
   private: std::unique_ptr<ViewEventHandlerImpl> event_handler_;
   private: domapi::IoDelegate* io_delegate_;
@@ -63,7 +67,7 @@ class ScriptHost : public v8_glue::RunnerDelegate {
 
   private: ScriptHost(ViewDelegate* view_delegate,
                       domapi::IoDelegate* io_deleage);
-  public: ~ScriptHost();
+  public: ~ScriptHost() final;
 
   public: ViewEventHandlerImpl* event_handler() const {
     return event_handler_.get();
@@ -75,6 +79,7 @@ class ScriptHost : public v8_glue::RunnerDelegate {
   public: void set_testing_runner(v8_glue::Runner* runner);
   public: ViewDelegate* view_delegate() const;
 
+  public: void CallClassEventHandler(EventTarget* target, Event* event);
   public: void DidStartViewHost();
   public: void PlatformError(const char* name);
   public: void PostTask(const tracked_objects::Location& from_here,
@@ -91,10 +96,10 @@ class ScriptHost : public v8_glue::RunnerDelegate {
   public: void WillDestroyHost();
 
   // v8_glue::RunnerDelegate
-  private: virtual v8::Handle<v8::ObjectTemplate>
-      GetGlobalTemplate(v8_glue::Runner* runner) override;
-  private: virtual void UnhandledException(v8_glue::Runner* runner,
-                                           const v8::TryCatch& try_catch);
+  private: v8::Handle<v8::ObjectTemplate>
+      GetGlobalTemplate(v8_glue::Runner* runner) final;
+  private: void UnhandledException(v8_glue::Runner* runner,
+                                   const v8::TryCatch& try_catch) final;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptHost);
 };

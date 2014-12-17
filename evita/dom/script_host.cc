@@ -208,6 +208,11 @@ ViewDelegate* ScriptHost::view_delegate() const {
   return view_delegate_;
 }
 
+void ScriptHost::CallClassEventHandler(EventTarget* event_target,
+                                       Event* event) {
+  event_handler_->CallClassEventHandler(event_target, event);
+}
+
 void ScriptHost::DidStartViewHost() {
  if (testing_)
     return;

@@ -1,5 +1,7 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_evita_dom_events_view_event_handler_impl_h)
 #define INCLUDE_evita_dom_events_view_event_handler_impl_h
 
@@ -11,43 +13,38 @@ class Event;
 class EventTarget;
 class ScriptHost;
 
-class ViewEventHandlerImpl : public domapi::ViewEventHandler {
+class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
   private: ScriptHost* host_;
 
   public: ViewEventHandlerImpl(ScriptHost* host);
-  public: virtual ~ViewEventHandlerImpl();
+  public: ~ViewEventHandlerImpl() final;
 
-  private: void CallClassEventHandler(EventTarget* event_target,
-                                      Event* event);
+  public: void CallClassEventHandler(EventTarget* event_target,
+                                     Event* event);
   private: void DispatchEventWithInLock(EventTarget* event_target,
                                         Event* event);
 
   // domapi::ViewEventHandler
-  private: virtual void DidChangeWindowBounds(
-      WindowId window_id, int left, int top, int right, int bottom) override;
-  private: virtual void DidChangeWindowVisibility(
-      WindowId window_id, domapi::Visibility visibility) override;
-  private: virtual void DidDestroyWidget(WindowId window_id) override;
-  private: virtual void DidDropWidget(WindowId source_id,
-                                      WindowId target_id) override;
-  private: virtual void DidRealizeWidget(WindowId window_id) override;
-  private: virtual void DidStartViewHost() override;
-  private: virtual void DispatchFocusEvent(
-      const domapi::FocusEvent& event) override;
-  private: virtual void DispatchKeyboardEvent(
-      const domapi::KeyboardEvent& event) override;
-  private: virtual void DispatchMouseEvent(
-      const domapi::MouseEvent& event) override;
-  private: virtual void DispatchTextCompositionEvent(
-      const domapi::TextCompositionEvent& event) override;
-  private: void DispatchViewIdleEvent(int hint) override;
-  private: virtual void DispatchWheelEvent(
-      const domapi::WheelEvent& event) override;
-  private: virtual void OpenFile(WindowId window_id,
-                                 const base::string16& file_name) override;
-  private: virtual void QueryClose(WindowId window_id) override;
-  private: virtual void RunCallback(base::Closure callback) override;
-  private: virtual void WillDestroyHost() override;
+  private: void DidChangeWindowBounds(
+      WindowId window_id, int left, int top, int right, int bottom) final;
+  private: void DidChangeWindowVisibility(
+      WindowId window_id, domapi::Visibility visibility) final;
+  private: void DidDestroyWidget(WindowId window_id) final;
+  private: void DidDropWidget(WindowId source_id, WindowId target_id) final;
+  private: void DidRealizeWidget(WindowId window_id) final;
+  private: void DidStartViewHost() final;
+  private: void DispatchFocusEvent(const domapi::FocusEvent& event) final;
+  private: void DispatchKeyboardEvent(const domapi::KeyboardEvent& event) final;
+  private: void DispatchMouseEvent(const domapi::MouseEvent& event) final;
+  private: void DispatchTextCompositionEvent(
+      const domapi::TextCompositionEvent& event) final;
+  private: void DispatchViewIdleEvent(int hint) final;
+  private: void DispatchWheelEvent(const domapi::WheelEvent& event) final;
+  private: void OpenFile(WindowId window_id,
+                         const base::string16& file_name) final;
+  private: void QueryClose(WindowId window_id) final;
+  private: void RunCallback(base::Closure callback) final;
+  private: void WillDestroyHost() final;
 
   DISALLOW_COPY_AND_ASSIGN(ViewEventHandlerImpl);
 };

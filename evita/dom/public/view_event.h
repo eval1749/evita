@@ -53,6 +53,7 @@ enum class Visibility {
 };
 
 struct Event {
+  int event_id;
   EventType event_type;
   EventTargetId target_id;
 };

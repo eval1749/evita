@@ -31,9 +31,19 @@
 #include "evita/v8_glue/runner.h"
 #include "v8_strings.h"
 
+namespace views {
+extern int event_id_counter;
+}
+
 namespace dom {
 
 namespace {
+
+void CheckEventId(const domapi::Event& api_event) {
+  if (views::event_id_counter != api_event.event_id)
+    return;
+  ScriptHost::instance()->RunMicrotasks();
+}
 
 base::string16 V8ToString(v8::Handle<v8::Value> value) {
   if (value.IsEmpty())
@@ -234,6 +244,7 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
   DispatchEventWithInLock(target, new FocusEvent(
       api_event.event_type == domapi::EventType::Blur ? L"blur" : L"focus",
       event_init));
+  CheckEventId(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchKeyboardEvent(
@@ -242,6 +253,7 @@ void ViewEventHandlerImpl::DispatchKeyboardEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new KeyboardEvent(api_event));
+  CheckEventId(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchMouseEvent(
@@ -250,6 +262,7 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new MouseEvent(api_event));
+  CheckEventId(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchTextCompositionEvent(
@@ -258,6 +271,7 @@ void ViewEventHandlerImpl::DispatchTextCompositionEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new CompositionEvent(api_event));
+  CheckEventId(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchViewIdleEvent(int hint) {
@@ -280,6 +294,7 @@ void ViewEventHandlerImpl::DispatchWheelEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new WheelEvent(api_event));
+  CheckEventId(api_event);
 }
 
 void ViewEventHandlerImpl::OpenFile(WindowId window_id,

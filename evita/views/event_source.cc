@@ -14,7 +14,13 @@
 
 namespace views {
 
+int event_id_counter;
+
 namespace {
+
+int next_event_id() {
+  return ++event_id_counter;
+}
 
 domapi::ViewEventHandler* view_event_handler() {
   return editor::Application::instance()->view_event_handler();
@@ -78,6 +84,7 @@ void EventSource::DispatchFocusEvent(domapi::EventType event_type,
   DCHECK(event_type == domapi::EventType::Blur ||
          event_type == domapi::EventType::Focus);
   domapi::FocusEvent api_event;
+  api_event.event_id = next_event_id();
   api_event.event_type = event_type;
   api_event.related_target_id = related_target_id;
   api_event.target_id = event_target_id_;
@@ -86,6 +93,7 @@ void EventSource::DispatchFocusEvent(domapi::EventType event_type,
 
 void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
   domapi::KeyboardEvent api_event;
+  api_event.event_id = next_event_id();
   api_event.alt_key = event.alt_key();
   api_event.control_key = event.control_key();
   api_event.event_type = ConvertEventType(event);
@@ -109,6 +117,7 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   MUST_EQUAL(Other2);
 
   domapi::MouseEvent api_event;
+  api_event.event_id = next_event_id();
   api_event.alt_key = event.alt_key();
   api_event.button = static_cast<domapi::MouseButton>(event.button());
   api_event.buttons = event.buttons();
@@ -134,15 +143,17 @@ void EventSource::DispatchTextCompositionEvent(
     data.spans.push_back(api_span);
   }
 
-  domapi::TextCompositionEvent event;
-  event.event_type = event_type;
-  event.target_id = event_target_id_;
-  event.data = data;
-  view_event_handler()->DispatchTextCompositionEvent(event);
+  domapi::TextCompositionEvent api_event;
+  api_event.event_id = next_event_id();
+  api_event.event_type = event_type;
+  api_event.target_id = event_target_id_;
+  api_event.data = data;
+  view_event_handler()->DispatchTextCompositionEvent(api_event);
 }
 
 void EventSource::DispatchWheelEvent(const ui::MouseWheelEvent& event) {
   domapi::WheelEvent api_event;
+  api_event.event_id = next_event_id();
   api_event.alt_key = event.alt_key();
   api_event.button = static_cast<domapi::MouseButton>(event.button());
   api_event.buttons = event.buttons();

@@ -1,5 +1,6 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include <string>
 
@@ -185,7 +186,7 @@ TEST_F(DocumentTest, load_failed_open) {
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
-  EXPECT_SCRIPT_TRUE("doc.obsolete == Document.Obsolete.UNKNOWN");
+  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_FALSE("doc.readonly");
 }
 
@@ -207,7 +208,7 @@ TEST_F(DocumentTest, load_failed_read) {
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
-  EXPECT_SCRIPT_TRUE("doc.obsolete == Document.Obsolete.UNKNOWN");
+  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_FALSE("doc.readonly");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
 }
@@ -247,7 +248,7 @@ TEST_F(DocumentTest, load_succeeded) {
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
   EXPECT_SCRIPT_EQ("C++", "doc.mode.name");
-  EXPECT_SCRIPT_EQ("0", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("Document.Obsolete.NO === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.readonly") << "set readonly from file attribute";
 }
 
@@ -350,7 +351,7 @@ TEST_F(DocumentTest, save_failed_open) {
     "doc.save('foo.cc');");
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
-  EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
@@ -369,7 +370,7 @@ TEST_F(DocumentTest, save_failed_encode) {
   EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
-  EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
@@ -388,7 +389,7 @@ TEST_F(DocumentTest, save_failed_write) {
   EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
-  EXPECT_SCRIPT_EQ("-1", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
@@ -420,7 +421,7 @@ TEST_F(DocumentTest, save_succeeded) {
 
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
-  EXPECT_SCRIPT_EQ("0", "doc.obsolete");
+  EXPECT_SCRIPT_TRUE("Document.Obsolete.NO === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
@@ -444,11 +445,11 @@ TEST_F(DocumentTest, state) {
 
 TEST_F(DocumentTest, undo) {
   EXPECT_SCRIPT_VALID("var doc = new Document('undo');"
-            "var range = new Range(doc);"
-            "range.text = 'foo';"
-            "doc.undo(3);"
-            "range.start = 0;"
-            "range.end = doc.length");
+      "var range = new Range(doc);"
+      "range.text = 'foo';"
+      "doc.undo(3);"
+      "range.start = 0;"
+      "range.end = doc.length");
   EXPECT_SCRIPT_EQ("", "range.text");
 }
 

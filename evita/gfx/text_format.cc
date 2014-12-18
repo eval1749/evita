@@ -49,6 +49,8 @@ TextFormat::TextFormat(const LOGFONT& log_font)
 
 std::unique_ptr<TextLayout> TextFormat::CreateLayout(
       const base::string16& text, const SizeF& size) const {
+  DCHECK(text.size());
+  DCHECK(!size.empty());
   common::ComPtr<IDWriteTextLayout> text_layout;
   COM_VERIFY(FactorySet::instance()->dwrite().CreateTextLayout(
     text.data(), static_cast<UINT32>(text.length()), *this, size.width,

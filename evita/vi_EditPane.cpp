@@ -149,7 +149,7 @@ class EditPane::Box : public Bounds,
   private: bool is_removed_;
 
   protected: Box(EditPane* edit_pane, const gfx::RectF& bounds);
-  public: virtual ~Box();
+  public: ~Box() override;
 
   public: EditPane* edit_pane() { return edit_pane_; }
   public: bool is_removed() const { return is_removed_; }
@@ -197,22 +197,20 @@ typedef EditPane::Box Box;
 //
 // ContentWatcher
 //
-class ContentWatcher : public ContentObserver {
+class ContentWatcher final : public ContentObserver {
   private: Box* box_;
   private: ContentWindow* content_;
   private: bool is_observing_content_;
 
   public: ContentWatcher(Box* box, ContentWindow* content);
-  public: virtual ~ContentWatcher();
+  public: ~ContentWatcher() final;
 
   public: void SetContent(ContentWindow* content);
   public: void WillChangeContent();
 
   // views::ContentObserver
-  private: virtual void DidActivateContent(
-      ContentWindow* content_window) override;
-  private: virtual void DidUpdateContent(
-      ContentWindow* content_window) override;
+  private: void DidActivateContent(ContentWindow* content_window) final;
+  private: void DidUpdateContent(ContentWindow* content_window) final;
 };
 
 ContentWatcher::ContentWatcher(Box* box, ContentWindow* content)
@@ -259,18 +257,17 @@ class HorizontalBox final : public EditPane::Box {
   DECLARE_CASTABLE_CLASS(HorizontalBox, Box);
 
   public: HorizontalBox(EditPane* edit_pane, const gfx::RectF& bounds);
-  public: virtual ~HorizontalBox() = default;
+  public: ~HorizontalBox() final = default;
 
   // Bounds
-  private: virtual void DidChangeBounds() override;
+  private: void DidChangeBounds() final;
 
   // EditPane::Box
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void MoveSplitter(const gfx::PointF&, Box*) override;
-  private: virtual void Split(Box* ref_box, ContentWindow* new_window,
-                              float new_box_size) override;
-  private: virtual void StopSplitter(const gfx::Point&, Box*) override;
+  private: HitTestResult HitTest(const gfx::PointF& point) const final;
+  private: void MoveSplitter(const gfx::PointF&, Box*) final;
+  private: void Split(Box* ref_box, ContentWindow* new_window,
+                      float new_box_size) final;
+  private: void StopSplitter(const gfx::Point&, Box*) final;
 
   DISALLOW_COPY_AND_ASSIGN(HorizontalBox);
 };
@@ -291,26 +288,25 @@ class LeafBox final : public EditPane::Box {
 
   public: LeafBox(EditPane* edit_pane, const gfx::RectF& bounds,
                   ContentWindow* content);
-  public: virtual ~LeafBox();
+  public: ~LeafBox() final;
 
   // Bounds
-  private: void DidChangeBounds() override;
-  private: void WillChangeBounds(const gfx::RectF& new_bounds) override;
+  private: void DidChangeBounds() final;
+  private: void WillChangeBounds(const gfx::RectF& new_bounds) final;
 
   // EditPane::Box
-  private: virtual void Destroy() override;
-  private: virtual void DidHide() override;
-  private: virtual void DidShow() override;
-  private: virtual void DidShowContent() override;
-  private: virtual ContentWindow* GetContent() const override;
-  private: virtual ui::Layer* GetLayer() override;
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void Realize() override;
-  private: virtual void SetContent(ContentWindow* new_window) override;
-  private: virtual void PrepareAnimation(ui::Animator* animator) override;
-  private: virtual void WillDestroyContent() override;
-  private: virtual void WillRemove() override;
+  private: void Destroy() final;
+  private: void DidHide() final;
+  private: void DidShow() final;
+  private: void DidShowContent() final;
+  private: ContentWindow* GetContent() const final;
+  private: ui::Layer* GetLayer() final;
+  private: HitTestResult HitTest(const gfx::PointF& point) const final;
+  private: void Realize() final;
+  private: void SetContent(ContentWindow* new_window) final;
+  private: void PrepareAnimation(ui::Animator* animator) final;
+  private: void WillDestroyContent() final;
+  private: void WillRemove() final;
 
   DISALLOW_COPY_AND_ASSIGN(LeafBox);
 };
@@ -325,21 +321,20 @@ class RootBox final : public EditPane::Box {
   private: std::vector<ui::Animatable*> animations_;
 
   public: RootBox(EditPane* edit_pane);
-  public: virtual ~RootBox();
+  public: ~RootBox() final;
 
   private: const Box* container() const { return first_child(); }
   private: Box* container() { return first_child(); }
 
   // Bounds
-  private: virtual void DidChangeBounds() override;
+  private: void DidChangeBounds() final;
 
   // EditPane::Box
-  private: virtual void AddAnimation(ui::Animatable* animatable) override;
-  private: virtual void Destroy() override;
-  private: virtual void DidShowContent() override;
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void SetContent(ContentWindow* new_content) override;
+  private: void AddAnimation(ui::Animatable* animatable) final;
+  private: void Destroy() final;
+  private: void DidShowContent() final;
+  private: HitTestResult HitTest(const gfx::PointF& point) const final;
+  private: void SetContent(ContentWindow* new_content) final;
 
   DISALLOW_COPY_AND_ASSIGN(RootBox);
 };
@@ -352,18 +347,17 @@ class VerticalBox final : public EditPane::Box {
   DECLARE_CASTABLE_CLASS(VerticalBox, Box);
 
   public: VerticalBox(EditPane* edit_pane, const gfx::RectF& bounds);
-  public: virtual ~VerticalBox() = default;
+  public: ~VerticalBox() final = default;
 
   // Bounds
-  private: virtual void DidChangeBounds() override;
+  private: void DidChangeBounds() final;
 
   // EditPane::Box
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void MoveSplitter(const gfx::PointF&, Box*) override;
-  private: virtual void Split(Box* ref_box, ContentWindow* new_window,
-                              float new_box_size) override;
-  private: virtual void StopSplitter(const gfx::Point&, Box*) override;
+  private: HitTestResult HitTest(const gfx::PointF& point) const final;
+  private: void MoveSplitter(const gfx::PointF&, Box*) final;
+  private: void Split(Box* ref_box, ContentWindow* new_window,
+                      float new_box_size) final;
+  private: void StopSplitter(const gfx::Point&, Box*) final;
 
   DISALLOW_COPY_AND_ASSIGN(VerticalBox);
 };

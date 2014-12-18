@@ -132,12 +132,17 @@ void Painter::Paint(gfx::Canvas* canvas,
         part->dirty = true;
         part->text = new_part.text;
         delete part->text_layout;
-        auto text_layout = text_format_->CreateLayout(part->text, big_size);
-        part->text_layout = text_layout.release();
-        DWRITE_TEXT_METRICS metrics;
-        COM_VERIFY((*part->text_layout)->GetMetrics(&metrics));
-        part->width = std::max(::ceil(metrics.width) + kPaddingRight,
-                               part->width);
+        part->text_layout = nullptr;
+        if (part->text.empty()) {
+          part->width = 0.0f;
+        } else {
+          auto text_layout = text_format_->CreateLayout(part->text, big_size);
+          part->text_layout = text_layout.release();
+          DWRITE_TEXT_METRICS metrics;
+          COM_VERIFY((*part->text_layout)->GetMetrics(&metrics));
+          part->width = std::max(::ceil(metrics.width) + kPaddingRight,
+                                 part->width);
+        }
         dirty = true;
       }
       total_width += part->width;

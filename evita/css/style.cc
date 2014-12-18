@@ -5,8 +5,60 @@
 #include "evita/css/style.h"
 
 #include "base/logging.h"
+#include "base/strings/string_util.h"
 
 namespace css {
+
+namespace {
+std::vector<base::string16> parseFontFamily(const base::string16& source) {
+  enum class State{
+    Comma,
+    Name,
+    NameSpace,
+    Start,
+  } state = State::Start;
+  std::vector<base::string16> names;
+  base::string16 name;
+  for (auto const ch : source) {
+    switch (state) {
+      case State::Name:
+        if (ch == ',') {
+          names.push_back(name);
+          name.clear();
+          state = State::Start;
+          break;
+        }
+        if (IsWhitespace(ch))
+          state = State::NameSpace;
+        else
+          name.push_back(ch);
+        break;
+      case State::NameSpace:
+        if (ch == ',') {
+          names.push_back(name);
+          name.clear();
+          state = State::Start;
+          break;
+        }
+        if (!IsWhitespace(ch)) {
+          name.push_back(' ');
+          name.push_back(ch);
+          state = State::Name;
+        }
+        break;
+      case State::Start:
+        if (ch != ',' && !IsWhitespace(ch)) {
+          name.push_back(ch);
+          state = State::Name;
+        }
+        break;
+    }
+  }
+  if (name.length())
+    names.push_back(name);
+  return names;
+}
+}  // namespace
 
 Style::Style(const Color& color, const Color& bgcolor)
     : Style() {
@@ -17,6 +69,7 @@ Style::Style(const Color& color, const Color& bgcolor)
 Style::Style(const Style& other)
     : bgcolor_(other.bgcolor_),
       color_(other.color_),
+      font_families_(other.font_families_),
       font_family_(other.font_family_),
       font_size_(other.font_size_),
       font_style_(other.font_style_),
@@ -76,6 +129,12 @@ void Style::set_color(Color color) {
   masks_ |= Mask_Color;
 }
 
+const std::vector<base::string16>& Style::font_families() const {
+  if (has_font_family() && font_families_.empty())
+    font_families_ = parseFontFamily(font_family_);
+  return font_families_;
+}
+
 const base::string16& Style::font_family() const {
   DCHECK(has_font_family());
   return font_family_;
@@ -84,6 +143,7 @@ const base::string16& Style::font_family() const {
 void Style::set_font_family(const base::string16& font_family) {
   font_family_ = font_family;
   masks_ |= Mask_FontFamily;
+  font_families_.clear();
 }
 
 FontSize Style::font_size() const {
@@ -153,23 +213,27 @@ Style* Style::Default() {
         default_style.set_marker_color(Color(0x00, 0x99, 0x00));
     #endif
 
-    default_style.set_font_family(L"Consolas, MS Gothic");
+    default_style.set_font_family(L"Consolas, Meiryo");
     default_style.set_font_size(10);
     default_style.set_font_style(FontStyle::Normal);
     default_style.set_font_weight(FontWeight::Normal);
     default_style.set_text_decoration(TextDecoration::None);
+    default_style.Prepare();
   }
 
   return &default_style;
 }
 
 void Style::Merge(const Style& other) {
+  other.Prepare();
   if (!has_bgcolor() && other.has_bgcolor())
     set_bgcolor(other.bgcolor());
   if (!has_color() && other.has_color())
     set_color(other.color());
-  if (!has_font_family() && other.has_font_family())
+  if (!has_font_family() && other.has_font_family()) {
     set_font_family(other.font_family());
+    font_families_ = other.font_families_;
+  }
   if (!has_font_size() && other.has_font_size())
     set_font_size(other.font_size());
   if (!has_font_style() && other.has_font_style())
@@ -183,12 +247,15 @@ void Style::Merge(const Style& other) {
 }
 
 void Style::OverrideBy(const Style& other) {
+  other.Prepare();
   if (other.has_bgcolor())
     set_bgcolor(other.bgcolor());
   if (other.has_color())
     set_color(other.color());
-  if (other.has_font_family())
+  if (other.has_font_family()) {
     set_font_family(other.font_family());
+    font_families_ = other.font_families_;
+  }
   if (other.has_font_size())
     set_font_size(other.font_size());
   if (other.has_font_style())
@@ -201,7 +268,13 @@ void Style::OverrideBy(const Style& other) {
     set_text_decoration(other.text_decoration());
 }
 
-}  // namspace css
+void Style::Prepare() const {
+  if (!has_font_family() || !font_families_.empty())
+    return;
+  font_families_ = parseFontFamily(font_family_);
+}
+
+}  // namespace css
 
 namespace std {
 size_t hash<css::Style>::operator()(

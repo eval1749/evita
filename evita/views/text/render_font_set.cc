@@ -8,7 +8,6 @@
 #include <unordered_map>
 
 #include "base/logging.h"
-#include "base/strings/string_util.h"
 #include "common/memory/singleton.h"
 #include "evita/css/style.h"
 #include "evita/gfx/font_face.h"
@@ -24,55 +23,6 @@ gfx::FontProperties ComputeFontProperties(const base::string16& family_name,
   font_props.italic = css::FontStyle::Italic == style.font_style();
   font_props.family_name = family_name;
   return font_props;
-}
-
-std::vector<base::string16> parseFontFamily(const base::string16& source) {
-  enum class State{
-    Comma,
-    Name,
-    NameSpace,
-    Start,
-  } state = State::Start;
-  std::vector<base::string16> names;
-  base::string16 name;
-  for (auto const ch : source) {
-    switch (state) {
-      case State::Name:
-        if (ch == ',') {
-          names.push_back(name);
-          name.clear();
-          state = State::Start;
-          break;
-        }
-        if (IsWhitespace(ch))
-          state = State::NameSpace;
-        else
-          name.push_back(ch);
-        break;
-      case State::NameSpace:
-        if (ch == ',') {
-          names.push_back(name);
-          name.clear();
-          state = State::Start;
-          break;
-        }
-        if (!IsWhitespace(ch)) {
-          name.push_back(' ');
-          name.push_back(ch);
-          state = State::Name;
-        }
-        break;
-      case State::Start:
-        if (ch != ',' && !IsWhitespace(ch)) {
-          name.push_back(ch);
-          state = State::Name;
-        }
-        break;
-    }
-  }
-  if (name.length())
-    names.push_back(name);
-  return names;
 }
 
 }  // namespace
@@ -137,7 +87,7 @@ const Font* FontSet::FindFont(base::char16 sample) const {
 
 const FontSet& FontSet::Get(const css::Style& style) {
   FontList fonts;
-  for (auto const font_family : parseFontFamily(style.font_family())) {
+  for (auto const font_family : style.font_families()) {
     const auto font_props = ComputeFontProperties(font_family, style);
     fonts.push_back(&Font::Get(font_props));
   }

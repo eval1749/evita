@@ -6,6 +6,7 @@
 #define INCLUDE_evita_css_style_h
 
 #include <functional>
+#include <vector>
 
 #include "base/strings/string16.h"
 #include "evita/css/color.h"
@@ -41,7 +42,7 @@ enum class TextDecoration {
 //
 // Style
 //
-class Style {
+class Style final {
   private: enum Mask {
     Mask_BgColor = 1 << 0,
     Mask_Color = 1 << 1,
@@ -55,6 +56,7 @@ class Style {
 
   private: Color bgcolor_;
   private: Color color_;
+  private: mutable std::vector<base::string16> font_families_;
   private: base::string16 font_family_;
   private: FontSize font_size_;
   private: FontStyle font_style_;
@@ -79,6 +81,7 @@ class Style {
   public: bool has_color() const { return masks_ & Mask_Color; }
   public: void set_color(Color color);
 
+  public: const std::vector<base::string16>& font_families() const;
   public: const base::string16& font_family() const;
   public: bool has_font_family() const { return masks_ & Mask_FontFamily; }
   public: void set_font_family(const base::string16& font_family);
@@ -108,6 +111,7 @@ class Style {
   public: static Style* Default();
   public: void Merge(const Style& style);
   public: void OverrideBy(const Style& style);
+  private: void Prepare() const;
 };
 
 }  // namespace css

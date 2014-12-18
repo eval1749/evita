@@ -1,5 +1,6 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/views/window.h"
 
@@ -111,10 +112,10 @@ Window::~Window() {
   view_event_handler()->DidDestroyWidget(window_id_);
 }
 
-
 Window* Window::FromWindowId(WindowId window_id) {
   return WindowIdMapper::instance()->Find(window_id);
 }
+
 void Window::DidDestroyDomWindow() {
   TabDataSet::instance()->RemoveTabData(window_id_);
   WindowIdMapper::instance()->DidDestroyDomWindow(window_id_);

@@ -25,7 +25,7 @@ using common::win::Rect;
 class TabContent;
 class TabStripDelegate;
 
-class TabStrip : public ui::AnimatableWindow {
+class TabStrip final : public ui::AnimatableWindow {
   DECLARE_CASTABLE_CLASS(TabStrip, AnimatableWindow);
 
   private: class View;
@@ -34,7 +34,7 @@ class TabStrip : public ui::AnimatableWindow {
   private: const std::unique_ptr<View> view_;
 
   public: TabStrip(TabStripDelegate* delegate);
-  public: virtual ~TabStrip();
+  public: ~TabStrip() final;
 
   public: int number_of_tabs() const;
   public: int selected_index() const;
@@ -51,12 +51,12 @@ class TabStrip : public ui::AnimatableWindow {
   public: void SetTab(int tab_index, const domapi::TabData& tab_data);
 
   // ui::AnimationFrameHanndler
-  private: virtual void DidBeginAnimationFrame(base::Time time) override;
+  private: void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::Widget
-  private: virtual gfx::Size GetPreferredSize() const override;
-  private: virtual void DidChangeBounds() override;
-  private: virtual void DidRealize() override;
+  private: gfx::Size GetPreferredSize() const final;
+  private: void DidChangeBounds() final;
+  private: void DidRealize() final;
 
   DISALLOW_COPY_AND_ASSIGN(TabStrip);
 };

@@ -68,13 +68,13 @@ auto const kTabHeight = 28; // SM_CYCAPTION + SM_CYEDGE + 1
 //
 // DragTabCursor
 //
-class DragTabCursor : public common::Singleton<DragTabCursor> {
+class DragTabCursor final : public common::Singleton<DragTabCursor> {
   DECLARE_SINGLETON_CLASS(DragTabCursor);
 
   private: HCURSOR cursor_;
 
   private: DragTabCursor();
-  public: virtual ~DragTabCursor();
+  public: ~DragTabCursor() final;
 
   public: HCURSOR GetCursor();
 
@@ -267,7 +267,7 @@ class TabCollection final : public ui::Widget,
   private: std::unique_ptr<gfx::TextFormat> text_format_;
 
   public: TabCollection(TabController* tab_controller);
-  public: virtual ~TabCollection();
+  public: ~TabCollection() final;
 
   public: const std::vector<Tab*> tabs() const { return tabs_; }
 
@@ -290,21 +290,21 @@ class TabCollection final : public ui::Widget,
   private: void UpdateTextFont();
 
   // ModelDelegate
-  private: void AddObserver(ModelObserver* observer) override;
-  private: Tab::HitTestResult HitTest(const gfx::PointF& point) override;
-  private: void InsertBefore(Tab* new_tab, Tab* ref_tab) override;
-  private: void RemoveObserver(ModelObserver* observer) override;
+  private: void AddObserver(ModelObserver* observer) final;
+  private: Tab::HitTestResult HitTest(const gfx::PointF& point) final;
+  private: void InsertBefore(Tab* new_tab, Tab* ref_tab) final;
+  private: void RemoveObserver(ModelObserver* observer) final;
 
   // ui::SystemMetricsObserver
-  private: virtual void DidChangeIconFont() override;
+  private: void DidChangeIconFont() final;
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
-  private: virtual void DidRealize() override;
-  private: virtual gfx::Size GetPreferredSize() const override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
-  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
+  private: void DidChangeBounds() final;
+  private: void DidRealize() final;
+  private: gfx::Size GetPreferredSize() const final;
+  private: void OnDraw(gfx::Canvas* canvas) final;
+  private: void OnMouseMoved(const ui::MouseEvent& event) final;
+  private: void OnMouseReleased(const ui::MouseEvent& event) final;
 
   DISALLOW_COPY_AND_ASSIGN(TabCollection);
 };
@@ -712,7 +712,7 @@ class TabStrip::View final : private ui::ButtonListener,
   private: TabStrip* widget_;
 
   public: View(TabStrip* widget, TabStripDelegate* delegate);
-  public: virtual ~View();
+  public: ~View() final;
 
   public: void DidBeginAnimationFrame(base::Time time);
   public: void DidChangeBounds();
@@ -734,25 +734,21 @@ class TabStrip::View final : private ui::ButtonListener,
   private: void UpdateLayout();
 
   // ButtonListner
-  private: virtual void DidPressButton(ui::Button* sender,
-                                       const ui::Event& event) override;
+  private: void DidPressButton(ui::Button* sender,
+                               const ui::Event& event) final;
   // ModelObserver
-  private: void DidDeleteTab(Tab* tab) override;
-  private: void DidInsertTab(Tab* tab) override;
+  private: void DidDeleteTab(Tab* tab) final;
+  private: void DidInsertTab(Tab* tab) final;
 
   // TabController
-  private: virtual void AddTabAnimation(
-      ui::AnimationGroupMember* member) override;
-  private: virtual void DidChangeTabBounds(Tab* tab) override;
-  private: virtual void DidDropTab(Tab* tab,
-                                   const gfx::Point& screen_point) override;
-  private: virtual void DidSelectTab(Tab* tab) override;
-  private: virtual void MaybeStartDrag(Tab* tab,
-                                       const gfx::Point& location) override;
-  private: virtual void RemoveTabAnimation(
-      ui::AnimationGroupMember* member) override;
-  private: virtual void RequestCloseTab(Tab* tab) override;
-  private: virtual void RequestSelectTab(Tab* tab) override;
+  private: void AddTabAnimation(ui::AnimationGroupMember* member) final;
+  private: void DidChangeTabBounds(Tab* tab) final;
+  private: void DidDropTab(Tab* tab, const gfx::Point& screen_point) final;
+  private: void DidSelectTab(Tab* tab) final;
+  private: void MaybeStartDrag(Tab* tab, const gfx::Point& location) final;
+  private: void RemoveTabAnimation(ui::AnimationGroupMember* member) final;
+  private: void RequestCloseTab(Tab* tab) final;
+  private: void RequestSelectTab(Tab* tab) final;
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };

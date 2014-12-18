@@ -133,7 +133,7 @@ class ModelDelegate {
 
   public: virtual void AddObserver(ModelObserver* observer) = 0;
   public: virtual Tab::HitTestResult HitTest(
-      const gfx::PointF& point) const = 0;
+      const gfx::PointF& point) = 0;
   public: virtual void InsertBefore(Tab* new_tab, Tab* ref_tab) = 0;
   public: virtual void RemoveObserver(ModelObserver* observer) = 0;
 
@@ -291,7 +291,7 @@ class TabCollection final : public ui::Widget,
 
   // ModelDelegate
   private: void AddObserver(ModelObserver* observer) override;
-  private: Tab::HitTestResult HitTest(const gfx::PointF& point) const override;
+  private: Tab::HitTestResult HitTest(const gfx::PointF& point) override;
   private: void InsertBefore(Tab* new_tab, Tab* ref_tab) override;
   private: void RemoveObserver(ModelObserver* observer) override;
 
@@ -368,11 +368,7 @@ void TabCollection::InsertTab(TabContent* tab_content, size_t tab_index_in) {
   auto const new_tab = new Tab(tab_controller_, tab_content,
                                text_format_.get());
   tabs_.insert(tabs_.begin() + static_cast<ptrdiff_t>(tab_index), new_tab);
-  // TODO(eval1749) Should we allow to realize empty bounds widget?
-  new_tab->SetBounds(gfx::Rect(gfx::Size(1, 1)));
   AppendChild(new_tab);
-  if (is_realized())
-    new_tab->RealizeWidget();
   RenumberTabIndex();
   FOR_EACH_OBSERVER(ModelObserver, observers_, DidInsertTab(new_tab));
 }
@@ -467,6 +463,8 @@ void TabCollection::UpdateBoundsForAllTabs(int tab_width) {
   auto const tab_size = gfx::Size(tab_width, bounds.bottom() - tab_origin.y());
   for (auto const tab : tabs_) {
     tab->SetBounds(gfx::Rect(tab_origin, tab_size));
+    if (!tab->is_realized())
+      tab->RealizeWidget();
     tab_origin = tab_origin.Offset(tab_width, 0);
     auto const visible_bounds = bounds.Intersect(tab->bounds());
     if (visible_bounds.empty()){
@@ -551,7 +549,8 @@ void TabCollection::AddObserver(ModelObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-Tab::HitTestResult TabCollection::HitTest(const gfx::PointF& point) const {
+Tab::HitTestResult TabCollection::HitTest(const gfx::PointF& point) {
+  UpdateLayout();
   for (auto const tab : tabs_) {
     auto const point_in_tab = point - gfx::PointF(tab->origin());
     auto const result = tab->HitTest(point_in_tab);

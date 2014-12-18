@@ -179,8 +179,11 @@ void Widget::DidHide() {
   visible_ = false;
   container_widget()->DidChangeChildVisibility(this);
   // Hide widgets in top to bottom == post order.
-  for (auto child : common::adopters::reverse(child_nodes()))
+  for (auto child : common::adopters::reverse(child_nodes())) {
+    if (!child->is_realized())
+      continue;
     child->Hide();
+  }
 }
 
 void Widget::DidKillFocus(ui::Widget*) {
@@ -215,8 +218,11 @@ void Widget::DidShow() {
   visible_ = true;
   container_widget()->DidChangeChildVisibility(this);
   // Show child in bottom to top == pre-order.
-  for (auto child : child_nodes())
+  for (auto child : child_nodes()) {
+    if (!child->is_realized())
+      continue;
     child->Show();
+  }
 }
 
 void Widget::DispatchMouseExited() {

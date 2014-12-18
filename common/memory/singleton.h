@@ -1,5 +1,7 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #if !defined(INCLUDE_common_memory_singleton_h)
 #define INCLUDE_common_memory_singleton_h
 
@@ -7,6 +9,9 @@ namespace common {
 
 template<class T>
 class Singleton {
+  public: Singleton() = default;
+  public: virtual ~Singleton() = default;
+
   public: static T* instance() {
     static T* instance;
     if (!instance)

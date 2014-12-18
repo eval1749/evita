@@ -201,7 +201,7 @@ void SwapChain::UpdateDeviceContext() {
         static_cast<float>(size.width), static_cast<float>(size.height)));
   }
 
-  d2d_device_context_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE);
+  d2d_device_context_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
   is_first_present_ = true;
 }
 

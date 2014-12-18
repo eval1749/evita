@@ -472,7 +472,7 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
                          static_cast<int>(ui::Modifier::Control)) &&
       event.control_key) {
     auto const isolate = ScriptHost::instance()->isolate();
-    v8::V8::TerminateExecution(isolate);
+    isolate->TerminateExecution();
     return;
   }
 

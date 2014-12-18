@@ -32,13 +32,13 @@ class MetricsView final : public ui::Widget {
   private: std::unique_ptr<View> view_;
 
   public: MetricsView();
-  public: virtual ~MetricsView();
+  public: ~MetricsView() final;
 
   public: void Animate(base::Time now);
   public: void RecordTime();
 
   // ui::Widget
-  private: virtual void DidRealize() override;
+  private: void DidRealize() final;
 
   DISALLOW_COPY_AND_ASSIGN(MetricsView);
 };

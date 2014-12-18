@@ -65,13 +65,13 @@ class MetricsView::View final : public ui::LayerOwnerDelegate {
   private: ui::Widget* const widget_;
 
   public: View(ui::Widget* widget);
-  public: virtual ~View() = default;
+  public: virtual ~View() final = default;
 
   public: void Animate(base::Time now);
   public: void RecordTime();
 
   // ui::LayerOwnerDelegate
-  private: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
+  private: void DidRecreateLayer(ui::Layer* old_layer) final;
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };
@@ -106,7 +106,7 @@ void MetricsView::View::Animate(base::Time) {
   auto const alpha = 0.4f;
   auto const radius = 5.0f;
   gfx::Brush bgcolor(canvas, gfx::ColorF(0, 0, 0, alpha));
-  gfx::Brush text_brush(canvas, gfx::ColorF(gfx::ColorF::White, alpha));
+  gfx::Brush text_brush(canvas, gfx::ColorF(gfx::ColorF::White, 0.7f));
   gfx::Brush graph_brush1(canvas, gfx::ColorF(gfx::ColorF::Red, alpha));
   gfx::Brush graph_brush2(canvas, gfx::ColorF(gfx::ColorF::Blue, alpha));
   gfx::RectF graph_bounds(bounds.left, bounds.bottom - 50,
@@ -122,7 +122,7 @@ void MetricsView::View::Animate(base::Time) {
   PaintSamples(canvas, graph_brush2, graph_bounds, frame_duration_data_);
 
   (*canvas)->DrawTextLayout(gfx::PointF(10, 10), *text_layout, text_brush,
-                                   D2D1_DRAW_TEXT_OPTIONS_CLIP);
+                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
 
 void MetricsView::View::RecordTime() {

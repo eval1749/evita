@@ -12,7 +12,6 @@
 #include "gin/modules/console.h"
 #include "gin/modules/module_runner_delegate.h"
 #include "gin/public/isolate_holder.h"
-#include "gin/test/file_runner.h"
 #include "gin/try_catch.h"
 
 namespace gin {
@@ -44,8 +43,7 @@ class GinShellRunnerDelegate : public ModuleRunnerDelegate {
     AddBuiltinModule(Console::kModuleName, Console::GetModule);
   }
 
-  virtual void UnhandledException(ShellRunner* runner,
-                                  TryCatch& try_catch) override {
+  void UnhandledException(ShellRunner* runner, TryCatch& try_catch) override {
     ModuleRunnerDelegate::UnhandledException(runner, try_catch);
     LOG(ERROR) << try_catch.GetStackTrace();
   }
@@ -59,8 +57,11 @@ class GinShellRunnerDelegate : public ModuleRunnerDelegate {
 
 int main(int argc, char** argv) {
   base::AtExitManager at_exit;
-  CommandLine::Init(argc, argv);
+  base::CommandLine::Init(argc, argv);
   base::i18n::InitializeICU();
+#ifdef V8_USE_EXTERNAL_STARTUP_DATA
+  gin::IsolateHolder::LoadV8Snapshot();
+#endif
 
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
                                  gin::ArrayBufferAllocator::SharedInstance());
@@ -76,8 +77,9 @@ int main(int argc, char** argv) {
     v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
   }
 
-  CommandLine::StringVector args = CommandLine::ForCurrentProcess()->GetArgs();
-  for (CommandLine::StringVector::const_iterator it = args.begin();
+  base::CommandLine::StringVector args =
+      base::CommandLine::ForCurrentProcess()->GetArgs();
+  for (base::CommandLine::StringVector::const_iterator it = args.begin();
        it != args.end(); ++it) {
     base::MessageLoop::current()->PostTask(FROM_HERE, base::Bind(
         gin::Run, runner.GetWeakPtr(), base::FilePath(*it)));

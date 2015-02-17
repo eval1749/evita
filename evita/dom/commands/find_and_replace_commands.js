@@ -234,7 +234,7 @@
     findWhatText.addEventListener(Event.Names.INPUT, updateUiByFindWhat);
 
     function setupTextField(textField) {
-      textField.addEventListener(Event.Names.CHANGE, () => {
+      textField.addEventListener(Event.Names.CHANGE, function() {
         textField.logger_.add(textField.value);
       });
       textField.addEventListener(Event.Names.KEYDOWN, handleTextFieldKeyDown);

@@ -69,7 +69,7 @@ global.TextWindow.prototype.clone = function() {
       }
       this.direction = direction;
       this.startedAt = Date.now();
-      this.timer.start(AUTOSCROLL_INTERVAL_MS, () => {
+      this.timer.start(AUTOSCROLL_INTERVAL_MS, function() {
         const duration = Date.now() - this.startedAt;
         const amount = Math.floor(
                         Math.min(Math.max(duration / AUTOSCROLL_SPEED_MS, 1),

@@ -106,7 +106,7 @@ Object.defineProperty(/** @type {!Object} */(global), 'console', (function() {
   // TODO(eval1749) Once closure compiler supports getter in class, we should
   // use getter syntax.
   Object.defineProperties(console, {
-    document: { get: () => this.ensureDocument() }
+    document: { get: function() { return this.ensureDocument(); } }
   });
   Object.seal(console);
 

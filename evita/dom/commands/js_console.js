@@ -25,22 +25,22 @@ global.JsConsole = (function() {
   function installKeyBindings(jsConsole) {
     /** @const @type {!Document} */ let document = jsConsole.document_;
     // JavaScript console specific key bindings.
-    document.bindKey('Ctrl+ArrowDown', () => {
+    document.bindKey('Ctrl+ArrowDown', function() {
       jsConsole.forwardHistory();
       this.selection.range.collapseTo(jsConsole.document_.length);
     });
-    document.bindKey('Ctrl+L', () => {
+    document.bindKey('Ctrl+L', function() {
       jsConsole.range_.startOf(Unit.DOCUMENT);
       jsConsole.range_.endOf(Unit.DOCUMENT, Alter.EXTEND);
       jsConsole.range_.text = '';
       jsConsole.emitPrompt();
       this.selection.range.collapseTo(jsConsole.document_.length);
     });
-    document.bindKey('Ctrl+ArrowUp', () => {
+    document.bindKey('Ctrl+ArrowUp', function() {
       jsConsole.backwardHistory();
       this.selection.range.collapseTo(jsConsole.document_.length);
     });
-    document.bindKey('Enter', () => {
+    document.bindKey('Enter', function() {
       this.selection.range.collapseTo(jsConsole.document_.length);
       jsConsole.evalLastLine();
     });

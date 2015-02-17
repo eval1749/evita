@@ -8,102 +8,125 @@
    * @extends {Lexer}
    * @param {!Document} document
    */
-  function PlainTextLexer(document) {
+  class PlainTextLexer {
+    constructor(document) {}
+    detach() {}
+    doColor(hint) { return hint; }
   }
-  PlainTextLexer.prototype = Object.create(Lexer.prototype, {
-    constructor: {value: PlainTextLexer},
-    detach: {value: function() {}},
-    doColor: {value: function(hint) { return hint; }}
-  });
 
   function inheritMode(ctor) {
     ctor.keymap = new Map();
-    ctor.prototype = Object.create(Mode.prototype, {
-      constructor: {value: ctor}
-    });
   }
 
   /** @constructor @extends {Mode} @return {?} */
-  function ConfigMode() {
-    Mode.call(this, 'Config', ConfigLexer);
+  class ConfigMode extends Mode {
+    constructor() {
+      super('Config', ConfigLexer);
+    }
   }
   inheritMode(ConfigMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function CppMode() {
-    Mode.call(this, 'C++', CppLexer);
+  class CppMode  extends Mode {
+    constructor() {
+      super('C++', CppLexer);
+    }
   }
   inheritMode(CppMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function CsharpMode() {
-    Mode.call(this, 'C#', CsharpLexer);
+  class CsharpMode  extends Mode {
+    constructor() {
+      super('C#', CsharpLexer);
+    }
   }
   inheritMode(CsharpMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function HtmlMode() {
-    Mode.call(this, 'HTML', HtmlLexer);
+  class HtmlMode  extends Mode {
+    constructor() {
+      super('HTML', HtmlLexer);
+    }
   }
   inheritMode(HtmlMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function IdlMode() {
-    Mode.call(this, 'IDL', IdlLexer);
+  class IdlMode  extends Mode {
+    constructor() {
+      super('IDL', IdlLexer);
+    }
   }
   inheritMode(IdlMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function JavaMode() {
-    Mode.call(this, 'Java', JavaLexer);
+  class JavaMode  extends Mode {
+    constructor() {
+      super('Java', JavaLexer);
+    }
   }
   inheritMode(JavaMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function JavaScriptMode() {
-    Mode.call(this, 'JavaScript', JavaScriptLexer);
+  class JavaScriptMode extends Mode {
+    constructor() {
+      super('JavaScript', JavaScriptLexer);
+    }
   }
   inheritMode(JavaScriptMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function HaskellMode() {
-    Mode.call(this, 'Haskell', PlainTextLexer);
+  class HaskellMode extends Mode {
+    constructor() {
+      super('Haskell', PlainTextLexer);
+    }
   }
   inheritMode(HaskellMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function LispMode() {
-    Mode.call(this, 'Lisp', PlainTextLexer);
+  class LispMode extends Mode {
+    constructor() {
+      super('Lisp', PlainTextLexer);
+    }
   }
   inheritMode(LispMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function MasonMode() {
-    Mode.call(this, 'Mason', PlainTextLexer);
+  class MasonMode extends Mode {
+    constructor() {
+      super('Mason', PlainTextLexer);
+    }
   }
   inheritMode(MasonMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function PerlMode() {
-    Mode.call(this, 'Perl', PlainTextLexer);
+  class PerlMode extends Mode {
+    constructor() {
+      super('Perl', PlainTextLexer);
+    }
   }
   inheritMode(PerlMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function PlainTextMode() {
-    Mode.call(this, 'Plain', PlainTextLexer);
+  class PlainTextMode extends Mode {
+    constructor() {
+      super('Plain', PlainTextLexer);
+    }
   }
   inheritMode(PlainTextMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function PythonMode() {
-    Mode.call(this, 'Python', PythonLexer);
+  class PythonMode extends Mode {
+    constructor() {
+      super('Python', PythonLexer);
+    }
   }
   inheritMode(PythonMode);
 
   /** @constructor @extends {Mode} @return {?} */
-  function XmlMode() {
-    Mode.call(this, 'XML', XmlLexer);
+  class XmlMode extends Mode {
+    constructor() {
+      super('XML', XmlLexer);
+    }
   }
   inheritMode(XmlMode);
 

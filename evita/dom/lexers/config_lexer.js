@@ -22,29 +22,25 @@ global.ConfigLexer = (function() {
    * @extends {Lexer}
    * @param {!Document} document
    */
-  function ConfigLexer(document) {
-    Lexer.call(this, document, {
-      characters: CHARACTERS,
-      keywords: KEYWORDS,
-    });
-  }
-
-  /**
-   * @this {!ConfigLexer}
-   * @param {number} charCode
-   */
-  function feedCharacter(charCode) {
-    if (this.state == Lexer.State.ZERO && charCode == Unicode.NUMBER_SIGN) {
-      this.startToken(Lexer.State.LINE_COMMENT);
-      return;
+  class ConfigLexer extends Lexer {
+    constructor(document) {
+      super(document, {
+        characters: CHARACTERS,
+        keywords: KEYWORDS,
+      });
     }
-    this.updateState(charCode);
+    /**
+     * @this {!ConfigLexer}
+     * @param {number} charCode
+     */
+    feedCharacter(charCode) {
+      if (this.state == Lexer.State.ZERO && charCode == Unicode.NUMBER_SIGN) {
+        this.startToken(Lexer.State.LINE_COMMENT);
+        return;
+      }
+      this.updateState(charCode);
+    }
   }
-
-  ConfigLexer.prototype = Object.create(Lexer.prototype, {
-    constructor: {value: ConfigLexer},
-    feedCharacter: {value: feedCharacter}
-  });
 
   return ConfigLexer;
 })();

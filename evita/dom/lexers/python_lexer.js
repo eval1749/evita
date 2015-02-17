@@ -44,77 +44,72 @@ global.PythonLexer = (function(keywords) {
    * @extends {Lexer}
    * @param {!Document} document
    */
-  function PythonLexer(document) {
-    Lexer.call(this, document, {
-      characters: CHARACTERS,
-      keywords: keywords
-    });
-  }
-
-  /**
-   * @this {!PythonLexer}
-   * @param {!Lexer.Token} token
-   * @return {!Lexer.State}
-   */
-  function didShrinkLastToken(token) {
-    if (this.debug_ > 1)
-      console.log('didShrinkLastToken', token);
-    if (token.state == Lexer.State.DOT) {
-      return Lexer.State.ZERO;
+  class PythonLexer extends Lexer {
+    constructor(document) {
+      super(document, {
+        characters: CHARACTERS,
+        keywords: keywords
+      });
     }
-    return token.state;
-  }
 
-  /**
-   * @this {!ConfigLexer}
-   * @param {number} charCode
-   */
-  function feedCharacter(charCode) {
-    if (this.state == Lexer.State.ZERO) {
-      switch (charCode) {
-        case Unicode.FULL_STOP:
-          this.startToken(Lexer.State.DOT);
-          this.endToken();
-          return;
-        case Unicode.NUMBER_SIGN:
-          this.startToken(Lexer.State.LINE_COMMENT);
-          return;
+    /**
+     * @this {!PythonLexer}
+     * @param {!Lexer.Token} token
+     * @return {!Lexer.State}
+     */
+    didShrinkLastToken(token) {
+      if (this.debug_ > 1)
+        console.log('didShrinkLastToken', token);
+      if (token.state == Lexer.State.DOT) {
+        return Lexer.State.ZERO;
       }
-    }
-    this.updateState(charCode);
-  }
-
-  /**
-   * @this {!PythonLexer}
-   * @param {!Lexer.Token} token
-   * @param {!Range} range
-   * @return {string}
-   */
-  function syntaxOfToken(range, token) {
-    if (token.state != Lexer.State.WORD)
-      return Lexer.prototype.syntaxOfToken.call(this, range, token);
-    var lexer = this;
-    var word = range.text;
-    var it = lexer.tokens.find(token);
-    console.assert(it, token);
-    do {
-      it = it.previous();
-    } while (it && it.data.state == Lexer.State.SPACE);
-
-    if (it && it.data.state == Lexer.State.DOT) {
-      var tokens = lexer.collectTokens(it, token);
-      return lexer.syntaxOfTokens(range, tokens);
+      return token.state;
     }
 
-    return lexer.syntaxOfWord(word);
-  }
+    /**
+     * @this {!ConfigLexer}
+     * @param {number} charCode
+     */
+    feedCharacter(charCode) {
+      if (this.state == Lexer.State.ZERO) {
+        switch (charCode) {
+          case Unicode.FULL_STOP:
+            this.startToken(Lexer.State.DOT);
+            this.endToken();
+            return;
+          case Unicode.NUMBER_SIGN:
+            this.startToken(Lexer.State.LINE_COMMENT);
+            return;
+        }
+      }
+      this.updateState(charCode);
+    }
 
-  PythonLexer.prototype = Object.create(Lexer.prototype, {
-    constructor: {value: PythonLexer},
-    didShrinkLastToken: {value: didShrinkLastToken },
-    feedCharacter: {value: feedCharacter},
-    syntaxOfToken: {value: syntaxOfToken}
-  });
+    /**
+     * @this {!PythonLexer}
+     * @param {!Lexer.Token} token
+     * @param {!Range} range
+     * @return {string}
+     */
+    syntaxOfToken(range, token) {
+      if (token.state != Lexer.State.WORD)
+        return Lexer.prototype.syntaxOfToken.call(this, range, token);
+      var lexer = this;
+      var word = range.text;
+      var it = lexer.tokens.find(token);
+      console.assert(it, token);
+      do {
+        it = it.previous();
+      } while (it && it.data.state == Lexer.State.SPACE);
+
+      if (it && it.data.state == Lexer.State.DOT) {
+        var tokens = lexer.collectTokens(it, token);
+        return lexer.syntaxOfTokens(range, tokens);
+      }
+
+      return lexer.syntaxOfWord(word);
+    }
+  }
 
   // TODO(eval1749) Once closure compiler support |static get|, we should use
   // it.

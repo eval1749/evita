@@ -8,7 +8,7 @@ global.JavaLexer = (function(options) {
      * @param {!Document} document
      */
     constructor(document) {
-      ClikeLexer.call(this, document, options);
+      super(document, options);
     }
   }
   // TODO(eval1749) Once closure compiler support |static get|, we should use

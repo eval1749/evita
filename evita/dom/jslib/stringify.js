@@ -73,6 +73,7 @@ Editor.stringify = (function() {
   //
   class Labeler extends Visitor {
     constructor() {
+      super();
       /** @private @const */
       this.labelMap_ = new Map();
     }
@@ -249,6 +250,7 @@ Editor.stringify = (function() {
     //
     class Printer extends Visitor {
       constructor(labeler) {
+        super();
         this.labeler_ = labeler;
         this.result = '';
       }

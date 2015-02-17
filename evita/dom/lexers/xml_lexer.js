@@ -77,9 +77,7 @@ global.XmlLexer = (function(xmlOptions) {
     lexer.childLexerMap_ = new Map();
     Object.keys(childLexers).forEach(function(tagName) {
       /** @type {!function(!Document, !Lexer)} */
-      var ctor = childLexers[tagName];
-      var childLexer = Object.create(ctor.prototype);
-      ctor.call(childLexer, document, lexer);
+      var childLexer = new childLexers[tagName](document, lexer);
       lexer.childLexerMap_.set(tagName, childLexer);
     });
   }

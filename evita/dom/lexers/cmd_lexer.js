@@ -44,7 +44,7 @@ global.CmdLexer = (function() {
    * @param {!Document} document
    */
   function CmdLexer(document) {
-    Lexer.call(this, document);
+    super(document);
   }
 
   /**

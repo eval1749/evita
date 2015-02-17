@@ -9,16 +9,18 @@ global.JavaScriptLexer = (function(options) {
      * @param {!Lexer=} opt_parentLexer
      */
     constructor(document, opt_parentLexer) {
+      super(document, options);
       this.parentLexer_ = opt_parentLexer !== undefined ?
           /** @type {!Lexer} */(opt_parentLexer) : null;
-      ClikeLexer.call(this, document, options);
     }
   }
+
   // TODO(eval1749) Once closure compiler support |static get|, we should use
   // it.
   Object.defineProperty(JavaScriptLexer, 'keywords', {
     get: function() { return options.keywords; }
   });
+
   return JavaScriptLexer;
 })({
   useDot: true,

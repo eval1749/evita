@@ -33,10 +33,10 @@ class EnumValue {
     auto index = 0u;
     for (auto value : values_) {
       if (EqualNames(js_value, value->Get(isolate)))
-        return v8::Maybe<T>(static_cast<T>(index));
+        return v8::Just(static_cast<T>(index));
       ++index;
     }
-    return v8::Maybe<T>();
+    return v8::Nothing<T>();
   }
 
   public: template<typename T> v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
@@ -120,9 +120,9 @@ struct EnumConverter {
   static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> js_value,
                      T* out_enum_value) {
     auto const maybe_enum_value = U::instance()->FromV8<T>(isolate, js_value);
-    if (!maybe_enum_value.has_value)
+    if (maybe_enum_value.IsNothing())
       return false;
-    *out_enum_value = maybe_enum_value.value;
+    *out_enum_value = maybe_enum_value.FromJust();
     return true;
   }
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T enum_value) {
@@ -157,10 +157,10 @@ template<typename T>
 v8::Maybe<T> ConvertFromV8(v8::Isolate* isolate,
                            v8::Handle<v8::Value> js_value) {
   if (js_value.IsEmpty())
-    return v8::Maybe<T>();
+    return v8::Nothing<T>();
   T cxx_value;
   return gin::ConvertFromV8(isolate, js_value, &cxx_value) ?
-      v8::Maybe<T>(true, cxx_value) : v8::Maybe<T>();
+      v8::Just<T>(cxx_value) : v8::Nothing<T>();
 }
 
 bool EqualNames(v8::Handle<v8::Value> name1, v8::Handle<v8::String> name2) {
@@ -243,8 +243,8 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
       if (js_value->IsUndefined()) \
         continue; \
       auto const attr_value = ConvertFromV8<type>(isolate, js_value); \
-      if (attr_value.has_value) { \
-        style_values.set_##member_name(attr_value.value); \
+      if (attr_value.IsJust()) { \
+        style_values.set_##member_name(attr_value.FromJust()); \
         changed = true; \
         continue; \
       } \

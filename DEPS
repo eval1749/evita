@@ -4,7 +4,7 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'v8_revision': 'b08c7327abd87ec5b72fb6fc612112ebb4a502e2',
+  'v8_revision': 'c817f6989574b4d80e4c68980e3de46acacaade0',
 }
 
 deps = {
@@ -21,13 +21,13 @@ deps = {
     Var('chromium_git') + '/external/googletest.git' + '@' + 'be1868139ffe0ccd0e8e3b37292b84c821d9c8ad', # from svn revision 704
 
   'src/tools/gyp':
-    Var('chromium_git') + '/external/gyp.git' + '@' + 'd174d75bf69c682cb62af9187879e01513b35e52',
+    Var('chromium_git') + '/external/gyp.git' + '@' + '2889664b9fa88cce175c5c7cdf207d28420a7412',
 
   'src/third_party/hunspell':
     Var('chromium_git') + '/chromium/deps/hunspell.git' + '@' + 'c956c0e97af00ef789afb2f64d02c9a5a50e6eb1',
 
   'src/third_party/icu':
-    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '7c81740601355556e630da515b74d889ba2f8d08',
+    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '10834e84d250eb31a73496bfdb7923eaa43ead51',
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),

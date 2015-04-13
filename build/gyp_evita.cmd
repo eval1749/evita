@@ -62,6 +62,7 @@ set PYTHONPATH=d:\h\evita\src\build;%PATH%
     --generator-output=%outdir% ^
     --include build\common.gypi ^
     --no-circular-check ^
+    -D v8_use_external_startup_data=0 ^
     %defines% ^
   build\evita_all.gyp
 

@@ -17,7 +17,6 @@
 #         ],
 #         'includes': [
 #           '../build/isolate.gypi',
-#           'foo_test.isolate',
 #         ],
 #         'sources': [
 #           'foo_test.isolate',
@@ -38,40 +37,69 @@
 # for more information.
 
 {
+  'includes': [
+    '../build/util/version.gypi',
+  ],
   'rules': [
     {
       'rule_name': 'isolate',
       'extension': 'isolate',
       'inputs': [
         # Files that are known to be involved in this step.
+        '<(DEPTH)/tools/isolate_driver.py',
         '<(DEPTH)/tools/swarming_client/isolate.py',
         '<(DEPTH)/tools/swarming_client/run_isolated.py',
-
-        # Disable file tracking by the build driver for now. This means the
-        # project must have the proper build-time dependency for their runtime
-        # dependency. This improves the runtime of the build driver since it
-        # doesn't have to stat() all these files.
-        #
-        # More importantly, it means that even if a isolate_dependency_tracked
-        # file is missing, for example if a file was deleted and the .isolate
-        # file was not updated, that won't break the build, especially in the
-        # case where foo_tests_run is not built! This should be reenabled once
-        # the switch-over to running tests on Swarm is completed.
-        #'<@(isolate_dependency_tracked)',
       ],
-      'outputs': [
-        '<(PRODUCT_DIR)/<(RULE_INPUT_ROOT).isolated',
-      ],
+      'outputs': [],
       'action': [
         'python',
-        '<(DEPTH)/tools/swarming_client/isolate.py',
+        '<(DEPTH)/tools/isolate_driver.py',
         '<(test_isolation_mode)',
-        # Variables should use the -V FOO=<(FOO) form so frequent values,
-        # like '0' or '1', aren't stripped out by GYP.
-        '--path-variable', 'PRODUCT_DIR', '<(PRODUCT_DIR) ',
-        '--config-variable', 'OS=<(OS)',
-        '--result', '<@(_outputs)',
+        '--isolated', '<(PRODUCT_DIR)/<(RULE_INPUT_ROOT).isolated',
         '--isolate', '<(RULE_INPUT_PATH)',
+
+        # Variables should use the -V FOO=<(FOO) form so frequent values,
+        # like '0' or '1', aren't stripped out by GYP. Run 'isolate.py help' for
+        # more details.
+        #
+        # This list needs to be kept in sync with the cmd line options
+        # in src/build/android/pylib/gtest/setup.py.
+
+        # Path variables are used to replace file paths when loading a .isolate
+        # file
+        '--path-variable', 'DEPTH', '<(DEPTH)',
+        '--path-variable', 'PRODUCT_DIR', '<(PRODUCT_DIR) ',
+
+        # Extra variables are replaced on the 'command' entry and on paths in
+        # the .isolate file but are not considered relative paths.
+        '--extra-variable', 'version_full=<(version_full)',
+
+        '--config-variable', 'CONFIGURATION_NAME=<(CONFIGURATION_NAME)',
+        '--config-variable', 'OS=<(OS)',
+        '--config-variable', 'asan=<(asan)',
+        '--config-variable', 'chromeos=<(chromeos)',
+        '--config-variable', 'component=<(component)',
+        '--config-variable', 'disable_nacl=<(disable_nacl)',
+        '--config-variable', 'enable_plugins=<(enable_plugins)',
+        '--config-variable', 'fastbuild=<(fastbuild)',
+        '--config-variable', 'icu_use_data_file_flag=<(icu_use_data_file_flag)',
+        # TODO(kbr): move this to chrome_tests.gypi:gles2_conform_tests_run
+        # once support for user-defined config variables is added.
+        '--config-variable',
+          'internal_gles2_conform_tests=<(internal_gles2_conform_tests)',
+        '--config-variable', 'libpeer_target_type=<(libpeer_target_type)',
+        '--config-variable', 'lsan=<(lsan)',
+        '--config-variable', 'msan=<(msan)',
+        '--config-variable', 'target_arch=<(target_arch)',
+        '--config-variable', 'tsan=<(tsan)',
+        '--config-variable', 'use_custom_libcxx=<(use_custom_libcxx)',
+        '--config-variable', 'use_instrumented_libraries=<(use_instrumented_libraries)',
+        '--config-variable',
+        'use_prebuilt_instrumented_libraries=<(use_prebuilt_instrumented_libraries)',
+        '--config-variable', 'use_openssl=<(use_openssl)',
+        '--config-variable', 'use_ozone=<(use_ozone)',
+        '--config-variable', 'use_x11=<(use_x11)',
+        '--config-variable', 'v8_use_external_startup_data=<(v8_use_external_startup_data)',
       ],
       'conditions': [
         # Note: When gyp merges lists, it appends them to the old value.
@@ -82,24 +110,19 @@
             '--extra-variable', 'mac_product_name', '<(mac_product_name)',
           ],
         }],
-        ["test_isolation_outdir==''", {
-          # GYP will eliminate duplicate arguments so '<(PRODUCT_DIR)' cannot
-          # be provided twice. To work around this behavior, append '/'.
-          #
-          # Also have a space after <(PRODUCT_DIR) or visual studio will
-          # escape the argument wrappping " with the \ and merge it into
-          # the following arguments.
-          'action': [ '--outdir', '<(PRODUCT_DIR)/ ' ],
-        }, {
-          'action': [ '--outdir', '<(test_isolation_outdir)' ],
+        ["test_isolation_outdir!=''", {
+          'action': [ '--isolate-server', '<(test_isolation_outdir)' ],
         }],
-        ['test_isolation_fail_on_missing == 0', {
-            'action': ['--ignore_broken_items'],
-          },
-        ],
+        ["test_isolation_mode == 'prepare'", {
+          'outputs': [
+            '<(PRODUCT_DIR)/<(RULE_INPUT_ROOT).isolated.gen.json',
+          ],
+        }, {
+          'outputs': [
+            '<(PRODUCT_DIR)/<(RULE_INPUT_ROOT).isolated',
+          ],
+        }],
       ],
-
-      'msvs_cygwin_shell': 0,
     },
   ],
 }

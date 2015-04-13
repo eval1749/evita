@@ -110,7 +110,12 @@ class TestCase(unittest.TestCase):
     if call.name.startswith('self.'):
       target = self.call_target(call.parent)
       _, attribute = call.name.rsplit('.', 1)
-      return mock.patch.object(target, attribute, **kwargs)
+      if (hasattr(type(target), attribute)
+          and isinstance(getattr(type(target), attribute), property)):
+        return mock.patch.object(
+            type(target), attribute, new_callable=mock.PropertyMock, **kwargs)
+      else:
+        return mock.patch.object(target, attribute, **kwargs)
     else:
       return mock.patch(call.name, **kwargs)
 
@@ -122,16 +127,19 @@ class TestCase(unittest.TestCase):
     """
     self._watched.update((call.name, call) for call in calls)
 
-  def watchMethodCalls(self, call):
+  def watchMethodCalls(self, call, ignore=None):
     """Watch all public methods of the target identified by a self.call.
 
     Args:
       call: a self.call instance indetifying an object
+      ignore: a list of public methods to ignore when watching for calls
     """
     target = self.call_target(call)
+    if ignore is None:
+      ignore = []
     self.watchCalls(getattr(call, method)
                     for method in dir(target.__class__)
-                    if not method.startswith('_'))
+                    if not method.startswith('_') and not method in ignore)
 
   def clearWatched(self):
     """Clear the set of watched calls."""

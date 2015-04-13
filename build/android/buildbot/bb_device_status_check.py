@@ -30,9 +30,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from pylib import android_commands
 from pylib import constants
 from pylib.cmd_helper import GetCmdOutput
+from pylib.device import battery_utils
 from pylib.device import device_blacklist
+from pylib.device import device_errors
 from pylib.device import device_list
 from pylib.device import device_utils
+
+_RE_DEVICE_ID = re.compile('Device ID = (\d+)')
 
 def DeviceInfo(serial, options):
   """Gathers info on a device via various adb calls.
@@ -44,62 +48,72 @@ def DeviceInfo(serial, options):
     Tuple of device type, build id, report as a string, error messages, and
     boolean indicating whether or not device can be used for testing.
   """
+  device = device_utils.DeviceUtils(serial)
+  battery = battery_utils.BatteryUtils(device)
 
-  device_adb = device_utils.DeviceUtils(serial)
-  device_type = device_adb.GetProp('ro.build.product')
-  device_build = device_adb.GetProp('ro.build.id')
-  device_build_type = device_adb.GetProp('ro.build.type')
-  device_product_name = device_adb.GetProp('ro.product.name')
-
+  battery_info = {}
   try:
-    battery_info = device_adb.old_interface.GetBatteryInfo()
+    battery_info = battery.GetBatteryInfo()
   except Exception as e:
     battery_info = {}
     logging.error('Unable to obtain battery info for %s, %s', serial, e)
 
-  def _GetData(re_expression, line, lambda_function=lambda x: x):
-    if not line:
-      return 'Unknown'
-    found = re.findall(re_expression, line)
-    if found and len(found):
-      return lambda_function(found[0])
-    return 'Unknown'
-
   battery_level = int(battery_info.get('level', 100))
-  imei_slice = _GetData(r'Device ID = (\d+)',
-                        device_adb.old_interface.GetSubscriberInfo(),
-                        lambda x: x[-6:])
-  report = ['Device %s (%s)' % (serial, device_type),
-            '  Build: %s (%s)' %
-              (device_build, device_adb.GetProp('ro.build.fingerprint')),
-            '  Current Battery Service state: ',
-            '\n'.join(['    %s: %s' % (k, v)
-                       for k, v in battery_info.iteritems()]),
-            '  IMEI slice: %s' % imei_slice,
-            '  Wifi IP: %s' % device_adb.GetProp('dhcp.wlan0.ipaddress'),
-            '']
+
+  imei_slice = 'Unknown'
+  try:
+    for l in device.RunShellCommand(['dumpsys', 'iphonesubinfo'],
+                                    check_return=True):
+      m = _RE_DEVICE_ID.match(l)
+      if m:
+        imei_slice = m.group(1)[-6:]
+  except device_errors.CommandFailedError:
+    logging.exception('Failed to get IMEI slice.')
+  except device_errors.CommandTimeoutError:
+    logging.exception('Timed out while attempting to get IMEI slice.')
+
+  json_data = {
+    'serial': serial,
+    'type': device.build_product,
+    'build': device.build_id,
+    'build_detail': device.GetProp('ro.build.fingerprint'),
+    'battery': battery_info,
+    'imei_slice': imei_slice,
+    'wifi_ip': device.GetProp('dhcp.wlan0.ipaddress'),
+  }
+  report = [
+    'Device %s (%s)' % (str(device), device.build_product),
+    '  Build: %s (%s)' % (device.build_id, json_data['build_detail']),
+    '  Current Battery Service state: ',
+    '\n'.join('    %s: %s' % (k, v) for k, v in battery_info.iteritems()),
+    '  IMEI slice: %s' % imei_slice,
+    '  Wifi IP: %s' % json_data['wifi_ip'],
+    ''
+  ]
 
   errors = []
   dev_good = True
   if battery_level < 15:
     errors += ['Device critically low in battery. Will add to blacklist.']
     dev_good = False
-    if not device_adb.old_interface.IsDeviceCharging():
-      if device_adb.old_interface.CanControlUsbCharging():
-        device_adb.old_interface.EnableUsbCharging()
-      else:
-        logging.error('Device %s is not charging' % serial)
+    if not battery.GetCharging():
+      try:
+        battery.SetCharging(True)
+      except device_errors.CommandFailedError:
+        logging.exception('Device %s is not charging', str(device))
   if not options.no_provisioning_check:
     setup_wizard_disabled = (
-        device_adb.GetProp('ro.setupwizard.mode') == 'DISABLED')
-    if not setup_wizard_disabled and device_build_type != 'user':
+        device.GetProp('ro.setupwizard.mode') == 'DISABLED')
+    if not setup_wizard_disabled and device.build_type != 'user':
       errors += ['Setup wizard not disabled. Was it provisioned correctly?']
-  if (device_product_name == 'mantaray' and
+  if (device.product_name == 'mantaray' and
       battery_info.get('AC powered', None) != 'true'):
     errors += ['Mantaray device not connected to AC power.']
 
   full_report = '\n'.join(report)
-  return device_type, device_build, battery_level, full_report, errors, dev_good
+
+  return (device.build_product, device.build_id, battery_level, full_report,
+          errors, dev_good, json_data)
 
 
 def CheckForMissingDevices(options, adb_online_devs):
@@ -319,11 +333,22 @@ def main():
   offline_devices = android_commands.GetAttachedDevices(
       hardware=False, emulator=False, offline=True)
 
-  types, builds, batteries, reports, errors = [], [], [], [], []
+  types, builds, batteries, reports, errors, json_data = [], [], [], [], [], []
   fail_step_lst = []
   if devices:
-    types, builds, batteries, reports, errors, fail_step_lst = (
+    types, builds, batteries, reports, errors, fail_step_lst, json_data = (
         zip(*[DeviceInfo(dev, options) for dev in devices]))
+
+  # Write device info to file for buildbot info display.
+  if os.path.exists('/home/chrome-bot'):
+    with open('/home/chrome-bot/.adb_device_info', 'w') as f:
+      for device in json_data:
+        try:
+          f.write('%s %s %s %.1fC %s%%\n' % (device['serial'], device['type'],
+              device['build'], float(device['battery']['temperature']) / 10,
+              device['battery']['level']))
+        except Exception:
+          pass
 
   err_msg = CheckForMissingDevices(options, devices) or []
 
@@ -363,13 +388,7 @@ def main():
 
   if options.json_output:
     with open(options.json_output, 'wb') as f:
-      f.write(json.dumps({
-        'online_devices': devices,
-        'offline_devices': offline_devices,
-        'expected_devices': expected_devices,
-        'unique_types': unique_types,
-        'unique_builds': unique_builds,
-      }))
+      f.write(json.dumps(json_data, indent=4))
 
   num_failed_devs = 0
   for fail_status, device in zip(fail_step_lst, devices):

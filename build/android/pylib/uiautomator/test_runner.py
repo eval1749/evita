@@ -41,7 +41,8 @@ class TestRunner(instr_test_runner.TestRunner):
         test_runner=None,
         test_support_apk_path=None,
         device_flags=None,
-        isolate_file_path=None)
+        isolate_file_path=None,
+        set_asserts=test_options.set_asserts)
     super(TestRunner, self).__init__(instrumentation_options, device,
                                      shard_index, test_pkg)
 
@@ -73,12 +74,16 @@ class TestRunner(instr_test_runner.TestRunner):
         force_stop=True)
     cmd = ['uiautomator', 'runtest',
            self.test_pkg.UIAUTOMATOR_PATH + self.test_pkg.GetPackageName(),
-           '-e', 'class', test]
+           '-e', 'class', test,
+           '-e', 'test_package', self._package]
     return self.device.RunShellCommand(cmd, timeout=timeout, retries=0)
 
   #override
-  def _GenerateTestResult(self, test, instr_statuses, start_ms, duration_ms):
+  def _GenerateTestResult(self, test, _result_code, _result_bundle, statuses,
+                          start_ms, duration_ms):
     # uiautomator emits its summary status with INSTRUMENTATION_STATUS_CODE,
     # not INSTRUMENTATION_CODE, so we have to drop if off the list of statuses.
+    summary_code, summary_bundle = statuses[-1]
     return super(TestRunner, self)._GenerateTestResult(
-        test, instr_statuses[:-1], start_ms, duration_ms)
+        test, summary_code, summary_bundle, statuses[:-1], start_ms,
+        duration_ms)

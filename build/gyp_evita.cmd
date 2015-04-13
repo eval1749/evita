@@ -55,13 +55,15 @@ if not "%defines%"=="" (
 : Cycle: base\allocator\allocator.gyp -> base\base.gyp -> base\allocator\allocator.gyp
 : Cycle: base\base.gyp -> base\allocator\allocator.gyp -> base\base.gyp
 
+set PYTHONPATH=d:\h\evita\src\build;%PATH%
+
 .\tools\gyp\gyp ^
     --format=%format% ^
     --generator-output=%outdir% ^
     --include build\common.gypi ^
     --no-circular-check ^
     %defines% ^
-  build\all.gyp
+  build\evita_all.gyp
 
 endlocal
 exit/b

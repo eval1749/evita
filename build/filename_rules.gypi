@@ -35,9 +35,9 @@
         ['exclude', '(^|/)linux/'],
       ],
     }],
-    ['OS!="android" or _toolset=="host"', {
+    ['OS!="android" or _toolset=="host" or >(nacl_untrusted_build)==1', {
       'sources/': [
-        ['exclude', '_android(_unittest)?\\.cc$'],
+        ['exclude', '_android(_unittest)?\\.(h|cc)$'],
         ['exclude', '(^|/)android/'],
       ],
     }],
@@ -65,21 +65,14 @@
     }],
     ['<(use_x11)!=1 or >(nacl_untrusted_build)==1', {
       'sources/': [
-        ['exclude', '_(x|x11)(_unittest)?\\.(h|cc)$'],
+        ['exclude', '_(x|x11)(_interactive_uitest|_unittest)?\\.(h|cc)$'],
         ['exclude', '(^|/)x11_[^/]*\\.(h|cc)$'],
         ['exclude', '(^|/)x11/'],
         ['exclude', '(^|/)x/'],
       ],
     }],
-    ['<(toolkit_uses_gtk)!=1 or >(nacl_untrusted_build)==1', {
-      'sources/': [
-        ['exclude', '_gtk(_browsertest|_unittest)?\\.(h|cc)$'],
-        ['exclude', '(^|/)gtk/'],
-        ['exclude', '(^|/)gtk_[^/]*\\.(h|cc)$'],
-      ],
-    }],
     ['<(toolkit_views)==0 or >(nacl_untrusted_build)==1', {
-      'sources/': [ ['exclude', '_views\\.(h|cc)$'] ]
+      'sources/': [ ['exclude', '_views(_browsertest|_unittest)?\\.(h|cc)$'] ]
     }],
     ['<(use_aura)==0 or >(nacl_untrusted_build)==1', {
       'sources/': [ ['exclude', '_aura(_browsertest|_unittest)?\\.(h|cc)$'],
@@ -111,11 +104,6 @@
     ['<(use_ozone_evdev)==0 or >(nacl_untrusted_build)==1', {
       'sources/': [ ['exclude', '_evdev(_browsertest|_unittest)?\\.(h|cc)$'],
                     ['exclude', '(^|/)evdev/'],
-      ]
-    }],
-    ['<(ozone_platform_dri)==0 or >(nacl_untrusted_build)==1', {
-      'sources/': [ ['exclude', '_dri(_browsertest|_unittest)?\\.(h|cc)$'],
-                    ['exclude', '(^|/)dri/'],
       ]
     }],
     ['<(use_pango)==0', {

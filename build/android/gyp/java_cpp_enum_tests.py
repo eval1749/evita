@@ -14,6 +14,7 @@ import os
 import sys
 import unittest
 
+import java_cpp_enum
 from java_cpp_enum import EnumDefinition, GenerateOutput, GetScriptName
 from java_cpp_enum import HeaderParser
 
@@ -151,6 +152,14 @@ public class ClassName {
     with self.assertRaises(Exception):
       HeaderParser(test_data).ParseDefinitions()
 
+  def testParseReturnsEmptyListWithoutDirectives(self):
+    test_data = """
+      enum EnumName {
+        VALUE_ONE,
+      };
+    """.split('\n')
+    self.assertEqual([], HeaderParser(test_data).ParseDefinitions())
+
   def testParseEnumClass(self):
     test_data = """
       // GENERATED_JAVA_ENUM_PACKAGE: test.namespace
@@ -217,6 +226,82 @@ public class ClassName {
     test_data = """
       // GENERATED_JAVA_ENUM_PACKAGE: test.namespace
       enum class Foo: foo_type {
+        FOO_A,
+      };
+    """.split('\n')
+    with self.assertRaises(Exception):
+      HeaderParser(test_data).ParseDefinitions()
+
+  def testParseSimpleMultiLineDirective(self):
+    test_data = """
+      // GENERATED_JAVA_ENUM_PACKAGE: (
+      //   test.namespace)
+      // GENERATED_JAVA_CLASS_NAME_OVERRIDE: Bar
+      enum Foo {
+        FOO_A,
+      };
+    """.split('\n')
+    definitions = HeaderParser(test_data).ParseDefinitions()
+    self.assertEqual('test.namespace', definitions[0].enum_package)
+    self.assertEqual('Bar', definitions[0].class_name)
+
+  def testParseMultiLineDirective(self):
+    test_data = """
+      // GENERATED_JAVA_ENUM_PACKAGE: (te
+      //   st.name
+      //   space)
+      enum Foo {
+        FOO_A,
+      };
+    """.split('\n')
+    definitions = HeaderParser(test_data).ParseDefinitions()
+    self.assertEqual('test.namespace', definitions[0].enum_package)
+
+  def testParseMultiLineDirectiveWithOtherDirective(self):
+    test_data = """
+      // GENERATED_JAVA_ENUM_PACKAGE: (
+      //   test.namespace)
+      // GENERATED_JAVA_CLASS_NAME_OVERRIDE: (
+      //   Ba
+      //   r
+      //   )
+      enum Foo {
+        FOO_A,
+      };
+    """.split('\n')
+    definitions = HeaderParser(test_data).ParseDefinitions()
+    self.assertEqual('test.namespace', definitions[0].enum_package)
+    self.assertEqual('Bar', definitions[0].class_name)
+
+  def testParseMalformedMultiLineDirectiveWithOtherDirective(self):
+    test_data = """
+      // GENERATED_JAVA_ENUM_PACKAGE: (
+      //   test.name
+      //   space
+      // GENERATED_JAVA_CLASS_NAME_OVERRIDE: Bar
+      enum Foo {
+        FOO_A,
+      };
+    """.split('\n')
+    with self.assertRaises(Exception):
+      HeaderParser(test_data).ParseDefinitions()
+
+  def testParseMalformedMultiLineDirective(self):
+    test_data = """
+      // GENERATED_JAVA_ENUM_PACKAGE: (
+      //   test.name
+      //   space
+      enum Foo {
+        FOO_A,
+      };
+    """.split('\n')
+    with self.assertRaises(Exception):
+      HeaderParser(test_data).ParseDefinitions()
+
+  def testParseMalformedMultiLineDirectiveShort(self):
+    test_data = """
+      // GENERATED_JAVA_ENUM_PACKAGE: (
+      enum Foo {
         FOO_A,
       };
     """.split('\n')
@@ -326,6 +411,15 @@ public class ClassName {
     definition.AppendEntry('NAME_LAST', None)
     definition.Finalize()
     self.assertEqual(['A', 'B', 'NAME_LAST'], definition.entries.keys())
+
+  def testGenerateThrowsOnEmptyInput(self):
+    with self.assertRaises(Exception):
+      original_do_parse = java_cpp_enum.DoParseHeaderFile
+      try:
+        java_cpp_enum.DoParseHeaderFile = lambda _: []
+        java_cpp_enum.DoGenerate('dir', ['file'])
+      finally:
+        java_cpp_enum.DoParseHeaderFile = original_do_parse
 
 def main(argv):
   parser = optparse.OptionParser()

@@ -33,9 +33,12 @@ STABLE_TEST_SUITES = [
     'media_unittests',
     'net_unittests',
     'sandbox_linux_unittests',
+    'skia_unittests',
     'sql_unittests',
     'sync_unit_tests',
+    'ui_android_unittests',
     'ui_base_unittests',
+    'ui_touch_selection_unittests',
     'unit_tests',
     'webkit_unit_tests',
 ]

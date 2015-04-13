@@ -31,7 +31,12 @@
   'variables': {
     'jni_generator': '<(DEPTH)/base/android/jni_generator/jni_generator.py',
     'jni_generator_jarjar_file%': '',
-    'jni_generator_ptr_type%': 'int',
+    'jni_generator_ptr_type%': 'long',
+    # A comma separated string of include files.
+    'jni_generator_includes%': (
+        'base/android/jni_generator/jni_generator_helper.h'
+    ),
+    'native_exports%': '--native_exports_optional',
   },
   'rules': [
     {
@@ -49,12 +54,15 @@
         '<(RULE_INPUT_PATH)',
         '--output_dir',
         '<(SHARED_INTERMEDIATE_DIR)/<(jni_gen_package)/jni',
+        '--includes',
+        '<(jni_generator_includes)',
         '--optimize_generation',
         '<(optimize_jni_generation)',
         '--jarjar',
         '<(jni_generator_jarjar_file)',
         '--ptr_type',
         '<(jni_generator_ptr_type)',
+        '<(native_exports)',
       ],
       'message': 'Generating JNI bindings from <(RULE_INPUT_PATH)',
       'process_outputs_as_sources': 1,
@@ -76,3 +84,4 @@
   # files.
   'hard_dependency': 1,
 }
+

@@ -135,7 +135,7 @@ LRESULT CALLBACK NativeWindow::WindowProc(HWND hwnd, UINT message,
     s_creating_window = nullptr;
     window->hwnd_ = hwnd;
     ::SetWindowLongPtrW(hwnd, GWLP_USERDATA,
-                        static_cast<LONG>(reinterpret_cast<LONG_PTR>(window)));
+                        reinterpret_cast<LONG_PTR>(window));
     return window->WindowProc(message, wParam, lParam);
   }
 

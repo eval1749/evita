@@ -40,6 +40,12 @@ if "%outdir%"=="default" (
   goto :EOF
 )
 
+: We use "icudt.dll".
+set defines=%defines% -D icu_use_data_file_flag=0
+
+: We don't use V8's external startup file.
+set defines=%defines% -D v8_use_external_startup_data=0
+
 if not "%defines%"=="" (
   echo Defines: %defines%
 )
@@ -62,7 +68,6 @@ set PYTHONPATH=d:\h\evita\src\build;%PATH%
     --generator-output=%outdir% ^
     --include build\common.gypi ^
     --no-circular-check ^
-    -D v8_use_external_startup_data=0 ^
     %defines% ^
   build\evita_all.gyp
 

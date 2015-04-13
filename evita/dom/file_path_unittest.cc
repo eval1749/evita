@@ -29,7 +29,7 @@ std::string FullPath(const std::string& file_name) {
   char* file_start = nullptr;
   auto const length = ::GetFullPathNameA(
       file_name.c_str(),
-      full_name.length(),
+      static_cast<DWORD>(full_name.length()),
       &full_name[0],
       &file_start);
   full_name.resize(length);

@@ -243,8 +243,8 @@ void MarkerSet::DidInsertAt(Posn offset, size_t length) {
        ++runner) {
     auto const marker = *runner;
     if (marker->start_ > offset)
-      marker->start_ += length;
-    marker->end_ += length;
+      marker->start_ = static_cast<Posn>(marker->start_ + length);
+    marker->end_ = static_cast<Posn>(marker->end_ + length);
   }
 }
 
@@ -253,8 +253,8 @@ void MarkerSet::DidInsertBefore(Posn offset, size_t length) {
        ++runner) {
     auto const marker = *runner;
     if (marker->start_ >= offset)
-      marker->start_ += length;
-    marker->end_ += length;
+      marker->start_ = static_cast<Posn>(marker->start_ + length);
+    marker->end_ = static_cast<Posn>(marker->end_ + length);
   }
 }
 

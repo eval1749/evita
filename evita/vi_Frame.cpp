@@ -186,7 +186,7 @@ void Frame::OnDropFiles(HDROP const drop_handle) {
   for (;;) {
     base::string16 file_name(MAX_PATH + 1, 0);
     auto const length = ::DragQueryFile(drop_handle, index, &file_name[0],
-                                        file_name.size());
+                                        static_cast<DWORD>(file_name.size()));
     if (!length)
       break;
     file_name.resize(length);

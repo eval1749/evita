@@ -338,7 +338,8 @@ Posn TextCell::Fix(float line_height, float descent) {
 }
 
 uint32_t TextCell::Hash() const {
-  return (Cell::Hash() << 3) ^ std::hash<base::string16>()(characters_);
+  return static_cast<uint32_t>((Cell::Hash() << 3) ^
+                                std::hash<base::string16>()(characters_));
 }
 
 // Returns bounds rectangle of caret at |offset|. Caret is placed before

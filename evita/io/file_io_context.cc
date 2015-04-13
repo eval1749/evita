@@ -117,8 +117,9 @@ if (running_) {
   running_ = true;
   deferred_ = deferred;
   DWORD read;
-  auto const succeeded = ::ReadFile(file_handle_.get(), buffer, num_read,
-                                    &read, &overlapped);
+  auto const succeeded = ::ReadFile(file_handle_.get(), buffer,
+                                    static_cast<DWORD>(num_read), &read,
+                                    &overlapped);
   DCHECK(!succeeded);
   __assume(!succeeded);
 
@@ -139,7 +140,8 @@ void FileIoContext::Write(void* buffer, size_t num_write,
   running_ = true;
   deferred_ = deferred;
   DWORD written;
-  auto const succeeded = ::WriteFile(file_handle_.get(), buffer, num_write,
+  auto const succeeded = ::WriteFile(file_handle_.get(), buffer,
+                                     static_cast<DWORD>(num_write),
                                      &written, &overlapped);
   DCHECK(!succeeded);
   __assume(!succeeded);

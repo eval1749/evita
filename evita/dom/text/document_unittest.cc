@@ -220,7 +220,8 @@ TEST_F(DocumentTest, load_succeeded) {
   };
   mock_io_delegate()->set_bytes(bytes);
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
-  mock_io_delegate()->SetCallResult("ReadFile", 0, bytes.size());
+  mock_io_delegate()->SetCallResult("ReadFile", 0,
+                                    static_cast<int>(bytes.size()));
   mock_io_delegate()->SetCallResult("ReadFile", 0, 0);
   domapi::FileStatus file_status;
   file_status.file_size = 123456;
@@ -401,7 +402,8 @@ TEST_F(DocumentTest, save_succeeded) {
   mock_io_delegate()->set_bytes(expected_bytes);
   mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
-  mock_io_delegate()->SetCallResult("WriteFile", 0, expected_bytes.size());
+  mock_io_delegate()->SetCallResult("WriteFile", 0,
+                                    static_cast<int>(expected_bytes.size()));
   mock_io_delegate()->SetCallResult("CloseFile", 0);
   mock_io_delegate()->SetCallResult("MoveFile", 0);
   domapi::FileStatus file_status;

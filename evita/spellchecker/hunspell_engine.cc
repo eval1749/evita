@@ -73,7 +73,8 @@ HunspellEngine::Dictionary::Dictionary() : is_valid_(false) {
   DCHECK(!info.nFileSizeHigh);
   data_.resize(info.nFileSizeLow);
   DWORD read;
-  if (!::ReadFile(file.get(), &data_[0], data_.size(), &read, nullptr)) {
+  if (!::ReadFile(file.get(), &data_[0], static_cast<DWORD>(data_.size()),
+                  &read, nullptr)) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "ReadFile" << last_error;
     return;
@@ -89,7 +90,7 @@ base::string16 HunspellEngine::Dictionary::GetFileName() {
   auto length_with_zero = ::ExpandEnvironmentStrings(
       L"%LOCALAPPDATA%/Google/Chrome/User Data/en-US-3-0.bdic",
       &file_name[0],
-      file_name.size());
+      static_cast<DWORD>(file_name.size()));
   file_name.resize(length_with_zero - 1);
   return file_name;
 }

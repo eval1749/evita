@@ -159,7 +159,7 @@ void Font::FontImpl::DrawText(
   DWRITE_GLYPH_RUN glyph_run;
   glyph_run.fontFace = *font_face_;
   glyph_run.fontEmSize = em_size_;
-  glyph_run.glyphCount = glyph_indexes.size();
+  glyph_run.glyphCount = static_cast<UINT32>(glyph_indexes.size());
   glyph_run.glyphIndices = &glyph_indexes[0];
   glyph_run.glyphAdvances = &glyph_advances[0];
   glyph_run.glyphOffsets = nullptr;
@@ -182,7 +182,8 @@ std::vector<uint16_t> Font::FontImpl::GetGlyphIndexes(
   }
   std::vector<uint16> glyph_indexes(num_chars);
   COM_VERIFY((*font_face_)->GetGlyphIndices(
-      &code_points[0], code_points.size(), &glyph_indexes[0]));
+      &code_points[0], static_cast<DWORD>(code_points.size()),
+      &glyph_indexes[0]));
   return std::move(glyph_indexes);
 }
 
@@ -199,7 +200,8 @@ std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
   std::vector<DWRITE_GLYPH_METRICS> metrics(glyph_indexes.size());
   COM_VERIFY((*font_face_)->GetGdiCompatibleGlyphMetrics(
       em_size_, pixels_per_dip_, transform, use_gdi_natural,
-      &glyph_indexes[0], glyph_indexes.size(), &metrics[0], is_side_ways));
+      &glyph_indexes[0], static_cast<DWORD>(glyph_indexes.size()),
+      &metrics[0], is_side_ways));
   return std::move(metrics);
 }
 

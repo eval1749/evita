@@ -84,8 +84,9 @@ DWORD ProcessIoContext::CloseProcess() {
 void ProcessIoContext::ReadFromProcess(
     void* buffer, size_t num_read, const domapi::FileIoDeferred& deferred) {
   DWORD read;
-  auto const succeeded = ::ReadFile(stdout_read_.get(), buffer, num_read,
-                                    &read, nullptr);
+  auto const succeeded = ::ReadFile(stdout_read_.get(), buffer,
+                                    static_cast<DWORD>(num_read), &read,
+                                    nullptr);
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "ReadFile", last_error);
@@ -176,8 +177,9 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
 void ProcessIoContext::WriteToProcess(
     void* buffer, size_t num_write, const domapi::FileIoDeferred& deferred) {
   DWORD written;
-  auto const succeeded = ::WriteFile(stdin_write_.get(), buffer, num_write,
-                                     &written, nullptr);
+  auto const succeeded = ::WriteFile(stdin_write_.get(), buffer,
+                                     static_cast<DWORD>(num_write), &written,
+                                     nullptr);
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "WriteFile", last_error);

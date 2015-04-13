@@ -232,7 +232,7 @@ void TextBlock::DidInsertAt(text::Posn offset, size_t length) {
   InvalidateLines(offset);
   if (view_start_ <= offset)
     return;
-  view_start_ += length;
+  view_start_ = static_cast<text::Posn>(view_start_ + length);
 }
 
 bool TextBlock::DiscardFirstLine() {

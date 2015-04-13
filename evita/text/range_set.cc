@@ -46,18 +46,18 @@ void RangeSet::DidDeleteAt(Posn offset, size_t length) {
 void RangeSet::DidInsertAt(Posn offset, size_t length) {
   for (auto* range : ranges_) {
     if (range->start_ > offset)
-      range->start_ += length;
+      range->start_ = static_cast<Posn>(range->start_ + length);
     if (range->end_ > offset)
-      range->end_ += length;
+      range->end_ = static_cast<Posn>(range->end_ + length);
   }
 }
 
 void RangeSet::DidInsertBefore(Posn offset, size_t length) {
   for (auto* range : ranges_) {
     if (range->start_ >= offset)
-      range->start_ += length;
+      range->start_ = static_cast<Posn>(range->start_ + length);
     if (range->end_ >= offset)
-      range->end_ += length;
+      range->end_ = static_cast<Posn>(range->end_ + length);
   }
 }
 

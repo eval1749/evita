@@ -204,7 +204,8 @@ TEST_F(OsFileTest, OsFile_write_succeeded) {
   EXPECT_SCRIPT_TRUE("file instanceof Os.File");
 
   std::vector<uint8_t> expected_bytes {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  mock_io_delegate()->SetCallResult("WriteFile", 0, expected_bytes.size());
+  mock_io_delegate()->SetCallResult("WriteFile", 0,
+                                    static_cast<int>(expected_bytes.size()));
   EXPECT_SCRIPT_VALID(
     "var transferred;"
     "var arrayBuffer = new ArrayBuffer(10);"

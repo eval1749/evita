@@ -156,7 +156,7 @@ void SwapChain::Present() {
     for (auto const rect : dirty_rects_) {
       dirty_rects.push_back(static_cast<RECT>(rect));
     }
-    parameters.DirtyRectsCount = dirty_rects.size();
+    parameters.DirtyRectsCount = static_cast<UINT>(dirty_rects.size());
     parameters.pDirtyRects = dirty_rects.data();
     parameters.pScrollRect = nullptr;
     parameters.pScrollOffset = nullptr;

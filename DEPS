@@ -8,7 +8,7 @@ vars = {
 
   'boringssl_revision': 'ef4962f5a38fd68f0b89b67fc5e13da70e4288f6',
   'buildtools_revision': '3b302fef93f7cc58d9b8168466905237484b2772',
-  'v8_revision': 'c817f6989574b4d80e4c68980e3de46acacaade0',
+  'v8_revision': '322689b2d2888412e4255b264b87b692c41a2ced', # 4.4.14
 }
 
 deps = {

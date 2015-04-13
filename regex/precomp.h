@@ -82,7 +82,7 @@ extern "C"
 
 #define unless(mp_expr) if (! (mp_expr) )
 
-#include "evita/z_debug.h"
+#include "../evita/z_debug.h"
 
 // warning C4061: enumerator 'identifier' in switch of enum 'enumeration' is
 // not explicitly handled by a case label

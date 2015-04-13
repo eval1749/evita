@@ -16,6 +16,10 @@
       'msvs_precompiled_header': 'precomp.h',
       'msvs_precompiled_source': 'precomp.cpp',
 
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+      ],
+
       'sources': [
         'precomp.h',
         'IRegex.cpp',

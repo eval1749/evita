@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_common_com_ptr_h)
 #define INCLUDE_common_com_ptr_h
 
+#include <unknwn.h>
+
 #include "base/logging.h"
 
 namespace common {

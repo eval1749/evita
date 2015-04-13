@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_common_win_point_h)
 #define INCLUDE_common_win_point_h
 
+#include <windows.h>
+
 #include "common/common_export.h"
 
 namespace common {

@@ -1,9 +1,10 @@
-#include "precomp.h"
-// Regex Unit Test
-//
-// Copyright (C) 2012 by Project Vogue.
-//
-#undef override
+// Copyright 2012-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <windows.h>
+
+#include "base/macros.h"
 
 #pragma warning(disable: 4365)
 #pragma warning(disable: 4481)

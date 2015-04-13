@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_common_win_native_window_h)
 #define INCLUDE_common_win_native_window_h
 
+#include <windows.h>
 #include <memory>
 
 #include "base/logging.h"
@@ -78,7 +79,7 @@ class COMMON_EXPORT NativeWindow {
   // [I]
   public: static void Init(HINSTANCE hInstance, HINSTANCE hResouce);
   public: static void Init(HINSTANCE hInstance);
-  public: virtual bool IsRealized() const { return hwnd_; }
+  public: virtual bool IsRealized() const { return hwnd_ != nullptr; }
 
   // [M]
   protected: static NativeWindow* MapHwnToNativeWindow(HWND);

@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_common_win_registry_h)
 #define INCLUDE_common_win_registry_h
 
+#include <windows.h>
 #include <winreg.h>
 
 #include "base/strings/string16.h"

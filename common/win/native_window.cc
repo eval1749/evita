@@ -96,7 +96,7 @@ bool NativeWindow::CreateWindowEx(DWORD dwExStyle, DWORD dwStyle,
                                      parent_hwnd, child_id,
                                      s_hInstance, 0);
   DCHECK(hwnd) << "CreateWindowEx err=" << ::GetLastError();
-  return hwnd;
+  return hwnd != nullptr;
 }
 
 void NativeWindow::Destroy() {

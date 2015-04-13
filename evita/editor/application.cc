@@ -133,7 +133,7 @@ void Application::Run() {
   switch_set->Register(views::switches::kTextWindowDisplayPaint,
                        &views::switches::text_window_display_paint);
 
-  auto const command_line = CommandLine::ForCurrentProcess();
+  auto const command_line = base::CommandLine::ForCurrentProcess();
   for (const auto& name : switch_set->names()) {
     const auto value = switch_set->Get(name);
     if (value.is_bool()) {

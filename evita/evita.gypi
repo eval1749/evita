@@ -13,6 +13,7 @@
       'target_name': 'evita',
       'type': 'executable',
       'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
         'editor',
       ], # dependencies
 

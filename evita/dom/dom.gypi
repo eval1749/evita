@@ -248,7 +248,10 @@
     {
       'target_name': 'dom_jslib',
       'type': 'static_library',
-      'dependencies': [ 'dom_jslib_js2c', ], 
+      'dependencies': [
+        '<(DEPTH)/base/base.gyp:base',
+        'dom_jslib_js2c',
+      ],
       'msvs_precompiled_header': '',
       'msvs_precompiled_source': '',
       'sources': [
@@ -287,7 +290,7 @@
         '<(DEPTH)/base/base.gyp:base_i18n',
         '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         '<(icu_gyp_path):icuuc',
-      ], 
+      ],
       'include_dirs+': [ '<(DEPTH)/third_party/icu/source/common' ],
       'msvs_precompiled_header': '',
       'msvs_precompiled_source': '',

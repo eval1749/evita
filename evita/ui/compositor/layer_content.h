@@ -7,7 +7,7 @@
 
 #include <memory>
 
-interface IDCompositionSurface;
+struct IDCompositionSurface;
 
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/rect.h"

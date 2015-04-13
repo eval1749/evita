@@ -27,7 +27,7 @@ void __declspec(noreturn) FatalExit(const char16* message) {
 }
 
 bool IsIndependentApplication() {
-  auto const command_line = CommandLine::ForCurrentProcess();
+  auto const command_line = base::CommandLine::ForCurrentProcess();
   return command_line->HasSwitch("multiple");
 }
 
@@ -260,7 +260,7 @@ int ApplicationProxy::Run() {
   if (!payload)
     FatalExit(L"MapViewOfFile");
 
-  for (auto param : CommandLine::ForCurrentProcess()->GetArgs()) {
+  for (auto param : base::CommandLine::ForCurrentProcess()->GetArgs()) {
     base::char16 wsz[MAX_PATH];
     base::char16* pwszFile;
     auto const length = ::GetFullPathNameW(param.c_str(), arraysize(wsz), wsz,

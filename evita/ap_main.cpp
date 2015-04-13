@@ -13,8 +13,8 @@ extern HINSTANCE   g_hResource;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   base::AtExitManager at_exit;
-  CommandLine::set_slash_is_not_a_switch();
-  CommandLine::Init(0, nullptr);
+  base::CommandLine::set_slash_is_not_a_switch();
+  base::CommandLine::Init(0, nullptr);
   {
     logging::LoggingSettings settings;
     settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;

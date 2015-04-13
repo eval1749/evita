@@ -4,12 +4,22 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
+  'boringssl_git': 'https://boringssl.googlesource.com',
+
+  'boringssl_revision': 'ef4962f5a38fd68f0b89b67fc5e13da70e4288f6',
+  'buildtools_revision': '3b302fef93f7cc58d9b8168466905237484b2772',
   'v8_revision': 'c817f6989574b4d80e4c68980e3de46acacaade0',
 }
 
 deps = {
+  'src/third_party/boringssl/src':
+   'https://boringssl.googlesource.com/boringssl.git' + '@' +  Var('boringssl_revision'),
+
+  'src/buildtools':
+    Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
+
   'src/third_party/cygwin':
-      Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
+    Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
 
   'src/tools/deps2git':
     Var('chromium_git') + '/chromium/tools/deps2git.git' + '@' + 'f04828eb0b5acd3e7ad983c024870f17f17b06d9',
@@ -31,13 +41,43 @@ deps = {
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
+
+  'src/third_party/yasm/source/patched-yasm':
+   Var('chromium_git') + '/chromium/deps/yasm/patched-yasm.git' + '@' + '4671120cd8558ce62ee8672ebf3eb6f5216f909b',
 }
 
-
 hooks = [
+  # Pull GN binaries. This needs to be before running GYP below.
+  {
+    'name': 'gn_win',
+    'pattern': '.',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--platform=win32',
+                '--no_auth',
+                '--bucket', 'chromium-gn',
+                '-s', 'src/buildtools/win/gn.exe.sha1',
+    ],
+  },
+  # Pull clang-format binaries using checked-in hashes.
+  {
+    'name': 'clang_format_win',
+    'pattern': '.',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--platform=win32',
+                '--no_auth',
+                '--bucket', 'chromium-clang-format',
+                '-s', 'src/buildtools/win/clang-format.exe.sha1',
+    ],
+  },
   {
     'pattern': '.',
     'action': ['src\\build\\gyp_evita.cmd']
+  },
 
+  {
+    'pattern': '.',
+    'action': ['src\\evita\\build\\gn_evita.cmd']
   },
 ]

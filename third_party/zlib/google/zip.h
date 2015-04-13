@@ -5,6 +5,8 @@
 #ifndef THIRD_PARTY_ZLIB_GOOGLE_ZIP_H_
 #define THIRD_PARTY_ZLIB_GOOGLE_ZIP_H_
 
+#include <vector>
+
 #include "base/callback.h"
 #include "base/files/file_path.h"
 
@@ -28,9 +30,10 @@ bool Zip(const base::FilePath& src_dir, const base::FilePath& dest_file,
 
 #if defined(OS_POSIX)
 // Zips files listed in |src_relative_paths| to destination specified by file
-// descriptor |dest_fd|. The paths listed in |src_relative_paths| are relative
-// to the |src_dir| and will be used as the file names in the created zip file.
-// All source paths must be under |src_dir| in the file system hierarchy.
+// descriptor |dest_fd|, without taking ownership of |dest_fd|. The paths listed
+// in |src_relative_paths| are relative to the |src_dir| and will be used as the
+// file names in the created zip file. All source paths must be under |src_dir|
+// in the file system hierarchy.
 bool ZipFiles(const base::FilePath& src_dir,
               const std::vector<base::FilePath>& src_relative_paths,
               int dest_fd);

@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "third_party/zlib/google/zip.h"
+#include "third_party/zlib/google/zip_internal.h"
 
 #include <algorithm>
 
+#include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/time/time.h"
 
 #if defined(USE_SYSTEM_MINIZIP)
 #include <minizip/ioapi.h>
@@ -35,12 +37,10 @@ typedef struct {
 // Its only difference is that it treats the char* as UTF8 and
 // uses the Unicode version of CreateFile.
 void* ZipOpenFunc(void *opaque, const char* filename, int mode) {
-  DWORD desired_access, creation_disposition;
-  DWORD share_mode, flags_and_attributes;
+  DWORD desired_access = 0, creation_disposition = 0;
+  DWORD share_mode = 0, flags_and_attributes = 0;
   HANDLE file = 0;
   void* ret = NULL;
-
-  desired_access = share_mode = flags_and_attributes = 0;
 
   if ((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER) == ZLIB_FILEFUNC_MODE_READ) {
     desired_access = GENERIC_READ;
@@ -54,7 +54,7 @@ void* ZipOpenFunc(void *opaque, const char* filename, int mode) {
     creation_disposition = CREATE_ALWAYS;
   }
 
-  base::string16 filename16 = UTF8ToUTF16(filename);
+  base::string16 filename16 = base::UTF8ToUTF16(filename);
   if ((filename != NULL) && (desired_access != 0)) {
     file = CreateFile(filename16.c_str(), desired_access, share_mode,
         NULL, creation_disposition, flags_and_attributes, NULL);
@@ -79,6 +79,8 @@ void* ZipOpenFunc(void *opaque, const char* filename, int mode) {
 
 #if defined(OS_POSIX)
 // Callback function for zlib that opens a file stream from a file descriptor.
+// Since we do not own the file descriptor, dup it so that we can fdopen/fclose
+// a file stream.
 void* FdOpenFileFunc(void* opaque, const char* filename, int mode) {
   FILE* file = NULL;
   const char* mode_fopen = NULL;
@@ -90,18 +92,18 @@ void* FdOpenFileFunc(void* opaque, const char* filename, int mode) {
   else if (mode & ZLIB_FILEFUNC_MODE_CREATE)
     mode_fopen = "wb";
 
-  if ((filename != NULL) && (mode_fopen != NULL))
-    file = fdopen(*static_cast<int*>(opaque), mode_fopen);
+  if ((filename != NULL) && (mode_fopen != NULL)) {
+    int fd = dup(*static_cast<int*>(opaque));
+    if (fd != -1)
+      file = fdopen(fd, mode_fopen);
+  }
 
   return file;
 }
 
-// We don't actually close the file stream since that would close
-// the underlying file descriptor, and we don't own it. However we do need to
-// flush buffers and free |opaque| since we malloc'ed it in FillFdOpenFileFunc.
-int CloseFileFunc(void* opaque, void* stream) {
-  fflush(static_cast<FILE*>(stream));
-  free(opaque);
+int FdCloseFileFunc(void* opaque, void* stream) {
+  fclose(static_cast<FILE*>(stream));
+  free(opaque); // malloc'ed in FillFdOpenFileFunc()
   return 0;
 }
 
@@ -110,7 +112,7 @@ int CloseFileFunc(void* opaque, void* stream) {
 void FillFdOpenFileFunc(zlib_filefunc_def* pzlib_filefunc_def, int fd) {
   fill_fopen_filefunc(pzlib_filefunc_def);
   pzlib_filefunc_def->zopen_file = FdOpenFileFunc;
-  pzlib_filefunc_def->zclose_file = CloseFileFunc;
+  pzlib_filefunc_def->zclose_file = FdCloseFileFunc;
   int* ptr_fd = static_cast<int*>(malloc(sizeof(fd)));
   *ptr_fd = fd;
   pzlib_filefunc_def->opaque = ptr_fd;
@@ -119,6 +121,7 @@ void FillFdOpenFileFunc(zlib_filefunc_def* pzlib_filefunc_def, int fd) {
 
 #if defined(OS_WIN)
 // Callback function for zlib that opens a file stream from a Windows handle.
+// Does not take ownership of the handle.
 void* HandleOpenFileFunc(void* opaque, const char* filename, int mode) {
   WIN32FILE_IOWIN file_ret;
   file_ret.hf = static_cast<HANDLE>(opaque);
@@ -130,6 +133,11 @@ void* HandleOpenFileFunc(void* opaque, const char* filename, int mode) {
   if (ret != NULL)
     *(static_cast<WIN32FILE_IOWIN*>(ret)) = file_ret;
   return ret;
+}
+
+int HandleCloseFileFunc(void* opaque, void* stream) {
+  free(stream); // malloc'ed in HandleOpenFileFunc()
+  return 0;
 }
 #endif
 
@@ -230,6 +238,28 @@ int GetErrorOfZipBuffer(void* /*opaque*/, void* /*stream*/) {
   return 0;
 }
 
+// Returns a zip_fileinfo struct with the time represented by |file_time|.
+zip_fileinfo TimeToZipFileInfo(const base::Time& file_time) {
+  base::Time::Exploded file_time_parts;
+  file_time.LocalExplode(&file_time_parts);
+
+  zip_fileinfo zip_info = {};
+  if (file_time_parts.year >= 1980) {
+    // This if check works around the handling of the year value in
+    // contrib/minizip/zip.c in function zip64local_TmzDateToDosDate
+    // It assumes that dates below 1980 are in the double digit format.
+    // Hence the fail safe option is to leave the date unset. Some programs
+    // might show the unset date as 1980-0-0 which is invalid.
+    zip_info.tmz_date.tm_year = file_time_parts.year;
+    zip_info.tmz_date.tm_mon = file_time_parts.month - 1;
+    zip_info.tmz_date.tm_mday = file_time_parts.day_of_month;
+    zip_info.tmz_date.tm_hour = file_time_parts.hour;
+    zip_info.tmz_date.tm_min = file_time_parts.minute;
+    zip_info.tmz_date.tm_sec = file_time_parts.second;
+  }
+
+  return zip_info;
+}
 }  // namespace
 
 namespace zip {
@@ -260,13 +290,14 @@ unzFile OpenHandleForUnzipping(HANDLE zip_handle) {
   zlib_filefunc_def zip_funcs;
   fill_win32_filefunc(&zip_funcs);
   zip_funcs.zopen_file = HandleOpenFileFunc;
+  zip_funcs.zclose_file = HandleCloseFileFunc;
   zip_funcs.opaque = zip_handle;
   return unzOpen2("fd", &zip_funcs);
 }
 #endif
 
 // static
-unzFile PreprareMemoryForUnzipping(const std::string& data) {
+unzFile PrepareMemoryForUnzipping(const std::string& data) {
   if (data.empty())
     return NULL;
 
@@ -311,6 +342,46 @@ zipFile OpenFdForZipping(int zip_fd, int append_flag) {
   return zipOpen2("fd", append_flag, NULL, &zip_funcs);
 }
 #endif
+
+zip_fileinfo GetFileInfoForZipping(const base::FilePath& path) {
+  base::Time file_time;
+  base::File::Info file_info;
+  if (base::GetFileInfo(path, &file_info))
+    file_time = file_info.last_modified;
+  return TimeToZipFileInfo(file_time);
+}
+
+bool ZipOpenNewFileInZip(zipFile zip_file,
+                         const std::string& str_path,
+                         const zip_fileinfo* file_info) {
+  // Section 4.4.4 http://www.pkware.com/documents/casestudies/APPNOTE.TXT
+  // Setting the Language encoding flag so the file is told to be in utf-8.
+  const uLong LANGUAGE_ENCODING_FLAG = 0x1 << 11;
+
+  if (ZIP_OK != zipOpenNewFileInZip4(
+                    zip_file,  // file
+                    str_path.c_str(),  // filename
+                    file_info,  // zipfi
+                    NULL,  // extrafield_local,
+                    0u,  // size_extrafield_local
+                    NULL,  // extrafield_global
+                    0u,  // size_extrafield_global
+                    NULL,  // comment
+                    Z_DEFLATED,  // method
+                    Z_DEFAULT_COMPRESSION,  // level
+                    0,  // raw
+                    -MAX_WBITS,  // windowBits
+                    DEF_MEM_LEVEL,  // memLevel
+                    Z_DEFAULT_STRATEGY,  // strategy
+                    NULL,  // password
+                    0,  // crcForCrypting
+                    0,  // versionMadeBy
+                    LANGUAGE_ENCODING_FLAG)) {  // flagBase
+    DLOG(ERROR) << "Could not open zip file entry " << str_path;
+    return false;
+  }
+  return true;
+}
 
 }  // namespace internal
 }  // namespace zip

@@ -1,0 +1,36 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+static_library("regex") {
+  sources = [
+    "IRegex.cpp",
+    "precomp.cpp",
+    "regex_compile.cpp",
+    "regex_debug.cpp",
+    "regex_exec.cpp",
+    "regex_node.cpp",
+    "regex_parse.cpp",
+    "regex_scanner.cpp",
+    "regex_unicode.cpp",
+    "regex_util.cpp",
+  ]
+
+  deps = [
+    "//base",
+  ]
+}
+
+test("regex_tests") {
+  sources = [
+    "regex_test.cpp",
+  ]
+
+  deps = [
+    "//testing/gtest",
+    "//testing/gtest:gtest_main",
+    ":regex",
+  ]
+}

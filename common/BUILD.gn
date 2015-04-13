@@ -1,0 +1,49 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+component("common") {
+  sources = [
+    "common_export.h",
+    "either.h",
+    "strings/atomic_string.cc",
+    "strings/atomic_string.h",
+    "temporary_change_value.h",
+    "timer/timer.cc",
+    "win/native_window.cc",
+    "win/point.cc",
+    "win/point.h",
+    "win/rect.cc",
+    "win/rect.h",
+    "win/registry.cc",
+    "win/singleton_hwnd.cc",
+    "win/singleton_hwnd.h",
+    "win/size.cc",
+    "win/size.h",
+   ]
+
+  defines = [ "COMMON_IMPLEMENTATION" ]
+
+  public_deps = [
+    "//base",
+  ]
+}
+
+test("common_tests") {
+  sources = [
+    "castable_unittest.cc",
+    "memory/ref_counted_unittest.cc",
+    "memory/scoped_refptr_unittest.cc",
+    "strings/atomic_string_unittest.cc",
+    "tree/node_unittest.cc",
+    "win/rect_unittest.cc",
+  ]
+
+  deps = [
+    "//base/test:run_all_unittests",
+    "//testing/gtest:gtest",
+    ":common",
+  ]
+}

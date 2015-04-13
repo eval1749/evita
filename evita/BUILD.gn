@@ -1,0 +1,151 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+executable("evita") {
+  sources = [
+    'precomp.cpp',
+    'ap_main.cpp',
+    'evita.rc',
+  ]
+
+  deps = [
+    ':editor',
+  ]
+}
+
+library('editor') {
+  sources = [
+    'precomp.cpp',
+
+    'ctrl_TitleBar.cpp',
+    'editor/application.cc',
+    'editor/application_proxy.cc',
+    'editor/application_proxy.h',
+    'editor/modal_message_loop_scope.cc',
+    'editor/dom_lock.cc',
+    'editor/switch_set.cc',
+    'editor/switch_set.h',
+    'metrics/counter.cc',
+    'metrics/sampling.cc',
+    'metrics/sampling.h',
+    'metrics/time_scope.cc',
+    'views/frame_list.cc',
+    'views/frame_observer.cc',
+    'views/tabs/tab.cc',
+    'views/tabs/tab.h',
+    'views/tabs/tab_data_set.cc',
+    'views/tabs/tab_content.cc',
+    'views/tabs/tab_content.h',
+    'views/tabs/tab_content_observer.cc',
+    'views/tabs/tab_content_observer.h',
+    'views/tabs/tab_strip.cc',
+    'views/tabs/tab_strip_animator.cc',
+    'views/tabs/tab_strip_animator.h',
+    'views/tabs/tab_strip_delegate.cc',
+    'views/text/render_cell.cc',
+    'views/text/render_font.cc',
+    'views/text/render_font.h',
+    'views/text/render_font_set.cc',
+    'views/text/render_font_set.h',
+    'views/text/render_selection.cc',
+    'views/text/render_selection.h',
+    'views/text/render_style.cc',
+    'views/text/render_text_block.cc',
+    'views/text/render_text_line.cc',
+    'views/text/screen_text_block.cc',
+    'views/text/text_formatter.cc',
+    'views/text/text_renderer.cc',
+    'views/text_window.cc',
+    'views/text_window.h',
+    'vi_EditPane.cpp',
+    'views/forms/file_dialog_box.cc',
+    'views/forms/form_control_controller.cc',
+    'views/forms/form_control_set.cc',
+    'views/forms/form_window.cc',
+    'vi_Frame.cpp',
+  ]
+
+  deps = [
+    '//base',
+    '//common',
+    ':gfx',
+    ':io',
+    ':views',
+  ]
+}
+
+library('gfx') {
+  sources = [
+    'precomp.cpp',
+
+    'gfx/bitmap.cc',
+    'gfx/color_f.cc',
+    'gfx/font_face.cc',
+    'gfx/canvas.cc',
+    'gfx/canvas_observer.cc',
+    'gfx/canvas_observer.h',
+    'gfx/dx_device.cc',
+    'gfx/dx_device.h',
+    'gfx/point_f.cc',
+    'gfx/rect_conversions.cc',
+    'gfx/rect_conversions.h',
+    'gfx/rect_f.cc',
+    'gfx/size_f.cc',
+    'gfx/stroke_style.cc',
+    'gfx/swap_chain.cc',
+    'gfx/swap_chain.h',
+    'gfx/text_format.cc',
+    'gfx/text_layout.cc',
+    'gfx_base.cpp',
+  ]
+}
+
+library('text') {
+  sources = [
+    'precomp.cpp',
+
+    'css/color.cc',
+    'css/style.cc',
+    'css/style_resolver.cc',
+    'css/style_rule.cc',
+    'css/style_sheet.cc',
+    'css/style_sheet_observer.cc',
+    'css/style_selector.cc',
+
+    'ed_BufferCore.cpp',
+    'ed_BufferFind.cpp',
+    'li_util.cpp',
+    'text/buffer.cc',
+    'text/buffer_mutation_observer.cc',
+    'text/interval.cc',
+    'text/interval_set.cc',
+    'text/line_number_cache.cc',
+    'text/marker.cc',
+    'text/marker_set.cc',
+    'text/marker_set_observer.cc',
+    'text/range.cc',
+    'text/range_base.cc',
+    'text/range_base.h',
+    'text/range_set.cc',
+    'text/range_set_base.cc',
+    'text/range_set_base.h',
+    'text/scoped_undo_group.cc',
+    'text/scoped_undo_group.h',
+    'text/selection.cc',
+    'text/selection.h',
+    'text/selection_change_observer.cc',
+    'text/selection_change_observer.h',
+    'text/undo_stack.cc',
+    'text/undo_step.cc',
+    'z_debug.cpp',
+  ]
+
+  deps = [
+    '//base',
+    '//common',
+    '//regex',
+  ]
+}

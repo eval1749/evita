@@ -98,8 +98,6 @@ class BASE_EXPORT WeakReference {
 
     SequenceChecker sequence_checker_;
     bool is_valid_;
-
-    DISALLOW_COPY_AND_ASSIGN(Flag);
   };
 
   WeakReference();

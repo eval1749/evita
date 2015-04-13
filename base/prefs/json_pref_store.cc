@@ -56,16 +56,16 @@ PersistentPrefStore::PrefReadError HandleReadErrors(
     DVLOG(1) << "Error while loading JSON file: " << error_msg
              << ", file: " << path.value();
     switch (error_code) {
-      case JSONFileValueSerializer::JSON_ACCESS_DENIED:
+      case JSONFileValueDeserializer::JSON_ACCESS_DENIED:
         return PersistentPrefStore::PREF_READ_ERROR_ACCESS_DENIED;
         break;
-      case JSONFileValueSerializer::JSON_CANNOT_READ_FILE:
+      case JSONFileValueDeserializer::JSON_CANNOT_READ_FILE:
         return PersistentPrefStore::PREF_READ_ERROR_FILE_OTHER;
         break;
-      case JSONFileValueSerializer::JSON_FILE_LOCKED:
+      case JSONFileValueDeserializer::JSON_FILE_LOCKED:
         return PersistentPrefStore::PREF_READ_ERROR_FILE_LOCKED;
         break;
-      case JSONFileValueSerializer::JSON_NO_SUCH_FILE:
+      case JSONFileValueDeserializer::JSON_NO_SUCH_FILE:
         return PersistentPrefStore::PREF_READ_ERROR_NO_FILE;
         break;
       default:
@@ -91,6 +91,22 @@ PersistentPrefStore::PrefReadError HandleReadErrors(
   return PersistentPrefStore::PREF_READ_ERROR_NONE;
 }
 
+// Records a sample for |size| in the Settings.JsonDataReadSizeKilobytes
+// histogram suffixed with the base name of the JSON file under |path|.
+void RecordJsonDataSizeHistogram(const base::FilePath& path, size_t size) {
+  std::string spaceless_basename;
+  base::ReplaceChars(path.BaseName().MaybeAsASCII(), " ", "_",
+                     &spaceless_basename);
+
+  // The histogram below is an expansion of the UMA_HISTOGRAM_CUSTOM_COUNTS
+  // macro adapted to allow for a dynamically suffixed histogram name.
+  // Note: The factory creates and owns the histogram.
+  base::HistogramBase* histogram = base::Histogram::FactoryGet(
+      "Settings.JsonDataReadSizeKilobytes." + spaceless_basename, 1, 10000, 50,
+      base::HistogramBase::kUmaTargetedHistogramFlag);
+  histogram->Add(static_cast<int>(size) / 1024);
+}
+
 scoped_ptr<JsonPrefStore::ReadResult> ReadPrefsFromDisk(
     const base::FilePath& path,
     const base::FilePath& alternate_path) {
@@ -103,11 +119,15 @@ scoped_ptr<JsonPrefStore::ReadResult> ReadPrefsFromDisk(
   std::string error_msg;
   scoped_ptr<JsonPrefStore::ReadResult> read_result(
       new JsonPrefStore::ReadResult);
-  JSONFileValueSerializer serializer(path);
-  read_result->value.reset(serializer.Deserialize(&error_code, &error_msg));
+  JSONFileValueDeserializer deserializer(path);
+  read_result->value.reset(deserializer.Deserialize(&error_code, &error_msg));
   read_result->error =
       HandleReadErrors(read_result->value.get(), path, error_code, error_msg);
   read_result->no_dir = !base::PathExists(path.DirName());
+
+  if (read_result->error == PersistentPrefStore::PREF_READ_ERROR_NONE)
+    RecordJsonDataSizeHistogram(path, deserializer.get_last_read_size());
+
   return read_result.Pass();
 }
 
@@ -137,6 +157,7 @@ JsonPrefStore::JsonPrefStore(
       initialized_(false),
       filtering_in_progress_(false),
       read_error_(PREF_READ_ERROR_NONE) {
+  DCHECK(!path_.empty());
 }
 
 JsonPrefStore::JsonPrefStore(
@@ -154,6 +175,7 @@ JsonPrefStore::JsonPrefStore(
       initialized_(false),
       filtering_in_progress_(false),
       read_error_(PREF_READ_ERROR_NONE) {
+  DCHECK(!path_.empty());
 }
 
 bool JsonPrefStore::GetValue(const std::string& key,
@@ -258,13 +280,6 @@ PersistentPrefStore::PrefReadError JsonPrefStore::GetReadError() const {
 PersistentPrefStore::PrefReadError JsonPrefStore::ReadPrefs() {
   DCHECK(CalledOnValidThread());
 
-  if (path_.empty()) {
-    scoped_ptr<ReadResult> no_file_result;
-    no_file_result->error = PREF_READ_ERROR_FILE_NOT_SPECIFIED;
-    OnFileRead(no_file_result.Pass());
-    return PREF_READ_ERROR_FILE_NOT_SPECIFIED;
-  }
-
   OnFileRead(ReadPrefsFromDisk(path_, alternate_path_));
   return filtering_in_progress_ ? PREF_READ_ERROR_ASYNCHRONOUS_TASK_INCOMPLETE
                                 : read_error_;
@@ -275,12 +290,6 @@ void JsonPrefStore::ReadPrefsAsync(ReadErrorDelegate* error_delegate) {
 
   initialized_ = false;
   error_delegate_.reset(error_delegate);
-  if (path_.empty()) {
-    scoped_ptr<ReadResult> no_file_result;
-    no_file_result->error = PREF_READ_ERROR_FILE_NOT_SPECIFIED;
-    OnFileRead(no_file_result.Pass());
-    return;
-  }
 
   // Weakly binds the read task so that it doesn't kick in during shutdown.
   base::PostTaskAndReplyWithResult(
@@ -389,28 +398,11 @@ bool JsonPrefStore::SerializeData(std::string* output) {
     pref_filter_->FilterSerializeData(prefs_.get());
 
   JSONStringValueSerializer serializer(output);
-  serializer.set_pretty_print(true);
-  bool result = serializer.Serialize(*prefs_);
-
-  if (result) {
-    std::string spaceless_basename;
-    base::ReplaceChars(path_.BaseName().MaybeAsASCII(), " ", "_",
-                       &spaceless_basename);
-
-    // The histogram below is an expansion of the UMA_HISTOGRAM_COUNTS_10000
-    // macro adapted to allow for a dynamically suffixed histogram name.
-    // Note: The factory creates and owns the histogram.
-    base::HistogramBase* histogram =
-        base::LinearHistogram::FactoryGet(
-            "Settings.JsonDataSizeKilobytes." + spaceless_basename,
-            1,
-            10000,
-            50,
-            base::HistogramBase::kUmaTargetedHistogramFlag);
-    histogram->Add(static_cast<int>(output->size()) / 1024);
-  }
-
-  return result;
+  // Not pretty-printing prefs shrinks pref file size by ~30%. To obtain
+  // readable prefs for debugging purposes, you can dump your prefs into any
+  // command-line or online JSON pretty printing tool.
+  serializer.set_pretty_print(false);
+  return serializer.Serialize(*prefs_);
 }
 
 void JsonPrefStore::FinalizeFileRead(bool initialization_successful,

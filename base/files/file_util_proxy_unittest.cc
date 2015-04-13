@@ -19,11 +19,9 @@ class FileUtilProxyTest : public testing::Test {
   FileUtilProxyTest()
       : file_thread_("FileUtilProxyTestFileThread"),
         error_(File::FILE_OK),
-        created_(false),
-        bytes_written_(-1),
         weak_factory_(this) {}
 
-  virtual void SetUp() override {
+  void SetUp() override {
     ASSERT_TRUE(dir_.CreateUniqueTempDir());
     ASSERT_TRUE(file_thread_.Start());
   }
@@ -52,11 +50,9 @@ class FileUtilProxyTest : public testing::Test {
 
   ScopedTempDir dir_;
   File::Error error_;
-  bool created_;
   FilePath path_;
   File::Info file_info_;
   std::vector<char> buffer_;
-  int bytes_written_;
   WeakPtrFactory<FileUtilProxyTest> weak_factory_;
 };
 

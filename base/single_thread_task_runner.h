@@ -29,11 +29,7 @@ class BASE_EXPORT SingleThreadTaskRunner : public SequencedTaskRunner {
   }
 
  protected:
-  SingleThreadTaskRunner() = default;
   ~SingleThreadTaskRunner() override {}
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(SingleThreadTaskRunner);
 };
 
 }  // namespace base

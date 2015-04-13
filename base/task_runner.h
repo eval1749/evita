@@ -142,9 +142,6 @@ class BASE_EXPORT TaskRunner
   // deletes |this|, but can be overridden to do something else, like
   // delete on a certain thread.
   virtual void OnDestruct() const;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(TaskRunner);
 };
 
 struct BASE_EXPORT TaskRunnerTraits {

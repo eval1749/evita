@@ -21,7 +21,6 @@ class BASE_EXPORT NonThreadSafeImpl {
   bool CalledOnValidThread() const;
 
  protected:
-  NonThreadSafeImpl() = default;
   ~NonThreadSafeImpl();
 
   // Changes the thread that is checked for in CalledOnValidThread. The next
@@ -33,8 +32,6 @@ class BASE_EXPORT NonThreadSafeImpl {
 
  private:
   ThreadCheckerImpl thread_checker_;
-
-  DISALLOW_COPY_AND_ASSIGN(NonThreadSafeImpl);
 };
 
 }  // namespace base

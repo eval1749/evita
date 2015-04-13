@@ -26,6 +26,7 @@
 #endif
 #if defined(OS_LINUX)
 #include <malloc.h>
+#include "base/test/malloc_wrapper.h"
 #endif
 
 #if defined(OS_WIN)
@@ -105,37 +106,6 @@ TEST(ProcessMemoryTest, EnableLFH) {
 // test suite setup and does not need to be done again, else mach_override
 // will fail.
 
-#if !defined(ADDRESS_SANITIZER)
-// The following code tests the system implementation of malloc() thus no need
-// to test it under AddressSanitizer.
-TEST(ProcessMemoryTest, MacMallocFailureDoesNotTerminate) {
-#if ARCH_CPU_32_BITS
-  // The Mavericks malloc library changed in a way which breaks the tricks used
-  // to implement EnableTerminationOnOutOfMemory() with UncheckedMalloc() under
-  // 32-bit.  Under 64-bit the oom_killer code handles this.
-  if (base::mac::IsOSMavericksOrLater())
-    return;
-#endif
-
-  // Test that ENOMEM doesn't crash via CrMallocErrorBreak two ways: the exit
-  // code and lack of the error string. The number of bytes is one less than
-  // MALLOC_ABSOLUTE_MAX_SIZE, more than which the system early-returns NULL and
-  // does not call through malloc_error_break(). See the comment at
-  // EnableTerminationOnOutOfMemory() for more information.
-  void* buf = NULL;
-  ASSERT_EXIT(
-      {
-        base::EnableTerminationOnOutOfMemory();
-
-        buf = malloc(std::numeric_limits<size_t>::max() - (2 * PAGE_SIZE) - 1);
-      },
-      testing::KilledBySignal(SIGTRAP),
-      "\\*\\*\\* error: can't allocate region.*\\n?.*");
-
-  base::debug::Alias(buf);
-}
-#endif  // !defined(ADDRESS_SANITIZER)
-
 TEST(ProcessMemoryTest, MacTerminateOnHeapCorruption) {
   // Assert that freeing an unallocated pointer will crash the process.
   char buf[9];
@@ -150,10 +120,8 @@ TEST(ProcessMemoryTest, MacTerminateOnHeapCorruption) {
   ASSERT_DEATH(free(buf), "attempting free on address which "
       "was not malloc\\(\\)-ed");
 #else
-  ASSERT_DEATH(free(buf), "being freed.*\\n?\\.*"
-      "\\*\\*\\* set a breakpoint in malloc_error_break to debug.*\\n?.*"
-      "Terminating process due to a potential for future heap corruption");
-#endif  // ARCH_CPU_64_BITS || defined(ADDRESS_SANITIZER)
+  ADD_FAILURE() << "This test is not supported in this build configuration.";
+#endif
 }
 
 #endif  // defined(OS_MACOSX)
@@ -182,13 +150,9 @@ class OutOfMemoryTest : public testing::Test {
   }
 
 #if defined(USE_TCMALLOC)
-  virtual void SetUp() override {
-    tc_set_new_mode(1);
-  }
+  void SetUp() override { tc_set_new_mode(1); }
 
-  virtual void TearDown() override {
-    tc_set_new_mode(0);
-  }
+  void TearDown() override { tc_set_new_mode(0); }
 #endif  // defined(USE_TCMALLOC)
 
  protected:
@@ -271,13 +235,11 @@ TEST_F(OutOfMemoryDeathTest, Memalign) {
 
 TEST_F(OutOfMemoryDeathTest, ViaSharedLibraries) {
   // This tests that the run-time symbol resolution is overriding malloc for
-  // shared libraries (including libc itself) as well as for our code.
-  std::string format = base::StringPrintf("%%%zud", test_size_);
-  char *value = NULL;
+  // shared libraries as well as for our code.
   ASSERT_DEATH({
-      SetUpInDeathAssert();
-      EXPECT_EQ(-1, asprintf(&value, format.c_str(), 0));
-    }, "");
+    SetUpInDeathAssert();
+    value_ = MallocWrapper(test_size_);
+  }, "");
 }
 #endif  // OS_LINUX
 
@@ -390,7 +352,7 @@ class OutOfMemoryHandledTest : public OutOfMemoryTest {
   static const size_t kSafeCallocSize = 128;
   static const size_t kSafeCallocItems = 4;
 
-  virtual void SetUp() {
+  void SetUp() override {
     OutOfMemoryTest::SetUp();
 
     // We enable termination on OOM - just as Chrome does at early

@@ -68,24 +68,24 @@
 // a macro argument here.  The name is only used in a DCHECK, to assure that
 // callers don't try to vary the name of the histogram (which would tend to be
 // ignored by the one-time initialization of the histogtram_pointer).
-#define STATIC_HISTOGRAM_POINTER_BLOCK(constant_histogram_name, \
-                                       histogram_add_method_invocation, \
-                                       histogram_factory_get_invocation) \
-  do { \
-    static base::subtle::AtomicWord atomic_histogram_pointer = 0; \
-    base::HistogramBase* histogram_pointer( \
-        reinterpret_cast<base::HistogramBase*>( \
-            base::subtle::Acquire_Load(&atomic_histogram_pointer))); \
-    if (!histogram_pointer) { \
-      histogram_pointer = histogram_factory_get_invocation; \
-      base::subtle::Release_Store(&atomic_histogram_pointer, \
+#define STATIC_HISTOGRAM_POINTER_BLOCK(constant_histogram_name,           \
+                                       histogram_add_method_invocation,   \
+                                       histogram_factory_get_invocation)  \
+  do {                                                                    \
+    static base::subtle::AtomicWord atomic_histogram_pointer = 0;         \
+    base::HistogramBase* histogram_pointer(                               \
+        reinterpret_cast<base::HistogramBase*>(                           \
+            base::subtle::Acquire_Load(&atomic_histogram_pointer)));      \
+    if (!histogram_pointer) {                                             \
+      histogram_pointer = histogram_factory_get_invocation;               \
+      base::subtle::Release_Store(                                        \
+          &atomic_histogram_pointer,                                      \
           reinterpret_cast<base::subtle::AtomicWord>(histogram_pointer)); \
-    } \
-    if (DCHECK_IS_ON) \
-      histogram_pointer->CheckName(constant_histogram_name); \
-    histogram_pointer->histogram_add_method_invocation; \
+    }                                                                     \
+    if (DCHECK_IS_ON())                                                   \
+      histogram_pointer->CheckName(constant_histogram_name);              \
+    histogram_pointer->histogram_add_method_invocation;                   \
   } while (0)
-
 
 //------------------------------------------------------------------------------
 // Provide easy general purpose histogram in a macro, just like stats counters.
@@ -228,5 +228,37 @@
     STATIC_HISTOGRAM_POINTER_BLOCK(name, Add(sample), \
         base::CustomHistogram::FactoryGet(name, custom_ranges, \
             base::HistogramBase::kUmaTargetedHistogramFlag))
+
+// Scoped class which logs its time on this earth as a UMA statistic. This is
+// recommended for when you want a histogram which measures the time it takes
+// for a method to execute. This measures up to 10 seconds.
+#define SCOPED_UMA_HISTOGRAM_TIMER(name) \
+  SCOPED_UMA_HISTOGRAM_TIMER_EXPANDER(name, false, __COUNTER__)
+
+// Similar scoped histogram timer, but this uses UMA_HISTOGRAM_LONG_TIMES_100,
+// which measures up to an hour, and uses 100 buckets. This is more expensive
+// to store, so only use if this often takes >10 seconds.
+#define SCOPED_UMA_HISTOGRAM_LONG_TIMER(name) \
+  SCOPED_UMA_HISTOGRAM_TIMER_EXPANDER(name, true, __COUNTER__)
+
+// This nested macro is necessary to expand __COUNTER__ to an actual value.
+#define SCOPED_UMA_HISTOGRAM_TIMER_EXPANDER(name, is_long, key) \
+  SCOPED_UMA_HISTOGRAM_TIMER_UNIQUE(name, is_long, key)
+
+#define SCOPED_UMA_HISTOGRAM_TIMER_UNIQUE(name, is_long, key) \
+  class ScopedHistogramTimer##key { \
+   public: \
+    ScopedHistogramTimer##key() : constructed_(base::TimeTicks::Now()) {} \
+    ~ScopedHistogramTimer##key() { \
+      base::TimeDelta elapsed = base::TimeTicks::Now() - constructed_; \
+      if (is_long) { \
+        UMA_HISTOGRAM_LONG_TIMES_100(name, elapsed); \
+      } else { \
+        UMA_HISTOGRAM_TIMES(name, elapsed); \
+      } \
+    } \
+   private: \
+    base::TimeTicks constructed_; \
+  } scoped_histogram_timer_##key
 
 #endif  // BASE_METRICS_HISTOGRAM_MACROS_H_

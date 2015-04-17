@@ -1,0 +1,38 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("views") {
+  sources = [
+    "content_observer.cc",
+    "content_observer.h",
+    "content_window.cc",
+    "content_window.h",
+    "event_source.cc",
+    "event_source.h",
+    "icon_cache.cc",
+    "icon_cache.h",
+    "message_view.cc",
+    "message_view.h",
+    "metrics_view.cc",
+    "metrics_view.h",
+    "switches.cc",
+    "switches.h",
+    "table_view_model.cc",
+    "table_view_model.h",
+    "table_window.cc",
+    "table_window.h",
+    "view_delegate_impl.cc",
+    "window.cc",
+    "window.h",
+    "window_set.cc",
+    "window_set.h",
+  ]
+
+  deps = [
+    "//base",
+    #"//evita/dom",
+    "//evita/spellchecker",
+    "//evita/ui",
+  ]
+}

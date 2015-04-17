@@ -1,0 +1,15 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("css") {
+  sources = [
+    "color.cc",
+    "style.cc",
+    "style_resolver.cc",
+    "style_rule.cc",
+    "style_sheet.cc",
+    "style_sheet_observer.cc",
+    "style_selector.cc",
+  ]
+}

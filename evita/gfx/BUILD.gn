@@ -1,0 +1,28 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("gfx") {
+  sources = [
+    "../gfx_base.cpp",
+
+    "bitmap.cc",
+    "color_f.cc",
+    "font_face.cc",
+    "canvas.cc",
+    "canvas_observer.cc",
+    "canvas_observer.h",
+    "dx_device.cc",
+    "dx_device.h",
+    "point_f.cc",
+    "rect_conversions.cc",
+    "rect_conversions.h",
+    "rect_f.cc",
+    "size_f.cc",
+    "stroke_style.cc",
+    "swap_chain.cc",
+    "swap_chain.h",
+    "text_format.cc",
+    "text_layout.cc",
+  ]
+}

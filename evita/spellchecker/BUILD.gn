@@ -1,0 +1,15 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("spellchecker") {
+  sources = [
+    "hunspell_engine.cc",
+    "spelling_engine.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//third_party/hunspell",
+  ]
+}

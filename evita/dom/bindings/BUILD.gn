@@ -1,0 +1,49 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//evita/dom/idl_files.gni")
+
+source_set("bindings") {
+  deps = [
+    ":bindings_cc",
+  ]
+  sources = interface_idl_files + dictionary_idl_files
+}
+
+action_foreach("bindings_cc") {
+  deps = [":interfaces_info"]
+  script = "idl_to_glue.py"
+  sources = interface_idl_files + dictionary_idl_files
+  inputs = [
+    "idl_to_glue.py",
+    "dictionary.cc",
+    "dictionary.h",
+    "interface.cc",
+    "interface.h",
+    "$idl_gen_dir/InterfacesInfo.pickle",
+  ]
+  outputs = [
+    "$bindings_gen_dir/{{source_name_part}}.cc",
+    "$bindings_gen_dir/{{source_name_part}}.h",
+  ]
+  args = [
+    "--output-dir", rebase_path(bindings_gen_dir),
+    "--interfaces-info", rebase_path("$idl_gen_dir/InterfacesInfo.pickle"),
+    "--write-file-only-if-changed", "1",
+    "{{source}}",
+  ]
+}
+
+action("interfaces_info") {
+  script = "//third_party/blink_idl_parser/compute_interfaces_info.py"
+  sources = interface_idl_files
+  file_list = "$idl_gen_dir/file_list.txt"
+  write_file(file_list, rebase_path(sources))
+  outputs = ["$idl_gen_dir/InterfacesInfo.pickle"]
+  args = [
+    "--idl-files-list", rebase_path(file_list),
+    "--interfaces-info-file", rebase_path("$idl_gen_dir/InterfacesInfo.pickle"),
+    "--write-file-only-if-changed", "1",
+  ]
+}

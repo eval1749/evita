@@ -1,0 +1,228 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+import("//evita/dom/idl_files.gni")
+import("//evita/dom/js_files.gni")
+
+source_set("dom") {
+  sources = [
+    "converter.cc",
+    "text/document.cc",
+    "text/document_set.cc",
+    "windows/document_window.cc",
+    "editor.cc",
+    "windows/editor_window.cc",
+
+    "clipboard/clipboard.cc",
+    "clipboard/data_transfer.cc",
+    "clipboard/data_transfer_data.cc",
+    "clipboard/data_transfer_item.cc",
+    "clipboard/data_transfer_item_list.cc",
+
+    "encodings/text_decoder.cc",
+    "encodings/text_encoder.cc",
+
+    "events/composition_event.cc",
+    "events/composition_event.h",
+    "events/composition_span.cc",
+    "events/composition_span.h",
+    "events/document_event.cc",
+    "events/event.cc",
+    "events/event_target.cc",
+    "events/focus_event.cc",
+    "events/form_event.cc",
+    "events/keyboard_event.cc",
+    "events/mouse_event.cc",
+    "events/wheel_event.cc",
+    "events/ui_event.cc",
+    "events/view_event_handler_impl.cc",
+    "events/view_event_target.cc",
+    "events/view_event_target_set.cc",
+    "events/window_event.cc",
+
+    "forms/button_control.cc",
+    "forms/checkbox_control.cc",
+    "forms/form.cc",
+    "forms/form_control.cc",
+    "forms/form_observer.cc",
+    "forms/form_window.cc",
+    "forms/label_control.cc",
+    "forms/radio_button_control.cc",
+    "forms/text_field_control.cc",
+    "forms/text_field_selection.cc",
+
+    "file_path.cc",
+    "global.cc",
+    "dictionary.cc",
+    "lock.cc",
+
+    "text/mutation_observer.cc",
+    "text/mutation_observer_controller.cc",
+    "text/mutation_record.cc",
+
+    "os/abstract_file.cc",
+    "os/file.cc",
+    "os/process.cc",
+
+    "windows/point.cc",
+    "windows/rect.cc",
+    "promise_resolver.cc",
+    "text/range.cc",
+    "text/regexp.cc",
+    "windows/selection.cc",
+    "script_host.cc",
+    "script_thread.cc",
+    "css/style.cc",
+    "windows/table_window.cc",
+    "windows/table_selection.cc",
+    "windows/text_selection.cc",
+    "windows/text_window.cc",
+    "timers/one_shot_timer.cc",
+    "timers/one_shot_timer.h",
+    "timers/repeating_timer.cc",
+    "timers/repeating_timer.h",
+    "timers/timer.cc",
+    "timers/timer.h",
+    "time_stamp.cc",
+    "windows/window.cc",
+    "windows/window_ostream.cc",
+    "windows/window_set.cc",
+
+     # TODO(eval1749) We should use "$target_gen_dir" for "v8_string.cc".
+     "$root_gen_dir/v8_strings.cc",
+     "$target_gen_dir/dom_jslib.cc",
+
+    "../gc/collectable.cc",
+    "../gc/collector.cc",
+    "../gc/visitable.cc",
+  ]
+
+  sources += process_file_template(
+    interface_idl_files + dictionary_idl_files,
+    [ "$bindings_gen_dir/{{source_name_part}}.cc",
+      "$bindings_gen_dir/{{source_name_part}}." ])
+
+  deps = [
+    ":dom_unicode_lib",
+    "//base",
+    "//base:i18n",
+    "//common",
+    "//evita/dom/bindings",
+    "//evita/dom/public:domapi",
+    "//evita/v8_glue",
+    "//regex",
+    "//v8",
+  ]
+
+  include_dirs = [
+    root_gen_dir,
+    bindings_gen_dir,
+  ]
+}
+
+action("dom_jslib") {
+  script = "make_get_jslib.py"
+  outputs = [ "$target_gen_dir/dom_jslib.cc" ]
+  inputs = [
+    "closure_compiler_workaround.js",
+  ] + js_defs_files + js_lib_files
+  # TODO(eval1749) We should pass list of JS files to "make_get_js_lib.py"
+  # rather than command line.
+  args = rebase_path(outputs) + rebase_path(inputs)
+}
+
+static_library("dom_unicode_lib") {
+  sources = [ "unicode_icu.cc" ]
+  deps = [
+    "//base:i18n",
+    "//v8",
+    "//third_party/icu:icuuc"
+  ]
+}
+
+action("dom_v8_strings_cc") {
+  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+
+  script = "make_v8_strings.py"
+
+  inputs = [
+    "v8_strings.in",
+  ]
+
+  # TODO(eval1749) We should use "$target_gen_dir" for "v8_string.cc".
+  outputs = [
+    "$root_gen_dir/v8_strings.cc",
+    "$root_gen_dir/v8_strings.h",
+  ]
+
+  args = [
+    rebase_path("$root_gen_dir/v8_strings"),
+  ] + rebase_path(inputs, root_build_dir)
+}
+
+# TODO(eval1749): We should rename to "evita_dom_tests"
+test("evita_dom_unittests") {
+  sources = [
+    "abstract_dom_test.cc",
+    "console_unittest.cc",
+    "css/style_unittest.cc",
+    "editor_unittest.cc",
+    "encodings/text_decoder_unittest.cc",
+    "encodings/text_encoder_unittest.cc",
+    "errors_unittest.cc",
+    "events/composition_event_unittest.cc",
+    "events/document_event_unittest.cc",
+    "events/event_target_unittest.cc",
+    "events/event_unittest.cc",
+    "events/focus_event_unittest.cc",
+    "events/form_event_unittest.cc",
+    "events/keyboard_event_unittest.cc",
+    "events/mouse_event_unittest.cc",
+    "events/ui_event_unittest.cc",
+    "events/view_event_handler_impl_unittest.cc",
+    "events/wheel_event_unittest.cc",
+    "events/window_event_unittest.cc",
+    "file_path_unittest.cc",
+    "forms/button_control_unittest.cc",
+    "forms/checkbox_control_unittest.cc",
+    "forms/form_unittest.cc",
+    "forms/form_window_unittest.cc",
+    "forms/label_control_unittest.cc",
+    "forms/radio_button_control_unittest.cc",
+    "forms/text_field_control_unittest.cc",
+    "forms/text_field_selection_unittest.cc",
+    "jslib/ordered_set_unittest.cc",
+    "lexers/lexers_unittest.cc",
+    "mock_io_delegate.cc",
+    "mock_view_impl.cc",
+    "os/file_unittest.cc",
+    "os/process_unittest.cc",
+    "polyfill_unittest.cc",
+    "text/document_unittest.cc",
+    "text/modes/modes_unittest.cc",
+    "text/mutation_observer_unittest.cc",
+    "text/range_unittest.cc",
+    "text/regexp_unittest.cc",
+    "text/text_position_unittest.cc",
+    "unicode_unittest.cc",
+    "windows/editor_window_unittest.cc",
+    "windows/point_unittest.cc",
+    "windows/rect_unittest.cc",
+    "windows/table_selection_unittest.cc",
+    "windows/text_selection_unittest.cc",
+    "windows/text_window_unittest.cc",
+    "windows/window_unittest.cc",
+  ]
+
+  deps = [
+    "//base/test:test_support",
+    # TODO(yosi) We should not have "editor" dependency on
+    # "evita_dom_unittests".
+    "//evita:editor",
+    "//testing/gmock",
+    "//testing/gtest",
+    "//v8",
+  ]
+}

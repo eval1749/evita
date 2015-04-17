@@ -1,0 +1,88 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+js_defs_files = [
+  "enums.js",
+  "events/event_enums.js",
+  "strings_en_US.js",
+  "unicode_enums.js",
+  "windows/window_enums.js",
+ ]
+
+js_lib_files = [
+  "polyfill.js",
+  "key_names.js",
+
+  "bracket.js",
+  "commander.js",
+  "text/document.js",
+  "text/document_file_io.js",
+  "text/document_file_load.js",
+  "text/document_file_save.js",
+  "editor.js",
+  "windows/editor_window.js",
+  "encodings/text_decoder.js",
+  "encodings/text_encoder.js",
+  "errors.js",
+  "file_path.js",
+
+  "forms/button_control.js",
+  "forms/checkbox_control.js",
+  "forms/form.js",
+  "forms/form_control.js",
+  "forms/form_window.js",
+  "forms/label_control.js",
+  "forms/radio_button_control.js",
+  "forms/text_field_control.js",
+  "forms/text_field_selection.js",
+
+  "lexers/lexer.js",
+  #"lexers/cmd_lexer.js",
+  "lexers/clike_lexer.js",
+      "lexers/cpp_lexer.js",
+      "lexers/csharp_lexer.js",
+      "lexers/idl_lexer.js",
+      "lexers/java_lexer.js",
+      "lexers/javascript_lexer.js",
+  "lexers/config_lexer.js",
+  "lexers/python_lexer.js",
+  "lexers/xml_lexer.js",
+      "lexers/html_lexer.js",
+
+  "text/modes/mode.js",
+  "text/modes/modes.js",
+  "os/file.js",
+  "os/os.js",
+  "os/process.js",
+  "text/range.js",
+  "text/regexp.js",
+  "css/style.js",
+  "windows/table_window.js",
+  "text/text_position.js",
+  "windows/document_state.js",
+  "windows/point.js",
+  "windows/rect.js",
+  "windows/tab_data.js",
+  "windows/text_selection.js",
+  "windows/text_window.js",
+  "windows/window.js",
+
+
+  "jslib/editors.js",
+  "jslib/ordered_set.js",
+  "jslib/stringify.js",
+  "jslib/windows.js",
+
+  "console.js",
+  "commands/document_list.js",
+  "commands/dynamic_abbrev.js",
+  "commands/js_console.js",
+  "commands/find_and_replace.js",
+  "commands/find_and_replace_commands.js",
+  "commands/spell_checker.js",
+  "commands/text_window_commands.js",
+  "commands/window_commands.js",
+
+  "jslib/install_stringify.js",
+]

@@ -1,0 +1,80 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+idl_gen_dir = "$root_gen_dir/evita"
+bindings_gen_dir = "$root_gen_dir/evita/bindings"
+
+interface_idl_files = [
+  "//evita/dom/clipboard/DataTransfer.idl",
+  "//evita/dom/clipboard/DataTransferItem.idl",
+  "//evita/dom/clipboard/DataTransferItemList.idl",
+  "//evita/dom/Editor.idl",
+  "//evita/dom/encodings/TextDecoder.idl",
+  "//evita/dom/encodings/TextEncoder.idl",
+  "//evita/dom/events/CompositionEvent.idl",
+  "//evita/dom/events/CompositionSpan.idl",
+  "//evita/dom/events/DocumentEvent.idl",
+  "//evita/dom/events/Event.idl",
+  "//evita/dom/events/EventTarget.idl",
+  "//evita/dom/events/FocusEvent.idl",
+  "//evita/dom/events/FormEvent.idl",
+  "//evita/dom/events/KeyboardEvent.idl",
+  "//evita/dom/events/MouseEvent.idl",
+  "//evita/dom/events/UiEvent.idl",
+  "//evita/dom/events/ViewEventTarget.idl",
+  "//evita/dom/events/WheelEvent.idl",
+  "//evita/dom/events/WindowEvent.idl",
+  "//evita/dom/forms/ButtonControl.idl",
+  "//evita/dom/forms/CheckboxControl.idl",
+  "//evita/dom/forms/Form.idl",
+  "//evita/dom/forms/FormControl.idl",
+  "//evita/dom/forms/FormWindow.idl",
+  "//evita/dom/forms/LabelControl.idl",
+  "//evita/dom/forms/RadioButtonControl.idl",
+  "//evita/dom/forms/TextFieldControl.idl",
+  "//evita/dom/forms/TextFieldSelection.idl",
+  "//evita/dom/os/AbstractFile.idl",
+  "//evita/dom/os/File.idl",
+  "//evita/dom/os/Process.idl",
+  # TODO(eval1749) Do we really need to have "Mode.idl"?
+  # "//evita/dom/text/modes/Mode.idl",
+  "//evita/dom/text/MutationObserver.idl",
+  "//evita/dom/text/MutationRecord.idl",
+  "//evita/dom/text/RegExp.idl",
+  "//evita/dom/timers/OneShotTimer.idl",
+  "//evita/dom/timers/RepeatingTimer.idl",
+  "//evita/dom/timers/Timer.idl",
+  "//evita/dom/windows/DocumentWindow.idl",
+  "//evita/dom/windows/EditorWindow.idl",
+  # TODO(eval1749) Do we really need to have "Poind.idl"?
+  # "//evita/dom/windows/Point.idl",
+  # TODO(eval1749) Do we really need to have "Rect.idl"?
+  # "//evita/dom/windows/Rect.idl",
+  "//evita/dom/windows/Selection.idl",
+  "//evita/dom/windows/TableSelection.idl",
+  "//evita/dom/windows/TableWindow.idl",
+  "//evita/dom/windows/TextSelection.idl",
+  "//evita/dom/windows/TextWindow.idl",
+  "//evita/dom/windows/Window.idl",
+]
+
+dictionary_idl_files = [
+  "//evita/dom/encodings/TextDecodeOptions.idl",
+  "//evita/dom/encodings/TextDecoderOptions.idl",
+  "//evita/dom/encodings/TextEncodeOptions.idl",
+  "//evita/dom/events/CompositionEventInit.idl",
+  "//evita/dom/events/DocumentEventInit.idl",
+  "//evita/dom/events/EventInit.idl",
+  "//evita/dom/events/FocusEventInit.idl",
+  "//evita/dom/events/FormEventInit.idl",
+  "//evita/dom/events/KeyboardEventInit.idl",
+  "//evita/dom/events/MouseEventInit.idl",
+  "//evita/dom/events/UiEventInit.idl",
+  "//evita/dom/events/WheelEventInit.idl",
+  "//evita/dom/events/WindowEventInit.idl",
+  "//evita/dom/forms/FormWindowInit.idl",
+  "//evita/dom/os/MoveFileOptions.idl",
+  "//evita/dom/text/MutationObserverInit.idl",
+  "//evita/dom/text/RegExpInit.idl",
+]

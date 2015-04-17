@@ -1,0 +1,55 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+static_library("text") {
+  sources = [
+    "../ed_BufferCore.cpp",
+    "../ed_BufferFind.cpp",
+    "../li_util.cpp",
+    "../z_debug.cpp",
+
+    "buffer.cc",
+    "buffer.h",
+    "buffer_mutation_observer.cc",
+    "buffer_mutation_observer.h",
+    "interval.cc",
+    "interval.h",
+    "interval_set.cc",
+    "interval_set.h",
+    "line_number_cache.cc",
+    "line_number_cache.h",
+    "marker.cc",
+    "marker.h",
+    "marker_set.cc",
+    "marker_set.h",
+    "marker_set_observer.cc",
+    "marker_set_observer.h",
+    "range.cc",
+    "range.h",
+    "range_base.cc",
+    "range_base.h",
+    "range_set.cc",
+    "range_set.h",
+    "range_set_base.cc",
+    "range_set_base.h",
+    "scoped_undo_group.cc",
+    "scoped_undo_group.h",
+    "selection.cc",
+    "selection.h",
+    "selection_change_observer.cc",
+    "selection_change_observer.h",
+    "undo_stack.cc",
+    "undo_step.cc",
+  ]
+
+  deps = [
+    "//base",
+    #"//common",
+    #"//regex",
+    "//evita/css",
+    "//evita/text/encodings",
+  ]
+}

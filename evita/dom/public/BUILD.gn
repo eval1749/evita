@@ -1,0 +1,22 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("domapi") {
+  sources = [
+    "io_context_id.cc",
+    "io_delegate.cc",
+    "io_error.cc",
+    "float_point.cc",
+    "float_rect.cc",
+    "switch_value.cc",
+    "switch_value.h",
+    "tab_data.cc",
+    "tab_data.h",
+    "view_event_handler.cc",
+  ]
+
+  public_deps = [
+    "//base",
+  ]
+}

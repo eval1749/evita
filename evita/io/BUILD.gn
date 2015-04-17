@@ -1,0 +1,19 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("io") {
+  sources = [
+    "file_io_context.cc",
+    "io_context.cc",
+    "io_context_utils.cc",
+    "io_delegate_impl.cc",
+    "io_manager.cc",
+    "process_io_context.cc",
+  ]
+
+  public_deps = [
+    "//base",
+    "//evita/dom",
+  ]
+}

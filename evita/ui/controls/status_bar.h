@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_evita_ui_controls_status_bar_h)
 #define INCLUDE_evita_ui_controls_status_bar_h
 
+#include <windows.h>
+
 #include <vector>
 
 #include "base/strings/string16.h"
@@ -28,7 +30,7 @@ class StatusBar {
   public: StatusBar();
   public: ~StatusBar();
 
-  public: explicit operator bool() const { return hwnd_; }
+  public: explicit operator bool() const { return hwnd_ != nullptr; }
 
   public: const Rect& bounds() const { return bounds_; }
   // TODO(eval1749) We should get rid of |StatusBar::height()|.

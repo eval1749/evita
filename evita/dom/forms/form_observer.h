@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_dom_forms_form_observer_h)
 #define INCLUDE_evita_dom_forms_form_observer_h
 
+#include "base/macros.h"
+
 namespace dom {
 
 class FormObserver {

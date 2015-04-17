@@ -149,7 +149,7 @@ void Window::DidRealize() {
 }
 
 void Window::DidSetFocus(ui::Widget* last_focused) {
-  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
+  CR_DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
   ++static_active_tick;
   active_tick_ = static_active_tick;
   ui::AnimatableWindow::DidSetFocus(last_focused);
@@ -190,4 +190,5 @@ void Window::WillDestroyWidget() {
   ui::AnimatableWindow::WillDestroyWidget();
   active_tick_ = 0;
 }
+
 }  // namespace views

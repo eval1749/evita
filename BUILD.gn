@@ -14,6 +14,7 @@ group("root") {
   deps = [
     "//common",
     "//regex",
+    "//evita",
     #"//third_party/icu",
   ]
 }

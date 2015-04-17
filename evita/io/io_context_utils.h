@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_io_io_context_utils_h)
 #define INCLUDE_evita_io_io_context_utils_h
 
+#include <stdint.h>
+
 #include "base/callback_forward.h"
 #include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/io_error.h"
@@ -12,10 +14,10 @@
 namespace io {
 
 void Reject(const base::Callback<void(domapi::IoError)>& reject,
-            DWORD last_error);
+            uint32_t last_error);
 
 void Resolve(const base::Callback<void(int)>& resolve,
-             DWORD num_transferred);
+             uint32_t num_transferred);
 
 }  // namespace io
 

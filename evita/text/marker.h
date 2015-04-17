@@ -10,6 +10,7 @@
 
 #include "base/basictypes.h"
 #include "common/strings/atomic_string.h"
+#include "evita/precomp.h"
 
 namespace text {
 

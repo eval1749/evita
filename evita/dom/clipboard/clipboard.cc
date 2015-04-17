@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/clipboard/clipboard.h"
-
+#include <windows.h>
 #include <unordered_map>
+
+#include "evita/dom/clipboard/clipboard.h"
 
 #include "base/logging.h"
 #include "common/memory/singleton.h"
@@ -184,7 +185,7 @@ DataTransferData* TextFormat::FromClipboard(HANDLE handle) const {
 //
 // Clipboard
 //
-Clipboard::Clipboard() : opened_(::OpenClipboard(nullptr)) {
+Clipboard::Clipboard() : opened_(::OpenClipboard(nullptr) != FALSE) {
   if (!opened_)
     ScriptHost::instance()->PlatformError("OpenClipboard");
 

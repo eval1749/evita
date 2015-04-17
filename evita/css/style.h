@@ -30,12 +30,10 @@ enum class TextDecoration {
   GreenWave,
   RedWave,
   Underline,
-  #if SUPPORT_IME
   ImeInput, // dotted underline
   ImeActive, // 2 pixel underline
   ImeInactiveA, // 1 pixel underline
   ImeInactiveB, // 1 pixel underline
-  #endif // SUPPORT_IME
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -74,37 +72,51 @@ class Style final {
   public: bool operator!=(const Style& other) const;
 
   public: Color bgcolor() const;
-  public: bool has_bgcolor() const { return masks_ & Mask_BgColor; }
+  public: bool has_bgcolor() const {
+    return (masks_ & Mask_BgColor) != 0;
+  }
   public: void set_bgcolor(Color bgcolor);
 
   public: Color color() const;
-  public: bool has_color() const { return masks_ & Mask_Color; }
+  public: bool has_color() const {
+    return (masks_ & Mask_Color) != 0;
+  }
   public: void set_color(Color color);
 
   public: const std::vector<base::string16>& font_families() const;
   public: const base::string16& font_family() const;
-  public: bool has_font_family() const { return masks_ & Mask_FontFamily; }
+  public: bool has_font_family() const {
+    return (masks_ & Mask_FontFamily) != 0;
+  }
   public: void set_font_family(const base::string16& font_family);
 
   public: FontSize font_size() const;
-  public: bool has_font_size() const { return masks_ & Mask_FontSize; }
+  public: bool has_font_size() const {
+    return (masks_ & Mask_FontSize) != 0;
+  }
   public: void set_font_size(FontSize font_size);
 
   public: FontStyle font_style() const;
-  public: bool has_font_style() const { return masks_ & Mask_FontStyle; }
+  public: bool has_font_style() const {
+    return (masks_ & Mask_FontStyle) != 0;
+  }
   public: void set_font_style(FontStyle font_style);
 
   public: FontWeight font_weight() const;
-  public: bool has_font_weight() const { return masks_ & Mask_FontWeight; }
+  public: bool has_font_weight() const {
+    return (masks_ & Mask_FontWeight) != 0;
+  }
   public: void set_font_weight(FontWeight font_weight);
 
   public: Color marker_color() const;
-  public: bool has_marker_color() const { return masks_ & Mask_MarkerColor; }
+  public: bool has_marker_color() const {
+    return (masks_ & Mask_MarkerColor) != 0;
+  }
   public: void set_marker_color(Color marker_color);
 
   public: TextDecoration text_decoration() const;
   public: bool has_text_decoration() const {
-    return masks_ & Mask_TextDecoration;
+    return (masks_ & Mask_TextDecoration) != 0;
   }
   public: void set_text_decoration(TextDecoration text_decoration);
 

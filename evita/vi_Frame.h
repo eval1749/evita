@@ -11,6 +11,9 @@
 #if !defined(INCLUDE_visual_Frame_h)
 #define INCLUDE_visual_Frame_h
 
+#include <windows.h>
+#include <shellapi.h>
+
 #include <unordered_set>
 #include <vector>
 
@@ -111,7 +114,7 @@ class Frame final : public views::Window,
   private: void DidRequestDestroy() final;
   private: void DidChangeBounds() final;
   private: void DidSetFocus(ui::Widget* last_focused) final;
-  private: LRESULT OnMessage(uint, WPARAM, LPARAM) final;
+  private: LRESULT OnMessage(uint32_t, WPARAM, LPARAM) final;
   private: void OnPaint(const gfx::Rect paint_rect) final;
   private: void WillDestroyWidget() final;
   private: void WillRemoveChildWidget(ui::Widget* old_child) final;

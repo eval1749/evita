@@ -71,7 +71,7 @@ class Tab final : public ui::Widget,
     public: HitTestResult();
     public: ~HitTestResult() = default;
 
-    public: operator bool() const { return tab_; }
+    public: operator bool() const { return tab_ != nullptr; }
 
     public: HitTestResult& operator=(const HitTestResult& other);
 

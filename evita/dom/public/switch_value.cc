@@ -62,7 +62,7 @@ SwitchValue& SwitchValue::operator=(SwitchValue&& other) {
 
 bool SwitchValue::bool_value() const {
   DCHECK_EQ(Type::Bool, type_);
-  return int_value_;
+  return int_value_ != 0;
 }
 
 int SwitchValue::int_value() const {

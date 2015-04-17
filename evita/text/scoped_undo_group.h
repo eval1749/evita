@@ -5,13 +5,20 @@
 #if !defined(INCLUDE_evita_text_scoped_undo_group_h)
 #define INCLUDE_evita_text_scoped_undo_group_h
 
+#include "base/macros.h"
+#include "base/strings/string16.h"
+#include "evita/precomp.h"
+
 namespace text {
+
+class Buffer;
+class Range;
 
 /// <summary>
 /// Utility class for inserting begin/end undo operation. Instances are
 /// created on stack instead of heap.
 /// </summary>
-class ScopedUndoGroup {
+class ScopedUndoGroup final {
   private: Buffer* buffer_;
   private: const base::string16 name_;
 

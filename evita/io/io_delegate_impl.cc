@@ -8,10 +8,7 @@
 
 #include "base/bind.h"
 #include "base/callback.h"
-#pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
 #include "base/message_loop/message_pump_win.h"
-#pragma warning(pop)
 #include "base/time/time.h"
 #include "common/win/scoped_handle.h"
 #include "evita/dom/public/deferred.h"
@@ -30,9 +27,9 @@
 namespace io {
 
 namespace {
-const DWORD kHugeFileSize = 1u << 28;
+const uint32_t kHugeFileSize = 1u << 28;
 
-class scoped_find_handle {
+class scoped_find_handle final {
   private: HANDLE handle_;
 
   public: scoped_find_handle(HANDLE handle) : handle_(handle) {
@@ -119,7 +116,7 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
       MOVEFILE_WRITE_THROUGH :
       MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING;
   auto const succeeded = ::MoveFileExW(src_path.c_str(), dst_path.c_str(),
-                                       static_cast<DWORD>(flags));
+                                       static_cast<uint32_t>(flags));
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "MoveFileEx error=" << last_error;
@@ -168,10 +165,10 @@ void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,
 
   domapi::FileStatus data = {0};
   data.file_size = static_cast<int>(find_data.nFileSizeLow);
-  data.is_directory = find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-  data.is_symlink = find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
+  data.is_directory = (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+  data.is_symlink = (find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
   data.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
-  data.readonly = find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY;
+  data.readonly = (find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 
   editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(deferred.resolve , data));

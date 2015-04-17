@@ -5,6 +5,9 @@
 #if !defined(INCLUDE_evita_text_buffer_mutation_observer_h)
 #define INCLUDE_evita_text_buffer_mutation_observer_h
 
+#include "base/basictypes.h"
+#include "evita/precomp.h"
+
 namespace text {
 
 class Buffer;

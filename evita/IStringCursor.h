@@ -11,8 +11,10 @@
 #if !defined(INCLUDE_IStringCursor)
 #define INCLUDE_IStringCursor
 
+#include "base/basictypes.h"
+#include "evita/precomp.h"
 
-interface IStringCursor
+struct IStringCursor
 {
     // [C]
     virtual bool   CanMove(int) = 0;
@@ -22,11 +24,11 @@ interface IStringCursor
     virtual long   GetPosition() = 0;
 
     // [F]
-    virtual bool FindBackward(char16, uint) = 0;
-    virtual bool FindForward(char16, uint) = 0;
+    virtual bool FindBackward(char16, uint32_t) = 0;
+    virtual bool FindForward(char16, uint32_t) = 0;
 
     // [M]
-    virtual bool Match(const char16*, int, uint) = 0;
+    virtual bool Match(const char16*, int, uint32_t) = 0;
     virtual long Move(int) = 0;
     virtual long MoveToEnd() = 0;
 
@@ -41,7 +43,7 @@ struct StringRange
     int m_lEnd;
 }; // StringRange
 
-interface IStringMatcher
+struct IStringMatcher
 {
     virtual bool FirstMatch(IStringCursor*) = 0;
     virtual bool GetMatched(int, StringRange*) = 0;

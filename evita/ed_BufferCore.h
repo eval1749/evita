@@ -12,6 +12,7 @@
 #define INCLUDE_edit_BufferCore_h
 
 #include "base/strings/string16.h"
+#include "evita/precomp.h"
 
 namespace text
 {

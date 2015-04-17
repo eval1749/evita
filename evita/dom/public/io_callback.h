@@ -6,6 +6,7 @@
 #define INCLUDE_evita_dom_public_io_callback_h
 
 #include "base/callback_forward.h"
+#include "base/strings/string16.h"
 #include "base/time/time.h"
 
 namespace domapi {

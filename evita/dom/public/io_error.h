@@ -10,8 +10,7 @@ namespace domapi {
 struct IoError {
   int error_code;
 
-  explicit IoError(int error_code) : error_code(error_code) {
-  }
+  explicit IoError(int error_code);
 };
 
 }  // namespace domapi

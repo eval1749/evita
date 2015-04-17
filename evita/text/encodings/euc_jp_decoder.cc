@@ -4,6 +4,7 @@
 
 #include "evita/text/encodings/euc_jp_decoder.h"
 
+#include <windows.h>
 #include <sstream>
 
 #include "base/logging.h"

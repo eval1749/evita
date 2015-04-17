@@ -45,7 +45,7 @@ class StrokeStyle {
 
   public: operator ID2D1StrokeStyle*() const;
 
-  public: bool is_realized() const { return platform_style_; }
+  public: bool is_realized() const { return platform_style_ != nullptr; }
   public: void set_cap_style(CapStyle start_style, CapStyle end_cap_style);
   public: void set_cap_style(CapStyle cap_style);
   public: void set_dashes(const std::vector<float>& dashes);

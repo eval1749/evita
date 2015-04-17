@@ -5,8 +5,10 @@
 #if !defined(INCLUDE_evita_dom_mutation_record_h)
 #define INCLUDE_evita_dom_mutation_record_h
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
+#include "evita/precomp.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {

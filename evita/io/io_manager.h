@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_io_io_manager_h)
 #define INCLUDE_evita_io_io_manager_h
 
+#include <windows.h>
 #include <memory>
 
 #include "base/basictypes.h"

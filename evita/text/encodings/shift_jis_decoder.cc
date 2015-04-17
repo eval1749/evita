@@ -4,6 +4,7 @@
 
 #include "evita/text/encodings/shift_jis_decoder.h"
 
+#include <windows.h>
 #include <sstream>
 
 #include "base/logging.h"

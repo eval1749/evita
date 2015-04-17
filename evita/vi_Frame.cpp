@@ -7,10 +7,9 @@
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
+#include <windowsx.h>
+
 #include "base/bind.h"
-#pragma warning(pop)
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
@@ -85,7 +84,7 @@ Frame::~Frame() {
 }
 
 bool Frame::Activate() {
-  return ::SetForegroundWindow(*native_window());
+  return ::SetForegroundWindow(*native_window()) != FALSE;
 }
 
 void Frame::AddObserver(views::FrameObserver* observer) {
@@ -233,7 +232,7 @@ void Frame::DidBeginAnimationFrame(base::Time now) {
   // TODO(eval1749) We should call update title bar only when needed.
   UpdateTitleBar();
 
-  DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
+  CR_DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;
   {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);

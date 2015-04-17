@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_common_win_scoped_handle_h)
 #define INCLUDE_common_win_scoped_handle_h
 
+#include <windows.h>
+
 #include "base/logging.h"
 
 namespace common {

@@ -66,7 +66,7 @@ class Font {
   public: float GetTextWidth(const base::string16& string) const;
 
   // [H]
-  public: bool HasCharacter(char16) const;
+  public: bool HasCharacter(base::char16) const;
 
   DISALLOW_COPY_AND_ASSIGN(Font);
 };

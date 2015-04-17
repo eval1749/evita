@@ -23,7 +23,7 @@ KeyboardEventInit ToKeyboardEventInit(const domapi::KeyboardEvent& event) {
   init_dict.set_key_code(event.key_code);
   init_dict.set_location(event.location);
   init_dict.set_meta_key(false);
-  init_dict.set_repeat(event.repeat);
+  init_dict.set_repeat(event.repeat != 0);
   init_dict.set_shift_key(event.shift_key);
   init_dict.set_bubbles(true);
   init_dict.set_cancelable(true);

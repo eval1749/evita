@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_views_frame_observer_h)
 #define INCLUDE_evita_views_frame_observer_h
 
+#include "base/macros.h"
+
 class Frame;
 
 namespace views {

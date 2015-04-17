@@ -6,9 +6,11 @@
 #define INCLUDE_evita_text_range_h
 
 #include "base/strings/string16.h"
+#include "evita/precomp.h"
 
 namespace text {
 
+class Buffer;
 class RangeSet;
 
 class Range {

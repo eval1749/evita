@@ -53,7 +53,7 @@ class Widget::HitTestResult {
   public: HitTestResult();
   public: ~HitTestResult() = default;
 
-  public: explicit operator bool() const { return widget_; }
+  public: explicit operator bool() const { return widget_ != nullptr; }
 
   public: const gfx::Point& local_point() const { return local_point_; }
   public: Widget* widget() const { return widget_; }

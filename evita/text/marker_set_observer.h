@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_text_marker_set_observer_h)
 #define INCLUDE_evita_text_marker_set_observer_h
 
+#include "evita/precomp.h"
+
 namespace text {
 
 class MarkerSetObserver {

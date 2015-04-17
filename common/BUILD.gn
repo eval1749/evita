@@ -31,7 +31,7 @@ component("common") {
   ]
 }
 
-test("common_tests") {
+test("common_unittests") {
   sources = [
     "castable_unittest.cc",
     "memory/ref_counted_unittest.cc",

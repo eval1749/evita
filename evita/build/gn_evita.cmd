@@ -1,6 +1,6 @@
 @if "%_echo%"=="" echo off
 setlocal
-set outdir=..\out\Debug
+set outdir=..\out.gn\Debug
 echo.
 echo.
 echo //////////////////////////////////////////////////////////////////////

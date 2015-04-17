@@ -98,7 +98,7 @@ struct Converter<T*, typename std::enable_if<
     auto const wrapper_info = T::static_wrapper_info();
     *out = static_cast<T*>(static_cast<v8_glue::AbstractScriptable*>(
         v8_glue::internal::FromV8Impl(isolate, val, wrapper_info)));
-    return *out;
+    return *out != nullptr;
   }
 };
 }  // namespace gin
@@ -111,7 +111,7 @@ struct Converter<T*, typename std::enable_if<
 
 #define DEFINE_SCRIPTABLE_OBJECT(name, wrapper_info_name) \
   v8_glue::WrapperInfo* name::static_wrapper_info() { \
-    DEFINE_STATIC_LOCAL(wrapper_info_name, wrapper_info, \
+    CR_DEFINE_STATIC_LOCAL(wrapper_info_name, wrapper_info, \
         (scriptable_class_name())); \
     return &wrapper_info; \
   }

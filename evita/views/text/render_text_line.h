@@ -5,9 +5,12 @@
 #if !defined(INCLUDE_evita_views_text_render_text_line_h)
 #define INCLUDE_evita_views_text_render_text_line_h
 
+#include <stdint.h>
+
 #include <vector>
 
 #include "evita/gfx_base.h"
+#include "evita/precomp.h"
 
 namespace views {
 
@@ -23,7 +26,7 @@ class TextSelection;
 class TextLine final {
   private: gfx::RectF bounds_;
   private: std::vector<Cell*> cells_;
-  private: mutable uint m_nHash;
+  private: mutable uint32_t m_nHash;
   private: Posn m_lStart;
   private: Posn m_lEnd;
 

@@ -139,7 +139,7 @@ int KeyEvent::ConvertToKeyCode(WPARAM wParam) {
 }
 
 bool KeyEvent::ConvertToRepeat(LPARAM lParam) {
-  return HIWORD(lParam) & KF_REPEAT;
+  return (HIWORD(lParam) & KF_REPEAT) != 0;
 }
 
 //////////////////////////////////////////////////////////////////////

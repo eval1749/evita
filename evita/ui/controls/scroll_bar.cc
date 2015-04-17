@@ -65,7 +65,7 @@ class ScrollBar::HitTestResult {
   public: HitTestResult();
   public: ~HitTestResult() = default;
 
-  public: explicit operator bool() const { return part_; }
+  public: explicit operator bool() const { return part_ != nullptr; }
 
   public: Location location() const { return location_; }
   public: Part* part() const { return part_; }

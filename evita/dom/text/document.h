@@ -9,6 +9,7 @@
 #include "base/time/time.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/gc/member.h"
+#include "evita/precomp.h"
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"

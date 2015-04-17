@@ -7,6 +7,7 @@
 
 #include "evita/css/style.h"
 #include "evita/gfx/color_f.h"
+#include "evita/precomp.h"
 #include "evita/ui/base/selection_state.h"
 
 namespace views {

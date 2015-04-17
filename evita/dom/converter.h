@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_dom_converter_h)
 #define INCLUDE_evita_dom_converter_h
 
+#include "evita/precomp.h"
 #include "evita/v8_glue/converter.h"
 
 namespace base {

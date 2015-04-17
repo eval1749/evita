@@ -33,7 +33,7 @@ void InstallTextDecoration(StyleSheet* style_sheet,
 }
 
 StyleSheet* GetDefaultStyleSheet() {
-  DEFINE_STATIC_LOCAL(StyleSheet, default_style_sheet, ());
+  CR_DEFINE_STATIC_LOCAL(StyleSheet, default_style_sheet, ());
   if (default_style_sheet.Find(StyleSelector::defaults()))
     return &default_style_sheet;
 

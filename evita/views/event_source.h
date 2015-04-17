@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_views_event_source_h)
 #define INCLUDE_evita_views_event_source_h
 
+#include "base/macros.h"
 #include "evita/dom/public/event_target_id.h"
 
 namespace domapi {

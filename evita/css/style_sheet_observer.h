@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_css_style__sheet_observer_h)
 #define INCLUDE_evita_css_style__sheet_observer_h
 
+#include "base/macros.h"
+
 namespace css {
 
 class StyleRule;

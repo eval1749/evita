@@ -8,6 +8,7 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "common/castable.h"
+#include "evita/precomp.h"
 
 namespace text {
 

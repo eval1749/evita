@@ -8,7 +8,7 @@ namespace css {
 
 #define DEFINE_STYLE_SELECTOR(name) \
   const common::AtomicString& StyleSelector::name() { \
-    DEFINE_STATIC_LOCAL(common::AtomicString, name, (L ## #name)); \
+    CR_DEFINE_STATIC_LOCAL(common::AtomicString, name, (L ## #name)); \
     return name; \
   }
 

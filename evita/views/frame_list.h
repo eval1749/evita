@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_views_frame_list_h)
 #define INCLUDE_evita_views_frame_list_h
 
+#include <windows.h>
+
 #include <unordered_set>
 
 #include "common/memory/singleton.h"

@@ -113,7 +113,7 @@ bool HunspellEngine::CheckSpelling(const base::string16& word_to_check) {
   std::string utf8_word_to_check(base::UTF16ToUTF8(word_to_check));
   if (utf8_word_to_check.size() > kMaxCheckedLen)
     return true;
-  return hunspell_->spell(utf8_word_to_check.c_str());
+  return hunspell_->spell(utf8_word_to_check.c_str()) != 0;
 }
 
 bool HunspellEngine::EnsureInitialized() {

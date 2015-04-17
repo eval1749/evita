@@ -4,6 +4,7 @@
 
 #include "base/command_line.h"
 #include "base/logging.h"
+#include "base/strings/string16.h"
 #include "common/win/scoped_handle.h"
 #include "common/win/singleton_hwnd.h"
 #include "common/win/win32_verify.h"
@@ -20,7 +21,7 @@ const base::char16 SINGLE_INSTANCE_NAME[] =
 const base::char16 k_wszFileMapping[] =
     L"Local\\03002DEC-D63E-4551-9AE8-B88E8C586376";
 
-void __declspec(noreturn) FatalExit(const char16* message) {
+void __declspec(noreturn) FatalExit(const base::char16* message) {
   base::char16 wsz[100];
   ::wsprintf(wsz, L"Evita Text Editor can't start (%s).", message);
   ::FatalAppExit(0, wsz);
@@ -40,7 +41,7 @@ bool IsIndependentApplication() {
 class ApplicationProxy::Channel {
   private: struct SharedArea {
     HWND m_hwnd;
-    char16 m_wsz[1];
+    base::char16 m_wsz[1];
   };
 
   public: class ScopedMap {
@@ -49,7 +50,7 @@ class ApplicationProxy::Channel {
     public: ScopedMap(Channel* channel);
     public: ~ScopedMap();
 
-    public: explicit operator bool() const { return location_; }
+    public: explicit operator bool() const { return location_ != nullptr; }
     public: SharedArea* operator->() const { return location_; }
   };
   friend class ScopedMap;
@@ -139,7 +140,7 @@ class ApplicationProxy::EventObject {
   public: EventObject(const base::char16* name);
   public: ~EventObject();
 
-  public: explicit operator bool() const { return handle_; }
+  public: explicit operator bool() const { return handle_ != nullptr; }
 
   public: bool is_existing() const { return is_existing_; }
 
@@ -270,7 +271,7 @@ int ApplicationProxy::Run() {
 
     COPYDATASTRUCT copy_data;
     copy_data.dwData = 1;
-    copy_data.cbData = sizeof(char16) * (length + 1);
+    copy_data.cbData = sizeof(base::char16) * (length + 1);
     copy_data.lpData = wsz;
 
     ::SendMessage(payload->m_hwnd, WM_COPYDATA, 0,

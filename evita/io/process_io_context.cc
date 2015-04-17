@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <windows.h>
+
 #include "evita/io/process_io_context.h"
 
 #include "base/bind.h"
-#pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
 #include "base/threading/thread.h"
-#pragma warning(pop)
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/public/view_event_handler.h"
@@ -59,7 +58,7 @@ void ProcessIoContext::CloseAndWaitProcess(
   Resolve(deferred.resolve, 0u);
 }
 
-DWORD ProcessIoContext::CloseProcess() {
+uint32_t ProcessIoContext::CloseProcess() {
   if (stdout_read_.is_valid()) {
     if (!::CloseHandle(stdout_read_.get())) {
         auto const last_error = ::GetLastError();

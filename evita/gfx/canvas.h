@@ -11,7 +11,7 @@
 #include "base/strings/string16.h"
 #include "evita/gfx_base.h"
 
-interface IDXGISwapChain1;
+struct IDXGISwapChain1;
 
 namespace gfx {
 
@@ -67,7 +67,7 @@ class Canvas : public Object, public DpiHandler {
   public: virtual ~Canvas();
 
   public: explicit operator bool() const {
-    return GetRenderTarget();
+    return GetRenderTarget() != nullptr;
   }
   public: operator ID2D1RenderTarget*() const {
     return GetRenderTarget();
@@ -80,7 +80,7 @@ class Canvas : public Object, public DpiHandler {
   // new backing bitmap.
   public: int bitmap_id() const { return bitmap_id_; }
   // |drawing()| is for debugging.
-  public: bool drawing() const { return batch_nesting_level_; }
+  public: bool drawing() const { return batch_nesting_level_ != 0; }
   public: const FactorySet& factory_set() const { return *factory_set_; }
   public: float height() const { return bounds_.height(); }
   public: Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }

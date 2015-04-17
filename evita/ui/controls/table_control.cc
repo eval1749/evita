@@ -511,7 +511,7 @@ class Row final : public Item {
 
   public: int flags() const { return flags_; }
   public: int row_id() const { return row_id_; }
-  public: bool selected() const { return flags_ & kSelected; }
+  public: bool selected() const { return (flags_ & kSelected) != 0; }
   public: State state() const { return state_; }
 
   public: void SetSelected(bool selected);

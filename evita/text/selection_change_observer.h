@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_text_selection_change_observer_h)
 #define INCLUDE_evita_text_selection_change_observer_h
 
+#include "base/macros.h"
+
 namespace text {
 
 class Selection;

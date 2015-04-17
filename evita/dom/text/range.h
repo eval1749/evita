@@ -5,6 +5,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
+#include "evita/precomp.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {

@@ -7,6 +7,9 @@
 
 #include <memory>
 
+#include "base/basictypes.h"
+#include "evita/precomp.h"
+
 namespace css {
 class Style;
 }
@@ -15,7 +18,7 @@ namespace text {
 
 class Interval;
 
-class IntervalSet {
+class IntervalSet final {
   // PImpl Idiom, see "interval_set.cc" for implementation.
   public: class Impl;
   private: std::unique_ptr<Impl> impl_;

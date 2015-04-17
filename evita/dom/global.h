@@ -3,6 +3,7 @@
 #if !defined(INCLUDE_evita_dom_global_h)
 #define INCLUDE_evita_dom_global_h
 
+#include "base/macros.h"
 #include "common/memory/singleton.h"
 
 #include "evita/v8_glue/scoped_persistent.h"

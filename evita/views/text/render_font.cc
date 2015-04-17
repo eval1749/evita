@@ -13,7 +13,7 @@
 
 namespace {
 
-bool IsCacheableChar(char16 wch) {
+bool IsCacheableChar(base::char16 wch) {
   return wch >= 0x20 && wch <= 0x7E;
 }
 
@@ -116,7 +116,7 @@ uint32_t Font::FontImpl::CalculateFixedWidth() const {
   static base::char16 cacheable_chars[0x7E - 0x20 + 1];
   if (!cacheable_chars[0]) {
     for (int ch = ' '; ch <= 0x7E; ++ch) {
-      cacheable_chars[ch - 0x20] = static_cast<char16>(ch);
+      cacheable_chars[ch - 0x20] = static_cast<base::char16>(ch);
     }
   }
 
@@ -216,7 +216,7 @@ bool Font::FontImpl::HasCharacter(base::char16 sample) const {
   uint32_t code_point = sample;
   uint16_t glyph_index;
   COM_VERIFY((*font_face_)->GetGlyphIndices(&code_point, 1, &glyph_index));
-  return glyph_index;
+  return glyph_index != 0;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -249,7 +249,7 @@ const Font& Font::Get(const gfx::FontProperties& properties) {
   return Cache::instance()->GetOrCreate(properties);
 }
 
-float Font::GetCharWidth(char16 wch) const {
+float Font::GetCharWidth(base::char16 wch) const {
   if (IsCacheableChar(wch) && metrics_.fixed_width)
     return metrics_.fixed_width;
   return GetTextWidth(&wch, 1);
@@ -271,7 +271,7 @@ float Font::GetTextWidth(const base::string16& string) const {
   return GetTextWidth(string.data(), static_cast<uint32>(string.length()));
 }
 
-bool Font::HasCharacter(char16 sample) const {
+bool Font::HasCharacter(base::char16 sample) const {
   // Note: The first font in FontSet must satisfy this invariant.
   // TODO(yosi): We don't believe this assumption.l
   if (sample >= 0x20 && sample <= 0x7E)

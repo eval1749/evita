@@ -5,9 +5,11 @@
 #if !defined(INCLUDE_evita_dom_clipboard_clipboard_h)
 #define INCLUDE_evita_dom_clipboard_clipboard_h
 
-#include "base/basictypes.h"
+#include <windows.h>
 
 #include <vector>
+
+#include "base/basictypes.h"
 
 #include "base/strings/string16.h"
 

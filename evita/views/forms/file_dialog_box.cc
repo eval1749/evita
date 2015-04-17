@@ -76,7 +76,7 @@ bool FileDialogBox::GetSaveFileName(Param* pParam) {
   return true;
 }
 
-void FileDialogBox::Param::SetDirectory(const char16* pwszFile) {
+void FileDialogBox::Param::SetDirectory(const base::char16* pwszFile) {
   if (!*pwszFile)
       return;
   base::char16* pwszFilePart;

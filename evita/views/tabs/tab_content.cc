@@ -55,7 +55,7 @@ void TabContent::DidRealize() {
 
 void TabContent::DidShow() {
   ui::Widget::DidShow();
-  DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
+  CR_DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
   ++static_active_tick;
   active_tick_ = static_active_tick;
 }

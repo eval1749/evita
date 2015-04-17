@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "evita/precomp.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -33,8 +34,8 @@ class MutationObserver : public v8_glue::Scriptable<MutationObserver> {
   private: MutationObserver(v8::Handle<v8::Function> callback);
   public: virtual ~MutationObserver();
 
-  public: void DidDeleteAt(Document* document, Posn offset, size_t length);
-  public: void DidInsertAt(Document* document, Posn offset, size_t length);
+  public: void DidDeleteAt(Document* document, text::Posn offset, size_t length);
+  public: void DidInsertAt(Document* document, text::Posn offset, size_t length);
   public: void DidMutateDocument(Document* document);
   private: void Disconnect();
   private: Tracker* GetTracker(Document* document) const;

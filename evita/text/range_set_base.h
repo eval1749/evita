@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_evita_text_range_set_base_h)
 #define INCLUDE_evita_text_range_set_base_h
 
+#include "evita/precomp.h"
+
 namespace text {
 
 class RangeBase;

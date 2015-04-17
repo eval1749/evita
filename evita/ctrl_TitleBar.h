@@ -5,6 +5,8 @@
 #if !defined(INCLUDE_visual_control_TitleBar_h)
 #define INCLUDE_visual_control_TitleBar_h
 
+#include <windows.h>
+
 #include "base/strings/string16.h"
 
 namespace views {

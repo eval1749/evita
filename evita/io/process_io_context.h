@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/win/scoped_handle.h"
 #include "evita/dom/public/io_context_id.h"
@@ -31,7 +32,7 @@ class ProcessIoContext : public IoContext {
   public: ~ProcessIoContext();
 
   private: void CloseAndWaitProcess(const domapi::FileIoDeferred& deferred);
-  private: DWORD CloseProcess();
+  private: uint32_t CloseProcess();
   private: void ReadFromProcess(void* buffer, size_t num_read,
                                 const domapi::FileIoDeferred& deferred);
   private: void StartProcess(domapi::IoContextId context_id,

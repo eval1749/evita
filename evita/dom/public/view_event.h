@@ -5,6 +5,7 @@
 #if !defined(INCLUDE_evita_dom_public_view_event_h)
 #define INCLUDE_evita_dom_public_view_event_h
 
+#include "base/strings/string16.h"
 #include "evita/dom/windows/window_id.h"
 
 namespace domapi {

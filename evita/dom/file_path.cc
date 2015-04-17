@@ -50,7 +50,7 @@ FilePath::~FilePath() {
 
 base::string16 FilePath::FullPath(const base::string16& file_name) {
   base::string16 full_name(MAX_PATH + 1, 0);
-  char16* file_start = nullptr;
+  base::char16* file_start = nullptr;
   auto const length = ::GetFullPathNameW(
       file_name.c_str(),
       static_cast<DWORD>(full_name.length()),

@@ -43,7 +43,7 @@ struct Converter<v8_glue::Nullable<T>, typename std::enable_if<
     auto const wrapper_info = T::static_wrapper_info();
     *out = static_cast<T*>(static_cast<v8_glue::AbstractScriptable*>(
         v8_glue::internal::FromV8Impl(isolate, val, wrapper_info)));
-    return *out;
+    return *out != nullptr;
   }
 };
 }  // namespace gin

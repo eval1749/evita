@@ -12,13 +12,13 @@
 namespace io {
 
 void Reject(const base::Callback<void(domapi::IoError)>& reject,
-            DWORD last_error) {
+            uint32_t last_error) {
   editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(reject, domapi::IoError(static_cast<int>(last_error))));
 }
 
 void Resolve(const base::Callback<void(int)>& resolve,
-             DWORD num_transferred) {
+             uint32_t num_transferred) {
   editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(resolve , static_cast<int>(num_transferred)));
 }

@@ -9,6 +9,7 @@
 
 #include "base/basictypes.h"
 #include "evita/gfx_base.h"
+#include "evita/precomp.h"
 #include "evita/views/text/render_style.h"
 
 namespace text {

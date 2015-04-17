@@ -199,7 +199,7 @@ void Style::set_text_decoration(
 
 Style* Style::Default() {
   static bool init;
-  DEFINE_STATIC_LOCAL(Style, default_style, ());
+  CR_DEFINE_STATIC_LOCAL(Style, default_style, ());
   if (!init) {
     init = true;
     #if 0

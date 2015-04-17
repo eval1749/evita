@@ -21,7 +21,9 @@
 #define _WIN32_WINNT 0x0700
 #endif
 
+#ifndef STRICT
 #define STRICT
+#endif
 #define INC_OLE2
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN

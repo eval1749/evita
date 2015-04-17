@@ -113,17 +113,17 @@ class KeyEvent : public Event {
   public: virtual ~KeyEvent();
 
   public: const bool alt_key() const {
-    return raw_key_code_ & static_cast<int>(Modifier::Alt);
+    return (raw_key_code_ & static_cast<int>(Modifier::Alt)) != 0;
   }
   public: const bool control_key() const {
-    return raw_key_code_ & static_cast<int>(Modifier::Control);
+    return (raw_key_code_ & static_cast<int>(Modifier::Control)) != 0;
   }
   public: int key_code() const { return raw_key_code_ & 0x1FF; }
   public: int raw_key_code() const { return raw_key_code_; }
   public: bool repeat() const { return repeat_; }
 
   public: const bool shift_key() const {
-    return raw_key_code_ & static_cast<int>(Modifier::Shift);
+    return (raw_key_code_ & static_cast<int>(Modifier::Shift)) != 0;
   }
 
   public: static EventType ConvertToEventType(uint32_t message);
@@ -156,20 +156,20 @@ class MouseEvent : public Event {
   public: virtual ~MouseEvent();
 
   public: bool alt_key() const {
-    return flags() & static_cast<int>(EventFlags::AltKey);
+    return (flags() & static_cast<int>(EventFlags::AltKey)) != 0;
   }
   public: MouseButton button() const { return button_; }
   public: int buttons() const { return buttons_; }
   public: int click_count() const { return click_count_; }
   public: bool control_key() const {
-    return flags() & static_cast<int>(EventFlags::ControlKey);
+    return (flags() & static_cast<int>(EventFlags::ControlKey)) != 0;
   }
   public: bool is_left_button() const { return button_ == MouseButton::Left; }
   public: bool is_middle_button() const {
     return button_ == MouseButton::Middle;
   }
   public: bool is_non_client() const {
-    return flags() & static_cast<int>(EventFlags::NonClient);
+    return (flags() & static_cast<int>(EventFlags::NonClient)) != 0;
   }
   public: bool is_right_button() const { return button_ == MouseButton::Right; }
   public: bool is_other1_button() const {
@@ -181,7 +181,7 @@ class MouseEvent : public Event {
   public: Point location() const { return client_point_; }
   public: Point screen_location() const { return screen_point_; }
   public: bool shift_key() const {
-    return flags() & static_cast<int>(EventFlags::ShiftKey);
+    return (flags() & static_cast<int>(EventFlags::ShiftKey)) != 0;
   }
   public: EventTarget* target() const { return target_; }
 

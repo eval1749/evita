@@ -3,6 +3,8 @@
 #if !defined(INCLUDE_evita_gc_visitable_h)
 #define INCLUDE_evita_gc_visitable_h
 
+#include "base/macros.h"
+
 namespace gc {
 
 class Visitor;

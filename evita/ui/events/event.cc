@@ -11,19 +11,15 @@
 #include "common/win/win32_verify.h"
 #include "evita/gfx/rect.h"
 
-namespace base {
-namespace win {
+namespace ui {
+
+namespace {
+
 // Note: We don't use |IsAltPressed()| in "base/win_util.h", because it links
 // netapi32.lib for |NetJoinInformation()| and |NetApiBufferFree()|
 bool IsAltPressed() {
   return ::GetKeyState(VK_MENU) < 0;
 }
-}  // namespace win
-}  // namespace base
-
-namespace ui {
-
-namespace {
 
 class KeyCodeMapper : public common::Singleton<KeyCodeMapper> {
   DECLARE_SINGLETON_CLASS(KeyCodeMapper);
@@ -248,7 +244,7 @@ int MouseEvent::ConvertToEventFlags(const base::NativeEvent& native_event) {
     flags |= static_cast<int>(EventFlags::Other1Button);
   if (native_event.wParam & MK_XBUTTON1)
     flags |= static_cast<int>(EventFlags::Other2Button);
-  if (base::win::IsAltPressed())
+  if (IsAltPressed())
     flags |= static_cast<int>(EventFlags::AltKey);
   return flags;
 }

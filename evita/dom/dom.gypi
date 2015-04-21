@@ -198,6 +198,7 @@
 
         'public/io_context_id.cc',
         'public/io_delegate.cc',
+        'public/io_error.cc',
         'public/float_point.cc',
         'public/float_rect.cc',
         'public/switch_value.cc',

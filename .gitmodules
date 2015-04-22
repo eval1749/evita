@@ -22,3 +22,16 @@
 [submodule "third_party/hunspell"]
 	path = third_party/hunspell
 	url = https://chromium.googlesource.com/chromium/deps/hunspell.git
+[submodule "buildtools"]
+	path = buildtools
+	url = https://chromium.googlesource.com/chromium/buildtools.git
+[submodule "boringssl"]
+	path = third_party/boringssl/src
+	url = https://boringssl.googlesource.com/boringssl.git
+[submodule "yasm"]
+	path = third_party/yasm/source/patched-yasm
+	url = https://chromium.googlesource.com/chromium/deps/yasm/patched-yasm.git
+
+[submodule "yasm_binaries"]
+	path = third_party/yasm/binaries
+	url = https://chromium.googlesource.com/chromium/deps/yasm/binaries.git

@@ -42,6 +42,7 @@ v8.log
 
 # We should not add pattern |third_party/|. When we do so, |git submodule add|
 # fails.
+/build/win_toolchain.json
 testing/gtest
 third_party/hunspell
 third_party/icu

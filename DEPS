@@ -7,8 +7,8 @@ vars = {
   'boringssl_git': 'https://boringssl.googlesource.com',
 
   'boringssl_revision': 'ef4962f5a38fd68f0b89b67fc5e13da70e4288f6',
-  'buildtools_revision': '3b302fef93f7cc58d9b8168466905237484b2772',
-  'v8_revision': '322689b2d2888412e4255b264b87b692c41a2ced', # 4.4.14
+  'buildtools_revision': '15308f469a704c45d15567fa69cd94ce07ad0e1b',
+  'v8_revision': 'd3c652f04b04725ff110a9016aeb728f60d5e6ba',
 }
 
 deps = {
@@ -31,7 +31,7 @@ deps = {
     Var('chromium_git') + '/external/googletest.git' + '@' + 'be1868139ffe0ccd0e8e3b37292b84c821d9c8ad', # from svn revision 704
 
   'src/tools/gyp':
-    Var('chromium_git') + '/external/gyp.git' + '@' + '2889664b9fa88cce175c5c7cdf207d28420a7412',
+    Var('chromium_git') + '/external/gyp.git' + '@' + '2a5511bd901f328db10d0b6415c864a5ff59fc81',
 
   'src/third_party/hunspell':
     Var('chromium_git') + '/chromium/deps/hunspell.git' + '@' + 'c956c0e97af00ef789afb2f64d02c9a5a50e6eb1',

@@ -6,9 +6,9 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'boringssl_git': 'https://boringssl.googlesource.com',
 
-  'boringssl_revision': '68de407b5fc746c0fa82706dd897288d01c32930',
-  'buildtools_revision': '15f5fc6fdb1795e2b99f66e5bc6c01e9fb62b436',
-  'v8_revision': '19ea8c6314a1e78d61cbefd185bbb307fe076504',
+  'boringssl_revision': '966003273dc1a8b92f376aefa81232f14eecde8a',
+  'buildtools_revision': 'b73e5f70d7ac6be98fb2555461f631afc90216ce',
+  'v8_revision': '57cf87de1fd03876eae91fb117594c92e2faf132',
 }
 
 deps = {
@@ -28,7 +28,7 @@ deps = {
     Var('chromium_git') + '/external/googlemock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271', # from svn revision 501
 
   'src/testing/gtest':
-    Var('chromium_git') + '/external/googletest.git' + '@' + 'be1868139ffe0ccd0e8e3b37292b84c821d9c8ad', # from svn revision 704
+    Var('chromium_git') + '/external/googletest.git' + '@' + '23574bf2333f834ff665f894c97bef8a5b33a0a9', # from svn revision 711
 
   'src/tools/gyp':
     Var('chromium_git') + '/external/gyp.git' + '@' + '0bb67471bca068996e15b56738fa4824dfa19de0',
@@ -37,7 +37,7 @@ deps = {
     Var('chromium_git') + '/chromium/deps/hunspell.git' + '@' + 'c956c0e97af00ef789afb2f64d02c9a5a50e6eb1',
 
   'src/third_party/icu':
-    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'f8c0e585b0a046d83d72b5d37356cb50d5b2031a',
+    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '5788e2736b3bc642994b6351a6096124895afa01',
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),

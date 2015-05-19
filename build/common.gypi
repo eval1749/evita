@@ -70,7 +70,10 @@
           # certificates, use_openssl_certs must be set.
           'use_openssl%': 0,
 
-          # Typedef X509Certificate::OSCertHandle to OpenSSL's struct X509*.
+          # Use OpenSSL for representing certificates. When targeting Android,
+          # the platform certificate library is used for certificate
+          # verification. On other targets, this flag also enables OpenSSL for
+          # certificate verification, but this configuration is unsupported.
           'use_openssl_certs%': 0,
 
           # Disable viewport meta tag by default.
@@ -146,6 +149,7 @@
         'enable_hidpi%': '<(enable_hidpi)',
         'buildtype%': '<(buildtype)',
         'branding%': '<(branding)',
+        'branding_path_component%': '<(branding)',
         'host_arch%': '<(host_arch)',
         'target_arch%': '<(target_arch)',
 
@@ -154,10 +158,6 @@
         # The channel to build on Android: stable, beta, dev, canary, or
         # default. "default" should be used on non-official builds.
         'android_channel%': 'default',
-
-        # WebView now builds in a normal android build; don't use this.
-        # TODO(torne): remove this. http://crbug.com/440793
-        'android_webview_build%': 0,
 
         # Set ARM architecture version.
         'arm_version%': 7,
@@ -173,6 +173,7 @@
 
         # The system root for cross-compiles. Default: none.
         'sysroot%': '',
+        'use_sysroot%': 0,
         'chroot_cmd%': '',
 
         # The system libdir used for this ABI.
@@ -189,6 +190,14 @@
         'mips_dsp_rev%': 0,
 
         'conditions': [
+          ['branding == "Chrome"', {
+            'branding_path_component%': 'google_chrome',
+          }],
+
+          ['branding == "Chromium"', {
+            'branding_path_component%': 'chromium',
+          }],
+
           # Ash needs Aura.
           ['use_aura==0', {
             'use_ash%': 0,
@@ -290,13 +299,13 @@
       'enable_viewport%': '<(enable_viewport)',
       'enable_hidpi%': '<(enable_hidpi)',
       'android_channel%': '<(android_channel)',
-      'android_webview_build%': '<(android_webview_build)',
       'use_goma%': '<(use_goma)',
       'gomadir%': '<(gomadir)',
       'enable_app_list%': '<(enable_app_list)',
       'use_default_render_theme%': '<(use_default_render_theme)',
       'buildtype%': '<(buildtype)',
       'branding%': '<(branding)',
+      'branding_path_component%': '<(branding_path_component)',
       'arm_version%': '<(arm_version)',
       'sysroot%': '<(sysroot)',
       'chroot_cmd%': '<(chroot_cmd)',
@@ -362,11 +371,11 @@
       'configuration_policy%': 1,
 
       # Variable safe_browsing is used to control the build time configuration
-      # for safe browsing feature. Safe browsing can be compiled in 3 different
+      # for safe browsing feature. Safe browsing can be compiled in 4 different
       # levels: 0 disables it, 1 enables it fully, and 2 enables only UI and
-      # reporting features without enabling phishing and malware detection. This
-      # is useful to integrate a third party phishing/malware detection to
-      # existing safe browsing logic.
+      # reporting features for use with Data Saver on Mobile, and 3 enables
+      # extended mobile protection via an external API.  When 3 is fully
+      # deployed, it will replace 2.
       'safe_browsing%': 1,
 
       # Web speech is enabled by default. Set to 0 to disable.
@@ -664,6 +673,12 @@
       # Whether the entire browser uses toolkit-views on Mac instead of Cocoa.
       'mac_views_browser%': 0,
 
+      # By default, use ICU data file (icudtl.dat).
+      'icu_use_data_file_flag%': 1,
+
+      # Turn on JNI generation optimizations by default.
+      'optimize_jni_generation%': 1,
+
       'conditions': [
         # A flag for POSIX platforms
         ['OS=="win"', {
@@ -680,18 +695,10 @@
         }],
 
         # NSS usage.
-        ['(OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris") and use_openssl==0', {
-          'use_nss%': 1,
+        ['(OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris")', {
+          'use_nss_certs%': 1,
         }, {
-          'use_nss%': 0,
-        }],
-
-        # When OpenSSL is used for SSL and crypto on Unix-like systems, use
-        # OpenSSL's certificate definition.
-        ['(OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris") and use_openssl==1', {
-          'use_openssl_certs%': 1,
-        }, {
-          'use_openssl_certs%': 0,
+          'use_nss_certs%': 0,
         }],
 
         # libudev usage.  This currently only affects the content layer.
@@ -860,7 +867,7 @@
         # are using a custom toolchain and need to control -B in ldflags.
         # Do not use 32-bit gold on 32-bit hosts as it runs out address space
         # for component=static_library builds.
-        ['OS=="linux" and (target_arch=="x64" or target_arch=="arm")', {
+        ['(OS=="linux" or OS=="android") and (target_arch=="x64" or target_arch=="arm")', {
           'linux_use_bundled_gold%': 1,
         }, {
           'linux_use_bundled_gold%': 0,
@@ -916,8 +923,6 @@
         ['chromeos==1', {
           'enable_basic_printing%': 0,
           'enable_print_preview%': 1,
-          # When building for ChromeOS we dont want Chromium to use libjpeg_turbo.
-          'use_libjpeg_turbo%': 0,
         }],
 
         # Do not enable the Settings App on ChromeOS.
@@ -935,7 +940,7 @@
           'sysroot%': '<!(cd <(DEPTH) && pwd -P)/chrome/installer/linux/debian_wheezy_arm-sysroot',
         }], # OS=="linux" and target_arch=="arm" and chromeos==0
 
-        ['OS=="linux" and branding=="Chrome" and buildtype=="Official" and chromeos==0', {
+        ['OS=="linux" and ((branding=="Chrome" and buildtype=="Official" and chromeos==0) or use_sysroot==1)' , {
           'conditions': [
             ['target_arch=="x64"', {
               'sysroot%': '<!(cd <(DEPTH) && pwd -P)/chrome/installer/linux/debian_wheezy_amd64-sysroot',
@@ -994,15 +999,6 @@
           'enable_print_preview%': 0,
         }],
 
-        # By default, use ICU data file (icudtl.dat) on all platforms
-        # except when building Android WebView.
-        # TODO(jshin): Handle 'use_system_icu' on Linux (Chromium).
-        # Set the data reduction proxy origin for Android Webview.
-        ['android_webview_build==0', {
-          'icu_use_data_file_flag%' : 1,
-        }, {
-          'icu_use_data_file_flag%' : 0,
-        }],
         ['OS=="win" or OS=="mac"', {
           'enable_wifi_bootstrapping%' : 1,
         }],
@@ -1014,21 +1010,11 @@
         }, {
           'sas_dll_path%': '<(DEPTH)/third_party/platformsdk_win7/files/redist/x86',
         }],
-
-        # Turn on JNI generation optimizations on non-WebView builds.
-        ['OS=="android" and android_webview_build==0', {
-          'optimize_jni_generation%': 1,
-        }, {
-          'optimize_jni_generation%': 0,
-        }],
-
-        # TODO(rmcilroy): Remove ios check. http://crbug.com/421063.
-        ['OS!="ios"', {
-          'v8_use_external_startup_data%': 1,
-        }, {
-          'v8_use_external_startup_data%': 0,
-        }],
       ],
+
+      # Setting this to '0' will cause V8's startup snapshot to be
+      # embedded in the binary instead of being a external files.
+      'v8_use_external_startup_data%': 1,
 
       # Set this to 1 to enable use of concatenated impulse responses
       # for the HRTF panner in WebAudio.
@@ -1089,6 +1075,7 @@
 
     # Copy conditionally-set variables out one scope.
     'branding%': '<(branding)',
+    'branding_path_component%': '<(branding_path_component)',
     'buildtype%': '<(buildtype)',
     'target_arch%': '<(target_arch)',
     'target_subarch%': '<(target_subarch)',
@@ -1103,7 +1090,7 @@
     'use_libpci%': '<(use_libpci)',
     'use_openssl%': '<(use_openssl)',
     'use_openssl_certs%': '<(use_openssl_certs)',
-    'use_nss%': '<(use_nss)',
+    'use_nss_certs%': '<(use_nss_certs)',
     'use_udev%': '<(use_udev)',
     'os_bsd%': '<(os_bsd)',
     'os_posix%': '<(os_posix)',
@@ -1208,7 +1195,6 @@
     'use_libjpeg_turbo%': '<(use_libjpeg_turbo)',
     'use_system_libjpeg%': '<(use_system_libjpeg)',
     'android_channel%': '<(android_channel)',
-    'android_webview_build%': '<(android_webview_build)',
     'icu_use_data_file_flag%': '<(icu_use_data_file_flag)',
     'gyp_managed_install%': 0,
     'create_standalone_apk%': 1,
@@ -1330,8 +1316,7 @@
     # Whether the VS xtree header has been patched to disable warning 4702. If
     # it has, then we don't need to disable 4702 (unreachable code warning).
     # The patch is preapplied to the internal toolchain and hence all bots.
-    #'msvs_xtree_patched%': '<!pymod_do_main(win_is_xtree_patched)',
-    'msvs_xtree_patched%': '0',
+    'msvs_xtree_patched%': '<!pymod_do_main(win_is_xtree_patched)',
 
     # Clang stuff.
     'clang%': '<(clang)',
@@ -1527,6 +1512,11 @@
     # Experiment: http://crbug.com/426914
     'envoy%': 0,
 
+    # Used to set libjpeg_gyp_path. Chrome OS ui/gfx/gfx.gyp uses the IJG path
+    # for robust login screen decoding.
+    'libjpeg_ijg_gyp_path': '<(DEPTH)/third_party/libjpeg/libjpeg.gyp',
+    'libjpeg_turbo_gyp_path': '<(DEPTH)/third_party/libjpeg_turbo/libjpeg.gyp',
+
     'conditions': [
       ['buildtype=="Official"', {
         # Continue to embed build meta data in Official builds, basically the
@@ -1702,7 +1692,7 @@
           'android_ndk_absolute_root%': '<(android_ndk_absolute_root)',
           'android_sdk_root%': '<(android_sdk_root)',
           'android_sdk_version%': '<(android_sdk_version)',
-          'android_stlport_root': '<(android_ndk_root)/sources/cxx-stl/stlport',
+          'android_libcpp_root': '<(android_ndk_root)/sources/cxx-stl/llvm-libc++',
           'host_os%': '<(host_os)',
 
           'android_sdk%': '<(android_sdk_root)/platforms/android-<(android_sdk_version)',
@@ -1778,9 +1768,9 @@
         'android_sdk%': '<(android_sdk)',
         'android_sdk_jar%': '<(android_sdk)/android.jar',
 
-        'android_stlport_root': '<(android_stlport_root)',
-        'android_stlport_include': '<(android_stlport_root)/stlport',
-        'android_stlport_libs_dir': '<(android_stlport_root)/libs/<(android_app_abi)',
+        'android_libcpp_root': '<(android_libcpp_root)',
+        'android_libcpp_include': '<(android_libcpp_root)/libcxx/include',
+        'android_libcpp_libs_dir': '<(android_libcpp_root)/libs/<(android_app_abi)',
         'host_os%': '<(host_os)',
 
         # Location of the "objcopy" binary, used by both gyp and scripts.
@@ -1821,16 +1811,6 @@
         'p2p_apis%' : 0,
 
         'gtest_target_type%': 'shared_library',
-
-        # Uses system APIs for decoding audio and video.
-        'use_libffmpeg%': '0',
-
-        # TODO(torne): Remove this unsupported option once all the places that
-        # test it have been updated.
-        'use_system_stlport%': 0,
-
-        # Copy it out one scope.
-        'android_webview_build%': '<(android_webview_build)',
       }],  # OS=="android"
       ['embedded==1', {
         'use_system_fontconfig%': 0,
@@ -1950,9 +1930,14 @@
           },{
             'winsdk_arch%': '<(target_arch)',
           }],
-          ['component=="shared_library"', {
+          ['component=="shared_library" or MSVS_VERSION == "2015"', {
+            # TODO(scottmg): The allocator shimming doesn't work on the 2015 CRT
+            # and we are hoping to be able to remove it if an additional feature
+            # lands in the 2015 CRT API. For now, don't shim and revisit once
+            # VS2015 is RTM: http://crbug.com/481611.
             'win_use_allocator_shim%': 0,
-          },{
+          }],
+          ['component=="static_library"', {
             # Turn on multiple dll by default on Windows when in static_library.
             'chrome_multiple_dll%': 1,
           }],
@@ -2017,9 +2002,9 @@
       # library used by Chromium.
       ['use_system_libjpeg==1 or use_libjpeg_turbo==0', {
         # Configuration for using the system libjeg is here.
-        'libjpeg_gyp_path': '../third_party/libjpeg/libjpeg.gyp',
+        'libjpeg_gyp_path': '<(libjpeg_ijg_gyp_path)',
       }, {
-        'libjpeg_gyp_path': '../third_party/libjpeg_turbo/libjpeg.gyp',
+        'libjpeg_gyp_path': '<(libjpeg_turbo_gyp_path)',
       }],
 
       # Options controlling the use of GConf (the classic GNOME configuration
@@ -2057,8 +2042,8 @@
       ['use_ash==1', {
         'grit_defines': ['-D', 'use_ash'],
       }],
-      ['use_nss==1', {
-        'grit_defines': ['-D', 'use_nss'],
+      ['use_nss_certs==1', {
+        'grit_defines': ['-D', 'use_nss_certs'],
       }],
       ['use_ozone==1', {
         'grit_defines': ['-D', 'use_ozone'],
@@ -2175,20 +2160,31 @@
         'grit_defines': ['-D', 'enable_service_discovery'],
         'enable_service_discovery%': 1
       }],
-      ['clang_use_chrome_plugins==1 and OS!="win"', {
+      ['clang_use_chrome_plugins==1', {
         'variables': {
           'conditions': [
-            ['OS=="mac" or OS=="ios"', {
-              'clang_lib_path%': '<!(cd <(DEPTH) && pwd -P)/third_party/llvm-build/Release+Asserts/lib/libFindBadConstructs.dylib',
-            }, { # OS != "mac" or OS != "ios"
-              'clang_lib_path%': '<!(cd <(DEPTH) && pwd -P)/third_party/llvm-build/Release+Asserts/lib/libFindBadConstructs.so',
-            }],
+            ['OS!="win"', {
+              'variables': {
+                'conditions': [
+                  ['OS=="mac" or OS=="ios"', {
+                    'clang_lib_path%': '<!(cd <(DEPTH) && pwd -P)/third_party/llvm-build/Release+Asserts/lib/libFindBadConstructs.dylib',
+                  }, { # OS != "mac" or OS != "ios"
+                    'clang_lib_path%': '<!(cd <(DEPTH) && pwd -P)/third_party/llvm-build/Release+Asserts/lib/libFindBadConstructs.so',
+                  }],
+                ],
+              },
+              'clang_dynlib_flags%': '-Xclang -load -Xclang <(clang_lib_path) ',
+            }, { # OS == "win"
+              # On Windows, the plugin is built directly into clang, so there's
+              # no need to load it dynamically.
+              'clang_dynlib_flags%': '',
+            }]
           ],
         },
         # If you change these, also change build/config/clang/BUILD.gn.
         'clang_chrome_plugins_flags%':
-          '-Xclang -load -Xclang <(clang_lib_path)'
-          ' -Xclang -add-plugin -Xclang find-bad-constructs',
+          '<(clang_dynlib_flags)'
+          '-Xclang -add-plugin -Xclang find-bad-constructs ',
       }],
       ['asan==1 or msan==1 or lsan==1 or tsan==1', {
         'clang%': 1,
@@ -2238,12 +2234,6 @@
             'make_clang_dir%': 'third_party/llvm-allocated-type/Linux_ia32',
           }],
         ],
-      }],
-
-      ['OS=="win"', {
-        # The Clang plugins don't currently work on Windows.
-        # TODO(hans): One day, this will work. (crbug.com/82385)
-        'clang_use_chrome_plugins%': 0,
       }],
 
       # On valgrind bots, override the optimizer settings so we don't inline too
@@ -2321,9 +2311,12 @@
           }, {
             'arm_fpu%': 'vfpv3-d16',
           }],
+          ['OS=="android"', {
+            'arm_float_abi%': 'softfp',
+          }, {
+            'arm_float_abi%': 'hard',
+          }],
         ],
-        # Change the default to hard once the armhf transition is complete.
-        'arm_float_abi%': 'softfp',
         'arm_thumb%': 1,
       }],
 
@@ -2365,6 +2358,12 @@
             'fastbuild': 1,
           }],
         ],
+      }],
+
+      ['OS=="win" and asan==1', {
+        # TODO(thakis): Enable this once the lkgr asan bot has caught up
+        # with trunk clang, http://crbug.com/489123 , http://crbug.com/489123
+        'blink_gc_plugin%': 0,
       }],
 
       ['OS=="win" and (clang==1 or asan==1)', {
@@ -2623,13 +2622,13 @@
           ],
         },
       }],
-      ['(clang==1 or host_clang==1) and OS!="win"', {
+      ['clang==1 or host_clang==1', {
         # This is here so that all files get recompiled after a clang roll and
         # when turning clang on or off.
         # (defines are passed via the command line, and build systems rebuild
         # things when their commandline changes). Nothing should ever read this
         # define.
-        'defines': ['CR_CLANG_REVISION=<!(<(DEPTH)/tools/clang/scripts/update.sh --print-revision)'],
+        'defines': ['CR_CLANG_REVISION=<!(python <(DEPTH)/tools/clang/scripts/update.py --print-revision)'],
       }],
       ['enable_rlz==1', {
         'defines': ['ENABLE_RLZ'],
@@ -2690,6 +2689,9 @@
       }],
       ['enable_webrtc==1', {
         'defines': ['ENABLE_WEBRTC=1'],
+      }],
+      ['enable_media_router==1', {
+        'defines': ['ENABLE_MEDIA_ROUTER=1'],
       }],
       ['proprietary_codecs==1', {
         'defines': ['USE_PROPRIETARY_CODECS'],
@@ -2929,6 +2931,8 @@
         'defines': ['ENABLE_AUTOFILL_DIALOG=1'],
       }],
       ['enable_prod_wallet_service==1', {
+        # In GN, this is set on the autofill tagets only. See
+        # //components/autofill/core/browser:wallet_service
         'defines': ['ENABLE_PROD_WALLET_SERVICE=1'],
       }],
       ['enable_background==1', {
@@ -3001,6 +3005,35 @@
       ['v8_use_external_startup_data==1', {
        'defines': ['V8_USE_EXTERNAL_STARTUP_DATA'],
       }],
+
+      # SAFE_BROWSING_SERVICE - browser manages a safe-browsing service.
+      # SAFE_BROWSING_DB_LOCAL - service manages a local database.
+      # SAFE_BROWSING_DB_REMOTE - service talks via API to a database
+      # SAFE_BROWSING_CSD - enable client-side phishing detection.
+      ['safe_browsing==1', {
+        'defines': [
+          # TODO(nparker): Remove existing uses of FULL_SAFE_BROWSING
+          'FULL_SAFE_BROWSING',
+          'SAFE_BROWSING_CSD',
+          'SAFE_BROWSING_DB_LOCAL',
+          'SAFE_BROWSING_SERVICE',
+        ],
+      }],
+      ['safe_browsing==2', {
+        'defines': [
+          # TODO(nparker): Remove existing uses of MOBILE_SAFE_BROWSING
+          'MOBILE_SAFE_BROWSING',
+          'SAFE_BROWSING_SERVICE',
+        ],
+      }],
+      ['safe_browsing==3', {
+        'defines': [
+          # TODO(nparker): Remove existing uses of MOBILE_SAFE_BROWSING
+          'MOBILE_SAFE_BROWSING',
+          'SAFE_BROWSING_DB_REMOTE',
+          'SAFE_BROWSING_SERVICE',
+        ],
+      }],
     ],  # conditions for 'target_defaults'
     'target_conditions': [
       ['<(use_libpci)==1', {
@@ -3021,8 +3054,8 @@
       ['<(use_glib)==1 and >(nacl_untrusted_build)==0', {
         'defines': ['USE_GLIB=1'],
       }],
-      ['<(use_nss)==1 and >(nacl_untrusted_build)==0', {
-        'defines': ['USE_NSS=1'],
+      ['<(use_nss_certs)==1 and >(nacl_untrusted_build)==0', {
+        'defines': ['USE_NSS_CERTS=1'],
       }],
       ['<(chromeos)==1 and >(nacl_untrusted_build)==0', {
         'defines': ['OS_CHROMEOS=1'],
@@ -3576,6 +3609,13 @@
         ],
       },
     }],
+    ['os_posix==1 and OS=="linux"', {
+      'defines': [
+        '_LARGEFILE_SOURCE',
+        '_LARGEFILE64_SOURCE',
+        '_FILE_OFFSET_BITS=64',
+      ],
+    }],
     ['os_posix==1 and OS!="mac" and OS!="ios"', {
       'target_defaults': {
         # Enable -Werror by default, but put it in a variable so it can
@@ -3661,12 +3701,6 @@
                 # function frames (crbug.com/391706).
                 'cflags': [
                   '-fomit-frame-pointer',
-                ],
-              }],
-              ['OS!="android"', {
-                'defines': [
-                  '_LARGEFILE_SOURCE',
-                  '_LARGEFILE64_SOURCE',
                 ],
               }],
               ['OS=="linux" and target_arch=="ia32"', {
@@ -4018,6 +4052,8 @@
                           '-no-integrated-as',
                           '-B<(android_toolchain)',  # Else /usr/bin/as gets picked up.
                         ],
+                      }],
+                      ['clang==1 and linux_use_bundled_gold==0', {
                         'ldflags': [
                           # Let clang find the ld.gold in the NDK.
                           '--gcc-toolchain=<(android_toolchain)/..',
@@ -4068,9 +4104,6 @@
                   ['OS=="android"', {
                     'cflags!': [
                        '-fstack-protector',  # stack protector is always enabled on arm64.
-                    ],
-                    'ldflags': [
-                      '-fuse-ld=gold',
                     ],
                   }],
                 ],
@@ -4151,8 +4184,7 @@
                   '-m<(mips_float_abi)-float'
                 ],
                 'ldflags': [
-                  '-Wl,--no-keep-memory',
-                  '-ldl',
+                  '-Wl,--no-keep-memory'
                 ],
                 'cflags_cc': [
                   '-Wno-uninitialized',
@@ -4175,9 +4207,6 @@
                 ],
                 'cflags_cc': [
                   '-Wno-uninitialized',
-                ],
-                'ldflags': [
-                  '-ldl',
                 ],
               }],
             ],
@@ -4542,11 +4571,16 @@
               '-B<!(cd <(DEPTH) && pwd -P)/<(binutils_dir)',
             ],
           }],
-          ['linux_use_bundled_gold==1', {
+          ['linux_use_bundled_gold==1 and '
+           'not (clang==0 and (use_lto==1 or use_lto_o2==1))', {
             # Put our binutils, which contains gold in the search path. We pass
             # the path to gold to the compiler. gyp leaves unspecified what the
             # cwd is when running the compiler, so the normal gyp path-munging
             # fails us. This hack gets the right path.
+            #
+            # Disabled when using GCC LTO because GCC also uses the -B search
+            # path at link time to find "as", and our bundled "as" can only
+            # target x86.
             'ldflags': [
               '-B<!(cd <(DEPTH) && pwd -P)/<(binutils_dir)',
             ],
@@ -4613,9 +4647,9 @@
           # Figure this out early since it needs symbols from libgcc.a, so it
           # has to be before that in the set of libraries.
           ['component=="shared_library"', {
-              'android_stlport_library': 'stlport_shared',
+              'android_libcpp_library': 'c++_shared',
           }, {
-              'android_stlport_library': 'stlport_static',
+              'android_libcpp_library': 'c++_static',
           }],
         ],
 
@@ -4693,20 +4727,19 @@
               '-fstack-protector',
               '-fno-short-enums',
               '-finline-limit=64',
-              '-Wa,--noexecstack',
               '<@(release_extra_cflags)',
               '--sysroot=<(android_ndk_sysroot)',
-              # NOTE: The stlport header include paths below are specified in
+              # NOTE: The libc++ header include paths below are specified in
               # cflags rather than include_dirs because they need to come
               # after include_dirs.
               # The include ordering here is important; change with caution.
-              '-isystem<(android_stlport_include)',
+              '-isystem<(android_libcpp_include)',
+              '-isystem<(android_ndk_root)/sources/cxx-stl/llvm-libc++abi/libcxxabi/include',
+              '-isystem<(android_ndk_root)/sources/android/support/include',
             ],
             'defines': [
               'ANDROID',
               '__GNU_SOURCE=1',  # Necessary for clone()
-              'USE_STLPORT=1',
-              '_STLP_USE_PTR_SPECIALIZATIONS=1',
               'CHROME_BUILD_ID="<(chrome_build_id)"',
               # The NDK has these things, but doesn't define the constants
               # to say that it does. Define them here instead.
@@ -4719,11 +4752,11 @@
               '-Wl,--no-undefined',
               '--sysroot=<(android_ndk_sysroot)',
               '-nostdlib',
-              '-L<(android_stlport_libs_dir)',
-              # Don't allow visible symbols from libgcc or stlport to be
+              '-L<(android_libcpp_libs_dir)',
+              # Don't allow visible symbols from libgcc or libc++ to be
               # re-exported.
               '-Wl,--exclude-libs=libgcc.a',
-              '-Wl,--exclude-libs=libstlport_static.a',
+              '-Wl,--exclude-libs=libc++_static.a',
               # Don't allow visible symbols from libraries that contain
               # assembly code with symbols that aren't hidden properly.
               # http://crbug.com/448386
@@ -4736,7 +4769,8 @@
               '-Wl,--exclude-libs=libvpx.a',
             ],
             'libraries': [
-              '-l<(android_stlport_library)',
+              '-l<(android_libcpp_library)',
+              '-latomic',
               # Manually link the libgcc.a that the cross compiler uses.
               '<!(<(android_toolchain)/*-gcc -print-libgcc-file-name)',
               '-lc',
@@ -4756,6 +4790,11 @@
                 ],
               }],
               ['clang==1', {
+                'libraries!': [
+                  # Clang with libc++ does not require an explicit atomic
+                  # library reference.
+                  '-latomic',
+                ],
                 'cflags': [
                   # Work around incompatibilities between bionic and clang
                   # headers.
@@ -5103,6 +5142,22 @@
             }],
           ],
         },
+        'configurations': {
+          'Release_Base': {
+            'conditions': [
+              ['branding=="Chrome" and buildtype=="Official"', {
+                'xcode_settings': {
+                  'OTHER_CFLAGS': [
+                    # The Google Chrome Framework dSYM generated by dsymutil has
+                    # grown larger than 4GB, which dsymutil can't handle. Reduce
+                    # the amount of debug symbols.
+                    '-fno-standalone-debug',  # See http://crbug.com/479841
+                  ]
+                },
+              }],
+            ],
+          },  # configuration "Release"
+        },  # configurations
         'xcode_settings': {
           'GCC_DYNAMIC_NO_PIC': 'NO',               # No -mdynamic-no-pic
                                                     # (Equivalent to -fPIC)
@@ -5499,6 +5554,11 @@
           4512, # Assignment operator could not be generated
           4610, # Object can never be instantiated
           4996, # 'X': was declared deprecated (for GetVersionEx).
+
+          # These are variable shadowing warnings that are new in VS2015. We
+          # should work through these at some point -- they may be removed from
+          # the RTM release in the /W4 set.
+          4456, 4457, 4458, 4459,
         ],
         'msvs_settings': {
           'VCCLCompilerTool': {
@@ -5634,6 +5694,13 @@
                 ],
               },
             }],
+            ['clang==1 and clang_use_chrome_plugins==1', {
+              'VCCLCompilerTool': {
+                'AdditionalOptions': [
+                  '<@(clang_chrome_plugins_flags)',
+                ],
+              },
+            }],
           ],
         },
       },
@@ -5723,8 +5790,28 @@
                     }],
                   ],
                 }],
+                ['sanitizer_coverage!=0', {
+                  # TODO(asan/win): Move this down into the general
+                  # win-target_defaults section once the 64-bit asan runtime
+                  # exists.  See crbug.com/345874.
+                  'VCCLCompilerTool': {
+                    'AdditionalOptions': [
+                      '-fsanitize-coverage=<(sanitizer_coverage)',
+                    ],
+                  },
+                }],
               ],
             },
+            'conditions': [
+              ['sanitizer_coverage!=0', {
+                # TODO(asan/win): Move this down into the general
+                # win-target_defaults section once the 64-bit asan runtime
+                # exists.  See crbug.com/345874.
+                'defines': [
+                  'SANITIZER_COVERAGE',
+                ],
+              }],
+            ],
           },
           'x64_Base': {
             'msvs_settings': {

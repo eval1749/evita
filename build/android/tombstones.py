@@ -19,7 +19,7 @@ import subprocess
 import sys
 import optparse
 
-from pylib import android_commands
+from pylib.device import adb_wrapper
 from pylib.device import device_errors
 from pylib.device import device_utils
 from pylib.utils import run_tests_helper
@@ -157,12 +157,13 @@ def _ResolveTombstones(jobs, tombstones):
     logging.warning('No tombstones to resolve.')
     return
   if len(tombstones) == 1:
-    data = _ResolveTombstone(tombstones[0])
+    data = [_ResolveTombstone(tombstones[0])]
   else:
     pool = multiprocessing.Pool(processes=jobs)
     data = pool.map(_ResolveTombstone, tombstones)
-  for d in data:
-    logging.info(d)
+  for tombstone in data:
+    for line in tombstone:
+      logging.info(line)
 
 
 def _GetTombstonesForDevice(device, options):
@@ -233,19 +234,19 @@ def main():
   options, _ = parser.parse_args()
 
   if options.device:
-    devices = [options.device]
+    devices = [device_utils.DeviceUtils(options.device)]
   else:
-    devices = android_commands.GetAttachedDevices()
+    devices = device_utils.DeviceUtils.HealthyDevices()
 
   # This must be done serially because strptime can hit a race condition if
   # used for the first time in a multithreaded environment.
   # http://bugs.python.org/issue7980
   tombstones = []
-  for device_serial in devices:
-    device = device_utils.DeviceUtils(device_serial)
+  for device in devices:
     tombstones += _GetTombstonesForDevice(device, options)
 
   _ResolveTombstones(options.jobs, tombstones)
+
 
 if __name__ == '__main__':
   sys.exit(main())

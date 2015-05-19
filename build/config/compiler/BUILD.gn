@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/config/android/config.gni")
+import("//build/config/chrome_build.gni")
 if (current_cpu == "arm") {
   import("//build/config/arm.gni")
 }
@@ -157,15 +158,15 @@ config("compiler") {
     ]
   }
 
-  if (is_clang && !is_win && !is_nacl) {
+  if (is_clang && !is_nacl) {
     # This is here so that all files get recompiled after a clang roll and
     # when turning clang on or off. (defines are passed via the command line,
     # and build system rebuild things when their commandline changes). Nothing
     # should ever read this define.
-    defines += [ "CR_CLANG_REVISION=" +
-                 exec_script("//tools/clang/scripts/posix-print-revision.py",
-                             [],
-                             "trim string") ]
+    defines +=
+        [ "CR_CLANG_REVISION=" + exec_script("//tools/clang/scripts/update.py",
+                                             [ "--print-revision" ],
+                                             "trim string") ]
   }
 
   # Mac-specific compiler flags setup.
@@ -194,16 +195,11 @@ config("compiler") {
     cflags_objcc = [ "-fobjc-call-cxx-cdtors" ]
 
     cflags_c += [ "-std=c99" ]
-    cflags_cc += [ "-std=gnu++11" ]
 
     ldflags += common_mac_flags
   } else if (is_posix) {
     # Non-Mac Posix compiler flags setup.
     # -----------------------------------
-    if (gcc_version >= 48) {
-      cflags_cc += [ "-std=gnu++11" ]
-    }
-
     if (enable_profiling && !is_debug) {
       # The GYP build spams this define into every compilation unit, as we do
       # here, but it only appears to be used in base and a couple other places.
@@ -340,6 +336,7 @@ config("compiler") {
         "-fno-unwind-tables",
         "-fno-asynchronous-unwind-tables",
       ]
+      defines += [ "NO_UNWIND_TABLES" ]
     } else {
       cflags += [ "-funwind-tables" ]
     }
@@ -413,7 +410,18 @@ config("compiler") {
   # ------------------------------------
   if (is_clang) {
     cflags += [ "-fcolor-diagnostics" ]
+  }
+
+  # C++11 compiler flags setup.
+  # ---------------------------
+  if (is_linux || is_android || is_nacl) {
+    # gnu++11 instead of c++11 is needed because some code uses typeof() (a
+    # GNU extension).
+    # TODO(thakis): Eventually switch this to c++11 instead,
+    # http://crbug.com/427584
     cflags_cc += [ "-std=gnu++11" ]
+  } else if (!is_win) {
+    cflags_cc += [ "-std=c++11" ]
   }
 
   # Android-specific flags setup.
@@ -455,10 +463,10 @@ config("compiler") {
     ldflags += [
       "-Wl,--no-undefined",
 
-      # Don't allow visible symbols from libgcc or stlport to be
+      # Don't allow visible symbols from libgcc or libc++ to be
       # re-exported.
       "-Wl,--exclude-libs=libgcc.a",
-      "-Wl,--exclude-libs=libstlport_static.a",
+      "-Wl,--exclude-libs=libc++_static.a",
 
       # Don't allow visible symbols from libraries that contain
       # assembly code with symbols that aren't hidden properly.
@@ -540,7 +548,7 @@ config("runtime_library") {
     ]
   }
 
-  # Stlport setup. Android uses a different (smaller) version of the STL.
+  # Android standard library setup.
   if (is_android) {
     if (is_clang) {
       # Work around incompatibilities between bionic and clang headers.
@@ -550,11 +558,7 @@ config("runtime_library") {
       ]
     }
 
-    defines += [
-      "USE_STLPORT=1",
-      "_STLP_USE_PTR_SPECIALIZATIONS=1",
-      "__GNU_SOURCE=1",  # Necessary for clone().
-    ]
+    defines += [ "__GNU_SOURCE=1" ]  # Necessary for clone().
 
     # TODO(jdduke) Re-enable on mips after resolving linking
     # issues with libc++ (crbug.com/456380).
@@ -563,45 +567,48 @@ config("runtime_library") {
     }
     ldflags += [ "-nostdlib" ]
 
-    # NOTE: The stlport header include paths below are specified in cflags
+    # NOTE: The libc++ header include paths below are specified in cflags
     # rather than include_dirs because they need to come after include_dirs.
     # Think of them like system headers, but don't use '-isystem' because the
     # arm-linux-androideabi-4.4.3 toolchain (circa Gingerbread) will exhibit
     # strange errors. The include ordering here is important; change with
     # caution.
-    android_stlport_root = "$android_ndk_root/sources/cxx-stl/stlport"
+    android_libcpp_root = "$android_ndk_root/sources/cxx-stl/llvm-libc++"
 
-    cflags += [ "-isystem" +
-                rebase_path("$android_stlport_root/stlport", root_build_dir) ]
-    lib_dirs += [ "$android_stlport_root/libs/$android_app_abi" ]
+    cflags += [
+      "-isystem" +
+          rebase_path("$android_libcpp_root/libcxx/include", root_build_dir),
+      "-isystem" + rebase_path(
+              "$android_ndk_root/sources/cxx-stl/llvm-libc++abi/libcxxabi/include",
+              root_build_dir),
+      "-isystem" +
+          rebase_path("$android_ndk_root/sources/android/support/include",
+                      root_build_dir),
+    ]
+
+    lib_dirs += [ "$android_libcpp_root/libs/$android_app_abi" ]
 
     if (component_mode == "shared_library") {
-      libs += [ "stlport_shared" ]
+      android_libcpp_library = "c++_shared"
     } else {
-      libs += [ "stlport_static" ]
-    }
-
-    if (current_cpu == "mipsel") {
-      libs += [
-        # ld linker is used for mips Android, and ld does not accept library
-        # absolute path prefixed by "-l"; Since libgcc does not exist in mips
-        # sysroot the proper library will be linked.
-        # TODO(gordanac): Remove once gold linker is used for mips Android.
-        "gcc",
-      ]
-    } else {
-      libs += [
-        # Manually link the libgcc.a that the cross compiler uses. This is
-        # absolute because the linker will look inside the sysroot if it's not.
-        rebase_path(android_libgcc_file),
-      ]
+      android_libcpp_library = "c++_static"
     }
 
     libs += [
+      "$android_libcpp_library",
+
+      # Manually link the libgcc.a that the cross compiler uses. This is
+      # absolute because the linker will look inside the sysroot if it's not.
+      rebase_path(android_libgcc_file),
       "c",
       "dl",
       "m",
     ]
+
+    # Clang with libc++ does not require an explicit atomic library reference.
+    if (!is_clang) {
+      libs += [ "atomic" ]
+    }
   }
 }
 
@@ -630,6 +637,18 @@ config("chromium_code") {
       "__STDC_CONSTANT_MACROS",
       "__STDC_FORMAT_MACROS",
     ]
+
+    if (using_sanitizer) {
+      # _FORTIFY_SOURCE isn't really supported by Clang now, see
+      # http://llvm.org/bugs/show_bug.cgi?id=16821.
+      # It seems to work fine with Ubuntu 12 headers though, so use it in
+      # official builds.
+      #
+      # Non-chromium code is not guaranteed to compile cleanly with
+      # _FORTIFY_SOURCE. Also, fortified build may fail when optimizations are
+      # disabled, so only do that for Release build.
+      defines += [ "_FORTIFY_SOURCE=2" ]
+    }
   }
 }
 config("no_chromium_code") {

@@ -12,13 +12,13 @@ vars = {
 
 deps = {
     'src/buildtools':
-        Var('git_url') + '/chromium/buildtools.git@b73e5f70d7ac6be98fb2555461f631afc90216ce',
+        Var('git_url') + '/chromium/buildtools.git@dc487f429cb90cac92ec7a9cd9d49db13648064d',
     'src/testing/gmock':
         Var('git_url') + '/external/googlemock.git@29763965ab52f24565299976b936d1265cb6a271',
     'src/testing/gtest':
         Var('git_url') + '/external/googletest.git@23574bf2333f834ff665f894c97bef8a5b33a0a9',
     'src/third_party/boringssl/src':
-        'https://boringssl.googlesource.com/boringssl.git@966003273dc1a8b92f376aefa81232f14eecde8a',
+        'https://boringssl.googlesource.com/boringssl.git@a7997f12be358e58aeb2345bb8b88a9d53240024',
     'src/third_party/cygwin':
         Var('git_url') + '/chromium/deps/cygwin.git@c89e446b273697fadf3a10ff1007a97c0b7de6df',
     'src/third_party/hunspell':
@@ -34,7 +34,7 @@ deps = {
     'src/tools/gyp':
         Var('git_url') + '/external/gyp.git@0bb67471bca068996e15b56738fa4824dfa19de0',
     'src/v8':
-        Var('git_url') + '/v8/v8.git@57cf87de1fd03876eae91fb117594c92e2faf132',
+        Var('git_url') + '/v8/v8.git@562de4048e1eeaec5b610e95b257a765a462c091',
 }
 
 deps_os = {

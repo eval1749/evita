@@ -6,9 +6,9 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'boringssl_git': 'https://boringssl.googlesource.com',
 
-  'boringssl_revision': '966003273dc1a8b92f376aefa81232f14eecde8a',
-  'buildtools_revision': 'b73e5f70d7ac6be98fb2555461f631afc90216ce',
-  'v8_revision': '57cf87de1fd03876eae91fb117594c92e2faf132',
+  'boringssl_revision': 'a7997f12be358e58aeb2345bb8b88a9d53240024',
+  'buildtools_revision': 'dc487f429cb90cac92ec7a9cd9d49db13648064d',
+  'v8_revision': '562de4048e1eeaec5b610e95b257a765a462c091',
 }
 
 deps = {

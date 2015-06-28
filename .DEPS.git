@@ -12,7 +12,7 @@ vars = {
 
 deps = {
     'src/buildtools':
-        Var('git_url') + '/chromium/buildtools.git@dc487f429cb90cac92ec7a9cd9d49db13648064d',
+        Var('git_url') + '/chromium/buildtools.git@ecc8e253abac3b6186a97573871a084f4c0ca3ae',
     'src/testing/gmock':
         Var('git_url') + '/external/googlemock.git@29763965ab52f24565299976b936d1265cb6a271',
     'src/testing/gtest':
@@ -32,9 +32,9 @@ deps = {
     'src/tools/deps2git':
         Var('git_url') + '/chromium/tools/deps2git.git@f04828eb0b5acd3e7ad983c024870f17f17b06d9',
     'src/tools/gyp':
-        Var('git_url') + '/external/gyp.git@0bb67471bca068996e15b56738fa4824dfa19de0',
+        Var('git_url') + '/external/gyp.git@5122240c5e5c4d8da12c543d82b03d6089eb77c5',
     'src/v8':
-        Var('git_url') + '/v8/v8.git@562de4048e1eeaec5b610e95b257a765a462c091',
+        Var('git_url') + '/v8/v8.git@3462ac26fbb97717525a60cfe2392a08c81fe065',
 }
 
 deps_os = {

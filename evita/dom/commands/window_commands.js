@@ -26,8 +26,10 @@
    * Open new document in new window in current editor window.
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+N', function(arg) {
-    const editorWindow = this.parent;
+  function newDocumentCommand(arg) {
+    if (!this.parent)
+      return;
+    const editorWindow = /** @type {!Window} */(this.parent);
     if (arg !== undefined) {
       windows.newTextWindow(editorWindow, new Document('untitled.txt'));
       return;
@@ -38,19 +40,23 @@
           const document = Document.open(fileName);
           windows.newTextWindow(editorWindow, document)
         });
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+N', newDocumentCommand);
 
   /**
    * Open document in new or existing window in current editor window.
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+O', function() {
-    const editorWindow = this.parent;
+  function openDocumentCommand() {
+    if (!this.parent)
+      return;
+    const editorWindow = /** @type {!Window} */(this.parent);
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
         .then(function(fileName) {
           windows.activate(editorWindow, openFile(fileName));
         });
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+O', openDocumentCommand);
 
   /**
    * Close this window.
@@ -64,7 +70,7 @@
    *   In this case, Windows generates WM_INPUTLANGCHANGEREQUEST for
    *   Ctrl+Shift sequence.
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+0', function() {
+  function closeThisWindowCommand() {
     const nextFocus = windows.nextWindow(this) || windows.previousWindow(this);
     if (!nextFocus) {
       Editor.messageBox(this,
@@ -74,57 +80,62 @@
     }
     nextFocus.focus();
     this.destroy();
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+0', closeThisWindowCommand);
 
   /**
    * Close all windows but this in current editor window.
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+1', function() {
+  function closeAllWindowsButThisCommand() {
     this.parent.children.forEach(function(window) {
       if (window === this || !window.visible)
         return;
       window.destroy();
     }, this);
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+1', closeAllWindowsButThisCommand);
 
   /**
    * Split window vertically and put new window below.
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+2', function() {
+  function splitThisWindowVerticallyCommand() {
     if (!this.clone)
       return;
     this.splitVertically(this.clone());
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+2', splitThisWindowVerticallyCommand);
 
   /**
    * Split window horizontally and put new window right.
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+5', function() {
+  function splitThisWindowHorizontallyCommand() {
     if (!this.clone)
       return;
     this.splitHorizontally(this.clone());
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+5', splitThisWindowHorizontallyCommand);
 
   /**
    * Close all editor window but this.
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+9', function() {
+  function closeAllEditorWindowsButThis() {
     const thisEditor_window = this.parent;
     EditorWindow.list.forEach(function(editorWindow) {
       if (editorWindow !== thisEditor_window)
         editorWindow.destroy();
     });
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+9', closeAllEditorWindowsButThis);
 
   /**
    * Open new document in new editor window.
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+N', function(arg) {
+  function newDocumentInNewWindowCommand(arg) {
     if (arg !== undefined) {
       windows.newEditorWindow(new Document('untitled.txt'));
       return;
@@ -135,24 +146,26 @@
           const document = Document.open(fileName);
           windows.newEditorWindow(document);
         });
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+N', newDocumentInNewWindowCommand);
 
   /**
    * Open document in new editor window.
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+O', function() {
+  function openDocumentInNewWindowCommand() {
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
         .then(function(fileName) {
           windows.newEditorWindow(openFile(fileName));
         });
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+O', openDocumentInNewWindowCommand);
 
   /**
    * Previous window
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+Tab', function() {
+  function previousWindowCommand() {
     const previousWindow = windows.previousWindow(this);
     if (previousWindow) {
       previousWindow.focus();
@@ -162,23 +175,25 @@
     if (lastWindow === this)
       return;
     lastWindow.focus();
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+Tab', previousWindowCommand);
 
   /**
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Shift+W', function(arg) {
+  function quitCommand(arg) {
     if (arg)
       Editor.forceExit();
     else
       Editor.exit();
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Shift+W', quitCommand);
 
   /**
    * Next window
    * @this {!Window}
    */
-  Editor.bindKey(Window, 'Ctrl+Tab', function() {
+  function nextWindowCommand() {
     const nextWindow = windows.nextWindow(this);
     if (nextWindow) {
       nextWindow.focus();
@@ -188,5 +203,6 @@
     if (firstWindow === this)
       return;
     firstWindow.focus();
-  });
+  }
+  Editor.bindKey(Window, 'Ctrl+Tab', nextWindowCommand);
 })();

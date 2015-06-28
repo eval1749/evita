@@ -92,7 +92,7 @@ global.XmlLexer = (function(xmlOptions) {
    */
   XmlLexer.prototype.ignoreCase_;
 
-  /** @enum{!Symbol} */
+  /** @enum{!symbol} */
   // ATTRVALUE_END and AMPERSAND_END make attribute value/entity reference
   // coloring with backspace.
   //

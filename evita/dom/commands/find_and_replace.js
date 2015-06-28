@@ -178,7 +178,7 @@ global.FindAndReplace = (function() {
     return false;
   }
 
-  /** @enum {!Symbol} */
+  /** @enum {!symbol} */
   const State = {
     BACKSLASH: Symbol('BACKSLASH'),
     BACKSLASH_C: Symbol('BACKSLASH_C'), // \cC = control character

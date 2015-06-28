@@ -40,7 +40,7 @@ global.ClikeLexer = (function() {
     return map;
   })();
 
-  /** @enum{!Symbol} */
+  /** @enum{!symbol} */
   ClikeLexer.State = {
     BLOCK_COMMENT: Symbol('block_comment'),
     BLOCK_COMMENT_ASTERISK: Symbol('block_comment_asterisk'),

@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 (function() {
-  /**
-   * @constructor
-   * @extends {Lexer}
-   * @param {!Document} document
-   */
   class PlainTextLexer {
+    /**
+     * @constructor
+     * @extends {Lexer}
+     * @param {!Document} document
+     */
     constructor(document) {}
     detach() {}
     doColor(hint) { return hint; }
@@ -18,7 +18,6 @@
     ctor.keymap = new Map();
   }
 
-  /** @constructor @extends {Mode} @return {?} */
   class ConfigMode extends Mode {
     constructor() {
       super('Config', ConfigLexer);
@@ -26,7 +25,6 @@
   }
   inheritMode(ConfigMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class CppMode  extends Mode {
     constructor() {
       super('C++', CppLexer);
@@ -34,7 +32,6 @@
   }
   inheritMode(CppMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class CsharpMode  extends Mode {
     constructor() {
       super('C#', CsharpLexer);
@@ -42,7 +39,6 @@
   }
   inheritMode(CsharpMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class HtmlMode  extends Mode {
     constructor() {
       super('HTML', HtmlLexer);
@@ -50,7 +46,6 @@
   }
   inheritMode(HtmlMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class IdlMode  extends Mode {
     constructor() {
       super('IDL', IdlLexer);
@@ -58,7 +53,6 @@
   }
   inheritMode(IdlMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class JavaMode  extends Mode {
     constructor() {
       super('Java', JavaLexer);
@@ -66,7 +60,6 @@
   }
   inheritMode(JavaMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class JavaScriptMode extends Mode {
     constructor() {
       super('JavaScript', JavaScriptLexer);
@@ -74,7 +67,6 @@
   }
   inheritMode(JavaScriptMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class HaskellMode extends Mode {
     constructor() {
       super('Haskell', PlainTextLexer);
@@ -82,7 +74,6 @@
   }
   inheritMode(HaskellMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class LispMode extends Mode {
     constructor() {
       super('Lisp', PlainTextLexer);
@@ -90,7 +81,6 @@
   }
   inheritMode(LispMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class MasonMode extends Mode {
     constructor() {
       super('Mason', PlainTextLexer);
@@ -98,7 +88,6 @@
   }
   inheritMode(MasonMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class PerlMode extends Mode {
     constructor() {
       super('Perl', PlainTextLexer);
@@ -106,7 +95,6 @@
   }
   inheritMode(PerlMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class PlainTextMode extends Mode {
     constructor() {
       super('Plain', PlainTextLexer);
@@ -114,7 +102,6 @@
   }
   inheritMode(PlainTextMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class PythonMode extends Mode {
     constructor() {
       super('Python', PythonLexer);
@@ -122,7 +109,6 @@
   }
   inheritMode(PythonMode);
 
-  /** @constructor @extends {Mode} @return {?} */
   class XmlMode extends Mode {
     constructor() {
       super('XML', XmlLexer);

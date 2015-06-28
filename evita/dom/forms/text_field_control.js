@@ -40,15 +40,27 @@ Object.defineProperties(TextFieldControl.prototype, {
 
 (function() {
   /** @const @type {number} */
-  var MAX_OFFSET = 1 << 28;
+  const MAX_OFFSET = 1 << 28;
 
-  /**
-   * @constructor
-   * @param {!TextFieldControl} control
-   */
-  function DragController(control) {
-    this.control = control;
-    this.dragging = false;
+  class DragController {
+    /**
+     * @constructor
+     * @param {!TextFieldControl} control
+     */
+    constructor(control) {
+      this.control = control;
+      this.dragging = false;
+    }
+
+    stop() {
+      this.dragging = false;
+      this.control.releaseCapture();
+    }
+
+    start() {
+      this.dragging = true;
+      this.control.setCapture();
+    }
   }
 
   /** @type {!TextFieldControl} */
@@ -57,23 +69,12 @@ Object.defineProperties(TextFieldControl.prototype, {
   /** @type {boolean} */
   DragController.prototype.dragging;
 
-  /** @type {function()} */
-  DragController.prototype.stop = function() {
-    this.dragging = false;
-    this.control.releaseCapture();
-  };
-
-  /** @type {function()} */
-  DragController.prototype.start = function() {
-    this.dragging = true;
-    this.control.setCapture();
-  };
-
-  /** @type {?DragController} */
+  /* TODO(eval1749) Once closure compiler support lcoal class name, we enable
+   annotation: type {DragController} */
   TextFieldControl.prototype.dragController_ = null;
 
   /** @type {!Map.<number, !TextFieldEditCommand>} */
-  var keymap = new Map();
+  const keymap = new Map();
 
   /**
    * @param {string} key_combination

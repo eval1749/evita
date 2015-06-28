@@ -43,10 +43,11 @@
      * @this {!TextWindow}
      * @param {number=} opt_count
      */
-    return function(opt_count) {
+    function command_function(opt_count) {
       var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
       this.selection.modify(unit, count * direction, alter);
-    };
+    }
+    return command_function;
   }
 
   /**
@@ -146,158 +147,167 @@
         'type character ' + String.fromCharCode(charCode));
   }
 
-  /**
-   * Backward delete character
-   * @param {number=} opt_count
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Backspace', function(opt_count) {
-    var count = arguments.length >= 1 ? opt_count : 1;
-    this.selection.range.delete(Unit.CHARACTER, -count);
-  });
-
-  /**
-   * Zoom-In
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl++', function() {
-    var currentZoom = Math.round(this.zoom * 100);
-    var index = ZOOM_STEPS.findIndex(function(zoom) {
-      return zoom > currentZoom;
+  Editor.bindKey(TextWindow, 'Backspace',
+    /**
+     * Backward delete character
+     * @param {number=} opt_count
+     * @this {!TextWindow}
+     */
+    function(opt_count) {
+      var count = arguments.length >= 1 ? opt_count : 1;
+      this.selection.range.delete(Unit.CHARACTER, -count);
     });
-    if (index >= 0)
-      this.zoom = ZOOM_STEPS[index] / 100;
-  }, 'Zoom In');
 
-  /**
-   * Reconvert text using IME.
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+,', function() {
-    var range = this.selection.range;
-    this.reconvert_(range.text);
-    range.text = '';
-  }, 'Reconvert');
+  Editor.bindKey(TextWindow, 'Ctrl++',
+    /**
+     * Zoom-In
+     * @this {!TextWindow}
+     */
+    function() {
+      var currentZoom = Math.round(this.zoom * 100);
+      var index = ZOOM_STEPS.findIndex(function(zoom) {
+        return zoom > currentZoom;
+      });
+      if (index >= 0)
+        this.zoom = ZOOM_STEPS[index] / 100;
+    }, 'Zoom In');
 
-  /**
-   * Zoom-Out
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+-', function() {
-    var currentZoom = Math.round(this.zoom * 100);
-    var index = ZOOM_STEPS.findIndex(function(zoom) {
-      return zoom >= currentZoom;
-    });
-    if (index >= 1)
-      this.zoom = ZOOM_STEPS[index - 1] / 100;
-  }, 'Zoom out');
+  Editor.bindKey(TextWindow, 'Ctrl+,',
+    /**
+     * Reconvert text using IME.
+     * @this {!TextWindow}
+     */
+    function() {
+      var range = this.selection.range;
+      this.reconvert_(range.text);
+      range.text = '';
+    }, 'Reconvert');
 
-  /**
-   * Exchange Unicode character code point and character
-   * @this {!TextWindow}
-   * @param {number=} opt_base
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+.', function(opt_base) {
-    var base = arguments.length >= 1 ? /** @type{number} */(opt_base) : 16;
-    if (base < 2 || base > 36)
-      return;
-    var range = new Range(this.selection.range);
-    if (range.start == range.end) {
-      range.moveStart(Unit.WORD, -1);
-      if (range.length > 4)
-        range.start = range.end - 4;
-    } else if (range.length > 4) {
-      return;
-    }
-    var text = range.text;
-    if (!text.length)
-      return;
-    /** @type {function(number, number): number} */
-    var fromDigitChar = function(charCode, base) {
-      if (charCode >= Unicode.DIGIT_ZERO &&
-          charCode <= Unicode.DIGIT_ZERO + Math.min(base, 9)) {
-        return charCode - Unicode.DIGIT_ZERO;
+  Editor.bindKey(TextWindow, 'Ctrl+-',
+    /**
+     * Zoom-Out
+     * @this {!TextWindow}
+     */
+    function() {
+      var currentZoom = Math.round(this.zoom * 100);
+      var index = ZOOM_STEPS.findIndex(function(zoom) {
+        return zoom >= currentZoom;
+      });
+      if (index >= 1)
+        this.zoom = ZOOM_STEPS[index - 1] / 100;
+    }, 'Zoom out');
+
+  Editor.bindKey(TextWindow, 'Ctrl+.',
+    /**
+     * Exchange Unicode character code point and character
+     * @this {!TextWindow}
+     * @param {number=} opt_base
+     */
+    function(opt_base) {
+      var base = arguments.length >= 1 ? /** @type{number} */(opt_base) : 16;
+      if (base < 2 || base > 36)
+        return;
+      var range = new Range(this.selection.range);
+      if (range.start == range.end) {
+        range.moveStart(Unit.WORD, -1);
+        if (range.length > 4)
+          range.start = range.end - 4;
+      } else if (range.length > 4) {
+        return;
       }
+      var text = range.text;
+      if (!text.length)
+        return;
+      /** @type {function(number, number): number} */
+      var fromDigitChar = function(charCode, base) {
+        if (charCode >= Unicode.DIGIT_ZERO &&
+            charCode <= Unicode.DIGIT_ZERO + Math.min(base, 9)) {
+          return charCode - Unicode.DIGIT_ZERO;
+        }
 
-      if (base < 10)
-        return NaN;
-
-      if (charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
-          charCode <= Unicode.LATIN_CAPITAL_LETTER_A + base - 10) {
-        return charCode - Unicode.LATIN_CAPITAL_LETTER_A + 10;
-      }
-
-      if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
-          charCode <= Unicode.LATIN_SMALL_LETTER_A + base - 10) {
-        return charCode - Unicode.LATIN_SMALL_LETTER_A + 10;
-      }
-
-      return NaN;
-    };
-
-    /** @type {function(string, number): number} */
-    var myParseInt = function(text, base) {
-      var value = 0;
-      for (var k = 0; k < text.length; ++k) {
-        var digit = fromDigitChar(text.charCodeAt(k), base);
-        if (isNaN(digit))
+        if (base < 10)
           return NaN;
-        value *= base;
-        value += digit;
+
+        if (charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
+            charCode <= Unicode.LATIN_CAPITAL_LETTER_A + base - 10) {
+          return charCode - Unicode.LATIN_CAPITAL_LETTER_A + 10;
+        }
+
+        if (charCode >= Unicode.LATIN_SMALL_LETTER_A &&
+            charCode <= Unicode.LATIN_SMALL_LETTER_A + base - 10) {
+          return charCode - Unicode.LATIN_SMALL_LETTER_A + 10;
+        }
+
+        return NaN;
+      };
+
+      /** @type {function(string, number): number} */
+      var myParseInt = function(text, base) {
+        var value = 0;
+        for (var k = 0; k < text.length; ++k) {
+          var digit = fromDigitChar(text.charCodeAt(k), base);
+          if (isNaN(digit))
+            return NaN;
+          value *= base;
+          value += digit;
+        }
+        return value;
+      };
+      var charCode = myParseInt(text, base);
+      if (isNaN(charCode)) {
+        range.start = range.end - 1;
+        range.text = ('000' + text.charCodeAt(text.length - 1).toString(16))
+            .substr(-4);
+      } else {
+        range.text = String.fromCharCode(charCode);
       }
-      return value;
-    };
-    var charCode = myParseInt(text, base);
-    if (isNaN(charCode)) {
-      range.start = range.end - 1;
-      range.text = ('000' + text.charCodeAt(text.length - 1).toString(16))
-          .substr(-4);
-    } else {
-      range.text = String.fromCharCode(charCode);
-    }
-    this.selection.range.collapseTo(range.end);
-  }, 'Exchange Unicode code point and character\n');
+      this.selection.range.collapseTo(range.end);
+    }, 'Exchange Unicode code point and character\n');
 
-  /**
-   * Zoom-In
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+0', function() {
-    this.zoom = 1.0;
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+0',
+    /**
+     * Zoom-In
+     * @this {!TextWindow}
+     */
+    function() {
+      this.zoom = 1.0;
+    });
 
-  /**
-   * Select all contents
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+A', function() {
-    var range = this.selection.range;
-    range.start = 0
-    range.end = range.document.length;
-    this.selection.startIsActive = false;
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+A',
+    /**
+     * Select all contents
+     * @this {!TextWindow}
+     */
+    function() {
+      var range = this.selection.range;
+      range.start = 0
+      range.end = range.document.length;
+      this.selection.startIsActive = false;
+    });
 
-  /**
-   * Backward delete word
-   * @param {number=} opt_count
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Backspace', function(opt_count) {
-    var count = arguments.length >= 1 ? opt_count : 1;
-    this.selection.range.delete(Unit.WORD, -count);
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+Backspace',
+    /**
+     * Backward delete word
+     * @param {number=} opt_count
+     * @this {!TextWindow}
+     */
+    function(opt_count) {
+      var count = arguments.length >= 1 ? opt_count : 1;
+      this.selection.range.delete(Unit.WORD, -count);
+    });
 
   Editor.bindKey(TextWindow, 'Ctrl+C', copyToClipboardCommand);
 
-  /**
-   * Forward delete word
-   * @param {number=} opt_count
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Delete', function(opt_count) {
-    var count = arguments.length >= 1 ? opt_count : 1;
-    this.selection.range.delete(Unit.WORD, count);
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+Delete',
+    /**
+     * Forward delete word
+     * @param {number=} opt_count
+     * @this {!TextWindow}
+     */
+    function(opt_count) {
+      var count = arguments.length >= 1 ? opt_count : 1;
+      this.selection.range.delete(Unit.WORD, count);
+    });
 
   Editor.bindKey(TextWindow, 'Ctrl+End', function() {
     this.selection.endKey(Unit.DOCUMENT);
@@ -318,28 +328,30 @@
 
   // TODO(yosi) We should display dialog box to prompt enter line number and
   // list of functions.
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+G', function(arg) {
-    if (!arg)
-      return;
-    this.selection.range.startOf(Unit.DOCUMENT);
-    this.selection.range.move(Unit.LINE, arg - 1);
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+G',
+    /**
+     * @this {!TextWindow}
+     */
+    function(arg) {
+      if (!arg)
+        return;
+      this.selection.range.startOf(Unit.DOCUMENT);
+      this.selection.range.move(Unit.LINE, arg - 1);
+    });
 
   Editor.bindKey(TextWindow, 'Ctrl+Home', function() {
     this.selection.homeKey(Unit.DOCUMENT);
   }, 'move to home of document\n' +
      'Move active position of selection to home of document.');
 
-  /**
-   * Make selection visible.
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+L', function() {
-    this.makeSelectionVisible();
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+L',
+    /**
+     * Make selection visible.
+     * @this {!TextWindow}
+     */
+    function() {
+      this.makeSelectionVisible();
+    });
 
   Editor.bindKey(TextWindow, 'Ctrl+ArrowLeft',
     makeSelectionMotionCommand(Unit.WORD, -1, Alter.MOVE),
@@ -353,92 +365,100 @@
 
   Editor.bindKey(TextWindow, 'Ctrl+Q', commander.startQuote);
 
-  /**
-   * Reload document
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+R', function(arg) {
-    var document = this.document;
-    if (!document.needSave())
-      return;
-    var selection = this.selection;
-    var offset = selection.range.start;
-    Editor.messageBox(this,
-        Editor.localizeText(Strings.IDS_ASK_RELOAD, {name: document.name}),
-        MessageBox.ICONQUESTION | MessageBox.YESNO)
-    .then(function(responseCode) {
-      if (responseCode != DialogItemId.YES)
+  Editor.bindKey(TextWindow, 'Ctrl+R',
+    /**
+     * Reload document
+     * @this {!TextWindow}
+     */
+    function(arg) {
+      var document = this.document;
+      if (!document.needSave())
         return;
-      document.load().then(function() {
-        selection.range.collapseTo(offset);
-      });
-    });
-  }, 'reload document');
-
-  /**
-   * Save file
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+S', function(arg) {
-    var document = this.selection.document;
-    if (!arg && document.fileName != '') {
-      document.save(document.fileName);
-      return;
-    }
-
-    Editor.getFileNameForSave(this, document.fileName)
-        .then(function(fileName) {
-          document.save(fileName);
+      var selection = this.selection;
+      var offset = selection.range.start;
+      Editor.messageBox(this,
+          Editor.localizeText(Strings.IDS_ASK_RELOAD, {name: document.name}),
+          MessageBox.ICONQUESTION | MessageBox.YESNO)
+      .then(function(responseCode) {
+        if (responseCode != DialogItemId.YES)
+          return;
+        document.load().then(function() {
+          selection.range.collapseTo(offset);
         });
-  });
+      });
+    }, 'reload document');
+
+  Editor.bindKey(TextWindow, 'Ctrl+S',
+    /**
+     * Save file
+     * @this {!TextWindow}
+     */
+    function(arg) {
+      var document = this.selection.document;
+      if (!arg && document.fileName != '') {
+        document.save(document.fileName);
+        return;
+      }
+
+      Editor.getFileNameForSave(this, document.fileName)
+          .then(function(fileName) {
+            document.save(fileName);
+          });
+    });
 
   Editor.bindKey(TextWindow, 'Ctrl+U', commander.startArgument);
 
-  /**
-   * Show document in new editor window.
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+3', function() {
-    var textWindow = new TextWindow(this.selection.range);
-    var editorWindow = new EditorWindow();
-    editorWindow.appendChild(textWindow);
-    editorWindow.realize();
-  });
-
-  /**
-   * Show document in new editor window and close current editor window.
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+4', function() {
-    var current = this.selection.window.parent;
-    // When editor window has only one tab, we don't ignore this command,
-    // since result of this command isn't useful.
-    if (current.children.length == 1)
-      return;
-    var textWindow = new TextWindow(this.selection.range);
-    var editorWindow = new EditorWindow();
-    editorWindow.appendChild(textWindow);
-    editorWindow.realize();
-    current.destroy();
-  });
-
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+C', function() {
-    changeCase(this.selection, function(selection) {
-      selection.range.capitalize();
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+3',
+    /**
+     * Show document in new editor window.
+     * @this {!TextWindow}
+     */
+    function() {
+      var textWindow = new TextWindow(this.selection.range);
+      var editorWindow = new EditorWindow();
+      editorWindow.appendChild(textWindow);
+      editorWindow.realize();
     });
-  });
 
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+D', function() {
-    changeCase(this.selection, function(selection) {
-      selection.range.toLowerCase();
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+4',
+    /**
+     * Show document in new editor window and close current editor window.
+     * @this {!TextWindow}
+     */
+    function() {
+      var current = this.selection.window.parent;
+      // When editor window has only one tab, we don't ignore this command,
+      // since result of this command isn't useful.
+      if (current.children.length == 1)
+        return;
+      var textWindow = new TextWindow(this.selection.range);
+      var editorWindow = new EditorWindow();
+      editorWindow.appendChild(textWindow);
+      editorWindow.realize();
+      current.destroy();
     });
-  });
+
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+C',
+    /**
+     * @this {!TextWindow}
+     */
+    function() {
+      changeCase(/** @type{!TextSelection} */(this.selection),
+        function(selection) {
+          selection.range.capitalize();
+        });
+    });
+
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+D',
+    /**
+     * @this {!TextWindow}
+     */
+    function() {
+      changeCase(/** @type{!TextSelection}*/(this.selection),
+        function(selection) {
+          selection.range.toLowerCase();
+        });
+    });
 
   /**
    * Evaluate script in selection selection
@@ -491,93 +511,100 @@
     'extend selection right word\n' +
     'Extend selection to right by words');
 
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Shift+U', function() {
-    changeCase(this.selection, function(selection) {
-      selection.range.toUpperCase();
+  Editor.bindKey(TextWindow, 'Ctrl+Shift+U',
+    /**
+     * @this {!TextWindow}
+     */
+    function() {
+      changeCase(/** @type{!TextSelection} */(this.selection),
+        function(selection) {
+          selection.range.toUpperCase();
+        });
     });
-  });
 
   Editor.bindKey(TextWindow, 'Ctrl+V', pasteFromClipboardCommand);
 
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+W', function(arg) {
-    var document = this.selection.document;
-    document.close();
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+W',
+    /**
+     * @this {!TextWindow}
+     */
+    function(arg) {
+      var document = this.selection.document;
+      document.close();
+    });
 
   Editor.bindKey(TextWindow, 'Ctrl+X', cutToClipboardCommand);
 
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Y', function() {
-    var selection = this.selection;
-    var position = selection.document.redo(selection.focusOffset);
-    if (position < 0) {
-      Editor.messageBox(this,
-          Editor.localizeText(Strings.IDS_NO_MORE_REDO),
-          MessageBox.ICONWARNING);
-      return;
-    }
-    selection.range.collapseTo(position);
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+Y',
+    /**
+     * @this {!TextWindow}
+     */
+    function() {
+      var selection = this.selection;
+      var position = selection.document.redo(selection.focusOffset);
+      if (position < 0) {
+        Editor.messageBox(this,
+            Editor.localizeText(Strings.IDS_NO_MORE_REDO),
+            MessageBox.ICONWARNING);
+        return;
+      }
+      selection.range.collapseTo(position);
+    });
 
-  /**
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Ctrl+Z', function() {
-    var selection = this.selection;
-    var position = selection.document.undo(selection.focusOffset);
-    if (position < 0) {
-      Editor.messageBox(this,
-          Editor.localizeText(Strings.IDS_NO_MORE_UNDO),
-          MessageBox.ICONWARNING);
-      return;
-    }
-    selection.range.collapseTo(position);
-  });
+  Editor.bindKey(TextWindow, 'Ctrl+Z',
+    /**
+     * @this {!TextWindow}
+     */
+    function() {
+      var selection = this.selection;
+      var position = selection.document.undo(selection.focusOffset);
+      if (position < 0) {
+        Editor.messageBox(this,
+            Editor.localizeText(Strings.IDS_NO_MORE_UNDO),
+            MessageBox.ICONWARNING);
+        return;
+      }
+      selection.range.collapseTo(position);
+    });
 
-  /**
-   * Forward delete character
-   * @param {number=} opt_count
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Delete', function(opt_count) {
-    var count = arguments.length >= 1 ? opt_count : 1;
-    this.selection.range.delete(Unit.CHARACTER, count);
-  });
+  Editor.bindKey(TextWindow, 'Delete',
+    /**
+     * Forward delete character
+     * @param {number=} opt_count
+     * @this {!TextWindow}
+     */
+    function(opt_count) {
+      var count = arguments.length >= 1 ? opt_count : 1;
+      this.selection.range.delete(Unit.CHARACTER, count);
+    });
 
   Editor.bindKey(TextWindow, 'End', function() {
     this.selection.endKey(Unit.WINDOW_LINE);
   }, 'move to end of window line\n' +
      'Move active position of selection to end of window line.');
 
-  /**
-   * @param {number=} opt_count
-   * @this {!TextWindow}
-   */
-  Editor.bindKey(TextWindow, 'Enter', function(opt_count) {
-    var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
-    if (count <= 0)
-      return;
-    var selection = this.selection;
-    var leadingWhitespaces = (new Range(selection.range)).startOf(Unit.LINE)
-        .moveEndWhile(' \t').text;
-    selection.document.undoGroup('TypeEnter', function() {
-      selection.range.moveStartWhile(' \t', Count.BACKWARD);
-      selection.range.text = '\n'.repeat(count);
-      selection.range.collapseTo(selection.range.end)
-          .moveEndWhile(' \t').text = leadingWhitespaces;
-      selection.range.collapseTo(selection.range.end);
-    });
-  }, 'type enter key\n' +
-     'Insert newlines with leading whitespaces and remove trailing' +
-     ' whitespaces.');
+  Editor.bindKey(TextWindow, 'Enter',
+    /**
+     * @param {number=} opt_count
+     * @this {!TextWindow}
+     */
+    function(opt_count) {
+      var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+      if (count <= 0)
+        return;
+      var selection = this.selection;
+      var leadingWhitespaces = (new Range(selection.range)).startOf(Unit.LINE)
+          .moveEndWhile(' \t').text;
+      selection.document.undoGroup('TypeEnter', function() {
+        selection.range.moveStartWhile(' \t', Count.BACKWARD);
+        selection.range.text = '\n'.repeat(count);
+        selection.range.collapseTo(selection.range.end)
+            .moveEndWhile(' \t').text = leadingWhitespaces;
+        selection.range.collapseTo(selection.range.end);
+      });
+    }, 'type enter key\n' +
+       'Insert newlines with leading whitespaces and remove trailing' +
+       ' whitespaces.');
 
   Editor.bindKey(TextWindow, 'Home', function() {
     this.selection.homeKey(Unit.WINDOW_LINE);
@@ -618,74 +645,76 @@
   // TODO(yosi) We should get |Indent|/|Outend| tab width from another place.
   var TAB_WIDTH = 4;
 
-  /** @param {number=} opt_count */
-  Editor.bindKey(TextWindow, 'Shift+Tab', function(opt_count) {
-    var tabWidth = arguments.length >= 1 ? /** @type{number} */(opt_count) :
-                                          TAB_WIDTH;
-    var range = this.selection.range;
-    if (range.start == range.end) {
-      // Move to previous tab stop
+  Editor.bindKey(TextWindow, 'Shift+Tab',
+    /** @param {number=} opt_count */
+    function(opt_count) {
+      var tabWidth = arguments.length >= 1 ? /** @type{number} */(opt_count) :
+                                            TAB_WIDTH;
+      var range = this.selection.range;
+      if (range.start == range.end) {
+        // Move to previous tab stop
+        range.startOf(Unit.LINE, Alter.EXTEND);
+        range.collapseTo(Math.floor((range.start - range.end - 1) / tabWidth) *
+                         tabWidth + range.end);
+        return;
+      }
+      // Exapnd range to contain whole lines
       range.startOf(Unit.LINE, Alter.EXTEND);
-      range.collapseTo(Math.floor((range.start - range.end - 1) / tabWidth) *
-                       tabWidth + range.end);
-      return;
-    }
-    // Exapnd range to contain whole lines
-    range.startOf(Unit.LINE, Alter.EXTEND);
-    // Remove leading whitespaces
-    range.document.undoGroup('Outdent', function() {
-      var document = this;
-      var lineRange = new Range(range);
-      lineRange.collapseTo(lineRange.start);
-      while (lineRange.start < range.end) {
-        lineRange.moveEndWhile(' ', tabWidth);
-        if (lineRange.end < document.length &&
-            lineRange.end - lineRange.start < tabWidth &&
-            document.charCodeAt_(lineRange.end) == 0x09) {
-          lineRange.moveEnd(Unit.CHARACTER);
+      // Remove leading whitespaces
+      range.document.undoGroup('Outdent', function() {
+        var document = this;
+        var lineRange = new Range(range);
+        lineRange.collapseTo(lineRange.start);
+        while (lineRange.start < range.end) {
+          lineRange.moveEndWhile(' ', tabWidth);
+          if (lineRange.end < document.length &&
+              lineRange.end - lineRange.start < tabWidth &&
+              document.charCodeAt_(lineRange.end) == 0x09) {
+            lineRange.moveEnd(Unit.CHARACTER);
+          }
+          lineRange.text = '';
+          lineRange.endOf(Unit.LINE).move(Unit.CHARACTER);
         }
-        lineRange.text = '';
-        lineRange.endOf(Unit.LINE).move(Unit.CHARACTER);
-      }
-      range.end = lineRange.start;
-    });
-  }, 'outdent\n' +
-     'Remove leading whitespaces from lines in selection.');
+        range.end = lineRange.start;
+      });
+    }, 'outdent\n' +
+       'Remove leading whitespaces from lines in selection.');
 
-  /** @param {number=} opt_count */
-  Editor.bindKey(TextWindow, 'Tab', function(opt_count) {
-    var tabWidth = arguments.length >= 1 ? /** @type{number} */(opt_count) :
-                                          TAB_WIDTH;
-    var range = this.selection.range;
-    if (range.start == range.end) {
-      var current = range.start;
+  Editor.bindKey(TextWindow, 'Tab',
+    /** @param {number=} opt_count */
+    function(opt_count) {
+      var tabWidth = arguments.length >= 1 ? /** @type{number} */(opt_count) :
+                                            TAB_WIDTH;
+      var range = this.selection.range;
+      if (range.start == range.end) {
+        var current = range.start;
+        range.startOf(Unit.LINE, Alter.EXTEND);
+        var numSpaces = tabWidth - (current - range.start) % tabWidth;
+        range.start = range.end;
+        range.insertBefore(' '.repeat(numSpaces));
+        return;
+      }
+
+      // Exapnd range to contain whole lines
       range.startOf(Unit.LINE, Alter.EXTEND);
-      var numSpaces = tabWidth - (current - range.start) % tabWidth;
-      range.start = range.end;
-      range.insertBefore(' '.repeat(numSpaces));
-      return;
-    }
-
-    // Exapnd range to contain whole lines
-    range.startOf(Unit.LINE, Alter.EXTEND);
-    range.document.undoGroup('Indent', function() {
-      var lineRange = new Range(range);
-      lineRange.collapseTo(lineRange.start);
-      while (lineRange.start < range.end) {
-        var spaces = ' '.repeat(tabWidth);
-        lineRange.endOf(Unit.LINE, Alter.EXTEND);
-        if (lineRange.start != lineRange.end)
-          lineRange.insertBefore(spaces);
-        lineRange.move(Unit.CHARACTER);
-      }
-      range.end = lineRange.start;
-    });
-    // Make selection contains spaces inserted at first line.
-    range.startOf(Unit.LINE, Alter.EXTEND);
-    this.selection.startIsActive = false;
-  }, 'indent\n' +
-     'Caret: insert spaces until tab stop column.\n' +
-     'Range: insert spaces all lines in range.');
+      range.document.undoGroup('Indent', function() {
+        var lineRange = new Range(range);
+        lineRange.collapseTo(lineRange.start);
+        while (lineRange.start < range.end) {
+          var spaces = ' '.repeat(tabWidth);
+          lineRange.endOf(Unit.LINE, Alter.EXTEND);
+          if (lineRange.start != lineRange.end)
+            lineRange.insertBefore(spaces);
+          lineRange.move(Unit.CHARACTER);
+        }
+        range.end = lineRange.start;
+      });
+      // Make selection contains spaces inserted at first line.
+      range.startOf(Unit.LINE, Alter.EXTEND);
+      this.selection.startIsActive = false;
+    }, 'indent\n' +
+       'Caret: insert spaces until tab stop column.\n' +
+       'Range: insert spaces all lines in range.');
 
   Editor.bindKey(TextWindow, 'ArrowUp',
       makeSelectionMotionCommand(Unit.WINDOW_LINE, -1, Alter.MOVE),

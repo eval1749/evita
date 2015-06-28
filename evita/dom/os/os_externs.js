@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/** @expose @type{!Object} */
+/** @export @type{!Object} */
 var Os;
 
 
-/** @expose
+/** @export
  *  @constructor
  *  @param {number} winLastError
  */
 Os.File.Error = function(winLastError) {};
 
 /**
- * @expose
+ * @export
  * @typedef {{
  *    isDir: boolean,
  *    isSymLink: boolean,
@@ -25,13 +25,13 @@ Os.File.Error = function(winLastError) {};
 Os.File.Info;
 
 /**
- * @expose
+ * @export
  * @type {string}
  */
 Os.environmentStrings;
 
 /**
- * @expose
+ * @export
  * @param {string} name
  * @return {string|undefined}
  */

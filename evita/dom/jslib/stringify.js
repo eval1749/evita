@@ -45,10 +45,10 @@ Editor.stringify = (function() {
     /** @param {string} string */
     visitString(string) {}
 
-    /** @param {!Symbol} symbol */
+    /** @param {!symbol} symbol */
     visitSymbol(symbol) {}
 
-    /** @param {!TypedArray} array */
+    /** @param {!ArrayBufferView} array */
     visitTypedArray(array) {}
 
       /** @param {!Object} object */
@@ -184,7 +184,7 @@ Editor.stringify = (function() {
         case 'string':
           return visitor.visitString(value);
         case 'symbol':
-          return visitor.visitSymbol(/** @type{!Symbol} */(value));
+          return visitor.visitSymbol(/** @type{!symbol} */(value));
       }
 
       let object = /** @type{!Object} */(value);
@@ -212,7 +212,7 @@ Editor.stringify = (function() {
       }
 
       if (isTypedArray(object))
-        return visitor.visitTypedArray(/** @type{!TypedArray}*/(object));
+        return visitor.visitTypedArray(/** @type{!ArrayBufferView}*/(object));
 
       if (object instanceof Date)
         return visitor.visitDate(/** @type{!Date} */(object));

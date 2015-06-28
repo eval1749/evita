@@ -4,7 +4,7 @@
 'use strict';
 
 (function() {
-  /** @enum{!Symbol} */
+  /** @enum{!symbol} */
   global.Range.Case = {
     // "This is capitalized."
     CAPITALIZED_TEXT: Symbol('CAPITALIZED_TEXT'),
@@ -29,7 +29,7 @@
    * @return {!Range.Case}
    */
   Range.prototype.analyzeCase = function() {
-    /** @enum{!Symbol} */
+    /** @enum{!symbol} */
     var State = {
       FIRST_CAP_IN_WORD: Symbol('FIRST_CAP_IN_WORD'),
       FIRST_CAP_NOT_WORD: Symbol('FIRST_CAP_NOT_WORD'),

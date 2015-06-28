@@ -1,28 +1,28 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-/** @expose @type{boolean} */
+/** @export @type{boolean} */
 Event.prototype.bubbles;
 
-/** @expose @type{boolean} */
+/** @export @type{boolean} */
 Event.prototype.cancelable;
 
-/** @expose @type{?EventTarget} */
+/** @export @type{?EventTarget} */
 Event.prototype.currentTarget;
 
-/** @expose @type{boolean} */
+/** @export @type{boolean} */
 Event.prototype.defaultPrevented;
 
-/** @expose @type{Event.PhaseType} */
+/** @export @type{Event.PhaseType} */
 Event.prototype.eventPhase;
 
-/** @expose @type{number} */
+/** @export @type{number} */
 Event.prototype.timeStamp;
 
-/** @expose @type{?EventTarget} */
+/** @export @type{?EventTarget} */
 Event.prototype.target;
 
-/** @expose @type{string} */
+/** @export @type{string} */
 Event.prototype.type;
 
 /**

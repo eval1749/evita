@@ -83,9 +83,8 @@
         });
     }
 
-    /** @param {DialogItemId} answer */
     function isCanceled(answer) {
-      return answer == DialogItemId.CANCEL;
+      return answer === DialogItemId.CANCEL;
     }
 
     Promise.all(Document.list.map(confirmForExit)).then(function(answers) {
@@ -154,7 +153,7 @@
      * @param {string} spec
      * @return {number} key code.
      */
-    return function(spec) {
+    function combinationFunction(spec) {
       if (spec.length == 1)
         return spec.charCodeAt(0);
       var code = 0;
@@ -174,5 +173,6 @@
         throw new Error('Invalid key specification: ' + spec);
       return code;
     }
+    return combinationFunction;
   })();
 })();

@@ -58,10 +58,10 @@ Document.removeObserver = function(observer) {};
 /** @type {string} */
 Document.prototype.encoding;
 
-/** @expose  @type {string} */
+/** @export  @type {string} */
 Document.prototype.fileName;
 
-/** @expose  @type {?Keymap} */
+/** @export  @type {?Keymap} */
 Document.prototype.keymap;
 
 /** @type {!Date} */
@@ -70,31 +70,31 @@ Document.prototype.lastStatTime_;
 /** @type {!Date} */
 Document.prototype.lastWriteTime;
 
-/** @expose  @type {number} */
+/** @export  @type {number} */
 Document.prototype.length;
 
-/** @expose  @type {!Generator.<string>} */
+/** @export  @type {!Generator.<string>} */
 Document.prototype.lines;
 
-/** @expose  @type {?Mode} */
+/** @export  @type {?Mode} */
 Document.prototype.mode;
 
-/** @expose  @type {boolean} */
+/** @export  @type {boolean} */
 Document.prototype.modified;
 
-/** @expose  @type {string} */
+/** @export  @type {string} */
 Document.prototype.name;
 
 /** @type {number} */
 Document.prototype.newline;
 
-/** @expose @type {!Document.Obsolete} */
+/** @export @type {!Document.Obsolete} */
 Document.prototype.obsolete;
 
-/** @expose  @type {!Map.<string, *>} */
+/** @export  @type {!Map.<string, *>} */
 Document.prototype.properties;
 
-/** @expose  @type {boolean} */
+/** @export  @type {boolean} */
 Document.prototype.readonly;
 
 /** @type {number} */
@@ -188,7 +188,7 @@ Document.prototype.match_ = function(regexp, start, end) {};
  */
 Document.prototype.needSave = function() {};
 
-/** @expose @type {function()} */
+/** @export @type {function()} */
 Document.prototype.parseFileProperties;
 
 /** @param {!TextOffset} position */

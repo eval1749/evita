@@ -2,28 +2,28 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 /**
- * @expose
+ * @export
  * @param {string} fileName
  * @return {string}
  */
 FilePath.basename = function(fileName) {};
 
 /**
- * @expose
+ * @export
  * @param {string} fileName
  * @return {string}
  */
 FilePath.dirname = function(fileName) {};
 
 /**
- * @expose
+ * @export
  * @param {string} fileName
  * @return {string}
  */
 FilePath.fullPath = function(fileName) {};
 
 /**
- * @expose
+ * @export
  * @param {string} fileName
  * @return {boolean}
  */

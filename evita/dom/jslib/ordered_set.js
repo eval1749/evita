@@ -63,7 +63,6 @@ global.OrderedSet = (function() {
   OrderedSetNode.prototype.right_;
 
   /**
-   * @private
    * @template T
    * @this {!OrderedSetNode.<T>}
    * @return {?OrderedSetNode.<T>}
@@ -71,7 +70,6 @@ global.OrderedSet = (function() {
   OrderedSetNode.prototype.next;
 
   /**
-   * @private
    * @template T
    * @this {!OrderedSetNode.<T>}
    * @return {?OrderedSetNode.<T>}

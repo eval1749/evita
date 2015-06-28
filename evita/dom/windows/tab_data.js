@@ -74,9 +74,10 @@ global.TabData = function (opt_state) {
    * @param {!Document} document
    * @param {!DocumentState} state
    */
-  DocumentState.addObserver(function(document, state) {
+  function observer(document, state) {
     document.listWindows().forEach(function(window) {
       updateTabData(window, state);
     });
-  });
+  }
+  DocumentState.addObserver(observer);
 })();

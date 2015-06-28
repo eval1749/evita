@@ -8,7 +8,7 @@
  * @externs
  */
 
-/** @enum {!Symbol} */
+/** @enum {!symbol} */
 Range.Case = {
   // "This is capitalized."
   CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
@@ -22,19 +22,19 @@ Range.Case = {
   UPPER: 'UPPER',
 };
 
-/** @expose @type {!Document} */
+/** @export @type {!Document} */
 Range.prototype.document;
 
-/** @expose @type {!TextOffset} */
+/** @export @type {!TextOffset} */
 Range.prototype.end = 0;
 
-/** @expose @type {number} */
+/** @export @type {number} */
 Range.prototype.length;
 
-/** @expose @type {!TextOffset} */
+/** @export @type {!TextOffset} */
 Range.prototype.start = 0;
 
-/** @expose @type {!string} */
+/** @export @type {!string} */
 Range.prototype.text = '';
 
 /** @return {!Range} */

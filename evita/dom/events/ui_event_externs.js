@@ -1,10 +1,10 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-/** @expose @type{number} */
+/** @export @type{number} */
 UiEvent.prototype.detail;
 
-/** @expose @type{?Window} */
+/** @export @type{?Window} */
 UiEvent.prototype.view;
 
 /**

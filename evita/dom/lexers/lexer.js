@@ -466,9 +466,10 @@ global.Lexer = (function() {
      * @param {!Range} range
      * @return {string}
      */
-    return function(range, token) {
+    function syntaxOfToken(range, token) {
       return map.get(token.state);
-    };
+    }
+    return syntaxOfToken;
   })();
 
   /**

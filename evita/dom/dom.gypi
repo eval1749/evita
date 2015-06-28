@@ -92,6 +92,8 @@
 
       'jslib/install_stringify.js',
     ], # js_lib_files
+
+    'js_lib_files_file': '<|(js_lib_files.txt <@(js_defs_files) <@(js_lib_files))',
    }, # variables
 
   'targets': [
@@ -219,33 +221,29 @@
       'target_name': 'check_jslib',
       'type': 'none',
       'dependencies': [
-        'dom_generated_js_extern_files',
-      ], # dependencies
-      'rules': [
+        'dom_aggregate_js_extern_files',
+      ],
+      'actions': [
         {
-          'rule_name': 'jscomp',
-          'extension': 'js',
+          'action_name': 'closure',
           'inputs': [
-             '<@(js_defs_files)',
-             '<(js_externs_dir)/evita_js_externs.js',
-           ], # inputs
-          'outputs': [
-              '<(SHARED_INTERMEDIATE_DIR)/evita/js_min/<(RULE_INPUT_ROOT)_min.js',
-           ], # outputs
+            '<(DEPTH)/evita/dom/closure_compiler_workaround.js',
+            '<(js_externs_dir)/evita_js_externs.js',
+            '<@(js_defs_files)',
+            '<@(js_lib_files)',
+          ], # inputs
+          'outputs': [ '<(SHARED_INTERMEDIATE_DIR)/evita/checked.js', ],
           'action': [
             'python',
             '<(DEPTH)/tools/razzle/closure_compiler.py',
             '--js_output_file=<@(_outputs)',
-            '<(RULE_INPUT_PATH)',
-            '<@(js_defs_files)',
+            '--flagfile=<(js_lib_files_file)',
             '--extern',
             '<(js_externs_dir)/evita_js_externs.js',
           ], # action
-        } # closure_compiler
-      ], # 'rules'
-      'sources': [ '<@(js_lib_files)', ],
-    },
-
+        }, # js2c
+      ], # actions
+    }, # dom_jslib_js2c
     {
       'target_name': 'dom_jslib',
       'type': 'static_library',

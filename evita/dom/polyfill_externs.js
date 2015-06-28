@@ -88,7 +88,7 @@ Math.min = function(var_args) {};
  */
 Object.prototype.create = function(proto, opt_properties) {};
 
-/** @expose @type {number} */
+/** @export @type {number} */
 String.prototype.length;
 
 /**

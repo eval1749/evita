@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 global.ConfigLexer = (function() {
-  /** @const @type {!Map.<number, !Symbol>} */
+  /** @const @type {!Map.<number, !symbol>} */
   var CHARACTERS = (function() {
     var map = new Map();
     map.set(Unicode.LF, Lexer.WHITESPACE_CHAR);
@@ -17,12 +17,12 @@ global.ConfigLexer = (function() {
   /** @const @type {!Map.<string, string>} */
   var KEYWORDS = Lexer.createKeywords([]);
 
-  /**
-   * @constructor
-   * @extends {Lexer}
-   * @param {!Document} document
-   */
   class ConfigLexer extends Lexer {
+    /**
+     * @constructor
+     * @extends {Lexer}
+     * @param {!Document} document
+     */
     constructor(document) {
       super(document, {
         characters: CHARACTERS,

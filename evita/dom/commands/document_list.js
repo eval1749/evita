@@ -93,7 +93,7 @@
     return document;
   }
 
-  /** @type {!Map.<!Symbol, string>} */
+  /** @type {!Map.<!symbol, string>} */
   const OBSOLETE_MARK_MAP = new Map([
     [Document.Obsolete.NO, '-'],
     [Document.Obsolete.CHECKING, '.'],

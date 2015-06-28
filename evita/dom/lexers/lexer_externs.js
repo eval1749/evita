@@ -4,7 +4,7 @@
 
 /**
  * @typedef {{
- *  characters: !Map.<number, !Symbol>,
+ *  characters: !Map.<number, !symbol>,
  *  keywords: !Map.<string, string>
  * }}
  */
@@ -17,34 +17,34 @@ var LexerOptions;
  */
 function Lexer(document, options) {}
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.DOT_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.NAMESTART_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.NAME_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.OPERATOR_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.OTHER_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.STRING1_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.STRING2_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.STRING3_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 Lexer.WHITESPACE_CHAR;
 
-/** @typedef {!Symbol} */
+/** @typedef {!symbol} */
 Lexer.State;
 
 /** @const @type {!Lexer.State} */
@@ -116,7 +116,7 @@ Lexer.createKeywords;
 Lexer.prototype.changedOffset;
 
 /**
- * @type {!Map.<number, !Symbol>}
+ * @type {!Map.<number, !symbol>}
  */
 Lexer.prototype.characters_;
 
@@ -166,7 +166,7 @@ Lexer.prototype.range;
 Lexer.prototype.scanOffset;
 
 /**
- * @type {!Symbol}
+ * @type {!symbol}
  */
 Lexer.prototype.state;
 

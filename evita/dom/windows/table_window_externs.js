@@ -1,14 +1,14 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-/** @expose @type {!Document} */
+/** @export @type {!Document} */
 TableWindow.prototype.document;
 
 /**
- * @expose
+ * @export
  * @param {!Event} event
  */
 TableWindow.prototype.handleEvent = function(event) {};
 
-/** @override @expose @type {!TableSelection} */
+/** @override @export @type {!TableSelection} */
 TableWindow.prototype.selection;

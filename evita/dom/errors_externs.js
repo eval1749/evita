@@ -9,7 +9,7 @@
  */
 var DocumentError = function(document, opt_message) {};
 
-/** @expose @type {!Document} */
+/** @export @type {!Document} */
 DocumentError.prototype.document;
 
 /**

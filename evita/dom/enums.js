@@ -38,10 +38,11 @@ var Direction = {
 };
 
 /**
- * @enum {!Symbol}
+ * @enum {!symbol}
  */
 Document.Obsolete = {
   CHECKING: Symbol('CHECKING'),
+  IGNORE: Symbol('IGNORE'),
   NO: Symbol('NO'),
   UNKNOWN: Symbol('UNKNOWN'),
   YES: Symbol('YES')

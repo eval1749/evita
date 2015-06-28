@@ -104,10 +104,14 @@ global.TextWindow.prototype.clone = function() {
     }
   }
 
-  /** @type {!Autoscroller|undefined} */
+  /* TODO(eval1749) Once closure compiler support lcoal class name, we enable
+   annotation: type {Autoscroller} */
+  /** @suppress {suspiciousCode} */
   TextWindow.prototype.autoscroller_;
 
-  /** @type {!DragController|undefined} */
+  /* TODO(eval1749) Once closure compiler support lcoal class name, we enable
+   annotation: type {DragController} */
+  /** @suppress {suspiciousCode} */
   TextWindow.prototype.dragController_;
 
   /** @type {!Range} */

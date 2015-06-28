@@ -4,7 +4,7 @@
 
 /**
  * @typedef {Object}
- *  characters: {!Map<number, !Symbol},
+ *  characters: {!Map<number, !symbol},
  *  hasCpp: boolean,
  *  keywords: {!Set.<string>} keywords
  */
@@ -26,13 +26,13 @@ function ClikeLexer(document, options) {}
  */
 ClikeLexer.newCharacters = function() {};
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 ClikeLexer.COLON_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 ClikeLexer.DOT_CHAR;
 
-/** @const @type {!Symbol} */
+/** @const @type {!symbol} */
 ClikeLexer.SLASH_CHAR;
 
 /**
@@ -45,7 +45,7 @@ function CppLexer(document) {}
 
 /**
  * @constructor
- * @extends {ClikeLexer}
+ * @extends {Lexer}
  * @param {!Document} document
  * @return {undefined}
  */
@@ -85,7 +85,7 @@ function JavaScriptLexer(document, opt_parentLexer) {}
 
 /**
  * @constructor
- * @extends {ClikeLexer}
+ * @extends {Lexer}
  * @param {!Document} document
  * @return {undefined}
  */

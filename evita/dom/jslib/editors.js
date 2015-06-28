@@ -25,7 +25,7 @@ function load(scriptPath, opt_options) {
       return file.read(buffer).then(function(num_bytes) {
         if (!num_bytes) {
           file.close();
-          return Promise.accept(text);
+          return Promise.resolve(text);
         }
         text += decoder.decode(buffer.subarray(0, num_bytes));
         return readLoop();
@@ -53,7 +53,7 @@ function load(scriptPath, opt_options) {
       }
       if (options.verbose)
         console.log('/\x2F loaded', scriptPath);
-      return result.exception ? Promise.reject(result) : Promise.accept({});
+      return result.exception ? Promise.reject(result) : Promise.resolve({});
     }).catch(function(reason) {
       if (options.verbose)
         console.log('/\x2F failed', scriptPath, reason);

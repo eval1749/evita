@@ -282,10 +282,3 @@ WeakSet.prototype.get = function(key) {}
  * @return {boolean}
  */
 WeakSet.prototype.has = function(key) {}
-
-/**
- * @param {(TYPE|IThenable.<TYPE>)=} opt_value
- * @return {!Promise.<TYPE>}
- * @template TYPE
- */
-Promise.accept = function(opt_value) {};

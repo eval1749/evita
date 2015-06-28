@@ -167,8 +167,7 @@ global.JavaScriptLexer = (function(options) {
       'Iterator',
       'Generator',
       'Promise',
-        'Promise.all', 'Promise.accept', 'Promise.defer',
-        'Promise.reject', 'Promise.race', 'Promise.resolve',
+        'Promise.all', 'Promise.reject', 'Promise.race', 'Promise.resolve',
 
       // Reflection
       'Reflect',

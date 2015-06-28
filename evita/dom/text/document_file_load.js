@@ -154,7 +154,7 @@
           document.newline = newline;
           document.readonly = file_info.readonly || readonly;
           document.clearUndo();
-          return Promise.accept(document.length);
+          return Promise.resolve(document.length);
         }).catch(logErrorInPromise('load/open/stat'));
       }
 

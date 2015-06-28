@@ -15,6 +15,7 @@ CLOSURE_JAR = os.path.join(CLOSURE_DIR, 'compiler.jar')
 ES3_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es3.js')
 ES5_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es5.js')
 ES6_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6.js')
+ES6_MORE_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6_more.js')
 
 # See below folow list of warnings:
 # https://code.google.com/p/closure-compiler/wiki/Warnings
@@ -81,7 +82,7 @@ def run(js_output_file, js_files, js_externs, closure_options):
                   ' %(js_files)s' + \
                   ' %(js_externs)s') % params;
   exit_code = os.system(command_line)
-  if exit_code != 0:
+  if exit_code != 0 and js_output_file != '':
     try:
       os.remove(js_output_file)
     except OSError as detail:
@@ -94,7 +95,8 @@ def readFile(filename):
 
 def main():
   js_codes = [];
-  js_externs = [ES3_EXTERNS_JS, ES5_EXTERNS_JS, ES6_EXTERNS_JS];
+  js_externs = [ES3_EXTERNS_JS, ES5_EXTERNS_JS, ES6_EXTERNS_JS,
+                ES6_MORE_EXTERNS_JS];
   js_output_file = ''
   closure_options = []
   externs = None

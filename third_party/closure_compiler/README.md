@@ -6,6 +6,9 @@ The [Closure Compiler](https://developers.google.com/closure/compiler/) is a too
 
 ## Getting Started
  * [Download the latest version](http://dl.google.com/closure-compiler/compiler-latest.zip) ([Release details here](https://github.com/google/closure-compiler/wiki/Releases))
+ * [Download a specific version](https://github.com/google/closure-compiler/wiki/Binary-Downloads). Also available via:
+   - [Maven](https://github.com/google/closure-compiler/wiki/Maven)
+   - [NPM](https://www.npmjs.com/package/google-closure-compiler)
  * See the [Google Developers Site](https://developers.google.com/closure/compiler/docs/gettingstarted_app) for documentation including instructions for running the compiler from the command line.
 
 ## Options for Getting Help
@@ -118,7 +121,18 @@ will re-order the inputs automatically.
 4. Submit your reqest as an issue.
 
 ### Submitting patches
-1. All contributors must sign a contributor license agreement. See the [CONTRIBUTORS](https://raw.githubusercontent.com/google/closure-compiler/master/CONTRIBUTORS) file for details.
+1. All contributors must sign a contributor license agreement (CLA).
+   A CLA basically says that you own the rights to any code you contribute,
+   and that you give us permission to use that code in Closure Compiler.
+   You maintain the copyright on that code.
+   If you own all the rights to your code, you can fill out an
+   [individual CLA](http://code.google.com/legal/individual-cla-v1.0.html).
+   If your employer has any rights to your code, then they also need to fill out
+   a [corporate CLA](http://code.google.com/legal/corporate-cla-v1.0.html).
+   If you don't know if your employer has any rights to your code, you should
+   ask before signing anything.
+   By default, anyone with an @google.com email address already has a CLA
+   signed for them.
 2. To make sure your changes are of the type that will be accepted, ask about your patch on the [Closure Compiler Discuss Group](https://groups.google.com/forum/#!forum/closure-compiler-discuss)
 3. Fork the repository.
 4. Make your changes.
@@ -353,6 +367,40 @@ an encoding of structured data.</td>
   </tr>
 </table>
 
+### Truth
+
+<table>
+  <tr>
+    <td>Code Path</td>
+    <td><code>lib/truth.jar</code></td>
+  </tr>
+
+  <tr>
+    <td>URL</td>
+    <td>https://github.com/google/truth</td>
+  </tr>
+
+  <tr>
+    <td>Version</td>
+    <td>0.24</td>
+  </tr>
+
+  <tr>
+    <td>License</td>
+    <td>Apache License 2.0</td>
+  </tr>
+
+  <tr>
+    <td>Description</td>
+    <td>Assertion/Proposition framework for Java unit tests</td>
+  </tr>
+
+  <tr>
+    <td>Local Modifications</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### Ant
 
 <table>
@@ -416,77 +464,6 @@ without make's wrinkles and with the full portability of pure java code.</td>
   <tr>
     <td>Description</td>
     <td>A Java library to convert JSON to Java objects and vice-versa</td>
-  </tr>
-
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### Mockito
-
-<table>
-  <tr>
-    <td>Code Path</td>
-    <td><code>lib/mockito-core.jar</code></td>
-  </tr>
-
-  <tr>
-    <td>URL</td>
-    <td>https://code.google.com/p/mockito</td>
-  </tr>
-
-  <tr>
-    <td>Version</td>
-    <td>1.9.5</td>
-  </tr>
-
-  <tr>
-    <td>License</td>
-    <td>MIT license</td>
-  </tr>
-
-  <tr>
-    <td>Description</td>
-    <td>Mockito is an open source testing framework for Java. The framework allows the
-creation of Test Double objects (called "Mock Objects") in automated unit tests
-for the purpose of Test-driven Development (TDD) or Behavior Driven Development
-(BDD).</td>
-  </tr>
-
-  <tr>
-    <td>Local Modifications</td>
-    <td>None</td>
-  </tr>
-</table>
-
-### Objenesis
-
-<table>
-  <tr>
-    <td>Code Path</td>
-    <td><code>lib/objenesis.jar</code></td>
-  </tr>
-
-  <tr>
-    <td>URL</td>
-    <td>http://objenesis.org</td>
-  </tr>
-
-  <tr>
-    <td>Version</td>
-    <td>1.2</td>
-  </tr>
-
-  <tr>
-    <td>License</td>
-    <td>Apache 2.0 license</td>
-  </tr>
-
-  <tr>
-    <td>Description</td>
-    <td>Depended by lib/mockito-core.jar, not used directly.</td>
   </tr>
 
   <tr>

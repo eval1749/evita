@@ -260,6 +260,7 @@
     {
       'target_name': 'dom_jslib_js2c',
       'type': 'none',
+      'dependencies': [ 'check_jslib' ],
       'actions': [
         {
           'action_name': 'js2c',

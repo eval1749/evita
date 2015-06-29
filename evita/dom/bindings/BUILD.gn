@@ -5,7 +5,7 @@
 import("//evita/dom/idl_files.gni")
 
 source_set("bindings") {
-  deps = [
+  public_deps = [
     ":bindings_cc",
   ]
   sources = interface_idl_files + dictionary_idl_files

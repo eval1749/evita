@@ -102,10 +102,12 @@ source_set("dom") {
   sources += process_file_template(
     interface_idl_files + dictionary_idl_files,
     [ "$bindings_gen_dir/{{source_name_part}}.cc",
-      "$bindings_gen_dir/{{source_name_part}}." ])
+      "$bindings_gen_dir/{{source_name_part}}.h" ])
 
   deps = [
-    ":dom_unicode_lib",
+    ":dom_jslib_cc",
+    ":dom_unicode_lib_cc",
+    ":dom_v8_strings_cc",
     "//base",
     "//base:i18n",
     "//common",
@@ -122,7 +124,7 @@ source_set("dom") {
   ]
 }
 
-action("dom_jslib") {
+action("dom_jslib_cc") {
   script = "make_get_jslib.py"
   outputs = [ "$target_gen_dir/dom_jslib.cc" ]
   inputs = [
@@ -133,7 +135,7 @@ action("dom_jslib") {
   args = rebase_path(outputs) + rebase_path(inputs)
 }
 
-static_library("dom_unicode_lib") {
+static_library("dom_unicode_lib_cc") {
   sources = [ "unicode_icu.cc" ]
   deps = [
     "//base:i18n",

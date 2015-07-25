@@ -7,10 +7,7 @@
 
 #include <memory>
 
-#pragma warning(push)
-#pragma warning(disable: 4625 4626)
 #include "base/observer_list.h"
-#pragma warning(pop)
 #include "common/common_export.h"
 #include "common/memory/singleton.h"
 #include "common/win/native_window.h"
@@ -35,7 +32,7 @@ class COMMON_EXPORT SingletonHwnd :
     DISALLOW_COPY_AND_ASSIGN(Observer);
   };
 
-  private: ObserverList<Observer> observers_;
+  private: base::ObserverList<Observer> observers_;
   private: std::unique_ptr<NativeWindow> window_;
 
   private: SingletonHwnd();

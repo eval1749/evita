@@ -12,19 +12,19 @@ vars = {
 
 deps = {
     'src/buildtools':
-        Var('git_url') + '/chromium/buildtools.git@ecc8e253abac3b6186a97573871a084f4c0ca3ae',
+        Var('git_url') + '/chromium/buildtools.git@125d157607de4d7c95bf8b02dd580aae17962f19',
     'src/testing/gmock':
         Var('git_url') + '/external/googlemock.git@29763965ab52f24565299976b936d1265cb6a271',
     'src/testing/gtest':
-        Var('git_url') + '/external/googletest.git@23574bf2333f834ff665f894c97bef8a5b33a0a9',
+        Var('git_url') + '/external/googletest.git@00a70a9667d92a4695d84e4fa36b64f611f147da',
     'src/third_party/boringssl/src':
-        'https://boringssl.googlesource.com/boringssl.git@a7997f12be358e58aeb2345bb8b88a9d53240024',
+        'https://boringssl.googlesource.com/boringssl.git@209b2562235f7dab66b8260624e7b3c5b00d14a6',
     'src/third_party/cygwin':
         Var('git_url') + '/chromium/deps/cygwin.git@c89e446b273697fadf3a10ff1007a97c0b7de6df',
     'src/third_party/hunspell':
         Var('git_url') + '/chromium/deps/hunspell.git@c956c0e97af00ef789afb2f64d02c9a5a50e6eb1',
     'src/third_party/icu':
-        Var('git_url') + '/chromium/deps/icu.git@5788e2736b3bc642994b6351a6096124895afa01',
+        Var('git_url') + '/chromium/deps/icu.git@508e9274baaa5caa8de9cf4c26a24e926a15ccf0',
     'src/third_party/yasm/binaries':
         Var('git_url') + '/chromium/deps/yasm/binaries.git@52f9b3f4b0aa06da24ef8b123058bb61ee468881',
     'src/third_party/yasm/source/patched-yasm':
@@ -34,7 +34,7 @@ deps = {
     'src/tools/gyp':
         Var('git_url') + '/external/gyp.git@5122240c5e5c4d8da12c543d82b03d6089eb77c5',
     'src/v8':
-        Var('git_url') + '/v8/v8.git@3462ac26fbb97717525a60cfe2392a08c81fe065',
+        Var('git_url') + '/v8/v8.git@d0c75b6dd37e9bf00a28319e9c2b75b802bb27b6',
 }
 
 deps_os = {

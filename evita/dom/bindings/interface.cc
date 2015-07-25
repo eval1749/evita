@@ -109,7 +109,10 @@ void {{class_name}}::{{method.cpp_name}}(
 {{indent}}{{callee}}({{ emit_arguments(signature) }});
 {%- else %}
 {{indent}}{{signature.to_v8_type}} value = {{callee}}({{ emit_arguments(signature) }});
-{{indent}}info.GetReturnValue().Set(gin::ConvertToV8(isolate, value));
+{{indent}}v8::Local<v8::Value> v8_value;
+{{indent}}if (!gin::TryConvertToV8(isolate, value, &v8_value))
+{{indent}}  return;
+{{indent}}info.GetReturnValue().Set(v8_value);
 {%- endif %}
 {%- endmacro %}
 //////////////////////////////////////////////////////////////////////
@@ -191,7 +194,10 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
     return;
   }
   {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cpp_name}}();
-  info.GetReturnValue().Set(gin::ConvertToV8(isolate, value));
+  v8::Local<v8::Value> v8_value;
+  if (!gin::TryConvertToV8(isolate, value, &v8_value))
+    return;
+  info.GetReturnValue().Set(v8_value);
 }
 
 {%  if not attribute.is_read_only %}
@@ -239,7 +245,10 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
     return;
   }
   {{attribute.to_v8_type}} value = impl->{{interface_name}}::{{attribute.cpp_name}}();
-  info.GetReturnValue().Set(gin::ConvertToV8(isolate, value));
+  v8::Local<v8::Value> v8_value;
+  if (!gin::TryConvertToV8(isolate, value, &v8_value))
+    return;
+  info.GetReturnValue().Set(v8_value);
 }
 
 {%  if not attribute.is_read_only %}

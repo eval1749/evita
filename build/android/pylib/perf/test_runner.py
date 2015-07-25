@@ -63,6 +63,7 @@ from pylib import constants
 from pylib import forwarder
 from pylib.base import base_test_result
 from pylib.base import base_test_runner
+from pylib.device import battery_utils
 from pylib.device import device_errors
 
 
@@ -191,6 +192,7 @@ class TestRunner(base_test_runner.BaseTestRunner):
     self._tests = tests
     self._flaky_tests = flaky_tests
     self._output_dir = None
+    self._device_battery = battery_utils.BatteryUtils(self.device)
 
   @staticmethod
   def _IsBetter(result):
@@ -231,8 +233,15 @@ class TestRunner(base_test_runner.BaseTestRunner):
       return ''
 
     json_output_path = os.path.join(self._output_dir, 'results-chart.json')
-    with open(json_output_path) as f:
-      return f.read()
+    try:
+      with open(json_output_path) as f:
+        return f.read()
+    except IOError:
+      logging.exception('Exception when reading chartjson.')
+      logging.error('This usually means that telemetry did not run, so it could'
+                    ' not generate the file. Please check the device running'
+                    ' the test.')
+      return ''
 
   def _LaunchPerfTest(self, test_name):
     """Runs a perf test.
@@ -260,6 +269,19 @@ class TestRunner(base_test_runner.BaseTestRunner):
     if self._options.collect_chartjson_data:
       self._output_dir = tempfile.mkdtemp()
       cmd = cmd + ' --output-dir=%s' % self._output_dir
+
+    logging.info(
+        'temperature: %s (0.1 C)',
+        str(self._device_battery.GetBatteryInfo().get('temperature')))
+    if self._options.max_battery_temp:
+      self._device_battery.LetBatteryCoolToTemperature(
+          self._options.max_battery_temp)
+
+    logging.info('Charge level: %s%%',
+        str(self._device_battery.GetBatteryInfo().get('level')))
+    if self._options.min_battery_level:
+      self._device_battery.ChargeDeviceToLevel(
+          self._options.min_battery_level)
 
     logging.info('%s : %s', test_name, cmd)
     start_time = datetime.datetime.now()

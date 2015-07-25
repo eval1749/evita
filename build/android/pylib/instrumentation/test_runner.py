@@ -100,6 +100,7 @@ class TestRunner(base_test_runner.BaseTestRunner):
         #                 android_commands refactor?
         self.device.RunShellCommand('stop')
         self.device.RunShellCommand('start')
+        self.device.WaitUntilFullyBooted()
 
     # We give different default value to launch HTTP server based on shard index
     # because it may have race condition when multiple processes are trying to
@@ -341,6 +342,11 @@ class TestRunner(base_test_runner.BaseTestRunner):
     duration_ms = 0
     try:
       self.TestSetup(test)
+
+      try:
+        self.device.GoHome()
+      except device_errors.CommandTimeoutError:
+        logging.exception('Failed to focus the launcher.')
 
       time_ms = lambda: int(time.time() * 1000)
       start_ms = time_ms()

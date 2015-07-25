@@ -27,6 +27,7 @@ from pylib.device import adb_wrapper
 from pylib.device import device_errors
 from pylib.device import device_utils
 from pylib.device import intent
+from pylib.sdk import split_select
 from pylib.utils import mock_calls
 
 # RunCommand from third_party/android_testrunner/run_command.py is mocked
@@ -140,6 +141,18 @@ class DeviceUtilsTest(mock_calls.TestCase):
         self.adb, default_timeout=10, default_retries=0)
     self.watchMethodCalls(self.call.adb, ignore=['GetDeviceSerial'])
 
+  def AdbCommandError(self, args=None, output=None, status=None, msg=None):
+    if args is None:
+      args = ['[unspecified]']
+    return mock.Mock(side_effect=device_errors.AdbCommandFailedError(
+        args, output, status, msg, str(self.device)))
+
+  def CommandError(self, msg=None):
+    if msg is None:
+      msg = 'Command failed'
+    return mock.Mock(side_effect=device_errors.CommandFailedError(
+        msg, str(self.device)))
+
   def ShellError(self, output=None, status=1):
     def action(cmd, *args, **kwargs):
       raise device_errors.AdbShellCommandFailedError(
@@ -152,12 +165,6 @@ class DeviceUtilsTest(mock_calls.TestCase):
     if msg is None:
       msg = 'Operation timed out'
     return mock.Mock(side_effect=device_errors.CommandTimeoutError(
-        msg, str(self.device)))
-
-  def CommandError(self, msg=None):
-    if msg is None:
-      msg = 'Command failed'
-    return mock.Mock(side_effect=device_errors.CommandFailedError(
         msg, str(self.device)))
 
 
@@ -259,8 +266,8 @@ class DeviceUtilsEnableRootTest(DeviceUtilsTest):
   def testEnableRoot_succeeds(self):
     with self.assertCalls(
         (self.call.device.IsUserBuild(), False),
-        self.call.adb.Root(),
-        self.call.adb.WaitForDevice()):
+         self.call.adb.Root(),
+         self.call.device.WaitUntilFullyBooted()):
       self.device.EnableRoot()
 
   def testEnableRoot_userBuild(self):
@@ -304,30 +311,49 @@ class DeviceUtilsGetExternalStoragePathTest(DeviceUtilsTest):
         self.device.GetExternalStoragePath()
 
 
-class DeviceUtilsGetApplicationPathTest(DeviceUtilsTest):
+class DeviceUtilsGetApplicationPathsTest(DeviceUtilsTest):
 
-  def testGetApplicationPath_exists(self):
+  def testGetApplicationPaths_exists(self):
     with self.assertCalls(
         (self.call.adb.Shell('getprop ro.build.version.sdk'), '19\n'),
         (self.call.adb.Shell('pm path android'),
          'package:/path/to/android.apk\n')):
-      self.assertEquals('/path/to/android.apk',
-                        self.device.GetApplicationPath('android'))
+      self.assertEquals(['/path/to/android.apk'],
+                        self.device.GetApplicationPaths('android'))
 
-  def testGetApplicationPath_notExists(self):
+  def testGetApplicationPaths_notExists(self):
     with self.assertCalls(
         (self.call.adb.Shell('getprop ro.build.version.sdk'), '19\n'),
         (self.call.adb.Shell('pm path not.installed.app'), '')):
-      self.assertEquals(None,
-                        self.device.GetApplicationPath('not.installed.app'))
+      self.assertEquals([],
+                        self.device.GetApplicationPaths('not.installed.app'))
 
-  def testGetApplicationPath_fails(self):
+  def testGetApplicationPaths_fails(self):
     with self.assertCalls(
         (self.call.adb.Shell('getprop ro.build.version.sdk'), '19\n'),
         (self.call.adb.Shell('pm path android'),
          self.CommandError('ERROR. Is package manager running?\n'))):
       with self.assertRaises(device_errors.CommandFailedError):
-        self.device.GetApplicationPath('android')
+        self.device.GetApplicationPaths('android')
+
+
+class DeviceUtilsGetApplicationDataDirectoryTest(DeviceUtilsTest):
+
+  def testGetApplicationDataDirectory_exists(self):
+    with self.assertCall(
+        self.call.device._RunPipedShellCommand(
+            'pm dump foo.bar.baz | grep dataDir='),
+        ['dataDir=/data/data/foo.bar.baz']):
+      self.assertEquals(
+          '/data/data/foo.bar.baz',
+          self.device.GetApplicationDataDirectory('foo.bar.baz'))
+
+  def testGetApplicationDataDirectory_notExists(self):
+    with self.assertCall(
+        self.call.device._RunPipedShellCommand(
+            'pm dump foo.bar.baz | grep dataDir='),
+        self.ShellError()):
+      self.assertIsNone(self.device.GetApplicationDataDirectory('foo.bar.baz'))
 
 
 @mock.patch('time.sleep', mock.Mock())
@@ -340,8 +366,8 @@ class DeviceUtilsWaitUntilFullyBootedTest(DeviceUtilsTest):
         (self.call.device.GetExternalStoragePath(), '/fake/storage/path'),
         (self.call.adb.Shell('test -d /fake/storage/path'), ''),
         # pm_ready
-        (self.call.device.GetApplicationPath('android'),
-         'package:/some/fake/path'),
+        (self.call.device.GetApplicationPaths('android'),
+         ['package:/some/fake/path']),
         # boot_completed
         (self.call.device.GetProp('sys.boot_completed'), '1')):
       self.device.WaitUntilFullyBooted(wifi=False)
@@ -353,14 +379,35 @@ class DeviceUtilsWaitUntilFullyBootedTest(DeviceUtilsTest):
         (self.call.device.GetExternalStoragePath(), '/fake/storage/path'),
         (self.call.adb.Shell('test -d /fake/storage/path'), ''),
         # pm_ready
-        (self.call.device.GetApplicationPath('android'),
-         'package:/some/fake/path'),
+        (self.call.device.GetApplicationPaths('android'),
+         ['package:/some/fake/path']),
         # boot_completed
         (self.call.device.GetProp('sys.boot_completed'), '1'),
         # wifi_enabled
         (self.call.adb.Shell('dumpsys wifi'),
          'stuff\nWi-Fi is enabled\nmore stuff\n')):
       self.device.WaitUntilFullyBooted(wifi=True)
+
+  def testWaitUntilFullyBooted_deviceNotInitiallyAvailable(self):
+    with self.assertCalls(
+        self.call.adb.WaitForDevice(),
+        # sd_card_ready
+        (self.call.device.GetExternalStoragePath(), self.AdbCommandError()),
+        # sd_card_ready
+        (self.call.device.GetExternalStoragePath(), self.AdbCommandError()),
+        # sd_card_ready
+        (self.call.device.GetExternalStoragePath(), self.AdbCommandError()),
+        # sd_card_ready
+        (self.call.device.GetExternalStoragePath(), self.AdbCommandError()),
+        # sd_card_ready
+        (self.call.device.GetExternalStoragePath(), '/fake/storage/path'),
+        (self.call.adb.Shell('test -d /fake/storage/path'), ''),
+        # pm_ready
+        (self.call.device.GetApplicationPaths('android'),
+         ['package:/some/fake/path']),
+        # boot_completed
+        (self.call.device.GetProp('sys.boot_completed'), '1')):
+      self.device.WaitUntilFullyBooted(wifi=False)
 
   def testWaitUntilFullyBooted_sdCardReadyFails_noPath(self):
     with self.assertCalls(
@@ -393,11 +440,11 @@ class DeviceUtilsWaitUntilFullyBootedTest(DeviceUtilsTest):
         (self.call.device.GetExternalStoragePath(), '/fake/storage/path'),
         (self.call.adb.Shell('test -d /fake/storage/path'), ''),
         # pm_ready
-        (self.call.device.GetApplicationPath('android'), self.CommandError()),
+        (self.call.device.GetApplicationPaths('android'), self.CommandError()),
         # pm_ready
-        (self.call.device.GetApplicationPath('android'), self.CommandError()),
+        (self.call.device.GetApplicationPaths('android'), self.CommandError()),
         # pm_ready
-        (self.call.device.GetApplicationPath('android'), self.TimeoutError())):
+        (self.call.device.GetApplicationPaths('android'), self.TimeoutError())):
       with self.assertRaises(device_errors.CommandTimeoutError):
         self.device.WaitUntilFullyBooted(wifi=False)
 
@@ -408,8 +455,8 @@ class DeviceUtilsWaitUntilFullyBootedTest(DeviceUtilsTest):
         (self.call.device.GetExternalStoragePath(), '/fake/storage/path'),
         (self.call.adb.Shell('test -d /fake/storage/path'), ''),
         # pm_ready
-        (self.call.device.GetApplicationPath('android'),
-         'package:/some/fake/path'),
+        (self.call.device.GetApplicationPaths('android'),
+         ['package:/some/fake/path']),
         # boot_completed
         (self.call.device.GetProp('sys.boot_completed'), '0'),
         # boot_completed
@@ -426,8 +473,8 @@ class DeviceUtilsWaitUntilFullyBootedTest(DeviceUtilsTest):
         (self.call.device.GetExternalStoragePath(), '/fake/storage/path'),
         (self.call.adb.Shell('test -d /fake/storage/path'), ''),
         # pm_ready
-        (self.call.device.GetApplicationPath('android'),
-         'package:/some/fake/path'),
+        (self.call.device.GetApplicationPaths('android'),
+         ['package:/some/fake/path']),
         # boot_completed
         (self.call.device.GetProp('sys.boot_completed'), '1'),
         # wifi_enabled
@@ -473,7 +520,7 @@ class DeviceUtilsInstallTest(DeviceUtilsTest):
     with self.assertCalls(
         (mock.call.pylib.utils.apk_helper.GetPackageName('/fake/test/app.apk'),
          'this.is.a.test.package'),
-        (self.call.device.GetApplicationPath('this.is.a.test.package'), None),
+        (self.call.device.GetApplicationPaths('this.is.a.test.package'), []),
         self.call.adb.Install('/fake/test/app.apk', reinstall=False)):
       self.device.Install('/fake/test/app.apk', retries=0)
 
@@ -481,11 +528,12 @@ class DeviceUtilsInstallTest(DeviceUtilsTest):
     with self.assertCalls(
         (mock.call.pylib.utils.apk_helper.GetPackageName('/fake/test/app.apk'),
          'this.is.a.test.package'),
-        (self.call.device.GetApplicationPath('this.is.a.test.package'),
-         '/fake/data/app/this.is.a.test.package.apk'),
-        (self.call.device._GetChangedFilesImpl(
+        (self.call.device.GetApplicationPaths('this.is.a.test.package'),
+         ['/fake/data/app/this.is.a.test.package.apk']),
+        (self.call.device._GetChangedAndStaleFiles(
             '/fake/test/app.apk', '/fake/data/app/this.is.a.test.package.apk'),
-         [('/fake/test/app.apk', '/fake/data/app/this.is.a.test.package.apk')]),
+         ([('/fake/test/app.apk', '/fake/data/app/this.is.a.test.package.apk')],
+          [])),
         self.call.adb.Uninstall('this.is.a.test.package'),
         self.call.adb.Install('/fake/test/app.apk', reinstall=False)):
       self.device.Install('/fake/test/app.apk', retries=0)
@@ -494,11 +542,12 @@ class DeviceUtilsInstallTest(DeviceUtilsTest):
     with self.assertCalls(
         (mock.call.pylib.utils.apk_helper.GetPackageName('/fake/test/app.apk'),
          'this.is.a.test.package'),
-        (self.call.device.GetApplicationPath('this.is.a.test.package'),
-         '/fake/data/app/this.is.a.test.package.apk'),
-        (self.call.device._GetChangedFilesImpl(
+        (self.call.device.GetApplicationPaths('this.is.a.test.package'),
+         ['/fake/data/app/this.is.a.test.package.apk']),
+        (self.call.device._GetChangedAndStaleFiles(
             '/fake/test/app.apk', '/fake/data/app/this.is.a.test.package.apk'),
-         [('/fake/test/app.apk', '/fake/data/app/this.is.a.test.package.apk')]),
+         ([('/fake/test/app.apk', '/fake/data/app/this.is.a.test.package.apk')],
+          [])),
         self.call.adb.Install('/fake/test/app.apk', reinstall=True)):
       self.device.Install('/fake/test/app.apk', reinstall=True, retries=0)
 
@@ -506,22 +555,61 @@ class DeviceUtilsInstallTest(DeviceUtilsTest):
     with self.assertCalls(
         (mock.call.pylib.utils.apk_helper.GetPackageName('/fake/test/app.apk'),
          'this.is.a.test.package'),
-        (self.call.device.GetApplicationPath('this.is.a.test.package'),
-         '/fake/data/app/this.is.a.test.package.apk'),
-        (self.call.device._GetChangedFilesImpl(
+        (self.call.device.GetApplicationPaths('this.is.a.test.package'),
+         ['/fake/data/app/this.is.a.test.package.apk']),
+        (self.call.device._GetChangedAndStaleFiles(
             '/fake/test/app.apk', '/fake/data/app/this.is.a.test.package.apk'),
-         [])):
+         ([], []))):
       self.device.Install('/fake/test/app.apk', retries=0)
 
   def testInstall_fails(self):
     with self.assertCalls(
         (mock.call.pylib.utils.apk_helper.GetPackageName('/fake/test/app.apk'),
          'this.is.a.test.package'),
-        (self.call.device.GetApplicationPath('this.is.a.test.package'), None),
+        (self.call.device.GetApplicationPaths('this.is.a.test.package'), []),
         (self.call.adb.Install('/fake/test/app.apk', reinstall=False),
          self.CommandError('Failure\r\n'))):
       with self.assertRaises(device_errors.CommandFailedError):
         self.device.Install('/fake/test/app.apk', retries=0)
+
+class DeviceUtilsInstallSplitApkTest(DeviceUtilsTest):
+
+  def testInstallSplitApk_noPriorInstall(self):
+    with self.assertCalls(
+        (self.call.device._CheckSdkLevel(21)),
+        (mock.call.pylib.sdk.split_select.SelectSplits(
+            self.device, 'base.apk',
+            ['split1.apk', 'split2.apk', 'split3.apk']),
+         ['split2.apk']),
+        (mock.call.pylib.utils.apk_helper.GetPackageName('base.apk'),
+         'this.is.a.test.package'),
+        (self.call.device.GetApplicationPaths('this.is.a.test.package'), []),
+        (self.call.adb.InstallMultiple(
+            ['base.apk', 'split2.apk'], partial=None, reinstall=False))):
+      self.device.InstallSplitApk('base.apk',
+          ['split1.apk', 'split2.apk', 'split3.apk'], retries=0)
+
+  def testInstallSplitApk_partialInstall(self):
+    with self.assertCalls(
+        (self.call.device._CheckSdkLevel(21)),
+        (mock.call.pylib.sdk.split_select.SelectSplits(
+            self.device, 'base.apk',
+            ['split1.apk', 'split2.apk', 'split3.apk']),
+         ['split2.apk']),
+        (mock.call.pylib.utils.apk_helper.GetPackageName('base.apk'),
+         'test.package'),
+        (self.call.device.GetApplicationPaths('test.package'),
+         ['base-on-device.apk', 'split2-on-device.apk']),
+        (mock.call.pylib.utils.md5sum.CalculateDeviceMd5Sums(
+            ['base-on-device.apk', 'split2-on-device.apk'], self.device),
+         {'base-on-device.apk': 'AAA', 'split2-on-device.apk': 'BBB'}),
+        (mock.call.pylib.utils.md5sum.CalculateHostMd5Sums(
+            ['base.apk', 'split2.apk']),
+         {'base.apk': 'AAA', 'split2.apk': 'CCC'}),
+        (self.call.adb.InstallMultiple(
+            ['split2.apk'], partial='test.package', reinstall=True))):
+      self.device.InstallSplitApk('base.apk',
+          ['split1.apk', 'split2.apk', 'split3.apk'], reinstall=True, retries=0)
 
 
 class DeviceUtilsRunShellCommandTest(DeviceUtilsTest):
@@ -945,7 +1033,7 @@ class DeviceUtilsStartInstrumentationTest(DeviceUtilsTest):
     with self.assertCalls(
         self.call.device.RunShellCommand(
             ['am', 'instrument', 'test.package/.TestInstrumentation'],
-            check_return=True)):
+            check_return=True, large_output=True)):
       self.device.StartInstrumentation(
           'test.package/.TestInstrumentation',
           finish=False, raw=False, extras=None)
@@ -954,7 +1042,7 @@ class DeviceUtilsStartInstrumentationTest(DeviceUtilsTest):
     with self.assertCalls(
         (self.call.device.RunShellCommand(
             ['am', 'instrument', '-w', 'test.package/.TestInstrumentation'],
-            check_return=True),
+            check_return=True, large_output=True),
          ['OK (1 test)'])):
       output = self.device.StartInstrumentation(
           'test.package/.TestInstrumentation',
@@ -965,7 +1053,7 @@ class DeviceUtilsStartInstrumentationTest(DeviceUtilsTest):
     with self.assertCalls(
         self.call.device.RunShellCommand(
             ['am', 'instrument', '-r', 'test.package/.TestInstrumentation'],
-            check_return=True)):
+            check_return=True, large_output=True)):
       self.device.StartInstrumentation(
           'test.package/.TestInstrumentation',
           finish=False, raw=True, extras=None)
@@ -975,7 +1063,7 @@ class DeviceUtilsStartInstrumentationTest(DeviceUtilsTest):
         self.call.device.RunShellCommand(
             ['am', 'instrument', '-e', 'foo', 'Foo', '-e', 'bar', 'Bar',
              'test.package/.TestInstrumentation'],
-            check_return=True)):
+            check_return=True, large_output=True)):
       self.device.StartInstrumentation(
           'test.package/.TestInstrumentation',
           finish=False, raw=False, extras={'foo': 'Foo', 'bar': 'Bar'})
@@ -1011,13 +1099,88 @@ class DeviceUtilsBroadcastIntentTest(DeviceUtilsTest):
 
 class DeviceUtilsGoHomeTest(DeviceUtilsTest):
 
-  def testGoHome(self):
-    with self.assertCall(
-        self.call.adb.Shell('am start -W -a android.intent.action.MAIN '
-                            '-c android.intent.category.HOME'),
-        'Starting: Intent { act=android.intent.action.MAIN }\r\n'):
+  def testGoHome_popupsExist(self):
+    with self.assertCalls(
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True), []),
+        (self.call.device.RunShellCommand(
+            ['am', 'start', '-W', '-a', 'android.intent.action.MAIN',
+            '-c', 'android.intent.category.HOME'], check_return=True),
+         'Starting: Intent { act=android.intent.action.MAIN }\r\n'''),
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True), []),
+        (self.call.device.RunShellCommand(
+            ['input', 'keyevent', '66'], check_return=True)),
+        (self.call.device.RunShellCommand(
+            ['input', 'keyevent', '4'], check_return=True)),
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True),
+         ['mCurrentFocus Launcher'])):
       self.device.GoHome()
 
+  def testGoHome_willRetry(self):
+    with self.assertCalls(
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True), []),
+        (self.call.device.RunShellCommand(
+            ['am', 'start', '-W', '-a', 'android.intent.action.MAIN',
+            '-c', 'android.intent.category.HOME'], check_return=True),
+         'Starting: Intent { act=android.intent.action.MAIN }\r\n'''),
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True), []),
+        (self.call.device.RunShellCommand(
+            ['input', 'keyevent', '66'], check_return=True,)),
+        (self.call.device.RunShellCommand(
+            ['input', 'keyevent', '4'], check_return=True)),
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True), []),
+        (self.call.device.RunShellCommand(
+            ['input', 'keyevent', '66'], check_return=True)),
+        (self.call.device.RunShellCommand(
+            ['input', 'keyevent', '4'], check_return=True)),
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True),
+         self.TimeoutError())):
+      with self.assertRaises(device_errors.CommandTimeoutError):
+        self.device.GoHome()
+
+  def testGoHome_alreadyFocused(self):
+    with self.assertCall(
+        self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True),
+        ['mCurrentFocus Launcher']):
+      self.device.GoHome()
+
+  def testGoHome_alreadyFocusedAlternateCase(self):
+    with self.assertCall(
+        self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True),
+        [' mCurrentFocus .launcher/.']):
+      self.device.GoHome()
+
+  def testGoHome_obtainsFocusAfterGoingHome(self):
+    with self.assertCalls(
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True), []),
+        (self.call.device.RunShellCommand(
+            ['am', 'start', '-W', '-a', 'android.intent.action.MAIN',
+            '-c', 'android.intent.category.HOME'], check_return=True),
+         'Starting: Intent { act=android.intent.action.MAIN }\r\n'''),
+        (self.call.device.RunShellCommand(
+            ['dumpsys', 'window', 'windows'], check_return=True,
+            large_output=True),
+         ['mCurrentFocus Launcher'])):
+      self.device.GoHome()
 
 class DeviceUtilsForceStopTest(DeviceUtilsTest):
 
@@ -1033,8 +1196,8 @@ class DeviceUtilsClearApplicationStateTest(DeviceUtilsTest):
   def testClearApplicationState_packageDoesntExist(self):
     with self.assertCalls(
         (self.call.adb.Shell('getprop ro.build.version.sdk'), '17\n'),
-        (self.call.device.GetApplicationPath('this.package.does.not.exist'),
-         None)):
+        (self.call.device.GetApplicationPaths('this.package.does.not.exist'),
+         [])):
       self.device.ClearApplicationState('this.package.does.not.exist')
 
   def testClearApplicationState_packageDoesntExistOnAndroidJBMR2OrAbove(self):
@@ -1047,8 +1210,8 @@ class DeviceUtilsClearApplicationStateTest(DeviceUtilsTest):
   def testClearApplicationState_packageExists(self):
     with self.assertCalls(
         (self.call.adb.Shell('getprop ro.build.version.sdk'), '17\n'),
-        (self.call.device.GetApplicationPath('this.package.exists'),
-         '/data/app/this.package.exists.apk'),
+        (self.call.device.GetApplicationPaths('this.package.exists'),
+         ['/data/app/this.package.exists.apk']),
         (self.call.adb.Shell('pm clear this.package.exists'),
          'Success\r\n')):
       self.device.ClearApplicationState('this.package.exists')
@@ -1129,20 +1292,27 @@ class DeviceUtilsPushChangedFilesZippedTest(DeviceUtilsTest):
          ('/test/host/path/file2', '/test/device/path/file2')])
 
 
-class DeviceUtilsFileExistsTest(DeviceUtilsTest):
+class DeviceUtilsPathExistsTest(DeviceUtilsTest):
 
-  def testFileExists_usingTest_fileExists(self):
+  def testPathExists_usingTest_pathExists(self):
     with self.assertCall(
         self.call.device.RunShellCommand(
             ['test', '-e', '/path/file.exists'], check_return=True), ''):
-      self.assertTrue(self.device.FileExists('/path/file.exists'))
+      self.assertTrue(self.device.PathExists('/path/file.exists'))
 
-  def testFileExists_usingTest_fileDoesntExist(self):
+  def testPathExists_usingTest_pathDoesntExist(self):
     with self.assertCall(
         self.call.device.RunShellCommand(
-            ['test', '-e', '/does/not/exist'], check_return=True),
+            ['test', '-e', '/path/does/not/exist'], check_return=True),
         self.ShellError('', 1)):
-      self.assertFalse(self.device.FileExists('/does/not/exist'))
+      self.assertFalse(self.device.PathExists('/path/does/not/exist'))
+
+  def testFileExists_usingTest_pathDoesntExist(self):
+    with self.assertCall(
+        self.call.device.RunShellCommand(
+            ['test', '-e', '/does/not/exist.html'], check_return=True),
+        self.ShellError('', 1)):
+      self.assertFalse(self.device.FileExists('/does/not/exist.html'))
 
 
 class DeviceUtilsPullFileTest(DeviceUtilsTest):

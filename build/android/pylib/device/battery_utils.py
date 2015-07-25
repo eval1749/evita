@@ -20,15 +20,23 @@ from pylib.utils import timeout_retry
 _DEFAULT_TIMEOUT = 30
 _DEFAULT_RETRIES = 3
 
-_CONTROL_CHARGING_COMMANDS = [
+
+_DEVICE_PROFILES = [
   {
-    # Nexus 4
+    'name': 'Nexus 4',
     'witness_file': '/sys/module/pm8921_charger/parameters/disabled',
-    'enable_command': 'echo 0 > /sys/module/pm8921_charger/parameters/disabled',
-    'disable_command':
-        'echo 1 > /sys/module/pm8921_charger/parameters/disabled',
+    'enable_command': (
+        'echo 0 > /sys/module/pm8921_charger/parameters/disabled && '
+        'dumpsys battery reset'),
+    'disable_command': (
+        'echo 1 > /sys/module/pm8921_charger/parameters/disabled && '
+        'dumpsys battery set ac 0 && dumpsys battery set usb 0'),
+    'charge_counter': None,
+    'voltage': None,
+    'current': None,
   },
   {
+    'name': 'Nexus 5',
     # Nexus 5
     # Setting the HIZ bit of the bq24192 causes the charger to actually ignore
     # energy coming from USB. Setting the power_supply offline just updates the
@@ -36,11 +44,55 @@ _CONTROL_CHARGING_COMMANDS = [
     'witness_file': '/sys/kernel/debug/bq24192/INPUT_SRC_CONT',
     'enable_command': (
         'echo 0x4A > /sys/kernel/debug/bq24192/INPUT_SRC_CONT && '
-        'echo 1 > /sys/class/power_supply/usb/online'),
+        'echo 1 > /sys/class/power_supply/usb/online && '
+        'dumpsys battery reset'),
     'disable_command': (
         'echo 0xCA > /sys/kernel/debug/bq24192/INPUT_SRC_CONT && '
         'chmod 644 /sys/class/power_supply/usb/online && '
-        'echo 0 > /sys/class/power_supply/usb/online'),
+        'echo 0 > /sys/class/power_supply/usb/online && '
+        'dumpsys battery set ac 0 && dumpsys battery set usb 0'),
+    'charge_counter': None,
+    'voltage': None,
+    'current': None,
+  },
+  {
+    'name': 'Nexus 6',
+    'witness_file': None,
+    'enable_command': (
+        'echo 1 > /sys/class/power_supply/battery/charging_enabled && '
+        'dumpsys battery reset'),
+    'disable_command': (
+        'echo 0 > /sys/class/power_supply/battery/charging_enabled && '
+        'dumpsys battery set ac 0 && dumpsys battery set usb 0'),
+    'charge_counter': (
+        '/sys/class/power_supply/max170xx_battery/charge_counter_ext'),
+    'voltage': '/sys/class/power_supply/max170xx_battery/voltage_now',
+    'current': '/sys/class/power_supply/max170xx_battery/current_now',
+  },
+  {
+    'name': 'Nexus 9',
+    'witness_file': None,
+    'enable_command': (
+        'echo Disconnected > '
+        '/sys/bus/i2c/drivers/bq2419x/0-006b/input_cable_state && '
+        'dumpsys battery reset'),
+    'disable_command': (
+        'echo Connected > '
+        '/sys/bus/i2c/drivers/bq2419x/0-006b/input_cable_state && '
+        'dumpsys battery set ac 0 && dumpsys battery set usb 0'),
+    'charge_counter': '/sys/class/power_supply/battery/charge_counter_ext',
+    'voltage': '/sys/class/power_supply/battery/voltage_now',
+    'current': '/sys/class/power_supply/battery/current_now',
+  },
+  {
+    'name': 'Nexus 10',
+    'witness_file': None,
+    'enable_command': None,
+    'disable_command': None,
+    'charge_counter': None,
+    'voltage': '/sys/class/power_supply/ds2784-fuelgauge/voltage_now',
+    'current': '/sys/class/power_supply/ds2784-fuelgauge/current_now',
+
   },
 ]
 
@@ -88,8 +140,47 @@ class BatteryUtils(object):
     self._default_retries = default_retries
 
   @decorators.WithTimeoutAndRetriesFromInstance()
+  def SupportsFuelGauge(self, timeout=None, retries=None):
+    """Detect if fuel gauge chip is present.
+
+    Args:
+      timeout: timeout in seconds
+      retries: number of retries
+
+    Returns:
+      True if known fuel gauge files are present.
+      False otherwise.
+    """
+    self._DiscoverDeviceProfile()
+    return (self._cache['profile']['enable_command'] != None
+        and self._cache['profile']['charge_counter'] != None)
+
+  @decorators.WithTimeoutAndRetriesFromInstance()
+  def GetFuelGaugeChargeCounter(self, timeout=None, retries=None):
+    """Get value of charge_counter on fuel gauge chip.
+
+    Device must have charging disabled for this, not just battery updates
+    disabled. The only device that this currently works with is the nexus 5.
+
+    Args:
+      timeout: timeout in seconds
+      retries: number of retries
+
+    Returns:
+      value of charge_counter for fuel gauge chip in units of nAh.
+
+    Raises:
+      device_errors.CommandFailedError: If fuel gauge chip not found.
+    """
+    if self.SupportsFuelGauge():
+       return int(self._device.ReadFile(
+          self._cache['profile']['charge_counter']))
+    raise device_errors.CommandFailedError(
+        'Unable to find fuel gauge.')
+
+  @decorators.WithTimeoutAndRetriesFromInstance()
   def GetNetworkData(self, package, timeout=None, retries=None):
-    """ Get network data for specific package.
+    """Get network data for specific package.
 
     Args:
       package: package name you want network data for.
@@ -127,7 +218,8 @@ class BatteryUtils(object):
 
   @decorators.WithTimeoutAndRetriesFromInstance()
   def GetPowerData(self, timeout=None, retries=None):
-    """ Get power data for device.
+    """Get power data for device.
+
     Args:
       timeout: timeout in seconds
       retries: number of retries
@@ -174,7 +266,7 @@ class BatteryUtils(object):
 
   @decorators.WithTimeoutAndRetriesFromInstance()
   def GetPackagePowerData(self, package, timeout=None, retries=None):
-    """ Get power data for particular package.
+    """Get power data for particular package.
 
     Args:
       package: Package to get power data on.
@@ -246,22 +338,18 @@ class BatteryUtils(object):
       device_errors.CommandFailedError: If method of disabling charging cannot
         be determined.
     """
-    if 'charging_config' not in self._cache:
-      for c in _CONTROL_CHARGING_COMMANDS:
-        if self._device.FileExists(c['witness_file']):
-          self._cache['charging_config'] = c
-          break
-      else:
-        raise device_errors.CommandFailedError(
-            'Unable to find charging commands.')
+    self._DiscoverDeviceProfile()
+    if not self._cache['profile']['enable_command']:
+      raise device_errors.CommandFailedError(
+          'Unable to find charging commands.')
 
     if enabled:
-      command = self._cache['charging_config']['enable_command']
+      command = self._cache['profile']['enable_command']
     else:
-      command = self._cache['charging_config']['disable_command']
+      command = self._cache['profile']['disable_command']
 
     def set_and_verify_charging():
-      self._device.RunShellCommand(command, check_return=True)
+      self._device.RunShellCommand(command, check_return=True, as_root=True)
       return self.GetCharging() == enabled
 
     timeout_retry.WaitFor(set_and_verify_charging, wait_period=1)
@@ -269,7 +357,7 @@ class BatteryUtils(object):
   # TODO(rnephew): Make private when all use cases can use the context manager.
   @decorators.WithTimeoutAndRetriesFromInstance()
   def DisableBatteryUpdates(self, timeout=None, retries=None):
-    """ Resets battery data and makes device appear like it is not
+    """Resets battery data and makes device appear like it is not
     charging so that it will collect power data since last charge.
 
     Args:
@@ -284,25 +372,7 @@ class BatteryUtils(object):
     def battery_updates_disabled():
       return self.GetCharging() is False
 
-    if (self._device.build_version_sdk <
-        constants.ANDROID_SDK_VERSION_CODES.LOLLIPOP):
-      raise device_errors.DeviceVersionError('Device must be L or higher.')
-
-    self._device.RunShellCommand(
-        ['dumpsys', 'battery', 'reset'], check_return=True)
-    self._device.RunShellCommand(
-        ['dumpsys', 'batterystats', '--reset'], check_return=True)
-    battery_data = self._device.RunShellCommand(
-        ['dumpsys', 'batterystats', '--charged', '--checkin'],
-        check_return=True)
-    ROW_TYPE_INDEX = 3
-    PWI_POWER_INDEX = 5
-    for line in battery_data:
-      l = line.split(',')
-      if (len(l) > PWI_POWER_INDEX and l[ROW_TYPE_INDEX] == 'pwi'
-          and l[PWI_POWER_INDEX] != 0):
-        raise device_errors.CommandFailedError(
-            'Non-zero pmi value found after reset.')
+    self._ClearPowerData()
     self._device.RunShellCommand(['dumpsys', 'battery', 'set', 'ac', '0'],
                                  check_return=True)
     self._device.RunShellCommand(['dumpsys', 'battery', 'set', 'usb', '0'],
@@ -312,7 +382,7 @@ class BatteryUtils(object):
   # TODO(rnephew): Make private when all use cases can use the context manager.
   @decorators.WithTimeoutAndRetriesFromInstance()
   def EnableBatteryUpdates(self, timeout=None, retries=None):
-    """ Restarts device charging so that dumpsys no longer collects power data.
+    """Restarts device charging so that dumpsys no longer collects power data.
 
     Args:
       timeout: timeout in seconds
@@ -322,11 +392,9 @@ class BatteryUtils(object):
       device_errors.DeviceVersionError: If device is not L or higher.
     """
     def battery_updates_enabled():
-      return self.GetCharging() is True
-
-    if (self._device.build_version_sdk <
-        constants.ANDROID_SDK_VERSION_CODES.LOLLIPOP):
-      raise device_errors.DeviceVersionError('Device must be L or higher.')
+      return (self.GetCharging()
+              or not bool('UPDATES STOPPED' in self._device.RunShellCommand(
+                  ['dumpsys', 'battery'], check_return=True)))
 
     self._device.RunShellCommand(['dumpsys', 'battery', 'reset'],
                                  check_return=True)
@@ -399,7 +467,127 @@ class BatteryUtils(object):
       else:
         logging.info('Current battery temperature: %s', temp)
       return int(temp) <= target_temp
-
-    logging.info('Waiting for the device to cool down to %s degrees.',
+    self.EnableBatteryUpdates()
+    logging.info('Waiting for the device to cool down to %s (0.1 C)',
                  target_temp)
     timeout_retry.WaitFor(cool_device, wait_period=wait_period)
+
+  @decorators.WithTimeoutAndRetriesFromInstance()
+  def TieredSetCharging(self, enabled, timeout=None, retries=None):
+    """Enables or disables charging on the device.
+
+    Args:
+      enabled: A boolean indicating whether charging should be enabled or
+        disabled.
+      timeout: timeout in seconds
+      retries: number of retries
+    """
+    if self.GetCharging() == enabled:
+      logging.warning('Device charging already in expected state: %s', enabled)
+      return
+
+    if enabled:
+      try:
+        self.SetCharging(enabled)
+      except device_errors.CommandFailedError:
+        logging.info('Unable to enable charging via hardware.'
+                     ' Falling back to software enabling.')
+        self.EnableBatteryUpdates()
+    else:
+      try:
+        self._ClearPowerData()
+        self.SetCharging(enabled)
+      except device_errors.CommandFailedError:
+        logging.info('Unable to disable charging via hardware.'
+                     ' Falling back to software disabling.')
+        self.DisableBatteryUpdates()
+
+  @contextlib.contextmanager
+  def PowerMeasurement(self, timeout=None, retries=None):
+    """Context manager that enables battery power collection.
+
+    Once the with block is exited, charging is resumed. Will attempt to disable
+    charging at the hardware level, and if that fails will fall back to software
+    disabling of battery updates.
+
+    Only for devices L and higher.
+
+    Example usage:
+      with PowerMeasurement():
+        browser_actions()
+        get_power_data() # report usage within this block
+      after_measurements() # Anything that runs after power
+                           # measurements are collected
+
+    Args:
+      timeout: timeout in seconds
+      retries: number of retries
+    """
+    try:
+      self.TieredSetCharging(False, timeout=timeout, retries=retries)
+      yield
+    finally:
+      self.TieredSetCharging(True, timeout=timeout, retries=retries)
+
+  def _ClearPowerData(self):
+    """Resets battery data and makes device appear like it is not
+    charging so that it will collect power data since last charge.
+
+    Returns:
+      True if power data cleared.
+      False if power data clearing is not supported (pre-L)
+
+    Raises:
+      device_errors.DeviceVersionError: If power clearing is supported,
+        but fails.
+    """
+    if (self._device.build_version_sdk <
+        constants.ANDROID_SDK_VERSION_CODES.LOLLIPOP):
+      logging.warning('Dumpsys power data only available on 5.0 and above. '
+                      'Cannot clear power data.')
+      return False
+
+    self._device.RunShellCommand(
+        ['dumpsys', 'battery', 'set', 'usb', '1'], check_return=True)
+    self._device.RunShellCommand(
+        ['dumpsys', 'battery', 'set', 'ac', '1'], check_return=True)
+    self._device.RunShellCommand(
+        ['dumpsys', 'batterystats', '--reset'], check_return=True)
+    battery_data = self._device.RunShellCommand(
+        ['dumpsys', 'batterystats', '--charged', '--checkin'],
+        check_return=True, large_output=True)
+    for line in battery_data:
+      l = line.split(',')
+      if (len(l) > _PWI_POWER_CONSUMPTION_INDEX and l[_ROW_TYPE_INDEX] == 'pwi'
+          and l[_PWI_POWER_CONSUMPTION_INDEX] != 0):
+        self._device.RunShellCommand(
+            ['dumpsys', 'battery', 'reset'], check_return=True)
+        raise device_errors.CommandFailedError(
+            'Non-zero pmi value found after reset.')
+    self._device.RunShellCommand(
+        ['dumpsys', 'battery', 'reset'], check_return=True)
+    return True
+
+  def _DiscoverDeviceProfile(self):
+    """Checks and caches device information.
+
+    Returns:
+      True if profile is found, false otherwise.
+    """
+
+    if 'profile' in self._cache:
+      return True
+    for profile in _DEVICE_PROFILES:
+      if self._device.product_model == profile['name']:
+        self._cache['profile'] = profile
+        return True
+    self._cache['profile'] = {
+        'name': None,
+        'witness_file': None,
+        'enable_command': None,
+        'disable_command': None,
+        'charge_counter': None,
+        'voltage': None,
+        'current': None,
+    }
+    return False

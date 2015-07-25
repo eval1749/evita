@@ -70,6 +70,12 @@ PACKAGE_INFO = {
         '/data/local/chrome-command-line',
         'chrome_devtools_remote',
         None),
+    'chromium': PackageInfo(
+        'org.chromium.chrome',
+        'com.google.android.apps.chrome.Main',
+        '/data/local/chrome-command-line',
+        'chrome_devtools_remote',
+        None),
     'legacy_browser': PackageInfo(
         'com.google.android.browser',
         'com.android.browser.BrowserActivity',
@@ -102,7 +108,7 @@ PACKAGE_INFO = {
         'org.chromium.android_webview.test'),
     'gtest': PackageInfo(
         'org.chromium.native_test',
-        'org.chromium.native_test.NativeTestActivity',
+        'org.chromium.native_test.NativeUnitTestActivity',
         '/data/local/tmp/chrome-native-tests-command-line',
         None,
         None),
@@ -110,13 +116,13 @@ PACKAGE_INFO = {
         'org.chromium.components_browsertests_apk',
         ('org.chromium.components_browsertests_apk' +
          '.ComponentsBrowserTestsActivity'),
-        '/data/local/tmp/components-browser-tests-command-line',
+        '/data/local/tmp/chrome-native-tests-command-line',
         None,
         None),
     'content_browsertests': PackageInfo(
         'org.chromium.content_browsertests_apk',
         'org.chromium.content_browsertests_apk.ContentBrowserTestsActivity',
-        '/data/local/tmp/content-browser-tests-command-line',
+        '/data/local/tmp/chrome-native-tests-command-line',
         None,
         None),
     'chromedriver_webview_shell': PackageInfo(

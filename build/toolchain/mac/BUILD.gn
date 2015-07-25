@@ -54,7 +54,7 @@ template("mac_toolchain") {
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -64,7 +64,7 @@ template("mac_toolchain") {
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
@@ -75,27 +75,27 @@ template("mac_toolchain") {
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
     tool("objc") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} {{cflags_objc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_objc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJC {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 
     tool("objcxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} {{cflags_objcc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_objcc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
       outputs = [
-        "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+        "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.o",
       ]
     }
 

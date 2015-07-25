@@ -18,7 +18,7 @@ class Animatable {
 
   private: Animator* animator_;
   private: bool is_finished_;
-  private: ObserverList<AnimationObserver> observers_;
+  private: base::ObserverList<AnimationObserver> observers_;
 
   protected: Animatable();
   public: virtual ~Animatable();

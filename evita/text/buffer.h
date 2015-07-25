@@ -52,7 +52,7 @@ class Buffer : public BufferCore,
                public BufferMutationObservee,
                public MarkerSetObserver {
 
-  private: ObserverList<BufferMutationObserver> observers_;
+  private: base::ObserverList<BufferMutationObserver> observers_;
   private: std::unique_ptr<IntervalSet> intervals_;
   private: std::unique_ptr<LineNumberCache> line_number_cache_;
   private: std::unique_ptr<MarkerSet> spelling_markers_;

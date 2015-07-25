@@ -58,7 +58,7 @@ class Canvas : public Object, public DpiHandler {
   private: int bitmap_id_;
   private: gfx::RectF bounds_;
   private: scoped_refptr<FactorySet> factory_set_;
-  private: ObserverList<CanvasObserver> observers_;
+  private: base::ObserverList<CanvasObserver> observers_;
   private: gfx::PointF offset_;
   private: std::unique_ptr<Bitmap> screen_bitmap_;
   private: bool should_clear_;

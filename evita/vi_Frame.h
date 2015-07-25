@@ -68,7 +68,7 @@ class Frame final : public views::Window,
   private: typedef views::TabStrip TabStrip;
 
   private: MessageView* message_view_;
-  private: ObserverList<FrameObserver> observers_;
+  private: base::ObserverList<FrameObserver> observers_;
   private: std::unordered_set<TabContent*> tab_contents_;
   private: std::unique_ptr<ui::Layer> tab_content_layer_;
   private: TabStrip* tab_strip_;

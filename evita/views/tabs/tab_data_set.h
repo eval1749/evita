@@ -33,7 +33,7 @@ class TabDataSet : public common::Singleton<TabDataSet> {
   private: typedef domapi::TabData TabData;
 
   private: std::unordered_map<int, TabData*> map_;
-  private: ObserverList<Observer> observers_;
+  private: base::ObserverList<Observer> observers_;
 
   private: TabDataSet();
   public: ~TabDataSet();

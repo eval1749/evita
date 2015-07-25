@@ -28,7 +28,7 @@ std::vector<base::string16> parseFontFamily(const base::string16& source) {
           state = State::Start;
           break;
         }
-        if (IsWhitespace(ch))
+        if (base::IsAsciiWhitespace(ch))
           state = State::NameSpace;
         else
           name.push_back(ch);
@@ -40,14 +40,14 @@ std::vector<base::string16> parseFontFamily(const base::string16& source) {
           state = State::Start;
           break;
         }
-        if (!IsWhitespace(ch)) {
+        if (!base::IsAsciiWhitespace(ch)) {
           name.push_back(' ');
           name.push_back(ch);
           state = State::Name;
         }
         break;
       case State::Start:
-        if (ch != ',' && !IsWhitespace(ch)) {
+        if (ch != ',' && !base::IsAsciiWhitespace(ch)) {
           name.push_back(ch);
           state = State::Name;
         }

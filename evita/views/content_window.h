@@ -30,7 +30,7 @@ class ContentWindow : public Window, protected ui::LayerOwnerDelegate {
   DECLARE_CASTABLE_CLASS(ContentWindow, Window);
 
   private: std::unique_ptr<gfx::Canvas> canvas_;
-  private: ObserverList<ContentObserver> observers_;
+  private: base::ObserverList<ContentObserver> observers_;
 
   protected: explicit ContentWindow(views::WindowId window_id);
   public: ~ContentWindow() override;

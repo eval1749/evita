@@ -25,7 +25,7 @@ class StyleSheet {
                                       std::unique_ptr<Style>>
       StyleMap;
 
-  private: ObserverList<StyleSheetObserver> observers_;
+  private: base::ObserverList<StyleSheetObserver> observers_;
   private: StyleMap selector_map_;
 
   public: StyleSheet();

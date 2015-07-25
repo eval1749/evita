@@ -27,7 +27,7 @@ class TabContent : public ui::Widget {
   DECLARE_CASTABLE_CLASS(TabContent, ui::Widget);
 
   private: int active_tick_;
-  private: ObserverList<TabContentObserver> observers_;
+  private: base::ObserverList<TabContentObserver> observers_;
 
   protected: TabContent();
   public: ~TabContent() override;

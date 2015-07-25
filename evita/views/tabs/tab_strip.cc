@@ -254,7 +254,7 @@ void DragController::DidInsertTab(Tab* tab) {
 class TabCollection final : public ui::Widget,
                             public ModelDelegate,
                             private ui::SystemMetricsObserver {
-  private: ObserverList<ModelObserver> observers_;
+  private: base::ObserverList<ModelObserver> observers_;
   private: DragController drag_controller_;
   private: bool dirty_;
   // Last bounds used for layout tabs.

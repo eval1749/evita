@@ -27,7 +27,7 @@ class MarkerSet : public BufferMutationObserver {
 
   private: MarkerSetImpl markers_;
   private: BufferMutationObservee* const mutation_observee_;
-  private: ObserverList<MarkerSetObserver> observers_;
+  private: base::ObserverList<MarkerSetObserver> observers_;
 
   public: MarkerSet(BufferMutationObservee* provider);
   public: virtual ~MarkerSet();

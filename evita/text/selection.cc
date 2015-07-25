@@ -16,7 +16,7 @@ namespace text {
 // Model
 //
 class Selection::Model : public Range {
-  private: ObserverList<SelectionChangeObserver> observers_;
+  private: base::ObserverList<SelectionChangeObserver> observers_;
   private: bool start_is_active_;
 
   public: Model(const Range* range);

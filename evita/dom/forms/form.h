@@ -28,7 +28,7 @@ class Form : public v8_glue::Scriptable<Form, ViewEventTarget> {
   private: std::vector<FormControl*> controls_;
   private: gc::Member<FormControl> focus_control_;
   private: float height_;
-  private: mutable ObserverList<FormObserver> observers_;
+  private: mutable base::ObserverList<FormObserver> observers_;
   private: base::string16 title_;
   private: float width_;
 

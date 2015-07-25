@@ -28,7 +28,7 @@ class SystemMetrics : public common::Singleton<SystemMetrics> {
   private: float icon_font_size_;
   private: gfx::ColorF shadow_;
   private: float font_size_;
-  private: ObserverList<SystemMetricsObserver> observers_;
+  private: base::ObserverList<SystemMetricsObserver> observers_;
 
   private: SystemMetrics();
   public: virtual ~SystemMetrics();

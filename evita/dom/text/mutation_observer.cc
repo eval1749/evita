@@ -97,8 +97,11 @@ void MutationObserver::DidMutateDocument(Document* document) {
   auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const isolate = runner->isolate();
+  v8::Local<v8::Value> records;
+  if (!gin::TryConvertToV8(isolate, tracker->TakeRecords(), &records))
+    return;
   runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate),
-               gin::ConvertToV8(isolate, tracker->TakeRecords()),
+               records,
                gin::ConvertToV8(isolate, this));
 }
 

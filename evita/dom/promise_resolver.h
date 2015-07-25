@@ -92,7 +92,10 @@ void PromiseResolver::Reject(T reason) {
     return;
   v8_glue::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
-  DoReject(gin::ConvertToV8(isolate, reason));
+  v8::Local<v8::Value> v8_value;
+  if (!gin::TryConvertToV8(isolate, reason, &v8_value))
+    return;
+  DoReject(v8_value);
 }
 
 template<typename T>
@@ -101,7 +104,10 @@ void PromiseResolver::Resolve(T value) {
     return;
   v8_glue::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
-  DoResolve(gin::ConvertToV8(isolate, value));
+  v8::Local<v8::Value> v8_value;
+  if (!gin::TryConvertToV8(isolate, value, &v8_value))
+    return;
+  DoResolve(v8_value);
 }
 
 }  // namespace dom

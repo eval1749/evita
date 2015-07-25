@@ -12,7 +12,7 @@ BEGIN_V8_INCLUDE
 END_V8_INCLUDE
 
 namespace base {
-class MessageLoopProxy;
+class TaskRunner;
 }
 
 namespace v8 {
@@ -32,7 +32,7 @@ class PerIsolateData {
   private: ConstructorMode construct_mode_;
   private: Runner* current_runner_;
   private: v8::Isolate* isolate_;
-  private: scoped_refptr<base::MessageLoopProxy> message_loop_proxy_;
+  private: scoped_refptr<base::TaskRunner> task_runner_;
 
   public: PerIsolateData(v8::Isolate* isolate);
   public: ~PerIsolateData();
@@ -50,8 +50,8 @@ class PerIsolateData {
   public: Runner* current_runner() const { return current_runner_; }
   public: void set_current_runner(Runner* runner) { current_runner_ = runner; }
 
-  public: base::MessageLoopProxy* message_loop_proxy() {
-    return message_loop_proxy_.get();
+  public: base::TaskRunner* task_runner() {
+    return task_runner_.get();
   }
 
   public: static PerIsolateData* From(v8::Isolate* isolate);

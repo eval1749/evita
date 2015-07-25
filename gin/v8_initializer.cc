@@ -353,7 +353,7 @@ void V8Initializer::Initialize(gin::IsolateHolder::ScriptMode mode) {
   v8::V8::InitializePlatform(V8Platform::Get());
 
   if (gin::IsolateHolder::kStrictMode == mode) {
-    static const char use_strict[] = "--use_strict";
+    static const char use_strict[] = "--use_strict --harmony --harmony-modules";
     v8::V8::SetFlagsFromString(use_strict, sizeof(use_strict) - 1);
   }
 

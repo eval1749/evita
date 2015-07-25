@@ -13,6 +13,7 @@
 #include "gin/modules/module_runner_delegate.h"
 #include "gin/public/isolate_holder.h"
 #include "gin/try_catch.h"
+#include "gin/v8_initializer.h"
 
 namespace gin {
 namespace {
@@ -60,21 +61,25 @@ int main(int argc, char** argv) {
   base::CommandLine::Init(argc, argv);
   base::i18n::InitializeICU();
 #ifdef V8_USE_EXTERNAL_STARTUP_DATA
-  gin::IsolateHolder::LoadV8Snapshot();
+  gin::V8Initializer::LoadV8Snapshot();
+  gin::V8Initializer::LoadV8Natives();
 #endif
+
+  base::MessageLoop message_loop;
 
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
                                  gin::ArrayBufferAllocator::SharedInstance());
   gin::IsolateHolder instance;
 
-  base::MessageLoop message_loop;
 
   gin::GinShellRunnerDelegate delegate;
   gin::ShellRunner runner(&delegate, instance.isolate());
 
   {
     gin::Runner::Scope scope(&runner);
-    v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
+    runner.GetContextHolder()
+        ->isolate()
+        ->SetCaptureStackTraceForUncaughtExceptions(true);
   }
 
   base::CommandLine::StringVector args =

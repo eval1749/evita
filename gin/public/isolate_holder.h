@@ -8,12 +8,14 @@
 #include "base/basictypes.h"
 #include "base/memory/scoped_ptr.h"
 #include "gin/gin_export.h"
+#include "gin/public/v8_idle_task_runner.h"
 #include "v8/include/v8.h"
 
 namespace gin {
 
 class PerIsolateData;
 class RunMicrotasksObserver;
+class V8IsolateMemoryDumpProvider;
 
 // To embed Gin, first initialize gin using IsolateHolder::Initialize and then
 // create an instance of IsolateHolder to hold the v8::Isolate in which you
@@ -27,13 +29,24 @@ class GIN_EXPORT IsolateHolder {
     kStrictMode
   };
 
+  // Stores whether the client uses v8::Locker to access the isolate.
+  enum AccessMode {
+    kSingleThread,
+    kUseLocker
+  };
+
   IsolateHolder();
+  explicit IsolateHolder(AccessMode access_mode);
   ~IsolateHolder();
 
   // Should be invoked once before creating IsolateHolder instances to
-  // initialize V8 and Gin. In case V8_USE_EXTERNAL_STARTUP_DATA is defined,
-  // V8's initial snapshot should be loaded (by calling LoadV8Snapshot or
-  // LoadV8SnapshotFd) before calling Initialize.
+  // initialize V8 and Gin. In case V8_USE_EXTERNAL_STARTUP_DATA is
+  // defined, V8's initial natives should be loaded (by calling
+  // V8Initializer::LoadV8NativesFromFD or
+  // V8Initializer::LoadV8Natives) before calling this method.  If the
+  // snapshot file is available, it should also be loaded (by calling
+  // V8Initializer::LoadV8SnapshotFromFD or
+  // V8Initializer::LoadV8Snapshot) before calling this method.
   static void Initialize(ScriptMode mode,
                          v8::ArrayBuffer::Allocator* allocator);
 
@@ -51,27 +64,24 @@ class GIN_EXPORT IsolateHolder {
   // thread.
   void RemoveRunMicrotasksObserver();
 
-#if defined(V8_USE_EXTERNAL_STARTUP_DATA)
-  static const char kNativesFileName[];
-  static const char kSnapshotFileName[];
+  // This method returns if v8::Locker is needed to access isolate.
+  AccessMode access_mode() const { return access_mode_; }
 
-  static bool LoadV8SnapshotFd(int natives_fd,
-                               int64 natives_offset,
-                               int64 natives_size,
-                               int snapshot_fd,
-                               int64 snapshot_offset,
-                               int64 snapshot_size);
-  static bool LoadV8Snapshot();
-#endif  // V8_USE_EXTERNAL_STARTUP_DATA
-  static void GetV8ExternalSnapshotData(const char** natives_data_out,
-                                        int* natives_size_out,
-                                        const char** snapshot_data_out,
-                                        int* snapshot_size_out);
+  void EnableIdleTasks(scoped_ptr<V8IdleTaskRunner> idle_task_runner);
+
+  // This method returns V8IsolateMemoryDumpProvider of this isolate, used for
+  // testing.
+  V8IsolateMemoryDumpProvider* isolate_memory_dump_provider_for_testing()
+      const {
+    return isolate_memory_dump_provider_.get();
+  }
 
  private:
   v8::Isolate* isolate_;
   scoped_ptr<PerIsolateData> isolate_data_;
   scoped_ptr<RunMicrotasksObserver> task_observer_;
+  scoped_ptr<V8IsolateMemoryDumpProvider> isolate_memory_dump_provider_;
+  AccessMode access_mode_;
 
   DISALLOW_COPY_AND_ASSIGN(IsolateHolder);
 };

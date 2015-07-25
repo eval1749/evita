@@ -46,21 +46,33 @@ component("gin") {
     "public/debug.h",
     "public/gin_embedders.h",
     "public/isolate_holder.h",
+    "public/v8_idle_task_runner.h",
     "public/v8_platform.h",
     "public/wrapper_info.h",
-    "runner.cc",
-    "runner.h",
     "run_microtasks_observer.cc",
     "run_microtasks_observer.h",
+    "runner.cc",
+    "runner.h",
     "shell_runner.cc",
     "shell_runner.h",
     "try_catch.cc",
     "try_catch.h",
+    "v8_initializer.cc",
+    "v8_initializer.h",
+    "v8_isolate_memory_dump_provider.cc",
+    "v8_isolate_memory_dump_provider.h",
     "v8_platform.cc",
     "wrappable.cc",
     "wrappable.h",
     "wrapper_info.cc",
   ]
+
+  if (v8_use_external_startup_data) {
+    data = [
+      "$root_out_dir/natives_blob.bin",
+      "$root_out_dir/snapshot_blob.bin",
+    ]
+  }
 
   defines = [ "GIN_IMPLEMENTATION" ]
 
@@ -72,10 +84,8 @@ component("gin") {
     "//base/third_party/dynamic_annotations",
   ]
   if (v8_use_external_startup_data && is_win) {
-    deps += [
-      ":gin_v8_snapshot_fingerprint",
-      "//crypto:crypto",
-    ]
+    public_deps += [ ":gin_v8_snapshot_fingerprint" ]
+    deps += [ "//crypto:crypto" ]
     sources += [ "$target_gen_dir/v8_snapshot_fingerprint.cc" ]
     defines += [ "V8_VERIFY_EXTERNAL_STARTUP_DATA" ]
   }
@@ -103,6 +113,10 @@ if (v8_use_external_startup_data) {
     ]
     outputs = [
       output_file,
+    ]
+
+    deps = [
+      "//v8",
     ]
   }
 }
@@ -151,10 +165,11 @@ test("gin_unittests") {
     "modules/module_registry_unittest.cc",
     "modules/timer_unittest.cc",
     "per_context_data_unittest.cc",
-    "shell_runner_unittest.cc",
     "shell/gin_shell_unittest.cc",
+    "shell_runner_unittest.cc",
     "test/run_all_unittests.cc",
     "test/run_js_tests.cc",
+    "v8_isolate_memory_dump_provider_unittest.cc",
     "wrappable_unittest.cc",
   ]
 

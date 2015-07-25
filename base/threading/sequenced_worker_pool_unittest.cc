@@ -11,7 +11,6 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/scoped_ptr.h"
 #include "base/message_loop/message_loop.h"
-#include "base/message_loop/message_loop_proxy.h"
 #include "base/synchronization/condition_variable.h"
 #include "base/synchronization/lock.h"
 #include "base/test/sequenced_task_runner_test_template.h"
@@ -949,6 +948,8 @@ class SequencedWorkerPoolTaskRunnerTestDelegate {
 INSTANTIATE_TYPED_TEST_CASE_P(
     SequencedWorkerPool, TaskRunnerTest,
     SequencedWorkerPoolTaskRunnerTestDelegate);
+INSTANTIATE_TYPED_TEST_CASE_P(SequencedWorkerPool, TaskRunnerAffinityTest,
+                              SequencedWorkerPoolTaskRunnerTestDelegate);
 
 class SequencedWorkerPoolTaskRunnerWithShutdownBehaviorTestDelegate {
  public:
@@ -986,6 +987,9 @@ class SequencedWorkerPoolTaskRunnerWithShutdownBehaviorTestDelegate {
 INSTANTIATE_TYPED_TEST_CASE_P(
     SequencedWorkerPoolTaskRunner, TaskRunnerTest,
     SequencedWorkerPoolTaskRunnerWithShutdownBehaviorTestDelegate);
+INSTANTIATE_TYPED_TEST_CASE_P(
+    SequencedWorkerPoolTaskRunner, TaskRunnerAffinityTest,
+    SequencedWorkerPoolTaskRunnerWithShutdownBehaviorTestDelegate);
 
 class SequencedWorkerPoolSequencedTaskRunnerTestDelegate {
  public:
@@ -1022,6 +1026,9 @@ class SequencedWorkerPoolSequencedTaskRunnerTestDelegate {
 
 INSTANTIATE_TYPED_TEST_CASE_P(
     SequencedWorkerPoolSequencedTaskRunner, TaskRunnerTest,
+    SequencedWorkerPoolSequencedTaskRunnerTestDelegate);
+INSTANTIATE_TYPED_TEST_CASE_P(
+    SequencedWorkerPoolSequencedTaskRunner, TaskRunnerAffinityTest,
     SequencedWorkerPoolSequencedTaskRunnerTestDelegate);
 
 INSTANTIATE_TYPED_TEST_CASE_P(

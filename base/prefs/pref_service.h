@@ -128,6 +128,10 @@ class BASE_PREFS_EXPORT PrefService : public base::NonThreadSafe {
     // the Preference.
     bool IsExtensionModifiable() const;
 
+    // Return the registration flags for this pref as a bitmask of
+    // PrefRegistry::PrefRegistrationFlags.
+    uint32 registration_flags() const { return registration_flags_; }
+
    private:
     friend class PrefService;
 
@@ -138,6 +142,8 @@ class BASE_PREFS_EXPORT PrefService : public base::NonThreadSafe {
     const std::string name_;
 
     const base::Value::Type type_;
+
+    uint32 registration_flags_;
 
     // Reference to the PrefService in which this pref was created.
     const PrefService* pref_service_;
@@ -158,6 +164,12 @@ class BASE_PREFS_EXPORT PrefService : public base::NonThreadSafe {
   // Lands pending writes to disk. This should only be used if we need to save
   // immediately (basically, during shutdown).
   void CommitPendingWrite();
+
+  // Schedule a write if there is any lossy data pending. Unlike
+  // CommitPendingWrite() this does not immediately sync to disk, instead it
+  // triggers an eventual write if there is lossy data pending and if there
+  // isn't one scheduled already.
+  void SchedulePendingLossyWrites();
 
   // Returns true if the preference for the given preference name is available
   // and is managed.
@@ -307,6 +319,7 @@ class BASE_PREFS_EXPORT PrefService : public base::NonThreadSafe {
 
   // Give access to ReportUserPrefChanged() and GetMutableUserPref().
   friend class subtle::ScopedUserPrefUpdateBase;
+  friend class PrefServiceTest_WriteablePrefStoreFlags_Test;
 
   // Registration of pref change observers must be done using the
   // PrefChangeRegistrar, which is declared as a friend here to grant it

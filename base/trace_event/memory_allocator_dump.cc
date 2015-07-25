@@ -6,85 +6,95 @@
 
 #include "base/format_macros.h"
 #include "base/strings/stringprintf.h"
-#include "base/trace_event/memory_allocator_attributes.h"
 #include "base/trace_event/memory_dump_manager.h"
 #include "base/trace_event/memory_dump_provider.h"
+#include "base/trace_event/process_memory_dump.h"
 #include "base/trace_event/trace_event_argument.h"
 #include "base/values.h"
 
 namespace base {
 namespace trace_event {
 
-MemoryAllocatorDump::MemoryAllocatorDump(const std::string& name,
-                                         MemoryAllocatorDump* parent)
-    : name_(name),
-      parent_(parent),
-      physical_size_in_bytes_(0),
-      allocated_objects_count_(0),
-      allocated_objects_size_in_bytes_(0) {
-  // Dots are not allowed in the name as the underlying base::DictionaryValue
+const char MemoryAllocatorDump::kNameSize[] = "size";
+const char MemoryAllocatorDump::kNameObjectsCount[] = "objects_count";
+const char MemoryAllocatorDump::kTypeScalar[] = "scalar";
+const char MemoryAllocatorDump::kTypeString[] = "string";
+const char MemoryAllocatorDump::kUnitsBytes[] = "bytes";
+const char MemoryAllocatorDump::kUnitsObjects[] = "objects";
+
+MemoryAllocatorDump::MemoryAllocatorDump(const std::string& absolute_name,
+                                         ProcessMemoryDump* process_memory_dump,
+                                         const MemoryAllocatorDumpGuid& guid)
+    : absolute_name_(absolute_name),
+      process_memory_dump_(process_memory_dump),
+      attributes_(new TracedValue),
+      guid_(guid) {
+  // The |absolute_name| cannot be empty.
+  DCHECK(!absolute_name.empty());
+
+  // The |absolute_name| can contain slash separator, but not leading or
+  // trailing ones.
+  DCHECK(absolute_name[0] != '/' && *absolute_name.rbegin() != '/');
+
+  // Dots are not allowed anywhere as the underlying base::DictionaryValue
   // would treat them magically and split in sub-nodes, which is not intended.
-  DCHECK_EQ(std::string::npos, name.find_first_of('.'));
+  DCHECK_EQ(std::string::npos, absolute_name.find_first_of('.'));
+}
+
+// If the caller didn't provide a guid, make one up by hashing the
+// absolute_name with the current PID.
+// Rationale: |absolute_name| is already supposed to be unique within a
+// process, the pid will make it unique among all processes.
+MemoryAllocatorDump::MemoryAllocatorDump(const std::string& absolute_name,
+                                         ProcessMemoryDump* process_memory_dump)
+    : MemoryAllocatorDump(absolute_name,
+                          process_memory_dump,
+                          MemoryAllocatorDumpGuid(StringPrintf(
+                              "%d:%s",
+                              TraceLog::GetInstance()->process_id(),
+                              absolute_name.c_str()))) {
+  string_conversion_buffer_.reserve(16);
 }
 
 MemoryAllocatorDump::~MemoryAllocatorDump() {
 }
 
-void MemoryAllocatorDump::SetExtraAttribute(const std::string& name,
-                                            int value) {
-  extra_attributes_.SetInteger(name, value);
+void MemoryAllocatorDump::AddScalar(const char* name,
+                                    const char* units,
+                                    uint64 value) {
+  SStringPrintf(&string_conversion_buffer_, "%" PRIx64, value);
+  attributes_->BeginDictionary(name);
+  attributes_->SetString("type", kTypeScalar);
+  attributes_->SetString("units", units);
+  attributes_->SetString("value", string_conversion_buffer_);
+  attributes_->EndDictionary();
 }
 
-int MemoryAllocatorDump::GetExtraIntegerAttribute(
-    const std::string& name) const {
-  bool res;
-  int value = -1;
-  res = extra_attributes_.GetInteger(name, &value);
-  DCHECK(res) << "Allocator attribute '" << name << "' not found";
-  return value;
+void MemoryAllocatorDump::AddScalarF(const char* name,
+                                     const char* units,
+                                     double value) {
+  attributes_->BeginDictionary(name);
+  attributes_->SetString("type", kTypeScalar);
+  attributes_->SetString("units", units);
+  attributes_->SetDouble("value", value);
+  attributes_->EndDictionary();
+}
+
+void MemoryAllocatorDump::AddString(const char* name,
+                                    const char* units,
+                                    const std::string& value) {
+  attributes_->BeginDictionary(name);
+  attributes_->SetString("type", kTypeString);
+  attributes_->SetString("units", units);
+  attributes_->SetString("value", value);
+  attributes_->EndDictionary();
 }
 
 void MemoryAllocatorDump::AsValueInto(TracedValue* value) const {
-  static const char kHexFmt[] = "%" PRIx64;
-
-  value->BeginDictionary(name_.c_str());
-
-  value->SetString("parent", parent_ ? parent_->name_ : "");
-  value->SetString("physical_size_in_bytes",
-                   StringPrintf(kHexFmt, physical_size_in_bytes_));
-  value->SetString("allocated_objects_count",
-                   StringPrintf(kHexFmt, allocated_objects_count_));
-  value->SetString("allocated_objects_size_in_bytes",
-                   StringPrintf(kHexFmt, allocated_objects_size_in_bytes_));
-
-  // Copy all the extra attributes.
-  const MemoryDumpProvider* mdp =
-      MemoryDumpManager::GetInstance()->dump_provider_currently_active();
-  const MemoryAllocatorDeclaredAttributes& extra_attributes_types =
-      mdp->allocator_attributes();
-
-  value->BeginDictionary("args");
-  for (DictionaryValue::Iterator it(extra_attributes_); !it.IsAtEnd();
-       it.Advance()) {
-    const std::string& attr_name = it.key();
-    const Value& attr_value = it.value();
-    value->BeginDictionary(attr_name.c_str());
-    value->SetValue("value", attr_value.DeepCopy());
-
-    auto attr_it = extra_attributes_types.find(attr_name);
-    DCHECK(attr_it != extra_attributes_types.end())
-        << "Allocator attribute " << attr_name
-        << " not declared for the dumper " << mdp->GetFriendlyName();
-
-    // TODO(primiano): the "type" should be dumped just once, not repeated on
-    // on every event. The ability of doing so depends on crbug.com/466121.
-    value->SetString("type", attr_it->second.type);
-
-    value->EndDictionary();  // "arg_name": { "type": "...", "value": "..." }
-  }
-  value->EndDictionary();  // "args": {}
-
-  value->EndDictionary();  // "allocator name": {}
+  value->BeginDictionaryWithCopiedName(absolute_name_);
+  value->SetString("guid", guid_.ToString());
+  value->SetValue("attrs", *attributes_);
+  value->EndDictionary();  // "allocator_name/heap_subheap": { ... }
 }
 
 }  // namespace trace_event

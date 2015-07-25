@@ -192,12 +192,12 @@ void PlatformThreadLocalStorage::OnThreadExit(void* value) {
 }  // namespace internal
 
 ThreadLocalStorage::Slot::Slot(TLSDestructorFunc destructor) {
-  initialized_ = false;
   slot_ = 0;
+  base::subtle::Release_Store(&initialized_, 0);
   Initialize(destructor);
 }
 
-bool ThreadLocalStorage::StaticSlot::Initialize(TLSDestructorFunc destructor) {
+void ThreadLocalStorage::StaticSlot::Initialize(TLSDestructorFunc destructor) {
   PlatformThreadLocalStorage::TLSKey key =
       base::subtle::NoBarrier_Load(&g_native_tls_key);
   if (key == PlatformThreadLocalStorage::TLS_KEY_OUT_OF_INDEXES ||
@@ -211,8 +211,7 @@ bool ThreadLocalStorage::StaticSlot::Initialize(TLSDestructorFunc destructor) {
 
   // Setup our destructor.
   g_tls_destructors[slot_] = destructor;
-  initialized_ = true;
-  return true;
+  base::subtle::Release_Store(&initialized_, 1);
 }
 
 void ThreadLocalStorage::StaticSlot::Free() {
@@ -222,7 +221,7 @@ void ThreadLocalStorage::StaticSlot::Free() {
   DCHECK_LT(slot_, kThreadLocalStorageSize);
   g_tls_destructors[slot_] = NULL;
   slot_ = 0;
-  initialized_ = false;
+  base::subtle::Release_Store(&initialized_, 0);
 }
 
 void* ThreadLocalStorage::StaticSlot::Get() const {

@@ -90,18 +90,6 @@
           ],
         }],
         ['OS == "android" and _toolset == "target"', {
-          'conditions': [
-            ['target_arch == "ia32" or target_arch == "x64"', {
-              'sources/': [
-                ['include', '^atomicops_internals_x86_gcc\\.cc$'],
-              ],
-            }],
-            ['target_arch == "mipsel"', {
-              'sources/': [
-                ['include', '^atomicops_internals_mips_gcc\\.cc$'],
-              ],
-            }],
-          ],
           'dependencies': [
             'base_java',
             'base_jni_headers',
@@ -189,6 +177,9 @@
                 '../build/win/dbghelp_xp/dbghelp.dll',
               ],
             },
+          ],
+          'dependencies': [
+           'trace_event/etw_manifest/etw_manifest.gyp:etw_manifest',
           ],
         }],
         ['OS == "mac" or (OS == "ios" and _toolset == "host")', {
@@ -373,24 +364,6 @@
       ],
     },
     {
-      # TODO(pasko): Remove this target when crbug.com/424562 is fixed.
-      # GN: //base:protect_file_posix
-      'target_name': 'protect_file_posix',
-      'conditions': [
-        ['os_posix == 1', {
-          'type': 'static_library',
-          'dependencies': [
-            'base',
-          ],
-          'sources': [
-            'files/protect_file_posix.cc',
-          ],
-        }, {
-          'type': 'none',
-        }],
-      ],
-    },
-    {
       'target_name': 'base_prefs_test_support',
       'type': 'static_library',
       'dependencies': [
@@ -453,6 +426,7 @@
         'android/jni_android_unittest.cc',
         'android/jni_array_unittest.cc',
         'android/jni_string_unittest.cc',
+        'android/library_loader/library_prefetcher_unittest.cc',
         'android/path_utils_unittest.cc',
         'android/scoped_java_ref_unittest.cc',
         'android/sys_utils_unittest.cc',
@@ -472,12 +446,13 @@
         'callback_unittest.cc',
         'callback_unittest.nc',
         'cancelable_callback_unittest.cc',
-        'chromeos/memory_pressure_observer_chromeos_unittest.cc',
         'command_line_unittest.cc',
         'containers/adapters_unittest.cc',
         'containers/hash_tables_unittest.cc',
         'containers/linked_list_unittest.cc',
         'containers/mru_cache_unittest.cc',
+        'containers/scoped_ptr_hash_map_unittest.cc',
+        'containers/scoped_ptr_map_unittest.cc',
         'containers/small_map_unittest.cc',
         'containers/stack_container_unittest.cc',
         'cpu_unittest.cc',
@@ -492,6 +467,7 @@
         'file_version_info_unittest.cc',
         'files/dir_reader_posix_unittest.cc',
         'files/file_path_unittest.cc',
+        'files/file_path_watcher_unittest.cc',
         'files/file_proxy_unittest.cc',
         'files/file_unittest.cc',
         'files/file_util_proxy_unittest.cc',
@@ -526,6 +502,8 @@
         'lazy_instance_unittest.cc',
         'logging_unittest.cc',
         'mac/bind_objc_block_unittest.mm',
+        'mac/call_with_eh_frame_unittest.mm',
+        'mac/dispatch_source_mach_unittest.cc',
         'mac/foundation_util_unittest.mm',
         'mac/libdispatch_task_runner_unittest.cc',
         'mac/mac_util_unittest.mm',
@@ -537,6 +515,9 @@
         'memory/aligned_memory_unittest.cc',
         'memory/discardable_shared_memory_unittest.cc',
         'memory/linked_ptr_unittest.cc',
+        'memory/memory_pressure_monitor_chromeos_unittest.cc',
+        'memory/memory_pressure_monitor_mac_unittest.cc',
+        'memory/memory_pressure_monitor_win_unittest.cc',
         'memory/ref_counted_memory_unittest.cc',
         'memory/ref_counted_unittest.cc',
         'memory/scoped_ptr_unittest.cc',
@@ -546,8 +527,7 @@
         'memory/singleton_unittest.cc',
         'memory/weak_ptr_unittest.cc',
         'memory/weak_ptr_unittest.nc',
-        'message_loop/message_loop_proxy_impl_unittest.cc',
-        'message_loop/message_loop_proxy_unittest.cc',
+        'message_loop/message_loop_task_runner_unittest.cc',
         'message_loop/message_loop_unittest.cc',
         'message_loop/message_pump_glib_unittest.cc',
         'message_loop/message_pump_io_ios_unittest.cc',
@@ -563,6 +543,7 @@
         'metrics/sample_vector_unittest.cc',
         'metrics/sparse_histogram_unittest.cc',
         'metrics/statistics_recorder_unittest.cc',
+        'move_unittest.cc',
         'numerics/safe_numerics_unittest.cc',
         'observer_list_unittest.cc',
         'os_compat_android_unittest.cc',
@@ -600,6 +581,7 @@
         'sha1_unittest.cc',
         'stl_util_unittest.cc',
         'strings/nullable_string16_unittest.cc',
+        'strings/pattern_unittest.cc',
         'strings/safe_sprintf_unittest.cc',
         'strings/string16_unittest.cc',
         'strings/string_number_conversions_unittest.cc',
@@ -625,12 +607,11 @@
         'task/cancelable_task_tracker_unittest.cc',
         'task_runner_util_unittest.cc',
         'template_util_unittest.cc',
-        'test/expectations/expectation_unittest.cc',
-        'test/expectations/parser_unittest.cc',
         'test/histogram_tester_unittest.cc',
         'test/test_pending_task_unittest.cc',
         'test/test_reg_util_win_unittest.cc',
         'test/trace_event_analyzer_unittest.cc',
+        'test/user_action_tester_unittest.cc',
         'threading/non_thread_safe_unittest.cc',
         'threading/platform_thread_unittest.cc',
         'threading/sequenced_worker_pool_unittest.cc',
@@ -706,7 +687,9 @@
         }],
         ['OS == "ios" and _toolset != "host"', {
           'sources/': [
-            # Only test the iOS-meaningful portion of process_utils.
+            # Only test the iOS-meaningful portion of memory and process_utils.
+            ['exclude', '^memory/discardable_shared_memory_unittest\\.cc$'],
+            ['exclude', '^memory/shared_memory_unittest\\.cc$'],
             ['exclude', '^process/memory_unittest'],
             ['exclude', '^process/process_unittest\\.cc$'],
             ['exclude', '^process/process_util_unittest\\.cc$'],
@@ -795,14 +778,6 @@
               # TODO(mark): This should not be necessary.
               'dependencies': [
                 '../third_party/icu/icu.gyp:icudata',
-              ],
-            }],
-            ['incremental_chrome_dll', {
-              'defines': [
-                # Used only to workaround a linker bug, do not use this
-                # otherwise, and don't make it broader scope. See
-                # http://crbug.com/251251.
-                'INCREMENTAL_LINKING',
               ],
             }],
           ],
@@ -914,12 +889,10 @@
         }],
       ],
       'sources': [
-        'test/expectations/expectation.cc',
-        'test/expectations/expectation.h',
-        'test/expectations/parser.cc',
-        'test/expectations/parser.h',
         'test/gtest_util.cc',
         'test/gtest_util.h',
+        'test/gtest_xml_unittest_result_printer.cc',
+        'test/gtest_xml_unittest_result_printer.h',
         'test/gtest_xml_util.cc',
         'test/gtest_xml_util.h',
         'test/histogram_tester.cc',
@@ -939,6 +912,8 @@
         'test/mock_chrome_application_mac.mm',
         'test/mock_devices_changed_observer.cc',
         'test/mock_devices_changed_observer.h',
+        'test/mock_entropy_provider.cc',
+        'test/mock_entropy_provider.h',
         'test/mock_log.cc',
         'test/mock_log.h',
         'test/multiprocess_test.cc',
@@ -1003,12 +978,16 @@
         'test/test_switches.h',
         'test/test_timeouts.cc',
         'test/test_timeouts.h',
+        'test/test_ui_thread_android.cc',
+        'test/test_ui_thread_android.h',
         'test/thread_test_helper.cc',
         'test/thread_test_helper.h',
         'test/trace_event_analyzer.cc',
         'test/trace_event_analyzer.h',
         'test/trace_to_file.cc',
         'test/trace_to_file.h',
+        'test/user_action_tester.cc',
+        'test/user_action_tester.h',
         'test/values_test_util.cc',
         'test/values_test_util.h',
       ],
@@ -1051,6 +1030,22 @@
           'PERF_TEST',
         ],
       },
+    },
+    {
+      'target_name': 'test_launcher_nacl_nonsfi',
+      'conditions': [
+        ['disable_nacl==0 and disable_nacl_untrusted==0 and enable_nacl_nonsfi_test==1', {
+          'type': 'static_library',
+          'sources': [
+            'test/launcher/test_launcher_nacl_nonsfi.cc',
+          ],
+          'dependencies': [
+            'test_support_base',
+          ],
+        }, {
+          'type': 'none',
+        }],
+      ],
     },
   ],
   'conditions': [
@@ -1111,6 +1106,7 @@
             'allocator/allocator.gyp:allocator_extension_thunks_win64',
             '../third_party/modp_b64/modp_b64.gyp:modp_b64_win64',
             'third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations_win64',
+            'trace_event/etw_manifest/etw_manifest.gyp:etw_manifest',
           ],
           # TODO(gregoryd): direct_dependent_settings should be shared with the
           # 32-bit target, but it doesn't work due to a bug in gyp
@@ -1352,6 +1348,7 @@
           'target_name': 'base_jni_headers',
           'type': 'none',
           'sources': [
+            'android/java/src/org/chromium/base/ApkAssets.java',
             'android/java/src/org/chromium/base/ApplicationStatus.java',
             'android/java/src/org/chromium/base/AnimationFrameTimeHistogram.java',
             'android/java/src/org/chromium/base/BuildInfo.java',
@@ -1374,11 +1371,25 @@
             'android/java/src/org/chromium/base/TraceEvent.java',
             'android/java/src/org/chromium/base/library_loader/LibraryLoader.java',
             'android/java/src/org/chromium/base/metrics/RecordHistogram.java',
+            'android/java/src/org/chromium/base/metrics/RecordUserAction.java',
           ],
           'variables': {
             'jni_gen_package': 'base',
           },
+          'dependencies': [
+            'android_runtime_jni_headers',
+          ],
           'includes': [ '../build/jni_generator.gypi' ],
+        },
+        {
+          # GN: //base:android_runtime_jni_headers
+          'target_name': 'android_runtime_jni_headers',
+          'type': 'none',
+          'variables': {
+            'jni_gen_package': 'base',
+            'input_java_class': 'java/lang/Runtime.class',
+          },
+          'includes': [ '../build/jar_file_jni_generator.gypi' ],
         },
         {
           # TODO(GN)
@@ -1386,6 +1397,7 @@
           'type': 'none',
           'sources': [
             'test/android/java/src/org/chromium/base/ContentUriTestUtils.java',
+            'test/android/java/src/org/chromium/base/TestUiThread.java',
           ],
           'variables': {
             'jni_gen_package': 'base',
@@ -1477,11 +1489,29 @@
           'type': 'none',
           'dependencies': [
             'base_java',
+            '../testing/android/on_device_instrumentation.gyp:reporter_java',
           ],
           'variables': {
             'java_in_dir': '../base/test/android/javatests',
           },
           'includes': [ '../build/java.gypi' ],
+        },
+        {
+          # GN: //base:base_junit_tests
+          'target_name': 'base_junit_tests',
+          'type': 'none',
+          'dependencies': [
+            'base_java',
+            'base_java_test_support',
+            '../testing/android/junit/junit_test.gyp:junit_test_support',
+          ],
+          'variables': {
+             'main_class': 'org.chromium.testing.local.JunitTestMain',
+             'src_paths': [
+               '../base/android/junit/',
+             ],
+           },
+          'includes': [ '../build/host_jar.gypi' ],
         },
         {
           # GN: //base:base_javatests
@@ -1501,7 +1531,7 @@
           'target_name': 'chromium_android_linker',
           'type': 'shared_library',
           'sources': [
-            'android/linker/linker_jni.cc',
+            'android/linker/legacy_linker_jni.cc',
           ],
           # The crazy linker is never instrumented.
           'cflags!': [
@@ -1536,6 +1566,7 @@
           ],
           'variables': {
             'test_suite_name': 'base_unittests',
+            'isolate_file': 'base_unittests.isolate',
           },
           'includes': [ '../build/apk_test.gypi' ],
         },
@@ -1592,13 +1623,6 @@
           ],
           'sources': [
             'base_unittests.isolate',
-          ],
-          'conditions': [
-            ['use_x11 == 1', {
-              'dependencies': [
-                '../tools/xdisplaycheck/xdisplaycheck.gyp:xdisplaycheck',
-              ],
-            }],
           ],
         },
       ],

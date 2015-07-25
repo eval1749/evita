@@ -46,9 +46,8 @@ void TraceEventAnalyzerTest::BeginTracing() {
   output_.json_output.clear();
   buffer_.Start();
   base::trace_event::TraceLog::GetInstance()->SetEnabled(
-      base::trace_event::CategoryFilter("*"),
-      base::trace_event::TraceLog::RECORDING_MODE,
-      base::trace_event::TraceOptions());
+      base::trace_event::TraceConfig("*", ""),
+      base::trace_event::TraceLog::RECORDING_MODE);
 }
 
 void TraceEventAnalyzerTest::EndTracing() {
@@ -225,7 +224,7 @@ TEST_F(TraceEventAnalyzerTest, BooleanOperators) {
 
   scoped_ptr<TraceAnalyzer>
       analyzer(TraceAnalyzer::Create(output_.json_output));
-  ASSERT_TRUE(!!analyzer.get());
+  ASSERT_TRUE(analyzer);
   analyzer->SetIgnoreMetadataEvents(true);
 
   TraceEventVector found;

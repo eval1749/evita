@@ -236,6 +236,9 @@ class JniParams(object):
         'Ljava/lang/Object',
         'Ljava/lang/String',
         'Ljava/lang/Class',
+        'Ljava/lang/CharSequence',
+        'Ljava/lang/Runnable',
+        'Ljava/lang/Throwable',
     ]
 
     prefix = ''
@@ -1443,7 +1446,7 @@ def GenerateJNIHeader(input_file, output_file, options):
     with file(output_file, 'w') as f:
       f.write(content)
   else:
-    print output
+    print content
 
 
 def GetScriptName():

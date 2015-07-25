@@ -25,10 +25,12 @@
 //   DispatchToMethod(&foo, &Foo::SomeMeth, MakeTuple(1, 2, 3));
 //   // foo->SomeMeth(1, 2, 3);
 
-#ifndef BASE_TUPLE_H__
-#define BASE_TUPLE_H__
+#ifndef BASE_TUPLE_H_
+#define BASE_TUPLE_H_
 
 #include "base/bind_helpers.h"
+
+namespace base {
 
 // Index sequences
 //
@@ -80,6 +82,12 @@ template <> struct MakeIndexSequenceImpl<10> {
 };
 template <> struct MakeIndexSequenceImpl<11> {
   using Type = IndexSequence<0,1,2,3,4,5,6,7,8,9,10>;
+};
+template <> struct MakeIndexSequenceImpl<12> {
+  using Type = IndexSequence<0,1,2,3,4,5,6,7,8,9,10,11>;
+};
+template <> struct MakeIndexSequenceImpl<13> {
+  using Type = IndexSequence<0,1,2,3,4,5,6,7,8,9,10,11,12>;
 };
 
 #else  // defined(WIN) && defined(_PREFAST_)
@@ -175,9 +183,9 @@ struct TupleLeaf {
 // Allows accessing an arbitrary tuple element by index.
 //
 // Example usage:
-//   Tuple<int, double> t2;
-//   get<0>(t2) = 42;
-//   get<1>(t2) = 3.14;
+//   base::Tuple<int, double> t2;
+//   base::get<0>(t2) = 42;
+//   base::get<1>(t2) = 3.14;
 
 template <size_t I, typename T>
 T& get(TupleLeaf<I, T>& leaf) {
@@ -323,4 +331,6 @@ inline void DispatchToMethod(ObjT* obj,
                        MakeIndexSequence<sizeof...(OutTs)>());
 }
 
-#endif  // BASE_TUPLE_H__
+}  // namespace base
+
+#endif  // BASE_TUPLE_H_

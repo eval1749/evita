@@ -29,6 +29,7 @@ public class ThreadUtils {
         }
     }
 
+    @VisibleForTesting
     public static void setUiThread(Looper looper) {
         synchronized (sLock) {
             if (sUiThreadHandler != null && sUiThreadHandler.getLooper() != looper) {
@@ -176,6 +177,7 @@ public class ThreadUtils {
      * @param task The Runnable to run
      * @param delayMillis The delay in milliseconds until the Runnable will be run
      */
+    @VisibleForTesting
     public static void postOnUiThreadDelayed(Runnable task, long delayMillis) {
         getUiThreadHandler().postDelayed(task, delayMillis);
     }

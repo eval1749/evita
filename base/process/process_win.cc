@@ -6,7 +6,6 @@
 
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
-#include "base/metrics/field_trial.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/process/kill.h"
 #include "base/win/windows_version.h"
@@ -30,6 +29,9 @@ Process::Process(RValue other)
     : is_current_process_(other.object->is_current_process_),
       process_(other.object->process_.Take()) {
   other.object->Close();
+}
+
+Process::~Process() {
 }
 
 Process& Process::operator=(RValue other) {
@@ -151,7 +153,8 @@ bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) {
   if (!::GetExitCodeProcess(Handle(), &temp_code))
     return false;
 
-  *exit_code = temp_code;
+  if (exit_code)
+    *exit_code = temp_code;
   return true;
 }
 
@@ -174,21 +177,7 @@ bool Process::SetProcessBackgrounded(bool value) {
     priority = value ? PROCESS_MODE_BACKGROUND_BEGIN :
                        PROCESS_MODE_BACKGROUND_END;
   } else {
-    // Experiment (http://crbug.com/458594) with using IDLE_PRIORITY_CLASS as a
-    // background priority for background renderers (this code path is
-    // technically for more than just the renderers but they're the only use
-    // case in practice and experimenting here direclty is thus easier -- plus
-    // it doesn't really hurt as above we already state our intent of using
-    // PROCESS_MODE_BACKGROUND_BEGIN if available which is essentially
-    // IDLE_PRIORITY_CLASS plus lowered IO priority). Enabled by default in the
-    // asbence of field trials to get coverage on the perf waterfall.
-    DWORD background_priority = IDLE_PRIORITY_CLASS;
-    base::FieldTrial* trial =
-        base::FieldTrialList::Find("BackgroundRendererProcesses");
-    if (trial && trial->group_name() == "AllowBelowNormalFromBrowser")
-      background_priority = BELOW_NORMAL_PRIORITY_CLASS;
-
-    priority = value ? background_priority : NORMAL_PRIORITY_CLASS;
+    priority = value ? IDLE_PRIORITY_CLASS : NORMAL_PRIORITY_CLASS;
   }
 
   return (::SetPriorityClass(Handle(), priority) != 0);

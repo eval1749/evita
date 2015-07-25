@@ -12,6 +12,7 @@
 #include "base/metrics/histogram.h"
 #include "base/metrics/histogram_samples.h"
 #include "base/metrics/sparse_histogram.h"
+#include "base/metrics/statistics_recorder.h"
 #include "base/pickle.h"
 #include "base/process/process_handle.h"
 #include "base/strings/stringprintf.h"
@@ -111,10 +112,20 @@ void HistogramBase::WriteJSON(std::string* output) const {
   root.SetInteger("count", count);
   root.SetDouble("sum", static_cast<double>(sum));
   root.SetInteger("flags", flags());
-  root.Set("params", parameters.release());
-  root.Set("buckets", buckets.release());
+  root.Set("params", parameters.Pass());
+  root.Set("buckets", buckets.Pass());
   root.SetInteger("pid", GetCurrentProcId());
   serializer.Serialize(root);
+}
+
+void HistogramBase::FindAndRunCallback(HistogramBase::Sample sample) const {
+  if ((flags_ & kCallbackExists) == 0)
+    return;
+
+  StatisticsRecorder::OnSampleCallback cb =
+      StatisticsRecorder::FindCallback(histogram_name());
+  if (!cb.is_null())
+    cb.Run(sample);
 }
 
 void HistogramBase::WriteAsciiBucketGraph(double current_size,

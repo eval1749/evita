@@ -101,7 +101,7 @@
 // Annotate a typedef or function indicating it's ok if it's not used.
 // Use like:
 //   typedef Foo Bar ALLOW_UNUSED_TYPE;
-#if defined(COMPILER_GCC)
+#if defined(COMPILER_GCC) || defined(__clang__)
 #define ALLOW_UNUSED_TYPE __attribute__((unused))
 #else
 #define ALLOW_UNUSED_TYPE
@@ -128,13 +128,11 @@
 #define ALIGNAS(byte_alignment) __attribute__((aligned(byte_alignment)))
 #endif
 
-// Return the byte alignment of the given type (available at compile time).  Use
-// sizeof(type) prior to checking __alignof to workaround Visual C++ bug:
-// http://goo.gl/isH0C
+// Return the byte alignment of the given type (available at compile time).
 // Use like:
 //   ALIGNOF(int32)  // this would be 4
 #if defined(COMPILER_MSVC)
-#define ALIGNOF(type) (sizeof(type) - sizeof(type) + __alignof(type))
+#define ALIGNOF(type) __alignof(type)
 #elif defined(COMPILER_GCC)
 #define ALIGNOF(type) __alignof__(type)
 #endif
@@ -142,7 +140,7 @@
 // Annotate a function indicating the caller must examine the return value.
 // Use like:
 //   int foo() WARN_UNUSED_RESULT;
-// To explicitly ignore a result, see |ignore_result()| in <base/basictypes.h>.
+// To explicitly ignore a result, see |ignore_result()| in base/macros.h.
 #if defined(COMPILER_GCC)
 #define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #else

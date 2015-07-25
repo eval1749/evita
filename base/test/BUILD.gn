@@ -27,12 +27,10 @@ source_set("test_support") {
   # TODO http://crbug.com/412064 enable this flag all the time.
   testonly = !is_component_build
   sources = [
-    "expectations/expectation.cc",
-    "expectations/expectation.h",
-    "expectations/parser.cc",
-    "expectations/parser.h",
     "gtest_util.cc",
     "gtest_util.h",
+    "gtest_xml_unittest_result_printer.cc",
+    "gtest_xml_unittest_result_printer.h",
     "gtest_xml_util.cc",
     "gtest_xml_util.h",
     "histogram_tester.cc",
@@ -50,6 +48,8 @@ source_set("test_support") {
     "mock_chrome_application_mac.mm",
     "mock_devices_changed_observer.cc",
     "mock_devices_changed_observer.h",
+    "mock_entropy_provider.cc",
+    "mock_entropy_provider.h",
     "mock_log.cc",
     "mock_log.h",
     "multiprocess_test.cc",
@@ -110,14 +110,24 @@ source_set("test_support") {
     "test_support_android.h",
     "test_support_ios.h",
     "test_support_ios.mm",
+    "test_ui_thread_android.cc",
+    "test_ui_thread_android.h",
     "thread_test_helper.cc",
     "thread_test_helper.h",
     "trace_event_analyzer.cc",
     "trace_event_analyzer.h",
     "trace_to_file.cc",
     "trace_to_file.h",
+    "user_action_tester.cc",
+    "user_action_tester.h",
     "values_test_util.cc",
     "values_test_util.h",
+  ]
+
+  data = [
+    # The isolate needs this script for setting up the test. It's not actually
+    # needed to run this target locally.
+    "//testing/test_env.py",
   ]
 
   public_deps = [
@@ -199,6 +209,7 @@ if (is_android) {
   generate_jni("base_unittests_jni_headers") {
     sources = [
       "android/java/src/org/chromium/base/ContentUriTestUtils.java",
+      "android/java/src/org/chromium/base/TestUiThread.java",
     ]
     jni_package = "base"
   }

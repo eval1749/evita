@@ -6,10 +6,12 @@
 
 #include "base/debug/leak_annotations.h"
 #include "base/lazy_instance.h"
+#include "base/location.h"
 #include "base/logging.h"
 #include "base/memory/scoped_ptr.h"
-#include "base/message_loop/message_loop.h"
+#include "base/single_thread_task_runner.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/strings/string_split.h"
 #include "base/strings/string_util.h"
 #include "base/threading/thread_local_storage.h"
 #include "base/trace_event/trace_event.h"
@@ -70,13 +72,12 @@ void DeleteStackOnThreadCleanup(void* value) {
   delete stack;
 }
 
-// Initializes the thread-local TraceMemoryStack pointer. Returns true on
-// success or if it is already initialized.
-bool InitThreadLocalStorage() {
+// Initializes the thread-local TraceMemoryStack pointer.
+void InitThreadLocalStorage() {
   if (tls_trace_memory_stack.initialized())
-    return true;
-  // Initialize the thread-local storage key, returning true on success.
-  return tls_trace_memory_stack.Initialize(&DeleteStackOnThreadCleanup);
+    return;
+  // Initialize the thread-local storage key.
+  tls_trace_memory_stack.Initialize(&DeleteStackOnThreadCleanup);
 }
 
 // Clean up thread-local-storage in the main thread.
@@ -144,11 +145,11 @@ int GetPseudoStack(int skip_count_ignored, void** stack_out) {
 //////////////////////////////////////////////////////////////////////////////
 
 TraceMemoryController::TraceMemoryController(
-    scoped_refptr<MessageLoopProxy> message_loop_proxy,
+    scoped_refptr<SingleThreadTaskRunner> task_runner,
     HeapProfilerStartFunction heap_profiler_start_function,
     HeapProfilerStopFunction heap_profiler_stop_function,
     GetHeapProfileFunction get_heap_profile_function)
-    : message_loop_proxy_(message_loop_proxy),
+    : task_runner_(task_runner.Pass()),
       heap_profiler_start_function_(heap_profiler_start_function),
       heap_profiler_stop_function_(heap_profiler_stop_function),
       get_heap_profile_function_(get_heap_profile_function),
@@ -174,10 +175,9 @@ void TraceMemoryController::OnTraceLogEnabled() {
   if (!enabled)
     return;
   DVLOG(1) << "OnTraceLogEnabled";
-  message_loop_proxy_->PostTask(
-      FROM_HERE,
-      base::Bind(&TraceMemoryController::StartProfiling,
-                 weak_factory_.GetWeakPtr()));
+  task_runner_->PostTask(FROM_HERE,
+                         base::Bind(&TraceMemoryController::StartProfiling,
+                                    weak_factory_.GetWeakPtr()));
 }
 
 void TraceMemoryController::OnTraceLogDisabled() {
@@ -185,10 +185,9 @@ void TraceMemoryController::OnTraceLogDisabled() {
   // called, so we cannot tell if it was enabled before. Always try to turn
   // off profiling.
   DVLOG(1) << "OnTraceLogDisabled";
-  message_loop_proxy_->PostTask(
-      FROM_HERE,
-      base::Bind(&TraceMemoryController::StopProfiling,
-                 weak_factory_.GetWeakPtr()));
+  task_runner_->PostTask(FROM_HERE,
+                         base::Bind(&TraceMemoryController::StopProfiling,
+                                    weak_factory_.GetWeakPtr()));
 }
 
 void TraceMemoryController::StartProfiling() {
@@ -196,8 +195,7 @@ void TraceMemoryController::StartProfiling() {
   if (dump_timer_.IsRunning())
     return;
   DVLOG(1) << "Starting trace memory";
-  if (!InitThreadLocalStorage())
-    return;
+  InitThreadLocalStorage();
   ScopedTraceMemory::set_enabled(true);
   // Call ::HeapProfilerWithPseudoStackStart().
   heap_profiler_start_function_(&GetPseudoStack);
@@ -321,9 +319,9 @@ void AppendHeapProfileAsTraceFormat(const char* input, std::string* output) {
     input_string.assign(input);
   }
 
-  std::vector<std::string> lines;
-  size_t line_count = Tokenize(input_string, "\n", &lines);
-  if (line_count == 0) {
+  std::vector<std::string> lines = base::SplitString(
+      input_string, "\n", base::KEEP_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
+  if (lines.empty()) {
     DLOG(WARNING) << "No lines found";
     return;
   }
@@ -333,10 +331,8 @@ void AppendHeapProfileAsTraceFormat(const char* input, std::string* output) {
   AppendHeapProfileTotalsAsTraceFormat(lines[0], output);
 
   // Handle the following stack trace lines.
-  for (size_t i = 1; i < line_count; ++i) {
-    const std::string& line = lines[i];
-    AppendHeapProfileLineAsTraceFormat(line, output);
-  }
+  for (size_t i = 1; i < lines.size(); i++)
+    AppendHeapProfileLineAsTraceFormat(lines[i], output);
   output->append("]\n");
 }
 
@@ -351,8 +347,8 @@ void AppendHeapProfileTotalsAsTraceFormat(const std::string& line,
   //   55227 = Outstanding bytes (malloc bytes - free bytes)
   //   14653 = Total allocations (mallocs)
   // 2624014 = Total bytes (malloc bytes)
-  std::vector<std::string> tokens;
-  Tokenize(line, " :[]@", &tokens);
+  std::vector<std::string> tokens = base::SplitString(
+      line, " :[]@", base::KEEP_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
   if (tokens.size() < 4) {
     DLOG(WARNING) << "Invalid totals line " << line;
     return;
@@ -381,8 +377,8 @@ bool AppendHeapProfileLineAsTraceFormat(const std::string& line,
   // 0x7fa7fa9b9ba0 0x7fa7f4b3be13 = Stack trace represented as pointers to
   //                                 static strings from trace event categories
   //                                 and names.
-  std::vector<std::string> tokens;
-  Tokenize(line, " :[]@", &tokens);
+  std::vector<std::string> tokens = base::SplitString(
+      line, " :[]@", base::KEEP_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
   // It's valid to have no stack addresses, so only require 4 tokens.
   if (tokens.size() < 4) {
     DLOG(WARNING) << "Invalid line " << line;

@@ -53,7 +53,9 @@
 #include "base/basictypes.h"
 #include "base/bind.h"
 #include "base/callback.h"
+#include "base/location.h"
 #include "base/memory/ref_counted.h"
+#include "base/single_thread_task_runner.h"
 #include "base/synchronization/condition_variable.h"
 #include "base/synchronization/lock.h"
 #include "base/task_runner.h"
@@ -158,6 +160,8 @@ TYPED_TEST_P(TaskRunnerTest, Delayed) {
             this->task_tracker_->GetTaskRunCounts());
 }
 
+REGISTER_TYPED_TEST_CASE_P(TaskRunnerTest, Basic, Delayed);
+
 namespace internal {
 
 // Calls RunsTasksOnCurrentThread() on |task_runner| and expects it to
@@ -168,11 +172,16 @@ void ExpectRunsTasksOnCurrentThread(
 
 }  // namespace internal
 
+template <typename TaskRunnerTestDelegate>
+class TaskRunnerAffinityTest : public TaskRunnerTest<TaskRunnerTestDelegate> {};
+
+TYPED_TEST_CASE_P(TaskRunnerAffinityTest);
+
 // Post a bunch of tasks to the task runner as well as to a separate
 // thread, each checking the value of RunsTasksOnCurrentThread(),
 // which should return true for the tasks posted on the task runner
 // and false for the tasks posted on the separate thread.
-TYPED_TEST_P(TaskRunnerTest, RunsTasksOnCurrentThread) {
+TYPED_TEST_P(TaskRunnerAffinityTest, RunsTasksOnCurrentThread) {
   std::map<int, int> expected_task_run_counts;
 
   Thread thread("Non-task-runner thread");
@@ -195,7 +204,7 @@ TYPED_TEST_P(TaskRunnerTest, RunsTasksOnCurrentThread) {
             i);
     for (int j = 0; j < i + 1; ++j) {
       task_runner->PostTask(FROM_HERE, ith_task_runner_task);
-      thread.message_loop()->PostTask(FROM_HERE, ith_non_task_runner_task);
+      thread.task_runner()->PostTask(FROM_HERE, ith_non_task_runner_task);
       expected_task_run_counts[i] += 2;
     }
   }
@@ -207,8 +216,7 @@ TYPED_TEST_P(TaskRunnerTest, RunsTasksOnCurrentThread) {
             this->task_tracker_->GetTaskRunCounts());
 }
 
-REGISTER_TYPED_TEST_CASE_P(
-    TaskRunnerTest, Basic, Delayed, RunsTasksOnCurrentThread);
+REGISTER_TYPED_TEST_CASE_P(TaskRunnerAffinityTest, RunsTasksOnCurrentThread);
 
 }  // namespace base
 

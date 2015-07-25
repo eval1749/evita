@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <objbase.h>
 #include <windows.h>
 
 #include <map>
@@ -9,6 +10,9 @@
 
 #include "base/logging.h"
 #include "base/profiler/native_stack_sampler.h"
+#include "base/strings/string_util.h"
+#include "base/strings/stringprintf.h"
+#include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
 #include "base/win/pe_image.h"
 #include "base/win/scoped_handle.h"
@@ -36,18 +40,26 @@ int RecordStack(CONTEXT* context,
     instruction_pointers[i] = reinterpret_cast<const void*>(context->Rip);
 
     if (runtime_function) {
-      KNONVOLATILE_CONTEXT_POINTERS nvcontext = {0};
+      KNONVOLATILE_CONTEXT_POINTERS nvcontext = {};
       void* handler_data;
       ULONG64 establisher_frame;
       RtlVirtualUnwind(0, image_base, context->Rip, runtime_function, context,
                        &handler_data, &establisher_frame, &nvcontext);
     } else {
-      // If we don't have a RUNTIME_FUNCTION, then we've encountered a leaf
-      // function.  Adjust the stack appropriately prior to the next function
-      // lookup.
-      context->Rip = *reinterpret_cast<PDWORD64>(context->Rsp);
-      context->Rsp += 8;
-      *last_frame_is_unknown_function = true;
+      // If we don't have a RUNTIME_FUNCTION, then in theory this should be a
+      // leaf function whose frame contains only a return address, at
+      // RSP. However, crash data also indicates that some third party libraries
+      // do not provide RUNTIME_FUNCTION information for non-leaf functions. We
+      // could manually unwind the stack in the former case, but attempting to
+      // do so in the latter case would produce wrong results and likely crash,
+      // so just bail out.
+      //
+      // Ad hoc runs with instrumentation show that ~5% of stack traces end with
+      // a valid leaf function. To avoid selectively omitting these traces it
+      // makes sense to ultimately try to distinguish these two cases and
+      // selectively unwind the stack for legitimate leaf functions. For the
+      // purposes of avoiding crashes though, just ignore them all for now.
+      return i;
     }
   }
   return i;
@@ -86,6 +98,34 @@ void FreeModuleHandles(int stack_depth, HMODULE module_handles[]) {
     if (module_handles[i])
       ::FreeLibrary(module_handles[i]);
   }
+}
+
+// Gets the unique build ID for a module. Windows build IDs are created by a
+// concatenation of a GUID and AGE fields found in the headers of a module. The
+// GUID is stored in the first 16 bytes and the AGE is stored in the last 4
+// bytes. Returns the empty string if the function fails to get the build ID.
+//
+// Example:
+// dumpbin chrome.exe /headers | find "Format:"
+//   ... Format: RSDS, {16B2A428-1DED-442E-9A36-FCE8CBD29726}, 10, ...
+//
+// The resulting buildID string of this instance of chrome.exe is
+// "16B2A4281DED442E9A36FCE8CBD2972610".
+//
+// Note that the AGE field is encoded in decimal, not hex.
+std::string GetBuildIDForModule(HMODULE module_handle) {
+  GUID guid;
+  DWORD age;
+  win::PEImage(module_handle).GetDebugId(&guid, &age);
+  const int kGUIDSize = 39;
+  std::wstring build_id;
+  int result =
+      ::StringFromGUID2(guid, WriteInto(&build_id, kGUIDSize), kGUIDSize);
+  if (result != kGUIDSize)
+    return std::string();
+  RemoveChars(build_id, L"{}-", &build_id);
+  build_id += StringPrintf(L"%d", age);
+  return WideToUTF8(build_id);
 }
 
 // Disables priority boost on a thread for the lifetime of the object.
@@ -253,11 +293,9 @@ bool NativeStackSamplerWin::GetModuleForHandle(
 
   module->base_address = reinterpret_cast<const void*>(module_handle);
 
-  GUID guid;
-  DWORD age;
-  win::PEImage(module_handle).GetDebugId(&guid, &age);
-  module->id.assign(reinterpret_cast<char*>(&guid), sizeof(guid));
-  module->id.append(reinterpret_cast<char*>(&age), sizeof(age));
+  module->id = GetBuildIDForModule(module_handle);
+  if (module->id.empty())
+    return false;
 
   return true;
 }

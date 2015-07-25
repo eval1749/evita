@@ -1,4 +1,4 @@
-// Copyright (c) 2011 The Chromium Authors. All rights reserved.
+// Copyright 2011 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -193,11 +193,13 @@ bool WaitForExitWithTimeoutImpl(base::ProcessHandle handle,
   if (!WaitpidWithTimeout(handle, &status, timeout))
     return false;
   if (WIFSIGNALED(status)) {
-    *exit_code = -1;
+    if (exit_code)
+      *exit_code = -1;
     return true;
   }
   if (WIFEXITED(status)) {
-    *exit_code = WEXITSTATUS(status);
+    if (exit_code)
+      *exit_code = WEXITSTATUS(status);
     return true;
   }
   return false;
@@ -209,6 +211,9 @@ bool WaitForExitWithTimeoutImpl(base::ProcessHandle handle,
 namespace base {
 
 Process::Process(ProcessHandle handle) : process_(handle) {
+}
+
+Process::~Process() {
 }
 
 Process::Process(RValue other)
@@ -250,12 +255,12 @@ Process Process::DeprecatedGetProcessFromHandle(ProcessHandle handle) {
   return Process(handle);
 }
 
-#if !defined(OS_LINUX)
+#if !defined(OS_LINUX) && !defined(OS_MACOSX)
 // static
 bool Process::CanBackgroundProcesses() {
   return false;
 }
-#endif  // !defined(OS_LINUX)
+#endif  // !defined(OS_LINUX) && !defined(OS_MACOSX)
 
 bool Process::IsValid() const {
   return process_ != kNullProcessHandle;
@@ -290,9 +295,10 @@ void Process::Close() {
 
 #if !defined(OS_NACL_NONSFI)
 bool Process::Terminate(int exit_code, bool wait) const {
-  // result_code isn't supportable.
+  // exit_code isn't supportable.
   DCHECK(IsValid());
-  DCHECK_GT(process_, 1);
+  CHECK_GT(process_, 0);
+
   bool result = kill(process_, SIGTERM) == 0;
   if (result && wait) {
     int tries = 60;
@@ -350,7 +356,7 @@ bool Process::WaitForExitWithTimeout(TimeDelta timeout, int* exit_code) {
   return WaitForExitWithTimeoutImpl(Handle(), exit_code, timeout);
 }
 
-#if !defined(OS_LINUX)
+#if !defined(OS_LINUX) && !defined(OS_MACOSX)
 bool Process::IsProcessBackgrounded() const {
   // See SetProcessBackgrounded().
   DCHECK(IsValid());
@@ -358,13 +364,13 @@ bool Process::IsProcessBackgrounded() const {
 }
 
 bool Process::SetProcessBackgrounded(bool value) {
-  // POSIX only allows lowering the priority of a process, so if we
-  // were to lower it we wouldn't be able to raise it back to its initial
-  // priority.
-  DCHECK(IsValid());
+  // Not implemented for POSIX systems other than Mac and Linux. With POSIX, if
+  // we were to lower the process priority we wouldn't be able to raise it back
+  // to its initial priority.
+  NOTIMPLEMENTED();
   return false;
 }
-#endif  // !defined(OS_LINUX)
+#endif  // !defined(OS_LINUX) && !defined(OS_MACOSX)
 
 int Process::GetPriority() const {
   DCHECK(IsValid());

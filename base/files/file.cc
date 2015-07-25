@@ -4,12 +4,9 @@
 
 #include "base/files/file.h"
 #include "base/files/file_path.h"
+#include "base/files/file_tracing.h"
 #include "base/metrics/histogram.h"
 #include "base/timer/elapsed_timer.h"
-
-#if defined(OS_POSIX)
-#include "base/files/file_posix_hooks_internal.h"
-#endif
 
 namespace base {
 
@@ -29,11 +26,11 @@ File::File()
 }
 
 #if !defined(OS_NACL)
-File::File(const FilePath& name, uint32 flags)
+File::File(const FilePath& path, uint32 flags)
     : error_details_(FILE_OK),
       created_(false),
       async_(false) {
-  Initialize(name, flags);
+  Initialize(path, flags);
 }
 #endif
 
@@ -44,8 +41,6 @@ File::File(PlatformFile platform_file)
       async_(false) {
 #if defined(OS_POSIX)
   DCHECK_GE(platform_file, -1);
-  if (IsValid())
-    ProtectFileDescriptor(platform_file);
 #endif
 }
 
@@ -57,13 +52,10 @@ File::File(Error error_details)
 
 File::File(RValue other)
     : file_(other.object->TakePlatformFile()),
+      tracing_path_(other.object->tracing_path_),
       error_details_(other.object->error_details()),
       created_(other.object->created()),
       async_(other.object->async_) {
-#if defined(OS_POSIX)
-   if (IsValid())
-     ProtectFileDescriptor(GetPlatformFile());
-#endif
 }
 
 File::~File() {
@@ -71,10 +63,20 @@ File::~File() {
   Close();
 }
 
+// static
+File File::CreateForAsyncHandle(PlatformFile platform_file) {
+  File file(platform_file);
+  // It would be nice if we could validate that |platform_file| was opened with
+  // FILE_FLAG_OVERLAPPED on Windows but this doesn't appear to be possible.
+  file.async_ = true;
+  return file.Pass();
+}
+
 File& File::operator=(RValue other) {
   if (this != other.object) {
     Close();
     SetPlatformFile(other.object->TakePlatformFile());
+    tracing_path_ = other.object->tracing_path_;
     error_details_ = other.object->error_details();
     created_ = other.object->created();
     async_ = other.object->async_;
@@ -83,12 +85,15 @@ File& File::operator=(RValue other) {
 }
 
 #if !defined(OS_NACL)
-void File::Initialize(const FilePath& name, uint32 flags) {
-  if (name.ReferencesParent()) {
+void File::Initialize(const FilePath& path, uint32 flags) {
+  if (path.ReferencesParent()) {
     error_details_ = FILE_ERROR_ACCESS_DENIED;
     return;
   }
-  InitializeUnsafe(name, flags);
+  if (FileTracing::IsCategoryEnabled())
+    tracing_path_ = path;
+  SCOPED_FILE_TRACE("Initialize");
+  DoInitialize(path, flags);
 }
 #endif
 
@@ -138,6 +143,7 @@ std::string File::ErrorToString(Error error) {
 
 bool File::Flush() {
   ElapsedTimer timer;
+  SCOPED_FILE_TRACE("Flush");
   bool return_value = DoFlush();
   UMA_HISTOGRAM_TIMES("PlatformFile.FlushTime", timer.Elapsed());
   return return_value;

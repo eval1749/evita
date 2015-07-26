@@ -8,21 +8,20 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_node.h#6 $
 //
-#if !defined(INCLUDE_regex_node_h)
-#define INCLUDE_regex_node_h
+#ifndef REGEX_REGEX_NODE_H_
+#define REGEX_REGEX_NODE_H_
 
 #include <algorithm>
 
 #include "base/logging.h"
-#include "./regex_bytecode.h"
-#include "./regex_util.h"
+#include "regex/regex_bytecode.h"
+#include "regex/regex_util.h"
 
 #if !defined(DEBUG_REGEX)
 #define DEBUG_REGEX 0
 #endif
 
 namespace Regex {
-
 namespace RegexPrivate {
 
 class Compiler;
@@ -53,10 +52,8 @@ struct LengthInfo {
   /// <param name="iMin">
   /// Minimum number of characters to be matched.
   /// </param>
-  LengthInfo(bool fFixed, int iMin = 0, int iMax = 0) :
-      m_fFixed(fFixed),
-      m_iMax(iMax),
-      m_iMin(iMin) {}
+  explicit LengthInfo(bool fFixed, int iMin = 0, int iMax = 0)
+      : m_fFixed(fFixed), m_iMax(iMax), m_iMin(iMin) {}
 };
 
 /// <remark>
@@ -66,8 +63,7 @@ struct MinMax {
   int m_iMin;
   int m_iMax;
 
-  MinMax(int iMin = -1, int iMax = -1)
-      : m_iMin(iMin), m_iMax(iMax) {}
+  explicit MinMax(int iMin = -1, int iMax = -1) : m_iMin(iMin), m_iMax(iMax) {}
 
   bool IsOne() const { return m_iMin == 1 && m_iMax == 1; }
 };
@@ -75,51 +71,42 @@ struct MinMax {
 /// <remark>
 /// Base class of parse tree node
 /// </remark>
-class Node
-    : public Castable_<Node>,
-      public DoubleLinkedItem_<Node>,
-      public LocalObject {
-  public: enum Case {
+class Node : public Castable_<Node>,
+             public DoubleLinkedItem_<Node>,
+             public LocalObject {
+ public:
+  enum Case {
     CaseSensitive = 0,
     CaseInsensitive = 1,
   };
 
-  public: enum Direction {
+  enum Direction {
     Forward = 0,
     Backward = 1,
   };
 
-  // [C]
-  public: virtual void Compile(Compiler*, int) = 0;
-
-  public: virtual void CompileNot(Compiler*, int) { NOTREACHED(); }
-
-  public: virtual LengthInfo ComputeLength() const {
-    return LengthInfo(false);
+  virtual void Compile(Compiler*, int) = 0;
+  virtual void CompileNot(Compiler*, int) { NOTREACHED(); }
+  virtual LengthInfo ComputeLength() const { return LengthInfo(false); }
+  virtual int ComputeMinLength() const { return 0; }
+  virtual bool IsCharSetMember(IEnvironment*, char16) const { return false; }
+  virtual bool NeedStack() const { return false; }
+  virtual Node* Not() {
+    NOTREACHED();
+    return nullptr;
   }
+  virtual Node* Reverse() { return this; }
+  virtual Node* Simplify(IEnvironment*, LocalHeap*) { return this; }
 
-  public: virtual int ComputeMinLength() const { return 0; }
+#if DEBUG_REGEX
+  virtual void Print() const { printf("%s", GetKind()); }
+#endif
 
-  public: virtual bool IsCharSetMember(IEnvironment*, char16) const {
-    return false;
-  }
+ protected:
+  Node() = default;
 
-  // [N]
-  public: virtual bool NeedStack() const { return false; }
-
-  public: virtual Node* Not() { NOTREACHED(); return nullptr; }
-
-  // [R]
-  public: virtual Node* Reverse() { return this; }
-
-  // [S]
-  public: virtual Node* Simplify(IEnvironment*, LocalHeap*) { return this; }
-
-  #if DEBUG_REGEX
-      public: virtual void Print() const {
-        printf("%s", GetKind());
-      }
-  #endif
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Node);
 };
 
 typedef DoubleLinkedList_<Node> Nodes;
@@ -129,24 +116,25 @@ typedef DoubleLinkedList_<Node> Nodes;
 /// WithCase
 //
 class WithCase {
-  private: Node::Case case_sensivity_;
-
-  protected: WithCase(Node::Case case_sensivity)
-      : case_sensivity_(case_sensivity) {}
-
-  public: Node::Case case_sensivity() const { return case_sensivity_; }
-
-  public: void set_case_sensivity(Node::Case case_sensivity) {
-    case_sensivity_ = case_sensivity;
+ public:
+  Node::Case case_sensitivity() const { return case_sensitivity_; }
+  void set_case_sensitivity(Node::Case case_sensitivity) {
+    case_sensitivity_ = case_sensitivity;
   }
 
-  // [G]
-  public: Node::Case GetCase() const { return case_sensivity_; }
-
-  // [I]
-  public: bool IsIgnoreCase() const {
-    return Node::CaseInsensitive == case_sensivity_;
+  Node::Case GetCase() const { return case_sensitivity_; }
+  bool IsIgnoreCase() const {
+    return Node::CaseInsensitive == case_sensitivity_;
   }
+
+ protected:
+  explicit WithCase(Node::Case case_sensitivity)
+      : case_sensitivity_(case_sensitivity) {}
+
+ private:
+  Node::Case case_sensitivity_;
+
+  DISALLOW_COPY_AND_ASSIGN(WithCase);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -154,36 +142,33 @@ class WithCase {
 /// WithDirection
 //
 class WithDirection {
-  private: Node::Direction const direction_;
+ public:
+  Node::Direction GetDirection() const { return direction_; }
+  bool IsBackward() const { return Node::Backward == direction_; }
 
-  // ctor
-  protected: WithDirection(Node::Direction const direction)
+ protected:
+  explicit WithDirection(Node::Direction const direction)
       : direction_(direction) {}
 
-  // [G]
-  public: Node::Direction GetDirection() const { return direction_; }
-
-  // [I]
-  public: bool IsBackward() const { return Node::Backward == direction_; }
+ private:
+  Node::Direction const direction_;
 
   DISALLOW_COPY_AND_ASSIGN(WithDirection);
 };
 
-#define CASTABLE(self, base) \
-  public: static const char* Kind_() { return #self; } \
-  public: virtual const char* GetKind() const override { return Kind_(); } \
-  public: virtual bool Is_(const char* name) const override { \
-    return self::GetKind() == name || base::Is_(name); \
+#define CASTABLE(self, base)                               \
+ public:                                                   \
+  static const char* Kind_() { return #self; }             \
+  const char* GetKind() const override { return Kind_(); } \
+  bool Is_(const char* name) const override {              \
+    return self::GetKind() == name || base::Is_(name);     \
   }
 
-#define CASTABLE_FINAL(self, base) \
-  public: static const char* Kind_() { return #self; } \
-  public: virtual const char* GetKind() const override final { \
-    return Kind_(); \
-  } \
-  public: virtual bool Is_(const char* name) const override final { \
-    return self::GetKind() == name; \
-  }
+#define CASTABLE_FINAL(self, base)                      \
+ public:                                                \
+  static const char* Kind_() { return #self; }          \
+  const char* GetKind() const final { return Kind_(); } \
+  bool Is_(const char* name) const final { return self::GetKind() == name; }
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -192,20 +177,20 @@ class WithDirection {
 class NodeEqBase : public Node, public WithDirection {
   CASTABLE(NodeEqBase, Node);
 
-  private: bool not_;
+ public:
+  bool IsNot() const { return not_; }
 
-  protected: NodeEqBase(Direction const eDirection, bool const fNot)
-    : WithDirection(eDirection),
-      not_(fNot) {}
-
-  // [I]
-  public: bool IsNot() const { return not_; }
-
-  // [N]
-  public: Node* Not() {
-    not_ = ! not_;
+  Node* Not() {
+    not_ = !not_;
     return this;
   }
+
+ protected:
+  NodeEqBase(Direction const eDirection, bool const fNot)
+      : WithDirection(eDirection), not_(fNot) {}
+
+ private:
+  bool not_;
 
   DISALLOW_COPY_AND_ASSIGN(NodeEqBase);
 };
@@ -216,17 +201,22 @@ class NodeEqBase : public Node, public WithDirection {
 class NodeCaptureBase : public Node, public WithDirection {
   CASTABLE(NodeCaptureBase, Node);
 
-  private: int nth_;
+ public:
+  int GetNth() const { return nth_; }
 
-  protected: NodeCaptureBase(Direction const eDirection, int const nth)
-      : WithDirection(eDirection),
-        nth_(nth) {}
+  void SetNth(int nth) {
+    ASSERT(nth_ <= 0);
+    nth_ = nth;
+  }
 
-  // [G]
-  public: int GetNth() const { return nth_; }
+ protected:
+  NodeCaptureBase(Direction const eDirection, int const nth)
+      : WithDirection(eDirection), nth_(nth) {}
 
-  // [S]
-  public: void SetNth(int nth) { ASSERT(nth_ <= 0); nth_ = nth; }
+ private:
+  int nth_;
+
+  DISALLOW_COPY_AND_ASSIGN(NodeCaptureBase);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -234,14 +224,15 @@ class NodeCaptureBase : public Node, public WithDirection {
 // NodeCsBase
 //
 class NodeCsBase : public NodeEqBase, public WithCase {
-   CASTABLE(NodeCsBase, NodeEqBase);
+  CASTABLE(NodeCsBase, NodeEqBase);
 
-  protected: NodeCsBase(
-      Direction const eDirection,
-      Case const case_sensivity,
-      bool const not)
-      : NodeEqBase(eDirection, not), WithCase(case_sensivity) {}
+ protected:
+  NodeCsBase(Direction const eDirection,
+             Case const case_sensitivity,
+             bool const not)
+      : NodeEqBase(eDirection, not), WithCase(case_sensitivity) {}
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(NodeCsBase);
 };
 
@@ -252,20 +243,19 @@ class NodeCsBase : public NodeEqBase, public WithCase {
 class NodeOpBase : public Node {
   CASTABLE(NodeOpBase, Node);
 
-  private: Op opcode_;
+ public:
+  Op GetOp() const { return opcode_; }
 
-  protected: NodeOpBase(Op const opcode) : opcode_(opcode) {}
+  // Node
+  void Compile(Compiler*, int) override;
 
-  // [C]
-  public: void Compile(Compiler*, int) override;
+ protected:
+  explicit NodeOpBase(Op const opcode) : opcode_(opcode) {}
 
-  // [G]
-  public: Op GetOp() const { return opcode_; }
+  void setOp(Op const opcode) { opcode_ = opcode; }
 
-  // [S]
-  protected: void setOp(Op const opcode) {
-    opcode_ = opcode;
-  }
+ private:
+  Op opcode_;
 
   DISALLOW_COPY_AND_ASSIGN(NodeOpBase);
 };
@@ -277,34 +267,33 @@ class NodeOpBase : public Node {
 class NodeSubNodeBase : public Node {
   CASTABLE(NodeSubNodeBase, Node);
 
-  private: Node* node_;
-
-  protected: NodeSubNodeBase(Node* const pNode) : node_(pNode) {}
-
-  // [C]
-  public: int ComputeMinLength() const override {
-    return node_->ComputeMinLength();
-  }
-
   // [G]
-  public: Node* GetNode() const { return node_; }
+  Node* GetNode() const { return node_; }
 
-  // [N]
-  public: bool NeedStack() const override { return node_->NeedStack(); }
+  // Node
+  int ComputeMinLength() const override { return node_->ComputeMinLength(); }
+  bool NeedStack() const override { return node_->NeedStack(); }
 
-  // [R]
-  public: Node* Reverse() override {
+  Node* Reverse() override {
     node_ = node_->Reverse();
     return this;
   }
 
-  #if DEBUG_REGEX
-    public: void Print() const override {
-      printf("(%s ", GetKind());
-      node_->Print();
-      printf(")");
-    }
-  #endif
+#if DEBUG_REGEX
+  void Print() const override {
+    printf("(%s ", GetKind());
+    node_->Print();
+    printf(")");
+  }
+#endif
+
+ protected:
+  explicit NodeSubNodeBase(Node* const pNode) : node_(pNode) {}
+
+ private:
+  Node* node_;
+
+  DISALLOW_COPY_AND_ASSIGN(NodeSubNodeBase);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -314,52 +303,50 @@ class NodeSubNodeBase : public Node {
 class NodeSubNodesBase : public Node {
   CASTABLE(NodeSubNodesBase, Node);
 
-  protected: Nodes m_oNodes;
+ public:
+  void Append(Node* pNode) { m_oNodes.Append(pNode); }
+  void Delete(Node* pNode) { m_oNodes.Delete(pNode); }
+  Node* GetFirst() const { return m_oNodes.GetFirst(); }
 
-  // [A]
-  public: void Append(Node* pNode) { m_oNodes.Append(pNode); }
+  // Node
+  Node* Reverse() override;
 
-  // [D]
-  public: void Delete(Node* pNode) { m_oNodes.Delete(pNode); }
-
-  // [G]
-  public: Node* GetFirst() const { return m_oNodes.GetFirst(); }
-
-  // [R]
-  public: Node* Reverse() override;
-
-  #if DEBUG_REGEX
-    public: void Print() const override {
-      printf("(%s", GetKind());
-      foreach (Nodes::Enum, oEnum, &m_oNodes) {
-        printf(" ");
-        oEnum.Get()->Print();
-      }
-      printf(")");
+#if DEBUG_REGEX
+  void Print() const override {
+    printf("(%s", GetKind());
+    for (Nodes::Enum oEnum(&m_oNodes); !oEnum.AtEnd(); oEnum.Next()) {
+      printf(" ");
+      oEnum.Get()->Print();
     }
-  #endif
+    printf(")");
+  }
+#endif
+
+ protected:
+  NodeSubNodesBase() = default;
+
+  Nodes m_oNodes;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeSubNodesBase);
 };
 
 /// <remark>
 /// Parse tree node "And".
 /// </remark>
-class NodeAnd : public NodeSubNodesBase {
+class NodeAnd final : public NodeSubNodesBase {
   CASTABLE_FINAL(NodeAnd, NodeSubNodesBase);
 
-  /// <remark>
-  /// Constructs empty And node.
-  /// </remark>
-  public: NodeAnd() {}
-
+ public:
   /// <remark>
   /// Constructs And node with one sub node.
   /// </remark>
-  public: NodeAnd(Node* pNode1) { Append(pNode1); }
+  explicit NodeAnd(Node* pNode1) { Append(pNode1); }
 
   /// <remark>
   /// Constructs And node with two sub nodes.
   /// </remark>
-  public: NodeAnd(Node* pNode1, Node* pNode2) {
+  NodeAnd(Node* pNode1, Node* pNode2) {
     Append(pNode1);
     Append(pNode2);
   }
@@ -367,87 +354,87 @@ class NodeAnd : public NodeSubNodesBase {
   /// <remark>
   /// Constructs And node with three sub nodes.
   /// </remark>
-  public: NodeAnd(Node* pNode1, Node* pNode2, Node* pNode3) {
+  NodeAnd(Node* pNode1, Node* pNode2, Node* pNode3) {
     Append(pNode1);
     Append(pNode2);
     Append(pNode3);
   }
+  NodeAnd() {}
 
-  // [C]
+  // Node
   /// <summary>
   /// Sum of value of all subnodes.
   /// </summary>
-  public: int ComputeMinLength() const override final {
-    int nMinLen = 0;
-    foreach (Nodes::Enum, oEnum, &m_oNodes) {
+  int ComputeMinLength() const final {
+    auto nMinLen = 0;
+    for (Nodes::Enum oEnum(&m_oNodes); !oEnum.AtEnd(); oEnum.Next()) {
       auto const pNode = oEnum.Get();
       nMinLen += pNode->ComputeMinLength();
-      if (nMinLen >= Infinity) return Infinity;
+      if (nMinLen >= Infinity)
+        return Infinity;
     }
     return nMinLen;
   }
 
-  public: void Compile(Compiler*, int) override final;
+  void Compile(Compiler*, int) final;
+  Node* Simplify(IEnvironment*, LocalHeap*) final;
 
-  // [S]
-  public: Node* Simplify(IEnvironment*, LocalHeap*) override final;
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeAnd);
 };
 
 /// <remark>
 /// Parse tree node for dot(.)
 /// </remark>
-class NodeAny : public Node, public WithDirection {
+class NodeAny final : public Node, public WithDirection {
   CASTABLE_FINAL(NodeAny, Node);
 
-  // ctor
-  public: NodeAny(Direction const direction) : WithDirection(direction) {}
+ public:
+  explicit NodeAny(Direction const direction) : WithDirection(direction) {}
 
-  // [C]
-  public: void Compile(Compiler*, int) override final;
-  public: int ComputeMinLength() const override final { return 1; }
+  Op GetOp() const { return IsBackward() ? Op_Any_B : Op_Any_F; }
 
-  // [G]
-  public: Op GetOp() const { return IsBackward() ? Op_Any_B : Op_Any_F; }
+  // Node
+  void Compile(Compiler*, int) final;
+  int ComputeMinLength() const final { return 1; }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeAny);
 };
 
 /// <remark>
 /// Parse tree node for atomic group <c>(?>...)</c>
 /// </remark>
-class NodeAtom : public NodeSubNodeBase {
+class NodeAtom final : public NodeSubNodeBase {
   CASTABLE(NodeAtom, NodeSubNodeBase);
 
-  public: NodeAtom(Node* node) : NodeSubNodeBase(node) {}
+ public:
+  explicit NodeAtom(Node* node) : NodeSubNodeBase(node) {}
 
-  // [C]
-  public: void Compile(Compiler*, int) override;
+  // Node
+  void Compile(Compiler*, int) final;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeAtom);
 };
 
 /// <remark>
 /// Parse tree node capture. Regex syntax is <c>(...)</c>.
 /// </remark>
-class NodeCapture : public NodeSubNodeBase, public WithDirection {
+class NodeCapture final : public NodeSubNodeBase, public WithDirection {
   CASTABLE(NodeCapture, NodeSubNodeBase);
 
-  /// <summary>
-  /// An index number of this capture.
-  /// </summary>
-  private: int nth_;
-
+ public:
   /// <summary>
   /// Construct NodeCapture object.
   /// </summary>
   /// <param name="direction">A direction of capturing</param>
   /// <param name="node">A node will be captured</param>
   /// <param name="nth">Capture index number</param>
-  public: NodeCapture(Direction direction, Node* node, int nth)
-      : NodeSubNodeBase(node),
-        WithDirection(direction),
-        nth_(nth) {
+  NodeCapture(Direction direction, Node* node, int nth)
+      : NodeSubNodeBase(node), WithDirection(direction), nth_(nth) {
     ASSERT(nth_ >= 1);
   }
-
-  // [C]
-  public: void Compile(Compiler*, int) override;
 
   // [G]
   /// <summary>
@@ -457,177 +444,171 @@ class NodeCapture : public NodeSubNodeBase, public WithDirection {
   /// Op_Capture_B for backward capturing, Op_Capture_F for
   /// forward capturing.
   /// </returns>
-  public: Op GetOp() const {
-    return IsBackward() ? Op_Capture_B : Op_Capture_F;
+  Op GetOp() const { return IsBackward() ? Op_Capture_B : Op_Capture_F; }
+
+  // Node
+  void Compile(Compiler*, int) final;
+  // Alwasy true for NodeCapture.
+  bool NeedStack() const final { return true; }
+
+#if DEBUG_REGEX
+  void Print() const final {
+    printf("(%s[%d] ", IsBackward() ? "CaptureB" : "CaptureF", nth_);
+    GetNode()->Print();
+    printf(")");
   }
+#endif
 
-  // [N]
-  /// <summary>
-  /// Alwasy true for NodeCapture.
-  /// </summary>
-  public: bool NeedStack() const override { return true; }
+ private:
+  // An index number of this capture.
+  int nth_;
 
-  #if DEBUG_REGEX
-    public: virtual void Print() const override {
-      printf("(%s[%d] ",
-          IsBackward() ? "CaptureB" : "CaptureF",
-          nth_);
-      GetNode()->Print();
-      printf(")");
-    }
-  #endif
+  DISALLOW_COPY_AND_ASSIGN(NodeCapture);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NodeCaptureEq -- \<n> \k<name>
 //
-class NodeCaptureEq : public NodeCaptureBase, public WithCase {
+class NodeCaptureEq final : public NodeCaptureBase, public WithCase {
   CASTABLE_FINAL(NodeCaptureEq, NodeCaptureBase);
 
-  public: NodeCaptureEq(
-      Direction const direction,
-      int const nth,
-      Case const case_sensivity)
-        : NodeCaptureBase(direction, nth),
-          WithCase(case_sensivity) {}
+ public:
+  NodeCaptureEq(Direction const direction,
+                int const nth,
+                Case const case_sensitivity)
+      : NodeCaptureBase(direction, nth), WithCase(case_sensitivity) {}
 
-  // [C]
-  public: void Compile(Compiler*, int) override final;
-
-  // [G]
-  public: Op GetOp() const {
-    return IsBackward() ?
-        IsIgnoreCase() ? Op_CaptureEq_Ci_B : Op_CaptureEq_Cs_B :
-        IsIgnoreCase() ? Op_CaptureEq_Ci_F : Op_CaptureEq_Cs_F;
+  Op GetOp() const {
+    return IsBackward()
+               ? IsIgnoreCase() ? Op_CaptureEq_Ci_B : Op_CaptureEq_Cs_B
+               : IsIgnoreCase() ? Op_CaptureEq_Ci_F : Op_CaptureEq_Cs_F;
   }
+
+  // Node
+  void Compile(Compiler*, int) final;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeCaptureEq);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NodeCaptureIfNot
 //
-class NodeCaptureIfNot : public NodeCaptureBase {
+class NodeCaptureIfNot final : public NodeCaptureBase {
   CASTABLE_FINAL(NodeCaptureIfNot, NodeCaptureBase);
 
-  public: NodeCaptureIfNot(Direction const direction, int const nth)
+ public:
+  NodeCaptureIfNot(Direction const direction, int const nth)
       : NodeCaptureBase(direction, nth) {}
 
-  // [C]
-  public: void Compile(Compiler*, int) override final { NOTREACHED(); }
+  // Node
+  void Compile(Compiler*, int) final { NOTREACHED(); }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeCaptureIfNot);
 };
 
 /// <remark>
 /// Parse tree node for character comparison.
 /// </remark>
-class NodeChar : public NodeCsBase {
+class NodeChar final : public NodeCsBase {
   CASTABLE_FINAL(NodeChar, NodeCsBase);
 
-  private: char16 char_;
-
+ public:
   /// <summary>
   /// Construct NodeChar.
   /// </summary>
-  public: NodeChar(
-      Direction const direction,
-      char16 char_code,
-      Case const case_sensivity = CaseSensitive,
-      bool not = false)
-      : NodeCsBase(direction, case_sensivity, not),
-        char_(char_code) {}
+  NodeChar(Direction const direction,
+           char16 char_code,
+           Case const case_sensitivity = CaseSensitive,
+           bool notEqual = false)
+      : NodeCsBase(direction, case_sensitivity, notEqual), char_(char_code) {}
 
-  // [C]
-  public: void Compile(Compiler*, int) override final;
-  public: void CompileNot(Compiler*, int) override final;
-  public: int ComputeMinLength() const override final { return 1; }
+  char16 GetChar() const { return char_; }
 
-  // [G]
-  public: char16 GetChar() const { return char_; }
-
-  public: Op GetOp(bool fNot) const {
+  Op GetOp(bool fNot) const {
     static const Op k_rgeOp[] = {
-      Op_CharEq_Cs_F,
-      Op_CharEq_Cs_B,
+        Op_CharEq_Cs_F, Op_CharEq_Cs_B,
 
-      Op_CharNe_Cs_F,
-      Op_CharNe_Cs_B,
+        Op_CharNe_Cs_F, Op_CharNe_Cs_B,
 
-      Op_CharEq_Ci_F,
-      Op_CharEq_Ci_B,
+        Op_CharEq_Ci_F, Op_CharEq_Ci_B,
 
-      Op_CharNe_Ci_F,
-      Op_CharNe_Ci_B,
+        Op_CharNe_Ci_F, Op_CharNe_Ci_B,
     };
 
     auto k = 0;
-    if (IsBackward()) k |= 1;
-    if (fNot) k |= 2;
-    if (IsIgnoreCase()) k |= 4;
+    if (IsBackward())
+      k |= 1;
+    if (fNot)
+      k |= 2;
+    if (IsIgnoreCase())
+      k |= 4;
     return k_rgeOp[k];
   }
 
-  // [I]
-  public: bool IsCharSetMember(IEnvironment*, char16) const override final;
+  // Node
+  void Compile(Compiler*, int) final;
+  void CompileNot(Compiler*, int) final;
+  int ComputeMinLength() const final { return 1; }
+  bool IsCharSetMember(IEnvironment*, char16) const final;
+  Node* Simplify(IEnvironment*, LocalHeap*) final;
 
-  // [S]
-  public: Node* Simplify(IEnvironment*, LocalHeap*) override final;
+#if DEBUG_REGEX
+  void Print() const final {
+    printf("(Char%s%s%s '%c')", IsNot() ? "Ne" : "Eq",
+           IsIgnoreCase() ? "Ci" : "Cs", IsBackward() ? "B" : "F", GetChar());
+  }
+#endif
 
-  #if DEBUG_REGEX
-    public: virtual void Print() const override final {
-      printf("(Char%s%s%s '%c')",
-          IsNot() ? "Ne" : "Eq",
-          IsIgnoreCase() ? "Ci" : "Cs",
-          IsBackward() ? "B" : "F",
-          GetChar());
-    }
-  #endif
+ private:
+  char16 char_;
+
+  DISALLOW_COPY_AND_ASSIGN(NodeChar);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NodeCharClass
 //
-class NodeCharClass : public NodeSubNodesBase, public WithDirection {
+class NodeCharClass final : public NodeSubNodesBase, public WithDirection {
   CASTABLE_FINAL(NodeCharClass, NodeSubNodesBase);
 
-  private: bool const not_;
+ public:
+  NodeCharClass(Direction const direction, bool const notEqual)
+      : WithDirection(direction), not_(notEqual) {}
 
-  public: NodeCharClass(Direction const direction, bool const not)
-      : WithDirection(direction),
-        not_(not) {}
-
-  // [C]
-  public: void Compile(Compiler*, int) override final;
-  public: int ComputeMinLength() const override final { return 1; }
-
-  // [I]
-  public: bool IsCharSetMember(IEnvironment* pIEnv, char16 wch) const {
-    foreach (Nodes::Enum, oEnum, &m_oNodes) {
-      if (oEnum.Get()->IsCharSetMember(pIEnv, wch)) {
+  bool IsCharSetMember(IEnvironment* pIEnv, char16 wch) const {
+    for (Nodes::Enum oEnum(&m_oNodes); !oEnum.AtEnd(); oEnum.Next()) {
+      if (oEnum.Get()->IsCharSetMember(pIEnv, wch))
         return true;
-      }
     }
     return false;
   }
 
-  public: bool IsNot() const { return not_; }
+  bool IsNot() const { return not_; }
 
-  // [N]
-  public: bool NeedStack() const override final { return true; }
+  // Node
+  void Compile(Compiler*, int) final;
+  int ComputeMinLength() const final { return 1; }
+  bool NeedStack() const final { return true; }
+  Node* Simplify(IEnvironment*, LocalHeap*) final;
 
-  // [S]
-  public: Node* Simplify(IEnvironment*, LocalHeap*) override final;
-
-  #if DEBUG_REGEX
-    public: void Print() const override final {
-      printf("(CharClass%s", IsNot() ? "Not" : "");
-      foreach (Nodes::Enum, oEnum, &m_oNodes) {
-        printf(" ");
-        oEnum.Get()->Print();
-      }
-      printf(")");
+#if DEBUG_REGEX
+  void Print() const final {
+    printf("(CharClass%s", IsNot() ? "Not" : "");
+    for (Nodes::Enum oEnum(&m_oNodes); !oEnum.AtEnd(); oEnum.Next()) {
+      printf(" ");
+      oEnum.Get()->Print();
     }
-  #endif
+    printf(")");
+  }
+#endif
+
+ private:
+  bool const not_;
 
   DISALLOW_COPY_AND_ASSIGN(NodeCharClass);
 };
@@ -637,131 +618,120 @@ class NodeCharClass : public NodeSubNodesBase, public WithDirection {
 // NodeCharSet
 //
 class NodeCharSet : public NodeEqBase {
-  CASTABLE_FINAL(NodeCharSet, NodeEqBase)
+  CASTABLE_FINAL(NodeCharSet, NodeEqBase);
 
-  private: int m_cwch;
-  private: char16* m_pwch;
+ public:
+  NodeCharSet(Direction const direction,
+              char16* const pwch,
+              int const cwch,
+              bool const not)
+      : NodeEqBase(direction, not), m_cwch(cwch), m_pwch(pwch) {}
 
-  // ctor
-  public: NodeCharSet(
-      Direction const direction,
-      char16* const pwch,
-      int const cwch,
-      bool const not)
-      : NodeEqBase(direction, not),
-        m_cwch(cwch),
-        m_pwch(pwch) {}
+  int GetLength() const { return m_cwch; }
 
-  // [C]
-  public: void Compile(Compiler*, int) override final;
-  public: int ComputeMinLength() const override final { return 1; }
-
-  // [G]
-  public: Op GetOp() const {
-    return IsBackward() ?
-        IsNot() ? Op_CharSetNe_B : Op_CharSetEq_B :
-        IsNot() ? Op_CharSetNe_F : Op_CharSetEq_F;
+  Op GetOp() const {
+    return IsBackward() ? IsNot() ? Op_CharSetNe_B : Op_CharSetEq_B
+                        : IsNot() ? Op_CharSetNe_F : Op_CharSetEq_F;
   }
 
-  public: int GetLength() const { return m_cwch; }
-  public: const char16* GetString() const { return m_pwch; }
+  const char16* GetString() const { return m_pwch; }
 
-  // [I]
-  public: bool IsCharSetMember(IEnvironment*, char16 wch)
-      const override final {
+  // Node
+  void Compile(Compiler*, int) final;
+  int ComputeMinLength() const final { return 1; }
+
+  bool IsCharSetMember(IEnvironment*, char16 wch) const final {
     const char16* pwchEnd = m_pwch + m_cwch;
     for (const char16* pwch = m_pwch; pwch < pwchEnd; pwch++) {
-      if (*pwch == wch) return !IsNot();
+      if (*pwch == wch)
+        return !IsNot();
     }
     return IsNot();
   }
 
-  #if DEBUG_REGEX
-    public: void Print() const override final {
-      printf("(%s '%ls')",
-          IsNot() ? "CharSetNe" : "CharSetEq",
-          m_pwch);
-    }
-  #endif
+#if DEBUG_REGEX
+  void Print() const final {
+    printf("(%s '%ls')", IsNot() ? "CharSetNe" : "CharSetEq", m_pwch);
+  }
+#endif
+
+ private:
+  int m_cwch;
+  char16* m_pwch;
+
+  DISALLOW_COPY_AND_ASSIGN(NodeCharSet);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NodeIf
 //
-class NodeIf : public Node {
-  CASTABLE_FINAL(NodeIf, Node)
+class NodeIf final : public Node {
+  CASTABLE_FINAL(NodeIf, Node);
 
-  private: Node* m_pCond;
-  private: Node* m_pElse;
-  private: Node* m_pThen;
+ public:
+  NodeIf(Node* pCond, Node* pThen, Node* pElse)
+      : m_pCond(pCond), m_pThen(pThen), m_pElse(pElse) {}
 
-  // ctor
-  public: NodeIf(Node* pCond, Node* pThen, Node* pElse)
-    : m_pCond(pCond),
-      m_pThen(pThen),
-      m_pElse(pElse) {}
+  // Node
+  void Compile(Compiler*, int) final;
+  int ComputeMinLength() const final;
+  bool NeedStack() const final { return true; }
 
-  // [C]
-  public: void Compile(Compiler*, int) override final;
-  public: int ComputeMinLength() const override final;
-
-  // [N]
-  public: bool NeedStack() const override final { return true; }
-
-  // [R]
-  public: Node* Reverse() override {
+  Node* Reverse() final {
     m_pCond = m_pCond->Reverse();
     m_pThen = m_pThen->Reverse();
     m_pElse = m_pElse->Reverse();
     return this;
   }
 
-  // [S]
-  public: virtual Node* Simplify(
-      IEnvironment* pIEnv,
-      LocalHeap* pHeap) override {
+  Node* Simplify(IEnvironment* pIEnv, LocalHeap* pHeap) final {
     m_pCond = m_pCond->Simplify(pIEnv, pHeap);
     m_pThen = m_pThen->Simplify(pIEnv, pHeap);
     m_pElse = m_pElse->Simplify(pIEnv, pHeap);
     return this;
   }
 
-  #if DEBUG_REGEX
-    public: virtual void Print() const override final {
-      printf("(if ");
-      m_pCond->Print();
-      printf(" ");
-      m_pThen->Print();
-      printf(" ");
-      m_pElse->Print();
-      printf(")");
-    }
-  #endif
+#if DEBUG_REGEX
+  void Print() const final {
+    printf("(if ");
+    m_pCond->Print();
+    printf(" ");
+    m_pThen->Print();
+    printf(" ");
+    m_pElse->Print();
+    printf(")");
+  }
+#endif
+
+ private:
+  Node* m_pCond;
+  Node* m_pElse;
+  Node* m_pThen;
+
+  DISALLOW_COPY_AND_ASSIGN(NodeIf);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NodeLookaround
 //
-class NodeLookaround : public NodeSubNodeBase {
+class NodeLookaround final : public NodeSubNodeBase {
   CASTABLE_FINAL(NodeLookaround, NodeSubNodeBase);
 
-  private: bool const m_fPositive;
+ public:
+  NodeLookaround(Node* pNode, bool fPositive)
+      : NodeSubNodeBase(pNode), m_fPositive(fPositive) {}
 
-  public: NodeLookaround(Node* pNode, bool fPositive)
-      : NodeSubNodeBase(pNode),
-        m_fPositive(fPositive) {}
+  bool IsPositive() const { return m_fPositive; }
 
-  // [C]
-  public: virtual void Compile(Compiler*, int) override final;
-  public: virtual int ComputeMinLength() const override final { return 0; }
+  // Node
+  void Compile(Compiler*, int) final;
+  int ComputeMinLength() const final { return 0; }
+  bool NeedStack() const final { return true; }
 
-  // [I]
-  public: bool IsPositive() const { return m_fPositive; }
-
-  // [N]
-  public: virtual bool NeedStack() const override final { return true; }
+ private:
+  bool const m_fPositive;
 
   DISALLOW_COPY_AND_ASSIGN(NodeLookaround);
 };
@@ -774,37 +744,34 @@ class NodeLookaround : public NodeSubNodeBase {
 class NodeMinMax : public NodeSubNodeBase, public WithDirection {
   CASTABLE(NodeMinMax, NodeSubNodeBase);
 
-  private: int const m_iMax;
-  private: int const m_iMin;
+ public:
+  int GetMax() const { return m_iMax; }
+  int GetMin() const { return m_iMin; }
 
-  protected: NodeMinMax(
-      Direction const direction,
-      Node* const node,
-      MinMax minmax)
+  // Node
+  int ComputeMinLength() const override {
+    return GetNode()->ComputeMinLength() * m_iMin;
+  }
+  bool NeedStack() const override { return true; }
+
+#if DEBUG_REGEX
+  void Print() const override {
+    printf("(%s min=%d max=%d ", GetKind(), GetMin(), GetMax());
+    GetNode()->Print();
+    printf(")");
+  }
+#endif
+
+ protected:
+  NodeMinMax(Direction const direction, Node* const node, MinMax minmax)
       : NodeSubNodeBase(node),
         WithDirection(direction),
         m_iMax(minmax.m_iMax),
         m_iMin(minmax.m_iMin) {}
 
-  // [C]
-  public: virtual int ComputeMinLength() const override {
-    return GetNode()->ComputeMinLength() * m_iMin;
-  }
-
-  // [G]
-  public: int GetMax() const { return m_iMax; }
-  public: int GetMin() const { return m_iMin; }
-
-  // [N]
-  public: virtual bool NeedStack() const override { return true; }
-
-  #if DEBUG_REGEX
-    public: virtual void Print() const override {
-      printf("(%s min=%d max=%d ", GetKind(), GetMin(), GetMax());
-          GetNode()->Print();
-          printf(")");
-    }
-  #endif
+ private:
+  int const m_iMax;
+  int const m_iMin;
 
   DISALLOW_COPY_AND_ASSIGN(NodeMinMax);
 };
@@ -813,90 +780,91 @@ class NodeMinMax : public NodeSubNodeBase, public WithDirection {
 //
 // NodeMax
 //
-class NodeMax : public NodeMinMax {
+class NodeMax final : public NodeMinMax {
   CASTABLE_FINAL(NodeMax, NodeMinMax);
 
-  public: NodeMax(Direction direction, Node* node, MinMax minmax)
+ public:
+  NodeMax(Direction direction, Node* node, MinMax minmax)
       : NodeMinMax(direction, node, minmax) {}
 
-  // [C]
-  public: virtual void Compile(Compiler*, int) override final;
+  // Node
+  void Compile(Compiler*, int) final;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeMax);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NodeMin
 //
-class NodeMin : public NodeMinMax {
+class NodeMin final : public NodeMinMax {
   CASTABLE_FINAL(NodeMin, NodeMinMax);
 
-  public: NodeMin(Direction direction, Node* node, MinMax minmax)
+ public:
+  NodeMin(Direction direction, Node* node, MinMax minmax)
       : NodeMinMax(direction, node, minmax) {}
 
-  // [C]
-  public: virtual void Compile(Compiler*, int) override final;
+  // Node
+  void Compile(Compiler*, int) final;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeMin);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NodeOneWidth
 //
-class NodeOneWidth : public NodeOpBase {
+class NodeOneWidth final : public NodeOpBase {
   CASTABLE_FINAL(NodeOneWidth, NodeOpBase);
 
-  public: NodeOneWidth(Op opcode) : NodeOpBase(opcode) {}
+ public:
+  explicit NodeOneWidth(Op opcode) : NodeOpBase(opcode) {}
 
-  // [C]
-  public: virtual void CompileNot(Compiler*, int) override final;
-  public: virtual int ComputeMinLength() const override final { return 1; }
+  Op GetNotOp() const { return static_cast<Op>(GetOp() + 1); }
 
-  // [G]
-  public: Op GetNotOp() const { return static_cast<Op>(GetOp() + 1); }
+  // Node
+  void CompileNot(Compiler*, int) final;
+  int ComputeMinLength() const final { return 1; }
+  bool IsCharSetMember(IEnvironment*, char16 wch) const final;
+  Node* Not() final;
 
-  // [I]
-  public: virtual bool IsCharSetMember(IEnvironment*, char16 wch)
-    const override final;
-
-  // [N]
-  public: virtual Node* Not() override final;
-
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeOneWidth);
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // NodeOr
 //
-class NodeOr : public NodeSubNodesBase {
+class NodeOr final : public NodeSubNodesBase {
   CASTABLE_FINAL(NodeOr, NodeSubNodesBase);
 
-  // ctor
-  public: NodeOr() {}
-
-  public: NodeOr(Node* pNode1) { m_oNodes.Append(pNode1); }
-
-  public: NodeOr(Node* pNode1, Node* pNode2) {
-      m_oNodes.Append(pNode1);
-      m_oNodes.Append(pNode2);
+ public:
+  explicit NodeOr(Node* pNode1) { m_oNodes.Append(pNode1); }
+  NodeOr(Node* pNode1, Node* pNode2) {
+    m_oNodes.Append(pNode1);
+    m_oNodes.Append(pNode2);
   }
+  NodeOr() {}
 
-  // [C]
   // ComputeMinLength - minimum value of all subnodes.
-  public: virtual int ComputeMinLength() const override final {
-    auto nMinLen = int(Infinity);
-    foreach (Nodes::Enum, oEnum, &m_oNodes) {
-        auto const pNode = oEnum.Get();
-        nMinLen = std::min(nMinLen, pNode->ComputeMinLength());
+  int ComputeMinLength() const final {
+    auto nMinLen = static_cast<int>(Infinity);
+    for (Nodes::Enum oEnum(&m_oNodes); !oEnum.AtEnd(); oEnum.Next()) {
+      auto const pNode = oEnum.Get();
+      nMinLen = std::min(nMinLen, pNode->ComputeMinLength());
     }
     return nMinLen;
   }
 
-  public: virtual void Compile(Compiler*, int) override final;
+  void Compile(Compiler*, int) final;
+  Nodes* GetNodes() { return &m_oNodes; }
+  bool NeedStack() const final { return true; }
 
-  // [G]
-  public: Nodes* GetNodes() { return &m_oNodes; }
-
-  // [N]
-  public: virtual bool NeedStack() const override final { return true; }
+ private:
+  DISALLOW_COPY_AND_ASSIGN(NodeOr);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -904,69 +872,59 @@ class NodeOr : public NodeSubNodesBase {
 // NodeRange
 // Represent simple character class, e.g. [A-Z].
 //
-class NodeRange : public NodeCsBase {
+class NodeRange final : public NodeCsBase {
   CASTABLE_FINAL(NodeRange, NodeCsBase);
 
-  private: char16 const m_wchMin;
-  private: char16 const m_wchMax;
-
-  public: NodeRange(
-      Direction direction,
-      char16 wchMin,
-      char16 wchMax,
-      Case case_sensivity,
-      bool not = false)
-      : NodeCsBase(direction, case_sensivity, not),
+ public:
+  NodeRange(Direction direction,
+            char16 wchMin,
+            char16 wchMax,
+            Case case_sensitivity,
+            bool notEqual = false)
+      : NodeCsBase(direction, case_sensitivity, notEqual),
         m_wchMin(wchMin),
         m_wchMax(wchMax) {}
 
-  // [C]
-  public: virtual void Compile(Compiler*, int) override final;
-  public: virtual void CompileNot(Compiler*, int) override final;
-  public: virtual int ComputeMinLength() const override final { return 1; }
+  void Compile(Compiler*, int) final;
+  void CompileNot(Compiler*, int) final;
+  int ComputeMinLength() const final { return 1; }
+  char16 GetMaxChar() const { return m_wchMax; }
+  char16 GetMinChar() const { return m_wchMin; }
 
-  // [G]
-  public: char16 GetMaxChar() const { return m_wchMax; }
-  public: char16 GetMinChar() const { return m_wchMin; }
-
-  public: Op GetOp(bool fNot) const {
+  Op GetOp(bool fNot) const {
     static const Op k_rgeOp[] = {
-      Op_RangeEq_Cs_F,
-      Op_RangeEq_Cs_B,
+        Op_RangeEq_Cs_F, Op_RangeEq_Cs_B,
 
-      Op_RangeNe_Cs_F,
-      Op_RangeNe_Cs_B,
+        Op_RangeNe_Cs_F, Op_RangeNe_Cs_B,
 
-      Op_RangeEq_Ci_F,
-      Op_RangeEq_Ci_B,
+        Op_RangeEq_Ci_F, Op_RangeEq_Ci_B,
 
-      Op_RangeNe_Ci_F,
-      Op_RangeNe_Ci_B,
+        Op_RangeNe_Ci_F, Op_RangeNe_Ci_B,
     };
 
     auto k = 0;
-    if (IsBackward()) k |= 1;
-    if (fNot) k |= 2;
-    if (IsIgnoreCase()) k |= 4;
+    if (IsBackward())
+      k |= 1;
+    if (fNot)
+      k |= 2;
+    if (IsIgnoreCase())
+      k |= 4;
     return k_rgeOp[k];
   }
 
-  // [I]
-  public: virtual bool IsCharSetMember(IEnvironment*, char16)
-    const override final;
+  bool IsCharSetMember(IEnvironment*, char16) const final;
+  Node* Simplify(IEnvironment*, LocalHeap*) final;
 
-  // [S]
-  public: virtual Node* Simplify(IEnvironment*, LocalHeap*) override final;
+#if DEBUG_REGEX
+  void Print() const override {
+    printf("(Range%s%s %lc-%lc)", IsNot() ? "Not" : "",
+           IsIgnoreCase() ? "Ci" : "Cs", GetMinChar(), GetMaxChar());
+  }
+#endif
 
-  #if DEBUG_REGEX
-    public: virtual void Print() const override {
-      printf("(Range%s%s %lc-%lc)",
-          IsNot() ? "Not" : "",
-          IsIgnoreCase() ? "Ci" : "Cs",
-          GetMinChar(),
-          GetMaxChar());
-    }
-  #endif
+ private:
+  char16 const m_wchMin;
+  char16 const m_wchMax;
 
   DISALLOW_COPY_AND_ASSIGN(NodeRange);
 };
@@ -974,68 +932,54 @@ class NodeRange : public NodeCsBase {
 /// <remark>
 /// Parse tree node for string comparison.
 /// </remark>
-class NodeString : public NodeCsBase {
+class NodeString final : public NodeCsBase {
   CASTABLE_FINAL(NodeString, NodeCsBase);
 
-  private: int const m_cwch;
-  private: const char16* const m_pwch;
+ public:
+  NodeString(Direction direction,
+             const char16* pwch,
+             int cwch,
+             Case case_sensitivity = CaseSensitive,
+             bool notEqual = false);
 
-  /// <summary>
-  /// Construct NodeString.
-  /// </summary>
-  public: NodeString(
-      Direction direction,
-      const char16* pwch,
-      int cwch,
-      Case case_sensivity = CaseSensitive,
-      bool not = false);
+  int ComputeMinLength() const final { return m_cwch; }
+  void Compile(Compiler*, int) final;
+  int GetLength() const { return m_cwch; }
 
-  public: virtual ~NodeString();
-
-  // [C]
-  public: virtual int ComputeMinLength() const override final {
-    return m_cwch;
-  }
-
-  public: virtual void Compile(Compiler*, int) override final;
-
-  // [G]
-  public: int GetLength() const { return m_cwch; }
-
-  public: Op GetOp(bool fNot) const {
+  Op GetOp(bool fNot) const {
     static const Op k_rgeOp[] = {
-      Op_StringEq_Cs_F,
-      Op_StringEq_Cs_B,
+        Op_StringEq_Cs_F, Op_StringEq_Cs_B,
 
-      Op_StringNe_Cs_F,
-      Op_StringNe_Cs_B,
+        Op_StringNe_Cs_F, Op_StringNe_Cs_B,
 
-      Op_StringEq_Ci_F,
-      Op_StringEq_Ci_B,
+        Op_StringEq_Ci_F, Op_StringEq_Ci_B,
 
-      Op_StringNe_Ci_F,
-      Op_StringNe_Ci_B,
+        Op_StringNe_Ci_F, Op_StringNe_Ci_B,
     };
 
     auto k = 0;
-    if (IsBackward()) k |= 1;
-    if (fNot) k |= 2;
-    if (IsIgnoreCase()) k |= 4;
+    if (IsBackward())
+      k |= 1;
+    if (fNot)
+      k |= 2;
+    if (IsIgnoreCase())
+      k |= 4;
     return k_rgeOp[k];
   }
 
-  public: const char16* GetStart() const { return m_pwch; }
+  const char16* GetStart() const { return m_pwch; }
 
-  // [P]
-  #if DEBUG_REGEX
-    public: virtual void Print() const override final {
-      printf("(String%s%s%s '%ls')",
-          IsNot() ? "Ne" : "Eq",
-          IsIgnoreCase() ? "Ci" : "Cs",
-          IsBackward() ? "B" : "F",
-          m_pwch);
-      }
-  #endif
+// [P]
+#if DEBUG_REGEX
+  void Print() const final {
+    printf("(String%s%s%s '%ls')", IsNot() ? "Ne" : "Eq",
+           IsIgnoreCase() ? "Ci" : "Cs", IsBackward() ? "B" : "F", m_pwch);
+  }
+#endif
+
+ private:
+  int const m_cwch;
+  const char16* const m_pwch;
 
   DISALLOW_COPY_AND_ASSIGN(NodeString);
 };
@@ -1043,11 +987,11 @@ class NodeString : public NodeCsBase {
 /// <summary>
 /// Parse tree node for void. This is used for empty capture.
 /// </summary>
-class NodeVoid : public Node {
+class NodeVoid final : public Node {
   CASTABLE_FINAL(NodeVoid, Node);
 
-  // [C]
-  public: virtual void Compile(Compiler*, int) override {}
+ public:
+  void Compile(Compiler*, int) override {}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1069,23 +1013,22 @@ class NodeVoid : public Node {
 // Compiler::compileScanner in regex_compile.cpp
 // Engine::Execute in regex_exec.cpp
 //
-class NodeZeroWidth : public NodeOpBase {
-  CASTABLE_FINAL(NodeZeroWidth, NodeOpBase)
-  public: NodeZeroWidth(Op opcode) : NodeOpBase(opcode) {}
+class NodeZeroWidth final : public NodeOpBase {
+  CASTABLE_FINAL(NodeZeroWidth, NodeOpBase);
+
+ public:
+  explicit NodeZeroWidth(Op opcode) : NodeOpBase(opcode) {}
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // CaptureDef
 //
-struct CaptureDef
-    : LocalObject,
-      DoubleLinkedItem_<CaptureDef> {
+struct CaptureDef : LocalObject, DoubleLinkedItem_<CaptureDef> {
   int m_iNth;
   char16* m_pwszName;
 
-  CaptureDef(char16* pwszName, int iNth)
-    : m_iNth(iNth), m_pwszName(pwszName) {}
+  CaptureDef(char16* pwszName, int iNth) : m_iNth(iNth), m_pwszName(pwszName) {}
 };
 
 typedef DoubleLinkedList_<CaptureDef> CaptureDefs;
@@ -1094,25 +1037,27 @@ typedef DoubleLinkedList_<CaptureDef> CaptureDefs;
 //
 // Tree
 //
-class Tree : public LocalObject {
-  public: int m_cCaptures;
-  public: int m_iErrorCode;
-  public: long m_lErrorPosn;
-  public: CaptureDefs m_oCaptures;
-  public: Node* m_pNode;
-  public: int m_rgfOption;
-  public: char16* m_prgpwszCaptureName;
+class Tree final : public LocalObject {
+ public:
+  explicit Tree(int rgfOption)
+      : m_cCaptures(0),
+        m_iErrorCode(0),
+        m_lErrorPosn(0),
+        m_pNode(nullptr),
+        m_rgfOption(rgfOption),
+        m_prgpwszCaptureName(nullptr) {}
 
-  public: Tree(int rgfOption)
-    : m_cCaptures(0),
-      m_iErrorCode(0),
-      m_lErrorPosn(0),
-      m_pNode(nullptr),
-      m_rgfOption(rgfOption),
-      m_prgpwszCaptureName(nullptr) {}
+  // TODO(eval1749) These member variables should be private.
+  int m_cCaptures;
+  int m_iErrorCode;
+  int m_lErrorPosn;
+  CaptureDefs m_oCaptures;
+  Node* m_pNode;
+  int m_rgfOption;
+  char16* m_prgpwszCaptureName;
 };
 
-} // RegexPrivate
-} // Regex
+}  // namespace RegexPrivate
+}  // namespace Regex
 
-#endif //!defined(INCLUDE_regex_node_h)
+#endif  // REGEX_REGEX_NODE_H_

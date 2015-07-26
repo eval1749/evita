@@ -20,15 +20,6 @@ struct Converter<base::Time> {
                      base::Time* out);
 };
 
-// text::Posn
-template<>
-struct Converter<text::Posn> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    text::Posn position);
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
-                     text::Posn* out);
-};
-
 } // namespace gin
 
 #endif //!defined(INCLUDE_evita_dom_converter_h)

@@ -8,629 +8,520 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_util.h#2 $
 //
-#if !defined(INCLUDE_regex_util_h)
-#define INCLUDE_regex_util_h
+#ifndef REGEX_REGEX_UTIL_H_
+#define REGEX_REGEX_UTIL_H_
 
-namespace Regex
-{
+namespace Regex {
 
-namespace RegexPrivate
-{
+namespace RegexPrivate {
 
-template<class T>
+template <class T>
 class Castable_ {
-  private: typedef Castable_<T> Self;
+ private:
+  typedef Castable_<T> Self;
 
   // [D]
-  public: template<class T> T* DynamicCast() const {
+ public:
+  template <class T>
+  T* DynamicCast() const {
     return const_cast<Self*>(this)->DynamicCast<T>();
   }
 
-  public: template<class T> T* DynamicCast() {
-    return this
-        ? Is_(T::Kind_()) ? static_cast<T*>(this) : nullptr
-        : nullptr;
+ public:
+  template <class T>
+  T* DynamicCast() {
+    return this ? Is_(T::Kind_()) ? static_cast<T*>(this) : nullptr : nullptr;
   }
 
   // [G]
-  public: virtual const char* GetKind() const = 0;
+ public:
+  virtual const char* GetKind() const = 0;
 
   // [I]
-  public: template<class T> bool Is() const {
+ public:
+  template <class T>
+  bool Is() const {
     return this && Is_(T::Kind_());
   }
 
-  public: virtual bool Is_(const char*) const { return false; }
+ public:
+  virtual bool Is_(const char*) const { return false; }
 
   // [S]
-  public: template<class T> T* StaticCast() const {
+ public:
+  template <class T>
+  T* StaticCast() const {
     return const_cast<T*>(this)->StaticCast<T>();
   }
 
-  public: template<class T> T* StaticCast() {
+ public:
+  template <class T>
+  T* StaticCast() {
     T* p = DynamicCast<T>();
     ASSERT(!!p);
     return p;
   }
-}; // Castable_
+};
 
-template<class Item_, class Parent_>
+template <class Item_, class Parent_>
 class DoubleLinkedList_;
 
 class GlobalObject {};
 class DummyParent {};
 
-template<class Item_, class Parent_ = DummyParent>
-class DoubleLinkedItem_
-{
-    friend class DoubleLinkedList_<Item_, Parent_>;
+template <class Item_, class Parent_ = DummyParent>
+class DoubleLinkedItem_ {
+ public:
+  DoubleLinkedItem_() : m_pNext(nullptr), m_pPrev(nullptr) {}
 
-    private: Item_* m_pNext;
-    private: Item_* m_pPrev;
+  Item_* GetNext() const { return m_pNext; }
+  Item_* GetPrev() const { return m_pPrev; }
 
-    public: DoubleLinkedItem_() :
-        m_pNext(NULL),
-        m_pPrev(NULL) {}
+ private:
+  friend class DoubleLinkedList_<Item_, Parent_>;
 
-    public: Item_* GetNext() const { return m_pNext; }
-    public: Item_* GetPrev() const { return m_pPrev; }
-}; // DoubleLinkedItem_
+  Item_* m_pNext;
+  Item_* m_pPrev;
+};
 
+template <class Item_, class Parent_ = DummyParent>
+class DoubleLinkedList_ {
+ protected:
+  typedef DoubleLinkedList_<Item_, Parent_> List_;
 
-template<class Item_, class Parent_ = DummyParent>
-class DoubleLinkedList_
-{
-    protected: typedef DoubleLinkedList_<Item_, Parent_> List_;
-    private:   typedef DoubleLinkedItem_<Item_, Parent_> Cons_;
+ private:
+  typedef DoubleLinkedItem_<Item_, Parent_> Cons_;
 
-    private: Item_* m_pFirst;
-    private: Item_* m_pLast;
+ public:
+  class Enum {
+   public:
+    explicit Enum(const List_* p) : m_pRunner(p->m_pFirst) {}
 
-    public: DoubleLinkedList_() :
-        m_pFirst(NULL),
-        m_pLast(NULL) {}
+    bool AtEnd() const { return nullptr == m_pRunner; }
+    Item_* Get() const { return m_pRunner; }
+    void Next() {
+      ASSERT(!AtEnd());
+      m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pNext;
+    }
 
-    // [A]
-    public: Item_* Append(Item_* pItem)
-    {
-        Cons_* pCons = static_cast<Cons_*>(pItem);
+   private:
+    Item_* m_pRunner;
+  };
 
-        pCons->m_pNext = NULL;
-        pCons->m_pPrev = m_pLast;
+  class EnumReverse {
+   public:
+    explicit EnumReverse(const List_* p) : m_pRunner(p->m_pLast) {}
 
-        if (NULL == m_pFirst)
-        {
-            m_pFirst = pItem;
-        } // if
+    bool AtEnd() const { return nullptr == m_pRunner; }
+    Item_* Get() const { return m_pRunner; }
+    void Next() {
+      ASSERT(!AtEnd());
+      m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pPrev;
+    }
 
-        if (NULL != m_pLast)
-        {
-            static_cast<Cons_*>(m_pLast)->m_pNext = pItem;
-        } // if
+   private:
+    Item_* m_pRunner;
+  };
 
-        return m_pLast = pItem;
-    } // Append
+  DoubleLinkedList_() : m_pFirst(nullptr), m_pLast(nullptr) {}
 
-    // [C]
-    public: int Count() const
-    {
-        int n = 0;
-        foreach (Enum, oEnum, this)
-        {
-            n += 1;
-        } // for
-        return n;
-    } // Count
+  Item_* Append(Item_* pItem) {
+    Cons_* pCons = static_cast<Cons_*>(pItem);
 
-    // [D]
-    public: Item_* Delete(Item_* pItem)
-    {
-        Cons_* pCons = static_cast<Cons_*>(pItem);
+    pCons->m_pNext = nullptr;
+    pCons->m_pPrev = m_pLast;
 
-        Item_* pNext = pCons->m_pNext;
-        Item_* pPrev = pCons->m_pPrev;
-        if (NULL == pNext)
-        {
-            m_pLast = pPrev;
-        }
-        else
-        {
-            static_cast<Cons_*>(pNext)->m_pPrev = pPrev;
-        } // if
+    if (nullptr == m_pFirst) {
+      m_pFirst = pItem;
+    }
 
-        if (NULL == pPrev)
-        {
-            m_pFirst = pNext;
-        }
-        else
-        {
-            static_cast<Cons_*>(pPrev)->m_pNext = pNext;
-        } // if
+    if (nullptr != m_pLast)
+      static_cast<Cons_*>(m_pLast)->m_pNext = pItem;
 
-        pCons->m_pNext = NULL;
-        pCons->m_pPrev = NULL;
+    return m_pLast = pItem;
+  }
 
-        return pItem;
-    } // Delete
+  int Count() const {
+    auto n = 0;
+    for (Enum oEnum(this), !oEnum.AtEnd(); oEnum.Next())
+      n += 1;
+    return n;
+  }
 
-    public: void DeleteAll()
-    {
-        while (Item_* pItem = GetFirst())
-        {
-            Delete(pItem);
-        } // while
-    } // DeleteAll
+  Item_* Delete(Item_* pItem) {
+    Cons_* pCons = static_cast<Cons_*>(pItem);
 
-    // [E]
-    public: class Enum
-    {
-        private: Item_* m_pRunner;
-        public: Enum(const List_* p) : m_pRunner(p->m_pFirst) {}
-        public: bool AtEnd() const { return NULL == m_pRunner; }
-        public: Item_* Get() const { return m_pRunner; }
-        public: void Next()
-        {
-            ASSERT(! AtEnd());
-            m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pNext;
-        } // Next
-    }; // Enum
+    Item_* pNext = pCons->m_pNext;
+    Item_* pPrev = pCons->m_pPrev;
+    if (nullptr == pNext) {
+      m_pLast = pPrev;
+    } else {
+      static_cast<Cons_*>(pNext)->m_pPrev = pPrev;
+    }
 
-    public: class EnumReverse
-    {
-        private: Item_* m_pRunner;
-        public: EnumReverse(const List_* p) : m_pRunner(p->m_pLast) {}
-        public: bool AtEnd() const { return NULL == m_pRunner; }
-        public: Item_* Get() const { return m_pRunner; }
-        public: void Next()
-        {
-            ASSERT(! AtEnd());
-            m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pPrev;
-        } // Next
-    }; // EnumReverse
+    if (nullptr == pPrev)
+      m_pFirst = pNext;
+    else
+      static_cast<Cons_*>(pPrev)->m_pNext = pNext;
 
-    // [G]
-    public: Item_* GetFirst() const { return m_pFirst; }
-    public: Item_* GetLast()  const { return m_pLast; }
+    pCons->m_pNext = nullptr;
+    pCons->m_pPrev = nullptr;
 
-    // [I]
-    public: Item_* InsertAfter(Item_* pItem, Item_* pRefItem)
-    {
-        Item_* pNext = static_cast<Cons_*>(pRefItem)->m_pNext;
-        if (NULL == pNext)
-        {
-            m_pLast = pItem;
-        }
-        else
-        {
-            static_cast<Cons_*>(pNext)->m_pPrev = pItem;
-        }
+    return pItem;
+  }
 
-        static_cast<Cons_*>(pItem)->m_pPrev    = pRefItem;
-        static_cast<Cons_*>(pItem)->m_pNext    = pNext;
-        static_cast<Cons_*>(pRefItem)->m_pNext = pItem;
-        return pItem;
-    } // InsertAfter
+  void DeleteAll() {
+    while (Item_* pItem = GetFirst()) {
+      Delete(pItem);
+    }
+  }
 
-    public: Item_* InsertBefore(Item_* pItem, Item_* pRefItem)
-    {
-        Item_* pPrev = static_cast<Cons_*>(pRefItem)->m_pPrev;
-        if (NULL == pPrev)
-        {
-            m_pFirst = pItem;
-        }
-        else
-        {
-            static_cast<Cons_*>(pPrev)->m_pNext = pItem;
-        }
+  Item_* GetFirst() const { return m_pFirst; }
+  Item_* GetLast() const { return m_pLast; }
 
-        static_cast<Cons_*>(pItem)->m_pPrev    = pPrev;
-        static_cast<Cons_*>(pItem)->m_pNext    = pRefItem;
-        static_cast<Cons_*>(pRefItem)->m_pPrev = pItem;
-        return pItem;
-    } // InsertBefore
+  Item_* InsertAfter(Item_* pItem, Item_* pRefItem) {
+    Item_* pNext = static_cast<Cons_*>(pRefItem)->m_pNext;
+    if (!pNext)
+      m_pLast = pItem;
+    else
+      static_cast<Cons_*>(pNext)->m_pPrev = pItem;
 
-    public: bool IsEmpty() const
-    {
-        return NULL == m_pFirst;
-    } // IsEmpty
+    static_cast<Cons_*>(pItem)->m_pPrev = pRefItem;
+    static_cast<Cons_*>(pItem)->m_pNext = pNext;
+    static_cast<Cons_*>(pRefItem)->m_pNext = pItem;
+    return pItem;
+  }
 
-    // [P]
-    public: Item_* Pop()
-    {
-        if (Item_* pItem = GetFirst())
-        {
-            return Delete(pItem);
-        }
-        return NULL;
-    } // Pop
+  Item_* InsertBefore(Item_* pItem, Item_* pRefItem) {
+    Item_* pPrev = static_cast<Cons_*>(pRefItem)->m_pPrev;
+    if (!pPrev)
+      m_pFirst = pItem;
+    else
+      static_cast<Cons_*>(pPrev)->m_pNext = pItem;
 
-    public: Item_* Prepend(Item_* pItem)
-    {
-        Cons_* pCons = static_cast<Cons_*>(pItem);
+    static_cast<Cons_*>(pItem)->m_pPrev = pPrev;
+    static_cast<Cons_*>(pItem)->m_pNext = pRefItem;
+    static_cast<Cons_*>(pRefItem)->m_pPrev = pItem;
+    return pItem;
+  }
 
-        pCons->m_pNext = m_pFirst;
-        pCons->m_pPrev = NULL;
+  bool IsEmpty() const { return nullptr == m_pFirst; }
 
-        if (NULL == m_pLast)
-        {
-            m_pLast = pItem;
-        } // if
+  Item_* Pop() {
+    if (auto pItem = GetFirst())
+      return Delete(pItem);
+    return nullptr;
+  }
 
-        if (NULL != m_pFirst)
-        {
-            static_cast<Cons_*>(m_pFirst)->m_pPrev = pItem;
-        } // if
+  Item_* Prepend(Item_* pItem) {
+    Cons_* pCons = static_cast<Cons_*>(pItem);
 
-        return m_pFirst = pItem;
-    } // Prepend
+    pCons->m_pNext = m_pFirst;
+    pCons->m_pPrev = nullptr;
 
-    // [R]
-    public: Item_* Replace(Item_* pNew, Item_* pOld)
-    {
-        InsertBefore(pNew, pOld);
-        Delete(pOld);
-        return pNew;
-    } // Replace
-}; // DoubleLinkedList_
+    if (nullptr == m_pLast) {
+      m_pLast = pItem;
+    }
 
+    if (nullptr != m_pFirst) {
+      static_cast<Cons_*>(m_pFirst)->m_pPrev = pItem;
+    }
 
-template<class Item_, class Parent_>
+    return m_pFirst = pItem;
+  }
+
+  Item_* Replace(Item_* pNew, Item_* pOld) {
+    InsertBefore(pNew, pOld);
+    Delete(pOld);
+    return pNew;
+  }
+
+ private:
+  Item_* m_pFirst;
+  Item_* m_pLast;
+};
+
+template <class Item_, class Parent_>
 class ChildList_;
 
-template<class Item_, class Parent_>
-class ChildItem_ : public DoubleLinkedItem_<Item_, Parent_>
-{
-    friend class ChildList_<Item_, Parent_>;
+template <class Item_, class Parent_>
+class ChildItem_ : public DoubleLinkedItem_<Item_, Parent_> {
+ public:
+  // TODO(eval1749) We should not use default parameter.
+  explicit ChildItem_(Parent_* p = nullptr) : m_pParent(p) {}
 
-    protected: Parent_*   m_pParent;
+ protected:
+  Parent_* m_pParent;
 
-    public: ChildItem_(Parent_* p = NULL) : m_pParent(p) {}
-}; // ChildItem_
+ private:
+  friend class ChildList_<Item_, Parent_>;
+};
 
+template <class Item_, class Parent_>
+class ChildList_ : public DoubleLinkedList_<Item_, Parent_> {
+ protected:
+  typedef ChildList_<Item_, Parent_> ChildList;
+  typedef ChildItem_<Item_, Parent_> ChildItem;
 
-template<class Item_, class Parent_>
-class ChildList_ : public DoubleLinkedList_<Item_, Parent_>
-{
-    private: typedef DoubleLinkedList_<Item_, Parent_> DoubleLinkedList;
-    protected: typedef ChildList_<Item_, Parent_> ChildList;
-    protected: typedef ChildItem_<Item_, Parent_> ChildItem;
+ private:
+  typedef DoubleLinkedList_<Item_, Parent_> DoubleLinkedList;
 
-    // [A]
-    public: Item_* Append(Item_* pItem)
-    {
-        DoubleLinkedList::Append(pItem);
+ public:
+  Item_* Append(Item_* pItem) {
+    DoubleLinkedList::Append(pItem);
 
-        static_cast<ChildItem*>(pItem)->m_pParent =
-            static_cast<Parent_*>(this);
+    static_cast<ChildItem*>(pItem)->m_pParent = static_cast<Parent_*>(this);
 
-        return pItem;
-    } // Append
+    return pItem;
+  }
 
-    // [D]
-    public: Item_* Delete(Item_* pItem)
-    {
-        DoubleLinkedList::Delete(pItem);
-        static_cast<ChildItem*>(pItem)->m_pParent = NULL;
-        return pItem;
-    } // Delete
+  Item_* Delete(Item_* pItem) {
+    DoubleLinkedList::Delete(pItem);
+    static_cast<ChildItem*>(pItem)->m_pParent = nullptr;
+    return pItem;
+  }
 
-    // [I]
-    public: Item_* InsertAfter(Item_* pItem, Item_* pRefItem)
-    {
-        DoubleLinkedList::InsertAfter(pItem, pRefItem);
+  Item_* InsertAfter(Item_* pItem, Item_* pRefItem) {
+    DoubleLinkedList::InsertAfter(pItem, pRefItem);
 
-        static_cast<ChildItem*>(pItem)->m_pParent = 
-            static_cast<ChildItem*>(pRefItem)->m_pParent;
+    static_cast<ChildItem*>(pItem)->m_pParent =
+        static_cast<ChildItem*>(pRefItem)->m_pParent;
 
-        return pItem;
-    } // InsertAfter
+    return pItem;
+  }
 
-    public: Item_* InsertBefore(Item_* pItem, Item_* pRefItem)
-    {
-        DoubleLinkedList::InsertBefore(pItem, pRefItem);
+  Item_* InsertBefore(Item_* pItem, Item_* pRefItem) {
+    DoubleLinkedList::InsertBefore(pItem, pRefItem);
 
-        static_cast<ChildItem*>(pItem)->m_pParent =
-            static_cast<ChildItem*>(pRefItem)->m_pParent;
+    static_cast<ChildItem*>(pItem)->m_pParent =
+        static_cast<ChildItem*>(pRefItem)->m_pParent;
 
-        return pItem;
-    } // InsertBefore
+    return pItem;
+  }
 
-    // [P]
-    public: Item_* Prepend(Item_* pItem)
-    {
-        DoubleLinkedList::Prepend(pItem);
+  Item_* Prepend(Item_* pItem) {
+    DoubleLinkedList::Prepend(pItem);
 
-        static_cast<ChildItem*>(pItem)->m_pParent =
-            static_cast<Parent_*>(this);
+    static_cast<ChildItem*>(pItem)->m_pParent = static_cast<Parent_*>(this);
 
-        return pItem;
-    } // Prepend
+    return pItem;
+  }
 
-    // [R]
-    public: Item_* Replace(Item_* pNew, Item_* pOld)
-    {
-        InsertBefore(pNew, pOld);
-        Delete(pOld);
-        return pNew;
-    } // Replace
-};  // ChiildList_
+  Item_* Replace(Item_* pNew, Item_* pOld) {
+    InsertBefore(pNew, pOld);
+    Delete(pOld);
+    return pNew;
+  }
+};
 
 /// <remark>
 ///   C-String enumerator.
 /// </remark>
-class EnumChar
-{
-    /// <summary>
-    ///   Argument for EnumChar
-    /// </summary>
-    public: struct Arg
-    {
-        const char16*   m_pwch;
-        const char16*   m_pwchEnd;
+class EnumChar {
+  /// <summary>
+  ///   Argument for EnumChar
+  /// </summary>
+ public:
+  struct Arg {
+    const char16* m_pwch;
+    const char16* m_pwchEnd;
 
-        Arg(
-            const char16*   pwch,
-            int             cwch ) :
-                m_pwch(pwch),
-                m_pwchEnd(pwch + cwch) {}
-    }; // Arg
+    Arg(const char16* pwch, int cwch) : m_pwch(pwch), m_pwchEnd(pwch + cwch) {}
+  };
 
-    private: const char16*   m_pwch;
-    private: const char16*   m_pwchEnd;
+  /// <summary>
+  ///   Construct C-String enumerator.
+  /// </summary>
+  explicit EnumChar(Arg oArg)
+      : m_pwch(oArg.m_pwch), m_pwchEnd(oArg.m_pwchEnd) {}
 
-    /// <summary>
-    ///   Construct C-String enumerator.
-    /// </summary>
-    public: EnumChar(Arg oArg) :
-            m_pwch(oArg.m_pwch),
-            m_pwchEnd(oArg.m_pwchEnd) {}
+  /// <summary>
+  ///  Check enumereator at end.
+  /// </summary>
+  bool AtEnd() const { return m_pwch >= m_pwchEnd; }
 
-    /// <summary>
-    ///  Check enumereator at end.
-    /// </summary>
-    public: bool AtEnd() const
-    {
-        return m_pwch >= m_pwchEnd;
-    } // AtEnd
+  /// <summary>
+  ///  Returns current character
+  /// </summary>
+  char16 Get() const {
+    ASSERT(!AtEnd());
+    return *m_pwch;
+  }
 
-    /// <summary>
-    ///  Returns current character
-    /// </summary>
-    public: char16 Get() const
-    {
-        ASSERT(! AtEnd());
-        return *m_pwch;
-    } // Get
+  /// <summary>
+  ///  Advance current position
+  /// </summary>
+  void Next() {
+    ASSERT(!AtEnd());
+    m_pwch++;
+  }
 
-    /// <summary>
-    ///  Advance current position
-    /// </summary>
-    public: void Next()
-    {
-        ASSERT(! AtEnd());
-        m_pwch++;
-    } // AtEnd
-}; // EnumChar
+ private:
+  const char16* m_pwch;
+  const char16* m_pwchEnd;
+};
 
 //////////////////////////////////////////////////////////////////////
 //
 // LocalHeap
 //
-class LocalHeap
-{
-    private: HANDLE m_hHeap;
+class LocalHeap {
+ public:
+  LocalHeap() : m_hHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)) {}
 
-    public: LocalHeap() :
-        m_hHeap(::HeapCreate(HEAP_NO_SERIALIZE, 0, 0)) {}
+  ~LocalHeap() {
+    if (nullptr != m_hHeap) {
+      ::HeapDestroy(m_hHeap);
+    }
+  }
 
-    public: ~LocalHeap()
-    {
-        if (NULL != m_hHeap)
-        {
-            ::HeapDestroy(m_hHeap);
-        }
-    } // ~Context
+  void* Alloc(size_t cb) { return ::HeapAlloc(m_hHeap, 0, cb); }
+  void Free(void* pv) { ::HeapFree(m_hHeap, 0, pv); }
 
-    // [A]
-    public: void* Alloc(size_t cb)
-        { return ::HeapAlloc(m_hHeap, 0, cb); }
+ private:
+  HANDLE m_hHeap;
+};
 
-    // [F]
-    public: void Free(void* pv)
-        { ::HeapFree(m_hHeap, 0, pv); }
-}; // LocalHeap
+class LocalObject {
+ public:
+  void operator delete(void*) = delete;
+  void(operator delete[])(void*) = delete;
 
-class LocalObject
-{
-    private: void operator delete(void*) {}
-    private: void (operator delete[])(void*) {}
+  void* operator new(size_t cb, LocalHeap* pHeap) { return pHeap->Alloc(cb); }
 
-    public: void* operator new(size_t cb, LocalHeap* pHeap)
-        { return pHeap->Alloc(cb); }
-
-    public: void* (operator new[])(size_t cb, LocalHeap* pHeap)
-        { return pHeap->Alloc(cb); }
-}; // LocalObject
+  void*(operator new[])(size_t cb, LocalHeap* pHeap) {
+    return pHeap->Alloc(cb);
+  }
+};
 
 //////////////////////////////////////////////////////////////////////
 //
 // CharSink
 //
-class CharSink
-{
-    private: LocalHeap* m_pHeap;
-    private: char16*    m_pwch;
-    private: char16*    m_pwchEnd;
-    private: char16*    m_pwchStart;
-    private: char16     m_rgwch[20];
-
-    // ctor
-    public: CharSink(LocalHeap* pHeap) :
-        m_pHeap(pHeap),
+class CharSink final {
+ public:
+  explicit CharSink(LocalHeap* pHeap)
+      : m_pHeap(pHeap),
         m_pwch(m_rgwch),
         m_pwchEnd(m_rgwch + ARRAYSIZE(m_rgwch)),
         m_pwchStart(m_rgwch) {}
 
-    // [A]
-    public: void Add(char16 ch)
-    {
-        if (m_pwch + 2 > m_pwchEnd)
-        {
-            grow();
-        }
+  void Add(char16 ch) {
+    if (m_pwch + 2 > m_pwchEnd)
+      grow();
+    *m_pwch++ = ch;
+    *m_pwch = 0;
+  }
 
-        *m_pwch++ = ch;
-        *m_pwch = 0;
-    } // Add
+  char16 Get(int iIndex) const {
+    ASSERT(static_cast<uint>(iIndex) < static_cast<uint>(GetLength()));
+    return m_pwchStart[iIndex];
+  }
+  int GetLength() const { return static_cast<int>(m_pwch - m_pwchStart); }
+  const char16* GetStart() const { return m_pwchStart; }
+  void Reset() { m_pwch = m_pwchStart; }
 
-    // [G]
-    public: char16 Get(int iIndex) const
-    {
-        ASSERT(static_cast<uint>(iIndex) < static_cast<uint>(GetLength()));
-        return m_pwchStart[iIndex];
-    } // Get
+  char16* Save(LocalHeap* pHeap) const {
+    int cwch = GetLength();
+    char16* pwsz =
+        reinterpret_cast<char16*>(pHeap->Alloc(sizeof(char16) * (cwch + 1)));
+    ::CopyMemory(pwsz, m_pwchStart, sizeof(char16) * cwch);
+    pwsz[cwch] = 0;
+    return pwsz;
+  }
 
-    public: int GetLength() const
-        { return static_cast<int>(m_pwch - m_pwchStart); }
+ private:
+  void grow() {
+    int cwch = GetLength();
+    int cwchNew = cwch * 130 / 100;
 
-    public: const char16* GetStart() const
-        { return m_pwchStart; }
+    char16* pwchNew =
+        reinterpret_cast<char16*>(m_pHeap->Alloc(sizeof(char16) * cwchNew));
 
-    private: void grow()
-    {
-        int cwch = GetLength();
-        int cwchNew = cwch * 130 / 100;
+    CopyMemory(pwchNew, m_pwchStart, sizeof(char16) * cwch);
 
-        char16* pwchNew = reinterpret_cast<char16*>(
-            m_pHeap->Alloc(sizeof(char16) * cwchNew) );
+    m_pwchStart = pwchNew;
+    m_pwchEnd = pwchNew + cwchNew;
+    m_pwch = pwchNew + cwch;
+  }
 
-        CopyMemory(pwchNew, m_pwchStart, sizeof(char16) * cwch);
-
-        m_pwchStart = pwchNew;
-        m_pwchEnd   = pwchNew + cwchNew;
-        m_pwch      = pwchNew + cwch;
-    } // grow
-
-    // [R]
-    public: void Reset()
-        { m_pwch = m_pwchStart; }
-
-    // [S]
-    public: char16* Save(LocalHeap* pHeap) const
-    {
-        int cwch = GetLength();
-        char16* pwsz = reinterpret_cast<char16*>(
-            pHeap->Alloc(sizeof(char16) * (cwch + 1)) );
-        ::CopyMemory(pwsz, m_pwchStart, sizeof(char16) * cwch);
-        pwsz[cwch] = 0;
-        return pwsz;
-    } // Save
-
-    #if 0
-        public: char16* Save() const
-        {
-            int cwch = GetLength();
-            char16* pwsz = new char16[cwch + 1];
-            ::CopyMemory(pwsz, m_pwchStart, sizeof(char16) * cwch);
-            pwsz[cwch] = 0;
-            return pwsz;
-        } // Get
-    #endif
-
-    public: void xShrink()
-    {
-        ASSERT(m_pwch > m_pwchStart);
-        --m_pwch;
-    } // Shrink
-}; // CharSink
+  LocalHeap* m_pHeap;
+  char16* m_pwch;
+  char16* m_pwchEnd;
+  char16* m_pwchStart;
+  char16 m_rgwch[20];
+};
 
 //////////////////////////////////////////////////////////////////////
 //
 // Sink
 //
-template<class T>
-class Sink
-{
-    private: LocalHeap* m_pHeap;
-    private: T*         m_pwch;
-    private: T*         m_pwchEnd;
-    private: T*         m_pwchStart;
-    private: T          m_rgwch[20];
-
-    // ctor
-    public: Sink(LocalHeap* pHeap) :
-        m_pHeap(pHeap),
+template <class T>
+class Sink final {
+ public:
+  explicit Sink(LocalHeap* pHeap)
+      : m_pHeap(pHeap),
         m_pwch(m_rgwch),
         m_pwchEnd(m_rgwch + ARRAYSIZE(m_rgwch)),
         m_pwchStart(m_rgwch) {}
 
-    // [A]
-    public: void Add(T ch)
-    {
-        if (m_pwch + 1 > m_pwchEnd)
-        {
-            grow();
-        }
+  void Add(T ch) {
+    if (m_pwch + 1 > m_pwchEnd) {
+      grow();
+    }
 
-        *m_pwch++ = ch;
-    } // Add
+    *m_pwch++ = ch;
+  }
 
-    // [G]
-    public: const T* Get() const
-        { return m_pwchStart; }
+  const T* Get() const { return m_pwchStart; }
+  T Get(int iIndex) const {
+    ASSERT(iIndex < GetLength());
+    return m_pwchStart[iIndex];
+  }
 
-    public: T Get(int iIndex) const
-    {
-        ASSERT(iIndex < GetLength());
-        return m_pwchStart[iIndex];
-    } // Get
+  int GetLength() const { return static_cast<int>(m_pwch - m_pwchStart); }
+  size_t GetSize() const { return sizeof(T) * GetLength(); }
 
-    public: int GetLength() const
-        { return static_cast<int>(m_pwch - m_pwchStart); }
+  void Serialize(void* pv) const {
+    size_t cb = GetLength() * sizeof(T);
+    ::CopyMemory(pv, m_pwchStart, cb);
+  }
 
-    public: size_t GetSize() const
-        { return sizeof(T) * GetLength(); }
+  void Set(int iIndex, T val) {
+    ASSERT(iIndex < GetLength());
+    m_pwchStart[iIndex] = val;
+  }
 
-    private: void grow()
-    {
-        int cwch = GetLength();
-        int cwchNew = cwch * 130 / 100;
+  void Shrink() {
+    ASSERT(m_pwch > m_pwchStart);
+    --m_pwch;
+  }
 
-        T* pwchNew = reinterpret_cast<T*>(
-            m_pHeap->Alloc(sizeof(T) * cwchNew) );
+ private:
+  void grow() {
+    int cwch = GetLength();
+    int cwchNew = cwch * 130 / 100;
 
-        ::CopyMemory(pwchNew, m_pwchStart, sizeof(T) * cwch);
+    T* pwchNew = reinterpret_cast<T*>(m_pHeap->Alloc(sizeof(T) * cwchNew));
 
-        m_pwchStart = pwchNew;
-        m_pwchEnd   = pwchNew + cwchNew;
-        m_pwch      = pwchNew + cwch;
-    } // grow
+    ::CopyMemory(pwchNew, m_pwchStart, sizeof(T) * cwch);
 
-    // [S]
-    public: void Serialize(void* pv) const
-    {
-        size_t cb = GetLength() * sizeof(T);
-        ::CopyMemory(pv, m_pwchStart, cb);
-    } // Serialize
+    m_pwchStart = pwchNew;
+    m_pwchEnd = pwchNew + cwchNew;
+    m_pwch = pwchNew + cwch;
+  }
 
-    public: void Set(int iIndex, T val)
-    {
-        ASSERT(iIndex < GetLength());
-        m_pwchStart[iIndex] = val;
-    } // Set
-
-    public: void Shrink()
-    {
-        ASSERT(m_pwch > m_pwchStart);
-        --m_pwch;
-    } // Shrink
-}; // Sink
-
+  LocalHeap* m_pHeap;
+  T* m_pwch;
+  T* m_pwchEnd;
+  T* m_pwchStart;
+  T m_rgwch[20];
+};
 
 char16* lstrchrW(const char16* pwsz, char16 wch);
 bool IsWhitespace(char16 wch);
 
-} // RegexPrivate
-} // Regex
+}  // namespace RegexPrivate
+}  // namespace Regex
 
-#endif // !defined(INCLUDE_regex_util_h)
+#endif  // REGEX_REGEX_UTIL_H_

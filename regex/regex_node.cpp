@@ -157,7 +157,7 @@ Node* NodeChar::Simplify(IEnvironment* pIEnv, LocalHeap*)
 {
     if (IsIgnoreCase())
     {
-        set_case_sensivity(pIEnv->IsBothCase(char_) ? CaseInsensitive : CaseSensitive);
+        set_case_sensitivity(pIEnv->IsBothCase(char_) ? CaseInsensitive : CaseSensitive);
         if (IsIgnoreCase()) {
             char_ = pIEnv->CharUpcase(char_);
         }
@@ -385,11 +385,11 @@ Node* NodeRange::Simplify(IEnvironment* pIEnv, LocalHeap* pHeap)
 
         if (pIEnv->IsBothCase(wchMin) && pIEnv->IsBothCase(wchMax))
         {
-            set_case_sensivity(CaseInsensitive);
+            set_case_sensitivity(CaseInsensitive);
         }
         else
         {
-            set_case_sensivity(CaseSensitive);
+            set_case_sensitivity(CaseSensitive);
         }
 
         if (IsIgnoreCase())
@@ -419,14 +419,11 @@ NodeString::NodeString(
     Direction direction,
     const char16* pwch,
     int cwch,
-    Case case_sensivity,
+    Case case_sensitivity,
     bool not)
-    : NodeCsBase(direction, case_sensivity, not),
+    : NodeCsBase(direction, case_sensitivity, not),
       m_cwch(cwch),
       m_pwch(pwch) {
-}
-
-NodeString::~NodeString() {
 }
 
 //////////////////////////////////////////////////////////////////////

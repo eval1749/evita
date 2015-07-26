@@ -58,9 +58,6 @@ enum Control {
   Control_Limit,
 };
 
-typedef long Count;
-typedef Count Posn;
-
 /// <remark>
 /// Represents a capture
 /// </remark>

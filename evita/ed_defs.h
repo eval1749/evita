@@ -13,11 +13,10 @@
 
 #include "base/strings/string16.h"
 
-namespace text
-{
+namespace text {
 
-typedef long Count;
-typedef long Posn;
+typedef int Count;
+typedef int Posn;
 const Posn Posn_Max = 1 << 28;
 
 class Buffer;

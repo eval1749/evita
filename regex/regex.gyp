@@ -22,16 +22,16 @@
 
       'sources': [
         'precomp.h',
-        'IRegex.cpp',
-        'precomp.cpp',
-        'regex_compile.cpp',
-        'regex_debug.cpp',
-        'regex_exec.cpp',
-        'regex_node.cpp',
-        'regex_parse.cpp',
-        'regex_scanner.cpp',
-        'regex_unicode.cpp',
-        'regex_util.cpp',
+        'precomp.cc',
+        'regex.cc',
+        'regex_compile.cc',
+        'regex_debug.cc',
+        'regex_exec.cc',
+        'regex_node.cc',
+        'regex_parse.cc',
+        'regex_scanner.cc',
+        'regex_unicode.cc',
+        'regex_util.cc',
       ], # sources
     }, # regex
 
@@ -47,7 +47,7 @@
         '<(DEPTH)/testing/gtest.gyp:gtest_main',
       ], # dependencies
       'sources': [
-        'regex_test.cpp',
+        'regex_test.cc',
       ], # sources
     }, # regex_test
   ], # targets

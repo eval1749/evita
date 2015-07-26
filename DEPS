@@ -4,17 +4,12 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
-  'boringssl_git': 'https://boringssl.googlesource.com',
 
-  'boringssl_revision': '209b2562235f7dab66b8260624e7b3c5b00d14a6',
   'buildtools_revision': '125d157607de4d7c95bf8b02dd580aae17962f19',
   'v8_revision': 'd0c75b6dd37e9bf00a28319e9c2b75b802bb27b6',
 }
 
 deps = {
-  'src/third_party/boringssl/src':
-   Var('boringssl_git') +'/boringssl.git' + '@' +  Var('boringssl_revision'),
-
   'src/buildtools':
     Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 

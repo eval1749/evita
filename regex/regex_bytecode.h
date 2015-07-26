@@ -11,7 +11,7 @@
 #ifndef REGEX_REGEX_BYTECODE_H_
 #define REGEX_REGEX_BYTECODE_H_
 
-#include "./IRegex.h"
+#include "regex/regex.h"
 
 namespace Regex {
 namespace RegexPrivate {

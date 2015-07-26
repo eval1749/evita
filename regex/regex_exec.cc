@@ -10,7 +10,7 @@
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_exec.cpp#15 $
 //
 #define DEBUG_EXEC 0
-#include "./IRegex.h"
+#include "regex/regex.h"
 #include "./regex_bytecode.h"
 #include "./regex_scanner.h"
 #include "./regex_util.h"

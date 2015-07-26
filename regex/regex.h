@@ -8,8 +8,8 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/IRegex.h#8 $
 //
-#ifndef REGEX_IREGEX_H_
-#define REGEX_IREGEX_H_
+#ifndef REGEX_REGEX_H_
+#define REGEX_REGEX_H_
 
 namespace Regex {
 
@@ -180,4 +180,4 @@ bool /* __fastcall */ StartMatch(IRegex*, IMatchContext*);
 
 }  // namespace Regex
 
-#endif  // REGEX_IREGEX_H_
+#endif  // REGEX_REGEX_H_

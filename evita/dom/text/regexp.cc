@@ -13,7 +13,7 @@
 #include "evita/v8_glue/runner.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
-#include "regex/IRegex.h"
+#include "regex/regex.h"
 #include "v8_strings.h"
 
 namespace dom {

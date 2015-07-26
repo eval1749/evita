@@ -9,7 +9,7 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_parse.cpp#11 $
 //
-#include "./IRegex.h"
+#include "regex/regex.h"
 #include "./regex_node.h"
 
 namespace Regex

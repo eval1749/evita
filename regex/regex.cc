@@ -9,8 +9,8 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/IRegex.cpp#2 $
 //
-#include "./IRegex.h"
-#include "./regex_node.h"
+#include "regex/regex.h"
+#include "regex/regex_node.h"
 
 #define DEBUG_REGEX 0
 

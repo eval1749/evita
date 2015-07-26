@@ -13,14 +13,15 @@
 
 namespace {
 
-class Node : public common::tree::Node<Node> {
-  private: int value_;
+class Node final : public common::tree::Node<Node> {
+ public:
+  explicit Node(int value) : value_(value) {}
 
-  public: Node(int value) : value_(value) {
-  }
+  int value() const { return value_; }
+  void set_value(int value) { value_ = value; }
 
-  public: int value() const { return value_; }
-  public: void set_value(int value) { value_ = value; }
+ private:
+  int value_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
@@ -70,7 +71,7 @@ std::vector<Node*> GetDescendantsOrSelf(Node* node) {
 
 TEST(Node, AncestorsOrSelfOne) {
   Node node1(1);
-  std::vector<Node*> expected_value { &node1 };
+  std::vector<Node*> expected_value{&node1};
   EXPECT_EQ(expected_value, GetAncestorsOrSelf(&node1));
 }
 
@@ -78,7 +79,7 @@ TEST(Node, AncestorsOrSelfTwo) {
   Node node1(1);
   Node node2(2);
   node1.AppendChild(&node2);
-  std::vector<Node*> expected_value { &node2, &node1 };
+  std::vector<Node*> expected_value{&node2, &node1};
   EXPECT_EQ(expected_value, GetAncestorsOrSelf(&node2));
 }
 
@@ -88,7 +89,7 @@ TEST(Node, AncestorsOrSelfThree) {
   Node node3(3);
   node1.AppendChild(&node2);
   node2.AppendChild(&node3);
-  std::vector<Node*> expected_value { &node3, &node2, &node1 };
+  std::vector<Node*> expected_value{&node3, &node2, &node1};
   EXPECT_EQ(expected_value, GetAncestorsOrSelf(&node3));
 }
 
@@ -135,7 +136,7 @@ TEST(Node, ChildNodesOne) {
   Node node2(2);
 
   node1.AppendChild(&node2);
-  std::vector<Node*> expected_value = { &node2 };
+  std::vector<Node*> expected_value = {&node2};
   EXPECT_EQ(expected_value, GetChildNodes(&node1));
 }
 
@@ -146,7 +147,7 @@ TEST(Node, ChildNodesTwo) {
 
   node1.AppendChild(&node2);
   node1.AppendChild(&node3);
-  std::vector<Node*> expected_value = { &node2, &node3 };
+  std::vector<Node*> expected_value = {&node2, &node3};
   EXPECT_EQ(expected_value, GetChildNodes(&node1));
 }
 
@@ -159,7 +160,7 @@ TEST(Node, ChildNodesThree) {
   node1.AppendChild(&node2);
   node1.AppendChild(&node3);
   node1.AppendChild(&node4);
-  std::vector<Node*> expected_value = { &node2, &node3, &node4 };
+  std::vector<Node*> expected_value = {&node2, &node3, &node4};
   EXPECT_EQ(expected_value, GetChildNodes(&node1));
 }
 
@@ -174,7 +175,7 @@ TEST(Node, ChildNodesNoChildChild) {
   node1.AppendChild(&node3);
   node1.AppendChild(&node4);
   node3.AppendChild(&node5);
-  std::vector<Node*> expected_value = { &node2, &node3, &node4 };
+  std::vector<Node*> expected_value = {&node2, &node3, &node4};
   EXPECT_EQ(expected_value, GetChildNodes(&node1));
 }
 
@@ -217,7 +218,7 @@ TEST(Node, ContainsFour) {
 
 TEST(Node, DescendantsOne) {
   Node node1(1);
-  std::vector<Node*> expected_value { };
+  std::vector<Node*> expected_value{};
   EXPECT_EQ(expected_value, GetDescendants(&node1));
 }
 
@@ -225,7 +226,7 @@ TEST(Node, DescendantsTwo) {
   Node node1(1);
   Node node2(2);
   node1.AppendChild(&node2);
-  std::vector<Node*> expected_value { &node2 };
+  std::vector<Node*> expected_value{&node2};
   EXPECT_EQ(expected_value, GetDescendants(&node1));
 }
 
@@ -235,7 +236,7 @@ TEST(Node, DescendantsThree) {
   Node node3(3);
   node1.AppendChild(&node2);
   node2.AppendChild(&node3);
-  std::vector<Node*> expected_value { &node2, &node3 };
+  std::vector<Node*> expected_value{&node2, &node3};
   EXPECT_EQ(expected_value, GetDescendants(&node1));
 }
 
@@ -247,13 +248,13 @@ TEST(Node, DescendantsFour) {
   node1.AppendChild(&node2);
   node2.AppendChild(&node3);
   node2.AppendChild(&node4);
-  std::vector<Node*> expected_value { &node2, &node3, &node4 };
+  std::vector<Node*> expected_value{&node2, &node3, &node4};
   EXPECT_EQ(expected_value, GetDescendants(&node1));
 }
 
 TEST(Node, DescendantsOrSelfOne) {
   Node node1(1);
-  std::vector<Node*> expected_value { &node1 };
+  std::vector<Node*> expected_value{&node1};
   EXPECT_EQ(expected_value, GetDescendantsOrSelf(&node1));
 }
 
@@ -261,7 +262,7 @@ TEST(Node, DescendantsOrSelfTwo) {
   Node node1(1);
   Node node2(2);
   node1.AppendChild(&node2);
-  std::vector<Node*> expected_value { &node1, &node2 };
+  std::vector<Node*> expected_value{&node1, &node2};
   EXPECT_EQ(expected_value, GetDescendantsOrSelf(&node1));
 }
 
@@ -271,7 +272,7 @@ TEST(Node, DescendantsOrSelfThree) {
   Node node3(3);
   node1.AppendChild(&node2);
   node2.AppendChild(&node3);
-  std::vector<Node*> expected_value { &node1, &node2, &node3 };
+  std::vector<Node*> expected_value{&node1, &node2, &node3};
   EXPECT_EQ(expected_value, GetDescendantsOrSelf(&node1));
 }
 
@@ -283,7 +284,7 @@ TEST(Node, DescendantsOrSelfFour) {
   node1.AppendChild(&node2);
   node2.AppendChild(&node3);
   node2.AppendChild(&node4);
-  std::vector<Node*> expected_value { &node1, &node2, &node3, &node4 };
+  std::vector<Node*> expected_value{&node1, &node2, &node3, &node4};
   EXPECT_EQ(expected_value, GetDescendantsOrSelf(&node1));
 }
 

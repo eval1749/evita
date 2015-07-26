@@ -4,7 +4,7 @@
 
 #include "base/logging.h"
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "common/win/singleton_hwnd.h"
@@ -18,29 +18,25 @@ namespace win {
 //
 // SingletonHwnd::Observer
 //
-SingletonHwnd::Observer::Observer() {
-}
+SingletonHwnd::Observer::Observer() {}
 
-SingletonHwnd::Observer::~Observer() {
-}
+SingletonHwnd::Observer::~Observer() {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // SingletonHwnd
 //
-SingletonHwnd::SingletonHwnd()
-    : window_(NativeWindow::Create(this)) {
+SingletonHwnd::SingletonHwnd() : window_(NativeWindow::Create(this)) {
   if (!base::MessageLoopForUI::IsCurrent()) {
     DLOG(ERROR) << "Cannot create window on non-UI thread.";
     return;
   }
-  window_->CreateWindowEx(0, 0, L"SingletonHwnd", HWND_MESSAGE,
-                          Point(), Size());
+  window_->CreateWindowEx(0, 0, L"SingletonHwnd", HWND_MESSAGE, Point(),
+                          Size());
   DCHECK(*window_);
 }
 
-SingletonHwnd::~SingletonHwnd() {
-}
+SingletonHwnd::~SingletonHwnd() {}
 
 void SingletonHwnd::AddObserver(Observer* observer) {
   observers_.AddObserver(observer);

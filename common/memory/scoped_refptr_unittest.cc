@@ -10,33 +10,22 @@ namespace {
 
 using common::scoped_refptr;
 
-class MyRefCounted : public common::RefCounted<MyRefCounted> {
-  private: bool* destructed_;
-
-  public: MyRefCounted(bool* destructed) : destructed_(destructed) {
+class MyRefCounted final : public common::RefCounted<MyRefCounted> {
+ public:
+  explicit MyRefCounted(bool* destructed) : destructed_(destructed) {
     *destructed_ = false;
   }
+  ~MyRefCounted() { *destructed_ = true; }
 
-  public: ~MyRefCounted() {
-    *destructed_ = true;
-  }
+ private:
+  bool* destructed_;
+
+  DISALLOW_COPY_AND_ASSIGN(MyRefCounted);
 };
 
 class ScopedRefPtrTest : public ::testing::Test {
-  private: MyRefCounted* pointer1_;
-  private: MyRefCounted* pointer2_;
-  private: bool destructed1_;
-  private: bool destructed2_;
-
-  protected: ScopedRefPtrTest()
-      : pointer1_(new MyRefCounted(&destructed1_)),
-        pointer2_(new MyRefCounted(&destructed2_)),
-        destructed1_(false),
-        destructed2_(false) {
-    pointer2_->AddRef();
-  }
-
-  public: ~ScopedRefPtrTest() {
+ public:
+  ~ScopedRefPtrTest() {
     while (!destructed1_) {
       pointer1_->Release();
     }
@@ -45,12 +34,27 @@ class ScopedRefPtrTest : public ::testing::Test {
     }
   }
 
-  protected: bool destructed1() const { return destructed1_; }
-  protected: MyRefCounted* pointer1() const { return pointer1_; }
-  protected: MyRefCounted* pointer2() const {
+ protected:
+  ScopedRefPtrTest()
+      : pointer1_(new MyRefCounted(&destructed1_)),
+        pointer2_(new MyRefCounted(&destructed2_)),
+        destructed1_(false),
+        destructed2_(false) {
+    pointer2_->AddRef();
+  }
+
+  bool destructed1() const { return destructed1_; }
+  MyRefCounted* pointer1() const { return pointer1_; }
+  MyRefCounted* pointer2() const {
     pointer2_->AddRef();
     return pointer2_;
   }
+
+ private:
+  MyRefCounted* pointer1_;
+  MyRefCounted* pointer2_;
+  bool destructed1_;
+  bool destructed2_;
 };
 
 TEST_F(ScopedRefPtrTest, Basic) {
@@ -169,4 +173,4 @@ TEST_F(ScopedRefPtrTest, Swap) {
   EXPECT_FALSE(destructed1());
 }
 
-} // namespace
+}  // namespace

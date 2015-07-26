@@ -17,22 +17,24 @@ namespace common {
 class AtomicString::Set : public Singleton<AtomicString::Set> {
   DECLARE_SINGLETON_CLASS(Set);
 
-  private: std::unordered_map<base::string16, base::string16*> map_;
+ private:
+  std::unordered_map<base::string16, base::string16*> map_;
 
-  private: Set();
-  public: ~Set();
+ private:
+  Set();
 
-  public: base::string16* GetOrCreate(const base::string16& string);
+ public:
+  ~Set();
+
+ public:
+  base::string16* GetOrCreate(const base::string16& string);
 };
 
-AtomicString::Set::Set() {
-}
+AtomicString::Set::Set() {}
 
-AtomicString::Set::~Set() {
-}
+AtomicString::Set::~Set() {}
 
-base::string16* AtomicString::Set::GetOrCreate(
-    const base::string16& string) {
+base::string16* AtomicString::Set::GetOrCreate(const base::string16& string) {
   auto const it = map_.find(string);
   if (it != map_.end())
     return it->second;
@@ -46,19 +48,14 @@ base::string16* AtomicString::Set::GetOrCreate(
 // AtomicString
 //
 AtomicString::AtomicString(const base::string16& string)
-    : string_(AtomicString::Set::instance()->GetOrCreate(string)) {
-}
+    : string_(AtomicString::Set::instance()->GetOrCreate(string)) {}
 
 AtomicString::AtomicString(const AtomicString& other)
-    : string_(other.string_) {
-}
+    : string_(other.string_) {}
 
-AtomicString::AtomicString()
-    : AtomicString(base::string16()) {
-}
+AtomicString::AtomicString() : AtomicString(base::string16()) {}
 
-AtomicString::~AtomicString() {
-}
+AtomicString::~AtomicString() {}
 
 const AtomicString& AtomicString::Empty() {
   CR_DEFINE_STATIC_LOCAL(AtomicString, empty, (base::string16()));

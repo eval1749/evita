@@ -9,8 +9,7 @@
 namespace common {
 namespace win {
 
-Size::Size(const Size& other) : data_(other.data_) {
-}
+Size::Size(const Size& other) : data_(other.data_) {}
 
 Size::Size(int width, int height) {
   DCHECK_GE(width, 0);
@@ -19,8 +18,7 @@ Size::Size(int width, int height) {
   data_.cy = height;
 }
 
-Size::Size() : Size(0, 0) {
-}
+Size::Size() : Size(0, 0) {}
 
 Size& Size::operator=(const Size& other) {
   data_ = other.data_;

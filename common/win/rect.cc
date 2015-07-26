@@ -9,37 +9,28 @@ namespace common {
 namespace win {
 
 Rect::Rect(const Point& origin, const Point& bottom_right)
-    : Rect(origin.x(), origin.y(), bottom_right.x(), bottom_right.y()) {
-}
+    : Rect(origin.x(), origin.y(), bottom_right.x(), bottom_right.y()) {}
 
 Rect::Rect(const Point& origin, const Size& size)
-    : Rect(origin, origin + size) {
-}
+    : Rect(origin, origin + size) {}
 
-Rect::Rect(const Size& size)
-    : Rect(0, 0, size.width(), size.height()) {
-}
+Rect::Rect(const Size& size) : Rect(0, 0, size.width(), size.height()) {}
 
 Rect::Rect(int left, int top, int right, int bottom) {
   data_.left = left;
-  data_.right= right;
-  data_.top= top;
-  data_.bottom= bottom;
+  data_.right = right;
+  data_.top = top;
+  data_.bottom = bottom;
 }
 
-Rect::Rect(const Rect& other)
-    : data_(other.data_) {
-}
+Rect::Rect(const Rect& other) : data_(other.data_) {}
 
 Rect::Rect(const RECT& other)
-    : Rect(other.left, other.top, other.right, other.bottom) {
-}
+    : Rect(other.left, other.top, other.right, other.bottom) {}
 
-Rect::Rect() : Rect(0, 0, 0, 0) {
-}
+Rect::Rect() : Rect(0, 0, 0, 0) {}
 
-Rect::~Rect() {
-}
+Rect::~Rect() {}
 
 Rect::operator RECT() const {
   RECT rect;
@@ -109,8 +100,8 @@ inline void Rect::set_origin(const Point& new_origin) {
 }
 
 bool Rect::Contains(const Point& point) const {
-  return point.x() >= left() && point.x() < right() &&
-         point.y() >= top() && point.y() < bottom();
+  return point.x() >= left() && point.x() < right() && point.y() >= top() &&
+         point.y() < bottom();
 }
 
 bool Rect::Contains(const Rect& other) const {
@@ -119,8 +110,7 @@ bool Rect::Contains(const Rect& other) const {
 }
 
 Rect Rect::Intersect(const Rect& other) const {
-  return Rect(std::max(left(), other.left()),
-              std::max(top(), other.top()),
+  return Rect(std::max(left(), other.left()), std::max(top(), other.top()),
               std::min(right(), other.right()),
               std::min(bottom(), other.bottom()));
 }
@@ -130,14 +120,13 @@ Rect Rect::Union(const Rect& other) const {
     return *this;
   if (empty())
     return other;
-  return Rect(std::min(left(), other.left()),
-              std::min(top(), other.top()),
+  return Rect(std::min(left(), other.left()), std::min(top(), other.top()),
               std::max(right(), other.right()),
               std::max(bottom(), other.bottom()));
 }
 
-} // namespace win
-} // namespace common
+}  // namespace win
+}  // namespace common
 
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Rect& rect) {

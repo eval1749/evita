@@ -6,24 +6,26 @@
 
 namespace {
 
-class MyRefCounted : public common::RefCounted<MyRefCounted> {
-  private: bool* destructed_;
-
-  public: MyRefCounted(bool* destructed) : destructed_(destructed) {
+class MyRefCounted final : public common::RefCounted<MyRefCounted> {
+ public:
+  explicit MyRefCounted(bool* destructed) : destructed_(destructed) {
     *destructed_ = false;
   }
 
-  public: ~MyRefCounted() {
-    *destructed_ = true;
-  }
+  ~MyRefCounted() { *destructed_ = true; }
+
+ private:
+  bool* destructed_;
+
+  DISALLOW_COPY_AND_ASSIGN(MyRefCounted);
 };
 
 TEST(RefCounted, Basic) {
-  bool destructed = false;
+  auto destructed = false;
   auto const sample = new MyRefCounted(&destructed);
   sample->AddRef();
   sample->Release();
   EXPECT_TRUE(destructed);
 }
 
-} // namespace
+}  // namespace

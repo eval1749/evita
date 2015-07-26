@@ -22,14 +22,11 @@ HKEY OpenKey(HKEY root, const base::string16& name, REGSAM sam_desired) {
 }
 }  // namespace
 
-Registry::Registry(HKEY root, const base::string16& name,
-                     REGSAM sam_desired) :
-    hkey_(OpenKey(root, name, sam_desired)) {
-}
+Registry::Registry(HKEY root, const base::string16& name, REGSAM sam_desired)
+    : hkey_(OpenKey(root, name, sam_desired)) {}
 
 Registry::Registry(HKEY root, const base::string16& name)
-    : Registry(root, name, KEY_QUERY_VALUE) {
-}
+    : Registry(root, name, KEY_QUERY_VALUE) {}
 
 Registry::~Registry() {
   if (hkey_) {
@@ -49,8 +46,9 @@ base::string16 Registry::GetValue() const {
   }
 
   base::string16 value(byte_size / sizeof(base::char16), '?');
-  auto const error = ::RegQueryValueEx(hkey_, nullptr, nullptr, nullptr,
-      reinterpret_cast<BYTE*>(&value[0]), &byte_size);
+  auto const error =
+      ::RegQueryValueEx(hkey_, nullptr, nullptr, nullptr,
+                        reinterpret_cast<BYTE*>(&value[0]), &byte_size);
   if (error != ERROR_SUCCESS)
     return base::string16();
   // Remove trailing zero.

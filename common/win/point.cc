@@ -10,12 +10,11 @@
 namespace common {
 namespace win {
 
-Point::Point(const Point& other) : data_(other.data_) {
-}
+Point::Point(const Point& other) : data_(other.data_) {}
 
 Point::Point(const POINT& point) {
- data_.x = point.x;
- data_.y = point.y;
+  data_.x = point.x;
+  data_.y = point.y;
 }
 
 Point::Point(int x, int y) {
@@ -24,12 +23,11 @@ Point::Point(int x, int y) {
 }
 
 Point::Point(POINTS point) {
- data_.x = point.x;
- data_.y = point.y;
+  data_.x = point.x;
+  data_.y = point.y;
 }
 
-Point::Point() : Point(0, 0) {
-}
+Point::Point() : Point(0, 0) {}
 
 Point& Point::operator=(const Point& other) {
   data_ = other.data_;
@@ -61,7 +59,7 @@ Size Point::operator-(const Point& other) const {
 }
 
 Point Point::Offset(int delta_x, int delta_y) const {
- return Point(x() + delta_x, y() + delta_y);
+  return Point(x() + delta_x, y() + delta_y);
 }
 
 }  // namespace win

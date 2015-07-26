@@ -14,57 +14,22 @@
 namespace common {
 namespace impl {
 
-struct COMMON_EXPORT TimerEntry : base::RefCounted<TimerEntry> {
+struct COMMON_EXPORT TimerEntry final : base::RefCounted<TimerEntry> {
   AbstractTimer* timer;
   int repeat_interval_ms;
   TimerEntry(AbstractTimer* timer, int repeat_interval_ms)
-      : timer(timer), repeat_interval_ms(repeat_interval_ms) {
-  }
+      : timer(timer), repeat_interval_ms(repeat_interval_ms) {}
   ~TimerEntry() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(TimerEntry);
 };
 
-class TimerController : public common::Singleton<TimerController> {
-  friend class common::Singleton<TimerController>;
-
-  private: class MessageWindow : public common::win::NativeWindow {
-    public: MessageWindow() = default;
-    public: virtual ~MessageWindow() = default;
-    DISALLOW_COPY_AND_ASSIGN(MessageWindow);
-  };
-
-  private: std::unique_ptr<MessageWindow> message_window_;
-
-  private: TimerController()
-      : message_window_(CreateMessageWindow()) {
-  }
-
-  private: UINT_PTR ComputeCookie(AbstractTimer* timer) {
-    auto const entry = timer->entry_.get();
-    DCHECK(entry);
-    auto const cookie = reinterpret_cast<UINT_PTR>(entry);
-    return cookie;
-  }
-
-  private: static std::unique_ptr<MessageWindow> CreateMessageWindow() {
-    std::unique_ptr<MessageWindow> window(new MessageWindow());
-    window->CreateWindowEx(0, 0, nullptr, HWND_MESSAGE,
-                           common::win::Point(), common::win::Size());
-    return std::move(window);
-  }
-
-  private: void SetTimer(AbstractTimer* timer,
-                         int next_fire_interval_ms) {
-    ::SetTimer(*message_window_,
-               ComputeCookie(timer),
-               static_cast<UINT>(next_fire_interval_ms),
-               TimerController::TimerProc);
-  }
-
-  public: void StartTimer(AbstractTimer* timer,
-                          int next_fire_interval_ms,
-                          int repeat_interval_ms) {
+class TimerController final : public common::Singleton<TimerController> {
+ public:
+  void StartTimer(AbstractTimer* timer,
+                  int next_fire_interval_ms,
+                  int repeat_interval_ms) {
     if (!timer->entry_)
       timer->entry_ = new TimerEntry(timer, repeat_interval_ms);
     else
@@ -73,7 +38,7 @@ class TimerController : public common::Singleton<TimerController> {
     SetTimer(timer, next_fire_interval_ms);
   }
 
-  public: void StopTimer(AbstractTimer* timer) {
+  void StopTimer(AbstractTimer* timer) {
     auto const entry = timer->entry_;
     if (!entry->timer)
       return;
@@ -83,10 +48,42 @@ class TimerController : public common::Singleton<TimerController> {
     timer->entry_ = nullptr;
   }
 
-  private: static void CALLBACK TimerProc(HWND, UINT, UINT_PTR cookie,
-                                          DWORD) {
-    scoped_refptr<TimerEntry> entry =
-        reinterpret_cast<TimerEntry*>(cookie);
+ private:
+  friend class common::Singleton<TimerController>;
+
+  class MessageWindow final : public common::win::NativeWindow {
+   public:
+    MessageWindow() = default;
+    ~MessageWindow() override = default;
+
+   private:
+    DISALLOW_COPY_AND_ASSIGN(MessageWindow);
+  };
+
+  TimerController() : message_window_(CreateMessageWindow()) {}
+
+  UINT_PTR ComputeCookie(AbstractTimer* timer) {
+    auto const entry = timer->entry_.get();
+    DCHECK(entry);
+    auto const cookie = reinterpret_cast<UINT_PTR>(entry);
+    return cookie;
+  }
+
+  static std::unique_ptr<MessageWindow> CreateMessageWindow() {
+    std::unique_ptr<MessageWindow> window(new MessageWindow());
+    window->CreateWindowEx(0, 0, nullptr, HWND_MESSAGE, common::win::Point(),
+                           common::win::Size());
+    return std::move(window);
+  }
+
+  void SetTimer(AbstractTimer* timer, int next_fire_interval_ms) {
+    ::SetTimer(*message_window_, ComputeCookie(timer),
+               static_cast<UINT>(next_fire_interval_ms),
+               TimerController::TimerProc);
+  }
+
+  static void CALLBACK TimerProc(HWND, UINT, UINT_PTR cookie, DWORD) {
+    scoped_refptr<TimerEntry> entry = reinterpret_cast<TimerEntry*>(cookie);
     auto const timer = entry->timer;
     if (!timer) {
       // |timer| is already stopped.
@@ -98,17 +95,17 @@ class TimerController : public common::Singleton<TimerController> {
       return;
     }
     if (entry->repeat_interval_ms)
-      TimerController::instance()->SetTimer(timer,
-                                            entry->repeat_interval_ms);
+      TimerController::instance()->SetTimer(timer, entry->repeat_interval_ms);
     else
       TimerController::instance()->StopTimer(timer);
   }
 
+  std::unique_ptr<MessageWindow> message_window_;
+
   DISALLOW_COPY_AND_ASSIGN(TimerController);
 };
 
-AbstractTimer::AbstractTimer() {
-}
+AbstractTimer::AbstractTimer() {}
 
 AbstractTimer::~AbstractTimer() {
   if (!entry_)
@@ -116,17 +113,16 @@ AbstractTimer::~AbstractTimer() {
   Stop();
 }
 
-void AbstractTimer::Start(int next_fire_interval_ms,
-                          int repeat_interval_ms) {
+void AbstractTimer::Start(int next_fire_interval_ms, int repeat_interval_ms) {
   DCHECK_GE(next_fire_interval_ms, 0);
   DCHECK_GE(repeat_interval_ms, 0);
   TimerController::instance()->StartTimer(this, next_fire_interval_ms,
-                                         repeat_interval_ms);
+                                          repeat_interval_ms);
 }
 
 void AbstractTimer::Stop() {
   TimerController::instance()->StopTimer(this);
 }
 
-} // namespace impl
-} // namespace common
+}  // namespace impl
+}  // namespace common

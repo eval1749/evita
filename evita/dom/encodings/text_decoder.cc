@@ -5,8 +5,8 @@
 #include "evita/dom/encodings/text_decoder.h"
 
 #include "base/strings/stringprintf.h"
-#include "evita/bindings/TextDecodeOptions.h"
-#include "evita/bindings/TextDecoderOptions.h"
+#include "evita/bindings/v8_glue_TextDecodeOptions.h"
+#include "evita/bindings/v8_glue_TextDecoderOptions.h"
 #include "evita/dom/script_host.h"
 #include "evita/text/encodings/decoder.h"
 #include "evita/text/encodings/encodings.h"

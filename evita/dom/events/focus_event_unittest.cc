@@ -3,7 +3,7 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-#include "evita/bindings/FocusEventInit.h"
+#include "evita/bindings/v8_glue_FocusEventInit.h"
 #include "evita/dom/events/focus_event.h"
 
 namespace {

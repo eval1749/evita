@@ -24,8 +24,8 @@ action_foreach("bindings_cc") {
     "$idl_gen_dir/InterfacesInfo.pickle",
   ]
   outputs = [
-    "$bindings_gen_dir/{{source_name_part}}.cc",
-    "$bindings_gen_dir/{{source_name_part}}.h",
+    "$bindings_gen_dir/v8_glue_{{source_name_part}}.cc",
+    "$bindings_gen_dir/v8_glue_{{source_name_part}}.h",
   ]
   args = [
     "--output-dir", rebase_path(bindings_gen_dir),

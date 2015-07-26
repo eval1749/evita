@@ -101,8 +101,8 @@ source_set("dom") {
 
   sources += process_file_template(
     interface_idl_files + dictionary_idl_files,
-    [ "$bindings_gen_dir/{{source_name_part}}.cc",
-      "$bindings_gen_dir/{{source_name_part}}.h" ])
+    [ "$bindings_gen_dir/v8_glue_{{source_name_part}}.cc",
+      "$bindings_gen_dir/v8_glue_{{source_name_part}}.h" ])
 
   deps = [
     ":dom_jslib_cc",

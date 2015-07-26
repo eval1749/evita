@@ -30,7 +30,9 @@ global_referenced_interface_names = set()
 global_definitions = {}
 global_interfaces_info = {}
 
-# TODO(yosi) Once all interfaces have IDL file. We should get rid of
+FILE_NAME_PREFIX = 'v8_glue_'
+
+# TODO(eval1749) Once all interfaces have IDL file. We should get rid of
 # |KNOWN_INTERFACE_NAMES|.
 KNOWN_INTERFACE_NAMES = {
     'Document': 'evita/dom/text/document.h',
@@ -127,9 +129,9 @@ class CppType(object):
 
 
 IDL_TO_CPP_TYPE_MAP = {
-    # TODO(yosi) We should have "SwitchValue.idl".
+    # TODO(eval1749) We should have "SwitchValue.idl".
     'SwitchValue': CppType('domapi::SwitchValue', is_by_value=False),
-    # TODO(yosi) We should have "TabData.idl".
+    # TODO(eval1749) We should have "TabData.idl".
     'TabData': CppType('domapi::TabData', is_by_value=False),
 
     # Glue specific types
@@ -195,7 +197,7 @@ def to_glue_type(idl_type, maybe_dictionary=True):
         return GlueType(idl_type, 'v8::Handle<v8::Function>', is_struct=True)
 
     if maybe_dictionary:
-        # TODO(yosi) Once we have "dictionary.pickle" which contains all
+        # TODO(eval1749) Once we have "dictionary.pickle" which contains all
         # dictiorines, we get rid of below assumption.
         # Note: Assume unknown type as Dictionary.
         global_referenced_dictionary_names.add(type_name)
@@ -503,7 +505,7 @@ def interface_context(interface):
     include_paths.append('evita/v8_glue/function_template_builder.h')
     if global_has_gc_member:
         include_paths.append('evita/gc/member.h')
-    # TODO(yosi) We should include "array_buffer.h" if needed
+    # TODO(eval1749) We should include "array_buffer.h" if needed
     include_paths.append('gin/array_buffer.h')
     if global_has_nullable:
         include_paths.append('evita/v8_glue/nullable.h')
@@ -569,7 +571,7 @@ def cpp_value(value):
 
 
 def dictionary_name_to_include_path(dictionary_name):
-    return dictionary_name + '.h'
+    return FILE_NAME_PREFIX + dictionary_name + '.h'
 
 
 # Make parameters list without optional parameters.
@@ -620,7 +622,7 @@ def underscore(text):
     return result
 
 
-# TODO(yosi) We should not use union_type_string
+# TODO(eval1749) We should not use union_type_string
 def union_type_string(type_strings):
     return '|'.join(type_strings)
 

@@ -4,7 +4,7 @@
 
 #include "evita/dom/windows/text_selection.h"
 
-#include "evita/bindings/UiEventInit.h"
+#include "evita/bindings/v8_glue_UiEventInit.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/document.h"

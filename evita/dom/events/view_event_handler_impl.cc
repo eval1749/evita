@@ -3,9 +3,9 @@
 
 #include "evita/dom/events/view_event_handler_impl.h"
 
-#include "evita/bindings/FocusEventInit.h"
-#include "evita/bindings/UiEventInit.h"
-#include "evita/bindings/WindowEventInit.h"
+#include "evita/bindings/v8_glue_FocusEventInit.h"
+#include "evita/bindings/v8_glue_UiEventInit.h"
+#include "evita/bindings/v8_glue_WindowEventInit.h"
 #include "evita/dom/events/composition_event.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/form_event.h"

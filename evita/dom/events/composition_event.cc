@@ -3,7 +3,7 @@
 
 #include "evita/dom/events/composition_event.h"
 
-#include "evita/bindings/CompositionEventInit.h"
+#include "evita/bindings/v8_glue_CompositionEventInit.h"
 #include "evita/dom/public/text_composition_event.h"
 
 namespace dom {

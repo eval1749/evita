@@ -3,8 +3,8 @@
 
 #include "evita/dom/events/form_event.h"
 
-#include "evita/bindings/EventInit.h"
-#include "evita/bindings/FormEventInit.h"
+#include "evita/bindings/v8_glue_EventInit.h"
+#include "evita/bindings/v8_glue_FormEventInit.h"
 #include "evita/dom/public/view_event.h"
 
 namespace dom {

@@ -5,7 +5,7 @@
 #include "evita/dom/encodings/text_encoder.h"
 
 #include "base/strings/stringprintf.h"
-#include "evita/bindings/TextEncodeOptions.h"
+#include "evita/bindings/v8_glue_TextEncodeOptions.h"
 #include "evita/dom/script_host.h"
 #include "evita/text/encodings/encoder.h"
 #include "evita/text/encodings/encodings.h"

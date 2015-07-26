@@ -4,7 +4,7 @@
 
 #include "evita/dom/forms/form_window.h"
 
-#include "evita/bindings/FormWindowInit.h"
+#include "evita/bindings/v8_glue_FormWindowInit.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 

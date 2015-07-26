@@ -21,6 +21,7 @@ from idl_compiler import idl_filename_to_interface_name, parse_options, \
 from code_generator_glue import CodeGeneratorGlue
 from utilities import write_file
 
+PREFIX = 'v8_glue_'
 
 class IdlCompilerGlue(IdlCompiler):
     # It seems pylint doesn't recognize what IdlCompiler defined.
@@ -37,7 +38,7 @@ class IdlCompilerGlue(IdlCompiler):
 
         for file_data in files:
             file_name = os.path.join(self.output_directory,
-                                     file_data['file_name'])
+                                     PREFIX + file_data['file_name'])
             write_file(file_data['contents'], file_name, self.only_if_changed)
 
 

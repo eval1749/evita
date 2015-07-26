@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "{{name}}.h"
+#include "v8_glue_{{name}}.h"
 
 {% for include_path in cc_include_paths %}
 #include "{{include_path}}"

@@ -1,0 +1,17 @@
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  ImplementedAs=JavaScript,
+  Constructor(TextFieldControl control)
+]
+interface TextFieldBuffer {
+  readonly attribute long length;
+  readonly attribute DOMString text;
+
+  void delete(long offset, long length);
+  void insertBefore(long offset, DOMString string);
+  void replace(long start, long end, DOMString string);
+  DOMString substring(long start, optional long end);
+};

@@ -3,7 +3,7 @@
 
 #include "evita/dom/events/document_event.h"
 
-#include "evita/bindings/DocumentEventInit.h"
+#include "evita/bindings/v8_glue_DocumentEventInit.h"
 
 namespace dom {
 

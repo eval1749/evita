@@ -4,7 +4,7 @@
 #include "evita/dom/windows/document_window.h"
 
 #include "base/bind.h"
-#include "evita/bindings/DocumentEventInit.h"
+#include "evita/bindings/v8_glue_DocumentEventInit.h"
 #include "evita/dom/events/document_event.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/text/document.h"

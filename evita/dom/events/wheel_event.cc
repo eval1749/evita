@@ -5,7 +5,7 @@
 
 #include "evita/dom/events/wheel_event.h"
 
-#include "evita/bindings/WheelEventInit.h"
+#include "evita/bindings/v8_glue_WheelEventInit.h"
 #include "evita/dom/public/view_event.h"
 
 namespace dom {

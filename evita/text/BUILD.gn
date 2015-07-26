@@ -44,12 +44,28 @@ static_library("text") {
     "undo_step.cc",
   ]
 
-  deps = [
+  public_deps = [
     "//base",
-
-    #"//common",
-    #"//regex",
+    "//common",
     "//evita/css",
     "//evita/text/encodings",
+  ]
+}
+
+# TODO(eval1749): We should rename to "evita_text_tests"
+test("evita_text_unittests") {
+  sources = [
+    # TODO(evita) Move "style_sheet_unittest.cc" to "css/"
+    "../css/style_sheet_unittest.cc",
+    "buffer_unittest.cc",
+    "encodings/encodings_unittest.cc",
+    "marker_set_unittest.cc",
+    "range_unittest.cc",
+    "undo_stack_unittest.cc",
+  ]
+
+  deps = [
+    ":text",
+    "//base/test:run_all_unittests",
   ]
 }

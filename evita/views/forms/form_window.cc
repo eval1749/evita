@@ -477,7 +477,7 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
       auto const has_menu = false;
       WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
                                         extended_window_style));
-      SetBounds(window_rect);
+      SetBounds(gfx::Rect(window_rect));
     }
 
     if (title_ != model_->title()) {

@@ -16,9 +16,9 @@
 #include "base/strings/sys_string_conversions.h"
 #include "base/threading/platform_thread.h"
 #include "base/time/time.h"
-#include "crypto/sha2.h"
 
 #if defined(V8_USE_EXTERNAL_STARTUP_DATA)
+#include "crypto/sha2.h"
 #if defined(OS_ANDROID)
 #include "base/android/apk_assets.h"
 #endif

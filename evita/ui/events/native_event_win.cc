@@ -16,11 +16,11 @@ gfx::Point GetClientPointFromNativeEvent(
     auto client_point(native_event.pt);
     WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, native_event.hwnd,
                                    &client_point, 1));
-    return client_point;
+    return gfx::Point(client_point);
   }
 
   if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST)
-    return native_event.pt;
+    return gfx::Point(native_event.pt);
 
   NOTREACHED();
   return gfx::Point();
@@ -31,14 +31,14 @@ gfx::Point GetScreenPointFromNativeEvent(
   auto const message = native_event.message;
   if (message == WM_MOUSEWHEEL ||
      (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
-    return native_event.pt;
+    return gfx::Point(native_event.pt);
   }
 
   if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {
     auto screen_point(native_event.pt);
     WIN32_VERIFY(::MapWindowPoints(native_event.hwnd, HWND_DESKTOP,
                                    &screen_point, 1));
-    return screen_point;
+    return gfx::Point(screen_point);
   }
   NOTREACHED();
   return gfx::Point();

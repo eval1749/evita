@@ -51,14 +51,14 @@ class HunspellEngine::Dictionary {
 
 HunspellEngine::Dictionary::Dictionary() : is_valid_(false) {
   auto const file_name = GetFileName();
-  common::win::scoped_handle file = ::CreateFileW(
+  common::win::scoped_handle file(::CreateFileW(
     file_name.c_str(),
     GENERIC_READ,
     FILE_SHARE_READ,
     nullptr,
     OPEN_EXISTING,
     FILE_FLAG_SEQUENTIAL_SCAN,
-    nullptr);
+    nullptr));
   if (!file) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "CreateFile " << file_name << " error=" << last_error;

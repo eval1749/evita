@@ -98,13 +98,13 @@ ApplicationProxy::Channel::~Channel() {
 }
 
 ApplicationProxy::Channel* ApplicationProxy::Channel::CreateChannel(HWND hwnd) {
-  common::win::scoped_handle handle = ::CreateFileMapping(
+  common::win::scoped_handle handle(::CreateFileMapping(
       INVALID_HANDLE_VALUE, // hFile
       nullptr, // lpAttributes
       PAGE_READWRITE, // flProtect
       0, // dwMaximumSizeHigh
       k_cbFileMapping, // dwMaximumSizeLow
-      k_wszFileMapping); // lpName
+      k_wszFileMapping)); // lpName
 
   if (!handle) {
     CHECK(handle) << "CreateFileMapping " << ::GetLastError();
@@ -120,10 +120,10 @@ ApplicationProxy::Channel* ApplicationProxy::Channel::CreateChannel(HWND hwnd) {
 }
 
 ApplicationProxy::Channel* ApplicationProxy::Channel::OpenChannel() {
-  common::win::scoped_handle handle = ::OpenFileMapping(
+  common::win::scoped_handle handle(::OpenFileMapping(
       FILE_MAP_READ | FILE_MAP_WRITE,
       FALSE,
-      k_wszFileMapping);
+      k_wszFileMapping));
   if (!handle)
       FatalExit(L"OpenFileMapping");
   return new Channel(handle.release());

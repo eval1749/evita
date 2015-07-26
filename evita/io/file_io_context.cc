@@ -40,9 +40,9 @@ HANDLE OpenFile(const base::string16& file_name,
                 const base::string16& mode,
                 const domapi::OpenFileDeferred& deferred) {
   CreateFileParams params(mode);
-  common::win::scoped_handle handle = ::CreateFileW(file_name.c_str(),
+  common::win::scoped_handle handle(::CreateFileW(file_name.c_str(),
       params.access, params.share_mode, nullptr, params.creation,
-      FILE_FLAG_OVERLAPPED, nullptr);
+      FILE_FLAG_OVERLAPPED, nullptr));
   if (!handle) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "CreateFileW " << file_name << " error=" << last_error;

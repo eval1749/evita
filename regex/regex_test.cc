@@ -2,43 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <assert.h>
+#include <ostream>
 #include <windows.h>
 
 #include "base/macros.h"
-
-#pragma warning(disable: 4365)
-#pragma warning(disable: 4481)
-#pragma warning(disable: 4514)
-#pragma warning(disable: 4625)
-#pragma warning(disable: 4626)
-#pragma warning(disable: 4668)
-#pragma warning(disable: 4710)
-#pragma warning(disable: 4820)
-#pragma warning(disable: 4826)
-#pragma warning(disable: 4986)
-
-// warning C4350: behavior change: 'member1' called instead of 'member2'
-// An rvalue cannot be bound to a non-const reference. In previous versions
-// of Visual C++, it was possible to bind an rvalue to a non-const reference
-// in a direct initialization. This code now gives a warning.
-#pragma warning(disable: 4350)
-
-#include <assert.h>
-#include <ostream>
-
-#include "IRegex.h"
+#include "regex/regex.h"
 #include "gtest/gtest.h"
 
-namespace RegexTest {
-
-typedef Regex::IRegex IRegex;
-typedef Regex::char16 char16;
-
-typedef unsigned short uint16;
-typedef unsigned int uint32;
-typedef unsigned int uint;
-
-typedef Regex::Posn Posn;
+namespace Regex {
 
 template<typename T>
 class scoped_ptr {
@@ -911,4 +883,4 @@ TEST_F(RegexTest, Capture) {
     Execute("foo\\((\\d+), (\\d+), ([\\d.]+)\\)", "foo(1, 2, 123.4567890123456789012345)"));
 }
 
-} // RegexTest
+} // Regex

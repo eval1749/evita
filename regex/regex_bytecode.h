@@ -12,6 +12,7 @@
 #define REGEX_REGEX_BYTECODE_H_
 
 #include "regex/regex.h"
+#include "regex/regex_bytecodes.h"
 
 namespace Regex {
 namespace RegexPrivate {
@@ -20,14 +21,19 @@ class Scanner;
 
 //////////////////////////////////////////////////////////////////////
 //
-// Op
-//  Regex byte code
+// Op - Regex byte code operation code
 //
 enum Op {
-#define DefByteCode(mp_mnemonic, mp_operand) Op_##mp_mnemonic,
-#include "regex_bytecode.inc"
-  Op_Limit,
-};  // Op
+#define V(mnemonic, operand) Op_##mnemonic,
+#define VBF(mnemonic, operand) V(mnemonic##_B, operand) V(mnemonic##_F, operand)
+#define VCBF(mnemonic, operand) \
+  VBF(mnemonic##_Ci, operand) VBF(mnemonic##_Cs, operand)
+  FOR_EACH_BYTE_CODE(V, VBF, VCBF, V)
+#undef V
+#undef VBF
+#undef VCBF
+      Op_Limit,
+};
 
 class StringOperand {
  public:

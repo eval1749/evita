@@ -50,12 +50,9 @@ void StdOutPrintf(const char* pszFormat, ...) {
 /// Control opcode for control stack.
 /// </remark>
 enum Control {
-  #define DefControl(mp_name, mp_operand) \
-    Control_ ## mp_name,
-
-  #include "./regex_bytecode.inc"
-
-  Control_Limit,
+#define VC(mnemonic, operand) Control_ ## mnemonic,
+  FOR_EACH_BYTE_CODE_CONTROL(VC)
+#undef VC
 };
 
 /// <remark>
@@ -607,14 +604,27 @@ struct OpDesc {
   const char* m_pszMnemonic;
 };
 
-static const OpDesc k_rgoOpDesc[Op_Limit + Control_Limit] = {
-  #define DefByteCode(mp_mnemonic, mp_operands) \
-    { OpFormat_ ## mp_operands, #mp_mnemonic },
+static const OpDesc k_rgoOpDesc[Op_Limit] = {
+  #define V(mnemonic, operands) \
+    { OpFormat_ ## operands, #mnemonic },
 
-  #define DefControl(mp_mnemonic, mp_operands) \
-    { OpFormat_ ## mp_operands, #mp_mnemonic },
+  #define VC(mnemonic, operands) \
+    { OpFormat_ ## operands, #mnemonic },
 
-  #include "regex_bytecode.inc"
+  #define VBF(mnemonic, operands) \
+    V(mnemonic ## _B, operands) \
+    V(mnemonic ## _F, operands)
+
+  #define VBF(mnemonic, operands) \
+    VBF(mp_mnemonic ## _Ci, operands) \
+    VBF(mp_mnemonic ## _Cs, operands)
+
+#define VC(mnemonic, operand) Control_ ## mnemonic,
+  FOR_EACH_BYTE_CODE(V, VBF, VCBF, VC)
+#undef V
+#undef VBF
+#undef VC
+#undef VCBF
 };
 
 static void printCharOperand(int iChar) {

@@ -1,4 +1,3 @@
-#include "precomp.h"
 //////////////////////////////////////////////////////////////////////////////
 //
 // Regex - Pre-Compiled Header
@@ -9,3 +8,4 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/precomp.cpp#1 $
 //
+#include "regex/precomp.h"

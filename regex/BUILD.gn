@@ -20,7 +20,6 @@ static_library("regex") {
     "regex_node.cc",
     "regex_node.h",
     "regex_parse.cc",
-    "regex_scanner.cc",
     "regex_scanner.h",
     "regex_unicode.cc",
     "regex_util.cc",

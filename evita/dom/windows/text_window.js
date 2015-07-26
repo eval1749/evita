@@ -304,7 +304,7 @@ global.TextWindow.prototype.clone = function() {
       const selection = window.selection;
       selectionMap.set(selection, selection.range.start);
     }
-    document.load().then(function(zero) {
+    document.load().then((zero) => {
       textWindow.status = 'Reloaded';
       for (let window of document.listWindows()) {
         const selection = window.selection;
@@ -353,7 +353,7 @@ global.TextWindow.prototype.clone = function() {
       return;
     }
     document.obsolete = Document.Obsolete.CHECKING;
-    Os.File.stat(document.fileName).then(function(info) {
+    Os.File.stat(document.fileName).then((info) => {
       document.lastStatTime_ = new Date();
       document.obsolete = info.lastModificationDate.valueOf() ===
                             document.lastWriteTime.valueOf() ?
@@ -367,14 +367,14 @@ global.TextWindow.prototype.clone = function() {
       Editor.messageBox(window,
           Editor.localizeText(Strings.IDS_ASK_REFRESH, {name: document.name}),
           MessageBox.YESNO | MessageBox.ICONWARNING | MessageBox.TOPMOST |
-              MessageBox.SETFOREGROUND).then(function(response) {
+              MessageBox.SETFOREGROUND).then((response) => {
         if (response !== DialogItemId.YES) {
           document.lastWriteTime = info.lastModificationDate;
           return;
         }
         reloadDocument(window, document);
       });
-    }).catch(function(reason){
+    }).catch((reason) => {
       console.log('Os.File.stat', document.fileName, reason);
       document.lastStatTime_ = new Date();
       document.obsolete = Document.Obsolete.UNKNOWN;
@@ -391,7 +391,7 @@ global.TextWindow.prototype.clone = function() {
         return false;
       // TODO(eval1749) We should use arrow notation once v8 fixes internal
       // parse error when we use arrow notation.
-      return texts1.every(function(text1, index) {
+      return texts1.every((text1, index) => {
         return text1 === texts2[index];
       });
     }
@@ -435,7 +435,7 @@ global.TextWindow.prototype.clone = function() {
    * @this {!TextWindow}
    * @param {!Event} event
    */
-  TextWindow.handleEvent = function(event) {
+  TextWindow.handleEvent = (event) => {
     let handler = handlerMap.get(event.type);
     if (handler)
       handler(this, event);

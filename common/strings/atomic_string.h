@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_common_strings_atomic_string_h)
-#define INCLUDE_common_strings_atomic_string_h
+#ifndef COMMON_STRINGS_ATOMIC_STRING_H_
+#define COMMON_STRINGS_ATOMIC_STRING_H_
+
+#include <string>
 
 #include "base/strings/string16.h"
 #include "common/common_export.h"
@@ -11,40 +13,38 @@
 namespace common {
 
 class COMMON_EXPORT AtomicString {
-  private: class Set;
+ public:
+  explicit AtomicString(const base::string16& string);
+  AtomicString(const AtomicString& other);
+  AtomicString();
+  ~AtomicString();
 
-  private: const base::string16* string_;
+  operator const base::string16&() const { return *string_; }
+  bool operator!() const { return empty(); }
 
-  public: explicit AtomicString(const base::string16& string);
-  public: AtomicString(const AtomicString& other);
-  public: AtomicString();
-  public: ~AtomicString();
-
-  public: operator const base::string16&() const {
-    return *string_;
-  }
-
-  public: bool operator!() const { return empty(); }
-
-  public: AtomicString& operator=(const AtomicString& other) {
+  AtomicString& operator=(const AtomicString& other) {
     string_ = other.string_;
     return *this;
   }
 
-  public: bool operator==(const AtomicString& other) const {
+  bool operator==(const AtomicString& other) const {
     return string_ == other.string_;
   }
 
-  public: bool operator!=(const AtomicString& other) const {
+  bool operator!=(const AtomicString& other) const {
     return !operator==(other);
   }
 
-  public: bool empty() const { return string_->empty(); }
-  public: const base::string16* get() const { return string_; }
+  bool empty() const { return string_->empty(); }
+  const base::string16* get() const { return string_; }
 
-  public: static const AtomicString& Empty();
+  static const AtomicString& Empty();
+
+ private:
+  class Set;
+  const base::string16* string_;
 };
 
 }  // namespace common
 
-#endif //!defined(INCLUDE_common_strings_atomic_string_h)
+#endif  // COMMON_STRINGS_ATOMIC_STRING_H_

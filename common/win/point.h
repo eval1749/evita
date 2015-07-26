@@ -1,9 +1,11 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_win_point_h)
-#define INCLUDE_common_win_point_h
+#ifndef COMMON_WIN_POINT_H_
+#define COMMON_WIN_POINT_H_
 
 #include <windows.h>
+
+#include <ostream>
 
 #include "common/common_export.h"
 
@@ -12,41 +14,40 @@ namespace win {
 
 class Size;
 
-class COMMON_EXPORT Point {
-  private: POINT data_;
+class COMMON_EXPORT Point final {
+ public:
+  explicit Point(POINTS other);
+  explicit Point(const POINT& other);
+  Point(const Point& other);
+  Point(int x, int y);
+  Point();
 
-  public: explicit Point(POINTS other);
-  public: Point(const Point& other);
-  public: Point(const POINT& other);
-  public: Point(int x, int y);
-  public: Point();
+  operator POINT() const { return data_; }
+  Point& operator=(const Point& other);
+  bool operator==(const Point& other) const;
+  bool operator!=(const Point& other) const;
+  Point operator+(const Point& other) const;
+  Point operator+(const Size& size) const;
+  Point operator-(const Size& size) const;
+  Size operator-(const Point& other) const;
 
-  public: operator POINT() const { return data_; }
+  int x() const { return data_.x; }
+  void set_x(int x) { data_.x = x; }
+  int y() const { return data_.y; }
+  void set_y(int y) { data_.y = y; }
 
-  public: Point& operator=(const Point& other);
-  public: bool operator==(const Point& other) const;
-  public: bool operator!=(const Point& other) const;
-  public: Point operator+(const Point& other) const;
-  public: Point operator+(const Size& size) const;
-  public: Point operator-(const Size& size) const;
-  public: Size operator-(const Point& other) const;
+  Point Offset(int delta_x, int delta_y) const;
 
-  public: int x() const { return data_.x; }
-  public: void set_x(int x) { data_.x = x; }
-  public: int y() const { return data_.y; }
-  public: void set_y(int y) { data_.y = y; }
-
-  public: Point Offset(int delta_x, int delta_y) const;
+ private:
+  POINT data_;
 };
 
-} // namespace win
-} // namespace common
-
-#include <ostream>
+}  // namespace win
+}  // namespace common
 
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Point& point);
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Point* point);
 
-#endif //!defined(INCLUDE_common_win_point_h)
+#endif  // COMMON_WIN_POINT_H_

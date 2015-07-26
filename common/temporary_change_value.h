@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_common_temporary_change_value_h)
-#define INCLUDE_common_temporary_change_value_h
+#ifndef COMMON_TEMPORARY_CHANGE_VALUE_H_
+#define COMMON_TEMPORARY_CHANGE_VALUE_H_
 
 #include "base/basictypes.h"
 
 namespace common {
 
-template<typename T>
+template <typename T>
 class TemporaryChangeValue {
-  private: T old_value_;
-  private: T& value_;
-
-  public: TemporaryChangeValue(T& value, const T& new_value)
-      : old_value_(value), value_(value) {
+ public:
+  TemporaryChangeValue(T& value, const T& new_value)  // NOLINT
+      : old_value_(value),
+        value_(value) {
     value_ = new_value;
   }
 
-  public: ~TemporaryChangeValue() {
-    value_ = old_value_;
-  }
+  ~TemporaryChangeValue() { value_ = old_value_; }
+
+ private:
+  T old_value_;
+  T& value_;
 
   DISALLOW_COPY_AND_ASSIGN(TemporaryChangeValue);
 };
 
 }  // namespace common
 
-#endif //!defined(INCLUDE_common_temporary_change_value_h)
+#endif  // COMMON_TEMPORARY_CHANGE_VALUE_H_

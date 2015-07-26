@@ -1,9 +1,11 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_win_size_h)
-#define INCLUDE_common_win_size_h
+#ifndef COMMON_WIN_SIZE_H_
+#define COMMON_WIN_SIZE_H_
 
 #include <windows.h>
+
+#include <ostream>
 
 #include "common/common_export.h"
 
@@ -11,46 +13,45 @@ namespace common {
 namespace win {
 
 class COMMON_EXPORT Size {
-  private: SIZE data_;
+ public:
+  Size(const Size& other);
+  Size(int width, int height);
+  Size();
 
-  public: Size(const Size& other);
-  public: Size(int width, int height);
-  public: Size();
+  explicit operator bool() const { return !empty(); }
+  const Size* operator&() const = delete;  // NOLINT(runtime/operator)
+  Size* operator&() = delete;              // NOLINT(runtime/operator)
 
-  public: explicit operator bool() const { return !empty(); }
-  public: const Size* operator&() const = delete;
-  public: Size* operator&() = delete;
-  public: Size& operator=(const Size& other);
+  Size& operator=(const Size& other);
+  bool operator==(const Size& other) const;
+  bool operator!=(const Size& other) const;
+  bool operator<(const Size& other) const;
+  bool operator<=(const Size& other) const;
+  bool operator>(const Size& other) const;
+  bool operator>=(const Size& other) const;
+  Size operator+(const Size& other) const;
+  Size operator-(const Size& other) const;
+  Size operator*(int multiplier) const;
+  Size operator/(int divider) const;
 
-  public: bool operator==(const Size& other) const;
-  public: bool operator!=(const Size& other) const;
-  public: bool operator<(const Size& other) const;
-  public: bool operator<=(const Size& other) const;
-  public: bool operator>(const Size& other) const;
-  public: bool operator>=(const Size& other) const;
+  bool empty() const { return width() <= 0 || height() <= 0; }
+  int height() const { return data_.cy; }
+  void set_height(int height) { data_.cy = height; }
+  int width() const { return data_.cx; }
+  void set_width(int width) { data_.cx = width; }
 
-  public: Size operator+(const Size& other) const;
-  public: Size operator-(const Size& other) const;
-  public: Size operator*(int multiplier) const;
-  public: Size operator/(int divider) const;
+  int GetArea() const;
 
-  public: bool empty() const { return width() <= 0 || height() <= 0; }
-  public: int height() const { return data_.cy; }
-  public: void set_height(int height) { data_.cy = height; }
-  public: int width() const { return data_.cx; }
-  public: void set_width(int width) { data_.cx = width; }
-
-  public: int GetArea() const;
+ private:
+  SIZE data_;
 };
 
-} // namespace win
-} // namespace common
-
-#include <ostream>
+}  // namespace win
+}  // namespace common
 
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Size& size);
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Size* size);
 
-#endif //!defined(INCLUDE_common_win_size_h)
+#endif  // COMMON_WIN_SIZE_H_

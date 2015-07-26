@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_com_ptr_h)
-#define INCLUDE_common_com_ptr_h
+#ifndef COMMON_WIN_SCOPED_COMPTR_H_
+#define COMMON_WIN_SCOPED_COMPTR_H_
 
 #include <unknwn.h>
 
@@ -10,97 +10,82 @@
 namespace common {
 
 #if defined(_DEBUG)
-#define COM_VERIFY(expr) { \
-  auto const macro_hr = (expr); \
-  if (FAILED(macro_hr)) { \
-    DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " <<  #expr; \
-    NOTREACHED(); \
-  } \
+#define COM_VERIFY(expr)                                             \
+  {                                                                  \
+    auto const macro_hr = (expr);                                    \
+    if (FAILED(macro_hr)) {                                          \
+      DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " << #expr; \
+      NOTREACHED();                                                  \
+    }                                                                \
+  \
 }
 #else
-#define COM_VERIFY(expr) { \
-  auto const macro_hr = (expr); \
-  if (FAILED(macro_hr)) \
-    DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " << #expr; \
+#define COM_VERIFY(expr)                                             \
+  {                                                                  \
+    auto const macro_hr = (expr);                                    \
+    if (FAILED(macro_hr))                                            \
+      DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " << #expr; \
+  \
 }
 #endif
 
-template<class T> class ComPtr {
-  private: T* ptr_;
-  public: explicit ComPtr(T* ptr = nullptr) : ptr_(ptr) {
+template <class T>
+class ComPtr final {
+ public:
+  explicit ComPtr(T* ptr = nullptr) : ptr_(ptr) {
     if (ptr_)
       ptr_->AddRef();
   }
-  public: explicit ComPtr(T& ptr) : ptr_(&ptr) {}
-  public: ComPtr(const ComPtr& other) : ptr_(other.ptr_) {
+  explicit ComPtr(T& ptr) : ptr_(&ptr) {}
+  ComPtr(const ComPtr& other) : ptr_(other.ptr_) {
     if (ptr_)
       ptr_->AddRef();
   }
-  public: ComPtr(ComPtr&& other) : ptr_(other.ptr_) {
-    other.ptr_ = nullptr;
-  }
-  public: ~ComPtr() {
-    reset();
-  }
-  public: operator T*() const { return ptr_; }
-  public: explicit operator bool() const { return ptr_; }
-  public: T* operator->() const { return ptr_; }
-  public: T** operator&() {
+  ComPtr(ComPtr&& other) : ptr_(other.ptr_) { other.ptr_ = nullptr; }
+  ~ComPtr() { reset(); }
+
+  operator T*() const { return ptr_; }
+  explicit operator bool() const { return ptr_; }
+  T* operator->() const { return ptr_; }
+  T** operator&() {  // NOLINT(runtime/operator)
     DCHECK(!ptr_) << "Leak COM interface";
     return &ptr_;
   }
-  public: bool operator!() const { return !ptr_; }
-
-  public: bool operator==(const ComPtr& other) const {
-    return ptr_ == other.ptr_;
-  }
-
-  public: bool operator==(T* other) const {
-    return ptr_ == other;
-  }
-
-  public: bool operator!=(const ComPtr& other) const {
-    return ptr_ != other.ptr_;
-  }
-
-  public: bool operator!=(T* other) const {
-    return ptr_ != other;
-  }
-
-  public: ComPtr& operator=(const ComPtr& other) {
-    reset(other.ptr_);
-  }
-
-  public: ComPtr& operator=(ComPtr&& other) {
+  bool operator!() const { return !ptr_; }
+  bool operator==(const ComPtr& other) const { return ptr_ == other.ptr_; }
+  bool operator==(T* other) const { return ptr_ == other; }
+  bool operator!=(const ComPtr& other) const { return ptr_ != other.ptr_; }
+  bool operator!=(T* other) const { return ptr_ != other; }
+  ComPtr& operator=(const ComPtr& other) { reset(other.ptr_); }
+  ComPtr& operator=(ComPtr&& other) {
     if (ptr_)
       ptr_->Release();
     ptr_ = other.ptr_;
     other.ptr_ = nullptr;
     return *this;
   }
+  ComPtr& operator=(T* ptr) = delete;
 
-  public: ComPtr& operator=(T* ptr) = delete;
+  T* get() const { return ptr_; }
 
-  public: T* get() const { return ptr_; }
-
-  public: void** location() {
+  void** location() {
     DCHECK(!ptr_) << "Leak COM interface";
     return reinterpret_cast<void**>(&ptr_);
   }
 
-  public: IUnknown** locationUnknown() {
+  IUnknown** locationUnknown() {
     DCHECK(!ptr_) << "Leak COM interface";
     return reinterpret_cast<IUnknown**>(&ptr_);
   }
 
-  public: T* release() {
+  T* release() {
     DCHECK(ptr_) << "Give ownership for uninitialized object";
     auto const ret = ptr_;
     ptr_ = nullptr;
     return ret;
   }
 
-  public: void reset(T* ptr) {
+  void reset(T* ptr) {
     if (ptr_)
       ptr_->Release();
     ptr_ = ptr;
@@ -108,26 +93,26 @@ template<class T> class ComPtr {
       ptr_->AddRef();
   }
 
-  public: void reset() {
+  void reset() {
     if (ptr_)
       ptr_->Release();
     ptr_ = nullptr;
   }
 
-  public: HRESULT QueryFrom(IUnknown* other) {
+  HRESULT QueryFrom(IUnknown* other) {
     return other->QueryInterface(__uuidof(T), location());
   }
+
+ private:
+  T* ptr_;
 };
 
 class ComInit {
-  public: ComInit() {
-    COM_VERIFY(::CoInitialize(nullptr));
-  }
-  public: ~ComInit() {
-    ::CoUninitialize();
-  }
+ public:
+  ComInit() { COM_VERIFY(::CoInitialize(nullptr)); }
+  ~ComInit() { ::CoUninitialize(); }
 };
 
-} // namespace common
+}  // namespace common
 
-#endif //!defined(INCLUDE_common_com_ptr_h)
+#endif  // COMMON_WIN_SCOPED_COMPTR_H_

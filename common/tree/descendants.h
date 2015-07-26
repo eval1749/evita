@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_tree_descendants_h)
-#define INCLUDE_common_tree_descendants_h
+#ifndef COMMON_TREE_DESCENDANTS_H_
+#define COMMON_TREE_DESCENDANTS_H_
 
 #include "common/tree/descendants_or_self.h"
 
@@ -11,36 +11,27 @@ namespace common {
 namespace tree {
 namespace internal {
 
-template<typename NodeType>
+template <typename NodeType>
 class Descendants : public DescendantsOrSelf<NodeType> {
-  public: explicit Descendants(NodeType* node) 
-      : DescendantsOrSelf(node) {
-  }
-
-  public: Iterator begin() const {
-    return Iterator(node_, node_->first_child());
-  }
-  public: Iterator end() const { return Iterator(node_, nullptr);
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(Descendants);
+ public:
+  explicit Descendants(NodeType* node) : DescendantsOrSelf(node) {}
+  Iterator begin() const { return Iterator(node_, node_->first_child()); }
+  Iterator end() const { return Iterator(node_, nullptr); }
 };
 
-} // naemspace internal
+}  // namespace internal
 
-template<class NodeClass>
-internal::Descendants<const NodeClass>
-descendants(const NodeClass* node) {
+template <class NodeClass>
+internal::Descendants<const NodeClass> descendants(const NodeClass* node) {
   return internal::Descendants<const NodeClass>(node);
 }
 
-template<class NodeClass>
-internal::Descendants<NodeClass>
-descendants(NodeClass* node) {
+template <class NodeClass>
+internal::Descendants<NodeClass> descendants(NodeClass* node) {
   return internal::Descendants<NodeClass>(node);
 }
 
-template<class NodeClass>
+template <class NodeClass>
 bool Node<NodeClass>::Contains(const NodeClass* node) const {
   for (auto child : descendants(this)) {
     if (node == child)
@@ -49,7 +40,7 @@ bool Node<NodeClass>::Contains(const NodeClass* node) const {
   return false;
 }
 
-} // namespace tree
-} // namespace common
+}  // namespace tree
+}  // namespace common
 
-#endif //!defined(INCLUDE_common_tree_descendants_h)
+#endif  // COMMON_TREE_DESCENDANTS_H_

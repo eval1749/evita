@@ -1,15 +1,17 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_win_win32_verify_h)
-#define INCLUDE_common_win_win32_verify_h
+#ifndef COMMON_WIN_WIN32_VERIFY_H_
+#define COMMON_WIN_WIN32_VERIFY_H_
 
 #include "base/logging.h"
 
-#define WIN32_VERIFY(expr) { \
-  if (!(expr)) { \
-    auto const error = ::GetLastError(); \
-    LOG(0) << #expr << " error=" << error; \
-  } \
+#define WIN32_VERIFY(expr)                   \
+  {                                          \
+    if (!(expr)) {                           \
+      auto const error = ::GetLastError();   \
+      LOG(0) << #expr << " error=" << error; \
+    }                                        \
+  \
 }
 
-#endif //!defined(INCLUDE_common_win_win32_verify_h)
+#endif  // COMMON_WIN_WIN32_VERIFY_H_

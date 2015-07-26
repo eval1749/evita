@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_tree_node_h)
-#define INCLUDE_common_tree_node_h
+#ifndef COMMON_TREE_NODE_H_
+#define COMMON_TREE_NODE_H_
 
 #include "base/basictypes.h"
 #include "base/logging.h"
@@ -9,77 +9,78 @@
 namespace common {
 namespace tree {
 
-template<class NodeClas>
+template <class NodeClas>
 class ChildNodes;
 
-template<class NodeClass>
+template <class NodeClass>
 class Node {
-  private: NodeClass* first_child_;
-  private: NodeClass* last_child_;
-  private: NodeClass* next_sibling_;
-  private: NodeClass* parent_node_;
-  private: NodeClass* previous_sibling_;
+ public:
+  Node();
+  ~Node() = default;
 
-  public: Node();
-  public: ~Node() = default;
+  bool operator==(const NodeClass& other) const;
+  bool operator==(const NodeClass* other) const;
+  bool operator!=(const NodeClass& other) const;
+  bool operator!=(const NodeClass* other) const;
 
-  public: bool operator==(const NodeClass& other)const;
-  public: bool operator==(const NodeClass* other)const;
-  public: bool operator!=(const NodeClass& other)const;
-  public: bool operator!=(const NodeClass* other)const;
+  ChildNodes<const NodeClass> child_nodes() const;
+  ChildNodes<NodeClass> child_nodes();
+  NodeClass* first_child() const { return first_child_; }
+  NodeClass* last_child() const { return last_child_; }
+  NodeClass* next_sibling() const { return next_sibling_; }
+  NodeClass* parent_node() const { return parent_node_; }
+  NodeClass* previous_sibling() const { return previous_sibling_; }
 
-  public: ChildNodes<const NodeClass> child_nodes() const;
-  public: ChildNodes<NodeClass> child_nodes();
-  public: NodeClass* first_child() const { return first_child_; }
-  public: NodeClass* last_child() const { return last_child_; }
-  public: NodeClass* next_sibling() const { return next_sibling_; }
-  public: NodeClass* parent_node() const { return parent_node_; }
-  public: NodeClass* previous_sibling() const { return previous_sibling_; }
+  void AppendChild(NodeClass* node);
+  bool Contains(const NodeClass*) const;
+  void InsertAfter(NodeClass* node, NodeClass* ref_node);
+  void InsertBefore(NodeClass* node, NodeClass* ref_node);
+  void PrependChild(NodeClass* node);
+  void RemoveChild(NodeClass* node);
+  void ReplaceChild(NodeClass* new_node, NodeClass* old_node);
 
-  public: void AppendChild(NodeClass* node);
-  public: bool Contains(const NodeClass*) const;
-  public: void InsertAfter(NodeClass* node, NodeClass* ref_node);
-  public: void InsertBefore(NodeClass* node, NodeClass* ref_node);
-  public: void PrependChild(NodeClass* node);
-  public: void RemoveChild(NodeClass* node);
-  public: void ReplaceChild(NodeClass* new_node, NodeClass* old_node);
+ private:
+  NodeClass* first_child_;
+  NodeClass* last_child_;
+  NodeClass* next_sibling_;
+  NodeClass* parent_node_;
+  NodeClass* previous_sibling_;
 
   DISALLOW_COPY_AND_ASSIGN(Node);
 };
 
 // See common/tree/child_nodes.h for Node::child_nodes() implementation.
-// See common/tree/descendant.h for Node::Contans() implementation.
+// See common/tree/descendant.h for Node::Contains() implementation.
 
-template<class NodeClass>
+template <class NodeClass>
 Node<NodeClass>::Node()
     : first_child_(nullptr),
       last_child_(nullptr),
       next_sibling_(nullptr),
       parent_node_(nullptr),
-      previous_sibling_(nullptr) {
-}
+      previous_sibling_(nullptr) {}
 
-template<class NodeClass>
+template <class NodeClass>
 bool Node<NodeClass>::operator==(const NodeClass& other) const {
   return this == &other;
 }
 
-template<class NodeClass>
+template <class NodeClass>
 bool Node<NodeClass>::operator==(const NodeClass* other) const {
   return this == other;
 }
 
-template<class NodeClass>
+template <class NodeClass>
 bool Node<NodeClass>::operator!=(const NodeClass& other) const {
   return this != &other;
 }
 
-template<class NodeClass>
+template <class NodeClass>
 bool Node<NodeClass>::operator!=(const NodeClass* other) const {
   return this != other;
 }
 
-template<class NodeClass>
+template <class NodeClass>
 void Node<NodeClass>::AppendChild(NodeClass* node) {
   if (auto const old_parent = node->parent_node_)
     old_parent->RemoveChild(node);
@@ -98,7 +99,7 @@ void Node<NodeClass>::AppendChild(NodeClass* node) {
   node->parent_node_ = static_cast<NodeClass*>(this);
 }
 
-template<class NodeClass>
+template <class NodeClass>
 void Node<NodeClass>::InsertAfter(NodeClass* node, NodeClass* ref_node) {
   if (!ref_node) {
     PrependChild(node);
@@ -115,13 +116,13 @@ void Node<NodeClass>::InsertAfter(NodeClass* node, NodeClass* ref_node) {
     DCHECK_EQ(last_child_, ref_node);
     last_child_ = node;
   }
-  ref_node->next_sibling_= node;
+  ref_node->next_sibling_ = node;
   node->next_sibling_ = next;
   node->previous_sibling_ = ref_node;
   node->parent_node_ = static_cast<NodeClass*>(this);
 }
 
-template<class NodeClass>
+template <class NodeClass>
 void Node<NodeClass>::InsertBefore(NodeClass* node, NodeClass* ref_node) {
   if (!ref_node) {
     AppendChild(node);
@@ -144,7 +145,7 @@ void Node<NodeClass>::InsertBefore(NodeClass* node, NodeClass* ref_node) {
   node->parent_node_ = static_cast<NodeClass*>(this);
 }
 
-template<class NodeClass>
+template <class NodeClass>
 void Node<NodeClass>::PrependChild(NodeClass* node) {
   if (auto const old_parent = node->parent_node_)
     old_parent->RemoveChild(node);
@@ -163,7 +164,7 @@ void Node<NodeClass>::PrependChild(NodeClass* node) {
   node->parent_node_ = static_cast<NodeClass*>(this);
 }
 
-template<class NodeClass>
+template <class NodeClass>
 void Node<NodeClass>::RemoveChild(NodeClass* node) {
   DCHECK_EQ(node->parent_node_, this);
   auto const previous = node->previous_sibling();
@@ -185,7 +186,7 @@ void Node<NodeClass>::RemoveChild(NodeClass* node) {
   node->previous_sibling_ = nullptr;
 }
 
-template<class NodeClass>
+template <class NodeClass>
 void Node<NodeClass>::ReplaceChild(NodeClass* new_node, NodeClass* old_node) {
   DCHECK_NE(new_node, old_node);
   DCHECK_EQ(old_node->parent_node_, this);
@@ -213,7 +214,7 @@ void Node<NodeClass>::ReplaceChild(NodeClass* new_node, NodeClass* old_node) {
   new_node->parent_node_ = static_cast<NodeClass*>(this);
 }
 
-} // namespace tree
-} // namespace common
+}  // namespace tree
+}  // namespace common
 
-#endif //!defined(INCLUDE_common_tree_node_h)
+#endif  // COMMON_TREE_NODE_H_

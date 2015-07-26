@@ -1,7 +1,9 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_win_rect_h)
-#define INCLUDE_common_win_rect_h
+#ifndef COMMON_WIN_RECT_H_
+#define COMMON_WIN_RECT_H_
+
+#include <ostream>
 
 #include "common/common_export.h"
 #include "common/win/point.h"
@@ -11,59 +13,58 @@ namespace common {
 namespace win {
 
 class COMMON_EXPORT Rect final {
-  private: RECT data_;
+ public:
+  Rect(const Point& origin, const Point& bottom_right);
+  Rect(const Point& origin, const Size& size);
+  explicit Rect(const Size& size);
+  explicit Rect(const RECT& other);
+  Rect(const Rect& other);
+  Rect(int l, int t, int r, int b);
+  Rect();
+  ~Rect();
 
-  public: Rect(const Point& origin, const Point& bottom_right);
-  public: Rect(const Point& origin, const Size& size);
-  public: explicit Rect(const Size& size);
-  public: Rect(const Rect& other);
-  public: Rect(const RECT& other);
-  public: Rect(int l, int t, int r, int b);
-  public: Rect();
-  public: ~Rect();
+  explicit operator RECT() const;
+  Rect& operator=(const Rect& other);
+  Rect& operator+=(const Rect& other);
+  bool operator==(const Rect& other) const;
+  bool operator!=(const Rect& other) const;
+  bool operator<(const Rect& other) const;
+  bool operator<=(const Rect& other) const;
+  bool operator>(const Rect& other) const;
+  bool operator>=(const Rect& other) const;
+  Rect operator+(const Rect& other) const { return Union(other); }
+  Rect operator-(const Size& size) const;
 
-  public: explicit operator RECT() const;
+  int area() const { return width() * height(); }
+  int bottom() const { return data_.bottom; }
+  Point bottom_left() const { return Point(left(), bottom()); }
+  Point bottom_right() const { return Point(right(), bottom()); }
+  bool empty() const { return width() <= 0 || height() <= 0; }
+  int height() const { return bottom() - top(); }
+  int left() const { return data_.left; }
+  Point origin() const { return Point(left(), top()); }
+  void set_origin(const Point& new_origin);
+  int right() const { return data_.right; }
+  Size size() const { return Size(width(), height()); }
+  int top() const { return data_.top; }
+  Point top_right() const { return Point(right(), top()); }
+  int width() const { return right() - left(); }
 
-  public: Rect& operator=(const Rect& other);
-  public: Rect& operator+=(const Rect& other);
-  public: bool operator==(const Rect& other) const;
-  public: bool operator!=(const Rect& other) const;
-  public: bool operator<(const Rect& other) const;
-  public: bool operator<=(const Rect& other) const;
-  public: bool operator>(const Rect& other) const;
-  public: bool operator>=(const Rect& other) const;
-  public: Rect operator+(const Rect& other) const { return Union(other); }
-  public: Rect operator-(const Size& size) const;
+  bool Contains(const Point& pt) const;
+  bool Contains(const Rect& other) const;
+  Rect Intersect(const Rect&) const;
+  Rect Union(const Rect& other) const;
 
-  public: int area() const { return width() * height(); }
-  public: int bottom() const { return data_.bottom; }
-  public: Point bottom_left() const { return Point(left(), bottom()); }
-  public: Point bottom_right() const { return Point(right(), bottom()); }
-  public: bool empty() const { return width() <= 0 || height() <= 0; }
-  public: int height() const { return bottom() - top(); }
-  public: int left() const { return data_.left; }
-  public: Point origin() const { return Point(left(), top()); }
-  public: void set_origin(const Point& new_origin);
-  public: int right() const { return data_.right; }
-  public: Size size() const { return Size(width(), height()); }
-  public: int top() const { return data_.top; }
-  public: Point top_right() const { return Point(right(), top()); }
-  public: int width() const { return right() - left(); }
-
-  public: bool Contains(const Point& pt) const;
-  public: bool Contains(const Rect& other) const;
-  public: Rect Intersect(const Rect&) const;
-  public: Rect Union(const Rect& other) const;
+ private:
+  RECT data_;
 };
 
-} // namespace win
-} // namespace common
-
-#include <ostream>
+}  // namespace win
+}  // namespace common
 
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Rect& rect);
 COMMON_EXPORT std::ostream& operator<<(std::ostream& out,
                                        const common::win::Rect* rect);
 
-#endif //!defined(INCLUDE_common_win_rect_h)
+#endif  // COMMON_WIN_RECT_H_

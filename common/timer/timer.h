@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_common_timer_timer_h)
-#define INCLUDE_common_timer_timer_h
+#ifndef COMMON_TIMER_TIMER_H_
+#define COMMON_TIMER_TIMER_H_
 
 #include "base/basictypes.h"
 #include "base/memory/ref_counted.h"
@@ -13,54 +13,73 @@ namespace impl {
 struct COMMON_EXPORT TimerEntry;
 
 class COMMON_EXPORT AbstractTimer {
+ public:
+  virtual ~AbstractTimer();
+
+  bool is_active() const { return entry_; }
+
+  void Start(int next_fire_interval_ms, int repeat_interval_ms);
+  void Stop();
+
+ protected:
+  AbstractTimer();
+
+  virtual void Fire() = 0;
+
+ private:
   friend class TimerController;
-  private: scoped_refptr<TimerEntry> entry_;
-  protected: AbstractTimer();
-  public: virtual ~AbstractTimer();
-  public: bool is_active() const { return entry_; }
-  public: void Start(int next_fire_interval_ms, int repeat_interval_ms);
-  public: void Stop();
-  protected: virtual void Fire() = 0;
+
+  scoped_refptr<TimerEntry> entry_;
+
   DISALLOW_COPY_AND_ASSIGN(AbstractTimer);
 };
 
-template<class Receiver, class TimerClass>
+template <class Receiver, class TimerClass>
 class Timer : public AbstractTimer {
-  public: typedef void (Receiver::*FiredFunction)(TimerClass*);
-  private: Receiver* const receiver_;
-  private: FiredFunction const function_;
-  protected: Timer(Receiver* receiver, FiredFunction function)
-      : receiver_(receiver),
-        function_(function) {
-  }
-  private: virtual void Fire() override {
+ public:
+  typedef void (Receiver::*FiredFunction)(TimerClass*);
+
+ protected:
+  Timer(Receiver* receiver, FiredFunction function)
+      : receiver_(receiver), function_(function) {}
+
+ private:
+  void Fire() override {
     (receiver_->*function_)(static_cast<TimerClass*>(this));
   }
+
+  Receiver* const receiver_;
+  FiredFunction const function_;
+
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
 
-} // namespace impl
+}  // namespace impl
 
-template<class Receiver>
+template <class Receiver>
 class OneShotTimer : public impl::Timer<Receiver, OneShotTimer<Receiver>> {
-  public: OneShotTimer(Receiver* receiver, FiredFunction function)
-      : Timer(receiver, function) {
-  }
-  public: void Start(int interval_ms) { Timer::Start(interval_ms, 0); }
+ public:
+  OneShotTimer(Receiver* receiver, FiredFunction function)
+      : Timer(receiver, function) {}
+
+  void Start(int interval_ms) { Timer::Start(interval_ms, 0); }
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(OneShotTimer);
 };
 
-template<class Receiver>
+template <class Receiver>
 class RepeatingTimer : public impl::Timer<Receiver, RepeatingTimer<Receiver>> {
-  public: RepeatingTimer(Receiver* receiver, FiredFunction function)
-      : Timer(receiver, function) {
-  }
-  public: void Start(int interval_ms) {
-    Timer::Start(interval_ms, interval_ms);
-  }
+ public:
+  RepeatingTimer(Receiver* receiver, FiredFunction function)
+      : Timer(receiver, function) {}
+
+  void Start(int interval_ms) { Timer::Start(interval_ms, interval_ms); }
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(RepeatingTimer);
 };
 
-} // namespace common
+}  // namespace common
 
-#endif //!defined(INCLUDE_common_timer_timer_h)
+#endif  // COMMON_TIMER_TIMER_H_

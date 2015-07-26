@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_common_win_singleton_hwnd_h)
-#define INCLUDE_common_win_singleton_hwnd_h
+#ifndef COMMON_WIN_SINGLETON_HWND_H_
+#define COMMON_WIN_SINGLETON_HWND_H_
 
 #include <memory>
 
@@ -17,38 +17,44 @@ namespace win {
 
 class NativeWindow;
 
-class COMMON_EXPORT SingletonHwnd :
-    public MessageDelegate,
-    public Singleton<SingletonHwnd> {
+class COMMON_EXPORT SingletonHwnd : public MessageDelegate,
+                                    public Singleton<SingletonHwnd> {
   DECLARE_SINGLETON_CLASS(SingletonHwnd);
 
-  public: class COMMON_EXPORT Observer {
-    protected: Observer();
-    protected: virtual ~Observer();
+ public:
+  class COMMON_EXPORT Observer {
+   public:
+    virtual void OnWndProc(HWND hwnd,
+                           UINT message,
+                           WPARAM wParam,
+                           LPARAM lParam) = 0;
 
-    public: virtual void OnWndProc(HWND hwnd, UINT message, WPARAM wParam,
-                                   LPARAM lParam) = 0;
+   protected:
+    Observer();
+    virtual ~Observer();
 
+   private:
     DISALLOW_COPY_AND_ASSIGN(Observer);
   };
 
-  private: base::ObserverList<Observer> observers_;
-  private: std::unique_ptr<NativeWindow> window_;
+  ~SingletonHwnd();
 
-  private: SingletonHwnd();
-  public: ~SingletonHwnd();
-
-  public: void AddObserver(Observer* observer);
-  public: void RemoveObserver(Observer* observer);
+  void AddObserver(Observer* observer);
+  void RemoveObserver(Observer* observer);
 
   // MessageDelegate
-  private: virtual LRESULT WindowProc(UINT message, WPARAM wParam,
-                                      LPARAM lParam) override;
+ private:
+  SingletonHwnd();
+
+  LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam) override;
+
+  base::ObserverList<Observer> observers_;
+  std::unique_ptr<NativeWindow> window_;
 
   DISALLOW_COPY_AND_ASSIGN(SingletonHwnd);
 };
 
-} // namespace win
-} // namespace common
+}  // namespace win
+}  // namespace common
 
-#endif //!defined(INCLUDE_common_win_singleton_hwnd_h)
+#endif  // COMMON_WIN_SINGLETON_HWND_H_

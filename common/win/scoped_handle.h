@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_common_win_scoped_handle_h)
-#define INCLUDE_common_win_scoped_handle_h
+#ifndef COMMON_WIN_SCOPED_HANDLE_H_
+#define COMMON_WIN_SCOPED_HANDLE_H_
 
 #include <windows.h>
 
@@ -11,53 +11,54 @@
 
 namespace common {
 namespace win {
-class scoped_handle {
-  private: HANDLE handle_;
-
-  public: scoped_handle(const scoped_handle& other) = delete;
-  public: scoped_handle(scoped_handle&& other)
-      : handle_(other.handle_) {
+class scoped_handle final {
+ public:
+  scoped_handle(const scoped_handle& other) = delete;
+  scoped_handle(scoped_handle&& other) : handle_(other.handle_) {
     other.handle_ = INVALID_HANDLE_VALUE;
   }
-  public: scoped_handle(HANDLE handle) : handle_(handle) {
-  }
-  public: scoped_handle() : scoped_handle(INVALID_HANDLE_VALUE) {
-  }
-  public: ~scoped_handle() {
+
+  explicit scoped_handle(HANDLE handle) : handle_(handle) {}
+  scoped_handle() : scoped_handle(INVALID_HANDLE_VALUE) {}
+  ~scoped_handle() {
     if (handle_ != INVALID_HANDLE_VALUE)
       ::CloseHandle(handle_);
   }
+  explicit operator bool() const { return is_valid(); }
 
-  public: explicit operator bool() const { return is_valid(); }
-
-  public: scoped_handle& operator=(const scoped_handle&) = delete;
-  public: scoped_handle& operator=(scoped_handle&& other) {
+  scoped_handle& operator=(const scoped_handle&) = delete;
+  scoped_handle& operator=(scoped_handle&& other) {
     DCHECK(!is_valid());
     handle_ = other.handle_;
     other.handle_ = INVALID_HANDLE_VALUE;
     return *this;
   }
 
-  public: HANDLE get() const { return handle_; }
-  public: HANDLE* location() {
+  HANDLE get() const { return handle_; }
+  bool is_valid() const { return handle_ != INVALID_HANDLE_VALUE; }
+
+  HANDLE* location() {
     DCHECK(!is_valid());
     return &handle_;
   }
-  public: bool is_valid() const { return handle_ != INVALID_HANDLE_VALUE; }
 
-  public: HANDLE release() {
+  HANDLE release() {
     DCHECK(is_valid());
     auto const handle = handle_;
     handle_ = INVALID_HANDLE_VALUE;
     return handle;
   }
 
-  public: void reset(HANDLE new_handle) {
+  void reset(HANDLE new_handle) {
     DCHECK(!is_valid());
     handle_ = new_handle;
   }
+
+ private:
+  HANDLE handle_;
 };
+
 }  // namespace win
 }  // namespace common
 
-#endif //!defined(INCLUDE_common_win_scoped_handle_h)
+#endif  // COMMON_WIN_SCOPED_HANDLE_H_

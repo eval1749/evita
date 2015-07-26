@@ -7,15 +7,23 @@ import("//testing/test.gni")
 static_library("regex") {
   sources = [
     "precomp.cc",
+    "precomp.h",
     "regex.cc",
+    "regex.h",
+    "regex_bytecode.h",
     "regex_compile.cc",
     "regex_debug.cc",
+    "regex_debug.h",
+    "regex_defs.h",
     "regex_exec.cc",
     "regex_node.cc",
+    "regex_node.h",
     "regex_parse.cc",
     "regex_scanner.cc",
+    "regex_scanner.h",
     "regex_unicode.cc",
     "regex_util.cc",
+    "regex_util.h",
   ]
 
   deps = [

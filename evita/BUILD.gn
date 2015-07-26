@@ -7,9 +7,9 @@ import("//testing/test.gni")
 
 executable("evita") {
   sources = [
-    "precomp.cpp",
     "ap_main.cpp",
     "evita.rc",
+    "precomp.cpp",
   ]
 
   deps = [
@@ -27,23 +27,29 @@ static_library("editor") {
     "editor/application.cc",
     "editor/application_proxy.cc",
     "editor/application_proxy.h",
-    "editor/modal_message_loop_scope.cc",
     "editor/dom_lock.cc",
+    "editor/modal_message_loop_scope.cc",
     "editor/switch_set.cc",
     "editor/switch_set.h",
     "metrics/counter.cc",
     "metrics/sampling.cc",
     "metrics/sampling.h",
     "metrics/time_scope.cc",
+    "vi_EditPane.cpp",
+    "vi_Frame.cpp",
+    "views/forms/file_dialog_box.cc",
+    "views/forms/form_control_controller.cc",
+    "views/forms/form_control_set.cc",
+    "views/forms/form_window.cc",
     "views/frame_list.cc",
     "views/frame_observer.cc",
     "views/tabs/tab.cc",
     "views/tabs/tab.h",
-    "views/tabs/tab_data_set.cc",
     "views/tabs/tab_content.cc",
     "views/tabs/tab_content.h",
     "views/tabs/tab_content_observer.cc",
     "views/tabs/tab_content_observer.h",
+    "views/tabs/tab_data_set.cc",
     "views/tabs/tab_strip.cc",
     "views/tabs/tab_strip_animator.cc",
     "views/tabs/tab_strip_animator.h",
@@ -63,12 +69,6 @@ static_library("editor") {
     "views/text/text_renderer.cc",
     "views/text_window.cc",
     "views/text_window.h",
-    "vi_EditPane.cpp",
-    "views/forms/file_dialog_box.cc",
-    "views/forms/form_control_controller.cc",
-    "views/forms/form_control_set.cc",
-    "views/forms/form_window.cc",
-    "vi_Frame.cpp",
   ]
 
   public_deps = [

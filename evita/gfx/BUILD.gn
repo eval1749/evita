@@ -5,15 +5,14 @@
 static_library("gfx") {
   sources = [
     "../gfx_base.cpp",
-
     "bitmap.cc",
-    "color_f.cc",
-    "font_face.cc",
     "canvas.cc",
     "canvas_observer.cc",
     "canvas_observer.h",
+    "color_f.cc",
     "dx_device.cc",
     "dx_device.h",
+    "font_face.cc",
     "point_f.cc",
     "rect_conversions.cc",
     "rect_conversions.h",

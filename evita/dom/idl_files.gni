@@ -37,6 +37,7 @@ interface_idl_files = [
   "//evita/dom/os/AbstractFile.idl",
   "//evita/dom/os/File.idl",
   "//evita/dom/os/Process.idl",
+
   # TODO(eval1749) Do we really need to have "Mode.idl"?
   # "//evita/dom/text/modes/Mode.idl",
   "//evita/dom/text/MutationObserver.idl",
@@ -47,6 +48,7 @@ interface_idl_files = [
   "//evita/dom/timers/Timer.idl",
   "//evita/dom/windows/DocumentWindow.idl",
   "//evita/dom/windows/EditorWindow.idl",
+
   # TODO(eval1749) Do we really need to have "Poind.idl"?
   # "//evita/dom/windows/Point.idl",
   # TODO(eval1749) Do we really need to have "Rect.idl"?

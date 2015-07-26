@@ -8,8 +8,8 @@ static_library("css") {
     "style.cc",
     "style_resolver.cc",
     "style_rule.cc",
+    "style_selector.cc",
     "style_sheet.cc",
     "style_sheet_observer.cc",
-    "style_selector.cc",
   ]
 }

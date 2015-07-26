@@ -8,22 +8,17 @@ import("//evita/dom/js_files.gni")
 
 source_set("dom") {
   sources = [
-    "converter.cc",
-    "text/document.cc",
-    "text/document_set.cc",
-    "windows/document_window.cc",
-    "editor.cc",
-    "windows/editor_window.cc",
-
     "clipboard/clipboard.cc",
     "clipboard/data_transfer.cc",
     "clipboard/data_transfer_data.cc",
     "clipboard/data_transfer_item.cc",
     "clipboard/data_transfer_item_list.cc",
-
+    "converter.cc",
+    "css/style.cc",
+    "dictionary.cc",
+    "editor.cc",
     "encodings/text_decoder.cc",
     "encodings/text_encoder.cc",
-
     "events/composition_event.cc",
     "events/composition_event.h",
     "events/composition_span.cc",
@@ -35,13 +30,13 @@ source_set("dom") {
     "events/form_event.cc",
     "events/keyboard_event.cc",
     "events/mouse_event.cc",
-    "events/wheel_event.cc",
     "events/ui_event.cc",
     "events/view_event_handler_impl.cc",
     "events/view_event_target.cc",
     "events/view_event_target_set.cc",
+    "events/wheel_event.cc",
     "events/window_event.cc",
-
+    "file_path.cc",
     "forms/button_control.cc",
     "forms/checkbox_control.cc",
     "forms/form.cc",
@@ -52,57 +47,55 @@ source_set("dom") {
     "forms/radio_button_control.cc",
     "forms/text_field_control.cc",
     "forms/text_field_selection.cc",
-
-    "file_path.cc",
     "global.cc",
-    "dictionary.cc",
     "lock.cc",
-
-    "text/mutation_observer.cc",
-    "text/mutation_observer_controller.cc",
-    "text/mutation_record.cc",
-
     "os/abstract_file.cc",
     "os/file.cc",
     "os/process.cc",
-
-    "windows/point.cc",
-    "windows/rect.cc",
     "promise_resolver.cc",
-    "text/range.cc",
-    "text/regexp.cc",
-    "windows/selection.cc",
     "script_host.cc",
     "script_thread.cc",
-    "css/style.cc",
-    "windows/table_window.cc",
-    "windows/table_selection.cc",
-    "windows/text_selection.cc",
-    "windows/text_window.cc",
+    "text/document.cc",
+    "text/document_set.cc",
+    "text/mutation_observer.cc",
+    "text/mutation_observer_controller.cc",
+    "text/mutation_record.cc",
+    "text/range.cc",
+    "text/regexp.cc",
+    "time_stamp.cc",
     "timers/one_shot_timer.cc",
     "timers/one_shot_timer.h",
     "timers/repeating_timer.cc",
     "timers/repeating_timer.h",
     "timers/timer.cc",
     "timers/timer.h",
-    "time_stamp.cc",
+    "windows/document_window.cc",
+    "windows/editor_window.cc",
+    "windows/point.cc",
+    "windows/rect.cc",
+    "windows/selection.cc",
+    "windows/table_selection.cc",
+    "windows/table_window.cc",
+    "windows/text_selection.cc",
+    "windows/text_window.cc",
     "windows/window.cc",
     "windows/window_ostream.cc",
     "windows/window_set.cc",
 
-     # TODO(eval1749) We should use "$target_gen_dir" for "v8_string.cc".
-     "$root_gen_dir/v8_strings.cc",
-     "$target_gen_dir/dom_jslib.cc",
-
+    # TODO(eval1749) We should use "$target_gen_dir" for "v8_string.cc".
+    "$root_gen_dir/v8_strings.cc",
+    "$target_gen_dir/dom_jslib.cc",
     "../gc/collectable.cc",
     "../gc/collector.cc",
     "../gc/visitable.cc",
   ]
 
   sources += process_file_template(
-    interface_idl_files + dictionary_idl_files,
-    [ "$bindings_gen_dir/v8_glue_{{source_name_part}}.cc",
-      "$bindings_gen_dir/v8_glue_{{source_name_part}}.h" ])
+          interface_idl_files + dictionary_idl_files,
+          [
+            "$bindings_gen_dir/v8_glue_{{source_name_part}}.cc",
+            "$bindings_gen_dir/v8_glue_{{source_name_part}}.h",
+          ])
 
   deps = [
     ":dom_jslib_cc",
@@ -126,21 +119,24 @@ source_set("dom") {
 
 action("dom_jslib_cc") {
   script = "make_get_jslib.py"
-  outputs = [ "$target_gen_dir/dom_jslib.cc" ]
-  inputs = [
-    "closure_compiler_workaround.js",
-  ] + js_defs_files + js_lib_files
+  outputs = [
+    "$target_gen_dir/dom_jslib.cc",
+  ]
+  inputs = [ "closure_compiler_workaround.js" ] + js_defs_files + js_lib_files
+
   # TODO(eval1749) We should pass list of JS files to "make_get_js_lib.py"
   # rather than command line.
   args = rebase_path(outputs) + rebase_path(inputs)
 }
 
 static_library("dom_unicode_lib_cc") {
-  sources = [ "unicode_icu.cc" ]
+  sources = [
+    "unicode_icu.cc",
+  ]
   deps = [
     "//base:i18n",
     "//v8",
-    "//third_party/icu:icuuc"
+    "//third_party/icu:icuuc",
   ]
 }
 
@@ -159,9 +155,8 @@ action("dom_v8_strings_cc") {
     "$root_gen_dir/v8_strings.h",
   ]
 
-  args = [
-    rebase_path("$root_gen_dir/v8_strings"),
-  ] + rebase_path(inputs, root_build_dir)
+  args = [ rebase_path("$root_gen_dir/v8_strings") ] +
+         rebase_path(inputs, root_build_dir)
 }
 
 # TODO(eval1749): We should rename to "evita_dom_tests"
@@ -220,6 +215,7 @@ test("evita_dom_unittests") {
 
   deps = [
     "//base/test:test_support",
+
     # TODO(yosi) We should not have "editor" dependency on
     # "evita_dom_unittests".
     "//evita:editor",

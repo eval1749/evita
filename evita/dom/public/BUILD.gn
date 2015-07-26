@@ -4,11 +4,11 @@
 
 source_set("domapi") {
   sources = [
+    "float_point.cc",
+    "float_rect.cc",
     "io_context_id.cc",
     "io_delegate.cc",
     "io_error.cc",
-    "float_point.cc",
-    "float_rect.cc",
     "switch_value.cc",
     "switch_value.h",
     "tab_data.cc",

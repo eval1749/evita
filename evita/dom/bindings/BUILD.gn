@@ -12,7 +12,9 @@ source_set("bindings") {
 }
 
 action_foreach("bindings_cc") {
-  deps = [":interfaces_info"]
+  deps = [
+    ":interfaces_info",
+  ]
   script = "idl_to_glue.py"
   sources = interface_idl_files + dictionary_idl_files
   inputs = [
@@ -28,9 +30,12 @@ action_foreach("bindings_cc") {
     "$bindings_gen_dir/v8_glue_{{source_name_part}}.h",
   ]
   args = [
-    "--output-dir", rebase_path(bindings_gen_dir),
-    "--interfaces-info", rebase_path("$idl_gen_dir/InterfacesInfo.pickle"),
-    "--write-file-only-if-changed", "1",
+    "--output-dir",
+    rebase_path(bindings_gen_dir),
+    "--interfaces-info",
+    rebase_path("$idl_gen_dir/InterfacesInfo.pickle"),
+    "--write-file-only-if-changed",
+    "1",
     "{{source}}",
   ]
 }
@@ -40,10 +45,15 @@ action("interfaces_info") {
   sources = interface_idl_files
   file_list = "$idl_gen_dir/file_list.txt"
   write_file(file_list, rebase_path(sources))
-  outputs = ["$idl_gen_dir/InterfacesInfo.pickle"]
+  outputs = [
+    "$idl_gen_dir/InterfacesInfo.pickle",
+  ]
   args = [
-    "--idl-files-list", rebase_path(file_list),
-    "--interfaces-info-file", rebase_path("$idl_gen_dir/InterfacesInfo.pickle"),
-    "--write-file-only-if-changed", "1",
+    "--idl-files-list",
+    rebase_path(file_list),
+    "--interfaces-info-file",
+    rebase_path("$idl_gen_dir/InterfacesInfo.pickle"),
+    "--write-file-only-if-changed",
+    "1",
   ]
 }

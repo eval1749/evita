@@ -10,7 +10,6 @@ static_library("text") {
     "../ed_BufferFind.cpp",
     "../li_util.cpp",
     "../z_debug.cpp",
-
     "buffer.cc",
     "buffer.h",
     "buffer_mutation_observer.cc",
@@ -47,6 +46,7 @@ static_library("text") {
 
   deps = [
     "//base",
+
     #"//common",
     #"//regex",
     "//evita/css",

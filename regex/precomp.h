@@ -47,9 +47,6 @@ typedef intptr_t Int;
 // scope
 #pragma warning(disable : 6246)
 
-#define foreach(mp_enum, mp_var, mp_arg) \
-  for (mp_enum mp_var(mp_arg); !(mp_var).AtEnd(); (mp_var).Next())
-
 #define unless(mp_expr) if (!(mp_expr))
 
 // warning C4061: enumerator 'identifier' in switch of enum 'enumeration' is

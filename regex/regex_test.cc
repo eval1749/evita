@@ -7,6 +7,7 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "base/macros.h"
 #include "regex/regex.h"
@@ -39,136 +40,6 @@ class ConstIterator_ : public BaseIterator {
 
   const ValueType& operator*() const { return Iterator::operator*(); }
   const ValueType* operator->() const { return Iterator::operator->(); }
-};
-
-template <typename T>
-class Vector {
- public:
-  class Iterator {
-   public:
-    typedef T& ReferenceType;
-    typedef T* PointerType;
-    typedef T ValueType;
-
-    Iterator(Vector& vector, int index) : index_(index), vector_(vector) {}
-    Iterator(const Iterator& other)
-        : index_(other.index_), vector_(other.vector_) {}
-
-    Iterator& operator=(const Iterator other) {
-      assert(vector_ == other.vector_);
-      index_ = other.index_;
-      return *this;
-    }
-
-    T& operator*() { return vector_[index_]; }
-    const T& operator*() const { return vector_[index_]; }
-    T* operator->() { return &vector_[index_]; }
-    const T* operator->() const { return &vector_[index_]; }
-
-    Iterator& operator++() {
-      ++index_;
-      return *this;
-    }
-
-    bool operator==(const Iterator& other) const {
-      assert(vector_ == other.vector_);
-      return index_ == other.index_;
-    }
-    bool operator!=(const Iterator& other) const { return !operator==(other); }
-
-   private:
-    int index_;
-    Vector& vector_;
-  };
-
-  typedef ConstIterator_<Iterator> ConstIterator;
-
-  explicit Vector(int size) : elements_(new T[size]), size_(size) {}
-
-  Vector(const Vector& other)
-      : elements_(new T[other.size_]), size_(other.size_) {
-    auto i = 0;
-    for (auto it = other.begin(); it != other.end(); ++it) {
-      elements_[i++] = *it;
-    }
-  }
-
-  Vector(Vector&& other) : elements_(other.elements_) size_(other.size_) {
-    other.elements_ = nullptr;
-    other.size_ = 0;
-  }
-
-  Vector& operator=(const Vector& other) {
-    delete elements_;
-    size_ = other.size_;
-    elements_ = new T[size_];
-    auto i = 0;
-    for (auto it = other.begin(); it != other.end(); ++it) {
-      elements_[i++] = *it;
-    }
-    return *this;
-  }
-
-  Vector& operator=(Vector&& other) {
-    delete elements_;
-    elements_ = other.elements_;
-    size_ = other.size_;
-    other.elements_ = nullptr;
-    other.size_ = 0;
-    return *this;
-  }
-
-  T& operator[](int index) {
-    assert(index >= 0);
-    assert(index < size_);
-    return elements_[index];
-  }
-
-  const T& operator[](int index) const {
-    assert(index >= 0);
-    assert(index < size_);
-    return elements_[index];
-  }
-
-  bool operator==(const Vector& other) const {
-    if (this == &other) {
-      return true;
-    }
-
-    if (size() != other.size()) {
-      return false;
-    }
-
-    auto other_it = other.begin();
-    for (auto it = begin(); it != end(); ++it) {
-      if (*it != *other_it) {
-        return false;
-      }
-      ++other_it;
-    }
-
-    return true;
-  }
-
-  bool operator!=(const Vector& other) const { return !operator==(other); }
-
-  Iterator begin() { return Iterator(*this, 0); }
-
-  ConstIterator begin() const {
-    return ConstIterator(const_cast<Vector*>(this)->begin());
-  }
-
-  Iterator end() { return Iterator(*this, size()); }
-
-  ConstIterator end() const {
-    return ConstIterator(const_cast<Vector*>(this)->end());
-  }
-
-  int size() const { return size_; }
-
- private:
-  T* elements_;
-  int size_;
 };
 
 class String {
@@ -363,7 +234,7 @@ class MatchContext final : public Regex::IMatchContext {
         regex_(regex),
         source_(source) {}
 
-  const Vector<Range>& captures() const { return captures_; }
+  const std::vector<Range>& captures() const { return captures_; }
   bool matched() const { return matched_; }
   void set_matched(bool matched) { matched_ = matched; }
 
@@ -497,7 +368,7 @@ class MatchContext final : public Regex::IMatchContext {
   }
 
  private:
-  Vector<Range> captures_;
+  std::vector<Range> captures_;
   bool matched_;
   IRegex* regex_;
   const String source_;
@@ -608,11 +479,11 @@ class Result {
     return strings_ == other.strings_;
   }
 
-  Vector<String>::ConstIterator begin() const { return strings_.begin(); }
-  Vector<String>::ConstIterator end() const { return strings_.end(); }
+  std::vector<String>::const_iterator begin() const { return strings_.begin(); }
+  std::vector<String>::const_iterator end() const { return strings_.end(); }
 
  private:
-  Vector<String> strings_;
+  std::vector<String> strings_;
 };
 
 ::std::ostream& operator<<(::std::ostream& os, const String& string) {

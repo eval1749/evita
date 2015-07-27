@@ -10,6 +10,7 @@
 //
 #include <algorithm>
 
+#include "base/logging.h"
 #include "regex/precomp.h"
 #include "regex/regex.h"
 #include "regex/regex_bytecode.h"
@@ -319,7 +320,7 @@ class StringScannerCompiler final : public ScannerCompiler,
       m_nMinChar = std::min(m_nMinChar, static_cast<int>(wch));
     }
 
-    ASSERT(m_nMinChar <= m_nMaxChar);
+    DCHECK_LE(m_nMinChar, m_nMaxChar);
   }
 
   int ComputeMinLength() const final { return m_cwch; }
@@ -336,7 +337,7 @@ class StringScannerCompiler final : public ScannerCompiler,
   // [S]
  private:
   void Serialize(void* pv) const final {
-    ASSERT(m_nMinChar <= m_nMaxChar);
+    DCHECK_LE(m_nMinChar, m_nMaxChar);
 
     StringScanner* p = reinterpret_cast<StringScanner*>(pv);
     *p = *this;

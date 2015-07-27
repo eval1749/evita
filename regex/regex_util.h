@@ -11,8 +11,9 @@
 #ifndef REGEX_REGEX_UTIL_H_
 #define REGEX_REGEX_UTIL_H_
 
-namespace Regex {
+#include "base/logging.h"
 
+namespace Regex {
 namespace RegexPrivate {
 
 template <class T>
@@ -58,7 +59,7 @@ class Castable_ {
   template <class T>
   T* StaticCast() {
     T* p = DynamicCast<T>();
-    ASSERT(!!p);
+    DCHECK(p);
     return p;
   }
 };
@@ -100,7 +101,7 @@ class DoubleLinkedList_ {
     bool AtEnd() const { return nullptr == m_pRunner; }
     Item_* Get() const { return m_pRunner; }
     void Next() {
-      ASSERT(!AtEnd());
+      DCHECK(!AtEnd());
       m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pNext;
     }
 
@@ -115,7 +116,7 @@ class DoubleLinkedList_ {
     bool AtEnd() const { return nullptr == m_pRunner; }
     Item_* Get() const { return m_pRunner; }
     void Next() {
-      ASSERT(!AtEnd());
+      DCHECK(!AtEnd());
       m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pPrev;
     }
 
@@ -344,7 +345,7 @@ class EnumChar {
   ///  Returns current character
   /// </summary>
   char16 Get() const {
-    ASSERT(!AtEnd());
+    DCHECK(!AtEnd());
     return *m_pwch;
   }
 
@@ -352,7 +353,7 @@ class EnumChar {
   ///  Advance current position
   /// </summary>
   void Next() {
-    ASSERT(!AtEnd());
+    DCHECK(!AtEnd());
     m_pwch++;
   }
 
@@ -414,7 +415,8 @@ class CharSink final {
   }
 
   char16 Get(int iIndex) const {
-    ASSERT(static_cast<uint>(iIndex) < static_cast<uint>(GetLength()));
+    DCHECK_GE(iIndex, 0);
+    DCHECK_LT(iIndex, GetLength());
     return m_pwchStart[iIndex];
   }
   int GetLength() const { return static_cast<int>(m_pwch - m_pwchStart); }
@@ -475,7 +477,8 @@ class Sink final {
 
   const T* Get() const { return m_pwchStart; }
   T Get(int iIndex) const {
-    ASSERT(iIndex < GetLength());
+    DCHECK_GE(iIndex, 0);
+    DCHECK_LT(iIndex, GetLength());
     return m_pwchStart[iIndex];
   }
 
@@ -488,12 +491,13 @@ class Sink final {
   }
 
   void Set(int iIndex, T val) {
-    ASSERT(iIndex < GetLength());
+    DCHECK_GE(iIndex, 0);
+    DCHECK_LT(iIndex, GetLength());
     m_pwchStart[iIndex] = val;
   }
 
   void Shrink() {
-    ASSERT(m_pwch > m_pwchStart);
+    DCHECK_GT(m_pwch, m_pwchStart);
     --m_pwch;
   }
 

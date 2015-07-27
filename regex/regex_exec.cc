@@ -9,6 +9,7 @@
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_exec.cpp#15 $
 //
 #define DEBUG_EXEC 0
+#include "base/logging.h"
 #include "regex/precomp.h"
 #include "regex/regex.h"
 #include "regex/regex_bytecode.h"
@@ -76,34 +77,34 @@ class PosnStack final {
   ~PosnStack() { delete elements_; }
 
   Posn& operator[](int const index) {
-    ASSERT(index >= 0);
-    ASSERT(index < capacity_);
+    DCHECK_GE(index, 0);
+    DCHECK_LT(index, capacity_);
     return elements_[index];
   }
 
   Posn operator[](int const index) const {
-    ASSERT(index >= 0);
-    ASSERT(index < capacity_);
+    DCHECK_GE(index, 0);
+    DCHECK_LT(index, capacity_);
     return elements_[index];
   }
 
   int count() const { return count_; }
 
   Posn& top(int const nth) {
-    ASSERT(nth >= 0);
-    ASSERT(count_ - nth - 1 >= 0);
+    DCHECK_GE(nth, 0);
+    DCHECK_GE(count_ - nth - 1, 0);
     return elements_[count_ - nth - 1];
   }
 
   Posn top(int const nth) const {
-    ASSERT(nth >= 0);
-    ASSERT(count_ - nth - 1 >= 0);
+    DCHECK_GE(nth, 0);
+    DCHECK_GE(count_ - nth - 1, 0);
     return elements_[count_ - nth - 1];
   }
 
   void set_count(int count) {
-    ASSERT(count >= 0);
-    ASSERT(count <= capacity_);
+    DCHECK_GE(count, 0);
+    DCHECK_LE(count, capacity_);
     count_ = count;
   }
 
@@ -119,13 +120,13 @@ class PosnStack final {
   }
 
   Posn Pop() {
-    ASSERT(count_ > 0);
+    DCHECK_GT(count_, 0);
     --count_;
     return elements_[count_];
   }
 
   void Push(Posn const datum) {
-    ASSERT(count_ + 1 <= capacity_);
+    DCHECK_LE(count_ + 1, capacity_);
     elements_[count_] = datum;
     ++count_;
   }
@@ -1390,7 +1391,7 @@ bool Engine::dispatch() {
 
       case Op_RestoreCxp: {
         auto const index = m_nCxp;
-        ASSERT(control_stack_[index - 1] == Control_SaveCxp);
+        DCHECK_EQ(control_stack_[index - 1], Control_SaveCxp);
         m_nCxp = control_stack_[index - 2];
         value_stack_.set_count(control_stack_[index - 3]);
         control_stack_.set_count(index - 4);
@@ -1518,7 +1519,7 @@ class CsCompare {
                                char16 wchFirst,
                                Posn* inout_lPosn,
                                Posn lStop) {
-    ASSERT(*inout_lPosn >= 0);
+    DCHECK_GE(*inout_lPosn, 0);
     return pIContext->BackwardFindCharCs(wchFirst, inout_lPosn, lStop);
   }
 
@@ -1528,7 +1529,7 @@ class CsCompare {
                               char16 wchFirst,
                               Posn* inout_lPosn,
                               Posn lStop) {
-    ASSERT(*inout_lPosn >= 0);
+    DCHECK_GE(*inout_lPosn, 0);
     return pIContext->ForwardFindCharCs(wchFirst, inout_lPosn, lStop);
   }
 
@@ -1536,7 +1537,7 @@ class CsCompare {
                        const char16* pwch,
                        int cwch,
                        Posn lPosn) {
-    ASSERT(lPosn >= 0);
+    DCHECK_GE(lPosn, 0);
     return pIContext->StringEqCs(pwch, cwch, lPosn);
   }
 };

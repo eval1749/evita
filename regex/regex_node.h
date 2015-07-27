@@ -205,7 +205,7 @@ class NodeCaptureBase : public Node, public WithDirection {
   int GetNth() const { return nth_; }
 
   void SetNth(int nth) {
-    ASSERT(nth_ <= 0);
+    DCHECK_LE(nth_, 0);
     nth_ = nth;
   }
 
@@ -433,7 +433,7 @@ class NodeCapture final : public NodeSubNodeBase, public WithDirection {
   /// <param name="nth">Capture index number</param>
   NodeCapture(Direction direction, Node* node, int nth)
       : NodeSubNodeBase(node), WithDirection(direction), nth_(nth) {
-    ASSERT(nth_ >= 1);
+    DCHECK_GE(nth_, 1);
   }
 
   // [G]

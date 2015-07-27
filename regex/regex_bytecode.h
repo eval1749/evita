@@ -11,6 +11,7 @@
 #ifndef REGEX_REGEX_BYTECODE_H_
 #define REGEX_REGEX_BYTECODE_H_
 
+#include "base/logging.h"
 #include "regex/regex.h"
 #include "regex/regex_bytecodes.h"
 
@@ -44,11 +45,11 @@ class StringOperand {
 
     bool AtEnd() const { return m_pwch == m_pwchEnd; }
     char16 Get() const {
-      ASSERT(!AtEnd());
+      DCHECK(!AtEnd());
       return *m_pwch;
     }
     void Next() {
-      ASSERT(!AtEnd());
+      DCHECK(!AtEnd());
       m_pwch++;
     }
 

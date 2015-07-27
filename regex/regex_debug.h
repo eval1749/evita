@@ -11,10 +11,9 @@
 #ifndef REGEX_REGEX_DEBUG_H_
 #define REGEX_REGEX_DEBUG_H_
 
+#include "base/logging.h"
+
 #if !defined(_DEBUG)
-#ifndef ASSERT
-#define ASSERT(mp_exp) __assume(mp_exp)
-#endif
 #ifndef DEBUG_PRINTF
 #define DEBUG_PRINTF __noop
 #endif
@@ -25,10 +24,6 @@
   Debugger::CanNotHappen(__FILE__, __LINE__, __FUNCTION__)
 
 #else  // ! defined(_DEBUG)
-#ifndef ASSERT
-#define ASSERT(mp_exp) \
-  Debugger::Assert(__FILE__, __LINE__, __FUNCTION__, #mp_exp, mp_exp)
-#endif
 
 #define CAN_NOT_HAPPEN() \
   Debugger::CanNotHappen(__FILE__, __LINE__, __FUNCTION__)
@@ -45,7 +40,7 @@
 #define REPORT_WIN32_ERROR(mp_strCallee, mp_dwError) \
   Debugger::ReportWIN32_ERROR(__FUNCTION__, mp_strCallee, mp_dwError)
 
-#define VERIFY(mp_exp) ASSERT(mp_exp)
+#define VERIFY(mp_exp) DCHECK(mp_exp)
 
 #endif  // ! defined(_DEBUG)
 

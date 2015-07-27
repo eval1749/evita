@@ -8,6 +8,7 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_parse.cpp#11 $
 //
+#include "base/logging.h"
 #include "regex/precomp.h"
 #include "regex/regex.h"
 #include "regex/regex_node.h"
@@ -1243,7 +1244,7 @@ class Parser {
           return new (m_pHeap) NodeVoid;
         }
 
-        ASSERT(nullptr != oToken.m_pNode);
+        DCHECK(oToken.m_pNode);
         return oToken.m_pNode;
     }
   }
@@ -1621,12 +1622,12 @@ class Parser {
   Node* unexpectedEof() { return signalError(Regex::Error_Eof); }
 
   void ungetChar() {
-    ASSERT(m_pwch > m_pwchStart);
+    DCHECK_GT(m_pwch, m_pwchStart);
     --m_pwch;
   }
 
   void ungetToken(Token oToken) {
-    ASSERT(TokenType_None == m_oUngetToken.GetType());
+    DCHECK_EQ(TokenType_None, m_oUngetToken.GetType());
     m_oUngetToken = oToken;
   }
 

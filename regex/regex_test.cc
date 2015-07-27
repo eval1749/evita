@@ -10,6 +10,10 @@
 #include <vector>
 
 #include "base/macros.h"
+#include "base/strings/string16.h"
+#include "base/strings/stringprintf.h"
+#include "base/strings/string_piece.h"
+#include "base/strings/utf_string_conversions.h"
 #include "regex/regex.h"
 #include "gtest/gtest.h"
 
@@ -31,159 +35,6 @@ class scoped_ptr {
   DISALLOW_COPY_AND_ASSIGN(scoped_ptr);
 };
 
-template <class BaseIterator>
-class ConstIterator_ : public BaseIterator {
- public:
-  typedef typename BaseIterator::ValueType ValueType;
-
-  ConstIterator_(const BaseIterator& it) : BaseIterator(it) {}  // NOLINT
-
-  const ValueType& operator*() const { return Iterator::operator*(); }
-  const ValueType* operator->() const { return Iterator::operator->(); }
-};
-
-class String {
- public:
-  class Iterator {
-   public:
-    typedef char16& ReferenceType;
-    typedef char16* PointerType;
-    typedef char16 ValueType;
-
-    Iterator(String& string, int index) : index_(index), string_(string) {}
-    Iterator(const Iterator& other)
-        : index_(other.index_), string_(other.string_) {}
-
-    Iterator& operator=(const Iterator other) {
-      assert(string_ == other.string_);
-      index_ = other.index_;
-      return *this;
-    }
-
-    bool operator==(const Iterator& other) const {
-      assert(string_ == other.string_);
-      return index_ == other.index_;
-    }
-
-    bool operator!=(const Iterator& other) const { return !operator==(other); }
-
-    const char16& operator*() const { return string_[index_]; }
-
-    Iterator& operator++() {
-      ++index_;
-      return *this;
-    }
-
-    Iterator operator+(int n) const { return Iterator(string_, index_ + n); }
-    Iterator operator-(int n) const { return Iterator(string_, index_ - n); }
-    int operator-(const Iterator& other) const { return index_ - other.index_; }
-
-   private:
-    int index_;
-    String& string_;
-  };
-
-  typedef ConstIterator_<Iterator> ConstIterator;
-
-  String() : chars_(nullptr), size_(0) {}
-
-  String(const char* string8) : size_(::lstrlenA(string8)) {  // NOLINT
-    chars_ = new char16[size_ + 1];
-    auto const end = string8 + size_;
-    auto dest = chars_;
-    for (auto s = string8; s < end; ++s) {
-      *dest++ = *s;
-    }
-    *dest = 0;
-  }
-
-  explicit String(const char16* string16) : size_(::lstrlenW(string16)) {
-    chars_ = new char16[size_ + 1];
-    ::CopyMemory(chars_, string16, (size_ + 1) * sizeof(char16));
-  }
-
-  String(const String& other)
-      : chars_(new char16[other.size() + 1]), size_(other.size_) {
-    ::CopyMemory(chars_, other.chars_, (size_ + 1) * sizeof(char16));
-  }
-
-  String(String&& other) : chars_(other.chars_), size_(other.size_) {
-    other.chars_ = nullptr;
-    other.size_ = 0;
-  }
-
-  String(const ConstIterator& begin, const ConstIterator& end)
-      : size_(end - begin) {
-    chars_ = new char16[size_ + 1];
-    auto dest = chars_;
-    for (auto it = begin; it != end; ++it) {
-      *dest++ = *it;
-    }
-    *dest = 0;
-  }
-
- public:
-  ~String() { delete chars_; }
-
- public:
-  String& operator=(const String& other) {
-    delete chars_;
-    size_ = other.size_;
-    chars_ = new char16[size_ + 1];
-    ::CopyMemory(chars_, other.chars_, (size_ + 1) * sizeof(char16));
-    return *this;
-  }
-
-  String& operator=(String&& other) {
-    delete chars_;
-    chars_ = other.chars_;
-    size_ = other.size_;
-    other.chars_ = nullptr;
-    other.size_ = 0;
-    return *this;
-  }
-
-  const char16& operator[](int index) const {
-    assert(index >= 0);
-    assert(index < size_);
-    return chars_[index];
-  }
-
-  operator const char16*() const { return chars_; }
-
-  bool operator==(const String& other) const {
-    return this == &other ||
-           !::memcmp(chars_, other.chars_, size_ * sizeof(char16));
-  }
-
-  bool operator!=(const String& other) const { return !operator==(other); }
-
-  Iterator begin() { return Iterator(*this, 0); }
-  ConstIterator begin() const {
-    return ConstIterator(const_cast<String*>(this)->begin());
-  }
-  Iterator end() { return Iterator(*this, size()); }
-  ConstIterator end() const {
-    return ConstIterator(const_cast<String*>(this)->end());
-  }
-
-  int size() const { return size_; }
-  const char16* value() const { return chars_; }
-
-  static String Format(const char16* format, ...) {
-    char16 buffer[100];
-    va_list args;
-    va_start(args, format);
-    ::wvsprintfW(buffer, format, args);
-    va_end(args);
-    return String(buffer);
-  }
-
- private:
-  char16* chars_;
-  int size_;
-};
-
 class Range {
  public:
   Range() : bound_(false), end_(0), start_(0) {}
@@ -200,11 +51,11 @@ class Range {
   int end() const { return end_; }
   int start() const { return start_; }
 
-  String text() const {
-    return String(text_.begin() + start_, text_.begin() + end_);
+  base::string16 text() const {
+    return base::string16(text_.begin() + start_, text_.begin() + end_);
   }
 
-  void Bind(const String& text, int start, int end) {
+  void Bind(const base::string16& text, int start, int end) {
     bound_ = true;
     end_ = end;
     start_ = start;
@@ -216,19 +67,19 @@ class Range {
   void Reset() {
     bound_ = false;
     end_ = start_ = 0;
-    text_ = String("");
+    text_ = L"";
   }
 
  private:
   bool bound_;
   Posn end_;
   Posn start_;
-  String text_;
+  base::string16 text_;
 };
 
 class MatchContext final : public Regex::IMatchContext {
  public:
-  MatchContext(IRegex* regex, int num_captures, const String& source)
+  MatchContext(IRegex* regex, int num_captures, const base::string16& source)
       : captures_(num_captures + 1),
         matched_(false),
         regex_(regex),
@@ -313,7 +164,7 @@ class MatchContext final : public Regex::IMatchContext {
   }
 
   char16 GetChar(Posn posn) const override { return source_[posn]; }
-  Posn GetEnd() const override { return source_.size(); }
+  Posn GetEnd() const override { return static_cast<Posn>(source_.size()); }
 
   void GetInfo(Regex::SourceInfo* info) const override {
     info->m_lStart = GetStart();
@@ -371,7 +222,7 @@ class MatchContext final : public Regex::IMatchContext {
   std::vector<Range> captures_;
   bool matched_;
   IRegex* regex_;
-  const String source_;
+  const base::string16 source_;
 
   DISALLOW_COPY_AND_ASSIGN(MatchContext);
 };
@@ -383,17 +234,17 @@ class Pattern final {
   int error_code() const { return error_code_; }
   int error_posn() const { return error_posn_; }
 
-  static Pattern& Compile(const String& source, int flags) {
+  static Pattern& Compile(const base::string16& source, int flags) {
     Context context;
-    auto const regex = Regex::Compile(&context, source, source.size(), flags);
-    if (regex) {
+    auto const regex = Regex::Compile(&context, source.data(),
+                                      static_cast<int>(source.size()), flags);
+    if (regex)
       return *new Pattern(regex, context.num_captures());
-    }
 
     return *new Pattern(context.error_code(), context.error_posn());
   }
 
-  MatchContext& Match(const String& source) {
+  MatchContext& Match(const base::string16& source) {
     auto& context = *new MatchContext(regex_, num_captures_, source);
     context.set_matched(StartMatch(regex_, &context));
     return context;
@@ -445,25 +296,28 @@ class Pattern final {
   DISALLOW_COPY_AND_ASSIGN(Pattern);
 };
 
-class Result {
+class Result final {
  public:
   Result() : strings_(0) {}
-  explicit Result(const String& p1) : strings_(1) { strings_[0] = p1; }
-  Result(const String& p1, const String& p2) : strings_(2) {
-    strings_[0] = p1;
-    strings_[1] = p2;
+  Result(base::StringPiece p1, base::StringPiece p2) : strings_(2) {
+    strings_[0] = base::UTF8ToUTF16(p1);
+    strings_[1] = base::UTF8ToUTF16(p2);
   }
-  Result(const String& p1, const String& p2, const String& p3) : strings_(3) {
-    strings_[0] = p1;
-    strings_[1] = p2;
-    strings_[2] = p3;
+  Result(base::StringPiece p1, base::StringPiece p2, base::StringPiece p3)
+      : strings_(3) {
+    strings_[0] = base::UTF8ToUTF16(p1);
+    strings_[1] = base::UTF8ToUTF16(p2);
+    strings_[2] = base::UTF8ToUTF16(p3);
   }
-  Result(const String& p1, const String& p2, const String& p3, const String& p4)
+  Result(base::StringPiece p1,
+         base::StringPiece p2,
+         base::StringPiece p3,
+         base::StringPiece p4)
       : strings_(4) {
-    strings_[0] = p1;
-    strings_[1] = p2;
-    strings_[2] = p3;
-    strings_[3] = p4;
+    strings_[0] = base::UTF8ToUTF16(p1);
+    strings_[1] = base::UTF8ToUTF16(p2);
+    strings_[2] = base::UTF8ToUTF16(p3);
+    strings_[3] = base::UTF8ToUTF16(p4);
   }
   explicit Result(const MatchContext& match)
       : strings_(match.captures().size()) {
@@ -474,19 +328,26 @@ class Result {
       ++index;
     }
   }
+  explicit Result(base::StringPiece string) : strings_(1) {
+    strings_[0] = base::UTF8ToUTF16(string);
+  }
 
   bool operator==(const Result& other) const {
     return strings_ == other.strings_;
   }
 
-  std::vector<String>::const_iterator begin() const { return strings_.begin(); }
-  std::vector<String>::const_iterator end() const { return strings_.end(); }
+  std::vector<base::string16>::const_iterator begin() const {
+    return strings_.begin();
+  }
+  std::vector<base::string16>::const_iterator end() const {
+    return strings_.end();
+  }
 
  private:
-  std::vector<String> strings_;
+  std::vector<base::string16> strings_;
 };
 
-::std::ostream& operator<<(::std::ostream& os, const String& string) {
+::std::ostream& operator<<(::std::ostream& os, const base::string16& string) {
   for (auto it = string.begin(); it != string.end(); ++it) {
     auto const ch = *it;
     if (ch == '\\') {
@@ -516,14 +377,15 @@ class Result {
 
 class RegexTest : public ::testing::Test {
  protected:
-  Result Execute(const String& pattern_source,
-                 const String& source,
+  Result Execute(base::StringPiece pattern_source8,
+                 base::StringPiece source8,
                  int flags = 0) {
+    base::string16 pattern_source = base::UTF8ToWide(pattern_source8);
+    base::string16 source = base::UTF8ToWide(source8);
     scoped_ptr<Pattern> pattern(Pattern::Compile(pattern_source, flags));
-    if (pattern->error_code()) {
-      return Result(String::Format(String("Regex compile failed at %d"),
-                                   pattern->error_posn()));
-    }
+    if (pattern->error_code())
+      return Result(base::StringPrintf("Regex compile failed at %d",
+                                       pattern->error_posn()));
 
     scoped_ptr<MatchContext> match(pattern->Match(source));
     return match->matched() ? Result(*match) : Result();

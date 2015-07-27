@@ -1530,15 +1530,13 @@ class Parser {
       bool fPossessive = false;
       switch (getChar()) {
         case '?':
-          unless(oMinMax.IsOne()) {
+          if (!oMinMax.IsOne())
             pNode = new (m_pHeap) NodeMin(getDir(), pNode, oMinMax);
-          }
           break;
 
         case '+':
-          unless(oMinMax.IsOne()) {
+          if (!oMinMax.IsOne())
             pNode = new (m_pHeap) NodeMax(getDir(), pNode, oMinMax);
-          }
           fPossessive = true;
           break;
 
@@ -1547,9 +1545,8 @@ class Parser {
 
         default:
           ungetChar();
-          unless(oMinMax.IsOne()) {
+          if (!oMinMax.IsOne())
             pNode = new (m_pHeap) NodeMax(getDir(), pNode, oMinMax);
-          }
           break;
       }
 

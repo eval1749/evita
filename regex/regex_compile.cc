@@ -951,7 +951,8 @@ void NodeLookaround::Compile(Compiler* pCompiler, int nMinRest) {
 static bool compileMaxCapture(Compiler* pCompiler,
                               const LoopInfo* pLoop,
                               int iMinRest) {
-  unless(pLoop->m_iMin <= 1 && pLoop->m_iMax == Infinity) { return false; }
+  if (pLoop->m_iMin > 1 || pLoop->m_iMax != Infinity)
+    return false;
 
   NodeCapture* pNodeCapture = pLoop->node_->DynamicCast<NodeCapture>();
   if (nullptr == pNodeCapture) {
@@ -959,7 +960,8 @@ static bool compileMaxCapture(Compiler* pCompiler,
   }
 
   LengthInfo oLength = pNodeCapture->ComputeLength();
-  unless(oLength.IsFixed()) { return false; }
+  if (!oLength.IsFixed())
+    return false;
 
   Node* pNode = new (pCompiler->GetHeap())
       NodeAnd(new (pCompiler->GetHeap())

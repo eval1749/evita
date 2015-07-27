@@ -246,26 +246,30 @@ class Engine : public Regex::SourceInfo {
   bool dispatch();
 
   bool equalCi(Posn lStart1, Posn lEnd1, Posn lStart2, Posn lEnd2) {
-    unless(lEnd1 - lStart1 == lEnd2 - lStart2) return false;
+    if (lEnd1 - lStart1 != lEnd2 - lStart2)
+      return false;
 
     auto lPosn2 = lStart2;
     for (Posn lPosn1 = lStart1; lPosn1 < lEnd1; lPosn1++) {
       char16 wch1 = m_pIContext->GetChar(lPosn1);
       char16 wch2 = m_pIContext->GetChar(lPosn2);
-      unless(charEqCi(wch1, wch2)) return false;
+      if (!charEqCi(wch1, wch2))
+        return false;
       lPosn2 += 1;
     }
     return true;
   }
 
   bool equalCs(Posn lStart1, Posn lEnd1, Posn lStart2, Posn lEnd2) const {
-    unless(lEnd1 - lStart1 == lEnd2 - lStart2) return false;
+    if (lEnd1 - lStart1 != lEnd2 - lStart2)
+      return false;
 
     auto lPosn2 = lStart2;
     for (Posn lPosn1 = lStart1; lPosn1 < lEnd1; lPosn1++) {
       char16 wch1 = m_pIContext->GetChar(lPosn1);
       char16 wch2 = m_pIContext->GetChar(lPosn2);
-      unless(charEqCs(wch1, wch2)) return false;
+      if (!charEqCs(wch1, wch2))
+        return false;
       lPosn2 += 1;
     }
     return true;
@@ -826,23 +830,27 @@ bool Engine::dispatch() {
 
       case Op_Any_B:  // Matches any character. ".", "\p{ANY}"
         m_lPosn -= 1;
-        unless(m_lPosn >= m_lStart) return false;
+        if (m_lPosn < m_lStart)
+          return false;
         m_nPc += 1;
         break;
 
       case Op_Any_F:
-        unless(m_lPosn < m_lEnd) return false;
+        if (m_lPosn >= m_lEnd)
+          return false;
         m_lPosn += 1;
         m_nPc += 1;
         break;
 
       case Op_AsciiBoundary:  // Matches word boundary. "\b"
-        unless(isAsciiWordBoundary()) return false;
+        if (!isAsciiWordBoundary())
+          return false;
         m_nPc += 1;
         break;
 
       case Op_AsciiNotBoundary:  // Matches not word boundary. ("\B")
-        unless(isAsciiWordBoundary()) return false;
+        if (!isAsciiWordBoundary())
+          return false;
         m_nPc += 1;
         break;
 
@@ -1084,7 +1092,8 @@ bool Engine::dispatch() {
       case Op_Last_B: {  // minRest
         auto const nMinRest = fetchInt(1);
         auto const lNextPosn = m_lPosn + nMinRest;
-        unless(lNextPosn >= m_lStart) return false;
+        if (lNextPosn < m_lStart)
+          return false;
 
         if (lNextPosn <= m_lLoopLimitPosn) {
           RE_DEBUG_PRINTF("We won't check after %d/%d\n", lNextPosn,
@@ -1102,7 +1111,7 @@ bool Engine::dispatch() {
       case Op_Last_F: {  // minRest
         auto const nMinRest = fetchInt(1);
         auto const lNextPosn = m_lPosn - nMinRest;
-        unless(lNextPosn <= m_lEnd) {
+        if (lNextPosn > m_lEnd) {
           RE_DEBUG_PRINTF("\tWe need at least %d, but %d.\n", nMinRest,
                           lNextPosn - m_lEnd);
           return false;
@@ -1268,11 +1277,13 @@ bool Engine::dispatch() {
     auto const nRest = fetchCount(1);                      \
     auto const lMaxPosn = m_lPosn;                         \
     auto const lNextPosn = m_lStart + nRest;               \
-    unless(lNextPosn < m_lPosn) return false;              \
+    if (lNextPosn >= m_lPosn)                              \
+      return false;                                        \
     while (m_lPosn > lNextPosn) {                          \
       m_lPosn -= 1;                                        \
       char16 wchSource = getChar();                        \
-      unless(mp_cmp) break;                                \
+      if (!mp_cmp)                                         \
+        break;                                             \
     }                                                      \
     if (m_lPosn == lMaxPosn)                               \
       return false;                                        \
@@ -1289,10 +1300,12 @@ bool Engine::dispatch() {
     auto const nRest = fetchCount(1);                      \
     auto const lMinPosn = m_lPosn;                         \
     auto const lNextPosn = m_lEnd - nRest;                 \
-    unless(lNextPosn > m_lPosn) return false;              \
+    if (lNextPosn <= m_lPosn)                              \
+      return false;                                        \
     while (m_lPosn < lNextPosn) {                          \
       auto const wchSource = getChar();                    \
-      unless(mp_cmp) break;                                \
+      if (!mp_cmp)                                         \
+        break;                                             \
       m_lPosn += 1;                                        \
     }                                                      \
     if (m_lPosn == lMinPosn)                               \
@@ -1418,30 +1431,35 @@ bool Engine::dispatch() {
         break;
 
       case Op_StartOfString:  // Matches start of string. "(?-m)^": "\A"
-        unless(m_lPosn == m_lStart) return false;
+        if (m_lPosn != m_lStart)
+          return false;
         m_nPc += 1;
         break;
 
-#define OP_IMPL_STRING_TEST_B(mp_cmp)                         \
-  {                                                           \
-    auto const pString = fetchString(1);                      \
-    auto const lNextPosn = m_lPosn - pString->GetLength();    \
-    unless(lNextPosn >= m_lScanStart) return false;           \
-    unless(mp_cmp(lNextPosn, m_lPosn, pString)) return false; \
-    m_lPosn = lNextPosn;                                      \
-    m_nPc += 2;                                               \
-    break;                                                    \
+#define OP_IMPL_STRING_TEST_B(mp_cmp)                      \
+  {                                                        \
+    auto const pString = fetchString(1);                   \
+    auto const lNextPosn = m_lPosn - pString->GetLength(); \
+    if (lNextPosn < m_lScanStart)                          \
+      return false;                                        \
+    if (!mp_cmp(lNextPosn, m_lPosn, pString))              \
+      return false;                                        \
+    m_lPosn = lNextPosn;                                   \
+    m_nPc += 2;                                            \
+    break;                                                 \
   }
 
-#define OP_IMPL_STRING_TEST_F(mp_cmp)                         \
-  {                                                           \
-    auto const pString = fetchString(1);                      \
-    auto const lNextPosn = m_lPosn + pString->GetLength();    \
-    unless(lNextPosn <= m_lScanEnd) return false;             \
-    unless(mp_cmp(m_lPosn, lNextPosn, pString)) return false; \
-    m_lPosn = lNextPosn;                                      \
-    m_nPc += 2;                                               \
-    break;                                                    \
+#define OP_IMPL_STRING_TEST_F(mp_cmp)                      \
+  {                                                        \
+    auto const pString = fetchString(1);                   \
+    auto const lNextPosn = m_lPosn + pString->GetLength(); \
+    if (lNextPosn > m_lScanEnd)                            \
+      return false;                                        \
+    if (!mp_cmp(m_lPosn, lNextPosn, pString))              \
+      return false;                                        \
+    m_lPosn = lNextPosn;                                   \
+    m_nPc += 2;                                            \
+    break;                                                 \
   }
 
       case Op_StringEq_Ci_B:
@@ -1461,12 +1479,14 @@ bool Engine::dispatch() {
 
       // [U]
       case Op_UnicodeBoundary:  // \b
-        unless(isUnicodeWordBoundary()) return false;
+        if (!isUnicodeWordBoundary())
+          return false;
         m_nPc += 1;
         break;
 
       case Op_UnicodeNotBoundary:  // \B
-        unless(isUnicodeWordBoundary()) return false;
+        if (!isUnicodeWordBoundary())
+          return false;
         m_nPc += 1;
         break;
 

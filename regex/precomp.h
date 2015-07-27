@@ -47,8 +47,6 @@ typedef intptr_t Int;
 // scope
 #pragma warning(disable : 6246)
 
-#define unless(mp_expr) if (!(mp_expr))
-
 // warning C4061: enumerator 'identifier' in switch of enum 'enumeration' is
 // not explicitly handled by a case label
 #pragma warning(disable : 4061)

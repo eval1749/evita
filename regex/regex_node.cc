@@ -58,7 +58,7 @@ Node* NodeAnd::Simplify(IEnvironment* pIEnv, LocalHeap* pHeap) {
           break;
 
         case Case_Ignore:
-          unless(pChar->IsIgnoreCase()) pChar = NULL;
+          if (!pChar->IsIgnoreCase()) pChar = NULL;
           break;
 
         case Case_Sensitive:
@@ -122,7 +122,7 @@ Node* NodeAnd::Simplify(IEnvironment* pIEnv, LocalHeap* pHeap) {
 bool NodeChar::IsCharSetMember(IEnvironment* pIEnv, char16 wch) const {
   if (GetChar() == wch)
     return !IsNot();
-  unless(IsIgnoreCase()) return IsNot();
+  if (!IsIgnoreCase()) return IsNot();
   wch = pIEnv->CharUpcase(wch);
   if (GetChar() == wch)
     return !IsNot();

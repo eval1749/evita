@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <windows.h>
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -18,22 +19,6 @@
 #include "gtest/gtest.h"
 
 namespace Regex {
-
-template <typename T>
-class scoped_ptr {
- public:
-  explicit scoped_ptr(T* pointer) : pointer_(pointer) {}
-  explicit scoped_ptr(T& pointer) : pointer_(&pointer) {}
-  ~scoped_ptr() { delete pointer_; }
-
-  T& operator*() { return *pointer_; }
-  T* operator->() { return pointer_; }
-
- private:
-  T* pointer_;
-
-  DISALLOW_COPY_AND_ASSIGN(scoped_ptr);
-};
 
 class Range {
  public:
@@ -229,25 +214,39 @@ class MatchContext final : public Regex::IMatchContext {
 
 class Pattern final {
  public:
-  virtual ~Pattern() {}
+  Pattern(IRegex* regex, int num_captures)
+      : error_code_(0),
+        error_posn_(0),
+        num_captures_(num_captures),
+        regex_(regex) {}
+
+  Pattern(int error_code, int error_posn)
+      : error_code_(error_code),
+        error_posn_(error_posn),
+        num_captures_(0),
+        regex_(nullptr) {}
+
+  ~Pattern() {}
 
   int error_code() const { return error_code_; }
   int error_posn() const { return error_posn_; }
 
-  static Pattern& Compile(const base::string16& source, int flags) {
+  static std::unique_ptr<Pattern> Compile(const base::string16& source,
+                                          int flags) {
     Context context;
     auto const regex = Regex::Compile(&context, source.data(),
                                       static_cast<int>(source.size()), flags);
     if (regex)
-      return *new Pattern(regex, context.num_captures());
-
-    return *new Pattern(context.error_code(), context.error_posn());
+      return std::make_unique<Pattern>(regex, context.num_captures());
+    return std::make_unique<Pattern>(context.error_code(),
+                                     context.error_posn());
   }
 
-  MatchContext& Match(const base::string16& source) {
-    auto& context = *new MatchContext(regex_, num_captures_, source);
-    context.set_matched(StartMatch(regex_, &context));
-    return context;
+  std::unique_ptr<MatchContext> Match(const base::string16& source) {
+    auto context =
+        std::make_unique<MatchContext>(regex_, num_captures_, source);
+    context->set_matched(StartMatch(regex_, context.get()));
+    return std::move(context);
   }
 
  private:
@@ -275,18 +274,6 @@ class Pattern final {
     int error_posn_;
     int num_captures_;
   };
-
-  Pattern(IRegex* regex, int num_captures)
-      : error_code_(0),
-        error_posn_(0),
-        num_captures_(num_captures),
-        regex_(regex) {}
-
-  Pattern(int error_code, int error_posn)
-      : error_code_(error_code),
-        error_posn_(error_posn),
-        num_captures_(0),
-        regex_(nullptr) {}
 
   int const error_code_;
   int const error_posn_;
@@ -382,12 +369,12 @@ class RegexTest : public ::testing::Test {
                  int flags = 0) {
     base::string16 pattern_source = base::UTF8ToWide(pattern_source8);
     base::string16 source = base::UTF8ToWide(source8);
-    scoped_ptr<Pattern> pattern(Pattern::Compile(pattern_source, flags));
+    std::unique_ptr<Pattern> pattern(Pattern::Compile(pattern_source, flags));
     if (pattern->error_code())
       return Result(base::StringPrintf("Regex compile failed at %d",
                                        pattern->error_posn()));
 
-    scoped_ptr<MatchContext> match(pattern->Match(source));
+    std::unique_ptr<MatchContext> match(pattern->Match(source));
     return match->matched() ? Result(*match) : Result();
   }
 };

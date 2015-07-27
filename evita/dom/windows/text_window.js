@@ -435,7 +435,7 @@ global.TextWindow.prototype.clone = function() {
    * @this {!TextWindow}
    * @param {!Event} event
    */
-  TextWindow.handleEvent = (event) => {
+  TextWindow.handleEvent = function (event) {
     let handler = handlerMap.get(event.type);
     if (handler)
       handler(this, event);

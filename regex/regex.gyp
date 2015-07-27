@@ -11,25 +11,18 @@
       'target_name': 'regex_lib',
       'type': 'static_library',
 
-      # Precompiled header
-      # See gyp/pylib/gyp/msvs_settings.py for details
-      'msvs_precompiled_header': 'precomp.h',
-      'msvs_precompiled_source': 'precomp.cpp',
-
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
       ],
 
       'sources': [
         'precomp.h',
-        'precomp.cc',
         'regex.cc',
         'regex_compile.cc',
         'regex_debug.cc',
         'regex_exec.cc',
         'regex_node.cc',
         'regex_parse.cc',
-        'regex_scanner.cc',
         'regex_unicode.cc',
         'regex_util.cc',
       ], # sources
@@ -43,6 +36,7 @@
       ], # include_dirs
       'dependencies': [
         'regex_lib',
+        '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/testing/gtest.gyp:gtest',
         '<(DEPTH)/testing/gtest.gyp:gtest_main',
       ], # dependencies

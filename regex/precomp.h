@@ -52,8 +52,6 @@ typedef intptr_t Int;
 
 #define unless(mp_expr) if (!(mp_expr))
 
-#include "../evita/z_debug.h"
-
 // warning C4061: enumerator 'identifier' in switch of enum 'enumeration' is
 // not explicitly handled by a case label
 #pragma warning(disable : 4061)

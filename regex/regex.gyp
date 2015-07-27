@@ -19,7 +19,6 @@
         'precomp.h',
         'regex.cc',
         'regex_compile.cc',
-        'regex_debug.cc',
         'regex_exec.cc',
         'regex_node.cc',
         'regex_parse.cc',

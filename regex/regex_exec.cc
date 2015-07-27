@@ -1479,7 +1479,9 @@ bool Engine::dispatch() {
             case_Op_OneWidth_BF(UnicodeWordCharEq, 1)  // \w
             case_Op_OneWidth_BF(UnicodeWordCharNe, 1)  // \W
 
-            default : DEBUG_PRINTF("Unknown op: 0x%x\n", fetchOp());
+            default : DVLOG(0)
+                      << "Unknown op="
+                      << fetchOp();
         return false;
     }
   }

@@ -12,8 +12,6 @@ static_library("regex") {
     "regex_bytecode.h",
     "regex_bytecodes.h",
     "regex_compile.cc",
-    "regex_debug.cc",
-    "regex_debug.h",
     "regex_defs.h",
     "regex_exec.cc",
     "regex_node.cc",

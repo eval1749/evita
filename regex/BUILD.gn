@@ -6,7 +6,6 @@ import("//testing/test.gni")
 
 static_library("regex") {
   sources = [
-    "precomp.cc",
     "precomp.h",
     "regex.cc",
     "regex.h",

@@ -299,13 +299,13 @@ class Parser {
     if (iChar >= '0' && iChar <= '9') {
       int iNum = iChar - '0';
       for (;;) {
-        int const iChar = getChar();
-        if (wchClose == iChar) {
+        int const iChar2 = getChar();
+        if (wchClose == iChar2) {
           return iNum;
         }
 
-        if (iChar < '0' || iChar > '9') {
-          if (Eof == iChar) {
+        if (iChar2 < '0' || iChar2 > '9') {
+          if (Eof == iChar2) {
             unclosedPair(wchOpen);
           } else {
             signalError(Regex::Error_InvalidName);
@@ -314,7 +314,7 @@ class Parser {
         }
 
         iNum *= 10;
-        iNum += iChar - '0';
+        iNum += iChar2 - '0';
       }
     } else if (isNameFirstChar(iChar)) {
       for (;;) {
@@ -408,8 +408,8 @@ class Parser {
 
         // Skip until newline
         for (;;) {
-          Char iChar = getCharAux();
-          if (Eof == iChar || Newline == iChar) {
+          const auto iChar2 = getCharAux();
+          if (Eof == iChar2 || Newline == iChar2) {
             return getToken();
           }
         }
@@ -491,18 +491,18 @@ class Parser {
       int iOct = wch - '0';
       int cDigits = 1;
       while (cDigits <= 3) {
-        int const iChar = getChar();
+        auto const iChar2 = getChar();
 
-        if (Eof == iChar) {
+        if (Eof == iChar2) {
           break;
         }
 
-        if (iChar < '0' || iChar > '7') {
+        if (iChar2 < '0' || iChar2 > '7') {
           break;
         }
 
         iOct *= 8;
-        iOct += iChar - '0';
+        iOct += iChar2 - '0';
         cDigits += 1;
       }
       ungetChar();
@@ -516,13 +516,13 @@ class Parser {
       int cDigits = 1;
       bool fOct = wch <= '7';
       while (cDigits <= 3) {
-        int const iChar = getChar();
+        auto const iChar2 = getChar();
 
-        if (Eof == iChar) {
+        if (Eof == iChar2) {
           break;
         }
 
-        if (iChar < '0' || iChar > '9') {
+        if (iChar2 < '0' || iChar2 > '9') {
           break;
         }
 
@@ -531,10 +531,10 @@ class Parser {
         }
 
         iOct *= 8;
-        iOct += iChar - '0';
+        iOct += iChar2 - '0';
 
         iNum *= 10;
-        iNum += iChar - '0';
+        iNum += iChar2 - '0';
 
         cDigits += 1;
       }
@@ -562,12 +562,12 @@ class Parser {
 
     // \xXX or \x{XXXX}
     if ('x' == wch) {
-      int iChar = getChar();
-      if (Eof == iChar) {
+      auto const iChar2 = getChar();
+      if (Eof == iChar2) {
         return nullptr;
       }
 
-      int iNum = toXdigit(iChar);
+      int iNum = toXdigit(iChar2);
       if (iNum >= 0) {
         iNum *= 16;
         int iDigit = toXdigit(getChar());
@@ -580,19 +580,19 @@ class Parser {
         return newChar(static_cast<char16>(iNum));
       }
 
-      if (OpenBrace == iChar) {
+      if (OpenBrace == iChar2) {
         int cDigits = 0;
         iNum = 0;
         for (;;) {
-          int const iChar = getChar();
-          if (CloseBrace == iChar) {
+          auto const iChar3 = getChar();
+          if (CloseBrace == iChar3) {
             if (cDigits >= 1) {
               return newChar(static_cast<char16>(iNum));
             }
             break;
           }
 
-          int iDigit = toXdigit(iChar);
+          int iDigit = toXdigit(iChar3);
           if (iDigit < 0) {
             break;
           }
@@ -629,13 +629,13 @@ class Parser {
 
     // \\cC
     if ('c' == wch) {
-      int iChar = getChar();
-      if (iChar >= 0x3F && iChar <= 0x5F) {
-        return newChar(static_cast<char16>(iChar ^ 0x40));
+      auto const iChar2 = getChar();
+      if (iChar2 >= 0x3F && iChar2 <= 0x5F) {
+        return newChar(static_cast<char16>(iChar2 ^ 0x40));
       }
 
-      if (iChar >= 0x60 && iChar <= 0x7A) {
-        return newChar(static_cast<char16>(iChar - 0x60));
+      if (iChar2 >= 0x60 && iChar2 <= 0x7A) {
+        return newChar(static_cast<char16>(iChar2 - 0x60));
       }
 
       return nullptr;
@@ -658,17 +658,16 @@ class Parser {
       CharSink oSink(m_pHeap);
       char16 wchLast = 0;
       for (;;) {
-        int const iChar = getChar();
+        auto const iChar2 = getChar();
 
-        if (Eof == iChar) {
+        if (Eof == iChar2)
           return new (m_pHeap) NodeVoid;
-        }
 
-        if ('E' == iChar && Backslash == wchLast) {
+        if ('E' == iChar2 && Backslash == wchLast) {
           return new (m_pHeap)
               NodeString(getDir(), oSink.GetStart(), oSink.GetLength());
         }
-        wchLast = static_cast<char16>(iChar);
+        wchLast = static_cast<char16>(iChar2);
       }
     }
 
@@ -755,10 +754,10 @@ class Parser {
 
       case '#':  // (?# comment )
         for (;;) {
-          auto const iChar = getChar();
-          if (Eof == iChar)
+          auto const iChar2 = getChar();
+          if (Eof == iChar2)
             return Token(unexpectedEof());
-          if (CloseParen == iChar)
+          if (CloseParen == iChar2)
             break;
         }
         return getToken();

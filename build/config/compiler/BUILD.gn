@@ -775,6 +775,22 @@ if (is_win) {
 
     # Warnings permanently disabled:
 
+    # C4091: 'typedef ': ignored on left of 'X' when no variable is declared.
+    # This happens in a number of Windows headers. Dumb.
+    "/wd4091",
+
+    # C4312: 'reinterpret_cast': conversion from 'uint32_t' to
+    # 'v8::internal::Address' of greater size
+    # v8/src/heap/spaces.h, v8/src/types-inl.h, v8/src/ast.h
+    "/wd4312",
+
+    # C4302: 'reinterpret_cast': truncation from 'BYTE *' to 'unsigned int'
+    # C4311: 'reinterpret_cast': pointer truncation from 'BYTE *' to
+    # 'unsigned int'
+    # v8/src/base/platform-win32.cc
+    "/wd4302",
+    "/wd4311",
+
     # C4127: conditional expression is constant
     # This warning can in theory catch dead code and other problems, but
     # triggers in far too many desirable cases where the conditional

@@ -19,10 +19,10 @@ import re
 import shutil
 import sys
 import tempfile
+import threading
 import time
 import zipfile
 
-import pylib.android_commands
 from pylib import cmd_helper
 from pylib import constants
 from pylib import device_signal
@@ -75,6 +75,20 @@ _CONTROL_CHARGING_COMMANDS = [
         'echo 0 > /sys/class/power_supply/usb/online'),
   },
 ]
+
+_RESTART_ADBD_SCRIPT = """
+  trap '' HUP
+  trap '' TERM
+  trap '' PIPE
+  function restart() {
+    stop adbd
+    start adbd
+  }
+  restart &
+"""
+
+_CURRENT_FOCUS_CRASH_RE = re.compile(
+    r'\s*mCurrentFocus.*Application (Error|Not Responding): (\S+)}')
 
 
 @decorators.WithExplicitTimeoutAndRetries(
@@ -159,16 +173,10 @@ class DeviceUtils(object):
                        value is provided.
     """
     self.adb = None
-    self.old_interface = None
     if isinstance(device, basestring):
       self.adb = adb_wrapper.AdbWrapper(device)
-      self.old_interface = pylib.android_commands.AndroidCommands(device)
     elif isinstance(device, adb_wrapper.AdbWrapper):
       self.adb = device
-      self.old_interface = pylib.android_commands.AndroidCommands(str(device))
-    elif isinstance(device, pylib.android_commands.AndroidCommands):
-      self.adb = adb_wrapper.AdbWrapper(device.GetDevice())
-      self.old_interface = device
     else:
       raise ValueError('Unsupported device value: %r' % device)
     self._commands_installed = None
@@ -178,6 +186,8 @@ class DeviceUtils(object):
     self._client_caches = {}
     assert hasattr(self, decorators.DEFAULT_TIMEOUT_ATTR)
     assert hasattr(self, decorators.DEFAULT_RETRIES_ATTR)
+
+    self._ClearCache()
 
   def __eq__(self, other):
     """Checks whether |other| refers to the same device as |self|.
@@ -352,6 +362,12 @@ class DeviceUtils(object):
     Returns:
       List of paths to the apks on the device for the given package.
     """
+    return self._GetApplicationPathsInternal(package)
+
+  def _GetApplicationPathsInternal(self, package, skip_cache=False):
+    cached_result = self._cache['package_apk_paths'].get(package)
+    if cached_result is not None and not skip_cache:
+      return list(cached_result)
     # 'pm path' is liable to incorrectly exit with a nonzero number starting
     # in Lollipop.
     # TODO(jbudorick): Check if this is fixed as new Android versions are
@@ -366,6 +382,7 @@ class DeviceUtils(object):
         raise device_errors.CommandFailedError(
             'pm path returned: %r' % '\n'.join(output), str(self))
       apks.append(line[len('package:'):])
+    self._cache['package_apk_paths'][package] = list(apks)
     return apks
 
   @decorators.WithTimeoutAndRetriesFromInstance()
@@ -418,7 +435,7 @@ class DeviceUtils(object):
 
     def pm_ready():
       try:
-        return self.GetApplicationPaths('android')
+        return self._GetApplicationPathsInternal('android', skip_cache=True)
       except device_errors.CommandFailedError:
         return False
 
@@ -488,21 +505,26 @@ class DeviceUtils(object):
       DeviceUnreachableError on missing device.
     """
     package_name = apk_helper.GetPackageName(apk_path)
-    device_paths = self.GetApplicationPaths(package_name)
+    device_paths = self._GetApplicationPathsInternal(package_name)
     if device_paths:
       if len(device_paths) > 1:
         logging.warning(
             'Installing single APK (%s) when split APKs (%s) are currently '
             'installed.', apk_path, ' '.join(device_paths))
-      (files_to_push, _) = self._GetChangedAndStaleFiles(
-          apk_path, device_paths[0])
-      should_install = bool(files_to_push)
+      apks_to_install, host_checksums = (
+          self._ComputeStaleApks(package_name, [apk_path]))
+      should_install = bool(apks_to_install)
       if should_install and not reinstall:
-        self.adb.Uninstall(package_name)
+        self.Uninstall(package_name)
     else:
       should_install = True
+      host_checksums = None
+
     if should_install:
+      # We won't know the resulting device apk names.
+      self._cache['package_apk_paths'].pop(package_name, 0)
       self.adb.Install(apk_path, reinstall=reinstall)
+      self._cache['package_apk_checksums'][package_name] = host_checksums
 
   @decorators.WithTimeoutAndRetriesDefaults(
       INSTALL_DEFAULT_TIMEOUT,
@@ -531,24 +553,54 @@ class DeviceUtils(object):
     all_apks = [base_apk] + split_select.SelectSplits(
         self, base_apk, split_apks)
     package_name = apk_helper.GetPackageName(base_apk)
-    device_apk_paths = self.GetApplicationPaths(package_name)
+    device_apk_paths = self._GetApplicationPathsInternal(package_name)
 
     if device_apk_paths:
       partial_install_package = package_name
-      device_checksums = md5sum.CalculateDeviceMd5Sums(device_apk_paths, self)
-      host_checksums = md5sum.CalculateHostMd5Sums(all_apks)
-      apks_to_install = [k for (k, v) in host_checksums.iteritems()
-                         if v not in device_checksums.values()]
+      apks_to_install, host_checksums = (
+          self._ComputeStaleApks(package_name, all_apks))
       if apks_to_install and not reinstall:
-        self.adb.Uninstall(package_name)
+        self.Uninstall(package_name)
         partial_install_package = None
         apks_to_install = all_apks
     else:
       partial_install_package = None
       apks_to_install = all_apks
+      host_checksums = None
+
     if apks_to_install:
+      # We won't know the resulting device apk names.
+      self._cache['package_apk_paths'].pop(package_name, 0)
       self.adb.InstallMultiple(
-          apks_to_install, partial=partial_install_package, reinstall=reinstall)
+          apks_to_install, partial=partial_install_package,
+          reinstall=reinstall)
+      self._cache['package_apk_checksums'][package_name] = host_checksums
+
+  @decorators.WithTimeoutAndRetriesFromInstance()
+  def Uninstall(self, package_name, keep_data=False, timeout=None,
+                retries=None):
+    """Remove the app |package_name| from the device.
+
+    Args:
+      package_name: The package to uninstall.
+      keep_data: (optional) Whether to keep the data and cache directories.
+      timeout: Timeout in seconds.
+      retries: Number of retries.
+
+    Raises:
+      CommandFailedError if the uninstallation fails.
+      CommandTimeoutError if the uninstallation times out.
+      DeviceUnreachableError on missing device.
+    """
+    try:
+      self.adb.Uninstall(package_name, keep_data)
+      self._cache['package_apk_paths'][package_name] = []
+      self._cache['package_apk_checksums'][package_name] = set()
+    except:
+      # Clear cache since we can't be sure of the state.
+      self._cache['package_apk_paths'].pop(package_name, 0)
+      self._cache['package_apk_checksums'].pop(package_name, 0)
+      raise
 
   def _CheckSdkLevel(self, required_sdk_level):
     """Raises an exception if the device does not have the required SDK level.
@@ -736,7 +788,8 @@ class DeviceUtils(object):
       CommandTimeoutError on timeout.
       DeviceUnreachableError on missing device.
     """
-    pids = self.GetPids(process_name)
+    procs_pids = self.GetPids(process_name)
+    pids = list(itertools.chain(*procs_pids.values()))
     if not pids:
       if quiet:
         return 0
@@ -744,7 +797,13 @@ class DeviceUtils(object):
         raise device_errors.CommandFailedError(
             'No process "%s"' % process_name, str(self))
 
-    cmd = ['kill', '-%d' % signum] + pids.values()
+    logging.info(
+        'KillAll(%s, ...) attempting to kill the following:', process_name)
+    for name, ids  in procs_pids.iteritems():
+      for i in ids:
+        logging.info('  %05s %s', str(i), name)
+
+    cmd = ['kill', '-%d' % signum] + pids
     self.RunShellCommand(cmd, as_root=as_root, check_return=True)
 
     if blocking:
@@ -893,7 +952,7 @@ class DeviceUtils(object):
     # may never return.
     if ((self.build_version_sdk >=
          constants.ANDROID_SDK_VERSION_CODES.JELLY_BEAN_MR2)
-        or self.GetApplicationPaths(package)):
+        or self._GetApplicationPathsInternal(package)):
       self.RunShellCommand(['pm', 'clear', package], check_return=True)
 
   @decorators.WithTimeoutAndRetriesFromInstance()
@@ -1016,6 +1075,29 @@ class DeviceUtils(object):
           to_push.append((host_abs_path, device_abs_path))
       to_delete = device_checksums.keys()
       return (to_push, to_delete)
+
+  def _ComputeDeviceChecksumsForApks(self, package_name):
+    ret = self._cache['package_apk_checksums'].get(package_name)
+    if ret is None:
+      device_paths = self._GetApplicationPathsInternal(package_name)
+      file_to_checksums = md5sum.CalculateDeviceMd5Sums(device_paths, self)
+      ret = set(file_to_checksums.values())
+      self._cache['package_apk_checksums'][package_name] = ret
+    return ret
+
+  def _ComputeStaleApks(self, package_name, host_apk_paths):
+    host_checksums_holder = [None]
+    def compute_host_checksums():
+      host_checksums_holder[0] = md5sum.CalculateHostMd5Sums(host_apk_paths)
+
+    host_thread = threading.Thread(target=compute_host_checksums)
+    host_thread.start()
+    device_checksums = self._ComputeDeviceChecksumsForApks(package_name)
+    host_thread.join()
+    host_checksums = host_checksums_holder[0]
+    stale_apks = [k for (k, v) in host_checksums.iteritems()
+                  if v not in device_checksums]
+    return stale_apks, set(host_checksums.values())
 
   def _PushFilesImpl(self, host_device_tuples, files):
     size = sum(host_utils.GetRecursiveDiskUsage(h) for h, _ in files)
@@ -1547,8 +1629,9 @@ class DeviceUtils(object):
     assert isinstance(value, basestring), "value is not a string: %r" % value
 
     self.RunShellCommand(['setprop', property_name, value], check_return=True)
-    if property_name in self._cache:
-      del self._cache[property_name]
+    cache_key = '_prop:' + property_name
+    if cache_key in self._cache:
+      del self._cache[cache_key]
     # TODO(perezju) remove the option and make the check mandatory, but using a
     # single shell script to both set- and getprop.
     if check and value != self.GetProp(property_name):
@@ -1584,14 +1667,14 @@ class DeviceUtils(object):
       retries: number of retries
 
     Returns:
-      A dict mapping process name to PID for each process that contained the
-      provided |process_name|.
+      A dict mapping process name to a list of PIDs for each process that
+      contained the provided |process_name|.
 
     Raises:
       CommandTimeoutError on timeout.
       DeviceUnreachableError on missing device.
     """
-    procs_pids = {}
+    procs_pids = collections.defaultdict(list)
     try:
       ps_output = self._RunPipedShellCommand(
           'ps | grep -F %s' % cmd_helper.SingleQuote(process_name))
@@ -1607,7 +1690,8 @@ class DeviceUtils(object):
       try:
         ps_data = line.split()
         if process_name in ps_data[-1]:
-          procs_pids[ps_data[-1]] = ps_data[1]
+          pid, process = ps_data[1], ps_data[-1]
+          procs_pids[process].append(pid)
       except IndexError:
         pass
     return procs_pids
@@ -1670,6 +1754,38 @@ class DeviceUtils(object):
 
     return result
 
+  @decorators.WithTimeoutAndRetriesFromInstance()
+  def DismissCrashDialogIfNeeded(self, timeout=None, retries=None):
+    """Dismiss the error/ANR dialog if present.
+
+    Returns: Name of the crashed package if a dialog is focused,
+             None otherwise.
+    """
+    def _FindFocusedWindow():
+      match = None
+      # TODO(jbudorick): Try to grep the output on the device instead of using
+      # large_output if/when DeviceUtils exposes a public interface for piped
+      # shell command handling.
+      for line in self.RunShellCommand(['dumpsys', 'window', 'windows'],
+                                       check_return=True, large_output=True):
+        match = re.match(_CURRENT_FOCUS_CRASH_RE, line)
+        if match:
+          break
+      return match
+
+    match = _FindFocusedWindow()
+    if not match:
+      return None
+    package = match.group(2)
+    logging.warning('Trying to dismiss %s dialog for %s' % match.groups())
+    self.SendKeyEvent(keyevent.KEYCODE_DPAD_RIGHT)
+    self.SendKeyEvent(keyevent.KEYCODE_DPAD_RIGHT)
+    self.SendKeyEvent(keyevent.KEYCODE_ENTER)
+    match = _FindFocusedWindow()
+    if match:
+      logging.error('Still showing a %s dialog for %s' % match.groups())
+    return package
+
   def _GetMemoryUsageForPidFromSmaps(self, pid):
     SMAPS_COLUMNS = (
         'Size', 'Rss', 'Pss', 'Shared_Clean', 'Shared_Dirty', 'Private_Clean',
@@ -1719,7 +1835,12 @@ class DeviceUtils(object):
     """Clears all caches."""
     for client in self._client_caches:
       self._client_caches[client].clear()
-    self._cache.clear()
+    self._cache = {
+        # Map of packageId -> list of on-device .apk paths
+        'package_apk_paths': {},
+        # Map of packageId -> set of on-device .apk checksums
+        'package_apk_checksums': {},
+    }
 
   @classmethod
   def parallel(cls, devices=None, async=False):
@@ -1760,3 +1881,11 @@ class DeviceUtils(object):
 
     return [cls(adb) for adb in adb_wrapper.AdbWrapper.Devices()
             if not blacklisted(adb)]
+
+  @decorators.WithTimeoutAndRetriesFromInstance()
+  def RestartAdbd(self, timeout=None, retries=None):
+    logging.info('Restarting adbd on device.')
+    with device_temp_file.DeviceTempFile(self.adb, suffix='.sh') as script:
+      self.WriteFile(script.name, _RESTART_ADBD_SCRIPT)
+      self.RunShellCommand(['source', script.name], as_root=True)
+      self.adb.WaitForDevice()

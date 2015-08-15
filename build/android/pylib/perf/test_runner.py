@@ -47,7 +47,6 @@ option:
 """
 
 import collections
-import datetime
 import json
 import logging
 import os
@@ -87,6 +86,8 @@ def OutputJsonList(json_input, json_output):
 
     persisted_result = GetPersistedResult(k)
     if persisted_result:
+      data['start_time'] = persisted_result['start_time']
+      data['end_time'] = persisted_result['end_time']
       data['total_time'] = persisted_result['total_time']
     step_values.append(data)
 
@@ -112,7 +113,13 @@ def PrintTestOutput(test_name, json_file_name=None):
   logging.info('Output from:')
   logging.info(persisted_result['cmd'])
   logging.info('*' * 80)
-  print persisted_result['output']
+
+  output_formatted = ''
+  persisted_outputs = persisted_result['output']
+  for i in xrange(len(persisted_outputs)):
+    output_formatted += '\n\nOutput from run #%d:\n\n%s' % (
+        i, persisted_outputs[i])
+  print output_formatted
 
   if json_file_name:
     with file(json_file_name, 'w') as f:
@@ -195,23 +202,15 @@ class TestRunner(base_test_runner.BaseTestRunner):
     self._device_battery = battery_utils.BatteryUtils(self.device)
 
   @staticmethod
-  def _IsBetter(result):
-    if result['actual_exit_code'] == 0:
-      return True
-    pickled = os.path.join(constants.PERF_OUTPUT_DIR,
-                           result['name'])
-    if not os.path.exists(pickled):
-      return True
-    with file(pickled, 'r') as f:
-      previous = pickle.loads(f.read())
-    return result['actual_exit_code'] < previous['actual_exit_code']
-
-  @staticmethod
   def _SaveResult(result):
-    if TestRunner._IsBetter(result):
-      with file(os.path.join(constants.PERF_OUTPUT_DIR,
-                             result['name']), 'w') as f:
-        f.write(pickle.dumps(result))
+    pickled = os.path.join(constants.PERF_OUTPUT_DIR, result['name'])
+    if os.path.exists(pickled):
+      with file(pickled, 'r') as f:
+        previous = pickle.loads(f.read())
+        result['output'] = previous['output'] + result['output']
+
+    with file(pickled, 'w') as f:
+      f.write(pickle.dumps(result))
 
   def _CheckDeviceAffinity(self, test_name):
     """Returns True if test_name has affinity for this shard."""
@@ -258,7 +257,7 @@ class TestRunner(base_test_runner.BaseTestRunner):
     try:
       logging.warning('Unmapping device ports')
       forwarder.Forwarder.UnmapAllDevicePorts(self.device)
-      self.device.old_interface.RestartAdbdOnDevice()
+      self.device.RestartAdbd()
     except Exception as e:
       logging.error('Exception when tearing down device %s', e)
 
@@ -284,9 +283,9 @@ class TestRunner(base_test_runner.BaseTestRunner):
           self._options.min_battery_level)
 
     logging.info('%s : %s', test_name, cmd)
-    start_time = datetime.datetime.now()
+    start_time = time.time()
 
-    timeout = self._tests['steps'][test_name].get('timeout', 5400)
+    timeout = self._tests['steps'][test_name].get('timeout', 3600)
     if self._options.no_timeout:
       timeout = None
     logging.info('Timeout for %s test: %s', test_name, timeout)
@@ -308,17 +307,17 @@ class TestRunner(base_test_runner.BaseTestRunner):
       json_output = self._ReadChartjsonOutput()
     except cmd_helper.TimeoutError as e:
       exit_code = -1
-      output = str(e)
+      output = e.output
       json_output = ''
     finally:
       self._CleanupOutputDirectory()
       if self._options.single_step:
         logfile.stop()
-    end_time = datetime.datetime.now()
+    end_time = time.time()
     if exit_code is None:
       exit_code = -1
     logging.info('%s : exit_code=%d in %d secs at %s',
-                 test_name, exit_code, (end_time - start_time).seconds,
+                 test_name, exit_code, end_time - start_time,
                  self.device_serial)
 
     if exit_code == 0:
@@ -343,12 +342,14 @@ class TestRunner(base_test_runner.BaseTestRunner):
 
     persisted_result = {
         'name': test_name,
-        'output': output,
+        'output': [output],
         'chartjson': json_output,
         'exit_code': exit_code,
         'actual_exit_code': actual_exit_code,
         'result_type': result_type,
-        'total_time': (end_time - start_time).seconds,
+        'start_time': start_time,
+        'end_time': end_time,
+        'total_time': end_time - start_time,
         'device': self.device_serial,
         'cmd': cmd,
     }

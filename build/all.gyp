@@ -494,14 +494,6 @@
             '../components/nacl.gyp:nacl_helper_nonsfi_unittests',
           ],
         }],
-        ['disable_nacl==0 and disable_nacl_untrusted==0', {
-          'dependencies': [
-            '../mojo/mojo_nacl_untrusted.gyp:libmojo',
-            '../mojo/mojo_nacl.gyp:monacl_codegen',
-            '../mojo/mojo_nacl.gyp:monacl_sel',
-            '../mojo/mojo_nacl.gyp:monacl_shell',
-          ],
-        }],
       ],
     }, # target_name: chromium_builder_tests
   ],
@@ -889,7 +881,7 @@
                 '../chrome/chrome.gyp:chrome_shell_uiautomator_tests',
                 '../chrome/chrome.gyp:chromedriver_webview_shell_apk',
                 '../chrome/chrome.gyp:unit_tests_apk',
-                '../third_party/custom_tabs_client/src/custom_tabs_client.gyp:custom_tabs_client_example_apk',
+                '../third_party/custom_tabs_client/custom_tabs_client.gyp:custom_tabs_client_example_apk',
               ],
             }],
           ],
@@ -1157,7 +1149,6 @@
           'target_name': 'chromium_builder_dbg_drmemory_win',
           'type': 'none',
           'dependencies': [
-            '../ash/ash.gyp:ash_shell_unittests',
             '../ash/ash.gyp:ash_unittests',
             '../base/base.gyp:base_unittests',
             '../cc/blink/cc_blink_tests.gyp:cc_blink_unittests',

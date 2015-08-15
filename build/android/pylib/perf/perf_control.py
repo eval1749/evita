@@ -5,7 +5,6 @@
 import atexit
 import logging
 
-from pylib import android_commands
 from pylib.device import device_errors
 from pylib.device import device_utils
 
@@ -16,8 +15,6 @@ class PerfControl(object):
   _KERNEL_MAX = '/sys/devices/system/cpu/kernel_max'
 
   def __init__(self, device):
-    # TODO(jbudorick) Remove once telemetry gets switched over.
-    assert not isinstance(device, android_commands.AndroidCommands)
     self._device = device
     # this will raise an AdbCommandFailedError if no CPU files are found
     self._cpu_files = self._device.RunShellCommand(
@@ -114,7 +111,7 @@ class PerfControl(object):
     if cpus:
       logging.info('Successfully set %s to %r on: %s', path, value, cpus)
     else:
-      logging.warning('Failed to set %s to %r on any cpus')
+      logging.warning('Failed to set %s to %r on any cpus', path, value)
 
   def _SetScalingGovernorInternal(self, value):
     self._WriteEachCpuFile('cpufreq/scaling_governor', value)

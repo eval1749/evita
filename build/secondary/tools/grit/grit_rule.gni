@@ -168,13 +168,6 @@ if (enable_image_loader_extension) {
   ]
 }
 
-if (enable_remoting) {
-  grit_defines += [
-    "-D",
-    "remoting",
-  ]
-}
-
 if (is_android) {
   grit_defines += [
     "-t",
@@ -299,6 +292,12 @@ if (mac_views_browser) {
   grit_defines += [
     "-D",
     "mac_views_browser",
+  ]
+}
+if (enable_topchrome_md) {
+  grit_defines += [
+    "-D",
+    "enable_topchrome_md",
   ]
 }
 

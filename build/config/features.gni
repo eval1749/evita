@@ -60,7 +60,8 @@ declare_args() {
   # TODO(GYP) The GYP build has || chromecast==1 for this:
   proprietary_codecs = is_android || is_chrome_branded
 
-  enable_configuration_policy = true
+  # TODO(GYP) This should be enabled on ios as well.
+  enable_configuration_policy = !is_ios
 
   # Enables support for background apps.
   enable_background = !is_ios && !is_android
@@ -92,6 +93,10 @@ declare_args() {
   # (e.g. Android and ChromeCast) that use a browser side CDM.
   enable_browser_cdms = is_android
 
+  # Enables the use of CDMs in pepper plugins. Chromecast requires that this
+  # can be explicitly disabled in gn args.
+  enable_pepper_cdms = enable_plugins && (is_linux || is_mac || is_win)
+
   # Variable safe_browsing is used to control the build time configuration
   # for safe browsing feature. Safe browsing can be compiled in 4 different
   # levels: 0 disables it, 1 enables it fully, and 2 enables only UI and
@@ -105,6 +110,11 @@ declare_args() {
   } else {
     safe_browsing_mode = 1
   }
+
+  # Set to true make a build that disables activation of field trial tests
+  # specified in testing/variations/fieldtrial_testing_config_*.json.
+  # Note: this setting is ignored if is_chrome_branded.
+  fieldtrial_testing_like_official_build = is_chrome_branded
 }
 
 # Additional dependent variables -----------------------------------------------
@@ -126,9 +136,7 @@ use_udev = is_linux
 enable_spellcheck = !is_ios
 
 # Use the operating system's spellchecker rather than hunspell.
-use_platform_spellchecker = is_android || is_mac
-
-enable_pepper_cdms = enable_plugins && (is_linux || is_mac || is_win)
+use_browser_spellchecker = is_android || is_mac
 
 # Enable basic printing support and UI.
 enable_basic_printing = !is_chromeos

@@ -31,7 +31,7 @@ if (is_linux) {
       "nspr/lib/libc/include",
     ]
 
-    if (component_mode != "shared_library") {
+    if (!is_component_build) {
       defines += [ "NSPR_STATIC" ]
     }
   }
@@ -355,7 +355,7 @@ if (is_linux) {
       public_deps += [ ":nssckbi" ]
     }
 
-    if (component_mode == "shared_library") {
+    if (is_component_build) {
       if (is_mac) {
         ldflags = [ "-all_load" ]
       } else if (is_win) {
@@ -913,7 +913,6 @@ if (is_linux) {
     if (include_nss_libpkix) {
       sources += [
         "nss/lib/certhigh/certvfypkix.c",
-        "nss/lib/certhigh/certvfypkixprint.c",
         "nss/lib/libpkix/include/pkix.h",
         "nss/lib/libpkix/include/pkix_certsel.h",
         "nss/lib/libpkix/include/pkix_certstore.h",

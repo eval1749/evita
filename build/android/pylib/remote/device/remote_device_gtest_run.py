@@ -6,12 +6,10 @@
 
 import logging
 import os
-import sys
 import tempfile
 
 from pylib import constants
 from pylib.base import base_test_result
-from pylib.remote.device import appurify_sanitized
 from pylib.remote.device import remote_device_test_run
 from pylib.remote.device import remote_device_helper
 
@@ -74,8 +72,6 @@ class RemoteDeviceGtestTestRun(remote_device_test_run.RemoteDeviceTestRun):
     results.AddResults(results_list)
     if self._env.only_output_failures:
       logging.info('See logcat for more results information.')
-    if not self._results['results']['pass']:
-      results.AddResult(base_test_result.BaseTestResult(
-          'Remote Service detected error.',
-          base_test_result.ResultType.FAIL))
+
+    self._DetectPlatformErrors(results)
     return results

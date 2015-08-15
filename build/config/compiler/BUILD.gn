@@ -30,6 +30,8 @@ declare_args() {
   # only two architectures that are currently checked in). Turn this off when
   # you are using a custom toolchain and need to control -B in cflags.
   linux_use_bundled_binutils = is_linux && current_cpu == "x64"
+  binutils_path = rebase_path("//third_party/binutils/Linux_x64/Release/bin",
+                              root_build_dir)
 
   # Compile in such a way as to enable profiling of the generated code. For
   # example, don't omit the frame pointer and leave in symbols.
@@ -45,6 +47,14 @@ declare_args() {
   # Use gold for linking on 64-bit Linux only (on 32-bit it runs out of
   # address space, and it doesn't support cross-compiling).
   use_gold = is_linux && current_cpu == "x64"
+
+  # When we are going to use gold we need to find it.
+  if (use_gold) {
+    gold_path = rebase_path("//third_party/binutils/Linux_x64/Release/bin",
+                            root_build_dir)
+  } else {
+    gold_path = ""
+  }
 
   # use_debug_fission: whether to use split DWARF debug info
   # files. This can reduce link time significantly, but is incompatible
@@ -106,7 +116,14 @@ config("compiler") {
       "/Gy",  # Enable function-level linking.
       "/GS",  # Enable buffer security checking.
       "/FS",  # Preserve previous PDB behavior.
+      "/bigobj",  # Some of our files are bigger than the regular limits.
     ]
+
+    # Force C/C++ mode for the given GN detected file type. This is necessary
+    # for precompiled headers where the same source file is compiled in both
+    # modes.
+    cflags_c += [ "/TC" ]
+    cflags_cc += [ "/TP" ]
 
     # Building with Clang on Windows is a work in progress and very
     # experimental. See crbug.com/82385.
@@ -130,10 +147,6 @@ config("compiler") {
         cflags += [ "-m64" ]
       }
 
-      # TODO(thakis): Remove this once llvm.org/PR24167 is fixed.
-      if (is_asan) {
-        cflags += [ "/fallback" ]
-      }
       if (exec_script("//build/win/use_ansi_codes.py", [], "trim string") ==
           "True") {
         cflags += [
@@ -146,6 +159,7 @@ config("compiler") {
 
     if (is_syzyasan) {
       # SyzyAsan needs /PROFILE turned on to produce appropriate pdbs.
+      assert(!is_win_fastlink, "/PROFILE and /DEBUG:FASTLINK are incompatible")
       ldflags += [ "/PROFILE" ]
     }
   } else {
@@ -164,11 +178,14 @@ config("compiler") {
     # Stack protection.
     if (is_mac) {
       cflags += [ "-fstack-protector-all" ]
-    } else if (is_linux) {
-      cflags += [
-        "-fstack-protector",
-        "--param=ssp-buffer-size=4",
-      ]
+    } else if (is_posix && !is_chromeos && !is_nacl) {
+      # TODO(phajdan.jr): Use -fstack-protector-strong when our gcc supports it.
+      cflags += [ "--param=ssp-buffer-size=4" ]
+      if (is_android && (current_cpu == "arm64" || current_cpu == "x86")) {
+        cflags += [ "-fno-stack-protector" ]
+      } else {
+        cflags += [ "-fstack-protector" ]
+      }
     }
 
     # Linker warnings.
@@ -267,9 +284,12 @@ config("compiler") {
         "i386",
       ]
     } else if (current_cpu == "arm") {
+      # TODO(GYP): we may need to distinguish between "arm64", "armv7",
+      # and "armv7s" for iOS, and hence need multiple current_cpu values
+      # rather than just "arm".
       common_mac_flags += [
         "-arch",
-        "armv7",
+        "arm64",
       ]
     }
 
@@ -453,8 +473,6 @@ config("compiler") {
     ldflags += [ "-pthread" ]
   }
   if (use_gold) {
-    gold_path = rebase_path("//third_party/binutils/Linux_x64/Release/bin",
-                            root_build_dir)
     ldflags += [
       "-B$gold_path",
 
@@ -488,8 +506,6 @@ config("compiler") {
   }
 
   if (linux_use_bundled_binutils) {
-    binutils_path = rebase_path("//third_party/binutils/Linux_x64/Release/bin",
-                                root_build_dir)
     cflags += [ "-B$binutils_path" ]
   }
 
@@ -523,6 +539,17 @@ config("compiler") {
       # Clang doesn't support these flags.
       cflags += [ "-finline-limit=64" ]
     }
+    if (is_clang) {
+      rebased_android_toolchain_root =
+          rebase_path(android_toolchain_root, root_build_dir)
+      if (current_cpu == "arm") {
+        cflags += [
+          # TODO(hans) Enable integrated-as (crbug.com/124610).
+          "-no-integrated-as",
+          "-B${rebased_android_toolchain_root}/bin",  # Else /usr/bin/as gets picked up.
+        ]
+      }
+    }
     if (is_asan) {
       # Android build relies on -Wl,--gc-sections removing unreachable code.
       # ASan instrumentation for globals inhibits this and results in a library
@@ -542,8 +569,7 @@ config("compiler") {
       ldflags += [ "-fuse-ld=gold" ]
       if (is_clang) {
         # Let clang find the ld.gold in the NDK.
-        ldflags += [ "--gcc-toolchain=" +
-                     rebase_path(android_toolchain_root, root_build_dir) ]
+        ldflags += [ "--gcc-toolchain=$rebased_android_toolchain_root" ]
       }
     }
 
@@ -569,12 +595,33 @@ config("compiler") {
 
     if (is_clang) {
       if (current_cpu == "arm") {
-        cflags += [ "-target arm-linux-androideabi" ]
-        ldflags += [ "-target arm-linux-androideabi" ]
+        _abi_target = "arm-linux-androideabi"
       } else if (current_cpu == "x86") {
-        cflags += [ "-target x86-linux-androideabi" ]
-        ldflags += [ "-target x86-linux-androideabi" ]
+        _abi_target = "i686-linux-androideabi"
+      } else if (current_cpu == "arm64") {
+        # Place holder for arm64 support, not tested.
+        _abi_target = "aarch64-linux-androideabi"
+      } else if (current_cpu == "x64") {
+        # Place holder for x64 support, not tested.
+        # TODO: Enable clang support for Android x64. http://crbug.com/346626
+        _abi_target = "x86_64-linux-androideabi"
+      } else if (current_cpu == "mipsel") {
+        # Place holder for mips support, not tested.
+        _abi_target = "mipsel-linux-androideabi"
+      } else if (current_cpu == "mips64el") {
+        # Place holder for mips64 support, not tested.
+        _abi_target = "mips64el-linux-androideabi"
+      } else {
+        assert(false, "Architecture not supported")
       }
+      cflags += [
+        "-target",
+        _abi_target,
+      ]
+      ldflags += [
+        "-target",
+        _abi_target,
+      ]
     }
   }
 
@@ -619,8 +666,15 @@ config("runtime_library") {
       }
     }
   } else {
-    # Static CRT.
-    if (is_win) {
+    if (is_win && current_os != "win") {
+      # WindowsRT: use the dynamic CRT.
+      if (is_debug) {
+        cflags += [ "/MDd" ]
+      } else {
+        cflags += [ "/MD" ]
+      }
+    } else if (is_win) {
+      # Desktop Windows: static CRT.
       if (is_debug) {
         cflags += [ "/MTd" ]
       } else {
@@ -715,18 +769,11 @@ config("runtime_library") {
 default_warning_flags = []
 default_warning_flags_cc = []
 if (is_win) {
-  # TODO(thakis): Make this unconditional once llvm.org/PR24167 is fixed.
-  if (!is_clang || !is_asan) {
-    default_warning_flags += [ "/WX" ]  # Treat warnings as errors.
-  }
-
   default_warning_flags += [
-    # Warnings permanently disabled:
+    # Treat warnings as errors.
+    "/WX",
 
-    # TODO(GYP) The GYP build doesn't have this globally enabled but disabled
-    # for a bunch of individual targets. Re-enable this globally when those
-    # targets are fixed.
-    "/wd4018",  # Comparing signed and unsigned values.
+    # Warnings permanently disabled:
 
     # C4127: conditional expression is constant
     # This warning can in theory catch dead code and other problems, but
@@ -814,7 +861,6 @@ if (is_win) {
       "-Wno-microsoft",  # http://crbug.com/505296
       "-Wno-switch",  # http://crbug.com/505308
       "-Wno-unknown-pragmas",  # http://crbug.com/505314
-      "-Wno-unused-function",  # http://crbug.com/505316
       "-Wno-unused-value",  # http://crbug.com/505318
     ]
   }
@@ -844,10 +890,13 @@ if (is_win) {
     default_warning_flags_cc += [
       # See comment for -Wno-c++11-narrowing.
       "-Wno-narrowing",
-
-      # TODO(thakis): Remove, http://crbug.com/263960
-      "-Wno-literal-suffix",
     ]
+    if (!is_clang) {
+      default_warning_flags_cc += [
+        # TODO(thakis): Remove, http://crbug.com/263960
+        "-Wno-literal-suffix",
+      ]
+    }
   }
 
   # Suppress warnings about ABI changes on ARM (Clang doesn't give this
@@ -957,7 +1006,8 @@ config("chromium_code") {
       "__STDC_FORMAT_MACROS",
     ]
 
-    if (!using_sanitizer && (!is_linux || !is_clang || is_official_build)) {
+    if (!is_debug && !using_sanitizer &&
+        (!is_linux || !is_clang || is_official_build)) {
       # _FORTIFY_SOURCE isn't really supported by Clang now, see
       # http://llvm.org/bugs/show_bug.cgi?id=16821.
       # It seems to work fine with Ubuntu 12 headers though, so use it in
@@ -1003,6 +1053,10 @@ config("no_chromium_code") {
       # TODO(mgiuca): Move this suppression into individual third-party
       # libraries as required. http://crbug.com/505301.
       "-Wno-overloaded-virtual",
+
+      # TODO(thakis): Move this suppression into individual third-party
+      # libraries as required. http://crbug.com/505316.
+      "-Wno-unused-function",
 
       # Lots of third-party libraries have unused variables. Instead of
       # suppressing them individually, we just blanket suppress them here.
@@ -1144,7 +1198,7 @@ if (is_win) {
     }
   }
 
-  if (is_mac) {
+  if (is_mac || is_ios) {
     if (symbol_level == 2) {
       # Mac dead code stripping requires symbols.
       common_optimize_on_ldflags += [ "-Wl,-dead_strip" ]
@@ -1245,7 +1299,14 @@ config("symbols") {
     } else {
       cflags = [ "/Zi" ]  # Produce PDB file, no edit and continue.
     }
-    ldflags = [ "/DEBUG" ]
+    if (is_win_fastlink) {
+      # Tell VS 2015+ to create a PDB that references debug
+      # information in .obj and .lib files instead of copying
+      # it all. This flag is incompatible with /PROFILE
+      ldflags = [ "/DEBUG:FASTLINK" ]
+    } else {
+      ldflags = [ "/DEBUG" ]
+    }
   } else {
     cflags = [ "-g2" ]
     if (use_debug_fission) {
@@ -1257,7 +1318,14 @@ config("symbols") {
 config("minimal_symbols") {
   if (is_win) {
     # Linker symbols for backtraces only.
-    ldflags = [ "/DEBUG" ]
+    if (is_win_fastlink) {
+      # Tell VS 2015+ to create a PDB that references debug
+      # information in .obj and .lib files instead of copying
+      # it all. This flag is incompatible with /PROFILE
+      ldflags = [ "/DEBUG:FASTLINK" ]
+    } else {
+      ldflags = [ "/DEBUG" ]
+    }
   } else {
     cflags = [ "-g1" ]
     if (use_debug_fission) {

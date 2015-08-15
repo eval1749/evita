@@ -63,9 +63,9 @@ struct RegExp::Match {
     end = start = -1;
   }
 
-  void Set(int start, int end) {
-    this->start = start;
-    this->end = end;
+  void Set(int start_in, int end_in) {
+    start = start_in;
+    end = end_in;
   }
 };
 

@@ -85,8 +85,6 @@ domapi::EventTargetId MaybeEventTarget(ui::Widget* widget) {
   return window ? window->window_id() : domapi::kInvalidEventTargetId;
 }
 
-int static_active_tick;
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////

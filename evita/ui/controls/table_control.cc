@@ -335,7 +335,7 @@ void Column::OnPaintCanvas(gfx::Canvas* canvas) {
   {
     const auto separator = gfx::RectF(bounds().top_right() + gfx::SizeF(-1, 3),
                                       gfx::SizeF(1.0f, bounds().height() - 6));
-    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, separator);
+    gfx::Canvas::AxisAlignedClipScope clip_scope2(canvas, separator);
     canvas->Clear(gfx::ColorF::LightGray);
   }
 
@@ -901,9 +901,10 @@ void RowCollection::DidRemoveRow(int row_id) {
   auto index = 0;
   auto row_pos = rows_.end();
   gfx::RectF new_rect;
-  for (auto it = rows_.begin(); it < rows_.end(); ++it){
-    auto row = *it;
-    if (row->row_id() == row_id) {
+  // TODO(eval1749) We should use range-for.
+  for (auto it = rows_.begin(); it < rows_.end(); ++it) {
+    auto runner = *it;
+    if (runner->row_id() == row_id) {
       row_pos = it;
       selection_.DidRemoveItem(index);
       NeedUpdateLayout();

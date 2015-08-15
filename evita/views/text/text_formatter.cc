@@ -303,7 +303,7 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
   if (!font) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
-    auto const font = FontSet::GetFont(style, 'u');
+    auto const font2 = FontSet::GetFont(style, 'u');
     base::string16 string;
     if (wch < 0x20) {
       string.push_back('^');
@@ -316,12 +316,12 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
       string.push_back(toxdigit((wch >> 0) & 15));
     }
 
-    auto const width = font->GetTextWidth(string) + 4;
-    auto const char_width = font->GetCharWidth('M');
+    auto const width = font2->GetTextWidth(string) + 4;
+    auto const char_width = font2->GetCharWidth('M');
     if (previous_cell && x + width + char_width > bounds_.right)
       return nullptr;
-    auto const height = AlignHeightToPixel(font->height());
-    return new UnicodeCell(MakeRenderStyle(style, font), width, height, lPosn,
+    auto const height = AlignHeightToPixel(font2->height());
+    return new UnicodeCell(MakeRenderStyle(style, font2), width, height, lPosn,
                            string);
   }
 

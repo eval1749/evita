@@ -29,9 +29,9 @@ void Sampling::AddSample(float sample) {
   if (discard_sample != maximum_ && discard_sample != minimum_)
     return;
   maximum_ = minimum_ = samples_.front();
-  for (auto const sample : samples_) {
-    maximum_ = std::max(maximum_, sample);
-    minimum_ = std::min(minimum_, sample);
+  for (auto const runner : samples_) {
+    maximum_ = std::max(maximum_, runner);
+    minimum_ = std::min(minimum_, runner);
   }
 }
 

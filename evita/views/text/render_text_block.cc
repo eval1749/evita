@@ -169,10 +169,10 @@ void TextBlock::TextLineCache::RemoveDirtyLines() {
   }
 
   for (auto offset : dirty_offsets) {
-    const auto it = lines_.find(offset);
-    DCHECK(it != lines_.end());
-    delete it->second;
-    lines_.erase(it);
+    const auto present = lines_.find(offset);
+    DCHECK(present != lines_.end());
+    delete present->second;
+    lines_.erase(present);
   }
 }
 

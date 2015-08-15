@@ -340,9 +340,10 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       hover_widget->DispatchEvent(&event);
       hover_widget = result.widget();
       if (hover_widget) {
-        MouseEvent event(EventType::MouseEntered, MouseButton::None, 0, 0,
-                         hover_widget, result.local_point(), screen_point);
-        hover_widget->DispatchEvent(&event);
+        MouseEvent entered_event(EventType::MouseEntered, MouseButton::None,
+                                 0, 0, hover_widget, result.local_point(),
+                                 screen_point);
+        hover_widget->DispatchEvent(&entered_event);
       }
     }
   }

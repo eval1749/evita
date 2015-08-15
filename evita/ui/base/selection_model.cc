@@ -70,9 +70,8 @@ void SelectionModel::ExtendTo(int index) {
   set_.clear();
   auto const start = std::min(anchor_, focus_);
   auto const end = std::max(anchor_, focus_);
-  for (auto index = start; index <= end; ++index) {
-    set_.insert(index);
-  }
+  for (auto runner = start; runner <= end; ++runner)
+    set_.insert(runner);
 }
 
 bool SelectionModel::IsSelected(int index) const {

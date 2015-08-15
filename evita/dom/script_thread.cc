@@ -156,12 +156,12 @@ void ScriptThread::Start(base::MessageLoop* view_message_loop,
                          ViewDelegate* view_delegate,
                          base::MessageLoop* io_message_loop,
                          domapi::IoDelegate* io_delegate) {
-  auto const script_thread = new ScriptThread(view_message_loop, view_delegate,
-                                              io_message_loop, io_delegate);
+  auto const thread = new ScriptThread(view_message_loop, view_delegate,
+                                       io_message_loop, io_delegate);
   PostScriptTask(FROM_HERE, base::Bind(
       base::IgnoreResult(&ScriptHost::Start),
-      base::Unretained(script_thread),
-      base::Unretained(script_thread)));
+      base::Unretained(thread),
+      base::Unretained(thread)));
 }
 
 // IoDelegate

@@ -44,7 +44,7 @@ if "%outdir%"=="default" (
 : set defines=%defines% -D icu_use_data_file_flag=0
 
 : We don't use V8's external startup file.
-set defines=%defines% -D v8_use_external_startup_data=0
+set defines=%defines% -D v8_use_external_startup_data=0 -D win_fastlink=1
 
 if not "%defines%"=="" (
   echo Defines: %defines%

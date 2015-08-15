@@ -13,9 +13,9 @@ namespace win {
 namespace {
 HKEY OpenKey(HKEY root, const base::string16& name, REGSAM sam_desired) {
   HKEY hkey;
-  auto const error = ::RegOpenKeyEx(root, name.c_str(), 0, sam_desired, &hkey);
-  if (error != ERROR_SUCCESS) {
-    WIN32_VERIFY(error);
+  auto const ret = ::RegOpenKeyEx(root, name.c_str(), 0, sam_desired, &hkey);
+  if (ret != ERROR_SUCCESS) {
+    WIN32_VERIFY(ret);
     return nullptr;
   }
   return hkey;

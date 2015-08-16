@@ -791,6 +791,11 @@ if (is_win) {
     "/wd4302",
     "/wd4311",
 
+    # C4458: declaration of 'type' hides class member
+    # third_party/icu/source/common/unicode/messagepattern.h
+    # base/test/trace_event_analyzer.cc
+    "/wd4458",
+
     # C4127: conditional expression is constant
     # This warning can in theory catch dead code and other problems, but
     # triggers in far too many desirable cases where the conditional

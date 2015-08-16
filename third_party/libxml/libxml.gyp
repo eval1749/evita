@@ -51,7 +51,14 @@
               },
             }],
             ['OS == "ios"', {
-              'type': 'none',
+              'type': 'static_library',
+              'sources': [
+                'chromium/libxml_utils.h',
+                'chromium/libxml_utils.cc',
+              ],
+              'include_dirs': [
+                '$(SDKROOT)/usr/include/libxml2',
+              ],
               'all_dependent_settings': {
                 'defines': [
                   'USE_SYSTEM_LIBXML',
@@ -61,9 +68,11 @@
                 ],
               },
               'link_settings': {
-                'libraries': [
-                  '$(SDKROOT)/usr/lib/libxml2.dylib',
-                ],
+                'xcode_settings': {
+                  'OTHER_LDFLAGS': [
+                    '-lxml2',
+                  ],
+                },
               },
             }],
           ],
@@ -89,8 +98,6 @@
             'src/include/libxml/HTMLparser.h',
             'src/include/libxml/HTMLtree.h',
             'src/include/libxml/list.h',
-            'src/include/libxml/nanoftp.h',
-            'src/include/libxml/nanohttp.h',
             'src/include/libxml/parser.h',
             'src/include/libxml/parserInternals.h',
             'src/include/libxml/pattern.h',
@@ -124,7 +131,8 @@
             'src/include/libxml/xpointer.h',
             'src/include/win32config.h',
             'src/include/wsockcompat.h',
-            'src/acconfig.h',
+            'src/buf.c',
+            'src/buf.h',
             'src/c14n.c',
             'src/catalog.c',
             'src/chvalid.c',
@@ -132,6 +140,7 @@
             'src/dict.c',
             'src/DOCBparser.c',
             'src/elfgcchack.h',
+            'src/enc.h',
             'src/encoding.c',
             'src/entities.c',
             'src/error.c',
@@ -142,16 +151,16 @@
             'src/legacy.c',
             'src/libxml.h',
             'src/list.c',
-            'src/nanoftp.c',
-            'src/nanohttp.c',
             'src/parser.c',
             'src/parserInternals.c',
             'src/pattern.c',
             'src/relaxng.c',
+            'src/save.h',
             'src/SAX.c',
             'src/SAX2.c',
             'src/schematron.c',
             'src/threads.c',
+            'src/timsort.h',
             'src/tree.c',
             #'src/trio.c',
             #'src/trio.h',
@@ -178,6 +187,8 @@
             'src/xmlwriter.c',
             'src/xpath.c',
             'src/xpointer.c',
+            #'src/xzlib.c',
+            'src/xzlib.h',
             'win32/config.h',
             'win32/include/libxml/xmlversion.h',
           ],
@@ -188,6 +199,26 @@
             # defines the macro FOO as 1.)
             'LIBXML_STATIC=',
           ],
+          'variables': {
+            'clang_warning_flags': [
+              # libxml passes `const unsigned char*` through `const char*`.
+              '-Wno-pointer-sign',
+              # pattern.c and uri.c both have an intentional
+              # `for (...);` / `while(...);` loop. I submitted a patch to
+              # move the `'` to its own line, but until that's landed
+              # suppress the warning:
+              '-Wno-empty-body',
+              # debugXML.c compares array 'arg' to NULL.
+              '-Wno-tautological-pointer-compare',
+              # See http://crbug.com/138571#c8
+              '-Wno-ignored-attributes',
+              # libxml casts from int to long to void*.
+              '-Wno-int-to-void-pointer-cast',
+              # libxml passes a volatile LPCRITICAL_SECTION* to a function
+              # expecting a void* volatile*.
+              '-Wno-incompatible-pointer-types',
+            ],
+          },
           'include_dirs': [
             '<(os_include)',
             '<(os_include)/include',
@@ -215,6 +246,7 @@
                 'libraries': [
                   # We need dl for dlopen() and friends.
                   '-ldl',
+                  '-lm',
                 ],
               },
             }],
@@ -233,27 +265,10 @@
             }, {  # else: OS!="win"
               'product_name': 'xml2',
             }],
-            ['clang == 1', {
-              'xcode_settings': {
-                'WARNING_CFLAGS': [
-                  # libxml passes `const unsigned char*` through `const char*`.
-                  '-Wno-pointer-sign',
-                  # pattern.c and uri.c both have an intentional
-                  # `for (...);` / `while(...);` loop. I submitted a patch to
-                  # move the `'` to its own line, but until that's landed
-                  # suppress the warning:
-                  '-Wno-empty-body',
-                ],
-              },
-              'cflags': [
-                '-Wno-pointer-sign',
-                '-Wno-empty-body',
-
-                # See http://crbug.com/138571#c8
-                '-Wno-ignored-attributes',
-              ],
-            }],
           ],
+        }],
+        ['OS == "ios"', {
+          'toolsets': ['host', 'target'],
         }],
       ],
     },

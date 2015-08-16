@@ -5,25 +5,26 @@
 package org.chromium.base.test;
 
 import android.app.Activity;
-import android.content.Context;
-import android.os.SystemClock;
 import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
 
-import org.chromium.base.test.util.CommandLineFlags;
+import org.chromium.base.test.util.parameter.BaseParameter;
+import org.chromium.base.test.util.parameter.Parameter;
+import org.chromium.base.test.util.parameter.Parameterizable;
+import org.chromium.base.test.util.parameter.parameters.MethodParameter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base class for all Activity-based Instrumentation tests.
  *
+ * This class currently does nothing.
+ *
  * @param <T> The Activity type.
  */
 public class BaseActivityInstrumentationTestCase<T extends Activity>
-        extends ActivityInstrumentationTestCase2<T> {
-
-    private static final String TAG = "BaseActivityInstrumentationTestCase";
-
-    private static final int SLEEP_INTERVAL = 50; // milliseconds
-    private static final int WAIT_DURATION = 5000; // milliseconds
+        extends ActivityInstrumentationTestCase2<T> implements Parameterizable {
+    private Parameter.Reader mParameterReader;
 
     /**
      * Creates a instance for running tests against an Activity of the given class.
@@ -34,33 +35,34 @@ public class BaseActivityInstrumentationTestCase<T extends Activity>
         super(activityClass);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        CommandLineFlags.setUp(getTargetContext(), getClass().getMethod(getName()));
+    /**
+     * Creates the list of available parameters that inherited classes can use.
+     *
+     * @return a list of {@link BaseParameter} objects to set as the available parameters.
+     */
+    public Map<String, BaseParameter> getAvailableParameters() {
+        Map<String, BaseParameter> parameters = new HashMap<>();
+        parameters.put(MethodParameter.PARAMETER_TAG, new MethodParameter(getParameterReader()));
+        return parameters;
     }
 
     /**
-     * Gets the target context.
+     * Setter method for {@link Parameter.Reader}.
      *
-     * On older versions of Android, getTargetContext() may initially return null, so we have to
-     * wait for it to become available.
-     *
-     * @return The target {@link android.content.Context} if available; null otherwise.
+     * @param parameterReader the {@link Parameter.Reader} to set.
      */
-    private Context getTargetContext() {
-        Context targetContext = getInstrumentation().getTargetContext();
-        try {
-            long startTime = SystemClock.uptimeMillis();
-            // TODO(jbudorick): Convert this to CriteriaHelper once that moves to base/.
-            while (targetContext == null
-                    && SystemClock.uptimeMillis() - startTime < WAIT_DURATION) {
-                Thread.sleep(SLEEP_INTERVAL);
-                targetContext = getInstrumentation().getTargetContext();
-            }
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Interrupted while attempting to initialize the command line.");
-        }
-        return targetContext;
+    public void setParameterReader(Parameter.Reader parameterReader) {
+        mParameterReader = parameterReader;
+    }
+
+    /**
+     * Getter method for {@link Parameter.Reader} object to be used by test cases reading the
+     * parameter.
+     *
+     * @return the {@link Parameter.Reader} for the current {@link
+     * org.chromium.base.test.util.parameter.ParameterizedTest} being run.
+     */
+    protected Parameter.Reader getParameterReader() {
+        return mParameterReader;
     }
 }

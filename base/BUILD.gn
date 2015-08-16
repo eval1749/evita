@@ -246,10 +246,14 @@ component("base") {
     "hash.cc",
     "hash.h",
     "id_map.h",
+    "ios/crb_protocol_observers.h",
+    "ios/crb_protocol_observers.mm",
     "ios/device_util.h",
     "ios/device_util.mm",
     "ios/ios_util.h",
     "ios/ios_util.mm",
+    "ios/ns_error_util.h",
+    "ios/ns_error_util.mm",
     "ios/scoped_critical_action.h",
     "ios/scoped_critical_action.mm",
     "ios/weak_nsobject.h",
@@ -390,14 +394,14 @@ component("base") {
     "profiler/alternate_timer.h",
     "profiler/native_stack_sampler.cc",
     "profiler/native_stack_sampler.h",
+    "profiler/native_stack_sampler_posix.cc",
+    "profiler/native_stack_sampler_win.cc",
     "profiler/scoped_profile.cc",
     "profiler/scoped_profile.h",
     "profiler/scoped_tracker.cc",
     "profiler/scoped_tracker.h",
     "profiler/stack_sampling_profiler.cc",
     "profiler/stack_sampling_profiler.h",
-    "profiler/stack_sampling_profiler_posix.cc",
-    "profiler/stack_sampling_profiler_win.cc",
     "profiler/tracked_time.cc",
     "profiler/tracked_time.h",
     "rand_util.cc",
@@ -638,6 +642,17 @@ component("base") {
     "win/wrapped_window_proc.h",
   ]
 
+  if (is_ios) {
+    sources -= [
+      "message_loop/message_pump_libevent.cc",
+      "message_loop/message_pump_libevent.h",
+    ]
+
+    set_sources_assignment_filter([])
+    sources += [ "files/file_path_watcher_mac.cc" ]
+    set_sources_assignment_filter(sources_assignment_filter)
+  }
+
   sources -= [
     "sys_info_freebsd.cc",
     "sys_info_openbsd.cc",
@@ -645,7 +660,10 @@ component("base") {
 
   data = []
 
-  configs += [ ":base_implementation" ]
+  configs += [
+    ":base_implementation",
+    "//build/config:precompiled_headers",
+  ]
 
   deps = [
     ":base_static",
@@ -964,6 +982,8 @@ component("i18n") {
     "i18n/icu_string_conversions.h",
     "i18n/icu_util.cc",
     "i18n/icu_util.h",
+    "i18n/message_formatter.cc",
+    "i18n/message_formatter.h",
     "i18n/number_formatting.cc",
     "i18n/number_formatting.h",
     "i18n/rtl.cc",
@@ -983,10 +1003,12 @@ component("i18n") {
   ]
   defines = [ "BASE_I18N_IMPLEMENTATION" ]
   configs += [ "//build/config/compiler:wexit_time_destructors" ]
+  public_deps = [
+    "//third_party/icu",
+  ]
   deps = [
     ":base",
     "//base/third_party/dynamic_annotations",
-    "//third_party/icu",
   ]
 
   if (!is_debug) {
@@ -998,7 +1020,7 @@ component("i18n") {
   configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
 }
 
-if (is_win || (is_linux && !is_chromeos)) {
+if (is_ios || is_win || (is_linux && !is_chromeos)) {
   # TODO(GYP): Figure out which of these work and are needed on other platforms.
   test("base_perftests") {
     sources = [
@@ -1057,23 +1079,18 @@ if (is_win || (is_linux && !is_chromeos)) {
 
 component("prefs") {
   sources = [
-    "prefs/base_prefs_export.h",
     "prefs/default_pref_store.cc",
     "prefs/default_pref_store.h",
     "prefs/json_pref_store.cc",
     "prefs/json_pref_store.h",
     "prefs/overlay_user_pref_store.cc",
     "prefs/overlay_user_pref_store.h",
-    "prefs/persistent_pref_store.h",
     "prefs/pref_change_registrar.cc",
     "prefs/pref_change_registrar.h",
-    "prefs/pref_filter.h",
     "prefs/pref_member.cc",
     "prefs/pref_member.h",
-    "prefs/pref_notifier.h",
     "prefs/pref_notifier_impl.cc",
     "prefs/pref_notifier_impl.h",
-    "prefs/pref_observer.h",
     "prefs/pref_registry.cc",
     "prefs/pref_registry.h",
     "prefs/pref_registry_simple.cc",
@@ -1092,8 +1109,17 @@ component("prefs") {
     "prefs/scoped_user_pref_update.h",
     "prefs/value_map_pref_store.cc",
     "prefs/value_map_pref_store.h",
-    "prefs/writeable_pref_store.h",
   ]
+  if (!is_ios) {
+    sources += [
+      "prefs/base_prefs_export.h",
+      "prefs/persistent_pref_store.h",
+      "prefs/pref_filter.h",
+      "prefs/pref_notifier.h",
+      "prefs/pref_observer.h",
+      "prefs/writeable_pref_store.h",
+    ]
+  }
 
   defines = [ "BASE_PREFS_IMPLEMENTATION" ]
 
@@ -1234,6 +1260,7 @@ test("base_unittests") {
     "i18n/char_iterator_unittest.cc",
     "i18n/file_util_icu_unittest.cc",
     "i18n/icu_string_conversions_unittest.cc",
+    "i18n/message_formatter_unittest.cc",
     "i18n/number_formatting_unittest.cc",
     "i18n/rtl_unittest.cc",
     "i18n/streaming_utf8_validator_unittest.cc",
@@ -1316,7 +1343,6 @@ test("base_unittests") {
     "process/process_metrics_unittest_ios.cc",
     "process/process_unittest.cc",
     "process/process_util_unittest.cc",
-    "process/process_util_unittest_ios.cc",
     "profiler/stack_sampling_profiler_unittest.cc",
     "profiler/tracked_time_unittest.cc",
     "rand_util_unittest.cc",
@@ -1443,6 +1469,8 @@ test("base_unittests") {
 
   if (is_ios) {
     sources -= [
+      "memory/discardable_shared_memory_unittest.cc",
+      "memory/shared_memory_unittest.cc",
       "process/memory_unittest.cc",
       "process/process_unittest.cc",
       "process/process_util_unittest.cc",
@@ -1456,7 +1484,7 @@ test("base_unittests") {
       "mac/foundation_util_unittest.mm",
       "mac/objc_property_releaser_unittest.mm",
       "mac/scoped_nsobject_unittest.mm",
-      "sys_string_conversions_mac_unittest.mm",
+      "strings/sys_string_conversions_mac_unittest.mm",
     ]
     set_sources_assignment_filter(sources_assignment_filter)
 
@@ -1477,7 +1505,7 @@ test("base_unittests") {
     sources -= [ "message_loop/message_pump_glib_unittest.cc" ]
   }
 
-  if (is_posix || is_ios) {
+  if (is_posix && !is_ios) {
     sources += [ "message_loop/message_pump_libevent_unittest.cc" ]
     deps += [ "//third_party/libevent" ]
   }

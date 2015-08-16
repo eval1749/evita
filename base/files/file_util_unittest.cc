@@ -244,15 +244,6 @@ std::wstring ReadTextFile(const FilePath& filename) {
   return std::wstring(contents);
 }
 
-#if defined(OS_WIN)
-uint64 FileTimeAsUint64(const FILETIME& ft) {
-  ULARGE_INTEGER u;
-  u.LowPart = ft.dwLowDateTime;
-  u.HighPart = ft.dwHighDateTime;
-  return u.QuadPart;
-}
-#endif
-
 TEST_F(FileUtilTest, FileAndDirectorySize) {
   // Create three files of 20, 30 and 3 chars (utf8). ComputeDirectorySize
   // should return 53 bytes.
@@ -435,8 +426,8 @@ TEST_F(FileUtilTest, NormalizeFilePathReparsePoints) {
 
 TEST_F(FileUtilTest, DevicePathToDriveLetter) {
   // Get a drive letter.
-  std::wstring real_drive_letter = temp_dir_.path().value().substr(0, 2);
-  StringToUpperASCII(&real_drive_letter);
+  string16 real_drive_letter =
+      ToUpperASCII(temp_dir_.path().value().substr(0, 2));
   if (!isalpha(real_drive_letter[0]) || ':' != real_drive_letter[1]) {
     LOG(ERROR) << "Can't get a drive letter to test with.";
     return;

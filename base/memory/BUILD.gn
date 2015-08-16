@@ -46,6 +46,12 @@ source_set("memory") {
     "weak_ptr.cc",
     "weak_ptr.h",
   ]
+  if (is_ios) {
+    sources -= [
+      "discardable_shared_memory.cc",
+      "shared_memory_posix.cc",
+    ]
+  }
 
   if (is_nacl) {
     sources -= [

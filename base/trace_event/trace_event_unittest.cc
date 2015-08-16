@@ -21,6 +21,7 @@
 #include "base/threading/platform_thread.h"
 #include "base/threading/thread.h"
 #include "base/time/time.h"
+#include "base/trace_event/trace_buffer.h"
 #include "base/trace_event/trace_event.h"
 #include "base/trace_event/trace_event_synthetic_delay.h"
 #include "base/values.h"
@@ -1424,11 +1425,13 @@ TEST_F(TraceEventTestFixture, StaticStringVsString) {
     TraceEventHandle handle1 =
         trace_event_internal::AddTraceEvent(
             TRACE_EVENT_PHASE_INSTANT, category_group_enabled, "name1", 0, 0,
+            trace_event_internal::kNoId,
             "arg1", std::string("argval"), "arg2", std::string("argval"));
     // Test that static TRACE_STR_COPY string arguments are copied.
     TraceEventHandle handle2 =
         trace_event_internal::AddTraceEvent(
             TRACE_EVENT_PHASE_INSTANT, category_group_enabled, "name2", 0, 0,
+            trace_event_internal::kNoId,
             "arg1", TRACE_STR_COPY("argval"),
             "arg2", TRACE_STR_COPY("argval"));
     EXPECT_GT(tracer->GetStatus().event_count, 1u);
@@ -1451,6 +1454,7 @@ TEST_F(TraceEventTestFixture, StaticStringVsString) {
     TraceEventHandle handle1 =
         trace_event_internal::AddTraceEvent(
             TRACE_EVENT_PHASE_INSTANT, category_group_enabled, "name1", 0, 0,
+            trace_event_internal::kNoId,
             "arg1", "argval", "arg2", "argval");
     // Test that static TRACE_STR_COPY NULL string arguments are not copied.
     const char* str1 = NULL;
@@ -1458,6 +1462,7 @@ TEST_F(TraceEventTestFixture, StaticStringVsString) {
     TraceEventHandle handle2 =
         trace_event_internal::AddTraceEvent(
             TRACE_EVENT_PHASE_INSTANT, category_group_enabled, "name2", 0, 0,
+            trace_event_internal::kNoId,
             "arg1", TRACE_STR_COPY(str1),
             "arg2", TRACE_STR_COPY(str2));
     EXPECT_GT(tracer->GetStatus().event_count, 1u);
@@ -2514,7 +2519,7 @@ TEST_F(TraceEventTestFixture, TraceBufferVectorReportFull) {
   trace_log->SetEnabled(
       TraceConfig(kRecordAllCategoryFilter, ""), TraceLog::RECORDING_MODE);
   trace_log->logged_events_.reset(
-      trace_log->CreateTraceBufferVectorOfSize(100));
+      TraceBuffer::CreateTraceBufferVectorOfSize(100));
   do {
     TRACE_EVENT_BEGIN_WITH_ID_TID_AND_TIMESTAMP0(
         "all", "with_timestamp", 0, 0, TraceTicks::Now().ToInternalValue());

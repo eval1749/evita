@@ -6,7 +6,7 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
 
   'buildtools_revision':  '565d04e8741429fb1b4f26d102f2c6c3b849edeb',
-  'v8_revision': 'f38c251e43cbe0dd927fa1b0350724a12b831050',
+  'v8_revision': '24d34a8ae3cad186792fb1e44e2d7c00d49cd181',
 }
 
 deps = {
@@ -32,7 +32,7 @@ deps = {
     Var('chromium_git') + '/chromium/deps/hunspell.git' + '@' + 'c956c0e97af00ef789afb2f64d02c9a5a50e6eb1',
 
   'src/third_party/icu':
-    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'bbb24c53b4f46025e87a5973c39fa722c8757595',
+    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '89dcdec16381883782b9cc9cff38e00f047a0f46',
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),

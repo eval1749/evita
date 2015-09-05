@@ -84,7 +84,7 @@ config("default_include_dirs") {
   ]
 }
 
-# TODO(GYP): is_ubsan, is_ubsan_vptr
+# TODO(GYP) bug 527515: is_ubsan, is_ubsan_vptr
 if (!is_win) {
   using_sanitizer = is_asan || is_lsan || is_tsan || is_msan
 }
@@ -118,6 +118,11 @@ config("compiler") {
       "/FS",  # Preserve previous PDB behavior.
       "/bigobj",  # Some of our files are bigger than the regular limits.
     ]
+
+    if (visual_studio_version == "2015") {
+      # Work around crbug.com/526851, bug in VS 2015 RTM compiler.
+      cflags += [ "/Zc:sizedDealloc-" ]
+    }
 
     # Force C/C++ mode for the given GN detected file type. This is necessary
     # for precompiled headers where the same source file is compiled in both
@@ -517,13 +522,17 @@ config("compiler") {
 
   # C++11 compiler flags setup.
   # ---------------------------
-  if (is_linux || is_android || is_nacl) {
+  if (is_linux || is_android || (is_nacl && is_clang)) {
     # gnu++11 instead of c++11 is needed because some code uses typeof() (a
     # GNU extension).
     # TODO(thakis): Eventually switch this to c++11 instead,
     # http://crbug.com/427584
     cflags_cc += [ "-std=gnu++11" ]
-  } else if (!is_win) {
+  } else if (!is_win && !is_nacl) {
+    # TODO(mcgrathr) - the NaCl GCC toolchain doesn't support either gnu++11
+    # or c++11; we technically don't need this toolchain any more, but there
+    # are still a few buildbots using it, so until those are turned off
+    # we need the !is_nacl clause and the (is_nacl && is_clang) clause, above.
     cflags_cc += [ "-std=c++11" ]
   }
 
@@ -570,6 +579,12 @@ config("compiler") {
       if (is_clang) {
         # Let clang find the ld.gold in the NDK.
         ldflags += [ "--gcc-toolchain=$rebased_android_toolchain_root" ]
+      }
+
+      # Use -mstackrealign due to a bug on ia32 Jelly Bean.
+      # See crbug.com/521527
+      if (current_cpu == "x86") {
+        cflags += [ "-mstackrealign" ]
       }
     }
 
@@ -777,23 +792,27 @@ if (is_win) {
 
     # C4091: 'typedef ': ignored on left of 'X' when no variable is declared.
     # This happens in a number of Windows headers. Dumb.
+    # MSVC2015
     "/wd4091",
 
     # C4312: 'reinterpret_cast': conversion from 'uint32_t' to
     # 'v8::internal::Address' of greater size
     # v8/src/heap/spaces.h, v8/src/types-inl.h, v8/src/ast.h
+    # MSVC2015
     "/wd4312",
 
     # C4302: 'reinterpret_cast': truncation from 'BYTE *' to 'unsigned int'
     # C4311: 'reinterpret_cast': pointer truncation from 'BYTE *' to
     # 'unsigned int'
     # v8/src/base/platform-win32.cc
+    # MSVC2015
     "/wd4302",
     "/wd4311",
 
     # C4458: declaration of 'type' hides class member
     # third_party/icu/source/common/unicode/messagepattern.h
     # base/test/trace_event_analyzer.cc
+    # MSVC2015
     "/wd4458",
 
     # C4127: conditional expression is constant
@@ -879,8 +898,7 @@ if (is_win) {
     default_warning_flags += [
       # TODO(hans): Make this list shorter eventually, http://crbug.com/504657
       "-Qunused-arguments",  # http://crbug.com/504658
-      "-Wno-microsoft",  # http://crbug.com/505296
-      "-Wno-switch",  # http://crbug.com/505308
+      "-Wno-microsoft-enum-value",  # http://crbug.com/505296
       "-Wno-unknown-pragmas",  # http://crbug.com/505314
       "-Wno-unused-value",  # http://crbug.com/505318
     ]
@@ -981,10 +999,14 @@ if (is_clang) {
     # which we no longer use. Check if it makes sense to remove
     # this as well. http://crbug.com/316352
     "-Wno-unneeded-internal-declaration",
-
-    # TODO(thakis): Remove, http://crbug.com/263960
-    "-Wno-reserved-user-defined-literal",
   ]
+
+  if (is_posix && !is_mac && !is_ios) {
+    default_warning_flags += [
+      # TODO(thakis): Remove, http://crbug.com/263960
+      "-Wno-reserved-user-defined-literal",
+    ]
+  }
 
   # NaCl's Clang compiler and Chrome's hermetic Clang compiler will almost
   # always have different versions. Certain flags may not be recognized by
@@ -1071,10 +1093,6 @@ config("no_chromium_code") {
 
   if (is_clang) {
     cflags += [
-      # TODO(mgiuca): Move this suppression into individual third-party
-      # libraries as required. http://crbug.com/505301.
-      "-Wno-overloaded-virtual",
-
       # TODO(thakis): Move this suppression into individual third-party
       # libraries as required. http://crbug.com/505316.
       "-Wno-unused-function",
@@ -1179,6 +1197,8 @@ if (is_win) {
   common_optimize_on_cflags = [
     "/Ob2",  # Both explicit and auto inlining.
     "/Oy-",  # Disable omitting frame pointers, must be after /O2.
+    "/d2Zi+",  # Improve debugging of optimized code.
+    "/Zc:inline",  # Remove unreferenced COMDAT (faster links).
   ]
   if (!is_asan) {
     common_optimize_on_cflags += [
@@ -1190,7 +1210,17 @@ if (is_win) {
       "/Gw",
     ]
   }
-  common_optimize_on_ldflags = [ "/OPT:REF" ]
+  common_optimize_on_ldflags = [ "/OPT:ICF" ]
+  if (is_official_build) {
+    common_optimize_on_ldflags += [
+      # Link-time code generation.
+      "/LTCG",
+
+      # Set the number of LTCG code-gen threads to eight. The default is four.
+      # This gives a 5-10% link speedup.
+      "/cgthreads:8",
+    ]
+  }
 } else {
   common_optimize_on_cflags = [
     # Don't emit the GCC version ident directives, they just end up in the
@@ -1303,7 +1333,6 @@ config("optimize_max") {
         # value of C4702 for PGO builds is likely very small.
         "/wd4702",
       ]
-      ldflags += [ "/LTCG" ]
     }
   } else {
     cflags = [ "-O2" ] + common_optimize_on_cflags

@@ -9,7 +9,7 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 
-from pylib.device import device_utils
+from devil.android import device_utils
 from pylib.perf import perf_control
 
 class TestPerfControl(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestPerfControl(unittest.TestCase):
     if not os.getenv('BUILDTYPE'):
       os.environ['BUILDTYPE'] = 'Debug'
 
-    devices = device_utils.DeviceUtils.HealthyDevices()
+    devices = device_utils.DeviceUtils.HealthyDevices(blacklist=None)
     self.assertGreater(len(devices), 0, 'No device attached!')
     self._device = devices[0]
 

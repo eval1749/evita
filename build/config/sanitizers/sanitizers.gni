@@ -23,3 +23,19 @@ declare_args() {
   # https://code.google.com/p/sawbuck/wiki/SyzyASanHowTo
   is_syzyasan = false
 }
+
+# MSan only links Chrome properly in release builds (brettw -- 9/1/2015). The
+# same is possibly true for the other non-ASan sanitizers. But regardless of
+# whether it links, one would normally never run a sanitizer in debug mode.
+# Running in debug mode probably indicates you forgot to set the "is_debug =
+# false" flag in the build args. ASan seems to run fine in debug mode.
+#
+# If you find a use-case where you want to compile a sanitizer in debug mode
+# and have verified it works, ask brettw and we can consider removing it from
+# this condition. We may also be able to find another way to enable your case
+# without having people accidentally get broken builds by compiling an
+# unsupported or unadvisable configurations.
+#
+# For one-off testing, just comment this assertion out.
+assert(!is_debug || !(is_msan || is_lsan || is_tsan),
+       "Sanitizers should generally be used in release (set is_debug=false).")

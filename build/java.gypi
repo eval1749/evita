@@ -64,6 +64,7 @@
     'instr_stamp': '<(intermediate_dir)/instr.stamp',
     'additional_input_paths': [],
     'dex_path': '<(PRODUCT_DIR)/lib.java/<(_target_name).dex.jar',
+    'main_dex_list_path': '<(intermediate_dir)/main_dex_list.txt',
     'generated_src_dirs': ['>@(generated_R_dirs)'],
     'generated_R_dirs': [],
     'has_java_resources%': 0,
@@ -82,8 +83,6 @@
     'java_in_dir_suffix%': '/src',
     'proguard_config%': '',
     'proguard_preprocess%': '0',
-    'enable_errorprone%': '0',
-    'errorprone_exe_path': '<(PRODUCT_DIR)/bin.java/chromium_errorprone',
     'variables': {
       'variables': {
         'proguard_preprocess%': 0,
@@ -104,6 +103,13 @@
     },
     'emma_instrument': '<(emma_instrument)',
     'javac_jar_path': '<(javac_jar_path)',
+    'conditions': [
+      ['chromium_code == 0', {
+        'enable_errorprone': 0,
+      }],
+    ],
+    'enable_errorprone%': 0,
+    'errorprone_exe_path': '<(PRODUCT_DIR)/bin.java/chromium_errorprone',
   },
   'conditions': [
     ['add_to_dependents_classpaths == 1', {
@@ -113,6 +119,7 @@
         'variables': {
           'input_jars_paths': ['<(jar_final_path)'],
           'library_dexed_jars_paths': ['<(dex_path)'],
+          'main_dex_list_paths': ['<(main_dex_list_path)'],
         },
       },
     }],
@@ -202,7 +209,7 @@
           'action_name': 'proguard_<(_target_name)',
           'message': 'Proguard preprocessing <(_target_name) jar',
           'inputs': [
-            '<(android_sdk_root)/tools/proguard/lib/proguard.jar',
+            '<(DEPTH)/third_party/proguard/lib/proguard.jar',
             '<(DEPTH)/build/android/gyp/util/build_utils.py',
             '<(DEPTH)/build/android/gyp/proguard.py',
             '<(javac_jar_path)',
@@ -213,7 +220,7 @@
           ],
           'action': [
             'python', '<(DEPTH)/build/android/gyp/proguard.py',
-            '--proguard-path=<(android_sdk_root)/tools/proguard/lib/proguard.jar',
+            '--proguard-path=<(DEPTH)/third_party/proguard/lib/proguard.jar',
             '--input-path=<(javac_jar_path)',
             '--output-path=<(jar_path)',
             '--proguard-config=<(proguard_config)',
@@ -227,6 +234,17 @@
         {
           'action_name': 'findbugs_<(_target_name)',
           'message': 'Running findbugs on <(_target_name)',
+          'variables': {
+            'additional_findbugs_args': [],
+            'findbugs_verbose%': 0,
+          },
+          'conditions': [
+            ['findbugs_verbose == 1', {
+              'variables': {
+                'additional_findbugs_args+': ['-vv'],
+              },
+            }],
+          ],
           'inputs': [
             '<(DEPTH)/build/android/findbugs_diff.py',
             '<(DEPTH)/build/android/findbugs_filter/findbugs_exclude.xml',
@@ -242,6 +260,7 @@
             'python', '<(DEPTH)/build/android/findbugs_diff.py',
             '--auxclasspath-gyp', '>(input_jars_paths)',
             '--stamp', '<(findbugs_stamp)',
+            '<@(additional_findbugs_args)',
             '<(jar_final_path)',
           ],
         },
@@ -249,7 +268,7 @@
     }],
     ['enable_errorprone == 1', {
       'dependencies': [
-        '<(DEPTH)/third_party/errorprone/errorprone.gyp:chromium_errorprone',
+        '<(DEPTH)/third_party/errorprone/errorprone.gyp:require_errorprone',
       ],
     }],
   ],
@@ -295,6 +314,14 @@
         '>@(java_sources)',
         '<@(extra_args)',
       ]
+    },
+    {
+      'action_name': 'main_dex_list_for_<(_target_name)',
+      'variables': {
+        'jar_path': '<(javac_jar_path)',
+        'output_path': '<(main_dex_list_path)',
+      },
+      'includes': [ 'android/main_dex_action.gypi' ],
     },
     {
       'action_name': 'instr_jar_<(_target_name)',

@@ -18,8 +18,8 @@ import bb_annotations
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import provision_devices
+from devil.android import device_utils
 from pylib import constants
-from pylib.device import device_utils
 from pylib.gtest import gtest_config
 
 CHROME_SRC_DIR = bb_utils.CHROME_SRC
@@ -63,12 +63,6 @@ INSTRUMENTATION_TESTS = dict((suite.name, suite) for suite in [
       'ContentShellTest',
       'content:content/test/data/android/device_files',
       isolate_file_path='content/content_shell_test_apk.isolate'),
-    I('ChromeShell',
-      'ChromeShell.apk',
-      'org.chromium.chrome.shell',
-      'ChromeShellTest',
-      'chrome:chrome/test/data/android/device_files',
-      isolate_file_path='chrome/chrome_shell_test_apk.isolate'),
     I('AndroidWebView',
       'AndroidWebView.apk',
       'org.chromium.android_webview.shell',
@@ -95,14 +89,11 @@ INSTALLABLE_PACKAGES = dict((package.name, package) for package in (
 VALID_TESTS = set([
     'base_junit_tests',
     'chromedriver',
-    'chrome_proxy',
     'components_browsertests',
     'gfx_unittests',
     'gl_unittests',
     'gpu',
     'python_unittests',
-    'telemetry_unittests',
-    'telemetry_perf_unittests',
     'ui',
     'unit',
     'webkit',
@@ -197,46 +188,12 @@ def RunChromeDriverTests(options):
   """Run all the steps for running chromedriver tests."""
   bb_annotations.PrintNamedStep('chromedriver_annotation')
   RunCmd(['chrome/test/chromedriver/run_buildbot_steps.py',
-          '--android-packages=%s,%s,%s,%s' %
-          ('chrome_shell',
-           'chrome_stable',
+          '--android-packages=%s,%s,%s' %
+          ('chrome_stable',
            'chrome_beta',
            'chromedriver_webview_shell'),
           '--revision=%s' % _GetRevision(options),
           '--update-log'])
-
-def RunChromeProxyTests(options):
-  """Run the chrome_proxy tests.
-
-  Args:
-    options: options object.
-  """
-  InstallApk(options, INSTRUMENTATION_TESTS['ChromeShell'], False)
-  args = ['--browser', 'android-chrome-shell']
-  devices = device_utils.DeviceUtils.HealthyDevices()
-  if devices:
-    args = args + ['--device', devices[0].adb.GetDeviceSerial()]
-  bb_annotations.PrintNamedStep('chrome_proxy')
-  RunCmd(['tools/chrome_proxy/run_tests'] + args)
-
-
-def RunTelemetryTests(options, step_name, run_tests_path):
-  """Runs either telemetry_perf_unittests or telemetry_unittests.
-
-  Args:
-    options: options object.
-    step_name: either 'telemetry_unittests' or 'telemetry_perf_unittests'
-    run_tests_path: path to run_tests script (tools/perf/run_tests for
-                    perf_unittests and tools/telemetry/run_tests for
-                    telemetry_unittests)
-  """
-  InstallApk(options, INSTRUMENTATION_TESTS['ChromeShell'], False)
-  args = ['--browser', 'android-chrome-shell']
-  devices = device_utils.DeviceUtils.HealthyDevices()
-  if devices:
-    args = args + ['--device', 'android']
-  bb_annotations.PrintNamedStep(step_name)
-  RunCmd([run_tests_path] + args)
 
 
 def InstallApk(options, test, print_step=False):
@@ -510,14 +467,6 @@ def RunUnitTests(options):
   RunTestSuites(options, suites)
 
 
-def RunTelemetryUnitTests(options):
-  RunTelemetryTests(options, 'telemetry_unittests', 'tools/telemetry/run_tests')
-
-
-def RunTelemetryPerfUnitTests(options):
-  RunTelemetryTests(options, 'telemetry_perf_unittests', 'tools/perf/run_tests')
-
-
 def RunInstrumentationTests(options):
   for test in INSTRUMENTATION_TESTS.itervalues():
     RunInstrumentationSuite(options, test)
@@ -579,7 +528,6 @@ def GetTestStepCmds():
       ('base_junit_tests',
           lambda _options: RunJunitSuite('base_junit_tests')),
       ('chromedriver', RunChromeDriverTests),
-      ('chrome_proxy', RunChromeProxyTests),
       ('components_browsertests',
           lambda options: RunTestSuites(options, ['components_browsertests'])),
       ('gfx_unittests',
@@ -588,8 +536,6 @@ def GetTestStepCmds():
           lambda options: RunTestSuites(options, ['gl_unittests'])),
       ('gpu', RunGPUTests),
       ('python_unittests', RunPythonUnitTests),
-      ('telemetry_unittests', RunTelemetryUnitTests),
-      ('telemetry_perf_unittests', RunTelemetryPerfUnitTests),
       ('ui', RunInstrumentationTests),
       ('unit', RunUnitTests),
       ('webkit', RunWebkitTests),

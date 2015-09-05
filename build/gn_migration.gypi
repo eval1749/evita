@@ -291,7 +291,6 @@
             '../build/android/rezip.gyp:rezip_apk_jar',
             '../chrome/chrome.gyp:chrome_public_apk',
             '../chrome/chrome.gyp:chrome_public_test_apk',
-            '../chrome/chrome.gyp:chrome_shell_apk',
             '../chrome/chrome.gyp:chromedriver_webview_shell_apk',
             #"//clank" TODO(GYP) - conditional somehow?
             '../tools/imagediff/image_diff.gyp:image_diff#host',
@@ -419,7 +418,7 @@
 
             # TODO(GYP): remove these when the corresponding root targets work.
             #"//cc/blink",
-            #"//components/ui/zoom:ui_zoom",
+            #"//components/ui/zoom",
             #"//content",
             #"//content/test:test_support",
             #"//device/battery",
@@ -525,6 +524,8 @@
             '../third_party/cacheinvalidation/cacheinvalidation.gyp:cacheinvalidation_unittests_run',
             '../third_party/mojo/mojo_edk_tests.gyp:mojo_public_bindings_unittests_run',
             '../third_party/mojo/mojo_edk_tests.gyp:mojo_public_environment_unittests_run',
+            '../third_party/mojo/mojo_edk_tests.gyp:mojo_public_system_unittests_run',
+            '../third_party/mojo/mojo_edk_tests.gyp:mojo_public_utility_unittests_run',
             '../tools/gn/gn.gyp:gn_unittests_run',
             '../ui/accessibility/accessibility.gyp:accessibility_unittests_run',
             '../ui/app_list/app_list.gyp:app_list_unittests_run',

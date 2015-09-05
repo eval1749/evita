@@ -2,17 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+from devil.android import device_blacklist
+from devil.android import device_errors
+from devil.android import device_utils
+from devil.android.sdk import adb_wrapper
+from devil.utils import parallelizer
 from pylib.base import environment
-from pylib.device import adb_wrapper
-from pylib.device import device_errors
-from pylib.device import device_utils
-from pylib.utils import parallelizer
 
 
 class LocalDeviceEnvironment(environment.Environment):
 
   def __init__(self, args, _error_func):
     super(LocalDeviceEnvironment, self).__init__()
+    self._blacklist = device_blacklist.Blacklist(
+        args.blacklist_file or device_blacklist.BLACKLIST_JSON)
     self._device_serial = args.test_device
     self._devices = []
     self._max_tries = 1 + args.num_retries
@@ -20,7 +23,8 @@ class LocalDeviceEnvironment(environment.Environment):
 
   #override
   def SetUp(self):
-    available_devices = device_utils.DeviceUtils.HealthyDevices()
+    available_devices = device_utils.DeviceUtils.HealthyDevices(
+        self._blacklist)
     if not available_devices:
       raise device_errors.NoDevicesError
     if self._device_serial:

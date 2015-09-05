@@ -11,10 +11,10 @@ import pickle
 import re
 import sys
 
-from pylib import cmd_helper
+from devil.android import device_utils
+from devil.android import md5sum
+from devil.utils import cmd_helper
 from pylib import constants
-from pylib.device import device_utils
-from pylib.utils import md5sum
 from pylib.utils import proguard
 
 sys.path.insert(0,
@@ -45,8 +45,8 @@ class TestJar(object):
     if not os.path.exists(jar_path):
       raise Exception('%s not found, please build it' % jar_path)
 
-    self._PROGUARD_PATH = os.path.join(constants.ANDROID_SDK_ROOT,
-                                       'tools/proguard/lib/proguard.jar')
+    self._PROGUARD_PATH = os.path.join(constants.PROGUARD_ROOT,
+                                       'lib', 'proguard.jar')
     if not os.path.exists(self._PROGUARD_PATH):
       self._PROGUARD_PATH = os.path.join(os.environ['ANDROID_BUILD_TOP'],
                                          'external/proguard/lib/proguard.jar')
@@ -170,7 +170,7 @@ class TestJar(object):
             attached_min_sdk_level >= required_min_sdk_level)
 
   def GetAllMatchingTests(self, annotation_filter_list,
-                          exclude_annotation_list, test_filter):
+                          exclude_annotation_list, test_filter, devices):
     """Get a list of tests matching any of the annotations and the filter.
 
     Args:
@@ -180,6 +180,7 @@ class TestJar(object):
       exclude_annotation_list: List of test annotations. A test must not have
         any of these annotations.
       test_filter: Filter used for partial matching on the test method names.
+      devices: The set of devices against which tests will be run.
 
     Returns:
       List of all matching tests.
@@ -218,7 +219,7 @@ class TestJar(object):
 
     # Filter out any tests with SDK level requirements that don't match the set
     # of attached devices.
-    devices = device_utils.DeviceUtils.parallel()
+    devices = device_utils.DeviceUtils.parallel(devices)
     min_sdk_version = min(devices.build_version_sdk.pGet(None))
     tests = [t for t in tests
              if self._IsTestValidForSdkRange(t, min_sdk_version)]

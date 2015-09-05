@@ -31,10 +31,11 @@ import sys
 import time
 
 from pylib import constants
-from pylib.device import device_errors
-from pylib.device import device_utils
-from pylib.utils import apk_helper
-from pylib.utils import run_tests_helper
+from devil.android import apk_helper
+from devil.android import device_blacklist
+from devil.android import device_errors
+from devil.android import device_utils
+from devil.utils import run_tests_helper
 
 def CreateAppData(device, old_apk, app_data, package_name):
   device.Install(old_apk)
@@ -64,6 +65,7 @@ def main():
       description="Script to do semi-automated upgrade testing.")
   parser.add_argument('-v', '--verbose', action='count',
                       help='Print verbose log information.')
+  parser.add_argument('--blacklist-file', help='Device blacklist JSON file.')
   command_parsers = parser.add_subparsers(dest='command')
 
   subparser = command_parsers.add_parser('create_app_data')
@@ -88,7 +90,12 @@ def main():
   args = parser.parse_args()
   run_tests_helper.SetLogLevel(args.verbose)
 
-  devices = device_utils.DeviceUtils.HealthyDevices()
+  if args.blacklist_file:
+    blacklist = device_blacklist.Blacklist(args.blacklist_file)
+  else:
+    blacklist = None
+
+  devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
   if not devices:
     raise device_errors.NoDevicesError()
   device = devices[0]

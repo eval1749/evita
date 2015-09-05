@@ -9,11 +9,9 @@ import logging
 import os
 import psutil
 
-from pylib import cmd_helper
+from devil.utils import cmd_helper
 from pylib import constants
 from pylib import valgrind_tools
-
-import pylib.device.device_utils
 
 
 def _GetProcessStartTime(pid):
@@ -96,6 +94,12 @@ class Forwarder(object):
           else: raise
         if exit_code != 0:
           Forwarder._KillDeviceLocked(device, tool)
+          # Log alive forwarders
+          ps_out = device.RunShellCommand(['ps'])
+          logging.info('Currently running device_forwarders:')
+          for line in ps_out:
+            if 'device_forwarder' in line:
+              logging.info('    %s', line)
           raise Exception('%s exited with %d:\n%s' % (
               instance._host_forwarder_path, exit_code, '\n'.join(output)))
         tokens = output.split(':')
@@ -215,6 +219,7 @@ class Forwarder(object):
     redirection_command = ['--adb=' + constants.GetAdbPath(),
                            '--serial-id=' + serial,
                            '--unmap', str(device_port)]
+    logging.info('Undo forwarding using command: %s', redirection_command)
     (exit_code, output) = cmd_helper.GetCmdStatusAndOutput(
         [instance._host_forwarder_path] + redirection_command)
     if exit_code != 0:

@@ -22,13 +22,13 @@ deps = {
     'src/third_party/hunspell':
         Var('git_url') + '/chromium/deps/hunspell.git@c956c0e97af00ef789afb2f64d02c9a5a50e6eb1',
     'src/third_party/icu':
-        Var('git_url') + '/chromium/deps/icu.git@89dcdec16381883782b9cc9cff38e00f047a0f46',
+        Var('git_url') + '/chromium/deps/icu.git@6b3ce817f8e828c3b7a577d2395f0882eb56ef18',
     'src/tools/deps2git':
         Var('git_url') + '/chromium/tools/deps2git.git@f04828eb0b5acd3e7ad983c024870f17f17b06d9',
     'src/tools/gyp':
-        Var('git_url') + '/external/gyp.git@6ee91ad8659871916f9aa840d42e1513befdf638',
+        Var('git_url') + '/external/gyp.git@2b17e0b26a93e8c9758c23aec6c554da4ca8f0a9',
     'src/v8':
-        Var('git_url') + '/v8/v8.git@24d34a8ae3cad186792fb1e44e2d7c00d49cd181',
+        Var('git_url') + '/v8/v8.git@294421cc9a9f105e59fd6101f6689bdfec056b70',
 }
 
 deps_os = {

@@ -6,10 +6,10 @@
 
 namespace css {
 
-#define DEFINE_STYLE_SELECTOR(name) \
-  const common::AtomicString& StyleSelector::name() { \
-    CR_DEFINE_STATIC_LOCAL(common::AtomicString, name, (L ## #name)); \
-    return name; \
+#define DEFINE_STYLE_SELECTOR(name)                                  \
+  const common::AtomicString& StyleSelector::name() {                \
+    CR_DEFINE_STATIC_LOCAL(common::AtomicString, name, (L## #name)); \
+    return name;                                                     \
   }
 
 DEFINE_STYLE_SELECTOR(active_selection)

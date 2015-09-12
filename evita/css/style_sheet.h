@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_css_style_sheet_h)
-#define INCLUDE_evita_css_style_sheet_h
+#ifndef EVITA_CSS_STYLE_SHEET_H_
+#define EVITA_CSS_STYLE_SHEET_H_
 
 #include <memory>
 #include <unordered_map>
@@ -20,28 +20,28 @@ namespace css {
 
 class Style;
 
-class StyleSheet {
-  private: typedef std::unordered_map<const base::string16*,
-                                      std::unique_ptr<Style>>
-      StyleMap;
+class StyleSheet final {
+ public:
+  StyleSheet();
+  ~StyleSheet();
 
-  private: base::ObserverList<StyleSheetObserver> observers_;
-  private: StyleMap selector_map_;
+  void AddObserver(StyleSheetObserver* observer) const;
+  void AddRule(const base::string16& selector, const Style& style);
+  void AddRule(const common::AtomicString& selector, const Style& style);
+  const Style* Find(const base::string16& selector) const;
+  const Style* Find(const common::AtomicString& selector) const;
+  void RemoveObserver(StyleSheetObserver* observer) const;
 
-  public: StyleSheet();
-  public: ~StyleSheet();
+ private:
+  using StyleMap =
+      std::unordered_map<const base::string16*, std::unique_ptr<Style>>;
 
-  public: void AddObserver(StyleSheetObserver* observer) const;
-  public: void AddRule(const base::string16& selector, const Style& style);
-  public: void AddRule(const common::AtomicString& selector,
-                       const Style& style);
-  public: const Style* Find(const base::string16& selector) const;
-  public: const Style* Find(const common::AtomicString& selector) const;
-  public: void RemoveObserver(StyleSheetObserver* observer) const;
+  base::ObserverList<StyleSheetObserver> observers_;
+  StyleMap selector_map_;
 
   DISALLOW_COPY_AND_ASSIGN(StyleSheet);
 };
 
 }  // namespace css
 
-#endif //!defined(INCLUDE_evita_css_style_sheet_h)
+#endif  // EVITA_CSS_STYLE_SHEET_H_

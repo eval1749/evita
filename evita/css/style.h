@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_css_style_h)
-#define INCLUDE_evita_css_style_h
+#ifndef EVITA_CSS_STYLE_H_
+#define EVITA_CSS_STYLE_H_
 
 #include <functional>
 #include <vector>
@@ -30,10 +30,10 @@ enum class TextDecoration {
   GreenWave,
   RedWave,
   Underline,
-  ImeInput, // dotted underline
-  ImeActive, // 2 pixel underline
-  ImeInactiveA, // 1 pixel underline
-  ImeInactiveB, // 1 pixel underline
+  ImeInput,      // dotted underline
+  ImeActive,     // 2 pixel underline
+  ImeInactiveA,  // 1 pixel underline
+  ImeInactiveB,  // 1 pixel underline
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -41,7 +41,56 @@ enum class TextDecoration {
 // Style
 //
 class Style final {
-  private: enum Mask {
+ public:
+  Style(const Color& color, const Color& bgcolor);
+  Style(const Style& other);
+  Style();
+  ~Style();
+
+  bool operator==(const Style& other) const;
+  bool operator!=(const Style& other) const;
+
+  Color bgcolor() const;
+  bool has_bgcolor() const { return (masks_ & Mask_BgColor) != 0; }
+  void set_bgcolor(Color bgcolor);
+
+  Color color() const;
+  bool has_color() const { return (masks_ & Mask_Color) != 0; }
+  void set_color(Color color);
+
+  const std::vector<base::string16>& font_families() const;
+  const base::string16& font_family() const;
+  bool has_font_family() const { return (masks_ & Mask_FontFamily) != 0; }
+  void set_font_family(const base::string16& font_family);
+
+  FontSize font_size() const;
+  bool has_font_size() const { return (masks_ & Mask_FontSize) != 0; }
+  void set_font_size(FontSize font_size);
+
+  FontStyle font_style() const;
+  bool has_font_style() const { return (masks_ & Mask_FontStyle) != 0; }
+  void set_font_style(FontStyle font_style);
+
+  FontWeight font_weight() const;
+  bool has_font_weight() const { return (masks_ & Mask_FontWeight) != 0; }
+  void set_font_weight(FontWeight font_weight);
+
+  Color marker_color() const;
+  bool has_marker_color() const { return (masks_ & Mask_MarkerColor) != 0; }
+  void set_marker_color(Color marker_color);
+
+  TextDecoration text_decoration() const;
+  bool has_text_decoration() const {
+    return (masks_ & Mask_TextDecoration) != 0;
+  }
+  void set_text_decoration(TextDecoration text_decoration);
+
+  static Style* Default();
+  void Merge(const Style& style);
+  void OverrideBy(const Style& style);
+
+ private:
+  enum Mask {
     Mask_BgColor = 1 << 0,
     Mask_Color = 1 << 1,
     Mask_FontFamily = 1 << 2,
@@ -52,86 +101,26 @@ class Style final {
     Mask_TextDecoration = 1 << 7,
   };
 
-  private: Color bgcolor_;
-  private: Color color_;
-  private: mutable std::vector<base::string16> font_families_;
-  private: base::string16 font_family_;
-  private: FontSize font_size_;
-  private: FontStyle font_style_;
-  private: FontWeight font_weight_;
-  private: Color marker_color_;
-  private: int masks_;
-  private: TextDecoration text_decoration_;
-
-  public: Style(const Color& color, const Color& bgcolor);
-  public: Style(const Style& other);
-  public: Style();
-  public: ~Style();
-
-  public: bool operator==(const Style& other) const;
-  public: bool operator!=(const Style& other) const;
-
-  public: Color bgcolor() const;
-  public: bool has_bgcolor() const {
-    return (masks_ & Mask_BgColor) != 0;
-  }
-  public: void set_bgcolor(Color bgcolor);
-
-  public: Color color() const;
-  public: bool has_color() const {
-    return (masks_ & Mask_Color) != 0;
-  }
-  public: void set_color(Color color);
-
-  public: const std::vector<base::string16>& font_families() const;
-  public: const base::string16& font_family() const;
-  public: bool has_font_family() const {
-    return (masks_ & Mask_FontFamily) != 0;
-  }
-  public: void set_font_family(const base::string16& font_family);
-
-  public: FontSize font_size() const;
-  public: bool has_font_size() const {
-    return (masks_ & Mask_FontSize) != 0;
-  }
-  public: void set_font_size(FontSize font_size);
-
-  public: FontStyle font_style() const;
-  public: bool has_font_style() const {
-    return (masks_ & Mask_FontStyle) != 0;
-  }
-  public: void set_font_style(FontStyle font_style);
-
-  public: FontWeight font_weight() const;
-  public: bool has_font_weight() const {
-    return (masks_ & Mask_FontWeight) != 0;
-  }
-  public: void set_font_weight(FontWeight font_weight);
-
-  public: Color marker_color() const;
-  public: bool has_marker_color() const {
-    return (masks_ & Mask_MarkerColor) != 0;
-  }
-  public: void set_marker_color(Color marker_color);
-
-  public: TextDecoration text_decoration() const;
-  public: bool has_text_decoration() const {
-    return (masks_ & Mask_TextDecoration) != 0;
-  }
-  public: void set_text_decoration(TextDecoration text_decoration);
-
-  public: static Style* Default();
-  public: void Merge(const Style& style);
-  public: void OverrideBy(const Style& style);
-  private: void Prepare() const;
+  Color bgcolor_;
+  Color color_;
+  mutable std::vector<base::string16> font_families_;
+  base::string16 font_family_;
+  FontSize font_size_;
+  FontStyle font_style_;
+  FontWeight font_weight_;
+  Color marker_color_;
+  int masks_;
+  TextDecoration text_decoration_;
+  void Prepare() const;
 };
 
 }  // namespace css
 
 namespace std {
-template<> struct hash<css::Style> {
+template <>
+struct hash<css::Style> {
   size_t operator()(const css::Style& style) const;
 };
 }  // namespace std
 
-#endif //!defined(INCLUDE_evita_css_style_h)
+#endif  // EVITA_CSS_STYLE_H_

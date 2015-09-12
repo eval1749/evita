@@ -11,7 +11,7 @@ namespace css {
 
 namespace {
 std::vector<base::string16> parseFontFamily(const base::string16& source) {
-  enum class State{
+  enum class State {
     Comma,
     Name,
     NameSpace,
@@ -60,8 +60,7 @@ std::vector<base::string16> parseFontFamily(const base::string16& source) {
 }
 }  // namespace
 
-Style::Style(const Color& color, const Color& bgcolor)
-    : Style() {
+Style::Style(const Color& color, const Color& bgcolor) : Style() {
   set_color(color);
   set_bgcolor(bgcolor);
 }
@@ -76,14 +75,11 @@ Style::Style(const Style& other)
       font_weight_(other.font_weight_),
       marker_color_(other.marker_color_),
       masks_(other.masks_),
-      text_decoration_(other.text_decoration_) {
-}
+      text_decoration_(other.text_decoration_) {}
 
-Style::Style() : masks_(0) {
-}
+Style::Style() : masks_(0) {}
 
-Style::~Style() {
-}
+Style::~Style() {}
 
 bool Style::operator==(const Style& other) const {
   if (masks_ != other.masks_)
@@ -191,8 +187,7 @@ TextDecoration Style::text_decoration() const {
   return text_decoration_;
 }
 
-void Style::set_text_decoration(
-    TextDecoration text_decoration) {
+void Style::set_text_decoration(TextDecoration text_decoration) {
   text_decoration_ = text_decoration;
   masks_ |= Mask_TextDecoration;
 }
@@ -202,16 +197,16 @@ Style* Style::Default() {
   CR_DEFINE_STATIC_LOCAL(Style, default_style, ());
   if (!init) {
     init = true;
-    #if 0
-        //default_style.SetBackground(Color(0xF0, 0xF0, 0xF0));
-        default_style.set_bgcolor(Color(247, 247, 239));
-        default_style.set_color(Color(0x00, 0x00, 0x00));
-        default_style.Set_marker_color{r(Color(0x00, 0x66, 0x00));
-    #else
-        default_style.set_bgcolor(Color(255, 255, 255));
-        default_style.set_color(Color(0x00, 0x00, 0x00));
-        default_style.set_marker_color(Color(0x00, 0x99, 0x00));
-    #endif
+#if 0
+    //  default_style.SetBackground(Color(0xF0, 0xF0, 0xF0));
+    default_style.set_bgcolor(Color(247, 247, 239));
+    default_style.set_color(Color(0x00, 0x00, 0x00));
+    default_style.Set_marker_color(Color(0x00, 0x66, 0x00));
+#else
+    default_style.set_bgcolor(Color(255, 255, 255));
+    default_style.set_color(Color(0x00, 0x00, 0x00));
+    default_style.set_marker_color(Color(0x00, 0x99, 0x00));
+#endif
 
     default_style.set_font_family(L"Consolas, Meiryo");
     default_style.set_font_size(10);
@@ -277,8 +272,7 @@ void Style::Prepare() const {
 }  // namespace css
 
 namespace std {
-size_t hash<css::Style>::operator()(
-    const css::Style& style) const {
+size_t hash<css::Style>::operator()(const css::Style& style) const {
   size_t result = 137u;
   if (style.has_bgcolor()) {
     result <<= 1;

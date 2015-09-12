@@ -20,14 +20,11 @@ uint32_t PackRgbToUint32(int red, int green, int blue) {
 }  // namespace
 
 Color::Color(int red, int green, int blue, float alpha)
-    : alpha_(alpha), rgb_(PackRgbToUint32(red, green, blue)) {
-}
+    : alpha_(alpha), rgb_(PackRgbToUint32(red, green, blue)) {}
 
-Color::Color() : Color(0, 0, 0, 0.0f) {
-}
+Color::Color() : Color(0, 0, 0, 0.0f) {}
 
-Color::~Color() {
-}
+Color::~Color() {}
 
 bool Color::operator==(const Color& other) const {
   return rgb_ == other.rgb_ && alpha_ == other.alpha_;

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_css_style_resolver_h)
-#define INCLUDE_evita_css_style_resolver_h
+#ifndef EVITA_CSS_STYLE_RESOLVER_H_
+#define EVITA_CSS_STYLE_RESOLVER_H_
 
 #include <memory>
 #include <unordered_map>
@@ -21,37 +21,39 @@ namespace css {
 class Style;
 class StyleSheet;
 
-class StyleResolver : private StyleSheetObserver {
-  private: typedef std::unordered_map<const base::string16*,
-                                      std::unique_ptr<Style>> StyleCache;
+class StyleResolver final : private StyleSheetObserver {
+ public:
+  StyleResolver();
+  ~StyleResolver();
 
-  private: mutable StyleCache partial_style_cache_;
-  private: std::vector<const StyleSheet*> style_sheets_;
-  private: mutable StyleCache style_cache_;
+  void AddStyleSheet(const StyleSheet* style_sheet);
+  void RemoveStyleSheet(const StyleSheet* style_sheet);
 
-  public: StyleResolver();
-  public: ~StyleResolver();
+  const Style& Resolve(const base::string16& selector) const;
+  const Style& Resolve(const common::AtomicString& selector) const;
 
-  public: void AddStyleSheet(const StyleSheet* style_sheet);
-  private: void ClearCache();
-  private: void InvalidateCache(const StyleRule*rule);
-  public: void RemoveStyleSheet(const StyleSheet* style_sheet);
-
-  public: const Style& Resolve(const base::string16& selector) const;
-  public: const Style& Resolve(const common::AtomicString& selector) const;
-
-  public: const Style& ResolveWithoutDefaults(
-      const base::string16& selector) const;
-  public: const Style& ResolveWithoutDefaults(
+  const Style& ResolveWithoutDefaults(const base::string16& selector) const;
+  const Style& ResolveWithoutDefaults(
       const common::AtomicString& selector) const;
 
+ private:
+  typedef std::unordered_map<const base::string16*, std::unique_ptr<Style>>
+      StyleCache;
+
+  void ClearCache();
+  void InvalidateCache(const StyleRule* rule);
+
   // css::StyleSheetObserver
-  private: virtual void DidAddRule(const StyleRule* rule) override;
-  private: virtual void DidRemoveRule(const StyleRule* rule) override;
+  void DidAddRule(const StyleRule* rule) override;
+  void DidRemoveRule(const StyleRule* rule) override;
+
+  mutable StyleCache partial_style_cache_;
+  std::vector<const StyleSheet*> style_sheets_;
+  mutable StyleCache style_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(StyleResolver);
 };
 
 }  // namespace css
 
-#endif //!defined(INCLUDE_evita_css_style_resolver_h)
+#endif  // EVITA_CSS_STYLE_RESOLVER_H_

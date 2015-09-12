@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #pragma warning(push)
-#pragma warning(disable: 4365 4625 4626 4826)
+#pragma warning(disable : 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
@@ -16,9 +16,11 @@
 namespace {
 
 class StyleSheetTest : public ::testing::Test {
-  public: StyleSheetTest() = default;
-  public: ~StyleSheetTest() = default;
+ public:
+  StyleSheetTest() = default;
+  ~StyleSheetTest() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(StyleSheetTest);
 };
 
@@ -37,8 +39,8 @@ TEST_F(StyleSheetTest, Resolve_some) {
                       css::Style(css::Color(1, 2, 3), css::Color(4, 5, 6)));
   css::StyleResolver style_resolver;
   style_resolver.AddStyleSheet(&style_sheet);
-  const auto& style1 = style_resolver.Resolve(
-      css::StyleSelector::active_selection());
+  const auto& style1 =
+      style_resolver.Resolve(css::StyleSelector::active_selection());
   EXPECT_EQ(css::Color(1, 2, 3), style1.color());
   EXPECT_EQ(css::Color(4, 5, 6), style1.bgcolor());
   EXPECT_EQ(css::FontStyle::Normal, style1.font_style());

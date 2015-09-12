@@ -6,10 +6,8 @@
 
 namespace css {
 
-StyleSheetObserver::StyleSheetObserver() {
-}
+StyleSheetObserver::StyleSheetObserver() {}
 
-StyleSheetObserver::~StyleSheetObserver() {
-}
+StyleSheetObserver::~StyleSheetObserver() {}
 
 }  // namespace css

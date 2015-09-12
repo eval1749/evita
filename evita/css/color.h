@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_css_color_h)
-#define INCLUDE_evita_css_color_h
+#ifndef EVITA_CSS_COLOR_H_
+#define EVITA_CSS_COLOR_H_
 
 #include <functional>
 
@@ -12,32 +12,35 @@
 namespace css {
 
 // Color
-class Color {
-  private: uint32_t rgb_;
-  private: float alpha_;
+class Color final {
+ public:
+  Color(int red, int green, int blue, float alpha = 1.0f);
+  Color();
+  ~Color();
 
-  public: Color(int red, int green, int blue, float alpha = 1.0f);
-  public: Color();
-  public: ~Color();
+  bool operator==(const Color& other) const;
+  bool operator!=(const Color& other) const;
 
-  public: bool operator==(const Color& other) const;
-  public: bool operator!=(const Color& other) const;
+  float alpha() const { return alpha_; }
+  int blue() const { return static_cast<int>(rgb_ & 0xFF); }
+  int green() const { return static_cast<int>((rgb_ >> 8) & 0xFF); }
+  int red() const { return static_cast<int>((rgb_ >> 16) & 0xFF); }
 
-  public: float alpha() const { return alpha_; }
-  public: int blue() const { return static_cast<int>(rgb_ & 0xFF); }
-  public: int green() const { return static_cast<int>((rgb_ >> 8) & 0xFF); }
-  public: int red() const { return static_cast<int>((rgb_ >> 16) & 0xFF); }
+  bool Equal(const Color& cr) const;
+  size_t Hash() const;
 
-  public: bool Equal(const Color& cr) const;
-  public: size_t Hash() const;
+ private:
+  uint32_t rgb_;
+  float alpha_;
 };
 
 }  // namespace css
 
 namespace std {
-template<> struct hash<css::Color> {
+template <>
+struct hash<css::Color> {
   size_t operator()(const css::Color& color) const;
 };
 }  // namespace std
 
-#endif //!defined(INCLUDE_evita_css_color_h)
+#endif  // EVITA_CSS_COLOR_H_

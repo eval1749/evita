@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_css_style__sheet_observer_h)
-#define INCLUDE_evita_css_style__sheet_observer_h
+#ifndef EVITA_CSS_STYLE_SHEET_OBSERVER_H_
+#define EVITA_CSS_STYLE_SHEET_OBSERVER_H_
 
 #include "base/macros.h"
 
@@ -12,15 +12,18 @@ namespace css {
 class StyleRule;
 
 class StyleSheetObserver {
-  public: StyleSheetObserver();
-  public: virtual ~StyleSheetObserver();
+ public:
+  virtual void DidAddRule(const StyleRule* rule) = 0;
+  virtual void DidRemoveRule(const StyleRule* rule) = 0;
 
-  public: virtual void DidAddRule(const StyleRule* rule) = 0;
-  public: virtual void DidRemoveRule(const StyleRule* rule) = 0;
+ protected:
+  StyleSheetObserver();
+  virtual ~StyleSheetObserver();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(StyleSheetObserver);
 };
 
 }  // namespace css
 
-#endif //!defined(INCLUDE_evita_css_style__sheet_observer_h)
+#endif  // EVITA_CSS_STYLE_SHEET_OBSERVER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_css_style_rule_h)
-#define INCLUDE_evita_css_style_rule_h
+#ifndef EVITA_CSS_STYLE_RULE_H_
+#define EVITA_CSS_STYLE_RULE_H_
 
 #include "common/strings/atomic_string.h"
 
@@ -11,19 +11,21 @@ namespace css {
 
 class Style;
 
-class StyleRule {
-  private: const common::AtomicString selector_;
-  private: const Style* const style_;
+class StyleRule final {
+ public:
+  StyleRule(const common::AtomicString& selector, const Style* style);
+  ~StyleRule();
 
-  public: StyleRule(const common::AtomicString& selector, const Style* style);
-  public: virtual ~StyleRule();
+  const common::AtomicString& selector() const { return selector_; }
+  const Style* style() const { return style_; }
 
-  public: const common::AtomicString& selector() const { return selector_; }
-  public: const Style* style() const { return style_; }
+ private:
+  const common::AtomicString selector_;
+  const Style* const style_;
 
   DISALLOW_COPY_AND_ASSIGN(StyleRule);
 };
 
 }  // namespace css
 
-#endif //!defined(INCLUDE_evita_css_style_rule_h)
+#endif  // EVITA_CSS_STYLE_RULE_H_

@@ -8,10 +8,8 @@ namespace css {
 
 StyleRule::StyleRule(const common::AtomicString& selector,
                      const css::Style* style)
-    : selector_(selector), style_(style) {
-}
+    : selector_(selector), style_(style) {}
 
-StyleRule::~StyleRule() {
-}
+StyleRule::~StyleRule() {}
 
 }  // namespace css

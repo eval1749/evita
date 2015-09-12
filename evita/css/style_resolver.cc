@@ -55,31 +55,31 @@ StyleSheet* GetDefaultStyleSheet() {
   default_style_sheet.AddRule(StyleSelector::tab_marker(), marker_style);
 
   // EvEdit 1.0's highlight color
-  //selection_->SetColor(Color(0, 0, 0));
-  //selection_->SetBackground(Color(0xCC, 0xCC, 0xFF));
+  // selection_->SetColor(Color(0, 0, 0));
+  // selection_->SetBackground(Color(0xCC, 0xCC, 0xFF));
 
   // We should not use GetSysColor. If we want to use here
   // default background must be obtained from GetSysColor.
-  //selection_->SetColor(::GetSysColor(COLOR_HIGHLIGHTTEXT));
-  //selection_->SetBackground(::GetSysColor(COLOR_HIGHLIGHT));
+  // selection_->SetColor(::GetSysColor(COLOR_HIGHLIGHTTEXT));
+  // selection_->SetBackground(::GetSysColor(COLOR_HIGHLIGHT));
 
   // We use Vista's highlight color.
   Style active_selection;
-  #if USE_SELETION_OVERLAY
-    active_selection.set_bgcolor(Color(51, 153, 255, 0.3f));
-  #else
-    active_selection.set_color(Color(255, 255, 255));
-    active_selection.set_bgcolor(Color(51, 153, 255));
-  #endif
+#if USE_SELETION_OVERLAY
+  active_selection.set_bgcolor(Color(51, 153, 255, 0.3f));
+#else
+  active_selection.set_color(Color(255, 255, 255));
+  active_selection.set_bgcolor(Color(51, 153, 255));
+#endif
   default_style_sheet.AddRule(StyleSelector::active_selection(),
                               active_selection);
   Style inactive_selection;
-  #if USE_SELETION_OVERLAY
-    inactive_selection.set_bgcolor(Color(191, 205, 219, 0.3f));
-  #else
-    inactive_selection.set_color(Color(67, 78, 84));
-    inactive_selection.set_bgcolor(Color(191, 205, 219));
-  #endif
+#if USE_SELETION_OVERLAY
+  inactive_selection.set_bgcolor(Color(191, 205, 219, 0.3f));
+#else
+  inactive_selection.set_color(Color(67, 78, 84));
+  inactive_selection.set_bgcolor(Color(191, 205, 219));
+#endif
   default_style_sheet.AddRule(StyleSelector::inactive_selection(),
                               inactive_selection);
 
@@ -93,45 +93,41 @@ StyleSheet* GetDefaultStyleSheet() {
   default_style_sheet.AddRule(StyleSelector::bad_grammar(), green_wave);
 
   // Syntax
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::comment(), Color(0, 128, 0));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::html_attribute_name(), Color(255, 0, 0));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::comment(),
+                     Color(0, 128, 0));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::html_attribute_name(),
+                     Color(255, 0, 0));
   InstallSyntaxColor(&default_style_sheet,
                      StyleSelector::html_attribute_value(), Color(0, 0, 255));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::html_comment(), Color(0, 128, 0));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::html_element_name(), Color(128, 0, 0));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::html_entity(), Color(255, 0, 0));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::identifier(), Color(0, 0, 0));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::keyword(), Color(0, 0, 255));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::keyword2(), Color(0, 0, 192));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::label(), Color(128, 0, 128));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::literal(), Color(0, 0, 128));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::operators(), Color(0, 0, 128));
-  InstallSyntaxColor(&default_style_sheet,
-                     StyleSelector::string_literal(), Color(163, 21, 21));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::html_comment(),
+                     Color(0, 128, 0));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::html_element_name(),
+                     Color(128, 0, 0));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::html_entity(),
+                     Color(255, 0, 0));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::identifier(),
+                     Color(0, 0, 0));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::keyword(),
+                     Color(0, 0, 255));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::keyword2(),
+                     Color(0, 0, 192));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::label(),
+                     Color(128, 0, 128));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::literal(),
+                     Color(0, 0, 128));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::operators(),
+                     Color(0, 0, 128));
+  InstallSyntaxColor(&default_style_sheet, StyleSelector::string_literal(),
+                     Color(163, 21, 21));
 
   // IME
-  InstallTextDecoration(&default_style_sheet,
-                        StyleSelector::ime_inactive1(),
+  InstallTextDecoration(&default_style_sheet, StyleSelector::ime_inactive1(),
                         TextDecoration::ImeInactiveA);
-  InstallTextDecoration(&default_style_sheet,
-                        StyleSelector::ime_inactive2(),
+  InstallTextDecoration(&default_style_sheet, StyleSelector::ime_inactive2(),
                         TextDecoration::ImeInactiveB);
-  InstallTextDecoration(&default_style_sheet,
-                        StyleSelector::ime_input(),
+  InstallTextDecoration(&default_style_sheet, StyleSelector::ime_input(),
                         TextDecoration::ImeInput);
-  InstallTextDecoration(&default_style_sheet,
-                        StyleSelector::ime_active1(),
+  InstallTextDecoration(&default_style_sheet, StyleSelector::ime_active1(),
                         TextDecoration::ImeActive);
   {
     Style style;

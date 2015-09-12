@@ -12,18 +12,15 @@
 
 namespace css {
 
-StyleSheet::StyleSheet() {
-}
+StyleSheet::StyleSheet() {}
 
-StyleSheet::~StyleSheet() {
-}
+StyleSheet::~StyleSheet() {}
 
 void StyleSheet::AddObserver(StyleSheetObserver* observer) const {
   const_cast<StyleSheet*>(this)->observers_.AddObserver(observer);
 }
 
-void StyleSheet::AddRule(const base::string16& selector,
-                         const Style& style) {
+void StyleSheet::AddRule(const base::string16& selector, const Style& style) {
   return AddRule(common::AtomicString(selector), style);
 }
 

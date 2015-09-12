@@ -2,21 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_bitmap_h)
-#define INCLUDE_evita_gfx_bitmap_h
+#ifndef EVITA_GFX_BITMAP_H_
+#define EVITA_GFX_BITMAP_H_
 
 #include "evita/gfx_base.h"
 
 namespace gfx {
 
-class Bitmap : public SimpleObject_<ID2D1Bitmap> {
-  public: Bitmap(Canvas* canvas, HICON hIcon);
-  public: Bitmap(Canvas* canvas, SizeU size);
-  public: explicit Bitmap(Canvas* canvas);
-  public: ~Bitmap();
+class Bitmap final : public SimpleObject_<ID2D1Bitmap> {
+ public:
+  Bitmap(Canvas* canvas, HICON hIcon);
+  Bitmap(Canvas* canvas, SizeU size);
+  explicit Bitmap(Canvas* canvas);
+  ~Bitmap();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(Bitmap);
 };
 
-} // namespace gfx
+}  // namespace gfx
 
-#endif //!defined(INCLUDE_evita_gfx_bitmap_h)
+#endif  // EVITA_GFX_BITMAP_H_

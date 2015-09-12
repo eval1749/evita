@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_font_face_h)
-#define INCLUDE_evita_gfx_font_face_h
+#ifndef EVITA_GFX_FONT_FACE_H_
+#define EVITA_GFX_FONT_FACE_H_
 
 #include <functional>
 
@@ -31,20 +31,26 @@ struct FontProperties {
 //
 // FontFace
 //
-class FontFace : public SimpleObject_<IDWriteFontFace> {
-  private: const DWRITE_FONT_METRICS metrics_;
-  public: FontFace(const FontProperties& properties);
-  public: ~FontFace();
-  public: const DWRITE_FONT_METRICS& metrics() const { return metrics_; }
+class FontFace final : public SimpleObject_<IDWriteFontFace> {
+ public:
+  explicit FontFace(const FontProperties& properties);
+  ~FontFace();
+
+  const DWRITE_FONT_METRICS& metrics() const { return metrics_; }
+
+ private:
+  const DWRITE_FONT_METRICS metrics_;
+
   DISALLOW_COPY_AND_ASSIGN(FontFace);
 };
 
-} // namespace gfx
+}  // namespace gfx
 
 namespace std {
-template<> struct hash<gfx::FontProperties> {
+template <>
+struct hash<gfx::FontProperties> {
   size_t operator()(const gfx::FontProperties& properties) const;
 };
 }  // namespace std
 
-#endif //!defined(INCLUDE_evita_gfx_font_face_h)
+#endif  // EVITA_GFX_FONT_FACE_H_

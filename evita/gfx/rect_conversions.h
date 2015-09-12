@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_gfx_rect_conversions_h)
-#define INCLUDE_gfx_rect_conversions_h
+#ifndef EVITA_GFX_RECT_CONVERSIONS_H_
+#define EVITA_GFX_RECT_CONVERSIONS_H_
 
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
@@ -18,4 +18,4 @@ Rect ToEnclosingRect(const RectF& rect);
 
 }  // namespace gfx
 
-#endif //!defined(INCLUDE_gfx_rect_conversions_h)
+#endif  // EVITA_GFX_RECT_CONVERSIONS_H_

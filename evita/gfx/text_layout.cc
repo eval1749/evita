@@ -11,10 +11,8 @@ namespace gfx {
 // TextLayout
 //
 TextLayout::TextLayout(IDWriteTextLayout* text_layout)
-    : SimpleObject_(text_layout) {
-}
+    : SimpleObject_(text_layout) {}
 
-TextLayout::~TextLayout() {
-}
+TextLayout::~TextLayout() {}
 
 }  // namespace gfx

@@ -11,5 +11,5 @@ std::ostream& operator<<(std::ostream& ostream, const gfx::SizeF& size) {
 std::ostream& operator<<(std::ostream& ostream, const gfx::SizeF* size) {
   if (!size)
     return ostream << "(null)";
-  return ostream <<*size;
+  return ostream << *size;
 }

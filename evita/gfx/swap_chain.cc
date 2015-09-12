@@ -18,7 +18,9 @@ namespace gfx {
 // SwapChain
 //
 SwapChain::SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain)
-    : is_first_present_(true), is_ready_(false), swap_chain_(swap_chain),
+    : is_first_present_(true),
+      is_ready_(false),
+      swap_chain_(swap_chain),
       swap_chain_waitable_(swap_chain_->GetFrameLatencyWaitableObject()) {
   COM_VERIFY(DxDevice::instance()->d2d_device()->CreateDeviceContext(
       D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &d2d_device_context_));
@@ -40,7 +42,7 @@ void SwapChain::AddDirtyRect(const RectF& new_dirty_rect_f) {
   }
   for (const auto& dirty_rect : dirty_rects_) {
     if (dirty_rect.Contains(new_dirty_rect))
-        return;
+      return;
   }
   std::vector<Rect> new_dirty_rects;
   for (const auto& dirty_rect : dirty_rects_) {
@@ -64,7 +66,7 @@ SwapChain* SwapChain::CreateForComposition(const RectF& bounds) {
   swap_chain_desc.Width = size.width;
   swap_chain_desc.Height = size.height;
   swap_chain_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-  swap_chain_desc.SampleDesc.Count = 1; // don't use multi-sampling
+  swap_chain_desc.SampleDesc.Count = 1;  // don't use multi-sampling
   swap_chain_desc.SampleDesc.Quality = 0;
   swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
   swap_chain_desc.BufferCount = 2;  // use double buffering to enable flip
@@ -101,7 +103,7 @@ SwapChain* SwapChain::CreateForHwnd(HWND hwnd) {
   // this is the most common swap chain format
   swap_chain_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
   swap_chain_desc.Stereo = false;
-  swap_chain_desc.SampleDesc.Count = 1; // don't use multi-sampling
+  swap_chain_desc.SampleDesc.Count = 1;  // don't use multi-sampling
   swap_chain_desc.SampleDesc.Quality = 0;
   swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
   swap_chain_desc.BufferCount = 2;  // use double buffering to enable flip
@@ -123,10 +125,9 @@ void SwapChain::DidChangeBounds(const RectF& new_bounds) {
   d2d_device_context_->SetTarget(nullptr);
   bounds_ = new_bounds;
   auto const enclosing_rect = ToEnclosingRect(new_bounds);
-  COM_VERIFY(swap_chain_->ResizeBuffers(0u,
-      static_cast<UINT>(enclosing_rect.width()),
-      static_cast<UINT>(enclosing_rect.height()),
-      DXGI_FORMAT_UNKNOWN,
+  COM_VERIFY(swap_chain_->ResizeBuffers(
+      0u, static_cast<UINT>(enclosing_rect.width()),
+      static_cast<UINT>(enclosing_rect.height()), DXGI_FORMAT_UNKNOWN,
       DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT));
   UpdateDeviceContext();
 }
@@ -135,7 +136,7 @@ bool SwapChain::IsReady() {
   if (is_ready_)
     return true;
   auto const wait = ::WaitForSingleObject(swap_chain_waitable_, 0);
-  switch (wait){
+  switch (wait) {
     case WAIT_OBJECT_0:
       is_ready_ = true;
       return true;
@@ -197,8 +198,8 @@ void SwapChain::UpdateDeviceContext() {
     d2d_device_context_->SetTarget(d2d_back_buffer);
 
     auto const size = d2d_back_buffer->GetPixelSize();
-    bounds_ = gfx::RectF(gfx::SizeF(
-        static_cast<float>(size.width), static_cast<float>(size.height)));
+    bounds_ = gfx::RectF(gfx::SizeF(static_cast<float>(size.width),
+                                    static_cast<float>(size.height)));
   }
 
   d2d_device_context_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);

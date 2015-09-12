@@ -2,20 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_text_layout_h)
-#define INCLUDE_evita_gfx_text_layout_h
+#ifndef EVITA_GFX_TEXT_LAYOUT_H_
+#define EVITA_GFX_TEXT_LAYOUT_H_
 
 #include "evita/gfx_base.h"
 
 namespace gfx {
 
-class TextLayout : public SimpleObject_<IDWriteTextLayout> {
-  public: TextLayout(IDWriteTextLayout* text_layout);
-  public: ~TextLayout();
-  public: SIZE GetMetrics() const;
+class TextLayout final : public SimpleObject_<IDWriteTextLayout> {
+ public:
+  explicit TextLayout(IDWriteTextLayout* text_layout);
+  ~TextLayout();
+
+  SIZE GetMetrics() const;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(TextLayout);
 };
 
-} // namespace gfx
+}  // namespace gfx
 
-#endif //!defined(INCLUDE_evita_gfx_text_layout_h)
+#endif  // EVITA_GFX_TEXT_LAYOUT_H_

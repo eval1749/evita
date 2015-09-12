@@ -17,8 +17,7 @@
 
 #pragma comment(lib, "d3d11.lib")
 
-std::ostream& operator<<(std::ostream& ostream,
-                         D2D1_TEXT_ANTIALIAS_MODE mode) {
+std::ostream& operator<<(std::ostream& ostream, D2D1_TEXT_ANTIALIAS_MODE mode) {
   switch (mode) {
     case D2D1_TEXT_ANTIALIAS_MODE_DEFAULT:
       return ostream << "DEFAULT";
@@ -43,7 +42,9 @@ int global_bitmap_id;
 // Canvas::AxisAlignedClipScope
 //
 Canvas::AxisAlignedClipScope::AxisAlignedClipScope(
-    Canvas* canvas, const RectF& bounds, D2D1_ANTIALIAS_MODE alias_mode)
+    Canvas* canvas,
+    const RectF& bounds,
+    D2D1_ANTIALIAS_MODE alias_mode)
     : canvas_(canvas) {
   DCHECK(!bounds.empty());
   (*canvas_)->PushAxisAlignedClip(bounds, alias_mode);
@@ -51,8 +52,7 @@ Canvas::AxisAlignedClipScope::AxisAlignedClipScope(
 
 Canvas::AxisAlignedClipScope::AxisAlignedClipScope(Canvas* canvas,
                                                    const RectF& bounds)
-    : AxisAlignedClipScope(canvas, bounds, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE) {
-}
+    : AxisAlignedClipScope(canvas, bounds, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE) {}
 
 Canvas::AxisAlignedClipScope::~AxisAlignedClipScope() {
   (*canvas_)->PopAxisAlignedClip();
@@ -62,8 +62,7 @@ Canvas::AxisAlignedClipScope::~AxisAlignedClipScope() {
 //
 // Canvas::DrawingScope
 //
-Canvas::DrawingScope::DrawingScope(Canvas* canvas)
-    : canvas_(canvas) {
+Canvas::DrawingScope::DrawingScope(Canvas* canvas) : canvas_(canvas) {
   canvas_->BeginDraw();
 }
 
@@ -92,23 +91,23 @@ Canvas::ScopedState::~ScopedState() {
 // Canvas
 //
 Canvas::Canvas()
-    : batch_nesting_level_(0), bitmap_id_(0),
-    factory_set_(FactorySet::instance()), should_clear_(true) {
-}
+    : batch_nesting_level_(0),
+      bitmap_id_(0),
+      factory_set_(FactorySet::instance()),
+      should_clear_(true) {}
 
-Canvas::~Canvas() {
-}
+Canvas::~Canvas() {}
 
 void Canvas::AddDirtyRect(const RectF& local_bounds) {
-  auto const bounds = gfx::RectF(local_bounds.origin() + bounds_.origin(),
-                                 local_bounds.size()).Intersect(bounds_);
+  auto const bounds =
+      gfx::RectF(local_bounds.origin() + bounds_.origin(), local_bounds.size())
+          .Intersect(bounds_);
   if (bounds.empty())
     return;
   AddDirtyRectImpl(bounds);
 }
 
-void Canvas::AddDirtyRectImpl(const RectF&) {
-}
+void Canvas::AddDirtyRectImpl(const RectF&) {}
 
 void Canvas::AddObserver(CanvasObserver* observer) {
   observers_.AddObserver(observer);
@@ -126,8 +125,11 @@ void Canvas::Clear(const ColorF& color) {
   GetRenderTarget()->Clear(color);
 }
 
-void Canvas::DidCallEndDraw() {
+void Canvas::Clear(D2D1::ColorF::Enum name) {
+  Clear(ColorF(name));
 }
+
+void Canvas::DidCallEndDraw() {}
 
 void Canvas::DidCreateRenderTarget() {
   bitmap_id_ = ++global_bitmap_id;
@@ -138,27 +140,34 @@ void Canvas::DidCreateRenderTarget() {
   FOR_EACH_OBSERVER(CanvasObserver, observers_, DidRecreateCanvas());
 }
 
-void Canvas::DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
-                        const RectF& src_rect, float opacity,
+void Canvas::DrawBitmap(const Bitmap& bitmap,
+                        const RectF& dst_rect,
+                        const RectF& src_rect,
+                        float opacity,
                         D2D1_BITMAP_INTERPOLATION_MODE mode) {
   GetRenderTarget()->DrawBitmap(bitmap, dst_rect, opacity, mode, src_rect);
 }
 
-void Canvas::DrawLine(const Brush& brush, const PointF& point1,
-                      const PointF& point2, float pen_width) {
+void Canvas::DrawLine(const Brush& brush,
+                      const PointF& point1,
+                      const PointF& point2,
+                      float pen_width) {
   DCHECK(drawing());
   GetRenderTarget()->DrawLine(point1, point2, brush, pen_width);
 }
 
-void Canvas::DrawRectangle(const Brush& brush, const RectF& rect,
+void Canvas::DrawRectangle(const Brush& brush,
+                           const RectF& rect,
                            float strokeWidth) {
   DCHECK(drawing());
   DCHECK(!rect.empty());
   GetRenderTarget()->DrawRectangle(rect, brush, strokeWidth);
 }
 
-void Canvas::DrawText(const TextFormat& text_format, const Brush& brush,
-                      const RectF& bounds, const base::string16& text){
+void Canvas::DrawText(const TextFormat& text_format,
+                      const Brush& brush,
+                      const RectF& bounds,
+                      const base::string16& text) {
   DCHECK(drawing());
   DCHECK(!bounds.empty());
   GetRenderTarget()->DrawText(text.data(), static_cast<uint32_t>(text.length()),
@@ -221,8 +230,8 @@ void Canvas::RemoveObserver(CanvasObserver* observer) {
 void Canvas::RestoreScreenImage(const RectF& bounds) {
   DCHECK(!bounds_.empty());
   DCHECK(screen_bitmap_);
-  auto const source_bounds = gfx::RectF(bounds.origin() + bounds_.origin(),
-                                        bounds.size());
+  auto const source_bounds =
+      gfx::RectF(bounds.origin() + bounds_.origin(), bounds.size());
   DrawBitmap(*screen_bitmap_, bounds, source_bounds);
 }
 
@@ -230,16 +239,17 @@ bool Canvas::SaveScreenImage(const RectF& rect_in) {
   DCHECK(!bounds_.empty());
   if (!screen_bitmap_)
     screen_bitmap_ = std::make_unique<Bitmap>(this);
-  auto const rect = gfx::RectF(rect_in.origin() + bounds_.origin(),
-                               rect_in.size());
+  auto const rect =
+      gfx::RectF(rect_in.origin() + bounds_.origin(), rect_in.size());
   auto const enclosing_rect = ToEnclosingRect(rect);
   const RectU source_rect(static_cast<uint32_t>(enclosing_rect.left()),
                           static_cast<uint32_t>(enclosing_rect.top()),
                           static_cast<uint32_t>(enclosing_rect.right()),
                           static_cast<uint32_t>(enclosing_rect.bottom()));
   const PointU dest_point(source_rect.origin());
-  auto const hr = (*screen_bitmap_)->CopyFromRenderTarget(&dest_point,
-      GetRenderTarget(), &source_rect);
+  auto const hr =
+      (*screen_bitmap_)
+          ->CopyFromRenderTarget(&dest_point, GetRenderTarget(), &source_rect);
   if (FAILED(hr))
     DVLOG(0) << "ID2D1Bitmap->CopyFromRenderTarget hr=" << std::hex << hr;
   return SUCCEEDED(hr);
@@ -292,8 +302,7 @@ CanvasForHwnd::CanvasForHwnd(HWND hwnd)
   SetInitialBounds(swap_chain_->bounds());
 }
 
-CanvasForHwnd::~CanvasForHwnd() {
-}
+CanvasForHwnd::~CanvasForHwnd() {}
 
 // Canvas
 void CanvasForHwnd::AddDirtyRectImpl(const RectF& new_dirty_rect) {

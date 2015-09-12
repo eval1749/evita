@@ -10,18 +10,12 @@ namespace {
 
 common::ComPtr<ID2D1Bitmap> CreateBitmap(Canvas* canvas, HICON hIcon) {
   common::ComPtr<IWICBitmap> icon;
-  COM_VERIFY(gfx::FactorySet::image().CreateBitmapFromHICON(
-      hIcon, &icon));
- common::ComPtr<IWICFormatConverter> converter;
- COM_VERIFY(gfx::FactorySet::image().
-    CreateFormatConverter(&converter));
- COM_VERIFY(converter->Initialize(
-      icon,
-      GUID_WICPixelFormat32bppPBGRA,
-      WICBitmapDitherTypeNone,
-      nullptr,
-      0,
-      WICBitmapPaletteTypeMedianCut));
+  COM_VERIFY(gfx::FactorySet::image().CreateBitmapFromHICON(hIcon, &icon));
+  common::ComPtr<IWICFormatConverter> converter;
+  COM_VERIFY(gfx::FactorySet::image().CreateFormatConverter(&converter));
+  COM_VERIFY(converter->Initialize(icon, GUID_WICPixelFormat32bppPBGRA,
+                                   WICBitmapDitherTypeNone, nullptr, 0,
+                                   WICBitmapPaletteTypeMedianCut));
   common::ComPtr<ID2D1Bitmap> bitmap;
   COM_VERIFY((*canvas)->CreateBitmapFromWicBitmap(converter, nullptr, &bitmap));
   return std::move(bitmap);
@@ -43,18 +37,14 @@ common::ComPtr<ID2D1Bitmap> CreateBitmap(Canvas* canvas, SizeU size) {
 // Bitmap
 //
 Bitmap::Bitmap(Canvas* canvas, HICON hIcon)
-    : SimpleObject_(CreateBitmap(canvas, hIcon)) {
-}
+    : SimpleObject_(CreateBitmap(canvas, hIcon)) {}
 
 Bitmap::Bitmap(Canvas* canvas, SizeU size)
-    : SimpleObject_(CreateBitmap(canvas, size)) {
-}
+    : SimpleObject_(CreateBitmap(canvas, size)) {}
 
 Bitmap::Bitmap(Canvas* canvas)
-    : Bitmap(canvas, (*canvas)->GetPixelSize()) {
-}
+    : Bitmap(canvas, SizeU((*canvas)->GetPixelSize())) {}
 
-Bitmap::~Bitmap() {
-}
+Bitmap::~Bitmap() {}
 
 }  // namespace gfx

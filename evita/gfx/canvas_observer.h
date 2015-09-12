@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_canvas_observer_h)
-#define INCLUDE_evita_gfx_canvas_observer_h
+#ifndef EVITA_GFX_CANVAS_OBSERVER_H_
+#define EVITA_GFX_CANVAS_OBSERVER_H_
 
 namespace gfx {
 
@@ -12,13 +12,15 @@ namespace gfx {
 // CanvasObserver
 //
 class CanvasObserver {
-  protected: CanvasObserver();
-  public: virtual ~CanvasObserver();
+ public:
+  virtual ~CanvasObserver();
 
-  public: virtual void DidRecreateCanvas() = 0;
+  virtual void DidRecreateCanvas() = 0;
+
+ protected:
+  CanvasObserver();
 };
 
+}  // namespace gfx
 
-} // namespace gfx
-
-#endif //!defined(INCLUDE_evita_gfx_canvas_observer_h)
+#endif  // EVITA_GFX_CANVAS_OBSERVER_H_

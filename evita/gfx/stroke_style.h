@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_stroke_style_h)
-#define INCLUDE_evita_gfx_stroke_style_h
+#ifndef EVITA_GFX_STROKE_STYLE_H_
+#define EVITA_GFX_STROKE_STYLE_H_
 
 #include <vector>
 
@@ -35,30 +35,31 @@ enum class LineJoin {
   MiterOrBevel = D2D1_LINE_JOIN_MITER_OR_BEVEL,
 };
 
-class StrokeStyle {
-  private: std::vector<float> dashes_;
-  private: common::ComPtr<ID2D1StrokeStyle> platform_style_;
-  private: D2D1_STROKE_STYLE_PROPERTIES properties_;
+class StrokeStyle final {
+ public:
+  StrokeStyle();
+  ~StrokeStyle();
 
-  public: StrokeStyle();
-  public: ~StrokeStyle();
+  operator ID2D1StrokeStyle*() const;
 
-  public: operator ID2D1StrokeStyle*() const;
+  bool is_realized() const { return platform_style_ != nullptr; }
+  void set_cap_style(CapStyle start_style, CapStyle end_cap_style);
+  void set_cap_style(CapStyle cap_style);
+  void set_dashes(const std::vector<float>& dashes);
+  void set_dash_offset(float offset);
+  void set_dash_style(DashStyle dash_style);
+  void set_line_join(LineJoin line_join);
 
-  public: bool is_realized() const { return platform_style_ != nullptr; }
-  public: void set_cap_style(CapStyle start_style, CapStyle end_cap_style);
-  public: void set_cap_style(CapStyle cap_style);
-  public: void set_dashes(const std::vector<float>& dashes);
-  public: void set_dash_offset(float offset);
-  public: void set_dash_style(DashStyle dash_style);
-  public: void set_line_join(LineJoin line_join);
+  void Realize();
 
-  public: void Realize();
+ private:
+  std::vector<float> dashes_;
+  common::ComPtr<ID2D1StrokeStyle> platform_style_;
+  D2D1_STROKE_STYLE_PROPERTIES properties_;
 
   DISALLOW_COPY_AND_ASSIGN(StrokeStyle);
 };
 
 }  // namespace gfx
 
-
-#endif //!defined(INCLUDE_evita_gfx_stroke_style_h)
+#endif  // EVITA_GFX_STROKE_STYLE_H_

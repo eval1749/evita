@@ -11,17 +11,17 @@ namespace {
 common::ComPtr<IDWriteFontFace> CreateFontFace(
     const FontProperties& properties) {
   common::ComPtr<IDWriteFontCollection> font_collection;
-  COM_VERIFY(gfx::FactorySet::dwrite().
-      GetSystemFontCollection(&font_collection, false));
+  COM_VERIFY(gfx::FactorySet::dwrite().GetSystemFontCollection(&font_collection,
+                                                               false));
 
   uint32 index;
   BOOL exists;
   COM_VERIFY(font_collection->FindFamilyName(properties.family_name.c_str(),
                                              &index, &exists));
   if (!exists) {
-   FontProperties fallback_properties;
-   fallback_properties.family_name = L"Courier New";
-   return CreateFontFace(fallback_properties);
+    FontProperties fallback_properties;
+    fallback_properties.family_name = L"Courier New";
+    return CreateFontFace(fallback_properties);
   }
 
   common::ComPtr<IDWriteFontFamily> font_family;
@@ -29,10 +29,10 @@ common::ComPtr<IDWriteFontFace> CreateFontFace(
 
   common::ComPtr<IDWriteFont> font;
   COM_VERIFY(font_family->GetFirstMatchingFont(
-    properties.bold ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
-    DWRITE_FONT_STRETCH_NORMAL,
-    properties.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
-    &font));
+      properties.bold ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
+      DWRITE_FONT_STRETCH_NORMAL,
+      properties.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
+      &font));
 
   common::ComPtr<IDWriteFontFace> font_face;
   COM_VERIFY(font->CreateFontFace(&font_face));
@@ -52,8 +52,7 @@ DWRITE_FONT_METRICS GetFontMetrics(IDWriteFontFace* font) {
 // Font::Properties
 //
 FontProperties::FontProperties()
-    : bold(false), italic(false), font_size_pt(0) {
-}
+    : bold(false), italic(false), font_size_pt(0) {}
 
 bool FontProperties::operator==(const FontProperties& other) const {
   return bold == other.bold && font_size_pt == other.font_size_pt &&
@@ -70,11 +69,9 @@ bool FontProperties::operator!=(const FontProperties& other) const {
 //
 FontFace::FontFace(const FontProperties& properties)
     : SimpleObject_(CreateFontFace(properties)),
-      metrics_(GetFontMetrics(*this)) {
-}
+      metrics_(GetFontMetrics(*this)) {}
 
-FontFace::~FontFace() {
-}
+FontFace::~FontFace() {}
 
 }  // namespace gfx
 

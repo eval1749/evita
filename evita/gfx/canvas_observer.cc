@@ -6,10 +6,8 @@
 
 namespace gfx {
 
-CanvasObserver::CanvasObserver() {
-}
+CanvasObserver::CanvasObserver() {}
 
-CanvasObserver::~CanvasObserver() {
-}
+CanvasObserver::~CanvasObserver() {}
 
 }  // namespace gfx

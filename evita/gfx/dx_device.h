@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_dx_device_h)
-#define INCLUDE_evita_gfx_dx_device_h
+#ifndef EVITA_GFX_DX_DEVICE_H_
+#define EVITA_GFX_DX_DEVICE_H_
 
 #include "base/basictypes.h"
 #include "common/memory/singleton.h"
@@ -22,21 +22,24 @@ namespace gfx {
 class DxDevice : public common::Singleton<DxDevice> {
   DECLARE_SINGLETON_CLASS(DxDevice);
 
-  private: common::ComPtr<ID2D1Device> d2d_device_;
-  private: common::ComPtr<IDXGIDevice3> dxgi_device_;
-  private: common::ComPtr<IDXGIFactory2> dxgi_factory_;
-
-  private: DxDevice();
+ public:
   // TODO(eval1749) We should destruct DxDevice by Singleton destructor.
-  public: virtual ~DxDevice();
+  virtual ~DxDevice();
 
-  public: ID2D1Device* d2d_device() const { return d2d_device_; }
-  public: IDXGIDevice3* dxgi_device() const { return dxgi_device_; }
-  public: IDXGIFactory2* dxgi_factory() const { return dxgi_factory_; }
+  ID2D1Device* d2d_device() const { return d2d_device_; }
+  IDXGIDevice3* dxgi_device() const { return dxgi_device_; }
+  IDXGIFactory2* dxgi_factory() const { return dxgi_factory_; }
+
+ private:
+  DxDevice();
+
+  common::ComPtr<ID2D1Device> d2d_device_;
+  common::ComPtr<IDXGIDevice3> dxgi_device_;
+  common::ComPtr<IDXGIFactory2> dxgi_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(DxDevice);
 };
 
-} // namespace gfx
+}  // namespace gfx
 
-#endif //!defined(INCLUDE_evita_gfx_dx_device_h)
+#endif  // EVITA_GFX_DX_DEVICE_H_

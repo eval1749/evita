@@ -11,5 +11,5 @@ std::ostream& operator<<(std::ostream& ostream, const gfx::PointF& point) {
 std::ostream& operator<<(std::ostream& ostream, const gfx::PointF* point) {
   if (!point)
     return ostream << "(null)";
-  return ostream <<*point;
+  return ostream << *point;
 }

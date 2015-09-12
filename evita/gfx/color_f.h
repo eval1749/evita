@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUE_evita_gfx_color_f_h)
-#define INCLUE_evita_gfx_color_f_h
+#ifndef EVITA_GFX_COLOR_F_H_
+#define EVITA_GFX_COLOR_F_H_
 
 #include <functional>
 
@@ -11,30 +11,31 @@
 
 namespace gfx {
 
-class ColorF : public D2D1::ColorF {
-  public: ColorF(float r, float g, float b, float a = 1.0f);
-  public: ColorF(D2D1::ColorF::Enum name, float a = 1.0f);
-  public: ColorF(const ColorF& other, float a);
-  public: ColorF(const ColorF& other);
-  public: ColorF();
-  public: ~ColorF();
+class ColorF final : public D2D1::ColorF {
+ public:
+  ColorF(float r, float g, float b, float a = 1.0f);
+  explicit ColorF(D2D1::ColorF::Enum name, float a = 1.0f);
+  ColorF(const ColorF& other, float a);
+  ColorF(const ColorF& other);
+  ColorF();
+  ~ColorF();
 
-  public: bool operator==(const ColorF& other) const;
-  public: bool operator!=(const ColorF& other) const;
+  bool operator==(const ColorF& other) const;
+  bool operator!=(const ColorF& other) const;
 
-  public: float alpha() const { return a; }
-  public: float blue() const { return b; }
-  public: float green() const { return g; }
-  public: float red() const { return r; }
+  float alpha() const { return a; }
+  float blue() const { return b; }
+  float green() const { return g; }
+  float red() const { return r; }
 };
 
-} // namespace gfx
+}  // namespace gfx
 
 namespace std {
-template<> struct hash<gfx::ColorF> {
+template <>
+struct hash<gfx::ColorF> {
   size_t operator()(const gfx::ColorF& color) const;
 };
 }  // namespace std
 
-
-#endif //!defined(INCLUDE_evita_gfx_color_f_h)
+#endif  // EVITA_GFX_COLOR_F_H_

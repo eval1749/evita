@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_canvas_h)
-#define INCLUDE_evita_gfx_canvas_h
+#ifndef EVITA_GFX_CANVAS_H_
+#define EVITA_GFX_CANVAS_H_
 
 #include <memory>
 #include <vector>
@@ -24,119 +24,120 @@ class SwapChain;
 // Canvas
 //
 class Canvas : public Object, public DpiHandler {
-  public: class AxisAlignedClipScope final {
-    private: Canvas* canvas_;
-    public: AxisAlignedClipScope(Canvas* canvas, const RectF& bounds,
-                                 D2D1_ANTIALIAS_MODE alias_mode);
-    public: AxisAlignedClipScope(Canvas* canvas, const RectF& bounds);
-    public: ~AxisAlignedClipScope();
+ public:
+  class AxisAlignedClipScope final {
+   public:
+    AxisAlignedClipScope(Canvas* canvas,
+                         const RectF& bounds,
+                         D2D1_ANTIALIAS_MODE alias_mode);
+    AxisAlignedClipScope(Canvas* canvas, const RectF& bounds);
+    ~AxisAlignedClipScope();
+
+   private:
+    Canvas* canvas_;
     DISALLOW_COPY_AND_ASSIGN(AxisAlignedClipScope);
   };
 
-  public: class DrawingScope final {
-    private: Canvas* const canvas_;
-    public: DrawingScope(Canvas* canvas);
-    public: ~DrawingScope();
+  class DrawingScope final {
+   public:
+    explicit DrawingScope(Canvas* canvas);
+    ~DrawingScope();
+
+   private:
+    Canvas* const canvas_;
     DISALLOW_COPY_AND_ASSIGN(DrawingScope);
   };
-  friend class DrawingScope;
 
-  public: class ScopedState final {
-    private: gfx::RectF bounds_;
-    private: Canvas* const canvas_;
-    private: gfx::PointF offset_;
-    private: D2D1::Matrix3x2F transform_;
+  class ScopedState final {
+   public:
+    explicit ScopedState(Canvas* canvas);
+    ~ScopedState();
 
-    public: ScopedState(Canvas* canvas);
-    public: ~ScopedState();
+   private:
+    gfx::RectF bounds_;
+    Canvas* const canvas_;
+    gfx::PointF offset_;
+    D2D1::Matrix3x2F transform_;
 
     DISALLOW_COPY_AND_ASSIGN(ScopedState);
   };
-  friend class ScopedState;
 
-  private: int batch_nesting_level_;
-  private: int bitmap_id_;
-  private: gfx::RectF bounds_;
-  private: scoped_refptr<FactorySet> factory_set_;
-  private: base::ObserverList<CanvasObserver> observers_;
-  private: gfx::PointF offset_;
-  private: std::unique_ptr<Bitmap> screen_bitmap_;
-  private: bool should_clear_;
+  virtual ~Canvas();
 
-  protected: Canvas();
-  public: virtual ~Canvas();
-
-  public: explicit operator bool() const {
-    return GetRenderTarget() != nullptr;
-  }
-  public: operator ID2D1RenderTarget*() const {
-    return GetRenderTarget();
-  }
-  public: ID2D1RenderTarget* operator->() const {
-    return GetRenderTarget();
-  }
+  explicit operator bool() const { return GetRenderTarget() != nullptr; }
+  operator ID2D1RenderTarget*() const { return GetRenderTarget(); }
+  ID2D1RenderTarget* operator->() const { return GetRenderTarget(); }
 
   // Id of current backing bitmap. Each time we change canvas bounds, we have
   // new backing bitmap.
-  public: int bitmap_id() const { return bitmap_id_; }
+  int bitmap_id() const { return bitmap_id_; }
   // |drawing()| is for debugging.
-  public: bool drawing() const { return batch_nesting_level_ != 0; }
-  public: const FactorySet& factory_set() const { return *factory_set_; }
-  public: float height() const { return bounds_.height(); }
-  public: Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
-  public: bool should_clear() const { return should_clear_; }
-  public: float width() const { return bounds_.width(); }
+  bool drawing() const { return batch_nesting_level_ != 0; }
+  const FactorySet& factory_set() const { return *factory_set_; }
+  float height() const { return bounds_.height(); }
+  Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
+  bool should_clear() const { return should_clear_; }
+  float width() const { return bounds_.width(); }
 
-  // [A]
-  public: virtual void AddDirtyRect(const RectF& new_dirty_rect);
-  protected: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect);
-  public: void AddObserver(CanvasObserver* observer);
-
-  // [B]
-  private: void BeginDraw();
-
-  // [C]
-  public: void Clear(const ColorF& color);
-
-  // [D]
-  protected: virtual void DidCallEndDraw();
-  protected: void DidCreateRenderTarget();
-  protected: virtual void DidChangeBounds(const RectF& new_bounds) = 0;
-  protected: virtual void DidLostRenderTarget() = 0;
-  public: void DrawBitmap(const Bitmap& bitmap, const RectF& dst_rect,
-                          const RectF& src_rect, float opacity = 1.0f,
-                          D2D1_BITMAP_INTERPOLATION_MODE mode =
-                              D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
-  public: void DrawLine(const Brush& brush, const PointF& point1,
-                        const PointF& point2, float pen_width = 1.0f);
-  public: void DrawRectangle(const Brush& brush, const RectF& rect,
-                             float strokeWidth = 1);
-  public: void DrawText(const TextFormat& text_format, const Brush& brush,
-                        const RectF& bounds, const base::string16& text);
-
-  // [E]
-  private: void EndDraw();
-
-  // [F]
-  public: void FillRectangle(const Brush& brush, const RectF& rect);
-  public: void Flush();
-
-  // [G]
-  public: gfx::RectF GetLocalBounds() const;
-  public: virtual ID2D1RenderTarget* GetRenderTarget() const = 0;
-
-  // [R]
-  public: void RemoveObserver(CanvasObserver* observer);
-  public: void RestoreScreenImage(const RectF& bounds);
-
-  // [S]
-  public: bool Canvas::SaveScreenImage(const RectF& bounds);
-  public: void SetBounds(const RectF& bounds);
-  protected: void SetInitialBounds(const RectF& bounds);
-  public: void SetOffsetBounds(const gfx::RectF& bounds);
+  virtual void AddDirtyRect(const RectF& new_dirty_rect);
+  void AddObserver(CanvasObserver* observer);
+  void Clear(const ColorF& color);
+  void Clear(D2D1::ColorF::Enum name);
+  void DrawBitmap(const Bitmap& bitmap,
+                  const RectF& dst_rect,
+                  const RectF& src_rect,
+                  float opacity = 1.0f,
+                  D2D1_BITMAP_INTERPOLATION_MODE mode =
+                      D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+  void DrawLine(const Brush& brush,
+                const PointF& point1,
+                const PointF& point2,
+                float pen_width = 1.0f);
+  void DrawRectangle(const Brush& brush,
+                     const RectF& rect,
+                     float strokeWidth = 1);
+  void DrawText(const TextFormat& text_format,
+                const Brush& brush,
+                const RectF& bounds,
+                const base::string16& text);
+  void FillRectangle(const Brush& brush, const RectF& rect);
+  void Flush();
+  gfx::RectF GetLocalBounds() const;
+  virtual ID2D1RenderTarget* GetRenderTarget() const = 0;
+  void RemoveObserver(CanvasObserver* observer);
+  void RestoreScreenImage(const RectF& bounds);
+  bool Canvas::SaveScreenImage(const RectF& bounds);
+  void SetBounds(const RectF& bounds);
+  void SetOffsetBounds(const gfx::RectF& bounds);
 
   // [T]
-  public: bool TryAddDirtyRect(const gfx::RectF& bounds);
+  bool TryAddDirtyRect(const gfx::RectF& bounds);
+
+ protected:
+  Canvas();
+
+  virtual void AddDirtyRectImpl(const RectF& new_dirty_rect);
+  virtual void DidCallEndDraw();
+  void DidCreateRenderTarget();
+  virtual void DidChangeBounds(const RectF& new_bounds) = 0;
+  virtual void DidLostRenderTarget() = 0;
+  void SetInitialBounds(const RectF& bounds);
+
+ private:
+  friend class DrawingScope;
+  friend class ScopedState;
+
+  void BeginDraw();
+  void EndDraw();
+
+  int batch_nesting_level_;
+  int bitmap_id_;
+  gfx::RectF bounds_;
+  scoped_refptr<FactorySet> factory_set_;
+  base::ObserverList<CanvasObserver> observers_;
+  gfx::PointF offset_;
+  std::unique_ptr<Bitmap> screen_bitmap_;
+  bool should_clear_;
 
   DISALLOW_COPY_AND_ASSIGN(Canvas);
 };
@@ -146,22 +147,24 @@ class Canvas : public Object, public DpiHandler {
 // CanvasForHwnd
 //
 class CanvasForHwnd final : public Canvas {
-  private: HWND hwnd_;
-  private: std::unique_ptr<SwapChain> swap_chain_;
+ public:
+  explicit CanvasForHwnd(HWND hwnd);
+  ~CanvasForHwnd() override;
 
-  public: CanvasForHwnd(HWND hwnd);
-  public: virtual ~CanvasForHwnd();
-
+ private:
   // Canvas
-  private: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect) override;
-  private: virtual void DidCallEndDraw() override;
-  private: virtual void DidChangeBounds(const RectF& new_bounds) override;
-  private: virtual void DidLostRenderTarget() override;
-  private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
+  void AddDirtyRectImpl(const RectF& new_dirty_rect) override;
+  void DidCallEndDraw() override;
+  void DidChangeBounds(const RectF& new_bounds) override;
+  void DidLostRenderTarget() override;
+  ID2D1RenderTarget* GetRenderTarget() const override;
+
+  HWND hwnd_;
+  std::unique_ptr<SwapChain> swap_chain_;
 
   DISALLOW_COPY_AND_ASSIGN(CanvasForHwnd);
 };
 
-} // namespace gfx
+}  // namespace gfx
 
-#endif //!defined(INCLUDE_evita_gfx_canvas_h)
+#endif  // EVITA_GFX_CANVAS_H_

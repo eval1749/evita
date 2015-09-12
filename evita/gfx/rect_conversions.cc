@@ -19,9 +19,9 @@ Rect ToEnclosedRect(const RectF& rect) {
 // Returns the smallest Rect that encloses the given RectF.
 Rect ToEnclosingRect(const RectF& rect) {
   return gfx::Rect(static_cast<int>(::floor(rect.left)),
-                  static_cast<int>(::floor(rect.top)),
-                  static_cast<int>(::ceil(rect.right)),
-                  static_cast<int>(::ceil(rect.bottom)));
+                   static_cast<int>(::floor(rect.top)),
+                   static_cast<int>(::ceil(rect.right)),
+                   static_cast<int>(::ceil(rect.bottom)));
 }
 
-}   // namespace gfx
+}  // namespace gfx

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_swap_chain_h)
-#define INCLUDE_evita_gfx_swap_chain_h
-
-#include "evita/gfx_base.h"
+#ifndef EVITA_GFX_SWAP_CHAIN_H_
+#define EVITA_GFX_SWAP_CHAIN_H_
 
 #include <vector>
+
+#include "evita/gfx_base.h"
 
 interface IDXGISwapChain2;
 
@@ -20,34 +20,36 @@ class DxDevice;
 // SwapChain
 //
 class SwapChain {
-  private: RectF bounds_;
-  private: common::ComPtr<ID2D1DeviceContext> d2d_device_context_;
-  private: std::vector<Rect> dirty_rects_;
-  private: bool is_first_present_;
-  private: bool is_ready_;
-  private: const common::ComPtr<IDXGISwapChain2> swap_chain_;
-  private: HANDLE const swap_chain_waitable_;
+ public:
+  ~SwapChain();
 
-  private: SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain);
-  public: ~SwapChain();
+  const gfx::RectF& bounds() const { return bounds_; }
+  ID2D1DeviceContext* d2d_device_context() const { return d2d_device_context_; }
+  IDXGISwapChain2* swap_chain() const { return swap_chain_; }
 
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  public: ID2D1DeviceContext* d2d_device_context() const {
-    return d2d_device_context_;
-  }
-  public: IDXGISwapChain2* swap_chain() const { return swap_chain_; }
+  void AddDirtyRect(const RectF& dirty_rects);
+  static SwapChain* CreateForComposition(const RectF& bounds);
+  static SwapChain* CreateForHwnd(HWND hwnd);
+  void DidChangeBounds(const RectF& new_bounds);
+  bool IsReady();
+  void Present();
 
-  public: void AddDirtyRect(const RectF& dirty_rects);
-  public: static SwapChain* CreateForComposition(const RectF& bounds);
-  public: static SwapChain* CreateForHwnd(HWND hwnd);
-  public: void DidChangeBounds(const RectF& new_bounds);
-  public: bool IsReady();
-  public: void Present();
-  private: void UpdateDeviceContext();
+ private:
+  explicit SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain);
+
+  void UpdateDeviceContext();
+
+  RectF bounds_;
+  common::ComPtr<ID2D1DeviceContext> d2d_device_context_;
+  std::vector<Rect> dirty_rects_;
+  bool is_first_present_;
+  bool is_ready_;
+  const common::ComPtr<IDXGISwapChain2> swap_chain_;
+  HANDLE const swap_chain_waitable_;
 
   DISALLOW_COPY_AND_ASSIGN(SwapChain);
 };
 
-} // namespace gfx
+}  // namespace gfx
 
-#endif //!defined(INCLUDE_evita_gfx_swap_chain_h)
+#endif  // EVITA_GFX_SWAP_CHAIN_H_

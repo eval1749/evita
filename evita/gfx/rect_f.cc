@@ -11,7 +11,7 @@ std::ostream& operator<<(std::ostream& ostream, const gfx::RectF& rect) {
 std::ostream& operator<<(std::ostream& ostream, const gfx::RectF* rect) {
   if (!rect)
     return ostream << "(null)";
-  return ostream <<*rect;
+  return ostream << *rect;
 }
 
 namespace std {

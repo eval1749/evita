@@ -2,23 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_gfx_text_format_h)
-#define INCLUDE_evita_gfx_text_format_h
+#ifndef EVITA_GFX_TEXT_FORMAT_H_
+#define EVITA_GFX_TEXT_FORMAT_H_
 
 #include "evita/gfx_base.h"
 
 namespace gfx {
 
-class TextFormat : public SimpleObject_<IDWriteTextFormat> {
-  private: const scoped_refptr<FactorySet> factory_set_;
-  public: TextFormat(const base::string16& font_face_name, float font_size);
-  public: TextFormat(const LOGFONT& log_font);
-  public: std::unique_ptr<TextLayout> CreateLayout(
-      const base::string16& text, const SizeF& size) const;
-  public: float GetWidth(const base::string16& text) const;
+class TextFormat final : public SimpleObject_<IDWriteTextFormat> {
+ public:
+  TextFormat(const base::string16& font_face_name, float font_size);
+  explicit TextFormat(const LOGFONT& log_font);
+
+  std::unique_ptr<TextLayout> CreateLayout(const base::string16& text,
+                                           const SizeF& size) const;
+  float GetWidth(const base::string16& text) const;
+
+ private:
+  const scoped_refptr<FactorySet> factory_set_;
+
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };
 
-} // namespace gfx
+}  // namespace gfx
 
-#endif //!defined(INCLUDE_evita_gfx_text_format_h)
+#endif  // EVITA_GFX_TEXT_FORMAT_H_

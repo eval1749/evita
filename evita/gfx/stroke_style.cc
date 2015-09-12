@@ -19,8 +19,7 @@ StrokeStyle::StrokeStyle() {
   properties_.dashOffset = 0.0f;
 }
 
-StrokeStyle::~StrokeStyle() {
-}
+StrokeStyle::~StrokeStyle() {}
 
 StrokeStyle::operator ID2D1StrokeStyle*() const {
   DCHECK(is_realized());
@@ -58,10 +57,8 @@ void StrokeStyle::set_line_join(LineJoin line_join) {
 void StrokeStyle::Realize() {
   DCHECK(!is_realized());
   COM_VERIFY(FactorySet::instance()->d2d1().CreateStrokeStyle(
-    properties_,
-    dashes_.data(),
-    static_cast<UINT>(dashes_.size()),
-    &platform_style_));
+      properties_, dashes_.data(), static_cast<UINT>(dashes_.size()),
+      &platform_style_));
 }
 
 }  // namespace gfx

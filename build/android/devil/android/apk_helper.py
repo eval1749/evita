@@ -8,7 +8,6 @@ import os.path
 import re
 
 from devil.android.sdk import aapt
-from devil.utils import cmd_helper
 from pylib import constants
 
 
@@ -110,6 +109,13 @@ class ApkHelper(object):
         self._package_name = m.group(1)
         return self._package_name
     raise Exception('Failed to determine package name of %s' % self._apk_path)
+
+  def GetPermissions(self):
+    manifest_info = self._GetManifest()
+    try:
+      return manifest_info['manifest']['uses-permission']['android:name']
+    except KeyError:
+      return []
 
   def GetSplitName(self):
     """Returns the name of the split of the apk."""

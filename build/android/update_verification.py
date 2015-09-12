@@ -26,11 +26,8 @@ and ask the user to verify that all of the app data was preserved.
 
 import argparse
 import logging
-import os
 import sys
-import time
 
-from pylib import constants
 from devil.android import apk_helper
 from devil.android import device_blacklist
 from devil.android import device_errors
@@ -42,7 +39,7 @@ def CreateAppData(device, old_apk, app_data, package_name):
   raw_input('Set the application state. Once ready, press enter and '
             'select "Backup my data" on the device.')
   device.adb.Backup(app_data, packages=[package_name])
-  logging.critical('Application data saved to %s' % app_data)
+  logging.critical('Application data saved to %s', app_data)
 
 def TestUpdate(device, old_apk, new_apk, app_data, package_name):
   device.Install(old_apk)
@@ -90,16 +87,15 @@ def main():
   args = parser.parse_args()
   run_tests_helper.SetLogLevel(args.verbose)
 
-  if args.blacklist_file:
-    blacklist = device_blacklist.Blacklist(args.blacklist_file)
-  else:
-    blacklist = None
+  blacklist = (device_blacklist.Blacklist(args.blacklist_file)
+               if args.blacklist_file
+               else None)
 
   devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
   if not devices:
     raise device_errors.NoDevicesError()
   device = devices[0]
-  logging.info('Using device %s for testing.' % str(device))
+  logging.info('Using device %s for testing.', str(device))
 
   package_name = (args.package_name if args.package_name
                   else apk_helper.GetPackageName(args.old_apk))

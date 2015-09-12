@@ -9,7 +9,6 @@
 import argparse
 import glob
 import logging
-import os
 import posixpath
 import sys
 import time
@@ -19,13 +18,11 @@ from devil.android import device_utils
 from devil.android import device_errors
 from devil.utils import reraiser_thread
 from pylib import constants
+from pylib.utils import run_tests_helper
 
 
 def main():
   start_time = time.time()
-  logging.basicConfig(level=logging.INFO,
-                      format='%(asctime)s (%(thread)d) %(message)s')
-
   parser = argparse.ArgumentParser()
   parser.add_argument('apk_path',
                       help='The path to the APK to install.')
@@ -46,9 +43,17 @@ def main():
                       action='store_true',
                       default=False,
                       help='Do not install and push concurrently')
+  parser.add_argument('-v',
+                      '--verbose',
+                      dest='verbose_count',
+                      default=0,
+                      action='count',
+                      help='Verbose level (multiple times for more)')
 
   args = parser.parse_args()
 
+  logging.basicConfig(format='%(asctime)s (%(thread)d) %(message)s')
+  run_tests_helper.SetLogLevel(args.verbose_count)
   constants.SetBuildType('Debug')
 
   if args.device:
@@ -92,6 +97,7 @@ def main():
                              allow_cached_props=True)
     else:
       device.Install(args.apk_path, reinstall=True)
+    logging.info('Finished installing .apk')
 
   # Push .so files to the device (if they have changed).
   def do_push_libs():
@@ -99,6 +105,8 @@ def main():
       device_lib_dir = posixpath.join(device_incremental_dir, 'lib')
       device.PushChangedFiles([(args.lib_dir, device_lib_dir)],
                               delete_device_stale=True)
+      logging.info('Finished pushing native libs')
+
   # Concurrency here speeds things up quite a bit, but DeviceUtils hasn't
   # been designed for multi-threading. Enabling only because this is a
   # developer-only tool.
@@ -107,7 +115,7 @@ def main():
     do_push_libs()
   else:
     reraiser_thread.RunAsync((do_install, do_push_libs))
-  logging.info('Took %s seconds' % round(time.time() - start_time, 1))
+  logging.info('Took %s seconds', round(time.time() - start_time, 1))
 
 
 if __name__ == '__main__':

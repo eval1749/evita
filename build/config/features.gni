@@ -37,7 +37,7 @@ declare_args() {
   # the commented out logic.
   # Eventually we want this to be:
   #   enable_nacl = !is_ios && !is_android
-  enable_nacl = (is_linux && !is_chromeos && current_cpu == "x64") || is_nacl
+  enable_nacl = (is_linux && !is_chromeos) || is_nacl
   enable_nacl_untrusted = enable_nacl
   enable_pnacl = enable_nacl_untrusted
 
@@ -128,6 +128,12 @@ declare_args() {
 #   1: (DEPRECATED! See http://crbug.com/528305 for info) Use only CLD1.
 #   2: Use only CLD2.
 cld_version = 2
+
+if (is_android || is_ios) {
+  cld2_table_size = 0  # Small, accurate tables
+} else {
+  cld2_table_size = 2  # Larger, more accurate tables
+}
 
 # libudev usage. This currently only affects the content layer.
 use_udev = is_linux

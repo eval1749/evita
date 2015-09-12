@@ -27,7 +27,8 @@ def _CaptureScreenshot(device, host_file):
 
 
 def _CaptureVideo(device, host_file, options):
-  size = tuple(map(int, options.size.split('x'))) if options.size else None
+  size = (tuple(int(i) for i in options.size.split('x')) if options.size
+          else None)
   recorder = screenshot.VideoRecorder(device,
                                       megabits_per_second=options.bitrate,
                                       size=size,
@@ -75,10 +76,9 @@ def main():
   if options.verbose:
     logging.getLogger().setLevel(logging.DEBUG)
 
-  if options.blacklist_file:
-    blacklist = device_blacklist.Blacklist(options.blacklist_file)
-  else:
-    blacklist = None
+  blacklist = (device_blacklist.Blacklist(options.blacklist_file)
+               if options.blacklist_file
+               else None)
 
   devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
   if options.device:

@@ -10,7 +10,6 @@
 # Assumes tombstone file was created with current symbols.
 
 import datetime
-import itertools
 import logging
 import multiprocessing
 import os
@@ -22,7 +21,6 @@ import optparse
 from devil.android import device_blacklist
 from devil.android import device_errors
 from devil.android import device_utils
-from devil.android.sdk import adb_wrapper
 from devil.utils import run_tests_helper
 
 
@@ -237,10 +235,9 @@ def main():
                          'crash stacks.')
   options, _ = parser.parse_args()
 
-  if options.blacklist_file:
-    blacklist = device_blacklist.Blacklist(options.blacklist_file)
-  else:
-    blacklist = None
+  blacklist = (device_blacklist.Blacklist(options.blacklist_file)
+               if options.blacklist_file
+               else None)
 
   if options.device:
     devices = [device_utils.DeviceUtils(options.device)]

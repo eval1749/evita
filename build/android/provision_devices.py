@@ -53,11 +53,9 @@ class _PHASES(object):
 
 
 def ProvisionDevices(args):
-  if args.blacklist_file:
-    blacklist = device_blacklist.Blacklist(args.blacklist_file)
-  else:
-    # TODO(jbudorick): Remove once the bots have switched over.
-    blacklist = device_blacklist.Blacklist(device_blacklist.BLACKLIST_JSON)
+  blacklist = (device_blacklist.Blacklist(args.blacklist_file)
+               if args.blacklist_file
+               else None)
 
   devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
   if args.device:
@@ -69,7 +67,7 @@ def ProvisionDevices(args):
   parallel_devices.pMap(ProvisionDevice, blacklist, args)
   if args.auto_reconnect:
     _LaunchHostHeartbeat()
-  blacklisted_devices = blacklist.Read()
+  blacklisted_devices = blacklist.Read() if blacklist else []
   if args.output_device_blacklist:
     with open(args.output_device_blacklist, 'w') as f:
       json.dump(blacklisted_devices, f)
@@ -81,7 +79,7 @@ def ProvisionDevices(args):
 def ProvisionDevice(device, blacklist, options):
   if options.reboot_timeout:
     reboot_timeout = options.reboot_timeout
-  elif (device.build_version_sdk >= version_codes.LOLLIPOP):
+  elif device.build_version_sdk >= version_codes.LOLLIPOP:
     reboot_timeout = _DEFAULT_TIMEOUTS.LOLLIPOP
   else:
     reboot_timeout = _DEFAULT_TIMEOUTS.PRE_LOLLIPOP
@@ -195,7 +193,7 @@ def WipeDevice(device, options):
             adb_public_keys = f.readlines()
           adb_keys_set.update(adb_public_keys)
         except IOError:
-          logging.warning('Unable to find adb keys file %s.' % adb_key_file)
+          logging.warning('Unable to find adb keys file %s.', adb_key_file)
       _WriteAdbKeysFile(device, '\n'.join(adb_keys_set))
   except device_errors.CommandFailedError:
     logging.exception('Possible failure while wiping the device. '
@@ -299,7 +297,7 @@ def FinishProvisioning(device, options):
       logging.exception('Unable to let battery cool to specified temperature.')
 
   def _set_and_verify_date():
-    if (device.build_version_sdk >= version_codes.MARSHMALLOW):
+    if device.build_version_sdk >= version_codes.MARSHMALLOW:
       date_format = '%m%d%H%M%Y.%S'
       set_date_command = ['date']
     else:
@@ -319,6 +317,8 @@ def FinishProvisioning(device, options):
       logging.info('Date/time successfully set on %s', device)
       return True
     else:
+      logging.error('Date mismatch. Device: %s Correct: %s',
+                    device_time.isoformat(), correct_time.isoformat())
       return False
 
   # Sometimes the date is not set correctly on the devices. Retry on failure.
@@ -329,7 +329,7 @@ def FinishProvisioning(device, options):
 
   props = device.RunShellCommand('getprop', check_return=True)
   for prop in props:
-    logging.info('  %s' % prop)
+    logging.info('  %s', prop)
   if options.auto_reconnect:
     _PushAndLaunchAdbReboot(device, options.target)
 
@@ -356,7 +356,7 @@ def _PushAndLaunchAdbReboot(device, target):
     target: The build target (example, Debug or Release) which helps in
             locating the adb_reboot binary.
   """
-  logging.info('Will push and launch adb_reboot on %s' % str(device))
+  logging.info('Will push and launch adb_reboot on %s', str(device))
   # Kill if adb_reboot is already running.
   device.KillAll('adb_reboot', blocking=True, timeout=2, quiet=True)
   # Push adb_reboot

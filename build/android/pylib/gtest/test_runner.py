@@ -9,12 +9,12 @@ import tempfile
 
 from devil.android import device_errors
 from devil.android import ports
+from devil.android.perf import perf_control
 from pylib import pexpect
 from pylib.base import base_test_result
 from pylib.base import base_test_runner
-from pylib.gtest import gtest_test_instance
 from pylib.local import local_test_server_spawner
-from pylib.perf import perf_control
+
 
 # Test case statuses.
 RE_RUN = re.compile('\\[ RUN      \\] ?(.*)\r\n')

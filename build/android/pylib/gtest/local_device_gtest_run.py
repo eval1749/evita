@@ -11,7 +11,6 @@ from devil.android import device_errors
 from devil.android import device_temp_file
 from devil.android import ports
 from pylib import constants
-from pylib.base import test_run
 from pylib.gtest import gtest_test_instance
 from pylib.local import local_test_server_spawner
 from pylib.local.device import local_device_environment
@@ -56,12 +55,13 @@ class _ApkDelegate(object):
     self._apk = test_instance.apk
     self._package = test_instance.package
     self._runner = test_instance.runner
+    self._permissions = test_instance.permissions
 
     self._component = '%s/%s' % (self._package, self._runner)
     self._extras = test_instance.extras
 
   def Install(self, device):
-    device.Install(self._apk)
+    device.Install(self._apk, permissions=self._permissions)
 
   def Run(self, test, device, flags=None, **kwargs):
     extras = dict(self._extras)
@@ -134,7 +134,7 @@ class _ExeDelegate(object):
     # for long shell commands lands.
     with device_temp_file.DeviceTempFile(device.adb) as script_file:
       script_contents = ' '.join(cmd)
-      logging.info('script contents: %r' % script_contents)
+      logging.info('script contents: %r', script_contents)
       device.WriteFile(script_file.name, script_contents)
       output = device.RunShellCommand(['sh', script_file.name], cwd=cwd,
                                       env=env, **kwargs)

@@ -7,10 +7,8 @@ import re
 import time
 
 from devil.android import device_errors
-from devil.android.sdk import keyevent
 from pylib import flag_changer
 from pylib.base import base_test_result
-from pylib.base import test_run
 from pylib.local.device import local_device_test_run
 
 
@@ -66,8 +64,10 @@ class LocalDeviceInstrumentationTestRun(
         return d
 
     def individual_device_set_up(dev, host_device_tuples):
-      dev.Install(self._test_instance.apk_under_test)
-      dev.Install(self._test_instance.test_apk)
+      dev.Install(self._test_instance.apk_under_test,
+                  permissions=self._test_instance.apk_under_test_permissions)
+      dev.Install(self._test_instance.test_apk,
+                  permissions=self._test_instance.test_permissions)
 
       external_storage = dev.GetExternalStoragePath()
       host_device_tuples = [
@@ -143,7 +143,7 @@ class LocalDeviceInstrumentationTestRun(
       extras['class'] = test_name
       timeout = self._GetTimeoutFromAnnotations(test['annotations'], test_name)
 
-    logging.info('preparing to run %s: %s' % (test_name, test))
+    logging.info('preparing to run %s: %s', test_name, test)
 
     time_ms = lambda: int(time.time() * 1e3)
     start_ms = time_ms()
@@ -176,8 +176,9 @@ class LocalDeviceInstrumentationTestRun(
     for k, v in TIMEOUT_ANNOTATIONS:
       if k in annotations:
         timeout = v
+        break
     else:
-      logging.warning('Using default 1 minute timeout for %s' % test_name)
+      logging.warning('Using default 1 minute timeout for %s', test_name)
       timeout = 60
 
     try:

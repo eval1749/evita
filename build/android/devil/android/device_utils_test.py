@@ -7,25 +7,19 @@
 Unit tests for the contents of device_utils.py (mostly DeviceUtils).
 """
 
-# pylint: disable=C0321
-# pylint: disable=W0212
-# pylint: disable=W0613
+# pylint: disable=protected-access
+# pylint: disable=unused-argument
 
-import collections
-import datetime
 import logging
 import os
-import re
 import sys
 import unittest
 
-from devil.android import device_blacklist
 from devil.android import device_errors
 from devil.android import device_signal
 from devil.android import device_utils
 from devil.android.sdk import adb_wrapper
 from devil.android.sdk import intent
-from devil.android.sdk import split_select
 from devil.android.sdk import version_codes
 from devil.utils import cmd_helper
 from devil.utils import mock_calls
@@ -120,10 +114,11 @@ class _PatchedFunction(object):
     self.mocked = mocked
 
 
-def _AdbWrapperMock(test_serial):
+def _AdbWrapperMock(test_serial, is_ready=True):
   adb = mock.Mock(spec=adb_wrapper.AdbWrapper)
   adb.__str__ = mock.Mock(return_value=test_serial)
   adb.GetDeviceSerial.return_value = test_serial
+  adb.is_ready = is_ready
   return adb
 
 
@@ -553,27 +548,62 @@ class DeviceUtilsRebootTest(DeviceUtilsTest):
 class DeviceUtilsInstallTest(DeviceUtilsTest):
 
   def testInstall_noPriorInstall(self):
+    with self.patch_call(self.call.device.build_version_sdk, return_value=23):
+      with self.assertCalls(
+          (mock.call.devil.android.apk_helper.GetPackageName(
+              '/fake/test/app.apk'),
+           'test.package'),
+          (self.call.device._GetApplicationPathsInternal('test.package'), []),
+          self.call.adb.Install('/fake/test/app.apk', reinstall=False),
+          (mock.call.devil.android.apk_helper.ApkHelper.GetPermissions(),
+              ['p1']),
+          (self.call.device.GrantPermissions('test.package', ['p1']), [])):
+        self.device.Install('/fake/test/app.apk', retries=0)
+
+  def testInstall_permissionsPreM(self):
+    with self.patch_call(self.call.device.build_version_sdk, return_value=20):
+      with self.assertCalls(
+          (mock.call.devil.android.apk_helper.GetPackageName(
+              '/fake/test/app.apk'),
+           'test.package'),
+          (self.call.device._GetApplicationPathsInternal('test.package'), []),
+          (self.call.adb.Install('/fake/test/app.apk', reinstall=False))):
+        self.device.Install('/fake/test/app.apk', retries=0)
+
+  def testInstall_findPermissions(self):
+    with self.patch_call(self.call.device.build_version_sdk, return_value=23):
+      with self.assertCalls(
+          (mock.call.devil.android.apk_helper.GetPackageName(
+              '/fake/test/app.apk'),
+           'test.package'),
+          (self.call.device._GetApplicationPathsInternal('test.package'), []),
+          (self.call.adb.Install('/fake/test/app.apk', reinstall=False)),
+          (mock.call.devil.android.apk_helper.ApkHelper.GetPermissions(),
+              ['p1']),
+          (self.call.device.GrantPermissions('test.package', ['p1']), [])):
+        self.device.Install('/fake/test/app.apk', retries=0)
+
+  def testInstall_passPermissions(self):
     with self.assertCalls(
         (mock.call.devil.android.apk_helper.GetPackageName(
             '/fake/test/app.apk'),
          'test.package'),
         (self.call.device._GetApplicationPathsInternal('test.package'), []),
-        self.call.adb.Install('/fake/test/app.apk', reinstall=False)):
-      self.device.Install('/fake/test/app.apk', retries=0)
+        (self.call.adb.Install('/fake/test/app.apk', reinstall=False)),
+        (self.call.device.GrantPermissions('test.package', ['p1', 'p2']), [])):
+      self.device.Install(
+          '/fake/test/app.apk', retries=0, permissions=['p1', 'p2'])
 
-  def testInstall_differentPriorInstall(self):
+  def testInstall_priorInstall(self):
+    APK_PATH = '/fake/test/app.apk'
     with self.assertCalls(
-        (mock.call.devil.android.apk_helper.GetPackageName(
-            '/fake/test/app.apk'),
+        (mock.call.devil.android.apk_helper.GetPackageName(APK_PATH),
          'test.package'),
         (self.call.device._GetApplicationPathsInternal('test.package'),
          ['/fake/data/app/test.package.apk']),
-        (self.call.device._ComputeStaleApks('test.package',
-            ['/fake/test/app.apk']),
-         (['/fake/test/app.apk'], None)),
         self.call.adb.Uninstall('test.package', False),
         self.call.adb.Install('/fake/test/app.apk', reinstall=False)):
-      self.device.Install('/fake/test/app.apk', retries=0)
+      self.device.Install('/fake/test/app.apk', retries=0, permissions=[])
 
   def testInstall_differentPriorInstall_reinstall(self):
     with self.assertCalls(
@@ -586,9 +616,10 @@ class DeviceUtilsInstallTest(DeviceUtilsTest):
             ['/fake/test/app.apk']),
          (['/fake/test/app.apk'], None)),
         self.call.adb.Install('/fake/test/app.apk', reinstall=True)):
-      self.device.Install('/fake/test/app.apk', reinstall=True, retries=0)
+      self.device.Install(
+          '/fake/test/app.apk', reinstall=True, retries=0, permissions=[])
 
-  def testInstall_identicalPriorInstall(self):
+  def testInstall_identicalPriorInstall_reinstall(self):
     with self.assertCalls(
         (mock.call.devil.android.apk_helper.GetPackageName(
             '/fake/test/app.apk'),
@@ -598,7 +629,8 @@ class DeviceUtilsInstallTest(DeviceUtilsTest):
         (self.call.device._ComputeStaleApks('test.package',
             ['/fake/test/app.apk']),
          ([], None))):
-      self.device.Install('/fake/test/app.apk', retries=0)
+      self.device.Install(
+          '/fake/test/app.apk', reinstall=True, retries=0, permissions=[])
 
   def testInstall_fails(self):
     with self.assertCalls(
@@ -627,7 +659,7 @@ class DeviceUtilsInstallSplitApkTest(DeviceUtilsTest):
         (self.call.adb.InstallMultiple(
             ['base.apk', 'split2.apk'], partial=None, reinstall=False))):
       self.device.InstallSplitApk('base.apk',
-          ['split1.apk', 'split2.apk', 'split3.apk'], retries=0)
+          ['split1.apk', 'split2.apk', 'split3.apk'], permissions=[], retries=0)
 
   def testInstallSplitApk_partialInstall(self):
     with self.assertCalls(
@@ -647,7 +679,8 @@ class DeviceUtilsInstallSplitApkTest(DeviceUtilsTest):
         (self.call.adb.InstallMultiple(
             ['split2.apk'], partial='test.package', reinstall=True))):
       self.device.InstallSplitApk('base.apk',
-          ['split1.apk', 'split2.apk', 'split3.apk'], reinstall=True, retries=0)
+                                  ['split1.apk', 'split2.apk', 'split3.apk'],
+                                  reinstall=True, permissions=[], retries=0)
 
 
 class DeviceUtilsUninstallTest(DeviceUtilsTest):
@@ -1628,7 +1661,7 @@ class DeviceUtilsWriteFileTest(DeviceUtilsTest):
       self.device.WriteFile('/test/file/to write', 'the contents')
 
   def testWriteFile_withEchoAndSU(self):
-    expected_cmd_without_su =  "sh -c 'echo -n contents > /test/file'"
+    expected_cmd_without_su = "sh -c 'echo -n contents > /test/file'"
     expected_cmd = 'su -c %s' % expected_cmd_without_su
     with self.assertCalls(
         (self.call.device.NeedsSU(), True),
@@ -1981,16 +2014,11 @@ class DeviceUtilsClientCache(DeviceUtilsTest):
 
 class DeviceUtilsHealthyDevicesTest(mock_calls.TestCase):
 
-  def _createAdbWrapperMock(self, serial, is_ready=True):
-    adb = _AdbWrapperMock(serial)
-    adb.is_ready = is_ready
-    return adb
-
   def testHealthyDevices_emptyBlacklist(self):
     test_serials = ['0123456789abcdef', 'fedcba9876543210']
     with self.assertCalls(
         (mock.call.devil.android.sdk.adb_wrapper.AdbWrapper.Devices(),
-         [self._createAdbWrapperMock(s) for s in test_serials])):
+         [_AdbWrapperMock(s) for s in test_serials])):
       blacklist = mock.NonCallableMock(**{'Read.return_value': []})
       devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
     for serial, device in zip(test_serials, devices):
@@ -2001,7 +2029,7 @@ class DeviceUtilsHealthyDevicesTest(mock_calls.TestCase):
     test_serials = ['0123456789abcdef', 'fedcba9876543210']
     with self.assertCalls(
         (mock.call.devil.android.sdk.adb_wrapper.AdbWrapper.Devices(),
-         [self._createAdbWrapperMock(s) for s in test_serials])):
+         [_AdbWrapperMock(s) for s in test_serials])):
       blacklist = mock.NonCallableMock(
           **{'Read.return_value': ['fedcba9876543210']})
       devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
@@ -2019,9 +2047,53 @@ class DeviceUtilsRestartAdbdTest(DeviceUtilsTest):
             self.adb, suffix='.sh'), MockTempFile(mock_temp_file)),
         self.call.device.WriteFile(mock.ANY, mock.ANY),
         (self.call.device.RunShellCommand(
-            ['source', mock_temp_file ], as_root=True)),
+            ['source', mock_temp_file], as_root=True)),
         self.call.adb.WaitForDevice()):
       self.device.RestartAdbd()
+
+
+class DeviceUtilsGrantPermissionsTest(DeviceUtilsTest):
+
+  def testGrantPermissions_none(self):
+    self.device.GrantPermissions('package', [])
+
+  def testGrantPermissions_underM(self):
+    with self.patch_call(self.call.device.build_version_sdk,
+                         return_value=20):
+      self.device.GrantPermissions('package', ['p1'])
+
+  def testGrantPermissions_one(self):
+    permissions_cmd = 'pm grant package p1'
+    with self.patch_call(self.call.device.build_version_sdk,
+                         return_value=23):
+      with self.assertCalls(
+          (self.call.device.RunShellCommand(permissions_cmd), [])):
+        self.device.GrantPermissions('package', ['p1'])
+
+  def testGrantPermissions_multiple(self):
+    permissions_cmd = 'pm grant package p1;pm grant package p2'
+    with self.patch_call(self.call.device.build_version_sdk,
+                         return_value=23):
+      with self.assertCalls(
+          (self.call.device.RunShellCommand(permissions_cmd), [])):
+        self.device.GrantPermissions('package', ['p1', 'p2'])
+
+  def testGrantPermissions_WriteExtrnalStorage(self):
+    permissions_cmd = (
+        'pm grant package android.permission.WRITE_EXTERNAL_STORAGE;'
+        'pm grant package android.permission.READ_EXTERNAL_STORAGE')
+    with self.patch_call(self.call.device.build_version_sdk,
+                         return_value=23):
+      with self.assertCalls(
+          (self.call.device.RunShellCommand(permissions_cmd), [])):
+        self.device.GrantPermissions(
+            'package', ['android.permission.WRITE_EXTERNAL_STORAGE'])
+
+  def testGrantPermissions_BlackList(self):
+    with self.patch_call(
+        self.call.device.build_version_sdk, return_value=23):
+        self.device.GrantPermissions(
+            'package', ['android.permission.ACCESS_MOCK_LOCATION'])
 
 
 if __name__ == '__main__':

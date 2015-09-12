@@ -5,6 +5,7 @@
 # found in the LICENSE file.
 
 """A class to keep track of devices across builds and report state."""
+
 import argparse
 import json
 import logging
@@ -12,19 +13,7 @@ import os
 import psutil
 import re
 import signal
-import smtplib
-import subprocess
 import sys
-import time
-import urllib
-
-import bb_annotations
-import bb_utils
-
-sys.path.append(os.path.join(os.path.dirname(__file__),
-                             os.pardir, os.pardir, 'util', 'lib',
-                             'common'))
-import perf_tests_results_helper  # pylint: disable=F0401
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from devil.android import battery_utils
@@ -36,11 +25,9 @@ from devil.android.sdk import adb_wrapper
 from devil.utils import lsusb
 from devil.utils import reset_usb
 from devil.utils import run_tests_helper
-from devil.utils import timeout_retry
 from pylib import constants
-from pylib.cmd_helper import GetCmdOutput
 
-_RE_DEVICE_ID = re.compile('Device ID = (\d+)')
+_RE_DEVICE_ID = re.compile(r'Device ID = (\d+)')
 
 
 def KillAllAdb():
@@ -68,6 +55,10 @@ def KillAllAdb():
       pass
 
 
+def _IsBlacklisted(serial, blacklist):
+  return blacklist and serial in blacklist.Read()
+
+
 def _BatteryStatus(device, blacklist):
   battery_info = {}
   try:
@@ -81,7 +72,7 @@ def _BatteryStatus(device, blacklist):
       if not battery.GetCharging():
         battery.SetCharging(True)
       if blacklist:
-        blacklist.Extend([device.GetDeviceSerial()])
+        blacklist.Extend([device.adb.GetDeviceSerial()])
 
   except device_errors.CommandFailedError:
     logging.exception('Failed to get battery information for %s',
@@ -151,7 +142,7 @@ def DeviceStatus(devices, blacklist):
     }
 
     if adb_status == 'device':
-      if not serial in blacklist.Read():
+      if not _IsBlacklisted(serial, blacklist):
         try:
           build_product = device.build_product
           build_id = device.build_id
@@ -193,7 +184,7 @@ def DeviceStatus(devices, blacklist):
     elif blacklist:
       blacklist.Extend([serial])
 
-    device_status['blacklisted'] = serial in blacklist.Read()
+    device_status['blacklisted'] = _IsBlacklisted(serial, blacklist)
 
     return device_status
 
@@ -221,7 +212,7 @@ def RecoverDevices(devices, blacklist):
           or status['adb_status'] == 'unknown'))
   should_restart_adb = should_restart_usb.union(set(
       status['serial'] for status in statuses
-      if (status['adb_status'] in ('offline', 'unauthorized'))))
+      if status['adb_status'] in ('offline', 'unauthorized')))
   should_reboot_device = should_restart_adb.union(set(
       status['serial'] for status in statuses
       if status['blacklisted']))
@@ -236,20 +227,21 @@ def RecoverDevices(devices, blacklist):
   for d in should_reboot_device:
     logging.debug('  %s', d)
 
-  blacklist.Reset()
+  if blacklist:
+    blacklist.Reset()
 
   if should_restart_adb:
     KillAllAdb()
   for serial in should_restart_usb:
     try:
       reset_usb.reset_android_usb(serial)
-    except device_errors.DeviceUnreachableError:
+    except (IOError, device_errors.DeviceUnreachableError):
       logging.exception('Unable to reset USB for %s.', serial)
       if blacklist:
         blacklist.Extend([serial])
 
   def blacklisting_recovery(device):
-    if blacklist and device.adb.GetDeviceSerial() in blacklist.Read():
+    if _IsBlacklisted(device.adb.GetDeviceSerial(), blacklist):
       logging.debug('%s is blacklisted, skipping recovery.', str(device))
       return
 
@@ -268,11 +260,11 @@ def RecoverDevices(devices, blacklist):
       except device_errors.CommandFailedError:
         logging.exception('Failure while waiting for %s.', str(device))
         if blacklist:
-          blacklist.Extend([str(device)])
+          blacklist.Extend([device.adb.GetDeviceSerial()])
       except device_errors.CommandTimeoutError:
         logging.exception('Timed out while waiting for %s. ', str(device))
         if blacklist:
-          blacklist.Extend([str(device)])
+          blacklist.Extend([device.adb.GetDeviceSerial()])
 
   device_utils.DeviceUtils.parallel(devices).pMap(blacklisting_recovery)
 
@@ -295,11 +287,9 @@ def main():
 
   run_tests_helper.SetLogLevel(args.verbose)
 
-  if args.blacklist_file:
-    blacklist = device_blacklist.Blacklist(args.blacklist_file)
-  else:
-    # TODO(jbudorick): Remove this once bots pass the blacklist file.
-    blacklist = device_blacklist.Blacklist(device_blacklist.BLACKLIST_JSON)
+  blacklist = (device_blacklist.Blacklist(args.blacklist_file)
+               if args.blacklist_file
+               else None)
 
   last_devices_path = os.path.join(
       args.out_dir, device_list.LAST_DEVICES_FILENAME)
@@ -348,7 +338,7 @@ def main():
         try:
           if status['adb_status'] == 'device':
             f.write('{serial} {adb_status} {build_product} {build_id} '
-                    '{temperature:.1f}C {level}%'.format(
+                    '{temperature:.1f}C {level}%\n'.format(
                 serial=status['serial'],
                 adb_status=status['adb_status'],
                 build_product=status['type'],
@@ -361,7 +351,7 @@ def main():
                 serial=status['serial'],
                 adb_status=status['adb_status']
             ))
-        except Exception:
+        except Exception: # pylint: disable=broad-except
           pass
 
   # Dump the device statuses to JSON.
@@ -371,7 +361,7 @@ def main():
 
   live_devices = [status['serial'] for status in statuses
                   if (status['adb_status'] == 'device'
-                      and status['serial'] not in blacklist.Read())]
+                      and not _IsBlacklisted(status['serial'], blacklist))]
 
   # If all devices failed, or if there are no devices, it's an infra error.
   return 0 if live_devices else constants.INFRA_EXIT_CODE

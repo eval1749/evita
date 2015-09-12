@@ -9,12 +9,11 @@ import unittest
 
 from devil.android import device_errors
 from devil.android import md5sum
-from devil.utils import cmd_helper
 from pylib import constants
 
 sys.path.append(
     os.path.join(constants.DIR_SOURCE_ROOT, 'third_party', 'pymock'))
-import mock
+import mock # pylint: disable=import-error
 
 TEST_OUT_DIR = os.path.join('test', 'out', 'directory')
 HOST_MD5_EXECUTABLE = os.path.join(TEST_OUT_DIR, 'md5sum_bin_host')
@@ -226,7 +225,7 @@ class Md5SumTest(unittest.TestCase):
                         out['/storage/emulated/legacy/test/file.dat'])
       self.assertEquals(3, len(device.RunShellCommand.call_args_list))
       device.adb.Push.assert_called_once_with(
-          'test/out/directory/md5sum_dist', '/data/local/tmp/md5sum/')
+          'test/out/directory/md5sum_dist', '/data/local/tmp/md5sum')
 
 
 if __name__ == '__main__':

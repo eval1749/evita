@@ -10,7 +10,6 @@ import argparse
 import collections
 import logging
 import os
-import shutil
 import signal
 import sys
 import threading
@@ -712,7 +711,7 @@ def _RunLinkerTests(args, devices):
 
 def _RunInstrumentationTests(args, devices):
   """Subcommand of RunTestsCommands which runs instrumentation tests."""
-  logging.info('_RunInstrumentationTests(%s, %s)' % (str(args), str(devices)))
+  logging.info('_RunInstrumentationTests(%s, %s)', str(args), str(devices))
 
   instrumentation_options = ProcessInstrumentationOptions(args)
 
@@ -895,13 +894,10 @@ def _GetAttachedDevices(blacklist_file, test_device):
   Returns:
     A list of attached devices.
   """
-  if not blacklist_file:
-    # TODO(jbudorick): Remove this once bots pass the blacklist file.
-    blacklist_file = device_blacklist.BLACKLIST_JSON
-    logging.warning('Using default device blacklist %s',
-                    device_blacklist.BLACKLIST_JSON)
+  blacklist = (device_blacklist.Blacklist(blacklist_file)
+               if blacklist_file
+               else None)
 
-  blacklist = device_blacklist.Blacklist(blacklist_file)
   attached_devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
   if test_device:
     test_device = [d for d in attached_devices if d == test_device]
@@ -917,7 +913,7 @@ def _GetAttachedDevices(blacklist_file, test_device):
     return sorted(attached_devices)
 
 
-def RunTestsCommand(args, parser):
+def RunTestsCommand(args, parser): # pylint: disable=too-many-return-statements
   """Checks test type and dispatches to the appropriate function.
 
   Args:

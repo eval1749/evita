@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_io_io_thread_h)
-#define INCLUDE_evita_io_io_thread_h
+#ifndef EVITA_IO_IO_THREAD_H_
+#define EVITA_IO_IO_THREAD_H_
 
-namespace io {
+namespace io {}  // namespace io
 
-}  // namespace io
-
-#endif //!defined(INCLUDE_evita_io_io_thread_h)
+#endif  // EVITA_IO_IO_THREAD_H_

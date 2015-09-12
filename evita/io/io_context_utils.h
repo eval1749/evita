@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_io_io_context_utils_h)
-#define INCLUDE_evita_io_io_context_utils_h
+#ifndef EVITA_IO_IO_CONTEXT_UTILS_H_
+#define EVITA_IO_IO_CONTEXT_UTILS_H_
 
 #include <stdint.h>
 
@@ -21,4 +21,4 @@ void Resolve(const base::Callback<void(int)>& resolve,
 
 }  // namespace io
 
-#endif //!defined(INCLUDE_evita_io_io_context_utils_h)
+#endif  // EVITA_IO_IO_CONTEXT_UTILS_H_

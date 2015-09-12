@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_io_io_manager_h)
-#define INCLUDE_evita_io_io_manager_h
+#ifndef EVITA_IO_IO_MANAGER_H_
+#define EVITA_IO_IO_MANAGER_H_
 
 #include <windows.h>
 #include <memory>
@@ -23,20 +23,22 @@ class IoDelegate;
 //
 // IoManager
 //
-class IoManager {
-  private: std::unique_ptr<domapi::IoDelegate> io_delegate_;
-  private: std::unique_ptr<base::Thread> io_thread_;
+class IoManager final {
+ public:
+  IoManager();
+  ~IoManager();
 
-  public: IoManager();
-  public: virtual ~IoManager();
+  domapi::IoDelegate* io_delegate() const;
+  base::MessageLoopForIO* message_loop() const;
 
-  public: domapi::IoDelegate* io_delegate() const;
-  public: base::MessageLoopForIO* message_loop() const;
+  void RegisterIoHandler(HANDLE handle, void* io_handler);
+  void Start();
 
-  public: void RegisterIoHandler(HANDLE handle, void* io_handler);
-  public: void Start();
+ private:
+  std::unique_ptr<domapi::IoDelegate> io_delegate_;
+  std::unique_ptr<base::Thread> io_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(IoManager);
 };
 
-#endif //!defined(INCLUDE_evita_io_io_manager_h)
+#endif  // EVITA_IO_IO_MANAGER_H_

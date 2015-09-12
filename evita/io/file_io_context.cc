@@ -23,7 +23,7 @@ struct CreateFileParams {
   DWORD creation;
   DWORD share_mode;
 
-  CreateFileParams(const base::string16& mode) {
+  explicit CreateFileParams(const base::string16& mode) {
     share_mode = FILE_SHARE_DELETE | FILE_SHARE_READ;
 
     if (mode.empty() || mode[0] != 'w') {
@@ -40,9 +40,9 @@ HANDLE OpenFile(const base::string16& file_name,
                 const base::string16& mode,
                 const domapi::OpenFileDeferred& deferred) {
   CreateFileParams params(mode);
-  common::win::scoped_handle handle(::CreateFileW(file_name.c_str(),
-      params.access, params.share_mode, nullptr, params.creation,
-      FILE_FLAG_OVERLAPPED, nullptr));
+  common::win::scoped_handle handle(
+      ::CreateFileW(file_name.c_str(), params.access, params.share_mode,
+                    nullptr, params.creation, FILE_FLAG_OVERLAPPED, nullptr));
   if (!handle) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "CreateFileW " << file_name << " error=" << last_error;
@@ -57,14 +57,13 @@ HANDLE OpenFile(const base::string16& file_name,
 void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
              domapi::FileId context_id) {
   editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolve , context_id));
+      base::Bind(resolve, context_id));
 }
 
 FileIoContext::FileIoContext(const base::string16& file_name,
                              const base::string16& mode,
                              const domapi::OpenFileDeferred& deferred)
-    : file_handle_(OpenFile(file_name, mode, deferred)),
-      running_(false) {
+    : file_handle_(OpenFile(file_name, mode, deferred)), running_(false) {
   if (!file_handle_.is_valid())
     return;
   overlapped = {0};
@@ -73,8 +72,7 @@ FileIoContext::FileIoContext(const base::string16& file_name,
       file_handle_.get(), this);
 }
 
-FileIoContext::~FileIoContext() {
-}
+FileIoContext::~FileIoContext() {}
 
 // base::MessagePumpForIO::FileIoContext
 void FileIoContext::OnIOCompleted(IOContext*,
@@ -98,7 +96,6 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
       DVLOG(0) << "CloseHandle error=" << last_error;
       Reject(deferred.reject, last_error);
       return;
-
     }
     file_handle_.release();
   }
@@ -107,9 +104,10 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
   Resolve(deferred.resolve, 0u);
 }
 
-void FileIoContext::Read(void* buffer, size_t num_read,
+void FileIoContext::Read(void* buffer,
+                         size_t num_read,
                          const domapi::FileIoDeferred& deferred) {
-if (running_) {
+  if (running_) {
     Reject(deferred.reject, ERROR_BUSY);
     return;
   }
@@ -117,9 +115,9 @@ if (running_) {
   running_ = true;
   deferred_ = deferred;
   DWORD read;
-  auto const succeeded = ::ReadFile(file_handle_.get(), buffer,
-                                    static_cast<DWORD>(num_read), &read,
-                                    &overlapped);
+  auto const succeeded =
+      ::ReadFile(file_handle_.get(), buffer, static_cast<DWORD>(num_read),
+                 &read, &overlapped);
   DCHECK(!succeeded);
   __assume(!succeeded);
 
@@ -130,7 +128,8 @@ if (running_) {
   OnIOCompleted(this, 0, error);
 }
 
-void FileIoContext::Write(void* buffer, size_t num_write,
+void FileIoContext::Write(void* buffer,
+                          size_t num_write,
                           const domapi::FileIoDeferred& deferred) {
   if (running_) {
     Reject(deferred.reject, ERROR_BUSY);
@@ -140,9 +139,9 @@ void FileIoContext::Write(void* buffer, size_t num_write,
   running_ = true;
   deferred_ = deferred;
   DWORD written;
-  auto const succeeded = ::WriteFile(file_handle_.get(), buffer,
-                                     static_cast<DWORD>(num_write),
-                                     &written, &overlapped);
+  auto const succeeded =
+      ::WriteFile(file_handle_.get(), buffer, static_cast<DWORD>(num_write),
+                  &written, &overlapped);
   DCHECK(!succeeded);
   __assume(!succeeded);
   auto const error = ::GetLastError();

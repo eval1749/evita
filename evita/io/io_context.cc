@@ -6,10 +6,8 @@
 
 namespace io {
 
-IoContext::IoContext() {
-}
+IoContext::IoContext() {}
 
-IoContext::~IoContext() {
-}
+IoContext::~IoContext() {}
 
 }  // namespace io

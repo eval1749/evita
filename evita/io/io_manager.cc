@@ -5,17 +5,17 @@
 #include "evita/io/io_manager.h"
 
 #pragma warning(push)
-#pragma warning(disable: 4365)
+#pragma warning(disable : 4365)
 #include "base/bind.h"
 #include "base/callback.h"
 #pragma warning(pop)
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "base/strings/string16.h"
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/threading/thread.h"
 #pragma warning(pop)
 #include "base/time/time.h"
@@ -48,11 +48,9 @@ enum Message {
 //
 IoManager::IoManager()
     : io_delegate_(new IoDelegateImpl()),
-      io_thread_(new base::Thread("io_manager_thread")) {
-}
+      io_thread_(new base::Thread("io_manager_thread")) {}
 
-IoManager::~IoManager() {
-}
+IoManager::~IoManager() {}
 
 domapi::IoDelegate* IoManager::io_delegate() const {
   return io_delegate_.get();
@@ -65,8 +63,8 @@ base::MessageLoopForIO* IoManager::message_loop() const {
 void IoManager::RegisterIoHandler(HANDLE handle, void* io_handler) {
   DCHECK(handle);
   DCHECK(io_handler);
-  message_loop()->RegisterIOHandler(handle,
-      reinterpret_cast<base::MessageLoopForIO::IOHandler*>(io_handler));
+  message_loop()->RegisterIOHandler(
+      handle, reinterpret_cast<base::MessageLoopForIO::IOHandler*>(io_handler));
 }
 
 void IoManager::Start() {

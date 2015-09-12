@@ -20,7 +20,7 @@ void Reject(const base::Callback<void(domapi::IoError)>& reject,
 void Resolve(const base::Callback<void(int)>& resolve,
              uint32_t num_transferred) {
   editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolve , static_cast<int>(num_transferred)));
+      base::Bind(resolve, static_cast<int>(num_transferred)));
 }
 
 }  // namespace io

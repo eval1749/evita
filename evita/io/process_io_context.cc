@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <windows.h>
+#include <vector>
 
 #include "evita/io/process_io_context.h"
 
@@ -22,21 +23,21 @@ namespace io {
 void Resolve(const base::Callback<void(domapi::ProcessId)>& resolve,
              domapi::ProcessId context_id) {
   editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolve , context_id));
+      base::Bind(resolve, context_id));
 }
 
 ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
-                 const base::string16& command_line,
-                 const domapi::OpenProcessDeferred& deferred)
+                                   const base::string16& command_line,
+                                   const domapi::OpenProcessDeferred& deferred)
     : gateway_thread_(new base::Thread("process")) {
   gateway_thread_->Start();
-  gateway_thread_->message_loop()->PostTask(FROM_HERE,
-    base::Bind(&ProcessIoContext::StartProcess,
-               base::Unretained(this), context_id, command_line, deferred));
+  gateway_thread_->message_loop()->PostTask(
+      FROM_HERE,
+      base::Bind(&ProcessIoContext::StartProcess, base::Unretained(this),
+                 context_id, command_line, deferred));
 }
 
-ProcessIoContext::~ProcessIoContext() {
-}
+ProcessIoContext::~ProcessIoContext() {}
 
 void ProcessIoContext::CloseAndWaitProcess(
     const domapi::FileIoDeferred& deferred) {
@@ -61,17 +62,17 @@ void ProcessIoContext::CloseAndWaitProcess(
 uint32_t ProcessIoContext::CloseProcess() {
   if (stdout_read_.is_valid()) {
     if (!::CloseHandle(stdout_read_.get())) {
-        auto const last_error = ::GetLastError();
-        DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
-        return last_error;
+      auto const last_error = ::GetLastError();
+      DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
+      return last_error;
     }
     stdout_read_.release();
   }
   if (stdin_write_.is_valid()) {
     if (!::CloseHandle(stdin_write_.get())) {
-        auto const last_error = ::GetLastError();
-        DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
-        return last_error;
+      auto const last_error = ::GetLastError();
+      DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
+      return last_error;
     }
     stdin_write_.release();
   }
@@ -80,12 +81,12 @@ uint32_t ProcessIoContext::CloseProcess() {
   return 0;
 }
 
-void ProcessIoContext::ReadFromProcess(
-    void* buffer, size_t num_read, const domapi::FileIoDeferred& deferred) {
+void ProcessIoContext::ReadFromProcess(void* buffer,
+                                       size_t num_read,
+                                       const domapi::FileIoDeferred& deferred) {
   DWORD read;
-  auto const succeeded = ::ReadFile(stdout_read_.get(), buffer,
-                                    static_cast<DWORD>(num_read), &read,
-                                    nullptr);
+  auto const succeeded = ::ReadFile(
+      stdout_read_.get(), buffer, static_cast<DWORD>(num_read), &read, nullptr);
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "ReadFile", last_error);
@@ -97,7 +98,8 @@ void ProcessIoContext::ReadFromProcess(
   Resolve(deferred.resolve, read);
 }
 
-void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
+void ProcessIoContext::StartProcess(
+    domapi::IoContextId context_id,
     const base::string16& command_line,
     const domapi::OpenProcessDeferred& deferred) {
   SECURITY_ATTRIBUTES security_attributes = {0};
@@ -146,17 +148,10 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
            command_line.length() * sizeof(base::char16));
   command_line_string[command_line.length()] = 0;
   auto const inherit_handles = true;
-  auto const succeeded = ::CreateProcessW(
-      nullptr,
-      &command_line_string[0],
-      nullptr,
-      nullptr,
-      inherit_handles,
-      CREATE_NO_WINDOW | CREATE_SUSPENDED,
-      nullptr,
-      nullptr,
-      &startup_info,
-      &process_info);
+  auto const succeeded =
+      ::CreateProcessW(nullptr, &command_line_string[0], nullptr, nullptr,
+                       inherit_handles, CREATE_NO_WINDOW | CREATE_SUSPENDED,
+                       nullptr, nullptr, &startup_info, &process_info);
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "CreateProcessW", last_error);
@@ -173,12 +168,13 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
   stdout_read_.reset(stdout_read.release());
 }
 
-void ProcessIoContext::WriteToProcess(
-    void* buffer, size_t num_write, const domapi::FileIoDeferred& deferred) {
+void ProcessIoContext::WriteToProcess(void* buffer,
+                                      size_t num_write,
+                                      const domapi::FileIoDeferred& deferred) {
   DWORD written;
-  auto const succeeded = ::WriteFile(stdin_write_.get(), buffer,
-                                     static_cast<DWORD>(num_write), &written,
-                                     nullptr);
+  auto const succeeded =
+      ::WriteFile(stdin_write_.get(), buffer, static_cast<DWORD>(num_write),
+                  &written, nullptr);
   if (!succeeded) {
     auto const last_error = ::GetLastError();
     DVLOG_WIN32_ERROR(0, "WriteFile", last_error);
@@ -196,23 +192,26 @@ void ProcessIoContext::Close(const domapi::FileIoDeferred& deferred) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;
   }
-  gateway_thread_->message_loop()->PostTask(FROM_HERE, base::Bind(
-      &ProcessIoContext::CloseAndWaitProcess,
-      base::Unretained(this), deferred));
+  gateway_thread_->message_loop()->PostTask(
+      FROM_HERE, base::Bind(&ProcessIoContext::CloseAndWaitProcess,
+                            base::Unretained(this), deferred));
 }
 
-void ProcessIoContext::Read(void* buffer, size_t num_read,
+void ProcessIoContext::Read(void* buffer,
+                            size_t num_read,
                             const domapi::FileIoDeferred& deferred) {
   if (!gateway_thread_->IsRunning() || !stdout_read_.is_valid()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;
   }
-  gateway_thread_->message_loop()->PostTask(FROM_HERE, base::Bind(
-      &ProcessIoContext::ReadFromProcess, base::Unretained(this),
-      base::Unretained(buffer), num_read, deferred));
+  gateway_thread_->message_loop()->PostTask(
+      FROM_HERE,
+      base::Bind(&ProcessIoContext::ReadFromProcess, base::Unretained(this),
+                 base::Unretained(buffer), num_read, deferred));
 }
 
-void ProcessIoContext::Write(void* buffer, size_t num_write,
+void ProcessIoContext::Write(void* buffer,
+                             size_t num_write,
                              const domapi::FileIoDeferred& deferred) {
   if (!gateway_thread_->IsRunning() || !stdin_write_.is_valid()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
@@ -232,9 +231,10 @@ void ProcessIoContext::Write(void* buffer, size_t num_write,
     }
   }
 
-  gateway_thread_->message_loop()->PostTask(FROM_HERE, base::Bind(
-      &ProcessIoContext::WriteToProcess, base::Unretained(this),
-      base::Unretained(buffer), num_write, deferred));
+  gateway_thread_->message_loop()->PostTask(
+      FROM_HERE,
+      base::Bind(&ProcessIoContext::WriteToProcess, base::Unretained(this),
+                 base::Unretained(buffer), num_write, deferred));
 }
 
 }  // namespace io

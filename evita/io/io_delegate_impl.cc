@@ -30,17 +30,18 @@ namespace {
 const uint32_t kHugeFileSize = 1u << 28;
 
 class scoped_find_handle final {
-  private: HANDLE handle_;
+ public:
+  explicit scoped_find_handle(HANDLE handle) : handle_(handle) {}
 
-  public: scoped_find_handle(HANDLE handle) : handle_(handle) {
-  }
-
-  public: ~scoped_find_handle() {
+  ~scoped_find_handle() {
     if (is_valid())
       ::FindClose(handle_);
   }
 
-  public: bool is_valid() const { return handle_ != INVALID_HANDLE_VALUE; }
+  bool is_valid() const { return handle_ != INVALID_HANDLE_VALUE; }
+
+ private:
+  HANDLE handle_;
 
   DISALLOW_COPY_AND_ASSIGN(scoped_find_handle);
 };
@@ -48,7 +49,7 @@ class scoped_find_handle final {
 void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
              domapi::FileId context_id) {
   editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolve , context_id));
+      base::Bind(resolve, context_id));
 }
 }  // namespace
 
@@ -56,19 +57,17 @@ void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
 //
 // IoDelegateImpl
 //
-IoDelegateImpl::IoDelegateImpl() {
-}
+IoDelegateImpl::IoDelegateImpl() {}
 
-IoDelegateImpl::~IoDelegateImpl() {
-}
+IoDelegateImpl::~IoDelegateImpl() {}
 
 // domapi::IoDelegate
 void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
-    const CheckSpellingResolver& deferred) {
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(deferred.resolve,
-          spellchecker::SpellingEngine::GetSpellingEngine()->
-              CheckSpelling(word_to_check)));
+                                   const CheckSpellingResolver& deferred) {
+  editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
+      deferred.resolve,
+      spellchecker::SpellingEngine::GetSpellingEngine()->CheckSpelling(
+          word_to_check)));
 }
 
 void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
@@ -81,20 +80,22 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
   context_map_.erase(it);
 }
 
-void IoDelegateImpl::GetSpellingSuggestions(const base::string16& wrong_word,
+void IoDelegateImpl::GetSpellingSuggestions(
+    const base::string16& wrong_word,
     const GetSpellingSuggestionsResolver& deferred) {
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(deferred.resolve,
-          spellchecker::SpellingEngine::GetSpellingEngine()->
-              GetSpellingSuggestions(wrong_word)));
+  editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
+      deferred.resolve,
+      spellchecker::SpellingEngine::GetSpellingEngine()->GetSpellingSuggestions(
+          wrong_word)));
 }
 
 void IoDelegateImpl::MakeTempFileName(
-      const base::string16& dir_name, const base::string16& prefix,
-      const domapi::MakeTempFileNameResolver& resolver) {
+    const base::string16& dir_name,
+    const base::string16& prefix,
+    const domapi::MakeTempFileNameResolver& resolver) {
   base::string16 file_name(MAX_PATH, 0);
-  auto const unique_id = ::GetTempFileNameW(dir_name.c_str(), prefix.c_str(),
-                                            0, &file_name[0]);
+  auto const unique_id =
+      ::GetTempFileNameW(dir_name.c_str(), prefix.c_str(), 0, &file_name[0]);
   if (!unique_id) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "GetTempFileNameW error=" << last_error;
@@ -112,9 +113,9 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
                               const base::string16& dst_path,
                               const domapi::MoveFileOptions& options,
                               const domapi::IoResolver& resolver) {
-  auto const flags = options.no_overwrite ?
-      MOVEFILE_WRITE_THROUGH :
-      MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING;
+  auto const flags = options.no_overwrite
+                         ? MOVEFILE_WRITE_THROUGH
+                         : MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING;
   auto const succeeded = ::MoveFileExW(src_path.c_str(), dst_path.c_str(),
                                        static_cast<uint32_t>(flags));
   if (!succeeded) {
@@ -139,18 +140,18 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
 }
 
 void IoDelegateImpl::OpenProcess(const base::string16& command_line,
-                                const domapi::OpenProcessDeferred& deferred) {
+                                 const domapi::OpenProcessDeferred& deferred) {
   auto const process_id = domapi::IoContextId::New();
-  auto const process = new ProcessIoContext(process_id, command_line,
-                                            deferred);
+  auto const process = new ProcessIoContext(process_id, command_line, deferred);
   context_map_[process_id] = process;
 }
 
-void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,
+void IoDelegateImpl::QueryFileStatus(
+    const base::string16& file_name,
     const domapi::QueryFileStatusDeferred& deferred) {
   WIN32_FIND_DATAW find_data;
-  scoped_find_handle find_handle = ::FindFirstFileW(file_name.c_str(),
-                                                    &find_data);
+  scoped_find_handle find_handle(
+      ::FindFirstFileW(file_name.c_str(), &find_data));
   if (!find_handle.is_valid()) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "FindFirstFileW error=" << last_error;
@@ -165,16 +166,19 @@ void IoDelegateImpl::QueryFileStatus(const base::string16& file_name,
 
   domapi::FileStatus data = {0};
   data.file_size = static_cast<int>(find_data.nFileSizeLow);
-  data.is_directory = (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-  data.is_symlink = (find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+  data.is_directory =
+      (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+  data.is_symlink =
+      (find_data.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
   data.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
   data.readonly = (find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 
   editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(deferred.resolve , data));
+      base::Bind(deferred.resolve, data));
 }
 
-void IoDelegateImpl::ReadFile(domapi::IoContextId context_id, void* buffer,
+void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
+                              void* buffer,
                               size_t num_read,
                               const domapi::FileIoDeferred& deferred) {
   auto const it = context_map_.find(context_id);
@@ -198,8 +202,8 @@ void IoDelegateImpl::RemoveFile(const base::string16& file_name,
       base::Bind(resolver.resolve, true));
 }
 
-
-void IoDelegateImpl::WriteFile(domapi::IoContextId context_id, void* buffer,
+void IoDelegateImpl::WriteFile(domapi::IoContextId context_id,
+                               void* buffer,
                                size_t num_write,
                                const domapi::FileIoDeferred& deferred) {
   auto const it = context_map_.find(context_id);

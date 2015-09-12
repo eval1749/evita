@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_tab_strip_animator_h)
-#define INCLUDE_evita_views_tab_strip_animator_h
+#ifndef EVITA_VIEWS_TABS_TAB_STRIP_ANIMATOR_H_
+#define EVITA_VIEWS_TABS_TAB_STRIP_ANIMATOR_H_
 
 #include <unordered_set>
 
@@ -19,29 +19,33 @@ class TabContent;
 class TabStrip;
 
 class TabStripAnimator final {
-  public: class Action;
+ public:
+  class Action;
+
+  explicit TabStripAnimator(TabStrip* tab_strip);
+  ~TabStripAnimator();
+
+  TabContent* active_tab_content() const { return active_tab_content_; }
+
+  void AddTab(TabContent* tab_content);
+  void DidDeleteTabContent(TabContent* tab_content);
+  void RequestSelect(TabContent* new_tab_content);
+  void SetTabContentLayer(ui::Layer* layer);
+
+ private:
   friend class Action;
 
-  private: Action* action_;
-  private: TabContent* active_tab_content_;
-  private: ui::Layer* layer_;
-  private: TabStrip* const tab_strip_;
+  void CancelCurrentAction();
+  void DidFinishAction(Action* action);
 
-  public: TabStripAnimator(TabStrip* tab_strip);
-  public: ~TabStripAnimator();
-
-  public: TabContent* active_tab_content() const { return active_tab_content_; }
-
-  public: void AddTab(TabContent* tab_content);
-  private: void CancelCurrentAction();
-  public: void DidDeleteTabContent(TabContent* tab_content);
-  private: void DidFinishAction(Action* action);
-  public: void RequestSelect(TabContent* new_tab_content);
-  public: void SetTabContentLayer(ui::Layer* layer);
+  Action* action_;
+  TabContent* active_tab_content_;
+  ui::Layer* layer_;
+  TabStrip* const tab_strip_;
 
   DISALLOW_COPY_AND_ASSIGN(TabStripAnimator);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_tab_strip_animator_h)
+#endif  // EVITA_VIEWS_TABS_TAB_STRIP_ANIMATOR_H_

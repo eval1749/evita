@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_tabs_tab_h)
-#define INCLUDE_evita_views_tabs_tab_h
+#ifndef EVITA_VIEWS_TABS_TAB_H_
+#define EVITA_VIEWS_TABS_TAB_H_
 
 #include <memory>
 
@@ -32,19 +32,22 @@ class TabContent;
 // TabController
 //
 class TabController {
-  protected: TabController();
-  protected: virtual ~TabController();
+ public:
+  virtual ~TabController();
 
-  public: virtual void AddTabAnimation(ui::AnimationGroupMember* member) = 0;
-  public: virtual void DidChangeTabBounds(Tab* tab) = 0;
-  public: virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
-  public: virtual void DidSelectTab(Tab* tab) = 0;
-  public: virtual void MaybeStartDrag(Tab* tab,
-                                      const gfx::Point& location) = 0;
-  public: virtual void RemoveTabAnimation(ui::AnimationGroupMember* member) = 0;
-  public: virtual void RequestCloseTab(Tab* tab) = 0;
-  public: virtual void RequestSelectTab(Tab* tab) = 0;
+  virtual void AddTabAnimation(ui::AnimationGroupMember* member) = 0;
+  virtual void DidChangeTabBounds(Tab* tab) = 0;
+  virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
+  virtual void DidSelectTab(Tab* tab) = 0;
+  virtual void MaybeStartDrag(Tab* tab, const gfx::Point& location) = 0;
+  virtual void RemoveTabAnimation(ui::AnimationGroupMember* member) = 0;
+  virtual void RequestCloseTab(Tab* tab) = 0;
+  virtual void RequestSelectTab(Tab* tab) = 0;
 
+ protected:
+  TabController();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(TabController);
 };
 
@@ -56,104 +59,110 @@ class TabController {
 class Tab final : public ui::Widget,
                   private ui::AnimationGroupMember,
                   public ui::Tooltip::ToolDelegate {
-  public: enum class Part {
+ public:
+  enum class Part {
     None,
     CloseMark,
     Label,
   };
 
-  public: class HitTestResult final {
-    private: Part part_;
-    private: Tab* tab_;
+  class HitTestResult final {
+   public:
+    HitTestResult(Tab* tab, Part part);
+    HitTestResult(const HitTestResult& other);
+    HitTestResult();
+    ~HitTestResult() = default;
 
-    public: HitTestResult(Tab* tab, Part part);
-    public: HitTestResult(const HitTestResult& other);
-    public: HitTestResult();
-    public: ~HitTestResult() = default;
+    operator bool() const { return tab_ != nullptr; }
 
-    public: operator bool() const { return tab_ != nullptr; }
+    HitTestResult& operator=(const HitTestResult& other);
 
-    public: HitTestResult& operator=(const HitTestResult& other);
+    bool operator==(const HitTestResult& other) const;
+    bool operator!=(const HitTestResult& other) const;
 
-    public: bool operator==(const HitTestResult& other) const;
-    public: bool operator!=(const HitTestResult& other) const;
+    Part part() const { return part_; }
+    Tab* tab() const { return tab_; }
 
-    public: Part part() const { return part_; }
-    public: Tab* tab() const { return tab_; }
+   private:
+    Part part_;
+    Tab* tab_;
   };
 
-  private: enum class State {
+  enum class State {
     Normal,
     Hovered,
     Selected,
   };
 
-  private: float animated_alpha_;
-  private: std::unique_ptr<ui::AnimationFloat> animation_alpha_;
-  private: gfx::RectF close_mark_bounds_;
-  private: State close_mark_state_;
-  private: bool dirty_visual_;
-  private: bool dirty_layout_;
-  private: int image_index_;
-  private: gfx::RectF icon_bounds_;
-  private: gfx::RectF label_bounds_;
-  private: base::string16 label_text_;
-  private: State state_;
-  private: TabContent* const tab_content_;
-  private: TabController* const tab_controller_;
-  private: domapi::TabData::State tab_data_state_;
-  private: int tab_index_;
-  private: gfx::TextFormat* text_format_;
-  private: std::unique_ptr<gfx::TextLayout> text_layout_;
+  Tab(TabController* tab_controller,
+      TabContent* tab_content,
+      gfx::TextFormat* text_format);
+  ~Tab() final;
 
-  public: Tab(TabController* tab_controller, TabContent* tab_content,
-              gfx::TextFormat* text_format);
-  public: virtual ~Tab() override;
+  bool is_selected() const { return state_ == State::Selected; }
+  const base::string16& label_text() const { return label_text_; }
+  TabContent* tab_content() const { return tab_content_; }
+  int tab_index() const { return tab_index_; }
 
-  public: bool is_selected() const { return state_ == State::Selected; }
-  public: const base::string16& label_text() const { return label_text_; }
-  public: TabContent* tab_content() const { return tab_content_; }
-  public: int tab_index() const { return tab_index_; }
+  void set_tab_index(int tab_index) { tab_index_ = tab_index; }
 
-  public: void set_tab_index(int tab_index) { tab_index_ = tab_index; }
+  int GetPreferredWidth() const;
+  State GetState(Part part) const;
+  HitTestResult HitTest(const gfx::PointF& point);
+  void MarkDirty();
+  void Select();
+  void SetTabData(const domapi::TabData& tab_data);
+  void SetTextFormat(gfx::TextFormat* text_format_);
+  void Unselect();
 
-  private: static float ComputeAlpha(State state);
-  private: gfx::ColorF ComputeBackgroundColor() const;
-  private: void DrawCloseMark(gfx::Canvas* canvas) const;
-  private: void DrawLabel(gfx::Canvas* canvas) const;
-  private: void DrawIcon(gfx::Canvas* canvas) const;
-  private: void DrawTabDataState(gfx::Canvas* canvas) const;
-  public: int GetPreferredWidth() const;
-  public: State GetState(Part part) const;
-  public: HitTestResult HitTest(const gfx::PointF& point);
-  public: void MarkDirty();
-  public: void Select();
-  private: void SetCloseMarkState(State new_state);
-  private: void SetLabelState(State new_state);
-  private: void SetState(Part part, State new_state);
-  public: void SetTabData(const domapi::TabData& tab_data);
-  public: void SetTextFormat(gfx::TextFormat* text_format_);
-  public: void Unselect();
-  private: void UpdateLayout();
+ private:
+  static float ComputeAlpha(State state);
+  gfx::ColorF ComputeBackgroundColor() const;
+  void DrawCloseMark(gfx::Canvas* canvas) const;
+  void DrawLabel(gfx::Canvas* canvas) const;
+  void DrawIcon(gfx::Canvas* canvas) const;
+  void DrawTabDataState(gfx::Canvas* canvas) const;
+  void SetCloseMarkState(State new_state);
+  void SetLabelState(State new_state);
+  void SetState(Part part, State new_state);
+  void UpdateLayout();
 
   // ui::AnimationGroupMember
-  private: virtual void Animate(base::Time time) override;
+  void Animate(base::Time time) final;
 
   // ui::Tooltip::ToolDelegate
-  private: virtual base::string16 GetTooltipText() override;
+  base::string16 GetTooltipText() final;
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
-  private: virtual void OnMouseEntered(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseReleased(const ui::MouseEvent& event) override;
+  void DidChangeBounds() final;
+  void OnDraw(gfx::Canvas* canvas) final;
+  void OnMouseEntered(const ui::MouseEvent& event) final;
+  void OnMouseExited(const ui::MouseEvent& event) final;
+  void OnMouseMoved(const ui::MouseEvent& event) final;
+  void OnMousePressed(const ui::MouseEvent& event) final;
+  void OnMouseReleased(const ui::MouseEvent& event) final;
+
+  float animated_alpha_;
+  std::unique_ptr<ui::AnimationFloat> animation_alpha_;
+  gfx::RectF close_mark_bounds_;
+  State close_mark_state_;
+  bool dirty_visual_;
+  bool dirty_layout_;
+  int image_index_;
+  gfx::RectF icon_bounds_;
+  gfx::RectF label_bounds_;
+  base::string16 label_text_;
+  State state_;
+  TabContent* const tab_content_;
+  TabController* const tab_controller_;
+  domapi::TabData::State tab_data_state_;
+  int tab_index_;
+  gfx::TextFormat* text_format_;
+  std::unique_ptr<gfx::TextLayout> text_layout_;
 
   DISALLOW_COPY_AND_ASSIGN(Tab);
 };
 
-}   // views
+}  // namespace views
 
-#endif // !defined(INCLUDE_evita_views_tabs_tab_h)
+#endif  // EVITA_VIEWS_TABS_TAB_H_

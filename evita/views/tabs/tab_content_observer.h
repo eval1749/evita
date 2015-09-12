@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_tab_content_observer_h)
-#define INCLUDE_evita_views_tab_content_observer_h
+#ifndef EVITA_VIEWS_TABS_TAB_CONTENT_OBSERVER_H_
+#define EVITA_VIEWS_TABS_TAB_CONTENT_OBSERVER_H_
 
 #include "base/basictypes.h"
 
@@ -12,15 +12,19 @@ namespace views {
 class TabContent;
 
 class TabContentObserver {
-  protected: TabContentObserver();
-  protected: virtual ~TabContentObserver();
+ public:
+  virtual ~TabContentObserver();
 
-  public: virtual void DidActivateTabContent(TabContent* tab_content);
-  public: virtual void DidUpdateContent(TabContent* tab_content);
+  virtual void DidActivateTabContent(TabContent* tab_content);
+  virtual void DidUpdateContent(TabContent* tab_content);
 
+ protected:
+  TabContentObserver();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(TabContentObserver);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_tab_content_observer_h)
+#endif  // EVITA_VIEWS_TABS_TAB_CONTENT_OBSERVER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_tab_strip_h)
-#define INCLUDE_evita_views_tab_strip_h
+#ifndef EVITA_VIEWS_TABS_TAB_STRIP_H_
+#define EVITA_VIEWS_TABS_TAB_STRIP_H_
 
 #include <memory>
 
@@ -28,39 +28,41 @@ class TabStripDelegate;
 class TabStrip final : public ui::AnimatableWindow {
   DECLARE_CASTABLE_CLASS(TabStrip, AnimatableWindow);
 
-  private: class View;
-  friend class View;
+ public:
+  explicit TabStrip(TabStripDelegate* delegate);
+  ~TabStrip() final;
 
-  private: const std::unique_ptr<View> view_;
+  int number_of_tabs() const;
+  int selected_index() const;
 
-  public: TabStrip(TabStripDelegate* delegate);
-  public: ~TabStrip() final;
-
-  public: int number_of_tabs() const;
-  public: int selected_index() const;
-
-  public: TabContent* GetTab(int tab_index);
-  public: void DeleteTab(int tab_index);
+  TabContent* GetTab(int tab_index);
+  void DeleteTab(int tab_index);
   // Insert a new tab before a tab at |tab_index|.
-  public: void InsertTab(TabContent* tab_content, int new_tab_index);
-  public: int NonClientHitTest(const gfx::Point& screen_point) const;
+  void InsertTab(TabContent* tab_content, int new_tab_index);
+  int NonClientHitTest(const gfx::Point& screen_point) const;
   // TODO(eval1749) Once we should revise tooltip handling, we should get rid
   // of |TabStrip::OnNotify()|.
-  public: LRESULT OnNotify(NMHDR* nmhdr);
-  public: void SelectTab(int tab_index);
-  public: void SetTab(int tab_index, const domapi::TabData& tab_data);
+  LRESULT OnNotify(NMHDR* nmhdr);
+  void SelectTab(int tab_index);
+  void SetTab(int tab_index, const domapi::TabData& tab_data);
+
+ private:
+  class View;
+  friend class View;
 
   // ui::AnimationFrameHanndler
-  private: void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::Widget
-  private: gfx::Size GetPreferredSize() const final;
-  private: void DidChangeBounds() final;
-  private: void DidRealize() final;
+  gfx::Size GetPreferredSize() const final;
+  void DidChangeBounds() final;
+  void DidRealize() final;
+
+  const std::unique_ptr<View> view_;
 
   DISALLOW_COPY_AND_ASSIGN(TabStrip);
 };
 
-}   // views
+}  // namespace views
 
-#endif // !defined(INCLUDE_evita_views_tab_strip_h)
+#endif  // EVITA_VIEWS_TABS_TAB_STRIP_H_

@@ -6,10 +6,8 @@
 
 namespace views {
 
-TabStripDelegate::TabStripDelegate() {
-}
+TabStripDelegate::TabStripDelegate() {}
 
-TabStripDelegate::~TabStripDelegate() {
-}
+TabStripDelegate::~TabStripDelegate() {}
 
 }  // namespace views

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_tab_data_model_h)
-#define INCLUDE_evita_views_tab_data_model_h
+#ifndef EVITA_VIEWS_TABS_TAB_DATA_SET_H_
+#define EVITA_VIEWS_TABS_TAB_DATA_SET_H_
 
 #include <unordered_map>
 
@@ -17,36 +17,43 @@ struct TabData;
 
 namespace views {
 
-class TabDataSet : public common::Singleton<TabDataSet> {
+class TabDataSet final : public common::Singleton<TabDataSet> {
   DECLARE_SINGLETON_CLASS(TabDataSet);
 
-  public: class Observer {
-    public: Observer();
-    public: virtual ~Observer();
+ public:
+  using TabData = domapi::TabData;
 
-    public: virtual void DidSetTabData(dom::WindowId window_id,
-                                       const domapi::TabData& tab_data) = 0;
+  class Observer {
+   public:
+    virtual ~Observer();
 
+    virtual void DidSetTabData(dom::WindowId window_id,
+                               const TabData& tab_data) = 0;
+
+   protected:
+    Observer();
+
+   private:
     DISALLOW_COPY_AND_ASSIGN(Observer);
   };
 
-  private: typedef domapi::TabData TabData;
+  ~TabDataSet();
 
-  private: std::unordered_map<int, TabData*> map_;
-  private: base::ObserverList<Observer> observers_;
+  void AddObserver(Observer* observer);
+  const TabData* GetTabData(dom::WindowId window_id);
+  void RemoveObserver(Observer* observer);
+  void RemoveTabData(dom::WindowId window_id);
+  void SetTabData(dom::WindowId window_id, const TabData& tab_data);
 
-  private: TabDataSet();
-  public: ~TabDataSet();
+ private:
+  TabDataSet();
 
-  public: void AddObserver(Observer* observer);
-  public: const TabData* GetTabData(dom::WindowId window_id);
-  public: void RemoveObserver(Observer* observer);
-  public: void RemoveTabData(dom::WindowId window_id);
-  public: void SetTabData(dom::WindowId window_id, const TabData& tab_data);
+  std::unordered_map<int, TabData*> map_;
+  base::ObserverList<Observer> observers_;
 
   DISALLOW_COPY_AND_ASSIGN(TabDataSet);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_tab_data_model_h)
+#endif  // EVITA_VIEWS_TABS_TAB_DATA_SET_H_

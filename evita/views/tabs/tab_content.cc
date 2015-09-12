@@ -10,22 +10,17 @@
 
 namespace views {
 
-TabContent::TabContent()
-    : active_tick_(0) {
-}
+TabContent::TabContent() : active_tick_(0) {}
 
-TabContent::~TabContent() {
-}
+TabContent::~TabContent() {}
 
 void TabContent::AddObserver(TabContentObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void TabContent::DidEnterSizeMove() {
-}
+void TabContent::DidEnterSizeMove() {}
 
-void TabContent::DidExitSizeMove() {
-}
+void TabContent::DidExitSizeMove() {}
 
 void TabContent::NotifyActivateTabContent() {
   FOR_EACH_OBSERVER(TabContentObserver, observers_,
@@ -33,8 +28,7 @@ void TabContent::NotifyActivateTabContent() {
 }
 
 void TabContent::NotifyUpdateTabContent() {
-  FOR_EACH_OBSERVER(TabContentObserver, observers_,
-                    DidUpdateContent(this));
+  FOR_EACH_OBSERVER(TabContentObserver, observers_, DidUpdateContent(this));
 }
 
 void TabContent::RemoveObserver(TabContentObserver* observer) {

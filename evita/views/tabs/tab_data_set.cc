@@ -12,21 +12,17 @@ namespace views {
 //
 // TabDataSet::Observer
 //
-TabDataSet::Observer::Observer() {
-}
+TabDataSet::Observer::Observer() {}
 
-TabDataSet::Observer::~Observer() {
-}
+TabDataSet::Observer::~Observer() {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // TabDataSet
 //
-TabDataSet::TabDataSet() {
-}
+TabDataSet::TabDataSet() {}
 
-TabDataSet::~TabDataSet() {
-}
+TabDataSet::~TabDataSet() {}
 
 void TabDataSet::AddObserver(Observer* observer) {
   observers_.AddObserver(observer);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_layout.h"
@@ -19,32 +21,27 @@ const auto kLabelHeight = 16.0f;
 const auto kMaxTabWidth = 200.0f;
 const auto kMinTabWidth = 140.0f;
 
-}   // namespace
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // TabController
 //
-TabController::TabController() {
-}
+TabController::TabController() {}
 
-TabController::~TabController() {
-}
+TabController::~TabController() {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // Tab::HitTestResult
 //
 Tab::HitTestResult::HitTestResult(Tab* tab, Part part)
-    : part_(part), tab_(tab) {
-}
+    : part_(part), tab_(tab) {}
 
 Tab::HitTestResult::HitTestResult(const HitTestResult& other)
-    : HitTestResult(other.tab_, other.part_) {
-}
+    : HitTestResult(other.tab_, other.part_) {}
 
-Tab::HitTestResult::HitTestResult() : HitTestResult(nullptr, Part::None) {
-}
+Tab::HitTestResult::HitTestResult() : HitTestResult(nullptr, Part::None) {}
 
 Tab::HitTestResult& Tab::HitTestResult::operator=(const HitTestResult& other) {
   tab_ = other.tab_;
@@ -64,7 +61,8 @@ bool Tab::HitTestResult::operator!=(const HitTestResult& other) const {
 //
 // Tab
 //
-Tab::Tab(TabController* tab_controller, TabContent* tab_content,
+Tab::Tab(TabController* tab_controller,
+         TabContent* tab_content,
          gfx::TextFormat* text_format)
     : animated_alpha_(ComputeAlpha(State::Normal)),
       close_mark_state_(State::Normal),
@@ -85,8 +83,7 @@ Tab::Tab(TabController* tab_controller, TabContent* tab_content,
   SetTabData(*tab_data);
 }
 
-Tab::~Tab() {
-}
+Tab::~Tab() {}
 
 float Tab::ComputeAlpha(State state) {
   switch (state) {
@@ -116,8 +113,9 @@ gfx::ColorF Tab::ComputeBackgroundColor() const {
 void Tab::DrawCloseMark(gfx::Canvas* canvas) const {
   if (state_ == State::Normal)
     return;
-  auto const color = close_mark_state_ == State::Hovered ?
-      gfx::ColorF(1, 0, 0, 0.5f) : gfx::ColorF(0, 0, 0, 0.5f);
+  auto const color = close_mark_state_ == State::Hovered
+                         ? gfx::ColorF(1, 0, 0, 0.5f)
+                         : gfx::ColorF(0, 0, 0, 0.5f);
   gfx::Brush brush(canvas, color);
   canvas->DrawLine(brush, close_mark_bounds_.origin(),
                    close_mark_bounds_.bottom_right(), 2.0f);
@@ -150,9 +148,9 @@ void Tab::DrawTabDataState(gfx::Canvas* canvas) const {
   if (tab_data_state_ == domapi::TabData::State::Normal)
     return;
   auto const marker_color =
-    tab_data_state_ == domapi::TabData::State::Modified ?
-        gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255) :
-        gfx::ColorF(56.0f / 255, 219.0f / 255, 74.0f / 255);
+      tab_data_state_ == domapi::TabData::State::Modified
+          ? gfx::ColorF(219.0f / 255, 74.0f / 255, 56.0f / 255)
+          : gfx::ColorF(56.0f / 255, 219.0f / 255, 74.0f / 255);
   auto const marker_height = 4.0f;
   auto const marker_width = 4.0f;
   DCHECK_GT(GetContentsBounds().width(), marker_width);
@@ -165,13 +163,13 @@ void Tab::DrawTabDataState(gfx::Canvas* canvas) const {
 
 int Tab::GetPreferredWidth() const {
   DCHECK(text_format_);
-  auto const label_width = std::min(
-      std::max(text_format_->GetWidth(label_text_), kMinTabWidth),
-      kMaxTabWidth);
+  auto const label_width =
+      std::min(std::max(text_format_->GetWidth(label_text_), kMinTabWidth),
+               kMaxTabWidth);
   auto const icon_width = 16.0f;
   auto const padding = 6.0f;
-  return static_cast<int>(::ceil(
-    padding + icon_width + 4 + label_width + 2 + 9 + padding));
+  return static_cast<int>(
+      ::ceil(padding + icon_width + 4 + label_width + 2 + 9 + padding));
 }
 
 Tab::State Tab::GetState(Part part) const {
@@ -211,10 +209,9 @@ void Tab::SetLabelState(State new_state) {
   animation_alpha_.reset();
   if (state_ != State::Selected && new_state != State::Selected) {
     tab_controller_->AddTabAnimation(this);
-    animation_alpha_.reset(new ui::AnimationFloat(
-        base::TimeDelta::FromMilliseconds(16 * 20),
-        ComputeAlpha(state_),
-        ComputeAlpha(new_state)));
+    animation_alpha_.reset(
+        new ui::AnimationFloat(base::TimeDelta::FromMilliseconds(16 * 20),
+                               ComputeAlpha(state_), ComputeAlpha(new_state)));
   }
   state_ = new_state;
   MarkDirty();
@@ -285,12 +282,12 @@ void Tab::UpdateLayout() {
   dirty_layout_ = false;
   MarkDirty();
   auto const bounds = GetContentsBounds() - gfx::SizeF(6, 6);
-  close_mark_bounds_ = gfx::RectF(bounds.top_right() + gfx::SizeF(-9, 5),
-                                  gfx::SizeF(8, 8));
+  close_mark_bounds_ =
+      gfx::RectF(bounds.top_right() + gfx::SizeF(-9, 5), gfx::SizeF(8, 8));
   icon_bounds_ = gfx::RectF(bounds.origin(), gfx::SizeF(16, 16));
-  label_bounds_ = gfx::RectF(icon_bounds_.top_right() + gfx::SizeF(4, 0),
-                             gfx::PointF(close_mark_bounds_.left - 2,
-                                         icon_bounds_.bottom));
+  label_bounds_ =
+      gfx::RectF(icon_bounds_.top_right() + gfx::SizeF(4, 0),
+                 gfx::PointF(close_mark_bounds_.left - 2, icon_bounds_.bottom));
   text_layout_ = text_format_->CreateLayout(label_text_, label_bounds_.size());
 }
 
@@ -302,7 +299,7 @@ void Tab::Animate(base::Time time) {
     animation_alpha_->Start(time);
   MarkDirty();
   animated_alpha_ = animation_alpha_->Compute(time);
-  if (animated_alpha_  == animation_alpha_->end_value()) {
+  if (animated_alpha_ == animation_alpha_->end_value()) {
     animation_alpha_.reset();
     return;
   }
@@ -349,8 +346,8 @@ void Tab::OnDraw(gfx::Canvas* canvas) {
       sink->AddLine(bounds.top_right());
       sink->AddLine(bounds.bottom_right());
       sink->AddLine(bounds.bottom_left());
-      sink->EndFigure(previous_sibling() ? D2D1_FIGURE_END_OPEN :
-                                           D2D1_FIGURE_END_CLOSED);
+      sink->EndFigure(previous_sibling() ? D2D1_FIGURE_END_OPEN
+                                         : D2D1_FIGURE_END_CLOSED);
       sink->Close();
     }
 
@@ -382,8 +379,8 @@ void Tab::OnMouseMoved(const ui::MouseEvent& event) {
   if (state_ == State::Normal)
     SetLabelState(State::Hovered);
   auto const result = HitTest(gfx::PointF(event.location()));
-  SetCloseMarkState(result.part() == Part::CloseMark ? State::Hovered :
-                                                       State::Normal);
+  SetCloseMarkState(result.part() == Part::CloseMark ? State::Hovered
+                                                     : State::Normal);
 }
 
 void Tab::OnMousePressed(const ui::MouseEvent& event) {

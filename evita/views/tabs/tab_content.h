@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_tab_content_h)
-#define INCLUDE_evita_views_tab_content_h
+#ifndef EVITA_VIEWS_TABS_TAB_CONTENT_H_
+#define EVITA_VIEWS_TABS_TAB_CONTENT_H_
 
 #include "base/basictypes.h"
 #include "base/observer_list.h"
@@ -26,30 +26,35 @@ class Window;
 class TabContent : public ui::Widget {
   DECLARE_CASTABLE_CLASS(TabContent, ui::Widget);
 
-  private: int active_tick_;
-  private: base::ObserverList<TabContentObserver> observers_;
+ public:
+  ~TabContent() override;
 
-  protected: TabContent();
-  public: ~TabContent() override;
+  int active_tick() const { return active_tick_; }
 
-  public: int active_tick() const { return active_tick_; }
+  void AddObserver(TabContentObserver* observer);
+  virtual void DidEnterSizeMove();
+  virtual void DidExitSizeMove();
+  virtual const domapi::TabData* GetTabData() const = 0;
+  void RemoveObserver(TabContentObserver* observer);
 
-  public: void AddObserver(TabContentObserver* observer);
-  public: virtual void DidEnterSizeMove();
-  public: virtual void DidExitSizeMove();
-  public: virtual const domapi::TabData* GetTabData() const = 0;
-  protected: void NotifyActivateTabContent();
-  protected: void NotifyUpdateTabContent();
-  public: void RemoveObserver(TabContentObserver* observer);
+ protected:
+  TabContent();
+
+  void NotifyActivateTabContent();
+  void NotifyUpdateTabContent();
 
   // ui::Widget
-  protected: void DidHide() override;
-  protected: void DidRealize() override;
-  protected: void DidShow() override;
+  void DidHide() override;
+  void DidRealize() override;
+  void DidShow() override;
+
+ private:
+  int active_tick_;
+  base::ObserverList<TabContentObserver> observers_;
 
   DISALLOW_COPY_AND_ASSIGN(TabContent);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_tab_content_h)
+#endif  // EVITA_VIEWS_TABS_TAB_CONTENT_H_

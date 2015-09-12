@@ -6,16 +6,12 @@
 
 namespace views {
 
-TabContentObserver::TabContentObserver() {
-}
+TabContentObserver::TabContentObserver() {}
 
-TabContentObserver::~TabContentObserver() {
-}
+TabContentObserver::~TabContentObserver() {}
 
-void TabContentObserver::DidActivateTabContent(TabContent*) {
-}
+void TabContentObserver::DidActivateTabContent(TabContent* tab_content) {}
 
-void TabContentObserver::DidUpdateContent(TabContent*) {
-}
+void TabContentObserver::DidUpdateContent(TabContent* tab_content) {}
 
 }  // namespace views

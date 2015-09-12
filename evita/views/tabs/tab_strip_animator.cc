@@ -25,41 +25,44 @@ class TabStripAnimator::Action : public common::Castable,
                                  private TabContentObserver {
   DECLARE_CASTABLE_CLASS(Action, Castable);
 
-  private: ui::Animatable* animation_;
-  private: TabContent* observing_tab_content_;
-  private: TabStripAnimator* const tab_strip_animator_;
+ public:
+  virtual ~Action();
 
-  protected: Action(TabStripAnimator* tab_strip_animator,
-                    TabContent* tab_content);
-  public: virtual ~Action();
+  void Cancel();
 
-  protected: TabContent* active_tab_content() const;
-  protected: base::TimeDelta animation_duration() const;
-  protected: ui::Layer* layer() const;
-  protected: TabStrip* tab_strip() const;
+ protected:
+  Action(TabStripAnimator* tab_strip_animator, TabContent* tab_content);
 
-  public: void Cancel();
-  protected: virtual ui::Animatable* CreateAnimation() = 0;
-  protected: virtual void DoCancel() = 0;
-  protected: virtual void DoFinish() = 0;
-  protected: int FindTab(TabContent* tab_content) const;
-  protected: void SetActiveTabContent(TabContent* new_tab_content);
+  TabContent* active_tab_content() const;
+  base::TimeDelta animation_duration() const;
+  ui::Layer* layer() const;
+  TabStrip* tab_strip() const;
 
+  virtual ui::Animatable* CreateAnimation() = 0;
+  virtual void DoCancel() = 0;
+  virtual void DoFinish() = 0;
+  int FindTab(TabContent* tab_content) const;
+  void SetActiveTabContent(TabContent* new_tab_content);
+
+ private:
   // TabContentObserver
-  private: virtual void DidUpdateContent(TabContent* tab_content) override;
+  void DidUpdateContent(TabContent* tab_content) final;
 
   // ui::AnimationObserver
-  private: virtual void DidCancelAnimation(
-      ui::Animatable* animatable) override;
-  private: virtual void DidFinishAnimation(
-      ui::Animatable* animatable) override;
+  void DidCancelAnimation(ui::Animatable* animatable) final;
+  void DidFinishAnimation(ui::Animatable* animatable) final;
+
+  ui::Animatable* animation_;
+  TabContent* observing_tab_content_;
+  TabStripAnimator* const tab_strip_animator_;
 
   DISALLOW_COPY_AND_ASSIGN(Action);
 };
 
 TabStripAnimator::Action::Action(TabStripAnimator* tab_strip_animator,
                                  TabContent* tab_content)
-    : animation_(nullptr), observing_tab_content_(tab_content),
+    : animation_(nullptr),
+      observing_tab_content_(tab_content),
       tab_strip_animator_(tab_strip_animator) {
   observing_tab_content_->AddObserver(this);
 }
@@ -103,7 +106,7 @@ void TabStripAnimator::Action::Cancel() {
   }
 
   if (!animation_)
-   return;
+    return;
   animation_->CancelAnimation();
 }
 
@@ -125,7 +128,7 @@ void TabStripAnimator::Action::SetActiveTabContent(
 }
 
 // TabContentObserver
-void TabStripAnimator::Action::DidUpdateContent(TabContent*) {
+void TabStripAnimator::Action::DidUpdateContent(TabContent* tab_content) {
   observing_tab_content_->RemoveObserver(this);
   observing_tab_content_ = nullptr;
   animation_ = CreateAnimation();
@@ -158,25 +161,25 @@ namespace {
 //
 // SelectTab
 //
-class SelectTabAction : public TabStripAnimator::Action {
+class SelectTabAction final : public TabStripAnimator::Action {
   DECLARE_CASTABLE_CLASS(SelectTabAction, Action);
 
-  private: TabContent* const new_tab_content_;
-  private: TabContent* old_tab_content_;
-  private: gfx::PointF old_tab_content_origin_;
+ public:
+  SelectTabAction(TabStripAnimator* tab_strip_animator,
+                  TabContent* new_tab_content);
+  ~SelectTabAction() final = default;
 
-  public: SelectTabAction(TabStripAnimator* tab_strip_animator,
-                          TabContent* new_tab_content);
-  protected: virtual ~SelectTabAction() = default;
+  TabContent* tab_content() const { return new_tab_content_; }
 
-  public: TabContent* tab_content() const {
-    return new_tab_content_;
-  }
-
+ private:
   // TabStripAnimator::Action
-  private: virtual ui::Animatable* CreateAnimation() override;
-  private: virtual void DoCancel() override;
-  private: virtual void DoFinish() override;
+  ui::Animatable* CreateAnimation() final;
+  void DoCancel() final;
+  void DoFinish() final;
+
+  TabContent* const new_tab_content_;
+  TabContent* old_tab_content_;
+  gfx::PointF old_tab_content_origin_;
 
   DISALLOW_COPY_AND_ASSIGN(SelectTabAction);
 };
@@ -184,8 +187,8 @@ class SelectTabAction : public TabStripAnimator::Action {
 SelectTabAction::SelectTabAction(TabStripAnimator* tab_strip_animator,
                                  TabContent* new_tab_content)
     : Action(tab_strip_animator, new_tab_content),
-      new_tab_content_(new_tab_content), old_tab_content_(nullptr) {
-}
+      new_tab_content_(new_tab_content),
+      old_tab_content_(nullptr) {}
 
 // TabStripAnimator::Action
 ui::Animatable* SelectTabAction::CreateAnimation() {
@@ -220,9 +223,10 @@ void SelectTabAction::DoFinish() {
 // TabStripAnimator
 //
 TabStripAnimator::TabStripAnimator(TabStrip* tab_strip)
-    : action_(nullptr), active_tab_content_(nullptr), layer_(nullptr),
-      tab_strip_(tab_strip) {
-}
+    : action_(nullptr),
+      active_tab_content_(nullptr),
+      layer_(nullptr),
+      tab_strip_(tab_strip) {}
 
 TabStripAnimator::~TabStripAnimator() {
   delete action_;

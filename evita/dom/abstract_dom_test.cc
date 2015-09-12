@@ -95,6 +95,14 @@ void StaticScript::LoadAll(v8::Isolate* isolate) {
   }
 }
 
+class RunnerDelegateMock final : public v8_glue::RunnerDelegate {
+ public:
+  RunnerDelegateMock() = default;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(RunnerDelegateMock);
+};
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -131,7 +139,7 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(
         GetGlobalTemplate(runner);
 
   auto const isolate = runner->isolate();
-  v8_glue::RunnerDelegate temp_delegate;
+  RunnerDelegateMock temp_delegate;
   v8_glue::Runner temp_runner(isolate, &temp_delegate);
   auto const context = v8::Context::New(isolate);
   v8::Context::Scope context_scope(context);

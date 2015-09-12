@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_gc_weak_ptr_h)
-#define INCLUDE_evita_gc_weak_ptr_h
+#ifndef EVITA_GC_WEAK_PTR_H_
+#define EVITA_GC_WEAK_PTR_H_
 
 #include "base/basictypes.h"
 #include "base/logging.h"
@@ -9,53 +9,44 @@
 namespace gc {
 
 // Note: At time time, December 2013, it is just marker for root set.
-template<typename T>
-class WeakPtr {
-  private: T* ptr_;
+template <typename T>
+class WeakPtr final {
+ public:
+  explicit WeakPtr(const WeakPtr& other) : ptr_(other.ptr_) {}
+  explicit WeakPtr(T* ptr) : ptr_(ptr) {}
+  WeakPtr() : ptr_(nullptr) {}
+  ~WeakPtr() = default;
 
-  public: explicit WeakPtr(const WeakPtr& other) : ptr_(other.ptr_) {
-  }
-  public: explicit WeakPtr(T* ptr) : ptr_(ptr) {
-  }
-  public: WeakPtr() : ptr_(nullptr) {
-  }
-  public: ~WeakPtr() = default;
-
-  public: operator T*() const { return ptr_; }
-  public: T* operator->() const {
+  operator T*() const { return ptr_; }
+  T* operator->() const {
     DCHECK(ptr_);
     return ptr_;
   }
 
-  public: WeakPtr& operator=(const WeakPtr& other) {
+  WeakPtr& operator=(const WeakPtr& other) {
     ptr_ = other.ptr_;
     return *this;
   }
 
-  public: WeakPtr& operator=(T* ptr) {
+  WeakPtr& operator=(T* ptr) {
     ptr_ = ptr;
     return *this;
   }
 
-  public: bool operator==(const WeakPtr& other) const {
-    return ptr_ == other.ptr_;
-  }
+  bool operator==(const WeakPtr& other) const { return ptr_ == other.ptr_; }
 
-  public: bool operator==(T* ptr) const {
-    return ptr_ == ptr;
-  }
+  bool operator==(T* ptr) const { return ptr_ == ptr; }
 
-  public: bool operator!=(const WeakPtr& other) const {
-    return ptr_ != other.ptr_;
-  }
+  bool operator!=(const WeakPtr& other) const { return ptr_ != other.ptr_; }
 
-  public: bool operator!=(T* ptr) const {
-    return ptr_ != ptr;
-  }
+  bool operator!=(T* ptr) const { return ptr_ != ptr; }
 
-  public: T* get() const { return ptr_; }
+  T* get() const { return ptr_; }
+
+ private:
+  T* ptr_;
 };
 
 }  // namespace gc
 
-#endif //!defined(INCLUDE_evita_gc_weak_ptr_h)
+#endif  // EVITA_GC_WEAK_PTR_H_

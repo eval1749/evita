@@ -10,8 +10,7 @@
 namespace gc {
 namespace internal {
 
-AbstractCollectable::AbstractCollectable()
-    : state_(kAlive) {
+AbstractCollectable::AbstractCollectable() : state_(kAlive) {
   Collector::instance()->AddToLiveSet(this);
 }
 
@@ -24,7 +23,7 @@ AbstractCollectable::~AbstractCollectable() {
 
 std::ostream& operator<<(std::ostream& ostream,
                          const gc::internal::AbstractCollectable& object) {
-  ostream << (object.is_alive() ? "Alive" : "Dead") << "Collectable@0x" <<
-      std::hex << reinterpret_cast<uintptr_t>(&object);
+  ostream << (object.is_alive() ? "Alive" : "Dead") << "Collectable@0x"
+          << std::hex << reinterpret_cast<uintptr_t>(&object);
   return ostream;
 }

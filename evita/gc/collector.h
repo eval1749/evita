@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_gc_collector_h)
-#define INCLUDE_evita_gc_collector_h
+#ifndef EVITA_GC_COLLECTOR_H_
+#define EVITA_GC_COLLECTOR_H_
 
 #include <memory>
 #include <unordered_set>
@@ -21,29 +21,32 @@ namespace internal {
 class AbstractCollectable;
 }  // namespace internal
 
-class Collector : public common::Singleton<Collector> {
+class Collector final : public common::Singleton<Collector> {
   DECLARE_SINGLETON_CLASS(Collector);
 
-  public: typedef internal::AbstractCollectable Collectable;
-  public: typedef std::unordered_set<Collectable*> CollectableSet;
-  public: typedef std::unordered_set<Visitable*> VisitableSet;
+ public:
+  typedef internal::AbstractCollectable Collectable;
+  typedef std::unordered_set<Collectable*> CollectableSet;
+  typedef std::unordered_set<Visitable*> VisitableSet;
 
-  private: CollectableSet live_set_;
-  private: std::unique_ptr<base::Lock> lock_;
-  private: VisitableSet root_set_;
+  ~Collector();
 
-  private: Collector();
-  public: ~Collector();
+  void AddToRootSet(Visitable* visitable);
+  void AddToLiveSet(Collectable* collectable);
+  void CollectGarbage();
+  base::string16 GetJson(const base::string16& name) const;
+  void RemoveFromRootSet(Visitable* visitable);
 
-  public: void AddToRootSet(Visitable* visitable);
-  public: void AddToLiveSet(Collectable* collectable);
-  public: void CollectGarbage();
-  public: base::string16 GetJson(const base::string16& name) const;
-  public: void RemoveFromRootSet(Visitable* visitable);
+ private:
+  Collector();
+
+  CollectableSet live_set_;
+  std::unique_ptr<base::Lock> lock_;
+  VisitableSet root_set_;
 
   DISALLOW_COPY_AND_ASSIGN(Collector);
 };
 
 }  // namespace gc
 
-#endif //!defined(INCLUDE_evita_gc_collector_h)
+#endif  // EVITA_GC_COLLECTOR_H_

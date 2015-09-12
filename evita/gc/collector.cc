@@ -17,20 +17,14 @@
 namespace gc {
 
 namespace {
-class CollectorVisitor : public Visitor {
-  private: Collector* collector_;
-  private: Collector::CollectableSet live_set_;
-  private: Collector::VisitableSet visited_set_;
+class CollectorVisitor final : public Visitor {
+ public:
+  explicit CollectorVisitor(Collector* collector) : collector_(collector) {}
+  ~CollectorVisitor() override = default;
 
-  public: CollectorVisitor(Collector* collector) : collector_(collector) {
-  }
-  public: virtual ~CollectorVisitor() = default;
+  const Collector::CollectableSet& live_set() const { return live_set_; }
 
-  public: const Collector::CollectableSet& live_set() const {
-    return live_set_;
-  }
-
-  public: virtual void Visit(Collectable* collectable) override {
+  void Visit(Collectable* collectable) override {
     CHECK(!collectable->is_dead());
     if (visited_set_.find(collectable) == visited_set_.end())
       return;
@@ -39,17 +33,22 @@ class CollectorVisitor : public Visitor {
     live_set_.insert(collectable);
   }
 
-  public: virtual void Visit(Visitable* visitable) override {
+  void Visit(Visitable* visitable) override {
     if (visited_set_.find(visitable) == visited_set_.end())
       return;
     visited_set_.insert(visitable);
     visitable->Accept(this);
   }
 
+ private:
+  Collector* collector_;
+  Collector::CollectableSet live_set_;
+  Collector::VisitableSet visited_set_;
+
   DISALLOW_COPY_AND_ASSIGN(CollectorVisitor);
 };
 
-void MapToJson(std::basic_ostringstream<base::char16>& ostream,
+void MapToJson(std::basic_ostringstream<base::char16>& ostream,  // NOLINT
                const base::StringPiece& map_name,
                const std::unordered_map<base::StringPiece, int> map) {
   const base::string16 comma = L",\n";
@@ -58,8 +57,8 @@ void MapToJson(std::basic_ostringstream<base::char16>& ostream,
   ostream << '"' << base::ASCIIToUTF16(map_name) << L"\": [";
   for (auto key_value : map) {
     ostream << delimiter;
-    ostream << L"{\"key\": \"" << base::ASCIIToUTF16(key_value.first) <<
-        L"\", \"value\": " << key_value.second << '}';
+    ostream << L"{\"key\": \"" << base::ASCIIToUTF16(key_value.first)
+            << L"\", \"value\": " << key_value.second << '}';
     delimiter = comma;
   }
   ostream << ']';
@@ -71,11 +70,9 @@ void MapToJson(std::basic_ostringstream<base::char16>& ostream,
 //
 // Collector
 //
-Collector::Collector() : lock_(new base::Lock()) {
-}
+Collector::Collector() : lock_(new base::Lock()) {}
 
-Collector::~Collector() {
-}
+Collector::~Collector() {}
 
 void Collector::AddToLiveSet(Collectable* collectable) {
   base::AutoLock lock_scope(*lock_);
@@ -89,21 +86,21 @@ void Collector::AddToRootSet(Visitable* visitable) {
 
 void Collector::CollectGarbage() {
   CollectorVisitor visitor(this);
-  for (auto const visitable: root_set_) {
+  for (auto const visitable : root_set_) {
     visitable->Accept(&visitor);
   }
 
   CollectableSet live_set;
-  for (auto const collectable: visitor.live_set()) {
+  for (auto const collectable : visitor.live_set()) {
     live_set_.erase(collectable);
     live_set.insert(collectable);
- }
+  }
 
- for (auto const collectable: live_set_) {
-   delete collectable;
- }
+  for (auto const collectable : live_set_) {
+    delete collectable;
+  }
 
- live_set_ = live_set;
+  live_set_ = live_set;
 }
 
 base::string16 Collector::GetJson(const base::string16& name) const {

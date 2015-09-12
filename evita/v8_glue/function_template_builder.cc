@@ -9,24 +9,23 @@ namespace v8_glue {
 FunctionTemplateBuilder::FunctionTemplateBuilder(
     v8::Isolate* isolate,
     v8::Handle<v8::FunctionTemplate> function_template)
-    : isolate_(isolate), template_(function_template) {
-}
+    : isolate_(isolate), template_(function_template) {}
 
 FunctionTemplateBuilder::FunctionTemplateBuilder(v8::Isolate* isolate)
-    : FunctionTemplateBuilder(isolate, v8::FunctionTemplate::New(isolate)) {
-}
+    : FunctionTemplateBuilder(isolate, v8::FunctionTemplate::New(isolate)) {}
 
-FunctionTemplateBuilder::~FunctionTemplateBuilder() {
-}
+FunctionTemplateBuilder::~FunctionTemplateBuilder() {}
 
 FunctionTemplateBuilder& FunctionTemplateBuilder::SetImpl(
-    const base::StringPiece& name, v8::Handle<v8::Data> val) {
+    const base::StringPiece& name,
+    v8::Handle<v8::Data> val) {
   template_->Set(gin::StringToSymbol(isolate_, name), val);
   return *this;
 }
 
 FunctionTemplateBuilder& FunctionTemplateBuilder::SetPropertyImpl(
-    const base::StringPiece& name, v8::Handle<v8::FunctionTemplate> getter,
+    const base::StringPiece& name,
+    v8::Handle<v8::FunctionTemplate> getter,
     v8::Handle<v8::FunctionTemplate> setter) {
   template_->SetAccessorProperty(gin::StringToSymbol(isolate_, name), getter,
                                  setter);

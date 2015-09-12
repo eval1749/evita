@@ -1,8 +1,8 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_evita_v8_glue_v8_glue_h)
-#define INCLUDE_evita_v8_glue_v8_glue_h
+#ifndef EVITA_V8_GLUE_V8_GLUE_H_
+#define EVITA_V8_GLUE_V8_GLUE_H_
 
 // L4 C4100: 'identifier' : unreferenced formal parameter
 // L1 C4191: 'operator/operation' : unsafe conversion from 'type of
@@ -23,9 +23,9 @@
 // '0' for 'directives'
 // L1 C4946: reinterpret_cast used between related classes: 'class1' and
 // 'class2'
-#define BEGIN_V8_INCLUDE __pragma(warning(push)) \
-  __pragma(warning(disable: 4100 4191 4365 4510 4512 4610 4623 4625 4626 \
-                            4668 4946))
+#define BEGIN_V8_INCLUDE                    \
+  __pragma(warning(push)) __pragma(warning( \
+      disable : 4100 4191 4365 4510 4512 4610 4623 4625 4626 4668 4946))
 
 #define END_V8_INCLUDE __pragma(warning(pop))
 
@@ -34,4 +34,4 @@ BEGIN_V8_INCLUDE
 #include "v8/include/v8.h"
 END_V8_INCLUDE
 
-#endif //!defined(INCLUDE_evita_v8_glue_v8_glue_h)
+#endif  // EVITA_V8_GLUE_V8_GLUE_H_

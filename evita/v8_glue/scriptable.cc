@@ -10,8 +10,7 @@
 
 namespace v8_glue {
 
-AbstractScriptable::AbstractScriptable() {
-}
+AbstractScriptable::AbstractScriptable() {}
 
 AbstractScriptable::~AbstractScriptable() {
   wrapper_.Reset();
@@ -34,8 +33,8 @@ v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
   DCHECK(this);
   if (!wrapper_.IsEmpty())
     return v8::Local<v8::Object>::New(isolate, wrapper_);
-  auto ctor = wrapper_info()->GetOrCreateConstructorTemplate(isolate)->
-      GetFunction();
+  auto ctor =
+      wrapper_info()->GetOrCreateConstructorTemplate(isolate)->GetFunction();
   ConstructorModeScope constructor_mode_scope(isolate, kWrapExistingObject);
   auto const wrapper = ctor->NewInstance();
   CHECK(!wrapper.IsEmpty());
@@ -52,7 +51,8 @@ void AbstractScriptable::WeakCallback(
 
 namespace internal {
 
-void* FromV8Impl(v8::Isolate*, v8::Handle<v8::Value> val,
+void* FromV8Impl(v8::Isolate*,
+                 v8::Handle<v8::Value> val,
                  WrapperInfo* wrapper_info) {
   if (!val->IsObject())
     return nullptr;

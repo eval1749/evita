@@ -1,8 +1,9 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_v8_glue_converter_h)
-#define INCLUDE_evita_v8_glue_converter_h
+#ifndef EVITA_V8_GLUE_CONVERTER_H_
+#define EVITA_V8_GLUE_CONVERTER_H_
 
+#include <string>
 #include <vector>
 
 #include "base/strings/string16.h"
@@ -117,4 +118,4 @@ v8::Local<v8::String> StringToV8(v8::Isolate* isolate,
 
 }  // namespace gin
 
-#endif  //! defined(INCLUDE_evita_v8_glue_converter_h)
+#endif  // EVITA_V8_GLUE_CONVERTER_H_

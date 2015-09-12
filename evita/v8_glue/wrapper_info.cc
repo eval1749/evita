@@ -4,7 +4,7 @@
 // L1 C4191: 'operator/operation' : unsafe conversion from 'type of
 // expression' to 'type required'
 #pragma warning(push)
-#pragma warning(disable: 4191)
+#pragma warning(disable : 4191)
 
 #include "evita/v8_glue/wrapper_info.h"
 
@@ -25,14 +25,14 @@ void ConstructorCallbackForNoConstructor(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
   auto const isolate = info.GetIsolate();
   if (!info.IsConstructCall()) {
-     isolate->ThrowException(
+    isolate->ThrowException(
         gin::StringToV8(isolate, "Cannot be called as function"));
-     return;
+    return;
   }
 
   if (!PerIsolateData::From(isolate)->is_creating_wrapper()) {
-    isolate->ThrowException(gin::StringToV8(isolate,
-        "Cannot use with new operator"));
+    isolate->ThrowException(
+        gin::StringToV8(isolate, "Cannot use with new operator"));
     return;
   }
 }
@@ -47,9 +47,7 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
 }  // namespace
 
 WrapperInfo::WrapperInfo(const char* class_name)
-    : embedder_(gin::kEmbedderEvita),
-      class_name_(class_name) {
-}
+    : embedder_(gin::kEmbedderEvita), class_name_(class_name) {}
 
 WrapperInfo* WrapperInfo::inherit_from() const {
   return nullptr;
@@ -107,13 +105,13 @@ v8::Handle<v8::FunctionTemplate> WrapperInfo::GetOrCreateConstructorTemplate(
 
   // We must set internal field count for instance template before creating
   // function object.
-  templ->InstanceTemplate()->
-    SetInternalFieldCount(gin::kNumberOfInternalFields);
+  templ->InstanceTemplate()->SetInternalFieldCount(
+      gin::kNumberOfInternalFields);
 
   if (auto const base_info = inherit_from()) {
     auto base_templ = data->GetFunctionTemplate(base_info->gin_wrapper_info());
     DCHECK(!base_templ.IsEmpty()) << "No such base class "
-        << base_info->class_name();
+                                  << base_info->class_name();
     templ->Inherit(base_templ);
   }
 
@@ -136,42 +134,50 @@ v8::Handle<v8::ObjectTemplate> WrapperInfo::GetOrCreateInstanceTemplate(
   return templ;
 }
 
-v8::Handle<v8::FunctionTemplate> WrapperInfo::Install(v8::Isolate* isolate,
-                          v8::Handle<v8::ObjectTemplate> global) {
+v8::Handle<v8::FunctionTemplate> WrapperInfo::Install(
+    v8::Isolate* isolate,
+    v8::Handle<v8::ObjectTemplate> global) {
   auto constructor = GetOrCreateConstructorTemplate(isolate);
   global->Set(gin::StringToV8(isolate, class_name_), constructor);
   return constructor;
 }
 
 v8::Handle<v8::ObjectTemplate> WrapperInfo::SetupInstanceTemplate(
-    v8::Isolate*, v8::Handle<v8::ObjectTemplate> templ) {
+    v8::Isolate*,
+    v8::Handle<v8::ObjectTemplate> templ) {
   return templ;
 }
 
 void WrapperInfo::ThrowArityError(v8::Isolate* isolate,
-    int min_arity, int max_arity, int actual_arity) {
+                                  int min_arity,
+                                  int max_arity,
+                                  int actual_arity) {
   if (min_arity == max_arity) {
-    isolate->ThrowException(gin::StringToV8(isolate, base::StringPrintf(
-        "Expect %d arguments, but %d supplied", min_arity, actual_arity)));
+    isolate->ThrowException(gin::StringToV8(
+        isolate, base::StringPrintf("Expect %d arguments, but %d supplied",
+                                    min_arity, actual_arity)));
     return;
   }
-  isolate->ThrowException(gin::StringToV8(isolate, base::StringPrintf(
-      "Expect %d to %d arguments, but %d supplied",
-      min_arity, max_arity, actual_arity)));
+  isolate->ThrowException(gin::StringToV8(
+      isolate, base::StringPrintf("Expect %d to %d arguments, but %d supplied",
+                                  min_arity, max_arity, actual_arity)));
 }
 
 void WrapperInfo::ThrowArgumentError(v8::Isolate* isolate,
-    const char* expected_type, v8::Handle<v8::Value> value, int index) {
-  isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(isolate,
-      base::StringPrintf("Expect argument[%d] as %s but %ls",
-          index, expected_type, V8ToString(value).c_str()))));
+                                     const char* expected_type,
+                                     v8::Handle<v8::Value> value,
+                                     int index) {
+  isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
+      isolate, base::StringPrintf("Expect argument[%d] as %s but %ls", index,
+                                  expected_type, V8ToString(value).c_str()))));
 }
 
 void WrapperInfo::ThrowReceiverError(v8::Isolate* isolate,
-    const char* expected_type, v8::Handle<v8::Value> value) {
-  isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(isolate,
-      base::StringPrintf("Expect receiver as %s but %ls.",
-          expected_type, V8ToString(value).c_str()))));
+                                     const char* expected_type,
+                                     v8::Handle<v8::Value> value) {
+  isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
+      isolate, base::StringPrintf("Expect receiver as %s but %ls.",
+                                  expected_type, V8ToString(value).c_str()))));
 }
 
 }  // namespace v8_glue

@@ -39,15 +39,15 @@ Runner::EscapableHandleScope::EscapableHandleScope(Runner* runner)
       context_scope_(runner->context()),
       current_runner_scope_(runner),
       runner_(runner) {
-  #if defined(_DEBUG)
-    ++runner->in_scope_;
-  #endif
+#if defined(_DEBUG)
+  ++runner->in_scope_;
+#endif
 }
 
 Runner::EscapableHandleScope::~EscapableHandleScope() {
-  #if defined(_DEBUG)
-    --runner_->in_scope_;
-  #endif
+#if defined(_DEBUG)
+  --runner_->in_scope_;
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -61,15 +61,15 @@ Runner::Scope::Scope(Runner* runner)
       context_scope_(runner->context()),
       current_runner_scope_(runner),
       runner_(runner) {
-  #if defined(_DEBUG)
-    ++runner->in_scope_;
-  #endif
+#if defined(_DEBUG)
+  ++runner->in_scope_;
+#endif
 }
 
 Runner::Scope::~Scope() {
-  #if defined(_DEBUG)
-    --runner_->in_scope_;
-  #endif
+#if defined(_DEBUG)
+  --runner_->in_scope_;
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -80,23 +80,22 @@ Runner::Runner(v8::Isolate* isoalte, RunnerDelegate* delegate)
     : gin::ContextHolder(isoalte),
       call_depth_(0),
       delegate_(delegate),
-      #if defined(_DEBUG)
+#if defined(_DEBUG)
       in_scope_(false),
-      #endif
+#endif
       weak_factory_(this) {
   v8::Locker locker_scope(isolate());
   v8::Isolate::Scope isolate_scope(isolate());
   v8::HandleScope handle_scope(isolate());
-  auto const context = v8::Context::New(isolate(), nullptr,
-      delegate_->GetGlobalTemplate(this));
+  auto const context =
+      v8::Context::New(isolate(), nullptr, delegate_->GetGlobalTemplate(this));
   SetContext(context);
 
   v8::Context::Scope scope(context);
   delegate_->DidCreateContext(this);
 }
 
-Runner::~Runner() {
-}
+Runner::~Runner() {}
 
 Runner* Runner::current_runner(v8::Isolate* isolate) {
   return PerIsolateData::From(isolate)->current_runner();
@@ -107,28 +106,29 @@ v8::Handle<v8::Object> Runner::global() const {
 }
 
 v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
-      v8::Handle<v8::Value> receiver, const Args& args) {
-  #if defined(_DEBUG)
-    DCHECK(in_scope_);
-  #endif
+                                   v8::Handle<v8::Value> receiver,
+                                   const Args& args) {
+#if defined(_DEBUG)
+  DCHECK(in_scope_);
+#endif
   common::TemporaryChangeValue<int> call_depth(call_depth_, call_depth_ + 1);
   if (!CheckCallDepth())
     return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
-  auto const value = callee->ToObject()->CallAsFunction(receiver,
-      static_cast<int>(args.size()),
+  auto const value = callee->ToObject()->CallAsFunction(
+      receiver, static_cast<int>(args.size()),
       const_cast<v8::Handle<v8::Value>*>(args.data()));
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
   return value;
 }
 
-v8::Handle<v8::Value> Runner::CallAsConstructor(
-    v8::Handle<v8::Value> callee, const Args& args) {
-  #if defined(_DEBUG)
-    DCHECK(in_scope_);
-  #endif
+v8::Handle<v8::Value> Runner::CallAsConstructor(v8::Handle<v8::Value> callee,
+                                                const Args& args) {
+#if defined(_DEBUG)
+  DCHECK(in_scope_);
+#endif
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
   auto const value = callee->ToObject()->CallAsConstructor(
@@ -148,11 +148,10 @@ bool Runner::CheckCallDepth() {
   return false;
 }
 
-v8::Handle<v8::Value> Runner::GetGlobalProperty(
-    const base::StringPiece& name) {
-  #if defined(_DEBUG)
-    DCHECK(in_scope_);
-  #endif
+v8::Handle<v8::Value> Runner::GetGlobalProperty(const base::StringPiece& name) {
+#if defined(_DEBUG)
+  DCHECK(in_scope_);
+#endif
   return global()->Get(gin::StringToV8(isolate(), name));
 }
 
@@ -167,24 +166,23 @@ void Runner::HandleTryCatch(const v8::TryCatch& try_catch) {
 }
 
 v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
-    const base::string16& script_name) {
-  #if defined(_DEBUG)
-    DCHECK(in_scope_);
-  #endif
+                                  const base::string16& script_name) {
+#if defined(_DEBUG)
+  DCHECK(in_scope_);
+#endif
   v8::TryCatch try_catch;
   v8::ScriptOrigin script_origin(
       gin::StringToV8(isolate(), script_name)->ToString());
   auto const script = v8::Script::Compile(
-      gin::StringToV8(isolate(), script_text)->ToString(),
-      &script_origin);
+      gin::StringToV8(isolate(), script_text)->ToString(), &script_origin);
   HandleTryCatch(try_catch);
   return Run(script);
 }
 
 v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {
-  #if defined(_DEBUG)
-    DCHECK(in_scope_);
-  #endif
+#if defined(_DEBUG)
+  DCHECK(in_scope_);
+#endif
   common::TemporaryChangeValue<int> call_depth(call_depth_, call_depth_ + 1);
   if (!CheckCallDepth())
     return v8::Handle<v8::Value>();

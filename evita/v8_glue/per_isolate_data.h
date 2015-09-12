@@ -1,8 +1,8 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_evita_v8_glue_per_isolate_data_h)
-#define INCLUDE_evita_v8_glue_per_isolate_data_h
+#ifndef EVITA_V8_GLUE_PER_ISOLATE_DATA_H_
+#define EVITA_V8_GLUE_PER_ISOLATE_DATA_H_
 
 #include "base/basictypes.h"
 #include "base/memory/ref_counted.h"
@@ -28,55 +28,56 @@ enum ConstructorMode {
 
 class Runner;
 
-class PerIsolateData {
-  private: ConstructorMode construct_mode_;
-  private: Runner* current_runner_;
-  private: v8::Isolate* isolate_;
-  private: scoped_refptr<base::TaskRunner> task_runner_;
+class PerIsolateData final {
+ public:
+  explicit PerIsolateData(v8::Isolate* isolate);
+  ~PerIsolateData();
 
-  public: PerIsolateData(v8::Isolate* isolate);
-  public: ~PerIsolateData();
+  ConstructorMode construct_mode() const { return construct_mode_; }
 
-  public: ConstructorMode construct_mode() const { return construct_mode_; }
-
-  public: bool is_creating_wrapper() const {
+  bool is_creating_wrapper() const {
     return construct_mode_ == kWrapExistingObject;
   }
 
-  public: void set_construct_mode(ConstructorMode construct_mode) {
+  void set_construct_mode(ConstructorMode construct_mode) {
     construct_mode_ = construct_mode;
   }
 
-  public: Runner* current_runner() const { return current_runner_; }
-  public: void set_current_runner(Runner* runner) { current_runner_ = runner; }
+  Runner* current_runner() const { return current_runner_; }
+  void set_current_runner(Runner* runner) { current_runner_ = runner; }
 
-  public: base::TaskRunner* task_runner() {
-    return task_runner_.get();
-  }
+  base::TaskRunner* task_runner() { return task_runner_.get(); }
 
-  public: static PerIsolateData* From(v8::Isolate* isolate);
+  static PerIsolateData* From(v8::Isolate* isolate);
+
+ private:
+  ConstructorMode construct_mode_;
+  Runner* current_runner_;
+  v8::Isolate* isolate_;
+  scoped_refptr<base::TaskRunner> task_runner_;
 
   DISALLOW_COPY_AND_ASSIGN(PerIsolateData);
 };
 
-class ConstructorModeScope {
-  private: ConstructorMode const construct_mode_;
-  private: v8::Isolate* isolate_;
-
-  public: ConstructorModeScope(v8::Isolate* isolate,
-                             ConstructorMode construct_mode)
+class ConstructorModeScope final {
+ public:
+  ConstructorModeScope(v8::Isolate* isolate, ConstructorMode construct_mode)
       : construct_mode_(PerIsolateData::From(isolate)->construct_mode()),
         isolate_(isolate) {
     PerIsolateData::From(isolate_)->set_construct_mode(construct_mode);
   }
 
-  public: ~ConstructorModeScope() {
+  ~ConstructorModeScope() {
     PerIsolateData::From(isolate_)->set_construct_mode(construct_mode_);
   }
+
+ private:
+  ConstructorMode const construct_mode_;
+  v8::Isolate* isolate_;
 
   DISALLOW_COPY_AND_ASSIGN(ConstructorModeScope);
 };
 
 }  // namespace v8_glue
 
-#endif //!defined(INCLUDE_evita_v8_glue_per_isolate_data_h)
+#endif  // EVITA_V8_GLUE_PER_ISOLATE_DATA_H_

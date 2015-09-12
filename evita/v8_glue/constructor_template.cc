@@ -24,8 +24,8 @@ void FinishConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info,
 bool IsValidConstructCall(const v8::FunctionCallbackInfo<v8::Value>& info) {
   auto const isolate = info.GetIsolate();
   if (!info.IsConstructCall()) {
-    isolate->ThrowException(gin::StringToV8(isolate,
-        "Cannot be called as function."));
+    isolate->ThrowException(
+        gin::StringToV8(isolate, "Cannot be called as function."));
     return false;
   }
   // When we're creating wrapper, e.g. Scriptable::GetWrapper(), we have

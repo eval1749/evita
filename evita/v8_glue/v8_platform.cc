@@ -12,17 +12,15 @@
 
 namespace v8_glue {
 
-V8Platform::V8Platform() {
-}
+V8Platform::V8Platform() {}
 
-V8Platform::~V8Platform() {
-}
+V8Platform::~V8Platform() {}
 
 void V8Platform::CallOnBackgroundThread(
-    v8::Task* task, v8::Platform::ExpectedRuntime expected_runtime) {
+    v8::Task* task,
+    v8::Platform::ExpectedRuntime expected_runtime) {
   base::WorkerPool::PostTask(
-      FROM_HERE,
-      base::Bind(&v8::Task::Run, base::Owned(task)),
+      FROM_HERE, base::Bind(&v8::Task::Run, base::Owned(task)),
       expected_runtime == v8::Platform::kLongRunningTask);
 }
 

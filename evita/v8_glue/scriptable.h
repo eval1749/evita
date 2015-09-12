@@ -1,8 +1,8 @@
-// Copyright (C) 2013 by Project Vogue.
+// Copyright 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_evita_v8_glue_scriptable_h)
-#define INCLUDE_evita_v8_glue_scriptable_h
+#ifndef EVITA_V8_GLUE_SCRIPTABLE_H_
+#define EVITA_V8_GLUE_SCRIPTABLE_H_
 
 #include <type_traits>
 
@@ -27,74 +27,79 @@ void* FromV8Impl(v8::Isolate* isolate,
 
 // Note: The |AbstractScriptable| class was called |AbstractScriptWrappable|.
 // Although, it is too long to fit in line. So, we renamed shorter name.
-class AbstractScriptable
-    : public gc::Collectable<AbstractScriptable> {
-  private: mutable v8::Persistent<v8::Object> wrapper_; // Weak
+class AbstractScriptable : public gc::Collectable<AbstractScriptable> {
+ public:
+  bool is_instance_of(const WrapperInfo* wrapper_info);
+  bool has_script_reference() const { return !wrapper_.IsEmpty(); }
 
-  protected: AbstractScriptable();
-  protected: virtual ~AbstractScriptable();
-
-  public: bool is_instance_of(const WrapperInfo* wrapper_info);
-  public: bool has_script_reference() const {
-    return !wrapper_.IsEmpty();
-  }
-
-  public: virtual WrapperInfo* wrapper_info() const = 0;
+  virtual WrapperInfo* wrapper_info() const = 0;
 
   // For |new ClassName()|. |Scriptable<T>| is create after wrapper.
-  public: void Bind(v8::Isolate* isolate, v8::Handle<v8::Object> wrapper);
+  void Bind(v8::Isolate* isolate, v8::Handle<v8::Object> wrapper);
 
   // Get wrapper for existing |Scriptable<T>|.
-  public: v8::Handle<v8::Object> GetWrapper(v8::Isolate* isolate) const;
+  v8::Handle<v8::Object> GetWrapper(v8::Isolate* isolate) const;
 
-  private: static void WeakCallback(
+ protected:
+  AbstractScriptable();
+  virtual ~AbstractScriptable();
+
+ private:
+  static void WeakCallback(
       const v8::WeakCallbackData<v8::Object, AbstractScriptable>& data);
+
+  mutable v8::Persistent<v8::Object> wrapper_;  // Weak
 
   DISALLOW_COPY_AND_ASSIGN(AbstractScriptable);
 };
 
-template<typename T, typename B = AbstractScriptable>
+template <typename T, typename B = AbstractScriptable>
 class Scriptable : public B {
-  protected: typedef Scriptable<T, B> ScriptableBase;
-
-  protected: template<typename... Params>
-      Scriptable(Params&&... params) : B(params...) {
-  }
-  protected: virtual ~Scriptable() = default;
-
-  public: template<typename T> T* as() {
+ public:
+  template <typename T>
+  T* as() {
     return is<T>() ? static_cast<T*>(this) : nullptr;
   }
-  public: template<typename T> const T* as() const {
+  template <typename T>
+  const T* as() const {
     return is<T>() ? static_cast<const T*>(this) : nullptr;
   }
-  public: template<typename T> bool is() const {
-    return wrapper_info()->is_descendant_or_self_of(
-        T::static_wrapper_info());
+  template <typename T>
+  bool is() const {
+    return wrapper_info()->is_descendant_or_self_of(T::static_wrapper_info());
   }
 
   // Expose as public function for logging. I'm not sure other usages of
   // |AbstractScriptable::wrapper_info()|.
-  public: virtual WrapperInfo* wrapper_info() const override {
+  WrapperInfo* wrapper_info() const override {
     return T::static_wrapper_info();
   }
 
+ protected:
+  using ScriptableBase = Scriptable<T, B>;
+
+  template <typename... Params>
+  explicit Scriptable(Params&&... params)
+      : B(params...) {}
+  virtual ~Scriptable() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(Scriptable);
 };
 
 }  // namespace v8_glue
 
 namespace gin {
-template<typename T>
-struct Converter<T*, typename std::enable_if<
-    std::is_convertible<T*,
-        v8_glue::AbstractScriptable*>::value>::type> {
+template <typename T>
+struct Converter<
+    T*,
+    typename std::enable_if<
+        std::is_convertible<T*, v8_glue::AbstractScriptable*>::value>::type> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T* val) {
     return val->GetWrapper(isolate);
   }
 
-  static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val, T** out) {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val, T** out) {
     auto const wrapper_info = T::static_wrapper_info();
     *out = static_cast<T*>(static_cast<v8_glue::AbstractScriptable*>(
         v8_glue::internal::FromV8Impl(isolate, val, wrapper_info)));
@@ -103,17 +108,18 @@ struct Converter<T*, typename std::enable_if<
 };
 }  // namespace gin
 
-#define DECLARE_SCRIPTABLE_OBJECT(name) \
-  DECLARE_COLLECTABLE_OBJECT(name) \
-  public: static v8_glue::WrapperInfo* static_wrapper_info(); \
-  public: static const char* scriptable_class_name() { return #name; } \
-  private:
+#define DECLARE_SCRIPTABLE_OBJECT(name)                        \
+  DECLARE_COLLECTABLE_OBJECT(name)                             \
+                                                               \
+ public:                                                       \
+  static v8_glue::WrapperInfo* static_wrapper_info();          \
+  static const char* scriptable_class_name() { return #name; }
 
-#define DEFINE_SCRIPTABLE_OBJECT(name, wrapper_info_name) \
-  v8_glue::WrapperInfo* name::static_wrapper_info() { \
+#define DEFINE_SCRIPTABLE_OBJECT(name, wrapper_info_name)   \
+  v8_glue::WrapperInfo* name::static_wrapper_info() {       \
     CR_DEFINE_STATIC_LOCAL(wrapper_info_name, wrapper_info, \
-        (scriptable_class_name())); \
-    return &wrapper_info; \
+                           (scriptable_class_name()));      \
+    return &wrapper_info;                                   \
   }
 
-#endif //!defined(INCLUDE_evita_v8_glue_scriptable_h)
+#endif  // EVITA_V8_GLUE_SCRIPTABLE_H_

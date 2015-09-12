@@ -14,20 +14,32 @@
 namespace {
 
 class RunnerTest : public ::testing::Test {
-  private: v8_glue::IsolateHolder isolate_holder_;
-  private: v8_glue::RunnerDelegate delegate;
-  private: v8_glue::Runner runner_;
+ private:
+  v8_glue::IsolateHolder isolate_holder_;
 
-  public: RunnerTest() :
-      runner_(isolate_holder_.isolate(), &delegate) {
-  }
-  public: ~RunnerTest() = default;
+ private:
+  v8_glue::RunnerDelegate delegate;
 
-  public: v8::Handle<v8::Object> global() const { return runner_.global(); }
-  public: v8::Isolate* isolate() { return isolate_holder_.isolate(); }
-  public: v8_glue::Runner* runner() { return &runner_; }
+ private:
+  v8_glue::Runner runner_;
 
-  public: v8::Handle<v8::Value> Get(const std::string& key) {
+ public:
+  RunnerTest() : runner_(isolate_holder_.isolate(), &delegate) {}
+
+ public:
+  ~RunnerTest() = default;
+
+ public:
+  v8::Handle<v8::Object> global() const { return runner_.global(); }
+
+ public:
+  v8::Isolate* isolate() { return isolate_holder_.isolate(); }
+
+ public:
+  v8_glue::Runner* runner() { return &runner_; }
+
+ public:
+  v8::Handle<v8::Value> Get(const std::string& key) {
     return runner_.global()->Get(gin::StringToV8(isolate(), key));
   }
 };
@@ -43,10 +55,10 @@ base::string16 V8ToString(v8::Handle<v8::Value> value) {
 TEST_F(RunnerTest, Call) {
   v8_glue::Runner::Scope runner_scope(runner());
   runner()->Run(L"function foo(x, y) { return x + y; }", L"bar.js");
-  auto const value = runner()->Call(Get("foo")->ToObject(),
-      runner()->global(),
-      v8_glue::Runner::Args {v8::Integer::New(isolate(), 1),
-                             v8::Integer::New(isolate(), 2)});
+  auto const value =
+      runner()->Call(Get("foo")->ToObject(), runner()->global(),
+                     v8_glue::Runner::Args{v8::Integer::New(isolate(), 1),
+                                           v8::Integer::New(isolate(), 2)});
   EXPECT_EQ(L"3", V8ToString(value));
 }
 

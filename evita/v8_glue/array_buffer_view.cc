@@ -11,8 +11,8 @@ bool Converter<ArrayBufferView*>::FromV8(v8::Isolate* isolate,
                                          ArrayBufferView** out) {
   if (!val->IsArrayBufferView())
     return false;
-  *out = new ArrayBufferView(isolate,
-                             v8::Handle<v8::ArrayBufferView>::Cast(val));
+  *out =
+      new ArrayBufferView(isolate, v8::Handle<v8::ArrayBufferView>::Cast(val));
   return true;
 }
 

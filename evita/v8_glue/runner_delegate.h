@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_v8_glue_script_runner_delegate_h)
-#define INCLUDE_evita_v8_glue_script_runner_delegate_h
+#ifndef EVITA_V8_GLUE_RUNNER_DELEGATE_H_
+#define EVITA_V8_GLUE_RUNNER_DELEGATE_H_
 
 #include "base/basictypes.h"
 #include "evita/v8_glue/v8.h"
@@ -13,20 +13,23 @@ namespace v8_glue {
 class Runner;
 
 class RunnerDelegate {
-  public: RunnerDelegate();
-  public: virtual ~RunnerDelegate();
+ public:
+  virtual ~RunnerDelegate();
 
-  public: virtual void DidCreateContext(Runner* runner);
-  public: virtual void DidRunScript(Runner* runner);
-  public: virtual v8::Handle<v8::ObjectTemplate>
-      GetGlobalTemplate(Runner* runner);
-  public: virtual void UnhandledException(Runner* runner,
-                                          const v8::TryCatch& try_catch);
-  public: virtual void WillRunScript(Runner* runner);
+  virtual void DidCreateContext(Runner* runner);
+  virtual void DidRunScript(Runner* runner);
+  virtual v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(Runner* runner);
+  virtual void UnhandledException(Runner* runner,
+                                  const v8::TryCatch& try_catch);
+  virtual void WillRunScript(Runner* runner);
 
+ protected:
+  RunnerDelegate();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(RunnerDelegate);
 };
 
 }  // namespace v8_glue
 
-#endif //!defined(INCLUDE_evita_v8_glue_script_runner_delegate_h)
+#endif  // EVITA_V8_GLUE_RUNNER_DELEGATE_H_

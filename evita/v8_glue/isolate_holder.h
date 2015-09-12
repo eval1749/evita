@@ -1,8 +1,8 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_evita_v8_glue_isolate_holder_h)
-#define INCLUDE_evita_v8_glue_isolate_holder_h
+#ifndef EVITA_V8_GLUE_ISOLATE_HOLDER_H_
+#define EVITA_V8_GLUE_ISOLATE_HOLDER_H_
 
 #include <memory>
 
@@ -17,15 +17,17 @@ namespace v8_glue {
 
 class PerIsolateData;
 
-class IsolateHolder : public gin::IsolateHolder {
-  private: std::unique_ptr<PerIsolateData> isolate_data_;
+class IsolateHolder final : public gin::IsolateHolder {
+ public:
+  IsolateHolder();
+  ~IsolateHolder() = default;
 
-  public: IsolateHolder();
-  public: ~IsolateHolder() = default;
+ private:
+  std::unique_ptr<PerIsolateData> isolate_data_;
 
   DISALLOW_COPY_AND_ASSIGN(IsolateHolder);
 };
 
 }  // namespace v8_glue
 
-#endif //!defined(INCLUDE_evita_v8_glue_isolate_holder_h)
+#endif  // EVITA_V8_GLUE_ISOLATE_HOLDER_H_

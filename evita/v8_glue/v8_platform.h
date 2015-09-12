@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_v8_glue_v8_platform_h)
-#define INCLUDE_evita_v8_glue_v8_platform_h
+#ifndef EVITA_V8_GLUE_V8_PLATFORM_H_
+#define EVITA_V8_GLUE_V8_PLATFORM_H_
 
+#include "base/macros.h"
 #include "common/memory/singleton.h"
 #include "v8/include/v8-platform.h"
 
@@ -14,19 +15,25 @@ namespace v8_glue {
 //
 // V8Platform
 //
-class V8Platform : public common::Singleton<V8Platform>, public v8::Platform {
+class V8Platform final : public common::Singleton<V8Platform>,
+                         public v8::Platform {
   DECLARE_SINGLETON_CLASS(V8Platform);
 
-  private: V8Platform();
-  public: virtual ~V8Platform();
+ public:
+  ~V8Platform() final;
+
+ private:
+  V8Platform();
 
   // v8::Platform
-  private: virtual void CallOnBackgroundThread(
-      v8::Task* task, v8::Platform::ExpectedRuntime expected_runtime) override;
-  private: virtual void CallOnForegroundThread(
-      v8::Isolate* isolate, v8::Task* task) override;
+  void CallOnBackgroundThread(
+      v8::Task* task,
+      v8::Platform::ExpectedRuntime expected_runtime) final;
+  void CallOnForegroundThread(v8::Isolate* isolate, v8::Task* task) final;
+
+  DISALLOW_COPY_AND_ASSIGN(V8Platform);
 };
 
 }  // namespace v8_glue
 
-#endif //!defined(INCLUDE_evita_v8_glue_v8_platform_h)
+#endif  // EVITA_V8_GLUE_V8_PLATFORM_H_

@@ -1,8 +1,8 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_evita_v8_glue_nullable_h)
-#define INCLUDE_evita_v8_glue_nullable_h
+#ifndef EVITA_V8_GLUE_NULLABLE_H_
+#define EVITA_V8_GLUE_NULLABLE_H_
 
 #include <type_traits>
 
@@ -12,22 +12,31 @@
 namespace v8_glue {
 class AbstractScriptable;
 
-template<typename T>
-class Nullable {
-  private: T* ptr_;
-  public: Nullable(const Nullable& other) : ptr_(other.ptr_) {}
-  public: Nullable(T* ptr) : ptr_(ptr) {}
-  public: Nullable() : ptr_(nullptr) {}
-  public: operator T*() const { return ptr_; }
-  public: T* operator->() const { DCHECK(ptr_); return ptr_; }
+template <typename T>
+class Nullable final {
+ public:
+  Nullable(T* ptr) : ptr_(ptr) {}  // NOLINT
+  Nullable(const Nullable& other) : ptr_(other.ptr_) {}
+  Nullable() : ptr_(nullptr) {}
+
+  operator T*() const { return ptr_; }
+  T* operator->() const {
+    DCHECK(ptr_);
+    return ptr_;
+  }
+
+ private:
+ private:
+  T* ptr_;
 };
 }  // namespace v8_glue
 
 namespace gin {
-template<typename T>
-struct Converter<v8_glue::Nullable<T>, typename std::enable_if<
-    std::is_convertible<T*,
-        v8_glue::AbstractScriptable*>::value>::type> {
+template <typename T>
+struct Converter<
+    v8_glue::Nullable<T>,
+    typename std::enable_if<
+        std::is_convertible<T*, v8_glue::AbstractScriptable*>::value>::type> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T* val) {
     if (val)
       return val->GetWrapper(isolate);
@@ -35,7 +44,8 @@ struct Converter<v8_glue::Nullable<T>, typename std::enable_if<
   }
 
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val, v8_glue::Nullable<T>* out) {
+                     v8::Handle<v8::Value> val,
+                     v8_glue::Nullable<T>* out) {
     if (val->IsNull()) {
       *out = nullptr;
       return true;
@@ -48,4 +58,4 @@ struct Converter<v8_glue::Nullable<T>, typename std::enable_if<
 };
 }  // namespace gin
 
-#endif //!defined(INCLUDE_evita_v8_glue_nullable_h)
+#endif  // EVITA_V8_GLUE_NULLABLE_H_

@@ -7,8 +7,6 @@
 
 namespace v8_glue {
 
-IsolateHolder::IsolateHolder()
-    : isolate_data_(new PerIsolateData(isolate())) {
-}
+IsolateHolder::IsolateHolder() : isolate_data_(new PerIsolateData(isolate())) {}
 
 }  // namespace v8_glue

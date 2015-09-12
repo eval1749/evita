@@ -213,7 +213,7 @@ gfx::ColorF Arrow::bgcolor() const {
       return gfx::sysColor(COLOR_BTNFACE, 0.3f);
     default:
       NOTREACHED();
-      return gfx::ColorF::Red;
+      return gfx::ColorF(gfx::ColorF::Red);
   }
 }
 
@@ -229,7 +229,7 @@ gfx::ColorF Arrow::color() const {
       return gfx::sysColor(COLOR_BTNTEXT, 0.3f);
     default:
       NOTREACHED();
-      return gfx::ColorF::Red;
+      return gfx::ColorF(gfx::ColorF::Red);
   }
 }
 
@@ -499,14 +499,14 @@ gfx::ColorF Thumb::thumb_color() const {
       return gfx::sysColor(COLOR_BTNSHADOW, 0.7f);
     case State::Disabled:
       NOTREACHED();
-      return gfx::ColorF::Red;
+      return gfx::ColorF(gfx::ColorF::Red);
     case State::Hover:
       return gfx::sysColor(COLOR_BTNSHADOW, 0.5f);
     case State::Normal:
       return gfx::sysColor(COLOR_BTNSHADOW, 0.3f);
     default:
       NOTREACHED();
-      return gfx::ColorF::Red;
+      return gfx::ColorF(gfx::ColorF::Red);
   }
 }
 

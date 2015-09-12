@@ -18,16 +18,15 @@ namespace views {
 //
 FormControlController::FormControlController(
     domapi::EventTargetId event_target_id)
-    : EventSource(event_target_id) {
-}
+    : EventSource(event_target_id) {}
 
-FormControlController::~FormControlController() {
-}
+FormControlController::~FormControlController() {}
 
 // ui::ControlController
 void FormControlController::DidKillFocus(ui::Control*,
                                          ui::Widget* related_widget) {
-  DispatchFocusEvent(domapi::EventType::Blur,
+  DispatchFocusEvent(
+      domapi::EventType::Blur,
       FormControlSet::instance()->MaybeControlId(related_widget));
 }
 
@@ -37,8 +36,9 @@ void FormControlController::DidRealize(ui::Control* control) {
 
 void FormControlController::DidSetFocus(ui::Control*,
                                         ui::Widget* related_widget) {
-  DispatchFocusEvent(domapi::EventType::Focus,
-    FormControlSet::instance()->MaybeControlId(related_widget));
+  DispatchFocusEvent(
+      domapi::EventType::Focus,
+      FormControlSet::instance()->MaybeControlId(related_widget));
 }
 
 void FormControlController::OnKeyEvent(ui::Control*,
@@ -78,8 +78,8 @@ void FormControlController::DidUpdateComposition(
 }
 
 ui::Widget* FormControlController::GetClientWindow() {
-  auto const control = FormControlSet::instance()->MaybeControl(
-      event_target_id());
+  auto const control =
+      FormControlSet::instance()->MaybeControl(event_target_id());
   DCHECK(control);
   return control;
 }

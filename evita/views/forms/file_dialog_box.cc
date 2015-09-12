@@ -8,7 +8,7 @@
 // For defining GetOpenFileName and GetSaveFileName.
 // warning C4191: 'operator/operation' : unsafe conversion from 'type of
 // expression' to 'type required'
-#pragma warning(disable: 4191)
+#pragma warning(disable : 4191)
 #include <commdlg.h>
 #pragma warning(pop)
 #undef GetOpenFileName
@@ -18,11 +18,9 @@
 
 namespace views {
 
-FileDialogBox::FileDialogBox() {
-}
+FileDialogBox::FileDialogBox() {}
 
-FileDialogBox::~FileDialogBox() {
-}
+FileDialogBox::~FileDialogBox() {}
 
 bool FileDialogBox::GetOpenFileName(Param* pParam) {
   OPENFILENAME oOfn = {0};
@@ -30,9 +28,10 @@ bool FileDialogBox::GetOpenFileName(Param* pParam) {
   oOfn.hwndOwner = pParam->m_hwndOwner;
   // TODO(yosi) We should make filter as parameter to allow scripts specify
   // filters.
-  oOfn.lpstrFilter = L"All Files\0*.*\0"
-                     L"C/C++ Files\0*.cpp;*.hpp;*.c;*.h;*.cxx;*.hxx\0"
-                     L"Lisp Files\0*.lisp;*.l;*.lsp;*.cl\0";
+  oOfn.lpstrFilter =
+      L"All Files\0*.*\0"
+      L"C/C++ Files\0*.cpp;*.hpp;*.c;*.h;*.cxx;*.hxx\0"
+      L"Lisp Files\0*.lisp;*.l;*.lsp;*.cl\0";
   oOfn.lpstrFile = pParam->m_wsz;
   oOfn.lpstrInitialDir = pParam->m_wszDir[0] ? pParam->m_wszDir : nullptr;
 
@@ -45,7 +44,7 @@ bool FileDialogBox::GetOpenFileName(Param* pParam) {
 
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
   if (!::GetOpenFileNameW(&oOfn))
-      return false;
+    return false;
 
   pParam->m_fReadOnly = (oOfn.Flags & OFN_READONLY) != 0;
   pParam->m_pwszFile = oOfn.lpstrFile + oOfn.nFileOffset;
@@ -71,19 +70,19 @@ bool FileDialogBox::GetSaveFileName(Param* pParam) {
   oOfn.Flags |= OFN_SHAREAWARE;
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
   if (!::GetSaveFileNameW(&oOfn))
-      return false;
+    return false;
   pParam->m_pwszFile = oOfn.lpstrFile + oOfn.nFileOffset;
   return true;
 }
 
 void FileDialogBox::Param::SetDirectory(const base::char16* pwszFile) {
   if (!*pwszFile)
-      return;
+    return;
   base::char16* pwszFilePart;
-  auto const cwchFull = ::GetFullPathName(pwszFile, arraysize(m_wszDir),
-                                          m_wszDir, &pwszFilePart);
+  auto const cwchFull =
+      ::GetFullPathName(pwszFile, arraysize(m_wszDir), m_wszDir, &pwszFilePart);
   if (cwchFull >= 1 && pwszFilePart)
     *pwszFilePart = 0;
 }
 
-} // namespace views
+}  // namespace views

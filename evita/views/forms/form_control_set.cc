@@ -8,11 +8,9 @@
 
 namespace views {
 
-FormControlSet::FormControlSet() {
-}
+FormControlSet::FormControlSet() {}
 
-FormControlSet::~FormControlSet() {
-}
+FormControlSet::~FormControlSet() {}
 
 ui::Control* FormControlSet::MaybeControl(
     domapi::EventTargetId event_target_id) const {
@@ -20,8 +18,7 @@ ui::Control* FormControlSet::MaybeControl(
   return it == id_map_.end() ? nullptr : it->second;
 }
 
-domapi::EventTargetId FormControlSet::MaybeControlId(
-    ui::Widget* widget) const {
+domapi::EventTargetId FormControlSet::MaybeControlId(ui::Widget* widget) const {
   if (!widget)
     return domapi::kInvalidEventTargetId;
   auto const control = widget->as<ui::Control>();
@@ -32,7 +29,7 @@ domapi::EventTargetId FormControlSet::MaybeControlId(
 }
 
 void FormControlSet::Register(ui::Control* control,
-                        domapi::EventTargetId target_id) {
+                              domapi::EventTargetId target_id) {
   control_map_[control] = target_id;
   id_map_[target_id] = control;
 }

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_forms_file_dialog_box_h)
-#define INCLUDE_evita_views_forms_file_dialog_box_h
+#ifndef EVITA_VIEWS_FORMS_FILE_DIALOG_BOX_H_
+#define EVITA_VIEWS_FORMS_FILE_DIALOG_BOX_H_
 
 #include <windows.h>
 
@@ -11,28 +11,27 @@
 
 namespace views {
 
-class FileDialogBox {
-  public: struct Param {
-    bool    m_fReadOnly;
-    HWND    m_hwndOwner;
+class FileDialogBox final {
+ public:
+  struct Param final {
+    bool m_fReadOnly;
+    HWND m_hwndOwner;
     base::char16* m_pwszFile;
-    base::char16  m_wsz[MAX_PATH + 1];
-    base::char16  m_wszDir[MAX_PATH + 1];
+    base::char16 m_wsz[MAX_PATH + 1];
+    base::char16 m_wszDir[MAX_PATH + 1];
 
-    Param() {
-      ::ZeroMemory(this, sizeof(*this));
-    }
+    Param() { ::ZeroMemory(this, sizeof(*this)); }
 
     void SetDirectory(const base::char16*);
   };
 
-  public: FileDialogBox();
-  public: ~FileDialogBox();
+  FileDialogBox();
+  ~FileDialogBox();
 
-  public: bool GetOpenFileName(Param*);
-  public: bool GetSaveFileName(Param*);
+  bool GetOpenFileName(Param* param);
+  bool GetSaveFileName(Param* param);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_forms_file_dialog_box_h)
+#endif  // EVITA_VIEWS_FORMS_FILE_DIALOG_BOX_H_

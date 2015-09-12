@@ -46,16 +46,21 @@ namespace {
 // ControlImporter
 //
 class ControlImporter {
-  protected: ControlImporter() = default;
-  public: virtual ~ControlImporter() = default;
+ public:
+  virtual ~ControlImporter() = default;
 
-  public: static ControlImporter* Create(const dom::FormControl* control);
+  static ControlImporter* Create(const dom::FormControl* control);
 
-  protected: ui::Control::Style ComputeStyle() const;
-  public: virtual ui::Control* CreateWidget() = 0;
-  protected: void Update(const dom::FormControl* control, ui::Widget* widget);
-  public: virtual void UpdateWidget(ui::Widget* widget) = 0;
+  virtual ui::Control* CreateWidget() = 0;
+  virtual void UpdateWidget(ui::Widget* widget) = 0;
 
+ protected:
+  ControlImporter() = default;
+
+  ui::Control::Style ComputeStyle() const;
+  void Update(const dom::FormControl* control, ui::Widget* widget);
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(ControlImporter);
 };
 
@@ -74,11 +79,10 @@ ui::Control::Style ControlImporter::ComputeStyle() const {
 
 void ControlImporter::Update(const dom::FormControl* control,
                              ui::Widget* widget) {
-  gfx::Rect rect(
-      gfx::Point(static_cast<int>(control->client_left()),
-                 static_cast<int>(control->client_top())),
-      gfx::Size(static_cast<int>(control->client_width()),
-                static_cast<int>(control->client_height())));
+  gfx::Rect rect(gfx::Point(static_cast<int>(control->client_left()),
+                            static_cast<int>(control->client_top())),
+                 gfx::Size(static_cast<int>(control->client_width()),
+                           static_cast<int>(control->client_height())));
   DCHECK(!rect.empty());
   widget->SetBounds(rect);
 
@@ -90,27 +94,28 @@ void ControlImporter::Update(const dom::FormControl* control,
 //
 // ButtonImporter
 //
-class ButtonImporter : public ControlImporter {
-  private: const dom::ButtonControl* const button_;
+class ButtonImporter final : public ControlImporter {
+ public:
+  explicit ButtonImporter(const dom::ButtonControl* checkbox);
+  ~ButtonImporter() final = default;
 
-  public: ButtonImporter(const dom::ButtonControl* checkbox);
-  public: virtual ~ButtonImporter() = default;
-
+ private:
   // ControlImporter
-  private: virtual ui::Control* CreateWidget() override;
-  private: virtual void UpdateWidget(ui::Widget* widget) override;
+  ui::Control* CreateWidget() final;
+  void UpdateWidget(ui::Widget* widget) final;
+
+  const dom::ButtonControl* const button_;
 
   DISALLOW_COPY_AND_ASSIGN(ButtonImporter);
 };
 
 ButtonImporter::ButtonImporter(const dom::ButtonControl* button)
-    : button_(button) {
-}
+    : button_(button) {}
 
 ui::Control* ButtonImporter::CreateWidget() {
   auto const widget = new ui::ButtonControl(
-      new FormControlController(button_->event_target_id()),
-      button_->text(), ComputeStyle());
+      new FormControlController(button_->event_target_id()), button_->text(),
+      ComputeStyle());
   Update(button_, widget);
   return widget;
 }
@@ -126,22 +131,23 @@ void ButtonImporter::UpdateWidget(ui::Widget* widget) {
 //
 // CheckboxImporter
 //
-class CheckboxImporter : public ControlImporter {
-  private: const dom::CheckboxControl* const checkbox_;
+class CheckboxImporter final : public ControlImporter {
+ public:
+  explicit CheckboxImporter(const dom::CheckboxControl* checkbox);
+  ~CheckboxImporter() final = default;
 
-  public: CheckboxImporter(const dom::CheckboxControl* checkbox);
-  public: virtual ~CheckboxImporter() = default;
-
+ private:
   // ControlImporter
-  private: virtual ui::Control* CreateWidget() override;
-  private: virtual void UpdateWidget(ui::Widget* widget) override;
+  ui::Control* CreateWidget() final;
+  void UpdateWidget(ui::Widget* widget) final;
+
+  const dom::CheckboxControl* const checkbox_;
 
   DISALLOW_COPY_AND_ASSIGN(CheckboxImporter);
 };
 
 CheckboxImporter::CheckboxImporter(const dom::CheckboxControl* checkbox)
-    : checkbox_(checkbox) {
-}
+    : checkbox_(checkbox) {}
 
 ui::Control* CheckboxImporter::CreateWidget() {
   auto const widget = new ui::CheckboxControl(
@@ -162,27 +168,27 @@ void CheckboxImporter::UpdateWidget(ui::Widget* widget) {
 //
 // LabelImporter
 //
-class LabelImporter : public ControlImporter {
-  private: const dom::LabelControl* const label_;
+class LabelImporter final : public ControlImporter {
+ public:
+  explicit LabelImporter(const dom::LabelControl* label);
+  ~LabelImporter() final = default;
 
-  public: LabelImporter(const dom::LabelControl* label);
-  public: virtual ~LabelImporter() = default;
-
+ private:
   // ControlImporter
-  private: virtual ui::Control* CreateWidget() override;
-  private: virtual void UpdateWidget(ui::Widget* widget) override;
+  ui::Control* CreateWidget() final;
+  void UpdateWidget(ui::Widget* widget) final;
+
+  const dom::LabelControl* const label_;
 
   DISALLOW_COPY_AND_ASSIGN(LabelImporter);
 };
 
-LabelImporter::LabelImporter(const dom::LabelControl* label)
-    : label_(label) {
-}
+LabelImporter::LabelImporter(const dom::LabelControl* label) : label_(label) {}
 
 ui::Control* LabelImporter::CreateWidget() {
-  auto const widget = new ui::LabelControl(
-      new FormControlController(label_->event_target_id()),
-      label_->text(), ComputeStyle());
+  auto const widget =
+      new ui::LabelControl(new FormControlController(label_->event_target_id()),
+                           label_->text(), ComputeStyle());
   Update(label_, widget);
   return widget;
 }
@@ -199,22 +205,23 @@ void LabelImporter::UpdateWidget(ui::Widget* widget) {
 // RadioButtonImporter
 //
 class RadioButtonImporter : public ControlImporter {
-  private: const dom::RadioButtonControl* const radio_button_;
+ public:
+  explicit RadioButtonImporter(const dom::RadioButtonControl* radio_button);
+  ~RadioButtonImporter() final = default;
 
-  public: RadioButtonImporter(const dom::RadioButtonControl* radio_button);
-  public: virtual ~RadioButtonImporter() = default;
-
+ private:
   // ControlImporter
-  private: virtual ui::Control* CreateWidget() override;
-  private: virtual void UpdateWidget(ui::Widget* widget) override;
+  ui::Control* CreateWidget() final;
+  void UpdateWidget(ui::Widget* widget) final;
+
+  const dom::RadioButtonControl* const radio_button_;
 
   DISALLOW_COPY_AND_ASSIGN(RadioButtonImporter);
 };
 
 RadioButtonImporter::RadioButtonImporter(
     const dom::RadioButtonControl* radio_button)
-    : radio_button_(radio_button) {
-}
+    : radio_button_(radio_button) {}
 
 ui::Control* RadioButtonImporter::CreateWidget() {
   auto const widget = new ui::RadioButtonControl(
@@ -235,40 +242,39 @@ void RadioButtonImporter::UpdateWidget(ui::Widget* widget) {
 //
 // TextFieldImporter
 //
-class TextFieldImporter : public ControlImporter {
-  private: const dom::TextFieldControl* const text_field_;
+class TextFieldImporter final : public ControlImporter {
+ public:
+  explicit TextFieldImporter(const dom::TextFieldControl* text_field);
+  ~TextFieldImporter() final = default;
 
-  public: TextFieldImporter(const dom::TextFieldControl* text_field);
-  public: virtual ~TextFieldImporter() = default;
-
-  private: ui::TextFieldControl::Selection ImportSelection() const;
+ private:
+  ui::TextFieldControl::Selection ImportSelection() const;
 
   // ControlImporter
-  private: virtual ui::Control* CreateWidget() override;
-  private: virtual void UpdateWidget(ui::Widget* widget) override;
+  ui::Control* CreateWidget() final;
+  void UpdateWidget(ui::Widget* widget) final;
+
+  const dom::TextFieldControl* const text_field_;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldImporter);
 };
 
 TextFieldImporter::TextFieldImporter(const dom::TextFieldControl* text_field)
-    : text_field_(text_field) {
-}
+    : text_field_(text_field) {}
 
 ui::TextFieldControl::Selection TextFieldImporter::ImportSelection() const {
   ui::TextFieldControl::Selection selection;
   auto const dom_selection = text_field_->selection();
-  selection.anchor_offset= static_cast<size_t>(dom_selection->anchor_offset());
-  selection.focus_offset= static_cast<size_t>(dom_selection->focus_offset());
+  selection.anchor_offset = static_cast<size_t>(dom_selection->anchor_offset());
+  selection.focus_offset = static_cast<size_t>(dom_selection->focus_offset());
   return selection;
 }
 
 ui::Control* TextFieldImporter::CreateWidget() {
-  auto const controller = new FormControlController(
-    text_field_->event_target_id());
-  auto const widget = new ui::TextFieldControl(controller,
-                                               ImportSelection(),
-                                               text_field_->value(),
-                                               ComputeStyle());
+  auto const controller =
+      new FormControlController(text_field_->event_target_id());
+  auto const widget = new ui::TextFieldControl(
+      controller, ImportSelection(), text_field_->value(), ComputeStyle());
   widget->set_text_input_delegate(controller);
   Update(text_field_, widget);
   return widget;
@@ -297,8 +303,8 @@ ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
     return new RadioButtonImporter(radio_button);
   if (auto const text_field = control->as<dom::TextFieldControl>())
     return new TextFieldImporter(text_field);
-  NOTREACHED() << "Unsupported form control " <<
-      control->wrapper_info()->class_name();
+  NOTREACHED() << "Unsupported form control "
+               << control->wrapper_info()->class_name();
   return nullptr;
 }
 
@@ -308,28 +314,30 @@ ControlImporter* ControlImporter::Create(const dom::FormControl* control) {
 //
 // FormWindow::FormViewModel
 //
-class FormWindow::FormViewModel final : private dom::FormObserver  {
-  private: bool dirty_;
-  private: ui::Control* focus_control_;
-  private: const dom::Form* const form_;
-  private: std::unordered_map<domapi::EventTargetId, ui::Control*> map_;
-  private: gfx::Size size_;
-  private: base::string16 title_;
-  private: FormWindow* const window_;
+class FormWindow::FormViewModel final : private dom::FormObserver {
+ public:
+  FormViewModel(const dom::Form* form, FormWindow* window);
+  ~FormViewModel() final;
 
-  public: FormViewModel(const dom::Form* form, FormWindow* window);
-  public: virtual ~FormViewModel();
-
-  public: bool dirty() const { return dirty_; }
-  public: ui::Control* focus_control() const { return focus_control_; }
-  public: const gfx::Size& size() const { return size_; }
-  public: const base::string16& title() const { return title_; }
+  bool dirty() const { return dirty_; }
+  ui::Control* focus_control() const { return focus_control_; }
+  const gfx::Size& size() const { return size_; }
+  const base::string16& title() const { return title_; }
 
   // Update DOM form control map
-  public: void Update();
+  void Update();
 
+ private:
   // dom::FormObserver
-  private: virtual void DidChangeForm() override;
+  void DidChangeForm() final;
+
+  bool dirty_;
+  ui::Control* focus_control_;
+  const dom::Form* const form_;
+  std::unordered_map<domapi::EventTargetId, ui::Control*> map_;
+  gfx::Size size_;
+  base::string16 title_;
+  FormWindow* const window_;
 
   DISALLOW_COPY_AND_ASSIGN(FormViewModel);
 };
@@ -374,8 +382,7 @@ void FormWindow::FormViewModel::Update() {
   focus_control_ = static_cast<ui::Control*>(nullptr);
   auto focusable = static_cast<ui::Control*>(nullptr);
   for (auto control : form_->controls()) {
-    std::unique_ptr<ControlImporter> importer(
-        ControlImporter::Create(control));
+    std::unique_ptr<ControlImporter> importer(ControlImporter::Create(control));
     auto const it = map_.find(control->event_target_id());
     auto widget = static_cast<ui::Control*>(nullptr);
     if (it == map_.end()) {
@@ -422,19 +429,19 @@ void FormWindow::FormViewModel::DidChangeForm() {
 //
 // FormWindow
 //
-FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form,
-                       Window* owner, gfx::Point offset)
+FormWindow::FormWindow(dom::WindowId window_id,
+                       dom::Form* form,
+                       Window* owner,
+                       gfx::Point offset)
     : views::Window(ui::NativeWindow::Create(this), window_id),
       model_(new FormViewModel(form, this)),
-      offset_(offset), owner_(owner) {
-}
+      offset_(offset),
+      owner_(owner) {}
 
 FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form)
-    : FormWindow(window_id, form, nullptr, gfx::Point()) {
-}
+    : FormWindow(window_id, form, nullptr, gfx::Point()) {}
 
-FormWindow::~FormWindow() {
-}
+FormWindow::~FormWindow() {}
 
 // ui::Animatable
 void FormWindow::DidBeginAnimationFrame(base::Time) {
@@ -470,10 +477,10 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
       ::GetWindowRect(AssociatedHwnd(), &window_rect);
       window_rect.right = window_rect.left + form_size_.width();
       window_rect.bottom = window_rect.top + form_size_.height();
-      auto const extended_window_style = static_cast<DWORD>(
-          ::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
-      auto const window_style = static_cast<DWORD>(
-          ::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
+      auto const extended_window_style =
+          static_cast<DWORD>(::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
+      auto const window_style =
+          static_cast<DWORD>(::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
       auto const has_menu = false;
       WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
                                         extended_window_style));
@@ -514,14 +521,13 @@ void FormWindow::DidChangeSystemMetrics() {
 void FormWindow::CreateNativeWindow() const {
   struct Local {
     static gfx::Rect GetDefaultBounds(const gfx::Size& form_size) {
-      return gfx::Rect(gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
-                       form_size);
+      return gfx::Rect(gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT), form_size);
     }
 
     // Compute form window bounds as center of foreground window if possible.
-    static gfx::Rect ComputeFormWindowBounds(
-        uint32_t extended_window_style, uint32_t window_style,
-        const gfx::Size& form_size) {
+    static gfx::Rect ComputeFormWindowBounds(uint32_t extended_window_style,
+                                             uint32_t window_style,
+                                             const gfx::Size& form_size) {
       auto const foreground_hwnd = ::GetForegroundWindow();
       if (!foreground_hwnd)
         return GetDefaultBounds(form_size);
@@ -529,14 +535,14 @@ void FormWindow::CreateNativeWindow() const {
       if (!::GetWindowRect(foreground_hwnd, &active_window_rect))
         return GetDefaultBounds(form_size);
       gfx::Rect active_window_bounds(active_window_rect);
-      auto window_bounds = gfx::Rect(
-          active_window_bounds.origin() +
-          ((active_window_bounds.size() - form_size) / 2),
-          form_size);
+      auto window_bounds =
+          gfx::Rect(active_window_bounds.origin() +
+                        ((active_window_bounds.size() - form_size) / 2),
+                    form_size);
       auto const has_menu = false;
       RECT window_rect(window_bounds);
-      WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style,
-                                        has_menu, extended_window_style));
+      WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
+                                        extended_window_style));
       return gfx::Rect(window_rect);
     }
   };
@@ -547,9 +553,9 @@ void FormWindow::CreateNativeWindow() const {
     auto const extended_window_style = WS_EX_LAYERED | WS_EX_TOOLWINDOW;
     auto const window_style = WS_POPUPWINDOW | WS_VISIBLE;
     auto const screen_point = owner_->MapToDesktopPoint(offset_);
-    native_window()->CreateWindowEx(
-      extended_window_style, window_style, L"popup",
-      owner_->AssociatedHwnd(), screen_point, form_size_);
+    native_window()->CreateWindowEx(extended_window_style, window_style,
+                                    L"popup", owner_->AssociatedHwnd(),
+                                    screen_point, form_size_);
     return;
   }
 
@@ -601,4 +607,5 @@ void FormWindow::RealizeWidget() {
   }
   views::Window::RealizeWidget();
 }
+
 }  // namespace views

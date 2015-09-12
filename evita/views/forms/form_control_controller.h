@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_forms_form_control_controller_h)
-#define INCLUDE_evita_views_forms_form_control_controller_h
+#ifndef EVITA_VIEWS_FORMS_FORM_CONTROL_CONTROLLER_H_
+#define EVITA_VIEWS_FORMS_FORM_CONTROL_CONTROLLER_H_
 
 #include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/controls/control_controller.h"
@@ -11,36 +11,33 @@
 
 namespace views {
 
-class FormControlController : public ui::ControlController,
-                              public ui::TextInputDelegate,
-                              protected EventSource {
-  public: FormControlController(domapi::EventTargetId event_target_id);
-  public: virtual ~FormControlController();
+class FormControlController final : public ui::ControlController,
+                                    public ui::TextInputDelegate,
+                                    protected EventSource {
+ public:
+  explicit FormControlController(domapi::EventTargetId event_target_id);
+  ~FormControlController();
 
   // ui::ControlController
-  public: virtual void DidKillFocus(ui::Control* control,
-                                    ui::Widget* focused_widget) override;
-  public: virtual void DidRealize(ui::Control* control) override;
-  public: virtual void DidSetFocus(ui::Control* control,
-                                   ui::Widget* last_focused_widget) override;
-  private: virtual void OnKeyEvent(ui::Control* control,
-                                   const ui::KeyEvent& event) override;
-  private: virtual void OnMouseEvent(ui::Control* control,
-                                     const ui::MouseEvent& event) override;
-  private: virtual void WillDestroyControl(ui::Control* control) override;
+  void DidKillFocus(ui::Control* control, ui::Widget* focused_widget) final;
+  void DidRealize(ui::Control* control) final;
+  void DidSetFocus(ui::Control* control, ui::Widget* last_focused_widget) final;
+
+ private:
+  void OnKeyEvent(ui::Control* control, const ui::KeyEvent& event) final;
+  void OnMouseEvent(ui::Control* control, const ui::MouseEvent& event) final;
+  void WillDestroyControl(ui::Control* control) final;
 
   // ui::TextInputDelegate
-  private: virtual void DidCommitComposition(
-      const ui::TextComposition& composition) override;
-  private: virtual void DidFinishComposition() override;
-  private: virtual void DidStartComposition() override;
-  private: virtual void DidUpdateComposition(
-      const ui::TextComposition& composition) override;
-  private: virtual ui::Widget* GetClientWindow() override;
+  void DidCommitComposition(const ui::TextComposition& composition) final;
+  void DidFinishComposition() final;
+  void DidStartComposition() final;
+  void DidUpdateComposition(const ui::TextComposition& composition) final;
+  ui::Widget* GetClientWindow() final;
 
   DISALLOW_COPY_AND_ASSIGN(FormControlController);
 };
 
-}  // namespace ui
+}  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_forms_form_control_controller_h)
+#endif  // EVITA_VIEWS_FORMS_FORM_CONTROL_CONTROLLER_H_

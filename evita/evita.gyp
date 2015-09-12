@@ -15,6 +15,6 @@
     # Precompiled header
     # See gyp/pylib/gyp/msvs_settings.py for details
     'msvs_precompiled_header': 'precomp.h',
-    'msvs_precompiled_source': 'precomp.cpp',
+    'msvs_precompiled_source': 'precomp.cc',
   }, # target_defaults
 }

@@ -114,7 +114,7 @@
       ],
       'include_dirs+': [ '<(SHARED_INTERMEDIATE_DIR)/' ],
       'sources': [
-        '../precomp.cpp',
+        '../precomp.cc',
 
         'converter.cc',
         'text/document.cc',

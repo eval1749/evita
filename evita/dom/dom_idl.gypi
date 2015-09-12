@@ -356,7 +356,7 @@
       ], # dependencies
       'include_dirs+': [ '<(SHARED_INTERMEDIATE_DIR)/evita/bindings' ],
       'sources': [
-        '../precomp.cpp',
+        '../precomp.cc',
         '<@(generated_glue_files)',
       ], # sources
     },

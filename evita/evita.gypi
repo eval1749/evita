@@ -38,8 +38,8 @@
       }, # msvs_settings
 
       'sources': [
-        'precomp.cpp',
-        'ap_main.cpp',
+        'precomp.cc',
+        'ap_main.cc',
         'evita.rc',
       ], # sources
     }, # evita
@@ -53,7 +53,7 @@
         'encodings',
       ], # dependencies
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
 
         'css/color.cc',
         'css/style.cc',
@@ -63,9 +63,9 @@
         'css/style_sheet_observer.cc',
         'css/style_selector.cc',
 
-        'ed_BufferCore.cpp',
-        'ed_BufferFind.cpp',
-        'li_util.cpp',
+        'ed_BufferCore.cc',
+        'ed_BufferFind.cc',
+        'li_util.cc',
         'text/buffer.cc',
         'text/buffer_mutation_observer.cc',
         'text/interval.cc',
@@ -88,7 +88,7 @@
         'text/selection_change_observer.h',
         'text/undo_stack.cc',
         'text/undo_step.cc',
-        'z_debug.cpp',
+        'z_debug.cc',
       ], # sources
     }, # text
     {
@@ -102,9 +102,9 @@
         'views',
       ],
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
 
-        'ctrl_TitleBar.cpp',
+        'ctrl_TitleBar.cc',
         'editor/application.cc',
         'editor/application_proxy.cc',
         'editor/application_proxy.h',
@@ -144,12 +144,12 @@
         'views/text/text_renderer.cc',
         'views/text_window.cc',
         'views/text_window.h',
-        'vi_EditPane.cpp',
+        'vi_EditPane.cc',
         'views/forms/file_dialog_box.cc',
         'views/forms/form_control_controller.cc',
         'views/forms/form_control_set.cc',
         'views/forms/form_window.cc',
-        'vi_Frame.cpp',
+        'vi_Frame.cc',
       ], # sources
     }, # editor
     {
@@ -159,7 +159,7 @@
         '<(DEPTH)/base/base.gyp:base',
       ],
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
 
         'gfx/bitmap.cc',
         'gfx/color_f.cc',
@@ -179,7 +179,7 @@
         'gfx/swap_chain.h',
         'gfx/text_format.cc',
         'gfx/text_layout.cc',
-        'gfx_base.cpp',
+        'gfx_base.cc',
       ], # sources
     }, # gfx
     {
@@ -192,7 +192,7 @@
         'views',
       ],
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
 
         'io/file_io_context.cc',
         'io/io_context.cc',
@@ -284,7 +284,7 @@
         'ui',
       ],
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
 
         'views/event_source.cc',
         'views/icon_cache.cc',

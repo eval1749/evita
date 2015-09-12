@@ -50,7 +50,7 @@
         }, # VCLinkerTool
       }, # msvs_settings
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
         'dom/abstract_dom_test.cc',
         'dom/console_unittest.cc',
         'dom/text/document_unittest.cc',
@@ -136,7 +136,7 @@
         }, # VCLinkerTool
       }, # msvs_settings
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
         'gfx/rect_f_unittest.cc',
       ],
     }, # evita_gfx_test
@@ -166,7 +166,7 @@
         }, # VCLinkerTool
       }, # msvs_settings
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
         'spellchecker/hunspell_engine_unittest.cc',
       ],
     }, # evita_spellchecker_test
@@ -196,7 +196,7 @@
         }, # VCLinkerTool
       }, # msvs_settings
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
         'css/style_sheet_unittest.cc',
         'text/buffer_unittest.cc',
         'text/encodings/encodings_unittest.cc',
@@ -231,7 +231,7 @@
         }, # VCLinkerTool
       }, # msvs_settings
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
         'views/table_model_unittest.cc',
       ],
     }, # evita_text_test
@@ -251,7 +251,7 @@
         4625, 4626, 4826,
       ],
       'sources': [
-        'precomp.cpp',
+        'precomp.cc',
         'v8_glue/runner_unittest.cc',
       ],
     }, # evita_text_test

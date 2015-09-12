@@ -4,7 +4,7 @@
 
 static_library("gfx") {
   sources = [
-    "../gfx_base.cpp",
+    "../gfx_base.cc",
     "bitmap.cc",
     "canvas.cc",
     "canvas_observer.cc",

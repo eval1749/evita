@@ -1,22 +1,19 @@
-#include "precomp.h"
 // Copyright (c) 1996-2014 Project Vogue. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/ed_BufferCore.h"
-
 #include <algorithm>
 
+#include "evita/ed_BufferCore.h"
+
 #include "base/logging.h"
+#include "evita/precomp.h"
 #include "evita/li_util.h"
 
 namespace text {
 
 BufferCore::BufferCore()
-    : m_cwch(MIN_GAP_LENGTH * 3),
-      m_lEnd(0),
-      m_lGapEnd(m_cwch),
-      m_lGapStart(0) {
+    : m_cwch(MIN_GAP_LENGTH * 3), m_lEnd(0), m_lGapEnd(m_cwch), m_lGapStart(0) {
   m_hHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
   DCHECK(m_hHeap);
   m_pwch = reinterpret_cast<char16*>(
@@ -37,7 +34,7 @@ Count BufferCore::deleteChars(Posn lStart, Posn lEnd) {
   return n;
 }
 
-void BufferCore::extend(Posn lPosn, long cwchExtent) {
+void BufferCore::extend(Posn lPosn, int cwchExtent) {
   if (cwchExtent <= 0)
     return;
 
@@ -55,11 +52,11 @@ void BufferCore::extend(Posn lPosn, long cwchExtent) {
 
   // Extend character buffer
   m_pwch = static_cast<base::char16*>(
-      ::HeapReAlloc(m_hHeap, 0, m_pwch, sizeof(base::char16) * m_cwch) );
+      ::HeapReAlloc(m_hHeap, 0, m_pwch, sizeof(base::char16) * m_cwch));
   DCHECK(m_pwch);
   // Extend GAP
   myMoveMemory(m_pwch + m_lGapEnd + nExtension, m_pwch + m_lGapEnd,
-               sizeof(base::char16) * (m_lEnd - m_lGapStart) );
+               sizeof(base::char16) * (m_lEnd - m_lGapStart));
 
   m_lGapEnd += nExtension;
 }
@@ -85,7 +82,7 @@ Count BufferCore::GetText(char16* prgwch, Posn lStart, Posn lEnd) const {
     // We extract text after gap.
     // gggggg<....>
     myCopyMemory(prgwch, m_pwch + m_lGapEnd + (lStart - m_lGapStart),
-                 sizeof(base::char16) * (lEnd - lStart) );
+                 sizeof(base::char16) * (lEnd - lStart));
   } else {
     // We extract text before gap.
     // <.....>gggg
@@ -95,7 +92,7 @@ Count BufferCore::GetText(char16* prgwch, Posn lStart, Posn lEnd) const {
     myCopyMemory(prgwch, m_pwch + lStart,
                  sizeof(base::char16) * (lMiddle - lStart));
     myCopyMemory(prgwch + (lMiddle - lStart), m_pwch + m_lGapEnd,
-                 sizeof(base::char16) * (lEnd - lMiddle) );
+                 sizeof(base::char16) * (lEnd - lMiddle));
   }
 
   return lEnd - lStart;
@@ -132,7 +129,7 @@ void BufferCore::insert(Posn lPosn, const char16* pwch, Count n) {
 // Gap  1 2 3 4 5 6 7 8 9 A B C D E F 10
 //              Posn     Gap
 void BufferCore::moveGap(Posn lNewStart) {
-  auto const lCurEnd   = m_lGapEnd;
+  auto const lCurEnd = m_lGapEnd;
   auto const lCurStart = m_lGapStart;
   auto const iDiff = m_lGapStart - lNewStart;
   auto const lNewEnd = m_lGapEnd - iDiff;

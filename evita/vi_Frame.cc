@@ -42,7 +42,7 @@
 #include "evita/vi_EditPane.h"
 
 using common::win::Rect;
-using namespace views;
+using namespace views;  // NOLINT
 
 namespace {
 
@@ -62,7 +62,7 @@ TabContent* GetTabContentFromWindow(Frame* frame, views::Window* window) {
   return nullptr;
 }
 
-} // namespace
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -392,7 +392,8 @@ void Frame::DidRemoveChildWidget(ui::Widget* old_child) {
 }
 
 void Frame::DidRequestDestroy() {
-  editor::Application::instance()->view_event_handler()->QueryClose(window_id());
+  editor::Application::instance()->view_event_handler()->QueryClose(
+      window_id());
 }
 
 void Frame::DidSetFocus(ui::Widget* widget) {
@@ -558,10 +559,10 @@ void Frame::DidSetTabData(dom::WindowId window_id,
   for (auto const tab_content : tab_contents_) {
     if (content_window->parent_node() != tab_content)
       continue;
-     auto const tab_index = GetTabIndexOfTabContent(tab_content);
-     if (tab_index < 0)
-       continue;
-     tab_strip_->SetTab(tab_index, tab_data);
+    auto const tab_index = GetTabIndexOfTabContent(tab_content);
+    if (tab_index < 0)
+      continue;
+    tab_strip_->SetTab(tab_index, tab_data);
   }
 }
 
@@ -577,7 +578,7 @@ void Frame::DidDropTab(TabContent* tab_content,
         }
       }
       return nullptr;
-   }
+    }
   };
 
   auto const edit_tab_content = tab_content->as<EditPane>();

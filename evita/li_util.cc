@@ -1,4 +1,3 @@
-#include "precomp.h"
 //////////////////////////////////////////////////////////////////////////////
 //
 // evcl - listener - winapp - Edit Buffer
@@ -11,30 +10,25 @@
 //
 #include "evita/li_util.h"
 
-char16* lstrchrW(const char16* pwsz, char16 wch)
-{
-    while (0 != *pwsz)
-    {
-        if (wch == *pwsz)
-        {
-            return const_cast<char16*>(pwsz);
-        } // if
-        pwsz++;
-    } // while
-    return NULL;
-} // lstrchrW
+#include "evita/precomp.h"
 
+char16* lstrchrW(const char16* pwsz, char16 wch) {
+  while (0 != *pwsz) {
+    if (wch == *pwsz) {
+      return const_cast<char16*>(pwsz);
+    }  // if
+    pwsz++;
+  }  // while
+  return NULL;
+}  // lstrchrW
 
-char16* lstrrchrW(const char16* pwsz, char16 wch)
-{
-    const char16* pFound = NULL;
-    while (0 != *pwsz)
-    {
-        if (wch == *pwsz)
-        {
-            pFound = pwsz;
-        } // if
-        pwsz++;
-    } // while
-    return const_cast<char16*>(pFound);
-} // lstrchrW
+char16* lstrrchrW(const char16* pwsz, char16 wch) {
+  const char16* pFound = NULL;
+  while (0 != *pwsz) {
+    if (wch == *pwsz) {
+      pFound = pwsz;
+    }  // if
+    pwsz++;
+  }  // while
+  return const_cast<char16*>(pFound);
+}  // lstrchrW

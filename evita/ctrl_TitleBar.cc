@@ -10,12 +10,9 @@
 
 namespace views {
 
-TitleBar::TitleBar()
-    : hwnd_(nullptr) {
-}
+TitleBar::TitleBar() : hwnd_(nullptr) {}
 
-TitleBar::~TitleBar() {
-}
+TitleBar::~TitleBar() {}
 
 void TitleBar::Realize(HWND hwnd) {
   DCHECK(hwnd);

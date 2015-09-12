@@ -1,4 +1,3 @@
-#include "precomp.h"
 //////////////////////////////////////////////////////////////////////////////
 //
 // evcl - listener - winapp - Edit Buffer
@@ -9,4 +8,5 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_BufferFind.cpp#1 $
 //
+#include "evita/precomp.h"
 #include "evita/text/buffer.h"

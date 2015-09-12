@@ -9,8 +9,8 @@
 #include "common/win/native_window.h"
 #include "evita/editor/application_proxy.h"
 
-extern HINSTANCE   g_hInstance;
-extern HINSTANCE   g_hResource;
+extern HINSTANCE g_hInstance;
+extern HINSTANCE g_hResource;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   base::AtExitManager at_exit;

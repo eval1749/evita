@@ -8,8 +8,8 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Frame.h#2 $
 //
-#if !defined(INCLUDE_visual_Frame_h)
-#define INCLUDE_visual_Frame_h
+#ifndef EVITA_VI_FRAME_H_
+#define EVITA_VI_FRAME_H_
 
 #include <windows.h>
 #include <shellapi.h>
@@ -62,79 +62,73 @@ class Frame final : public views::Window,
                     public views::TabStripDelegate {
   DECLARE_CASTABLE_CLASS(Frame, views::Window);
 
-  private: typedef views::FrameObserver FrameObserver;
-  private: typedef views::MessageView MessageView;
-  private: typedef views::TabContent TabContent;
-  private: typedef views::TabStrip TabStrip;
+  typedef views::FrameObserver FrameObserver;
+  typedef views::MessageView MessageView;
+  typedef views::TabContent TabContent;
+  typedef views::TabStrip TabStrip;
 
-  private: MessageView* message_view_;
-  private: base::ObserverList<FrameObserver> observers_;
-  private: std::unordered_set<TabContent*> tab_contents_;
-  private: std::unique_ptr<ui::Layer> tab_content_layer_;
-  private: TabStrip* tab_strip_;
-  private: const std::unique_ptr<views::TabStripAnimator> tab_strip_animator_;
-  private: const std::unique_ptr<views::TitleBar> title_bar_;
+ public:
+  explicit Frame(views::WindowId window_id);
 
-  public: explicit Frame(views::WindowId window_id);
-  private: ~Frame() final;
+  bool Activate();
+  void AddObserver(views::FrameObserver* observer);
+  void AddOrActivateTabContent(views::ContentWindow*);
+  void SetStatusBar(std::vector<base::string16> texts);
+  void ShowMessage(MessageLevel, const base::string16& text) const;
 
-  // [A]
-  public: bool Activate();
-  public: void AddObserver(views::FrameObserver* observer);
-  private: void AddTabContent(views::ContentWindow* content_window);
-  public: void AddOrActivateTabContent(views::ContentWindow*);
+ private:
+  ~Frame() final;
 
-  // [D]
-  private: void DrawForResize();
+  void AddTabContent(views::ContentWindow* content_window);
+  void DrawForResize();
+  TabContent* GetRecentTabContent();
+  gfx::Rect GetTabContentBounds() const;
+  TabContent* GetTabContentByTabIndex(int tab_index) const;
+  void OnDropFiles(HDROP);
 
-  // [G]
-  private: TabContent* GetRecentTabContent();
-  private: gfx::Rect GetTabContentBounds() const;
-  private: TabContent* GetTabContentByTabIndex(int tab_index) const;
-  private: int GetTabIndexOfTabContent(TabContent* tab_content) const;
+  int GetTabIndexOfTabContent(TabContent* tab_content) const;
 
-  // [O]
-  private: void OnDropFiles(HDROP);
-
-  // [S]
-  public: void SetStatusBar(std::vector<base::string16> texts);
-  public: void ShowMessage(MessageLevel, const base::string16& text) const;
-
-  // [U]
-  private: void UpdateTitleBar();
+  void UpdateTitleBar();
 
   // ui::AnimationFrameHandler
-  private: void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::Widget
-  private: void CreateNativeWindow() const final;
-  private: void DidAddChildWidget(ui::Widget* new_child) final;
-  private: void DidRealize() final;
-  private: void DidRemoveChildWidget(ui::Widget* old_child) final;
-  private: void DidRequestDestroy() final;
-  private: void DidChangeBounds() final;
-  private: void DidSetFocus(ui::Widget* last_focused) final;
-  private: LRESULT OnMessage(uint32_t, WPARAM, LPARAM) final;
-  private: void OnPaint(const gfx::Rect paint_rect) final;
-  private: void WillDestroyWidget() final;
-  private: void WillRemoveChildWidget(ui::Widget* old_child) final;
+  void CreateNativeWindow() const final;
+  void DidAddChildWidget(ui::Widget* new_child) final;
+  void DidRealize() final;
+  void DidRemoveChildWidget(ui::Widget* old_child) final;
+  void DidRequestDestroy() final;
+  void DidChangeBounds() final;
+  void DidSetFocus(ui::Widget* last_focused) final;
+  LRESULT OnMessage(uint32_t, WPARAM, LPARAM) final;
+  void OnPaint(const gfx::Rect paint_rect) final;
+  void WillDestroyWidget() final;
+  void WillRemoveChildWidget(ui::Widget* old_child) final;
 
   // views::TabContentObserver
-  private: void DidActivateTabContent(TabContent* tab_content);
+  void DidActivateTabContent(TabContent* tab_content);
 
   // views::TabDataSet::Observer
-  private: void DidSetTabData(dom::WindowId window_id,
-                                      const domapi::TabData& tab_data) final;
+  void DidSetTabData(dom::WindowId window_id,
+                     const domapi::TabData& tab_data) final;
 
   // views::TabStripDelegate
-  private: void DidDropTab(TabContent* tab_content,
-                                   const gfx::Point& screen_point) final;
-  private: void DidSelectTab(int new_selected_index) final;
-  private: void RequestCloseTab(int tab_index) final;
-  private: void RequestSelectTab(
-      int new_selected_index) final;
+  void DidDropTab(TabContent* tab_content,
+                  const gfx::Point& screen_point) final;
+  void DidSelectTab(int new_selected_index) final;
+  void RequestCloseTab(int tab_index) final;
+  void RequestSelectTab(int new_selected_index) final;
+
+  MessageView* message_view_;
+  base::ObserverList<FrameObserver> observers_;
+  std::unordered_set<TabContent*> tab_contents_;
+  std::unique_ptr<ui::Layer> tab_content_layer_;
+  TabStrip* tab_strip_;
+  const std::unique_ptr<views::TabStripAnimator> tab_strip_animator_;
+  const std::unique_ptr<views::TitleBar> title_bar_;
 
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };
 
-#endif //!defined(INCLUDE_visual_Frame_h)
+#endif  // EVITA_VI_FRAME_H_

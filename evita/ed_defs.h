@@ -8,8 +8,8 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_defs.h#2 $
 //
-#if !defined(INCLUDE_edit_defs_h)
-#define INCLUDE_edit_defs_h
+#ifndef EVITA_ED_DEFS_H_
+#define EVITA_ED_DEFS_H_
 
 #include "base/strings/string16.h"
 
@@ -25,29 +25,27 @@ class Interval;
 
 }  // namespace text
 
-enum
-{
-    Count_Backward =  -1 << 28,
-    Count_Forward  =  +1 << 28,
-    Count_Max      = Count_Forward,
+enum {
+  Count_Backward = -1 << 28,
+  Count_Forward = +1 << 28,
+  Count_Max = Count_Forward,
 };
 
 //////////////////////////////////////////////////////////////////////
 //
 // Unit
 //
-enum Unit
-{
-    Unit_Buffer,
-    Unit_Char,
-    Unit_Line,
-    Unit_Page,
-    Unit_Paragraph,
-    Unit_Screen,        // valid only for selection
-    Unit_Sentence,
-    Unit_Window,        // valid only for selection
-    Unit_WindowLine,    // valid only for selection
-    Unit_Word,
-}; // Unit
+enum Unit {
+  Unit_Buffer,
+  Unit_Char,
+  Unit_Line,
+  Unit_Page,
+  Unit_Paragraph,
+  Unit_Screen,  // valid only for selection
+  Unit_Sentence,
+  Unit_Window,      // valid only for selection
+  Unit_WindowLine,  // valid only for selection
+  Unit_Word,
+};
 
-#endif //!defined(INCLUDE_edit_defs_h)
+#endif  // EVITA_ED_DEFS_H_

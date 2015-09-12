@@ -8,75 +8,70 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_BufferCore.h#1 $
 //
-#if !defined(INCLUDE_edit_BufferCore_h)
-#define INCLUDE_edit_BufferCore_h
+#ifndef EVITA_ED_BUFFERCORE_H_
+#define EVITA_ED_BUFFERCORE_H_
 
 #include "base/strings/string16.h"
 #include "evita/precomp.h"
 
-namespace text
-{
+namespace text {
 
 //////////////////////////////////////////////////////////////////////
 //
 // BufferCore
 //
-class BufferCore
-{
-    private: static const Count MIN_GAP_LENGTH    = 1024;
-    private: static const Count EXTENSION_LENGTH  = 1024;
+class BufferCore {
+ public:
+  ~BufferCore();
 
-    private: char16*    m_pwch;
-    private: Count      m_cwch;
-    private: HANDLE     m_hHeap;
-    private: Posn       m_lEnd;
-    private: Posn       m_lGapEnd;
-    private: Posn       m_lGapStart;
+  bool operator==(const BufferCore* other) const { return this == other; }
 
-    protected: BufferCore();
-    public:    ~BufferCore();
+  bool operator!=(const BufferCore* other) const { return this != other; }
 
-    public: bool operator==(const BufferCore* other) const {
-        return this == other;
-    }
+  // [E]
+  Posn EnsurePosn(Posn lPosn) const {
+    if (lPosn < 0)
+      return 0;
+    if (lPosn > m_lEnd)
+      return m_lEnd;
+    return lPosn;
+  }
 
-    public: bool operator!=(const BufferCore* other) const {
-        return this != other;
-    }
+  // [G]
+  char16 GetCharAt(Posn) const;
+  Posn GetEnd() const { return m_lEnd; }
+  Count GetText(char16*, Posn, Posn) const;
+  base::string16 GetText(Posn start, Posn end) const;
 
-    // [D]
-    protected: Count deleteChars(Posn, Posn);
+  // [I]
+  bool IsValidPosn(Posn p) const { return p >= 0 && p <= m_lEnd; }
 
-    // [E]
-    public: Posn EnsurePosn(Posn lPosn) const
-    {
-        if (lPosn < 0) return 0;
-        if (lPosn > m_lEnd) return m_lEnd;
-        return lPosn;
-    } // EnsurePosn
+  bool IsValidRange(Posn s, Posn e) const {
+    return IsValidPosn(s) && IsValidPosn(e) && s <= e;
+  }
 
-    protected: void extend(Posn, long);
+ protected:
+  BufferCore();
 
-    // [G]
-    public: char16 GetCharAt(Posn) const;
-    public: Posn   GetEnd() const { return m_lEnd; }
-    public: Count  GetText(char16*, Posn, Posn) const;
-    public: base::string16 GetText(Posn start, Posn end) const;
+  Count deleteChars(Posn, Posn);
+  void extend(Posn, int);
+  void insert(Posn, const char16*, Count);
 
-    // [I]
-    protected: void insert(Posn, const char16*, Count);
+ private:
+  static const Count MIN_GAP_LENGTH = 1024;
+  static const Count EXTENSION_LENGTH = 1024;
 
-    public: bool IsValidPosn(Posn p) const
-        { return p >= 0 && p <= m_lEnd; }
+  bool Match(Posn, const char16*, int, uint) const;
+  void moveGap(Posn);
 
-    public: bool IsValidRange(Posn s, Posn e) const
-        { return IsValidPosn(s) && IsValidPosn(e) && s <= e; }
-
-    // [M]
-    private:  bool Match(Posn, const char16*, int, uint) const;
-    private: void moveGap(Posn);
-}; // BufferCore
+  char16* m_pwch;
+  Count m_cwch;
+  HANDLE m_hHeap;
+  Posn m_lEnd;
+  Posn m_lGapEnd;
+  Posn m_lGapStart;
+};
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_edit_BufferCore_h)
+#endif  // EVITA_ED_BUFFERCORE_H_

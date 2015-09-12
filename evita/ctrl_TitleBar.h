@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_visual_control_TitleBar_h)
-#define INCLUDE_visual_control_TitleBar_h
+#ifndef EVITA_CTRL_TITLEBAR_H_
+#define EVITA_CTRL_TITLEBAR_H_
 
 #include <windows.h>
 
@@ -11,17 +11,21 @@
 
 namespace views {
 
-class TitleBar {
-  private: HWND  hwnd_;
-  private: base::string16 title_;
+class TitleBar final {
+ public:
+  TitleBar();
+  ~TitleBar();
 
-  public: TitleBar();
-  public: ~TitleBar();
+  void Realize(HWND hwnd);
+  void SetText(const base::string16& new_title);
 
-  public: void Realize(HWND hwnd);
-  public: void SetText(const base::string16& new_title);
+ private:
+  HWND hwnd_;
+  base::string16 title_;
+
+  DISALLOW_COPY_AND_ASSIGN(TitleBar);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_visual_control_TitleBar_h)
+#endif  // EVITA_CTRL_TITLEBAR_H_

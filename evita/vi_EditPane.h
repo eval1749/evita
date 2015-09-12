@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_vi_EditPane_h)
-#define INCLUDE_evita_vi_EditPane_h
+#ifndef EVITA_VI_EDITPANE_H_
+#define EVITA_VI_EDITPANE_H_
 
 #include "evita/views/tabs/tab_content.h"
 
@@ -26,49 +26,53 @@ class ContentWindow;
 class EditPane final : public views::TabContent {
   DECLARE_CASTABLE_CLASS(EditPane, TabContent);
 
-  private: typedef views::ContentWindow ContentWindow;
+  typedef views::ContentWindow ContentWindow;
 
-  public: class Box;
-  private: class SplitterController;
+ public:
+  class Box;
 
-  private: scoped_refptr<Box> root_box_;
-  private: const std::unique_ptr<SplitterController> splitter_controller_;
+  EditPane();
+  ~EditPane() final;
 
-  public: EditPane();
-  public: ~EditPane() final;
+  bool has_more_than_one_child() const;
 
-  public: bool has_more_than_one_child() const;
+  ContentWindow* GetActiveContent() const;
+  void ReplaceActiveContent(ContentWindow* window);
+  void SetContent(ContentWindow* window);
+  void SplitHorizontally(ContentWindow* left_window,
+                         ContentWindow* new_right_window);
+  void SplitVertically(ContentWindow* above_window,
+                       ContentWindow* new_below_window);
 
-  public: ContentWindow* GetActiveContent() const;
-  private: Frame* GetFrame();
-  public: void ReplaceActiveContent(ContentWindow* window);
-  public: void SetContent(ContentWindow* window);
-  public: void SplitHorizontally(ContentWindow* left_window,
-                                 ContentWindow* new_right_window);
-  public: void SplitVertically(ContentWindow* above_window,
-                               ContentWindow* new_below_window);
+ private:
+  class SplitterController;
+
+  Frame* GetFrame();
 
   // ui::Widget
-  private: void DidChangeBounds() final;
-  private: void DidHide() final;
-  private: void DidRealize() final;
-  private: void DidRealizeChildWidget(Widget* new_child) final;
-  private: void DidRemoveChildWidget(Widget* old_child) final;
-  private: void DidSetFocus(ui::Widget* last_focused) final;
-  private: void DidShow() final;
-  private: HCURSOR GetCursorAt(const gfx::Point& point) const final;
-  private: void OnMouseMoved(const ui::MouseEvent&) final;
-  private: void OnMousePressed(const ui::MouseEvent& event) final;
-  private: void OnMouseReleased(const ui::MouseEvent& event) final;
-  private: void WillDestroyWidget() final;
-  private: void WillRemoveChildWidget(Widget* old_child) final;
+  void DidChangeBounds() final;
+  void DidHide() final;
+  void DidRealize() final;
+  void DidRealizeChildWidget(Widget* new_child) final;
+  void DidRemoveChildWidget(Widget* old_child) final;
+  void DidSetFocus(ui::Widget* last_focused) final;
+  void DidShow() final;
+  HCURSOR GetCursorAt(const gfx::Point& point) const final;
+  void OnMouseMoved(const ui::MouseEvent&) final;
+  void OnMousePressed(const ui::MouseEvent& event) final;
+  void OnMouseReleased(const ui::MouseEvent& event) final;
+  void WillDestroyWidget() final;
+  void WillRemoveChildWidget(Widget* old_child) final;
 
   // views::TabContent
-  private: void DidEnterSizeMove() final;
-  private: void DidExitSizeMove() final;
-  private: const domapi::TabData* GetTabData() const final;
+  void DidEnterSizeMove() final;
+  void DidExitSizeMove() final;
+  const domapi::TabData* GetTabData() const final;
+
+  scoped_refptr<Box> root_box_;
+  const std::unique_ptr<SplitterController> splitter_controller_;
 
   DISALLOW_COPY_AND_ASSIGN(EditPane);
 };
 
-#endif //!defined(INCLUDE_evita_vi_EditPane_h)
+#endif  // EVITA_VI_EDITPANE_H_

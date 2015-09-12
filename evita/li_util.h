@@ -8,331 +8,300 @@
 //
 // @(#)$Id: //proj/evcl3/mainline/listener/winapp/li_util.h#1 $
 //
-#if !defined(INCLUDE_listener_util_h)
-#define INCLUDE_listener_util_h
+#ifndef EVITA_LI_UTIL_H_
+#define EVITA_LI_UTIL_H_
 
 #include "base/logging.h"
 
-template<class Base_>
-class Castable_
-{
-    private: typedef Castable_<Base_> Self;
+template <class Base_>
+class Castable_ {
+ public:
+  template <class T>
+  T* DynamicCast() const {
+    Base_* p = static_cast<Base_*>(const_cast<Self*>(this));
+// warning C4946: reinterpret_cast used between related classes:
+// 'class1' and 'class2'
+#pragma warning(suppress : 4946)
+    return T::Is_(p) ? reinterpret_cast<T*>(p) : nullptr;
+  }
 
-    // [D]
-    public: template<class T> T* DynamicCast() const
-    {
-        Base_* p = static_cast<Base_*>(const_cast<Self*>(this));
-        // warning C4946: reinterpret_cast used between related classes: 
-        // 'class1' and 'class2'
-        #pragma warning(suppress: 4946)
-        return T::Is_(p) ? reinterpret_cast<T*>(p) : NULL;
-    } // DynamicCast
+  template <class T>
+  T* StaticCast() const {
+    T* p = DynamicCast<T>();
+    DCHECK(nullptr != p);
+    return p;
+  }
 
-    // [S]
-    public: template<class T> T* StaticCast() const
-    {
-        T* p = DynamicCast<T>();
-        DCHECK(NULL != p);
-        return p;
-    } // StaticCast
-}; // Castable_
+ private:
+  typedef Castable_<Base_> Self;
+};
 
-template<class Item_, class Parent_>
+template <class Item_, class Parent_>
 class DoubleLinkedList_;
 
 class DummyParent {};
 
-template<class Item_, class Parent_ = DummyParent>
-class DoubleLinkedNode_
-{
-    friend class DoubleLinkedList_<Item_, Parent_>;
+template <class Item_, class Parent_ = DummyParent>
+class DoubleLinkedNode_ {
+ public:
+  DoubleLinkedNode_() : m_pNext(nullptr), m_pPrev(nullptr) {}
 
-    private: Item_* m_pNext;
-    private: Item_* m_pPrev;
+  Item_* GetNext() const { return m_pNext; }
+  Item_* GetPrev() const { return m_pPrev; }
 
-    public: DoubleLinkedNode_() :
-        m_pNext(NULL),
-        m_pPrev(NULL) {}
+ private:
+  friend class DoubleLinkedList_<Item_, Parent_>;
 
-    public: Item_* GetNext() const { return m_pNext; }
-    public: Item_* GetPrev() const { return m_pPrev; }
-}; // DoubleLinkedNode_
+  Item_* m_pNext;
+  Item_* m_pPrev;
+};
 
+template <class Item_, class Parent_ = DummyParent>
+class DoubleLinkedList_ {
+ protected:
+  typedef DoubleLinkedList_<Item_, Parent_> List_;
 
-template<class Item_, class Parent_ = DummyParent>
-class DoubleLinkedList_
-{
-    protected: typedef DoubleLinkedList_<Item_, Parent_> List_;
-    private: typedef DoubleLinkedNode_<Item_, Parent_> Cons_;
+ public:
+  DoubleLinkedList_() : m_pFirst(nullptr), m_pLast(nullptr) {}
 
-    private: Item_* m_pFirst;
-    private: Item_* m_pLast;
+  Item_* Append(Item_* pItem) {
+    Cons_* pCons = static_cast<Cons_*>(pItem);
+    DCHECK(!pCons->m_pNext);
+    DCHECK(!pCons->m_pPrev);
 
-    public: DoubleLinkedList_() :
-        m_pFirst(NULL),
-        m_pLast(NULL) {}
+    pCons->m_pNext = nullptr;
+    pCons->m_pPrev = m_pLast;
 
-    // [A]
-    public: Item_* Append(Item_* pItem)
+    if (nullptr == m_pFirst)
+      m_pFirst = pItem;
+
+    if (nullptr != m_pLast)
+      static_cast<Cons_*>(m_pLast)->m_pNext = pItem;
+
+    return m_pLast = pItem;
+  }
+
+  int Count() const {
+    auto num_items = 0;
+    for (Enum it(this); !it.AtEnd(); it.Next())
+      ++num_items;
+    return num_items;
+  }
+
+  Item_* Delete(Item_* pItem) {
+#if _DEBUG
     {
-        Cons_* pCons = static_cast<Cons_*>(pItem);
-        DCHECK(!pCons->m_pNext);
-        DCHECK(!pCons->m_pPrev);
-
-        pCons->m_pNext = NULL;
-        pCons->m_pPrev = m_pLast;
-
-        if (NULL == m_pFirst)
-        {
-            m_pFirst = pItem;
-        } // if
-
-        if (NULL != m_pLast)
-        {
-            static_cast<Cons_*>(m_pLast)->m_pNext = pItem;
-        } // if
-
-        return m_pLast = pItem;
-    } // Append
-
-    // [C]
-    public: int Count() const {
-      auto num_items = 0;
-      foreach (Enum, it, this) {
-        ++num_items;
+      bool fFound = false;
+      for (Enum oEnum(this); !oEnum.AtEnd(); oEnum.Next()) {
+        if (oEnum.Get() == pItem) {
+          fFound = true;
+          break;
+        }
       }
-      return num_items;
+      DCHECK(fFound);
+    }
+#endif
+
+    Cons_* pCons = static_cast<Cons_*>(pItem);
+
+    Item_* pNext = pCons->m_pNext;
+    Item_* pPrev = pCons->m_pPrev;
+    if (nullptr == pNext) {
+      m_pLast = pPrev;
+    } else {
+      static_cast<Cons_*>(pNext)->m_pPrev = pPrev;
     }
 
-    // [D]
-    public: Item_* Delete(Item_* pItem)
-    {
-        #if _DEBUG
-        {
-            bool fFound = false;
-            foreach (Enum, oEnum, this)
-            {
-                if (oEnum.Get() == pItem)
-                {
-                    fFound = true;
-                    break;
-                }
-            } // for each item
-            DCHECK(fFound);
-        }
-        #endif
-
-        Cons_* pCons = static_cast<Cons_*>(pItem);
-
-        Item_* pNext = pCons->m_pNext;
-        Item_* pPrev = pCons->m_pPrev;
-        if (NULL == pNext)
-        {
-            m_pLast = pPrev;
-        }
-        else
-        {
-            static_cast<Cons_*>(pNext)->m_pPrev = pPrev;
-        } // if
-
-        if (NULL == pPrev)
-        {
-            m_pFirst = pNext;
-        }
-        else
-        {
-            static_cast<Cons_*>(pPrev)->m_pNext = pNext;
-        } // if
-
-        pCons->m_pNext = NULL;
-        pCons->m_pPrev = NULL;
-
-        return pItem;
-    } // Delete
-
-    public: void DeleteAll() {
-      m_pFirst = m_pLast = nullptr;
+    if (nullptr == pPrev) {
+      m_pFirst = pNext;
+    } else {
+      static_cast<Cons_*>(pPrev)->m_pNext = pNext;
     }
 
-    // [E]
-    public: class Enum
-    {
-        private: Item_* m_pRunner;
-        public: Enum(List_& r) : m_pRunner(r.m_pFirst) {}
-        public: Enum(const List_& r) : m_pRunner(r.m_pFirst) {}
-        public: Enum(List_* p) : m_pRunner(p->m_pFirst) {}
-        public: Enum(const List_* p) : m_pRunner(p->m_pFirst) {}
-        public: Item_* operator ->() { return Get(); }
-        public: bool AtEnd() const { return m_pRunner == NULL; }
-        public: Item_* Get() { return m_pRunner; }
-        public: void Next()
-        {
-            DCHECK(! AtEnd());
-            m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pNext;
-        } // Next
-    }; // Enum
+    pCons->m_pNext = nullptr;
+    pCons->m_pPrev = nullptr;
 
-    // [G]
-    public: Item_* GetFirst() const { return m_pFirst; }
-    public: Item_* GetLast()  const { return m_pLast; }
+    return pItem;
+  }
 
-    // [I]
-    public: Item_* InsertAfter(Item_* pItem, Item_* pRefItem)
-    {
-        Item_* pNext = static_cast<Cons_*>(pRefItem)->m_pNext;
-        if (NULL == pNext)
-        {
-            m_pLast = pItem;
-        }
-        else
-        {
-            static_cast<Cons_*>(pNext)->m_pPrev = pItem;
-        }
+  void DeleteAll() { m_pFirst = m_pLast = nullptr; }
 
-        static_cast<Cons_*>(pItem)->m_pPrev    = pRefItem;
-        static_cast<Cons_*>(pItem)->m_pNext    = pNext;
-        static_cast<Cons_*>(pRefItem)->m_pNext = pItem;
-        return pItem;
-    } // InsertAfter
+  class Enum final {
+   public:
+    explicit Enum(List_& r) : m_pRunner(r.m_pFirst) {}
+    explicit Enum(const List_& r) : m_pRunner(r.m_pFirst) {}
+    explicit Enum(List_* p) : m_pRunner(p->m_pFirst) {}
+    explicit Enum(const List_* p) : m_pRunner(p->m_pFirst) {}
+    Item_* operator->() { return Get(); }
+    bool AtEnd() const { return m_pRunner == nullptr; }
+    Item_* Get() { return m_pRunner; }
+    void Next() {
+      DCHECK(!AtEnd());
+      m_pRunner = static_cast<Cons_*>(m_pRunner)->m_pNext;
+    }  // Next
 
-    public: Item_* InsertBefore(Item_* pItem, Item_* pRefItem)
-    {
-        Item_* pPrev = static_cast<Cons_*>(pRefItem)->m_pPrev;
-        if (NULL == pPrev)
-        {
-            m_pFirst = pItem;
-        }
-        else
-        {
-            static_cast<Cons_*>(pPrev)->m_pNext = pItem;
-        }
+   private:
+    Item_* m_pRunner;
+  };
 
-        static_cast<Cons_*>(pItem)->m_pPrev    = pPrev;
-        static_cast<Cons_*>(pItem)->m_pNext    = pRefItem;
-        static_cast<Cons_*>(pRefItem)->m_pPrev = pItem;
-        return pItem;
-    } // InsertBefore
+  Item_* GetFirst() const { return m_pFirst; }
+  Item_* GetLast() const { return m_pLast; }
 
-    public: bool IsEmpty() const
-    {
-        return NULL == m_pFirst;
-    } // IsEmpty
-
-    // Iterator
-    private: template<class IteratorT_, typename Return_>
-        class Iterator_ {
-      protected: Item_* item_;
-      protected: List_* list_;
-
-      protected: Iterator_(List_& list, Item_* item)
-          : item_(item), list_(&list) {
-      }
-
-      public: bool operator==(const IteratorT_& other) const {
-        DCHECK(list_ == other.list_);
-        return item_ == other.item_;
-      }
-
-      public: bool operator!=(const IteratorT_& other) const {
-        return !operator==(other);
-      }
-
-      public: Return_& operator*() const {
-        DCHECK(item_);
-        return *item_;
-      }
-
-      public: Return_* operator->() const {
-        DCHECK(item_);
-        return item_;
-      }
-
-      protected: void decrement() {
-        DCHECK(item_);
-        item_ = static_cast<Cons_*>(item_)->m_pPrev;
-      }
-
-      protected: void increment() {
-        DCHECK(item_);
-        item_ = static_cast<Cons_*>(item_)->m_pNext;
-      }
-    };
-
-    public: class Iterator : public Iterator_<Iterator, Item_> {
-      public: Iterator(List_& list, Item_* item)
-          : Iterator_(list, item) {
-      }
-      public: Iterator& operator--() {
-        decrement();
-        return *this;
-      }
-      public: Iterator& operator++() {
-        increment();
-        return *this;
-      }
-    };
-
-    public: class ConstIterator
-        : public Iterator_<ConstIterator, const Item_> {
-      public: ConstIterator(const List_& list, Item_* item)
-          : Iterator_(const_cast<List_&>(list), item) {
-      }
-      public: ConstIterator& operator--() {
-        decrement();
-        return *this;
-      }
-      public: ConstIterator& operator++() {
-        increment();
-        return *this;
-      }
-    };
-
-    Iterator begin() { return Iterator(*this, m_pFirst); }
-    Iterator end() { return Iterator(*this, nullptr); }
-    ConstIterator begin() const { return ConstIterator(*this, m_pFirst); }
-    ConstIterator end() const { return ConstIterator(*this, nullptr); }
-
-    public: Item_* Prepend(Item_* item) {
-      auto const cons = static_cast<Cons_*>(item);
-      DCHECK(!cons->m_pNext);
-      DCHECK(!cons->m_pPrev);
-      cons->m_pPrev = nullptr;
-      cons ->m_pNext = m_pFirst;
-      if (!m_pLast)
-        m_pLast = item;
-      if (m_pFirst)
-        static_cast<Cons_*>(m_pFirst)->m_pPrev= item;
-      return m_pFirst = item;
+  Item_* InsertAfter(Item_* pItem, Item_* pRefItem) {
+    Item_* pNext = static_cast<Cons_*>(pRefItem)->m_pNext;
+    if (nullptr == pNext) {
+      m_pLast = pItem;
+    } else {
+      static_cast<Cons_*>(pNext)->m_pPrev = pItem;
     }
-}; // DoubleLinkedList_
 
+    static_cast<Cons_*>(pItem)->m_pPrev = pRefItem;
+    static_cast<Cons_*>(pItem)->m_pNext = pNext;
+    static_cast<Cons_*>(pRefItem)->m_pNext = pItem;
+    return pItem;
+  }
 
-template<class Parent_, class Item_>
+  Item_* InsertBefore(Item_* pItem, Item_* pRefItem) {
+    Item_* pPrev = static_cast<Cons_*>(pRefItem)->m_pPrev;
+    if (nullptr == pPrev) {
+      m_pFirst = pItem;
+    } else {
+      static_cast<Cons_*>(pPrev)->m_pNext = pItem;
+    }
+
+    static_cast<Cons_*>(pItem)->m_pPrev = pPrev;
+    static_cast<Cons_*>(pItem)->m_pNext = pRefItem;
+    static_cast<Cons_*>(pRefItem)->m_pPrev = pItem;
+    return pItem;
+  }
+
+  bool IsEmpty() const { return nullptr == m_pFirst; }  // IsEmpty
+
+  // Iterator
+  template <class IteratorT_, typename Return_>
+  class Iterator_ {
+   public:
+    bool operator==(const IteratorT_& other) const {
+      DCHECK(list_ == other.list_);
+      return item_ == other.item_;
+    }
+
+   public:
+    bool operator!=(const IteratorT_& other) const {
+      return !operator==(other);
+    }
+
+   public:
+    Return_& operator*() const {
+      DCHECK(item_);
+      return *item_;
+    }
+
+   public:
+    Return_* operator->() const {
+      DCHECK(item_);
+      return item_;
+    }
+
+   protected:
+    Iterator_(List_& list, Item_* item) : item_(item), list_(&list) {}
+
+    void decrement() {
+      DCHECK(item_);
+      item_ = static_cast<Cons_*>(item_)->m_pPrev;
+    }
+
+    void increment() {
+      DCHECK(item_);
+      item_ = static_cast<Cons_*>(item_)->m_pNext;
+    }
+
+    Item_* item_;
+    List_* list_;
+  };
+
+  class Iterator final : public Iterator_<Iterator, Item_> {
+   public:
+    Iterator(List_& list, Item_* item) : Iterator_(list, item) {}
+
+    Iterator& operator--() {
+      decrement();
+      return *this;
+    }
+
+    Iterator& operator++() {
+      increment();
+      return *this;
+    }
+  };
+
+  class ConstIterator final : public Iterator_<ConstIterator, const Item_> {
+   public:
+    ConstIterator(const List_& list, Item_* item)
+        : Iterator_(const_cast<List_&>(list), item) {}
+
+    ConstIterator& operator--() {
+      decrement();
+      return *this;
+    }
+
+    ConstIterator& operator++() {
+      increment();
+      return *this;
+    }
+  };
+
+  Iterator begin() { return Iterator(*this, m_pFirst); }
+  Iterator end() { return Iterator(*this, nullptr); }
+  ConstIterator begin() const { return ConstIterator(*this, m_pFirst); }
+  ConstIterator end() const { return ConstIterator(*this, nullptr); }
+
+  Item_* Prepend(Item_* item) {
+    auto const cons = static_cast<Cons_*>(item);
+    DCHECK(!cons->m_pNext);
+    DCHECK(!cons->m_pPrev);
+    cons->m_pPrev = nullptr;
+    cons->m_pNext = m_pFirst;
+    if (!m_pLast)
+      m_pLast = item;
+    if (m_pFirst)
+      static_cast<Cons_*>(m_pFirst)->m_pPrev = item;
+    return m_pFirst = item;
+  }
+
+ private:
+  typedef DoubleLinkedNode_<Item_, Parent_> Cons_;
+
+  Item_* m_pFirst;
+  Item_* m_pLast;
+};
+
+template <class Parent_, class Item_>
 class ChildList_;
 
-template<class Parent_, class Item_>
-class ChildNode_ : public DoubleLinkedNode_<Item_, Parent_>
-{
-    friend class ChildList_<Parent_, Item_>;
+template <class Parent_, class Item_>
+class ChildNode_ : public DoubleLinkedNode_<Item_, Parent_> {
+ public:
+  ChildNode_() : m_pParent(nullptr) {}
 
-    protected: Parent_*   m_pParent;
+ protected:
+  Parent_* m_pParent;
 
-    public: ChildNode_() : m_pParent(NULL) {}
-}; // ChildNode_
+ private:
+  friend class ChildList_<Parent_, Item_>;
+};
 
+template <class Parent_, class Item_>
+class ChildList_ : public DoubleLinkedList_<Item_, Parent_> {
+ public:
+  Item_* Append(Parent_* pParent, Item_* pItem) {
+    List::Append(pItem);
+    pItem->m_pParent = pParent;
+    return pItem;
+  }
+ protected:
+  typedef DoubleLinkedList_<Item_, Parent_> List;
+  typedef ChildList_<Parent_, Item_> ChildList;
+};
 
-template<class Parent_, class Item_>
-class ChildList_ : public DoubleLinkedList_<Item_, Parent_>
-{
-    protected: typedef DoubleLinkedList_<Item_, Parent_> List;
-    protected: typedef ChildList_<Parent_, Item_> ChildList;
-
-    public: Item_* Append(Parent_* pParent, Item_* pItem)
-    {
-        List::Append(pItem);
-        pItem->m_pParent = pParent;
-        return pItem;
-    } // Append
-};  // ChiildList_
-
-#endif //!defined(INCLUDE_listener_util_h)
+#endif  // EVITA_LI_UTIL_H_

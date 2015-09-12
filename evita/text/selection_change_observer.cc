@@ -10,10 +10,8 @@ namespace text {
 //
 // SelectionChangeObserver
 //
-SelectionChangeObserver::SelectionChangeObserver() {
-}
+SelectionChangeObserver::SelectionChangeObserver() {}
 
-SelectionChangeObserver::~SelectionChangeObserver() {
-}
+SelectionChangeObserver::~SelectionChangeObserver() {}
 
 }  // namespace text

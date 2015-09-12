@@ -5,7 +5,9 @@
 #include "evita/text/interval_set.h"
 
 #include <algorithm>
+#include <functional>
 #include <set>
+#include <vector>
 
 #include "base/logging.h"
 #include "evita/css/style.h"
@@ -15,9 +17,9 @@
 #include "evita/text/range_set_base.h"
 
 namespace std {
-template<>
+template <>
 struct less<text::Interval*> {
-  bool operator() (const text::Interval* x, const text::Interval* y) const {
+  bool operator()(const text::Interval* x, const text::Interval* y) const {
     return x->end() < y->end();
   }
 };
@@ -37,37 +39,40 @@ bool CanMergeIntervals(const Interval* interval1, const Interval* interval2) {
 //
 // IntervalSet::Impl
 //
-class IntervalSet::Impl : public RangeSetBase, public BufferMutationObserver {
-  private: Buffer* buffer_;
+class IntervalSet::Impl final : public RangeSetBase,
+                                public BufferMutationObserver {
+ public:
+  explicit Impl(Buffer* buffer);
+  virtual ~Impl();
+
+  // Get |Interval| contains |offset|.
+  Interval* GetIntervalAt(Posn offset) const;
+
+  // Set style on specified range.
+  void set_style(Posn start, Posn end, const css::Style& style_values);
+
+  // Split |interval| at |offset| and return new interval starts at |offset|.
+  Interval* SplitAt(Interval* interval, Posn offset);
+
+ private:
+  // Merge |interval2| into |interval1| if possible and return true if merged.
+  bool MergeAdjacentIntervalsIfPossible(Interval* interval1,
+                                        Interval* interval2);
+
+  // Try merge interval with adjacent intervals.
+  Interval* TryMergeInterval(Interval* interval);
+
+  // BufferMutationObserver
+  void DidDeleteAt(Posn offset, size_t length) override;
+  void DidInsertAt(Posn offset, size_t length) override;
+  void DidInsertBefore(Posn offset, size_t length) override;
+
+  Buffer* const buffer_;
 
   // Order |Interval| by end boundary point. |intervals_| always have at least
   // one |Interval|. The end boundary point of the last interval is length of
   // document plus one and represents default style.
-  private: std::set<Interval*> intervals_;
-
-  public: Impl(Buffer* buffer);
-  public: virtual ~Impl();
-
-  // Get |Interval| contains |offset|.
-  public: Interval* GetIntervalAt(Posn offset) const;
-
-  // Merge |interval2| into |interval1| if possible and return true if merged.
-  private: bool MergeAdjacentIntervalsIfPossible(Interval* interval1,
-                                                 Interval* interval2);
-
-  // Set style on specified range.
-  public: void set_style(Posn start, Posn end, const css::Style& style_values);
-
-  // Split |interval| at |offset| and return new interval starts at |offset|.
-  private: Interval* SplitAt(Interval* interval, Posn offset);
-
-  // Try merge interval with adjacent intervals.
-  private: Interval* TryMergeInterval(Interval* interval);
-
-  // BufferMutationObserver
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertBefore(Posn offset, size_t length) override;
+  std::set<Interval*> intervals_;
 
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
@@ -98,8 +103,8 @@ Interval* IntervalSet::Impl::GetIntervalAt(Posn offset) const {
   return *it;
 }
 
-bool IntervalSet::Impl::MergeAdjacentIntervalsIfPossible(
-    Interval* interval1, Interval* interval2) {
+bool IntervalSet::Impl::MergeAdjacentIntervalsIfPossible(Interval* interval1,
+                                                         Interval* interval2) {
   DCHECK_EQ(interval1->end(), interval2->start());
   if (!CanMergeIntervals(interval1, interval2))
     return false;
@@ -113,15 +118,16 @@ bool IntervalSet::Impl::MergeAdjacentIntervalsIfPossible(
   return true;
 }
 
-void IntervalSet::Impl::set_style(Posn start, Posn end,
+void IntervalSet::Impl::set_style(Posn start,
+                                  Posn end,
                                   const css::Style& style) {
   DCHECK_LT(start, end);
   auto offset = start;
   while (offset < end) {
     auto const interval = GetIntervalAt(offset);
     DCHECK_LE(interval->start(), offset);
-    auto const target = interval->start() == offset ? interval :
-        SplitAt(interval, offset);
+    auto const target =
+        interval->start() == offset ? interval : SplitAt(interval, offset);
     if (target->end() == end) {
       target->set_style(style);
       TryMergeInterval(target);
@@ -182,11 +188,12 @@ void IntervalSet::Impl::DidDeleteAt(Posn offset, size_t length) {
   for (auto it = intervals_.rbegin();
        it != intervals_.rend() && (*it)->end() > offset; ++it) {
     auto const interval = *it;
-    auto const start = interval->start() > offset ?
-        std::max(static_cast<Posn>(interval->start() - length),
-                 offset) : interval->start();
-    auto const end = std::max(static_cast<Posn>(interval->end() - length),
-                              offset);
+    auto const start =
+        interval->start() > offset
+            ? std::max(static_cast<Posn>(interval->start() - length), offset)
+            : interval->start();
+    auto const end =
+        std::max(static_cast<Posn>(interval->end() - length), offset);
     if (start == end)
       intervals_to_remove.push_back(*it);
   }
@@ -201,11 +208,12 @@ void IntervalSet::Impl::DidDeleteAt(Posn offset, size_t length) {
   for (auto it = intervals_.rbegin();
        it != intervals_.rend() && (*it)->end() > offset; ++it) {
     auto const interval = *it;
-    auto const start = interval->start() > offset ?
-        std::max(static_cast<Posn>(interval->start() - length),
-                 offset) : interval->start();
-    auto const end = std::max(static_cast<Posn>(interval->end() - length),
-                              offset);
+    auto const start =
+        interval->start() > offset
+            ? std::max(static_cast<Posn>(interval->start() - length), offset)
+            : interval->start();
+    auto const end =
+        std::max(static_cast<Posn>(interval->end() - length), offset);
     set_range(interval, start, end);
   }
 }
@@ -215,8 +223,7 @@ void IntervalSet::Impl::DidInsertAt(Posn offset, size_t length) {
        it != intervals_.rend() && (*it)->end() > offset; ++it) {
     auto interval = *it;
     if (interval->start() > offset) {
-      set_range(interval,
-                static_cast<Posn>(interval->start() + length),
+      set_range(interval, static_cast<Posn>(interval->start() + length),
                 static_cast<Posn>(interval->end() + length));
     } else {
       set_range_end(interval, static_cast<Posn>(interval->end() + length));
@@ -229,8 +236,7 @@ void IntervalSet::Impl::DidInsertBefore(Posn offset, size_t length) {
        it != intervals_.rend() && (*it)->end() >= offset; ++it) {
     auto interval = *it;
     if (interval->start() >= offset) {
-      set_range(interval,
-                static_cast<Posn>(interval->start() + length),
+      set_range(interval, static_cast<Posn>(interval->start() + length),
                 static_cast<Posn>(interval->end() + length));
     } else {
       set_range_end(interval, static_cast<Posn>(interval->end() + length));
@@ -256,11 +262,9 @@ void IntervalSet::Impl::DidInsertBefore(Posn offset, size_t length) {
 //////////////////////////////////////////////////////////////////////
 //
 // IntervalSet
-IntervalSet::IntervalSet(Buffer* buffer) : impl_(new Impl(buffer)) {
-}
+IntervalSet::IntervalSet(Buffer* buffer) : impl_(new Impl(buffer)) {}
 
-IntervalSet::~IntervalSet() {
-}
+IntervalSet::~IntervalSet() {}
 
 Interval* IntervalSet::GetIntervalAt(Posn offset) const {
   return impl_->GetIntervalAt(offset);

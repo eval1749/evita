@@ -3,7 +3,7 @@
 #include <memory>
 
 #pragma warning(push)
-#pragma warning(disable: 4365 4625 4626 4826)
+#pragma warning(disable : 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
@@ -13,22 +13,25 @@
 
 namespace {
 
-struct LineAndColumn : text::LineAndColumn {
-  LineAndColumn(int line_number, int column) {
-    this->column = column;
-    this->line_number = line_number;
+struct MyLineAndColumn : text::LineAndColumn {
+  int column;
+  int line_number;
+
+  MyLineAndColumn(int line_number_in, int column_in) {
+    column = column_in;
+    line_number = line_number_in;
   }
 
-  LineAndColumn(const text::LineAndColumn other) {
+  explicit MyLineAndColumn(const text::LineAndColumn other) {
     column = other.column;
     line_number = other.line_number;
   }
 
-  bool operator==(const LineAndColumn& other) const {
+  bool operator==(const MyLineAndColumn& other) const {
     return column == other.column && line_number == other.line_number;
   }
 
-  bool operator!=(const LineAndColumn& other) const {
+  bool operator!=(const MyLineAndColumn& other) const {
     return !operator==(other);
   }
 };
@@ -36,47 +39,50 @@ struct LineAndColumn : text::LineAndColumn {
 }  // namespace
 
 namespace std {
-ostream& operator<<(ostream& ostream, const LineAndColumn& line_and_column) {
-  return ostream << "(" << line_and_column.line_number << ", " <<
-      line_and_column.column << ")";
+ostream& operator<<(ostream& ostream, const MyLineAndColumn& line_and_column) {
+  return ostream << "(" << line_and_column.line_number << ", "
+                 << line_and_column.column << ")";
 }
 }  // namespace std
 
 namespace {
 class BufferTest : public ::testing::Test {
-  private: std::unique_ptr<text::Buffer> buffer_;
+ public:
+  text::Buffer* buffer() const { return buffer_.get(); }
 
-  protected: BufferTest()
-      : buffer_(new text::Buffer()) {
-  }
-  public: virtual ~BufferTest() {
+ protected:
+  BufferTest() : buffer_(new text::Buffer()) {}
+
+  MyLineAndColumn GetLineAndColumn(int offset) const {
+    return MyLineAndColumn(buffer()->GetLineAndColumn(offset));
   }
 
-  public: text::Buffer* buffer() const { return buffer_.get(); }
+ private:
+  std::unique_ptr<text::Buffer> buffer_;
 
   DISALLOW_COPY_AND_ASSIGN(BufferTest);
 };
 
 TEST_F(BufferTest, GetLineAndColumn) {
   buffer()->Insert(0, L"01\n02\n03\04\05\n");
-  EXPECT_EQ(LineAndColumn(1, 0), buffer()->GetLineAndColumn(0));
+  EXPECT_EQ(MyLineAndColumn(1, 0), GetLineAndColumn(0));
   // No cache update.
-  EXPECT_EQ(LineAndColumn(1, 1), buffer()->GetLineAndColumn(1));
+  EXPECT_EQ(MyLineAndColumn(1, 1), GetLineAndColumn(1));
   // Populate cache.
-  EXPECT_EQ(LineAndColumn(3, 0), buffer()->GetLineAndColumn(6));
-  EXPECT_EQ(LineAndColumn(1, 1), buffer()->GetLineAndColumn(1));
-  EXPECT_EQ(LineAndColumn(1, 2), buffer()->GetLineAndColumn(2));
-  EXPECT_EQ(LineAndColumn(2, 0), buffer()->GetLineAndColumn(3));
+  EXPECT_EQ(MyLineAndColumn(3, 0), GetLineAndColumn(6));
+  EXPECT_EQ(MyLineAndColumn(1, 1), GetLineAndColumn(1));
+  EXPECT_EQ(MyLineAndColumn(1, 2), GetLineAndColumn(2));
+  EXPECT_EQ(MyLineAndColumn(2, 0), GetLineAndColumn(3));
 }
 
 TEST_F(BufferTest, InsertAt) {
   buffer()->InsertBefore(0, L"abc");
 
-  css::Style style_values1;;
+  css::Style style_values1;
   style_values1.set_text_decoration(css::TextDecoration::GreenWave);
   buffer()->SetStyle(1, 2, style_values1);
 
-  css::Style style_values2;;
+  css::Style style_values2;
   style_values2.set_text_decoration(css::TextDecoration::RedWave);
   buffer()->SetStyle(2, 3, style_values2);
 
@@ -88,25 +94,25 @@ TEST_F(BufferTest, InsertAt) {
   EXPECT_EQ('X', buffer()->GetCharAt(2));
   EXPECT_EQ('c', buffer()->GetCharAt(3));
   EXPECT_EQ(css::TextDecoration::RedWave,
-            buffer()->GetStyleAt(2).text_decoration()) <<
-      "The style of inserted text is the style of insertion position.";
+            buffer()->GetStyleAt(2).text_decoration())
+      << "The style of inserted text is the style of insertion position.";
   EXPECT_EQ(css::TextDecoration::RedWave,
-            buffer()->GetStyleAt(3).text_decoration()) <<
-      "The style at insertion position isn't changed.";
-  EXPECT_EQ(2, range->start()) <<
-    "The range at insertion position should not be moved.";
-  EXPECT_EQ(2, range->end()) <<
-    "The range at insertion position should not be moved.";
+            buffer()->GetStyleAt(3).text_decoration())
+      << "The style at insertion position isn't changed.";
+  EXPECT_EQ(2, range->start())
+      << "The range at insertion position should not be moved.";
+  EXPECT_EQ(2, range->end())
+      << "The range at insertion position should not be moved.";
 }
 
 TEST_F(BufferTest, InsertBefore) {
   buffer()->InsertBefore(0, L"abc");
 
-  css::Style style_values1;;
+  css::Style style_values1;
   style_values1.set_text_decoration(css::TextDecoration::GreenWave);
   buffer()->SetStyle(1, 2, style_values1);
 
-  css::Style style_values2;;
+  css::Style style_values2;
   style_values2.set_text_decoration(css::TextDecoration::RedWave);
   buffer()->SetStyle(2, 3, style_values2);
 
@@ -118,16 +124,16 @@ TEST_F(BufferTest, InsertBefore) {
   EXPECT_EQ('X', buffer()->GetCharAt(2));
   EXPECT_EQ('c', buffer()->GetCharAt(3));
   EXPECT_EQ(css::TextDecoration::GreenWave,
-            buffer()->GetStyleAt(2).text_decoration()) <<
-      "The style of inserted text is inherited from styles before insertion"
-      " position.";
+            buffer()->GetStyleAt(2).text_decoration())
+      << "The style of inserted text is inherited from styles before insertion"
+         " position.";
   EXPECT_EQ(css::TextDecoration::RedWave,
-            buffer()->GetStyleAt(3).text_decoration()) <<
-      "The style at insertion position isn't changed.";
-  EXPECT_EQ(3, range->start()) <<
-    "The range at insertion position should be push back.";
-  EXPECT_EQ(3, range->end()) <<
-    "The range at insertion position should be push back.";
+            buffer()->GetStyleAt(3).text_decoration())
+      << "The style at insertion position isn't changed.";
+  EXPECT_EQ(3, range->start())
+      << "The range at insertion position should be push back.";
+  EXPECT_EQ(3, range->end())
+      << "The range at insertion position should be push back.";
 }
 
 TEST_F(BufferTest, SetStyle) {
@@ -143,8 +149,8 @@ TEST_F(BufferTest, SetStyle) {
   style_color_red.set_color(css::Color(0xCC, 0, 0));
   buffer()->SetStyle(4, 7, style_color_red);
 
-  EXPECT_EQ(30, buffer()->GetStyleAt(4).font_size()) <<
-      "Set color doesn't affect font size.";
+  EXPECT_EQ(30, buffer()->GetStyleAt(4).font_size())
+      << "Set color doesn't affect font size.";
 }
 
 }  // namespace

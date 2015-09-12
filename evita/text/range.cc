@@ -14,9 +14,7 @@
 namespace text {
 
 Range::Range(Buffer* buffer, Posn start, Posn end)
-    : end_(end),
-      start_(start),
-      buffer_(buffer) {
+    : end_(end), start_(start), buffer_(buffer) {
   DCHECK(buffer_->IsValidRange(start_, end_));
   buffer_->ranges()->AddRange(this);
 }
@@ -27,8 +25,7 @@ Range::~Range() {
   buffer_->ranges()->RemoveRange(this);
 }
 
-void Range::DidChangeRange() {
-}
+void Range::DidChangeRange() {}
 
 Posn Range::EnsureOffset(Posn offset) const {
   if (offset < 0)
@@ -64,7 +61,7 @@ void Range::set_start(Posn offset) {
 
 void Range::set_text(const base::string16& text) {
   if (buffer_->IsReadOnly()) {
-    // TODO: We should throw read only buffer exception.
+    // TODO(eval1749): We should throw read only buffer exception.
     return;
   }
 
@@ -83,13 +80,11 @@ void Range::set_text(const base::string16& text) {
 Buffer::EnumChar::EnumChar(const Range* range)
     : m_lEnd(range->end()),
       m_lPosn(range->start()),
-      m_pBuffer(range->buffer()) {
-}
+      m_pBuffer(range->buffer()) {}
 
 Buffer::EnumCharRev::EnumCharRev(const Range* range)
     : m_lStart(range->start()),
       m_lPosn(range->end()),
-      m_pBuffer(range->buffer()) {
-}
+      m_pBuffer(range->buffer()) {}
 
 }  // namespace text

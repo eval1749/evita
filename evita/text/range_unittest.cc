@@ -5,7 +5,7 @@
 #include <memory>
 
 #pragma warning(push)
-#pragma warning(disable: 4365 4625 4626 4826)
+#pragma warning(disable : 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
@@ -15,16 +15,14 @@
 
 namespace {
 class RangeTest : public ::testing::Test {
-  private: std::unique_ptr<text::Buffer> buffer_;
+ public:
+  text::Buffer* buffer() const { return buffer_.get(); }
 
-  protected: RangeTest()
-      : buffer_(new text::Buffer()) {
-  }
-  public: virtual ~RangeTest() {
-  }
+ protected:
+  RangeTest() : buffer_(new text::Buffer()) {}
 
-  public: text::Buffer* buffer() const { return buffer_.get(); }
-
+ private:
+  std::unique_ptr<text::Buffer> buffer_;
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
 };
 

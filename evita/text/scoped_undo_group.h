@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_scoped_undo_group_h)
-#define INCLUDE_evita_text_scoped_undo_group_h
+#ifndef EVITA_TEXT_SCOPED_UNDO_GROUP_H_
+#define EVITA_TEXT_SCOPED_UNDO_GROUP_H_
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
@@ -19,16 +19,18 @@ class Range;
 /// created on stack instead of heap.
 /// </summary>
 class ScopedUndoGroup final {
-  private: Buffer* buffer_;
-  private: const base::string16 name_;
+ public:
+  ScopedUndoGroup(Range* range, const base::string16& name);
+  ScopedUndoGroup(Buffer* buffer, const base::string16& name);
+  ~ScopedUndoGroup();
 
-  public: ScopedUndoGroup(Range* range, const base::string16& name);
-  public: ScopedUndoGroup(Buffer* buffer, const base::string16& name);
-  public: ~ScopedUndoGroup();
+ private:
+  Buffer* const buffer_;
+  const base::string16 name_;
 
   DISALLOW_COPY_AND_ASSIGN(ScopedUndoGroup);
 };
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_evita_text_scoped_undo_group_h)
+#endif  // EVITA_TEXT_SCOPED_UNDO_GROUP_H_

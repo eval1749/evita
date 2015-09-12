@@ -86,19 +86,19 @@ Count Buffer::Delete(Posn lStart, Posn lEnd) {
     return 0;
 
   lStart = std::max(lStart, static_cast<Posn>(0));
-  lEnd   = std::min(lEnd, GetEnd());
+  lEnd = std::min(lEnd, GetEnd());
 
   auto const length = lEnd - lStart;
   if (!length)
     return 0;
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-      WillDeleteAt(lStart, static_cast<size_t>(length)));
+                    WillDeleteAt(lStart, static_cast<size_t>(length)));
 
   deleteChars(lStart, lEnd);
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-      DidDeleteAt(lStart, static_cast<size_t>(length)));
+                    DidDeleteAt(lStart, static_cast<size_t>(length)));
 
   UpdateChangeTick();
   return length;
@@ -140,7 +140,7 @@ Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {
   lPosn = std::min(lPosn, GetEnd());
   insert(lPosn, pwch, n);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-      DidInsertAt(lPosn, static_cast<size_t>(n)));
+                    DidInsertAt(lPosn, static_cast<size_t>(n)));
   UpdateChangeTick();
 
   return n;
@@ -157,7 +157,7 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   insert(position, text.data(), static_cast<Count>(text_length));
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-      DidInsertBefore(position, text_length));
+                    DidInsertBefore(position, text_length));
 
   UpdateChangeTick();
 }
@@ -193,7 +193,7 @@ void Buffer::SetStyle(Posn lStart, Posn lEnd, const css::Style& style) {
   // This may be enough for syntax coloring.
   intervals_->SetStyle(lStart, lEnd, style);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-    DidChangeStyle(lStart, static_cast<size_t>(lEnd - lStart)));
+                    DidChangeStyle(lStart, static_cast<size_t>(lEnd - lStart)));
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {
@@ -216,7 +216,7 @@ void Buffer::UpdateChangeTick() {
 void Buffer::DidChangeMarker(Posn start, Posn end) {
   DCHECK_LT(start, end);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-    DidChangeStyle(start, static_cast<size_t>(end - start)));
+                    DidChangeStyle(start, static_cast<size_t>(end - start)));
 }
 
 }  // namespace text

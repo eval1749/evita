@@ -51,15 +51,16 @@ void LineNumberCache::InvalidateCache(Posn offset) {
     return;
   }
   for (;;) {
-   auto it = map_.lower_bound(offset);
-   if (it == map_.end())
-     break;
-   map_.erase(it);
+    auto it = map_.lower_bound(offset);
+    if (it == map_.end())
+      break;
+    map_.erase(it);
   }
 }
 
-LineNumberAndOffset LineNumberCache::UpdateCache(
-    Posn line_start_offset, int line_number, Posn goal_offset) {
+LineNumberAndOffset LineNumberCache::UpdateCache(Posn line_start_offset,
+                                                 int line_number,
+                                                 Posn goal_offset) {
   DCHECK(!map_.empty());
   auto start_offset = line_start_offset;
   for (auto offset = line_start_offset; offset < goal_offset; ++offset) {
@@ -73,12 +74,12 @@ LineNumberAndOffset LineNumberCache::UpdateCache(
 }
 
 // BufferMutationObserver
-void LineNumberCache:: DidDeleteAt(Posn offset, size_t) {
+void LineNumberCache::DidDeleteAt(Posn offset, size_t) {
   InvalidateCache(offset);
 }
 
-void LineNumberCache:: DidInsertAt(Posn offset, size_t) {
+void LineNumberCache::DidInsertAt(Posn offset, size_t) {
   InvalidateCache(offset);
 }
 
-}  // namespace
+}  // namespace text

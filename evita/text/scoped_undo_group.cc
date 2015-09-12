@@ -19,10 +19,8 @@ ScopedUndoGroup::ScopedUndoGroup(Buffer* buffer, const base::string16& name)
   buffer->StartUndoGroup(name_);
 }
 
-
 ScopedUndoGroup::ScopedUndoGroup(Range* range, const base::string16& name)
-    : ScopedUndoGroup(range->buffer(), name) {
-}
+    : ScopedUndoGroup(range->buffer(), name) {}
 
 ScopedUndoGroup::~ScopedUndoGroup() {
   buffer_->EndUndoGroup(name_);

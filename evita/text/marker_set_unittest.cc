@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 #pragma warning(push)
-#pragma warning(disable: 4365 4625 4626 4826)
+#pragma warning(disable : 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
@@ -15,45 +15,50 @@ using text::Marker;
 using text::MarkerSet;
 
 class MockBufferMutationObservee : public text::BufferMutationObservee {
-  private: virtual void AddObserver(BufferMutationObserver*) override {}
-  private: virtual void RemoveObserver(BufferMutationObserver*) override {}
+ private:
+  void AddObserver(BufferMutationObserver* observer) final {}
+  void RemoveObserver(BufferMutationObserver* observer) final {}
 };
 
 class MarkerSetTest : public ::testing::Test {
-  protected: const common::AtomicString Correct;
-  protected: const common::AtomicString Misspelled;
+ public:
+  virtual ~MarkerSetTest() {}
 
-  private: MockBufferMutationObservee mutation_observee_;
-  private: MarkerSet marker_set_;
+ protected:
+  MarkerSetTest()
+      : Correct(L"Correct"),
+        Misspelled(L"Misspelled"),
+        marker_set_(&mutation_observee_) {}
 
-  protected: MarkerSetTest()
-    : Correct(L"Correct"),
-      Misspelled(L"Misspelled"),
-      marker_set_(&mutation_observee_) {
-  }
-  public: virtual ~MarkerSetTest() {
-  }
+  MarkerSet* marker_set() { return &marker_set_; }
 
-  protected: MarkerSet* marker_set() { return &marker_set_; }
-
-  protected: void DidDeleteAt(text::Posn offset, size_t length) {
-    static_cast<text::BufferMutationObserver*>(marker_set())->DidDeleteAt(
-        offset, length);
+  void DidDeleteAt(text::Posn offset, size_t length) {
+    static_cast<text::BufferMutationObserver*>(marker_set())
+        ->DidDeleteAt(offset, length);
   }
 
-  protected: void RemoveMarker(text::Posn start, text::Posn end) {
+  void RemoveMarker(text::Posn start, text::Posn end) {
     marker_set()->RemoveMarkerForTesting(start, end);
   }
 
-  protected: Marker GetAt(Posn offset) {
+  Marker GetAt(Posn offset) {
     auto const marker = marker_set_.GetMarkerAt(offset);
     return marker ? *marker : Marker();
   }
 
-  protected: void InsertMarker(text::Posn start, text::Posn end,
-                               const common::AtomicString& type) {
+  void InsertMarker(text::Posn start,
+                    text::Posn end,
+                    const common::AtomicString& type) {
     marker_set()->InsertMarker(start, end, type);
   }
+
+  const common::AtomicString Correct;
+  const common::AtomicString Misspelled;
+
+ private:
+  MockBufferMutationObservee mutation_observee_;
+
+  MarkerSet marker_set_;
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSetTest);
 };
@@ -232,14 +237,14 @@ TEST_F(MarkerSetTest, InsertMarker_merge) {
 }
 
 TEST_F(MarkerSetTest, InsertMarker_merge2) {
- // before:  --CCCC-CCCC--
+  // before:  --CCCC-CCCC--
   // insert: ------C------
   // after:  --CCCCCCCC---
   InsertMarker(0, 4, Correct);
   InsertMarker(5, 9, Correct);
   InsertMarker(4, 5, Correct);
   EXPECT_EQ(Marker(0, 9, Correct), GetAt(1));
- }
+}
 
 TEST_F(MarkerSetTest, InsertMarker_split) {
   // before: --CCCCCC--

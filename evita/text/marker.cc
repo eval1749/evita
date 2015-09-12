@@ -15,19 +15,14 @@ Marker::Marker(Posn start, Posn end, const common::AtomicString& type)
 }
 
 Marker::Marker(const Marker& other)
-    : end_(other.end_), start_(other.start_), type_(other.type_) {
-}
+    : end_(other.end_), start_(other.start_), type_(other.type_) {}
 
 Marker::Marker(Posn offset)
-    : end_(offset), start_(offset), 
-      type_(common::AtomicString::Empty()) {
-}
+    : end_(offset), start_(offset), type_(common::AtomicString::Empty()) {}
 
-Marker::Marker() : Marker(0) {
-}
+Marker::Marker() : Marker(0) {}
 
-Marker::~Marker() {
-}
+Marker::~Marker() {}
 
 Marker& Marker::operator=(const Marker& other) {
   end_ = other.end_;
@@ -52,8 +47,8 @@ bool Marker::Contains(Posn offset) const {
 
 namespace std {
 ostream& operator<<(ostream& ostream, const text::Marker& marker) {
-  return ostream << "text::Marker(" << marker.type().get() << ", [" <<
-      marker.start() << ", " << marker.end() << "])";
+  return ostream << "text::Marker(" << marker.type().get() << ", ["
+                 << marker.start() << ", " << marker.end() << "])";
 }
 
 ostream& operator<<(ostream& ostream, const text::Marker* marker) {

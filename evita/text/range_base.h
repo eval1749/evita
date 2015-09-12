@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_range_base_h)
-#define INCLUDE_evita_text_range_base_h
+#ifndef EVITA_TEXT_RANGE_BASE_H_
+#define EVITA_TEXT_RANGE_BASE_H_
 
 #include "evita/precomp.h"
 
@@ -12,21 +12,24 @@ namespace text {
 class RangeSetBase;
 
 class RangeBase {
+ public:
+  Posn end() const { return end_; }
+  Posn start() const { return start_; }
+
+  bool Contains(Posn offset) const;
+
+ protected:
+  RangeBase(Posn start, Posn end);
+  RangeBase(const RangeBase& other);
+  ~RangeBase();
+
+ private:
   friend class RangeSetBase;
 
-  private: Posn end_;
-  private: Posn start_;
-
-  protected: RangeBase(Posn start, Posn end);
-  protected: RangeBase(const RangeBase& other);
-  protected: ~RangeBase();
-
-  public: Posn end() const { return end_; }
-  public: Posn start() const { return start_; }
-
-  public: bool Contains(Posn offset) const;
+  Posn end_;
+  Posn start_;
 };
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_evita_text_range_base_h)
+#endif  // EVITA_TEXT_RANGE_BASE_H_

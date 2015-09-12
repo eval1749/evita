@@ -14,11 +14,9 @@ namespace text {
 //
 // UndoStep
 //
-UndoStep::UndoStep() {
-}
+UndoStep::UndoStep() {}
 
-UndoStep::~UndoStep() {
-}
+UndoStep::~UndoStep() {}
 
 Posn UndoStep::GetAfterRedo() const {
   return -1;
@@ -36,10 +34,12 @@ Posn UndoStep::GetBeforeUndo() const {
   return -1;
 }
 
-void UndoStep::Redo(Buffer*) {
+void UndoStep::Redo(Buffer* buffer) {
+  DCHECK(buffer);
 }
 
-void UndoStep::Undo(Buffer*) {
+void UndoStep::Undo(Buffer* buffer) {
+  DCHECK(buffer);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -50,29 +50,21 @@ NamedUndoStep::NamedUndoStep(const base::string16& name) : name_(name) {
   DCHECK(!name_.empty());
 }
 
-NamedUndoStep::~NamedUndoStep() {
-}
+NamedUndoStep::~NamedUndoStep() {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextUndoStep
 //
-TextUndoStep::TextUndoStep(Posn start, Posn end)
-    : end_(end), start_(start) {
+TextUndoStep::TextUndoStep(Posn start, Posn end) : end_(end), start_(start) {
   DCHECK_LE(start_, end_);
 }
 
-TextUndoStep::~TextUndoStep() {
-}
+TextUndoStep::~TextUndoStep() {}
 
 void TextUndoStep::set_text(const base::string16& text) {
   DCHECK(!text.empty());
   text_ = text;
-}
-
-void TextUndoStep::set_text(base::string16&& text) {
-  DCHECK(!text.empty());
-  text_ = std::move(text);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -81,11 +73,9 @@ void TextUndoStep::set_text(base::string16&& text) {
 //
 
 BeginUndoStep::BeginUndoStep(const base::string16& name)
-    : NamedUndoStep(name) {
-}
+    : NamedUndoStep(name) {}
 
-BeginUndoStep::~BeginUndoStep() {
-}
+BeginUndoStep::~BeginUndoStep() {}
 
 // UndoStep
 bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep* new_undo_step) {
@@ -106,8 +96,7 @@ DeleteUndoStep::DeleteUndoStep(Posn start, Posn end, const base::string16& text)
   set_text(text);
 }
 
-DeleteUndoStep::~DeleteUndoStep() {
-}
+DeleteUndoStep::~DeleteUndoStep() {}
 
 // UndoStep
 Posn DeleteUndoStep::GetAfterRedo() const {
@@ -175,12 +164,9 @@ void DeleteUndoStep::Undo(Buffer* buffer) {
 //
 // EndUndoStep
 //
-EndUndoStep::EndUndoStep(const base::string16& name)
-    : NamedUndoStep(name) {
-}
+EndUndoStep::EndUndoStep(const base::string16& name) : NamedUndoStep(name) {}
 
-EndUndoStep::~EndUndoStep() {
-}
+EndUndoStep::~EndUndoStep() {}
 
 // UndoStep
 bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
@@ -192,11 +178,9 @@ bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
 // InsertUndoStep
 //
 InsertUndoStep::InsertUndoStep(Posn start, Posn end)
-    : TextUndoStep(start, end) {
-}
+    : TextUndoStep(start, end) {}
 
-InsertUndoStep::~InsertUndoStep() {
-}
+InsertUndoStep::~InsertUndoStep() {}
 
 // Merge "Insert" UndoStep if
 // o [last][new]

@@ -13,11 +13,9 @@ namespace text {
 //
 // RangeSetBase
 //
-RangeSetBase::RangeSetBase() {
-}
+RangeSetBase::RangeSetBase() {}
 
-RangeSetBase::~RangeSetBase() {
-}
+RangeSetBase::~RangeSetBase() {}
 
 void RangeSetBase::set_range(RangeBase* range, Posn start, Posn end) {
   DCHECK_LE(start, end);

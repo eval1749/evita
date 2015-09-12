@@ -6,10 +6,8 @@
 
 namespace text {
 
-MarkerSetObserver::MarkerSetObserver() {
-}
+MarkerSetObserver::MarkerSetObserver() {}
 
-MarkerSetObserver::~MarkerSetObserver() {
-}
+MarkerSetObserver::~MarkerSetObserver() {}
 
 }  // namespace text

@@ -33,12 +33,11 @@ void RangeSet::RemoveRange(Range* range) {
 void RangeSet::DidDeleteAt(Posn offset, size_t length) {
   for (auto* range : ranges_) {
     if (range->start_ > offset) {
-      range->start_ = std::max(static_cast<Posn>(range->start_ - length),
-                                 offset);
+      range->start_ =
+          std::max(static_cast<Posn>(range->start_ - length), offset);
     }
     if (range->end_ > offset) {
-      range->end_ = std::max(static_cast<Posn>(range->end_ - length),
-                               offset);
+      range->end_ = std::max(static_cast<Posn>(range->end_ - length), offset);
     }
   }
 }
@@ -61,4 +60,4 @@ void RangeSet::DidInsertBefore(Posn offset, size_t length) {
   }
 }
 
-} // namespace text
+}  // namespace text

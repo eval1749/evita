@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_range_set_h)
-#define INCLUDE_evita_text_range_set_h
+#ifndef EVITA_TEXT_RANGE_SET_H_
+#define EVITA_TEXT_RANGE_SET_H_
 
 #include <unordered_set>
 
@@ -13,23 +13,25 @@ namespace text {
 
 class Range;
 
-class RangeSet : public BufferMutationObserver {
-  private: std::unordered_set<Range*> ranges_;
+class RangeSet final : public BufferMutationObserver {
+ public:
+  explicit RangeSet(Buffer* buffer);
+  ~RangeSet() final;
 
-  public: RangeSet(Buffer* buffer);
-  public: virtual ~RangeSet();
+  void AddRange(Range* range);
+  void RemoveRange(Range* range);
 
-  public: void AddRange(Range* range);
-  public: void RemoveRange(Range* range);
-
+ private:
   // BufferMutationObserver
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertBefore(Posn offset, size_t length) override;
+  void DidDeleteAt(Posn offset, size_t length) final;
+  void DidInsertAt(Posn offset, size_t length) final;
+  void DidInsertBefore(Posn offset, size_t length) final;
+
+  std::unordered_set<Range*> ranges_;
 
   DISALLOW_COPY_AND_ASSIGN(RangeSet);
 };
 
-}   // text
+}  // namespace text
 
-#endif //!defined(INCLUDE_evita_text_range_set_h)
+#endif  // EVITA_TEXT_RANGE_SET_H_

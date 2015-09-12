@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_interval_set_h)
-#define INCLUDE_evita_text_interval_set_h
+#ifndef EVITA_TEXT_INTERVAL_SET_H_
+#define EVITA_TEXT_INTERVAL_SET_H_
 
 #include <memory>
 
@@ -19,19 +19,21 @@ namespace text {
 class Interval;
 
 class IntervalSet final {
-  // PImpl Idiom, see "interval_set.cc" for implementation.
-  public: class Impl;
-  private: std::unique_ptr<Impl> impl_;
+ public:
+  explicit IntervalSet(Buffer* buffer);
+  ~IntervalSet();
 
-  public: IntervalSet(Buffer* buffer);
-  public: ~IntervalSet();
+  Interval* GetIntervalAt(Posn offset) const;
+  void SetStyle(Posn, Posn, const css::Style& style_values);
 
-  public: Interval* GetIntervalAt(Posn offset) const;
-  public: void SetStyle(Posn, Posn, const css::Style& style_values);
+ private:
+  class Impl;
+
+  std::unique_ptr<Impl> impl_;
 
   DISALLOW_COPY_AND_ASSIGN(IntervalSet);
 };
 
-}   // text
+}  // namespace text
 
-#endif //!defined(INCLUDE_evita_text_buffer_mutation_observer_h)
+#endif  // EVITA_TEXT_INTERVAL_SET_H_

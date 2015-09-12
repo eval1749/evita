@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_text_buffer_h)
-#define INCLUDE_evita_text_buffer_h
+#ifndef EVITA_TEXT_BUFFER_H_
+#define EVITA_TEXT_BUFFER_H_
 
 #include <memory>
 
@@ -51,206 +51,205 @@ struct LineAndColumn {
 class Buffer : public BufferCore,
                public BufferMutationObservee,
                public MarkerSetObserver {
-
-  private: base::ObserverList<BufferMutationObserver> observers_;
-  private: std::unique_ptr<IntervalSet> intervals_;
-  private: std::unique_ptr<LineNumberCache> line_number_cache_;
-  private: std::unique_ptr<MarkerSet> spelling_markers_;
-  private: std::unique_ptr<MarkerSet> syntax_markers_;
-  private: std::unique_ptr<RangeSet> ranges_;
-  private: std::unique_ptr<css::StyleResolver> style_resolver_;
-  private: std::unique_ptr<UndoStack> undo_stack_;
-
-  private: bool m_fReadOnly;
-
-  // Modified?
-  private: int m_nCharTick;
-  private: int m_nSaveTick;
-
+ public:
   // ctor/dtor
-  public: Buffer();
-  public: virtual ~Buffer();
+  Buffer();
+  virtual ~Buffer();
 
-  public: RangeSet* ranges() const { return ranges_.get(); }
-  public: MarkerSet* spelling_markers() const {
-    return spelling_markers_.get();
-  }
-  public: MarkerSet* syntax_markers() const {
-    return syntax_markers_.get();
-  }
+  RangeSet* ranges() const { return ranges_.get(); }
+  MarkerSet* spelling_markers() const { return spelling_markers_.get(); }
+  MarkerSet* syntax_markers() const { return syntax_markers_.get(); }
 
-  public: const css::StyleResolver* style_resolver() const {
+  const css::StyleResolver* style_resolver() const {
     return style_resolver_.get();
   }
 
   // [C]
-  public: bool CanRedo() const;
-  public: bool CanUndo() const;
-  public: void ClearUndo();
-  public: Posn ComputeEndOfLine(Posn offset) const;
-  public: Posn ComputeStartOfLine(Posn offset) const;
+  bool CanRedo() const;
+  bool CanUndo() const;
+  void ClearUndo();
+  Posn ComputeEndOfLine(Posn offset) const;
+  Posn ComputeStartOfLine(Posn offset) const;
 
   // [D]
-  public: Count Delete(Posn, Posn);
+  Count Delete(Posn, Posn);
 
   // [E]
-  public: void EndUndoGroup(const base::string16& name);
+  void EndUndoGroup(const base::string16& name);
 
   // [G]
-  public: const css::Style& GetDefaultStyle() const;
-  public: Interval* GetIntervalAt(Posn) const;
-  public: LineAndColumn GetLineAndColumn(Posn offset) const;
-  public: Posn GetStart() const { return 0; }
-  public: const css::Style& GetStyleAt(Posn) const;
-  public: UndoStack* GetUndo() const { return undo_stack_.get(); }
+  const css::Style& GetDefaultStyle() const;
+  Interval* GetIntervalAt(Posn) const;
+  LineAndColumn GetLineAndColumn(Posn offset) const;
+  Posn GetStart() const { return 0; }
+  const css::Style& GetStyleAt(Posn) const;
+  UndoStack* GetUndo() const { return undo_stack_.get(); }
 
   // [I]
-  public: Count IncCharTick(int n) { return m_nCharTick += n; }
-  public: Count Insert(Posn, const char16*, Count);
-  public: bool IsModified() const { return m_nCharTick != m_nSaveTick; }
-  public: bool IsNotReady() const;
-  public: bool IsReadOnly() const { return m_fReadOnly; }
+  Count IncCharTick(int n) { return m_nCharTick += n; }
+  Count Insert(Posn, const char16*, Count);
+  bool IsModified() const { return m_nCharTick != m_nSaveTick; }
+  bool IsNotReady() const;
+  bool IsReadOnly() const { return m_fReadOnly; }
 
-  public: void Insert(Posn lPosn, const char16* pwsz) {
+  void Insert(Posn lPosn, const char16* pwsz) {
     Insert(lPosn, pwsz, ::lstrlenW(pwsz));
   }
 
-  public: void InsertBefore(Posn position, const base::string16& text);
+  void InsertBefore(Posn position, const base::string16& text);
 
   // [R]
-  public: Posn Redo(Posn, Count = 1);
+  Posn Redo(Posn, Count = 1);
 
   // [S]
-  public: void SetNotModifiedForTesting() {
-    m_nSaveTick = m_nCharTick;
-  }
-  public: void SetModified(bool new_modifier);
-  public: bool SetReadOnly(bool f) { return m_fReadOnly = f; }
-  public: void SetStyle(Posn, Posn, const css::Style& style_values);
-  public: void StartUndoGroup(const base::string16& name);
+  void SetNotModifiedForTesting() { m_nSaveTick = m_nCharTick; }
+  void SetModified(bool new_modifier);
+  bool SetReadOnly(bool f) { return m_fReadOnly = f; }
+  void SetStyle(Posn, Posn, const css::Style& style_values);
+  void StartUndoGroup(const base::string16& name);
 
   // [U]
-  public: Posn Undo(Posn, Count = 1);
-  private: void UpdateChangeTick();
+  Posn Undo(Posn, Count = 1);
 
   // BufferMutationObservee
-  public: virtual void AddObserver(
-      BufferMutationObserver* observer) override;
-  public: virtual void RemoveObserver(
-      BufferMutationObserver* observer) override;
-
-  // MarkerSetObserver
-  private: virtual void DidChangeMarker(Posn start, Posn end) override;
+  void AddObserver(BufferMutationObserver* observer) final;
+  void RemoveObserver(BufferMutationObserver* observer) final;
 
   /// <summary>
   /// Buffer character enumerator
   /// </summary>
-  public: class EnumChar {
-    private: Posn m_lEnd;
-    private: Posn m_lPosn;
-    private: Buffer* m_pBuffer;
-
-    public: struct Arg {
+  class EnumChar final {
+   public:
+    struct Arg final {
       Posn m_lEnd;
       Posn m_lPosn;
       Buffer* m_pBuffer;
 
       Arg(Buffer* pBuffer, Posn lPosn, Posn lEnd)
-          : m_lEnd(lEnd),
-            m_lPosn(lPosn),
-            m_pBuffer(pBuffer) {
-      }
+          : m_lEnd(lEnd), m_lPosn(lPosn), m_pBuffer(pBuffer) {}
 
       Arg(Buffer* pBuffer, Posn lPosn)
-          : m_lEnd(pBuffer->GetEnd()),
-            m_lPosn(lPosn),
-            m_pBuffer(pBuffer) {
-      }
+          : m_lEnd(pBuffer->GetEnd()), m_lPosn(lPosn), m_pBuffer(pBuffer) {}
     };
 
-    public: EnumChar(Buffer* pBuffer)
-        : m_lEnd(pBuffer->GetEnd()),
-          m_lPosn(0),
-          m_pBuffer(pBuffer) {
+    explicit EnumChar(Buffer* pBuffer)
+        : m_lEnd(pBuffer->GetEnd()), m_lPosn(0), m_pBuffer(pBuffer) {
       DCHECK(m_pBuffer->IsValidRange(m_lPosn, m_lEnd));
     }
 
-    public: EnumChar(Arg oArg)
+    explicit EnumChar(Arg oArg)
         : m_lEnd(oArg.m_lEnd),
           m_lPosn(oArg.m_lPosn),
           m_pBuffer(oArg.m_pBuffer) {
       DCHECK(m_pBuffer->IsValidRange(m_lPosn, m_lEnd));
     }
 
-    public: EnumChar(const Range*);
+    explicit EnumChar(const Range*);
 
-    public: bool AtEnd() const { return m_lPosn >= m_lEnd; }
+    bool AtEnd() const { return m_lPosn >= m_lEnd; }
 
-    public: char16 Get() const {
+    char16 Get() const {
       DCHECK(!AtEnd());
       return m_pBuffer->GetCharAt(m_lPosn);
     }
 
-    public: Posn GetPosn() const { return m_lPosn; }
+    Posn GetPosn() const { return m_lPosn; }
 
-    public: const css::Style& GetStyle() const {
+    const css::Style& GetStyle() const {
       DCHECK(!AtEnd());
       return m_pBuffer->GetStyleAt(m_lPosn);
     }
 
-    public: Posn GoTo(Posn lPosn) { return m_lPosn = lPosn; }
-    public: void Next() { DCHECK(!AtEnd()); m_lPosn += 1; }
-    public: void Prev() { m_lPosn -= 1; }
+    Posn GoTo(Posn lPosn) { return m_lPosn = lPosn; }
+    void Next() {
+      DCHECK(!AtEnd());
+      m_lPosn += 1;
+    }
+    void Prev() { m_lPosn -= 1; }
 
-    public: void SyncEnd() { m_lEnd = m_pBuffer->GetEnd(); }
+    void SyncEnd() { m_lEnd = m_pBuffer->GetEnd(); }
+
+   private:
+    Posn m_lEnd;
+    Posn m_lPosn;
+    Buffer* m_pBuffer;
+
+    DISALLOW_COPY_AND_ASSIGN(EnumChar);
   };
 
   /// <summary>
   /// Reverse character enumerator
   /// </summary>
-  public: class EnumCharRev {
-    private: Posn m_lPosn;
-    private: Posn m_lStart;
-    private: const Buffer* m_pBuffer;
-
-    public: struct Arg {
+  class EnumCharRev final {
+   public:
+    struct Arg {
       Posn m_lPosn;
       Posn m_lStart;
       Buffer* m_pBuffer;
       Arg(Buffer* pBuffer, Posn lPosn, Posn lStart = 0)
-          : m_lPosn(lPosn), m_lStart(lStart), m_pBuffer(pBuffer) {
-      }
+          : m_lPosn(lPosn), m_lStart(lStart), m_pBuffer(pBuffer) {}
     };
 
-    public: EnumCharRev(Arg oArg)
+    explicit EnumCharRev(Arg oArg)
         : m_lPosn(oArg.m_lPosn),
           m_lStart(oArg.m_lStart),
-          m_pBuffer(oArg.m_pBuffer) {
-    }
+          m_pBuffer(oArg.m_pBuffer) {}
 
-    public: EnumCharRev(const Range*);
+    explicit EnumCharRev(const Range*);
 
-    public: bool AtEnd() const { return m_lPosn <= m_lStart; }
+    bool AtEnd() const { return m_lPosn <= m_lStart; }
 
-    public: char16 Get() const {
+    char16 Get() const {
       DCHECK(!AtEnd());
       return m_pBuffer->GetCharAt(m_lPosn - 1);
     }
 
-    public: Posn GetPosn() const { DCHECK(!AtEnd()); return m_lPosn; }
+    Posn GetPosn() const {
+      DCHECK(!AtEnd());
+      return m_lPosn;
+    }
 
-    public: const css::Style& GetStyle() const {
+    const css::Style& GetStyle() const {
       DCHECK(!AtEnd());
       return m_pBuffer->GetStyleAt(m_lPosn - 1);
     }
 
-    public: void Next() { DCHECK(!AtEnd()); --m_lPosn; }
-    public: void Prev() { ++m_lPosn; }
+    void Next() {
+      DCHECK(!AtEnd());
+      --m_lPosn;
+    }
+    void Prev() { ++m_lPosn; }
+
+   private:
+    Posn m_lPosn;
+    Posn m_lStart;
+    const Buffer* m_pBuffer;
+
+    DISALLOW_COPY_AND_ASSIGN(EnumCharRev);
   };
+
+ private:
+  void UpdateChangeTick();
+
+  base::ObserverList<BufferMutationObserver> observers_;
+  std::unique_ptr<IntervalSet> intervals_;
+  std::unique_ptr<LineNumberCache> line_number_cache_;
+  std::unique_ptr<MarkerSet> spelling_markers_;
+  std::unique_ptr<MarkerSet> syntax_markers_;
+  std::unique_ptr<RangeSet> ranges_;
+  std::unique_ptr<css::StyleResolver> style_resolver_;
+  std::unique_ptr<UndoStack> undo_stack_;
+
+  // MarkerSetObserver
+  void DidChangeMarker(Posn start, Posn end) override;
+
+  int m_nCharTick;
+  int m_nSaveTick;
+  bool m_fReadOnly;
 
   DISALLOW_COPY_AND_ASSIGN(Buffer);
 };
 
 }  // namespace text
 
-#endif //!defined(INCLUDE_evita_text_buffer_h)
+#endif  // EVITA_TEXT_BUFFER_H_

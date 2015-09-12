@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_spelling_h)
-#define INCLUDE_evita_text_spelling_h
+#ifndef EVITA_TEXT_SPELLING_H_
+#define EVITA_TEXT_SPELLING_H_
 
 namespace text {
 
@@ -16,4 +16,4 @@ enum class Spelling {
 
 }  // namespace text
 
-#endif // !defined(INCLUDE_evita_text_spelling_h)
+#endif  // EVITA_TEXT_SPELLING_H_

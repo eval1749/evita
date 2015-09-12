@@ -4,6 +4,7 @@
 
 #include "evita/text/marker_set.h"
 
+#include <algorithm>
 #include <vector>
 
 #include "base/logging.h"
@@ -14,46 +15,49 @@ namespace text {
 //
 // MarkerSet::ChangeScope
 //
-class MarkerSet::ChangeScope {
-  private: struct InsertOperation {
+class MarkerSet::ChangeScope final {
+ public:
+  explicit ChangeScope(MarkerSetImpl* markers);
+  ~ChangeScope();
+
+  void Insert(Posn start, Posn end, const common::AtomicString& type);
+  void Remove(Marker* marker);
+  void Update(Marker* marker, Posn new_start, Posn new_end);
+
+ private:
+  struct InsertOperation {
     Posn start;
     Posn end;
     const common::AtomicString* type;
   };
-  private: struct RemoveOperation {
+
+  struct RemoveOperation final {
     Marker* marker;
   };
-  private: struct UpdateOperation {
+
+  struct UpdateOperation final {
     Marker* marker;
     Posn start;
     Posn end;
   };
 
-  private: MarkerSetImpl* markers_;
-  private: std::vector<InsertOperation> inserts_;
-  private: std::vector<RemoveOperation> removes_;
-  private: std::vector<UpdateOperation> updates_;
-
-  public: ChangeScope(MarkerSetImpl* markers);
-  public: ~ChangeScope();
-
-  public: void Insert(Posn start, Posn end, const common::AtomicString& type);
-  public: void Remove(Marker* marker);
-  public: void Update(Marker* marker, Posn new_start, Posn new_end);
+  MarkerSetImpl* markers_;
+  std::vector<InsertOperation> inserts_;
+  std::vector<RemoveOperation> removes_;
+  std::vector<UpdateOperation> updates_;
 
   DISALLOW_COPY_AND_ASSIGN(ChangeScope);
 };
 
 MarkerSet::ChangeScope::ChangeScope(MarkerSetImpl* markers)
-    : markers_(markers) {
-}
+    : markers_(markers) {}
 
 MarkerSet::ChangeScope::~ChangeScope() {
   for (auto const remove : removes_) {
     markers_->erase(remove.marker);
     delete remove.marker;
   }
-  for (auto const update: updates_) {
+  for (auto const update : updates_) {
     update.marker->end_ = update.end;
     update.marker->start_ = update.start;
     DCHECK_LT(update.marker->start_, update.marker->end_);
@@ -63,16 +67,18 @@ MarkerSet::ChangeScope::~ChangeScope() {
   }
 }
 
-void MarkerSet::ChangeScope::Insert(Posn start, Posn end,
+void MarkerSet::ChangeScope::Insert(Posn start,
+                                    Posn end,
                                     const common::AtomicString& type) {
-  inserts_.push_back(InsertOperation {start, end, &type});
+  inserts_.push_back(InsertOperation{start, end, &type});
 }
 
 void MarkerSet::ChangeScope::Remove(Marker* marker) {
-  removes_.push_back(RemoveOperation {marker});
+  removes_.push_back(RemoveOperation{marker});
 }
 
-void MarkerSet::ChangeScope::Update(Marker* marker, Posn new_start,
+void MarkerSet::ChangeScope::Update(Marker* marker,
+                                    Posn new_start,
                                     Posn new_end) {
   if (marker->start_ == new_start && marker->end_ == new_end)
     return;
@@ -80,7 +86,7 @@ void MarkerSet::ChangeScope::Update(Marker* marker, Posn new_start,
     Remove(marker);
     return;
   }
-  updates_.push_back(UpdateOperation {marker, new_start, new_end});
+  updates_.push_back(UpdateOperation{marker, new_start, new_end});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -136,7 +142,8 @@ const Marker* MarkerSet::GetLowerBoundMarker(Posn offset) const {
   return *present;
 }
 
-void MarkerSet::InsertMarker(Posn start, Posn end,
+void MarkerSet::InsertMarker(Posn start,
+                             Posn end,
                              const common::AtomicString& type) {
   DCHECK_LT(start, end);
   RemoveMarker(start, end);
@@ -145,10 +152,12 @@ void MarkerSet::InsertMarker(Posn start, Posn end,
 
   auto const after = lower_bound(end);
   auto const can_merge_after = after != markers_.end() &&
-      (*after)->type_ == type && (*after)->start_ == end;
+                               (*after)->type_ == type &&
+                               (*after)->start_ == end;
   auto const before = lower_bound(start);
   auto const can_merge_before = before != markers_.end() &&
-      (*before)->type_ == type && (*before)->end_ == start;
+                                (*before)->type_ == type &&
+                                (*before)->end_ == start;
 
   ChangeScope change_scope(&markers_);
   NotifyChange(start, end);
@@ -169,12 +178,10 @@ void MarkerSet::InsertMarker(Posn start, Posn end,
 }
 
 void MarkerSet::NotifyChange(Posn start, Posn end) {
-  FOR_EACH_OBSERVER(MarkerSetObserver, observers_,
-      DidChangeMarker(start, end));
+  FOR_EACH_OBSERVER(MarkerSetObserver, observers_, DidChangeMarker(start, end));
 }
 
 void MarkerSet::RemoveMarker(Posn start, Posn end) {
-
   DCHECK_LT(start, end);
   if (markers_.empty())
     return;
@@ -226,14 +233,13 @@ void MarkerSet::RemoveObserver(MarkerSetObserver* observer) {
 void MarkerSet::DidDeleteAt(Posn offset, size_t length) {
   ChangeScope change_scope(&markers_);
   for (auto runner = markers_.rbegin();
-       runner != markers_.rend() && (*runner)->end_ > offset;
-       ++runner) {
+       runner != markers_.rend() && (*runner)->end_ > offset; ++runner) {
     auto const marker = *runner;
     change_scope.Update(
         marker,
-        marker->start_ > offset ?
-            std::max(static_cast<Posn>(marker->start_ - length), offset) :
-            marker->start_,
+        marker->start_ > offset
+            ? std::max(static_cast<Posn>(marker->start_ - length), offset)
+            : marker->start_,
         std::max(static_cast<Posn>(marker->end_ - length), offset));
   }
 }

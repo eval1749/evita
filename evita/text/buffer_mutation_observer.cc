@@ -10,36 +10,28 @@ namespace text {
 //
 // BufferMutationObserver
 //
-BufferMutationObserver::BufferMutationObserver() {
-}
+BufferMutationObserver::BufferMutationObserver() {}
 
-BufferMutationObserver::~BufferMutationObserver() {
-}
+BufferMutationObserver::~BufferMutationObserver() {}
 
-void BufferMutationObserver::DidChangeStyle(Posn, size_t) {
-}
+void BufferMutationObserver::DidChangeStyle(Posn, size_t) {}
 
-void BufferMutationObserver::DidDeleteAt(Posn, size_t) {
-}
+void BufferMutationObserver::DidDeleteAt(Posn, size_t) {}
 
-void BufferMutationObserver::DidInsertAt(Posn, size_t) {
-}
+void BufferMutationObserver::DidInsertAt(Posn, size_t) {}
 
 void BufferMutationObserver::DidInsertBefore(Posn offset, size_t length) {
   DidInsertAt(offset, length);
 }
 
-void BufferMutationObserver::WillDeleteAt(Posn, size_t) {
-}
+void BufferMutationObserver::WillDeleteAt(Posn, size_t) {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // BufferMutationObservee
 //
-BufferMutationObservee::BufferMutationObservee() {
-}
+BufferMutationObservee::BufferMutationObservee() {}
 
-BufferMutationObservee::~BufferMutationObservee() {
-}
+BufferMutationObservee::~BufferMutationObservee() {}
 
 }  // namespace text

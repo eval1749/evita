@@ -17,11 +17,9 @@ RangeBase::RangeBase(Posn start, Posn end) : end_(end), start_(start) {
 }
 
 RangeBase::RangeBase(const RangeBase& other)
-    : end_(other.end_), start_(other.start_) {
-}
+    : end_(other.end_), start_(other.start_) {}
 
-RangeBase::~RangeBase() {
-}
+RangeBase::~RangeBase() {}
 
 bool RangeBase::Contains(Posn offset) const {
   return offset >= start() && offset < end();

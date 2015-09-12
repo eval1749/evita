@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_marker_h)
-#define INCLUDE_evita_text_marker_h
+#ifndef EVITA_TEXT_MARKER_H_
+#define EVITA_TEXT_MARKER_H_
 
 #include <functional>
 #include <ostream>
@@ -16,37 +16,40 @@ namespace text {
 
 class MarkerSet;
 
-class Marker {
+class Marker final {
+ public:
+  Marker(Posn start, Posn end, const common::AtomicString& type);
+  Marker(const Marker& other);
+  Marker();
+  ~Marker();
+
+  Marker& operator=(const Marker& other);
+
+  bool operator==(const Marker& other) const;
+  bool operator!=(const Marker& other) const;
+
+  Posn end() const { return end_; }
+  Posn start() const { return start_; }
+  const common::AtomicString& type() const { return type_; }
+
+  bool Contains(Posn offset) const;
+
+ private:
   friend class MarkerSet;
 
-  private: Posn end_;
-  private: Posn start_;
-  private: common::AtomicString type_;
+  explicit Marker(Posn start);
 
-  public: Marker(Posn start, Posn end, const common::AtomicString& type);
-  public: Marker(const Marker& other);
-  private: explicit Marker(Posn start);
-  public: Marker();
-  public: ~Marker();
-
-  public: Marker& operator=(const Marker& other);
-
-  public: bool operator==(const Marker& other) const;
-  public: bool operator!=(const Marker& other) const;
-
-  public: Posn end() const { return end_; }
-  public: Posn start() const { return start_; }
-  public: const common::AtomicString& type() const { return type_; }
-
-  public: bool Contains(Posn offset) const;
+  Posn end_;
+  Posn start_;
+  common::AtomicString type_;
 };
 
 }  // namespace text
 
 namespace std {
-template<>
+template <>
 struct less<text::Marker*> {
-  bool operator() (const text::Marker* x, const text::Marker* y) const {
+  bool operator()(const text::Marker* x, const text::Marker* y) const {
     return x->end() < y->end();
   }
 };
@@ -55,4 +58,4 @@ ostream& operator<<(ostream& ostream, const text::Marker& marker);
 ostream& operator<<(ostream& ostream, const text::Marker* marker);
 }  // namespace std
 
-#endif // !defined(INCLUDE_evita_text_marker_h)
+#endif  // EVITA_TEXT_MARKER_H_

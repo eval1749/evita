@@ -15,30 +15,33 @@ namespace text {
 //
 // Model
 //
-class Selection::Model : public Range {
-  private: base::ObserverList<SelectionChangeObserver> observers_;
-  private: bool start_is_active_;
+class Selection::Model final : public Range {
+ public:
+  explicit Model(const Range* range);
+  ~Model() final;
 
-  public: Model(const Range* range);
-  public: virtual ~Model();
+  void AddObserver(SelectionChangeObserver* observer);
+  bool IsStartActive() const { return start_is_active_; }
+  void RemoveObserver(SelectionChangeObserver* observer);
+  void SetStartIsActive(bool new_start_is_active);
 
-  public: void AddObserver(SelectionChangeObserver* observer);
-  private: void DidChangeRange() override;
-  public: bool IsStartActive() const { return start_is_active_; }
-  private: void NotifyChange();
-  public: void RemoveObserver(SelectionChangeObserver* observer);
-  public: void SetStartIsActive(bool new_start_is_active);
+ private:
+  void NotifyChange();
+
+  // Range
+  void DidChangeRange() final;
+
+  base::ObserverList<SelectionChangeObserver> observers_;
+  bool start_is_active_;
 
   DISALLOW_COPY_AND_ASSIGN(Model);
 };
 
 Selection::Model::Model(const Range* range)
     : Range(range->buffer(), range->start(), range->end()),
-      start_is_active_(false) {
-}
+      start_is_active_(false) {}
 
-Selection::Model::~Model() {
-}
+Selection::Model::~Model() {}
 
 void Selection::Model::AddObserver(SelectionChangeObserver* observer) {
   observers_.AddObserver(observer);
@@ -67,11 +70,9 @@ void Selection::Model::SetStartIsActive(bool new_start_is_active) {
 //
 // Selection
 //
-Selection::Selection(const Range* range) : model_(new Model(range)) {
-}
+Selection::Selection(const Range* range) : model_(new Model(range)) {}
 
-Selection::~Selection() {
-}
+Selection::~Selection() {}
 
 Posn Selection::anchor_offset() const {
   return model_->IsStartActive() ? model_->end() : model_->start();

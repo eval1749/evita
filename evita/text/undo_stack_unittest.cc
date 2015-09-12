@@ -3,7 +3,7 @@
 #include <memory>
 
 #pragma warning(push)
-#pragma warning(disable: 4365 4625 4626 4826)
+#pragma warning(disable : 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
@@ -14,15 +14,14 @@
 namespace {
 
 class UndoStackTest : public ::testing::Test {
-  private: std::unique_ptr<text::Buffer> buffer_;
+ public:
+  text::Buffer* buffer() const { return buffer_.get(); }
 
-  protected: UndoStackTest()
-      : buffer_(new text::Buffer()) {
-  }
-  public: virtual ~UndoStackTest() {
-  }
+ protected:
+  UndoStackTest() : buffer_(new text::Buffer()) {}
 
-  public: text::Buffer* buffer() const { return buffer_.get(); }
+ private:
+  std::unique_ptr<text::Buffer> buffer_;
 
   DISALLOW_COPY_AND_ASSIGN(UndoStackTest);
 };
@@ -35,16 +34,16 @@ TEST_F(UndoStackTest, Delete) {
   buffer()->Delete(0, 3);
   buffer()->Undo(0);
   EXPECT_EQ(3, buffer()->GetEnd());
-  EXPECT_FALSE(buffer()->IsModified()) <<
-    "Undo delete should make document not modified.";
+  EXPECT_FALSE(buffer()->IsModified())
+      << "Undo delete should make document not modified.";
 
   buffer()->Redo(3);
   EXPECT_EQ(0, buffer()->GetEnd());
   EXPECT_TRUE(buffer()->IsModified());
 
   buffer()->Undo(0);
-  EXPECT_FALSE(buffer()->IsModified()) <<
-      "Undo should make document not modified even if after redo.";
+  EXPECT_FALSE(buffer()->IsModified())
+      << "Undo should make document not modified even if after redo.";
 }
 
 TEST_F(UndoStackTest, Group) {
@@ -55,27 +54,27 @@ TEST_F(UndoStackTest, Group) {
   }
   buffer()->Undo(4);
   EXPECT_EQ(0, buffer()->GetEnd());
-  EXPECT_FALSE(buffer()->IsModified()) <<
-      "Undo should make document not modified even if after redo.";
+  EXPECT_FALSE(buffer()->IsModified())
+      << "Undo should make document not modified even if after redo.";
 }
 
 TEST_F(UndoStackTest, Insert) {
   buffer()->Insert(0, L"foo");
   EXPECT_EQ(3, buffer()->Undo(2)) << "Move to the last editing position";
-  EXPECT_EQ(3, buffer()->GetEnd()) <<
-      "Undo isn't occured position other than last editing position.";
+  EXPECT_EQ(3, buffer()->GetEnd())
+      << "Undo isn't occured position other than last editing position.";
   EXPECT_EQ(0, buffer()->Undo(3)) << "Undo at the last editing position";
   EXPECT_EQ(0, buffer()->GetEnd());
-  EXPECT_FALSE(buffer()->IsModified()) <<
-      "Undo should make document not modified.";
+  EXPECT_FALSE(buffer()->IsModified())
+      << "Undo should make document not modified.";
 
   buffer()->Redo(0);
   EXPECT_EQ(3, buffer()->GetEnd());
   EXPECT_TRUE(buffer()->IsModified());
 
   buffer()->Undo(3);
-  EXPECT_FALSE(buffer()->IsModified()) <<
-      "Undo should make document not modified.";
+  EXPECT_FALSE(buffer()->IsModified())
+      << "Undo should make document not modified.";
 }
 
 TEST_F(UndoStackTest, Merge) {
@@ -90,9 +89,8 @@ TEST_F(UndoStackTest, Merge) {
   EXPECT_EQ(3, buffer()->Undo(6));
   EXPECT_EQ(3, buffer()->GetEnd());
   EXPECT_EQ(0, buffer()->Undo(3));
-  EXPECT_FALSE(buffer()->IsModified()) <<
-      "Undo should make document not modified.";
-
+  EXPECT_FALSE(buffer()->IsModified())
+      << "Undo should make document not modified.";
 }
 
 }  // namespace

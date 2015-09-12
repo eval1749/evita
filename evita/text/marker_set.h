@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_marker_set_h)
-#define INCLUDE_evita_text_marker_set_h
+#ifndef EVITA_TEXT_MARKER_SET_H_
+#define EVITA_TEXT_MARKER_SET_H_
 
 #include <set>
 
@@ -19,59 +19,59 @@ class AtomicString;
 
 namespace text {
 
-class MarkerSet;
-
-class MarkerSet : public BufferMutationObserver {
-  private: typedef std::set<Marker*> MarkerSetImpl;
-  private: class ChangeScope;
-
-  private: MarkerSetImpl markers_;
-  private: BufferMutationObservee* const mutation_observee_;
-  private: base::ObserverList<MarkerSetObserver> observers_;
-
-  public: MarkerSet(BufferMutationObservee* provider);
-  public: virtual ~MarkerSet();
-
-  private: MarkerSetImpl::iterator lower_bound(Posn offset);
+class MarkerSet final : public BufferMutationObserver {
+ public:
+  explicit MarkerSet(BufferMutationObservee* provider);
+  ~MarkerSet() final;
 
   // Remove |observer|
-  public: void AddObserver(MarkerSetObserver* observer);
-
-  // Remove all markers in this |MarkerSet|.
-  private: void Clear();
+  void AddObserver(MarkerSetObserver* observer);
 
   // Get marker at |offset|.
-  public: const Marker* GetMarkerAt(Posn offset) const;
+  const Marker* GetMarkerAt(Posn offset) const;
 
   // Get marker starting at |offset| or after |offset|. This function is
   // provided for reducing call for |GetMarkerAt()| on every position in
   // document. See |TextFormatter::TextScanner::spelling()|.
-  public: const Marker* GetLowerBoundMarker(Posn offset) const;
-
-  // Notify marker changes to observers.
-  private: void NotifyChange(Posn start, Posn end);
+  const Marker* GetLowerBoundMarker(Posn offset) const;
 
   // Insert marker from |start| to |end|, exclusive.
-  public: void InsertMarker(Posn start, Posn end,
-                            const common::AtomicString& type);
+  void InsertMarker(Posn start, Posn end, const common::AtomicString& type);
 
-  // Remove marker from |start| to |end|, exclusive.
-  private: void RemoveMarker(Posn start, Posn end);
-  public: void RemoveMarkerForTesting(Posn start, Posn end) {
+  void RemoveMarkerForTesting(Posn start, Posn end) {
     RemoveMarker(start, end);
   }
 
   // Remove |observer|
-  public: void RemoveObserver(MarkerSetObserver* observer);
+  void RemoveObserver(MarkerSetObserver* observer);
+
+ private:
+  using MarkerSetImpl = std::set<Marker*>;
+  class ChangeScope;
+
+  MarkerSetImpl::iterator lower_bound(Posn offset);
+
+  // Remove all markers in this |MarkerSet|.
+  void Clear();
+
+  // Notify marker changes to observers.
+  void NotifyChange(Posn start, Posn end);
+
+  // Remove marker from |start| to |end|, exclusive.
+  void RemoveMarker(Posn start, Posn end);
 
   // BufferMutationObserver
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertBefore(Posn offset, size_t length) override;
+  void DidDeleteAt(Posn offset, size_t length) final;
+  void DidInsertAt(Posn offset, size_t length) final;
+  void DidInsertBefore(Posn offset, size_t length) final;
+
+  MarkerSetImpl markers_;
+  BufferMutationObservee* const mutation_observee_;
+  base::ObserverList<MarkerSetObserver> observers_;
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSet);
 };
 
 }  // namespace text
 
-#endif // !defined(INCLUDE_evita_text_marker_set_h)
+#endif  // EVITA_TEXT_MARKER_SET_H_

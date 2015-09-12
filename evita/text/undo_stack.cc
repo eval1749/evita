@@ -191,4 +191,3 @@ void UndoStack::WillDeleteAt(Posn start, size_t length) {
 }
 
 }  // namespace text
-

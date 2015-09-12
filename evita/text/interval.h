@@ -2,34 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_interval_h)
-#define INCLUDE_evita_text_interval_h
+#ifndef EVITA_TEXT_INTERVAL_H_
+#define EVITA_TEXT_INTERVAL_H_
+
+#include <ostream>
 
 #include "evita/css/style.h"
 #include "evita/text/range_base.h"
 
 namespace text {
 
-class Interval : public RangeBase {
-  private: css::Style style_;
+class Interval final : public RangeBase {
+ public:
+  Interval(const Interval& other);
+  Interval(Posn start, Posn end);
+  ~Interval();
 
-  public: Interval(const Interval& other);
-  public: Interval(Posn start, Posn end);
-  public: ~Interval();
+  const css::Style& style() const { return style_; }
+  void set_style(const css::Style& style);
 
-  public: const css::Style& style() const { return style_; }
-  public: void set_style(const css::Style& style);
+ private:
+  css::Style style_;
 
   DISALLOW_ASSIGN(Interval);
 };
 
 }  // namespace text
 
-#include <ostream>
-
 namespace std {
 ostream& operator<<(ostream& ostream, const text::Interval& interval);
 ostream& operator<<(ostream& ostream, const text::Interval* interval);
 }  // namespace std
 
-#endif //!defined(INCLUDE_evita_text_interval_h)
+#endif  // EVITA_TEXT_INTERVAL_H_

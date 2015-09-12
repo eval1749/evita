@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_undo_step_h)
-#define INCLUDE_evita_text_undo_step_h
+#ifndef EVITA_TEXT_UNDO_STEP_H_
+#define EVITA_TEXT_UNDO_STEP_H_
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
@@ -21,18 +21,21 @@ class UndoStack;
 class UndoStep : public common::Castable {
   DECLARE_CASTABLE_CLASS(UndoStep, Castable);
 
-  protected: UndoStep();
-  public: virtual ~UndoStep();
+ public:
+  virtual ~UndoStep();
 
-  public: virtual Posn GetAfterRedo() const;
-  public: virtual Posn GetAfterUndo() const;
-  public: virtual Posn GetBeforeRedo() const;
-  public: virtual Posn GetBeforeUndo() const;
-  public: virtual void Redo(Buffer* buffer);
-  public: virtual bool TryMerge(const Buffer* buffer,
-                                const UndoStep* other) = 0;
-  public: virtual void Undo(Buffer* buffer);
+  virtual Posn GetAfterRedo() const;
+  virtual Posn GetAfterUndo() const;
+  virtual Posn GetBeforeRedo() const;
+  virtual Posn GetBeforeUndo() const;
+  virtual void Redo(Buffer* buffer);
+  virtual bool TryMerge(const Buffer* buffer, const UndoStep* other) = 0;
+  virtual void Undo(Buffer* buffer);
 
+ protected:
+  UndoStep();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(UndoStep);
 };
 
@@ -43,12 +46,15 @@ class UndoStep : public common::Castable {
 class NamedUndoStep : public UndoStep {
   DECLARE_CASTABLE_CLASS(NamedUndoStep, UndoStep);
 
-  private: const base::string16 name_;
+ public:
+  const base::string16& name() const { return name_; }
 
-  protected: NamedUndoStep(const base::string16& name);
-  public: virtual ~NamedUndoStep();
+ protected:
+  explicit NamedUndoStep(const base::string16& name);
+  ~NamedUndoStep() override;
 
-  public: const base::string16& name() const { return name_; }
+ private:
+  const base::string16 name_;
 
   DISALLOW_COPY_AND_ASSIGN(NamedUndoStep);
 };
@@ -60,20 +66,22 @@ class NamedUndoStep : public UndoStep {
 class TextUndoStep : public UndoStep {
   DECLARE_CASTABLE_CLASS(TextUndoStep, UndoStep);
 
-  private: Posn end_;
-  private: Posn start_;
-  private: base::string16 text_;
+ public:
+  Posn end() const { return end_; }
+  void set_end(Posn end) { end_ = end; }
+  Posn start() const { return start_; }
+  void set_start(Posn start) { start_ = start; }
+  const base::string16& text() const { return text_; }
+  void set_text(const base::string16& text);
 
-  protected: TextUndoStep(Posn start, Posn end);
-  public: virtual ~TextUndoStep();
+ protected:
+  TextUndoStep(Posn start, Posn end);
+  ~TextUndoStep() override;
 
-  public: Posn end() const { return end_; }
-  public: void set_end(Posn end) { end_ = end; }
-  public: Posn start() const { return start_; }
-  public: void set_start(Posn start) { start_ = start; }
-  public: const base::string16& text() const { return text_; }
-  public: void set_text(const base::string16& text);
-  public: void set_text(base::string16&& text);
+ private:
+  Posn end_;
+  Posn start_;
+  base::string16 text_;
 
   DISALLOW_COPY_AND_ASSIGN(TextUndoStep);
 };
@@ -82,15 +90,16 @@ class TextUndoStep : public UndoStep {
 //
 // BeginUndoStep
 //
-class BeginUndoStep : public NamedUndoStep {
+class BeginUndoStep final : public NamedUndoStep {
   DECLARE_CASTABLE_CLASS(BeginUndoStep, NamedUndoStep);
 
-  public: BeginUndoStep(const base::string16& name);
-  public: virtual ~BeginUndoStep();
+ public:
+  explicit BeginUndoStep(const base::string16& name);
+  ~BeginUndoStep() final;
 
+ private:
   // UndoStep
-  private: virtual bool TryMerge(const Buffer* buffer,
-                                 const UndoStep* other) override;
+  bool TryMerge(const Buffer* buffer, const UndoStep* other) final;
 
   DISALLOW_COPY_AND_ASSIGN(BeginUndoStep);
 };
@@ -99,21 +108,22 @@ class BeginUndoStep : public NamedUndoStep {
 //
 // DeleteUndoStep
 //
-class DeleteUndoStep : public TextUndoStep {
+class DeleteUndoStep final : public TextUndoStep {
   DECLARE_CASTABLE_CLASS(DeleteUndoStep, TextUndoStep);
 
-  public: DeleteUndoStep(Posn start, Posn end, const base::string16& text);
-  public: virtual ~DeleteUndoStep();
+ public:
+  DeleteUndoStep(Posn start, Posn end, const base::string16& text);
+  ~DeleteUndoStep() final;
 
+ private:
   // Recrod
-  private: virtual Posn GetAfterRedo() const override;
-  private: virtual Posn GetAfterUndo() const override;
-  private: virtual Posn GetBeforeRedo() const override;
-  private: virtual Posn GetBeforeUndo() const override;
-  private: virtual void Redo(Buffer* buffer) override;
-  private: virtual bool TryMerge(const Buffer* buffer,
-                                 const UndoStep* other) override;
-  private: virtual void Undo(Buffer* buffer) override;
+  Posn GetAfterRedo() const final;
+  Posn GetAfterUndo() const final;
+  Posn GetBeforeRedo() const final;
+  Posn GetBeforeUndo() const final;
+  void Redo(Buffer* buffer) final;
+  bool TryMerge(const Buffer* buffer, const UndoStep* other) final;
+  void Undo(Buffer* buffer) final;
 
   DISALLOW_COPY_AND_ASSIGN(DeleteUndoStep);
 };
@@ -122,15 +132,16 @@ class DeleteUndoStep : public TextUndoStep {
 //
 // EndUndoStep
 //
-class EndUndoStep : public NamedUndoStep {
+class EndUndoStep final : public NamedUndoStep {
   DECLARE_CASTABLE_CLASS(EndUndoStep, NamedUndoStep);
 
-  public: EndUndoStep(const base::string16& name);
-  public: virtual ~EndUndoStep();
+ public:
+  explicit EndUndoStep(const base::string16& name);
+  ~EndUndoStep() final;
 
+ private:
   // UndoStep
-  private: virtual bool TryMerge(const Buffer* buffer,
-                                 const UndoStep* other) override;
+  bool TryMerge(const Buffer* buffer, const UndoStep* other) final;
 
   DISALLOW_COPY_AND_ASSIGN(EndUndoStep);
 };
@@ -139,25 +150,27 @@ class EndUndoStep : public NamedUndoStep {
 //
 // InsertUndoStep
 //
-class InsertUndoStep : public TextUndoStep {
+class InsertUndoStep final : public TextUndoStep {
   DECLARE_CASTABLE_CLASS(InsertUndoStep, TextUndoStep);
 
-  public: InsertUndoStep(Posn lStart, Posn lEnd);
-  public: virtual ~InsertUndoStep();
+ public:
+  InsertUndoStep(Posn lStart, Posn lEnd);
+  ~InsertUndoStep() final;
 
+ private:
   // UndoStep
-  private: virtual Posn GetAfterRedo() const override;
-  private: virtual Posn GetAfterUndo() const override;
-  private: virtual Posn GetBeforeRedo() const override;
-  private: virtual Posn GetBeforeUndo() const override;
-  private: virtual void Redo(Buffer* buffer) override;;
-  private: virtual bool TryMerge(const Buffer* buffer,
-                                 const UndoStep* other) override;
-  private: virtual void Undo(Buffer* buffer) override;;
+  Posn GetAfterRedo() const final;
+  Posn GetAfterUndo() const final;
+  Posn GetBeforeRedo() const final;
+  Posn GetBeforeUndo() const final;
+  void Redo(Buffer* buffer) final;
+
+  bool TryMerge(const Buffer* buffer, const UndoStep* other) final;
+  void Undo(Buffer* buffer) final;
 
   DISALLOW_COPY_AND_ASSIGN(InsertUndoStep);
 };
 
 }  // namespace text
 
-#endif // !defined(INCLUDE_evita_text_undo_step_h)
+#endif  // EVITA_TEXT_UNDO_STEP_H_

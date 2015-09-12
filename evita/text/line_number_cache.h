@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_line_number_cache_h)
-#define INCLUDE_evita_text_line_number_cache_h
+#ifndef EVITA_TEXT_LINE_NUMBER_CACHE_H_
+#define EVITA_TEXT_LINE_NUMBER_CACHE_H_
 
 #include <map>
 
@@ -13,36 +13,38 @@ namespace text {
 
 class Buffer;
 
-struct LineNumberAndOffset{
+struct LineNumberAndOffset {
   int number;
   Posn offset;
 };
 
+class LineNumberCache final : public BufferMutationObserver {
+ public:
+  explicit LineNumberCache(Buffer* buffer);
+  ~LineNumberCache() final;
 
-class LineNumberCache : public BufferMutationObserver {
-  private: Buffer* buffer_;
-  private: std::map<Posn, int> map_;
+  LineNumberAndOffset Get(Posn offset);
 
-  public: LineNumberCache(Buffer* buffer);
-  public: ~LineNumberCache();
-
-  public: LineNumberAndOffset Get(Posn offset);
-
+ private:
   // Invalidate cache entries after |offset|, inclusive.
-  private: void InvalidateCache(Posn offset);
+  void InvalidateCache(Posn offset);
 
   // Scan buffer from |line_start_offset| which line number is |line_number|,
   // to |offset| and returns line number for |offset|.
-  private: LineNumberAndOffset UpdateCache(Posn line_start_offset,
-                                           int line_number, Posn offset);
+  LineNumberAndOffset UpdateCache(Posn line_start_offset,
+                                  int line_number,
+                                  Posn offset);
 
   // BufferMutationObserver
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+  void DidDeleteAt(Posn offset, size_t length) final;
+  void DidInsertAt(Posn offset, size_t length) final;
+
+  Buffer* buffer_;
+  std::map<Posn, int> map_;
 
   DISALLOW_COPY_AND_ASSIGN(LineNumberCache);
 };
 
 }  // namespace text
 
-#endif // !defined(INCLUDE_evita_text_line_number_cache_h)
+#endif  // EVITA_TEXT_LINE_NUMBER_CACHE_H_

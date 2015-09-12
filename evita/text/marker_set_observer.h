@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_marker_set_observer_h)
-#define INCLUDE_evita_text_marker_set_observer_h
+#ifndef EVITA_TEXT_MARKER_SET_OBSERVER_H_
+#define EVITA_TEXT_MARKER_SET_OBSERVER_H_
 
 #include "evita/precomp.h"
 
 namespace text {
 
 class MarkerSetObserver {
-  public: MarkerSetObserver();
-  public: virtual ~MarkerSetObserver();
+ public:
+  MarkerSetObserver();
+  virtual ~MarkerSetObserver();
 
-  public: virtual void DidChangeMarker(Posn start, Posn end) = 0;
+  virtual void DidChangeMarker(Posn start, Posn end) = 0;
 };
 
 }  // namespace text
 
-#endif // !defined(INCLUDE_evita_text_marker_set_observer_h)
+#endif  // EVITA_TEXT_MARKER_SET_OBSERVER_H_

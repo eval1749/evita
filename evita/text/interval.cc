@@ -22,8 +22,7 @@ Interval::Interval(Posn start, Posn end) : RangeBase(start, end) {
   DCHECK_LT(start, end);
 }
 
-Interval::~Interval() {
-}
+Interval::~Interval() {}
 
 void Interval::set_style(const css::Style& style) {
   style_.OverrideBy(style);
@@ -33,8 +32,8 @@ void Interval::set_style(const css::Style& style) {
 
 namespace std {
 ostream& operator<<(ostream& ostream, const text::Interval& interval) {
-  return ostream << "text::Interval(" << interval.start() << ", " <<
-      interval.end() << ")";
+  return ostream << "text::Interval(" << interval.start() << ", "
+                 << interval.end() << ")";
 }
 
 ostream& operator<<(ostream& ostream, const text::Interval* interval) {

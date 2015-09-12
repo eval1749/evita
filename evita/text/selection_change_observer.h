@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_text_selection_change_observer_h)
-#define INCLUDE_evita_text_selection_change_observer_h
+#ifndef EVITA_TEXT_SELECTION_CHANGE_OBSERVER_H_
+#define EVITA_TEXT_SELECTION_CHANGE_OBSERVER_H_
 
 #include "base/macros.h"
 
@@ -12,14 +12,18 @@ namespace text {
 class Selection;
 
 class SelectionChangeObserver {
-  public: SelectionChangeObserver();
-  public: virtual ~SelectionChangeObserver();
+ public:
+  virtual ~SelectionChangeObserver();
 
-  public: virtual void DidChangeSelection() = 0;
+  virtual void DidChangeSelection() = 0;
 
+ protected:
+  SelectionChangeObserver();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(SelectionChangeObserver);
 };
 
-}   // text
+}  // namespace text
 
-#endif //!defined(INCLUDE_evita_text_selection_change_observer_h)
+#endif  // EVITA_TEXT_SELECTION_CHANGE_OBSERVER_H_

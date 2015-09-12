@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/text/render_text_block.h"
-
+#include <algorithm>
 #include <limits>
 #include <map>
 #include <vector>
+
+#include "evita/views/text/render_text_block.h"
 
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
@@ -23,32 +24,35 @@ namespace rendering {
 //
 // TextBlock::TextLineCache
 //
-class TextBlock::TextLineCache {
-  private: gfx::RectF bounds_;
-  private: const text::Buffer* const buffer_;
-  private: text::Posn dirty_start_;
-  private: std::map<text::Posn, TextLine*> lines_;
-  private: float zoom_;
+class TextBlock::TextLineCache final {
+ public:
+  explicit TextLineCache(const text::Buffer* buffer);
+  ~TextLineCache();
 
-  public: TextLineCache(const text::Buffer* buffer);
-  public: ~TextLineCache();
+  void DidChangeBuffer(text::Posn offset);
+  TextLine* FindLine(text::Posn text_offset) const;
+  void Invalidate(const gfx::RectF& bounds, float zoom);
+  void Register(TextLine* line);
 
-  public: void DidChangeBuffer(text::Posn offset);
-  public: TextLine* FindLine(text::Posn text_offset) const;
-  public: void Invalidate(const gfx::RectF& bounds, float zoom);
-  private: bool IsAfterNewline(const TextLine* text_line) const;
-  private: bool IsEndWithNewline(const TextLine* text_line) const;
-  public: void Register(TextLine* line);
-  private: void RemoveDirtyLines();
-  private: void RemoveAllLines();
+ private:
+  bool IsAfterNewline(const TextLine* text_line) const;
+  bool IsEndWithNewline(const TextLine* text_line) const;
+  void RemoveDirtyLines();
+  void RemoveAllLines();
+
+  gfx::RectF bounds_;
+  const text::Buffer* const buffer_;
+  text::Posn dirty_start_;
+  std::map<text::Posn, TextLine*> lines_;
+  float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(TextLineCache);
 };
 
 TextBlock::TextLineCache::TextLineCache(const text::Buffer* buffer)
-    : buffer_(buffer), dirty_start_(std::numeric_limits<text::Posn>::max()),
-      zoom_(0.0f) {
-}
+    : buffer_(buffer),
+      dirty_start_(std::numeric_limits<text::Posn>::max()),
+      zoom_(0.0f) {}
 
 TextBlock::TextLineCache::~TextLineCache() {
   for (auto& entry : lines_) {
@@ -86,7 +90,7 @@ void TextBlock::TextLineCache::Invalidate(const gfx::RectF& new_bounds,
   if (bounds_ == new_bounds)
     return;
 
-  if (!lines_.empty() && bounds_.width() != new_bounds.width()){
+  if (!lines_.empty() && bounds_.width() != new_bounds.width()) {
     std::vector<text::Posn> dirty_offsets;
     for (auto it : lines_) {
       auto const line = it.second;
@@ -120,17 +124,17 @@ void TextBlock::TextLineCache::Register(TextLine* line) {
   UI_ASSERT_DOM_LOCKED();
   DCHECK_GE(line->GetEnd(), line->GetStart());
   lines_[line->GetStart()] = line;
-  #if _DEBUG
-    auto it = lines_.find(line->GetStart());
-    if (it != lines_.begin()) {
-      --it;
-      DCHECK_LE(it->second->GetEnd(), line->GetStart());
-      ++it;
-    }
+#if _DEBUG
+  auto it = lines_.find(line->GetStart());
+  if (it != lines_.begin()) {
+    --it;
+    DCHECK_LE(it->second->GetEnd(), line->GetStart());
     ++it;
-    if (it != lines_.end())
-      DCHECK_GE(it->second->GetStart(), line->GetEnd());
-  #endif
+  }
+  ++it;
+  if (it != lines_.end())
+    DCHECK_GE(it->second->GetStart(), line->GetEnd());
+#endif
 }
 
 void TextBlock::TextLineCache::RemoveDirtyLines() {
@@ -156,8 +160,7 @@ void TextBlock::TextLineCache::RemoveDirtyLines() {
   }
 
   DCHECK_GE(dirty_start, it->second->GetStart());
-  while (it != lines_.end() &&
-         it->second->GetStart() < dirty_start &&
+  while (it != lines_.end() && it->second->GetStart() < dirty_start &&
          it->second->GetEnd() < dirty_start) {
     ++it;
   }
@@ -188,14 +191,16 @@ void TextBlock::TextLineCache::RemoveAllLines() {
 // TextBlock
 //
 TextBlock::TextBlock(text::Buffer* text_buffer)
-    : dirty_(true), dirty_line_point_(true), format_counter_(0),
-      lines_height_(0), text_buffer_(text_buffer),
-      text_line_cache_(new TextLineCache(text_buffer)), view_start_(0),
-      zoom_(1.0f) {
-}
+    : dirty_(true),
+      dirty_line_point_(true),
+      format_counter_(0),
+      lines_height_(0),
+      text_buffer_(text_buffer),
+      text_line_cache_(new TextLineCache(text_buffer)),
+      view_start_(0),
+      zoom_(1.0f) {}
 
-TextBlock::~TextBlock() {
-}
+TextBlock::~TextBlock() {}
 
 void TextBlock::Append(TextLine* line) {
   UI_ASSERT_DOM_LOCKED();
@@ -223,8 +228,7 @@ void TextBlock::DidDeleteAt(text::Posn offset, size_t length) {
   InvalidateLines(offset);
   if (view_start_ <= offset)
     return;
-  view_start_ = std::max(static_cast<text::Posn>(view_start_ - length),
-                         offset);
+  view_start_ = std::max(static_cast<text::Posn>(view_start_ - length), offset);
 }
 
 void TextBlock::DidInsertAt(text::Posn offset, size_t length) {
@@ -347,8 +351,7 @@ bool TextBlock::FormatIfNeeded() {
 
 TextLine* TextBlock::FormatLine(TextFormatter* formatter) {
   UI_ASSERT_DOM_LOCKED();
-  auto const cached_line = text_line_cache_->FindLine(
-      formatter->text_offset());
+  auto const cached_line = text_line_cache_->FindLine(formatter->text_offset());
   if (cached_line) {
     formatter->set_text_offset(cached_line->GetEnd());
     return cached_line;

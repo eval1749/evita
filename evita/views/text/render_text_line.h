@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_render_text_line_h)
-#define INCLUDE_evita_views_text_render_text_line_h
+#ifndef EVITA_VIEWS_TEXT_RENDER_TEXT_LINE_H_
+#define EVITA_VIEWS_TEXT_RENDER_TEXT_LINE_H_
 
 #include <stdint.h>
 
@@ -24,51 +24,52 @@ class TextBlock;
 class TextSelection;
 
 class TextLine final {
-  private: gfx::RectF bounds_;
-  private: std::vector<Cell*> cells_;
-  private: mutable uint32_t m_nHash;
-  private: Posn m_lStart;
-  private: Posn m_lEnd;
+ public:
+  TextLine();
+  ~TextLine();
 
-  private: TextLine(const TextLine& other);
-  public: TextLine();
-  public: ~TextLine();
+  float bottom() const { return bounds_.bottom; }
+  const gfx::PointF& bottom_right() const { return bounds_.bottom_right(); }
+  const gfx::RectF& bounds() const { return bounds_; }
+  const std::vector<Cell*>& cells() const { return cells_; }
+  float height() const { return bounds_.height(); }
+  Cell* last_cell() const { return cells_.back(); }
+  float left() const { return bounds_.left; }
+  float right() const { return bounds_.right; }
+  float top() const { return bounds_.top; }
+  const gfx::PointF origin() const { return bounds_.origin(); }
+  void set_origin(const gfx::PointF& origin);
+  void set_start(Posn start) { m_lStart = start; }
+  text::Posn text_end() const { return m_lEnd; }
+  text::Posn text_start() const { return m_lStart; }
 
-  public: float bottom() const { return bounds_.bottom; }
-  public: const gfx::PointF& bottom_right() const {
-    return bounds_.bottom_right();
-  }
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  public: const std::vector<Cell*>& cells() const { return cells_; }
-  public: float height() const { return bounds_.height(); }
-  public: Cell* last_cell() const { return cells_.back(); }
-  public: float left() const { return bounds_.left; }
-  public: float right() const { return bounds_.right; }
-  public: float top() const { return bounds_.top; }
-  public: const gfx::PointF origin() const { return bounds_.origin(); }
-  public: void set_origin(const gfx::PointF& origin);
-  public: void set_start(Posn start) { m_lStart = start; }
-  public: text::Posn text_end() const { return m_lEnd; }
-  public: text::Posn text_start() const { return m_lStart; }
+  void AddCell(Cell* cell);
+  gfx::RectF CalculateSelectionRect(const TextSelection& selection) const;
+  TextLine* Copy() const;
+  bool Equal(const TextLine*) const;
+  void Fix(float ascent, float descent);
+  Posn GetEnd() const { return m_lEnd; }
+  float GetHeight() const { return bounds_.height(); }
+  Posn GetStart() const { return m_lStart; }
+  float GetWidth() const { return bounds_.width(); }
+  uint Hash() const;
+  gfx::RectF HitTestTextPosition(Posn lPosn) const;
+  Posn MapXToPosn(float x) const;
+  void Render(gfx::Canvas* canvas) const;
 
-  public: void AddCell(Cell* cell);
-  public: gfx::RectF CalculateSelectionRect(
-      const TextSelection& selection) const;
-  private: bool Contains(text::Posn offset) const;
-  public: TextLine* Copy() const;
-  public: bool Equal(const TextLine*) const;
-  public: void Fix(float ascent, float descent);
-  public: Posn GetEnd() const { return m_lEnd; }
-  public: float GetHeight() const { return bounds_.height(); }
-  public: Posn GetStart() const { return m_lStart; }
-  public: float GetWidth() const { return bounds_.width(); }
-  public: uint Hash() const;
-  public: gfx::RectF HitTestTextPosition(Posn lPosn) const;
-  public: Posn MapXToPosn(float x) const;
-  public: void Render(gfx::Canvas* canvas) const;
+ private:
+  TextLine(const TextLine& other);
+
+  bool Contains(text::Posn offset) const;
+
+  gfx::RectF bounds_;
+  std::vector<Cell*> cells_;
+  mutable uint32_t m_nHash;
+  Posn m_lStart;
+  Posn m_lEnd;
 };
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_text_render_text_line_h)
+#endif  // EVITA_VIEWS_TEXT_RENDER_TEXT_LINE_H_

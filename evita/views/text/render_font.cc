@@ -5,6 +5,7 @@
 #include "evita/views/text/render_font.h"
 
 #include <unordered_map>
+#include <vector>
 
 #include "base/logging.h"
 #include "common/memory/singleton.h"
@@ -34,15 +35,19 @@ namespace rendering {
 //
 // Font::Cache
 //
-class Font::Cache : public common::Singleton<Font::Cache> {
+class Font::Cache final : public common::Singleton<Font::Cache> {
   DECLARE_SINGLETON_CLASS(Font::Cache);
 
-  private: std::unordered_map<gfx::FontProperties, Font*> map_;
+ public:
+  const Font& GetOrCreate(const gfx::FontProperties& font_props);
 
-  private: Cache() = default;
-  private: ~Cache() = default;
+ private:
+  Cache() = default;
+  ~Cache() = default;
 
-  public: const Font& GetOrCreate(const gfx::FontProperties& font_props);
+  std::unordered_map<gfx::FontProperties, Font*> map_;
+
+  DISALLOW_COPY_AND_ASSIGN(Cache);
 };
 
 const Font& Font::Cache::GetOrCreate(const gfx::FontProperties& font_props) {
@@ -59,35 +64,39 @@ const Font& Font::Cache::GetOrCreate(const gfx::FontProperties& font_props) {
 // Font
 //
 class Font::FontImpl {
-  private: const std::unique_ptr<gfx::FontFace> font_face_;
-  private: float const em_size_; // the logical size of the font in DIP units.
-  private: float const pixels_per_dip_;
-  private: const DWRITE_FONT_METRICS metrics_;
-
-  public: FontImpl(const gfx::FontProperties& properties);
+ public:
+  explicit FontImpl(const gfx::FontProperties& properties);
 
   // [C]
-  public: SimpleMetrics CalculateMetrics() const;
-  private: uint32_t CalculateFixedWidth() const;
-  public: float ConvertToDip(uint32_t design_unit) const;
-  public: float ConvertToDip(int design_unit) const;
+  SimpleMetrics CalculateMetrics() const;
+  float ConvertToDip(uint32_t design_unit) const;
+  float ConvertToDip(int design_unit) const;
 
   // [D]
-  public: void DrawText(gfx::Canvas* canvas, const gfx::Brush& text_brush,
-                        const gfx::PointF& baseline, const base::char16* chars,
-                        size_t num_chars) const;
+  void DrawText(gfx::Canvas* canvas,
+                const gfx::Brush& text_brush,
+                const gfx::PointF& baseline,
+                const base::char16* chars,
+                size_t num_chars) const;
 
   // [G]
-  public: std::vector<uint16_t> GetGlyphIndexes(const base::char16* chars,
-                                                size_t num_chars) const;
-  public: std::vector<DWRITE_GLYPH_METRICS> GetGlyphMetrics(
-      const base::char16* chars, size_t num_chars) const;
-  private: std::vector<DWRITE_GLYPH_METRICS> GetGlyphMetrics(
-      const std::vector<uint16_t> glyph_indexes) const;
-  private: DWRITE_FONT_METRICS GetMetrics() const;
-
+  std::vector<uint16_t> GetGlyphIndexes(const base::char16* chars,
+                                        size_t num_chars) const;
+  std::vector<DWRITE_GLYPH_METRICS> GetGlyphMetrics(const base::char16* chars,
+                                                    size_t num_chars) const;
   // [H]
-  public: bool HasCharacter(base::char16 sample) const;
+  bool HasCharacter(base::char16 sample) const;
+
+ private:
+  uint32_t CalculateFixedWidth() const;
+  std::vector<DWRITE_GLYPH_METRICS> GetGlyphMetrics(
+      const std::vector<uint16_t> glyph_indexes) const;
+  DWRITE_FONT_METRICS GetMetrics() const;
+
+  const std::unique_ptr<gfx::FontFace> font_face_;
+  float const em_size_;  // the logical size of the font in DIP units.
+  float const pixels_per_dip_;
+  const DWRITE_FONT_METRICS metrics_;
 
   DISALLOW_COPY_AND_ASSIGN(FontImpl);
 };
@@ -96,16 +105,14 @@ Font::FontImpl::FontImpl(const gfx::FontProperties& properties)
     : font_face_(new gfx::FontFace(properties)),
       em_size_(properties.font_size_pt * 96.0f / 72.0f),
       pixels_per_dip_(gfx::FactorySet::instance()->pixels_per_dip().height),
-      metrics_(GetMetrics()) {
-}
+      metrics_(GetMetrics()) {}
 
 Font::SimpleMetrics Font::FontImpl::CalculateMetrics() const {
   SimpleMetrics metrics;
   metrics.ascent = ConvertToDip(metrics_.ascent);
   metrics.descent = ConvertToDip(metrics_.descent);
-  metrics.height = ConvertToDip(metrics_.ascent +
-                                metrics_.descent +
-                                metrics_.lineGap);
+  metrics.height =
+      ConvertToDip(metrics_.ascent + metrics_.descent + metrics_.lineGap);
   metrics.fixed_width = ConvertToDip(CalculateFixedWidth());
   metrics.underline = ConvertToDip(-metrics_.underlinePosition);
   metrics.underline_thickness = ConvertToDip(metrics_.underlineThickness);
@@ -120,8 +127,8 @@ uint32_t Font::FontImpl::CalculateFixedWidth() const {
     }
   }
 
-  const auto metrics = GetGlyphMetrics(cacheable_chars,
-                                       arraysize(cacheable_chars));
+  const auto metrics =
+      GetGlyphMetrics(cacheable_chars, arraysize(cacheable_chars));
   auto const width = metrics[0].advanceWidth;
   for (const auto metric : metrics) {
     if (width != metric.advanceWidth)
@@ -139,10 +146,11 @@ float Font::FontImpl::ConvertToDip(int design_unit) const {
   return ConvertToDip(static_cast<uint32_t>(design_unit));
 }
 
-void Font::FontImpl::DrawText(
-    gfx::Canvas* canvas, const gfx::Brush& text_brush,
-    const gfx::PointF& baseline, const base::char16* chars,
-    size_t num_chars) const {
+void Font::FontImpl::DrawText(gfx::Canvas* canvas,
+                              const gfx::Brush& text_brush,
+                              const gfx::PointF& baseline,
+                              const base::char16* chars,
+                              size_t num_chars) const {
   DCHECK_GE(num_chars, 1u);
   const auto glyph_indexes = GetGlyphIndexes(chars, num_chars);
 
@@ -150,7 +158,7 @@ void Font::FontImpl::DrawText(
   {
     const auto glyph_metrics = GetGlyphMetrics(glyph_indexes);
     auto metrics_it = glyph_metrics.begin();
-    for (auto& it: glyph_advances) {
+    for (auto& it : glyph_advances) {
       it = ConvertToDip(metrics_it->advanceWidth);
       ++metrics_it;
     }
@@ -171,8 +179,8 @@ void Font::FontImpl::DrawText(
                           DWRITE_MEASURING_MODE_GDI_NATURAL);
 }
 
-std::vector<uint16_t> Font::FontImpl::GetGlyphIndexes(
-    const base::char16* chars, size_t num_chars) const {
+std::vector<uint16_t> Font::FontImpl::GetGlyphIndexes(const base::char16* chars,
+                                                      size_t num_chars) const {
   DCHECK_GE(num_chars, 1u);
   std::vector<uint32> code_points(num_chars);
   auto it = code_points.begin();
@@ -181,14 +189,16 @@ std::vector<uint16_t> Font::FontImpl::GetGlyphIndexes(
     ++it;
   }
   std::vector<uint16> glyph_indexes(num_chars);
-  COM_VERIFY((*font_face_)->GetGlyphIndices(
-      &code_points[0], static_cast<DWORD>(code_points.size()),
-      &glyph_indexes[0]));
+  COM_VERIFY((*font_face_)
+                 ->GetGlyphIndices(&code_points[0],
+                                   static_cast<DWORD>(code_points.size()),
+                                   &glyph_indexes[0]));
   return std::move(glyph_indexes);
 }
 
 std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
-    const base::char16* chars, size_t num_chars) const {
+    const base::char16* chars,
+    size_t num_chars) const {
   return GetGlyphMetrics(GetGlyphIndexes(chars, num_chars));
 }
 
@@ -198,17 +208,20 @@ std::vector<DWRITE_GLYPH_METRICS> Font::FontImpl::GetGlyphMetrics(
   auto const use_gdi_natural = true;
   auto const is_side_ways = false;
   std::vector<DWRITE_GLYPH_METRICS> metrics(glyph_indexes.size());
-  COM_VERIFY((*font_face_)->GetGdiCompatibleGlyphMetrics(
-      em_size_, pixels_per_dip_, transform, use_gdi_natural,
-      &glyph_indexes[0], static_cast<DWORD>(glyph_indexes.size()),
-      &metrics[0], is_side_ways));
+  COM_VERIFY((*font_face_)
+                 ->GetGdiCompatibleGlyphMetrics(
+                     em_size_, pixels_per_dip_, transform, use_gdi_natural,
+                     &glyph_indexes[0],
+                     static_cast<DWORD>(glyph_indexes.size()), &metrics[0],
+                     is_side_ways));
   return std::move(metrics);
 }
 
 DWRITE_FONT_METRICS Font::FontImpl::GetMetrics() const {
   DWRITE_FONT_METRICS metrics;
-  COM_VERIFY((*font_face_)->GetGdiCompatibleMetrics(
-      em_size_, pixels_per_dip_, nullptr, &metrics));
+  COM_VERIFY((*font_face_)
+                 ->GetGdiCompatibleMetrics(em_size_, pixels_per_dip_, nullptr,
+                                           &metrics));
   return metrics;
 }
 
@@ -225,20 +238,21 @@ bool Font::FontImpl::HasCharacter(base::char16 sample) const {
 //
 Font::Font(const gfx::FontProperties& properties)
     : font_impl_(new FontImpl(properties)),
-      metrics_(font_impl_->CalculateMetrics()) {
-}
+      metrics_(font_impl_->CalculateMetrics()) {}
 
-Font::~Font() {
-}
+Font::~Font() {}
 
-void Font::DrawText(gfx::Canvas* canvas, const gfx::Brush& text_brush,
-                    const gfx::RectF& rect, const base::char16* chars,
+void Font::DrawText(gfx::Canvas* canvas,
+                    const gfx::Brush& text_brush,
+                    const gfx::RectF& rect,
+                    const base::char16* chars,
                     size_t num_chars) const {
   auto const baseline = rect.origin() + gfx::SizeF(0.0f, metrics_.ascent);
   font_impl_->DrawText(canvas, text_brush, baseline, chars, num_chars);
 }
 
-void Font::DrawText(gfx::Canvas* canvas,const gfx::Brush& text_brush,
+void Font::DrawText(gfx::Canvas* canvas,
+                    const gfx::Brush& text_brush,
                     const gfx::RectF& rect,
                     const base::string16& string) const {
   DrawText(canvas, text_brush, rect, string.data(),
@@ -261,7 +275,7 @@ float Font::GetTextWidth(const base::char16* chars, size_t num_chars) const {
 
   const auto metrics = font_impl_->GetGlyphMetrics(chars, num_chars);
   auto width = 0;
-  for (const auto metric: metrics) {
+  for (const auto metric : metrics) {
     width += metric.advanceWidth;
   }
   return font_impl_->ConvertToDip(width);

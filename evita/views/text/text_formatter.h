@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_text_formatter_h)
-#define INCLUDE_evita_views_text_text_formatter_h
+#ifndef EVITA_VIEWS_TEXT_TEXT_FORMATTER_H_
+#define EVITA_VIEWS_TEXT_TEXT_FORMATTER_H_
 
 #include <memory>
 
@@ -26,32 +26,38 @@ class TextSelection;
 class TextSelectionModel;
 
 class TextFormatter final {
-  private: class TextScanner;
+ public:
+  TextFormatter(const text::Buffer* buffer,
+                text::Posn text_offset,
+                const gfx::RectF& bounds,
+                float zoom);
+  ~TextFormatter();
 
-  private: gfx::RectF bounds_;
-  private: RenderStyle default_render_style_;
-  private: std::unique_ptr<TextScanner> text_scanner_;
-  private: float zoom_;
+  text::Posn text_offset() const;
+  void set_text_offset(text::Posn new_text_offset);
 
-  public: TextFormatter(const text::Buffer* buffer, text::Posn text_offset,
-                        const gfx::RectF& bounds, float zoom);
-  public: ~TextFormatter();
+  TextLine* FormatLine(text::Posn text_offset);
+  TextLine* FormatLine();
+  Cell* FormatMarker(TextMarker marker_name);
 
-  public: text::Posn text_offset() const;
-  public: void set_text_offset(text::Posn new_text_offset);
+  static TextSelection FormatSelection(
+      const text::Buffer* buffer,
+      const TextSelectionModel& selection_model);
 
-  public: TextLine* FormatLine(text::Posn text_offset);
-  public: TextLine* FormatLine();
-  private: Cell* FormatChar(Cell*, float x, char16);
-  private: Cell* FormatMarker(TextMarker marker_name);
+ private:
+  class TextScanner;
 
-  public: static TextSelection FormatSelection(
-      const text::Buffer* buffer, const TextSelectionModel& selection_model);
+  Cell* FormatChar(Cell*, float x, char16);
+
+  gfx::RectF bounds_;
+  RenderStyle default_render_style_;
+  std::unique_ptr<TextScanner> text_scanner_;
+  float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(TextFormatter);
 };
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_text_text_formatter_h)
+#endif  // EVITA_VIEWS_TEXT_TEXT_FORMATTER_H_

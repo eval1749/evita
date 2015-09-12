@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <string>
+
 #include "evita/views/text/text_formatter.h"
 
 #include "base/logging.h"
@@ -30,8 +33,9 @@ const float kLeftMargin = 10.0f;
 const int kTabWidth = 4;
 
 float AlignHeightToPixel(float height) {
-  return gfx::FactorySet::instance()->AlignToPixel(
-      gfx::SizeF(0.0f, height)).height;
+  return gfx::FactorySet::instance()
+      ->AlignToPixel(gfx::SizeF(0.0f, height))
+      .height;
 }
 
 float AlignWidthToPixel(float width) {
@@ -41,15 +45,13 @@ float AlignWidthToPixel(float width) {
 inline char16 toxdigit(int k) {
   if (k <= 9)
     return static_cast<char16>(k + '0');
- return static_cast<char16>(k - 10 + 'A');
+  return static_cast<char16>(k - 10 + 'A');
 }
 
 gfx::ColorF CssColorToColorF(const css::Color& color) {
-  return gfx::ColorF(
-      static_cast<float>(color.red()) / 255,
-      static_cast<float>(color.green()) / 255,
-      static_cast<float>(color.blue()) / 255,
-      color.alpha());
+  return gfx::ColorF(static_cast<float>(color.red()) / 255,
+                     static_cast<float>(color.green()) / 255,
+                     static_cast<float>(color.blue()) / 255, color.alpha());
 }
 
 const Font* GetFont(const css::Style& style) {
@@ -72,58 +74,65 @@ RenderStyle MakeRenderStyle(const css::Style& style, const Font* font) {
 // Enumerator for characters and interval
 //
 class TextFormatter::TextScanner final {
-  private: base::char16 buffer_cache_[80];
-  private: const text::Buffer* const buffer_;
-  private: text::Posn buffer_cache_end_;
-  private: text::Posn buffer_cache_start_;
-  private: text::Interval* interval_;
-  private: mutable const text::Marker* spelling_marker_;
-  private: mutable const text::Marker* syntax_marker_;
-  private: text::Posn text_offset_;
+ public:
+  explicit TextScanner(const text::Buffer* buffer);
+  ~TextScanner() = default;
 
-  public: explicit TextScanner(const text::Buffer* buffer);
-  public: ~TextScanner() = default;
-
-  public: const common::AtomicString& spelling() const;
-  public: const css::StyleResolver* style_resolver() const {
+  const common::AtomicString& spelling() const;
+  const css::StyleResolver* style_resolver() const {
     return buffer_->style_resolver();
   }
-  public: const common::AtomicString& syntax() const;
-  public: text::Posn text_offset() const { return text_offset_; }
-  public: void set_text_offset(text::Posn new_text_offset) {
+  const common::AtomicString& syntax() const;
+  text::Posn text_offset() const { return text_offset_; }
+  void set_text_offset(text::Posn new_text_offset) {
     text_offset_ = new_text_offset;
   }
 
-  public: bool AtEnd() const;
-  public: base::char16 GetChar();
-  public: const css::Style& GetStyle();
-  public: void Next();
+  bool AtEnd() const;
+  base::char16 GetChar();
+  const css::Style& GetStyle();
+  void Next();
+
+ private:
+  base::char16 buffer_cache_[80];
+  const text::Buffer* const buffer_;
+  text::Posn buffer_cache_end_;
+  text::Posn buffer_cache_start_;
+  text::Interval* interval_;
+  mutable const text::Marker* spelling_marker_;
+  mutable const text::Marker* syntax_marker_;
+  text::Posn text_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(TextScanner);
 };
 
 TextFormatter::TextScanner::TextScanner(const text::Buffer* buffer)
-    : buffer_(buffer), buffer_cache_end_(0), buffer_cache_start_(0),
+    : buffer_(buffer),
+      buffer_cache_end_(0),
+      buffer_cache_start_(0),
       interval_(nullptr),
-      spelling_marker_(nullptr), syntax_marker_(nullptr), text_offset_(0) {
-}
+      spelling_marker_(nullptr),
+      syntax_marker_(nullptr),
+      text_offset_(0) {}
 
 const common::AtomicString& TextFormatter::TextScanner::spelling() const {
   if (!spelling_marker_ || text_offset_ >= spelling_marker_->end()) {
-    spelling_marker_ = buffer_->spelling_markers()->
-        GetLowerBoundMarker(text_offset_);
+    spelling_marker_ =
+        buffer_->spelling_markers()->GetLowerBoundMarker(text_offset_);
   }
-  return spelling_marker_ && spelling_marker_->Contains(text_offset_) ?
-      spelling_marker_->type() : common::AtomicString::Empty();
+  return spelling_marker_ && spelling_marker_->Contains(text_offset_)
+             ? spelling_marker_->type()
+             : common::AtomicString::Empty();
 }
 
 const common::AtomicString& TextFormatter::TextScanner::syntax() const {
   if (!syntax_marker_ || text_offset_ >= syntax_marker_->end()) {
-    syntax_marker_ = buffer_->syntax_markers()->
-        GetLowerBoundMarker(text_offset_);
+    syntax_marker_ =
+        buffer_->syntax_markers()->GetLowerBoundMarker(text_offset_);
   }
-  return syntax_marker_ && syntax_marker_->Contains(text_offset_) ?
-      syntax_marker_->type() : common::AtomicString::Empty();
+  return syntax_marker_ && syntax_marker_->Contains(text_offset_)
+             ? syntax_marker_->type()
+             : common::AtomicString::Empty();
 }
 
 bool TextFormatter::TextScanner::AtEnd() const {
@@ -139,8 +148,7 @@ base::char16 TextFormatter::TextScanner::GetChar() {
     buffer_cache_end_ = std::min(
         static_cast<text::Posn>(buffer_cache_start_ + arraysize(buffer_cache_)),
         buffer_->GetEnd());
-    buffer_->GetText(buffer_cache_, buffer_cache_start_,
-                     buffer_cache_end_);
+    buffer_->GetText(buffer_cache_, buffer_cache_start_, buffer_cache_end_);
   }
   DCHECK_GE(text_offset_, buffer_cache_start_);
   DCHECK_LT(text_offset_, buffer_cache_end_);
@@ -167,17 +175,18 @@ void TextFormatter::TextScanner::Next() {
 //
 TextFormatter::TextFormatter(const text::Buffer* text_buffer,
                              text::Posn text_offset,
-                             const gfx::RectF& bounds, float zoom)
+                             const gfx::RectF& bounds,
+                             float zoom)
     : bounds_(bounds),
       default_render_style_(GetRenderStyle(text_buffer->GetDefaultStyle())),
-      text_scanner_(new TextScanner(text_buffer)), zoom_(zoom) {
+      text_scanner_(new TextScanner(text_buffer)),
+      zoom_(zoom) {
   DCHECK(!bounds_.empty());
   DCHECK_GT(zoom_, 0.0f);
   text_scanner_->set_text_offset(text_offset);
 }
 
-TextFormatter::~TextFormatter() {
-}
+TextFormatter::~TextFormatter() {}
 
 text::Posn TextFormatter::text_offset() const {
   return text_scanner_->text_offset();
@@ -266,26 +275,26 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
 
   auto const spelling = text_scanner_->spelling();
   if (!spelling.empty()) {
-    style.Merge(text_scanner_->style_resolver()->
-        ResolveWithoutDefaults(spelling));
+    style.Merge(
+        text_scanner_->style_resolver()->ResolveWithoutDefaults(spelling));
   }
 
   auto const syntax = text_scanner_->syntax();
   if (!syntax.empty()) {
-    style.Merge(text_scanner_->style_resolver()->
-        ResolveWithoutDefaults(syntax));
+    style.Merge(
+        text_scanner_->style_resolver()->ResolveWithoutDefaults(syntax));
   }
 
-  style.Merge(text_scanner_->style_resolver()->Resolve(
-    css::StyleSelector::defaults()));
+  style.Merge(
+      text_scanner_->style_resolver()->Resolve(css::StyleSelector::defaults()));
   style.set_font_size(style.font_size() * zoom_);
 
   if (wch == 0x09) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
     auto const font = FontSet::GetFont(style, 'x');
-    auto const widthTab = AlignWidthToPixel(font->GetCharWidth(' ')) *
-                          kTabWidth;
+    auto const widthTab =
+        AlignWidthToPixel(font->GetCharWidth(' ')) * kTabWidth;
     auto const x2 = (x + widthTab - kLeftMargin) / widthTab * widthTab;
     auto const width = (x2 + kLeftMargin) - x;
     auto const width_of_M = AlignWidthToPixel(font->GetCharWidth('M'));
@@ -297,8 +306,8 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
                           TextMarker::Tab);
   }
 
-  auto const font = wch < 0x20 || wch == 0xFEFF ?
-      nullptr : FontSet::GetFont(style, wch);
+  auto const font =
+      wch < 0x20 || wch == 0xFEFF ? nullptr : FontSet::GetFont(style, wch);
 
   if (!font) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
@@ -347,8 +356,8 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
 
 Cell* TextFormatter::FormatMarker(TextMarker marker_name) {
   auto style = text_scanner_->GetStyle();
-  style.Merge(text_scanner_->style_resolver()->Resolve(
-    css::StyleSelector::defaults()));
+  style.Merge(
+      text_scanner_->style_resolver()->Resolve(css::StyleSelector::defaults()));
   style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
       css::StyleSelector::end_of_line_marker()));
   style.set_font_size(style.font_size() * zoom_);
@@ -361,10 +370,11 @@ Cell* TextFormatter::FormatMarker(TextMarker marker_name) {
 }
 
 TextSelection TextFormatter::FormatSelection(
-    const text::Buffer* buffer, const TextSelectionModel& selection_model) {
+    const text::Buffer* buffer,
+    const TextSelectionModel& selection_model) {
   const auto& style = buffer->style_resolver()->ResolveWithoutDefaults(
-      selection_model.disabled() ? css::StyleSelector::inactive_selection() :
-                                   css::StyleSelector::active_selection());
+      selection_model.disabled() ? css::StyleSelector::inactive_selection()
+                                 : css::StyleSelector::active_selection());
   return TextSelection(selection_model, CssColorToColorF(style.bgcolor()));
 }
 

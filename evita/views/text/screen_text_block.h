@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_screen_text_block_h)
-#define INCLUDE_evita_views_text_screen_text_block_h
+#ifndef EVITA_VIEWS_TEXT_SCREEN_TEXT_BLOCK_H_
+#define EVITA_VIEWS_TEXT_SCREEN_TEXT_BLOCK_H_
 
 #include <memory>
 #include <vector>
@@ -28,40 +28,44 @@ class TextLine;
 class TextBlock;
 
 class ScreenTextBlock final {
-  private: class Caret;
-  private: class RenderContext;
+ public:
+  explicit ScreenTextBlock(ui::CaretOwner* caret_owner);
+  ~ScreenTextBlock();
+
+  bool dirty() const { return dirty_; }
+
+  void Render(gfx::Canvas* canvas,
+              const TextBlock* text_block,
+              const TextSelection& selection,
+              base::Time now);
+  void RenderSelectionIfNeeded(gfx::Canvas* canvas,
+                               const TextSelection& selection,
+                               base::Time now);
+  void Reset();
+  void SetBounds(const gfx::RectF& new_bounds);
+
+ private:
+  class Caret;
+  class RenderContext;
   friend class RenderContext;
 
-  private: gfx::RectF bounds_;
-  private: const std::unique_ptr<Caret> caret_;
-  private: bool dirty_;
-  private: bool has_screen_bitmap_;
-  private: std::vector<TextLine*> lines_;
-  private: TextSelection selection_;
+  gfx::RectF HitTestTextPosition(text::Posn offset) const;
+  void RenderSelection(gfx::Canvas* canvas,
+                       const TextSelection& selection,
+                       base::Time now);
+  void UpdateCaret(gfx::Canvas* canvas, base::Time now);
 
-  public: explicit ScreenTextBlock(ui::CaretOwner* caret_owner);
-  public: virtual ~ScreenTextBlock();
-
-  public: bool dirty() const { return dirty_; }
-
-  private: gfx::RectF HitTestTextPosition(text::Posn offset) const;
-  public: void Render(gfx::Canvas* canvas, const TextBlock* text_block,
-                      const TextSelection& selection,
-                      base::Time now);
-  private: void RenderSelection(gfx::Canvas* canvas,
-                                const TextSelection& selection,
-                                base::Time now);
-  public: void RenderSelectionIfNeeded(gfx::Canvas* canvas,
-                                       const TextSelection& selection,
-                                       base::Time now);
-  public: void Reset();
-  public: void SetBounds(const gfx::RectF& new_bounds);
-  private: void UpdateCaret(gfx::Canvas* canvas, base::Time now);
+  gfx::RectF bounds_;
+  const std::unique_ptr<Caret> caret_;
+  bool dirty_;
+  bool has_screen_bitmap_;
+  std::vector<TextLine*> lines_;
+  TextSelection selection_;
 
   DISALLOW_COPY_AND_ASSIGN(ScreenTextBlock);
 };
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_text_screen_text_block_h)
+#endif  // EVITA_VIEWS_TEXT_SCREEN_TEXT_BLOCK_H_

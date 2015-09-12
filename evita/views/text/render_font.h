@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_render_font_h)
-#define INCLUDE_evita_views_text_render_font_h
+#ifndef EVITA_VIEWS_TEXT_RENDER_FONT_H_
+#define EVITA_VIEWS_TEXT_RENDER_FONT_H_
 
 #include <functional>
 #include <memory>
+#include <string>
 
 #include "base/strings/string16.h"
 #include "evita/gfx/forward.h"
@@ -23,12 +24,34 @@ namespace rendering {
 // Font
 //
 class Font {
-  private: class Cache;
+ public:
+  class Cache;
   friend class Cache;
 
-  private: class FontImpl;
+  float descent() const { return metrics_.descent; }
+  float height() const { return metrics_.height; }
+  float underline() const { return metrics_.underline; }
+  float underline_thickness() const { return metrics_.underline_thickness; }
 
-  private: struct SimpleMetrics {
+  void DrawText(gfx::Canvas* canvas,
+                const gfx::Brush& text_brush,
+                const gfx::RectF& rect,
+                const base::char16* chars,
+                size_t num_chars) const;
+  void DrawText(gfx::Canvas* canvas,
+                const gfx::Brush& text_brush,
+                const gfx::RectF& rect,
+                const base::string16& string) const;
+  static const Font& Get(const gfx::FontProperties& properties);
+  float GetCharWidth(base::char16 ch) const;
+  float GetTextWidth(const base::char16* chars, size_t num_chars) const;
+  float GetTextWidth(const base::string16& string) const;
+  bool HasCharacter(base::char16) const;
+
+ private:
+  class FontImpl;
+
+  struct SimpleMetrics {
     float ascent;
     float descent;
     float height;
@@ -37,36 +60,13 @@ class Font {
     float underline_thickness;
   };
 
-  private: const std::unique_ptr<FontImpl> font_impl_;
-  private: const SimpleMetrics metrics_;
+  explicit Font(const gfx::FontProperties& properties);
+  ~Font();
 
-  private: Font(const gfx::FontProperties& properties);
-  private: ~Font();
+  float ascent() const { return metrics_.ascent; }
 
-  private: float ascent() const { return metrics_.ascent; }
-  public: float descent() const { return metrics_.descent; }
-  public: float height() const { return metrics_.height; }
-  public: float underline() const { return metrics_.underline; }
-  public: float underline_thickness() const {
-    return metrics_.underline_thickness;
-  }
-
-  // [D]
-  public: void DrawText(gfx::Canvas* canvas, const gfx::Brush& text_brush,
-                        const gfx::RectF& rect, const base::char16* chars,
-                        size_t num_chars) const;
-  public: void DrawText(gfx::Canvas* canvas,const gfx::Brush& text_brush,
-                        const gfx::RectF& rect,
-                        const base::string16& string) const;
-
-  // [G]
-  public: static const Font& Get(const gfx::FontProperties& properties);
-  public: float GetCharWidth(base::char16 ch) const;
-  public: float GetTextWidth(const base::char16* chars, size_t num_chars) const;
-  public: float GetTextWidth(const base::string16& string) const;
-
-  // [H]
-  public: bool HasCharacter(base::char16) const;
+  const std::unique_ptr<FontImpl> font_impl_;
+  const SimpleMetrics metrics_;
 
   DISALLOW_COPY_AND_ASSIGN(Font);
 };
@@ -75,9 +75,10 @@ class Font {
 }  // namespace views
 
 namespace std {
-template<> struct hash<views::rendering::Font> {
+template <>
+struct hash<views::rendering::Font> {
   size_t operator()(const views::rendering::Font& font) const;
 };
-}  // namespace
+}  // namespace std
 
-#endif //!defined(INCLUDE_evita_views_text_render_font_h)
+#endif  // EVITA_VIEWS_TEXT_RENDER_FONT_H_

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define DEBUG_DIRTY  0
+#define DEBUG_DIRTY 0
 #define DEBUG_DISPBUF 0
 #define DEBUG_FORMAT 0
 #define DEBUG_RENDER 0
@@ -24,21 +24,21 @@
 #include "evita/views/text/text_formatter.h"
 
 namespace views {
-using namespace rendering;
+using namespace rendering;  // NOLINT
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextRenderer
 //
 TextRenderer::TextRenderer(text::Buffer* buffer, ui::CaretOwner* caret_owner)
-    : buffer_(buffer), format_counter_(0),
+    : buffer_(buffer),
+      format_counter_(0),
       screen_text_block_(new ScreenTextBlock(caret_owner)),
       should_render_(true),
-      text_block_(new TextBlock(buffer)), zoom_(1.0f) {
-}
+      text_block_(new TextBlock(buffer)),
+      zoom_(1.0f) {}
 
-TextRenderer::~TextRenderer() {
-}
+TextRenderer::~TextRenderer() {}
 
 void TextRenderer::DidChangeStyle(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
@@ -119,8 +119,8 @@ void TextRenderer::Paint(gfx::Canvas* canvas,
                          const TextSelectionModel& selection_model,
                          base::Time now) {
   DCHECK(!ShouldFormat());
-  const auto selection = TextFormatter::FormatSelection(buffer_,
-                                                        selection_model);
+  const auto selection =
+      TextFormatter::FormatSelection(buffer_, selection_model);
   if (!should_render_ && canvas->screen_bitmap()) {
     screen_text_block_->RenderSelectionIfNeeded(canvas, selection, now);
     return;
@@ -141,8 +141,8 @@ void TextRenderer::RenderRuler(gfx::Canvas* canvas) {
   auto const num_columns = 81;
   auto const width_of_M = font->GetCharWidth('M');
   auto const ruler_x = ::floor(bounds_.left + width_of_M * num_columns);
-  auto const ruler_bounds = gfx::RectF (
-      gfx::PointF(ruler_x, bounds_.top), gfx::SizeF(1.0f, bounds_.height()));
+  auto const ruler_bounds = gfx::RectF(gfx::PointF(ruler_x, bounds_.top),
+                                       gfx::SizeF(1.0f, bounds_.height()));
 
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, ruler_bounds);
   gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));

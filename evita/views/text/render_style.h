@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_render_style_h)
-#define INCLUDE_evita_views_text_render_style_h
+#ifndef EVITA_VIEWS_TEXT_RENDER_STYLE_H_
+#define EVITA_VIEWS_TEXT_RENDER_STYLE_H_
 
 #include <functional>
 
@@ -17,39 +17,40 @@ namespace rendering {
 class Font;
 
 class RenderStyle {
-  private: gfx::ColorF bgcolor_;
-  private: gfx::ColorF color_;
-  private: const Font* font_;
-  private: gfx::ColorF overlay_color_;
-  private: css::TextDecoration text_decoration_;
+ public:
+  RenderStyle(const css::Style& values, const Font& font);
+  RenderStyle(const css::Style& values, const Font* font);
+  RenderStyle(const RenderStyle& other);
+  RenderStyle();
+  ~RenderStyle();
 
-  public: RenderStyle(const css::Style& values, const Font& font);
-  public: RenderStyle(const css::Style& values, const Font* font);
-  public: RenderStyle(const RenderStyle& other);
-  public: RenderStyle();
-  public: ~RenderStyle();
+  bool operator==(const RenderStyle& other) const;
+  bool operator!=(const RenderStyle& other) const;
 
-  public: bool operator==(const RenderStyle& other) const;
-  public: bool operator!=(const RenderStyle& other) const;
+  const gfx::ColorF& bgcolor() const { return bgcolor_; }
+  const gfx::ColorF& color() const { return color_; }
+  const Font& font() const { return *font_; }
+  void set_fond(const Font& font) { font_ = &font; }
+  const gfx::ColorF& overlay_color() const { return overlay_color_; }
+  void set_overlay_color(const css::Color& color);
+  css::TextDecoration text_decoration() const { return text_decoration_; }
 
-  public: const gfx::ColorF& bgcolor() const { return bgcolor_; }
-  public: const gfx::ColorF& color() const { return color_; }
-  public: const Font& font() const { return *font_; }
-  public: void set_fond(const Font& font) { font_ = &font; }
-  public: const gfx::ColorF& overlay_color() const { return overlay_color_; }
-  public: void set_overlay_color(const css::Color& color);
-  public: css::TextDecoration text_decoration() const {
-    return text_decoration_;
-  }
+ private:
+  gfx::ColorF bgcolor_;
+  gfx::ColorF color_;
+  const Font* font_;
+  gfx::ColorF overlay_color_;
+  css::TextDecoration text_decoration_;
 };
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views
 
 namespace std {
-template<> struct hash<views::rendering::RenderStyle> {
+template <>
+struct hash<views::rendering::RenderStyle> {
   size_t operator()(const views::rendering::RenderStyle& style) const;
 };
 }  // namespace std
 
-#endif //!defined(INCLUDE_evita_views_text_render_style_h)
+#endif  // EVITA_VIEWS_TEXT_RENDER_STYLE_H_

@@ -23,14 +23,9 @@ TextLine::TextLine(const TextLine& other)
   }
 }
 
-TextLine::TextLine()
-    : m_nHash(0),
-      m_lStart(0),
-      m_lEnd(0) {
-}
+TextLine::TextLine() : m_nHash(0), m_lStart(0), m_lEnd(0) {}
 
-TextLine::~TextLine() {
-}
+TextLine::~TextLine() {}
 
 void TextLine::set_origin(const gfx::PointF& origin) {
   bounds_.right = bounds_.width() + origin.x;
@@ -44,10 +39,13 @@ gfx::RectF TextLine::CalculateSelectionRect(
   DCHECK(selection.is_range());
   if (selection.start() >= text_end() || selection.end() <= text_start())
     return gfx::RectF();
-  auto const left = HitTestTextPosition(
-      Contains(selection.start()) ? selection.start() : text_start()).left;
-  auto const right = Contains(selection.end()) ?
-      HitTestTextPosition(selection.end()).left : bounds_.right;
+  auto const left =
+      HitTestTextPosition(Contains(selection.start()) ? selection.start()
+                                                      : text_start())
+          .left;
+  auto const right = Contains(selection.end())
+                         ? HitTestTextPosition(selection.end()).left
+                         : bounds_.right;
   return gfx::RectF(left, bounds_.top, right, bounds_.bottom);
 }
 

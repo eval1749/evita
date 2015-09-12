@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <string>
+
 #include "evita/views/text/render_cell.h"
 
 #include "base/logging.h"
@@ -13,26 +16,32 @@ namespace rendering {
 
 namespace {
 
-void DrawText(gfx::Canvas* canvas, const Font& font,
-              const gfx::Brush& text_brush, const gfx::RectF& rect,
+void DrawText(gfx::Canvas* canvas,
+              const Font& font,
+              const gfx::Brush& text_brush,
+              const gfx::RectF& rect,
               const base::string16& string) {
   font.DrawText(canvas, text_brush, rect, string);
 }
 
-inline void FillRect(gfx::Canvas* canvas, const gfx::RectF& rect,
+inline void FillRect(gfx::Canvas* canvas,
+                     const gfx::RectF& rect,
                      gfx::ColorF color) {
   gfx::Brush fill_brush(canvas, color);
   canvas->FillRectangle(fill_brush, rect);
 }
 
-} // namespace
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // Cell
 //
 Cell::Cell(const RenderStyle& style, float width, float height, float descent)
-    : descent_(descent), height_(height), line_height_(height), style_(style),
+    : descent_(descent),
+      height_(height),
+      line_height_(height),
+      style_(style),
       width_(width) {
   DCHECK_GE(width, 1.0f);
   DCHECK_GE(height, 1.0f);
@@ -44,26 +53,23 @@ Cell::Cell(const Cell& other)
   line_height_ = other.line_height_;
 }
 
-Cell::~Cell() {
-}
+Cell::~Cell() {}
 
 float Cell::top() const {
   return line_height() - line_descent() - height() + descent();
 }
 
-void Cell::FillBackground(gfx::Canvas* canvas,
-                          const gfx::RectF& rect) const {
+void Cell::FillBackground(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
-                           ::ceilf(rect.bottom)),
+                              ::ceilf(rect.bottom)),
            style_.bgcolor());
 }
 
-void Cell::FillOverlay(gfx::Canvas* canvas,
-                       const gfx::RectF& rect) const {
+void Cell::FillOverlay(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   if (style_.overlay_color().alpha() == 0.0f)
     return;
   FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
-                           ::ceilf(rect.bottom)),
+                              ::ceilf(rect.bottom)),
            style_.overlay_color());
 }
 
@@ -94,7 +100,7 @@ gfx::RectF Cell::HitTestTextPosition(Posn) const {
   return gfx::RectF();
 }
 
-Posn Cell::MapXToPosn(float) const {
+Posn Cell::MapXToPosn(float x) const {
   return -1;
 }
 
@@ -111,15 +117,11 @@ void Cell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
 // FillerCell
 //
 FillerCell::FillerCell(const RenderStyle& style, float width, float height)
-    : Cell(style, width, height, 0.0f) {
-}
+    : Cell(style, width, height, 0.0f) {}
 
-FillerCell::FillerCell(const FillerCell& other)
-    : Cell(other) {
-}
+FillerCell::FillerCell(const FillerCell& other) : Cell(other) {}
 
-FillerCell::~FillerCell() {
-}
+FillerCell::~FillerCell() {}
 
 Cell* FillerCell::Copy() const {
   return new FillerCell(*this);
@@ -129,14 +131,11 @@ Cell* FillerCell::Copy() const {
 //
 // WithFont
 //
-WithFont::WithFont(const Font& font) : font_(&font) {
-}
+WithFont::WithFont(const Font& font) : font_(&font) {}
 
-WithFont::WithFont(const WithFont& other) : font_(other.font_) {
-}
+WithFont::WithFont(const WithFont& other) : font_(other.font_) {}
 
-WithFont::~WithFont() {
-}
+WithFont::~WithFont() {}
 
 float WithFont::underline() const {
   return font_->underline();
@@ -146,27 +145,39 @@ float WithFont::underline_thickness() const {
   return font_->underline_thickness();
 }
 
-void WithFont::DrawHLine(gfx::Canvas* canvas, const gfx::Brush& brush,
-                         float sx, float ex, float y) const {
+void WithFont::DrawHLine(gfx::Canvas* canvas,
+                         const gfx::Brush& brush,
+                         float sx,
+                         float ex,
+                         float y) const {
   canvas->DrawLine(brush, gfx::PointF(sx, y), gfx::PointF(ex, y),
                    font_->underline_thickness());
 }
 
-void WithFont::DrawLine(gfx::Canvas* canvas, const gfx::Brush& brush,
-                        float sx, float sy, float ex, float ey,
+void WithFont::DrawLine(gfx::Canvas* canvas,
+                        const gfx::Brush& brush,
+                        float sx,
+                        float sy,
+                        float ex,
+                        float ey,
                         float width) const {
   canvas->DrawLine(brush, gfx::PointF(sx, sy), gfx::PointF(ex, ey),
-                   width* font_->underline_thickness());
+                   width * font_->underline_thickness());
 }
 
-void WithFont::DrawVLine(gfx::Canvas* canvas, const gfx::Brush& brush,
-                         float x, float sy, float ey) const {
+void WithFont::DrawVLine(gfx::Canvas* canvas,
+                         const gfx::Brush& brush,
+                         float x,
+                         float sy,
+                         float ey) const {
   canvas->DrawLine(brush, gfx::PointF(x, sy), gfx::PointF(x, ey),
                    font_->underline_thickness());
 }
 
-void WithFont::DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
-                        const gfx::RectF& bounds, float baseline) const {
+void WithFont::DrawWave(gfx::Canvas* canvas,
+                        const gfx::Brush& brush,
+                        const gfx::RectF& bounds,
+                        float baseline) const {
   auto const wave = std::max(font_->underline() * 1.3f, 2.0f);
   auto const pen_width = font_->underline_thickness();
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
@@ -187,21 +198,25 @@ void WithFont::DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
 //
 // MarkerCell
 //
-MarkerCell::MarkerCell(const RenderStyle& style, float width, float height,
-                       Posn lPosn, TextMarker marker_name)
+MarkerCell::MarkerCell(const RenderStyle& style,
+                       float width,
+                       float height,
+                       Posn lPosn,
+                       TextMarker marker_name)
     : Cell(style, width, height, style.font().descent()),
       WithFont(style.font()),
       end_(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
-      marker_name_(marker_name), start_(lPosn) {
-}
+      marker_name_(marker_name),
+      start_(lPosn) {}
 
 MarkerCell::MarkerCell(const MarkerCell& other)
-    : Cell(other), WithFont(other),
-      end_(other.end_), marker_name_(other.marker_name_), start_(other.start_) {
-}
+    : Cell(other),
+      WithFont(other),
+      end_(other.end_),
+      marker_name_(other.marker_name_),
+      start_(other.start_) {}
 
-MarkerCell::~MarkerCell() {
-}
+MarkerCell::~MarkerCell() {}
 
 // rendering::Cell
 Cell* MarkerCell::Copy() const {
@@ -233,13 +248,12 @@ gfx::RectF MarkerCell::HitTestTextPosition(Posn lPosn) const {
   return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
 }
 
-Posn MarkerCell::MapXToPosn(float) const {
+Posn MarkerCell::MapXToPosn(float x) const {
   return start_;
 }
 
 // Render marker above baseline.
-void MarkerCell::Render(gfx::Canvas* canvas,
-                        const gfx::RectF& rect) const {
+void MarkerCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   Cell::Render(canvas, rect);
 
   auto const ascent = height() - descent();
@@ -248,7 +262,7 @@ void MarkerCell::Render(gfx::Canvas* canvas,
   gfx::Brush stroke_brush(canvas, style().color());
   auto const baseline = marker_rect.bottom - descent();
   switch (marker_name_) {
-    case TextMarker::EndOfDocument: { // Draw <-
+    case TextMarker::EndOfDocument: {  // Draw <-
       auto const wing = underline() * 3;
       auto const w = std::max(ascent / 6, 2.0f);
       auto const y = baseline - (ascent - wing) / 2;
@@ -260,7 +274,7 @@ void MarkerCell::Render(gfx::Canvas* canvas,
       break;
     }
 
-    case TextMarker::EndOfLine: { // Draw V
+    case TextMarker::EndOfLine: {  // Draw V
       auto const ey = baseline;
       auto const sy = ey - ascent * 3 / 5;
       auto const w = std::max(ascent / 6, 2.0f);
@@ -271,7 +285,7 @@ void MarkerCell::Render(gfx::Canvas* canvas,
       break;
     }
 
-    case TextMarker::LineWrap: { // Draw ->
+    case TextMarker::LineWrap: {  // Draw ->
       auto const wing = underline() * 3;
       auto const w = std::max(ascent / 6, 2.0f);
       auto const y = baseline - (ascent - wing) / 2;
@@ -283,7 +297,7 @@ void MarkerCell::Render(gfx::Canvas* canvas,
       break;
     }
 
-    case TextMarker::Tab: { // Draw |_|
+    case TextMarker::Tab: {  // Draw |_|
       auto const sx = marker_rect.left + underline_thickness() * 2;
       auto const ex = marker_rect.right - underline_thickness() * 2;
       auto const y = baseline;
@@ -301,20 +315,25 @@ void MarkerCell::Render(gfx::Canvas* canvas,
 //
 // TextCell
 //
-TextCell::TextCell(const RenderStyle& style, float width, float height,
-                   Posn lPosn, const base::string16& characters)
+TextCell::TextCell(const RenderStyle& style,
+                   float width,
+                   float height,
+                   Posn lPosn,
+                   const base::string16& characters)
     : Cell(style, width, height, style.font().descent()),
       WithFont(style.font()),
-      characters_(characters), end_(lPosn + 1), start_(lPosn) {
-}
+      characters_(characters),
+      end_(lPosn + 1),
+      start_(lPosn) {}
 
 TextCell::TextCell(const TextCell& other)
-    : Cell(other), WithFont(other),
-      characters_(other.characters_), end_(other.end_), start_(other.start_) {
-}
+    : Cell(other),
+      WithFont(other),
+      characters_(other.characters_),
+      end_(other.end_),
+      start_(other.start_) {}
 
-TextCell::~TextCell() {
-}
+TextCell::~TextCell() {}
 
 void TextCell::AddChar(base::char16 char_code) {
   characters_.push_back(char_code);
@@ -339,7 +358,7 @@ Posn TextCell::Fix(float line_height, float descent) {
 
 uint32_t TextCell::Hash() const {
   return static_cast<uint32_t>((Cell::Hash() << 3) ^
-                                std::hash<base::string16>()(characters_));
+                               std::hash<base::string16>()(characters_));
 }
 
 // Returns bounds rectangle of caret at |offset|. Caret is placed before
@@ -349,10 +368,9 @@ gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
   if (offset < start_ || offset > end_)
     return gfx::RectF();
   auto const length = static_cast<size_t>(offset - start_);
-  auto const left = length ?
-      style().font().GetTextWidth(characters_.data(), length) : 0.0f;
-  return gfx::RectF(gfx::PointF(left, top()),
-                    gfx::SizeF(1.0f, height()));
+  auto const left =
+      length ? style().font().GetTextWidth(characters_.data(), length) : 0.0f;
+  return gfx::RectF(gfx::PointF(left, top()), gfx::SizeF(1.0f, height()));
 }
 
 Posn TextCell::MapXToPosn(float x) const {
@@ -376,9 +394,8 @@ bool TextCell::Merge(const RenderStyle& style, float width) {
 
 void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   DCHECK(!characters_.empty());
-  auto const text_rect = gfx::RectF(
-      gfx::PointF(rect.left, rect.top + top()), 
-      gfx::SizeF(rect.width(), height()));
+  auto const text_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
+                                    gfx::SizeF(rect.width(), height()));
   FillBackground(canvas, rect);
   gfx::Brush text_brush(canvas, style().color());
   DrawText(canvas, style().font(), text_brush, text_rect, characters_);
@@ -399,8 +416,8 @@ void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
       break;
 
     case css::TextDecoration::ImeActive:
-      DrawLine(canvas, text_brush, rect.left, underline,
-               rect.right, underline, 2.0f);
+      DrawLine(canvas, text_brush, rect.left, underline, rect.right, underline,
+               2.0f);
       break;
 
     case css::TextDecoration::None:
@@ -426,17 +443,16 @@ void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
 //
 // UnicodeCell
 //
-UnicodeCell::UnicodeCell(const RenderStyle& style, float width, float height,
-                         Posn lPosn, const base::string16& characters)
-    : TextCell(style, width, height + 4.0f, lPosn, characters) {
-}
+UnicodeCell::UnicodeCell(const RenderStyle& style,
+                         float width,
+                         float height,
+                         Posn lPosn,
+                         const base::string16& characters)
+    : TextCell(style, width, height + 4.0f, lPosn, characters) {}
 
-UnicodeCell::UnicodeCell(const UnicodeCell& other)
-    : TextCell(other) {
-}
+UnicodeCell::UnicodeCell(const UnicodeCell& other) : TextCell(other) {}
 
-UnicodeCell::~UnicodeCell() {
-}
+UnicodeCell::~UnicodeCell() {}
 
 // rendering::Cell
 Cell* UnicodeCell::Copy() const {
@@ -454,9 +470,9 @@ bool UnicodeCell::Merge(const RenderStyle&, float) {
 }
 
 void UnicodeCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
-  auto const text_rect = gfx::RectF(
-      gfx::PointF(rect.left, rect.top + top()),
-      gfx::SizeF(rect.width(), height())) - gfx::SizeF(1, 1);
+  auto const text_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
+                                    gfx::SizeF(rect.width(), height())) -
+                         gfx::SizeF(1, 1);
   FillBackground(canvas, rect);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, text_rect);
   gfx::Brush text_brush(canvas, style().color());
@@ -466,5 +482,5 @@ void UnicodeCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   FillOverlay(canvas, text_rect);
 }
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views

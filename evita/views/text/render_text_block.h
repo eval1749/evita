@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_render_text_block_h)
-#define INCLUDE_evita_views_text_render_text_block_h
+#ifndef EVITA_VIEWS_TEXT_RENDER_TEXT_BLOCK_H_
+#define EVITA_VIEWS_TEXT_RENDER_TEXT_BLOCK_H_
 
 #include <list>
 #include <memory>
@@ -20,70 +20,73 @@ class TextFormatter;
 class TextLine;
 
 class TextBlock final {
-  private: class TextLineCache;
+ public:
+  explicit TextBlock(text::Buffer* buffer);
+  ~TextBlock();
 
-  private: gfx::RectF bounds_;
-  private: RenderStyle default_style_;
-  private: bool dirty_;
-  private: bool dirty_line_point_;
-  private: int format_counter_;
-  private: std::list<TextLine*> lines_;
-  private: float lines_height_;
-  private: text::Buffer* const text_buffer_;
-  private: std::unique_ptr<TextLineCache> text_line_cache_;
-  private: text::Posn view_start_;
-  private: float zoom_;
+  const RenderStyle& default_style() const { return default_style_; }
+  bool dirty() const { return dirty_; }
+  int format_counter() const { return format_counter_; }
+  const std::list<TextLine*>& lines() const { return lines_; }
 
-  public: explicit TextBlock(text::Buffer* buffer);
-  public: ~TextBlock();
-
-  public: const RenderStyle& default_style() const { return default_style_; }
-  public: bool dirty() const { return dirty_; }
-  public: int format_counter() const { return format_counter_; }
-  public: const std::list<TextLine*>& lines() const { return lines_; }
-
-  private: void Append(TextLine* line);
-  public: void DidChangeStyle(Posn offset, size_t length);
-  public: void DidDeleteAt(Posn offset, size_t length);
-  public: void DidInsertAt(Posn offset, size_t length);
-  // Returns true if discarded the first line.
-  private: bool DiscardFirstLine();
-  // Returns true if discarded the last line.
-  private: bool DiscardLastLine();
+  void DidChangeStyle(Posn offset, size_t length);
+  void DidDeleteAt(Posn offset, size_t length);
+  void DidInsertAt(Posn offset, size_t length);
   // Returns end of line offset containing |text_offset|.
-  public: text::Posn EndOfLine(text::Posn text_offset);
-  private: void EnsureLinePoints();
-  public: void Format(text::Posn text_offset);
+  text::Posn EndOfLine(text::Posn text_offset);
+  void Format(text::Posn text_offset);
   // Returns true if text format is taken place.
-  public: bool FormatIfNeeded();
-  private: TextLine* FormatLine(TextFormatter* formatter);
-  public: text::Posn GetEnd();
-  public: text::Posn GetStart();
-  public: text::Posn GetVisibleEnd();
-  public: gfx::RectF HitTestTextPosition(text::Posn text_offset);
-  private: void InvalidateCache();
-  private: void InvalidateLines(text::Posn offset);
-  public: bool IsPositionFullyVisible(text::Posn text_offset);
-  public: bool IsShowEndOfDocument();
-  public: text::Posn MapPointToPosition(gfx::PointF point);
-  public: text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
-  private: void Prepend(TextLine* line);
+  bool FormatIfNeeded();
+  text::Posn GetEnd();
+  text::Posn GetStart();
+  text::Posn GetVisibleEnd();
+  gfx::RectF HitTestTextPosition(text::Posn text_offset);
+  bool IsPositionFullyVisible(text::Posn text_offset);
+  bool IsShowEndOfDocument();
+  text::Posn MapPointToPosition(gfx::PointF point);
+  text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
   // Returns true if this |TextBlock| is modified.
-  public: bool ScrollDown();
+  bool ScrollDown();
   // Returns true if this |TextBlock| is modified.
-  public: bool ScrollToPosition(text::Posn offset);
+  bool ScrollToPosition(text::Posn offset);
   // Returns true if this |TextBlock| is modified.
-  public: bool ScrollUp();
-  public: void SetBounds(const gfx::RectF& new_bounds);
-  public: void SetZoom(float new_zoom);
-  public: bool ShouldFormat() const;
+  bool ScrollUp();
+  void SetBounds(const gfx::RectF& new_bounds);
+  void SetZoom(float new_zoom);
+  bool ShouldFormat() const;
   // Returns start of line offset containing |text_offset|.
-  public: text::Posn StartOfLine(text::Posn text_offset);
+  text::Posn StartOfLine(text::Posn text_offset);
+
+ private:
+  class TextLineCache;
+
+  void Append(TextLine* line);
+  // Returns true if discarded the first line.
+  bool DiscardFirstLine();
+  // Returns true if discarded the last line.
+  bool DiscardLastLine();
+  void EnsureLinePoints();
+  TextLine* FormatLine(TextFormatter* formatter);
+  void InvalidateCache();
+  void InvalidateLines(text::Posn offset);
+  void Prepend(TextLine* line);
+
+  gfx::RectF bounds_;
+  RenderStyle default_style_;
+  bool dirty_;
+  bool dirty_line_point_;
+  int format_counter_;
+  std::list<TextLine*> lines_;
+  float lines_height_;
+  text::Buffer* const text_buffer_;
+  std::unique_ptr<TextLineCache> text_line_cache_;
+  text::Posn view_start_;
+  float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(TextBlock);
 };
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_text_render_text_block_h)
+#endif  // EVITA_VIEWS_TEXT_RENDER_TEXT_BLOCK_H_

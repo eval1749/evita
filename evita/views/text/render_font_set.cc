@@ -28,7 +28,8 @@ gfx::FontProperties ComputeFontProperties(const base::string16& family_name,
 }  // namespace
 
 namespace std {
-template<> struct hash<views::rendering::FontSet::FontList> {
+template <>
+struct hash<views::rendering::FontSet::FontList> {
   size_t operator()(const views::rendering::FontSet::FontList& fonts) const {
     size_t result = 137u;
     for (auto const font : fonts) {
@@ -50,12 +51,16 @@ namespace rendering {
 class FontSet::Cache : public common::Singleton<FontSet::Cache> {
   DECLARE_SINGLETON_CLASS(FontSet::Cache);
 
-  private: std::unordered_map<FontList, FontSet*> map_;
+ public:
+  const FontSet& GetOrCreate(const FontList& fonts);
 
-  private: Cache() = default;
-  private: ~Cache() = default;
+ private:
+  Cache() = default;
+  ~Cache() = default;
 
-  public: const FontSet& GetOrCreate(const FontList& fonts);
+  std::unordered_map<FontList, FontSet*> map_;
+
+  DISALLOW_COPY_AND_ASSIGN(Cache);
 };
 
 const FontSet& FontSet::Cache::GetOrCreate(const FontList& fonts) {
@@ -71,11 +76,9 @@ const FontSet& FontSet::Cache::GetOrCreate(const FontList& fonts) {
 //
 // FontSet
 //
-FontSet::FontSet(const std::vector<const Font*>& fonts) : fonts_(fonts) {
-}
+FontSet::FontSet(const std::vector<const Font*>& fonts) : fonts_(fonts) {}
 
-FontSet::~FontSet() {
-}
+FontSet::~FontSet() {}
 
 const Font* FontSet::FindFont(base::char16 sample) const {
   for (auto const font : fonts_) {

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_render_cell_h)
-#define INCLUDE_evita_views_text_render_cell_h
+#ifndef EVITA_VIEWS_TEXT_RENDER_CELL_H_
+#define EVITA_VIEWS_TEXT_RENDER_CELL_H_
 
 #include "common/castable.h"
 #include "evita/gfx_base.h"
@@ -13,7 +13,7 @@
 namespace views {
 namespace rendering {
 
-enum class TextMarker{
+enum class TextMarker {
   EndOfDocument,
   EndOfLine,
   LineWrap,
@@ -21,11 +21,11 @@ enum class TextMarker{
 };
 
 // TODO(yosi) We should remove |using css::Color|.
-//using css::Color;
+// using css::Color;
 // TODO(yosi) We should remove |using css::Style|.
-//using css::Style;
+// using css::Style;
 // TODO(yosi) We should remove |using text::TextDecoration|.
-//using text::TextDecoration;
+// using text::TextDecoration;
 
 class RenderStyle;
 
@@ -36,43 +36,42 @@ class RenderStyle;
 class Cell : public common::Castable {
   DECLARE_CASTABLE_CLASS(Cell, Castable);
 
-  private: float descent_;
-  private: float height_;
-  private: float line_descent_;
-  private: float line_height_;
-  private: RenderStyle style_;
-  private: float width_;
+ public:
+  explicit Cell(const Cell& other);
+  virtual ~Cell();
 
-  protected: Cell(const RenderStyle& style, float width, float height,
-                  float descent);
-  public: explicit Cell(const Cell& other);
-  public: virtual ~Cell();
+  float descent() const { return descent_; }
+  float height() const { return height_; }
+  float line_height() const { return line_height_; }
+  float width() const { return width_; }
 
-  public: float descent() const { return descent_; }
-  public: float height() const { return height_; }
-  protected: float line_descent() const { return line_descent_; }
-  public: float line_height() const { return line_height_; }
-  protected: float top() const;
-  public: float width() const { return width_; }
+  virtual Cell* Copy() const = 0;
+  virtual bool Equal(const Cell* pCell) const;
+  virtual Posn Fix(float line_height, float line_descent);
+  virtual uint32_t Hash() const;
+  virtual gfx::RectF HitTestTextPosition(Posn position) const;
+  virtual Posn MapXToPosn(float x) const;
+  virtual bool Merge(const RenderStyle& style, float width);
+  virtual void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const;
 
-  protected: const RenderStyle& style() const { return style_; }
+ protected:
+  Cell(const RenderStyle& style, float width, float height, float descent);
 
-  protected: void FillOverlay(gfx::Canvas* canvas,
-                              const gfx::RectF& rect) const;
-  protected: void FillBackground(gfx::Canvas* canvas,
-                                 const gfx::RectF& rect) const;
-  protected: void IncrementWidth(float amount);
+  float line_descent() const { return line_descent_; }
+  float top() const;
+  const RenderStyle& style() const { return style_; }
 
-  // rendering::Cell
-  public: virtual Cell* Copy() const = 0;
-  public: virtual bool Equal(const Cell* pCell) const;
-  public: virtual Posn Fix(float line_height, float line_descent);
-  public: virtual uint32_t Hash() const;
-  public: virtual gfx::RectF HitTestTextPosition(Posn position) const;
-  public: virtual Posn MapXToPosn(float x) const;
-  public: virtual bool Merge(const RenderStyle& style, float width);
-  public: virtual void Render(gfx::Canvas* canvas,
-                              const gfx::RectF& rect) const;
+  void FillOverlay(gfx::Canvas* canvas, const gfx::RectF& rect) const;
+  void FillBackground(gfx::Canvas* canvas, const gfx::RectF& rect) const;
+  void IncrementWidth(float amount);
+
+ private:
+  float descent_;
+  float height_;
+  float line_descent_;
+  float line_height_;
+  RenderStyle style_;
+  float width_;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -82,12 +81,14 @@ class Cell : public common::Castable {
 class FillerCell final : public Cell {
   DECLARE_CASTABLE_CLASS(FillerCell, Cell);
 
-  public: FillerCell(const RenderStyle& style, float width, float height);
-  public: FillerCell(const FillerCell& other);
-  public: virtual ~FillerCell();
+ public:
+  FillerCell(const RenderStyle& style, float width, float height);
+  FillerCell(const FillerCell& other);
+  ~FillerCell() final;
 
+ private:
   // rendering::Cell
-  private: virtual Cell* Copy() const override;
+  Cell* Copy() const final;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -95,24 +96,38 @@ class FillerCell final : public Cell {
 // WithFont
 //
 class WithFont {
-  private: const Font* font_;
+ protected:
+  explicit WithFont(const Font& font);
+  WithFont(const WithFont& other);
+  ~WithFont();
 
-  protected: WithFont(const Font& font);
-  protected: WithFont(const WithFont& other);
-  protected: ~WithFont();
+  float underline() const;
+  float underline_thickness() const;
 
-  protected: float underline() const;
-  protected: float underline_thickness() const;
+  void DrawHLine(gfx::Canvas* canvas,
+                 const gfx::Brush& brush,
+                 float sx,
+                 float sy,
+                 float y) const;
+  void DrawLine(gfx::Canvas* canvas,
+                const gfx::Brush& brush,
+                float x1,
+                float y1,
+                float x2,
+                float y2,
+                float width) const;
+  void DrawVLine(gfx::Canvas* canvas,
+                 const gfx::Brush& brush,
+                 float x,
+                 float sy,
+                 float ey) const;
+  void DrawWave(gfx::Canvas* canvas,
+                const gfx::Brush& brush,
+                const gfx::RectF& bounds,
+                float baseline) const;
 
-  protected: void DrawHLine(gfx::Canvas* canvas, const gfx::Brush& brush,
-                            float sx, float sy, float y) const;
-  protected: void DrawLine(gfx::Canvas* canvas, const gfx::Brush& brush,
-                           float x1, float y1, float x2, float y2,
-                           float width) const;
-  protected: void DrawVLine(gfx::Canvas* canvas, const gfx::Brush& brush,
-                            float x, float sy, float ey) const;
-  protected: void DrawWave(gfx::Canvas* canvas, const gfx::Brush& brush,
-                           const gfx::RectF& bounds, float baseline) const;
+ private:
+  const Font* font_;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -122,26 +137,29 @@ class WithFont {
 class MarkerCell final : public Cell, private WithFont {
   DECLARE_CASTABLE_CLASS(MarkerCell, Cell);
 
-  private: Posn end_;
-  private: TextMarker marker_name_;
-  private: Posn start_;
+ public:
+  MarkerCell(const RenderStyle& style,
+             float width,
+             float height,
+             Posn lPosn,
+             TextMarker marker_name);
+  MarkerCell(const MarkerCell& other);
+  virtual ~MarkerCell();
 
-  public: MarkerCell(const RenderStyle& style, float width, float height,
-                     Posn lPosn, TextMarker marker_name);
-  public: MarkerCell(const MarkerCell& other);
-  public: virtual ~MarkerCell();
+  TextMarker marker_name() const { return marker_name_; }
 
-  public: TextMarker marker_name() const { return marker_name_; }
-
+ private:
   // rendering::Cell
-  private: virtual Cell* Copy() const override;
-  private: virtual bool Equal(const Cell* pCell) const override;
-  private: virtual Posn Fix(float iHeight, float iDescent) override;
-  private: virtual uint32_t Hash() const override;
-  private: virtual gfx::RectF HitTestTextPosition(Posn lPosn) const override;
-  private: virtual Posn MapXToPosn(float x) const override;
-  private: virtual void Render(gfx::Canvas* canvas,
-                               const gfx::RectF& rect) const override;
+  Cell* Copy() const final;
+  bool Equal(const Cell* pCell) const final;
+  Posn Fix(float iHeight, float iDescent) final;
+  uint32_t Hash() const final;
+  gfx::RectF HitTestTextPosition(Posn lPosn) const final;
+  Posn MapXToPosn(float x) const final;
+  void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
+  Posn end_;
+  TextMarker marker_name_;
+  Posn start_;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -151,32 +169,36 @@ class MarkerCell final : public Cell, private WithFont {
 class TextCell : public Cell, private WithFont {
   DECLARE_CASTABLE_CLASS(TextCell, Cell);
 
-  private: base::string16 characters_;
-  private: Posn end_;
-  private: Posn start_;
+ public:
+  TextCell(const RenderStyle& style,
+           float width,
+           float height,
+           Posn lPosn,
+           const base::string16& characters);
+  TextCell(const TextCell& other);
+  virtual ~TextCell();
 
-  public: TextCell(const RenderStyle& style, float width, float height,
-                   Posn lPosn, const base::string16& characters);
-  public: TextCell(const TextCell& other);
-  public: virtual ~TextCell();
+  const base::string16 characters() const { return characters_; }
+  Posn end() const { return end_; }
+  Posn start() const { return start_; }
 
-  public: const base::string16 characters() const { return characters_; }
-  public: Posn end() const { return end_; }
-  public: Posn start() const { return start_; }
+  void AddChar(base::char16 char_code);
 
-  public: void AddChar(base::char16 char_code);
+  bool Equal(const Cell* pCell) const override;
+  Posn Fix(float iHeight, float iDescent) override;
+  uint32_t Hash() const override;
+  gfx::RectF HitTestTextPosition(Posn position) const override;
+  Posn MapXToPosn(float x) const override;
+  bool Merge(const RenderStyle& style, float width) override;
+  void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const override;
 
+ private:
   // rendering::Cell
-  private: virtual Cell* Copy() const override;
-  public: virtual bool Equal(const Cell* pCell) const override;
-  public: virtual Posn Fix(float iHeight, float iDescent) override;
-  public: virtual uint32_t Hash() const override final;
-  public: virtual gfx::RectF HitTestTextPosition(
-      Posn position) const override;
-  public: virtual Posn MapXToPosn(float x) const override final;
-  public: virtual bool Merge(const RenderStyle& style, float width) override;
-  public: virtual void Render(gfx::Canvas* canvas,
-                              const gfx::RectF& rect) const override;
+  Cell* Copy() const override;
+
+  base::string16 characters_;
+  Posn end_;
+  Posn start_;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -186,20 +208,24 @@ class TextCell : public Cell, private WithFont {
 class UnicodeCell final : public TextCell {
   DECLARE_CASTABLE_CLASS(UnicodeCell, TextCell);
 
-  public: UnicodeCell(const RenderStyle& style, float width, float height,
-                      Posn lPosn, const base::string16& characters);
-  public: UnicodeCell(const UnicodeCell& other);
-  public: virtual ~UnicodeCell();
+ public:
+  UnicodeCell(const RenderStyle& style,
+              float width,
+              float height,
+              Posn lPosn,
+              const base::string16& characters);
+  UnicodeCell(const UnicodeCell& other);
+  ~UnicodeCell() final;
 
+ private:
   // rendering::Cell
-  private: virtual Cell* Copy() const override;
-  private: virtual gfx::RectF HitTestTextPosition(Posn lPosn) const override;
-  private: virtual bool Merge(const RenderStyle& style, float width) override;
-  private: virtual void Render(gfx::Canvas* canvas,
-                               const gfx::RectF& rect) const override;
+  Cell* Copy() const final;
+  gfx::RectF HitTestTextPosition(Posn lPosn) const final;
+  bool Merge(const RenderStyle& style, float width) final;
+  void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
 };
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_text_render_cell_h)
+#endif  // EVITA_VIEWS_TEXT_RENDER_CELL_H_

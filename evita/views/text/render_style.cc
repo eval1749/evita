@@ -11,36 +11,32 @@ namespace rendering {
 
 namespace {
 inline gfx::ColorF ColorToColorF(const css::Color& color) {
-  return gfx::ColorF(
-      static_cast<float>(color.red()) / 255,
-      static_cast<float>(color.green()) / 255,
-      static_cast<float>(color.blue()) / 255,
-      color.alpha());
+  return gfx::ColorF(static_cast<float>(color.red()) / 255,
+                     static_cast<float>(color.green()) / 255,
+                     static_cast<float>(color.blue()) / 255, color.alpha());
 }
 }  // namespace
 
 RenderStyle::RenderStyle(const css::Style& values, const Font* font)
     : bgcolor_(ColorToColorF(values.bgcolor())),
-      color_(ColorToColorF(values.color())), font_(font),
-      text_decoration_(values.text_decoration()) {
-}
+      color_(ColorToColorF(values.color())),
+      font_(font),
+      text_decoration_(values.text_decoration()) {}
 
 RenderStyle::RenderStyle(const css::Style& values, const Font& font)
-    : RenderStyle(values, &font) {
-}
+    : RenderStyle(values, &font) {}
 
 RenderStyle::RenderStyle(const RenderStyle& other)
-    : bgcolor_(other.bgcolor_), color_(other.color_), font_(other.font_),
+    : bgcolor_(other.bgcolor_),
+      color_(other.color_),
+      font_(other.font_),
       overlay_color_(other.overlay_color_),
-      text_decoration_(other.text_decoration_) {
-}
+      text_decoration_(other.text_decoration_) {}
 
 RenderStyle::RenderStyle()
-    : font_(nullptr), text_decoration_(css::TextDecoration::None) {
-}
+    : font_(nullptr), text_decoration_(css::TextDecoration::None) {}
 
-RenderStyle::~RenderStyle() {
-}
+RenderStyle::~RenderStyle() {}
 
 bool RenderStyle::operator==(const RenderStyle& other) const {
   return bgcolor_ == other.bgcolor_ && color_ == other.color_ &&
@@ -52,12 +48,12 @@ bool RenderStyle::operator!=(const RenderStyle& other) const {
   return !operator==(other);
 }
 
-void RenderStyle::set_overlay_color(const css::Color& color){
+void RenderStyle::set_overlay_color(const css::Color& color) {
   overlay_color_ = ColorToColorF(color);
 }
 
-} // namespace rendering
-} // namespace views
+}  // namespace rendering
+}  // namespace views
 
 namespace std {
 size_t hash<views::rendering::RenderStyle>::operator()(

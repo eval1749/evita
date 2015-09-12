@@ -48,13 +48,17 @@ void LogCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
 class StaticScript : public common::Singleton<StaticScript> {
   DECLARE_SINGLETON_CLASS(StaticScript);
 
-  private: std::vector<v8::UniquePersistent<v8::UnboundScript>> unbound_scripts_;
+ public:
+  ~StaticScript();
 
-  private: StaticScript();
-  public: ~StaticScript();
+  std::vector<v8::Local<v8::Script>> GetAll(v8::Isolate* isolate);
 
-  public: std::vector<v8::Local<v8::Script>> GetAll(v8::Isolate* isolate);
-  private: void LoadAll(v8::Isolate* isolate);
+ private:
+  StaticScript();
+
+  void LoadAll(v8::Isolate* isolate);
+
+  std::vector<v8::UniquePersistent<v8::UnboundScript>> unbound_scripts_;
 
   DISALLOW_COPY_AND_ASSIGN(StaticScript);
 };
@@ -97,24 +101,25 @@ void StaticScript::LoadAll(v8::Isolate* isolate) {
 //
 // AbstractDomTest::RunnerDelegate
 //
-class AbstractDomTest::RunnerDelegate
+class AbstractDomTest::RunnerDelegate final
     : public common::Singleton<RunnerDelegate>,
       public v8_glue::RunnerDelegate {
+ public:
+  RunnerDelegate() = default;
+  ~RunnerDelegate() final = default;
 
-  private: AbstractDomTest* test_instance_;
-
-  public: RunnerDelegate() = default;
-  public: virtual ~RunnerDelegate() = default;
-
-  public: void set_test_instance(AbstractDomTest* test_instance) {
+  void set_test_instance(AbstractDomTest* test_instance) {
     test_instance_ = test_instance;
   }
 
+ private:
   // v8_glue::RunnerDelegate
-  private: virtual v8::Handle<v8::ObjectTemplate>
-      GetGlobalTemplate(v8_glue::Runner* runner) override;
-  private: virtual void UnhandledException(v8_glue::Runner* runner,
-      const v8::TryCatch& try_catch) override;
+  v8::Handle<v8::ObjectTemplate>
+      GetGlobalTemplate(v8_glue::Runner* runner) final;
+  void UnhandledException(v8_glue::Runner* runner,
+      const v8::TryCatch& try_catch) final;
+
+  AbstractDomTest* test_instance_;
 };
 
 // v8_glue::RunnerDelegate

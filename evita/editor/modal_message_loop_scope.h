@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_editor_modal_message_loop_scope_h)
-#define INCLUDE_evita_editor_modal_message_loop_scope_h
+#ifndef EVITA_EDITOR_MODAL_MESSAGE_LOOP_SCOPE_H_
+#define EVITA_EDITOR_MODAL_MESSAGE_LOOP_SCOPE_H_
 
 #include "base/basictypes.h"
 
@@ -9,12 +9,15 @@ namespace editor {
 
 // ::MessageBox must be inside ModalMessageLoopScope.
 // Note: Windows file dialog box doesn't feed Windows message to MessagePump.
-class ModalMessageLoopScope {
-  public: ModalMessageLoopScope();
-  public: ~ModalMessageLoopScope();
+class ModalMessageLoopScope final {
+ public:
+  ModalMessageLoopScope();
+  ~ModalMessageLoopScope();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(ModalMessageLoopScope);
 };
 
 }  // namespace editor
 
-#endif //!defined(INCLUDE_evita_editor_modal_message_loop_scope_h)
+#endif  // EVITA_EDITOR_MODAL_MESSAGE_LOOP_SCOPE_H_

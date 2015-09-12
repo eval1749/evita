@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_editor_application_proxy)
-#define INCLUDE_evita_editor_application_proxy
+#ifndef EVITA_EDITOR_APPLICATION_PROXY_H_
+#define EVITA_EDITOR_APPLICATION_PROXY_H_
 
 #include <memory>
 
@@ -16,28 +16,31 @@ namespace editor {
 //
 // ApplicationProxy
 //
-class ApplicationProxy : public common::Singleton<ApplicationProxy> {
+class ApplicationProxy final : public common::Singleton<ApplicationProxy> {
   DECLARE_SINGLETON_CLASS(ApplicationProxy);
 
-  private: class Channel;
-  private: class EventObject;
-  private: class ShellHandler;
+ public:
+  ~ApplicationProxy();
 
-  private: std::unique_ptr<Channel> channel_;
-  private: std::unique_ptr<EventObject> event_;
-  private: std::unique_ptr<ShellHandler> shell_handler_;
+  void DidCopyData(const COPYDATASTRUCT* data);
+  void DidStartChannel(HWND channel_hwnd);
+  int Run();
+  void WillStartApplication();
 
-  private: ApplicationProxy();
-  public: ~ApplicationProxy();
+ private:
+  class Channel;
+  class EventObject;
+  class ShellHandler;
 
-  public: void DidCopyData(const COPYDATASTRUCT* data);
-  public: void DidStartChannel(HWND channel_hwnd);
-  public: int Run();
-  public: void WillStartApplication();
+  ApplicationProxy();
+
+  std::unique_ptr<Channel> channel_;
+  std::unique_ptr<EventObject> event_;
+  std::unique_ptr<ShellHandler> shell_handler_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationProxy);
 };
 
 }  // namespace editor
 
-#endif //!defined(INCLUDE_evita_editor_application_proxy)
+#endif  // EVITA_EDITOR_APPLICATION_PROXY_H_

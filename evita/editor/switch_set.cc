@@ -11,11 +11,9 @@
 
 namespace editor {
 
-SwitchSet::SwitchSet() {
-}
+SwitchSet::SwitchSet() {}
 
-SwitchSet::~SwitchSet() {
-}
+SwitchSet::~SwitchSet() {}
 
 std::vector<base::string16> SwitchSet::names() const {
   std::vector<base::string16> names(map_.size());
@@ -36,16 +34,15 @@ domapi::SwitchValue SwitchSet::Get(const base::string16& name) const {
     case domapi::SwitchValue::Type::Int:
       return domapi::SwitchValue(*reinterpret_cast<int*>(it->second.pointer));
     case domapi::SwitchValue::Type::String:
-      return domapi::SwitchValue(*reinterpret_cast<base::string16*>(
-          it->second.pointer));
+      return domapi::SwitchValue(
+          *reinterpret_cast<base::string16*>(it->second.pointer));
     case domapi::SwitchValue::Type::Void:
       return domapi::SwitchValue();
   }
   return domapi::SwitchValue();
 }
 
-void SwitchSet::Register(const base::StringPiece&  ascii_name,
-                         bool* pointer) {
+void SwitchSet::Register(const base::StringPiece& ascii_name, bool* pointer) {
   auto const name = base::ASCIIToUTF16(ascii_name);
   DCHECK(map_.find(name) == map_.end());
   ValueLocation location;
@@ -54,8 +51,7 @@ void SwitchSet::Register(const base::StringPiece&  ascii_name,
   map_[name] = location;
 }
 
-void SwitchSet::Register(const base::StringPiece&  ascii_name,
-                         int* pointer) {
+void SwitchSet::Register(const base::StringPiece& ascii_name, int* pointer) {
   auto const name = base::ASCIIToUTF16(ascii_name);
   DCHECK(map_.find(name) == map_.end());
   ValueLocation location;

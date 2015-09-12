@@ -25,7 +25,6 @@
 #include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/widget.h"
-#include "evita/views/frame_list.h"
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/switches.h"
@@ -34,12 +33,11 @@
 #define DEBUG_IDLE 0
 
 #if _DEBUG
-  #define APP_TITLE L"evita/debug"
+#define APP_TITLE L"evita/debug"
 #else
-  #define APP_TITLE L"evita"
+#define APP_TITLE L"evita"
 #endif
 #define APP_VERSION L"5.0"
-
 
 HINSTANCE g_hInstance;
 HINSTANCE g_hResource;
@@ -64,13 +62,14 @@ Application::Application()
   dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),
                            io_manager_->message_loop(),
                            io_manager_->io_delegate());
-  io_manager_->message_loop()->PostTask(FROM_HERE, base::Bind(
-      base::IgnoreResult(&spellchecker::SpellingEngine::EnsureInitialized),
-      base::Unretained(spellchecker::SpellingEngine::GetSpellingEngine())));
+  io_manager_->message_loop()->PostTask(
+      FROM_HERE,
+      base::Bind(
+          base::IgnoreResult(&spellchecker::SpellingEngine::EnsureInitialized),
+          base::Unretained(spellchecker::SpellingEngine::GetSpellingEngine())));
 }
 
-Application::~Application() {
-}
+Application::~Application() {}
 
 const base::string16& Application::title() const {
   DEFINE_STATIC_LOCAL(base::string16, title, (APP_TITLE L" " APP_VERSION));
@@ -105,24 +104,21 @@ void Application::Quit() {
 
 void Application::Run() {
   {
-      INITCOMMONCONTROLSEX init_params;
-      init_params.dwSize = sizeof(init_params);
-      init_params.dwICC  = ICC_BAR_CLASSES;
-      if (!::InitCommonControlsEx(&init_params)) {
-          ::MessageBoxW(
-              nullptr,
-              L"InitCommonControlsEx",
-              APP_TITLE L" " APP_VERSION,
-              MB_APPLMODAL | MB_ICONERROR);
-          return;
-      }
+    INITCOMMONCONTROLSEX init_params;
+    init_params.dwSize = sizeof(init_params);
+    init_params.dwICC = ICC_BAR_CLASSES;
+    if (!::InitCommonControlsEx(&init_params)) {
+      ::MessageBoxW(nullptr, L"InitCommonControlsEx",
+                    APP_TITLE L" " APP_VERSION, MB_APPLMODAL | MB_ICONERROR);
+      return;
+    }
   }
 
-  #if _DEBUG
+#if _DEBUG
   views::switches::editor_window_display_paint = true;
   views::switches::form_window_display_paint = false;
   views::switches::text_window_display_paint = true;
-  #endif
+#endif
 
   auto const switch_set = editor::SwitchSet::instance();
 

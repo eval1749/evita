@@ -25,8 +25,7 @@ DomLock::AutoLock::~AutoLock() {
 // DomLock::AutoTryLock
 //
 DomLock::AutoTryLock::AutoTryLock(const Location& location)
-    : locked_(DomLock::instance()->TryLock(location)) {
-}
+    : locked_(DomLock::instance()->TryLock(location)) {}
 
 DomLock::AutoTryLock::~AutoTryLock() {
   if (!locked_)
@@ -50,11 +49,9 @@ DomLock::AutoUnlock::~AutoUnlock() {
 //
 // DomLock
 //
-DomLock::DomLock() : locked_(false) {
-}
+DomLock::DomLock() : locked_(false) {}
 
-DomLock::~DomLock() {
-}
+DomLock::~DomLock() {}
 
 DomLock* DomLock::instance() {
   return editor::Application::instance()->dom_lock();
@@ -73,8 +70,8 @@ void DomLock::Acquire(const Location& location) {
 void DomLock::AssertLocked(const Location& location) {
   if (locked_)
     return;
-  LOG(ERROR) << "Assert locked at " << location.ToString() <<
-      ", but locked by " << this->location().ToString();
+  LOG(ERROR) << "Assert locked at " << location.ToString() << ", but locked by "
+             << this->location().ToString();
   NOTREACHED();
 }
 

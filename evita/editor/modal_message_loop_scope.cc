@@ -10,7 +10,7 @@
 // L4 C4626: 'derived class' : assignment operator could not be generated
 // because a base class assignment operator is inaccessible
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 
@@ -21,7 +21,7 @@ ModalMessageLoopScope::ModalMessageLoopScope() {
   base::MessageLoop::current()->set_os_modal_loop(true);
 }
 
-ModalMessageLoopScope:: ~ModalMessageLoopScope() {
+ModalMessageLoopScope::~ModalMessageLoopScope() {
   base::MessageLoop::current()->set_os_modal_loop(false);
 }
 

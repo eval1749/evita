@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_editor_switch_set_h)
-#define INCLUDE_evita_editor_switch_set_h
+#ifndef EVITA_EDITOR_SWITCH_SET_H_
+#define EVITA_EDITOR_SWITCH_SET_H_
 
 #include <unordered_map>
 #include <vector>
@@ -15,30 +15,32 @@
 
 namespace editor {
 
-class SwitchSet : public common::Singleton<SwitchSet> {
+class SwitchSet final : public common::Singleton<SwitchSet> {
   DECLARE_SINGLETON_CLASS(SwitchSet);
 
-  private: struct ValueLocation {
+ public:
+  ~SwitchSet();
+
+  std::vector<base::string16> names() const;
+
+  domapi::SwitchValue Get(const base::string16& name) const;
+  void Register(const base::StringPiece& name, bool* value_location);
+  void Register(const base::StringPiece& name, int* value_location);
+  void Set(const base::string16& name, const domapi::SwitchValue& new_value);
+
+ private:
+  struct ValueLocation {
     domapi::SwitchValue::Type type;
     void* pointer;
   };
 
-  private: std::unordered_map<base::string16, ValueLocation> map_;
+  SwitchSet();
 
-  private: SwitchSet();
-  public: ~SwitchSet();
-
-  public: std::vector<base::string16> names() const;
-
-  public: domapi::SwitchValue Get(const base::string16& name) const;
-  public: void Register(const base::StringPiece& name, bool* value_location);
-  public: void Register(const base::StringPiece& name, int* value_location);
-  public: void Set(const base::string16& name,
-                   const domapi::SwitchValue& new_value);
+  std::unordered_map<base::string16, ValueLocation> map_;
 
   DISALLOW_COPY_AND_ASSIGN(SwitchSet);
 };
 
 }  // namespace editor
 
-#endif //!defined(INCLUDE_evita_editor_switch_set_h)
+#endif  // EVITA_EDITOR_SWITCH_SET_H_

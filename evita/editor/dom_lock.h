@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_editor_dom_lock_h)
-#define INCLUDE_evita_editor_dom_lock_h
+#ifndef EVITA_EDITOR_DOM_LOCK_H_
+#define EVITA_EDITOR_DOM_LOCK_H_
 
 #include "base/location.h"
 #include "base/logging.h"
@@ -10,55 +10,69 @@
 // L4 C4626: 'derived class' : assignment operator could not be generated
 // because a base class assignment operator is inaccessible
 #pragma warning(push)
-#pragma warning(disable: 4625 4626)
+#pragma warning(disable : 4625 4626)
 #include "base/threading/thread_checker.h"
 #pragma warning(pop)
 
 namespace editor {
 
 class DomLock {
-  private: typedef tracked_objects::Location Location;
+ public:
+  typedef tracked_objects::Location Location;
 
-  public: class AutoLock {
-    public: AutoLock(const Location& location);
-    public: ~AutoLock();
+  class AutoLock {
+   public:
+    explicit AutoLock(const Location& location);
+    ~AutoLock();
+
+   private:
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
   };
-  friend class AutoLock;
 
-  public: class AutoTryLock {
-    private: bool locked_;
-    public: AutoTryLock(const Location& location);
-    public: ~AutoTryLock();
-    public: bool locked() const { return locked_; }
+  class AutoTryLock {
+   public:
+    explicit AutoTryLock(const Location& location);
+    ~AutoTryLock();
+
+    bool locked() const { return locked_; }
+
+   private:
+    bool locked_;
+
     DISALLOW_COPY_AND_ASSIGN(AutoTryLock);
   };
-  friend class AutoTryLock;
 
-  public: class AutoUnlock {
-    public: AutoUnlock(const Location& location);
-    public: ~AutoUnlock();
+  class AutoUnlock {
+   public:
+    explicit AutoUnlock(const Location& location);
+    ~AutoUnlock();
+
+   private:
     DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
   };
-  friend class AutoUnlock;
 
-  private: bool locked_;
-  private: base::ThreadChecker thread_checker_;
+  DomLock();
+  ~DomLock();
 
-  public: DomLock();
-  public: ~DomLock();
-
-  public: static DomLock* instance();
-  public: const Location& location() const;
-  public: bool locked() const {
+  static DomLock* instance();
+  const Location& location() const;
+  bool locked() const {
     DCHECK(thread_checker_.CalledOnValidThread());
     return locked_;
   }
 
-  public: void Acquire(const Location& location);
-  public: void AssertLocked(const Location& location);
-  public: void Release(const Location& location);
-  public: bool TryLock(const Location& location);
+  void Acquire(const Location& location);
+  void AssertLocked(const Location& location);
+  void Release(const Location& location);
+  bool TryLock(const Location& location);
+
+ private:
+  friend class AutoLock;
+  friend class AutoTryLock;
+  friend class AutoUnlock;
+
+  bool locked_;
+  base::ThreadChecker thread_checker_;
 
   DISALLOW_COPY_AND_ASSIGN(DomLock);
 };
@@ -68,8 +82,7 @@ class DomLock {
 #define UI_ASSERT_DOM_LOCKED() \
   editor::DomLock::instance()->AssertLocked(FROM_HERE);
 
-#define UI_DOM_AUTO_LOCK_SCOPE() \
-  editor::DomLock::AutoLock dom_scope(FROM_HERE)
+#define UI_DOM_AUTO_LOCK_SCOPE() editor::DomLock::AutoLock dom_scope(FROM_HERE)
 
 #define UI_DOM_AUTO_TRY_LOCK_SCOPE(scope_name) \
   editor::DomLock::AutoTryLock scope_name(FROM_HERE)
@@ -77,4 +90,4 @@ class DomLock {
 #define UI_DOM_AUTO_UNLOCK_SCOPE() \
   editor::DomLock::AutoUnlock dom_scope(FROM_HERE)
 
-#endif //!defined(INCLUDE_evita_editor_dom_lock_h)
+#endif  // EVITA_EDITOR_DOM_LOCK_H_

@@ -8,13 +8,12 @@
 
 namespace metrics {
 
-Sampling::Sampling(size_t max_samples) :
-    max_samples_(max_samples), samples_(max_samples) {
+Sampling::Sampling(size_t max_samples)
+    : max_samples_(max_samples), samples_(max_samples) {
   maximum_ = minimum_ = samples_.front();
 }
 
-Sampling::~Sampling() {
-}
+Sampling::~Sampling() {}
 
 void Sampling::AddSample(base::TimeDelta sample) {
   AddSample(static_cast<float>(sample.InMillisecondsF()));
@@ -51,9 +50,9 @@ base::TimeTicks Sampling::NowTimeTicks() {
     ::QueryPerformanceFrequency(&ticks_per_sec);
   LARGE_INTEGER counter;
   ::QueryPerformanceCounter(&counter);
-  return base::TimeTicks::FromInternalValue(
-      counter.QuadPart * base::Time::kMicrosecondsPerSecond /
-      ticks_per_sec.QuadPart);
+  return base::TimeTicks::FromInternalValue(counter.QuadPart *
+                                            base::Time::kMicrosecondsPerSecond /
+                                            ticks_per_sec.QuadPart);
 #endif
 }
 

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_metrics_counter_h)
-#define INCLUDE_evita_metrics_counter_h
+#ifndef EVITA_METRICS_COUNTER_H_
+#define EVITA_METRICS_COUNTER_H_
 
 #include <unordered_map>
 
@@ -12,34 +12,41 @@
 
 namespace metrics {
 
-class Counter {
-  public: typedef std::unordered_map<base::StringPiece, int> SampleMap;
+class Counter final {
+ public:
+  typedef std::unordered_map<base::StringPiece, int> SampleMap;
 
-  private: SampleMap map_;
-  private: base::StringPiece name_;
+  explicit Counter(const base::StringPiece& name);
+  ~Counter();
 
-  public: Counter(const base::StringPiece& name);
-  public: ~Counter();
+  const SampleMap& data() const { return map_; }
 
-  public: const SampleMap& data() const {
-    return map_;
-  }
+  void AddSample(const base::StringPiece& sample);
 
-  public: void AddSample(const base::StringPiece& sample);
+ private:
+  SampleMap map_;
+  base::StringPiece name_;
+
+  DISALLOW_COPY_AND_ASSIGN(Counter);
 };
 
 class CounterSet : public common::Singleton<CounterSet> {
   DECLARE_SINGLETON_CLASS(CounterSet);
 
-  private: std::unordered_map<base::StringPiece, Counter*> map_;
+ public:
+  ~CounterSet();
 
-  private: CounterSet();
-  public: ~CounterSet();
+  void AddSample(const base::StringPiece& name,
+                 const base::StringPiece& sample);
+  Counter* GetOrCreate(const base::StringPiece& name);
+  base::string16 GetJson(const base::string16& name) const;
 
-  public: void AddSample(const base::StringPiece& name,
-                         const base::StringPiece& sample);
-  public: Counter* GetOrCreate(const base::StringPiece& name);
-  public: base::string16 GetJson(const base::string16& name) const;
+ private:
+  CounterSet();
+
+  std::unordered_map<base::StringPiece, Counter*> map_;
+
+  DISALLOW_COPY_AND_ASSIGN(CounterSet);
 };
 
 }  // namespace metrics
@@ -47,4 +54,4 @@ class CounterSet : public common::Singleton<CounterSet> {
 #define METRICS_COUNT(sample) \
   ::metrics::CounterSet::instance()->AddSample(__FUNCTION__, sample)
 
-#endif //!defined(INCLUDE_evita_metrics_counter_h)
+#endif  // EVITA_METRICS_COUNTER_H_

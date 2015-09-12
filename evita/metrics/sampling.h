@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_metrics_sampling_h)
-#define INCLUDE_evita_metrics_sampling_h
+#ifndef EVITA_METRICS_SAMPLING_H_
+#define EVITA_METRICS_SAMPLING_H_
 
 #include <list>
 
@@ -16,28 +16,30 @@ namespace metrics {
 //
 // Sampling
 //
-class Sampling {
-  private: float maximum_;
-  private: float minimum_;
-  private: size_t max_samples_;
-  private: std::list<float> samples_;
+class Sampling final {
+ public:
+  explicit Sampling(size_t max_samples = 100);
+  ~Sampling();
 
-  public: Sampling(size_t max_samples = 100);
-  public: ~Sampling();
+  float last() const { return samples_.back(); }
+  float maximum() const { return maximum_; }
+  float minimum() const { return minimum_; }
+  const std::list<float> samples() const { return samples_; }
 
-  public: float last() const { return samples_.back(); }
-  public: float maximum() const { return maximum_; }
-  public: float minimum() const { return minimum_; }
-  public: const std::list<float> samples() const { return samples_; }
-
-  public: void AddSample(base::TimeDelta sample);
-  public: void AddSample(float sample);
+  void AddSample(base::TimeDelta sample);
+  void AddSample(float sample);
 
   // Returns value of |GetSystemTimePreciseAsFileTime()| as |base::TimeTicks|.
-  public: static base::TimeTicks NowTimeTicks();
+  static base::TimeTicks NowTimeTicks();
+
+ private:
+  float maximum_;
+  float minimum_;
+  size_t max_samples_;
+  std::list<float> samples_;
 
   DISALLOW_COPY_AND_ASSIGN(Sampling);
 };
 }  // namespace metrics
 
-#endif //!defined(INCLUDE_evita_metrics_sampling_h)
+#endif  // EVITA_METRICS_SAMPLING_H_

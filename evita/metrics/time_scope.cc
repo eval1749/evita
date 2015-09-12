@@ -11,11 +11,9 @@
 
 namespace metrics {
 
-Histogram::Histogram(const base::StringPiece& name) : name_(name) {
-}
+Histogram::Histogram(const base::StringPiece& name) : name_(name) {}
 
-Histogram::~Histogram() {
-}
+Histogram::~Histogram() {}
 
 void Histogram::AddSample(int sample) {
   auto const it = map_.find(sample);
@@ -25,11 +23,9 @@ void Histogram::AddSample(int sample) {
     map_[sample] = 1;
 }
 
-HistogramSet::HistogramSet() {
-}
+HistogramSet::HistogramSet() {}
 
-HistogramSet::~HistogramSet() {
-}
+HistogramSet::~HistogramSet() {}
 
 Histogram* HistogramSet::GetOrCreate(const base::StringPiece& name) {
   auto const it = map_.find(name);
@@ -53,8 +49,8 @@ base::string16 HistogramSet::GetJson(const base::string16& name) const {
     base::string16 delimiter2 = L"";
     for (auto key_value : it.second->data()) {
       ostream << delimiter2;
-      ostream << L"{\"key\": " << key_value.first << L", " <<
-          L"\"value\": " << key_value.second << '}';
+      ostream << L"{\"key\": " << key_value.first << L", " << L"\"value\": "
+              << key_value.second << '}';
       delimiter2 = comma;
     }
     ostream << ']';
@@ -65,8 +61,7 @@ base::string16 HistogramSet::GetJson(const base::string16& name) const {
 }
 
 TimeScope::TimeScope(const base::StringPiece& name)
-    : name_(name), start_at_(base::Time::Now()) {
-}
+    : name_(name), start_at_(base::Time::Now()) {}
 
 TimeScope::~TimeScope() {
   auto const end_at = base::Time::Now();

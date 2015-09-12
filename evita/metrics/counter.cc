@@ -11,11 +11,9 @@
 
 namespace metrics {
 
-Counter::Counter(const base::StringPiece& name) : name_(name) {
-}
+Counter::Counter(const base::StringPiece& name) : name_(name) {}
 
-Counter::~Counter() {
-}
+Counter::~Counter() {}
 
 void Counter::AddSample(const base::StringPiece& sample) {
   auto const it = map_.find(sample);
@@ -25,11 +23,9 @@ void Counter::AddSample(const base::StringPiece& sample) {
     map_[sample] = 1;
 }
 
-CounterSet::CounterSet() {
-}
+CounterSet::CounterSet() {}
 
-CounterSet::~CounterSet() {
-}
+CounterSet::~CounterSet() {}
 
 void CounterSet::AddSample(const base::StringPiece& name,
                            const base::StringPiece& sample) {
@@ -59,8 +55,8 @@ base::string16 CounterSet::GetJson(const base::string16& name) const {
     base::string16 delimiter2 = L"";
     for (auto key_value : it.second->data()) {
       ostream << delimiter2;
-      ostream << L"{\"key\": \"" << base::ASCIIToUTF16(key_value.first) <<
-          L"\", \"value\": " << key_value.second << '}';
+      ostream << L"{\"key\": \"" << base::ASCIIToUTF16(key_value.first)
+              << L"\", \"value\": " << key_value.second << '}';
       delimiter2 = comma;
     }
     ostream << ']';

@@ -74,6 +74,7 @@ class TextLayout;
 
 class Brush : public SimpleObject_<ID2D1SolidColorBrush> {
   public: Brush(Canvas* canvas, ColorF color);
+  public: Brush(Canvas* canvas, D2D1::ColorF::Enum name);
   public: Brush(Canvas* canvas, float red, float green, float blue,
                 float alpha = 1.0f);
   public: ~Brush();

@@ -124,6 +124,10 @@ Brush::Brush(Canvas* canvas, ColorF color)
     : SimpleObject_(CreateSolidColorBrush(canvas, color)) {
 }
 
+Brush::Brush(Canvas* canvas, D2D1::ColorF::Enum name)
+    : Brush(canvas, ColorF(name)) {
+}
+
 Brush::Brush(Canvas* canvas, float red, float green, float blue,
              float alpha)
     : SimpleObject_(CreateSolidColorBrush(canvas,

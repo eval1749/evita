@@ -84,14 +84,14 @@ template("generate_jni") {
   }
 
   group(target_name) {
-    deps = []
+    public_deps = []
     forward_variables_from(invoker,
                            [
                              "deps",
                              "public_deps",
                              "visibility",
                            ])
-    deps += [ ":$foreach_target_name" ]
+    public_deps += [ ":$foreach_target_name" ]
     public_configs = [ ":jni_includes_${target_name}" ]
   }
 }
@@ -183,14 +183,14 @@ template("generate_jar_jni") {
   }
 
   group(target_name) {
-    deps = []
+    public_deps = []
     forward_variables_from(invoker,
                            [
                              "deps",
                              "public_deps",
                              "visibility",
                            ])
-    deps += jni_actions
+    public_deps += jni_actions
     public_configs = [ ":jni_includes_${target_name}" ]
   }
 }
@@ -308,7 +308,7 @@ template("java_cpp_template") {
 
   group(final_target_name) {
     forward_variables_from(invoker, [ "visibility" ])
-    deps = [
+    public_deps = [
       ":$zip_srcjar_target_name",
     ]
   }
@@ -391,7 +391,7 @@ template("java_cpp_enum") {
 
   group(final_target_name) {
     forward_variables_from(invoker, [ "visibility" ])
-    deps = [
+    public_deps = [
       ":$zip_srcjar_target_name",
     ]
   }
@@ -511,7 +511,7 @@ template("jinja_template_resources") {
   }
 
   group(target_name) {
-    deps = [
+    public_deps = [
       ":${target_name}__build_config",
       ":${target_name}__template",
     ]
@@ -574,7 +574,7 @@ template("locale_pak_resources") {
   }
 
   group(target_name) {
-    deps = [
+    public_deps = [
       ":${target_name}__build_config",
       ":${target_name}__create_resources_zip",
     ]
@@ -605,18 +605,22 @@ template("locale_pak_resources") {
 #     different application at runtime to access the package's resources.
 #
 
-# Example
+# Example:
 #   android_resources("foo_resources") {
 #     deps = [":foo_strings_grd"]
 #     resource_dirs = ["res"]
 #     custom_package = "org.chromium.foo"
+#   }
+#
+#   android_resources("foo_resources_overrides") {
+#     deps = [":foo_resources"]
+#     resource_dirs = ["res_overrides"]
 #   }
 template("android_resources") {
   set_sources_assignment_filter([])
   forward_variables_from(invoker, [ "testonly" ])
 
   assert(defined(invoker.resource_dirs))
-  assert(defined(invoker.android_manifest) || defined(invoker.custom_package))
 
   base_path = "$target_gen_dir/$target_name"
   zip_path = base_path + ".resources.zip"
@@ -635,12 +639,19 @@ template("android_resources") {
                              "custom_package",
                              "deps",
                            ])
+
+    # No package means resources override their deps.
+    if (defined(custom_package) || defined(android_manifest)) {
+      r_text = r_text_path
+    } else {
+      assert(defined(invoker.deps),
+             "Must specify deps when custom_package is omitted.")
+    }
     visibility = [ ":$process_resources_target_name" ]
 
     type = "android_resources"
     resources_zip = zip_path
     srcjar = srcjar_path
-    r_text = r_text_path
   }
 
   process_resources(process_resources_target_name) {
@@ -663,7 +674,7 @@ template("android_resources") {
 
   group(final_target_name) {
     forward_variables_from(invoker, [ "visibility" ])
-    deps = [
+    public_deps = [
       ":${target_name}__process_resources",
     ]
   }
@@ -726,7 +737,7 @@ template("java_strings_grd") {
   }
 
   group(target_name) {
-    deps = [
+    public_deps = [
       ":${target_name}__build_config",
       ":${target_name}__zip",
     ]
@@ -782,7 +793,7 @@ template("java_strings_grd_prebuilt") {
 
   group(final_target_name) {
     forward_variables_from(invoker, [ "visibility" ])
-    deps = [
+    public_deps = [
       ":$zip_target_name",
     ]
   }
@@ -1150,7 +1161,9 @@ template("android_apk") {
   _build_config = "$target_gen_dir/$target_name.build_config"
   resources_zip_path = "$base_path.resources.zip"
   _all_resources_zip_path = "$base_path.resources.all.zip"
-  jar_path = "$base_path.jar"
+  _jar_path = "$base_path.jar"
+  _lib_dex_path = "$base_path.dex.jar"
+  _rebased_lib_dex_path = rebase_path(_lib_dex_path, root_build_dir)
   _template_name = target_name
 
   final_dex_path = "$gen_dir/classes.dex"
@@ -1286,6 +1299,7 @@ template("android_apk") {
   write_build_config(build_config_target) {
     forward_variables_from(invoker, [ "apk_under_test" ])
     type = "android_apk"
+    jar_path = _jar_path
     dex_path = final_dex_path
     resources_zip = resources_zip_path
     build_config = _build_config
@@ -1378,7 +1392,8 @@ template("android_apk") {
       java_files = []
     }
     srcjar_deps = _srcjar_deps
-    dex_path = base_path + ".dex.jar"
+    jar_path = _jar_path
+    dex_path = _lib_dex_path
 
     if (defined(invoker.deps)) {
       deps += invoker.deps
@@ -1410,8 +1425,8 @@ template("android_apk") {
         rebase_path(_dist_jar_path, root_build_dir),
         "--inputs=@FileArg($_rebased_build_config:dist_jar:dependency_jars)",
       ]
-      inputs += [ jar_path ]
-      _rebased_jar_path = rebase_path([ jar_path ], root_build_dir)
+      inputs += [ _jar_path ]
+      _rebased_jar_path = rebase_path([ _jar_path ], root_build_dir)
       args += [ "--inputs=$_rebased_jar_path" ]
       deps = [
         ":$build_config_target",  # Generates the build config file.
@@ -1425,15 +1440,15 @@ template("android_apk") {
       ":$build_config_target",
       ":$java_target",
     ]
-    sources = [
-      jar_path,
-    ]
     inputs = [
       _build_config,
     ]
     output = final_dex_path
-    dex_arg_key = "${_rebased_build_config}:final_dex:dependency_dex_files"
-    args = [ "--inputs=@FileArg($dex_arg_key)" ]
+    _dex_arg_key = "${_rebased_build_config}:final_dex:dependency_dex_files"
+    args = [
+      "--inputs=@FileArg($_dex_arg_key)",
+      _rebased_lib_dex_path,
+    ]
   }
 
   if (_native_libs != []) {
@@ -1587,8 +1602,11 @@ template("android_apk") {
   _create_incremental_script_rule_name = "${_template_name}__incremental_script"
   _incremental_final_deps += [ ":${_create_incremental_script_rule_name}" ]
   action(_create_incremental_script_rule_name) {
-    script = "//build/android/gn/create_incremental_install_script.py"
+    script = "//build/android/incremental_install/create_install_script.py"
     depfile = "$target_gen_dir/$target_name.d"
+    deps = [
+      ":$build_config_target",
+    ]
 
     _generated_script_path =
         "${root_out_dir}/bin/install_incremental_${_template_name}"
@@ -1602,9 +1620,12 @@ template("android_apk") {
     _rebased_generated_script_path =
         rebase_path(_generated_script_path, root_build_dir)
     _rebased_depfile = rebase_path(depfile, root_build_dir)
+    _dex_arg_key = "${_rebased_build_config}:final_dex:dependency_dex_files"
     args = [
       "--apk-path=${_rebased_apk_path_no_ext}_incremental.apk",
       "--script-output-path=$_rebased_generated_script_path",
+      "--dex-file=$_rebased_lib_dex_path",
+      "--dex-file-list=@FileArg($_dex_arg_key)",
       "--depfile=$_rebased_depfile",
     ]
     if (defined(_native_libs_dir)) {
@@ -1621,13 +1642,13 @@ template("android_apk") {
 
   group(target_name) {
     forward_variables_from(invoker, [ "data_deps" ])
-    deps = _final_deps
+    public_deps = _final_deps
   }
   group("${target_name}_incremental") {
     data_deps = []
     forward_variables_from(invoker, [ "data_deps" ])
     data_deps += [ "//build/android/pylib/device/commands" ]
-    deps = _incremental_final_deps
+    public_deps = _incremental_final_deps
   }
 }
 
@@ -1945,7 +1966,7 @@ template("create_native_executable_dist") {
 
   group(template_name) {
     forward_variables_from(invoker, [ "visibility" ])
-    deps = [
+    public_deps = [
       ":$copy_target_name",
     ]
   }

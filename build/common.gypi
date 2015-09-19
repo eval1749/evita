@@ -513,10 +513,6 @@
       # builds.
       'use_custom_libcxx%': 0,
 
-      # Use system libc++ instead of the default C++ library, usually libstdc++.
-      # This is intended for iOS builds only.
-      'use_system_libcxx%': 0,
-
       # Set to true to instrument the code with function call logger.
       # See src/third_party/cygprofile/cyg-profile.cc for details.
       'order_profiling%': 0,
@@ -874,7 +870,6 @@
           'safe_browsing%': 0,
           'enable_supervised_users%': 0,
           'enable_task_manager%': 0,
-          'use_system_libcxx%': 1,
           'enable_media_router%': 0,
         }],
 
@@ -1198,7 +1193,6 @@
     'use_instrumented_libraries%': '<(use_instrumented_libraries)',
     'use_prebuilt_instrumented_libraries%': '<(use_prebuilt_instrumented_libraries)',
     'use_custom_libcxx%': '<(use_custom_libcxx)',
-    'use_system_libcxx%': '<(use_system_libcxx)',
     'order_profiling%': '<(order_profiling)',
     'order_text_section%': '<(order_text_section)',
     'enable_extensions%': '<(enable_extensions)',
@@ -1541,7 +1535,6 @@
     # Ozone platforms to include in the build.
     'ozone_platform_caca%': 0,
     'ozone_platform_cast%': 0,
-    'ozone_platform_drm%': 0,
     'ozone_platform_egltest%': 0,
     'ozone_platform_gbm%': 0,
     'ozone_platform_ozonex%': 0,
@@ -2385,7 +2378,7 @@
 
         # Build all platforms whose deps are in install-build-deps.sh.
         # Only these platforms will be compile tested by buildbots.
-        'ozone_platform_drm%': 1,
+        'ozone_platform_gbm%': 1,
         'ozone_platform_test%': 1,
         'ozone_platform_egltest%': 1,
       }],
@@ -3107,6 +3100,12 @@
       ['enable_wexit_time_destructors==1 and OS!="win"', {
         # TODO: Enable on Windows too, http://crbug.com/404525
         'variables': { 'clang_warning_flags': ['-Wexit-time-destructors']},
+      }],
+      ['"<!(python <(DEPTH)/tools/clang/scripts/update.py --print-revision)"!="245965-1"', {
+        # TODO(thakis): Move this to the global clang_warning_flags block once
+        # clang is rolled far enough that the pinned clang understands this flag
+        # TODO(thakis): Consider enabling this?
+        'variables': { 'clang_warning_flags': ['-Wno-bitfield-width']},
       }],
       ['chromium_code==0', {
         'variables': {
@@ -4590,7 +4589,7 @@
               '<(DEPTH)/buildtools/third_party/libc++/libc++.gyp:libcxx_proxy',
             ],
           }],
-          ['order_profiling!=0 and (chromeos==1 or OS=="linux" or OS=="android")', {
+          ['order_profiling!=0 and OS=="android"', {
             'target_conditions' : [
               # crazy_linker has an upstream gyp file we can't edit, and we
               # don't want to instrument it.
@@ -4603,7 +4602,7 @@
                 ],
                 'defines': ['CYGPROFILE_INSTRUMENTATION'],
               }],
-              ['_toolset=="target" and OS=="android"', {
+              ['_toolset=="target"', {
                 'cflags': [
                   # Avoids errors with current NDK:
                   # "third_party/android_tools/ndk/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.6/include/arm_neon.h:3426:3: error: argument must be a constant"
@@ -4756,7 +4755,7 @@
         # so forking it's deps seems like overkill.
         # But this variable need defined to properly run gyp.
         # A proper solution is to have an OS==android conditional
-        # in third_party/libvpx/libvpx.gyp to define it.
+        # in third_party/libvpx_new/libvpx.gyp to define it.
         'libvpx_path': 'lib/linux/arm',
       },
       'target_defaults': {
@@ -5396,6 +5395,7 @@
         'xcode_settings' : {
           'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
           'ENABLE_BITCODE': 'NO',
+          'CLANG_CXX_LIBRARY': 'libc++',  # -stdlib=libc++
 
           'conditions': [
             # Older Xcodes do not support -Wno-deprecated-register, so pass an
@@ -5425,20 +5425,6 @@
             }],
             ['target_subarch=="both"', {
               'VALID_ARCHS': ['arm64', 'armv7', 'x86_64', 'i386'],
-            }],
-            ['use_system_libcxx==1', {
-              'target_conditions': [
-                # Only use libc++ when building target for iOS not when building
-                # tools for the host (OS X) as Mac targets OS X SDK 10.6 which
-                # does not support libc++.
-                ['_toolset=="target"', {
-                  'CLANG_CXX_LIBRARY': 'libc++',  # -stdlib=libc++
-                }]
-              ],
-            }, {
-              # The default for deployment target of 7.0+ is libc++, so force
-              # the old behavior unless libc++ is enabled.
-              'CLANG_CXX_LIBRARY': 'libstdc++',  # -stdlib=libstdc++
             }],
           ],
         },

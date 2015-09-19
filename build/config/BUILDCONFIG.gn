@@ -111,14 +111,6 @@ if (current_os == "") {
 #   even if the value is overridden, which is wasteful. See first bullet.
 
 declare_args() {
-  # How many symbols to include in the build. This affects the performance of
-  # the build since the symbols are large and dealing with them is slow.
-  #   2 means regular build with symbols.
-  #   1 means minimal symbols, usually enough for backtraces only.
-  #   0 means no symbols.
-  #   -1 means auto-set (off in release, regular in debug).
-  symbol_level = -1
-
   # Component build.
   is_component_build = false
 
@@ -133,18 +125,6 @@ declare_args() {
   is_clang = current_os == "mac" || current_os == "ios" ||
              current_os == "linux" || current_os == "chromeos"
 
-  # Compile for Address Sanitizer to find memory bugs.
-  is_asan = false
-
-  # Compile for Leak Sanitizer to find leaks.
-  is_lsan = false
-
-  # Compile for Memory Sanitizer to find uninitialized reads.
-  is_msan = false
-
-  # Compile for Thread Sanitizer to find threading bugs.
-  is_tsan = false
-
   if (current_os == "chromeos") {
     # Allows the target toolchain to be injected as arguments. This is needed
     # to support the CrOS build system which supports per-build-configuration
@@ -154,37 +134,6 @@ declare_args() {
 
   # DON'T ADD MORE FLAGS HERE. Read the comment above.
 }
-
-# This flag indicates if the build is using the new optimization and symbol
-# level configs, or the old ones.
-#
-# This is part of a multi-repo landing. When all required deps (WebKit and
-# ffmpeg) have been updated to handle this flag, we can change the optimization
-# and symbol level configs and set this flag to true. Then delete the users of
-# the flag, wait for all deps rolls, then remove the flag.
-#
-# In the old scheme, this file sets the appropriate optimization or symbol
-# level config on targets depending on what the current build setup is. This
-# requires that targets know what the default is, and if they want to change it,
-# they have to figure out which one to remove depending on the state of the
-# current build. It also means that symbol_level and the sanitizer flags need
-# to be global.
-#
-# In the new scheme, this file sets a "default_symbols" and
-# "default_optimization" configs, which then expands to the right thing
-# depending on the current build. This means less information has to be global,
-# and there's only one config to remove that's the same in all cases for
-# targets that want to override it. It also means that the associated flags can
-# be non-global.
-using_new_global_compiler_configs = false
-
-# To assist in a multi-sided landing of updating the default optimization
-# config. When false, this file sets up the default optimization config to be
-# either "no_optimize" (debug) or "optimize" (release). When true it will
-# always set the config "default_optimization".
-#
-# TODO(brettw) remove this when all repos are updated.
-using_new_optimization_config = false
 
 # =============================================================================
 # OS DEFINITIONS
@@ -387,16 +336,6 @@ if (!is_chromeos) {
 set_sources_assignment_filter(sources_assignment_filter)
 
 # =============================================================================
-# BUILD OPTIONS
-# =============================================================================
-
-# These Sanitizers all imply using the Clang compiler. On Windows they either
-# don't work or work differently.
-if (!is_clang && (is_asan || is_lsan || is_tsan || is_msan)) {
-  is_clang = true
-}
-
-# =============================================================================
 # TARGET DEFAULTS
 # =============================================================================
 #
@@ -413,6 +352,8 @@ _native_compiler_configs = [
   "//build/config/compiler:compiler_arm_fpu",
   "//build/config/compiler:chromium_code",
   "//build/config/compiler:default_include_dirs",
+  "//build/config/compiler:default_optimization",
+  "//build/config/compiler:default_symbols",
   "//build/config/compiler:no_rtti",
   "//build/config/compiler:runtime_library",
 ]
@@ -453,41 +394,12 @@ if (is_clang && !is_nacl) {
   ]
 }
 
-# Optimizations and debug checking.
+# Debug/release-related defines.
 if (is_debug) {
   _native_compiler_configs += [ "//build/config:debug" ]
-  _default_optimization_config = "//build/config/compiler:no_optimize"
 } else {
   _native_compiler_configs += [ "//build/config:release" ]
-  _default_optimization_config = "//build/config/compiler:optimize"
 }
-_native_compiler_configs += [ _default_optimization_config ]
-
-# If it wasn't manually set, set to an appropriate default.
-if (symbol_level == -1) {
-  # Linux is slowed by having symbols as part of the target binary, whereas
-  # Mac and Windows have them separate, so in Release Linux, default them off.
-  if (is_debug || !is_linux) {
-    symbol_level = 2
-  } else if (is_asan || is_lsan || is_tsan || is_msan) {
-    # Sanitizers require symbols for filename suppressions to work.
-    symbol_level = 1
-  } else {
-    symbol_level = 0
-  }
-}
-
-# Symbol setup.
-if (symbol_level == 2) {
-  _default_symbols_config = "//build/config/compiler:symbols"
-} else if (symbol_level == 1) {
-  _default_symbols_config = "//build/config/compiler:minimal_symbols"
-} else if (symbol_level == 0) {
-  _default_symbols_config = "//build/config/compiler:no_symbols"
-} else {
-  assert(false, "Bad value for symbol_level.")
-}
-_native_compiler_configs += [ _default_symbols_config ]
 
 # Windows linker setup for EXEs and DLLs.
 if (is_win) {

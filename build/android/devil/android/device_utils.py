@@ -484,11 +484,9 @@ class DeviceUtils(object):
       timeout_retry.WaitFor(wifi_enabled)
 
   REBOOT_DEFAULT_TIMEOUT = 10 * _DEFAULT_TIMEOUT
-  REBOOT_DEFAULT_RETRIES = _DEFAULT_RETRIES
 
-  @decorators.WithTimeoutAndRetriesDefaults(
-      REBOOT_DEFAULT_TIMEOUT,
-      REBOOT_DEFAULT_RETRIES)
+  @decorators.WithTimeoutAndRetriesFromInstance(
+      min_default_timeout=REBOOT_DEFAULT_TIMEOUT)
   def Reboot(self, block=True, wifi=False, timeout=None, retries=None):
     """Reboot the device.
 
@@ -513,11 +511,9 @@ class DeviceUtils(object):
       self.WaitUntilFullyBooted(wifi=wifi)
 
   INSTALL_DEFAULT_TIMEOUT = 4 * _DEFAULT_TIMEOUT
-  INSTALL_DEFAULT_RETRIES = _DEFAULT_RETRIES
 
-  @decorators.WithTimeoutAndRetriesDefaults(
-      INSTALL_DEFAULT_TIMEOUT,
-      INSTALL_DEFAULT_RETRIES)
+  @decorators.WithTimeoutAndRetriesFromInstance(
+      min_default_timeout=INSTALL_DEFAULT_TIMEOUT)
   def Install(self, apk_path, reinstall=False, permissions=None, timeout=None,
               retries=None):
     """Install an APK.
@@ -540,9 +536,8 @@ class DeviceUtils(object):
     self._InstallInternal(apk_path, None, reinstall=reinstall,
                           permissions=permissions)
 
-  @decorators.WithTimeoutAndRetriesDefaults(
-      INSTALL_DEFAULT_TIMEOUT,
-      INSTALL_DEFAULT_RETRIES)
+  @decorators.WithTimeoutAndRetriesFromInstance(
+      min_default_timeout=INSTALL_DEFAULT_TIMEOUT)
   def InstallSplitApk(self, base_apk, split_apks, reinstall=False,
                       allow_cached_props=False, permissions=None, timeout=None,
                       retries=None):
@@ -617,6 +612,10 @@ class DeviceUtils(object):
       # Upon success, we know the device checksums, but not their paths.
       if host_checksums is not None:
         self._cache['package_apk_checksums'][package_name] = host_checksums
+    else:
+      # Running adb install terminates running instances of the app, so to be
+      # consistent, we explicitly terminate it when skipping the install.
+      self.ForceStop(package_name)
 
     if (permissions is None
         and self.build_version_sdk >= version_codes.MARSHMALLOW):
@@ -627,6 +626,8 @@ class DeviceUtils(object):
   def Uninstall(self, package_name, keep_data=False, timeout=None,
                 retries=None):
     """Remove the app |package_name| from the device.
+
+    This is a no-op if the app is not already installed.
 
     Args:
       package_name: The package to uninstall.
@@ -639,6 +640,9 @@ class DeviceUtils(object):
       CommandTimeoutError if the uninstallation times out.
       DeviceUnreachableError on missing device.
     """
+    installed = self._GetApplicationPathsInternal(package_name)
+    if not installed:
+      return
     try:
       self.adb.Uninstall(package_name, keep_data)
       self._cache['package_apk_paths'][package_name] = []
@@ -989,11 +993,13 @@ class DeviceUtils(object):
     self.RunShellCommand(['am', 'force-stop', package], check_return=True)
 
   @decorators.WithTimeoutAndRetriesFromInstance()
-  def ClearApplicationState(self, package, timeout=None, retries=None):
+  def ClearApplicationState(
+      self, package, permissions=None, timeout=None, retries=None):
     """Clear all state for the given package.
 
     Args:
       package: A string containing the name of the package to stop.
+      permissions: List of permissions to set after clearing data.
       timeout: timeout in seconds
       retries: number of retries
 
@@ -1007,6 +1013,7 @@ class DeviceUtils(object):
     if ((self.build_version_sdk >= version_codes.JELLY_BEAN_MR2)
         or self._GetApplicationPathsInternal(package)):
       self.RunShellCommand(['pm', 'clear', package], check_return=True)
+      self.GrantPermissions(package, permissions)
 
   @decorators.WithTimeoutAndRetriesFromInstance()
   def SendKeyEvent(self, keycode, timeout=None, retries=None):
@@ -1027,11 +1034,9 @@ class DeviceUtils(object):
                          check_return=True)
 
   PUSH_CHANGED_FILES_DEFAULT_TIMEOUT = 10 * _DEFAULT_TIMEOUT
-  PUSH_CHANGED_FILES_DEFAULT_RETRIES = _DEFAULT_RETRIES
 
-  @decorators.WithTimeoutAndRetriesDefaults(
-      PUSH_CHANGED_FILES_DEFAULT_TIMEOUT,
-      PUSH_CHANGED_FILES_DEFAULT_RETRIES)
+  @decorators.WithTimeoutAndRetriesFromInstance(
+      min_default_timeout=PUSH_CHANGED_FILES_DEFAULT_TIMEOUT)
   def PushChangedFiles(self, host_device_tuples, timeout=None,
                        retries=None, delete_device_stale=False):
     """Push files to the device, skipping files that don't need updating.
@@ -1653,7 +1658,7 @@ class DeviceUtils(object):
         # It takes ~120ms to query a single property, and ~130ms to query all
         # properties. So, when caching we always query all properties.
         output = self.RunShellCommand(
-            ['getprop'], check_return=True,
+            ['getprop'], check_return=True, large_output=True,
             timeout=self._default_timeout if timeout is DEFAULT else timeout,
             retries=self._default_retries if retries is DEFAULT else retries)
         prop_cache.clear()

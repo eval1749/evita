@@ -5,18 +5,14 @@
 
 namespace ui {
 
-TableModel::TableModel() {
-}
+TableModel::TableModel() {}
 
-TableModel::~TableModel() {
-}
+TableModel::~TableModel() {}
 
-TableColumn::TableColumn(int column_id,  Alignment alignment, float width)
-    : alignment(alignment), column_id(column_id), width(width) {
-}
+TableColumn::TableColumn(int column_id, Alignment alignment, float width)
+    : alignment(alignment), column_id(column_id), width(width) {}
 
 TableColumn::TableColumn()
-    : alignment(Alignment::Left), column_id(0), width(0.0f) {
-}
+    : alignment(Alignment::Left), column_id(0), width(0.0f) {}
 
 }  // namespace ui

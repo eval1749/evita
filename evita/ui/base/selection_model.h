@@ -1,38 +1,40 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_ui_base_selection_model_h)
-#define INCLUDE_evita_ui_base_selection_model_h
-
-#include "base/strings/string16.h"
+#ifndef EVITA_UI_BASE_SELECTION_MODEL_H_
+#define EVITA_UI_BASE_SELECTION_MODEL_H_
 
 #include <unordered_set>
 
+#include "base/strings/string16.h"
+
 namespace ui {
 
-class SelectionModel {
-  private: int anchor_;
-  private: int focus_;
-  private: int size_;
-  private: std::unordered_set<int> set_;
+class SelectionModel final {
+ public:
+  explicit SelectionModel(int size);
+  ~SelectionModel();
 
-  public: SelectionModel(int size);
-  public: ~SelectionModel();
+  bool empty() const { return !set_.size(); }
 
-  public: bool empty() const { return !set_.size(); }
+  void Add(int index);
+  void Clear();
+  void CollapseTo(int index);
+  void DidAddItem(int index);
+  void DidRemoveItem(int index);
+  void Extend(int direction);
+  void ExtendTo(int index);
+  bool IsSelected(int index) const;
+  void Move(int direction);
 
-  public: void Add(int index);
-  public: void Clear();
-  public: void CollapseTo(int index);
-  public: void DidAddItem(int index);
-  public: void DidRemoveItem(int index);
-  public: void Extend(int direction);
-  public: void ExtendTo(int index);
-  public: bool IsSelected(int index) const;
-  public: void Move(int direction);
+ private:
+  int anchor_;
+  int focus_;
+  int size_;
+  std::unordered_set<int> set_;
 
   DISALLOW_COPY_AND_ASSIGN(SelectionModel);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_base_selection_model_h)
+#endif  // EVITA_UI_BASE_SELECTION_MODEL_H_

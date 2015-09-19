@@ -5,10 +5,8 @@
 
 namespace ui {
 
-TableModelObserver::TableModelObserver() {
-}
+TableModelObserver::TableModelObserver() {}
 
-TableModelObserver::~TableModelObserver() {
-}
+TableModelObserver::~TableModelObserver() {}
 
 }  // namespace ui

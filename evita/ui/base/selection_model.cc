@@ -8,11 +8,9 @@
 namespace ui {
 
 SelectionModel::SelectionModel(int size)
-    : anchor_(-1), focus_(-1), size_(size) {
-}
+    : anchor_(-1), focus_(-1), size_(size) {}
 
-SelectionModel::~SelectionModel() {
-}
+SelectionModel::~SelectionModel() {}
 
 void SelectionModel::Add(int index) {
   anchor_ = focus_ = index;

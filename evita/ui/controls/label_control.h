@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_label_control_h)
-#define INCLUDE_evita_ui_controls_label_control_h
-
-#include "evita/ui/controls/control.h"
+#ifndef EVITA_UI_CONTROLS_LABEL_CONTROL_H_
+#define EVITA_UI_CONTROLS_LABEL_CONTROL_H_
 
 #include <memory>
+
+#include "evita/ui/controls/control.h"
 
 #include "base/strings/string16.h"
 #include "evita/gfx_base.h"
@@ -15,29 +15,32 @@
 namespace ui {
 
 class LabelControl final : public Control {
-  private: class Renderer;
+ public:
+  LabelControl(ControlController* controller,
+               const base::string16& text,
+               const Style& style);
+  ~LabelControl() final;
 
-  private: std::unique_ptr<Renderer> renderer_;
-  private: Style style_;
-  private: base::string16 text_;
+  bool focusable() const final;
+  const Style& style() const { return style_; }
+  void set_style(const Style& style);
+  base::string16 text() const { return text_; }
+  void set_text(const base::string16& text);
 
-  public: LabelControl(ControlController* controller,
-                       const base::string16& text, const Style& style);
-  public: virtual ~LabelControl();
-
-  public: virtual bool focusable() const override;
-  public: const Style& style() const { return style_; }
-  public: void set_style(const Style& style);
-  public: base::string16 text() const { return text_; }
-  public: void set_text(const base::string16& text);
+ private:
+  class Renderer;
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  void DidChangeBounds() final;
+  void OnDraw(gfx::Canvas* canvas) final;
+
+  std::unique_ptr<Renderer> renderer_;
+  Style style_;
+  base::string16 text_;
 
   DISALLOW_COPY_AND_ASSIGN(LabelControl);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_label_control_h)
+#endif  // EVITA_UI_CONTROLS_LABEL_CONTROL_H_

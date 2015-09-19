@@ -13,12 +13,11 @@ namespace ui {
 // CheckboxControl
 //
 CheckboxControl::CheckboxControl(ControlController* controller,
-                                 bool checked, const Style& style)
-    : Control(controller), checked_(checked), style_(style) {
-}
+                                 bool checked,
+                                 const Style& style)
+    : Control(controller), checked_(checked), style_(style) {}
 
-CheckboxControl::~CheckboxControl() {
-}
+CheckboxControl::~CheckboxControl() {}
 
 void CheckboxControl::set_style(const Style& new_style) {
   if (style_ == new_style)
@@ -53,13 +52,11 @@ void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
   if (checked_) {
     gfx::Brush black_brush(canvas, gfx::ColorF(0, 0, 0));
     (*canvas)->DrawLine(gfx::PointF(frame_rect.left + 3, frame_rect.top + 6),
-                     gfx::PointF(frame_rect.left + 6, frame_rect.bottom - 3),
-                     black_brush,
-                     2.0f);
+                        gfx::PointF(frame_rect.left + 6, frame_rect.bottom - 3),
+                        black_brush, 2.0f);
     (*canvas)->DrawLine(gfx::PointF(frame_rect.left + 6, frame_rect.top + 9),
-                     gfx::PointF(frame_rect.right - 3, frame_rect.top + 3),
-                     black_brush,
-                     2.0f);
+                        gfx::PointF(frame_rect.right - 3, frame_rect.top + 3),
+                        black_brush, 2.0f);
   }
   switch (state()) {
     case Control::State::Disabled:
@@ -67,19 +64,15 @@ void CheckboxControl::OnDraw(gfx::Canvas* canvas) {
       break;
     case Control::State::Highlight:
       canvas->FillRectangle(
-          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)),
-          frame_rect);
+          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)), frame_rect);
       canvas->DrawRectangle(
-        gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)),
-        frame_rect);
+          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)), frame_rect);
       break;
     case Control::State::Hovered:
       canvas->FillRectangle(
-          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)),
-          frame_rect);
+          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)), frame_rect);
       canvas->DrawRectangle(
-          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)),
-          frame_rect);
+          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)), frame_rect);
       break;
   }
   canvas->AddDirtyRect(bounds);

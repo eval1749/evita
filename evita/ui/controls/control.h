@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_control_h)
-#define INCLUDE_evita_ui_controls_control_h
+#ifndef EVITA_UI_CONTROLS_CONTROL_H_
+#define EVITA_UI_CONTROLS_CONTROL_H_
 
 #include "evita/gfx/color_f.h"
 #include "evita/ui/widget.h"
@@ -16,13 +16,15 @@ class TextInputDelegate;
 class Control : public Widget {
   DECLARE_CASTABLE_CLASS(Control, Widget);
 
-  public: enum class State {
+ public:
+  enum class State {
     Normal,
     Disabled,
     Highlight,
     Hovered,
   };
-  public: struct Style {
+
+  struct Style final {
     gfx::ColorF bgcolor;
     gfx::ColorF color;
     base::string16 font_family;
@@ -36,36 +38,40 @@ class Control : public Widget {
     bool operator!=(const Style& other) const;
   };
 
-  private: ControlController* controller_;
-  private: TextInputDelegate* text_input_delegate_;
-  private: State state_;
+  ~Control() override;
 
-  public: explicit Control(ControlController* controller);
-  public: virtual ~Control();
+  bool disabled() const { return state_ == State::Disabled; }
+  void set_disabled(bool new_disabled);
+  virtual bool focusable() const;
+  ControlController* controller() const { return controller_; }
+  void set_text_input_delegate(TextInputDelegate* delegate);
 
-  public: bool disabled() const { return state_ == State::Disabled; }
-  public: void set_disabled(bool new_disabled);
-  public: virtual bool focusable() const;
-  public: ControlController* controller() const { return controller_; }
-  protected: bool hover() const { return state_ == State::Hovered; }
-  protected: State state() const { return state_; }
-  public: void set_text_input_delegate(TextInputDelegate* delegate);
+ protected:
+  explicit Control(ControlController* controller);
 
-  protected: virtual void DidChangeState();
+  bool hover() const { return state_ == State::Hovered; }
+  State state() const { return state_; }
+
+  virtual void DidChangeState();
 
   // ui::EventTarget
-  protected: virtual void OnKeyEvent(ui::KeyEvent* event) override;
-  protected: virtual void OnMouseEvent(ui::MouseEvent* event) override;
+  void OnKeyEvent(ui::KeyEvent* event) override;
+  void OnMouseEvent(ui::MouseEvent* event) override;
 
   // ui::Widget
-  protected: virtual void DidKillFocus(ui::Widget* focused_window) override;
-  protected: virtual void DidRealize() override;
-  protected: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  protected: virtual void WillDestroyWidget() override;
+  void DidKillFocus(ui::Widget* focused_window) override;
+  void DidRealize() override;
+  void DidSetFocus(ui::Widget* last_focused) override;
+  void WillDestroyWidget() override;
+
+ private:
+  ControlController* controller_;
+  TextInputDelegate* text_input_delegate_;
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Control);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_control_h)
+#endif  // EVITA_UI_CONTROLS_CONTROL_H_

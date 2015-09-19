@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_checkbox_control_h)
-#define INCLUDE_evita_ui_controls_checkbox_control_h
+#ifndef EVITA_UI_CONTROLS_CHECKBOX_CONTROL_H_
+#define EVITA_UI_CONTROLS_CHECKBOX_CONTROL_H_
 
 #include "evita/ui/controls/control.h"
 
@@ -12,24 +12,27 @@
 namespace ui {
 
 class CheckboxControl final : public Control {
-  private: bool checked_;
-  private: Style style_;
+ public:
+  CheckboxControl(ControlController* controller,
+                  bool checked,
+                  const Style& style);
+  ~CheckboxControl() final;
 
-  public: CheckboxControl(ControlController* controller,
-                          bool checked, const Style& style);
-  public: virtual ~CheckboxControl();
+  const Style& style() const { return style_; }
+  void set_style(const Style& style);
+  bool checked() const { return checked_; }
+  void set_checked(bool checked);
 
-  public: const Style& style() const { return style_; }
-  public: void set_style(const Style& style);
-  public: bool checked() const { return checked_; }
-  public: void set_checked(bool checked);
-
+ private:
   // ui::Widget
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  void OnDraw(gfx::Canvas* canvas) final;
+
+  bool checked_;
+  Style style_;
 
   DISALLOW_COPY_AND_ASSIGN(CheckboxControl);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_checkbox_control_h)
+#endif  // EVITA_UI_CONTROLS_CHECKBOX_CONTROL_H_

@@ -13,12 +13,11 @@ namespace ui {
 // RadioButtonControl
 //
 RadioButtonControl::RadioButtonControl(ControlController* controller,
-                                       bool checked, const Style& style)
-    : Control(controller), checked_(checked), style_(style) {
-}
+                                       bool checked,
+                                       const Style& style)
+    : Control(controller), checked_(checked), style_(style) {}
 
-RadioButtonControl::~RadioButtonControl() {
-}
+RadioButtonControl::~RadioButtonControl() {}
 
 void RadioButtonControl::set_style(const Style& new_style) {
   if (style_ == new_style)
@@ -61,16 +60,14 @@ void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
     case Control::State::Normal:
       break;
     case Control::State::Highlight:
-      (*canvas)->FillEllipse(ellipse,
-          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)));
-      (*canvas)->DrawEllipse(ellipse,
-          gfx::Brush(canvas, style_.highlight));
+      (*canvas)->FillEllipse(
+          ellipse, gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)));
+      (*canvas)->DrawEllipse(ellipse, gfx::Brush(canvas, style_.highlight));
       break;
     case Control::State::Hovered:
-      (*canvas)->FillEllipse(ellipse,
-          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)));
-      (*canvas)->DrawEllipse(ellipse,
-          gfx::Brush(canvas, style_.hotlight));
+      (*canvas)->FillEllipse(
+          ellipse, gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)));
+      (*canvas)->DrawEllipse(ellipse, gfx::Brush(canvas, style_.hotlight));
       break;
   }
   canvas->AddDirtyRect(bounds);

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_button_h)
-#define INCLUDE_evita_ui_controls_button_h
+#ifndef EVITA_UI_CONTROLS_BUTTON_H_
+#define EVITA_UI_CONTROLS_BUTTON_H_
 
 #include "evita/ui/widget.h"
 
@@ -17,10 +17,12 @@ class Event;
 // ButtonListener
 //
 class ButtonListener {
-  protected: ButtonListener();
-  protected: virtual ~ButtonListener();
+ public:
+  virtual void DidPressButton(Button* sender, const Event& event) = 0;
 
-  public: virtual void DidPressButton(Button* sender, const Event& event) = 0;
+ protected:
+  ButtonListener();
+  virtual ~ButtonListener();
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -30,40 +32,45 @@ class ButtonListener {
 class Button : public ui::Widget {
   DECLARE_CASTABLE_CLASS(Button, ui::Widget);
 
-  public: enum class State {
+ public:
+  enum class State {
     Normal,
     Disabled,
     Hovered,
     Pressed,
   };
 
-  private: int canvas_bitmap_id_;
-  private: bool dirty_;
-  private: ButtonListener* listener_;
-  private: State state_;
+  ~Button() override;
 
-  protected: Button(ButtonListener* listener);
-  public: virtual ~Button();
+  State state() const { return state_; }
 
-  public: State state() const { return state_; }
+ protected:
+  explicit Button(ButtonListener* listener);
 
-  private: bool IsDirty(const gfx::Canvas* canvas) const;
-  private: void MarkDirty();
-  protected: virtual void PaintButton(gfx::Canvas* canvas);
-  protected: void SetState(State new_state);
+  virtual void PaintButton(gfx::Canvas* canvas);
+  void SetState(State new_state);
 
   // ui::Widget
-  protected: virtual void DidChangeBounds() override;
-  protected: virtual void DidShow() override;
-  protected: void OnDraw(gfx::Canvas* canvas) override;
-  protected: void OnMouseEntered(const ui::MouseEvent& event) override;
-  protected: void OnMouseExited(const ui::MouseEvent& event) override;
-  protected: void OnMousePressed(const ui::MouseEvent& event) override;
-  protected: void OnMouseReleased(const ui::MouseEvent& event) override;
+  void DidChangeBounds() override;
+  void DidShow() override;
+  void OnDraw(gfx::Canvas* canvas) override;
+  void OnMouseEntered(const ui::MouseEvent& event) override;
+  void OnMouseExited(const ui::MouseEvent& event) override;
+  void OnMousePressed(const ui::MouseEvent& event) override;
+  void OnMouseReleased(const ui::MouseEvent& event) override;
+
+ private:
+  bool IsDirty(const gfx::Canvas* canvas) const;
+  void MarkDirty();
+
+  int canvas_bitmap_id_;
+  bool dirty_;
+  ButtonListener* listener_;
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Button);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_button_h)
+#endif  // EVITA_UI_CONTROLS_BUTTON_H_

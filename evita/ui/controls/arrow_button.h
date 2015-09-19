@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_arrow_button_h)
-#define INCLUDE_evita_ui_controls_arrow_button_h
+#ifndef EVITA_UI_CONTROLS_ARROW_BUTTON_H_
+#define EVITA_UI_CONTROLS_ARROW_BUTTON_H_
 
 #include "evita/ui/controls/button.h"
 
@@ -20,27 +20,29 @@ namespace ui {
 class ArrowButton final : public ui::Button {
   DECLARE_CASTABLE_CLASS(ArrowButton, Button);
 
-  public: enum class Direction {
+ public:
+  enum class Direction {
     Down,
     Left,
     Right,
     Up,
   };
 
-  private: Direction direction_;
+  ArrowButton(Direction direction, ButtonListener* listener);
+  ~ArrowButton() final;
 
-  public: ArrowButton(Direction direction, ButtonListener* listener);
-  public: virtual ~ArrowButton();
-
-  private: gfx::ColorF ComputeColor() const;
-  private: void DrawArrow(gfx::Canvas* canvas) const;
+ private:
+  gfx::ColorF ComputeColor() const;
+  void DrawArrow(gfx::Canvas* canvas) const;
 
   // ui::Button
-  private: virtual void PaintButton(gfx::Canvas* canvas) override;
+  void PaintButton(gfx::Canvas* canvas) final;
+
+  Direction direction_;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowButton);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_arrow_button_h)
+#endif  // EVITA_UI_CONTROLS_ARROW_BUTTON_H_

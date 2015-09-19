@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include "evita/ui/controls/text_field_control.h"
 
 #include "evita/gfx/canvas.h"
@@ -25,24 +27,23 @@ auto const padding_top = 1.0f;
 // TextFieldCaret
 //
 class TextFieldCaret final : public Caret {
-  private: bool has_background_;
+ public:
+  explicit TextFieldCaret(CaretOwner* owner);
+  ~TextFieldCaret() final;
 
-  public: TextFieldCaret(CaretOwner* owner);
-  public: virtual ~TextFieldCaret();
+ private:
+  void DidChangeCaret() final;
+  void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) final;
 
-  private: virtual void DidChangeCaret() override;
-  private: virtual void Paint(gfx::Canvas* canvas,
-                              const gfx::RectF& bounds) override;
+  bool has_background_;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldCaret);
 };
 
 TextFieldCaret::TextFieldCaret(CaretOwner* owner)
-    : Caret(owner), has_background_(false) {
-}
+    : Caret(owner), has_background_(false) {}
 
-TextFieldCaret::~TextFieldCaret() {
-}
+TextFieldCaret::~TextFieldCaret() {}
 
 // ui::Caret
 void TextFieldCaret::DidChangeCaret() {
@@ -82,52 +83,60 @@ void TextFieldCaret::Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) {
 //                     |view_text_start_|
 //
 class TextFieldControl::View final {
-  private: gfx::RectF bounds_;
-  private: std::unique_ptr<TextFieldCaret> caret_;
+ public:
+  View(CaretOwner* caret_owner,
+       const base::string16& text,
+       const Style& style,
+       const Selection& selection);
+  ~View();
+
+  void set_selection(const Selection& selection);
+  void set_state(Control::State new_state);
+  void set_style(const Style& style);
+  void set_text(const base::string16& text);
+
+  void Animate(gfx::Canvas* canvas, base::Time now);
+  int View::MapPointToOffset(const gfx::PointF& point) const;
+  void SetBounds(const gfx::RectF& rect);
+
+ private:
+  gfx::PointF text_origin() const;
+  void MakeSelectionVisible();
+  void PaintSelection(gfx::Canvas* canvas, base::Time now);
+  void ResetTextLayout();
+  void ResetViewPort();
+  void UpdateCaret(gfx::Canvas* canvas,
+                   const gfx::RectF& caret_rect,
+                   base::Time now);
+  void UpdateTextLayout();
+
+  gfx::RectF bounds_;
+  std::unique_ptr<TextFieldCaret> caret_;
   // Text range from 0 to |clean_offset_|, exclusive, of |text_| equals to
   // |text_layout_|.
-  private: size_t clean_offset_;
-  private: bool dirty_;
-  private: Style style_;
-  private: Selection selection_;
-  private: Control::State state_;
-  private: base::string16 text_;
-  private: std::unique_ptr<gfx::TextLayout> text_layout_;
+  size_t clean_offset_;
+  bool dirty_;
+  Style style_;
+  Selection selection_;
+  Control::State state_;
+  base::string16 text_;
+  std::unique_ptr<gfx::TextLayout> text_layout_;
   // Text dimension of all text in one line.
-  private: gfx::SizeF text_size_;
-  private: gfx::RectF view_bounds_;
+  gfx::SizeF text_size_;
+  gfx::RectF view_bounds_;
   // Rectangle of rendered text in |text_layout_| coordinate.
-  private: gfx::RectF view_text_bounds_;
+  gfx::RectF view_text_bounds_;
   // Text offset of first character of rendered text.
-  private: size_t view_text_start_;
-
-  public: View(CaretOwner* caret_owner, const base::string16& text,
-               const Style& style, const Selection& selection);
-  public: ~View();
-
-  public: void set_selection(const Selection& selection);
-  public: void set_state(Control::State new_state);
-  public: void set_style(const Style& style);
-  public: void set_text(const base::string16& text);
-  private: gfx::PointF text_origin() const;
-
-  public: void Animate(gfx::Canvas* canvas, base::Time now);
-  private: void MakeSelectionVisible();
-  public: int View::MapPointToOffset(const gfx::PointF& point) const;
-  private: void PaintSelection(gfx::Canvas* canvas, base::Time now);
-  private: void ResetTextLayout();
-  private: void ResetViewPort();
-  public: void SetBounds(const gfx::RectF& rect);
-  private: void UpdateCaret(gfx::Canvas* canvas, const gfx::RectF& caret_rect,
-                            base::Time now);
-  private: void UpdateTextLayout();
+  size_t view_text_start_;
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };
 
 namespace {
-std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
-    const TextFieldControl::Style& style, float height) {
+std::unique_ptr<gfx::TextLayout> CreateTextLayout(
+    const base::string16& text,
+    const TextFieldControl::Style& style,
+    float height) {
   gfx::TextFormat text_format(style.font_family, style.font_size);
   const auto kHugeWidth = 1e6f;
   return text_format.CreateLayout(text, gfx::SizeF(kHugeWidth, height));
@@ -139,18 +148,19 @@ TextFieldControl::View::View(CaretOwner* caret_owner,
                              const base::string16& text,
                              const Style& style,
                              const Selection& selection)
-    : caret_(new TextFieldCaret(caret_owner)), dirty_(true),
-      selection_(selection), state_(Control::State::Normal),
-      style_(style), text_(text) {
+    : caret_(new TextFieldCaret(caret_owner)),
+      dirty_(true),
+      selection_(selection),
+      state_(Control::State::Normal),
+      style_(style),
+      text_(text) {
   ResetViewPort();
   ResetTextLayout();
 }
 
-TextFieldControl::View::~View() {
-}
+TextFieldControl::View::~View() {}
 
-void TextFieldControl::View::set_selection(
-    const Selection& new_selection) {
+void TextFieldControl::View::set_selection(const Selection& new_selection) {
   if (selection_ == new_selection)
     return;
   selection_ = new_selection;
@@ -226,8 +236,8 @@ void TextFieldControl::View::Animate(gfx::Canvas* canvas, base::Time now) {
 
   // Render text
   {
-    gfx::Brush text_brush(canvas, state_ == State::Disabled ? style_.gray_text :
-                                                              style_.color);
+    gfx::Brush text_brush(
+        canvas, state_ == State::Disabled ? style_.gray_text : style_.color);
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, view_bounds_);
     (*canvas)->DrawTextLayout(text_origin(), *text_layout_, text_brush,
                               D2D1_DRAW_TEXT_OPTIONS_CLIP);
@@ -241,8 +251,7 @@ void TextFieldControl::View::Animate(gfx::Canvas* canvas, base::Time now) {
   switch (state_) {
     case Control::State::Disabled:
       canvas->FillRectangle(
-          gfx::Brush(canvas, gfx::ColorF(style_.shadow, 0.1f)),
-          frame_rect);
+          gfx::Brush(canvas, gfx::ColorF(style_.shadow, 0.1f)), frame_rect);
       break;
     case Control::State::Normal:
       break;
@@ -272,9 +281,10 @@ void TextFieldControl::View::MakeSelectionVisible() {
     auto caret_y = 0.0f;
     auto const is_trailing = true;
     DWRITE_HIT_TEST_METRICS metrics = {0};
-    COM_VERIFY((*text_layout_)->HitTestTextPosition(
-        static_cast<uint32_t>(selection_.focus_offset), is_trailing,
-        &caret_x, &caret_y, &metrics));
+    COM_VERIFY((*text_layout_)
+                   ->HitTestTextPosition(
+                       static_cast<uint32_t>(selection_.focus_offset),
+                       is_trailing, &caret_x, &caret_y, &metrics));
     if (caret_x <= view_bounds_.width()) {
       // Caret is in left most text part.
       view_text_start_ = 0;
@@ -297,9 +307,9 @@ void TextFieldControl::View::MakeSelectionVisible() {
   BOOL is_inside = false;
   BOOL is_trailing = false;
   DWRITE_HIT_TEST_METRICS metrics = {0};
-  COM_VERIFY((*text_layout_)->HitTestPoint(
-      view_text_bounds_.left, 0.0f,
-      &is_trailing, &is_inside, &metrics));
+  COM_VERIFY((*text_layout_)
+                 ->HitTestPoint(view_text_bounds_.left, 0.0f, &is_trailing,
+                                &is_inside, &metrics));
   view_text_start_ = metrics.textPosition;
 }
 
@@ -310,8 +320,9 @@ int TextFieldControl::View::MapPointToOffset(
   DWRITE_HIT_TEST_METRICS metrics = {0};
   auto const origin = text_origin();
   auto point = window_point - origin;
-  COM_VERIFY((*text_layout_)->HitTestPoint(
-      point.x, point.y, &is_trailing, &is_inside, &metrics));
+  COM_VERIFY(
+      (*text_layout_)
+          ->HitTestPoint(point.x, point.y, &is_trailing, &is_inside, &metrics));
   return static_cast<int>(metrics.textPosition + is_trailing);
 }
 
@@ -323,9 +334,10 @@ void TextFieldControl::View::PaintSelection(gfx::Canvas* canvas,
     auto caret_y = 0.0f;
     auto const is_trailing = false;
     DWRITE_HIT_TEST_METRICS metrics;
-    COM_VERIFY((*text_layout_)->HitTestTextPosition(
-        static_cast<uint32_t>(selection_.focus_offset), is_trailing,
-        &caret_x, &caret_y, &metrics));
+    COM_VERIFY((*text_layout_)
+                   ->HitTestTextPosition(
+                       static_cast<uint32_t>(selection_.focus_offset),
+                       is_trailing, &caret_x, &caret_y, &metrics));
     const auto caret = gfx::PointF(caret_x, caret_y) + text_origin;
     UpdateCaret(canvas, gfx::RectF(caret, gfx::SizeF(1.0f, metrics.height)),
                 now);
@@ -334,24 +346,26 @@ void TextFieldControl::View::PaintSelection(gfx::Canvas* canvas,
 
   DWRITE_HIT_TEST_METRICS metrics;
   uint32_t num_metrics = 0;
-  COM_VERIFY((*text_layout_)->HitTestTextRange(
-      static_cast<uint32_t>(selection_.start()),
-      static_cast<uint32_t>(selection_.end() - selection_.start()),
-      0.0f, 0.0f,
-      &metrics, 1u, &num_metrics));
+  COM_VERIFY((*text_layout_)
+                 ->HitTestTextRange(static_cast<uint32_t>(selection_.start()),
+                                    static_cast<uint32_t>(selection_.end() -
+                                                          selection_.start()),
+                                    0.0f, 0.0f, &metrics, 1u, &num_metrics));
   DCHECK_EQ(1u, num_metrics);
   auto const fill_color = style_.highlight;
-  const auto range_rect = gfx::RectF(
-      std::max(metrics.left, view_text_bounds_.left), metrics.top,
-      std::min(metrics.left + metrics.width, view_text_bounds_.right),
-      metrics.top + metrics.height).Offset(text_origin.x, text_origin.y);
+  const auto range_rect =
+      gfx::RectF(
+          std::max(metrics.left, view_text_bounds_.left), metrics.top,
+          std::min(metrics.left + metrics.width, view_text_bounds_.right),
+          metrics.top + metrics.height)
+          .Offset(text_origin.x, text_origin.y);
   canvas->FillRectangle(gfx::Brush(canvas, gfx::ColorF(fill_color, 0.3f)),
                         range_rect);
-  auto const caret_bounds = gfx::RectF(
-      selection_.focus_offset < selection_.anchor_offset ?
-          range_rect.origin() :
-          gfx::PointF(range_rect.right, range_rect.top),
-      gfx::SizeF(1.0f, metrics.height));;
+  auto const caret_bounds =
+      gfx::RectF(selection_.focus_offset < selection_.anchor_offset
+                     ? range_rect.origin()
+                     : gfx::PointF(range_rect.right, range_rect.top),
+                 gfx::SizeF(1.0f, metrics.height));
   UpdateCaret(canvas, caret_bounds, now);
 }
 
@@ -371,14 +385,14 @@ void TextFieldControl::View::SetBounds(const gfx::RectF& new_rect) {
     return;
   ResetTextLayout();
   bounds_ = new_rect;
-  view_bounds_ = gfx::RectF(new_rect.left + padding_left,
-                            new_rect.top + padding_top,
-                            new_rect.right - padding_right,
-                            new_rect.bottom - padding_bottom);
+  view_bounds_ = gfx::RectF(
+      new_rect.left + padding_left, new_rect.top + padding_top,
+      new_rect.right - padding_right, new_rect.bottom - padding_bottom);
 }
 
-void TextFieldControl::View::UpdateCaret(
-    gfx::Canvas* canvas, const gfx::RectF& caret_bounds_in, base::Time now) {
+void TextFieldControl::View::UpdateCaret(gfx::Canvas* canvas,
+                                         const gfx::RectF& caret_bounds_in,
+                                         base::Time now) {
   const auto bounds = gfx::RectF(gfx::ToEnclosingRect(caret_bounds_in));
   caret_->Update(canvas, now, gfx::RectF(bounds.origin(),
                                          gfx::SizeF(1.0f, bounds.height())));
@@ -403,11 +417,9 @@ void TextFieldControl::View::UpdateTextLayout() {
 //
 // TextFieldControl::Selection
 //
-TextFieldControl::Selection::Selection() : anchor_offset(0), focus_offset(0) {
-}
+TextFieldControl::Selection::Selection() : anchor_offset(0), focus_offset(0) {}
 
-TextFieldControl::Selection::~Selection() {
-}
+TextFieldControl::Selection::~Selection() {}
 
 bool TextFieldControl::Selection::operator==(const Selection& other) const {
   return anchor_offset == other.anchor_offset &&
@@ -438,12 +450,9 @@ TextFieldControl::TextFieldControl(ControlController* controller,
                                    const Selection& selection,
                                    const base::string16& text,
                                    const Style& style)
-    : Control(controller),
-      view_(new View(this, text, style, selection)) {
-}
+    : Control(controller), view_(new View(this, text, style, selection)) {}
 
-TextFieldControl::~TextFieldControl() {
-}
+TextFieldControl::~TextFieldControl() {}
 
 void TextFieldControl::set_selection(const Selection& new_selection) {
   view_->set_selection(new_selection);
@@ -463,7 +472,6 @@ void TextFieldControl::set_text(const base::string16& new_text) {
 int TextFieldControl::MapPointToOffset(const gfx::PointF& point) const {
   return view_->MapPointToOffset(point);
 }
-
 
 // ui::CaretOwner
 void TextFieldControl::DidFireCaretTimer() {

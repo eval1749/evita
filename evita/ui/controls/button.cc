@@ -14,12 +14,12 @@ namespace ui {
 // Button
 //
 Button::Button(ButtonListener* listener)
-    : canvas_bitmap_id_(0), dirty_(true), listener_(listener),
-      state_(State::Normal) {
-}
+    : canvas_bitmap_id_(0),
+      dirty_(true),
+      listener_(listener),
+      state_(State::Normal) {}
 
-Button::~Button() {
-}
+Button::~Button() {}
 
 bool Button::IsDirty(const gfx::Canvas* canvas) const {
   return dirty_ || canvas_bitmap_id_ != canvas->bitmap_id();
@@ -32,8 +32,7 @@ void Button::MarkDirty() {
   dirty_ = true;
 }
 
-void Button::PaintButton(gfx::Canvas*) {
-}
+void Button::PaintButton(gfx::Canvas*) {}
 
 void Button::SetState(State new_state) {
   if (state_ == new_state)
@@ -86,10 +85,8 @@ void Button::OnMouseReleased(const ui::MouseEvent& event) {
 //
 // ButtonListener
 //
-ButtonListener::ButtonListener() {
-}
+ButtonListener::ButtonListener() {}
 
-ButtonListener::~ButtonListener() {
-}
+ButtonListener::~ButtonListener() {}
 
 }  // namespace ui

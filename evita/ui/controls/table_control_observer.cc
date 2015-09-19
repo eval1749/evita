@@ -5,19 +5,14 @@
 
 namespace ui {
 
-TableControlObserver::TableControlObserver() {
-}
+TableControlObserver::TableControlObserver() {}
 
-TableControlObserver::~TableControlObserver() {
-}
+TableControlObserver::~TableControlObserver() {}
 
-void TableControlObserver::OnKeyPressed(const KeyEvent&) {
-}
+void TableControlObserver::OnKeyPressed(const KeyEvent&) {}
 
-void TableControlObserver::OnMousePressed(const MouseEvent&) {
-}
+void TableControlObserver::OnMousePressed(const MouseEvent&) {}
 
-void TableControlObserver::OnSelectionChanged() {
-}
+void TableControlObserver::OnSelectionChanged() {}
 
 }  // namespace ui

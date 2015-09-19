@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_scroll_bar_h)
-#define INCLUDE_evita_ui_controls_scroll_bar_h
+#ifndef EVITA_UI_CONTROLS_SCROLL_BAR_H_
+#define EVITA_UI_CONTROLS_SCROLL_BAR_H_
 
 #include <vector>
 
@@ -21,10 +21,11 @@ class ScrollBarObserver;
 //
 // ScrollBar
 //
-class ScrollBar : public ui::Widget {
+class ScrollBar final : public ui::Widget {
   DECLARE_CASTABLE_CLASS(ScrollBar, Widget);
 
-  public: struct Data {
+ public:
+  struct Data final {
     int minimum;
     int maximum;
     int thumb_value;
@@ -32,50 +33,52 @@ class ScrollBar : public ui::Widget {
 
     Data();
 
-    public: bool operator==(const Data&) const;
-    public: bool operator!=(const Data&) const;
+    bool operator==(const Data&) const;
+    bool operator!=(const Data&) const;
   };
 
-  public: class HitTestResult;
-  public: enum class Location;
+  class HitTestResult;
+  enum class Location;
 
-  // Note: class |Part| is base class of scroll bar parts, e.g. arrow, and
+  // class |Part| is base class of scroll bar parts, e.g. arrow, and
   // thumb. You can't use |Part| outside "scroll_bar.cc".
-  public: class Part;
+  class Part;
 
-  public: enum class Type {
+  enum class Type {
     Horizontal,
     Vertical,
   };
 
-  private: Location capturing_location_;
-  private: Part* capturing_part_;
-  private: Data data_;
-  private: Part* hover_part_;
-  private: ScrollBarObserver* observer_;
-  private: std::vector<Part*> parts_;
+  ScrollBar(Type type, ScrollBarObserver* observer);
+  ~ScrollBar();
 
-  public: ScrollBar(Type type, ScrollBarObserver* observer);
-  public: virtual ~ScrollBar();
+  void SetData(const Data& date);
 
-  private: static std::vector<Part*> CreateParts(Type type);
-  private: HitTestResult HitTest(const gfx::PointF& point) const;
-  private: void ResetHover();
-  public: void SetData(const Data& date);
-  private: void UpdateLayout();
+ private:
+  static std::vector<Part*> CreateParts(Type type);
+  HitTestResult HitTest(const gfx::PointF& point) const;
+  void ResetHover();
+  void UpdateLayout();
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
-  private: virtual void DidShow() override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
-  private: virtual void OnMouseExited(const MouseEvent& event) override;
-  private: virtual void OnMouseMoved(const MouseEvent& event) override;
-  private: virtual void OnMousePressed(const MouseEvent& event) override;
-  private: virtual void OnMouseReleased(const MouseEvent& event) override;
+  void DidChangeBounds() final;
+  void DidShow() final;
+  void OnDraw(gfx::Canvas* canvas) final;
+  void OnMouseExited(const MouseEvent& event) final;
+  void OnMouseMoved(const MouseEvent& event) final;
+  void OnMousePressed(const MouseEvent& event) final;
+  void OnMouseReleased(const MouseEvent& event) final;
+
+  Location capturing_location_;
+  Part* capturing_part_;
+  Data data_;
+  Part* hover_part_;
+  ScrollBarObserver* observer_;
+  std::vector<Part*> parts_;
 
   DISALLOW_COPY_AND_ASSIGN(ScrollBar);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_scroll_bar_h)
+#endif  // EVITA_UI_CONTROLS_SCROLL_BAR_H_

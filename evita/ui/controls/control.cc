@@ -17,8 +17,7 @@ bool Control::Style::operator==(const Style& other) const {
   return bgcolor == other.bgcolor && color == other.color &&
          font_family == other.font_family && font_size == other.font_size &&
          gray_text == other.gray_text && highlight == other.highlight &&
-         hotlight == other.hotlight &&
-         shadow == other.shadow;
+         hotlight == other.hotlight && shadow == other.shadow;
 }
 
 bool Control::Style::operator!=(const Style& other) const {
@@ -30,9 +29,9 @@ bool Control::Style::operator!=(const Style& other) const {
 // Control
 //
 Control::Control(ControlController* controller)
-    : controller_(controller), state_(State::Normal),
-      text_input_delegate_(nullptr) {
-}
+    : controller_(controller),
+      state_(State::Normal),
+      text_input_delegate_(nullptr) {}
 
 Control::~Control() {
   DCHECK(!controller_);

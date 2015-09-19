@@ -24,17 +24,19 @@
 
 namespace ui {
 
-
 //////////////////////////////////////////////////////////////////////
 //
 // PaintScheduler
 //
 class PaintScheduler {
-  protected: PaintScheduler() = default;
-  protected: virtual ~PaintScheduler() = default;
+ public:
+  virtual void SchedulePaintCanvas() = 0;
 
-  public: virtual void SchedulePaintCanvas() = 0;
+ protected:
+  PaintScheduler() = default;
+  virtual ~PaintScheduler() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(PaintScheduler);
 };
 
@@ -43,34 +45,37 @@ class PaintScheduler {
 // CanvasPainter
 //
 class CanvasPainter {
-  private: gfx::RectF bounds_;
-  private: int canvas_bitmap_id_;
-  private: bool dirty_;
-  private: PaintScheduler* const paint_scheduler_;
+ public:
+  virtual ~CanvasPainter();
 
-  protected: CanvasPainter(PaintScheduler* paint_scheduler);
-  public: virtual ~CanvasPainter();
+  const gfx::RectF& bounds() const { return bounds_; }
+  float height() const { return bounds_.height(); }
+  float width() const { return bounds_.width(); }
 
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  public: float height() const { return bounds_.height(); }
-  public: float width() const { return bounds_.width(); }
+  void MarkDirty();
+  void Paint(gfx::Canvas* canvas);
+  void SetBounds(const gfx::PointF& origin, const gfx::SizeF& size);
+  void SetBounds(const gfx::RectF& new_bounds);
 
-  private: bool IsDirty(const gfx::Canvas* canvas) const;
-  public: void MarkDirty();
-  protected: virtual void OnPaintCanvas(gfx::Canvas* canvas) = 0;
-  public: void Paint(gfx::Canvas* canvas);
-  public: void SetBounds(const gfx::PointF& origin, const gfx::SizeF& size);
-  public: void SetBounds(const gfx::RectF& new_bounds);
+ protected:
+  explicit CanvasPainter(PaintScheduler* paint_scheduler);
+  virtual void OnPaintCanvas(gfx::Canvas* canvas) = 0;
+
+ private:
+  bool IsDirty(const gfx::Canvas* canvas) const;
+
+  gfx::RectF bounds_;
+  int canvas_bitmap_id_;
+  bool dirty_;
+  PaintScheduler* const paint_scheduler_;
 
   DISALLOW_COPY_AND_ASSIGN(CanvasPainter);
 };
 
 CanvasPainter::CanvasPainter(PaintScheduler* paint_scheduler)
-    : canvas_bitmap_id_(0), dirty_(true), paint_scheduler_(paint_scheduler) {
-}
+    : canvas_bitmap_id_(0), dirty_(true), paint_scheduler_(paint_scheduler) {}
 
-CanvasPainter::~CanvasPainter() {
-}
+CanvasPainter::~CanvasPainter() {}
 
 bool CanvasPainter::IsDirty(const gfx::Canvas* canvas) const {
   return dirty_ || canvas_bitmap_id_ != canvas->bitmap_id();
@@ -93,7 +98,7 @@ void CanvasPainter::Paint(gfx::Canvas* canvas) {
 }
 
 void CanvasPainter::SetBounds(const gfx::PointF& origin,
-                             const gfx::SizeF& size) {
+                              const gfx::SizeF& size) {
   SetBounds(gfx::RectF(origin, size));
 }
 
@@ -114,36 +119,38 @@ class CanvasWindow : public ui::AnimatableWindow,
                      protected ui::LayerOwnerDelegate {
   DECLARE_CASTABLE_CLASS(CanvasWindow, AnimatableWindow);
 
-  private: std::unique_ptr<gfx::Canvas> canvas_;
+ public:
+  ~CanvasWindow() override;
 
-  protected: CanvasWindow();
-  protected: virtual ~CanvasWindow();
+  gfx::Canvas* canvas() { return canvas_.get(); }
 
-  public: gfx::Canvas* canvas() { return canvas_.get(); }
+ protected:
+  CanvasWindow();
 
-  protected: virtual void DidChangeCanvas() = 0;
+  virtual void DidChangeCanvas() = 0;
 
   // ui::AnimationFrameHanndler
-  protected: virtual void DidBeginAnimationFrame(base::Time time) override;
+  void DidBeginAnimationFrame(base::Time time) override;
 
   // ui::PaintScheduler
-  protected: virtual void SchedulePaintCanvas() override;
+  void SchedulePaintCanvas() override;
 
   // ui::LayerOwnerDelegate
-  protected: virtual void DidRecreateLayer(ui::Layer* old_layer) override;
+  void DidRecreateLayer(ui::Layer* old_layer) override;
 
   // ui::Widget
-  protected: virtual void DidHide() override;
-  protected: virtual void DidRealize() override;
+  void DidHide() override;
+  void DidRealize() override;
+
+ private:
+  std::unique_ptr<gfx::Canvas> canvas_;
 
   DISALLOW_COPY_AND_ASSIGN(CanvasWindow);
 };
 
-CanvasWindow::CanvasWindow() {
-}
+CanvasWindow::CanvasWindow() {}
 
-CanvasWindow::~CanvasWindow() {
-}
+CanvasWindow::~CanvasWindow() {}
 
 // ui::AnimationFrameHanndler
 void CanvasWindow::DidBeginAnimationFrame(base::Time) {
@@ -190,23 +197,22 @@ auto const kTopMargin = 3.0f;
 
 std::unique_ptr<gfx::TextFormat> CreateTextFormat() {
   auto const font_size = 13.0f;
-  auto text_format = std::make_unique<gfx::TextFormat>(
-      L"MS Shell Dlg 2", font_size);
+  auto text_format =
+      std::make_unique<gfx::TextFormat>(L"MS Shell Dlg 2", font_size);
   common::ComPtr<IDWriteInlineObject> inline_object;
-  COM_VERIFY(gfx::FactorySet::instance()->dwrite().
-      CreateEllipsisTrimmingSign(*text_format.get(), &inline_object));
-  DWRITE_TRIMMING trimming {DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
+  COM_VERIFY(gfx::FactorySet::instance()->dwrite().CreateEllipsisTrimmingSign(
+      *text_format.get(), &inline_object));
+  DWRITE_TRIMMING trimming{DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
   (*text_format.get())->SetTrimming(&trimming, inline_object);
-  (*text_format.get())->SetParagraphAlignment(
-      DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+  (*text_format.get())
+      ->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
   return std::move(text_format);
 }
 
 gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
   return gfx::ColorF(static_cast<float>(red) / 255,
                      static_cast<float>(green) / 255,
-                     static_cast<float>(blue) / 255,
-                     alpha);
+                     static_cast<float>(blue) / 255, alpha);
 }
 //////////////////////////////////////////////////////////////////////
 //
@@ -215,24 +221,26 @@ gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
 class Item : public ui::CanvasPainter, public common::Castable {
   DECLARE_CASTABLE_CLASS(Item, common::Castable);
 
-  private: gfx::TextFormat* const text_format_;
+ public:
+  ~Item() override;
 
-  protected: Item(PaintScheduler* paint_scheduler, gfx::TextFormat* text_format);
-  public: virtual ~Item();
+  Item* HitTest(const gfx::PointF& point) const;
 
-  protected: gfx::TextFormat* text_format() const { return text_format_; }
+ protected:
+  Item(PaintScheduler* paint_scheduler, gfx::TextFormat* text_format);
 
-  public: Item* HitTest(const gfx::PointF& point) const;
+  gfx::TextFormat* text_format() const { return text_format_; }
+
+ private:
+  gfx::TextFormat* const text_format_;
 
   DISALLOW_COPY_AND_ASSIGN(Item);
 };
 
 Item::Item(PaintScheduler* paint_scheduler, gfx::TextFormat* text_format)
-    : CanvasPainter(paint_scheduler), text_format_(text_format) {
-}
+    : CanvasPainter(paint_scheduler), text_format_(text_format) {}
 
-Item::~Item() {
-}
+Item::~Item() {}
 
 Item* Item::HitTest(const gfx::PointF& point) const {
   return bounds().Contains(point) ? const_cast<Item*>(this) : nullptr;
@@ -245,50 +253,53 @@ Item* Item::HitTest(const gfx::PointF& point) const {
 class Column final : public Item {
   DECLARE_CASTABLE_CLASS(Column, Item);
 
-  public: enum class State {
+ public:
+  enum class State {
     Normal,
     Hovered,
     Pressed,
   };
 
-  private: TableColumn data_;
-  private: State state_;
-  private: std::unique_ptr<gfx::TextLayout> text_layout_;
+  Column(PaintScheduler* paint_scheduler,
+         const TableColumn& data,
+         gfx::TextFormat* text_format);
+  virtual ~Column();
 
-  public: Column(PaintScheduler* paint_scheduler, const TableColumn& data,
-                 gfx::TextFormat* text_format);
-  public: virtual ~Column();
+  DWRITE_TEXT_ALIGNMENT alignment() const;
+  int column_id() const { return data_.column_id; }
+  State state() const { return state_; }
+  const base::string16& text() const { return data_.text; }
+  float width() const { return data_.width; }
 
-  public: DWRITE_TEXT_ALIGNMENT alignment() const;
-  public: int column_id() const { return data_.column_id; }
-  public: State state() const { return state_; }
-  public: const base::string16& text() const { return data_.text; }
-  public: float width() const { return data_.width; }
+  void SetState(State new_state);
 
-  private: gfx::ColorF GetOverlayColor() const;
-  public: void SetState(State new_state);
+ private:
+  gfx::ColorF GetOverlayColor() const;
 
   // CanvasPainter
-  private: virtual void OnPaintCanvas(gfx::Canvas* canvas) override;
+  void OnPaintCanvas(gfx::Canvas* canvas) final;
+
+  TableColumn data_;
+  State state_;
+  std::unique_ptr<gfx::TextLayout> text_layout_;
 
   DISALLOW_COPY_AND_ASSIGN(Column);
 };
 
-Column::Column(PaintScheduler* paint_scheduler, const TableColumn& data,
+Column::Column(PaintScheduler* paint_scheduler,
+               const TableColumn& data,
                gfx::TextFormat* text_format)
     : Item(paint_scheduler, text_format), data_(data), state_(State::Normal) {
   auto const kRightPadding = 5;
   data_.width += kRightPadding;
 }
 
-Column::~Column() {
-}
+Column::~Column() {}
 
 DWRITE_TEXT_ALIGNMENT Column::alignment() const {
   static const DWRITE_TEXT_ALIGNMENT dwrite_alignment[] = {
-    DWRITE_TEXT_ALIGNMENT_LEADING,
-    DWRITE_TEXT_ALIGNMENT_TRAILING,
-    DWRITE_TEXT_ALIGNMENT_CENTER,
+      DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_TEXT_ALIGNMENT_TRAILING,
+      DWRITE_TEXT_ALIGNMENT_CENTER,
   };
   return dwrite_alignment[static_cast<int>(data_.alignment)];
 }
@@ -323,8 +334,8 @@ void Column::OnPaintCanvas(gfx::Canvas* canvas) {
   {
     auto const text_bounds = bounds().Inset(5, 0);
     if (!text_layout_) {
-      text_layout_ = text_format()->CreateLayout(data_.text,
-                                                 text_bounds.size());
+      text_layout_ =
+          text_format()->CreateLayout(data_.text, text_bounds.size());
     }
     gfx::Brush text_brush(canvas, gfx::ColorF::Black);
     (*canvas)->DrawTextLayout(text_bounds.origin(), *text_layout_, text_brush,
@@ -349,40 +360,44 @@ void Column::OnPaintCanvas(gfx::Canvas* canvas) {
 //
 // ColumnCollection
 //
-class ColumnCollection : public ui::Widget, private PaintScheduler {
+class ColumnCollection final : public ui::Widget, private PaintScheduler {
   DECLARE_CASTABLE_CLASS(ColumnCollection, Widget);
 
-  private: std::vector<Column*> columns_;
-  private: float column_height_;
-  private: gfx::RectF canvas_bounds_;
-  private: Column* hovered_column_;
-  private: std::unique_ptr<gfx::TextFormat> text_format_;
+ public:
+  explicit ColumnCollection(const std::vector<TableColumn>& columns);
 
-  public: ColumnCollection(const std::vector<TableColumn>& columns);
-  public: virtual ~ColumnCollection();
+  ~ColumnCollection() final;
 
-  public: float canvas_width() const;
-  public: const std::vector<Column*> columns() const { return columns_; }
-  public: int window_height() const;
+  float canvas_width() const;
+  const std::vector<Column*>& columns() const { return columns_; }
+  int window_height() const;
 
-  private: Column* HitTest(const gfx::PointF& point);
-  private: void UpdateHover(Column* column);
-  private: void UpdateLayoutIfNeeded();
+ private:
+  Column* HitTest(const gfx::PointF& point);
+  void UpdateHover(Column* column);
+  void UpdateLayoutIfNeeded();
 
   // ui::PaintScheduler
-  protected: virtual void SchedulePaintCanvas() override;
+  void SchedulePaintCanvas() final;
 
   // ui::Widget
-  private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
-  private: virtual void OnMouseEntered(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
+  HCURSOR GetCursorAt(const gfx::Point& point) const final;
+  void OnDraw(gfx::Canvas* canvas) final;
+  void OnMouseEntered(const ui::MouseEvent& event) final;
+  void OnMouseExited(const ui::MouseEvent& event) final;
+
+  std::vector<Column*> columns_;
+  float column_height_;
+  gfx::RectF canvas_bounds_;
+  Column* hovered_column_;
+  std::unique_ptr<gfx::TextFormat> text_format_;
 
   DISALLOW_COPY_AND_ASSIGN(ColumnCollection);
 };
 
 ColumnCollection::ColumnCollection(const std::vector<TableColumn>& columns)
-    : column_height_(24.0f), hovered_column_(nullptr),
+    : column_height_(24.0f),
+      hovered_column_(nullptr),
       text_format_(CreateTextFormat()) {
   columns_.resize(columns.size());
   for (auto index = 0u; index < columns.size(); ++index)
@@ -431,8 +446,9 @@ void ColumnCollection::UpdateLayoutIfNeeded() {
   for (auto column : columns_) {
     --rest;
     (*text_format_)->SetTextAlignment(column->alignment());
-    auto const width = rest ?
-        column->width() : canvas_bounds_.width() - cell_origin.x - kRightMargin;
+    auto const width =
+        rest ? column->width()
+             : canvas_bounds_.width() - cell_origin.x - kRightMargin;
     gfx::RectF bounds(cell_origin, gfx::SizeF(width, column_height_));
     column->SetBounds(bounds);
     DCHECK(!column->bounds().empty());
@@ -481,7 +497,8 @@ void ColumnCollection::OnMouseEntered(const ui::MouseEvent& event) {
 class Row final : public Item {
   DECLARE_CASTABLE_CLASS(Row, Item);
 
-  public: enum RowFlags {
+ public:
+  enum RowFlags {
     kNone = 0,
     kFocused = 1,
     kSelected = 1 << 1,
@@ -491,47 +508,55 @@ class Row final : public Item {
     Activating = 1 << 5,
   };
 
-  public: enum class State {
+  enum class State {
     Normal,
     ActiveSelected,
     Hovered,
     InactiveSelected,
   };
 
-  private: ColumnCollection* const header_;
-  private: int flags_;
-  private: const TableModel* const model_;
-  private: int const row_id_;
-  private: State state_;
+  Row(PaintScheduler* paint_scheduler,
+      const TableModel* model,
+      ColumnCollection* columns,
+      int row_id,
+      gfx::TextFormat* text_format);
+  ~Row() final;
 
-  public: Row(PaintScheduler* paint_scheduler, const TableModel* model,
-              ColumnCollection* columns, int row_id,
-              gfx::TextFormat* text_format);
-  public: virtual ~Row();
+  int flags() const { return flags_; }
+  int row_id() const { return row_id_; }
+  bool selected() const { return (flags_ & kSelected) != 0; }
+  State state() const { return state_; }
 
-  public: int flags() const { return flags_; }
-  public: int row_id() const { return row_id_; }
-  public: bool selected() const { return (flags_ & kSelected) != 0; }
-  public: State state() const { return state_; }
+  void SetSelected(bool selected);
+  void SetState(State new_state);
+  void UpdateRowFlags(int new_state, int flags_mask);
 
-  public: void SetSelected(bool selected);
-  public: void SetState(State new_state);
-  public: void UpdateRowFlags(int new_state, int flags_mask);
-
+ private:
   // CanvasPainter
-  private: virtual void OnPaintCanvas(gfx::Canvas* canvas) override;
+  void OnPaintCanvas(gfx::Canvas* canvas) final;
+
+  ColumnCollection* const header_;
+  int flags_;
+  const TableModel* const model_;
+  int const row_id_;
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Row);
 };
 
-Row::Row(PaintScheduler* paint_scheduler, const TableModel* model,
-         ColumnCollection* columns, int row_id, gfx::TextFormat* text_format)
-    : Item(paint_scheduler, text_format), header_(columns), flags_(kNone),
-      model_(model), row_id_(row_id), state_(State::Normal) {
-}
+Row::Row(PaintScheduler* paint_scheduler,
+         const TableModel* model,
+         ColumnCollection* columns,
+         int row_id,
+         gfx::TextFormat* text_format)
+    : Item(paint_scheduler, text_format),
+      header_(columns),
+      flags_(kNone),
+      model_(model),
+      row_id_(row_id),
+      state_(State::Normal) {}
 
-Row::~Row() {
-}
+Row::~Row() {}
 
 void Row::SetSelected(bool selected) {
   UpdateRowFlags(selected ? kSelected : 0, kSelected);
@@ -567,10 +592,10 @@ void Row::OnPaintCanvas(gfx::Canvas* canvas) {
     --rest;
     auto const text = model_->GetCellText(row_id(), column->column_id());
     (*text_format())->SetTextAlignment(column->alignment());
-    auto const width = rest ?
-        column->width() : bounds().width() - cell_origin.x - kRightMargin;
-    auto const cell_bounds = gfx::RectF(cell_origin,
-                                        gfx::SizeF(width, height()));
+    auto const width = rest ? column->width()
+                            : bounds().width() - cell_origin.x - kRightMargin;
+    auto const cell_bounds =
+        gfx::RectF(cell_origin, gfx::SizeF(width, height()));
     auto const text_bounds = cell_bounds.Inset(kPadding, kPadding);
     (*canvas)->DrawText(text.data(), static_cast<uint32_t>(text.length()),
                         *text_format(), text_bounds, text_brush);
@@ -579,23 +604,23 @@ void Row::OnPaintCanvas(gfx::Canvas* canvas) {
 
   switch (state_) {
     case State::ActiveSelected:
-      canvas->FillRectangle(
-          gfx::Brush(canvas, RgbToColorF(51, 153, 255, 0.2f)), bounds());
-      canvas->DrawRectangle(
-          gfx::Brush(canvas, RgbToColorF(51, 153, 255, 1.0f)), bounds());
+      canvas->FillRectangle(gfx::Brush(canvas, RgbToColorF(51, 153, 255, 0.2f)),
+                            bounds());
+      canvas->DrawRectangle(gfx::Brush(canvas, RgbToColorF(51, 153, 255, 1.0f)),
+                            bounds());
       break;
     case State::Hovered:
-      canvas->FillRectangle(
-          gfx::Brush(canvas, RgbToColorF(51, 153, 255, 0.1f)), bounds());
-      canvas->DrawRectangle(
-          gfx::Brush(canvas, RgbToColorF(51, 153, 255, 1.0f)), bounds());
-       break;
+      canvas->FillRectangle(gfx::Brush(canvas, RgbToColorF(51, 153, 255, 0.1f)),
+                            bounds());
+      canvas->DrawRectangle(gfx::Brush(canvas, RgbToColorF(51, 153, 255, 1.0f)),
+                            bounds());
+      break;
     case State::InactiveSelected:
       canvas->FillRectangle(
           gfx::Brush(canvas, RgbToColorF(191, 205, 191, 0.2f)), bounds());
       canvas->DrawRectangle(
           gfx::Brush(canvas, RgbToColorF(191, 205, 191, 1.0f)), bounds());
-       break;
+      break;
     case State::Normal:
       break;
     default:
@@ -613,10 +638,9 @@ struct RowCompare {
   int column_id_;
 
   RowCompare(const TableModel* model, int column_id)
-      : column_id_(column_id), model_(model) {
-  }
+      : column_id_(column_id), model_(model) {}
 
-  bool operator() (const Row* a, const Row* b) const {
+  bool operator()(const Row* a, const Row* b) const {
     const auto& a_text = model_->GetCellText(a->row_id(), column_id_);
     const auto& b_text = model_->GetCellText(b->row_id(), column_id_);
     return a_text < b_text;
@@ -630,61 +654,64 @@ struct RowCompare {
 class RowCollection final : public CanvasWindow, public TableModelObserver {
   DECLARE_CASTABLE_CLASS(RowCollection, CanvasWindow);
 
-  private: ColumnCollection* header_;
-  private: Row* hovered_row_;
-  private: const TableModel* model_;
-  private: bool need_sort_rows_;
-  private: bool need_update_layout_;
-  private: bool need_update_selection_;
-  private: TableControlObserver* const observer_;
-  private: std::vector<Row*> rows_;
-  private: std::unordered_map<int, Row*> row_map_;
-  private: float const row_height_;
-  private: SelectionModel selection_;
-  private: std::unique_ptr<gfx::TextFormat> text_format_;
+ public:
+  RowCollection(const TableModel* model,
+                ColumnCollection* columns,
+                TableControlObserver* observer);
+  ~RowCollection() final;
 
-  public: RowCollection(const TableModel* model,
-                        ColumnCollection* columns,
-                        TableControlObserver* observer);
-  public: virtual ~RowCollection();
+  int GetRowFlags(int row_id) const;
+  void Select(int row_id);
+  void SortRowsIfNeeded(size_t column_id);
 
-  private: Row* CreateRow(int row_id);
-  private: void ExtendSelection(int direction);
-  private: const Row* GetRowById(int row_id) const;
-  private: int GetRowIndex(const Row* row);
-  public: int GetRowFlags(int row_id) const;
-  private: Row* HitTest(const gfx::PointF& point);
-  private: void MoveSelection(int direction);
-  private: void NeedSortRows();
-  private: void NeedUpdateLayout();
-  private: void NeedUpdateSelection();
-  public: void Select(int row_id);
-  public: void SortRowsIfNeeded(size_t column_id);
-  private: void UpdateHover(Row* new_hovered_row);
-  private: void UpdateLayoutIfNeeded();
-  private: void UpdateRowFlags();
-  private: void UpdateSelectionIfNeeded();
+ private:
+  Row* CreateRow(int row_id);
+  void ExtendSelection(int direction);
+  const Row* GetRowById(int row_id) const;
+  int GetRowIndex(const Row* row);
+  Row* HitTest(const gfx::PointF& point);
+  void MoveSelection(int direction);
+  void NeedSortRows();
+  void NeedUpdateLayout();
+  void NeedUpdateSelection();
+  void UpdateHover(Row* new_hovered_row);
+  void UpdateLayoutIfNeeded();
+  void UpdateRowFlags();
+  void UpdateSelectionIfNeeded();
 
   // ui::AnimationFrameHanndler
-  private: virtual void DidBeginAnimationFrame(base::Time time) override;
+  void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::CanavsWindow
-  private: virtual void DidChangeCanvas() override;
+  void DidChangeCanvas() final;
 
   // ui::TableModelObserver
-  public: virtual void DidAddRow(int row_id) override;
-  public: virtual void DidChangeRow(int row_id) override;
-  public: virtual void DidRemoveRow(int row_id) override;
+  void DidAddRow(int row_id) final;
+  void DidChangeRow(int row_id) final;
+  void DidRemoveRow(int row_id) final;
 
   // ui::Widget
-  private: virtual void DidKillFocus(ui::Widget* focused_window) override;
-  private: virtual void DidRealize() override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
-  private: virtual void OnKeyPressed(const KeyEvent& event) override;
-  private: virtual void OnMouseExited(const ui::MouseEvent& event) override;
-  private: virtual void OnMouseMoved(const ui::MouseEvent& event) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent& event) override;
+  void DidKillFocus(ui::Widget* focused_window) final;
+  void DidRealize() final;
+  void DidSetFocus(ui::Widget* last_focused) final;
+  void OnDraw(gfx::Canvas* canvas) final;
+  void OnKeyPressed(const KeyEvent& event) final;
+  void OnMouseExited(const ui::MouseEvent& event) final;
+  void OnMouseMoved(const ui::MouseEvent& event) final;
+  void OnMousePressed(const ui::MouseEvent& event) final;
+
+  ColumnCollection* header_;
+  Row* hovered_row_;
+  const TableModel* model_;
+  bool need_sort_rows_;
+  bool need_update_layout_;
+  bool need_update_selection_;
+  TableControlObserver* const observer_;
+  std::vector<Row*> rows_;
+  std::unordered_map<int, Row*> row_map_;
+  float const row_height_;
+  SelectionModel selection_;
+  std::unique_ptr<gfx::TextFormat> text_format_;
 
   DISALLOW_COPY_AND_ASSIGN(RowCollection);
 };
@@ -692,9 +719,14 @@ class RowCollection final : public CanvasWindow, public TableModelObserver {
 RowCollection::RowCollection(const TableModel* model,
                              ColumnCollection* columns,
                              TableControlObserver* observer)
-    : header_(columns), hovered_row_(nullptr),
-      model_(model), need_sort_rows_(true), need_update_layout_(true),
-      need_update_selection_(false), observer_(observer), row_height_(24.0f),
+    : header_(columns),
+      hovered_row_(nullptr),
+      model_(model),
+      need_sort_rows_(true),
+      need_update_layout_(true),
+      need_update_selection_(false),
+      observer_(observer),
+      row_height_(24.0f),
       selection_(model->GetRowCount()),
       text_format_(CreateTextFormat()) {
   auto const num_rows = static_cast<size_t>(model->GetRowCount());
@@ -817,9 +849,9 @@ void RowCollection::UpdateLayoutIfNeeded() {
   if (!need_update_layout_)
     return;
   need_update_layout_ = false;
-  auto bounds = gfx::RectF(gfx::PointF(kLeftMargin, 0.0f),
-                           gfx::PointF(GetContentsBounds().right - kRightMargin,
-                                       row_height_));
+  auto bounds = gfx::RectF(
+      gfx::PointF(kLeftMargin, 0.0f),
+      gfx::PointF(GetContentsBounds().right - kRightMargin, row_height_));
   for (auto row : rows_) {
     row->SetBounds(bounds);
     bounds = bounds.Offset(0.0f, row_height_);
@@ -828,7 +860,7 @@ void RowCollection::UpdateLayoutIfNeeded() {
 
 void RowCollection::UpdateRowFlags() {
   auto index = 0;
-  for(auto row : rows_) {
+  for (auto row : rows_) {
     row->SetSelected(selection_.IsSelected(index));
     ++index;
   }
@@ -841,8 +873,8 @@ void RowCollection::UpdateSelectionIfNeeded() {
   UpdateRowFlags();
   for (auto row : rows_) {
     if (row->selected()) {
-      row->SetState(has_focus() ? Row::State::ActiveSelected :
-                                  Row::State::InactiveSelected);
+      row->SetState(has_focus() ? Row::State::ActiveSelected
+                                : Row::State::InactiveSelected);
     } else if (row == hovered_row_) {
       row->SetState(Row::State::Hovered);
     } else {
@@ -919,7 +951,8 @@ void RowCollection::DidRemoveRow(int row_id) {
 }
 
 // ui::Widget
-void RowCollection::DidKillFocus(Widget*) {
+void RowCollection::DidKillFocus(Widget* window) {
+  DCHECK(window);
   // Change selected rows to inactive selected color.
   RequestAnimationFrame();
   NeedUpdateSelection();
@@ -942,7 +975,8 @@ void RowCollection::DidRealize() {
   Local::GetParentLayer(this)->AppendLayer(layer());
 }
 
-void RowCollection::DidSetFocus(Widget*) {
+void RowCollection::DidSetFocus(Widget* widget) {
+  DCHECK(widget);
   // Change selected rows to active selected color.
   RequestAnimationFrame();
   NeedUpdateSelection();
@@ -1036,14 +1070,18 @@ void RowCollection::OnMousePressed(const ui::MouseEvent& event) {
 class TableControl::View final : public ui::Widget {
   DECLARE_CASTABLE_CLASS(View, Widget);
 
-  private: ColumnCollection* header_;
-  private: RowCollection* row_collection_;
+ public:
+  View(ui::Widget* widget_,
+       const std::vector<TableColumn>& columns,
+       const TableModel* model,
+       TableControlObserver* observer);
+  ~View() final;
 
-  public: View(ui::Widget* widget_, const std::vector<TableColumn>& columns,
-               const TableModel* model, TableControlObserver* observer);
-  public: virtual ~View();
+  RowCollection* row_collection() { return row_collection_; }
 
-  public: RowCollection* row_collection() { return row_collection_; }
+ private:
+  ColumnCollection* header_;
+  RowCollection* row_collection_;
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };
@@ -1060,8 +1098,7 @@ TableControl::View::View(ui::Widget* widget,
   row_collection_->SetBounds(gfx::Rect(gfx::Size(1, 1)));
 }
 
-TableControl::View::~View() {
-}
+TableControl::View::~View() {}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1070,11 +1107,9 @@ TableControl::View::~View() {
 TableControl::TableControl(const std::vector<TableColumn>& columns,
                            const TableModel* model,
                            TableControlObserver* observer)
-    : view_(new View(this, columns, model, observer)) {
-}
+    : view_(new View(this, columns, model, observer)) {}
 
-TableControl::~TableControl() {
-}
+TableControl::~TableControl() {}
 
 TableModelObserver* TableControl::GetTableModelObserver() {
   return static_cast<TableModelObserver*>(view_->row_collection());
@@ -1089,7 +1124,8 @@ void TableControl::Select(int row_id) {
 }
 
 // ui::Widget
-void TableControl::DidSetFocus(Widget*) {
+void TableControl::DidSetFocus(Widget* widget) {
+  DCHECK(widget);
   // Transfer focus to |RowCollection|. |TableControl| is a just container of
   // header, row collection and scroll bar.
   view_->row_collection()->RequestFocus();

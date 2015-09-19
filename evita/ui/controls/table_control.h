@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_table_control_h)
-#define INCLUDE_evita_ui_controls_table_control_h
+#ifndef EVITA_UI_CONTROLS_TABLE_CONTROL_H_
+#define EVITA_UI_CONTROLS_TABLE_CONTROL_H_
+
+#include <memory>
+#include <vector>
 
 #include "evita/gfx/point_f.h"
 #include "evita/ui/base/table_model_observer.h"
 #include "evita/ui/widget.h"
-
-#include <memory>
-#include <vector>
 
 namespace gfx {
 class Canvas;
@@ -33,25 +33,27 @@ class TableModel;
 class TableControl final : public ui::Widget {
   DECLARE_CASTABLE_CLASS(TableControl, Widget);
 
-  private: class View;
+ public:
+  TableControl(const std::vector<TableColumn>& columns,
+               const TableModel* model,
+               TableControlObserver* observer);
+  ~TableControl() final;
 
-  private: std::unique_ptr<View> view_;
+  TableModelObserver* GetTableModelObserver();
+  int GetRowState(int row_id) const;
+  void Select(int row_id);
 
-  public: TableControl(const std::vector<TableColumn>& columns,
-                       const TableModel* model,
-                       TableControlObserver* observer);
-  public: virtual ~TableControl();
-
-  public: TableModelObserver* GetTableModelObserver();
-  public: int GetRowState(int row_id) const;
-  public: void Select(int row_id);
+ private:
+  class View;
 
   // ui::Widget
-  private: virtual void DidSetFocus(Widget* last_focused) override;
+  void DidSetFocus(Widget* last_focused) final;
+
+  std::unique_ptr<View> view_;
 
   DISALLOW_COPY_AND_ASSIGN(TableControl);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_table_control_h)
+#endif  // EVITA_UI_CONTROLS_TABLE_CONTROL_H_

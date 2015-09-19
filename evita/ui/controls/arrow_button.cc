@@ -9,22 +9,20 @@
 namespace ui {
 
 ArrowButton::ArrowButton(Direction direction, ButtonListener* listener)
-    : Button(listener), direction_(direction) {
-}
+    : Button(listener), direction_(direction) {}
 
-ArrowButton::~ArrowButton() {
-}
+ArrowButton::~ArrowButton() {}
 
 gfx::ColorF ArrowButton::ComputeColor() const {
   switch (state()) {
-  case State::Disabled:
-    return gfx::ColorF(0, 0, 0, 0.1f);
-  case State::Hovered:
-    return gfx::ColorF(0, 0, 0, 0.5f);
-  case State::Normal:
-    return gfx::ColorF(0, 0, 0, 0.3f);
-  case State::Pressed:
-    return gfx::ColorF(0, 0, 0, 1.0f);
+    case State::Disabled:
+      return gfx::ColorF(0, 0, 0, 0.1f);
+    case State::Hovered:
+      return gfx::ColorF(0, 0, 0, 0.5f);
+    case State::Normal:
+      return gfx::ColorF(0, 0, 0, 0.3f);
+    case State::Pressed:
+      return gfx::ColorF(0, 0, 0, 1.0f);
   }
   NOTREACHED();
   return gfx::ColorF(0, 0, 1, 1.0f);
@@ -57,8 +55,8 @@ void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
       factors[2] = 1.0f;
       factors[3] = 1.0f;
       break;
-     default:
-       NOTREACHED();
+    default:
+      NOTREACHED();
   }
 
   auto const bounds = GetContentsBounds();
@@ -68,13 +66,11 @@ void ArrowButton::DrawArrow(gfx::Canvas* canvas) const {
   auto const pen_width = 2.0f;
 
   gfx::Brush arrow_brush(canvas, ComputeColor());
-  canvas->DrawLine(arrow_brush,
-                   gfx::PointF(center_x + factors[0] * wing_size,
-                               center_y + factors[1] * wing_size),
+  canvas->DrawLine(arrow_brush, gfx::PointF(center_x + factors[0] * wing_size,
+                                            center_y + factors[1] * wing_size),
                    gfx::PointF(center_x, center_y), pen_width);
-  canvas->DrawLine(arrow_brush,
-                   gfx::PointF(center_x + factors[2] * wing_size,
-                               center_y + factors[3] * wing_size),
+  canvas->DrawLine(arrow_brush, gfx::PointF(center_x + factors[2] * wing_size,
+                                            center_y + factors[3] * wing_size),
                    gfx::PointF(center_x, center_y), pen_width);
 }
 

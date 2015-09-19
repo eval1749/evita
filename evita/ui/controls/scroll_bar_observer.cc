@@ -6,10 +6,8 @@
 
 namespace ui {
 
-ScrollBarObserver::ScrollBarObserver() {
-}
+ScrollBarObserver::ScrollBarObserver() {}
 
-ScrollBarObserver::~ScrollBarObserver() {
-}
+ScrollBarObserver::~ScrollBarObserver() {}
 
 }  // namespace ui

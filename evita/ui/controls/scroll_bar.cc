@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/ui/controls/scroll_bar.h"
-
+#include <algorithm>
 #include <ostream>
+
+#include "evita/ui/controls/scroll_bar.h"
 
 #include "evita/gfx_base.h"
 #include "evita/gfx/rect_conversions.h"
@@ -56,19 +57,20 @@ std::ostream& operator<<(std::ostream& ostream, ScrollBar::Location location) {
 //
 // ScrollBar::HitTestResult
 //
-class ScrollBar::HitTestResult {
-  private: Location location_;
-  private: Part* part_;
+class ScrollBar::HitTestResult final {
+ public:
+  HitTestResult(Location location, const Part* part);
+  HitTestResult(const HitTestResult& other);
+  HitTestResult();
+  ~HitTestResult() = default;
 
-  public: HitTestResult(Location location, const Part* part);
-  public: HitTestResult(const HitTestResult& other);
-  public: HitTestResult();
-  public: ~HitTestResult() = default;
+  explicit operator bool() const { return part_ != nullptr; }
 
-  public: explicit operator bool() const { return part_ != nullptr; }
+  Location location() const { return location_; }
+  Part* part() const { return part_; }
 
-  public: Location location() const { return location_; }
-  public: Part* part() const { return part_; }
+  Location location_;
+  Part* part_;
 };
 
 ScrollBar::HitTestResult::HitTestResult(Location location, const Part* part)
@@ -93,45 +95,51 @@ ScrollBar::HitTestResult::HitTestResult()
 // ScrollBar::Part
 //
 class ScrollBar::Part {
-  protected: typedef ScrollBar::HitTestResult HitTestResult;
-  protected: typedef ScrollBar::Location Location;
-
-  public: enum class State {
+ public:
+  enum class State {
     Active,
     Disabled,
     Hover,
     Normal,
   };
 
-  private: gfx::RectF bounds_;
-  private: gfx::RectF new_bounds_;
-  private: State new_state_;
-  private: State state_;
+  virtual ~Part() = default;
 
-  protected: Part();
-  public: virtual ~Part() = default;
+  const gfx::RectF& bounds() const { return bounds_; }
+  bool is_active() const { return state_ == State::Active; }
+  bool is_disabled() const { return state_ == State::Disabled; }
+  bool is_normal() const { return state_ == State::Normal; }
+  State state() const { return state_; }
+  void set_state(State new_state);
 
-  public: const gfx::RectF& bounds() const { return bounds_; }
-  protected: void set_bounds(const gfx::RectF& bounds) { new_bounds_ = bounds; }
-  protected: void set_current_bounds() { bounds_ = new_bounds_; }
-  public: bool is_active() const { return state_ == State::Active; }
-  public: bool is_disabled() const { return state_ == State::Disabled; }
-  public: bool is_normal() const { return state_ == State::Normal; }
-  protected: const gfx::RectF& new_bounds() const { return new_bounds_; }
-  protected: State new_state() const { return new_state_; }
-  public: State state() const { return state_; }
-  public: void set_state(State new_state);
-  protected: void set_current_state() { state_ = new_state_; }
-
-  public: virtual int GetValueAt(const gfx::PointF& point) const;
-  public: virtual HitTestResult HitTest(const gfx::PointF& point) const = 0;
-  public: virtual bool IsDirty() const;
-  protected: virtual void Paint(gfx::Canvas* canvas,
-                                const gfx::RectF& bounds) const = 0;
-  public: virtual void Render(gfx::Canvas* canvas, const gfx::RectF& bounds);
-  public: virtual void ResetView();
-  public: virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
+  virtual int GetValueAt(const gfx::PointF& point) const;
+  virtual HitTestResult HitTest(const gfx::PointF& point) const = 0;
+  virtual bool IsDirty() const;
+  virtual void Render(gfx::Canvas* canvas, const gfx::RectF& bounds);
+  virtual void ResetView();
+  virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                                     const ScrollBar::Data& data) = 0;
+
+ protected:
+  typedef ScrollBar::HitTestResult HitTestResult;
+  typedef ScrollBar::Location Location;
+
+  Part();
+
+  void set_bounds(const gfx::RectF& bounds) { new_bounds_ = bounds; }
+  void set_current_bounds() { bounds_ = new_bounds_; }
+  const gfx::RectF& new_bounds() const { return new_bounds_; }
+  State new_state() const { return new_state_; }
+  void set_current_state() { state_ = new_state_; }
+
+  virtual void Paint(gfx::Canvas* canvas,
+                                const gfx::RectF& bounds) const = 0;
+
+ private:
+  gfx::RectF bounds_;
+  gfx::RectF new_bounds_;
+  State new_state_;
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Part);
 };
@@ -182,21 +190,23 @@ namespace {
 // Arrow
 //
 class Arrow : public ScrollBar::Part {
-  protected: enum class Direction {
+ protected:
+  enum class Direction {
     Down,
     Left,
     Right,
     Up,
   };
 
-  protected: Arrow() = default;
-  protected: virtual ~Arrow() = default;
+  Arrow() = default;
+  ~Arrow() override = default;
 
-  private: gfx::ColorF bgcolor() const;
-  private: gfx::ColorF color() const;
-
-  protected: void PaintArrow(gfx::Canvas* canvas, const gfx::RectF& bounds,
+  void PaintArrow(gfx::Canvas* canvas, const gfx::RectF& bounds,
                              Direction direction) const;
+
+ private:
+  gfx::ColorF bgcolor() const;
+  gfx::ColorF color() const;
 
   DISALLOW_COPY_AND_ASSIGN(Arrow);
 };
@@ -262,8 +272,9 @@ void Arrow::PaintArrow(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds,
       factors[3] = 1.0f;
       break;
      default:
-       NOTREACHED();
-   }
+      NOTREACHED();
+      break;
+  }
 
   auto const bounds = this->bounds().Offset(canvas_bounds.origin());
   canvas->AddDirtyRect(bounds);
@@ -311,17 +322,19 @@ void Arrow::PaintArrow(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds,
 //
 // ArrowDown
 //
-class ArrowDown : public Arrow {
-  public: ArrowDown() = default;
-  public: virtual ~ArrowDown() = default;
+class ArrowDown final : public Arrow {
+ public:
+  ArrowDown() = default;
+  ~ArrowDown() final = default;
 
+ private:
   // ScrollBar::Part
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void Paint(gfx::Canvas* canvas,
-                              const gfx::RectF& bounds) const override;
-  private: virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) override;
+  HitTestResult HitTest(
+      const gfx::PointF& point) const final;
+  void Paint(gfx::Canvas* canvas,
+                              const gfx::RectF& bounds) const final;
+  void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
+                                     const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowDown);
 };
@@ -349,17 +362,19 @@ void ArrowDown::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
 //
 // ArrowLeft
 //
-class ArrowLeft : public Arrow {
-  public: ArrowLeft() = default;
-  public: virtual ~ArrowLeft() = default;
+class ArrowLeft final : public Arrow {
+ public:
+  ArrowLeft() = default;
+  ~ArrowLeft() final = default;
 
+ private:
   // ScrollBar::Part
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void Paint(gfx::Canvas* canvas,
-                              const gfx::RectF& bounds) const override;
-  private: virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) override;
+  HitTestResult HitTest(
+      const gfx::PointF& point) const final;
+  void Paint(gfx::Canvas* canvas,
+                              const gfx::RectF& bounds) const final;
+  void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
+                                     const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowLeft);
 };
@@ -385,17 +400,19 @@ void ArrowLeft::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
 //
 // ArrowRight
 //
-class ArrowRight : public Arrow {
-  public: ArrowRight() = default;
-  public: virtual ~ArrowRight() = default;
+class ArrowRight final : public Arrow {
+ public:
+  ArrowRight() = default;
+  ~ArrowRight() final = default;
 
+ private:
   // ScrollBar::Part
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void Paint(gfx::Canvas* canvas,
-                               const gfx::RectF& bounds) const override;
-  private: virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) override;
+  HitTestResult HitTest(
+      const gfx::PointF& point) const final;
+  void Paint(gfx::Canvas* canvas,
+                               const gfx::RectF& bounds) const final;
+  void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
+                                     const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowRight);
 };
@@ -424,17 +441,19 @@ void ArrowRight::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
 //
 // ArrowUp
 //
-class ArrowUp : public Arrow {
-  public: ArrowUp() = default;
-  public: virtual ~ArrowUp() = default;
+class ArrowUp final : public Arrow {
+ public:
+  ArrowUp() = default;
+  ~ArrowUp() final = default;
 
+ private:
   // ScrollBar::Part
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void Paint(gfx::Canvas* canvas,
-                               const gfx::RectF& bounds) const override;
-  private: virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) override;
+  HitTestResult HitTest(
+      const gfx::PointF& point) const final;
+  void Paint(gfx::Canvas* canvas,
+                               const gfx::RectF& bounds) const final;
+  void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
+                                     const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowUp);
 };
@@ -464,31 +483,35 @@ void ArrowUp::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
 // Thumb
 //
 class Thumb : public ScrollBar::Part {
-  private: ScrollBar::Data data_;
-  private: gfx::RectF new_thumb_bounds_;
-  private: gfx::RectF thumb_bounds_;
+ protected:
+  Thumb() = default;
+  ~Thumb() override = default;
 
-  protected: Thumb() = default;
-  protected: virtual ~Thumb() = default;
-
-  protected: const ScrollBar::Data& data() const { return data_; }
-  protected: void set_data(const ScrollBar::Data& data) { data_ = data; }
-  private: gfx::ColorF thumb_color() const;
-  protected: const gfx::RectF thumb_bounds() const { return thumb_bounds_; }
-  protected: void set_thumb_bounds(const gfx::RectF& new_thumb_bounds) {
+  const ScrollBar::Data& data() const { return data_; }
+  void set_data(const ScrollBar::Data& data) { data_ = data; }
+  const gfx::RectF thumb_bounds() const { return thumb_bounds_; }
+  void set_thumb_bounds(const gfx::RectF& new_thumb_bounds) {
     new_thumb_bounds_ = new_thumb_bounds;
   }
 
-  protected: float ComputeThumbSize(float screen_size) const;
-  private: void PaintThumb(gfx::Canvas* canvas, const gfx::RectF& bounds) const;
+  float ComputeThumbSize(float screen_size) const;
+
+ private:
+  gfx::ColorF thumb_color() const;
+
+  void PaintThumb(gfx::Canvas* canvas, const gfx::RectF& bounds) const;
 
   // ScrollBar::Part
-  private: virtual bool IsDirty() const override;
-  private: virtual void Paint(gfx::Canvas* canvas,
+  bool IsDirty() const override;
+  void Paint(gfx::Canvas* canvas,
                               const gfx::RectF& bounds) const override;
-  private: virtual void Render(gfx::Canvas* canvas,
+  void Render(gfx::Canvas* canvas,
                                const gfx::RectF& bounds) override;
-  private: virtual void ResetView() override;
+  void ResetView() override;
+
+  ScrollBar::Data data_;
+  gfx::RectF new_thumb_bounds_;
+  gfx::RectF thumb_bounds_;
 
   DISALLOW_COPY_AND_ASSIGN(Thumb);
 };
@@ -575,16 +598,18 @@ void Thumb::ResetView() {
 //
 // ThumbHorizontal
 //
-class ThumbHorizontal : public Thumb {
-  public: ThumbHorizontal() = default;
-  public: virtual ~ThumbHorizontal() = default;
+class ThumbHorizontal final : public Thumb {
+ public:
+  ThumbHorizontal() = default;
+  ~ThumbHorizontal() final = default;
 
+ private:
   // ScrollBar::Part
-  private: virtual int GetValueAt(const gfx::PointF& point) const override;
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) override;
+  int GetValueAt(const gfx::PointF& point) const final;
+  HitTestResult HitTest(
+      const gfx::PointF& point) const final;
+  void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
+                                     const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ThumbHorizontal);
 };
@@ -629,8 +654,8 @@ void ThumbHorizontal::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
   if (new_state() == State::Disabled)
     set_state(State::Normal);
 
-  auto const thumb_left= ::floor((data.thumb_value - data.minimum) * scale);
-  auto const thumb_right= ::floor(
+  auto const thumb_left = ::floor((data.thumb_value - data.minimum) * scale);
+  auto const thumb_right = ::floor(
       (data.thumb_value + data.thumb_size - data.minimum) * scale);
   set_thumb_bounds(gfx::RectF(
       gfx::PointF(bounds.left + thumb_left, bounds.top),
@@ -641,16 +666,18 @@ void ThumbHorizontal::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
 //
 // ThumbVertical
 //
-class ThumbVertical : public Thumb {
-  public: ThumbVertical() = default;
-  public: virtual ~ThumbVertical() = default;
+class ThumbVertical final : public Thumb {
+ public:
+  ThumbVertical() = default;
+  ~ThumbVertical() final = default;
 
+ private:
   // ScrollBar::Part
-  private: virtual int GetValueAt(const gfx::PointF& point) const override;
-  private: virtual HitTestResult HitTest(
-      const gfx::PointF& point) const override;
-  private: virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) override;
+  int GetValueAt(const gfx::PointF& point) const final;
+  HitTestResult HitTest(
+      const gfx::PointF& point) const final;
+  void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
+                                     const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ThumbVertical);
 };

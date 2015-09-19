@@ -2,26 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_scroll_bar_observer_h)
-#define INCLUDE_evita_ui_controls_scroll_bar_observer_h
+#ifndef EVITA_UI_CONTROLS_SCROLL_BAR_OBSERVER_H_
+#define EVITA_UI_CONTROLS_SCROLL_BAR_OBSERVER_H_
 
 #include "base/basictypes.h"
 
 namespace ui {
 
 class ScrollBarObserver {
-  protected: ScrollBarObserver();
-  public: virtual ~ScrollBarObserver();
+ public:
+  virtual ~ScrollBarObserver();
+  virtual void DidClickLineDown() = 0;
+  virtual void DidClickLineUp() = 0;
+  virtual void DidClickPageDown() = 0;
+  virtual void DidClickPageUp() = 0;
+  virtual void DidMoveThumb(int value) = 0;
 
-  public: virtual void DidClickLineDown() = 0;
-  public: virtual void DidClickLineUp() = 0;
-  public: virtual void DidClickPageDown() = 0;
-  public: virtual void DidClickPageUp() = 0;
-  public: virtual void DidMoveThumb(int value) = 0;
+ protected:
+  ScrollBarObserver();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(ScrollBarObserver);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_scroll_bar_observer_h)
+#endif  // EVITA_UI_CONTROLS_SCROLL_BAR_OBSERVER_H_

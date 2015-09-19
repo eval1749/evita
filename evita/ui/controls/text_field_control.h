@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_controls_text_field_control_h)
-#define INCLUDE_evita_ui_controls_text_field_control_h
-
-#include "evita/ui/controls/control.h"
+#ifndef EVITA_UI_CONTROLS_TEXT_FIELD_CONTROL_H_
+#define EVITA_UI_CONTROLS_TEXT_FIELD_CONTROL_H_
 
 #include <memory>
+
+#include "evita/ui/controls/control.h"
 
 #include "base/strings/string16.h"
 #include "evita/gfx/canvas.h"
@@ -20,9 +20,9 @@ namespace ui {
 //
 // TextFieldControl
 //
-class TextFieldControl final : public Control, private CaretOwner  {
-  private: class View;
-  public: struct Selection {
+class TextFieldControl final : public Control, private CaretOwner {
+ public:
+  struct Selection final {
     size_t anchor_offset;
     size_t focus_offset;
 
@@ -37,33 +37,37 @@ class TextFieldControl final : public Control, private CaretOwner  {
     size_t start() const;
   };
 
-  private: const std::unique_ptr<View> view_;
+  TextFieldControl(ControlController* controller,
+                   const Selection& selection,
+                   const base::string16& text,
+                   const Style& style);
+  ~TextFieldControl() final;
 
-  public: TextFieldControl(ControlController* controller,
-                           const Selection& selection,
-                           const base::string16& text, const Style& style);
-  public: virtual ~TextFieldControl();
+  void set_style(const Style& style);
+  void set_selection(const Selection& new_selection);
+  void set_text(const base::string16& text);
 
-  public: void set_style(const Style& style);
-  public: void set_selection(const Selection& new_selection);
-  public: void set_text(const base::string16& text);
+  int MapPointToOffset(const gfx::PointF& point) const;
 
-  public: int MapPointToOffset(const gfx::PointF& point) const;
+ private:
+  class View;
 
   // ui::CaretOwner
-  private: virtual void DidFireCaretTimer() override;
+  void DidFireCaretTimer() final;
 
   // ui::Control
-  private: virtual void DidChangeState() override;
+  void DidChangeState() final;
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
-  private: virtual HCURSOR GetCursorAt(const gfx::Point& point) const override;
-  private: virtual void OnDraw(gfx::Canvas* canvas) override;
+  void DidChangeBounds() final;
+  HCURSOR GetCursorAt(const gfx::Point& point) const final;
+  void OnDraw(gfx::Canvas* canvas) final;
+
+  const std::unique_ptr<View> view_;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldControl);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_controls_text_field_control_h)
+#endif  // EVITA_UI_CONTROLS_TEXT_FIELD_CONTROL_H_

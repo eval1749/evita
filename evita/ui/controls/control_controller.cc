@@ -4,34 +4,41 @@
 
 #include "evita/ui/controls/control_controller.h"
 
+#include "base/logging.h"
+
 namespace ui {
 
 //////////////////////////////////////////////////////////////////////
 //
 // ControlController
 //
-ControlController::ControlController() {
+ControlController::ControlController() {}
+
+ControlController::~ControlController() {}
+
+void ControlController::DidKillFocus(Control* control, Widget* widget) {
+  DCHECK(control);
 }
 
-ControlController::~ControlController() {
+void ControlController::DidRealize(Control* control) {
+  DCHECK(control);
 }
 
-void ControlController::DidKillFocus(Control*, Widget*) {
+void ControlController::DidSetFocus(Control* control, Widget* widget) {
+  DCHECK(control);
 }
 
-void ControlController::DidRealize(Control*) {
+void ControlController::OnKeyEvent(Control* control, const KeyEvent& event) {
+  DCHECK(control);
 }
 
-void ControlController::DidSetFocus(Control*, Widget*) {
+void ControlController::OnMouseEvent(Control* control,
+                                     const MouseEvent& event) {
+  DCHECK(control);
 }
 
-void ControlController::OnKeyEvent(Control*, const KeyEvent&) {
-}
-
-void ControlController::OnMouseEvent(Control*, const MouseEvent&) {
-}
-
-void ControlController::WillDestroyControl(Control*) {
+void ControlController::WillDestroyControl(Control* control) {
+  DCHECK(control);
 }
 
 }  // namespace ui

@@ -14,29 +14,34 @@ namespace ui {
 //
 // ButtonControl::Renderer
 //
-class ButtonControl::Renderer {
-  private: gfx::RectF bounds_;
-  private: Style style_;
-  private: std::unique_ptr<gfx::TextLayout> text_layout_;
-  private: gfx::SizeF text_size_;
+class ButtonControl::Renderer final {
+ public:
+  Renderer(const base::string16& text,
+           const Style& style,
+           const gfx::RectF& rect);
+  ~Renderer();
 
-  public: Renderer(const base::string16& text, const Style& style,
-                   const gfx::RectF& rect);
-  public: ~Renderer();
+  void Render(gfx::Canvas* canvas, Control::State state) const;
 
-  public: void Render(gfx::Canvas* canvas, Control::State state) const;
+ private:
+  gfx::RectF bounds_;
+  Style style_;
+  std::unique_ptr<gfx::TextLayout> text_layout_;
+  gfx::SizeF text_size_;
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
 
 namespace {
-std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
-    const ButtonControl::Style& style, const gfx::SizeF& size) {
+std::unique_ptr<gfx::TextLayout> CreateTextLayout(
+    const base::string16& text,
+    const ButtonControl::Style& style,
+    const gfx::SizeF& size) {
   gfx::TextFormat text_format(style.font_family, style.font_size);
   common::ComPtr<IDWriteInlineObject> inline_object;
-  COM_VERIFY(gfx::FactorySet::instance()->dwrite().
-      CreateEllipsisTrimmingSign(text_format, &inline_object));
-  DWRITE_TRIMMING trimming {DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
+  COM_VERIFY(gfx::FactorySet::instance()->dwrite().CreateEllipsisTrimmingSign(
+      text_format, &inline_object));
+  DWRITE_TRIMMING trimming{DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
   text_format->SetTrimming(&trimming, inline_object);
   return text_format.CreateLayout(text, size);
 }
@@ -45,7 +50,8 @@ std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
 ButtonControl::Renderer::Renderer(const base::string16& text,
                                   const Style& style,
                                   const gfx::RectF& rect)
-    : bounds_(rect), style_(style),
+    : bounds_(rect),
+      style_(style),
       text_layout_(CreateTextLayout(text, style, rect.size())) {
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY((*text_layout_)->GetMetrics(&metrics));
@@ -54,8 +60,7 @@ ButtonControl::Renderer::Renderer(const base::string16& text,
   text_size_ = gfx::SizeF(metrics.width, metrics.height);
 }
 
-ButtonControl::Renderer::~Renderer() {
-}
+ButtonControl::Renderer::~Renderer() {}
 
 void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
                                      Control::State state) const {
@@ -70,10 +75,10 @@ void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
 
   auto const offset = (frame_rect.size() - text_size_) / 2.0f;
   gfx::PointF origin(frame_rect.origin() + offset);
-  gfx::Brush text_brush(canvas, state == State::Disabled ? style_.gray_text :
-                                                           style_.color);
+  gfx::Brush text_brush(
+      canvas, state == State::Disabled ? style_.gray_text : style_.color);
   (*canvas)->DrawTextLayout(origin, *text_layout_, text_brush,
-                         D2D1_DRAW_TEXT_OPTIONS_CLIP);
+                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
 
   switch (state) {
     case Control::State::Disabled:
@@ -81,14 +86,12 @@ void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
       break;
     case Control::State::Highlight:
       canvas->FillRectangle(
-          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)),
-          frame_rect);
+          gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)), frame_rect);
       canvas->DrawRectangle(gfx::Brush(canvas, style_.highlight), frame_rect);
       break;
     case Control::State::Hovered:
       canvas->FillRectangle(
-          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)),
-          frame_rect);
+          gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)), frame_rect);
       canvas->DrawRectangle(gfx::Brush(canvas, style_.hotlight), frame_rect);
       break;
   }
@@ -100,12 +103,11 @@ void ButtonControl::Renderer::Render(gfx::Canvas* canvas,
 // ButtonControl
 //
 ButtonControl::ButtonControl(ControlController* controller,
-                           const base::string16& text, const Style& style)
-    : Control(controller), style_(style), text_(text) {
-}
+                             const base::string16& text,
+                             const Style& style)
+    : Control(controller), style_(style), text_(text) {}
 
-ButtonControl::~ButtonControl() {
-}
+ButtonControl::~ButtonControl() {}
 
 void ButtonControl::set_style(const Style& new_style) {
   if (style_ == new_style)

@@ -14,24 +14,29 @@ namespace ui {
 //
 // LabelControl::Renderer
 //
-class LabelControl::Renderer {
-  private: gfx::RectF bounds_;
-  private: gfx::PointF text_origin_;
-  private: Style style_;
-  private: std::unique_ptr<gfx::TextLayout> text_layout_;
+class LabelControl::Renderer final {
+ public:
+  Renderer(const base::string16& text,
+           const Style& style,
+           const gfx::RectF& rect);
+  ~Renderer();
 
-  public: Renderer(const base::string16& text, const Style& style,
-                   const gfx::RectF& rect);
-  public: ~Renderer();
+  void Render(gfx::Canvas* canvas) const;
 
-  public: void Render(gfx::Canvas* canvas) const;
+ private:
+  gfx::RectF bounds_;
+  gfx::PointF text_origin_;
+  Style style_;
+  std::unique_ptr<gfx::TextLayout> text_layout_;
 
   DISALLOW_COPY_AND_ASSIGN(Renderer);
 };
 
 namespace {
-std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
-    const LabelControl::Style& style, const gfx::SizeF& size) {
+std::unique_ptr<gfx::TextLayout> CreateTextLayout(
+    const base::string16& text,
+    const LabelControl::Style& style,
+    const gfx::SizeF& size) {
   gfx::TextFormat text_format(style.font_family, style.font_size);
   return text_format.CreateLayout(text, size);
 }
@@ -40,7 +45,8 @@ std::unique_ptr<gfx::TextLayout> CreateTextLayout(const base::string16& text,
 LabelControl::Renderer::Renderer(const base::string16& text,
                                  const Style& style,
                                  const gfx::RectF& rect)
-    : bounds_(rect), style_(style),
+    : bounds_(rect),
+      style_(style),
       text_layout_(CreateTextLayout(text, style, rect.size())) {
   // TODO(yosi) We should share following code fragment with |ButtonControl|
   // and |TextFieldControl|.
@@ -52,8 +58,7 @@ LabelControl::Renderer::Renderer(const base::string16& text,
   text_origin_ = gfx::PointF(bounds_.left, bounds_.top + offset.height);
 }
 
-LabelControl::Renderer::~Renderer() {
-}
+LabelControl::Renderer::~Renderer() {}
 
 void LabelControl::Renderer::Render(gfx::Canvas* canvas) const {
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds_);
@@ -69,12 +74,11 @@ void LabelControl::Renderer::Render(gfx::Canvas* canvas) const {
 // LabelControl
 //
 LabelControl::LabelControl(ControlController* controller,
-                           const base::string16& text, const Style& style)
-    : Control(controller), style_(style), text_(text) {
-}
+                           const base::string16& text,
+                           const Style& style)
+    : Control(controller), style_(style), text_(text) {}
 
-LabelControl::~LabelControl() {
-}
+LabelControl::~LabelControl() {}
 
 bool LabelControl::focusable() const {
   return false;

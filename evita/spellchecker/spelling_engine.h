@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_spellchecker_spelling_engine_h)
-#define INCLUDE_evita_spellchecker_spelling_engine_h
+#ifndef EVITA_SPELLCHECKER_SPELLING_ENGINE_H_
+#define EVITA_SPELLCHECKER_SPELLING_ENGINE_H_
 
 #include <vector>
 
@@ -13,19 +13,23 @@
 namespace spellchecker {
 
 class SpellingEngine {
-  protected: SpellingEngine();
-  public: virtual ~SpellingEngine();
+ public:
+  virtual ~SpellingEngine();
 
-  public: static SpellingEngine* GetSpellingEngine();
+  static SpellingEngine* GetSpellingEngine();
 
-  public: virtual bool CheckSpelling(const base::string16& word_to_check) = 0;
-  public: virtual bool EnsureInitialized() = 0;
-  public: virtual std::vector<base::string16> GetSpellingSuggestions(
+  virtual bool CheckSpelling(const base::string16& word_to_check) = 0;
+  virtual bool EnsureInitialized() = 0;
+  virtual std::vector<base::string16> GetSpellingSuggestions(
       const base::string16& wrong_word) = 0;
 
+ protected:
+  SpellingEngine();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(SpellingEngine);
 };
 
 }  // namespace spellchecker
 
-#endif //!defined(INCLUDE_evita_spellchecker_spelling_engine_h)
+#endif  // EVITA_SPELLCHECKER_SPELLING_ENGINE_H_

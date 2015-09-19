@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/spellchecker/hunspell_engine.h"
+#include <windows.h>
 
 #include <string>
-#include <windows.h>
+
+#include "evita/spellchecker/hunspell_engine.h"
 
 #include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
@@ -16,55 +17,54 @@
 namespace spellchecker {
 
 namespace {
-  // Maximum length of words we actually check.
-  // 64 is the observed limits for OSX system checker.
-  const size_t kMaxCheckedLen = 64;
+// Maximum length of words we actually check.
+// 64 is the observed limits for OSX system checker.
+const size_t kMaxCheckedLen = 64;
 
-  // Maximum length of words we provide suggestions for.
-  // 24 is the observed limits for OSX system checker.
-  const size_t kMaxSuggestLen = 24;
+// Maximum length of words we provide suggestions for.
+// 24 is the observed limits for OSX system checker.
+const size_t kMaxSuggestLen = 24;
 
-  COMPILE_ASSERT(kMaxCheckedLen <= size_t(MAXWORDLEN), MaxCheckedLen_too_long);
-  COMPILE_ASSERT(kMaxSuggestLen <= kMaxCheckedLen, MaxSuggestLen_too_long);
+COMPILE_ASSERT(kMaxCheckedLen <= size_t(MAXWORDLEN), MaxCheckedLen_too_long);
+COMPILE_ASSERT(kMaxSuggestLen <= kMaxCheckedLen, MaxSuggestLen_too_long);
 
-  // Max number of dictionary suggestions.
-  const int kMaxSuggestions = 5;
+// Max number of dictionary suggestions.
+const int kMaxSuggestions = 5;
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // HunspellEngine::Dictionary
 //
-class HunspellEngine::Dictionary {
-  private: bool is_valid_;
-  private: std::vector<uint8_t> data_;
+class HunspellEngine::Dictionary final {
+ public:
+  Dictionary();
+  ~Dictionary();
 
-  public: Dictionary();
-  public: ~Dictionary();
+  bool is_valid() const { return is_valid_; }
+  const uint8_t* data() const { return data_.data(); }
+  size_t size() const { return data_.size(); }
 
-  public: bool is_valid() const { return is_valid_; }
-  public: const uint8_t* data() const { return data_.data(); }
-  public: size_t size() const { return data_.size(); }
+ private:
+  static base::string16 GetFileName();
 
-  private: static base::string16 GetFileName();
+  bool is_valid_;
+  std::vector<uint8_t> data_;
+
+  DISALLOW_COPY_AND_ASSIGN(Dictionary);
 };
 
 HunspellEngine::Dictionary::Dictionary() : is_valid_(false) {
   auto const file_name = GetFileName();
-  common::win::scoped_handle file(::CreateFileW(
-    file_name.c_str(),
-    GENERIC_READ,
-    FILE_SHARE_READ,
-    nullptr,
-    OPEN_EXISTING,
-    FILE_FLAG_SEQUENTIAL_SCAN,
-    nullptr));
+  common::win::scoped_handle file(
+      ::CreateFileW(file_name.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+                    OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr));
   if (!file) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "CreateFile " << file_name << " error=" << last_error;
     return;
   }
-  BY_HANDLE_FILE_INFORMATION  info;
+  BY_HANDLE_FILE_INFORMATION info;
   if (!::GetFileInformationByHandle(file.get(), &info)) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "GetFileInformationByHandle " << last_error;
@@ -82,14 +82,12 @@ HunspellEngine::Dictionary::Dictionary() : is_valid_(false) {
   is_valid_ = true;
 }
 
-HunspellEngine::Dictionary::~Dictionary() {
-}
+HunspellEngine::Dictionary::~Dictionary() {}
 
 base::string16 HunspellEngine::Dictionary::GetFileName() {
   base::string16 file_name(MAX_PATH, '?');
   auto length_with_zero = ::ExpandEnvironmentStrings(
-      L"%LOCALAPPDATA%/Google/Chrome/User Data/en-US-3-0.bdic",
-      &file_name[0],
+      L"%LOCALAPPDATA%/Google/Chrome/User Data/en-US-3-0.bdic", &file_name[0],
       static_cast<DWORD>(file_name.size()));
   file_name.resize(length_with_zero - 1);
   return file_name;
@@ -99,11 +97,9 @@ base::string16 HunspellEngine::Dictionary::GetFileName() {
 //
 // HunspellEngine
 //
-HunspellEngine::HunspellEngine() : lock_(new base::Lock()) {
-}
+HunspellEngine::HunspellEngine() : lock_(new base::Lock()) {}
 
-HunspellEngine::~HunspellEngine() {
-}
+HunspellEngine::~HunspellEngine() {}
 
 // spellchecker::SpellingEngine
 bool HunspellEngine::CheckSpelling(const base::string16& word_to_check) {
@@ -136,14 +132,14 @@ std::vector<base::string16> HunspellEngine::GetSpellingSuggestions(
     return std::vector<base::string16>();
   std::string utf8_wrong_word(base::UTF16ToUTF8(wrong_word));
   char** utf8_suggestions = nullptr;
-  auto const num_suggestions = hunspell_->suggest(&utf8_suggestions,
-                                                  utf8_wrong_word.c_str());
+  auto const num_suggestions =
+      hunspell_->suggest(&utf8_suggestions, utf8_wrong_word.c_str());
   std::vector<base::string16> suggestions;
   for (auto i = 0; i < num_suggestions; ++i) {
     auto const utf8_suggestion = utf8_suggestions[i];
     if (i < kMaxSuggestions)
       suggestions.push_back(base::UTF8ToUTF16(utf8_suggestion));
-     ::free(utf8_suggestion);
+    ::free(utf8_suggestion);
   }
   if (utf8_suggestions)
     ::free(utf8_suggestions);

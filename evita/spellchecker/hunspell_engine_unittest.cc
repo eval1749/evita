@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #pragma warning(push)
-#pragma warning(disable: 4365 4625 4626 4826)
+#pragma warning(disable : 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
@@ -12,15 +12,17 @@
 namespace {
 
 class HunspellEngineTest : public ::testing::Test {
-  protected: HunspellEngineTest() {
-  }
-  public: virtual ~HunspellEngineTest() {
-  }
+ public:
+  ~HunspellEngineTest() override {}
 
-  protected: spellchecker::SpellingEngine* spelling_engine() const {
+ protected:
+  HunspellEngineTest() {}
+
+  spellchecker::SpellingEngine* spelling_engine() const {
     return spellchecker::HunspellEngine::instance();
   }
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(HunspellEngineTest);
 };
 
@@ -28,7 +30,6 @@ TEST_F(HunspellEngineTest, CheckSpelling) {
   EXPECT_TRUE(spelling_engine()->CheckSpelling(L"word"));
   EXPECT_FALSE(spelling_engine()->CheckSpelling(L"foobarbaz"));
 }
-
 
 TEST_F(HunspellEngineTest, GetSpellingSuggestions) {
   auto const suggestions = spelling_engine()->GetSpellingSuggestions(L"wrod");

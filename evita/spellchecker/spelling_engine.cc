@@ -8,11 +8,9 @@
 
 namespace spellchecker {
 
-SpellingEngine::SpellingEngine() {
-}
+SpellingEngine::SpellingEngine() {}
 
-SpellingEngine::~SpellingEngine() {
-}
+SpellingEngine::~SpellingEngine() {}
 
 SpellingEngine* SpellingEngine::GetSpellingEngine() {
   return HunspellEngine::instance();

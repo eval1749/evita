@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_animation_animation_observer)
-#define INCLUDE_evita_ui_animation_animation_observer
+#ifndef EVITA_UI_ANIMATION_ANIMATION_OBSERVER_H_
+#define EVITA_UI_ANIMATION_ANIMATION_OBSERVER_H_
 
 #include "base/basictypes.h"
 
@@ -12,16 +12,20 @@ namespace ui {
 class Animatable;
 
 class AnimationObserver {
-  protected: AnimationObserver();
-  public: virtual ~AnimationObserver();
+ public:
+  virtual ~AnimationObserver();
 
-  public: virtual void DidAnimate(Animatable* animatable);
-  public: virtual void DidCancelAnimation(Animatable* animatable);
-  public: virtual void DidFinishAnimation(Animatable* animatable);
+  virtual void DidAnimate(Animatable* animatable);
+  virtual void DidCancelAnimation(Animatable* animatable);
+  virtual void DidFinishAnimation(Animatable* animatable);
 
+ protected:
+  AnimationObserver();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(AnimationObserver);
 };
 
-}   // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_animation_animation_observer)
+#endif  // EVITA_UI_ANIMATION_ANIMATION_OBSERVER_H_

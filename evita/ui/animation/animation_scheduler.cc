@@ -20,12 +20,11 @@ enum class AnimationScheduler::State {
 };
 
 AnimationScheduler::AnimationScheduler(base::MessageLoop* message_loop)
-    : lock_(new base::Lock()), message_loop_(message_loop),
-      state_(State::Sleeping)  {
-}
+    : lock_(new base::Lock()),
+      message_loop_(message_loop),
+      state_(State::Sleeping) {}
 
-AnimationScheduler::~AnimationScheduler() {
-}
+AnimationScheduler::~AnimationScheduler() {}
 
 void AnimationScheduler::CancelAnimationFrameRequest(
     AnimationFrameHandler* handler) {
@@ -67,8 +66,7 @@ void AnimationScheduler::Run() {
   }
 }
 
-void AnimationScheduler::RequestAnimationFrame(
-    AnimationFrameHandler* handler) {
+void AnimationScheduler::RequestAnimationFrame(AnimationFrameHandler* handler) {
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.insert(handler);
   if (state_ != State::Sleeping)
@@ -79,8 +77,8 @@ void AnimationScheduler::RequestAnimationFrame(
 void AnimationScheduler::Wait() {
   DCHECK_EQ(static_cast<int>(state_), static_cast<int>(State::Sleeping));
   state_ = State::Waiting;
-  message_loop_->PostNonNestableDelayedTask(FROM_HERE,
-      base::Bind(&AnimationScheduler::Run, base::Unretained(this)),
+  message_loop_->PostNonNestableDelayedTask(
+      FROM_HERE, base::Bind(&AnimationScheduler::Run, base::Unretained(this)),
       base::TimeDelta::FromMilliseconds(1000 / 60));
 }
 

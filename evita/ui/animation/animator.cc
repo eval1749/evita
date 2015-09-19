@@ -11,11 +11,9 @@
 
 namespace ui {
 
-Animator::Animator() {
-}
+Animator::Animator() {}
 
-Animator::~Animator() {
-}
+Animator::~Animator() {}
 
 base::Time Animator::current_time() const {
   DCHECK(is_playing());

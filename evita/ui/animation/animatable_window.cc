@@ -8,16 +8,12 @@
 
 namespace ui {
 
-AnimatableWindow::AnimatableWindow(
-    std::unique_ptr<NativeWindow> native_window)
-    : Widget(std::move(native_window)) {
-}
+AnimatableWindow::AnimatableWindow(std::unique_ptr<NativeWindow> native_window)
+    : Widget(std::move(native_window)) {}
 
-AnimatableWindow::AnimatableWindow() {
-}
+AnimatableWindow::AnimatableWindow() {}
 
-AnimatableWindow::~AnimatableWindow() {
-}
+AnimatableWindow::~AnimatableWindow() {}
 
 // Widget
 void AnimatableWindow::DidChangeBounds() {

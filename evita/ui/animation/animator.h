@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_animation_animator_h)
-#define INCLUDE_evita_ui_animation_animator_h
+#ifndef EVITA_UI_ANIMATION_ANIMATOR_H_
+#define EVITA_UI_ANIMATION_ANIMATOR_H_
+
+#include <unordered_set>
 
 #include "base/basictypes.h"
 #include "base/time/time.h"
 #include "common/memory/singleton.h"
 #include "evita/ui/animation/animation_frame_handler.h"
-
-#include <unordered_set>
 
 namespace ui {
 
@@ -20,31 +20,35 @@ class Animator : public common::Singleton<Animator>,
                  public AnimationFrameHandler {
   DECLARE_SINGLETON_CLASS(Animator);
 
-  private: std::unordered_set<Animatable*> animatables_;
-  private: base::Time current_time_;
-  private: std::unordered_set<Animatable*> pending_animatables_;
-  private: std::unordered_set<Animatable*> running_animatables_;
-  private: std::unordered_set<Animatable*> waiting_animatables_;
+ public:
+  ~Animator() override;
 
-  private: Animator();
-  public: virtual ~Animator();
+  base::Time current_time() const;
+  bool is_playing() const;
 
-  public: base::Time current_time() const;
-  public: bool is_playing() const;
+  void CancelAnimation(Animatable* animatable);
+  void ScheduleAnimation(Animatable* animatable);
 
-  private: void Animate(Animatable* animatable);
-  public: void CancelAnimation(Animatable* animatable);
-  private: void EndAnimate();
-  private: void PlayAnimations(base::Time time);
-  public: void ScheduleAnimation(Animatable* animatable);
-  private: void StartAnimate(base::Time time);
+ private:
+  Animator();
+
+  void EndAnimate();
+  void Animate(Animatable* animatable);
+  void PlayAnimations(base::Time time);
+  void StartAnimate(base::Time time);
 
   // AnimationFrameHandler
-  private: virtual void DidBeginAnimationFrame(base::Time time) override;
+  void DidBeginAnimationFrame(base::Time time) override;
+
+  std::unordered_set<Animatable*> animatables_;
+  base::Time current_time_;
+  std::unordered_set<Animatable*> pending_animatables_;
+  std::unordered_set<Animatable*> running_animatables_;
+  std::unordered_set<Animatable*> waiting_animatables_;
 
   DISALLOW_COPY_AND_ASSIGN(Animator);
 };
 
-}   // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_animation_animator_h)
+#endif  // EVITA_UI_ANIMATION_ANIMATOR_H_

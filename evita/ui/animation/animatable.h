@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_animation_animatable_h)
-#define INCLUDE_evita_ui_animation_animatable_h
+#ifndef EVITA_UI_ANIMATION_ANIMATABLE_H_
+#define EVITA_UI_ANIMATION_ANIMATABLE_H_
 
 #include "base/observer_list.h"
 #include "base/time/time.h"
@@ -14,31 +14,36 @@ class AnimationObserver;
 class Animator;
 
 class Animatable {
+ public:
+  virtual ~Animatable();
+
+  Animator* animator() const { return animator_; }
+
+  void AddObserver(AnimationObserver* observer);
+  void CancelAnimation();
+  void FinishAnimation();
+  void RemoveObserver(AnimationObserver* observer);
+  void ScheduleAnimation();
+
+ protected:
+  Animatable();
+  virtual void Animate(base::Time time) = 0;
+  void DidAnimate();
+  virtual void FinalizeAnimation();
+
+ private:
   friend class Animator;
 
-  private: Animator* animator_;
-  private: bool is_finished_;
-  private: base::ObserverList<AnimationObserver> observers_;
+  void DidCancelAnimation();
+  void DidFinishAnimation();
 
-  protected: Animatable();
-  public: virtual ~Animatable();
-
-  public: Animator* animator() const { return animator_; }
-
-  public: void AddObserver(AnimationObserver* observer);
-  protected: virtual void Animate(base::Time time) = 0;
-  public: void CancelAnimation();
-  private: void DidCancelAnimation();
-  protected: void DidAnimate();
-  private: void DidFinishAnimation();
-  protected: virtual void FinalizeAnimation();
-  public: void FinishAnimation();
-  public: void RemoveObserver(AnimationObserver* observer);
-  public: void ScheduleAnimation();
+  Animator* animator_;
+  bool is_finished_;
+  base::ObserverList<AnimationObserver> observers_;
 
   DISALLOW_COPY_AND_ASSIGN(Animatable);
 };
 
-}   // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_animation_animatable_h)
+#endif  // EVITA_UI_ANIMATION_ANIMATABLE_H_

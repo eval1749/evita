@@ -4,21 +4,24 @@
 
 #include "evita/ui/animation/animation_observer.h"
 
+#include "base/logging.h"
+
 namespace ui {
 
-AnimationObserver::AnimationObserver() {
+AnimationObserver::AnimationObserver() {}
+
+AnimationObserver::~AnimationObserver() {}
+
+void AnimationObserver::DidAnimate(Animatable* animatable) {
+  DCHECK(animatable);
 }
 
-AnimationObserver::~AnimationObserver() {
+void AnimationObserver::DidCancelAnimation(Animatable* animatable) {
+  DCHECK(animatable);
 }
 
-void AnimationObserver::DidAnimate(Animatable*) {
-}
-
-void AnimationObserver::DidCancelAnimation(Animatable*) {
-}
-
-void AnimationObserver::DidFinishAnimation(Animatable*) {
+void AnimationObserver::DidFinishAnimation(Animatable* animatable) {
+  DCHECK(animatable);
 }
 
 }  // namespace ui

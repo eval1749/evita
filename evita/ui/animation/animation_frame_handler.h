@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_animation_animation_frame_handler_h)
-#define INCLUDE_evita_ui_animation_animation_frame_handler_h
+#ifndef EVITA_UI_ANIMATION_ANIMATION_FRAME_HANDLER_H_
+#define EVITA_UI_ANIMATION_ANIMATION_FRAME_HANDLER_H_
 
 #include "base/basictypes.h"
 
@@ -18,23 +18,26 @@ namespace ui {
 // AnimationFrameHandler
 //
 class AnimationFrameHandler {
-  protected: AnimationFrameHandler();
-  public: virtual ~AnimationFrameHandler();
+ public:
+  virtual ~AnimationFrameHandler();
 
   // Request animation frame.
-  public: void CancelAnimationFrameRequest();
+  void CancelAnimationFrameRequest();
 
-  public: void HandleAnimationFrame(base::Time time);
+  void HandleAnimationFrame(base::Time time);
 
+  // Request animation frame.
+  void RequestAnimationFrame();
+
+ protected:
+  AnimationFrameHandler();
   // Called when animation frame started at |time|.
-  protected: virtual void DidBeginAnimationFrame(base::Time time) = 0;
+  virtual void DidBeginAnimationFrame(base::Time time) = 0;
 
-  // Request animation frame.
-  public: void RequestAnimationFrame();
-
+ private:
   DISALLOW_COPY_AND_ASSIGN(AnimationFrameHandler);
 };
 
-}   // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_animation_animation_frame_handler_h)
+#endif  // EVITA_UI_ANIMATION_ANIMATION_FRAME_HANDLER_H_

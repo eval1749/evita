@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_animation_animation_group_member)
-#define INCLUDE_evita_ui_animation_animation_group_member
+#ifndef EVITA_UI_ANIMATION_ANIMATION_GROUP_MEMBER_H_
+#define EVITA_UI_ANIMATION_ANIMATION_GROUP_MEMBER_H_
 
 #include "base/macros.h"
 
@@ -14,14 +14,18 @@ class Time;
 namespace ui {
 
 class AnimationGroupMember {
-  protected: AnimationGroupMember();
-  public: virtual ~AnimationGroupMember();
+ public:
+  virtual ~AnimationGroupMember();
 
-  public: virtual void Animate(base::Time time) = 0;
+  virtual void Animate(base::Time time) = 0;
 
+ protected:
+  AnimationGroupMember();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(AnimationGroupMember);
 };
 
 }  // namespace ui
 
-#endif // !defined(INCLUDE_evita_ui_animation_animation_group_member)
+#endif  // EVITA_UI_ANIMATION_ANIMATION_GROUP_MEMBER_H_

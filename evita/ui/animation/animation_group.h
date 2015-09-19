@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_animation_animation_group)
-#define INCLUDE_evita_ui_animation_animation_group
+#ifndef EVITA_UI_ANIMATION_ANIMATION_GROUP_H_
+#define EVITA_UI_ANIMATION_ANIMATION_GROUP_H_
 
 #include <unordered_set>
 
@@ -18,20 +18,22 @@ namespace ui {
 class AnimationGroupMember;
 
 class AnimationGroup {
-  private: std::unordered_set<AnimationGroupMember*> members_;
-  private: std::unordered_set<AnimationGroupMember*> removed_members_;
-  private: bool is_running_;
+ public:
+  AnimationGroup();
+  ~AnimationGroup();
 
-  public: AnimationGroup();
-  public: ~AnimationGroup();
+  void AddMember(AnimationGroupMember* member);
+  bool Animate(base::Time time);
+  void RemoveMember(AnimationGroupMember* member);
 
-  public: void AddMember(AnimationGroupMember* member);
-  public: bool Animate(base::Time time);
-  public: void RemoveMember(AnimationGroupMember* member);
+ private:
+  std::unordered_set<AnimationGroupMember*> members_;
+  std::unordered_set<AnimationGroupMember*> removed_members_;
+  bool is_running_;
 
   DISALLOW_COPY_AND_ASSIGN(AnimationGroup);
 };
 
 }  // namespace ui
 
-#endif // !defined(INCLUDE_evita_ui_animation_animation_group)
+#endif  // EVITA_UI_ANIMATION_ANIMATION_GROUP_H_

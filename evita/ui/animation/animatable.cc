@@ -9,8 +9,7 @@
 
 namespace ui {
 
-Animatable::Animatable() : animator_(nullptr), is_finished_(false) {
-}
+Animatable::Animatable() : animator_(nullptr), is_finished_(false) {}
 
 Animatable::~Animatable() {
   DCHECK(!animator_);

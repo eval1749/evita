@@ -6,10 +6,8 @@
 
 namespace ui {
 
-AnimationGroupMember::AnimationGroupMember() {
-}
+AnimationGroupMember::AnimationGroupMember() {}
 
-AnimationGroupMember::~AnimationGroupMember() {
-}
+AnimationGroupMember::~AnimationGroupMember() {}
 
 }  // namespace ui

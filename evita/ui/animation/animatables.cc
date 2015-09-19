@@ -10,8 +10,7 @@
 
 namespace ui {
 
-Animatables::Animatables() {
-}
+Animatables::Animatables() {}
 
 Animatables::~Animatables() {
   for (auto animatable : animatables_) {

@@ -11,11 +11,9 @@
 
 namespace ui {
 
-AnimationGroup::AnimationGroup() : is_running_(false) {
-}
+AnimationGroup::AnimationGroup() : is_running_(false) {}
 
-AnimationGroup::~AnimationGroup() {
-}
+AnimationGroup::~AnimationGroup() {}
 
 void AnimationGroup::AddMember(AnimationGroupMember* member) {
   members_.insert(member);

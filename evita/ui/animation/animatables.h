@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_animation_animatables_h)
-#define INCLUDE_evita_ui_animation_animatables_h
+#ifndef EVITA_UI_ANIMATION_ANIMATABLES_H_
+#define EVITA_UI_ANIMATION_ANIMATABLES_H_
 
 #include <unordered_set>
 
@@ -18,19 +18,21 @@ namespace ui {
 // Manages life time of |Animatable| objects.
 //
 class Animatables final : public AnimationObserver {
-  private: std::unordered_set<Animatable*> animatables_;
+ public:
+  Animatables();
+  ~Animatables() final;
 
-  public: Animatables();
-  public: ~Animatables();
+  void AddAnimatable(Animatable* animatables);
 
-  public: void AddAnimatable(Animatable* animatables);
-
+ private:
   // AnimationObserver
-  private: virtual void DidFinishAnimation(Animatable* animatable) override;
+  void DidFinishAnimation(Animatable* animatable) final;
+
+  std::unordered_set<Animatable*> animatables_;
 
   DISALLOW_COPY_AND_ASSIGN(Animatables);
 };
 
-}   // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_animation_animatables_h)
+#endif  // EVITA_UI_ANIMATION_ANIMATABLES_H_

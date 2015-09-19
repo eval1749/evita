@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_clipboard_clipboard_h)
-#define INCLUDE_evita_dom_clipboard_clipboard_h
+#ifndef EVITA_DOM_CLIPBOARD_CLIPBOARD_H_
+#define EVITA_DOM_CLIPBOARD_CLIPBOARD_H_
 
 #include <windows.h>
 
@@ -17,40 +17,45 @@ namespace dom {
 
 class DataTransferData;
 
-class Clipboard {
-  public: class Format {
-    private: const uint32_t format_;
-    private: const base::string16 mime_type_;
+class Clipboard final {
+ public:
+  class Format {
+   public:
+    virtual ~Format();
 
-    protected: Format(const base::char16* name,
-                      const base::string16& mime_type);
-    protected: Format(uint32_t format, const base::string16& mime_type);
-    public: virtual ~Format();
+    uint32_t format() const { return format_; }
+    const base::string16& mime_type() const { return mime_type_; }
 
-    public: uint32_t format() const { return format_; }
-    public: const base::string16& mime_type() const { return mime_type_; }
+    static const Format* Get(const base::string16& mime_type);
+    static const Format* Get(uint32_t format);
 
-    public: static const Format* Get(const base::string16& mime_type);
-    public: static const Format* Get(uint32_t format);
+    virtual DataTransferData* FromClipboard(HANDLE handle) const = 0;
 
-    public: virtual DataTransferData* FromClipboard(HANDLE handle) const = 0;
+   protected:
+    Format(const base::char16* name, const base::string16& mime_type);
+    Format(uint32_t format, const base::string16& mime_type);
+
+   private:
+    const uint32_t format_;
+    const base::string16 mime_type_;
 
     DISALLOW_COPY_AND_ASSIGN(Format);
   };
 
-  private: bool opened_;
+  Clipboard();
+  ~Clipboard();
 
-  public: Clipboard();
-  public: ~Clipboard();
+  bool opened() const { return opened_; }
+  void Add(const Format* format, const DataTransferData* data);
+  void Clear();
+  DataTransferData* Get(const Format* format) const;
 
-  public: bool opened() const { return opened_; }
-  public: void Add(const Format* format, const DataTransferData* data);
-  public: void Clear();
-  public: DataTransferData* Get(const Format* format) const;
+ private:
+  bool opened_;
 
   DISALLOW_ASSIGN(Clipboard);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_clipboard_clipboard_h)
+#endif  // EVITA_DOM_CLIPBOARD_CLIPBOARD_H_

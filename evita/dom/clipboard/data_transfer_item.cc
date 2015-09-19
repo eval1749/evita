@@ -10,7 +10,8 @@
 
 namespace gin {
 v8::Handle<v8::Value> Converter<dom::DataTransferData::Kind>::ToV8(
-    v8::Isolate* isolate, dom::DataTransferData::Kind kind) {
+    v8::Isolate* isolate,
+    dom::DataTransferData::Kind kind) {
   return StringToV8(isolate, dom::DataTransferData::KindToString(kind));
 }
 }  // namespace gin
@@ -19,16 +20,13 @@ namespace dom {
 
 DataTransferItem::DataTransferItem(const Clipboard::Format* format,
                                    DataTransferData* data)
-    : data_(data), format_(format) {
-}
+    : data_(data), format_(format) {}
 
 DataTransferItem::DataTransferItem(const base::string16& type,
                                    DataTransferData* data)
-    : DataTransferItem(Clipboard::Format::Get(type), data) {
-}
+    : DataTransferItem(Clipboard::Format::Get(type), data) {}
 
-DataTransferItem::~DataTransferItem() {
-}
+DataTransferItem::~DataTransferItem() {}
 
 DataTransferData::Kind DataTransferItem::kind() const {
   return data_->kind();
@@ -40,8 +38,8 @@ const base::string16& DataTransferItem::type() const {
 
 std::vector<uint8_t> DataTransferItem::GetAsBlob() const {
   if (kind() != DataTransferData::Kind::Blob) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "%ls isn't blob.", type()));
+    ScriptHost::instance()->ThrowError(
+        base::StringPrintf("%ls isn't blob.", type()));
     return std::vector<uint8_t>();
   }
   std::vector<uint8_t> data(data_->num_bytes());
@@ -51,8 +49,8 @@ std::vector<uint8_t> DataTransferItem::GetAsBlob() const {
 
 base::string16 DataTransferItem::GetAsString() const {
   if (kind() != DataTransferData::Kind::String) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "%ls isn't string.", type()));
+    ScriptHost::instance()->ThrowError(
+        base::StringPrintf("%ls isn't string.", type()));
     return base::string16();
   }
   base::string16 data(data_->num_bytes() / 2, 0);

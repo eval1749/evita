@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include <windows.h>
+
+#include <string>
 #include <unordered_map>
 
 #include "evita/dom/clipboard/clipboard.h"
@@ -20,25 +22,27 @@ namespace {
 //
 // ScopedGlobalAlloc
 //
-class ScopedGlobalAlloc {
-  private: HANDLE handle_;
+class ScopedGlobalAlloc final {
+ public:
+  explicit ScopedGlobalAlloc(size_t size)
+      : handle_(::GlobalAlloc(GMEM_MOVEABLE, size)) {}
 
-  public: ScopedGlobalAlloc(size_t size)
-      : handle_(::GlobalAlloc(GMEM_MOVEABLE, size)) {
-  }
-  public: ~ScopedGlobalAlloc() {
+  ~ScopedGlobalAlloc() {
     if (!handle_)
       return;
     ::GlobalFree(handle_);
   }
 
-  public: operator HANDLE() const { return handle_; }
+  operator HANDLE() const { return handle_; }
 
-  public: HANDLE release() {
+  HANDLE release() {
     auto const handle = handle_;
     handle_ = nullptr;
     return handle;
   }
+
+ private:
+  HANDLE handle_;
 
   DISALLOW_COPY_AND_ASSIGN(ScopedGlobalAlloc);
 };
@@ -47,25 +51,24 @@ class ScopedGlobalAlloc {
 //
 // ScopedGlobalLock
 //
-template<typename T>
-class ScopedGlobalLock {
-  private: HANDLE handle_;
-
-  public: ScopedGlobalLock(HANDLE handle) : handle_(handle) {
-  }
-  public: ~ScopedGlobalLock() {
+template <typename T>
+class ScopedGlobalLock final {
+ public:
+  explicit ScopedGlobalLock(HANDLE handle) : handle_(handle) {}
+  ~ScopedGlobalLock() {
     if (!handle_)
       return;
     ::GlobalUnlock(handle_);
   }
 
-  public: T* bytes() const {
+  T* bytes() const {
     return handle_ ? reinterpret_cast<T*>(::GlobalLock(handle_)) : nullptr;
   }
 
-  public: size_t num_bytes() const {
-    return handle_ ? ::GlobalSize(handle_) : 0u;
-  }
+  size_t num_bytes() const { return handle_ ? ::GlobalSize(handle_) : 0u; }
+
+ private:
+  HANDLE handle_;
 
   DISALLOW_COPY_AND_ASSIGN(ScopedGlobalLock);
 };
@@ -74,26 +77,28 @@ class ScopedGlobalLock {
 //
 // FormatMap
 //
-class FormatMap : public common::Singleton<FormatMap> {
+class FormatMap final : public common::Singleton<FormatMap> {
   DECLARE_SINGLETON_CLASS(FormatMap);
 
-  private: std::unordered_map<uint32_t, Clipboard::Format*> code_map_;
-  private: std::unordered_map<base::string16, Clipboard::Format*>
-      mime_type_map_;
+ public:
+  ~FormatMap() final;
 
-  private: FormatMap();
-  public: ~FormatMap();
+  Clipboard::Format* Get(const base::string16& mime_type) const;
+  Clipboard::Format* Get(uint32_t format_code) const;
+  void Register(Clipboard::Format* format);
 
-  public: Clipboard::Format* Get(const base::string16& mime_type) const;
-  public: Clipboard::Format* Get(uint32_t format_code) const;
-  public: void Register(Clipboard::Format* format);
+ private:
+  FormatMap();
+
+  std::unordered_map<uint32_t, Clipboard::Format*> code_map_;
+  std::unordered_map<base::string16, Clipboard::Format*> mime_type_map_;
+
+  DISALLOW_ASSIGN(FormatMap);
 };
 
-FormatMap::FormatMap() {
-}
+FormatMap::FormatMap() {}
 
-FormatMap::~FormatMap() {
-}
+FormatMap::~FormatMap() {}
 
 Clipboard::Format* FormatMap::Get(const base::string16& mime_type) const {
   auto it = mime_type_map_.find(mime_type);
@@ -117,18 +122,15 @@ void FormatMap::Register(Clipboard::Format* format) {
 // Clipboard::Format
 //
 Clipboard::Format::Format(const base::char16* name,
-                                     const base::string16& mime_type)
-    : Format(::RegisterClipboardFormatW(name), mime_type) {
-}
+                          const base::string16& mime_type)
+    : Format(::RegisterClipboardFormatW(name), mime_type) {}
 
-Clipboard::Format::Format(uint32_t format,
-                                     const base::string16& mime_type)
+Clipboard::Format::Format(uint32_t format, const base::string16& mime_type)
     : format_(format), mime_type_(mime_type) {
   FormatMap::instance()->Register(this);
 }
 
-Clipboard::Format::~Format() {
-}
+Clipboard::Format::~Format() {}
 
 const Clipboard::Format* Clipboard::Format::Get(
     const base::string16& mime_type) {
@@ -143,22 +145,21 @@ const Clipboard::Format* Clipboard::Format::Get(uint32_t format) {
 //
 // FormatText
 //
-class TextFormat : public Clipboard::Format {
-  public: TextFormat();
-  public: virtual ~TextFormat();
+class TextFormat final : public Clipboard::Format {
+ public:
+  TextFormat();
+  ~TextFormat() final;
 
+ private:
   // Clipboard::Format
-  private: virtual DataTransferData* FromClipboard(
-      HANDLE handle) const override;
+  DataTransferData* FromClipboard(HANDLE handle) const final;
 
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };
 
-TextFormat::TextFormat() : Format(CF_UNICODETEXT, L"text/plain") {
-}
+TextFormat::TextFormat() : Format(CF_UNICODETEXT, L"text/plain") {}
 
-TextFormat::~TextFormat() {
-}
+TextFormat::~TextFormat() {}
 
 DataTransferData* TextFormat::FromClipboard(HANDLE handle) const {
   ScopedGlobalLock<uint8_t> lock_scope(handle);
@@ -173,7 +174,7 @@ DataTransferData* TextFormat::FromClipboard(HANDLE handle) const {
   auto const end_of_chars = chars + num_chars;
   auto runner = chars;
   while (runner < end_of_chars) {
-    if(!*runner)
+    if (!*runner)
       break;
     ++runner;
   }

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_clipboard_data_transfer_h)
-#define INCLUDE_evita_dom_clipboard_data_transfer_h
+#ifndef EVITA_DOM_CLIPBOARD_DATA_TRANSFER_H_
+#define EVITA_DOM_CLIPBOARD_DATA_TRANSFER_H_
 
 #include "evita/v8_glue/scriptable.h"
 
@@ -15,19 +15,23 @@ class DataTransferClass;
 
 class DataTransferItemList;
 
-class DataTransfer : public v8_glue::Scriptable<DataTransfer> {
+class DataTransfer final : public v8_glue::Scriptable<DataTransfer> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransfer)
+
+ public:
+  ~DataTransfer() final;
+
+ private:
   friend class bindings::DataTransferClass;
 
-  private: DataTransfer();
-  public: virtual ~DataTransfer();
+  DataTransfer();
 
-  private: static DataTransfer* clipboard();
-  private: DataTransferItemList* items();
+  static DataTransfer* clipboard();
+  DataTransferItemList* items();
 
   DISALLOW_COPY_AND_ASSIGN(DataTransfer);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_clipboard_data_transfer_h)
+#endif  // EVITA_DOM_CLIPBOARD_DATA_TRANSFER_H_

@@ -11,11 +11,9 @@
 
 namespace dom {
 
-DataTransfer::DataTransfer() {
-}
+DataTransfer::DataTransfer() {}
 
-DataTransfer::~DataTransfer() {
-}
+DataTransfer::~DataTransfer() {}
 
 DataTransfer* DataTransfer::clipboard() {
   return new DataTransfer();

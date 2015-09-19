@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string>
+
 #include "evita/dom/clipboard/data_transfer_item_list.h"
 
 #include "base/logging.h"
@@ -12,9 +14,9 @@
 #include "evita/dom/script_host.h"
 
 namespace gin {
-bool Converter<dom::DataTransferData*>::FromV8(
-    v8::Isolate* isolate, v8::Handle<v8::Value> val,
-    dom::DataTransferData** out) {
+bool Converter<dom::DataTransferData*>::FromV8(v8::Isolate* isolate,
+                                               v8::Handle<v8::Value> val,
+                                               dom::DataTransferData** out) {
   base::string16 string;
   if (ConvertFromV8(isolate, val, &string)) {
     *out = new dom::DataTransferStringData(string);
@@ -33,18 +35,16 @@ bool Converter<dom::DataTransferData*>::FromV8(
 
 namespace dom {
 
-DataTransferItemList::DataTransferItemList() : fetched_(false) {
-}
+DataTransferItemList::DataTransferItemList() : fetched_(false) {}
 
-DataTransferItemList::~DataTransferItemList() {
-}
+DataTransferItemList::~DataTransferItemList() {}
 
 int DataTransferItemList::length() const {
   FetchIfNeeded();
   return static_cast<int>(items_.size());
 }
 
-void DataTransferItemList::Add(DataTransferData* data, 
+void DataTransferItemList::Add(DataTransferData* data,
                                const base::string16& type) {
   FetchIfNeeded();
   Clipboard clipboard;
@@ -52,8 +52,8 @@ void DataTransferItemList::Add(DataTransferData* data,
     return;
   auto const format = Clipboard::Format::Get(type);
   if (!format) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "Unsupported type for clipboard: %ls", type));
+    ScriptHost::instance()->ThrowError(
+        base::StringPrintf("Unsupported type for clipboard: %ls", type));
     return;
   }
   auto const item = new DataTransferItem(format, data);
@@ -69,7 +69,7 @@ void DataTransferItemList::FetchIfNeeded() const {
   if (!clipboard.opened())
     return;
   auto format_code = 0u;
-  for (;;){
+  for (;;) {
     format_code = ::EnumClipboardFormats(format_code);
     if (!format_code)
       break;

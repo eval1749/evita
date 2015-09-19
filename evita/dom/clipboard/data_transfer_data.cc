@@ -17,18 +17,16 @@ ostream& operator<<(ostream& ostream, dom::DataTransferData::Kind kind) {
 namespace dom {
 
 namespace {
-const char* const kind_strings[] = { "blob", "string" };
+const char* const kind_strings[] = {"blob", "string"};
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // DataTransferData
 //
-DataTransferData::DataTransferData() {
-}
+DataTransferData::DataTransferData() {}
 
-DataTransferData::~DataTransferData() {
-}
+DataTransferData::~DataTransferData() {}
 
 const char* DataTransferData::KindToString(Kind kind) {
   auto const index = static_cast<size_t>(kind);
@@ -44,8 +42,7 @@ DataTransferBlobData::DataTransferBlobData(const void* bytes, size_t num_bytes)
   ::memcpy(const_cast<uint8_t*>(&data_[0]), bytes, num_bytes);
 }
 
-DataTransferBlobData::~DataTransferBlobData() {
-}
+DataTransferBlobData::~DataTransferBlobData() {}
 
 const void* DataTransferBlobData::bytes() const {
   return data_.data();
@@ -64,11 +61,9 @@ size_t DataTransferBlobData::num_bytes() const {
 // DataTransferStringData
 //
 DataTransferStringData::DataTransferStringData(const base::string16& string)
-    : data_(string) {
-}
+    : data_(string) {}
 
-DataTransferStringData::~DataTransferStringData() {
-}
+DataTransferStringData::~DataTransferStringData() {}
 
 const void* DataTransferStringData::bytes() const {
   return data_.data();
@@ -81,6 +76,5 @@ DataTransferData::Kind DataTransferStringData::kind() const {
 size_t DataTransferStringData::num_bytes() const {
   return data_.size() * sizeof(data_[0]);
 }
-
 
 }  // namespace dom

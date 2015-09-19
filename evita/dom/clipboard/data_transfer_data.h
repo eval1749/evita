@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_clipboard_data_transfer_data_h)
-#define INCLUDE_evita_dom_clipboard_data_transfer_data_h
+#ifndef EVITA_DOM_CLIPBOARD_DATA_TRANSFER_DATA_H_
+#define EVITA_DOM_CLIPBOARD_DATA_TRANSFER_DATA_H_
+
+#include <string>
+#include <vector>
 
 #include "base/basictypes.h"
-
-#include <vector>
 
 #include "base/strings/string16.h"
 
@@ -18,20 +19,24 @@ namespace dom {
 // DataTransferData
 //
 class DataTransferData {
-  public: enum class Kind {
+ public:
+  enum class Kind {
     Blob,
     String,
   };
 
-  protected: DataTransferData();
-  public: virtual ~DataTransferData();
+  virtual ~DataTransferData();
 
-  public: virtual const void* bytes() const = 0;
-  public: virtual Kind kind() const = 0;
-  public: virtual size_t num_bytes() const = 0;
+  virtual const void* bytes() const = 0;
+  virtual Kind kind() const = 0;
+  virtual size_t num_bytes() const = 0;
 
-  public: static const char* KindToString(Kind kind);
+  static const char* KindToString(Kind kind);
 
+ protected:
+  DataTransferData();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(DataTransferData);
 };
 
@@ -39,15 +44,17 @@ class DataTransferData {
 //
 // DataTransferBlobData
 //
-class DataTransferBlobData : public DataTransferData {
-  private: const std::vector<uint8_t> data_;
+class DataTransferBlobData final : public DataTransferData {
+ public:
+  DataTransferBlobData(const void* bytes, size_t num_bytes);
+  ~DataTransferBlobData() final;
 
-  public: DataTransferBlobData(const void* bytes, size_t num_bytes);
-  public: virtual ~DataTransferBlobData();
+  const void* bytes() const final;
+  Kind kind() const final;
+  size_t num_bytes() const final;
 
-  public: virtual const void* bytes() const override;
-  public: virtual Kind kind() const override;
-  public: virtual size_t num_bytes() const override;;
+ private:
+  const std::vector<uint8_t> data_;
 
   DISALLOW_COPY_AND_ASSIGN(DataTransferBlobData);
 };
@@ -56,19 +63,21 @@ class DataTransferBlobData : public DataTransferData {
 //
 // DataTransferStringData
 //
-class DataTransferStringData : public DataTransferData {
-  private: const base::string16 data_;
+class DataTransferStringData final : public DataTransferData {
+ public:
+  explicit DataTransferStringData(const base::string16& string);
+  ~DataTransferStringData() final;
 
-  public: DataTransferStringData(const base::string16& string);
-  public: virtual ~DataTransferStringData();
+  const void* bytes() const final;
+  Kind kind() const final;
+  size_t num_bytes() const final;
 
-  public: virtual const void* bytes() const override;
-  public: virtual Kind kind() const override;
-  public: virtual size_t num_bytes() const override;;
+ private:
+  const base::string16 data_;
 
   DISALLOW_COPY_AND_ASSIGN(DataTransferStringData);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_clipboard_data_transfer_data_h)
+#endif  // EVITA_DOM_CLIPBOARD_DATA_TRANSFER_DATA_H_

@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_clipboard_data_transfer_item_h)
-#define INCLUDE_evita_dom_clipboard_data_transfer_item_h
+#ifndef EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_H_
+#define EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_H_
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "evita/dom/clipboard/clipboard.h"
 #include "evita/dom/clipboard/data_transfer_data.h"
@@ -17,25 +19,26 @@ namespace bindings {
 class DataTransferItemClass;
 }
 
-class DataTransferItem : public v8_glue::Scriptable<DataTransferItem> {
+class DataTransferItem final : public v8_glue::Scriptable<DataTransferItem> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransferItem)
+ public:
+  DataTransferItem(const Clipboard::Format* format, DataTransferData* data);
+  DataTransferItem(const base::string16& type, DataTransferData* data);
+  ~DataTransferItem() final;
+
+  const DataTransferData* data() const { return data_.get(); }
+  const Clipboard::Format* format() const { return format_; }
+  DataTransferData::Kind kind() const;
+  const base::string16& type() const;
+
+ private:
   friend class bindings::DataTransferItemClass;
 
-  private: const std::unique_ptr<DataTransferData> data_;
-  private: const Clipboard::Format* const format_;
+  std::vector<uint8_t> GetAsBlob() const;
+  base::string16 GetAsString() const;
 
-  public: DataTransferItem(const Clipboard::Format* format,
-                           DataTransferData* data);
-  public: DataTransferItem(const base::string16& type, DataTransferData* data);
-  public: virtual ~DataTransferItem();
-
-  public: const DataTransferData* data() const { return data_.get(); }
-  public: const Clipboard::Format* format() const { return format_; }
-  public: DataTransferData::Kind kind() const;
-  public: const base::string16& type() const;
-
-  private: std::vector<uint8_t> GetAsBlob() const;
-  private: base::string16 GetAsString() const;
+  const std::unique_ptr<DataTransferData> data_;
+  const Clipboard::Format* const format_;
 
   DISALLOW_COPY_AND_ASSIGN(DataTransferItem);
 };
@@ -43,12 +46,11 @@ class DataTransferItem : public v8_glue::Scriptable<DataTransferItem> {
 }  // namespace dom
 
 namespace gin {
-template<>
+template <>
 struct Converter<dom::DataTransferData::Kind> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
                                     dom::DataTransferData::Kind kind);
 };
 }  // namespace gin
 
-
-#endif //!defined(INCLUDE_evita_dom_clipboard_data_transfer_item_h)
+#endif  // EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_H_

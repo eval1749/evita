@@ -30,6 +30,9 @@ class Castable {
   }
 
  protected:
+  Castable() = default;
+  virtual ~Castable() = default;
+
   virtual bool is_class_of(const char* other_name) const {
     return static_class_name() == other_name;
   }

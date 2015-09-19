@@ -44,7 +44,6 @@ v8.log
 # fails.
 /build/win_toolchain.json
 testing/gtest
-third_party/hunspell
 third_party/icu
 third_party/v8
 tools/deps2git/

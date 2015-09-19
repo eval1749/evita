@@ -7,17 +7,13 @@
 
 namespace dom {
 
-TimeStamp::TimeStamp(double value) : value_(value) {
-}
+TimeStamp::TimeStamp(double value) : value_(value) {}
 
-TimeStamp::TimeStamp(const TimeStamp& other) : value_(other.value_) {
-}
+TimeStamp::TimeStamp(const TimeStamp& other) : value_(other.value_) {}
 
-TimeStamp::TimeStamp() : value_(0.0) {
-}
+TimeStamp::TimeStamp() : value_(0.0) {}
 
-TimeStamp::~TimeStamp() {
-}
+TimeStamp::~TimeStamp() {}
 
 bool TimeStamp::operator==(const TimeStamp& other) const {
   return value_ == other.value_;
@@ -30,7 +26,6 @@ bool TimeStamp::operator!=(const TimeStamp& other) const {
 bool TimeStamp::operator<(const TimeStamp& other) const {
   return value_ < other.value_;
 }
-
 
 bool TimeStamp::operator<=(const TimeStamp& other) const {
   return value_ <= other.value_;
@@ -53,8 +48,9 @@ TimeStamp TimeStamp::Now() {
 namespace gin {
 
 v8::Handle<v8::Value> Converter<dom::TimeStamp>::ToV8(
-    v8::Isolate* isolate, const dom::TimeStamp& time_stamp) {
-  return gin::ConvertToV8(isolate, 
+    v8::Isolate* isolate,
+    const dom::TimeStamp& time_stamp) {
+  return gin::ConvertToV8(isolate,
                           static_cast<dom::TimeStamp::ValueType>(time_stamp));
 }
 

@@ -12,11 +12,9 @@ namespace dom {
 
 base::string16 V8ToString(v8::Handle<v8::Value> value);
 
-Dictionary::Dictionary() {
-}
+Dictionary::Dictionary() {}
 
-Dictionary::~Dictionary() {
-}
+Dictionary::~Dictionary() {}
 
 v8::Isolate* Dictionary::isolate() const {
   return v8::Isolate::GetCurrent();
@@ -35,14 +33,14 @@ bool Dictionary::Init(v8::Isolate* isolate, v8::Handle<v8::Value> dict) {
     auto const result = HandleKeyValue(key, value);
     switch (result) {
       case HandleResult::CanNotConvert:
-        isolate->ThrowException(v8::Exception::TypeError(
-            gin::StringToV8(isolate, base::StringPrintf(L"Bad value for %ls",
-                V8ToString(key).c_str()))));
+        isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
+            isolate, base::StringPrintf(L"Bad value for %ls",
+                                        V8ToString(key).c_str()))));
         return false;
       case HandleResult::NotFound:
-        isolate->ThrowException(v8::Exception::TypeError(
-            gin::StringToV8(isolate, base::StringPrintf(L"Invalid key: %ls",
-                V8ToString(key).c_str()))));
+        isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
+            isolate,
+            base::StringPrintf(L"Invalid key: %ls", V8ToString(key).c_str()))));
         return false;
       case HandleResult::Succeeded:
         break;

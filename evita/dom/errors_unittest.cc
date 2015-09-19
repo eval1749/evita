@@ -7,16 +7,20 @@
 namespace {
 
 class ErrorsTest : public dom::AbstractDomTest {
-  public: ErrorsTest() = default;
-  public: ~ErrorsTest() = default;
+ public:
+  ~ErrorsTest() override = default;
 
+ protected:
+  ErrorsTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(ErrorsTest);
 };
 
 TEST_F(ErrorsTest, DocumentError) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('foo');"
-    "var e1 = new DocumentError(doc, 'foo');");
+      "var doc = new Document('foo');"
+      "var e1 = new DocumentError(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
   EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");
   EXPECT_SCRIPT_TRUE("e1.document === doc");
@@ -26,8 +30,8 @@ TEST_F(ErrorsTest, DocumentError) {
 
 TEST_F(ErrorsTest, DocumentNotReady) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('foo');"
-    "var e1 = new DocumentNotReady(doc, 'foo');");
+      "var doc = new Document('foo');"
+      "var e1 = new DocumentNotReady(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
   EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");
   EXPECT_SCRIPT_TRUE("e1 instanceof DocumentNotReady");
@@ -38,8 +42,8 @@ TEST_F(ErrorsTest, DocumentNotReady) {
 
 TEST_F(ErrorsTest, DocumentReadOnly) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('foo');"
-    "var e1 = new DocumentReadOnly(doc, 'foo');");
+      "var doc = new Document('foo');"
+      "var e1 = new DocumentReadOnly(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
   EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");
   EXPECT_SCRIPT_TRUE("e1 instanceof DocumentReadOnly");

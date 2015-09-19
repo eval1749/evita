@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_mock_io_delegate_h)
-#define INCLUDE_evita_dom_mock_io_delegate_h
+#ifndef EVITA_DOM_MOCK_IO_DELEGATE_H_
+#define EVITA_DOM_MOCK_IO_DELEGATE_H_
 
 #include <deque>
 #include <ostream>
@@ -13,86 +13,91 @@
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_delegate.h"
 #pragma warning(push)
-#pragma warning(disable: 4365 4628)
+#pragma warning(disable : 4365 4628)
 #include "gmock/gmock.h"
 #pragma warning(pop)
 
 namespace dom {
 
-class MockIoDelegate : public domapi::IoDelegate {
-  private: struct CallResult {
+class MockIoDelegate final : public domapi::IoDelegate {
+ public:
+  MockIoDelegate();
+  ~MockIoDelegate();
+
+  const std::vector<uint8_t>& bytes() const { return bytes_; }
+  void set_bytes(const std::vector<uint8_t> new_bytes);
+  int num_close_called() const { return num_close_called_; }
+  int num_remove_called() const { return num_remove_called_; }
+  void set_check_spelling_result(bool result) {
+    check_spelling_result_ = result;
+  }
+  void set_spelling_suggestions(
+      const std::vector<base::string16>& spelling_suggestions) {
+    spelling_suggestions_ = spelling_suggestions;
+  }
+
+  void SetCallResult(const base::StringPiece& name, int error_code);
+  void SetCallResult(const base::StringPiece& name,
+                     int erorr_code,
+                     int num_transferred);
+  void SetMakeTempFileName(const base::string16 file_name, int error_code);
+  void SetFileStatus(const domapi::FileStatus& data, int error_code);
+  void SetOpenFileResult(domapi::IoContextId context_id, int error_code);
+
+  // domapi::IoDelegate
+  void CheckSpelling(const base::string16& word_to_check,
+                     const CheckSpellingResolver& deferred) final;
+  void CloseFile(domapi::IoContextId, const domapi::FileIoDeferred& deferred);
+  void GetSpellingSuggestions(
+      const base::string16& wrong_word,
+      const GetSpellingSuggestionsResolver& deferred) final;
+  void MakeTempFileName(const base::string16& dir_name,
+                        const base::string16& prefix,
+                        const domapi::MakeTempFileNameResolver& resolver) final;
+  void MoveFile(const base::string16& src_path,
+                const base::string16& dst_path,
+                const domapi::MoveFileOptions& options,
+                const domapi::IoResolver& resolver) final;
+  void OpenFile(const base::string16& file_name,
+                const base::string16& mode,
+                const domapi::OpenFileDeferred&) final;
+  void OpenProcess(const base::string16& command_line,
+                   const domapi::OpenProcessDeferred&) final;
+  void ReadFile(domapi::IoContextId context_id,
+                void* buffer,
+                size_t num_read,
+                const domapi::FileIoDeferred& deferred) final;
+  void RemoveFile(const base::string16& file_name,
+                  const domapi::IoResolver& resolver) final;
+  void WriteFile(domapi::IoContextId context_id,
+                 void* buffer,
+                 size_t num_write,
+                 const domapi::FileIoDeferred& deferred) final;
+
+ private:
+  struct CallResult final {
     int error_code;
     base::StringPiece name;
     int num_transferred;
   };
 
-  private: std::vector<uint8_t> bytes_;
-  private: domapi::IoContextId context_id_;
-  private: std::deque<CallResult> call_results_;
-  private: domapi::FileStatus file_status_;
-  private: int num_close_called_;
-  private: int num_remove_called_;
-  private: bool check_spelling_result_;
-  private: std::vector<base::string16> spelling_suggestions_;
-  private: base::string16 temp_file_name_;
+  CallResult PopCallResult(const base::StringPiece& name);
+  void QueryFileStatus(const base::string16& file_name,
+                       const domapi::QueryFileStatusDeferred& deferred) final;
 
-  public: MockIoDelegate();
-  public: virtual ~MockIoDelegate();
+  std::vector<uint8_t> bytes_;
+  domapi::IoContextId context_id_;
+  std::deque<CallResult> call_results_;
+  domapi::FileStatus file_status_;
+  int num_close_called_;
+  int num_remove_called_;
+  bool check_spelling_result_;
+  std::vector<base::string16> spelling_suggestions_;
+  base::string16 temp_file_name_;
 
-  public: const std::vector<uint8_t>& bytes() const { return bytes_; }
-  public: void set_bytes(const std::vector<uint8_t> new_bytes);
-  public: int num_close_called() const { return num_close_called_; }
-  public: int num_remove_called() const { return num_remove_called_; }
-  public: void set_check_spelling_result(bool result) {
-    check_spelling_result_ = result;
-  }
-  public: void set_spelling_suggestions(
-      const std::vector<base::string16>& spelling_suggestions) {
-    spelling_suggestions_ = spelling_suggestions;
-  }
-
-  private: CallResult PopCallResult(const base::StringPiece& name);
-  public: void SetCallResult(const base::StringPiece& name, int error_code);
-  public: void SetCallResult(const base::StringPiece& name, int erorr_code,
-                             int num_transferred);
-  public: void SetMakeTempFileName(const base::string16 file_name,
-                                   int error_code);
-  public: void SetFileStatus(const domapi::FileStatus& data, int error_code);
-  public: void SetOpenFileResult(domapi::IoContextId context_id,
-                                 int error_code);
-
-  // domapi::IoDelegate
-  public: virtual void CheckSpelling(const base::string16& word_to_check,
-      const CheckSpellingResolver& deferred) override;
-  public: virtual void CloseFile(domapi::IoContextId,
-                                 const domapi::FileIoDeferred& deferred);
-  public: virtual void GetSpellingSuggestions(
-      const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& deferred) override;
-  public: virtual void MakeTempFileName(
-      const base::string16& dir_name, const base::string16& prefix,
-      const domapi::MakeTempFileNameResolver& resolver) override;
-  public: virtual void MoveFile(const base::string16& src_path,
-                                const base::string16& dst_path,
-                                const domapi::MoveFileOptions& options,
-                                const domapi::IoResolver& resolver) override;
-  public: virtual void OpenFile(
-      const base::string16& file_name, const base::string16& mode,
-      const domapi::OpenFileDeferred&) override;
-  public: virtual void OpenProcess(const base::string16& command_line,
-      const domapi::OpenProcessDeferred&) override;
-  private: virtual void QueryFileStatus(const base::string16& file_name,
-      const domapi::QueryFileStatusDeferred& deferred) override;
-  public: virtual void ReadFile(domapi::IoContextId context_id, void* buffer,
-                        size_t num_read,
-                        const domapi::FileIoDeferred& deferred) override;
-  public: virtual void RemoveFile(const base::string16& file_name,
-                                  const domapi::IoResolver& resolver) override;
-  public: virtual void WriteFile(domapi::IoContextId context_id, void* buffer,
-                         size_t num_write,
-                         const domapi::FileIoDeferred& deferred) override;
+  DISALLOW_COPY_AND_ASSIGN(MockIoDelegate);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_mock_io_delegate_h)
+#endif  // EVITA_DOM_MOCK_IO_DELEGATE_H_

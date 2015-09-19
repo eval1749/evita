@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_global_h)
-#define INCLUDE_evita_dom_global_h
+#ifndef EVITA_DOM_GLOBAL_H_
+#define EVITA_DOM_GLOBAL_H_
 
 #include "base/macros.h"
 #include "common/memory/singleton.h"
@@ -10,20 +10,22 @@
 
 namespace dom {
 
-class Global : public common::Singleton<Global> {
+class Global final : public common::Singleton<Global> {
+ public:
+  ~Global() final;
+
+  v8::Handle<v8::ObjectTemplate> object_template(v8::Isolate* isolate);
+
+ private:
   friend class common::Singleton<Global>;
 
-  private: v8_glue::ScopedPersistent<v8::ObjectTemplate> object_template_;
+  Global();
 
-  private: Global();
-  public: ~Global();
-
-  public: v8::Handle<v8::ObjectTemplate>
-      object_template(v8::Isolate* isolate);
+  v8_glue::ScopedPersistent<v8::ObjectTemplate> object_template_;
 
   DISALLOW_COPY_AND_ASSIGN(Global);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_global_h)
+#endif  // EVITA_DOM_GLOBAL_H_

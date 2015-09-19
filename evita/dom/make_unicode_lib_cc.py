@@ -153,18 +153,22 @@ v8::Handle<v8::Object> CreateUnicode(v8::Isolate* isolate) {
 
 // Note: Creating UCD object takes a few second in debug build. To make
 // test faster, we cache UCD object.
-class Unicode {
-  private: std::unique_ptr<v8::UniquePersistent<v8::Object>> unicode_;
-
-  public: Unicode(v8::Isolate* isolate)
+class Unicode final {
+ public:
+  Unicode(v8::Isolate* isolate)
     : unicode_(new v8::UniquePersistent<v8::Object>()) {
     unicode_->Reset(isolate, CreateUnicode(isolate));
   }
-  public: ~Unicode() = default;
+  ~Unicode() = default;
 
-  public: v8::Handle<v8::Object> Get(v8::Isolate* isolate) {
+  v8::Handle<v8::Object> Get(v8::Isolate* isolate) {
     return v8::Local<v8::Object>::New(isolate, *unicode_);
   }
+
+ private:
+  std::unique_ptr<v8::UniquePersistent<v8::Object>> unicode_;
+
+  DISALLOW_COPY_AND_ASSIGN(Unicode);
 };
 
 }  // namespace

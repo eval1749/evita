@@ -9,20 +9,23 @@
 namespace {
 
 class ConsoleTest : public dom::AbstractDomTest {
-  protected: ConsoleTest() {
-  }
-  public: virtual ~ConsoleTest() {
-  }
+ public:
+  ~ConsoleTest() override = default;
 
+ protected:
+  ConsoleTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(ConsoleTest);
 };
 
 TEST_F(ConsoleTest, log) {
-  EXPECT_SCRIPT_VALID("function consoleContents() {"
-                      "  var doc = console.document;"
-                      "  var range = new Range(doc, 0, doc.length);"
-                      "  return range.text;"
-                      "}");
+  EXPECT_SCRIPT_VALID(
+      "function consoleContents() {"
+      "  var doc = console.document;"
+      "  var range = new Range(doc, 0, doc.length);"
+      "  return range.text;"
+      "}");
 
   EXPECT_SCRIPT_VALID("console.log()");
   EXPECT_SCRIPT_EQ("\n", "consoleContents()");

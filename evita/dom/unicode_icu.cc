@@ -11,12 +11,12 @@
 // mismatch
 // L1 C4530: C++ exception handler used, but unwind semantics are not enabled.
 // Specify /EHsc
-#pragma warning(disable: 4127 4251 4530)
+#pragma warning(disable : 4127 4251 4530)
 #include "base/basictypes.h"
 #include "base/i18n/icu_util.h"
 // L4 C4127: conditional expression is constant
 #pragma warning(push)
-#pragma warning(disable: 4127)
+#pragma warning(disable : 4127)
 #include "base/logging.h"
 #pragma warning(pop)
 #include "evita/v8_glue/converter.h"
@@ -29,37 +29,36 @@ namespace internal {
 namespace {
 // Note: The order of |kBidiClassNames| must be matched to |UCharDirection|.
 const char* kBidiClassNames[] = {
-  "L", "R", "EN", "ES", "ET", "AN", "CS", "B", "S", "WS", "ON", "LRE", "LRO",
-  "AL", "RLE", "RLO", "PDF", "NSM", "BN", "FSI", "LRI", "RLI", "PDI",
+    "L",   "R",   "EN", "ES",  "ET",  "AN",  "CS",  "B",
+    "S",   "WS",  "ON", "LRE", "LRO", "AL",  "RLE", "RLO",
+    "PDF", "NSM", "BN", "FSI", "LRI", "RLI", "PDI",
 };
 
 static_assert(sizeof(kBidiClassNames) / sizeof(*kBidiClassNames) ==
-               U_CHAR_DIRECTION_COUNT, "kBidiClassNames size mismatch");
+                  U_CHAR_DIRECTION_COUNT,
+              "kBidiClassNames size mismatch");
 
 // Note: The order of |kCategoryNames| must be matched to |UCharCategory|.
 const char* kCategoryNames[] = {
-  "Cn", "Lu", "Ll", "Lt", "Lm", "Lo", "Mn", "Me", "Mc", "Nd", "Nl", "No",
-  "Zs", "Zl", "Zp", "Cc", "Cf", "Co", "Cs", "Pd", "Ps", "Pe", "Pc", "Po",
-  "Sm", "Sc", "Sk", "So", "Pi", "Pf",
+    "Cn", "Lu", "Ll", "Lt", "Lm", "Lo", "Mn", "Me", "Mc", "Nd",
+    "Nl", "No", "Zs", "Zl", "Zp", "Cc", "Cf", "Co", "Cs", "Pd",
+    "Ps", "Pe", "Pc", "Po", "Sm", "Sc", "Sk", "So", "Pi", "Pf",
 };
 
 static_assert(sizeof(kCategoryNames) / sizeof(*kCategoryNames) ==
-               U_CHAR_CATEGORY_COUNT, "kCategoryNames size mismatch");
+                  U_CHAR_CATEGORY_COUNT,
+              "kCategoryNames size mismatch");
 
 #define DCHECK_EQ_CHAR_1(vector, index, name) \
-  DCHECK((vector)[index][0] == (name)[0] && \
-         (vector)[index][1] == (name)[1])
+  DCHECK((vector)[index][0] == (name)[0] && (vector)[index][1] == (name)[1])
 
-#define DCHECK_EQ_CHAR_2(vector, index, name) \
-  DCHECK((vector)[index][0] == (name)[0] && \
-         (vector)[index][1] == (name)[1] && \
+#define DCHECK_EQ_CHAR_2(vector, index, name)                                  \
+  DCHECK((vector)[index][0] == (name)[0] && (vector)[index][1] == (name)[1] && \
          (vector)[index][2] == (name)[2])
 
-#define DCHECK_EQ_CHAR_3(vector, index, name) \
-  DCHECK((vector)[index][0] == (name)[0] && \
-         (vector)[index][1] == (name)[1] && \
-         (vector)[index][2] == (name)[2] && \
-         (vector)[index][3] == (name)[3])
+#define DCHECK_EQ_CHAR_3(vector, index, name)                                  \
+  DCHECK((vector)[index][0] == (name)[0] && (vector)[index][1] == (name)[1] && \
+         (vector)[index][2] == (name)[2] && (vector)[index][3] == (name)[3])
 
 // Unicode.BIDI_CLASS_SHORT_NAMES : Array.<string>
 // Unicode.GENERAL_CATEGORY_SHOT_NAMES : Array.<string>
@@ -172,8 +171,8 @@ v8::Handle<v8::Object> CreateUnicode(v8::Isolate* isolate) {
     // gc
     auto const category_index = u_charType(code);
     CHECK(category_index < arraysize(kCategoryNames));
-    data->ForceSet(category, category_names->Get(
-        static_cast<size_t>(category_index)));
+    data->ForceSet(category,
+                   category_names->Get(static_cast<size_t>(category_index)));
 
     ucd->Set(static_cast<size_t>(code), data);
   }
@@ -182,18 +181,20 @@ v8::Handle<v8::Object> CreateUnicode(v8::Isolate* isolate) {
 
 // Note: Creating UCD object takes a few second in debug build. To make
 // test faster, we cache UCD object.
-class Unicode {
-  private: std::unique_ptr<v8::UniquePersistent<v8::Object>> unicode_;
-
-  public: Unicode(v8::Isolate* isolate)
-    : unicode_(new v8::UniquePersistent<v8::Object>()) {
+class Unicode final {
+ public:
+  explicit Unicode(v8::Isolate* isolate)
+      : unicode_(new v8::UniquePersistent<v8::Object>()) {
     unicode_->Reset(isolate, CreateUnicode(isolate));
   }
-  public: ~Unicode() = default;
+  ~Unicode() = default;
 
-  public: v8::Handle<v8::Object> Get(v8::Isolate* isolate) {
+  v8::Handle<v8::Object> Get(v8::Isolate* isolate) {
     return v8::Local<v8::Object>::New(isolate, *unicode_);
   }
+
+ private:
+  std::unique_ptr<v8::UniquePersistent<v8::Object>> unicode_;
 
   DISALLOW_COPY_AND_ASSIGN(Unicode);
 };

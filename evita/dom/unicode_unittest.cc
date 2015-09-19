@@ -9,8 +9,13 @@
 namespace {
 
 class UnicodTest : public dom::AbstractDomTest {
-  protected: UnicodTest() = default;
-  public: virtual ~UnicodTest() = default;
+ public:
+  ~UnicodTest() override = default;
+
+ protected:
+  UnicodTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(UnicodTest);
 };
 

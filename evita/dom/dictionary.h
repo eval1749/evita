@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_dictionary_h)
-#define INCLUDE_evita_dom_dictionary_h
+#ifndef EVITA_DOM_DICTIONARY_H_
+#define EVITA_DOM_DICTIONARY_H_
 
 #include "base/basictypes.h"
 #include "evita/v8_glue/converter.h"
@@ -11,34 +11,37 @@
 namespace dom {
 
 class Dictionary {
-  protected: enum class HandleResult {
+ public:
+  virtual ~Dictionary();
+
+  bool Init(v8::Isolate* isolate, v8::Handle<v8::Value> dict);
+
+ protected:
+  enum class HandleResult {
     NotFound,
     Succeeded,
     CanNotConvert,
   };
 
-  protected: Dictionary();
-  public: virtual ~Dictionary();
+  Dictionary();
 
-  protected: v8::Isolate* isolate() const;
+  v8::Isolate* isolate() const;
 
-  protected: virtual HandleResult HandleKeyValue(
-      v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) = 0;
-  public: bool Init(v8::Isolate* isolate, v8::Handle<v8::Value> dict);
+  virtual HandleResult HandleKeyValue(v8::Handle<v8::Value> key,
+                                      v8::Handle<v8::Value> value) = 0;
 };
 
 }  // namespace dom
 
 namespace gin {
-template<typename T>
-struct Converter<T, typename
-    std::enable_if<std::is_base_of<dom::Dictionary, T>::value>::type>
-{
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val,
-                     T* out) {
+template <typename T>
+struct Converter<
+    T,
+    typename std::enable_if<std::is_base_of<dom::Dictionary, T>::value>::type> {
+  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val, T* out) {
     return out->Init(isolate, val->ToObject());
   }
 };
 }  // namespace gin
 
-#endif //!defined(INCLUDE_evita_dom_dictionary_h)
+#endif  // EVITA_DOM_DICTIONARY_H_

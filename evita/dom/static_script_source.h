@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_static_script_source_h)
-#define INCLUDE_evita_dom_static_script_source_h
+#ifndef EVITA_DOM_STATIC_SCRIPT_SOURCE_H_
+#define EVITA_DOM_STATIC_SCRIPT_SOURCE_H_
 
 #include <vector>
 
@@ -20,4 +20,4 @@ const std::vector<StaticScriptSource>& GetJsLibSources();
 }  // namespace internal
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_static_script_source_h)
+#endif  // EVITA_DOM_STATIC_SCRIPT_SOURCE_H_

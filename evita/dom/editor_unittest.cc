@@ -15,11 +15,13 @@ namespace {
 using ::testing::_;
 
 class EditorTest : public dom::AbstractDomTest {
-  protected: EditorTest() {
-  }
-  public: virtual ~EditorTest() {
-  }
+ public:
+  ~EditorTest() override = default;
 
+ protected:
+  EditorTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(EditorTest);
 };
 
@@ -73,7 +75,7 @@ TEST_F(EditorTest, getSpellingSuggestions) {
 
 TEST_F(EditorTest, localizeText) {
   EXPECT_SCRIPT_EQ("This is a pen",
-      "Editor.localizeText('This is a __item__', {item: 'pen'})");
+                   "Editor.localizeText('This is a __item__', {item: 'pen'})");
 }
 
 TEST_F(EditorTest, messageBox) {
@@ -90,10 +92,9 @@ TEST_F(EditorTest, messageBox) {
 
 TEST_F(EditorTest, runScript) {
   EXPECT_SCRIPT_EQ("1", "Editor.runScript('1').value");
-  EXPECT_SCRIPT_EQ(
-      "ReferenceError: foo is not defined,0,1",
-      "var result = Editor.runScript('foo');"
-      "[result.exception, result.start, result.end]");
+  EXPECT_SCRIPT_EQ("ReferenceError: foo is not defined,0,1",
+                   "var result = Editor.runScript('foo');"
+                   "[result.exception, result.start, result.end]");
 }
 
 TEST_F(EditorTest, version) {
@@ -105,7 +106,7 @@ TEST_F(EditorTest, version) {
 #include "base/bind.h"
 #pragma warning(push)
 #include "base/test/launcher/unit_test_launcher.h"
-#pragma warning(disable: 4625)
+#pragma warning(disable : 4625)
 #include "base/test/test_suite.h"
 #pragma warning(pop)
 
@@ -113,6 +114,6 @@ int main(int argc, char** argv) {
   base::TestSuite test_suite(argc, argv);
 
   return base::LaunchUnitTests(
-      argc, argv, base::Bind(&base::TestSuite::Run,
-                             base::Unretained(&test_suite)));
+      argc, argv,
+      base::Bind(&base::TestSuite::Run, base::Unretained(&test_suite)));
 }

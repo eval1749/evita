@@ -6,7 +6,7 @@
 
 #include "base/bind.h"
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "base/logging.h"
@@ -27,7 +27,7 @@
 #include "evita/v8_glue/per_isolate_data.h"
 #include "evita/v8_glue/v8_platform.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"
+#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {
 
@@ -52,7 +52,7 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
-  auto const js_console =  runner->GetGlobalProperty("JsConsole");
+  auto const js_console = runner->GetGlobalProperty("JsConsole");
   if (js_console.IsEmpty()) {
     DVLOG(0) << "No JsConsole";
     return;
@@ -68,8 +68,7 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
                reject_message.GetValue());
 }
 
-void MessageBoxCallback(int) {
-}
+void MessageBoxCallback(int count) {}
 
 bool need_unlock_after_gc;
 int suppress_message_box;
@@ -81,21 +80,20 @@ void MessageBox(const base::string16& message, int flags) {
   domapi::Deferred<int, int> resolver;
   resolver.reject = base::Bind(MessageBoxCallback);
   resolver.resolve = base::Bind(MessageBoxCallback);
-  ScriptHost::instance()->view_delegate()->MessageBox(kInvalidWindowId,
-    message, L"Evita System Message", flags, resolver);
+  ScriptHost::instance()->view_delegate()->MessageBox(
+      kInvalidWindowId, message, L"Evita System Message", flags, resolver);
 }
 
 void GcEpilogueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
-  auto text = base::StringPrintf(L"GC finished type=%d flags=0x%X",
-                                 type, flags);
+  auto text =
+      base::StringPrintf(L"GC finished type=%d flags=0x%X", type, flags);
   MessageBox(text, MB_ICONINFORMATION);
   if (need_unlock_after_gc)
     dom::Lock::instance()->Release(FROM_HERE);
 }
 
 void GcPrologueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
-  auto text = base::StringPrintf(L"GC Started type=%d flags=%X",
-                                 type, flags);
+  auto text = base::StringPrintf(L"GC Started type=%d flags=%X", type, flags);
   MessageBox(text, MB_ICONINFORMATION);
   need_unlock_after_gc = !dom::Lock::instance()->locked_by_dom();
   if (need_unlock_after_gc)
@@ -103,7 +101,7 @@ void GcPrologueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
 }
 
 void MessageCallback(v8::Handle<v8::Message> message,
-                       v8::Handle<v8::Value> error) {
+                     v8::Handle<v8::Value> error) {
   auto text = base::StringPrintf(
       L"Exception: %ls\n"
       L"Source: %ls\n"
@@ -117,8 +115,8 @@ void MessageCallback(v8::Handle<v8::Message> message,
     auto const length = static_cast<size_t>(stack_trace->GetFrameCount());
     for (auto index = 0u; index < length; ++index) {
       auto const frame = stack_trace->GetFrame(index);
-      text += base::StringPrintf(L"  at %ls (%ls(%d))\n",
-          V8ToString(frame->GetFunctionName()).c_str(),
+      text += base::StringPrintf(
+          L"  at %ls (%ls(%d))\n", V8ToString(frame->GetFunctionName()).c_str(),
           V8ToString(frame->GetScriptName()).c_str(), frame->GetLineNumber());
     }
   }
@@ -138,18 +136,19 @@ void PopulateEnviromentStrings(v8_glue::Runner* runner) {
   }
   --scanner;
   auto const isolate = runner->isolate();
-  runner->global()->Get(gin::StringToV8(isolate, "Os"))->ToObject()->Set(
-    gin::StringToV8(isolate, "environmentStrings"),
-    v8::String::NewFromTwoByte(
-        isolate,
-        reinterpret_cast<const uint16_t*>(strings),
-        v8::String::kNormalString,
-        static_cast<int>(scanner - strings)));
+  runner->global()
+      ->Get(gin::StringToV8(isolate, "Os"))
+      ->ToObject()
+      ->Set(
+          gin::StringToV8(isolate, "environmentStrings"),
+          v8::String::NewFromTwoByte(
+              isolate, reinterpret_cast<const uint16_t*>(strings),
+              v8::String::kNormalString, static_cast<int>(scanner - strings)));
 }
 
 ScriptHost* script_host;
 
-}   // namespace
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -168,7 +167,7 @@ SuppressMessageBoxScope::~SuppressMessageBoxScope() {
 // ScriptHost
 //
 ScriptHost::ScriptHost(ViewDelegate* view_delegate,
-                                   domapi::IoDelegate* io_delegate)
+                       domapi::IoDelegate* io_delegate)
     : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
       message_loop_for_script_(base::MessageLoop::current()),
@@ -214,7 +213,7 @@ void ScriptHost::CallClassEventHandler(EventTarget* event_target,
 }
 
 void ScriptHost::DidStartViewHost() {
- if (testing_)
+  if (testing_)
     return;
   auto const script_sources = internal::GetJsLibSources();
   // We should prevent UI thread to access DOM.
@@ -222,9 +221,9 @@ void ScriptHost::DidStartViewHost() {
   v8_glue::Runner::Scope runner_scope(runner());
   PopulateEnviromentStrings(runner());
   for (const auto& script_source : script_sources) {
-    auto const result = runner()->Run(
-        base::ASCIIToUTF16(script_source.script_text),
-        base::ASCIIToUTF16(script_source.file_name));
+    auto const result =
+        runner()->Run(base::ASCIIToUTF16(script_source.script_text),
+                      base::ASCIIToUTF16(script_source.file_name));
     if (result.IsEmpty()) {
       view_delegate_->DidStartScriptHost(state_);
       return;
@@ -244,7 +243,7 @@ void ScriptHost::PlatformError(const char* name) {
 }
 
 void ScriptHost::PostTask(const tracked_objects::Location& from_here,
-                                const base::Closure& task) {
+                          const base::Closure& task) {
   DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
   message_loop_for_script_->PostTask(from_here, task);
 }
@@ -274,17 +273,15 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   DCHECK(!script_host);
   SuppressMessageBoxScope suppress_messagebox_scope;
 
-  gin::IsolateHolder::Initialize(
-      gin::IsolateHolder::kStrictMode,
-      gin::ArrayBufferAllocator::SharedInstance());
+  gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
+                                 gin::ArrayBufferAllocator::SharedInstance());
   v8::V8::InitializeICU();
 
   // See v8/src/flag-definitions.h
   // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
   // flags.
-  //char flags[] = "--use_strict" " --harmony";
-  //v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
-
+  // char flags[] = "--use_strict" " --harmony";
+  // v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
 
   script_host = new ScriptHost(view_delegate, io_deleage);
   auto const isolate = script_host->isolate();
@@ -307,8 +304,8 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   return script_host;
 }
 
-ScriptHost* ScriptHost::StartForTesting(
-    ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate) {
+ScriptHost* ScriptHost::StartForTesting(ViewDelegate* view_delegate,
+                                        domapi::IoDelegate* io_delegate) {
   if (!script_host) {
     Start(view_delegate, io_delegate)->testing_ = true;
   } else {
@@ -330,8 +327,8 @@ void ScriptHost::ThrowError(const std::string& message) {
 
 void ScriptHost::ThrowRangeError(const std::string& message) {
   v8_glue::Runner::Scope runner_scope(runner());
-  auto exception = v8::Exception::RangeError(
-      gin::StringToV8(isolate(), message));
+  auto exception =
+      v8::Exception::RangeError(gin::StringToV8(isolate(), message));
   isolate()->ThrowException(exception);
 }
 
@@ -357,13 +354,12 @@ void ScriptHost::UnhandledException(v8_glue::Runner*,
   auto const message = try_catch.Message();
   if (!message.IsEmpty()) {
     text = base::StringPrintf(
-            L"Exception: %ls\n"
-            L"Source: %ls\n"
-            L"Source name: %ls(%d)\n",
-            V8ToString(error).c_str(),
-            V8ToString(message->GetSourceLine()).c_str(),
-            V8ToString(message->GetScriptResourceName()).c_str(),
-            message->GetLineNumber());
+        L"Exception: %ls\n"
+        L"Source: %ls\n"
+        L"Source name: %ls(%d)\n",
+        V8ToString(error).c_str(), V8ToString(message->GetSourceLine()).c_str(),
+        V8ToString(message->GetScriptResourceName()).c_str(),
+        message->GetLineNumber());
     auto const stack_trace = message->GetStackTrace();
     if (!stack_trace.IsEmpty()) {
       text += L"Stack trace:\n";
@@ -371,15 +367,15 @@ void ScriptHost::UnhandledException(v8_glue::Runner*,
       for (auto index = 0u; index < length; ++index) {
         auto const frame = stack_trace->GetFrame(index);
         text += base::StringPrintf(L"  at %ls (%ls(%d))\n",
-            V8ToString(frame->GetFunctionName()).c_str(),
-            V8ToString(frame->GetScriptName()).c_str(),
-            frame->GetLineNumber());
+                                   V8ToString(frame->GetFunctionName()).c_str(),
+                                   V8ToString(frame->GetScriptName()).c_str(),
+                                   frame->GetLineNumber());
       }
     }
-  }  if (try_catch.HasTerminated()) {
+  } else if (try_catch.HasTerminated()) {
     text = L"Script execution is terminated.";
   } else if (message.IsEmpty()) {
-    text =  L"No details";
+    text = L"No details";
   }
 
   if (state_ != domapi::ScriptHostState::Running) {

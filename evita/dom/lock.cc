@@ -6,7 +6,7 @@
 #include <ostream>
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const tracked_objects::Location & location) {
+                         const tracked_objects::Location& location) {
   return ostream << location.ToString();
 }
 
@@ -20,12 +20,12 @@ Lock::AutoLock::AutoLock(const Location& location)
     : base::AutoLock(*Lock::instance()->lock()) {
   DVLOG(1) << "Lock dom at " << location;
   Lock::instance()->location_ = location;
-  Lock::instance()->locked_by_dom_ = true;;
+  Lock::instance()->locked_by_dom_ = true;
 }
 
 Lock::AutoLock::~AutoLock() {
   Lock::instance()->locked_by_dom_ = false;
-  DVLOG(1) << "Unlock dom at " << Lock::instance()->location_ ;
+  DVLOG(1) << "Unlock dom at " << Lock::instance()->location_;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ Lock::AutoTryLock::~AutoTryLock() {
     Lock::instance()->locked_by_dom_ = false;
     Lock::instance()->lock()->Release();
   }
-  DVLOG(1) << "Unlock dom at " << Lock::instance()->location_ ;
+  DVLOG(1) << "Unlock dom at " << Lock::instance()->location_;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ Lock::AutoUnlock::AutoUnlock(const Location& location)
 }
 
 Lock::AutoUnlock::~AutoUnlock() {
-  DVLOG(1) << "Lock dom at " << Lock::instance()->location_ ;
+  DVLOG(1) << "Lock dom at " << Lock::instance()->location_;
   Lock::instance()->locked_by_dom_ = true;
 }
 
@@ -68,11 +68,9 @@ Lock::AutoUnlock::~AutoUnlock() {
 //
 // Lock
 //
-Lock::Lock() : lock_(new base::Lock()), locked_by_dom_(false) {
-}
+Lock::Lock() : lock_(new base::Lock()), locked_by_dom_(false) {}
 
-Lock::~Lock() {
-}
+Lock::~Lock() {}
 
 void Lock::Acquire(const tracked_objects::Location& location) {
   location_ = location;
@@ -83,7 +81,6 @@ void Lock::Release(const tracked_objects::Location& location) {
   location_ = location;
   lock_->Release();
 }
-
 
 bool Lock::TryLock(const tracked_objects::Location& location) {
   if (!lock_->Try())

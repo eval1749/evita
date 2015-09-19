@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_promise_resolver_h)
-#define INCLUDE_evita_dom_promise_resolver_h
+#ifndef EVITA_DOM_PROMISE_RESOLVER_H_
+#define EVITA_DOM_PROMISE_RESOLVER_H_
 
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
@@ -21,53 +21,57 @@ namespace dom {
 // |Promise.defer()| during asynchronous call.
 //
 class PromiseResolver final : public base::RefCounted<PromiseResolver> {
-  private: enum class Type {
+ public:
+  ~PromiseResolver();
+
+  template <typename ResolveType, typename RejectType>
+  static v8::Handle<v8::Promise> FastCall(
+      const base::Callback<
+          void(const domapi::Deferred<ResolveType, RejectType>&)> closure) {
+    return DoCall(Type::Fast, closure);
+  }
+
+  v8::Local<v8::Promise> GetPromise(v8::Isolate* isoalte) const;
+  template <typename T>
+  void Reject(T reason);
+  template <typename T>
+  void Resolve(T value);
+
+  template <typename ResolveType, typename RejectType>
+  static v8::Handle<v8::Promise> SlowCall(
+      const base::Callback<
+          void(const domapi::Deferred<ResolveType, RejectType>&)> closure) {
+    return DoCall(Type::Slow, closure);
+  }
+
+ private:
+  enum class Type {
     Fast,
     Slow,
   };
 
-  private: v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
-  private: base::WeakPtr<v8_glue::Runner> runner_;
-  private: Type type_;
+  PromiseResolver(Type type, v8_glue::Runner* runner);
 
-  private: PromiseResolver(Type type, v8_glue::Runner* runner);
-  public: ~PromiseResolver();
+  v8_glue::Runner* runner() const { return runner_.get(); }
 
-  private: v8_glue::Runner* runner() const { return runner_.get(); }
+  template <typename ResolveType, typename RejectType>
+  static v8::Handle<v8::Promise> DoCall(
+      Type type,
+      const base::Callback<
+          void(const domapi::Deferred<ResolveType, RejectType>&)> closure);
 
-  private: template<typename ResolveType, typename RejectType>
-    static v8::Handle<v8::Promise> DoCall(
-        Type type,
-        const base::Callback<
-            void(const domapi::Deferred<ResolveType, RejectType>&)> closure);
+  void DoReject(v8::Handle<v8::Value> reason);
+  void DoResolve(v8::Handle<v8::Value> value);
+  void ScheduleRunMicrotasks();
 
-  private: void DoReject(v8::Handle<v8::Value> reason);
-  private: void DoResolve(v8::Handle<v8::Value> value);
-
-  public: template<typename ResolveType, typename RejectType>
-    static v8::Handle<v8::Promise> FastCall(
-        const base::Callback<
-            void(const domapi::Deferred<ResolveType, RejectType>&)> closure) {
-    return DoCall(Type::Fast, closure);
-  }
-
-  public: v8::Local<v8::Promise> GetPromise(v8::Isolate* isoalte) const;
-  public: template<typename T> void Reject(T reason);
-  public: template<typename T> void Resolve(T value);
-  private: void ScheduleRunMicrotasks();
-
-  public: template<typename ResolveType, typename RejectType>
-    static v8::Handle<v8::Promise> SlowCall(
-        const base::Callback<
-            void(const domapi::Deferred<ResolveType, RejectType>&)> closure) {
-    return DoCall(Type::Slow, closure);
-  }
-
+  v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
+  base::WeakPtr<v8_glue::Runner> runner_;
+  Type type_;
 
   DISALLOW_COPY_AND_ASSIGN(PromiseResolver);
 };
 
-template<typename T, typename U>
+template <typename T, typename U>
 v8::Handle<v8::Promise> PromiseResolver::DoCall(
     Type type,
     const base::Callback<void(const domapi::Deferred<T, U>&)> closure) {
@@ -78,15 +82,13 @@ v8::Handle<v8::Promise> PromiseResolver::DoCall(
       make_scoped_refptr(new PromiseResolver(type, runner));
 
   domapi::Deferred<T, U> deferred;
-  deferred.reject = base::Bind(&PromiseResolver::Reject<U>,
-                               promise_resolver);
-  deferred.resolve = base::Bind(&PromiseResolver::Resolve<T>,
-                                promise_resolver);
+  deferred.reject = base::Bind(&PromiseResolver::Reject<U>, promise_resolver);
+  deferred.resolve = base::Bind(&PromiseResolver::Resolve<T>, promise_resolver);
   closure.Run(deferred);
   return runner_scope.Escape(promise_resolver->GetPromise(runner->isolate()));
 }
 
-template<typename T>
+template <typename T>
 void PromiseResolver::Reject(T reason) {
   if (!runner_)
     return;
@@ -98,7 +100,7 @@ void PromiseResolver::Reject(T reason) {
   DoReject(v8_value);
 }
 
-template<typename T>
+template <typename T>
 void PromiseResolver::Resolve(T value) {
   if (!runner_)
     return;
@@ -112,4 +114,4 @@ void PromiseResolver::Resolve(T value) {
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_promise_resolver_h)
+#endif  // EVITA_DOM_PROMISE_RESOLVER_H_

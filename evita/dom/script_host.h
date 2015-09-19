@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_script_host_h)
-#define INCLUDE_evita_dom_script_host_h
+#ifndef EVITA_DOM_SCRIPT_HOST_H_
+#define EVITA_DOM_SCRIPT_HOST_H_
 
 #include <string>
 #include <memory>
@@ -20,7 +20,6 @@
 #include "evita/v8_glue/v8.h"
 
 namespace base {
-//template<typename T> class Callback;
 class MessageLoop;
 }
 
@@ -43,9 +42,13 @@ class ViewEventHandlerImpl;
 //
 // SuppressMessageBoxScope
 //
-class SuppressMessageBoxScope {
-  public: SuppressMessageBoxScope();
-  public: ~SuppressMessageBoxScope();
+class SuppressMessageBoxScope final {
+ public:
+  SuppressMessageBoxScope();
+  ~SuppressMessageBoxScope();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SuppressMessageBoxScope);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -53,57 +56,57 @@ class SuppressMessageBoxScope {
 // ScriptHost
 //
 class ScriptHost final : public v8_glue::RunnerDelegate {
-  private: v8_glue::IsolateHolder isolate_holder_;
-  private: std::unique_ptr<ViewEventHandlerImpl> event_handler_;
-  private: domapi::IoDelegate* io_delegate_;
-  // A |MessageLoop| where script runs on. We don't allow to run script other
-  // than this message loop.
-  private: base::MessageLoop* message_loop_for_script_;
-  private: std::unique_ptr<v8_glue::Runner> runner_;
-  private: domapi::ScriptHostState state_;
-  private: bool testing_;
-  private: v8_glue::Runner* testing_runner_;
-  private: ViewDelegate* view_delegate_;
+ public:
+  ~ScriptHost() final;
 
-  private: ScriptHost(ViewDelegate* view_delegate,
-                      domapi::IoDelegate* io_deleage);
-  public: ~ScriptHost() final;
+  ViewEventHandlerImpl* event_handler() const { return event_handler_.get(); }
+  static ScriptHost* instance();
+  domapi::IoDelegate* io_delegate() const { return io_delegate_; }
+  v8::Isolate* isolate() const;
+  v8_glue::Runner* runner() const;
+  void set_testing_runner(v8_glue::Runner* runner);
+  ViewDelegate* view_delegate() const;
 
-  public: ViewEventHandlerImpl* event_handler() const {
-    return event_handler_.get();
-  }
-  public: static ScriptHost* instance();
-  public: domapi::IoDelegate* io_delegate() const { return io_delegate_; }
-  public: v8::Isolate* isolate() const;
-  public: v8_glue::Runner* runner() const;
-  public: void set_testing_runner(v8_glue::Runner* runner);
-  public: ViewDelegate* view_delegate() const;
+  void CallClassEventHandler(EventTarget* target, Event* event);
+  void DidStartViewHost();
+  void PlatformError(const char* name);
+  void PostTask(const tracked_objects::Location& from_here,
+                const base::Closure& task);
+  void ResetForTesting();
+  void RunMicrotasks();
+  static ScriptHost* Start(ViewDelegate* view_delegate,
+                           domapi::IoDelegate* io_delegate);
+  static ScriptHost* StartForTesting(ViewDelegate* view_delegate,
+                                     domapi::IoDelegate* io_delegate);
+  void ThrowError(const std::string& message);
+  void ThrowRangeError(const std::string& message);
+  void ThrowException(v8::Handle<v8::Value> exception);
+  void WillDestroyHost();
 
-  public: void CallClassEventHandler(EventTarget* target, Event* event);
-  public: void DidStartViewHost();
-  public: void PlatformError(const char* name);
-  public: void PostTask(const tracked_objects::Location& from_here,
-                        const base::Closure& task);
-  public: void ResetForTesting();
-  public: void RunMicrotasks();
-  public: static ScriptHost* Start(ViewDelegate* view_delegate,
-                                         domapi::IoDelegate* io_delegate);
-  public: static ScriptHost* StartForTesting(
-      ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
-  public: void ThrowError(const std::string& message);
-  public: void ThrowRangeError(const std::string& message);
-  public: void ThrowException(v8::Handle<v8::Value> exception);
-  public: void WillDestroyHost();
+ private:
+  ScriptHost(ViewDelegate* view_delegate, domapi::IoDelegate* io_deleage);
 
   // v8_glue::RunnerDelegate
-  private: v8::Handle<v8::ObjectTemplate>
-      GetGlobalTemplate(v8_glue::Runner* runner) final;
-  private: void UnhandledException(v8_glue::Runner* runner,
-                                   const v8::TryCatch& try_catch) final;
+  v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
+      v8_glue::Runner* runner) final;
+  void UnhandledException(v8_glue::Runner* runner,
+                          const v8::TryCatch& try_catch) final;
+
+  v8_glue::IsolateHolder isolate_holder_;
+  std::unique_ptr<ViewEventHandlerImpl> event_handler_;
+  domapi::IoDelegate* io_delegate_;
+  // A |MessageLoop| where script runs on. We don't allow to run script other
+  // than this message loop.
+  base::MessageLoop* message_loop_for_script_;
+  std::unique_ptr<v8_glue::Runner> runner_;
+  domapi::ScriptHostState state_;
+  bool testing_;
+  v8_glue::Runner* testing_runner_;
+  ViewDelegate* view_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptHost);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_script_host_h)
+#endif  // EVITA_DOM_SCRIPT_HOST_H_

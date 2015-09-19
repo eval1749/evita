@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_lock_h)
-#define INCLUDE_evita_dom_lock_h
+#ifndef EVITA_DOM_LOCK_H_
+#define EVITA_DOM_LOCK_H_
 
 #include <memory>
 
@@ -12,50 +12,64 @@
 
 namespace dom {
 
-class Lock : public common::Singleton<Lock> {
+class Lock final : public common::Singleton<Lock> {
   DECLARE_SINGLETON_CLASS(Lock);
 
-  private: typedef tracked_objects::Location Location;
+ public:
+  using Location = tracked_objects::Location;
 
-  public: class AutoLock : public base::AutoLock {
-    public: AutoLock(const Location& location);
-    public: ~AutoLock();
+  class AutoLock final : public base::AutoLock {
+   public:
+    explicit AutoLock(const Location& location);
+    ~AutoLock();
+
+   private:
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
   };
-  friend class AutoLock;
 
-  public: class AutoTryLock {
-    private: bool locked_;
-    public: AutoTryLock(const Location& location);
-    public: ~AutoTryLock();
-    public: bool locked() const { return locked_; }
+  class AutoTryLock final {
+   public:
+    explicit AutoTryLock(const Location& location);
+    ~AutoTryLock();
+
+    bool locked() const { return locked_; }
+
+   private:
+    bool locked_;
     DISALLOW_COPY_AND_ASSIGN(AutoTryLock);
   };
-  friend class AutoTryLock;
 
-  public: class AutoUnlock : public base::AutoUnlock {
-    public: AutoUnlock(const Location& location);
-    public: ~AutoUnlock();
+  class AutoUnlock final : public base::AutoUnlock {
+   public:
+    explicit AutoUnlock(const Location& location);
+    ~AutoUnlock();
+
+   private:
     DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
   };
+
+  virtual ~Lock();
+
+  bool locked_by_dom() const { return locked_by_dom_; }
+  void set_locked_by_dom() { locked_by_dom_ = true; }
+  const Location& location() const { return location_; }
+  base::Lock* lock() const { return lock_.get(); }
+
+  void Acquire(const Location& location);
+  void AssertAcquired() { lock_->AssertAcquired(); }
+  void Release(const Location& location);
+  bool TryLock(const Location& location);
+
+ private:
+  friend class AutoLock;
+  friend class AutoTryLock;
   friend class AutoUnlock;
 
-  private: Location location_;
-  private: std::unique_ptr<base::Lock> lock_;
-  private: bool locked_by_dom_;
+  Lock();
 
-  private: Lock();
-  public: virtual ~Lock();
-
-  public: bool locked_by_dom() const { return locked_by_dom_; }
-  public: void set_locked_by_dom() { locked_by_dom_ = true; }
-  public: const Location& location() const { return location_; }
-  private: base::Lock* lock() const { return lock_.get(); }
-
-  public: void Acquire(const Location& location);
-  public: void AssertAcquired() { lock_->AssertAcquired(); }
-  public: void Release(const Location& location);
-  public: bool TryLock(const Location& location);
+  Location location_;
+  std::unique_ptr<base::Lock> lock_;
+  bool locked_by_dom_;
 
   DISALLOW_COPY_AND_ASSIGN(Lock);
 };
@@ -63,19 +77,15 @@ class Lock : public common::Singleton<Lock> {
 }  // namespace dom
 
 #if _DEBUG
-#define ASSERT_DOM_LOCKED() \
-  dom::Lock::instance()->AssertAcquired()
+#define ASSERT_DOM_LOCKED() dom::Lock::instance()->AssertAcquired()
 #else
 #define ASSERT_DOM_LOCKED()
 #endif
 
-#define DOM_AUTO_LOCK_SCOPE() \
-  dom::Lock::AutoLock dom_lock_scope(FROM_HERE)
+#define DOM_AUTO_LOCK_SCOPE() dom::Lock::AutoLock dom_lock_scope(FROM_HERE)
 
-#define DOM_AUTO_UNLOCK_SCOPE() \
-  dom::Lock::AutoUnlock dom_lock_scope(FROM_HERE)
+#define DOM_AUTO_UNLOCK_SCOPE() dom::Lock::AutoUnlock dom_lock_scope(FROM_HERE)
 
-#define DOM_TRY_LOCK_SCOPE(name) \
-  dom::Lock::AutoTryLock name(FROM_HERE)
+#define DOM_TRY_LOCK_SCOPE(name) dom::Lock::AutoTryLock name(FROM_HERE)
 
-#endif //!defined(INCLUDE_evita_dom_lock_h)
+#endif  // EVITA_DOM_LOCK_H_

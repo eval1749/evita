@@ -14,7 +14,8 @@ v8::Handle<v8::Value> Converter<base::Time>::ToV8(v8::Isolate* isolate,
   return v8::Date::New(isolate, time.ToJsTime());
 }
 
-bool Converter<base::Time>::FromV8(v8::Isolate*, v8::Handle<v8::Value> val,
+bool Converter<base::Time>::FromV8(v8::Isolate*,
+                                   v8::Handle<v8::Value> val,
                                    base::Time* out) {
   if (!val->IsDate())
     return false;

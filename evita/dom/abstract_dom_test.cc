@@ -7,7 +7,7 @@
 
 #include "base/logging.h"
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
 #include "base/run_loop.h"
 #pragma warning(pop)
@@ -63,20 +63,17 @@ class StaticScript : public common::Singleton<StaticScript> {
   DISALLOW_COPY_AND_ASSIGN(StaticScript);
 };
 
-StaticScript::StaticScript() {
-}
+StaticScript::StaticScript() {}
 
-StaticScript::~StaticScript() {
-}
+StaticScript::~StaticScript() {}
 
-std::vector<v8::Local<v8::Script>> StaticScript::GetAll(
-    v8::Isolate* isolate) {
+std::vector<v8::Local<v8::Script>> StaticScript::GetAll(v8::Isolate* isolate) {
   if (unbound_scripts_.empty())
     LoadAll(isolate);
   std::vector<v8::Local<v8::Script>> scripts;
   for (auto& unbound_script : unbound_scripts_) {
-    auto script = v8::Local<v8::UnboundScript>::New(isolate, unbound_script)->
-        BindToCurrentContext();
+    auto script = v8::Local<v8::UnboundScript>::New(isolate, unbound_script)
+                      ->BindToCurrentContext();
     scripts.push_back(script);
   }
   return scripts;
@@ -87,8 +84,7 @@ void StaticScript::LoadAll(v8::Isolate* isolate) {
     v8::ScriptOrigin script_origin(
         gin::StringToV8(isolate, script_source.file_name)->ToString());
     v8::ScriptCompiler::Source source(
-        gin::StringToV8(isolate, script_source.script_text),
-        script_origin);
+        gin::StringToV8(isolate, script_source.script_text), script_origin);
     auto unbound_script = v8::ScriptCompiler::CompileUnbound(isolate, &source);
     v8::UniquePersistent<v8::UnboundScript> handle(isolate, unbound_script);
     unbound_scripts_.push_back(std::move(handle));
@@ -122,21 +118,20 @@ class AbstractDomTest::RunnerDelegate final
 
  private:
   // v8_glue::RunnerDelegate
-  v8::Handle<v8::ObjectTemplate>
-      GetGlobalTemplate(v8_glue::Runner* runner) final;
+  v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
+      v8_glue::Runner* runner) final;
   void UnhandledException(v8_glue::Runner* runner,
-      const v8::TryCatch& try_catch) final;
+                          const v8::TryCatch& try_catch) final;
 
   AbstractDomTest* test_instance_;
 };
 
 // v8_glue::RunnerDelegate
 v8::Handle<v8::ObjectTemplate>
-AbstractDomTest::RunnerDelegate::GetGlobalTemplate(
-    v8_glue::Runner* runner) {
+AbstractDomTest::RunnerDelegate::GetGlobalTemplate(v8_glue::Runner* runner) {
   auto const templ =
-    static_cast<v8_glue::RunnerDelegate*>(test_instance_->script_host_)->
-        GetGlobalTemplate(runner);
+      static_cast<v8_glue::RunnerDelegate*>(test_instance_->script_host_)
+          ->GetGlobalTemplate(runner);
 
   auto const isolate = runner->isolate();
   RunnerDelegateMock temp_delegate;
@@ -156,7 +151,8 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(
 }
 
 void AbstractDomTest::RunnerDelegate::UnhandledException(
-    v8_glue::Runner*, const v8::TryCatch& try_catch) {
+    v8_glue::Runner*,
+    const v8::TryCatch& try_catch) {
   LOG(0) << V8ToString(try_catch.StackTrace());
   test_instance_->exception_ =
       base::UTF16ToUTF8(V8ToString(try_catch.Exception()));
@@ -167,38 +163,31 @@ void AbstractDomTest::RunnerDelegate::UnhandledException(
 // AbstractDomTest::RunnerScope
 //
 AbstractDomTest::RunnerScope::RunnerScope(AbstractDomTest* test)
-    : runner_scope_(test->runner()) {
-}
+    : runner_scope_(test->runner()) {}
 
-AbstractDomTest::RunnerScope::~RunnerScope() {
-}
+AbstractDomTest::RunnerScope::~RunnerScope() {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // AbstractDomTest::ScriptCallArguments
 //
 AbstractDomTest::ScriptCallArguments::ScriptCallArguments(v8::Isolate* isolate)
-    : isolate_(isolate) {
-}
+    : isolate_(isolate) {}
 
-AbstractDomTest::ScriptCallArguments::~ScriptCallArguments() {
-}
+AbstractDomTest::ScriptCallArguments::~ScriptCallArguments() {}
 
-void AbstractDomTest::ScriptCallArguments::Populate() {
-}
+void AbstractDomTest::ScriptCallArguments::Populate() {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // AbstractDomTest
 //
 AbstractDomTest::AbstractDomTest()
-      : mock_io_delegate_(new MockIoDelegate()),
-        mock_view_impl_(new MockViewImpl()),
-        script_host_(nullptr) {
-}
+    : mock_io_delegate_(new MockIoDelegate()),
+      mock_view_impl_(new MockViewImpl()),
+      script_host_(nullptr) {}
 
-AbstractDomTest::~AbstractDomTest() {
-}
+AbstractDomTest::~AbstractDomTest() {}
 
 v8::Isolate* AbstractDomTest::isolate() const {
   return runner_->isolate();
@@ -212,8 +201,7 @@ domapi::ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_host_->event_handler();
 }
 
-bool AbstractDomTest::DoCall(const base::StringPiece& name,
-                             const Argv& argv) {
+bool AbstractDomTest::DoCall(const base::StringPiece& name, const Argv& argv) {
   v8_glue::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
   auto callee = runner_->GetGlobalProperty(name);
@@ -230,8 +218,8 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
   v8::TryCatch try_catch;
-  auto const script = v8::Script::Compile(
-      gin::StringToV8(isolate, script_text), &script_origin);
+  auto const script = v8::Script::Compile(gin::StringToV8(isolate, script_text),
+                                          &script_origin);
   if (script.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
     return exception_;
@@ -245,8 +233,7 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
 }
 
 void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
-                                             v8::Handle<v8::ObjectTemplate>) {
-}
+                                             v8::Handle<v8::ObjectTemplate>) {}
 
 bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
                                 const char* file_name,
@@ -257,8 +244,8 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
   v8::TryCatch try_catch;
-  auto const script = v8::Script::Compile(
-      gin::StringToV8(isolate, script_text), &script_origin);
+  auto const script = v8::Script::Compile(gin::StringToV8(isolate, script_text),
+                                          &script_origin);
   if (script.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
     return false;
@@ -280,8 +267,8 @@ void AbstractDomTest::SetUp() {
   if (!static_runner)
     EXPECT_CALL(*mock_view_impl_, RegisterViewEventHandler(_)).Times(1);
 
-  script_host_ = dom::ScriptHost::StartForTesting(
-    mock_view_impl_.get(), mock_io_delegate_.get());
+  script_host_ = dom::ScriptHost::StartForTesting(mock_view_impl_.get(),
+                                                  mock_io_delegate_.get());
 
   auto const isolate = script_host_->isolate();
 
@@ -328,8 +315,8 @@ void AbstractDomTest::TearDown() {
 
 void AbstractDomTest::UnhandledException(v8_glue::Runner* runner,
                                          const v8::TryCatch& try_catch) {
-  static_cast<v8_glue::RunnerDelegate*>(RunnerDelegate::instance())->
-      UnhandledException(runner, try_catch);
+  static_cast<v8_glue::RunnerDelegate*>(RunnerDelegate::instance())
+      ->UnhandledException(runner, try_catch);
 }
 
 }  // namespace dom

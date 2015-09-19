@@ -57,11 +57,9 @@ namespace internal {
 v8::Handle<v8::Object> GetUnicodeObject(v8::Isolate* isoalte);
 }  // namespace internal
 
-Global::Global() {
-}
+Global::Global() {}
 
-Global::~Global() {
-}
+Global::~Global() {}
 
 v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
   if (!object_template_->IsEmpty())
@@ -75,65 +73,65 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     auto context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
 
-    #define INSTALL(name) v8_glue::Installer<name>::Run(isolate, global_templ)
+#define INSTALL(name) v8_glue::Installer<name>::Run(isolate, global_templ)
 
     // Clipboard
     INSTALL(DataTransfer);
     INSTALL(DataTransferItem);
     INSTALL(DataTransferItemList);
-  
+
     // Note: super class must be installed before subclass.
     INSTALL(Event);
-      INSTALL(DocumentEvent);
-      INSTALL(FormEvent);
-      INSTALL(UiEvent);
-        INSTALL(CompositionEvent);
-        INSTALL(FocusEvent);
-        INSTALL(KeyboardEvent);
-        INSTALL(MouseEvent);
-          INSTALL(WheelEvent);
-      INSTALL(WindowEvent);
+    INSTALL(DocumentEvent);
+    INSTALL(FormEvent);
+    INSTALL(UiEvent);
+    INSTALL(CompositionEvent);
+    INSTALL(FocusEvent);
+    INSTALL(KeyboardEvent);
+    INSTALL(MouseEvent);
+    INSTALL(WheelEvent);
+    INSTALL(WindowEvent);
 
     auto const editor_templ = INSTALL(Editor);
     INSTALL(FilePath);
     INSTALL(Range);
 
     INSTALL(EventTarget);
-      INSTALL(Document);
-      INSTALL(ViewEventTarget);
-        INSTALL(Form);
-        INSTALL(FormControl);
-          INSTALL(ButtonControl);
-          INSTALL(CheckboxControl);
-          INSTALL(LabelControl);
-          INSTALL(RadioButtonControl);
-          INSTALL(TextFieldControl);
-        INSTALL(Window);
-          INSTALL(DocumentWindow);
-            INSTALL(TableWindow);
-            INSTALL(TextWindow);
-          INSTALL(EditorWindow);
-          INSTALL(FormWindow);
+    INSTALL(Document);
+    INSTALL(ViewEventTarget);
+    INSTALL(Form);
+    INSTALL(FormControl);
+    INSTALL(ButtonControl);
+    INSTALL(CheckboxControl);
+    INSTALL(LabelControl);
+    INSTALL(RadioButtonControl);
+    INSTALL(TextFieldControl);
+    INSTALL(Window);
+    INSTALL(DocumentWindow);
+    INSTALL(TableWindow);
+    INSTALL(TextWindow);
+    INSTALL(EditorWindow);
+    INSTALL(FormWindow);
     INSTALL(TextFieldSelection);
 
     INSTALL(MutationObserver);
     INSTALL(MutationRecord);
 
     INSTALL(Selection);
-        INSTALL(TableSelection);
-        INSTALL(TextSelection);
+    INSTALL(TableSelection);
+    INSTALL(TextSelection);
 
     INSTALL(TextDecoder);
     INSTALL(TextEncoder);
 
     INSTALL(Timer);
-      INSTALL(OneShotTimer);
-      INSTALL(RepeatingTimer);
+    INSTALL(OneShotTimer);
+    INSTALL(RepeatingTimer);
 
-    #define INSTALL_IN(templ, name) \
-        templ->Set(gin::StringToV8(isolate, #name), \
-                   name::static_wrapper_info()-> \
-                      GetOrCreateConstructorTemplate(isolate))
+#define INSTALL_IN(templ, name)        \
+  templ->Set(                          \
+      gin::StringToV8(isolate, #name), \
+      name::static_wrapper_info()->GetOrCreateConstructorTemplate(isolate))
 
     // Editor
     INSTALL_IN(editor_templ, RegExp);
@@ -157,4 +155,4 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
   return object_template_.NewLocal(isolate);
 }
 
-}   // namespace dom
+}  // namespace dom

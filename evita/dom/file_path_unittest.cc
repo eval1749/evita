@@ -15,11 +15,13 @@ namespace {
 using ::testing::_;
 
 class FilePathTest : public dom::AbstractDomTest {
-  protected: FilePathTest() {
-  }
-  public: virtual ~FilePathTest() {
-  }
+ public:
+  ~FilePathTest() override = default;
 
+ protected:
+  FilePathTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(FilePathTest);
 };
 
@@ -27,15 +29,13 @@ namespace {
 std::string FullPath(const std::string& file_name) {
   std::string full_name(MAX_PATH + 1, 0);
   char* file_start = nullptr;
-  auto const length = ::GetFullPathNameA(
-      file_name.c_str(),
-      static_cast<DWORD>(full_name.length()),
-      &full_name[0],
-      &file_start);
+  auto const length = ::GetFullPathNameA(file_name.c_str(),
+                                         static_cast<DWORD>(full_name.length()),
+                                         &full_name[0], &file_start);
   full_name.resize(length);
   return full_name;
 }
-} // namespace
+}  // namespace
 
 TEST_F(FilePathTest, basename) {
   EXPECT_SCRIPT_EQ("bar.txt", "FilePath.basename('/foo/bar.txt')");

@@ -8,26 +8,27 @@
 
 namespace dom {
 
-MockViewImpl::MockViewImpl() : check_spelling_result_(false) {
-}
+MockViewImpl::MockViewImpl() : check_spelling_result_(false) {}
 
-MockViewImpl::~MockViewImpl() {
-}
+MockViewImpl::~MockViewImpl() {}
 
 // dom::ViewDelegate
 void MockViewImpl::GetFileNameForLoad(
-    WindowId, const base::string16& dir_path,
+    WindowId,
+    const base::string16& dir_path,
     const GetFileNameForLoadResolver& resolver) {
   resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
 void MockViewImpl::GetFileNameForSave(
-    WindowId, const base::string16& dir_path,
+    WindowId,
+    const base::string16& dir_path,
     const GetFileNameForSaveResolver& resolver) {
   resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
-std::vector<int> MockViewImpl::GetTableRowStates(WindowId,
+std::vector<int> MockViewImpl::GetTableRowStates(
+    WindowId,
     const std::vector<base::string16>& keys) {
   std::vector<int> states;
   for (auto index = 0u; index < keys.size(); ++index) {
@@ -36,8 +37,10 @@ std::vector<int> MockViewImpl::GetTableRowStates(WindowId,
   return std::move(states);
 }
 
-void MockViewImpl::MessageBox(WindowId, const base::string16&,
-                              const base::string16&, int flags,
+void MockViewImpl::MessageBox(WindowId,
+                              const base::string16&,
+                              const base::string16&,
+                              int flags,
                               const MessageBoxResolver& resolver) {
   resolver.resolve.Run(flags);
 }

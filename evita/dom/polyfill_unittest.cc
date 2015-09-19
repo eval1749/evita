@@ -15,11 +15,13 @@ namespace {
 using ::testing::_;
 
 class PolyfillTest : public dom::AbstractDomTest {
-  protected: PolyfillTest() {
-  }
-  public: virtual ~PolyfillTest() {
-  }
+ public:
+  ~PolyfillTest() override = default;
 
+ protected:
+  PolyfillTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(PolyfillTest);
 };
 

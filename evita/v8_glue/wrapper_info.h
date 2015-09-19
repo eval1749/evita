@@ -28,7 +28,7 @@ class WrapperInfo {
   typedef v8_glue::AbstractScriptable AbstractScriptable;
 
  public:
-  ~WrapperInfo() = default;
+  virtual ~WrapperInfo() = default;
 
   const char* class_name() const { return class_name_; }
   gin::GinEmbedder embedder() const { return embedder_; }
@@ -114,7 +114,7 @@ class DerivedWrapperInfo : public WrapperInfo {
   explicit DerivedWrapperInfo(const char* class_name)
       : WrapperInfo(class_name) {}
 
-  virtual ~DerivedWrapperInfo() = default;
+  ~DerivedWrapperInfo() override = default;
 
  private:
   v8_glue::WrapperInfo* inherit_from() const override {

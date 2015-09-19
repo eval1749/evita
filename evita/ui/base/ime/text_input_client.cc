@@ -17,8 +17,7 @@ TextInputClient::TextInputClient() : delegate_(nullptr) {
   static_instance = this;
 }
 
-TextInputClient::~TextInputClient() {
-}
+TextInputClient::~TextInputClient() {}
 
 void TextInputClient::set_caret_bounds(const gfx::RectF& new_bounds) {
   if (caret_bounds_ == new_bounds)

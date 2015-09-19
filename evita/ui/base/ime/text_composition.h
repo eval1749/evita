@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_base_ime_text_composition_h)
-#define INCLUDE_evita_ui_base_ime_text_composition_h
-
-#include "base/strings/string16.h"
+#ifndef EVITA_UI_BASE_IME_TEXT_COMPOSITION_H_
+#define EVITA_UI_BASE_IME_TEXT_COMPOSITION_H_
 
 #include <vector>
 
+#include "base/strings/string16.h"
+
 namespace ui {
 
-class TextComposition  {
-  public: struct Span {
+class TextComposition final {
+ public:
+  struct Span final {
+    // TODO(eval1749) We should use |enum class| for |Type|.
     enum Type {
       Input,
       SelectionConverted,
@@ -28,25 +30,25 @@ class TextComposition  {
     Span();
   };
 
-  private: int caret_;
-  private: std::vector<Span> spans_;
-  private: base::string16 text_;
+  TextComposition(const base::string16& text, const std::vector<Span> spans);
+  TextComposition();
+  ~TextComposition();
 
-  public: TextComposition(const base::string16& text,
-                          const std::vector<Span> spans);
-  public: TextComposition();
-  public: ~TextComposition();
+  int caret() const { return caret_; }
+  void set_caret(int new_caret) { caret_ = new_caret; }
+  const std::vector<Span>& spans() const { return spans_; }
+  void set_spans(const std::vector<Span>& new_spans) { spans_ = new_spans; }
+  const base::string16& text() const { return text_; }
+  void set_text(const base::string16& new_text) { text_ = new_text; }
 
-  public: int caret() const { return caret_; }
-  public: void set_caret(int new_caret) { caret_ = new_caret; }
-  public: const std::vector<Span>& spans() const { return spans_; }
-  public: void set_spans(const std::vector<Span>& new_spans) {
-      spans_ = new_spans;
-  }
-  public: const base::string16& text() const { return text_; }
-  public: void set_text(const base::string16& new_text) { text_ = new_text; }
+ private:
+  int caret_;
+  std::vector<Span> spans_;
+  base::string16 text_;
+
+  DISALLOW_COPY_AND_ASSIGN(TextComposition);
 };
 
-} // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_base_ime_text_composition_h)
+#endif  // EVITA_UI_BASE_IME_TEXT_COMPOSITION_H_

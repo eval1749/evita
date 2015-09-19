@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_base_ime_text_input_client_h)
-#define INCLUDE_evita_ui_base_ime_text_input_client_h
+#ifndef EVITA_UI_BASE_IME_TEXT_INPUT_CLIENT_H_
+#define EVITA_UI_BASE_IME_TEXT_INPUT_CLIENT_H_
 
 #include "base/strings/string16.h"
 #include "evita/gfx/rect_f.h"
@@ -14,33 +14,39 @@ class TextInputDelegate;
 class Widget;
 
 class TextInputClient {
-  private: gfx::RectF caret_bounds_;
-  private: TextInputDelegate* delegate_;
-  private: bool has_composition_;
+ public:
+  virtual ~TextInputClient();
 
-  public: TextInputClient();
-  public: virtual ~TextInputClient();
+  TextInputDelegate* delegate() const { return delegate_; }
+  void set_delegate(TextInputDelegate* new_delegate);
+  const gfx::RectF& caret_bounds() const { return caret_bounds_; }
+  void set_caret_bounds(const gfx::RectF& new_bounds);
+  bool has_composition() const { return has_composition_; }
 
-  public: TextInputDelegate* delegate() const { return delegate_; }
-  public: void set_delegate(TextInputDelegate* new_delegate);
-  public: const gfx::RectF& caret_bounds() const { return caret_bounds_; }
-  public: void set_caret_bounds(const gfx::RectF& new_bounds);
-  public: bool has_composition() const { return has_composition_; }
-  protected: void set_has_composition(bool has_composition) {
+  virtual void CancelComposition(TextInputDelegate* requester) = 0;
+  virtual void CommitComposition(TextInputDelegate* requester) = 0;
+  static TextInputClient* Get();
+  virtual void Reconvert(TextInputDelegate* requester,
+                         const base::string16& text) = 0;
+
+ protected:
+  TextInputClient();
+
+  void set_has_composition(bool has_composition) {
     has_composition_ = has_composition;
   }
 
-  public: virtual void CancelComposition(TextInputDelegate* requester) = 0;
-  public: virtual void CommitComposition(TextInputDelegate* requester) = 0;
-  protected: virtual void DidChangeCaretBounds() = 0;
-  public: static TextInputClient* Get();
-  protected: virtual void DidChangeDelegate(TextInputDelegate* old_delegate) = 0;
-  public: virtual void Reconvert(TextInputDelegate* requester,
-                                 const base::string16& text) = 0;
+  virtual void DidChangeCaretBounds() = 0;
+  virtual void DidChangeDelegate(TextInputDelegate* old_delegate) = 0;
+
+ private:
+  gfx::RectF caret_bounds_;
+  TextInputDelegate* delegate_;
+  bool has_composition_;
 
   DISALLOW_COPY_AND_ASSIGN(TextInputClient);
 };
 
-} // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_base_ime_text_input_client_h)
+#endif  // EVITA_UI_BASE_IME_TEXT_INPUT_CLIENT_H_

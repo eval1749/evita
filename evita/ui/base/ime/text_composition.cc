@@ -12,8 +12,7 @@ namespace ui {
 //
 // TextComposition::Span
 //
-TextComposition::Span::Span() : end(0), start(0), type(Type::Input) {
-}
+TextComposition::Span::Span() : end(0), start(0), type(Type::Input) {}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -21,13 +20,10 @@ TextComposition::Span::Span() : end(0), start(0), type(Type::Input) {
 //
 TextComposition::TextComposition(const base::string16& text,
                                  const std::vector<Span> spans)
-    : caret_(0), spans_(spans), text_(text) {
-}
+    : caret_(0), spans_(spans), text_(text) {}
 
-TextComposition::TextComposition() {
-}
+TextComposition::TextComposition() {}
 
-TextComposition::~TextComposition() {
-}
+TextComposition::~TextComposition() {}
 
 }  // namespace ui

@@ -24,31 +24,31 @@ namespace {
 //
 // InputMethodContext
 //
-class InputMethodContext {
-  private: HIMC handle_;
-  private: HWND hwnd_;
+class InputMethodContext final {
+ public:
+  explicit InputMethodContext(TextInputDelegate* delegate);
+  ~InputMethodContext();
 
-  public: explicit InputMethodContext(TextInputDelegate* delegate);
-  private: explicit InputMethodContext(HWND hwnd);
-  public: ~InputMethodContext();
+  operator HIMC() const { return handle_; }
 
-  public: operator HIMC() const { return handle_; }
+  std::vector<TextComposition::Span> GetSpans();
+  int GetCursorOffset();
+  base::string16 GetText(int index);
+  bool SetComposition(int index, uint8_t* bytes, size_t num_bytes);
 
-  public: std::vector<TextComposition::Span> GetSpans();
-  public: int GetCursorOffset();
-  public: base::string16 GetText(int index);
-  public: bool SetComposition(int index, uint8_t* bytes, size_t num_bytes);
+ private:
+  explicit InputMethodContext(HWND hwnd);
+  HIMC handle_;
+  HWND hwnd_;
 
   DISALLOW_COPY_AND_ASSIGN(InputMethodContext);
 };
 
-InputMethodContext::InputMethodContext(TextInputDelegate* delegate) :
-    InputMethodContext(delegate->GetClientWindow()->AssociatedHwnd()) {
-}
+InputMethodContext::InputMethodContext(TextInputDelegate* delegate)
+    : InputMethodContext(delegate->GetClientWindow()->AssociatedHwnd()) {}
 
-InputMethodContext::InputMethodContext(HWND hwnd) :
-    handle_(::ImmGetContext(hwnd)), hwnd_(hwnd) {
-}
+InputMethodContext::InputMethodContext(HWND hwnd)
+    : handle_(::ImmGetContext(hwnd)), hwnd_(hwnd) {}
 
 InputMethodContext::~InputMethodContext() {
   if (handle_)
@@ -56,8 +56,8 @@ InputMethodContext::~InputMethodContext() {
 }
 
 std::vector<TextComposition::Span> InputMethodContext::GetSpans() {
-  auto const num_bytes = ::ImmGetCompositionString(handle_, GCS_COMPATTR,
-                                                   nullptr, 0);
+  auto const num_bytes =
+      ::ImmGetCompositionString(handle_, GCS_COMPATTR, nullptr, 0);
   if (num_bytes < 0) {
     DVLOG(0) << "ImmGetCompositionString GCS_COMPATTR" << num_bytes;
     return std::vector<TextComposition::Span>();
@@ -90,8 +90,8 @@ int InputMethodContext::GetCursorOffset() {
 }
 
 base::string16 InputMethodContext::GetText(int index) {
-  auto const num_bytes = ::ImmGetCompositionString(
-      handle_, static_cast<DWORD>(index), nullptr, 0);
+  auto const num_bytes =
+      ::ImmGetCompositionString(handle_, static_cast<DWORD>(index), nullptr, 0);
   if (num_bytes < 0) {
     DVLOG(0) << "ImmGetCompositionString " << index << " " << num_bytes;
     return base::string16();
@@ -99,9 +99,9 @@ base::string16 InputMethodContext::GetText(int index) {
   if (!num_bytes)
     return base::string16();
   base::string16 text(static_cast<size_t>(num_bytes / sizeof(base::char16)), 0);
-  auto const result = ::ImmGetCompositionString(
-      handle_, static_cast<DWORD>(index), &text[0],
-      static_cast<DWORD>(num_bytes));
+  auto const result =
+      ::ImmGetCompositionString(handle_, static_cast<DWORD>(index), &text[0],
+                                static_cast<DWORD>(num_bytes));
   if (result != num_bytes) {
     DVLOG(0) << "ImmGetCompositionString " << result;
     return base::string16();
@@ -109,13 +109,14 @@ base::string16 InputMethodContext::GetText(int index) {
   return text;
 }
 
-bool InputMethodContext::SetComposition(int index, uint8_t* bytes,
+bool InputMethodContext::SetComposition(int index,
+                                        uint8_t* bytes,
                                         size_t num_bytes) {
   if (!handle_)
     return false;
-  auto const succeeded = ::ImmSetCompositionString(handle_,
-      static_cast<DWORD>(index), bytes, static_cast<DWORD>(num_bytes),
-      nullptr, 0);
+  auto const succeeded =
+      ::ImmSetCompositionString(handle_, static_cast<DWORD>(index), bytes,
+                                static_cast<DWORD>(num_bytes), nullptr, 0);
   if (!succeeded) {
     DVLOG(0) << "ImmSetCompositionString " << index << " failed.";
     return false;
@@ -129,11 +130,9 @@ bool InputMethodContext::SetComposition(int index, uint8_t* bytes,
 //
 // TextInputClientWin
 //
-TextInputClientWin::TextInputClientWin() {
-}
+TextInputClientWin::TextInputClientWin() {}
 
-TextInputClientWin::~TextInputClientWin() {
-}
+TextInputClientWin::~TextInputClientWin() {}
 
 void TextInputClientWin::DidChangeDelegate(TextInputDelegate* old_delegate) {
   if (!delegate()) {
@@ -185,8 +184,9 @@ HWND TextInputClientWin::GetHwnd() const {
   return delegate()->GetClientWindow()->AssociatedHwnd();
 }
 
-std::pair<LRESULT, bool> TextInputClientWin::OnImeMessage(
-      uint32_t message, WPARAM wParam, LPARAM lParam) {
+std::pair<LRESULT, bool> TextInputClientWin::OnImeMessage(uint32_t message,
+                                                          WPARAM wParam,
+                                                          LPARAM lParam) {
   if (!delegate())
     return std::make_pair(0, false);
 
@@ -217,8 +217,7 @@ std::pair<LRESULT, bool> TextInputClientWin::OnImeMessage(
   return std::make_pair(0, false);
 }
 
-void TextInputClientWin::Start() {
-}
+void TextInputClientWin::Start() {}
 
 // ui::TextInputClient
 void TextInputClientWin::CancelComposition(TextInputDelegate* requester) {
@@ -279,8 +278,8 @@ void TextInputClientWin::Reconvert(TextInputDelegate* requester,
   reconvert->dwCompStrOffset = 0;
   reconvert->dwTargetStrLen = reconvert->dwCompStrLen;
   reconvert->dwTargetStrOffset = reconvert->dwCompStrOffset;
-  auto reconvert_string = reinterpret_cast<base::char16*>(
-      &buffer[reconvert->dwStrOffset]);
+  auto reconvert_string =
+      reinterpret_cast<base::char16*>(&buffer[reconvert->dwStrOffset]);
   ::memcpy(reconvert_string, text.data(), num_text_bytes);
 
   InputMethodContext imc(delegate());

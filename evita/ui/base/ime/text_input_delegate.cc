@@ -6,10 +6,8 @@
 
 namespace ui {
 
-TextInputDelegate::TextInputDelegate() {
-}
+TextInputDelegate::TextInputDelegate() {}
 
-TextInputDelegate::~TextInputDelegate() {
-}
+TextInputDelegate::~TextInputDelegate() {}
 
 }  // namespace ui

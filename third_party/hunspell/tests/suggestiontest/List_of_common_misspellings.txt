@@ -1,5 +1,5 @@
 # source: http://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_machines
-abandonned	abandoned
+abandoned	abandoned
 aberation	aberration
 abilties	abilities
 abilty	ability

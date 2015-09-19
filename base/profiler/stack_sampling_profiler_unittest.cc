@@ -183,8 +183,9 @@ Sample::const_iterator FindFirstFrameWithinFunction(
     int function_size) {
   function_address = MaybeFixupFunctionAddressForILT(function_address);
   for (auto it = sample.begin(); it != sample.end(); ++it) {
-    if ((it->instruction_pointer >= function_address) &&
-        (it->instruction_pointer <
+    if ((reinterpret_cast<const void*>(it->instruction_pointer) >=
+         function_address) &&
+        (reinterpret_cast<const void*>(it->instruction_pointer) <
          (static_cast<const unsigned char*>(function_address) + function_size)))
       return it;
   }
@@ -198,7 +199,7 @@ std::string FormatSampleForDiagnosticOutput(
   std::string output;
   for (const Frame& frame: sample) {
     output += StringPrintf(
-        "0x%p %s\n", frame.instruction_pointer,
+        "0x%p %s\n", reinterpret_cast<const void*>(frame.instruction_pointer),
         modules[frame.module_index].filename.AsUTF8Unsafe().c_str());
   }
   return output;
@@ -346,7 +347,7 @@ TEST(StackSamplingProfilerTest, MAYBE_StopDuringInterBurstInterval) {
   EXPECT_EQ(1u, profiles[0].samples.size());
 }
 
-// Checks that only completed call stack profiles are captured.
+// Checks that incomplete call stack profiles are captured.
 #if defined(STACK_SAMPLING_PROFILER_SUPPORTED)
 #define MAYBE_StopDuringInterSampleInterval StopDuringInterSampleInterval
 #else
@@ -361,7 +362,8 @@ TEST(StackSamplingProfilerTest, MAYBE_StopDuringInterSampleInterval) {
   std::vector<CallStackProfile> profiles;
   CaptureProfiles(params, TimeDelta::FromMilliseconds(50), &profiles);
 
-  EXPECT_TRUE(profiles.empty());
+  ASSERT_EQ(1u, profiles.size());
+  EXPECT_EQ(1u, profiles[0].samples.size());
 }
 
 // Checks that we can destroy the profiler while profiling.

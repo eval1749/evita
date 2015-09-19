@@ -77,8 +77,8 @@ bool InitializeSymbols() {
   if (!SymGetSearchPathW(GetCurrentProcess(),
                          symbols_path.get(),
                          kSymbolsArraySize)) {
-    DLOG(WARNING) << "SymGetSearchPath failed: " << g_init_error;
     g_init_error = GetLastError();
+    DLOG(WARNING) << "SymGetSearchPath failed: " << g_init_error;
     return false;
   }
 
@@ -193,7 +193,6 @@ bool EnableInProcessStackDumping() {
   // Add stack dumping support on exception on windows. Similar to OS_POSIX
   // signal() handling in process_util_posix.cc.
   g_previous_filter = SetUnhandledExceptionFilter(&StackDumpExceptionFilter);
-  RouteStdioToConsole();
 
   // Need to initialize symbols early in the process or else this fails on
   // swarming (since symbols are in different directory than in the exes) and

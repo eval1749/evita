@@ -179,7 +179,8 @@ TEST_F(EtwTraceControllerTest, StartFileSession) {
   base::DeleteFile(temp, false);
 }
 
-TEST_F(EtwTraceControllerTest, EnableDisable) {
+// Disable until bug 525297 is fixed (hangs on Windows 7?)
+TEST_F(EtwTraceControllerTest, DISABLE_EnableDisable) {
   TestingProvider provider(test_provider_);
 
   EXPECT_EQ(ERROR_SUCCESS, provider.Register());
@@ -220,6 +221,9 @@ TEST_F(EtwTraceControllerTest, EnableDisable) {
 
   EXPECT_EQ(TRACE_LEVEL_VERBOSE, provider.enable_level());
   EXPECT_EQ(kTestProviderFlags, provider.enable_flags());
+
+  // Consume the callback event of the previous controller.EnableProvider().
+  provider.WaitForCallback();
 
   EXPECT_HRESULT_SUCCEEDED(controller.Stop(NULL));
 

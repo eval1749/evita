@@ -12,15 +12,11 @@
 #include "base/strings/string_piece.h"
 #include "base/trace_event/trace_event_impl.h"
 
-// Fwd.
+namespace base {
+
 template <typename Type>
 struct StaticMemorySingletonTraits;
 
-namespace {
-class ETWKeywordUpdateThread;
-}
-
-namespace base {
 namespace trace_event {
 
 class BASE_EXPORT TraceEventETWExport {
@@ -72,7 +68,7 @@ class BASE_EXPORT TraceEventETWExport {
   // Ensure only the provider can construct us.
   friend struct StaticMemorySingletonTraits<TraceEventETWExport>;
   // To have access to UpdateKeyword().
-  friend class ETWKeywordUpdateThread;
+  class ETWKeywordUpdateThread;
   TraceEventETWExport();
 
   // Updates the list of enabled categories by consulting the ETW keyword.
@@ -90,7 +86,7 @@ class BASE_EXPORT TraceEventETWExport {
   bool etw_export_enabled_;
 
   // Maps category names to their status (enabled/disabled).
-  std::map<base::StringPiece, bool> categories_status_;
+  std::map<StringPiece, bool> categories_status_;
 
   // Local copy of the ETW keyword.
   uint64 etw_match_any_keyword_;

@@ -495,7 +495,7 @@ TEST(FileTest, GetInfoForDirectory) {
 
   base::File dir(
       ::CreateFile(empty_dir.value().c_str(),
-                   FILE_ALL_ACCESS,
+                   GENERIC_READ | GENERIC_WRITE,
                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
                    NULL,
                    OPEN_EXISTING,
@@ -517,7 +517,7 @@ TEST(FileTest, MemoryCorruption) {
     // Test that changing the checksum value is detected.
     base::File file;
     EXPECT_NE(file.file_.file_memory_checksum_,
-              implicit_cast<unsigned int>(file.GetPlatformFile()));
+              static_cast<unsigned int>(file.GetPlatformFile()));
     file.file_.file_memory_checksum_ = file.GetPlatformFile();
     EXPECT_DEATH(file.IsValid(), "");
 

@@ -4,6 +4,13 @@
 
 import("//build/config/allocator.gni")
 
+declare_args() {
+  # Provide a way to force disable debugallocation in Debug builds,
+  # e.g. for profiling (it's more rare to profile Debug builds,
+  # but people sometimes need to do that).
+  enable_debugallocation = is_debug
+}
+
 # Only executables and not libraries should depend on the allocator target;
 # only the application (the final executable) knows what allocator makes sense.
 # This "allocator" meta-target will forward to the default allocator according
@@ -32,6 +39,16 @@ config("allocator_shim_define") {
   }
 }
 
+config("tcmalloc_flags") {
+  if (enable_debugallocation) {
+    defines = [
+      # Use debugallocation for Debug builds to catch problems early
+      # and cleanly, http://crbug.com/30715 .
+      "TCMALLOC_FOR_DEBUGALLOCATION",
+    ]
+  }
+}
+
 # This config and libc modification are only used on Windows.
 if (is_win) {
   import("//build/config/win/visual_studio_version.gni")
@@ -44,29 +61,31 @@ if (is_win) {
     libs = [ rebase_path("$target_gen_dir/allocator/libcmt.lib") ]
   }
 
-  action("prep_libc") {
-    script = "prep_libc.py"
-    outputs = [
-      "$target_gen_dir/allocator/libcmt.lib",
-    ]
-    args = [
-      visual_studio_path + "/vc/lib",
-      rebase_path("$target_gen_dir/allocator"),
-      current_cpu,
-    ]
-  }
+  if (!is_component_build) {
+    action("prep_libc") {
+      script = "prep_libc.py"
+      outputs = [
+        "$target_gen_dir/allocator/libcmt.lib",
+      ]
+      args = [
+        visual_studio_path + "/vc/lib",
+        rebase_path("$target_gen_dir/allocator"),
+        current_cpu,
+      ]
+    }
 
-  source_set("allocator_shim") {
-    sources = [
-      "allocator_shim_win.cc",
-    ]
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
+    source_set("allocator_shim") {
+      sources = [
+        "allocator_shim_win.cc",
+      ]
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
 
-    public_configs = [ ":nocmt" ]
-    deps = [
-      ":prep_libc",
-    ]
+      public_configs = [ ":nocmt" ]
+      deps = [
+        ":prep_libc",
+      ]
+    }
   }
 }
 
@@ -81,7 +100,7 @@ if (use_allocator == "tcmalloc") {
     check_includes = false
 
     sources = [
-      # Generated for our configuration from tcmalloc"s build
+      # Generated for our configuration from tcmalloc's build
       # and checked in.
       "$tcmalloc_dir/src/config.h",
       "$tcmalloc_dir/src/config_android.h",
@@ -132,8 +151,6 @@ if (use_allocator == "tcmalloc") {
 
       # #included by debugallocation_shim.cc
       #"$tcmalloc_dir/src/debugallocation.cc",
-      "$tcmalloc_dir/src/deep-heap-profile.cc",
-      "$tcmalloc_dir/src/deep-heap-profile.h",
       "$tcmalloc_dir/src/free_list.cc",
       "$tcmalloc_dir/src/free_list.h",
       "$tcmalloc_dir/src/heap-profile-table.cc",
@@ -195,7 +212,10 @@ if (use_allocator == "tcmalloc") {
     ]
 
     configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
+    configs += [
+      "//build/config/compiler:no_chromium_code",
+      ":tcmalloc_flags",
+    ]
 
     deps = []
 
@@ -267,7 +287,7 @@ if (use_allocator == "tcmalloc") {
     # Make sure the allocation library is optimized as much as possible when
     # we"re in release mode.
     if (!is_debug) {
-      configs -= [ "//build/config/compiler:optimize" ]
+      configs -= [ "//build/config/compiler:default_optimization" ]
       configs += [ "//build/config/compiler:optimize_max" ]
     }
 
@@ -286,7 +306,7 @@ source_set("allocator_extension_thunks") {
     "allocator_extension_thunks.h",
   ]
   if (is_android && !is_debug) {
-    configs -= [ "//build/config/compiler:optimize" ]
+    configs -= [ "//build/config/compiler:default_optimization" ]
     configs += [ "//build/config/compiler:optimize_max" ]
   }
 }

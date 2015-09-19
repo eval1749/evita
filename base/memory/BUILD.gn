@@ -49,6 +49,8 @@ source_set("memory") {
   if (is_ios) {
     sources -= [
       "discardable_shared_memory.cc",
+      "discardable_shared_memory.h",
+      "shared_memory.h",
       "shared_memory_posix.cc",
     ]
   }
@@ -69,6 +71,15 @@ source_set("memory") {
 
   if (is_mac) {
     sources -= [ "shared_memory_posix.cc" ]
+  }
+
+  if (is_ios) {
+    set_sources_assignment_filter([])
+    sources += [
+      "shared_memory_handle_mac.cc",
+      "shared_memory_mac.cc",
+    ]
+    set_sources_assignment_filter(sources_assignment_filter)
   }
 
   if (is_android) {

@@ -18,6 +18,7 @@
 using std::numeric_limits;
 using base::CheckedNumeric;
 using base::checked_cast;
+using base::IsValueInRangeForNumericType;
 using base::SizeT;
 using base::StrictNumeric;
 using base::saturated_cast;
@@ -27,6 +28,7 @@ using base::internal::RANGE_VALID;
 using base::internal::RANGE_INVALID;
 using base::internal::RANGE_OVERFLOW;
 using base::internal::RANGE_UNDERFLOW;
+using base::internal::SignedIntegerForSize;
 using base::enable_if;
 
 // These tests deliberately cause arithmetic overflows. If the compiler is
@@ -35,6 +37,26 @@ using base::enable_if;
 #if defined(OS_WIN)
 #pragma warning(disable:4756)
 #endif
+
+// This is a helper function for finding the maximum value in Src that can be
+// wholy represented as the destination floating-point type.
+template <typename Dst, typename Src>
+Dst GetMaxConvertibleToFloat() {
+  typedef numeric_limits<Dst> DstLimits;
+  typedef numeric_limits<Src> SrcLimits;
+  static_assert(SrcLimits::is_specialized, "Source must be numeric.");
+  static_assert(DstLimits::is_specialized, "Destination must be numeric.");
+  CHECK(DstLimits::is_iec559);
+
+  if (SrcLimits::digits <= DstLimits::digits &&
+      MaxExponent<Src>::value <= MaxExponent<Dst>::value)
+    return SrcLimits::max();
+  Src max = SrcLimits::max() / 2 + (SrcLimits::is_integer ? 1 : 0);
+  while (max != static_cast<Src>(static_cast<Dst>(max))) {
+    max /= 2;
+  }
+  return static_cast<Dst>(max);
+}
 
 // Helper macros to wrap displaying the conversion types and line numbers.
 #define TEST_EXPECTED_VALIDITY(expected, actual)                           \
@@ -122,6 +144,13 @@ static void TestSpecializedArithmetic(
                          CheckedNumeric<Dst>(DstLimits::min()) - 1);
   TEST_EXPECTED_VALUE(0, CheckedNumeric<Dst>(DstLimits::min()) * 2);
   TEST_EXPECTED_VALUE(0, CheckedNumeric<Dst>(1) / 2);
+  TEST_EXPECTED_VALIDITY(RANGE_VALID,
+                         CheckedNumeric<Dst>(DstLimits::min()).UnsignedAbs());
+  TEST_EXPECTED_VALIDITY(
+      RANGE_VALID,
+      CheckedNumeric<typename SignedIntegerForSize<Dst>::type>(
+          std::numeric_limits<typename SignedIntegerForSize<Dst>::type>::min())
+          .UnsignedAbs());
 
   // Modulus is legal only for integers.
   TEST_EXPECTED_VALUE(0, CheckedNumeric<Dst>() % 1);
@@ -370,6 +399,18 @@ struct TestNumericConversion<Dst, Src, SIGN_PRESERVING_NARROW> {
       TEST_EXPECTED_RANGE(RANGE_OVERFLOW, SrcLimits::infinity());
       TEST_EXPECTED_RANGE(RANGE_UNDERFLOW, SrcLimits::infinity() * -1);
       TEST_EXPECTED_RANGE(RANGE_INVALID, SrcLimits::quiet_NaN());
+      if (DstLimits::is_integer) {
+        if (SrcLimits::digits < DstLimits::digits) {
+          TEST_EXPECTED_RANGE(RANGE_OVERFLOW,
+                              static_cast<Src>(DstLimits::max()));
+        } else {
+          TEST_EXPECTED_RANGE(RANGE_VALID, static_cast<Src>(DstLimits::max()));
+        }
+        TEST_EXPECTED_RANGE(
+            RANGE_VALID,
+            static_cast<Src>(GetMaxConvertibleToFloat<Src, Dst>()));
+        TEST_EXPECTED_RANGE(RANGE_VALID, static_cast<Src>(DstLimits::min()));
+      }
     } else if (SrcLimits::is_signed) {
       TEST_EXPECTED_VALUE(-1, checked_dst - static_cast<Src>(1));
       TEST_EXPECTED_RANGE(RANGE_UNDERFLOW, SrcLimits::min());
@@ -428,6 +469,18 @@ struct TestNumericConversion<Dst, Src, SIGN_TO_UNSIGN_NARROW> {
       TEST_EXPECTED_RANGE(RANGE_OVERFLOW, SrcLimits::infinity());
       TEST_EXPECTED_RANGE(RANGE_UNDERFLOW, SrcLimits::infinity() * -1);
       TEST_EXPECTED_RANGE(RANGE_INVALID, SrcLimits::quiet_NaN());
+      if (DstLimits::is_integer) {
+        if (SrcLimits::digits < DstLimits::digits) {
+          TEST_EXPECTED_RANGE(RANGE_OVERFLOW,
+                              static_cast<Src>(DstLimits::max()));
+        } else {
+          TEST_EXPECTED_RANGE(RANGE_VALID, static_cast<Src>(DstLimits::max()));
+        }
+        TEST_EXPECTED_RANGE(
+            RANGE_VALID,
+            static_cast<Src>(GetMaxConvertibleToFloat<Src, Dst>()));
+        TEST_EXPECTED_RANGE(RANGE_VALID, static_cast<Src>(DstLimits::min()));
+      }
     } else {
       TEST_EXPECTED_RANGE(RANGE_UNDERFLOW, SrcLimits::min());
     }
@@ -600,3 +653,77 @@ TEST(SafeNumerics, CastTests) {
   EXPECT_EQ(numeric_limits<int>::max(), saturated_cast<int>(double_large_int));
 }
 
+TEST(SafeNumerics, IsValueInRangeForNumericType) {
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint32_t>(0));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint32_t>(1));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint32_t>(2));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint32_t>(-1));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint32_t>(0xffffffffu));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint32_t>(UINT64_C(0xffffffff)));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint32_t>(UINT64_C(0x100000000)));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint32_t>(UINT64_C(0x100000001)));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint32_t>(
+      std::numeric_limits<int32_t>::min()));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint32_t>(
+      std::numeric_limits<int64_t>::min()));
+
+  EXPECT_TRUE(IsValueInRangeForNumericType<int32_t>(0));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int32_t>(1));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int32_t>(2));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int32_t>(-1));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int32_t>(0x7fffffff));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int32_t>(0x7fffffffu));
+  EXPECT_FALSE(IsValueInRangeForNumericType<int32_t>(0x80000000u));
+  EXPECT_FALSE(IsValueInRangeForNumericType<int32_t>(0xffffffffu));
+  EXPECT_FALSE(IsValueInRangeForNumericType<int32_t>(INT64_C(0x80000000)));
+  EXPECT_FALSE(IsValueInRangeForNumericType<int32_t>(INT64_C(0xffffffff)));
+  EXPECT_FALSE(IsValueInRangeForNumericType<int32_t>(INT64_C(0x100000000)));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int32_t>(
+      std::numeric_limits<int32_t>::min()));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int32_t>(
+      static_cast<int64_t>(std::numeric_limits<int32_t>::min())));
+  EXPECT_FALSE(IsValueInRangeForNumericType<int32_t>(
+      static_cast<int64_t>(std::numeric_limits<int32_t>::min()) - 1));
+  EXPECT_FALSE(IsValueInRangeForNumericType<int32_t>(
+      std::numeric_limits<int64_t>::min()));
+
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint64_t>(0));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint64_t>(1));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint64_t>(2));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint64_t>(-1));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint64_t>(0xffffffffu));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint64_t>(UINT64_C(0xffffffff)));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint64_t>(UINT64_C(0x100000000)));
+  EXPECT_TRUE(IsValueInRangeForNumericType<uint64_t>(UINT64_C(0x100000001)));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint64_t>(
+      std::numeric_limits<int32_t>::min()));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint64_t>(INT64_C(-1)));
+  EXPECT_FALSE(IsValueInRangeForNumericType<uint64_t>(
+      std::numeric_limits<int64_t>::min()));
+
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(0));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(1));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(2));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(-1));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(0x7fffffff));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(0x7fffffffu));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(0x80000000u));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(0xffffffffu));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(INT64_C(0x80000000)));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(INT64_C(0xffffffff)));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(INT64_C(0x100000000)));
+  EXPECT_TRUE(
+      IsValueInRangeForNumericType<int64_t>(INT64_C(0x7fffffffffffffff)));
+  EXPECT_TRUE(
+      IsValueInRangeForNumericType<int64_t>(UINT64_C(0x7fffffffffffffff)));
+  EXPECT_FALSE(
+      IsValueInRangeForNumericType<int64_t>(UINT64_C(0x8000000000000000)));
+  EXPECT_FALSE(
+      IsValueInRangeForNumericType<int64_t>(UINT64_C(0xffffffffffffffff)));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(
+      std::numeric_limits<int32_t>::min()));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(
+      static_cast<int64_t>(std::numeric_limits<int32_t>::min())));
+  EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(
+      std::numeric_limits<int64_t>::min()));
+}

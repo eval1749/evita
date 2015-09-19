@@ -704,15 +704,11 @@ class SandboxSymbolizeHelper {
 };
 #endif  // USE_SYMBOLIZE
 
-bool EnableInProcessStackDumpingForSandbox() {
+bool EnableInProcessStackDumping() {
 #if defined(USE_SYMBOLIZE)
   SandboxSymbolizeHelper::GetInstance();
 #endif  // USE_SYMBOLIZE
 
-  return EnableInProcessStackDumping();
-}
-
-bool EnableInProcessStackDumping() {
   // When running in an application, our code typically expects SIGPIPE
   // to be ignored.  Therefore, when testing that same code, it should run
   // with SIGPIPE ignored as well.

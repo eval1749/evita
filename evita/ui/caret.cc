@@ -15,7 +15,7 @@
 
 namespace ui {
 
-static const auto kBlinkInterval = 16 * 20; // milliseconds
+static const auto kBlinkInterval = 16 * 20;  // milliseconds
 
 namespace {
 base::TimeDelta GetCaretBlinkInterval() {
@@ -33,8 +33,7 @@ base::TimeDelta GetCaretBlinkInterval() {
 // Caret
 //
 Caret::Caret(CaretOwner* owner)
-    : blink_interval_(GetCaretBlinkInterval()),
-      owner_(owner), visible_(false) {
+    : blink_interval_(GetCaretBlinkInterval()), owner_(owner), visible_(false) {
   if (blink_interval_ == base::TimeDelta())
     return;
   timer_.Start(FROM_HERE, blink_interval_,
@@ -63,8 +62,7 @@ void Caret::Blink(gfx::Canvas* canvas, base::Time now) {
   Paint(canvas, bounds);
 }
 
-void Caret::DidChangeCaret() {
-}
+void Caret::DidChangeCaret() {}
 
 void Caret::DidFireTimer() {
   owner_->DidFireCaretTimer();
@@ -99,7 +97,8 @@ void Caret::Reset() {
   DidChangeCaret();
 }
 
-void Caret::Update(gfx::Canvas* canvas, base::Time now,
+void Caret::Update(gfx::Canvas* canvas,
+                   base::Time now,
                    const gfx::RectF& new_bounds) {
   DCHECK(!visible_);
   DCHECK(!new_bounds.empty());

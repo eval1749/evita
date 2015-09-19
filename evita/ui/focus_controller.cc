@@ -42,21 +42,22 @@ bool IsPopupWindow(HWND hwnd) {
 // FocusController::WidgetUseMap
 //
 class FocusController::WidgetUseMap final {
-  private: std::unordered_map<Widget*, int> map_;
-  private: int use_tick_;
+ public:
+  WidgetUseMap();
+  ~WidgetUseMap() = default;
 
-  public: WidgetUseMap();
-  public: ~WidgetUseMap() = default;
+  Widget* GetRecentUsedWidget() const;
+  void UseWidget(Widget* widget);
+  void WillDestroyWidget(Widget* widget);
 
-  public: Widget* GetRecentUsedWidget() const;
-  public: void UseWidget(Widget* widget);
-  public: void WillDestroyWidget(Widget* widget);
+ private:
+  std::unordered_map<Widget*, int> map_;
+  int use_tick_;
 
   DISALLOW_COPY_AND_ASSIGN(WidgetUseMap);
 };
 
-FocusController::WidgetUseMap::WidgetUseMap() : use_tick_(0) {
-}
+FocusController::WidgetUseMap::WidgetUseMap() : use_tick_(0) {}
 
 Widget* FocusController::WidgetUseMap::GetRecentUsedWidget() const {
   auto widget = static_cast<Widget*>(nullptr);
@@ -92,15 +93,15 @@ void FocusController::WidgetUseMap::WillDestroyWidget(Widget* widget) {
 // FocusController
 //
 FocusController::FocusController()
-    : focus_widget_(nullptr), has_active_focus_(false),
-      widget_use_map_(new WidgetUseMap()), will_focus_widget_(nullptr) {
-}
+    : focus_widget_(nullptr),
+      has_active_focus_(false),
+      widget_use_map_(new WidgetUseMap()),
+      will_focus_widget_(nullptr) {}
 
-FocusController::~FocusController() {
-}
+FocusController::~FocusController() {}
 
-void FocusController::DidKillNativeFocus(Widget*) {
-  if (auto widget = focus_widget_) {
+void FocusController::DidKillNativeFocus(Widget* widget) {
+  if (focus_widget_) {
     focus_widget_ = nullptr;
     widget->DidKillFocus(will_focus_widget_);
   }
@@ -134,7 +135,7 @@ SelectionState FocusController::GetSelectionState(Widget* widget) const {
 
   auto const recent_used_widget = widget_use_map_->GetRecentUsedWidget();
   if (GetTopLevelWidget(widget) == recent_used_widget)
-      return SelectionState::Highlight;
+    return SelectionState::Highlight;
 
   return SelectionState::Disabled;
 }
@@ -165,4 +166,4 @@ void FocusController::WillDestroyWidget(Widget* widget) {
   widget->DidKillFocus(nullptr);
 }
 
-}  // namespace ui
+}   // namespace ui

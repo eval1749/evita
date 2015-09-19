@@ -16,15 +16,14 @@ gfx::ColorF GetSysColorF(int index) {
                      GetGValue(color_ref) / 255.0f,
                      GetBValue(color_ref) / 255.0f);
 }
-}   // namespace
+}  // namespace
 
 SystemMetrics::SystemMetrics() {
   UpdateColors();
   UpdateTextFormat();
 }
 
-SystemMetrics::~SystemMetrics() {
-}
+SystemMetrics::~SystemMetrics() {}
 
 void SystemMetrics::AddObserver(SystemMetricsObserver* observer) {
   observers_.AddObserver(observer);
@@ -64,8 +63,8 @@ void SystemMetrics::UpdateTextFormat() {
 #if 1
   NONCLIENTMETRICS metrics = {0};
   metrics.cbSize = sizeof(metrics);
-  WIN32_VERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS,
-                                      sizeof(metrics), &metrics, 0));
+  WIN32_VERIFY(::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics),
+                                      &metrics, 0));
   auto const log_font = &metrics.lfStatusFont;
   font_family_ = log_font->lfFaceName;
   font_size_ = static_cast<float>(-log_font->lfHeight);

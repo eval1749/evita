@@ -6,10 +6,8 @@
 
 namespace ui {
 
-CaretOwner::CaretOwner() {
-}
+CaretOwner::CaretOwner() {}
 
-CaretOwner::~CaretOwner() {
-}
+CaretOwner::~CaretOwner() {}
 
 }  // namespace ui

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_caret_owner_h)
-#define INCLUDE_evita_ui_caret_owner_h
+#ifndef EVITA_UI_CARET_OWNER_H_
+#define EVITA_UI_CARET_OWNER_H_
 
 #include "base/basictypes.h"
 #include "evita/gfx/rect_f.h"
@@ -21,14 +21,17 @@ class Caret;
 // CaretOwner
 //
 class CaretOwner {
-  protected: CaretOwner();
-  protected: virtual ~CaretOwner();
+ public:
+  virtual void DidFireCaretTimer() = 0;
 
-  public: virtual void DidFireCaretTimer() = 0;
+ protected:
+  CaretOwner();
+  virtual ~CaretOwner();
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(CaretOwner);
 };
 
-} // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_caret_owner_h)
+#endif  // EVITA_UI_CARET_OWNER_H_

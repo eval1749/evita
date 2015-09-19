@@ -44,47 +44,43 @@ using ui::EventType;
 //
 // HitTestResult
 //
-class Widget::HitTestResult {
-  private: Point local_point_;
-  private: Widget* widget_;
+class Widget::HitTestResult final {
+ public:
+  HitTestResult(const Widget* widget, const gfx::Point& local_point);
+  HitTestResult(const HitTestResult& other);
+  HitTestResult();
+  ~HitTestResult() = default;
 
-  public: HitTestResult(const Widget* widget, const gfx::Point& local_point);
-  public: HitTestResult(const HitTestResult& other);
-  public: HitTestResult();
-  public: ~HitTestResult() = default;
+  explicit operator bool() const { return widget_ != nullptr; }
 
-  public: explicit operator bool() const { return widget_ != nullptr; }
+  const gfx::Point& local_point() const { return local_point_; }
+  Widget* widget() const { return widget_; }
 
-  public: const gfx::Point& local_point() const { return local_point_; }
-  public: Widget* widget() const { return widget_; }
+ private:
+  Point local_point_;
+  Widget* widget_;
 };
 
 Widget::HitTestResult::HitTestResult(const Widget* widget,
                                      const gfx::Point& local_point)
-    : local_point_(local_point), widget_(const_cast<Widget*>(widget)) {
-}
+    : local_point_(local_point), widget_(const_cast<Widget*>(widget)) {}
 
 Widget::HitTestResult::HitTestResult(const HitTestResult& other)
-    : HitTestResult(other.widget_, other.local_point_) {
-}
+    : HitTestResult(other.widget_, other.local_point_) {}
 
-Widget::HitTestResult::HitTestResult()
-    : HitTestResult(nullptr, Point()) {
-}
+Widget::HitTestResult::HitTestResult() : HitTestResult(nullptr, Point()) {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // Widget
 //
 Widget::Widget(std::unique_ptr<NativeWindow> native_window)
-    : native_window_(std::move(native_window)), owned_by_client_(false),
+    : native_window_(std::move(native_window)),
+      owned_by_client_(false),
       visible_(0),
-      state_(kNotRealized) {
-}
+      state_(kNotRealized) {}
 
-Widget::Widget()
-    : Widget(NativeWindow::Create()) {
-}
+Widget::Widget() : Widget(NativeWindow::Create()) {}
 
 Widget::~Widget() {
   DCHECK(!native_window_);
@@ -124,8 +120,7 @@ HWND Widget::AssociatedHwnd() const {
   return nullptr;
 }
 
-void Widget::CreateNativeWindow() const {
-}
+void Widget::CreateNativeWindow() const {}
 
 void Widget::DestroyWidget() {
   if (state_ == kBeingDestroyed)
@@ -140,16 +135,14 @@ void Widget::DestroyWidget() {
   DidDestroyWidget();
 }
 
-void Widget::DidAddChildWidget(Widget*) {
-}
+void Widget::DidAddChildWidget(Widget* widget) {}
 
 void Widget::DidChangeHierarchy() {
   for (auto child : child_nodes())
     child->DidChangeHierarchy();
 }
 
-void Widget::DidChangeChildVisibility(Widget*) {
-}
+void Widget::DidChangeChildVisibility(Widget* widget) {}
 
 void Widget::DidDestroyNativeWindow() {
   DCHECK_EQ(kBeingDestroyed, state_);
@@ -186,19 +179,16 @@ void Widget::DidHide() {
   }
 }
 
-void Widget::DidKillFocus(ui::Widget*) {
-}
+void Widget::DidKillFocus(ui::Widget*) {}
 
 void Widget::DidRealize() {
   for (auto const child : child_nodes())
     child->RealizeWidget();
 }
 
-void Widget::DidRealizeChildWidget(Widget*) {
-}
+void Widget::DidRealizeChildWidget(Widget* widget) {}
 
-void Widget::DidRemoveChildWidget(Widget*) {
-}
+void Widget::DidRemoveChildWidget(Widget* widget) {}
 
 void Widget::DidRequestDestroy() {
   ::DestroyWindow(AssociatedHwnd());
@@ -211,8 +201,7 @@ void Widget::DidChangeBounds() {
   layer()->SetBounds(bounds());
 }
 
-void Widget::DidSetFocus(ui::Widget*) {
-}
+void Widget::DidSetFocus(ui::Widget*) {}
 
 void Widget::DidShow() {
   visible_ = true;
@@ -232,8 +221,8 @@ void Widget::DispatchMouseExited() {
   hover_widget = nullptr;
   auto const screen_point = GetCursorPoint();
   auto const client_point = MapFromDesktopPoint(screen_point);
-  MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
-                   hover, client_point, screen_point);
+  MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0, hover,
+                   client_point, screen_point);
   hover->OnMouseExited(event);
 }
 
@@ -264,7 +253,7 @@ HCURSOR Widget::GetCursorAt(const gfx::Point&) const {
 Widget* Widget::GetHostWidget() const {
   for (auto runner : common::tree::ancestors_or_self(this)) {
     if (runner->native_window())
-       return const_cast<Widget*>(runner);
+      return const_cast<Widget*>(runner);
   }
   return RootWidget::instance();
 }
@@ -277,19 +266,20 @@ gfx::Size Widget::GetPreferredSize() const {
   return gfx::Size();
 }
 
-LRESULT Widget::HandleKeyboardMessage(uint32_t message, WPARAM wParam,
+LRESULT Widget::HandleKeyboardMessage(uint32_t message,
+                                      WPARAM wParam,
                                       LPARAM lParam) {
   if (message == WM_CHAR) {
     KeyEvent event(EventType::KeyPressed, static_cast<int>(wParam),
-                        KeyEvent::ConvertToRepeat(lParam));
+                   KeyEvent::ConvertToRepeat(lParam));
     if (event.raw_key_code() >= 0x20)
       OnEvent(&event);
     return 0;
   }
 
   KeyEvent event(KeyEvent::ConvertToEventType(message),
-                      KeyEvent::ConvertToKeyCode(wParam),
-                      KeyEvent::ConvertToRepeat(lParam));
+                 KeyEvent::ConvertToKeyCode(wParam),
+                 KeyEvent::ConvertToRepeat(lParam));
 
   if (message == WM_KEYDOWN && event.key_code() <= 0x7E && !event.alt_key() &&
       !event.control_key()) {
@@ -340,8 +330,8 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       hover_widget->DispatchEvent(&event);
       hover_widget = result.widget();
       if (hover_widget) {
-        MouseEvent entered_event(EventType::MouseEntered, MouseButton::None,
-                                 0, 0, hover_widget, result.local_point(),
+        MouseEvent entered_event(EventType::MouseEntered, MouseButton::None, 0,
+                                 0, hover_widget, result.local_point(),
                                  screen_point);
         hover_widget->DispatchEvent(&entered_event);
       }
@@ -362,16 +352,15 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
     MouseClickTracker::instance()->OnMouseReleased(event);
     if (!result.widget()->DispatchEvent(&event))
       return false;
-    auto const click_count  = MouseClickTracker::instance()->click_count();
+    auto const click_count = MouseClickTracker::instance()->click_count();
     if (!click_count)
       return !event.default_prevented();
     if (event.default_prevented())
       return false;
-    MouseEvent click_event(EventType::MousePressed,
-                           MouseEvent::ConvertToButton(native_event),
-                           MouseEvent::ConvertToEventFlags(native_event),
-                           click_count, result.widget(), result.local_point(),
-                           screen_point);
+    MouseEvent click_event(
+        EventType::MousePressed, MouseEvent::ConvertToButton(native_event),
+        MouseEvent::ConvertToEventFlags(native_event), click_count,
+        result.widget(), result.local_point(), screen_point);
     return result.widget()->DispatchEvent(&click_event);
   }
 
@@ -397,8 +386,8 @@ Widget::HitTestResult Widget::HitTest(const gfx::Point& local_point) const {
     auto const child = runner;
     if (!child->visible())
       continue;
-    auto const child_point = local_point.Offset(-child->bounds().left(),
-                                                -child->bounds().top());
+    auto const child_point =
+        local_point.Offset(-child->bounds().left(), -child->bounds().top());
     if (auto const result = child->HitTest(child_point))
       return result;
   }
@@ -412,8 +401,8 @@ Widget::HitTestResult Widget::HitTestForMouseEventTarget(
     auto local_point = host_point;
     for (auto runner = capture_widget; runner != this;
          runner = runner->container_widget()) {
-      local_point = local_point.Offset(-runner->bounds().left(),
-                                       -runner->bounds().top());
+      local_point =
+          local_point.Offset(-runner->bounds().left(), -runner->bounds().top());
     }
     return HitTestResult(capture_widget, local_point);
   }
@@ -456,29 +445,21 @@ void Widget::OnDraw(gfx::Canvas* canvas) {
   }
 }
 
-void Widget::OnKeyPressed(const KeyEvent&) {
-}
+void Widget::OnKeyPressed(const KeyEvent&) {}
 
-void Widget::OnKeyReleased(const KeyEvent&) {
-}
+void Widget::OnKeyReleased(const KeyEvent&) {}
 
-void Widget::OnMouseEntered(const MouseEvent&) {
-}
+void Widget::OnMouseEntered(const MouseEvent&) {}
 
-void Widget::OnMouseExited(const MouseEvent&) {
-}
+void Widget::OnMouseExited(const MouseEvent&) {}
 
-void Widget::OnMouseMoved(const MouseEvent&) {
-}
+void Widget::OnMouseMoved(const MouseEvent&) {}
 
-void Widget::OnMousePressed(const MouseEvent&) {
-}
+void Widget::OnMousePressed(const MouseEvent&) {}
 
-void Widget::OnMouseReleased(const MouseEvent&) {
-}
+void Widget::OnMouseReleased(const MouseEvent&) {}
 
-void Widget::OnMouseWheel(const MouseWheelEvent&) {
-}
+void Widget::OnMouseWheel(const MouseWheelEvent&) {}
 
 LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   if (native_window_)
@@ -486,8 +467,7 @@ LRESULT Widget::OnMessage(UINT message, WPARAM wParam, LPARAM lParam) {
   return container_widget()->OnMessage(message, wParam, lParam);
 }
 
-void Widget::OnPaint(const Rect) {
-}
+void Widget::OnPaint(const Rect) {}
 
 void Widget::RealizeWidget() {
   DCHECK(!is_realized());
@@ -673,8 +653,7 @@ void Widget::WillDestroyNativeWindow() {
   WillDestroyWidget();
 }
 
-void Widget::WillRemoveChildWidget(Widget*) {
-}
+void Widget::WillRemoveChildWidget(Widget* widget) {}
 
 LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   DCHECK(native_window_);
@@ -685,6 +664,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
         capture_widget = nullptr;
       return 0;
     }
+
     case WM_CLOSE:
       DidRequestDestroy();
       return 0;
@@ -764,29 +744,29 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       return 0;
 
     case WM_SYSCOMMAND:
-     if ((wParam & 0xFFF0) == SC_KEYMENU) {
-       // TODO(eval1749) When we support menu, we should redirect |SC_KEYMENU|
-       // to menu for menu shortcut.
-       // Note: We use Alt+Key for |accesskey|.
-       return 0;
-     }
-     break;
+      if ((wParam & 0xFFF0) == SC_KEYMENU) {
+        // TODO(eval1749) When we support menu, we should redirect |SC_KEYMENU|
+        // to menu for menu shortcut.
+        // Note: We use Alt+Key for |accesskey|.
+        return 0;
+      }
+      break;
 
     case WM_WINDOWPOSCHANGED: {
-      // DefWindowProc sents WM_SIZE and WM_MOVE, so handling
-      // WM_WINDPOSCHANGED is faster than DefWindowProc.
-      // undocumented SWP flags. See http://www.winehq.org.
-      #if !defined(SWP_NOCLIENTSIZE)
-          #define SWP_NOCLIENTSIZE    0x0800
-          #define SWP_NOCLIENTMOVE    0x1000
-      #endif // !defined(SWP_NOCLIENTSIZE)
+// DefWindowProc sents WM_SIZE and WM_MOVE, so handling
+// WM_WINDPOSCHANGED is faster than DefWindowProc.
+// undocumented SWP flags. See http://www.winehq.org.
+#if !defined(SWP_NOCLIENTSIZE)
+#define SWP_NOCLIENTSIZE 0x0800
+#define SWP_NOCLIENTMOVE 0x1000
+#endif  // !defined(SWP_NOCLIENTSIZE)
       // Create   0x10001843  NOCLIENTMOVE NOCLIENTSIZE SHOWWINDOW NOMOV NOSIZE
       // Minimize 0x00008130
       // Restore  0x00008124
       // Move     0x00000A15
       // Destroy  0x20001897  NOCLIENTMOVE NOCLIENTSIZE HIDEWINDOW NOACTIVATE
       //                      NOZORDER NOMOVE NOSIZE
-      //if (wp->flags & SWP_NOSIZE) return 0;
+      // if (wp->flags & SWP_NOSIZE) return 0;
 
       auto const wp = reinterpret_cast<WINDOWPOS*>(lParam);
       if (wp->flags & SWP_NOSIZE)
@@ -800,8 +780,8 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       if (container_widget() == RootWidget::instance()) {
         UpdateBounds();
       } else {
-        bounds_ = gfx::Rect(gfx::Point(wp->x, wp->y),
-                            gfx::Size(wp->cx, wp->cy));
+        bounds_ =
+            gfx::Rect(gfx::Point(wp->x, wp->y), gfx::Size(wp->cx, wp->cy));
       }
       DidChangeBounds();
       return 0;
@@ -816,17 +796,20 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   if ((message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) ||
       (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
     base::NativeEvent native_event = {
-      AssociatedHwnd(), message, wParam, lParam, 0,
-      { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) }
-    };
+        AssociatedHwnd(),
+        message,
+        wParam,
+        lParam,
+        0,
+        {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)}};
     if (HandleMouseMessage(native_event))
       return OnMessage(message, wParam, lParam);
     return 0;
   }
 
-  if (message >= WM_IME_STARTCOMPOSITION && message<= WM_IME_KEYLAST) {
-    auto result = TextInputClientWin::instance()->OnImeMessage(
-        message, wParam, lParam);
+  if (message >= WM_IME_STARTCOMPOSITION && message <= WM_IME_KEYLAST) {
+    auto result =
+        TextInputClientWin::instance()->OnImeMessage(message, wParam, lParam);
     if (result.second)
       return result.first;
     return OnMessage(message, wParam, lParam);
@@ -876,12 +859,12 @@ void Widget::OnMouseEvent(MouseEvent* event) {
   NOTREACHED();
 }
 
-} // namespace ui
+}  // namespace ui
 
 std::ostream& operator<<(std::ostream& out, const ui::Widget& widget) {
-  out << "{" << widget.class_name() << "@" << std::hex <<
-    reinterpret_cast<uintptr_t>(&widget) << " " <<
-    std::dec << widget.bounds() << "}";
+  out << "{" << widget.class_name() << "@" << std::hex
+      << reinterpret_cast<uintptr_t>(&widget) << " " << std::dec
+      << widget.bounds() << "}";
   return out;
 }
 

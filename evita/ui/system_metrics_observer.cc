@@ -6,19 +6,14 @@
 
 namespace ui {
 
-SystemMetricsObserver::SystemMetricsObserver() {
-};
+SystemMetricsObserver::SystemMetricsObserver() {}
 
-SystemMetricsObserver::~SystemMetricsObserver() {
-}
+SystemMetricsObserver::~SystemMetricsObserver() {}
 
-void SystemMetricsObserver::DidChangeIconFont() {
-}
+void SystemMetricsObserver::DidChangeIconFont() {}
 
-void SystemMetricsObserver::DidChangeSystemColor() {
-}
+void SystemMetricsObserver::DidChangeSystemColor() {}
 
-void SystemMetricsObserver::DidChangeSystemMetrics() {
-}
+void SystemMetricsObserver::DidChangeSystemMetrics() {}
 
 }  // namespace ui

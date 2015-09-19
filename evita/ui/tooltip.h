@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_tooltip_h)
-#define INCLUDE_evita_ui_tooltip_h
+#ifndef EVITA_UI_TOOLTIP_H_
+#define EVITA_UI_TOOLTIP_H_
 
 #include "base/strings/string16.h"
 #include "evita/gfx/rect.h"
@@ -18,33 +18,39 @@ namespace ui {
 // Tooltip
 //
 class Tooltip final {
-  public: class ToolDelegate {
-    public: ToolDelegate();
-    public: virtual ~ToolDelegate();
+ public:
+  class ToolDelegate {
+   public:
+    virtual ~ToolDelegate();
 
-    public: virtual base::string16 GetTooltipText() = 0;
+    virtual base::string16 GetTooltipText() = 0;
 
+   protected:
+    ToolDelegate();
+
+   private:
     DISALLOW_COPY_AND_ASSIGN(ToolDelegate);
   };
 
-  private: HWND tool_hwnd_;
-  private: base::string16 tool_text_;
-  private: HWND tooltip_hwnd_;
+  Tooltip();
+  ~Tooltip();
 
-  public: Tooltip();
-  public: ~Tooltip();
+  void AddTool(ToolDelegate* tool_delegate);
+  void DeleteTool(ToolDelegate* tool_delegate);
+  void OnNotify(NMHDR* nmhdr);
+  void Realize(HWND tool_hwnd);
+  void SetToolBounds(ToolDelegate* tool_delegate, const gfx::Rect& bounds);
 
-  public: void AddTool(ToolDelegate* tool_delegate);
-  public: void DeleteTool(ToolDelegate* tool_delegate);
-  public: void OnNotify(NMHDR* nmhdr);
-  public: void Realize(HWND tool_hwnd);
-  private: void SendMessage(UINT message, TTTOOLINFOW* info);
-  public: void SetToolBounds(ToolDelegate* tool_delegate,
-                             const gfx::Rect& bounds);
+ private:
+  void SendMessage(UINT message, TTTOOLINFOW* info);
+
+  HWND tool_hwnd_;
+  base::string16 tool_text_;
+  HWND tooltip_hwnd_;
 
   DISALLOW_COPY_AND_ASSIGN(Tooltip);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_tooltip_h)
+#endif  // EVITA_UI_TOOLTIP_H_

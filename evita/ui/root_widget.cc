@@ -4,10 +4,8 @@
 
 namespace ui {
 
-RootWidget::RootWidget() {
-}
+RootWidget::RootWidget() {}
 
-RootWidget::~RootWidget() {
-}
+RootWidget::~RootWidget() {}
 
 }  // namespace ui

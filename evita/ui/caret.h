@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_caret_h)
-#define INCLUDE_evita_ui_caret_h
+#ifndef EVITA_UI_CARET_H_
+#define EVITA_UI_CARET_H_
 
 #include <memory>
 
 #include "base/time/time.h"
 #pragma warning(push)
-#pragma warning(disable: 4625 4626)
+#pragma warning(disable : 4625 4626)
 #include "base/timer/timer.h"
 #pragma warning(pop)
 #include "evita/gfx/rect_f.h"
@@ -27,33 +27,40 @@ class CaretOwner;
 // Caret
 //
 class Caret {
-  private: base::TimeDelta blink_interval_;
-  private: gfx::RectF bounds_;
-  private: base::Time last_blink_time_;
-  private: CaretOwner* const owner_;
-  private: base::RepeatingTimer<Caret> timer_;
-  private: bool visible_;
+ public:
+  virtual ~Caret();
 
-  protected: Caret(CaretOwner* owner);
-  protected: virtual ~Caret();
+  bool visible() const { return visible_; }
 
-  private: const gfx::RectF& bounds() const { return bounds_; }
-  public: bool visible() const { return visible_; }
+  void Blink(gfx::Canvas* canvas, base::Time time);
+  void DidPaint(const gfx::RectF& paint_bounds);
+  void Hide(gfx::Canvas* canvas);
+  void Reset();
+  void Update(gfx::Canvas* canvas,
+              base::Time time,
+              const gfx::RectF& new_bounds);
 
-  public: void Blink(gfx::Canvas* canvas, base::Time time);
-  protected: virtual void DidChangeCaret();
-  private: void DidFireTimer();
-  public: void DidPaint(const gfx::RectF& paint_bounds);
-  public: void Hide(gfx::Canvas* canvas);
-  protected: virtual void Paint(gfx::Canvas* canvas,
-                                const gfx::RectF& bounds) = 0;
-  public: void Reset();
-  public: void Update(gfx::Canvas* canvas, base::Time time,
-                      const gfx::RectF& new_bounds);
+ protected:
+  explicit Caret(CaretOwner* owner);
+
+  virtual void DidChangeCaret();
+  virtual void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) = 0;
+
+ private:
+  const gfx::RectF& bounds() const { return bounds_; }
+
+  void DidFireTimer();
+
+  base::TimeDelta blink_interval_;
+  gfx::RectF bounds_;
+  base::Time last_blink_time_;
+  CaretOwner* const owner_;
+  base::RepeatingTimer<Caret> timer_;
+  bool visible_;
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };
 
-} // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_caret_h)
+#endif  // EVITA_UI_CARET_H_

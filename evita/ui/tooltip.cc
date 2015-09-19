@@ -15,20 +15,15 @@ namespace ui {
 //
 // Tooltip::ToolDelegate
 //
-Tooltip::ToolDelegate::ToolDelegate() {
-}
+Tooltip::ToolDelegate::ToolDelegate() {}
 
-Tooltip::ToolDelegate::~ToolDelegate() {
-}
+Tooltip::ToolDelegate::~ToolDelegate() {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // Tooltip
 //
-Tooltip::Tooltip()
-    : tool_hwnd_(nullptr),
-      tooltip_hwnd_(nullptr) {
-}
+Tooltip::Tooltip() : tool_hwnd_(nullptr), tooltip_hwnd_(nullptr) {}
 
 Tooltip::~Tooltip() {
   if (!tooltip_hwnd_)
@@ -56,8 +51,7 @@ void Tooltip::OnNotify(NMHDR* nmhdr) {
   // Set width of tool tip
   ::SendMessage(tooltip_hwnd_, TTM_SETMAXTIPWIDTH, 0, 300);
   auto const disp_info = reinterpret_cast<NMTTDISPINFO*>(nmhdr);
-  tool_text_ = reinterpret_cast<ToolDelegate*>(nmhdr->idFrom)->
-      GetTooltipText();
+  tool_text_ = reinterpret_cast<ToolDelegate*>(nmhdr->idFrom)->GetTooltipText();
   disp_info->lpszText = const_cast<LPWSTR>(tool_text_.c_str());
 }
 
@@ -67,8 +61,8 @@ void Tooltip::Realize(HWND tool_hwnd) {
   DCHECK(!tooltip_hwnd_);
   tool_hwnd_ = tool_hwnd;
   tooltip_hwnd_ = ::CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, nullptr,
-      WS_POPUP | TTS_NOPREFIX, 0, 0, 0, 0, tool_hwnd, nullptr, nullptr,
-      nullptr);
+                                   WS_POPUP | TTS_NOPREFIX, 0, 0, 0, 0,
+                                   tool_hwnd, nullptr, nullptr, nullptr);
   if (!tooltip_hwnd_) {
     PLOG(WARNING) << "tooltipe creation failed, disabling tooltips";
     return;

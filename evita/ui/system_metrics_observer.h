@@ -2,20 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_top_level_widget_observer_h)
-#define INCLUDE_evita_ui_top_level_widget_observer_h
+#ifndef EVITA_UI_SYSTEM_METRICS_OBSERVER_H_
+#define EVITA_UI_SYSTEM_METRICS_OBSERVER_H_
 
 namespace ui {
 
 class SystemMetricsObserver {
-  protected: SystemMetricsObserver();
-  public: virtual ~SystemMetricsObserver();
+ public:
+  virtual ~SystemMetricsObserver();
 
-  public: virtual void DidChangeIconFont();
-  public: virtual void DidChangeSystemColor();
-  public: virtual void DidChangeSystemMetrics();
+  virtual void DidChangeIconFont();
+  virtual void DidChangeSystemColor();
+  virtual void DidChangeSystemMetrics();
+
+ protected:
+  SystemMetricsObserver();
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_top_level_widget_observer_h)
+#endif  // EVITA_UI_SYSTEM_METRICS_OBSERVER_H_

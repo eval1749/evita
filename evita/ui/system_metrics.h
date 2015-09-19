@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_system_metrics_h)
-#define INCLUDE_evita_ui_system_metrics_h
+#ifndef EVITA_UI_SYSTEM_METRICS_H_
+#define EVITA_UI_SYSTEM_METRICS_H_
 
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
@@ -14,50 +14,52 @@ namespace ui {
 
 class SystemMetricsObserver;
 
-class SystemMetrics : public common::Singleton<SystemMetrics> {
+class SystemMetrics final : public common::Singleton<SystemMetrics> {
   DECLARE_SINGLETON_CLASS(SystemMetrics);
 
-  private: gfx::ColorF bgcolor_;
-  private: gfx::ColorF border_color_;
-  private: gfx::ColorF color_;
-  private: base::string16 font_family_;
-  private: gfx::ColorF gray_text_;
-  private: gfx::ColorF highlight_;
-  private: gfx::ColorF hotlight_;
-  private: base::string16 icon_font_family_;
-  private: float icon_font_size_;
-  private: gfx::ColorF shadow_;
-  private: float font_size_;
-  private: base::ObserverList<SystemMetricsObserver> observers_;
+ public:
+  ~SystemMetrics() override;
 
-  private: SystemMetrics();
-  public: virtual ~SystemMetrics();
+  gfx::ColorF bgcolor() const { return bgcolor_; }
+  gfx::ColorF border_color() const { return border_color_; }
+  gfx::ColorF color() const { return color_; }
+  const base::string16& font_family() const { return font_family_; }
+  gfx::ColorF gray_text() const { return gray_text_; }
+  gfx::ColorF highlight() const { return highlight_; }
+  gfx::ColorF hotlight() const { return hotlight_; }
+  const base::string16& icon_font_family() const { return icon_font_family_; }
+  float icon_font_size() const { return icon_font_size_; }
+  gfx::ColorF shadow() const { return shadow_; }
+  float font_size() const { return font_size_; }
 
-  public: gfx::ColorF bgcolor() const { return bgcolor_; }
-  public: gfx::ColorF border_color() const { return border_color_; }
-  public: gfx::ColorF color() const { return color_; }
-  public: const base::string16& font_family() const { return font_family_; }
-  public: gfx::ColorF gray_text() const { return gray_text_; }
-  public: gfx::ColorF highlight() const { return highlight_; }
-  public: gfx::ColorF hotlight() const { return hotlight_; }
-  public: const base::string16& icon_font_family() const {
-    return icon_font_family_;
-  }
-  public: float icon_font_size() const { return icon_font_size_; }
-  public: gfx::ColorF shadow() const { return shadow_; }
-  public: float font_size() const { return font_size_; }
+  void AddObserver(SystemMetricsObserver* observer);
+  void NotifyChangeIconFont();
+  void NotifyChangeSystemColor();
+  void NotifyChangeSystemMetrics();
+  void RemoveObserver(SystemMetricsObserver* observer);
 
-  public: void AddObserver(SystemMetricsObserver* observer);
-  public: void NotifyChangeIconFont();
-  public: void NotifyChangeSystemColor();
-  public: void NotifyChangeSystemMetrics();
-  public: void RemoveObserver(SystemMetricsObserver* observer);
-  private: void UpdateColors();
-  private: void UpdateTextFormat();
+ private:
+  SystemMetrics();
+
+  void UpdateColors();
+  void UpdateTextFormat();
+
+  gfx::ColorF bgcolor_;
+  gfx::ColorF border_color_;
+  gfx::ColorF color_;
+  base::string16 font_family_;
+  gfx::ColorF gray_text_;
+  gfx::ColorF highlight_;
+  gfx::ColorF hotlight_;
+  base::string16 icon_font_family_;
+  float icon_font_size_;
+  gfx::ColorF shadow_;
+  float font_size_;
+  base::ObserverList<SystemMetricsObserver> observers_;
 
   DISALLOW_COPY_AND_ASSIGN(SystemMetrics);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_system_metrics_h)
+#endif  // EVITA_UI_SYSTEM_METRICS_H_

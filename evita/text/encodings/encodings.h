@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_encodings_encodings_h)
-#define INCLUDE_evita_encodings_encodings_h
+#ifndef EVITA_TEXT_ENCODINGS_ENCODINGS_H_
+#define EVITA_TEXT_ENCODINGS_ENCODINGS_H_
 
 #include <memory>
 
@@ -16,22 +16,26 @@ namespace encodings {
 class Decoder;
 class Encoder;
 
-class Encodings : public common::Singleton<Encodings> {
+class Encodings final : public common::Singleton<Encodings> {
   DECLARE_SINGLETON_CLASS(Encodings);
 
-  private: class Private;
+ public:
+  Decoder* GetDecoder(const base::string16& name) const;
+  Encoder* GetEncoder(const base::string16& name) const;
 
-  private: std::unique_ptr<Private> private_;
+ private:
+  ~Encodings() final;
 
-  private: Encodings();
-  public: ~Encodings();
+ private:
+  class Private;
 
-  public: Decoder* GetDecoder(const base::string16& name) const;
-  public: Encoder* GetEncoder(const base::string16& name) const;
+  Encodings();
+
+  std::unique_ptr<Private> private_;
 
   DISALLOW_COPY_AND_ASSIGN(Encodings);
 };  // Encodings
 
 }  // namespace encodings
 
-#endif //!defined(INCLUDE_evita_encodings_encodings_h)
+#endif  // EVITA_TEXT_ENCODINGS_ENCODINGS_H_

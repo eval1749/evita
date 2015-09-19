@@ -6,10 +6,8 @@
 
 namespace encodings {
 
-Encoder::Encoder() {
-}
+Encoder::Encoder() {}
 
-Encoder::~Encoder() {
-}
+Encoder::~Encoder() {}
 
 }  // namespace encodings

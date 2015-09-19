@@ -15,28 +15,32 @@ namespace encodings {
 //
 // ShiftJisDecoder::Private
 //
-class ShiftJisDecoder::Private {
-  private: uint8_t bytes_[2];
+class ShiftJisDecoder::Private final {
+ public:
+  Private();
+  ~Private();
 
-  public: Private();
-  public: ~Private();
+  common::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                              size_t num_bytes,
+                                              bool is_stream);
 
-  public: common::Either<bool, base::string16> Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream);
+ private:
+  uint8_t bytes_[2];
 
   DISALLOW_COPY_AND_ASSIGN(Private);
-};  // ShiftJisDecoder
+};
 
 ShiftJisDecoder::Private::Private() {
   bytes_[0] = 0;
   bytes_[1] = 0;
 }
 
-ShiftJisDecoder::Private::~Private() {
-}
+ShiftJisDecoder::Private::~Private() {}
 
 common::Either<bool, base::string16> ShiftJisDecoder::Private::Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream) {
+    const uint8_t* bytes,
+    size_t num_bytes,
+    bool is_stream) {
   if (!is_stream) {
     bytes_[0] = 0;
     bytes_[1] = 0;
@@ -50,12 +54,12 @@ common::Either<bool, base::string16> ShiftJisDecoder::Private::Decode(
       auto const kShiftJisCodePage = 932;
       base::char16 code_point;
       auto const num_chars = ::MultiByteToWideChar(
-        kShiftJisCodePage, MB_ERR_INVALID_CHARS,
-        reinterpret_cast<char*>(bytes_), 2, &code_point, 1);
+          kShiftJisCodePage, MB_ERR_INVALID_CHARS,
+          reinterpret_cast<char*>(bytes_), 2, &code_point, 1);
       if (num_chars != 1)
         return common::make_either(false, output.str());
-       output.sputc(code_point);
-       bytes_[0] = 0;
+      output.sputc(code_point);
+      bytes_[0] = 0;
     } else {
       if (byte <= 0x80) {
         output.sputc(static_cast<base::char16>(byte));
@@ -78,11 +82,9 @@ common::Either<bool, base::string16> ShiftJisDecoder::Private::Decode(
 //
 // ShiftJisDecoder
 //
-ShiftJisDecoder::ShiftJisDecoder() : private_(new Private()) {
-}
+ShiftJisDecoder::ShiftJisDecoder() : private_(new Private()) {}
 
-ShiftJisDecoder::~ShiftJisDecoder() {
-}
+ShiftJisDecoder::~ShiftJisDecoder() {}
 
 // encoding::Decoder
 const base::string16& ShiftJisDecoder::name() const {
@@ -91,7 +93,9 @@ const base::string16& ShiftJisDecoder::name() const {
 }
 
 common::Either<bool, base::string16> ShiftJisDecoder::Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream) {
+    const uint8_t* bytes,
+    size_t num_bytes,
+    bool is_stream) {
   return private_->Decode(bytes, num_bytes, is_stream);
 }
 

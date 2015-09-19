@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/text/encodings/utf8_decoder.h"
-
 #include <sstream>
+#include <string>
+
+#include "evita/text/encodings/utf8_decoder.h"
 
 #include "base/logging.h"
 
@@ -14,37 +15,37 @@ namespace encodings {
 //
 // Utf8Decoder::Private
 //
-class Utf8Decoder::Private {
-  private: enum class State {
+class Utf8Decoder::Private final {
+ public:
+  Private();
+  ~Private();
+
+  // |string| contains characters decoded so far. Caller may use it what's
+  // wrong in input data.
+  common::Either<bool, base::string16> BadInput(const base::string16& string);
+
+  common::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                              size_t num_bytes,
+                                              bool is_stream);
+
+ private:
+  enum class State {
     BadInput,
     FirstByte,
     NeedByte,
   };
 
-  private: int char32_;
-  private: int num_bytes_needed_;
-  private: State state_;
-
-  public: Private();
-  public: ~Private();
-
-  // |string| contains characters decoded so far. Caller may use it what's
-  // wrong in input data.
-  private: common::Either<bool, base::string16> BadInput(
-      const base::string16& string);
-
-  public: common::Either<bool, base::string16> Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream);
+  int char32_;
+  int num_bytes_needed_;
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Private);
-};  // Utf8Decoder
+};
 
 Utf8Decoder::Private::Private()
-    : char32_(0), num_bytes_needed_(0), state_(State::FirstByte) {
-}
+    : char32_(0), num_bytes_needed_(0), state_(State::FirstByte) {}
 
-Utf8Decoder::Private::~Private() {
-}
+Utf8Decoder::Private::~Private() {}
 
 common::Either<bool, base::string16> Utf8Decoder::Private::BadInput(
     const base::string16& string) {
@@ -58,7 +59,9 @@ common::Either<bool, base::string16> Utf8Decoder::Private::BadInput(
 // 4 U+10000  U+1FFFFF 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 // Note: We don't support 5 byte and 6 byte UTF-8 sequence yet.
 common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream) {
+    const uint8_t* bytes,
+    size_t num_bytes,
+    bool is_stream) {
   if (!is_stream) {
     // Reset decode stream when we start decoding.
     state_ = State::FirstByte;
@@ -108,10 +111,9 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
           output.sputc(static_cast<base::char16>(char32_));
         } else if (char32_ <= 0x10FFFF) {
           char32_ -= 0x10000;
-          output.sputc(static_cast<base::char16>(
-              0xD800 | ((char32_ >> 10) & 0x3FF)));
-          output.sputc(static_cast<base::char16>(
-              0xDC00 | (char32_ & 0x3FF)));
+          output.sputc(
+              static_cast<base::char16>(0xD800 | ((char32_ >> 10) & 0x3FF)));
+          output.sputc(static_cast<base::char16>(0xDC00 | (char32_ & 0x3FF)));
         } else {
           return BadInput(output.str());
         }
@@ -135,11 +137,9 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
 //
 // Utf8Decoder
 //
-Utf8Decoder::Utf8Decoder() : private_(new Private()) {
-}
+Utf8Decoder::Utf8Decoder() : private_(new Private()) {}
 
-Utf8Decoder::~Utf8Decoder() {
-}
+Utf8Decoder::~Utf8Decoder() {}
 
 // encoding::Decoder
 const base::string16& Utf8Decoder::name() const {
@@ -147,8 +147,9 @@ const base::string16& Utf8Decoder::name() const {
   return name_;
 }
 
-common::Either<bool, base::string16> Utf8Decoder::Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream) {
+common::Either<bool, base::string16> Utf8Decoder::Decode(const uint8_t* bytes,
+                                                         size_t num_bytes,
+                                                         bool is_stream) {
   return private_->Decode(bytes, num_bytes, is_stream);
 }
 

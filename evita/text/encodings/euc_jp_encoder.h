@@ -2,34 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_encodings_euc_jp_encoder_h)
-#define INCLUDE_evita_encodings_euc_jp_encoder_h
+#ifndef EVITA_TEXT_ENCODINGS_EUC_JP_ENCODER_H_
+#define EVITA_TEXT_ENCODINGS_EUC_JP_ENCODER_H_
+
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "evita/text/encodings/encoder.h"
 
-#include <memory>
-
 namespace encodings {
 
-// UTF-8 Charset encoder.
-class EucJpEncoder : public Encoder {
-  private: class Private;
+// EUC-JP Charset encoder.
+class EucJpEncoder final : public Encoder {
+ public:
+  EucJpEncoder();
+  ~EucJpEncoder() final;
 
-  private: std::unique_ptr<Private> private_;
+  static const base::char16* static_name() { return L"euc-jp"; }
 
-  public: EucJpEncoder();
-  public: virtual ~EucJpEncoder();
-
-  public: static const base::char16* static_name() { return L"euc-jp"; }
+ private:
+  class Private;
 
   // encoding::Encoder
-  private: virtual const base::string16& name() const override;
-  private: virtual common::Either<base::char16, std::vector<uint8_t>>
-      Encode(const base::string16& string, bool is_stream) override;
+  const base::string16& name() const final;
+  common::Either<base::char16, std::vector<uint8_t>> Encode(
+      const base::string16& string,
+      bool is_stream) final;
+
+  std::unique_ptr<Private> private_;
 
   DISALLOW_COPY_AND_ASSIGN(EucJpEncoder);
-};  // EucJpEncoder
+};
 
 }  // namespace encodings
 
-#endif //!defined(INCLUDE_evita_encodings_euc_jp_encoder_h)
+#endif  // EVITA_TEXT_ENCODINGS_EUC_JP_ENCODER_H_

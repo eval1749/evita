@@ -15,30 +15,32 @@ namespace encodings {
 //
 // ShiftJisEncoder::Private
 //
-class ShiftJisEncoder::Private {
-  public: Private();
-  public: ~Private();
+class ShiftJisEncoder::Private final {
+ public:
+  Private();
+  ~Private();
 
-  public: common::Either<base::char16, std::vector<uint8_t>>
-      Encode(const base::string16& string, bool is_stream);
+  common::Either<base::char16, std::vector<uint8_t>> Encode(
+      const base::string16& string,
+      bool is_stream);
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(Private);
-};  // ShiftJisEncoder
+};
 
-ShiftJisEncoder::Private::Private() {
-}
+ShiftJisEncoder::Private::Private() {}
 
-ShiftJisEncoder::Private::~Private() {
-}
+ShiftJisEncoder::Private::~Private() {}
 
 static size_t EncodeShiftJis(const base::string16 string,
-                             uint8_t* bytes, size_t max_bytes) {
+                             uint8_t* bytes,
+                             size_t max_bytes) {
   auto const kShiftJisCodePage = 932;
   BOOL used_default_char = FALSE;
   auto const num_bytes = static_cast<size_t>(::WideCharToMultiByte(
-      kShiftJisCodePage, 0, string.data(),
-      static_cast<int>(string.size()), reinterpret_cast<char*>(bytes),
-      static_cast<int>(max_bytes), nullptr, &used_default_char));
+      kShiftJisCodePage, 0, string.data(), static_cast<int>(string.size()),
+      reinterpret_cast<char*>(bytes), static_cast<int>(max_bytes), nullptr,
+      &used_default_char));
   if (used_default_char) {
     ::SetLastError(ERROR_NO_UNICODE_TRANSLATION);
     return 0;
@@ -47,7 +49,7 @@ static size_t EncodeShiftJis(const base::string16 string,
 }
 
 common::Either<base::char16, std::vector<uint8_t>>
-    ShiftJisEncoder::Private::Encode(const base::string16& string, bool) {
+ShiftJisEncoder::Private::Encode(const base::string16& string, bool) {
   if (string.empty()) {
     return common::make_either(static_cast<base::char16>(0),
                                std::vector<uint8_t>());
@@ -56,7 +58,7 @@ common::Either<base::char16, std::vector<uint8_t>>
   if (!num_bytes) {
     auto const last_error = ::GetLastError();
     if (last_error != ERROR_NO_UNICODE_TRANSLATION) {
-      return common::make_either(static_cast<base::char16>(1), 
+      return common::make_either(static_cast<base::char16>(1),
                                  std::vector<uint8_t>());
     }
     for (auto const code_point : string) {
@@ -77,11 +79,9 @@ common::Either<base::char16, std::vector<uint8_t>>
 //
 // ShiftJisEncoder
 //
-ShiftJisEncoder::ShiftJisEncoder() : private_(new Private()) {
-}
+ShiftJisEncoder::ShiftJisEncoder() : private_(new Private()) {}
 
-ShiftJisEncoder::~ShiftJisEncoder() {
-}
+ShiftJisEncoder::~ShiftJisEncoder() {}
 
 // encoding::Encoder
 const base::string16& ShiftJisEncoder::name() const {
@@ -90,7 +90,8 @@ const base::string16& ShiftJisEncoder::name() const {
 }
 
 common::Either<base::char16, std::vector<uint8_t>> ShiftJisEncoder::Encode(
-    const base::string16& string, bool is_stream) {
+    const base::string16& string,
+    bool is_stream) {
   return private_->Encode(string, is_stream);
 }
 

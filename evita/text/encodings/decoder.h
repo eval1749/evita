@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_encodings_decoder_h)
-#define INCLUDE_evita_encodings_decoder_h
+#ifndef EVITA_TEXT_ENCODINGS_DECODER_H_
+#define EVITA_TEXT_ENCODINGS_DECODER_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
@@ -14,17 +14,22 @@
 namespace encodings {
 
 class Decoder {
-  protected: Decoder();
-  public: virtual ~Decoder();
+ public:
+  virtual ~Decoder();
 
-  public: virtual const base::string16& name() const = 0;
+  virtual const base::string16& name() const = 0;
 
-  public: virtual common::Either<bool, base::string16> Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream) = 0;
+  virtual common::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                                      size_t num_bytes,
+                                                      bool is_stream) = 0;
 
+ protected:
+  Decoder();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(Decoder);
-};  // Decoder
+};
 
 }  // namespace encodings
 
-#endif //!defined(INCLUDE_evita_encodings_decoder_h)
+#endif  // EVITA_TEXT_ENCODINGS_DECODER_H_

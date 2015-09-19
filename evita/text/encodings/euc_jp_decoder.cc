@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/text/encodings/euc_jp_decoder.h"
-
 #include <windows.h>
 #include <sstream>
+
+#include "evita/text/encodings/euc_jp_decoder.h"
 
 #include "base/logging.h"
 
@@ -15,33 +15,35 @@ namespace encodings {
 //
 // EucJpDecoder::Private
 //
-class EucJpDecoder::Private {
-  private: enum class State {
-    CS0, // 0x00-0x7E ASCII or JIS Roman
-    CS1, // 0xA1..0xFE 0xA1..0xFE JIS-X0208-1990
-    CS2, // 0x8E 0xA1..0xFE half-width katakana
-    CS3, // 0x8F 0xA1..0xFE 0xA1..0xFE JIS X0212-1990
+class EucJpDecoder::Private final {
+ public:
+  Private();
+  ~Private();
+
+  common::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                              size_t num_bytes,
+                                              bool is_stream);
+
+ private:
+  enum class State {
+    CS0,  // 0x00-0x7E ASCII or JIS Roman
+    CS1,  // 0xA1..0xFE 0xA1..0xFE JIS-X0208-1990
+    CS2,  // 0x8E 0xA1..0xFE half-width katakana
+    CS3,  // 0x8F 0xA1..0xFE 0xA1..0xFE JIS X0212-1990
     CS32,
   };
 
-  private: uint8_t bytes_[2];
-  private: State state_;
+  common::Either<bool, base::string16> Error();
 
-  public: Private();
-  public: ~Private();
-
-  public: common::Either<bool, base::string16> Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream);
-  private: common::Either<bool, base::string16> Error();
+  uint8_t bytes_[2];
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Private);
 };  // EucJpDecoder
 
-EucJpDecoder::Private::Private() : state_(State::CS0) {
-}
+EucJpDecoder::Private::Private() : state_(State::CS0) {}
 
-EucJpDecoder::Private::~Private() {
-}
+EucJpDecoder::Private::~Private() {}
 
 static void ConvertJisToShiftJis(uint8_t* bytes) {
   auto const row = bytes[0] < 95 ? 112 : 176;
@@ -51,7 +53,9 @@ static void ConvertJisToShiftJis(uint8_t* bytes) {
 }
 
 common::Either<bool, base::string16> EucJpDecoder::Private::Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream) {
+    const uint8_t* bytes,
+    size_t num_bytes,
+    bool is_stream) {
   auto const kShiftJisCodePage = 932;
   if (!is_stream) {
     state_ = State::CS0;
@@ -89,8 +93,8 @@ common::Either<bool, base::string16> EucJpDecoder::Private::Decode(
           ConvertJisToShiftJis(bytes_);
           base::char16 code_point = 0;
           auto const num_chars = ::MultiByteToWideChar(
-            kShiftJisCodePage, MB_ERR_INVALID_CHARS,
-            reinterpret_cast<char*>(bytes_), 2, &code_point, 1);
+              kShiftJisCodePage, MB_ERR_INVALID_CHARS,
+              reinterpret_cast<char*>(bytes_), 2, &code_point, 1);
           if (num_chars != 1)
             return Error();
           output.sputc(code_point);
@@ -120,8 +124,8 @@ common::Either<bool, base::string16> EucJpDecoder::Private::Decode(
           ConvertJisToShiftJis(bytes_ + 1);
           base::char16 code_point = 0;
           auto const num_chars = ::MultiByteToWideChar(
-            kShiftJisCodePage, MB_ERR_INVALID_CHARS,
-            reinterpret_cast<char*>(bytes_ + 1), 2, &code_point, 1);
+              kShiftJisCodePage, MB_ERR_INVALID_CHARS,
+              reinterpret_cast<char*>(bytes_ + 1), 2, &code_point, 1);
           if (num_chars != 1)
             return Error();
           output.sputc(code_point);
@@ -144,11 +148,9 @@ common::Either<bool, base::string16> EucJpDecoder::Private::Error() {
 //
 // EucJpDecoder
 //
-EucJpDecoder::EucJpDecoder() : private_(new Private()) {
-}
+EucJpDecoder::EucJpDecoder() : private_(new Private()) {}
 
-EucJpDecoder::~EucJpDecoder() {
-}
+EucJpDecoder::~EucJpDecoder() {}
 
 // encoding::Decoder
 const base::string16& EucJpDecoder::name() const {
@@ -156,8 +158,9 @@ const base::string16& EucJpDecoder::name() const {
   return name_;
 }
 
-common::Either<bool, base::string16> EucJpDecoder::Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream) {
+common::Either<bool, base::string16> EucJpDecoder::Decode(const uint8_t* bytes,
+                                                          size_t num_bytes,
+                                                          bool is_stream) {
   return private_->Decode(bytes, num_bytes, is_stream);
 }
 

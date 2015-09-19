@@ -2,34 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_encodings_utf8_decoder_h)
-#define INCLUDE_evita_encodings_utf8_decoder_h
-
-#include "evita/text/encodings/decoder.h"
+#ifndef EVITA_TEXT_ENCODINGS_UTF8_DECODER_H_
+#define EVITA_TEXT_ENCODINGS_UTF8_DECODER_H_
 
 #include <memory>
+#include <vector>
+
+#include "evita/text/encodings/decoder.h"
 
 namespace encodings {
 
 // UTF-8 Charset decoder.
-class Utf8Decoder : public Decoder {
-  private: class Private;
+class Utf8Decoder final : public Decoder {
+ public:
+  Utf8Decoder();
+  ~Utf8Decoder() final;
 
-  private: std::unique_ptr<Private> private_;
+  static const base::char16* static_name() { return L"utf-8"; }
 
-  public: Utf8Decoder();
-  public: virtual ~Utf8Decoder();
-
-  public: static const base::char16* static_name() { return L"utf-8"; }
+ private:
+  class Private;
 
   // encoding::Decoder
-  private: virtual const base::string16& name() const override;
-  private: virtual common::Either<bool, base::string16> Decode(
-      const uint8_t* bytes, size_t num_bytes, bool is_stream) override;
+  const base::string16& name() const final;
+  common::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                              size_t num_bytes,
+                                              bool is_stream) final;
+
+  std::unique_ptr<Private> private_;
 
   DISALLOW_COPY_AND_ASSIGN(Utf8Decoder);
-};  // Utf8Decoder
+};
 
 }  // namespace encodings
 
-#endif //!defined(INCLUDE_evita_encodings_utf8_decoder_h)
+#endif  // EVITA_TEXT_ENCODINGS_UTF8_DECODER_H_

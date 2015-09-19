@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_switches_h)
-#define INCLUDE_evita_views_switches_h
+#ifndef EVITA_VIEWS_SWITCHES_H_
+#define EVITA_VIEWS_SWITCHES_H_
 
-namespace views{
+namespace views {
 namespace switches {
 // All switches in alphabetical order. The switches should be documented
 // alongside the definition of their values in the .cc file.extern const char
@@ -18,7 +18,7 @@ extern bool editor_window_display_paint;
 extern bool form_window_display_paint;
 extern bool text_window_display_paint;
 
-} // switches
+}  // namespace switches
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_switches_h)
+#endif  // EVITA_VIEWS_SWITCHES_H_

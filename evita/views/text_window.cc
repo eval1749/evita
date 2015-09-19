@@ -47,8 +47,8 @@ text::Posn GetCaretOffset(const text::Buffer* buffer,
   return caret_offset == -1 ? selection.focus_offset() : caret_offset;
 }
 
-TextSelectionModel GetTextSelectionModel(
-    TextWindow* window, const text::Selection& selection) {
+TextSelectionModel GetTextSelectionModel(TextWindow* window,
+                                         const text::Selection& selection) {
   return TextSelectionModel(
       ui::FocusController::instance()->GetSelectionState(window),
       selection.anchor_offset(), selection.focus_offset());
@@ -66,8 +66,8 @@ TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
       metrics_view_(new MetricsView()),
       text_renderer_(new TextRenderer(selection->buffer(), this)),
       selection_(selection),
-      vertical_scroll_bar_(new ui::ScrollBar(ui::ScrollBar::Type::Vertical,
-                                             this)) {
+      vertical_scroll_bar_(
+          new ui::ScrollBar(ui::ScrollBar::Type::Vertical, this)) {
   AppendChild(vertical_scroll_bar_);
   AppendChild(metrics_view_);
   UI_DOM_AUTO_LOCK_SCOPE();
@@ -85,8 +85,10 @@ text::Buffer* TextWindow::buffer() const {
   return text_renderer_->buffer();
 }
 
-text::Posn TextWindow::ComputeMotion(
-    Unit eUnit, Count n, const gfx::PointF& pt, text::Posn lPosn) {
+text::Posn TextWindow::ComputeMotion(Unit eUnit,
+                                     Count n,
+                                     const gfx::PointF& pt,
+                                     text::Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
   switch (eUnit) {
     case Unit_WindowLine:
@@ -133,8 +135,7 @@ text::Posn TextWindow::ComputeMotion(
 
     case Unit_Window:
       if (n > 0) {
-        return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()),
-                        GetStart());
+        return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()), GetStart());
       }
       if (n < 0)
         return GetStart();
@@ -156,7 +157,7 @@ Posn TextWindow::GetEnd() {
   return text_renderer_->GetVisibleEnd();
 }
 
-//For Selection.MoveUp Screen
+// For Selection.MoveUp Screen
 Posn TextWindow::GetStart() {
   UI_ASSERT_DOM_LOCKED();
   return text_renderer_->GetStart();
@@ -217,10 +218,10 @@ void TextWindow::Paint(const TextSelectionModel& selection, base::Time now) {
   {
     ui::ScrollBar::Data data;
     data.minimum = 0;
-    data.thumb_size = text_renderer_->GetVisibleEnd() -
-          text_renderer_->GetStart();
+    data.thumb_size =
+        text_renderer_->GetVisibleEnd() - text_renderer_->GetStart();
     data.thumb_value = text_renderer_->GetStart();
-    data.maximum = buffer()->GetEnd() + 1;;
+    data.maximum = buffer()->GetEnd() + 1;
     vertical_scroll_bar_->SetData(data);
   }
   gfx::Canvas::DrawingScope drawing_scope(canvas());
@@ -233,8 +234,8 @@ void TextWindow::Redraw(base::Time now) {
   UI_ASSERT_DOM_LOCKED();
 
   auto const selection = GetTextSelectionModel(this, *selection_);
-  auto const new_caret_offset = GetCaretOffset(buffer(), selection,
-                                               caret_offset_);
+  auto const new_caret_offset =
+      GetCaretOffset(buffer(), selection, caret_offset_);
   DCHECK_GE(new_caret_offset, 0);
 
   if (text_renderer_->FormatIfNeeded()) {
@@ -283,7 +284,7 @@ bool TextWindow::SmallScroll(int, int y_count) {
   }
 
   if (scrolled)
-   RequestAnimationFrame();
+    RequestAnimationFrame();
   return scrolled;
 }
 
@@ -298,8 +299,8 @@ void TextWindow::UpdateLayout() {
   if (canvas())
     canvas()->SetBounds(canvas_bounds);
 
-  auto const vertical_scroll_bar_width = static_cast<float>(
-      ::GetSystemMetrics(SM_CXVSCROLL));
+  auto const vertical_scroll_bar_width =
+      static_cast<float>(::GetSystemMetrics(SM_CXVSCROLL));
 
   auto const text_block_bounds = gfx::RectF(
       canvas_bounds.size() - gfx::SizeF(vertical_scroll_bar_width, 0.0f));
@@ -307,14 +308,14 @@ void TextWindow::UpdateLayout() {
 
   // Place vertical scroll bar at right edge of text block.
   auto const vertical_scroll_bar_bounds = gfx::RectF(
-    gfx::PointF(text_block_bounds.right, text_block_bounds.top),
-    gfx::SizeF(vertical_scroll_bar_width, text_block_bounds.height()));
+      gfx::PointF(text_block_bounds.right, text_block_bounds.top),
+      gfx::SizeF(vertical_scroll_bar_width, text_block_bounds.height()));
   vertical_scroll_bar_->SetBounds(
       gfx::ToEnclosingRect(vertical_scroll_bar_bounds));
 
   // Place metrics view at bottom right of text block.
-  auto const metrics_view_size = gfx::SizeF(
-      metrics_view_->bounds().width(), metrics_view_->bounds().height());
+  auto const metrics_view_size = gfx::SizeF(metrics_view_->bounds().width(),
+                                            metrics_view_->bounds().height());
   auto const metrics_view_bounds = gfx::RectF(
       text_block_bounds.bottom_right() - metrics_view_size - gfx::SizeF(3, 3),
       metrics_view_size);
@@ -413,8 +414,7 @@ void TextWindow::DidMoveThumb(int value) {
 }
 
 // ui::TextInputDelegate
-void TextWindow::DidCommitComposition(
-    const ui::TextComposition& composition) {
+void TextWindow::DidCommitComposition(const ui::TextComposition& composition) {
   DispatchTextCompositionEvent(domapi::EventType::TextCompositionCommit,
                                composition);
 }
@@ -423,20 +423,19 @@ void TextWindow::DidFinishComposition() {
   DispatchTextCompositionEvent(domapi::EventType::TextCompositionEnd,
                                ui::TextComposition());
 }
- 
+
 void TextWindow::DidStartComposition() {
   DispatchTextCompositionEvent(domapi::EventType::TextCompositionStart,
                                ui::TextComposition());
 }
- 
-void TextWindow::DidUpdateComposition(
-    const ui::TextComposition& composition) {
+
+void TextWindow::DidUpdateComposition(const ui::TextComposition& composition) {
   DispatchTextCompositionEvent(domapi::EventType::TextCompositionUpdate,
                                composition);
 }
 
 ui::Widget* TextWindow::GetClientWindow() {
-   return this;
+  return this;
 }
 
 // ui::Widget

@@ -6,10 +6,8 @@
 
 namespace views {
 
-FrameObserver::FrameObserver() {
-}
+FrameObserver::FrameObserver() {}
 
-FrameObserver::~FrameObserver() {
-}
+FrameObserver::~FrameObserver() {}
 
 }  // namespace views

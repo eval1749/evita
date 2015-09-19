@@ -21,31 +21,31 @@ const size_t kNumberOfSamples = 200;
 const int kViewHeight = 100;
 const int kViewWidth = 250;
 
-void PaintSamples(gfx::Canvas* canvas, const gfx::Brush& brush,
-                  const gfx::RectF& bounds, const metrics::Sampling& data) {
+void PaintSamples(gfx::Canvas* canvas,
+                  const gfx::Brush& brush,
+                  const gfx::RectF& bounds,
+                  const metrics::Sampling& data) {
   auto const maximum = data.maximum() * 1.1f;
   auto const minimum = data.minimum() * 0.9f;
   auto const span = maximum == minimum ? 1.0f : maximum - minimum;
   auto const scale = bounds.height() / span;
   const auto& samples = data.samples();
   auto last_point = gfx::PointF(
-      bounds.left,
-      bounds.bottom - (samples.front() - data.minimum()) * scale);
+      bounds.left, bounds.bottom - (samples.front() - data.minimum()) * scale);
   auto x_step = bounds.width() / samples.size();
   auto sum = 0.0f;
   for (auto const sample : samples) {
     sum += sample;
-    auto const curr_point = gfx::PointF(
-        last_point.x + x_step,
-        bounds.bottom - (sample - data.minimum()) * scale);
+    auto const curr_point =
+        gfx::PointF(last_point.x + x_step,
+                    bounds.bottom - (sample - data.minimum()) * scale);
     (*canvas)->DrawLine(last_point, curr_point, brush, 1.0f);
     last_point = curr_point;
   }
   auto const avg = sum / samples.size();
   auto const avg_y = bounds.bottom - (avg - data.minimum()) * scale;
   (*canvas)->DrawLine(gfx::PointF(bounds.left, avg_y),
-                      gfx::PointF(bounds.right, avg_y),
-                      brush, 2.0f);
+                      gfx::PointF(bounds.right, avg_y), brush, 2.0f);
 }
 
 }  // namespace
@@ -55,23 +55,25 @@ void PaintSamples(gfx::Canvas* canvas, const gfx::Brush& brush,
 // MetricsView::View
 //
 class MetricsView::View final : public ui::LayerOwnerDelegate {
+ public:
+  explicit View(ui::Widget* widget);
+  ~View() final = default;
+
+  void Animate(base::Time now);
+  void RecordTime();
+
+ private:
   friend class TimingScope;
 
-  private: std::unique_ptr<gfx::Canvas> canvas_;
-  private: metrics::Sampling frame_duration_data_;
-  private: metrics::Sampling frame_latency_data_;
-  private: base::TimeTicks last_record_time_;
-  private: std::unique_ptr<gfx::TextFormat> text_format_;
-  private: ui::Widget* const widget_;
-
-  public: View(ui::Widget* widget);
-  public: virtual ~View() final = default;
-
-  public: void Animate(base::Time now);
-  public: void RecordTime();
-
   // ui::LayerOwnerDelegate
-  private: void DidRecreateLayer(ui::Layer* old_layer) final;
+  void DidRecreateLayer(ui::Layer* old_layer) final;
+
+  std::unique_ptr<gfx::Canvas> canvas_;
+  metrics::Sampling frame_duration_data_;
+  metrics::Sampling frame_latency_data_;
+  base::TimeTicks last_record_time_;
+  std::unique_ptr<gfx::TextFormat> text_format_;
+  ui::Widget* const widget_;
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };
@@ -80,8 +82,8 @@ MetricsView::View::View(ui::Widget* widget)
     : frame_duration_data_(kNumberOfSamples),
       frame_latency_data_(kNumberOfSamples),
       last_record_time_(metrics::Sampling::NowTimeTicks()),
-      text_format_(new gfx::TextFormat(L"Consolas", 11.5)), widget_(widget) {
-}
+      text_format_(new gfx::TextFormat(L"Consolas", 11.5)),
+      widget_(widget) {}
 
 void MetricsView::View::Animate(base::Time) {
   if (!canvas_)
@@ -93,15 +95,15 @@ void MetricsView::View::Animate(base::Time) {
   auto const bounds = canvas->GetLocalBounds();
 
   std::basic_ostringstream<base::char16> stream;
-  stream << L"Frame latency=" << frame_latency_data_.minimum() << L" " <<
-    frame_latency_data_.maximum() << L" " << frame_latency_data_.last() <<
-    std::endl;
-  stream << L"Frame duration=" << frame_duration_data_.minimum() << L" " <<
-    frame_duration_data_.maximum() << L" " << frame_duration_data_.last() <<
-    std::endl;
+  stream << L"Frame latency=" << frame_latency_data_.minimum() << L" "
+         << frame_latency_data_.maximum() << L" " << frame_latency_data_.last()
+         << std::endl;
+  stream << L"Frame duration=" << frame_duration_data_.minimum() << L" "
+         << frame_duration_data_.maximum() << L" "
+         << frame_duration_data_.last() << std::endl;
 
-  auto const text_layout = text_format_->CreateLayout(stream.str(),
-                                                      bounds.size());
+  auto const text_layout =
+      text_format_->CreateLayout(stream.str(), bounds.size());
 
   auto const alpha = 0.4f;
   auto const radius = 5.0f;
@@ -109,13 +111,13 @@ void MetricsView::View::Animate(base::Time) {
   gfx::Brush text_brush(canvas, gfx::ColorF(gfx::ColorF::White, 0.7f));
   gfx::Brush graph_brush1(canvas, gfx::ColorF(gfx::ColorF::Red, alpha));
   gfx::Brush graph_brush2(canvas, gfx::ColorF(gfx::ColorF::Blue, alpha));
-  gfx::RectF graph_bounds(bounds.left, bounds.bottom - 50,
-                          bounds.right, bounds.bottom);
+  gfx::RectF graph_bounds(bounds.left, bounds.bottom - 50, bounds.right,
+                          bounds.bottom);
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   canvas->AddDirtyRect(bounds);
   canvas->Clear(gfx::ColorF());
-  (*canvas)->FillRoundedRectangle(
-      D2D1::RoundedRect(bounds, radius, radius), bgcolor);
+  (*canvas)->FillRoundedRectangle(D2D1::RoundedRect(bounds, radius, radius),
+                                  bgcolor);
 
   PaintSamples(canvas, graph_brush1, graph_bounds, frame_latency_data_);
   graph_bounds = graph_bounds.Offset(0, -30);
@@ -141,8 +143,7 @@ void MetricsView::View::DidRecreateLayer(ui::Layer*) {
 // MetricsView::TimingScope
 //
 MetricsView::TimingScope::TimingScope(MetricsView* view)
-    : start_(metrics::Sampling::NowTimeTicks()), view_(view) {
-}
+    : start_(metrics::Sampling::NowTimeTicks()), view_(view) {}
 
 MetricsView::TimingScope::~TimingScope() {
   auto const end = metrics::Sampling::NowTimeTicks();
@@ -157,8 +158,7 @@ MetricsView::MetricsView() : view_(new View(this)) {
   SetBounds(gfx::Rect(gfx::Size(kViewWidth, kViewHeight)));
 }
 
-MetricsView::~MetricsView() {
-}
+MetricsView::~MetricsView() {}
 
 void MetricsView::Animate(base::Time now) {
   view_->Animate(now);

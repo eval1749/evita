@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_view_window_id_h)
-#define INCLUDE_evita_view_window_id_h
+#ifndef EVITA_VIEWS_WINDOW_ID_H_
+#define EVITA_VIEWS_WINDOW_ID_H_
 
 namespace views {
 
@@ -10,4 +10,4 @@ const WindowId kInvalidWindowId = -1;
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_view_window_id_h)
+#endif  // EVITA_VIEWS_WINDOW_ID_H_

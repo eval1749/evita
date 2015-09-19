@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_text_window_h)
-#define INCLUDE_evita_views_text_window_h
+#ifndef EVITA_VIEWS_TEXT_WINDOW_H_
+#define EVITA_VIEWS_TEXT_WINDOW_H_
 
 #include <memory>
 
@@ -44,86 +44,89 @@ class TextWindow final : public ContentWindow,
                          public ui::TextInputDelegate {
   DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
 
-  private: typedef rendering::TextSelectionModel TextSelectionModel;
+ public:
+  TextWindow(WindowId window_id, text::Selection* selection);
+  ~TextWindow() final;
 
-  private: text::Posn caret_offset_;
-  private: MetricsView* metrics_view_;
-  // TODO(eval1749): Manage life time of selection.
-  private: text::Selection* const selection_;
-  private: std::unique_ptr<TextRenderer> text_renderer_;
-  private: ui::ScrollBar* const vertical_scroll_bar_;
-
-  public: TextWindow(WindowId window_id, text::Selection* selection);
-  public: ~TextWindow() final;
-
-  private: text::Buffer* buffer() const;
-
-  public: text::Posn ComputeMotion(
+  text::Posn ComputeMotion(
       Unit unit, Count count, const gfx::PointF& point, text::Posn position);
-  public: text::Posn EndOfLine(text::Posn offset);
-  public: text::Posn GetEnd();
-  public: text::Posn GetStart();
-  public: gfx::RectF HitTestTextPosition(text::Posn offset);
-  private: bool LargeScroll(int x_count, int y_count);
-  public: text::Posn MapPointToPosition(const gfx::PointF point);
-  private: void Paint(const TextSelectionModel& selection, base::Time now);
-  private: void Redraw(base::Time now);
-  public: void SetZoom(float new_zoom);
-  public: bool SmallScroll(int x_count, int y_count);
-  public: text::Posn StartOfLine(text::Posn offset);
-  private: void UpdateLayout();
+  text::Posn EndOfLine(text::Posn offset);
+  text::Posn GetEnd();
+  text::Posn GetStart();
+  gfx::RectF HitTestTextPosition(text::Posn offset);
+  text::Posn MapPointToPosition(const gfx::PointF point);
+  void SetZoom(float new_zoom);
+  bool SmallScroll(int x_count, int y_count);
+  text::Posn StartOfLine(text::Posn offset);
+
+ private:
+  typedef rendering::TextSelectionModel TextSelectionModel;
+
+  text::Buffer* buffer() const;
+
+  bool LargeScroll(int x_count, int y_count);
+  void Paint(const TextSelectionModel& selection, base::Time now);
+  void Redraw(base::Time now);
+  void UpdateLayout();
 
   // gfx::CanvasObserver
-  private: void DidRecreateCanvas() final;
+  void DidRecreateCanvas() final;
 
   // text::BufferMutationObserver
-  private: void DidChangeStyle(Posn offset, size_t length) final;
-  private: void DidDeleteAt(Posn offset, size_t length) final;
-  private: void DidInsertAt(Posn offset, size_t length) final;
+  void DidChangeStyle(Posn offset, size_t length) final;
+  void DidDeleteAt(Posn offset, size_t length) final;
+  void DidInsertAt(Posn offset, size_t length) final;
 
   // text::SelectionChangeObserver
-  private: void DidChangeSelection() final;
+  void DidChangeSelection() final;
 
   // ui::AnimationFrameHandler
-  private: void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::CaretOwner
-  private: void DidFireCaretTimer() final;
+  void DidFireCaretTimer() final;
 
   // ui::LayerOwnerDelegate
-  private: void DidRecreateLayer(ui::Layer* old_layer) final;
+  void DidRecreateLayer(ui::Layer* old_layer) final;
 
   // ui::ScrollBarObserver
-  private: void DidClickLineDown() final;
-  private: void DidClickLineUp() final;
-  private: void DidClickPageDown() final;
-  private: void DidClickPageUp() final;
-  private: void DidMoveThumb(int value) final;
+  void DidClickLineDown() final;
+  void DidClickLineUp() final;
+  void DidClickPageDown() final;
+  void DidClickPageUp() final;
+  void DidMoveThumb(int value) final;
 
   // ui::TextInputDelegate
-  private: void DidCommitComposition(
+  void DidCommitComposition(
       const ui::TextComposition& composition) final;
-  private: void DidFinishComposition() final;
-  private: void DidStartComposition() final;
-  private: void DidUpdateComposition(
+  void DidFinishComposition() final;
+  void DidStartComposition() final;
+  void DidUpdateComposition(
       const ui::TextComposition& composition) final;
-  private: Widget* GetClientWindow() final;
+  Widget* GetClientWindow() final;
 
   // ui::Widget
-  private: void DidChangeBounds() final;
-  private: void DidHide() final;
-  private: void DidKillFocus(ui::Widget* focused_window) final;
-  private: void DidRealize() final;
-  private: void DidSetFocus(ui::Widget* last_focused) final;
-  private: void DidShow() final;
-  private: HCURSOR GetCursorAt(const gfx::Point& point) const final;
+  void DidChangeBounds() final;
+  void DidHide() final;
+  void DidKillFocus(ui::Widget* focused_window) final;
+  void DidRealize() final;
+  void DidSetFocus(ui::Widget* last_focused) final;
+  void DidShow() final;
+  HCURSOR GetCursorAt(const gfx::Point& point) const final;
 
   // views::ContentWindow
-  private: void MakeSelectionVisible() final;
+  void MakeSelectionVisible() final;
+
+  text::Posn caret_offset_;
+  MetricsView* metrics_view_;
+  // TODO(eval1749): Manage life time of selection.
+  text::Selection* const selection_;
+  std::unique_ptr<TextRenderer> text_renderer_;
+  ui::ScrollBar* const vertical_scroll_bar_;
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_text_window_h)
+#endif  // EVITA_VIEWS_TEXT_WINDOW_H_

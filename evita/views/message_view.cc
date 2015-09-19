@@ -1,6 +1,8 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
+#include <algorithm>
+
 #include "evita/views/message_view.h"
 
 #include "base/logging.h"
@@ -28,30 +30,28 @@ struct PartView {
 };
 
 PartView::PartView(float alpha, const base::string16& text)
-    : alpha(alpha), text(text) {
-}
+    : alpha(alpha), text(text) {}
 
-PartView::PartView()
-    : PartView(1.0f, base::string16()) {
-}
+PartView::PartView() : PartView(1.0f, base::string16()) {}
 
 // Paint resize button with six dots:
 //  --o
 //  -oo
 //  ooo
-void PaintResizeButton(gfx::Canvas* canvas, const gfx::RectF& bounds,
+void PaintResizeButton(gfx::Canvas* canvas,
+                       const gfx::RectF& bounds,
                        float alpha) {
   auto const bounds2 = bounds - gfx::SizeF(2.0f, 2.0f);
   auto const dot_size = 2.0f;
   for (auto y = 1; y <= 3; ++y) {
     for (auto x = 4 - y; x >= 1; --x) {
-        auto const dot = gfx::RectF(
-            gfx::PointF(bounds2.right - x * (dot_size + 1),
-                        bounds2.bottom - y * (dot_size + 1)),
-            gfx::SizeF(dot_size, dot_size));
-        gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, dot);
-        canvas->Clear(gfx::sysColor(COLOR_SCROLLBAR, alpha));
-     }
+      auto const dot =
+          gfx::RectF(gfx::PointF(bounds2.right - x * (dot_size + 1),
+                                 bounds2.bottom - y * (dot_size + 1)),
+                     gfx::SizeF(dot_size, dot_size));
+      gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, dot);
+      canvas->Clear(gfx::sysColor(COLOR_SCROLLBAR, alpha));
+    }
   }
 }
 
@@ -60,7 +60,14 @@ void PaintResizeButton(gfx::Canvas* canvas, const gfx::RectF& bounds,
 // Painter
 //
 class Painter final {
-  private: struct Part {
+ public:
+  Painter();
+  ~Painter() = default;
+
+  void Paint(gfx::Canvas* canvas, const std::vector<PartView>& parts);
+
+ private:
+  struct Part {
     float alpha;
     gfx::RectF bounds;
     bool dirty;
@@ -73,15 +80,10 @@ class Painter final {
     ~Part();
   };
 
-  private: gfx::RectF bounds_;
-  private: float original_main_part_width_;
-  private: std::vector<Part> parts_;
-  private: std::unique_ptr<gfx::TextFormat> text_format_;
-
-  public: Painter();
-  public: ~Painter() = default;
-
-  public: void Paint(gfx::Canvas* canvas, const std::vector<PartView>& parts);
+  gfx::RectF bounds_;
+  float original_main_part_width_;
+  std::vector<Part> parts_;
+  std::unique_ptr<gfx::TextFormat> text_format_;
 
   DISALLOW_COPY_AND_ASSIGN(Painter);
 };
@@ -89,17 +91,16 @@ class Painter final {
 auto const kPaddingRight = 8.0f;
 
 Painter::Part::Part()
-    : alpha(1), dirty(false), text_layout(nullptr), width(kPaddingRight) {
-}
+    : alpha(1), dirty(false), text_layout(nullptr), width(kPaddingRight) {}
 
 Painter::Part::~Part() {
   delete text_layout;
 }
 
 Painter::Painter() : original_main_part_width_(0) {
-  text_format_.reset(new gfx::TextFormat(
-      ui::SystemMetrics::instance()->font_family(),
-      ui::SystemMetrics::instance()->font_size()));
+  text_format_.reset(
+      new gfx::TextFormat(ui::SystemMetrics::instance()->font_family(),
+                          ui::SystemMetrics::instance()->font_size()));
   (*text_format_)->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 }
 
@@ -116,9 +117,9 @@ void Painter::Paint(gfx::Canvas* canvas,
   auto const new_resize_button_bounds = gfx::RectF(
       new_bounds.bottom_right() - gfx::SizeF(button_size, button_size),
       new_bounds.bottom_right());
-  auto const new_parts_bounds = gfx::RectF(
-      new_bounds.origin() + gfx::SizeF(0, 1),
-      gfx::PointF(new_resize_button_bounds.left, new_bounds.bottom));
+  auto const new_parts_bounds =
+      gfx::RectF(new_bounds.origin() + gfx::SizeF(0, 1),
+                 gfx::PointF(new_resize_button_bounds.left, new_bounds.bottom));
 
   // Update part width
   {
@@ -140,8 +141,8 @@ void Painter::Paint(gfx::Canvas* canvas,
           part->text_layout = text_layout.release();
           DWRITE_TEXT_METRICS metrics;
           COM_VERIFY((*part->text_layout)->GetMetrics(&metrics));
-          part->width = std::max(::ceil(metrics.width) + kPaddingRight,
-                                 part->width);
+          part->width =
+              std::max(::ceil(metrics.width) + kPaddingRight, part->width);
         }
         dirty = true;
       }
@@ -153,10 +154,10 @@ void Painter::Paint(gfx::Canvas* canvas,
       }
       ++part;
     }
-    auto const new_main_part_width = std::max(
-        new_parts_bounds.width() - total_width + parts_[0].width,
-        std::min(std::max(parts_[0].width, kMinMainPartWidth),
-                 new_parts_bounds.width()));
+    auto const new_main_part_width =
+        std::max(new_parts_bounds.width() - total_width + parts_[0].width,
+                 std::min(std::max(parts_[0].width, kMinMainPartWidth),
+                          new_parts_bounds.width()));
     original_main_part_width_ = parts_[0].width;
     parts_[0].width = main_part_width;
     if (parts_[0].width != new_main_part_width) {
@@ -171,10 +172,10 @@ void Painter::Paint(gfx::Canvas* canvas,
     auto origin = new_parts_bounds.origin();
     for (auto& part : parts_) {
       // Part bounds don't contain top border line.
-      auto const new_part_size = gfx::SizeF(part.width,
-                                            new_parts_bounds.height());
-      auto const new_part_bounds = new_parts_bounds.Intersect(
-          gfx::RectF(origin, new_part_size));
+      auto const new_part_size =
+          gfx::SizeF(part.width, new_parts_bounds.height());
+      auto const new_part_bounds =
+          new_parts_bounds.Intersect(gfx::RectF(origin, new_part_size));
       if (part.bounds != new_part_bounds) {
         part.bounds = new_part_bounds;
         part.dirty = true;
@@ -226,27 +227,28 @@ void Painter::Paint(gfx::Canvas* canvas,
 // MessageView::View
 //
 class MessageView::View final {
-  private: ui::AnimatableWindow* const animator_;
-  private: std::unique_ptr<gfx::Canvas> canvas_;
-  private: std::unique_ptr<Painter> painter_;
-  private: std::vector<PartView> parts_;
-  private: std::unique_ptr<ui::AnimationFloat> main_text_alpha_;
-  private: base::string16 message_text_;
-  private: base::string16 status_text_;
+ public:
+  explicit View(ui::AnimatableWindow* animator);
+  ~View() = default;
 
-  public: View(ui::AnimatableWindow* animator);
-  public: ~View() = default;
+  void Animate(base::Time time);
+  void SetMessage(const base::string16& text);
+  void SetStatus(const std::vector<base::string16>& texts);
 
-  public: void Animate(base::Time time);
-  public: void SetMessage(const base::string16& text);
-  public: void SetStatus(const std::vector<base::string16>& texts);
+ private:
+  ui::AnimatableWindow* const animator_;
+  std::unique_ptr<gfx::Canvas> canvas_;
+  std::unique_ptr<Painter> painter_;
+  std::vector<PartView> parts_;
+  std::unique_ptr<ui::AnimationFloat> main_text_alpha_;
+  base::string16 message_text_;
+  base::string16 status_text_;
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };
 
 MessageView::View::View(ui::AnimatableWindow* animator)
-    : animator_(animator), painter_(new Painter()), parts_(1) {
-}
+    : animator_(animator), painter_(new Painter()), parts_(1) {}
 
 void MessageView::View::Animate(base::Time now) {
   if (!animator_->visible())
@@ -298,8 +300,8 @@ void MessageView::View::SetStatus(const std::vector<base::string16>& texts) {
   status_text_ = texts[0];
   const auto current_text = parts_[0].text;
   parts_.clear();
-  for (auto const text : texts){
-    PartView part_model {1.0f, text};
+  for (auto const text : texts) {
+    PartView part_model{1.0f, text};
     parts_.push_back(part_model);
   }
   parts_[0].text = current_text;
@@ -311,11 +313,9 @@ void MessageView::View::SetStatus(const std::vector<base::string16>& texts) {
 //
 // MessageView
 //
-MessageView::MessageView() : view_(new View(this)) {
-}
+MessageView::MessageView() : view_(new View(this)) {}
 
-MessageView::~MessageView() {
-}
+MessageView::~MessageView() {}
 
 void MessageView::SetMessage(const base::string16& text) {
   view_->SetMessage(text);

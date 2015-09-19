@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_content_observer_h)
-#define INCLUDE_evita_views_content_observer_h
+#ifndef EVITA_VIEWS_CONTENT_OBSERVER_H_
+#define EVITA_VIEWS_CONTENT_OBSERVER_H_
 
 #include "base/basictypes.h"
 
@@ -12,15 +12,19 @@ namespace views {
 class ContentWindow;
 
 class ContentObserver {
-  protected: ContentObserver();
-  public: virtual ~ContentObserver();
+ public:
+  virtual ~ContentObserver();
 
-  public: virtual void DidActivateContent(ContentWindow* content_window) = 0;
-  public: virtual void DidUpdateContent(ContentWindow* content_window) = 0;
+  virtual void DidActivateContent(ContentWindow* content_window) = 0;
+  virtual void DidUpdateContent(ContentWindow* content_window) = 0;
 
+ protected:
+  ContentObserver();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(ContentObserver);
 };
 
 }   // namespace views
 
-#endif //!defined(INCLUDE_evita_views_content_observer_h)
+#endif  // EVITA_VIEWS_CONTENT_OBSERVER_H_

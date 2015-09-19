@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_frame_list_h)
-#define INCLUDE_evita_views_frame_list_h
+#ifndef EVITA_VIEWS_FRAME_LIST_H_
+#define EVITA_VIEWS_FRAME_LIST_H_
 
 #include <windows.h>
 
@@ -20,24 +20,27 @@ class FrameList : public common::Singleton<FrameList>,
                   public FrameObserver {
   DECLARE_SINGLETON_CLASS(FrameList);
 
-  private: Frame* active_frame_;
-  private: std::unordered_set<Frame*> frames_;
+ public:
+  ~FrameList() final;
 
-  private: FrameList();
-  public: virtual ~FrameList();
+  Frame* active_frame() const { return active_frame_; }
 
-  public: Frame* active_frame() const { return active_frame_; }
+  void AddFrame(Frame* frame);
+  Frame* FindFrameByHwnd(HWND hwnd) const;
+  void RemoveFrame(Frame* frame);
 
-  public: void AddFrame(Frame* frame);
-  public: Frame* FindFrameByHwnd(HWND hwnd) const;
-  public: void RemoveFrame(Frame* frame);
+ private:
+  FrameList();
 
   // FrameObserver
-  public: virtual void DidActivateFrame(Frame* frame) override;
+  void DidActivateFrame(Frame* frame) final;
+
+  Frame* active_frame_;
+  std::unordered_set<Frame*> frames_;
 
   DISALLOW_COPY_AND_ASSIGN(FrameList);
 };
 
-}   // views
+}  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_frame_list_h)
+#endif  // EVITA_VIEWS_FRAME_LIST_H_

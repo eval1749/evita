@@ -5,11 +5,8 @@
 
 namespace views {
 
-WindowSet::WindowSet(Set&& set)
-    : set_(set) {
-}
+WindowSet::WindowSet(Set&& set) : set_(set) {}
 
-WindowSet::~WindowSet() {
-}
+WindowSet::~WindowSet() {}
 
 }  // namespace views

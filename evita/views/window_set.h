@@ -1,26 +1,33 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#if !defined(INCLUDE_evita_views_window_set_h)
-#define INCLUDE_evita_views_window_set_h
+#ifndef EVITA_VIEWS_WINDOW_SET_H_
+#define EVITA_VIEWS_WINDOW_SET_H_
 
 #include <unordered_set>
+
+#include "base/macros.h"
 
 namespace views {
 
 class Window;
 
 class WindowSet {
-  public: typedef std::unordered_set<Window*> Set;
-  private: Set set_;
+ public:
+  typedef std::unordered_set<Window*> Set;
 
-  public: WindowSet(Set&& set);
-  public: ~WindowSet();
+  explicit WindowSet(Set&& set);
+  ~WindowSet();
 
-  public: Set::const_iterator begin() const { return set_.begin(); }
-  public: Set::const_iterator end() const { return set_.end(); }
+  Set::const_iterator begin() const { return set_.begin(); }
+  Set::const_iterator end() const { return set_.end(); }
+
+ private:
+  Set set_;
+
+  DISALLOW_COPY_AND_ASSIGN(WindowSet);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_window_set_h)
+#endif  // EVITA_VIEWS_WINDOW_SET_H_

@@ -25,17 +25,11 @@ namespace {
 //
 // This class represents mapping from widget id to DOM Window object.
 //
-class WindowIdMapper : public common::Singleton<WindowIdMapper> {
-  friend class common::Singleton<WindowIdMapper>;
+class WindowIdMapper final : public common::Singleton<WindowIdMapper> {
+ public:
+  ~WindowIdMapper() = default;
 
-  private: typedef WindowId WindowId;
-
-  private: std::unordered_map<WindowId, Window*> map_;
-
-  private: WindowIdMapper() = default;
-  public: ~WindowIdMapper() = default;
-
-  public: void DidDestroyDomWindow(WindowId window_id) {
+  void DidDestroyDomWindow(WindowId window_id) {
     ASSERT_CALLED_ON_UI_THREAD();
     DCHECK_NE(kInvalidWindowId, window_id);
     auto it = map_.find(window_id);
@@ -46,14 +40,14 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
     map_.erase(it);
   }
 
-  public: Window* Find(WindowId window_id) {
+  Window* Find(WindowId window_id) {
     ASSERT_CALLED_ON_UI_THREAD();
     DCHECK_NE(kInvalidWindowId, window_id);
     auto it = map_.find(window_id);
     return it == map_.end() ? nullptr : it->second;
   }
 
-  public: WindowId Register(Window* window) {
+  WindowId Register(Window* window) {
     ASSERT_CALLED_ON_UI_THREAD();
     auto const window_id = window->window_id();
     DCHECK_NE(kInvalidWindowId, window_id);
@@ -62,7 +56,7 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
     return window_id;
   }
 
-  public: void Unregister(WindowId window_id) {
+  void Unregister(WindowId window_id) {
     ASSERT_CALLED_ON_UI_THREAD();
     DCHECK_NE(kInvalidWindowId, window_id);
     auto it = map_.find(window_id);
@@ -72,6 +66,16 @@ class WindowIdMapper : public common::Singleton<WindowIdMapper> {
     }
     map_.erase(it);
   }
+
+ private:
+  friend class common::Singleton<WindowIdMapper>;
+  typedef WindowId WindowId;
+
+  WindowIdMapper() = default;
+
+  std::unordered_map<WindowId, Window*> map_;
+
+  DISALLOW_COPY_AND_ASSIGN(WindowIdMapper);
 };
 
 domapi::ViewEventHandler* view_event_handler() {
@@ -91,8 +95,7 @@ domapi::EventTargetId MaybeEventTarget(ui::Widget* widget) {
 //
 // Window
 //
-Window::Window(std::unique_ptr<NativeWindow> native_window,
-               WindowId window_id)
+Window::Window(std::unique_ptr<NativeWindow> native_window, WindowId window_id)
     : ui::AnimatableWindow(std::move(native_window)),
       EventSource(window_id),
       active_tick_(0),
@@ -102,8 +105,7 @@ Window::Window(std::unique_ptr<NativeWindow> native_window,
 }
 
 Window::Window(WindowId window_id)
-    : Window(std::unique_ptr<NativeWindow>(), window_id) {
-}
+    : Window(std::unique_ptr<NativeWindow>(), window_id) {}
 
 Window::~Window() {
   WindowIdMapper::instance()->Unregister(window_id_);
@@ -123,8 +125,8 @@ void Window::DidDestroyDomWindow() {
 void Window::DidChangeBounds() {
   ui::AnimatableWindow::DidChangeBounds();
   view_event_handler()->DidChangeWindowBounds(window_id_, bounds().left(),
-                                        bounds().top(), bounds().right(),
-                                        bounds().bottom());
+                                              bounds().top(), bounds().right(),
+                                              bounds().bottom());
 }
 
 void Window::DidHide() {
@@ -141,8 +143,8 @@ void Window::DidKillFocus(ui::Widget* focused_window) {
 void Window::DidRealize() {
   view_event_handler()->DidRealizeWidget(window_id_);
   view_event_handler()->DidChangeWindowBounds(window_id_, bounds().left(),
-                                        bounds().top(), bounds().right(),
-                                        bounds().bottom());
+                                              bounds().top(), bounds().right(),
+                                              bounds().bottom());
   ui::AnimatableWindow::DidRealize();
 }
 

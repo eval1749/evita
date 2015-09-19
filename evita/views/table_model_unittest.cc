@@ -4,7 +4,7 @@
 #include <memory>
 
 #pragma warning(push)
-#pragma warning(disable: 4365 4625 4626 4826)
+#pragma warning(disable : 4365 4625 4626 4826)
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
@@ -13,11 +13,13 @@
 namespace {
 
 class TableModeTest : public ::testing::Test {
-  protected: TableModeTest() {
-  }
-  public: virtual ~TableModeTest() {
-  }
+ public:
+  ~TableModeTest() override {}
 
+ protected:
+  TableModeTest() {}
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(TableModeTest);
 };
 

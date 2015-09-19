@@ -9,11 +9,9 @@
 
 namespace views {
 
-FrameList::FrameList() : active_frame_(nullptr) {
-}
+FrameList::FrameList() : active_frame_(nullptr) {}
 
-FrameList::~FrameList() {
-}
+FrameList::~FrameList() {}
 
 void FrameList::AddFrame(Frame* frame) {
   frames_.insert(frame);

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_event_source_h)
-#define INCLUDE_evita_views_event_source_h
+#ifndef EVITA_VIEWS_EVENT_SOURCE_H_
+#define EVITA_VIEWS_EVENT_SOURCE_H_
 
 #include "base/macros.h"
 #include "evita/dom/public/event_target_id.h"
@@ -23,26 +23,27 @@ class TextComposition;
 namespace views {
 
 class EventSource {
-  private: const domapi::EventTargetId event_target_id_;
+ public:
+  ~EventSource();
 
-  protected: explicit EventSource(domapi::EventTargetId event_target_id);
-  public: ~EventSource();
-
-  protected: domapi::EventTargetId event_target_id() const {
-    return event_target_id_;
-  }
-
-  public: void DispatchFocusEvent(domapi::EventType event_type,
+  void DispatchFocusEvent(domapi::EventType event_type,
                                   domapi::EventTargetId related_target_id);
-  public: void DispatchKeyboardEvent(const ui::KeyEvent& event);
-  public: void DispatchMouseEvent(const ui::MouseEvent& event);
-  public: void DispatchTextCompositionEvent(
+  void DispatchKeyboardEvent(const ui::KeyEvent& event);
+  void DispatchMouseEvent(const ui::MouseEvent& event);
+  void DispatchTextCompositionEvent(
       domapi::EventType event_type, const ui::TextComposition& composition);
-  public: void DispatchWheelEvent(const ui::MouseWheelEvent& event);
+  void DispatchWheelEvent(const ui::MouseWheelEvent& event);
+
+ protected:
+  explicit EventSource(domapi::EventTargetId event_target_id);
+  domapi::EventTargetId event_target_id() const { return event_target_id_; }
+
+ private:
+  const domapi::EventTargetId event_target_id_;
 
   DISALLOW_COPY_AND_ASSIGN(EventSource);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_event_source_h)
+#endif  // EVITA_VIEWS_EVENT_SOURCE_H_

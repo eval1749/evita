@@ -61,9 +61,7 @@ Frame* GetFrameForMessage(dom::WindowId window_id) {
 
 }  // namespace
 
-ViewDelegateImpl::ViewDelegateImpl()
-    : event_handler_(nullptr) {
-}
+ViewDelegateImpl::ViewDelegateImpl() : event_handler_(nullptr) {}
 
 ViewDelegateImpl::~ViewDelegateImpl() {
   // event_handler_ should be nullptr
@@ -100,9 +98,10 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
 }
 
 text::Posn ViewDelegateImpl::ComputeOnTextWindow(
-    dom::WindowId window_id, const dom::TextWindowCompute& data) {
-  auto const window = FromWindowId("ComputeOnTextWindow", window_id)->
-      as<TextWindow>();
+    dom::WindowId window_id,
+    const dom::TextWindowCompute& data) {
+  auto const window =
+      FromWindowId("ComputeOnTextWindow", window_id)->as<TextWindow>();
   if (!window)
     return -1;
   gfx::PointF point(data.x, data.y);
@@ -136,9 +135,9 @@ void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   new Frame(window->window_id());
 }
 
-void ViewDelegateImpl::CreateFormWindow(
-    dom::WindowId window_id, dom::Form* form,
-    const domapi::PopupWindowInit& init) {
+void ViewDelegateImpl::CreateFormWindow(dom::WindowId window_id,
+                                        dom::Form* form,
+                                        const domapi::PopupWindowInit& init) {
   if (init.owner_id == dom::kInvalidWindowId) {
     new FormWindow(window_id, form);
     return;
@@ -187,11 +186,12 @@ void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
 }
 
 void ViewDelegateImpl::GetFileNameForLoad(
-    dom::WindowId window_id, const base::string16& dir_path,
+    dom::WindowId window_id,
+    const base::string16& dir_path,
     const GetFileNameForLoadResolver& resolver) {
-  auto const widget = window_id == dom::kInvalidWindowId ?
-        FrameList::instance()->active_frame() :
-        Window::FromWindowId(window_id);
+  auto const widget = window_id == dom::kInvalidWindowId
+                          ? FrameList::instance()->active_frame()
+                          : Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "GetFileNameForLoad: no such widget " << window_id;
     event_handler_->RunCallback(base::Bind(resolver.resolve, base::string16()));
@@ -203,16 +203,17 @@ void ViewDelegateImpl::GetFileNameForLoad(
   FileDialogBox oDialog;
   if (!oDialog.GetOpenFileName(&params))
     return;
-  event_handler_->RunCallback(base::Bind(resolver.resolve,
-                                         base::string16(params.m_wsz)));
+  event_handler_->RunCallback(
+      base::Bind(resolver.resolve, base::string16(params.m_wsz)));
 }
 
 void ViewDelegateImpl::GetFileNameForSave(
-    dom::WindowId window_id, const base::string16& dir_path,
+    dom::WindowId window_id,
+    const base::string16& dir_path,
     const GetFileNameForSaveResolver& resolver) {
-  auto const widget = window_id == dom::kInvalidWindowId ?
-        FrameList::instance()->active_frame() :
-        Window::FromWindowId(window_id);
+  auto const widget = window_id == dom::kInvalidWindowId
+                          ? FrameList::instance()->active_frame()
+                          : Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "GetFileNameForSave: no such widget " << window_id;
     event_handler_->RunCallback(base::Bind(resolver.resolve, base::string16()));
@@ -224,8 +225,8 @@ void ViewDelegateImpl::GetFileNameForSave(
   FileDialogBox oDialog;
   if (!oDialog.GetSaveFileName(&params))
     return;
-  event_handler_->RunCallback(base::Bind(resolver.resolve,
-                                         base::string16(params.m_wsz)));
+  event_handler_->RunCallback(
+      base::Bind(resolver.resolve, base::string16(params.m_wsz)));
 }
 
 base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
@@ -272,7 +273,8 @@ std::vector<base::string16> ViewDelegateImpl::GetSwitchNames() {
   return editor::SwitchSet::instance()->names();
 }
 
-std::vector<int> ViewDelegateImpl::GetTableRowStates(WindowId window_id,
+std::vector<int> ViewDelegateImpl::GetTableRowStates(
+    WindowId window_id,
     const std::vector<base::string16>& keys) {
   auto const widget = FromWindowId("GetTableRowStates", window_id);
   if (!widget)
@@ -292,10 +294,10 @@ void ViewDelegateImpl::HideWindow(dom::WindowId window_id) {
   window->Hide();
 }
 
-domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(
-    WindowId window_id, text::Posn position) {
-  auto const window = FromWindowId("HitTestTextPosition", window_id)->
-      as<TextWindow>();
+domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(WindowId window_id,
+                                                        text::Posn position) {
+  auto const window =
+      FromWindowId("HitTestTextPosition", window_id)->as<TextWindow>();
   if (!window)
     return domapi::FloatRect();
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -321,7 +323,9 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
 }
 
 text::Posn ViewDelegateImpl::MapPointToPosition(
-    domapi::EventTargetId event_target_id, float x, float y) {
+    domapi::EventTargetId event_target_id,
+    float x,
+    float y) {
   if (auto const window = Window::FromWindowId(event_target_id)) {
     if (auto const text_window = window->as<TextWindow>()) {
       UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -330,8 +334,8 @@ text::Posn ViewDelegateImpl::MapPointToPosition(
     }
   }
 
-  if (auto const control = FormControlSet::instance()->
-          MaybeControl(event_target_id)) {
+  if (auto const control =
+          FormControlSet::instance()->MaybeControl(event_target_id)) {
     if (auto const text_field = control->as<ui::TextFieldControl>())
       return text_field->MapPointToOffset(gfx::PointF(x, y));
   }
@@ -340,18 +344,20 @@ text::Posn ViewDelegateImpl::MapPointToPosition(
 }
 
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
-      const base::string16& message, const base::string16& title, int flags,
-      const MessageBoxResolver& resolver) {
-
+                                  const base::string16& message,
+                                  const base::string16& title,
+                                  int flags,
+                                  const MessageBoxResolver& resolver) {
   auto const frame = GetFrameForMessage(window_id);
 
   auto const kButtonMask = 7;
   auto const kIconMask = 0x70;
   auto const need_response = flags & kButtonMask;
-  auto const level = (flags & kIconMask) == MB_ICONERROR ?
-      MessageLevel_Error :
-      (flags & kIconMask) == MB_ICONWARNING ? MessageLevel_Warning :
-          MessageLevel_Information;
+  auto const level = (flags & kIconMask) == MB_ICONERROR
+                         ? MessageLevel_Error
+                         : (flags & kIconMask) == MB_ICONWARNING
+                               ? MessageLevel_Warning
+                               : MessageLevel_Information;
 
   if (!need_response && level != MessageLevel_Error) {
     if (frame)
@@ -366,13 +372,13 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   safe_title += editor::Application::instance()->title();
   auto const hwnd = frame ? frame->AssociatedHwnd() : nullptr;
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
-  auto const response= ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
-                                     static_cast<UINT>(flags));
+  auto const response = ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
+                                      static_cast<UINT>(flags));
   event_handler_->RunCallback(base::Bind(resolver.resolve, response));
 }
 
-void ViewDelegateImpl::Reconvert(
-    WindowId window_id, const base::string16& text) {
+void ViewDelegateImpl::Reconvert(WindowId window_id,
+                                 const base::string16& text) {
   auto const window = FromWindowId("Reconvert", window_id);
   if (!window)
     return;
@@ -424,8 +430,8 @@ void ViewDelegateImpl::ReleaseCapture(domapi::EventTargetId event_target_id) {
     return;
   }
 
-  if (auto const control = FormControlSet::instance()->
-          MaybeControl(event_target_id)) {
+  if (auto const control =
+          FormControlSet::instance()->MaybeControl(event_target_id)) {
     control->ReleaseCapture();
     return;
   }
@@ -453,8 +459,8 @@ void ViewDelegateImpl::SetCapture(domapi::EventTargetId event_target_id) {
     return;
   }
 
-  if (auto const control = FormControlSet::instance()->
-          MaybeControl(event_target_id)) {
+  if (auto const control =
+          FormControlSet::instance()->MaybeControl(event_target_id)) {
     control->SetCapture();
     return;
   }
@@ -488,7 +494,7 @@ void ViewDelegateImpl::SetTabData(dom::WindowId window_id,
 }
 
 void ViewDelegateImpl::SplitHorizontally(dom::WindowId left_window_id,
-    dom::WindowId new_right_window_id) {
+                                         dom::WindowId new_right_window_id) {
   auto const left_window = Window::FromWindowId(left_window_id);
   if (!left_window)
     return;
@@ -503,7 +509,7 @@ void ViewDelegateImpl::SplitHorizontally(dom::WindowId left_window_id,
 }
 
 void ViewDelegateImpl::SplitVertically(dom::WindowId above_window_id,
-    dom::WindowId new_below_window_id) {
+                                       dom::WindowId new_below_window_id) {
   auto const above_window = Window::FromWindowId(above_window_id);
   if (!above_window)
     return;

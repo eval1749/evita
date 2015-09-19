@@ -11,18 +11,15 @@
 
 namespace views {
 
-ContentWindow::ContentWindow(views::WindowId window_id)
-    : Window(window_id) {
-}
+ContentWindow::ContentWindow(views::WindowId window_id) : Window(window_id) {}
 
-ContentWindow::~ContentWindow() {
-}
+ContentWindow::~ContentWindow() {}
 
 void ContentWindow::Activate() {
-  #if DEBUG_FOCUS
-    DVLOG(0) << "Activate " << this << " focus=" << has_focus() <<
-        "show=" << visible();
-  #endif
+#if DEBUG_FOCUS
+  DVLOG(0) << "Activate " << this << " focus=" << has_focus()
+           << "show=" << visible();
+#endif
   RequestFocus();
 }
 

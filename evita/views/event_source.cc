@@ -76,8 +76,7 @@ EventSource::EventSource(domapi::EventTargetId event_target_id)
   DCHECK_NE(domapi::kInvalidEventTargetId, event_target_id_);
 }
 
-EventSource::~EventSource() {
-}
+EventSource::~EventSource() {}
 
 void EventSource::DispatchFocusEvent(domapi::EventType event_type,
                                      domapi::EventTargetId related_target_id) {
@@ -106,10 +105,10 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
 }
 
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
-  #define MUST_EQUAL(name) \
-    static_assert(static_cast<int>(domapi::MouseButton::name) == \
-                  static_cast<int>(ui::MouseButton::name), \
-                  "Button name " # name " must be equal.")
+#define MUST_EQUAL(name)                                       \
+  static_assert(static_cast<int>(domapi::MouseButton::name) == \
+                    static_cast<int>(ui::MouseButton::name),   \
+                "Button name " #name " must be equal.")
   MUST_EQUAL(Left);
   MUST_EQUAL(Middle);
   MUST_EQUAL(Right);
@@ -131,7 +130,8 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
 }
 
 void EventSource::DispatchTextCompositionEvent(
-      domapi::EventType event_type, const ui::TextComposition& composition) {
+    domapi::EventType event_type,
+    const ui::TextComposition& composition) {
   domapi::TextCompositionData data;
   data.caret = composition.caret();
   data.text = composition.text();

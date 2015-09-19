@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_message_view_h)
-#define INCLUDE_evita_views_message_view_h
+#ifndef EVITA_VIEWS_MESSAGE_VIEW_H_
+#define EVITA_VIEWS_MESSAGE_VIEW_H_
 
 #include <memory>
 #include <vector>
@@ -19,27 +19,28 @@ namespace views {
 //
 class MessageView final : public ui::AnimatableWindow {
   DECLARE_CASTABLE_CLASS(MessageView, ui::AnimatableWindow);
+ public:
+  MessageView();
+  ~MessageView() final;
 
-  private: class View;
+  void SetMessage(const base::string16& text);
+  void SetStatus(const std::vector<base::string16>& texts);
 
-  private: std::unique_ptr<View> view_;
-
-  public: MessageView();
-  public: virtual ~MessageView();
-
-  public: void SetMessage(const base::string16& text);
-  public: void SetStatus(const std::vector<base::string16>& texts);
+ private:
+  class View;
 
   // ui::AnimationFrameHandler
-  private: virtual void DidBeginAnimationFrame(base::Time time) override;
+  void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::Widget
-  private: virtual void DidRealize() override;
-  private: virtual gfx::Size GetPreferredSize() const override;
+  void DidRealize() final;
+  gfx::Size GetPreferredSize() const final;
+
+  std::unique_ptr<View> view_;
 
   DISALLOW_COPY_AND_ASSIGN(MessageView);
 };
 
 }  // namespace views
 
-#endif // !defined(INCLUDE_evita_views_message_view_h)
+#endif  // EVITA_VIEWS_MESSAGE_VIEW_H_

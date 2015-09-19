@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_metrics_view_h)
-#define INCLUDE_evita_views_metrics_view_h
+#ifndef EVITA_VIEWS_METRICS_VIEW_H_
+#define EVITA_VIEWS_METRICS_VIEW_H_
 
 #include <memory>
 
@@ -17,31 +17,35 @@ namespace views {
 // MetricsView
 //
 class MetricsView final : public ui::Widget {
-  public: class TimingScope final {
-    private: base::TimeTicks start_;
-    private: MetricsView* view_;
+ public:
+  class TimingScope final {
+   public:
+    explicit TimingScope(MetricsView* view);
+    ~TimingScope();
 
-    public: TimingScope(MetricsView* view);
-    public: ~TimingScope();
+   private:
+    base::TimeTicks start_;
+    MetricsView* view_;
 
     DISALLOW_COPY_AND_ASSIGN(TimingScope);
   };
 
-  private: class View;
+  MetricsView();
+  ~MetricsView() final;
 
-  private: std::unique_ptr<View> view_;
+  void Animate(base::Time now);
+  void RecordTime();
 
-  public: MetricsView();
-  public: ~MetricsView() final;
-
-  public: void Animate(base::Time now);
-  public: void RecordTime();
+ private:
+  class View;
 
   // ui::Widget
-  private: void DidRealize() final;
+  void DidRealize() final;
+
+  std::unique_ptr<View> view_;
 
   DISALLOW_COPY_AND_ASSIGN(MetricsView);
 };
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_metrics_view_h)
+#endif  // EVITA_VIEWS_METRICS_VIEW_H_

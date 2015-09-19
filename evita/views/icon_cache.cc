@@ -16,10 +16,9 @@ namespace views {
 namespace {
 
 base::string16 GetExtension(const base::string16& name,
-                             const base::string16& default_extension) {
+                            const base::string16& default_extension) {
   auto const index = name.find_last_of('.');
-  return index == base::string16::npos ? default_extension :
-                                         name.substr(index);
+  return index == base::string16::npos ? default_extension : name.substr(index);
 }
 
 HICON LoadIconFromRegistry(const base::string16& extension) {
@@ -33,7 +32,7 @@ HICON LoadIconFromRegistry(const base::string16& extension) {
 
   common::win::Registry id_key(HKEY_CLASSES_ROOT, id_name + L"\\DefaultIcon");
   if (!id_key)
-    return nullptr;;
+    return nullptr;
 
   auto const icon_location = id_key.GetValue();
   if (icon_location.empty())
@@ -62,11 +61,10 @@ HICON LoadIconFromRegistry(const base::string16& extension) {
   return hIcon;
 }
 
-} // namespace
+}  // namespace
 
 IconCache::IconCache()
-    : image_list_(::ImageList_Create(16, 16, ILC_COLOR32, 10, 10)) {
-}
+    : image_list_(::ImageList_Create(16, 16, ILC_COLOR32, 10, 10)) {}
 
 IconCache::~IconCache() {
   if (image_list_)

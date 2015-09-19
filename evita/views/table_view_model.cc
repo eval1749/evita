@@ -13,14 +13,11 @@ namespace views {
 //
 // TableViewModel::Cell
 //
-TableViewModel::Cell::Cell(Cell&& other) : text_(std::move(other.text_)) {
-}
+TableViewModel::Cell::Cell(Cell&& other) : text_(std::move(other.text_)) {}
 
-TableViewModel::Cell::Cell(const base::string16& text) : text_(text) {
-}
+TableViewModel::Cell::Cell(const base::string16& text) : text_(text) {}
 
-TableViewModel::Cell::~Cell() {
-}
+TableViewModel::Cell::~Cell() {}
 
 bool TableViewModel::Cell::operator==(const Cell& other) const {
   return text_ == other.text_;
@@ -34,11 +31,9 @@ bool TableViewModel::Cell::operator!=(const Cell& other) const {
 //
 // TableViewModel::Row
 //
-TableViewModel::Row::Row() : hash_code_(0), row_id_(0) {
-}
+TableViewModel::Row::Row() : hash_code_(0), row_id_(0) {}
 
-TableViewModel::Row::~Row() {
-}
+TableViewModel::Row::~Row() {}
 
 bool TableViewModel::Row::operator==(const Row& other) const {
   if (hash_code_ != other.hash_code_)
@@ -72,8 +67,7 @@ void TableViewModel::Row::Clear() {
 //
 // TableModle
 //
-TableViewModel::TableViewModel() {
-}
+TableViewModel::TableViewModel() {}
 
 TableViewModel::~TableViewModel() {
   Clear();

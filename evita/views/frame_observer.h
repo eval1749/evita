@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_frame_observer_h)
-#define INCLUDE_evita_views_frame_observer_h
+#ifndef EVITA_VIEWS_FRAME_OBSERVER_H_
+#define EVITA_VIEWS_FRAME_OBSERVER_H_
 
 #include "base/macros.h"
 
@@ -12,14 +12,18 @@ class Frame;
 namespace views {
 
 class FrameObserver {
-  public: FrameObserver();
-  public: virtual ~FrameObserver();
+ public:
+  virtual ~FrameObserver();
 
-  public: virtual void DidActivateFrame(Frame* frame) = 0;
+  virtual void DidActivateFrame(Frame* frame) = 0;
 
+ protected:
+  FrameObserver();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(FrameObserver);
 };
 
-}   // views
+}  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_frame_observer_h)
+#endif  // EVITA_VIEWS_FRAME_OBSERVER_H_

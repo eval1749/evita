@@ -230,8 +230,7 @@ void TableWindow::OnMousePressed(const ui::MouseEvent& event) {
   ContentWindow::OnMousePressed(event);
 }
 
-void TableWindow::OnSelectionChanged() {
-}
+void TableWindow::OnSelectionChanged() {}
 
 // ui::TableModel
 int TableWindow::GetRowCount() const {
@@ -268,7 +267,6 @@ void TableWindow::DidSetFocus(ui::Widget* last_focused) {
 }
 
 // views::ContentWindow
-void TableWindow::MakeSelectionVisible() {
-}
+void TableWindow::MakeSelectionVisible() {}
 
 }  // namespace views

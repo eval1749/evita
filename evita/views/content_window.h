@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_content_window_h)
-#define INCLUDE_evita_views_content_window_h
+#ifndef EVITA_VIEWS_CONTENT_WINDOW_H_
+#define EVITA_VIEWS_CONTENT_WINDOW_H_
 
 #include <memory>
 
@@ -29,35 +29,40 @@ class ContentObserver;
 class ContentWindow : public Window, protected ui::LayerOwnerDelegate {
   DECLARE_CASTABLE_CLASS(ContentWindow, Window);
 
-  private: std::unique_ptr<gfx::Canvas> canvas_;
-  private: base::ObserverList<ContentObserver> observers_;
+ public:
+  ~ContentWindow() override;
 
-  protected: explicit ContentWindow(views::WindowId window_id);
-  public: ~ContentWindow() override;
+  void Activate();
+  void AddObserver(ContentObserver* observer);
+  virtual void MakeSelectionVisible() = 0;
+  void RemoveObserver(ContentObserver* observer);
 
-  protected: gfx::Canvas* canvas() { return canvas_.get(); }
-  protected: const gfx::Canvas* canvas() const { return canvas_.get(); }
+ protected:
+  explicit ContentWindow(views::WindowId window_id);
 
-  public: void Activate();
-  public: void AddObserver(ContentObserver* observer);
-  public: virtual void MakeSelectionVisible() = 0;
-  protected: void NotifyUpdateContent();
-  public: void RemoveObserver(ContentObserver* observer);
+  gfx::Canvas* canvas() { return canvas_.get(); }
+  const gfx::Canvas* canvas() const { return canvas_.get(); }
+
+  void NotifyUpdateContent();
 
   // ui::LayerOwnerDelegate
-  protected: void DidRecreateLayer(ui::Layer* old_layer) override;
+  void DidRecreateLayer(ui::Layer* old_layer) override;
 
   // ui::Widget
-  protected: void DidChangeBounds() override;
-  protected: void DidChangeHierarchy() override;
-  protected: void DidHide() override;
-  protected: void DidRealize() override;
-  protected: void DidSetFocus(ui::Widget*) override;
-  protected: void DidShow() override;
+  void DidChangeBounds() override;
+  void DidChangeHierarchy() override;
+  void DidHide() override;
+  void DidRealize() override;
+  void DidSetFocus(ui::Widget*) override;
+  void DidShow() override;
+
+ private:
+  std::unique_ptr<gfx::Canvas> canvas_;
+  base::ObserverList<ContentObserver> observers_;
 
   DISALLOW_COPY_AND_ASSIGN(ContentWindow);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_content_window_h)
+#endif  // EVITA_VIEWS_CONTENT_WINDOW_H_

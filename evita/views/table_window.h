@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_views_table_window_h)
-#define INCLUDE_evita_views_table_window_h
-
-#include "evita/views/content_window.h"
+#ifndef EVITA_VIEWS_TABLE_WINDOW_H_
+#define EVITA_VIEWS_TABLE_WINDOW_H_
 
 #include <memory>
 #include <vector>
+
+#include "evita/views/content_window.h"
 
 #include "base/basictypes.h"
 #include "evita/gc/member.h"
@@ -37,51 +37,53 @@ class TableWindow final : public text::BufferMutationObserver,
                           public ui::TableModel {
   DECLARE_CASTABLE_CLASS(TableView, ContentWindow);
 
-  private: std::vector<ui::TableColumn> columns_;
-  private: ui::TableControl* control_;
-  private: gc::Member<dom::Document> document_;
-  private: std::unique_ptr<TableViewModel> model_;
-  private: std::unordered_map<int, TableViewModel::Row*> row_map_;
-  private: bool should_update_model_;
+ public:
+  TableWindow(WindowId window_id, dom::Document* document);
+  ~TableWindow() final;
 
-  public: TableWindow(WindowId window_id, dom::Document* document);
-  public: virtual ~TableWindow();
+  std::vector<int> GetRowStates(const std::vector<base::string16>& keys) const;
 
-  private: bool DrawIfNeeded();
-  public: std::vector<int> GetRowStates(
-      const std::vector<base::string16>& keys) const;
-  private: void Redraw();
-  private: std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
-  private: void UpdateControl(std::unique_ptr<TableViewModel> new_model);
+ private:
+  bool DrawIfNeeded();
+  void Redraw();
+  std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
+  void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
   // text::BufferMutationObserver
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+  void DidDeleteAt(Posn offset, size_t length) final;
+  void DidInsertAt(Posn offset, size_t length) final;
 
   // ui::AnimationFrameHandler
-  private: virtual void DidBeginAnimationFrame(base::Time time) override;
+  void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::TableControlObserver
-  private: virtual void OnKeyPressed(const ui::KeyEvent&) override;
-  private: virtual void OnMousePressed(const ui::MouseEvent&) override;
-  private: virtual void OnSelectionChanged() override;
+  void OnKeyPressed(const ui::KeyEvent&) final;
+  void OnMousePressed(const ui::MouseEvent&) final;
+  void OnSelectionChanged() final;
 
   // ui::TableModel
-  private: virtual int GetRowCount() const override;
-  private: virtual int GetRowId(int index) const override;
-  private: virtual base::string16 GetCellText(
-      int row_id, int column_id) const override;
+  int GetRowCount() const final;
+  int GetRowId(int index) const final;
+  base::string16 GetCellText(
+      int row_id, int column_id) const final;
 
   // views::ContentWindow
-  private: virtual void MakeSelectionVisible() override;
+  void MakeSelectionVisible() final;
 
   // ui::Widget
-  private: virtual void DidChangeBounds() override;
-  private: virtual void DidSetFocus(ui::Widget* last_focused) override;
+  void DidChangeBounds() final;
+  void DidSetFocus(ui::Widget* last_focused) final;
+
+  std::vector<ui::TableColumn> columns_;
+  ui::TableControl* control_;
+  gc::Member<dom::Document> document_;
+  std::unique_ptr<TableViewModel> model_;
+  std::unordered_map<int, TableViewModel::Row*> row_map_;
+  bool should_update_model_;
 
   DISALLOW_COPY_AND_ASSIGN(TableWindow);
 };
 
 }  // namespace views
 
-#endif //!defined(INCLUDE_evita_views_table_window_h)
+#endif  // EVITA_VIEWS_TABLE_WINDOW_H_

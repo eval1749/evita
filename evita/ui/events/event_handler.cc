@@ -10,8 +10,7 @@
 
 namespace ui {
 
-EventHandler::EventHandler() {
-}
+EventHandler::EventHandler() {}
 
 EventHandler::~EventHandler() {
   EventDispatcher::instance()->DidDestroyEventHandler(this);
@@ -29,10 +28,12 @@ void EventHandler::OnEvent(Event* event) {
   NOTREACHED();
 }
 
-void EventHandler::OnKeyEvent(KeyEvent*) {
+void EventHandler::OnKeyEvent(KeyEvent* event) {
+  DCHECK(event);
 }
 
-void EventHandler::OnMouseEvent(MouseEvent*) {
+void EventHandler::OnMouseEvent(MouseEvent* event) {
+  DCHECK(event);
 }
 
 }  // namespace ui

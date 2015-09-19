@@ -8,11 +8,9 @@
 
 namespace ui {
 
-EventTarget::EventTarget() {
-}
+EventTarget::EventTarget() {}
 
-EventTarget::~EventTarget() {
-}
+EventTarget::~EventTarget() {}
 
 bool EventTarget::DispatchEvent(Event* event) {
   return EventDispatcher::instance()->DispatchEvent(this, event);

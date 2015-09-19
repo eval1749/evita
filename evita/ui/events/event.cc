@@ -21,12 +21,16 @@ bool IsAltPressed() {
   return ::GetKeyState(VK_MENU) < 0;
 }
 
-class KeyCodeMapper : public common::Singleton<KeyCodeMapper> {
+class KeyCodeMapper final : public common::Singleton<KeyCodeMapper> {
   DECLARE_SINGLETON_CLASS(KeyCodeMapper);
 
-  private: std::vector<int> graph_keys_;
+ public:
+  ~KeyCodeMapper() = default;
 
-  private: KeyCodeMapper() : graph_keys_(256) {
+  int Map(int virtual_key_code);
+
+ private:
+  KeyCodeMapper() : graph_keys_(256) {
     for (auto key_code = 0u; key_code < graph_keys_.size(); ++key_code) {
       auto const char_code = ::MapVirtualKey(key_code, MAPVK_VK_TO_CHAR);
       if (char_code >= 0x20)
@@ -34,9 +38,9 @@ class KeyCodeMapper : public common::Singleton<KeyCodeMapper> {
     }
   }
 
-  public: ~KeyCodeMapper() = default;
+  std::vector<int> graph_keys_;
 
-  public: int Map(int virtual_key_code);
+  DISALLOW_COPY_AND_ASSIGN(KeyCodeMapper);
 };
 
 int KeyCodeMapper::Map(int virtual_key_code) {
@@ -50,10 +54,10 @@ int KeyCodeMapper::Map(int virtual_key_code) {
   auto key_code = graph_keys_[static_cast<size_t>(virtual_key_code)];
 
   if (!key_code) {
-   if (virtual_key_code == VK_CANCEL)
-     key_code = VK_PAUSE | 0x100;
-   else
-     key_code = virtual_key_code | 0x100;
+    if (virtual_key_code == VK_CANCEL)
+      key_code = VK_PAUSE | 0x100;
+    else
+      key_code = virtual_key_code | 0x100;
   }
 
   if (::GetKeyState(VK_MENU) < 0)
@@ -66,7 +70,7 @@ int KeyCodeMapper::Map(int virtual_key_code) {
   return key_code;
 }
 
-bool IsNonClientMouseEvent(const base::NativeEvent&  native_event) {
+bool IsNonClientMouseEvent(const base::NativeEvent& native_event) {
   auto const message = native_event.message;
   if (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)
     return true;
@@ -86,15 +90,14 @@ bool IsNonClientMouseEvent(const base::NativeEvent&  native_event) {
 // Event
 //
 Event::Event(EventType event_type, int flags)
-    : default_prevented_(false), event_type_(event_type), flags_(flags),
-      time_stamp_(base::Time::Now()) {
-}
+    : default_prevented_(false),
+      event_type_(event_type),
+      flags_(flags),
+      time_stamp_(base::Time::Now()) {}
 
-Event::Event() : Event(EventType::Invalid, 0) {
-}
+Event::Event() : Event(EventType::Invalid, 0) {}
 
-Event::~Event() {
-}
+Event::~Event() {}
 
 void Event::PreventDefault() {
   default_prevented_ = true;
@@ -104,18 +107,12 @@ void Event::PreventDefault() {
 //
 // KeyEvent
 //
-KeyEvent::KeyEvent(EventType event_type, int raw_key_code,
-                             bool repeat)
-    : Event(event_type, 0), raw_key_code_(raw_key_code),
-      repeat_(repeat) {
-}
+KeyEvent::KeyEvent(EventType event_type, int raw_key_code, bool repeat)
+    : Event(event_type, 0), raw_key_code_(raw_key_code), repeat_(repeat) {}
 
-KeyEvent::KeyEvent()
-    : KeyEvent(EventType::Invalid, 0, false) {
-}
+KeyEvent::KeyEvent() : KeyEvent(EventType::Invalid, 0, false) {}
 
-KeyEvent::~KeyEvent() {
-}
+KeyEvent::~KeyEvent() {}
 
 EventType KeyEvent::ConvertToEventType(uint32_t message) {
   switch (message) {
@@ -142,8 +139,11 @@ bool KeyEvent::ConvertToRepeat(LPARAM lParam) {
 //
 // MouseEvent
 //
-MouseEvent::MouseEvent(EventType event_type, MouseButton button, int flags,
-                       int click_count, EventTarget* event_target,
+MouseEvent::MouseEvent(EventType event_type,
+                       MouseButton button,
+                       int flags,
+                       int click_count,
+                       EventTarget* event_target,
                        const gfx::Point& client_point,
                        const gfx::Point& screen_point)
     : Event(event_type, flags),
@@ -152,8 +152,7 @@ MouseEvent::MouseEvent(EventType event_type, MouseButton button, int flags,
       click_count_(click_count),
       client_point_(client_point),
       screen_point_(screen_point),
-      target_(event_target) {
-}
+      target_(event_target) {}
 
 MouseEvent::MouseEvent(const base::NativeEvent& native_event,
                        EventTarget* event_target,
@@ -162,16 +161,21 @@ MouseEvent::MouseEvent(const base::NativeEvent& native_event,
     : MouseEvent(ConvertToEventType(native_event),
                  ConvertToButton(native_event),
                  ConvertToEventFlags(native_event),
-                 0, event_target, client_point, screen_point) {
-}
+                 0,
+                 event_target,
+                 client_point,
+                 screen_point) {}
 
 MouseEvent::MouseEvent()
-    : MouseEvent(EventType::Invalid, MouseButton::None, 0, 0, nullptr,
-                 gfx::Point(), gfx::Point()) {
-}
+    : MouseEvent(EventType::Invalid,
+                 MouseButton::None,
+                 0,
+                 0,
+                 nullptr,
+                 gfx::Point(),
+                 gfx::Point()) {}
 
-MouseEvent::~MouseEvent() {
-}
+MouseEvent::~MouseEvent() {}
 
 MouseButton MouseEvent::ConvertToButton(const base::NativeEvent& native_event) {
   switch (native_event.message) {
@@ -179,13 +183,13 @@ MouseButton MouseEvent::ConvertToButton(const base::NativeEvent& native_event) {
     case WM_LBUTTONDBLCLK:
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
-        return MouseButton::Left;
+      return MouseButton::Left;
 
     // Middle button
     case WM_MBUTTONDBLCLK:
     case WM_MBUTTONDOWN:
     case WM_MBUTTONUP:
-        return MouseButton::Middle;
+      return MouseButton::Middle;
 
     // Move
     case WM_MOUSEMOVE:
@@ -296,32 +300,33 @@ EventType MouseEvent::ConvertToEventType(
 //
 // MouseWheelEvent
 //
-MouseWheelEvent::MouseWheelEvent(EventTarget* event_target, const gfx::Point& client_point,
-                                 const gfx::Point& screen_point, int flags,
+MouseWheelEvent::MouseWheelEvent(EventTarget* event_target,
+                                 const gfx::Point& client_point,
+                                 const gfx::Point& screen_point,
+                                 int flags,
                                  int delta)
-    : MouseEvent(EventType::MouseWheel, MouseButton::None, flags, 0, event_target,
-                 client_point, screen_point), delta_(delta) {
-}
+    : MouseEvent(EventType::MouseWheel,
+                 MouseButton::None,
+                 flags,
+                 0,
+                 event_target,
+                 client_point,
+                 screen_point),
+      delta_(delta) {}
 
-MouseWheelEvent::~MouseWheelEvent() {
-}
+MouseWheelEvent::~MouseWheelEvent() {}
 
 }  // namespace ui
 
 namespace {
 const char* event_names[] = {
-  "Invalid",
-  "KeyPressed",
-  "KeyReleased",
-  "MouseMoved",
-  "MousePressed",
-  "MouseReleased",
-  "MouseWheel",
+    "Invalid",      "KeyPressed",    "KeyReleased", "MouseMoved",
+    "MousePressed", "MouseReleased", "MouseWheel",
 };
 
 const char* MouseButton(const ui::MouseEvent& event) {
   static const char* button_names[] = {
-    "Left", "Middle", "Right", "Other1", "Other2",
+      "Left", "Middle", "Right", "Other1", "Other2",
   };
   if (static_cast<size_t>(event.button()) < arraysize(button_names))
     return button_names[static_cast<int>(event.button())];
@@ -330,7 +335,7 @@ const char* MouseButton(const ui::MouseEvent& event) {
 
 const char* MouseModifiers(const ui::MouseEvent& event) {
   static const char* modifier_names[] = {
-    "", "Ctrl+", "Shift+", "Ctrl+Shift+",
+      "", "Ctrl+", "Shift+", "Ctrl+Shift+",
   };
   static_assert(sizeof(modifier_names) == sizeof(const char*) * 4,
                 "arraysize(modifier_names[]) must be 4.");
@@ -360,9 +365,9 @@ std::ostream& operator<<(std::ostream& out, const ui::Event* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::KeyEvent& event) {
-  return out << event.event_type() << "Event" <<
-      "(key_code=" << event.key_code() <<
-      " repeate=" << event.repeat() << ")";
+  return out << event.event_type() << "Event"
+             << "(key_code=" << event.key_code()
+             << " repeate=" << event.repeat() << ")";
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::KeyEvent* event) {
@@ -370,9 +375,8 @@ std::ostream& operator<<(std::ostream& out, const ui::KeyEvent* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent& event) {
-  return out << event.event_type() << "Event(" <<
-      MouseModifiers(event) << MouseButton(event) <<
-      " at " << event.location() << ")";
+  return out << event.event_type() << "Event(" << MouseModifiers(event)
+             << MouseButton(event) << " at " << event.location() << ")";
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent* event) {
@@ -380,8 +384,8 @@ std::ostream& operator<<(std::ostream& out, const ui::MouseEvent* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseWheelEvent& event) {
-  return out << event.event_type() << "Event(" <<
-      " delta=" << event.delta() << ")";
+  return out << event.event_type() << "Event("
+             << " delta=" << event.delta() << ")";
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseWheelEvent* event) {

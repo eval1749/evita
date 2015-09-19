@@ -12,10 +12,10 @@ gfx::Point GetClientPointFromNativeEvent(
     const base::NativeEvent& native_event) {
   auto const message = native_event.message;
   if (message == WM_MOUSEWHEEL ||
-     (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
+      (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
     auto client_point(native_event.pt);
-    WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, native_event.hwnd,
-                                   &client_point, 1));
+    WIN32_VERIFY(
+        ::MapWindowPoints(HWND_DESKTOP, native_event.hwnd, &client_point, 1));
     return gfx::Point(client_point);
   }
 
@@ -30,14 +30,14 @@ gfx::Point GetScreenPointFromNativeEvent(
     const base::NativeEvent& native_event) {
   auto const message = native_event.message;
   if (message == WM_MOUSEWHEEL ||
-     (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
+      (message >= WM_NCMOUSEMOVE && message <= WM_NCMBUTTONDBLCLK)) {
     return gfx::Point(native_event.pt);
   }
 
   if (message >= WM_MOUSEFIRST && message <= WM_MOUSELAST) {
     auto screen_point(native_event.pt);
-    WIN32_VERIFY(::MapWindowPoints(native_event.hwnd, HWND_DESKTOP,
-                                   &screen_point, 1));
+    WIN32_VERIFY(
+        ::MapWindowPoints(native_event.hwnd, HWND_DESKTOP, &screen_point, 1));
     return gfx::Point(screen_point);
   }
   NOTREACHED();

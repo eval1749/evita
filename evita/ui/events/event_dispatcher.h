@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_events_event_dispatcher_h)
-#define INCLUDE_evita_ui_events_event_dispatcher_h
+#ifndef EVITA_UI_EVENTS_EVENT_DISPATCHER_H_
+#define EVITA_UI_EVENTS_EVENT_DISPATCHER_H_
 
 #include "base/macros.h"
 #include "common/memory/singleton.h"
@@ -13,20 +13,23 @@ namespace ui {
 class Event;
 class EventHandler;
 
-class EventDispatcher : public common::Singleton<EventDispatcher> {
+class EventDispatcher final : public common::Singleton<EventDispatcher> {
   DECLARE_SINGLETON_CLASS(EventDispatcher);
 
-  private: EventHandler* current_handler_;
+ public:
+  virtual ~EventDispatcher();
 
-  private: EventDispatcher();
-  public: virtual ~EventDispatcher();
+  void DidDestroyEventHandler(EventHandler* handler);
+  bool DispatchEvent(EventHandler* handler, Event* event);
 
-  public: void DidDestroyEventHandler(EventHandler* handler);
-  public: bool DispatchEvent(EventHandler* handler, Event* event);
+ private:
+  EventDispatcher();
+
+  EventHandler* current_handler_;
 
   DISALLOW_COPY_AND_ASSIGN(EventDispatcher);
 };
 
 }  // namespace ui
 
-#endif // !defined(INCLUDE_evita_ui_events_event_dispatcher_h)
+#endif  // EVITA_UI_EVENTS_EVENT_DISPATCHER_H_

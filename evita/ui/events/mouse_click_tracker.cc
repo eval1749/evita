@@ -9,11 +9,9 @@
 namespace ui {
 
 MouseClickTracker::MouseClickTracker()
-    : click_count_(0), state_(State::Start) {
-}
+    : click_count_(0), state_(State::Start) {}
 
-MouseClickTracker::~MouseClickTracker() {
-}
+MouseClickTracker::~MouseClickTracker() {}
 
 bool MouseClickTracker::is_repeated_event(const MouseEvent& event) const {
   return is_same_location(event) && is_same_time(event);
@@ -75,7 +73,7 @@ void MouseClickTracker::OnMouseReleased(const MouseEvent& event) {
       click_count_ = 2;
     return;
   }
-  
+
   // MousePressed is occurred in window which we don't managed.
 }
 

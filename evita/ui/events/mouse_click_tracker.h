@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_events_mouse_click_tracker_h)
-#define INCLUDE_evita_ui_events_mouse_click_tracker_h
+#ifndef EVITA_UI_EVENTS_MOUSE_CLICK_TRACKER_H_
+#define EVITA_UI_EVENTS_MOUSE_CLICK_TRACKER_H_
 
 #include "common/memory/singleton.h"
 #include "evita/ui/events/event.h"
@@ -11,39 +11,42 @@
 namespace ui {
 
 // Tracking mouse click.
-class MouseClickTracker : public common::Singleton<MouseClickTracker> {
+class MouseClickTracker final : public common::Singleton<MouseClickTracker> {
   DECLARE_SINGLETON_CLASS(MouseClickTracker);
 
-  // These values match the Windows defaults.
-  private: static const auto kDoubleClickTimeMS = 500;
-  private: static const auto kDoubleClickWidth = 4;
-  private: static const auto kDoubleClickHeight = 4;
+ public:
+  ~MouseClickTracker();
 
-  private: enum class State {
+  int click_count() const { return click_count_; }
+  void OnMousePressed(const MouseEvent& event);
+  void OnMouseReleased(const MouseEvent& event);
+
+ private:
+  // These values match the Windows defaults.
+  static const auto kDoubleClickTimeMS = 500;
+  static const auto kDoubleClickWidth = 4;
+  static const auto kDoubleClickHeight = 4;
+
+  enum class State {
     Start,
     Pressed,
     PressedReleased,
     PressedReleasedPressed,
   };
 
-  private: int click_count_;
-  private: MouseEvent last_event_;
-  private: State state_;
+  MouseClickTracker();
 
-  private: MouseClickTracker();
-  public: ~MouseClickTracker();
+  bool is_repeated_event(const MouseEvent& event) const;
+  bool is_same_location(const MouseEvent& event) const;
+  bool is_same_time(const MouseEvent& event) const;
 
-  public: int click_count() const { return click_count_; }
-  private: bool is_repeated_event(const MouseEvent& event) const;
-  private: bool is_same_location(const MouseEvent& event) const;
-  private: bool is_same_time(const MouseEvent& event) const;
-
-  public: void OnMousePressed(const MouseEvent& event);
-  public: void OnMouseReleased(const MouseEvent& event);
+  int click_count_;
+  MouseEvent last_event_;
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(MouseClickTracker);
 };
 
 }  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_events_mouse_click_tracker_h)
+#endif  // EVITA_UI_EVENTS_MOUSE_CLICK_TRACKER_H_

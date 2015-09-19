@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_events_event_handler_h)
-#define INCLUDE_evita_ui_events_event_handler_h
+#ifndef EVITA_UI_EVENTS_EVENT_HANDLER_H_
+#define EVITA_UI_EVENTS_EVENT_HANDLER_H_
 
 #include "base/macros.h"
 
@@ -18,16 +18,20 @@ class MouseEvent;
 // EventHandler
 //
 class EventHandler {
-  protected: EventHandler();
-  public: virtual ~EventHandler();
+ public:
+  virtual ~EventHandler();
 
-  public: virtual void OnEvent(Event* event);
-  public: virtual void OnKeyEvent(KeyEvent* event);
-  public: virtual void OnMouseEvent(MouseEvent* event);
+  virtual void OnEvent(Event* event);
+  virtual void OnKeyEvent(KeyEvent* event);
+  virtual void OnMouseEvent(MouseEvent* event);
 
+ protected:
+  EventHandler();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(EventHandler);
 };
 
 }  // namespace ui
 
-#endif // !defined(INCLUDE_evita_ui_events_event_handler_h)
+#endif  // EVITA_UI_EVENTS_EVENT_HANDLER_H_

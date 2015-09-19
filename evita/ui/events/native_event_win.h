@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_events_native_event_win_h)
-#define INCLUDE_evita_ui_events_native_event_win_h
+#ifndef EVITA_UI_EVENTS_NATIVE_EVENT_WIN_H_
+#define EVITA_UI_EVENTS_NATIVE_EVENT_WIN_H_
 
 #include "base/event_types.h"
 #include "evita/gfx/rect.h"
 
 #if !defined(GET_X_LPARAM)
-#define GET_X_LPARAM(lParam) ((int)(short)LOWORD(lParam))
-#define GET_Y_LPARAM(lParam) ((int)(short)HIWORD(lParam))
+#define GET_X_LPARAM(lParam) (static_cast<int>(LOWORD(lParam)))
+#define GET_Y_LPARAM(lParam) (static_cast<int>(HIWORD(lParam)))
 #endif
 
 namespace ui {
@@ -18,4 +18,4 @@ gfx::Point GetClientPointFromNativeEvent(const base::NativeEvent& native_event);
 gfx::Point GetScreenPointFromNativeEvent(const base::NativeEvent& native_event);
 }  // namespace ui
 
-#endif // !defined(INCLUDE_evita_ui_events_native_event_win_h)
+#endif  // EVITA_UI_EVENTS_NATIVE_EVENT_WIN_H_

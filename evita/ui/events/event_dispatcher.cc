@@ -10,8 +10,7 @@
 
 namespace ui {
 
-EventDispatcher::EventDispatcher() : current_handler_(nullptr) {
-}
+EventDispatcher::EventDispatcher() : current_handler_(nullptr) {}
 
 EventDispatcher::~EventDispatcher() {
   DCHECK(!current_handler_);

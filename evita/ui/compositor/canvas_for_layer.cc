@@ -26,8 +26,7 @@ CanvasForLayer::CanvasForLayer(ui::Layer* layer)
   SetInitialBounds(swap_chain_->bounds());
 }
 
-CanvasForLayer::~CanvasForLayer() {
-}
+CanvasForLayer::~CanvasForLayer() {}
 
 // Canvas
 void CanvasForLayer::AddDirtyRectImpl(const RectF& new_dirty_rect) {

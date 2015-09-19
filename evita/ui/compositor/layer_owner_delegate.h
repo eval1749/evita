@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_compositor_layer_owner_delegate_h)
-#define INCLUDE_evita_ui_compositor_layer_owner_delegate_h
+#ifndef EVITA_UI_COMPOSITOR_LAYER_OWNER_DELEGATE_H_
+#define EVITA_UI_COMPOSITOR_LAYER_OWNER_DELEGATE_H_
 
 #include "base/macros.h"
 
@@ -16,14 +16,18 @@ class Layer;
 // LayerOwnerDelegate
 //
 class LayerOwnerDelegate {
-  protected: LayerOwnerDelegate();
-  public: virtual ~LayerOwnerDelegate();
+ public:
+  virtual ~LayerOwnerDelegate();
 
-  public: virtual void DidRecreateLayer(Layer* old_layer) = 0;
+  virtual void DidRecreateLayer(Layer* old_layer) = 0;
 
+ protected:
+  LayerOwnerDelegate();
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(LayerOwnerDelegate);
 };
 
-} // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_compositor_layer_owner_delegate_h)
+#endif  // EVITA_UI_COMPOSITOR_LAYER_OWNER_DELEGATE_H_

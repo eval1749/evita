@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_compositor_layer_content_h)
-#define INCLUDE_evita_ui_compositor_layer_content_h
+#ifndef EVITA_UI_COMPOSITOR_LAYER_CONTENT_H_
+#define EVITA_UI_COMPOSITOR_LAYER_CONTENT_H_
 
 #include <memory>
 
@@ -27,32 +27,37 @@ class Layer;
 // A wrapper of direct composition surface.
 //
 class LayerContent final {
-  public: class DrawingScope {
-    private: std::unique_ptr<gfx::Canvas> canvas_;
-    private: LayerContent* content_;
+ public:
+  class DrawingScope final {
+   public:
+    explicit DrawingScope(LayerContent* content);
+    ~DrawingScope();
 
-    public: DrawingScope(LayerContent* content);
-    public: ~DrawingScope();
+    gfx::Canvas* canvas() const { return canvas_.get(); }
 
-    public: gfx::Canvas* canvas() const { return canvas_.get(); }
+   private:
+    std::unique_ptr<gfx::Canvas> canvas_;
+    LayerContent* content_;
 
     DISALLOW_COPY_AND_ASSIGN(DrawingScope);
   };
+
+  explicit LayerContent(Layer* layer);
+  ~LayerContent();
+
+  Layer* layer() const { return layer_; }
+  IDCompositionSurface* surface() const { return surface_; }
+
+ private:
   friend class DrawingScope;
 
-  private: gfx::RectF bounds_;
-  private: Layer* layer_;
-  private: common::ComPtr<IDCompositionSurface> surface_;
-
-  public: LayerContent(Layer* layer);
-  public: ~LayerContent();
-
-  public: Layer* layer() const { return layer_; }
-  public: IDCompositionSurface* surface() const { return surface_; }
+  gfx::RectF bounds_;
+  Layer* layer_;
+  common::ComPtr<IDCompositionSurface> surface_;
 
   DISALLOW_COPY_AND_ASSIGN(LayerContent);
 };
 
-} // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_compositor_layer_content_h)
+#endif  // EVITA_UI_COMPOSITOR_LAYER_CONTENT_H_

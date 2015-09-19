@@ -6,7 +6,7 @@
 
 // L1 C4917 'declarator' : a GUID can only be associated with a class, interface
 // or namespace
-#pragma warning(disable: 4917)
+#pragma warning(disable : 4917)
 #include <dcomp.h>
 
 #include "evita/gfx/dx_device.h"
@@ -17,9 +17,9 @@
 namespace ui {
 
 Compositor::Compositor() : need_commit_(false) {
-  COM_VERIFY(::DCompositionCreateDevice2(
-      gfx::DxDevice::instance()->d2d_device(),
-      IID_PPV_ARGS(&composition_device_)));
+  COM_VERIFY(
+      ::DCompositionCreateDevice2(gfx::DxDevice::instance()->d2d_device(),
+                                  IID_PPV_ARGS(&composition_device_)));
 
 #if _DEBUG
   common::ComPtr<IDCompositionDeviceDebug> debug_device;
@@ -28,8 +28,7 @@ Compositor::Compositor() : need_commit_(false) {
 #endif
 }
 
-Compositor::~Compositor() {
-}
+Compositor::~Compositor() {}
 
 void Compositor::CommitIfNeeded() {
   if (!need_commit_)

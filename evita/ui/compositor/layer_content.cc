@@ -19,15 +19,17 @@ namespace {
 // CanvasForSurface
 //
 class CanvasForSurface final : public gfx::Canvas {
-  private: common::ComPtr<ID2D1DeviceContext> d2d_device_context_;
+ public:
+  explicit CanvasForSurface(LayerContent* content);
+  ~CanvasForSurface() = default;
 
-  public: CanvasForSurface(LayerContent* content);
-  public: ~CanvasForSurface() = default;
-
+ private:
   // gfx::Canvas
-  private: virtual void DidChangeBounds(const gfx::RectF& new_bounds) override;
-  private: virtual void DidLostRenderTarget() override;
-  private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
+  void DidChangeBounds(const gfx::RectF& new_bounds) final;
+  void DidLostRenderTarget() final;
+  ID2D1RenderTarget* GetRenderTarget() const final;
+
+  common::ComPtr<ID2D1DeviceContext> d2d_device_context_;
 
   DISALLOW_COPY_AND_ASSIGN(CanvasForSurface);
 };
@@ -36,14 +38,14 @@ CanvasForSurface::CanvasForSurface(LayerContent* content) {
   POINT offset;
   COM_VERIFY(content->surface()->BeginDraw(
       nullptr, IID_PPV_ARGS(&d2d_device_context_), &offset));
-  auto const bounds = gfx::RectF(gfx::PointF(static_cast<float>(offset.x),
-                                             static_cast<float>(offset.y)),
-                                 content->layer()->bounds().size());
+  auto const bounds = gfx::RectF(
+      gfx::PointF(static_cast<float>(offset.x), static_cast<float>(offset.y)),
+      content->layer()->bounds().size());
   SetInitialBounds(bounds);
 }
 
 // gfx::Canvas
-void  CanvasForSurface::DidChangeBounds(const gfx::RectF&) {
+void CanvasForSurface::DidChangeBounds(const gfx::RectF&) {
   NOTREACHED();
 }
 void CanvasForSurface::DidLostRenderTarget() {
@@ -89,10 +91,8 @@ LayerContent::DrawingScope::~DrawingScope() {
 //
 // LayerContent
 //
-LayerContent::LayerContent(Layer* layer) : layer_(layer) {
-}
+LayerContent::LayerContent(Layer* layer) : layer_(layer) {}
 
-LayerContent::~LayerContent() {
-}
+LayerContent::~LayerContent() {}
 
 }  // namespace ui

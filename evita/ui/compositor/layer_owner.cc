@@ -12,11 +12,9 @@
 
 namespace ui {
 
-LayerOwner::LayerOwner() : delegate_(nullptr), layer_(nullptr) {
-}
+LayerOwner::LayerOwner() : delegate_(nullptr), layer_(nullptr) {}
 
-LayerOwner::~LayerOwner() {
-}
+LayerOwner::~LayerOwner() {}
 
 void LayerOwner::set_layer_owner_delegate(LayerOwnerDelegate* delegate) {
   DCHECK(!delegate_);

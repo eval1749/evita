@@ -13,14 +13,12 @@
 namespace ui {
 
 RootLayer::RootLayer(Widget* widget) {
-  COM_VERIFY(Compositor::instance()->device()->
-      CreateTargetForHwnd(widget->AssociatedHwnd(), false,
-                          &composition_target_));
+  COM_VERIFY(Compositor::instance()->device()->CreateTargetForHwnd(
+      widget->AssociatedHwnd(), false, &composition_target_));
   composition_target_->SetRoot(visual());
   SetBounds(widget->bounds());
 }
 
-RootLayer::~RootLayer() {
-}
+RootLayer::~RootLayer() {}
 
 }  // namespace ui

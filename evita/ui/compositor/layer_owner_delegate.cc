@@ -6,10 +6,8 @@
 
 namespace ui {
 
-LayerOwnerDelegate::LayerOwnerDelegate() {
-}
+LayerOwnerDelegate::LayerOwnerDelegate() {}
 
-LayerOwnerDelegate::~LayerOwnerDelegate() {
-}
+LayerOwnerDelegate::~LayerOwnerDelegate() {}
 
 }  // namespace ui

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_compositor_root_layer_h)
-#define INCLUDE_evita_ui_compositor_root_layer_h
+#ifndef EVITA_UI_COMPOSITOR_ROOT_LAYER_H_
+#define EVITA_UI_COMPOSITOR_ROOT_LAYER_H_
 
 #include "evita/ui/compositor/layer.h"
 
@@ -13,15 +13,17 @@ namespace ui {
 
 class Widget;
 
-class RootLayer : public Layer {
-  private: common::ComPtr<IDCompositionTarget> composition_target_;
+class RootLayer final : public Layer {
+ public:
+  explicit RootLayer(Widget* widget);
+  ~RootLayer();
 
-  public: RootLayer(Widget* widget);
-  public: ~RootLayer();
+ private:
+  common::ComPtr<IDCompositionTarget> composition_target_;
 
   DISALLOW_COPY_AND_ASSIGN(RootLayer);
 };
 
-} // namespace ui
+}  // namespace ui
 
-#endif //!defined(INCLUDE_evita_ui_compositor_root_layer_h)
+#endif  // EVITA_UI_COMPOSITOR_ROOT_LAYER_H_

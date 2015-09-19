@@ -23,7 +23,9 @@ namespace ui {
 // Layer
 //
 Layer::Layer()
-    : animatable_(nullptr), owner_(nullptr), parent_layer_(nullptr),
+    : animatable_(nullptr),
+      owner_(nullptr),
+      parent_layer_(nullptr),
       visual_(Compositor::instance()->CreateVisual()) {
   COM_VERIFY(visual_->SetBitmapInterpolationMode(
       DCOMPOSITION_BITMAP_INTERPOLATION_MODE_LINEAR));
@@ -31,7 +33,7 @@ Layer::Layer()
 
   common::ComPtr<IDCompositionVisualDebug> debug_visual;
   COM_VERIFY(debug_visual.QueryFrom(visual_));
-  //COM_VERIFY(debug_visual->EnableHeatMap(gfx::ColorF(255, 255, 0, 0.1)));
+  // COM_VERIFY(debug_visual->EnableHeatMap(gfx::ColorF(255, 255, 0, 0.1)));
   // Node: EnableRedrawRegions() makes too many color changes.
   // COM_VERIFY(debug_visual->EnableRedrawRegions());
 }
@@ -67,8 +69,8 @@ void Layer::AppendLayer(Layer* new_child) {
   child_layers_.push_back(new_child);
   auto const is_insert_above = false;
   auto const ref_visual = static_cast<IDCompositionVisual*>(nullptr);
-  COM_VERIFY(visual_->AddVisual(new_child->visual_, is_insert_above,
-                                ref_visual));
+  COM_VERIFY(
+      visual_->AddVisual(new_child->visual_, is_insert_above, ref_visual));
   Compositor::instance()->NeedCommit();
 }
 
@@ -110,8 +112,8 @@ void Layer::InsertLayer(Layer* new_child, Layer* ref_child) {
   if (auto const old_parent = new_child->parent_layer_)
     old_parent->RemoveLayer(new_child);
   new_child->parent_layer_ = this;
-  auto const it = std::find(child_layers_.begin(), child_layers_.end(),
-                            ref_child);
+  auto const it =
+      std::find(child_layers_.begin(), child_layers_.end(), ref_child);
   DCHECK(it != child_layers_.end());
   child_layers_.insert(it, new_child);
   auto const is_insert_above = false;
@@ -121,8 +123,7 @@ void Layer::InsertLayer(Layer* new_child, Layer* ref_child) {
 }
 
 bool Layer::IsDescendantOf(const Layer* other) const {
-  for (auto runner = parent_layer_; runner;
-       runner = runner->parent_layer_) {
+  for (auto runner = parent_layer_; runner; runner = runner->parent_layer_) {
     if (runner == other)
       return true;
   }
@@ -136,8 +137,8 @@ void Layer::RemoveClip() {
 
 void Layer::RemoveLayer(Layer* old_layer) {
   DCHECK_EQ(old_layer->parent_layer_, this);
-  auto const it = std::find(child_layers_.begin(), child_layers_.end(),
-                            old_layer);
+  auto const it =
+      std::find(child_layers_.begin(), child_layers_.end(), old_layer);
   DCHECK(it != child_layers_.end());
   child_layers_.erase(it);
   visual_->RemoveVisual(old_layer->visual_);
@@ -211,10 +212,10 @@ HwndLayer::HwndLayer(HWND hwnd) {
     NOTREACHED();
   }
   DVLOG(0) << "ex_style=0x" << std::hex << ::GetWindowLong(hwnd, GWL_EXSTYLE);
-  //DCHECK(::GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_LAYERED);
+  // DCHECK(::GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_LAYERED);
   common::ComPtr<IUnknown> surface;
-  COM_VERIFY(Compositor::instance()->device()->
-      CreateSurfaceFromHwnd(hwnd, &surface));
+  COM_VERIFY(
+      Compositor::instance()->device()->CreateSurfaceFromHwnd(hwnd, &surface));
   visual()->SetContent(surface);
   RECT bounds;
   ::GetClientRect(hwnd, &bounds);
@@ -222,7 +223,6 @@ HwndLayer::HwndLayer(HWND hwnd) {
   visual()->SetOffsetY(static_cast<float>(bounds.top));
 }
 
-HwndLayer::~HwndLayer() {
-}
+HwndLayer::~HwndLayer() {}
 
 }  // namespace ui

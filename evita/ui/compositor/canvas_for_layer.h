@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_ui_compositor_canvas_for_layer_h)
-#define INCLUDE_evita_ui_compositor_canvas_for_layer_h
+#ifndef EVITA_UI_COMPOSITOR_CANVAS_FOR_LAYER_H_
+#define EVITA_UI_COMPOSITOR_CANVAS_FOR_LAYER_H_
 
 #include "evita/gfx/canvas.h"
 
@@ -17,25 +17,27 @@ namespace gfx {
 //
 // CanvasForLayer
 //
-class CanvasForLayer : public Canvas {
-  private: ui::Layer* layer_;
-  private: std::unique_ptr<SwapChain> swap_chain_;
+class CanvasForLayer final : public Canvas {
+ public:
+  explicit CanvasForLayer(ui::Layer* layer);
+  ~CanvasForLayer() final;
 
-  public: CanvasForLayer(ui::Layer* layer);
-  public: virtual ~CanvasForLayer();
+  SwapChain* swap_chain() const { return swap_chain_.get(); }
 
-  public: SwapChain* swap_chain() const { return swap_chain_.get(); }
-
+ private:
   // Canvas
-  private: virtual void AddDirtyRectImpl(const RectF& new_dirty_rect) override;
-  private: virtual void DidCallEndDraw() override;
-  private: virtual void DidChangeBounds(const RectF& new_bounds) override;
-  private: virtual void DidLostRenderTarget() override;
-  private: virtual ID2D1RenderTarget* GetRenderTarget() const override;
+  void AddDirtyRectImpl(const RectF& new_dirty_rect) final;
+  void DidCallEndDraw() final;
+  void DidChangeBounds(const RectF& new_bounds) final;
+  void DidLostRenderTarget() final;
+  ID2D1RenderTarget* GetRenderTarget() const final;
+
+  ui::Layer* layer_;
+  std::unique_ptr<SwapChain> swap_chain_;
 
   DISALLOW_COPY_AND_ASSIGN(CanvasForLayer);
 };
 
-} // namespace gfx
+}  // namespace gfx
 
-#endif //!defined(INCLUDE_evita_ui_compositor_canvas_for_layer_h)
+#endif  // EVITA_UI_COMPOSITOR_CANVAS_FOR_LAYER_H_

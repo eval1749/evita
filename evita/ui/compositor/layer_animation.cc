@@ -15,17 +15,18 @@ namespace ui {
 namespace {
 
 class ReplaceAnimation : public LayerAnimation {
-  private: Layer* const new_layer_;
-  private: std::unique_ptr<Layer> old_layer_;
+ protected:
+  ReplaceAnimation(Layer* new_layer, std::unique_ptr<Layer> old_layer);
+  ~ReplaceAnimation() override;
 
-  protected: ReplaceAnimation(Layer* new_layer,
-                              std::unique_ptr<Layer> old_layer);
-  protected: virtual ~ReplaceAnimation();
+  Layer* new_layer() { return new_layer_; }
+  Layer* old_layer() { return old_layer_.get(); }
 
-  protected: Layer* new_layer() { return new_layer_; }
-  protected: Layer* old_layer() { return old_layer_.get(); }
+  void SetUpNewLayer();
 
-  protected: void SetUpNewLayer();
+ private:
+  Layer* const new_layer_;
+  std::unique_ptr<Layer> old_layer_;
 
   DISALLOW_COPY_AND_ASSIGN(ReplaceAnimation);
 };
@@ -39,8 +40,7 @@ ReplaceAnimation::ReplaceAnimation(Layer* new_layer,
   DCHECK(old_layer_->parent_layer());
 }
 
-ReplaceAnimation::~ReplaceAnimation() {
-}
+ReplaceAnimation::~ReplaceAnimation() {}
 
 void ReplaceAnimation::SetUpNewLayer() {
   DCHECK(!new_layer_->parent_layer());
@@ -51,30 +51,30 @@ void ReplaceAnimation::SetUpNewLayer() {
 //
 // ExtendAnimation
 //
-class ExtendAnimation : public ReplaceAnimation {
-  private: std::unique_ptr<AnimationSize> animation_size_;
+class ExtendAnimation final : public ReplaceAnimation {
+ public:
+  ExtendAnimation(Layer* new_layer, std::unique_ptr<Layer> old_layer);
+  ~ExtendAnimation() final = default;
 
-  public: ExtendAnimation(Layer* new_layer,
-                          std::unique_ptr<Layer> old_layer);
-  public: virtual ~ExtendAnimation() = default;
-
+ private:
   // Animatable
-  private: virtual void Animate(base::Time now) override;
-  private: virtual void FinalizeAnimation() override;
+  void Animate(base::Time now) final;
+  void FinalizeAnimation() final;
+
+  std::unique_ptr<AnimationSize> animation_size_;
 
   DISALLOW_COPY_AND_ASSIGN(ExtendAnimation);
 };
 
 ExtendAnimation::ExtendAnimation(Layer* new_layer,
                                  std::unique_ptr<Layer> old_layer)
-    : ReplaceAnimation(new_layer, std::move(old_layer)) {
-}
+    : ReplaceAnimation(new_layer, std::move(old_layer)) {}
 
 void ExtendAnimation::Animate(base::Time now) {
   if (!animation_size_) {
-    animation_size_.reset(new AnimationSize(
-        now, animation_duration(), old_layer()->bounds().size(),
-        new_layer()->bounds().size()));
+    animation_size_.reset(new AnimationSize(now, animation_duration(),
+                                            old_layer()->bounds().size(),
+                                            new_layer()->bounds().size()));
     SetUpNewLayer();
   }
   const auto size = animation_size_->Compute(now);
@@ -99,27 +99,32 @@ void ExtendAnimation::FinalizeAnimation() {
 //
 // MoveAnimation
 //
-class MoveAnimation : public LayerAnimation {
-  private: std::unique_ptr<AnimationPoint> animation_origin_;
-  private: Layer* const new_layer_;
-  private: const gfx::PointF old_origin_;
-  private: Layer* const parent_layer_;
+class MoveAnimation final : public LayerAnimation {
+ public:
+  MoveAnimation(Layer* parent_layer,
+                Layer* new_layer,
+                const gfx::PointF& old_origin);
+  ~MoveAnimation() final = default;
 
-  public: MoveAnimation(Layer* parent_layer, Layer* new_layer,
-                        const gfx::PointF& old_origin);
-  public: virtual ~MoveAnimation() = default;
-
+ private:
   // Animatable
-  private: virtual void Animate(base::Time now) override;
-  private: virtual void FinalizeAnimation() override;
+  void Animate(base::Time now) final;
+  void FinalizeAnimation() final;
+
+  std::unique_ptr<AnimationPoint> animation_origin_;
+  Layer* const new_layer_;
+  const gfx::PointF old_origin_;
+  Layer* const parent_layer_;
 
   DISALLOW_COPY_AND_ASSIGN(MoveAnimation);
 };
 
-MoveAnimation::MoveAnimation(Layer* parent_layer, Layer* new_layer,
+MoveAnimation::MoveAnimation(Layer* parent_layer,
+                             Layer* new_layer,
                              const gfx::PointF& old_origin)
-    : new_layer_(new_layer), old_origin_(old_origin),
-       parent_layer_(parent_layer) {
+    : new_layer_(new_layer),
+      old_origin_(old_origin),
+      parent_layer_(parent_layer) {
   DCHECK(!new_layer_->parent_layer());
   new_layer_->DidRegisterAnimation(this);
 }
@@ -127,8 +132,7 @@ MoveAnimation::MoveAnimation(Layer* parent_layer, Layer* new_layer,
 void MoveAnimation::Animate(base::Time now) {
   if (!animation_origin_) {
     animation_origin_.reset(new AnimationPoint(
-        now, animation_duration(), old_origin_,
-        new_layer_->bounds().origin()));
+        now, animation_duration(), old_origin_, new_layer_->bounds().origin()));
     parent_layer_->AppendLayer(new_layer_);
   }
   const auto origin = animation_origin_->Compute(now);
@@ -157,29 +161,30 @@ void MoveAnimation::FinalizeAnimation() {
 //
 // Shrinks |old_layer_| until |old_layer_| equals to |new_layer_|.
 //
-class ShrinkAnimation : public ReplaceAnimation {
-  private: std::unique_ptr<AnimationSize> animation_size_;
+class ShrinkAnimation final : public ReplaceAnimation {
+ public:
+  ShrinkAnimation(Layer* new_layer, std::unique_ptr<Layer> old_layer);
+  ~ShrinkAnimation() final = default;
 
-  public: ShrinkAnimation(Layer* new_layer, std::unique_ptr<Layer> old_layer);
-  public: virtual ~ShrinkAnimation() = default;
-
+ private:
   // Animatable
-  private: virtual void Animate(base::Time now) override;
-  private: virtual void FinalizeAnimation() override;
+  void Animate(base::Time now) final;
+  void FinalizeAnimation() final;
+
+  std::unique_ptr<AnimationSize> animation_size_;
 
   DISALLOW_COPY_AND_ASSIGN(ShrinkAnimation);
 };
 
 ShrinkAnimation::ShrinkAnimation(Layer* new_layer,
                                  std::unique_ptr<Layer> old_layer)
-    : ReplaceAnimation(new_layer, std::move(old_layer)) {
-}
+    : ReplaceAnimation(new_layer, std::move(old_layer)) {}
 
 void ShrinkAnimation::Animate(base::Time now) {
   if (!animation_size_) {
-    animation_size_.reset(new AnimationSize(
-        now, animation_duration(), old_layer()->bounds().size(),
-        new_layer()->bounds().size()));
+    animation_size_.reset(new AnimationSize(now, animation_duration(),
+                                            old_layer()->bounds().size(),
+                                            new_layer()->bounds().size()));
   }
   const auto size = animation_size_->Compute(now);
   old_layer()->SetClip(gfx::RectF(new_layer()->origin(), size));
@@ -200,34 +205,34 @@ void ShrinkAnimation::FinalizeAnimation() {
 // SimpleAnimation
 // Moves and changes size of |new_layer| from |old_layer|.
 //
-class SimpleAnimation : public ReplaceAnimation {
-  private: std::unique_ptr<AnimationPoint> animation_origin_;
-  private: std::unique_ptr<AnimationSize> animation_size_;
+class SimpleAnimation final : public ReplaceAnimation {
+ public:
+  SimpleAnimation(Layer* new_layer, std::unique_ptr<Layer> old_layer);
+  ~SimpleAnimation() final = default;
 
-  public: SimpleAnimation(Layer* new_layer,
-                          std::unique_ptr<Layer> old_layer);
-  public: virtual ~SimpleAnimation() = default;
-
+ private:
   // Animatable
-  private: virtual void Animate(base::Time now) override;
-  private: virtual void FinalizeAnimation() override;
+  void Animate(base::Time now) final;
+  void FinalizeAnimation() final;
+
+  std::unique_ptr<AnimationPoint> animation_origin_;
+  std::unique_ptr<AnimationSize> animation_size_;
 
   DISALLOW_COPY_AND_ASSIGN(SimpleAnimation);
 };
 
 SimpleAnimation::SimpleAnimation(Layer* new_layer,
                                  std::unique_ptr<Layer> old_layer)
-    : ReplaceAnimation(new_layer, std::move(old_layer)) {
-}
+    : ReplaceAnimation(new_layer, std::move(old_layer)) {}
 
 void SimpleAnimation::Animate(base::Time now) {
   if (!animation_size_) {
-    animation_origin_.reset(new AnimationPoint(
-        now, animation_duration(), old_layer()->bounds().origin(),
-        new_layer()->bounds().origin()));
-    animation_size_.reset(new AnimationSize(
-        now, animation_duration(), old_layer()->bounds().size(),
-        new_layer()->bounds().size()));
+    animation_origin_.reset(new AnimationPoint(now, animation_duration(),
+                                               old_layer()->bounds().origin(),
+                                               new_layer()->bounds().origin()));
+    animation_size_.reset(new AnimationSize(now, animation_duration(),
+                                            old_layer()->bounds().size(),
+                                            new_layer()->bounds().size()));
     SetUpNewLayer();
   }
   const auto origin = animation_origin_->Compute(now);
@@ -263,27 +268,30 @@ void SimpleAnimation::FinalizeAnimation() {
 //      |     |      |     |
 //      +-----+      +-----+
 //
-class SlideInAnimation : public LayerAnimation {
-  private: std::unique_ptr<AnimationPoint> animation_origin_;
-  private: Layer* const new_layer_;
-  private: Layer* const old_layer_;
-  private: Layer* const parent_layer_;
+class SlideInAnimation final : public LayerAnimation {
+ public:
+  SlideInAnimation(Layer* parent_layer, Layer* new_layer, Layer* old_layer);
+  ~SlideInAnimation() final = default;
 
-  public: SlideInAnimation(Layer* parent_layer, Layer* new_layer,
-                           Layer* old_layer);
-  public: virtual ~SlideInAnimation() = default;
-
+ private:
   // Animatable
-  private: virtual void Animate(base::Time now) override;
-  private: virtual void FinalizeAnimation() override;
+  void Animate(base::Time now) final;
+  void FinalizeAnimation() final;
+
+  std::unique_ptr<AnimationPoint> animation_origin_;
+  Layer* const new_layer_;
+  Layer* const old_layer_;
+  Layer* const parent_layer_;
 
   DISALLOW_COPY_AND_ASSIGN(SlideInAnimation);
 };
 
-SlideInAnimation::SlideInAnimation(Layer* parent_layer, Layer* new_layer,
+SlideInAnimation::SlideInAnimation(Layer* parent_layer,
+                                   Layer* new_layer,
                                    Layer* old_layer)
-    : new_layer_(new_layer), old_layer_(old_layer),
-      parent_layer_(parent_layer)  {
+    : new_layer_(new_layer),
+      old_layer_(old_layer),
+      parent_layer_(parent_layer) {
   DCHECK(!new_layer_->parent_layer());
   new_layer_->DidRegisterAnimation(this);
   if (!old_layer_)
@@ -332,18 +340,20 @@ void SlideInAnimation::FinalizeAnimation() {
 //
 // SlideOutAnimation
 //
-class SlideOutAnimation : public LayerAnimation {
-  private: std::unique_ptr<AnimationPoint> animation_origin_;
-  private: std::unique_ptr<Layer> layer_;
-  private: const gfx::PointF new_origin_;
+class SlideOutAnimation final : public LayerAnimation {
+ public:
+  SlideOutAnimation(std::unique_ptr<Layer> layer,
+                    const gfx::PointF& new_origin);
+  ~SlideOutAnimation() final = default;
 
-  public: SlideOutAnimation(std::unique_ptr<Layer> layer,
-                            const gfx::PointF& new_origin);
-  public: virtual ~SlideOutAnimation() = default;
-
+ private:
   // Animatable
-  private: virtual void Animate(base::Time now) override;
-  private: virtual void FinalizeAnimation() override;
+  void Animate(base::Time now) final;
+  void FinalizeAnimation() final;
+
+  std::unique_ptr<AnimationPoint> animation_origin_;
+  std::unique_ptr<Layer> layer_;
+  const gfx::PointF new_origin_;
 
   DISALLOW_COPY_AND_ASSIGN(SlideOutAnimation);
 };
@@ -380,34 +390,35 @@ void SlideOutAnimation::FinalizeAnimation() {
 //
 // SlideReplaceAnimation
 //
-class SlideReplaceAnimation : public ReplaceAnimation {
-  private: std::unique_ptr<AnimationPoint> animation_origin_;
-  private: const gfx::PointF old_origin_;
+class SlideReplaceAnimation final : public ReplaceAnimation {
+ public:
+  SlideReplaceAnimation(Layer* new_layer,
+                        std::unique_ptr<Layer> old_layer,
+                        const gfx::PointF& old_origin);
+  ~SlideReplaceAnimation() final = default;
 
-  public: SlideReplaceAnimation(Layer* new_layer,
-                                std::unique_ptr<Layer> old_layer,
-                                const gfx::PointF& old_origin);
-  public: virtual ~SlideReplaceAnimation() = default;
-
+ private:
   // Animatable
-  private: virtual void Animate(base::Time now) override;
-  private: virtual void FinalizeAnimation() override;
+  void Animate(base::Time now) final;
+  void FinalizeAnimation() final;
+
+  std::unique_ptr<AnimationPoint> animation_origin_;
+  const gfx::PointF old_origin_;
 
   DISALLOW_COPY_AND_ASSIGN(SlideReplaceAnimation);
 };
 
-SlideReplaceAnimation::SlideReplaceAnimation(
-    Layer* new_layer, std::unique_ptr<Layer> old_layer,
-    const gfx::PointF& old_origin)
+SlideReplaceAnimation::SlideReplaceAnimation(Layer* new_layer,
+                                             std::unique_ptr<Layer> old_layer,
+                                             const gfx::PointF& old_origin)
     : ReplaceAnimation(new_layer, std::move(old_layer)),
-    old_origin_(old_origin) {
-}
+      old_origin_(old_origin) {}
 
 void SlideReplaceAnimation::Animate(base::Time now) {
   if (!animation_origin_) {
-    animation_origin_.reset(new AnimationPoint(
-        now, animation_duration(), old_origin_,
-        new_layer()->bounds().origin()));
+    animation_origin_.reset(new AnimationPoint(now, animation_duration(),
+                                               old_origin_,
+                                               new_layer()->bounds().origin()));
     SetUpNewLayer();
     new_layer()->SetOrigin(animation_origin_->Compute(now));
   }
@@ -437,11 +448,9 @@ void SlideReplaceAnimation::FinalizeAnimation() {
 //
 // LayerAnimation
 //
-LayerAnimation::LayerAnimation() {
-}
+LayerAnimation::LayerAnimation() {}
 
-LayerAnimation::~LayerAnimation() {
-}
+LayerAnimation::~LayerAnimation() {}
 
 base::TimeDelta LayerAnimation::animation_duration() const {
 #if _DEBUG
@@ -452,38 +461,41 @@ base::TimeDelta LayerAnimation::animation_duration() const {
   return base::TimeDelta::FromMilliseconds(16 * number_of_frames);
 }
 
-LayerAnimation* LayerAnimation::CreateExtend(
-    Layer* new_layer, std::unique_ptr<Layer> old_layer) {
+LayerAnimation* LayerAnimation::CreateExtend(Layer* new_layer,
+                                             std::unique_ptr<Layer> old_layer) {
   return new ExtendAnimation(new_layer, std::move(old_layer));
 }
 
-LayerAnimation* LayerAnimation::CreateMove(
-    Layer* parent_layer, Layer* new_layer, const gfx::PointF& old_origin) {
+LayerAnimation* LayerAnimation::CreateMove(Layer* parent_layer,
+                                           Layer* new_layer,
+                                           const gfx::PointF& old_origin) {
   return new MoveAnimation(parent_layer, new_layer, old_origin);
 }
 
-LayerAnimation* LayerAnimation::CreateShrink(
-    Layer* new_layer, std::unique_ptr<Layer> old_layer) {
+LayerAnimation* LayerAnimation::CreateShrink(Layer* new_layer,
+                                             std::unique_ptr<Layer> old_layer) {
   return new ShrinkAnimation(new_layer, std::move(old_layer));
 }
 
-LayerAnimation* LayerAnimation::CreateSimple(
-    Layer* new_layer, std::unique_ptr<Layer> old_layer) {
+LayerAnimation* LayerAnimation::CreateSimple(Layer* new_layer,
+                                             std::unique_ptr<Layer> old_layer) {
   return new SimpleAnimation(new_layer, std::move(old_layer));
 }
 
-LayerAnimation* LayerAnimation::CreateSlideIn(
-    Layer* parent_layer, Layer* new_layer, Layer* old_layer) {
+LayerAnimation* LayerAnimation::CreateSlideIn(Layer* parent_layer,
+                                              Layer* new_layer,
+                                              Layer* old_layer) {
   return new SlideInAnimation(parent_layer, new_layer, old_layer);
 }
 
-LayerAnimation* LayerAnimation::CreateSlideOut(
-    std::unique_ptr<Layer> layer, const gfx::PointF& new_origin) {
+LayerAnimation* LayerAnimation::CreateSlideOut(std::unique_ptr<Layer> layer,
+                                               const gfx::PointF& new_origin) {
   return new SlideOutAnimation(std::move(layer), new_origin);
 }
 
 LayerAnimation* LayerAnimation::CreateSlideReplace(
-    Layer* new_layer, std::unique_ptr<Layer> old_layer,
+    Layer* new_layer,
+    std::unique_ptr<Layer> old_layer,
     const gfx::PointF& old_origin) {
   return new SlideReplaceAnimation(new_layer, std::move(old_layer), old_origin);
 }

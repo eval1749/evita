@@ -12,11 +12,9 @@ namespace dom {
 //
 // ButtonControl
 //
-ButtonControl::ButtonControl(const base::string16& text) : text_(text) {
-}
+ButtonControl::ButtonControl(const base::string16& text) : text_(text) {}
 
-ButtonControl::~ButtonControl() {
-}
+ButtonControl::~ButtonControl() {}
 
 void ButtonControl::set_text(const base::string16& new_text) {
   if (text_ == new_text)

@@ -12,11 +12,9 @@ namespace dom {
 //
 // CheckboxControl
 //
-CheckboxControl::CheckboxControl() : checked_(false) {
-}
+CheckboxControl::CheckboxControl() : checked_(false) {}
 
-CheckboxControl::~CheckboxControl() {
-}
+CheckboxControl::~CheckboxControl() {}
 
 void CheckboxControl::set_checked(bool new_checked) {
   if (checked_ == new_checked)

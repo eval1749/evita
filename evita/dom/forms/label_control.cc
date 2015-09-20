@@ -10,11 +10,9 @@ namespace dom {
 //
 // LabelControl
 //
-LabelControl::LabelControl(const base::string16& text) : text_(text) {
-}
+LabelControl::LabelControl(const base::string16& text) : text_(text) {}
 
-LabelControl::~LabelControl() {
-}
+LabelControl::~LabelControl() {}
 
 void LabelControl::set_text(const base::string16& new_text) {
   if (text_ == new_text)

@@ -6,14 +6,16 @@
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/mock_view_impl.h"
 
-namespace {
+namespace dom {
 
-class TextFieldControlTest : public dom::AbstractDomTest {
-  protected: TextFieldControlTest() {
-  }
-  public: virtual ~TextFieldControlTest() {
-  }
+class TextFieldControlTest : public AbstractDomTest {
+ public:
+  ~TextFieldControlTest() override = default;
 
+ protected:
+  TextFieldControlTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(TextFieldControlTest);
 };
 
@@ -32,13 +34,13 @@ TEST_F(TextFieldControlTest, set_disabled) {
   EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
-
 TEST_F(TextFieldControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl();"
-                      "sample.clientLeft = 1;"
-                      "sample.clientTop = 2;"
-                      "sample.clientWidth = 3;"
-                      "sample.clientHeight = 4;");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new TextFieldControl();"
+      "sample.clientLeft = 1;"
+      "sample.clientTop = 2;"
+      "sample.clientWidth = 3;"
+      "sample.clientHeight = 4;");
   EXPECT_SCRIPT_EQ("4", "sample.clientHeight");
   EXPECT_SCRIPT_EQ("1", "sample.clientLeft");
   EXPECT_SCRIPT_EQ("2", "sample.clientTop");
@@ -67,10 +69,10 @@ TEST_F(TextFieldControlTest, set_value) {
       "sample.addEventListener('change', function() { ++num_changes; });"
       "sample.addEventListener('input', function() { ++num_inputs; });"
       "sample.value = 'foo';");
-  EXPECT_SCRIPT_EQ("0", "num_changes") <<
-      "Change value from script doesn't dispatch 'change' event.";
-  EXPECT_SCRIPT_EQ("0", "num_inputs") <<
-      "Change value from script doesn't dispatch 'input' event.";
+  EXPECT_SCRIPT_EQ("0", "num_changes")
+      << "Change value from script doesn't dispatch 'change' event.";
+  EXPECT_SCRIPT_EQ("0", "num_inputs")
+      << "Change value from script doesn't dispatch 'input' event.";
 }
 
-}  // namespace
+}  // namespace dom

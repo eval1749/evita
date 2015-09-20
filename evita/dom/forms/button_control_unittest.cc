@@ -4,14 +4,16 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class ButtonControlTest : public dom::AbstractDomTest {
-  protected: ButtonControlTest() {
-  }
-  public: virtual ~ButtonControlTest() {
-  }
+class ButtonControlTest : public AbstractDomTest {
+ public:
+  ~ButtonControlTest() override = default;
 
+ protected:
+  ButtonControlTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(ButtonControlTest);
 };
 
@@ -44,11 +46,12 @@ TEST_F(ButtonControlTest, set_disabled) {
 }
 
 TEST_F(ButtonControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new ButtonControl('foo');"
-                      "sample.clientLeft = 1;"
-                      "sample.clientTop = 2;"
-                      "sample.clientWidth = 3;"
-                      "sample.clientHeight = 4;");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new ButtonControl('foo');"
+      "sample.clientLeft = 1;"
+      "sample.clientTop = 2;"
+      "sample.clientWidth = 3;"
+      "sample.clientHeight = 4;");
   EXPECT_SCRIPT_EQ("4", "sample.clientHeight");
   EXPECT_SCRIPT_EQ("1", "sample.clientLeft");
   EXPECT_SCRIPT_EQ("2", "sample.clientTop");
@@ -74,4 +77,4 @@ TEST_F(ButtonControlTest, set_text) {
   EXPECT_SCRIPT_EQ("bar", "sample.text");
 }
 
-}  // namespace
+}  // namespace dom

@@ -5,14 +5,16 @@
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
 
-namespace {
+namespace dom {
 
-class CheckboxControlTest : public dom::AbstractDomTest {
-  protected: CheckboxControlTest() {
-  }
-  public: virtual ~CheckboxControlTest() {
-  }
+class CheckboxControlTest : public AbstractDomTest {
+ public:
+  ~CheckboxControlTest() override = default;
 
+ protected:
+  CheckboxControlTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(CheckboxControlTest);
 };
 
@@ -36,8 +38,8 @@ TEST_F(CheckboxControlTest, dispatchEvent) {
   EXPECT_SCRIPT_EQ("2", "changed") << "UI changes control's value.";
 
   EXPECT_SCRIPT_VALID("sample.dispatchEvent(new FormEvent('change'))");
-  EXPECT_SCRIPT_EQ("2", "changed") <<
-      "UI doesn't change value, but event was dispatched.";
+  EXPECT_SCRIPT_EQ("2", "changed")
+      << "UI doesn't change value, but event was dispatched.";
 }
 
 TEST_F(CheckboxControlTest, set_value) {
@@ -63,13 +65,13 @@ TEST_F(CheckboxControlTest, set_disabled) {
   EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
-
 TEST_F(CheckboxControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new CheckboxControl();"
-                      "sample.clientLeft = 1;"
-                      "sample.clientTop = 2;"
-                      "sample.clientWidth = 3;"
-                      "sample.clientHeight = 4;");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new CheckboxControl();"
+      "sample.clientLeft = 1;"
+      "sample.clientTop = 2;"
+      "sample.clientWidth = 3;"
+      "sample.clientHeight = 4;");
   EXPECT_SCRIPT_EQ("4", "sample.clientHeight");
   EXPECT_SCRIPT_EQ("1", "sample.clientLeft");
   EXPECT_SCRIPT_EQ("2", "sample.clientTop");
@@ -88,4 +90,4 @@ TEST_F(CheckboxControlTest, set_clientLeft) {
   EXPECT_SCRIPT_EQ("40", "sample.clientHeight");
 }
 
-}  // namespace
+}  // namespace dom

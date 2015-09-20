@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_forms_checkbox_control_h)
-#define INCLUDE_evita_dom_forms_checkbox_control_h
+#ifndef EVITA_DOM_FORMS_CHECKBOX_CONTROL_H_
+#define EVITA_DOM_FORMS_CHECKBOX_CONTROL_H_
 
 #include "evita/dom/forms/form_control.h"
 
@@ -13,25 +13,30 @@ namespace bindings {
 class CheckboxControlClass;
 }
 
-class CheckboxControl
+class CheckboxControl final
     : public v8_glue::Scriptable<CheckboxControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(CheckboxControl);
+
+ public:
+  ~CheckboxControl() final;
+
+  bool checked() const { return checked_; }
+
+ private:
   friend class bindings::CheckboxControlClass;
 
-  private: bool checked_;
+  CheckboxControl();
 
-  private: CheckboxControl();
-  public: virtual ~CheckboxControl();
-
-  public: bool checked() const { return checked_; }
-  private: void set_checked(bool checked);
+  void set_checked(bool checked);
 
   // EventTarget
-  private: virtual bool DispatchEvent(Event* event) override;
+  bool DispatchEvent(Event* event) override;
+
+  bool checked_;
 
   DISALLOW_COPY_AND_ASSIGN(CheckboxControl);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_forms_checkbox_control_h)
+#endif  // EVITA_DOM_FORMS_CHECKBOX_CONTROL_H_

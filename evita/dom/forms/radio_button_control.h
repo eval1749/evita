@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_forms_radio_button_control_h)
-#define INCLUDE_evita_dom_forms_radio_button_control_h
+#ifndef EVITA_DOM_FORMS_RADIO_BUTTON_CONTROL_H_
+#define EVITA_DOM_FORMS_RADIO_BUTTON_CONTROL_H_
 
 #include "evita/dom/forms/form_control.h"
 
@@ -13,25 +13,30 @@ namespace bindings {
 class RadioButtonControlClass;
 }
 
-class RadioButtonControl
+class RadioButtonControl final
     : public v8_glue::Scriptable<RadioButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(RadioButtonControl);
+
+ public:
+  virtual ~RadioButtonControl();
+
+  bool checked() const { return checked_; }
+
+ private:
   friend class bindings::RadioButtonControlClass;
 
-  private: bool checked_;
+  explicit RadioButtonControl(const base::string16& name);
 
-  private: explicit RadioButtonControl(const base::string16& name);
-  public: virtual ~RadioButtonControl();
-
-  public: bool checked() const { return checked_; }
-  private: void set_checked(bool new_checked);
+  void set_checked(bool new_checked);
 
   // EventTarget
-  private: virtual bool DispatchEvent(Event* event) override;
+  bool DispatchEvent(Event* event) final;
+
+  bool checked_;
 
   DISALLOW_COPY_AND_ASSIGN(RadioButtonControl);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_forms_radio_button_control_h)
+#endif  // EVITA_DOM_FORMS_RADIO_BUTTON_CONTROL_H_

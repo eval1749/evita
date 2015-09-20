@@ -15,12 +15,12 @@ namespace dom {
 // TextFieldSelection
 //
 TextFieldSelection::TextFieldSelection(TextFieldControl* control)
-    : ScriptableBase(), control_(control), anchor_offset_(0),
-      focus_offset_(0) {
-}
+    : ScriptableBase(),
+      control_(control),
+      anchor_offset_(0),
+      focus_offset_(0) {}
 
-TextFieldSelection::~TextFieldSelection() {
-}
+TextFieldSelection::~TextFieldSelection() {}
 
 void TextFieldSelection::set_anchor_offset(int anchor_offset) {
   auto const new_anchor_offset = NormalizeOffset(anchor_offset);

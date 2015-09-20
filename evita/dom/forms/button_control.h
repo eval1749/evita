@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_forms_button_control_h)
-#define INCLUDE_evita_dom_forms_button_control_h
+#ifndef EVITA_DOM_FORMS_BUTTON_CONTROL_H_
+#define EVITA_DOM_FORMS_BUTTON_CONTROL_H_
 
 #include "evita/dom/forms/form_control.h"
 
@@ -13,23 +13,28 @@ namespace bindings {
 class ButtonControlClass;
 }
 
-class ButtonControl
+class ButtonControl final
     : public v8_glue::Scriptable<ButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(ButtonControl);
-  friend class bindings::ButtonControlClass;
 
-  private: base::string16 text_;
-
-  private: ButtonControl(const base::string16& text);
-  public: virtual ~ButtonControl();
+ public:
+  ~ButtonControl() final;
 
   // Expose |text| for |view::FormWindow|.
-  public: const base::string16& text() const { return text_; }
-  private: void set_text(const base::string16& text);
+  const base::string16& text() const { return text_; }
+
+ private:
+  friend class bindings::ButtonControlClass;
+
+  explicit ButtonControl(const base::string16& text);
+
+  void set_text(const base::string16& text);
+
+  base::string16 text_;
 
   DISALLOW_COPY_AND_ASSIGN(ButtonControl);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_forms_button_control_h)
+#endif  // EVITA_DOM_FORMS_BUTTON_CONTROL_H_

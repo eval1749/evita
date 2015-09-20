@@ -6,10 +6,8 @@
 
 namespace dom {
 
-FormObserver::FormObserver() {
-}
+FormObserver::FormObserver() {}
 
-FormObserver::~FormObserver() {
-}
+FormObserver::~FormObserver() {}
 
 }  // namespace dom

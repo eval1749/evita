@@ -8,17 +8,19 @@
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
 
-namespace {
+namespace dom {
 
 using ::testing::Eq;
 using ::testing::_;
 
-class FormTest : public dom::AbstractDomTest {
-  protected: FormTest() {
-  }
-  public: virtual ~FormTest() {
-  }
+class FormTest : public AbstractDomTest {
+ public:
+  ~FormTest() override = default;
 
+ protected:
+  FormTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(FormTest);
 };
 
@@ -33,40 +35,45 @@ TEST_F(FormTest, ctor) {
 }
 
 TEST_F(FormTest, add) {
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
-                      "var text_field = new TextFieldControl();"
-                      "sample.add(text_field);");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new Form();"
+      "var text_field = new TextFieldControl();"
+      "sample.add(text_field);");
   EXPECT_SCRIPT_EQ("1", "sample.controls.length");
   EXPECT_SCRIPT_TRUE("sample.controls[0] === text_field");
 }
 
 TEST_F(FormTest, focusControl) {
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
-                      "var button = new ButtonControl('button');"
-                      "sample.focusControl = button");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new Form();"
+      "var button = new ButtonControl('button');"
+      "sample.focusControl = button");
   EXPECT_SCRIPT_TRUE("sample.focusControl == button");
-  EXPECT_SCRIPT_VALID("sample.focusControl = null") <<
-      "Set null to Form.protected.focusControl means the form doesn't have"
-      " focus control.";
+  EXPECT_SCRIPT_VALID("sample.focusControl = null")
+      << "Set null to Form.protected.focusControl means the form doesn't have"
+         " focus control.";
   EXPECT_SCRIPT_TRUE("sample.focusControl == null");
 }
 
 TEST_F(FormTest, height) {
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
-                      "sample.height = 123");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new Form();"
+      "sample.height = 123");
   EXPECT_SCRIPT_EQ("123", "sample.height");
 }
 
 TEST_F(FormTest, title) {
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
-                      "sample.title = 'foo'");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new Form();"
+      "sample.title = 'foo'");
   EXPECT_SCRIPT_EQ("foo", "sample.title");
 }
 
 TEST_F(FormTest, width) {
-  EXPECT_SCRIPT_VALID("var sample = new Form();"
-                      "sample.width = 123");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new Form();"
+      "sample.width = 123");
   EXPECT_SCRIPT_EQ("123", "sample.width");
 }
 
-}  // namespace
+}  // namespace dom

@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_forms_form_observer_h)
-#define INCLUDE_evita_dom_forms_form_observer_h
-
-#include "base/macros.h"
+#ifndef EVITA_DOM_FORMS_FORM_OBSERVER_H_
+#define EVITA_DOM_FORMS_FORM_OBSERVER_H_
 
 namespace dom {
 
 class FormObserver {
-  protected: FormObserver();
-  public: virtual ~FormObserver();
+ public:
+  virtual ~FormObserver();
 
-  public: virtual void DidChangeForm() = 0;
+  virtual void DidChangeForm() = 0;
 
-  DISALLOW_COPY_AND_ASSIGN(FormObserver);
+ protected:
+  FormObserver();
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_forms_form_observer_h)
+#endif  // EVITA_DOM_FORMS_FORM_OBSERVER_H_

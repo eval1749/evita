@@ -14,7 +14,8 @@ namespace dom {
 // FormControl::HandlingFormEventScope
 //
 FormControl::HandlingFormEventScope::HandlingFormEventScope(
-    FormControl* control) : control_(control) {
+    FormControl* control)
+    : control_(control) {
   DCHECK(!control_->handling_form_event_);
   control_->handling_form_event_ = true;
 }
@@ -29,14 +30,11 @@ FormControl::HandlingFormEventScope::~HandlingFormEventScope() {
 // FormControl
 //
 FormControl::FormControl(const base::string16& name)
-    : disabled_(false), handling_form_event_(false), name_(name) {
-}
+    : disabled_(false), handling_form_event_(false), name_(name) {}
 
-FormControl::FormControl() : FormControl(base::string16()) {
-}
+FormControl::FormControl() : FormControl(base::string16()) {}
 
-FormControl::~FormControl() {
-}
+FormControl::~FormControl() {}
 
 void FormControl::set_client_height(float new_height) {
   if (bounds_.height() == new_height)
@@ -106,7 +104,7 @@ void FormControl::NotifyControlChange() {
 
 // dom::EventTarget
 EventTarget::EventPath FormControl::BuildEventPath() const {
-  return form_ ? EventPath {form_} : EventPath();
+  return form_ ? EventPath{form_} : EventPath();
 }
 
 }  // namespace dom

@@ -14,10 +14,10 @@ namespace dom {
 namespace {
 base::string16 EnsureSingleLine(const base::string16& text) {
   auto last_char = 0;
-  for (auto index = 0u; index < text.size(); ++index){
+  for (auto index = 0u; index < text.size(); ++index) {
     if (text[index] == '\n') {
-      return last_char == '\r' ? text.substr(0, index - 1) :
-                                 text.substr(0, index);
+      return last_char == '\r' ? text.substr(0, index - 1)
+                               : text.substr(0, index);
     }
     last_char = text[index];
   }
@@ -31,11 +31,9 @@ base::string16 EnsureSingleLine(const base::string16& text) {
 
 //
 TextFieldControl::TextFieldControl()
-    : selection_(new TextFieldSelection(this)) {
-}
+    : selection_(new TextFieldSelection(this)) {}
 
-TextFieldControl::~TextFieldControl() {
-}
+TextFieldControl::~TextFieldControl() {}
 
 // This function is used for implementing setter of |value| property.
 // Caller should dispatch "input" event.

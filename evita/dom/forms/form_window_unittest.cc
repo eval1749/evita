@@ -6,17 +6,19 @@
 
 #include "evita/dom/mock_view_impl.h"
 
-namespace {
+namespace dom {
 
 using ::testing::Eq;
 using ::testing::_;
 
-class FormWindowTest : public dom::AbstractDomTest {
-  protected: FormWindowTest() {
-  }
-  public: virtual ~FormWindowTest() {
-  }
+class FormWindowTest : public AbstractDomTest {
+ public:
+  ~FormWindowTest() override = default;
 
+ protected:
+  FormWindowTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(FormWindowTest);
 };
 
@@ -29,4 +31,4 @@ TEST_F(FormWindowTest, ctor) {
   EXPECT_SCRIPT_TRUE("sample.form === form");
 }
 
-}  // namespace
+}  // namespace dom

@@ -31,11 +31,9 @@ RadioButtonControl* FindCheckedRadioButton(const Form* form,
 // RadioButtonControl
 //
 RadioButtonControl::RadioButtonControl(const base::string16& name)
-    : ScriptableBase(name), checked_(false) {
-}
+    : ScriptableBase(name), checked_(false) {}
 
-RadioButtonControl::~RadioButtonControl() {
-}
+RadioButtonControl::~RadioButtonControl() {}
 
 void RadioButtonControl::set_checked(bool new_checked) {
   if (checked_ == new_checked)

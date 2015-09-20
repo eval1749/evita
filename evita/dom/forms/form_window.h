@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_forms_form_window_h)
-#define INCLUDE_evita_dom_forms_form_window_h
+#ifndef EVITA_DOM_FORMS_FORM_WINDOW_H_
+#define EVITA_DOM_FORMS_FORM_WINDOW_H_
 
 #include "evita/dom/windows/window.h"
 
@@ -24,19 +24,23 @@ class FormWindowClass;
 //
 class FormWindow final : public v8_glue::Scriptable<FormWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(FormWindow);
+
+ public:
+  ~FormWindow() final;
+
+  Form* form() const { return form_.get(); }
+
+ private:
   friend class bindings::FormWindowClass;
 
-  private: gc::Member<Form> form_;
+  FormWindow(Form* form, const FormWindowInit& init);
+  explicit FormWindow(Form* form);
 
-  private: FormWindow(Form* form, const FormWindowInit& init);
-  private: FormWindow(Form* form);
-  public: virtual ~FormWindow();
-
-  public: Form* form() const { return form_.get(); }
+  gc::Member<Form> form_;
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_forms_form_window_h)
+#endif  // EVITA_DOM_FORMS_FORM_WINDOW_H_

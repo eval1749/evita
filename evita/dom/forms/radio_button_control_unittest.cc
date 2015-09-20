@@ -5,14 +5,16 @@
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
 
-namespace {
+namespace dom {
 
-class RadioButtonControlTest : public dom::AbstractDomTest {
-  protected: RadioButtonControlTest() {
-  }
-  public: virtual ~RadioButtonControlTest() {
-  }
+class RadioButtonControlTest : public AbstractDomTest {
+ public:
+  ~RadioButtonControlTest() override = default;
 
+ protected:
+  RadioButtonControlTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(RadioButtonControlTest);
 };
 
@@ -96,13 +98,13 @@ TEST_F(RadioButtonControlTest, set_disabled) {
   EXPECT_SCRIPT_TRUE("sample.disabled");
 }
 
-
 TEST_F(RadioButtonControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new RadioButtonControl('foo');"
-                      "sample.clientLeft = 1;"
-                      "sample.clientTop = 2;"
-                      "sample.clientWidth = 3;"
-                      "sample.clientHeight = 4;");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new RadioButtonControl('foo');"
+      "sample.clientLeft = 1;"
+      "sample.clientTop = 2;"
+      "sample.clientWidth = 3;"
+      "sample.clientHeight = 4;");
   EXPECT_SCRIPT_EQ("4", "sample.clientHeight");
   EXPECT_SCRIPT_EQ("1", "sample.clientLeft");
   EXPECT_SCRIPT_EQ("2", "sample.clientTop");
@@ -121,4 +123,4 @@ TEST_F(RadioButtonControlTest, set_clientLeft) {
   EXPECT_SCRIPT_EQ("40", "sample.clientHeight");
 }
 
-}  // namespace
+}  // namespace dom

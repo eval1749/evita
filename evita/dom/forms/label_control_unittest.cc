@@ -6,14 +6,16 @@
 
 #include "evita/dom/mock_view_impl.h"
 
-namespace {
+namespace dom {
 
-class LabelControlTest : public dom::AbstractDomTest {
-  protected: LabelControlTest() {
-  }
-  public: virtual ~LabelControlTest() {
-  }
+class LabelControlTest : public AbstractDomTest {
+ public:
+  ~LabelControlTest() override = default;
 
+ protected:
+  LabelControlTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(LabelControlTest);
 };
 
@@ -46,11 +48,12 @@ TEST_F(LabelControlTest, set_disabled) {
 }
 
 TEST_F(LabelControlTest, set_clientLeft) {
-  EXPECT_SCRIPT_VALID("var sample = new LabelControl('foo');"
-                      "sample.clientLeft = 1;"
-                      "sample.clientTop = 2;"
-                      "sample.clientWidth = 3;"
-                      "sample.clientHeight = 4;");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new LabelControl('foo');"
+      "sample.clientLeft = 1;"
+      "sample.clientTop = 2;"
+      "sample.clientWidth = 3;"
+      "sample.clientHeight = 4;");
   EXPECT_SCRIPT_EQ("4", "sample.clientHeight");
   EXPECT_SCRIPT_EQ("1", "sample.clientLeft");
   EXPECT_SCRIPT_EQ("2", "sample.clientTop");
@@ -75,4 +78,4 @@ TEST_F(LabelControlTest, set_text) {
   EXPECT_SCRIPT_EQ("bar", "sample.text");
 }
 
-}  // namespace
+}  // namespace dom

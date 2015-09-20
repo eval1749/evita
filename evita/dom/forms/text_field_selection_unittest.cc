@@ -4,20 +4,23 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class TextFieldSelectionTest : public dom::AbstractDomTest {
-  protected: TextFieldSelectionTest() {
-  }
-  public: virtual ~TextFieldSelectionTest() {
-  }
+class TextFieldSelectionTest : public AbstractDomTest {
+ public:
+  ~TextFieldSelectionTest() override = default;
 
+ protected:
+  TextFieldSelectionTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(TextFieldSelectionTest);
 };
 
 TEST_F(TextFieldSelectionTest, ctor) {
-  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl();"
-                      "var selection = sample.selection;");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new TextFieldControl();"
+      "var selection = sample.selection;");
   EXPECT_SCRIPT_TRUE("selection instanceof TextFieldSelection");
   EXPECT_SCRIPT_EQ("0", "selection.anchorOffset");
   EXPECT_SCRIPT_EQ("true", "selection.collapsed");
@@ -27,15 +30,16 @@ TEST_F(TextFieldSelectionTest, ctor) {
 }
 
 TEST_F(TextFieldSelectionTest, collapseTo) {
-  EXPECT_SCRIPT_VALID("var sample = new TextFieldControl();"
-                      "sample.value = '0123456789';"
-                      "var selection = sample.selection;"
-                      "selection.collapseTo(3)");
+  EXPECT_SCRIPT_VALID(
+      "var sample = new TextFieldControl();"
+      "sample.value = '0123456789';"
+      "var selection = sample.selection;"
+      "selection.collapseTo(3)");
   EXPECT_SCRIPT_EQ("3,3",
-      "selection.anchorOffset + ',' + selection.focusOffset");
+                   "selection.anchorOffset + ',' + selection.focusOffset");
   EXPECT_SCRIPT_VALID("selection.focusOffset = 5; selection.collapseTo(8);");
   EXPECT_SCRIPT_EQ("8,8",
-      "selection.anchorOffset+ ',' + selection.focusOffset");
+                   "selection.anchorOffset+ ',' + selection.focusOffset");
 }
 
 TEST_F(TextFieldSelectionTest, extendTo) {
@@ -93,4 +97,4 @@ TEST_F(TextFieldSelectionTest, text) {
   EXPECT_SCRIPT_EQ("4567", "testIt(4, 8)") << "range";
 }
 
-}  // namespace
+}  // namespace dom

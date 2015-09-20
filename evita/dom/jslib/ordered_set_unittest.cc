@@ -4,14 +4,16 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class OrderedSetTest : public dom::AbstractDomTest {
-  protected: OrderedSetTest() {
-  }
-  public: virtual ~OrderedSetTest() {
-  }
+class OrderedSetTest : public AbstractDomTest {
+ public:
+  ~OrderedSetTest() override = default;
 
+ protected:
+  OrderedSetTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(OrderedSetTest);
 };
 
@@ -66,4 +68,4 @@ TEST_F(OrderedSetTest, all) {
   EXPECT_SCRIPT_EQ("0", "set.size");
 }
 
-}  // namespace
+}  // namespace dom

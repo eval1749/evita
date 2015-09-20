@@ -14,22 +14,15 @@
 #include "evita/text/range.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"
+#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {
 namespace internal {
 class EnumValue {
-  private: std::vector<v8::Eternal<v8::String>*> values_;
-
-  protected: EnumValue() = default;
-  protected: ~EnumValue() = default;
-
-  protected: void AddValue(v8::Eternal<v8::String>* value) {
-    values_.push_back(value);
-  }
-
-  public: template<typename T> v8::Maybe<T> FromV8(
-      v8::Isolate* isolate, v8::Handle<v8::Value> js_value) const {
+ public:
+  template <typename T>
+  v8::Maybe<T> FromV8(v8::Isolate* isolate,
+                      v8::Handle<v8::Value> js_value) const {
     auto index = 0u;
     for (auto value : values_) {
       if (EqualNames(js_value, value->Get(isolate)))
@@ -39,43 +32,66 @@ class EnumValue {
     return v8::Nothing<T>();
   }
 
-  public: template<typename T> v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                                          T index) {
+  template <typename T>
+  v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T index) {
     if (static_cast<size_t>(index) >= values_.size())
       return v8::String::Empty(isolate);
     return values_[static_cast<size_t>(index)]->Get(isolate);
   }
+
+ protected:
+  EnumValue() = default;
+  ~EnumValue() = default;
+
+  void AddValue(v8::Eternal<v8::String>* value) { values_.push_back(value); }
+
+ private:
+  std::vector<v8::Eternal<v8::String>*> values_;
+
+  DISALLOW_COPY_AND_ASSIGN(EnumValue);
 };
 
-class FontStyleValue : public common::Singleton<FontStyleValue>,
-                       public EnumValue {
+class FontStyleValue final : public common::Singleton<FontStyleValue>,
+                             public EnumValue {
   DECLARE_SINGLETON_CLASS(FontStyleValue);
 
-  private: FontStyleValue() {
+ public:
+  ~FontStyleValue() final = default;
+
+ private:
+  FontStyleValue() {
     AddValue(&v8Strings::normal);
     AddValue(&v8Strings::italic);
   }
 
-  public: ~FontStyleValue() = default;
+  DISALLOW_COPY_AND_ASSIGN(FontStyleValue);
 };
 
-class FontWeightValue : public common::Singleton<FontWeightValue>,
-                       public EnumValue {
+class FontWeightValue final : public common::Singleton<FontWeightValue>,
+                              public EnumValue {
   DECLARE_SINGLETON_CLASS(FontWeightValue);
 
-  private: FontWeightValue() {
+ public:
+  ~FontWeightValue() final = default;
+
+ private:
+  FontWeightValue() {
     AddValue(&v8Strings::normal);
     AddValue(&v8Strings::bold);
   }
 
-  public: ~FontWeightValue() = default;
+  DISALLOW_COPY_AND_ASSIGN(FontWeightValue);
 };
 
 class TextDecorationValue : public common::Singleton<TextDecorationValue>,
-                       public EnumValue {
+                            public EnumValue {
   DECLARE_SINGLETON_CLASS(TextDecorationValue);
 
-  private: TextDecorationValue() {
+ public:
+  ~TextDecorationValue() final = default;
+
+ private:
+  TextDecorationValue() {
     AddValue(&v8Strings::none);
     AddValue(&v8Strings::greenwave);
     AddValue(&v8Strings::redwave);
@@ -86,7 +102,7 @@ class TextDecorationValue : public common::Singleton<TextDecorationValue>,
     AddValue(&v8Strings::imeinactive2);
   }
 
-  public: ~TextDecorationValue() = default;
+  DISALLOW_COPY_AND_ASSIGN(TextDecorationValue);
 };
 
 }  // namespace internal
@@ -94,30 +110,31 @@ class TextDecorationValue : public common::Singleton<TextDecorationValue>,
 
 namespace gin {
 
-template<>
+template <>
 struct Converter<css::Color> {
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> js_value,
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Handle<v8::Value> js_value,
                      css::Color* out_color) {
     int int_value;
     if (!ConvertFromV8(isolate, js_value, &int_value))
       return false;
     // TODO(yosi) How do we represent css::Color in JS?
-    *out_color = css::Color((int_value >> 16) & 0xFF,
-                            (int_value >> 8) & 0xFF,
+    *out_color = css::Color((int_value >> 16) & 0xFF, (int_value >> 8) & 0xFF,
                             int_value & 0xFF);
     return true;
   }
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, css::Color color) {
     // TODO(yosi) How do we represent css::Color in JS?
-    auto const int_value = (color.red() << 16) | (color.green() << 8) |
-                           color.blue();
+    auto const int_value =
+        (color.red() << 16) | (color.green() << 8) | color.blue();
     return ConvertToV8(isolate, int_value);
   }
 };
 
-template<typename T, typename U>
+template <typename T, typename U>
 struct EnumConverter {
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> js_value,
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Handle<v8::Value> js_value,
                      T* out_enum_value) {
     auto const maybe_enum_value = U::instance()->FromV8<T>(isolate, js_value);
     if (maybe_enum_value.IsNothing())
@@ -130,21 +147,17 @@ struct EnumConverter {
   }
 };
 
-template<>
-struct Converter<css::FontStyle> :
-    EnumConverter<css::FontStyle, dom::internal::FontStyleValue> {
-};
+template <>
+struct Converter<css::FontStyle>
+    : EnumConverter<css::FontStyle, dom::internal::FontStyleValue> {};
 
-template<>
-struct Converter<css::FontWeight> :
-    EnumConverter<css::FontWeight, dom::internal::FontWeightValue> {
-};
+template <>
+struct Converter<css::FontWeight>
+    : EnumConverter<css::FontWeight, dom::internal::FontWeightValue> {};
 
-
-template<>
-struct Converter<css::TextDecoration> :
-    EnumConverter<css::TextDecoration, dom::internal::TextDecorationValue> {
-};
+template <>
+struct Converter<css::TextDecoration>
+    : EnumConverter<css::TextDecoration, dom::internal::TextDecorationValue> {};
 
 }  // namespace gin
 
@@ -153,14 +166,15 @@ namespace dom {
 base::string16 V8ToString(v8::Handle<v8::Value> value);
 
 namespace {
-template<typename T>
+template <typename T>
 v8::Maybe<T> ConvertFromV8(v8::Isolate* isolate,
                            v8::Handle<v8::Value> js_value) {
   if (js_value.IsEmpty())
     return v8::Nothing<T>();
   T cxx_value;
-  return gin::ConvertFromV8(isolate, js_value, &cxx_value) ?
-      v8::Just<T>(cxx_value) : v8::Nothing<T>();
+  return gin::ConvertFromV8(isolate, js_value, &cxx_value)
+             ? v8::Just<T>(cxx_value)
+             : v8::Nothing<T>();
 }
 
 bool EqualNames(v8::Handle<v8::Value> name1, v8::Handle<v8::String> name2) {
@@ -175,12 +189,12 @@ bool EqualNames(v8::Handle<v8::Value> name1, v8::Handle<v8::String> name2) {
 void InvalidStyleAttributeValue(v8::Isolate* isolate,
                                 v8::Handle<v8::String> attr_name,
                                 v8::Handle<v8::Value> attr_value) {
-  ScriptHost::instance()->ThrowException(v8::Exception::Error(
-      gin::StringToV8(isolate, base::StringPrintf(
-          L"Style propery '%ls' doesn't take '%ls'.",
-          V8ToString(attr_name).c_str(), V8ToString(attr_value).c_str()))));
+  ScriptHost::instance()->ThrowException(v8::Exception::Error(gin::StringToV8(
+      isolate, base::StringPrintf(L"Style propery '%ls' doesn't take '%ls'.",
+                                  V8ToString(attr_name).c_str(),
+                                  V8ToString(attr_value).c_str()))));
 }
-}
+}  // namespace
 
 v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
   if (!IsValidPosition(position))
@@ -191,8 +205,8 @@ v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
   auto const isolate = runner->isolate();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
-  auto const style_ctor = runner->global()->Get(
-      v8Strings::Style.Get(isolate))->ToObject();
+  auto const style_ctor =
+      runner->global()->Get(v8Strings::Style.Get(isolate))->ToObject();
   auto const js_style = style_ctor->CallAsConstructor(0, nullptr)->ToObject();
 
   if (style_values.has_bgcolor()) {
@@ -236,21 +250,21 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
 
-  #define LOAD_DICT_VALUE(type, attr_name, member_name) \
-    auto const attr_name = v8Strings::attr_name.Get(isolate); \
-    if (EqualNames(name, attr_name)) { \
-      auto const js_value = style_dict->Get(attr_name); \
-      if (js_value->IsUndefined()) \
-        continue; \
-      auto const attr_value = ConvertFromV8<type>(isolate, js_value); \
-      if (attr_value.IsJust()) { \
-        style_values.set_##member_name(attr_value.FromJust()); \
-        changed = true; \
-        continue; \
-      } \
-      InvalidStyleAttributeValue(isolate, attr_name, js_value); \
-      return; \
-   } \
+#define LOAD_DICT_VALUE(type, attr_name, member_name)               \
+  auto const attr_name = v8Strings::attr_name.Get(isolate);         \
+  if (EqualNames(name, attr_name)) {                                \
+    auto const js_value = style_dict->Get(attr_name);               \
+    if (js_value->IsUndefined())                                    \
+      continue;                                                     \
+    auto const attr_value = ConvertFromV8<type>(isolate, js_value); \
+    if (attr_value.IsJust()) {                                      \
+      style_values.set_##member_name(attr_value.FromJust());        \
+      changed = true;                                               \
+      continue;                                                     \
+    }                                                               \
+    InvalidStyleAttributeValue(isolate, attr_name, js_value);       \
+    return;                                                         \
+  }
 
   auto const names = style_dict->GetPropertyNames();
   auto const names_length = names->Length();
@@ -265,10 +279,9 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
     LOAD_DICT_VALUE(css::FontWeight, fontWeight, font_weight);
     LOAD_DICT_VALUE(css::TextDecoration, textDecoration, text_decoration)
 
-    ScriptHost::instance()->ThrowException(v8::Exception::Error(
-        gin::StringToV8(isolate, base::StringPrintf(
-            L"Invalid style attribute name '%ls'",
-            V8ToString(name).c_str()))));
+    ScriptHost::instance()->ThrowException(v8::Exception::Error(gin::StringToV8(
+        isolate, base::StringPrintf(L"Invalid style attribute name '%ls'",
+                                    V8ToString(name).c_str()))));
     return;
   }
   if (!changed)
@@ -276,4 +289,4 @@ void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
   document_->buffer()->SetStyle(range_->start(), range_->end(), style_values);
 }
 
-}  // namespace
+}  // namespace dom

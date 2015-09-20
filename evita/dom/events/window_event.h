@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_window_event_h)
-#define INCLUDE_evita_dom_events_window_event_h
+#ifndef EVITA_DOM_EVENTS_WINDOW_EVENT_H_
+#define EVITA_DOM_EVENTS_WINDOW_EVENT_H_
 
 #include "evita/dom/events/event.h"
 
@@ -14,24 +14,25 @@ namespace bindings {
 class WindowEventClass;
 }
 
-class WindowEvent : public v8_glue::Scriptable<WindowEvent, Event> {
+class WindowEvent final : public v8_glue::Scriptable<WindowEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(WindowEvent)
+
+ public:
+  WindowEvent(const base::string16& type, const WindowEventInit& init_dict);
+  ~WindowEvent() final;
+
+ private:
   friend class bindings::WindowEventClass;
 
-  private: gc::Member<Window> source_window_;
+  explicit WindowEvent(const base::string16& type);
 
-  public: WindowEvent(const base::string16& type,
-                      const WindowEventInit& init_dict);
-  private: explicit WindowEvent(const base::string16& type);
-  public: virtual ~WindowEvent();
+  Window* source_window() const { return source_window_.get(); }
 
-  private: Window* source_window() const {
-    return source_window_.get();
-  }
+  gc::Member<Window> source_window_;
 
   DISALLOW_COPY_AND_ASSIGN(WindowEvent);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_window_event_h)
+#endif  // EVITA_DOM_EVENTS_WINDOW_EVENT_H_

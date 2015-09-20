@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_focus_event_h)
-#define INCLUDE_evita_dom_events_focus_event_h
+#ifndef EVITA_DOM_EVENTS_FOCUS_EVENT_H_
+#define EVITA_DOM_EVENTS_FOCUS_EVENT_H_
 
 #include "evita/dom/events/ui_event.h"
 #include "evita/v8_glue/nullable.h"
@@ -15,24 +15,25 @@ namespace bindings {
 class FocusEventClass;
 }
 
-class FocusEvent : public v8_glue::Scriptable<FocusEvent, UiEvent> {
+class FocusEvent final : public v8_glue::Scriptable<FocusEvent, UiEvent> {
   DECLARE_SCRIPTABLE_OBJECT(FocusEvent)
+
+ public:
+  FocusEvent(const base::string16& type, const FocusEventInit& init_dict);
+  ~FocusEvent() final;
+
+ private:
   friend class bindings::FocusEventClass;
 
-  private: gc::Member<EventTarget> related_target_;
+  explicit FocusEvent(const base::string16& type);
 
-  public: FocusEvent(const base::string16& type,
-                     const FocusEventInit& init_dict);
-  private: FocusEvent(const base::string16& type);
-  public: virtual ~FocusEvent();
+  EventTarget* related_target() const { return related_target_.get(); }
 
-  private: EventTarget* related_target() const {
-    return related_target_.get();
-  }
+  gc::Member<EventTarget> related_target_;
 
   DISALLOW_COPY_AND_ASSIGN(FocusEvent);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_focus_event_h)
+#endif  // EVITA_DOM_EVENTS_FOCUS_EVENT_H_

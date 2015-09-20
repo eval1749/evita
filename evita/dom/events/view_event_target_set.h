@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_events_view_event_target_set_h)
-#define INCLUDE_evita_dom_events_view_event_target_set_h
+#ifndef EVITA_DOM_EVENTS_VIEW_EVENT_TARGET_SET_H_
+#define EVITA_DOM_EVENTS_VIEW_EVENT_TARGET_SET_H_
 
 #include <unordered_map>
 
@@ -21,25 +21,27 @@ class ViewEventTarget;
 //
 // This class represents mapping from widget id to DOM EventTarget object.
 //
-class ViewEventTargetSet : public common::Singleton<ViewEventTargetSet> {
+class ViewEventTargetSet final : public common::Singleton<ViewEventTargetSet> {
   DECLARE_SINGLETON_CLASS(ViewEventTargetSet);
 
-  private: std::unordered_map<domapi::EventTargetId,
-                              gc::WeakPtr<ViewEventTarget>> map_;
-  private: domapi::EventTargetId next_event_target_id_;
+ public:
+  ~ViewEventTargetSet() final;
 
-  private: ViewEventTargetSet();
-  public: ~ViewEventTargetSet();
+  void DidDestroyWidget(domapi::EventTargetId event_target_id);
+  ViewEventTarget* Find(domapi::EventTargetId event_target_id) const;
+  domapi::EventTargetId Register(ViewEventTarget* event_target);
+  void ResetForTesting();
+  void Unregister(domapi::EventTargetId event_target_id);
 
-  public: void DidDestroyWidget(domapi::EventTargetId event_target_id);
-  public: ViewEventTarget* Find(domapi::EventTargetId event_target_id) const;
-  public: domapi::EventTargetId Register(ViewEventTarget* event_target);
-  public: void ResetForTesting();
-  public: void Unregister(domapi::EventTargetId event_target_id);
+ private:
+  ViewEventTargetSet();
+
+  std::unordered_map<domapi::EventTargetId, gc::WeakPtr<ViewEventTarget>> map_;
+  domapi::EventTargetId next_event_target_id_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewEventTargetSet);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_view_event_target_set_h)
+#endif  // EVITA_DOM_EVENTS_VIEW_EVENT_TARGET_SET_H_

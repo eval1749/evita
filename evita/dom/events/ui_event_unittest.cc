@@ -3,14 +3,16 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class UiEventTest : public dom::AbstractDomTest {
-  protected: UiEventTest() {
-  }
-  public: virtual ~UiEventTest() {
-  }
+class UiEventTest : public AbstractDomTest {
+ public:
+  ~UiEventTest() override = default;
 
+ protected:
+  UiEventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(UiEventTest);
 };
 
@@ -51,4 +53,4 @@ TEST_F(UiEventTest, ctor_init_dict) {
   EXPECT_SCRIPT_TRUE("event.view == null");
 }
 
-}  // namespace
+}  // namespace dom

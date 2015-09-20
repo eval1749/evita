@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_events_view_event_target_h)
-#define INCLUDE_evita_dom_events_view_event_target_h
+#ifndef EVITA_DOM_EVENTS_VIEW_EVENT_TARGET_H_
+#define EVITA_DOM_EVENTS_VIEW_EVENT_TARGET_H_
 
 #include "evita/dom/events/event_target.h"
 
@@ -18,26 +18,28 @@ class ViewEventTargetClass;
 class ViewEventTarget
     : public v8_glue::Scriptable<ViewEventTarget, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(ViewEventTarget);
-  friend class bindings::ViewEventTargetClass;
 
+ public:
+  ~ViewEventTarget() override;
+
+  domapi::EventTargetId event_target_id() const { return event_target_id_; }
+  domapi::EventTargetId window_id() const { return event_target_id(); }
+
+ protected:
+  ViewEventTarget();
+
+  void ReleaseCapture();
+  void SetCapture();
+
+ private:
+  friend class bindings::ViewEventTargetClass;
   friend class ViewEventTargetSet;
 
-  private: domapi::EventTargetId event_target_id_;
-
-  protected: ViewEventTarget();
-  protected: virtual ~ViewEventTarget();
-
-  public: domapi::EventTargetId event_target_id() const {
-      return event_target_id_;
-  }
-  public: domapi::EventTargetId window_id() const { return event_target_id(); }
-
-  protected: void ReleaseCapture();
-  protected: void SetCapture();
+  domapi::EventTargetId event_target_id_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewEventTarget);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_view_event_target_h)
+#endif  // EVITA_DOM_EVENTS_VIEW_EVENT_TARGET_H_

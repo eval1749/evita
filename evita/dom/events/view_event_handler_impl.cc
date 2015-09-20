@@ -29,7 +29,7 @@
 #include "evita/gc/local.h"
 #include "evita/text/buffer.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"
+#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace views {
 extern int event_id_counter;
@@ -73,10 +73,10 @@ Window* FromWindowId(WindowId window_id) {
 EventTarget* GetFocusWindow(v8_glue::Runner* runner) {
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
-  auto const window_class = runner->global()->
-      Get(v8Strings::Window.Get(isolate));
-  auto const focus_window = window_class->ToObject()->
-      Get(v8Strings::focus.Get(isolate));
+  auto const window_class =
+      runner->global()->Get(v8Strings::Window.Get(isolate));
+  auto const focus_window =
+      window_class->ToObject()->Get(v8Strings::focus.Get(isolate));
   auto event_target = static_cast<EventTarget*>(nullptr);
   if (!gin::ConvertFromV8(isolate, focus_window, &event_target))
     return nullptr;
@@ -102,8 +102,8 @@ ViewEventTarget* MaybeEventTarget(domapi::EventTargetId event_target_id) {
 }
 
 Window* NewOrFromWindowId(WindowId window_id) {
-  return window_id == kInvalidWindowId ? new EditorWindow() :
-      FromWindowId(window_id);
+  return window_id == kInvalidWindowId ? new EditorWindow()
+                                       : FromWindowId(window_id);
 }
 
 // Note: The constructor returned by v8::Object::GetConstructor() doesn't
@@ -124,9 +124,9 @@ v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
                                       v8::Eternal<v8::String> method_name) {
   auto const value = js_class->Get(method_name.Get(isolate));
   if (value.IsEmpty() || !value->IsFunction()) {
-    LOG(0) << "Object " << V8ToString(js_class) << " has no method '" <<
-        V8ToString(method_name.Get(isolate)) << "', it has " <<
-        V8ToString(js_class->GetPropertyNames()) << ".";
+    LOG(0) << "Object " << V8ToString(js_class) << " has no method '"
+           << V8ToString(method_name.Get(isolate)) << "', it has "
+           << V8ToString(js_class->GetPropertyNames()) << ".";
     return v8::Handle<v8::Object>();
   }
   return value->ToObject();
@@ -134,12 +134,9 @@ v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
 
 }  // namespace
 
-ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptHost* host)
-    : host_(host) {
-}
+ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptHost* host) : host_(host) {}
 
-ViewEventHandlerImpl::~ViewEventHandlerImpl() {
-}
+ViewEventHandlerImpl::~ViewEventHandlerImpl() {}
 
 // Call |handleEvent| function in the class of event target.
 void ViewEventHandlerImpl::CallClassEventHandler(EventTarget* event_target,
@@ -151,8 +148,8 @@ void ViewEventHandlerImpl::CallClassEventHandler(EventTarget* event_target,
   if (js_class.IsEmpty())
     return;
 
-  auto const js_method = ToMethodObject(isolate, js_class,
-                                        v8Strings::handleEvent);
+  auto const js_method =
+      ToMethodObject(isolate, js_class, v8Strings::handleEvent);
   if (js_method.IsEmpty())
     return;
 
@@ -172,8 +169,11 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
 }
 
 // domapi::ViewEventHandler
-void ViewEventHandlerImpl::DidChangeWindowBounds(
-    WindowId window_id, int left, int top, int right, int bottom) {
+void ViewEventHandlerImpl::DidChangeWindowBounds(WindowId window_id,
+                                                 int left,
+                                                 int top,
+                                                 int right,
+                                                 int bottom) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
@@ -181,13 +181,15 @@ void ViewEventHandlerImpl::DidChangeWindowBounds(
 }
 
 void ViewEventHandlerImpl::DidChangeWindowVisibility(
-   WindowId window_id, domapi::Visibility visibility) {
+    WindowId window_id,
+    domapi::Visibility visibility) {
   auto const target = FromEventTargetId(window_id);
   if (!target)
     return;
-  DispatchEventWithInLock(target, new UiEvent(
-    visibility == domapi::Visibility::Visible ? L"show" : L"hide",
-    UiEventInit()));
+  DispatchEventWithInLock(
+      target,
+      new UiEvent(visibility == domapi::Visibility::Visible ? L"show" : L"hide",
+                  UiEventInit()));
 }
 
 void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
@@ -199,7 +201,6 @@ void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
 
 void ViewEventHandlerImpl::DidDropWidget(WindowId source_id,
                                          WindowId target_id) {
-
   auto const source_window = FromWindowId(source_id);
   if (!source_window)
     return;
@@ -241,9 +242,11 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
   }
   FocusEventInit event_init;
   event_init.set_related_target(MaybeEventTarget(api_event.related_target_id));
-  DispatchEventWithInLock(target, new FocusEvent(
-      api_event.event_type == domapi::EventType::Blur ? L"blur" : L"focus",
-      event_init));
+  DispatchEventWithInLock(
+      target,
+      new FocusEvent(
+          api_event.event_type == domapi::EventType::Blur ? L"blur" : L"focus",
+          event_init));
   CheckEventId(api_event);
 }
 
@@ -291,8 +294,8 @@ void ViewEventHandlerImpl::OpenFile(WindowId window_id,
   auto const js_handler = GetOpenFileHandler(runner, window_id);
   if (js_handler.IsEmpty() || !js_handler->IsObject())
     return;
-  auto const open_file = js_handler->ToObject()->Get(
-      gin::StringToV8(isolate, "open"));
+  auto const open_file =
+      js_handler->ToObject()->Get(gin::StringToV8(isolate, "open"));
   if (!open_file->IsFunction()) {
     DVLOG(0) << "OpenFile: window doesn't have callable open property.";
     return;
@@ -322,4 +325,4 @@ void ViewEventHandlerImpl::WillDestroyHost() {
   host_->WillDestroyHost();
 }
 
-} // namespace dom
+}  // namespace dom

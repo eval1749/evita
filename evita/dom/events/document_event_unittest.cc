@@ -5,16 +5,18 @@
 #include "evita/dom/mock_view_impl.h"
 #include "gmock/gmock.h"
 
-namespace {
+namespace dom {
 
 using ::testing::_;
 
-class DocumentEventTest : public dom::AbstractDomTest {
-  protected: DocumentEventTest() {
-  }
-  public: virtual ~DocumentEventTest() {
-  }
+class DocumentEventTest : public AbstractDomTest {
+ public:
+  ~DocumentEventTest() override = default;
 
+ protected:
+  DocumentEventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(DocumentEventTest);
 };
 
@@ -39,4 +41,4 @@ TEST_F(DocumentEventTest, ctor) {
   EXPECT_SCRIPT_TRUE("event.view == window");
 }
 
-}  // namespace
+}  // namespace dom

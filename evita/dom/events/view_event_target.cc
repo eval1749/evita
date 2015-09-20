@@ -15,11 +15,9 @@ namespace dom {
 // ViewEventTarget
 //
 ViewEventTarget::ViewEventTarget()
-    : event_target_id_(ViewEventTargetSet::instance()->Register(this)) {
-}
+    : event_target_id_(ViewEventTargetSet::instance()->Register(this)) {}
 
-ViewEventTarget::~ViewEventTarget() {
-}
+ViewEventTarget::~ViewEventTarget() {}
 
 void ViewEventTarget::ReleaseCapture() {
   ScriptHost::instance()->view_delegate()->ReleaseCapture(event_target_id());

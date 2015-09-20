@@ -14,14 +14,11 @@ namespace dom {
 FocusEvent::FocusEvent(const base::string16& type,
                        const FocusEventInit& init_dict)
     : ScriptableBase(type, init_dict),
-      related_target_(init_dict.related_target()) {
-}
+      related_target_(init_dict.related_target()) {}
 
 FocusEvent::FocusEvent(const base::string16& type)
-    : FocusEvent(type, FocusEventInit()) {
-}
+    : FocusEvent(type, FocusEventInit()) {}
 
-FocusEvent::~FocusEvent() {
-}
+FocusEvent::~FocusEvent() {}
 
 }  // namespace dom

@@ -67,23 +67,23 @@ MouseEventInit ToMouseEventInit(const domapi::MouseEvent& event) {
 // MouseEvent
 //
 MouseEvent::MouseEvent(const domapi::MouseEvent& event)
-    : MouseEvent(ConvertEventType(event), ToMouseEventInit(event)) {
-}
+    : MouseEvent(ConvertEventType(event), ToMouseEventInit(event)) {}
 
 MouseEvent::MouseEvent(const base::string16& type,
                        const MouseEventInit& init_dict)
     : ScriptableBase(type, init_dict),
-      alt_key_(init_dict.alt_key()), button_(init_dict.button()),
-      buttons_(init_dict.buttons()), client_x_(init_dict.client_x()),
-      client_y_(init_dict.client_y()), ctrl_key_(init_dict.ctrl_key()),
-      meta_key_(init_dict.meta_key()), shift_key_(init_dict.shift_key()) {
-}
+      alt_key_(init_dict.alt_key()),
+      button_(init_dict.button()),
+      buttons_(init_dict.buttons()),
+      client_x_(init_dict.client_x()),
+      client_y_(init_dict.client_y()),
+      ctrl_key_(init_dict.ctrl_key()),
+      meta_key_(init_dict.meta_key()),
+      shift_key_(init_dict.shift_key()) {}
 
 MouseEvent::MouseEvent(const base::string16& type)
-    : MouseEvent(type, MouseEventInit()) {
-}
+    : MouseEvent(type, MouseEventInit()) {}
 
-MouseEvent::~MouseEvent() {
-}
+MouseEvent::~MouseEvent() {}
 
 }  // namespace dom

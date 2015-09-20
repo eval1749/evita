@@ -8,19 +8,17 @@
 
 namespace dom {
 
-ViewEventTargetSet::ViewEventTargetSet() : next_event_target_id_(1) {
-}
+ViewEventTargetSet::ViewEventTargetSet() : next_event_target_id_(1) {}
 
-ViewEventTargetSet::~ViewEventTargetSet() {
-}
+ViewEventTargetSet::~ViewEventTargetSet() {}
 
 void ViewEventTargetSet::DidDestroyWidget(
     domapi::EventTargetId event_target_id) {
   DCHECK_NE(domapi::kInvalidEventTargetId, event_target_id);
   auto it = map_.find(event_target_id);
   if (it == map_.end()) {
-    DVLOG(0) << "Why we don't have a widget for EventTargetId " <<
-      event_target_id << " in EventTargetIdMap?";
+    DVLOG(0) << "Why we don't have a widget for EventTargetId "
+             << event_target_id << " in EventTargetIdMap?";
     return;
   }
   auto const event_target = it->second.get();

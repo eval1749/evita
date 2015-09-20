@@ -3,14 +3,16 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class EventTest : public dom::AbstractDomTest {
-  protected: EventTest() {
-  }
-  public: virtual ~EventTest() {
-  }
+class EventTest : public AbstractDomTest {
+ public:
+  ~EventTest() override = default;
 
+ protected:
+  EventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(EventTest);
 };
 
@@ -28,10 +30,10 @@ TEST_F(EventTest, ctor) {
 
 TEST_F(EventTest, initEvent) {
   EXPECT_SCRIPT_VALID(
-    "var event = new Event('foo', {"
-    "     bubbles: true,"
-    "     cancelable: true"
-    "});");
+      "var event = new Event('foo', {"
+      "     bubbles: true,"
+      "     cancelable: true"
+      "});");
   EXPECT_SCRIPT_TRUE("event.bubbles");
   EXPECT_SCRIPT_TRUE("event.cancelable");
   EXPECT_SCRIPT_TRUE("event.currentTarget == null");
@@ -44,14 +46,14 @@ TEST_F(EventTest, initEvent) {
 
 TEST_F(EventTest, preventDefault) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(cancelable) {"
-    "   var event = new Event('foo', {cancelable: cancelable});"
-    "   event.preventDefault();"
-    "   return event.defaultPrevented;"
-    "}");
+      "function testIt(cancelable) {"
+      "   var event = new Event('foo', {cancelable: cancelable});"
+      "   event.preventDefault();"
+      "   return event.defaultPrevented;"
+      "}");
   EXPECT_SCRIPT_TRUE("testIt(true)");
-  EXPECT_SCRIPT_FALSE("testIt(false)") <<
-      "We can't prevent default if event isn't cancelable.";
+  EXPECT_SCRIPT_FALSE("testIt(false)")
+      << "We can't prevent default if event isn't cancelable.";
 }
 
-}  // namespace
+}  // namespace dom

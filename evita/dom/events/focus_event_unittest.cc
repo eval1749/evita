@@ -6,21 +6,24 @@
 #include "evita/bindings/v8_glue_FocusEventInit.h"
 #include "evita/dom/events/focus_event.h"
 
-namespace {
+namespace dom {
 
-class FocusEventTest : public dom::AbstractDomTest {
-  protected: FocusEventTest() {
-  }
-  public: virtual ~FocusEventTest() {
-  }
+class FocusEventTest : public AbstractDomTest {
+ public:
+  ~FocusEventTest() override = default;
 
+ protected:
+  FocusEventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(FocusEventTest);
 };
 
 TEST_F(FocusEventTest, ctor) {
   RunnerScope runner_scope(this);
-  EXPECT_SCRIPT_VALID("var event;"
-                      "function init(x) { event = x; }");
+  EXPECT_SCRIPT_VALID(
+      "var event;"
+      "function init(x) { event = x; }");
   dom::FocusEventInit init_dict;
   init_dict.set_bubbles(true);
   auto const event = new dom::FocusEvent(L"focusin", init_dict);
@@ -38,4 +41,4 @@ TEST_F(FocusEventTest, ctor) {
   EXPECT_SCRIPT_TRUE("event.related_target == null");
 }
 
-}  // namespace
+}  // namespace dom

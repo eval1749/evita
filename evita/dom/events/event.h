@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_event_h)
-#define INCLUDE_evita_dom_events_event_h
+#ifndef EVITA_DOM_EVENTS_EVENT_H_
+#define EVITA_DOM_EVENTS_EVENT_H_
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
@@ -21,67 +21,74 @@ class EventClass;
 
 class Event : public v8_glue::Scriptable<Event> {
   DECLARE_SCRIPTABLE_OBJECT(Event);
-  friend class bindings::EventClass;
 
-  public: enum PhaseType {
+ public:
+  // TODO(eval1749) We should use |enum class| for |PhaseType|.
+  enum PhaseType {
     kNone,
     kCapturingPhase,
     kAtTarget,
     kBubblingPhase,
   };
 
-  public: class DispatchScope {
-    private: Event* event_;
+  class DispatchScope final {
+   public:
+    DispatchScope(Event* event, EventTarget* event_target);
+    ~DispatchScope();
 
-    public: DispatchScope(Event* event, EventTarget* event_target);
-    public: ~DispatchScope();
+    void set_current_target(EventTarget* target);
 
-    public: void set_current_target(EventTarget* target);
+    void StartAtTarget();
+    void StartBubbling();
 
-    public: void StartAtTarget();
-    public: void StartBubbling();
+   private:
+    Event* event_;
+
+    DISALLOW_COPY_AND_ASSIGN(DispatchScope);
   };
-  friend class DispatchScope;
 
-  private: bool bubbles_;
-  private: bool cancelable_;
-  private: gc::Member<EventTarget> current_target_;
-  private: bool default_prevented_;
-  private: bool dispatched_;
-  private: PhaseType event_phase_;
-  private: bool stop_immediate_propagation_;
-  private: bool stop_propagation_;
-  private: gc::Member<EventTarget> target_;
-  private: TimeStamp time_stamp_;
-  private: base::string16 type_;
+  Event(const base::string16& type, const EventInit& init_dict);
+  ~Event() override;
 
-  public: Event(const base::string16& type, const EventInit& init_dict);
-  private: explicit Event(const base::string16& type);
-  public: virtual ~Event();
-
-  public: bool bubbles() const { return bubbles_; }
-  public: bool cancelable() const { return cancelable_; }
-  public: EventTarget* current_target() const {
-    return current_target_.get();
-  }
-  public: bool default_prevented() const { return default_prevented_; }
-  public: bool dispatched() const { return dispatched_; }
-  public: PhaseType event_phase() const { return event_phase_; }
-  public: EventTarget* target() const { return target_.get(); }
-  public: bool stop_immediate_propagation() const {
+  bool bubbles() const { return bubbles_; }
+  bool cancelable() const { return cancelable_; }
+  EventTarget* current_target() const { return current_target_.get(); }
+  bool default_prevented() const { return default_prevented_; }
+  bool dispatched() const { return dispatched_; }
+  PhaseType event_phase() const { return event_phase_; }
+  EventTarget* target() const { return target_.get(); }
+  bool stop_immediate_propagation() const {
     return stop_immediate_propagation_;
   }
-  public: bool stop_propagation() const { return stop_propagation_; }
-  public: TimeStamp time_stamp() const { return time_stamp_; }
-  public: const base::string16& type() const { return type_; }
+  bool stop_propagation() const { return stop_propagation_; }
+  TimeStamp time_stamp() const { return time_stamp_; }
+  const base::string16& type() const { return type_; }
 
-  public: void PreventDefault();
-  public: void StopImmediatePropagation();
-  public: void StopPropagation();
+  void PreventDefault();
+  void StopImmediatePropagation();
+  void StopPropagation();
+
+ private:
+  friend class bindings::EventClass;
+  friend class DispatchScope;
+
+  explicit Event(const base::string16& type);
+
+  bool bubbles_;
+  bool cancelable_;
+  gc::Member<EventTarget> current_target_;
+  bool default_prevented_;
+  bool dispatched_;
+  PhaseType event_phase_;
+  bool stop_immediate_propagation_;
+  bool stop_propagation_;
+  gc::Member<EventTarget> target_;
+  TimeStamp time_stamp_;
+  base::string16 type_;
 
   DISALLOW_COPY_AND_ASSIGN(Event);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_event_h)
+#endif  // EVITA_DOM_EVENTS_EVENT_H_

@@ -7,7 +7,7 @@
 #include "evita/dom/events/event_target.h"
 #include "evita/v8_glue/nullable.h"
 
-namespace {
+namespace dom {
 
 using v8_glue::Nullable;
 
@@ -15,24 +15,24 @@ using v8_glue::Nullable;
 //
 // SampleEventTarget
 //
-class SampleEventTarget
-    : public v8_glue::Scriptable<SampleEventTarget, dom::EventTarget> {
+class SampleEventTarget final
+    : public v8_glue::Scriptable<SampleEventTarget, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(SampleEventTarget);
+
+ public:
+  SampleEventTarget() = default;
+  ~SampleEventTarget() final = default;
+
+ public:
+  Nullable<Event> handled() const { return handled_.get(); }
+  void set_handled(Nullable<Event> event) { handled_ = event; }
+
+  void HandleEvent(Event* event) { handled_ = event; }
+
+ private:
   friend class SampleEventTargetClass;
 
-  private: gc::Member<dom::Event> handled_;
-
-  public: SampleEventTarget() = default;
-  public: virtual ~SampleEventTarget() = default;
-
-  public: Nullable<dom::Event> handled() const { return handled_.get(); }
-  public: void set_handled(Nullable<dom::Event> event) {
-    handled_ = event;
-  }
-
-  public: void HandleEvent(dom::Event* event) {
-    handled_= event;
-  }
+  gc::Member<Event> handled_;
 
   DISALLOW_COPY_AND_ASSIGN(SampleEventTarget);
 };
@@ -41,34 +41,35 @@ class SampleEventTarget
 //
 // SampleEventTargetClass
 //
-class SampleEventTargetClass :
-    public v8_glue::DerivedWrapperInfo<SampleEventTarget, dom::EventTarget> {
+class SampleEventTargetClass final
+    : public v8_glue::DerivedWrapperInfo<SampleEventTarget, EventTarget> {
+ public:
+  explicit SampleEventTargetClass(const char* name) : BaseClass(name) {}
+  ~SampleEventTargetClass() final = default;
 
-  public: explicit SampleEventTargetClass(const char* name)
-      : BaseClass(name) {
+ private:
+  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
+      v8::Isolate* isolate) final {
+    return v8_glue::CreateConstructorTemplate(
+        isolate, &SampleEventTargetClass::NewSampleEventTarget);
   }
-  public: ~SampleEventTargetClass() = default;
 
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &SampleEventTargetClass::NewSampleEventTarget);
-  }
-
-  private: static SampleEventTarget* NewSampleEventTarget() {
+  static SampleEventTarget* NewSampleEventTarget() {
     return new SampleEventTarget();
   }
 
-private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override {
+  v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate,
+      v8::Handle<v8::ObjectTemplate> templ) final {
     auto const base_templ = BaseClass::SetupInstanceTemplate(isolate, templ);
     gin::ObjectTemplateBuilder builder(isolate, base_templ);
-    builder
-      .SetProperty("handled", &SampleEventTarget::handled,
-                   &SampleEventTarget::set_handled)
-      .SetMethod("handleEvent", &SampleEventTarget::HandleEvent);
+    builder.SetProperty("handled", &SampleEventTarget::handled,
+                        &SampleEventTarget::set_handled)
+        .SetMethod("handleEvent", &SampleEventTarget::HandleEvent);
     return builder.Build();
   }
+
+  DISALLOW_COPY_AND_ASSIGN(SampleEventTargetClass);
 };
 
 DEFINE_SCRIPTABLE_OBJECT(SampleEventTarget, SampleEventTargetClass);
@@ -77,15 +78,17 @@ DEFINE_SCRIPTABLE_OBJECT(SampleEventTarget, SampleEventTargetClass);
 //
 // EventTargetTest
 //
-class EventTargetTest : public dom::AbstractDomTest {
-  protected: EventTargetTest() {
-  }
-  public: virtual ~EventTargetTest() {
-  }
+class EventTargetTest : public AbstractDomTest {
+ public:
+  ~EventTargetTest() override = default;
 
-  private: void virtual PopulateGlobalTemplate(
+ protected:
+  EventTargetTest() = default;
+
+ private:
+  void PopulateGlobalTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> global_template) override {
+      v8::Handle<v8::ObjectTemplate> global_template) final {
     v8_glue::Installer<SampleEventTarget>::Run(isolate, global_template);
   }
 
@@ -104,8 +107,7 @@ TEST_F(EventTargetTest, dispatchEvent_function) {
   EXPECT_SCRIPT_TRUE("event.target == sample");
 
   // We can't dispatch again
-  EXPECT_SCRIPT_EQ("Error: InvalidStateError",
-                   "sample.dispatchEvent(event)");
+  EXPECT_SCRIPT_EQ("Error: InvalidStateError", "sample.dispatchEvent(event)");
 
   EXPECT_SCRIPT_VALID(
       "var event2 = new Event('foo');"
@@ -132,4 +134,4 @@ TEST_F(EventTargetTest, dispatchEvent_handleEvent) {
   EXPECT_SCRIPT_TRUE("sample.handled == null");
 }
 
-}  // namespace
+}  // namespace dom

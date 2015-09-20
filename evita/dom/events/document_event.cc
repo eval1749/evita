@@ -13,14 +13,11 @@ namespace dom {
 //
 DocumentEvent::DocumentEvent(const base::string16& type,
                              const DocumentEventInit& init_dict)
-    : ScriptableBase(type, init_dict), view_(init_dict.view()) {
-}
+    : ScriptableBase(type, init_dict), view_(init_dict.view()) {}
 
 DocumentEvent::DocumentEvent(const base::string16& type)
-    : DocumentEvent(type, DocumentEventInit()) {
-}
+    : DocumentEvent(type, DocumentEventInit()) {}
 
-DocumentEvent::~DocumentEvent() {
-}
+DocumentEvent::~DocumentEvent() {}
 
 }  // namespace dom

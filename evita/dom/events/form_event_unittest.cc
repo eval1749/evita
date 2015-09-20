@@ -6,11 +6,13 @@
 namespace {
 
 class FormEventTest : public dom::AbstractDomTest {
-  protected: FormEventTest() {
-  }
-  public: virtual ~FormEventTest() {
-  }
+ public:
+  ~FormEventTest() override = default;
 
+ protected:
+  FormEventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(FormEventTest);
 };
 

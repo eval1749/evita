@@ -36,23 +36,22 @@ KeyboardEventInit ToKeyboardEventInit(const domapi::KeyboardEvent& event) {
 // KeyboardEvent
 //
 KeyboardEvent::KeyboardEvent(const domapi::KeyboardEvent& event)
-    : KeyboardEvent(ConvertEventType(event), ToKeyboardEventInit(event)) {
-}
+    : KeyboardEvent(ConvertEventType(event), ToKeyboardEventInit(event)) {}
 
 KeyboardEvent::KeyboardEvent(const base::string16& type,
                              const KeyboardEventInit& init_dict)
     : ScriptableBase(type, init_dict),
-      alt_key_(init_dict.alt_key()), ctrl_key_(init_dict.ctrl_key()),
-      key_code_(init_dict.key_code()), location_(init_dict.location()),
-      meta_key_(init_dict.meta_key()), repeat_(init_dict.repeat()),
-      shift_key_(init_dict.shift_key()) {
-}
+      alt_key_(init_dict.alt_key()),
+      ctrl_key_(init_dict.ctrl_key()),
+      key_code_(init_dict.key_code()),
+      location_(init_dict.location()),
+      meta_key_(init_dict.meta_key()),
+      repeat_(init_dict.repeat()),
+      shift_key_(init_dict.shift_key()) {}
 
 KeyboardEvent::KeyboardEvent(const base::string16& type)
-    : KeyboardEvent(type, KeyboardEventInit()) {
-}
+    : KeyboardEvent(type, KeyboardEventInit()) {}
 
-KeyboardEvent::~KeyboardEvent() {
-}
+KeyboardEvent::~KeyboardEvent() {}
 
 }  // namespace dom

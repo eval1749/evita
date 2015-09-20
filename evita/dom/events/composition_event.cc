@@ -60,18 +60,14 @@ CompositionEvent::CompositionEvent(const base::string16& type,
     : ScriptableBase(type, init_dict),
       caret_(init_dict.caret()),
       data_(init_dict.data()),
-      spans_(init_dict.spans()) {
-}
+      spans_(init_dict.spans()) {}
 
 CompositionEvent::CompositionEvent(const base::string16& type)
-    : CompositionEvent(type, CompositionEventInit()) {
-}
+    : CompositionEvent(type, CompositionEventInit()) {}
 
 CompositionEvent::CompositionEvent(const domapi::TextCompositionEvent& event)
-    : CompositionEvent(ConvertEventType(event), ConvertToInitDict(event)) {
-}
+    : CompositionEvent(ConvertEventType(event), ConvertToInitDict(event)) {}
 
-CompositionEvent::~CompositionEvent() {
-}
+CompositionEvent::~CompositionEvent() {}
 
 }  // namespace dom

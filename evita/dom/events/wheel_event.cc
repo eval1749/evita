@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 #include "evita/dom/events/wheel_event.h"
 
 #include "evita/bindings/v8_glue_WheelEventInit.h"
@@ -46,21 +45,19 @@ WheelEventInit ToWheelEventInit(const domapi::WheelEvent& event) {
 // WheelEvent
 //
 WheelEvent::WheelEvent(const domapi::WheelEvent& event)
-    : WheelEvent(L"wheel", ToWheelEventInit(event)) {
-}
+    : WheelEvent(L"wheel", ToWheelEventInit(event)) {}
 
 WheelEvent::WheelEvent(const base::string16& type,
                        const WheelEventInit& init_dict)
-    : ScriptableBase(type, init_dict), delta_mode_(init_dict.delta_mode()),
-      delta_x_(init_dict.delta_x()), delta_y_(init_dict.delta_y()),
-      delta_z_(init_dict.delta_z()) {
-}
+    : ScriptableBase(type, init_dict),
+      delta_mode_(init_dict.delta_mode()),
+      delta_x_(init_dict.delta_x()),
+      delta_y_(init_dict.delta_y()),
+      delta_z_(init_dict.delta_z()) {}
 
 WheelEvent::WheelEvent(const base::string16& type)
-    : WheelEvent(type, WheelEventInit()) {
-}
+    : WheelEvent(type, WheelEventInit()) {}
 
-WheelEvent::~WheelEvent() {
-}
+WheelEvent::~WheelEvent() {}
 
 }  // namespace dom

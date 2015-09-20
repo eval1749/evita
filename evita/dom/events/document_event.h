@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_document_event_h)
-#define INCLUDE_evita_dom_events_document_event_h
+#ifndef EVITA_DOM_EVENTS_DOCUMENT_EVENT_H_
+#define EVITA_DOM_EVENTS_DOCUMENT_EVENT_H_
 
 #include "base/strings/string16.h"
 #include "evita/dom/events/event.h"
@@ -16,23 +16,26 @@ namespace bindings {
 class DocumentEventClass;
 }
 
-class DocumentEvent : public v8_glue::Scriptable<DocumentEvent, Event> {
+class DocumentEvent final : public v8_glue::Scriptable<DocumentEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(DocumentEvent)
+
+ public:
+  // Expose for|DocumentWindow|.
+  DocumentEvent(const base::string16& type, const DocumentEventInit& init_dict);
+  ~DocumentEvent() final;
+
+ private:
   friend class bindings::DocumentEventClass;
 
-  private: gc::Member<DocumentWindow> view_;
+  explicit DocumentEvent(const base::string16& type);
 
-  // Expose for|DocumentWindow|.
-  public: DocumentEvent(const base::string16& type,
-                        const DocumentEventInit& init_dict);
-  private: DocumentEvent(const base::string16& type);
-  public: virtual ~DocumentEvent();
+  DocumentWindow* view() const { return view_.get(); }
 
-  private: DocumentWindow* view() const { return view_.get(); }
+  gc::Member<DocumentWindow> view_;
 
   DISALLOW_COPY_AND_ASSIGN(DocumentEvent);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_document_event_h)
+#endif  // EVITA_DOM_EVENTS_DOCUMENT_EVENT_H_

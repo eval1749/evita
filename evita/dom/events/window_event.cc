@@ -14,15 +14,12 @@ namespace dom {
 //
 WindowEvent::WindowEvent(const base::string16& type,
                          const WindowEventInit& init_dict)
-  : ScriptableBase(type, init_dict),
-    source_window_(init_dict.source_window()) {
-}
+    : ScriptableBase(type, init_dict),
+      source_window_(init_dict.source_window()) {}
 
 WindowEvent::WindowEvent(const base::string16& type)
-    : WindowEvent(type, WindowEventInit()) {
-}
+    : WindowEvent(type, WindowEventInit()) {}
 
-WindowEvent::~WindowEvent() {
-}
+WindowEvent::~WindowEvent() {}
 
 }  // namespace dom

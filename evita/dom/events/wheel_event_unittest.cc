@@ -7,21 +7,24 @@
 #include "evita/dom/events/wheel_event.h"
 #include "evita/dom/public/view_event.h"
 
-namespace {
+namespace dom {
 
-class WheelEventTest : public dom::AbstractDomTest {
-  protected: WheelEventTest() {
-  }
-  public: virtual ~WheelEventTest() {
-  }
+class WheelEventTest : public AbstractDomTest {
+ public:
+  ~WheelEventTest() override = default;
 
+ protected:
+  WheelEventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(WheelEventTest);
 };
 
 TEST_F(WheelEventTest, ctor) {
   RunnerScope runner_scope(this);
-  EXPECT_SCRIPT_VALID("var event;"
-                      "function init(x) { event = x; }");
+  EXPECT_SCRIPT_VALID(
+      "var event;"
+      "function init(x) { event = x; }");
   domapi::WheelEvent api_event;
   api_event.target_id = 1;
   api_event.event_type = domapi::EventType::Wheel;
@@ -36,7 +39,7 @@ TEST_F(WheelEventTest, ctor) {
   api_event.delta_y = 3.0;
   api_event.delta_z = 4.0;
 
-  auto const event = new dom::WheelEvent(api_event);
+  auto const event = new WheelEvent(api_event);
   EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
 
   EXPECT_SCRIPT_TRUE("event instanceof WheelEvent");
@@ -70,4 +73,4 @@ TEST_F(WheelEventTest, ctor) {
   EXPECT_SCRIPT_EQ("4", "event.deltaZ");
 }
 
-}  // namespace
+}  // namespace dom

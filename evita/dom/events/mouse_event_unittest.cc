@@ -6,21 +6,24 @@
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/public/view_event.h"
 
-namespace {
+namespace dom {
 
-class MouseEventTest : public dom::AbstractDomTest {
-  protected: MouseEventTest() {
-  }
-  public: virtual ~MouseEventTest() {
-  }
+class MouseEventTest : public AbstractDomTest {
+ public:
+  ~MouseEventTest() override = default;
 
+ protected:
+  MouseEventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(MouseEventTest);
 };
 
 TEST_F(MouseEventTest, ctor) {
   RunnerScope runner_scope(this);
-  EXPECT_SCRIPT_VALID("var event;"
-                      "function init(x) { event = x; }");
+  EXPECT_SCRIPT_VALID(
+      "var event;"
+      "function init(x) { event = x; }");
   domapi::MouseEvent api_event;
   api_event.target_id = 1;
   api_event.event_type = domapi::EventType::DblClick;
@@ -30,7 +33,7 @@ TEST_F(MouseEventTest, ctor) {
   api_event.alt_key = false;
   api_event.control_key = true;
   api_event.shift_key = false;
-  auto const event = new dom::MouseEvent(api_event);
+  auto const event = new MouseEvent(api_event);
   EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
 
   EXPECT_SCRIPT_TRUE("event instanceof MouseEvent");
@@ -58,4 +61,4 @@ TEST_F(MouseEventTest, ctor) {
   EXPECT_SCRIPT_FALSE("event.shiftKey");
 }
 
-}  // namespace
+}  // namespace dom

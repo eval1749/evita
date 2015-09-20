@@ -34,19 +34,14 @@ FormEventInit ToFormEventInit(const domapi::FormEvent& event) {
 // FormEvent
 //
 FormEvent::FormEvent(const domapi::FormEvent& event)
-    : FormEvent(ConvertEventType(event), ToFormEventInit(event)) {
-}
+    : FormEvent(ConvertEventType(event), ToFormEventInit(event)) {}
 
-FormEvent::FormEvent(const base::string16& type,
-                     const FormEventInit& init_dict)
-    : ScriptableBase(type, init_dict), data_(init_dict.data()) {
-}
+FormEvent::FormEvent(const base::string16& type, const FormEventInit& init_dict)
+    : ScriptableBase(type, init_dict), data_(init_dict.data()) {}
 
 FormEvent::FormEvent(const base::string16& type)
-    : FormEvent(type, FormEventInit()) {
-}
+    : FormEvent(type, FormEventInit()) {}
 
-FormEvent::~FormEvent() {
-}
+FormEvent::~FormEvent() {}
 
 }  // namespace dom

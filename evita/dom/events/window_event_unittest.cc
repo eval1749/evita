@@ -5,16 +5,18 @@
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
 
-namespace {
+namespace dom {
 
 using ::testing::_;
 
-class WindowEventTest : public dom::AbstractDomTest {
-  protected: WindowEventTest() {
-  }
-  public: virtual ~WindowEventTest() {
-  }
+class WindowEventTest : public AbstractDomTest {
+ public:
+  ~WindowEventTest() override = default;
 
+ protected:
+  WindowEventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(WindowEventTest);
 };
 
@@ -55,4 +57,4 @@ TEST_F(WindowEventTest, ctor_init_dict) {
   EXPECT_SCRIPT_TRUE("event.sourceWindow == source");
 }
 
-}  // namespace
+}  // namespace dom

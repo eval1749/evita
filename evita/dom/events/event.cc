@@ -49,18 +49,17 @@ void Event::DispatchScope::StartBubbling() {
 //
 Event::Event(const base::string16& type, const EventInit& init_dict)
     : bubbles_(init_dict.bubbles()),
-      cancelable_(init_dict.cancelable()), default_prevented_(false),
-      dispatched_(false), event_phase_(kNone),
-      stop_immediate_propagation_(false), stop_propagation_(false),
-      type_(type) {
-}
+      cancelable_(init_dict.cancelable()),
+      default_prevented_(false),
+      dispatched_(false),
+      event_phase_(kNone),
+      stop_immediate_propagation_(false),
+      stop_propagation_(false),
+      type_(type) {}
 
-Event::Event(const base::string16& type)
-    : Event(type, EventInit()) {
-}
+Event::Event(const base::string16& type) : Event(type, EventInit()) {}
 
-Event::~Event() {
-}
+Event::~Event() {}
 
 void Event::PreventDefault() {
   default_prevented_ = cancelable_;

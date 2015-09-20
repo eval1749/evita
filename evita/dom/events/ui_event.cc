@@ -5,23 +5,19 @@
 
 #include "evita/bindings/v8_glue_UiEventInit.h"
 
-namespace dom   {
+namespace dom {
 
 //////////////////////////////////////////////////////////////////////
 //
 // UiEvent
 //
-UiEvent::UiEvent(const base::string16& type,
-                 const UiEventInit& init_dict)
-    : ScriptableBase(type, init_dict), detail_(init_dict.detail()),
-      view_(init_dict.view()) {
-}
+UiEvent::UiEvent(const base::string16& type, const UiEventInit& init_dict)
+    : ScriptableBase(type, init_dict),
+      detail_(init_dict.detail()),
+      view_(init_dict.view()) {}
 
-UiEvent::UiEvent(const base::string16& type)
-    : UiEvent(type, UiEventInit()) {
-}
+UiEvent::UiEvent(const base::string16& type) : UiEvent(type, UiEventInit()) {}
 
-UiEvent::~UiEvent() {
-}
+UiEvent::~UiEvent() {}
 
 }  // namespace dom

@@ -6,21 +6,24 @@
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/public/view_event.h"
 
-namespace {
+namespace dom {
 
-class KeyboardEventTest : public dom::AbstractDomTest {
-  protected: KeyboardEventTest() {
-  }
-  public: virtual ~KeyboardEventTest() {
-  }
+class KeyboardEventTest : public AbstractDomTest {
+ public:
+  ~KeyboardEventTest() override = default;
 
+ protected:
+  KeyboardEventTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(KeyboardEventTest);
 };
 
 TEST_F(KeyboardEventTest, ctor_event) {
   RunnerScope runner_scope(this);
-  EXPECT_SCRIPT_VALID("var event;"
-                      "function init(x) { event = x; }");
+  EXPECT_SCRIPT_VALID(
+      "var event;"
+      "function init(x) { event = x; }");
   domapi::KeyboardEvent raw_event;
   raw_event.target_id = 1;
   raw_event.event_type = domapi::EventType::KeyDown;
@@ -32,7 +35,7 @@ TEST_F(KeyboardEventTest, ctor_event) {
   raw_event.key_code = 0x42;
   raw_event.repeat = false;
 
-  auto const event = new dom::KeyboardEvent(raw_event);
+  auto const event = new KeyboardEvent(raw_event);
   EXPECT_SCRIPT_VALID_CALL("init", event->GetWrapper(isolate()));
 
   EXPECT_SCRIPT_TRUE("event instanceof KeyboardEvent");
@@ -62,15 +65,15 @@ TEST_F(KeyboardEventTest, ctor_event) {
 
 TEST_F(KeyboardEventTest, ctor_init_dict) {
   EXPECT_SCRIPT_VALID(
-    "var event = new KeyboardEvent('keydown', {"
-    "  bubbles: false,"
-    "  cancelable: false,"
-    "  detail: 3,"
-    "  altKey: true, ctrlKey: false, metaKey: true, shiftKey: true,"
-    "  keyCode: 66,"
-    "  location: 3,"
-    "  repeat: true"
-    "});");
+      "var event = new KeyboardEvent('keydown', {"
+      "  bubbles: false,"
+      "  cancelable: false,"
+      "  detail: 3,"
+      "  altKey: true, ctrlKey: false, metaKey: true, shiftKey: true,"
+      "  keyCode: 66,"
+      "  location: 3,"
+      "  repeat: true"
+      "});");
   EXPECT_SCRIPT_TRUE("event instanceof KeyboardEvent");
   EXPECT_SCRIPT_FALSE("event.bubbles");
   EXPECT_SCRIPT_FALSE("event.cancelable");
@@ -97,4 +100,4 @@ TEST_F(KeyboardEventTest, ctor_init_dict) {
   EXPECT_SCRIPT_TRUE("event.repeat");
 }
 
-}  // namespace
+}  // namespace dom

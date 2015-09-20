@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_from_event_h)
-#define INCLUDE_evita_dom_events_from_event_h
+#ifndef EVITA_DOM_EVENTS_FORM_EVENT_H_
+#define EVITA_DOM_EVENTS_FORM_EVENT_H_
 
 #include "base/strings/string16.h"
 #include "evita/dom/events/event.h"
@@ -20,24 +20,27 @@ namespace bindings {
 class FormEventClass;
 }
 
-class FormEvent : public v8_glue::Scriptable<FormEvent, Event> {
+class FormEvent final : public v8_glue::Scriptable<FormEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(FormEvent)
-  friend class bindings::FormEventClass;
 
-  private: base::string16 data_;
-
-  public: explicit FormEvent(const domapi::FormEvent& event);
-  private: FormEvent(const base::string16& type,
-                     const FormEventInit& init_dict);
-  private: FormEvent(const base::string16& type);
-  public: virtual ~FormEvent();
+ public:
+  explicit FormEvent(const domapi::FormEvent& event);
+  ~FormEvent() final;
 
   // Expose for |CheckBoxControl|.
-  public: const base::string16& data() const { return data_; }
+  const base::string16& data() const { return data_; }
+
+ private:
+  friend class bindings::FormEventClass;
+
+  FormEvent(const base::string16& type, const FormEventInit& init_dict);
+  explicit FormEvent(const base::string16& type);
+
+  base::string16 data_;
 
   DISALLOW_COPY_AND_ASSIGN(FormEvent);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_from_event_h)
+#endif  // EVITA_DOM_EVENTS_FORM_EVENT_H_

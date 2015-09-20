@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
@@ -30,8 +30,8 @@ v8::Handle<v8::Object> GetCallee(v8::Isolate* isolate,
     return v8::Handle<v8::Object>();
   if (object->ToObject()->IsCallable())
     return object->ToObject();
-  auto handler = object->ToObject()->Get(
-      gin::StringToV8(isolate, "handleEvent"));
+  auto handler =
+      object->ToObject()->Get(gin::StringToV8(isolate, "handleEvent"));
   if (handler.IsEmpty() || !handler->IsObject())
     return v8::Handle<v8::Object>();
   return handler->ToObject();
@@ -43,80 +43,91 @@ v8::Handle<v8::Object> GetCallee(v8::Isolate* isolate,
 //
 // EventTarget::EventListenerMap
 //
- class EventTarget::EventListenerMap {
-  private: struct EventListener {
+class EventTarget::EventListenerMap final {
+ public:
+  struct EventListener final {
     bool capture;
     v8_glue::ScopedPersistent<v8::Object> callback;
 
-    EventListener(v8::Isolate* isoalte, v8::Handle<v8::Object> callback,
+    EventListener(v8::Isolate* isoalte,
+                  v8::Handle<v8::Object> callback,
                   bool capture)
-        : capture(capture), callback(isoalte, callback) {
-    }
+        : capture(capture), callback(isoalte, callback) {}
 
+   private:
     DISALLOW_COPY_AND_ASSIGN(EventListener);
   };
-  public: typedef std::list<EventListener*> EventListenerList;
 
-  private: std::unordered_map<base::string16, EventListenerList*> map_;
+  using EventListenerList = std::list<EventListener*>;
 
-  public: EventListenerMap() = default;
-  public: ~EventListenerMap() = default;
+  EventListenerMap() = default;
+  ~EventListenerMap() = default;
 
-  public: void Add(const base::string16& type,
-                   v8::Handle<v8::Object> callback,
-                   bool capture) {
-    auto isolate = v8::Isolate::GetCurrent();
-    if (auto const list = Find(type)) {
-      for (auto runner : *list) {
-        if (runner->callback == callback && runner->capture == capture) {
-          runner->callback.Reset(isolate, callback);
-          return;
-        }
-      }
-      list->push_back(new EventListener(isolate, callback, capture));
-      return;
-    }
+  void Add(const base::string16& type,
+           v8::Handle<v8::Object> callback,
+           bool capture);
+  EventListenerList* Find(const base::string16& type) const;
+  void Remove(const base::string16& type,
+              v8::Handle<v8::Object> callback,
+              bool capture);
 
-    auto list = new EventListenerList();
-    list->push_back(new EventListener(isolate, callback, capture));
-    map_[type] = list;
-  }
+ private:
+  std::unordered_map<base::string16, EventListenerList*> map_;
 
-  public: EventListenerList* Find(const base::string16& type) {
-    auto present = map_.find(type);
-    return present == map_.end() ? nullptr : present->second;
-  }
+  DISALLOW_COPY_AND_ASSIGN(EventListenerMap);
+};
 
-  public: void Remove(const base::string16& type,
-                      v8::Handle<v8::Object> callback,
-                      bool capture) {
-    auto list = Find(type);
-    if (!list)
-      return;
-    for (auto it = list->begin(); it != list->end(); ++it) {
-      if ((*it)->callback == callback && (*it)->capture == capture) {
-        list->erase(it);
+void EventTarget::EventListenerMap::Add(const base::string16& type,
+                                        v8::Handle<v8::Object> callback,
+                                        bool capture) {
+  auto isolate = v8::Isolate::GetCurrent();
+  if (auto const list = Find(type)) {
+    for (auto runner : *list) {
+      if (runner->callback == callback && runner->capture == capture) {
+        runner->callback.Reset(isolate, callback);
         return;
       }
     }
+    list->push_back(new EventListener(isolate, callback, capture));
+    return;
   }
-  DISALLOW_COPY_AND_ASSIGN(EventListenerMap);
-};
+
+  auto list = new EventListenerList();
+  list->push_back(new EventListener(isolate, callback, capture));
+  map_[type] = list;
+}
+
+EventTarget::EventListenerMap::EventListenerList*
+EventTarget::EventListenerMap::Find(const base::string16& type) const {
+  auto present = map_.find(type);
+  return present == map_.end() ? nullptr : present->second;
+}
+
+void EventTarget::EventListenerMap::Remove(const base::string16& type,
+                                           v8::Handle<v8::Object> callback,
+                                           bool capture) {
+  auto list = Find(type);
+  if (!list)
+    return;
+  for (auto it = list->begin(); it != list->end(); ++it) {
+    if ((*it)->callback == callback && (*it)->capture == capture) {
+      list->erase(it);
+      return;
+    }
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 //
 // EventTarget
 //
-EventTarget::EventTarget()
-    : event_listener_map_(new EventListenerMap()) {
-}
+EventTarget::EventTarget() : event_listener_map_(new EventListenerMap()) {}
 
-EventTarget::~EventTarget() {
-}
+EventTarget::~EventTarget() {}
 
 void EventTarget::AddEventListener(const base::string16& type,
-                            v8::Handle<v8::Object> listener,
-                            bool capture) {
+                                   v8::Handle<v8::Object> listener,
+                                   bool capture) {
   event_listener_map_->Add(type, listener, capture);
 }
 
@@ -194,8 +205,8 @@ void EventTarget::InvokeEventListeners(v8_glue::Runner* runner, Event* event) {
     }
 
     auto const isolate = runner->isolate();
-    auto const callee = GetCallee(isolate,
-                                  listener->callback.NewLocal(isolate));
+    auto const callee =
+        GetCallee(isolate, listener->callback.NewLocal(isolate));
     if (callee.IsEmpty())
       continue;
     runner->Call(callee, GetWrapper(isolate), event->GetWrapper(isolate));
@@ -214,9 +225,9 @@ void EventTarget::RemoveEventListener(const base::string16& type,
 }
 
 void EventTarget::ScheduleDispatchEvent(Event* event) {
-  ScriptHost::instance()->PostTask(FROM_HERE, base::Bind(
-      &EventTarget::DispatchEventWithInLock, base::Unretained(this),
-      base::Unretained(event)));
+  ScriptHost::instance()->PostTask(
+      FROM_HERE, base::Bind(&EventTarget::DispatchEventWithInLock,
+                            base::Unretained(this), base::Unretained(event)));
 }
 
 }  // namespace dom

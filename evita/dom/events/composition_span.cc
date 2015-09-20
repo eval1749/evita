@@ -7,10 +7,8 @@
 namespace dom {
 
 CompositionSpan::CompositionSpan(int start, int end, int data)
-    : data_(data), end_(end), start_(start) {
-}
+    : data_(data), end_(end), start_(start) {}
 
-CompositionSpan::~CompositionSpan() {
-}
+CompositionSpan::~CompositionSpan() {}
 
 }  // namespace dom

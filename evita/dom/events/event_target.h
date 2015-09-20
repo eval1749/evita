@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_event_target_h)
-#define INCLUDE_evita_dom_events_event_target_h
+#ifndef EVITA_DOM_EVENTS_EVENT_TARGET_H_
+#define EVITA_DOM_EVENTS_EVENT_TARGET_H_
 
 #include <vector>
 
@@ -32,35 +32,36 @@ typedef v8::Handle<v8::Object> EventListener;
 //
 class EventTarget : public v8_glue::Scriptable<EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(EventTarget);
+
+ public:
+  using EventPath = std::vector<EventTarget*>;
+  EventTarget();
+  virtual ~EventTarget();
+
+  virtual bool DispatchEvent(Event* event);
+  void ScheduleDispatchEvent(Event* event);
+
+ private:
   friend class bindings::EventTargetClass;
 
-  public: typedef std::vector<EventTarget*> EventPath;
-  private: class EventListenerMap;
+  class EventListenerMap;
 
-  private: std::unique_ptr<EventListenerMap> event_listener_map_;
-
-  protected: EventTarget();
-  protected: virtual ~EventTarget();
-
-  private: void AddEventListener(const base::string16& type,
-                                EventListener callback,
-                                bool capture);
-  private: void AddEventListener(const base::string16& type,
-                                EventListener callback);
-  private: virtual EventPath BuildEventPath() const;
-  public: virtual bool DispatchEvent(Event* event);
-  private: void DispatchEventWithInLock(Event* event);
-  private: void InvokeEventListeners(v8_glue::Runner* runner, Event* event);
-  private: void RemoveEventListener(const base::string16& type,
-                                    EventListener callback,
-                                    bool capture);
-  private: void RemoveEventListener(const base::string16& type,
-                                    EventListener callback);
-  public: void ScheduleDispatchEvent(Event* event);
+  void AddEventListener(const base::string16& type,
+                        EventListener callback,
+                        bool capture);
+  void AddEventListener(const base::string16& type, EventListener callback);
+  virtual EventPath BuildEventPath() const;
+  void DispatchEventWithInLock(Event* event);
+  void InvokeEventListeners(v8_glue::Runner* runner, Event* event);
+  void RemoveEventListener(const base::string16& type,
+                           EventListener callback,
+                           bool capture);
+  void RemoveEventListener(const base::string16& type, EventListener callback);
+  std::unique_ptr<EventListenerMap> event_listener_map_;
 
   DISALLOW_COPY_AND_ASSIGN(EventTarget);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_event_target_h)
+#endif  // EVITA_DOM_EVENTS_EVENT_TARGET_H_

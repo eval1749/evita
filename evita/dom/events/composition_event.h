@@ -1,12 +1,12 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_events_composition_event_h)
-#define INCLUDE_evita_dom_events_composition_event_h
+#ifndef EVITA_DOM_EVENTS_COMPOSITION_EVENT_H_
+#define EVITA_DOM_EVENTS_COMPOSITION_EVENT_H_
+
+#include <vector>
 
 #include "evita/dom/events/composition_span.h"
 #include "evita/dom/events/ui_event.h"
-
-#include <vector>
 
 namespace domapi {
 struct TextCompositionEvent;
@@ -21,29 +21,32 @@ namespace bindings {
 class CompositionEventClass;
 }
 
-class CompositionEvent : public v8_glue::Scriptable<CompositionEvent, UiEvent> {
+class CompositionEvent final
+    : public v8_glue::Scriptable<CompositionEvent, UiEvent> {
   DECLARE_SCRIPTABLE_OBJECT(CompositionEvent)
+
+ public:
+  CompositionEvent(const base::string16& type,
+                   const CompositionEventInit& init_dict);
+  explicit CompositionEvent(const domapi::TextCompositionEvent& event);
+  virtual ~CompositionEvent();
+
+ private:
   friend class bindings::CompositionEventClass;
 
-  private: int caret_;
-  private: base::string16 data_;
-  private: std::vector<CompositionSpan*> spans_;
+  explicit CompositionEvent(const base::string16& type);
 
-  public: CompositionEvent(const base::string16& type,
-                           const CompositionEventInit& init_dict);
-  private: explicit CompositionEvent(const base::string16& type);
-  public: explicit CompositionEvent(const domapi::TextCompositionEvent& event);
-  public: virtual ~CompositionEvent();
+  int caret() const { return caret_; }
+  base::string16 data() const { return data_; }
+  std::vector<CompositionSpan*> spans() const { return spans_; }
 
-  private: int caret() const { return caret_; }
-  private: base::string16 data() const { return data_; }
-  private: std::vector<CompositionSpan*> spans() const {
-    return spans_;
-  }
+  int caret_;
+  base::string16 data_;
+  std::vector<CompositionSpan*> spans_;
 
   DISALLOW_COPY_AND_ASSIGN(CompositionEvent);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_events_composition_event_h)
+#endif  // EVITA_DOM_EVENTS_COMPOSITION_EVENT_H_

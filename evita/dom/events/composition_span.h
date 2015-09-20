@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_events_composition_span_h)
-#define INCLUDE_evita_dom_events_composition_span_h
+#ifndef EVITA_DOM_EVENTS_COMPOSITION_SPAN_H_
+#define EVITA_DOM_EVENTS_COMPOSITION_SPAN_H_
 
 #include "evita/v8_glue/scriptable.h"
 
@@ -13,27 +13,30 @@ namespace bindings {
 class CompositionSpanClass;
 }
 
-class CompositionSpan : public v8_glue::Scriptable<CompositionSpan> {
+class CompositionSpan final : public v8_glue::Scriptable<CompositionSpan> {
   DECLARE_SCRIPTABLE_OBJECT(CompositionSpan);
+
+ public:
+  CompositionSpan(int start, int end, int data);
+  ~CompositionSpan() final;
+
+  int data() const { return data_; }
+  void set_data(int new_data) { data_ = new_data; }
+  int end() const { return end_; }
+  void set_end(int new_end) { end_ = new_end; }
+  int start() const { return start_; }
+  void set_start(int new_start) { start_ = new_start; }
+
+ private:
   friend class bindings::CompositionSpanClass;
 
-  private: int data_;
-  private: int end_;
-  private: int start_;
-
-  public: CompositionSpan(int start, int end, int data);
-  public: ~CompositionSpan();
-
-  public: int data() const { return data_; }
-  public: void set_data(int new_data) { data_ = new_data; }
-  public: int end() const { return end_; }
-  public: void set_end(int new_end) { end_ = new_end; }
-  public: int start() const { return start_; }
-  public: void set_start(int new_start) { start_ = new_start; }
+  int data_;
+  int end_;
+  int start_;
 
   DISALLOW_COPY_AND_ASSIGN(CompositionSpan);
 };
 
 }  // namespace dom
 
-#endif // !defined(INCLUDE_evita_dom_events_composition_span_h)
+#endif  // EVITA_DOM_EVENTS_COMPOSITION_SPAN_H_

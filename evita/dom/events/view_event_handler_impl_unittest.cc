@@ -5,20 +5,22 @@
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/mock_view_impl.h"
 #pragma warning(push)
-#pragma warning(disable: 4625 4626 4365)
+#pragma warning(disable : 4625 4626 4365)
 #include "gmock/gmock.h"
 #pragma warning(pop)
 
-namespace {
+namespace dom {
 
 using ::testing::_;
 
-class ViewEventHandlerImplTest : public dom::AbstractDomTest {
-  protected: ViewEventHandlerImplTest() {
-  }
-  public: virtual ~ViewEventHandlerImplTest() {
-  }
+class ViewEventHandlerImplTest : public AbstractDomTest {
+ public:
+  ~ViewEventHandlerImplTest() override = default;
 
+ protected:
+  ViewEventHandlerImplTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(ViewEventHandlerImplTest);
 };
 
@@ -46,7 +48,7 @@ TEST_F(ViewEventHandlerImplTest, DidDropWidget_InvalidWindowId) {
       "  target = this;"
       "  result = event;"
       "}");
-  view_event_handler()->DidDropWidget(1, dom::kInvalidWindowId);
+  view_event_handler()->DidDropWidget(1, kInvalidWindowId);
   EXPECT_SCRIPT_EQ("dropwindow", "result.type");
   EXPECT_SCRIPT_EQ("2", "target.id");
 }
@@ -65,4 +67,4 @@ TEST_F(ViewEventHandlerImplTest, QueryClose) {
   EXPECT_SCRIPT_TRUE("editorWindow == target");
 }
 
-}  // namespace
+}  // namespace dom

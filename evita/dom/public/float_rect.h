@@ -2,35 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_float_rect_h)
-#define INCLUDE_evita_dom_public_float_rect_h
+#ifndef EVITA_DOM_PUBLIC_FLOAT_RECT_H_
+#define EVITA_DOM_PUBLIC_FLOAT_RECT_H_
 
 namespace domapi {
 
 class FloatPoint;
 
-class FloatRect {
-  private: float x_;
-  private: float y_;
-  private: float width_;
-  private: float height_;
+class FloatRect final {
+ public:
+  FloatRect(float x, float y, float width, float height);
+  FloatRect();
+  ~FloatRect();
 
-  public: FloatRect(float x, float y, float width, float height);
-  public: FloatRect();
-  public: ~FloatRect();
+  float bottom() const { return y_ + height_; }
+  float height() const { return height_; }
+  float left() const { return x_; }
+  FloatPoint origin() const;
+  float right() const { return x_ + width_; }
+  FloatPoint bottom_right() const;
+  float top() const { return x_; }
+  float width() const { return width_; }
+  float x() const { return x_; }
+  float y() const { return y_; }
 
-  public: float bottom() const { return y_ + height_; }
-  public: float height() const { return height_; }
-  public: float left() const { return x_; }
-  public: FloatPoint origin() const;
-  public: float right() const { return x_ + width_; }
-  public: FloatPoint bottom_right() const;
-  public: float top() const { return x_; }
-  public: float width() const { return width_; }
-  public: float x() const { return x_; }
-  public: float y() const { return y_; }
+ private:
+  float x_;
+  float y_;
+  float width_;
+  float height_;
 };
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_float_rect_h)
+#endif  // EVITA_DOM_PUBLIC_FLOAT_RECT_H_

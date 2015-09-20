@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_view_event_handler_h)
-#define INCLUDE_evita_dom_public_view_event_handler_h
+#ifndef EVITA_DOM_PUBLIC_VIEW_EVENT_HANDLER_H_
+#define EVITA_DOM_PUBLIC_VIEW_EVENT_HANDLER_H_
 
 #include <string>
 #include <vector>
@@ -29,33 +29,37 @@ struct WheelEvent;
 using dom::WindowId;
 
 class ViewEventHandler {
-  public: ViewEventHandler();
-  public: virtual ~ViewEventHandler();
+ public:
+  ViewEventHandler();
+  virtual ~ViewEventHandler();
 
-  public: virtual void DidChangeWindowBounds(
-      WindowId window_id, int left, int top, int right, int bottom) = 0;
-  public: virtual void DidChangeWindowVisibility(
-      WindowId window_id, Visibility visibility) = 0;
-  public: virtual void DidDestroyWidget(WindowId window_id) = 0;
-  public: virtual void DidDropWidget(WindowId source_id,
-                                     WindowId target_id)  = 0;
-  public: virtual void DidRealizeWidget(WindowId window_id) = 0;
-  public: virtual void DidStartViewHost() = 0;
-  public: virtual void DispatchFocusEvent(const FocusEvent& event) = 0;
-  public: virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;
-  public: virtual void DispatchMouseEvent(const MouseEvent& event) = 0;
-  public: virtual void DispatchTextCompositionEvent(
+  virtual void DidChangeWindowBounds(WindowId window_id,
+                                     int left,
+                                     int top,
+                                     int right,
+                                     int bottom) = 0;
+  virtual void DidChangeWindowVisibility(WindowId window_id,
+                                         Visibility visibility) = 0;
+  virtual void DidDestroyWidget(WindowId window_id) = 0;
+  virtual void DidDropWidget(WindowId source_id, WindowId target_id) = 0;
+  virtual void DidRealizeWidget(WindowId window_id) = 0;
+  virtual void DidStartViewHost() = 0;
+  virtual void DispatchFocusEvent(const FocusEvent& event) = 0;
+  virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;
+  virtual void DispatchMouseEvent(const MouseEvent& event) = 0;
+  virtual void DispatchTextCompositionEvent(
       const TextCompositionEvent& event) = 0;
-  public: virtual void DispatchWheelEvent(const WheelEvent& event) = 0;
-  public: virtual void OpenFile(WindowId window_id,
-                                const base::string16& file_name) = 0;
-  public: virtual void QueryClose(WindowId window_id) = 0;
-  public: virtual void RunCallback(base::Closure) = 0;
-  public: virtual void WillDestroyHost() = 0;
+  virtual void DispatchWheelEvent(const WheelEvent& event) = 0;
+  virtual void OpenFile(WindowId window_id,
+                        const base::string16& file_name) = 0;
+  virtual void QueryClose(WindowId window_id) = 0;
+  virtual void RunCallback(base::Closure) = 0;
+  virtual void WillDestroyHost() = 0;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(ViewEventHandler);
 };
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_view_event_handler_h)
+#endif  // EVITA_DOM_PUBLIC_VIEW_EVENT_HANDLER_H_

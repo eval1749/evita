@@ -6,10 +6,8 @@
 
 namespace domapi {
 
-ViewEventHandler::ViewEventHandler() {
-}
+ViewEventHandler::ViewEventHandler() {}
 
-ViewEventHandler::~ViewEventHandler() {
-}
+ViewEventHandler::~ViewEventHandler() {}
 
 }  // namespace domapi

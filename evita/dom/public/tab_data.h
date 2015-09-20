@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_tab_data_h)
-#define INCLUDE_evita_dom_public_tab_data_h
+#ifndef EVITA_DOM_PUBLIC_TAB_DATA_H_
+#define EVITA_DOM_PUBLIC_TAB_DATA_H_
 
 #include "base/strings/string16.h"
 #include "evita/css/color.h"
 
 namespace domapi {
 
-struct TabData {
+struct TabData final {
   enum class State {
     Normal,
     Modified,
@@ -33,4 +33,4 @@ struct TabData {
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_tab_data_h)
+#endif  // EVITA_DOM_PUBLIC_TAB_DATA_H_

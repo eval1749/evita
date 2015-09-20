@@ -9,14 +9,11 @@
 namespace domapi {
 
 FloatRect::FloatRect(float x, float y, float width, float height)
-    : height_(height), width_(width), x_(x), y_(y) {
-}
+    : height_(height), width_(width), x_(x), y_(y) {}
 
-FloatRect::FloatRect() : FloatRect(0.0f, 0.0f, 0.0f, 0.0f) {
-}
+FloatRect::FloatRect() : FloatRect(0.0f, 0.0f, 0.0f, 0.0f) {}
 
-FloatRect::~FloatRect() {
-}
+FloatRect::~FloatRect() {}
 
 FloatPoint FloatRect::origin() const {
   return FloatPoint(x_, y_);

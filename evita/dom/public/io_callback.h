@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_io_callback_h)
-#define INCLUDE_evita_dom_public_io_callback_h
+#ifndef EVITA_DOM_PUBLIC_IO_CALLBACK_H_
+#define EVITA_DOM_PUBLIC_IO_CALLBACK_H_
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
@@ -11,13 +11,14 @@
 
 namespace domapi {
 
-template<typename ResolveType, typename RejectType> struct Deferred;
+template <typename ResolveType, typename RejectType>
+struct Deferred;
 class FileId;
 class IoContextId;
 struct IoError;
 class ProcessId;
 
-struct FileStatus {
+struct FileStatus final {
   int file_size;
   bool is_directory;
   bool is_symlink;
@@ -25,7 +26,7 @@ struct FileStatus {
   bool readonly;
 };
 
-struct MoveFileOptions {
+struct MoveFileOptions final {
   bool no_overwrite;
 };
 
@@ -38,4 +39,4 @@ typedef Deferred<FileStatus, IoError> QueryFileStatusDeferred;
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_io_callback_h)
+#endif  // EVITA_DOM_PUBLIC_IO_CALLBACK_H_

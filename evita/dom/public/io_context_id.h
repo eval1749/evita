@@ -2,47 +2,53 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_io_context_id_h)
-#define INCLUDE_evita_dom_public_io_context_id_h
+#ifndef EVITA_DOM_PUBLIC_IO_CONTEXT_ID_H_
+#define EVITA_DOM_PUBLIC_IO_CONTEXT_ID_H_
 
 #include <functional>
 
 namespace domapi {
 
 class IoContextId {
-  public: int value_;
+ public:
+  IoContextId(const IoContextId& other);
+  IoContextId();
+  ~IoContextId();
 
-  public: IoContextId(const IoContextId& other);
-  private: explicit IoContextId(int value);
-  public: IoContextId();
-  public: ~IoContextId();
+  IoContextId& operator=(const IoContextId& other);
 
-  public: IoContextId& operator=(const IoContextId& other);
+  bool operator==(const IoContextId& other) const;
+  bool operator!=(const IoContextId& other) const;
 
-  public: bool operator==(const IoContextId& other) const;
-  public: bool operator!=(const IoContextId& other) const;
+  int value() const { return value_; }
 
-  public: int value() const { return value_; }
+  static IoContextId New();
 
-  public: static IoContextId New();
+ private:
+  explicit IoContextId(int value);
+
+  int value_;
 };
 
-class FileId : public IoContextId {
-  public: explicit FileId(IoContextId context_id);
-  public: ~FileId();
+class FileId final : public IoContextId {
+ public:
+  explicit FileId(IoContextId context_id);
+  ~FileId();
 };
 
-class ProcessId : public IoContextId{
-  public: explicit ProcessId(IoContextId context_id);
-  public: ~ProcessId();
+class ProcessId final : public IoContextId {
+ public:
+  explicit ProcessId(IoContextId context_id);
+  ~ProcessId();
 };
 
 }  // namespace domapi
 
 namespace std {
-template<> struct hash<domapi::IoContextId> {
+template <>
+struct hash<domapi::IoContextId> {
   size_t operator()(const domapi::IoContextId& context_id) const;
 };
 }  // namespace std
 
-#endif //!defined(INCLUDE_evita_dom_public_io_context_id_h)
+#endif  // EVITA_DOM_PUBLIC_IO_CONTEXT_ID_H_

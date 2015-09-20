@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_view_event_h)
-#define INCLUDE_evita_dom_public_view_event_h
+#ifndef EVITA_DOM_PUBLIC_VIEW_EVENT_H_
+#define EVITA_DOM_PUBLIC_VIEW_EVENT_H_
 
 #include "base/strings/string16.h"
 #include "evita/dom/windows/window_id.h"
@@ -59,16 +59,16 @@ struct Event {
   EventTargetId target_id;
 };
 
-struct FocusEvent : Event {
+struct FocusEvent final : Event {
   EventTargetId related_target_id;
 };
 
-struct FormEvent : Event {
+struct FormEvent final : Event {
   int control_id;
   base::string16 data;
 };
 
-struct KeyboardEvent : Event {
+struct KeyboardEvent final : Event {
   bool alt_key;
   bool control_key;
   int key_code;
@@ -88,7 +88,7 @@ struct MouseEvent : Event {
   bool shift_key;
 };
 
-struct WheelEvent : MouseEvent {
+struct WheelEvent final : MouseEvent {
   int delta_mode;
   double delta_x;
   double delta_y;
@@ -97,4 +97,4 @@ struct WheelEvent : MouseEvent {
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_view_event_h)
+#endif  // EVITA_DOM_PUBLIC_VIEW_EVENT_H_

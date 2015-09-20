@@ -6,7 +6,6 @@
 
 namespace domapi {
 
-IoError::IoError(int error_code) : error_code(error_code) {
-}
+IoError::IoError(int error_code) : error_code(error_code) {}
 
 }  // namespace domapi

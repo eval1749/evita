@@ -12,37 +12,32 @@ namespace std {
 ostream& operator<<(ostream& ostream, domapi::SwitchValue::Type type) {
   return ostream << static_cast<int>(type);
 }
-}   // namespace std
-
+}  // namespace std
 
 namespace domapi {
 
-SwitchValue::SwitchValue(bool value) : int_value_(value), type_(Type::Bool) {
-}
+SwitchValue::SwitchValue(bool value) : int_value_(value), type_(Type::Bool) {}
 
-SwitchValue::SwitchValue(int value) : int_value_(value), type_(Type::Int) {
-}
+SwitchValue::SwitchValue(int value) : int_value_(value), type_(Type::Int) {}
 
-SwitchValue::SwitchValue(const base::string16& value) 
-    : str_value_(value), type_(Type::String) {
-}
+SwitchValue::SwitchValue(const base::string16& value)
+    : str_value_(value), type_(Type::String) {}
 
 SwitchValue::SwitchValue(const SwitchValue& other)
-    : int_value_(other.int_value_), str_value_(other.str_value_),
-      type_(other.type_) {
-}
+    : int_value_(other.int_value_),
+      str_value_(other.str_value_),
+      type_(other.type_) {}
 
 SwitchValue::SwitchValue(SwitchValue&& other)
     : int_value_(other.int_value_),
-      str_value_(std::move(other.str_value_)), type_(other.type_) {
+      str_value_(std::move(other.str_value_)),
+      type_(other.type_) {
   other.type_ = Type::Void;
 }
 
-SwitchValue::SwitchValue() : int_value_(0), type_(Type::Void) {
-}
+SwitchValue::SwitchValue() : int_value_(0), type_(Type::Void) {}
 
-SwitchValue::~SwitchValue() {
-}
+SwitchValue::~SwitchValue() {}
 
 SwitchValue& SwitchValue::operator=(const SwitchValue& other) {
   int_value_ = other.int_value_;

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_io_error_h)
-#define INCLUDE_evita_dom_public_io_error_h
+#ifndef EVITA_DOM_PUBLIC_IO_ERROR_H_
+#define EVITA_DOM_PUBLIC_IO_ERROR_H_
 
 namespace domapi {
 
-struct IoError {
+struct IoError final {
   int error_code;
 
   explicit IoError(int error_code);
@@ -15,4 +15,4 @@ struct IoError {
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_io_error_h)
+#endif  // EVITA_DOM_PUBLIC_IO_ERROR_H_

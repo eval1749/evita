@@ -6,11 +6,9 @@
 
 namespace domapi {
 
-TabData::TabData() : icon(-1), state(State::Normal) {
-}
+TabData::TabData() : icon(-1), state(State::Normal) {}
 
-TabData::~TabData() {
-}
+TabData::~TabData() {}
 
 bool TabData::operator==(const TabData& other) const {
   return icon == other.icon && state == other.state && title == other.title &&

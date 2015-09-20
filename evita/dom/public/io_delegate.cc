@@ -6,10 +6,8 @@
 
 namespace domapi {
 
-IoDelegate::IoDelegate() {
-}
+IoDelegate::IoDelegate() {}
 
-IoDelegate::~IoDelegate() {
-}
+IoDelegate::~IoDelegate() {}
 
 }  // namespace domapi

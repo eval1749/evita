@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_deferred_h)
-#define INCLUDE_evita_dom_public_deferred_h
+#ifndef EVITA_DOM_PUBLIC_DEFERRED_H_
+#define EVITA_DOM_PUBLIC_DEFERRED_H_
 
 #include "base/callback_forward.h"
 
 namespace domapi {
 
-template<typename ResolveType, typename RejectType = int>
-struct Deferred {
+template <typename ResolveType, typename RejectType = int>
+struct Deferred final {
   base::Callback<void(RejectType)> reject;
   base::Callback<void(ResolveType)> resolve;
 };
+
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_deferred_h)
+#endif  // EVITA_DOM_PUBLIC_DEFERRED_H_

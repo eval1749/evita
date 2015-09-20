@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_event_target_id_h)
-#define INCLUDE_evita_dom_public_event_target_id_h
+#ifndef EVITA_DOM_PUBLIC_EVENT_TARGET_ID_H_
+#define EVITA_DOM_PUBLIC_EVENT_TARGET_ID_H_
 
 namespace domapi {
 
-typedef int EventTargetId;
+using EventTargetId = int;
 const EventTargetId kInvalidEventTargetId = -1;
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_event_target_id_h)
+#endif  // EVITA_DOM_PUBLIC_EVENT_TARGET_ID_H_

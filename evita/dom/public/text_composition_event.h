@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_text_composition_event_h)
-#define INCLUDE_evita_dom_public_text_composition_event_h
+#ifndef EVITA_DOM_PUBLIC_TEXT_COMPOSITION_EVENT_H_
+#define EVITA_DOM_PUBLIC_TEXT_COMPOSITION_EVENT_H_
 
 #include "evita/dom/public/text_composition_data.h"
 #include "evita/dom/public/view_event.h"
 
 namespace domapi {
 
-struct TextCompositionEvent : Event {
+struct TextCompositionEvent final : Event {
   TextCompositionData data;
 };
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_text_composition_event_h)
+#endif  // EVITA_DOM_PUBLIC_TEXT_COMPOSITION_EVENT_H_

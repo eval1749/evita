@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_public_script_host_state_h)
-#define INCLUDE_evita_dom_public_script_host_state_h
+#ifndef EVITA_DOM_PUBLIC_SCRIPT_HOST_STATE_H_
+#define EVITA_DOM_PUBLIC_SCRIPT_HOST_STATE_H_
 
 namespace domapi {
 
@@ -15,4 +15,4 @@ enum class ScriptHostState {
 
 }  // namespace domapi
 
-#endif //!defined(INCLUDE_evita_dom_public_script_host_state_h)
+#endif  // EVITA_DOM_PUBLIC_SCRIPT_HOST_STATE_H_

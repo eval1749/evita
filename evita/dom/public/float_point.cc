@@ -6,13 +6,10 @@
 
 namespace domapi {
 
-FloatPoint::FloatPoint(float x, float y) : x_(x), y_(y) {
-}
+FloatPoint::FloatPoint(float x, float y) : x_(x), y_(y) {}
 
-FloatPoint::FloatPoint() : FloatPoint(0.0f, 0.0f) {
-}
+FloatPoint::FloatPoint() : FloatPoint(0.0f, 0.0f) {}
 
-FloatPoint::~FloatPoint() {
-}
+FloatPoint::~FloatPoint() {}
 
 }  // namespace domapi

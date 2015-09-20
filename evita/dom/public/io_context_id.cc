@@ -9,17 +9,13 @@
 namespace domapi {
 
 IoContextId::IoContextId(const IoContextId& other)
-    : IoContextId(other.value_) {
-}
+    : IoContextId(other.value_) {}
 
-IoContextId::IoContextId(int value) : value_(value) {
-}
+IoContextId::IoContextId(int value) : value_(value) {}
 
-IoContextId::IoContextId() : IoContextId(0) {
-}
+IoContextId::IoContextId() : IoContextId(0) {}
 
-IoContextId::~IoContextId() {
-}
+IoContextId::~IoContextId() {}
 
 IoContextId& IoContextId::operator=(const IoContextId& other) {
   DCHECK(!value_);
@@ -45,23 +41,17 @@ IoContextId IoContextId::New() {
 //
 // FileId
 //
-FileId::FileId(IoContextId context_id)
-    : IoContextId(context_id) {
-}
+FileId::FileId(IoContextId context_id) : IoContextId(context_id) {}
 
-FileId::~FileId() {
-}
+FileId::~FileId() {}
 
 //////////////////////////////////////////////////////////////////////
 //
 // ProcessId
 //
-ProcessId::ProcessId(IoContextId context_id)
-    : IoContextId(context_id) {
-}
+ProcessId::ProcessId(IoContextId context_id) : IoContextId(context_id) {}
 
-ProcessId::~ProcessId() {
-}
+ProcessId::~ProcessId() {}
 
 }  // namespace domapi
 

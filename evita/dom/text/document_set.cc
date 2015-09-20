@@ -4,10 +4,11 @@
 
 #include "evita/dom/text/document_set.h"
 
+#include <utility>
 #include <vector>
 
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/logging.h"
@@ -35,32 +36,33 @@ StringPair SplitByDot(const base::string16& name) {
   return StringPair(name.substr(0, last_dot), name.substr(last_dot));
 }
 
-} // namespace
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // DocumentSet::Observer
 //
-class DocumentSet::Observer {
-  private: v8_glue::ScopedPersistent<v8::Function> function_;
+class DocumentSet::Observer final {
+ public:
+  Observer(v8::Isolate* isolate, v8::Handle<v8::Function> function);
+  ~Observer();
 
-  public: Observer(v8::Isolate* isolate, v8::Handle<v8::Function> function);
-  public: ~Observer();
+  v8::Local<v8::Function> GetCallback(v8::Isolate* isolate);
+  void Notify(v8_glue::Runner* runner,
+              const base::string16& type,
+              Document* document);
 
-  public: v8::Local<v8::Function> GetCallback(v8::Isolate* isolate);
-  public: void Notify(v8_glue::Runner* runner, const base::string16& type,
-                      Document* document);
+ private:
+  v8_glue::ScopedPersistent<v8::Function> function_;
 
   DISALLOW_COPY_AND_ASSIGN(Observer);
 };
 
 DocumentSet::Observer::Observer(v8::Isolate* isolate,
                                 v8::Handle<v8::Function> function)
-    : function_(isolate, function) {
-}
+    : function_(isolate, function) {}
 
-DocumentSet::Observer::~Observer() {
-}
+DocumentSet::Observer::~Observer() {}
 
 v8::Local<v8::Function> DocumentSet::Observer::GetCallback(
     v8::Isolate* isolate) {
@@ -71,8 +73,7 @@ void DocumentSet::Observer::Notify(v8_glue::Runner* runner,
                                    const base::string16& type,
                                    Document* document) {
   auto const isolate = runner->isolate();
-  runner->Call(function_.NewLocal(runner->isolate()),
-               v8::Undefined(isolate),
+  runner->Call(function_.NewLocal(runner->isolate()), v8::Undefined(isolate),
                gin::ConvertToV8(isolate, type),
                gin::ConvertToV8(isolate, document));
 }
@@ -81,11 +82,9 @@ void DocumentSet::Observer::Notify(v8_glue::Runner* runner,
 //
 // DocumentSet
 //
-DocumentSet::DocumentSet() {
-}
+DocumentSet::DocumentSet() {}
 
-DocumentSet::~DocumentSet() {
-}
+DocumentSet::~DocumentSet() {}
 
 std::vector<Document*> DocumentSet::list() const {
   std::vector<Document*> list(map_.size());
@@ -115,9 +114,9 @@ base::string16 DocumentSet::MakeUniqueName(const base::string16& name) {
     return name;
   const auto pair = SplitByDot(name);
   auto candidate = name;
-  for (auto n = 2; Find(candidate); ++ n) {
-    candidate = pair.first + L" (" + base::IntToString16(n) + L")" +
-      pair.second;
+  for (auto n = 2; Find(candidate); ++n) {
+    candidate =
+        pair.first + L" (" + base::IntToString16(n) + L")" + pair.second;
   }
   return candidate;
 }
@@ -161,7 +160,7 @@ void DocumentSet::RenameDocument(Document* document,
                                  const base::string16& new_name) {
   auto& old_name = document->name();
   if (old_name == new_name)
-   return;
+    return;
   auto const it = map_.find(old_name);
   if (it == map_.end()) {
     document->set_name(new_name);
@@ -175,9 +174,10 @@ void DocumentSet::RenameDocument(Document* document,
 
 void DocumentSet::ScheduleNotifyObserver(const base::string16& type,
                                          Document* document) {
-  ScriptHost::instance()->PostTask(FROM_HERE, base::Bind(
-      &DocumentSet::NotifyObserverWithInLock, base::Unretained(this), type,
-      base::Unretained(document)));
+  ScriptHost::instance()->PostTask(
+      FROM_HERE,
+      base::Bind(&DocumentSet::NotifyObserverWithInLock, base::Unretained(this),
+                 type, base::Unretained(document)));
 }
 
 void DocumentSet::Unregister(Document* document) {

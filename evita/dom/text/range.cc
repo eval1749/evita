@@ -25,21 +25,21 @@ namespace {
 //
 // RangeClass
 //
-class RangeClass : public v8_glue::WrapperInfo {
-  public: RangeClass(const char* name)
-      : v8_glue::WrapperInfo(name) {
-  }
-  public: ~RangeClass() = default;
+class RangeClass final : public v8_glue::WrapperInfo {
+ public:
+  explicit RangeClass(const char* name) : v8_glue::WrapperInfo(name) {}
+  ~RangeClass() final = default;
 
-  protected: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-        &RangeClass::NewRange);
+ private:
+  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
+      v8::Isolate* isolate) final {
+    return v8_glue::CreateConstructorTemplate(isolate, &RangeClass::NewRange);
   }
 
-  private: static Range* NewRange(
+  static Range* NewRange(
       v8_glue::Either<Document*, Range*> either_document_or_range,
-      v8_glue::Optional<int> opt_start, v8_glue::Optional<int> opt_end) {
+      v8_glue::Optional<int> opt_start,
+      v8_glue::Optional<int> opt_end) {
     if (either_document_or_range.is_left) {
       auto const document = either_document_or_range.left;
       auto const start = opt_start.get(0);
@@ -49,17 +49,16 @@ class RangeClass : public v8_glue::WrapperInfo {
     auto const range = either_document_or_range.right;
     auto const document = range->document();
     if (opt_start.is_supplied) {
-      return new Range(document, opt_start.value,
-                       opt_end.get(opt_start.value));
+      return new Range(document, opt_start.value, opt_end.get(opt_start.value));
     }
     return new Range(document, range->start(), range->end());
   }
 
-  private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override {
+  v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate,
+      v8::Handle<v8::ObjectTemplate> templ) final {
     gin::ObjectTemplateBuilder builder(isolate, templ);
-    builder
-        .SetProperty("collapsed", &Range::collapsed)
+    builder.SetProperty("collapsed", &Range::collapsed)
         .SetProperty("document", &Range::document)
         .SetProperty("end", &Range::end, &Range::set_end)
         .SetProperty("start", &Range::start, &Range::set_start)
@@ -83,15 +82,12 @@ class RangeClass : public v8_glue::WrapperInfo {
 DEFINE_SCRIPTABLE_OBJECT(Range, RangeClass);
 
 Range::Range(Document* document, text::Posn start, text::Posn end)
-    : Range(document, new text::Range(document->buffer(), start, end)) {
-}
+    : Range(document, new text::Range(document->buffer(), start, end)) {}
 
 Range::Range(Document* document, text::Range* range)
-    : document_(document), range_(range) {
-}
+    : document_(document), range_(range) {}
 
-Range::~Range() {
-}
+Range::~Range() {}
 
 bool Range::collapsed() const {
   return range_->start() == range_->end();
@@ -159,21 +155,20 @@ void Range::SetSpelling(int spelling_code) const {
   };
   if (collapsed()) {
     ScriptHost::instance()->ThrowError(
-      "Can't set spelling for collapsed range.");
+        "Can't set spelling for collapsed range.");
     return;
   }
   document_->buffer()->spelling_markers()->InsertMarker(
-    range_->start(), range_->end(), Local::MapToSpelling(spelling_code));
+      range_->start(), range_->end(), Local::MapToSpelling(spelling_code));
 }
 
 void Range::SetSyntax(const base::string16& syntax) const {
   if (collapsed()) {
-    ScriptHost::instance()->ThrowError(
-      "Can't set syntax for collapsed range.");
+    ScriptHost::instance()->ThrowError("Can't set syntax for collapsed range.");
     return;
   }
   document_->buffer()->syntax_markers()->InsertMarker(
-    range_->start(), range_->end(), common::AtomicString(syntax));
+      range_->start(), range_->end(), common::AtomicString(syntax));
 }
 
 }  // namespace dom

@@ -8,7 +8,7 @@
 #include <vector>
 
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
@@ -33,36 +33,38 @@ namespace dom {
 class MutationObserverController::Tracker final
     : public base::RefCounted<Tracker>,
       public text::BufferMutationObserver {
+ public:
+  explicit Tracker(Document* document);
+  ~Tracker() final;
 
-  private: gc::Member<Document> document_;
-  private: bool is_observing_;
-  private: bool is_schedule_notification_;
-  private: std::unordered_set<MutationObserver*> observers_;
-  private: base::WeakPtrFactory<Tracker> weak_factory_;
+  bool is_tracking() const { return !observers_.empty(); }
 
-  public: Tracker(Document* document);
-  public: virtual ~Tracker();
+  void Register(MutationObserver* observer);
+  void Unregister(MutationObserver* observer);
 
-  public: bool is_tracking() const { return !observers_.empty(); }
-
-  private: base::WeakPtr<Tracker> GetWeakPtr();
-  public: void Register(MutationObserver* observer);
-  private: static void NotifyObservers(base::WeakPtr<Tracker> tracker);
-  private: void ScheduleNotification();
-  public: void Unregister(MutationObserver* observer);
+ private:
+  base::WeakPtr<Tracker> GetWeakPtr();
+  static void NotifyObservers(base::WeakPtr<Tracker> tracker);
+  void ScheduleNotification();
 
   // text::BufferMutationObserver
-  private: virtual void DidDeleteAt(Posn offset, size_t length) override;
-  private: virtual void DidInsertAt(Posn offset, size_t length) override;
+  void DidDeleteAt(Posn offset, size_t length) override;
+  void DidInsertAt(Posn offset, size_t length) override;
+
+  gc::Member<Document> document_;
+  bool is_observing_;
+  bool is_schedule_notification_;
+  std::unordered_set<MutationObserver*> observers_;
+  base::WeakPtrFactory<Tracker> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(Tracker);
 };
 
 MutationObserverController::Tracker::Tracker(Document* document)
-    : document_(document), is_observing_(false),
+    : document_(document),
+      is_observing_(false),
       is_schedule_notification_(false),
-      weak_factory_(this) {
-}
+      weak_factory_(this) {}
 
 MutationObserverController::Tracker::~Tracker() {
   if (is_observing_)
@@ -70,7 +72,7 @@ MutationObserverController::Tracker::~Tracker() {
 }
 
 base::WeakPtr<MutationObserverController::Tracker>
-    MutationObserverController::Tracker::GetWeakPtr() {
+MutationObserverController::Tracker::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -90,8 +92,7 @@ void MutationObserverController::Tracker::NotifyObservers(
   }
 }
 
-void MutationObserverController::Tracker::Register(
-    MutationObserver* observer) {
+void MutationObserverController::Tracker::Register(MutationObserver* observer) {
   observers_.insert(observer);
   if (is_observing_)
     return;
@@ -103,8 +104,8 @@ void MutationObserverController::Tracker::ScheduleNotification() {
   if (is_schedule_notification_)
     return;
   is_schedule_notification_ = true;
-  ScriptHost::instance()->PostTask(FROM_HERE,
-      base::Bind(&Tracker::NotifyObservers, GetWeakPtr()));
+  ScriptHost::instance()->PostTask(
+      FROM_HERE, base::Bind(&Tracker::NotifyObservers, GetWeakPtr()));
 }
 
 void MutationObserverController::Tracker::Unregister(
@@ -137,11 +138,9 @@ void MutationObserverController::Tracker::DidInsertAt(Posn offset,
 //
 // MutationObserverController
 //
-MutationObserverController::MutationObserverController() {
-}
+MutationObserverController::MutationObserverController() {}
 
-MutationObserverController::~MutationObserverController() {
-}
+MutationObserverController::~MutationObserverController() {}
 
 void MutationObserverController::Register(MutationObserver* observer,
                                           Document* document) {

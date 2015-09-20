@@ -4,14 +4,13 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class MutationObserverTest : public dom::AbstractDomTest {
-  protected: MutationObserverTest() {
-  }
-  public: virtual ~MutationObserverTest() {
-  }
+class MutationObserverTest : public AbstractDomTest {
+ protected:
+  MutationObserverTest() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(MutationObserverTest);
 };
 
@@ -26,4 +25,4 @@ TEST_F(MutationObserverTest, ctor) {
       "range.text = ''");
 }
 
-}  // namespace
+}  // namespace dom

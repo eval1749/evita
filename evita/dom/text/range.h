@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_range_h)
-#define INCLUDE_evita_dom_range_h
+#ifndef EVITA_DOM_TEXT_RANGE_H_
+#define EVITA_DOM_TEXT_RANGE_H_
 
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
@@ -17,36 +17,38 @@ class RegExp;
 //
 // Range
 //
-class Range : public v8_glue::Scriptable<Range> {
+class Range final : public v8_glue::Scriptable<Range> {
   DECLARE_SCRIPTABLE_OBJECT(Range);
 
-  private: gc::Member<Document> document_;
+ public:
+  Range(Document* document, text::Posn start, text::Posn end);
+  Range(Document* document, text::Range* range);
+  ~Range() final;
+
+  bool collapsed() const;
+  Document* document() const { return document_.get(); }
+  int end() const;
+  int start() const;
+  void set_end(int position);
+  void set_start(int position);
+  base::string16 text() const;
+  void set_text(const base::string16& text);
+  text::Range* text_range() const { return range_; }
+
+  Range* CollapseTo(Posn position);
+  Range* InsertBefore(const base::string16& text);
+  void SetSpelling(int spelling) const;
+  void SetStyle(v8::Handle<v8::Object> style_dict) const;
+  void SetSyntax(const base::string16& syntax) const;
+
+ private:
+  gc::Member<Document> document_;
   // TODO(yosi): We should manage life time of text::Range.
-  private: text::Range* range_;
-
-  public: Range(Document* document, text::Posn start, text::Posn end);
-  public: Range(Document* document, text::Range* range);
-  public: virtual ~Range();
-
-  public: bool collapsed() const;
-  public: Document* document() const { return document_.get(); }
-  public: int end() const;
-  public: int start() const;
-  public: void set_end(int position);
-  public: void set_start(int position);
-  public: base::string16 text() const;
-  public: void set_text(const base::string16& text);
-  public: text::Range* text_range() const { return range_; }
-
-  public: Range* CollapseTo(Posn position);
-  public: Range* InsertBefore(const base::string16& text);
-  public: void SetSpelling(int spelling) const;
-  public: void SetStyle(v8::Handle<v8::Object> style_dict) const;
-  public: void SetSyntax(const base::string16& syntax) const;
+  text::Range* range_;
 
   DISALLOW_COPY_AND_ASSIGN(Range);
 };
 
-} // namespace dom
+}  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_range_h)
+#endif  // EVITA_DOM_TEXT_RANGE_H_

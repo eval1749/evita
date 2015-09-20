@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_mutation_observer_controller_h)
-#define INCLUDE_evita_dom_mutation_observer_controller_h
+#ifndef EVITA_DOM_TEXT_MUTATION_OBSERVER_CONTROLLER_H_
+#define EVITA_DOM_TEXT_MUTATION_OBSERVER_CONTROLLER_H_
 
 #include <unordered_map>
+#include <vector>
 
 #include "base/macros.h"
 #include "common/memory/singleton.h"
@@ -20,20 +21,23 @@ class MutationObserverController final
     : public common::Singleton<MutationObserverController> {
   DECLARE_SINGLETON_CLASS(MutationObserverController);
 
-  private: class Tracker;
+ public:
+  ~MutationObserverController() final;
 
-  private: std::unordered_map<Document*, Tracker*> map_;
+  void Register(MutationObserver* observer, Document* document);
+  std::vector<MutationRecord*> TakeRecords(MutationObserver* observer);
+  void Unregister(MutationObserver* observer);
 
-  private: MutationObserverController();
-  public: virtual ~MutationObserverController();
+ private:
+  class Tracker;
 
-  public: void Register(MutationObserver* observer, Document* document);
-  public: std::vector<MutationRecord*> TakeRecords(MutationObserver* observer);
-  public: void Unregister(MutationObserver* observer);
+  MutationObserverController();
+
+  std::unordered_map<Document*, Tracker*> map_;
 
   DISALLOW_COPY_AND_ASSIGN(MutationObserverController);
 };
 
 }  // namespace dom
 
-#endif // !defined(INCLUDE_evita_dom_mutation_observer_controller_h)
+#endif  // EVITA_DOM_TEXT_MUTATION_OBSERVER_CONTROLLER_H_

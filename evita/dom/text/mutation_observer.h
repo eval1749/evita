@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_mutation_observer_h)
-#define INCLUDE_evita_dom_mutation_observer_h
+#ifndef EVITA_DOM_TEXT_MUTATION_OBSERVER_H_
+#define EVITA_DOM_TEXT_MUTATION_OBSERVER_H_
 
 #include <unordered_map>
 #include <vector>
@@ -22,30 +22,33 @@ namespace bindings {
 class MutationObserverClass;
 }
 
-class MutationObserver : public v8_glue::Scriptable<MutationObserver> {
+class MutationObserver final : public v8_glue::Scriptable<MutationObserver> {
   DECLARE_SCRIPTABLE_OBJECT(MutationObserver);
+
+ public:
+  ~MutationObserver() final;
+
+  void DidDeleteAt(Document* document, text::Posn offset, size_t length);
+  void DidInsertAt(Document* document, text::Posn offset, size_t length);
+  void DidMutateDocument(Document* document);
+
+ private:
   friend class bindings::MutationObserverClass;
+  class Tracker;
 
-  private: class Tracker;
+  explicit MutationObserver(v8::Handle<v8::Function> callback);
 
-  private: v8_glue::ScopedPersistent<v8::Function> callback_;
-  private: std::unordered_map<Document*, Tracker*> tracker_map_;
+  void Disconnect();
+  Tracker* GetTracker(Document* document) const;
+  void Observe(Document* document, const MutationObserverInit& options);
+  std::vector<MutationRecord*> TakeRecords();
 
-  private: MutationObserver(v8::Handle<v8::Function> callback);
-  public: virtual ~MutationObserver();
-
-  public: void DidDeleteAt(Document* document, text::Posn offset, size_t length);
-  public: void DidInsertAt(Document* document, text::Posn offset, size_t length);
-  public: void DidMutateDocument(Document* document);
-  private: void Disconnect();
-  private: Tracker* GetTracker(Document* document) const;
-  private: void Observe(Document* document,
-                        const MutationObserverInit& options);
-  private: std::vector<MutationRecord*> TakeRecords();
+  v8_glue::ScopedPersistent<v8::Function> callback_;
+  std::unordered_map<Document*, Tracker*> tracker_map_;
 
   DISALLOW_COPY_AND_ASSIGN(MutationObserver);
 };
 
 }  // namespace dom
 
-#endif // !defined(INCLUDE_evita_dom_mutation_observer_h)
+#endif  // EVITA_DOM_TEXT_MUTATION_OBSERVER_H_

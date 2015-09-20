@@ -4,6 +4,7 @@
 
 #include "evita/dom/text/mutation_observer.h"
 
+#include <algorithm>
 #include <vector>
 
 #include "evita/bindings/v8_glue_MutationObserverInit.h"
@@ -20,30 +21,29 @@ namespace dom {
 //
 // MutationObserver::Tracker
 //
-class MutationObserver::Tracker {
+class MutationObserver::Tracker final {
+ public:
+  explicit Tracker(Document* document);
+  ~Tracker();
+
+  bool has_records() const { return minimum_change_offset_ != text::Posn_Max; }
+
+  void Reset();
+  std::vector<MutationRecord*> TakeRecords();
+  void Update(text::Posn offset);
+
+ private:
   // TODO(yosi) Reference to |Document| from |Tracker| should be a weak
   // reference.
-  private: Document* document_;
-  private: text::Posn minimum_change_offset_;
-
-  public: Tracker(Document* document);
-  public: ~Tracker();
-
-  public: bool has_records() const {
-    return minimum_change_offset_ != text::Posn_Max;
-  }
-
-  public: void Reset();
-  public: std::vector<MutationRecord*> TakeRecords();
-  public: void Update(text::Posn offset);
+  Document* document_;
+  text::Posn minimum_change_offset_;
 };
 
 MutationObserver::Tracker::Tracker(Document* document) : document_(document) {
   Reset();
 }
 
-MutationObserver::Tracker::~Tracker() {
-}
+MutationObserver::Tracker::~Tracker() {}
 
 void MutationObserver::Tracker::Reset() {
   minimum_change_offset_ = text::Posn_Max;
@@ -54,8 +54,8 @@ std::vector<MutationRecord*> MutationObserver::Tracker::TakeRecords() {
     return std::vector<MutationRecord*>();
   auto const minimum_change_offset = minimum_change_offset_;
   Reset();
-  return std::vector<MutationRecord*> {
-    new MutationRecord(L"summary", document_, minimum_change_offset),
+  return std::vector<MutationRecord*>{
+      new MutationRecord(L"summary", document_, minimum_change_offset),
   };
 }
 
@@ -68,11 +68,9 @@ void MutationObserver::Tracker::Update(text::Posn offset) {
 // MutationObserver
 //
 MutationObserver::MutationObserver(v8::Handle<v8::Function> callback)
-    : callback_(v8::Isolate::GetCurrent(), callback) {
-}
+    : callback_(v8::Isolate::GetCurrent(), callback) {}
 
-MutationObserver::~MutationObserver() {
-}
+MutationObserver::~MutationObserver() {}
 
 void MutationObserver::DidDeleteAt(Document* document, Posn offset, size_t) {
   auto const tracker = GetTracker(document);
@@ -100,8 +98,7 @@ void MutationObserver::DidMutateDocument(Document* document) {
   v8::Local<v8::Value> records;
   if (!gin::TryConvertToV8(isolate, tracker->TakeRecords(), &records))
     return;
-  runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate),
-               records,
+  runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate), records,
                gin::ConvertToV8(isolate, this));
 }
 
@@ -126,10 +123,10 @@ void MutationObserver::Observe(Document* document,
 std::vector<MutationRecord*> MutationObserver::TakeRecords() {
   std::vector<MutationRecord*> records;
   for (auto key_val : tracker_map_) {
-   auto const tracker = key_val.second;
-   for (auto record : tracker->TakeRecords()) {
-     records.push_back(record);
-   }
+    auto const tracker = key_val.second;
+    for (auto record : tracker->TakeRecords()) {
+      records.push_back(record);
+    }
   }
 
   return records;

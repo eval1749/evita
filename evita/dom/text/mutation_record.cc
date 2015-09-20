@@ -10,12 +10,11 @@ namespace dom {
 //
 // MutationRecord
 //
-MutationRecord::MutationRecord(const base::string16& type, Document* document,
+MutationRecord::MutationRecord(const base::string16& type,
+                               Document* document,
                                text::Posn offset)
-    : document_(document), offset_(offset), type_(type) {
-}
+    : document_(document), offset_(offset), type_(type) {}
 
-MutationRecord::~MutationRecord() {
-}
+MutationRecord::~MutationRecord() {}
 
 }  // namespace dom

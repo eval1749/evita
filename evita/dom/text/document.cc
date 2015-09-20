@@ -5,6 +5,7 @@
 #include "evita/dom/text/document.h"
 
 #include <utility>
+#include <vector>
 
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
@@ -29,13 +30,14 @@
 #include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/wrapper_info.h"
-#include "v8_strings.h"
+#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace gin {
-template<>
+template <>
 struct Converter<text::LineAndColumn> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-      text::LineAndColumn& line_and_column) {
+  static v8::Handle<v8::Value> ToV8(
+      v8::Isolate* isolate,
+      const text::LineAndColumn& line_and_column) {
     auto const result = v8::Object::New(isolate);
     result->Set(gin::StringToV8(isolate, "column"),
                 v8::Integer::New(isolate, line_and_column.column));
@@ -53,36 +55,36 @@ namespace bindings {
 //
 // DocumentClass
 //
-class DocumentClass
+class DocumentClass final
     : public v8_glue::DerivedWrapperInfo<Document, EventTarget> {
-  public: DocumentClass(const char* name);
-  public: virtual ~DocumentClass();
+ public:
+  explicit DocumentClass(const char* name);
+  ~DocumentClass() final;
 
-  private: static std::vector<Document*> list();
+ private:
+  static std::vector<Document*> list();
 
-  private: static void AddObserver(v8::Handle<v8::Function> function);
-  private: static v8_glue::Nullable<Document> Find(const base::string16& name);
+  static void AddObserver(v8::Handle<v8::Function> function);
+  static v8_glue::Nullable<Document> Find(const base::string16& name);
 
-  private: static Document* NewDocument(const base::string16& name);
-  private: static void RemoveDocument(Document* document);
-  private: static void RemoveObserver(v8::Handle<v8::Function> function);
+  static Document* NewDocument(const base::string16& name);
+  static void RemoveDocument(Document* document);
+  static void RemoveObserver(v8::Handle<v8::Function> function);
 
   // v8_glue::WrapperInfo
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override;
+  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
+      v8::Isolate* isolate) override;
 
-  private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override;
+  v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate,
+      v8::Handle<v8::ObjectTemplate> templ) override;
 
   DISALLOW_COPY_AND_ASSIGN(DocumentClass);
 };
 
-DocumentClass::DocumentClass(const char* name)
-    : BaseClass(name) {
-}
+DocumentClass::DocumentClass(const char* name) : BaseClass(name) {}
 
-DocumentClass::~DocumentClass() {
-}
+DocumentClass::~DocumentClass() {}
 
 std::vector<Document*> DocumentClass::list() {
   return DocumentSet::instance()->list();
@@ -107,8 +109,7 @@ void DocumentClass::RemoveObserver(v8::Handle<v8::Function> function) {
 // v8_glue::WrapperInfo
 v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
     v8::Isolate* isolate) {
-  auto templ = v8_glue::CreateConstructorTemplate(isolate,
-      &Document::New);
+  auto templ = v8_glue::CreateConstructorTemplate(isolate, &Document::New);
   return v8_glue::FunctionTemplateBuilder(isolate, templ)
       .SetProperty("list", &DocumentClass::list)
       .SetMethod("addObserver", &DocumentClass::AddObserver)
@@ -118,16 +119,14 @@ v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
       .Build();
 }
 
-v8::Handle<v8::ObjectTemplate>
-DocumentClass::SetupInstanceTemplate(v8::Isolate* isolate,
-                                     v8::Handle<v8::ObjectTemplate> templ) {
+v8::Handle<v8::ObjectTemplate> DocumentClass::SetupInstanceTemplate(
+    v8::Isolate* isolate,
+    v8::Handle<v8::ObjectTemplate> templ) {
   gin::ObjectTemplateBuilder builder(isolate, templ);
-  builder
-      .SetProperty("length", &Document::length)
+  builder.SetProperty("length", &Document::length)
       .SetProperty("modified", &Document::modified, &Document::set_modified)
       .SetProperty("name", &Document::name)
-      .SetProperty("readonly", &Document::read_only,
-                   &Document::set_read_only)
+      .SetProperty("readonly", &Document::read_only, &Document::set_read_only)
       .SetMethod("charCodeAt_", &Document::charCodeAt)
       .SetMethod("clearUndo", &Document::ClearUndo)
       .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
@@ -150,13 +149,13 @@ DocumentClass::SetupInstanceTemplate(v8::Isolate* isolate,
 //
 // Document
 //
-using namespace bindings;
+using namespace bindings;  // NOLINT(build/namespaces)
+
 DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
 
 Document::Document(const base::string16& name)
     : buffer_(new text::Buffer()),
-      name_(DocumentSet::instance()->MakeUniqueName(name)) {
-}
+      name_(DocumentSet::instance()->MakeUniqueName(name)) {}
 
 Document::~Document() {
   DocumentSet::instance()->Unregister(this);
@@ -165,9 +164,9 @@ Document::~Document() {
 base::char16 Document::charCodeAt(text::Posn position) const {
   if (position >= 0 && position < length())
     return buffer_->GetCharAt(position);
-  ScriptHost::instance()->ThrowRangeError(base::StringPrintf(
-      "Bad index %d, valid index is [%d, %d]",
-      position, 0, buffer_->GetEnd() - 1));
+  ScriptHost::instance()->ThrowRangeError(
+      base::StringPrintf("Bad index %d, valid index is [%d, %d]", position, 0,
+                         buffer_->GetEnd() - 1));
   return 0;
 }
 
@@ -219,8 +218,8 @@ bool Document::CheckCanChange() const {
     auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
     v8_glue::Runner::Scope runner_scope(runner);
-    auto const ctor = runner->global()->Get(
-        v8Strings::DocumentReadOnly.Get(isolate));
+    auto const ctor =
+        runner->global()->Get(v8Strings::DocumentReadOnly.Get(isolate));
     auto const error = runner->CallAsConstructor(ctor, GetWrapper(isolate));
     ScriptHost::instance()->ThrowException(error);
     return false;
@@ -228,7 +227,7 @@ bool Document::CheckCanChange() const {
   return true;
 }
 
-void Document::ClearUndo(){
+void Document::ClearUndo() {
   buffer_->ClearUndo();
 }
 
@@ -246,9 +245,9 @@ text::LineAndColumn Document::GetLineAndColumn(text::Posn offset) const {
 bool Document::IsValidPosition(text::Posn position) const {
   if (position >= 0 && position <= buffer_->GetEnd())
     return true;
-  ScriptHost::instance()->ThrowRangeError(base::StringPrintf(
-      "Invalid position %d, valid range is [%d, %d]",
-      position, 0, buffer_->GetEnd()));
+  ScriptHost::instance()->ThrowRangeError(
+      base::StringPrintf("Invalid position %d, valid range is [%d, %d]",
+                         position, 0, buffer_->GetEnd()));
   return false;
 }
 

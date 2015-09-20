@@ -11,73 +11,72 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 
-namespace {
+namespace dom {
 
 using ::testing::_;
 
-class RangeTest : public dom::AbstractDomTest {
-  protected: RangeTest() {
-  }
-  public: virtual ~RangeTest() {
+class RangeTest : public AbstractDomTest {
+ protected:
+  RangeTest() = default;
+
+  void PopulateSample(const char* sample) {
+    EXPECT_SCRIPT_VALID(
+        base::StringPrintf("var doc = new Document('sample');"
+                           "var r = new Range(doc);"
+                           "r.text = '%s';",
+                           sample));
   }
 
-  protected: void PopulateSample(const char* sample) {
-    EXPECT_SCRIPT_VALID(base::StringPrintf(
+ private:
+  void SetUp() override {
+    AbstractDomTest::SetUp();
+    EXPECT_SCRIPT_VALID(
         "var doc = new Document('sample');"
-        "var r = new Range(doc);"
-        "r.text = '%s';",
-        sample));
-  }
-
-  protected: virtual void SetUp() override {
-    dom::AbstractDomTest::SetUp();
+        "var range = new Range(doc);");
     EXPECT_SCRIPT_VALID(
-      "var doc = new Document('sample');"
-      "var range = new Range(doc);");
+        "function doTest(sample, sampler) {"
+        "  range.start = 0;"
+        "  range.end = doc.length;"
+        "  sample = sample.replace(/[$]/g, '\\n');"
+        "  range.text = sample.replace(/[|]/g, '');"
+        "  range.collapseTo(sample.indexOf('|'));"
+        "  var before_end = sample.lastIndexOf('|');"
+        "  if (range.start != before_end)"
+        "    --before_end;"
+        "  range.end = before_end;"
+        "  sampler(range);"
+        "  var start = range.start;"
+        "  var end = range.end;"
+        "  range.start = 0;"
+        "  range.end = doc.length;"
+        "  var result = range.text.replace(/\\n/g, '$');"
+        "  if (start == end)"
+        "    return result.substr(0, start) + '|' + result.substr(start);"
+        "  return result.substr(0, start) + '|' +"
+        "         result.substring(start, end) + '|' +"
+        "         result.substr(end);"
+        "}");
     EXPECT_SCRIPT_VALID(
-      "function doTest(sample, sampler) {"
-      "  range.start = 0;"
-      "  range.end = doc.length;"
-      "  sample = sample.replace(/[$]/g, '\\n');"
-      "  range.text = sample.replace(/[|]/g, '');"
-      "  range.collapseTo(sample.indexOf('|'));"
-      "  var before_end = sample.lastIndexOf('|');"
-      "  if (range.start != before_end)"
-      "    --before_end;"
-      "  range.end = before_end;"
-      "  sampler(range);"
-      "  var start = range.start;"
-      "  var end = range.end;"
-      "  range.start = 0;"
-      "  range.end = doc.length;"
-      "  var result = range.text.replace(/\\n/g, '$');"
-      "  if (start == end)"
-      "    return result.substr(0, start) + '|' + result.substr(start);"
-      "  return result.substr(0, start) + '|' +"
-      "         result.substring(start, end) + '|' +"
-      "         result.substr(end);"
-      "}");
-  EXPECT_SCRIPT_VALID(
-      "function doTest2(sample, sampler) {"
-      "  range.collapseTo(0);"
-      "  range.end = doc.length;"
-      "  var source = sample;"
-      "  source = source.replace(/\\\\n/g, '\\n');"
-      "  source = source.replace(/\\\\t/g, '\\t');"
-      "  var caret = source.indexOf('|');"
-      "  source = source.replace(/[|]/g, '');"
-      "  range.text = source;"
-      "  range.collapseTo(caret);"
-      "  sampler(range);"
-      "  caret = range.start;"
-      "  range.start = 0;"
-      "  range.end = range.document.length;"
-      "  var result = range.text;"
-      "  result = result.substr(0, caret) + '|' + result.substr(caret);"
-      "  result = result.replace(/\\n/g, '\\\\n');"
-      "  result = result.replace(/\\t/g, '\\\\t');"
-      "  return result;"
-      "}");
+        "function doTest2(sample, sampler) {"
+        "  range.collapseTo(0);"
+        "  range.end = doc.length;"
+        "  var source = sample;"
+        "  source = source.replace(/\\\\n/g, '\\n');"
+        "  source = source.replace(/\\\\t/g, '\\t');"
+        "  var caret = source.indexOf('|');"
+        "  source = source.replace(/[|]/g, '');"
+        "  range.text = source;"
+        "  range.collapseTo(caret);"
+        "  sampler(range);"
+        "  caret = range.start;"
+        "  range.start = 0;"
+        "  range.end = range.document.length;"
+        "  var result = range.text;"
+        "  result = result.substr(0, caret) + '|' + result.substr(caret);"
+        "  result = result.replace(/\\n/g, '\\\\n');"
+        "  result = result.replace(/\\t/g, '\\\\t');"
+        "  return result;"
+        "}");
   }
 
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
@@ -124,7 +123,6 @@ TEST_F(RangeTest, ctor) {
   EXPECT_SCRIPT_EQ("7", "range4.end");
   EXPECT_SCRIPT_EQ("6", "range4.length");
 
-
   EXPECT_SCRIPT_VALID("var range5 = new Range(range1, 2)");
   EXPECT_SCRIPT_TRUE("range5.document === doc1");
   EXPECT_SCRIPT_EQ("2", "range5.start");
@@ -140,13 +138,13 @@ TEST_F(RangeTest, ctor) {
 
 TEST_F(RangeTest, capitalize) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('endOf');"
-    "var range = new Range(doc);"
-    "function test(sample) {"
-    "  range.text = sample;"
-    "  range.capitalize();"
-    "  return range.text;"
-    "}");
+      "var doc = new Document('endOf');"
+      "var range = new Range(doc);"
+      "function test(sample) {"
+      "  range.text = sample;"
+      "  range.capitalize();"
+      "  return range.text;"
+      "}");
   EXPECT_SCRIPT_EQ("Foo bar", "test('FOO BAR')");
   EXPECT_SCRIPT_EQ("Foo bar", "test('foo bar')");
   EXPECT_SCRIPT_EQ(" Foo bar", "test(' foo Bar')");
@@ -154,8 +152,8 @@ TEST_F(RangeTest, capitalize) {
 
 TEST_F(RangeTest, collapsed) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('collapsed');"
-    "var range = new Range(doc);");
+      "var doc = new Document('collapsed');"
+      "var range = new Range(doc);");
   EXPECT_SCRIPT_TRUE("range.collapsed");
   EXPECT_SCRIPT_TRUE("range.start == range.end");
   EXPECT_SCRIPT_VALID("range.text = 'foo';");
@@ -165,36 +163,36 @@ TEST_F(RangeTest, collapsed) {
 
 TEST_F(RangeTest, collapseTo) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('endOf');"
-    "var range = new Range(doc);"
-    "range.text = 'foo';"
-    "range.collapseTo(1);");
+      "var doc = new Document('endOf');"
+      "var range = new Range(doc);"
+      "range.text = 'foo';"
+      "range.collapseTo(1);");
   EXPECT_SCRIPT_EQ("1", "range.start");
   EXPECT_SCRIPT_EQ("1", "range.end");
 }
 
 TEST_F(RangeTest, delete) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit, count) {"
-    "  var doc = new Document('delete');"
-    "  var range = new Range(doc);"
-    "  range.text = sample.replace(/[|]/g, '');"
-    "  range.collapseTo(sample.indexOf('|'));"
-    "  var end = sample.lastIndexOf('|');"
-    "  if (range.start != end)"
-    "    --end;"
-    "  range.end = end;"
-    "  if (arguments.length >= 3)"
-    "    range.delete(unit, count);"
-    "  else"
-    "    range.delete(unit);"
-    "  var caret = range.start;"
-    "  range.start = 0;"
-    "  range.end = doc.length;"
-    "  var result = range.text;"
-    "  result = result.substr(0, caret) + '|' + result.substr(caret);"
-    "  return result;"
-    "}");
+      "function testIt(sample, unit, count) {"
+      "  var doc = new Document('delete');"
+      "  var range = new Range(doc);"
+      "  range.text = sample.replace(/[|]/g, '');"
+      "  range.collapseTo(sample.indexOf('|'));"
+      "  var end = sample.lastIndexOf('|');"
+      "  if (range.start != end)"
+      "    --end;"
+      "  range.end = end;"
+      "  if (arguments.length >= 3)"
+      "    range.delete(unit, count);"
+      "  else"
+      "    range.delete(unit);"
+      "  var caret = range.start;"
+      "  range.start = 0;"
+      "  range.end = doc.length;"
+      "  var result = range.text;"
+      "  result = result.substr(0, caret) + '|' + result.substr(caret);"
+      "  return result;"
+      "}");
   // Backspace
   EXPECT_SCRIPT_EQ("|abcd", "testIt('|abcd', Unit.CHARACTER, -1)");
   EXPECT_SCRIPT_EQ("a|cd", "testIt('ab|cd', Unit.CHARACTER, -1)");
@@ -221,13 +219,13 @@ TEST_F(RangeTest, delete) {
   EXPECT_SCRIPT_EQ("foo | baz", "testIt('foo |bar| baz', Unit.CHARACTER)");
 }
 
-TEST_F(RangeTest,  endOf) {
+TEST_F(RangeTest, endOf) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit) {"
-    "  return doTest2(sample, function(range) {"
-    "   range.endOf(unit);"
-    "  });"
-    "}");
+      "function testIt(sample, unit) {"
+      "  return doTest2(sample, function(range) {"
+      "   range.endOf(unit);"
+      "  });"
+      "}");
   EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("foo| bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
@@ -242,12 +240,12 @@ TEST_F(RangeTest,  endOf) {
 
 TEST_F(RangeTest, insertBefore) {
   EXPECT_SCRIPT_VALID(
-    "var doc = new Document('insertBefore');"
-    "var range = new Range(doc);"
-    "range.text = 'foo';"
-    "range.insertBefore('bar');"
-    "var range2 = new Range(doc);"
-    "range2.end = doc.length;");
+      "var doc = new Document('insertBefore');"
+      "var range = new Range(doc);"
+      "range.text = 'foo';"
+      "range.insertBefore('bar');"
+      "var range2 = new Range(doc);"
+      "range2.end = doc.length;");
   EXPECT_SCRIPT_EQ("3", "range.start");
   EXPECT_SCRIPT_EQ("6", "range.end");
   EXPECT_SCRIPT_EQ("barfoo", "range2.text");
@@ -257,7 +255,7 @@ TEST_F(RangeTest, move) {
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('move');"
       "var range = new Range(doc);"
-                   //0123456789012345  678901234  56789012345
+      // 0123456789012345  678901234  56789012345
       "range.text = 'this is a word.\\nline two\\nline three\\n';"
       "function test(start, end, unit, count) {"
       "  range.collapseTo(start);"
@@ -302,12 +300,11 @@ TEST_F(RangeTest, move) {
   EXPECT_SCRIPT_EQ("5 5", "test(7, 8, Unit.WORD, -1)");
 }
 
-
 TEST_F(RangeTest, moveEnd) {
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('move');"
       "var range = new Range(doc);"
-                   //0123456789012345  678901234  56789012345
+      // 0123456789012345  678901234  56789012345
       "range.text = 'this is a word.\\nline two\\nline three\\n';"
       "function test(start, end, unit, count) {"
       "  range.collapseTo(start);"
@@ -389,7 +386,7 @@ TEST_F(RangeTest, moveStart) {
   EXPECT_SCRIPT_VALID(
       "var doc = new Document('move');"
       "var range = new Range(doc);"
-                   //0123456789012345  678901234  56789012345
+      // 0123456789012345  678901234  56789012345
       "range.text = 'this is a word.\\nline two\\nline three\\n';"
       "function test(start, end, unit, count) {"
       "  range.collapseTo(start);"
@@ -435,7 +432,6 @@ TEST_F(RangeTest, moveStart) {
   EXPECT_SCRIPT_EQ("5 7", "test(7, 7, Unit.WORD, -1)");
   EXPECT_SCRIPT_EQ("5 8", "test(7, 8, Unit.WORD, -1)");
 }
-
 
 TEST_F(RangeTest, moveStartWhile) {
   EXPECT_SCRIPT_VALID(
@@ -506,11 +502,11 @@ TEST_F(RangeTest, set_start_end) {
 
 TEST_F(RangeTest, startOf) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit) {"
-    "  return doTest2(sample, function(range) {"
-    "   range.startOf(unit);"
-    "  });"
-    "}");
+      "function testIt(sample, unit) {"
+      "  return doTest2(sample, function(range) {"
+      "   range.startOf(unit);"
+      "  });"
+      "}");
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('|foo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('f|oo bar  baz', Unit.WORD)");
   EXPECT_SCRIPT_EQ("|foo bar  baz", "testIt('fo|o bar  baz', Unit.WORD)");
@@ -557,4 +553,4 @@ TEST_F(RangeTest, toLocalUpperCase) {
   EXPECT_SCRIPT_EQ("ABCDEFGHIJ", "r.toUpperCase(); r.text");
 }
 
-}  // namespace
+}  // namespace dom

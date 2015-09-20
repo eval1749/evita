@@ -4,22 +4,23 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class ModesTest : public dom::AbstractDomTest {
-  public: ModesTest() = default;
-  public: ~ModesTest() = default;
+class ModesTest : public AbstractDomTest {
+ protected:
+  ModesTest() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(ModesTest);
 };
 
 TEST_F(ModesTest, chooseMode) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(mode_name) {"
-    "  var doc = new Document('foo');"
-    "  doc.properties.set('mode', mode_name);"
-    "  return Mode.chooseMode(doc).name;"
-    "}");
+      "function testIt(mode_name) {"
+      "  var doc = new Document('foo');"
+      "  doc.properties.set('mode', mode_name);"
+      "  return Mode.chooseMode(doc).name;"
+      "}");
   EXPECT_SCRIPT_EQ("C++", "testIt('C++')");
   EXPECT_SCRIPT_EQ("Lisp", "testIt('Lisp')");
 }
@@ -120,4 +121,4 @@ TEST_F(ModesTest, XmlMode) {
   EXPECT_SCRIPT_EQ("XML", "mode.name");
 }
 
-}  // namespace
+}  // namespace dom

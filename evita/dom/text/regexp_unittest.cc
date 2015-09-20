@@ -4,14 +4,13 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class RegExpTest : public dom::AbstractDomTest {
-  protected: RegExpTest() {
-  }
-  public: virtual ~RegExpTest() {
-  }
+class RegExpTest : public AbstractDomTest {
+ protected:
+  RegExpTest() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(RegExpTest);
 };
 
@@ -34,4 +33,4 @@ TEST_F(RegExpTest, execOnDocument_) {
   EXPECT_SCRIPT_EQ("bar baz,ar ba", "exec('b(.+)z', false)");
 }
 
-}  // namespace
+}  // namespace dom

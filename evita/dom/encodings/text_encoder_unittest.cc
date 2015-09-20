@@ -4,21 +4,22 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
-class TextEncoderTest : public dom::AbstractDomTest {
-  protected: TextEncoderTest() {
-  }
-  public: virtual ~TextEncoderTest() {
-  }
+class TextEncoderTest : public AbstractDomTest {
+ public:
+  ~TextEncoderTest() override = default;
 
+ protected:
+  TextEncoderTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(TextEncoderTest);
 };
 
 TEST_F(TextEncoderTest, ctor) {
-  EXPECT_SCRIPT_EQ(
-      "Error: No such encoding 'foo'",
-      "var decoder = new TextEncoder('foo');");
+  EXPECT_SCRIPT_EQ("Error: No such encoding 'foo'",
+                   "var decoder = new TextEncoder('foo');");
 
   EXPECT_SCRIPT_VALID("var encoder1 = new TextEncoder();");
   EXPECT_SCRIPT_EQ("utf-8", "encoder1.encoding");
@@ -29,8 +30,8 @@ TEST_F(TextEncoderTest, ctor) {
 
 TEST_F(TextEncoderTest, encode_utf8_ascii) {
   EXPECT_SCRIPT_VALID(
-    "var encoder = new TextEncoder('utf-8');"
-    "var buffer = encoder.encode('abc');");
+      "var encoder = new TextEncoder('utf-8');"
+      "var buffer = encoder.encode('abc');");
   EXPECT_SCRIPT_EQ("3", "buffer.length");
   EXPECT_SCRIPT_EQ("97", "buffer[0]");
   EXPECT_SCRIPT_EQ("98", "buffer[1]");
@@ -39,8 +40,8 @@ TEST_F(TextEncoderTest, encode_utf8_ascii) {
 
 TEST_F(TextEncoderTest, encode_utf8_kanji) {
   EXPECT_SCRIPT_VALID(
-    "var encoder = new TextEncoder('utf-8');"
-    "var buffer = encoder.encode('\\u611B\\u60C5');");
+      "var encoder = new TextEncoder('utf-8');"
+      "var buffer = encoder.encode('\\u611B\\u60C5');");
   EXPECT_SCRIPT_EQ("6", "buffer.length");
   EXPECT_SCRIPT_EQ("230", "buffer[0]");
   EXPECT_SCRIPT_EQ("132", "buffer[1]");
@@ -50,4 +51,4 @@ TEST_F(TextEncoderTest, encode_utf8_kanji) {
   EXPECT_SCRIPT_EQ("133", "buffer[5]");
 }
 
-}  // namespace
+}  // namespace dom

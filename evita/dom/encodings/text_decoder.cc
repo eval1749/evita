@@ -20,11 +20,9 @@ namespace dom {
 //
 TextDecoder::TextDecoder(encodings::Decoder* decoder,
                          const TextDecoderOptions& options)
-    : decoder_(decoder), fatal_(options.fatal()) {
-}
+    : decoder_(decoder), fatal_(options.fatal()) {}
 
-TextDecoder::~TextDecoder() {
-}
+TextDecoder::~TextDecoder() {}
 
 const base::string16& TextDecoder::encoding() const {
   return decoder_->name();
@@ -32,18 +30,18 @@ const base::string16& TextDecoder::encoding() const {
 
 base::string16 TextDecoder::Decode(const gin::ArrayBufferView& input,
                                    const TextDecodeOptions& options) {
-  auto const result = decoder_->Decode(
-      reinterpret_cast<const uint8_t*>(input.bytes()), input.num_bytes(),
-      options.stream());
+  auto const result =
+      decoder_->Decode(reinterpret_cast<const uint8_t*>(input.bytes()),
+                       input.num_bytes(), options.stream());
   if (!result.left && fatal_)
     ScriptHost::instance()->ThrowError("EncodingError");
   return result.right;
 }
 
 base::string16 TextDecoder::Decode(const gin::ArrayBufferView& input) {
-  auto const result = decoder_->Decode(
-      reinterpret_cast<const uint8_t*>(input.bytes()), input.num_bytes(),
-      false);
+  auto const result =
+      decoder_->Decode(reinterpret_cast<const uint8_t*>(input.bytes()),
+                       input.num_bytes(), false);
   if (!result.left && fatal_)
     ScriptHost::instance()->ThrowError("EncodingError");
   return result.right;
@@ -58,11 +56,11 @@ base::string16 TextDecoder::Decode() {
 
 // static
 TextDecoder* TextDecoder::NewTextDecoder(const base::string16& label,
-                                         const TextDecoderOptions & options) {
+                                         const TextDecoderOptions& options) {
   auto const decoder = encodings::Encodings::instance()->GetDecoder(label);
   if (!decoder) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "No such encoding '%ls'", label.c_str()));
+    ScriptHost::instance()->ThrowError(
+        base::StringPrintf("No such encoding '%ls'", label.c_str()));
     return nullptr;
   }
   return new TextDecoder(decoder, options);

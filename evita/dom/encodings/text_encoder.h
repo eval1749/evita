@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_encoding_text_encoder_h)
-#define INCLUDE_evita_dom_encoding_text_encoder_h
+#ifndef EVITA_DOM_ENCODINGS_TEXT_ENCODER_H_
+#define EVITA_DOM_ENCODINGS_TEXT_ENCODER_H_
+
+#include <memory>
+#include <vector>
 
 #include "evita/v8_glue/scriptable.h"
-
-#include <memory.h>
 
 #include "base/strings/string16.h"
 
@@ -23,29 +24,32 @@ class TextEncoderClass;
 
 class TextEncodeOptions;
 
-class TextEncoder : public v8_glue::Scriptable<TextEncoder> {
+class TextEncoder final : public v8_glue::Scriptable<TextEncoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextEncoder);
+
+ public:
+  ~TextEncoder() final;
+
+ private:
   friend class bindings::TextEncoderClass;
 
-  private: std::unique_ptr<encodings::Encoder> encoder_;
+  explicit TextEncoder(encodings::Encoder* encoder);
 
-  private: TextEncoder(encodings::Encoder* encoder);
-  public: virtual ~TextEncoder();
+  const base::string16& encoding() const;
 
-  private: const base::string16& encoding() const;
+  std::vector<uint8_t> Encode(const base::string16& input,
+                              const TextEncodeOptions& options);
+  std::vector<uint8_t> Encode(const base::string16& input);
+  std::vector<uint8_t> Encode();
 
-  private: std::vector<uint8_t> Encode(
-      const base::string16& input,
-      const TextEncodeOptions& options);
-  private: std::vector<uint8_t> Encode(const base::string16& input);
-  private: std::vector<uint8_t> Encode();
+  static TextEncoder* NewTextEncoder(const base::string16& label);
+  static TextEncoder* NewTextEncoder();
 
-  private: static TextEncoder* NewTextEncoder(const base::string16& label);
-  private: static TextEncoder* NewTextEncoder();
+  std::unique_ptr<encodings::Encoder> encoder_;
 
   DISALLOW_COPY_AND_ASSIGN(TextEncoder);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_encoding_text_encoder_h)
+#endif  // EVITA_DOM_ENCODINGS_TEXT_ENCODER_H_

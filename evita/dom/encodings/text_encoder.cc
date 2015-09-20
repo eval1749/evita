@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string>
+
 #include "evita/dom/encodings/text_encoder.h"
 
 #include "base/strings/stringprintf.h"
@@ -16,11 +18,9 @@ namespace dom {
 //
 // TextEncoder
 //
-TextEncoder::TextEncoder(encodings::Encoder* encoder) : encoder_(encoder) {
-}
+TextEncoder::TextEncoder(encodings::Encoder* encoder) : encoder_(encoder) {}
 
-TextEncoder::~TextEncoder() {
-}
+TextEncoder::~TextEncoder() {}
 
 const base::string16& TextEncoder::encoding() const {
   return encoder_->name();
@@ -31,16 +31,15 @@ static std::vector<uint8_t> DoEncode(encodings::Encoder* encoder,
                                      bool is_stream) {
   auto const result = encoder->Encode(string, is_stream);
   if (result.left) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "EncodingError: codePoint=0x%X", result.left));
+    ScriptHost::instance()->ThrowError(
+        base::StringPrintf("EncodingError: codePoint=0x%X", result.left));
     return std::vector<uint8_t>();
   }
   return result.right;
 }
 
-std::vector<uint8_t> TextEncoder::Encode(
-    const base::string16& input,
-    const TextEncodeOptions& options) {
+std::vector<uint8_t> TextEncoder::Encode(const base::string16& input,
+                                         const TextEncodeOptions& options) {
   return DoEncode(encoder_.get(), input, options.stream());
 }
 
@@ -55,8 +54,8 @@ std::vector<uint8_t> TextEncoder::Encode() {
 TextEncoder* TextEncoder::NewTextEncoder(const base::string16& label) {
   auto const encoder = encodings::Encodings::instance()->GetEncoder(label);
   if (!encoder) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "No such encoding '%ls'", label.c_str()));
+    ScriptHost::instance()->ThrowError(
+        base::StringPrintf("No such encoding '%ls'", label.c_str()));
     return nullptr;
   }
   return new TextEncoder(encoder);

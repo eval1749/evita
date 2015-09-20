@@ -1,7 +1,7 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_timers_timer_h)
-#define INCLUDE_evita_dom_timers_timer_h
+#ifndef EVITA_DOM_TIMERS_TIMER_H_
+#define EVITA_DOM_TIMERS_TIMER_H_
 
 #include <memory>
 
@@ -21,33 +21,39 @@ class TimerClass;
 
 class Timer : public v8_glue::Scriptable<Timer> {
   DECLARE_SCRIPTABLE_OBJECT(Timer);
-  friend class bindings::TimerClass;
 
-  protected: enum class Type {
+ public:
+  ~Timer() override;
+
+  bool is_running() const;
+
+  void Reset();
+
+ protected:
+  enum class Type {
     OneShot,
     Repeating,
   };
 
-  private: v8_glue::ScopedPersistent<v8::Function> callback_;
-  private: v8_glue::ScopedPersistent<v8::Value> receiver_;
-  private: std::unique_ptr<base::Timer> timer_;
+  explicit Timer(Type type);
 
-  protected: Timer(Type type);
-  public: ~Timer();
+ private:
+  friend class bindings::TimerClass;
 
-  public: bool is_running() const;
+  void DidFireTimer();
+  void Stop();
+  void Start(int delay_ms, v8::Handle<v8::Function> callback);
+  void Start(int delay_ms,
+             v8::Handle<v8::Function> callback,
+             v8::Handle<v8::Value> receiver);
 
-  private: void DidFireTimer();
-
-  public: void Reset();
-  private: void Stop();
-  private: void Start(int delay_ms, v8::Handle<v8::Function> callback);
-  private: void Start(int delay_ms, v8::Handle<v8::Function> callback,
-                      v8::Handle<v8::Value> receiver);
+  v8_glue::ScopedPersistent<v8::Function> callback_;
+  v8_glue::ScopedPersistent<v8::Value> receiver_;
+  std::unique_ptr<base::Timer> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
 
-} // namespace dom
+}  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_timers_timer_h)
+#endif  // EVITA_DOM_TIMERS_TIMER_H_

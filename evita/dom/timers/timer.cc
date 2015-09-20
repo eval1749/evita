@@ -20,27 +20,33 @@ namespace {
 // TimerList
 // TimerList holds timer objects during they are running.
 //
-class TimerList : public common::Singleton<TimerList> {
-  friend class common::Singleton<TimerList>;
+class TimerList final : public common::Singleton<TimerList> {
+ public:
+  ~TimerList() final = default;
 
-  private: typedef v8_glue::ScopedPersistent<v8::Object> TimerHolder;
-  private: std::unordered_map<Timer*, TimerHolder*> timers_;
-
-  private: TimerList() = default;
-  public: ~TimerList() = default;
-
-  public: void Register(Timer* timer) {
+  void Register(Timer* timer) {
     auto const isolate = v8::Isolate::GetCurrent();
     timers_[timer] = new TimerHolder(isolate, timer->GetWrapper(isolate));
   }
 
-  public: void Unregister(Timer* timer) {
+  void Unregister(Timer* timer) {
     auto const it = timers_.find(timer);
     if (it == timers_.end())
       return;
     delete it->second;
     timers_.erase(it);
   }
+
+ private:
+  friend class common::Singleton<TimerList>;
+
+  using TimerHolder = v8_glue::ScopedPersistent<v8::Object>;
+
+  TimerList() = default;
+
+  std::unordered_map<Timer*, TimerHolder*> timers_;
+
+  DISALLOW_COPY_AND_ASSIGN(TimerList);
 };
 }  // namespace
 
@@ -49,9 +55,8 @@ class TimerList : public common::Singleton<TimerList> {
 // Timer
 //
 Timer::Timer(Type type)
-    : timer_(new base::Timer(type == Type::Repeating,
-                             type == Type::Repeating)) {
-}
+    : timer_(
+          new base::Timer(type == Type::Repeating, type == Type::Repeating)) {}
 
 Timer::~Timer() {
   Stop();
@@ -76,7 +81,8 @@ void Timer::Stop() {
   TimerList::instance()->Unregister(this);
 }
 
-void Timer::Start(int delay_ms, v8::Handle<v8::Function> callback,
+void Timer::Start(int delay_ms,
+                  v8::Handle<v8::Function> callback,
                   v8::Handle<v8::Value> receiver) {
   auto const isolate = v8::Isolate::GetCurrent();
   callback_.Reset(isolate, callback);

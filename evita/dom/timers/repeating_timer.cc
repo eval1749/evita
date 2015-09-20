@@ -9,10 +9,8 @@ namespace dom {
 //
 // RepeatingTimer
 //
-RepeatingTimer::RepeatingTimer() : ScriptableBase(Type::Repeating) {
-}
+RepeatingTimer::RepeatingTimer() : ScriptableBase(Type::Repeating) {}
 
-RepeatingTimer::~RepeatingTimer() {
-}
+RepeatingTimer::~RepeatingTimer() {}
 
 }  // namespace dom

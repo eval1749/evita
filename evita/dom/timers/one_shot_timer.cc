@@ -9,10 +9,8 @@ namespace dom {
 //
 // OneShotTimer
 //
-OneShotTimer::OneShotTimer() : ScriptableBase(Type::OneShot) {
-}
+OneShotTimer::OneShotTimer() : ScriptableBase(Type::OneShot) {}
 
-OneShotTimer::~OneShotTimer() {
-}
+OneShotTimer::~OneShotTimer() {}
 
 }  // namespace dom

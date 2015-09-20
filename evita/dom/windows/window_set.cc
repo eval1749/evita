@@ -10,18 +10,16 @@
 
 namespace dom {
 
-WindowSet::WindowSet() {
-}
+WindowSet::WindowSet() {}
 
-WindowSet::~WindowSet() {
-}
+WindowSet::~WindowSet() {}
 
 void WindowSet::DidDestroyWidget(WindowId window_id) {
   DCHECK_NE(kInvalidWindowId, window_id);
   auto it = map_.find(window_id);
   if (it == map_.end()) {
-    DVLOG(0) << "Why we don't have a widget for WindowId " << window_id <<
-      " in WindowIdMap?";
+    DVLOG(0) << "Why we don't have a widget for WindowId " << window_id
+             << " in WindowIdMap?";
     return;
   }
   auto const window = it->second.get();

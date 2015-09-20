@@ -17,20 +17,17 @@
 #include "evita/dom/windows/window_set.h"
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"
+#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {
 namespace internal {
 const char* WindowStateString(dom::Window::State state) {
   static const char* const state_strings[] = {
-    "destroyed",
-    "destroying",
-    "notrealized",
-    "realizing",
-    "realized",
+      "destroyed", "destroying", "notrealized", "realizing", "realized",
   };
-  auto const index = static_cast<size_t>(static_cast<int>(state) -
-      static_cast<int>(dom::Window::State::Destroyed));
+  auto const index =
+      static_cast<size_t>(static_cast<int>(state) -
+                          static_cast<int>(dom::Window::State::Destroyed));
   DCHECK_LE(index, arraysize(state_strings) - 1);
   return state_strings[index];
 }
@@ -40,11 +37,12 @@ const char* WindowStateString(dom::Window::State state) {
 namespace gin {
 
 v8::Handle<v8::Value> Converter<dom::Window::State>::ToV8(
-    v8::Isolate* isolate, dom::Window::State state) {
+    v8::Isolate* isolate,
+    dom::Window::State state) {
   return gin::StringToSymbol(isolate, dom::internal::WindowStateString(state));
 }
 
-} // namespace gin
+}  // namespace gin
 
 namespace dom {
 
@@ -59,8 +57,7 @@ int global_focus_tick;
 //
 // Window
 //
-Window::Window()
-    : state_(State::NotRealized) {
+Window::Window() : state_(State::NotRealized) {
   WindowSet::instance()->Register(this);
 }
 
@@ -86,28 +83,27 @@ void Window::AddWindow(Window* window) {
     return;
   }
   if (window->parent_node()) {
-    ScriptHost::instance()->ThrowError(
-        base::StringPrintf("Window(%d) is already child of window(%d).",
-            window->window_id(), window->parent_node()->window_id()));
+    ScriptHost::instance()->ThrowError(base::StringPrintf(
+        "Window(%d) is already child of window(%d).", window->window_id(),
+        window->parent_node()->window_id()));
     return;
   }
   if (IsDescendantOf(window)) {
     ScriptHost::instance()->ThrowError(
         base::StringPrintf("Window(%d) is parent or ancestor of window(%d).",
-            window->window_id(), window_id()));
+                           window->window_id(), window_id()));
     return;
   }
   AppendChild(window);
-  ScriptHost::instance()->view_delegate()->AddWindow(
-      window_id(), window->window_id());
+  ScriptHost::instance()->view_delegate()->AddWindow(window_id(),
+                                                     window->window_id());
 }
 
 void Window::ChangeParentWindow(Window* new_parent_window) {
   if (parent_node() == new_parent_window)
     return;
   if (this == new_parent_window) {
-    ScriptHost::instance()->ThrowError(
-      "Can't change parent to itself.");
+    ScriptHost::instance()->ThrowError("Can't change parent to itself.");
     return;
   }
   if (new_parent_window->IsDescendantOf(this)) {
@@ -129,12 +125,11 @@ void Window::Destroy() {
   if (state_ == State::NotRealized)
     return;
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError(
-        "You can't destroy unrealized window.");
+    ScriptHost::instance()->ThrowError("You can't destroy unrealized window.");
     return;
   }
   for (auto descendant : common::tree::descendants_or_self(this)) {
-    descendant->state_= State::Destroying;
+    descendant->state_ = State::Destroying;
   }
   ScriptHost::instance()->view_delegate()->DestroyWindow(window_id());
 }
@@ -144,15 +139,14 @@ void Window::DidDestroyWindow() {
 }
 
 // Possible state transitions:
-//  State::Realizing -> State::Realized 
+//  State::Realizing -> State::Realized
 //    |realize()| call.
 //  State::NotRealized -> State::Realized
 //    Adding |State::NotRealized| window to |State::Realized| window.
 //  State::Destroying -> State::Realized
 //    The window was |State::Realizing| then |destroy()|.
 void Window::DidRealizeWindow() {
-  DCHECK(state_ == State::Realizing ||
-         state_ == State::Destroying ||
+  DCHECK(state_ == State::Realizing || state_ == State::Destroying ||
          state_ == State::NotRealized);
   state_ = State::Realized;
   for (auto child : child_nodes()) {
@@ -161,19 +155,21 @@ void Window::DidRealizeWindow() {
   }
 }
 
-void Window::DidChangeBounds(int clientLeft, int clientTop,
-                       int clientRight, int clientBottom) {
+void Window::DidChangeBounds(int clientLeft,
+                             int clientTop,
+                             int clientRight,
+                             int clientBottom) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
-  #define SET_PROP(name) \
-    instance->ForceSet(v8Strings::name.Get(isolate), \
-                       v8::Integer::New(isolate, name), \
-                       kDefaultPropertyAttribute)
+#define SET_PROP(name)                                \
+  instance->ForceSet(v8Strings::name.Get(isolate),    \
+                     v8::Integer::New(isolate, name), \
+                     kDefaultPropertyAttribute)
   auto const clientWidth = clientRight - clientLeft;
   auto const clientHeight = clientBottom - clientTop;
-    SET_PROP(clientLeft);
+  SET_PROP(clientLeft);
   SET_PROP(clientTop);
   SET_PROP(clientWidth);
   SET_PROP(clientHeight);
@@ -189,16 +185,15 @@ void Window::DidSetFocus() {
   auto const instance = GetWrapper(isolate);
   auto const klass = runner->global()->Get(v8Strings::Window.Get(isolate));
   instance->ForceSet(v8Strings::focusTick_.Get(isolate),
-    v8::Integer::New(isolate, global_focus_tick),
-    kDefaultPropertyAttribute);
+                     v8::Integer::New(isolate, global_focus_tick),
+                     kDefaultPropertyAttribute);
   klass->ToObject()->ForceSet(v8Strings::focus.Get(isolate), instance,
-    kDefaultPropertyAttribute);
+                              kDefaultPropertyAttribute);
 }
 
 void Window::Focus() {
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError(
-        "You can't focus unrealized window.");
+    ScriptHost::instance()->ThrowError("You can't focus unrealized window.");
     return;
   }
   ScriptHost::instance()->view_delegate()->FocusWindow(window_id());
@@ -206,8 +201,7 @@ void Window::Focus() {
 
 void Window::Hide() {
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError(
-        "You can't hide unrealized window.");
+    ScriptHost::instance()->ThrowError("You can't hide unrealized window.");
     return;
   }
   ScriptHost::instance()->view_delegate()->HideWindow(window_id());
@@ -224,27 +218,23 @@ bool Window::IsDescendantOf(Window* other) const {
 void Window::Realize() {
   if (state_ == State::Destroyed) {
     DCHECK_EQ(kInvalidWindowId, window_id());
-    ScriptHost::instance()->ThrowError(
-        "Can't realize deatched window.");
+    ScriptHost::instance()->ThrowError("Can't realize deatched window.");
     return;
   }
   if (state_ == State::Realized) {
-    ScriptHost::instance()->ThrowError(
-        "This window is already realized.");
+    ScriptHost::instance()->ThrowError("This window is already realized.");
     return;
   }
   if (state_ == State::Realizing) {
-    ScriptHost::instance()->ThrowError(
-        "This window is being realized.");
+    ScriptHost::instance()->ThrowError("This window is being realized.");
     return;
   }
   if (parent_node() && parent_node()->state_ == State::NotRealized) {
-    ScriptHost::instance()->ThrowError(
-        "Parent window isn't realized.");
+    ScriptHost::instance()->ThrowError("Parent window isn't realized.");
     return;
   }
   for (auto descendant : common::tree::descendants_or_self(this)) {
-    descendant->state_= State::Realizing;
+    descendant->state_ = State::Realizing;
   }
   ScriptHost::instance()->view_delegate()->RealizeWindow(window_id());
 }
@@ -267,33 +257,27 @@ void Window::ResetForTesting() {
 
 static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
   if (!ref_window->parent_node()) {
-    ScriptHost::instance()->ThrowError(
-        "Can't split top-level window.");
+    ScriptHost::instance()->ThrowError("Can't split top-level window.");
     return false;
   }
 
   if (ref_window == new_window) {
-    ScriptHost::instance()->ThrowError(
-        "Can't split window with itself.");
+    ScriptHost::instance()->ThrowError("Can't split window with itself.");
     return false;
   }
 
   if (ref_window->state() != Window::State::Realized) {
-    ScriptHost::instance()->ThrowError(
-        "Can't split unrealized window.");
+    ScriptHost::instance()->ThrowError("Can't split unrealized window.");
     return false;
   }
 
   if (new_window->parent_node()) {
-
-    ScriptHost::instance()->ThrowError(
-        "Can't split with child window.");
+    ScriptHost::instance()->ThrowError("Can't split with child window.");
     return false;
   }
 
   if (new_window->state() != Window::State::NotRealized) {
-    ScriptHost::instance()->ThrowError(
-        "Can't split with realized window.");
+    ScriptHost::instance()->ThrowError("Can't split with realized window.");
     return false;
   }
 
@@ -320,8 +304,7 @@ void Window::SetCapture() {
 
 void Window::Show() {
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError(
-        "You can't show unrealized window.");
+    ScriptHost::instance()->ThrowError("You can't show unrealized window.");
     return;
   }
   ScriptHost::instance()->view_delegate()->ShowWindow(window_id());
@@ -332,7 +315,7 @@ void Window::SplitHorizontally(Window* new_right_window) {
     return;
   parent_node()->InsertAfter(new_right_window, this);
   ScriptHost::instance()->view_delegate()->SplitHorizontally(
-    window_id(), new_right_window->window_id());
+      window_id(), new_right_window->window_id());
 }
 
 void Window::SplitVertically(Window* new_below_window) {
@@ -340,13 +323,12 @@ void Window::SplitVertically(Window* new_below_window) {
     return;
   parent_node()->InsertAfter(new_below_window, this);
   ScriptHost::instance()->view_delegate()->SplitVertically(
-    window_id(), new_below_window->window_id());
+      window_id(), new_below_window->window_id());
 }
 
 void Window::Update() {
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError(
-        "You can't update unrealized window.");
+    ScriptHost::instance()->ThrowError("You can't update unrealized window.");
     return;
   }
   ScriptHost::instance()->view_delegate()->UpdateWindow(window_id());

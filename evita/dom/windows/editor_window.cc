@@ -19,16 +19,13 @@ namespace {
 //
 // EditorWindowList
 //
-class EditorWindowList : public common::Singleton<EditorWindowList> {
-  friend class common::Singleton<EditorWindowList>;
+class EditorWindowList final : public common::Singleton<EditorWindowList> {
+ public:
+  using List = std::vector<EditorWindow*>;
 
-  public: typedef std::vector<EditorWindow*> List;
-  private: std::unordered_set<EditorWindow*> set_;
+  ~EditorWindowList() final = default;
 
-  private: EditorWindowList() = default;
-  public: ~EditorWindowList() = default;
-
-  public: List list() const {
+  List list() const {
     List list(set_.size());
     list.resize(0);
     for (auto window : set_) {
@@ -37,15 +34,16 @@ class EditorWindowList : public common::Singleton<EditorWindowList> {
     return std::move(list);
   }
 
-  public: void Register(EditorWindow* window) {
-    set_.insert(window);
-  }
-  public: void ResetForTesting() {
-    set_.clear();
-  }
-  public: void Unregister(EditorWindow* window) {
-    set_.erase(window);
-  }
+  void Register(EditorWindow* window) { set_.insert(window); }
+  void ResetForTesting() { set_.clear(); }
+  void Unregister(EditorWindow* window) { set_.erase(window); }
+
+ private:
+  friend class common::Singleton<EditorWindowList>;
+
+  EditorWindowList() = default;
+
+  std::unordered_set<EditorWindow*> set_;
 
   DISALLOW_COPY_AND_ASSIGN(EditorWindowList);
 };
@@ -60,8 +58,7 @@ EditorWindow::EditorWindow() {
   ScriptHost::instance()->view_delegate()->CreateEditorWindow(this);
 }
 
-EditorWindow::~EditorWindow() {
-}
+EditorWindow::~EditorWindow() {}
 
 // static
 EditorWindowList::List EditorWindow::list() {
@@ -73,8 +70,7 @@ void EditorWindow::ResetForTesting() {
 }
 
 void EditorWindow::SetStatusBar(const std::vector<base::string16>& texts) {
-  ScriptHost::instance()->view_delegate()->SetStatusBar(
-      window_id(), texts);
+  ScriptHost::instance()->view_delegate()->SetStatusBar(window_id(), texts);
 }
 
 // Window

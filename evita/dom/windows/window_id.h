@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_window_id_h)
-#define INCLUDE_evita_dom_window_id_h
+#ifndef EVITA_DOM_WINDOWS_WINDOW_ID_H_
+#define EVITA_DOM_WINDOWS_WINDOW_ID_H_
 
 #include "evita/dom/public/event_target_id.h"
 
@@ -12,4 +12,4 @@ const WindowId kInvalidWindowId = domapi::kInvalidEventTargetId;
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_window_id_h)
+#endif  // EVITA_DOM_WINDOWS_WINDOW_ID_H_

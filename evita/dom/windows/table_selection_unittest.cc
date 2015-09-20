@@ -10,16 +10,15 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 
-namespace {
+namespace dom {
 
 using ::testing::_;
 
-class TableSelectionTest : public dom::AbstractDomTest {
-  protected: TableSelectionTest() {
-  }
-  public: virtual ~TableSelectionTest() {
-  }
+class TableSelectionTest : public AbstractDomTest {
+ protected:
+  TableSelectionTest() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(TableSelectionTest);
 };
 
@@ -44,4 +43,4 @@ TEST_F(TableSelectionTest, getRowStates) {
   EXPECT_SCRIPT_EQ("1", "result[1]");
 }
 
-}  // namespace
+}  // namespace dom

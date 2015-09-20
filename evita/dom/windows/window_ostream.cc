@@ -11,8 +11,8 @@ const char* WindowStateString(dom::Window::State state);
 }
 
 std::ostream& operator<<(std::ostream& ostream, const dom::Window& window) {
-  ostream << "(" << window.wrapper_info()->class_name() << " widget:" <<
-      window.window_id() << ")";
+  ostream << "(" << window.wrapper_info()->class_name()
+          << " widget:" << window.window_id() << ")";
   return ostream;
 }
 

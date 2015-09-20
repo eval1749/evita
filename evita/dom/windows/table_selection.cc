@@ -14,16 +14,14 @@ namespace dom {
 // TableSelection
 //
 TableSelection::TableSelection(TableWindow* table_window, Document* document)
-    : ScriptableBase(table_window, document) {
-}
+    : ScriptableBase(table_window, document) {}
 
-TableSelection::~TableSelection() {
-}
+TableSelection::~TableSelection() {}
 
 std::vector<int> TableSelection::GetRowStates(
     const std::vector<base::string16>& keys) const {
-  return ScriptHost::instance()->view_delegate()->
-      GetTableRowStates(window()->window_id(), keys);
+  return ScriptHost::instance()->view_delegate()->GetTableRowStates(
+      window()->window_id(), keys);
 }
 
 }  // namespace dom

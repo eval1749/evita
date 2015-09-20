@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_windows_text_selection_h)
-#define INCLUDE_evita_dom_windows_text_selection_h
+#ifndef EVITA_DOM_WINDOWS_TEXT_SELECTION_H_
+#define EVITA_DOM_WINDOWS_TEXT_SELECTION_H_
 
 #include "evita/dom/windows/selection.h"
 #include "evita/gc/member.h"
@@ -32,27 +32,30 @@ class TextSelection final
     : public v8_glue::Scriptable<TextSelection, Selection>,
       private text::SelectionChangeObserver {
   DECLARE_SCRIPTABLE_OBJECT(TextSelection);
+
+ public:
+  TextSelection(TextWindow* text_window, Range* range);
+  ~TextSelection() final;
+
+  Posn anchor_offset() const;
+  Posn focus_offset() const;
+  Range* range() const { return range_.get(); }
+  bool start_is_active() const;
+  void set_start_is_active(bool start_is_active);
+  text::Selection* text_selection() const { return text_selection_; }
+
+ private:
   friend class bindings::TextSelectionClass;
 
-  private: text::Selection* const text_selection_;
-  private: gc::Member<Range> range_;
-
-  public: TextSelection(TextWindow* text_window, Range* range);
-  public: ~TextSelection() final;
-
-  public: Posn anchor_offset() const;
-  public: Posn focus_offset() const;
-  public: Range* range() const { return range_.get(); }
-  public: bool start_is_active() const;
-  public: void set_start_is_active(bool start_is_active);
-  public: text::Selection* text_selection() const { return text_selection_; }
-
   // text::SelectionChangeObserver
-  private: void DidChangeSelection() final;
+  void DidChangeSelection() final;
+
+  text::Selection* const text_selection_;
+  gc::Member<Range> range_;
 
   DISALLOW_COPY_AND_ASSIGN(TextSelection);
 };
 
-} // namespace dom
+}  // namespace dom
 
-#endif // !defined(INCLUDE_evita_dom_windows_text_selection_h)
+#endif  // EVITA_DOM_WINDOWS_TEXT_SELECTION_H_

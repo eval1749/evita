@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 #pragma warning(push)
-#pragma warning(disable: 4365 4625 4626)
+#pragma warning(disable : 4365 4625 4626)
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
@@ -15,7 +15,7 @@
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/converter.h"
 
-namespace {
+namespace dom {
 
 using ::testing::Eq;
 
@@ -23,47 +23,49 @@ using ::testing::Eq;
 //
 // SampleWindow for JavaScript testing.
 //
-class SampleWindow : public v8_glue::Scriptable<SampleWindow, dom::Window> {
+class SampleWindow final : public v8_glue::Scriptable<SampleWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(SampleWindow);
+
+ public:
+  SampleWindow() = default;
+  ~SampleWindow() final = default;
+
+  const base::string16& name() const { return name_; }
+  void set_name(const base::string16& name) { name_ = name; }
+
+ private:
   friend class SampleWindowClass;
 
-  private: base::string16 name_;
+  static SampleWindow* NewSampleWindow() { return new SampleWindow(); }
 
-  public: SampleWindow() = default;
-  public: virtual ~SampleWindow() = default;
-
-  public: const base::string16& name() const { return name_; }
-  public: void set_name(const base::string16& name) { name_ = name; }
-
-  private: static SampleWindow* NewSampleWindow() {
-    return new SampleWindow();
-  }
+  base::string16 name_;
 
   DISALLOW_COPY_AND_ASSIGN(SampleWindow);
 };
 
-class SampleWindowClass :
-    public v8_glue::DerivedWrapperInfo<SampleWindow, dom::Window> {
+class SampleWindowClass final
+    : public v8_glue::DerivedWrapperInfo<SampleWindow, Window> {
+ public:
+  explicit SampleWindowClass(const char* name) : BaseClass(name) {}
+  ~SampleWindowClass() = default;
 
-  public: explicit SampleWindowClass(const char* name)
-      : BaseClass(name) {
-  }
-  public: ~SampleWindowClass() = default;
-
-  private: virtual v8::Handle<v8::FunctionTemplate>
-      CreateConstructorTemplate(v8::Isolate* isolate) override {
+ private:
+  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
+      v8::Isolate* isolate) override {
     return v8_glue::CreateConstructorTemplate(isolate,
-        &SampleWindow::NewSampleWindow);
+                                              &SampleWindow::NewSampleWindow);
   }
 
-  private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override {
+  v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate,
+      v8::Handle<v8::ObjectTemplate> templ) override {
     auto const base_templ = BaseClass::SetupInstanceTemplate(isolate, templ);
     gin::ObjectTemplateBuilder builder(isolate, templ);
-    builder
-      .SetProperty("name", &SampleWindow::name, &SampleWindow::set_name);
+    builder.SetProperty("name", &SampleWindow::name, &SampleWindow::set_name);
     return builder.Build();
   }
+
+  DISALLOW_COPY_AND_ASSIGN(SampleWindowClass);
 };
 
 DEFINE_SCRIPTABLE_OBJECT(SampleWindow, SampleWindowClass);
@@ -72,21 +74,23 @@ DEFINE_SCRIPTABLE_OBJECT(SampleWindow, SampleWindowClass);
 //
 // WindowTest
 //
-class WindowTest : public dom::AbstractDomTest {
-  protected: WindowTest() {
-  }
-  public: virtual ~WindowTest() {
-  }
+class WindowTest : public AbstractDomTest {
+ public:
+  ~WindowTest() override = default;
 
-  private: virtual void PopulateGlobalTemplate(
+ protected:
+  WindowTest() = default;
+
+ private:
+  void PopulateGlobalTemplate(
       v8::Isolate* isolate,
       v8::Handle<v8::ObjectTemplate> global_template) override {
     v8_glue::Installer<SampleWindow>::Run(isolate, global_template);
   }
 
   // testing::Test
-  private: virtual void SetUp() override {
-    dom::AbstractDomTest::SetUp();
+  void SetUp() override {
+    AbstractDomTest::SetUp();
     EXPECT_SCRIPT_VALID(
         "SampleWindow.handleEvent = function(event) {"
         "  Window.handleEvent.call(this, event);"
@@ -128,8 +132,8 @@ TEST_F(WindowTest, Add) {
   EXPECT_SCRIPT_TRUE("child1.previousSibling === null");
   EXPECT_SCRIPT_TRUE("child2.nextSibling === null");
   EXPECT_SCRIPT_TRUE("child2.previousSibling === child1");
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(2));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
+  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(2));
   EXPECT_SCRIPT_EQ("1", "parent.children.length");
   EXPECT_SCRIPT_TRUE("parent.firstChild === child2");
   EXPECT_SCRIPT_TRUE("parent.lastChild === child2");
@@ -153,15 +157,15 @@ TEST_F(WindowTest, Destroy) {
       "child1.appendChild(child3);"
       "sample1.realize();"
       "sample1.destroy();");
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
   EXPECT_SCRIPT_EQ("realized", "sample1.state");
   EXPECT_SCRIPT_EQ("destroying", "child1.state");
   EXPECT_SCRIPT_EQ("destroying", "child2.state");
   EXPECT_SCRIPT_EQ("destroying", "child3.state");
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(1));
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(2));
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(3));
-  view_event_handler()->DidDestroyWidget(static_cast<dom::WindowId>(4));
+  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(1));
+  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(2));
+  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(3));
+  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(4));
   EXPECT_SCRIPT_EQ("destroyed", "sample1.state");
   EXPECT_SCRIPT_EQ("destroyed", "child1.state");
   EXPECT_SCRIPT_EQ("destroyed", "child2.state");
@@ -172,14 +176,14 @@ TEST_F(WindowTest, changeParent) {
   EXPECT_CALL(*mock_view_impl(), AddWindow(Eq(1), Eq(2)));
   EXPECT_CALL(*mock_view_impl(), ChangeParentWindow(Eq(2), Eq(3)));
   EXPECT_SCRIPT_VALID(
-    "var sample1 = new SampleWindow();"
-    "var sample2 = new SampleWindow();"
-    "var sample3 = new SampleWindow();"
-    "sample1.appendChild(sample2)");
+      "var sample1 = new SampleWindow();"
+      "var sample2 = new SampleWindow();"
+      "var sample3 = new SampleWindow();"
+      "sample1.appendChild(sample2)");
   EXPECT_SCRIPT_EQ(
-    "Error: Can't change parent of window(1) to window(2), becase window(2)"
-    " is descendant of window(1).",
-    "sample1.changeParent(sample2)");
+      "Error: Can't change parent of window(1) to window(2), becase window(2)"
+      " is descendant of window(1).",
+      "sample1.changeParent(sample2)");
   EXPECT_SCRIPT_EQ("Error: Can't change parent to itself.",
                    "sample2.changeParent(sample2)");
   EXPECT_SCRIPT_VALID("sample2.changeParent(sample1)");
@@ -194,8 +198,8 @@ TEST_F(WindowTest, DidResize) {
   EXPECT_SCRIPT_EQ("0", "sample.clientWidth");
   EXPECT_SCRIPT_EQ("0", "sample.clientHeight");
 
-  view_event_handler()->DidChangeWindowBounds(static_cast<dom::WindowId>(1),
-                                              11, 22, 33 + 11, 44 + 22);
+  view_event_handler()->DidChangeWindowBounds(static_cast<WindowId>(1), 11, 22,
+                                              33 + 11, 44 + 22);
   EXPECT_SCRIPT_EQ("11", "sample.clientLeft");
   EXPECT_SCRIPT_EQ("22", "sample.clientTop");
   EXPECT_SCRIPT_EQ("33", "sample.clientWidth");
@@ -209,7 +213,7 @@ TEST_F(WindowTest, focus) {
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("sample.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
 
   EXPECT_CALL(*mock_view_impl(), FocusWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("sample.focus();");
@@ -241,7 +245,7 @@ TEST_F(WindowTest, Realize) {
   EXPECT_SCRIPT_EQ("realizing", "sample1.state");
   EXPECT_SCRIPT_EQ("Error: This window is being realized.",
                    "sample1.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
   EXPECT_SCRIPT_EQ("realized", "sample1.state");
 }
 
@@ -273,20 +277,20 @@ TEST_F(WindowTest, splitHorizontally) {
       "parent2.appendChild(child2);"
       "parent1.realize();"
       "parent3.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(3));
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(4));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(3));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(4));
 
   EXPECT_SCRIPT_EQ("Error: Can't split top-level window.",
-      "parent1.splitHorizontally(parent1);");
+                   "parent1.splitHorizontally(parent1);");
   EXPECT_SCRIPT_EQ("Error: Can't split window with itself.",
-      "child1.splitHorizontally(child1);");
+                   "child1.splitHorizontally(child1);");
   EXPECT_SCRIPT_EQ("Error: Can't split unrealized window.",
-      "child2.splitHorizontally(child3);");
+                   "child2.splitHorizontally(child3);");
   EXPECT_SCRIPT_EQ("Error: Can't split with child window.",
-      "child1.splitHorizontally(child2);");
+                   "child1.splitHorizontally(child2);");
   EXPECT_SCRIPT_EQ("Error: Can't split with realized window.",
-      "child1.splitHorizontally(parent3);");
+                   "child1.splitHorizontally(parent3);");
 
   EXPECT_SCRIPT_VALID("child1.splitHorizontally(child3);");
   EXPECT_SCRIPT_TRUE("parent1.firstChild === child1");
@@ -314,20 +318,20 @@ TEST_F(WindowTest, splitVertically) {
       "parent2.appendChild(child2);"
       "parent1.realize();"
       "parent3.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(1));
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(3));
-  view_event_handler()->DidRealizeWidget(static_cast<dom::WindowId>(4));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(3));
+  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(4));
 
   EXPECT_SCRIPT_EQ("Error: Can't split top-level window.",
-      "parent1.splitVertically(parent1);");
+                   "parent1.splitVertically(parent1);");
   EXPECT_SCRIPT_EQ("Error: Can't split window with itself.",
-      "child1.splitVertically(child1);");
+                   "child1.splitVertically(child1);");
   EXPECT_SCRIPT_EQ("Error: Can't split unrealized window.",
-      "child2.splitVertically(child3);");
+                   "child2.splitVertically(child3);");
   EXPECT_SCRIPT_EQ("Error: Can't split with child window.",
-      "child1.splitVertically(child2);");
+                   "child1.splitVertically(child2);");
   EXPECT_SCRIPT_EQ("Error: Can't split with realized window.",
-      "child1.splitVertically(parent3);");
+                   "child1.splitVertically(parent3);");
 
   EXPECT_SCRIPT_VALID("child1.splitVertically(child3);");
   EXPECT_SCRIPT_TRUE("parent1.firstChild === child1");
@@ -349,9 +353,9 @@ TEST_F(WindowTest, update) {
 TEST_F(WindowTest, visible) {
   EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow();");
   EXPECT_SCRIPT_TRUE("sample1.visible === false");
-  view_event_handler()->DidChangeWindowVisibility(static_cast<dom::WindowId>(1),
+  view_event_handler()->DidChangeWindowVisibility(static_cast<WindowId>(1),
                                                   domapi::Visibility::Visible);
   EXPECT_SCRIPT_TRUE("sample1.visible === true");
 }
 
-}  // namespace
+}  // namespace dom

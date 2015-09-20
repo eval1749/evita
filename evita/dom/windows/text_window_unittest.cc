@@ -5,7 +5,7 @@
 
 #include "base/basictypes.h"
 #pragma warning(push)
-#pragma warning(disable: 4100 4625 4626)
+#pragma warning(disable : 4100 4625 4626)
 #include "base/run_loop.h"
 #pragma warning(pop)
 #include "gmock/gmock.h"
@@ -14,28 +14,32 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 
-namespace {
+namespace dom {
 
 using ::testing::Eq;
 using ::testing::_;
 
-class TextWindowTest : public dom::AbstractDomTest {
-  protected: TextWindowTest() {
-  }
-  public: virtual ~TextWindowTest() {
-  }
+class TextWindowTest : public AbstractDomTest {
+ public:
+  ~TextWindowTest() override = default;
 
+ protected:
+  TextWindowTest() = default;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(TextWindowTest);
 };
 
 class TextWindowSlowTest : public TextWindowTest {
-  protected: TextWindowSlowTest() {
-  }
-  public: virtual ~TextWindowSlowTest() {
-  }
+ public:
+  ~TextWindowSlowTest() override = default;
 
+ protected:
+  TextWindowSlowTest() = default;
+
+ private:
   // AbstractDomTest
-  private: virtual bool shouldUseNewContext() const override {
+  bool shouldUseNewContext() const override {
     // We need to have new context for |TextWindowTest.realize| to call
     // |ViewDelegate::SetTabData| via |DocumentSet| observer.
     // TODO(yosi) We should make |TextWindowTest.realize| to work within
@@ -128,4 +132,4 @@ TEST_F(TextWindowTest, zoom) {
                    "sample.zoom = -1;");
 }
 
-}  // namespace
+}  // namespace dom

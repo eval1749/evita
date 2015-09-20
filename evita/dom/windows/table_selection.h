@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_table_selection_h)
-#define INCLUDE_evita_dom_table_selection_h
+#ifndef EVITA_DOM_WINDOWS_TABLE_SELECTION_H_
+#define EVITA_DOM_WINDOWS_TABLE_SELECTION_H_
 
 #include <vector>
 
@@ -29,18 +29,19 @@ class TableSelectionClass;
 class TableSelection final
     : public v8_glue::Scriptable<TableSelection, Selection> {
   DECLARE_SCRIPTABLE_OBJECT(TableSelection);
+
+ public:
+  TableSelection(TableWindow* table_window, Document* document);
+  ~TableSelection() final;
+
+ private:
   friend class bindings::TableSelectionClass;
 
-  public: TableSelection(TableWindow* table_window, Document* document);
-  public: virtual ~TableSelection();
-
-  private: std::vector<int> GetRowStates(
-      const std::vector<base::string16>& keys) const;
+  std::vector<int> GetRowStates(const std::vector<base::string16>& keys) const;
 
   DISALLOW_COPY_AND_ASSIGN(TableSelection);
 };
 
-} // namespace dom
+}  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_table_selection_h)
-
+#endif  // EVITA_DOM_WINDOWS_TABLE_SELECTION_H_

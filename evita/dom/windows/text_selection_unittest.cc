@@ -10,48 +10,47 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 
-namespace {
+namespace dom {
 
 using ::testing::_;
 
-class TextSelectionTest : public dom::AbstractDomTest {
-  protected: TextSelectionTest() {
-  }
-  public: virtual ~TextSelectionTest() {
-  }
+class TextSelectionTest : public AbstractDomTest {
+ protected:
+  TextSelectionTest() = default;
 
-  protected: virtual void SetUp() override {
-    dom::AbstractDomTest::SetUp();
+ private:
+  void SetUp() override {
+    AbstractDomTest::SetUp();
     EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
     EXPECT_SCRIPT_VALID(
-      "var doc = new Document('delete');"
-      "var window = new TextWindow(new Range(doc));"
-      "var selection = window.selection;"
-      "var range = selection.range;"
-      "function doTest(sample, sampler) {"
-      "  range.start = 0;"
-      "  range.end = doc.length;"
-      "  sample = sample.replace(/[$]/g, '\\n');"
-      "  range.text = sample.replace(/[|]/g, '');"
-      "  range.collapseTo(sample.indexOf('|'));"
-      "  var before_end = sample.lastIndexOf('|');"
-      "  if (range.start != before_end)"
-      "    --before_end;"
-      "  range.end = before_end;"
-      "  sampler(selection);"
-      "  var start = range.start;"
-      "  var end = range.end;"
-      "  range.start = 0;"
-      "  range.end = doc.length;"
-      "  var result = range.text.replace(/\\n/g, '$');"
-      "  if (start == end)"
-      "    return result.substr(0, start) + '|' + result.substr(start);"
-      "  var end_mark = selection.startIsActive ? '^' : '|';"
-      "  var start_mark = selection.startIsActive ? '|' : '^';"
-      "  return result.substr(0, start) + start_mark +"
-      "         result.substring(start, end) + end_mark +"
-      "         result.substr(end);"
-      "}");
+        "var doc = new Document('delete');"
+        "var window = new TextWindow(new Range(doc));"
+        "var selection = window.selection;"
+        "var range = selection.range;"
+        "function doTest(sample, sampler) {"
+        "  range.start = 0;"
+        "  range.end = doc.length;"
+        "  sample = sample.replace(/[$]/g, '\\n');"
+        "  range.text = sample.replace(/[|]/g, '');"
+        "  range.collapseTo(sample.indexOf('|'));"
+        "  var before_end = sample.lastIndexOf('|');"
+        "  if (range.start != before_end)"
+        "    --before_end;"
+        "  range.end = before_end;"
+        "  sampler(selection);"
+        "  var start = range.start;"
+        "  var end = range.end;"
+        "  range.start = 0;"
+        "  range.end = doc.length;"
+        "  var result = range.text.replace(/\\n/g, '$');"
+        "  if (start == end)"
+        "    return result.substr(0, start) + '|' + result.substr(start);"
+        "  var end_mark = selection.startIsActive ? '^' : '|';"
+        "  var start_mark = selection.startIsActive ? '|' : '^';"
+        "  return result.substr(0, start) + start_mark +"
+        "         result.substring(start, end) + end_mark +"
+        "         result.substr(end);"
+        "}");
   }
 
   DISALLOW_COPY_AND_ASSIGN(TextSelectionTest);
@@ -72,11 +71,11 @@ TEST_F(TextSelectionTest, focusOffset) {
 
 TEST_F(TextSelectionTest, endKey) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit, opt_alter) {"
-    "  return doTest(sample, function(selection) {"
-    "    selection.endKey(unit);"
-    "  });"
-    "}");
+      "function testIt(sample, unit, opt_alter) {"
+      "  return doTest(sample, function(selection) {"
+      "    selection.endKey(unit);"
+      "  });"
+      "}");
 
   EXPECT_SCRIPT_EQ("foo|$bar$", "testIt('|foo$bar$', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo|$bar$", "testIt('fo|o$bar$', Unit.LINE)");
@@ -88,11 +87,11 @@ TEST_F(TextSelectionTest, endKey) {
 
 TEST_F(TextSelectionTest, endKeyExtend) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit, opt_alter) {"
-    "  return doTest(sample, function(selection) {"
-    "    selection.endKey(unit, Alter.EXTEND);"
-    "  });"
-    "}");
+      "function testIt(sample, unit, opt_alter) {"
+      "  return doTest(sample, function(selection) {"
+      "    selection.endKey(unit, Alter.EXTEND);"
+      "  });"
+      "}");
 
   EXPECT_SCRIPT_EQ("^foo|$bar$", "testIt('|foo$bar$', Unit.LINE)");
   EXPECT_SCRIPT_EQ("fo^o|$bar$", "testIt('fo|o$bar$', Unit.LINE)");
@@ -104,11 +103,11 @@ TEST_F(TextSelectionTest, endKeyExtend) {
 
 TEST_F(TextSelectionTest, endOf) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit) {"
-    "  return doTest(sample, function(selection) {"
-    "   selection.endOf(unit);"
-    "  });"
-    "}");
+      "function testIt(sample, unit) {"
+      "  return doTest(sample, function(selection) {"
+      "   selection.endOf(unit);"
+      "  });"
+      "}");
   EXPECT_SCRIPT_EQ("foo|$bar$$baz", "testIt('|foo$bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo$bar|$$baz", "testIt('foo$|bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo$bar$|$baz", "testIt('foo$bar$|$baz', Unit.LINE)");
@@ -123,11 +122,11 @@ TEST_F(TextSelectionTest, endOf) {
 
 TEST_F(TextSelectionTest, endOfExtend) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit) {"
-    "  return doTest(sample, function(selection) {"
-    "   selection.endOf(unit, Alter.EXTEND);"
-    "  });"
-    "}");
+      "function testIt(sample, unit) {"
+      "  return doTest(sample, function(selection) {"
+      "   selection.endOf(unit, Alter.EXTEND);"
+      "  });"
+      "}");
   EXPECT_SCRIPT_EQ("^foo|$bar$$baz", "testIt('|foo$bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo$^bar|$$baz", "testIt('foo$|bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("foo$bar$|$baz", "testIt('foo$bar$|$baz', Unit.LINE)");
@@ -142,12 +141,12 @@ TEST_F(TextSelectionTest, endOfExtend) {
 
 TEST_F(TextSelectionTest, homeKey) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit) {"
-    "  var has_opt_alter = arguments.length >= 3;"
-    "  return doTest(sample, function(selection) {"
-    "    selection.homeKey(unit);"
-    "  });"
-    "}");
+      "function testIt(sample, unit) {"
+      "  var has_opt_alter = arguments.length >= 3;"
+      "  return doTest(sample, function(selection) {"
+      "    selection.homeKey(unit);"
+      "  });"
+      "}");
 
   EXPECT_SCRIPT_EQ("|foo$bar$", "testIt('|foo$bar$', Unit.LINE)");
   EXPECT_SCRIPT_EQ("|foo$bar$", "testIt('fo|o$bar$', Unit.LINE)");
@@ -167,12 +166,12 @@ TEST_F(TextSelectionTest, homeKey) {
 
 TEST_F(TextSelectionTest, homeKeyExtend) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit) {"
-    "  var has_opt_alter = arguments.length >= 3;"
-    "  return doTest(sample, function(selection) {"
-    "    selection.homeKey(unit, Alter.EXTEND);"
-    "  });"
-    "}");
+      "function testIt(sample, unit) {"
+      "  var has_opt_alter = arguments.length >= 3;"
+      "  return doTest(sample, function(selection) {"
+      "    selection.homeKey(unit, Alter.EXTEND);"
+      "  });"
+      "}");
 
   EXPECT_SCRIPT_EQ("|foo$bar$", "testIt('|foo$bar$', Unit.LINE)");
   EXPECT_SCRIPT_EQ("|fo^o$bar$", "testIt('fo|o$bar$', Unit.LINE)");
@@ -192,11 +191,11 @@ TEST_F(TextSelectionTest, homeKeyExtend) {
 
 TEST_F(TextSelectionTest, startOf) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit, opt_alter) {"
-    "  return doTest(sample, function(selection) {"
-    "    selection.startOf(unit);"
-    "  });"
-    "}");
+      "function testIt(sample, unit, opt_alter) {"
+      "  return doTest(sample, function(selection) {"
+      "    selection.startOf(unit);"
+      "  });"
+      "}");
   EXPECT_SCRIPT_EQ("|foo$bar$$baz", "testIt('|foo$bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("|foo$bar$$baz", "testIt('fo|o$bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("|foo$bar$$baz", "testIt('foo|$bar$$baz', Unit.LINE)");
@@ -222,11 +221,11 @@ TEST_F(TextSelectionTest, startOf) {
 
 TEST_F(TextSelectionTest, startOfExtend) {
   EXPECT_SCRIPT_VALID(
-    "function testIt(sample, unit, opt_alter) {"
-    "  return doTest(sample, function(selection) {"
-    "    selection.startOf(unit, Alter.EXTEND);"
-    "  });"
-    "}");
+      "function testIt(sample, unit, opt_alter) {"
+      "  return doTest(sample, function(selection) {"
+      "    selection.startOf(unit, Alter.EXTEND);"
+      "  });"
+      "}");
   EXPECT_SCRIPT_EQ("|foo$bar$$baz", "testIt('|foo$bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("|fo^o$bar$$baz", "testIt('fo|o$bar$$baz', Unit.LINE)");
   EXPECT_SCRIPT_EQ("|foo^$bar$$baz", "testIt('foo|$bar$$baz', Unit.LINE)");
@@ -267,4 +266,4 @@ TEST_F(TextSelectionTest, Realize) {
   EXPECT_SCRIPT_TRUE("sample.startIsActive");
 }
 
-}  // namespace
+}  // namespace dom

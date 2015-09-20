@@ -20,12 +20,11 @@ namespace dom {
 //
 TextWindow::TextWindow(Range* selection_range)
     : ScriptableBase(new TextSelection(this, selection_range)), zoom_(1.0f) {
-  ScriptHost::instance()->view_delegate()->CreateTextWindow(window_id(),
-      static_cast<TextSelection*>(selection())->text_selection());
+  ScriptHost::instance()->view_delegate()->CreateTextWindow(
+      window_id(), static_cast<TextSelection*>(selection())->text_selection());
 }
 
-TextWindow::~TextWindow() {
-}
+TextWindow::~TextWindow() {}
 
 void TextWindow::set_zoom(float new_zoom) {
   if (zoom_ == new_zoom)
@@ -36,12 +35,14 @@ void TextWindow::set_zoom(float new_zoom) {
     return;
   }
   zoom_ = new_zoom;
-  ScriptHost::instance()->view_delegate()->SetTextWindowZoom(
-      window_id(), zoom_);
+  ScriptHost::instance()->view_delegate()->SetTextWindowZoom(window_id(),
+                                                             zoom_);
 }
 
-text::Posn TextWindow::ComputeMotion(int method, text::Posn position,
-                                     int count, const domapi::FloatPoint& point) {
+text::Posn TextWindow::ComputeMotion(int method,
+                                     text::Posn position,
+                                     int count,
+                                     const domapi::FloatPoint& point) {
   TextWindowCompute data;
   data.method = static_cast<TextWindowCompute::Method>(method);
   data.count = count;
@@ -52,7 +53,8 @@ text::Posn TextWindow::ComputeMotion(int method, text::Posn position,
       window_id(), data);
 }
 
-text::Posn TextWindow::ComputeMotion(int method, text::Posn position,
+text::Posn TextWindow::ComputeMotion(int method,
+                                     text::Posn position,
                                      int count) {
   return ComputeMotion(method, position, count, domapi::FloatPoint());
 }
@@ -66,18 +68,17 @@ text::Posn TextWindow::ComputeMotion(int method) {
 }
 
 domapi::FloatRect TextWindow::HitTestTextPosition(text::Posn position) {
-  return ScriptHost::instance()->view_delegate()->
-      HitTestTextPosition(window_id(), position);
+  return ScriptHost::instance()->view_delegate()->HitTestTextPosition(
+      window_id(), position);
 }
 
 void TextWindow::MakeSelectionVisible() {
-  ScriptHost::instance()->view_delegate()->MakeSelectionVisible(
-      window_id());
+  ScriptHost::instance()->view_delegate()->MakeSelectionVisible(window_id());
 }
 
 text::Posn TextWindow::MapPointToPosition(float x, float y) {
   return ScriptHost::instance()->view_delegate()->MapPointToPosition(
-    window_id(), x, y);
+      window_id(), x, y);
 }
 
 // static
@@ -90,8 +91,8 @@ void TextWindow::Reconvert(const base::string16& text) {
 }
 
 void TextWindow::Scroll(int direction) {
-  ScriptHost::instance()->view_delegate()->
-      ScrollTextWindow(window_id(), direction);
+  ScriptHost::instance()->view_delegate()->ScrollTextWindow(window_id(),
+                                                            direction);
 }
 
 }  // namespace dom

@@ -1,7 +1,7 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_selection_h)
-#define INCLUDE_evita_dom_selection_h
+#ifndef EVITA_DOM_WINDOWS_SELECTION_H_
+#define EVITA_DOM_WINDOWS_SELECTION_H_
 
 #include "evita/dom/text/document.h"
 #include "evita/dom/windows/document_window.h"
@@ -23,20 +23,26 @@ class SelectionClass;
 //
 class Selection : public v8_glue::Scriptable<Selection> {
   DECLARE_SCRIPTABLE_OBJECT(Selection);
+
+ public:
+  ~Selection() override;
+
+  Document* document() const { return document_; }
+
+ protected:
+  Selection(DocumentWindow* document_window, Document* document);
+
+  DocumentWindow* window() const { return document_window_; }
+
+ private:
   friend class bindings::SelectionClass;
 
-  private: gc::Member<Document> document_;
-  private: gc::Member<DocumentWindow> document_window_;
-
-  protected: Selection(DocumentWindow* document_window, Document* document);
-  protected: virtual ~Selection();
-
-  public: Document* document() const { return document_; }
-  protected: DocumentWindow* window() const { return document_window_; }
+  gc::Member<Document> document_;
+  gc::Member<DocumentWindow> document_window_;
 
   DISALLOW_COPY_AND_ASSIGN(Selection);
 };
 
-} // namespace dom
+}  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_selection_h)
+#endif  // EVITA_DOM_WINDOWS_SELECTION_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !defined(INCLUDE_evita_dom_windows_window_set_h)
-#define INCLUDE_evita_dom_windows_window_set_h
+#ifndef EVITA_DOM_WINDOWS_WINDOW_SET_H_
+#define EVITA_DOM_WINDOWS_WINDOW_SET_H_
 
 #include <unordered_map>
 
@@ -15,25 +15,26 @@ namespace dom {
 
 class Window;
 
-class WindowSet : public common::Singleton<WindowSet> {
+class WindowSet final : public common::Singleton<WindowSet> {
   DECLARE_SINGLETON_CLASS(WindowSet);
 
-  private: typedef WindowId WindowId;
+ public:
+  ~WindowSet() final;
 
-  private: std::unordered_map<WindowId, gc::WeakPtr<Window>> map_;
+  void DidDestroyWidget(WindowId window_id);
+  Window* Find(WindowId window_id) const;
+  void Register(Window* window);
+  void ResetForTesting();
+  void Unregister(WindowId window_id);
 
-  private: WindowSet();
-  public: ~WindowSet();
+ private:
+  WindowSet();
 
-  public: void DidDestroyWidget(WindowId window_id);
-  public: Window* Find(WindowId window_id) const;
-  public: void Register(Window* window);
-  public: void ResetForTesting();
-  public: void Unregister(WindowId window_id);
+  std::unordered_map<WindowId, gc::WeakPtr<Window>> map_;
 
   DISALLOW_COPY_AND_ASSIGN(WindowSet);
 };
 
 }  // namespace dom
 
-#endif // !defined(INCLUDE_evita_dom_windows_window_set_h)
+#endif  // EVITA_DOM_WINDOWS_WINDOW_SET_H_

@@ -1,7 +1,9 @@
 // Copyright (C) 2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#if !defined(INCLUDE_evita_dom_editor_window_h)
-#define INCLUDE_evita_dom_editor_window_h
+#ifndef EVITA_DOM_WINDOWS_EDITOR_WINDOW_H_
+#define EVITA_DOM_WINDOWS_EDITOR_WINDOW_H_
+
+#include <vector>
 
 #include "evita/dom/windows/window.h"
 
@@ -15,26 +17,28 @@ class EditorWindowClass;
 // |Frame|.
 class EditorWindow final : public v8_glue::Scriptable<EditorWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(EditorWindow);
+
+ public:
+  // TODO(yosi) We should not allow to create |EditorWindow| from C++.
+  EditorWindow();
+  ~EditorWindow() final;
+
+  static void ResetForTesting();
+
+ private:
   friend class bindings::EditorWindowClass;
 
-  // TODO(yosi) We should not allow to create |EditorWindow| from C++.
-  public: EditorWindow();
-  public: virtual ~EditorWindow();
-
-  private: static std::vector<EditorWindow*> list();
-
-  public: static void ResetForTesting();
+  static std::vector<EditorWindow*> list();
 
   // Set status bar texts.
-  private: void EditorWindow::SetStatusBar(
-      const std::vector<base::string16>& texts);
+  void EditorWindow::SetStatusBar(const std::vector<base::string16>& texts);
 
   // Window
-  private: virtual void DidDestroyWindow() override;
+  void DidDestroyWindow() final;
 
   DISALLOW_COPY_AND_ASSIGN(EditorWindow);
 };
 
 }  // namespace dom
 
-#endif //!defined(INCLUDE_evita_dom_editor_window_h)
+#endif  // EVITA_DOM_WINDOWS_EDITOR_WINDOW_H_

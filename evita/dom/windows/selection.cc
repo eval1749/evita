@@ -10,10 +10,8 @@ namespace dom {
 // Selection
 //
 Selection::Selection(DocumentWindow* document_window, Document* document)
-    : document_(document), document_window_(document_window) {
-}
+    : document_(document), document_window_(document_window) {}
 
-Selection::~Selection() {
-}
+Selection::~Selection() {}
 
 }  // namespace dom

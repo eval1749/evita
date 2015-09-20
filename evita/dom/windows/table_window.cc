@@ -15,11 +15,10 @@ namespace dom {
 //
 TableWindow::TableWindow(Document* document)
     : ScriptableBase(new TableSelection(this, document)) {
-  ScriptHost::instance()->view_delegate()->CreateTableWindow(
-      window_id(), document);
+  ScriptHost::instance()->view_delegate()->CreateTableWindow(window_id(),
+                                                             document);
 }
 
-TableWindow::~TableWindow() {
-}
+TableWindow::~TableWindow() {}
 
 }  // namespace dom

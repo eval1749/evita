@@ -4,14 +4,13 @@
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/windows/point.h"
 
-namespace {
+namespace dom {
 
 class PointTest : public dom::AbstractDomTest {
-  protected: PointTest() {
-  }
-  public: virtual ~PointTest() {
-  }
+ protected:
+  PointTest() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(PointTest);
 };
 
@@ -23,13 +22,13 @@ TEST_F(PointTest, Constructor) {
 
 TEST_F(PointTest, Wrapper) {
   RunnerScope runner_scope(this);
-  EXPECT_SCRIPT_VALID("var point;"
-                      "function init(x) { point = x; }");
+  EXPECT_SCRIPT_VALID(
+      "var point;"
+      "function init(x) { point = x; }");
   domapi::FloatPoint point(1234.0f, 4567.0f);
-  EXPECT_SCRIPT_VALID_CALL("init",
-                           gin::ConvertToV8(isolate(), point));
+  EXPECT_SCRIPT_VALID_CALL("init", gin::ConvertToV8(isolate(), point));
   EXPECT_SCRIPT_EQ("1234", "point.x");
   EXPECT_SCRIPT_EQ("4567", "point.y");
 }
 
-}  // namespace
+}  // namespace dom

@@ -10,17 +10,16 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 
-namespace {
+namespace dom {
 
 using ::testing::Eq;
 using ::testing::_;
 
-class EditorWindowTest : public dom::AbstractDomTest {
-  protected: EditorWindowTest() {
-  }
-  public: virtual ~EditorWindowTest() {
-  }
+class EditorWindowTest : public AbstractDomTest {
+ protected:
+  EditorWindowTest() = default;
 
+ private:
   DISALLOW_COPY_AND_ASSIGN(EditorWindowTest);
 };
 
@@ -51,4 +50,4 @@ TEST_F(EditorWindowTest, Realize) {
   EXPECT_SCRIPT_VALID("sample.realize()");
 }
 
-}  // namespace
+}  // namespace dom

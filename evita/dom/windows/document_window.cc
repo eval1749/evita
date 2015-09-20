@@ -16,12 +16,9 @@ namespace dom {
 //
 // DocumentWindow
 //
-DocumentWindow::DocumentWindow(Selection* selection)
-    : selection_(selection) {
-}
+DocumentWindow::DocumentWindow(Selection* selection) : selection_(selection) {}
 
-DocumentWindow::~DocumentWindow() {
-}
+DocumentWindow::~DocumentWindow() {}
 
 Document* DocumentWindow::document() const {
   return selection_->document();

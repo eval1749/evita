@@ -3,12 +3,13 @@
 
 #include "evita/dom/windows/point.h"
 
-#include "v8_strings.h"
+#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace gin {
 
-bool Converter<domapi::FloatPoint>::FromV8(
-    v8::Isolate* isolate, v8::Handle<v8::Value> val, domapi::FloatPoint* out) {
+bool Converter<domapi::FloatPoint>::FromV8(v8::Isolate* isolate,
+                                           v8::Handle<v8::Value> val,
+                                           domapi::FloatPoint* out) {
   if (val.IsEmpty() || !val->IsObject())
     return false;
   auto const obj = val->ToObject();
@@ -25,14 +26,13 @@ bool Converter<domapi::FloatPoint>::FromV8(
 }
 
 v8::Handle<v8::Value> Converter<domapi::FloatPoint>::ToV8(
-    v8::Isolate* isolate, const domapi::FloatPoint& point) {
+    v8::Isolate* isolate,
+    const domapi::FloatPoint& point) {
   auto const context = isolate->GetCurrentContext();
-  auto const point_ctor = context->Global()->
-      Get(dom::v8Strings::Point.Get(isolate));
-  v8::Handle<v8::Value> argv[] {
-      ConvertToV8(isolate, point.x()),
-      ConvertToV8(isolate, point.y())
-  };
+  auto const point_ctor =
+      context->Global()->Get(dom::v8Strings::Point.Get(isolate));
+  v8::Handle<v8::Value> argv[]{ConvertToV8(isolate, point.x()),
+                               ConvertToV8(isolate, point.y())};
   return point_ctor->ToObject()->CallAsConstructor(arraysize(argv), argv);
 }
 

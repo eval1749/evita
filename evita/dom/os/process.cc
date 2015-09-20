@@ -9,15 +9,14 @@
 #include "evita/dom/script_host.h"
 
 namespace gin {
-template<>
+template <>
 struct Converter<domapi::ProcessId> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-      domapi::ProcessId context_id) {
+                                    domapi::ProcessId context_id) {
     return gin::ConvertToV8(isolate, new dom::Process(context_id));
   }
 };
 }  // namespace gin
-
 
 namespace dom {
 
@@ -25,18 +24,14 @@ namespace dom {
 //
 // Process
 //
-Process::Process(domapi::IoContextId context_id)
-    : ScriptableBase(context_id) {
-}
+Process::Process(domapi::IoContextId context_id) : ScriptableBase(context_id) {}
 
-Process::~Process() {
-}
+Process::~Process() {}
 
 v8::Handle<v8::Promise> Process::Open(const base::string16& command_line) {
   return PromiseResolver::FastCall(base::Bind(
       &domapi::IoDelegate::OpenProcess,
-      base::Unretained(ScriptHost::instance()->io_delegate()),
-      command_line));
+      base::Unretained(ScriptHost::instance()->io_delegate()), command_line));
 }
 
 }  // namespace dom

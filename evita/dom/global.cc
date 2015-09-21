@@ -39,7 +39,7 @@
 #include "evita/dom/os/file.h"
 #include "evita/dom/os/process.h"
 #include "evita/dom/text/range.h"
-#include "evita/dom/text/regexp.h"
+#include "evita/dom/text/regular_expression.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/windows/selection.h"
 #include "evita/dom/windows/table_selection.h"
@@ -95,6 +95,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     auto const editor_templ = INSTALL(Editor);
     INSTALL(FilePath);
     INSTALL(Range);
+    INSTALL(RegularExpression);
 
     INSTALL(EventTarget);
     INSTALL(Document);
@@ -132,9 +133,6 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
   templ->Set(                          \
       gin::StringToV8(isolate, #name), \
       name::static_wrapper_info()->GetOrCreateConstructorTemplate(isolate))
-
-    // Editor
-    INSTALL_IN(editor_templ, RegExp);
 
     // Os
     auto const os_templ = v8::ObjectTemplate::New(isolate);

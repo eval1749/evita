@@ -2,8 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-idl_gen_dir = "$root_gen_dir/evita"
+idl_gen_dir = "$root_gen_dir/evita/idl"
 bindings_gen_dir = "$root_gen_dir/evita/bindings"
+bindings_scripts_output_dir = "$root_gen_dir/evita/idl"
 
 interface_idl_files = [
   "//evita/dom/clipboard/DataTransfer.idl",
@@ -42,7 +43,8 @@ interface_idl_files = [
   # "//evita/dom/text/modes/Mode.idl",
   "//evita/dom/text/MutationObserver.idl",
   "//evita/dom/text/MutationRecord.idl",
-  "//evita/dom/text/RegExp.idl",
+  "//evita/dom/text/Range.idl",
+  "//evita/dom/text/RegularExpression.idl",
   "//evita/dom/timers/OneShotTimer.idl",
   "//evita/dom/timers/RepeatingTimer.idl",
   "//evita/dom/timers/Timer.idl",
@@ -79,4 +81,14 @@ dictionary_idl_files = [
   "//evita/dom/os/MoveFileOptions.idl",
   "//evita/dom/text/MutationObserverInit.idl",
   "//evita/dom/text/RegExpInit.idl",
+]
+
+idl_lexer_parser_files = [
+  "//third_party/ply/lex.py",
+  "//third_party/ply/yacc.py",
+  "//third_party/idl_parser/idl_lexer.py",
+  "//third_party/idl_parser/idl_node.py",
+  "//third_party/idl_parser/idl_parser.py",
+  "//third_party/WebKit/Source/bindings/scripts/blink_idl_lexer.py",
+  "//third_party/WebKit/Source/bindings/scripts/blink_idl_parser.py",
 ]

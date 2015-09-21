@@ -14,7 +14,7 @@
 #include "evita/editor/application.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/text/document_set.h"
-#include "evita/dom/text/regexp.h"
+#include "evita/dom/text/regular_expression.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/metrics/time_scope.h"
@@ -251,7 +251,9 @@ bool Document::IsValidPosition(text::Posn position) const {
   return false;
 }
 
-v8::Handle<v8::Value> Document::Match(RegExp* regexp, int start, int end) {
+v8::Handle<v8::Value> Document::Match(RegularExpression* regexp,
+                                      int start,
+                                      int end) {
   return regexp->ExecuteOnDocument(this, start, end);
 }
 

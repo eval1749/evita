@@ -22,7 +22,7 @@ struct LineAndColumn;
 namespace dom {
 
 class Range;
-class RegExp;
+class RegularExpression;
 
 namespace bindings {
 class DocumentClass;
@@ -59,7 +59,7 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   void EndUndoGroup(const base::string16& name);
   text::LineAndColumn GetLineAndColumn(text::Posn offset) const;
   bool IsValidPosition(text::Posn position) const;
-  v8::Handle<v8::Value> Match(RegExp* regexp, int start, int end);
+  v8::Handle<v8::Value> Match(RegularExpression* regexp, int start, int end);
   static Document* New(const base::string16& name);
   Posn Redo(Posn position);
   void RenameTo(const base::string16& new_name);

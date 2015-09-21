@@ -62,7 +62,7 @@
       'os/os.js',
       'os/process.js',
       'text/range.js',
-      'text/regexp.js',
+      'text/regular_expression.js',
       'css/style.js',
       'windows/table_window.js',
       'text/text_position.js',

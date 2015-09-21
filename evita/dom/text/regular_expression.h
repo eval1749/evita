@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_TEXT_REGEXP_H_
-#define EVITA_DOM_TEXT_REGEXP_H_
+#ifndef EVITA_DOM_TEXT_REGULAR_EXPRESSION_H_
+#define EVITA_DOM_TEXT_REGULAR_EXPRESSION_H_
 
 #include <memory>
 #include <vector>
@@ -17,33 +17,33 @@ class Document;
 class RegExpInit;
 
 namespace bindings {
-class RegExpClass;
+class RegularExpressionClass;
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// RegExp
+// RegularExpression
 //
-class RegExp final : public v8_glue::Scriptable<RegExp> {
-  DECLARE_SCRIPTABLE_OBJECT(RegExp);
+class RegularExpression final : public v8_glue::Scriptable<RegularExpression> {
+  DECLARE_SCRIPTABLE_OBJECT(RegularExpression);
 
  public:
-  ~RegExp() final;
+  ~RegularExpression() final;
 
   v8::Handle<v8::Value> ExecuteOnDocument(Document* document,
                                           int start,
                                           int end);
 
  private:
-  friend class bindings::RegExpClass;
+  friend class bindings::RegularExpressionClass;
   friend class BufferMatcher;
-  friend class RegExpCompiler;
+  friend class RegularExpressionCompiler;
   class BufferMatcher;
   class Compiler;
   struct Match;
-  class RegExpImpl;
+  class RegularExpressionImpl;
 
-  RegExp(RegExpImpl* regex,
+  RegularExpression(RegularExpressionImpl* regex,
          const base::string16& source,
          const RegExpInit& init_dict);
 
@@ -58,9 +58,9 @@ class RegExp final : public v8_glue::Scriptable<RegExp> {
 
   v8::Local<v8::Value> MakeMatchArray(const std::vector<Match>& matchs);
 
-  static RegExp* NewRegExp(const base::string16& source,
+  static RegularExpression* NewRegularExpression(const base::string16& source,
                            const RegExpInit& options);
-  static RegExp* NewRegExp(const base::string16& source);
+  static RegularExpression* NewRegularExpression(const base::string16& source);
 
   bool backward_;
   bool global_;
@@ -68,13 +68,13 @@ class RegExp final : public v8_glue::Scriptable<RegExp> {
   bool match_exact_;
   bool match_word_;
   bool multiline_;
-  std::unique_ptr<RegExpImpl> regex_;
+  std::unique_ptr<RegularExpressionImpl> regex_;
   base::string16 source_;
   bool sticky_;
 
-  DISALLOW_COPY_AND_ASSIGN(RegExp);
+  DISALLOW_COPY_AND_ASSIGN(RegularExpression);
 };
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_TEXT_REGEXP_H_
+#endif  // EVITA_DOM_TEXT_REGULAR_EXPRESSION_H_

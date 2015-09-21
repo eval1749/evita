@@ -5,9 +5,8 @@
 [
     CustomConstructor(DOMString source),
     CustomConstructor(DOMString source, RegExpInit options),
-    JsNamespace=Editor,
 ]
-interface RegExp {
+interface RegularExpression {
   readonly attribute boolean backward;
   readonly attribute boolean global;
   readonly attribute boolean ignoreCase;

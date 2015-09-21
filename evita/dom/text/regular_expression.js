@@ -5,7 +5,7 @@
 /**
  * @struct { name: string, start: number, end: number }
  */
-Editor.RegExp.Match = (function() {
+RegularExpression.Match = (function() {
   function Match() {
   }
   return Match;

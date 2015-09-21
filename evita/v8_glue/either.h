@@ -4,6 +4,8 @@
 #ifndef EVITA_V8_GLUE_EITHER_H_
 #define EVITA_V8_GLUE_EITHER_H_
 
+#include "evita/v8_glue/converter.h"
+
 namespace v8_glue {
 // The template Either<Left, Right> is inspired by Haskell's Either data type.
 // You can use this as:

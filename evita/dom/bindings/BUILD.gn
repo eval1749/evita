@@ -13,6 +13,7 @@ source_set("bindings") {
 
 action_foreach("bindings_cc") {
   deps = [
+    ":cached_lex_yacc_tables",
     ":interfaces_info",
   ]
   script = "idl_to_glue.py"
@@ -23,37 +24,71 @@ action_foreach("bindings_cc") {
     "dictionary.h",
     "interface.cc",
     "interface.h",
-    "$idl_gen_dir/InterfacesInfo.pickle",
+    "$idl_gen_dir/modules/InterfacesInfoOverall.pickle",
+    "$bindings_scripts_output_dir/lextab.py",
+    "$bindings_scripts_output_dir/parsetab.pickle",
+    "//third_party/WebKit/Source/bindings/IDLExtendedAttributes.txt",
   ]
   outputs = [
     "$bindings_gen_dir/v8_glue_{{source_name_part}}.cc",
     "$bindings_gen_dir/v8_glue_{{source_name_part}}.h",
   ]
   args = [
-    "--output-dir",
-    rebase_path(bindings_gen_dir),
-    "--interfaces-info",
-    rebase_path("$idl_gen_dir/InterfacesInfo.pickle"),
-    "--write-file-only-if-changed",
-    "1",
+    "--output-dir", rebase_path(bindings_gen_dir),
+    "--cache-dir", rebase_path(bindings_scripts_output_dir),
+    "--info-dir", rebase_path(idl_gen_dir),
+    "--write-file-only-if-changed=1",
+    "--target-component=core",
     "{{source}}",
   ]
 }
 
-action("interfaces_info") {
-  script = "//third_party/blink_idl_parser/compute_interfaces_info.py"
-  sources = interface_idl_files
-  file_list = "$idl_gen_dir/file_list.txt"
+action("cached_lex_yacc_tables") {
+  script = "//third_party/WebKit/Source/bindings/scripts/blink_idl_parser.py"
+
+  inputs = idl_lexer_parser_files
+  outputs = [
+    "$bindings_scripts_output_dir/lextab.py",
+    "$bindings_scripts_output_dir/parsetab.pickle",
+  ]
+
+  args = [ rebase_path(bindings_scripts_output_dir, root_build_dir) ]
+}
+
+action("interfaces_info_individual") {
+  script = "//third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_individual.py"
+  sources = interface_idl_files + dictionary_idl_files
+  file_list = "$bindings_gen_dir/file_list.txt"
   write_file(file_list, rebase_path(sources))
   outputs = [
-    "$idl_gen_dir/InterfacesInfo.pickle",
+    "$idl_gen_dir/core/InterfacesInfoCoreIndividual.pickle",
+    "$idl_gen_dir/core/ComponentInfoCore.pickle",
   ]
   args = [
+    "--cache-directory",
+    rebase_path(bindings_scripts_output_dir),
     "--idl-files-list",
     rebase_path(file_list),
     "--interfaces-info-file",
-    rebase_path("$idl_gen_dir/InterfacesInfo.pickle"),
-    "--write-file-only-if-changed",
-    "1",
+    rebase_path("$idl_gen_dir/core/InterfacesInfoCoreIndividual.pickle"),
+    "--component-info-file",
+    rebase_path("$idl_gen_dir/core/ComponentInfoCore.pickle"),
+    "--write-file-only-if-changed=1",
+    "--",
+  ]
+}
+
+action("interfaces_info") {
+  deps = [
+    ":interfaces_info_individual"
+  ]
+  script = "//third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py"
+  inputs = [ "$idl_gen_dir/core/InterfacesInfoCoreIndividual.pickle" ]
+  outputs = [ "$idl_gen_dir/modules/InterfacesInfoOverall.pickle" ]
+  args = [
+    "--write-file-only-if-changed=1",
+    "--",
+    rebase_path("$idl_gen_dir/core/InterfacesInfoCoreIndividual.pickle"),
+    rebase_path("$idl_gen_dir/modules/InterfacesInfoOverall.pickle"),
   ]
 }

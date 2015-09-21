@@ -13,13 +13,13 @@ third_party_path = os.path.normpath(os.path.join(
     module_path, os.pardir, os.pardir, os.pardir, 'third_party'))
 sys.path.insert(1, third_party_path)
 idl_compiler_path = os.path.normpath(os.path.join(
-    third_party_path, 'blink_idl_parser'))
+    third_party_path, 'WebKit', 'Source', 'bindings', 'scripts'))
 sys.path.insert(1, idl_compiler_path)
 
 from idl_compiler import idl_filename_to_interface_name, parse_options, \
                          IdlCompiler
 from code_generator_glue import CodeGeneratorGlue
-from utilities import write_file
+from utilities import create_component_info_provider, write_file
 
 PREFIX = 'v8_glue_'
 
@@ -28,7 +28,8 @@ class IdlCompilerGlue(IdlCompiler):
     # pylint: disable=E1101
     def __init__(self, *args, **kwargs):
         IdlCompiler.__init__(self, *args, **kwargs)
-        self.code_generator = CodeGeneratorGlue(self.interfaces_info,
+        self.code_generator = CodeGeneratorGlue(self.info_provider,
+                                                self.cache_directory,
                                                 self.output_directory)
 
     def compile_file(self, idl_filename):
@@ -44,10 +45,14 @@ class IdlCompilerGlue(IdlCompiler):
 
 def main():
     options, idl_filename = parse_options()
+    info_provider = create_component_info_provider(
+        options.info_dir, options.target_component)
     idl_compiler = IdlCompilerGlue(
         options.output_directory,
-        interfaces_info_filename=options.interfaces_info_file,
-        only_if_changed=options.write_file_only_if_changed)
+        cache_directory=options.cache_directory,
+        info_provider=info_provider,
+        only_if_changed=options.write_file_only_if_changed,
+        target_component=options.target_component)
     idl_compiler.compile_file(idl_filename)
 
 

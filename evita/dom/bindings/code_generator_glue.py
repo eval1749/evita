@@ -19,6 +19,7 @@ templates_dir = module_path
 sys.path.insert(1, third_party_dir)
 import jinja2
 
+from idl_definitions import Visitor
 import idl_types
 from idl_types import IdlType
 
@@ -36,7 +37,7 @@ FILE_NAME_PREFIX = 'v8_glue_'
 # |KNOWN_INTERFACE_NAMES|.
 KNOWN_INTERFACE_NAMES = {
     'Document': 'evita/dom/text/document.h',
-    'Range': 'evita/dom/text/range.h',
+    # 'Range': 'evita/dom/text/range.h',
 }
 global_known_interface_names = set()
 
@@ -45,6 +46,11 @@ JS_INTERFACE_NAMES = {
     'Rect': 'evita/dom/windows/rect.h',
 }
 global_js_interface_names = set()
+
+def should_be_callback(idl_type):
+    if idl_type.is_callback_function or idl_type.is_callback_interface:
+        return True
+    return idl_type.name.endswith('Callback')
 
 # GlueType
 class GlueType(object):
@@ -57,17 +63,15 @@ class GlueType(object):
         self.is_nullable = idl_type.is_nullable
         self.is_pointer = is_pointer
         self.is_struct = is_struct
-        if self.idl_type.is_array or self.idl_type.is_sequence:
-            if is_collectable or is_pointer:
-                self.element_typestr = self.cpp_name + '*'
-            else:
-                self.element_typestr = self.cpp_name
+        if self.idl_type.is_array or self.idl_type.is_sequence or idl_type.is_array_or_sequence_type:
+            element_type = to_glue_type(idl_type.element_type)
+            self.element_typestr = element_type.return_str()
         else:
             self.element_typestr = None
 
     def declare_str(self):
         if self.idl_type.is_union_type:
-            raise Exception("Union type isn't supported.")
+            raise Exception("Can't use as member: " + str(idl_type))
         if self.element_typestr:
             return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
@@ -79,12 +83,14 @@ class GlueType(object):
         return self.cpp_name
 
     def display_str(self):
-        return self.idl_type.base_type
+        return str(self.idl_type)
 
     # Used for variable declaration of output parameter of |gin::ConvertFromV8|.
     def from_v8_str(self):
         if self.idl_type.is_union_type:
-            raise Exception("Union type isn't supported.")
+            members = [member for member in self.idl_type.idl_types()]
+            print ' union', str(members)
+            return 'v8_glue::Either<' + ', '.join(to_glue_type(member_type).from_v8_str() for member_type in members[1:]) + '>'
         if self.element_typestr:
             return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
@@ -92,20 +98,25 @@ class GlueType(object):
                 global global_has_nullable
                 global_has_nullable = True
                 return 'v8_glue::Nullable<%s>' % self.cpp_name
-            return self.cpp_name + '*'
+            return self.cpp_name + '* /* from_v8 is_collectable */'
         if self.is_pointer:
-            return self.cpp_name + '*'
+            return self.cpp_name + '* /* from_v8 is_pointer */'
         return self.cpp_name
+
+    def parameter_str(self):
+        if self.element_typestr:
+            return 'const std::vector<%s>&' % self.element_typestr
+        return self.return_str()
 
     def return_str(self):
         if self.idl_type.is_union_type:
-            raise Exception("Union type isn't supported.")
+            return self.declare_str()
         if self.element_typestr:
             return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
-            return self.cpp_name + '*'
+            return self.cpp_name + '* /* return_str is_collectable */'
         if self.is_pointer:
-            return self.cpp_name + '*'
+            return self.cpp_name + '* /* return_str is_ponter */'
         return self.cpp_name
 
     def to_v8_str(self):
@@ -127,6 +138,13 @@ class CppType(object):
         self.is_pointer = is_pointer
         self.is_struct = is_struct
 
+    def __str__(self):
+        return 'CppType(' + self.cpp_name + \
+            (' by_value' if self.is_by_value else '') + \
+            (' collectable' if self.is_collectable else '') + \
+            (' pointer' if self.is_pointer else '') + \
+            (' struct' if self.is_pointer else '') + ')'
+
 
 IDL_TO_CPP_TYPE_MAP = {
     # TODO(eval1749) We should have "SwitchValue.idl".
@@ -143,8 +161,11 @@ IDL_TO_CPP_TYPE_MAP = {
     'Point': CppType('domapi::FloatPoint'),
     # For Window.prototype.compute_
     'Rect': CppType('domapi::FloatRect'),
+    # For Editor.runScript
+    'RunScriptResult': CppType('v8::Handle<v8::Object>'),
     # For Editor.localizeText
     'StringDict': CppType('v8::Handle<v8::Object>'),
+    'Style': CppType('v8::Handle<v8::Object>'),
     'Unit': CppType('Unit'),
 
     # V8 types
@@ -154,6 +175,8 @@ IDL_TO_CPP_TYPE_MAP = {
 
     # IDL types
     'DOMString': CppType('base::string16', is_by_value=False),
+    # DOMTimeStamp is defined in "core/dom/CommonDefinitions.idl".
+    'DOMTimeStamp': CppType('TimeStamp'),
     'any': CppType('v8::Handle<v8::Value>'),
     'boolean': CppType('bool'),
     'byte': CppType('uint8_t'),
@@ -170,50 +193,163 @@ IDL_TO_CPP_TYPE_MAP = {
 }
 
 # Map IDL type to Glue Type
-def to_glue_type(idl_type, maybe_dictionary=True):
+def to_glue_type(idl_type):
+    print '  to_glue_type', idl_type, idl_type.is_dictionary, idl_type.base_type, idl_type.is_callback_interface
+    if idl_type.is_array or idl_type.is_sequence_type or idl_type.is_array_or_sequence_type:
+        return GlueType(idl_type, idl_type.element_type.base_type)
+
+    if idl_type.is_union_type:
+        return GlueType(idl_type, idl_type.name)
+
     type_name = idl_type.base_type
+
+    if type_name == None:
+        raise 'to_glue_type(' + str(idl_type) + ')'
 
     if type_name in IDL_TO_CPP_TYPE_MAP:
         if type_name in JS_INTERFACE_NAMES:
             global_js_interface_names.add(type_name)
         cpp_type = IDL_TO_CPP_TYPE_MAP[type_name]
+        print '  cpp_type', cpp_type
         return GlueType(idl_type, cpp_type.cpp_name,
                         is_by_value=cpp_type.is_by_value,
                         is_pointer=cpp_type.is_pointer)
 
-    if type_name in global_interfaces_info:
-        global_referenced_interface_names.add(type_name)
-        return GlueType(idl_type, type_name, is_collectable=True)
-
     if type_name in KNOWN_INTERFACE_NAMES:
+        print '  known interface', idl_type
         global_known_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
 
-    if type_name in global_definitions.dictionaries:
+    if idl_type.is_dictionary:
+        print "dictionary", idl_type, idl_type.is_dictionary, type_name
         global_referenced_dictionary_names.add(type_name)
         return GlueType(idl_type, type_name, is_struct=True)
 
-    if type_name in global_definitions.callback_functions:
+    if should_be_callback(idl_type):
+        print '  callback', idl_type
         return GlueType(idl_type, 'v8::Handle<v8::Function>', is_struct=True)
 
-    if maybe_dictionary:
-        # TODO(eval1749) Once we have "dictionary.pickle" which contains all
-        # dictiorines, we get rid of below assumption.
-        # Note: Assume unknown type as Dictionary.
-        global_referenced_dictionary_names.add(type_name)
-        return GlueType(idl_type, type_name, is_struct=True)
+    if idl_type.is_interface_type:
+        print '  interface', idl_type, idl_type.is_interface_type
+        assert idl_type.is_interface_type, idl_type
+        assert not idl_type.name.endswith('Callback'), 'Should be callback ' + idl_type.name
+        assert not idl_type.name.endswith('Init'), 'Should be dictionary ' + idl_type.name
+        if type_name in global_interfaces_info:
+            global_referenced_interface_names.add(type_name)
+        return GlueType(idl_type, type_name, is_collectable=True)
 
-    return GlueType(idl_type, type_name)
+    raise Exception('Unknown type: ' + str(idl_type))
 
 
+# interface_info
+#   component_dir   {'KeyboardEvent': 'dom', 'TextEncoder': 'dom', ...}
+
+def set_global_type_info(info_provider):
+    interfaces_info = info_provider.interfaces_info
+    idl_types.set_ancestors(interfaces_info['ancestors'])
+    IdlType.set_callback_interfaces(interfaces_info['callback_interfaces'])
+    IdlType.set_dictionaries(interfaces_info['dictionaries'])
+    IdlType.set_enums(info_provider.enumerations)
+    IdlType.set_implemented_as_interfaces(interfaces_info['implemented_as_interfaces'])
+    IdlType.set_garbage_collected_types(interfaces_info['garbage_collected_interfaces'])
+    IdlType.set_will_be_garbage_collected_types(interfaces_info['will_be_garbage_collected_interfaces'])
+
+
+def depends_on_union_types(idl_type):
+    """Returns true when a given idl_type depends on union containers
+    directly.
+    """
+    if idl_type.is_union_type:
+        return True
+    if idl_type.is_array_or_sequence_type:
+        return idl_type.element_type.is_union_type
+    return False
+
+
+class TypedefResolver(Visitor):
+    def __init__(self, info_provider):
+        self.info_provider = info_provider
+
+    def resolve(self, definitions, definition_name):
+        """Traverse definitions and resolves typedefs with the actual types."""
+        self.typedefs = {}
+        for name, typedef in self.info_provider.typedefs.iteritems():
+            self.typedefs[name] = typedef.idl_type
+        self.additional_includes = set()
+        definitions.accept(self)
+        self._update_dependencies_include_paths(definition_name)
+
+    def _update_dependencies_include_paths(self, definition_name):
+        interface_info = self.info_provider.interfaces_info[definition_name]
+        dependencies_include_paths = interface_info['dependencies_include_paths']
+        for include_path in self.additional_includes:
+            if include_path not in dependencies_include_paths:
+                dependencies_include_paths.append(include_path)
+
+    def _resolve_typedefs(self, typed_object):
+        """Resolve typedefs to actual types in the object."""
+        for attribute_name in typed_object.idl_type_attributes:
+            try:
+                idl_type = getattr(typed_object, attribute_name)
+            except AttributeError:
+                continue
+            if not idl_type:
+                continue
+            resolved_idl_type = idl_type.resolve_typedefs(self.typedefs)
+            if depends_on_union_types(resolved_idl_type):
+                self.additional_includes.add(
+                    self.info_provider.include_path_for_union_types)
+            # Need to re-assign the attribute, not just mutate idl_type, since
+            # type(idl_type) may change.
+            setattr(typed_object, attribute_name, resolved_idl_type)
+
+    def visit_typed_object(self, typed_object):
+        self._resolve_typedefs(typed_object)
+
+
+# interfaces_info contains:
+#   ancestors
+#   callback_interfaces
+#   component_dirs
+#   dictionaries
+#   garbage_collected_interfaces
+#   implemented_as_interfaces
+#   (Interface name, starts with capitale letter)
+#
+#   Example:
+# CompositionEvent {
+#   'relative_dir': '../../../evita/dom/events',
+#   'include_path': '../../../evita/dom/events/CompositionEvent.h',
+#   'ancestors': ['UiEvent', 'Event'],
+#   'dependencies_include_paths': [],
+#   'parent': 'UiEvent',
+#   'inherited_extended_attributes': {},
+#   'dependencies_other_component_include_paths': [],
+#   'dependencies_full_paths': [],
+#   'implements_interfaces': [],
+#   'referenced_interfaces': [],
+#   'implemented_as': None,
+#   'is_dictionary': False,
+#   'is_callback_interface': False,
+#   'dependencies_other_component_full_paths': [],
+#   'full_path': 'D:\\w\\evita\\src\\evita\\dom\\events\\CompositionEvent.idl'
+#  }
 class CodeGeneratorGlue(object):
-    def __init__(self, interfaces_info, cache_dir):
-        interfaces_info = interfaces_info or {}
-        self.interfaces_info = interfaces_info
+    def __init__(self, info_provider, cache_dir, output_dir):
+        self.info_provider = info_provider
+        self.jinja_env = initialize_jinja_env(cache_dir)
+        self.typedef_resolver = TypedefResolver(info_provider)
+        set_global_type_info(info_provider)
+
+        interfaces_info = info_provider.interfaces_info
         global global_interfaces_info
         global_interfaces_info = interfaces_info
-        self.jinja_env = initialize_jinja_env(cache_dir)
-        for interface_info in interfaces_info.values():
+
+        #for interface_info in interfaces_info.values():
+        for key in interfaces_info.keys():
+            if key[0] >= 'a':
+                continue
+            interface_info = interfaces_info[key]
             interface_info['include_path'] = fix_include_path(
                 interface_info['include_path'])
 
@@ -230,7 +366,9 @@ class CodeGeneratorGlue(object):
             for extension in ['.cc', '.h']
         ]
 
-    def generate_code(self, definitions):
+    # module_definitions = {'dom': idl_definitions.IdlDefinitions}
+    def generate_code(self, module_definitions):
+        definitions = module_definitions['dom']
         global global_definitions
         global_definitions = definitions
         return list(chain(*[
@@ -259,7 +397,7 @@ def dictionary_member_context(member):
         global global_has_nullable
         global_has_nullable = True
 
-    glue_type = to_glue_type(member.idl_type, maybe_dictionary=False)
+    glue_type = to_glue_type(member.idl_type)
     return {
         'cpp_name': cpp_name,
         'declare_type': glue_type.declare_str(),
@@ -269,7 +407,7 @@ def dictionary_member_context(member):
         'has_default_value': member.default_value != None,
         'is_nullable': member.idl_type.is_nullable,
         'name': member.name,
-        'parameter_type': glue_type.return_str(),
+        'parameter_type': glue_type.parameter_str(),
         'return_type': glue_type.return_str(),
     }
 
@@ -291,8 +429,12 @@ def dictionary_context(dictionary):
         base_class_include = 'evita/dom/dictionary.h'
 
     class_references = list(global_referenced_interface_names)
+
     cc_include_paths = map(interface_name_to_include_path,
-                           global_referenced_interface_names)
+                        filter(lambda name: 'include_path' in global_interfaces_info[name],
+                               global_referenced_interface_names)) + \
+                    map(dictionary_name_to_include_path,
+                        global_referenced_dictionary_names)
     cc_include_paths.append('evita/dom/converter.h')
     if global_has_nullable:
         cc_include_paths.append('evita/v8_glue/nullable.h')
@@ -332,7 +474,10 @@ def attribute_context(attribute):
         cpp_name = attribute.extended_attributes['ImplementedAs']
     else:
         cpp_name = underscore(attribute.name)
-    glue_type = to_glue_type(attribute.idl_type, maybe_dictionary=False)
+    if cpp_name == 'JavaScript':
+        return {'cpp_name': cpp_name}
+
+    glue_type = to_glue_type(attribute.idl_type)
     return {
         'cpp_name': cpp_name,
         'from_v8_type': glue_type.from_v8_str(),
@@ -344,7 +489,7 @@ def attribute_context(attribute):
 
 
 def callback_context(callback):
-    glue_type = to_glue_type(callback.idl_type, maybe_dictionary=False)
+    glue_type = to_glue_type(callback.idl_type)
     return {
         'parameters': [parameter.name
                        for parameter in callback.arguments],
@@ -354,7 +499,7 @@ def callback_context(callback):
 
 
 def constant_context(constant):
-    glue_type = to_glue_type(constant.idl_type, maybe_dictionary=False)
+    glue_type = to_glue_type(constant.idl_type)
     return {
         'name': constant.name,
         'type': glue_type.from_v8_str(),
@@ -392,22 +537,24 @@ def enumeration_context(enumeration):
 
 
 def fix_include_path(path):
-    return os.path.join(os.path.dirname(path),
+    return os.path.join(os.path.dirname(path).replace('../', ''),
         underscore(os.path.basename(path))).replace('\\', '/')
 
 
 def function_context(functions):
-    parameters_list = expand_parameters(functions)
-    assert parameters_list
-
     if 'ImplementedAs' in functions[0].extended_attributes:
         cpp_name = functions[0].extended_attributes['ImplementedAs']
     else:
         cpp_name = upper_camel_case(functions[0].name)
 
+    if cpp_name == 'JavaScript':
+        return {'cpp_name': cpp_name}
+
+    parameters_list = expand_parameters(functions)
+    assert parameters_list
+
     is_static = functions[0].is_static
-    return_glue_type = to_glue_type(functions[0].idl_type,
-                                    maybe_dictionary=False)
+    return_glue_type = to_glue_type(functions[0].idl_type)
     to_v8_type = return_glue_type.to_v8_str()
 
     signatures = [
@@ -496,7 +643,8 @@ def interface_context(interface):
     global_referenced_interface_names.add(interface.name)
 
     include_paths = map(interface_name_to_include_path,
-                        global_referenced_interface_names) + \
+                        filter(lambda name: 'include_path' in global_interfaces_info[name],
+                               global_referenced_interface_names)) + \
                     map(dictionary_name_to_include_path,
                         global_referenced_dictionary_names)
     include_paths.append('base/logging.h')
@@ -523,7 +671,7 @@ def interface_context(interface):
 
     if interface.parent:
         base_class_include = \
-            global_interfaces_info[interface.name]['include_path']
+            interface_name_to_include_path(interface.name)
     else:
         base_class_include = None
 
@@ -601,7 +749,13 @@ def initialize_jinja_env(cache_dir):
 
 
 def interface_name_to_include_path(interface_name):
-    return global_interfaces_info[interface_name]['include_path']
+    if not(interface_name in global_interfaces_info):
+        raise Exception('No include path for ' + interface_name)
+    interface_info = global_interfaces_info[interface_name]
+    if not('include_path' in interface_info):
+        print interface_info
+        assert False
+    return interface_info['include_path']
 
 
 def sort_context_list(context_list):

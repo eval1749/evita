@@ -3,11 +3,11 @@
 
 #include "evita/dom/text/range.h"
 
+#include "base/strings/stringprintf.h"
 #include "evita/css/style_selector.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/document.h"
-#include "evita/dom/text/regexp.h"
 #include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
@@ -15,72 +15,13 @@
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/either.h"
-#include "evita/v8_glue/optional.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
-
-namespace {
-//////////////////////////////////////////////////////////////////////
-//
-// RangeClass
-//
-class RangeClass final : public v8_glue::WrapperInfo {
- public:
-  explicit RangeClass(const char* name) : v8_glue::WrapperInfo(name) {}
-  ~RangeClass() final = default;
-
- private:
-  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
-      v8::Isolate* isolate) final {
-    return v8_glue::CreateConstructorTemplate(isolate, &RangeClass::NewRange);
-  }
-
-  static Range* NewRange(
-      v8_glue::Either<Document*, Range*> either_document_or_range,
-      v8_glue::Optional<int> opt_start,
-      v8_glue::Optional<int> opt_end) {
-    if (either_document_or_range.is_left) {
-      auto const document = either_document_or_range.left;
-      auto const start = opt_start.get(0);
-      auto const end = opt_end.get(start);
-      return new Range(document, start, end);
-    }
-    auto const range = either_document_or_range.right;
-    auto const document = range->document();
-    if (opt_start.is_supplied) {
-      return new Range(document, opt_start.value, opt_end.get(opt_start.value));
-    }
-    return new Range(document, range->start(), range->end());
-  }
-
-  v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
-      v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> templ) final {
-    gin::ObjectTemplateBuilder builder(isolate, templ);
-    builder.SetProperty("collapsed", &Range::collapsed)
-        .SetProperty("document", &Range::document)
-        .SetProperty("end", &Range::end, &Range::set_end)
-        .SetProperty("start", &Range::start, &Range::set_start)
-        .SetProperty("text", &Range::text, &Range::set_text)
-        .SetMethod("collapseTo", &Range::CollapseTo)
-        .SetMethod("insertBefore", &Range::InsertBefore)
-        .SetMethod("setSpelling", &Range::SetSpelling)
-        .SetMethod("setStyle", &Range::SetStyle)
-        .SetMethod("setSyntax", &Range::SetSyntax);
-    return builder.Build();
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(RangeClass);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // Range
 //
-DEFINE_SCRIPTABLE_OBJECT(Range, RangeClass);
-
 Range::Range(Document* document, text::Posn start, text::Posn end)
     : Range(document, new text::Range(document->buffer(), start, end)) {}
 
@@ -135,6 +76,27 @@ Range* Range::InsertBefore(const base::string16& text) {
     return this;
   document_->buffer()->InsertBefore(start(), text);
   return this;
+}
+
+Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range) {
+  if (document_or_range.is_left)
+    return NewRange(document_or_range, 0, 0);
+  auto const range = document_or_range.right;
+  return new Range(range->document(), range->start(), range->end());
+}
+
+Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range,
+                       int offset) {
+  return NewRange(document_or_range, offset, offset);
+}
+
+Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range,
+                       int start,
+                       int end) {
+  if (document_or_range.is_left)
+    return new Range(document_or_range.left, start, end);
+  auto const range = document_or_range.right;
+  return new Range(range->document(), start, end);
 }
 
 void Range::SetSpelling(int spelling_code) const {

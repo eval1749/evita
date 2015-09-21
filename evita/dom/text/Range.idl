@@ -1,0 +1,87 @@
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+enum RangeCase {
+  // "This is capitalized."
+  "CAPITALIZED_TEXT",
+  // "This Is Capitalized Words."
+  "CAPITALIZED_WORDS",
+  // "this is lower."
+  "LOWER",
+  // "ThisIsMixed."
+  "MIXED",
+  // "THIS IS UPPER."
+  "UPPER",
+};
+
+[
+    CustomConstructor((Document or Range) document_or_range),
+    CustomConstructor((Document or Range) document_or_range, long offset),
+    CustomConstructor((Document or Range) document_or_range, long start_offset,
+                      long end_offset),
+]
+interface Range {
+  readonly attribute boolean collapsed;
+  readonly attribute Document document;
+  attribute long end;
+  attribute long start;
+  attribute DOMString text;
+
+  [ImplementedAs=JavaScript]
+  Range analyzeCase();
+
+  [ImplementedAs=JavaScript]
+  RangeCase capitalize();
+
+  void collapseTo(long offset);
+
+  [ImplementedAs=JavaScript]
+  Range delete(Unit unit, optional long count);
+
+  [ImplementedAs=JavaScript]
+  Range endOf(Unit unit, optional Alter alter);
+
+  void insertBefore(DOMString text);
+
+  [ImplementedAs=JavaScript]
+  String[]? match(RegulareExpression regexp);
+
+  [ImplementedAs=JavaScript]
+  Range move(Unit unit, optional long count);
+
+  [ImplementedAs=JavaScript]
+  Range moveEnd(Unit unit, optional long count);
+
+  [ImplementedAs=JavaScript]
+  Range moveEndWhile(DOMString char_set, optional long count);
+
+  [ImplementedAs=JavaScript]
+  Range moveStart(Unit unit, optional long count);
+
+  [ImplementedAs=JavaScript]
+  Range moveStartWhile(DOMString char_set, optional long count);
+
+  [ImplementedAs=JavaScript]
+  //  @param {string|!function(string, ...):string} replacement
+  String[]? replace(RegulareExpression regexp, Object replacement);
+
+  void setSpelling(long spelling);
+  void setStyle(Style style);
+  void setSyntax(DOMString syntax);
+
+  [ImplementedAs=JavaScript]
+  Range startOf(Unit unit, optional Alter alter);
+
+  [ImplementedAs=JavaScript]
+  Range toLocaleLowerCase();
+
+  [ImplementedAs=JavaScript]
+  Range toLocaleUpperCase();
+
+  [ImplementedAs=JavaScript]
+  Range toLowerCase();
+
+  [ImplementedAs=JavaScript]
+  Range toUpperCase();
+};

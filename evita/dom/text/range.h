@@ -6,12 +6,19 @@
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
 #include "evita/precomp.h"
+#include "evita/v8_glue/either.h"
 #include "evita/v8_glue/scriptable.h"
+
+#if 0
+namespace v8_glue {
+template <typename Left, typename Right>
+struct Either;
+}
+#endif
 
 namespace dom {
 
 class Document;
-class RegExp;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -37,6 +44,12 @@ class Range final : public v8_glue::Scriptable<Range> {
 
   Range* CollapseTo(Posn position);
   Range* InsertBefore(const base::string16& text);
+  static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range);
+  static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range,
+                         int offset);
+  static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range,
+                         int start,
+                         int end);
   void SetSpelling(int spelling) const;
   void SetStyle(v8::Handle<v8::Object> style_dict) const;
   void SetSyntax(const base::string16& syntax) const;

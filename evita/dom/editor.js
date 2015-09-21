@@ -5,6 +5,8 @@
 'use strict';
 
 (function() {
+  Editor.RegExp = RegularExpression;
+
   Object.defineProperty(Editor, 'activeWindow', {
     /**
      * @return {?Window}

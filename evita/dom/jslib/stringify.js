@@ -108,8 +108,10 @@ Editor.stringify = (function() {
      */
     function collectProperties(object) {
       let override = object['stringifyProperties'];
-      if (typeof(override) === 'function')
+      if (object !== object.constructor.prototype &&
+          typeof(override) === 'function') {
         return override.call(object);
+      }
       let props = [];
       let removeFunction = object.constructor !== Object;
       for (let runner = object; runner;

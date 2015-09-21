@@ -86,9 +86,9 @@ dictionary_idl_files = [
 idl_lexer_parser_files = [
   "//third_party/ply/lex.py",
   "//third_party/ply/yacc.py",
-  "//third_party/idl_parser/idl_lexer.py",
-  "//third_party/idl_parser/idl_node.py",
-  "//third_party/idl_parser/idl_parser.py",
   "//third_party/WebKit/Source/bindings/scripts/blink_idl_lexer.py",
   "//third_party/WebKit/Source/bindings/scripts/blink_idl_parser.py",
+  "//tools/idl_parser/idl_lexer.py",
+  "//tools/idl_parser/idl_node.py",
+  "//tools/idl_parser/idl_parser.py",
 ]

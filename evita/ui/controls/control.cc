@@ -94,9 +94,8 @@ void Control::OnMouseEvent(ui::MouseEvent* event) {
 // ui::Widget
 void Control::DidKillFocus(ui::Widget* focused_widget) {
   Widget::DidKillFocus(focused_widget);
-  if (disabled()) {
+  if (disabled())
     return;
-  }
   state_ = State::Normal;
   if (text_input_delegate_) {
     ui::TextInputClient::Get()->CommitComposition(text_input_delegate_);
@@ -117,9 +116,8 @@ void Control::DidSetFocus(ui::Widget* last_focused_widget) {
   if (disabled())
     return;
   state_ = State::Highlight;
-  if (is_realized()) {
+  if (is_realized())
     ui::TextInputClient::Get()->set_delegate(text_input_delegate_);
-  }
   DidChangeState();
   controller_->DidSetFocus(this, last_focused_widget);
 }

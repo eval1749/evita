@@ -69,13 +69,73 @@ class SampleEventTargetClass final
 
   v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> templ) final {
-    auto const base_templ = BaseClass::SetupInstanceTemplate(isolate, templ);
-    gin::ObjectTemplateBuilder builder(isolate, base_templ);
-    builder.SetProperty("handled", &SampleEventTarget::handled,
-                        &SampleEventTarget::set_handled)
-        .SetMethod("handleEvent", &SampleEventTarget::HandleEvent);
-    return builder.Build();
+      v8::Handle<v8::ObjectTemplate> base_templ) final {
+    auto const templ = BaseClass::SetupInstanceTemplate(isolate, base_templ);
+    templ->SetAccessorProperty(
+        gin::StringToSymbol(isolate, "handled"),
+        v8::FunctionTemplate::New(isolate, &GetHandled),
+        v8::FunctionTemplate::New(isolate, &SetHandled),
+        static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum));
+    templ->Set(gin::StringToSymbol(isolate, "handleEvent"),
+               v8::FunctionTemplate::New(isolate, &HandleEvent),
+               static_cast<v8::PropertyAttribute>(v8::DontDelete |
+                                                  v8::DontEnum | v8::ReadOnly));
+    return templ;
+  }
+
+  // |handled| IDL attribute getter
+  static void GetHandled(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    auto const isolate = info.GetIsolate();
+    SampleEventTarget* impl = nullptr;
+    if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
+      ThrowReceiverError(isolate, "SampleEventTarget", info.This());
+      return;
+    }
+    auto value = impl->handled();
+    v8::Local<v8::Value> v8_value;
+    if (!gin::TryConvertToV8(isolate, value, &v8_value))
+      return;
+    info.GetReturnValue().Set(v8_value);
+  }
+
+  // |handleEvent| IDL operation
+  static void HandleEvent(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    auto const isolate = info.GetIsolate();
+    if (info.Length() != 1) {
+      ThrowArityError(isolate, 1, 1, info.Length());
+      return;
+    }
+    SampleEventTarget* impl = nullptr;
+    if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
+      ThrowReceiverError(isolate, "SampleEventTarget", info.This());
+      return;
+    }
+    Event* value;
+    if (!gin::ConvertFromV8(isolate, info[0], &value)) {
+      ThrowArgumentError(isolate, "Event", info[0], 0);
+      return;
+    }
+    impl->HandleEvent(value);
+  }
+
+  // |handled| IDL attribute setter
+  static void SetHandled(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    auto const isolate = info.GetIsolate();
+    if (info.Length() != 1) {
+      ThrowArityError(isolate, 1, 1, info.Length());
+      return;
+    }
+    SampleEventTarget* impl = nullptr;
+    if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
+      ThrowReceiverError(isolate, "SampleEventTarget", info.This());
+      return;
+    }
+    v8_glue::Nullable<Event> new_value;
+    if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
+      ThrowArgumentError(isolate, "Event or null", info[0], 0);
+      return;
+    }
+    impl->set_handled(new_value);
   }
 
   DISALLOW_COPY_AND_ASSIGN(SampleEventTargetClass);

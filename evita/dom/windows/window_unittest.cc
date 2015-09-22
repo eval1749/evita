@@ -71,11 +71,49 @@ class SampleWindowClass final
 
   v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> templ) override {
-    auto const base_templ = BaseClass::SetupInstanceTemplate(isolate, templ);
-    gin::ObjectTemplateBuilder builder(isolate, templ);
-    builder.SetProperty("name", &SampleWindow::name, &SampleWindow::set_name);
-    return builder.Build();
+      v8::Handle<v8::ObjectTemplate> base_templ) override {
+    auto const templ = BaseClass::SetupInstanceTemplate(isolate, base_templ);
+    templ->SetAccessorProperty(
+        gin::StringToSymbol(isolate, "name"),
+        v8::FunctionTemplate::New(isolate, &GetName),
+        v8::FunctionTemplate::New(isolate, &SetName),
+        static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum));
+    return templ;
+  }
+
+  // |name| IDL attribute getter
+  static void GetName(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    auto const isolate = info.GetIsolate();
+    SampleWindow* impl = nullptr;
+    if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
+      ThrowReceiverError(isolate, "SampleWindow", info.This());
+      return;
+    }
+    auto value = impl->name();
+    v8::Local<v8::Value> v8_value;
+    if (!gin::TryConvertToV8(isolate, value, &v8_value))
+      return;
+    info.GetReturnValue().Set(v8_value);
+  }
+
+  // |name| IDL attribute setter
+  static void SetName(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    auto const isolate = info.GetIsolate();
+    if (info.Length() != 1) {
+      ThrowArityError(isolate, 1, 1, info.Length());
+      return;
+    }
+    SampleWindow* impl = nullptr;
+    if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
+      ThrowReceiverError(isolate, "SampleWindow", info.This());
+      return;
+    }
+    base::string16 new_value;
+    if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
+      ThrowArgumentError(isolate, "string", info[0], 0);
+      return;
+    }
+    impl->set_name(new_value);
   }
 
   DISALLOW_COPY_AND_ASSIGN(SampleWindowClass);

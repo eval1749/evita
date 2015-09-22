@@ -42,6 +42,7 @@ KNOWN_INTERFACE_NAMES = {
 global_known_interface_names = set()
 
 JS_INTERFACE_NAMES = {
+    'LineAndColumn': 'evita/text/buffer.h',
     'Point': 'evita/dom/windows/point.h',
     'Rect': 'evita/dom/windows/rect.h',
 }
@@ -157,6 +158,7 @@ IDL_TO_CPP_TYPE_MAP = {
     'ArrayBufferView': CppType('gin::ArrayBufferView', is_by_value=False),
     'DataTransferData': CppType('DataTransferData', is_pointer=True),
     'EventListener': CppType('v8::Handle<v8::Object>'),
+    'LineAndColumn': CppType('text::LineAndColumn'),
     # For Window.prototype.compute_
     'Point': CppType('domapi::FloatPoint'),
     # For Window.prototype.compute_

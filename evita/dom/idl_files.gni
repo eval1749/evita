@@ -42,6 +42,7 @@ interface_idl_files = [
 
   # Note: We have "Mode.idl" here for JS externs
   "//evita/dom/text/modes/Mode.idl",
+  "//evita/dom/text/LineAndColumn.idl",
   "//evita/dom/text/MutationObserver.idl",
   "//evita/dom/text/MutationRecord.idl",
   "//evita/dom/text/Range.idl",

@@ -10,15 +10,26 @@ namespace base {
 class Time;
 }
 
+namespace text {
+struct LineAndColumn;
+}
+
 namespace gin {
 
-// base::Time
 template <>
 struct Converter<base::Time> {
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, base::Time file_time);
   static bool FromV8(v8::Isolate* isolate,
                      v8::Handle<v8::Value> val,
                      base::Time* out);
+};
+
+
+template <>
+struct Converter<text::LineAndColumn> {
+  static v8::Handle<v8::Value> ToV8(
+      v8::Isolate* isolate,
+      const text::LineAndColumn& line_and_column);
 };
 
 }  // namespace gin

@@ -32,22 +32,6 @@
 #include "evita/v8_glue/wrapper_info.h"
 #include "v8_strings.h"  // NOLINT(build/include)
 
-namespace gin {
-template <>
-struct Converter<text::LineAndColumn> {
-  static v8::Handle<v8::Value> ToV8(
-      v8::Isolate* isolate,
-      const text::LineAndColumn& line_and_column) {
-    auto const result = v8::Object::New(isolate);
-    result->Set(gin::StringToV8(isolate, "column"),
-                v8::Integer::New(isolate, line_and_column.column));
-    result->Set(gin::StringToV8(isolate, "lineNumber"),
-                v8::Integer::New(isolate, line_and_column.line_number));
-    return result;
-  }
-};
-}  // namespace gin
-
 namespace dom {
 
 namespace bindings {

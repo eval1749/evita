@@ -38,7 +38,7 @@ interface Range {
   [ImplementedAs=JavaScript]
   Range capitalize();
 
-  void collapseTo(long offset);
+  Range collapseTo(long offset);
 
   [ImplementedAs=JavaScript]
   Range delete(Unit unit, optional long count);

@@ -14,8 +14,6 @@ var global = {};
 /** @typedef {!Function|!Object} Object which has |handleEvent(event)| */
 var EventListener;
 
-var FilePath;
-
 /**
  * Note: Since, Closure compiler doesn't support recursive type, we use
  * |!Map| instead of |!Keymap|.

@@ -4,46 +4,13 @@
 #include "evita/dom/file_path.h"
 
 #include "base/strings/string16.h"
-#include "evita/v8_glue/constructor_template.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/function_template_builder.h"
-#include "evita/v8_glue/wrapper_info.h"
 
 namespace dom {
-
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// FilePathWrapperInfo
-//
-class FilePathWrapperInfo final : public v8_glue::WrapperInfo {
- public:
-  explicit FilePathWrapperInfo(const char* name) : v8_glue::WrapperInfo(name) {}
-
-  ~FilePathWrapperInfo() final = default;
-
- protected:
-  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
-      v8::Isolate* isolate) final {
-    auto templ = v8_glue::WrapperInfo::CreateConstructorTemplate(isolate);
-    return v8_glue::FunctionTemplateBuilder(isolate, templ)
-        .SetMethod("fullPath", &FilePath::FullPath)
-        .Build();
-  }
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(FilePathWrapperInfo);
-};
-
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // FilePath
 //
-DEFINE_SCRIPTABLE_OBJECT(FilePath, FilePathWrapperInfo);
-
 FilePath::FilePath() {}
 
 FilePath::~FilePath() {}

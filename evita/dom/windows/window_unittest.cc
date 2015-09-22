@@ -13,6 +13,7 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/window.h"
+#include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {
@@ -50,10 +51,22 @@ class SampleWindowClass final
   ~SampleWindowClass() = default;
 
  private:
+  static void ConstructSampleWindow(
+      const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (!v8_glue::internal::IsValidConstructCall(info))
+      return;
+    v8_glue::internal::FinishConstructCall(info, NewSampleWindow(info));
+  }
+
   v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
       v8::Isolate* isolate) override {
-    return v8_glue::CreateConstructorTemplate(isolate,
-                                              &SampleWindow::NewSampleWindow);
+    return v8::FunctionTemplate::New(isolate,
+                                     &SampleWindowClass::ConstructSampleWindow);
+  }
+
+  static SampleWindow* NewSampleWindow(
+      const v8::FunctionCallbackInfo<v8::Value>& info) {
+    return new SampleWindow();
   }
 
   v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(

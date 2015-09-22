@@ -5,6 +5,7 @@
 
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
+#include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/nullable.h"
 
 namespace dom {
@@ -48,13 +49,21 @@ class SampleEventTargetClass final
   ~SampleEventTargetClass() final = default;
 
  private:
-  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
-      v8::Isolate* isolate) final {
-    return v8_glue::CreateConstructorTemplate(
-        isolate, &SampleEventTargetClass::NewSampleEventTarget);
+  static void ConstructSampleEventTarget(
+      const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (!v8_glue::internal::IsValidConstructCall(info))
+      return;
+    v8_glue::internal::FinishConstructCall(info, NewSampleEventTarget(info));
   }
 
-  static SampleEventTarget* NewSampleEventTarget() {
+  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
+      v8::Isolate* isolate) final {
+    return v8::FunctionTemplate::New(
+        isolate, &SampleEventTargetClass::ConstructSampleEventTarget);
+  }
+
+  static SampleEventTarget* NewSampleEventTarget(
+      const v8::FunctionCallbackInfo<v8::Value>& info) {
     return new SampleEventTarget();
   }
 

@@ -23,9 +23,11 @@ from idl_definitions import Visitor
 import idl_types
 from idl_types import IdlType
 
+# We'll include "gc/member.h" when one of members of dictionary is collectable.
 global_has_gc_member = False
+
+# We'll include "v8_glue/nullable.h" when return value is nullable.
 global_has_nullable = False
-global_has_optional = False
 global_referenced_dictionary_names = set()
 global_referenced_interface_names = set()
 global_definitions = {}
@@ -34,6 +36,7 @@ global_interfaces_info = {}
 FILE_NAME_PREFIX = 'v8_glue_'
 
 JS_INTERFACE_NAMES = {
+    'ArrayBufferView': 'gin/array_buffer.h',
     'LineAndColumn': 'evita/text/buffer.h',
     'Point': 'evita/dom/windows/point.h',
     'Rect': 'evita/dom/windows/rect.h',
@@ -652,15 +655,8 @@ def interface_context(interface):
     include_paths.append('evita/v8_glue/function_template_builder.h')
     if global_has_gc_member:
         include_paths.append('evita/gc/member.h')
-    # TODO(eval1749) We should include "array_buffer.h" if needed
-    include_paths.append('gin/array_buffer.h')
     if global_has_nullable:
         include_paths.append('evita/v8_glue/nullable.h')
-    if global_has_optional:
-        include_paths.append('evita/v8_glue/optional.h')
-
-    if constructor['dispatch'] != 'none':
-        include_paths.append('evita/v8_glue/constructor_template.h')
 
     for name in global_js_interface_names:
         include_paths.append(JS_INTERFACE_NAMES[name])

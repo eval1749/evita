@@ -44,6 +44,12 @@ JS_INTERFACE_NAMES = {
 global_js_interface_names = set()
 
 
+def can_fast_return_of(glue_type):
+    # Note: to_v8_str() returns 'auto'.
+    return_str = glue_type.return_str()
+    return return_str in ['bool', 'int', 'double', 'float']
+
+
 def should_be_callback(idl_type):
     if idl_type.is_callback_function or idl_type.is_callback_interface:
         return True
@@ -491,6 +497,7 @@ def attribute_context(attribute):
 
     glue_type = to_glue_type(attribute.idl_type)
     return {
+        'can_fast_return': can_fast_return_of(glue_type),
         'cpp_name': cpp_name,
         'from_v8_type': glue_type.from_v8_str(),
         'is_read_only': attribute.is_read_only,

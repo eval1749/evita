@@ -65,7 +65,7 @@ class GlueType(object):
         self.is_pointer = is_pointer
         self.is_struct = is_struct
         if self.idl_type.is_array or self.idl_type.is_sequence or \
-            idl_type.is_array_or_sequence_type:
+                idl_type.is_array_or_sequence_type:
             element_type = to_glue_type(idl_type.element_type)
             self.element_typestr = element_type.return_str()
         else:
@@ -203,7 +203,7 @@ IDL_TO_CPP_TYPE_MAP = {
 
 def to_glue_type(idl_type):
     if idl_type.is_array or idl_type.is_sequence_type or \
-        idl_type.is_array_or_sequence_type:
+            idl_type.is_array_or_sequence_type:
         return GlueType(idl_type, idl_type.element_type.base_type)
 
     if idl_type.is_union_type:
@@ -445,8 +445,8 @@ def dictionary_context(dictionary):
     class_references = list(global_referenced_interface_names)
 
     cc_include_paths = map(interface_name_to_include_path,
-                           filter(lambda name: 'include_path' in \
-                                    global_interfaces_info[name],
+                           filter(lambda name: 'include_path' in
+                                  global_interfaces_info[name],
                                   global_referenced_interface_names)) + \
         map(dictionary_name_to_include_path,
             global_referenced_dictionary_names)
@@ -667,8 +667,8 @@ def interface_context(interface):
     global_referenced_interface_names.add(interface.name)
 
     include_paths = map(interface_name_to_include_path,
-                        filter(lambda name: 'include_path' in \
-                                global_interfaces_info[name],
+                        filter(lambda name: 'include_path' in
+                               global_interfaces_info[name],
                                global_referenced_interface_names)) + \
         map(dictionary_name_to_include_path,
             global_referenced_dictionary_names)

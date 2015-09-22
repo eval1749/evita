@@ -652,6 +652,7 @@ def interface_context(interface):
     include_paths.append('base/logging.h')
     include_paths.append('evita/dom/converter.h')
     include_paths.append('evita/dom/script_host.h')
+    include_paths.append('evita/v8_glue/constructor_template.h')
     include_paths.append('evita/v8_glue/function_template_builder.h')
     if global_has_gc_member:
         include_paths.append('evita/gc/member.h')

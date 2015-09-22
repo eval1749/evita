@@ -119,6 +119,7 @@ source_set("dom") {
 }
 
 action("dom_jslib_cc") {
+  deps = [ ":check_jslib" ]
   script = "make_get_jslib.py"
   outputs = [
     "$target_gen_dir/dom_jslib.cc",
@@ -158,6 +159,31 @@ action("dom_v8_strings_cc") {
 
   args = [ rebase_path("$root_gen_dir/v8_strings") ] +
          rebase_path(inputs, root_build_dir)
+}
+
+action("check_jslib") {
+  deps = [
+    "//evita/dom/bindings:js_externs",
+  ]
+
+  js_files = js_defs_files + js_lib_files
+  js_file_list = "$root_gen_dir/evita/jslib_file_list.txt"
+  write_file(js_file_list, rebase_path(js_files))
+
+  script = "//tools/razzle/closure_compiler.py"
+  outputs = [
+    "$root_gen_dir/evita/evita_checked.js",
+  ]
+  inputs = [
+             "closure_compiler_workaround.js",
+             "$root_gen_dir/evita/evita_js_externs.js",
+           ] + js_files
+  args = [
+    "--js_output_file=" + rebase_path("$root_gen_dir/evita/evita_checked.js"),
+    "--flagfile=" + rebase_path(js_file_list),
+    "--extern",
+    "$root_gen_dir/evita/evita_js_externs.js",
+  ]
 }
 
 # TODO(eval1749): We should rename to "evita_dom_tests"

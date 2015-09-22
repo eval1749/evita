@@ -3,13 +3,21 @@
 // found in the LICENSE file.
 
 /**
- * @fileoverview Range
- * See types_externs.js for Range constructor.
+ * @fileoverview OldRange
+ * See types_externs.js for OldRange constructor.
  * @externs
  */
 
+/**
+ * @constructor
+ * @param {!Document|!Range} document_or_range
+ * @param {number=} opt_start
+ * @param {number=} opt_end
+ */
+var OldRange = function(document_or_range, opt_start, opt_end) {};
+
 /** @enum {!symbol} */
-Range.Case = {
+OldRange.Case = {
   // "This is capitalized."
   CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
   // "This Is Capitalized Words."
@@ -23,134 +31,134 @@ Range.Case = {
 };
 
 /** @export @type {!Document} */
-Range.prototype.document;
+OldRange.prototype.document;
 
 /** @export @type {!TextOffset} */
-Range.prototype.end = 0;
+OldRange.prototype.end = 0;
 
 /** @export @type {number} */
-Range.prototype.length;
+OldRange.prototype.length;
 
 /** @export @type {!TextOffset} */
-Range.prototype.start = 0;
+OldRange.prototype.start = 0;
 
 /** @export @type {!string} */
-Range.prototype.text = '';
+OldRange.prototype.text = '';
 
-/** @return {!Range} */
-Range.prototype.capitalize = function() {}
+/** @return {!OldRange} */
+OldRange.prototype.capitalize = function() {}
 
 /** @type {boolean} */
-Range.prototype.collapsed;
+OldRange.prototype.collapsed;
 
 /**
- * @return {!Range.Case}
+ * @return {!OldRange.Case}
  */
-Range.prototype.analyzeCase = function() {};
+OldRange.prototype.analyzeCase = function() {};
 
 /**
  * @param {!TextOffset} position
  */
-Range.prototype.collapseTo = function(position) {};
+OldRange.prototype.collapseTo = function(position) {};
 
 /**
  * @param {Unit} unit
  * @param {number=} opt_count, default is one.
- * @return {!Range}
+ * @return {!OldRange}
  */
-Range.prototype.delete = function(unit, opt_count) {};
+OldRange.prototype.delete = function(unit, opt_count) {};
 
 /**
  * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
- * @return {!Range}
+ * @return {!OldRange}
  */
-Range.prototype.endOf = function(unit, opt_alter) {};
+OldRange.prototype.endOf = function(unit, opt_alter) {};
 
 /**
  * @param {!Editor.RegExp} regexp
  * @return {?Array.<string>}
  */
-Range.prototype.match = function(regexp) {};
+OldRange.prototype.match = function(regexp) {};
 
 /**
  * @param {Unit} unit
  * @param {number=} opt_count, default is one.
- * @return {!Range}
+ * @return {!OldRange}
  */
-Range.prototype.move = function(unit, opt_count) {};
+OldRange.prototype.move = function(unit, opt_count) {};
 
 /**
  * @param {Unit} unit
  * @param {number=} opt_count, default is one.
- * @return {!Range}
+ * @return {!OldRange}
  */
-Range.prototype.moveEnd = function(unit, opt_count) {};
+OldRange.prototype.moveEnd = function(unit, opt_count) {};
 
 /**
  * @param {string} char_set
  * @param {number=} opt_count
- * @return {!Range}
+ * @return {!OldRange}
  */
-Range.prototype.moveEndWhile = function(char_set, opt_count) {};
+OldRange.prototype.moveEndWhile = function(char_set, opt_count) {};
 
 /**
  * @param {Unit} unit
  * @param {number=} opt_count, default is one.
- * @return {!Range}
+ * @return {!OldRange}
  */
 
-Range.prototype.moveStart = function(unit, opt_count) {};
+OldRange.prototype.moveStart = function(unit, opt_count) {};
 
 /**
  * @param {string} char_set
  * @param {number=} opt_count
- * @return {!Range}
+ * @return {!OldRange}
  */
-Range.prototype.moveStartWhile = function(char_set, opt_count) {};
+OldRange.prototype.moveStartWhile = function(char_set, opt_count) {};
 
 /**
  * @param {!string} text
  */
-Range.prototype.insertBefore = function(text) {};
+OldRange.prototype.insertBefore = function(text) {};
 
 /**
  * @param {!Editor.RegExp} regexp
  * @param {string|!function(string, ...):string} replacement
  * @return {?Array.<string>}
  */
-Range.prototype.replace = function(regexp, replacement) {};
+OldRange.prototype.replace = function(regexp, replacement) {};
 
 /**
  * @param {number} spelling
  */
-Range.prototype.setSpelling = function(spelling) {};
+OldRange.prototype.setSpelling = function(spelling) {};
 
 /**
  * @param {!Object} style_dict
  */
-Range.prototype.setStyle = function(style_dict) {};
+OldRange.prototype.setStyle = function(style_dict) {};
 
 /**
  * @param {string} syntax
  */
-Range.prototype.setSyntax = function(syntax) {};
+OldRange.prototype.setSyntax = function(syntax) {};
 
 /**
  * @param {Unit} unit
  * @param {Alter=} opt_alter, default is Alter.MOVE.
- * @return {!Range}
+ * @return {!OldRange}
  */
-Range.prototype.startOf = function(unit, opt_alter) {};
+OldRange.prototype.startOf = function(unit, opt_alter) {};
 
-/** @return {!Range} */
-Range.prototype.toLocaleLowerCase = function() {}
+/** @return {!OldRange} */
+OldRange.prototype.toLocaleLowerCase = function() {}
 
-/** @return {!Range} */
-Range.prototype.toLocaleUpperCase = function() {}
+/** @return {!OldRange} */
+OldRange.prototype.toLocaleUpperCase = function() {}
 
-/** @return {!Range} */
-Range.prototype.toLowerCase = function() {}
+/** @return {!OldRange} */
+OldRange.prototype.toLowerCase = function() {}
 
-/** @return {!Range} */
-Range.prototype.toUpperCase = function() {}
+/** @return {!OldRange} */
+OldRange.prototype.toUpperCase = function() {}

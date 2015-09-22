@@ -25,14 +25,18 @@ interface Range {
   readonly attribute boolean collapsed;
   readonly attribute Document document;
   attribute long end;
+  [ImplementedAs=JavaScript]
+  attribute long length;
   attribute long start;
   attribute DOMString text;
 
+  // TODO(yosin) We should make |analyzeCase()| as global function
   [ImplementedAs=JavaScript]
-  Range analyzeCase();
+  RangeCase analyzeCase();
 
+  // TODO(yosin) We should make |capitalized()| as global function
   [ImplementedAs=JavaScript]
-  RangeCase capitalize();
+  Range capitalize();
 
   void collapseTo(long offset);
 
@@ -45,7 +49,7 @@ interface Range {
   void insertBefore(DOMString text);
 
   [ImplementedAs=JavaScript]
-  String[]? match(RegulareExpression regexp);
+  DOMString[]? match(RegularExpression regexp);
 
   [ImplementedAs=JavaScript]
   Range move(Unit unit, optional long count);
@@ -64,7 +68,7 @@ interface Range {
 
   [ImplementedAs=JavaScript]
   //  @param {string|!function(string, ...):string} replacement
-  String[]? replace(RegulareExpression regexp, Object replacement);
+  DOMString[]? replace(RegularExpression regexp, Object replacement);
 
   void setSpelling(long spelling);
   void setStyle(Style style);
@@ -73,15 +77,19 @@ interface Range {
   [ImplementedAs=JavaScript]
   Range startOf(Unit unit, optional Alter alter);
 
+  // TODO(yosin) We should make |toLocaleLowerCase()| as global function
   [ImplementedAs=JavaScript]
   Range toLocaleLowerCase();
 
+  // TODO(yosin) We should make |toLocaleUpperCase()| as global function
   [ImplementedAs=JavaScript]
   Range toLocaleUpperCase();
 
+  // TODO(yosin) We should make |toLowerCase()| as global function
   [ImplementedAs=JavaScript]
   Range toLowerCase();
 
+  // TODO(yosin) We should make |toUpperCase()| as global function
   [ImplementedAs=JavaScript]
   Range toUpperCase();
 };

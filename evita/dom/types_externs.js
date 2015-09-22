@@ -24,9 +24,29 @@ var FilePath;
 var Keymap;
 
 /**
+ * @typedef {RegularExpression}
+ */
+Editor.RegExp;
+
+/**
  * @typedef {{name: string, start: number, end: number}}
  */
 Editor.RegExp.Match;
+
+// TODO(eval1749) We should rename |Range.Case| to |CaseAnalysisResult|.
+/** @enum {!symbol} */
+Range.Case = {
+  // "This is capitalized."
+  CAPITALIZED_TEXT: 'CAPITALIZED_TEXT',
+  // "This Is Capitalized Words."
+  CAPITALIZED_WORDS: 'CAPITALIZED_WORDS',
+  // "this is lower."
+  LOWER: 'LOWER',
+  // "ThisIsMixed."
+  MIXED: 'MIXED',
+  // "THIS IS UPPER."
+  UPPER: 'UPPER',
+};
 
 /** @typedef {number} */
 var TextOffset;
@@ -37,14 +57,6 @@ var TextOffset;
  * @param {!TextOffset} offset
  */
 var TextPosition = function(document, offset) {};
-
-/**
- * @constructor
- * @param {!Document|!Range} document_or_range
- * @param {number=} opt_start
- * @param {number=} opt_end
- */
-var Range = function(document_or_range, opt_start, opt_end) {};
 
 /**
  * @constructor

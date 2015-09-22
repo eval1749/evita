@@ -19,13 +19,17 @@ templates_dir = module_path
 sys.path.insert(1, third_party_dir)
 import jinja2
 
+from idl_definitions import Visitor
 import idl_types
 from idl_types import IdlType
 
 IDL_TO_JS_TYPE_MAP = {
     'DOMString': 'string',
+    'DOMTimeStamp': 'Date',
+    'RangeCase': 'Range.Case',
+    'RegExpInit': 'Editor.RegExpInit',
     'any': '*',
-    'bool': 'boolean',
+    'boolean': 'boolean',
     'byte': 'number',
     'double': 'number',
     'float': 'number',
@@ -36,7 +40,6 @@ IDL_TO_JS_TYPE_MAP = {
     'unsigned long': 'number',
     'unsigned long long': 'number',
     'unsigned short': 'number',
-    'RegExpInit': 'Editor.RegExpInit',
 }
 
 NAMESPACE_MAP = {
@@ -49,16 +52,89 @@ NON_NULL_JS_TYPE_SET = frozenset([
     'boolean',
     'number',
     'string',
+    'void',
 ])
 
 
-class CodeGeneratorJS(object):
-    def __init__(self, interfaces_info, cache_dir):
-        interfaces_info = interfaces_info or {}
-        self.interfaces_info = interfaces_info
-        self.jinja_env = initialize_jinja_env(cache_dir)
+# TODO(eval1749) We should share |set_global_type_info()| with
+# "code_generator_glue.py"
+def set_global_type_info(info_provider):
+    interfaces_info = info_provider.interfaces_info
+    idl_types.set_ancestors(interfaces_info['ancestors'])
+    IdlType.set_callback_interfaces(interfaces_info['callback_interfaces'])
+    IdlType.set_dictionaries(interfaces_info['dictionaries'])
+    IdlType.set_enums(info_provider.enumerations)
+    IdlType.set_implemented_as_interfaces(interfaces_info['implemented_as_interfaces'])
+    IdlType.set_garbage_collected_types(interfaces_info['garbage_collected_interfaces'])
+    IdlType.set_will_be_garbage_collected_types(interfaces_info['will_be_garbage_collected_interfaces'])
 
-    def generate_code(self, definitions):
+
+# TODO(eval1749) We should share |depends_on_union_types()| with
+# "code_generator_glue.py"
+def depends_on_union_types(idl_type):
+    """Returns true when a given idl_type depends on union containers
+    directly.
+    """
+    if idl_type.is_union_type:
+        return True
+    if idl_type.is_array_or_sequence_type:
+        return idl_type.element_type.is_union_type
+    return False
+
+
+# TODO(eval1749) We should share |TypedefResolver()| with
+# "code_generator_glue.py"
+class TypedefResolver(Visitor):
+    def __init__(self, info_provider):
+        self.info_provider = info_provider
+
+    def resolve(self, definitions, definition_name):
+        """Traverse definitions and resolves typedefs with the actual types."""
+        self.typedefs = {}
+        for name, typedef in self.info_provider.typedefs.iteritems():
+            self.typedefs[name] = typedef.idl_type
+        self.additional_includes = set()
+        definitions.accept(self)
+        self._update_dependencies_include_paths(definition_name)
+
+    def _update_dependencies_include_paths(self, definition_name):
+        interface_info = self.info_provider.interfaces_info[definition_name]
+        dependencies_include_paths = interface_info['dependencies_include_paths']
+        for include_path in self.additional_includes:
+            if include_path not in dependencies_include_paths:
+                dependencies_include_paths.append(include_path)
+
+    def _resolve_typedefs(self, typed_object):
+        """Resolve typedefs to actual types in the object."""
+        for attribute_name in typed_object.idl_type_attributes:
+            try:
+                idl_type = getattr(typed_object, attribute_name)
+            except AttributeError:
+                continue
+            if not idl_type:
+                continue
+            resolved_idl_type = idl_type.resolve_typedefs(self.typedefs)
+            if depends_on_union_types(resolved_idl_type):
+                self.additional_includes.add(
+                    self.info_provider.include_path_for_union_types)
+            # Need to re-assign the attribute, not just mutate idl_type, since
+            # type(idl_type) may change.
+            setattr(typed_object, attribute_name, resolved_idl_type)
+
+    def visit_typed_object(self, typed_object):
+        self._resolve_typedefs(typed_object)
+
+
+class CodeGeneratorJS(object):
+    def __init__(self, info_provider, cache_dir, output_dir):
+        self.info_provider = info_provider
+        self.jinja_env = initialize_jinja_env(cache_dir)
+        self.typedef_resolver = TypedefResolver(info_provider)
+        self.output_dir = output_dir
+        set_global_type_info(info_provider)
+
+    def generate_code(self,module_definitions):
+        definitions = module_definitions['dom']
         if len(definitions.interfaces) == 0:
           return [self.generate_code_for_dictionary(dictionary)
                   for dictionary in definitions.dictionaries.values()]
@@ -138,7 +214,7 @@ def dictionary_context(dictionary):
 def dictionary_member_context(member):
     if member.default_value:
         idl_type = member.idl_type
-        idl_type.is_nullable = True
+        # idl_type.is_nullable = True
     else:
         idl_type = member.idl_type
     return {
@@ -281,21 +357,32 @@ def sort_context_list(context_list):
 
 
 def type_string(idl_type):
+    base_type_string = type_string_without_nullable(idl_type)
     if idl_type.is_union_type:
-        return union_type_string([type_string(member_type)
-                                  for member_type in idl_type.member_types])
-    type_str = IDL_TO_JS_TYPE_MAP.get(idl_type.base_type, idl_type.base_type)
-    if type_str == 'void':
-        return ''
-    if idl_type.is_array or idl_type.is_sequence:
-        return '!Array.<%s>' % type_string_with_nullable(type_str, idl_type.is_nullable)
-    return type_string_with_nullable(type_str, idl_type.is_nullable)
+        # Union type already handles nullable.
+        return base_type_string
+    assert base_type_string[0] != '!' and base_type_string[0] != '?', idl_type
+    if base_type_string in NON_NULL_JS_TYPE_SET:
+        if idl_type.is_nullable:
+            return '?' + base_type_string
+        return base_type_string
+    if idl_type.is_nullable:
+        return base_type_string
+    return '!' + base_type_string
 
 
-def type_string_with_nullable(type_string, is_nullable):
-    if type_string in NON_NULL_JS_TYPE_SET:
-        return type_string
-    return '?' + type_string if is_nullable else '!' + type_string
+def type_string_without_nullable(idl_type):
+    if idl_type.is_nullable:
+        return type_string_without_nullable(idl_type.inner_type)
+    if idl_type.is_union_type:
+        return '|'.join(sorted(type_string(member_type) for member_type in idl_type.member_types))
+    if idl_type.is_array or idl_type.is_sequence or \
+       idl_type.is_array_or_sequence_type:
+       return 'Array.<%s>' % type_string(idl_type.element_type)
+    assert idl_type.base_type, idl_type
+    if idl_type.base_type in IDL_TO_JS_TYPE_MAP:
+        return IDL_TO_JS_TYPE_MAP[idl_type.base_type]
+    return idl_type.name
 
 
 def union_type_string(type_strings):

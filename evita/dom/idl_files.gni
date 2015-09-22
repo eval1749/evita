@@ -3,8 +3,9 @@
 # found in the LICENSE file.
 
 idl_gen_dir = "$root_gen_dir/evita/idl"
+idl_scripts_output_dir = "$root_gen_dir/evita/idl"
 bindings_gen_dir = "$root_gen_dir/evita/bindings"
-bindings_scripts_output_dir = "$root_gen_dir/evita/idl"
+externs_gen_dir = "$root_gen_dir/evita/externs"
 
 interface_idl_files = [
   "//evita/dom/clipboard/DataTransfer.idl",
@@ -39,8 +40,8 @@ interface_idl_files = [
   "//evita/dom/os/File.idl",
   "//evita/dom/os/Process.idl",
 
-  # TODO(eval1749) Do we really need to have "Mode.idl"?
-  # "//evita/dom/text/modes/Mode.idl",
+  # Note: We have "Mode.idl" here for JS externs
+  "//evita/dom/text/modes/Mode.idl",
   "//evita/dom/text/MutationObserver.idl",
   "//evita/dom/text/MutationRecord.idl",
   "//evita/dom/text/Range.idl",
@@ -51,10 +52,9 @@ interface_idl_files = [
   "//evita/dom/windows/DocumentWindow.idl",
   "//evita/dom/windows/EditorWindow.idl",
 
-  # TODO(eval1749) Do we really need to have "Poind.idl"?
-  # "//evita/dom/windows/Point.idl",
-  # TODO(eval1749) Do we really need to have "Rect.idl"?
-  # "//evita/dom/windows/Rect.idl",
+  # Note: We have "Point.idl" and "Rect.idl" here for JS externs
+  "//evita/dom/windows/Point.idl",
+  "//evita/dom/windows/Rect.idl",
   "//evita/dom/windows/Selection.idl",
   "//evita/dom/windows/TableSelection.idl",
   "//evita/dom/windows/TableWindow.idl",
@@ -91,4 +91,31 @@ idl_lexer_parser_files = [
   "//tools/idl_parser/idl_lexer.py",
   "//tools/idl_parser/idl_node.py",
   "//tools/idl_parser/idl_parser.py",
+]
+
+static_js_externs_files = [
+  "//evita/dom/errors_externs.js",
+  "//evita/dom/types_externs.js",
+  "//evita/dom/bracket_externs.js",
+  "//evita/dom/clipboard/clipboard_externs.js",
+  "//evita/dom/commander_externs.js",
+  "//evita/dom/commands/find_and_replace_externs.js",
+  "//evita/dom/commands/spell_checker_externs.js",
+  "//evita/dom/console_externs.js",
+  "//evita/dom/text/document_externs.js",
+  "//evita/dom/file_path_externs.js",
+  "//evita/dom/js_console_externs.js",
+  "//evita/dom/key_names_externs.js",
+  "//evita/dom/lexers/lexer_externs.js",
+  "//evita/dom/lexers/lexers_externs.js",
+  "//evita/dom/text/modes/modes_externs.js",
+  "//evita/dom/os/os_externs.js",
+  "//evita/dom/text/range_externs.js",
+  "//evita/dom/windows/document_state_externs.js",
+  "//evita/dom/css/style_externs.js",
+  "//evita/dom/windows/tab_data_externs.js",
+  "//evita/dom/text/text_position_externs.js",
+  "//evita/dom/jslib/editors_externs.js",
+  "//evita/dom/jslib/ordered_set_externs.js",
+  "//evita/dom/jslib/windows_externs.js",
 ]

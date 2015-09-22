@@ -4,7 +4,7 @@
 
 [
   ImplementedAs=JavaScript,
-  Constructor(DOMString name, Function lexerConstructor)
+  Constructor(DOMString name, Function lexerConstructor),
 ]
 interface Mode {
   static readonly attribute Mode defaultMode;

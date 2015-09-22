@@ -474,6 +474,7 @@ def attribute_context(attribute):
         cpp_name = attribute.extended_attributes['ImplementedAs']
     else:
         cpp_name = underscore(attribute.name)
+
     if cpp_name == 'JavaScript':
         return {'cpp_name': cpp_name}
 

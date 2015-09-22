@@ -6,12 +6,25 @@ import("//evita/dom/idl_files.gni")
 
 source_set("bindings") {
   public_deps = [
-    ":bindings_cc",
+    ":cc_bindings",
+    ":js_externs",
   ]
   sources = interface_idl_files + dictionary_idl_files
 }
 
-action_foreach("bindings_cc") {
+action("cached_lex_yacc_tables") {
+  script = "//third_party/WebKit/Source/bindings/scripts/blink_idl_parser.py"
+
+  inputs = idl_lexer_parser_files
+  outputs = [
+    "$idl_scripts_output_dir/lextab.py",
+    "$idl_scripts_output_dir/parsetab.pickle",
+  ]
+
+  args = [ rebase_path(idl_scripts_output_dir, root_build_dir) ]
+}
+
+action_foreach("cc_bindings") {
   deps = [
     ":cached_lex_yacc_tables",
     ":interfaces_info",
@@ -27,8 +40,8 @@ action_foreach("bindings_cc") {
     "templates/js_interface.cc",
     "templates/js_interface.h",
     "$idl_gen_dir/modules/InterfacesInfoOverall.pickle",
-    "$bindings_scripts_output_dir/lextab.py",
-    "$bindings_scripts_output_dir/parsetab.pickle",
+    "$idl_scripts_output_dir/lextab.py",
+    "$idl_scripts_output_dir/parsetab.pickle",
     "//third_party/WebKit/Source/bindings/IDLExtendedAttributes.txt",
   ]
   outputs = [
@@ -36,31 +49,22 @@ action_foreach("bindings_cc") {
     "$bindings_gen_dir/v8_glue_{{source_name_part}}.h",
   ]
   args = [
-    "--output-dir", rebase_path(bindings_gen_dir),
-    "--cache-dir", rebase_path(bindings_scripts_output_dir),
-    "--info-dir", rebase_path(idl_gen_dir),
+    "--output-dir",
+    rebase_path(bindings_gen_dir),
+    "--cache-dir",
+    rebase_path(idl_scripts_output_dir),
+    "--info-dir",
+    rebase_path(idl_gen_dir),
     "--write-file-only-if-changed=1",
     "--target-component=core",
     "{{source}}",
   ]
 }
 
-action("cached_lex_yacc_tables") {
-  script = "//third_party/WebKit/Source/bindings/scripts/blink_idl_parser.py"
-
-  inputs = idl_lexer_parser_files
-  outputs = [
-    "$bindings_scripts_output_dir/lextab.py",
-    "$bindings_scripts_output_dir/parsetab.pickle",
-  ]
-
-  args = [ rebase_path(bindings_scripts_output_dir, root_build_dir) ]
-}
-
 action("interfaces_info_individual") {
   script = "//third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_individual.py"
   sources = interface_idl_files + dictionary_idl_files
-  file_list = "$bindings_gen_dir/file_list.txt"
+  file_list = "$idl_scripts_output_dir/file_list.txt"
   write_file(file_list, rebase_path(sources))
   outputs = [
     "$idl_gen_dir/core/InterfacesInfoCoreIndividual.pickle",
@@ -68,7 +72,7 @@ action("interfaces_info_individual") {
   ]
   args = [
     "--cache-directory",
-    rebase_path(bindings_scripts_output_dir),
+    rebase_path(idl_scripts_output_dir),
     "--idl-files-list",
     rebase_path(file_list),
     "--interfaces-info-file",
@@ -82,15 +86,87 @@ action("interfaces_info_individual") {
 
 action("interfaces_info") {
   deps = [
-    ":interfaces_info_individual"
+    ":interfaces_info_individual",
   ]
   script = "//third_party/WebKit/Source/bindings/scripts/compute_interfaces_info_overall.py"
-  inputs = [ "$idl_gen_dir/core/InterfacesInfoCoreIndividual.pickle" ]
-  outputs = [ "$idl_gen_dir/modules/InterfacesInfoOverall.pickle" ]
+  inputs = [
+    "$idl_gen_dir/core/InterfacesInfoCoreIndividual.pickle",
+  ]
+  outputs = [
+    "$idl_gen_dir/modules/InterfacesInfoOverall.pickle",
+  ]
   args = [
     "--write-file-only-if-changed=1",
     "--",
     rebase_path("$idl_gen_dir/core/InterfacesInfoCoreIndividual.pickle"),
     rebase_path("$idl_gen_dir/modules/InterfacesInfoOverall.pickle"),
+  ]
+}
+
+# Generate JS externs
+#   root_build_dir/gen/evita/externs
+#       evita_js_externs.js
+#       $(IDL_file_name)_externs.js
+action("js_externs") {
+  deps = [
+    ":js_externs_indivisual",
+  ]
+
+  idl_files = interface_idl_files + dictionary_idl_files
+  idl_file_list = "$externs_gen_dir/idl_file_list.txt"
+  write_file(idl_file_list, idl_files)
+
+  static_js_file_list = "$externs_gen_dir/static_js_file_list.txt"
+  write_file(static_js_file_list, rebase_path(static_js_externs_files))
+
+  script = "//tools/idl_to_js_externs/aggregate_js_externs.py"
+  outputs = [
+    "$root_gen_dir/evita/evita_js_externs.js",
+  ]
+  inputs = [ "//tools/idl_to_js_externs/aggregate_js_externs.py" ] +
+           process_file_template(
+               idl_files,
+               "$externs_gen_dir/{{source_name_part}}_externs.js") +
+           static_js_externs_files
+  args = [
+    rebase_path("$root_gen_dir/evita/evita_js_externs.js"),
+    rebase_path("//tools/idl_to_js_externs/header.js"),
+    rebase_path(externs_gen_dir),
+    rebase_path(idl_file_list),
+    rebase_path("//evita/dom"),
+    rebase_path(static_js_file_list),
+  ]
+}
+
+action_foreach("js_externs_indivisual") {
+  deps = [
+    ":cached_lex_yacc_tables",
+    ":interfaces_info",
+  ]
+  script = "//tools/idl_to_js_externs/idl_to_js_externs.py"
+  sources = interface_idl_files + dictionary_idl_files
+  inputs = [
+    "//tools/idl_to_js_externs/idl_to_js_externs.py",
+    "//tools/idl_to_js_externs/code_generator_js.py",
+    "//tools/idl_to_js_externs/dictionary.js",
+    "//tools/idl_to_js_externs/interface.js",
+    "$idl_gen_dir/modules/InterfacesInfoOverall.pickle",
+    "$idl_scripts_output_dir/lextab.py",
+    "$idl_scripts_output_dir/parsetab.pickle",
+    "//third_party/WebKit/Source/bindings/IDLExtendedAttributes.txt",
+  ]
+  outputs = [
+    "$externs_gen_dir/{{source_name_part}}_externs.js",
+  ]
+  args = [
+    "--output-dir",
+    rebase_path(externs_gen_dir),
+    "--cache-dir",
+    rebase_path(idl_scripts_output_dir),
+    "--info-dir",
+    rebase_path(idl_gen_dir),
+    "--write-file-only-if-changed=1",
+    "--target-component=core",
+    "{{source}}",
   ]
 }

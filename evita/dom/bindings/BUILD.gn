@@ -20,10 +20,10 @@ action_foreach("bindings_cc") {
   sources = interface_idl_files + dictionary_idl_files
   inputs = [
     "idl_to_glue.py",
-    "dictionary.cc",
-    "dictionary.h",
-    "interface.cc",
-    "interface.h",
+    "templates/dictionary.cc",
+    "templates/dictionary.h",
+    "templates/interface.cc",
+    "templates/interface.h",
     "$idl_gen_dir/modules/InterfacesInfoOverall.pickle",
     "$bindings_scripts_output_dir/lextab.py",
     "$bindings_scripts_output_dir/parsetab.pickle",

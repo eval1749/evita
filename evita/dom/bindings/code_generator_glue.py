@@ -11,7 +11,7 @@ import sys
 module_path = os.path.dirname(os.path.realpath(__file__))
 blink_path = os.path.normpath(os.path.join(module_path, os.pardir, os.pardir))
 third_party_dir = os.path.normpath(os.path.join(blink_path, os.pardir))
-templates_dir = module_path
+templates_dir = os.path.normpath(os.path.join(module_path, 'templates'))
 
 # jinja2 is in chromium's third_party directory.
 # Insert at 1 so at front to override system libraries, and

@@ -10,6 +10,7 @@ BLACK_LIST = [
     'build/',
     'buildtools/',
     'gin/',
+    'evita/dom/bindings/templates',
     'testing/',
     'tools/',
     'third_party/',

@@ -35,22 +35,24 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
 
  public:
   using EventPath = std::vector<EventTarget*>;
+
   EventTarget();
-  virtual ~EventTarget();
+  ~EventTarget() override;
 
   virtual bool DispatchEvent(Event* event);
   void ScheduleDispatchEvent(Event* event);
 
+ protected:
+  virtual EventPath BuildEventPath() const;
+
  private:
   friend class bindings::EventTargetClass;
-
   class EventListenerMap;
 
   void AddEventListener(const base::string16& type,
                         EventListener callback,
                         bool capture);
   void AddEventListener(const base::string16& type, EventListener callback);
-  virtual EventPath BuildEventPath() const;
   void DispatchEventWithInLock(Event* event);
   void InvokeEventListeners(v8_glue::Runner* runner, Event* event);
   void RemoveEventListener(const base::string16& type,

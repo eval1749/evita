@@ -110,7 +110,6 @@ static_js_externs_files = [
   "//evita/dom/lexers/lexers_externs.js",
   "//evita/dom/text/modes/modes_externs.js",
   "//evita/dom/os/os_externs.js",
-  "//evita/dom/text/range_externs.js",
   "//evita/dom/windows/document_state_externs.js",
   "//evita/dom/css/style_externs.js",
   "//evita/dom/windows/tab_data_externs.js",

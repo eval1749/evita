@@ -50,7 +50,8 @@ global_js_interface_names = set()
 def should_be_callback(idl_type):
     if idl_type.is_callback_function or idl_type.is_callback_interface:
         return True
-    return idl_type.name.endswith('Callback')
+    assert not idl_type.name.endswith('Callback')
+    return False
 
 # GlueType
 class GlueType(object):
@@ -365,6 +366,10 @@ class CodeGeneratorGlue(object):
     # module_definitions = {'dom': idl_definitions.IdlDefinitions}
     def generate_code(self, module_definitions):
         definitions = module_definitions['dom']
+
+        # Note: callback functions aren't visible out side defined IDL.
+        IdlType.set_callback_interfaces(definitions.callback_functions)
+
         global global_definitions
         global_definitions = definitions
         return list(chain(*[

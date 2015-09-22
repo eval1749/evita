@@ -71,7 +71,7 @@ class GlueType(object):
 
     def declare_str(self):
         if self.idl_type.is_union_type:
-            raise Exception("Can't use as member: " + str(idl_type))
+            raise Exception("Can't use as member: " + str(self.idl_type))
         if self.element_typestr:
             return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
@@ -89,7 +89,6 @@ class GlueType(object):
     def from_v8_str(self):
         if self.idl_type.is_union_type:
             members = [member for member in self.idl_type.idl_types()]
-            print ' union', str(members)
             return 'v8_glue::Either<' + ', '.join(to_glue_type(member_type).from_v8_str() for member_type in members[1:]) + '>'
         if self.element_typestr:
             return 'std::vector<%s>' % self.element_typestr
@@ -194,7 +193,6 @@ IDL_TO_CPP_TYPE_MAP = {
 
 # Map IDL type to Glue Type
 def to_glue_type(idl_type):
-    print '  to_glue_type', idl_type, idl_type.is_dictionary, idl_type.base_type, idl_type.is_callback_interface
     if idl_type.is_array or idl_type.is_sequence_type or idl_type.is_array_or_sequence_type:
         return GlueType(idl_type, idl_type.element_type.base_type)
 
@@ -210,27 +208,22 @@ def to_glue_type(idl_type):
         if type_name in JS_INTERFACE_NAMES:
             global_js_interface_names.add(type_name)
         cpp_type = IDL_TO_CPP_TYPE_MAP[type_name]
-        print '  cpp_type', cpp_type
         return GlueType(idl_type, cpp_type.cpp_name,
                         is_by_value=cpp_type.is_by_value,
                         is_pointer=cpp_type.is_pointer)
 
     if type_name in KNOWN_INTERFACE_NAMES:
-        print '  known interface', idl_type
         global_known_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
 
     if idl_type.is_dictionary:
-        print "dictionary", idl_type, idl_type.is_dictionary, type_name
         global_referenced_dictionary_names.add(type_name)
         return GlueType(idl_type, type_name, is_struct=True)
 
     if should_be_callback(idl_type):
-        print '  callback', idl_type
         return GlueType(idl_type, 'v8::Handle<v8::Function>', is_struct=True)
 
     if idl_type.is_interface_type:
-        print '  interface', idl_type, idl_type.is_interface_type
         assert idl_type.is_interface_type, idl_type
         assert not idl_type.name.endswith('Callback'), 'Should be callback ' + idl_type.name
         assert not idl_type.name.endswith('Init'), 'Should be dictionary ' + idl_type.name
@@ -268,7 +261,9 @@ def depends_on_union_types(idl_type):
 
 class TypedefResolver(Visitor):
     def __init__(self, info_provider):
+        self.additional_includes = set()
         self.info_provider = info_provider
+        self.typedefs = {}
 
     def resolve(self, definitions, definition_name):
         """Traverse definitions and resolves typedefs with the actual types."""
@@ -338,6 +333,7 @@ class CodeGeneratorGlue(object):
     def __init__(self, info_provider, cache_dir, output_dir):
         self.info_provider = info_provider
         self.jinja_env = initialize_jinja_env(cache_dir)
+        self.output_dir = output_dir
         self.typedef_resolver = TypedefResolver(info_provider)
         set_global_type_info(info_provider)
 
@@ -763,8 +759,7 @@ def interface_name_to_include_path(interface_name):
         raise Exception('No include path for ' + interface_name)
     interface_info = global_interfaces_info[interface_name]
     if not('include_path' in interface_info):
-        print interface_info
-        assert False
+        raise Exception('No include_path in ' + str(interface_info))
     return interface_info['include_path']
 
 

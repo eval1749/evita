@@ -33,6 +33,7 @@ action_foreach("cc_bindings") {
   sources = interface_idl_files + dictionary_idl_files
   inputs = [
     "idl_to_glue.py",
+    "code_generator_glue.py",
     "templates/dictionary.cc",
     "templates/dictionary.h",
     "templates/interface.cc",

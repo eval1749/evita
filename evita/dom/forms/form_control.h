@@ -76,7 +76,7 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   void set_disabled(bool new_disabled);
 
   // dom::EventTarget
-  EventPath BuildEventPath() const override;
+  EventPath BuildEventPath() const final;
 
   gfx::RectF bounds_;
   bool disabled_;

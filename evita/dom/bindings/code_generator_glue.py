@@ -509,6 +509,8 @@ def constant_context(constant):
     }
 
 
+# IdlConstructor is derived class of IdlOperation.
+# IdlConstructor.name = 'Constructor' | 'NamedConstructor'
 def constructor_context_list(interface):
     name = interface.name
     return [

@@ -64,9 +64,12 @@ def set_global_type_info(info_provider):
     IdlType.set_callback_interfaces(interfaces_info['callback_interfaces'])
     IdlType.set_dictionaries(interfaces_info['dictionaries'])
     IdlType.set_enums(info_provider.enumerations)
-    IdlType.set_implemented_as_interfaces(interfaces_info['implemented_as_interfaces'])
-    IdlType.set_garbage_collected_types(interfaces_info['garbage_collected_interfaces'])
-    IdlType.set_will_be_garbage_collected_types(interfaces_info['will_be_garbage_collected_interfaces'])
+    IdlType.set_implemented_as_interfaces(
+        interfaces_info['implemented_as_interfaces'])
+    IdlType.set_garbage_collected_types(
+        interfaces_info['garbage_collected_interfaces'])
+    IdlType.set_will_be_garbage_collected_types(
+        interfaces_info['will_be_garbage_collected_interfaces'])
 
 
 # TODO(eval1749) We should share |depends_on_union_types()| with
@@ -85,6 +88,7 @@ def depends_on_union_types(idl_type):
 # TODO(eval1749) We should share |TypedefResolver()| with
 # "code_generator_glue.py"
 class TypedefResolver(Visitor):
+
     def __init__(self, info_provider):
         self.info_provider = info_provider
 
@@ -99,7 +103,8 @@ class TypedefResolver(Visitor):
 
     def _update_dependencies_include_paths(self, definition_name):
         interface_info = self.info_provider.interfaces_info[definition_name]
-        dependencies_include_paths = interface_info['dependencies_include_paths']
+        dependencies_include_paths = interface_info[
+            'dependencies_include_paths']
         for include_path in self.additional_includes:
             if include_path not in dependencies_include_paths:
                 dependencies_include_paths.append(include_path)
@@ -126,6 +131,7 @@ class TypedefResolver(Visitor):
 
 
 class CodeGeneratorJS(object):
+
     def __init__(self, info_provider, cache_dir, output_dir):
         self.info_provider = info_provider
         self.jinja_env = initialize_jinja_env(cache_dir)
@@ -133,14 +139,14 @@ class CodeGeneratorJS(object):
         self.output_dir = output_dir
         set_global_type_info(info_provider)
 
-    def generate_code(self,module_definitions):
+    def generate_code(self, module_definitions):
         definitions = module_definitions['dom']
         if len(definitions.interfaces) == 0:
-          return [self.generate_code_for_dictionary(dictionary)
-                  for dictionary in definitions.dictionaries.values()]
+            return [self.generate_code_for_dictionary(dictionary)
+                    for dictionary in definitions.dictionaries.values()]
         else:
-          return [self.generate_code_for_interface(interface, definitions)
-                  for interface in definitions.interfaces.values()]
+            return [self.generate_code_for_interface(interface, definitions)
+                    for interface in definitions.interfaces.values()]
 
     def generate_code_for_dictionary(self, dictionary):
         template = self.jinja_env.get_template('dictionary.js')
@@ -188,7 +194,7 @@ def constant_context(constant):
 # We consolidate overloaded signatures into one function signature.
 # See URL.idl for example.
 def constructor_context_list(interface):
-    if not interface.constructors  and not interface.custom_constructors:
+    if not interface.constructors and not interface.custom_constructors:
         return []
     contents = function_context(interface.constructors +
                                 interface.custom_constructors)
@@ -199,13 +205,13 @@ def constructor_context_list(interface):
 
 def dictionary_context(dictionary):
     if 'JsNamespace' in dictionary.extended_attributes:
-      namespace = dictionary.extended_attributes['JsNamespace'] + '.'
+        namespace = dictionary.extended_attributes['JsNamespace'] + '.'
     else:
-      namespace = '';
+        namespace = ''
 
     return {
         'dictionary_members': [dictionary_member_context(member)
-                    for member in dictionary.members],
+                               for member in dictionary.members],
         'dictionary_name': dictionary.name,
         'namespace': namespace,
     }
@@ -222,6 +228,7 @@ def dictionary_member_context(member):
         'name': member.name,
         'type': type_string(idl_type),
     }
+
 
 def enumeration_context(enumeration):
     # FIXME: Handle empty string value. We don't have way to express empty
@@ -256,7 +263,8 @@ def initialize_jinja_env(cache_dir):
     jinja_env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(templates_dir),
         # Bytecode cache is not concurrency-safe unless pre-cached:
-        # if pre-cached this is read-only, but writing creates a race condition.
+        # if pre-cached this is read-only, but writing creates a race
+        # condition.
         bytecode_cache=jinja2.FileSystemBytecodeCache(cache_dir),
         keep_trailing_newline=True,  # newline-terminate generated files
         lstrip_blocks=True,  # so can indent control flow tags
@@ -265,47 +273,47 @@ def initialize_jinja_env(cache_dir):
 
 
 def interface_context(interface, definitions):
-        callback_context_list = [
-            callback_context(callback_function)
-            for callback_function in definitions.callback_functions.values()]
+    callback_context_list = [
+        callback_context(callback_function)
+        for callback_function in definitions.callback_functions.values()]
 
-        dictionary_context_list = [
-            dictionary_context(dictionary)
-            for dictionary in definitions.dictionaries.values()]
+    dictionary_context_list = [
+        dictionary_context(dictionary)
+        for dictionary in definitions.dictionaries.values()]
 
-        enumeration_context_list = [
-            enumeration_context(enumeration)
-            for enumeration in definitions.enumerations.values()]
+    enumeration_context_list = [
+        enumeration_context(enumeration)
+        for enumeration in definitions.enumerations.values()]
 
-        if 'JsNamespace' in interface.extended_attributes:
-          namespace = interface.extended_attributes['JsNamespace'] + '.'
-        else:
-          namespace = '';
+    if 'JsNamespace' in interface.extended_attributes:
+        namespace = interface.extended_attributes['JsNamespace'] + '.'
+    else:
+        namespace = ''
 
-        attribute_context_list = [attribute_context(attribute)
-                                  for attribute in interface.attributes]
-        constant_context_list = [constant_context(constant)
-                                 for constant in interface.constants]
+    attribute_context_list = [attribute_context(attribute)
+                              for attribute in interface.attributes]
+    constant_context_list = [constant_context(constant)
+                             for constant in interface.constants]
 
-        method_context_list = [
-            function_context(list(functions))
-            for name, functions in
-            groupby(interface.operations, lambda operation: operation.name)
-        ]
+    method_context_list = [
+        function_context(list(functions))
+        for name, functions in
+        groupby(interface.operations, lambda operation: operation.name)
+    ]
 
-        # Context for tempaltes
-        return {
-          'attributes': sort_context_list(attribute_context_list),
-          'callbacks': sort_context_list(callback_context_list),
-          'constants': sort_context_list(constant_context_list),
-          'constructors': constructor_context_list(interface),
-          'dictionaries': sort_context_list(dictionary_context_list),
-          'enumerations': sort_context_list(enumeration_context_list),
-          'interfaces': interface_context_list(interface),
-          'interface_name': namespace + interface.name,
-          'methods': sort_context_list(method_context_list),
-          'namespace': namespace,
-        }
+    # Context for tempaltes
+    return {
+        'attributes': sort_context_list(attribute_context_list),
+        'callbacks': sort_context_list(callback_context_list),
+        'constants': sort_context_list(constant_context_list),
+        'constructors': constructor_context_list(interface),
+        'dictionaries': sort_context_list(dictionary_context_list),
+        'enumerations': sort_context_list(enumeration_context_list),
+        'interfaces': interface_context_list(interface),
+        'interface_name': namespace + interface.name,
+        'methods': sort_context_list(method_context_list),
+        'namespace': namespace,
+    }
 
 
 def interface_context_list(interface):
@@ -319,9 +327,8 @@ def overloaded_parameter(overloaded_parameters):
     parameters = [parameter for parameter in overloaded_parameters
                   if parameter]
     is_optional = len(parameters) != len(overloaded_parameters) or \
-                  any(parameter.is_optional for parameter in parameters)
-    names = list(set([parameter.name for parameter in parameters]))
-    names.sort()
+        any(parameter.is_optional for parameter in parameters)
+    names = sorted(set([parameter.name for parameter in parameters]))
     name = '_or_'.join(names)
     parameter_type_strings = [parameter_type_string(parameter, is_optional)
                               for parameter in parameters]
@@ -345,6 +352,7 @@ def parameter_name(name, is_optional):
 def parameter_type_string(parameter, is_optional):
     string = type_string(parameter.idl_type)
     return string + '=' if is_optional else string
+
 
 def parent_name(name):
     if name in NAMESPACE_MAP:
@@ -375,10 +383,11 @@ def type_string_without_nullable(idl_type):
     if idl_type.is_nullable:
         return type_string_without_nullable(idl_type.inner_type)
     if idl_type.is_union_type:
-        return '|'.join(sorted(type_string(member_type) for member_type in idl_type.member_types))
+        return '|'.join(sorted(type_string(member_type)
+                               for member_type in idl_type.member_types))
     if idl_type.is_array or idl_type.is_sequence or \
        idl_type.is_array_or_sequence_type:
-       return 'Array.<%s>' % type_string(idl_type.element_type)
+        return 'Array.<%s>' % type_string(idl_type.element_type)
     assert idl_type.base_type, idl_type
     if idl_type.base_type in IDL_TO_JS_TYPE_MAP:
         return IDL_TO_JS_TYPE_MAP[idl_type.base_type]
@@ -386,6 +395,5 @@ def type_string_without_nullable(idl_type):
 
 
 def union_type_string(type_strings):
-    type_string_list = list(set(type_strings))
-    type_string_list.sort()
+    type_string_list = sorted(set(type_strings))
     return '|'.join(type_string_list)

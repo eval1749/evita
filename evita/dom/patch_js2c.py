@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys;
+import sys
 
 FOOTER = """\
 namespace dom {
@@ -27,23 +27,24 @@ void LoadJsLibrary(v8::Isolate* isolate) {
 
 WARNINGS = [
     4100, 4127, 4189, 4244, 4245, 4302, 4512, 4800
-];
+]
+
 
 def main():
-  input_file = sys.argv[1];
-  output_file = sys.argv[2];
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
 
-  lines = open(input_file, "rt").readlines();
+    lines = open(input_file, "rt").readlines()
 
-  output = open(output_file, "w");
-  output.write("#pragma warning(disable: %(warnings)s)\n" % {
-    'warnings': " ".join(map(str, WARNINGS)),
-  })
-  for line in lines:
-    line = line.replace('#include "', '#include "v8/src/');
-    output.write(line);
-  output.write(FOOTER);
-  output.close()
+    output = open(output_file, "w")
+    output.write("#pragma warning(disable: %(warnings)s)\n" % {
+        'warnings': " ".join(map(str, WARNINGS)),
+    })
+    for line in lines:
+        line = line.replace('#include "', '#include "v8/src/')
+        output.write(line)
+    output.write(FOOTER)
+    output.close()
 
 if __name__ == "__main__":
-  main()
+    main()

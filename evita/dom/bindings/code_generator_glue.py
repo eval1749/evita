@@ -43,6 +43,7 @@ JS_INTERFACE_NAMES = {
 }
 global_js_interface_names = set()
 
+
 def should_be_callback(idl_type):
     if idl_type.is_callback_function or idl_type.is_callback_interface:
         return True
@@ -50,7 +51,10 @@ def should_be_callback(idl_type):
     return False
 
 # GlueType
+
+
 class GlueType(object):
+
     def __init__(self, idl_type, cpp_name, is_by_value=True,
                  is_collectable=False, is_pointer=False, is_struct=False):
         self.cpp_name = cpp_name
@@ -60,7 +64,8 @@ class GlueType(object):
         self.is_nullable = idl_type.is_nullable
         self.is_pointer = is_pointer
         self.is_struct = is_struct
-        if self.idl_type.is_array or self.idl_type.is_sequence or idl_type.is_array_or_sequence_type:
+        if self.idl_type.is_array or self.idl_type.is_sequence or \
+            idl_type.is_array_or_sequence_type:
             element_type = to_glue_type(idl_type.element_type)
             self.element_typestr = element_type.return_str()
         else:
@@ -82,11 +87,14 @@ class GlueType(object):
     def display_str(self):
         return str(self.idl_type)
 
-    # Used for variable declaration of output parameter of |gin::ConvertFromV8|.
+    # Used for variable declaration of output parameter of
+    # |gin::ConvertFromV8|.
     def from_v8_str(self):
         if self.idl_type.is_union_type:
             members = [member for member in self.idl_type.idl_types()]
-            return 'v8_glue::Either<' + ', '.join(to_glue_type(member_type).from_v8_str() for member_type in members[1:]) + '>'
+            return 'v8_glue::Either<' + \
+                ', '.join(to_glue_type(member_type).from_v8_str()
+                          for member_type in members[1:]) + '>'
         if self.element_typestr:
             return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
@@ -126,6 +134,7 @@ class GlueType(object):
 
 
 class CppType(object):
+
     def __init__(self, cpp_name, is_by_value=True, is_collectable=False,
                  is_pointer=False, is_struct=False):
         self.cpp_name = cpp_name
@@ -190,8 +199,11 @@ IDL_TO_CPP_TYPE_MAP = {
 }
 
 # Map IDL type to Glue Type
+
+
 def to_glue_type(idl_type):
-    if idl_type.is_array or idl_type.is_sequence_type or idl_type.is_array_or_sequence_type:
+    if idl_type.is_array or idl_type.is_sequence_type or \
+        idl_type.is_array_or_sequence_type:
         return GlueType(idl_type, idl_type.element_type.base_type)
 
     if idl_type.is_union_type:
@@ -199,7 +211,7 @@ def to_glue_type(idl_type):
 
     type_name = idl_type.base_type
 
-    if type_name == None:
+    if type_name is None:
         raise 'to_glue_type(' + str(idl_type) + ')'
 
     if type_name in IDL_TO_CPP_TYPE_MAP:
@@ -219,8 +231,10 @@ def to_glue_type(idl_type):
 
     if idl_type.is_interface_type:
         assert idl_type.is_interface_type, idl_type
-        assert not idl_type.name.endswith('Callback'), 'Should be callback ' + idl_type.name
-        assert not idl_type.name.endswith('Init'), 'Should be dictionary ' + idl_type.name
+        assert not idl_type.name.endswith(
+            'Callback'), 'Should be callback ' + idl_type.name
+        assert not idl_type.name.endswith(
+            'Init'), 'Should be dictionary ' + idl_type.name
         if type_name in global_interfaces_info:
             global_referenced_interface_names.add(type_name)
         return GlueType(idl_type, type_name, is_collectable=True)
@@ -237,9 +251,12 @@ def set_global_type_info(info_provider):
     IdlType.set_callback_interfaces(interfaces_info['callback_interfaces'])
     IdlType.set_dictionaries(interfaces_info['dictionaries'])
     IdlType.set_enums(info_provider.enumerations)
-    IdlType.set_implemented_as_interfaces(interfaces_info['implemented_as_interfaces'])
-    IdlType.set_garbage_collected_types(interfaces_info['garbage_collected_interfaces'])
-    IdlType.set_will_be_garbage_collected_types(interfaces_info['will_be_garbage_collected_interfaces'])
+    IdlType.set_implemented_as_interfaces(
+        interfaces_info['implemented_as_interfaces'])
+    IdlType.set_garbage_collected_types(
+        interfaces_info['garbage_collected_interfaces'])
+    IdlType.set_will_be_garbage_collected_types(
+        interfaces_info['will_be_garbage_collected_interfaces'])
 
 
 def depends_on_union_types(idl_type):
@@ -254,6 +271,7 @@ def depends_on_union_types(idl_type):
 
 
 class TypedefResolver(Visitor):
+
     def __init__(self, info_provider):
         self.additional_includes = set()
         self.info_provider = info_provider
@@ -270,7 +288,8 @@ class TypedefResolver(Visitor):
 
     def _update_dependencies_include_paths(self, definition_name):
         interface_info = self.info_provider.interfaces_info[definition_name]
-        dependencies_include_paths = interface_info['dependencies_include_paths']
+        dependencies_include_paths = interface_info[
+            'dependencies_include_paths']
         for include_path in self.additional_includes:
             if include_path not in dependencies_include_paths:
                 dependencies_include_paths.append(include_path)
@@ -324,6 +343,7 @@ class TypedefResolver(Visitor):
 #   'full_path': 'D:\\w\\evita\\src\\evita\\dom\\events\\CompositionEvent.idl'
 #  }
 class CodeGeneratorGlue(object):
+
     def __init__(self, info_provider, cache_dir, output_dir):
         self.info_provider = info_provider
         self.jinja_env = initialize_jinja_env(cache_dir)
@@ -335,7 +355,7 @@ class CodeGeneratorGlue(object):
         global global_interfaces_info
         global_interfaces_info = interfaces_info
 
-        #for interface_info in interfaces_info.values():
+        # for interface_info in interfaces_info.values():
         for key in interfaces_info.keys():
             if key[0] >= 'a':
                 continue
@@ -350,7 +370,7 @@ class CodeGeneratorGlue(object):
     def generate_cc_h(self, context):
         return [
             {
-                'contents':  self.generate_contents(context,  extension),
+                'contents': self.generate_contents(context, extension),
                 'file_name': context['output_name'] + extension,
             }
             for extension in ['.cc', '.h']
@@ -398,7 +418,7 @@ def dictionary_member_context(member):
         'default_value': cpp_value(member.default_value),
         'display_type': glue_type.display_str(),
         'from_v8_type': glue_type.from_v8_str(),
-        'has_default_value': member.default_value != None,
+        'has_default_value': member.default_value is not None,
         'is_nullable': member.idl_type.is_nullable,
         'name': member.name,
         'parameter_type': glue_type.parameter_str(),
@@ -425,10 +445,11 @@ def dictionary_context(dictionary):
     class_references = list(global_referenced_interface_names)
 
     cc_include_paths = map(interface_name_to_include_path,
-                        filter(lambda name: 'include_path' in global_interfaces_info[name],
-                               global_referenced_interface_names)) + \
-                    map(dictionary_name_to_include_path,
-                        global_referenced_dictionary_names)
+                           filter(lambda name: 'include_path' in \
+                                    global_interfaces_info[name],
+                                  global_referenced_interface_names)) + \
+        map(dictionary_name_to_include_path,
+            global_referenced_dictionary_names)
     cc_include_paths.append('evita/dom/converter.h')
     if global_has_nullable:
         cc_include_paths.append('evita/v8_glue/nullable.h')
@@ -519,6 +540,7 @@ def constructor_context_list(interface):
         for parameters in expand_parameters(interface.custom_constructors)
     ]
 
+
 def enumeration_context(enumeration):
     # FIXME: Handle empty string value. We don't have way to express empty
     # string as Glue externs as of March 2014.
@@ -531,7 +553,7 @@ def enumeration_context(enumeration):
 
 def fix_include_path(path):
     return os.path.join(os.path.dirname(path).replace('../', ''),
-        underscore(os.path.basename(path))).replace('\\', '/')
+                        underscore(os.path.basename(path))).replace('\\', '/')
 
 
 def function_context(functions):
@@ -552,10 +574,10 @@ def function_context(functions):
 
     signatures = [
         {
-          'cpp_name': cpp_name,
-          'is_static': is_static,
-          'parameters': parameters,
-          'to_v8_type': to_v8_type,
+            'cpp_name': cpp_name,
+            'is_static': is_static,
+            'parameters': parameters,
+            'to_v8_type': to_v8_type,
         }
         for parameters in parameters_list
     ]
@@ -615,7 +637,7 @@ def interface_context(interface):
         for callback_function in global_definitions.callback_functions.values()
     ]
 
-    enumeration_context_list =[
+    enumeration_context_list = [
         enumeration_context(enumeration)
         for enumeration in global_definitions.enumerations.values()
     ]
@@ -645,10 +667,11 @@ def interface_context(interface):
     global_referenced_interface_names.add(interface.name)
 
     include_paths = map(interface_name_to_include_path,
-                        filter(lambda name: 'include_path' in global_interfaces_info[name],
+                        filter(lambda name: 'include_path' in \
+                                global_interfaces_info[name],
                                global_referenced_interface_names)) + \
-                    map(dictionary_name_to_include_path,
-                        global_referenced_dictionary_names)
+        map(dictionary_name_to_include_path,
+            global_referenced_dictionary_names)
     include_paths.append('base/logging.h')
     include_paths.append('evita/dom/converter.h')
     include_paths.append('evita/dom/script_host.h')
@@ -680,22 +703,22 @@ def interface_context(interface):
              for method in method_context_list])
 
     return {
-      'attributes': sort_context_list(attribute_context_list),
-      'callbacks': sort_context_list(callback_context_list),
-      'class_name': interface.name + 'Class',
-      'base_class_include': base_class_include,
-      'constants': sort_context_list(constant_context_list),
-      'constructor': constructor,
-      'dictionaries': dictionaries,
-      'enumerations': enumeration_context_list,
-      'has_static_member': has_static_member,
-      'need_instance_template': need_instance_template,
-      'include_paths': sorted(include_paths),
-      'interface_name': interface.name,
-      'interface_parent': interface.parent,
-      'methods': sort_context_list(method_context_list),
-      'output_name': interface.name,
-      'template_name': 'interface',
+        'attributes': sort_context_list(attribute_context_list),
+        'callbacks': sort_context_list(callback_context_list),
+        'class_name': interface.name + 'Class',
+        'base_class_include': base_class_include,
+        'constants': sort_context_list(constant_context_list),
+        'constructor': constructor,
+        'dictionaries': dictionaries,
+        'enumerations': enumeration_context_list,
+        'has_static_member': has_static_member,
+        'need_instance_template': need_instance_template,
+        'include_paths': sorted(include_paths),
+        'interface_name': interface.name,
+        'interface_parent': interface.parent,
+        'methods': sort_context_list(method_context_list),
+        'output_name': interface.name,
+        'template_name': 'interface',
     }
 
 
@@ -705,7 +728,7 @@ def interface_context(interface):
 #
 def cpp_value(value):
     if value == 'NULL':
-        return 'nullptr';
+        return 'nullptr'
     if isinstance(value, bool):
         return str(value).lower()
     return str(value)
@@ -729,11 +752,13 @@ def expand_parameters(functions):
         parameters_list.append(parameters)
     return parameters_list
 
+
 def initialize_jinja_env(cache_dir):
     jinja_env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(templates_dir),
         # Bytecode cache is not concurrency-safe unless pre-cached:
-        # if pre-cached this is read-only, but writing creates a race condition.
+        # if pre-cached this is read-only, but writing creates a race
+        # condition.
         bytecode_cache=jinja2.FileSystemBytecodeCache(cache_dir),
         keep_trailing_newline=True,  # newline-terminate generated files
         lstrip_blocks=True,  # so can indent control flow tags
@@ -755,7 +780,7 @@ def sort_context_list(context_list):
 
 
 def underscore(text):
-    result =''
+    result = ''
     start = True
     for ch in text:
         if ch >= 'A' and ch <= 'Z':
@@ -773,5 +798,7 @@ def union_type_string(type_strings):
     return '|'.join(type_strings)
 
 # Convert lower case cample, lowerCaseCamel, to upper case came, UpperCaseCamel
+
+
 def upper_camel_case(lower_camel_case):
     return lower_camel_case[0].upper() + lower_camel_case[1:]

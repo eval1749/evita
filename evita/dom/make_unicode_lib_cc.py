@@ -2,51 +2,55 @@
 # Copyright (c) 2014 Project Vogue. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-import json, os, sys
+import json
+import os
+import sys
 
 BIDI_CLASS_MAP = {}
 BIDI_CLASS_NAMES = []
 CATEGORY_MAP = {}
 CATEGORY_NAMES = []
 
+
 def build(input_file):
-  input = open(input_file, 'rt')
-  ucd = range(0x10000)
-  for line in input:
-    fields = line.split(';')
-    code = int(fields[0], 16);
-    if (code > 0xFFFF):
-      break;
-    category = fields[2]
-    bidi_class = fields[4]
-    if (not CATEGORY_MAP.has_key(category)):
-      assert not BIDI_CLASS_MAP.has_key(category)
-      CATEGORY_MAP[category] = len(CATEGORY_MAP)
-      CATEGORY_NAMES.append(category)
-    if (not BIDI_CLASS_MAP.has_key(bidi_class)):
-      assert not CATEGORY_MAP.has_key(bidi_class)
-      BIDI_CLASS_MAP[bidi_class] = len(BIDI_CLASS_MAP)
-      BIDI_CLASS_NAMES.append(bidi_class)
-    ucd[code] = {
-      'code': code,
-      'name': fields[1],
-      'category': CATEGORY_MAP[category],
-      'bidi': BIDI_CLASS_MAP[bidi_class],
-    }
-  for code in range(0x10000):
-    if (ucd[code] == code):
-      ucd[code] = {
-        'code': code,
-        'name': "",
-        'category': 0,
-        'bidi': 0,
-      }
-  input.close()
-  return ucd
+    input_file = open(input_file, 'rt')
+    ucd = range(0x10000)
+    for line in input_file:
+        fields = line.split(';')
+        code = int(fields[0], 16)
+        if (code > 0xFFFF):
+            break
+        category = fields[2]
+        bidi_class = fields[4]
+        if (category not in CATEGORY_MAP):
+            assert category not in BIDI_CLASS_MAP
+            CATEGORY_MAP[category] = len(CATEGORY_MAP)
+            CATEGORY_NAMES.append(category)
+        if (bidi_class not in BIDI_CLASS_MAP):
+            assert bidi_class not in CATEGORY_MAP
+            BIDI_CLASS_MAP[bidi_class] = len(BIDI_CLASS_MAP)
+            BIDI_CLASS_NAMES.append(bidi_class)
+        ucd[code] = {
+            'code': code,
+            'name': fields[1],
+            'category': CATEGORY_MAP[category],
+            'bidi': BIDI_CLASS_MAP[bidi_class],
+        }
+    for code in range(0x10000):
+        if (ucd[code] == code):
+            ucd[code] = {
+                'code': code,
+                'name': "",
+                'category': 0,
+                'bidi': 0,
+            }
+    input.close()
+    return ucd
+
 
 def emitJs(output_file, ucd):
-  output = open(output_file, 'w')
-  output.write("""\
+    output = open(output_file, 'w')
+    output.write("""\
 // Copyright (c) 2014 Project Vogue. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -70,31 +74,32 @@ struct Entry {
 
 const Entry kUnicodeData[] = {
 """)
-  for code in range(0x10000):
-    output.write('  { %(category)2d, %(bidi)2d, "%(name)s" }, // %(code)04X\n' %
-        ucd[code])
-  output.write("""\
+    for code in range(0x10000):
+        output.write(
+            '  { %(category)2d, %(bidi)2d, "%(name)s" }, // %(code)04X\n' %
+            ucd[code])
+    output.write("""\
 };
 
 const char* kBidiClassNames[] = {
 """)
 
-  index = 0
-  for name in BIDI_CLASS_NAMES:
-    output.write("""  "%(name)s, // %(index)d"\n""" %
-        {'index': index, 'name': name})
-    index += 1
-  output.write("""\
+    index = 0
+    for name in BIDI_CLASS_NAMES:
+        output.write("""  "%(name)s, // %(index)d"\n""" %
+                     {'index': index, 'name': name})
+        index += 1
+    output.write("""\
 };
 
 const char* kCategoryNames[] = {
 """)
-  index = 0
-  for name in CATEGORY_NAMES:
-    output.write("""  "%(name)s", // %(index)d\n""" % 
-        {'index': index, 'name': name})
-    index += 1
-  output.write("""\
+    index = 0
+    for name in CATEGORY_NAMES:
+        output.write("""  "%(name)s", // %(index)d\n""" %
+                     {'index': index, 'name': name})
+        index += 1
+    output.write("""\
 };
 
 // Unicode.BIDI_CLASS_SHORT_NAMES : Array.<string>
@@ -182,14 +187,14 @@ v8::Handle<v8::Object> GetUnicodeObject(v8::Isolate* isolate) {
 }  // namespace dom
 """)
 
-  output.close()
+    output.close()
+
 
 def main():
-  output_file = sys.argv[1];
-  input_file = sys.argv[2];
-  ucd = build(input_file)
-  index = 0
-  emitJs(output_file, ucd)
+    output_file = sys.argv[1]
+    input_file = sys.argv[2]
+    ucd = build(input_file)
+    emitJs(output_file, ucd)
 
 if __name__ == '__main__':
-  main()
+    main()

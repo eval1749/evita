@@ -17,13 +17,15 @@ idl_compiler_path = os.path.normpath(os.path.join(
 sys.path.insert(1, idl_compiler_path)
 
 from idl_compiler import idl_filename_to_interface_name, parse_options, \
-                         IdlCompiler
+    IdlCompiler
 from code_generator_js import CodeGeneratorJS
 from utilities import create_component_info_provider, write_file
+
 
 class IdlCompilerJS(IdlCompiler):
     # It seems pylint doesn't recognize what IdlCompiler defined.
     # pylint: disable=E1101
+
     def __init__(self, *args, **kwargs):
         IdlCompiler.__init__(self, *args, **kwargs)
         self.code_generator = CodeGeneratorJS(self.info_provider,

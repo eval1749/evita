@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import os, re, sys
+import os
+import re
+import sys
 import string
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -46,6 +48,7 @@ const std::vector<StaticScriptSource>& GetJsLibSources() {
 kMaxCharsInLine = 80
 kIndent = '  '
 
+
 def ConvertToCString(script_text):
     lines = script_text.split('\n')
     result = ''
@@ -69,6 +72,7 @@ def minify(script_text):
     result = re.sub(r'//.*?\n', '\n', result)
     return result
 
+
 def main():
     output_file = sys.argv[1]
     #minifier = jsmin.JavaScriptMinifier()
@@ -87,7 +91,7 @@ def main():
             'script_text': ConvertToCString(script_text)
         })
 
-    output = open(output_file, 'w');
+    output = open(output_file, 'w')
     output.write(SOURCE % {
         'entries': '\n'.join(entries)
     })

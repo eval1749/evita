@@ -608,6 +608,15 @@ def function_parameter(parameter):
 
 
 def interface_context(interface):
+    if 'ImplementedAs' in interface.extended_attributes:
+        if interface.extended_attributes['ImplementedAs'] == 'JavaScript':
+            return {
+                'INTERFACE_NAME': underscore(interface.name).upper(),
+                'interface_name': interface.name,
+                'output_name': interface.name,
+                'template_name': 'js_interface',
+            }
+
     callback_context_list = [
         callback_context(callback_function)
         for callback_function in global_definitions.callback_functions.values()

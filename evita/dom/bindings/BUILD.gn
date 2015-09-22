@@ -24,6 +24,8 @@ action_foreach("bindings_cc") {
     "templates/dictionary.h",
     "templates/interface.cc",
     "templates/interface.h",
+    "templates/js_interface.cc",
+    "templates/js_interface.h",
     "$idl_gen_dir/modules/InterfacesInfoOverall.pickle",
     "$bindings_scripts_output_dir/lextab.py",
     "$bindings_scripts_output_dir/parsetab.pickle",

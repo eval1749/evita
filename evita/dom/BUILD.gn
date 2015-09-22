@@ -119,7 +119,9 @@ source_set("dom") {
 }
 
 action("dom_jslib_cc") {
-  deps = [ ":check_jslib" ]
+  deps = [
+    ":check_jslib",
+  ]
   script = "make_get_jslib.py"
   outputs = [
     "$target_gen_dir/dom_jslib.cc",

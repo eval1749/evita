@@ -9,13 +9,6 @@
 #include "evita/v8_glue/either.h"
 #include "evita/v8_glue/scriptable.h"
 
-#if 0
-namespace v8_glue {
-template <typename Left, typename Right>
-struct Either;
-}
-#endif
-
 namespace dom {
 
 class Document;

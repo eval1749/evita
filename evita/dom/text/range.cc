@@ -12,9 +12,6 @@
 #include "evita/text/marker_set.h"
 #include "evita/text/range.h"
 #include "evita/text/spelling.h"
-#include "evita/v8_glue/constructor_template.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/either.h"
 
 namespace dom {
 

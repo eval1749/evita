@@ -33,6 +33,11 @@ Editor.RegExp;
  */
 Editor.RegExp.Match;
 
+/**
+ * @typedef {{name: string, start: number, end: number}}
+ */
+var RegExpMatch;
+
 // TODO(eval1749) We should rename |Range.Case| to |CaseAnalysisResult|.
 /** @enum {!symbol} */
 Range.Case = {

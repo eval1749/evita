@@ -47,25 +47,25 @@ class FormWindow final : public views::Window,
   ~FormWindow() final;
 
  private:
+  class FormViewModel;
+
   void DoRealizeWidget();
 
   // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(base::Time time) override;
+  void DidBeginAnimationFrame(base::Time time) final;
 
   // ui::SystemMetricsObserver
-  void DidChangeIconFont() override;
-  void DidChangeSystemColor() override;
-  void DidChangeSystemMetrics() override;
+  void DidChangeIconFont() final;
+  void DidChangeSystemColor() final;
+  void DidChangeSystemMetrics() final;
 
   // ui::Widget
-  void CreateNativeWindow() const override;
-  void DidChangeBounds() override;
-  void DidDestroyWidget() override;
-  void DidRealize() override;
-  void DidRequestDestroy() override;
-  void RealizeWidget() override;
-
-  class FormViewModel;
+  void CreateNativeWindow() const final;
+  void DidChangeBounds() final;
+  void DidDestroyWidget() final;
+  void DidRealize() final;
+  void DidRequestDestroy() final;
+  void RealizeWidget() final;
 
   gfx::Size form_size_;
   std::unique_ptr<gfx::Canvas> canvas_;

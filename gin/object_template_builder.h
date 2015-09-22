@@ -85,8 +85,6 @@ struct CallbackTraits<v8::Local<v8::FunctionTemplate> > {
 // v8::ObjectTemplate instances with various sorts of properties.
 class GIN_EXPORT ObjectTemplateBuilder {
  public:
-  ObjectTemplateBuilder(v8::Isolate* isolate,
-                        v8::Handle<v8::ObjectTemplate> templ);
   explicit ObjectTemplateBuilder(v8::Isolate* isolate);
   ~ObjectTemplateBuilder();
 

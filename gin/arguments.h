@@ -56,10 +56,6 @@ class GIN_EXPORT Arguments {
     return true;
   }
 
-  bool HasNext() {
-    return next_ < info_->Length();
-  }
-
   bool Skip() {
     if (next_ >= info_->Length())
       return false;

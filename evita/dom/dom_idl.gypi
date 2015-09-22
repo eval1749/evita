@@ -38,8 +38,10 @@
       'os/File.idl',
       'os/Process.idl',
       'text/modes/Mode.idl',
+      'text/Document.idl',
       'text/MutationObserver.idl',
       'text/MutationRecord.idl',
+      'text/Range.idl',
       'text/RegExp.idl',
       'timers/OneShotTimer.idl',
       'timers/RepeatingTimer.idl',
@@ -279,7 +281,6 @@
       'console_externs.js',
       'text/document_externs.js',
 
-      'file_path_externs.js',
       'js_console_externs.js',
       'key_names_externs.js',
       'lexers/lexer_externs.js',

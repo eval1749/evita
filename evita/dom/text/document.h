@@ -4,15 +4,15 @@
 #define EVITA_DOM_TEXT_DOCUMENT_H_
 
 #include <memory>
+#include <vector>
 
 #include "base/strings/string16.h"
 #include "base/time/time.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/gc/member.h"
 #include "evita/precomp.h"
-#include "evita/v8_glue/optional.h"
+#include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/scriptable.h"
-#include "evita/v8_glue/scoped_persistent.h"
 
 namespace text {
 class Buffer;
@@ -23,10 +23,6 @@ namespace dom {
 
 class Range;
 class RegularExpression;
-
-namespace bindings {
-class DocumentClass;
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -60,16 +56,24 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   text::LineAndColumn GetLineAndColumn(text::Posn offset) const;
   bool IsValidPosition(text::Posn position) const;
   v8::Handle<v8::Value> Match(RegularExpression* regexp, int start, int end);
-  static Document* New(const base::string16& name);
   Posn Redo(Posn position);
   void RenameTo(const base::string16& new_name);
-  base::string16 Slice(int start, v8_glue::Optional<int> opt_end);
+  base::string16 Slice(int start, int end);
+  base::string16 Slice(int start);
   void StartUndoGroup(const base::string16& name);
   Posn Undo(Posn position);
 
- private:
-  friend class bindings::DocumentClass;
+  // Implementations of static IDL attributes
+  static std::vector<Document*> list();
 
+  // Implementations of static IDL operations
+  static void AddObserver(v8::Handle<v8::Function> function);
+  static Document* Find(const base::string16& name);
+  static Document* NewDocument(const base::string16& name);
+  static void RemoveDocument(Document* document);
+  static void RemoveObserver(v8::Handle<v8::Function> function);
+
+ private:
   explicit Document(const base::string16& name);
 
   std::unique_ptr<text::Buffer> buffer_;

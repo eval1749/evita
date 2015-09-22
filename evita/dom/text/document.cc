@@ -8,11 +8,8 @@
 #include <vector>
 
 #include "base/logging.h"
-#include "base/memory/ref_counted.h"
 #include "base/strings/stringprintf.h"
 #include "evita/css/style_selector.h"
-#include "evita/editor/application.h"
-#include "evita/dom/converter.h"
 #include "evita/dom/text/document_set.h"
 #include "evita/dom/text/regular_expression.h"
 #include "evita/dom/script_host.h"
@@ -22,121 +19,35 @@
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/spelling.h"
-#include "evita/v8_glue/constructor_template.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/function_template_builder.h"
-
-#include "evita/v8_glue/nullable.h"
-#include "evita/v8_glue/optional.h"
 #include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/wrapper_info.h"
 #include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {
 
-namespace bindings {
-//////////////////////////////////////////////////////////////////////
-//
-// DocumentClass
-//
-class DocumentClass final
-    : public v8_glue::DerivedWrapperInfo<Document, EventTarget> {
- public:
-  explicit DocumentClass(const char* name);
-  ~DocumentClass() final;
-
- private:
-  static std::vector<Document*> list();
-
-  static void AddObserver(v8::Handle<v8::Function> function);
-  static v8_glue::Nullable<Document> Find(const base::string16& name);
-
-  static Document* NewDocument(const base::string16& name);
-  static void RemoveDocument(Document* document);
-  static void RemoveObserver(v8::Handle<v8::Function> function);
-
-  // v8_glue::WrapperInfo
-  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
-      v8::Isolate* isolate) override;
-
-  v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
-      v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> templ) override;
-
-  DISALLOW_COPY_AND_ASSIGN(DocumentClass);
-};
-
-DocumentClass::DocumentClass(const char* name) : BaseClass(name) {}
-
-DocumentClass::~DocumentClass() {}
-
-std::vector<Document*> DocumentClass::list() {
+std::vector<Document*> Document::list() {
   return DocumentSet::instance()->list();
 }
 
-void DocumentClass::AddObserver(v8::Handle<v8::Function> function) {
+void Document::AddObserver(v8::Handle<v8::Function> function) {
   DocumentSet::instance()->AddObserver(function);
 }
 
-v8_glue::Nullable<Document> DocumentClass::Find(const base::string16& name) {
+Document* Document::Find(const base::string16& name) {
   return DocumentSet::instance()->Find(name);
 }
 
-void DocumentClass::RemoveDocument(Document* document) {
+void Document::RemoveDocument(Document* document) {
   DocumentSet::instance()->Unregister(document);
 }
 
-void DocumentClass::RemoveObserver(v8::Handle<v8::Function> function) {
+void Document::RemoveObserver(v8::Handle<v8::Function> function) {
   DocumentSet::instance()->RemoveObserver(function);
 }
-
-// v8_glue::WrapperInfo
-v8::Handle<v8::FunctionTemplate> DocumentClass::CreateConstructorTemplate(
-    v8::Isolate* isolate) {
-  auto templ = v8_glue::CreateConstructorTemplate(isolate, &Document::New);
-  return v8_glue::FunctionTemplateBuilder(isolate, templ)
-      .SetProperty("list", &DocumentClass::list)
-      .SetMethod("addObserver", &DocumentClass::AddObserver)
-      .SetMethod("find", &DocumentClass::Find)
-      .SetMethod("remove", &DocumentClass::RemoveDocument)
-      .SetMethod("removeObserver", &DocumentClass::RemoveObserver)
-      .Build();
-}
-
-v8::Handle<v8::ObjectTemplate> DocumentClass::SetupInstanceTemplate(
-    v8::Isolate* isolate,
-    v8::Handle<v8::ObjectTemplate> templ) {
-  gin::ObjectTemplateBuilder builder(isolate, templ);
-  builder.SetProperty("length", &Document::length)
-      .SetProperty("modified", &Document::modified, &Document::set_modified)
-      .SetProperty("name", &Document::name)
-      .SetProperty("readonly", &Document::read_only, &Document::set_read_only)
-      .SetMethod("charCodeAt_", &Document::charCodeAt)
-      .SetMethod("clearUndo", &Document::ClearUndo)
-      .SetMethod("endUndoGroup_", &Document::EndUndoGroup)
-      .SetMethod("getLineAndColumn_", &Document::GetLineAndColumn)
-      .SetMethod("match_", &Document::Match)
-      .SetMethod("redo", &Document::Redo)
-      .SetMethod("renameTo", &Document::RenameTo)
-      .SetMethod("slice", &Document::Slice)
-      .SetMethod("startUndoGroup_", &Document::StartUndoGroup)
-      .SetMethod("spellingAt", &Document::spelling_at)
-      .SetMethod("styleAt", &Document::style_at)
-      .SetMethod("syntaxAt", &Document::syntax_at)
-      .SetMethod("undo", &Document::Undo);
-  return builder.Build();
-}
-
-}  // namespace bindings
 
 //////////////////////////////////////////////////////////////////////
 //
 // Document
 //
-using namespace bindings;  // NOLINT(build/namespaces)
-
-DEFINE_SCRIPTABLE_OBJECT(Document, DocumentClass)
-
 Document::Document(const base::string16& name)
     : buffer_(new text::Buffer()),
       name_(DocumentSet::instance()->MakeUniqueName(name)) {}
@@ -241,7 +152,7 @@ v8::Handle<v8::Value> Document::Match(RegularExpression* regexp,
   return regexp->ExecuteOnDocument(this, start, end);
 }
 
-Document* Document::New(const base::string16& name) {
+Document* Document::NewDocument(const base::string16& name) {
   auto const document = new Document(name);
   DocumentSet::instance()->Register(document);
   return document;
@@ -255,9 +166,12 @@ void Document::RenameTo(const base::string16& new_name) {
   DocumentSet::instance()->RenameDocument(this, new_name);
 }
 
-base::string16 Document::Slice(int start, v8_glue::Optional<int> opt_end) {
-  auto const end = opt_end.is_supplied ? opt_end.value : buffer_->GetEnd();
+base::string16 Document::Slice(int start, int end) {
   return buffer_->GetText(start, end);
+}
+
+base::string16 Document::Slice(int start) {
+  return Slice(start, buffer_->GetEnd());
 }
 
 void Document::StartUndoGroup(const base::string16& name) {

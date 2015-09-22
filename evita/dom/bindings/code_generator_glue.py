@@ -33,14 +33,6 @@ global_interfaces_info = {}
 
 FILE_NAME_PREFIX = 'v8_glue_'
 
-# TODO(eval1749) Once all interfaces have IDL file. We should get rid of
-# |KNOWN_INTERFACE_NAMES|.
-KNOWN_INTERFACE_NAMES = {
-    'Document': 'evita/dom/text/document.h',
-    # 'Range': 'evita/dom/text/range.h',
-}
-global_known_interface_names = set()
-
 JS_INTERFACE_NAMES = {
     'LineAndColumn': 'evita/text/buffer.h',
     'Point': 'evita/dom/windows/point.h',
@@ -214,10 +206,6 @@ def to_glue_type(idl_type):
         return GlueType(idl_type, cpp_type.cpp_name,
                         is_by_value=cpp_type.is_by_value,
                         is_pointer=cpp_type.is_pointer)
-
-    if type_name in KNOWN_INTERFACE_NAMES:
-        global_known_interface_names.add(type_name)
-        return GlueType(idl_type, type_name, is_collectable=True)
 
     if idl_type.is_dictionary:
         global_referenced_dictionary_names.add(type_name)
@@ -446,10 +434,6 @@ def dictionary_context(dictionary):
     for name in global_js_interface_names:
         class_references.append(name)
         cc_include_paths.append(JS_INTERFACE_NAMES[name])
-
-    for name in global_known_interface_names:
-        class_references.append(name)
-        cc_include_paths.append(KNOWN_INTERFACE_NAMES[name])
 
     h_include_paths = []
     if global_has_gc_member:
@@ -680,9 +664,6 @@ def interface_context(interface):
 
     for name in global_js_interface_names:
         include_paths.append(JS_INTERFACE_NAMES[name])
-
-    for name in global_known_interface_names:
-        include_paths.append(KNOWN_INTERFACE_NAMES[name])
 
     if interface.parent:
         base_class_include = \

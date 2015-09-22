@@ -1,3 +1,128 @@
 // Copyright (c) 2014 Project Vogue. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+callback DocumentObserverCallback = void(DOMString name, Document document);
+
+[
+    CustomConstructor(DOMString name)
+]
+interface Document : EventTarget {
+    static void addObserver(DocumentObserverCallback observer);
+    static Document? find(DOMString name);
+
+    [ImplementedAs=JavaScript]
+    static Document? findFile(DOMString absoluteFileName);
+
+    static readonly attribute Document[] list;
+
+    [ImplementedAs=JavaScript]
+    static Document open(DOMString fileName);
+
+    [ImplementedAs=RemoveDocument]
+    static void remove(Document document);
+
+    static void removeObserver(DocumentObserverCallback observer);
+
+    [ImplementedAs=JavaScript]
+    attribute DOMString encoding;
+
+    [ImplementedAs=JavaScript]
+    attribute DOMString fileName;
+
+    [ImplementedAs=JavaScript]
+    attribute Keymap keymap;
+
+    [ImplementedAs=JavaScript]
+    attribute Date lastStartTime_;
+
+    [ImplementedAs=JavaScript]
+    attribute Date lastWriteTime;
+
+    readonly attribute long length;
+
+    [ImplementedAs=JavaScript]
+    attribute Mode? mode;
+
+    attribute boolean modified;
+    readonly attribute DOMString name;
+
+    [ImplementedAs=JavaScript]
+    attribute long newline;
+
+    [ImplementedAs=read_only]
+    attribute boolean _readonly;
+
+    [ImplementedAs=JavaScript]
+    attribute long state;
+
+    [ImplementedAs=JavaScript]
+    void bindKey(DOMString keyCombination, Object command);
+
+    [ImplementedAs=charCodeAt]
+    long charCodeAt_(long offset);
+
+    void clearUndo();
+
+    [ImplementedAs=JavaScript]
+    void close();
+
+    [ImplementedAs=JavaScript]
+    long computeEndOf_(Unit unit, long offset);
+
+    [ImplementedAs=JavaScript]
+    long computeMotion_(Unit unit, long count, long offset);
+
+    [ImplementedAs=JavaScript]
+    long computeStartOf_(Unit unit, long offset);
+
+    [ImplementedAs=JavaScript]
+    long computeWhile_(DOMString charSet, long count, long offset);
+
+    [ImplementedAs=JavaScript]
+    void doColor_(long hint);
+
+    [ImplementedAs=EndUndoGroup]
+    void endUndoGroup_(DOMString name);
+
+    [ImplementedAs=JavaScript]
+    void forceClose();
+
+    // {column: long, lineNumber: long}
+    [ImplementedAs=GetLineAndColumn]
+    LineAndColumn getLineAndColumn_(long offset);
+
+    [ImplementedAs=JavaScript]
+    DocumentWindow[] listWindows();
+
+    [ImplementedAs=JavaScript]
+    Promise<long> load(optional DOMString fileName);
+
+    [ImplementedAs=Match]
+    RegExpMatch[] match_(RegularExpression regexp, long start, long end);
+
+    [ImplementedAs=JavaScript]
+    boolean needSave();
+
+    long redo(long offset);
+    void renameTo(DOMString newName);
+
+    [ImplementedAs=JavaScript]
+    Promise<long> save(optional DOMString fileName);
+
+    DOMString slice(long start, optional long end);
+
+    [ImplementedAs=StartUndoGroup]
+    void startUndoGroup_(DOMString name);
+
+    [ImplementedAs=spelling_at]
+    DOMString spellingAt(long offset);
+
+    [ImplementedAs=style_at]
+    Style styleAt(long offset);
+
+    [ImplementedAs=syntax_at]
+    long syntaxAt(long offset);
+
+    long undo(long offset);
+};

@@ -16,7 +16,7 @@ class FormControlController final : public ui::ControlController,
                                     protected EventSource {
  public:
   explicit FormControlController(domapi::EventTargetId event_target_id);
-  ~FormControlController();
+  ~FormControlController() final;
 
   // ui::ControlController
   void DidKillFocus(ui::Control* control, ui::Widget* focused_widget) final;

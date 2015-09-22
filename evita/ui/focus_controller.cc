@@ -100,10 +100,10 @@ FocusController::FocusController()
 
 FocusController::~FocusController() {}
 
-void FocusController::DidKillNativeFocus(Widget* widget) {
-  if (focus_widget_) {
+void FocusController::DidKillNativeFocus(Widget* native_widget) {
+  if (auto const focus_widget = focus_widget_) {
     focus_widget_ = nullptr;
-    widget->DidKillFocus(will_focus_widget_);
+    focus_widget->DidKillFocus(will_focus_widget_);
   }
   has_active_focus_ = false;
 }

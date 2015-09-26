@@ -91,6 +91,7 @@ def run(js_output_file, js_files, js_externs, closure_options):
             os.remove(js_output_file)
         except OSError as detail:
             print detail
+    return exit_code
 
 
 def readFile(filename):

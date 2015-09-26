@@ -87,7 +87,7 @@ v8::Handle<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
                                          WindowId window_id) {
   auto const isolate = runner->isolate();
   if (window_id == kInvalidWindowId)
-    return runner->global()->Get(gin::StringToV8(isolate, "editor"));
+    return runner->global()->Get(gin::StringToV8(isolate, "Editor"));
 
   auto const window = FromWindowId(window_id);
   if (!window)

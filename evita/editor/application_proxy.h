@@ -20,10 +20,9 @@ class ApplicationProxy final : public common::Singleton<ApplicationProxy> {
   DECLARE_SINGLETON_CLASS(ApplicationProxy);
 
  public:
-  ~ApplicationProxy();
+  ~ApplicationProxy() final;
 
   void DidCopyData(const COPYDATASTRUCT* data);
-  void DidStartChannel(HWND channel_hwnd);
   int Run();
   void WillStartApplication();
 
@@ -33,6 +32,8 @@ class ApplicationProxy final : public common::Singleton<ApplicationProxy> {
   class ShellHandler;
 
   ApplicationProxy();
+
+  void StartChannel(HWND channel_hwnd);
 
   std::unique_ptr<Channel> channel_;
   std::unique_ptr<EventObject> event_;

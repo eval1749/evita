@@ -189,7 +189,7 @@ class ApplicationProxy::ShellHandler final
   ShellHandler();
   ~ShellHandler() override;
 
-  void Start();
+  HWND Start();
 
  private:
   // common::win::SingletonHwnd::Observer
@@ -209,8 +209,8 @@ ApplicationProxy::ShellHandler::ShellHandler() {}
 
 ApplicationProxy::ShellHandler::~ShellHandler() {}
 
-void ApplicationProxy::ShellHandler::Start() {
-  common::win::SingletonHwnd::instance()->AddObserver(this);
+HWND ApplicationProxy::ShellHandler::Start() {
+  return common::win::SingletonHwnd::instance()->AddObserver(this);
 }
 
 // common::win::SingletonHwnd::Observer
@@ -219,10 +219,6 @@ void ApplicationProxy::ShellHandler::OnWndProc(HWND hwnd,
                                                WPARAM,
                                                LPARAM lParam) {
   switch (message) {
-    case WM_CREATE:
-      ApplicationProxy::instance()->DidStartChannel(hwnd);
-      return;
-
     case WM_COPYDATA:
       ApplicationProxy::instance()->DidCopyData(
           reinterpret_cast<COPYDATASTRUCT*>(lParam));
@@ -247,7 +243,7 @@ void ApplicationProxy::DidCopyData(const COPYDATASTRUCT* data) {
       dom::kInvalidWindowId, file_name);
 }
 
-void ApplicationProxy::DidStartChannel(HWND hwnd) {
+void ApplicationProxy::StartChannel(HWND hwnd) {
   DCHECK(!channel_);
   DCHECK(event_);
   channel_.reset(Channel::CreateChannel(hwnd));
@@ -260,7 +256,7 @@ int ApplicationProxy::Run() {
     return 0;
   }
 
-  if (!event_->Wait(30 * 1000))
+  if (!event_->Wait(3 * 1000))
     FatalExit(L"EventObject::Wait");
 
   std::unique_ptr<Channel> channel(Channel::OpenChannel());
@@ -290,7 +286,7 @@ int ApplicationProxy::Run() {
 void ApplicationProxy::WillStartApplication() {
   if (!shell_handler_)
     return;
-  shell_handler_->Start();
+  StartChannel(shell_handler_->Start());
 }
 
 }  // namespace editor

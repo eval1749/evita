@@ -6,10 +6,11 @@ global.windows = Object.create({}, (function() {
   'use strict';
 
   /**
-   * @param {!Window} parent
+   * @param {!Window} window
    * @param {!Document} document
    */
-  function activate(parent, document) {
+  function activate(window, document) {
+    const parent = window.children.length == 0 ? window.parent : window;
     const present = parent.children.find(function(window) {
       return window instanceof TextWindow && window.document == document;
     });

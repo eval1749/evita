@@ -33,13 +33,19 @@ SingletonHwnd::SingletonHwnd() : window_(NativeWindow::Create(this)) {
   }
   window_->CreateWindowEx(0, 0, L"SingletonHwnd", HWND_MESSAGE, Point(),
                           Size());
-  DCHECK(*window_);
+  DCHECK(window_->hwnd());
 }
 
 SingletonHwnd::~SingletonHwnd() {}
 
-void SingletonHwnd::AddObserver(Observer* observer) {
+HWND SingletonHwnd::hwnd() const {
+  DCHECK(window_->hwnd());
+  return window_->hwnd();
+}
+
+HWND SingletonHwnd::AddObserver(Observer* observer) {
   observers_.AddObserver(observer);
+  return hwnd();
 }
 
 void SingletonHwnd::RemoveObserver(Observer* observer) {

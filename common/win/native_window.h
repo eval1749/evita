@@ -50,6 +50,8 @@ class COMMON_EXPORT NativeWindow {
     return hwnd_ == hwnd;
   }
 
+  HWND hwnd() const { return hwnd_; }
+
   bool CreateWindowEx(DWORD dwExStyle,
                       DWORD dwStyle,
                       const base::char16* title,

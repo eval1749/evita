@@ -17,8 +17,8 @@ namespace win {
 
 class NativeWindow;
 
-class COMMON_EXPORT SingletonHwnd : public MessageDelegate,
-                                    public Singleton<SingletonHwnd> {
+class COMMON_EXPORT SingletonHwnd final : public MessageDelegate,
+                                          public Singleton<SingletonHwnd> {
   DECLARE_SINGLETON_CLASS(SingletonHwnd);
 
  public:
@@ -37,16 +37,18 @@ class COMMON_EXPORT SingletonHwnd : public MessageDelegate,
     DISALLOW_COPY_AND_ASSIGN(Observer);
   };
 
-  ~SingletonHwnd();
+  ~SingletonHwnd() final;
 
-  void AddObserver(Observer* observer);
+  HWND hwnd() const;
+
+  HWND AddObserver(Observer* observer);
   void RemoveObserver(Observer* observer);
 
   // MessageDelegate
  private:
   SingletonHwnd();
 
-  LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam) override;
+  LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam) final;
 
   base::ObserverList<Observer> observers_;
   std::unique_ptr<NativeWindow> window_;

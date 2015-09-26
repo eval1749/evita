@@ -61,6 +61,9 @@ interface Editor {
   static DOMString metrics(DOMString name);
 
   [ImplementedAs=JavaScript]
+  static void open(DOMString fileName);
+
+  [ImplementedAs=JavaScript]
   static long parseKeyCombination(DOMString spec);
 
   static void setTabData(Window window, TabData tabData);

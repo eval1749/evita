@@ -120,6 +120,33 @@
   };
 
   /**
+   * @param {string} file_name
+   */
+  Editor.open = function(file_name) {
+    const document = Document.open(file_name);
+    if (document.length == 0) {
+      document.load(file_name).then(function() {
+        windows.activate(Editor.activeWindow(), document);
+      });
+      return;
+    }
+    const parent = Editor.activeWindow().parent;
+    const present = parent.children.find((window) => {
+      return window instanceof TextWindow && window.document == document;
+    });
+    if (present) {
+      present.focus();
+      return;
+    }
+    const text_windows = document.listWindows();
+    if (text_windows.length != 0) {
+      text_windows[0].focus();
+      return;
+    }
+    text_windows.newTextWindow(parent, document);
+  };
+
+  /**
    * @param {string} spec
    * @return {number} key code.
    * @suppress {globalThis}

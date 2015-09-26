@@ -69,6 +69,7 @@ js_lib_files = [
   "windows/text_window.js",
   "windows/window.js",
 
+  "jslib/await.js",
   "jslib/editors.js",
   "jslib/ordered_set.js",
   "jslib/stringify.js",

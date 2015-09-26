@@ -13,52 +13,46 @@ global.editors = {};
  *  verbose: boolean
  */
 function load(scriptPath, opt_options) {
-  /**
-   * @param {!Os.File} file
-   * @param {!TextDecoder} decoder
-   * @return {!Promise}
-   */
-  function readAll(file, decoder) {
-    var buffer = new Uint8Array(1024 * 16);
-    var text = '';
-    function readLoop() {
-      return file.read(buffer).then(function(num_bytes) {
-        if (!num_bytes) {
-          file.close();
-          return Promise.resolve(text);
-        }
-        text += decoder.decode(buffer.subarray(0, num_bytes));
-        return readLoop();
-      }).catch(function(reason) {
-        file.close();
-        return Promise.reject(reason);
-      });
+  let options = opt_options ? /** @type{!Object} */(opt_options) : {};
+  let encoding = options.encoding ? /** @type{string} */(options.encoding)
+      : 'utf-8';
+  if (options.verbose)
+    console.log('/\x2F loading', scriptPath);
+  /** @type {Os.File} */
+  let file = null;
+  return (async(function*() {
+    file = yield Os.File.open(scriptPath);
+    /** @type {number} */
+    let total_read = 0;
+    /** @type {string} */
+    let text = '';
+    /** @type {!ArrayBufferView} */
+    const buffer = new Uint8Array(4096);
+    /** @type {!TextDecoder} */
+    const decoder = new TextDecoder(encoding, {fatal: true});
+    for (;;) {
+      let num_read = yield file.read(buffer);
+      if (num_read == 0)
+        break;
+      text += decoder.decode(buffer.subarray(0, num_read));
+      total_read += num_read;
     }
-    return readLoop();
-  }
-
-  var options = arguments.length == 1 ? {} :
-      /** @type {!Object} */(opt_options);
-  var encoding = options.encoding ? /** @type {string} */ (options.encoding) :
-      'utf-8';
-  var decoder = new TextDecoder(encoding, {fatal: true});
-  return Os.File.open(scriptPath).then(function(file) {
+    file.close();
     if (options.verbose)
-      console.log('/\x2F loading', scriptPath);
-    return readAll(file, decoder).then(function(scriptText) {
-      var result = Editor.runScript(scriptText, scriptPath);
-      if (result.exception && options.verbose) {
-        console.log('/\x2A\n' + result.exception + '\n' + result.stackTrace +
-            '*/');
-      }
-      if (options.verbose)
-        console.log('/\x2F loaded', scriptPath);
-      return result.exception ? Promise.reject(result) : Promise.resolve({});
-    }).catch(function(reason) {
-      if (options.verbose)
-        console.log('/\x2F failed', scriptPath, reason);
-      return Promise.reject(reason);
-    });
+      console.log('/\x2F loaded', scriptPath, total_read);
+    let result = Editor.runScript(text, scriptPath);
+    if (result.exception && options.verbose) {
+      console.log('/\x2A\n' + result.exception + '\n' + result.stackTrace +
+                  '*/');
+    }
+    if (result.exception)
+      return Promise.reject(result.exception)
+    return Promise.resolve();
+  }))().catch((reason) => {
+    if (file)
+      file.close();
+    console.log('/\x2F failed', scriptPath, reason);
+    throw reason;
   });
 }
 

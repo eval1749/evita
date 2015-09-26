@@ -91,11 +91,7 @@
     };
   }
 
-  /**
-   * @param {!Document} document
-   * @param {string} fileName
-   * @return {!Promise.<number|!Os.File.Error>}
-   *
+  /*
    * Load contents of |fileName| into |document|. The |document| is readonly
    * during reading file contents.
    *
@@ -105,95 +101,101 @@
    *    * |newline|
    *    * |readonly|
    */
-  function load(document, fileName) {
-    /** @type {string} */ var encoding = '';
-    /** @type {?Os.File} */ var opened_file = null;
-    /** @type {number} */ var newline = Newline.UNKNOWN;
-    // Remember |readonly| property for restoring on error.
-    /** @type {boolean} */ var readonly = document.readonly;
-    document.readonly = true;
-    var range = new Range(document);
-    range.end = document.length;
-    return Os.File.open(fileName).then(function(x) {
-      var file = /** @type {!Os.File} */(x);
-      opened_file = file;
-      var detector = new EncodingDetector();
+  class FileLoader {
+    constructor(document) {
+      this.document_ = document;
+      this.detector_ = new EncodingDetector();
+      this.encoding_ = '';
+      this.file_ = null;
+      this.readonly_ = document.readonly;
+      this.range_ = new Range(document);
+    }
 
-      // Reading file contents is finished. Record file last write time.
-      function finishRead() {
-        return Os.File.stat(fileName).then(function(x) {
-          var file_info = /** @type {!Os.File.Info} */(x);
-          file.close();
-          var decoder = detector.decoders[0];
-          if (!decoder)
-            return Promise.reject(new Error('Bad encoding'));
+    close() {
+      this.document_.readonly = this.readonly_;
+      if (!this.file_)
+        return;
+      this.file_.close();
+      this.file_ = null;
+    }
 
-          // Inserts file contents into document with replacing CRLF to LF.
-          var range = new Range(document);
-          range.end = document.length;
-          var newline = Newline.UNKNOWN;
-          decoder.strings.forEach(function(string) {
-            if (newline == Newline.UNKNOWN) {
-              if (string.indexOf('\r\n') >= 0)
-                newline = Newline.CRLF;
-              else if (string.indexOf('\n') >= 0)
-                newline = Newline.LF;
-            }
-            document.readonly = false;
-            if (newline == Newline.CRLF)
-              string = string.replace(RE_CR, '');
-            range.text = string;
-            document.readonly = true;
-            range.collapseTo(range.end);
-          });
+    didRead(readData, num_read) {
+      let detector = this.detector_;
+      if (!detector.detect(readData.subarray(0, num_read)))
+        throw new Error('Bad encoding');
 
-          // Update document properties based on file.
-          document.encoding = decoder.encoding;
-          document.lastWriteTime = file_info.lastModificationDate;
-          document.modified = false;
-          document.newline = newline;
-          document.readonly = file_info.readonly || readonly;
-          document.clearUndo();
-          return Promise.resolve(document.length);
-        }).catch(logErrorInPromise('load/open/stat'));
-      }
+      // Display loading result
+      // Note: We may display text in wrong encoding.
+      this.document_.readonly = false;
+      let decoder = detector.decoders[0];
+      let range = this.range_;
+      let string = decoder.strings[decoder.strings.length - 1];
+      string = string.replace(RE_CR, '');
+      range.text = string;
+      range.collapseTo(range.end);
+      this.document_.readonly = true;
 
-      const readData = new Uint8Array(4096);
-      function readLoop() {
-        function handleRead(num_bytes) {
-          if (!num_bytes)
-            return finishRead();
+      // Color portion of text.
+      this.document_.doColor_(string.length);
+    }
 
-          if (!detector.detect(readData.subarray(0, num_bytes)))
-            return Promise.reject(new Error('Bad encoding'));
-
-          // Request read next block.
-          var promise = readLoop();
-
-          // Display loading result
-          // Note: We may display text in wrong encoding.
-          document.readonly = false;
-          var decoder = detector.decoders[0];
-          var string = decoder.strings[decoder.strings.length - 1];
-          string = string.replace(RE_CR, '');
-          range.text = string;
-          range.collapseTo(range.end);
-          document.readonly = true;
-
-          // Color portion of text.
-          document.doColor_(string.length);
-          return promise;
+    load(fileName) {
+      return (async(function*(loader, fileName) {
+        const detector = new EncodingDetector();
+        // Remember |readonly| property for restoring on error.
+        const readonly = loader.document_.readonly;
+        loader.range_.start = 0;
+        loader.range_.end = loader.document_.length;
+        loader.file_ = yield Os.File.open(fileName);
+        let file = loader.file_;
+        const readData = new Uint8Array(4096);
+        for (;;) {
+          let num_read = yield file.read(readData);
+          if (num_read == 0)
+            break;
+          loader.didRead(readData, num_read);
         }
-        return file.read(readData).then(handleRead);
-      }
-      return readLoop();
-    }).catch(function(error) {
-      console.log('load', 'error', error, 'opened_file', opened_file);
-      document.readonly = readonly;
-      if (opened_file)
-        opened_file.close();
-      return Promise.reject(error);
-    });
+        let file_info = yield Os.File.stat(fileName);
+        loader.finish(file_info);
+      }))(this, fileName);
+    }
+
+    // Reading file contents is finished. Record file last write time.
+    finish(file_info) {
+      let detector = this.detector_;
+      let decoder = detector.decoders[0];
+      if (!decoder)
+        throw new Error('Bad encoding');
+
+      this.readonly_ = file_info.readonly;
+
+      let document = this.document_;
+      let range = this.range_;
+      range.start = 0;
+      range.end = document.length;
+
+      document.readonly = false;
+      let newline = Newline.UNKNOWN;
+      decoder.strings.forEach(function(string) {
+        if (newline == Newline.UNKNOWN) {
+          if (string.indexOf('\r\n') >= 0)
+            newline = Newline.CRLF;
+          else if (string.indexOf('\n') >= 0)
+            newline = Newline.LF;
+        }
+        if (newline == Newline.CRLF)
+          string = string.replace(RE_CR, '');
+        range.text = string;
+        range.collapseTo(range.end);
+      });
+
+      // Update document properties based on file.
+      document.encoding = decoder.encoding;
+      document.lastWriteTime = file_info.lastModificationDate;
+      document.modified = false;
+      document.newline = newline;
+      document.clearUndo();
+    }
   }
 
   /**
@@ -222,7 +224,11 @@
     Editor.messageBox(null, 'Loading ' + document.fileName,
                       MessageBox.ICONINFORMATION);
     document.dispatchEvent(new DocumentEvent(Event.Names.BEFORELOAD));
-    return load(document, document.fileName).then(function(length) {
+
+    // Start loading
+    let loader = new FileLoader(document);
+    return loader.load(document.fileName).then(function(length) {
+      loader.close();
       Editor.messageBox(null, 'Loaded ' + document.fileName,
                         MessageBox.ICONINFORMATION);
       document.obsolete = Document.Obsolete.NO;
@@ -245,6 +251,7 @@
     }).catch(function(exception) {
       console.log('load.catch', exception, 'during loading', fileName,
                   'into', document, exception.stack);
+      loader.close();
       document.lastStatTime_ = new Date();
       document.obsolete = Document.Obsolete.UNKNOWN;
       document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));

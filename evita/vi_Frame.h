@@ -70,7 +70,6 @@ class Frame final : public views::Window,
  public:
   explicit Frame(views::WindowId window_id);
 
-  bool Activate();
   void AddObserver(views::FrameObserver* observer);
   void AddOrActivateTabContent(views::ContentWindow*);
   void SetStatusBar(std::vector<base::string16> texts);

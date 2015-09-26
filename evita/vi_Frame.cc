@@ -83,10 +83,6 @@ Frame::~Frame() {
   TabDataSet::instance()->RemoveObserver(this);
 }
 
-bool Frame::Activate() {
-  return ::SetForegroundWindow(*native_window()) != FALSE;
-}
-
 void Frame::AddObserver(views::FrameObserver* observer) {
   observers_.AddObserver(observer);
 }

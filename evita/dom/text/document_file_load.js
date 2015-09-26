@@ -158,13 +158,13 @@
         }).catch(logErrorInPromise('load/open/stat'));
       }
 
+      const readData = new Uint8Array(4096);
       function readLoop() {
-        var data = new Uint8Array(1024);
         function handleRead(num_bytes) {
           if (!num_bytes)
             return finishRead();
 
-          if (!detector.detect(data.subarray(0, num_bytes)))
+          if (!detector.detect(readData.subarray(0, num_bytes)))
             return Promise.reject(new Error('Bad encoding'));
 
           // Request read next block.
@@ -184,7 +184,7 @@
           document.doColor_(string.length);
           return promise;
         }
-        return file.read(data).then(handleRead);
+        return file.read(readData).then(handleRead);
       }
       return readLoop();
     }).catch(function(error) {

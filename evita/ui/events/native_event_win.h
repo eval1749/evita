@@ -9,8 +9,10 @@
 #include "evita/gfx/rect.h"
 
 #if !defined(GET_X_LPARAM)
-#define GET_X_LPARAM(lParam) (static_cast<int>(LOWORD(lParam)))
-#define GET_Y_LPARAM(lParam) (static_cast<int>(HIWORD(lParam)))
+#define GET_X_LPARAM(lParam) \
+  (static_cast<int>(static_cast<int16_t>(LOWORD(lParam))))
+#define GET_Y_LPARAM(lParam) \
+  (static_cast<int>(static_cast<int16_t>(HIWORD(lParam))))
 #endif
 
 namespace ui {

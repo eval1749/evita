@@ -135,6 +135,8 @@ void Widget::DestroyWidget() {
   DidDestroyWidget();
 }
 
+void Widget::DidActivate() {}
+
 void Widget::DidAddChildWidget(Widget* widget) {}
 
 void Widget::DidChangeHierarchy() {
@@ -694,6 +696,13 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
     case WM_MOUSELEAVE:
     case WM_NCMOUSELEAVE:
       DispatchMouseExited();
+      return 0;
+
+    case WM_NCACTIVATE:
+      // To handle activating window after blocked |SetForegroundWindow()|.
+      if (wParam != WA_ACTIVE)
+        return 0;
+      FocusController::instance()->DidActivate(this);
       return 0;
 
     case WM_NCDESTROY:

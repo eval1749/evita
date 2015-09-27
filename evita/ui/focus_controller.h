@@ -27,6 +27,9 @@ class FocusController final : public common::Singleton<FocusController> {
   // |have_active_focus_| is false.
   bool has_active_focus() const { return has_active_focus_; }
 
+  // Called when widget recieves WM_NCACTIVATE/WA_ACTIVE.
+  void DidActivate(Widget* widget);
+
   // Called when widget, which has native window, loses native focus. This is
   // good time to restore caret background image.
   void DidKillNativeFocus(Widget* widget);

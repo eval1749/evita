@@ -100,6 +100,12 @@ FocusController::FocusController()
 
 FocusController::~FocusController() {}
 
+void FocusController::DidActivate(Widget* native_widget) {
+  if (!focus_widget_)
+    return;
+  focus_widget_->DidActivate();
+}
+
 void FocusController::DidKillNativeFocus(Widget* native_widget) {
   if (auto const focus_widget = focus_widget_) {
     focus_widget_ = nullptr;
@@ -147,8 +153,11 @@ SelectionState FocusController::GetSelectionState(Widget* widget) const {
 void FocusController::RequestFocus(Widget* widget) {
   DCHECK(!will_focus_widget_);
   // This widget might be hidden during creating window.
-  auto host = widget->GetHostWidget();
-  if (::GetFocus() == *host->native_window()) {
+  auto const host = widget->GetHostWidget();
+  auto const focusHwnd = ::GetFocus();
+  if (focusHwnd == *host->native_window()) {
+    if (focusHwnd != ::GetForegroundWindow())
+      ::SetForegroundWindow(focusHwnd);
     if (focus_widget_ == widget)
       return;
     auto const last_focus_widget = focus_widget_;

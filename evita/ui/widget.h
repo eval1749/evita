@@ -90,6 +90,7 @@ class Widget : public EventTarget,
 
   NativeWindow* native_window() const { return native_window_.get(); }
   virtual void CreateNativeWindow() const;
+  virtual void DidActivate();
   virtual void DidAddChildWidget(Widget* new_child);
   virtual void DidChangeBounds();
   virtual void DidChangeChildVisibility(Widget* child);

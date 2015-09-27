@@ -119,6 +119,9 @@ void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
   }
 
   AddTabContent(window);
+  if (!window->is_realized())
+    return;
+  window->RequestFocus();
 }
 
 void Frame::DrawForResize() {

@@ -127,10 +127,14 @@ Widget* FocusController::GetRecentUsedWidget() const {
 }
 
 SelectionState FocusController::GetSelectionState(Widget* widget) const {
+  auto const focusHwnd = ::GetFocus();
+  if (focusHwnd != ::GetForegroundWindow())
+    return SelectionState::Disabled;
+
   if (widget->has_focus())
     return SelectionState::HasFocus;
 
-  if (!IsPopupWindow(::GetFocus()))
+  if (!IsPopupWindow(focusHwnd))
     return SelectionState::Disabled;
 
   auto const recent_used_widget = widget_use_map_->GetRecentUsedWidget();

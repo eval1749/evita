@@ -10,7 +10,6 @@
 #include "common/tree/node.h"
 #include "evita/dom/events/view_event_target.h"
 #include "evita/dom/windows/window_id.h"
-#include "evita/v8_glue/nullable.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
@@ -39,15 +38,11 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
 
   ~Window() override;
 
-  v8_glue::Nullable<Window> first_child() const { return Node::first_child(); }
-  v8_glue::Nullable<Window> last_child() const { return Node::last_child(); }
-  v8_glue::Nullable<Window> next_sibling() const {
-    return Node::next_sibling();
-  }
-  v8_glue::Nullable<Window> previous_sibling() const {
-    return Node::previous_sibling();
-  }
-  v8_glue::Nullable<Window> parent_window() const { return parent_node(); }
+  Window* first_child() const { return Node::first_child(); }
+  Window* last_child() const { return Node::last_child(); }
+  Window* next_sibling() const { return Node::next_sibling(); }
+  Window* previous_sibling() const { return Node::previous_sibling(); }
+  Window* parent_window() const { return parent_node(); }
   State state() const { return state_; }
   WindowId window_id() const { return event_target_id(); }
 

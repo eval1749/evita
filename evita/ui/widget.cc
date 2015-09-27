@@ -201,7 +201,9 @@ void Widget::DidChangeBounds() {
   layer()->SetBounds(bounds());
 }
 
-void Widget::DidSetFocus(ui::Widget*) {}
+void Widget::DidSetFocus(ui::Widget*) {
+  ::SetForegroundWindow(AssociatedHwnd());
+}
 
 void Widget::DidShow() {
   visible_ = true;

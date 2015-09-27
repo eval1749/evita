@@ -71,6 +71,7 @@ class TableWindow final : public text::BufferMutationObserver,
   void MakeSelectionVisible() final;
 
   // ui::Widget
+  void DidActivate() final;
   void DidChangeBounds() final;
   void DidSetFocus(ui::Widget* last_focused) final;
 

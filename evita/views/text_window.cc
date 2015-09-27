@@ -439,6 +439,10 @@ ui::Widget* TextWindow::GetClientWindow() {
 }
 
 // ui::Widget
+void TextWindow::DidActivate() {
+  RequestAnimationFrame();
+}
+
 void TextWindow::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
   UpdateLayout();

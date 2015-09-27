@@ -252,6 +252,10 @@ base::string16 TableWindow::GetCellText(int row_id, int column_id) const {
 }
 
 // ui::Widget
+void TableWindow::DidActivate() {
+  RequestAnimationFrame();
+}
+
 void TableWindow::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
   if (!control_)

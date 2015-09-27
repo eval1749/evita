@@ -56,8 +56,7 @@ function load(scriptPath, opt_options) {
   });
 }
 
-/** @type {function(!Array.<string>)} */
-editors.start = (function() {
+(function() {
   function loadUserScript() {
     var context = {
         dirs: [
@@ -93,5 +92,8 @@ editors.start = (function() {
     editor_window.realize();
     args.forEach(fileName => Editor.open(fileName));
   }
-  return start;
+
+  Object.defineProperties(editors, {
+    start: {value: start}
+  });
 })();

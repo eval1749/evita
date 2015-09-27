@@ -699,11 +699,11 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       return 0;
 
     case WM_NCACTIVATE:
-      // To handle activating window after blocked |SetForegroundWindow()|.
-      if (wParam != WA_ACTIVE)
-        return 0;
-      FocusController::instance()->DidActivate(this);
-      return 0;
+      // To handle activating window after blocked |SetForegroundWindow()|
+      if (LOWORD(wParam) == WA_ACTIVE)
+        FocusController::instance()->DidActivate(this);
+      // Ask Windows to process |WM_NCACTIVATE| too.
+      return 1;
 
     case WM_NCDESTROY:
       DidDestroyNativeWindow();

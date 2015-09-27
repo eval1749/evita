@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
+
 #include "base/command_line.h"
+#include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "common/win/scoped_handle.h"
@@ -238,9 +241,25 @@ ApplicationProxy::ApplicationProxy()
 ApplicationProxy::~ApplicationProxy() {}
 
 void ApplicationProxy::DidCopyData(const COPYDATASTRUCT* data) {
-  auto const file_name = reinterpret_cast<base::char16*>(data->lpData);
-  editor::Application::instance()->view_event_handler()->OpenFile(
-      dom::kInvalidWindowId, file_name);
+  auto chars = reinterpret_cast<base::char16*>(data->lpData);
+  base::string16 directory;
+  while (*chars) {
+    directory.push_back(*chars);
+    ++chars;
+  }
+  ++chars;
+  std::vector<base::string16> args;
+  while (*chars) {
+    base::string16 arg;
+    while (*chars) {
+      arg.push_back(*chars);
+      ++chars;
+    }
+    ++chars;
+    args.push_back(arg);
+  }
+  editor::Application::instance()->view_event_handler()->ProcessCommandLine(
+      directory, args);
 }
 
 void ApplicationProxy::StartChannel(HWND hwnd) {
@@ -264,22 +283,28 @@ int ApplicationProxy::Run() {
   if (!payload)
     FatalExit(L"MapViewOfFile");
 
+  std::vector<base::char16> data;
+
+  base::FilePath directory;
+  base::GetCurrentDirectory(&directory);
+  for (auto ch : directory.AsUTF16Unsafe())
+    data.push_back(ch);
+  data.push_back(0);
+
   for (auto param : base::CommandLine::ForCurrentProcess()->GetArgs()) {
-    base::char16 wsz[MAX_PATH];
-    base::char16* pwszFile;
-    auto const length =
-        ::GetFullPathNameW(param.c_str(), arraysize(wsz), wsz, &pwszFile);
-    if (!length || length > arraysize(wsz))
-      continue;
-
-    COPYDATASTRUCT copy_data;
-    copy_data.dwData = 1;
-    copy_data.cbData = sizeof(base::char16) * (length + 1);
-    copy_data.lpData = wsz;
-
-    ::SendMessage(payload->m_hwnd, WM_COPYDATA, 0,
-                  reinterpret_cast<LPARAM>(&copy_data));
+    for (auto ch : param)
+      data.push_back(ch);
+    data.push_back(0);
   }
+  data.push_back(0);
+
+  COPYDATASTRUCT copy_data;
+  copy_data.dwData = 0;
+  copy_data.cbData = static_cast<DWORD>(sizeof(base::char16) * data.size());
+  copy_data.lpData = data.data();
+
+  ::SendMessage(payload->m_hwnd, WM_COPYDATA, 0,
+                reinterpret_cast<LPARAM>(&copy_data));
   return 0;
 }
 

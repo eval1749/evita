@@ -204,4 +204,39 @@
     }
     return combinationFunction;
   })();
+
+  /**
+   * @param {string} cwd
+   * @param {!Array.<string>} args
+   */
+  function processCommandLine(cwd, args) {
+    let maybe_option = true;
+    for (let arg of args) {
+      if (maybe_option && arg[0] === '-') {
+        if (arg === '--') {
+          maybe_option = false;
+          continue;
+        }
+        // TODO(eval1749) Handle command line option.
+        continue;
+      }
+      if (arg[0] === '*') {
+        let document = Document.find(arg);
+        if (!document)
+          continue;
+        windows.activate(Editor.activeWindow(), document);
+        continue;
+      }
+      let path_info = FilePath.split(arg);
+      if (path_info.absolute && path_info.winDrive) {
+        Editor.open(arg);
+        continue;
+      }
+      Editor.open(cwd + '/' + arg);
+    }
+  }
+
+  Object.defineProperties(Editor, {
+    processCommandLine: {value: processCommandLine}
+  });
 })();

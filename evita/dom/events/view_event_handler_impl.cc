@@ -305,6 +305,24 @@ void ViewEventHandlerImpl::OpenFile(WindowId window_id,
   runner->Call(open_file, js_handler, js_file_name);
 }
 
+void ViewEventHandlerImpl::ProcessCommandLine(
+    base::string16 working_directory,
+    const std::vector<base::string16>& args) {
+  auto const runner = host_->runner();
+  v8_glue::Runner::Scope runner_scope(runner);
+  auto const isolate = runner->isolate();
+  auto const editor = runner->global()->Get(gin::StringToV8(isolate, "Editor"));
+  auto const process =
+      editor->ToObject()->Get(gin::StringToV8(isolate, "processCommandLine"));
+  if (!process->IsFunction()) {
+    DVLOG(0) << "No Editor.processCommandLine";
+    return;
+  }
+  DOM_AUTO_LOCK_SCOPE();
+  runner->Call(process, editor, gin::ConvertToV8(isolate, working_directory),
+               gin::ConvertToV8(runner->context(), args).ToLocalChecked());
+}
+
 void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
   auto const window = WindowSet::instance()->Find(window_id);
   if (!window)

@@ -66,6 +66,9 @@ interface Editor {
   [ImplementedAs=JavaScript]
   static long parseKeyCombination(DOMString spec);
 
+  [ImplementedAs=JavaScript]
+  static void processCommandLine(DOMString directory, DOMString[] args);
+
   static void setTabData(Window window, TabData tabData);
 
   static void setSwitch(DOMString name, SwitchValue new_value);

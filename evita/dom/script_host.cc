@@ -4,6 +4,7 @@
 
 #include "evita/dom/script_host.h"
 
+#include "base/command_line.h"
 #include "base/bind.h"
 #pragma warning(push)
 #pragma warning(disable : 4100 4625 4626)
@@ -229,7 +230,24 @@ void ScriptHost::DidStartViewHost() {
       return;
     }
   }
-  runner()->Run(L"editors.start([]);", L"__start__");
+
+  // Invoke |editors.start()| with command line arguments.
+  auto const isolate = runner()->isolate();
+  auto const js_editors = runner()->GetGlobalProperty("editors");
+  auto const js_start =
+      js_editors->ToObject()->Get(gin::StringToV8(isolate, "start"));
+  if (!js_start->IsFunction()) {
+    ThrowError("Editor.start isn't a function.");
+    view_delegate_->DidStartScriptHost(state_);
+    return;
+  }
+  auto const js_args =
+      gin::ConvertToV8(runner()->context(),
+                       base::CommandLine::ForCurrentProcess()->GetArgs())
+          .ToLocalChecked();
+  runner()->Call(js_start, js_editors, js_args);
+
+  // Notify script execution completion to view.
   if (state_ == domapi::ScriptHostState::Stopped)
     state_ = domapi::ScriptHostState::Running;
   view_delegate_->DidStartScriptHost(state_);

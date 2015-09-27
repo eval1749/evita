@@ -80,14 +80,18 @@ editors.start = (function() {
     });
   }
 
+  /**
+   * @param {!Array.<string>} args
+   */
   function start(args) {
     loadUserScript();
-    var doc = new Document('*scratch*');
-    var range = new Range(doc);
-    var editor_window = new EditorWindow();
-    var text_window = new TextWindow(range);
+    let editor_window = new EditorWindow();
+    let doc = new Document('*scratch*');
+    let range = new Range(doc);
+    let text_window = new TextWindow(range);
     editor_window.appendChild(text_window);
     editor_window.realize();
+    args.forEach(fileName => Editor.open(fileName));
   }
   return start;
 })();

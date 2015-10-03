@@ -733,6 +733,7 @@ class TabStrip::View final : private ui::ButtonListener,
   void SetTabData(size_t tab_index, const domapi::TabData& tab_data);
 
  private:
+  gfx::Rect ComputeBounds() const;
   void DisableButton(ui::Widget* widget);
   void EnableButton(ui::Widget* widget);
   void MarkDirty();
@@ -790,6 +791,15 @@ TabStrip::View::View(TabStrip* widget, TabStripDelegate* delegate)
 }
 
 TabStrip::View::~View() {}
+
+gfx::Rect TabStrip::View::ComputeBounds() const {
+  auto const contents_bounds =
+      gfx::ToEnclosingRect(widget_->GetContentsBounds());
+  auto const caption_buttons_width = 45 * 3;
+  return gfx::Rect(contents_bounds.origin(),
+                   gfx::Size(contents_bounds.width() - caption_buttons_width,
+                             contents_bounds.height()));
+}
 
 void TabStrip::View::DeleteTab(size_t tab_index) {
   auto const tab = tab_collection_->GetTab(static_cast<size_t>(tab_index));
@@ -862,6 +872,14 @@ void TabStrip::View::MarkDirty() {
 }
 
 int TabStrip::View::NonClientHitTest(const gfx::Point& screen_point) {
+  auto const point = widget_->MapFromDesktopPoint(screen_point);
+  if (point.y() < 0)
+    return HTCAPTION;
+  if (!widget_->GetLocalBounds().Contains(point))
+    return HTNOWHERE;
+  auto const bounds = ComputeBounds();
+  if (!bounds.Contains(point))
+    return HTCAPTION;
   UpdateLayout();
   return tab_collection_->NonClientHitTest(screen_point);
 }
@@ -890,13 +908,7 @@ void TabStrip::View::UpdateLayout() {
   if (!dirty_)
     return;
   dirty_ = false;
-  auto const contents_bounds =
-      gfx::ToEnclosingRect(widget_->GetContentsBounds());
-  auto const caption_buttons_width = 45 * 3;
-  auto const bounds =
-      gfx::Rect(contents_bounds.origin(),
-                gfx::Size(contents_bounds.width() - caption_buttons_width,
-                          contents_bounds.height()));
+  auto const bounds = ComputeBounds();
   auto const tabs_size =
       static_cast<ui::Widget*>(tab_collection_.get())->GetPreferredSize();
   if (tabs_size.width() <= bounds.width()) {
@@ -1058,11 +1070,6 @@ gfx::Size TabStrip::GetPreferredSize() const {
 }
 
 int TabStrip::NonClientHitTest(const gfx::Point& screen_point) const {
-  auto const point = MapFromDesktopPoint(screen_point);
-  if (point.y() < 0)
-    return HTCAPTION;
-  if (!GetLocalBounds().Contains(point))
-    return HTNOWHERE;
   return view_->NonClientHitTest(screen_point);
 }
 

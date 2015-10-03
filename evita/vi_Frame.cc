@@ -153,8 +153,7 @@ TabContent* Frame::GetRecentTabContent() {
 Rect Frame::GetTabContentBounds() const {
   auto const message_view_height = message_view_->bounds().height();
   return gfx::Rect(bounds().left(), tab_strip_->bounds().bottom(),
-                   bounds().right(),
-                   bounds().bottom() - message_view_height);
+                   bounds().right(), bounds().bottom() - message_view_height);
 }
 
 TabContent* Frame::GetTabContentByTabIndex(int const index) const {
@@ -188,8 +187,8 @@ void Frame::OnDropFiles(HDROP const drop_handle) {
     if (!length)
       break;
     file_name.resize(length);
-    editor::Application::instance()->view_event_handler()->OpenFile(
-        window_id(), file_name);
+    editor::Application::instance()->view_event_handler()->OpenFile(window_id(),
+                                                                    file_name);
     ++index;
   }
   ::DragFinish(drop_handle);
@@ -217,7 +216,8 @@ void Frame::UpdateTitleBar() {
   if (tab_index >= 0)
     tab_strip_->SetTab(tab_index, *tab_data);
 
-  auto const window_title = title +
+  auto const window_title =
+      title +
       (tab_data->state == domapi::TabData::State::Modified ? L" * " : L" - ") +
       editor::Application::instance()->title();
   title_bar_->SetText(window_title);
@@ -252,31 +252,23 @@ void Frame::DidBeginAnimationFrame(base::Time now) {
     return;
 
   message_view_->SetMessage(base::StringPrintf(
-    L"Script runs %ds. Ctrl+Break to terminate script.",
-    delta));
+      L"Script runs %ds. Ctrl+Break to terminate script.", delta));
 }
 
 // ui::Widget
 void Frame::CreateNativeWindow() const {
   int const cColumns = 83;
-  int const cRows    = 40;
+  int const cRows = 40;
 
   // Note: WS_EX_COMPOSITED posts WM_PAINT many times.
   // Note: WS_EX_LAYERED doesn't show window with Win7+.
-  DWORD dwExStyle =
-      WS_EX_APPWINDOW
-      | WS_EX_NOPARENTNOTIFY
-      | WS_EX_WINDOWEDGE;
+  DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_NOPARENTNOTIFY | WS_EX_WINDOWEDGE;
 
-  DWORD dwStyle =
-    WS_OVERLAPPEDWINDOW
-    | WS_CLIPCHILDREN
-    | WS_VISIBLE;
+  DWORD dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VISIBLE;
 
-  const auto& font = *views::rendering::FontSet::GetFont(*css::Style::Default(),
-                                                         'x');
-  gfx::SizeF size(font.GetCharWidth('M') * cColumns,
-                  font.height() * cRows);
+  const auto& font =
+      *views::rendering::FontSet::GetFont(*css::Style::Default(), 'x');
+  gfx::SizeF size(font.GetCharWidth('M') * cColumns, font.height() * cRows);
   gfx::RectF rect(gfx::PointF(), gfx::FactorySet::AlignToPixel(size));
 
   RECT raw_original_bounds(gfx::ToEnclosingRect(rect));
@@ -326,15 +318,15 @@ void Frame::DidChangeBounds() {
       gfx::Size(bounds().width(), tab_strip_->bounds().height()));
 
   message_view_->SetBounds(
-    bounds().bottom_left() - gfx::Size(0, message_view_->bounds().height()),
-    bounds().bottom_right());
+      bounds().bottom_left() - gfx::Size(0, message_view_->bounds().height()),
+      bounds().bottom_right());
 
   for (auto tab_content : tab_contents_)
     tab_content->SetBounds(tab_content_bounds);
 
   // Display resizing information.
-  message_view_->SetMessage(base::StringPrintf(L"Resizing... %dx%d",
-      bounds().width(), bounds().height()));
+  message_view_->SetMessage(base::StringPrintf(
+      L"Resizing... %dx%d", bounds().width(), bounds().height()));
 
   DrawForResize();
   ui::Compositor::instance()->CommitIfNeeded();
@@ -347,8 +339,8 @@ void Frame::DidRealize() {
   title_bar_->Realize(*native_window());
 
   // TODO(eval1749) How do we determine height of TabStrip?
-  auto const tab_strip_height = static_cast<Widget*>(tab_strip_)->
-      GetPreferredSize().height();
+  auto const tab_strip_height =
+      static_cast<Widget*>(tab_strip_)->GetPreferredSize().height();
   const auto close_button_height = ::GetSystemMetrics(SM_CYSIZE);
   tab_strip_->SetBounds(gfx::Point(0, close_button_height),
                         gfx::Size(bounds().width(), tab_strip_height));
@@ -363,8 +355,8 @@ void Frame::DidRealize() {
 
   // Place message vie at bottom of editor window.
   {
-    auto const size = static_cast<ui::Widget*>(message_view_)->
-        GetPreferredSize();
+    auto const size =
+        static_cast<ui::Widget*>(message_view_)->GetPreferredSize();
     message_view_->SetBounds(
         bounds().bottom_left() - gfx::Size(0, size.height()),
         bounds().bottom_right());
@@ -380,7 +372,7 @@ void Frame::DidRealize() {
 
   ::SetWindowPos(AssociatedHwnd(), nullptr, 0, 0, 0, 0,
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
-                 SWP_NOREDRAW | SWP_NOSIZE | SWP_FRAMECHANGED);
+                     SWP_NOREDRAW | SWP_NOSIZE | SWP_FRAMECHANGED);
 }
 
 void Frame::DidRemoveChildWidget(ui::Widget* old_child) {
@@ -408,7 +400,8 @@ void Frame::DidSetFocus(ui::Widget* widget) {
   tab_content->RequestFocus();
 }
 
-LRESULT Frame::OnMessage(uint32_t message, WPARAM const wParam,
+LRESULT Frame::OnMessage(uint32_t message,
+                         WPARAM const wParam,
                          LPARAM const lParam) {
   switch (message) {
     case WM_ACTIVATE: {
@@ -433,8 +426,8 @@ LRESULT Frame::OnMessage(uint32_t message, WPARAM const wParam,
     case WM_EXITSIZEMOVE:
       for (auto tab_content : tab_contents_)
         tab_content->DidExitSizeMove();
-      message_view_->SetMessage(base::StringPrintf(L"Resized to %dx%d",
-          bounds().width(), bounds().height()));
+      message_view_->SetMessage(base::StringPrintf(
+          L"Resized to %dx%d", bounds().width(), bounds().height()));
       break;
 
     case WM_GETMINMAXINFO: {
@@ -597,8 +590,7 @@ void Frame::DidDropTab(TabContent* tab_content,
 
   DCHECK_NE(frame, tab_content->parent_node());
   editor::Application::instance()->view_event_handler()->DidDropWidget(
-      edit_tab_content->GetActiveContent()->window_id(),
-      frame->window_id());
+      edit_tab_content->GetActiveContent()->window_id(), frame->window_id());
 }
 
 void Frame::DidSelectTab(int selected_index) {

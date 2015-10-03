@@ -18,8 +18,6 @@ static_library("ui") {
     "animation/animation_group_member.h",
     "animation/animation_observer.cc",
     "animation/animation_observer.h",
-    "animation/animation_scheduler.cc",
-    "animation/animation_scheduler.h",
     "animation/animation_value.cc",
     "animation/animation_value.h",
     "animation/animator.cc",

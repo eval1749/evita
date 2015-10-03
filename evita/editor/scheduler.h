@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_UI_ANIMATION_ANIMATION_SCHEDULER_H_
-#define EVITA_UI_ANIMATION_ANIMATION_SCHEDULER_H_
+#ifndef EVITA_EDITOR_SCHEDULER_H_
+#define EVITA_EDITOR_SCHEDULER_H_
 
 #include <memory>
 #include <unordered_set>
@@ -17,22 +17,24 @@ class Time;
 }
 
 namespace ui {
-
 class AnimationFrameHandler;
+}
+
+namespace editor {
 
 //////////////////////////////////////////////////////////////////////
 //
-// AnimationScheduler
+// Scheduler
 //
-class AnimationScheduler final {
+class Scheduler final {
  public:
-  explicit AnimationScheduler(base::MessageLoop* message_loop);
-  ~AnimationScheduler();
+  explicit Scheduler(base::MessageLoop* message_loop);
+  ~Scheduler();
 
   // Request animation frame.
-  void CancelAnimationFrameRequest(AnimationFrameHandler* handler);
+  void CancelAnimationFrameRequest(ui::AnimationFrameHandler* handler);
   // Request animation frame.
-  void RequestAnimationFrame(AnimationFrameHandler* handler);
+  void RequestAnimationFrame(ui::AnimationFrameHandler* handler);
 
  private:
   enum class State;
@@ -41,15 +43,15 @@ class AnimationScheduler final {
   void Run();
   void Wait();
 
-  std::unordered_set<AnimationFrameHandler*> canceled_handlers_;
+  std::unordered_set<ui::AnimationFrameHandler*> canceled_handlers_;
   std::unique_ptr<base::Lock> lock_;
   base::MessageLoop* const message_loop_;
   State state_;
-  std::unordered_set<AnimationFrameHandler*> pending_handlers_;
+  std::unordered_set<ui::AnimationFrameHandler*> pending_handlers_;
 
-  DISALLOW_COPY_AND_ASSIGN(AnimationScheduler);
+  DISALLOW_COPY_AND_ASSIGN(Scheduler);
 };
 
-}  // namespace ui
+}  // namespace editor
 
-#endif  // EVITA_UI_ANIMATION_ANIMATION_SCHEDULER_H_
+#endif  // EVITA_EDITOR_SCHEDULER_H_

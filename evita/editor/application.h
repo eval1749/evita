@@ -29,15 +29,13 @@ namespace metrics {
 class TimeScope;
 }
 
-namespace ui {
-class AnimationScheduler;
-}
-
 namespace views {
 class ViewDelegateImpl;
 }
 
 namespace editor {
+
+class Scheduler;
 
 class Application final : public common::Singleton<Application> {
   DECLARE_SINGLETON_CLASS(Application);
@@ -45,10 +43,8 @@ class Application final : public common::Singleton<Application> {
  public:
   ~Application();
 
-  ui::AnimationScheduler* animation_scheduler() const {
-    return animation_scheduler_.get();
-  }
   editor::DomLock* dom_lock() const { return dom_lock_.get(); }
+  Scheduler* scheduler() const { return scheduler_.get(); }
   const base::string16& title() const;
   const base::string16& version() const;
   domapi::ViewEventHandler* view_event_handler() const;
@@ -70,7 +66,7 @@ class Application final : public common::Singleton<Application> {
   std::unique_ptr<IoManager> io_manager_;
   bool is_quit_;
   std::unique_ptr<base::MessageLoop> message_loop_;
-  std::unique_ptr<ui::AnimationScheduler> animation_scheduler_;
+  std::unique_ptr<Scheduler> scheduler_;
   std::unique_ptr<metrics::TimeScope> view_idle_time_scope_;
   int view_idle_count_;
   int view_idle_hint_;

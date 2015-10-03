@@ -29,6 +29,8 @@ static_library("editor") {
     "editor/application_proxy.h",
     "editor/dom_lock.cc",
     "editor/modal_message_loop_scope.cc",
+    "editor/scheduler.cc",
+    "editor/scheduler.h",
     "editor/switch_set.cc",
     "editor/switch_set.h",
     "metrics/counter.cc",

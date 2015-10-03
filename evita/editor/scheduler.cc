@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/ui/animation/animation_scheduler.h"
+#include "evita/editor/scheduler.h"
 
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
@@ -11,31 +11,31 @@
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/ui/compositor/compositor.h"
 
-namespace ui {
+namespace editor {
 
-enum class AnimationScheduler::State {
+enum class Scheduler::State {
   Running,
   Sleeping,
   Waiting,
 };
 
-AnimationScheduler::AnimationScheduler(base::MessageLoop* message_loop)
+Scheduler::Scheduler(base::MessageLoop* message_loop)
     : lock_(new base::Lock()),
       message_loop_(message_loop),
       state_(State::Sleeping) {}
 
-AnimationScheduler::~AnimationScheduler() {}
+Scheduler::~Scheduler() {}
 
-void AnimationScheduler::CancelAnimationFrameRequest(
-    AnimationFrameHandler* handler) {
+void Scheduler::CancelAnimationFrameRequest(
+    ui::AnimationFrameHandler* handler) {
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.erase(handler);
   canceled_handlers_.insert(handler);
 }
 
-void AnimationScheduler::HandleAnimationFrame(base::Time time) {
-  std::unordered_set<AnimationFrameHandler*> running_handlers;
-  std::unordered_set<AnimationFrameHandler*> canceling_handlers;
+void Scheduler::HandleAnimationFrame(base::Time time) {
+  std::unordered_set<ui::AnimationFrameHandler*> running_handlers;
+  std::unordered_set<ui::AnimationFrameHandler*> canceling_handlers;
   {
     base::AutoLock lock_scope(*lock_);
     running_handlers.swap(pending_handlers_);
@@ -48,7 +48,7 @@ void AnimationScheduler::HandleAnimationFrame(base::Time time) {
   }
 }
 
-void AnimationScheduler::Run() {
+void Scheduler::Run() {
   {
     base::AutoLock lock_scope(*lock_);
     state_ = State::Running;
@@ -66,7 +66,7 @@ void AnimationScheduler::Run() {
   }
 }
 
-void AnimationScheduler::RequestAnimationFrame(AnimationFrameHandler* handler) {
+void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.insert(handler);
   if (state_ != State::Sleeping)
@@ -74,12 +74,12 @@ void AnimationScheduler::RequestAnimationFrame(AnimationFrameHandler* handler) {
   Wait();
 }
 
-void AnimationScheduler::Wait() {
+void Scheduler::Wait() {
   DCHECK_EQ(static_cast<int>(state_), static_cast<int>(State::Sleeping));
   state_ = State::Waiting;
   message_loop_->PostNonNestableDelayedTask(
-      FROM_HERE, base::Bind(&AnimationScheduler::Run, base::Unretained(this)),
+      FROM_HERE, base::Bind(&Scheduler::Run, base::Unretained(this)),
       base::TimeDelta::FromMilliseconds(1000 / 60));
 }
 
-}  // namespace ui
+}  // namespace editor

@@ -14,6 +14,7 @@
 #include "evita/dom/script_thread.h"
 #include "evita/editor/application_proxy.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/editor/scheduler.h"
 #include "evita/editor/switch_set.h"
 #include "evita/gfx/dx_device.h"
 #include "evita/io/io_manager.h"
@@ -21,7 +22,6 @@
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/spellchecker/spelling_engine.h"
-#include "evita/ui/animation/animation_scheduler.h"
 #include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/widget.h"
@@ -53,7 +53,7 @@ Application::Application()
       is_quit_(false),
       io_manager_(new IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
-      animation_scheduler_(new ui::AnimationScheduler(message_loop_.get())),
+      scheduler_(new Scheduler(message_loop_.get())),
       view_idle_count_(0),
       view_idle_hint_(0),
       view_delegate_impl_(new views::ViewDelegateImpl()) {

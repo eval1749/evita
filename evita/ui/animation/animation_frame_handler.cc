@@ -6,7 +6,7 @@
 
 #include "base/time/time.h"
 #include "evita/editor/application.h"
-#include "evita/ui/animation/animation_scheduler.h"
+#include "evita/editor/scheduler.h"
 
 namespace ui {
 
@@ -17,9 +17,8 @@ AnimationFrameHandler::~AnimationFrameHandler() {
 }
 
 void AnimationFrameHandler::CancelAnimationFrameRequest() {
-  editor::Application::instance()
-      ->animation_scheduler()
-      ->CancelAnimationFrameRequest(this);
+  editor::Application::instance()->scheduler()->CancelAnimationFrameRequest(
+      this);
 }
 
 void AnimationFrameHandler::HandleAnimationFrame(base::Time time) {
@@ -27,8 +26,7 @@ void AnimationFrameHandler::HandleAnimationFrame(base::Time time) {
 }
 
 void AnimationFrameHandler::RequestAnimationFrame() {
-  editor::Application::instance()->animation_scheduler()->RequestAnimationFrame(
-      this);
+  editor::Application::instance()->scheduler()->RequestAnimationFrame(this);
 }
 
 }  // namespace ui

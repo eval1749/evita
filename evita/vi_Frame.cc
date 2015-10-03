@@ -262,9 +262,9 @@ void Frame::CreateNativeWindow() const {
 
   // Note: WS_EX_COMPOSITED posts WM_PAINT many times.
   // Note: WS_EX_LAYERED doesn't show window with Win7+.
-  DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_NOPARENTNOTIFY | WS_EX_WINDOWEDGE;
-
-  DWORD dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VISIBLE;
+  DWORD const dwExStyle =
+      WS_EX_APPWINDOW | WS_EX_NOPARENTNOTIFY | WS_EX_WINDOWEDGE | WS_EX_LAYERED;
+  DWORD const dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VISIBLE;
 
   const auto& font =
       *views::rendering::FontSet::GetFont(*css::Style::Default(), 'x');
@@ -288,6 +288,7 @@ void Frame::CreateNativeWindow() const {
       dwExStyle, dwStyle, L"", nullptr,
       gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT),
       gfx::Size(window_bounds.width(), workarea_bounds.height() * 4 / 5));
+  ::SetLayeredWindowAttributes(*native_window(), 0, 240, LWA_ALPHA);
 }
 
 void Frame::DidAddChildWidget(ui::Widget* new_child) {

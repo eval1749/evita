@@ -890,7 +890,13 @@ void TabStrip::View::UpdateLayout() {
   if (!dirty_)
     return;
   dirty_ = false;
-  auto const bounds = gfx::ToEnclosingRect(widget_->GetContentsBounds());
+  auto const contents_bounds =
+      gfx::ToEnclosingRect(widget_->GetContentsBounds());
+  auto const caption_buttons_width = 45 * 3;
+  auto const bounds =
+      gfx::Rect(contents_bounds.origin(),
+                gfx::Size(contents_bounds.width() - caption_buttons_width,
+                          contents_bounds.height()));
   auto const tabs_size =
       static_cast<ui::Widget*>(tab_collection_.get())->GetPreferredSize();
   if (tabs_size.width() <= bounds.width()) {

@@ -78,4 +78,10 @@ void ContentWindow::DidShow() {
   canvas_.reset(layer()->CreateCanvas());
 }
 
+void ContentWindow::OnDraw(gfx::Canvas* canvas) {
+  Window::OnDraw(canvas);
+  gfx::Brush edge_brush(canvas, gfx::ColorF(0, 0, 0, 0.1f));
+  canvas->DrawRectangle(edge_brush, GetContentsBounds());
+}
+
 }  // namespace views

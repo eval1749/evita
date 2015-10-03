@@ -55,6 +55,7 @@ class ContentWindow : public Window, protected ui::LayerOwnerDelegate {
   void DidRealize() override;
   void DidSetFocus(ui::Widget*) override;
   void DidShow() override;
+  void OnDraw(gfx::Canvas* canvas) override;
 
  private:
   std::unique_ptr<gfx::Canvas> canvas_;

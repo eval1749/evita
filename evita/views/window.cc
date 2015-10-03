@@ -135,9 +135,10 @@ void Window::DidHide() {
                                                   domapi::Visibility::Hidden);
 }
 
-void Window::DidKillFocus(ui::Widget* focused_window) {
-  ui::AnimatableWindow::DidKillFocus(focused_window);
-  DispatchFocusEvent(domapi::EventType::Blur, MaybeEventTarget(focused_window));
+void Window::DidKillFocus(ui::Widget* will_focus_window) {
+  ui::AnimatableWindow::DidKillFocus(will_focus_window);
+  DispatchFocusEvent(domapi::EventType::Blur,
+                     MaybeEventTarget(will_focus_window));
 }
 
 void Window::DidRealize() {

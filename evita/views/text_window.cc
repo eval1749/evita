@@ -455,8 +455,8 @@ void TextWindow::DidHide() {
   text_renderer_->DidHide();
 }
 
-void TextWindow::DidKillFocus(ui::Widget* focused_widget) {
-  ContentWindow::DidKillFocus(focused_widget);
+void TextWindow::DidKillFocus(ui::Widget* will_focus_widget) {
+  ContentWindow::DidKillFocus(will_focus_widget);
   ui::TextInputClient::Get()->CommitComposition(this);
   ui::TextInputClient::Get()->CancelComposition(this);
   ui::TextInputClient::Get()->set_delegate(nullptr);

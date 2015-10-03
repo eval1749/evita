@@ -951,8 +951,7 @@ void RowCollection::DidRemoveRow(int row_id) {
 }
 
 // ui::Widget
-void RowCollection::DidKillFocus(Widget* window) {
-  DCHECK(window);
+void RowCollection::DidKillFocus(Widget* will_focus_widget) {
   // Change selected rows to inactive selected color.
   RequestAnimationFrame();
   NeedUpdateSelection();

@@ -101,8 +101,9 @@ float Tab::ComputeAlpha(State state) {
 gfx::ColorF Tab::ComputeBackgroundColor() const {
   switch (state_) {
     case State::Hovered:
+      return gfx::ColorF(0.9f, 0.9f, 0.9f, animated_alpha_);
     case State::Normal:
-      return gfx::ColorF(1.0f, 1.0f, 1.0f, animated_alpha_);
+      return gfx::ColorF(0.8f, 0.8f, 0.8f, animated_alpha_);
     case State::Selected:
       return gfx::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
   }

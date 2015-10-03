@@ -310,7 +310,6 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   v8::V8::AddMessageListener(MessageCallback);
   v8::V8::AddGCPrologueCallback(GcPrologueCallback);
   v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
-#if 0
   // TODO(yosi) Turning off micro task running during creating wrapper, name
   // |Editor.checkSpelling('foo').then(console.log)| to work.
   // Otherwise |console.log| executed as micro task gets storage object which
@@ -318,7 +317,6 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   // See "985a73d2cce5", same thing is happened in spell checker with
   // |Editor.RegExp| object.
   isolate->SetAutorunMicrotasks(false);
-#endif
   isolate->SetPromiseRejectCallback(DidRejectPromise);
   v8Strings::Init(isolate);
   return script_host;

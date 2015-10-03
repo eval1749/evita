@@ -39,7 +39,8 @@ namespace dom {
 
 namespace {
 
-void CheckEventId(const domapi::Event& api_event) {
+void RunMicrotasksIfNoMoreEvents(const domapi::Event& api_event) {
+  // TODO(eval1749) We should have another way to check the last event.
   if (views::event_id_counter != api_event.event_id)
     return;
   ScriptHost::instance()->RunMicrotasks();
@@ -247,7 +248,7 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
       new FocusEvent(
           api_event.event_type == domapi::EventType::Blur ? L"blur" : L"focus",
           event_init));
-  CheckEventId(api_event);
+  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchKeyboardEvent(
@@ -256,7 +257,7 @@ void ViewEventHandlerImpl::DispatchKeyboardEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new KeyboardEvent(api_event));
-  CheckEventId(api_event);
+  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchMouseEvent(
@@ -265,7 +266,7 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new MouseEvent(api_event));
-  CheckEventId(api_event);
+  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchTextCompositionEvent(
@@ -274,7 +275,7 @@ void ViewEventHandlerImpl::DispatchTextCompositionEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new CompositionEvent(api_event));
-  CheckEventId(api_event);
+  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchWheelEvent(
@@ -283,7 +284,7 @@ void ViewEventHandlerImpl::DispatchWheelEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new WheelEvent(api_event));
-  CheckEventId(api_event);
+  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::OpenFile(WindowId window_id,

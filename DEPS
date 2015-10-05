@@ -5,8 +5,8 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
 
-  'buildtools_revision':  '8d89c1b15f80323b54b3305b2be7b26686fd5611',
-  'v8_revision': '76d0303374b12252aac0574027be114a397cf35c',
+  'buildtools_revision':  '0c88009d5c50b9f21b6f8849db08abfb9eb29f1e',
+  'v8_revision': 'adc72743c22ddfbec9efb613e241822e01c6ad43',
 }
 
 deps = {
@@ -29,7 +29,7 @@ deps = {
     Var('chromium_git') + '/external/gyp.git' + '@' + '01528c7244837168a1c80f06ff60fa5a9793c824',
 
   'src/third_party/icu':
-    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '423fc7e1107fb08ccf007c4aeb76dcab8b2747c1',
+    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '94e4b770ce2f6065d4261d29c32683a6099b9d93',
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),

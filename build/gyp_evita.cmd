@@ -61,8 +61,14 @@ if not "%defines%"=="" (
 : Cycle: base\allocator\allocator.gyp -> base\base.gyp -> base\allocator\allocator.gyp
 : Cycle: base\base.gyp -> base\allocator\allocator.gyp -> base\base.gyp
 
+: Note: We need to have
+: "C:\Program Files (x86)\Windows Kits\8.1\Bin\SetEnv.Cmd"'
+: it is used by vs.SetupScript() in GenerateEnvironmentFiles()
+
+
 set PYTHONPATH=%cd%\build;%PATH%
 
+: Please try --no-parallel, when gyp failures.
 .\tools\gyp\gyp ^
     --format=%format% ^
     --generator-output=%outdir% ^

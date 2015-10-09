@@ -12,21 +12,21 @@ vars = {
 
 deps = {
     'src/buildtools':
-        Var('git_url') + '/chromium/buildtools.git@8d89c1b15f80323b54b3305b2be7b26686fd5611',
+        Var('git_url') + '/chromium/buildtools.git@5fc8d3943e163ee627c8af50366c700c0325bba2',
     'src/testing/gmock':
         Var('git_url') + '/external/googlemock.git@0421b6f358139f02e102c9c332ce19a33faf75be',
     'src/testing/gtest':
-        Var('git_url') + '/external/googletest.git@9855a87157778d39b95eccfb201a9dc90f6d61c6',
+        Var('git_url') + '/external/github.com/google/googletest.git@6f8a66431cb592dad629028a50b3dd418a408c87',
     'src/third_party/cygwin':
         Var('git_url') + '/chromium/deps/cygwin.git@c89e446b273697fadf3a10ff1007a97c0b7de6df',
     'src/third_party/icu':
-        Var('git_url') + '/chromium/deps/icu.git@423fc7e1107fb08ccf007c4aeb76dcab8b2747c1',
+        Var('git_url') + '/chromium/deps/icu.git@94e4b770ce2f6065d4261d29c32683a6099b9d93',
     'src/tools/deps2git':
         Var('git_url') + '/chromium/tools/deps2git.git@f04828eb0b5acd3e7ad983c024870f17f17b06d9',
     'src/tools/gyp':
         Var('git_url') + '/external/gyp.git@01528c7244837168a1c80f06ff60fa5a9793c824',
     'src/v8':
-        Var('git_url') + '/v8/v8.git@76d0303374b12252aac0574027be114a397cf35c',
+        Var('git_url') + '/v8/v8.git@650dd77c3323ee0a685c016406f04351970a7b68',
 }
 
 deps_os = {

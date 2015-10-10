@@ -16,6 +16,10 @@ namespace base {
 class MessageLoop;
 }
 
+namespace dom {
+class ScriptThread;
+}
+
 namespace domapi {
 enum class ScriptHostState;
 class ViewEventHandler;
@@ -67,10 +71,13 @@ class Application final : public common::Singleton<Application> {
   bool is_quit_;
   std::unique_ptr<base::MessageLoop> message_loop_;
   std::unique_ptr<Scheduler> scheduler_;
+  std::unique_ptr<views::ViewDelegateImpl> view_delegate_impl_;
   std::unique_ptr<metrics::TimeScope> view_idle_time_scope_;
   int view_idle_count_;
   int view_idle_hint_;
-  std::unique_ptr<views::ViewDelegateImpl> view_delegate_impl_;
+
+  // |dom::ScriptThread| uses |IoDelegate| and |ViewDelegate|.
+  std::unique_ptr<dom::ScriptThread> script_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

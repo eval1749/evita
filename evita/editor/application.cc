@@ -56,12 +56,12 @@ Application::Application()
       scheduler_(new Scheduler(message_loop_.get())),
       view_idle_count_(0),
       view_idle_hint_(0),
-      view_delegate_impl_(new views::ViewDelegateImpl()) {
+      view_delegate_impl_(new views::ViewDelegateImpl()),
+      script_thread_(new dom::ScriptThread(view_delegate_impl_.get(),
+                                           io_manager_->io_delegate())) {
   io_manager_->Start();
   ui::TextInputClientWin::instance()->Start();
-  dom::ScriptThread::Start(message_loop_.get(), view_delegate_impl_.get(),
-                           io_manager_->message_loop(),
-                           io_manager_->io_delegate());
+  script_thread_->Start(message_loop_.get(), io_manager_->message_loop());
   io_manager_->message_loop()->PostTask(
       FROM_HERE,
       base::Bind(
@@ -82,7 +82,7 @@ const base::string16& Application::version() const {
 }
 
 domapi::ViewEventHandler* Application::view_event_handler() const {
-  return view_delegate_impl_->event_handler();
+  return script_thread_.get();
 }
 
 bool Application::CalledOnValidThread() const {

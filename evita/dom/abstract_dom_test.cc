@@ -264,9 +264,6 @@ void AbstractDomTest::SetUp() {
 
   RunnerDelegate::instance()->set_test_instance(this);
 
-  if (!static_runner)
-    EXPECT_CALL(*mock_view_impl_, RegisterViewEventHandler(_)).Times(1);
-
   script_host_ = dom::ScriptHost::StartForTesting(mock_view_impl_.get(),
                                                   mock_io_delegate_.get());
 
@@ -302,7 +299,6 @@ void AbstractDomTest::SetUp() {
     if (result.IsEmpty())
       break;
   }
-  script_host_->DidStartViewHost();
 }
 
 void AbstractDomTest::TearDown() {

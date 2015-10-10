@@ -23,22 +23,24 @@ class WaitableEvent;
 
 namespace dom {
 
+class ScriptHost;
+
+
+// TODO(eval1749) We should introduce |ViewThreadProxy| class and
+// |IoThreadProxy| class to encapsulate thread communication rather than
+// in |ScriptThread|.
 class ScriptThread final : public domapi::IoDelegate,
                            public ViewDelegate,
                            public domapi::ViewEventHandler {
  public:
+  ScriptThread(ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
   ~ScriptThread() final;
 
-  static void Start(base::MessageLoop* host_message_loop,
-                    ViewDelegate* view_delegate,
-                    base::MessageLoop* io_message_loop,
-                    domapi::IoDelegate* io_delegate);
+  void Start(base::MessageLoop* view_message_loop,
+             base::MessageLoop* io_message_loop);
 
  private:
-  ScriptThread(base::MessageLoop* host_message_loop,
-               ViewDelegate* view_delegate,
-               base::MessageLoop* io_message_loop,
-               domapi::IoDelegate* io_delegate);
+  domapi::ViewEventHandler* view_event_handler() const;
 
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
@@ -114,7 +116,6 @@ class ScriptThread final : public domapi::IoDelegate,
                   const MessageBoxResolver& resolver) final;
   void Reconvert(WindowId window_id, const base::string16& text) final;
   void RealizeWindow(WindowId window_id) final;
-  void RegisterViewEventHandler(domapi::ViewEventHandler* event_handler) final;
   void ReleaseCapture(domapi::EventTargetId event_target_id) final;
   void ScrollTextWindow(WindowId window_id, int direction) final;
   void SetCapture(domapi::EventTargetId event_target_id) final;
@@ -143,7 +144,6 @@ class ScriptThread final : public domapi::IoDelegate,
   void DidDestroyWidget(WindowId window_id) final;
   void DidDropWidget(WindowId source_id, WindowId target_id) final;
   void DidRealizeWidget(WindowId window_id) final;
-  void DidStartViewHost() final;
   void DispatchFocusEvent(const domapi::FocusEvent& event) final;
   void DispatchKeyboardEvent(const domapi::KeyboardEvent& event) final;
   void DispatchMouseEvent(const domapi::MouseEvent& event) final;
@@ -159,11 +159,12 @@ class ScriptThread final : public domapi::IoDelegate,
 
   domapi::IoDelegate* io_delegate_;
   base::MessageLoop* io_message_loop_;
-  std::unique_ptr<base::Thread> thread_;
-  ViewDelegate* view_delegate_;
-  domapi::ViewEventHandler* view_event_handler_;
+  const std::unique_ptr<base::Thread> thread_;
+  ViewDelegate* const view_delegate_;
   base::MessageLoop* view_message_loop_;
   std::unique_ptr<base::WaitableEvent> waitable_event_;
+
+  const std::unique_ptr<ScriptHost> script_host_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);
 };

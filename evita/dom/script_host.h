@@ -69,14 +69,14 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
 
   // Call |handleEvent()| function in the class of |target| with |event|.
   void CallClassEventHandler(EventTarget* target, Event* event);
-  void DidStartViewHost();
+  static std::unique_ptr<ScriptHost> Create(ViewDelegate* view_delegate,
+                                            domapi::IoDelegate* io_delegate);
   void PlatformError(const char* name);
   void PostTask(const tracked_objects::Location& from_here,
                 const base::Closure& task);
   void ResetForTesting();
   void RunMicrotasks();
-  static ScriptHost* Start(ViewDelegate* view_delegate,
-                           domapi::IoDelegate* io_delegate);
+  void Start();
   static ScriptHost* StartForTesting(ViewDelegate* view_delegate,
                                      domapi::IoDelegate* io_delegate);
   void ThrowError(const std::string& message);
@@ -86,6 +86,8 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
 
  private:
   ScriptHost(ViewDelegate* view_delegate, domapi::IoDelegate* io_deleage);
+
+  void DidStartScriptHost();
 
   // v8_glue::RunnerDelegate
   v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(

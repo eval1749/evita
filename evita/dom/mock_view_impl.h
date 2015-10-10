@@ -61,7 +61,6 @@ class MockViewImpl final : public dom::ViewDelegate {
                   const MessageBoxResolver& resolver) final;
   MOCK_METHOD2(Reconvert, void(WindowId, const base::string16&));
   MOCK_METHOD1(RealizeWindow, void(WindowId));
-  MOCK_METHOD1(RegisterViewEventHandler, void(domapi::ViewEventHandler*));
   MOCK_METHOD1(ReleaseCapture, void(domapi::EventTargetId));
   MOCK_METHOD2(ScrollTextWindow, void(WindowId, int));
   MOCK_METHOD1(SetCapture, void(domapi::EventTargetId));

@@ -135,8 +135,6 @@ class ViewDelegate {
 
   virtual void Reconvert(WindowId window_id, const base::string16& text) = 0;
   virtual void RealizeWindow(WindowId window_id) = 0;
-  virtual void RegisterViewEventHandler(
-      domapi::ViewEventHandler* event_handler) = 0;
 
   // Release capture from window or form control.
   virtual void ReleaseCapture(domapi::EventTargetId event_target_id) = 0;

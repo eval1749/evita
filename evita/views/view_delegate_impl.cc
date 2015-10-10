@@ -59,13 +59,15 @@ Frame* GetFrameForMessage(dom::WindowId window_id) {
   return FrameList::instance()->active_frame();
 }
 
+domapi::ViewEventHandler* ScriptDelegate() {
+  return editor::Application::instance()->view_event_handler();
+}
+
 }  // namespace
 
-ViewDelegateImpl::ViewDelegateImpl() : event_handler_(nullptr) {}
+ViewDelegateImpl::ViewDelegateImpl() {}
 
-ViewDelegateImpl::~ViewDelegateImpl() {
-  // event_handler_ should be nullptr
-}
+ViewDelegateImpl::~ViewDelegateImpl() {}
 
 void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
                                  dom::WindowId child_id) {
@@ -196,7 +198,8 @@ void ViewDelegateImpl::GetFileNameForLoad(
                           : Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "GetFileNameForLoad: no such widget " << window_id;
-    event_handler_->RunCallback(base::Bind(resolver.resolve, base::string16()));
+    ScriptDelegate()->RunCallback(
+        base::Bind(resolver.resolve, base::string16()));
     return;
   }
   FileDialogBox::Param params;
@@ -205,7 +208,7 @@ void ViewDelegateImpl::GetFileNameForLoad(
   FileDialogBox oDialog;
   if (!oDialog.GetOpenFileName(&params))
     return;
-  event_handler_->RunCallback(
+  ScriptDelegate()->RunCallback(
       base::Bind(resolver.resolve, base::string16(params.m_wsz)));
 }
 
@@ -218,7 +221,8 @@ void ViewDelegateImpl::GetFileNameForSave(
                           : Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "GetFileNameForSave: no such widget " << window_id;
-    event_handler_->RunCallback(base::Bind(resolver.resolve, base::string16()));
+    ScriptDelegate()->RunCallback(
+        base::Bind(resolver.resolve, base::string16()));
     return;
   }
   FileDialogBox::Param params;
@@ -227,7 +231,7 @@ void ViewDelegateImpl::GetFileNameForSave(
   FileDialogBox oDialog;
   if (!oDialog.GetSaveFileName(&params))
     return;
-  event_handler_->RunCallback(
+  ScriptDelegate()->RunCallback(
       base::Bind(resolver.resolve, base::string16(params.m_wsz)));
 }
 
@@ -376,7 +380,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   if (!need_response && level != MessageLevel_Error) {
     if (frame)
       frame->ShowMessage(level, message);
-    event_handler_->RunCallback(base::Bind(resolver.resolve, IDOK));
+    ScriptDelegate()->RunCallback(base::Bind(resolver.resolve, IDOK));
     return;
   }
 
@@ -388,7 +392,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
   editor::ModalMessageLoopScope modal_mesage_loop_scope;
   auto const response = ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
                                       static_cast<UINT>(flags));
-  event_handler_->RunCallback(base::Bind(resolver.resolve, response));
+  ScriptDelegate()->RunCallback(base::Bind(resolver.resolve, response));
 }
 
 void ViewDelegateImpl::Reconvert(WindowId window_id,
@@ -411,13 +415,6 @@ void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
     return;
   DCHECK_EQ(window_id, widget->window_id());
   widget->RealizeWidget();
-}
-
-void ViewDelegateImpl::RegisterViewEventHandler(
-    domapi::ViewEventHandler* event_handler) {
-  DCHECK(!event_handler_);
-  event_handler_ = event_handler;
-  event_handler_->DidStartViewHost();
 }
 
 void ViewDelegateImpl::SetTextWindowZoom(dom::WindowId window_id, float zoom) {

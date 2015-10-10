@@ -197,12 +197,13 @@ ScriptHost::ScriptHost(ViewDelegate* view_delegate,
                        domapi::IoDelegate* io_delegate)
     : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
-      message_loop_for_script_(base::MessageLoop::current()),
+      message_loop_for_script_(nullptr),
       state_(domapi::ScriptHostState::Stopped),
       testing_(false),
       testing_runner_(nullptr),
       view_delegate_(view_delegate) {
-  view_delegate_->RegisterViewEventHandler(event_handler_.get());
+  DCHECK(!script_host);
+  script_host = this;
 }
 
 ScriptHost::~ScriptHost() {
@@ -251,7 +252,22 @@ void ScriptHost::CallClassEventHandler(EventTarget* event_target,
   runner()->Call(js_method, js_target, js_event);
 }
 
-void ScriptHost::DidStartViewHost() {
+std::unique_ptr<ScriptHost> ScriptHost::Create(
+    ViewDelegate* view_delegate,
+    domapi::IoDelegate* io_delegate) {
+  // See v8/src/flag-definitions.h
+  // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
+  // flags.
+  // char flags[] = "--use_strict" " --harmony";
+  // v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
+  gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
+                                 gin::ArrayBufferAllocator::SharedInstance());
+  v8::V8::InitializeICU();
+  return std::unique_ptr<ScriptHost>(
+      new ScriptHost(view_delegate, io_delegate));
+}
+
+void ScriptHost::DidStartScriptHost() {
   if (testing_)
     return;
   auto const script_sources = internal::GetJsLibSources();
@@ -319,30 +335,19 @@ void ScriptHost::RunMicrotasks() {
   runner()->HandleTryCatch(try_catch);
 }
 
-ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
-                              domapi::IoDelegate* io_deleage) {
+void ScriptHost::Start() {
+  DCHECK(!message_loop_for_script_);
+  message_loop_for_script_ = base::MessageLoop::current();
+
   // Node: Using editor::Application::instance() starts thread. So, we don't
   // start |ScriptHost| in testing. Although, we should remove
   // all |editor::Application::instance()| in DOM world.
-  if (script_host && script_host->testing_)
-    return script_host;
-  DCHECK(!script_host);
+  DCHECK(script_host);
   SuppressMessageBoxScope suppress_messagebox_scope;
 
-  gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
-                                 gin::ArrayBufferAllocator::SharedInstance());
-  v8::V8::InitializeICU();
-
-  // See v8/src/flag-definitions.h
-  // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
-  // flags.
-  // char flags[] = "--use_strict" " --harmony";
-  // v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
-
-  script_host = new ScriptHost(view_delegate, io_deleage);
-  auto const isolate = script_host->isolate();
+  auto const isolate = this->isolate();
   auto const runner = new v8_glue::Runner(isolate, script_host);
-  script_host->runner_.reset(runner);
+  runner_.reset(runner);
   v8_glue::Runner::Scope runner_scope(runner);
   v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
   v8::V8::AddMessageListener(MessageCallback);
@@ -357,13 +362,15 @@ ScriptHost* ScriptHost::Start(ViewDelegate* view_delegate,
   isolate->SetAutorunMicrotasks(false);
   isolate->SetPromiseRejectCallback(DidRejectPromise);
   v8Strings::Init(isolate);
-  return script_host;
+  DidStartScriptHost();
 }
 
 ScriptHost* ScriptHost::StartForTesting(ViewDelegate* view_delegate,
                                         domapi::IoDelegate* io_delegate) {
   if (!script_host) {
-    Start(view_delegate, io_delegate)->testing_ = true;
+    script_host = ScriptHost::Create(view_delegate, io_delegate).release();
+    script_host->testing_ = true;
+    script_host->Start();
   } else {
     // In testing, view_delegate is gmock'ed object. Each test case passes
     // newly constructed one.

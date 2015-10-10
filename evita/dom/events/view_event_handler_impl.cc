@@ -182,10 +182,6 @@ void ViewEventHandlerImpl::DidRealizeWidget(WindowId window_id) {
   window->DidRealizeWindow();
 }
 
-void ViewEventHandlerImpl::DidStartViewHost() {
-  host_->DidStartViewHost();
-}
-
 void ViewEventHandlerImpl::DispatchFocusEvent(
     const domapi::FocusEvent& api_event) {
   auto const target = FromEventTargetId(api_event.target_id);

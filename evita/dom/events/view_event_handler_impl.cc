@@ -170,6 +170,10 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
 }
 
 // domapi::ViewEventHandler
+void ViewEventHandlerImpl::DidBeginFrame(const base::Time& deadline) {
+  // TODO(eval1749) We'll have input event processing here.
+}
+
 void ViewEventHandlerImpl::DidChangeWindowBounds(WindowId window_id,
                                                  int left,
                                                  int top,

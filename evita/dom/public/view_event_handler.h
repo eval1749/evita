@@ -13,6 +13,10 @@
 #include "evita/dom/public/event_target_id.h"
 #include "evita/dom/windows/window_id.h"
 
+namespace base {
+class Time;
+}
+
 namespace text {
 class Buffer;
 }
@@ -30,9 +34,9 @@ using dom::WindowId;
 
 class ViewEventHandler {
  public:
-  ViewEventHandler();
   virtual ~ViewEventHandler();
 
+  virtual void DidBeginFrame(const base::Time& deadline) = 0;
   virtual void DidChangeWindowBounds(WindowId window_id,
                                      int left,
                                      int top,
@@ -57,6 +61,9 @@ class ViewEventHandler {
   virtual void QueryClose(WindowId window_id) = 0;
   virtual void RunCallback(base::Closure) = 0;
   virtual void WillDestroyHost() = 0;
+
+ protected:
+  ViewEventHandler();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ViewEventHandler);

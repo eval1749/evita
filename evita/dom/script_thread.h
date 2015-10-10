@@ -131,6 +131,7 @@ class ScriptThread final : public domapi::IoDelegate,
   void UpdateWindow(WindowId window_id) final;
 
   // domapi::ViewEventHandler
+  void DidBeginFrame(const base::Time& deadline);
   void DidChangeWindowBounds(WindowId window_id,
                              int left,
                              int top,

@@ -26,6 +26,7 @@ class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
   void DispatchEventWithInLock(EventTarget* event_target, Event* event);
 
   // domapi::ViewEventHandler
+  void DidBeginFrame(const base::Time& deadline);
   void DidChangeWindowBounds(WindowId window_id,
                              int left,
                              int top,

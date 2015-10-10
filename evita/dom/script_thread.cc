@@ -494,6 +494,7 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
                               param2, param3, param4, param5));              \
   }
 
+DEFINE_VIEW_EVENT_HANDLER_1(DidBeginFrame, const base::Time&)
 DEFINE_VIEW_EVENT_HANDLER_5(DidChangeWindowBounds, WindowId, int, int, int, int)
 DEFINE_VIEW_EVENT_HANDLER_2(DidChangeWindowVisibility,
                             WindowId,

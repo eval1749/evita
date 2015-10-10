@@ -67,6 +67,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   void set_testing_runner(v8_glue::Runner* runner);
   ViewDelegate* view_delegate() const;
 
+  // Call |handleEvent()| function in the class of |target| with |event|.
   void CallClassEventHandler(EventTarget* target, Event* event);
   void DidStartViewHost();
   void PlatformError(const char* name);

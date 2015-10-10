@@ -20,8 +20,6 @@ class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
   explicit ViewEventHandlerImpl(ScriptHost* host);
   ~ViewEventHandlerImpl() final;
 
-  void CallClassEventHandler(EventTarget* event_target, Event* event);
-
  private:
   void DispatchEventWithInLock(EventTarget* event_target, Event* event);
 

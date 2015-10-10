@@ -107,56 +107,11 @@ Window* NewOrFromWindowId(WindowId window_id) {
                                        : FromWindowId(window_id);
 }
 
-// Note: The constructor returned by v8::Object::GetConstructor() doesn't
-// have properties defined in JavaScript.
-v8::Handle<v8::Object> GetClassObject(v8::Isolate* isolate,
-                                      v8::Handle<v8::Object> object) {
-  auto const name = object->GetConstructorName();
-  auto const value = isolate->GetCurrentContext()->Global()->Get(name);
-  if (value.IsEmpty() || !value->IsFunction()) {
-    LOG(0) << "No such class " << V8ToString(name) << ".";
-    return v8::Handle<v8::Object>();
-  }
-  return value->ToObject();
-}
-
-v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
-                                      v8::Handle<v8::Object> js_class,
-                                      v8::Eternal<v8::String> method_name) {
-  auto const value = js_class->Get(method_name.Get(isolate));
-  if (value.IsEmpty() || !value->IsFunction()) {
-    LOG(0) << "Object " << V8ToString(js_class) << " has no method '"
-           << V8ToString(method_name.Get(isolate)) << "', it has "
-           << V8ToString(js_class->GetPropertyNames()) << ".";
-    return v8::Handle<v8::Object>();
-  }
-  return value->ToObject();
-}
-
 }  // namespace
 
 ViewEventHandlerImpl::ViewEventHandlerImpl(ScriptHost* host) : host_(host) {}
 
 ViewEventHandlerImpl::~ViewEventHandlerImpl() {}
-
-// Call |handleEvent| function in the class of event target.
-void ViewEventHandlerImpl::CallClassEventHandler(EventTarget* event_target,
-                                                 Event* event) {
-  auto const runner = host_->runner();
-  auto const isolate = runner->isolate();
-  auto const js_target = event_target->GetWrapper(isolate);
-  auto const js_class = GetClassObject(isolate, js_target);
-  if (js_class.IsEmpty())
-    return;
-
-  auto const js_method =
-      ToMethodObject(isolate, js_class, v8Strings::handleEvent);
-  if (js_method.IsEmpty())
-    return;
-
-  auto const js_event = event->GetWrapper(isolate);
-  runner->Call(js_method, js_target, js_event);
-}
 
 void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
                                                    Event* event) {
@@ -165,7 +120,7 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
   v8::TryCatch try_catch;
   DOM_AUTO_LOCK_SCOPE();
   if (event_target->DispatchEvent(event))
-    CallClassEventHandler(event_target, event);
+    host_->CallClassEventHandler(event_target, event);
   runner->HandleTryCatch(try_catch);
 }
 

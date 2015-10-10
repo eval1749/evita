@@ -31,13 +31,7 @@
 HANDLE g_hEvent;
 bool g_fMultiple;
 
-// TODO(yosi) Once we move IoManager to namespace |io|, we should remove this
-// |using| statement.
-using io::IoDelegateImpl;
-
-// TODO(yosi) Once we move IoManager to namespace |io|, we should remove this
-// |using| statement.
-using io::IoThreadProxy;
+namespace io {
 
 namespace {
 
@@ -77,3 +71,5 @@ void IoManager::Start() {
   io_thread_->StartWithOptions(
       base::Thread::Options(base::MessageLoop::TYPE_IO, 0));
 }
+
+}  // namespace io

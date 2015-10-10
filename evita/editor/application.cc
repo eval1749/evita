@@ -51,7 +51,7 @@ namespace editor {
 Application::Application()
     : dom_lock_(new editor::DomLock()),
       is_quit_(false),
-      io_manager_(new IoManager()),
+      io_manager_(new io::IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
       scheduler_(new Scheduler(message_loop_.get())),
       view_idle_count_(0),

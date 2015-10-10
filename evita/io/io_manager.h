@@ -21,7 +21,6 @@ class IoDelegate;
 
 namespace io {
 class IoThreadProxy;
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -45,5 +44,7 @@ class IoManager final {
 
   DISALLOW_COPY_AND_ASSIGN(IoManager);
 };
+
+}  // namespace io
 
 #endif  // EVITA_IO_IO_MANAGER_H_

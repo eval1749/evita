@@ -10,8 +10,6 @@
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 
-class IoManager;
-
 namespace base {
 class MessageLoop;
 }
@@ -27,6 +25,10 @@ class ViewEventHandler;
 
 namespace editor {
 class DomLock;
+}
+
+namespace io {
+class IoManager;
 }
 
 namespace metrics {
@@ -55,7 +57,7 @@ class Application final : public common::Singleton<Application> {
 
   bool CalledOnValidThread() const;
   void DidStartScriptHost(domapi::ScriptHostState state);
-  IoManager* GetIoManager() const { return io_manager_.get(); }
+  io::IoManager* GetIoManager() const { return io_manager_.get(); }
   void Quit();
   void Run();
 
@@ -67,7 +69,7 @@ class Application final : public common::Singleton<Application> {
   void DoIdle();
 
   std::unique_ptr<editor::DomLock> dom_lock_;
-  std::unique_ptr<IoManager> io_manager_;
+  std::unique_ptr<io::IoManager> io_manager_;
   bool is_quit_;
   std::unique_ptr<base::MessageLoop> message_loop_;
   std::unique_ptr<Scheduler> scheduler_;

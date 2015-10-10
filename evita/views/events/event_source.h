@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_EVENT_SOURCE_H_
-#define EVITA_VIEWS_EVENT_SOURCE_H_
+#ifndef EVITA_VIEWS_EVENTS_EVENT_SOURCE_H_
+#define EVITA_VIEWS_EVENTS_EVENT_SOURCE_H_
 
 #include "base/macros.h"
 #include "evita/dom/public/event_target_id.h"
@@ -46,4 +46,4 @@ class EventSource {
 
 }  // namespace views
 
-#endif  // EVITA_VIEWS_EVENT_SOURCE_H_
+#endif  // EVITA_VIEWS_EVENTS_EVENT_SOURCE_H_

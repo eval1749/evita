@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/event_source.h"
+#include "evita/views/events/event_source.h"
 
 #include "base/logging.h"
 #include "evita/dom/public/text_composition_event.h"

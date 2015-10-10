@@ -7,7 +7,7 @@
 
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/widget.h"
-#include "evita/views/event_source.h"
+#include "evita/views/events/event_source.h"
 #include "evita/views/window_id.h"
 
 namespace views {

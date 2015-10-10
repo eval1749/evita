@@ -7,7 +7,7 @@
 
 #include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/controls/control_controller.h"
-#include "evita/views/event_source.h"
+#include "evita/views/events/event_source.h"
 
 namespace views {
 

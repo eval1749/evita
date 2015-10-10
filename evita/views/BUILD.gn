@@ -8,8 +8,6 @@ static_library("views") {
     "content_observer.h",
     "content_window.cc",
     "content_window.h",
-    "event_source.cc",
-    "event_source.h",
     "icon_cache.cc",
     "icon_cache.h",
     "message_view.cc",
@@ -35,5 +33,6 @@ static_library("views") {
     #"//evita/dom",
     "//evita/spellchecker",
     "//evita/ui",
+    "//evita/views/events",
   ]
 }

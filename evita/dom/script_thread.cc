@@ -22,16 +22,14 @@
 #include "v8/include/v8-debug.h"
 
 #define DCHECK_CALLED_ON_NON_SCRIPT_THREAD() \
-  DCHECK_NE(script_thread->message_loop(), base::MessageLoop::current())
+  DCHECK_NE(thread_->message_loop(), base::MessageLoop::current())
 
 #define DCHECK_CALLED_ON_SCRIPT_THREAD() \
-  DCHECK_EQ(script_thread->message_loop(), base::MessageLoop::current())
+  DCHECK_EQ(thread_->message_loop(), base::MessageLoop::current())
 
 namespace dom {
 
 namespace {
-
-base::Thread* script_thread;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -48,7 +46,6 @@ class SynchronousCaller final {
   ~SynchronousCaller() = default;
 
   Result Call(base::MessageLoop* message_loop) {
-    DCHECK_CALLED_ON_SCRIPT_THREAD();
     event_->Reset();
     DOM_AUTO_UNLOCK_SCOPE();
     message_loop->PostTask(FROM_HERE, base::Bind(&SynchronousCaller::RunTask,
@@ -59,7 +56,6 @@ class SynchronousCaller final {
 
  private:
   void RunTask() {
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
     result_ = task_.Run();
     event_->Signal();
   }
@@ -94,7 +90,6 @@ class SynchronousRunner final {
   ~SynchronousRunner() = default;
 
   void Run(base::MessageLoop* message_loop) {
-    DCHECK_CALLED_ON_SCRIPT_THREAD();
     event_->Reset();
     DOM_AUTO_UNLOCK_SCOPE();
     message_loop->PostTask(FROM_HERE, base::Bind(&SynchronousRunner::RunTask,
@@ -104,7 +99,6 @@ class SynchronousRunner final {
 
  private:
   void RunTask() {
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
     task_.Run();
     event_->Signal();
   }
@@ -123,12 +117,6 @@ void RunSynchronously(const base::Callback<void(Params...)>& task,
   caller.Run(message_loop);
 }
 
-void PostScriptTask(const tracked_objects::Location& from_here,
-                    const base::Closure& task) {
-  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  script_thread->message_loop()->PostTask(from_here, task);
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -141,18 +129,15 @@ ScriptThread::ScriptThread(base::MessageLoop* view_message_loop,
                            domapi::IoDelegate* io_delegate)
     : io_delegate_(io_delegate),
       io_message_loop_(io_message_loop),
+      thread_(std::make_unique<base::Thread>("script_thread")),
       view_delegate_(view_delegate),
       view_event_handler_(nullptr),
       view_message_loop_(view_message_loop),
       waitable_event_(new base::WaitableEvent(true, false)) {
-  DCHECK(!script_thread);
-  script_thread = new base::Thread("script_thread");
-  script_thread->Start();
+  thread_->Start();
 }
 
-ScriptThread::~ScriptThread() {
-  script_thread = nullptr;
-}
+ScriptThread::~ScriptThread() {}
 
 void ScriptThread::Start(base::MessageLoop* view_message_loop,
                          ViewDelegate* view_delegate,
@@ -160,9 +145,10 @@ void ScriptThread::Start(base::MessageLoop* view_message_loop,
                          domapi::IoDelegate* io_delegate) {
   auto const thread = new ScriptThread(view_message_loop, view_delegate,
                                        io_message_loop, io_delegate);
-  PostScriptTask(FROM_HERE, base::Bind(base::IgnoreResult(&ScriptHost::Start),
-                                       base::Unretained(thread),
-                                       base::Unretained(thread)));
+  thread->thread_->message_loop()->PostTask(
+      FROM_HERE,
+      base::Bind(base::IgnoreResult(&ScriptHost::Start),
+                 base::Unretained(thread), base::Unretained(thread)));
 }
 
 // IoDelegate
@@ -438,8 +424,8 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
   void ScriptThread::name() {                                          \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                              \
     DCHECK(view_event_handler_);                                       \
-    PostScriptTask(FROM_HERE,                                          \
-                   base::Bind(&ViewEventHandler::name,                 \
+    thread_->message_loop()->PostTask(                                 \
+        FROM_HERE, base::Bind(&ViewEventHandler::name,                 \
                               base::Unretained(view_event_handler_))); \
   }
 
@@ -447,8 +433,8 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
   void ScriptThread::name(type1 param1) {                                      \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                      \
     DCHECK(view_event_handler_);                                               \
-    PostScriptTask(FROM_HERE,                                                  \
-                   base::Bind(&ViewEventHandler::name,                         \
+    thread_->message_loop()->PostTask(                                         \
+        FROM_HERE, base::Bind(&ViewEventHandler::name,                         \
                               base::Unretained(view_event_handler_), param1)); \
   }
 
@@ -456,7 +442,7 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
   void ScriptThread::name(type1 param1, type2 param2) {                     \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                   \
     DCHECK(view_event_handler_);                                            \
-    PostScriptTask(                                                         \
+    thread_->message_loop()->PostTask(                                      \
         FROM_HERE,                                                          \
         base::Bind(&ViewEventHandler::name,                                 \
                    base::Unretained(view_event_handler_), param1, param2)); \
@@ -466,8 +452,8 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
   void ScriptThread::name(type1 param1, type2 param2, type3 param3) {        \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                    \
     DCHECK(view_event_handler_);                                             \
-    PostScriptTask(FROM_HERE,                                                \
-                   base::Bind(&ViewEventHandler::name,                       \
+    thread_->message_loop()->PostTask(                                       \
+        FROM_HERE, base::Bind(&ViewEventHandler::name,                       \
                               base::Unretained(view_event_handler_), param1, \
                               param2, param3));                              \
   }
@@ -477,8 +463,8 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
                           type4 param4) {                                    \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                    \
     DCHECK(view_event_handler_);                                             \
-    PostScriptTask(FROM_HERE,                                                \
-                   base::Bind(&ViewEventHandler::name,                       \
+    thread_->message_loop()->PostTask(                                       \
+        FROM_HERE, base::Bind(&ViewEventHandler::name,                       \
                               base::Unretained(view_event_handler_), param1, \
                               param2, param3, param4));                      \
   }
@@ -488,8 +474,8 @@ void ScriptThread::UpdateWindow(WindowId window_id) {
                           type4 param4, type5 param5) {                      \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                    \
     DCHECK(view_event_handler_);                                             \
-    PostScriptTask(FROM_HERE,                                                \
-                   base::Bind(&ViewEventHandler::name,                       \
+    thread_->message_loop()->PostTask(                                       \
+        FROM_HERE, base::Bind(&ViewEventHandler::name,                       \
                               base::Unretained(view_event_handler_), param1, \
                               param2, param3, param4, param5));              \
   }
@@ -516,8 +502,8 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
     return;
   }
 
-  PostScriptTask(FROM_HERE,
-                 base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
+  thread_->message_loop()->PostTask(
+      FROM_HERE, base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
                             base::Unretained(view_event_handler_), event));
 }
 
@@ -537,8 +523,9 @@ void ScriptThread::WillDestroyHost() {
   DCHECK(view_event_handler_);
   view_delegate_ = nullptr;
   view_message_loop_ = nullptr;
-  PostScriptTask(FROM_HERE, base::Bind(&ViewEventHandler::WillDestroyHost,
-                                       base::Unretained(view_event_handler_)));
+  thread_->message_loop()->PostTask(
+      FROM_HERE, base::Bind(&ViewEventHandler::WillDestroyHost,
+                            base::Unretained(view_event_handler_)));
 }
 
 }  // namespace dom

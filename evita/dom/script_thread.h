@@ -17,6 +17,7 @@
 
 namespace base {
 class MessageLoop;
+class Thread;
 class WaitableEvent;
 }
 
@@ -158,6 +159,7 @@ class ScriptThread final : public domapi::IoDelegate,
 
   domapi::IoDelegate* io_delegate_;
   base::MessageLoop* io_message_loop_;
+  std::unique_ptr<base::Thread> thread_;
   ViewDelegate* view_delegate_;
   domapi::ViewEventHandler* view_event_handler_;
   base::MessageLoop* view_message_loop_;

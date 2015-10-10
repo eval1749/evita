@@ -49,7 +49,7 @@ class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
                           const std::vector<base::string16>& args) final;
   void QueryClose(WindowId window_id) final;
   void RunCallback(base::Closure callback) final;
-  void WillDestroyHost() final;
+  void WillDestroyViewHost() final;
 
   ScriptHost* host_;
 

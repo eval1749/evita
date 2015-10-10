@@ -155,7 +155,7 @@ class ScriptThread final : public domapi::IoDelegate,
                           const std::vector<base::string16>& args) final;
   void QueryClose(WindowId window_id) final;
   void RunCallback(base::Closure callback) final;
-  void WillDestroyHost() final;
+  void WillDestroyViewHost() final;
 
   domapi::IoDelegate* io_delegate_;
   base::MessageLoop* io_message_loop_;

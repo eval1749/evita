@@ -518,13 +518,13 @@ DEFINE_VIEW_EVENT_HANDLER_2(ProcessCommandLine,
 DEFINE_VIEW_EVENT_HANDLER_1(QueryClose, WindowId)
 DEFINE_VIEW_EVENT_HANDLER_1(RunCallback, base::Closure)
 
-void ScriptThread::WillDestroyHost() {
+void ScriptThread::WillDestroyViewHost() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   DCHECK(view_event_handler_);
   view_delegate_ = nullptr;
   view_message_loop_ = nullptr;
   thread_->message_loop()->PostTask(
-      FROM_HERE, base::Bind(&ViewEventHandler::WillDestroyHost,
+      FROM_HERE, base::Bind(&ViewEventHandler::WillDestroyViewHost,
                             base::Unretained(view_event_handler_)));
 }
 

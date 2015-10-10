@@ -355,7 +355,7 @@ void ScriptHost::ThrowException(v8::Handle<v8::Value> exception) {
   isolate()->ThrowException(exception);
 }
 
-void ScriptHost::WillDestroyHost() {
+void ScriptHost::WillDestroyViewHost() {
   view_delegate_ = nullptr;
 }
 

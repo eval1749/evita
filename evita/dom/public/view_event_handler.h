@@ -60,7 +60,7 @@ class ViewEventHandler {
                                   const std::vector<base::string16>& args) = 0;
   virtual void QueryClose(WindowId window_id) = 0;
   virtual void RunCallback(base::Closure) = 0;
-  virtual void WillDestroyHost() = 0;
+  virtual void WillDestroyViewHost() = 0;
 
  protected:
   ViewEventHandler();

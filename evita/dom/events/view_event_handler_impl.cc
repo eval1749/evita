@@ -344,8 +344,8 @@ void ViewEventHandlerImpl::RunCallback(base::Closure callback) {
   callback.Run();
 }
 
-void ViewEventHandlerImpl::WillDestroyHost() {
-  host_->WillDestroyHost();
+void ViewEventHandlerImpl::WillDestroyViewHost() {
+  host_->WillDestroyViewHost();
 }
 
 }  // namespace dom

@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("domapi") {
+source_set("public") {
   sources = [
     "float_point.cc",
     "float_rect.cc",

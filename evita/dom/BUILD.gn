@@ -106,7 +106,7 @@ source_set("dom") {
     "//base:i18n",
     "//common",
     "//evita/dom/bindings",
-    "//evita/dom/public:domapi",
+    "//evita/dom/public",
     "//evita/v8_glue",
     "//regex",
     "//v8",

@@ -25,9 +25,8 @@ namespace dom {
 
 class ScriptHost;
 
-// TODO(eval1749) We should introduce |ViewThreadProxy| class and
-// |IoThreadProxy| class to encapsulate thread communication rather than
-// in |ScriptThread|.
+// TODO(eval1749) We should introduce |ViewThreadProxy| class to encapsulate
+// inter thread communication rather than in |ScriptThread|.
 class ScriptThread final : public ViewDelegate,
                            public domapi::ViewEventHandler {
  public:

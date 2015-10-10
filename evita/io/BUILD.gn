@@ -9,6 +9,8 @@ static_library("io") {
     "io_context_utils.cc",
     "io_delegate_impl.cc",
     "io_manager.cc",
+    "io_thread_proxy.cc",
+    "io_thread_proxy.h",
     "process_io_context.cc",
   ]
 

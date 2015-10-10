@@ -127,12 +127,11 @@ void RunSynchronously(const base::Callback<void(Params...)>& task,
 ScriptThread::ScriptThread(ViewDelegate* view_delegate,
                            domapi::IoDelegate* io_delegate)
     : io_delegate_(io_delegate),
-      io_message_loop_(nullptr),
       thread_(std::make_unique<base::Thread>("script_thread")),
       view_delegate_(view_delegate),
       view_message_loop_(nullptr),
       waitable_event_(new base::WaitableEvent(true, false)),
-      script_host_(ScriptHost::Create(this, this)) {}
+      script_host_(ScriptHost::Create(this, io_delegate)) {}
 
 ScriptThread::~ScriptThread() {}
 
@@ -140,85 +139,16 @@ domapi::ViewEventHandler* ScriptThread::view_event_handler() const {
   return script_host_->event_handler();
 }
 
-void ScriptThread::Start(base::MessageLoop* view_message_loop,
-                         base::MessageLoop* io_message_loop) {
-  DCHECK(io_message_loop);
-  DCHECK(!io_message_loop_);
+void ScriptThread::Start(base::MessageLoop* view_message_loop) {
   DCHECK(view_message_loop);
   DCHECK(!view_message_loop_);
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  io_message_loop_ = io_message_loop;
   view_message_loop_ = view_message_loop;
   thread_->Start();
   thread_->message_loop()->PostTask(
       FROM_HERE,
       base::Bind(&ScriptHost::Start, base::Unretained(script_host_.get())));
 }
-
-// IoDelegate
-#define DEFINE_IO_DELEGATE_2(name, type1, type2)                        \
-  void ScriptThread::name(type1 p1, type2 p2) {                         \
-    io_message_loop_->PostTask(                                         \
-        FROM_HERE, base::Bind(&IoDelegate::name,                        \
-                              base::Unretained(io_delegate_), p1, p2)); \
-  }
-
-#define DEFINE_IO_DELEGATE_3(name, type1, type2, type3)                     \
-  void ScriptThread::name(type1 p1, type2 p2, type3 p3) {                   \
-    io_message_loop_->PostTask(                                             \
-        FROM_HERE, base::Bind(&IoDelegate::name,                            \
-                              base::Unretained(io_delegate_), p1, p2, p3)); \
-  }
-
-#define DEFINE_IO_DELEGATE_4(name, type1, type2, type3, type4)                \
-  void ScriptThread::name(type1 p1, type2 p2, type3 p3, type4 p4) {           \
-    io_message_loop_->PostTask(                                               \
-        FROM_HERE,                                                            \
-        base::Bind(&IoDelegate::name, base::Unretained(io_delegate_), p1, p2, \
-                   p3, p4));                                                  \
-  }
-
-DEFINE_IO_DELEGATE_2(CheckSpelling,
-                     const base::string16&,
-                     const CheckSpellingResolver&)
-DEFINE_IO_DELEGATE_2(CloseFile,
-                     domapi::IoContextId,
-                     const domapi::FileIoDeferred&)
-DEFINE_IO_DELEGATE_2(GetSpellingSuggestions,
-                     const base::string16&,
-                     const GetSpellingSuggestionsResolver&)
-DEFINE_IO_DELEGATE_3(MakeTempFileName,
-                     const base::string16&,
-                     const base::string16&,
-                     const domapi::MakeTempFileNameResolver&)
-DEFINE_IO_DELEGATE_4(MoveFile,
-                     const base::string16&,
-                     const base::string16&,
-                     const domapi::MoveFileOptions&,
-                     const domapi::IoResolver&)
-DEFINE_IO_DELEGATE_3(OpenFile,
-                     const base::string16&,
-                     const base::string16&,
-                     const domapi::OpenFileDeferred&)
-DEFINE_IO_DELEGATE_2(OpenProcess,
-                     const base::string16&,
-                     const domapi::OpenProcessDeferred&)
-DEFINE_IO_DELEGATE_2(QueryFileStatus,
-                     const base::string16&,
-                     const domapi::QueryFileStatusDeferred&)
-DEFINE_IO_DELEGATE_4(ReadFile,
-                     domapi::IoContextId,
-                     void*,
-                     size_t,
-                     const domapi::FileIoDeferred&)
-DEFINE_IO_DELEGATE_2(RemoveFile,
-                     const base::string16&,
-                     const domapi::IoResolver&)
-DEFINE_IO_DELEGATE_4(WriteFile,
-                     domapi::IoContextId,
-                     void*,
-                     size_t,
-                     const domapi::FileIoDeferred&)
 
 // ViewDelegate
 #define DEFINE_VIEW_DELEGATE_1(name, type1)                               \
@@ -505,7 +435,6 @@ DEFINE_VIEW_EVENT_HANDLER1(RunCallback, base::Closure)
 
 void ScriptThread::WillDestroyViewHost() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  io_message_loop_ = nullptr;
   view_message_loop_ = nullptr;
   thread_->message_loop()->PostTask(
       FROM_HERE, base::Bind(&ViewEventHandler::WillDestroyViewHost,

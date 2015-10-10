@@ -25,55 +25,19 @@ namespace dom {
 
 class ScriptHost;
 
-
 // TODO(eval1749) We should introduce |ViewThreadProxy| class and
 // |IoThreadProxy| class to encapsulate thread communication rather than
 // in |ScriptThread|.
-class ScriptThread final : public domapi::IoDelegate,
-                           public ViewDelegate,
+class ScriptThread final : public ViewDelegate,
                            public domapi::ViewEventHandler {
  public:
   ScriptThread(ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
   ~ScriptThread() final;
 
-  void Start(base::MessageLoop* view_message_loop,
-             base::MessageLoop* io_message_loop);
+  void Start(base::MessageLoop* view_message_loop);
 
  private:
   domapi::ViewEventHandler* view_event_handler() const;
-
-  // domapi::IoDelegate
-  void CheckSpelling(const base::string16& word_to_check,
-                     const CheckSpellingResolver& deferred) final;
-  void CloseFile(domapi::IoContextId context_id,
-                 const domapi::FileIoDeferred& deferred) final;
-  void GetSpellingSuggestions(
-      const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& deferred) final;
-  void MakeTempFileName(const base::string16& dir_name,
-                        const base::string16& prefix,
-                        const domapi::MakeTempFileNameResolver& resolver) final;
-  void MoveFile(const base::string16& src_path,
-                const base::string16& dst_path,
-                const domapi::MoveFileOptions& options,
-                const domapi::IoResolver& resolver) final;
-  void OpenFile(const base::string16& file_name,
-                const base::string16& mode,
-                const domapi::OpenFileDeferred& deferred) final;
-  void OpenProcess(const base::string16& command_line,
-                   const domapi::OpenProcessDeferred& deferred) final;
-  void QueryFileStatus(const base::string16& file_name,
-                       const domapi::QueryFileStatusDeferred& deferred) final;
-  void ReadFile(domapi::IoContextId context_id,
-                void* buffer,
-                size_t num_read,
-                const domapi::FileIoDeferred& deferred) final;
-  void RemoveFile(const base::string16& file_name,
-                  const domapi::IoResolver& resolver) final;
-  void WriteFile(domapi::IoContextId context_id,
-                 void* buffer,
-                 size_t num_write,
-                 const domapi::FileIoDeferred& deferred) final;
 
   // ViewDelegate
   void AddWindow(WindowId parent_id, WindowId child_id) final;

@@ -25,6 +25,7 @@
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/io/io_delegate_impl.h"
+#include "evita/io/io_thread_proxy.h"
 #include "evita/views/window_id.h"
 
 HANDLE g_hEvent;
@@ -33,6 +34,10 @@ bool g_fMultiple;
 // TODO(yosi) Once we move IoManager to namespace |io|, we should remove this
 // |using| statement.
 using io::IoDelegateImpl;
+
+// TODO(yosi) Once we move IoManager to namespace |io|, we should remove this
+// |using| statement.
+using io::IoThreadProxy;
 
 namespace {
 
@@ -48,16 +53,17 @@ enum Message {
 //
 IoManager::IoManager()
     : io_delegate_(new IoDelegateImpl()),
-      io_thread_(new base::Thread("io_manager_thread")) {}
+      io_thread_(new base::Thread("io_manager_thread")),
+      proxy_(new IoThreadProxy(io_delegate_.get(), io_thread_.get())) {}
 
 IoManager::~IoManager() {}
 
-domapi::IoDelegate* IoManager::io_delegate() const {
-  return io_delegate_.get();
-}
-
 base::MessageLoopForIO* IoManager::message_loop() const {
   return static_cast<base::MessageLoopForIO*>(io_thread_->message_loop());
+}
+
+domapi::IoDelegate* IoManager::proxy() const {
+  return proxy_.get();
 }
 
 void IoManager::RegisterIoHandler(HANDLE handle, void* io_handler) {

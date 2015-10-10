@@ -58,10 +58,10 @@ Application::Application()
       view_idle_hint_(0),
       view_delegate_impl_(new views::ViewDelegateImpl()),
       script_thread_(new dom::ScriptThread(view_delegate_impl_.get(),
-                                           io_manager_->io_delegate())) {
+                                           io_manager_->proxy())) {
   io_manager_->Start();
   ui::TextInputClientWin::instance()->Start();
-  script_thread_->Start(message_loop_.get(), io_manager_->message_loop());
+  script_thread_->Start(message_loop_.get());
   io_manager_->message_loop()->PostTask(
       FROM_HERE,
       base::Bind(

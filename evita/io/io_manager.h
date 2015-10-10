@@ -19,6 +19,10 @@ namespace domapi {
 class IoDelegate;
 }
 
+namespace io {
+class IoThreadProxy;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // IoManager
@@ -28,15 +32,16 @@ class IoManager final {
   IoManager();
   ~IoManager();
 
-  domapi::IoDelegate* io_delegate() const;
   base::MessageLoopForIO* message_loop() const;
+  domapi::IoDelegate* proxy() const;
 
   void RegisterIoHandler(HANDLE handle, void* io_handler);
   void Start();
 
  private:
-  std::unique_ptr<domapi::IoDelegate> io_delegate_;
-  std::unique_ptr<base::Thread> io_thread_;
+  const std::unique_ptr<domapi::IoDelegate> io_delegate_;
+  const std::unique_ptr<base::Thread> io_thread_;
+  const std::unique_ptr<io::IoThreadProxy> proxy_;
 
   DISALLOW_COPY_AND_ASSIGN(IoManager);
 };

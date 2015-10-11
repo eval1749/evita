@@ -113,8 +113,10 @@
     var start = range.start;
     var end = range.end;
 
-    // TODO(yosi) Should we move matching bracket blinking into |TextWindow|
-    // idle processing?
+    // TODO(eval1749): We should color matched parenthesis rather than moving
+    // caret, since restoring caret by using timer is too slow.
+    // TODO(eval1749): Should we move matching bracket blinking into
+    // |TextWindow| idle processing?
     new OneShotTimer().start(0, function() {
       // Force color newly inserted characters.
       // Note: If we are in long comment, parenthesis matching may not work.

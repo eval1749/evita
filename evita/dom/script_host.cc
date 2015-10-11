@@ -381,6 +381,10 @@ ScriptHost* ScriptHost::StartForTesting(ViewDelegate* view_delegate,
   return script_host;
 }
 
+void ScriptHost::TerminateScriptExecution() {
+  isolate()->TerminateExecution();
+}
+
 void ScriptHost::ThrowError(const std::string& message) {
   v8_glue::Runner::Scope runner_scope(runner());
   auto exception = v8::Exception::Error(gin::StringToV8(isolate(), message));

@@ -78,6 +78,9 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   void RunMicrotasks();
   static ScriptHost* StartForTesting(ViewDelegate* view_delegate,
                                      domapi::IoDelegate* io_delegate);
+
+  // Terminate script execution from another thread.
+  void TerminateScriptExecution();
   void ThrowError(const std::string& message);
   void ThrowRangeError(const std::string& message);
   void ThrowException(v8::Handle<v8::Value> exception);

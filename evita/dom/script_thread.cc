@@ -15,7 +15,6 @@
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/ui/events/event.h"
-#include "v8/include/v8-debug.h"
 
 #define DCHECK_CALLED_ON_NON_SCRIPT_THREAD() \
   DCHECK_NE(thread_->message_loop(), base::MessageLoop::current())
@@ -24,6 +23,15 @@
   DCHECK_EQ(thread_->message_loop(), base::MessageLoop::current())
 
 namespace dom {
+
+namespace {
+bool IsScriptBreakEvent(const domapi::KeyboardEvent& event) {
+  if (!event.control_key)
+    return false;
+  return event.key_code == (static_cast<int>(ui::KeyCode::Pause) |
+                            static_cast<int>(ui::Modifier::Control));
+}
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -119,16 +127,10 @@ DEFINE_VIEW_EVENT_HANDLER1(DispatchFocusEvent, const domapi::FocusEvent&)
 
 void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  if (event.key_code == (static_cast<int>(ui::KeyCode::Pause) |
-                         static_cast<int>(ui::Modifier::Control)) &&
-      event.control_key) {
-    // We should have |ScriptHost::TerminateExecution()| instead of calling
-    // |v8::Isolate::TerminateExecution()| here.
-    auto const isolate = ScriptHost::instance()->isolate();
-    isolate->TerminateExecution();
+  if (IsScriptBreakEvent(event)) {
+    ScriptHost::instance()->TerminateScriptExecution();
     return;
   }
-
   scheduler_->ScheduleTask(base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
                                       base::Unretained(view_event_handler()),
                                       event));

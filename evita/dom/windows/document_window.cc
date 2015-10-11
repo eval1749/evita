@@ -26,6 +26,8 @@ Document* DocumentWindow::document() const {
 
 // Window
 void DocumentWindow::DidDestroyWindow() {
+  // TODO(eval1749): We should dispatch "detach" event in JavaScript rather than
+  // in C++;
   Window::DidDestroyWindow();
   DocumentEventInit init;
   init.set_bubbles(true);
@@ -35,6 +37,8 @@ void DocumentWindow::DidDestroyWindow() {
 }
 
 void DocumentWindow::DidRealizeWindow() {
+  // TODO(eval1749): We should dispatch "attach" event in JavaScript rather than
+  // in C++;
   Window::DidRealizeWindow();
   DocumentEventInit init;
   init.set_bubbles(true);

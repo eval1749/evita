@@ -53,6 +53,8 @@ source_set("dom") {
     "os/file.cc",
     "os/process.cc",
     "promise_resolver.cc",
+    "scheduler.cc",
+    "scheduler.h",
     "script_host.cc",
     "script_thread.cc",
     "text/document.cc",

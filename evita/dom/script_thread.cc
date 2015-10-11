@@ -12,6 +12,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
+#include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/ui/events/event.h"
 #include "v8/include/v8-debug.h"
@@ -30,8 +31,8 @@ namespace dom {
 //
 ScriptThread::ScriptThread(ViewDelegate* view_delegate,
                            domapi::IoDelegate* io_delegate)
-    : io_delegate_(io_delegate),
-      thread_(std::make_unique<base::Thread>("script_thread")),
+    : scheduler_(new Scheduler()),
+      thread_(new base::Thread("script_thread")),
       view_delegate_(view_delegate),
       script_host_(ScriptHost::Create(view_delegate, io_delegate)) {}
 
@@ -61,8 +62,7 @@ void ScriptThread::Start() {
 #define DEFINE_VIEW_EVENT_HANDLER1(name, type1)                      \
   void ScriptThread::name(type1 param1) {                            \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                            \
-    thread_->message_loop()->PostTask(                               \
-        FROM_HERE,                                                   \
+    scheduler_->ScheduleTask(                                        \
         base::Bind(&ViewEventHandler::name,                          \
                    base::Unretained(view_event_handler()), param1)); \
   }
@@ -70,42 +70,43 @@ void ScriptThread::Start() {
 #define DEFINE_VIEW_EVENT_HANDLER2(name, type1, type2)                       \
   void ScriptThread::name(type1 param1, type2 param2) {                      \
     DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                    \
-    thread_->message_loop()->PostTask(                                       \
-        FROM_HERE,                                                           \
+    scheduler_->ScheduleTask(                                                \
         base::Bind(&ViewEventHandler::name,                                  \
                    base::Unretained(view_event_handler()), param1, param2)); \
   }
 
-#define DEFINE_VIEW_EVENT_HANDLER3(name, type1, type2, type3)                 \
-  void ScriptThread::name(type1 param1, type2 param2, type3 param3) {         \
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                     \
-    thread_->message_loop()->PostTask(                                        \
-        FROM_HERE, base::Bind(&ViewEventHandler::name,                        \
-                              base::Unretained(view_event_handler()), param1, \
-                              param2, param3));                               \
+#define DEFINE_VIEW_EVENT_HANDLER3(name, type1, type2, type3)            \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3) {    \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                \
+    scheduler_->ScheduleTask(base::Bind(                                 \
+        &ViewEventHandler::name, base::Unretained(view_event_handler()), \
+        param1, param2, param3));                                        \
   }
 
-#define DEFINE_VIEW_EVENT_HANDLER4(name, type1, type2, type3, type4)          \
-  void ScriptThread::name(type1 param1, type2 param2, type3 param3,           \
-                          type4 param4) {                                     \
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                     \
-    thread_->message_loop()->PostTask(                                        \
-        FROM_HERE, base::Bind(&ViewEventHandler::name,                        \
-                              base::Unretained(view_event_handler()), param1, \
-                              param2, param3, param4));                       \
+#define DEFINE_VIEW_EVENT_HANDLER4(name, type1, type2, type3, type4)     \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3,      \
+                          type4 param4) {                                \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                \
+    scheduler_->ScheduleTask(base::Bind(                                 \
+        &ViewEventHandler::name, base::Unretained(view_event_handler()), \
+        param1, param2, param3, param4));                                \
   }
 
-#define DEFINE_VIEW_EVENT_HANDLER5(name, type1, type2, type3, type4, type5)   \
-  void ScriptThread::name(type1 param1, type2 param2, type3 param3,           \
-                          type4 param4, type5 param5) {                       \
-    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                     \
-    thread_->message_loop()->PostTask(                                        \
-        FROM_HERE, base::Bind(&ViewEventHandler::name,                        \
-                              base::Unretained(view_event_handler()), param1, \
-                              param2, param3, param4, param5));               \
+#define DEFINE_VIEW_EVENT_HANDLER5(name, type1, type2, type3, type4, type5) \
+  void ScriptThread::name(type1 param1, type2 param2, type3 param3,         \
+                          type4 param4, type5 param5) {                     \
+    DCHECK_CALLED_ON_NON_SCRIPT_THREAD();                                   \
+    scheduler_->ScheduleTask(base::Bind(                                    \
+        &ViewEventHandler::name, base::Unretained(view_event_handler()),    \
+        param1, param2, param3, param4, param5));                           \
   }
 
-DEFINE_VIEW_EVENT_HANDLER1(DidBeginFrame, const base::Time&)
+void ScriptThread::DidBeginFrame(const base::Time& deadline) {
+  thread_->message_loop()->PostTask(
+      FROM_HERE, base::Bind(&Scheduler::DidBeginFrame,
+                            base::Unretained(scheduler_.get()), deadline));
+}
+
 DEFINE_VIEW_EVENT_HANDLER5(DidChangeWindowBounds, WindowId, int, int, int, int)
 DEFINE_VIEW_EVENT_HANDLER2(DidChangeWindowVisibility,
                            WindowId,
@@ -125,9 +126,9 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
     return;
   }
 
-  thread_->message_loop()->PostTask(
-      FROM_HERE, base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
-                            base::Unretained(view_event_handler()), event));
+  scheduler_->ScheduleTask(base::Bind(&ViewEventHandler::DispatchKeyboardEvent,
+                                      base::Unretained(view_event_handler()),
+                                      event));
 }
 
 DEFINE_VIEW_EVENT_HANDLER1(DispatchMouseEvent, const domapi::MouseEvent&)
@@ -143,9 +144,8 @@ DEFINE_VIEW_EVENT_HANDLER1(RunCallback, base::Closure)
 
 void ScriptThread::WillDestroyViewHost() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  thread_->message_loop()->PostTask(
-      FROM_HERE, base::Bind(&ViewEventHandler::WillDestroyViewHost,
-                            base::Unretained(view_event_handler())));
+  scheduler_->ScheduleTask(base::Bind(&ViewEventHandler::WillDestroyViewHost,
+                                      base::Unretained(view_event_handler())));
 }
 
 }  // namespace dom

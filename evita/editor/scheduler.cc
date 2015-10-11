@@ -8,6 +8,8 @@
 #include "base/message_loop/message_loop.h"
 #include "base/synchronization/lock.h"
 #include "base/time/time.h"
+#include "evita/dom/public/view_event_handler.h"
+#include "evita/editor/application.h"
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/ui/compositor/compositor.h"
 
@@ -49,6 +51,10 @@ void Scheduler::HandleAnimationFrame(base::Time time) {
 }
 
 void Scheduler::Run() {
+  base::Time deadline =
+      base::Time::Now() + base::TimeDelta::FromMilliseconds(10);
+  editor::Application::instance()->view_event_handler()->DidBeginFrame(
+      deadline);
   {
     base::AutoLock lock_scope(*lock_);
     state_ = State::Running;

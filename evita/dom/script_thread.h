@@ -11,7 +11,6 @@
 
 #include "base/basictypes.h"
 #include "base/callback_forward.h"
-#include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/view_delegate.h"
 
@@ -19,8 +18,13 @@ namespace base {
 class Thread;
 }
 
+namespace domapi {
+class IoDelegate;
+}
+
 namespace dom {
 
+class Scheduler;
 class ScriptHost;
 
 class ScriptThread final : public domapi::ViewEventHandler {
@@ -58,7 +62,7 @@ class ScriptThread final : public domapi::ViewEventHandler {
   void RunCallback(base::Closure callback) final;
   void WillDestroyViewHost() final;
 
-  domapi::IoDelegate* io_delegate_;
+  const std::unique_ptr<Scheduler> scheduler_;
   const std::unique_ptr<base::Thread> thread_;
   ViewDelegate* const view_delegate_;
 

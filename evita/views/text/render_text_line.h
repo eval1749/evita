@@ -54,6 +54,7 @@ class TextLine final {
   float GetWidth() const { return bounds_.width(); }
   uint Hash() const;
   gfx::RectF HitTestTextPosition(Posn lPosn) const;
+  bool IsEndOfDocument() const;
   Posn MapXToPosn(float x) const;
   void Render(gfx::Canvas* canvas) const;
 

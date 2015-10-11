@@ -120,6 +120,11 @@ gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
   return gfx::RectF();
 }
 
+bool TextLine::IsEndOfDocument() const {
+  auto const last_marker_cell = last_cell()->as<MarkerCell>();
+  return last_marker_cell->marker_name() == TextMarker::EndOfDocument;
+}
+
 Posn TextLine::MapXToPosn(float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;

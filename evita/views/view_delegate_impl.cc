@@ -15,6 +15,7 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/modal_message_loop_scope.h"
+#include "evita/editor/scheduler.h"
 #include "evita/editor/switch_set.h"
 #include "evita/gc/collector.h"
 #include "evita/metrics/counter.h"
@@ -178,6 +179,10 @@ void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
 
 void ViewDelegateImpl::DidStartScriptHost(domapi::ScriptHostState state) {
   editor::Application::instance()->DidStartScriptHost(state);
+}
+
+void ViewDelegateImpl::DidUpdateDom() {
+  editor::Application::instance()->scheduler()->DidUpdateDom();
 }
 
 void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {

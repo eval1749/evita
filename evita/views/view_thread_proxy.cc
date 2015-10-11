@@ -122,6 +122,16 @@ ViewThreadProxy::ViewThreadProxy(base::MessageLoop* message_loop)
 ViewThreadProxy::~ViewThreadProxy() {}
 
 // ViewDelegate
+#define DEFINE_DELEGATE_0(name)                                              \
+  void ViewThreadProxy::name() {                                             \
+    DCHECK_CALLED_ON_SCRIPT_THREAD();                                        \
+    if (!message_loop_)                                                      \
+      return;                                                                \
+    message_loop_->PostTask(                                                 \
+        FROM_HERE,                                                           \
+        base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()))); \
+  }
+
 #define DEFINE_DELEGATE_1(name, type1)                                     \
   void ViewThreadProxy::name(type1 param1) {                               \
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
@@ -188,6 +198,7 @@ DEFINE_DELEGATE_2(CreateTableWindow, dom::WindowId, dom::Document*)
 DEFINE_DELEGATE_2(CreateTextWindow, dom::WindowId, text::Selection*)
 DEFINE_DELEGATE_1(DestroyWindow, dom::WindowId)
 DEFINE_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
+DEFINE_DELEGATE_0(DidUpdateDom)
 DEFINE_DELEGATE_1(FocusWindow, dom::WindowId)
 DEFINE_DELEGATE_3(GetFileNameForLoad,
                   dom::WindowId,

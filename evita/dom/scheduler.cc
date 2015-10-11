@@ -7,6 +7,7 @@
 #include "base/synchronization/lock.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/view_delegate.h"
 
 namespace dom {
 
@@ -18,11 +19,21 @@ Scheduler::~Scheduler() {}
 void Scheduler::DidBeginFrame(const base::Time& deadline) {
   for (;;) {
     auto maybe_task = Take();
-    if (maybe_task.IsNothing())
+    if (maybe_task.IsNothing()) {
+      script_host_->RunMicrotasks();
       break;
+    }
     maybe_task.FromJust().Run();
+    if (base::Time::Now() > deadline) {
+      base::AutoLock lock_scope(*lock_);
+      if (!task_queue_.empty()) {
+        DVLOG(0) << "Reached at deadline, " << task_queue_.size()
+                 << " tasks left";
+      }
+      break;
+    }
   }
-  script_host_->RunMicrotasks();
+  script_host_->view_delegate()->DidUpdateDom();
 }
 
 void Scheduler::ScheduleTask(const base::Closure& task) {

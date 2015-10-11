@@ -42,6 +42,7 @@ class ViewThreadProxy : public dom::ViewDelegate {
                         text::Selection* selection) final;
   void DestroyWindow(dom::WindowId window_id) final;
   void DidStartScriptHost(domapi::ScriptHostState state) final;
+  void DidUpdateDom() final;
   void FocusWindow(dom::WindowId window_id) final;
   void GetFileNameForLoad(dom::WindowId window_id,
                           const base::string16& dir_path,

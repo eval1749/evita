@@ -9,11 +9,11 @@
 #include <unordered_set>
 
 #include "base/basictypes.h"
+#include "base/time/time.h"
 
 namespace base {
 class Lock;
 class MessageLoop;
-class Time;
 }
 
 namespace ui {
@@ -33,21 +33,27 @@ class Scheduler final {
 
   // Request animation frame.
   void CancelAnimationFrameRequest(ui::AnimationFrameHandler* handler);
+
+  // Called when DOM thread stopped.
+  void DidUpdateDom();
+
   // Request animation frame.
   void RequestAnimationFrame(ui::AnimationFrameHandler* handler);
 
  private:
-  enum class State;
-
+  void DidFireTimer();
   void HandleAnimationFrame(base::Time time);
-  void Run();
-  void Wait();
+  void RunAnimation();
+  void StartTimerIfNeeded();
 
   std::unordered_set<ui::AnimationFrameHandler*> canceled_handlers_;
+  base::Time last_paint_time_;
   std::unique_ptr<base::Lock> lock_;
   base::MessageLoop* const message_loop_;
-  State state_;
   std::unordered_set<ui::AnimationFrameHandler*> pending_handlers_;
+  bool script_is_running_;
+  base::Time script_start_time_;
+  bool timer_is_running_;
 
   DISALLOW_COPY_AND_ASSIGN(Scheduler);
 };

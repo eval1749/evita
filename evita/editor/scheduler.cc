@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include "evita/editor/scheduler.h"
 
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "base/synchronization/lock.h"
-#include "base/time/time.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/ui/animation/animation_frame_handler.h"
@@ -15,16 +16,11 @@
 
 namespace editor {
 
-enum class Scheduler::State {
-  Running,
-  Sleeping,
-  Waiting,
-};
-
 Scheduler::Scheduler(base::MessageLoop* message_loop)
     : lock_(new base::Lock()),
       message_loop_(message_loop),
-      state_(State::Sleeping) {}
+      script_is_running_(true),
+      timer_is_running_(false) {}
 
 Scheduler::~Scheduler() {}
 
@@ -33,6 +29,44 @@ void Scheduler::CancelAnimationFrameRequest(
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.erase(handler);
   canceled_handlers_.insert(handler);
+}
+
+void Scheduler::DidFireTimer() {
+  {
+    base::AutoLock lock_scope(*lock_);
+    timer_is_running_ = false;
+  }
+
+  auto const now = base::Time::Now();
+
+  if (script_is_running_) {
+    // TODO(eval1749): Run non-DOM animations
+    DVLOG(0) << "Scheduler::DidFirTimer: script_is_running_"
+             << " paint=" << (now - last_paint_time_).InMillisecondsF() << "ms"
+             << " script=" << (now - script_start_time_).InMillisecondsF()
+             << "ms";
+    RunAnimation();
+    return;
+  }
+
+  script_start_time_ = now;
+  script_is_running_ = true;
+  auto const deadline =
+      base::Time::Now() + base::TimeDelta::FromMilliseconds(10);
+  editor::Application::instance()->view_event_handler()->DidBeginFrame(
+      deadline);
+}
+
+void Scheduler::DidUpdateDom() {
+  script_is_running_ = false;
+  RunAnimation();
+}
+
+void Scheduler::RunAnimation() {
+  HandleAnimationFrame(base::Time::Now());
+  ui::Compositor::instance()->CommitIfNeeded();
+  last_paint_time_ = base::Time::Now();
+  StartTimerIfNeeded();
 }
 
 void Scheduler::HandleAnimationFrame(base::Time time) {
@@ -50,42 +84,25 @@ void Scheduler::HandleAnimationFrame(base::Time time) {
   }
 }
 
-void Scheduler::Run() {
-  base::Time deadline =
-      base::Time::Now() + base::TimeDelta::FromMilliseconds(10);
-  editor::Application::instance()->view_event_handler()->DidBeginFrame(
-      deadline);
-  {
-    base::AutoLock lock_scope(*lock_);
-    state_ = State::Running;
-  }
-  auto const now = base::Time::Now();
-  HandleAnimationFrame(now);
-  ui::Compositor::instance()->CommitIfNeeded();
-  {
-    base::AutoLock lock_scope(*lock_);
-    state_ = State::Sleeping;
-    if (pending_handlers_.empty())
-      return;
-    // TODO(eval1749) We should run next frame once composition finished.
-    Wait();
-  }
-}
-
 void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
-  base::AutoLock lock_scope(*lock_);
-  pending_handlers_.insert(handler);
-  if (state_ != State::Sleeping)
-    return;
-  Wait();
+  {
+    base::AutoLock lock_scope(*lock_);
+    pending_handlers_.insert(handler);
+  }
+  StartTimerIfNeeded();
 }
 
-void Scheduler::Wait() {
-  DCHECK_EQ(static_cast<int>(state_), static_cast<int>(State::Sleeping));
-  state_ = State::Waiting;
+void Scheduler::StartTimerIfNeeded() {
+  base::AutoLock lock_scope(*lock_);
+  if (timer_is_running_)
+    return;
+  timer_is_running_ = true;
+  auto const kFrameDelta = base::TimeDelta::FromMilliseconds(1000 / 60);
+  auto const next_paint_time = last_paint_time_ + kFrameDelta;
+  auto const remaining = next_paint_time - base::Time::Now();
   message_loop_->PostNonNestableDelayedTask(
-      FROM_HERE, base::Bind(&Scheduler::Run, base::Unretained(this)),
-      base::TimeDelta::FromMilliseconds(1000 / 60));
+      FROM_HERE, base::Bind(&Scheduler::DidFireTimer, base::Unretained(this)),
+      std::max(base::TimeDelta::FromMilliseconds(0), remaining));
 }
 
 }  // namespace editor

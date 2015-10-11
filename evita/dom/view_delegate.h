@@ -87,6 +87,10 @@ class ViewDelegate {
                                 text::Selection* selection) = 0;
   virtual void DestroyWindow(WindowId window_id) = 0;
 
+  // |DidUpdateDom()| is called when DOM thread finishes DOM
+  // modification.
+  virtual void DidUpdateDom() = 0;
+
   // |DidStartScriptHost| is called when script host execute editor start
   // script.
   virtual void DidStartScriptHost(ScriptHostState state) = 0;

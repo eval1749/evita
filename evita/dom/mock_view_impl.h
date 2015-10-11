@@ -36,6 +36,7 @@ class MockViewImpl final : public dom::ViewDelegate {
   MOCK_METHOD2(CreateTextWindow, void(WindowId, text::Selection*));
   MOCK_METHOD1(DestroyWindow, void(WindowId));
   MOCK_METHOD1(DidStartScriptHost, void(ScriptHostState));
+  MOCK_METHOD0(DidUpdateDom, void());
   MOCK_METHOD1(FocusWindow, void(WindowId));
   void GetFileNameForLoad(WindowId window_id,
                           const base::string16& dir_path,

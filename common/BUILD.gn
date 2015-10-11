@@ -8,6 +8,7 @@ component("common") {
   sources = [
     "common_export.h",
     "either.h",
+    "maybe.h",
     "strings/atomic_string.cc",
     "strings/atomic_string.h",
     "temporary_change_value.h",
@@ -34,6 +35,7 @@ component("common") {
 test("common_unittests") {
   sources = [
     "castable_unittest.cc",
+    "maybe_test.cc",
     "memory/ref_counted_unittest.cc",
     "memory/scoped_refptr_unittest.cc",
     "strings/atomic_string_unittest.cc",

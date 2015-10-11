@@ -15,4 +15,10 @@ TEST(RectTest, Contains) {
   EXPECT_FALSE(Rect(10, 10, 50, 50).Contains(Rect(60, 60, 70, 70)));
 }
 
+TEST(RectTest, Intersect) {
+  EXPECT_EQ(Rect(), Rect(0, 0, 732, 88).Intersect(Rect(-184, 0, -1, 28)));
+  EXPECT_EQ(Rect(10, 20, 30, 40),
+            Rect(10, 20, 30, 40).Intersect(Rect(0, 0, 100, 200)));
+}
+
 }  // namespace

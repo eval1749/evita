@@ -114,9 +114,13 @@ bool Rect::Contains(const Rect& other) const {
 }
 
 Rect Rect::Intersect(const Rect& other) const {
-  return Rect(std::max(left(), other.left()), std::max(top(), other.top()),
-              std::min(right(), other.right()),
-              std::min(bottom(), other.bottom()));
+  auto const left = std::max(this->left(), other.left());
+  auto const top = std::max(this->top(), other.top());
+  auto const right = std::min(this->right(), other.right());
+  auto const bottom = std::min(this->bottom(), other.bottom());
+  if (left > right || top > bottom)
+    return Rect();
+  return Rect(left, top, right, bottom);
 }
 
 Rect Rect::Union(const Rect& other) const {

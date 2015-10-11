@@ -103,8 +103,10 @@ void MutationObserverController::Tracker::Register(MutationObserver* observer) {
 void MutationObserverController::Tracker::ScheduleNotification() {
   if (is_schedule_notification_)
     return;
+  // TODO(eval1749): We should integrate mutation notification into scheduler
+  // rather than using |ScriptHost::PostTaskDeprecated()|.
   is_schedule_notification_ = true;
-  ScriptHost::instance()->PostTask(
+  ScriptHost::instance()->PostTaskDeprecated(
       FROM_HERE, base::Bind(&Tracker::NotifyObservers, GetWeakPtr()));
 }
 

@@ -312,12 +312,15 @@ void ScriptHost::DidStartScriptHost() {
 void ScriptHost::PlatformError(const char* name) {
   auto const error = ::GetLastError();
   DVLOG(0) << "PlatformError " << name << " error=" << error;
-  // TODO(yosi) Should be Win32Error.
+  // TODO(eval1749): Should be Win32Error.
   instance()->ThrowError(base::StringPrintf("%s error=%d", name, error));
 }
 
-void ScriptHost::PostTask(const tracked_objects::Location& from_here,
-                          const base::Closure& task) {
+// TODO(eval1749): We should get rid of |ScriptHost::PostTaskDeprecated()| by
+// utilizing scheduler. See |EventTarget::ScheduleDispatchEvent()| and
+// |DocuemntWindow::DidDestroyHost()| and |DocuemntWindow::DidRealizeWindow()|.
+void ScriptHost::PostTaskDeprecated(const tracked_objects::Location& from_here,
+                                    const base::Closure& task) {
   DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
   message_loop_for_script_->PostTask(from_here, task);
 }

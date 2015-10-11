@@ -72,8 +72,11 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   static void CreateAndStart(ViewDelegate* view_delegate,
                              domapi::IoDelegate* io_delegate);
   void PlatformError(const char* name);
-  void PostTask(const tracked_objects::Location& from_here,
-                const base::Closure& task);
+
+  // TODO(eval1749): We should get rid of |ScriptHost::PostTask()| by utilizing
+  // scheduler.
+  void PostTaskDeprecated(const tracked_objects::Location& from_here,
+                          const base::Closure& task);
   void ResetForTesting();
   void RunMicrotasks();
   static ScriptHost* StartForTesting(ViewDelegate* view_delegate,

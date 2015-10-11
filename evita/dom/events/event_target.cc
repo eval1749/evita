@@ -225,7 +225,7 @@ void EventTarget::RemoveEventListener(const base::string16& type,
 }
 
 void EventTarget::ScheduleDispatchEvent(Event* event) {
-  ScriptHost::instance()->PostTask(
+  ScriptHost::instance()->PostTaskDeprecated(
       FROM_HERE, base::Bind(&EventTarget::DispatchEventWithInLock,
                             base::Unretained(this), base::Unretained(event)));
 }

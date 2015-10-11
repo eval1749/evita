@@ -174,7 +174,9 @@ void DocumentSet::RenameDocument(Document* document,
 
 void DocumentSet::ScheduleNotifyObserver(const base::string16& type,
                                          Document* document) {
-  ScriptHost::instance()->PostTask(
+  // TODO(eval1749): We should integrate document set notification into
+  // scheduler rather than using |ScriptHost::PostTaskDeprecated()|.
+  ScriptHost::instance()->PostTaskDeprecated(
       FROM_HERE,
       base::Bind(&DocumentSet::NotifyObserverWithInLock, base::Unretained(this),
                  type, base::Unretained(document)));

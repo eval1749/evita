@@ -2,16 +2,22 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-static_library("io") {
+source_set("io") {
   sources = [
     "file_io_context.cc",
+    "file_io_context.h",
     "io_context.cc",
+    "io_context.h",
     "io_context_utils.cc",
+    "io_context_utils.h",
     "io_delegate_impl.cc",
+    "io_delegate_impl.h",
     "io_manager.cc",
+    "io_manager.h",
     "io_thread_proxy.cc",
     "io_thread_proxy.h",
     "process_io_context.cc",
+    "process_io_context.h",
   ]
 
   public_deps = [

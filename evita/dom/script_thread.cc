@@ -34,7 +34,7 @@ ScriptThread::ScriptThread(ViewDelegate* view_delegate,
     : thread_(new base::Thread("script_thread")),
       view_delegate_(view_delegate),
       script_host_(ScriptHost::Create(view_delegate, io_delegate)),
-      scheduler_(new Scheduler(script_host_.get())) {}
+      scheduler_(new Scheduler(view_delegate)) {}
 
 ScriptThread::~ScriptThread() {}
 

@@ -19,11 +19,11 @@ class Time;
 
 namespace dom {
 
-class ScriptHost;
+class ViewDelegate;
 
 class Scheduler {
  public:
-  explicit Scheduler(ScriptHost* script_host);
+  explicit Scheduler(ViewDelegate* view_delegate);
   ~Scheduler();
 
   void DidBeginFrame(const base::Time& deadline);
@@ -33,8 +33,8 @@ class Scheduler {
   common::Maybe<base::Closure> Take();
 
   std::unique_ptr<base::Lock> lock_;
-  ScriptHost* const script_host_;
   std::queue<base::Closure> task_queue_;
+  ViewDelegate* const view_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(Scheduler);
 };

@@ -11,8 +11,8 @@
 
 namespace dom {
 
-Scheduler::Scheduler(ScriptHost* script_host)
-    : lock_(new base::Lock()), script_host_(script_host) {}
+Scheduler::Scheduler(ViewDelegate* view_delegate)
+    : lock_(new base::Lock()), view_delegate_(view_delegate) {}
 
 Scheduler::~Scheduler() {}
 
@@ -20,7 +20,7 @@ void Scheduler::DidBeginFrame(const base::Time& deadline) {
   for (;;) {
     auto maybe_task = Take();
     if (maybe_task.IsNothing()) {
-      script_host_->RunMicrotasks();
+      ScriptHost::instance()->RunMicrotasks();
       break;
     }
     maybe_task.FromJust().Run();
@@ -33,7 +33,7 @@ void Scheduler::DidBeginFrame(const base::Time& deadline) {
       break;
     }
   }
-  script_host_->view_delegate()->DidUpdateDom();
+  view_delegate_->DidUpdateDom();
 }
 
 void Scheduler::ScheduleTask(const base::Closure& task) {

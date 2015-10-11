@@ -6,10 +6,12 @@
 
 #include "base/synchronization/lock.h"
 #include "evita/dom/public/view_event.h"
+#include "evita/dom/script_host.h"
 
 namespace dom {
 
-Scheduler::Scheduler() : lock_(new base::Lock()) {}
+Scheduler::Scheduler(ScriptHost* script_host)
+    : lock_(new base::Lock()), script_host_(script_host) {}
 
 Scheduler::~Scheduler() {}
 

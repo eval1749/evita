@@ -31,10 +31,10 @@ namespace dom {
 //
 ScriptThread::ScriptThread(ViewDelegate* view_delegate,
                            domapi::IoDelegate* io_delegate)
-    : scheduler_(new Scheduler()),
-      thread_(new base::Thread("script_thread")),
+    : thread_(new base::Thread("script_thread")),
       view_delegate_(view_delegate),
-      script_host_(ScriptHost::Create(view_delegate, io_delegate)) {}
+      script_host_(ScriptHost::Create(view_delegate, io_delegate)),
+      scheduler_(new Scheduler(script_host_.get())) {}
 
 ScriptThread::~ScriptThread() {}
 

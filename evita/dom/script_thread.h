@@ -62,11 +62,11 @@ class ScriptThread final : public domapi::ViewEventHandler {
   void RunCallback(const base::Closure& callback) final;
   void WillDestroyViewHost() final;
 
-  const std::unique_ptr<Scheduler> scheduler_;
   const std::unique_ptr<base::Thread> thread_;
   ViewDelegate* const view_delegate_;
 
   const std::unique_ptr<ScriptHost> script_host_;
+  const std::unique_ptr<Scheduler> scheduler_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);
 };

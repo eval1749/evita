@@ -23,7 +23,7 @@ class ScriptHost;
 
 class Scheduler {
  public:
-  Scheduler();
+  explicit Scheduler(ScriptHost* script_host);
   ~Scheduler();
 
   void DidBeginFrame(const base::Time& deadline);
@@ -33,6 +33,7 @@ class Scheduler {
   common::Maybe<base::Closure> Take();
 
   std::unique_ptr<base::Lock> lock_;
+  ScriptHost* const script_host_;
   std::queue<base::Closure> task_queue_;
 
   DISALLOW_COPY_AND_ASSIGN(Scheduler);

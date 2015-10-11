@@ -14,9 +14,9 @@
 
 namespace views {
 
-int event_id_counter;
-
 namespace {
+
+int event_id_counter;
 
 int next_event_id() {
   return ++event_id_counter;

@@ -42,7 +42,6 @@ class TextBlock final {
   text::Posn GetVisibleEnd();
   gfx::RectF HitTestTextPosition(text::Posn text_offset);
   bool IsPositionFullyVisible(text::Posn text_offset);
-  bool IsShowEndOfDocument();
   text::Posn MapPointToPosition(gfx::PointF point);
   text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
   // Returns true if this |TextBlock| is modified.
@@ -69,6 +68,7 @@ class TextBlock final {
   TextLine* FormatLine(TextFormatter* formatter);
   void InvalidateCache();
   void InvalidateLines(text::Posn offset);
+  bool IsShowEndOfDocument() const;
   void Prepend(TextLine* line);
 
   gfx::RectF bounds_;

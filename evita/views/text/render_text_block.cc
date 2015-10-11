@@ -421,13 +421,12 @@ bool TextBlock::IsPositionFullyVisible(text::Posn offset) {
   return offset >= GetStart() && offset < GetVisibleEnd();
 }
 
-bool TextBlock::IsShowEndOfDocument() {
+bool TextBlock::IsShowEndOfDocument() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   auto const last_line = lines_.back();
-  return last_line->GetEnd() > text_buffer_->GetEnd() &&
-         last_line->bottom() <= bounds_.bottom;
+  return last_line->IsEndOfDocument() && last_line->bottom() <= bounds_.bottom;
 }
 
 text::Posn TextBlock::MapPointToPosition(gfx::PointF point) {
@@ -590,13 +589,17 @@ bool TextBlock::ScrollUp() {
   if (IsShowEndOfDocument())
     return false;
 
-  if (!DiscardFirstLine())
-    return false;
+  for (;;) {
+    if (!DiscardFirstLine())
+      return false;
+    EnsureLinePoints();
 
-  view_start_ = lines_.front()->GetStart();
-  EnsureLinePoints();
-  if (IsShowEndOfDocument())
-    return true;
+    view_start_ = lines_.front()->GetStart();
+    if (!lines_.back()->IsEndOfDocument())
+      break;
+    if (IsShowEndOfDocument())
+      return true;
+  }
 
   auto const start_offset = lines_.back()->GetEnd();
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);

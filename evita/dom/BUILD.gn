@@ -234,6 +234,7 @@ test("evita_dom_unittests") {
     "text/range_unittest.cc",
     "text/regular_expression_unittest.cc",
     "text/text_position_unittest.cc",
+    "timers/timer_test.cc",
     "unicode_unittest.cc",
     "windows/editor_window_unittest.cc",
     "windows/point_unittest.cc",

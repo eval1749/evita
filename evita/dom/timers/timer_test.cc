@@ -37,15 +37,18 @@ TEST_F(TimerTest, RepeatingTimer) {
   EXPECT_SCRIPT_VALID(
       "var didFire = false;"
       "var count = 0;"
-      "timer.start(0, function() {"
+      "timer.start(1, function() {"
       "  ++count;"
       "  if (count == 2) this.stop();"
       "  didFire = true;"
       "});");
   EXPECT_SCRIPT_TRUE("timer.isRunning");
-  ::Sleep(0);
+  ::Sleep(1);
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("didFire");
+  EXPECT_SCRIPT_TRUE("timer.isRunning");
+  ::Sleep(1);
+  RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_FALSE("timer.isRunning");
   EXPECT_SCRIPT_EQ("2", "count");
 }

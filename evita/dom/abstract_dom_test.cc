@@ -262,6 +262,7 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
 void AbstractDomTest::RunMessageLoopUntilIdle() {
   base::RunLoop run_loop;
   run_loop.RunUntilIdle();
+  runner_->isolate()->RunMicrotasks();
 }
 
 void AbstractDomTest::SetUp() {

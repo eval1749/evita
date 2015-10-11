@@ -70,9 +70,7 @@ void Timer::DidFireTimer() {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
-  auto const callback = callback_.NewLocal(isolate);
-  DOM_AUTO_LOCK_SCOPE();
-  runner->Call(callback, v8::Undefined(isolate));
+  isolate->EnqueueMicrotask(callback_.NewLocal(isolate));
 }
 
 void Timer::Stop() {

@@ -2,12 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// |this| is bound to |Timer| object or third parameter of |Timer.start()|
+// if specified.
 callback TimerCallback = void();
 
 interface Timer {
   readonly attribute boolean isRunning;
 
-  void start(long delayMs, TimerCallback callback);
-  void start(long delayMs, TimerCallback callback, any receiver);
+  // Starts timer then calls |callback| after |delayMs| in milliseconds with
+  // binding |this| to |receiver| if specified or |Timer| object.
+  [ImplementedAs=JavaScript]
+  void start(long delayMs, TimerCallback callback, optional any receiver);
+
+  // Similar to |start()|, but calls |callback| with |undefined| reciever.
+  void startInternal(long delayMs, TimerCallback callback);
+
+  // Stop timter.
   void stop();
 };

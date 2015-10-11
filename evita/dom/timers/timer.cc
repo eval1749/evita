@@ -71,9 +71,8 @@ void Timer::DidFireTimer() {
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const callback = callback_.NewLocal(isolate);
-  auto const receiver = receiver_.NewLocal(isolate);
   DOM_AUTO_LOCK_SCOPE();
-  runner->Call(callback, receiver);
+  runner->Call(callback, v8::Undefined(isolate));
 }
 
 void Timer::Stop() {
@@ -81,20 +80,12 @@ void Timer::Stop() {
   TimerList::instance()->Unregister(this);
 }
 
-void Timer::Start(int delay_ms,
-                  v8::Handle<v8::Function> callback,
-                  v8::Handle<v8::Value> receiver) {
-  auto const isolate = v8::Isolate::GetCurrent();
+void Timer::StartInternal(int delay_ms, v8::Handle<v8::Function> callback) {
+  auto const isolate = ScriptHost::instance()->isolate();
   callback_.Reset(isolate, callback);
-  receiver_.Reset(isolate, receiver);
   TimerList::instance()->Register(this);
   timer_->Start(FROM_HERE, base::TimeDelta::FromMilliseconds(delay_ms),
                 base::Bind(&Timer::DidFireTimer, base::Unretained(this)));
-}
-
-void Timer::Start(int delay_ms, v8::Handle<v8::Function> callback) {
-  auto const isolate = v8::Isolate::GetCurrent();
-  Start(delay_ms, callback, GetWrapper(isolate));
 }
 
 }  // namespace dom

@@ -16,6 +16,7 @@ js_lib_files = [
 
   "bracket.js",
   "commander.js",
+  "css/style.js",
   "text/document.js",
   "text/document_file_io.js",
   "text/document_file_load.js",
@@ -58,7 +59,7 @@ js_lib_files = [
   "os/process.js",
   "text/range.js",
   "text/regular_expression.js",
-  "css/style.js",
+  "timers/timer.js",
   "windows/table_window.js",
   "text/text_position.js",
   "windows/document_state.js",

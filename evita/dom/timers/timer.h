@@ -42,13 +42,9 @@ class Timer : public v8_glue::Scriptable<Timer> {
 
   void DidFireTimer();
   void Stop();
-  void Start(int delay_ms, v8::Handle<v8::Function> callback);
-  void Start(int delay_ms,
-             v8::Handle<v8::Function> callback,
-             v8::Handle<v8::Value> receiver);
+  void StartInternal(int delay_ms, v8::Handle<v8::Function> callback);
 
   v8_glue::ScopedPersistent<v8::Function> callback_;
-  v8_glue::ScopedPersistent<v8::Value> receiver_;
   std::unique_ptr<base::Timer> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(Timer);

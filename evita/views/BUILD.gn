@@ -21,6 +21,8 @@ static_library("views") {
     "table_window.cc",
     "table_window.h",
     "view_delegate_impl.cc",
+    "view_thread_proxy.cc",
+    "view_thread_proxy.h",
     "window.cc",
     "window.h",
     "window_set.cc",

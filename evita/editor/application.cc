@@ -28,7 +28,7 @@
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/switches.h"
-#include "evita/views/view_delegate_impl.h"
+#include "evita/views/view_thread_proxy.h"
 
 #define DEBUG_IDLE 0
 
@@ -56,12 +56,12 @@ Application::Application()
       scheduler_(new Scheduler(message_loop_.get())),
       view_idle_count_(0),
       view_idle_hint_(0),
-      view_delegate_impl_(new views::ViewDelegateImpl()),
-      script_thread_(new dom::ScriptThread(view_delegate_impl_.get(),
-                                           io_manager_->proxy())) {
+      view_delegate_(new views::ViewThreadProxy(message_loop_.get())),
+      script_thread_(
+          new dom::ScriptThread(view_delegate_.get(), io_manager_->proxy())) {
   io_manager_->Start();
   ui::TextInputClientWin::instance()->Start();
-  script_thread_->Start(message_loop_.get());
+  script_thread_->Start();
   io_manager_->message_loop()->PostTask(
       FROM_HERE,
       base::Bind(

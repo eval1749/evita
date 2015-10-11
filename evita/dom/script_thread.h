@@ -16,84 +16,22 @@
 #include "evita/dom/view_delegate.h"
 
 namespace base {
-class MessageLoop;
 class Thread;
-class WaitableEvent;
 }
 
 namespace dom {
 
 class ScriptHost;
 
-// TODO(eval1749) We should introduce |ViewThreadProxy| class to encapsulate
-// inter thread communication rather than in |ScriptThread|.
-class ScriptThread final : public ViewDelegate,
-                           public domapi::ViewEventHandler {
+class ScriptThread final : public domapi::ViewEventHandler {
  public:
   ScriptThread(ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
   ~ScriptThread() final;
 
-  void Start(base::MessageLoop* view_message_loop);
+  void Start();
 
  private:
   domapi::ViewEventHandler* view_event_handler() const;
-
-  // ViewDelegate
-  void AddWindow(WindowId parent_id, WindowId child_id) final;
-  void ChangeParentWindow(WindowId window_id,
-                          WindowId new_parent_window_id) final;
-  text::Posn ComputeOnTextWindow(WindowId window_id,
-                                 const TextWindowCompute& data) final;
-  void CreateEditorWindow(const EditorWindow* window) final;
-  void CreateFormWindow(WindowId window_id,
-                        Form* form,
-                        const domapi::PopupWindowInit& init) final;
-  void CreateTableWindow(WindowId window_id, Document* document) final;
-  void CreateTextWindow(WindowId window_id, text::Selection* selection) final;
-  void DestroyWindow(WindowId window_id) final;
-  void DidStartScriptHost(domapi::ScriptHostState state) final;
-  void FocusWindow(WindowId window_id) final;
-  void GetFileNameForLoad(WindowId window_id,
-                          const base::string16& dir_path,
-                          const GetFileNameForLoadResolver& callback) final;
-  base::string16 GetMetrics(const base::string16& name) final;
-  void GetFileNameForSave(WindowId window_id,
-                          const base::string16& dir_path,
-                          const GetFileNameForSaveResolver& resolver) final;
-  domapi::SwitchValue GetSwitch(const base::string16& name) final;
-  std::vector<base::string16> GetSwitchNames() final;
-  std::vector<int> GetTableRowStates(
-      WindowId window_id,
-      const std::vector<base::string16>& keys) final;
-  void HideWindow(WindowId window_id) final;
-  domapi::FloatRect HitTestTextPosition(WindowId window_id,
-                                        text::Posn position);
-  void MakeSelectionVisible(WindowId window_id) final;
-  text::Posn MapPointToPosition(domapi::EventTargetId event_target_id,
-                                float x,
-                                float y) final;
-  void MessageBox(WindowId window_id,
-                  const base::string16& message,
-                  const base::string16& title,
-                  int flags,
-                  const MessageBoxResolver& resolver) final;
-  void Reconvert(WindowId window_id, const base::string16& text) final;
-  void RealizeWindow(WindowId window_id) final;
-  void ReleaseCapture(domapi::EventTargetId event_target_id) final;
-  void ScrollTextWindow(WindowId window_id, int direction) final;
-  void SetCapture(domapi::EventTargetId event_target_id) final;
-  void SetStatusBar(WindowId window_id,
-                    const std::vector<base::string16>& texts) final;
-  void SetSwitch(const base::string16& name,
-                 const domapi::SwitchValue& new_value) final;
-  void SetTabData(WindowId window_id, const domapi::TabData& tab_data) final;
-  void SetTextWindowZoom(WindowId window_id, float zoom) final;
-  void ShowWindow(WindowId window_id) final;
-  void SplitHorizontally(WindowId left_window_id,
-                         WindowId new_right_window_id) final;
-  void SplitVertically(WindowId above_window_id,
-                       WindowId new_below_window_id) final;
-  void UpdateWindow(WindowId window_id) final;
 
   // domapi::ViewEventHandler
   void DidBeginFrame(const base::Time& deadline);
@@ -121,11 +59,8 @@ class ScriptThread final : public ViewDelegate,
   void WillDestroyViewHost() final;
 
   domapi::IoDelegate* io_delegate_;
-  base::MessageLoop* io_message_loop_;
   const std::unique_ptr<base::Thread> thread_;
   ViewDelegate* const view_delegate_;
-  base::MessageLoop* view_message_loop_;
-  std::unique_ptr<base::WaitableEvent> waitable_event_;
 
   const std::unique_ptr<ScriptHost> script_host_;
 

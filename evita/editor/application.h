@@ -36,7 +36,7 @@ class TimeScope;
 }
 
 namespace views {
-class ViewDelegateImpl;
+class ViewThreadProxy;
 }
 
 namespace editor {
@@ -73,7 +73,7 @@ class Application final : public common::Singleton<Application> {
   bool is_quit_;
   std::unique_ptr<base::MessageLoop> message_loop_;
   std::unique_ptr<Scheduler> scheduler_;
-  std::unique_ptr<views::ViewDelegateImpl> view_delegate_impl_;
+  std::unique_ptr<views::ViewThreadProxy> view_delegate_;
   std::unique_ptr<metrics::TimeScope> view_idle_time_scope_;
   int view_idle_count_;
   int view_idle_hint_;

@@ -4,7 +4,7 @@
 
 (function() {
   /** @const @type {!RegExp} */
-  var RE_CR = NewRegExp('\r', 'g');
+  const RE_CR = NewRegExp('\r', 'g');
 
   /**
    * @constructor
@@ -26,9 +26,7 @@
      * @this {!Decoder}
      * @return {string}
      */
-    get: function() {
-      return this.decoder.encoding;
-    },
+    get: function() { return this.decoder.encoding; },
   });
 
   /** @type {!Array.<string>} */
@@ -55,9 +53,8 @@
    * @class A text encoding detector.
    */
   function EncodingDetector() {
-    this.decoders = [
-        new Decoder('utf-8'), new Decoder('shift_jis'), new Decoder('euc-jp')
-    ];
+    this.decoders =
+        [new Decoder('utf-8'), new Decoder('shift_jis'), new Decoder('euc-jp')];
   }
 
   /**
@@ -119,18 +116,18 @@
       this.file_ = null;
     }
 
-    didRead(readData, num_read) {
-      let detector = this.detector_;
-      if (!detector.detect(readData.subarray(0, num_read)))
+    didRead(read_data, num_read) {
+      const detector = this.detector_;
+      if (!detector.detect(read_data.subarray(0, num_read)))
         throw new Error('Bad encoding');
 
       // Display loading result
       // Note: We may display text in wrong encoding.
       this.document_.readonly = false;
-      let decoder = detector.decoders[0];
-      let range = this.range_;
-      let string = decoder.strings[decoder.strings.length - 1];
-      string = string.replace(RE_CR, '');
+      const decoder = detector.decoders[0];
+      const range = this.range_;
+      const string =
+          decoder.strings[decoder.strings.length - 1].replace(RE_CR, '');
       range.text = string;
       range.collapseTo(range.end);
       this.document_.readonly = true;
@@ -139,51 +136,51 @@
       this.document_.doColor_(string.length);
     }
 
-    load(fileName) {
-      return (async(function*(loader, fileName) {
+    load(file_name) {
+      return (async(function * (loader, file_name) {
         const detector = new EncodingDetector();
         // Remember |readonly| property for restoring on error.
         const readonly = loader.document_.readonly;
         loader.range_.start = 0;
         loader.range_.end = loader.document_.length;
-        loader.file_ = yield Os.File.open(fileName);
-        let file = loader.file_;
-        const readData = new Uint8Array(4096);
+        loader.file_ = yield Os.File.open(file_name);
+        const file = loader.file_;
+        const read_data = new Uint8Array(4096);
         for (;;) {
-          let num_read = yield file.read(readData);
-          if (num_read == 0)
+          const num_read = yield file.read(read_data);
+          if (num_read === 0)
             break;
-          loader.didRead(readData, num_read);
+          loader.didRead(read_data, num_read);
         }
-        let file_info = yield Os.File.stat(fileName);
+        const file_info = yield Os.File.stat(file_name);
         loader.finish(file_info);
-      }))(this, fileName);
+      }))(this, file_name);
     }
 
     // Reading file contents is finished. Record file last write time.
     finish(file_info) {
-      let detector = this.detector_;
-      let decoder = detector.decoders[0];
+      const detector = this.detector_;
+      const decoder = detector.decoders[0];
       if (!decoder)
         throw new Error('Bad encoding');
 
       this.readonly_ = file_info.readonly;
 
-      let document = this.document_;
-      let range = this.range_;
+      const document = this.document_;
+      const range = this.range_;
       range.start = 0;
       range.end = document.length;
 
       document.readonly = false;
       let newline = Newline.UNKNOWN;
       decoder.strings.forEach(function(string) {
-        if (newline == Newline.UNKNOWN) {
+        if (newline === Newline.UNKNOWN) {
           if (string.indexOf('\r\n') >= 0)
             newline = Newline.CRLF;
           else if (string.indexOf('\n') >= 0)
             newline = Newline.LF;
         }
-        if (newline == Newline.CRLF)
+        if (newline === Newline.CRLF)
           string = string.replace(RE_CR, '');
         range.text = string;
         range.collapseTo(range.end);
@@ -199,25 +196,26 @@
   }
 
   /**
-   * @param {string=} opt_fileName
+   * @this {!Document}
+   * @param {string=} opt_file_name
    * @return {!Promise.<number>}
    */
-  global.Document.prototype.load = function(opt_fileName) {
-    var document = this;
-    if (!arguments.length) {
-      if (document.fileName == '')
+  function load(opt_file_name) {
+    const document = this;
+    if (opt_file_name === undefined) {
+      if (document.fileName === '')
         throw 'Document isn\'t bound to file.';
     } else {
-      var fileName = /** @type{string} */(opt_fileName);
+      const file_name = /** @type{string} */ (opt_file_name);
       // TODO(yosi) FilePath.fullPath() will return Promise.
-      var absoluteFileName = FilePath.fullPath(fileName);
-      var present = Document.findFile(absoluteFileName);
+      const absolute_file_name = FilePath.fullPath(file_name);
+      const present = Document.findFile(absolute_file_name);
       if (present && present !== this)
-        throw fileName + ' is already bound to ' + present;
-      document.fileName = absoluteFileName;
-      var newMode = Mode.chooseModeByFileName(absoluteFileName);
-      if (document.mode != newMode)
-        document.mode = newMode;
+        throw file_name + ' is already bound to ' + present;
+      document.fileName = absolute_file_name;
+      const new_mode = Mode.chooseModeByFileName(absolute_file_name);
+      if (document.mode !== new_mode)
+        document.mode = new_mode;
     }
 
     document.obsolete = Document.Obsolete.CHECKING;
@@ -226,36 +224,40 @@
     document.dispatchEvent(new DocumentEvent(Event.Names.BEFORELOAD));
 
     // Start loading
-    let loader = new FileLoader(document);
-    return loader.load(document.fileName).then(function(length) {
-      loader.close();
-      Editor.messageBox(null, 'Loaded ' + document.fileName,
-                        MessageBox.ICONINFORMATION);
-      document.obsolete = Document.Obsolete.NO;
-      document.lastStatTime_ = new Date();
-      document.parseFileProperties();
-      var newMode = Mode.chooseMode(document);
-      if (newMode.name != document.mode.name) {
-        Editor.messageBox(null, 'Change mode to ' + newMode.name,
-                          MessageBox.ICONINFORMATION);
-        document.mode = newMode;
-      }
-      document.listWindows().forEach(function(window) {
-        if (window instanceof TextWindow) {
-          window.selection.range.collapseTo(0);
-          window.makeSelectionVisible();
-        }
-      });
-      document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
-      return Promise.resolve(length);
-    }).catch(function(exception) {
-      console.log('load.catch', exception, 'during loading', fileName,
-                  'into', document, exception.stack);
-      loader.close();
-      document.lastStatTime_ = new Date();
-      document.obsolete = Document.Obsolete.UNKNOWN;
-      document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
-      return Promise.reject(exception);
-    });
-  };
+    const loader = new FileLoader(document);
+    return loader.load(document.fileName)
+        .then(function(length) {
+          loader.close();
+          Editor.messageBox(null, 'Loaded ' + document.fileName,
+                            MessageBox.ICONINFORMATION);
+          document.obsolete = Document.Obsolete.NO;
+          document.lastStatTime_ = new Date();
+          document.parseFileProperties();
+          const new_mode = Mode.chooseMode(document);
+          if (new_mode.name !== document.mode.name) {
+            Editor.messageBox(null, 'Change mode to ' + new_mode.name,
+                              MessageBox.ICONINFORMATION);
+            document.mode = new_mode;
+          }
+          document.listWindows().forEach(function(window) {
+            if (window instanceof TextWindow) {
+              window.selection.range.collapseTo(0);
+              window.makeSelectionVisible();
+            }
+          });
+          document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
+          return Promise.resolve(length);
+        })
+        .catch(function(exception) {
+          console.log('load.catch', exception, 'during loading',
+                      document.fileName, 'into', document, exception.stack);
+          loader.close();
+          document.lastStatTime_ = new Date();
+          document.obsolete = Document.Obsolete.UNKNOWN;
+          document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
+          return Promise.reject(exception);
+        });
+  }
+
+  Object.defineProperty(Document.prototype, 'load', {value: load});
 })();

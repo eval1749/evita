@@ -262,7 +262,7 @@ void ViewEventHandlerImpl::OpenFile(WindowId window_id,
 }
 
 void ViewEventHandlerImpl::ProcessCommandLine(
-    base::string16 working_directory,
+    const base::string16& working_directory,
     const std::vector<base::string16>& args) {
   auto const runner = host_->runner();
   v8_glue::Runner::Scope runner_scope(runner);

@@ -56,7 +56,7 @@ class ScriptThread final : public domapi::ViewEventHandler {
       const domapi::TextCompositionEvent& event) final;
   void DispatchWheelEvent(const domapi::WheelEvent& event) final;
   void OpenFile(WindowId window_id, const base::string16& file_name) final;
-  void ProcessCommandLine(base::string16 working_directory,
+  void ProcessCommandLine(const base::string16& working_directory,
                           const std::vector<base::string16>& args) final;
   void QueryClose(WindowId window_id) final;
   void RunCallback(const base::Closure& callback) final;

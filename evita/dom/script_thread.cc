@@ -137,7 +137,7 @@ DEFINE_VIEW_EVENT_HANDLER1(DispatchTextCompositionEvent,
 DEFINE_VIEW_EVENT_HANDLER1(DispatchWheelEvent, const domapi::WheelEvent&)
 DEFINE_VIEW_EVENT_HANDLER2(OpenFile, WindowId, const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER2(ProcessCommandLine,
-                           base::string16,
+                           const base::string16&,
                            const std::vector<base::string16>&)
 DEFINE_VIEW_EVENT_HANDLER1(QueryClose, WindowId)
 DEFINE_VIEW_EVENT_HANDLER1(RunCallback, const base::Closure&)

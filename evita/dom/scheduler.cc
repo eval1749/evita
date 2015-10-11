@@ -22,6 +22,7 @@ void Scheduler::DidBeginFrame(const base::Time& deadline) {
       break;
     maybe_task.FromJust().Run();
   }
+  script_host_->RunMicrotasks();
 }
 
 void Scheduler::ScheduleTask(const base::Closure& task) {

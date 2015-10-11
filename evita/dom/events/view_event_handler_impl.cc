@@ -22,7 +22,6 @@
 #include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
 #include "evita/dom/windows/window_set.h"
@@ -31,20 +30,9 @@
 #include "evita/v8_glue/runner.h"
 #include "v8_strings.h"  // NOLINT(build/include)
 
-namespace views {
-extern int event_id_counter;
-}
-
 namespace dom {
 
 namespace {
-
-void RunMicrotasksIfNoMoreEvents(const domapi::Event& api_event) {
-  // TODO(eval1749) We should have another way to check the last event.
-  if (views::event_id_counter != api_event.event_id)
-    return;
-  ScriptHost::instance()->RunMicrotasks();
-}
 
 base::string16 V8ToString(v8::Handle<v8::Value> value) {
   if (value.IsEmpty())
@@ -203,7 +191,6 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
       new FocusEvent(
           api_event.event_type == domapi::EventType::Blur ? L"blur" : L"focus",
           event_init));
-  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchKeyboardEvent(
@@ -212,7 +199,6 @@ void ViewEventHandlerImpl::DispatchKeyboardEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new KeyboardEvent(api_event));
-  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchMouseEvent(
@@ -221,7 +207,6 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new MouseEvent(api_event));
-  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchTextCompositionEvent(
@@ -230,7 +215,6 @@ void ViewEventHandlerImpl::DispatchTextCompositionEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new CompositionEvent(api_event));
-  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::DispatchWheelEvent(
@@ -239,7 +223,6 @@ void ViewEventHandlerImpl::DispatchWheelEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new WheelEvent(api_event));
-  RunMicrotasksIfNoMoreEvents(api_event);
 }
 
 void ViewEventHandlerImpl::OpenFile(WindowId window_id,

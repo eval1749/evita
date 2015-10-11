@@ -290,7 +290,7 @@ void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
   DispatchEventWithInLock(window, new UiEvent(L"queryclose", init_dict));
 }
 
-void ViewEventHandlerImpl::RunCallback(base::Closure callback) {
+void ViewEventHandlerImpl::RunCallback(const base::Closure& callback) {
   DOM_AUTO_LOCK_SCOPE();
   callback.Run();
 }

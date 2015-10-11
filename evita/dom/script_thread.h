@@ -59,7 +59,7 @@ class ScriptThread final : public domapi::ViewEventHandler {
   void ProcessCommandLine(base::string16 working_directory,
                           const std::vector<base::string16>& args) final;
   void QueryClose(WindowId window_id) final;
-  void RunCallback(base::Closure callback) final;
+  void RunCallback(const base::Closure& callback) final;
   void WillDestroyViewHost() final;
 
   const std::unique_ptr<Scheduler> scheduler_;

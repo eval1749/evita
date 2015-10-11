@@ -140,7 +140,7 @@ DEFINE_VIEW_EVENT_HANDLER2(ProcessCommandLine,
                            base::string16,
                            const std::vector<base::string16>&)
 DEFINE_VIEW_EVENT_HANDLER1(QueryClose, WindowId)
-DEFINE_VIEW_EVENT_HANDLER1(RunCallback, base::Closure)
+DEFINE_VIEW_EVENT_HANDLER1(RunCallback, const base::Closure&)
 
 void ScriptThread::WillDestroyViewHost() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();

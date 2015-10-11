@@ -58,7 +58,7 @@ class ViewEventHandler {
   virtual void ProcessCommandLine(base::string16 working_directory,
                                   const std::vector<base::string16>& args) = 0;
   virtual void QueryClose(WindowId window_id) = 0;
-  virtual void RunCallback(base::Closure) = 0;
+  virtual void RunCallback(const base::Closure&) = 0;
   virtual void WillDestroyViewHost() = 0;
 
  protected:

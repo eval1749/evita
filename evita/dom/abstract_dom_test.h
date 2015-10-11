@@ -81,6 +81,11 @@ class AbstractDomTest : public ::testing::Test {
   virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate,
       v8::Handle<v8::ObjectTemplate> global_tempalte);
+
+  // When test case posts a task to message loop, it should call
+  // |RunMessageLoopUntilIdle()| to run posted tasks.
+  void RunMessageLoopUntilIdle();
+
   bool RunScript(const base::StringPiece& text,
                  const char* file_name,
                  int line_number);

@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "base/basictypes.h"
-#include "base/run_loop.h"
 #include "base/strings/utf_string_conversions.h"
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
@@ -64,29 +63,23 @@ TEST_F(DocumentTest, Document_addObserver) {
       "}"
       "Document.addObserver(callback);"
       "var doc1 = new Document('addObserver');");
-  {
-    base::RunLoop run_loop;
-    run_loop.RunUntilIdle();
-  }
+
+  RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("result_doc === doc1");
   EXPECT_SCRIPT_EQ("add", "result_type")
       << "The observer gets 'add' notification.";
 
   EXPECT_SCRIPT_VALID("Document.remove(doc1)");
-  {
-    base::RunLoop run_loop;
-    run_loop.RunUntilIdle();
-  }
+
+  RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("result_doc === doc1");
   EXPECT_SCRIPT_EQ("remove", "result_type")
       << "The observer gets 'remove' notification.";
 
   EXPECT_SCRIPT_VALID("Document.removeObserver(callback)");
   EXPECT_SCRIPT_VALID("var doc2 = new Document('addObserver2')");
-  {
-    base::RunLoop run_loop;
-    run_loop.RunUntilIdle();
-  }
+
+  RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("result_doc === doc1");
   EXPECT_SCRIPT_EQ("remove", "result_type")
       << "The observer doesn't get notification.";

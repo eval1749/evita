@@ -4,10 +4,6 @@
 #include <string>
 
 #include "base/basictypes.h"
-#pragma warning(push)
-#pragma warning(disable : 4100 4625 4626)
-#include "base/run_loop.h"
-#pragma warning(pop)
 #include "gmock/gmock.h"
 #include "evita/dom/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
@@ -97,10 +93,8 @@ TEST_F(TextWindowSlowTest, realize) {
   EXPECT_CALL(*mock_view_impl(), SetTabData(Eq(1), _));
   EXPECT_SCRIPT_VALID("sample.realize()");
   view_event_handler()->DidRealizeWidget(1);
-  {
-    base::RunLoop run_loop;
-    run_loop.RunUntilIdle();
-  }
+  RunMessageLoopUntilIdle();
+
   EXPECT_SCRIPT_TRUE("event instanceof DocumentEvent");
   EXPECT_SCRIPT_EQ("attach", "event.type");
   EXPECT_SCRIPT_TRUE("event.view === sample");
@@ -109,10 +103,8 @@ TEST_F(TextWindowSlowTest, realize) {
   EXPECT_CALL(*mock_view_impl(), DestroyWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("sample.destroy()");
   view_event_handler()->DidDestroyWidget(1);
-  {
-    base::RunLoop run_loop;
-    run_loop.RunUntilIdle();
-  }
+  RunMessageLoopUntilIdle();
+
   EXPECT_SCRIPT_TRUE("event instanceof DocumentEvent");
   EXPECT_SCRIPT_EQ("detach", "event.type");
   EXPECT_SCRIPT_TRUE("event.view === sample");

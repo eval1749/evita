@@ -259,6 +259,11 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
   return true;
 }
 
+void AbstractDomTest::RunMessageLoopUntilIdle() {
+  base::RunLoop run_loop;
+  run_loop.RunUntilIdle();
+}
+
 void AbstractDomTest::SetUp() {
   DEFINE_STATIC_LOCAL(base::MessageLoop, message_loop, ());
 

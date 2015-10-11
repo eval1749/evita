@@ -88,6 +88,15 @@
     };
   }
 
+  /**
+   * @param {!Document} document
+   */
+  function resetSelections(document) {
+    document.listWindows()
+        .filter((window) => window instanceof TextWindow)
+        .forEach((window) => { window.selection.range.collapseTo(0); });
+  }
+
   /*
    * Load contents of |fileName| into |document|. The |document| is readonly
    * during reading file contents.
@@ -104,6 +113,7 @@
       this.detector_ = new EncodingDetector();
       this.encoding_ = '';
       this.file_ = null;
+      this.first_read_ = true;
       this.readonly_ = document.readonly;
       this.range_ = new Range(document);
     }
@@ -123,17 +133,25 @@
 
       // Display loading result
       // Note: We may display text in wrong encoding.
-      this.document_.readonly = false;
+      const document = this.document_;
+      document.readonly = false;
       const decoder = detector.decoders[0];
       const range = this.range_;
       const string =
           decoder.strings[decoder.strings.length - 1].replace(RE_CR, '');
       range.text = string;
       range.collapseTo(range.end);
-      this.document_.readonly = true;
+      document.readonly = true;
+
+      // TDOO(eval1749): We should have loading progress UI feedback since we
+      // shows top of document during loading.
+      if (this.first_read_) {
+        this.first_read_ = false;
+        resetSelections(document);
+      }
 
       // Color portion of text.
-      this.document_.doColor_(string.length);
+      document.doColor_(string.length);
     }
 
     load(file_name) {
@@ -167,10 +185,11 @@
       this.readonly_ = file_info.readonly;
 
       const document = this.document_;
+
+      // Adjust newline character
       const range = this.range_;
       range.start = 0;
       range.end = document.length;
-
       document.readonly = false;
       let newline = Newline.UNKNOWN;
       decoder.strings.forEach(function(string) {
@@ -185,6 +204,7 @@
         range.text = string;
         range.collapseTo(range.end);
       });
+      resetSelections(document);
 
       // Update document properties based on file.
       document.encoding = decoder.encoding;
@@ -239,12 +259,6 @@
                               MessageBox.ICONINFORMATION);
             document.mode = new_mode;
           }
-          document.listWindows().forEach(function(window) {
-            if (window instanceof TextWindow) {
-              window.selection.range.collapseTo(0);
-              window.makeSelectionVisible();
-            }
-          });
           document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
           return Promise.resolve(length);
         })

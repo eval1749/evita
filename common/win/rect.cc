@@ -1,9 +1,11 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
+#include <algorithm>
+
 #include "common/win/rect.h"
 
-#include <algorithm>
+#include "base/logging.h"
 
 namespace common {
 namespace win {
@@ -17,6 +19,8 @@ Rect::Rect(const Point& origin, const Size& size)
 Rect::Rect(const Size& size) : Rect(0, 0, size.width(), size.height()) {}
 
 Rect::Rect(int left, int top, int right, int bottom) {
+  DCHECK_LE(left, right);
+  DCHECK_LE(top, bottom);
   data_.left = left;
   data_.right = right;
   data_.top = top;

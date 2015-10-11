@@ -31,15 +31,15 @@ namespace dom {
 //
 ScriptThread::ScriptThread(ViewDelegate* view_delegate,
                            domapi::IoDelegate* io_delegate)
-    : thread_(new base::Thread("script_thread")),
-      view_delegate_(view_delegate),
-      script_host_(ScriptHost::Create(view_delegate, io_delegate)),
-      scheduler_(new Scheduler(view_delegate)) {}
+    : io_delegate_(io_delegate),
+      scheduler_(new Scheduler(view_delegate)),
+      thread_(new base::Thread("script_thread")),
+      view_delegate_(view_delegate) {}
 
 ScriptThread::~ScriptThread() {}
 
 domapi::ViewEventHandler* ScriptThread::view_event_handler() const {
-  return script_host_->event_handler();
+  return ScriptHost::instance()->event_handler();
 }
 
 void ScriptThread::Start() {
@@ -47,7 +47,8 @@ void ScriptThread::Start() {
   thread_->Start();
   thread_->message_loop()->PostTask(
       FROM_HERE,
-      base::Bind(&ScriptHost::Start, base::Unretained(script_host_.get())));
+      base::Bind(&ScriptHost::CreateAndStart, base::Unretained(view_delegate_),
+                 base::Unretained(io_delegate_)));
 }
 
 // domapi::ViewEventHandler
@@ -121,7 +122,9 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
   if (event.key_code == (static_cast<int>(ui::KeyCode::Pause) |
                          static_cast<int>(ui::Modifier::Control)) &&
       event.control_key) {
-    auto const isolate = script_host_->isolate();
+    // We should have |ScriptHost::TerminateExecution()| instead of calling
+    // |v8::Isolate::TerminateExecution()| here.
+    auto const isolate = ScriptHost::instance()->isolate();
     isolate->TerminateExecution();
     return;
   }

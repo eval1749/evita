@@ -69,14 +69,13 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
 
   // Call |handleEvent()| function in the class of |target| with |event|.
   void CallClassEventHandler(EventTarget* target, Event* event);
-  static std::unique_ptr<ScriptHost> Create(ViewDelegate* view_delegate,
-                                            domapi::IoDelegate* io_delegate);
+  static void CreateAndStart(ViewDelegate* view_delegate,
+                             domapi::IoDelegate* io_delegate);
   void PlatformError(const char* name);
   void PostTask(const tracked_objects::Location& from_here,
                 const base::Closure& task);
   void ResetForTesting();
   void RunMicrotasks();
-  void Start();
   static ScriptHost* StartForTesting(ViewDelegate* view_delegate,
                                      domapi::IoDelegate* io_delegate);
   void ThrowError(const std::string& message);
@@ -87,11 +86,15 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
  private:
   ScriptHost(ViewDelegate* view_delegate, domapi::IoDelegate* io_deleage);
 
+  static ScriptHost* Create(ViewDelegate* view_delegate,
+                            domapi::IoDelegate* io_delegate);
+
   void DidStartScriptHost();
 
   // v8_glue::RunnerDelegate
   v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
       v8_glue::Runner* runner) final;
+  void Start();
   void UnhandledException(v8_glue::Runner* runner,
                           const v8::TryCatch& try_catch) final;
 
@@ -100,7 +103,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   domapi::IoDelegate* io_delegate_;
   // A |MessageLoop| where script runs on. We don't allow to run script other
   // than this message loop.
-  base::MessageLoop* message_loop_for_script_;
+  base::MessageLoop* const message_loop_for_script_;
   std::unique_ptr<v8_glue::Runner> runner_;
   domapi::ScriptHostState state_;
   bool testing_;

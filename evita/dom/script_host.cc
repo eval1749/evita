@@ -197,14 +197,11 @@ ScriptHost::ScriptHost(ViewDelegate* view_delegate,
                        domapi::IoDelegate* io_delegate)
     : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
-      message_loop_for_script_(nullptr),
+      message_loop_for_script_(base::MessageLoop::current()),
       state_(domapi::ScriptHostState::Stopped),
       testing_(false),
       testing_runner_(nullptr),
-      view_delegate_(view_delegate) {
-  DCHECK(!script_host);
-  script_host = this;
-}
+      view_delegate_(view_delegate) {}
 
 ScriptHost::~ScriptHost() {
   script_host = nullptr;
@@ -252,9 +249,8 @@ void ScriptHost::CallClassEventHandler(EventTarget* event_target,
   runner()->Call(js_method, js_target, js_event);
 }
 
-std::unique_ptr<ScriptHost> ScriptHost::Create(
-    ViewDelegate* view_delegate,
-    domapi::IoDelegate* io_delegate) {
+ScriptHost* ScriptHost::Create(ViewDelegate* view_delegate,
+                               domapi::IoDelegate* io_delegate) {
   // See v8/src/flag-definitions.h
   // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
   // flags.
@@ -263,8 +259,14 @@ std::unique_ptr<ScriptHost> ScriptHost::Create(
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
                                  gin::ArrayBufferAllocator::SharedInstance());
   v8::V8::InitializeICU();
-  return std::unique_ptr<ScriptHost>(
-      new ScriptHost(view_delegate, io_delegate));
+  return new ScriptHost(view_delegate, io_delegate);
+}
+
+void ScriptHost::CreateAndStart(ViewDelegate* view_delegate,
+                                domapi::IoDelegate* io_delegate) {
+  DCHECK(!script_host);
+  script_host = Create(view_delegate, io_delegate);
+  script_host->Start();
 }
 
 void ScriptHost::DidStartScriptHost() {
@@ -336,9 +338,6 @@ void ScriptHost::RunMicrotasks() {
 }
 
 void ScriptHost::Start() {
-  DCHECK(!message_loop_for_script_);
-  message_loop_for_script_ = base::MessageLoop::current();
-
   // Node: Using editor::Application::instance() starts thread. So, we don't
   // start |ScriptHost| in testing. Although, we should remove
   // all |editor::Application::instance()| in DOM world.
@@ -368,7 +367,7 @@ void ScriptHost::Start() {
 ScriptHost* ScriptHost::StartForTesting(ViewDelegate* view_delegate,
                                         domapi::IoDelegate* io_delegate) {
   if (!script_host) {
-    script_host = ScriptHost::Create(view_delegate, io_delegate).release();
+    script_host = ScriptHost::Create(view_delegate, io_delegate);
     script_host->testing_ = true;
     script_host->Start();
   } else {

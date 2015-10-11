@@ -25,7 +25,6 @@ class IoDelegate;
 namespace dom {
 
 class Scheduler;
-class ScriptHost;
 
 class ScriptThread final : public domapi::ViewEventHandler {
  public:
@@ -62,11 +61,10 @@ class ScriptThread final : public domapi::ViewEventHandler {
   void RunCallback(const base::Closure& callback) final;
   void WillDestroyViewHost() final;
 
+  domapi::IoDelegate* const io_delegate_;
+  const std::unique_ptr<Scheduler> scheduler_;
   const std::unique_ptr<base::Thread> thread_;
   ViewDelegate* const view_delegate_;
-
-  const std::unique_ptr<ScriptHost> script_host_;
-  const std::unique_ptr<Scheduler> scheduler_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);
 };

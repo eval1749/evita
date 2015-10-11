@@ -32,7 +32,7 @@ void DocumentWindow::DidDestroyWindow() {
   DocumentEventInit init;
   init.set_bubbles(true);
   init.set_view(this);
-  selection_->document()->ScheduleDispatchEvent(
+  selection_->document()->ScheduleDispatchEventDeprecated(
       new DocumentEvent(L"detach", init));
 }
 
@@ -43,7 +43,7 @@ void DocumentWindow::DidRealizeWindow() {
   DocumentEventInit init;
   init.set_bubbles(true);
   init.set_view(this);
-  selection_->document()->ScheduleDispatchEvent(
+  selection_->document()->ScheduleDispatchEventDeprecated(
       new DocumentEvent(L"attach", init));
 }
 

@@ -153,7 +153,9 @@ global.Lexer = (function() {
         return;
       let task = this.pendingSet_.values().next().value;
       this.pendingSet_.delete(task);
+      let startAt = Date.now();
       task.doColor(100);
+      global.Lexer.colorTime = Date.now() - startAt;
       this.startTimerIfNeeded_();
     }
 

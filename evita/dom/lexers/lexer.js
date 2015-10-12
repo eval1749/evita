@@ -138,6 +138,17 @@ global.Lexer = (function() {
     return map;
   }
 
+  /** @type {number}
+   * Number of characters to color during scheduled task.
+   * This is an experiment for searching right value.
+   */
+  Lexer.incTime = 1000;
+
+  /** @type {number}
+   * Duration of doClor() in scheduler in milliseconds.
+   */
+  Lexer.colorTime = 0;
+
   // @class The scheduler for coloring.
   // Runs |doColor(100)| for one document each 50ms.
   class Scheduler {
@@ -154,7 +165,7 @@ global.Lexer = (function() {
       let task = this.pendingSet_.values().next().value;
       this.pendingSet_.delete(task);
       let startAt = Date.now();
-      task.doColor(100);
+      task.doColor(Lexer.incTime);
       global.Lexer.colorTime = Date.now() - startAt;
       this.startTimerIfNeeded_();
     }

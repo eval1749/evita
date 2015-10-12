@@ -173,10 +173,6 @@ global.Lexer = (function() {
     }
   }
 
-  if (xyza && foo) {
-    return 123;
-  }
-
   const scheduler = new Scheduler();
 
   /**

@@ -113,7 +113,7 @@
       this.detector_ = new EncodingDetector();
       this.encoding_ = '';
       this.file_ = null;
-      this.first_read_ = true;
+      this.firstRead_ = true;
       this.readonly_ = document.readonly;
       this.range_ = new Range(document);
     }
@@ -126,9 +126,9 @@
       this.file_ = null;
     }
 
-    didRead(read_data, num_read) {
+    didRead(readData, numRead) {
       const detector = this.detector_;
-      if (!detector.detect(read_data.subarray(0, num_read)))
+      if (!detector.detect(readData.subarray(0, numRead)))
         throw new Error('Bad encoding');
 
       // Display loading result
@@ -145,8 +145,8 @@
 
       // TDOO(eval1749): We should have loading progress UI feedback since we
       // shows top of document during loading.
-      if (this.first_read_) {
-        this.first_read_ = false;
+      if (this.firstRead_) {
+        this.firstRead_ = false;
         resetSelections(document);
       }
 
@@ -154,35 +154,35 @@
       document.doColor_(string.length);
     }
 
-    load(file_name) {
-      return (async(function * (loader, file_name) {
+    load(fileName) {
+      return (async(function * (loader, fileName) {
         const detector = new EncodingDetector();
         // Remember |readonly| property for restoring on error.
         const readonly = loader.document_.readonly;
         loader.range_.start = 0;
         loader.range_.end = loader.document_.length;
-        loader.file_ = yield Os.File.open(file_name);
+        loader.file_ = yield Os.File.open(fileName);
         const file = loader.file_;
-        const read_data = new Uint8Array(4096);
+        const readData = new Uint8Array(4096);
         for (;;) {
-          const num_read = yield file.read(read_data);
-          if (num_read === 0)
+          const numRead = yield file.read(readData);
+          if (numRead === 0)
             break;
-          loader.didRead(read_data, num_read);
+          loader.didRead(readData, numRead);
         }
-        const file_info = yield Os.File.stat(file_name);
-        loader.finish(file_info);
-      }))(this, file_name);
+        const fileInfo = yield Os.File.stat(fileName);
+        loader.finish(fileInfo);
+      }))(this, fileName);
     }
 
     // Reading file contents is finished. Record file last write time.
-    finish(file_info) {
+    finish(fileInfo) {
       const detector = this.detector_;
       const decoder = detector.decoders[0];
       if (!decoder)
         throw new Error('Bad encoding');
 
-      this.readonly_ = file_info.readonly;
+      this.readonly_ = fileInfo.readonly;
 
       const document = this.document_;
 
@@ -208,7 +208,7 @@
 
       // Update document properties based on file.
       document.encoding = decoder.encoding;
-      document.lastWriteTime = file_info.lastModificationDate;
+      document.lastWriteTime = fileInfo.lastModificationDate;
       document.modified = false;
       document.newline = newline;
       document.clearUndo();
@@ -217,25 +217,25 @@
 
   /**
    * @this {!Document}
-   * @param {string=} opt_file_name
+   * @param {string=} opt_fileName
    * @return {!Promise.<number>}
    */
-  function load(opt_file_name) {
+  function load(opt_fileName) {
     const document = this;
-    if (opt_file_name === undefined) {
+    if (opt_fileName === undefined) {
       if (document.fileName === '')
         throw 'Document isn\'t bound to file.';
     } else {
-      const file_name = /** @type{string} */ (opt_file_name);
+      const fileName = /** @type{string} */ (opt_fileName);
       // TODO(yosi) FilePath.fullPath() will return Promise.
-      const absolute_file_name = FilePath.fullPath(file_name);
-      const present = Document.findFile(absolute_file_name);
+      const absoluteFile_name = FilePath.fullPath(fileName);
+      const present = Document.findFile(absoluteFile_name);
       if (present && present !== this)
-        throw file_name + ' is already bound to ' + present;
-      document.fileName = absolute_file_name;
-      const new_mode = Mode.chooseModeByFileName(absolute_file_name);
-      if (document.mode !== new_mode)
-        document.mode = new_mode;
+        throw fileName + ' is already bound to ' + present;
+      document.fileName = absoluteFile_name;
+      const newMode = Mode.chooseModeByFileName(absoluteFile_name);
+      if (document.mode !== newMode)
+        document.mode = newMode;
     }
 
     document.obsolete = Document.Obsolete.CHECKING;
@@ -253,11 +253,11 @@
           document.obsolete = Document.Obsolete.NO;
           document.lastStatTime_ = new Date();
           document.parseFileProperties();
-          const new_mode = Mode.chooseMode(document);
-          if (new_mode.name !== document.mode.name) {
-            Editor.messageBox(null, 'Change mode to ' + new_mode.name,
+          const newMode = Mode.chooseMode(document);
+          if (newMode.name !== document.mode.name) {
+            Editor.messageBox(null, 'Change mode to ' + newMode.name,
                               MessageBox.ICONINFORMATION);
-            document.mode = new_mode;
+            document.mode = newMode;
           }
           document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
           return Promise.resolve(length);

@@ -41,6 +41,7 @@ class Timer : public v8_glue::Scriptable<Timer> {
   friend class bindings::TimerClass;
 
   void DidFireTimer();
+  void RunCallback();
   void Stop();
   void StartInternal(int delay_ms, v8::Handle<v8::Function> callback);
 

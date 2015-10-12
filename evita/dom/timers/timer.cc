@@ -67,6 +67,11 @@ bool Timer::is_running() const {
 }
 
 void Timer::DidFireTimer() {
+  ScriptHost::instance()->ScheduleIdleTask(
+      base::Bind(&Timer::RunCallback, base::Unretained(this)));
+}
+
+void Timer::RunCallback() {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);

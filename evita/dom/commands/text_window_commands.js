@@ -50,11 +50,16 @@
     return command_function;
   }
 
+  function isRightBracket(charCode) {
+    // return charCode == 0x29 || charCode == 0x5D || charCode == 0x7D ?
+    return false;
+  }
+
   /**
    * @param {number} charCode
    */
   function makeTypeCharCommand(charCode) {
-    return charCode == 0x29 || charCode == 0x5D || charCode == 0x7D ?
+    return isRightBracket(charCode) ?
       function(opt_count) {
         if (arguments.length)
           typeRightBracket.call(this, charCode, opt_count);

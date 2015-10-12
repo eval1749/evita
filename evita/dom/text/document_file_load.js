@@ -7,46 +7,38 @@
   const RE_CR = NewRegExp('\r', 'g');
 
   /**
-   * @constructor
    * @class A wrapper class of |TextDecoder| to keep decoded strings.
    */
-  function Decoder(encoding) {
-    this.decoder = new TextDecoder(encoding, {fatal: true});
-    this.strings = [];
-  };
-
-  /** @type {?TextDecoder} */
-  Decoder.prototype.decoder;
-
-  /** @type {string} */
-  Decoder.prototype.encoding;
-
-  Object.defineProperty(Decoder.prototype, 'encoding', {
+  class Decoder {
     /**
-     * @this {!Decoder}
-     * @return {string}
+     * @param {string} encoding
      */
-    get: function() { return this.decoder.encoding; },
-  });
-
-  /** @type {!Array.<string>} */
-  Decoder.prototype.strings;
-
-  /**
-   * @param {!Uint8Array} data
-   * @return {boolean}
-   */
-  Decoder.prototype.decode = function(data) {
-    if (!this.decoder)
-      return false;
-    try {
-      this.strings.push(this.decoder.decode(data, {stream: data.length > 0}));
-      return true;
-    } catch (e) {
-      this.decoder = null;
-      return false;
+    constructor(encoding) {
+      /** @type {?TextDecoder} */
+      this.decoder_ = new TextDecoder(encoding, {fatal: true});
+      /** @type {!Array.<string>} */
+      this.strings = [];
     }
-  };
+
+   /** @return {string} */
+   get encoding() { return this.decoder_.encoding; }
+
+    /**
+     * @param {!Uint8Array} data
+     * @return {boolean}
+     */
+    decode(data) {
+      if (!this.decoder_)
+        return false;
+      try {
+        this.strings.push(this.decoder_.decode(data, {stream: data.length > 0}));
+        return true;
+      } catch (e) {
+        this.decoder_ = null;
+        return false;
+      }
+    }
+  }
 
   /**
    * @constructor

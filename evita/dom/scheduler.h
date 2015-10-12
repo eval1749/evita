@@ -5,37 +5,26 @@
 #ifndef EVITA_DOM_SCHEDULER_H_
 #define EVITA_DOM_SCHEDULER_H_
 
-#include <memory>
-#include <queue>
-
 #include "base/callback.h"
 #include "base/macros.h"
-#include "common/maybe.h"
 
 namespace base {
-class Lock;
 class Time;
 }
 
 namespace dom {
 
-class ViewDelegate;
-
 class Scheduler {
  public:
-  explicit Scheduler(ViewDelegate* view_delegate);
-  ~Scheduler();
+  virtual ~Scheduler();
 
-  void DidBeginFrame(const base::Time& deadline);
-  void ScheduleTask(const base::Closure& task);
+  virtual void DidBeginFrame(const base::Time& deadline) = 0;
+  virtual void ScheduleTask(const base::Closure& task) = 0;
+
+ protected:
+  Scheduler();
 
  private:
-  common::Maybe<base::Closure> Take();
-
-  std::unique_ptr<base::Lock> lock_;
-  std::queue<base::Closure> task_queue_;
-  ViewDelegate* const view_delegate_;
-
   DISALLOW_COPY_AND_ASSIGN(Scheduler);
 };
 

@@ -12,7 +12,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
-#include "evita/dom/scheduler.h"
+#include "evita/dom/scheduler_impl.h"
 #include "evita/dom/script_host.h"
 #include "evita/ui/events/event.h"
 
@@ -40,7 +40,7 @@ bool IsScriptBreakEvent(const domapi::KeyboardEvent& event) {
 ScriptThread::ScriptThread(ViewDelegate* view_delegate,
                            domapi::IoDelegate* io_delegate)
     : io_delegate_(io_delegate),
-      scheduler_(new Scheduler(view_delegate)),
+      scheduler_(new SchedulerImpl(view_delegate)),
       thread_(new base::Thread("script_thread")),
       view_delegate_(view_delegate) {}
 

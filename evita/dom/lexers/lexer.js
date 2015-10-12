@@ -138,7 +138,7 @@ global.Lexer = (function() {
     return map;
   }
 
-  // Scheduler
+  // @class The scheduler for coloring.
   // Runs |doColor(100)| for one document each 50ms.
   class Scheduler {
     constructor() {

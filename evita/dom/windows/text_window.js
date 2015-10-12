@@ -142,8 +142,11 @@ global.TextWindow.prototype.clone = function() {
   function handleCompositionEvent(window, event) {
     if (!window.textCompositionRange)
       window.textCompositionRange = new Range(window.document);
+    /** @type {!Range} */
     const range = window.textCompositionRange;
-    const selection = window.selection;
+    /** @type {!TextSelection} */
+    const selection = /** @type {!TextSelection} */(window.selection);
+    /** @type {!Range} */
     const selectionRange = selection.range;
 
     if (event.type === Event.Names.COMPOSITIONSTART) {

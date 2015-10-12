@@ -287,6 +287,7 @@ global.TextWindow.prototype.clone = function() {
    */
   function handleSelectionChange(window) {
     updateStatusBar(window);
+    highlightMatchedBrackets(window);
   }
 
   /**
@@ -295,6 +296,77 @@ global.TextWindow.prototype.clone = function() {
    */
   function handleWheel(window, event) {
     window.scroll(event.deltaY > 0 ? -2 : 2);
+  }
+
+  /**
+   * @param {!Document} document
+   * @param {string} key
+   * @return {!Range}
+   */
+  function createOrGetRange(document, key) {
+    const present = document.properties.get(key);
+    if (present)
+      return present;
+    const newRange = new Range(document);
+    document.properties.set(key, newRange);
+    return newRange;
+  }
+
+  /** @type {number}*/
+  global.matchedBracketsColor = 0xEEFF41;
+
+  /**
+   * @type {!TextWindow} window
+   */
+  function highlightMatchedBrackets(window) {
+    function tryLeft(range) {
+      if (range.start == range.document.length)
+        return false;
+      const leftBracket = Bracket.DATA[document.charCodeAt_(range.start)];
+      if (!leftBracket || leftBracket.type !== Bracket.Type.LEFT)
+        return false;
+      range.moveEnd(Unit.BRACKET, 1);
+      return !range.collapsed;
+    }
+
+    function tryRight(range) {
+      if (range.start === 0)
+        return false;
+
+      const rightBracket = Bracket.DATA[document.charCodeAt_(range.start - 1)];
+      if (!rightBracket || rightBracket.type !== Bracket.Type.RIGHT)
+        return false;
+      range.moveStart(Unit.BRACKET, -1);
+      return !range.collapsed;
+    }
+
+    const selection = /** @type {!TextSelection} */(window.selection);
+    const selectionRange = selection.range;
+    const document = selection.document;
+    const range = createOrGetRange(document, 'bracket');
+    // TODO(eval1749): We should just remove 'backgroundColor' style from
+    // range.
+    range.setStyle({backgroundColor: 0xFFFFFF});
+    if (!selectionRange.collapsed)
+      return;
+
+    range.collapseTo(selectionRange.start);
+    if (!tryLeft(range) && !tryRight(range)) {
+      window.status = Strings.IDS_NO_MATCHING_PAREN;
+      return;
+    }
+    const rangeStart = range.start;
+    const rangeEnd = range.end;
+
+    range.collapseTo(rangeStart + 1);
+    range.start = rangeStart;
+    range.setStyle({backgroundColor: global.matchedBracketsColor});
+
+    range.collapseTo(rangeEnd);
+    range.start = rangeEnd - 1;
+    range.setStyle({backgroundColor: global.matchedBracketsColor});
+
+    range.start = rangeStart;
   }
 
   /**

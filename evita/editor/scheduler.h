@@ -43,7 +43,8 @@ class Scheduler final {
  private:
   void DidFireTimer();
   void HandleAnimationFrame(base::Time time);
-  void RunAnimation();
+  void Paint();
+  void StartScript();
   void StartTimerIfNeeded();
 
   std::unordered_set<ui::AnimationFrameHandler*> canceled_handlers_;

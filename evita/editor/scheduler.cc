@@ -45,27 +45,18 @@ void Scheduler::DidFireTimer() {
              << " paint=" << (now - last_paint_time_).InMillisecondsF() << "ms"
              << " script=" << (now - script_start_time_).InMillisecondsF()
              << "ms";
-    RunAnimation();
+    HandleAnimationFrame(now);
+    Paint();
+    StartTimerIfNeeded();
     return;
   }
-
-  script_start_time_ = now;
-  script_is_running_ = true;
-  auto const deadline =
-      base::Time::Now() + base::TimeDelta::FromMilliseconds(10);
-  editor::Application::instance()->view_event_handler()->DidBeginFrame(
-      deadline);
+  StartScript();
 }
 
 void Scheduler::DidUpdateDom() {
   script_is_running_ = false;
-  RunAnimation();
-}
-
-void Scheduler::RunAnimation() {
   HandleAnimationFrame(base::Time::Now());
-  ui::Compositor::instance()->CommitIfNeeded();
-  last_paint_time_ = base::Time::Now();
+  Paint();
   StartTimerIfNeeded();
 }
 
@@ -84,12 +75,26 @@ void Scheduler::HandleAnimationFrame(base::Time time) {
   }
 }
 
+void Scheduler::Paint() {
+  ui::Compositor::instance()->CommitIfNeeded();
+  last_paint_time_ = base::Time::Now();
+}
+
 void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   {
     base::AutoLock lock_scope(*lock_);
     pending_handlers_.insert(handler);
   }
   StartTimerIfNeeded();
+}
+
+void Scheduler::StartScript() {
+  auto const now = base::Time::Now();
+  script_start_time_ = now;
+  script_is_running_ = true;
+  auto const deadline = now + base::TimeDelta::FromMilliseconds(10);
+  editor::Application::instance()->view_event_handler()->DidBeginFrame(
+      deadline);
 }
 
 void Scheduler::StartTimerIfNeeded() {

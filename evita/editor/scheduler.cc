@@ -19,7 +19,7 @@ namespace editor {
 Scheduler::Scheduler(base::MessageLoop* message_loop)
     : lock_(new base::Lock()),
       message_loop_(message_loop),
-      script_is_running_(true),
+      script_is_running_(false),
       timer_is_running_(false) {}
 
 Scheduler::~Scheduler() {}
@@ -45,19 +45,16 @@ void Scheduler::DidFireTimer() {
              << " paint=" << (now - last_paint_time_).InMillisecondsF() << "ms"
              << " script=" << (now - script_start_time_).InMillisecondsF()
              << "ms";
-    HandleAnimationFrame(now);
-    Paint();
-    StartTimerIfNeeded();
-    return;
   }
-  StartScript();
+  HandleAnimationFrame(now);
+  if (!script_is_running_)
+    StartScript();
+  Paint();
+  StartTimer();
 }
 
 void Scheduler::DidUpdateDom() {
   script_is_running_ = false;
-  HandleAnimationFrame(base::Time::Now());
-  Paint();
-  StartTimerIfNeeded();
 }
 
 void Scheduler::HandleAnimationFrame(base::Time time) {
@@ -81,11 +78,12 @@ void Scheduler::Paint() {
 }
 
 void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
-  {
-    base::AutoLock lock_scope(*lock_);
-    pending_handlers_.insert(handler);
-  }
-  StartTimerIfNeeded();
+  base::AutoLock lock_scope(*lock_);
+  pending_handlers_.insert(handler);
+}
+
+void Scheduler::Start() {
+  StartTimer();
 }
 
 void Scheduler::StartScript() {
@@ -97,17 +95,15 @@ void Scheduler::StartScript() {
       deadline);
 }
 
-void Scheduler::StartTimerIfNeeded() {
-  base::AutoLock lock_scope(*lock_);
-  if (timer_is_running_)
-    return;
+void Scheduler::StartTimer() {
+  DCHECK(!timer_is_running_);
   timer_is_running_ = true;
-  auto const kFrameDelta = base::TimeDelta::FromMilliseconds(1000 / 60);
-  auto const next_paint_time = last_paint_time_ + kFrameDelta;
-  auto const remaining = next_paint_time - base::Time::Now();
+  // TODO(eval1749): We should increase |frame_delta| if the application is
+  // running in background.
+  auto const frame_delta = base::TimeDelta::FromMilliseconds(1000 / 60);
   message_loop_->PostNonNestableDelayedTask(
       FROM_HERE, base::Bind(&Scheduler::DidFireTimer, base::Unretained(this)),
-      std::max(base::TimeDelta::FromMilliseconds(0), remaining));
+      frame_delta);
 }
 
 }  // namespace editor

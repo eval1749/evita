@@ -40,12 +40,14 @@ class Scheduler final {
   // Request animation frame.
   void RequestAnimationFrame(ui::AnimationFrameHandler* handler);
 
+  void Start();
+
  private:
   void DidFireTimer();
   void HandleAnimationFrame(base::Time time);
   void Paint();
   void StartScript();
-  void StartTimerIfNeeded();
+  void StartTimer();
 
   std::unordered_set<ui::AnimationFrameHandler*> canceled_handlers_;
   base::Time last_paint_time_;

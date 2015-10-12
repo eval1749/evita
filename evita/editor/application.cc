@@ -95,7 +95,7 @@ void Application::DidStartScriptHost(domapi::ScriptHostState state) {
     editor::Application::instance()->Quit();
     return;
   }
-  scheduler_->DidUpdateDom();
+  scheduler_->Start();
 }
 
 void Application::Quit() {

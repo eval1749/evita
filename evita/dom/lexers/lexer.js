@@ -148,19 +148,28 @@ global.Lexer = (function() {
 
     /** @private */
     didFireTimer_() {
-      let runningSet = Array.from(this.pendingSet_);
-      this.pendingSet_.clear();
       this.timer_.stop();
-      for (let runnable of runningSet)
-        runnable.doColor(100);
+      if (this.pendingSet_.size === 0)
+        return;
+      let task = this.pendingSet_.values().next().value;
+      this.pendingSet_.delete(task);
+      task.doColor(100);
+      this.startTimerIfNeeded_();
     }
 
     /** @param {!Lexer} scheduleable */
     schedule(scheduleable) {
       this.pendingSet_.add(scheduleable);
+      this.startTimerIfNeeded_();
+    }
+
+    /** @private */
+    startTimerIfNeeded_() {
       if (this.timer_.isRunning)
         return;
-      this.timer_.start(100, this.didFireTimer_, this);
+      // TODO(eval1749) We should use |Editor.requestIdleCallback()| instead of
+      // repeating timer.
+      this.timer_.start(50, this.didFireTimer_, this);
     }
   }
 

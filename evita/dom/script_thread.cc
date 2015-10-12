@@ -136,6 +136,8 @@ void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
                                       event));
 }
 
+// TODO(eval1749): Combine |MouseMove| events if last event is also
+// |MouseMove| event.
 DEFINE_VIEW_EVENT_HANDLER1(DispatchMouseEvent, const domapi::MouseEvent&)
 DEFINE_VIEW_EVENT_HANDLER1(DispatchTextCompositionEvent,
                            const domapi::TextCompositionEvent&)

@@ -321,15 +321,6 @@ void ScriptHost::PlatformError(const char* name) {
   instance()->ThrowError(base::StringPrintf("%s error=%d", name, error));
 }
 
-// TODO(eval1749): We should get rid of |ScriptHost::PostTaskDeprecated()| by
-// utilizing scheduler. See |EventTarget::ScheduleDispatchEvent()| and
-// |DocuemntWindow::DidDestroyHost()| and |DocuemntWindow::DidRealizeWindow()|.
-void ScriptHost::PostTaskDeprecated(const tracked_objects::Location& from_here,
-                                    const base::Closure& task) {
-  DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
-  message_loop_for_script_->PostTask(from_here, task);
-}
-
 void ScriptHost::ResetForTesting() {
   DocumentSet::instance()->ResetForTesting();
   EditorWindow::ResetForTesting();

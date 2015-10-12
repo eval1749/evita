@@ -3,6 +3,7 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
+#include <queue>
 #include <vector>
 
 #include "base/logging.h"
@@ -108,11 +109,29 @@ class MockScheduler final : public Scheduler {
   MockScheduler() = default;
   ~MockScheduler() final = default;
 
+  void RunPendingTasks() {
+    while (!normal_tasks_.empty()) {
+      normal_tasks_.front().Run();
+      normal_tasks_.pop();
+    }
+    while (!idle_tasks_.empty()) {
+      idle_tasks_.front().Run();
+      idle_tasks_.pop();
+    }
+  }
+
  private:
   // dom::Scheduler
   void DidBeginFrame(const base::Time& deadline) final {}
-  void ScheduleTask(const base::Closure& task) final { task.Run(); }
-  void ScheduleIdleTask(const base::Closure& task) final { task.Run(); }
+  void ScheduleTask(const base::Closure& task) final {
+    normal_tasks_.push(task);
+  }
+  void ScheduleIdleTask(const base::Closure& task) final {
+    idle_tasks_.push(task);
+  }
+
+  std::queue<base::Closure> idle_tasks_;
+  std::queue<base::Closure> normal_tasks_;
 
   DISALLOW_COPY_AND_ASSIGN(MockScheduler);
 };
@@ -279,6 +298,7 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
 void AbstractDomTest::RunMessageLoopUntilIdle() {
   base::RunLoop run_loop;
   run_loop.RunUntilIdle();
+  mock_scheduler_->RunPendingTasks();
   runner_->isolate()->RunMicrotasks();
 }
 

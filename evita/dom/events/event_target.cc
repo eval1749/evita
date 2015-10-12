@@ -227,9 +227,9 @@ void EventTarget::RemoveEventListener(const base::string16& type,
 // TODO(eval1749): We should get rid of
 // |EventTarget::ScheduleDispatchEventDeprecated()|.
 void EventTarget::ScheduleDispatchEventDeprecated(Event* event) {
-  ScriptHost::instance()->PostTaskDeprecated(
-      FROM_HERE, base::Bind(&EventTarget::DispatchEventWithInLock,
-                            base::Unretained(this), base::Unretained(event)));
+  ScriptHost::instance()->ScheduleIdleTask(
+      base::Bind(&EventTarget::DispatchEventWithInLock, base::Unretained(this),
+                 base::Unretained(event)));
 }
 
 }  // namespace dom

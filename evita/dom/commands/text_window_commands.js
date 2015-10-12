@@ -116,7 +116,7 @@
     const document = selection.document;
     selection.range.text = String.fromCharCode(charCode).repeat(count);
     selection.range.collapseTo(selection.range.end);
-    document.doColor_(100);
+    document.doColor_(1000);
 
     /** @type {!Range} */
     const enclosingRange = new Range(selection.range);

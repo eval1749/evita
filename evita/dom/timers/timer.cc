@@ -75,9 +75,8 @@ void Timer::RunCallback() {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
-  // TODO(eval1749): We should schedule timer task to low-priority rather than
-  // using V8 microtask queue, which is high-priority task.
-  isolate->EnqueueMicrotask(callback_.NewLocal(isolate));
+  DOM_AUTO_LOCK_SCOPE();
+  runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate));
 }
 
 void Timer::Stop() {

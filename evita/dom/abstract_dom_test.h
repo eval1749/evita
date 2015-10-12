@@ -22,6 +22,7 @@ class ViewEventHandler;
 namespace dom {
 
 class MockIoDelegate;
+class MockScheduler;
 class MockViewImpl;
 class ScriptHost;
 
@@ -93,14 +94,16 @@ class AbstractDomTest : public ::testing::Test {
   void TearDown() override;
 
  private:
+  class RunnerDelegate;
+  friend class RunnerDelegate;
+
   void UnhandledException(v8_glue::Runner* runner,
                           const v8::TryCatch& try_catch);
 
-  class RunnerDelegate;
-  friend class RunnerDelegate;
   std::string exception_;
-  std::unique_ptr<MockIoDelegate> mock_io_delegate_;
-  std::unique_ptr<MockViewImpl> mock_view_impl_;
+  const std::unique_ptr<MockIoDelegate> mock_io_delegate_;
+  const std::unique_ptr<MockScheduler> mock_scheduler_;
+  const std::unique_ptr<MockViewImpl> mock_view_impl_;
   std::unique_ptr<v8_glue::Runner> runner_;
 
   // Note: ScriptHost is a singleton.

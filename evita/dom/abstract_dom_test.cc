@@ -19,6 +19,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/mock_io_delegate.h"
 #include "evita/dom/mock_view_impl.h"
+#include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/static_script_source.h"
 #include "evita/v8_glue/runner_delegate.h"
@@ -41,6 +42,7 @@ void LogCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
   }
   LOG(0) << message;
 }
+
 //////////////////////////////////////////////////////////////////////
 //
 // StaticScript
@@ -100,6 +102,20 @@ class RunnerDelegateMock final : public v8_glue::RunnerDelegate {
 };
 
 }  // namespace
+
+class MockScheduler final : public Scheduler {
+ public:
+  MockScheduler() = default;
+  ~MockScheduler() final = default;
+
+ private:
+  // dom::Scheduler
+  void DidBeginFrame(const base::Time& deadline) final {}
+  void ScheduleTask(const base::Closure& task) final { task.Run(); }
+  void ScheduleIdleTask(const base::Closure& task) final { task.Run(); }
+
+  DISALLOW_COPY_AND_ASSIGN(MockScheduler);
+};
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -184,6 +200,7 @@ void AbstractDomTest::ScriptCallArguments::Populate() {}
 //
 AbstractDomTest::AbstractDomTest()
     : mock_io_delegate_(new MockIoDelegate()),
+      mock_scheduler_(new MockScheduler()),
       mock_view_impl_(new MockViewImpl()),
       script_host_(nullptr) {}
 
@@ -270,8 +287,8 @@ void AbstractDomTest::SetUp() {
 
   RunnerDelegate::instance()->set_test_instance(this);
 
-  script_host_ = dom::ScriptHost::StartForTesting(mock_view_impl_.get(),
-                                                  mock_io_delegate_.get());
+  script_host_ = dom::ScriptHost::StartForTesting(
+      mock_scheduler_.get(), mock_view_impl_.get(), mock_io_delegate_.get());
 
   auto const isolate = script_host_->isolate();
 

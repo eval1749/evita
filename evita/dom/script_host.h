@@ -35,6 +35,7 @@ namespace dom {
 
 class Event;
 class EventTarget;
+class Scheduler;
 class ViewDelegate;
 class ViewEventHandlerImpl;
 
@@ -69,7 +70,8 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
 
   // Call |handleEvent()| function in the class of |target| with |event|.
   void CallClassEventHandler(EventTarget* target, Event* event);
-  static void CreateAndStart(ViewDelegate* view_delegate,
+  static void CreateAndStart(Scheduler* scheduler,
+                             ViewDelegate* view_delegate,
                              domapi::IoDelegate* io_delegate);
   void PlatformError(const char* name);
 
@@ -79,7 +81,12 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
                           const base::Closure& task);
   void ResetForTesting();
   void RunMicrotasks();
-  static ScriptHost* StartForTesting(ViewDelegate* view_delegate,
+
+  // Schedule idle task
+  void ScheduleIdleTask(const base::Closure& task);
+
+  static ScriptHost* StartForTesting(Scheduler* scheduler,
+                                     ViewDelegate* view_delegate,
                                      domapi::IoDelegate* io_delegate);
 
   // Terminate script execution from another thread.
@@ -90,9 +97,12 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   void WillDestroyViewHost();
 
  private:
-  ScriptHost(ViewDelegate* view_delegate, domapi::IoDelegate* io_deleage);
+  ScriptHost(Scheduler* scheduler,
+             ViewDelegate* view_delegate,
+             domapi::IoDelegate* io_delegate);
 
-  static ScriptHost* Create(ViewDelegate* view_delegate,
+  static ScriptHost* Create(Scheduler* scheduler,
+                            ViewDelegate* view_delegate,
                             domapi::IoDelegate* io_delegate);
 
   void DidStartScriptHost();
@@ -111,6 +121,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   // than this message loop.
   base::MessageLoop* const message_loop_for_script_;
   std::unique_ptr<v8_glue::Runner> runner_;
+  Scheduler* scheduler_;
   domapi::ScriptHostState state_;
   bool testing_;
   v8_glue::Runner* testing_runner_;

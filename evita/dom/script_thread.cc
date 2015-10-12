@@ -54,9 +54,10 @@ void ScriptThread::Start() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   thread_->Start();
   thread_->message_loop()->PostTask(
-      FROM_HERE,
-      base::Bind(&ScriptHost::CreateAndStart, base::Unretained(view_delegate_),
-                 base::Unretained(io_delegate_)));
+      FROM_HERE, base::Bind(&ScriptHost::CreateAndStart,
+                            base::Unretained(scheduler_.get()),
+                            base::Unretained(view_delegate_),
+                            base::Unretained(io_delegate_)));
 }
 
 // domapi::ViewEventHandler

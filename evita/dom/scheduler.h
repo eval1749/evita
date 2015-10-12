@@ -20,6 +20,7 @@ class Scheduler {
 
   virtual void DidBeginFrame(const base::Time& deadline) = 0;
   virtual void ScheduleTask(const base::Closure& task) = 0;
+  virtual void ScheduleIdleTask(const base::Closure& task) = 0;
 
  protected:
   Scheduler();

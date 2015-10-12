@@ -6,14 +6,8 @@
 #define EVITA_DOM_SCHEDULER_IMPL_H_
 
 #include <memory>
-#include <queue>
 
-#include "common/maybe.h"
 #include "evita/dom/scheduler.h"
-
-namespace base {
-class Lock;
-}
 
 namespace dom {
 
@@ -25,14 +19,18 @@ class SchedulerImpl final : public Scheduler {
   ~SchedulerImpl() final;
 
  private:
-  common::Maybe<base::Closure> Take();
+  class TaskQueue;
+
+  // Returns true if executing micro tasks.
+  bool RunMicrotasksIfPossible(const base::Time& deadline);
 
   // dom::Scheduler
   void DidBeginFrame(const base::Time& deadline) final;
   void ScheduleTask(const base::Closure& task) final;
+  void ScheduleIdleTask(const base::Closure& task) final;
 
-  std::unique_ptr<base::Lock> lock_;
-  std::queue<base::Closure> task_queue_;
+  std::unique_ptr<TaskQueue> idle_task_queue_;
+  std::unique_ptr<TaskQueue> normal_task_queue_;
   ViewDelegate* const view_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(SchedulerImpl);

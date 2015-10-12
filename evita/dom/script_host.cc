@@ -99,7 +99,9 @@ void MessageBox(const base::string16& message, int flags) {
       kInvalidWindowId, message, L"Evita System Message", flags, resolver);
 }
 
-void GcEpilogueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
+void GcEpilogueCallback(v8::Isolate* isolate,
+                        v8::GCType type,
+                        v8::GCCallbackFlags flags) {
   auto text =
       base::StringPrintf(L"GC finished type=%d flags=0x%X", type, flags);
   MessageBox(text, MB_ICONINFORMATION);
@@ -107,12 +109,15 @@ void GcEpilogueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
     dom::Lock::instance()->Release(FROM_HERE);
 }
 
-void GcPrologueCallback(v8::GCType type, v8::GCCallbackFlags flags) {
+void GcPrologueCallback(v8::Isolate* isolate,
+                        v8::GCType type,
+                        v8::GCCallbackFlags flags) {
   auto text = base::StringPrintf(L"GC Started type=%d flags=%X", type, flags);
   MessageBox(text, MB_ICONINFORMATION);
   need_unlock_after_gc = !dom::Lock::instance()->locked_by_dom();
-  if (need_unlock_after_gc)
-    dom::Lock::instance()->Acquire(FROM_HERE);
+  if (!need_unlock_after_gc)
+    return;
+  dom::Lock::instance()->Acquire(FROM_HERE);
 }
 
 void MessageCallback(v8::Handle<v8::Message> message,
@@ -351,10 +356,10 @@ void ScriptHost::Start() {
   auto const runner = new v8_glue::Runner(isolate, script_host);
   runner_.reset(runner);
   v8_glue::Runner::Scope runner_scope(runner);
-  v8::V8::SetCaptureStackTraceForUncaughtExceptions(true);
-  v8::V8::AddMessageListener(MessageCallback);
-  v8::V8::AddGCPrologueCallback(GcPrologueCallback);
-  v8::V8::AddGCEpilogueCallback(GcEpilogueCallback);
+  isolate->SetCaptureStackTraceForUncaughtExceptions(true);
+  isolate->AddMessageListener(MessageCallback);
+  isolate->AddGCPrologueCallback(GcPrologueCallback);
+  isolate->AddGCEpilogueCallback(GcEpilogueCallback);
   // TODO(yosi) Turning off micro task running during creating wrapper, name
   // |Editor.checkSpelling('foo').then(console.log)| to work.
   // Otherwise |console.log| executed as micro task gets storage object which

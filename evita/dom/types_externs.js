@@ -61,11 +61,6 @@ var TextOffset;
  */
 var TextPosition = function(document, offset) {};
 
-/**
- * @constructor
- */
-var Style = function() {};
-
 //////////////////////////////////////////////////////////////////////
 //
 // Editor.idl

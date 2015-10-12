@@ -139,11 +139,11 @@ global.Lexer = (function() {
   }
 
   // Scheduler
-  // Runs |doColor(100)| ever 100ms.
+  // Runs |doColor(100)| for one document each 50ms.
   class Scheduler {
     constructor() {
-      this.pendingSet_ = new Set();
-      this.timer_ = new RepeatingTimer();
+      /** @type {!Set.<!Lexer>} */ this.pendingSet_ = new Set();
+      /** @type {!RepeatingTimer} */ this.timer_ = new RepeatingTimer();
     }
 
     /** @private */
@@ -157,9 +157,9 @@ global.Lexer = (function() {
       this.startTimerIfNeeded_();
     }
 
-    /** @param {!Lexer} scheduleable */
-    schedule(scheduleable) {
-      this.pendingSet_.add(scheduleable);
+    /** @param {!Lexer} task */
+    schedule(task) {
+      this.pendingSet_.add(task);
       this.startTimerIfNeeded_();
     }
 
@@ -167,7 +167,7 @@ global.Lexer = (function() {
     startTimerIfNeeded_() {
       if (this.timer_.isRunning)
         return;
-      // TODO(eval1749) We should use |Editor.requestIdleCallback()| instead of
+      // TODO(eval1749): We should use |Editor.requestIdleCallback()| instead of
       // repeating timer.
       this.timer_.start(50, this.didFireTimer_, this);
     }

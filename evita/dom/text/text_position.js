@@ -33,6 +33,17 @@
   }
 
   /**
+   * @param {string} syntax1
+   * @param {string} syntax2
+   * @return {boolean}
+   */
+  function syntaxEquals(syntax1, syntax2) {
+    if (syntax1 === syntax2)
+      return true;
+    return syntax1 === 'normal' || syntax2 == 'normal';
+  }
+
+  /**
    * @param {!TextPosition} position
    * Note: We use syntax coloring information for preventing matching
    * parenthesis among statement, string and comment.
@@ -52,12 +63,12 @@
         continue;
       if (bracketCharSyntax == '?')
         bracketCharSyntax = position.charSyntax();
-      else if (position.charSyntax() != bracketCharSyntax)
+      else if (!syntaxEquals(position.charSyntax(), bracketCharSyntax))
         continue;
 
       var currentOffset = position.offset;
       position.moveWhile(function() {
-        return this.charSyntax() == bracketCharSyntax &&
+        return syntaxEquals(this.charSyntax(), bracketCharSyntax) &&
                bracketDataOf(this).type == Bracket.Type.ESCAPE;
       }, Count.BACKWARD);
       if ((currentOffset - position.offset) & 1)
@@ -116,14 +127,14 @@
         continue;
       if (bracketCharSyntax == '?')
         bracketCharSyntax = position.charSyntax();
-      else if (position.charSyntax() != bracketCharSyntax)
+      else if (!syntaxEquals(position.charSyntax(), bracketCharSyntax))
         continue;
       switch (bracket.type) {
         case Bracket.Type.ESCAPE: {
           var currentOffset = position.offset;
           position.moveWhile(function() {
             return bracketDataOf(this).type == Bracket.Type.ESCAPE &&
-                   this.charSyntax() == bracketCharSyntax;
+                   syntaxEquals(this.charSyntax(), bracketCharSyntax);
           }, Count.FORWARD);
           if (!((position.offset - currentOffset) & 1))
             position.move(Unit.CHARACTER, -1);

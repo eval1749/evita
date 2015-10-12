@@ -97,7 +97,7 @@ Map.prototype.has = function(key) {};
 
 /**
  * @template T
- * @return {!Iterable.<T>}
+ * @return {!Iterator.<T>}
  */
 Map.prototype.keys = function() {};
 
@@ -114,7 +114,7 @@ Map.prototype.size;
 
 /**
  * @template T
- * @return {!Iterable.<T>}
+ * @return {!Iterator.<T>}
  */
 Map.prototype.values = function() {};
 
@@ -163,7 +163,7 @@ Set.prototype.has = function(key) {};
 
 /**
  * @template T
- * @return {!Iterable.<T>}
+ * @return {!Iterator.<T>}
  */
 Set.prototype.keys = function() {};
 
@@ -172,7 +172,7 @@ Set.prototype.size;
 
 /**
  * @template T
- * @return {!Iterable.<T>}
+ * @return {!Iterator.<T>}
  */
 Set.prototype.values = function() {};
 

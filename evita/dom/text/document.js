@@ -183,8 +183,14 @@
    *  this |is a word.    this is| a word.    |this is a word
    */
   Document.prototype.computeMotion_ = function(unit, count, position) {
-    var document = this;
+    /** @type {!Document} */
+    const document = this;
     switch (unit) {
+      case Unit.BRACKET: {
+        const textPosition = new TextPosition(this, position);
+        textPosition.move(Unit.BRACKET, count);
+        return textPosition.offset;
+      }
       case Unit.CHARACTER:
         if (count > 0)
           return Math.min(document.length, position + count);

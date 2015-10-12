@@ -11,12 +11,6 @@
    * @return {number}
    */
   function computeMotion(selection, unit, count, offset) {
-    if (unit == Unit.BRACKET) {
-      var position = new TextPosition(selection.document, offset);
-      position.move(Unit.BRACKET, count);
-      return position.offset;
-    }
-
     if (unit == Unit.SCREEN) {
       if (!selection.goal_point_)
         throw 'Goal X point must be initialized.';

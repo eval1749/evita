@@ -24,11 +24,6 @@ class DomUpdateScope {
 
   ~DomUpdateScope() {
     view_delegate_->DidUpdateDom();
-    auto const delta = base::Time::Now() - deadline_;
-    if (delta >= base::TimeDelta::FromMilliseconds(0))
-      return;
-    DVLOG(0) << "Exceed deadline " << -delta.InMilliseconds() << "ms at "
-             << state_;
   }
 
   void SetState(const char* state) { state_ = state; }

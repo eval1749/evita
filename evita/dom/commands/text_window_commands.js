@@ -97,6 +97,9 @@
     range.collapseTo(range.end);
   }
 
+  /** @type {number}*/
+  global.parenthesisColor = 0xCCFF90;
+
   /**
    * Type right bracket.
    * @this {!TextWindow}
@@ -104,41 +107,29 @@
    * @param {number=} opt_count
    */
   function typeRightBracket(charCode, opt_count) {
-    var count = arguments.length >= 2 ? /**@type{number}*/(opt_count) : 1;
-    var window = this;
-    var selection = window.selection;
-    var range = selection.range;
-    range.text = String.fromCharCode(charCode).repeat(count);
-    range.collapseTo(range.end);
-    var start = range.start;
-    var end = range.end;
+    const count = /**@type{number}*/(opt_count) || 1;
+    /** @type {!TextWindow} */
+    const window = this;
+    /** @type {!TextSelection} */
+    const selection = /** @type {!TextSelection} */(window.selection);
+    /** @type {!Document} */
+    const document = selection.document;
+    selection.range.text = String.fromCharCode(charCode).repeat(count);
+    selection.range.collapseTo(selection.range.end);
+    document.doColor_(100);
 
-    // TODO(eval1749): We should color matched parenthesis rather than moving
-    // caret, since restoring caret by using timer is too slow.
-    // TODO(eval1749): Should we move matching bracket blinking into
-    // |TextWindow| idle processing?
-    new OneShotTimer().start(0, function() {
-      // Force color newly inserted characters.
-      // Note: If we are in long comment, parenthesis matching may not work.
-      range.document.doColor_(100);
-      selection.move(Unit.BRACKET, -1);
-      if (range.start == start) {
-        range.collapseTo(end);
-        selection.window.status = Strings.IDS_NO_MATCHING_PAREN;
-        return;
-      }
+    /** @type {!Range} */
+    const enclosingRange = new Range(selection.range);
+    enclosingRange.moveStart(Unit.BRACKET, -1);
+    if (enclosingRange.collapsed) {
+      window.status = Strings.IDS_NO_MATCHING_PAREN;
+      return;
+    }
 
-      // Move caret to left bracket 100ms or 500ms if left bracket above window.
-      range.collapseTo(range.start);
-      selection.document.readonly = true;
-      // TODO(yosi) Should we share blink timer?
-      var windowStart = window.compute_(TextWindowComputeMethod.MOVE_WINDOW,
-                                       0, -1);
-      new OneShotTimer().start(range.start < windowStart ? 500 : 100,
-          function() {
-            range.collapseTo(end);
-            range.document.readonly = false;
-          });
+    enclosingRange.setStyle({backgroundColor: global.parenthesisColor});
+    new OneShotTimer().start(160, function() {
+      // TODO(eval1749): We should restore original background color.
+      enclosingRange.setStyle({backgroundColor: 0xFFFFFF});
     });
   }
 

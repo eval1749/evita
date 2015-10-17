@@ -430,7 +430,7 @@
    */
   function undoGroup(name, callback, opt_receiver) {
     const document = this;
-    const receiver = opt_receiver || opt_receiver;
+    const receiver = opt_receiver || document;
     try {
       document.startUndoGroup_(name);
       callback.call(receiver);

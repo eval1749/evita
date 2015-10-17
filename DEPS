@@ -5,8 +5,8 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
 
-  'buildtools_revision':  '5fc8d3943e163ee627c8af50366c700c0325bba2',
-  'v8_revision': '650dd77c3323ee0a685c016406f04351970a7b68',
+  'buildtools_revision':  'ef7f1f539cff0441c4401d8c052e54cfd01bff07',
+  'v8_revision': '10b354c61d860b82bf5bc60a102b64d990758d75',
 }
 
 deps = {

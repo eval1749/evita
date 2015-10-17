@@ -31,7 +31,7 @@ class PromiseResolver final : public base::RefCounted<PromiseResolver> {
     return DoCall(Type::Fast, closure);
   }
 
-  v8::Local<v8::Promise> GetPromise(v8::Isolate* isoalte) const;
+  v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) const;
   template <typename T>
   void Reject(T reason);
   template <typename T>

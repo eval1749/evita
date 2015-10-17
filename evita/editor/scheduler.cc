@@ -9,6 +9,7 @@
 #include "base/bind.h"
 #include "base/message_loop/message_loop.h"
 #include "base/synchronization/lock.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/ui/animation/animation_frame_handler.h"
@@ -58,6 +59,7 @@ void Scheduler::DidUpdateDom() {
 }
 
 void Scheduler::HandleAnimationFrame(base::Time time) {
+  TRACE_EVENT0("scheduler", "Scheduler::HandleAnimationFrame");
   std::unordered_set<ui::AnimationFrameHandler*> running_handlers;
   std::unordered_set<ui::AnimationFrameHandler*> canceling_handlers;
   {
@@ -73,6 +75,7 @@ void Scheduler::HandleAnimationFrame(base::Time time) {
 }
 
 void Scheduler::Paint() {
+  TRACE_EVENT0("scheduler", "Scheduler::Paint");
   ui::Compositor::instance()->CommitIfNeeded();
   last_paint_time_ = base::Time::Now();
 }

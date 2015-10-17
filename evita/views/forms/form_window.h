@@ -49,7 +49,7 @@ class FormWindow final : public views::Window,
  private:
   class FormViewModel;
 
-  void DoRealizeWidget();
+  void Paint();
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

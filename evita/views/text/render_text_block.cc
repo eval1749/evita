@@ -9,6 +9,7 @@
 
 #include "evita/views/text/render_text_block.h"
 
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
@@ -295,6 +296,7 @@ void TextBlock::EnsureLinePoints() {
 }
 
 void TextBlock::Format(text::Posn text_offset) {
+  TRACE_EVENT0("view", "TextBlock::Format");
   UI_ASSERT_DOM_LOCKED();
   InvalidateCache();
   lines_.clear();

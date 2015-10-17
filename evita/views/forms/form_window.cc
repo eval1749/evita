@@ -9,6 +9,7 @@
 #include <unordered_set>
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "common/tree/child_nodes.h"
 #include "common/win/win32_verify.h"
 #include "evita/editor/dom_lock.h"
@@ -443,6 +444,12 @@ FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form)
 
 FormWindow::~FormWindow() {}
 
+void FormWindow::Paint() {
+  TRACE_EVENT0("view", "FormWindow::Paint");
+  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  Window::OnDraw(canvas_.get());
+}
+
 // ui::Animatable
 void FormWindow::DidBeginAnimationFrame(base::Time) {
   if (!is_realized()) {
@@ -462,6 +469,8 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
   DCHECK(is_realized());
   if (!visible())
     return;
+
+  TRACE_EVENT0("scheduler", "FormWindow::DidBeginAnimationFrame");
 
   if (model_->dirty()) {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -500,8 +509,7 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
     }
   }
 
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  Window::OnDraw(canvas_.get());
+  Paint();
 }
 
 // ui::SystemMetricsObserver

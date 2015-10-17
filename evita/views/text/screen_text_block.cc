@@ -10,6 +10,7 @@
 
 #include "base/logging.h"
 #include "base/time/time.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/ui/caret.h"
 #include "evita/views/switches.h"
@@ -463,6 +464,7 @@ void ScreenTextBlock::Render(gfx::Canvas* canvas,
   dirty_ = render_context.Render();
   caret_->DidPaint(bounds_);
   if (!dirty_) {
+    TRACE_EVENT0("view", "ScreenTextBlock::RenderClean");
     // Contents of lines aren't changed. But, text offset of lines may be
     // changed.
     auto runner = lines_.begin();
@@ -477,6 +479,7 @@ void ScreenTextBlock::Render(gfx::Canvas* canvas,
     return;
   }
 
+  TRACE_EVENT0("view", "ScreenTextBlock::RenderDirty");
   Reset();
   has_screen_bitmap_ = canvas->SaveScreenImage(bounds_);
   // Event if we can't get bitmap from render target, screen is up-to-date,

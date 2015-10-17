@@ -6,11 +6,9 @@
 
 #include <algorithm>
 
-#include "base/bind.h"
-#include "base/callback.h"
 #include "base/logging.h"
-#include "base/message_loop/message_loop.h"
 #include "base/strings/string16.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/editor/dom_lock.h"
@@ -214,6 +212,8 @@ Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
 
 void TextWindow::Paint(const TextSelectionModel& selection, base::Time now) {
   DCHECK(visible());
+  TRACE_EVENT0("view", "TextWindow::Paint");
+
   // Update scroll bar
   {
     ui::ScrollBar::Data data;
@@ -355,6 +355,7 @@ void TextWindow::DidChangeSelection() {
 void TextWindow::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
+  TRACE_EVENT0("scheduler", "TextWindow::DidBeginAnimationFrame");
   UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock_scope);
   if (!dom_lock_scope.locked()) {
     RequestAnimationFrame();

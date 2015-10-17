@@ -13,6 +13,7 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
+#include "base/trace_event/trace_event.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
@@ -227,6 +228,9 @@ void Frame::UpdateTitleBar() {
 void Frame::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
+  TRACE_EVENT0("scheduler", "Frame::DidBeginAnimationFrame");
+  // TODO(eval1749): We should request animation frame for |Frame| only if
+  // needed.
   RequestAnimationFrame();
   // TODO(eval1749) We should call update title bar only when needed.
   UpdateTitleBar();

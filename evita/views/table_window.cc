@@ -8,6 +8,7 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/text/document.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx/canvas.h"
@@ -81,6 +82,14 @@ std::vector<int> TableWindow::GetRowStates(
     states.push_back(state);
   }
   return std::move(states);
+}
+
+void TableWindow::Paint() {
+  TRACE_EVENT0("view", "TextWindow::Paint");
+  gfx::Canvas::DrawingScope drawing_scope(canvas());
+  if (canvas()->should_clear())
+    canvas()->Clear(gfx::ColorF::White);
+  OnDraw(canvas());
 }
 
 void TableWindow::Redraw() {
@@ -202,6 +211,7 @@ void TableWindow::DidInsertAt(Posn, size_t) {
 void TableWindow::DidBeginAnimationFrame(base::Time) {
   if (!visible())
     return;
+  TRACE_EVENT0("scheduler", "TableWindow::DidBeginAnimationFrame");
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   if (!lock_scope.locked()) {
     // We hope we can update frame in next animation frame.
@@ -214,10 +224,7 @@ void TableWindow::DidBeginAnimationFrame(base::Time) {
   if (has_focus())
     control_->RequestFocus();
 
-  gfx::Canvas::DrawingScope drawing_scope(canvas());
-  if (canvas()->should_clear())
-    canvas()->Clear(gfx::ColorF::White);
-  OnDraw(canvas());
+  Paint();
   NotifyUpdateContent();
 }
 

@@ -46,6 +46,7 @@ class TableWindow final : public text::BufferMutationObserver,
  private:
   bool DrawIfNeeded();
   void Redraw();
+  void Paint();
   std::unique_ptr<TableViewModel> UpdateModelIfNeeded();
   void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 

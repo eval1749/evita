@@ -16,6 +16,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/editor/scheduler.h"
 #include "evita/editor/switch_set.h"
+#include "evita/editor/trace_log_controller.h"
 #include "evita/gfx/dx_device.h"
 #include "evita/io/io_manager.h"
 #include "evita/io/io_thread.h"
@@ -54,6 +55,7 @@ Application::Application()
       io_manager_(new io::IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
       scheduler_(new Scheduler(message_loop_.get())),
+      trace_log_controller_(new TraceLogController()),
       view_idle_count_(0),
       view_idle_hint_(0),
       view_delegate_(new views::ViewThreadProxy(message_loop_.get())),

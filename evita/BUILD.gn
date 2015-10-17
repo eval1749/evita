@@ -33,6 +33,8 @@ static_library("editor") {
     "editor/scheduler.h",
     "editor/switch_set.cc",
     "editor/switch_set.h",
+    "editor/trace_log_controller.cc",
+    "editor/trace_log_controller.h",
     "metrics/counter.cc",
     "metrics/sampling.cc",
     "metrics/sampling.h",

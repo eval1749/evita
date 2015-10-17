@@ -5,6 +5,7 @@
 #include "evita/views/view_delegate_impl.h"
 
 #include <sstream>
+#include <string>
 
 #include "base/logging.h"
 #include "evita/dom/windows/editor_window.h"
@@ -17,6 +18,7 @@
 #include "evita/editor/modal_message_loop_scope.h"
 #include "evita/editor/scheduler.h"
 #include "evita/editor/switch_set.h"
+#include "evita/editor/trace_log_controller.h"
 #include "evita/gc/collector.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
@@ -36,6 +38,36 @@
 namespace views {
 
 namespace {
+
+domapi::ViewEventHandler* ScriptDelegate() {
+  return editor::Application::instance()->view_event_handler();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// TraceLogClient
+//
+class TraceLogClient final {
+ public:
+  explicit TraceLogClient(const domapi::TraceLogOutputCallback& callback)
+      : callback_(callback) {}
+  ~TraceLogClient() = default;
+
+  void DidGetEvent(const std::string& chunk, bool has_more_events);
+
+ private:
+  domapi::TraceLogOutputCallback callback_;
+
+  DISALLOW_COPY_AND_ASSIGN(TraceLogClient);
+};
+
+void TraceLogClient::DidGetEvent(const std::string& chunk,
+                                 bool has_more_events) {
+  ScriptDelegate()->RunCallback(base::Bind(callback_, chunk, has_more_events));
+  if (has_more_events)
+    return;
+  delete this;
+}
 
 Window* FromWindowId(const char* name, dom::WindowId window_id) {
   auto const window = Window::FromWindowId(window_id);
@@ -58,10 +90,6 @@ Frame* GetFrameForMessage(dom::WindowId window_id) {
       return frame;
   }
   return FrameList::instance()->active_frame();
-}
-
-domapi::ViewEventHandler* ScriptDelegate() {
-  return editor::Application::instance()->view_event_handler();
 }
 
 }  // namespace
@@ -539,6 +567,19 @@ void ViewDelegateImpl::SplitVertically(dom::WindowId above_window_id,
     return;
   parent->SplitVertically(above_window->as<ContentWindow>(),
                           new_below_window->as<ContentWindow>());
+}
+
+void ViewDelegateImpl::StartTraceLog(const std::string& config) {
+  editor::Application::instance()->trace_log_controller()->StartRecording(
+      config);
+}
+
+void ViewDelegateImpl::StopTraceLog(
+    const domapi::TraceLogOutputCallback& callback) {
+  auto const trace_log_client = new TraceLogClient(callback);
+  editor::Application::instance()->trace_log_controller()->StopRecording(
+      base::Bind(&TraceLogClient::DidGetEvent,
+                 base::Unretained(trace_log_client)));
 }
 
 void ViewDelegateImpl::UpdateWindow(dom::WindowId window_id) {

@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_VIEW_DELEGATE_H_
 #define EVITA_DOM_VIEW_DELEGATE_H_
 
+#include <string>
 #include <vector>
 
 #include "base/callback_forward.h"
@@ -31,6 +32,11 @@ struct PopupWindowInit {
 namespace text {
 class Selection;
 }
+
+namespace domapi {
+using TraceLogOutputCallback =
+    base::Callback<void(const std::string& chunk, bool has_more_events)>;
+};
 
 namespace dom {
 
@@ -166,6 +172,10 @@ class ViewDelegate {
                                  WindowId new_right_window_id) = 0;
   virtual void SplitVertically(WindowId above_window_id,
                                WindowId new_below_window_id) = 0;
+
+  // Trace Log
+  virtual void StartTraceLog(const std::string& config) = 0;
+  virtual void StopTraceLog(const domapi::TraceLogOutputCallback& callback) = 0;
 
   // Synchronous: Update window contents
   virtual void UpdateWindow(WindowId window_id) = 0;

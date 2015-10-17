@@ -5,6 +5,7 @@
 #ifndef EVITA_VIEWS_VIEW_DELEGATE_IMPL_H_
 #define EVITA_VIEWS_VIEW_DELEGATE_IMPL_H_
 
+#include <string>
 #include <vector>
 
 #include "evita/dom/view_delegate.h"
@@ -76,6 +77,10 @@ class ViewDelegateImpl final : public dom::ViewDelegate {
                          dom::WindowId new_right_window) final;
   void SplitVertically(dom::WindowId above_window,
                        dom::WindowId new_below_window) final;
+
+  void StartTraceLog(const std::string& config) final;
+  void StopTraceLog(const domapi::TraceLogOutputCallback& callback) final;
+
   void UpdateWindow(dom::WindowId window_id) final;
 
   DISALLOW_COPY_AND_ASSIGN(ViewDelegateImpl);

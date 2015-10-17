@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string>
 #include <vector>
 
 #include "evita/views/view_thread_proxy.h"
@@ -228,6 +229,8 @@ DEFINE_DELEGATE_2(SetTextWindowZoom, dom::WindowId, float)
 DEFINE_DELEGATE_1(ShowWindow, dom::WindowId)
 DEFINE_DELEGATE_2(SplitHorizontally, dom::WindowId, dom::WindowId)
 DEFINE_DELEGATE_2(SplitVertically, dom::WindowId, dom::WindowId)
+DEFINE_DELEGATE_1(StartTraceLog, const std::string&)
+DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
 
 #define DEFINE_SYNC_DELEGATE_0(name, return_type)                           \
   return_type ViewThreadProxy::name() {                                     \

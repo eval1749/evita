@@ -6,6 +6,7 @@
 #define EVITA_VIEWS_VIEW_THREAD_PROXY_H_
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "base/macros.h"
@@ -85,6 +86,10 @@ class ViewThreadProxy : public dom::ViewDelegate {
                          dom::WindowId new_right_window) final;
   void SplitVertically(dom::WindowId above_window,
                        dom::WindowId new_below_window) final;
+
+  void StartTraceLog(const std::string& config) final;
+  void StopTraceLog(const domapi::TraceLogOutputCallback& callback) final;
+
   void UpdateWindow(dom::WindowId window_id) final;
 
   const std::unique_ptr<ViewDelegate> delegate_;

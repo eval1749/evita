@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_MOCK_VIEW_IMPL_H_
 #define EVITA_DOM_MOCK_VIEW_IMPL_H_
 
+#include <string>
 #include <vector>
 
 #include "base/basictypes.h"
@@ -74,6 +75,11 @@ class MockViewImpl final : public dom::ViewDelegate {
   MOCK_METHOD1(ShowWindow, void(WindowId));
   MOCK_METHOD2(SplitHorizontally, void(WindowId, WindowId));
   MOCK_METHOD2(SplitVertically, void(WindowId, WindowId));
+
+  MOCK_METHOD1(StartTraceLog, void(const std::string& config));
+  MOCK_METHOD1(StopTraceLog,
+               void(const domapi::TraceLogOutputCallback& callback));
+
   MOCK_METHOD1(UpdateWindow, void(WindowId));
 
  private:

@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string>
+
 #include "evita/dom/editor.h"
 
 #include "base/bind.h"
 #include "base/strings/utf_string_conversions.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/script_host.h"
@@ -87,6 +90,37 @@ namespace dom {
 namespace {
 
 const base::char16 kVersion[] = L"5.0";
+
+//////////////////////////////////////////////////////////////////////
+//
+// TraceLogClient
+//
+class TraceLogClient final {
+ public:
+  TraceLogClient(v8::Isolate* isolate, v8::Handle<v8::Function> callback)
+      : callback_(isolate, callback) {}
+  ~TraceLogClient() = default;
+
+  void DidGetOutput(const std::string& chunk, bool has_more_events);
+
+ private:
+  v8_glue::ScopedPersistent<v8::Function> callback_;
+  DISALLOW_COPY_AND_ASSIGN(TraceLogClient);
+};
+
+void TraceLogClient::DidGetOutput(const std::string& chunk,
+                                  bool has_more_events) {
+  auto const runner = ScriptHost::instance()->runner();
+  auto const isolate = runner->isolate();
+  v8_glue::Runner::Scope runner_scope(runner);
+  ASSERT_DOM_LOCKED();
+  runner->Call(callback_.NewLocal(isolate), runner->global(),
+               gin::StringToV8(isolate, chunk),
+               has_more_events ? v8::True(isolate) : v8::False(isolate));
+  if (has_more_events)
+    return;
+  delete this;
+}
 
 v8::Local<v8::Object> NewRunScriptResult(v8::Isolate* isolate,
                                          v8::Handle<v8::Value> run_value,
@@ -254,6 +288,18 @@ void Editor::SetSwitch(const base::string16& name,
 void Editor::SetTabData(Window* window, const domapi::TabData& tab_data) {
   ScriptHost::instance()->view_delegate()->SetTabData(window->window_id(),
                                                       tab_data);
+}
+
+void Editor::StartTraceLog(const base::string16& config) {
+  ScriptHost::instance()->view_delegate()->StartTraceLog(
+      base::UTF16ToASCII(config));
+}
+
+void Editor::StopTraceLog(v8::Handle<v8::Function> callback) {
+  auto const isolate = ScriptHost::instance()->isolate();
+  auto const trace_log_client = new TraceLogClient(isolate, callback);
+  ScriptHost::instance()->view_delegate()->StopTraceLog(base::Bind(
+      &TraceLogClient::DidGetOutput, base::Unretained(trace_log_client)));
 }
 
 }  // namespace dom

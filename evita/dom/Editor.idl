@@ -2,6 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Trace Event JSON
+// pid  process id
+// tid  thread id
+// ts   wall time in micro second
+// ph   A phase, see "base/trace/event/trace_event_common.h", "X" means
+//      TRACE_EVENT_PHASE_COMPLETE.
+// cat  category name
+// name name
+// args arguments to TRACE_EVENT macro
+// dur  duration
+// tdur thread duration
+// tts  thread time
+callback TraceLogOutputCallback = void(DOMString trace_event_json,
+                                       boolean has_more_events);
+
 interface Editor {
   static readonly attribute DOMString v8Version;
   static readonly attribute DOMString version;
@@ -89,4 +104,31 @@ interface Editor {
 
   [ImplementedAs=JavaScript]
   static DOMString stringify(any value);
+
+  // Trace Log
+ // |config_string| is a dictionary formatted as a JSON string, containing both
+  // category filters and trace options.
+  //
+  // Example:
+  //   {
+  //     "record_mode": "record-continuously",
+  //     "enable_sampling": true,
+  //     "enable_systrace": true,
+  //     "enable_argument_filter": true,
+  //     "included_categories": ["included",
+  //                             "inc_pattern*",
+  //                             "disabled-by-default-memory-infra"],
+  //     "excluded_categories": ["excluded", "exc_pattern*"],
+  //     "synthetic_delays": ["test.Delay1;16", "test.Delay2;32"]
+  //     "memory_dump_config": {
+  //       "triggers": [
+  //         {
+  //           "mode": "detailed",
+  //           "periodic_interval_ms": 2000
+  //         }
+  //       ]
+  //     }
+  //   }
+  static void startTraceLog(DOMString config_string);
+  static void stopTraceLog(TraceLogOutputCallback callback);
 };

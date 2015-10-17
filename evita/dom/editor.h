@@ -76,6 +76,10 @@ class Editor final : public v8_glue::Scriptable<Editor> {
 
   static void SetTabData(Window* window, const domapi::TabData& tab_data);
 
+  // Trace logging
+  static void StartTraceLog(const base::string16& config);
+  static void StopTraceLog(v8::Handle<v8::Function> callback);
+
   DISALLOW_COPY_AND_ASSIGN(Editor);
 };
 

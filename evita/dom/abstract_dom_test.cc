@@ -7,11 +7,8 @@
 #include <vector>
 
 #include "base/logging.h"
-#pragma warning(push)
-#pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
 #include "base/run_loop.h"
-#pragma warning(pop)
 #include "base/strings/utf_string_conversions.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/converter.h"
@@ -260,6 +257,7 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
     UnhandledException(runner_.get(), try_catch);
     return exception_;
   }
+  DOM_AUTO_LOCK_SCOPE();
   auto const result = script->Run();
   if (result.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
@@ -286,6 +284,7 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
     UnhandledException(runner_.get(), try_catch);
     return false;
   }
+  DOM_AUTO_LOCK_SCOPE();
   auto const result = script->Run();
   if (result.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);

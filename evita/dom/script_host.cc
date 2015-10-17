@@ -64,7 +64,7 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
     DVLOG(0) << "No JsConsole.handleRejectedPromise";
     return;
   }
-  DOM_AUTO_LOCK_SCOPE();
+  ASSERT_DOM_LOCKED();
   runner->Call(handler, runner->global(), promise, reject_message.GetValue());
 }
 

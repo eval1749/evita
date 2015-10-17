@@ -20,7 +20,8 @@ namespace dom {
 // The instance of |PromiseResolver| keeps a JavaScript object of
 // |Promise.defer()| during asynchronous call.
 //
-class PromiseResolver final : public base::RefCounted<PromiseResolver> {
+class PromiseResolver final
+    : public base::RefCountedThreadSafe<PromiseResolver> {
  public:
   ~PromiseResolver();
 

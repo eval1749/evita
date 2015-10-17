@@ -50,7 +50,7 @@ void LivePromiseResolverSet::Unregister(const PromiseResolver* resolver) {
 
 PromiseResolver::PromiseResolver(Type type, v8_glue::Runner* runner)
     : resolver_(runner->isolate(),
-                v8::Promise::Resolver::New(runner->isolate())),
+                v8::Promise::Resolver::New(runner->context()).ToLocalChecked()),
       runner_(runner->GetWeakPtr()),
       type_(type) {
   LivePromiseResolverSet::instance()->Register(this);
@@ -65,7 +65,8 @@ void PromiseResolver::DoReject(v8::Handle<v8::Value> value) {
   CHECK(runner_);
   auto const isolate = runner_->isolate();
   auto const resolver = resolver_.NewLocal(isolate);
-  resolver->Reject(value);
+  auto const result = resolver->Reject(runner_->context(), value);
+  CHECK(result.IsJust());
 }
 
 void PromiseResolver::DoResolve(v8::Handle<v8::Value> value) {
@@ -73,7 +74,8 @@ void PromiseResolver::DoResolve(v8::Handle<v8::Value> value) {
   CHECK(runner_);
   auto const isolate = runner_->isolate();
   auto const resolver = resolver_.NewLocal(isolate);
-  resolver->Resolve(value);
+  auto const result = resolver->Resolve(runner_->context(), value);
+  CHECK(result.IsJust());
 }
 
 v8::Local<v8::Promise> PromiseResolver::GetPromise(v8::Isolate* isolate) const {

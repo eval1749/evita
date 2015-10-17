@@ -23,7 +23,7 @@ class DxDevice : public common::Singleton<DxDevice> {
   DECLARE_SINGLETON_CLASS(DxDevice);
 
  public:
-  // TODO(eval1749) We should destruct DxDevice by Singleton destructor.
+  // TODO(eval1749): We should destruct DxDevice by Singleton destructor.
   virtual ~DxDevice();
 
   ID2D1Device* d2d_device() const { return d2d_device_; }

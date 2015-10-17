@@ -14,7 +14,7 @@ namespace ui {
 class TextComposition final {
  public:
   struct Span final {
-    // TODO(eval1749) We should use |enum class| for |Type|.
+    // TODO(eval1749): We should use |enum class| for |Type|.
     enum Type {
       Input,
       SelectionConverted,

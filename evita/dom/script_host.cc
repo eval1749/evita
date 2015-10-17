@@ -65,8 +65,7 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
     return;
   }
   DOM_AUTO_LOCK_SCOPE();
-  runner->Call(handler, runner->global(), promise,
-               reject_message.GetValue());
+  runner->Call(handler, runner->global(), promise, reject_message.GetValue());
 }
 
 // Note: The constructor returned by v8::Object::GetConstructor() doesn't
@@ -363,12 +362,11 @@ void ScriptHost::Start() {
   isolate->AddMessageListener(MessageCallback);
   isolate->AddGCPrologueCallback(GcPrologueCallback);
   isolate->AddGCEpilogueCallback(GcEpilogueCallback);
-  // TODO(yosi) Turning off micro task running during creating wrapper, name
-  // |Editor.checkSpelling('foo').then(console.log)| to work.
-  // Otherwise |console.log| executed as micro task gets storage object which
-  // doesn't have |v8_glue::WrapperInfo| at zeroth internal field.
-  // See "985a73d2cce5", same thing is happened in spell checker with
-  // |Editor.RegExp| object.
+  // TODO(eval1749): Turning off micro task running during creating wrapper,
+  // name |Editor.checkSpelling('foo').then(console.log)| to work. Otherwise
+  // |console.log| executed as micro task gets storage object which doesn't have
+  // |v8_glue::WrapperInfo| at zeroth internal field. See "985a73d2cce5", same
+  // thing is happened in spell checker with |Editor.RegExp| object.
   isolate->SetAutorunMicrotasks(false);
   isolate->SetPromiseRejectCallback(DidRejectPromise);
   v8Strings::Init(isolate);

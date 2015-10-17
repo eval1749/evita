@@ -36,7 +36,7 @@ Editor.RegExp.Match;
  */
 var RegExpMatch;
 
-// TODO(eval1749) We should rename |Range.Case| to |CaseAnalysisResult|.
+// TODO(eval1749): We should rename |Range.Case| to |CaseAnalysisResult|.
 /** @enum {!symbol} */
 Range.Case = {
   // "This is capitalized."
@@ -121,7 +121,7 @@ Unicode.Category = {
 /** @const @type{Array.<{bidi: string, category: string}>} */
 Unicode.UCD;
 
-// TODO(yosi) Once Closure compiler works with |new RegExp(...)|, we should
+// TODO(eval1749): Once Closure compiler works with |new RegExp(...)|, we should
 // remove |NewRegExp|. V20140508 doesn't work.
 /**
  * @param {string} source

@@ -28,7 +28,7 @@
    */
   function bracketDataOf(position) {
     var charCode = position.charCode();
-    // TODO(yosi) We should get character syntax from mime type information.
+    // TODO(eval1749): We should get character syntax from mime type information.
     return Bracket.DATA[charCode] || NOT_BRACKET;
   }
 
@@ -57,7 +57,7 @@
 
     while (position.offset) {
       position.move(Unit.CHARACTER, -1);
-      // TODO(yosi) We should get character syntax from mime type information.
+      // TODO(eval1749): We should get character syntax from mime type information.
       var bracket = bracketDataOf(position);
       if (bracket.type == Bracket.Type.NONE)
         continue;

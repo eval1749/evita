@@ -19,7 +19,7 @@ global.TextFieldBuffer = function(control) {
  * @param {!TextFieldControl} control
  * @param {!function(!TextFieldRange)} callback
  */
-// TODO(yosi) Until |WeakSet| supports |forEach| method, we use
+// TODO(eval1749): Until |WeakSet| supports |forEach| method, we use
 // to sue |WeakMap|.
 function rangeSetForEach(control, callback) {
   // Relocate ranges
@@ -108,7 +108,7 @@ Object.defineProperties(TextFieldBuffer.prototype, {
        */
      function(start, end, string) {
        var text = this.text;
-       // TODO(yosi) We should record old value for undo/redo.
+       // TODO(eval1749): We should record old value for undo/redo.
        this.control_.value_ = text.substr(0, start) + string + text.substr(end);
        var delta = string.length - (end - start);
        rangeSetForEach(this, function(range) {

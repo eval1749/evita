@@ -129,7 +129,7 @@ void Frame::DrawForResize() {
   auto const tab_content = tab_strip_animator_->active_tab_content();
   if (!tab_content)
     return;
-  // TODO(eval1749) Is doing animation for active tab content here right thing?
+  // TODO(eval1749): Is doing animation for active tab content here right thing?
   auto const now = base::Time::Now();
   for (auto child : tab_content->child_nodes()) {
     auto const window = child->as<Window>();
@@ -232,7 +232,7 @@ void Frame::DidBeginAnimationFrame(base::Time now) {
   // TODO(eval1749): We should request animation frame for |Frame| only if
   // needed.
   RequestAnimationFrame();
-  // TODO(eval1749) We should call update title bar only when needed.
+  // TODO(eval1749): We should call update title bar only when needed.
   UpdateTitleBar();
 
   CR_DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
@@ -343,7 +343,7 @@ void Frame::DidRealize() {
 
   title_bar_->Realize(*native_window());
 
-  // TODO(eval1749) How do we determine height of TabStrip?
+  // TODO(eval1749): How do we determine height of TabStrip?
   auto const tab_strip_height =
       static_cast<Widget*>(tab_strip_)->GetPreferredSize().height();
   const auto close_button_height = ::GetSystemMetrics(SM_CYSIZE);

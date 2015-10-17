@@ -502,7 +502,7 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
     }
 
     if (auto focus_control = model_->focus_control()) {
-      // TODO(eval1749) Should we make |RequestFocus()| to check focused
+      // TODO(eval1749): Should we make |RequestFocus()| to check focused
       // window rather than here?
       if (!focus_control->has_focus() && has_native_focus())
         focus_control->RequestFocus();
@@ -594,7 +594,7 @@ void FormWindow::DidDestroyWidget() {
 }
 
 void FormWindow::DidRealize() {
-  // TODO(eval1749) We should get default value of form window transparency
+  // TODO(eval1749): We should get default value of form window transparency
   // from CSS.
   ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
                                LWA_ALPHA);
@@ -604,7 +604,7 @@ void FormWindow::DidRealize() {
 }
 
 void FormWindow::DidRequestDestroy() {
-  // TODO(eval1749) Should we dispatch "close" event to JavaScript?
+  // TODO(eval1749): Should we dispatch "close" event to JavaScript?
   Hide();
 }
 

@@ -121,7 +121,7 @@ text::Posn TextWindow::ComputeMotion(Unit eUnit,
       return lPosn;
 
     case Unit_Screen: {
-      // TODO(eval1749) We should not call |LargetScroll()| in |ComputeMotion|.
+      // TODO(eval1749): We should not call |LargetScroll()| in |ComputeMotion|.
       if (LargeScroll(0, n))
         return MapPointToPosition(pt);
       if (n > 0)

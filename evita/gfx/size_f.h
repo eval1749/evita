@@ -21,12 +21,12 @@ class Size_ final : public BaseType {
     height = other.height;
   }
   Size_(UnitType width, UnitType height) {
-    // TODO(eval1749) We should not allow negative |width| and |height|.
+    // TODO(eval1749): We should not allow negative |width| and |height|.
     this->width = width;
     this->height = height;
   }
   Size_(int width, int height) {
-    // TODO(eval1749) We should not allow negative |width| and |height|.
+    // TODO(eval1749): We should not allow negative |width| and |height|.
     this->width = static_cast<UnitType>(width);
     this->height = static_cast<UnitType>(height);
   }

@@ -247,7 +247,7 @@ void IntervalSet::Impl::DidInsertBefore(Posn offset, size_t length) {
     // Set default style to new text inserted at start of document.
     auto const head = *intervals_.begin();
     DCHECK_EQ(static_cast<Posn>(length), head->start());
-    // TODO(yosi) We should check head interval has default style or not
+    // TODO(eval1749): We should check head interval has default style or not
     // without creating Interval object.
     auto const interval = new Interval(0, head->start());
     if (CanMergeIntervals(interval, head)) {

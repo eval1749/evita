@@ -18,7 +18,7 @@ TextFieldRange.prototype.start_;
 global.TextFieldRange = function(control) {
   this.control_ = control;
   if (!control.ranges_) {
-    // TODO(yosi) Until |WeakSet| supports |forEach| method, we use
+    // TODO(eval1749): Until |WeakSet| supports |forEach| method, we use
     // to sue |WeakMap|.
     control.ranges_ = new WeakMap();
     control.ranges_['size_'] = 0;

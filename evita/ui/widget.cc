@@ -756,7 +756,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 
     case WM_SYSCOMMAND:
       if ((wParam & 0xFFF0) == SC_KEYMENU) {
-        // TODO(eval1749) When we support menu, we should redirect |SC_KEYMENU|
+        // TODO(eval1749): When we support menu, we should redirect |SC_KEYMENU|
         // to menu for menu shortcut.
         // Note: We use Alt+Key for |accesskey|.
         return 0;

@@ -13,7 +13,7 @@ STRINGS_H = """
 #if !defined(INCLUDE_evita_dom_v8_strings_h)
 #define INCLUDE_evita_dom_v8_strings_h
 
-// TODO(eval1749) We should not include "evita/precomp.h" here. We need to
+// TODO(eval1749): We should not include "evita/precomp.h" here. We need to
 // include for |new(void*, size_t)| for |V8String|.
 #include "evita/precomp.h"
 #include "evita/v8_glue/v8.h"

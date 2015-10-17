@@ -26,7 +26,7 @@ bool FileDialogBox::GetOpenFileName(Param* pParam) {
   OPENFILENAME oOfn = {0};
   oOfn.lStructSize = sizeof(oOfn);
   oOfn.hwndOwner = pParam->m_hwndOwner;
-  // TODO(yosi) We should make filter as parameter to allow scripts specify
+  // TODO(eval1749): We should make filter as parameter to allow scripts specify
   // filters.
   oOfn.lpstrFilter =
       L"All Files\0*.*\0"

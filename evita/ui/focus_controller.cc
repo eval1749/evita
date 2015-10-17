@@ -121,7 +121,7 @@ void FocusController::DidSetNativeFocus(Widget* widget) {
   focus_widget_->DidSetFocus(last_focused_widget);
   has_active_focus_ = true;
   auto const host_widget = GetTopLevelWidget(focus_widget_);
-  // TODO(eval1749) Should we have |Widget::IsPopupWindow()| to avoid checking
+  // TODO(eval1749): Should we have |Widget::IsPopupWindow()| to avoid checking
   // WS_POPUP?
   if (IsPopupWindow(host_widget->AssociatedHwnd()))
     return;
@@ -179,4 +179,4 @@ void FocusController::WillDestroyWidget(Widget* widget) {
   widget->DidKillFocus(nullptr);
 }
 
-}   // namespace ui
+}  // namespace ui

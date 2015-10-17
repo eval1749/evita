@@ -59,7 +59,7 @@ global.Lexer = (function() {
     this.debug_ = 0;
     this.keywords = options.keywords;
     this.lastToken = null;
-    // TODO(yosi) |maxChainWords_| should be part of |LexerOptions|.
+    // TODO(eval1749): |maxChainWords_| should be part of |LexerOptions|.
     this.maxChainWords_ = 3;
     this.range = new Range(document);
     this.scanOffset = 0;

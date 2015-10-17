@@ -10,7 +10,7 @@ global.DocumentState = function(document_or_state) {
   if (document_or_state instanceof Document) {
     var document = /** @type {!Document} */(document_or_state);
     this.fileName = document.fileName;
-    // TODO(yosi) We should specify |DocumentState.prototype.icon| from
+    // TODO(eval1749): We should specify |DocumentState.prototype.icon| from
     // IconSet.
     this.icon = -2;
     this.lastWriteTime = document.lastWriteTime;

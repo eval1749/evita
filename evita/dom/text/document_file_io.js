@@ -83,14 +83,14 @@
    * @return {boolean}
    */
   Document.prototype.needSave = function() {
-    // TODO(eval1749) We should use |document.notForSave|.
+    // TODO(eval1749): We should use |document.notForSave|.
     return this.modified && !this.name.startsWith('*') &&
            FilePath.isValidFileName(this.fileName);
   };
 
   /**
    * This function handles Emacs "File Variables" in the first line.
-   * TODO(eval1749) Support "Local Variables: ... End:".
+   * TODO(eval1749): Support "Local Variables: ... End:".
    */
   Document.prototype.parseFileProperties = function() {
     const document = this;

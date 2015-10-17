@@ -61,7 +61,7 @@ global.JsConsole = (function() {
     constructor() {
       /** @const @type {!Document} */
       let document = console.document;
-      // TODO(yosi) We should make |*javascript*| document with JavaScript
+      // TODO(eval1749): We should make |*javascript*| document with JavaScript
       // syntax coloring.
       /** @type {!Document} */
       this.document_ = document;

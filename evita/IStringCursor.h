@@ -21,11 +21,11 @@ struct IStringCursor {
   virtual char16 GetChar(int offset) = 0;
   virtual text::Posn GetPosition() = 0;
 
-  // TODO(eval1749) We should use |int| for |FindBackward()|
+  // TODO(eval1749): We should use |int| for |FindBackward()|
   virtual bool FindBackward(base::char16 ch, uint32_t count) = 0;
-  // TODO(eval1749) We should use |int| for |FindForward()|
+  // TODO(eval1749): We should use |int| for |FindForward()|
   virtual bool FindForward(base::char16 ch, uint32_t count) = 0;
-  // TODO(eval1749) We should use |int| for |Match()|
+  // TODO(eval1749): We should use |int| for |Match()|
   virtual bool Match(const base::char16* sting, int offset, uint32_t count) = 0;
   virtual text::Posn Move(int count) = 0;
   virtual text::Posn MoveToEnd() = 0;

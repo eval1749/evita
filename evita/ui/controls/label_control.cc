@@ -48,7 +48,8 @@ LabelControl::Renderer::Renderer(const base::string16& text,
     : bounds_(rect),
       style_(style),
       text_layout_(CreateTextLayout(text, style, rect.size())) {
-  // TODO(yosi) We should share following code fragment with |ButtonControl|
+  // TODO(eval1749): We should share following code fragment with
+  // |ButtonControl|
   // and |TextFieldControl|.
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY((*text_layout_)->GetMetrics(&metrics));

@@ -219,7 +219,7 @@
         throw 'Document isn\'t bound to file.';
     } else {
       const fileName = /** @type{string} */ (opt_fileName);
-      // TODO(yosi) FilePath.fullPath() will return Promise.
+      // TODO(eval1749): FilePath.fullPath() will return Promise.
       const absoluteFile_name = FilePath.fullPath(fileName);
       const present = Document.findFile(absoluteFile_name);
       if (present && present !== this)

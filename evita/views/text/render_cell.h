@@ -20,11 +20,11 @@ enum class TextMarker {
   Tab,
 };
 
-// TODO(yosi) We should remove |using css::Color|.
+// TODO(eval1749): We should remove |using css::Color|.
 // using css::Color;
-// TODO(yosi) We should remove |using css::Style|.
+// TODO(eval1749): We should remove |using css::Style|.
 // using css::Style;
-// TODO(yosi) We should remove |using text::TextDecoration|.
+// TODO(eval1749): We should remove |using text::TextDecoration|.
 // using text::TextDecoration;
 
 class RenderStyle;

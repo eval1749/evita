@@ -10,7 +10,7 @@ global.DocumentError = (function() {
   function DocumentError(document, opt_message) {
     if (arguments.length >= 2) {
       Error.call(this, opt_message);
-      // TODO(yosi) Not sure why |Error.call(this, opt_message)| doesn't set
+      // TODO(eval1749): Not sure why |Error.call(this, opt_message)| doesn't set
       // |message| property.
       this.message = opt_message;
     } else {

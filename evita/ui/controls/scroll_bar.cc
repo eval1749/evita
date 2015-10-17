@@ -20,8 +20,7 @@ namespace ui {
 // ScrollBar::Data
 //
 ScrollBar::Data::Data()
-    : minimum(0), maximum(0), thumb_value(0), thumb_size(0) {
-}
+    : minimum(0), maximum(0), thumb_value(0), thumb_size(0) {}
 
 bool ScrollBar::Data::operator==(const Data& other) const {
   return minimum == other.minimum && maximum == other.maximum &&
@@ -83,12 +82,10 @@ ScrollBar::HitTestResult::HitTestResult(Location location, const Part* part)
 }
 
 ScrollBar::HitTestResult::HitTestResult(const HitTestResult& other)
-    : HitTestResult(other.location_, other.part_) {
-}
+    : HitTestResult(other.location_, other.part_) {}
 
 ScrollBar::HitTestResult::HitTestResult()
-    : HitTestResult(Location::None, nullptr) {
-}
+    : HitTestResult(Location::None, nullptr) {}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -118,7 +115,7 @@ class ScrollBar::Part {
   virtual void Render(gfx::Canvas* canvas, const gfx::RectF& bounds);
   virtual void ResetView();
   virtual void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                    const ScrollBar::Data& data) = 0;
+                            const ScrollBar::Data& data) = 0;
 
  protected:
   typedef ScrollBar::HitTestResult HitTestResult;
@@ -132,8 +129,7 @@ class ScrollBar::Part {
   State new_state() const { return new_state_; }
   void set_current_state() { state_ = new_state_; }
 
-  virtual void Paint(gfx::Canvas* canvas,
-                                const gfx::RectF& bounds) const = 0;
+  virtual void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const = 0;
 
  private:
   gfx::RectF bounds_;
@@ -148,8 +144,7 @@ std::ostream& operator<<(std::ostream& ostream, ScrollBar::Part::State state) {
   return ostream << static_cast<int>(state);
 }
 
-ScrollBar::Part::Part() : new_state_(State::Normal), state_(State::Normal) {
-}
+ScrollBar::Part::Part() : new_state_(State::Normal), state_(State::Normal) {}
 
 void ScrollBar::Part::set_state(State new_state) {
   new_state_ = new_state;
@@ -201,8 +196,9 @@ class Arrow : public ScrollBar::Part {
   Arrow() = default;
   ~Arrow() override = default;
 
-  void PaintArrow(gfx::Canvas* canvas, const gfx::RectF& bounds,
-                             Direction direction) const;
+  void PaintArrow(gfx::Canvas* canvas,
+                  const gfx::RectF& bounds,
+                  Direction direction) const;
 
  private:
   gfx::ColorF bgcolor() const;
@@ -243,7 +239,8 @@ gfx::ColorF Arrow::color() const {
   }
 }
 
-void Arrow::PaintArrow(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds,
+void Arrow::PaintArrow(gfx::Canvas* canvas,
+                       const gfx::RectF& canvas_bounds,
                        Direction direction) const {
   float factors[4] = {0.0f};
   switch (direction) {
@@ -271,7 +268,7 @@ void Arrow::PaintArrow(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds,
       factors[2] = 1.0f;
       factors[3] = 1.0f;
       break;
-     default:
+    default:
       NOTREACHED();
       break;
   }
@@ -288,17 +285,16 @@ void Arrow::PaintArrow(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds,
   canvas->Clear(gfx::sysColor(COLOR_BTNFACE));
   canvas->FillRectangle(gfx::Brush(canvas, bgcolor()), bounds);
 
-  // TODO(eval1749) We should have only one arrow figure as singleton and
+  // TODO(eval1749): We should have only one arrow figure as singleton and
   // paint with rotation for all directions.
   common::ComPtr<ID2D1PathGeometry> geometry;
   gfx::FactorySet::d2d1().CreatePathGeometry(&geometry);
   {
     common::ComPtr<ID2D1GeometrySink> sink;
     geometry->Open(&sink);
-    sink->BeginFigure(
-        gfx::PointF(center_x + factors[0] * wing_size,
-                    center_y + factors[1] * wing_size),
-        D2D1_FIGURE_BEGIN_HOLLOW);
+    sink->BeginFigure(gfx::PointF(center_x + factors[0] * wing_size,
+                                  center_y + factors[1] * wing_size),
+                      D2D1_FIGURE_BEGIN_HOLLOW);
     sink->AddLine(gfx::PointF(center_x, center_y));
     sink->AddLine(gfx::PointF(center_x + factors[2] * wing_size,
                               center_y + factors[3] * wing_size));
@@ -307,7 +303,7 @@ void Arrow::PaintArrow(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds,
     sink->Close();
   }
 
-  // TODO(eval1749) Arrow stroke style should be singleton. Stroke style is
+  // TODO(eval1749): Arrow stroke style should be singleton. Stroke style is
   // a device independent resource.
   gfx::StrokeStyle stroke_style;
   stroke_style.set_cap_style(gfx::CapStyle::Flat);
@@ -329,12 +325,10 @@ class ArrowDown final : public Arrow {
 
  private:
   // ScrollBar::Part
-  HitTestResult HitTest(
-      const gfx::PointF& point) const final;
-  void Paint(gfx::Canvas* canvas,
-                              const gfx::RectF& bounds) const final;
+  HitTestResult HitTest(const gfx::PointF& point) const final;
+  void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const final;
   void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) final;
+                    const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowDown);
 };
@@ -369,12 +363,10 @@ class ArrowLeft final : public Arrow {
 
  private:
   // ScrollBar::Part
-  HitTestResult HitTest(
-      const gfx::PointF& point) const final;
-  void Paint(gfx::Canvas* canvas,
-                              const gfx::RectF& bounds) const final;
+  HitTestResult HitTest(const gfx::PointF& point) const final;
+  void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const final;
   void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) final;
+                    const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowLeft);
 };
@@ -407,12 +399,10 @@ class ArrowRight final : public Arrow {
 
  private:
   // ScrollBar::Part
-  HitTestResult HitTest(
-      const gfx::PointF& point) const final;
-  void Paint(gfx::Canvas* canvas,
-                               const gfx::RectF& bounds) const final;
+  HitTestResult HitTest(const gfx::PointF& point) const final;
+  void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const final;
   void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) final;
+                    const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowRight);
 };
@@ -429,8 +419,8 @@ void ArrowRight::Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const {
 
 void ArrowRight::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                               const ScrollBar::Data& data) {
-  set_state(data.thumb_value + data.thumb_size >= data.minimum ?
-      State::Disabled : State::Normal);
+  set_state(data.thumb_value + data.thumb_size >= data.minimum ? State::Disabled
+                                                               : State::Normal);
   auto const size = scroll_bar_bounds.width();
   set_bounds(gfx::RectF(
       gfx::PointF(scroll_bar_bounds.right - size, scroll_bar_bounds.top),
@@ -448,12 +438,10 @@ class ArrowUp final : public Arrow {
 
  private:
   // ScrollBar::Part
-  HitTestResult HitTest(
-      const gfx::PointF& point) const final;
-  void Paint(gfx::Canvas* canvas,
-                               const gfx::RectF& bounds) const final;
+  HitTestResult HitTest(const gfx::PointF& point) const final;
+  void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const final;
   void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) final;
+                    const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowUp);
 };
@@ -470,8 +458,8 @@ void ArrowUp::Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const {
 
 void ArrowUp::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                            const ScrollBar::Data& data) {
-  set_state(data.thumb_value + data.thumb_size >= data.minimum ?
-      State::Disabled : State::Normal);
+  set_state(data.thumb_value + data.thumb_size >= data.minimum ? State::Disabled
+                                                               : State::Normal);
   auto const size = scroll_bar_bounds.width();
   set_bounds(gfx::RectF(
       gfx::PointF(scroll_bar_bounds.right - size, scroll_bar_bounds.top),
@@ -503,10 +491,8 @@ class Thumb : public ScrollBar::Part {
 
   // ScrollBar::Part
   bool IsDirty() const override;
-  void Paint(gfx::Canvas* canvas,
-                              const gfx::RectF& bounds) const override;
-  void Render(gfx::Canvas* canvas,
-                               const gfx::RectF& bounds) override;
+  void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const override;
+  void Render(gfx::Canvas* canvas, const gfx::RectF& bounds) override;
   void ResetView() override;
 
   ScrollBar::Data data_;
@@ -606,10 +592,9 @@ class ThumbHorizontal final : public Thumb {
  private:
   // ScrollBar::Part
   int GetValueAt(const gfx::PointF& point) const final;
-  HitTestResult HitTest(
-      const gfx::PointF& point) const final;
+  HitTestResult HitTest(const gfx::PointF& point) const final;
   void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) final;
+                    const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ThumbHorizontal);
 };
@@ -619,8 +604,8 @@ int ThumbHorizontal::GetValueAt(const gfx::PointF& point) const {
   auto const size = data().maximum - data().minimum;
   if (size <= 0)
     return data().minimum;
-  auto const offset = std::min(std::max(point.x - bounds().left, 0.0f),
-                               bounds().right);
+  auto const offset =
+      std::min(std::max(point.x - bounds().left, 0.0f), bounds().right);
   auto const scale = static_cast<float>(size) / bounds().width();
   return std::min(static_cast<int>(offset * scale) + data().minimum,
                   data().maximum);
@@ -632,8 +617,8 @@ ScrollBar::HitTestResult ThumbHorizontal::HitTest(
     return HitTestResult();
   if (thumb_bounds().Contains(point))
     return HitTestResult(Location::Thumb, this);
-  return HitTestResult(point.x < thumb_bounds().left ? Location::EastOfThumb :
-                                                       Location::WestOfThumb,
+  return HitTestResult(point.x < thumb_bounds().left ? Location::EastOfThumb
+                                                     : Location::WestOfThumb,
                        this);
 }
 
@@ -655,11 +640,11 @@ void ThumbHorizontal::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
     set_state(State::Normal);
 
   auto const thumb_left = ::floor((data.thumb_value - data.minimum) * scale);
-  auto const thumb_right = ::floor(
-      (data.thumb_value + data.thumb_size - data.minimum) * scale);
-  set_thumb_bounds(gfx::RectF(
-      gfx::PointF(bounds.left + thumb_left, bounds.top),
-      gfx::PointF(bounds.left + thumb_right, bounds.bottom)));
+  auto const thumb_right =
+      ::floor((data.thumb_value + data.thumb_size - data.minimum) * scale);
+  set_thumb_bounds(
+      gfx::RectF(gfx::PointF(bounds.left + thumb_left, bounds.top),
+                 gfx::PointF(bounds.left + thumb_right, bounds.bottom)));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -674,10 +659,9 @@ class ThumbVertical final : public Thumb {
  private:
   // ScrollBar::Part
   int GetValueAt(const gfx::PointF& point) const final;
-  HitTestResult HitTest(
-      const gfx::PointF& point) const final;
+  HitTestResult HitTest(const gfx::PointF& point) const final;
   void UpdateLayout(const gfx::RectF& scroll_bar_bounds,
-                                     const ScrollBar::Data& data) final;
+                    const ScrollBar::Data& data) final;
 
   DISALLOW_COPY_AND_ASSIGN(ThumbVertical);
 };
@@ -687,8 +671,8 @@ int ThumbVertical::GetValueAt(const gfx::PointF& point) const {
   auto const size = data().maximum - data().minimum;
   if (size <= 0)
     return data().minimum;
-  auto const offset = std::min(std::max(point.y - bounds().top, 0.0f),
-                               bounds().bottom);
+  auto const offset =
+      std::min(std::max(point.y - bounds().top, 0.0f), bounds().bottom);
   auto const scale = size / bounds().height();
   return std::min(static_cast<int>(offset * scale) + data().minimum,
                   data().maximum);
@@ -700,8 +684,8 @@ ScrollBar::HitTestResult ThumbVertical::HitTest(
     return HitTestResult();
   if (thumb_bounds().Contains(point))
     return HitTestResult(Location::Thumb, this);
-  return HitTestResult(point.y < thumb_bounds().top ? Location::NorthOfThumb :
-                                                      Location::SouthOfThumb,
+  return HitTestResult(point.y < thumb_bounds().top ? Location::NorthOfThumb
+                                                    : Location::SouthOfThumb,
                        this);
 }
 
@@ -723,11 +707,11 @@ void ThumbVertical::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
     set_state(State::Normal);
 
   auto const thumb_top = ::floor((data.thumb_value - data.minimum) * scale);
-  auto const thumb_bottom = ::floor(
-      (data.thumb_value + data.thumb_size - data.minimum) * scale);
-  set_thumb_bounds(gfx::RectF(
-      gfx::PointF(bounds.left, bounds.top + thumb_top),
-      gfx::PointF(bounds.right, bounds.top + thumb_bottom)));
+  auto const thumb_bottom =
+      ::floor((data.thumb_value + data.thumb_size - data.minimum) * scale);
+  set_thumb_bounds(
+      gfx::RectF(gfx::PointF(bounds.left, bounds.top + thumb_top),
+                 gfx::PointF(bounds.right, bounds.top + thumb_bottom)));
 }
 
 }  // namespace
@@ -737,9 +721,10 @@ void ThumbVertical::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
 // ScrollBar
 //
 ScrollBar::ScrollBar(Type type, ScrollBarObserver* observer)
-    : capturing_location_(Location::None), hover_part_(nullptr),
-      observer_(observer), parts_(CreateParts(type)) {
-}
+    : capturing_location_(Location::None),
+      hover_part_(nullptr),
+      observer_(observer),
+      parts_(CreateParts(type)) {}
 
 ScrollBar::~ScrollBar() {
   for (auto part : parts_)
@@ -748,16 +733,12 @@ ScrollBar::~ScrollBar() {
 
 std::vector<ScrollBar::Part*> ScrollBar::CreateParts(Type type) {
   if (type == Type::Horizontal) {
-    return std::vector<Part*> {
-        new ArrowLeft(),
-        new ThumbHorizontal(),
-        new ArrowRight(),
+    return std::vector<Part*>{
+        new ArrowLeft(), new ThumbHorizontal(), new ArrowRight(),
     };
   }
-  return std::vector<Part*> {
-      new ArrowUp(),
-      new ThumbVertical(),
-      new ArrowDown(),
+  return std::vector<Part*>{
+      new ArrowUp(), new ThumbVertical(), new ArrowDown(),
   };
 }
 
@@ -829,8 +810,8 @@ void ScrollBar::OnMouseExited(const ui::MouseEvent&) {
 void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
   if (capturing_location_ == Location::Thumb) {
     DCHECK(hover_part_);
-    observer_->DidMoveThumb(hover_part_->GetValueAt(
-        gfx::PointF(event.location())));
+    observer_->DidMoveThumb(
+        hover_part_->GetValueAt(gfx::PointF(event.location())));
     return;
   }
   if (capturing_location_ != Location::None)

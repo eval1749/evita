@@ -193,7 +193,7 @@ global.KEY_NAMES = (function() {
       names[key_code] = String.fromCharCode(key_code);
     }
   }
-  // TODO(yosi) We should get supported key code values for current keyboard
+  // TODO(eval1749): We should get supported key code values for current keyboard
   // from |::MapVirtualKey(vkey, MAPVK_VK_TOCHAR)|.
   populate(0x20, 0x60);
   populate(0x7B, 0x7E);

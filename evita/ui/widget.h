@@ -116,7 +116,7 @@ class Widget : public EventTarget,
   virtual void OnMousePressed(const MouseEvent& event);
   virtual void OnMouseReleased(const MouseEvent& event);
   virtual void OnMouseWheel(const MouseWheelEvent& event);
-  // TODO(eval1749) We should get rid of |ui::Widget::SchedulePaint()|, since
+  // TODO(eval1749): We should get rid of |ui::Widget::SchedulePaint()|, since
   // it isn't matched with "always paint" model.
   void SchedulePaint();
   void SchedulePaintInRect(const gfx::Rect& rect);

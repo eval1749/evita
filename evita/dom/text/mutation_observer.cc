@@ -34,7 +34,7 @@ class MutationObserver::Tracker final {
   void Update(text::Posn offset);
 
  private:
-  // TODO(yosi) Reference to |Document| from |Tracker| should be a weak
+  // TODO(eval1749): Reference to |Document| from |Tracker| should be a weak
   // reference.
   Document* document_;
   text::Posn minimum_change_offset_;

@@ -27,7 +27,7 @@ class Compositor final : public common::Singleton<Compositor> {
   DECLARE_SINGLETON_CLASS(Compositor);
 
  public:
-  // TODO(eval1749) We should destruct Compositor by Singleton destructor.
+  // TODO(eval1749): We should destruct Compositor by Singleton destructor.
   virtual ~Compositor();
 
   IDCompositionDesktopDevice* device() const { return composition_device_; }

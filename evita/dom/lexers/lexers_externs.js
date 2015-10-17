@@ -14,7 +14,7 @@ var ClikeLexerOptions;
  * @constructor
  * @extends {Lexer}
  * @param {!Document} document
- * TODO(yosi) We should use |ClikeLexerOptions| instead of |Object| for
+ * TODO(eval1749): We should use |ClikeLexerOptions| instead of |Object| for
  * |options|.
  * @param {!Object} options
  * @return {undefined}
@@ -103,7 +103,7 @@ var XmlLexerOptions;
  * @constructor
  * @extends {Lexer}
  * @param {!Document} document
- * TODO(yosi) We should use |XmlLexerOptions| instead of |Object| for
+ * TODO(eval1749): We should use |XmlLexerOptions| instead of |Object| for
  * |options|.
  * @param {!Object=} opt_options
  * @return {undefined}

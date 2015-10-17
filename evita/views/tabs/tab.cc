@@ -398,7 +398,7 @@ void Tab::OnMousePressed(const ui::MouseEvent& event) {
 void Tab::OnMouseReleased(const ui::MouseEvent& event) {
   if (!event.is_left_button() || event.click_count())
     return;
-  // TODO(eval1749) stop tab dragging
+  // TODO(eval1749): stop tab dragging
   auto const result = HitTest(gfx::PointF(event.location()));
   if (result.part() == Part::CloseMark)
     tab_controller_->RequestCloseTab(this);

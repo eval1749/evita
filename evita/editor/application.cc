@@ -93,7 +93,7 @@ bool Application::CalledOnValidThread() const {
 
 void Application::DidStartScriptHost(domapi::ScriptHostState state) {
   if (state != domapi::ScriptHostState::Running) {
-    // TODO(yosi) We should set exit code other than EXIT_SUCCESS.
+    // TODO(eval1749): We should set exit code other than EXIT_SUCCESS.
     editor::Application::instance()->Quit();
     return;
   }
@@ -145,10 +145,10 @@ void Application::Run() {
   base::RunLoop run_loop;
   run_loop.Run();
 
-  // TODO(eval1749) We should use Singleton destructor for destructing
+  // TODO(eval1749): We should use Singleton destructor for destructing
   // |gfx::DxDevice|.
   delete gfx::DxDevice::instance();
-  // TODO(eval1749) We should use Singleton destructor for destructing
+  // TODO(eval1749): We should use Singleton destructor for destructing
   // |ui::Compositor|.
   delete ui::Compositor::instance();
 }

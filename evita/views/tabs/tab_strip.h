@@ -40,7 +40,7 @@ class TabStrip final : public ui::AnimatableWindow {
   // Insert a new tab before a tab at |tab_index|.
   void InsertTab(TabContent* tab_content, int new_tab_index);
   int NonClientHitTest(const gfx::Point& screen_point) const;
-  // TODO(eval1749) Once we should revise tooltip handling, we should get rid
+  // TODO(eval1749): Once we should revise tooltip handling, we should get rid
   // of |TabStrip::OnNotify()|.
   LRESULT OnNotify(NMHDR* nmhdr);
   void SelectTab(int tab_index);

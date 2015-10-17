@@ -23,7 +23,7 @@ class Event : public v8_glue::Scriptable<Event> {
   DECLARE_SCRIPTABLE_OBJECT(Event);
 
  public:
-  // TODO(eval1749) We should use |enum class| for |PhaseType|.
+  // TODO(eval1749): We should use |enum class| for |PhaseType|.
   enum PhaseType {
     kNone,
     kCapturingPhase,

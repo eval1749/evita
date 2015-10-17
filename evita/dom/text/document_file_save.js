@@ -16,7 +16,7 @@
   }
 
   /** @const @type {number} */
-  // TODO(yosi) Once, we confirm save works fine, we should increase buffer
+  // TODO(eval1749): Once, we confirm save works fine, we should increase buffer
   // size.
   FileWriter.kBufferSize = 1024 * 1;
 
@@ -182,7 +182,7 @@
     } else {
       var fileName = /** @type{string} */(opt_fileName);
       var absoluteFileName = FilePath.fullPath(fileName);
-      // TODO(yosi) FilePath.fullPath() will return Promise.
+      // TODO(eval1749): FilePath.fullPath() will return Promise.
       var present = Document.findFile(absoluteFileName);
       if (present && present !== this)
         throw fileName + ' is already bound to ' + present;

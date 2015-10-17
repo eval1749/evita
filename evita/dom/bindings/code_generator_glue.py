@@ -158,9 +158,9 @@ class CppType(object):
 
 
 IDL_TO_CPP_TYPE_MAP = {
-    # TODO(eval1749) We should have "SwitchValue.idl".
+    # TODO(eval1749): We should have "SwitchValue.idl".
     'SwitchValue': CppType('domapi::SwitchValue', is_by_value=False),
-    # TODO(eval1749) We should have "TabData.idl".
+    # TODO(eval1749): We should have "TabData.idl".
     'TabData': CppType('domapi::TabData', is_by_value=False),
 
     # Glue specific types
@@ -800,7 +800,7 @@ def underscore(text):
     return result
 
 
-# TODO(eval1749) We should not use union_type_string
+# TODO(eval1749): We should not use union_type_string
 def union_type_string(type_strings):
     return '|'.join(type_strings)
 

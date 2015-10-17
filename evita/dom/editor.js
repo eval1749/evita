@@ -217,7 +217,7 @@
           maybe_option = false;
           continue;
         }
-        // TODO(eval1749) Handle command line option.
+        // TODO(eval1749): Handle command line option.
         continue;
       }
       if (arg[0] === '*') {

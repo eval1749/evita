@@ -30,7 +30,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     set: function(new_value) {
       if (this.value_ == new_value)
         return;
-      // TODO(yosi) We should record old value for undo/redo.
+      // TODO(eval1749): We should record old value for undo/redo.
       this.value_ = new_value;
       this.selection.anchorOffset = 0;
       this.selection.focusOffset = new_value.length;
@@ -69,7 +69,7 @@ Object.defineProperties(TextFieldControl.prototype, {
   /** @type {boolean} */
   DragController.prototype.dragging;
 
-  /* TODO(eval1749) Once closure compiler support lcoal class name, we enable
+  /* TODO(eval1749): Once closure compiler support lcoal class name, we enable
    annotation: type {DragController} */
   TextFieldControl.prototype.dragController_ = null;
 
@@ -96,7 +96,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     control.dispatchEvent(new FormEvent(Event.Names.CHANGE, {data: value}));
   }
 
-  // TODO(yosi) Once we finish debugging of TextFieldControl editor, we should
+  // TODO(eval1749): Once we finish debugging of TextFieldControl editor, we should
   // not expose |bindKey|.
   TextFieldControl.bindKey = bindKey;
 

@@ -324,7 +324,7 @@
     changer(selection);
   }
 
-  // TODO(yosi) We should display dialog box to prompt enter line number and
+  // TODO(eval1749): We should display dialog box to prompt enter line number and
   // list of functions.
   Editor.bindKey(TextWindow, 'Ctrl+G',
     /**
@@ -640,7 +640,7 @@
       'extend selection to right by character');
 
   /** @const @type {number} */
-  // TODO(yosi) We should get |Indent|/|Outend| tab width from another place.
+  // TODO(eval1749): We should get |Indent|/|Outend| tab width from another place.
   var TAB_WIDTH = 4;
 
   Editor.bindKey(TextWindow, 'Shift+Tab',

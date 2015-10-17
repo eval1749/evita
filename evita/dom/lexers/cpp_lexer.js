@@ -11,7 +11,7 @@ global.CppLexer = (function(options) {
       super(document, options);
     }
   }
-  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // TODO(eval1749): Once closure compiler support |static get|, we should use
   // it.
   Object.defineProperty(CppLexer, 'keywords', {
     get: function() { return options.keywords; }

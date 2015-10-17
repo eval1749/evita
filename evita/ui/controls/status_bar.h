@@ -26,7 +26,7 @@ class StatusBar final {
   explicit operator bool() const { return hwnd_ != nullptr; }
 
   const Rect& bounds() const { return bounds_; }
-  // TODO(eval1749) We should get rid of |StatusBar::height()|.
+  // TODO(eval1749): We should get rid of |StatusBar::height()|.
   int height() const { return bounds_.height(); }
   HWND hwnd() const { return hwnd_; }
 

@@ -494,7 +494,7 @@ HCURSOR TextFieldControl::GetCursorAt(const gfx::Point&) const {
 }
 
 void TextFieldControl::OnDraw(gfx::Canvas* canvas) {
-  // TODO(eval1749) We should get current time from animation scheduler.
+  // TODO(eval1749): We should get current time from animation scheduler.
   view_->Animate(canvas, base::Time::Now());
 }
 

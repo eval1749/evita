@@ -39,7 +39,7 @@
       if (!document)
         return;
       document.close();
-      // TODO(eval1749) We should handle Document event rather than using
+      // TODO(eval1749): We should handle Document event rather than using
       // |needUpdate| variable. Because |close()| is asynchronous operation
       // and document may not be closed yet or canceled.
       needUpdate = true;

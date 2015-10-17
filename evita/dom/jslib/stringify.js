@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 Editor.stringify = (function() {
-  // TODO(yosi) Once v8 provide |TypedArray| class, we can replace this
+  // TODO(eval1749): Once v8 provide |TypedArray| class, we can replace this
   // |isTypedArray()|.
   function isTypedArray(object) {
     return object instanceof Float32Array ||

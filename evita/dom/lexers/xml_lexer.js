@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(yosi) Should we color entity reference in attribute value? VS2013
+// TODO(eval1749): Should we color entity reference in attribute value? VS2013
 // doesn't color.
-// TODO(yosi) NYI: <![CDATA[ ... ]]>
+// TODO(eval1749): NYI: <![CDATA[ ... ]]>
 global.XmlLexer = (function(xmlOptions) {
 
   /** @const @type {!Map.<number, number>} */
@@ -892,7 +892,7 @@ global.XmlLexer = (function(xmlOptions) {
     syntaxOfToken: {value: syntaxOfToken}
   });
 
-  // TODO(eval1749) Once closure compiler support |static get|, we should use
+  // TODO(eval1749): Once closure compiler support |static get|, we should use
   // it.
   Object.defineProperty(XmlLexer, 'keywords', {
     get: function() { return xmlOptions.keywords; }

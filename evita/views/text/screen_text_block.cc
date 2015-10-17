@@ -391,7 +391,7 @@ FormatLineIterator ScreenTextBlock::RenderContext::TryCopy(
   auto const screen_end = screen_lines_.end();
   auto format_runner = format_current;
   while (format_runner != format_end) {
-    // TODO(yosi) Should we search longest match? How?
+    // TODO(eval1749): Should we search longest match? How?
     auto const format_start = format_runner;
     auto const screen_start = FindCopyable(*format_start);
     if (screen_start == screen_lines_.end())
@@ -485,7 +485,7 @@ void ScreenTextBlock::Render(gfx::Canvas* canvas,
   // Event if we can't get bitmap from render target, screen is up-to-date,
   // but we render all lines next time.
   if (has_screen_bitmap_) {
-    // TODO(yosi) We should use existing TextLine's in ScreenTextBlock.
+    // TODO(eval1749): We should use existing TextLine's in ScreenTextBlock.
     for (auto line : text_block->lines()) {
       lines_.push_back(line->Copy());
     }

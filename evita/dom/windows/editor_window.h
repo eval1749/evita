@@ -19,7 +19,7 @@ class EditorWindow final : public v8_glue::Scriptable<EditorWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(EditorWindow);
 
  public:
-  // TODO(yosi) We should not allow to create |EditorWindow| from C++.
+  // TODO(eval1749): We should not allow to create |EditorWindow| from C++.
   EditorWindow();
   ~EditorWindow() final;
 

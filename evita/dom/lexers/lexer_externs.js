@@ -318,7 +318,7 @@ Lexer.prototype.syntaxOfWord = function(word) {};
 Lexer.prototype.syntaxOfTokens = function(range, tokens) {};
 
 /**
- * TODO(yosi) Once, Closure compiler recognizes |ClikeLexer| is subclass of
+ * TODO(eval1749): Once, Closure compiler recognizes |ClikeLexer| is subclass of
  * |Lexer|, we enable |@protected|.
  * protected
  * @param {number} charCode

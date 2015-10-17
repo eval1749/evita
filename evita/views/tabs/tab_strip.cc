@@ -726,7 +726,7 @@ class TabStrip::View final : private ui::ButtonListener,
   Tab* GetTab(size_t tab_index) const;
   void InsertTab(TabContent* tab_content, size_t tab_index);
   int NonClientHitTest(const gfx::Point& screen_point);
-  // TODO(eval1749) Once we should revise tooltip handling, we should get rid
+  // TODO(eval1749): Once we should revise tooltip handling, we should get rid
   // of |TabStrip::View::OnNotify()|.
   LRESULT OnNotify(NMHDR* nmhder);
   void SelectTab(size_t tab_index);

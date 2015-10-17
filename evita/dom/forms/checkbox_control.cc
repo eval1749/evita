@@ -19,7 +19,7 @@ CheckboxControl::~CheckboxControl() {}
 void CheckboxControl::set_checked(bool new_checked) {
   if (checked_ == new_checked)
     return;
-  // TODO(yosi) Dispatch |beforeinput| and |input| event.
+  // TODO(eval1749): Dispatch |beforeinput| and |input| event.
   checked_ = new_checked;
   DispatchChangeEvent();
 }

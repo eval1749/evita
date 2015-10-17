@@ -118,13 +118,13 @@ struct Converter<css::Color> {
     int int_value;
     if (!ConvertFromV8(isolate, js_value, &int_value))
       return false;
-    // TODO(yosi) How do we represent css::Color in JS?
+    // TODO(eval1749): How do we represent css::Color in JS?
     *out_color = css::Color((int_value >> 16) & 0xFF, (int_value >> 8) & 0xFF,
                             int_value & 0xFF);
     return true;
   }
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, css::Color color) {
-    // TODO(yosi) How do we represent css::Color in JS?
+    // TODO(eval1749): How do we represent css::Color in JS?
     auto const int_value =
         (color.red() << 16) | (color.green() << 8) | color.blue();
     return ConvertToV8(isolate, int_value);

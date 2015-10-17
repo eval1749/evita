@@ -50,7 +50,7 @@ void RadioButtonControl::set_checked(bool new_checked) {
     }
   }
 
-  // TODO(yosi) Dispatch |beforeinput| and |input| event.
+  // TODO(eval1749): Dispatch |beforeinput| and |input| event.
   checked_ = new_checked;
   DispatchChangeEvent();
 }

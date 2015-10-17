@@ -172,7 +172,7 @@ DynamicAbbrevExpander.prototype.findCandidate = function(current_word) {
 /**
  * @this {!DynamicAbbrevExpander}
  * @param {!TextSelection} selection
- * TODO(yosi) Check this command and last command
+ * TODO(eval1749): Check this command and last command
  */
 DynamicAbbrevExpander.prototype.prepare = function(selection) {
   if (this.prefix == '')

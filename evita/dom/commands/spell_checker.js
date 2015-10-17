@@ -231,7 +231,7 @@ SpellChecker.prototype.didFireTimer = function() {
       return false;
     }
     var category = Unicode.UCD[document.charCodeAt_(range.start)].category;
-    // TODO(yosi) When we support spell checking other than English, we
+    // TODO(eval1749): When we support spell checking other than English, we
     // should make other Unicode general categories are valid.
     if (category != 'Lu' && category != 'Ll')
       return false;
@@ -310,7 +310,7 @@ SpellChecker.prototype.markWord = function(wordRange, mark) {
   if (mark == Spelling.CORRECT) {
     return;
   }
-  // TODO(yosi) We should not mark for word in source code.
+  // TODO(eval1749): We should not mark for word in source code.
   wordRange.setSpelling(mark);
 };
 
@@ -387,7 +387,7 @@ SpellChecker.checkSpelling = function(wordToCheck) {
 Document.addObserver(function(action, document) {
   /** @param {!Document} document */
   function installSpellChecker(document) {
-    // TODO(yosi) We should have generic way to disable spell checking for
+    // TODO(eval1749): We should have generic way to disable spell checking for
     // document.
     if (document.name == '*javascript*')
       return;

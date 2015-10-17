@@ -67,7 +67,7 @@ Canvas::DrawingScope::DrawingScope(Canvas* canvas) : canvas_(canvas) {
 }
 
 Canvas::DrawingScope::~DrawingScope() {
-  // TODO(yosi) Should DrawingScope take mutable Canvas?
+  // TODO(eval1749): Should DrawingScope take mutable Canvas?
   canvas_->EndDraw();
 }
 

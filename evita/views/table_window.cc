@@ -28,7 +28,7 @@ namespace views {
 namespace {
 
 float CellWidth(const TableViewModel::Cell& cell) {
-  // TODO(eval1749) We should get character width from ListView control.
+  // TODO(eval1749): We should get character width from ListView control.
   const auto kCharWidth = 6.0f;
   const auto kLeftMargin = 5.0f;
   const auto kRightMargin = 5.0f;
@@ -36,7 +36,7 @@ float CellWidth(const TableViewModel::Cell& cell) {
 }
 
 std::vector<ui::TableColumn> BuildColumns(const TableViewModel::Row* row) {
-  // TODO(eval1749) We should specify minimum/maximum column width from model.
+  // TODO(eval1749): We should specify minimum/maximum column width from model.
   auto min_width = 200.0f;
   auto max_width = 300.0f;
   std::vector<ui::TableColumn> columns;

@@ -21,7 +21,7 @@
         '<(DEPTH)/common/common.gyp:common',
         '<(DEPTH)/v8/tools/gyp/v8.gyp:v8',
         'dom',
-        # TODO(yosi) We should not have "editor" dependency on
+        # TODO(eval1749): We should not have "editor" dependency on
         # "evita_dom_unittests".
         'editor',
         '<(DEPTH)/testing/gtest.gyp:gtest',

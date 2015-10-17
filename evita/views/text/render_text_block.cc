@@ -304,7 +304,7 @@ void TextBlock::Format(text::Posn text_offset) {
   dirty_ = false;
   dirty_line_point_ = false;
 
-  // TODO(eval1749) We should recompute default style when style is changed,
+  // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
   const auto& style = text_buffer_->GetDefaultStyle();
   // |default_style_| is used for providing fill color of right of end of line

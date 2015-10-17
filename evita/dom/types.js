@@ -6,7 +6,7 @@
 function EnumError(fields, message) {
   TypeError.call(this, message);
   this.fields = fields;
-  // TODO(yosi) This is work around of V8 bug. We should not have
+  // TODO(eval1749): This is work around of V8 bug. We should not have
   // |EnumError.message| here.
   this.message = message;
 }

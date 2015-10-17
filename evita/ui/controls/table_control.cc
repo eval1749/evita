@@ -469,7 +469,7 @@ HCURSOR ColumnCollection::GetCursorAt(const gfx::Point& point_in) const {
     return nullptr;
   if (point.x < column->bounds().right - 5)
     return nullptr;
-  // TODO(eval1749) We should use horizontal splitter cursor.
+  // TODO(eval1749): We should use horizontal splitter cursor.
   return ::LoadCursor(nullptr, IDC_SIZEWE);
 }
 
@@ -933,7 +933,7 @@ void RowCollection::DidRemoveRow(int row_id) {
   auto index = 0;
   auto row_pos = rows_.end();
   gfx::RectF new_rect;
-  // TODO(eval1749) We should use range-for.
+  // TODO(eval1749): We should use range-for.
   for (auto it = rows_.begin(); it < rows_.end(); ++it) {
     auto runner = *it;
     if (runner->row_id() == row_id) {

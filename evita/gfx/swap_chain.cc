@@ -55,7 +55,7 @@ void SwapChain::AddDirtyRect(const RectF& new_dirty_rect_f) {
 
 SwapChain* SwapChain::CreateForComposition(const RectF& bounds) {
   DCHECK(!bounds.empty());
-  // TODO(eval1749) We should use ToEnclosedRect().
+  // TODO(eval1749): We should use ToEnclosedRect().
   const auto size = gfx::SizeU(static_cast<uint32_t>(bounds.width()),
                                static_cast<uint32_t>(bounds.height()));
 

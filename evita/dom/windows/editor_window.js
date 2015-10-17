@@ -10,7 +10,7 @@
    * @param {EditorWindow} target
    */
   function handleDropWindow(source, target) {
-    // TODO(yosi) Realize target without showing then show target after
+    // TODO(eval1749): Realize target without showing then show target after
     // change parent.
     if (target.state == Window.State.NOTREALIZED)
       target.realize();

@@ -104,12 +104,12 @@ global.TextWindow.prototype.clone = function() {
     }
   }
 
-  /* TODO(eval1749) Once closure compiler support lcoal class name, we enable
+  /* TODO(eval1749): Once closure compiler support lcoal class name, we enable
    annotation: type {Autoscroller} */
   /** @suppress {suspiciousCode} */
   TextWindow.prototype.autoscroller_;
 
-  /* TODO(eval1749) Once closure compiler support lcoal class name, we enable
+  /* TODO(eval1749): Once closure compiler support lcoal class name, we enable
    annotation: type {DragController} */
   /** @suppress {suspiciousCode} */
   TextWindow.prototype.dragController_;
@@ -464,7 +464,7 @@ global.TextWindow.prototype.clone = function() {
     function equal(texts1, texts2) {
       if (texts1.length !== texts2.length)
         return false;
-      // TODO(eval1749) We should use arrow notation once v8 fixes internal
+      // TODO(eval1749): We should use arrow notation once v8 fixes internal
       // parse error when we use arrow notation.
       return texts1.every((text1, index) => {
         return text1 === texts2[index];

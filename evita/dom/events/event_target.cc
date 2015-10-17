@@ -209,6 +209,7 @@ void EventTarget::InvokeEventListeners(v8_glue::Runner* runner, Event* event) {
         GetCallee(isolate, listener->callback.NewLocal(isolate));
     if (callee.IsEmpty())
       continue;
+    DOM_AUTO_LOCK_SCOPE();
     runner->Call(callee, GetWrapper(isolate), event->GetWrapper(isolate));
   }
 }

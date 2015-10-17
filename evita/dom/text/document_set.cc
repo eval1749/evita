@@ -73,6 +73,7 @@ void DocumentSet::Observer::Notify(v8_glue::Runner* runner,
                                    const base::string16& type,
                                    Document* document) {
   auto const isolate = runner->isolate();
+  ASSERT_DOM_LOCKED();
   runner->Call(function_.NewLocal(runner->isolate()), v8::Undefined(isolate),
                gin::ConvertToV8(isolate, type),
                gin::ConvertToV8(isolate, document));

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "evita/bindings/v8_glue_MutationObserverInit.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/mutation_observer_controller.h"
 #include "evita/dom/text/mutation_record.h"
@@ -98,6 +99,7 @@ void MutationObserver::DidMutateDocument(Document* document) {
   v8::Local<v8::Value> records;
   if (!gin::TryConvertToV8(isolate, tracker->TakeRecords(), &records))
     return;
+  ASSERT_DOM_LOCKED();
   runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate), records,
                gin::ConvertToV8(isolate, this));
 }

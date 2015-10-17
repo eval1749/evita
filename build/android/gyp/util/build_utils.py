@@ -16,6 +16,8 @@ import sys
 import tempfile
 import zipfile
 
+# Some clients do not add //build/android/gyp to PYTHONPATH.
+import md5_check  # pylint: disable=relative-import
 
 CHROMIUM_SRC = os.path.normpath(
     os.path.join(os.path.dirname(__file__),
@@ -26,6 +28,7 @@ COLORAMA_ROOT = os.path.join(CHROMIUM_SRC,
 AAPT_IGNORE_PATTERN = ('!OWNERS:!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:' +
                        '!CVS:!thumbs.db:!picasa.ini:!*~:!*.d.stamp')
 HERMETIC_TIMESTAMP = (2001, 1, 1, 0, 0, 0)
+HERMETIC_FILE_ATTR = (0644 << 16L)
 
 
 @contextlib.contextmanager
@@ -195,7 +198,8 @@ def CheckZipPath(name):
     raise Exception('Absolute zip path: %s' % name)
 
 
-def ExtractAll(zip_path, path=None, no_clobber=True, pattern=None):
+def ExtractAll(zip_path, path=None, no_clobber=True, pattern=None,
+               predicate=None):
   if path is None:
     path = os.getcwd()
   elif not os.path.exists(path):
@@ -208,6 +212,8 @@ def ExtractAll(zip_path, path=None, no_clobber=True, pattern=None):
       if pattern is not None:
         if not fnmatch.fnmatch(name, pattern):
           continue
+      if predicate and not predicate(name):
+        continue
       CheckZipPath(name)
       if no_clobber:
         output_path = os.path.join(path, name)
@@ -215,8 +221,7 @@ def ExtractAll(zip_path, path=None, no_clobber=True, pattern=None):
           raise Exception(
               'Path already exists from zip: %s %s %s'
               % (zip_path, name, output_path))
-
-    z.extractall(path=path)
+      z.extract(name, path)
 
 
 def DoZip(inputs, output, base_dir=None):
@@ -239,6 +244,7 @@ def DoZip(inputs, output, base_dir=None):
     for zip_path, fs_path in input_tuples:
       CheckZipPath(zip_path)
       zipinfo = zipfile.ZipInfo(filename=zip_path, date_time=HERMETIC_TIMESTAMP)
+      zipinfo.external_attr = HERMETIC_FILE_ATTR
       with file(fs_path) as f:
         contents = f.read()
       outfile.writestr(zipinfo, contents)
@@ -271,6 +277,7 @@ def MergeZips(output, inputs, exclude_patterns=None, path_transform=None):
           if not already_added and not MatchesGlob(dst_name, exclude_patterns):
             zipinfo = zipfile.ZipInfo(filename=dst_name,
                                       date_time=HERMETIC_TIMESTAMP)
+            zipinfo.external_attr = HERMETIC_FILE_ATTR
             out_zip.writestr(zipinfo, in_zip.read(name))
             added_names.add(dst_name)
 
@@ -399,4 +406,49 @@ def ExpandFileArgs(args):
     new_args[i] = arg[:match.start()] + str(expansion)
 
   return new_args
+
+
+def CallAndWriteDepfileIfStale(function, options, record_path=None,
+                               input_paths=None, input_strings=None,
+                               output_paths=None, force=False,
+                               pass_changes=False):
+  """Wraps md5_check.CallAndRecordIfStale() and also writes dep & stamp files.
+
+  Depfiles and stamp files are automatically added to output_paths when present
+  in the |options| argument. They are then created after |function| is called.
+  """
+  if not output_paths:
+    raise Exception('At least one output_path must be specified.')
+  input_paths = list(input_paths or [])
+  input_strings = list(input_strings or [])
+  output_paths = list(output_paths or [])
+
+  python_deps = None
+  if hasattr(options, 'depfile') and options.depfile:
+    python_deps = GetPythonDependencies()
+    # List python deps in input_strings rather than input_paths since the
+    # contents of them does not change what gets written to the depfile.
+    input_strings += python_deps
+    output_paths += [options.depfile]
+
+  stamp_file = hasattr(options, 'stamp') and options.stamp
+  if stamp_file:
+    output_paths += [stamp_file]
+
+  def on_stale_md5(changes):
+    args = (changes,) if pass_changes else ()
+    function(*args)
+    if python_deps is not None:
+      WriteDepfile(options.depfile, python_deps + input_paths)
+    if stamp_file:
+      Touch(stamp_file)
+
+  md5_check.CallAndRecordIfStale(
+      on_stale_md5,
+      record_path=record_path,
+      input_paths=input_paths,
+      input_strings=input_strings,
+      output_paths=output_paths,
+      force=force,
+      pass_changes=True)
 

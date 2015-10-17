@@ -25,7 +25,7 @@
 // in base/ which hasn't been loaded yet.
 #define DEBUG 0
 
-#define TAG "cr.chromium_android_linker"
+#define TAG "cr_ChromiumAndroidLinker"
 
 #if DEBUG
 #define LOG_INFO(FORMAT, ...) \
@@ -188,9 +188,8 @@ struct LibInfo_class {
     }
 
     if (relro_size) {
-      *relro_size =
-          static_cast<size_t>(env->GetLongField(library_info_obj,
-                                                relro_size_id));
+      *relro_size = static_cast<size_t>(
+          env->GetLongField(library_info_obj, relro_size_id));
     }
 
     if (relro_fd) {

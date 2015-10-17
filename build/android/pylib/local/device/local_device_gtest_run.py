@@ -2,14 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import imp
 import itertools
-import logging
 import os
 import posixpath
 
 from devil.android import device_errors
 from devil.android import device_temp_file
 from devil.android import ports
+from incremental_install import installer
 from pylib import constants
 from pylib.gtest import gtest_test_instance
 from pylib.local import local_test_server_spawner
@@ -27,6 +28,10 @@ _EXTRA_TEST_LIST = (
         '.TestList')
 
 _MAX_SHARD_SIZE = 256
+_SECONDS_TO_NANOS = int(1e9)
+
+# The amount of time a test executable may run before it gets killed.
+_TEST_TIMEOUT_SECONDS = 30*60
 
 # TODO(jbudorick): Move this up to the test instance if the net test server is
 # handled outside of the APK for the remote_device environment.
@@ -49,22 +54,72 @@ def PullAppFilesImpl(device, package, files, directory):
         break
     device.PullFile(device_file, host_file)
 
+
+def _ExtractTestsFromFilter(gtest_filter):
+  """Returns the list of tests specified by the given filter.
+
+  Returns:
+    None if the device should be queried for the test list instead.
+  """
+  # Empty means all tests, - means exclude filter.
+  if not gtest_filter or '-' in gtest_filter:
+    return None
+
+  patterns = gtest_filter.split(':')
+  # For a single pattern, allow it even if it has a wildcard so long as the
+  # wildcard comes at the end and there is at least one . to prove the scope is
+  # not too large.
+  # This heuristic is not necessarily faster, but normally is.
+  if len(patterns) == 1 and patterns[0].endswith('*'):
+    no_suffix = patterns[0].rstrip('*')
+    if '*' not in no_suffix and '.' in no_suffix:
+      return patterns
+
+  if '*' in gtest_filter:
+    return None
+  return patterns
+
+
 class _ApkDelegate(object):
   def __init__(self, test_instance):
     self._activity = test_instance.activity
-    self._apk = test_instance.apk
+    self._apk_helper = test_instance.apk_helper
     self._package = test_instance.package
     self._runner = test_instance.runner
     self._permissions = test_instance.permissions
-
+    self._suite = test_instance.suite
     self._component = '%s/%s' % (self._package, self._runner)
     self._extras = test_instance.extras
 
-  def Install(self, device):
-    device.Install(self._apk, permissions=self._permissions)
+  def Install(self, device, incremental=False):
+    if not incremental:
+      device.Install(self._apk_helper, permissions=self._permissions)
+      return
+
+    installer_script = os.path.join(constants.GetOutDirectory(), 'bin',
+                                    'install_%s_apk_incremental' % self._suite)
+    try:
+      install_wrapper = imp.load_source('install_wrapper', installer_script)
+    except IOError:
+      raise Exception(('Incremental install script not found: %s\n'
+                       'Make sure to first build "%s_incremental"') %
+                      (installer_script, self._suite))
+    params = install_wrapper.GetInstallParameters()
+
+    installer.Install(device, self._apk_helper, split_globs=params['splits'],
+                      lib_dir=params['lib_dir'], dex_files=params['dex_files'])
 
   def Run(self, test, device, flags=None, **kwargs):
     extras = dict(self._extras)
+
+    if ('timeout' in kwargs
+        and gtest_test_instance.EXTRA_SHARD_NANO_TIMEOUT not in extras):
+      # Make sure the instrumentation doesn't kill the test before the
+      # scripts do. The provided timeout value is in seconds, but the
+      # instrumentation deals with nanoseconds because that's how Android
+      # handles time.
+      extras[gtest_test_instance.EXTRA_SHARD_NANO_TIMEOUT] = int(
+          kwargs['timeout'] * _SECONDS_TO_NANOS)
 
     with device_temp_file.DeviceTempFile(device.adb) as command_line_file:
       device.WriteFile(command_line_file.name, '_ %s' % flags if flags else '_')
@@ -75,8 +130,12 @@ class _ApkDelegate(object):
           device.WriteFile(test_list_file.name, '\n'.join(test))
           extras[_EXTRA_TEST_LIST] = test_list_file.name
 
-        return device.StartInstrumentation(
-            self._component, extras=extras, raw=False, **kwargs)
+        try:
+          return device.StartInstrumentation(
+              self._component, extras=extras, raw=False, **kwargs)
+        except Exception:
+          device.ForceStop(self._package)
+          raise
 
   def PullAppFiles(self, device, files, directory):
     PullAppFilesImpl(device, self._package, files, directory)
@@ -99,7 +158,8 @@ class _ExeDelegate(object):
       self._deps_host_path = None
     self._test_run = tr
 
-  def Install(self, device):
+  def Install(self, device, incremental=False):
+    assert not incremental
     # TODO(jbudorick): Look into merging this with normal data deps pushing if
     # executables become supported on nonlocal environments.
     host_device_tuples = [(self._exe_host_path, self._exe_device_path)]
@@ -108,10 +168,13 @@ class _ExeDelegate(object):
     device.PushChangedFiles(host_device_tuples)
 
   def Run(self, test, device, flags=None, **kwargs):
-    cmd = [
-        self._test_run.GetTool(device).GetTestWrapper(),
-        self._exe_device_path,
-    ]
+    tool = self._test_run.GetTool(device).GetTestWrapper()
+    if tool:
+      cmd = [tool]
+    else:
+      cmd = []
+    cmd.append(self._exe_device_path)
+
     if test:
       cmd.append('--gtest_filter=%s' % ':'.join(test))
     if flags:
@@ -130,14 +193,8 @@ class _ExeDelegate(object):
     except (device_errors.CommandFailedError, KeyError):
       pass
 
-    # TODO(jbudorick): Switch to just RunShellCommand once perezju@'s CL
-    # for long shell commands lands.
-    with device_temp_file.DeviceTempFile(device.adb) as script_file:
-      script_contents = ' '.join(cmd)
-      logging.info('script contents: %r', script_contents)
-      device.WriteFile(script_file.name, script_contents)
-      output = device.RunShellCommand(['sh', script_file.name], cwd=cwd,
-                                      env=env, **kwargs)
+    output = device.RunShellCommand(
+        cmd, cwd=cwd, env=env, check_return=True, large_output=True, **kwargs)
     return output
 
   def PullAppFiles(self, device, files, directory):
@@ -168,9 +225,10 @@ class LocalDeviceGtestRun(local_device_test_run.LocalDeviceTestRun):
   #override
   def SetUp(self):
 
+    @local_device_test_run.handle_shard_failures
     def individual_device_set_up(dev, host_device_tuples):
       # Install test APK.
-      self._delegate.Install(dev)
+      self._delegate.Install(dev, incremental=self._env.incremental_install)
 
       # Push data dependencies.
       external_storage = dev.GetExternalStoragePath()
@@ -179,11 +237,15 @@ class LocalDeviceGtestRun(local_device_test_run.LocalDeviceTestRun):
           for h, d in host_device_tuples]
       dev.PushChangedFiles(host_device_tuples)
 
+      tool = self.GetTool(dev)
+      tool.CopyFiles(dev)
+      tool.SetupEnvironment()
+
       self._servers[str(dev)] = []
       if self.TestPackage() in _SUITE_REQUIRES_TEST_SERVER_SPAWNER:
         self._servers[str(dev)].append(
             local_test_server_spawner.LocalTestServerSpawner(
-                ports.AllocateTestServerPort(), dev, self.GetTool(dev)))
+                ports.AllocateTestServerPort(), dev, tool))
 
       for s in self._servers[str(dev)]:
         s.SetUp()
@@ -207,16 +269,36 @@ class LocalDeviceGtestRun(local_device_test_run.LocalDeviceTestRun):
 
   #override
   def _GetTests(self):
-    tests = self._delegate.Run(
-        None, self._env.devices[0], flags='--gtest_list_tests')
-    tests = gtest_test_instance.ParseGTestListTests(tests)
-    tests = self._test_instance.FilterTests(tests)
-    return tests
+    # When the exact list of tests to run is given via command-line (e.g. when
+    # locally iterating on a specific test), skip querying the device (which
+    # takes ~3 seconds).
+    tests = _ExtractTestsFromFilter(self._test_instance.gtest_filter)
+    if tests:
+      return tests
+
+    # Even when there's only one device, it still makes sense to retrieve the
+    # test list so that tests can be split up and run in batches rather than all
+    # at once (since test output is not streamed).
+    @local_device_test_run.handle_shard_failures_with(
+        on_failure=self._env.BlacklistDevice)
+    def list_tests(dev):
+      tests = self._delegate.Run(
+          None, dev, flags='--gtest_list_tests', timeout=10)
+      tests = gtest_test_instance.ParseGTestListTests(tests)
+      tests = self._test_instance.FilterTests(tests)
+      return tests
+
+    # Query all devices in case one fails.
+    test_lists = self._env.parallel_devices.pMap(list_tests).pGet(None)
+    # TODO(agrieve): Make this fail rather than return an empty list when
+    #     all devices fail.
+    return list(sorted(set().union(*[set(tl) for tl in test_lists if tl])))
 
   #override
   def _RunTest(self, device, test):
     # Run the test.
-    timeout = 900 * self.GetTool(device).GetTimeoutScale()
+    timeout = (self._test_instance.shard_timeout
+               * self.GetTool(device).GetTimeoutScale())
     output = self._delegate.Run(
         test, device, timeout=timeout, retries=0)
     for s in self._servers[str(device)]:
@@ -233,9 +315,12 @@ class LocalDeviceGtestRun(local_device_test_run.LocalDeviceTestRun):
 
   #override
   def TearDown(self):
+    @local_device_test_run.handle_shard_failures
     def individual_device_tear_down(dev):
-      for s in self._servers[str(dev)]:
+      for s in self._servers.get(str(dev), []):
         s.TearDown()
 
-    self._env.parallel_devices.pMap(individual_device_tear_down)
+      tool = self.GetTool(dev)
+      tool.CleanUpEnvironment()
 
+    self._env.parallel_devices.pMap(individual_device_tear_down)

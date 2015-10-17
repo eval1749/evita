@@ -56,13 +56,17 @@ class TestRunner(base_test_runner.BaseTestRunner):
     self.coverage_dir = test_options.coverage_dir
     self.coverage_host_file = None
     self.options = test_options
+    package_info_candidates = [a for a in constants.PACKAGE_INFO.itervalues()
+                               if a.test_package == test_pkg.GetPackageName()]
+    assert len(package_info_candidates) < 2, (
+        'Multiple packages have the same test package')
+    self.package_info = (package_info_candidates[0] if package_info_candidates
+                         else None)
     self.test_pkg = test_pkg
     # Use the correct command line file for the package under test.
-    cmdline_file = [a.cmdline_file for a in constants.PACKAGE_INFO.itervalues()
-                    if a.test_package == self.test_pkg.GetPackageName()]
-    assert len(cmdline_file) < 2, 'Multiple packages have the same test package'
-    if len(cmdline_file) and cmdline_file[0]:
-      self.flags = flag_changer.FlagChanger(self.device, cmdline_file[0])
+    if self.package_info and self.package_info.cmdline_file:
+      self.flags = flag_changer.FlagChanger(
+          self.device, self.package_info.cmdline_file)
       if additional_flags:
         self.flags.AddFlags(additional_flags)
     else:
@@ -152,7 +156,8 @@ class TestRunner(base_test_runner.BaseTestRunner):
       Whether the feature being tested is FirstRunExperience.
     """
     annotations = self.test_pkg.GetTestAnnotations(test)
-    return 'FirstRunExperience' == annotations.get('Feature', None)
+    feature = annotations.get('Feature', None)
+    return feature and 'FirstRunExperience' in feature['value']
 
   def _IsPerfTest(self, test):
     """Determines whether a test is a performance test.
@@ -191,20 +196,21 @@ class TestRunner(base_test_runner.BaseTestRunner):
 
     self.tool.CleanUpEnvironment()
 
-    # The logic below relies on the test passing.
-    if not result or not result.DidRunPass():
+    if not result:
       return
+    if result.DidRunPass():
+      self.TearDownPerfMonitoring(test)
 
-    self.TearDownPerfMonitoring(test)
+      if self.flags and self._IsFreTest(test):
+        self.flags.AddFlags(['--disable-fre'])
 
-    if self.flags and self._IsFreTest(test):
-      self.flags.AddFlags(['--disable-fre'])
-
-    if self.coverage_dir:
-      self.device.PullFile(
-          self.coverage_device_file, self.coverage_host_file)
-      self.device.RunShellCommand(
-          'rm -f %s' % self.coverage_device_file)
+      if self.coverage_dir:
+        self.device.PullFile(
+            self.coverage_device_file, self.coverage_host_file)
+        self.device.RunShellCommand(
+            'rm -f %s' % self.coverage_device_file)
+    elif self.package_info:
+      self.device.ClearApplicationState(self.package_info.package)
 
   def TearDownPerfMonitoring(self, test):
     """Cleans up performance monitoring if the specified test required it.
@@ -272,10 +278,10 @@ class TestRunner(base_test_runner.BaseTestRunner):
     timeout_scale = 1
     if 'TimeoutScale' in annotations:
       try:
-        timeout_scale = int(annotations['TimeoutScale'])
+        timeout_scale = int(annotations['TimeoutScale']['value'])
       except ValueError:
         logging.warning('Non-integer value of TimeoutScale ignored. (%s)',
-                        annotations['TimeoutScale'])
+                        annotations['TimeoutScale']['value'])
     if self.options.wait_for_debugger:
       timeout_scale *= 100
     return timeout_scale
@@ -317,7 +323,7 @@ class TestRunner(base_test_runner.BaseTestRunner):
     extras['class'] = test
     return self.device.StartInstrumentation(
         '%s/%s' % (self.test_pkg.GetPackageName(), self.options.test_runner),
-        raw=True, extras=extras, timeout=timeout, retries=3)
+        raw=True, extras=extras, timeout=timeout, retries=0)
 
   # pylint: disable=no-self-use
   def _GenerateTestResult(self, test, instr_result_code, instr_result_bundle,
@@ -366,6 +372,9 @@ class TestRunner(base_test_runner.BaseTestRunner):
       results.AddResult(test_result.InstrumentationTestResult(
           test, base_test_result.ResultType.TIMEOUT, start_ms, duration_ms,
           log=str(e) or 'No information'))
+      if self.package_info:
+        self.device.ForceStop(self.package_info.package)
+        self.device.ForceStop(self.package_info.test_package)
     except device_errors.DeviceUnreachableError as e:
       results.AddResult(test_result.InstrumentationTestResult(
           test, base_test_result.ResultType.CRASH, start_ms, duration_ms,

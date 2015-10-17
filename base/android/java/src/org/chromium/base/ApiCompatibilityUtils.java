@@ -352,24 +352,6 @@ public class ApiCompatibilityUtils {
 
     /**
      * @see android.view.Window#setStatusBarColor(int color).
-     * TODO(ianwen): remove this method after downstream rolling.
-     */
-    public static void setStatusBarColor(Activity activity, int statusBarColor) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // If both system bars are black, we can remove these from our layout,
-            // removing or shrinking the SurfaceFlinger overlay required for our views.
-            Window window = activity.getWindow();
-            if (statusBarColor == Color.BLACK && window.getNavigationBarColor() == Color.BLACK) {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            } else {
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            }
-            window.setStatusBarColor(statusBarColor);
-        }
-    }
-
-    /**
-     * @see android.view.Window#setStatusBarColor(int color).
      */
     public static void setStatusBarColor(Window window, int statusBarColor) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -452,6 +434,18 @@ public class ApiCompatibilityUtils {
             return res.getColorStateList(id, null);
         } else {
             return res.getColorStateList(id);
+        }
+    }
+
+    /**
+     * @see android.widget.TextView#setTextAppearance(int id).
+     */
+    @SuppressWarnings("deprecation")
+    public static void setTextAppearance(TextView view, int id) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            view.setTextAppearance(id);
+        } else {
+            view.setTextAppearance(view.getContext(), id);
         }
     }
 }

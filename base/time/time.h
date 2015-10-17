@@ -79,6 +79,8 @@
 // For FILETIME in FromFileTime, until it moves to a new converter class.
 // See TODO(iyengar) below.
 #include <windows.h>
+
+#include "base/gtest_prod_util.h"
 #endif
 
 #include <limits>
@@ -685,12 +687,14 @@ class BASE_EXPORT TimeTicks : public time_internal::TimeBase<TimeTicks> {
   static TimeTicks FromQPCValue(LONGLONG qpc_value);
 #endif
 
-  // Get the TimeTick value at the time of the UnixEpoch. This is useful when
-  // you need to relate the value of TimeTicks to a real time and date.
-  // Note: Upon first invocation, this function takes a snapshot of the realtime
-  // clock to establish a reference point.  This function will return the same
-  // value for the duration of the application, but will be different in future
-  // application runs.
+  // Get an estimate of the TimeTick value at the time of the UnixEpoch. Because
+  // Time and TimeTicks respond differently to user-set time and NTP
+  // adjustments, this number is only an estimate. Nevertheless, this can be
+  // useful when you need to relate the value of TimeTicks to a real time and
+  // date. Note: Upon first invocation, this function takes a snapshot of the
+  // realtime clock to establish a reference point.  This function will return
+  // the same value for the duration of the application, but will be different
+  // in future application runs.
   static TimeTicks UnixEpoch();
 
   // Returns |this| snapped to the next tick, given a |tick_phase| and
@@ -731,8 +735,18 @@ class BASE_EXPORT ThreadTicks : public time_internal::TimeBase<ThreadTicks> {
 #if (defined(_POSIX_THREAD_CPUTIME) && (_POSIX_THREAD_CPUTIME >= 0)) || \
     (defined(OS_MACOSX) && !defined(OS_IOS)) || defined(OS_ANDROID)
     return true;
+#elif defined(OS_WIN)
+    return IsSupportedWin();
 #else
     return false;
+#endif
+  }
+
+  // Waits until the initialization is completed. Needs to be guarded with a
+  // call to IsSupported().
+  static void WaitUntilInitialized() {
+#if defined(OS_WIN)
+    WaitUntilInitializedWin();
 #endif
   }
 
@@ -740,7 +754,9 @@ class BASE_EXPORT ThreadTicks : public time_internal::TimeBase<ThreadTicks> {
   // Needs to be guarded with a call to IsSupported(). Use this timer
   // to (approximately) measure how much time the calling thread spent doing
   // actual work vs. being de-scheduled. May return bogus results if the thread
-  // migrates to another CPU between two calls.
+  // migrates to another CPU between two calls. Returns an empty ThreadTicks
+  // object until the initialization is completed. If a clock reading is
+  // absolutely needed, call WaitUntilInitialized() before this method.
   static ThreadTicks Now();
 
  private:
@@ -750,6 +766,19 @@ class BASE_EXPORT ThreadTicks : public time_internal::TimeBase<ThreadTicks> {
   // and testing.
   explicit ThreadTicks(int64 us) : TimeBase(us) {
   }
+
+#if defined(OS_WIN)
+  FRIEND_TEST_ALL_PREFIXES(TimeTicks, TSCTicksPerSecond);
+
+  // Returns the frequency of the TSC in ticks per second, or 0 if it hasn't
+  // been measured yet. Needs to be guarded with a call to IsSupported().
+  // This method is declared here rather than in the anonymous namespace to
+  // allow testing.
+  static double TSCTicksPerSecond();
+
+  static bool IsSupportedWin();
+  static void WaitUntilInitializedWin();
+#endif
 };
 
 // For logging use only.

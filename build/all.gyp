@@ -30,6 +30,7 @@
         '../testing/gtest.gyp:*',
         '../third_party/icu/icu.gyp:*',
         '../third_party/libxml/libxml.gyp:*',
+        '../third_party/openh264/tests/openh264_unittests.gyp:*',
         '../third_party/sqlite/sqlite.gyp:*',
         '../third_party/zlib/zlib.gyp:*',
         '../ui/accessibility/accessibility.gyp:*',
@@ -85,7 +86,7 @@
               'dependencies': [
                 '../android_webview/android_webview.gyp:android_webview_apk',
                 '../android_webview/android_webview.gyp:system_webview_apk',
-                '../android_webview/android_webview_shell.gyp:android_webview_shell_apk',
+                '../android_webview/android_webview_shell.gyp:system_webview_shell_apk',
                 '../chrome/android/chrome_apk.gyp:chrome_public_apk',
                 '../chrome/android/chrome_apk.gyp:chrome_sync_shell_apk',
                 '../remoting/remoting.gyp:remoting_apk',
@@ -159,10 +160,9 @@
           'dependencies': [
             '../device/bluetooth/bluetooth.gyp:*',
             '../device/device_tests.gyp:*',
-            '../gpu/skia_runner/skia_runner.gyp:*',
           ],
         }],
-        ['use_openssl==0 and (OS=="mac" or OS=="ios" or OS=="win")', {
+        ['use_openssl==0 and OS=="ios"', {
           'dependencies': [
             '../third_party/nss/nss.gyp:*',
            ],
@@ -498,7 +498,7 @@
   ],
   'conditions': [
     # TODO(GYP): make gn_migration.gypi work unconditionally.
-    ['OS=="mac" or OS=="win" or (OS=="linux" and target_arch=="x64" and chromecast==0)', {
+    ['OS=="mac" or OS=="win" or (OS=="android" and chromecast==0) or (OS=="linux" and target_arch=="x64" and chromecast==0)', {
       'includes': [
         'gn_migration.gypi',
       ],
@@ -783,9 +783,7 @@
       'targets': [
         {
           # The current list of tests for android.  This is temporary
-          # until the full set supported.  If adding a new test here,
-          # please also add it to build/android/pylib/gtest/gtest_config.py,
-          # else the test is not run.
+          # until the full set supported.
           #
           # WARNING:
           # Do not add targets here without communicating the implications
@@ -873,6 +871,8 @@
                 # Unit test bundles packaged as an apk.
                 '../android_webview/android_webview.gyp:android_webview_test_apk',
                 '../android_webview/android_webview.gyp:android_webview_unittests_apk',
+                '../android_webview/android_webview_shell.gyp:system_webview_shell_layout_test_apk',
+                '../android_webview/android_webview_shell.gyp:system_webview_shell_page_cycler_apk',
                 '../chrome/android/chrome_apk.gyp:chrome_public_test_apk',
                 '../chrome/android/chrome_apk.gyp:chrome_sync_shell_test_apk',
                 '../chrome/chrome.gyp:chrome_junit_tests',
@@ -1340,7 +1340,7 @@
             }],
             ['use_ash==1', {
               'dependencies': [
-                '../ash/ash.gyp:ash_shell',
+                '../ash/ash.gyp:ash_shell_with_content',
                 '../ash/ash.gyp:ash_unittests',
               ],
             }],

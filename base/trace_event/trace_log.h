@@ -5,25 +5,10 @@
 #ifndef BASE_TRACE_EVENT_TRACE_LOG_H_
 #define BASE_TRACE_EVENT_TRACE_LOG_H_
 
+#include "base/gtest_prod_util.h"
 #include "base/trace_event/memory_dump_provider.h"
 #include "base/trace_event/trace_config.h"
 #include "base/trace_event/trace_event_impl.h"
-
-// Older style trace macros with explicit id and extra data
-// Only these macros result in publishing data to ETW as currently implemented.
-// TODO(georgesak): Update/replace these with new ETW macros.
-#define TRACE_EVENT_BEGIN_ETW(name, id, extra)   \
-  base::trace_event::TraceLog::AddTraceEventEtw( \
-      TRACE_EVENT_PHASE_BEGIN, name, reinterpret_cast<const void*>(id), extra)
-
-#define TRACE_EVENT_END_ETW(name, id, extra)     \
-  base::trace_event::TraceLog::AddTraceEventEtw( \
-      TRACE_EVENT_PHASE_END, name, reinterpret_cast<const void*>(id), extra)
-
-#define TRACE_EVENT_INSTANT_ETW(name, id, extra)                          \
-  base::trace_event::TraceLog::AddTraceEventEtw(                          \
-      TRACE_EVENT_PHASE_INSTANT, name, reinterpret_cast<const void*>(id), \
-      extra)
 
 namespace base {
 
@@ -239,14 +224,6 @@ class BASE_EXPORT TraceLog : public MemoryDumpProvider {
       const unsigned long long* arg_values,
       const scoped_refptr<ConvertableToTraceFormat>* convertable_values,
       unsigned int flags);
-  static void AddTraceEventEtw(char phase,
-                               const char* category_group,
-                               const void* id,
-                               const char* extra);
-  static void AddTraceEventEtw(char phase,
-                               const char* category_group,
-                               const void* id,
-                               const std::string& extra);
 
   void UpdateTraceEventDuration(const unsigned char* category_group_enabled,
                                 const char* name,

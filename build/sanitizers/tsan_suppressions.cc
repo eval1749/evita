@@ -246,11 +246,6 @@ char kTSanDefaultSuppressions[] =
 "race:SkFontConfigInterface::GetSingletonDirectInterface\n"
 "race:FcStrStaticName\n"
 
-// http://crbug.com/372807
-"deadlock:net::X509Certificate::CreateCertificateListFromBytes\n"
-"deadlock:net::X509Certificate::CreateFromBytes\n"
-"deadlock:net::SSLClientSocketNSS::Core::DoHandshakeLoop\n"
-
 // http://crbug.com/374135
 "race:media::AlsaWrapper::PcmWritei\n"
 
@@ -304,6 +299,9 @@ char kTSanDefaultSuppressions[] =
 
 // https://crbug.com/454655
 "race:content::BrowserTestBase::PostTaskToInProcessRendererAndWait\n"
+
+// https://crbug.com/539315
+"race:MojoCreateMessagePipe\n"
 
 // End of suppressions.
 ;  // Please keep this semicolon.

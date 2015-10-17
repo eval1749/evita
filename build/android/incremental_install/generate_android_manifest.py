@@ -21,7 +21,10 @@ _ANDROID_NAMESPACE = 'http://schemas.android.com/apk/res/android'
 ElementTree.register_namespace('android', _ANDROID_NAMESPACE)
 
 _INCREMENTAL_APP_NAME = 'org.chromium.incrementalinstall.BootstrapApplication'
-_META_DATA_NAME = 'incremental-install-real-app'
+_META_DATA_APP_NAME = 'incremental-install-real-app'
+_META_DATA_INSTRUMENTATION_NAME = 'incremental-install-real-instrumentation'
+_DEFAULT_APPLICATION_CLASS = 'android.app.Application'
+_DEFAULT_INSTRUMENTATION_CLASS = 'android.app.Instrumentation'
 
 
 def _AddNamespace(name):
@@ -44,13 +47,17 @@ def _ParseArgs():
   return parser.parse_args()
 
 
-def _ProcessManifest(main_manifest, main_manifest_path,
-                     disable_isolated_processes):
+def _CreateMetaData(parent, name, value):
+  meta_data_node = ElementTree.SubElement(parent, 'meta-data')
+  meta_data_node.set(_AddNamespace('name'), name)
+  meta_data_node.set(_AddNamespace('value'), value)
+
+
+def _ProcessManifest(main_manifest, disable_isolated_processes):
   """Returns a transformed AndroidManifest.xml for use with _incremental apks.
 
   Args:
     main_manifest: Manifest contents to transform.
-    main_manifest_path: Path to main_manifest (used for error messages).
     disable_isolated_processes: Whether to set all isolatedProcess attributes to
         false
 
@@ -64,16 +71,23 @@ def _ProcessManifest(main_manifest, main_manifest_path,
   doc = ElementTree.fromstring(main_manifest)
   app_node = doc.find('application')
   if app_node is None:
-    raise Exception('Could not find <application> in %s' % main_manifest_path)
-  real_app_class = app_node.get(_AddNamespace('name'))
-  if real_app_class is None:
-    raise Exception('Could not find android:name in <application> in %s' %
-                    main_manifest_path)
-  app_node.set(_AddNamespace('name'), _INCREMENTAL_APP_NAME)
+    app_node = ElementTree.SubElement(doc, 'application')
 
-  meta_data_node = ElementTree.SubElement(app_node, 'meta-data')
-  meta_data_node.set(_AddNamespace('name'), _META_DATA_NAME)
-  meta_data_node.set(_AddNamespace('value'), real_app_class)
+  real_app_class = app_node.get(_AddNamespace('name'),
+                                _DEFAULT_APPLICATION_CLASS)
+  app_node.set(_AddNamespace('name'), _INCREMENTAL_APP_NAME)
+  _CreateMetaData(app_node, _META_DATA_APP_NAME, real_app_class)
+
+  # Seems to be a bug in ElementTree, as doc.find() doesn't work here.
+  instrumentation_nodes = doc.findall('instrumentation')
+  if instrumentation_nodes:
+    instrumentation_node = instrumentation_nodes[0]
+    real_instrumentation_class = instrumentation_node.get(_AddNamespace('name'))
+    instrumentation_node.set(_AddNamespace('name'),
+                             _DEFAULT_INSTRUMENTATION_CLASS)
+    _CreateMetaData(app_node, _META_DATA_INSTRUMENTATION_NAME,
+                    real_instrumentation_class)
+
   return ElementTree.tostring(doc, encoding='UTF-8')
 
 
@@ -81,7 +95,7 @@ def main():
   options = _ParseArgs()
   with open(options.src_manifest) as f:
     main_manifest_data = f.read()
-  new_manifest_data = _ProcessManifest(main_manifest_data, options.src_manifest,
+  new_manifest_data = _ProcessManifest(main_manifest_data,
                                        options.disable_isolated_processes)
   with open(options.out_manifest, 'w') as f:
     f.write(new_manifest_data)

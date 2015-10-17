@@ -218,7 +218,7 @@ class BASE_EXPORT MemoryDumpManager : public TraceLog::EnabledStateObserver {
   subtle::AtomicWord memory_tracing_enabled_;
 
   // For time-triggered periodic dumps.
-  RepeatingTimer<MemoryDumpManager> periodic_dump_timer_;
+  RepeatingTimer periodic_dump_timer_;
 
   // The unique id of the child process. This is created only for tracing and is
   // expected to be valid only when tracing is enabled.
@@ -226,6 +226,9 @@ class BASE_EXPORT MemoryDumpManager : public TraceLog::EnabledStateObserver {
 
   // Skips the auto-registration of the core dumpers during Initialize().
   bool skip_core_dumpers_auto_registration_for_testing_;
+
+  // Whether new memory dump providers should be told to enable heap profiling.
+  bool heap_profiling_enabled_;
 
   DISALLOW_COPY_AND_ASSIGN(MemoryDumpManager);
 };

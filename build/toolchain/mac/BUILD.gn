@@ -50,10 +50,7 @@ template("mac_toolchain") {
 
     tool("cc") {
       depfile = "{{output}}.d"
-
-      # TODO:(andybons): enable this when GCC PCH support in the binary has been
-      # rolled.
-      #precompiled_header_type = "gcc"
+      precompiled_header_type = "gcc"
       command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
@@ -64,10 +61,7 @@ template("mac_toolchain") {
 
     tool("cxx") {
       depfile = "{{output}}.d"
-
-      # TODO:(andybons): enable this when GCC PCH support in the binary has been
-      # rolled.
-      #precompiled_header_type = "gcc"
+      precompiled_header_type = "gcc"
       command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
@@ -79,7 +73,7 @@ template("mac_toolchain") {
     tool("asm") {
       # For GCC we can just use the C compiler to compile assembly.
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
@@ -89,12 +83,8 @@ template("mac_toolchain") {
 
     tool("objc") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_objc}} -c {{source}} -o {{output}}"
-
-      # TODO:(andybons): enable this when GCC PCH support in the binary has been
-      # rolled.
-      #precompiled_header_type = "gcc"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} {{cflags_objc}} -c {{source}} -o {{output}}"
+      precompiled_header_type = "gcc"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_objc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJC {{output}}"
       outputs = [
@@ -104,11 +94,8 @@ template("mac_toolchain") {
 
     tool("objcxx") {
       depfile = "{{output}}.d"
+      precompiled_header_type = "gcc"
       command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_objcc}} -c {{source}} -o {{output}}"
-
-      # TODO:(andybons): enable this when GCC PCH support in the binary has been
-      # rolled.
-      #precompiled_header_type = "gcc"
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
       outputs = [
@@ -131,9 +118,9 @@ template("mac_toolchain") {
       rspfile = dylib + ".rsp"
 
       # These variables are not built into GN but are helpers that implement
-      # (1) linking to produce a .so, (2) extracting the symbols from that file
-      # to a temporary file, (3) if the temporary file has differences from the
-      # existing .TOC file, overwrite it, otherwise, don't change it.
+      # (1) linking to produce a .dylib, (2) extracting the symbols from that
+      # file to a temporary file, (3) if the temporary file has differences from
+      # the existing .TOC file, overwrite it, otherwise, don't change it.
       #
       # As a special case, if the library reexports symbols from other dynamic
       # libraries, we always update the .TOC and skip the temporary file and
@@ -178,6 +165,33 @@ template("mac_toolchain") {
       ]
       link_output = dylib
       depend_output = tocname
+    }
+
+    tool("solink_module") {
+      sofile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"  # eg "./libfoo.so"
+      rspfile = sofile + ".rsp"
+
+      link_command = "$ld -bundle {{ldflags}} -o $sofile -Wl,-filelist,$rspfile"
+      if (is_component_build) {
+        link_command += " -Wl,-install_name,@rpath/{{target_output_name}}{{output_extension}}"
+      }
+      link_command += " {{solibs}} {{libs}}"
+      command = link_command
+
+      rspfile_content = "{{inputs_newline}}"
+
+      description = "SOLINK_MODULE {{output}}"
+
+      # Use this for {{output_extension}} expansions unless a target manually
+      # overrides it (in which case {{output_extension}} will be what the target
+      # specifies).
+      default_output_extension = ".so"
+
+      output_prefix = "lib"
+
+      outputs = [
+        sofile,
+      ]
     }
 
     tool("link") {

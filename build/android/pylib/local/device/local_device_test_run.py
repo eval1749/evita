@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import fnmatch
+import functools
 import logging
 
 from devil.android import device_errors
@@ -9,6 +11,46 @@ from pylib import valgrind_tools
 from pylib.base import base_test_result
 from pylib.base import test_run
 from pylib.base import test_collection
+
+
+def handle_shard_failures(f):
+  """A decorator that handles device failures for per-device functions.
+
+  Args:
+    f: the function being decorated. The function must take at least one
+      argument, and that argument must be the device.
+  """
+  return handle_shard_failures_with(None)(f)
+
+
+def handle_shard_failures_with(on_failure):
+  """A decorator that handles device failures for per-device functions.
+
+  This calls on_failure in the event of a failure.
+
+  Args:
+    f: the function being decorated. The function must take at least one
+      argument, and that argument must be the device.
+    on_failure: A unary function to call on failure.
+  """
+  def decorator(f):
+    @functools.wraps(f)
+    def wrapper(dev, *args, **kwargs):
+      try:
+        return f(dev, *args, **kwargs)
+      except device_errors.CommandFailedError:
+        logging.exception('Shard failed: %s(%s)', f.__name__, str(dev))
+      except device_errors.CommandTimeoutError:
+        logging.exception('Shard timed out: %s(%s)', f.__name__, str(dev))
+      except device_errors.DeviceUnreachableError:
+        logging.exception('Shard died: %s(%s)', f.__name__, str(dev))
+      if on_failure:
+        on_failure(dev)
+      return None
+
+    return wrapper
+
+  return decorator
 
 
 class LocalDeviceTestRun(test_run.TestRun):
@@ -21,8 +63,10 @@ class LocalDeviceTestRun(test_run.TestRun):
   def RunTests(self):
     tests = self._GetTests()
 
+    @handle_shard_failures
     def run_tests_on_device(dev, tests, results):
       for test in tests:
+        result = None
         try:
           result = self._RunTest(dev, test)
           if isinstance(result, base_test_result.BaseTestResult):
@@ -39,6 +83,8 @@ class LocalDeviceTestRun(test_run.TestRun):
         finally:
           if isinstance(tests, test_collection.TestCollection):
             tests.test_completed()
+
+
       logging.info('Finished running tests on this device.')
 
     tries = 0
@@ -52,21 +98,14 @@ class LocalDeviceTestRun(test_run.TestRun):
       for t in tests:
         logging.debug('  %s', t)
 
-      try:
-        try_results = base_test_result.TestRunResults()
-        if self._ShouldShard():
-          tc = test_collection.TestCollection(self._CreateShards(tests))
-          self._env.parallel_devices.pMap(
-              run_tests_on_device, tc, try_results).pGet(None)
-        else:
-          self._env.parallel_devices.pMap(
-              run_tests_on_device, tests, try_results).pGet(None)
-      except device_errors.CommandFailedError:
-        logging.exception('Shard terminated: command failed')
-      except device_errors.CommandTimeoutError:
-        logging.exception('Shard terminated: command timed out')
-      except device_errors.DeviceUnreachableError:
-        logging.exception('Shard terminated: device became unreachable')
+      try_results = base_test_result.TestRunResults()
+      if self._ShouldShard():
+        tc = test_collection.TestCollection(self._CreateShards(tests))
+        self._env.parallel_devices.pMap(
+            run_tests_on_device, tc, try_results).pGet(None)
+      else:
+        self._env.parallel_devices.pMap(
+            run_tests_on_device, tests, try_results).pGet(None)
 
       for result in try_results.GetAll():
         if result.GetType() in (base_test_result.ResultType.PASS,
@@ -76,7 +115,15 @@ class LocalDeviceTestRun(test_run.TestRun):
           all_fail_results[result.GetName()] = result
 
       results_names = set(r.GetName() for r in results.GetAll())
-      tests = [t for t in tests if self._GetTestName(t) not in results_names]
+
+      def has_test_result(name):
+        # When specifying a test filter, names can contain trailing wildcards.
+        # See local_device_gtest_run._ExtractTestsFromFilter()
+        if name.endswith('*'):
+          return any(fnmatch.fnmatch(n, name) for n in results_names)
+        return name in results_names
+
+      tests = [t for t in tests if not has_test_result(self._GetTestName(t))]
       tries += 1
       logging.info('FINISHED TRY #%d/%d', tries, self._env.max_tries)
       if tests:

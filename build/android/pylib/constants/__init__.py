@@ -22,7 +22,6 @@ keyevent = devil.android.sdk.keyevent
 DIR_SOURCE_ROOT = os.environ.get('CHECKOUT_SOURCE_ROOT',
     os.path.abspath(os.path.join(os.path.dirname(__file__),
                                  os.pardir, os.pardir, os.pardir, os.pardir)))
-ISOLATE_DEPS_DIR = os.path.join(DIR_SOURCE_ROOT, 'isolate_deps_dir')
 
 PackageInfo = collections.namedtuple('PackageInfo',
     ['package', 'activity', 'cmdline_file', 'devtools_socket',
@@ -76,7 +75,7 @@ PACKAGE_INFO = {
         'com.google.android.apps.chrome.Main',
         '/data/local/chrome-command-line',
         'chrome_devtools_remote',
-        None),
+        'org.chromium.chrome.tests'),
     'legacy_browser': PackageInfo(
         'com.google.android.browser',
         'com.android.browser.BrowserActivity',
@@ -136,7 +135,6 @@ LIGHTTPD_DEFAULT_PORT = 9000
 LIGHTTPD_RANDOM_PORT_FIRST = 8001
 LIGHTTPD_RANDOM_PORT_LAST = 8999
 TEST_SYNC_SERVER_PORT = 9031
-TEST_SEARCH_BY_IMAGE_SERVER_PORT = 9041
 TEST_POLICY_SERVER_PORT = 9051
 
 
@@ -159,18 +157,14 @@ SCREENSHOTS_DIR = os.path.join(DIR_SOURCE_ROOT, 'out_screenshots')
 ANDROID_SDK_VERSION = version_codes.MARSHMALLOW
 ANDROID_SDK_BUILD_TOOLS_VERSION = '23.0.0'
 ANDROID_SDK_ROOT = os.path.join(DIR_SOURCE_ROOT,
-                                'third_party/android_tools/sdk')
+                                'third_party', 'android_tools', 'sdk')
 ANDROID_SDK_TOOLS = os.path.join(ANDROID_SDK_ROOT,
                                  'build-tools', ANDROID_SDK_BUILD_TOOLS_VERSION)
 ANDROID_NDK_ROOT = os.path.join(DIR_SOURCE_ROOT,
-                                'third_party/android_tools/ndk')
+                                'third_party', 'android_tools', 'ndk')
 
 PROGUARD_SCRIPT_PATH = os.path.join(
     ANDROID_SDK_ROOT, 'tools', 'proguard', 'bin', 'proguard.sh')
-
-EMULATOR_SDK_ROOT = os.environ.get('ANDROID_EMULATOR_SDK_ROOT',
-                                   os.path.join(DIR_SOURCE_ROOT,
-                                                'android_emulator_sdk'))
 
 PROGUARD_ROOT = os.path.join(DIR_SOURCE_ROOT, 'third_party', 'proguard')
 

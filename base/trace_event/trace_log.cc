@@ -27,6 +27,7 @@
 #include "base/time/time.h"
 #include "base/trace_event/memory_dump_manager.h"
 #include "base/trace_event/memory_dump_provider.h"
+#include "base/trace_event/memory_profiler_allocation_context.h"
 #include "base/trace_event/process_memory_dump.h"
 #include "base/trace_event/trace_buffer.h"
 #include "base/trace_event/trace_event.h"
@@ -36,7 +37,6 @@
 
 #if defined(OS_WIN)
 #include "base/trace_event/trace_event_etw_export_win.h"
-#include "base/trace_event/trace_event_win.h"
 #endif
 
 // The thread buckets for the sampling profiler.
@@ -1320,6 +1320,15 @@ TraceEventHandle TraceLog::AddTraceEventWithThreadIdAndTimestamp(
     }
   }
 
+  if (base::trace_event::AllocationContextTracker::capture_enabled()) {
+    if (phase == TRACE_EVENT_PHASE_BEGIN || phase == TRACE_EVENT_PHASE_COMPLETE)
+      base::trace_event::AllocationContextTracker::PushPseudoStackFrame(name);
+    else if (phase == TRACE_EVENT_PHASE_END)
+      // The pop for |TRACE_EVENT_PHASE_COMPLETE| events
+      // is in |TraceLog::UpdateTraceEventDuration|.
+      base::trace_event::AllocationContextTracker::PopPseudoStackFrame(name);
+  }
+
   return handle;
 }
 
@@ -1371,28 +1380,6 @@ std::string TraceLog::EventToConsoleMessage(unsigned char phase,
   return log.str();
 }
 
-void TraceLog::AddTraceEventEtw(char phase,
-                                const char* name,
-                                const void* id,
-                                const char* extra) {
-#if defined(OS_WIN)
-  TraceEventETWProvider::Trace(name, phase, id, extra);
-#endif
-  INTERNAL_TRACE_EVENT_ADD(phase, "ETW Trace Event", name,
-                           TRACE_EVENT_FLAG_COPY, "id", id, "extra", extra);
-}
-
-void TraceLog::AddTraceEventEtw(char phase,
-                                const char* name,
-                                const void* id,
-                                const std::string& extra) {
-#if defined(OS_WIN)
-  TraceEventETWProvider::Trace(name, phase, id, extra);
-#endif
-  INTERNAL_TRACE_EVENT_ADD(phase, "ETW Trace Event", name,
-                           TRACE_EVENT_FLAG_COPY, "id", id, "extra", extra);
-}
-
 void TraceLog::UpdateTraceEventDuration(
     const unsigned char* category_group_enabled,
     const char* name,
@@ -1424,6 +1411,11 @@ void TraceLog::UpdateTraceEventDuration(
     if (trace_options() & kInternalEchoToConsole) {
       console_message =
           EventToConsoleMessage(TRACE_EVENT_PHASE_END, now, trace_event);
+    }
+
+    if (base::trace_event::AllocationContextTracker::capture_enabled()) {
+      // The corresponding push is in |AddTraceEventWithThreadIdAndTimestamp|.
+      base::trace_event::AllocationContextTracker::PopPseudoStackFrame(name);
     }
   }
 

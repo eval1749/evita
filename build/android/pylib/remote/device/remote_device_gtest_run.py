@@ -10,6 +10,7 @@ import tempfile
 
 from pylib import constants
 from pylib.base import base_test_result
+from pylib.gtest import gtest_test_instance
 from pylib.remote.device import remote_device_test_run
 
 
@@ -48,7 +49,10 @@ class RemoteDeviceGtestTestRun(remote_device_test_run.RemoteDeviceTestRun):
 
     # pylint: disable=protected-access
     with tempfile.NamedTemporaryFile(suffix='.flags.txt') as flag_file:
-      env_vars = {}
+      env_vars = dict(self._test_instance.extras)
+      if gtest_test_instance.EXTRA_SHARD_NANO_TIMEOUT not in env_vars:
+        env_vars[gtest_test_instance.EXTRA_SHARD_NANO_TIMEOUT] = int(
+            self._test_instance.shard_timeout * 1e9)
       filter_string = self._test_instance._GenerateDisabledFilterString(None)
       if filter_string:
         flag_file.write('_ --gtest_filter=%s' % filter_string)
@@ -71,8 +75,6 @@ class RemoteDeviceGtestTestRun(remote_device_test_run.RemoteDeviceTestRun):
               if l.startswith(self._INSTRUMENTATION_STREAM_LEADER))
     results_list = self._test_instance.ParseGTestOutput(output)
     results.AddResults(results_list)
-    if self._env.only_output_failures:
-      logging.info('See logcat for more results information.')
 
     self._DetectPlatformErrors(results)
     return results

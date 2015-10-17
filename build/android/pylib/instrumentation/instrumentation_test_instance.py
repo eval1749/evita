@@ -28,6 +28,8 @@ _ACTIVITY_RESULT_OK = -1
 _DEFAULT_ANNOTATIONS = [
     'Smoke', 'SmallTest', 'MediumTest', 'LargeTest',
     'EnormousTest', 'IntegrationTest']
+_EXCLUDE_UNLESS_REQUESTED_ANNOTATIONS = [
+    'DisabledTest', 'FlakyTest']
 _EXTRA_ENABLE_HTTP_SERVER = (
     'org.chromium.chrome.test.ChromeInstrumentationTestRunner.'
         + 'EnableTestHttpServer')
@@ -137,6 +139,7 @@ class InstrumentationTestInstance(test_instance.TestInstance):
   def __init__(self, args, isolate_delegate, error_func):
     super(InstrumentationTestInstance, self).__init__()
 
+    self._additional_apks = []
     self._apk_under_test = None
     self._apk_under_test_permissions = None
     self._package_info = None
@@ -216,6 +219,11 @@ class InstrumentationTestInstance(test_instance.TestInstance):
     if not self._package_info:
       logging.warning('Unable to find package info for %s', self._test_package)
 
+    for apk in args.additional_apks:
+      if not os.path.exists(apk):
+        error_func('Unable to find additional APK: %s' % apk)
+    self._additional_apks = args.additional_apks
+
   def _initializeDataDependencyAttributes(self, args, isolate_delegate):
     self._data_deps = []
     if args.isolate_file_path:
@@ -262,6 +270,12 @@ class InstrumentationTestInstance(test_instance.TestInstance):
     else:
       self._excluded_annotations = {}
 
+    self._excluded_annotations.update(
+        {
+          a: None for a in _EXCLUDE_UNLESS_REQUESTED_ANNOTATIONS
+          if a not in self._annotations
+        })
+
   def _initializeFlagAttributes(self, args):
     self._flags = ['--disable-fre', '--enable-test-intents']
     # TODO(jbudorick): Transition "--device-flags" to "--device-flags-file"
@@ -284,6 +298,10 @@ class InstrumentationTestInstance(test_instance.TestInstance):
       self._driver_name = driver_apk.GetInstrumentationName()
     else:
       self._driver_apk = None
+
+  @property
+  def additional_apks(self):
+    return self._additional_apks
 
   @property
   def apk_under_test(self):
@@ -351,7 +369,7 @@ class InstrumentationTestInstance(test_instance.TestInstance):
       self._isolate_delegate.Remap(
           self._isolate_abs_path, self._isolated_abs_path)
       self._isolate_delegate.MoveOutputDeps()
-      self._data_deps.extend([(constants.ISOLATE_DEPS_DIR, None)])
+      self._data_deps.extend([(self._isolate_delegate.isolate_deps_dir, None)])
 
     # TODO(jbudorick): Convert existing tests that depend on the --test-data
     # mechanism to isolate, then remove this.

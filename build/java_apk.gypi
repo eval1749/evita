@@ -39,6 +39,8 @@
 #    that are generated at build time. This should be set automatically by a
 #    target's dependencies. The .java files in these directories are not
 #    included in the 'inputs' list (unlike additional_src_dirs).
+#  library_jars_paths - The path to library jars to be included in the classpath.
+#    These will not be included into the final apk.
 #  input_jars_paths - The path to jars to be included in the classpath. This
 #    should be filled automatically by depending on the appropriate targets.
 #  is_test_apk - Set to 1 if building a test apk.  This prevents resources from
@@ -68,14 +70,18 @@
 #  java_in_dir_suffix - To override the /src suffix on java_in_dir.
 #  app_manifest_version_name - set the apps 'human readable' version number.
 #  app_manifest_version_code - set the apps version number.
+#  dependencies_locale_zip_alternative_paths - a list of paths that used to
+#    replace dependencies_locale_zip_paths of all_dependent_settings.
 {
   'variables': {
     'tested_apk_obfuscated_jar_path%': '/',
     'tested_apk_dex_path%': '/',
     'tested_apk_is_multidex%': 0,
     'additional_input_paths': [],
+    'additional_locale_input_paths': [],
     'create_density_splits%': 0,
     'language_splits': [],
+    'library_jars_paths': [],
     'input_jars_paths': [],
     'library_dexed_jars_paths': [],
     'main_dex_list_path': '<(intermediate_dir)/main_dex_list.txt',
@@ -93,6 +99,8 @@
     'R_package%':'',
     'include_all_resources%': 0,
     'additional_R_text_files': [],
+    'dependencies_locale_zip_alternative_paths%': [],
+    'dependencies_locale_zip_paths': [],
     'dependencies_res_zip_paths': [],
     'additional_res_packages': [],
     'additional_bundled_libs%': [],
@@ -122,7 +130,7 @@
     'findbugs_stamp': '<(intermediate_dir)/findbugs.stamp',
     'run_findbugs%': 0,
     'java_in_dir_suffix%': '/src',
-    'instr_stamp': '<(intermediate_dir)/instr.stamp',
+    'emma_instr_stamp': '<(intermediate_dir)/emma_instr.stamp',
     'jar_stamp': '<(intermediate_dir)/jar.stamp',
     'obfuscate_stamp': '<(intermediate_dir)/obfuscate.stamp',
     'pack_relocations_stamp': '<(intermediate_dir)/pack_relocations.stamp',
@@ -781,12 +789,27 @@
       'action_name': 'process_resources',
       'message': 'processing resources for <(_target_name)',
       'variables': {
+        'local_additional_input_paths': [
+          '>@(additional_input_paths)',
+        ],
+        'local_dependencies_res_zip_paths': [
+          '>@(dependencies_res_zip_paths)'
+        ],
         # Write the inputs list to a file, so that its mtime is updated when
         # the list of inputs changes.
-        'inputs_list_file': '>|(apk_codegen.<(_target_name).gypcmd >@(additional_input_paths) >@(resource_input_paths))',
+        'inputs_list_file': '>|(apk_codegen.<(_target_name).gypcmd >@(local_additional_input_paths) >@(resource_input_paths))',
+
         'process_resources_options': [],
         'conditions': [
+          ['dependencies_locale_zip_alternative_paths == []', {
+            'local_dependencies_res_zip_paths': ['>@(dependencies_locale_zip_paths)'],
+            'local_additional_input_paths': ['>@(additional_locale_input_paths)']
+          }, {
+            'local_dependencies_res_zip_paths': ['<@(dependencies_locale_zip_alternative_paths)'],
+            'local_additional_input_paths': ['>@(dependencies_locale_zip_alternative_paths)'],
+          }],
           ['is_test_apk == 1', {
+            'dependencies_locale_zip_paths=': [],
             'dependencies_res_zip_paths=': [],
             'additional_res_packages=': [],
           }],
@@ -811,9 +834,9 @@
         '<(DEPTH)/build/android/gyp/util/build_utils.py',
         '<(DEPTH)/build/android/gyp/process_resources.py',
         '<(android_manifest_path)',
-        '>@(additional_input_paths)',
+        '>@(local_additional_input_paths)',
         '>@(resource_input_paths)',
-        '>@(dependencies_res_zip_paths)',
+        '>@(local_dependencies_res_zip_paths)',
         '>(inputs_list_file)',
       ],
       'outputs': [
@@ -827,7 +850,7 @@
         '--aapt-path', '<(android_aapt_path)',
 
         '--android-manifest', '<(android_manifest_path)',
-        '--dependencies-res-zips', '>(dependencies_res_zip_paths)',
+        '--dependencies-res-zips', '>(local_dependencies_res_zip_paths)',
 
         '--extra-res-packages', '>(additional_res_packages)',
         '--extra-r-text-files', '>(additional_R_text_files)',
@@ -894,7 +917,7 @@
       'action': [
         'python', '<(DEPTH)/build/android/gyp/javac.py',
         '--bootclasspath=<(android_sdk_jar)',
-        '--classpath=>(input_jars_paths) <(android_sdk_jar)',
+        '--classpath=>(input_jars_paths) <(android_sdk_jar) >(library_jars_paths)',
         '--src-gendirs=>(gen_src_dirs)',
         '--javac-includes=<(javac_includes)',
         '--chromium-code=<(chromium_code)',
@@ -914,22 +937,22 @@
       'includes': [ 'android/main_dex_action.gypi' ],
     },
     {
-      'action_name': 'instr_jar_<(_target_name)',
+      'action_name': 'emma_instr_jar_<(_target_name)',
       'message': 'Instrumenting <(_target_name) jar',
       'variables': {
         'input_path': '<(javac_jar_path)',
         'output_path': '<(jar_path)',
-        'stamp_path': '<(instr_stamp)',
+        'stamp_path': '<(emma_instr_stamp)',
         'instr_type': 'jar',
       },
       'outputs': [
-        '<(instr_stamp)',
+        '<(emma_instr_stamp)',
         '<(jar_path)',
       ],
       'inputs': [
         '<(javac_jar_path)',
       ],
-      'includes': [ 'android/instr_action.gypi' ],
+      'includes': [ 'android/emma_instr_action.gypi' ],
     },
     {
       'variables': {
@@ -996,7 +1019,7 @@
         '>@(proguard_flags_paths)',
         '>@(obfuscate_input_jars_paths)',
         '>@(additional_obfuscate_input_paths)',
-        '<(instr_stamp)',
+        '<(emma_instr_stamp)',
       ],
       'outputs': [
         '<(obfuscate_stamp)',
@@ -1089,21 +1112,27 @@
         ['proguard_enabled == "true"', {
           'inputs': [ '<(obfuscate_stamp)' ]
         }, {
-          'inputs': [ '<(instr_stamp)' ]
+          'inputs': [ '<(emma_instr_stamp)' ]
         }],
       ],
       'includes': [ 'android/dex_action.gypi' ],
     },
     {
       'variables': {
+        'local_dependencies_res_zip_paths': ['>@(dependencies_res_zip_paths)'],
         'extra_inputs': ['<(codegen_stamp)'],
         'resource_zips': [
           '<(resource_zip_path)',
         ],
         'conditions': [
+          ['dependencies_locale_zip_alternative_paths == []', {
+            'local_dependencies_res_zip_paths': ['>@(dependencies_locale_zip_paths)'],
+          }, {
+            'local_dependencies_res_zip_paths': ['<@(dependencies_locale_zip_alternative_paths)'],
+          }],
           ['is_test_apk == 0', {
             'resource_zips': [
-              '>@(dependencies_res_zip_paths)',
+              '>@(local_dependencies_res_zip_paths)',
             ],
           }],
         ],

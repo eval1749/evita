@@ -2,7 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/nacl/config.gni")
 import("//build/config/sanitizers/sanitizers.gni")
+import("//build/toolchain/ccache.gni")
+import("//build/toolchain/goma.gni")
 import("//build/toolchain/toolchain.gni")
 
 # This value will be inherited in the toolchain below.
@@ -70,6 +73,17 @@ concurrent_links = exec_script("get_concurrent_links.py", [], "value")
 #      Whether to forcibly enable or disable component builds for this
 #      toolchain; if not specified, the toolchain will inherit the
 #      default setting.
+#  - is_nacl_glibc
+#      Whether NaCl code is built using Glibc instead of Newlib.
+#  - use_ccache
+#      Override the global use_ccache setting, useful to opt-out of ccache in
+#      a particular toolchain by setting use_ccache = false in it.
+#  - use_goma
+#      Override the global use_goma setting, useful to opt-out of goma in a
+#      particular toolchain by setting use_gome = false in it.
+#  - use_gold
+#      Override the global use_gold setting, useful if the particular
+#      toolchain has a custom link step that is not actually using Gold.
 template("gcc_toolchain") {
   toolchain(target_name) {
     assert(defined(invoker.cc), "gcc_toolchain() must specify a \"cc\" value")
@@ -81,6 +95,21 @@ template("gcc_toolchain") {
     assert(defined(invoker.toolchain_os),
            "gcc_toolchain() must specify a \"toolchain_os\"")
 
+    if (defined(invoker.use_ccache)) {
+      use_ccache = invoker.use_ccache
+    }
+    if (defined(invoker.use_goma)) {
+      use_goma = invoker.use_goma
+    }
+    if (use_goma) {
+      assert(!use_ccache, "Goma and ccache can't be used together.")
+      compiler_prefix = "$goma_dir/gomacc "
+    } else if (use_ccache) {
+      compiler_prefix = "ccache "
+    } else {
+      compiler_prefix = ""
+    }
+
     # This define changes when the toolchain changes, forcing a rebuild.
     # Nothing should ever use this define.
     if (defined(invoker.rebuild_define)) {
@@ -89,11 +118,8 @@ template("gcc_toolchain") {
       rebuild_string = ""
     }
 
-    # We can't do string interpolation ($ in strings) on things with dots in
-    # them. To allow us to use $cc below, for example, we create copies of
-    # these values in our scope.
-    cc = invoker.cc
-    cxx = invoker.cxx
+    cc = compiler_prefix + invoker.cc
+    cxx = compiler_prefix + invoker.cxx
     ar = invoker.ar
     ld = invoker.ld
     if (defined(invoker.readelf)) {
@@ -171,7 +197,7 @@ template("gcc_toolchain") {
     tool("asm") {
       # For GCC we can just use the C compiler to compile assembly.
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile ${rebuild_string}{{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile ${rebuild_string}{{defines}} {{include_dirs}} {{asmflags}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
@@ -259,6 +285,45 @@ template("gcc_toolchain") {
       depend_output = tocfile
     }
 
+    tool("solink_module") {
+      soname = "{{target_output_name}}{{output_extension}}"  # e.g. "libfoo.so".
+      sofile = "{{root_out_dir}}/$soname"  # Possibly including toolchain dir.
+      if (shlib_subdir != ".") {
+        sofile = "{{root_out_dir}}/$shlib_subdir/$soname"
+      }
+      rspfile = sofile + ".rsp"
+
+      unstripped_sofile = sofile
+      if (defined(invoker.strip)) {
+        unstripped_sofile = "{{root_out_dir}}/lib.unstripped/$soname"
+      }
+
+      command = "$ld -shared {{ldflags}} -o $unstripped_sofile -Wl,-soname=$soname @$rspfile"
+
+      if (defined(invoker.strip)) {
+        strip_command =
+            "${invoker.strip} --strip-unneeded -o $sofile $unstripped_sofile"
+        command += " && " + strip_command
+      }
+      rspfile_content = "-Wl,--whole-archive {{inputs}} {{solibs}} -Wl,--no-whole-archive $solink_libs_section_prefix {{libs}} $solink_libs_section_postfix"
+
+      description = "SOLINK_MODULE $sofile"
+
+      # Use this for {{output_extension}} expansions unless a target manually
+      # overrides it (in which case {{output_extension}} will be what the target
+      # specifies).
+      default_output_extension = default_shlib_extension
+
+      output_prefix = "lib"
+
+      outputs = [
+        sofile,
+      ]
+      if (sofile != unstripped_sofile) {
+        outputs += [ unstripped_sofile ]
+      }
+    }
+
     tool("link") {
       exename = "{{target_output_name}}{{output_extension}}"
       outfile = "{{root_out_dir}}/$exename"
@@ -320,6 +385,9 @@ template("gcc_toolchain") {
                              [
                                "is_clang",
                                "is_component_build",
+                               "is_nacl_glibc",
+                               "use_gold",
+                               "symbol_level",
                              ])
 
       if (defined(invoker.clear_sanitizers) && invoker.clear_sanitizers) {
@@ -329,9 +397,50 @@ template("gcc_toolchain") {
         is_msan = false
         is_syzyasan = false
         is_tsan = false
+        is_ubsan = false
+        is_ubsan_vptr = false
       }
     }
 
     forward_variables_from(invoker, [ "deps" ])
+  }
+}
+
+# This is a shorthand for gcc_toolchain instances based on the
+# Chromium-built version of Clang.  Only the toolchain_cpu and
+# toolchain_os variables need to be specified by the invoker, and
+# optionally toolprefix if it's a cross-compile case.  Note that for
+# a cross-compile case this toolchain requires a config to pass the
+# appropriate -target option, or else it will actually just be doing
+# a native compile.  The invoker can optionally override use_gold too.
+template("clang_toolchain") {
+  assert(defined(invoker.toolchain_cpu),
+         "clang_toolchain() must specify a \"toolchain_cpu\"")
+  assert(defined(invoker.toolchain_os),
+         "clang_toolchain() must specify a \"toolchain_os\"")
+  if (defined(invoker.toolprefix)) {
+    toolprefix = invoker.toolprefix
+  } else {
+    toolprefix = ""
+  }
+
+  gcc_toolchain(target_name) {
+    prefix = rebase_path("//third_party/llvm-build/Release+Asserts/bin",
+                         root_build_dir)
+    cc = "$prefix/clang"
+    cxx = "$prefix/clang++"
+    ld = cxx
+    is_clang = true
+
+    readelf = "${toolprefix}readelf"
+    ar = "${toolprefix}ar"
+    nm = "${toolprefix}nm"
+
+    forward_variables_from(invoker,
+                           [
+                             "toolchain_cpu",
+                             "toolchain_os",
+                             "use_gold",
+                           ])
   }
 }

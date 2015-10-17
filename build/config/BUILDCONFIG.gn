@@ -125,12 +125,9 @@ declare_args() {
   is_clang = current_os == "mac" || current_os == "ios" ||
              current_os == "linux" || current_os == "chromeos"
 
-  if (current_os == "chromeos") {
-    # Allows the target toolchain to be injected as arguments. This is needed
-    # to support the CrOS build system which supports per-build-configuration
-    # toolchains.
-    cros_use_custom_toolchain = false
-  }
+  # Allows the path to a custom target toolchain to be injected as a single
+  # argument, and set as the default toolchain.
+  custom_toolchain = ""
 
   # DON'T ADD MORE FLAGS HERE. Read the comment above.
 }
@@ -356,12 +353,12 @@ _native_compiler_configs = [
   "//build/config/compiler:default_symbols",
   "//build/config/compiler:no_rtti",
   "//build/config/compiler:runtime_library",
+  "//build/config/sanitizers:default_sanitizer_flags",
 ]
 if (is_win) {
   _native_compiler_configs += [
     "//build/config/win:lean_and_mean",
     "//build/config/win:nominmax",
-    "//build/config/win:sdk",
     "//build/config/win:unicode",
     "//build/config/win:winver",
   ]
@@ -377,14 +374,9 @@ if (is_posix) {
   ]
 }
 
-if (is_linux) {
-  _native_compiler_configs += [ "//build/config/linux:sdk" ]
-} else if (is_mac) {
-  _native_compiler_configs += [ "//build/config/mac:sdk" ]
-} else if (is_ios) {
-  _native_compiler_configs += [ "//build/config/ios:sdk" ]
-} else if (is_android) {
-  _native_compiler_configs += [ "//build/config/android:sdk" ]
+if (is_android) {
+  _native_compiler_configs +=
+      [ "//build/config/android:default_cygprofile_instrumentation" ]
 }
 
 if (is_clang && !is_nacl) {
@@ -439,7 +431,8 @@ set_defaults("static_library") {
   configs = _native_compiler_configs
 }
 
-# Shared library defaults (also for components in component mode).
+# Shared library and loadable module defaults (also for components in component
+# mode).
 _shared_library_configs =
     _native_compiler_configs + [ "//build/config:default_libs" ]
 if (is_win) {
@@ -453,6 +446,9 @@ if (is_win) {
       [ "//build/config/android:hide_native_jni_exports" ]
 }
 set_defaults("shared_library") {
+  configs = _shared_library_configs
+}
+set_defaults("loadable_module") {
   configs = _shared_library_configs
 }
 if (is_component_build) {
@@ -489,6 +485,7 @@ set_defaults("test") {
 # doing cross-compiles. When not cross-compiling, this will be the same as the
 # default toolchain.
 
+_default_toolchain = ""
 if (is_win) {
   # On windows we use the same toolchain for host and target by default.
   if (is_clang) {
@@ -498,11 +495,11 @@ if (is_win) {
   }
 
   if (current_os == "win") {
-    set_default_toolchain("$host_toolchain")
+    _default_toolchain = host_toolchain
   } else if (current_cpu == "x64") {  # WinRT x64
-    set_default_toolchain("//build/toolchain/win:winrt_x64")
+    _default_toolchain = "//build/toolchain/win:winrt_x64"
   } else if (current_cpu == "x86") {  # WinRT x86
-    set_default_toolchain("//build/toolchain/win:winrt_x86")
+    _default_toolchain = "//build/toolchain/win:winrt_x86"
   }
 } else if (is_android) {
   if (host_os == "linux") {
@@ -518,33 +515,38 @@ if (is_win) {
     assert(false, "Unknown host for android cross compile")
   }
   if (is_clang) {
-    set_default_toolchain("//build/toolchain/android:clang_$current_cpu")
+    _default_toolchain = "//build/toolchain/android:clang_$current_cpu"
   } else {
-    set_default_toolchain("//build/toolchain/android:$current_cpu")
+    _default_toolchain = "//build/toolchain/android:$current_cpu"
   }
 } else if (is_linux) {
   if (is_clang) {
     host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
-    set_default_toolchain("//build/toolchain/linux:clang_$current_cpu")
+    _default_toolchain = "//build/toolchain/linux:clang_$current_cpu"
   } else {
     host_toolchain = "//build/toolchain/linux:$host_cpu"
-    set_default_toolchain("//build/toolchain/linux:$current_cpu")
-  }
-  if (is_chromeos && cros_use_custom_toolchain) {
-    set_default_toolchain("//build/toolchain/cros:target")
+    _default_toolchain = "//build/toolchain/linux:$current_cpu"
   }
 } else if (is_mac) {
   host_toolchain = "//build/toolchain/mac:clang_x64"
-  set_default_toolchain(host_toolchain)
+  _default_toolchain = host_toolchain
 } else if (is_ios) {
   host_toolchain = "//build/toolchain/mac:clang_x64"
-  set_default_toolchain("//build/toolchain/mac:ios_clang_arm")
+  _default_toolchain = "//build/toolchain/mac:ios_clang_arm"
 } else if (is_nacl) {
   # TODO(GYP): This will need to change when we get NaCl working
   # on multiple platforms, but this whole block of code (how we define
   # host_toolchain) needs to be reworked regardless to key off of host_os
   # and host_cpu rather than the is_* variables.
   host_toolchain = "//build/toolchain/linux:clang_x64"
+}
+
+# If a custom toolchain has been set in the args, set it as default. Otherwise,
+# set the default toolchain for the platform (if any).
+if (custom_toolchain != "") {
+  set_default_toolchain(custom_toolchain)
+} else if (_default_toolchain != "") {
+  set_default_toolchain(_default_toolchain)
 }
 
 # ==============================================================================

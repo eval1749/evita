@@ -2,5 +2,3 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Override nacl's build directory.
-nacl_shared_build_dir = "//build"

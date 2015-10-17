@@ -55,7 +55,7 @@ class Caret {
   gfx::RectF bounds_;
   base::Time last_blink_time_;
   CaretOwner* const owner_;
-  base::RepeatingTimer<Caret> timer_;
+  base::RepeatingTimer timer_;
   bool visible_;
 
   DISALLOW_COPY_AND_ASSIGN(Caret);

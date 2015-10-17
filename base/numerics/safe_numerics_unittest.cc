@@ -19,6 +19,7 @@ using std::numeric_limits;
 using base::CheckedNumeric;
 using base::checked_cast;
 using base::IsValueInRangeForNumericType;
+using base::IsValueNegative;
 using base::SizeT;
 using base::StrictNumeric;
 using base::saturated_cast;
@@ -631,6 +632,18 @@ TEST(SafeNumerics, CastTests) {
   EXPECT_TRUE(CheckedNumeric<int>(StrictNumeric<unsigned>(1U)).IsValid());
   EXPECT_FALSE(CheckedNumeric<unsigned>(StrictNumeric<int>(-1)).IsValid());
 
+  EXPECT_TRUE(IsValueNegative(-1));
+  EXPECT_TRUE(IsValueNegative(numeric_limits<int>::min()));
+  EXPECT_FALSE(IsValueNegative(numeric_limits<unsigned>::min()));
+  EXPECT_TRUE(IsValueNegative(-numeric_limits<double>::max()));
+  EXPECT_FALSE(IsValueNegative(0));
+  EXPECT_FALSE(IsValueNegative(1));
+  EXPECT_FALSE(IsValueNegative(0u));
+  EXPECT_FALSE(IsValueNegative(1u));
+  EXPECT_FALSE(IsValueNegative(numeric_limits<int>::max()));
+  EXPECT_FALSE(IsValueNegative(numeric_limits<unsigned>::max()));
+  EXPECT_FALSE(IsValueNegative(numeric_limits<double>::max()));
+
   // These casts and coercions will fail to compile:
   // EXPECT_EQ(0, strict_cast<int>(static_cast<size_t>(0)));
   // EXPECT_EQ(0, strict_cast<size_t>(static_cast<int>(0)));
@@ -726,4 +739,28 @@ TEST(SafeNumerics, IsValueInRangeForNumericType) {
       static_cast<int64_t>(std::numeric_limits<int32_t>::min())));
   EXPECT_TRUE(IsValueInRangeForNumericType<int64_t>(
       std::numeric_limits<int64_t>::min()));
+}
+
+TEST(SafeNumerics, CompoundNumericOperations) {
+  CheckedNumeric<int> a = 1;
+  CheckedNumeric<int> b = 2;
+  CheckedNumeric<int> c = 3;
+  CheckedNumeric<int> d = 4;
+  a += b;
+  EXPECT_EQ(3, a.ValueOrDie());
+  a -= c;
+  EXPECT_EQ(0, a.ValueOrDie());
+  d /= b;
+  EXPECT_EQ(2, d.ValueOrDie());
+  d *= d;
+  EXPECT_EQ(4, d.ValueOrDie());
+
+  CheckedNumeric<int> too_large = std::numeric_limits<int>::max();
+  EXPECT_TRUE(too_large.IsValid());
+  too_large += d;
+  EXPECT_FALSE(too_large.IsValid());
+  too_large -= d;
+  EXPECT_FALSE(too_large.IsValid());
+  too_large /= d;
+  EXPECT_FALSE(too_large.IsValid());
 }

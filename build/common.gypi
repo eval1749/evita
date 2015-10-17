@@ -85,9 +85,9 @@
           # Enable top chrome material design.
           'enable_topchrome_md%' : 0,
 
-          # Force building against pre-built sysroot image on linux.  By default
-          # the sysroot image is only used for Official builds  or when cross
-          # compiling to arm or mips.
+          # Build against pre-built sysroot image on linux.  By default
+          # the sysroot image is only used for Official builds or when cross
+          # compiling.
           'use_sysroot%': 0,
 
           # Override buildtype to select the desired build flavor.
@@ -110,9 +110,14 @@
               'use_aura%': 1,
             }],
 
-            ['chromecast==1 and OS!="android"', {
-              'embedded%': 1,
-              'use_ozone%': 1,
+            ['chromecast==1', {
+              'use_libpci': 0,
+              'conditions': [
+                ['OS!="android"', {
+                  'embedded%': 1,
+                  'use_ozone%': 1,
+                }],
+              ],
             }],
 
             # Ozone uses Aura.
@@ -180,8 +185,6 @@
         'use_goma%': 0,
         'gomadir%': '',
 
-        # The system root for cross-compiles. Default: none.
-        'sysroot%': '',
         'chroot_cmd%': '',
 
         # The system libdir used for this ABI.
@@ -287,26 +290,27 @@
             'mips_arch_variant%': 'r1',
           }],
 
-          ['OS=="linux" and target_arch=="arm" and chromeos==0', {
+          # The system root for cross-compiles. Default: none.
+          ['OS=="linux" and chromeos==0 and ((branding=="Chrome" and buildtype=="Official") or target_arch=="arm" or target_arch=="mipsel" or use_sysroot==1)', {
             # sysroot needs to be an absolute path otherwise it generates
             # incorrect results when passed to pkg-config
-            'sysroot%': '<!(cd <(DEPTH) && pwd -P)/build/linux/debian_wheezy_arm-sysroot',
-          }], # OS=="linux" and target_arch=="arm" and chromeos==0
-
-          ['OS=="linux" and ((branding=="Chrome" and buildtype=="Official" and chromeos==0) or use_sysroot==1)' , {
             'conditions': [
+              ['target_arch=="arm"', {
+                'sysroot%': '<!(cd <(DEPTH) && pwd -P)/build/linux/debian_wheezy_arm-sysroot',
+              }],
               ['target_arch=="x64"', {
                 'sysroot%': '<!(cd <(DEPTH) && pwd -P)/build/linux/debian_wheezy_amd64-sysroot',
               }],
               ['target_arch=="ia32"', {
                 'sysroot%': '<!(cd <(DEPTH) && pwd -P)/build/linux/debian_wheezy_i386-sysroot',
               }],
-          ],
-          }], # OS=="linux" and branding=="Chrome" and buildtype=="Official" and chromeos==0
-
-          ['OS=="linux" and target_arch=="mipsel"', {
-            'sysroot%': '<!(cd <(DEPTH) && pwd -P)/build/linux/debian_wheezy_mips-sysroot',
-          }],
+              ['target_arch=="mipsel"', {
+                'sysroot%': '<!(cd <(DEPTH) && pwd -P)/build/linux/debian_wheezy_mips-sysroot',
+              }],
+            ],
+          }, {
+            'sysroot%': ''
+          }], # OS=="linux" and use_sysroot==1
         ],
       },
 
@@ -412,11 +416,9 @@
       'configuration_policy%': 1,
 
       # Variable safe_browsing is used to control the build time configuration
-      # for safe browsing feature. Safe browsing can be compiled in 4 different
-      # levels: 0 disables it, 1 enables it fully, and 2 enables only UI and
-      # reporting features for use with Data Saver on Mobile, and 3 enables
-      # extended mobile protection via an external API.  When 3 is fully
-      # deployed, it will replace 2.
+      # for safe browsing feature. Safe browsing can be compiled in 3 different
+      # levels: 0 disables it, 1 enables it fully, and 2 enables mobile
+      # protection via an external API.
       'safe_browsing%': 1,
 
       # Web speech is enabled by default. Set to 0 to disable.
@@ -1511,6 +1513,16 @@
     # Compile d8 for the host toolset.
     'v8_toolset_for_d8': 'host',
 
+    # V8 extras
+    # Adding V8 extras files requires API owners review
+    # Be sure to synchronize with build/module_args/v8.gni
+
+    'v8_extra_library_files': [
+    ],
+    'v8_experimental_extra_library_files': [
+      '../third_party/WebKit/Source/core/streams/ByteLengthQueuingStrategy.js',
+    ],
+
     # Use brlapi from brltty for braille display support.
     'use_brlapi%': 0,
 
@@ -1835,8 +1847,6 @@
 
         'proprietary_codecs%': '<(proprietary_codecs)',
 
-        # safe_browsing defaults to 2 for public builds and is switched to 3 in
-        # //clank/supplement.gypi since mode 3 requires an internal API.
         'safe_browsing%': 2,
 
         'enable_web_speech%': 0,
@@ -1872,7 +1882,6 @@
             'arm_arch%': '',
             'arm_tune%': 'cortex-a9',
             'arm_thumb%': 1,
-            'video_hole%': 1,
           }],
         ],
       }],
@@ -2617,6 +2626,9 @@
 
         # TODO(thakis): Enable this, crbug.com/507717
         '-Wno-shift-negative-value',
+
+        # TODO(thakis): Consider enabling this?
+        '-Wno-bitfield-width',
       ],
     },
     'includes': [ 'set_clang_warning_flags.gypi', ],
@@ -3043,7 +3055,6 @@
         'defines': ['ENABLE_WEBVR'],
       }],
 
-      # SAFE_BROWSING_SERVICE - browser manages a safe-browsing service.
       # SAFE_BROWSING_DB_LOCAL - service manages a local database.
       # SAFE_BROWSING_DB_REMOTE - service talks via API to a database
       # SAFE_BROWSING_CSD - enable client-side phishing detection.
@@ -3053,22 +3064,11 @@
           'FULL_SAFE_BROWSING',
           'SAFE_BROWSING_CSD',
           'SAFE_BROWSING_DB_LOCAL',
-          'SAFE_BROWSING_SERVICE',
         ],
       }],
       ['safe_browsing==2', {
         'defines': [
-          # TODO(nparker): Remove existing uses of MOBILE_SAFE_BROWSING
-          'MOBILE_SAFE_BROWSING',
-          'SAFE_BROWSING_SERVICE',
-        ],
-      }],
-      ['safe_browsing==3', {
-        'defines': [
-          # TODO(nparker): Remove existing uses of MOBILE_SAFE_BROWSING
-          'MOBILE_SAFE_BROWSING',
           'SAFE_BROWSING_DB_REMOTE',
-          'SAFE_BROWSING_SERVICE',
         ],
       }],
     ],  # conditions for 'target_defaults'
@@ -3101,18 +3101,9 @@
         # TODO: Enable on Windows too, http://crbug.com/404525
         'variables': { 'clang_warning_flags': ['-Wexit-time-destructors']},
       }],
-      ['"<!(python <(DEPTH)/tools/clang/scripts/update.py --print-revision)"!="245965-1"', {
-        # TODO(thakis): Move this to the global clang_warning_flags block once
-        # clang is rolled far enough that the pinned clang understands this flag
-        # TODO(thakis): Consider enabling this?
-        'variables': { 'clang_warning_flags': ['-Wno-bitfield-width']},
-      }],
       ['chromium_code==0', {
         'variables': {
           'clang_warning_flags': [
-            # TODO(thakis): Move this suppression into individual third-party
-            # libraries as required. http://crbug.com/505316.
-            '-Wno-unused-function',
             # Lots of third-party libraries have unused variables. Instead of
             # suppressing them individually, we just blanket suppress them here.
             '-Wno-unused-variable',
@@ -4591,23 +4582,17 @@
           }],
           ['order_profiling!=0 and OS=="android"', {
             'target_conditions' : [
-              # crazy_linker has an upstream gyp file we can't edit, and we
-              # don't want to instrument it.
-              ['_toolset=="target" and _target_name!="crazy_linker"', {
+              ['_toolset=="target"', {
                 'cflags': [
                   '-finstrument-functions',
                   # Allow mmx intrinsics to inline, so that the
                   # compiler can expand the intrinsics.
                   '-finstrument-functions-exclude-file-list=mmintrin.h',
-                ],
-                'defines': ['CYGPROFILE_INSTRUMENTATION'],
-              }],
-              ['_toolset=="target"', {
-                'cflags': [
                   # Avoids errors with current NDK:
                   # "third_party/android_tools/ndk/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.6/include/arm_neon.h:3426:3: error: argument must be a constant"
                   '-finstrument-functions-exclude-file-list=arm_neon.h,SaturatedArithmeticARM.h',
                 ],
+                'defines': ['CYGPROFILE_INSTRUMENTATION'],
               }],
             ],
           }],
@@ -4920,8 +4905,18 @@
                       '-target i686-linux-androideabi',
                     ],
                   }],
+                  # Place holder for arm64 support, not tested.
+                  # TODO: Enable clang support for Android Arm64. http://crbug.com/539781
+                  ['target_arch=="arm64"', {
+                    'cflags': [
+                      '-target aarch64-linux-androideabi',
+                    ],
+                    'ldflags': [
+                      '-target aarch64-linux-androideabi',
+                    ],
+                  }],
                   # Place holder for x64 support, not tested.
-                  # TODO: Enable clang support for Android x64. http://crbug.com/346626
+                  # TODO: Enable clang support for Android x64. http://crbug.com/539781
                   ['target_arch=="x64"', {
                     'cflags': [
                       '-target x86_64-linux-androideabi',
@@ -5277,6 +5272,21 @@
             # specified or not.
             '-fno-strict-aliasing',  # See http://crbug.com/32204.
           ],
+          'conditions': [
+            ['component=="shared_library"', {
+              # In component builds, link to the system libc++. This requires
+              # OS X 10.7, but we currently pass -mmacosx-version-min=10.6.
+              # Xcode's clang complains about this, but our open-source bundled
+              # chromium clang doesn't.  This has the effect of making
+              # everything depend on libc++, which means component-build
+              # binaries won't run on 10.6 (no libc++ there), but for a
+              # developer-only configuration that's ok.
+              # (We don't want to raise the deployment target yet so that
+              # official and dev builds have the same deployment target.  This
+              # affects things like which functions are considered deprecated.)
+              'CLANG_CXX_LIBRARY': 'libc++',  # -stdlib=libc++
+            }],
+          ],
         },
         'target_conditions': [
           ['_type=="executable"', {
@@ -5393,7 +5403,6 @@
       ],
       'target_defaults': {
         'xcode_settings' : {
-          'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
           'ENABLE_BITCODE': 'NO',
           'CLANG_CXX_LIBRARY': 'libc++',  # -stdlib=libc++
 
@@ -5717,7 +5726,6 @@
             ],
             'GenerateDebugInformation': 'true',
             'MapFileName': '$(OutDir)\\$(TargetName).map',
-            'ImportLibrary': '$(OutDir)\\lib\\$(TargetName).lib',
             'FixedBaseAddress': '1',
             # SubSystem values:
             #   0 == not set
@@ -5772,7 +5780,10 @@
                   '-Qunused-arguments',  # http://crbug.com/504658
                   '-Wno-microsoft-enum-value',  # http://crbug.com/505296
                   '-Wno-unknown-pragmas',  # http://crbug.com/505314
-                  '-Wno-unused-value',  # http://crbug.com/505318
+                  # Disable unused-value (crbug.com/505318) except
+                  # -Wunused-result.
+                  '-Wno-unused-value',
+                  '-Wunused-result',
                 ],
               },
             }],

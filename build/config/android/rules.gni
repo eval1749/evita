@@ -817,6 +817,7 @@ template("java_strings_grd_prebuilt") {
 #     android_library target, for example.
 #   chromium_code: If true, extra analysis warning/errors will be enabled.
 #   enable_errorprone: If true, enables the errorprone compiler.
+#   enable_incremental_javac: Overrides the global enable_incremental_javac.
 #   main_class: When specified, a wrapper script is created within
 #     $target_out_dir/bin to launch the binary with the given class as the
 #     entrypoint.
@@ -905,6 +906,7 @@ template("junit_binary") {
 #
 #   chromium_code: If true, extra analysis warning/errors will be enabled.
 #   enable_errorprone: If true, enables the errorprone compiler.
+#   enable_incremental_javac: Overrides the global enable_incremental_javac.
 #
 #   jar_excluded_patterns: List of patterns of .class files to exclude from the
 #     final jar.
@@ -996,6 +998,7 @@ template("java_prebuilt") {
 #
 #   chromium_code: If true, extra analysis warning/errors will be enabled.
 #   enable_errorprone: If true, enables the errorprone compiler.
+#   enable_incremental_javac: Overrides the global enable_incremental_javac.
 #
 #   jar_excluded_patterns: List of patterns of .class files to exclude from the
 #     final jar.
@@ -1105,6 +1108,7 @@ template("android_java_prebuilt") {
 # Variables
 #   android_manifest: Path to AndroidManifest.xml.
 #   android_manifest_dep: Target that generates AndroidManifest (if applicable)
+#   chromium_code: If true, extra analysis warning/errors will be enabled.
 #   data_deps: List of dependencies needed at runtime. These will be built but
 #     won't change the generated .apk in any way (in fact they may be built
 #     after the .apk is).
@@ -1217,7 +1221,7 @@ template("android_apk") {
   # The dependency that makes the chromium linker, if any is needed.
   _chromium_linker_dep = []
 
-  if (defined(invoker.native_libs)) {
+  if (defined(invoker.native_libs) && invoker.native_libs != []) {
     _use_chromium_linker = false
     if (defined(invoker.use_chromium_linker)) {
       _use_chromium_linker =
@@ -1231,14 +1235,6 @@ template("android_apk") {
       assert(_use_chromium_linker,
              "Loading library from the apk requires use" +
                  " of the Chromium linker.")
-    }
-
-    _enable_relocation_packing = false
-    if (defined(invoker.enable_relocation_packing) &&
-        invoker.enable_relocation_packing) {
-      _enable_relocation_packing = relocation_packing_supported
-      assert(_use_chromium_linker,
-             "Relocation packing requires use of the" + " Chromium linker.")
     }
 
     if (is_component_build) {
@@ -1314,7 +1310,6 @@ template("android_apk") {
   }
 
   _final_deps = []
-  _incremental_final_deps = []
 
   process_resources_target = "${_template_name}__process_resources"
   process_resources(process_resources_target) {
@@ -1384,6 +1379,10 @@ template("android_apk") {
 
     android_manifest = _android_manifest
     chromium_code = true
+    if (defined(invoker.chromium_code)) {
+      chromium_code = invoker.chromium_code
+    }
+
     if (defined(invoker.java_files)) {
       java_files = invoker.java_files
     } else if (defined(invoker.DEPRECATED_java_in_dir)) {
@@ -1403,7 +1402,6 @@ template("android_apk") {
   if (_dist_jar_path != "") {
     create_dist_target = "${_template_name}__create_dist_jar"
     _final_deps += [ ":$create_dist_target" ]
-    _incremental_final_deps += [ ":$create_dist_target" ]
 
     # TODO(cjhopman): This is only ever needed to calculate the list of tests to
     # run. See build/android/pylib/instrumentation/test_jar.py. We should be
@@ -1452,7 +1450,8 @@ template("android_apk") {
   }
 
   if (_native_libs != []) {
-    action("${_template_name}__prepare_native") {
+    _prepare_native_target_name = "${_template_name}__prepare_native"
+    action(_prepare_native_target_name) {
       forward_variables_from(invoker,
                              [
                                "data_deps",
@@ -1471,9 +1470,10 @@ template("android_apk") {
       inputs += [ _build_config ]
       deps += [ ":$build_config_target" ]
 
+      rebased_gdbserver = rebase_path(android_gdbserver, root_build_dir)
       skip_packing_list = [
-        "gdbserver",
-        "libchromium_android_linker$shlib_extension",
+        rebased_gdbserver,
+        "libchromium_android_linker.so",
       ]
 
       enable_packing_arg = 0
@@ -1502,7 +1502,6 @@ template("android_apk") {
       }
 
       if (is_debug) {
-        rebased_gdbserver = rebase_path([ android_gdbserver ], root_build_dir)
         inputs += [ android_gdbserver ]
         args += [ "--libraries=$rebased_gdbserver" ]
       }
@@ -1510,18 +1509,23 @@ template("android_apk") {
   }
 
   _final_deps += [ ":${_template_name}__create" ]
-  _incremental_final_deps += [ ":${_template_name}__create_incremental" ]
   create_apk("${_template_name}__create") {
-    forward_variables_from(invoker, [ "language_splits" ])
+    deps = []
+    forward_variables_from(invoker,
+                           [
+                             "asset_location",
+                             "deps",
+                             "extensions_to_not_compress",
+                             "language_splits",
+                           ])
     apk_path = _final_apk_path
     android_manifest = _android_manifest
     resources_zip = _all_resources_zip_path
     dex_path = final_dex_path
     load_library_from_apk = _load_library_from_apk
     create_density_splits = _create_density_splits
-    if (defined(invoker.extensions_to_not_compress)) {
-      extensions_to_not_compress = invoker.extensions_to_not_compress
-    } else {
+
+    if (!defined(extensions_to_not_compress)) {
       # Allow icu data, v8 snapshots, and pak files to be loaded directly from
       # the .apk.
       # Note: These are actually suffix matches, not necessarily extensions.
@@ -1535,29 +1539,19 @@ template("android_apk") {
     keystore_path = _keystore_path
     keystore_password = _keystore_password
 
+    # Incremental apk does not use native libs nor final dex.
+    incremental_deps =
+        deps + _android_manifest_deps + [ ":$process_resources_target" ]
+
     # This target generates the input file _all_resources_zip_path.
-    deps = _android_manifest_deps + [
-             ":$process_resources_target",
-             ":$final_dex_target_name",
-           ]
-    if (defined(invoker.deps)) {
-      deps += invoker.deps
-    }
-
-    if (defined(invoker.asset_location)) {
-      asset_location = invoker.asset_location
-
-      # We don't know the exact dependencies that create the assets in
-      # |asset_location|; we depend on all caller deps until a better solution
-      # is figured out (http://crbug.com/433330).
-      if (defined(invoker.deps)) {
-        deps += invoker.deps
-      }
-    }
+    deps += _android_manifest_deps + [
+              ":$process_resources_target",
+              ":$final_dex_target_name",
+            ]
 
     if (_native_libs != [] && !_create_abi_split) {
       native_libs_dir = _native_libs_dir
-      deps += [ ":${_template_name}__prepare_native" ]
+      deps += [ ":$_prepare_native_target_name" ]
     }
   }
 
@@ -1574,8 +1568,6 @@ template("android_apk") {
     _apk_rule = "${_template_name}__split_apk_abi_${android_app_abi}"
     _final_deps += [ ":$_apk_rule" ]
 
-    # Don't add this to _incremental_final_deps since for incremental installs
-    # we skip abi splits altogether.
     create_apk(_apk_rule) {
       apk_path = "${_final_apk_path_no_ext}-abi-${android_app_abi}.apk"
       base_path = "$gen_dir/$_apk_rule"
@@ -1593,14 +1585,14 @@ template("android_apk") {
 
       native_libs_dir = _native_libs_dir
       deps = [
-        ":${_template_name}__prepare_native",
+        ":${_prepare_native_target_name}",
         ":${_manifest_rule}",
       ]
+      incremental_deps = deps
     }
   }
 
   _create_incremental_script_rule_name = "${_template_name}__incremental_script"
-  _incremental_final_deps += [ ":${_create_incremental_script_rule_name}" ]
   action(_create_incremental_script_rule_name) {
     script = "//build/android/incremental_install/create_install_script.py"
     depfile = "$target_gen_dir/$target_name.d"
@@ -1609,7 +1601,7 @@ template("android_apk") {
     ]
 
     _generated_script_path =
-        "${root_out_dir}/bin/install_incremental_${_template_name}"
+        "${root_out_dir}/bin/install_${_template_name}_incremental"
     outputs = [
       depfile,
       _generated_script_path,
@@ -1647,8 +1639,21 @@ template("android_apk") {
   group("${target_name}_incremental") {
     data_deps = []
     forward_variables_from(invoker, [ "data_deps" ])
+
+    # device/commands is used by the installer script to push files via .zip.
     data_deps += [ "//build/android/pylib/device/commands" ]
-    public_deps = _incremental_final_deps
+
+    # Since the _incremental.apk does not include use .so nor .dex from the
+    # actual target, but instead loads them at runtime, we need to explicitly
+    # depend on them here.
+    public_deps = [
+      ":${_template_name}__create_incremental",
+      ":${_create_incremental_script_rule_name}",
+      ":${java_target}",
+    ]
+    if (_native_libs != []) {
+      public_deps += [ ":$_prepare_native_target_name" ]
+    }
   }
 }
 
@@ -1794,7 +1799,9 @@ template("unittest_apk") {
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
-    data_deps = [ "//tools/android/md5sum" ]
+    data_deps = [
+      "//tools/android/md5sum",
+    ]
     if (host_os == "linux") {
       data_deps += [ "//tools/android/forwarder2" ]
     }

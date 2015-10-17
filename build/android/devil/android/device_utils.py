@@ -10,6 +10,7 @@ Eventually, this will be based on adb_wrapper.
 
 import collections
 import itertools
+import json
 import logging
 import multiprocessing
 import os
@@ -67,6 +68,7 @@ _PERMISSIONS_BLACKLIST = [
     'android.permission.ACCESS_NETWORK_STATE',
     'android.permission.BLUETOOTH',
     'android.permission.BLUETOOTH_ADMIN',
+    'android.permission.DOWNLOAD_WITHOUT_NOTIFICATION',
     'android.permission.INTERNET',
     'android.permission.MANAGE_ACCOUNTS',
     'android.permission.MODIFY_AUDIO_SETTINGS',
@@ -163,19 +165,20 @@ class DeviceUtils(object):
   # Property in /data/local.prop that controls Java assertions.
   JAVA_ASSERT_PROPERTY = 'dalvik.vm.enableassertions'
 
-  def __init__(self, device, default_timeout=_DEFAULT_TIMEOUT,
+  def __init__(self, device, enable_device_files_cache=False,
+               default_timeout=_DEFAULT_TIMEOUT,
                default_retries=_DEFAULT_RETRIES):
     """DeviceUtils constructor.
 
     Args:
       device: Either a device serial, an existing AdbWrapper instance, or an
-              an existing AndroidCommands instance.
+        an existing AndroidCommands instance.
+      enable_device_files_cache: For PushChangedFiles(), cache checksums of
+        pushed files rather than recomputing them on a subsequent call.
       default_timeout: An integer containing the default number of seconds to
-                       wait for an operation to complete if no explicit value
-                       is provided.
+        wait for an operation to complete if no explicit value is provided.
       default_retries: An integer containing the default number or times an
-                       operation should be retried on failure if no explicit
-                       value is provided.
+        operation should be retried on failure if no explicit value is provided.
     """
     self.adb = None
     if isinstance(device, basestring):
@@ -187,6 +190,7 @@ class DeviceUtils(object):
     self._commands_installed = None
     self._default_timeout = default_timeout
     self._default_retries = default_retries
+    self._enable_device_files_cache = enable_device_files_cache
     self._cache = {}
     self._client_caches = {}
     assert hasattr(self, decorators.DEFAULT_TIMEOUT_ATTR)
@@ -376,7 +380,16 @@ class DeviceUtils(object):
   def _GetApplicationPathsInternal(self, package, skip_cache=False):
     cached_result = self._cache['package_apk_paths'].get(package)
     if cached_result is not None and not skip_cache:
-      return list(cached_result)
+      if package in self._cache['package_apk_paths_to_verify']:
+        self._cache['package_apk_paths_to_verify'].remove(package)
+        # Don't verify an app that is not thought to be installed. We are
+        # concerned only with apps we think are installed having been
+        # uninstalled manually.
+        if cached_result and not self.PathExists(cached_result):
+          cached_result = None
+          self._cache['package_apk_checksums'].pop(package, 0)
+      if cached_result is not None:
+        return list(cached_result)
     # 'pm path' is liable to incorrectly exit with a nonzero number starting
     # in Lollipop.
     # TODO(jbudorick): Check if this is fixed as new Android versions are
@@ -514,14 +527,14 @@ class DeviceUtils(object):
 
   @decorators.WithTimeoutAndRetriesFromInstance(
       min_default_timeout=INSTALL_DEFAULT_TIMEOUT)
-  def Install(self, apk_path, reinstall=False, permissions=None, timeout=None,
+  def Install(self, apk, reinstall=False, permissions=None, timeout=None,
               retries=None):
     """Install an APK.
 
     Noop if an identical APK is already installed.
 
     Args:
-      apk_path: A string containing the path to the APK to install.
+      apk: An ApkHelper instance or string containing the path to the APK.
       permissions: Set of permissions to set. If not set, finds permissions with
           apk helper. To set no permissions, pass [].
       reinstall: A boolean indicating if we should keep any existing app data.
@@ -533,7 +546,7 @@ class DeviceUtils(object):
       CommandTimeoutError if the installation times out.
       DeviceUnreachableError on missing device.
     """
-    self._InstallInternal(apk_path, None, reinstall=reinstall,
+    self._InstallInternal(apk, None, reinstall=reinstall,
                           permissions=permissions)
 
   @decorators.WithTimeoutAndRetriesFromInstance(
@@ -546,7 +559,8 @@ class DeviceUtils(object):
     Noop if all of the APK splits are already installed.
 
     Args:
-      base_apk: A string of the path to the base APK.
+      base_apk: An ApkHelper instance or string containing the path to the base
+          APK.
       split_apks: A list of strings of paths of all of the APK splits.
       reinstall: A boolean indicating if we should keep any existing app data.
       allow_cached_props: Whether to use cached values for device properties.
@@ -570,22 +584,21 @@ class DeviceUtils(object):
     if split_apks:
       self._CheckSdkLevel(version_codes.LOLLIPOP)
 
-    all_apks = [base_apk]
+    base_apk = apk_helper.ToHelper(base_apk)
+
+    all_apks = [base_apk.path]
     if split_apks:
       all_apks += split_select.SelectSplits(
-        self, base_apk, split_apks, allow_cached_props=allow_cached_props)
+        self, base_apk.path, split_apks, allow_cached_props=allow_cached_props)
       if len(all_apks) == 1:
         logging.warning('split-select did not select any from %s', split_apks)
 
-    package_name = apk_helper.GetPackageName(base_apk)
+    package_name = base_apk.GetPackageName()
     device_apk_paths = self._GetApplicationPathsInternal(package_name)
 
     apks_to_install = None
     host_checksums = None
     if not device_apk_paths:
-      apks_to_install = all_apks
-    elif not reinstall:
-      self.Uninstall(package_name)
       apks_to_install = all_apks
     elif len(device_apk_paths) > 1 and not split_apks:
       logging.warning(
@@ -596,8 +609,15 @@ class DeviceUtils(object):
           'Installing split APK when non-split APK was previously installed')
       apks_to_install = all_apks
     else:
-      apks_to_install, host_checksums = (
-          self._ComputeStaleApks(package_name, all_apks))
+      try:
+        apks_to_install, host_checksums = (
+            self._ComputeStaleApks(package_name, all_apks))
+      except EnvironmentError as e:
+        logging.warning('Error calculating md5: %s', e)
+        apks_to_install, host_checksums = all_apks, None
+      if apks_to_install and not reinstall:
+        self.Uninstall(package_name)
+        apks_to_install = all_apks
 
     if apks_to_install:
       # Assume that we won't know the resulting device state.
@@ -608,7 +628,11 @@ class DeviceUtils(object):
         self.adb.InstallMultiple(
             apks_to_install, partial=partial, reinstall=reinstall)
       else:
-        self.adb.Install(base_apk, reinstall=reinstall)
+        self.adb.Install(base_apk.path, reinstall=reinstall)
+      if (permissions is None
+          and self.build_version_sdk >= version_codes.MARSHMALLOW):
+        permissions = base_apk.GetPermissions()
+      self.GrantPermissions(package_name, permissions)
       # Upon success, we know the device checksums, but not their paths.
       if host_checksums is not None:
         self._cache['package_apk_checksums'][package_name] = host_checksums
@@ -616,11 +640,6 @@ class DeviceUtils(object):
       # Running adb install terminates running instances of the app, so to be
       # consistent, we explicitly terminate it when skipping the install.
       self.ForceStop(package_name)
-
-    if (permissions is None
-        and self.build_version_sdk >= version_codes.MARSHMALLOW):
-      permissions = apk_helper.ApkHelper(base_apk).GetPermissions()
-    self.GrantPermissions(package_name, permissions)
 
   @decorators.WithTimeoutAndRetriesFromInstance()
   def Uninstall(self, package_name, keep_data=False, timeout=None,
@@ -742,13 +761,13 @@ class DeviceUtils(object):
         with device_temp_file.DeviceTempFile(self.adb, suffix='.sh') as script:
           self._WriteFileWithPush(script.name, cmd)
           logging.info('Large shell command will be run from file: %s ...',
-                       cmd[:100])
+                       cmd[:self._MAX_ADB_COMMAND_LENGTH])
           return handle_check_return('sh %s' % script.name_quoted)
 
     def handle_large_output(cmd, large_output_mode):
       if large_output_mode:
         with device_temp_file.DeviceTempFile(self.adb) as large_output_file:
-          cmd = '%s > %s' % (cmd, large_output_file.name)
+          cmd = '( %s )>%s' % (cmd, large_output_file.name)
           logging.debug('Large output mode enabled. Will write output to '
                         'device and read results from file.')
           handle_large_command(cmd)
@@ -920,7 +939,14 @@ class DeviceUtils(object):
     for k, v in extras.iteritems():
       cmd.extend(['-e', str(k), str(v)])
     cmd.append(component)
-    return self.RunShellCommand(cmd, check_return=True, large_output=True)
+
+    # Store the package name in a shell variable to help the command stay under
+    # the _MAX_ADB_COMMAND_LENGTH limit.
+    package = component.split('/')[0]
+    shell_snippet = 'p=%s;%s' % (package,
+                                 cmd_helper.ShrinkToSnippet(cmd, 'p', package))
+    return self.RunShellCommand(shell_snippet, check_return=True,
+                                large_output=True)
 
   @decorators.WithTimeoutAndRetriesFromInstance()
   def BroadcastIntent(self, intent_obj, timeout=None, retries=None):
@@ -990,7 +1016,8 @@ class DeviceUtils(object):
       CommandTimeoutError on timeout.
       DeviceUnreachableError on missing device.
     """
-    self.RunShellCommand(['am', 'force-stop', package], check_return=True)
+    cmd = 'p=%s;if [[ "$(ps)" = *$p* ]]; then am force-stop $p; fi'
+    self.RunShellCommand(cmd % package, check_return=True)
 
   @decorators.WithTimeoutAndRetriesFromInstance()
   def ClearApplicationState(
@@ -1064,11 +1091,13 @@ class DeviceUtils(object):
     all_changed_files = []
     all_stale_files = []
     missing_dirs = []
+    cache_commit_funcs = []
     for h, d in host_device_tuples:
-      changed_files, up_to_date_files, stale_files = (
+      changed_files, up_to_date_files, stale_files, cache_commit_func = (
           self._GetChangedAndStaleFiles(h, d, delete_device_stale))
       all_changed_files += changed_files
       all_stale_files += stale_files
+      cache_commit_funcs.append(cache_commit_func)
       if (os.path.isdir(h) and changed_files and not up_to_date_files
           and not stale_files):
         missing_dirs.append(d)
@@ -1081,6 +1110,8 @@ class DeviceUtils(object):
       if missing_dirs:
         self.RunShellCommand(['mkdir', '-p'] + missing_dirs, check_return=True)
       self._PushFilesImpl(host_device_tuples, all_changed_files)
+    for func in cache_commit_funcs:
+      func()
 
   def _GetChangedAndStaleFiles(self, host_path, device_path, track_stale=False):
     """Get files to push and delete
@@ -1098,17 +1129,37 @@ class DeviceUtils(object):
         track_stale == False
     """
     try:
-      host_checksums = md5sum.CalculateHostMd5Sums([host_path])
-      interesting_device_paths = [device_path]
-      if not track_stale and os.path.isdir(host_path):
-        interesting_device_paths = [
-            posixpath.join(device_path, os.path.relpath(p, host_path))
-            for p in host_checksums.keys()]
-      device_checksums = md5sum.CalculateDeviceMd5Sums(
-          interesting_device_paths, self)
+      # Length calculations below assume no trailing /.
+      host_path = host_path.rstrip('/')
+      device_path = device_path.rstrip('/')
+
+      specific_device_paths = [device_path]
+      ignore_other_files = not track_stale and os.path.isdir(host_path)
+      if ignore_other_files:
+        specific_device_paths = []
+        for root, _, filenames in os.walk(host_path):
+          relative_dir = root[len(host_path) + 1:]
+          specific_device_paths.extend(
+              posixpath.join(device_path, relative_dir, f) for f in filenames)
+
+      def device_sums_helper():
+        if self._enable_device_files_cache:
+          cache_entry = self._cache['device_path_checksums'].get(device_path)
+          if cache_entry and cache_entry[0] == ignore_other_files:
+            return dict(cache_entry[1])
+
+        sums = md5sum.CalculateDeviceMd5Sums(specific_device_paths, self)
+
+        cache_entry = [ignore_other_files, sums]
+        self._cache['device_path_checksums'][device_path] = cache_entry
+        return dict(sums)
+
+      host_checksums, device_checksums = reraiser_thread.RunAsync((
+          lambda: md5sum.CalculateHostMd5Sums([host_path]),
+          device_sums_helper))
     except EnvironmentError as e:
       logging.warning('Error calculating md5: %s', e)
-      return ([(host_path, device_path)], [], [])
+      return ([(host_path, device_path)], [], [], lambda: 0)
 
     to_push = []
     up_to_date = []
@@ -1130,7 +1181,14 @@ class DeviceUtils(object):
         else:
           to_push.append((host_abs_path, device_abs_path))
       to_delete = device_checksums.keys()
-    return (to_push, up_to_date, to_delete)
+
+    def cache_commit_func():
+      new_sums = {posixpath.join(device_path, path[len(host_path) + 1:]): val
+                  for path, val in host_checksums.iteritems()}
+      cache_entry = [ignore_other_files, new_sums]
+      self._cache['device_path_checksums'][device_path] = cache_entry
+
+    return (to_push, up_to_date, to_delete, cache_commit_func)
 
   def _ComputeDeviceChecksumsForApks(self, package_name):
     ret = self._cache['package_apk_checksums'].get(package_name)
@@ -1243,9 +1301,8 @@ class DeviceUtils(object):
 
         # Warm up NeedsSU cache while we're still zipping.
         self.NeedsSU()
-        external_dir = self.GetExternalStoragePath()
         with device_temp_file.DeviceTempFile(
-            self.adb, suffix='.zip', dir=external_dir) as device_temp:
+            self.adb, suffix='.zip') as device_temp:
           zip_proc.join()
           self.adb.Push(zip_file.name, device_temp.name)
           quoted_dirs = ' '.join(cmd_helper.SingleQuote(d) for d in dirs)
@@ -1379,8 +1436,10 @@ class DeviceUtils(object):
           ['cat', device_path], as_root=as_root, check_return=True))
     elif as_root and self.NeedsSU():
       with device_temp_file.DeviceTempFile(self.adb) as device_temp:
-        self.RunShellCommand(['cp', device_path, device_temp.name],
-                             as_root=True, check_return=True)
+        cmd = 'SRC=%s DEST=%s;cp "$SRC" "$DEST" && chmod 666 "$DEST"' % (
+            cmd_helper.SingleQuote(device_path),
+            cmd_helper.SingleQuote(device_temp.name))
+        self.RunShellCommand(cmd, as_root=True, check_return=True)
         return self._ReadFileWithPull(device_temp.name)
     else:
       return self._ReadFileWithPull(device_path)
@@ -1909,11 +1968,43 @@ class DeviceUtils(object):
     self._cache = {
         # Map of packageId -> list of on-device .apk paths
         'package_apk_paths': {},
+        # Set of packageId that were loaded from LoadCacheData and not yet
+        # verified.
+        'package_apk_paths_to_verify': set(),
         # Map of packageId -> set of on-device .apk checksums
         'package_apk_checksums': {},
         # Map of property_name -> value
         'getprop': {},
+        # Map of device_path -> [ignore_other_files, map of path->checksum]
+        'device_path_checksums': {},
     }
+
+  def LoadCacheData(self, data):
+    """Initializes the cache from data created using DumpCacheData."""
+    obj = json.loads(data)
+    self._cache['package_apk_paths'] = obj.get('package_apk_paths', {})
+    # When using a cache across script invokations, verify that apps have
+    # not been uninstalled.
+    self._cache['package_apk_paths_to_verify'] = set(
+        self._cache['package_apk_paths'].iterkeys())
+
+    package_apk_checksums = obj.get('package_apk_checksums', {})
+    for k, v in package_apk_checksums.iteritems():
+      package_apk_checksums[k] = set(v)
+    self._cache['package_apk_checksums'] = package_apk_checksums
+    device_path_checksums = obj.get('device_path_checksums', {})
+    self._cache['device_path_checksums'] = device_path_checksums
+
+  def DumpCacheData(self):
+    """Dumps the current cache state to a string."""
+    obj = {}
+    obj['package_apk_paths'] = self._cache['package_apk_paths']
+    obj['package_apk_checksums'] = self._cache['package_apk_checksums']
+    # JSON can't handle sets.
+    for k, v in obj['package_apk_checksums'].iteritems():
+      obj['package_apk_checksums'][k] = list(v)
+    obj['device_path_checksums'] = self._cache['device_path_checksums']
+    return json.dumps(obj, separators=(',', ':'))
 
   @classmethod
   def parallel(cls, devices, async=False):

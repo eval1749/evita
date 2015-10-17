@@ -218,11 +218,14 @@
             }],
           ],
         }],
+        ['OS=="ios"', {
+          'sources!': [
+            'sync_socket.h',
+            'sync_socket_posix.cc',
+          ]
+        }],
       ],
       'sources': [
-        'async_socket_io_handler.h',
-        'async_socket_io_handler_posix.cc',
-        'async_socket_io_handler_win.cc',
         'auto_reset.h',
         'linux_util.cc',
         'linux_util.h',
@@ -432,7 +435,6 @@
         'android/path_utils_unittest.cc',
         'android/scoped_java_ref_unittest.cc',
         'android/sys_utils_unittest.cc',
-        'async_socket_io_handler_unittest.cc',
         'at_exit_unittest.cc',
         'atomicops_unittest.cc',
         'barrier_closure_unittest.cc',
@@ -529,6 +531,7 @@
         'memory/scoped_ptr_unittest.nc',
         'memory/scoped_vector_unittest.cc',
         'memory/shared_memory_unittest.cc',
+        'memory/shared_memory_mac_unittest.cc',
         'memory/singleton_unittest.cc',
         'memory/weak_ptr_unittest.cc',
         'memory/weak_ptr_unittest.nc',
@@ -821,6 +824,12 @@
         # strings
         ['OS=="mac" or OS=="ios" or <(chromeos)==1 or <(chromecast)==1', {
           'defines': ['SYSTEM_NATIVE_UTF8'],
+        }],
+        # SyncSocket isn't used on iOS
+        ['OS=="ios"', {
+          'sources!': [
+            'sync_socket_unittest.cc',
+          ],
         }],
       ],  # target_conditions
     },
@@ -1185,9 +1194,6 @@
             4267,
           ],
           'sources': [
-            'async_socket_io_handler.h',
-            'async_socket_io_handler_posix.cc',
-            'async_socket_io_handler_win.cc',
             'auto_reset.h',
             'linux_util.cc',
             'linux_util.h',
@@ -1611,21 +1617,30 @@
           'includes': [ '../build/apk_test.gypi' ],
         },
       ],
+      'conditions': [
+        ['test_isolation_mode != "noop"',
+          {
+            'targets': [
+              {
+                'target_name': 'base_unittests_apk_run',
+                'type': 'none',
+                'dependencies': [
+                  'base_unittests_apk',
+                ],
+                'includes': [
+                  '../build/isolate.gypi',
+                ],
+                'sources': [
+                  'base_unittests_apk.isolate',
+                ],
+              },
+            ]
+          }
+        ],
+      ],
     }],
     ['OS == "win"', {
       'targets': [
-        {
-          'target_name': 'debug_message',
-          'type': 'executable',
-          'sources': [
-            'debug_message.cc',
-          ],
-          'msvs_settings': {
-            'VCLinkerTool': {
-              'SubSystem': '2',         # Set /SUBSYSTEM:WINDOWS
-            },
-          },
-        },
         {
           # Target to manually rebuild pe_image_test.dll which is checked into
           # base/test/data/pe_image.

@@ -4,6 +4,7 @@
 
 #include "evita/v8_glue/runner.h"
 
+#include "base/trace_event/trace_event.h"
 #include "common/temporary_change_value.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner_delegate.h"
@@ -116,9 +117,11 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
     return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
+  TRACE_EVENT_BEGIN0("script", "Runner::Call");
   auto const value = callee->ToObject()->CallAsFunction(
       receiver, static_cast<int>(args.size()),
       const_cast<v8::Handle<v8::Value>*>(args.data()));
+  TRACE_EVENT_END0("script", "Runner::Call");
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
   return value;
@@ -131,9 +134,11 @@ v8::Handle<v8::Value> Runner::CallAsConstructor(v8::Handle<v8::Value> callee,
 #endif
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
+  TRACE_EVENT_BEGIN0("script", "Runner::CallAsConstructor");
   auto const value = callee->ToObject()->CallAsConstructor(
       static_cast<int>(args.size()),
       const_cast<v8::Handle<v8::Value>*>(args.data()));
+  TRACE_EVENT_END0("script", "Runner::CallAsConstructor");
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
   return value;

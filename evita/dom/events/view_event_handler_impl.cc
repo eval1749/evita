@@ -3,6 +3,8 @@
 
 #include "evita/dom/events/view_event_handler_impl.h"
 
+#include "base/strings/utf_string_conversions.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/bindings/v8_glue_FocusEventInit.h"
 #include "evita/bindings/v8_glue_UiEventInit.h"
 #include "evita/bindings/v8_glue_WindowEventInit.h"
@@ -103,6 +105,8 @@ ViewEventHandlerImpl::~ViewEventHandlerImpl() {}
 
 void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
                                                    Event* event) {
+  TRACE_EVENT1("script", "ViewEventHandlerImpl::DispatchEventWithInLock",
+               "type", base::UTF16ToASCII(event->type()));
   auto const runner = host_->runner();
   v8_glue::Runner::Scope runner_scope(runner);
   v8::TryCatch try_catch;
@@ -274,6 +278,7 @@ void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
 }
 
 void ViewEventHandlerImpl::RunCallback(const base::Closure& callback) {
+  TRACE_EVENT0("script", "ViewEventHandlerImpl::RunCallback");
   DOM_AUTO_LOCK_SCOPE();
   callback.Run();
 }

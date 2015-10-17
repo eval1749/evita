@@ -6,14 +6,12 @@
 
 #include "base/command_line.h"
 #include "base/bind.h"
-#pragma warning(push)
-#pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_loop.h"
-#pragma warning(pop)
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/trace_event/trace_event.h"
 #include "gin/array_buffer.h"
 #include "evita/dom/text/document_set.h"
 #include "evita/dom/events/view_event_handler_impl.h"
@@ -102,6 +100,8 @@ void MessageBox(const base::string16& message, int flags) {
 void GcEpilogueCallback(v8::Isolate* isolate,
                         v8::GCType type,
                         v8::GCCallbackFlags flags) {
+  TRACE_EVENT_END2("scheduler", "GcEpilogueCallback", "type", type, "flags",
+                   flags);
   auto text =
       base::StringPrintf(L"GC finished type=%d flags=0x%X", type, flags);
   MessageBox(text, MB_ICONINFORMATION);
@@ -114,6 +114,8 @@ void GcPrologueCallback(v8::Isolate* isolate,
                         v8::GCCallbackFlags flags) {
   auto text = base::StringPrintf(L"GC Started type=%d flags=%X", type, flags);
   MessageBox(text, MB_ICONINFORMATION);
+  TRACE_EVENT_BEGIN2("scheduler", "GcPrologueCallback", "type", type, "flags",
+                     flags);
   need_unlock_after_gc = !dom::Lock::instance()->locked_by_dom();
   if (!need_unlock_after_gc)
     return;

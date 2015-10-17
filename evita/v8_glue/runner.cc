@@ -77,19 +77,19 @@ Runner::Scope::~Scope() {
 //
 // Runner
 //
-Runner::Runner(v8::Isolate* isoalte, RunnerDelegate* delegate)
-    : gin::ContextHolder(isoalte),
+Runner::Runner(v8::Isolate* isolate, RunnerDelegate* delegate)
+    : gin::ContextHolder(isolate),
       call_depth_(0),
       delegate_(delegate),
 #if defined(_DEBUG)
       in_scope_(false),
 #endif
       weak_factory_(this) {
-  v8::Locker locker_scope(isolate());
-  v8::Isolate::Scope isolate_scope(isolate());
-  v8::HandleScope handle_scope(isolate());
+  v8::Locker locker_scope(isolate);
+  v8::Isolate::Scope isolate_scope(isolate);
+  v8::HandleScope handle_scope(isolate);
   auto const context =
-      v8::Context::New(isolate(), nullptr, delegate_->GetGlobalTemplate(this));
+      v8::Context::New(isolate, nullptr, delegate_->GetGlobalTemplate(this));
   SetContext(context);
 
   v8::Context::Scope scope(context);

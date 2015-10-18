@@ -10,6 +10,7 @@
 #include "base/callback.h"
 #include "base/message_loop/message_pump_win.h"
 #include "base/time/time.h"
+#include "base/trace_event/trace_event.h"
 #include "common/win/scoped_handle.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_context_id.h"
@@ -83,6 +84,7 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
 void IoDelegateImpl::GetSpellingSuggestions(
     const base::string16& wrong_word,
     const GetSpellingSuggestionsResolver& deferred) {
+  TRACE_EVENT0("io", "IoDelegateImpl::GetSpellingSugges");
   editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
       deferred.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->GetSpellingSuggestions(
@@ -93,6 +95,7 @@ void IoDelegateImpl::MakeTempFileName(
     const base::string16& dir_name,
     const base::string16& prefix,
     const domapi::MakeTempFileNameResolver& resolver) {
+  TRACE_EVENT0("io", "IoDelegateImpl::MakeTempFileName");
   base::string16 file_name(MAX_PATH, 0);
   auto const unique_id =
       ::GetTempFileNameW(dir_name.c_str(), prefix.c_str(), 0, &file_name[0]);
@@ -113,6 +116,7 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
                               const base::string16& dst_path,
                               const domapi::MoveFileOptions& options,
                               const domapi::IoResolver& resolver) {
+  TRACE_EVENT0("io", "IoDelegateImpl::MoveFile");
   auto const flags = options.no_overwrite
                          ? MOVEFILE_WRITE_THROUGH
                          : MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING;
@@ -131,6 +135,7 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
                               const domapi::OpenFileDeferred& deferred) {
+  TRACE_EVENT0("io", "IoDelegateImpl::OpenFile");
   auto file = std::make_unique<FileIoContext>(file_name, mode, deferred);
   if (!file->is_valid())
     return;
@@ -141,6 +146,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
 
 void IoDelegateImpl::OpenProcess(const base::string16& command_line,
                                  const domapi::OpenProcessDeferred& deferred) {
+  TRACE_EVENT0("io", "IoDelegateImpl::OpenProcess");
   auto const process_id = domapi::IoContextId::New();
   auto const process = new ProcessIoContext(process_id, command_line, deferred);
   context_map_[process_id] = process;
@@ -149,6 +155,7 @@ void IoDelegateImpl::OpenProcess(const base::string16& command_line,
 void IoDelegateImpl::QueryFileStatus(
     const base::string16& file_name,
     const domapi::QueryFileStatusDeferred& deferred) {
+  TRACE_EVENT0("io", "IoDelegateImpl::QueryFileStatus");
   WIN32_FIND_DATAW find_data;
   scoped_find_handle find_handle(
       ::FindFirstFileW(file_name.c_str(), &find_data));
@@ -181,6 +188,7 @@ void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
                               void* buffer,
                               size_t num_read,
                               const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "IoDelegateImpl::ReadFile");
   auto const it = context_map_.find(context_id);
   if (it == context_map_.end()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
@@ -191,6 +199,7 @@ void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
 
 void IoDelegateImpl::RemoveFile(const base::string16& file_name,
                                 const domapi::IoResolver& resolver) {
+  TRACE_EVENT0("io", "IoDelegateImpl::RemoveFile");
   auto const succeeded = ::DeleteFileW(file_name.c_str());
   if (!succeeded) {
     auto const last_error = ::GetLastError();
@@ -206,6 +215,7 @@ void IoDelegateImpl::WriteFile(domapi::IoContextId context_id,
                                void* buffer,
                                size_t num_write,
                                const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "IoDelegateImpl::WriteFile");
   auto const it = context_map_.find(context_id);
   if (it == context_map_.end()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);

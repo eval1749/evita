@@ -9,6 +9,7 @@
 
 #include "base/bind.h"
 #include "base/threading/thread.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/public/view_event_handler.h"
@@ -41,6 +42,7 @@ ProcessIoContext::~ProcessIoContext() {}
 
 void ProcessIoContext::CloseAndWaitProcess(
     const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "ProcessIoContext::CloseAndWaitProcess");
   if (auto const last_error = CloseProcess()) {
     Reject(deferred.reject, last_error);
     return;
@@ -60,6 +62,7 @@ void ProcessIoContext::CloseAndWaitProcess(
 }
 
 uint32_t ProcessIoContext::CloseProcess() {
+  TRACE_EVENT0("io", "ProcessIoContext::CloseProcess");
   if (stdout_read_.is_valid()) {
     if (!::CloseHandle(stdout_read_.get())) {
       auto const last_error = ::GetLastError();
@@ -84,6 +87,7 @@ uint32_t ProcessIoContext::CloseProcess() {
 void ProcessIoContext::ReadFromProcess(void* buffer,
                                        size_t num_read,
                                        const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "ProcessIoContext::ReadFromProcess");
   DWORD read;
   auto const succeeded = ::ReadFile(
       stdout_read_.get(), buffer, static_cast<DWORD>(num_read), &read, nullptr);
@@ -102,6 +106,7 @@ void ProcessIoContext::StartProcess(
     domapi::IoContextId context_id,
     const base::string16& command_line,
     const domapi::OpenProcessDeferred& deferred) {
+  TRACE_EVENT0("io", "ProcessIoContext::StartProcess");
   SECURITY_ATTRIBUTES security_attributes = {0};
   security_attributes.nLength = sizeof(security_attributes);
   security_attributes.bInheritHandle = true;
@@ -171,6 +176,7 @@ void ProcessIoContext::StartProcess(
 void ProcessIoContext::WriteToProcess(void* buffer,
                                       size_t num_write,
                                       const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "ProcessIoContext::WriteToProcess");
   DWORD written;
   auto const succeeded =
       ::WriteFile(stdin_write_.get(), buffer, static_cast<DWORD>(num_write),
@@ -188,6 +194,7 @@ void ProcessIoContext::WriteToProcess(void* buffer,
 
 // io::IoContext
 void ProcessIoContext::Close(const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "ProcessIoContext::Close");
   if (!gateway_thread_->IsRunning()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;
@@ -200,6 +207,7 @@ void ProcessIoContext::Close(const domapi::FileIoDeferred& deferred) {
 void ProcessIoContext::Read(void* buffer,
                             size_t num_read,
                             const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "ProcessIoContext::Read");
   if (!gateway_thread_->IsRunning() || !stdout_read_.is_valid()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;
@@ -213,6 +221,7 @@ void ProcessIoContext::Read(void* buffer,
 void ProcessIoContext::Write(void* buffer,
                              size_t num_write,
                              const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "ProcessIoContext::Write");
   if (!gateway_thread_->IsRunning() || !stdin_write_.is_valid()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;

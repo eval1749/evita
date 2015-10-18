@@ -6,6 +6,7 @@
 
 #include "base/bind.h"
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/io/io_context_utils.h"
@@ -64,6 +65,7 @@ FileIoContext::FileIoContext(const base::string16& file_name,
                              const base::string16& mode,
                              const domapi::OpenFileDeferred& deferred)
     : file_handle_(OpenFile(file_name, mode, deferred)), running_(false) {
+  TRACE_EVENT_ASYNC_BEGIN0("io", "FileContext", this);
   if (!file_handle_.is_valid())
     return;
   overlapped = {0};
@@ -72,12 +74,16 @@ FileIoContext::FileIoContext(const base::string16& file_name,
       file_handle_.get(), this);
 }
 
-FileIoContext::~FileIoContext() {}
+FileIoContext::~FileIoContext() {
+  TRACE_EVENT_ASYNC_END0("io", "FileContext", this);
+}
 
 // base::MessagePumpForIO::FileIoContext
 void FileIoContext::OnIOCompleted(IOContext*,
                                   DWORD bytes_transferred,
                                   DWORD error) {
+  TRACE_EVENT0("io", "FileIoContext::OnIOCompleted");
+  TRACE_EVENT_ASYNC_END0("io", "FileIoContext I/O", this);
   overlapped.Offset += bytes_transferred;
   running_ = false;
   if (!error || error == ERROR_HANDLE_EOF)
@@ -90,7 +96,8 @@ void FileIoContext::OnIOCompleted(IOContext*,
 
 // io::IoContext
 void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
-  if (file_handle_.is_valid()) {
+  TRACE_EVENT0("io", "FileIoContext::Close");
+    if (file_handle_.is_valid()) {
     if (!::CloseHandle(file_handle_.get())) {
       auto const last_error = ::GetLastError();
       DVLOG(0) << "CloseHandle error=" << last_error;
@@ -107,11 +114,13 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
 void FileIoContext::Read(void* buffer,
                          size_t num_read,
                          const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "FileIoContext::Read");
   if (running_) {
     Reject(deferred.reject, ERROR_BUSY);
     return;
   }
 
+  TRACE_EVENT_ASYNC_BEGIN0("io", "FileIoContext I/O", this);
   running_ = true;
   deferred_ = deferred;
   DWORD read;
@@ -131,11 +140,13 @@ void FileIoContext::Read(void* buffer,
 void FileIoContext::Write(void* buffer,
                           size_t num_write,
                           const domapi::FileIoDeferred& deferred) {
+  TRACE_EVENT0("io", "FileIoContext::Write");
   if (running_) {
     Reject(deferred.reject, ERROR_BUSY);
     return;
   }
 
+  TRACE_EVENT_ASYNC_BEGIN0("io", "FileIoContext I/O", this);
   running_ = true;
   deferred_ = deferred;
   DWORD written;

@@ -5,6 +5,7 @@
 #include "evita/views/events/event_source.h"
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
@@ -80,6 +81,7 @@ EventSource::~EventSource() {}
 
 void EventSource::DispatchFocusEvent(domapi::EventType event_type,
                                      domapi::EventTargetId related_target_id) {
+  TRACE_EVENT0("views", "EventSource::DispatchFocusEvent");
   DCHECK(event_type == domapi::EventType::Blur ||
          event_type == domapi::EventType::Focus);
   domapi::FocusEvent api_event;
@@ -91,6 +93,7 @@ void EventSource::DispatchFocusEvent(domapi::EventType event_type,
 }
 
 void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
+  TRACE_EVENT0("views", "EventSource::DispatchKeyboardEvent");
   domapi::KeyboardEvent api_event;
   api_event.event_id = next_event_id();
   api_event.alt_key = event.alt_key();
@@ -105,6 +108,7 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
 }
 
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
+  TRACE_EVENT0("views", "EventSource::DispatchMouseEvent");
 #define MUST_EQUAL(name)                                       \
   static_assert(static_cast<int>(domapi::MouseButton::name) == \
                     static_cast<int>(ui::MouseButton::name),   \
@@ -132,6 +136,7 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
 void EventSource::DispatchTextCompositionEvent(
     domapi::EventType event_type,
     const ui::TextComposition& composition) {
+  TRACE_EVENT0("views", "EventSource::DispatchTextCompositionEvent");
   domapi::TextCompositionData data;
   data.caret = composition.caret();
   data.text = composition.text();
@@ -152,6 +157,7 @@ void EventSource::DispatchTextCompositionEvent(
 }
 
 void EventSource::DispatchWheelEvent(const ui::MouseWheelEvent& event) {
+  TRACE_EVENT0("views", "EventSource::DispatchWheelEvent");
   domapi::WheelEvent api_event;
   api_event.event_id = next_event_id();
   api_event.alt_key = event.alt_key();

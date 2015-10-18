@@ -39,21 +39,13 @@ void Scheduler::DidFireTimer() {
     base::AutoLock lock_scope(*lock_);
     timer_is_running_ = false;
   }
+  StartTimer();
 
   auto const now = base::Time::Now();
-
-  if (script_is_running_) {
-    // TODO(eval1749): Run non-DOM animations
-    DVLOG(0) << "Scheduler::DidFirTimer: script_is_running_"
-             << " paint=" << (now - last_paint_time_).InMillisecondsF() << "ms"
-             << " script=" << (now - script_start_time_).InMillisecondsF()
-             << "ms";
-  }
   HandleAnimationFrame(now);
   if (!script_is_running_)
     StartScript();
   Paint();
-  StartTimer();
 }
 
 void Scheduler::DidUpdateDom() {

@@ -48,8 +48,6 @@ class Application final : public common::Singleton<Application> {
   DECLARE_SINGLETON_CLASS(Application);
 
  public:
-  ~Application();
-
   editor::DomLock* dom_lock() const { return dom_lock_.get(); }
   io::IoManager* io_manager() const { return io_manager_.get(); }
   Scheduler* scheduler() const { return scheduler_.get(); }
@@ -67,10 +65,7 @@ class Application final : public common::Singleton<Application> {
 
  private:
   Application();
-
-  const base::char16* GetTitle() const;
-  bool OnIdle(int hint);
-  void DoIdle();
+  ~Application() final;
 
   std::unique_ptr<editor::DomLock> dom_lock_;
   std::unique_ptr<io::IoManager> io_manager_;

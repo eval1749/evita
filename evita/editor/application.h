@@ -79,9 +79,6 @@ class Application final : public common::Singleton<Application> {
   std::unique_ptr<Scheduler> scheduler_;
   std::unique_ptr<TraceLogController> trace_log_controller_;
   std::unique_ptr<views::ViewThreadProxy> view_delegate_;
-  std::unique_ptr<metrics::TimeScope> view_idle_time_scope_;
-  int view_idle_count_;
-  int view_idle_hint_;
 
   // |dom::ScriptThread| uses |IoDelegate| and |ViewDelegate|.
   std::unique_ptr<dom::ScriptThread> script_thread_;

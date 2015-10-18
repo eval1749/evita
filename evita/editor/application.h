@@ -51,6 +51,7 @@ class Application final : public common::Singleton<Application> {
   ~Application();
 
   editor::DomLock* dom_lock() const { return dom_lock_.get(); }
+  io::IoManager* io_manager() const { return io_manager_.get(); }
   Scheduler* scheduler() const { return scheduler_.get(); }
   const base::string16& title() const;
   TraceLogController* trace_log_controller() const {
@@ -61,7 +62,6 @@ class Application final : public common::Singleton<Application> {
 
   bool CalledOnValidThread() const;
   void DidStartScriptHost(domapi::ScriptHostState state);
-  io::IoManager* GetIoManager() const { return io_manager_.get(); }
   void Quit();
   void Run();
 

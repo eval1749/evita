@@ -70,7 +70,7 @@ FileIoContext::FileIoContext(const base::string16& file_name,
     return;
   overlapped = {0};
   handler = this;
-  editor::Application::instance()->GetIoManager()->RegisterIoHandler(
+  editor::Application::instance()->io_manager()->RegisterIoHandler(
       file_handle_.get(), this);
 }
 

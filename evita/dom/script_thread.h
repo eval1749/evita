@@ -38,6 +38,9 @@ class ScriptThread final : public domapi::ViewEventHandler,
  private:
   domapi::ViewEventHandler* view_event_handler() const;
 
+  void ScheduleScriptTask(const base::Closure& task);
+  void StartScriptIfNeeded(const base::Time& deadline);
+
   // domapi::ViewEventHandler
   void DidBeginFrame(const base::Time& deadline);
   void DidChangeWindowBounds(WindowId window_id,
@@ -68,6 +71,7 @@ class ScriptThread final : public domapi::ViewEventHandler,
 
   domapi::IoDelegate* const io_delegate_;
   const std::unique_ptr<Scheduler> scheduler_;
+  bool script_is_running_;
   const std::unique_ptr<base::Thread> thread_;
   ViewDelegate* const view_delegate_;
 

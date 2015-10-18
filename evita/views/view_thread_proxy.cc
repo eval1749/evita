@@ -199,7 +199,11 @@ DEFINE_DELEGATE_2(CreateTableWindow, dom::WindowId, dom::Document*)
 DEFINE_DELEGATE_2(CreateTextWindow, dom::WindowId, text::Selection*)
 DEFINE_DELEGATE_1(DestroyWindow, dom::WindowId)
 DEFINE_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
-DEFINE_DELEGATE_0(DidUpdateDom)
+
+void ViewThreadProxy::DidUpdateDom() {
+  delegate_->DidUpdateDom();
+}
+
 DEFINE_DELEGATE_1(FocusWindow, dom::WindowId)
 DEFINE_DELEGATE_3(GetFileNameForLoad,
                   dom::WindowId,

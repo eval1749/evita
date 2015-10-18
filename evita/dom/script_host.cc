@@ -348,6 +348,7 @@ void ScriptHost::ResetForTesting() {
 
 // This function is called by |PromiseResolver::ScheduleRunMicrotasks|.
 void ScriptHost::RunMicrotasks() {
+  TRACE_EVENT0("script", "ScriptHost::RunMicrotasks");
   v8_glue::Runner::Scope runner_scope(runner());
   v8::TryCatch try_catch;
   DOM_AUTO_LOCK_SCOPE();

@@ -7,6 +7,7 @@
 #include "evita/dom/scheduler_impl.h"
 
 #include "base/synchronization/lock.h"
+#include "base/trace_event/trace_event.h"
 #include "common/maybe.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
@@ -20,17 +21,14 @@ namespace {
 class DomUpdateScope {
  public:
   DomUpdateScope(dom::ViewDelegate* view_delegate, const base::Time& deadline)
-      : deadline_(deadline), state_("normal"), view_delegate_(view_delegate) {}
+      : deadline_(deadline), view_delegate_(view_delegate) {}
 
   ~DomUpdateScope() {
     view_delegate_->DidUpdateDom();
   }
 
-  void SetState(const char* state) { state_ = state; }
-
  private:
   const base::Time deadline_;
-  const char* state_;
   dom::ViewDelegate* const view_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(DomUpdateScope);
@@ -66,6 +64,7 @@ void SchedulerImpl::TaskQueue::GiveTask(const base::Closure& task) {
 }
 
 bool SchedulerImpl::TaskQueue::RunTasksUntil(const base::Time& deadline) {
+  TRACE_EVENT0("script", "SchedulerImpl::TaskQueue::RunTasksUntil");
   while (base::Time::Now() < deadline) {
     auto maybe_task = TakeTask();
     if (maybe_task.IsNothing())
@@ -96,22 +95,27 @@ SchedulerImpl::SchedulerImpl(ViewDelegate* view_delegate)
 SchedulerImpl::~SchedulerImpl() {}
 
 void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
+  TRACE_EVENT0("script", "SchedulerImpl::DidBeginFrame");
   DomUpdateScope scope(view_delegate_, deadline);
 
-  if (!normal_task_queue_->RunTasksUntil(deadline))
-    return;
-  scope.SetState("normal microtasks");
-  if (!RunMicrotasksIfPossible(deadline))
-    return;
+  {
+    TRACE_EVENT0("script", "normal tasks");
+    if (!normal_task_queue_->RunTasksUntil(deadline))
+      return;
+    if (!RunMicrotasksIfPossible(deadline))
+      return;
+  }
 
-  scope.SetState("idle");
-  if (!idle_task_queue_->RunTasksUntil(deadline))
-    return;
-  scope.SetState("idle microtasks");
-  RunMicrotasksIfPossible(deadline);
+  {
+    TRACE_EVENT0("script", "idle tasks");
+    if (!idle_task_queue_->RunTasksUntil(deadline))
+      return;
+    RunMicrotasksIfPossible(deadline);
+  }
 }
 
 bool SchedulerImpl::RunMicrotasksIfPossible(const base::Time& deadline) {
+  TRACE_EVENT0("script", "SchedulerImpl::RunMicrotasksIfPossible");
   if (base::Time::Now() >= deadline)
     return false;
   ScriptHost::instance()->RunMicrotasks();
@@ -119,10 +123,12 @@ bool SchedulerImpl::RunMicrotasksIfPossible(const base::Time& deadline) {
 }
 
 void SchedulerImpl::ScheduleIdleTask(const base::Closure& task) {
+  TRACE_EVENT0("script", "SchedulerImpl::ScheduleIdleTask");
   idle_task_queue_->GiveTask(task);
 }
 
 void SchedulerImpl::ScheduleTask(const base::Closure& task) {
+  TRACE_EVENT0("script", "SchedulerImpl::ScheduleTask");
   normal_task_queue_->GiveTask(task);
 }
 

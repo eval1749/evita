@@ -27,12 +27,14 @@ Scheduler::~Scheduler() {}
 
 void Scheduler::CancelAnimationFrameRequest(
     ui::AnimationFrameHandler* handler) {
+  TRACE_EVENT0("scheduler", "Scheduler::CancelAnimationFrameRequest");
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.erase(handler);
   canceled_handlers_.insert(handler);
 }
 
 void Scheduler::DidFireTimer() {
+  TRACE_EVENT0("scheduler", "Scheduler::DidFireTimer");
   {
     base::AutoLock lock_scope(*lock_);
     timer_is_running_ = false;
@@ -55,6 +57,7 @@ void Scheduler::DidFireTimer() {
 }
 
 void Scheduler::DidUpdateDom() {
+  TRACE_EVENT0("scheduler", "Scheduler::DidUpdateDom");
   script_is_running_ = false;
 }
 
@@ -81,15 +84,18 @@ void Scheduler::Paint() {
 }
 
 void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
+  TRACE_EVENT0("scheduler", "Scheduler::RequestAnimationFrame");
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.insert(handler);
 }
 
 void Scheduler::Start() {
+  TRACE_EVENT0("scheduler", "Scheduler::Start");
   StartTimer();
 }
 
 void Scheduler::StartScript() {
+  TRACE_EVENT0("scheduler", "Scheduler::StartScript");
   auto const now = base::Time::Now();
   script_start_time_ = now;
   script_is_running_ = true;
@@ -99,6 +105,7 @@ void Scheduler::StartScript() {
 }
 
 void Scheduler::StartTimer() {
+  TRACE_EVENT0("scheduler", "Scheduler::StartTimer");
   DCHECK(!timer_is_running_);
   timer_is_running_ = true;
   // TODO(eval1749): We should increase |frame_delta| if the application is

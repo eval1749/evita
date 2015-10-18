@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <array>
+
 #include "evita/dom/script_host.h"
 
 #include "base/command_line.h"
@@ -97,14 +100,22 @@ void MessageBox(const base::string16& message, int flags) {
       kInvalidWindowId, message, L"Evita System Message", flags, resolver);
 }
 
+const char* GcTypeToString(v8::GCType type) {
+  static std::array<const char*, 5> strings{
+      "Scavenge",     "MarkSweepCompact", "IncrementalMarking",
+      "WeakCallback", "Unknown",
+  };
+  return strings[std::min(static_cast<size_t>(type), strings.size() - 1)];
+}
+
 void GcEpilogueCallback(v8::Isolate* isolate,
                         v8::GCType type,
                         v8::GCCallbackFlags flags) {
-  TRACE_EVENT_END2("scheduler", "GcEpilogueCallback", "type", type, "flags",
-                   flags);
-  auto text =
-      base::StringPrintf(L"GC finished type=%d flags=0x%X", type, flags);
-  MessageBox(text, MB_ICONINFORMATION);
+  TRACE_EVENT_END2("scheduler", "GcPrologueCallback", "type",
+                   GcTypeToString(type), "flags", flags);
+  auto text = base::StringPrintf("GC finished type=%s flags=0x%X",
+                                 GcTypeToString(type), flags);
+  MessageBox(base::ASCIIToUTF16(text), MB_ICONINFORMATION);
   if (need_unlock_after_gc)
     dom::Lock::instance()->Release(FROM_HERE);
 }
@@ -112,10 +123,11 @@ void GcEpilogueCallback(v8::Isolate* isolate,
 void GcPrologueCallback(v8::Isolate* isolate,
                         v8::GCType type,
                         v8::GCCallbackFlags flags) {
-  auto text = base::StringPrintf(L"GC Started type=%d flags=%X", type, flags);
-  MessageBox(text, MB_ICONINFORMATION);
-  TRACE_EVENT_BEGIN2("scheduler", "GcPrologueCallback", "type", type, "flags",
-                     flags);
+  auto text = base::StringPrintf("GC Started type=%s flags=%X",
+                                 GcTypeToString(type), flags);
+  MessageBox(base::ASCIIToUTF16(text), MB_ICONINFORMATION);
+  TRACE_EVENT_BEGIN2("scheduler", "GcPrologueCallback", "type",
+                     GcTypeToString(type), "flags", flags);
   need_unlock_after_gc = !dom::Lock::instance()->locked_by_dom();
   if (!need_unlock_after_gc)
     return;

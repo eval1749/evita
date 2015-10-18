@@ -11,11 +11,11 @@
 
 namespace dom {
 
-class ViewDelegate;
+class SchedulerClient;
 
 class SchedulerImpl final : public Scheduler {
  public:
-  explicit SchedulerImpl(ViewDelegate* view_delegate);
+  explicit SchedulerImpl(SchedulerClient* view_delegate);
   ~SchedulerImpl() final;
 
  private:
@@ -31,7 +31,7 @@ class SchedulerImpl final : public Scheduler {
 
   std::unique_ptr<TaskQueue> idle_task_queue_;
   std::unique_ptr<TaskQueue> normal_task_queue_;
-  ViewDelegate* const view_delegate_;
+  SchedulerClient* const scheduler_client_;
 
   DISALLOW_COPY_AND_ASSIGN(SchedulerImpl);
 };

@@ -55,6 +55,8 @@ source_set("dom") {
     "promise_resolver.cc",
     "scheduler.cc",
     "scheduler.h",
+    "scheduler_client.cc",
+    "scheduler_client.h",
     "scheduler_impl.cc",
     "scheduler_impl.h",
     "script_host.cc",

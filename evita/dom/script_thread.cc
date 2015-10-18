@@ -40,7 +40,7 @@ bool IsScriptBreakEvent(const domapi::KeyboardEvent& event) {
 ScriptThread::ScriptThread(ViewDelegate* view_delegate,
                            domapi::IoDelegate* io_delegate)
     : io_delegate_(io_delegate),
-      scheduler_(new SchedulerImpl(view_delegate)),
+      scheduler_(new SchedulerImpl(this)),
       thread_(new base::Thread("script_thread")),
       view_delegate_(view_delegate) {}
 
@@ -154,6 +154,12 @@ void ScriptThread::WillDestroyViewHost() {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   scheduler_->ScheduleTask(base::Bind(&ViewEventHandler::WillDestroyViewHost,
                                       base::Unretained(view_event_handler())));
+}
+
+// SchedulerClient
+void ScriptThread::DidUpdateDom() {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  view_delegate_->DidUpdateDom();
 }
 
 }  // namespace dom

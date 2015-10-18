@@ -10,26 +10,24 @@
 #include "base/trace_event/trace_event.h"
 #include "common/maybe.h"
 #include "evita/dom/public/view_event.h"
+#include "evita/dom/scheduler_client.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/view_delegate.h"
 
 namespace dom {
 
 namespace {
 
-// To make sure we call |ViewDelegate::DidUpdateDom()| after running scripts.
+// To make sure we call |SchedulerClient::DidUpdateDom()| after running scripts.
 class DomUpdateScope {
  public:
-  DomUpdateScope(dom::ViewDelegate* view_delegate, const base::Time& deadline)
-      : deadline_(deadline), view_delegate_(view_delegate) {}
+  DomUpdateScope(SchedulerClient* scheduler_client, const base::Time& deadline)
+      : deadline_(deadline), scheduler_client_(scheduler_client) {}
 
-  ~DomUpdateScope() {
-    view_delegate_->DidUpdateDom();
-  }
+  ~DomUpdateScope() { scheduler_client_->DidUpdateDom(); }
 
  private:
   const base::Time deadline_;
-  dom::ViewDelegate* const view_delegate_;
+  SchedulerClient* const scheduler_client_;
 
   DISALLOW_COPY_AND_ASSIGN(DomUpdateScope);
 };
@@ -87,16 +85,16 @@ common::Maybe<base::Closure> SchedulerImpl::TaskQueue::TakeTask() {
 //
 // SchedulerImpl
 //
-SchedulerImpl::SchedulerImpl(ViewDelegate* view_delegate)
+SchedulerImpl::SchedulerImpl(SchedulerClient* scheduler_client)
     : idle_task_queue_(new TaskQueue()),
       normal_task_queue_(new TaskQueue()),
-      view_delegate_(view_delegate) {}
+      scheduler_client_(scheduler_client) {}
 
 SchedulerImpl::~SchedulerImpl() {}
 
 void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
   TRACE_EVENT0("script", "SchedulerImpl::DidBeginFrame");
-  DomUpdateScope scope(view_delegate_, deadline);
+  DomUpdateScope scope(scheduler_client_, deadline);
 
   {
     TRACE_EVENT0("script", "normal tasks");

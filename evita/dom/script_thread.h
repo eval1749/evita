@@ -12,6 +12,7 @@
 #include "base/basictypes.h"
 #include "base/callback_forward.h"
 #include "evita/dom/public/view_event_handler.h"
+#include "evita/dom/scheduler_client.h"
 #include "evita/dom/view_delegate.h"
 
 namespace base {
@@ -26,7 +27,8 @@ namespace dom {
 
 class Scheduler;
 
-class ScriptThread final : public domapi::ViewEventHandler {
+class ScriptThread final : public domapi::ViewEventHandler,
+                           public SchedulerClient {
  public:
   ScriptThread(ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
   ~ScriptThread() final;
@@ -60,6 +62,9 @@ class ScriptThread final : public domapi::ViewEventHandler {
   void QueryClose(WindowId window_id) final;
   void RunCallback(const base::Closure& callback) final;
   void WillDestroyViewHost() final;
+
+  // SchedulerClient
+  void DidUpdateDom() final;
 
   domapi::IoDelegate* const io_delegate_;
   const std::unique_ptr<Scheduler> scheduler_;

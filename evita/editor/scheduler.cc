@@ -54,7 +54,6 @@ void Scheduler::DidUpdateDom() {
 }
 
 void Scheduler::HandleAnimationFrame(base::Time time) {
-  TRACE_EVENT0("scheduler", "Scheduler::HandleAnimationFrame");
   std::unordered_set<ui::AnimationFrameHandler*> running_handlers;
   std::unordered_set<ui::AnimationFrameHandler*> canceling_handlers;
   {
@@ -62,9 +61,12 @@ void Scheduler::HandleAnimationFrame(base::Time time) {
     running_handlers.swap(pending_handlers_);
     canceling_handlers.swap(canceled_handlers_);
   }
+  TRACE_EVENT1("scheduler", "Scheduler::HandleAnimationFrame", "tasks",
+               running_handlers.size());
   for (auto handler : running_handlers) {
     if (canceling_handlers.find(handler) != canceling_handlers.end())
       continue;
+    TRACE_EVENT0("scheduler", "Scheduler::HandleAnimationFrame/1");
     handler->HandleAnimationFrame(time);
   }
 }

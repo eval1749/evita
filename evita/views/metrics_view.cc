@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/metrics_view.h"
-
 #include <sstream>
 
+#include "evita/views/metrics_view.h"
+
+#include "base/logging.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
@@ -59,7 +60,7 @@ class MetricsView::View final : public ui::LayerOwnerDelegate {
   explicit View(ui::Widget* widget);
   ~View() final = default;
 
-  void Animate(base::Time now);
+  void Paint();
   void RecordTime();
 
  private:
@@ -85,7 +86,7 @@ MetricsView::View::View(ui::Widget* widget)
       text_format_(new gfx::TextFormat(L"Consolas", 11.5)),
       widget_(widget) {}
 
-void MetricsView::View::Animate(base::Time) {
+void MetricsView::View::Paint() {
   if (!canvas_)
     canvas_.reset(widget_->layer()->CreateCanvas());
   else if (canvas_->GetLocalBounds() != widget_->GetContentsBounds())
@@ -160,10 +161,6 @@ MetricsView::MetricsView() : view_(new View(this)) {
 
 MetricsView::~MetricsView() {}
 
-void MetricsView::Animate(base::Time now) {
-  view_->Animate(now);
-}
-
 void MetricsView::RecordTime() {
   view_->RecordTime();
 }
@@ -173,6 +170,11 @@ void MetricsView::DidRealize() {
   ui::Widget::DidRealize();
   SetLayer(new ui::Layer());
   set_layer_owner_delegate(view_.get());
+}
+
+void MetricsView::OnDraw(gfx::Canvas* canvas) {
+  DCHECK(canvas);
+  view_->Paint();
 }
 
 }  // namespace views

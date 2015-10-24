@@ -226,11 +226,12 @@ void TextWindow::Paint(const TextSelectionModel& selection, base::Time now) {
   }
   gfx::Canvas::DrawingScope drawing_scope(canvas());
   text_renderer_->Paint(canvas(), selection, now);
-  OnDraw(canvas());
 }
 
 void TextWindow::Redraw(base::Time now) {
   DCHECK(visible());
+  TRACE_EVENT0("view", "TextWindow::Redraw");
+  MetricsView::TimingScope timing_scope(metrics_view_);
   UI_ASSERT_DOM_LOCKED();
 
   auto const selection = GetTextSelectionModel(this, *selection_);
@@ -356,19 +357,22 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
   TRACE_EVENT0("scheduler", "TextWindow::DidBeginAnimationFrame");
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock_scope);
-  if (!dom_lock_scope.locked()) {
-    RequestAnimationFrame();
-    return;
-  }
-
-  metrics_view_->RecordTime();
   {
-    MetricsView::TimingScope timing_scope(metrics_view_);
+    UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock_scope);
+    if (!dom_lock_scope.locked()) {
+      RequestAnimationFrame();
+      return;
+    }
+
+    metrics_view_->RecordTime();
     Redraw(now);
   }
 
-  metrics_view_->Animate(now);
+  {
+    TRACE_EVENT0("view", "TextWindow::DidBeginAnimationFrame/1");
+    gfx::Canvas::DrawingScope drawing_scope(canvas());
+    OnDraw(canvas());
+  }
   NotifyUpdateContent();
 }
 

@@ -33,7 +33,6 @@ class MetricsView final : public ui::Widget {
   MetricsView();
   ~MetricsView() final;
 
-  void Animate(base::Time now);
   void RecordTime();
 
  private:
@@ -41,6 +40,7 @@ class MetricsView final : public ui::Widget {
 
   // ui::Widget
   void DidRealize() final;
+  void OnDraw(gfx::Canvas* canvas);
 
   std::unique_ptr<View> view_;
 

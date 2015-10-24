@@ -119,7 +119,10 @@ class MockScheduler final : public Scheduler {
 
  private:
   // dom::Scheduler
-  void DidBeginFrame(const base::Time& deadline) final {}
+  void DidBeginFrame(const base::Time& deadline) final { NOTREACHED(); }
+  void DidEnterViewIdle(const base::Time& deadline) final { NOTREACHED(); }
+  void DidExitViewIdle() final { NOTREACHED(); }
+  void RunIdleTasks() final { NOTREACHED(); }
   void ScheduleTask(const base::Closure& task) final {
     normal_tasks_.push(task);
   }

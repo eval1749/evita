@@ -53,6 +53,8 @@ class ScriptThread final : public domapi::ViewEventHandler,
   void DidDestroyWidget(WindowId window_id) final;
   void DidDropWidget(WindowId source_id, WindowId target_id) final;
   void DidRealizeWidget(WindowId window_id) final;
+  void DidEnterViewIdle(const base::Time& deadline) final;
+  void DidExitViewIdle() final;
   void DispatchFocusEvent(const domapi::FocusEvent& event) final;
   void DispatchKeyboardEvent(const domapi::KeyboardEvent& event) final;
   void DispatchMouseEvent(const domapi::MouseEvent& event) final;

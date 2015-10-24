@@ -19,6 +19,9 @@ class Scheduler {
   virtual ~Scheduler();
 
   virtual void DidBeginFrame(const base::Time& deadline) = 0;
+  virtual void DidEnterViewIdle(const base::Time& deadline) = 0;
+  virtual void DidExitViewIdle() = 0;
+  virtual void RunIdleTasks() = 0;
   virtual void ScheduleTask(const base::Closure& task) = 0;
   virtual void ScheduleIdleTask(const base::Closure& task) = 0;
 

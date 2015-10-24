@@ -54,11 +54,11 @@ Application::Application()
       is_quit_(false),
       io_manager_(new io::IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
-      scheduler_(new Scheduler(message_loop_.get())),
       trace_log_controller_(new TraceLogController()),
       view_delegate_(new views::ViewThreadProxy(message_loop_.get())),
       script_thread_(
-          new dom::ScriptThread(view_delegate_.get(), io_manager_->proxy())) {
+          new dom::ScriptThread(view_delegate_.get(), io_manager_->proxy())),
+      scheduler_(new Scheduler(script_thread_.get())) {
   io_manager_->Start();
   ui::TextInputClientWin::instance()->Start();
   script_thread_->Start();

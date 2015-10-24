@@ -141,6 +141,20 @@ DEFINE_VIEW_EVENT_HANDLER2(DidChangeWindowVisibility,
                            domapi::Visibility)
 DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER2(DidDropWidget, WindowId, WindowId)
+
+void ScriptThread::DidEnterViewIdle(const base::Time& deadline) {
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
+  scheduler_->DidEnterViewIdle(deadline);
+  thread_->message_loop()->PostTask(
+      FROM_HERE,
+      base::Bind(&Scheduler::RunIdleTasks, base::Unretained(scheduler_.get())));
+}
+
+void ScriptThread::DidExitViewIdle() {
+  // Called both view thread and script thread via |RequestAnimationFrame()|.
+  scheduler_->DidExitViewIdle();
+}
+
 DEFINE_VIEW_EVENT_HANDLER1(DidRealizeWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER1(DispatchFocusEvent, const domapi::FocusEvent&)
 
@@ -160,6 +174,7 @@ DEFINE_VIEW_EVENT_HANDLER1(DispatchMouseEvent, const domapi::MouseEvent&)
 DEFINE_VIEW_EVENT_HANDLER1(DispatchTextCompositionEvent,
                            const domapi::TextCompositionEvent&)
 DEFINE_VIEW_EVENT_HANDLER1(DispatchWheelEvent, const domapi::WheelEvent&)
+
 DEFINE_VIEW_EVENT_HANDLER2(OpenFile, WindowId, const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER2(ProcessCommandLine,
                            const base::string16&,

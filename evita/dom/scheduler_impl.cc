@@ -42,14 +42,13 @@ class SchedulerImpl::TaskQueue {
   TaskQueue() = default;
   ~TaskQueue() = default;
 
+  bool empty() const { return tasks_.empty(); }
+  size_t size() const { return tasks_.size(); }
+
   void GiveTask(const base::Closure& closure);
-
-  // Returns true if no more tasks.
-  bool RunTasksUntil(const base::Time& deadline);
-
- private:
   common::Maybe<base::Closure> TakeTask();
 
+ private:
   base::Lock lock_;
   std::queue<base::Closure> tasks_;
 
@@ -59,17 +58,6 @@ class SchedulerImpl::TaskQueue {
 void SchedulerImpl::TaskQueue::GiveTask(const base::Closure& task) {
   base::AutoLock lock_scope(lock_);
   tasks_.push(task);
-}
-
-bool SchedulerImpl::TaskQueue::RunTasksUntil(const base::Time& deadline) {
-  TRACE_EVENT0("script", "SchedulerImpl::TaskQueue::RunTasksUntil");
-  while (base::Time::Now() < deadline) {
-    auto maybe_task = TakeTask();
-    if (maybe_task.IsNothing())
-      return true;
-    maybe_task.FromJust().Run();
-  }
-  return false;
 }
 
 common::Maybe<base::Closure> SchedulerImpl::TaskQueue::TakeTask() {
@@ -88,36 +76,63 @@ common::Maybe<base::Closure> SchedulerImpl::TaskQueue::TakeTask() {
 SchedulerImpl::SchedulerImpl(SchedulerClient* scheduler_client)
     : idle_task_queue_(new TaskQueue()),
       normal_task_queue_(new TaskQueue()),
-      scheduler_client_(scheduler_client) {}
+      scheduler_client_(scheduler_client),
+      view_is_idle_(false) {}
 
 SchedulerImpl::~SchedulerImpl() {}
 
-void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
-  TRACE_EVENT0("script", "SchedulerImpl::DidBeginFrame");
-  DomUpdateScope scope(scheduler_client_, deadline);
-
-  {
-    TRACE_EVENT0("script", "normal tasks");
-    if (!normal_task_queue_->RunTasksUntil(deadline))
-      return;
-    if (!RunMicrotasksIfPossible(deadline))
-      return;
-  }
-
-  {
-    TRACE_EVENT0("script", "idle tasks");
-    if (!idle_task_queue_->RunTasksUntil(deadline))
-      return;
-    RunMicrotasksIfPossible(deadline);
-  }
+bool SchedulerImpl::IsViewIdle() const {
+  if (!view_is_idle_ || !normal_task_queue_->empty())
+    return false;
+  return view_idle_deadline_ > base::Time::Now();
 }
 
-bool SchedulerImpl::RunMicrotasksIfPossible(const base::Time& deadline) {
-  TRACE_EVENT0("script", "SchedulerImpl::RunMicrotasksIfPossible");
-  if (base::Time::Now() >= deadline)
-    return false;
+void SchedulerImpl::RunMicrotasks() {
+  TRACE_EVENT0("script", "SchedulerImpl::RunMicrotasks");
   ScriptHost::instance()->RunMicrotasks();
-  return true;
+}
+
+// dom::Scheduler
+void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
+  TRACE_EVENT1("script", "SchedulerImpl::DidBeginFrame", "period",
+               (view_idle_deadline_ - base::Time::Now()).InMilliseconds());
+  DomUpdateScope scope(scheduler_client_, deadline);
+
+  for (;;) {
+    auto maybe_task = normal_task_queue_->TakeTask();
+    if (maybe_task.IsNothing())
+      break;
+    maybe_task.FromJust().Run();
+  }
+  RunMicrotasks();
+  view_idle_deadline_ = deadline;
+  RunMicrotasks();
+}
+
+void SchedulerImpl::DidEnterViewIdle(const base::Time& deadline) {
+  DCHECK(!view_is_idle_);
+  view_idle_deadline_ = deadline;
+  view_is_idle_ = true;
+}
+
+void SchedulerImpl::DidExitViewIdle() {
+  view_is_idle_ = false;
+}
+
+void SchedulerImpl::RunIdleTasks() {
+  if (idle_task_queue_->empty())
+    return;
+  TRACE_EVENT1("script", "SchedulerImpl::RunIdleTasks", "period",
+               (view_idle_deadline_ - base::Time::Now()).InMilliseconds());
+  if (!IsViewIdle())
+    return;
+  do {
+    auto maybe_task = idle_task_queue_->TakeTask();
+    if (maybe_task.IsNothing())
+      break;
+    maybe_task.FromJust().Run();
+  } while (IsViewIdle());
+  RunMicrotasks();
 }
 
 void SchedulerImpl::ScheduleIdleTask(const base::Closure& task) {

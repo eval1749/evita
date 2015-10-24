@@ -229,11 +229,6 @@ void Frame::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
   TRACE_EVENT0("scheduler", "Frame::DidBeginAnimationFrame");
-  // TODO(eval1749): We should request animation frame for |Frame| only if
-  // needed.
-  RequestAnimationFrame();
-  // TODO(eval1749): We should call update title bar only when needed.
-  UpdateTitleBar();
 
   CR_DEFINE_STATIC_LOCAL(base::Time, busy_start_at, ());
   static bool busy;
@@ -628,4 +623,5 @@ void Frame::RequestSelectTab(int selected_index) {
   if (!tab_content)
     return;
   tab_strip_animator_->RequestSelect(tab_content);
+  UpdateTitleBar();
 }

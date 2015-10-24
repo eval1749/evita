@@ -71,12 +71,14 @@ class Application final : public common::Singleton<Application> {
   std::unique_ptr<io::IoManager> io_manager_;
   bool is_quit_;
   std::unique_ptr<base::MessageLoop> message_loop_;
-  std::unique_ptr<Scheduler> scheduler_;
   std::unique_ptr<TraceLogController> trace_log_controller_;
   std::unique_ptr<views::ViewThreadProxy> view_delegate_;
 
   // |dom::ScriptThread| uses |IoDelegate| and |ViewDelegate|.
   std::unique_ptr<dom::ScriptThread> script_thread_;
+
+  // |Scheduler| uses |domapi::ViewEventHandler|.
+  std::unique_ptr<Scheduler> scheduler_;
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

@@ -17,13 +17,39 @@
 
 namespace editor {
 
-Scheduler::Scheduler(base::MessageLoop* message_loop)
-    : lock_(new base::Lock()),
-      message_loop_(message_loop),
-      script_is_running_(false),
-      timer_is_running_(false) {}
+Scheduler::Scheduler(domapi::ViewEventHandler* script_delegate)
+    : is_running_(false),
+      lock_(new base::Lock()),
+      message_loop_(base::MessageLoop::current()),
+      post_task_(false),
+      script_delegate_(script_delegate) {}
 
 Scheduler::~Scheduler() {}
+
+void Scheduler::BeginFrame() {
+  TRACE_EVENT0("scheduler", "Scheduler::BeginFrame");
+  last_frame_time_ = base::Time::Now();
+  script_delegate_->DidExitViewIdle();
+  {
+    base::AutoLock lock_scope(*lock_);
+    DCHECK(post_task_);
+    is_running_ = true;
+    post_task_ = false;
+  }
+  auto const now = base::Time::Now();
+  HandleAnimationFrame(now);
+  CommitFrame();
+
+  base::AutoLock lock_scope(*lock_);
+  is_running_ = false;
+  if (pending_handlers_.empty()) {
+    auto const idle_deadline =
+        base::Time::Now() + base::TimeDelta::FromMicroseconds(50);
+    script_delegate_->DidEnterViewIdle(idle_deadline);
+    return;
+  }
+  ScheduleFrame();
+}
 
 void Scheduler::CancelAnimationFrameRequest(
     ui::AnimationFrameHandler* handler) {
@@ -33,24 +59,14 @@ void Scheduler::CancelAnimationFrameRequest(
   canceled_handlers_.insert(handler);
 }
 
-void Scheduler::DidFireTimer() {
-  TRACE_EVENT0("scheduler", "Scheduler::DidFireTimer");
-  {
-    base::AutoLock lock_scope(*lock_);
-    timer_is_running_ = false;
-  }
-  StartTimer();
-
-  auto const now = base::Time::Now();
-  HandleAnimationFrame(now);
-  if (!script_is_running_)
-    StartScript();
-  Paint();
+void Scheduler::CommitFrame() {
+  TRACE_EVENT0("scheduler", "Scheduler::CommitFrame");
+  ui::Compositor::instance()->CommitIfNeeded();
+  last_paint_time_ = base::Time::Now();
 }
 
 void Scheduler::DidUpdateDom() {
   TRACE_EVENT0("scheduler", "Scheduler::DidUpdateDom");
-  script_is_running_ = false;
 }
 
 void Scheduler::HandleAnimationFrame(base::Time time) {
@@ -71,43 +87,39 @@ void Scheduler::HandleAnimationFrame(base::Time time) {
   }
 }
 
-void Scheduler::Paint() {
-  TRACE_EVENT0("scheduler", "Scheduler::Paint");
-  ui::Compositor::instance()->CommitIfNeeded();
-  last_paint_time_ = base::Time::Now();
-}
-
 void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   TRACE_EVENT0("scheduler", "Scheduler::RequestAnimationFrame");
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.insert(handler);
+  if (is_running_ || post_task_)
+    return;
+  ScheduleFrame();
+}
+
+void Scheduler::ScheduleFrame() {
+  TRACE_EVENT0("scheduler", "Scheduler::ScheduleFrame");
+  lock_->AssertAcquired();
+  DCHECK(!post_task_);
+  post_task_ = true;
+  // TODO(eval1749): We should increase |frame_delta| if the application is
+  // running in background.
+  auto const kMinFrameDelta = base::TimeDelta::FromMilliseconds(1000 / 60);
+  auto const next_frame_time = last_frame_time_ + kMinFrameDelta;
+  auto const now = base::Time::Now();
+  auto const delta = next_frame_time - now;
+  if (delta <= base::TimeDelta()) {
+    message_loop_->PostTask(
+        FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)));
+    return;
+  }
+  script_delegate_->DidEnterViewIdle(next_frame_time);
+  message_loop_->PostNonNestableDelayedTask(
+      FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)),
+      delta);
 }
 
 void Scheduler::Start() {
   TRACE_EVENT0("scheduler", "Scheduler::Start");
-  StartTimer();
-}
-
-void Scheduler::StartScript() {
-  TRACE_EVENT0("scheduler", "Scheduler::StartScript");
-  auto const now = base::Time::Now();
-  script_start_time_ = now;
-  script_is_running_ = true;
-  auto const deadline = now + base::TimeDelta::FromMilliseconds(10);
-  editor::Application::instance()->view_event_handler()->DidBeginFrame(
-      deadline);
-}
-
-void Scheduler::StartTimer() {
-  TRACE_EVENT0("scheduler", "Scheduler::StartTimer");
-  DCHECK(!timer_is_running_);
-  timer_is_running_ = true;
-  // TODO(eval1749): We should increase |frame_delta| if the application is
-  // running in background.
-  auto const frame_delta = base::TimeDelta::FromMilliseconds(1000 / 60);
-  message_loop_->PostNonNestableDelayedTask(
-      FROM_HERE, base::Bind(&Scheduler::DidFireTimer, base::Unretained(this)),
-      frame_delta);
 }
 
 }  // namespace editor

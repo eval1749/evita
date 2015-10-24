@@ -16,6 +16,10 @@ class Lock;
 class MessageLoop;
 }
 
+namespace domapi {
+class ViewEventHandler;
+}
+
 namespace ui {
 class AnimationFrameHandler;
 }
@@ -28,7 +32,7 @@ namespace editor {
 //
 class Scheduler final {
  public:
-  explicit Scheduler(base::MessageLoop* message_loop);
+  explicit Scheduler(domapi::ViewEventHandler* script_delegate);
   ~Scheduler();
 
   // Request animation frame.
@@ -43,20 +47,20 @@ class Scheduler final {
   void Start();
 
  private:
-  void DidFireTimer();
+  void BeginFrame();
+  void CommitFrame();
   void HandleAnimationFrame(base::Time time);
-  void Paint();
-  void StartScript();
-  void StartTimer();
+  void ScheduleFrame();
 
   std::unordered_set<ui::AnimationFrameHandler*> canceled_handlers_;
+  bool is_running_;
+  base::Time last_frame_time_;
   base::Time last_paint_time_;
   std::unique_ptr<base::Lock> lock_;
   base::MessageLoop* const message_loop_;
   std::unordered_set<ui::AnimationFrameHandler*> pending_handlers_;
-  bool script_is_running_;
-  base::Time script_start_time_;
-  bool timer_is_running_;
+  bool post_task_;
+  domapi::ViewEventHandler* script_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(Scheduler);
 };

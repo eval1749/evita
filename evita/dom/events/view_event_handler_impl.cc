@@ -118,7 +118,7 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
 
 // domapi::ViewEventHandler
 void ViewEventHandlerImpl::DidBeginFrame(const base::Time& deadline) {
-  // TODO(eval1749): We'll have input event processing here.
+  NOTREACHED();
 }
 
 void ViewEventHandlerImpl::DidChangeWindowBounds(WindowId window_id,
@@ -165,6 +165,14 @@ void ViewEventHandlerImpl::DidDropWidget(WindowId source_id,
   init_dict.set_source_window(source_window);
   DispatchEventWithInLock(target_window,
                           new WindowEvent(L"dropwindow", init_dict));
+}
+
+void ViewEventHandlerImpl::DidEnterViewIdle(const base::Time& deadline) {
+  NOTREACHED();
+}
+
+void ViewEventHandlerImpl::DidExitViewIdle() {
+  NOTREACHED();
 }
 
 void ViewEventHandlerImpl::DidRealizeWidget(WindowId window_id) {

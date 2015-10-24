@@ -21,6 +21,8 @@ executable("evita") {
   configs += [ "//build/config/win:windowed" ]
 }
 
+# TODO(eval1749): Once "evita_dom_unitests" has prices dependency, we should
+# not have source_set "application".
 source_set("application") {
   sources = [
     "ctrl_TitleBar.cc",
@@ -37,38 +39,6 @@ source_set("application") {
     "editor/trace_log_controller.h",
     "vi_EditPane.cc",
     "vi_Frame.cc",
-    "views/forms/file_dialog_box.cc",
-    "views/forms/form_control_controller.cc",
-    "views/forms/form_control_set.cc",
-    "views/forms/form_window.cc",
-    "views/frame_list.cc",
-    "views/frame_observer.cc",
-    "views/tabs/tab.cc",
-    "views/tabs/tab.h",
-    "views/tabs/tab_content.cc",
-    "views/tabs/tab_content.h",
-    "views/tabs/tab_content_observer.cc",
-    "views/tabs/tab_content_observer.h",
-    "views/tabs/tab_data_set.cc",
-    "views/tabs/tab_strip.cc",
-    "views/tabs/tab_strip_animator.cc",
-    "views/tabs/tab_strip_animator.h",
-    "views/tabs/tab_strip_delegate.cc",
-    "views/text/render_cell.cc",
-    "views/text/render_font.cc",
-    "views/text/render_font.h",
-    "views/text/render_font_set.cc",
-    "views/text/render_font_set.h",
-    "views/text/render_selection.cc",
-    "views/text/render_selection.h",
-    "views/text/render_style.cc",
-    "views/text/render_text_block.cc",
-    "views/text/render_text_line.cc",
-    "views/text/screen_text_block.cc",
-    "views/text/text_formatter.cc",
-    "views/text/text_renderer.cc",
-    "views/text_window.cc",
-    "views/text_window.h",
   ]
 
   public_deps = [

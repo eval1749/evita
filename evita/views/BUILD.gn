@@ -2,12 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-static_library("views") {
+source_set("views") {
   sources = [
     "content_observer.cc",
     "content_observer.h",
     "content_window.cc",
     "content_window.h",
+    "frame_list.cc",
+    "frame_observer.cc",
     "icon_cache.cc",
     "icon_cache.h",
     "message_view.cc",
@@ -20,6 +22,8 @@ static_library("views") {
     "table_view_model.h",
     "table_window.cc",
     "table_window.h",
+    "text_window.cc",
+    "text_window.h",
     "view_delegate_impl.cc",
     "view_thread_proxy.cc",
     "view_thread_proxy.h",
@@ -36,5 +40,8 @@ static_library("views") {
     "//evita/spellchecker",
     "//evita/ui",
     "//evita/views/events",
+    "//evita/views/forms",
+    "//evita/views/tabs",
+    "//evita/views/text",
   ]
 }

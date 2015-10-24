@@ -1,0 +1,24 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("tabs") {
+  sources = [
+    "tab.cc",
+    "tab.h",
+    "tab_content.cc",
+    "tab_content.h",
+    "tab_content_observer.cc",
+    "tab_content_observer.h",
+    "tab_data_set.cc",
+    "tab_strip.cc",
+    "tab_strip_animator.cc",
+    "tab_strip_animator.h",
+    "tab_strip_delegate.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/ui",
+  ]
+}

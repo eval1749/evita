@@ -1,0 +1,17 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("forms") {
+  sources = [
+    "file_dialog_box.cc",
+    "form_control_controller.cc",
+    "form_control_set.cc",
+    "form_window.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/ui",
+  ]
+}

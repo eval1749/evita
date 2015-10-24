@@ -1,0 +1,33 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("text") {
+  sources = [
+    "render_cell.cc",
+    "render_cell.h",
+    "render_font.cc",
+    "render_font.h",
+    "render_font_set.cc",
+    "render_font_set.h",
+    "render_selection.cc",
+    "render_selection.h",
+    "render_style.cc",
+    "render_style.h",
+    "render_text_block.cc",
+    "render_text_block.h",
+    "render_text_line.cc",
+    "render_text_line.h",
+    "screen_text_block.cc",
+    "screen_text_block.h",
+    "text_formatter.cc",
+    "text_formatter.h",
+    "text_renderer.cc",
+    "text_renderer.h",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/ui",
+  ]
+}

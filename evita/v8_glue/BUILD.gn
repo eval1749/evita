@@ -4,7 +4,7 @@
 
 import("//testing/test.gni")
 
-static_library("v8_glue") {
+source_set("v8_glue") {
   sources = [
     "array_buffer_view.cc",
     "constructor_template.cc",

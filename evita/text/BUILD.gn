@@ -4,7 +4,7 @@
 
 import("//testing/test.gni")
 
-static_library("text") {
+source_set("text") {
   sources = [
     "../ed_BufferCore.cc",
     "../ed_BufferFind.cc",

@@ -139,7 +139,7 @@ action("dom_jslib_cc") {
   args = rebase_path(outputs) + rebase_path(inputs)
 }
 
-static_library("dom_unicode_lib_cc") {
+source_set("dom_unicode_lib_cc") {
   sources = [
     "unicode_icu.cc",
   ]

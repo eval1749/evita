@@ -498,6 +498,7 @@ void ScreenTextBlock::Render(gfx::Canvas* canvas,
 void ScreenTextBlock::RenderSelection(gfx::Canvas* canvas,
                                       const TextSelection& selection,
                                       base::Time now) {
+  TRACE_EVENT0("view", "ScreenTextBlock::RenderSelection");
   selection_ = selection;
   if (selection_.start() >= lines_.back()->text_end()) {
     caret_->Hide(canvas);

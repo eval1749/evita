@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/ui/widget.h"
-
 #include <vector>
 
+#include "evita/ui/widget.h"
+
+#include "base/trace_event/trace_event.h"
 #include "common/adopters/reverse.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
@@ -276,8 +277,11 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
   if (message == WM_CHAR) {
     KeyEvent event(EventType::KeyPressed, static_cast<int>(wParam),
                    KeyEvent::ConvertToRepeat(lParam));
-    if (event.raw_key_code() >= 0x20)
-      OnEvent(&event);
+    auto const key_code = event.raw_key_code();
+    if (key_code < 0x20)
+      return 0;
+    TRACE_EVENT1("input", "WM_CHAR", "key_code", key_code);
+    OnEvent(&event);
     return 0;
   }
 
@@ -288,10 +292,13 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
   if (message == WM_KEYDOWN && event.key_code() <= 0x7E && !event.alt_key() &&
       !event.control_key()) {
     // We use WM_CHAR for graphic key down.
+    TRACE_EVENT1("input", "WM_KEYDOWN", "key_code", event.raw_key_code());
     return OnMessage(message, wParam, lParam);
   }
 
   if (event.event_type() != EventType::Invalid) {
+    TRACE_EVENT1("input", "Widget::HandleKeyboardMessage", "type",
+                 static_cast<int>(event.event_type()));
     OnEvent(&event);
     return 0;
   }
@@ -308,6 +315,7 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
     auto const result = HitTestForMouseEventTarget(client_point);
     if (!result)
       return true;
+    TRACE_EVENT0("input", "WM_MOUSEWHEEL");
     MouseWheelEvent event(result.widget(), result.local_point(), screen_point,
                           MouseEvent::ConvertToEventFlags(native_event),
                           GET_WHEEL_DELTA_WPARAM(native_event.wParam));
@@ -334,6 +342,7 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       hover_widget->DispatchEvent(&event);
       hover_widget = result.widget();
       if (hover_widget) {
+        TRACE_EVENT0("input", "WM_MOUSEMOVE");
         MouseEvent entered_event(EventType::MouseEntered, MouseButton::None, 0,
                                  0, hover_widget, result.local_point(),
                                  screen_point);
@@ -344,15 +353,19 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
 
   MouseEvent event(native_event, result.widget(), result.local_point(),
                    screen_point);
-  if (event.event_type() == EventType::MouseMoved)
+  if (event.event_type() == EventType::MouseMoved) {
+    TRACE_EVENT0("input", "EventType::MouseMoved");
     return result.widget()->DispatchEvent(&event);
+  }
 
   if (event.event_type() == EventType::MousePressed) {
+    TRACE_EVENT0("input", "EventType::MousePressed");
     MouseClickTracker::instance()->OnMousePressed(event);
     return result.widget()->DispatchEvent(&event);
   }
 
   if (event.event_type() == EventType::MouseReleased) {
+    TRACE_EVENT0("input", "EventType::MouseReleased");
     MouseClickTracker::instance()->OnMouseReleased(event);
     if (!result.widget()->DispatchEvent(&event))
       return false;

@@ -26,8 +26,11 @@ source_set("text") {
     "text_renderer.h",
   ]
 
-  deps = [
+  public_deps = [
     "//base",
+    "//evita/css",
+    "//evita/gfx",
+    "//evita/text",
     "//evita/ui",
   ]
 }

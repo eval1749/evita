@@ -1,0 +1,26 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("editor") {
+  sources = [
+    "application.cc",
+    "application_proxy.cc",
+    "application_proxy.h",
+    "dom_lock.cc",
+    "modal_message_loop_scope.cc",
+    "scheduler.cc",
+    "scheduler.h",
+    "switch_set.cc",
+    "switch_set.h",
+    "trace_log_controller.cc",
+    "trace_log_controller.h",
+  ]
+
+  public_deps = [
+    "//base",
+    "//evita/dom",
+    "//evita/io",
+    "//evita/views",
+  ]
+}

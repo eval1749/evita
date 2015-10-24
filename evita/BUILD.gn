@@ -26,17 +26,6 @@ executable("evita") {
 source_set("application") {
   sources = [
     "ctrl_TitleBar.cc",
-    "editor/application.cc",
-    "editor/application_proxy.cc",
-    "editor/application_proxy.h",
-    "editor/dom_lock.cc",
-    "editor/modal_message_loop_scope.cc",
-    "editor/scheduler.cc",
-    "editor/scheduler.h",
-    "editor/switch_set.cc",
-    "editor/switch_set.h",
-    "editor/trace_log_controller.cc",
-    "editor/trace_log_controller.h",
     "vi_EditPane.cc",
     "vi_Frame.cc",
   ]
@@ -44,11 +33,7 @@ source_set("application") {
   public_deps = [
     "//base",
     "//common",
-    "//evita/dom",
-    "//evita/gfx",
-    "//evita/io",
+    "//evita/editor",
     "//evita/metrics",
-    "//evita/text",
-    "//evita/views",
   ]
 }

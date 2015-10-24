@@ -13,6 +13,7 @@
 #include "base/thread_task_runner_handle.h"
 #include "base/trace_event/memory_dump_provider.h"
 #include "base/trace_event/memory_dump_session_state.h"
+#include "base/trace_event/memory_profiler_allocation_context.h"
 #include "base/trace_event/process_memory_dump.h"
 #include "base/trace_event/trace_event_argument.h"
 #include "build/build_config.h"
@@ -99,8 +100,6 @@ MemoryDumpManager* MemoryDumpManager::GetInstance() {
 
 // static
 void MemoryDumpManager::SetInstanceForTesting(MemoryDumpManager* instance) {
-  if (instance)
-    instance->skip_core_dumpers_auto_registration_for_testing_ = true;
   g_instance_for_testing = instance;
 }
 
@@ -109,13 +108,16 @@ MemoryDumpManager::MemoryDumpManager()
       is_coordinator_(false),
       memory_tracing_enabled_(0),
       tracing_process_id_(kInvalidTracingProcessId),
-      skip_core_dumpers_auto_registration_for_testing_(false) {
+      dumper_registrations_ignored_for_testing_(false) {
   g_next_guid.GetNext();  // Make sure that first guid is not zero.
 
   heap_profiling_enabled_ = CommandLine::InitializedForCurrentProcess()
                                 ? CommandLine::ForCurrentProcess()->HasSwitch(
                                       switches::kEnableHeapProfiling)
                                 : false;
+
+  if (heap_profiling_enabled_)
+    AllocationContextTracker::SetCaptureEnabled(true);
 }
 
 MemoryDumpManager::~MemoryDumpManager() {
@@ -133,24 +135,22 @@ void MemoryDumpManager::Initialize(MemoryDumpManagerDelegate* delegate,
   }
 
   // Enable the core dump providers.
-  if (!skip_core_dumpers_auto_registration_for_testing_) {
 #if !defined(OS_NACL)
-    RegisterDumpProvider(ProcessMemoryTotalsDumpProvider::GetInstance());
+  RegisterDumpProvider(ProcessMemoryTotalsDumpProvider::GetInstance());
 #endif
 
 #if defined(OS_LINUX) || defined(OS_ANDROID)
-    RegisterDumpProvider(ProcessMemoryMapsDumpProvider::GetInstance());
-    RegisterDumpProvider(MallocDumpProvider::GetInstance());
+  RegisterDumpProvider(ProcessMemoryMapsDumpProvider::GetInstance());
+  RegisterDumpProvider(MallocDumpProvider::GetInstance());
 #endif
 
 #if defined(OS_ANDROID)
-    RegisterDumpProvider(JavaHeapDumpProvider::GetInstance());
+  RegisterDumpProvider(JavaHeapDumpProvider::GetInstance());
 #endif
 
 #if defined(OS_WIN)
-    RegisterDumpProvider(WinHeapDumpProvider::GetInstance());
+  RegisterDumpProvider(WinHeapDumpProvider::GetInstance());
 #endif
-  }  // !skip_core_dumpers_auto_registration_for_testing_
 
   // If tracing was enabled before initializing MemoryDumpManager, we missed the
   // OnTraceLogEnabled() event. Synthetize it so we can late-join the party.
@@ -164,6 +164,9 @@ void MemoryDumpManager::Initialize(MemoryDumpManagerDelegate* delegate,
 void MemoryDumpManager::RegisterDumpProvider(
     MemoryDumpProvider* mdp,
     const scoped_refptr<SingleThreadTaskRunner>& task_runner) {
+  if (dumper_registrations_ignored_for_testing_)
+    return;
+
   MemoryDumpProviderInfo mdp_info(mdp, task_runner);
   AutoLock lock(lock_);
   auto iter_new = dump_providers_.insert(mdp_info);

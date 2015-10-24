@@ -869,7 +869,7 @@
           'enable_webrtc%': 0,
           'notifications%': 0,
           'remoting%': 0,
-          'safe_browsing%': 0,
+          'safe_browsing%': 2,
           'enable_supervised_users%': 0,
           'enable_task_manager%': 0,
           'enable_media_router%': 0,
@@ -1928,13 +1928,17 @@
           'conditions': [
             ['OS=="ios"', {
               'mac_sdk_min%': '10.8',
+              # The iOS build can use Xcode's clang, and that will complain
+              # about -stdlib=libc++ if the deployment target is not at least
+              # 10.7.
+              'mac_deployment_target%': '10.7',
             }, {  # else OS!="ios"
               'mac_sdk_min%': '10.10',
+              'mac_deployment_target%': '10.6',
             }],
           ],
           'mac_sdk_path%': '',
 
-          'mac_deployment_target%': '10.6',
         },
 
         'mac_sdk_min': '<(mac_sdk_min)',
@@ -3066,7 +3070,7 @@
           'SAFE_BROWSING_DB_LOCAL',
         ],
       }],
-      ['safe_browsing==2', {
+      ['safe_browsing==2 and OS!="ios"', {
         'defines': [
           'SAFE_BROWSING_DB_REMOTE',
         ],
@@ -5447,6 +5451,17 @@
               ],
               'ARCHS': [
                 'x86_64',
+              ],
+              'WARNING_CFLAGS': [
+                # TODO(thakis): Remove this once the deployment target on OS X
+                # is 10.7 too, http://crbug.com/547071
+                # In general, it is NOT OK to add -Wno-deprecated-declarations
+                # anywhere, you should instead fix your code instead.  But host
+                # compiles on iOS are really mac compiles, so this will be fixed
+                # when the mac deployment target is increased.  (Some of the
+                # fixes depend on OS X 10.7 so they can't be done before mac
+                # upgrades).
+                '-Wno-deprecated-declarations',
               ],
             },
           }],

@@ -160,7 +160,7 @@ class GtestTestInstance(test_instance.TestInstance):
 
     if not os.path.exists(self._exe_path):
       self._exe_path = None
-    if not apk_path and not self._exe_path:
+    if not self._apk_helper and not self._exe_path:
       error_func('Could not find apk or executable for %s' % self._suite)
 
     self._data_deps = []
@@ -198,9 +198,63 @@ class GtestTestInstance(test_instance.TestInstance):
       self._app_data_files = None
       self._app_data_file_dir = None
 
+    self._test_arguments = args.test_arguments
+
+  @property
+  def activity(self):
+    return self._apk_helper and self._apk_helper.GetActivityName()
+
+  @property
+  def apk(self):
+    return self._apk_helper and self._apk_helper.path
+
+  @property
+  def apk_helper(self):
+    return self._apk_helper
+
+  @property
+  def app_file_dir(self):
+    return self._app_data_file_dir
+
+  @property
+  def app_files(self):
+    return self._app_data_files
+
+  @property
+  def exe(self):
+    return self._exe_path
+
+  @property
+  def extras(self):
+    return self._extras
+
   @property
   def gtest_filter(self):
     return self._gtest_filter
+
+  @property
+  def package(self):
+    return self._apk_helper and self._apk_helper.GetPackageName()
+
+  @property
+  def permissions(self):
+    return self._apk_helper and self._apk_helper.GetPermissions()
+
+  @property
+  def runner(self):
+    return self._apk_helper and self._apk_helper.GetInstrumentationName()
+
+  @property
+  def shard_timeout(self):
+    return self._shard_timeout
+
+  @property
+  def suite(self):
+    return self._suite
+
+  @property
+  def test_arguments(self):
+    return self._test_arguments
 
   #override
   def TestType(self):
@@ -313,52 +367,4 @@ class GtestTestInstance(test_instance.TestInstance):
     """Clear the mappings created by SetUp."""
     if self._isolate_delegate:
       self._isolate_delegate.Clear()
-
-  @property
-  def activity(self):
-    return self._apk_helper and self._apk_helper.GetActivityName()
-
-  @property
-  def apk(self):
-    return self._apk_helper and self._apk_helper.path
-
-  @property
-  def apk_helper(self):
-    return self._apk_helper
-
-  @property
-  def app_file_dir(self):
-    return self._app_data_file_dir
-
-  @property
-  def app_files(self):
-    return self._app_data_files
-
-  @property
-  def exe(self):
-    return self._exe_path
-
-  @property
-  def extras(self):
-    return self._extras
-
-  @property
-  def package(self):
-    return self._apk_helper and self._apk_helper.GetPackageName()
-
-  @property
-  def permissions(self):
-    return self._apk_helper and self._apk_helper.GetPermissions()
-
-  @property
-  def runner(self):
-    return self._apk_helper and self._apk_helper.GetInstrumentationName()
-
-  @property
-  def shard_timeout(self):
-    return self._shard_timeout
-
-  @property
-  def suite(self):
-    return self._suite
 

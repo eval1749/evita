@@ -252,9 +252,9 @@ test("evita_dom_unittests") {
   deps = [
     "//base/test:test_support",
 
-    # TODO(eval1749): We should not have "editor" dependency on
+    # TODO(eval1749): We should not have "application" dependency on
     # "evita_dom_unittests".
-    "//evita:editor",
+    "//evita:application",
     "//testing/gmock",
     "//testing/gtest",
     "//v8",

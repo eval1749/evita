@@ -13,7 +13,7 @@ executable("evita") {
   ]
 
   deps = [
-    ":editor",
+    ":application",
     "//build/win:default_exe_manifest",
   ]
 
@@ -21,7 +21,7 @@ executable("evita") {
   configs += [ "//build/config/win:windowed" ]
 }
 
-static_library("editor") {
+source_set("application") {
   sources = [
     "ctrl_TitleBar.cc",
     "editor/application.cc",
@@ -35,10 +35,6 @@ static_library("editor") {
     "editor/switch_set.h",
     "editor/trace_log_controller.cc",
     "editor/trace_log_controller.h",
-    "metrics/counter.cc",
-    "metrics/sampling.cc",
-    "metrics/sampling.h",
-    "metrics/time_scope.cc",
     "vi_EditPane.cc",
     "vi_Frame.cc",
     "views/forms/file_dialog_box.cc",
@@ -81,6 +77,7 @@ static_library("editor") {
     "//evita/dom",
     "//evita/gfx",
     "//evita/io",
+    "//evita/metrics",
     "//evita/text",
     "//evita/views",
   ]

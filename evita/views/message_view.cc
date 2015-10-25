@@ -1,5 +1,6 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include <algorithm>
 
@@ -7,6 +8,8 @@
 
 #include "base/logging.h"
 #include "base/time/time.h"
+#include "base/trace_event/trace_event.h"
+
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/ui/animation/animation_value.h"
@@ -106,6 +109,8 @@ Painter::Painter() : original_main_part_width_(0) {
 
 void Painter::Paint(gfx::Canvas* canvas,
                     const std::vector<PartView>& new_parts) {
+  TRACE_EVENT1("views", "MessageView::Painter::Paint", "count",
+               new_parts.size());
   auto const new_bounds = canvas->GetLocalBounds();
   auto dirty = bounds_ != new_bounds;
   if (parts_.size() != new_parts.size()) {
@@ -123,6 +128,7 @@ void Painter::Paint(gfx::Canvas* canvas,
 
   // Update part width
   {
+    TRACE_EVENT0("views", "MessageView::Painter::Paint/Width");
     auto part = parts_.begin();
     auto const big_size = gfx::SizeF(10000.0f, new_parts_bounds.height());
     auto total_width = 0.0f;
@@ -169,6 +175,7 @@ void Painter::Paint(gfx::Canvas* canvas,
 
   // Update part bounds
   {
+    TRACE_EVENT0("views", "MessageView::Painter::Paint/Bounds");
     auto origin = new_parts_bounds.origin();
     for (auto& part : parts_) {
       // Part bounds don't contain top border line.
@@ -209,6 +216,7 @@ void Painter::Paint(gfx::Canvas* canvas,
     part.dirty = false;
     if (part.bounds.empty())
       continue;
+    TRACE_EVENT0("views", "MessageView::Painter::Paint/Part");
     gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, part.bounds);
     canvas->AddDirtyRect(part.bounds);
     canvas->Clear(gfx::sysColor(COLOR_BTNFACE, alpha));

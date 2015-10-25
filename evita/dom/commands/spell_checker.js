@@ -23,16 +23,15 @@ function SpellChecker(document) {
   this.coldEnd = document.length;
   this.coldOffset = 0;
   this.freeRanges_ = new Array(SpellChecker.MAX_CHECKING);
-  for (var i = 0; i < this.freeRanges_.length; ++i) {
+  for (var i = 0; i < this.freeRanges_.length; ++i)
     this.freeRanges_[i] = new Range(document);
-  }
   this.hotOffset = document.length;
   this.mutationObserver_ = new MutationObserver(
       this.mutationCallback.bind(this));
   this.range_ = new Range(document);
   this.timer_ = new RepeatingTimer();
 
-  var spellChecker = this;
+  const spellChecker = this;
   document.addEventListener(Event.Names.ATTACH, function(event) {
     event.view.addEventListener(Event.Names.BLUR,
         spellChecker.didBlurWindow.bind(spellChecker));
@@ -134,17 +133,17 @@ SpellChecker.prototype.timer_;
  * Checks then mark word as correct or misspelled.
  */
 SpellChecker.prototype.checkSpelling = function(wordRange) {
-  var spellChecker = this;
+  const spellChecker = this;
   if (!spellChecker.freeRanges_.length ||
       SpellChecker.numberOfChecking >= SpellChecker.MAX_CHECKING) {
     return false;
   }
   ++SpellChecker.numberOfChecking;
 
-  var markerRange = spellChecker.freeRanges_.pop();
+  const markerRange = spellChecker.freeRanges_.pop();
   markerRange.collapseTo(wordRange.start);
   markerRange.end = wordRange.end;
-  var wordToCheck = markerRange.text;
+  const wordToCheck = markerRange.text;
   SpellChecker.checkSpelling(wordToCheck).then(function(state) {
     --SpellChecker.numberOfChecking;
     if (state.word === markerRange.text)
@@ -187,9 +186,12 @@ SpellChecker.prototype.didBlurWindow = function(event) {
 // names, we don't check character syntax.
 //
 SpellChecker.prototype.didFireTimer = function() {
-  var range = this.range_;
-  var document = range.document;
-  var maxOffset = document.length;
+  /** @type {!Range} */
+  const range = this.range_;
+  /** @type {!Document} */
+  const document = range.document;
+  /** @type {number} */
+  const maxOffset = document.length;
 
   // |didFireTimer| can be called before handling mutation callback, we should
   // make sure offsets don't exceed |document.length|.
@@ -210,18 +212,19 @@ SpellChecker.prototype.didFireTimer = function() {
       return -1;
     if (Window.focus.document !== document)
       return -1;
-    var range = Window.focus.selection.range;
+    const range = Window.focus.selection.range;
     return range.collapsed ? range.start : -1;
   }
 
-  var hottestOffset = getHottestOffset();
+  /** @type {number} */
+  const hottestOffset = getHottestOffset();
 
   /**
    * @param {!Range} range
    * @return {boolean}
    */
   function isCheckableWord(range) {
-    var length = range.length;
+    const length = range.length;
     if (length < SpellChecker.MIN_WORD_LENGTH ||
         length > SpellChecker.MAX_WORD_LENGTH) {
       return false;
@@ -230,20 +233,21 @@ SpellChecker.prototype.didFireTimer = function() {
       // The word is still changing, we ignore it.
       return false;
     }
-    var category = Unicode.UCD[document.charCodeAt_(range.start)].category;
+    const category = Unicode.UCD[document.charCodeAt_(range.start)].category;
     // TODO(eval1749): When we support spell checking other than English, we
     // should make other Unicode general categories are valid.
     if (category !== 'Lu' && category !== 'Ll')
       return false;
     if (document.syntaxAt(range.start) === 'keyword')
       return false;
-    var word = range.text;
+    const word = range.text;
     if (SpellChecker.keywords.has(word))
       return false;
     return SpellChecker.RE_WORD.test(word)
   }
 
-  var numberOfChecked = 0;
+  /** @type {number} */
+  let numberOfChecked = 0;
 
   /**
    * @param {!SpellChecker} spellChecker
@@ -258,7 +262,7 @@ SpellChecker.prototype.didFireTimer = function() {
     range.startOf(Unit.WORD);
     while (numberOfChecked < SpellChecker.CHECK_INTERVAL_LIMIT &&
            range.start < end && spellChecker.freeRanges_.length) {
-      var restartOffset = range.start;
+      const restartOffset = range.start;
       range.endOf(Unit.WORD, Alter.EXTEND);
       range.setSpelling(Spelling.NONE);
       if (range.end === maxOffset) {
@@ -278,7 +282,8 @@ SpellChecker.prototype.didFireTimer = function() {
       // Move to next word.
       // <#>include     => #|include
       // foo<;>\n   bar => foo;\n  |bar
-      var wordStart = range.start;
+      /** @type {number} */
+      const wordStart = range.start;
       range.collapseTo(wordStart);
       range.move(Unit.WORD);
     }
@@ -289,7 +294,8 @@ SpellChecker.prototype.didFireTimer = function() {
     this.hotOffset = scan(this, this.hotOffset, maxOffset);
   this.coldOffset = scan(this, this.coldOffset, this.coldEnd);
 
-  var rest = maxOffset - this.hotOffset + this.coldEnd - this.coldOffset;
+  /** @type {number} */
+  const rest = maxOffset - this.hotOffset + this.coldEnd - this.coldOffset;
   if (rest > 0)
     return;
   this.timer_.stop();
@@ -307,9 +313,8 @@ SpellChecker.prototype.didFocusWindow = function() {
  * Mark first |word| without misspelled marker in document with |mark|.
  */
 SpellChecker.prototype.markWord = function(wordRange, mark) {
-  if (mark === Spelling.CORRECT) {
+  if (mark === Spelling.CORRECT)
     return;
-  }
   // TODO(eval1749): We should not mark for word in source code.
   wordRange.setSpelling(mark);
 };
@@ -322,23 +327,29 @@ SpellChecker.prototype.markWord = function(wordRange, mark) {
  * Resets hot offset to minimal changed offset and kicks word scanner.
  */
 SpellChecker.prototype.mutationCallback = function(mutations, observer) {
-  var range = this.range_;
-  var document = range.document;
+  /** @type {!Range} */
+  const range = this.range_;
+  /** @type {!Document} */
+  const document = range.document;
   /** @type {number} */
-  var minOffset = mutations.reduce(function(previousValue, mutation) {
+  const minOffset = mutations.reduce(function(previousValue, mutation) {
     return Math.min(previousValue, mutation.offset);
   }, document.length);
   this.coldOffset = Math.min(this.coldOffset, minOffset);
   this.coldEnd = minOffset;
   this.hotOffset = minOffset;
 
-  var hasFocus = document.listWindows().some(function(window) {
-    return Window.focus === window;
-  });
-  if (hasFocus)
-    this.startTimeIfNeeded();
+  /** @type {boolean} */
+  const hasFocus = document.listWindows()
+      .some((window) => Window.focus === window);
+  if (!hasFocus)
+    return;
+  this.startTimeIfNeeded();
 };
 
+/**
+ * @this {!SpellChecker}
+ */
 SpellChecker.prototype.startTimeIfNeeded = function() {
   if (this.timer_.isRunning)
     return;
@@ -358,14 +369,14 @@ SpellChecker.wordStateMap = new Map();
  * @return {!Promise.<SpellChecker.SpellingResult>}
  */
 SpellChecker.checkSpelling = function(wordToCheck) {
-  var present = SpellChecker.wordStateMap.get(wordToCheck);
+  const present = SpellChecker.wordStateMap.get(wordToCheck);
   if (present) {
     present.lastUsedTime = new Date();
     ++present.useCount;
     return present.promise ? present.promise : Promise.resolve(present);
   }
 
-  var state = {
+  const state = {
     lastUsedTime: new Date(),
     promise: null,
     useCount: 1,
@@ -391,13 +402,13 @@ Document.addObserver(function(action, document) {
     // document.
     if (document.name === '*javascript*')
       return;
-    var spellChecker = new SpellChecker(document);
+    const spellChecker = new SpellChecker(document);
     document.properties.set(SpellChecker.PROPERTY, spellChecker);
   }
 
   /** @param {!Document} document */
   function uninstallSpellChecker(document) {
-    var spellChecker = document.properties.get(SpellChecker.PROPERTY);
+    const spellChecker = document.properties.get(SpellChecker.PROPERTY);
     if (!spellChecker)
       return;
     spellChecker.destroy();

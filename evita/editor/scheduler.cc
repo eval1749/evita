@@ -77,13 +77,11 @@ void Scheduler::HandleAnimationFrame(base::Time time) {
     running_handlers.swap(pending_handlers_);
     canceling_handlers.swap(canceled_handlers_);
   }
-  TRACE_EVENT1("scheduler", "Scheduler::HandleAnimationFrame", "tasks",
-               running_handlers.size());
   for (auto handler : running_handlers) {
     if (canceling_handlers.find(handler) != canceling_handlers.end())
       continue;
-    TRACE_EVENT1("scheduler", "Scheduler::HandleAnimationFrame/Frame",
-                 "type", handler->GetAnimationFrameType());
+    TRACE_EVENT1("scheduler", "Scheduler::HandleAnimationFrame", "type",
+                 handler->GetAnimationFrameType());
     handler->HandleAnimationFrame(time);
   }
 }

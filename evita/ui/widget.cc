@@ -271,6 +271,9 @@ gfx::Size Widget::GetPreferredSize() const {
   return gfx::Size();
 }
 
+// Note: WM_KEYDOWN events is dispatch maximum 30 times per second. This rate
+// is specified by |SPI_GETKEYBOARDSPEED| of |SystemParametersInfo()|, minimum
+// is 2.5 repetitions per second through maximum 30 repetitions.
 LRESULT Widget::HandleKeyboardMessage(uint32_t message,
                                       WPARAM wParam,
                                       LPARAM lParam) {

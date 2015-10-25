@@ -147,7 +147,7 @@ SpellChecker.prototype.checkSpelling = function(wordRange) {
   var wordToCheck = markerRange.text;
   SpellChecker.checkSpelling(wordToCheck).then(function(state) {
     --SpellChecker.numberOfChecking;
-    if (state.word == markerRange.text)
+    if (state.word === markerRange.text)
       spellChecker.markWord(markerRange, state.spelling);
     spellChecker.freeRanges_.push(markerRange);
   }).catch(function(e) { console.log(e.stack); });
@@ -208,7 +208,7 @@ SpellChecker.prototype.didFireTimer = function() {
     }
     if (!(Window.focus instanceof TextWindow))
       return -1;
-    if (Window.focus.document != document)
+    if (Window.focus.document !== document)
       return -1;
     var range = Window.focus.selection.range;
     return range.collapsed ? range.start : -1;
@@ -233,9 +233,9 @@ SpellChecker.prototype.didFireTimer = function() {
     var category = Unicode.UCD[document.charCodeAt_(range.start)].category;
     // TODO(eval1749): When we support spell checking other than English, we
     // should make other Unicode general categories are valid.
-    if (category != 'Lu' && category != 'Ll')
+    if (category !== 'Lu' && category !== 'Ll')
       return false;
-    if (document.syntaxAt(range.start) == 'keyword')
+    if (document.syntaxAt(range.start) === 'keyword')
       return false;
     var word = range.text;
     if (SpellChecker.keywords.has(word))
@@ -261,7 +261,7 @@ SpellChecker.prototype.didFireTimer = function() {
       var restartOffset = range.start;
       range.endOf(Unit.WORD, Alter.EXTEND);
       range.setSpelling(Spelling.NONE);
-      if (range.end == maxOffset) {
+      if (range.end === maxOffset) {
         // Word seems not to be completed yet. Spell checker will sleep
         // until document is changed.
         numberOfChecked += range.length;
@@ -307,7 +307,7 @@ SpellChecker.prototype.didFocusWindow = function() {
  * Mark first |word| without misspelled marker in document with |mark|.
  */
 SpellChecker.prototype.markWord = function(wordRange, mark) {
-  if (mark == Spelling.CORRECT) {
+  if (mark === Spelling.CORRECT) {
     return;
   }
   // TODO(eval1749): We should not mark for word in source code.
@@ -333,7 +333,7 @@ SpellChecker.prototype.mutationCallback = function(mutations, observer) {
   this.hotOffset = minOffset;
 
   var hasFocus = document.listWindows().some(function(window) {
-    return Window.focus == window;
+    return Window.focus === window;
   });
   if (hasFocus)
     this.startTimeIfNeeded();
@@ -389,7 +389,7 @@ Document.addObserver(function(action, document) {
   function installSpellChecker(document) {
     // TODO(eval1749): We should have generic way to disable spell checking for
     // document.
-    if (document.name == '*javascript*')
+    if (document.name === '*javascript*')
       return;
     var spellChecker = new SpellChecker(document);
     document.properties.set(SpellChecker.PROPERTY, spellChecker);

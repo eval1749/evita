@@ -92,4 +92,8 @@ void Animator::DidBeginAnimationFrame(base::Time time) {
   PlayAnimations(time);
 }
 
+const char* Animator::GetAnimationFrameType() const {
+  return "Animator";
+}
+
 }  // namespace ui

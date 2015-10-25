@@ -82,7 +82,8 @@ void Scheduler::HandleAnimationFrame(base::Time time) {
   for (auto handler : running_handlers) {
     if (canceling_handlers.find(handler) != canceling_handlers.end())
       continue;
-    TRACE_EVENT0("scheduler", "Scheduler::HandleAnimationFrame/1");
+    TRACE_EVENT1("scheduler", "Scheduler::HandleAnimationFrame/Frame",
+                 "type", handler->GetAnimationFrameType());
     handler->HandleAnimationFrame(time);
   }
 }

@@ -17,6 +17,8 @@ namespace views {
 // MetricsView
 //
 class MetricsView final : public ui::AnimatableWindow {
+  DECLARE_CASTABLE_CLASS(MetricsView, ui::AnimatableWindow);
+
  public:
   class TimingScope final {
    public:

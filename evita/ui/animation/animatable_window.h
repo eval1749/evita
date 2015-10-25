@@ -18,6 +18,9 @@ class AnimatableWindow : public AnimationFrameHandler, public Widget {
   AnimatableWindow();
   ~AnimatableWindow() override;
 
+  // AnimationFrameHandler
+  const char* GetAnimationFrameType() const override;
+
   // Widget
   void DidChangeBounds() override;
   void DidRealize() override;

@@ -24,6 +24,9 @@ class AnimationFrameHandler {
   // Request animation frame.
   void CancelAnimationFrameRequest();
 
+  // Returns type of animation frame providing this handler.
+  virtual const char* GetAnimationFrameType() const = 0;
+
   void HandleAnimationFrame(base::Time time);
 
   // Request animation frame.

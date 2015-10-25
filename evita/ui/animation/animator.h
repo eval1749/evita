@@ -39,6 +39,7 @@ class Animator : public common::Singleton<Animator>,
 
   // AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) override;
+  const char* GetAnimationFrameType() const override;
 
   std::unordered_set<Animatable*> animatables_;
   base::Time current_time_;

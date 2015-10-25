@@ -15,6 +15,11 @@ AnimatableWindow::AnimatableWindow() {}
 
 AnimatableWindow::~AnimatableWindow() {}
 
+// AnimationFrameHandler
+const char* AnimatableWindow::GetAnimationFrameType() const {
+  return class_name();
+}
+
 // Widget
 void AnimatableWindow::DidChangeBounds() {
   Widget::DidChangeBounds();

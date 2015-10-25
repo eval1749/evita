@@ -192,6 +192,7 @@ void ScreenTextBlock::RenderContext::Copy(float dst_top,
   DVLOG(0) << "Copy to " << dst_rect << " from " << src_rect.origin();
 #endif
   canvas_->DrawBitmap(*canvas_->screen_bitmap(), dst_rect, src_rect);
+  canvas_->Flush();
 }
 
 void ScreenTextBlock::RenderContext::DrawDirtyRect(const gfx::RectF& rect,
@@ -345,6 +346,7 @@ bool ScreenTextBlock::RenderContext::Render() {
       format_line->Render(canvas_);
       FillRight(format_line);
       AddRect(&dirty_rects_, format_line->bounds());
+      canvas_->Flush();
     }
   }
 

@@ -23,6 +23,9 @@ SwapChain::SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain)
       is_ready_(false),
       swap_chain_(swap_chain),
       swap_chain_waitable_(swap_chain_->GetFrameLatencyWaitableObject()) {
+  // Antialias Mode = D2D1_ANTIALIAS_MODE_PER_PRIMITIVE
+  // Primitive Blend = D2D1_PRIMITIVE_BLEND_SOURCE_OVER
+  // Text Antialias Mode = D2D1_TEXT_ANTIALIAS_MODE_DEFAULT
   COM_VERIFY(DxDevice::instance()->d2d_device()->CreateDeviceContext(
       D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &d2d_device_context_));
   UpdateDeviceContext();

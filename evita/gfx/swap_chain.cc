@@ -90,7 +90,7 @@ SwapChain* SwapChain::CreateForComposition(const RectF& bounds) {
   // does not queue more than one frame at a time. This both reduces latency
   // and ensures that the application will only render after each VSync,
   // minimizing power consumption.
-  // COM_VERIFY(swap_chain_->SetMaximumFrameLatency(1));
+  COM_VERIFY(swap_chain2->SetMaximumFrameLatency(1));
   return new SwapChain(swap_chain2);
 }
 

@@ -149,6 +149,7 @@ MetricsView::TimingScope::TimingScope(MetricsView* view)
 MetricsView::TimingScope::~TimingScope() {
   auto const end = metrics::Sampling::NowTimeTicks();
   view_->view_->frame_duration_data_.AddSample(end - start_);
+  view_->RequestAnimationFrame();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -163,6 +164,7 @@ MetricsView::~MetricsView() {}
 
 void MetricsView::RecordTime() {
   view_->RecordTime();
+  RequestAnimationFrame();
 }
 
 // ui::Widget
@@ -172,8 +174,7 @@ void MetricsView::DidRealize() {
   set_layer_owner_delegate(view_.get());
 }
 
-void MetricsView::OnDraw(gfx::Canvas* canvas) {
-  DCHECK(canvas);
+void MetricsView::DidBeginAnimationFrame(base::Time time) {
   view_->Paint();
 }
 

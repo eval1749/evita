@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "base/time/time.h"
-#include "evita/ui/widget.h"
+#include "evita/ui/animation/animatable_window.h"
 
 namespace views {
 
@@ -16,7 +16,7 @@ namespace views {
 //
 // MetricsView
 //
-class MetricsView final : public ui::Widget {
+class MetricsView final : public ui::AnimatableWindow {
  public:
   class TimingScope final {
    public:
@@ -38,9 +38,11 @@ class MetricsView final : public ui::Widget {
  private:
   class View;
 
+  // ui::AnimationFrameHandler
+  void DidBeginAnimationFrame(base::Time time) final;
+
   // ui::Widget
   void DidRealize() final;
-  void OnDraw(gfx::Canvas* canvas);
 
   std::unique_ptr<View> view_;
 

@@ -220,6 +220,7 @@ void Painter::Paint(gfx::Canvas* canvas,
     gfx::Brush text_brush(canvas, gfx::sysColor(COLOR_BTNTEXT, part.alpha));
     (*canvas)->DrawTextLayout(part.bounds.origin() + gfx::SizeF(4, 0),
                               *part.text_layout, text_brush);
+    canvas->Flush();
   }
 }
 

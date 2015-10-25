@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/gfx/canvas.h"
-
 #include <d2d1_2helper.h>
 
 #include <cmath>
 #include <utility>
 
+#include "evita/gfx/canvas.h"
+
+#include "base/trace_event/trace_event.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas_observer.h"
 #include "evita/gfx/rect_conversions.h"
@@ -116,6 +117,7 @@ void Canvas::AddObserver(CanvasObserver* observer) {
 void Canvas::BeginDraw() {
   DCHECK(!bounds_.empty());
   DCHECK(GetRenderTarget());
+  TRACE_EVENT_BEGIN1("gfx", "Canvas/Batch", "level", batch_nesting_level_);
   if (!batch_nesting_level_)
     GetRenderTarget()->BeginDraw();
   ++batch_nesting_level_;
@@ -127,6 +129,24 @@ void Canvas::Clear(const ColorF& color) {
 
 void Canvas::Clear(D2D1::ColorF::Enum name) {
   Clear(ColorF(name));
+}
+
+void Canvas::CommitDraw() {
+  TRACE_EVENT0("gfx", "Canvas::CommitDraw");
+  auto const hr = GetRenderTarget()->EndDraw();
+  if (SUCCEEDED(hr)) {
+    DidCallEndDraw();
+    should_clear_ = false;
+    return;
+  }
+
+  if (hr == D2DERR_RECREATE_TARGET) {
+    DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
+    DidLostRenderTarget();
+    return;
+  }
+
+  DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
 }
 
 void Canvas::DidCallEndDraw() {}
@@ -178,24 +198,9 @@ void Canvas::EndDraw() {
   DCHECK(drawing());
   DCHECK(GetRenderTarget());
   --batch_nesting_level_;
-  if (batch_nesting_level_)
-    return;
-  auto const hr = GetRenderTarget()->EndDraw();
-  if (SUCCEEDED(hr)) {
-    if (!batch_nesting_level_) {
-      DidCallEndDraw();
-      should_clear_ = false;
-    }
-    return;
-  }
-
-  if (hr == D2DERR_RECREATE_TARGET) {
-    DVLOG(0) << "Canvas::End D2DERR_RECREATE_TARGET";
-    DidLostRenderTarget();
-    return;
-  }
-
-  DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
+  if (batch_nesting_level_ == 0)
+    CommitDraw();
+  TRACE_EVENT_END1("gfx", "Canvas/Batch", "level", batch_nesting_level_);
 }
 
 void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {

@@ -128,6 +128,7 @@ class Canvas : public Object, public DpiHandler {
   friend class ScopedState;
 
   void BeginDraw();
+  void CommitDraw();
   void EndDraw();
 
   int batch_nesting_level_;

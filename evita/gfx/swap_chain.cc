@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/gfx/swap_chain.h"
-
 #include <d2d1_2helper.h>
 #include <dxgi1_3.h>
 
+#include "evita/gfx/swap_chain.h"
+
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/gfx/dx_device.h"
 #include "evita/gfx/rect_conversions.h"
 
@@ -55,6 +56,7 @@ void SwapChain::AddDirtyRect(const RectF& new_dirty_rect_f) {
 
 SwapChain* SwapChain::CreateForComposition(const RectF& bounds) {
   DCHECK(!bounds.empty());
+  TRACE_EVENT0("gfx", "SwapChain::CreateForComposition");
   // TODO(eval1749): We should use ToEnclosedRect().
   const auto size = gfx::SizeU(static_cast<uint32_t>(bounds.width()),
                                static_cast<uint32_t>(bounds.height()));
@@ -122,6 +124,7 @@ SwapChain* SwapChain::CreateForHwnd(HWND hwnd) {
 }
 
 void SwapChain::DidChangeBounds(const RectF& new_bounds) {
+  TRACE_EVENT0("gfx", "SwapChain::DidChangeBounds");
   d2d_device_context_->SetTarget(nullptr);
   bounds_ = new_bounds;
   auto const enclosing_rect = ToEnclosingRect(new_bounds);
@@ -135,6 +138,7 @@ void SwapChain::DidChangeBounds(const RectF& new_bounds) {
 bool SwapChain::IsReady() {
   if (is_ready_)
     return true;
+  TRACE_EVENT0("gfx", "SwapChain::IsReady");
   auto const wait = ::WaitForSingleObject(swap_chain_waitable_, 0);
   switch (wait) {
     case WAIT_OBJECT_0:
@@ -151,6 +155,8 @@ bool SwapChain::IsReady() {
 void SwapChain::Present() {
   if (dirty_rects_.empty())
     return;
+  TRACE_EVENT2("gfx", "SwapChain::Present", "first", is_first_present_,
+               "count", dirty_rects_.size());
   DXGI_PRESENT_PARAMETERS parameters = {0};
   std::vector<RECT> dirty_rects;
   if (!is_first_present_) {
@@ -170,6 +176,7 @@ void SwapChain::Present() {
 }
 
 void SwapChain::UpdateDeviceContext() {
+  TRACE_EVENT0("gfx", "SwapChain::UpdateDeviceContext");
   {
     DXGI_RGBA color;
     color.r = 1.0f;

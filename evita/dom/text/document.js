@@ -4,26 +4,26 @@
 'use strict';
 
 (function() {
+  /** @enum {string} */
+  const WordClass = {BLANK: 'Z', PUNCTUATION: 'P', WORD: 'w'};
+
   /** @const @type {Map.<string, string>} */
   const WORD_CLASS_MAP = (function() {
     /** @param {string} name */
-    function wordClass(name) {
-      let word_class = name.charAt(0);
-      if (word_class === 'L' || word_class === 'N')
-        return 'w';
-      if (word_class === 'S')
-        return 'P';
-      return word_class;
+    function mapCategoryToWordClass(name) {
+      let wordClass = name.charAt(0);
+      if (wordClass === 'L' || wordClass === 'N')
+        return WordClass.WORD;
+      if (wordClass === 'S')
+        return WordClass.PUNCTUATION;
+      return wordClass;
     }
-    let map = new Map();
+    const map = new Map();
     Unicode.CATEGORY_SHORT_NAMES.forEach(function(name) {
-      map.set(name, wordClass(name));
+      map.set(name, mapCategoryToWordClass(name));
     });
     return map;
   })();
-
-  /** @enum {string} */
-  const WordClass = {BLANK: 'Z', WORD: 'w'};
 
   function throwInvalidUnit(unit) { throw 'Invalid unit: ' + unit; }
 
@@ -36,15 +36,17 @@
   }
 
   /**
-   * @param {number} char_code
+   * @param {number} charCode
    * @return {WordClass|null}
    *
    * Note: We should not treat TAB and LF as blank. If we do so,
    * |Ctrl+Backspace| at start of line, removes newline at end of the previous
    * line
    */
-  function wordClassOf(char_code) {
-    return WORD_CLASS_MAP.get(Unicode.UCD[char_code].category);
+  function wordClassOf(charCode) {
+    if (charCode == Unicode.LF)
+      return WordClass.BLANK;
+    return WORD_CLASS_MAP.get(Unicode.UCD[charCode].category);
   }
 
   /**

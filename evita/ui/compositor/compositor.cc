@@ -2,17 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/ui/compositor/compositor.h"
-
+#include <windows.h>
 // L1 C4917 'declarator' : a GUID can only be associated with a class, interface
 // or namespace
+#pragma warning(push)
 #pragma warning(disable : 4917)
 #include <dcomp.h>
+#pragma warning(pop)
+#pragma comment(lib, "dcomp.lib")
 
+#include "evita/ui/compositor/compositor.h"
+
+#include "base/trace_event/trace_event.h"
 #include "evita/gfx/dx_device.h"
 #include "evita/ui/compositor/layer.h"
-
-#pragma comment(lib, "dcomp.lib")
 
 namespace ui {
 
@@ -33,6 +36,7 @@ Compositor::~Compositor() {}
 void Compositor::CommitIfNeeded() {
   if (!need_commit_)
     return;
+  TRACE_EVENT0("ui", "ui::Compositor::CommitIfNeeded");
 #if _DEBUG
   common::ComPtr<IDCompositionDevice> device;
   BOOL is_valid;
@@ -52,6 +56,7 @@ common::ComPtr<IDCompositionVisual2> Compositor::CreateVisual() {
 }
 
 void Compositor::WaitForCommitCompletion() {
+  TRACE_EVENT0("ui", "ui::Compositor::WaitForCommitCompletion");
   COM_VERIFY(composition_device_->WaitForCommitCompletion());
 }
 

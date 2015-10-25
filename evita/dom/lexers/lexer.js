@@ -142,7 +142,7 @@ global.Lexer = (function() {
    * Number of characters to color during scheduled task.
    * This is an experiment for searching right value.
    */
-  Lexer.incTime = 1000;
+  Lexer.incTime = 1000 * 2;
 
   /** @type {number}
    * Duration of doClor() in scheduler in milliseconds.
@@ -154,7 +154,7 @@ global.Lexer = (function() {
   class Scheduler {
     constructor() {
       /** @type {!Set.<!Lexer>} */ this.pendingSet_ = new Set();
-      /** @type {!RepeatingTimer} */ this.timer_ = new RepeatingTimer();
+      /** @type {!OneShotTimer} */ this.timer_ = new OneShotTimer();
     }
 
     /** @private */
@@ -180,9 +180,8 @@ global.Lexer = (function() {
     startTimerIfNeeded_() {
       if (this.timer_.isRunning)
         return;
-      // TODO(eval1749): We should use |Editor.requestIdleCallback()| instead of
-      // repeating timer.
-      this.timer_.start(50, this.didFireTimer_, this);
+      // Continue coloring after 0.5 second at last modification.
+      this.timer_.start(500, this.didFireTimer_, this);
     }
   }
 

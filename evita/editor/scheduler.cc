@@ -95,26 +95,27 @@ void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   ScheduleFrame();
 }
 
+static base::TimeDelta ComputeDelay(const base::Time& last_frame_time,
+                                    const base::Time& now) {
+  // TODO(eval1749): We should increase |frame_delta| if the application is
+  // running in background.
+  auto const kMinFrameDelta = base::TimeDelta::FromMilliseconds(1000 / 60);
+  auto const next_frame_time = last_frame_time + kMinFrameDelta;
+  auto const delta = next_frame_time - now;
+  return std::max(delta, base::TimeDelta::FromMilliseconds(3));
+}
+
 void Scheduler::ScheduleFrame() {
   TRACE_EVENT0("scheduler", "Scheduler::ScheduleFrame");
   lock_->AssertAcquired();
   DCHECK(!post_task_);
   post_task_ = true;
-  // TODO(eval1749): We should increase |frame_delta| if the application is
-  // running in background.
-  auto const kMinFrameDelta = base::TimeDelta::FromMilliseconds(1000 / 60);
-  auto const next_frame_time = last_frame_time_ + kMinFrameDelta;
   auto const now = base::Time::Now();
-  auto const delta = next_frame_time - now;
-  if (delta <= base::TimeDelta()) {
-    message_loop_->PostTask(
-        FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)));
-    return;
-  }
-  script_delegate_->DidEnterViewIdle(next_frame_time);
+  auto const delay = ComputeDelay(last_frame_time_, now);
+  script_delegate_->DidEnterViewIdle(now + delay);
   message_loop_->PostNonNestableDelayedTask(
       FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)),
-      delta);
+      delay);
 }
 
 void Scheduler::Start() {

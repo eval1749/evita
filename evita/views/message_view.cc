@@ -200,9 +200,8 @@ void Painter::Paint(gfx::Canvas* canvas,
                      bounds_.origin(), bounds_.top_right());
     PaintResizeButton(canvas, new_resize_button_bounds, alpha);
     canvas->AddDirtyRect(bounds_);
-    for (auto& part : parts_) {
+    for (auto& part : parts_)
       part.dirty = true;
-    }
   }
 
   // Paint parts
@@ -268,9 +267,9 @@ void MessageView::View::Animate(base::Time now) {
     canvas_->Clear(gfx::ColorF());
 
   if (!main_text_alpha_) {
-    // Hide main text after 5 seconds.
+    // Hide main text after 3 seconds.
     main_text_alpha_.reset(new ui::AnimationFloat(
-        now, base::TimeDelta::FromSeconds(5), 1.0f, 0.0f));
+        now, base::TimeDelta::FromSeconds(3), 1.0f, 0.0f));
     parts_[0].text = message_text_.empty() ? status_text_ : message_text_;
   }
 
@@ -322,10 +321,12 @@ MessageView::MessageView() : view_(new View(this)) {}
 MessageView::~MessageView() {}
 
 void MessageView::SetMessage(const base::string16& text) {
+  TRACE_EVENT0("view", "MessageView::SetMessage");
   view_->SetMessage(text);
 }
 
 void MessageView::SetStatus(const std::vector<base::string16>& texts) {
+  TRACE_EVENT1("view", "MessageView::SetStatusText", "texts", texts.size());
   view_->SetStatus(texts);
 }
 

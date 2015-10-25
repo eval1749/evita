@@ -114,12 +114,15 @@ global.TextWindow.prototype.clone = function() {
   /** @suppress {suspiciousCode} */
   TextWindow.prototype.dragController_;
 
+  /** @type {boolean} */
+  TextWindow.prototype.handleSelectionChange_;
+
   /** @type {!Range} */
   TextWindow.prototype.textCompositionRange;
 
-  Object.defineProperty(TextWindow.prototype, 'textCompositionRange', {
-    value: null,
-    writable: true
+  Object.defineProperties(TextWindow.prototype, {
+    'handleSelectionChange_': { value: false, writable: true },
+    'textCompositionRange': { value: null, writable: true }
   });
 
   /**
@@ -286,8 +289,16 @@ global.TextWindow.prototype.clone = function() {
    * @param {!TextWindow} window
    */
   function handleSelectionChange(window) {
-    updateStatusBar(window);
-    highlightMatchedBrackets(window);
+    if (window.handleSelectionChange_)
+        return;
+    window.handleSelectionChange_ = true;
+    // TODO(eval1749): We should use |requestIdleCallback()| rather than
+    // |OneShotTimer|.
+    (new OneShotTimer()).start(0, () => {
+      window.handleSelectionChange_ = false;
+      updateStatusBar(window);
+      highlightMatchedBrackets(window);
+    });
   }
 
   /**

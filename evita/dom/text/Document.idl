@@ -122,7 +122,7 @@ interface Document : EventTarget {
     Style styleAt(long offset);
 
     [ImplementedAs=syntax_at]
-    long syntaxAt(long offset);
+    DOMString syntaxAt(long offset);
 
     long undo(long offset);
 };

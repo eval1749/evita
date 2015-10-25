@@ -211,6 +211,7 @@ void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {
 
 void Canvas::Flush() {
   DCHECK(drawing());
+  TRACE_EVENT0("gfx", "Canvas::Flush");
   auto const hr = GetRenderTarget()->Flush();
   if (SUCCEEDED(hr))
     return;

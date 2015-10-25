@@ -330,6 +330,7 @@ void MessageView::SetStatus(const std::vector<base::string16>& texts) {
 
 // ui::AnimationFrameHandler
 void MessageView::DidBeginAnimationFrame(base::Time time) {
+  TRACE_EVENT0("view", "MessageView::DidBeginAnimationFrame");
   view_->Animate(time);
 }
 

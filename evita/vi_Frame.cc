@@ -204,6 +204,14 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
   message_view_->SetMessage(text);
 }
 
+void Frame::UpdateTitleBar(const domapi::TabData& tab_data) {
+  auto const window_title = base::StringPrintf(L"%ls %lc %ls",
+      tab_data.title.c_str(),
+      tab_data.state == domapi::TabData::State::Modified ? '*' : '-',
+      editor::Application::instance()->title().c_str());
+  title_bar_->SetText(window_title);
+}
+
 // ui::AnimationFrameHandler
 void Frame::DidBeginAnimationFrame(base::Time now) {
   // Nothing to do
@@ -501,20 +509,17 @@ void Frame::DidSetTabData(dom::WindowId window_id,
   if (!window)
     return;
   auto const content_window = window->as<ContentWindow>();
-  if (!content_window)
+  if (!content_window || !content_window->parent_node())
     return;
   auto const tab_content = content_window->parent_node()->as<TabContent>();
   auto const tab_index = GetTabIndexOfTabContent(tab_content);
   if (tab_index < 0)
     return;
   tab_strip_->SetTab(tab_index, tab_data);
-  if (tab_content != tab_strip_animator_->active_tab_content())
+  auto const active_tab_content = tab_strip_animator_->active_tab_content();
+  if (active_tab_content && tab_content != active_tab_content)
     return;
-  auto const window_title = base::StringPrintf(L"%ls %lc %ls",
-      tab_data.title.c_str(),
-      tab_data.state == domapi::TabData::State::Modified ? '*' : '-',
-      editor::Application::instance()->title().c_str());
-  title_bar_->SetText(window_title);
+  UpdateTitleBar(tab_data);
 }
 
 // views::TabStripDelegate
@@ -562,6 +567,10 @@ void Frame::DidSelectTab(int selected_index) {
   if (!tab_content || !has_native_focus())
     return;
   tab_content->RequestFocus();
+  const auto tab_data = tab_content->GetTabData();
+  if (!tab_data)
+    return;
+  UpdateTitleBar(*tab_data);
 }
 
 void Frame::RequestCloseTab(int tab_index) {

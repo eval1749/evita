@@ -85,6 +85,7 @@ class Frame final : public views::Window,
   TabContent* GetTabContentByTabIndex(int tab_index) const;
   int GetTabIndexOfTabContent(TabContent* tab_content) const;
   void OnDropFiles(HDROP);
+  void UpdateTitleBar(const domapi::TabData& tab_data);
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

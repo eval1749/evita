@@ -303,7 +303,7 @@ SpellChecker.prototype.didFireTimer = function() {
 
 // Spell checking is started when window is focused.
 SpellChecker.prototype.didFocusWindow = function() {
-  this.startTimeIfNeeded();
+  this.startTimerIfNeeded();
 };
 
 /**
@@ -344,13 +344,13 @@ SpellChecker.prototype.mutationCallback = function(mutations, observer) {
       .some((window) => Window.focus === window);
   if (!hasFocus)
     return;
-  this.startTimeIfNeeded();
+  this.startTimerIfNeeded();
 };
 
 /**
  * @this {!SpellChecker}
  */
-SpellChecker.prototype.startTimeIfNeeded = function() {
+SpellChecker.prototype.startTimerIfNeeded = function() {
   if (this.timer_.isRunning)
     return;
   this.timer_.start(SpellChecker.CHECK_INTERVAL_MS, this.didFireTimer, this);

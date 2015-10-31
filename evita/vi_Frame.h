@@ -83,11 +83,8 @@ class Frame final : public views::Window,
   TabContent* GetRecentTabContent();
   gfx::Rect GetTabContentBounds() const;
   TabContent* GetTabContentByTabIndex(int tab_index) const;
-  void OnDropFiles(HDROP);
-
   int GetTabIndexOfTabContent(TabContent* tab_content) const;
-
-  void UpdateTitleBar();
+  void OnDropFiles(HDROP);
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

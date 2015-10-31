@@ -204,26 +204,6 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
   message_view_->SetMessage(text);
 }
 
-// Updates title bar to display active buffer.
-void Frame::UpdateTitleBar() {
-  auto const tab_content = tab_strip_animator_->active_tab_content();
-  if (!tab_content)
-    return;
-  auto const tab_data = tab_content->GetTabData();
-  if (!tab_data)
-    return;
-  auto& title = tab_data->title;
-  auto const tab_index = GetTabIndexOfTabContent(tab_content);
-  if (tab_index >= 0)
-    tab_strip_->SetTab(tab_index, *tab_data);
-
-  auto const window_title =
-      title +
-      (tab_data->state == domapi::TabData::State::Modified ? L" * " : L" - ") +
-      editor::Application::instance()->title();
-  title_bar_->SetText(window_title);
-}
-
 // ui::AnimationFrameHandler
 void Frame::DidBeginAnimationFrame(base::Time now) {
   // Nothing to do
@@ -523,14 +503,18 @@ void Frame::DidSetTabData(dom::WindowId window_id,
   auto const content_window = window->as<ContentWindow>();
   if (!content_window)
     return;
-  for (auto const tab_content : tab_contents_) {
-    if (content_window->parent_node() != tab_content)
-      continue;
-    auto const tab_index = GetTabIndexOfTabContent(tab_content);
-    if (tab_index < 0)
-      continue;
-    tab_strip_->SetTab(tab_index, tab_data);
-  }
+  auto const tab_content = content_window->parent_node()->as<TabContent>();
+  auto const tab_index = GetTabIndexOfTabContent(tab_content);
+  if (tab_index < 0)
+    return;
+  tab_strip_->SetTab(tab_index, tab_data);
+  if (tab_content != tab_strip_animator_->active_tab_content())
+    return;
+  auto const window_title = base::StringPrintf(L"%ls %lc %ls",
+      tab_data.title.c_str(),
+      tab_data.state == domapi::TabData::State::Modified ? '*' : '-',
+      editor::Application::instance()->title().c_str());
+  title_bar_->SetText(window_title);
 }
 
 // views::TabStripDelegate
@@ -598,5 +582,4 @@ void Frame::RequestSelectTab(int selected_index) {
   if (!tab_content)
     return;
   tab_strip_animator_->RequestSelect(tab_content);
-  UpdateTitleBar();
 }

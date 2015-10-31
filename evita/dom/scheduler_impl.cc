@@ -105,8 +105,6 @@ void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
     maybe_task.FromJust().Run();
   }
   RunMicrotasks();
-  view_idle_deadline_ = deadline;
-  RunMicrotasks();
 }
 
 void SchedulerImpl::DidEnterViewIdle(const base::Time& deadline) {

@@ -129,7 +129,7 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
 }
 
 // TODO(eval1749): We should make |ComputeOnTextWindow()| to return value
-// asynchronusly.
+// asynchronously.
 text::Posn ViewDelegateImpl::ComputeOnTextWindow(
     dom::WindowId window_id,
     const dom::TextWindowCompute& data) {

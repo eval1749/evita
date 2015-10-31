@@ -9,8 +9,8 @@
 #include "base/message_loop/message_loop.h"
 #include "base/run_loop.h"
 #include "base/strings/string16.h"
+#include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
-#include "base/time/time.h"
 #include "evita/dom/script_thread.h"
 #include "evita/editor/application_proxy.h"
 #include "evita/editor/dom_lock.h"
@@ -30,6 +30,7 @@
 #include "evita/views/frame_list.h"
 #include "evita/views/switches.h"
 #include "evita/views/view_thread_proxy.h"
+#include "evita/vi_Frame.h"
 
 #define DEBUG_IDLE 0
 
@@ -96,6 +97,27 @@ void Application::DidStartScriptHost(domapi::ScriptHostState state) {
     return;
   }
   scheduler_->Start();
+}
+
+void Application::NotifyViewBusy() {
+  auto const now = base::Time::Now();
+  if (busy_start_time_ == base::Time()) {
+    busy_start_time_ = now;
+    return;
+  }
+  auto const delta = now - busy_start_time_;
+  if (delta < base::TimeDelta::FromSeconds(1))
+    return;
+  auto const active_frame = views::FrameList::instance()->active_frame();
+  if (!active_frame)
+    return;
+  auto const message = base::StringPrintf(
+      L"Script runs %ds. Ctrl+Break to terminate script.", delta.InSeconds());
+  active_frame->ShowMessage(MessageLevel_Warning, message);
+}
+
+void Application::NotifyViewReady() {
+  busy_start_time_ = base::Time();
 }
 
 void Application::Quit() {

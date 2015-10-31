@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "base/strings/string16.h"
+#include "base/time/time.h"
 #include "common/memory/singleton.h"
 
 namespace base {
@@ -60,6 +61,8 @@ class Application final : public common::Singleton<Application> {
 
   bool CalledOnValidThread() const;
   void DidStartScriptHost(domapi::ScriptHostState state);
+  void NotifyViewBusy();
+  void NotifyViewReady();
   void Quit();
   void Run();
 
@@ -76,6 +79,7 @@ class Application final : public common::Singleton<Application> {
 
   // |dom::ScriptThread| uses |IoDelegate| and |ViewDelegate|.
   std::unique_ptr<dom::ScriptThread> script_thread_;
+  base::Time busy_start_time_;
 
   // |Scheduler| uses |domapi::ViewEventHandler|.
   std::unique_ptr<Scheduler> scheduler_;

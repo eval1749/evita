@@ -9,12 +9,13 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/trace_event/trace_event.h"
-#include "evita/gfx/canvas.h"
-#include "evita/gfx/rect_conversions.h"
-#include "evita/editor/dom_lock.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_data.h"
 #include "evita/dom/public/view_event.h"
+#include "evita/editor/application.h"
+#include "evita/editor/dom_lock.h"
+#include "evita/gfx/canvas.h"
+#include "evita/gfx/rect_conversions.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/text/buffer.h"
 #include "evita/text/selection.h"
@@ -360,10 +361,12 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
   {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock_scope);
     if (!dom_lock_scope.locked()) {
+      editor::Application::instance()->NotifyViewBusy();
       RequestAnimationFrame();
       return;
     }
 
+    editor::Application::instance()->NotifyViewReady();
     metrics_view_->RecordTime();
     Redraw(now);
   }

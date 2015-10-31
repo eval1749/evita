@@ -44,8 +44,6 @@
    * line
    */
   function wordClassOf(charCode) {
-    if (charCode == Unicode.LF)
-      return WordClass.BLANK;
     return WORD_CLASS_MAP.get(Unicode.UCD[charCode].category);
   }
 

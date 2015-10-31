@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <iterator>
+#include <ostream>
 
 #include "evita/editor/scheduler.h"
 
@@ -17,38 +19,64 @@
 
 namespace editor {
 
+static base::TimeDelta ComputeDelay(const base::Time& last_frame_time,
+                                    const base::Time& now) {
+  // TODO(eval1749): We should increase |frame_delta| if the application is
+  // running in background.
+  auto const kMinFrameDelta = base::TimeDelta::FromMilliseconds(1000 / 60);
+  auto const next_frame_time = last_frame_time + kMinFrameDelta;
+  auto const delta = next_frame_time - now;
+  return std::max(delta, base::TimeDelta::FromMilliseconds(3));
+}
+
+#define FOR_EACH_STATE(V) V(Idle) V(Running) V(Sleeping) V(Waiting)
+
+enum class Scheduler::State {
+#define V(name) name,
+  FOR_EACH_STATE(V)
+#undef V
+};
+
+std::ostream& operator<<(std::ostream& ostream, Scheduler::State state) {
+  static const char* const names[] = {
+#define V(name) #name,
+      FOR_EACH_STATE(V)};
+#undef V
+  auto const it = std::begin(names) + static_cast<size_t>(state);
+  return ostream << (it < std::end(names) ? *it : "Invalid");
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Scheduler
+//
 Scheduler::Scheduler(domapi::ViewEventHandler* script_delegate)
-    : is_running_(false),
-      lock_(new base::Lock()),
+    : lock_(new base::Lock()),
       message_loop_(base::MessageLoop::current()),
-      post_task_(false),
-      script_delegate_(script_delegate) {}
+      script_delegate_(script_delegate),
+      state_(State::Sleeping) {}
 
 Scheduler::~Scheduler() {}
 
 void Scheduler::BeginFrame() {
+  DCHECK_EQ(State::Waiting, state_);
   TRACE_EVENT0("scheduler", "Scheduler::BeginFrame");
   last_frame_time_ = base::Time::Now();
   script_delegate_->DidExitViewIdle();
   {
     base::AutoLock lock_scope(*lock_);
-    DCHECK(post_task_);
-    is_running_ = true;
-    post_task_ = false;
+    state_ = State::Running;
   }
-  auto const now = base::Time::Now();
-  HandleAnimationFrame(now);
+  HandleAnimationFrame();
   CommitFrame();
 
   base::AutoLock lock_scope(*lock_);
-  is_running_ = false;
+  state_ = State::Sleeping;
   if (pending_handlers_.empty()) {
-    auto const idle_deadline =
-        base::Time::Now() + base::TimeDelta::FromMicroseconds(50);
-    script_delegate_->DidEnterViewIdle(idle_deadline);
+    EnterIdle();
     return;
   }
-  ScheduleFrame();
+  ScheduleNextFrame();
 }
 
 void Scheduler::CancelAnimationFrameRequest(
@@ -60,6 +88,7 @@ void Scheduler::CancelAnimationFrameRequest(
 }
 
 void Scheduler::CommitFrame() {
+  DCHECK_EQ(State::Running, state_);
   TRACE_EVENT0("scheduler", "Scheduler::CommitFrame");
   ui::Compositor::instance()->CommitIfNeeded();
   last_paint_time_ = base::Time::Now();
@@ -69,7 +98,19 @@ void Scheduler::DidUpdateDom() {
   TRACE_EVENT0("scheduler", "Scheduler::DidUpdateDom");
 }
 
-void Scheduler::HandleAnimationFrame(base::Time time) {
+void Scheduler::EnterIdle() {
+  lock_->AssertAcquired();
+  DCHECK_EQ(State::Sleeping, state_);
+  DCHECK(pending_handlers_.empty());
+  auto const now = base::Time::Now();
+  state_ = State::Idle;
+  auto const idle_deadline = now + base::TimeDelta::FromMicroseconds(50);
+  script_delegate_->DidEnterViewIdle(idle_deadline);
+}
+
+void Scheduler::HandleAnimationFrame() {
+  DCHECK_EQ(State::Running, state_);
+  auto const time = base::Time::Now();
   std::unordered_set<ui::AnimationFrameHandler*> running_handlers;
   std::unordered_set<ui::AnimationFrameHandler*> canceling_handlers;
   {
@@ -90,27 +131,18 @@ void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   TRACE_EVENT0("scheduler", "Scheduler::RequestAnimationFrame");
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.insert(handler);
-  if (is_running_ || post_task_)
+  if (state_ == State::Running || state_ == State::Waiting)
     return;
-  ScheduleFrame();
+  state_ = State::Waiting;
+  message_loop_->PostTask(
+      FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)));
 }
 
-static base::TimeDelta ComputeDelay(const base::Time& last_frame_time,
-                                    const base::Time& now) {
-  // TODO(eval1749): We should increase |frame_delta| if the application is
-  // running in background.
-  auto const kMinFrameDelta = base::TimeDelta::FromMilliseconds(1000 / 60);
-  auto const next_frame_time = last_frame_time + kMinFrameDelta;
-  auto const delta = next_frame_time - now;
-  return std::max(delta, base::TimeDelta::FromMilliseconds(3));
-}
-
-void Scheduler::ScheduleFrame() {
-  TRACE_EVENT0("scheduler", "Scheduler::ScheduleFrame");
+void Scheduler::ScheduleNextFrame() {
   lock_->AssertAcquired();
-  DCHECK(!post_task_);
-  post_task_ = true;
+  DCHECK_EQ(State::Sleeping, state_);
   auto const now = base::Time::Now();
+  state_ = State::Waiting;
   auto const delay = ComputeDelay(last_frame_time_, now);
   script_delegate_->DidEnterViewIdle(now + delay);
   message_loop_->PostNonNestableDelayedTask(
@@ -120,6 +152,7 @@ void Scheduler::ScheduleFrame() {
 
 void Scheduler::Start() {
   TRACE_EVENT0("scheduler", "Scheduler::Start");
+  DCHECK_EQ(State::Waiting, state_);
 }
 
 }  // namespace editor

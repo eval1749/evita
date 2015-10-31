@@ -32,6 +32,8 @@ namespace editor {
 //
 class Scheduler final {
  public:
+  enum class State;
+
   explicit Scheduler(domapi::ViewEventHandler* script_delegate);
   ~Scheduler();
 
@@ -49,18 +51,18 @@ class Scheduler final {
  private:
   void BeginFrame();
   void CommitFrame();
-  void HandleAnimationFrame(base::Time time);
-  void ScheduleFrame();
+  void EnterIdle();
+  void HandleAnimationFrame();
+  void ScheduleNextFrame();
 
   std::unordered_set<ui::AnimationFrameHandler*> canceled_handlers_;
-  bool is_running_;
   base::Time last_frame_time_;
   base::Time last_paint_time_;
   std::unique_ptr<base::Lock> lock_;
   base::MessageLoop* const message_loop_;
   std::unordered_set<ui::AnimationFrameHandler*> pending_handlers_;
-  bool post_task_;
   domapi::ViewEventHandler* script_delegate_;
+  State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Scheduler);
 };

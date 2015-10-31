@@ -151,7 +151,7 @@ void ScriptThread::DidEnterViewIdle(const base::Time& deadline) {
 }
 
 void ScriptThread::DidExitViewIdle() {
-  // Called both view thread and script thread via |RequestAnimationFrame()|.
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   scheduler_->DidExitViewIdle();
 }
 

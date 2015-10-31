@@ -1,9 +1,12 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <ostream>
 
 #include "evita/dom/lock.h"
 
-#include <ostream>
+#include "base/trace_event/trace_event.h"
 
 std::ostream& operator<<(std::ostream& ostream,
                          const tracked_objects::Location& location) {
@@ -16,15 +19,19 @@ namespace dom {
 //
 // Lock::AutoLock
 //
-Lock::AutoLock::AutoLock(const Location& location)
-    : base::AutoLock(*Lock::instance()->lock()) {
+Lock::AutoLock::AutoLock(const Location& location) {
   DVLOG(1) << "Lock dom at " << location;
   Lock::instance()->location_ = location;
   Lock::instance()->locked_by_dom_ = true;
+  if (Lock::instance()->lock()->Try())
+    return;
+  TRACE_EVENT0("script", "Lock::AutoLock");
+  Lock::instance()->lock()->Acquire();
 }
 
 Lock::AutoLock::~AutoLock() {
   Lock::instance()->locked_by_dom_ = false;
+  Lock::instance()->lock()->Release();
   DVLOG(1) << "Unlock dom at " << Lock::instance()->location_;
 }
 

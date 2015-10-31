@@ -1,5 +1,7 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_DOM_LOCK_H_
 #define EVITA_DOM_LOCK_H_
 
@@ -18,7 +20,7 @@ class Lock final : public common::Singleton<Lock> {
  public:
   using Location = tracked_objects::Location;
 
-  class AutoLock final : public base::AutoLock {
+  class AutoLock final {
    public:
     explicit AutoLock(const Location& location);
     ~AutoLock();

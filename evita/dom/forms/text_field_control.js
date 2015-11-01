@@ -44,7 +44,6 @@ Object.defineProperties(TextFieldControl.prototype, {
 
   class DragController {
     /**
-     * @constructor
      * @param {!TextFieldControl} control
      */
     constructor(control) {

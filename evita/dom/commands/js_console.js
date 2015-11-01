@@ -53,11 +53,6 @@ global.JsConsole = (function() {
   // JsConsole
   //
   class JsConsole {
-    /**
-     * @constructor
-     * @final
-     * @struct
-     */
     constructor() {
       /** @const @type {!Document} */
       let document = console.document;

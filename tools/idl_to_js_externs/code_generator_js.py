@@ -380,6 +380,10 @@ def type_string(idl_type):
 
 
 def type_string_without_nullable(idl_type):
+    # TODO(eval1749): Once Blink IDL parser support Promise type, we should
+    # encode return type.
+    if idl_type.name == 'Promise':
+        return 'Promise.<?>'
     if idl_type.is_nullable:
         return type_string_without_nullable(idl_type.inner_type)
     if idl_type.is_union_type:

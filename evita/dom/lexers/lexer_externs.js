@@ -176,7 +176,9 @@ Lexer.prototype.state;
 Lexer.prototype.tokenData;
 
 /**
- * @type {OrderedSet.<!Lexer.Token>}
+ * TODO(eval1749): Closure compiler doesn't recognize
+ * OrderedSetNode<Lexer.Token>.prototype.previous.
+ * @type {?} !OrderedSet.<!Lexer.Token>
  */
 Lexer.prototype.tokens;
 

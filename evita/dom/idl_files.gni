@@ -37,6 +37,8 @@ interface_idl_files = [
   "//evita/dom/forms/RadioButtonControl.idl",
   "//evita/dom/forms/TextFieldControl.idl",
   "//evita/dom/forms/TextFieldSelection.idl",
+  "//evita/dom/jslib/Runnable.idl",
+  "//evita/dom/jslib/TaskScheduler.idl",
   "//evita/dom/os/AbstractFile.idl",
   "//evita/dom/os/File.idl",
   "//evita/dom/os/Process.idl",

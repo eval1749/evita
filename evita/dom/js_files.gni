@@ -14,6 +14,9 @@ js_lib_files = [
   "polyfill.js",
   "key_names.js",
 
+  "jslib/runnable.js",
+  "lexers/lexer.js",
+
   "bracket.js",
   "commander.js",
   "css/style.js",
@@ -38,7 +41,12 @@ js_lib_files = [
   "forms/text_field_control.js",
   "forms/text_field_selection.js",
 
-  "lexers/lexer.js",
+  "jslib/await.js",
+  "jslib/editors.js",
+  "jslib/ordered_set.js",
+  "jslib/stringify.js",
+  "jslib/task_scheduler.js",
+  "jslib/windows.js",
 
   #"lexers/cmd_lexer.js",
   "lexers/clike_lexer.js",
@@ -70,12 +78,6 @@ js_lib_files = [
   "windows/text_selection.js",
   "windows/text_window.js",
   "windows/window.js",
-
-  "jslib/await.js",
-  "jslib/editors.js",
-  "jslib/ordered_set.js",
-  "jslib/stringify.js",
-  "jslib/windows.js",
 
   "console.js",
   "commands/document_list.js",

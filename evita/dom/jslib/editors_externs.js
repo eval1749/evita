@@ -1,5 +1,7 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 
 /**
  * @const @type{{
@@ -7,3 +9,8 @@
  * }}
  */
 var editors;
+
+/**
+ * @const @type {!TaskScheduler}
+ */
+var taskScheduler;

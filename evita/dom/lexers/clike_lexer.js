@@ -2,8 +2,48 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-global.ClikeLexer = (function() {
-  /** @const @type {!Map.<number, number>} */
+(function() {
+  //////////////////////////////////////////////////////////////////////
+  //
+  // ClikeLexer
+  //
+  class ClikeLexer extends Lexer {
+    /**
+     * @param {!Document} document
+     * @param {!ClikeLexerOptions} options
+     */
+    constructor(document, options) {
+      super(document, {
+        characters: options.characters,
+        keywords: options.keywords
+      });
+      this.hasCpp = options.hasCpp;
+      this.useColonColon = options.useColonColon;
+      this.useDot = options.useDot;
+    }
+  }
+
+  /** @enum{!symbol} */
+  ClikeLexer.State = {
+    BLOCK_COMMENT: Symbol('block_comment'),
+    BLOCK_COMMENT_ASTERISK: Symbol('block_comment_asterisk'),
+    BLOCK_COMMENT_END: Symbol('block_comment_end'),
+    BLOCK_COMMENT_START: Symbol('block_comment_start'),
+    COLON: Symbol(':'),
+    COLON_COLON: Symbol('::'),
+    LINE_COMMENT: Symbol('line_comment'),
+    LINE_COMMENT_ESCAPE: Symbol('line_comment_escape'),
+    LINE_COMMENT_START: Symbol('line_commend_start'),
+    NEWLINE: Symbol('newline'),
+    NUMBER_SIGN: Symbol('#'),
+    SOLIDUS: Symbol('/'),
+  };
+
+  ClikeLexer.COLON_CHAR = Symbol('COLON_CHAR');
+  ClikeLexer.DOT_CHAR = Symbol('DOT_CHAR');
+  ClikeLexer.SLASH_CHAR = Symbol('SLASH_CHAR');
+
+  /** @const @type {!Map.<number, !symbol>} */
   var CHARACTERS = (function() {
     var map = new Map();
 
@@ -40,22 +80,6 @@ global.ClikeLexer = (function() {
     return map;
   })();
 
-  /** @enum{!symbol} */
-  ClikeLexer.State = {
-    BLOCK_COMMENT: Symbol('block_comment'),
-    BLOCK_COMMENT_ASTERISK: Symbol('block_comment_asterisk'),
-    BLOCK_COMMENT_END: Symbol('block_comment_end'),
-    BLOCK_COMMENT_START: Symbol('block_comment_start'),
-    COLON: Symbol(':'),
-    COLON_COLON: Symbol('::'),
-    LINE_COMMENT: Symbol('line_comment'),
-    LINE_COMMENT_ESCAPE: Symbol('line_comment_escape'),
-    LINE_COMMENT_START: Symbol('line_commend_start'),
-    NEWLINE: Symbol('newline'),
-    NUMBER_SIGN: Symbol('#'),
-    SOLIDUS: Symbol('/'),
-  };
-
   /** @const @type {!Map.<ClikeLexer.State, string>} */
   var STATE_TO_SYNTAX = (function() {
     var map = new Map();
@@ -78,22 +102,6 @@ global.ClikeLexer = (function() {
     });
     return map;
   })();
-
-  /**
-   * @constructor
-   * @extends {Lexer}
-   * @param {!Document} document
-   * @param {!ClikeLexerOptions} options
-   */
-  function ClikeLexer(document, options) {
-    Lexer.call(this, document, {
-      characters: options.characters,
-      keywords: options.keywords
-    });
-    this.hasCpp = options.hasCpp;
-    this.useColonColon = options.useColonColon;
-    this.useDot = options.useDot;
-  }
 
   /**
    * @this {!ClikeLexer}
@@ -324,12 +332,11 @@ global.ClikeLexer = (function() {
     return map;
   };
 
-  ClikeLexer.prototype = Object.create(Lexer.prototype, {
-    constructor: {value: ClikeLexer},
+  Object.defineProperties(ClikeLexer.prototype, {
     didShrinkLastToken: {value: didShrinkLastToken },
     feedCharacter: {value: feedCharacter},
     syntaxOfToken: {value: syntaxOfToken}
   });
 
-  return ClikeLexer;
+  global.ClikeLexer = ClikeLexer;
 })();

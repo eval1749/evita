@@ -26,13 +26,10 @@ function ClikeLexer(document, options) {}
  */
 ClikeLexer.newCharacters = function() {};
 
-/** @const @type {!symbol} */
+/** @type {!symbol} */
 ClikeLexer.COLON_CHAR;
 
-/** @const @type {!symbol} */
-ClikeLexer.DOT_CHAR;
-
-/** @const @type {!symbol} */
+/** @type {!symbol} */
 ClikeLexer.SLASH_CHAR;
 
 /**

@@ -3,14 +3,10 @@
 // found in the LICENSE file.
 
 /**
- * @constructor
- *
- * @param {!Document} document
- *
  * Note: Closure compiler doesn't allow to write |function Lexer|, we use
  * IIFE to set constructor name to |Lexer| rather than |global.Lexer|.
  */
-global.Lexer = (function() {
+(function() {
   /**
    * @this {!Lexer}
    */
@@ -49,41 +45,57 @@ global.Lexer = (function() {
     lexer.mutationObserver_.observe(lexer.range.document, {summary: true});
   }
 
-  /**
-   * @param {!Document} document
-   * @param {!LexerOptions} options
-   */
-  function Lexer(document, options) {
-    this.characters_ = options.characters;
-    this.changedOffset = Count.FORWARD;
-    this.debug_ = 0;
-    this.keywords = options.keywords;
-    this.lastToken = null;
-    // TODO(eval1749): |maxChainWords_| should be part of |LexerOptions|.
-    this.maxChainWords_ = 3;
-    this.range = new Range(document);
-    this.scanOffset = 0;
-    this.state = Lexer.State.ZERO;
-    this.tokens = new OrderedSet(function(a, b) {
-      return a.end < b.end;
-    });
+  //////////////////////////////////////////////////////////////////////
+  //
+  // Lexer
+  //
+  class Lexer extends Runnable {
+    /**
+     * @param {!Document} document
+     * @param {!LexerOptions} options
+     * @return {undefined}
+     */
+    constructor(document, options) {
+      super();
+      this.characters_ = options.characters;
+      this.changedOffset = Count.FORWARD;
+      this.debug_ = 0;
+      this.keywords = options.keywords;
+      this.lastToken = null;
+      // TODO(eval1749): |maxChainWords_| should be part of |LexerOptions|.
+      this.maxChainWords_ = 3;
+      this.range = new Range(document);
+      this.scanOffset = 0;
+      this.state = Lexer.State.ZERO;
+      this.tokens = new OrderedSet(function(a, b) {
+        return a.end < b.end;
+      });
 
-    if (this.parentLexer_)
-      return;
+      if (this.parentLexer_)
+        return;
 
-    this.mutationObserver_ = new MutationObserver(
-        mutationCallback.bind(this));
-    this.eventHandlers_ = new Map();
-    function installEventHandler(eventType, lexer, callback) {
-      let handler = callback.bind(lexer);
-      lexer.eventHandlers_.set(eventType, handler);
-      document.addEventListener(eventType, handler);
+      this.mutationObserver_ = new MutationObserver(
+          mutationCallback.bind(this));
+      this.eventHandlers_ = new Map();
+      function installEventHandler(eventType, lexer, callback) {
+        let handler = callback.bind(lexer);
+        lexer.eventHandlers_.set(eventType, handler);
+        document.addEventListener(eventType, handler);
+      }
+      installEventHandler(Event.Names.BEFORELOAD, this, willLoadDocument);
+      installEventHandler(Event.Names.LOAD, this, didLoadDocument);
+      setupMutationObserver(this);
     }
-    installEventHandler(Event.Names.BEFORELOAD, this, willLoadDocument);
-    installEventHandler(Event.Names.LOAD, this, didLoadDocument);
-    setupMutationObserver(this);
+
+    /**
+     * @param {!Lexer.Token} token
+     */
+    didShrinkLastToken(token) {
+      // nothing to do
+    }
   }
 
+  Lexer.DOT_CHAR = Symbol('dot');
   Lexer.NAME_CHAR = Symbol('name');
   Lexer.NAMESTART_CHAR = Symbol('nameStart');
   Lexer.OPERATOR_CHAR = Symbol('operator');
@@ -322,14 +334,6 @@ global.Lexer = (function() {
     });
     this.mutationObserver_.disconnect();
     this.range = null;
-  }
-
-  /**
-   * @this {!Lexer}
-   * @param {!Lexer.Token} token
-   */
-  function didShrinkLastToken(token) {
-    // nothing to do
   }
 
   /**
@@ -669,7 +673,6 @@ global.Lexer = (function() {
     colorLastToken: {value: colorLastToken},
     colorToken: {value: colorToken},
     detach: {value: detach},
-    didShrinkLastToken: {value: didShrinkLastToken},
     doColor: {value: doColor},
     endToken: {value: endToken},
     extendToken: {value: extendToken},
@@ -687,5 +690,5 @@ global.Lexer = (function() {
     updateState: {value: updateState},
   });
 
-  return Lexer;
+  global.Lexer = Lexer;
 })();

@@ -5,7 +5,7 @@
 // TODO(eval1749): Should we color entity reference in attribute value? VS2013
 // doesn't color.
 // TODO(eval1749): NYI: <![CDATA[ ... ]]>
-global.XmlLexer = (function(xmlOptions) {
+(function(xmlOptions) {
 
   /** @const @type {!Map.<number, number>} */
   var CHARACTERS = (function() {
@@ -59,27 +59,31 @@ global.XmlLexer = (function(xmlOptions) {
     return map;
   })();
 
-  /**
-   * @constructor
-   * @extends {Lexer}
-   * @param {!Document} document
-   * @param {!XmlLexerOptions=} opt_options
-   */
-  function XmlLexer(document, opt_options) {
-    var options = arguments.length >= 2 ? opt_options : xmlOptions;
-    var lexer = this;
-    Lexer.call(lexer, document, {
-      characters: CHARACTERS,
-      keywords: options['keywords'],
-    });
-    lexer.ignoreCase_ = Boolean(options.ignoreCase);
-    var childLexers = options['childLexers'] || {};
-    lexer.childLexerMap_ = new Map();
-    Object.keys(childLexers).forEach(function(tagName) {
-      /** @type {!function(!Document, !Lexer)} */
-      var childLexer = new childLexers[tagName](document, lexer);
-      lexer.childLexerMap_.set(tagName, childLexer);
-    });
+  //////////////////////////////////////////////////////////////////////
+  //
+  // XmlLexer
+  //
+  class XmlLexer extends Lexer {
+    /**
+     * @param {!Document} document
+     * @param {!XmlLexerOptions=} opt_options
+     */
+    constructor(document, opt_options) {
+      var options = arguments.length >= 2 ? opt_options : xmlOptions;
+      super(document, {
+        characters: CHARACTERS,
+        keywords: options['keywords'],
+      });
+      const lexer = this;
+      lexer.ignoreCase_ = Boolean(options.ignoreCase);
+      var childLexers = options['childLexers'] || {};
+      lexer.childLexerMap_ = new Map();
+      Object.keys(childLexers).forEach(function(tagName) {
+        /** @type {!function(!Document, !Lexer)} */
+        var childLexer = new childLexers[tagName](document, lexer);
+        lexer.childLexerMap_.set(tagName, childLexer);
+      });
+    }
   }
 
   /**
@@ -877,7 +881,7 @@ global.XmlLexer = (function(xmlOptions) {
     return STATE_TO_SYNTAX.get(token.state) || '';
   }
 
-  XmlLexer.prototype = Object.create(Lexer.prototype, {
+  Object.defineProperties(XmlLexer.prototype, {
     // Properties
     childLexerMap_: {writable: true},
     ignoreCase_: {value: false, writable: true},
@@ -897,7 +901,8 @@ global.XmlLexer = (function(xmlOptions) {
   Object.defineProperty(XmlLexer, 'keywords', {
     get: function() { return xmlOptions.keywords; }
   });
-  return XmlLexer;
+
+  global.XmlLexer = XmlLexer;
 })({
   keywords: Lexer.createKeywords([
       'xi:include',

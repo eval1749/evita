@@ -2,16 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/**
- * @typedef {{
- *  lastUsedTime: !Date,
- *  promise: ?Promise,
- *  spelling: !Spelling,
- *  useCount: number,
- *  word: string
- * }}
- */
-const SpellingResult = {};
+function debug(...params) {
+}
 
 (function() {
   /**
@@ -25,7 +17,10 @@ const SpellingResult = {};
   };
 
   /** @const @type {number} */
-  const kMaxScanCount = 1000 * 5;
+  const kMaxColdScanCount = 1000 * 2;
+
+  /** @const @type {number} */
+  const kMaxHotScanCount = 400;
 
   /** @const @type {number} */
   const kMaxWordLength = 20;
@@ -33,14 +28,11 @@ const SpellingResult = {};
   /** @const @type {number} */
   const kMinWordLength = 3;
 
-  /** @const @type {string} */
-  const kCheckerPropertyName = 'SpellChecker';
+  /** @const @type {number} */
+  const kMaxNumberOfRequests = 100;
 
   /** @const @type {number} */
-  const kMaxNumberOfRequests = 10;
-
-  /** @const @type {number} */
-  const kCheckIntervalMilliseconds = 100;
+  const kHotScanIntervalMs = 100;
 
   /** @const @type {!RegExp} */
   const RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
@@ -59,6 +51,51 @@ const SpellingResult = {};
     return category === 'Lu' || category === 'Ll';
   }
 
+    /**
+     * @param {!Range} wordRange
+     * @param {Spelling} mark
+     *
+     * Mark first |word| without misspelled marker in document with |mark|.
+     */
+  function markWord(wordRange, mark) {
+    if (mark === Spelling.CORRECT)
+      return;
+    wordRange.setSpelling(mark);
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // HotScehduler
+  //
+  class HotScehduler {
+    constructor() {
+      this.task_ = null;
+
+      /** @const @type {!OneShotTimer} */
+      this.timer_ = new OneShotTimer();
+    }
+
+    didFireTimer() {
+      if (!this.task_)
+        return;
+      this.task_.run();
+    }
+
+    remove(task) {
+      if (this.task_ !== task)
+        return;
+      this.task_ = null;
+    }
+
+    schedule(task) {
+      this.task_ = task;
+      if (this.timer_.isRunning)
+        return;
+      this.timer_.start(kHotScanIntervalMs, this.didFireTimer, this);
+    }
+  }
+  const hotScheduler = new HotScehduler();
+
   //////////////////////////////////////////////////////////////////////
   //
   // Controller
@@ -68,13 +105,11 @@ const SpellingResult = {};
       /** @type {number} */
       this.numberOfRequests_ = 0;
 
-      /**
-       * @type {!Map.<string, SpellingResult>}
-       *
-       * Note: We expose |wordStateMap| for debugging and testing
-       * purpose.
-       */
-      this.wordStateMap_ = new Map();
+      /** @const @type {!Set.<string>} */
+      this.correctWords_ = new Set();
+
+      /** @const @type {!Set.<string>} */
+      this.missSpelledWords_ = new Set();
     }
 
     /**
@@ -85,71 +120,90 @@ const SpellingResult = {};
     }
 
     /**
-     * @param {string} wordToCheck
-     * @return {!Promise.<SpellingResult>}
+     * @param {string}word
+     * @return {Spelling}
      */
-    requestCheckSpelling(wordToCheck) {
-      const present = this.wordStateMap_.get(wordToCheck);
-      if (present) {
-        present.lastUsedTime = new Date();
-        ++present.useCount;
-        return present.promise ? present.promise : Promise.resolve(present);
+    checkSpelling(word) {
+      if (!RE_WORD.test(word) || keywords.has(word) ||
+          this.correctWords_.has(word)) {
+        return Spelling.CORRECT;
       }
+      if (this.missSpelledWords_.has(word))
+        return Spelling.MISSPELLED;
+      return Spelling.NONE;
+    }
 
-      const state = {
-        lastUsedTime: new Date(),
-        promise: null,
-        useCount: 1,
-        word: wordToCheck,
-      };
+    /**
+     * TODO(eval1749): We should use |Promise.<boolean>| for return type
+     * once Blink IDL parser supports Promise type.
+     * @param {string} word
+     * @return {!Promise.<?>}
+     */
+    requestCheckSpelling(word) {
+      debug('requestCheckSpelling', word);
       ++this.numberOfRequests_;
-      this.wordStateMap_.set(wordToCheck, state);
-      state.promise = Editor.checkSpelling(wordToCheck).then((isCorrect) => {
+      return Editor.checkSpelling(word).then((isCorrect) => {
         --this.numberOfRequests_;
-        state.lastUsedTime = new Date(),
-        state.promise = null;
-        state.spelling = isCorrect ? Spelling.CORRECT : Spelling.MISSPELLED;
-        return state;
+        if (isCorrect)
+          this.correctWords_.add(word);
+        else
+          this.missSpelledWords_.add(word);
+        return isCorrect;
       });
-      return state.promise;
     }
   }
-
   const controller = new Controller();
 
   //////////////////////////////////////////////////////////////////////
   //
-  // PositionRunner
+  // Scanner
   //
-  /** @class */
-  class PositionRunner {
+  class Scanner extends Runnable {
     /**
-     * @param {!Document} document
-     * @param {number} offset
+     * @param {!Range} range
+     * @param {number} start
+     * @param {number} end
      * @param {number} life
      */
-    constructor(document, offset, life) {
+    constructor(range, start, end, life) {
+      super();
+
       /** @const @type {!Document} */
-      this.document_ = document;
+      this.document_ = range.document;
+
+      /** @type {number} */
+      this.end_ = end;
 
       /** @type {number} */
       this.life_ = life;
 
-      /** @const @type {number} */
-      this.maxLife_ = life;
+      /** @type {number} */
+      this.offset_ = start;
+
+      /** @type {!Range} */
+      this.range_ = range;
 
       /** @type {number} */
-      this.offset_ = offset;
+      this.start_ = start;
     }
 
     /** @return {boolean} */
-    atEnd() { return this.offset_ === this.document_.length; }
+    atEnd() { return this.offset_ >= this.document_.length; }
 
     /** @return {boolean} */
     atStart() { return this.offset_ === 0; }
 
     /** @return {number} */
     charCode() { return this.document_.charCodeAt_(this.offset_); }
+
+    /** @return {number} */
+    get end() { return this.end_; }
+
+    /** @return {number} */
+    get life() { return this.life_; }
+
+    /** @return {number} */
+    get offset() { return this.offset_; }
 
     /** @return {boolean} */
     isDead() { return this.life_ === 0 }
@@ -212,99 +266,201 @@ const SpellingResult = {};
       return true;
     }
 
-    /** @return {number} */
-    get offset() { return this.offset_; }
+    /** @param {number} start */
+    removeMarker(start) {
+      if (start === this.offset_)
+        return;
+      this.range_.collapseTo(start);
+      this.range_.end = this.offset_;
+      this.range_.setSpelling(Spelling.NONE);
+    }
 
-    /** @return {number} */
-    get usedLife() { return this.maxLife_ - this.life_; }
+    /**
+     * @param {number} wordStart
+     * @param {number} wordEnd
+     * @return {string}
+     */
+    prepareRequest(wordStart, wordEnd) {
+      if (wordStart === wordEnd)
+        return '';
+
+      /** @const @type {number} */
+      const length = wordEnd - wordStart;
+      if (length < kMinWordLength || length > kMaxWordLength)
+        return '';
+
+      if (this.document_.syntaxAt(wordStart) === 'keyword')
+        return '';
+
+      /** @const @type {!Range} */
+      const range = this.range_;
+      range.collapseTo(wordStart);
+      range.end = wordEnd;
+
+      /** @type {string} */
+      const word = range.text;
+
+      /** @type {Spelling} */
+      const spelling = controller.checkSpelling(word);
+      if (spelling !== Spelling.NONE) {
+        range.setSpelling(spelling);
+        return '';
+      }
+      return word;
+    }
+
+    /**
+     * @param {number} newOffset
+     * @param {number} newEnd
+     * @param {number} newLife
+     */
+    reset(newOffset, newEnd, newLife) {
+      this.offset_ = Math.min(this.offset_, newOffset);
+      this.end_ = newEnd;
+      this.life_ = newLife;
+    }
   }
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  // Scanner
-  //
-  class Scanner {
-    /** @param {!Document} document */
-    constructor(document) {
-      /** @const @type {!Document} document */
-      this.document_ = document;
+  /**
+   * TODO(eval1749): Once closure compiler support class inside function,
+   * we should annotate with |SpellChecker|.
+   */
+  function* scannerWords() {
+    /** @type {number} */
+    const maxOffset = this.document_.length;
+    this.end_ = Math.min(this.end_, maxOffset);
+    this.offset_ = Math.min(this.offset_, maxOffset);
 
-      /** @type {boolean} */
-      this.more_ = false;
+    /** @type {number} */
+    let lastOffset = this.offset_;
+    if (!this.moveToStartOfWord()) {
+      this.removeMarker(lastOffset);
+      return;
+    }
+
+    while (this.offset_ < this.end_) {
+      this.removeMarker(lastOffset);
 
       /** @type {number} */
-      this.life_ = kMaxScanCount;
-    }
+      const wordStart = this.offset_;
+      if (!this.moveToEndOfWord())
+        break;
 
-    /** @return {boolean} */
-    get more() { return this.more_; }
-
-    /**
-     * TODO(eval1749): Once closure compiler support class inside function,
-     * we should annotate with |PositionRunner|.
-     * @param {?} runner
-     * @param {number} offset
-     * @return {number}
-     */
-    needMore(runner, offset) {
-      this.life_ -= runner.usedLife;
-      this.more_ = true;
-      return offset;
-    }
-
-    /**
-     * TODO(eval1749): Once closure compiler support class inside function,
-     * we should annotate with |SpellChecker|.
-     * @param {?} spellChecker
-     * @param {number} start
-     * @param {number} end
-     * @return {number}
-     */
-    scan(spellChecker, start, end) {
-      let runner = new PositionRunner(this.document_, start, this.life_);
-      if (!runner.moveToStartOfWord())
-        return this.needMore(runner, start);
-
-      while (runner.offset < end) {
-        /** @type {number} */
-        const wordStart = runner.offset;
-        if (!runner.moveToEndOfWord())
-          return this.needMore(runner, wordStart);
-
-        /** @type {number} */
-        const wordEnd = runner.offset;
-        if (!spellChecker.checkSpelling(wordStart, wordEnd))
-          return this.needMore(runner, wordStart);
-
-        if (!runner.moveToNextWord())
-          return this.needMore(runner, runner.offset);
+      /** @type {number} */
+      const wordEnd = this.offset_;
+      if (wordStart !== wordEnd) {
+        this.removeMarker(wordStart);
+        lastOffset = this.offset_;
+        yield {start: wordStart, end: lastOffset};
       }
 
-      this.life_ -= runner.usedLife;
-      return end;
+      if (!this.moveToNextWord())
+        break;
+    }
+    this.removeMarker(lastOffset);
+  }
+
+  /** @type {function():!Iterator.<{start: number, end: number}>} */
+  Scanner.prototype.words;
+  Object.defineProperty(Scanner.prototype, 'words', {value: scannerWords});
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // ColdPainter
+  //
+  class ColdPainter extends Scanner {
+    /** @param {!Range} range */
+    constructor(range) {
+      super(range, 0, 0, 0);
+    }
+
+    run() {
+      const range = this.range_;
+      for (let wordRange of this.words()) {
+        range.collapseTo(wordRange.start);
+        range.end = wordRange.end;
+        const spelling = controller.checkSpelling(range.text);
+        range.setSpelling(spelling);
+      }
+      this.schedule();
+    }
+
+    schedule() {
+      if (this.offset_ >= this.end_)
+        return;
+      this.life_ = kMaxColdScanCount;
+      taskScheduler.schedule(this);
     }
   }
 
   //////////////////////////////////////////////////////////////////////
   //
-  // SpellChecker
+  // ColdScanner
   //
-  class SpellChecker {
+  class ColdScanner extends Scanner {
+    /** @param {!Range} range */
+    constructor(range) {
+      super(range, 0, 0, 0);
+
+      /** @type {number} */
+      this.checked_ = 0;
+
+      // TODO(eval1749): We should use |Promise.<boolean>| for return type
+      // once Blink IDL parser supports Promise type.
+      this.painter_ = new ColdPainter(range);
+    }
+
     /**
-     * Spell checker for specified document. Each document is associated to
-     * separate |SpellChecker| instance.
-     *
-     * @param {!Document} document
+     * @param {number} wordStart
+     * @param {number} wordEnd
+     * @return {boolean}
      */
-    constructor(document) {
-      /** @type {TextWindow} */
-      this.activeWindow_ = null;
+    checkWord(wordStart, wordEnd) {
+      const word = this.prepareRequest(wordStart, wordEnd);
+      if (word.length === 0) {
+        this.checked_ = wordEnd;
+        return true;
+      }
 
-      /** @type {number} */
-      this.coldEnd = document.length;
+      if (!controller.canRequest())
+        return false;
 
-      /** @type {number} */
-      this.coldOffset = 0;
+      controller.requestCheckSpelling(word).then(() => {
+        this.checked_ = wordEnd;
+      });
+      return true;
+    }
+
+    run() {
+      debug('taskScheduler.run', this.offset_, this.end_);
+      for (let wordRange of this.words()) {
+        if (!this.checkWord(wordRange.start, wordRange.end))
+          break;
+      }
+      this.painter_.reset(this.checked_, this.checked_, this.life);
+      this.painter_.run();
+      this.schedule();
+    }
+
+    schedule() {
+      if (this.offset_ >= this.end_)
+        return;
+      this.life_ = kMaxColdScanCount;
+      taskScheduler.schedule(this);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // HotScanner
+  //
+  class HotScanner extends Scanner {
+    /** @param {!Range} range */
+    constructor(range) {
+      super(range, 0, 0, 0);
+
+      /** @type {TextSelection} */
+      this.activeSelection_ = null;
 
       /**
        * @const
@@ -313,26 +469,136 @@ const SpellingResult = {};
        */
       this.freeRanges_ = new Array(10);
       for (var i = 0; i < this.freeRanges_.length; ++i)
-        this.freeRanges_[i] = new Range(document);
+        this.freeRanges_[i] = new Range(range.document);
+    }
 
+    /**
+     * @private
+     * @return {number} A active caret offset
+     */
+    activeCaretOffset() {
+      if (!this.activeSelection_)
+        return -1;
+      return this.activeSelection_.focusOffset;
+    }
+
+    /**
+     * @param {number} wordStart
+     * @param {number} wordEnd
+     * @return {boolean}
+     */
+    checkWord(wordStart, wordEnd) {
+      const word = this.prepareRequest(wordStart, wordEnd);
+      if (word.length === 0)
+        return true;
+
+      if (!this.freeRanges_.length || !controller.canRequest())
+        return false;
+
+      /** @type {!Range} */
+      const markerRange = this.freeRanges_.pop();
+      markerRange.collapseTo(wordStart);
+      markerRange.end = wordEnd;
+      controller.requestCheckSpelling(word).then((isCorrect) => {
+        this.schedule();
+        this.freeRanges_.push(markerRange);
+        if (word !== markerRange.text)
+          return;
+        const marker = isCorrect ? Spelling.CORRECT : Spelling.MISSPELLED;
+        markWord(markerRange, marker);
+      });
+      return true;
+    }
+
+    didBlurWindow() {
+      this.activeSelection_ = null;
+    }
+
+    didFocusWindow() {
+      if (Window.focus instanceof TextWindow) {
+        this.activeSelection_ =
+            /** @type {!TextSelection} */(Window.focus.selection);
+        return;
+      }
+      this.activeSelection_ = null;
+    }
+
+    run() {
       /** @type {number} */
-      this.hotOffset = document.length;
+      const caretOffset = this.activeCaretOffset();
+
+      debug('hotScanner.run', this.offset_, this.end_, this.life_);
+
+      for (let wordRange of this.words()) {
+        if (caretOffset >= wordRange.start && caretOffset <= wordRange.end) {
+          // Since candidate word contains caret, we consider this word is still
+          // changing.
+          debug('hot word', wordRange.start, wordRange.end,
+                      this.range_.text);
+          this.offset_ = wordRange.start;
+          break;
+        }
+        if (!this.checkWord(wordRange.start, wordRange.end))
+          break;
+      }
+    }
+
+    schedule() {
+      if (this.offset_ >= this.end_)
+        return;
+      this.life_ = kMaxHotScanCount;
+      hotScheduler.schedule(this);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // SpellChecker
+  //
+  //
+  //  Check spelling in hot region and cold region. When we check all words in
+  //  cold region, |coldOffset| >= |coldEnd|, we check all the words in the
+  //  document.
+  // 
+  //  Cold and hot regions are updated in mutation observer callback by using
+  //  minimum changed offset.
+  // 
+  //    // Cold region: |coldOffset| to |coldEnd|.
+  //    // Hot region: |hotOffset| to end of document.
+  // 
+  // 
+  //          |...........|....................|
+  //   offset 0           minimum change       document.length
+  //          === cold === ======= hot ========
+  // 
+  //  Word scanner, |scan()|, stops hot word which contains caret not to check
+  //  spell incomplete word.
+  // 
+  //  Note: To reduce misspelling in source code, e.g. function name, and
+  //  variable names, we don't check character syntax.
+  class SpellChecker {
+    /**
+     * Spell checker for specified document. Each document is associated to
+     * separate |SpellChecker| instance.
+     *
+     * @param {!Document} document
+     */
+    constructor(document) {
+      /** @type {!Document} */
+      this.document_ = document;
+
+      /** @type {!Range} */
+      const range = new Range(document);
+
+      /** @type {?} TODO(eval1749): We should use |ColdScanner| here. */
+      this.coldScanner_ = new ColdScanner(range);
+
+      /** @type {?} TODO(eval1749): We should use |HotScanner| here. */
+      this.hotScanner_ = new HotScanner(range);
 
       /** @const @type {!MutationObserver} */
       this.mutationObserver_ = new MutationObserver(
           this.mutationCallback.bind(this));
-
-      /**
-       * @const @type {!Range}
-       * A Range object for scanning document.
-       */
-      this.range_ = new Range(document);
-
-      /** @type {boolean} */
-      this.shouldStopAtCaret_;
-
-      /** @const @type {!OneShotTimer} */
-      this.timer_ = new OneShotTimer();
 
       document.addEventListener(Event.Names.ATTACH,
                                 this.didAttachWindow.bind(this));
@@ -345,72 +611,22 @@ const SpellingResult = {};
       document.addEventListener(Event.Names.LOAD, this.didLoad.bind(this));
 
       this.mutationObserver_.observe(document, {summary: true});
+      this.restartColdScanner();
     }
 
     /**
      * @private
      */
     beforeLoad() {
-      this.mutationObserver_.disconnect();
-      this.timer_.stop();
-    }
-
-    /**
-     * @param {number} wordStart
-     * @param {number} wordEnd
-     * @return {boolean}
-     */
-    checkSpelling(wordStart, wordEnd) {
-      if (wordStart === wordEnd)
-        return true;
-      /** @const @type {!Range} */
-      const range = this.range_;
-      range.collapseTo(wordStart);
-      range.end = wordEnd;
-      range.setSpelling(Spelling.NONE);
-      const length = wordEnd - wordStart;
-      if (length < kMinWordLength ||
-          length > kMaxWordLength) {
-        return true;
-      }
-
-      if (this.shouldStopAtCaret_) {
-        const selection = /** @type {!TextSelection} */(
-            this.activeWindow_.selection);
-        if (selection.focusOffset >= wordStart &&
-            selection.focusOffset >= wordEnd) {
-          // Since candidate word contains caret, we consider this word is still
-          // changing.
-          this.shouldStopAtCaret_ = false;
-          return false;
-        }
-      }
-
-      if (this.document.syntaxAt(wordStart) === 'keyword')
-        return true;
-      const word = range.text;
-      if (keywords.has(word))
-        return true;
-      if (!RE_WORD.test(word))
-        return true;
-      if (!this.freeRanges_.length || !controller.canRequest())
-        return false;
-
-      /** @type {!Range} */
-      const markerRange = this.freeRanges_.pop();
-      markerRange.collapseTo(wordStart);
-      markerRange.end = wordEnd;
-      controller.requestCheckSpelling(word).then((state) => {
-        if (state.word === markerRange.text)
-          this.markWord(markerRange, state.spelling);
-        this.freeRanges_.push(markerRange);
-      });
-      return true;
+      debug('beforeLoad', this.document_);
+      taskScheduler.remove(this.coldScanner_);
+      hotScheduler.remove(this.hotScanner_);
     }
 
     // Cleanup resources used by spell checker.
     destroy() {
-      this.timer_.stop();
+      taskScheduler.remove(this.coldScanner_);
+      hotScheduler.remove(this.hotScanner_);
     }
 
     /**
@@ -418,10 +634,15 @@ const SpellingResult = {};
      * @param {!UiEvent} event
      */
     didAttachWindow(event) {
-      event.view.addEventListener(Event.Names.BLUR,
+      const window = /** @type {!TextWindow} */(event.view);
+      window.addEventListener(Event.Names.BLUR,
           this.didBlurWindow.bind(this));
-      event.view.addEventListener(Event.Names.FOCUS,
+      window.addEventListener(Event.Names.FOCUS,
           this.didFocusWindow.bind(this));
+      window.addEventListener(Event.Names.SELECTIONCHANGE,
+          this.didChangeSelection.bind(this));
+      this.hotScanner_.didFocusWindow();
+      this.coldScanner_.schedule();
     }
 
     /**
@@ -430,51 +651,12 @@ const SpellingResult = {};
      * Spell checker is stopped when window loses focus.
      */
     didBlurWindow(event) {
-      this.activeWindow_ = null;
-      this.timer_.stop();
+      this.hotScanner_.didBlurWindow();
     }
 
-    // Check spelling in hot region and cold region. When we check all words in
-    // cold region, |coldOffset| >= |coldEnd|, we check all the words in the
-    // document.
-    //
-    // Cold and hot regions are updated in mutation observer callback by using
-    // minimum changed offset.
-    //
-    //  * Cold region: |coldOffset| to |coldEnd|.
-    //  * Hot region: |hotOffset| to end of document.
-    //
-    //
-    //         |...........|....................|
-    //  offset 0           minimum change       document.length
-    //         === cold === ======= hot ========
-    //
-    // Word scanner, |scan()|, stops hot word which contains caret not to check
-    // spell incomplete word.
-    //
-    // Note: To reduce misspelling in source code, e.g. function name, and
-    // variable names, we don't check character syntax.
-    //
-    didFireTimer() {
-      if (!this.activeWindow_)
-        return;
-
-      /** @const @type {!Document} */
-      const document = this.document;
-
-      // |didFireTimer| can be called before handling mutation callback, we should
-      // make sure offsets don't exceed |document.length|.
-      this.coldOffset = Math.min(this.coldOffset, this.document.length);
-      this.coldEnd = Math.min(this.coldEnd, this.document.length);
-      this.hotOffset = Math.min(this.hotOffset, this.document.length);
-
-      /** @const @type {!Scanner} */
-      const scanner = new Scanner(document);
-      this.hotOffset = scanner.scan(this, this.hotOffset, document.length);
-      this.coldOffset = scanner.scan(this, this.coldOffset, this.coldEnd);
-      if (!scanner.more)
-        return;
-      this.startTimerIfNeeded();
+    /** @private */
+    didChangeSelection() {
+      this.hotScanner_.schedule();
     }
 
     /**
@@ -482,33 +664,14 @@ const SpellingResult = {};
      * Spell checking is started when window is focused.
      */
     didFocusWindow() {
-      if (Window.focus instanceof TextWindow)
-        this.activeWindow_ = Window.focus;
-      this.startTimerIfNeeded();
+      this.hotScanner_.didFocusWindow();
     }
 
     /**
      * @private
      */
     didLoad() {
-      this.coldOffset = 0;
-      this.coldEnd = this.document.length;
-      this.hotOffset = 0;
-    }
-
-    /** @return {!Document} */
-    get document() { return this.range_.document; }
-
-    /**
-     * @param {!Range} wordRange
-     * @param {Spelling} mark
-     *
-     * Mark first |word| without misspelled marker in document with |mark|.
-     */
-    markWord(wordRange, mark) {
-      if (mark === Spelling.CORRECT)
-        return;
-      wordRange.setSpelling(mark);
+      this.restartColdScanner();
     }
 
     /**
@@ -518,27 +681,21 @@ const SpellingResult = {};
      * Resets hot offset to minimal changed offset and kicks word scanner.
      */
     mutationCallback(mutations, observer) {
-      /** @type {!Range} */
-      const range = this.range_;
       /** @type {!Document} */
-      const document = range.document;
+      const document = this.document_;
       /** @type {number} */
-      const minOffset = mutations.reduce(function(previousValue, mutation) {
+      const minOffset = mutations.reduce((previousValue, mutation) => {
         return Math.min(previousValue, mutation.offset);
       }, document.length);
-      this.coldOffset = Math.min(this.coldOffset, minOffset);
-      this.coldEnd = Math.min(this.coldEnd, minOffset);
-      this.hotOffset = Math.min(this.hotOffset, minOffset);
-      this.shouldStopAtCaret_ = true;
-
-      this.startTimerIfNeeded();
+      this.coldScanner_.reset(minOffset, minOffset, kMaxColdScanCount);
+      this.hotScanner_.reset(minOffset, document.length, kMaxHotScanCount);
+      this.hotScanner_.run();
     }
 
-    startTimerIfNeeded() {
-      if (this.timer_.isRunning || !this.activeWindow_)
-        return;
-      this.timer_.start(kCheckIntervalMilliseconds,
-                        this.didFireTimer.bind(this));
+    /** @private */
+    restartColdScanner() {
+      this.coldScanner_.reset(0, this.document_.length, kMaxColdScanCount);
+      taskScheduler.schedule(this.coldScanner_);
     }
   }
 
@@ -552,16 +709,16 @@ const SpellingResult = {};
       if (document.name === '*javascript*')
         return;
       const spellChecker = new SpellChecker(document);
-      document.properties.set(kCheckerPropertyName, spellChecker);
+      document.properties.set(SpellChecker.name, spellChecker);
     }
 
     /** @param {!Document} document */
     function uninstallSpellChecker(document) {
-      const spellChecker = document.properties.get(kCheckerPropertyName);
+      const spellChecker = document.properties.get(SpellChecker.name);
       if (!spellChecker)
         return;
       spellChecker.destroy();
-      document.properties.delete(kCheckerPropertyName);
+      document.properties.delete(SpellChecker.name);
     }
 
     switch (action) {

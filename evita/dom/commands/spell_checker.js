@@ -25,7 +25,7 @@ const SpellingResult = {};
   };
 
   /** @const @type {number} */
-  const kMaxScanCount = 1000;
+  const kMaxScanCount = 1000 * 5;
 
   /** @const @type {number} */
   const kMaxWordLength = 20;
@@ -40,7 +40,12 @@ const SpellingResult = {};
   const kMaxNumberOfRequests = 10;
 
   /** @const @type {number} */
-  const kCheckIntervalMilliseconds = 200;
+  const kCheckIntervalMilliseconds = 100;
+
+  /** @const @type {!RegExp} */
+  const RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
+    (kMinWordLength - 1) + ',' +
+    (kMaxWordLength - 1) + '}$');
 
   /** @const @type {!Set.<string>} */
   const keywords = new Set();
@@ -385,6 +390,8 @@ const SpellingResult = {};
         return true;
       const word = range.text;
       if (keywords.has(word))
+        return true;
+      if (!RE_WORD.test(word))
         return true;
       if (!this.freeRanges_.length || !controller.canRequest())
         return false;

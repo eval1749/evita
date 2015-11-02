@@ -7,7 +7,7 @@
   //
   // ClikeLexer
   //
-  class ClikeLexer extends Lexer {
+  class ClikeLexer extends global.Lexer {
     /**
      * @param {!Document} document
      * @param {!ClikeLexerOptions} options
@@ -338,5 +338,5 @@
     syntaxOfToken: {value: syntaxOfToken}
   });
 
-  global.ClikeLexer = ClikeLexer;
+  global['ClikeLexer'] = ClikeLexer;
 })();

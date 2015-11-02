@@ -491,7 +491,7 @@
      * @return {string}
      */
     function syntaxOfToken(range, token) {
-      return map.get(token.state);
+      return map.get(token.state) || '';
     }
     return syntaxOfToken;
   })();
@@ -689,5 +689,5 @@
     updateState: {value: updateState},
   });
 
-  global.Lexer = Lexer;
+  global['Lexer'] = Lexer;
 })();

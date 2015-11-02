@@ -7,7 +7,7 @@
  * @externs
  */
 
-/** @const @type {Array.<string, number>} */
+/** @const @type {!Map.<string, number>} */
 var KEY_CODE_MAP;
 
 /** @const @type {Array.<string>} */

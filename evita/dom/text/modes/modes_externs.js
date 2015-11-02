@@ -10,3 +10,7 @@ var ExtensionToModeMap;
 
 /** @typedef {!Map.<string, !Function>} */
 var NameToModeMap;
+
+// TODO(eval1749): We should delete below line once closure compiler fixed.
+/** @typedef {Mode} */
+global.Mode;

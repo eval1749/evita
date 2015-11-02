@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 global.JavaLexer = (function(options) {
-  class JavaLexer extends ClikeLexer {
+  class JavaLexer extends global.ClikeLexer {
     /**
      * @param {!Document} document
      */

@@ -316,7 +316,7 @@ global.TextWindow.prototype.clone = function() {
    */
   function createOrGetRange(document, key) {
     const present = document.properties.get(key);
-    if (present)
+    if (present instanceof Range)
       return present;
     const newRange = new Range(document);
     document.properties.set(key, newRange);

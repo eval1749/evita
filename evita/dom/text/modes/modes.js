@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 (function() {
-  class PlainTextLexer {
+  class PlainTextLexer extends global.Lexer {
     /**
-     * @constructor
-     * @extends {Lexer}
      * @param {!Document} document
      */
-    constructor(document) {}
+    constructor(document) { super(document, {}); }
     detach() {}
     doColor(hint) { return hint; }
   }
@@ -18,98 +16,98 @@
     ctor.keymap = new Map();
   }
 
-  class ConfigMode extends Mode {
+  class ConfigMode extends global.Mode {
     constructor() {
       super('Config', ConfigLexer);
     }
   }
   inheritMode(ConfigMode);
 
-  class CppMode  extends Mode {
+  class CppMode  extends global.Mode {
     constructor() {
       super('C++', CppLexer);
     }
   }
   inheritMode(CppMode);
 
-  class CsharpMode  extends Mode {
+  class CsharpMode  extends global.Mode {
     constructor() {
       super('C#', CsharpLexer);
     }
   }
   inheritMode(CsharpMode);
 
-  class HtmlMode  extends Mode {
+  class HtmlMode  extends global.Mode {
     constructor() {
       super('HTML', HtmlLexer);
     }
   }
   inheritMode(HtmlMode);
 
-  class IdlMode  extends Mode {
+  class IdlMode  extends global.Mode {
     constructor() {
       super('IDL', IdlLexer);
     }
   }
   inheritMode(IdlMode);
 
-  class JavaMode  extends Mode {
+  class JavaMode  extends global.Mode {
     constructor() {
       super('Java', JavaLexer);
     }
   }
   inheritMode(JavaMode);
 
-  class JavaScriptMode extends Mode {
+  class JavaScriptMode extends global.Mode {
     constructor() {
       super('JavaScript', JavaScriptLexer);
     }
   }
   inheritMode(JavaScriptMode);
 
-  class HaskellMode extends Mode {
+  class HaskellMode extends global.Mode {
     constructor() {
       super('Haskell', PlainTextLexer);
     }
   }
   inheritMode(HaskellMode);
 
-  class LispMode extends Mode {
+  class LispMode extends global.Mode {
     constructor() {
       super('Lisp', PlainTextLexer);
     }
   }
   inheritMode(LispMode);
 
-  class MasonMode extends Mode {
+  class MasonMode extends global.Mode {
     constructor() {
       super('Mason', PlainTextLexer);
     }
   }
   inheritMode(MasonMode);
 
-  class PerlMode extends Mode {
+  class PerlMode extends global.Mode {
     constructor() {
       super('Perl', PlainTextLexer);
     }
   }
   inheritMode(PerlMode);
 
-  class PlainTextMode extends Mode {
+  class PlainTextMode extends global.Mode {
     constructor() {
       super('Plain', PlainTextLexer);
     }
   }
   inheritMode(PlainTextMode);
 
-  class PythonMode extends Mode {
+  class PythonMode extends global.Mode {
     constructor() {
       super('Python', PythonLexer);
     }
   }
   inheritMode(PythonMode);
 
-  class XmlMode extends Mode {
+  class XmlMode extends global.Mode {
     constructor() {
       super('XML', XmlLexer);
     }

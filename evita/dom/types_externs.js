@@ -7,9 +7,9 @@
  */
 
 /**
- * @type {Object.<string>}
+ * @type {Object}
  */
-var global = {};
+var global;
 
 /** @typedef {!Function|!Object} Object which has |handleEvent(event)| */
 var EventListener;

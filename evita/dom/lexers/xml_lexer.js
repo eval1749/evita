@@ -63,7 +63,7 @@
   //
   // XmlLexer
   //
-  class XmlLexer extends Lexer {
+  class XmlLexer extends global.Lexer {
     /**
      * @param {!Document} document
      * @param {!XmlLexerOptions=} opt_options
@@ -79,7 +79,7 @@
       var childLexers = options['childLexers'] || {};
       lexer.childLexerMap_ = new Map();
       Object.keys(childLexers).forEach(function(tagName) {
-        /** @type {!function(!Document, !Lexer)} */
+        /** @type {!Lexer} */
         var childLexer = new childLexers[tagName](document, lexer);
         lexer.childLexerMap_.set(tagName, childLexer);
       });
@@ -897,7 +897,7 @@
     get: function() { return xmlOptions.keywords; }
   });
 
-  global.XmlLexer = XmlLexer;
+  global['XmlLexer'] = XmlLexer;
 })({
   keywords: Lexer.createKeywords([
       'xi:include',

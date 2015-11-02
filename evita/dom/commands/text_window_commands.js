@@ -476,8 +476,8 @@
     }
     Editor.messageBox(this, result.stackTraceString, MessageBox.ICONERROR,
                       'Evaluate Selection Command')
-      .then(function(x) {
-        var offset = isWhole ? 0 : this.selection.range.start;
+      .then((x) => {
+        const offset = isWhole ? 0 : this.selection.range.start;
         selection.range.collapseTo(offset + result.start)
           .moveEnd(Unit.CHARACTER, result.end - result.start);
       });

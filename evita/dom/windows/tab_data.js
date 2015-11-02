@@ -33,15 +33,15 @@ global.TabData = function (opt_state) {
   /**
    * @type {!Map.<!Window, !DocumentState>}
    */
-  var tabStateMap = new Map();
+  const tabStateMap = new Map();
 
   /**
    * For testing purpose only.
    * @param {!Window} window
-   * @return {?TabData}
+   * @return {?DocumentState}
    */
   global.TabData.get = function(window) {
-    return tabStateMap.get(window);
+    return tabStateMap.get(window) || null;
   };
 
   /**

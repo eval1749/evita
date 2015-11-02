@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 global.CppLexer = (function(options) {
-  class CppLexer extends ClikeLexer {
+  class CppLexer extends global.ClikeLexer {
     /**
      * @param {!Document} document
      */

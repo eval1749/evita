@@ -77,10 +77,10 @@ global.DocumentState.prototype.equals = function(other) {
   /**
    * For testing purpose only.
    * @param {!Document} document
-   * @return {!DocumentState}
+   * @return {DocumentState}
    */
   global.DocumentState.get = function(document) {
-    return documentStateMap.get(document);
+    return documentStateMap.get(document) || null;
   };
 
   /**
@@ -91,14 +91,14 @@ global.DocumentState.prototype.equals = function(other) {
    * @param {!Document} document
    */
   global.DocumentState.update = function(document) {
-    var state = documentStateMap.get(document);
-    if (!state)
+    const state = documentStateMap.get(document) || null;
+    if (state === null)
       return;
     if (state.modified == document.modified)
       return;
     state.modified = document.modified;
     observers.forEach(function(observer) {
-      observer.call(this, document, state);
+      observer.call(this, document, /** @type {!DocumentState} */(state));
     });
   };
 
@@ -110,8 +110,8 @@ global.DocumentState.prototype.equals = function(other) {
     if (!(event.view instanceof TextWindow))
       return;
     var document = /** @type{!Document} */(event.target);
-    var state = documentStateMap.get(document);
-    if (!state)
+    var state = documentStateMap.get(document) || null;
+    if (state === null)
       return;
     TabData.update(event.view, state);
   }
@@ -122,7 +122,7 @@ global.DocumentState.prototype.equals = function(other) {
   function didDocumentLoadSave(event) {
     var document = /** @type{!Document} */(event.target);
     var state = new DocumentState(document);
-    documentStateMap.set(documentStateMap, state);
+    documentStateMap.set(document, state);
     observers.forEach(function(observer) {
       observer.call(this, document, state);
     });
@@ -143,13 +143,13 @@ global.DocumentState.prototype.equals = function(other) {
    * @param {!DocumentEvent} event
    */
   function willLoadDocument(event) {
-    var document = /** @type{!Document} */(event.target);
-    var state = documentStateMap.get(document);
-    if (!state)
+    const document = /** @type{!Document} */(event.target);
+    const state = documentStateMap.get(document) || null;
+    if (state === null)
       return;
     state.state = 1;
     observers.forEach(function(observer) {
-      observer.call(this, document, state);
+      observer.call(this, document, /** @type {!DocumentState} */(state));
     });
   }
 

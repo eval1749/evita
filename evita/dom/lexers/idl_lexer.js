@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 global.IdlLexer = (function(options) {
-  class IdlLexer extends ClikeLexer {
+  class IdlLexer extends global.ClikeLexer {
     /**
      * @param {!Document} document
      */

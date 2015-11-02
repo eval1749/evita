@@ -31,20 +31,17 @@ global.OrderedSet = (function() {
   })();
 
   /**
-   * @template T
    * @type {T}
    */
   OrderedSetNode.prototype.data_;
 
   /**
-   * @template T
    * @type {?OrderedSetNode.<T>}
    */
   OrderedSetNode.prototype.left_;
 
   /**
    * @private
-   * @template T
    * @type {?OrderedSetNode.<T>}
    */
   OrderedSetNode.prototype.parent_;
@@ -57,7 +54,6 @@ global.OrderedSet = (function() {
 
   /**
    * @private
-   * @template T
    * @type {?OrderedSetNode.<T>}
    */
   OrderedSetNode.prototype.right_;
@@ -202,7 +198,6 @@ global.OrderedSet = (function() {
 
   /**
    * @private
-   * @template T
    * @type {OrderedSetNode.<T>}
    */
   OrderedSet.prototype.root_;

@@ -114,3 +114,11 @@ function XmlLexer(document, opt_options) {}
  * @return {undefined}
  */
 function HtmlLexer(document) {}
+
+// TODO(eval1749): We should delete below line once closure compiler fixed.
+/** @typedef {ClikeLexer} */
+global.ClikeLexer;
+
+/** @typedef {XmlLexer} */
+global.XmlLexer;
+

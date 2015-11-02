@@ -39,10 +39,8 @@ global.PythonLexer = (function(keywords) {
     return map;
   })();
 
-  class PythonLexer extends Lexer {
+  class PythonLexer extends global.Lexer {
     /**
-     * @constructor
-     * @extends {Lexer}
      * @param {!Document} document
      */
     constructor(document) {

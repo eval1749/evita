@@ -10,7 +10,6 @@
 function OrderedSetNode(data) {}
 
 /**
- * @template T
  * @type {T}
  */
 OrderedSetNode.prototype.data;
@@ -35,13 +34,11 @@ OrderedSetNode.prototype.previous = function() {};
 function OrderedSet(less) {}
 
 /**
- * @template T
  * @type {T}
  */
 OrderedSet.prototype.maximum;
 
 /**
- * @template T
  * @type {T}
  */
 OrderedSet.prototype.minimum;
@@ -52,7 +49,6 @@ OrderedSet.prototype.minimum;
 OrderedSet.prototype.size;
 
 /**
- * @template T
  * @param {T} data
  */
 OrderedSet.prototype.add = function(data) {};

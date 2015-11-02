@@ -17,10 +17,8 @@ global.ConfigLexer = (function() {
   /** @const @type {!Map.<string, string>} */
   var KEYWORDS = Lexer.createKeywords([]);
 
-  class ConfigLexer extends Lexer {
+  class ConfigLexer extends global.Lexer {
     /**
-     * @constructor
-     * @extends {Lexer}
      * @param {!Document} document
      */
     constructor(document) {

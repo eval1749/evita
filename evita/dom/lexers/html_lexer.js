@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 global.HtmlLexer = (function(options) {
-  class HtmlLexer extends XmlLexer {
+  class HtmlLexer extends global.XmlLexer {
     /**
      * @param {!Document} document
      */

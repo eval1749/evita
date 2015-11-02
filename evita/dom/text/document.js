@@ -7,7 +7,7 @@
   /** @enum {string} */
   const WordClass = {BLANK: 'Z', PUNCTUATION: 'P', WORD: 'w'};
 
-  /** @const @type {Map.<string, string>} */
+  /** @const @type {Map.<string, WordClass>} */
   const WORD_CLASS_MAP = (function() {
     /** @param {string} name */
     function mapCategoryToWordClass(name) {
@@ -37,20 +37,20 @@
 
   /**
    * @param {number} charCode
-   * @return {WordClass|null}
+   * @return {string|null}
    *
    * Note: We should not treat TAB and LF as blank. If we do so,
    * |Ctrl+Backspace| at start of line, removes newline at end of the previous
    * line
    */
   function wordClassOf(charCode) {
-    return WORD_CLASS_MAP.get(Unicode.UCD[charCode].category);
+    return WORD_CLASS_MAP.get(Unicode.UCD[charCode].category) || null;
   }
 
   /**
    * @param {!Document} document
    * @param {number} position
-   * @return {WordClass|null}
+   * @return {string|null}
    */
   function wordClassAt(document, position) {
     return wordClassOf(document.charCodeAt_(position));
@@ -59,7 +59,7 @@
   /**
    * @param {!Document} document
    * @param {number} position
-   * @return {WordClass|null}
+   * @return {string|null}
    */
   function wordClassBefore(document, position) {
     return wordClassOf(document.charCodeAt_(position - 1));
@@ -68,7 +68,7 @@
   /**
    * @this {!Document}
    * @param {string} keyCombination
-   * @param {Object} command
+   * @param {!Function|!Map} command
    */
   function bindKey(keyCombination, command) {
     let keyCode = Editor.parseKeyCombination(keyCombination);

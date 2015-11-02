@@ -37,7 +37,8 @@ interface_idl_files = [
   "//evita/dom/forms/RadioButtonControl.idl",
   "//evita/dom/forms/TextFieldControl.idl",
   "//evita/dom/forms/TextFieldSelection.idl",
-  "//evita/dom/jslib/Runnable.idl",
+  # TODO(eval1749): We should use "Runnable.idl" instead of "types_externs.js".
+  #"//evita/dom/jslib/Runnable.idl",
   "//evita/dom/jslib/TaskScheduler.idl",
   "//evita/dom/os/AbstractFile.idl",
   "//evita/dom/os/File.idl",

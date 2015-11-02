@@ -12,7 +12,7 @@ var LexerOptions;
 
 /**
  * @constructor
- * @extends {Runnable}
+ * @implements {Runnable}
  * @param {!Document} document
  * @param {!LexerOptions} options
  * @return {undefined}

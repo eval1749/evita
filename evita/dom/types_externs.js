@@ -51,6 +51,11 @@ Range.Case = {
   UPPER: 'UPPER',
 };
 
+/**
+ * @interface
+ */
+var Runnable;
+
 /** @typedef {number} */
 var TextOffset;
 

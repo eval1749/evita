@@ -154,11 +154,11 @@ function debug(...params) {
   }
   const controller = new Controller();
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  // Scanner
-  //
-  class Scanner extends Runnable {
+  /**
+   * @class
+   * @implements {Runnable}
+   */
+  class Scanner {
     /**
      * @param {!Range} range
      * @param {number} start
@@ -166,8 +166,6 @@ function debug(...params) {
      * @param {number} life
      */
     constructor(range, start, end, life) {
-      super();
-
       /** @const @type {!Document} */
       this.document_ = range.document;
 

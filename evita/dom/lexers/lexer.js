@@ -45,18 +45,17 @@
     lexer.mutationObserver_.observe(lexer.range.document, {summary: true});
   }
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  // Lexer
-  //
-  class Lexer extends Runnable {
+  /**
+   * @class
+   * @implements {Runnable}
+   */
+  class Lexer {
     /**
      * @param {!Document} document
      * @param {!LexerOptions} options
      * @return {undefined}
      */
     constructor(document, options) {
-      super();
       this.characters_ = options.characters;
       this.changedOffset = Count.FORWARD;
       this.debug_ = 0;

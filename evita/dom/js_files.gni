@@ -14,7 +14,6 @@ js_lib_files = [
   "polyfill.js",
   "key_names.js",
 
-  "jslib/runnable.js",
   "lexers/lexer.js",
 
   "bracket.js",

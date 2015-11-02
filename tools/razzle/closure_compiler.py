@@ -14,10 +14,7 @@ evita_src = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 JAVA_OPTIONS = ['-d64', '-server', '-Xms1G', '-XX:+TieredCompilation']
 CLOSURE_DIR = os.path.join(evita_src, 'third_party', 'closure_compiler')
 CLOSURE_JAR = os.path.join(CLOSURE_DIR, 'compiler.jar')
-ES3_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es3.js')
-ES5_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es5.js')
-ES6_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6.js')
-ES6_MORE_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6_more.js')
+# ES6_MORE_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6_more.js')
 
 # See below folow list of warnings:
 # https://code.google.com/p/closure-compiler/wiki/Warnings
@@ -26,7 +23,6 @@ CLOSURE_ERRORS = [
     'ambiguousFunctionDecl',
     'checkDebuggerStatement',
     'checkRegExp',
-    'checkStructDictInheritance',
     'checkTypes',
     'checkVars',
     'const',
@@ -52,13 +48,12 @@ CLOSURE_WARNINGS = [
 ]
 
 CLOSURE_OPTIONS = [
-    '--accept_const_keyword',
     '--compilation_level=SIMPLE',
     '--formatting=PRETTY_PRINT',
+    '--env=CUSTOM',
     '--language_in=ECMASCRIPT6_STRICT',
     '--language_out=ECMASCRIPT5',
     '--summary_detail_level=3',
-    '--use_only_custom_externs',
     '--warning_level=VERBOSE',
 ]
 
@@ -102,8 +97,7 @@ def readFile(filename):
 
 def main():
     js_codes = []
-    js_externs = [ES3_EXTERNS_JS, ES5_EXTERNS_JS, ES6_EXTERNS_JS,
-                  ES6_MORE_EXTERNS_JS]
+    js_externs = []
     js_output_file = ''
     closure_options = []
     externs = None

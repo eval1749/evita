@@ -7,6 +7,12 @@
  * IIFE to set constructor name to |Lexer| rather than |global.Lexer|.
  */
 (function() {
+  /** @type {number}
+   * Number of characters to color during scheduled task.
+   * This is an experiment for searching right value.
+   */
+  const kIncrementalCount = 1000 * 2;
+
   /**
    * @this {!Lexer}
    */
@@ -92,6 +98,10 @@
     didShrinkLastToken(token) {
       // nothing to do
     }
+
+    run() {
+      this.doColor(kIncrementalCount);
+    }
   }
 
   Lexer.DOT_CHAR = Symbol('dot');
@@ -148,55 +158,6 @@
     });
     return map;
   }
-
-  /** @type {number}
-   * Number of characters to color during scheduled task.
-   * This is an experiment for searching right value.
-   */
-  Lexer.incTime = 1000 * 2;
-
-  /** @type {number}
-   * Duration of doClor() in scheduler in milliseconds.
-   */
-  Lexer.colorTime = 0;
-
-  // @class The scheduler for coloring.
-  // Runs |doColor(100)| for one document each 50ms.
-  class Scheduler {
-    constructor() {
-      /** @type {!Set.<!Lexer>} */ this.pendingSet_ = new Set();
-      /** @type {!OneShotTimer} */ this.timer_ = new OneShotTimer();
-    }
-
-    /** @private */
-    didFireTimer_() {
-      this.timer_.stop();
-      if (this.pendingSet_.size === 0)
-        return;
-      let task = this.pendingSet_.values().next().value;
-      this.pendingSet_.delete(task);
-      let startAt = Date.now();
-      task.doColor(Lexer.incTime);
-      global.Lexer.colorTime = Date.now() - startAt;
-      this.startTimerIfNeeded_();
-    }
-
-    /** @param {!Lexer} task */
-    schedule(task) {
-      this.pendingSet_.add(task);
-      this.startTimerIfNeeded_();
-    }
-
-    /** @private */
-    startTimerIfNeeded_() {
-      if (this.timer_.isRunning)
-        return;
-      // Continue coloring after 0.5 second at last modification.
-      this.timer_.start(500, this.didFireTimer_, this);
-    }
-  }
-
-  const scheduler = new Scheduler();
 
   /**
    * @this {!Lexer}
@@ -356,7 +317,7 @@
     if (count && this.lastToken)
       this.colorLastToken();
     if (this.scanOffset < document.length)
-      scheduler.schedule(this);
+      taskScheduler.schedule(this);
     return maxCount - count;
   }
 

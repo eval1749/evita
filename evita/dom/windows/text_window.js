@@ -327,28 +327,52 @@ global.TextWindow.prototype.clone = function() {
   global.matchedBracketsColor = 0xEEFF41;
 
   /**
-   * @type {!TextWindow} window
+   * Highlight matched brackets at selection.
+   * @param {!TextWindow} window
    */
   function highlightMatchedBrackets(window) {
-    function tryLeft(range) {
+    function isLeftBracket(range) {
       if (range.start == range.document.length)
         return false;
       const leftBracket = Bracket.DATA[document.charCodeAt_(range.start)];
-      if (!leftBracket || leftBracket.type !== Bracket.Type.LEFT)
+      return leftBracket && leftBracket.type === Bracket.Type.LEFT;
+    }
+
+    function isRightBracket(range) {
+      if (range.start === 0)
         return false;
+
+      const rightBracket = Bracket.DATA[document.charCodeAt_(range.start - 1)];
+      return rightBracket && rightBracket.type === Bracket.Type.RIGHT;
+    }
+
+    function tryLeft(range) {
       range.moveEnd(Unit.BRACKET, 1);
       return !range.collapsed;
     }
 
     function tryRight(range) {
-      if (range.start === 0)
-        return false;
-
-      const rightBracket = Bracket.DATA[document.charCodeAt_(range.start - 1)];
-      if (!rightBracket || rightBracket.type !== Bracket.Type.RIGHT)
-        return false;
       range.moveStart(Unit.BRACKET, -1);
       return !range.collapsed;
+    }
+
+    function colorMatching(range) {
+      const rangeStart = range.start;
+      const rangeEnd = range.end;
+
+      range.collapseTo(rangeStart + 1);
+      range.start = rangeStart;
+      range.setStyle({backgroundColor: global.matchedBracketsColor});
+
+      range.collapseTo(rangeEnd);
+      range.start = rangeEnd - 1;
+      range.setStyle({backgroundColor: global.matchedBracketsColor});
+
+      range.start = rangeStart;
+    }
+
+    function reportNoMatching(window) {
+      window.status = Strings.IDS_NO_MATCHING_PAREN;
     }
 
     const selection = /** @type {!TextSelection} */(window.selection);
@@ -362,22 +386,17 @@ global.TextWindow.prototype.clone = function() {
       return;
 
     range.collapseTo(selectionRange.start);
-    if (!tryLeft(range) && !tryRight(range)) {
-      window.status = Strings.IDS_NO_MATCHING_PAREN;
-      return;
+    if (isLeftBracket(range)) {
+      if (tryLeft(range))
+        return colorMatching(range);
+      return reportNoMatching(window);
     }
-    const rangeStart = range.start;
-    const rangeEnd = range.end;
 
-    range.collapseTo(rangeStart + 1);
-    range.start = rangeStart;
-    range.setStyle({backgroundColor: global.matchedBracketsColor});
-
-    range.collapseTo(rangeEnd);
-    range.start = rangeEnd - 1;
-    range.setStyle({backgroundColor: global.matchedBracketsColor});
-
-    range.start = rangeStart;
+    if (!isRightBracket(range))
+      return;
+    if (tryRight(range))
+      return colorMatching(range);
+    return reportNoMatching(window);
   }
 
   /**

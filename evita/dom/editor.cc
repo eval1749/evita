@@ -186,6 +186,10 @@ Editor::Editor() {}
 
 Editor::~Editor() {}
 
+Performance* Editor::performance() {
+  return ScriptHost::instance()->performance();
+}
+
 base::string16 Editor::v8_version() {
   return base::ASCIIToUTF16(v8::V8::GetVersion());
 }

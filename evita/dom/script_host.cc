@@ -22,6 +22,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/static_script_source.h"
+#include "evita/dom/timing/performance.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
@@ -219,6 +220,7 @@ ScriptHost::ScriptHost(Scheduler* scheduler,
     : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
       message_loop_for_script_(base::MessageLoop::current()),
+      performance_(new Performance()),
       scheduler_(scheduler),
       state_(domapi::ScriptHostState::Stopped),
       testing_(false),
@@ -236,6 +238,10 @@ ScriptHost* ScriptHost::instance() {
 
 v8::Isolate* ScriptHost::isolate() const {
   return const_cast<ScriptHost*>(this)->isolate_holder_.isolate();
+}
+
+Performance* ScriptHost::performance() const {
+  return performance_.get();
 }
 
 v8_glue::Runner* ScriptHost::runner() const {

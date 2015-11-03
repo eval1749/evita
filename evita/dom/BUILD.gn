@@ -113,6 +113,7 @@ source_set("dom") {
     "//common",
     "//evita/dom/bindings",
     "//evita/dom/public",
+    "//evita/dom/timing",
     "//evita/v8_glue",
     "//regex",
     "//v8",

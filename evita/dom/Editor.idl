@@ -18,6 +18,7 @@ callback TraceLogOutputCallback = void(DOMString trace_event_json,
                                        boolean has_more_events);
 
 interface Editor {
+  static readonly attribute Performance performance;
   static readonly attribute DOMString v8Version;
   static readonly attribute DOMString version;
 

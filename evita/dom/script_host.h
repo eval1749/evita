@@ -35,6 +35,7 @@ namespace dom {
 
 class Event;
 class EventTarget;
+class Performance;
 class Scheduler;
 class ViewDelegate;
 class ViewEventHandlerImpl;
@@ -64,6 +65,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   static ScriptHost* instance();
   domapi::IoDelegate* io_delegate() const { return io_delegate_; }
   v8::Isolate* isolate() const;
+  Performance* performance() const;
   v8_glue::Runner* runner() const;
   void set_testing_runner(v8_glue::Runner* runner);
   ViewDelegate* view_delegate() const;
@@ -115,6 +117,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   // A |MessageLoop| where script runs on. We don't allow to run script other
   // than this message loop.
   base::MessageLoop* const message_loop_for_script_;
+  std::unique_ptr<Performance> performance_;
   std::unique_ptr<v8_glue::Runner> runner_;
   Scheduler* scheduler_;
   domapi::ScriptHostState state_;

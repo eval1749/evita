@@ -19,6 +19,12 @@ namespace bindings {
 class EditorClass;
 }
 
+class Performance;
+
+//////////////////////////////////////////////////////////////////////
+//
+// Editor
+//
 class Editor final : public v8_glue::Scriptable<Editor> {
   DECLARE_SCRIPTABLE_OBJECT(Editor)
 
@@ -30,6 +36,7 @@ class Editor final : public v8_glue::Scriptable<Editor> {
 
   Editor();
 
+  static Performance* performance();
   static base::string16 v8_version();
   static base::string16 version();
 

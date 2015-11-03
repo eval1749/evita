@@ -188,6 +188,7 @@ IDL_TO_CPP_TYPE_MAP = {
     # IDL types
     'DOMString': CppType('base::string16', is_by_value=False),
     # DOMTimeStamp is defined in "core/dom/CommonDefinitions.idl".
+    'DOMHighResTimeStamp': CppType('double'),
     'DOMTimeStamp': CppType('TimeStamp'),
     'any': CppType('v8::Handle<v8::Value>'),
     'boolean': CppType('bool'),

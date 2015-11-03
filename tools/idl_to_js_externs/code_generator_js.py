@@ -25,6 +25,7 @@ from idl_types import IdlType
 
 IDL_TO_JS_TYPE_MAP = {
     'DOMString': 'string',
+    'DOMHighResTimeStamp': 'number',
     'DOMTimeStamp': 'Date',
     'RangeCase': 'Range.Case',
     'RegExpInit': 'Editor.RegExpInit',

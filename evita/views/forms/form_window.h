@@ -50,6 +50,9 @@ class FormWindow final : public views::Window,
   class FormViewModel;
 
   void Paint();
+  // Returns true if model is updated.
+  bool UpdateModel();
+  void UpdateView();
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

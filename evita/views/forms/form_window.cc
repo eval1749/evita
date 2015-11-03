@@ -450,6 +450,49 @@ void FormWindow::Paint() {
   Window::OnDraw(canvas_.get());
 }
 
+bool FormWindow::UpdateModel() {
+  DCHECK(model_->dirty());
+  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
+  if (!lock_scope.locked())
+    return false;
+  TRACE_EVENT0("view", "FormWindow::UpdateModel");
+  model_->Update();
+  return true;
+}
+
+void FormWindow::UpdateView() {
+  TRACE_EVENT0("scheduler", "FormWindow::UpdateView");
+  if (form_size_ != model_->size()) {
+    form_size_ = model_->size();
+    RECT window_rect;
+    ::GetWindowRect(AssociatedHwnd(), &window_rect);
+    window_rect.right = window_rect.left + form_size_.width();
+    window_rect.bottom = window_rect.top + form_size_.height();
+    auto const extended_window_style =
+        static_cast<DWORD>(::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
+    auto const window_style =
+        static_cast<DWORD>(::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
+    auto const has_menu = false;
+    WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
+                                      extended_window_style));
+    SetBounds(gfx::Rect(window_rect));
+  }
+
+  if (title_ != model_->title()) {
+    title_ = model_->title();
+    ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
+  }
+
+  // TODO(eval1749): Should we make |RequestFocus()| to check focused
+  // window rather than here?
+  if (!has_native_focus())
+    return;
+  auto focus_control = model_->focus_control();
+  if (!focus_control || focus_control->has_focus())
+    return;
+  focus_control->RequestFocus();
+}
+
 // ui::Animatable
 void FormWindow::DidBeginAnimationFrame(base::Time) {
   if (!is_realized()) {
@@ -473,40 +516,11 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
   TRACE_EVENT0("scheduler", "FormWindow::DidBeginAnimationFrame");
 
   if (model_->dirty()) {
-    UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-    if (!lock_scope.locked()) {
+    if (!UpdateModel()) {
       RequestAnimationFrame();
       return;
     }
-
-    model_->Update();
-    if (form_size_ != model_->size()) {
-      form_size_ = model_->size();
-      RECT window_rect;
-      ::GetWindowRect(AssociatedHwnd(), &window_rect);
-      window_rect.right = window_rect.left + form_size_.width();
-      window_rect.bottom = window_rect.top + form_size_.height();
-      auto const extended_window_style =
-          static_cast<DWORD>(::GetWindowLong(AssociatedHwnd(), GWL_EXSTYLE));
-      auto const window_style =
-          static_cast<DWORD>(::GetWindowLong(AssociatedHwnd(), GWL_STYLE));
-      auto const has_menu = false;
-      WIN32_VERIFY(::AdjustWindowRectEx(&window_rect, window_style, has_menu,
-                                        extended_window_style));
-      SetBounds(gfx::Rect(window_rect));
-    }
-
-    if (title_ != model_->title()) {
-      title_ = model_->title();
-      ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
-    }
-
-    if (auto focus_control = model_->focus_control()) {
-      // TODO(eval1749): Should we make |RequestFocus()| to check focused
-      // window rather than here?
-      if (!focus_control->has_focus() && has_native_focus())
-        focus_control->RequestFocus();
-    }
+    UpdateView();
   }
 
   Paint();

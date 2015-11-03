@@ -640,7 +640,6 @@ function debug(...params) {
       window.addEventListener(Event.Names.SELECTIONCHANGE,
           this.didChangeSelection.bind(this));
       this.hotScanner_.didFocusWindow();
-      this.coldScanner_.schedule();
     }
 
     /**

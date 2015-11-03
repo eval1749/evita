@@ -295,7 +295,7 @@ global.TextWindow.prototype.clone = function() {
       return;
     // TODO(eval1749): We should use |requestIdleCallback()| rather than
     // |OneShotTimer|.
-    window.selectionTimer_.start(0, () => {
+    window.selectionTimer_.start(50, () => {
       updateStatusBar(window);
       highlightMatchedBrackets(window);
     });

@@ -6,12 +6,14 @@
 #define EVITA_DOM_SCHEDULER_IMPL_H_
 
 #include <memory>
+#include <queue>
 
 #include "base/time/time.h"
 #include "evita/dom/scheduler.h"
 
 namespace dom {
 
+class IdleTask;
 class SchedulerClient;
 
 class SchedulerImpl final : public Scheduler {
@@ -22,23 +24,19 @@ class SchedulerImpl final : public Scheduler {
   void RunIdleTasks();
 
  private:
+  class IdleTaskQueue;
   class TaskQueue;
-
-  bool IsViewIdle() const;
-  void RunMicrotasks();
 
   // dom::Scheduler
   void DidBeginFrame(const base::Time& deadline) final;
   void DidEnterViewIdle(const base::Time& deadline) final;
   void DidExitViewIdle() final;
   void ScheduleTask(const base::Closure& task) final;
-  void ScheduleIdleTask(const base::Closure& task) final;
+  void ScheduleIdleTask(const IdleTask& task) final;
 
-  std::unique_ptr<TaskQueue> idle_task_queue_;
+  std::unique_ptr<IdleTaskQueue> idle_task_queue_;
   std::unique_ptr<TaskQueue> normal_task_queue_;
   SchedulerClient* const scheduler_client_;
-  base::Time view_idle_deadline_;
-  bool view_is_idle_;
 
   DISALLOW_COPY_AND_ASSIGN(SchedulerImpl);
 };

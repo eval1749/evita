@@ -22,6 +22,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/static_script_source.h"
+#include "evita/dom/timing/idle_task.h"
 #include "evita/dom/timing/performance.h"
 #include "evita/dom/view_delegate.h"
 #include "evita/dom/windows/editor_window.h"
@@ -363,7 +364,16 @@ void ScriptHost::RunMicrotasks() {
 }
 
 void ScriptHost::ScheduleIdleTask(const base::Closure& task) {
-  scheduler_->ScheduleIdleTask(task);
+  struct Wrapper {
+    explicit Wrapper(const base::Closure& task) : task(task) {}
+
+    void Run(IdleDeadlineProvider* idle_deadline) { task.Run(); }
+
+    base::Closure task;
+  };
+  auto const wrapper = new Wrapper(task);
+  scheduler_->ScheduleIdleTask(
+      IdleTask(FROM_HERE, base::Bind(&Wrapper::Run, base::Owned(wrapper))));
 }
 
 void ScriptHost::Start() {

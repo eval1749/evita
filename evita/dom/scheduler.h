@@ -14,6 +14,8 @@ class Time;
 
 namespace dom {
 
+class IdleTask;
+
 class Scheduler {
  public:
   virtual ~Scheduler();
@@ -23,7 +25,7 @@ class Scheduler {
   virtual void DidExitViewIdle() = 0;
   virtual void RunIdleTasks() = 0;
   virtual void ScheduleTask(const base::Closure& task) = 0;
-  virtual void ScheduleIdleTask(const base::Closure& task) = 0;
+  virtual void ScheduleIdleTask(const IdleTask& task) = 0;
 
  protected:
   Scheduler();

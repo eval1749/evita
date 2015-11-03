@@ -4,6 +4,10 @@
 
 source_set("timing") {
   sources = [
+    "idle_deadline_provider.cc",
+    "idle_deadline_provider.h",
+    "idle_task.cc",
+    "idle_task.h",
     "performance.cc",
     "performance.h",
   ]

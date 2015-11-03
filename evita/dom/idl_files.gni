@@ -55,6 +55,7 @@ interface_idl_files = [
   # TODO(eval1749): binding generator and js extern generator should support
   # typedef only file.
   #"//evita/dom/timing/DOMHighResTimeStamp.idl",
+  "//evita/dom/timing/IdleDeadline.idl",
   "//evita/dom/timing/Performance.idl",
   "//evita/dom/timers/OneShotTimer.idl",
   "//evita/dom/timers/RepeatingTimer.idl",
@@ -91,6 +92,7 @@ dictionary_idl_files = [
   "//evita/dom/os/MoveFileOptions.idl",
   "//evita/dom/text/MutationObserverInit.idl",
   "//evita/dom/text/RegExpInit.idl",
+  "//evita/dom/timing/IdleRequestOptions.idl",
 ]
 
 idl_lexer_parser_files = [

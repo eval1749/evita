@@ -364,16 +364,7 @@ void ScriptHost::RunMicrotasks() {
 }
 
 void ScriptHost::ScheduleIdleTask(const base::Closure& task) {
-  struct Wrapper {
-    explicit Wrapper(const base::Closure& task) : task(task) {}
-
-    void Run(IdleDeadlineProvider* idle_deadline) { task.Run(); }
-
-    base::Closure task;
-  };
-  auto const wrapper = new Wrapper(task);
-  scheduler_->ScheduleIdleTask(
-      IdleTask(FROM_HERE, base::Bind(&Wrapper::Run, base::Owned(wrapper))));
+  scheduler_->ScheduleIdleTask(IdleTask(FROM_HERE, task));
 }
 
 void ScriptHost::Start() {

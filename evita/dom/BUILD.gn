@@ -256,6 +256,7 @@ test("evita_dom_unittests") {
     # TODO(eval1749): We should not have "application" dependency on
     # "evita_dom_unittests".
     "//evita:application",
+    "//evita/dom/timing:test_files",
     "//testing/gmock",
     "//testing/gtest",
     "//v8",

@@ -14,18 +14,21 @@ class Time;
 
 namespace dom {
 
+class IdleDeadlineProvider;
 class IdleTask;
 
 class Scheduler {
  public:
   virtual ~Scheduler();
 
+  virtual void CancelIdleTask(int task_id) = 0;
   virtual void DidBeginFrame(const base::Time& deadline) = 0;
   virtual void DidEnterViewIdle(const base::Time& deadline) = 0;
   virtual void DidExitViewIdle() = 0;
+  virtual IdleDeadlineProvider* GetIdleDeadlineProvider() = 0;
   virtual void RunIdleTasks() = 0;
+  virtual int ScheduleIdleTask(const IdleTask& task) = 0;
   virtual void ScheduleTask(const base::Closure& task) = 0;
-  virtual void ScheduleIdleTask(const IdleTask& task) = 0;
 
  protected:
   Scheduler();

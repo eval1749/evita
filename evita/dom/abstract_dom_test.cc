@@ -3,7 +3,6 @@
 
 #include "evita/dom/abstract_dom_test.h"
 
-#include <queue>
 #include <vector>
 
 #include "base/logging.h"
@@ -20,8 +19,7 @@
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/static_script_source.h"
-#include "evita/dom/timing/idle_deadline_provider.h"
-#include "evita/dom/timing/idle_task.h"
+#include "evita/dom/timing/mock_scheduler.h"
 #include "evita/v8_glue/runner_delegate.h"
 
 namespace dom {
@@ -102,47 +100,6 @@ class RunnerDelegateMock final : public v8_glue::RunnerDelegate {
 };
 
 }  // namespace
-
-//////////////////////////////////////////////////////////////////////
-//
-// MockScheduler
-//
-class MockScheduler final : public IdleDeadlineProvider, public Scheduler {
- public:
-  MockScheduler() = default;
-  ~MockScheduler() final = default;
-
-  void RunPendingTasks() {
-    while (!normal_tasks_.empty()) {
-      normal_tasks_.front().Run();
-      normal_tasks_.pop();
-    }
-    while (!idle_tasks_.empty()) {
-      idle_tasks_.front().Run(this);
-      idle_tasks_.pop();
-    }
-  }
-
- private:
-  // dom::IdleDeadlineProvider
-  base::TimeDelta GetTimeRemaining() const final { return base::TimeDelta(); }
-  bool IsIdle() const final { return false; }
-
-  // dom::Scheduler
-  void DidBeginFrame(const base::Time& deadline) final { NOTREACHED(); }
-  void DidEnterViewIdle(const base::Time& deadline) final { NOTREACHED(); }
-  void DidExitViewIdle() final { NOTREACHED(); }
-  void RunIdleTasks() final { NOTREACHED(); }
-  void ScheduleTask(const base::Closure& task) final {
-    normal_tasks_.push(task);
-  }
-  void ScheduleIdleTask(const IdleTask& task) final { idle_tasks_.push(task); }
-
-  std::queue<IdleTask> idle_tasks_;
-  std::queue<base::Closure> normal_tasks_;
-
-  DISALLOW_COPY_AND_ASSIGN(MockScheduler);
-};
 
 //////////////////////////////////////////////////////////////////////
 //

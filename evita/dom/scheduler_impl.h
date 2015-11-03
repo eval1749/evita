@@ -28,11 +28,13 @@ class SchedulerImpl final : public Scheduler {
   class TaskQueue;
 
   // dom::Scheduler
+  void CancelIdleTask(int task_id) final;
   void DidBeginFrame(const base::Time& deadline) final;
   void DidEnterViewIdle(const base::Time& deadline) final;
   void DidExitViewIdle() final;
+  IdleDeadlineProvider* GetIdleDeadlineProvider() final;
+  int ScheduleIdleTask(const IdleTask& task) final;
   void ScheduleTask(const base::Closure& task) final;
-  void ScheduleIdleTask(const IdleTask& task) final;
 
   std::unique_ptr<IdleTaskQueue> idle_task_queue_;
   std::unique_ptr<TaskQueue> normal_task_queue_;

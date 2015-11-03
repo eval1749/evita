@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <queue>
+#include <unordered_map>
 
 #include "evita/dom/scheduler_impl.h"
 
@@ -44,30 +45,42 @@ class SchedulerImpl::IdleTaskQueue final : public IdleDeadlineProvider {
   IdleTaskQueue();
   ~IdleTaskQueue() = default;
 
-  void BreakIdle() { view_is_idle_ = false; }
+  void CancelTask(int task_id);
   void DidEnterViewIdle(const base::Time& deadline);
   void DidExitViewIdle();
-  void GiveTask(const IdleTask& task);
-  void Run();
+  int GiveTask(const IdleTask& task);
+  void RunIdleTasks();
+  void StopIdleTasks();
+
+ private:
+  void RemoveTask(IdleTask* task);
 
   // dom::IdleDeadlineProvider
   base::TimeDelta GetTimeRemaining() const final;
   bool IsIdle() const final;
 
- private:
-  std::queue<IdleTask> ready_tasks_;
+  std::queue<IdleTask*> ready_tasks_;
+  volatile bool should_stop_;
+  std::unordered_map<int, IdleTask*> task_map_;
   base::Time view_idle_deadline_;
   volatile bool view_is_idle_;
-  std::queue<IdleTask> waiting_tasks_;
+  std::queue<IdleTask*> waiting_tasks_;
 
   DISALLOW_COPY_AND_ASSIGN(IdleTaskQueue);
 };
 
-SchedulerImpl::IdleTaskQueue::IdleTaskQueue() : view_is_idle_(false) {}
+SchedulerImpl::IdleTaskQueue::IdleTaskQueue()
+    : should_stop_(false), view_is_idle_(false) {}
+
+void SchedulerImpl::IdleTaskQueue::CancelTask(int task_id) {
+  auto const it = task_map_.find(task_id);
+  if (it == task_map_.end())
+    return;
+  it->second->Cancel();
+}
 
 void SchedulerImpl::IdleTaskQueue::DidEnterViewIdle(
     const base::Time& deadline) {
-  DCHECK(!view_is_idle_);
   view_idle_deadline_ = deadline;
   view_is_idle_ = true;
 }
@@ -80,42 +93,49 @@ base::TimeDelta SchedulerImpl::IdleTaskQueue::GetTimeRemaining() const {
   return view_idle_deadline_ - base::Time::Now();
 }
 
-void SchedulerImpl::IdleTaskQueue::GiveTask(const IdleTask& task) {
-  if (task.delayed_run_time != base::TimeTicks()) {
+int SchedulerImpl::IdleTaskQueue::GiveTask(const IdleTask& task_in) {
+  auto const task = new IdleTask(task_in);
+  task_map_.insert({task->id(), task});
+  if (task->delayed_run_time != base::TimeTicks())
     waiting_tasks_.push(task);
-    return;
-  }
-  ready_tasks_.push(task);
+  else
+    ready_tasks_.push(task);
+  return task->id();
 }
 
 bool SchedulerImpl::IdleTaskQueue::IsIdle() const {
-  if (!view_is_idle_)
-    return false;
-  return view_idle_deadline_ > base::Time::Now();
+  return !should_stop_ && view_is_idle_ &&
+         view_idle_deadline_ > base::Time::Now();
 }
 
-void SchedulerImpl::IdleTaskQueue::Run() {
+void SchedulerImpl::IdleTaskQueue::RemoveTask(IdleTask* task) {
+  auto const it = task_map_.find(task->id());
+  DCHECK(it != task_map_.end());
+  task_map_.erase(it);
+  delete task;
+}
+
+void SchedulerImpl::IdleTaskQueue::RunIdleTasks() {
+  should_stop_ = false;
+
   auto const now = base::TimeTicks::Now();
-  while (!waiting_tasks_.empty()) {
-    while (!waiting_tasks_.empty() && waiting_tasks_.front().IsCanceled())
-      waiting_tasks_.pop();
-    if (waiting_tasks_.front().delayed_run_time > now)
-      break;
+  while (!waiting_tasks_.empty() &&
+         waiting_tasks_.front()->delayed_run_time <= now) {
     ready_tasks_.push(waiting_tasks_.front());
     waiting_tasks_.pop();
   }
 
   while (!ready_tasks_.empty() && IsIdle()) {
-    while (!ready_tasks_.empty() && ready_tasks_.front().IsCanceled())
-      ready_tasks_.pop();
-    if (ready_tasks_.empty())
-      break;
-    auto task = ready_tasks_.front();
+    auto const task = ready_tasks_.front();
     ready_tasks_.pop();
-    if (task.IsCanceled())
-      continue;
-    task.Run(this);
+    if (!task->IsCanceled())
+      task->Run();
+    RemoveTask(task);
   }
+}
+
+void SchedulerImpl::IdleTaskQueue::StopIdleTasks() {
+  should_stop_ = true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -166,6 +186,10 @@ SchedulerImpl::SchedulerImpl(SchedulerClient* scheduler_client)
 SchedulerImpl::~SchedulerImpl() {}
 
 // dom::Scheduler
+void SchedulerImpl::CancelIdleTask(int task_id) {
+  idle_task_queue_->CancelTask(task_id);
+}
+
 void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
   TRACE_EVENT0("script", "SchedulerImpl::DidBeginFrame");
   DomUpdateScope scope(scheduler_client_, deadline);
@@ -191,20 +215,24 @@ void SchedulerImpl::DidExitViewIdle() {
   idle_task_queue_->DidExitViewIdle();
 }
 
-void SchedulerImpl::RunIdleTasks() {
-  TRACE_EVENT0("script", "SchedulerImpl::RunIdleTasks");
-  idle_task_queue_->Run();
+IdleDeadlineProvider* SchedulerImpl::GetIdleDeadlineProvider() {
+  return idle_task_queue_.get();
 }
 
-void SchedulerImpl::ScheduleIdleTask(const IdleTask& task) {
+void SchedulerImpl::RunIdleTasks() {
+  TRACE_EVENT0("script", "SchedulerImpl::RunIdleTasks");
+  idle_task_queue_->RunIdleTasks();
+}
+
+int SchedulerImpl::ScheduleIdleTask(const IdleTask& task) {
   TRACE_EVENT0("script", "SchedulerImpl::ScheduleIdleTask");
-  idle_task_queue_->GiveTask(task);
+  return idle_task_queue_->GiveTask(task);
 }
 
 void SchedulerImpl::ScheduleTask(const base::Closure& task) {
   TRACE_EVENT0("script", "SchedulerImpl::ScheduleTask");
   normal_task_queue_->GiveTask(task);
-  idle_task_queue_->BreakIdle();
+  idle_task_queue_->StopIdleTasks();
 }
 
 }  // namespace dom

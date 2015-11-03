@@ -35,6 +35,7 @@ namespace dom {
 
 class Event;
 class EventTarget;
+class IdleTask;
 class Performance;
 class Scheduler;
 class ViewDelegate;
@@ -68,6 +69,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   Performance* performance() const;
   v8_glue::Runner* runner() const;
   void set_testing_runner(v8_glue::Runner* runner);
+  Scheduler* scheduler() const { return scheduler_; }
   ViewDelegate* view_delegate() const;
 
   // Call |handleEvent()| function in the class of |target| with |event|.

@@ -20,21 +20,22 @@ class IdleDeadlineProvider;
 //
 class IdleTask final : public base::TrackingInfo {
  public:
-  using Callback = base::Callback<void(IdleDeadlineProvider*)>;
-
   IdleTask(const tracked_objects::Location& posted_from,
-           const Callback& callback,
+           const base::Closure& callback,
            base::TimeTicks delayed_run_time);
   IdleTask(const tracked_objects::Location& posted_from,
-           const Callback& callback);
+           const base::Closure& callback);
   ~IdleTask();
+
+  int id() const { return id_; }
 
   void Cancel() { is_canceled_ = true; }
   bool IsCanceled() const { return is_canceled_; }
-  void Run(IdleDeadlineProvider* idle_deadline);
+  void Run();
 
  private:
-  Callback callback_;
+  base::Closure callback_;
+  int const id_;
   bool is_canceled_;
 };
 

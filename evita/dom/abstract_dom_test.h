@@ -8,10 +8,7 @@
 #include <vector>
 
 #include "base/strings/string_piece.h"
-#pragma warning(push)
-#pragma warning(disable : 4365 4625 4626 4826)
 #include "gtest/gtest.h"
-#pragma warning(pop)
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/v8.h"
 
@@ -68,6 +65,7 @@ class AbstractDomTest : public ::testing::Test {
 
   v8::Isolate* isolate() const;
   MockIoDelegate* mock_io_delegate() const { return mock_io_delegate_.get(); }
+  MockScheduler* mock_scheduler() const { return mock_scheduler_.get(); }
   MockViewImpl* mock_view_impl() const { return mock_view_impl_.get(); }
   v8_glue::Runner* runner() const { return runner_.get(); }
   virtual bool shouldUseNewContext() const;

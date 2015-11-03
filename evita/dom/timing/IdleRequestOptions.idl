@@ -1,0 +1,11 @@
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// See https://w3c.github.io/requestidlecallback/
+
+dictionary IdleRequestOptions {
+  // TODO(eval1749): Once idl_parser support |optional| keyword in IDL
+  // dictionary, we should use it.
+  /* optional */ unsigned long timeout;
+};

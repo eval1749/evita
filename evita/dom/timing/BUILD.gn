@@ -4,14 +4,35 @@
 
 source_set("timing") {
   sources = [
+    "idle_deadline.cc",
+    "idle_deadline.h",
     "idle_deadline_provider.cc",
     "idle_deadline_provider.h",
     "idle_task.cc",
     "idle_task.h",
     "performance.cc",
     "performance.h",
+    "request_idle_callback.cc",
   ]
 
   deps = [
+    "//evita/dom/bindings",
+  ]
+}
+
+source_set("test_support") {
+  testonly = true
+  sources = [
+    "mock_scheduler.cc",
+    "mock_scheduler.h",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [ "request_idle_callback_test.cc" ]
+  public_deps = [
+    ":test_support",
+    "//testing/gtest",
   ]
 }

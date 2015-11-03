@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+callback IdleRequestCallback = void (IdleDeadline deadline);
+
 // Trace Event JSON
 // pid  process id
 // tid  thread id
@@ -107,7 +109,7 @@ interface Editor {
   static DOMString stringify(any value);
 
   // Trace Log
- // |config_string| is a dictionary formatted as a JSON string, containing both
+  // |config_string| is a dictionary formatted as a JSON string, containing both
   // category filters and trace options.
   //
   // Example:
@@ -132,4 +134,9 @@ interface Editor {
   //   }
   static void startTraceLog(DOMString config_string);
   static void stopTraceLog(TraceLogOutputCallback callback);
+
+  // Request Idle Callback
+  static unsigned long requestIdleCallback(IdleRequestCallback callback,
+                                           optional IdleRequestOptions options);
+  static void cancelIdleCallback(unsigned long handle);
 };

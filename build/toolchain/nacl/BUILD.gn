@@ -32,6 +32,7 @@ nacl_toolchain("newlib_pnacl") {
       rebase_path("${nacl_toolchain_dir}/${toolchain_package}/bin/pnacl-",
                   root_build_dir)
 
+  is_clang = true
   cc = toolprefix + "clang"
   cxx = toolprefix + "clang++"
   ar = toolprefix + "ar"
@@ -44,6 +45,22 @@ nacl_toolchain("newlib_pnacl") {
   finalized_file = "{{root_out_dir}}/{{target_output_name}}.pexe"
   postlink = "$finalize $nonfinal_file -o $finalized_file"
   link_outputs = [ finalized_file ]
+}
+
+nacl_toolchain("newlib_pnacl_nonsfi") {
+  toolchain_package = "pnacl_newlib"
+  toolchain_revision = pnacl_newlib_rev
+  toolchain_cpu = "pnacl"
+  toolprefix =
+      rebase_path("${nacl_toolchain_dir}/${toolchain_package}/bin/pnacl-",
+                  root_build_dir)
+
+  is_clang = true
+  cc = toolprefix + "clang"
+  cxx = toolprefix + "clang++"
+  ar = toolprefix + "ar"
+  ld = cxx
+  executable_extension = ""
 }
 
 template("nacl_glibc_toolchain") {
@@ -134,6 +151,7 @@ template("nacl_irt_toolchain") {
     cxx = toolprefix + "clang++"
     ar = toolprefix + "ar"
     readelf = toolprefix + "readelf"
+    strip = toolprefix + "strip"
 
     # Always build the IRT with full debugging symbols, regardless of
     # how Chromium itself is being built (or other NaCl executables).

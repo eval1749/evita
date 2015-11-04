@@ -649,7 +649,6 @@
 
       'enable_mdns%' : 0,
       'enable_service_discovery%': 0,
-      'enable_wifi_bootstrapping%': 0,
       'enable_hangout_services_extension%': 0,
 
        # Enable the Syzygy optimization step.
@@ -1010,10 +1009,6 @@
           'enable_print_preview%': 0,
         }],
 
-        ['OS=="win" or OS=="mac"', {
-          'enable_wifi_bootstrapping%' : 1,
-        }],
-
         # Path to sas.dll, which provides the SendSAS function.
         # http://msdn.microsoft.com/en-us/library/windows/desktop/dd979761(v=vs.85).aspx
         ['target_arch=="x64"', {
@@ -1241,7 +1236,6 @@
     'native_memory_pressure_signals%': '<(native_memory_pressure_signals)',
     'enable_mdns%' : '<(enable_mdns)',
     'enable_service_discovery%' : '<(enable_service_discovery)',
-    'enable_wifi_bootstrapping%': '<(enable_wifi_bootstrapping)',
     'enable_hangout_services_extension%' : '<(enable_hangout_services_extension)',
     'proprietary_codecs%': '<(proprietary_codecs)',
     'use_goma%': '<(use_goma)',
@@ -1718,7 +1712,7 @@
             'android_host_arch%': '<!(uname -m)',
             # Android API-level of the SDK used for compilation.
             'android_sdk_version%': '23',
-            'android_sdk_build_tools_version%': '23.0.0',
+            'android_sdk_build_tools_version%': '23.0.1',
             'host_os%': "<!(uname -s | sed -e 's/Linux/linux/;s/Darwin/mac/')",
 
             'conditions': [
@@ -2191,9 +2185,6 @@
       }],
       ['notifications==1', {
         'grit_defines': ['-D', 'enable_notifications'],
-      }],
-      ['enable_wifi_bootstrapping==1', {
-        'grit_defines': ['-D', 'enable_wifi_bootstrapping'],
       }],
       ['mac_views_browser==1', {
         'grit_defines': ['-D', 'mac_views_browser'],
@@ -3039,9 +3030,6 @@
       }],
       ['enable_service_discovery==1', {
         'defines' : [ 'ENABLE_SERVICE_DISCOVERY=1' ],
-      }],
-      ['enable_wifi_bootstrapping==1', {
-        'defines' : [ 'ENABLE_WIFI_BOOTSTRAPPING=1' ],
       }],
       ['enable_hangout_services_extension==1', {
         'defines': ['ENABLE_HANGOUT_SERVICES_EXTENSION=1'],
@@ -5260,6 +5248,28 @@
           },  # configuration "Release"
         },  # configurations
         'xcode_settings': {
+          # Tell the compiler to use libc++'s headers and the linker to link
+          # against libc++.  The latter part normally requires OS X 10.7,
+          # but we still support running on 10.6.  How does this work?  Two
+          # parts:
+          # 1. Chromium's clang doesn't error on -mmacosx-version-min=10.6
+          #    combined with -stdlib=libc++ (it normally silently produced a
+          #    binary that doesn't run on 10.6)
+          # 2. Further down, library_dirs is set to
+          #    third_party/libc++-static, which contains a static
+          #    libc++.a library.  The linker then links against that instead
+          #    of against /usr/lib/libc++.dylib when it sees the -lc++ flag
+          #    added by the driver.
+          #
+          # In component builds, just link to the system libc++.  This has
+          # the effect of making everything depend on libc++, which means
+          # component-build binaries won't run on 10.6 (no libc++ there),
+          # but for a developer-only configuration that's ok.  (We don't
+          # want to raise the deployment target yet so that official and
+          # dev builds have the same deployment target.  This affects
+          # things like which functions are considered deprecated.)
+          'CLANG_CXX_LIBRARY': 'libc++',  # -stdlib=libc++
+
           'GCC_DYNAMIC_NO_PIC': 'NO',               # No -mdynamic-no-pic
                                                     # (Equivalent to -fPIC)
           # MACOSX_DEPLOYMENT_TARGET maps to -mmacosx-version-min
@@ -5276,23 +5286,20 @@
             # specified or not.
             '-fno-strict-aliasing',  # See http://crbug.com/32204.
           ],
-          'conditions': [
-            ['component=="shared_library"', {
-              # In component builds, link to the system libc++. This requires
-              # OS X 10.7, but we currently pass -mmacosx-version-min=10.6.
-              # Xcode's clang complains about this, but our open-source bundled
-              # chromium clang doesn't.  This has the effect of making
-              # everything depend on libc++, which means component-build
-              # binaries won't run on 10.6 (no libc++ there), but for a
-              # developer-only configuration that's ok.
-              # (We don't want to raise the deployment target yet so that
-              # official and dev builds have the same deployment target.  This
-              # affects things like which functions are considered deprecated.)
-              'CLANG_CXX_LIBRARY': 'libc++',  # -stdlib=libc++
-            }],
-          ],
         },
         'target_conditions': [
+          ['>(nacl_untrusted_build)==0 and component=="static_library"', {
+            # See the comment for CLANG_CXX_LIBRARY above for what this does.
+            # The NaCl toolchains have their own toolchain and don't need this.
+            # ASan requires 10.7+ and clang implicitly adds -lc++abi in ASan
+            # mode.  Our libc++.a contains both libc++ and libc++abi in one
+            # library, so it doesn't work in that mode.
+            'conditions': [
+              ['asan==0', {
+                'library_dirs': [ '<(DEPTH)/third_party/libc++-static' ],
+              }],
+            ],
+          }],
           ['_type=="executable"', {
             'postbuilds': [
               {
@@ -5795,6 +5802,7 @@
                   '-Qunused-arguments',  # http://crbug.com/504658
                   '-Wno-microsoft-enum-value',  # http://crbug.com/505296
                   '-Wno-unknown-pragmas',  # http://crbug.com/505314
+                  '-Wno-microsoft-cast',  # http://crbug.com/550065
                   # Disable unused-value (crbug.com/505318) except
                   # -Wunused-result.
                   '-Wno-unused-value',

@@ -7,6 +7,7 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
+#include "base/trace_event/trace_event.h"
 #include "base/threading/thread.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/lock.h"

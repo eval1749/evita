@@ -283,7 +283,9 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
     auto const key_code = event.raw_key_code();
     if (key_code < 0x20)
       return 0;
-    TRACE_EVENT1("input", "WM_CHAR", "key_code", key_code);
+    TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(),
+                             "type", static_cast<int>(event.event_type()),
+                             "key_code", event.raw_key_code());
     OnEvent(&event);
     return 0;
   }
@@ -292,16 +294,17 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
                  KeyEvent::ConvertToKeyCode(wParam),
                  KeyEvent::ConvertToRepeat(lParam));
 
+  TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(),
+                           "type", static_cast<int>(event.event_type()),
+                           "key_code", event.raw_key_code());
+
   if (message == WM_KEYDOWN && event.key_code() <= 0x7E && !event.alt_key() &&
       !event.control_key()) {
     // We use WM_CHAR for graphic key down.
-    TRACE_EVENT1("input", "WM_KEYDOWN", "key_code", event.raw_key_code());
     return OnMessage(message, wParam, lParam);
   }
 
   if (event.event_type() != EventType::Invalid) {
-    TRACE_EVENT1("input", "Widget::HandleKeyboardMessage", "type",
-                 static_cast<int>(event.event_type()));
     OnEvent(&event);
     return 0;
   }

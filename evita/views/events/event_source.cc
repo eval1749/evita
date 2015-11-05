@@ -95,7 +95,7 @@ void EventSource::DispatchFocusEvent(domapi::EventType event_type,
 void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
   TRACE_EVENT0("views", "EventSource::DispatchKeyboardEvent");
   domapi::KeyboardEvent api_event;
-  api_event.event_id = next_event_id();
+  api_event.event_id = event.id();
   api_event.alt_key = event.alt_key();
   api_event.control_key = event.control_key();
   api_event.event_type = ConvertEventType(event);
@@ -105,6 +105,9 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
   api_event.shift_key = event.shift_key();
   api_event.target_id = event_target_id_;
   view_event_handler()->DispatchKeyboardEvent(api_event);
+  TRACE_EVENT_ASYNC_END2("input", "KeyEvent", event.id(),
+                         "type", static_cast<int>(event.event_type()),
+                         "key_code", event.raw_key_code());
 }
 
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
@@ -120,7 +123,7 @@ void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   MUST_EQUAL(Other2);
 
   domapi::MouseEvent api_event;
-  api_event.event_id = next_event_id();
+  api_event.event_id = event.id();
   api_event.alt_key = event.alt_key();
   api_event.button = static_cast<domapi::MouseButton>(event.button());
   api_event.buttons = event.buttons();
@@ -159,7 +162,7 @@ void EventSource::DispatchTextCompositionEvent(
 void EventSource::DispatchWheelEvent(const ui::MouseWheelEvent& event) {
   TRACE_EVENT0("views", "EventSource::DispatchWheelEvent");
   domapi::WheelEvent api_event;
-  api_event.event_id = next_event_id();
+  api_event.event_id = event.id();
   api_event.alt_key = event.alt_key();
   api_event.button = static_cast<domapi::MouseButton>(event.button());
   api_event.buttons = event.buttons();

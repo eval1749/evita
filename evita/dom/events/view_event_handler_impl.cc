@@ -211,6 +211,9 @@ void ViewEventHandlerImpl::DispatchKeyboardEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new KeyboardEvent(api_event));
+  TRACE_EVENT_ASYNC_END2("input", "KeyEvent", api_event.event_id,
+                         "type", static_cast<int>(api_event.event_type),
+                         "key_code", api_event.key_code);
 }
 
 void ViewEventHandlerImpl::DispatchMouseEvent(

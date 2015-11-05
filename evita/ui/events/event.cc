@@ -15,6 +15,8 @@ namespace ui {
 
 namespace {
 
+int current_sequence_number;
+
 // Note: We don't use |IsAltPressed()| in "base/win_util.h", because it links
 // netapi32.lib for |NetJoinInformation()| and |NetApiBufferFree()|
 bool IsAltPressed() {
@@ -93,6 +95,7 @@ Event::Event(EventType event_type, int flags)
     : default_prevented_(false),
       event_type_(event_type),
       flags_(flags),
+      sequence_number_(++current_sequence_number),
       time_stamp_(base::Time::Now()) {}
 
 Event::Event() : Event(EventType::Invalid, 0) {}

@@ -87,6 +87,7 @@ class Event : public common::Castable {
 
   bool default_prevented() const { return default_prevented_; }
   EventType event_type() const { return event_type_; }
+  int id() const { return sequence_number_; }
   int flags() const { return flags_; }
   base::Time time_stamp() const { return time_stamp_; }
 
@@ -100,6 +101,7 @@ class Event : public common::Castable {
   bool default_prevented_;
   EventType event_type_;
   int flags_;
+  int sequence_number_;
   base::Time time_stamp_;
 };
 

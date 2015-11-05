@@ -20,13 +20,13 @@ deps = {
     'src/third_party/cygwin':
         Var('git_url') + '/chromium/deps/cygwin.git@c89e446b273697fadf3a10ff1007a97c0b7de6df',
     'src/third_party/icu':
-        Var('git_url') + '/chromium/deps/icu.git@94e4b770ce2f6065d4261d29c32683a6099b9d93',
+        Var('git_url') + '/chromium/deps/icu.git@42c58d4e49f2250039f0e98d43e0b76e8f5ca024',
     'src/tools/deps2git':
         Var('git_url') + '/chromium/tools/deps2git.git@f04828eb0b5acd3e7ad983c024870f17f17b06d9',
     'src/tools/gyp':
-        Var('git_url') + '/external/gyp.git@3f21260b43401553c37bb28090b65a75577d5b4e',
+        Var('git_url') + '/external/gyp.git@2c1e6cced23554ce84806e570acea637f6473afc',
     'src/v8':
-        Var('git_url') + '/v8/v8.git@0e641d2eae31681bef70a04f3da4cbfb88edd266',
+        Var('git_url') + '/v8/v8.git@956cf2893ec79c239a96aa0931c2601209c526a9',
 }
 
 deps_os = {

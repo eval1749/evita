@@ -64,7 +64,7 @@ class SchedulerImpl::IdleTaskQueue final : public IdleDeadlineProvider {
   std::unordered_map<int, IdleTask*> task_map_;
   base::Time view_idle_deadline_;
   volatile bool view_is_idle_;
-  std::queue<IdleTask*> waiting_tasks_;
+  std::priority_queue<IdleTask*> waiting_tasks_;
 
   DISALLOW_COPY_AND_ASSIGN(IdleTaskQueue);
 };
@@ -120,8 +120,8 @@ void SchedulerImpl::IdleTaskQueue::RunIdleTasks() {
 
   auto const now = base::TimeTicks::Now();
   while (!waiting_tasks_.empty() &&
-         waiting_tasks_.front()->delayed_run_time <= now) {
-    ready_tasks_.push(waiting_tasks_.front());
+         waiting_tasks_.top()->delayed_run_time <= now) {
+    ready_tasks_.push(waiting_tasks_.top());
     waiting_tasks_.pop();
   }
 

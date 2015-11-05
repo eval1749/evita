@@ -27,7 +27,10 @@ class IdleTask final : public base::TrackingInfo {
            const base::Closure& callback);
   ~IdleTask();
 
-  int id() const { return id_; }
+// Used to support sorting.
+  bool operator<(const IdleTask& other) const;
+
+  int id() const { return sequence_num_; }
 
   void Cancel() { is_canceled_ = true; }
   bool IsCanceled() const { return is_canceled_; }
@@ -35,7 +38,7 @@ class IdleTask final : public base::TrackingInfo {
 
  private:
   base::Closure callback_;
-  int const id_;
+  int const sequence_num_;
   bool is_canceled_;
 };
 

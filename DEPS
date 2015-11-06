@@ -12,7 +12,7 @@ vars = {
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': '2c1e6cced23554ce84806e570acea637f6473afc',
   'icu_revision': '42c58d4e49f2250039f0e98d43e0b76e8f5ca024',
-  'v8_revision': '956cf2893ec79c239a96aa0931c2601209c526a9',
+  'v8_revision': '5b9f10bdec38888fa2505e88645e28066f363dbd',
 }
 
 deps = {

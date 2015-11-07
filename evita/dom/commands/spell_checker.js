@@ -617,6 +617,7 @@ function debug(...params) {
      */
     beforeLoad() {
       debug('beforeLoad', this.document_);
+      this.mutationObserver_.disconnect();
       taskScheduler.remove(this.coldScanner_);
       hotScheduler.remove(this.hotScanner_);
     }
@@ -668,6 +669,7 @@ function debug(...params) {
      * @private
      */
     didLoad() {
+      this.mutationObserver_.observe(document, {summary: true});
       this.restartColdScanner();
     }
 

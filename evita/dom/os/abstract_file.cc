@@ -45,14 +45,14 @@ AbstractFile::~AbstractFile() {
 }
 
 v8::Handle<v8::Promise> AbstractFile::Close() {
-  return PromiseResolver::FastCall(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &domapi::IoDelegate::CloseFile,
       base::Unretained(ScriptHost::instance()->io_delegate()), context_id_));
 }
 
 v8::Handle<v8::Promise> AbstractFile::Read(
     const gin::ArrayBufferView& array_buffer_view) {
-  return PromiseResolver::FastCall(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &domapi::IoDelegate::ReadFile,
       base::Unretained(ScriptHost::instance()->io_delegate()), context_id_,
       array_buffer_view.bytes(), array_buffer_view.num_bytes()));
@@ -60,7 +60,7 @@ v8::Handle<v8::Promise> AbstractFile::Read(
 
 v8::Handle<v8::Promise> AbstractFile::Write(
     const gin::ArrayBufferView& array_buffer_view) {
-  return PromiseResolver::FastCall(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &domapi::IoDelegate::WriteFile,
       base::Unretained(ScriptHost::instance()->io_delegate()), context_id_,
       array_buffer_view.bytes(), array_buffer_view.num_bytes()));

@@ -29,7 +29,7 @@ Process::Process(domapi::IoContextId context_id) : ScriptableBase(context_id) {}
 Process::~Process() {}
 
 v8::Handle<v8::Promise> Process::Open(const base::string16& command_line) {
-  return PromiseResolver::FastCall(base::Bind(
+  return PromiseResolver::Call(base::Bind(
       &domapi::IoDelegate::OpenProcess,
       base::Unretained(ScriptHost::instance()->io_delegate()), command_line));
 }

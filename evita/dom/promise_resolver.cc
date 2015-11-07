@@ -49,11 +49,10 @@ void LivePromiseResolverSet::Unregister(const PromiseResolver* resolver) {
 
 }  // namespace
 
-PromiseResolver::PromiseResolver(Type type, v8_glue::Runner* runner)
+PromiseResolver::PromiseResolver(v8_glue::Runner* runner)
     : resolver_(runner->isolate(),
                 v8::Promise::Resolver::New(runner->context()).ToLocalChecked()),
-      runner_(runner->GetWeakPtr()),
-      type_(type) {
+      runner_(runner->GetWeakPtr()) {
   LivePromiseResolverSet::instance()->Register(this);
 }
 

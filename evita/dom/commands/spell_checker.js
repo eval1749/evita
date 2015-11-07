@@ -669,7 +669,7 @@ function debug(...params) {
      * @private
      */
     didLoad() {
-      this.mutationObserver_.observe(document, {summary: true});
+      this.mutationObserver_.observe(this.document_, {summary: true});
       this.restartColdScanner();
     }
 

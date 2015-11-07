@@ -31,7 +31,7 @@
       return;
     const editorWindow = /** @type {!Window} */(this.parent);
     if (arg !== undefined) {
-      windows.newTextWindow(editorWindow, new Document('untitled.txt'));
+      windows.newTextWindow(editorWindow, Document.new('untitled.txt'));
       return;
     }
 
@@ -137,7 +137,7 @@
    */
   function newDocumentInNewWindowCommand(arg) {
     if (arg !== undefined) {
-      windows.newEditorWindow(new Document('untitled.txt'));
+      windows.newEditorWindow(Document.new('untitled.txt'));
       return;
     }
 

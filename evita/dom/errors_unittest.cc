@@ -19,7 +19,7 @@ class ErrorsTest : public dom::AbstractDomTest {
 
 TEST_F(ErrorsTest, DocumentError) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('foo');"
+      "var doc = Document.new('foo');"
       "var e1 = new DocumentError(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
   EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");
@@ -30,7 +30,7 @@ TEST_F(ErrorsTest, DocumentError) {
 
 TEST_F(ErrorsTest, DocumentNotReady) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('foo');"
+      "var doc = Document.new('foo');"
       "var e1 = new DocumentNotReady(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
   EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");
@@ -42,7 +42,7 @@ TEST_F(ErrorsTest, DocumentNotReady) {
 
 TEST_F(ErrorsTest, DocumentReadOnly) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('foo');"
+      "var doc = Document.new('foo');"
       "var e1 = new DocumentReadOnly(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
   EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");

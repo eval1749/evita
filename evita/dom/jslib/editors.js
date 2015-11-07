@@ -85,7 +85,7 @@ function load(scriptPath, opt_options) {
   function start(args) {
     loadUserScript();
     let editor_window = new EditorWindow();
-    let doc = new Document('*scratch*');
+    let doc = Document.new('*scratch*');
     let range = new Range(doc);
     let text_window = new TextWindow(range);
     editor_window.appendChild(text_window);

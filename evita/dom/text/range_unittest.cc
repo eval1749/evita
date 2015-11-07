@@ -21,7 +21,7 @@ class RangeTest : public AbstractDomTest {
 
   void PopulateSample(const char* sample) {
     EXPECT_SCRIPT_VALID(
-        base::StringPrintf("var doc = new Document('sample');"
+        base::StringPrintf("var doc = Document.new('sample');"
                            "var r = new Range(doc);"
                            "r.text = '%s';",
                            sample));
@@ -31,7 +31,7 @@ class RangeTest : public AbstractDomTest {
   void SetUp() override {
     AbstractDomTest::SetUp();
     EXPECT_SCRIPT_VALID(
-        "var doc = new Document('sample');"
+        "var doc = Document.new('sample');"
         "var range = new Range(doc);");
     EXPECT_SCRIPT_VALID(
         "function doTest(sample, sampler) {"
@@ -85,7 +85,7 @@ class RangeTest : public AbstractDomTest {
 TEST_F(RangeTest, analyzeCase) {
   EXPECT_SCRIPT_VALID(
       "function testIt(sample) {"
-      "  var doc = new Document('analyzeCase');"
+      "  var doc = Document.new('analyzeCase');"
       "  var range = new Range(doc);"
       "  range.text = sample;"
       "  return range.analyzeCase().toString();"
@@ -99,7 +99,7 @@ TEST_F(RangeTest, analyzeCase) {
 }
 
 TEST_F(RangeTest, ctor) {
-  EXPECT_SCRIPT_VALID("var doc1 = new Document('range')");
+  EXPECT_SCRIPT_VALID("var doc1 = Document.new('range')");
   EXPECT_SCRIPT_VALID("var range1 = new Range(doc1)");
   EXPECT_SCRIPT_TRUE("range1.document === doc1");
   EXPECT_SCRIPT_VALID("range1.text = '0123456';");
@@ -138,7 +138,7 @@ TEST_F(RangeTest, ctor) {
 
 TEST_F(RangeTest, capitalize) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('endOf');"
+      "var doc = Document.new('endOf');"
       "var range = new Range(doc);"
       "function test(sample) {"
       "  range.text = sample;"
@@ -152,7 +152,7 @@ TEST_F(RangeTest, capitalize) {
 
 TEST_F(RangeTest, collapsed) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('collapsed');"
+      "var doc = Document.new('collapsed');"
       "var range = new Range(doc);");
   EXPECT_SCRIPT_TRUE("range.collapsed");
   EXPECT_SCRIPT_TRUE("range.start == range.end");
@@ -163,7 +163,7 @@ TEST_F(RangeTest, collapsed) {
 
 TEST_F(RangeTest, collapseTo) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('endOf');"
+      "var doc = Document.new('endOf');"
       "var range = new Range(doc);"
       "range.text = 'foo';"
       "range.collapseTo(1);");
@@ -174,7 +174,7 @@ TEST_F(RangeTest, collapseTo) {
 TEST_F(RangeTest, delete) {
   EXPECT_SCRIPT_VALID(
       "function testIt(sample, unit, count) {"
-      "  var doc = new Document('delete');"
+      "  var doc = Document.new('delete');"
       "  var range = new Range(doc);"
       "  range.text = sample.replace(/[|]/g, '');"
       "  range.collapseTo(sample.indexOf('|'));"
@@ -240,7 +240,7 @@ TEST_F(RangeTest, endOf) {
 
 TEST_F(RangeTest, insertBefore) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('insertBefore');"
+      "var doc = Document.new('insertBefore');"
       "var range = new Range(doc);"
       "range.text = 'foo';"
       "range.insertBefore('bar');"
@@ -253,7 +253,7 @@ TEST_F(RangeTest, insertBefore) {
 
 TEST_F(RangeTest, move) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('move');"
+      "var doc = Document.new('move');"
       "var range = new Range(doc);"
       // 0123456789012345  678901234  56789012345
       "range.text = 'this is a word.\\nline two\\nline three\\n';"
@@ -302,7 +302,7 @@ TEST_F(RangeTest, move) {
 
 TEST_F(RangeTest, moveEnd) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('move');"
+      "var doc = Document.new('move');"
       "var range = new Range(doc);"
       // 0123456789012345  678901234  56789012345
       "range.text = 'this is a word.\\nline two\\nline three\\n';"
@@ -384,7 +384,7 @@ TEST_F(RangeTest, moveEndWhile) {
 
 TEST_F(RangeTest, moveStart) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('move');"
+      "var doc = Document.new('move');"
       "var range = new Range(doc);"
       // 0123456789012345  678901234  56789012345
       "range.text = 'this is a word.\\nline two\\nline three\\n';"
@@ -467,7 +467,7 @@ TEST_F(RangeTest, moveStartWhile) {
 
 TEST_F(RangeTest, setSpelling) {
   EXPECT_SCRIPT_VALID(
-      "var doc1 = new Document('spelling');"
+      "var doc1 = Document.new('spelling');"
       "var range1 = new Range(doc1);"
       "range1.text = 'foo bar baz';"
       "range1.start = 4;"
@@ -484,7 +484,7 @@ TEST_F(RangeTest, setSpelling) {
 
 TEST_F(RangeTest, set_start_end) {
   EXPECT_SCRIPT_VALID(
-      "var doc1 = new Document('text');"
+      "var doc1 = Document.new('text');"
       "var range1 = new Range(doc1);"
       "range1.text = 'abcdefghijkl';"
       "range1.start = 5;");
@@ -526,7 +526,7 @@ TEST_F(RangeTest, startOf) {
 
 TEST_F(RangeTest, text) {
   EXPECT_SCRIPT_VALID(
-      "var doc1 = new Document('text');"
+      "var doc1 = Document.new('text');"
       "var range1 = new Range(doc1);"
       "range1.text = 'abcdefghijkl';"
       "var range2 = new Range(doc1, 3, 6);");

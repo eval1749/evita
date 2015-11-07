@@ -26,7 +26,7 @@ class StyleTest : public dom::AbstractDomTest {
 TEST_F(StyleTest, DefaultStyle) {
   EXPECT_SCRIPT_EQ("function", "typeof(Style)");
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('style');"
+      "var doc = Document.new('style');"
       "var style = doc.styleAt(doc.length);");
   EXPECT_SCRIPT_EQ("undefined", "style.backgroundColor");
   EXPECT_SCRIPT_EQ("undefined", "style.charSyntax");
@@ -38,7 +38,7 @@ TEST_F(StyleTest, DefaultStyle) {
 TEST_F(StyleTest, SetStyle) {
   EXPECT_SCRIPT_EQ("function", "typeof(Style)");
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('style');"
+      "var doc = Document.new('style');"
       "var range = new Range(doc);"
       "range.text = 'foo';"
       "range.setStyle({color: 0x00FF00, fontSize: 23});"

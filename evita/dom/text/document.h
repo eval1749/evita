@@ -40,8 +40,6 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   text::Posn length() const;
   bool modified() const;
   void set_modified(bool new_modified);
-  const base::string16& name() const;
-  void set_name(const base::string16& new_name);
   bool read_only() const;
   void set_read_only(bool read_only) const;
   // Returns spelling at |offset|.
@@ -63,21 +61,13 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   void StartUndoGroup(const base::string16& name);
   Posn Undo(Posn position);
 
-  // Implementations of static IDL attributes
-  static std::vector<Document*> list();
-
-  // Implementations of static IDL operations
-  static void AddObserver(v8::Handle<v8::Function> function);
-  static Document* Find(const base::string16& name);
-  static Document* NewDocument(const base::string16& name);
-  static void RemoveDocument(Document* document);
-  static void RemoveObserver(v8::Handle<v8::Function> function);
+  // Implementation of Document static method
+  static Document* NewDocument();
 
  private:
-  explicit Document(const base::string16& name);
+  Document();
 
   std::unique_ptr<text::Buffer> buffer_;
-  base::string16 name_;
 
   DISALLOW_COPY_AND_ASSIGN(Document);
 };

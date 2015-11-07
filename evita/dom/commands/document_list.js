@@ -76,7 +76,7 @@
   function ensureDocumentList() {
     if (documentListDocument)
       return documentListDocument;
-    const document = new Document('*document list*');
+    const document = Document.new('*document list*');
     document.bindKey('Delete', closeSelectedDocuments);
     document.bindKey('Enter', openSelectedDocuments);
     Document.list.forEach(function(document) {

@@ -73,7 +73,7 @@
     const present = Document.findFile(absoluteFileName);
     if (present)
       return present;
-    const document = new Document(FilePath.basename(fileName));
+    const document = Document.new(FilePath.basename(fileName));
     document.fileName = absoluteFileName;
     document.mode = Mode.chooseModeByFileName(fileName);
     return document;

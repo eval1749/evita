@@ -16,7 +16,7 @@ class MutationObserverTest : public AbstractDomTest {
 
 TEST_F(MutationObserverTest, ctor) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('foo');"
+      "var doc = Document.new('foo');"
       "var range = new Range(doc);"
       "range.text = 'foo bar baz';"
       "function callback(records, observer) {"

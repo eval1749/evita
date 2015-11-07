@@ -5,23 +5,31 @@
 callback DocumentObserverCallback = void(DOMString name, Document document);
 
 [
-    CustomConstructor(DOMString name)
+    CustomConstructor()
 ]
 interface Document : EventTarget {
+    [ImplementedAs=JavaScript]
     static void addObserver(DocumentObserverCallback observer);
+
+    [ImplementedAs=JavaScript]
     static Document? find(DOMString name);
 
     [ImplementedAs=JavaScript]
     static Document? findFile(DOMString absoluteFileName);
 
+    [ImplementedAs=JavaScript]
     static readonly attribute Document[] list;
+
+    [ImplementedAs=JavaScript]
+    static Document new(DOMString name);
 
     [ImplementedAs=JavaScript]
     static Document open(DOMString fileName);
 
-    [ImplementedAs=RemoveDocument]
+    [ImplementedAs=JavaScript]
     static void remove(Document document);
 
+    [ImplementedAs=JavaScript]
     static void removeObserver(DocumentObserverCallback observer);
 
     [ImplementedAs=JavaScript]
@@ -45,6 +53,8 @@ interface Document : EventTarget {
     attribute Mode? mode;
 
     attribute boolean modified;
+
+    [ImplementedAs=JavaScript]
     readonly attribute DOMString name;
 
     [ImplementedAs=JavaScript]
@@ -105,7 +115,9 @@ interface Document : EventTarget {
     boolean needSave();
 
     long redo(long offset);
-    void renameTo(DOMString newName);
+
+    [ImplementedAs=JavaScript]
+    static void renameTo(DOMString newName);
 
     [ImplementedAs=JavaScript]
     Promise<long> save(optional DOMString fileName);

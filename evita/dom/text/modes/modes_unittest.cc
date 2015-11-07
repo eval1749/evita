@@ -17,7 +17,7 @@ class ModesTest : public AbstractDomTest {
 TEST_F(ModesTest, chooseMode) {
   EXPECT_SCRIPT_VALID(
       "function testIt(mode_name) {"
-      "  var doc = new Document('foo');"
+      "  var doc = Document.new('foo');"
       "  doc.properties.set('mode', mode_name);"
       "  return Mode.chooseMode(doc).name;"
       "}");

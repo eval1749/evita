@@ -25,7 +25,7 @@ void LexersTest::SetUp() {
 
   EXPECT_SCRIPT_VALID(
       "function doColor(fileName, lines) {"
-      "  var doc = new Document(fileName);"
+      "  var doc = Document.new(fileName);"
       "  var range = new Range(doc);"
       "  range.text = lines.join('\\n');"
       "  doc.mode = Mode.chooseModeByFileName(fileName);"

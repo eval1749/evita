@@ -16,7 +16,6 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
 #include "gin/array_buffer.h"
-#include "evita/dom/text/document_set.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
@@ -348,7 +347,6 @@ void ScriptHost::PlatformError(const char* name) {
 }
 
 void ScriptHost::ResetForTesting() {
-  DocumentSet::instance()->ResetForTesting();
   EditorWindow::ResetForTesting();
   Window::ResetForTesting();
 }

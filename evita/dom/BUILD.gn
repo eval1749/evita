@@ -62,7 +62,6 @@ source_set("dom") {
     "script_host.cc",
     "script_thread.cc",
     "text/document.cc",
-    "text/document_set.cc",
     "text/mutation_observer.cc",
     "text/mutation_observer_controller.cc",
     "text/mutation_record.cc",

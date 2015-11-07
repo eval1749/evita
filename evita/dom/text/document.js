@@ -439,6 +439,109 @@
     }
   }
 
+  /** @type {!Map.<string, !Document>} */
+  const documentNameMap = new Map();
+
+  /** @type {!Set.<!DocumentObserverCallback>} */
+  const documentObservers = new Set();
+
+  /** @param {!DocumentObserverCallback} callback */
+  function addObserver(callback) {
+    documentObservers.add(callback);
+  }
+
+  /**
+   * @param {string} name
+   * @return {Document}
+   */
+  function findDocument(name) {
+    return documentNameMap.get(name) || null;
+  }
+
+  /**
+   * @return {!Array.<!Document>}
+   */
+  function listDocument() {
+    // TODO(eval1749): Once closure compiler support spreading, we should write
+    // |return [... documentNameMap.values()];|
+    const result = [];
+    for (let document of documentNameMap.values())
+      result.push(document);
+    return result;
+  }
+
+  /**
+   * @param {string} candidate
+   * @return {string}
+   */
+  function makeUniqueName(candidate) {
+    let uniqueName = candidate;
+    const lastDot = candidate.lastIndexOf('.');
+    const head = lastDot > 0 ? candidate.substr(0, lastDot) : candidate;
+    const tail = lastDot > 0 ? candidate.substr(lastDot) : '';
+    let body = '';
+    let count = 1;
+    for (;;) {
+      const uniqueName = head + body + tail;
+      if (!findDocument(uniqueName))
+        return uniqueName;
+      ++count;
+      body = ` (${count})`
+    }
+  }
+
+  /**
+   * @param {string} name
+   * @return {!Document}
+   */
+  function newDocument(name) {
+    const document = new Document();
+    document.name_ = makeUniqueName(name);
+    documentNameMap.set(document.name, document);
+    for (let observer of documentObservers)
+      observer.call(Document, 'add', document);
+    return document;
+  }
+
+  /** @param {!Document} document */
+  function removeDocument(document) {
+    if (!documentNameMap.has(document.name))
+      throw new Error(`${document.name} isn't in list`);
+    documentNameMap.delete(document.name);
+    for (let observer of documentObservers)
+      observer.call(Document, 'remove', document);
+  }
+
+  /** @param {!DocumentObserverCallback} callback */
+  function removeObserver(callback) {
+    documentObservers.delete(callback);
+  }
+
+  /**
+   * @this {!Document}
+   * @param {string} newName
+   */
+  function renameTo(newName) {
+    documentNameMap.delete(this.name);
+    this.name_ = makeUniqueName(newName);
+    documentNameMap.set(this.name_, this);
+  }
+
+  function resetForTesting() {
+    documentNameMap.clear();
+    documentObservers.clear();
+  }
+
+  Object.defineProperties(Document, {
+    addObserver: {value: addObserver},
+    find: {value: findDocument},
+    list: {get: () => listDocument()},
+    new: {value: newDocument},
+    remove: {value: removeDocument},
+    removeObserver: {value: removeObserver},
+    resetForTesting: {value: resetForTesting},
+  });
+
   Object.defineProperties(Document.prototype, {
     fileName: {value: '', writable: true},
     keymap: {
@@ -461,6 +564,8 @@
       }
     },
     mode_: {value: null, writable: true},
+    name_: {value: '', writable: true},
+    name: {get: function() { return this.name_; }},
     newline: {value: 0, writable: true},
     properties: {
       get: /** @return {!Map} */ function() {
@@ -480,6 +585,7 @@
     doColor_: {value: doColor_},
     lines: {get: lines},
     listWindows: {value: listWindows},
+    renameTo: {value: renameTo},
     undoGroup: {value: undoGroup}
   });
 })();

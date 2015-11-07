@@ -16,7 +16,7 @@ class RegExpTest : public AbstractDomTest {
 
 TEST_F(RegExpTest, execOnDocument_) {
   EXPECT_SCRIPT_VALID(
-      "var doc = new Document('foo');"
+      "var doc = Document.new('foo');"
       "var range = new Range(doc);"
       "range.text = 'foo bar baz';"
       "function exec(source, match_exact) {"

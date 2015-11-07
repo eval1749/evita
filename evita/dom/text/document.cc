@@ -10,7 +10,6 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "evita/css/style_selector.h"
-#include "evita/dom/text/document_set.h"
 #include "evita/dom/text/regular_expression.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
@@ -24,37 +23,13 @@
 
 namespace dom {
 
-std::vector<Document*> Document::list() {
-  return DocumentSet::instance()->list();
-}
-
-void Document::AddObserver(v8::Handle<v8::Function> function) {
-  DocumentSet::instance()->AddObserver(function);
-}
-
-Document* Document::Find(const base::string16& name) {
-  return DocumentSet::instance()->Find(name);
-}
-
-void Document::RemoveDocument(Document* document) {
-  DocumentSet::instance()->Unregister(document);
-}
-
-void Document::RemoveObserver(v8::Handle<v8::Function> function) {
-  DocumentSet::instance()->RemoveObserver(function);
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // Document
 //
-Document::Document(const base::string16& name)
-    : buffer_(new text::Buffer()),
-      name_(DocumentSet::instance()->MakeUniqueName(name)) {}
+Document::Document() : buffer_(new text::Buffer()) {}
 
-Document::~Document() {
-  DocumentSet::instance()->Unregister(this);
-}
+Document::~Document() {}
 
 base::char16 Document::charCodeAt(text::Posn position) const {
   if (position >= 0 && position < length())
@@ -75,15 +50,6 @@ bool Document::modified() const {
 
 void Document::set_modified(bool new_modified) {
   buffer_->SetModified(new_modified);
-}
-
-const base::string16& Document::name() const {
-  return name_;
-}
-
-void Document::set_name(const base::string16& new_name) {
-  DCHECK_NE(name_, new_name);
-  name_ = new_name;
 }
 
 bool Document::read_only() const {
@@ -152,18 +118,12 @@ v8::Handle<v8::Value> Document::Match(RegularExpression* regexp,
   return regexp->ExecuteOnDocument(this, start, end);
 }
 
-Document* Document::NewDocument(const base::string16& name) {
-  auto const document = new Document(name);
-  DocumentSet::instance()->Register(document);
-  return document;
+Document* Document::NewDocument() {
+  return new Document();
 }
 
 Posn Document::Redo(Posn position) {
   return buffer_->Redo(position);
-}
-
-void Document::RenameTo(const base::string16& new_name) {
-  DocumentSet::instance()->RenameDocument(this, new_name);
 }
 
 base::string16 Document::Slice(int start, int end) {

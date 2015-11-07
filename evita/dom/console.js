@@ -44,7 +44,7 @@ Object.defineProperty(/** @type {!Object} */(global), 'console', (function() {
       let present = Document.find(DOCUMENT_NAME);
       if (present)
         return present;
-      let document = new Document(DOCUMENT_NAME);
+      let document = Document.new(DOCUMENT_NAME);
       document.mode = Mode.chooseModeByFileName('foo.js');
       return document;
     }

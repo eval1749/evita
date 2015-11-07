@@ -117,20 +117,21 @@
    * @param {!Event} event
    * Default event handler.
    */
-  Form.handleEvent = function(event) {
+  function handleEvent(event) {
     switch (event.type) {
       case Event.Names.BLUR:
       case Event.Names.CLICK:
       case Event.Names.DBLCLICK:
+      case Event.Names.HIDE:
       case Event.Names.KEYUP:
       case Event.Names.MOUSEDOWN:
       case Event.Names.MOUSEMOVE:
       case Event.Names.MOUSEUP:
+      case Event.Names.SHOW:
         break;
       case Event.Names.FOCUS:
         if (!this.focusControl)
           moveFocusToNext(this);
-
         break;
       case Event.Names.KEYDOWN:
         if (!event.defaultPrevented)
@@ -140,5 +141,9 @@
         console.log('Form.handleEvent', event);
         break;
     }
-  };
+  }
+
+  Object.defineProperties(Form, {
+    handleEvent: {value: handleEvent},
+  });
 })();

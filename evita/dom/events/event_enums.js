@@ -18,6 +18,7 @@ Event.Names = {
   DETACH: 'detach', // DocumentEvent
   DROPWINDOW: 'dropwindow',
   FOCUS: 'focus',
+  HIDE: 'hide',
   INPUT: 'input',
   KEYDOWN: 'keydown',
   KEYUP: 'keyup',
@@ -30,6 +31,7 @@ Event.Names = {
   QUERYCLOSE: 'queryclose',
   SAVE: 'save',
   SELECTIONCHANGE: 'selectionchange',
+  SHOW: 'show',
   WHEEL: 'wheel'
 };
 

@@ -11,6 +11,10 @@
 #include "base/time/time.h"
 #include "evita/dom/scheduler.h"
 
+namespace base {
+class MessageLoop;
+}
+
 namespace dom {
 
 class IdleTask;
@@ -22,10 +26,15 @@ class SchedulerImpl final : public Scheduler {
   ~SchedulerImpl() final;
 
   void RunIdleTasks();
+  void Start(base::MessageLoop* script_message_loop);
 
  private:
   class IdleTaskQueue;
+  enum class State;
   class TaskQueue;
+
+  void ProcessTasks();
+  void StartFrame(const base::Time& deadline);
 
   // dom::Scheduler
   void CancelIdleTask(int task_id) final;
@@ -39,6 +48,9 @@ class SchedulerImpl final : public Scheduler {
   std::unique_ptr<IdleTaskQueue> idle_task_queue_;
   std::unique_ptr<TaskQueue> normal_task_queue_;
   SchedulerClient* const scheduler_client_;
+  base::MessageLoop* script_message_loop_;
+  State state_;
+  base::MessageLoop* const view_message_loop_;
 
   DISALLOW_COPY_AND_ASSIGN(SchedulerImpl);
 };

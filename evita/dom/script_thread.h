@@ -26,6 +26,7 @@ class IoDelegate;
 namespace dom {
 
 class Scheduler;
+class SchedulerImpl;
 
 class ScriptThread final : public domapi::ViewEventHandler,
                            public SchedulerClient {
@@ -36,10 +37,10 @@ class ScriptThread final : public domapi::ViewEventHandler,
   void Start();
 
  private:
+  Scheduler* scheduler() const;
   domapi::ViewEventHandler* view_event_handler() const;
 
   void ScheduleScriptTask(const base::Closure& task);
-  void StartScriptIfNeeded(const base::Time& deadline);
 
   // domapi::ViewEventHandler
   void DidBeginFrame(const base::Time& deadline);
@@ -72,8 +73,7 @@ class ScriptThread final : public domapi::ViewEventHandler,
   void DidUpdateDom() final;
 
   domapi::IoDelegate* const io_delegate_;
-  const std::unique_ptr<Scheduler> scheduler_;
-  bool script_is_running_;
+  const std::unique_ptr<SchedulerImpl> scheduler_;
   const std::unique_ptr<base::Thread> thread_;
   ViewDelegate* const view_delegate_;
 

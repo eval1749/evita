@@ -7,6 +7,7 @@
 
 #include "evita/dom/scheduler_impl.h"
 
+#include "base/message_loop/message_loop.h"
 #include "base/synchronization/lock.h"
 #include "base/trace_event/trace_event.h"
 #include "common/maybe.h"
@@ -17,24 +18,6 @@
 #include "evita/dom/timing/idle_task.h"
 
 namespace dom {
-
-namespace {
-
-// To make sure we call |SchedulerClient::DidUpdateDom()| after running scripts.
-class DomUpdateScope {
- public:
-  DomUpdateScope(SchedulerClient* scheduler_client, const base::Time& deadline)
-      : deadline_(deadline), scheduler_client_(scheduler_client) {}
-
-  ~DomUpdateScope() { scheduler_client_->DidUpdateDom(); }
-
- private:
-  const base::Time deadline_;
-  SchedulerClient* const scheduler_client_;
-
-  DISALLOW_COPY_AND_ASSIGN(DomUpdateScope);
-};
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -174,16 +157,66 @@ common::Maybe<base::Closure> SchedulerImpl::TaskQueue::TakeTask() {
   return task;
 }
 
+enum class SchedulerImpl::State {
+  Initialized,
+  Running,
+  Sleep,
+};
+
 //////////////////////////////////////////////////////////////////////
 //
 // SchedulerImpl
 //
+#define ASSERT_ON_VIEW_THREAD() \
+  DCHECK_EQ(view_message_loop_, base::MessageLoop::current())
+
+#define ASSERT_ON_SCRIPT_THREAD() \
+  DCHECK_EQ(script_message_loop_, base::MessageLoop::current())
+
 SchedulerImpl::SchedulerImpl(SchedulerClient* scheduler_client)
     : idle_task_queue_(new IdleTaskQueue()),
       normal_task_queue_(new TaskQueue()),
-      scheduler_client_(scheduler_client) {}
+      scheduler_client_(scheduler_client),
+      script_message_loop_(nullptr),
+      state_(State::Initialized),
+      view_message_loop_(base::MessageLoop::current()) {}
 
 SchedulerImpl::~SchedulerImpl() {}
+
+void SchedulerImpl::ProcessTasks() {
+  ASSERT_ON_SCRIPT_THREAD();
+  state_ = State::Running;
+  for (;;) {
+    auto maybe_task = normal_task_queue_->TakeTask();
+    if (maybe_task.IsNothing()) {
+      ScriptHost::instance()->RunMicrotasks();
+      if (normal_task_queue_->empty())
+        break;
+      continue;
+    }
+    maybe_task.FromJust().Run();
+  }
+  state_ = State::Sleep;
+}
+
+void SchedulerImpl::Start(base::MessageLoop* script_message_loop) {
+  ASSERT_ON_VIEW_THREAD();
+  DCHECK_NE(view_message_loop_, script_message_loop);
+  DCHECK(!script_message_loop_);
+  script_message_loop_ = script_message_loop;
+}
+
+void SchedulerImpl::StartFrame(const base::Time& deadline) {
+  ASSERT_ON_SCRIPT_THREAD();
+  TRACE_EVENT0("script", "SchedulerImpl::StartFrame");
+  ProcessTasks();
+  if (base::Time::Now() < deadline) {
+    idle_task_queue_->DidEnterViewIdle(deadline);
+    RunIdleTasks();
+    idle_task_queue_->DidExitViewIdle();
+  }
+  scheduler_client_->DidUpdateDom();
+}
 
 // dom::Scheduler
 void SchedulerImpl::CancelIdleTask(int task_id) {
@@ -191,24 +224,18 @@ void SchedulerImpl::CancelIdleTask(int task_id) {
 }
 
 void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
-  TRACE_EVENT0("script", "SchedulerImpl::DidBeginFrame");
-  DomUpdateScope scope(scheduler_client_, deadline);
-
-  for (;;) {
-    auto maybe_task = normal_task_queue_->TakeTask();
-    if (maybe_task.IsNothing())
-      break;
-    maybe_task.FromJust().Run();
-  }
-
-  ScriptHost::instance()->RunMicrotasks();
-  idle_task_queue_->DidEnterViewIdle(deadline);
-  RunIdleTasks();
-  idle_task_queue_->DidExitViewIdle();
+  ASSERT_ON_VIEW_THREAD();
+  script_message_loop_->task_runner()->PostTask(
+      FROM_HERE,
+      base::Bind(&SchedulerImpl::StartFrame, base::Unretained(this), deadline));
 }
 
 void SchedulerImpl::DidEnterViewIdle(const base::Time& deadline) {
+  ASSERT_ON_VIEW_THREAD();
+  DCHECK(script_message_loop_->task_runner());
   idle_task_queue_->DidEnterViewIdle(deadline);
+  script_message_loop_->task_runner()->PostTask(
+      FROM_HERE, base::Bind(&Scheduler::RunIdleTasks, base::Unretained(this)));
 }
 
 void SchedulerImpl::DidExitViewIdle() {
@@ -231,8 +258,14 @@ int SchedulerImpl::ScheduleIdleTask(const IdleTask& task) {
 
 void SchedulerImpl::ScheduleTask(const base::Closure& task) {
   TRACE_EVENT0("script", "SchedulerImpl::ScheduleTask");
+  DCHECK(script_message_loop_->task_runner());
   normal_task_queue_->GiveTask(task);
   idle_task_queue_->StopIdleTasks();
+  if (state_ == State::Running)
+    return;
+  script_message_loop_->task_runner()->PostTask(
+      FROM_HERE,
+      base::Bind(&SchedulerImpl::ProcessTasks, base::Unretained(this)));
 }
 
 }  // namespace dom

@@ -9,6 +9,7 @@
 #include "base/bind.h"
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
+#include "base/trace_event/trace_event.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/script_host.h"
 
@@ -61,6 +62,7 @@ PromiseResolver::~PromiseResolver() {
 }
 
 void PromiseResolver::DoReject(v8::Handle<v8::Value> value) {
+  TRACE_EVENT0("script", "PromiseResolver::DoReject");
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));
   CHECK(runner_);
   auto const isolate = runner_->isolate();
@@ -70,6 +72,7 @@ void PromiseResolver::DoReject(v8::Handle<v8::Value> value) {
 }
 
 void PromiseResolver::DoResolve(v8::Handle<v8::Value> value) {
+  TRACE_EVENT0("script", "PromiseResolver::DoResolve");
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));
   CHECK(runner_);
   auto const isolate = runner_->isolate();

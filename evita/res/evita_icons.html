@@ -1,17 +1,39 @@
-<canvas width="32" height="32">
-</canvas>
-<br>
-<iframe></iframe>
+<div id="canvasList"></div>
+<iframe width="256" height="256"></iframe>
 <script>
-var canvas = document.querySelector('canvas');
-var context = canvas.getContext('2d');
-context.beginPath();
-context.arc(15, 15, 15, 0, Math.PI * 2);
-context.fill();
-context.font = '11px Tahoma';
-context.fillStyle = '#00CCFF';
-context.fillText('Ev', 5, 22);
+const list = [
+  {size: 256, r: 127, fontSize: '100px', fontX: 100, fontY: 220},
+  {size: 48, r: 23, fontSize: '20px', fontX: 16, fontY: 35},
+  {size: 32, r: 15, fontSize: '12px', fontX: 8, fontY: 23},
+  {size: 16, r: 7, fontSize: '3px', fontX: 2, fontY: 6},
+];
 
-var iframe = document.querySelector('iframe');
-iframe.src = canvas.toDataURL('image/png');
+function paint(canvas, r, fontSize, fontX, fontY) {
+  const context = canvas.getContext('2d');
+  context.beginPath();
+  context.arc(r, r, r, 0, Math.PI * 2);
+  context.fill();
+  context.font = `bold ${fontSize} Tahoma`;
+  context.fillStyle = '#00CCFF';
+  context.fillText('Ev', fontX, fontY);
+}
+
+const canvasList = document.querySelector('#canvasList');
+list.forEach((data) => {
+  const canvas = document.createElement('canvas');
+  canvas.id = `canvas${data.size}`;
+  canvas.width = data.size;
+  canvas.height = data.size;
+  canvasList.appendChild(canvas);
+  //canvasList.appendChild(document.createElement('br'));
+  paint(canvas, data.r, data.fontSize, data.fontX, data.fontY);
+});
+
+// var iframe = document.querySelector('iframe');
+// iframe.src = canvas.toDataURL('image/png');
 </script>
+
+<svg width="256" height="256">
+  <circle cx="128" cy="128" r="128" fill="black" />
+  <text x="100" y="220" fill="#00CCFF" style="font-family: Tahoma; font-size: 100px; font-weight: bold">Ev</text>
+</svg>

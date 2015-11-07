@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-function debug(...params) {
-}
-
 (function() {
   /**
    * @enum {number}
@@ -65,39 +62,6 @@ function debug(...params) {
 
   //////////////////////////////////////////////////////////////////////
   //
-  // HotScehduler
-  //
-  class HotScehduler {
-    constructor() {
-      this.task_ = null;
-
-      /** @const @type {!OneShotTimer} */
-      this.timer_ = new OneShotTimer();
-    }
-
-    didFireTimer() {
-      if (!this.task_)
-        return;
-      this.task_.run();
-    }
-
-    remove(task) {
-      if (this.task_ !== task)
-        return;
-      this.task_ = null;
-    }
-
-    schedule(task) {
-      this.task_ = task;
-      if (this.timer_.isRunning)
-        return;
-      this.timer_.start(kHotScanIntervalMs, this.didFireTimer, this);
-    }
-  }
-  const hotScheduler = new HotScehduler();
-
-  //////////////////////////////////////////////////////////////////////
-  //
   // Controller
   //
   class Controller {
@@ -140,7 +104,6 @@ function debug(...params) {
      * @return {!Promise.<?>}
      */
     requestCheckSpelling(word) {
-      debug('requestCheckSpelling', word);
       ++this.numberOfRequests_;
       return Editor.checkSpelling(word).then((isCorrect) => {
         --this.numberOfRequests_;
@@ -166,23 +129,20 @@ function debug(...params) {
      * @param {number} life
      */
     constructor(range, start, end, life) {
-      /** @const @type {!Document} */
+      /** @private @const @type {!Document} */
       this.document_ = range.document;
 
-      /** @type {number} */
+      /** @private @type {number} */
       this.end_ = end;
 
-      /** @type {number} */
+      /** @private @type {number} */
       this.life_ = life;
 
-      /** @type {number} */
+      /** @private @type {number} */
       this.offset_ = start;
 
-      /** @type {!Range} */
+      /** @private @type {!Range} */
       this.range_ = range;
-
-      /** @type {number} */
-      this.start_ = start;
     }
 
     /** @return {boolean} */
@@ -193,6 +153,9 @@ function debug(...params) {
 
     /** @return {number} */
     charCode() { return this.document_.charCodeAt_(this.offset_); }
+
+    /** @return {!Document} */
+    get document() { return this.document_; }
 
     /** @return {number} */
     get end() { return this.end_; }
@@ -290,17 +253,16 @@ function debug(...params) {
       if (this.document_.syntaxAt(wordStart) === 'keyword')
         return '';
 
-      /** @const @type {!Range} */
-      const range = this.range_;
-      range.collapseTo(wordStart);
-      range.end = wordEnd;
-
       /** @type {string} */
-      const word = range.text;
+      const word = this.document_.slice(wordStart, wordEnd);
 
       /** @type {Spelling} */
       const spelling = controller.checkSpelling(word);
       if (spelling !== Spelling.NONE) {
+        /** @const @type {!Range} */
+        const range = this.range_;
+        range.collapseTo(wordStart);
+        range.end = wordEnd;
         range.setSpelling(spelling);
         return '';
       }
@@ -308,14 +270,30 @@ function debug(...params) {
     }
 
     /**
-     * @param {number} newOffset
-     * @param {number} newEnd
+     * @protected
      * @param {number} newLife
      */
-    reset(newOffset, newEnd, newLife) {
-      this.offset_ = Math.min(this.offset_, newOffset);
-      this.end_ = newEnd;
+    resetLife(newLife) {
       this.life_ = newLife;
+    }
+
+    /**
+     * @param {number} newStart
+     * @param {number} newEnd
+     */
+    resetOffset(newStart, newEnd) {
+      this.offset_ = newStart;
+      this.end_ = newEnd;
+    }
+
+    /**
+     * @param {number} newOffset
+     * @param {number} newEnd
+     */
+    updateOffset(newOffset, newEnd) {
+      console.assert(newOffset <= newEnd);
+      this.offset_ = Math.min(newOffset, this.offset_);
+      this.end_ = newEnd;
     }
   }
 
@@ -386,7 +364,7 @@ function debug(...params) {
     schedule() {
       if (this.offset_ >= this.end_)
         return;
-      this.life_ = kMaxColdScanCount;
+      this.resetLife(kMaxColdScanCount);
       taskScheduler.schedule(this);
     }
   }
@@ -409,6 +387,7 @@ function debug(...params) {
     }
 
     /**
+     * @private
      * @param {number} wordStart
      * @param {number} wordEnd
      * @return {boolean}
@@ -426,24 +405,41 @@ function debug(...params) {
       controller.requestCheckSpelling(word).then(() => {
         this.checked_ = wordEnd;
       });
-      return true;
+      return false;
+    }
+
+    /**
+     * @param {number} hotStart
+     */
+    didChangeDocument(hotStart) {
+      this.updateOffset(hotStart, hotStart);
+      this.run();
+    }
+
+    /*
+     * Scan and paint on whole document.
+     */
+    didLoadDocument() {
+      this.resetOffset(0, this.document.length);
+      taskScheduler.schedule(this);
     }
 
     run() {
-      debug('taskScheduler.run', this.offset_, this.end_);
+      this.resetLife(kMaxColdScanCount);
       for (let wordRange of this.words()) {
         if (!this.checkWord(wordRange.start, wordRange.end))
           break;
       }
-      this.painter_.reset(this.checked_, this.checked_, this.life);
+      this.painter_.resetOffset(this.offset, this.checked_);
+      this.resetLife(this.life);
       this.painter_.run();
       this.schedule();
     }
 
+    /** @private */
     schedule() {
       if (this.offset_ >= this.end_)
         return;
-      this.life_ = kMaxColdScanCount;
       taskScheduler.schedule(this);
     }
   }
@@ -460,6 +456,9 @@ function debug(...params) {
       /** @type {TextSelection} */
       this.activeSelection_ = null;
 
+      /** @type {boolean} */
+      this.caretIsHot_ = false;
+
       /**
        * @const
        * @type {!Array.<!Range>}
@@ -475,12 +474,13 @@ function debug(...params) {
      * @return {number} A active caret offset
      */
     activeCaretOffset() {
-      if (!this.activeSelection_)
+      if (!this.caretIsHot_ || !this.activeSelection_)
         return -1;
       return this.activeSelection_.focusOffset;
     }
 
     /**
+     * @private
      * @param {number} wordStart
      * @param {number} wordEnd
      * @return {boolean}
@@ -498,7 +498,7 @@ function debug(...params) {
       markerRange.collapseTo(wordStart);
       markerRange.end = wordEnd;
       controller.requestCheckSpelling(word).then((isCorrect) => {
-        this.schedule();
+        this.schedule(0);
         this.freeRanges_.push(markerRange);
         if (word !== markerRange.text)
           return;
@@ -510,6 +510,16 @@ function debug(...params) {
 
     didBlurWindow() {
       this.activeSelection_ = null;
+      this.caretIsHot_ = false;
+    }
+
+    /**
+     * @param {number} hotStart
+     */
+    didChangeDocument(hotStart) {
+      this.updateOffset(hotStart, this.document.length);
+      this.caretIsHot_ = true;
+      taskScheduler.schedule(this);
     }
 
     didFocusWindow() {
@@ -519,33 +529,61 @@ function debug(...params) {
         return;
       }
       this.activeSelection_ = null;
+      this.caretIsHot_ = false;
+    }
+
+    didLoadDocument() {
+      this.resetOffset(this.document.length, this.document.length);
+      this.caretIsHot_ = false;
     }
 
     run() {
+      this.resetLife(kMaxHotScanCount);
+      if (this.caretIsHot_)
+        return this.runWithHotCaret();
+      this.runWithColdCaret();
+    }
+
+    /** @private */
+    runWithColdCaret() {
+      for (let wordRange of this.words()) {
+        if (!this.checkWord(wordRange.start, wordRange.end)) {
+          this.offset_ = wordRange.start;
+          break;
+        }
+      }
+      this.schedule(0);
+    }
+
+    /** @private */
+    runWithHotCaret() {
       /** @type {number} */
       const caretOffset = this.activeCaretOffset();
-
-      debug('hotScanner.run', this.offset_, this.end_, this.life_);
-
       for (let wordRange of this.words()) {
         if (caretOffset >= wordRange.start && caretOffset <= wordRange.end) {
           // Since candidate word contains caret, we consider this word is still
           // changing.
-          debug('hot word', wordRange.start, wordRange.end,
-                      this.range_.text);
+          this.offset_ = wordRange.start;
+          this.caretIsHot_ = false;
+          this.schedule(1000);
+          return;
+        }
+        if (!this.checkWord(wordRange.start, wordRange.end)) {
           this.offset_ = wordRange.start;
           break;
         }
-        if (!this.checkWord(wordRange.start, wordRange.end))
-          break;
       }
+      this.schedule(0);
     }
 
-    schedule() {
+    /**
+     * @private
+     * @param {number} delay A time in milliseconds to next scan.
+     */
+    schedule(delay) {
       if (this.offset_ >= this.end_)
         return;
-      this.life_ = kMaxHotScanCount;
-      hotScheduler.schedule(this);
+      taskScheduler.schedule(this, delay);
     }
   }
 
@@ -603,29 +641,19 @@ function debug(...params) {
 
       // Ignore document mutation during loading contents.
       document.addEventListener(Event.Names.BEFORELOAD,
-                                this.beforeLoad.bind(this));
+                                this.willLoadDocument.bind(this));
 
       // Restart spell checking from start of document after loading.
-      document.addEventListener(Event.Names.LOAD, this.didLoad.bind(this));
+      document.addEventListener(Event.Names.LOAD,
+                                this.didLoadDocument.bind(this));
 
-      this.mutationObserver_.observe(document, {summary: true});
-      this.restartColdScanner();
-    }
-
-    /**
-     * @private
-     */
-    beforeLoad() {
-      debug('beforeLoad', this.document_);
-      this.mutationObserver_.disconnect();
-      taskScheduler.remove(this.coldScanner_);
-      hotScheduler.remove(this.hotScanner_);
+      this.didLoadDocument();
     }
 
     // Cleanup resources used by spell checker.
     destroy() {
       taskScheduler.remove(this.coldScanner_);
-      hotScheduler.remove(this.hotScanner_);
+      taskScheduler.remove(this.hotScanner_);
     }
 
     /**
@@ -638,8 +666,6 @@ function debug(...params) {
           this.didBlurWindow.bind(this));
       window.addEventListener(Event.Names.FOCUS,
           this.didFocusWindow.bind(this));
-      window.addEventListener(Event.Names.SELECTIONCHANGE,
-          this.didChangeSelection.bind(this));
       this.hotScanner_.didFocusWindow();
     }
 
@@ -652,11 +678,6 @@ function debug(...params) {
       this.hotScanner_.didBlurWindow();
     }
 
-    /** @private */
-    didChangeSelection() {
-      this.hotScanner_.schedule();
-    }
-
     /**
      * @private
      * Spell checking is started when window is focused.
@@ -667,10 +688,12 @@ function debug(...params) {
 
     /**
      * @private
+     * We do cold spell checking after load document.
      */
-    didLoad() {
+    didLoadDocument() {
       this.mutationObserver_.observe(this.document_, {summary: true});
-      this.restartColdScanner();
+      this.coldScanner_.didLoadDocument();
+      this.hotScanner_.didLoadDocument();
     }
 
     /**
@@ -686,15 +709,18 @@ function debug(...params) {
       const minOffset = mutations.reduce((previousValue, mutation) => {
         return Math.min(previousValue, mutation.offset);
       }, document.length);
-      this.coldScanner_.reset(minOffset, minOffset, kMaxColdScanCount);
-      this.hotScanner_.reset(minOffset, document.length, kMaxHotScanCount);
-      this.hotScanner_.run();
+      this.coldScanner_.didChangeDocument(minOffset);
+      this.hotScanner_.didChangeDocument(minOffset);
     }
 
-    /** @private */
-    restartColdScanner() {
-      this.coldScanner_.reset(0, this.document_.length, kMaxColdScanCount);
-      taskScheduler.schedule(this.coldScanner_);
+    /**
+     * @private
+     * We don't do spell checking during load document.
+     */
+    willLoadDocument() {
+      this.mutationObserver_.disconnect();
+      taskScheduler.remove(this.coldScanner_);
+      taskScheduler.remove(this.hotScanner_);
     }
   }
 

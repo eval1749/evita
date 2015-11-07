@@ -66,7 +66,7 @@ global.JavaScriptLexer = (function(options) {
       // E6 context keywords
       'let',
       'module',
-      'on', // for (var on iterable)
+      'of', // 'for' '(' ForDeclaration 'of' AssignmentExpression ')'
 
       // Standard build-int objects
       // Value properties

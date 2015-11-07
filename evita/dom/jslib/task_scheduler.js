@@ -12,14 +12,19 @@
   //
   class TaskScheduler {
     constructor() {
+      /** @const @type {!function()} */
+      this.idleCallback_ = this.runTask.bind(this);
+
+      /** @type {boolean} */
+      this.isWaiting_ = false;
+
       /** @const @type {!Set.<Runnable>} */
       this.tasks_ = new Set();
-
-      /** @const @type {!OneShotTimer} */
-      this.timer_ = new OneShotTimer();
     }
 
-    didFireTimer() {
+    /** @private */
+    runTask() {
+      this.isWaiting_ = false;
       if (this.tasks_.size === 0)
         return;
       const task = this.tasks_.values().next().value;
@@ -27,7 +32,7 @@
         return;
       this.remove(task);
       task.run();
-      this.startTimerIfNeeded();
+      this.wait();
     }
 
     /** @param {Runnable} task */
@@ -38,14 +43,15 @@
     /** @param {Runnable} task */
     schedule(task) {
       this.tasks_.add(task);
-      this.startTimerIfNeeded();
+      this.wait();
     }
 
     /** @private */
-    startTimerIfNeeded() {
-      if (this.tasks_.size === 0 || this.timer_.isRunning)
+    wait() {
+      if (this.isWaiting_ || this.tasks_.size === 0)
         return;
-      this.timer_.start(kIntervalMs, this.didFireTimer, this);
+      this.isWaiting_ = true;
+      Editor.requestIdleCallback(this.idleCallback_);
     }
   }
 

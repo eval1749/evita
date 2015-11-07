@@ -8,5 +8,5 @@
 ]
 interface TaskScheduler {
   void remove(Runnable runnable);
-  void schedule(Runnable runnable);
+  void schedule(Runnable runnable, optional long delay);
 };

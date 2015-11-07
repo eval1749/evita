@@ -32,7 +32,7 @@
         return;
       this.remove(task);
       task.run();
-      this.wait();
+      this.wait(0);
     }
 
     /** @param {Runnable} task */
@@ -40,18 +40,25 @@
       this.tasks_.delete(task);
     }
 
-    /** @param {Runnable} task */
-    schedule(task) {
+    /**
+     * @param {Runnable} task
+     * @param {number=} opt_delay
+     */
+    schedule(task, opt_delay) {
+      const delay = opt_delay ? /** @type {number} */(opt_delay) : 0;
       this.tasks_.add(task);
-      this.wait();
+      this.wait(delay);
     }
 
-    /** @private */
-    wait() {
+    /**
+     * @private
+     * @param {number} delay
+     */
+    wait(delay) {
       if (this.isWaiting_ || this.tasks_.size === 0)
         return;
       this.isWaiting_ = true;
-      Editor.requestIdleCallback(this.idleCallback_);
+      Editor.requestIdleCallback(this.idleCallback_, {timeout: delay});
     }
   }
 

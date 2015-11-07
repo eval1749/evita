@@ -105,13 +105,12 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
   api_event.shift_key = event.shift_key();
   api_event.target_id = event_target_id_;
   view_event_handler()->DispatchKeyboardEvent(api_event);
-  TRACE_EVENT_ASYNC_END2("input", "KeyEvent", event.id(),
-                         "type", static_cast<int>(event.event_type()),
-                         "key_code", event.raw_key_code());
+  TRACE_EVENT_ASYNC_END2("input", "KeyEvent", event.id(), "type",
+                         static_cast<int>(event.event_type()), "key_code",
+                         event.raw_key_code());
 }
 
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
-  TRACE_EVENT0("views", "EventSource::DispatchMouseEvent");
 #define MUST_EQUAL(name)                                       \
   static_assert(static_cast<int>(domapi::MouseButton::name) == \
                     static_cast<int>(ui::MouseButton::name),   \

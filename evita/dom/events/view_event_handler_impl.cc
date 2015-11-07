@@ -211,17 +211,19 @@ void ViewEventHandlerImpl::DispatchKeyboardEvent(
   if (!window)
     return;
   DispatchEventWithInLock(window, new KeyboardEvent(api_event));
-  TRACE_EVENT_ASYNC_END2("input", "KeyEvent", api_event.event_id,
-                         "type", static_cast<int>(api_event.event_type),
-                         "key_code", api_event.key_code);
+  TRACE_EVENT_ASYNC_END2("input", "KeyEvent", api_event.event_id, "type",
+                         static_cast<int>(api_event.event_type), "key_code",
+                         api_event.key_code);
 }
 
 void ViewEventHandlerImpl::DispatchMouseEvent(
     const domapi::MouseEvent& api_event) {
+  TRACE_EVENT_WITH_FLOW0("input", "ViewEventHandlerImpl::DispatchMouseEvent",
+                         api_event.event_id, TRACE_EVENT_FLAG_FLOW_IN);
   auto const window = FromEventTargetId(api_event.target_id);
-  if (!window)
-    return;
-  DispatchEventWithInLock(window, new MouseEvent(api_event));
+  if (window)
+    DispatchEventWithInLock(window, new MouseEvent(api_event));
+  TRACE_EVENT_ASYNC_END0("input", "MouseEvent", api_event.event_id);
 }
 
 void ViewEventHandlerImpl::DispatchTextCompositionEvent(

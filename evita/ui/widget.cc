@@ -283,9 +283,9 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
     auto const key_code = event.raw_key_code();
     if (key_code < 0x20)
       return 0;
-    TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(),
-                             "type", static_cast<int>(event.event_type()),
-                             "key_code", event.raw_key_code());
+    TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(), "type",
+                             static_cast<int>(event.event_type()), "key_code",
+                             event.raw_key_code());
     OnEvent(&event);
     return 0;
   }
@@ -294,9 +294,9 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
                  KeyEvent::ConvertToKeyCode(wParam),
                  KeyEvent::ConvertToRepeat(lParam));
 
-  TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(),
-                           "type", static_cast<int>(event.event_type()),
-                           "key_code", event.raw_key_code());
+  TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(), "type",
+                           static_cast<int>(event.event_type()), "key_code",
+                           event.raw_key_code());
 
   if (message == WM_KEYDOWN && event.key_code() <= 0x7E && !event.alt_key() &&
       !event.control_key()) {
@@ -311,6 +311,14 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
   return OnMessage(message, wParam, lParam);
 }
 
+static bool DispatchMouseEvent(Widget* widget, MouseEvent* event) {
+  TRACE_EVENT_ASYNC_BEGIN1("input", "MouseEvent", event->id(), "type",
+                           static_cast<int>(event->event_type()));
+  TRACE_EVENT_WITH_FLOW0("input", "DispatchMouseEvent", event->id(),
+                         TRACE_EVENT_FLAG_FLOW_OUT);
+  return widget->DispatchEvent(event);
+}
+
 bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
   auto const client_point = GetClientPointFromNativeEvent(native_event);
   auto const screen_point = GetScreenPointFromNativeEvent(native_event);
@@ -321,10 +329,12 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
     auto const result = HitTestForMouseEventTarget(client_point);
     if (!result)
       return true;
-    TRACE_EVENT0("input", "WM_MOUSEWHEEL");
     MouseWheelEvent event(result.widget(), result.local_point(), screen_point,
                           MouseEvent::ConvertToEventFlags(native_event),
                           GET_WHEEL_DELTA_WPARAM(native_event.wParam));
+    TRACE_EVENT_ASYNC_BEGIN0("input", "WheelEvent", event.id());
+    TRACE_EVENT_WITH_FLOW0("input", "WheelEvent", event.id(),
+                           TRACE_EVENT_FLAG_FLOW_OUT);
     return result.widget()->DispatchEvent(&event);
   }
 
@@ -341,39 +351,34 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       hover_widget = result.widget();
       MouseEvent event(EventType::MouseEntered, MouseButton::None, 0, 0,
                        hover_widget, result.local_point(), screen_point);
-      hover_widget->DispatchEvent(&event);
+      DispatchMouseEvent(hover_widget, &event);
     } else if (hover_widget != result.widget()) {
       MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
                        hover_widget, result.local_point(), screen_point);
-      hover_widget->DispatchEvent(&event);
+      DispatchMouseEvent(hover_widget, &event);
       hover_widget = result.widget();
       if (hover_widget) {
-        TRACE_EVENT0("input", "WM_MOUSEMOVE");
         MouseEvent entered_event(EventType::MouseEntered, MouseButton::None, 0,
                                  0, hover_widget, result.local_point(),
                                  screen_point);
-        hover_widget->DispatchEvent(&entered_event);
+        DispatchMouseEvent(hover_widget, &entered_event);
       }
     }
   }
 
   MouseEvent event(native_event, result.widget(), result.local_point(),
                    screen_point);
-  if (event.event_type() == EventType::MouseMoved) {
-    TRACE_EVENT0("input", "EventType::MouseMoved");
-    return result.widget()->DispatchEvent(&event);
-  }
+  if (event.event_type() == EventType::MouseMoved)
+    return DispatchMouseEvent(result.widget(), &event);
 
   if (event.event_type() == EventType::MousePressed) {
-    TRACE_EVENT0("input", "EventType::MousePressed");
     MouseClickTracker::instance()->OnMousePressed(event);
-    return result.widget()->DispatchEvent(&event);
+    return DispatchMouseEvent(result.widget(), &event);
   }
 
   if (event.event_type() == EventType::MouseReleased) {
-    TRACE_EVENT0("input", "EventType::MouseReleased");
     MouseClickTracker::instance()->OnMouseReleased(event);
-    if (!result.widget()->DispatchEvent(&event))
+    if (!DispatchMouseEvent(result.widget(), &event))
       return false;
     auto const click_count = MouseClickTracker::instance()->click_count();
     if (!click_count)
@@ -384,7 +389,7 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
         EventType::MousePressed, MouseEvent::ConvertToButton(native_event),
         MouseEvent::ConvertToEventFlags(native_event), click_count,
         result.widget(), result.local_point(), screen_point);
-    return result.widget()->DispatchEvent(&click_event);
+    return DispatchMouseEvent(result.widget(), &click_event);
   }
 
   return true;

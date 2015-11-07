@@ -5,15 +5,15 @@
 (function() {
   /**
    * @param {!Form} form
-   * @param {?FormControl} control
+   * @param {FormControl} control
    * @return {number}
    */
   function controlIndex(form, control) {
     if (!control)
       return -1;
-    var controls = form.controls;
-    for (var i = 0; i < controls.length; ++i) {
-      if (controls[i] == control)
+    const controls = form.controls;
+    for (let i = 0; i < controls.length; ++i) {
+      if (controls[i] === control)
         return i;
     }
     return -1;
@@ -26,19 +26,22 @@
    * @param {!Form} form
    */
   function moveFocusToNext(form) {
-    var controls = form.controls;
+    /** @type {!Array.<!FormControl>} */
+    const controls = form.controls;
     function findFocusable(start) {
-      for (var i = start + 1; i < controls.length; ++i) {
-        var control = controls[i];
+      for (let i = start + 1; i < controls.length; ++i) {
+        const control = controls[i];
         if (control.canFocus())
           return control;
       }
       return null;
     }
-    var focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
-                       findFocusable(-1);
-    if (focusControl)
-      focusControl.focus();
+    /** @type {FormControl} */
+    const focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
+                         findFocusable(-1);
+    if (!focusControl)
+      return;
+    focusControl.focus();
   }
 
   /**
@@ -48,19 +51,56 @@
    * @param {!Form} form
    */
   function moveFocusToPrevious(form) {
-    var controls = form.controls;
+    /** @type {!Array.<!FormControl>} */
+    const controls = form.controls;
     function findFocusable(start) {
-      for (var i = start - 1; i >= 0; --i) {
-        var control = controls[i];
+      for (let i = start - 1; i >= 0; --i) {
+        const control = controls[i];
         if (control.canFocus())
           return control;
       }
       return null;
     }
-    var focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
-                       findFocusable(controls.length);
-    if (focusControl)
-      focusControl.focus();
+    /** @type {FormControl} */
+    const focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
+                         findFocusable(controls.length);
+    if (!focusControl)
+      return;
+    focusControl.focus();
+  }
+
+  /**
+   * @param {!Form} form
+   * @param {!KeyboardEvent} event
+   *
+   * Set focus to control which have matched access key for controls other
+   * than button, checkbox and radio button:
+   *  * button: dispatch "click" event.
+   *  * checkbox: toggle |checked| property.
+   *  * radio button: toggle |checked| property.
+   */
+  function handleAltKeyDown(form, event) {
+    /** @type {string} */
+    const accessKey = String.fromCharCode(event.keyCode & 0x1FF);
+    /** @type {FormControl} */
+    const control = form.controls.find((control) => {
+      return control.accessKey === accessKey;
+    }) || null;
+    if (!control || control.disabled)
+      return;
+    if (control instanceof ButtonControl) {
+      control.dispatchEvent(new MouseEvent(Event.Names.CLICK));
+      return;
+    }
+    control.focus();
+    if (control instanceof CheckboxControl) {
+      control.checked = !control.checked;
+      return;
+    }
+    if (control instanceof RadioButtonControl) {
+      control.checked = !control.checked;
+      return;
+    }
   }
 
   /**
@@ -70,29 +110,8 @@
   function handleKeyDown(form, event) {
     if (event.ctrlKey)
       return;
-    if (event.altKey) {
-      // Set focus to control which have matched access key for controls other
-      // than button, checkbox and radio button:
-      //  * button: dispatch "click" event.
-      //  * checkbox: toggle |checked| property.
-      //  * radio button: toggle |checked| property.
-      var accessKey = String.fromCharCode(event.keyCode & 0x1FF);
-      var control = form.controls.find(function(control) {
-        return control.accessKey == accessKey;
-      });
-      if (!control || control.disabled)
-        return;
-      if (control instanceof ButtonControl) {
-        control.dispatchEvent(new MouseEvent('click'));
-        return;
-      }
-      control.focus();
-      if (control instanceof CheckboxControl)
-        control.checked = !control.checked;
-      else if (control instanceof RadioButtonControl)
-        control.checked = !control.checked;
-      return;
-    }
+    if (event.altKey)
+      return handleAltKeyDown(form, event);
     // Move focus to next/previous of current focus control.
     switch (event.keyCode & 0x1FF) {
       case 0x109: // TAB

@@ -116,17 +116,19 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
   if (!CheckCallDepth())
     return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);
-  v8::Handle<v8::Value> value;
+  v8::MaybeLocal<v8::Value> maybe_value;
   v8::TryCatch try_catch;
   {
     TRACE_EVENT0("script", "Runner::Call");
-    value = callee->ToObject()->CallAsFunction(
-        receiver, static_cast<int>(args.size()),
+    maybe_value = callee->ToObject()->CallAsFunction(
+        context(), receiver, static_cast<int>(args.size()),
         const_cast<v8::Handle<v8::Value>*>(args.data()));
   }
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
-  return value;
+  if (maybe_value.IsEmpty())
+    return v8::Handle<v8::Value>();
+  return maybe_value.ToLocalChecked();
 }
 
 v8::Handle<v8::Value> Runner::CallAsConstructor(v8::Handle<v8::Value> callee,
@@ -135,17 +137,19 @@ v8::Handle<v8::Value> Runner::CallAsConstructor(v8::Handle<v8::Value> callee,
   DCHECK(in_scope_);
 #endif
   delegate_->WillRunScript(this);
-  v8::Handle<v8::Value> value;
+  v8::MaybeLocal<v8::Value> maybe_value;
   v8::TryCatch try_catch;
   {
     TRACE_EVENT0("script", "Runner::CallAsConstructor");
-    value = callee->ToObject()->CallAsConstructor(
-        static_cast<int>(args.size()),
+    maybe_value = callee->ToObject()->CallAsConstructor(
+        context(), static_cast<int>(args.size()),
         const_cast<v8::Handle<v8::Value>*>(args.data()));
   }
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
-  return value;
+  if (maybe_value.IsEmpty())
+    return v8::Handle<v8::Value>();
+  return maybe_value.ToLocalChecked();
 }
 
 bool Runner::CheckCallDepth() {

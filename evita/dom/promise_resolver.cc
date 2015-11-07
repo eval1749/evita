@@ -87,13 +87,4 @@ v8::Local<v8::Promise> PromiseResolver::GetPromise(v8::Isolate* isolate) const {
   return resolver->GetPromise();
 }
 
-void PromiseResolver::ScheduleRunMicrotasks() {
-  CHECK(LivePromiseResolverSet::instance()->IsLive(this));
-  if (type_ != Type::Fast)
-    return;
-  base::MessageLoop::current()->PostTask(
-      FROM_HERE, base::Bind(&ScriptHost::RunMicrotasks,
-                            base::Unretained(ScriptHost::instance())));
-}
-
 }  // namespace dom

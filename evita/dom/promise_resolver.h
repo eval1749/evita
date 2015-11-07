@@ -63,7 +63,6 @@ class PromiseResolver final
 
   void DoReject(v8::Handle<v8::Value> reason);
   void DoResolve(v8::Handle<v8::Value> value);
-  void ScheduleRunMicrotasks();
 
   v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
   base::WeakPtr<v8_glue::Runner> runner_;

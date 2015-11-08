@@ -20,12 +20,14 @@ namespace dom {
 // Lock::AutoLock
 //
 Lock::AutoLock::AutoLock(const Location& location) {
+  TRACE_EVENT_ASYNC_BEGIN2("script", "DomLock", this, "function",
+                           location.function_name(), "type", "AutoLock");
   DVLOG(1) << "Lock dom at " << location;
   Lock::instance()->location_ = location;
   Lock::instance()->locked_by_dom_ = true;
   if (Lock::instance()->lock()->Try())
     return;
-  TRACE_EVENT0("script", "Lock::AutoLock");
+  TRACE_EVENT1("script", "AutoLock Wait", "function", location.function_name());
   Lock::instance()->lock()->Acquire();
 }
 
@@ -33,6 +35,7 @@ Lock::AutoLock::~AutoLock() {
   Lock::instance()->locked_by_dom_ = false;
   Lock::instance()->lock()->Release();
   DVLOG(1) << "Unlock dom at " << Lock::instance()->location_;
+  TRACE_EVENT_ASYNC_END0("script", "DomLock", this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -43,8 +46,14 @@ Lock::AutoTryLock::AutoTryLock(const Location& location)
     : locked_(Lock::instance()->lock()->Try()) {
   DVLOG(1) << "TryLock dom at " << location;
   Lock::instance()->location_ = location;
-  if (locked_)
-    Lock::instance()->locked_by_dom_ = true;
+  if (!locked_) {
+    TRACE_EVENT_INSTANT1("script", "DomTryLock", TRACE_EVENT_SCOPE_THREAD,
+                         "function", location.function_name());
+    return;
+  }
+  TRACE_EVENT_ASYNC_BEGIN2("script", "DomLock", this, "function",
+                           location.function_name(), "type", "AutoTryLock");
+  Lock::instance()->locked_by_dom_ = true;
 }
 
 Lock::AutoTryLock::~AutoTryLock() {
@@ -53,6 +62,7 @@ Lock::AutoTryLock::~AutoTryLock() {
     Lock::instance()->lock()->Release();
   }
   DVLOG(1) << "Unlock dom at " << Lock::instance()->location_;
+  TRACE_EVENT_ASYNC_END0("script", "DomLock", this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -61,6 +71,8 @@ Lock::AutoTryLock::~AutoTryLock() {
 //
 Lock::AutoUnlock::AutoUnlock(const Location& location)
     : base::AutoUnlock(*Lock::instance()->lock()) {
+  TRACE_EVENT_ASYNC_BEGIN2("script", "DomLock", this, "function",
+                           location.function_name(), "type", "AutoUnlock");
   DVLOG(1) << "Unlock dom at " << location;
   Lock::instance()->location_ = location;
   Lock::instance()->locked_by_dom_ = false;
@@ -69,6 +81,7 @@ Lock::AutoUnlock::AutoUnlock(const Location& location)
 Lock::AutoUnlock::~AutoUnlock() {
   DVLOG(1) << "Lock dom at " << Lock::instance()->location_;
   Lock::instance()->locked_by_dom_ = true;
+  TRACE_EVENT_ASYNC_END0("script", "DomLock", this);
 }
 
 //////////////////////////////////////////////////////////////////////

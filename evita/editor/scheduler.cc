@@ -131,11 +131,20 @@ void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   TRACE_EVENT0("scheduler", "Scheduler::RequestAnimationFrame");
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.insert(handler);
-  if (state_ == State::Running || state_ == State::Waiting)
-    return;
-  state_ = State::Waiting;
-  message_loop_->PostTask(
-      FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)));
+  switch (state_) {
+    case State::Idle:
+      script_delegate_->DidExitViewIdle();
+      state_ = State::Sleeping;
+      ScheduleNextFrame();
+      return;
+    case State::Running:
+    case State::Waiting:
+      return;
+    case State::Sleeping:
+      ScheduleNextFrame();
+      return;
+  }
+  NOTREACHED();
 }
 
 void Scheduler::ScheduleNextFrame() {

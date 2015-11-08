@@ -135,12 +135,10 @@ DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWidget, WindowId)
 DEFINE_VIEW_EVENT_HANDLER2(DidDropWidget, WindowId, WindowId)
 
 void ScriptThread::DidEnterViewIdle(const base::Time& deadline) {
-  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   scheduler()->DidEnterViewIdle(deadline);
 }
 
 void ScriptThread::DidExitViewIdle() {
-  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   scheduler()->DidExitViewIdle();
 }
 

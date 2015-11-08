@@ -1,11 +1,13 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/forms/text_field_control.h"
 
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/text_field_selection.h"
+#include "evita/dom/promise_resolver.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_delegate.h"
 
@@ -50,9 +52,13 @@ void TextFieldControl::DidChangeSelection() {
   NotifyControlChange();
 }
 
-int TextFieldControl::MapPointToOffset(float x, float y) const {
-  return ScriptHost::instance()->view_delegate()->MapPointToPosition(
-      event_target_id(), x, y);
+v8::Handle<v8::Promise> TextFieldControl::MapPointToOffset(float x,
+                                                           float y) const {
+  return PromiseResolver::Call(
+      FROM_HERE,
+      base::Bind(&ViewDelegate::MapPointToPosition,
+                 base::Unretained(ScriptHost::instance()->view_delegate()),
+                 event_target_id(), x, y));
 }
 
 }  // namespace dom

@@ -53,7 +53,7 @@ class TextWindow final
   domapi::FloatRect HitTestTextPosition(text::Posn position);
   void MakeSelectionVisible();
   TextWindow* NewTextWindow(Range* range);
-  text::Posn MapPointToPosition(float x, float y);
+  v8::Handle<v8::Promise> MapPointToPosition(float x, float y);
   void Reconvert(const base::string16& text);
   void Scroll(int direction);
 

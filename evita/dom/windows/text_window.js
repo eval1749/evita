@@ -211,34 +211,35 @@ global.TextWindow.prototype.clone = function() {
   function handleMouseDown(window, event) {
     if (event.button)
       return;
-    const position = window.mapPointToPosition_(event.clientX, event.clientY);
-    if (position < 0)
-      return;
-    if (Window.focus !== window) {
-      window.focus();
-      if (position >= window.selection.range.start &&
-          position < window.selection.range.end) {
-        return
+    window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
+      if (offset < 0)
+        return;
+      if (Window.focus !== window) {
+        window.focus();
+        if (offset >= window.selection.range.start &&
+            offset < window.selection.range.end) {
+          return
+        }
       }
-    }
 
-    if (event.shiftKey) {
-      if (window.selection.startIsActive)
-        window.selection.range.start = position;
-      else
-        window.selection.range.end = position;
-    } else {
-      window.selection.range.collapseTo(position);
-    }
+      if (event.shiftKey) {
+        if (window.selection.startIsActive)
+          window.selection.range.start = offset;
+        else
+          window.selection.range.end = offset;
+      } else {
+        window.selection.range.collapseTo(offset);
+      }
 
-    if (event.ctrlKey) {
-      selectWord(window);
-      return;
-    }
+      if (event.ctrlKey) {
+        selectWord(window);
+        return;
+      }
 
-    if (!window.dragController_)
-      window.dragController_ = new DragController(window);
-    window.dragController_.start();
+      if (!window.dragController_)
+        window.dragController_ = new DragController(window);
+      window.dragController_.start();
+    });
   }
 
   /**
@@ -249,30 +250,31 @@ global.TextWindow.prototype.clone = function() {
     const dragController = window.dragController_;
     if (!dragController || !dragController.dragging)
       return;
-    const position = window.mapPointToPosition_(event.clientX, event.clientY);
-    if (position < 0)
-      return;
+    window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
+      if (offset < 0)
+        return;
 
-    const selection = window.selection;
-    if (position <= selection.range.start) {
-      selection.range.start = position;
-      selection.startIsActive = true;
-    } else if (position >= selection.range.end) {
-      selection.range.end = position;
-      selection.startIsActive = false;
-    } else if (selection.startIsActive) {
-      selection.range.start = position;
-    } else {
-      selection.range.end = position;
-    }
+      const selection = window.selection;
+      if (offset <= selection.range.start) {
+        selection.range.start = offset;
+        selection.startIsActive = true;
+      } else if (offset >= selection.range.end) {
+        selection.range.end = offset;
+        selection.startIsActive = false;
+      } else if (selection.startIsActive) {
+        selection.range.start = offset;
+      } else {
+        selection.range.end = offset;
+      }
 
-    const autoscroller = ensureAutoscroller(window);
-    if (event.clientY < AUTOSCROLL_ZONE_SIZE)
-      autoscroller.start(-1);
-    else if (event.clientY > window.clientHeight - AUTOSCROLL_ZONE_SIZE)
-      autoscroller.start(1);
-    else
-      autoscroller.stop();
+      const autoscroller = ensureAutoscroller(window);
+      if (event.clientY < AUTOSCROLL_ZONE_SIZE)
+        autoscroller.start(-1);
+      else if (event.clientY > window.clientHeight - AUTOSCROLL_ZONE_SIZE)
+        autoscroller.start(1);
+      else
+        autoscroller.stop();
+    });
   }
 
   /**

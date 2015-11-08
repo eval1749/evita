@@ -1,5 +1,7 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_DOM_FORMS_TEXT_FIELD_CONTROL_H_
 #define EVITA_DOM_FORMS_TEXT_FIELD_CONTROL_H_
 
@@ -28,8 +30,6 @@ class TextFieldControl final
 
   void DidChangeSelection();
 
-  int MapPointToOffset(float x, float y) const;
-
  private:
   friend class bindings::TextFieldControlClass;
 
@@ -38,6 +38,8 @@ class TextFieldControl final
   // API: Set |value| property to the first line, excluding newline character,
   // of |new_value|.
   void set_value(const base::string16& new_value);
+
+  v8::Handle<v8::Promise> MapPointToOffset(float x, float y) const;
 
   base::string16 value_;
   gc::Member<TextFieldSelection> selection_;

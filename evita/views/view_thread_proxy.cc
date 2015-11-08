@@ -219,6 +219,11 @@ DEFINE_DELEGATE_2(GetMetrics,
                   const domapi::StringPromise&)
 DEFINE_DELEGATE_1(HideWindow, dom::WindowId)
 DEFINE_DELEGATE_1(MakeSelectionVisible, dom::WindowId)
+DEFINE_DELEGATE_4(MapPointToPosition,
+                  domapi::EventTargetId,
+                  float,
+                  float,
+                  const domapi::IntegerPromise&)
 DEFINE_DELEGATE_5(MessageBox,
                   dom::WindowId,
                   const base::string16&,
@@ -301,11 +306,6 @@ DEFINE_SYNC_DELEGATE_2(HitTestTextPosition,
                        domapi::FloatRect,
                        dom::WindowId,
                        text::Posn)
-DEFINE_SYNC_DELEGATE_3(MapPointToPosition,
-                       text::Posn,
-                       domapi::EventTargetId,
-                       float,
-                       float)
 
 void ViewThreadProxy::ScrollTextWindow(dom::WindowId window_id, int direction) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();

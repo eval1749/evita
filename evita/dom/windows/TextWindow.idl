@@ -16,7 +16,7 @@ interface TextWindow : DocumentWindow {
   void makeSelectionVisible();
 
   [ImplementedAs=MapPointToPosition]
-  long mapPointToPosition_(float x, float y);
+  Promise<long> mapPointToPosition_(float x, float y);
 
   [ImplementedAs=Reconvert]
   void reconvert_(DOMString text);

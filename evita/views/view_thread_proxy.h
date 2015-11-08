@@ -62,9 +62,10 @@ class ViewThreadProxy : public dom::ViewDelegate {
   domapi::FloatRect HitTestTextPosition(dom::WindowId window_id,
                                         text::Posn position);
   void MakeSelectionVisible(dom::WindowId window_id) final;
-  text::Posn MapPointToPosition(domapi::EventTargetId event_target_id,
-                                float x,
-                                float y) final;
+  void MapPointToPosition(domapi::EventTargetId event_target_id,
+                          float x,
+                          float y,
+                          const domapi::IntegerPromise& promise) final;
   void MessageBox(dom::WindowId window_id,
                   const base::string16& message,
                   const base::string16& title,

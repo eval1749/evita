@@ -134,9 +134,10 @@ class ViewDelegate {
                                                 text::Posn offset) = 0;
 
   virtual void MakeSelectionVisible(WindowId window_id) = 0;
-  virtual text::Posn MapPointToPosition(domapi::EventTargetId event_target_id,
-                                        float x,
-                                        float y) = 0;
+  virtual void MapPointToPosition(domapi::EventTargetId event_target_id,
+                                  float x,
+                                  float y,
+                                  const domapi::IntegerPromise& promise) = 0;
   // Popup message box dialog box and return response code.
   virtual void MessageBox(WindowId window_id,
                           const base::string16& message,

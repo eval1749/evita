@@ -231,7 +231,6 @@ void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
 }
 
 void SchedulerImpl::DidEnterViewIdle(const base::Time& deadline) {
-  ASSERT_ON_VIEW_THREAD();
   DCHECK(script_message_loop_->task_runner());
   idle_task_queue_->DidEnterViewIdle(deadline);
   script_message_loop_->task_runner()->PostTask(

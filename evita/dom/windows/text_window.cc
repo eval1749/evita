@@ -1,10 +1,12 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/windows/text_window.h"
 
 #include "base/bind.h"
 #include "evita/dom/text/document.h"
+#include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/text/range.h"
@@ -76,9 +78,12 @@ void TextWindow::MakeSelectionVisible() {
   ScriptHost::instance()->view_delegate()->MakeSelectionVisible(window_id());
 }
 
-text::Posn TextWindow::MapPointToPosition(float x, float y) {
-  return ScriptHost::instance()->view_delegate()->MapPointToPosition(
-      window_id(), x, y);
+v8::Handle<v8::Promise> TextWindow::MapPointToPosition(float x, float y) {
+  return PromiseResolver::Call(
+      FROM_HERE,
+      base::Bind(&ViewDelegate::MapPointToPosition,
+                 base::Unretained(ScriptHost::instance()->view_delegate()),
+                 window_id(), x, y));
 }
 
 // static

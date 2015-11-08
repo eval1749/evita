@@ -15,5 +15,5 @@ interface TextFieldControl : FormControl {
   [ImplementedAs=value]
   attribute DOMString value_;
 
-  long mapPointToOffset(float x, float y);
+  Promise<long> mapPointToOffset(float x, float y);
 };

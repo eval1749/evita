@@ -55,8 +55,11 @@ class MockViewImpl final : public dom::ViewDelegate {
   MOCK_METHOD1(HideWindow, void(WindowId));
   MOCK_METHOD2(HitTestTextPosition, domapi::FloatRect(WindowId, text::Posn));
   MOCK_METHOD1(MakeSelectionVisible, void(WindowId));
-  MOCK_METHOD3(MapPointToPosition,
-               text::Posn(domapi::EventTargetId, float x, float y));
+  MOCK_METHOD4(MapPointToPosition,
+               void(domapi::EventTargetId,
+                    float x,
+                    float y,
+                    const domapi::IntegerPromise& promise));
   void MessageBox(WindowId window_id,
                   const base::string16& message,
                   const base::string16& title,

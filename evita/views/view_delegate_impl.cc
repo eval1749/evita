@@ -45,6 +45,10 @@ domapi::ViewEventHandler* ScriptDelegate() {
   return editor::Application::instance()->view_event_handler();
 }
 
+void Resolve(const domapi::IntegerPromise promise, int value) {
+  ScriptDelegate()->RunCallback(base::Bind(promise.resolve, value));
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // TraceLogClient
@@ -384,28 +388,31 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
   content_window->MakeSelectionVisible();
 }
 
-// TODO(eval1749): We should make |MapPointToPosition()| to return value
-// asynchronously.
-text::Posn ViewDelegateImpl::MapPointToPosition(
+void ViewDelegateImpl::MapPointToPosition(
     domapi::EventTargetId event_target_id,
     float x,
-    float y) {
-  TRACE_EVENT0("view", "ViewDelegateImpl::MapPointToPosition");
+    float y,
+    const domapi::IntegerPromise& promise) {
+  TRACE_EVENT_WITH_FLOW0("script", "ViewDelegateImpl::MapPointToPosition",
+                         promise.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (auto const window = Window::FromWindowId(event_target_id)) {
     if (auto const text_window = window->as<TextWindow>()) {
-      UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-      DCHECK(lock_scope.locked());
-      return text_window->MapPointToPosition(gfx::PointF(x, y));
+      UI_DOM_AUTO_LOCK_SCOPE();
+      auto const offset = text_window->MapPointToPosition(gfx::PointF(x, y));
+      return Resolve(promise, offset);
     }
   }
 
   if (auto const control =
           FormControlSet::instance()->MaybeControl(event_target_id)) {
-    if (auto const text_field = control->as<ui::TextFieldControl>())
-      return text_field->MapPointToOffset(gfx::PointF(x, y));
+    if (auto const text_field = control->as<ui::TextFieldControl>()) {
+      auto const offset = text_field->MapPointToOffset(gfx::PointF(x, y));
+      return Resolve(promise, offset);
+    }
   }
 
-  return 0;
+  Resolve(promise, 0);
 }
 
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,

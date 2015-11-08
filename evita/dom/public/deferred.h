@@ -17,6 +17,7 @@ struct Deferred final {
   int sequence_num;
 };
 
+using IntegerPromise = domapi::Deferred<int>;
 using StringPromise = domapi::Deferred<base::string16>;
 
 }  // namespace domapi

@@ -81,7 +81,7 @@ void TextWindow::MakeSelectionVisible() {
 v8::Handle<v8::Promise> TextWindow::MapPointToPosition(float x, float y) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&ViewDelegate::MapPointToPosition,
+      base::Bind(&ViewDelegate::MapTextWindowPointToOffset,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
                  window_id(), x, y));
 }

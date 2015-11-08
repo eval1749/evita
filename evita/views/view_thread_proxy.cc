@@ -219,7 +219,12 @@ DEFINE_DELEGATE_2(GetMetrics,
                   const domapi::StringPromise&)
 DEFINE_DELEGATE_1(HideWindow, dom::WindowId)
 DEFINE_DELEGATE_1(MakeSelectionVisible, dom::WindowId)
-DEFINE_DELEGATE_4(MapPointToPosition,
+DEFINE_DELEGATE_4(MapTextFieldPointToOffset,
+                  domapi::EventTargetId,
+                  float,
+                  float,
+                  const domapi::IntegerPromise&)
+DEFINE_DELEGATE_4(MapTextWindowPointToOffset,
                   domapi::EventTargetId,
                   float,
                   float,

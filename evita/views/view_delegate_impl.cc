@@ -45,7 +45,12 @@ domapi::ViewEventHandler* ScriptDelegate() {
   return editor::Application::instance()->view_event_handler();
 }
 
-void Resolve(const domapi::IntegerPromise promise, int value) {
+template <typename ResolveType>
+void Reject(const domapi::Deferred<ResolveType, int>& promise, int value) {
+  ScriptDelegate()->RunCallback(base::Bind(promise.reject, value));
+}
+
+void Resolve(const domapi::IntegerPromise& promise, int value) {
   ScriptDelegate()->RunCallback(base::Bind(promise.resolve, value));
 }
 
@@ -388,31 +393,48 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
   content_window->MakeSelectionVisible();
 }
 
-void ViewDelegateImpl::MapPointToPosition(
+void ViewDelegateImpl::MapTextFieldPointToOffset(
     domapi::EventTargetId event_target_id,
     float x,
     float y,
     const domapi::IntegerPromise& promise) {
-  TRACE_EVENT_WITH_FLOW0("script", "ViewDelegateImpl::MapPointToPosition",
+  TRACE_EVENT_WITH_FLOW0("script",
+                         "ViewDelegateImpl::MapTextFieldPointToOffset",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
-  if (auto const window = Window::FromWindowId(event_target_id)) {
-    if (auto const text_window = window->as<TextWindow>()) {
-      UI_DOM_AUTO_LOCK_SCOPE();
-      auto const offset = text_window->MapPointToPosition(gfx::PointF(x, y));
-      return Resolve(promise, offset);
-    }
-  }
+  auto const control =
+      FormControlSet::instance()->MaybeControl(event_target_id);
+  if (!control)
+    return Reject(promise, -1);
 
-  if (auto const control =
-          FormControlSet::instance()->MaybeControl(event_target_id)) {
-    if (auto const text_field = control->as<ui::TextFieldControl>()) {
-      auto const offset = text_field->MapPointToOffset(gfx::PointF(x, y));
-      return Resolve(promise, offset);
-    }
-  }
+  auto const text_field = control->as<ui::TextFieldControl>();
+  if (!text_field)
+    return Reject(promise, -1);
 
-  Resolve(promise, 0);
+  auto const offset = text_field->MapPointToOffset(gfx::PointF(x, y));
+  return Resolve(promise, offset);
+}
+
+void ViewDelegateImpl::MapTextWindowPointToOffset(
+    domapi::EventTargetId event_target_id,
+    float x,
+    float y,
+    const domapi::IntegerPromise& promise) {
+  TRACE_EVENT_WITH_FLOW0("script",
+                         "ViewDelegateImpl::MapTextWindowPointToOffset",
+                         promise.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
+  auto const window = Window::FromWindowId(event_target_id);
+  if (!window)
+    return Reject(promise, -1);
+
+  auto const text_window = window->as<TextWindow>();
+  if (!text_window)
+    return Reject(promise, -1);
+
+  UI_DOM_AUTO_LOCK_SCOPE();
+  auto const offset = text_window->MapPointToPosition(gfx::PointF(x, y));
+  return Resolve(promise, offset);
 }
 
 void ViewDelegateImpl::MessageBox(dom::WindowId window_id,

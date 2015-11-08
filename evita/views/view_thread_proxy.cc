@@ -11,6 +11,7 @@
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
 #include "base/synchronization/waitable_event.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/tab_data.h"
@@ -244,6 +245,7 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                       \
     if (!message_loop_)                                                     \
       return return_type();                                                 \
+    TRACE_EVENT0("script", "ViewThreadProxy::" #name);                      \
     return DoSynchronousCall(                                               \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get())), \
         message_loop_, waitable_event_.get());                              \
@@ -254,6 +256,7 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                      \
     if (!message_loop_)                                                    \
       return return_type();                                                \
+    TRACE_EVENT0("script", "ViewThreadProxy::" #name);                     \
     return DoSynchronousCall(                                              \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), \
                    p1),                                                    \
@@ -265,6 +268,7 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
     if (!message_loop_)                                                        \
       return return_type();                                                    \
+    TRACE_EVENT0("script", "ViewThreadProxy::" #name);                         \
     return DoSynchronousCall(                                                  \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), p1, \
                    p2),                                                        \
@@ -276,6 +280,7 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
     DCHECK_CALLED_ON_SCRIPT_THREAD();                                          \
     if (!message_loop_)                                                        \
       return return_type();                                                    \
+    TRACE_EVENT0("script", "ViewThreadProxy::" #name);                         \
     return DoSynchronousCall(                                                  \
         base::Bind(&ViewDelegate::name, base::Unretained(delegate_.get()), p1, \
                    p2, p3),                                                    \
@@ -306,6 +311,7 @@ void ViewThreadProxy::ScrollTextWindow(dom::WindowId window_id, int direction) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!message_loop_)
     return;
+  TRACE_EVENT0("script", "ViewThreadProxy::ScrollTextWindow");
   RunSynchronously(
       base::Bind(&ViewDelegate::ScrollTextWindow,
                  base::Unretained(delegate_.get()), window_id, direction),
@@ -317,6 +323,7 @@ void ViewThreadProxy::SetSwitch(const base::string16& name,
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!message_loop_)
     return;
+  TRACE_EVENT0("script", "ViewThreadProxy::SetSwitch");
   RunSynchronously(
       base::Bind(&ViewDelegate::SetSwitch, base::Unretained(delegate_.get()),
                  name, new_value),
@@ -327,6 +334,7 @@ void ViewThreadProxy::UpdateWindow(dom::WindowId window_id) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!message_loop_)
     return;
+  TRACE_EVENT0("script", "ViewThreadProxy::UpdateWindow");
   RunSynchronously(base::Bind(&ViewDelegate::UpdateWindow,
                               base::Unretained(delegate_.get()), window_id),
                    message_loop_, waitable_event_.get());

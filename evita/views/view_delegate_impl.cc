@@ -135,6 +135,7 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
 text::Posn ViewDelegateImpl::ComputeOnTextWindow(
     dom::WindowId window_id,
     const dom::TextWindowCompute& data) {
+  TRACE_EVENT0("view", "ViewDelegateImpl::ComputeOnTextWindow");
   auto const window =
       FromWindowId("ComputeOnTextWindow", window_id)->as<TextWindow>();
   if (!window)
@@ -313,6 +314,7 @@ void ViewDelegateImpl::GetMetrics(const base::string16& name,
 
 // TODO(eval1749): We should make |GetSwitch()| to return value asynchronously.
 domapi::SwitchValue ViewDelegateImpl::GetSwitch(const base::string16& name) {
+  TRACE_EVENT0("view", "ViewDelegateImpl::GetSwitch");
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
   return editor::SwitchSet::instance()->Get(name);
@@ -353,6 +355,7 @@ void ViewDelegateImpl::HideWindow(dom::WindowId window_id) {
 // asynchronously.
 domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(WindowId window_id,
                                                         text::Posn position) {
+  TRACE_EVENT0("view", "ViewDelegateImpl::HitTestTextPosition");
   auto const window =
       FromWindowId("HitTestTextPosition", window_id)->as<TextWindow>();
   if (!window)
@@ -365,6 +368,7 @@ domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(WindowId window_id,
 
 // TODO(eval1749): We should not have |MakeSelectionVisible()|.
 void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
+  TRACE_EVENT0("view", "ViewDelegateImpl::MakeSelectionVisible");
   DCHECK_NE(dom::kInvalidWindowId, window_id);
   auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
@@ -386,6 +390,7 @@ text::Posn ViewDelegateImpl::MapPointToPosition(
     domapi::EventTargetId event_target_id,
     float x,
     float y) {
+  TRACE_EVENT0("view", "ViewDelegateImpl::MapPointToPosition");
   if (auto const window = Window::FromWindowId(event_target_id)) {
     if (auto const text_window = window->as<TextWindow>()) {
       UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
@@ -497,6 +502,7 @@ void ViewDelegateImpl::ReleaseCapture(domapi::EventTargetId event_target_id) {
 
 // TODO(eval1749): We should make |ScrollTextWindow()| asynchronous.
 void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
+  TRACE_EVENT0("view", "ViewDelegateImpl::ScrollTextWindow");
   auto const window = FromWindowId("ScrollTextWindow", window_id);
   if (!window)
     return;
@@ -540,6 +546,7 @@ void ViewDelegateImpl::SetStatusBar(dom::WindowId window_id,
 
 void ViewDelegateImpl::SetSwitch(const base::string16& name,
                                  const domapi::SwitchValue& new_value) {
+  TRACE_EVENT0("view", "ViewDelegateImpl::SetSwitch");
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
   editor::SwitchSet::instance()->Set(name, new_value);
@@ -594,6 +601,7 @@ void ViewDelegateImpl::StopTraceLog(
 }
 
 void ViewDelegateImpl::UpdateWindow(dom::WindowId window_id) {
+  TRACE_EVENT0("view", "ViewDelegateImpl::UpdateWindow");
   auto const window = FromWindowId("UpdateWindow", window_id);
   if (!window)
     return;

@@ -45,7 +45,8 @@ class MockViewImpl final : public dom::ViewDelegate {
   void GetFileNameForSave(WindowId window_id,
                           const base::string16& dir_path,
                           const GetFileNameForSaveResolver& resolver) final;
-  MOCK_METHOD1(GetMetrics, base::string16(const base::string16&));
+  MOCK_METHOD2(GetMetrics,
+               void(const base::string16&, const domapi::StringPromise&));
   MOCK_METHOD1(GetSwitch, domapi::SwitchValue(const base::string16& name));
   MOCK_METHOD0(GetSwitchNames, std::vector<base::string16>());
   std::vector<int> GetTableRowStates(

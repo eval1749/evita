@@ -6,6 +6,7 @@
 #define EVITA_DOM_PUBLIC_DEFERRED_H_
 
 #include "base/callback_forward.h"
+#include "base/strings/string16.h"
 
 namespace domapi {
 
@@ -15,6 +16,8 @@ struct Deferred final {
   base::Callback<void(ResolveType)> resolve;
   int sequence_num;
 };
+
+using StringPromise = domapi::Deferred<base::string16>;
 
 }  // namespace domapi
 

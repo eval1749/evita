@@ -213,6 +213,9 @@ DEFINE_DELEGATE_3(GetFileNameForSave,
                   dom::WindowId,
                   const base::string16&,
                   const GetFileNameForSaveResolver&)
+DEFINE_DELEGATE_2(GetMetrics,
+                  const base::string16&,
+                  const domapi::StringPromise&)
 DEFINE_DELEGATE_1(HideWindow, dom::WindowId)
 DEFINE_DELEGATE_1(MakeSelectionVisible, dom::WindowId)
 DEFINE_DELEGATE_5(MessageBox,
@@ -283,7 +286,6 @@ DEFINE_SYNC_DELEGATE_2(ComputeOnTextWindow,
                        text::Posn,
                        dom::WindowId,
                        const dom::TextWindowCompute&);
-DEFINE_SYNC_DELEGATE_1(GetMetrics, base::string16, const base::string16&)
 DEFINE_SYNC_DELEGATE_1(GetSwitch, domapi::SwitchValue, const base::string16&)
 DEFINE_SYNC_DELEGATE_0(GetSwitchNames, std::vector<base::string16>)
 DEFINE_SYNC_DELEGATE_2(GetTableRowStates,

@@ -8,6 +8,7 @@
 #include <string>
 
 #include "base/logging.h"
+#include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/forms/form.h"
@@ -275,12 +276,13 @@ void ViewDelegateImpl::GetFileNameForSave(
       base::Bind(resolver.resolve, base::string16(params.m_wsz)));
 }
 
-// TODO(eval1749): We should make |GetMetrics()| to return value
-// asynchronously.
-base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
-
+void ViewDelegateImpl::GetMetrics(const base::string16& name,
+                                  const domapi::StringPromise& promise) {
+  TRACE_EVENT_WITH_FLOW1("script", "ViewDelegateImpl::GetMetrics",
+                         promise.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "name", base::UTF16ToUTF8(name));
+  UI_DOM_AUTO_LOCK_SCOPE();
   base::string16 delimiter = L"";
   const base::string16 comma = L",\n";
 
@@ -306,7 +308,7 @@ base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
   }
 
   ostream << '}';
-  return ostream.str();
+  ScriptDelegate()->RunCallback(base::Bind(promise.resolve, ostream.str()));
 }
 
 // TODO(eval1749): We should make |GetSwitch()| to return value asynchronously.

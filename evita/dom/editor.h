@@ -55,7 +55,7 @@ class Editor final : public v8_glue::Scriptable<Editor> {
   static v8::Handle<v8::Promise> GetFileNameForSave(
       Window* window,
       const base::string16& dir_path);
-  static base::string16 GetMetrics(const base::string16& name);
+  static v8::Handle<v8::Promise> GetMetrics(const base::string16& name);
   static v8::Handle<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
   // Get global switch value.

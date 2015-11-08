@@ -76,7 +76,7 @@ interface Editor {
                                        long flags, DOMString title);
 
   [ImplementedAs=GetMetrics]
-  static DOMString metrics(DOMString name);
+  static Promise<DOMString> metrics(DOMString name);
 
   [ImplementedAs=JavaScript]
   static void open(DOMString fileName);

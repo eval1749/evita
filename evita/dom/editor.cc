@@ -241,8 +241,12 @@ v8::Handle<v8::Promise> Editor::GetFileNameForSave(
                  dir_path));
 }
 
-base::string16 Editor::GetMetrics(const base::string16& name) {
-  return ScriptHost::instance()->view_delegate()->GetMetrics(name);
+v8::Handle<v8::Promise> Editor::GetMetrics(const base::string16& name) {
+  return PromiseResolver::Call(
+      FROM_HERE,
+      base::Bind(&ViewDelegate::GetMetrics,
+                 base::Unretained(ScriptHost::instance()->view_delegate()),
+                 name));
 }
 
 v8::Handle<v8::Promise> Editor::GetSpellingSuggestions(

@@ -70,9 +70,9 @@ struct TextWindowCompute final {
 
 class ViewDelegate {
  public:
-  typedef domapi::Deferred<base::string16> GetFileNameForLoadResolver;
-  typedef domapi::Deferred<base::string16> GetFileNameForSaveResolver;
-  typedef domapi::Deferred<int> MessageBoxResolver;
+  using GetFileNameForLoadResolver = domapi::Deferred<base::string16>;
+  using GetFileNameForSaveResolver = domapi::Deferred<base::string16>;
+  using MessageBoxResolver = domapi::Deferred<int>;
 
   virtual ~ViewDelegate() = default;
 
@@ -115,7 +115,8 @@ class ViewDelegate {
       const base::string16& dir_path,
       const GetFileNameForSaveResolver& resolver) = 0;
 
-  virtual base::string16 GetMetrics(const base::string16& name) = 0;
+  virtual void GetMetrics(const base::string16& name,
+                          const domapi::StringPromise& promise) = 0;
 
   // Get switch bool value
   virtual domapi::SwitchValue GetSwitch(const base::string16& name) = 0;

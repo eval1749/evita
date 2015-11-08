@@ -42,7 +42,8 @@ class ViewDelegateImpl final : public dom::ViewDelegate {
   void GetFileNameForSave(dom::WindowId window_id,
                           const base::string16& dir_path,
                           const GetFileNameForSaveResolver& resolver) final;
-  base::string16 GetMetrics(const base::string16& name) final;
+  void GetMetrics(const base::string16& name,
+                  const domapi::StringPromise& promise) final;
   domapi::SwitchValue GetSwitch(const base::string16& name) final;
   std::vector<base::string16> GetSwitchNames() final;
   std::vector<int> GetTableRowStates(

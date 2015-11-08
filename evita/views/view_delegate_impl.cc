@@ -276,7 +276,7 @@ void ViewDelegateImpl::GetFileNameForSave(
 }
 
 // TODO(eval1749): We should make |GetMetrics()| to return value
-// asynchronusly.
+// asynchronously.
 base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
@@ -309,7 +309,7 @@ base::string16 ViewDelegateImpl::GetMetrics(const base::string16& name) {
   return ostream.str();
 }
 
-// TODO(eval1749): We should make |GetSwitch()| to return value asynchronusly.
+// TODO(eval1749): We should make |GetSwitch()| to return value asynchronously.
 domapi::SwitchValue ViewDelegateImpl::GetSwitch(const base::string16& name) {
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
@@ -317,7 +317,7 @@ domapi::SwitchValue ViewDelegateImpl::GetSwitch(const base::string16& name) {
 }
 
 // TODO(eval1749): We should make |GetSwitchNames()| to return value
-// asynchronusly.
+// asynchronously.
 std::vector<base::string16> ViewDelegateImpl::GetSwitchNames() {
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
@@ -325,7 +325,7 @@ std::vector<base::string16> ViewDelegateImpl::GetSwitchNames() {
 }
 
 // TODO(eval1749): We should make |GetTableRowStates()| to return value
-// asynchronusly.
+// asynchronously.
 std::vector<int> ViewDelegateImpl::GetTableRowStates(
     WindowId window_id,
     const std::vector<base::string16>& keys) {
@@ -348,7 +348,7 @@ void ViewDelegateImpl::HideWindow(dom::WindowId window_id) {
 }
 
 // TODO(eval1749): We should make |HitTestTextPosition()| to return value
-// asynchronusly.
+// asynchronously.
 domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(WindowId window_id,
                                                         text::Posn position) {
   auto const window =
@@ -379,7 +379,7 @@ void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
 }
 
 // TODO(eval1749): We should make |MapPointToPosition()| to return value
-// asynchronusly.
+// asynchronously.
 text::Posn ViewDelegateImpl::MapPointToPosition(
     domapi::EventTargetId event_target_id,
     float x,
@@ -432,7 +432,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
     safe_title += L" - ";
   safe_title += editor::Application::instance()->title();
   auto const hwnd = frame ? frame->AssociatedHwnd() : nullptr;
-  editor::ModalMessageLoopScope modal_mesage_loop_scope;
+  editor::ModalMessageLoopScope modal_message_loop_scope;
   auto const response = ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
                                       static_cast<UINT>(flags));
   ScriptDelegate()->RunCallback(base::Bind(resolver.resolve, response));
@@ -493,7 +493,7 @@ void ViewDelegateImpl::ReleaseCapture(domapi::EventTargetId event_target_id) {
   DVLOG(0) << "ReleaseCapture: no such target " << event_target_id;
 }
 
-// TODO(eval1749): We should make |ScrollTextWindow()| asynchronus.
+// TODO(eval1749): We should make |ScrollTextWindow()| asynchronous.
 void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
   auto const window = FromWindowId("ScrollTextWindow", window_id);
   if (!window)
@@ -538,7 +538,6 @@ void ViewDelegateImpl::SetStatusBar(dom::WindowId window_id,
 
 void ViewDelegateImpl::SetSwitch(const base::string16& name,
                                  const domapi::SwitchValue& new_value) {
-  // TODO(eval1749): We should make |SetSwitch()| to asynchronus call.
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
   editor::SwitchSet::instance()->Set(name, new_value);

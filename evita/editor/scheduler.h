@@ -50,8 +50,8 @@ class Scheduler final {
 
  private:
   void BeginFrame();
+  void ChangeState(State new_state);
   void CommitFrame();
-  void EnterIdle();
   void HandleAnimationFrame();
   void ScheduleNextFrame();
 
@@ -63,6 +63,7 @@ class Scheduler final {
   std::unordered_set<ui::AnimationFrameHandler*> pending_handlers_;
   domapi::ViewEventHandler* script_delegate_;
   State state_;
+  int state_sequence_num_;
 
   DISALLOW_COPY_AND_ASSIGN(Scheduler);
 };

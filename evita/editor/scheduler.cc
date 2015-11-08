@@ -37,13 +37,17 @@ enum class Scheduler::State {
 #undef V
 };
 
-std::ostream& operator<<(std::ostream& ostream, Scheduler::State state) {
+const char* StateNameOf(Scheduler::State state) {
   static const char* const names[] = {
 #define V(name) #name,
       FOR_EACH_STATE(V)};
 #undef V
   auto const it = std::begin(names) + static_cast<size_t>(state);
-  return ostream << (it < std::end(names) ? *it : "Invalid");
+  return std::end(names) ? *it : "Invalid";
+}
+
+std::ostream& operator<<(std::ostream& ostream, Scheduler::State state) {
+  return ostream << StateNameOf(state);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -54,7 +58,11 @@ Scheduler::Scheduler(domapi::ViewEventHandler* script_delegate)
     : lock_(new base::Lock()),
       message_loop_(base::MessageLoop::current()),
       script_delegate_(script_delegate),
-      state_(State::Sleeping) {}
+      state_(State::Sleeping),
+      state_sequence_num_(1) {
+  TRACE_EVENT_ASYNC_BEGIN1("view", "ViewState", state_sequence_num_, "state",
+                           StateNameOf(state_));
+}
 
 Scheduler::~Scheduler() {}
 
@@ -65,18 +73,23 @@ void Scheduler::BeginFrame() {
   script_delegate_->DidExitViewIdle();
   {
     base::AutoLock lock_scope(*lock_);
-    state_ = State::Running;
+    ChangeState(State::Running);
   }
   HandleAnimationFrame();
   CommitFrame();
 
   base::AutoLock lock_scope(*lock_);
-  state_ = State::Sleeping;
-  if (pending_handlers_.empty()) {
-    EnterIdle();
+  if (!pending_handlers_.empty()) {
+    state_ = State::Sleeping;
+    ScheduleNextFrame();
     return;
   }
-  ScheduleNextFrame();
+
+  // Enter idle state
+  auto const now = base::Time::Now();
+  ChangeState(State::Idle);
+  auto const idle_deadline = now + base::TimeDelta::FromMicroseconds(50);
+  script_delegate_->DidEnterViewIdle(idle_deadline);
 }
 
 void Scheduler::CancelAnimationFrameRequest(
@@ -85,6 +98,16 @@ void Scheduler::CancelAnimationFrameRequest(
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.erase(handler);
   canceled_handlers_.insert(handler);
+}
+
+void Scheduler::ChangeState(State new_state) {
+  DCHECK_NE(state_, new_state);
+  lock_->AssertAcquired();
+  TRACE_EVENT_ASYNC_END0("view", "ViewState", state_sequence_num_);
+  state_ = new_state;
+  ++state_sequence_num_;
+  TRACE_EVENT_ASYNC_BEGIN1("view", "ViewState", state_sequence_num_, "state",
+                           StateNameOf(state_));
 }
 
 void Scheduler::CommitFrame() {
@@ -96,16 +119,6 @@ void Scheduler::CommitFrame() {
 
 void Scheduler::DidUpdateDom() {
   TRACE_EVENT0("scheduler", "Scheduler::DidUpdateDom");
-}
-
-void Scheduler::EnterIdle() {
-  lock_->AssertAcquired();
-  DCHECK_EQ(State::Sleeping, state_);
-  DCHECK(pending_handlers_.empty());
-  auto const now = base::Time::Now();
-  state_ = State::Idle;
-  auto const idle_deadline = now + base::TimeDelta::FromMicroseconds(50);
-  script_delegate_->DidEnterViewIdle(idle_deadline);
 }
 
 void Scheduler::HandleAnimationFrame() {
@@ -134,7 +147,7 @@ void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   switch (state_) {
     case State::Idle:
       script_delegate_->DidExitViewIdle();
-      state_ = State::Sleeping;
+      ChangeState(State::Sleeping);
       ScheduleNextFrame();
       return;
     case State::Running:
@@ -151,7 +164,7 @@ void Scheduler::ScheduleNextFrame() {
   lock_->AssertAcquired();
   DCHECK_EQ(State::Sleeping, state_);
   auto const now = base::Time::Now();
-  state_ = State::Waiting;
+  ChangeState(State::Waiting);
   auto const delay = ComputeDelay(last_frame_time_, now);
   script_delegate_->DidEnterViewIdle(now + delay);
   message_loop_->PostNonNestableDelayedTask(

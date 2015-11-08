@@ -14,6 +14,9 @@
   };
 
   /** @const @type {number} */
+  const kColdScanStartDelay = 100;
+
+  /** @const @type {number} */
   const kMaxColdScanCount = 1000 * 2;
 
   /** @const @type {number} */
@@ -29,7 +32,7 @@
   const kMaxNumberOfRequests = 100;
 
   /** @const @type {number} */
-  const kHotScanIntervalMs = 100;
+  const kHotScanStartDelay = 100;
 
   /** @const @type {!RegExp} */
   const RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
@@ -413,7 +416,7 @@
      */
     didChangeDocument(hotStart) {
       this.updateOffset(hotStart, hotStart);
-      this.run();
+      this.schedule(kColdScanStartDelay);
     }
 
     /*
@@ -421,7 +424,7 @@
      */
     didLoadDocument() {
       this.resetOffset(0, this.document.length);
-      taskScheduler.schedule(this);
+      this.schedule(0);
     }
 
     run() {
@@ -433,14 +436,17 @@
       this.painter_.resetOffset(this.offset, this.checked_);
       this.resetLife(this.life);
       this.painter_.run();
-      this.schedule();
+      this.schedule(0);
     }
 
-    /** @private */
-    schedule() {
+    /**
+     * @private
+     * @param {number} delay
+     */
+    schedule(delay) {
       if (this.offset_ >= this.end_)
         return;
-      taskScheduler.schedule(this);
+      taskScheduler.schedule(this, delay);
     }
   }
 
@@ -519,7 +525,7 @@
     didChangeDocument(hotStart) {
       this.updateOffset(hotStart, this.document.length);
       this.caretIsHot_ = true;
-      taskScheduler.schedule(this);
+      this.schedule(kHotScanStartDelay);
     }
 
     didFocusWindow() {

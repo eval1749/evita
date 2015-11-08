@@ -286,6 +286,9 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
     TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(), "type",
                              event.type_name(), "key_code",
                              event.raw_key_code());
+    TRACE_EVENT_WITH_FLOW1("input", "DispatchKeyEvent", event.id(),
+                           TRACE_EVENT_FLAG_FLOW_OUT, "type",
+                           event.type_name());
     OnEvent(&event);
     return 0;
   }

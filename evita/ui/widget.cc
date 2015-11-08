@@ -284,7 +284,7 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
     if (key_code < 0x20)
       return 0;
     TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(), "type",
-                             static_cast<int>(event.event_type()), "key_code",
+                             static_cast<int>(event.type()), "key_code",
                              event.raw_key_code());
     OnEvent(&event);
     return 0;
@@ -295,7 +295,7 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
                  KeyEvent::ConvertToRepeat(lParam));
 
   TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(), "type",
-                           static_cast<int>(event.event_type()), "key_code",
+                           static_cast<int>(event.type()), "key_code",
                            event.raw_key_code());
 
   if (message == WM_KEYDOWN && event.key_code() <= 0x7E && !event.alt_key() &&
@@ -304,7 +304,7 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
     return OnMessage(message, wParam, lParam);
   }
 
-  if (event.event_type() != EventType::Invalid) {
+  if (event.type() != EventType::Invalid) {
     OnEvent(&event);
     return 0;
   }
@@ -313,7 +313,7 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
 
 static bool DispatchMouseEvent(Widget* widget, MouseEvent* event) {
   TRACE_EVENT_ASYNC_BEGIN1("input", "MouseEvent", event->id(), "type",
-                           static_cast<int>(event->event_type()));
+                           static_cast<int>(event->type()));
   TRACE_EVENT_WITH_FLOW0("input", "DispatchMouseEvent", event->id(),
                          TRACE_EVENT_FLAG_FLOW_OUT);
   return widget->DispatchEvent(event);
@@ -368,15 +368,15 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
 
   MouseEvent event(native_event, result.widget(), result.local_point(),
                    screen_point);
-  if (event.event_type() == EventType::MouseMoved)
+  if (event.type() == EventType::MouseMoved)
     return DispatchMouseEvent(result.widget(), &event);
 
-  if (event.event_type() == EventType::MousePressed) {
+  if (event.type() == EventType::MousePressed) {
     MouseClickTracker::instance()->OnMousePressed(event);
     return DispatchMouseEvent(result.widget(), &event);
   }
 
-  if (event.event_type() == EventType::MouseReleased) {
+  if (event.type() == EventType::MouseReleased) {
     MouseClickTracker::instance()->OnMouseReleased(event);
     if (!DispatchMouseEvent(result.widget(), &event))
       return false;
@@ -855,11 +855,11 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
 
 // EventTarget
 void Widget::OnKeyEvent(KeyEvent* event) {
-  if (event->event_type() == EventType::KeyPressed) {
+  if (event->type() == EventType::KeyPressed) {
     OnKeyPressed(*event);
     return;
   }
-  if (event->event_type() == EventType::KeyReleased) {
+  if (event->type() == EventType::KeyReleased) {
     OnKeyReleased(*event);
     return;
   }
@@ -867,27 +867,27 @@ void Widget::OnKeyEvent(KeyEvent* event) {
 }
 
 void Widget::OnMouseEvent(MouseEvent* event) {
-  if (event->event_type() == EventType::MouseEntered) {
+  if (event->type() == EventType::MouseEntered) {
     OnMouseEntered(*event);
     return;
   }
-  if (event->event_type() == EventType::MouseExited) {
+  if (event->type() == EventType::MouseExited) {
     OnMouseExited(*event);
     return;
   }
-  if (event->event_type() == EventType::MouseMoved) {
+  if (event->type() == EventType::MouseMoved) {
     OnMouseMoved(*event);
     return;
   }
-  if (event->event_type() == EventType::MousePressed) {
+  if (event->type() == EventType::MousePressed) {
     OnMousePressed(*event);
     return;
   }
-  if (event->event_type() == EventType::MouseReleased) {
+  if (event->type() == EventType::MouseReleased) {
     OnMouseReleased(*event);
     return;
   }
-  if (event->event_type() == EventType::MouseWheel) {
+  if (event->type() == EventType::MouseWheel) {
     OnMouseWheel(*(event->as<MouseWheelEvent>()));
     return;
   }

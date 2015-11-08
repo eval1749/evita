@@ -1,10 +1,11 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-
-#include "evita/ui/events/event.h"
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include <algorithm>
 #include <vector>
+
+#include "evita/ui/events/event.h"
 
 #include "base/logging.h"
 #include "common/memory/singleton.h"
@@ -93,10 +94,10 @@ bool IsNonClientMouseEvent(const base::NativeEvent& native_event) {
 //
 Event::Event(EventType event_type, int flags)
     : default_prevented_(false),
-      event_type_(event_type),
       flags_(flags),
       sequence_number_(++current_sequence_number),
-      time_stamp_(base::Time::Now()) {}
+      time_stamp_(base::Time::Now()),
+      type_(event_type) {}
 
 Event::Event() : Event(EventType::Invalid, 0) {}
 
@@ -360,7 +361,7 @@ std::ostream& operator<<(std::ostream& out, ui::EventType event_type) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::Event& event) {
-  return out << event.event_type() << "Event()";
+  return out << event.type() << "Event()";
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::Event* event) {
@@ -368,7 +369,7 @@ std::ostream& operator<<(std::ostream& out, const ui::Event* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::KeyEvent& event) {
-  return out << event.event_type() << "Event"
+  return out << event.type() << "Event"
              << "(key_code=" << event.key_code()
              << " repeate=" << event.repeat() << ")";
 }
@@ -378,7 +379,7 @@ std::ostream& operator<<(std::ostream& out, const ui::KeyEvent* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent& event) {
-  return out << event.event_type() << "Event(" << MouseModifiers(event)
+  return out << event.type() << "Event(" << MouseModifiers(event)
              << MouseButton(event) << " at " << event.location() << ")";
 }
 
@@ -387,7 +388,7 @@ std::ostream& operator<<(std::ostream& out, const ui::MouseEvent* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseWheelEvent& event) {
-  return out << event.event_type() << "Event("
+  return out << event.type() << "Event("
              << " delta=" << event.delta() << ")";
 }
 

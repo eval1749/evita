@@ -75,14 +75,14 @@ void Control::OnMouseEvent(ui::MouseEvent* event) {
   ui::EventTarget::OnMouseEvent(event);
   if (!focusable())
     return;
-  if (event->event_type() == ui::EventType::MouseEntered) {
+  if (event->type() == ui::EventType::MouseEntered) {
     if (state_ == State::Normal) {
       state_ = State::Hovered;
       DidChangeState();
     }
     return;
   }
-  if (event->event_type() == ui::EventType::MouseExited) {
+  if (event->type() == ui::EventType::MouseExited) {
     if (state_ == State::Hovered) {
       state_ = State::Normal;
       DidChangeState();

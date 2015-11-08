@@ -28,7 +28,7 @@ domapi::ViewEventHandler* view_event_handler() {
 }
 
 domapi::EventType ConvertEventType(const ui::KeyEvent event) {
-  auto const event_type = event.event_type();
+  auto const event_type = event.type();
   if (event_type == ui::EventType::KeyPressed)
     return domapi::EventType::KeyDown;
 
@@ -39,7 +39,7 @@ domapi::EventType ConvertEventType(const ui::KeyEvent event) {
 }
 
 domapi::EventType ConvertEventType(const ui::MouseEvent event) {
-  auto const event_type = event.event_type();
+  auto const event_type = event.type();
   if (event_type == ui::EventType::MousePressed) {
     if (!event.click_count())
       return domapi::EventType::MouseDown;
@@ -106,7 +106,7 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
   api_event.target_id = event_target_id_;
   view_event_handler()->DispatchKeyboardEvent(api_event);
   TRACE_EVENT_ASYNC_END2("input", "KeyEvent", event.id(), "type",
-                         static_cast<int>(event.event_type()), "key_code",
+                         static_cast<int>(event.type()), "key_code",
                          event.raw_key_code());
 }
 

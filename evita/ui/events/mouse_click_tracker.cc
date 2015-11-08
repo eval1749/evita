@@ -33,7 +33,7 @@ bool MouseClickTracker::is_same_time(const MouseEvent& event) const {
 }
 
 void MouseClickTracker::OnMousePressed(const MouseEvent& event) {
-  DCHECK_EQ(EventType::MousePressed, event.event_type());
+  DCHECK_EQ(EventType::MousePressed, event.type());
 
   click_count_ = 0;
   auto const state = state_;
@@ -55,7 +55,7 @@ void MouseClickTracker::OnMousePressed(const MouseEvent& event) {
 }
 
 void MouseClickTracker::OnMouseReleased(const MouseEvent& event) {
-  DCHECK_EQ(EventType::MouseReleased, event.event_type());
+  DCHECK_EQ(EventType::MouseReleased, event.type());
 
   click_count_ = 0;
   auto const state = state_;

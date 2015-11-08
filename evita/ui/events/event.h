@@ -1,5 +1,7 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_UI_EVENTS_EVENT_H_
 #define EVITA_UI_EVENTS_EVENT_H_
 
@@ -86,10 +88,10 @@ class Event : public common::Castable {
   ~Event() override;
 
   bool default_prevented() const { return default_prevented_; }
-  EventType event_type() const { return event_type_; }
   int id() const { return sequence_number_; }
   int flags() const { return flags_; }
   base::Time time_stamp() const { return time_stamp_; }
+  EventType type() const { return type_; }
 
   void PreventDefault();
 
@@ -99,10 +101,10 @@ class Event : public common::Castable {
 
  private:
   bool default_prevented_;
-  EventType event_type_;
   int flags_;
   int sequence_number_;
   base::Time time_stamp_;
+  EventType type_;
 };
 
 //////////////////////////////////////////////////////////////////////

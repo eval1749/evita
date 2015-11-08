@@ -32,16 +32,21 @@ enum class EventFlags {
   Other2Button = 1 << 9,
 };
 
+#define FOR_EACH_UI_EVENT_TYPE(V) \
+  V(Invalid) \
+  V(KeyPressed) \
+  V(KeyReleased) \
+  V(MouseEntered) \
+  V(MouseExited) \
+  V(MouseMoved) \
+  V(MousePressed) \
+  V(MouseReleased) \
+  V(MouseWheel) \
+
 enum class EventType {
-  Invalid,
-  KeyPressed,
-  KeyReleased,
-  MouseEntered,
-  MouseExited,
-  MouseMoved,
-  MousePressed,
-  MouseReleased,
-  MouseWheel,
+#define V(name) name,
+  FOR_EACH_UI_EVENT_TYPE(V)
+#undef V
 };
 
 enum class KeyCode {
@@ -92,6 +97,7 @@ class Event : public common::Castable {
   int flags() const { return flags_; }
   base::Time time_stamp() const { return time_stamp_; }
   EventType type() const { return type_; }
+  const char* type_name() const;
 
   void PreventDefault();
 

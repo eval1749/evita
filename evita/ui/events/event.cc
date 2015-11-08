@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <iterator>
 #include <vector>
 
 #include "evita/ui/events/event.h"
@@ -88,6 +89,16 @@ bool IsNonClientMouseEvent(const base::NativeEvent& native_event) {
 
 }  // namespace
 
+const char* EventTypeName(EventType event_type) {
+  static const char* names[] = {
+#define V(name) #name,
+  FOR_EACH_UI_EVENT_TYPE(V)
+#undef V
+  };
+  auto const it = std::begin(names) + static_cast<size_t>(event_type);
+  return it < std::end(names) ? *it : "Unknown";
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Event
@@ -102,6 +113,10 @@ Event::Event(EventType event_type, int flags)
 Event::Event() : Event(EventType::Invalid, 0) {}
 
 Event::~Event() {}
+
+const char* Event::type_name() const {
+  return EventTypeName(type_);
+}
 
 void Event::PreventDefault() {
   default_prevented_ = true;
@@ -323,11 +338,6 @@ MouseWheelEvent::~MouseWheelEvent() {}
 }  // namespace ui
 
 namespace {
-const char* event_names[] = {
-    "Invalid",      "KeyPressed",    "KeyReleased", "MouseMoved",
-    "MousePressed", "MouseReleased", "MouseWheel",
-};
-
 const char* MouseButton(const ui::MouseEvent& event) {
   static const char* button_names[] = {
       "Left", "Middle", "Right", "Other1", "Other2",
@@ -353,15 +363,11 @@ const char* MouseModifiers(const ui::MouseEvent& event) {
 }  // namespace
 
 std::ostream& operator<<(std::ostream& out, ui::EventType event_type) {
-  auto index = static_cast<size_t>(event_type);
-  if (index < arraysize(event_names)) {
-    return out << event_names[index];
-  }
-  return out << index;
+  return out << ui::EventTypeName(event_type);
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::Event& event) {
-  return out << event.type() << "Event()";
+  return out << event.type_name() << "Event()";
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::Event* event) {
@@ -369,7 +375,7 @@ std::ostream& operator<<(std::ostream& out, const ui::Event* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::KeyEvent& event) {
-  return out << event.type() << "Event"
+  return out << event.type_name() << "Event"
              << "(key_code=" << event.key_code()
              << " repeate=" << event.repeat() << ")";
 }
@@ -379,7 +385,7 @@ std::ostream& operator<<(std::ostream& out, const ui::KeyEvent* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseEvent& event) {
-  return out << event.type() << "Event(" << MouseModifiers(event)
+  return out << event.type_name() << "Event(" << MouseModifiers(event)
              << MouseButton(event) << " at " << event.location() << ")";
 }
 
@@ -388,7 +394,7 @@ std::ostream& operator<<(std::ostream& out, const ui::MouseEvent* event) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ui::MouseWheelEvent& event) {
-  return out << event.type() << "Event("
+  return out << event.type_name() << "Event("
              << " delta=" << event.delta() << ")";
 }
 

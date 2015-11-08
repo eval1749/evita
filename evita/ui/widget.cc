@@ -295,8 +295,9 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
                  KeyEvent::ConvertToRepeat(lParam));
 
   TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(), "type",
-                           event.type_name(), "key_code",
-                           event.raw_key_code());
+                           event.type_name(), "key_code", event.raw_key_code());
+  TRACE_EVENT_WITH_FLOW1("input", "DispatchKeyEvent", event.id(),
+                         TRACE_EVENT_FLAG_FLOW_OUT, "type", event.type_name());
 
   if (message == WM_KEYDOWN && event.key_code() <= 0x7E && !event.alt_key() &&
       !event.control_key()) {
@@ -315,8 +316,7 @@ static bool DispatchMouseEvent(Widget* widget, MouseEvent* event) {
   TRACE_EVENT_ASYNC_BEGIN1("input", "MouseEvent", event->id(), "type",
                            event->type_name());
   TRACE_EVENT_WITH_FLOW1("input", "DispatchMouseEvent", event->id(),
-                         TRACE_EVENT_FLAG_FLOW_OUT, "type",
-                         event->type_name());
+                         TRACE_EVENT_FLAG_FLOW_OUT, "type", event->type_name());
   return widget->DispatchEvent(event);
 }
 

@@ -93,7 +93,6 @@ void EventSource::DispatchFocusEvent(domapi::EventType event_type,
 }
 
 void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
-  TRACE_EVENT0("views", "EventSource::DispatchKeyboardEvent");
   domapi::KeyboardEvent api_event;
   api_event.event_id = event.id();
   api_event.alt_key = event.alt_key();
@@ -105,9 +104,6 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
   api_event.shift_key = event.shift_key();
   api_event.target_id = event_target_id_;
   view_event_handler()->DispatchKeyboardEvent(api_event);
-  TRACE_EVENT_ASYNC_END2("input", "KeyEvent", event.id(), "type",
-                         static_cast<int>(event.type()), "key_code",
-                         event.raw_key_code());
 }
 
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {

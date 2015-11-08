@@ -1,5 +1,6 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/events/view_event_handler_impl.h"
 
@@ -207,13 +208,12 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
 
 void ViewEventHandlerImpl::DispatchKeyboardEvent(
     const domapi::KeyboardEvent& api_event) {
+  TRACE_EVENT_WITH_FLOW0("input", "ViewEventHandlerImpl::DispatchKeyboardEvent",
+                         api_event.event_id, TRACE_EVENT_FLAG_FLOW_IN);
   auto const window = FromEventTargetId(api_event.target_id);
-  if (!window)
-    return;
-  DispatchEventWithInLock(window, new KeyboardEvent(api_event));
-  TRACE_EVENT_ASYNC_END2("input", "KeyEvent", api_event.event_id, "type",
-                         static_cast<int>(api_event.event_type), "key_code",
-                         api_event.key_code);
+  if (window)
+    DispatchEventWithInLock(window, new KeyboardEvent(api_event));
+  TRACE_EVENT_ASYNC_END0("input", "KeyEvent", api_event.event_id);
 }
 
 void ViewEventHandlerImpl::DispatchMouseEvent(

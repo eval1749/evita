@@ -29,6 +29,8 @@ class FileIoContext final : private base::MessagePumpForIO::IOContext,
   bool is_valid() const { return file_handle_.is_valid(); }
 
  private:
+  bool IsRunning() const { return operation_ != nullptr; }
+
   // base::MessagePumpForIO::IOHandler
   void OnIOCompleted(IOContext* context,
                      DWORD bytes_transfered,
@@ -45,7 +47,7 @@ class FileIoContext final : private base::MessagePumpForIO::IOContext,
 
   domapi::FileIoDeferred deferred_;
   common::win::scoped_handle file_handle_;
-  bool running_;
+  const char* operation_;
 
   DISALLOW_COPY_AND_ASSIGN(FileIoContext);
 };

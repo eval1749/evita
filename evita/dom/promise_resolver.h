@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_PROMISE_RESOLVER_H_
 #define EVITA_DOM_PROMISE_RESOLVER_H_
 
+#include "base/location.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "evita/dom/public/deferred.h"
@@ -27,6 +28,7 @@ class PromiseResolver final
 
   template <typename ResolveType, typename RejectType>
   static v8::Handle<v8::Promise> Call(
+      const tracked_objects::Location& from_here,
       const base::Callback<
           void(const domapi::Deferred<ResolveType, RejectType>&)> closure);
 
@@ -39,32 +41,38 @@ class PromiseResolver final
   void Resolve(T value);
 
  private:
-  explicit PromiseResolver(v8_glue::Runner* runner);
+  PromiseResolver(const tracked_objects::Location& from_here,
+                  v8_glue::Runner* runner);
 
   v8_glue::Runner* runner() const { return runner_.get(); }
 
   void DoReject(v8::Handle<v8::Value> reason);
   void DoResolve(v8::Handle<v8::Value> value);
 
+  tracked_objects::Location from_here_;
   v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
   base::WeakPtr<v8_glue::Runner> runner_;
+  int const sequence_num_;
 
   DISALLOW_COPY_AND_ASSIGN(PromiseResolver);
 };
 
 template <typename T, typename U>
 v8::Handle<v8::Promise> PromiseResolver::Call(
+    const tracked_objects::Location& from_here,
     const base::Callback<void(const domapi::Deferred<T, U>&)> closure) {
   auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
-  auto const promise_resolver = make_scoped_refptr(new PromiseResolver(runner));
+  auto const resolver =
+      make_scoped_refptr(new PromiseResolver(from_here, runner));
 
   domapi::Deferred<T, U> deferred;
-  deferred.reject = base::Bind(&PromiseResolver::Reject<U>, promise_resolver);
-  deferred.resolve = base::Bind(&PromiseResolver::Resolve<T>, promise_resolver);
+  deferred.reject = base::Bind(&PromiseResolver::Reject<U>, resolver);
+  deferred.resolve = base::Bind(&PromiseResolver::Resolve<T>, resolver);
+  deferred.sequence_num = resolver->sequence_num_;
   closure.Run(deferred);
-  return runner_scope.Escape(promise_resolver->GetPromise(runner->isolate()));
+  return runner_scope.Escape(resolver->GetPromise(runner->isolate()));
 }
 
 template <typename T>

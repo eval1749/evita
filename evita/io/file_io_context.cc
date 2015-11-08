@@ -64,7 +64,7 @@ void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
 FileIoContext::FileIoContext(const base::string16& file_name,
                              const base::string16& mode,
                              const domapi::OpenFileDeferred& deferred)
-    : file_handle_(OpenFile(file_name, mode, deferred)), running_(false) {
+    : file_handle_(OpenFile(file_name, mode, deferred)), operation_(nullptr) {
   TRACE_EVENT_ASYNC_BEGIN0("io", "FileContext", this);
   if (!file_handle_.is_valid())
     return;
@@ -82,22 +82,29 @@ FileIoContext::~FileIoContext() {
 void FileIoContext::OnIOCompleted(IOContext*,
                                   DWORD bytes_transferred,
                                   DWORD error) {
-  TRACE_EVENT0("io", "FileIoContext::OnIOCompleted");
-  TRACE_EVENT_ASYNC_END0("io", "FileIoContext I/O", this);
+  DCHECK(IsRunning());
+  TRACE_EVENT_WITH_FLOW1("script", "FileIoContext::OnIOCompleted",
+                         deferred_.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "operation", operation_);
   overlapped.Offset += bytes_transferred;
-  running_ = false;
+  auto const operation = operation_;
+  operation_ = nullptr;
   if (!error || error == ERROR_HANDLE_EOF)
     Resolve(deferred_.resolve, bytes_transferred);
   else
     Reject(deferred_.reject, error);
   if (!file_handle_.is_valid())
     delete this;
+  TRACE_EVENT_ASYNC_END0("io", operation, deferred_.sequence_num);
 }
 
 // io::IoContext
 void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT0("io", "FileIoContext::Close");
-    if (file_handle_.is_valid()) {
+  TRACE_EVENT_WITH_FLOW0("script", "FileIoContext::Close",
+                         deferred.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
+  if (file_handle_.is_valid()) {
     if (!::CloseHandle(file_handle_.get())) {
       auto const last_error = ::GetLastError();
       DVLOG(0) << "CloseHandle error=" << last_error;
@@ -106,7 +113,7 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
     }
     file_handle_.release();
   }
-  if (!running_)
+  if (!IsRunning())
     delete this;
   Resolve(deferred.resolve, 0u);
 }
@@ -114,15 +121,16 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
 void FileIoContext::Read(void* buffer,
                          size_t num_read,
                          const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT0("io", "FileIoContext::Read");
-  if (running_) {
+  TRACE_EVENT_WITH_FLOW0("script", "FileIoContext::Read", deferred.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
+  if (IsRunning()) {
     Reject(deferred.reject, ERROR_BUSY);
     return;
   }
 
-  TRACE_EVENT_ASYNC_BEGIN0("io", "FileIoContext I/O", this);
-  running_ = true;
   deferred_ = deferred;
+  operation_ = "ReadFile";
+  TRACE_EVENT_ASYNC_BEGIN0("io", operation_, deferred.sequence_num);
   DWORD read;
   auto const succeeded =
       ::ReadFile(file_handle_.get(), buffer, static_cast<DWORD>(num_read),
@@ -133,22 +141,23 @@ void FileIoContext::Read(void* buffer,
   auto const error = ::GetLastError();
   if (error == ERROR_IO_PENDING)
     return;
-  running_ = false;
   OnIOCompleted(this, 0, error);
 }
 
 void FileIoContext::Write(void* buffer,
                           size_t num_write,
                           const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT0("io", "FileIoContext::Write");
-  if (running_) {
+  TRACE_EVENT_WITH_FLOW0("script", "FileIoContext::Write",
+                         deferred.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
+  if (IsRunning()) {
     Reject(deferred.reject, ERROR_BUSY);
     return;
   }
 
-  TRACE_EVENT_ASYNC_BEGIN0("io", "FileIoContext I/O", this);
-  running_ = true;
   deferred_ = deferred;
+  operation_ = "WriteFile";
+  TRACE_EVENT_ASYNC_BEGIN0("io", operation_, deferred.sequence_num);
   DWORD written;
   auto const succeeded =
       ::WriteFile(file_handle_.get(), buffer, static_cast<DWORD>(num_write),
@@ -158,7 +167,6 @@ void FileIoContext::Write(void* buffer,
   auto const error = ::GetLastError();
   if (error == ERROR_IO_PENDING)
     return;
-  running_ = false;
   OnIOCompleted(this, 0, error);
 }
 

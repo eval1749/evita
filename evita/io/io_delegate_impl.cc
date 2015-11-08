@@ -65,6 +65,9 @@ IoDelegateImpl::~IoDelegateImpl() {}
 // domapi::IoDelegate
 void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
                                    const CheckSpellingResolver& deferred) {
+  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "step", "IoDelegateImpl::CheckSpelling");
   editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
       deferred.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->CheckSpelling(
@@ -84,7 +87,9 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
 void IoDelegateImpl::GetSpellingSuggestions(
     const base::string16& wrong_word,
     const GetSpellingSuggestionsResolver& deferred) {
-  TRACE_EVENT0("io", "IoDelegateImpl::GetSpellingSugges");
+  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "step", "IoDelegateImpl::GetSpellingSuggestions");
   editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
       deferred.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->GetSpellingSuggestions(
@@ -95,7 +100,9 @@ void IoDelegateImpl::MakeTempFileName(
     const base::string16& dir_name,
     const base::string16& prefix,
     const domapi::MakeTempFileNameResolver& resolver) {
-  TRACE_EVENT0("io", "IoDelegateImpl::MakeTempFileName");
+  TRACE_EVENT_WITH_FLOW1("script", "Promise", resolver.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "step", "IoDelegateImpl::MakeTempFileName");
   base::string16 file_name(MAX_PATH, 0);
   auto const unique_id =
       ::GetTempFileNameW(dir_name.c_str(), prefix.c_str(), 0, &file_name[0]);
@@ -117,6 +124,9 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
                               const domapi::MoveFileOptions& options,
                               const domapi::IoResolver& resolver) {
   TRACE_EVENT0("io", "IoDelegateImpl::MoveFile");
+  TRACE_EVENT_WITH_FLOW1("script", "Promise", resolver.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "step", "IoDelegateImpl::MoveFile");
   auto const flags = options.no_overwrite
                          ? MOVEFILE_WRITE_THROUGH
                          : MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING;
@@ -136,6 +146,9 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
                               const domapi::OpenFileDeferred& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenFile");
+  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "step", "IoDelegateImpl::OpenFile");
   auto file = std::make_unique<FileIoContext>(file_name, mode, deferred);
   if (!file->is_valid())
     return;
@@ -147,6 +160,9 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
 void IoDelegateImpl::OpenProcess(const base::string16& command_line,
                                  const domapi::OpenProcessDeferred& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenProcess");
+  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "step", "IoDelegateImpl::OpenProcess");
   auto const process_id = domapi::IoContextId::New();
   auto const process = new ProcessIoContext(process_id, command_line, deferred);
   context_map_[process_id] = process;
@@ -156,6 +172,9 @@ void IoDelegateImpl::QueryFileStatus(
     const base::string16& file_name,
     const domapi::QueryFileStatusDeferred& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::QueryFileStatus");
+  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
+                         "step", "IoDelegateImpl::QueryFileStatus");
   WIN32_FIND_DATAW find_data;
   scoped_find_handle find_handle(
       ::FindFirstFileW(file_name.c_str(), &find_data));

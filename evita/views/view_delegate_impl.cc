@@ -8,6 +8,7 @@
 #include <string>
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/windows/text_window.h"
@@ -226,6 +227,9 @@ void ViewDelegateImpl::GetFileNameForLoad(
     dom::WindowId window_id,
     const base::string16& dir_path,
     const GetFileNameForLoadResolver& resolver) {
+  TRACE_EVENT_WITH_FLOW0("script", "ViewDelegateImpl::GetFileNameForLoad",
+                         resolver.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   auto const widget = window_id == dom::kInvalidWindowId
                           ? FrameList::instance()->active_frame()
                           : Window::FromWindowId(window_id);
@@ -249,6 +253,9 @@ void ViewDelegateImpl::GetFileNameForSave(
     dom::WindowId window_id,
     const base::string16& dir_path,
     const GetFileNameForSaveResolver& resolver) {
+  TRACE_EVENT_WITH_FLOW0("script", "ViewDelegateImpl::GetFileNameForSave",
+                         resolver.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   auto const widget = window_id == dom::kInvalidWindowId
                           ? FrameList::instance()->active_frame()
                           : Window::FromWindowId(window_id);
@@ -399,6 +406,9 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
                                   const base::string16& title,
                                   int flags,
                                   const MessageBoxResolver& resolver) {
+  TRACE_EVENT_WITH_FLOW0("script", "ViewDelegateImpl::MessageBox",
+                         resolver.sequence_num,
+                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   auto const frame = GetFrameForMessage(window_id);
 
   auto const kButtonMask = 7;

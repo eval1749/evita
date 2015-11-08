@@ -66,6 +66,7 @@ File::~File() {}
 v8::Handle<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
                                                const base::string16& prefix) {
   return PromiseResolver::Call(
+      FROM_HERE,
       base::Bind(&domapi::IoDelegate::MakeTempFileName,
                  base::Unretained(ScriptHost::instance()->io_delegate()),
                  dir_name, prefix));
@@ -77,6 +78,7 @@ v8::Handle<v8::Promise> File::Move(const base::string16& src_path,
   domapi::MoveFileOptions api_options;
   api_options.no_overwrite = options.no_overwrite();
   return PromiseResolver::Call(
+      FROM_HERE,
       base::Bind(&domapi::IoDelegate::MoveFile,
                  base::Unretained(ScriptHost::instance()->io_delegate()),
                  src_path, dst_path, api_options));
@@ -90,6 +92,7 @@ v8::Handle<v8::Promise> File::Move(const base::string16& src_path,
 v8::Handle<v8::Promise> File::Open(const base::string16& file_name,
                                    const base::string16& mode) {
   return PromiseResolver::Call(
+      FROM_HERE,
       base::Bind(&domapi::IoDelegate::OpenFile,
                  base::Unretained(ScriptHost::instance()->io_delegate()),
                  file_name, mode));
@@ -100,15 +103,19 @@ v8::Handle<v8::Promise> File::Open(const base::string16& file_name) {
 }
 
 v8::Handle<v8::Promise> File::Remove(const base::string16& file_name) {
-  return PromiseResolver::Call(base::Bind(
-      &domapi::IoDelegate::RemoveFile,
-      base::Unretained(ScriptHost::instance()->io_delegate()), file_name));
+  return PromiseResolver::Call(
+      FROM_HERE,
+      base::Bind(&domapi::IoDelegate::RemoveFile,
+                 base::Unretained(ScriptHost::instance()->io_delegate()),
+                 file_name));
 }
 
 v8::Handle<v8::Promise> File::Stat(const base::string16& file_name) {
-  return PromiseResolver::Call(base::Bind(
-      &domapi::IoDelegate::QueryFileStatus,
-      base::Unretained(ScriptHost::instance()->io_delegate()), file_name));
+  return PromiseResolver::Call(
+      FROM_HERE,
+      base::Bind(&domapi::IoDelegate::QueryFileStatus,
+                 base::Unretained(ScriptHost::instance()->io_delegate()),
+                 file_name));
 }
 
 }  // namespace dom

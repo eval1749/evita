@@ -13,6 +13,7 @@ template <typename ResolveType, typename RejectType = int>
 struct Deferred final {
   base::Callback<void(RejectType)> reject;
   base::Callback<void(ResolveType)> resolve;
+  int sequence_num;
 };
 
 }  // namespace domapi

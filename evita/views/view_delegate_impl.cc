@@ -238,7 +238,7 @@ void ViewDelegateImpl::GetFileNameForLoad(
     dom::WindowId window_id,
     const base::string16& dir_path,
     const GetFileNameForLoadResolver& resolver) {
-  TRACE_EVENT_WITH_FLOW0("script", "ViewDelegateImpl::GetFileNameForLoad",
+  TRACE_EVENT_WITH_FLOW0("promise", "ViewDelegateImpl::GetFileNameForLoad",
                          resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   auto const widget = window_id == dom::kInvalidWindowId
@@ -264,7 +264,7 @@ void ViewDelegateImpl::GetFileNameForSave(
     dom::WindowId window_id,
     const base::string16& dir_path,
     const GetFileNameForSaveResolver& resolver) {
-  TRACE_EVENT_WITH_FLOW0("script", "ViewDelegateImpl::GetFileNameForSave",
+  TRACE_EVENT_WITH_FLOW0("promise", "ViewDelegateImpl::GetFileNameForSave",
                          resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   auto const widget = window_id == dom::kInvalidWindowId
@@ -288,7 +288,7 @@ void ViewDelegateImpl::GetFileNameForSave(
 
 void ViewDelegateImpl::GetMetrics(const base::string16& name,
                                   const domapi::StringPromise& promise) {
-  TRACE_EVENT_WITH_FLOW1("script", "ViewDelegateImpl::GetMetrics",
+  TRACE_EVENT_WITH_FLOW1("promise", "ViewDelegateImpl::GetMetrics",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "name", base::UTF16ToUTF8(name));
@@ -398,7 +398,7 @@ void ViewDelegateImpl::MapTextFieldPointToOffset(
     float x,
     float y,
     const domapi::IntegerPromise& promise) {
-  TRACE_EVENT_WITH_FLOW0("script",
+  TRACE_EVENT_WITH_FLOW0("promise",
                          "ViewDelegateImpl::MapTextFieldPointToOffset",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
@@ -420,7 +420,7 @@ void ViewDelegateImpl::MapTextWindowPointToOffset(
     float x,
     float y,
     const domapi::IntegerPromise& promise) {
-  TRACE_EVENT_WITH_FLOW0("script",
+  TRACE_EVENT_WITH_FLOW0("promise",
                          "ViewDelegateImpl::MapTextWindowPointToOffset",
                          promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
@@ -442,7 +442,7 @@ void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
                                   const base::string16& title,
                                   int flags,
                                   const MessageBoxResolver& resolver) {
-  TRACE_EVENT_WITH_FLOW0("script", "ViewDelegateImpl::MessageBox",
+  TRACE_EVENT_WITH_FLOW0("promise", "ViewDelegateImpl::MessageBox",
                          resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   auto const frame = GetFrameForMessage(window_id);

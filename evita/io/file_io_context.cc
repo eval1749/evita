@@ -83,7 +83,7 @@ void FileIoContext::OnIOCompleted(IOContext*,
                                   DWORD bytes_transferred,
                                   DWORD error) {
   DCHECK(IsRunning());
-  TRACE_EVENT_WITH_FLOW1("script", "FileIoContext::OnIOCompleted",
+  TRACE_EVENT_WITH_FLOW1("promise", "FileIoContext::OnIOCompleted",
                          deferred_.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "operation", operation_);
@@ -101,7 +101,7 @@ void FileIoContext::OnIOCompleted(IOContext*,
 
 // io::IoContext
 void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT_WITH_FLOW0("script", "FileIoContext::Close",
+  TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Close",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (file_handle_.is_valid()) {
@@ -121,7 +121,7 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
 void FileIoContext::Read(void* buffer,
                          size_t num_read,
                          const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT_WITH_FLOW0("script", "FileIoContext::Read", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Read", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (IsRunning()) {
     Reject(deferred.reject, ERROR_BUSY);
@@ -147,7 +147,7 @@ void FileIoContext::Read(void* buffer,
 void FileIoContext::Write(void* buffer,
                           size_t num_write,
                           const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT_WITH_FLOW0("script", "FileIoContext::Write",
+  TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Write",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (IsRunning()) {

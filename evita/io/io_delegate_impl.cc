@@ -65,7 +65,7 @@ IoDelegateImpl::~IoDelegateImpl() {}
 // domapi::IoDelegate
 void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
                                    const CheckSpellingResolver& deferred) {
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::CheckSpelling");
   editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
@@ -87,7 +87,7 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
 void IoDelegateImpl::GetSpellingSuggestions(
     const base::string16& wrong_word,
     const GetSpellingSuggestionsResolver& deferred) {
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::GetSpellingSuggestions");
   editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
@@ -100,7 +100,7 @@ void IoDelegateImpl::MakeTempFileName(
     const base::string16& dir_name,
     const base::string16& prefix,
     const domapi::MakeTempFileNameResolver& resolver) {
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", resolver.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::MakeTempFileName");
   base::string16 file_name(MAX_PATH, 0);
@@ -124,7 +124,7 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
                               const domapi::MoveFileOptions& options,
                               const domapi::IoResolver& resolver) {
   TRACE_EVENT0("io", "IoDelegateImpl::MoveFile");
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", resolver.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::MoveFile");
   auto const flags = options.no_overwrite
@@ -146,7 +146,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
                               const domapi::OpenFileDeferred& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenFile");
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::OpenFile");
   auto file = std::make_unique<FileIoContext>(file_name, mode, deferred);
@@ -160,7 +160,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
 void IoDelegateImpl::OpenProcess(const base::string16& command_line,
                                  const domapi::OpenProcessDeferred& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenProcess");
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::OpenProcess");
   auto const process_id = domapi::IoContextId::New();
@@ -172,7 +172,7 @@ void IoDelegateImpl::QueryFileStatus(
     const base::string16& file_name,
     const domapi::QueryFileStatusDeferred& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::QueryFileStatus");
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::QueryFileStatus");
   WIN32_FIND_DATAW find_data;

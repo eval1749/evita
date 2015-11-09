@@ -48,7 +48,7 @@ ProcessIoContext::~ProcessIoContext() {
 void ProcessIoContext::CloseAndWaitProcess(
     const domapi::FileIoDeferred& deferred) {
   TRACE_EVENT0("io", "ProcessIoContext::CloseAndWaitProcess");
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "ProcessIoContext::CloseAndWaitProcess");
   if (auto const last_error = CloseProcess()) {
@@ -95,7 +95,7 @@ uint32_t ProcessIoContext::CloseProcess() {
 void ProcessIoContext::ReadFromProcess(void* buffer,
                                        size_t num_read,
                                        const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT_WITH_FLOW1("script", "ProcessIoContext::ReadFromProcess",
+  TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::ReadFromProcess",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "ProcessIoContext::ReadFromProcess");
@@ -117,7 +117,7 @@ void ProcessIoContext::StartProcess(
     domapi::IoContextId context_id,
     const base::string16& command_line,
     const domapi::OpenProcessDeferred& deferred) {
-  TRACE_EVENT_WITH_FLOW1("script", "ProcessIoContext::StartProcess",
+  TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::StartProcess",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "ProcessIoContext::StartProcess");
@@ -190,7 +190,7 @@ void ProcessIoContext::StartProcess(
 void ProcessIoContext::WriteToProcess(void* buffer,
                                       size_t num_write,
                                       const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT_WITH_FLOW1("script", "ProcessIoContext::WriteToProcess",
+  TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::WriteToProcess",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "ProcessIoContext::WriteToProcess");

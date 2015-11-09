@@ -61,7 +61,7 @@ PromiseResolver::PromiseResolver(const tracked_objects::Location& from_here,
       sequence_num_(++promise_sequence_num) {
   TRACE_EVENT_ASYNC_BEGIN1("script", "Promise", sequence_num_, "function",
                            from_here.function_name());
-  TRACE_EVENT_WITH_FLOW1("script", "Promise", sequence_num_,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", sequence_num_,
                          TRACE_EVENT_FLAG_FLOW_OUT, "function",
                          from_here.function_name());
   LivePromiseResolverSet::instance()->Register(this);
@@ -72,7 +72,7 @@ PromiseResolver::~PromiseResolver() {
 }
 
 void PromiseResolver::DoReject(v8::Handle<v8::Value> value) {
-  TRACE_EVENT_WITH_FLOW1("script", "PromiseResolver::Reject", sequence_num_,
+  TRACE_EVENT_WITH_FLOW1("promise", "PromiseResolver::Reject", sequence_num_,
                          TRACE_EVENT_FLAG_FLOW_IN, "function",
                          from_here_.function_name());
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));
@@ -85,7 +85,7 @@ void PromiseResolver::DoReject(v8::Handle<v8::Value> value) {
 }
 
 void PromiseResolver::DoResolve(v8::Handle<v8::Value> value) {
-  TRACE_EVENT_WITH_FLOW1("script", "PromiseResolver::Resolver", sequence_num_,
+  TRACE_EVENT_WITH_FLOW1("promise", "PromiseResolver::Resolver", sequence_num_,
                          TRACE_EVENT_FLAG_FLOW_IN, "function",
                          from_here_.function_name());
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));

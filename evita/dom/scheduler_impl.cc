@@ -108,7 +108,10 @@ void SchedulerImpl::IdleTaskQueue::RunIdleTasks() {
     waiting_tasks_.pop();
   }
 
-  while (!ready_tasks_.empty() && IsIdle()) {
+ // Run runnable tasks before this loop.
+ for (auto count = ready_tasks_.size(); count > 0; --count) {
+    if (!IsIdle())
+      break;
     auto const task = ready_tasks_.front();
     ready_tasks_.pop();
     if (!task->IsCanceled())

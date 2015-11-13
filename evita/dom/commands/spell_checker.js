@@ -436,7 +436,7 @@
       this.painter_.resetOffset(this.offset, this.checked_);
       this.resetLife(this.life);
       this.painter_.run();
-      this.schedule(0);
+      this.schedule(32);
     }
 
     /**
@@ -558,7 +558,7 @@
           break;
         }
       }
-      this.schedule(0);
+      this.schedule(32);
     }
 
     /** @private */
@@ -571,7 +571,7 @@
           // changing.
           this.offset_ = wordRange.start;
           this.caretIsHot_ = false;
-          this.schedule(1000);
+          this.schedule(500);
           return;
         }
         if (!this.checkWord(wordRange.start, wordRange.end)) {
@@ -579,7 +579,7 @@
           break;
         }
       }
-      this.schedule(0);
+      this.schedule(32);
     }
 
     /**

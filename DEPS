@@ -1,18 +1,17 @@
-# When you update vars or deps, you should run
-#   python tools/deps2git/deps2git.py -w .. -o .DEPS.git
-# then commit both DEPS and .DEPS.git
+# This file is used to manage the dependencies of the Evita src repo. It is
+# used by gclient to determine what version of each dependency to check out, and
+# where.
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
 
-  'buildtools_revision':  'c2f259809d5ede3275df5ea0842f0431990c4f98',
+  'buildtools_revision':  '3ba3ca22ec610fe95683f6bfdeea9d90c768abd7',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
-  'deps2git_revision': 'f04828eb0b5acd3e7ad983c024870f17f17b06d9',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': '2c1e6cced23554ce84806e570acea637f6473afc',
   'icu_revision': '42c58d4e49f2250039f0e98d43e0b76e8f5ca024',
-  'v8_revision': 'a30c57cb7767baceb627e8d9e6f27955aba54c44',
+  'v8_revision': '28fa22aebc92d1c74b6c87e83afc67cec4b79124',
 }
 
 deps = {
@@ -21,9 +20,6 @@ deps = {
 
   'src/third_party/cygwin':
     Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),
-
-  'src/tools/deps2git':
-    Var('chromium_git') + '/chromium/tools/deps2git.git' + '@' + Var('deps2git_revision'), 
 
   'src/testing/gmock':
     Var('chromium_git') + '/external/googlemock.git' + '@' + Var('gmock_revision'), 

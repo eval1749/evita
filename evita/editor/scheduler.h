@@ -52,10 +52,13 @@ class Scheduler final {
   void BeginFrame();
   void ChangeState(State new_state);
   void CommitFrame();
+  void EnterIdle();
+  void ExitIdle();
   void HandleAnimationFrame();
   void ScheduleNextFrame();
 
   std::unordered_set<ui::AnimationFrameHandler*> canceled_handlers_;
+  int idle_sequence_num_;
   base::Time last_frame_time_;
   base::Time last_paint_time_;
   std::unique_ptr<base::Lock> lock_;

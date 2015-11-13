@@ -55,7 +55,8 @@ std::ostream& operator<<(std::ostream& ostream, Scheduler::State state) {
 // Scheduler
 //
 Scheduler::Scheduler(domapi::ViewEventHandler* script_delegate)
-    : lock_(new base::Lock()),
+    : idle_sequence_num_(0),
+      lock_(new base::Lock()),
       message_loop_(base::MessageLoop::current()),
       script_delegate_(script_delegate),
       state_(State::Sleeping),
@@ -86,10 +87,9 @@ void Scheduler::BeginFrame() {
   }
 
   // Enter idle state
-  auto const now = base::Time::Now();
   ChangeState(State::Idle);
-  auto const idle_deadline = now + base::TimeDelta::FromMicroseconds(50);
-  script_delegate_->DidEnterViewIdle(idle_deadline);
+  idle_sequence_num_ = state_sequence_num_;
+  EnterIdle();
 }
 
 void Scheduler::CancelAnimationFrameRequest(
@@ -119,6 +119,26 @@ void Scheduler::CommitFrame() {
 
 void Scheduler::DidUpdateDom() {
   TRACE_EVENT0("scheduler", "Scheduler::DidUpdateDom");
+}
+
+void Scheduler::EnterIdle() {
+  lock_->AssertAcquired();
+  DCHECK_EQ(State::Idle, state_);
+  auto const now = base::Time::Now();
+  auto const delay = base::TimeDelta::FromMilliseconds(50);
+  auto const idle_deadline = now + delay;
+  script_delegate_->DidEnterViewIdle(idle_deadline);
+  message_loop_->task_runner()->PostNonNestableDelayedTask(
+      FROM_HERE, base::Bind(&Scheduler::ExitIdle, base::Unretained(this)),
+      delay);
+}
+
+void Scheduler::ExitIdle() {
+  base::AutoLock lock_scope(*lock_);
+  if (state_ != State::Idle || idle_sequence_num_ != state_sequence_num_)
+    return;
+  DCHECK_EQ(State::Idle, state_);
+  EnterIdle();
 }
 
 void Scheduler::HandleAnimationFrame() {

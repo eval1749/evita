@@ -94,7 +94,6 @@ void FocusController::WidgetUseMap::WillDestroyWidget(Widget* widget) {
 //
 FocusController::FocusController()
     : focus_widget_(nullptr),
-      has_active_focus_(false),
       widget_use_map_(new WidgetUseMap()),
       will_focus_widget_(nullptr) {}
 
@@ -107,11 +106,11 @@ void FocusController::DidActivate(Widget* native_widget) {
 }
 
 void FocusController::DidKillNativeFocus(Widget* native_widget) {
-  if (auto const focus_widget = focus_widget_) {
-    focus_widget_ = nullptr;
-    focus_widget->DidKillFocus(will_focus_widget_);
-  }
-  has_active_focus_ = false;
+  auto const focus_widget = focus_widget_;
+  if (!focus_widget)
+    return;
+  focus_widget_ = nullptr;
+  focus_widget->DidKillFocus(will_focus_widget_);
 }
 
 void FocusController::DidSetNativeFocus(Widget* widget) {
@@ -119,7 +118,6 @@ void FocusController::DidSetNativeFocus(Widget* widget) {
   focus_widget_ = will_focus_widget_ ? will_focus_widget_ : widget;
   will_focus_widget_ = nullptr;
   focus_widget_->DidSetFocus(last_focused_widget);
-  has_active_focus_ = true;
   auto const host_widget = GetTopLevelWidget(focus_widget_);
   // TODO(eval1749): Should we have |Widget::IsPopupWindow()| to avoid checking
   // WS_POPUP?
@@ -134,7 +132,7 @@ Widget* FocusController::GetRecentUsedWidget() const {
 
 SelectionState FocusController::GetSelectionState(Widget* widget) const {
   auto const focusHwnd = ::GetFocus();
-  if (focusHwnd != ::GetForegroundWindow())
+  if (!IsForeground())
     return SelectionState::Disabled;
 
   if (widget->has_focus())
@@ -148,6 +146,12 @@ SelectionState FocusController::GetSelectionState(Widget* widget) const {
     return SelectionState::Highlight;
 
   return SelectionState::Disabled;
+}
+
+bool FocusController::IsForeground() const {
+  if (!focus_widget_)
+    return false;
+  return focus_widget_->AssociatedHwnd() == ::GetForegroundWindow();
 }
 
 void FocusController::RequestFocus(Widget* widget) {

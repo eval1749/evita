@@ -16,17 +16,27 @@
 #include "evita/editor/application.h"
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/ui/compositor/compositor.h"
+#include "evita/ui/focus_controller.h"
 
 namespace editor {
 
-static base::TimeDelta ComputeDelay(const base::Time& last_frame_time,
-                                    const base::Time& now) {
-  // TODO(eval1749): We should increase |frame_delta| if the application is
-  // running in background.
-  auto const kMinFrameDelta = base::TimeDelta::FromMilliseconds(1000 / 60);
-  auto const next_frame_time = last_frame_time + kMinFrameDelta;
+static base::TimeDelta ComputeFrameDelay() {
+  return ui::FocusController::instance()->IsForeground()
+      ? base::TimeDelta::FromMilliseconds(1000 / 60)
+      : base::TimeDelta::FromMilliseconds(1000);
+}
+
+static base::TimeDelta ComputeFrameDelay(const base::Time& last_frame_time,
+                                         const base::Time& now) {
+  auto const next_frame_time = last_frame_time + ComputeFrameDelay();
   auto const delta = next_frame_time - now;
   return std::max(delta, base::TimeDelta::FromMilliseconds(3));
+}
+
+static base::TimeDelta ComputeIdleDelay() {
+  return ui::FocusController::instance()->IsForeground()
+      ? base::TimeDelta::FromMilliseconds(50)
+      : base::TimeDelta::FromMilliseconds(5000);
 }
 
 #define FOR_EACH_STATE(V) V(Idle) V(Running) V(Sleeping) V(Waiting)
@@ -125,12 +135,11 @@ void Scheduler::EnterIdle() {
   lock_->AssertAcquired();
   DCHECK_EQ(State::Idle, state_);
   auto const now = base::Time::Now();
-  auto const delay = base::TimeDelta::FromMilliseconds(50);
-  auto const idle_deadline = now + delay;
+  auto const idle_deadline = now + base::TimeDelta::FromMilliseconds(50);
   script_delegate_->DidEnterViewIdle(idle_deadline);
   message_loop_->task_runner()->PostNonNestableDelayedTask(
       FROM_HERE, base::Bind(&Scheduler::ExitIdle, base::Unretained(this)),
-      delay);
+      ComputeIdleDelay());
 }
 
 void Scheduler::ExitIdle() {
@@ -185,7 +194,7 @@ void Scheduler::ScheduleNextFrame() {
   DCHECK_EQ(State::Sleeping, state_);
   auto const now = base::Time::Now();
   ChangeState(State::Waiting);
-  auto const delay = ComputeDelay(last_frame_time_, now);
+  auto const delay = ComputeFrameDelay(last_frame_time_, now);
   script_delegate_->DidEnterViewIdle(now + delay);
   message_loop_->PostNonNestableDelayedTask(
       FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)),

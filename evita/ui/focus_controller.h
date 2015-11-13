@@ -23,10 +23,6 @@ class FocusController final : public common::Singleton<FocusController> {
 
   Widget* focus_widget() const { return focus_widget_; }
 
-  // When mode less dialog box has focus, ::GetFocus() returns it, but
-  // |have_active_focus_| is false.
-  bool has_active_focus() const { return has_active_focus_; }
-
   // Called when widget recieves WM_NCACTIVATE/WA_ACTIVE.
   void DidActivate(Widget* widget);
 
@@ -38,6 +34,7 @@ class FocusController final : public common::Singleton<FocusController> {
   // good time to prepare caret rendering.
   void DidSetNativeFocus(Widget* widget);
   Widget* GetRecentUsedWidget() const;
+  bool IsForeground() const;
   SelectionState GetSelectionState(Widget* widget) const;
   void RequestFocus(Widget* widget);
   void WillDestroyWidget(Widget* widget);
@@ -48,7 +45,6 @@ class FocusController final : public common::Singleton<FocusController> {
   FocusController();
 
   Widget* focus_widget_;
-  bool has_active_focus_;
   std::unique_ptr<WidgetUseMap> widget_use_map_;
   Widget* will_focus_widget_;
 

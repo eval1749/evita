@@ -17,7 +17,7 @@
   const kColdScanStartDelay = 100;
 
   /** @const @type {number} */
-  const kMaxColdScanCount = 1000 * 2;
+  const kMaxColdScanCount = 1000 * 4;
 
   /** @const @type {number} */
   const kMaxHotScanCount = 400;
@@ -450,7 +450,7 @@
       this.painter_.resetOffset(this.offset, this.checked_);
       this.resetLife(this.life);
       this.painter_.run();
-      this.schedule(32);
+      this.schedule(0);
     }
 
     /**

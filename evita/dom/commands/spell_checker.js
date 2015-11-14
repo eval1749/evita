@@ -43,24 +43,21 @@
   const keywords = new Set();
 
   /**
-   * @param {number} charCode
-   * @return {boolean}
+   * @param {!Spelling} spelling
+   * @return {!Spelling}
    */
-  function isWordChar(charCode) {
-    const category = Unicode.UCD[charCode].category;
-    return category === 'Lu' || category === 'Ll';
+  function colorOf(spelling) {
+    return spelling == Spelling.MISSPELLED ? spelling : Spelling.NONE;
   }
 
-    /**
-     * @param {!Range} wordRange
-     * @param {Spelling} mark
-     *
-     * Mark first |word| without misspelled marker in document with |mark|.
-     */
-  function markWord(wordRange, mark) {
-    if (mark === Spelling.CORRECT)
-      return;
-    wordRange.setSpelling(mark);
+  /**
+   * @param {!Document} document
+   * @param {number} start
+   * @param {number} end
+   * @param {!Spelling} spelling
+   */
+  function paint(document, start, end, spelling) {
+    document.setSpelling(start, end, colorOf(spelling));
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -259,7 +256,7 @@
     removeMarker(start) {
       if (start === this.offset_)
         return;
-      this.document_.setSpelling(start, this.offset_, Spelling.NONE);
+      paint(this.document_, start, this.offset_, Spelling.NONE);
     }
 
     /**
@@ -285,7 +282,7 @@
       /** @type {Spelling} */
       const spelling = controller.checkSpelling(word);
       if (spelling !== Spelling.NONE) {
-        this.document_.setSpelling(wordStart, wordEnd, spelling);
+        paint(this.document_, wordStart, wordEnd, spelling);
         return '';
       }
       return word;
@@ -376,7 +373,7 @@
       for (let wordRange of this.words()) {
         const word = this.document.slice(wordRange.start, wordRange.end);
         const spelling = controller.checkSpelling(word);
-        this.document.setSpelling(wordRange.start, wordRange.end, spelling);
+        paint(this.document, wordRange.start, wordRange.end, spelling);
       }
       this.schedule();
     }
@@ -525,8 +522,8 @@
         this.freeRanges_.push(markerRange);
         if (word !== markerRange.text)
           return;
-        const marker = isCorrect ? Spelling.CORRECT : Spelling.MISSPELLED;
-        markWord(markerRange, marker);
+        const spelling = isCorrect ? Spelling.CORRECT : Spelling.MISSPELLED;
+        markerRange.setSpelling(colorOf(spelling));
       });
       return true;
     }
@@ -575,7 +572,7 @@
           break;
         }
       }
-      this.schedule(32);
+      this.schedule(0);
     }
 
     /** @private */

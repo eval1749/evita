@@ -9,9 +9,9 @@ vars = {
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
-  'gyp_revision': '2c1e6cced23554ce84806e570acea637f6473afc',
+  'gyp_revision': '33b351b2eda8facc464c89213fc8cd9919666c05',
   'icu_revision': '42c58d4e49f2250039f0e98d43e0b76e8f5ca024',
-  'v8_revision': '28fa22aebc92d1c74b6c87e83afc67cec4b79124',
+  'v8_revision': '10449d46aa20f10f39598627bf07f70def597029',
 }
 
 deps = {

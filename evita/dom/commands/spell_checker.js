@@ -154,6 +154,11 @@
     /** @return {boolean} */
     atStart() { return this.offset_ === 0; }
 
+    /** @return {boolean} */
+    atWordChar() {
+      return Unicode.UCD[this.charCode()].category.charCodeAt(0) === 0x4C;
+    }
+
     /** @return {number} */
     charCode() { return this.document_.charCodeAt_(this.offset_); }
 
@@ -171,6 +176,20 @@
 
     /** @return {boolean} */
     isDead() { return this.life_ === 0 }
+
+    /**
+     * @param {!Unicode.CharacterData} wordData
+     * @return {boolean}
+     *
+     * Note: The script for U+30FC, Katakana-Hiragana prolonged sound mark, is
+     * Unicode.Script.COMMON, instead of "HIRAGANA" or KATAKANA.
+     */
+    isWordChar(wordData) {
+      const data = Unicode.UCD[this.charCode()];
+      if (data.category.charCodeAt(0) !== 0x4C)
+        return false;
+      return wordData.script === data.script;
+    }
 
     moveNext() {
       if (this.isDead())
@@ -194,7 +213,12 @@
 
     /** @return {boolean} */
     moveToEndOfWord() {
-      while (!this.atEnd() && isWordChar(this.charCode())) {
+      if (this.atEnd())
+        return true;
+      const wordData = Unicode.UCD[this.charCode()];
+      if (wordData.category.charCodeAt(0) !== 0x4C)
+        return true;
+      while (!this.atEnd() && this.isWordChar(wordData)) {
         if (!this.moveNext())
           return false;
       }
@@ -203,7 +227,7 @@
 
     /** @return {boolean} */
     moveToNextWord() {
-      while (!this.atEnd() && !isWordChar(this.charCode())) {
+      while (!this.atEnd() && !this.atWordChar()) {
         if (!this.moveNext())
           return false;
       }
@@ -214,17 +238,21 @@
     moveToStartOfWord() {
       if (this.atStart())
         return true;
-      if (this.atEnd() || !isWordChar(this.charCode()))
+      if (this.atEnd() || !this.atWordChar()) {
         while (!this.atStart()) {
           if (!this.movePrevious())
             return false;
-          if (isWordChar(this.charCode()))
+          if (this.atWordChar())
             break;
+        }
       }
+      if (this.atStart())
+        return true;
+      const wordData = Unicode.UCD[this.charCode()];
       while (!this.atStart()) {
         if (!this.movePrevious())
           return false;
-        if (!isWordChar(this.charCode()))
+        if (!this.isWordChar(wordData))
           return this.moveNext();
       }
       return true;

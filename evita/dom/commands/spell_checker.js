@@ -126,14 +126,14 @@
    */
   class Scanner {
     /**
-     * @param {!Range} range
+     * @param {!Document} document
      * @param {number} start
      * @param {number} end
      * @param {number} life
      */
-    constructor(range, start, end, life) {
+    constructor(document, start, end, life) {
       /** @private @const @type {!Document} */
-      this.document_ = range.document;
+      this.document_ = document;
 
       /** @private @type {number} */
       this.end_ = end;
@@ -143,9 +143,6 @@
 
       /** @private @type {number} */
       this.offset_ = start;
-
-      /** @private @type {!Range} */
-      this.range_ = range;
     }
 
     /** @return {boolean} */
@@ -262,9 +259,7 @@
     removeMarker(start) {
       if (start === this.offset_)
         return;
-      this.range_.collapseTo(start);
-      this.range_.end = this.offset_;
-      this.range_.setSpelling(Spelling.NONE);
+      this.document_.setSpelling(start, this.offset_, Spelling.NONE);
     }
 
     /**
@@ -290,11 +285,7 @@
       /** @type {Spelling} */
       const spelling = controller.checkSpelling(word);
       if (spelling !== Spelling.NONE) {
-        /** @const @type {!Range} */
-        const range = this.range_;
-        range.collapseTo(wordStart);
-        range.end = wordEnd;
-        range.setSpelling(spelling);
+        this.document_.setSpelling(wordStart, wordEnd, spelling);
         return '';
       }
       return word;
@@ -376,18 +367,16 @@
   // ColdPainter
   //
   class ColdPainter extends Scanner {
-    /** @param {!Range} range */
-    constructor(range) {
-      super(range, 0, 0, 0);
+    /** @param {!Document} document */
+    constructor(document) {
+      super(document, 0, 0, 0);
     }
 
     run() {
-      const range = this.range_;
       for (let wordRange of this.words()) {
-        range.collapseTo(wordRange.start);
-        range.end = wordRange.end;
-        const spelling = controller.checkSpelling(range.text);
-        range.setSpelling(spelling);
+        const word = this.document.slice(wordRange.start, wordRange.end);
+        const spelling = controller.checkSpelling(word);
+        this.document.setSpelling(wordRange.start, wordRange.end, spelling);
       }
       this.schedule();
     }
@@ -405,16 +394,16 @@
   // ColdScanner
   //
   class ColdScanner extends Scanner {
-    /** @param {!Range} range */
-    constructor(range) {
-      super(range, 0, 0, 0);
+    /** @param {!Document} document */
+    constructor(document) {
+      super(document, 0, 0, 0);
 
       /** @type {number} */
       this.checked_ = 0;
 
       // TODO(eval1749): We should use |Promise.<boolean>| for return type
       // once Blink IDL parser supports Promise type.
-      this.painter_ = new ColdPainter(range);
+      this.painter_ = new ColdPainter(document);
     }
 
     /**
@@ -485,7 +474,7 @@
   class HotScanner extends Scanner {
     /** @param {!Range} range */
     constructor(range) {
-      super(range, 0, 0, 0);
+      super(range.document, 0, 0, 0);
 
       /** @type {TextSelection} */
       this.activeSelection_ = null;
@@ -661,7 +650,7 @@
       const range = new Range(document);
 
       /** @type {?} TODO(eval1749): We should use |ColdScanner| here. */
-      this.coldScanner_ = new ColdScanner(range);
+      this.coldScanner_ = new ColdScanner(document);
 
       /** @type {?} TODO(eval1749): We should use |HotScanner| here. */
       this.hotScanner_ = new HotScanner(range);

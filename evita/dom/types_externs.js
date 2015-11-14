@@ -123,7 +123,15 @@ Unicode.Category = {
   Ll: "Ll", Lm: "Lm", Lo: "Lo", Lt: "Lt", Lu: "Lu", Mc: "Mc"
 };
 
-/** @const @type{Array.<{bidi: string, category: string}>} */
+/** @typedef {symbol} */
+Unicode.Script;
+
+/** @const @type{Array.<{
+ *    bidi: string,
+ *    category: string,
+ *    script: Unicode.Script
+ *  }>}
+ */
 Unicode.UCD;
 
 // TODO(eval1749): Once Closure compiler works with |new RegExp(...)|, we should

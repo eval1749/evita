@@ -422,6 +422,21 @@ TEST_F(DocumentTest, save_succeeded) {
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
+TEST_F(DocumentTest, setSpelling) {
+  EXPECT_SCRIPT_VALID(
+      "var doc1 = Document.new('spelling');"
+      "var range1 = new Range(doc1);"
+      "range1.text = 'foo bar baz';"
+      "doc1.setSpelling(4, 7, 2);");
+  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(0)");
+  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(3)");
+  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(4)");
+  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(5)");
+  EXPECT_SCRIPT_EQ("misspelled", "doc1.spellingAt(6)");
+  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(7)");
+  EXPECT_SCRIPT_EQ("", "doc1.spellingAt(8)");
+}
+
 TEST_F(DocumentTest, slice) {
   EXPECT_SCRIPT_VALID(
       "var doc = Document.new('slice');"

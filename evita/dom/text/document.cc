@@ -126,6 +126,30 @@ Posn Document::Redo(Posn position) {
   return buffer_->Redo(position);
 }
 
+void Document::SetSpelling(text::Posn start,
+                           text::Posn end,
+                           int spelling_code) {
+  struct Local {
+    static const common::AtomicString& MapToSpelling(int spelling_code) {
+      switch (spelling_code) {
+        case text::Spelling::None:
+          return common::AtomicString::Empty();
+        case text::Spelling::Corrected:
+          return css::StyleSelector::normal();
+        case text::Spelling::Misspelled:
+          return css::StyleSelector::misspelled();
+        case text::Spelling::BadGrammar:
+          return css::StyleSelector::bad_grammar();
+      }
+      return common::AtomicString::Empty();
+    }
+  };
+  if (!IsValidPosition(start) || !IsValidPosition(end) || start >= end)
+    return;
+  buffer()->spelling_markers()->InsertMarker(
+      start, end, Local::MapToSpelling(spelling_code));
+}
+
 base::string16 Document::Slice(int start, int end) {
   return buffer_->GetText(start, end);
 }

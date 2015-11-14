@@ -129,6 +129,7 @@ interface Document : EventTarget {
 
     [ImplementedAs=spelling_at]
     DOMString spellingAt(long offset);
+    void setSpelling(long start, long end, long spelling);
 
     [ImplementedAs=style_at]
     Style styleAt(long offset);

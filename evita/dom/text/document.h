@@ -56,6 +56,7 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   v8::Handle<v8::Value> Match(RegularExpression* regexp, int start, int end);
   Posn Redo(Posn position);
   void RenameTo(const base::string16& new_name);
+  void SetSpelling(text::Posn start, text::Posn end, int spelling);
   base::string16 Slice(int start, int end);
   base::string16 Slice(int start);
   void StartUndoGroup(const base::string16& name);

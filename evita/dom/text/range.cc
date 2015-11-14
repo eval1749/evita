@@ -97,28 +97,12 @@ Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range,
 }
 
 void Range::SetSpelling(int spelling_code) const {
-  struct Local {
-    static const common::AtomicString& MapToSpelling(int spelling_code) {
-      switch (spelling_code) {
-        case text::Spelling::None:
-          return common::AtomicString::Empty();
-        case text::Spelling::Corrected:
-          return css::StyleSelector::normal();
-        case text::Spelling::Misspelled:
-          return css::StyleSelector::misspelled();
-        case text::Spelling::BadGrammar:
-          return css::StyleSelector::bad_grammar();
-      }
-      return common::AtomicString::Empty();
-    }
-  };
   if (collapsed()) {
     ScriptHost::instance()->ThrowError(
         "Can't set spelling for collapsed range.");
     return;
   }
-  document_->buffer()->spelling_markers()->InsertMarker(
-      range_->start(), range_->end(), Local::MapToSpelling(spelling_code));
+  document_->SetSpelling(range_->start(), range_->end(), spelling_code);
 }
 
 void Range::SetSyntax(const base::string16& syntax) const {

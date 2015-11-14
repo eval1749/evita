@@ -33,6 +33,7 @@ class TextBlock::TextLineCache final {
   void DidChangeBuffer(text::Posn offset);
   TextLine* FindLine(text::Posn text_offset) const;
   void Invalidate(const gfx::RectF& bounds, float zoom);
+  bool IsDirty(const gfx::RectF& bounds, float zoom) const;
   void Register(TextLine* line);
 
  private:
@@ -113,6 +114,15 @@ void TextBlock::TextLineCache::Invalidate(const gfx::RectF& new_bounds,
 bool TextBlock::TextLineCache::IsAfterNewline(const TextLine* text_line) const {
   auto const start = text_line->GetStart();
   return !start || buffer_->GetCharAt(start - 1) == '\n';
+}
+
+bool TextBlock::TextLineCache::IsDirty(const gfx::RectF& bounds,
+                                       float zoom) const {
+  if (zoom_ != zoom)
+    return false;
+  if (dirty_start_ != std::numeric_limits<text::Posn>::max())
+    return false;
+  return bounds_ != bounds;
 }
 
 bool TextBlock::TextLineCache::IsEndWithNewline(
@@ -196,6 +206,7 @@ TextBlock::TextBlock(text::Buffer* text_buffer)
       dirty_line_point_(true),
       format_counter_(0),
       lines_height_(0),
+      need_format_(false),
       text_buffer_(text_buffer),
       text_line_cache_(new TextLineCache(text_buffer)),
       view_start_(0),
@@ -303,6 +314,7 @@ void TextBlock::Format(text::Posn text_offset) {
   lines_height_ = 0;
   dirty_ = false;
   dirty_line_point_ = false;
+  need_format_ = false;
 
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
@@ -345,8 +357,12 @@ void TextBlock::Format(text::Posn text_offset) {
 }
 
 bool TextBlock::FormatIfNeeded() {
-  if (!ShouldFormat())
+  UI_ASSERT_DOM_LOCKED();
+  text_line_cache_->Invalidate(bounds_, zoom_);
+  if (!NeedFormat()) {
+    dirty_ = false;
     return false;
+  }
   Format(view_start_);
   return true;
 }
@@ -480,6 +496,22 @@ text::Posn TextBlock::MapPointXToOffset(text::Posn text_offset, float point_x) {
     if (text_offset < line->GetEnd())
       return line->MapXToPosn(point_x);
   }
+}
+
+bool TextBlock::NeedFormat() const {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(!text_line_cache_->IsDirty(bounds_, zoom_));
+  if (need_format_)
+    return true;
+  if (!dirty_)
+    return false;
+  if (lines_.empty())
+    return true;
+  for (auto const line : lines_) {
+    if (line != text_line_cache_->FindLine(line->text_start()))
+      return true;
+  }
+  return false;
 }
 
 void TextBlock::Prepend(TextLine* line) {
@@ -616,6 +648,7 @@ void TextBlock::SetBounds(const gfx::RectF& new_bounds) {
     return;
   bounds_ = new_bounds;
   dirty_ = true;
+  need_format_ = true;
 }
 
 void TextBlock::SetZoom(float new_zoom) {
@@ -624,6 +657,7 @@ void TextBlock::SetZoom(float new_zoom) {
     return;
   zoom_ = new_zoom;
   dirty_ = true;
+  need_format_ = true;
 }
 
 bool TextBlock::ShouldFormat() const {

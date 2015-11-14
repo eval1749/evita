@@ -69,6 +69,9 @@ class TextBlock final {
   void InvalidateCache();
   void InvalidateLines(text::Posn offset);
   bool IsShowEndOfDocument() const;
+
+  // Returns true if we need to format all lines.
+  bool NeedFormat() const;
   void Prepend(TextLine* line);
 
   gfx::RectF bounds_;
@@ -78,6 +81,9 @@ class TextBlock final {
   int format_counter_;
   std::list<TextLine*> lines_;
   float lines_height_;
+
+  // True if we need to format all lines.
+  bool need_format_;
   text::Buffer* const text_buffer_;
   std::unique_ptr<TextLineCache> text_line_cache_;
   text::Posn view_start_;

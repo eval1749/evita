@@ -133,6 +133,7 @@ interface Document : EventTarget {
 
     [ImplementedAs=style_at]
     Style styleAt(long offset);
+    void setSyntax(long start, long end, DOMString syntax);
 
     [ImplementedAs=syntax_at]
     DOMString syntaxAt(long offset);

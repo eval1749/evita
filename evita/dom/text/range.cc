@@ -110,8 +110,7 @@ void Range::SetSyntax(const base::string16& syntax) const {
     ScriptHost::instance()->ThrowError("Can't set syntax for collapsed range.");
     return;
   }
-  document_->buffer()->syntax_markers()->InsertMarker(
-      range_->start(), range_->end(), common::AtomicString(syntax));
+  document_->SetSyntax(range_->start(), range_->end(), syntax);
 }
 
 }  // namespace dom

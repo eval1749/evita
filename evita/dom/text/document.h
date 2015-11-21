@@ -57,6 +57,9 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   Posn Redo(Posn position);
   void RenameTo(const base::string16& new_name);
   void SetSpelling(text::Posn start, text::Posn end, int spelling);
+  void SetSyntax(text::Posn start,
+                 text::Posn end,
+                 const base::string16& syntax);
   base::string16 Slice(int start, int end);
   base::string16 Slice(int start);
   void StartUndoGroup(const base::string16& name);

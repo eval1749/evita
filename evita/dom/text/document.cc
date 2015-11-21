@@ -150,6 +150,15 @@ void Document::SetSpelling(text::Posn start,
       start, end, Local::MapToSpelling(spelling_code));
 }
 
+void Document::SetSyntax(text::Posn start,
+                         text::Posn end,
+                         const base::string16& syntax) {
+  if (!IsValidPosition(start) || !IsValidPosition(end) || start >= end)
+    return;
+  buffer()->syntax_markers()->InsertMarker(start, end,
+                                           common::AtomicString(syntax));
+}
+
 base::string16 Document::Slice(int start, int end) {
   return buffer_->GetText(start, end);
 }

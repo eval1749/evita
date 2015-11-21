@@ -437,6 +437,28 @@ TEST_F(DocumentTest, setSpelling) {
   EXPECT_SCRIPT_EQ("", "doc1.spellingAt(8)");
 }
 
+TEST_F(DocumentTest, setSyntax) {
+  EXPECT_SCRIPT_VALID(
+      "var doc = Document.new('syntax');"
+      "var range = new Range(doc);"
+      "range.text = 'foo bar baz';"
+      "doc.setSyntax(0, 3, 'keyword');"
+      "doc.setSyntax(4, 7, 'operator');"
+      "doc.setSyntax(8, 11, 'identifier');");
+  EXPECT_SCRIPT_EQ("keyword", "doc.syntaxAt(0)");
+  EXPECT_SCRIPT_EQ("keyword", "doc.syntaxAt(1)");
+  EXPECT_SCRIPT_EQ("keyword", "doc.syntaxAt(2)");
+  EXPECT_SCRIPT_EQ("normal", "doc.syntaxAt(3)");
+  EXPECT_SCRIPT_EQ("operator", "doc.syntaxAt(4)");
+  EXPECT_SCRIPT_EQ("operator", "doc.syntaxAt(5)");
+  EXPECT_SCRIPT_EQ("operator", "doc.syntaxAt(6)");
+  EXPECT_SCRIPT_EQ("", "doc.syntaxAt(7)");
+  EXPECT_SCRIPT_EQ("identifier", "doc.syntaxAt(8)");
+  EXPECT_SCRIPT_EQ("identifier", "doc.syntaxAt(9)");
+  EXPECT_SCRIPT_EQ("identifier", "doc.syntaxAt(10)");
+  EXPECT_SCRIPT_EQ("normal", "doc.syntaxAt(11)");
+}
+
 TEST_F(DocumentTest, slice) {
   EXPECT_SCRIPT_VALID(
       "var doc = Document.new('slice');"

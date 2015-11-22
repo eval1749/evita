@@ -161,15 +161,15 @@ v8::Handle<v8::Object> RunScriptInternal(const base::string16& script_text,
   auto const isolate = runner->isolate();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
   v8::TryCatch try_catch;
-  v8::ScriptOrigin script_origin(
-      gin::StringToV8(isolate, file_name)->ToString());
-  auto const script = v8::Script::Compile(
-      gin::StringToV8(isolate, script_text)->ToString(), &script_origin);
+  v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name));
+  v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
+                                    script_origin);
+  auto script = v8::ScriptCompiler::Compile(runner->context(), &source);
   if (script.IsEmpty()) {
     return runner_scope.Escape(
         NewRunScriptResult(isolate, v8::Handle<v8::Value>(), try_catch));
   }
-  auto const run_value = script->Run();
+  auto const run_value = script.ToLocalChecked()->Run();
   if (run_value.IsEmpty()) {
     return runner_scope.Escape(
         NewRunScriptResult(isolate, v8::Handle<v8::Value>(), try_catch));

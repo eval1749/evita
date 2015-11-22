@@ -218,15 +218,16 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name),
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
+  v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
+                                    script_origin);
   v8::TryCatch try_catch;
-  auto const script = v8::Script::Compile(gin::StringToV8(isolate, script_text),
-                                          &script_origin);
+  auto script = v8::ScriptCompiler::Compile(runner_->context(), &source);
   if (script.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
     return exception_;
   }
   DOM_AUTO_LOCK_SCOPE();
-  auto const result = script->Run();
+  auto const result = script.ToLocalChecked()->Run();
   if (result.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
     return exception_;
@@ -245,15 +246,16 @@ bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name),
                                  v8::Integer::New(isolate, line_number),
                                  v8::Integer::New(isolate, 0));
+  v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
+                                    script_origin);
   v8::TryCatch try_catch;
-  auto const script = v8::Script::Compile(gin::StringToV8(isolate, script_text),
-                                          &script_origin);
+  auto script = v8::ScriptCompiler::Compile(runner_->context(), &source);
   if (script.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
     return false;
   }
   DOM_AUTO_LOCK_SCOPE();
-  auto const result = script->Run();
+  auto const result = script.ToLocalChecked()->Run();
   if (result.IsEmpty()) {
     UnhandledException(runner_.get(), try_catch);
     return false;

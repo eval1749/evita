@@ -184,12 +184,14 @@ v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
   DCHECK(in_scope_);
 #endif
   v8::TryCatch try_catch;
-  v8::ScriptOrigin script_origin(
-      gin::StringToV8(isolate(), script_name)->ToString());
-  auto const script = v8::Script::Compile(
-      gin::StringToV8(isolate(), script_text)->ToString(), &script_origin);
+  v8::ScriptOrigin script_origin(gin::StringToV8(isolate(), script_name));
+  v8::ScriptCompiler::Source source(gin::StringToV8(isolate(), script_text),
+                                    script_origin);
+  auto script = v8::ScriptCompiler::Compile(context(), &source);
+  if (script.IsEmpty())
+    return v8::Handle<v8::Value>();
   HandleTryCatch(try_catch);
-  return Run(script);
+  return Run(script.ToLocalChecked());
 }
 
 v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {

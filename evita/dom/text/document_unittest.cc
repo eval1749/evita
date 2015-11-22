@@ -452,7 +452,7 @@ TEST_F(DocumentTest, setSyntax) {
   EXPECT_SCRIPT_EQ("operator", "doc.syntaxAt(4)");
   EXPECT_SCRIPT_EQ("operator", "doc.syntaxAt(5)");
   EXPECT_SCRIPT_EQ("operator", "doc.syntaxAt(6)");
-  EXPECT_SCRIPT_EQ("", "doc.syntaxAt(7)");
+  EXPECT_SCRIPT_EQ("normal", "doc.syntaxAt(7)");
   EXPECT_SCRIPT_EQ("identifier", "doc.syntaxAt(8)");
   EXPECT_SCRIPT_EQ("identifier", "doc.syntaxAt(9)");
   EXPECT_SCRIPT_EQ("identifier", "doc.syntaxAt(10)");

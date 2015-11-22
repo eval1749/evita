@@ -26,26 +26,6 @@ class TextWindowTest : public AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(TextWindowTest);
 };
 
-class TextWindowSlowTest : public TextWindowTest {
- public:
-  ~TextWindowSlowTest() override = default;
-
- protected:
-  TextWindowSlowTest() = default;
-
- private:
-  // AbstractDomTest
-  bool shouldUseNewContext() const override {
-    // We need to have new context for |TextWindowTest.realize| to call
-    // |ViewDelegate::SetTabData| via |DocumentSet| observer.
-    // TODO(eval1749): We should make |TextWindowTest.realize| to work within
-    // existing context.
-    return true;
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(TextWindowSlowTest);
-};
-
 TEST_F(TextWindowTest, _ctor) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
@@ -77,8 +57,7 @@ TEST_F(TextWindowTest, makeSelectionVisible) {
       "sample.makeSelectionVisible();");
 }
 
-#if 0
-TEST_F(TextWindowSlowTest, realize) {
+TEST_F(TextWindowTest, realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = Document.new('foo');"
@@ -90,7 +69,6 @@ TEST_F(TextWindowSlowTest, realize) {
 
   // The document receives "attach" event when |TextWindow| is realized.
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
-  EXPECT_CALL(*mock_view_impl(), SetTabData(Eq(1), _));
   EXPECT_SCRIPT_VALID("sample.realize()");
   view_event_handler()->DidRealizeWidget(1);
   RunMessageLoopUntilIdle();
@@ -109,7 +87,6 @@ TEST_F(TextWindowSlowTest, realize) {
   EXPECT_SCRIPT_EQ("detach", "event.type");
   EXPECT_SCRIPT_TRUE("event.view === sample");
 }
-#endif
 
 TEST_F(TextWindowTest, zoom) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));

@@ -194,10 +194,6 @@ v8::Isolate* AbstractDomTest::isolate() const {
   return runner_->isolate();
 }
 
-bool AbstractDomTest::shouldUseNewContext() const {
-  return false;
-}
-
 domapi::ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_host_->event_handler();
 }
@@ -281,7 +277,7 @@ void AbstractDomTest::SetUp() {
 
   auto const isolate = script_host_->isolate();
 
-  if (static_runner && !shouldUseNewContext()) {
+  if (static_runner) {
     script_host_->set_testing_runner(static_runner);
     runner_.reset(static_runner);
 

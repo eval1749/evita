@@ -68,7 +68,6 @@ class AbstractDomTest : public ::testing::Test {
   MockScheduler* mock_scheduler() const { return mock_scheduler_.get(); }
   MockViewImpl* mock_view_impl() const { return mock_view_impl_.get(); }
   v8_glue::Runner* runner() const { return runner_.get(); }
-  virtual bool shouldUseNewContext() const;
   domapi::ViewEventHandler* view_event_handler() const;
 
   template <typename... Params>

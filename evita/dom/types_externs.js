@@ -7,7 +7,7 @@
  */
 
 /**
- * @type {Object}
+ * @type {!Object}
  */
 var global;
 

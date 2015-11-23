@@ -42,7 +42,10 @@ function load(scriptPath, opt_options) {
       console.log('/\x2F loaded', scriptPath, total_read);
     let result = Editor.runScript(text, scriptPath);
     if (result.exception && options.verbose) {
-      console.log('/\x2A\n' + result.exception + '\n' + result.stackTrace +
+      console.log('/\x2A\n' + result.exception + '\n' +
+                  scriptPath + '(' + result.lineNumber + ':' +
+                  result.startColumn + ':' + result.endColumn + ')' +
+                  result.stackTrace +
                   '*/');
     }
     if (result.exception)

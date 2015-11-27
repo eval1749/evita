@@ -189,9 +189,16 @@ def main(argv):
   parser.add_option('--native-libs', help='List of top-level native libs.')
   parser.add_option('--readelf-path', help='Path to toolchain\'s readelf.')
 
+  # apk options
+  parser.add_option('--apk-path', help='Path to the target\'s apk output.')
+
   parser.add_option('--tested-apk-config',
       help='Path to the build config of the tested apk (for an instrumentation '
       'test apk).')
+  parser.add_option('--proguard-enabled', action='store_true',
+      help='Whether proguard is enabled for this apk.')
+  parser.add_option('--proguard-info',
+      help='Path to the proguard .info output for this apk.')
 
   options, args = parser.parse_args(argv)
 
@@ -203,7 +210,8 @@ def main(argv):
       'android_assets': ['build_config'],
       'android_resources': ['build_config', 'resources_zip'],
       'android_apk': ['build_config', 'jar_path', 'dex_path', 'resources_zip'],
-      'deps_dex': ['build_config', 'dex_path']
+      'deps_dex': ['build_config', 'dex_path'],
+      'resource_rewriter': ['build_config']
   }
   required_options = required_options_map.get(options.type)
   if not required_options:
@@ -286,6 +294,8 @@ def main(argv):
     deps_info['jar_path'] = options.jar_path
     if options.type == 'android_apk' or options.supports_android:
       deps_info['dex_path'] = options.dex_path
+    if options.type == 'android_apk':
+      deps_info['apk_path'] = options.apk_path
     config['javac'] = {
       'classpath': javac_classpath,
     }
@@ -334,14 +344,14 @@ def main(argv):
     if options.r_text:
       deps_info['r_text'] = options.r_text
 
-  if options.type == 'android_resources' or options.type == 'android_apk':
+  if options.type in ('android_resources','android_apk', 'resource_rewriter'):
     config['resources'] = {}
     config['resources']['dependency_zips'] = [
         c['resources_zip'] for c in all_resources_deps]
     config['resources']['extra_package_names'] = []
     config['resources']['extra_r_text_files'] = []
 
-  if options.type == 'android_apk':
+  if options.type == 'android_apk' or options.type == 'resource_rewriter':
     config['resources']['extra_package_names'] = [
         c['package_name'] for c in all_resources_deps if 'package_name' in c]
     config['resources']['extra_r_text_files'] = [
@@ -349,6 +359,17 @@ def main(argv):
 
   if options.type in ['android_apk', 'deps_dex']:
     deps_dex_files = [c['dex_path'] for c in all_library_deps]
+
+  proguard_enabled = options.proguard_enabled
+  if options.type == 'android_apk':
+    deps_info['proguard_enabled'] = proguard_enabled
+
+  if proguard_enabled:
+    deps_info['proguard_info'] = options.proguard_info
+    config['proguard'] = {}
+    proguard_config = config['proguard']
+    proguard_config['input_paths'] = [options.jar_path] + java_full_classpath
+    proguard_config['tested_apk_info'] = ''
 
   # An instrumentation test apk should exclude the dex files that are in the apk
   # under test.
@@ -363,12 +384,17 @@ def main(argv):
     expected_tested_package = tested_apk_config['package_name']
     AndroidManifest(options.android_manifest).CheckInstrumentation(
         expected_tested_package)
+    if tested_apk_config['proguard_enabled']:
+      assert proguard_enabled, ('proguard must be enabled for instrumentation'
+          ' apks if it\'s enabled for the tested apk')
+      proguard_config['tested_apk_info'] = tested_apk_config['proguard_info']
+
+    deps_info['tested_apk_path'] = tested_apk_config['apk_path']
 
   # Dependencies for the final dex file of an apk or a 'deps_dex'.
   if options.type in ['android_apk', 'deps_dex']:
     config['final_dex'] = {}
     dex_config = config['final_dex']
-    # TODO(cjhopman): proguard version
     dex_config['dependency_dex_files'] = deps_dex_files
 
   if options.type == 'android_apk':

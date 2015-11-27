@@ -4,10 +4,10 @@
 
 #include "base/trace_event/process_memory_dump.h"
 
+#include <errno.h>
 #include <vector>
 
 #include "base/process/process_metrics.h"
-#include "base/stl_util.h"
 #include "base/trace_event/process_memory_totals.h"
 #include "base/trace_event/trace_event_argument.h"
 
@@ -54,7 +54,7 @@ size_t ProcessMemoryDump::CountResidentBytes(void* start_address,
 #if defined(OS_MACOSX) || defined(OS_IOS)
     std::vector<char> vec(page_count + 1);
     // mincore in MAC does not fail with EAGAIN.
-    result = mincore(chunk_start, chunk_size, vector_as_array(&vec));
+    result = mincore(chunk_start, chunk_size, vec.data());
     if (result)
       break;
 
@@ -65,7 +65,7 @@ size_t ProcessMemoryDump::CountResidentBytes(void* start_address,
     int error_counter = 0;
     // HANDLE_EINTR tries for 100 times. So following the same pattern.
     do {
-      result = mincore(chunk_start, chunk_size, vector_as_array(&vec));
+      result = mincore(chunk_start, chunk_size, vec.data());
     } while (result == -1 && errno == EAGAIN && error_counter++ < 100);
     if (result)
       break;
@@ -145,6 +145,12 @@ MemoryAllocatorDump* ProcessMemoryDump::GetSharedGlobalAllocatorDump(
   return GetAllocatorDump(GetSharedGlobalAllocatorDumpName(guid));
 }
 
+void ProcessMemoryDump::AddHeapDump(const std::string& absolute_name,
+                                    scoped_refptr<TracedValue> heap_dump) {
+  DCHECK_EQ(0ul, heap_dumps_.count(absolute_name));
+  heap_dumps_[absolute_name] = heap_dump;
+}
+
 void ProcessMemoryDump::Clear() {
   if (has_process_totals_) {
     process_totals_.Clear();
@@ -159,6 +165,7 @@ void ProcessMemoryDump::Clear() {
   allocator_dumps_storage_.clear();
   allocator_dumps_.clear();
   allocator_dumps_edges_.clear();
+  heap_dumps_.clear();
 }
 
 void ProcessMemoryDump::TakeAllDumpsFrom(ProcessMemoryDump* other) {
@@ -180,6 +187,9 @@ void ProcessMemoryDump::TakeAllDumpsFrom(ProcessMemoryDump* other) {
                                 other->allocator_dumps_edges_.begin(),
                                 other->allocator_dumps_edges_.end());
   other->allocator_dumps_edges_.clear();
+
+  heap_dumps_.insert(other->heap_dumps_.begin(), other->heap_dumps_.end());
+  other->heap_dumps_.clear();
 }
 
 void ProcessMemoryDump::AsValueInto(TracedValue* value) const {
@@ -200,6 +210,13 @@ void ProcessMemoryDump::AsValueInto(TracedValue* value) const {
     for (const MemoryAllocatorDump* allocator_dump : allocator_dumps_storage_)
       allocator_dump->AsValueInto(value);
     value->EndDictionary();
+  }
+
+  if (heap_dumps_.size() > 0) {
+    value->BeginDictionary("heaps");
+    for (const auto& name_and_dump : heap_dumps_)
+      value->SetValueWithCopiedName(name_and_dump.first, *name_and_dump.second);
+    value->EndDictionary();  // "heaps"
   }
 
   value->BeginArray("allocators_graph");

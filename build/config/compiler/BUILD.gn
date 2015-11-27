@@ -22,6 +22,11 @@ if (is_win) {
 }
 
 declare_args() {
+  # Default to warnings as errors for default workflow, where we catch
+  # warnings with known toolchains. Allow overriding this e.g. for Chromium
+  # builds on Linux that could use a different version of the compiler.
+  treat_warnings_as_errors = true
+
   # Normally, Android builds are lightly optimized, even for debug builds, to
   # keep binary size down. Setting this flag to true disables such optimization
   android_full_debug = false
@@ -172,7 +177,7 @@ config("compiler") {
     if (!(is_chromeos && current_cpu == "arm") &&
         !(is_android && use_order_profiling) && !is_mac && !is_ios) {
       # TODO(jochen): Enable this on chromeos on arm. http://crbug.com/356580
-      # TODO(azarchs): Fix link errors when linking with order_profiling=1
+      # TODO(lizeb,pasko): Fix link errors when linking with order_profiling=1
       # crbug.com/485542
       ldflags += [ "-Wl,--fatal-warnings" ]
     }
@@ -601,16 +606,18 @@ config("default_warnings") {
   cflags_cc = []
 
   if (is_win) {
+    if (treat_warnings_as_errors) {
+      cflags += [ "/WX" ]
+    }
+
     cflags += [
-      # Treat warnings as errors.
-      "/WX",
+      # Warnings permanently disabled:
 
-      # Warnings disabled for VS2015
-
-      # C4091: 'typedef ': ignored on left of 'X' when no variable is declared.
-      # This happens in a number of Windows headers. Dumb.
+      # C4311: 'reinterpret_cast': pointer truncation from 'BYTE *' to
+      # 'unsigned int'
+      # v8/src/base/platform-win32.cc
       # MSVC2015
-      "/wd4091",
+      "/wd4311",
 
       # C4312: 'reinterpret_cast': conversion from 'uint32_t' to
       # 'v8::internal::Address' of greater size
@@ -618,21 +625,10 @@ config("default_warnings") {
       # MSVC2015
       "/wd4312",
 
-      # C4302: 'reinterpret_cast': truncation from 'BYTE *' to 'unsigned int'
-      # C4311: 'reinterpret_cast': pointer truncation from 'BYTE *' to
-      # 'unsigned int'
-      # v8/src/base/platform-win32.cc
-      # MSVC2015
-      "/wd4302",
-      "/wd4311",
-
-      # C4458: declaration of 'type' hides class member
-      # third_party/icu/source/common/unicode/messagepattern.h
-      # base/test/trace_event_analyzer.cc
-      # MSVC2015
-      "/wd4458",
-
-      # Warnings permanently disabled:
+      # C4091: 'typedef ': ignored on left of 'X' when no variable is
+      #                    declared.
+      # This happens in a number of Windows headers. Dumb.
+      "/wd4091",
 
       # C4127: conditional expression is constant
       # This warning can in theory catch dead code and other problems, but
@@ -698,8 +694,17 @@ config("default_warnings") {
       "/wd4510",  # Default constructor could not be generated.
       "/wd4512",  # Assignment operator could not be generated.
       "/wd4610",  # Class can never be instantiated, constructor required.
+      "/wd4838",  # Narrowing conversion. Doesn't seem to be very useful.
       "/wd4995",  # 'X': name was marked as #pragma deprecated
       "/wd4996",  # Deprecated function warning.
+
+      # These are variable shadowing warnings that are new in VS2015. We
+      # should work through these at some point -- they may be removed from
+      # the RTM release in the /W4 set.
+      "/wd4456",
+      "/wd4457",
+      "/wd4458",
+      "/wd4459",
     ]
 
     # VS xtree header file needs to be patched or 4702 (unreachable code
@@ -731,12 +736,15 @@ config("default_warnings") {
     cflags += [
       # Enables.
       "-Wendif-labels",  # Weird old-style text after an #endif.
-      "-Werror",  # Warnings as errors.
 
       # Disables.
       "-Wno-missing-field-initializers",  # "struct foo f = {0};"
       "-Wno-unused-parameter",  # Unused function parameters.
     ]
+
+    if (treat_warnings_as_errors) {
+      cflags += [ "-Werror" ]
+    }
 
     if (is_mac) {
       cflags += [ "-Wnewline-eof" ]

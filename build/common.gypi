@@ -85,10 +85,14 @@
           # Enable top chrome material design.
           'enable_topchrome_md%' : 0,
 
-          # Build against pre-built sysroot image on linux.  By default
-          # the sysroot image is only used for Official builds or when cross
-          # compiling.
-          'use_sysroot%': 0,
+          # Enable Wayland display server support.
+          'enable_wayland_server%' : 0,
+
+          # By default we build against a stable sysroot image to avoid
+          # depending on the packages installed on the local machine. Set this
+          # to 0 to build against locally installed headers and libraries (e.g.
+          # if packaging for a linux distro)
+          'use_sysroot%': 1,
 
           # Override buildtype to select the desired build flavor.
           # Dev - everyday build for development/testing
@@ -161,6 +165,7 @@
         'enable_viewport%': '<(enable_viewport)',
         'enable_hidpi%': '<(enable_hidpi)',
         'enable_topchrome_md%': '<(enable_topchrome_md)',
+        'enable_wayland_server%': '<(enable_wayland_server)',
         'buildtype%': '<(buildtype)',
         'branding%': '<(branding)',
         'branding_path_component%': '<(branding)',
@@ -290,8 +295,11 @@
             'mips_arch_variant%': 'r1',
           }],
 
-          # The system root for cross-compiles. Default: none.
-          ['OS=="linux" and chromeos==0 and ((branding=="Chrome" and buildtype=="Official") or target_arch=="arm" or target_arch=="mipsel" or use_sysroot==1)', {
+          # The system root for linux compiles.
+          # Not used when chromecast=1 since ozone_platform_gbm doesn't
+          # currently build against the linux sysroot
+          # TODO(sbc): http://crbug.com/559708
+          ['OS=="linux" and chromeos==0 and chromecast==0 and use_sysroot==1', {
             # sysroot needs to be an absolute path otherwise it generates
             # incorrect results when passed to pkg-config
             'conditions': [
@@ -337,6 +345,7 @@
       'enable_viewport%': '<(enable_viewport)',
       'enable_hidpi%': '<(enable_hidpi)',
       'enable_topchrome_md%': '<(enable_topchrome_md)',
+      'enable_wayland_server%': '<(enable_wayland_server)',
       'android_channel%': '<(android_channel)',
       'use_goma%': '<(use_goma)',
       'gomadir%': '<(gomadir)',
@@ -538,9 +547,6 @@
       # Enable Chrome browser extensions
       'enable_extensions%': 1,
 
-      # Enable Google Now.
-      'enable_google_now%': 1,
-
       # Enable basic printing support and UI.
       'enable_basic_printing%': 1,
 
@@ -643,9 +649,6 @@
 
       # Supervised users are enabled by default.
       'enable_supervised_users%': 1,
-
-      # Platform sends memory pressure signals natively.
-      'native_memory_pressure_signals%': 0,
 
       'enable_mdns%' : 0,
       'enable_service_discovery%': 0,
@@ -754,6 +757,13 @@
           'use_glib%': 1,
         }],
 
+        # Flags to use Wayland server support.
+        ['chromeos==1 and use_ozone==1', {
+          'enable_wayland_server%': 1,
+        }, {
+          'enable_wayland_server%': 0,
+        }],
+
         # Flags to use pango and cairo.
         ['OS=="win" or OS=="mac" or OS=="ios" or OS=="android" or embedded==1', {
           'use_pango%': 0,
@@ -806,13 +816,11 @@
 
         ['OS=="android"', {
           'enable_extensions%': 0,
-          'enable_google_now%': 0,
           'cld2_table_size%': 0,
           'enable_themes%': 0,
           'remoting%': 0,
           'arm_neon%': 0,
           'arm_neon_optional%': 1,
-          'native_memory_pressure_signals%': 1,
           'enable_basic_printing%': 1,
           'enable_print_preview%': 0,
           'enable_task_manager%':0,
@@ -831,10 +839,6 @@
           'proprietary_codecs%': 1,
         }, {
           'proprietary_codecs%': 0,
-        }],
-
-        ['OS=="mac" or OS=="ios"', {
-          'native_memory_pressure_signals%': 1,
         }],
 
         # Enable autofill dialog when not on iOS.
@@ -856,9 +860,9 @@
         }],
 
         ['OS=="ios"', {
+          'configuration_policy%': 0,
           'disable_ftp_support%': 1,
           'enable_extensions%': 0,
-          'enable_google_now%': 0,
           'cld2_table_size%': 0,
           'enable_basic_printing%': 0,
           'enable_print_preview%': 0,
@@ -1136,6 +1140,7 @@
     'enable_viewport%': '<(enable_viewport)',
     'enable_hidpi%': '<(enable_hidpi)',
     'enable_topchrome_md%': '<(enable_topchrome_md)',
+    'enable_wayland_server%': '<(enable_wayland_server)',
     'image_loader_extension%': '<(image_loader_extension)',
     'fastbuild%': '<(fastbuild)',
     'dont_embed_build_metadata%': '<(dont_embed_build_metadata)',
@@ -1211,7 +1216,6 @@
     'enable_print_preview%': '<(enable_print_preview)',
     'enable_spellcheck%': '<(enable_spellcheck)',
     'use_browser_spellchecker%': '<(use_browser_spellchecker)',
-    'enable_google_now%': '<(enable_google_now)',
     'cld_version%': '<(cld_version)',
     'cld2_table_size%': '<(cld2_table_size)',
     'enable_captive_portal_detection%': '<(enable_captive_portal_detection)',
@@ -1233,7 +1237,6 @@
     'google_default_client_id%': '<(google_default_client_id)',
     'google_default_client_secret%': '<(google_default_client_secret)',
     'enable_supervised_users%': '<(enable_supervised_users)',
-    'native_memory_pressure_signals%': '<(native_memory_pressure_signals)',
     'enable_mdns%' : '<(enable_mdns)',
     'enable_service_discovery%' : '<(enable_service_discovery)',
     'enable_hangout_services_extension%' : '<(enable_hangout_services_extension)',
@@ -1544,7 +1547,7 @@
     'ozone_platform_egltest%': 0,
     'ozone_platform_gbm%': 0,
     'ozone_platform_ozonex%': 0,
-    'ozone_platform_test%': 0,
+    'ozone_platform_headless%': 0,
 
     # Experiment: http://crbug.com/426914
     'envoy%': 0,
@@ -1996,6 +1999,13 @@
           ['asan==1 or syzyasan==1', {
             'win_use_allocator_shim%': 0,
           }],
+          # The AddressSanitizer build should be a console program as it prints
+          # out stuff on stderr.
+          ['asan==1', {
+            'win_console_app%': 1,
+          }, {
+            'win_console_app%': 0,
+          }],
           ['syzyasan==1', {
             'kasko%': 1,
           }],
@@ -2042,9 +2052,8 @@
         'enable_browser_cdms%': 0,
       }],
 
-      # Native Client glibc toolchain is enabled
-      # by default except on arm, mips and mips64.
-      ['target_arch=="arm" or target_arch=="mipsel" or target_arch=="mips64el"', {
+      # Native Client glibc toolchain is enabled except on mips
+      ['target_arch=="mipsel" or target_arch=="mips64el"', {
         'disable_glibc%': 1,
       }, {
         'disable_glibc%': 0,
@@ -2165,9 +2174,6 @@
       ['enable_settings_app==1', {
         'grit_defines': ['-D', 'enable_settings_app'],
       }],
-      ['enable_google_now==1', {
-        'grit_defines': ['-D', 'enable_google_now'],
-      }],
       ['use_concatenated_impulse_responses==1', {
         'grit_defines': ['-D', 'use_concatenated_impulse_responses'],
       }],
@@ -2221,13 +2227,8 @@
               # no need to load it dynamically.
               'clang_dynlib_flags%': '',
             }],
-            # https://crbug.com/441916
-            ['OS=="android" or OS=="linux" or OS=="mac"', {
-              'clang_plugin_args%': '-Xclang -plugin-arg-find-bad-constructs -Xclang check-templates ',
-            }, { # OS != "linux"
-              'clang_plugin_args%': ''
-            }],
           ],
+          'clang_plugin_args%': '-Xclang -plugin-arg-find-bad-constructs -Xclang check-templates ',
         },
         # If you change these, also change build/config/clang/BUILD.gn.
         'clang_chrome_plugins_flags%':
@@ -2377,13 +2378,13 @@
       }],
 
       ['use_ozone==1 and ozone_auto_platforms==1', {
-        # Use test as the default platform.
-        'ozone_platform%': 'test',
+        # Use headless as the default platform.
+        'ozone_platform%': 'headless',
 
         # Build all platforms whose deps are in install-build-deps.sh.
         # Only these platforms will be compile tested by buildbots.
         'ozone_platform_gbm%': 1,
-        'ozone_platform_test%': 1,
+        'ozone_platform_headless%': 1,
         'ozone_platform_egltest%': 1,
       }],
 
@@ -2761,8 +2762,8 @@
       ['enable_topchrome_md==1', {
         'defines': ['ENABLE_TOPCHROME_MD=1'],
       }],
-      ['native_memory_pressure_signals==1', {
-        'defines': ['SYSTEM_NATIVELY_SIGNALS_MEMORY_PRESSURE'],
+      ['enable_wayland_server==1', {
+        'defines': ['ENABLE_WAYLAND_SERVER=1'],
       }],
       ['use_udev==1', {
         'defines': ['USE_UDEV'],
@@ -2984,9 +2985,6 @@
       }],
       ['enable_background==1', {
         'defines': ['ENABLE_BACKGROUND=1'],
-      }],
-      ['enable_google_now==1', {
-        'defines': ['ENABLE_GOOGLE_NOW=1'],
       }],
       ['enable_basic_printing==1 or enable_print_preview==1', {
         # Convenience define for ENABLE_BASIC_PRINTING || ENABLE_PRINT_PREVIEW.
@@ -4547,9 +4545,13 @@
                   '-fsanitize=memory',
                   '-fsanitize-memory-track-origins=<(msan_track_origins)',
                   '-fsanitize-blacklist=<(msan_blacklist)',
+                  # TODO(eugenis): Remove when msan migrates to new ABI (crbug.com/560589).
+                  '-fPIC',
                 ],
                 'ldflags': [
                   '-fsanitize=memory',
+                  # TODO(eugenis): Remove when msan migrates to new ABI (crbug.com/560589).
+                  '-pie',
                 ],
                 'defines': [
                   'MEMORY_SANITIZER',
@@ -4582,7 +4584,7 @@
                   '-finstrument-functions-exclude-file-list=mmintrin.h',
                   # Avoids errors with current NDK:
                   # "third_party/android_tools/ndk/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.6/include/arm_neon.h:3426:3: error: argument must be a constant"
-                  '-finstrument-functions-exclude-file-list=arm_neon.h,SaturatedArithmeticARM.h',
+                  '-finstrument-functions-exclude-file-list=arm_neon.h',
                 ],
                 'defines': ['CYGPROFILE_INSTRUMENTATION'],
               }],
@@ -6014,6 +6016,9 @@
         # Limited to Windows because lld-link is the driver that is
         # compatible with link.exe.
         ['LD', '<(make_clang_dir)/bin/lld-link'],
+        # lld-link includes a replacement for lib.exe that can produce thin
+        # archives and understands bitcode (for use_lto==1).
+        ['AR', '<(make_clang_dir)/bin/lld-link /lib /llvmlibthin'],
       ],
     }],
     ['OS=="android" and clang==0', {
@@ -6099,10 +6104,19 @@
             ],
           }],
         ],
+        'msvs_settings': {
+          'VCCLCompilerTool': {
+            'AdditionalOptions': [
+              # TODO(pcc): Add LTO support to clang-cl driver and use it here.
+              '-Xclang',
+              '-emit-llvm-bc',
+            ],
+          },
+        },
       },
     }],
-    # Apply a lower LTO optimization level in non-official builds.
-    ['use_lto==1 and clang==1 and buildtype!="Official"', {
+    # Apply a lower LTO optimization level as the default is too slow.
+    ['use_lto==1 and clang==1', {
       'target_defaults': {
         'target_conditions': [
           ['_toolset=="target"', {
@@ -6118,6 +6132,13 @@
             },
           }],
         ],
+        'msvs_settings': {
+          'VCLinkerTool': {
+            'AdditionalOptions': [
+              '/opt:lldlto=1',
+            ],
+          },
+        },
       },
     }],
     ['use_lto==1 and clang==1 and target_arch=="arm"', {
@@ -6234,16 +6255,6 @@
                 '-fsanitize-blacklist=<(cfi_blacklist)',
               ],
             },
-            'msvs_settings': {
-              'VCCLCompilerTool': {
-                'AdditionalOptions': [
-                  '-fsanitize=cfi-vcall',
-                  '-fsanitize=cfi-derived-cast',
-                  '-fsanitize=cfi-unrelated-cast',
-                  '-fsanitize-blacklist=<(cfi_blacklist)',
-                ],
-              },
-            },
           }],
           ['_toolset=="target" and _type!="static_library"', {
             'xcode_settings':  {
@@ -6252,6 +6263,38 @@
                 '-fsanitize=cfi-derived-cast',
                 '-fsanitize=cfi-unrelated-cast',
               ],
+            },
+          }],
+        ],
+      },
+    }],
+    ['cfi_vptr==1 and OS=="win"', {
+      'target_defaults': {
+        'target_conditions': [
+          ['_toolset=="target"', {
+            'msvs_settings': {
+              'VCCLCompilerTool': {
+                'AdditionalOptions': [
+                  # TODO(pcc): Use regular -fsanitize=* flags here once clang-cl
+                  # supports LTO.
+                  '-Xclang',
+                  '-fsanitize=cfi-vcall',
+                  '-Xclang',
+                  '-fsanitize=cfi-derived-cast',
+                  '-Xclang',
+                  '-fsanitize=cfi-unrelated-cast',
+                  '-Xclang',
+                  '-fsanitize-trap=cfi-vcall',
+                  '-Xclang',
+                  '-fsanitize-trap=cfi-derived-cast',
+                  '-Xclang',
+                  '-fsanitize-trap=cfi-unrelated-cast',
+                  '-Xclang',
+                  '-fsanitize-blacklist=<(cfi_blacklist)',
+                  '-Xclang',
+                  '-fsanitize-blacklist=../../<(make_clang_dir)/lib/clang/<!(python <(DEPTH)/tools/clang/scripts/update.py --print-clang-version)/cfi_blacklist.txt',
+                ],
+              },
             },
           }],
         ],

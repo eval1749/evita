@@ -164,9 +164,6 @@ char kTSanDefaultSuppressions[] =
 // http://crbug.com/329225
 "race:blink::currentTimeFunction\n"
 
-// http://crbug.com/329460
-"race:extensions::InfoMap::AddExtension\n"
-
 // http://crbug.com/333244
 "race:content::"
     "VideoCaptureImplTest::MockVideoCaptureImpl::~MockVideoCaptureImpl\n"
@@ -261,9 +258,6 @@ char kTSanDefaultSuppressions[] =
 // http://crbug.com/388730
 "race:g_next_user_script_id\n"
 
-// http://crbug.com/389098
-"race:webrtc::voe::TransmitMixer::EnableStereoChannelSwapping\n"
-
 // http://crbug.com/397022
 "deadlock:"
 "base::trace_event::TraceEventTestFixture_ThreadOnceBlocking_Test::TestBody\n"
@@ -287,6 +281,7 @@ char kTSanDefaultSuppressions[] =
 // https://crbug.com/448203
 "race:blink::RemoteFrame::detach\n"
 
+// Lock inversion in third party code, won't fix.
 // https://crbug.com/455638
 "deadlock:dbus::Bus::ShutdownAndBlock\n"
 

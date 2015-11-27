@@ -3,11 +3,22 @@
 # found in the LICENSE file.
 
 import("//build/config/compiler/compiler.gni")
+import("//build/config/nacl/config.gni")
 import("//build/config/ui.gni")
 import("//testing/test.gni")
 
 if (is_android) {
   import("//build/config/android/rules.gni")
+}
+
+config("base_flags") {
+  if (is_clang) {
+    cflags = [
+      # Don't die on dtoa code that uses a char as an array index.
+      # This is required solely for base/third_party/dmg_fp/dtoa_wrapper.cc.
+      "-Wno-char-subscripts",
+    ]
+  }
 }
 
 config("base_implementation") {
@@ -23,6 +34,16 @@ if (is_win) {
       "/DELAYLOAD:powrprof.dll",
       "/DELAYLOAD:setupapi.dll",
     ]
+  }
+}
+
+if (is_nacl_nonsfi) {
+  # Must be in a config because of how GN orders flags (otherwise -Wall will
+  # appear after this, and turn it back on).
+  config("nacl_nonsfi_warnings") {
+    # file_util_posix.cc contains a function which is not
+    # being used by nacl_helper_nonsfi.
+    cflags = [ "-Wno-unused-function" ]
   }
 }
 
@@ -81,6 +102,8 @@ component("base") {
     "android/command_line_android.h",
     "android/content_uri_utils.cc",
     "android/content_uri_utils.h",
+    "android/context_utils.cc",
+    "android/context_utils.h",
     "android/cpu_features.cc",
     "android/cxa_demangle_stub.cc",
     "android/event_log.cc",
@@ -144,6 +167,8 @@ component("base") {
     "barrier_closure.h",
     "base64.cc",
     "base64.h",
+    "base64url.cc",
+    "base64url.h",
     "base_export.h",
     "base_switches.h",
     "basictypes.h",
@@ -524,6 +549,8 @@ component("base") {
     "threading/platform_thread_win.cc",
     "threading/post_task_and_reply_impl.cc",
     "threading/post_task_and_reply_impl.h",
+    "threading/sequenced_task_runner_handle.cc",
+    "threading/sequenced_task_runner_handle.h",
     "threading/sequenced_worker_pool.cc",
     "threading/sequenced_worker_pool.h",
     "threading/simple_thread.cc",
@@ -667,6 +694,7 @@ component("base") {
   data = []
 
   configs += [
+    ":base_flags",
     ":base_implementation",
     "//build/config:precompiled_headers",
   ]
@@ -708,8 +736,8 @@ component("base") {
 
     deps += [
       ":base_jni_headers",
-      "//third_party/ashmem",
       "//third_party/android_tools:cpu_features",
+      "//third_party/ashmem",
     ]
 
     # logging.cc uses the Android logging library.
@@ -735,21 +763,34 @@ component("base") {
       "cpu.cc",
       "files/file_enumerator_posix.cc",
       "files/file_proxy.cc",
-      "files/file_util.cc",
-      "files/file_util_posix.cc",
       "files/file_util_proxy.cc",
       "files/important_file_writer.cc",
       "files/important_file_writer.h",
       "files/scoped_temp_dir.cc",
-      "message_loop/message_pump_libevent.cc",
       "native_library_posix.cc",
       "path_service.cc",
-      "rand_util_posix.cc",
       "scoped_native_library.cc",
       "sync_socket_posix.cc",
       "sys_info.cc",
       "sys_info_posix.cc",
     ]
+
+    if (is_nacl_nonsfi) {
+      set_sources_assignment_filter([])
+      sources += [ "posix/unix_domain_socket_linux.cc" ]
+      set_sources_assignment_filter(sources_assignment_filter)
+      sources -= [ "rand_util_nacl.cc" ]
+      configs += [ ":nacl_nonsfi_warnings" ]
+    } else {
+      sources -= [
+        "files/file_util.cc",
+        "files/file_util.h",
+        "files/file_util_posix.cc",
+        "message_loop/message_pump_libevent.cc",
+        "message_loop/message_pump_libevent.h",
+        "rand_util_posix.cc",
+      ]
+    }
   } else {
     # Remove NaCl stuff.
     sources -= [
@@ -809,7 +850,7 @@ component("base") {
       "setupapi.lib",
     ]
     all_dependent_configs = [ ":base_win_linker_flags" ]
-  } else if (!is_nacl) {
+  } else if (!is_nacl || is_nacl_nonsfi) {
     # Non-Windows.
     deps += [ "//third_party/libevent" ]
   }
@@ -1021,7 +1062,7 @@ component("i18n") {
   configs += [ "//build/config/compiler:no_size_t_to_int_warning" ]
 }
 
-if (is_ios || is_win || (is_linux && !is_chromeos)) {
+if (is_ios || is_android || is_win || (is_linux && !is_chromeos)) {
   # TODO(GYP): Figure out which of these work and are needed on other platforms.
   test("base_perftests") {
     sources = [
@@ -1034,8 +1075,8 @@ if (is_ios || is_win || (is_linux && !is_chromeos)) {
       ":base",
       "//base/test:test_support",
       "//base/test:test_support_perf",
-      "//testing/perf",
       "//testing/gtest",
+      "//testing/perf",
     ]
 
     if (is_android) {
@@ -1192,6 +1233,18 @@ if (is_win) {
       "//build/config/sanitizers:deps",
     ]
   }
+
+  if (target_cpu == "x64") {
+    # Must be a shared library so that it can be unloaded during testing.
+    shared_library("base_profiler_test_support_library") {
+      sources = [
+        "profiler/test_support_library.cc",
+      ]
+      deps = [
+        "//build/config/sanitizers:deps",
+      ]
+    }
+  }
 }
 
 # TODO(GYP): Delete this after we've converted everything to GN.
@@ -1218,6 +1271,7 @@ test("base_unittests") {
     "atomicops_unittest.cc",
     "barrier_closure_unittest.cc",
     "base64_unittest.cc",
+    "base64url_unittest.cc",
     "big_endian_unittest.cc",
     "bind_unittest.cc",
     "bind_unittest.nc",
@@ -1326,6 +1380,7 @@ test("base_unittests") {
     "metrics/sparse_histogram_unittest.cc",
     "metrics/statistics_recorder_unittest.cc",
     "move_unittest.cc",
+    "native_library_unittest.cc",
     "numerics/safe_numerics_unittest.cc",
     "observer_list_unittest.cc",
     "os_compat_android_unittest.cc",
@@ -1397,6 +1452,7 @@ test("base_unittests") {
     "test/user_action_tester_unittest.cc",
     "threading/non_thread_safe_unittest.cc",
     "threading/platform_thread_unittest.cc",
+    "threading/sequenced_task_runner_handle_unittest.cc",
     "threading/sequenced_worker_pool_unittest.cc",
     "threading/simple_thread_unittest.cc",
     "threading/thread_checker_unittest.cc",
@@ -1531,8 +1587,9 @@ test("base_unittests") {
     set_sources_assignment_filter(sources_assignment_filter)
   }
 
-  if (is_win) {
+  if (is_win && target_cpu == "x64") {
     sources += [ "profiler/win32_stack_frame_unwinder_unittest.cc" ]
+    deps += [ ":base_profiler_test_support_library" ]
   }
 
   # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
@@ -1558,6 +1615,7 @@ if (is_android) {
       "android/java/src/org/chromium/base/BuildInfo.java",
       "android/java/src/org/chromium/base/CommandLine.java",
       "android/java/src/org/chromium/base/ContentUriUtils.java",
+      "android/java/src/org/chromium/base/ContextUtils.java",
       "android/java/src/org/chromium/base/CpuFeatures.java",
       "android/java/src/org/chromium/base/EventLog.java",
       "android/java/src/org/chromium/base/FieldTrialList.java",
@@ -1595,6 +1653,7 @@ if (is_android) {
   android_library("base_java") {
     srcjar_deps = [
       ":base_android_java_enums_srcjar",
+      ":base_multidex_gen",
       ":base_native_libraries_gen",
     ]
 
@@ -1668,12 +1727,17 @@ if (is_android) {
       "android/library_loader/library_loader_hooks.h",
       "memory/memory_pressure_listener.h",
     ]
-    outputs = [
-      "org/chromium/base/ApplicationState.java",
-      "org/chromium/base/library_loader/LibraryLoadFromApkStatusCodes.java",
-      "org/chromium/base/library_loader/LibraryProcessType.java",
-      "org/chromium/base/MemoryPressureLevel.java",
+  }
+
+  # GYP: //base/base.gyp:base_multidex_gen
+  java_cpp_template("base_multidex_gen") {
+    sources = [
+      "android/java/templates/ChromiumMultiDex.template",
     ]
+    if (is_debug) {
+      defines = [ "MULTIDEX_CONFIGURATION_Debug" ]
+    }
+    package_name = "org/chromium/base/multidex"
   }
 
   # GYP: //base/base.gyp:base_native_libraries_gen

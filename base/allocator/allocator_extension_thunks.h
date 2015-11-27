@@ -15,19 +15,15 @@ namespace thunks {
 // new allocator extension from a specific allocator implementation to base.
 // See allocator_extension.h to see the interface that base exports.
 
-typedef bool (*GetAllocatorWasteSizeFunction)(size_t* size);
-void SetGetAllocatorWasteSizeFunction(
-    GetAllocatorWasteSizeFunction get_allocator_waste_size_function);
-GetAllocatorWasteSizeFunction GetGetAllocatorWasteSizeFunction();
-
-typedef void (*GetStatsFunction)(char* buffer, int buffer_length);
-void SetGetStatsFunction(GetStatsFunction get_stats_function);
-GetStatsFunction GetGetStatsFunction();
-
 typedef void (*ReleaseFreeMemoryFunction)();
 void SetReleaseFreeMemoryFunction(
     ReleaseFreeMemoryFunction release_free_memory_function);
 ReleaseFreeMemoryFunction GetReleaseFreeMemoryFunction();
+
+typedef bool (*GetNumericPropertyFunction)(const char* name, size_t* value);
+void SetGetNumericPropertyFunction(
+    GetNumericPropertyFunction get_numeric_property_function);
+GetNumericPropertyFunction GetGetNumericPropertyFunction();
 
 }  // namespace thunks
 }  // namespace allocator

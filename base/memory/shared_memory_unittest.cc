@@ -316,6 +316,10 @@ TEST(SharedMemoryTest, ShareReadOnly) {
   SharedMemoryCreateOptions options;
   options.size = contents.size();
   options.share_read_only = true;
+#if defined(OS_MACOSX) && !defined(OS_IOS)
+  // The Mach functionality is tested in shared_memory_mac_unittest.cc.
+  options.type = SharedMemoryHandle::POSIX;
+#endif
   ASSERT_TRUE(writable_shmem.Create(options));
   ASSERT_TRUE(writable_shmem.Map(options.size));
   memcpy(writable_shmem.memory(), contents.data(), contents.size());
@@ -469,6 +473,10 @@ TEST(SharedMemoryTest, AnonymousExecutable) {
   SharedMemoryCreateOptions options;
   options.size = kTestSize;
   options.executable = true;
+#if defined(OS_MACOSX) && !defined(OS_IOS)
+  // The Mach functionality is tested in shared_memory_mac_unittest.cc.
+  options.type = SharedMemoryHandle::POSIX;
+#endif
 
   EXPECT_TRUE(shared_memory.Create(options));
   EXPECT_TRUE(shared_memory.Map(shared_memory.requested_size()));
@@ -502,6 +510,10 @@ TEST(SharedMemoryTest, FilePermissionsAnonymous) {
   SharedMemory shared_memory;
   SharedMemoryCreateOptions options;
   options.size = kTestSize;
+#if defined(OS_MACOSX) && !defined(OS_IOS)
+  // The Mach functionality is tested in shared_memory_mac_unittest.cc.
+  options.type = SharedMemoryHandle::POSIX;
+#endif
   // Set a file mode creation mask that gives all permissions.
   ScopedUmaskSetter permissive_mask(S_IWGRP | S_IWOTH);
 
@@ -524,6 +536,10 @@ TEST(SharedMemoryTest, FilePermissionsNamed) {
   SharedMemory shared_memory;
   SharedMemoryCreateOptions options;
   options.size = kTestSize;
+#if defined(OS_MACOSX) && !defined(OS_IOS)
+  // The Mach functionality is tested in shared_memory_mac_unittest.cc.
+  options.type = SharedMemoryHandle::POSIX;
+#endif
 
   // Set a file mode creation mask that gives all permissions.
   ScopedUmaskSetter permissive_mask(S_IWGRP | S_IWOTH);

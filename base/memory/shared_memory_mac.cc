@@ -4,6 +4,7 @@
 
 #include "base/memory/shared_memory.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <mach/mach_vm.h>
 #include <sys/mman.h>
@@ -13,7 +14,10 @@
 #include "base/files/file_util.h"
 #include "base/files/scoped_file.h"
 #include "base/logging.h"
+#include "base/mac/mac_util.h"
 #include "base/mac/scoped_mach_vm.h"
+#include "base/metrics/field_trial.h"
+#include "base/metrics/histogram_macros.h"
 #include "base/posix/eintr_wrapper.h"
 #include "base/posix/safe_strerror.h"
 #include "base/process/process_metrics.h"
@@ -28,6 +32,38 @@
 namespace base {
 
 namespace {
+
+const char kTrialName[] = "MacMemoryMechanism";
+const char kTrialMach[] = "Mach";
+const char kTrialPosix[] = "Posix";
+
+SharedMemoryHandle::Type GetABTestMechanism() {
+  static bool found_group = false;
+  static SharedMemoryHandle::Type group = SharedMemoryHandle::MACH;
+
+  if (found_group)
+    return group;
+
+  const std::string group_name =
+      base::FieldTrialList::FindFullName(kTrialName);
+  if (group_name == kTrialMach) {
+    group = SharedMemoryHandle::MACH;
+    found_group = true;
+  } else if (group_name == kTrialPosix) {
+    group = SharedMemoryHandle::POSIX;
+    found_group = true;
+  } else {
+    group = SharedMemoryHandle::MACH;
+  }
+
+  return group;
+}
+
+// Emits a histogram entry indicating which type of SharedMemory was created.
+void EmitMechanism(SharedMemoryHandle::Type type) {
+  UMA_HISTOGRAM_ENUMERATION("OSX.SharedMemory.Mechanism", type,
+                            SharedMemoryHandle::TypeMax);
+}
 
 // Returns whether the operation succeeded.
 // |new_handle| is an output variable, populated on success. The caller takes
@@ -139,10 +175,20 @@ bool CreateAnonymousSharedMemory(const SharedMemoryCreateOptions& options,
 }  // namespace
 
 SharedMemoryCreateOptions::SharedMemoryCreateOptions()
-    : type(SharedMemoryHandle::POSIX),
+    : type(SharedMemoryHandle::MACH),
       size(0),
       executable(false),
-      share_read_only(false) {}
+      share_read_only(false) {
+  if (mac::IsOSLionOrLater()) {
+    // A/B test the mechanism. Once the experiment is over, this will always be
+    // set to SharedMemoryHandle::MACH.
+    // http://crbug.com/547261
+    type = GetABTestMechanism();
+  } else {
+    // Mach shared memory isn't supported on OSX 10.6 or older.
+    type = SharedMemoryHandle::POSIX;
+  }
+}
 
 SharedMemory::SharedMemory()
     : mapped_memory_mechanism_(SharedMemoryHandle::POSIX),
@@ -248,6 +294,8 @@ bool SharedMemory::Create(const SharedMemoryCreateOptions& options) {
   if (options.size > static_cast<size_t>(std::numeric_limits<int>::max()))
     return false;
 
+  EmitMechanism(options.type);
+
   if (options.type == SharedMemoryHandle::MACH) {
     shm_ = SharedMemoryHandle(options.size);
     requested_size_ = options.size;
@@ -283,7 +331,7 @@ bool SharedMemory::Create(const SharedMemoryCreateOptions& options) {
   }
   requested_size_ = options.size;
 
-  return PrepareMapFile(fp.Pass(), readonly_fd.Pass());
+  return PrepareMapFile(std::move(fp), std::move(readonly_fd));
 }
 
 bool SharedMemory::MapAt(off_t offset, size_t bytes) {
@@ -314,15 +362,17 @@ bool SharedMemory::Unmap() {
   switch (mapped_memory_mechanism_) {
     case SharedMemoryHandle::POSIX:
       munmap(memory_, mapped_size_);
-      memory_ = NULL;
-      mapped_size_ = 0;
-      return true;
+      break;
     case SharedMemoryHandle::MACH:
       mach_vm_deallocate(mach_task_self(),
                          reinterpret_cast<mach_vm_address_t>(memory_),
                          mapped_size_);
-      return true;
+      break;
   }
+
+  memory_ = NULL;
+  mapped_size_ = 0;
+  return true;
 }
 
 SharedMemoryHandle SharedMemory::handle() const {

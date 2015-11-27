@@ -42,6 +42,7 @@ class GpuChannelHost;
 class NestedMessagePumpAndroid;
 class ScopedAllowWaitForAndroidLayoutTests;
 class ScopedAllowWaitForDebugURL;
+class SoftwareOutputDeviceMus;
 class TextInputClientMac;
 }  // namespace content
 namespace dbus {
@@ -50,6 +51,9 @@ class Bus;
 namespace disk_cache {
 class BackendImpl;
 class InFlightIO;
+}
+namespace gles2 {
+class CommandBufferClientImpl;
 }
 namespace mojo {
 namespace common {
@@ -69,6 +73,10 @@ class AutoThread;
 
 namespace ui {
 class WindowResizeHelperMac;
+}
+
+namespace views {
+class WindowManagerConnection;
 }
 
 namespace base {
@@ -194,6 +202,7 @@ class BASE_EXPORT ThreadRestrictions {
   friend class ThreadTestHelper;
   friend class PlatformThread;
   friend class android::JavaHandlerThread;
+  friend class gles2::CommandBufferClientImpl;
 
   // END ALLOWED USAGE.
   // BEGIN USAGE THAT NEEDS TO BE FIXED.
@@ -213,7 +222,11 @@ class BASE_EXPORT ThreadRestrictions {
   friend class net::NetworkChangeNotifierMac;     // http://crbug.com/125097
   friend class ::BrowserProcessImpl;              // http://crbug.com/125207
   friend class ::NativeBackendKWallet;            // http://crbug.com/125331
-  // END USAGE THAT NEEDS TO BE FIXED.
+#if !defined(OFFICIAL_BUILD)
+  friend class content::SoftwareOutputDeviceMus;  // Interim non-production code
+#endif
+  friend class views::WindowManagerConnection;
+// END USAGE THAT NEEDS TO BE FIXED.
 
 #if ENABLE_THREAD_RESTRICTIONS
   static bool SetWaitAllowed(bool allowed);

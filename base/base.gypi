@@ -34,6 +34,8 @@
           'android/command_line_android.h',
           'android/content_uri_utils.cc',
           'android/content_uri_utils.h',
+          'android/context_utils.cc',
+          'android/context_utils.h',
           'android/cpu_features.cc',
           'android/cxa_demangle_stub.cc',
           'android/event_log.cc',
@@ -96,6 +98,8 @@
           'barrier_closure.h',
           'base64.cc',
           'base64.h',
+          'base64url.cc',
+          'base64url.h',
           'base_export.h',
           'base_paths.cc',
           'base_paths.h',
@@ -475,6 +479,7 @@
           'process/memory_linux.cc',
           'process/memory_mac.mm',
           'process/memory_win.cc',
+          'process/port_provider_mac.cc',
           'process/port_provider_mac.h',
           'process/process.h',
           'process/process_handle.cc',
@@ -643,6 +648,8 @@
           'threading/platform_thread_win.cc',
           'threading/post_task_and_reply_impl.cc',
           'threading/post_task_and_reply_impl.h',
+          'threading/sequenced_task_runner_handle.cc',
+          'threading/sequenced_task_runner_handle.h',
           'threading/sequenced_worker_pool.cc',
           'threading/sequenced_worker_pool.h',
           'threading/simple_thread.cc',
@@ -860,9 +867,6 @@
             ],
           }],
           ['OS == "android" and _toolset == "host" and host_os == "linux"', {
-            'defines': [
-              'OS_ANDROID_HOST=Linux',
-            ],
             'sources/': [
               # Pull in specific files for host builds.
               ['include', '^threading/platform_thread_linux\\.cc$'],

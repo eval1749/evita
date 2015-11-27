@@ -4,6 +4,7 @@
 
 #include "base/memory/shared_memory.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -310,7 +311,7 @@ bool SharedMemory::Create(const SharedMemoryCreateOptions& options) {
     return false;
   }
 
-  return PrepareMapFile(fp.Pass(), readonly_fd.Pass());
+  return PrepareMapFile(std::move(fp), std::move(readonly_fd));
 }
 
 // Our current implementation of shmem is with mmap()ing of files.
@@ -342,7 +343,7 @@ bool SharedMemory::Open(const std::string& name, bool read_only) {
     DPLOG(ERROR) << "open(\"" << path.value() << "\", O_RDONLY) failed";
     return false;
   }
-  return PrepareMapFile(fp.Pass(), readonly_fd.Pass());
+  return PrepareMapFile(std::move(fp), std::move(readonly_fd));
 }
 #endif  // !defined(OS_ANDROID)
 

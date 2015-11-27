@@ -19,6 +19,9 @@
 # above contracts.
 
 {
+  'includes': [
+    '../media/media_variables.gypi'
+  ],
   'targets': [
     {
       'target_name': 'gyp_all',
@@ -64,6 +67,7 @@
         '../gpu/gpu.gyp:gpu_unittests',
         '../ipc/ipc.gyp:ipc_tests',
         '../ipc/mojo/ipc_mojo.gyp:ipc_mojo_unittests',
+        '../media/cast/cast.gyp:cast_unittests',
         '../media/media.gyp:media_perftests',
         '../media/media.gyp:media_unittests',
         '../media/midi/midi.gyp:midi_unittests',
@@ -82,14 +86,13 @@
         '../third_party/WebKit/Source/wtf/wtf_tests.gyp:wtf_unittests',
         '../third_party/leveldatabase/leveldatabase.gyp:env_chromium_unittests',
         '../third_party/libaddressinput/libaddressinput.gyp:libaddressinput_unittests',
-        '../third_party/openh264/tests/openh264_unittests.gyp:*',
         '../third_party/smhasher/smhasher.gyp:pmurhash',
         '../tools/battor_agent/battor_agent.gyp:battor_agent',
         '../tools/telemetry/telemetry.gyp:bitmaptools#host',
         '../ui/accessibility/accessibility.gyp:accessibility_unittests',
         '../ui/base/ui_base_tests.gyp:ui_base_unittests',
         '../ui/display/display.gyp:display_unittests',
-        '../ui/events/events.gyp:events_unittests',
+        '../ui/events/events_unittests.gyp:events_unittests',
         '../ui/gfx/gfx_tests.gyp:gfx_unittests',
         '../ui/gl/gl_tests.gyp:gl_unittests',
         '../ui/snapshot/snapshot.gyp:snapshot_unittests',
@@ -196,8 +199,10 @@
             '../content/content_shell_and_tests.gyp:content_junit_tests',
             '../content/content_shell_and_tests.gyp:content_shell_apk',
             '../content/content_shell_and_tests.gyp:content_unittests_apk',
+            '../content/content_shell_and_tests.gyp:video_decode_accelerator_unittest_apk',
             '../device/device_tests.gyp:device_unittests_apk',
             '../gpu/gpu.gyp:gpu_unittests_apk',
+            '../media/cast/cast.gyp:cast_unittests_apk',
             '../media/media.gyp:media_unittests_apk',
             '../media/midi/midi.gyp:midi_unittests_apk',
             '../net/net.gyp:net_junit_tests',
@@ -214,7 +219,7 @@
             '../tools/imagediff/image_diff.gyp:image_diff#host',
             '../tools/telemetry/telemetry.gyp:bitmaptools#host',
             '../ui/base/ui_base_tests.gyp:ui_base_unittests_apk',
-            '../ui/events/events.gyp:events_unittests_apk',
+            '../ui/events/events_unittests.gyp:events_unittests_apk',
             '../ui/gfx/gfx_tests.gyp:gfx_unittests_apk',
             '../ui/gl/gl_tests.gyp:gl_unittests_apk',
             '../ui/touch_selection/ui_touch_selection.gyp:ui_touch_selection_unittests_apk',
@@ -279,10 +284,6 @@
             '../google_apis/gcm/gcm.gyp:mcs_probe',
             '../google_apis/google_apis.gyp:google_apis_unittests',
             '../jingle/jingle.gyp:jingle_unittests',
-            '../media/cast/cast.gyp:cast_benchmarks',
-            '../media/cast/cast.gyp:cast_unittests',
-            '../media/cast/cast.gyp:generate_barcode_video',
-            '../media/cast/cast.gyp:generate_timecode_audio',
             '../mojo/mojo.gyp:mojo',
             '../net/net.gyp:crash_cache',
             '../net/net.gyp:crl_set_dump',
@@ -354,14 +355,12 @@
             '../chrome/chrome.gyp:performance_browser_tests',
             '../chrome/chrome.gyp:sync_integration_tests',
             '../chrome/chrome.gyp:sync_performance_tests',
-            '../chrome/tools/profile_reset/jtl_compiler.gyp:jtl_compiler',
             '../extensions/extensions_tests.gyp:extensions_browsertests',
             '../extensions/extensions_tests.gyp:extensions_unittests',
             '../gin/gin.gyp:gin_shell',
             '../gpu/gles2_conform_support/gles2_conform_test.gyp:gles2_conform_test',  # TODO(GYP) crbug.com/471920
             '../gpu/khronos_glcts_support/khronos_glcts_test.gyp:khronos_glcts_test',  # TODO(GYP) crbug.com/471903 to make this complete.
             '../ipc/ipc.gyp:ipc_perftests',
-            '../media/media.gyp:ffmpeg_regression_tests',  # TODO(GYP) this should be conditional on media_use_ffmpeg
             '../mojo/mojo_base.gyp:mojo_common_unittests',
             '../ppapi/tools/ppapi_tools.gyp:pepper_hash_for_uma',
             '../skia/skia.gyp:filter_fuzz_stub',
@@ -378,6 +377,11 @@
             '../tools/perf/clear_system_cache/clear_system_cache.gyp:clear_system_cache',
             '../ui/message_center/message_center.gyp:message_center_unittests',
             '../ui/views/examples/examples.gyp:views_examples_with_content_exe',
+          ],
+        }],
+        ['media_use_ffmpeg==1', {
+          'dependencies': [
+            '../media/media.gyp:ffmpeg_regression_tests',
           ],
         }],
         ['OS=="android" or OS=="linux"', {
@@ -420,6 +424,7 @@
           'dependencies': [
             '../dbus/dbus.gyp:dbus_test_server',
             '../dbus/dbus.gyp:dbus_unittests',
+            '../media/cast/cast.gyp:cast_testing_tools',
             '../media/cast/cast.gyp:tap_proxy',
             '../net/net.gyp:disk_cache_memory_test',
             '../net/net.gyp:flip_in_mem_edsm_server',
@@ -577,7 +582,7 @@
             '../ui/accessibility/accessibility.gyp:accessibility_unittests_run',
             '../ui/app_list/app_list.gyp:app_list_unittests_run',
             '../ui/compositor/compositor.gyp:compositor_unittests_run',
-            '../ui/events/events.gyp:events_unittests_run',
+            '../ui/events/events_unittests.gyp:events_unittests_run',
             '../ui/message_center/message_center.gyp:message_center_unittests_run',
             '../url/url.gyp:url_unittests_run',
           ],
@@ -760,7 +765,6 @@
             '../components/components.gyp:cronet_perf_test_apk',
             '../content/content_shell_and_tests.gyp:chromium_linker_test_apk',
             '../content/content_shell_and_tests.gyp:content_shell_test_apk',
-            '../content/content_shell_and_tests.gyp:video_decode_accelerator_unittest_apk',
             '../gpu/gpu.gyp:gl_tests_apk',
             '../gpu/gpu.gyp:gpu_perftests_apk',
             '../ipc/ipc.gyp:ipc_tests_apk',
@@ -783,7 +787,6 @@
             '../android_webview/android_webview_shell.gyp:system_webview_shell_page_cycler_apk',
             '../chrome/android/chrome_apk.gyp:chrome_sync_shell_apk',
             '../chrome/android/chrome_apk.gyp:chrome_sync_shell_test_apk',
-            '../remoting/remoting.gyp:remoting_apk',
           ],
         }],
         ['OS=="android" and target_arch != "x64"', {

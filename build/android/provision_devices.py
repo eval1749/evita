@@ -57,15 +57,17 @@ def ProvisionDevices(args):
   blacklist = (device_blacklist.Blacklist(args.blacklist_file)
                if args.blacklist_file
                else None)
-
-  devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
+  devices = [d for d in device_utils.DeviceUtils.HealthyDevices(blacklist)
+             if not args.emulators or d.adb.is_emulator]
   if args.device:
     devices = [d for d in devices if d == args.device]
-    if not devices:
-      raise device_errors.DeviceUnreachableError(args.device)
-
+  if not devices:
+    raise device_errors.DeviceUnreachableError(args.device)
   parallel_devices = device_utils.DeviceUtils.parallel(devices)
-  parallel_devices.pMap(ProvisionDevice, blacklist, args)
+  if args.emulators:
+    parallel_devices.pMap(SetProperties, args)
+  else:
+    parallel_devices.pMap(ProvisionDevice, blacklist, args)
   if args.auto_reconnect:
     _LaunchHostHeartbeat()
   blacklisted_devices = blacklist.Read() if blacklist else []
@@ -122,12 +124,14 @@ def ProvisionDevice(device, blacklist, options):
   except device_errors.CommandTimeoutError:
     logging.exception('Timed out waiting for device %s. Adding to blacklist.',
                       str(device))
-    blacklist.Extend([str(device)], reason='provision_timeout')
+    if blacklist:
+      blacklist.Extend([str(device)], reason='provision_timeout')
 
   except device_errors.CommandFailedError:
     logging.exception('Failed to provision device %s. Adding to blacklist.',
                       str(device))
-    blacklist.Extend([str(device)], reason='provision_failure')
+    if blacklist:
+      blacklist.Extend([str(device)], reason='provision_failure')
 
 def CheckExternalStorage(device):
   """Checks that storage is writable and if not makes it writable.
@@ -479,6 +483,8 @@ def main():
                       help='Json file to output the device blacklist.')
   parser.add_argument('--chrome-specific-wipe', action='store_true',
                       help='only wipe chrome specific data during provisioning')
+  parser.add_argument('--emulators', action='store_true',
+                      help='provision only emulators and ignore usb devices')
   args = parser.parse_args()
   constants.SetBuildType(args.target)
 

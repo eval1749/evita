@@ -65,7 +65,6 @@
     'additional_input_paths': [],
     'additional_locale_input_paths': [],
     'dex_path': '<(PRODUCT_DIR)/lib.java/<(_target_name).dex.jar',
-    'main_dex_list_path': '<(intermediate_dir)/main_dex_list.txt',
     'generated_src_dirs': ['>@(generated_R_dirs)'],
     'generated_R_dirs': [],
     'has_java_resources%': 0,
@@ -120,7 +119,6 @@
         'variables': {
           'input_jars_paths': ['<(jar_final_path)'],
           'library_dexed_jars_paths': ['<(dex_path)'],
-          'main_dex_list_paths': ['<(main_dex_list_path)'],
         },
       },
     }],
@@ -327,21 +325,14 @@
       ]
     },
     {
-      'action_name': 'main_dex_list_for_<(_target_name)',
-      'variables': {
-        'jar_path': '<(javac_jar_path)',
-        'output_path': '<(main_dex_list_path)',
-      },
-      'includes': [ 'android/main_dex_action.gypi' ],
-    },
-    {
       'action_name': 'emma_instr_jar_<(_target_name)',
       'message': 'Instrumenting <(_target_name) jar',
       'variables': {
         'input_path': '<(jar_path)',
         'output_path': '<(jar_final_path)',
+        'coverage_file': '<(jar_dir)/<(_target_name).em',
+        'sources_list_file': '<(jar_dir)/<(_target_name)_sources.txt',
         'stamp_path': '<(emma_instr_stamp)',
-        'instr_type': 'jar',
       },
       'outputs': [
         '<(jar_final_path)',

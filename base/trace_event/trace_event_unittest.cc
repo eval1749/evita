@@ -459,6 +459,11 @@ void TraceWithAllMacroVariants(WaitableEvent* task_complete_event) {
                    "a", 30000,
                    "b", 1415);
 
+    TRACE_COUNTER_WITH_TIMESTAMP1("all", "TRACE_COUNTER_WITH_TIMESTAMP1 call",
+                                  42, 31415);
+    TRACE_COUNTER_WITH_TIMESTAMP2("all", "TRACE_COUNTER_WITH_TIMESTAMP2 call",
+                                  42, "a", 30000, "b", 1415);
+
     TRACE_COUNTER_ID1("all", "TRACE_COUNTER_ID1 call", 0x319009, 31415);
     TRACE_COUNTER_ID2("all", "TRACE_COUNTER_ID2 call", 0x319009,
                       "a", 30000, "b", 1415);
@@ -653,6 +658,39 @@ void ValidateAllTraceMacrosCreatedData(const ListValue& trace_parsed) {
 
     EXPECT_TRUE((item && item->GetInteger("args.b", &value)));
     EXPECT_EQ(1415, value);
+  }
+
+  EXPECT_FIND_("TRACE_COUNTER_WITH_TIMESTAMP1 call");
+  {
+    std::string ph;
+    EXPECT_TRUE((item && item->GetString("ph", &ph)));
+    EXPECT_EQ("C", ph);
+
+    int value;
+    EXPECT_TRUE((item && item->GetInteger("args.value", &value)));
+    EXPECT_EQ(31415, value);
+
+    int ts;
+    EXPECT_TRUE((item && item->GetInteger("ts", &ts)));
+    EXPECT_EQ(42, ts);
+  }
+
+  EXPECT_FIND_("TRACE_COUNTER_WITH_TIMESTAMP2 call");
+  {
+    std::string ph;
+    EXPECT_TRUE((item && item->GetString("ph", &ph)));
+    EXPECT_EQ("C", ph);
+
+    int value;
+    EXPECT_TRUE((item && item->GetInteger("args.a", &value)));
+    EXPECT_EQ(30000, value);
+
+    EXPECT_TRUE((item && item->GetInteger("args.b", &value)));
+    EXPECT_EQ(1415, value);
+
+    int ts;
+    EXPECT_TRUE((item && item->GetInteger("ts", &ts)));
+    EXPECT_EQ(42, ts);
   }
 
   EXPECT_FIND_("TRACE_COUNTER_ID1 call");
@@ -1087,6 +1125,63 @@ TEST_F(TraceEventTestFixture, TestTraceFlush) {
     }
     EndTraceAndFlush();
   }
+}
+
+TEST_F(TraceEventTestFixture, AddMetadataEvent) {
+  int num_calls = 0;
+
+  class Convertable : public ConvertableToTraceFormat {
+   public:
+    Convertable(int* num_calls) : num_calls_(num_calls) {}
+    void AppendAsTraceFormat(std::string* out) const override {
+      (*num_calls_)++;
+      out->append("\"metadata_value\"");
+    }
+
+   private:
+    ~Convertable() override {}
+    int* num_calls_;
+  };
+
+  scoped_refptr<ConvertableToTraceFormat> convertable =
+      new Convertable(&num_calls);
+
+  BeginTrace();
+  TRACE_EVENT_API_ADD_METADATA_EVENT("metadata_event_name", "metadata_arg_name",
+                                     convertable);
+
+  // |AppendAsTraceFormat| should only be called on flush, not when the event
+  // is added.
+  ASSERT_EQ(0, num_calls);
+  EndTraceAndFlush();
+  ASSERT_EQ(1, num_calls);
+  EXPECT_TRUE(FindNamePhaseKeyValue("metadata_event_name", "M",
+                                    "metadata_arg_name", "metadata_value"));
+
+  // The metadata event should only be adde to the current trace. In this new
+  // trace, the event should not appear.
+  BeginTrace();
+  EndTraceAndFlush();
+  ASSERT_EQ(1, num_calls);
+
+  // Flushing should cause |AppendAsTraceFormat| to be called, but if the buffer
+  // is left intact, it the flush at the end of the trace should still call it;
+  // the metadata event should not be removed.
+  TraceLog::GetInstance()->SetEnabled(
+      TraceConfig(kRecordAllCategoryFilter,
+                  "record-until-full,enable-sampling"),
+      TraceLog::MONITORING_MODE);
+  TRACE_EVENT_API_ADD_METADATA_EVENT("metadata_event_name", "metadata_arg_name",
+                                     convertable);
+  FlushMonitoring();
+  ASSERT_EQ(2, num_calls);
+
+  // Flushing the trace at this point will case |AppendAsTraceFormat| to be
+  // called twice: once for the event that was added by the monitoring flush,
+  // and once for the end trace flush; the metadata event will be duplicated.
+  // This is consistent with the other metadata events.
+  EndTraceAndFlush();
+  ASSERT_EQ(4, num_calls);
 }
 
 // Test that categories work.
@@ -2187,10 +2282,21 @@ TEST_F(TraceEventTestFixture, PrimitiveArgs) {
 
 namespace {
 
+bool IsArgNameWhitelisted(const char* arg_name) {
+  return base::MatchPattern(arg_name, "granular_arg_whitelisted");
+}
+
 bool IsTraceEventArgsWhitelisted(const char* category_group_name,
-                                 const char* event_name) {
+                                 const char* event_name,
+                                 ArgumentNameFilterPredicate* arg_filter) {
   if (base::MatchPattern(category_group_name, "toplevel") &&
       base::MatchPattern(event_name, "*")) {
+    return true;
+  }
+
+  if (base::MatchPattern(category_group_name, "benchmark") &&
+      base::MatchPattern(event_name, "granularly_whitelisted")) {
+    *arg_filter = base::Bind(&IsArgNameWhitelisted);
     return true;
   }
 
@@ -2209,6 +2315,11 @@ TEST_F(TraceEventTestFixture, ArgsWhitelisting) {
 
   TRACE_EVENT1("toplevel", "event1", "int_one", 1);
   TRACE_EVENT1("whitewashed", "event2", "int_two", 1);
+
+  TRACE_EVENT2("benchmark", "granularly_whitelisted",
+               "granular_arg_whitelisted", "whitelisted_value",
+               "granular_arg_blacklisted", "blacklisted_value");
+
   EndTraceAndFlush();
 
   const DictionaryValue* args_dict = NULL;
@@ -2230,6 +2341,17 @@ TEST_F(TraceEventTestFixture, ArgsWhitelisting) {
 
   std::string args_string;
   EXPECT_TRUE(dict->GetString("args", &args_string));
+  EXPECT_EQ(args_string, "__stripped__");
+
+  dict = FindNamePhase("granularly_whitelisted", "X");
+  ASSERT_TRUE(dict);
+  dict->GetDictionary("args", &args_dict);
+  ASSERT_TRUE(args_dict);
+
+  EXPECT_TRUE(args_dict->GetString("granular_arg_whitelisted", &args_string));
+  EXPECT_EQ(args_string, "whitelisted_value");
+
+  EXPECT_TRUE(args_dict->GetString("granular_arg_blacklisted", &args_string));
   EXPECT_EQ(args_string, "__stripped__");
 }
 
@@ -2278,10 +2400,10 @@ class TraceEventCallbackTest : public TraceEventTestFixture {
   std::vector<std::string> collected_events_categories_;
   std::vector<std::string> collected_events_names_;
   std::vector<unsigned char> collected_events_phases_;
-  std::vector<TraceTicks> collected_events_timestamps_;
+  std::vector<TimeTicks> collected_events_timestamps_;
 
   static TraceEventCallbackTest* s_instance;
-  static void Callback(TraceTicks timestamp,
+  static void Callback(TimeTicks timestamp,
                        char phase,
                        const unsigned char* category_group_enabled,
                        const char* name,
@@ -2467,9 +2589,9 @@ TEST_F(TraceEventTestFixture, TraceBufferVectorReportFull) {
       TraceBuffer::CreateTraceBufferVectorOfSize(100));
   do {
     TRACE_EVENT_BEGIN_WITH_ID_TID_AND_TIMESTAMP0(
-        "all", "with_timestamp", 0, 0, TraceTicks::Now().ToInternalValue());
+        "all", "with_timestamp", 0, 0, TimeTicks::Now().ToInternalValue());
     TRACE_EVENT_END_WITH_ID_TID_AND_TIMESTAMP0(
-        "all", "with_timestamp", 0, 0, TraceTicks::Now().ToInternalValue());
+        "all", "with_timestamp", 0, 0, TimeTicks::Now().ToInternalValue());
   } while (!trace_log->BufferIsFull());
 
   EndTraceAndFlush();
@@ -2842,7 +2964,7 @@ TEST_F(TraceEventTestFixture, EchoToConsoleTraceEventRecursion) {
 TEST_F(TraceEventTestFixture, TimeOffset) {
   BeginTrace();
   // Let TraceLog timer start from 0.
-  TimeDelta time_offset = TraceTicks::Now() - TraceTicks();
+  TimeDelta time_offset = TimeTicks::Now() - TimeTicks();
   TraceLog::GetInstance()->SetTimeOffset(time_offset);
 
   {
@@ -2850,15 +2972,15 @@ TEST_F(TraceEventTestFixture, TimeOffset) {
     TRACE_EVENT0("all", "duration2");
   }
   TRACE_EVENT_BEGIN_WITH_ID_TID_AND_TIMESTAMP0(
-      "all", "with_timestamp", 0, 0, TraceTicks::Now().ToInternalValue());
+      "all", "with_timestamp", 0, 0, TimeTicks::Now().ToInternalValue());
   TRACE_EVENT_END_WITH_ID_TID_AND_TIMESTAMP0(
-      "all", "with_timestamp", 0, 0, TraceTicks::Now().ToInternalValue());
+      "all", "with_timestamp", 0, 0, TimeTicks::Now().ToInternalValue());
 
   EndTraceAndFlush();
   DropTracedMetadataRecords();
 
   double end_time = static_cast<double>(
-      (TraceTicks::Now() - time_offset).ToInternalValue());
+      (TimeTicks::Now() - time_offset).ToInternalValue());
   double last_timestamp = 0;
   for (size_t i = 0; i < trace_parsed_.GetSize(); ++i) {
     const DictionaryValue* item;

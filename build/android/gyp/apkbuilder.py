@@ -31,6 +31,9 @@ def _ParseArgs(args):
                       help='GYP-list of files to add as assets in the form '
                            '"srcPath:zipPath", where ":zipPath" is optional.',
                       default='[]')
+  parser.add_argument('--write-asset-list',
+                      action='store_true',
+                      help='Whether to create an assets/assets_list file.')
   parser.add_argument('--uncompressed-assets',
                       help='Same as --assets, except disables compression.',
                       default='[]')
@@ -48,16 +51,21 @@ def _ParseArgs(args):
                       default=[])
   parser.add_argument('--android-abi',
                       help='Android architecture to use for native libraries')
-  parser.add_argument('--create-placeholder-lib',
-                      action='store_true',
-                      help='Whether to add a dummy library file')
+  parser.add_argument('--native-lib-placeholders',
+                      help='GYP-list of native library placeholders to add.',
+                      default='[]')
+  parser.add_argument('--emma-device-jar',
+                      help='Path to emma_device.jar to include.')
   options = parser.parse_args(args)
-  if not options.android_abi and (options.native_libs_dir or
-                                  options.create_placeholder_lib):
-    raise Exception('Must specify --android-abi with --native-libs-dir')
   options.assets = build_utils.ParseGypList(options.assets)
   options.uncompressed_assets = build_utils.ParseGypList(
       options.uncompressed_assets)
+  options.native_lib_placeholders = build_utils.ParseGypList(
+      options.native_lib_placeholders)
+
+  if not options.android_abi and (options.native_libs_dir or
+                                  options.native_lib_placeholders):
+    raise Exception('Must specify --android-abi with --native-libs-dir')
   return options
 
 
@@ -87,16 +95,13 @@ def _AddAssets(apk, paths, disable_compression=False):
   """
   # Group all uncompressed assets together in the hope that it will increase
   # locality of mmap'ed files.
-  for target_compress_type in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+  for target_compress in (False, True):
     for path in paths:
       src_path, dest_path = _SplitAssetPath(path)
 
-      compress_type = zipfile.ZIP_DEFLATED
-      if disable_compression or (
-          os.path.splitext(src_path)[1] in _NO_COMPRESS_EXTENSIONS):
-        compress_type = zipfile.ZIP_STORED
-
-      if target_compress_type == compress_type:
+      compress = not disable_compression and (
+          os.path.splitext(src_path)[1] not in _NO_COMPRESS_EXTENSIONS)
+      if target_compress == compress:
         apk_path = 'assets/' + dest_path
         try:
           apk.getinfo(apk_path)
@@ -104,7 +109,13 @@ def _AddAssets(apk, paths, disable_compression=False):
           raise Exception('Multiple targets specified the asset path: %s' %
                           apk_path)
         except KeyError:
-          apk.write(src_path, apk_path, compress_type)
+          build_utils.AddToZipHermetic(apk, apk_path, src_path=src_path,
+                                       compress=compress)
+
+
+def _CreateAssetsList(paths):
+  """Returns a newline-separated list of asset paths for the given paths."""
+  return '\n'.join(_SplitAssetPath(p)[1] for p in sorted(paths)) + '\n'
 
 
 def main(args):
@@ -119,7 +130,10 @@ def main(args):
   if options.dex_file:
     input_paths.append(options.dex_file)
 
-  input_strings = [options.create_placeholder_lib, options.android_abi]
+  if options.emma_device_jar:
+    input_paths.append(options.emma_device_jar)
+
+  input_strings = [options.android_abi, options.native_lib_placeholders]
 
   for path in itertools.chain(options.assets, options.uncompressed_assets):
     src_path, dest_path = _SplitAssetPath(path)
@@ -136,17 +150,49 @@ def main(args):
       # with finalize_apk(), which sometimes aligns and uncompresses the
       # native libraries.
       with zipfile.ZipFile(tmp_apk, 'a', zipfile.ZIP_DEFLATED) as apk:
+        if options.write_asset_list:
+          data = _CreateAssetsList(
+              itertools.chain(options.assets, options.uncompressed_assets))
+          build_utils.AddToZipHermetic(apk, 'assets/assets_list', data=data)
+
         _AddAssets(apk, options.assets, disable_compression=False)
         _AddAssets(apk, options.uncompressed_assets, disable_compression=True)
+
         for path in native_libs:
           basename = os.path.basename(path)
-          apk.write(path, 'lib/%s/%s' % (options.android_abi, basename))
-        if options.create_placeholder_lib:
+          apk_path = 'lib/%s/%s' % (options.android_abi, basename)
+          build_utils.AddToZipHermetic(apk, apk_path, src_path=path)
+
+        for name in options.native_lib_placeholders:
           # Make it non-empty so that its checksum is non-zero and is not
           # ignored by md5_check.
-          apk.writestr('lib/%s/libplaceholder.so' % options.android_abi, ':-)')
-        if options.dex_file:
-          apk.write(options.dex_file, 'classes.dex')
+          apk_path = 'lib/%s/%s.so' % (options.android_abi, name)
+          build_utils.AddToZipHermetic(apk, apk_path, data=':)')
+
+        if options.dex_file and options.dex_file.endswith('.zip'):
+          with zipfile.ZipFile(options.dex_file, 'r') as dex_zip:
+            for dex in (d for d in dex_zip.namelist() if d.endswith('.dex')):
+              build_utils.AddToZipHermetic(apk, dex, data=dex_zip.read(dex))
+        elif options.dex_file:
+          build_utils.AddToZipHermetic(apk, 'classes.dex',
+                                       src_path=options.dex_file)
+
+        if options.emma_device_jar:
+          # Add EMMA Java resources to APK.
+          with zipfile.ZipFile(options.emma_device_jar, 'r') as emma_device_jar:
+            for apk_path in emma_device_jar.namelist():
+              apk_path_lower = apk_path.lower()
+              if apk_path_lower.startswith('meta-inf/'):
+                continue
+
+              if apk_path_lower.endswith('/'):
+                continue
+
+              if apk_path_lower.endswith('.class'):
+                continue
+
+              build_utils.AddToZipHermetic(apk, apk_path,
+                                           data=emma_device_jar.read(apk_path))
 
       shutil.move(tmp_apk, options.output_apk)
     finally:

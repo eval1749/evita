@@ -17,6 +17,7 @@ js_lib_files = [
   "lexers/lexer.js",
 
   "base/define.js",
+  "base/strings/string_util.js",
 
   "bracket.js",
   "commander.js",

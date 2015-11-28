@@ -106,6 +106,8 @@ idl_lexer_parser_files = [
 ]
 
 static_js_externs_files = [
+  "//evita/dom/base/base_externs.js",
+  "//evita/dom/base/strings/string_util_externs.js",
   "//evita/dom/bracket_externs.js",
   "//evita/dom/clipboard/clipboard_externs.js",
   "//evita/dom/commander_externs.js",

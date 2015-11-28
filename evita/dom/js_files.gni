@@ -92,4 +92,6 @@ js_lib_files = [
   "commands/window_commands.js",
 
   "jslib/install_stringify.js",
+
+  "testing/test.js",
 ]

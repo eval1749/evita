@@ -17,6 +17,7 @@ js_lib_files = [
   "lexers/lexer.js",
 
   "base/define.js",
+  "base/async.js",
   "base/strings/string_util.js",
 
   "bracket.js",
@@ -43,7 +44,6 @@ js_lib_files = [
   "forms/text_field_control.js",
   "forms/text_field_selection.js",
 
-  "jslib/await.js",
   "jslib/editors.js",
   "jslib/ordered_set.js",
   "jslib/stringify.js",

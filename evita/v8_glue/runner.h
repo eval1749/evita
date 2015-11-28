@@ -100,6 +100,12 @@ class Runner : public gin::ContextHolder {
 
   bool CheckCallDepth();
 
+  // Compile |script_text| and returns |v8::Script| handle if succeeded,
+  // otherwise returns empty handle and calls |UnhandledException| of
+  // |delegate_|.
+  v8::Handle<v8::Script> Compile(const base::string16& script_text,
+                                 const base::string16& script_name);
+
   int call_depth_;
   RunnerDelegate* delegate_;
 #if defined(_DEBUG)

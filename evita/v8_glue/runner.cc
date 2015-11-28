@@ -161,6 +161,20 @@ bool Runner::CheckCallDepth() {
   return false;
 }
 
+v8::Handle<v8::Script> Runner::Compile(const base::string16& script_text,
+                                       const base::string16& script_name) {
+  v8::TryCatch try_catch;
+  v8::ScriptOrigin script_origin(gin::StringToV8(isolate(), script_name));
+  v8::ScriptCompiler::Source source(gin::StringToV8(isolate(), script_text),
+                                    script_origin);
+  auto script = v8::ScriptCompiler::Compile(context(), &source);
+  if (script.IsEmpty()) {
+    HandleTryCatch(try_catch);
+    return v8::Handle<v8::Script>();
+  }
+  return script.ToLocalChecked();
+}
+
 v8::Handle<v8::Value> Runner::GetGlobalProperty(const base::StringPiece& name) {
 #if defined(_DEBUG)
   DCHECK(in_scope_);
@@ -183,15 +197,10 @@ v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
-  v8::TryCatch try_catch;
-  v8::ScriptOrigin script_origin(gin::StringToV8(isolate(), script_name));
-  v8::ScriptCompiler::Source source(gin::StringToV8(isolate(), script_text),
-                                    script_origin);
-  auto script = v8::ScriptCompiler::Compile(context(), &source);
+  auto const script = Compile(script_text, script_name);
   if (script.IsEmpty())
     return v8::Handle<v8::Value>();
-  HandleTryCatch(try_catch);
-  return Run(script.ToLocalChecked());
+  return Run(script);
 }
 
 v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {

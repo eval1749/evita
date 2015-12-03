@@ -11,7 +11,7 @@
    * Number of characters to color during scheduled task.
    * This is an experiment for searching right value.
    */
-  const kIncrementalCount = 1000 * 2;
+  const kIncrementalCount = 100;
 
   /**
    * @this {!Lexer}

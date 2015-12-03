@@ -20,7 +20,7 @@ var $0;
  *
  */
 global.JsConsole = (function() {
-  'use strict';
+  /** @const @type {number} */ const MAX_HISTORY_LINES = 20;
 
   function installKeyBindings(jsConsole) {
     /** @const @type {!Document} */ let document = jsConsole.document_;
@@ -50,7 +50,62 @@ global.JsConsole = (function() {
     });
   }
 
-  /** @const @type {number} */ let MAX_HISTORY_LINES = 20;
+  //////////////////////////////////////////////////////////////////////
+  //
+  // History
+  //
+  class History {
+    constructor() {
+      /** @type {number} */
+      this.index_ = 0;
+      /** @type {!Array.<string>} */
+      this.lines_ = [];
+    }
+
+    /** @return {string} */
+    get current() {
+      return this.lines_[this.lines_.length - this.index_];
+    }
+
+    /**
+     * @param {string} line
+     */
+    add(line) {
+      this.index_ = 0;
+      if (!this.shouldAdd_(line))
+        return;
+      if (this.lines_.length > MAX_HISTORY_LINES)
+        this.lines_.shift();
+      this.lines_.push(line);
+    }
+
+    /** @return {boolean} */
+    backward() {
+      if (this.index_ === this.lines_.length)
+        return false;
+      ++this.index_;
+      return true;
+    }
+
+    /** @return {boolean} */
+    forward() {
+      if (this.index_ === 0)
+        return false;
+      --this.index_;
+      return true;
+    }
+
+    /**
+     * @param {string} line
+     * @return {boolean}
+     */
+    shouldAdd_(line) {
+      const length = this.lines_.length;
+      if (length === 0)
+        return true;
+      return this.lines_[length - 1] !== line;
+    }
+  }
 
   //////////////////////////////////////////////////////////////////////
   //
@@ -64,10 +119,10 @@ global.JsConsole = (function() {
       // syntax coloring.
       /** @type {!Document} */
       this.document_ = document;
-      /** @type {number} */
-      this.historyIndex_ = 0;
-      /** @type {!Array.<string>} */
-      this.history_ = [];
+      // TODO(eval1749): We should annotate |history_| with |History| once
+      // Closure compiler recognize class |History|.
+      /** @const $type {!History} */
+      this.history_ = new History();
       /** @type {number} */
       this.lineNumber_ = 0;
       /** @const @type {!Range} */
@@ -105,24 +160,10 @@ global.JsConsole = (function() {
 
     /**
      * @this {!JsConsole}
-     * @param {string} line
-     */
-    addToHistory(line) {
-      let history = this.history_;
-      if (history.length && history[history.length - 1] === line)
-        return;
-      if (history.length > MAX_HISTORY_LINES)
-        history.shift();
-      history.push(line);
-    }
-
-    /**
-     * @this {!JsConsole}
      */
     backwardHistory() {
-      if (this.historyIndex_ === this.history_.length)
+      if (!this.history_.backward())
         return;
-      ++this.historyIndex_;
       this.useHistory();
     }
 
@@ -160,8 +201,7 @@ global.JsConsole = (function() {
         this.emitPrompt();
         return;
       }
-      this.addToHistory(line);
-      this.historyIndex_ = 0;
+      this.history_.add(line);
       range.collapseTo(range.end);
       range.text = '\n';
 
@@ -190,9 +230,8 @@ global.JsConsole = (function() {
      * @this {!JsConsole}
      */
     forwardHistory() {
-      if (this.historyIndex_ <= 1)
+      if (!this.history_.forward())
         return;
-      --this.historyIndex_;
       this.useHistory();
     }
 
@@ -242,10 +281,8 @@ global.JsConsole = (function() {
      * @this {!JsConsole}
      */
     useHistory() {
-      let history = this.history_;
-      let range = this.range_;
-      range.end = this.document_.length;
-      range.text = ' ' + history[history.length - this.historyIndex_];
+      this.range_.end = this.document_.length;
+      this.range_.text = ' ' + this.history_.current;
     }
   }
   Object.freeze(JsConsole.prototype);

@@ -310,14 +310,20 @@ global.JsConsole = (function() {
     /**
      * @param {!Promise} promise
      * @param {*} reason
+     * @param {number} event
+     *
+     * enum PromiseRejectEvent {
+     *   kPromiseRejectWithNoHandler = 0,
+     *   kPromiseHandlerAddedAfterReject = 1
+     * };
      *
      * This function is called from C++ via
      * |v8::Isolate::SetPromiseRejectCallback()|.
      */
-    static handleRejectedPromise(promise, reason) {
+    static handleRejectedPromise(promise, reason, event) {
       let jsConsole = ensureJsConsole();
       jsConsole.freshLine_();
-      console.log(BLOCK_COMMENT, 'Unhandled promise rejection:');
+      console.log(BLOCK_COMMENT, 'Unhandled promise rejection:', event);
       jsConsole.emitReason(reason);
       console.log(BLOCK_COMMENT_END);
     }

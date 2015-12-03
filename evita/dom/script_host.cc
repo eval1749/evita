@@ -52,7 +52,6 @@ namespace {
 void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
   if (reject_message.GetEvent() != v8::kPromiseRejectWithNoHandler)
     return;
-  auto const promise = reject_message.GetPromise();
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
@@ -68,8 +67,12 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
     DVLOG(0) << "No JsConsole.handleRejectedPromise";
     return;
   }
+  auto const event = static_cast<int>(reject_message.GetEvent());
   ASSERT_DOM_LOCKED();
-  runner->Call(handler, runner->global(), promise, reject_message.GetValue());
+  runner->Call(handler, runner->global(),
+               reject_message.GetPromise(),
+               reject_message.GetValue(),
+               gin::ConvertToV8(isolate, event));
 }
 
 // Note: The constructor returned by v8::Object::GetConstructor() doesn't

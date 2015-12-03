@@ -20,6 +20,9 @@ var $0;
  *
  */
 global.JsConsole = (function() {
+  /** @const @type {string} */ const BLOCK_COMMENT = '\x2F*';
+  /** @const @type {string} */ const BLOCK_COMMENT_END = '*\x2F';
+  /** @const @type {string} */ const LINE_COMMENT = '\x2F/';
   /** @const @type {number} */ const MAX_HISTORY_LINES = 20;
 
   function installKeyBindings(jsConsole) {
@@ -125,6 +128,8 @@ global.JsConsole = (function() {
       this.history_ = new History();
       /** @type {number} */
       this.lineNumber_ = 0;
+      /** @const @type {!RepeatingTimer} */
+      this.promiseTimer_ = new RepeatingTimer();
       /** @const @type {!Range} */
       this.range_ = new Range(document);
       installKeyBindings(this);
@@ -183,6 +188,7 @@ global.JsConsole = (function() {
      * @this {!JsConsole}
      */
     emitPrompt() {
+      this.promiseTimer_.stop();
       ++this.lineNumber_;
       this.emit('\njs:' + this.lineNumber_ + '> ');
       // Off by one to keep |this.range_.end| before user input.
@@ -194,9 +200,9 @@ global.JsConsole = (function() {
      * @this {!JsConsole}
      */
     evalLastLine() {
-      let range = this.range_;
+      const range = this.range_;
       range.end = this.document_.length;
-      let line = range.text.trim();
+      const line = range.text.trim();
       if (line === '') {
         this.emitPrompt();
         return;
@@ -205,7 +211,7 @@ global.JsConsole = (function() {
       range.collapseTo(range.end);
       range.text = '\n';
 
-      let result = Editor.runScript(line, console.document.name);
+      const result = Editor.runScript(line, console.document.name);
       range.collapseTo(range.end);
       if (result.exception) {
         $0 = result.exception;
@@ -218,12 +224,40 @@ global.JsConsole = (function() {
             }).join('');
         }
         this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
-      } else {
-        if (result.value !== undefined)
-          $0 = result.value;
-        this.emit(Editor.stringify(result.value));
+        this.emitPrompt();
+        return;
       }
+
+      const value = result.value;
+      if (value instanceof Promise)
+        return this.handlePromiseResult(value);
+
+      if (value !== undefined)
+        $0 = value;
+      this.emit(Editor.stringify(value));
       this.emitPrompt();
+    }
+
+    /**
+     * @private
+     * @this {!JsConsole}
+     * @param {*} reason
+     */
+    emitReason(reason) {
+      $0 = reason;
+      if (reason instanceof Error) {
+        const stack = reason['stack'];
+        if (stack) {
+          this.emit(stack);
+          return;
+        }
+        const message = reason['message'];
+        if (message) {
+          this.emit('Exception: ' + message);
+          return;
+        }
+      }
+      this.emit(Editor.stringify(reason));
     }
 
     /**
@@ -236,35 +270,41 @@ global.JsConsole = (function() {
     }
 
     /**
-     * @this {!JsConsole}
-     * @param {*} reason
+     * @private
+     * @param {!Promise} promise
      */
-    handleError(reason) {
-      $0 = reason;
-      if (reason instanceof Error) {
-        let stack = reason['stack'];
-        if (stack) {
-          this.emit('\x2F*\n' + stack + '\n*\x2F\n');
-          return;
-        }
-        let message = reason['message'];
-        if (message) {
-          this.emit('\x2F*\nException: ' + message + '\n*\x2F\n');
-          return;
-        }
-      }
-      this.emit('JsConsole.errorHandler: ' + Editor.stringify(reason));
-      this.emit('\n');
+    handlePromiseResult(promise) {
+      console.log(LINE_COMMENT, 'Waiting for', promise);
+      let counter = 0;
+      this.promiseTimer_.start(1000, () => {
+        ++counter;
+        console.log(LINE_COMMENT, 'waiting promise...', promise, counter);
+      });
+      promise.then((value) => {
+        console.log(LINE_COMMENT, 'Value of', promise, 'is:');
+        this.emit(Editor.stringify(value));
+        this.emitPrompt();
+      }).catch((reason) => {
+        console.log(BLOCK_COMMENT, promise, 'is rejected with:');
+        this.emitReason(reason);
+        console.log(BLOCK_COMMENT_END);
+        this.emitPrompt();
+      });
     }
 
     /**
      * @param {!Promise} promise
      * @param {*} reason
+     *
+     * This function is called from C++ via
+     * |v8::Isolate::SetPromiseRejectCallback()|.
      */
     static handleRejectedPromise(promise, reason) {
       let jsConsole = ensureJsConsole();
-      jsConsole.emit('\n\x2F/Unhandled promise rejection:\n');
-      jsConsole.handleError(reason);
+      jsConsole.emit('\n');
+      console.log(BLOCK_COMMENT, 'Unhandled promise rejection:');
+      jsConsole.emitReason(reason);
+      console.log(BLOCK_COMMENT_END);
     }
 
     /**

@@ -190,7 +190,8 @@ global.JsConsole = (function() {
     emitPrompt() {
       this.promiseTimer_.stop();
       ++this.lineNumber_;
-      this.emit('\njs:' + this.lineNumber_ + '> ');
+      this.freshLine_();
+      this.emit('js:' + this.lineNumber_ + '> ');
       // Off by one to keep |this.range_.end| before user input.
       this.range_.collapseTo(this.document_.length - 1);
       this.document_.readonly = false;
@@ -223,6 +224,7 @@ global.JsConsole = (function() {
                   stackFrame.column + ')';
             }).join('');
         }
+        this.freshLine_();
         this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
         this.emitPrompt();
         return;
@@ -271,6 +273,18 @@ global.JsConsole = (function() {
 
     /**
      * @private
+     * Emits new line if console doesn't end with newline.
+     */
+    freshLine_() {
+      if (this.document_.length === 0)
+        return;
+      if (this.document_.charCodeAt_(this.document_.length - 1) === Unicode.LF)
+        return;
+      this.emit('\n');
+    }
+
+    /**
+     * @private
      * @param {!Promise} promise
      */
     handlePromiseResult(promise) {
@@ -285,6 +299,7 @@ global.JsConsole = (function() {
         this.emit(Editor.stringify(value));
         this.emitPrompt();
       }).catch((reason) => {
+        this.freshLine_();
         console.log(BLOCK_COMMENT, promise, 'is rejected with:');
         this.emitReason(reason);
         console.log(BLOCK_COMMENT_END);
@@ -301,7 +316,7 @@ global.JsConsole = (function() {
      */
     static handleRejectedPromise(promise, reason) {
       let jsConsole = ensureJsConsole();
-      jsConsole.emit('\n');
+      jsConsole.freshLine_();
       console.log(BLOCK_COMMENT, 'Unhandled promise rejection:');
       jsConsole.emitReason(reason);
       console.log(BLOCK_COMMENT_END);
@@ -339,7 +354,7 @@ global.JsConsole = (function() {
       return instance;
     instance = new JsConsole();
     instance.emit(`\x2F/ JavaScript Console ${Editor.version},` +
-                  ` v8:${Editor.v8Version}\n`);
+                  ` v8:${Editor.v8Version}\n\n`);
     instance.emitPrompt();
     return instance;
   }

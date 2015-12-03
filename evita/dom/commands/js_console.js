@@ -30,9 +30,13 @@ global.JsConsole = (function() {
       this.selection.range.collapseTo(jsConsole.document_.length);
     });
     document.bindKey('Ctrl+L', function() {
+      const document = jsConsole.range_.document;
+      const readonly = document.readonly;
+      document.readonly = false;
       jsConsole.range_.startOf(Unit.DOCUMENT);
       jsConsole.range_.endOf(Unit.DOCUMENT, Alter.EXTEND);
       jsConsole.range_.text = '';
+      document.readonly = readonly;
       jsConsole.emitPrompt();
       this.selection.range.collapseTo(jsConsole.document_.length);
     });

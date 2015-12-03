@@ -38,23 +38,22 @@ function load(scriptPath, opt_options) {
       total_read += num_read;
     }
     file.close();
+    text = text.replace(/\r\n/g, '\n');
     if (options.verbose)
       console.log('/\x2F loaded', scriptPath, total_read);
     let result = Editor.runScript(text, scriptPath);
-    if (result.exception && options.verbose) {
-      console.log('/\x2A\n' + result.exception + '\n' +
-                  scriptPath + '(' + result.lineNumber + ':' +
-                  result.startColumn + ':' + result.endColumn + ')' +
-                  result.stackTrace +
-                  '*/');
+    if (result.exception instanceof SyntaxError) {
+      const syntaxError = result.exception + '; ' +
+        scriptPath + '(' + result.lineNumber + ':' +
+        result.startColumn + ':' + result.endColumn + ')';
+      throw syntaxError;
     }
     if (result.exception)
-      return Promise.reject(result.exception)
+      throw result.exception;
     return Promise.resolve();
   }))().catch((reason) => {
     if (file)
       file.close();
-    console.log('/\x2F failed', scriptPath, reason);
     throw reason;
   });
 }

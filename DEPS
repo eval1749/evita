@@ -5,13 +5,13 @@
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
 
-  'buildtools_revision':  '818123dac34899ec230840936fc15b8b2b5556f9',
+  'buildtools_revision':  'b747a9e091cb8212a62343258406eaf53a6c032e',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
-  'gyp_revision': 'e1133480da78cd4a23a8cec604d1d6d46dab35d6',
+  'gyp_revision': 'e2313c02ad7b6d589b38fe578f5d39970a9bbc20',
   'icu_revision': '42c58d4e49f2250039f0e98d43e0b76e8f5ca024',
-  'v8_revision': '5b74353f66b783da1aa57671565397de7c081622', # 4.9.125
+  'v8_revision': 'd93a58ce9f12b3202b2bf4c47db83f377c0e1e1b', # 4.9.135
 }
 
 deps = {

@@ -85,12 +85,10 @@
 
   /**
    * @param {Unit} unit
-   * @param {Alter=} opt_alter, default is Alter.MOVE
+   * @param {Alter=} alter, default is Alter.MOVE
    * @return {!TextSelection}
    */
-  TextSelection.prototype.endKey = function(unit, opt_alter) {
-    var alter = arguments.length >= 2 ? /** @type{Alter} */(opt_alter) :
-                                        Alter.MOVE;
+  TextSelection.prototype.endKey = function(unit, alter = Alter.MOVE) {
     if (this.startIsActive)
       this.range.collapseTo(this.range.end);
     var anchor = this.range.start;
@@ -112,12 +110,10 @@
    * Move end position of TextSelection at end of specified unit.
    * @this {!TextSelection}
    * @param {Unit} unit
-   * @param {Alter=} opt_alter, default is Alter.MOVE.
+   * @param {Alter=} alter, default is Alter.MOVE.
    * @return {!TextSelection}
    */
-  TextSelection.prototype.endOf = function(unit, opt_alter) {
-    var alter = arguments.length >= 2 ? /** @type{Alter} */(opt_alter) :
-                                        Alter.MOVE;
+  TextSelection.prototype.endOf = function(unit, alter = Alter.MOVE) {
     var anchor = this.range.start;
     switch (unit) {
       case Unit.WINDOW:
@@ -136,12 +132,10 @@
 
   /**
    * @param {Unit} unit, one of DOCUMENT, LINE, or WINDOW_LINE.
-   * @param {!Alter=} opt_alter, default is Alter.MOVE
+   * @param {!Alter=} alter, default is Alter.MOVE
    * @return {!TextSelection}
    */
-  TextSelection.prototype.homeKey = function(unit, opt_alter) {
-    var alter = arguments.length >= 2 ? /** @type{Alter} */(opt_alter) :
-                                        Alter.MOVE;
+  TextSelection.prototype.homeKey = function(unit, alter = Alter.MOVE) {
     if (!this.startIsActive)
       this.range.collapseTo(this.range.start);
     var anchor = this.range.end;
@@ -162,14 +156,11 @@
   /**
    * @this {!TextSelection}
    * @param {Unit} unit
-   * @param {number=} opt_count, default is one.
-   * @param {Alter=} opt_alter, defualt is Alter.MOVE
+   * @param {number=} count, default is one.
+   * @param {Alter=} alter, default is Alter.MOVE
    * @return {!TextSelection}
    */
-  TextSelection.prototype.modify = function(unit, opt_count, opt_alter) {
-    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
-    var alter = arguments.length >= 3 ? /** @type {Alter} */(opt_alter) :
-                                        Alter.MOVE;
+  TextSelection.prototype.modify = function(unit, count = 1, alter = Alter.MOVE) {
     updateGoalX(this, unit);
     switch (alter) {
       case Alter.EXTEND: {
@@ -202,11 +193,10 @@
   /**
    * @this {!TextSelection}
    * @param {Unit} unit
-   * @param {number=} opt_count, defualt is one.
+   * @param {number=} count, default is one.
    * @return {!TextSelection}
    */
-  TextSelection.prototype.move = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+  TextSelection.prototype.move = function(unit, count = 1) {
     if (this.startIsActive) {
       return updateSelection(this, Alter.MOVE, this.range.end,
           computeMotion(this, unit, count, this.range.start));
@@ -219,11 +209,10 @@
   /**
    * @this {!TextSelection}
    * @param {Unit} unit
-   * @param {number=} opt_count, defualt is one.
+   * @param {number=} count, default is one.
    * @return {!TextSelection}
    */
-  TextSelection.prototype.moveEnd = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+  TextSelection.prototype.moveEnd = function(unit, count = 1) {
     var position = computeMotion(this, unit, count, this.range.end);
     if (position < this.range.start)
       this.range.collapseTo(position);
@@ -235,11 +224,10 @@
   /**
    * @this {!TextSelection}
    * @param {Unit} unit
-   * @param {number=} opt_count, defualt is one.
+   * @param {number=} count, default is one.
    * @return {!TextSelection}
    */
-  TextSelection.prototype.moveStart = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+  TextSelection.prototype.moveStart = function(unit, count = 1) {
     var position = computeMotion(this, unit, count, this.range.start);
     if (position > this.range.end)
       this.range.collapseTo(position);
@@ -252,12 +240,10 @@
    * Move start position of TextSelection at end of specified unit.
    * @this {!TextSelection}
    * @param {Unit} unit, except for CHARACTER and SCREEN,
-   * @param {!Alter=} opt_alter, default is Alter.MOVE.
+   * @param {!Alter=} alter, default is Alter.MOVE.
    * @return {!TextSelection}
    */
-  TextSelection.prototype.startOf = function(unit, opt_alter) {
-    var alter = arguments.length >= 2 ? /** @type{Alter} */(opt_alter) :
-                                        Alter.MOVE;
+  TextSelection.prototype.startOf = function(unit, alter = Alter.MOVE) {
     var anchor = this.range.end;
     switch (unit) {
       case Unit.WINDOW:

@@ -317,7 +317,7 @@
     if (count && this.lastToken)
       this.colorLastToken();
     if (this.scanOffset < document.length)
-      taskScheduler.schedule(this);
+      taskScheduler.schedule(this, 100);
     return maxCount - count;
   }
 

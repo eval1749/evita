@@ -41,10 +41,9 @@
   function makeSelectionMotionCommand(unit, direction, alter) {
     /**
      * @this {!TextWindow}
-     * @param {number=} opt_count
+     * @param {number=} count
      */
-    function command_function(opt_count) {
-      var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+    function command_function(count = 1) {
       this.selection.modify(unit, count * direction, alter);
     }
     return command_function;
@@ -60,16 +59,10 @@
    */
   function makeTypeCharCommand(charCode) {
     return isRightBracket(charCode) ?
-      function(opt_count) {
-        if (arguments.length)
-          typeRightBracket.call(this, charCode, opt_count);
-        else
-          typeRightBracket.call(this, charCode);
-      } : function(opt_count) {
-        if (arguments.length)
-          typeChar.call(this, charCode, opt_count);
-        else
-          typeChar.call(this, charCode);
+      function(count = 1) {
+        typeRightBracket.call(this, charCode, count);
+      } : function(count = 1) {
+        typeChar.call(this, charCode, count);
       };
   }
 
@@ -93,10 +86,9 @@
    * Type character
    * @this {!TextWindow}
    * @param {number} charCode
-   * @param {number=} opt_count
+   * @param {number=} count
    */
-  function typeChar(charCode, opt_count) {
-    var count = arguments.length >= 2 ? /**@type{number}*/(opt_count) : 1;
+  function typeChar(charCode, count = 1) {
     var range = this.selection.range;
     range.text = String.fromCharCode(charCode).repeat(count);
     range.collapseTo(range.end);
@@ -109,10 +101,9 @@
    * Type right bracket.
    * @this {!TextWindow}
    * @param {number} charCode
-   * @param {number=} opt_count
+   * @param {number=} count
    */
-  function typeRightBracket(charCode, opt_count) {
-    const count = /**@type{number}*/(opt_count) || 1;
+  function typeRightBracket(charCode, count = 1) {
     /** @type {!TextWindow} */
     const window = this;
     /** @type {!TextSelection} */
@@ -148,11 +139,10 @@
   Editor.bindKey(TextWindow, 'Backspace',
     /**
      * Backward delete character
-     * @param {number=} opt_count
+     * @param {number=} count
      * @this {!TextWindow}
      */
-    function(opt_count) {
-      var count = arguments.length >= 1 ? opt_count : 1;
+    function(count = 1) {
       this.selection.range.delete(Unit.CHARACTER, -count);
     });
 
@@ -199,10 +189,9 @@
     /**
      * Exchange Unicode character code point and character
      * @this {!TextWindow}
-     * @param {number=} opt_base
+     * @param {number=} base
      */
-    function(opt_base) {
-      var base = arguments.length >= 1 ? /** @type{number} */(opt_base) : 16;
+    function(base = 16) {
       if (base < 2 || base > 36)
         return;
       var range = new Range(this.selection.range);
@@ -286,11 +275,10 @@
   Editor.bindKey(TextWindow, 'Ctrl+Backspace',
     /**
      * Backward delete word
-     * @param {number=} opt_count
+     * @param {number=} count
      * @this {!TextWindow}
      */
-    function(opt_count) {
-      var count = arguments.length >= 1 ? opt_count : 1;
+    function(count = 1) {
       this.selection.range.delete(Unit.WORD, -count);
     });
 
@@ -299,11 +287,10 @@
   Editor.bindKey(TextWindow, 'Ctrl+Delete',
     /**
      * Forward delete word
-     * @param {number=} opt_count
+     * @param {number=} count
      * @this {!TextWindow}
      */
-    function(opt_count) {
-      var count = arguments.length >= 1 ? opt_count : 1;
+    function(count = 1) {
       this.selection.range.delete(Unit.WORD, count);
     });
 
@@ -568,11 +555,10 @@
   Editor.bindKey(TextWindow, 'Delete',
     /**
      * Forward delete character
-     * @param {number=} opt_count
+     * @param {number=} count
      * @this {!TextWindow}
      */
-    function(opt_count) {
-      var count = arguments.length >= 1 ? opt_count : 1;
+    function(count = 1) {
       this.selection.range.delete(Unit.CHARACTER, count);
     });
 
@@ -583,11 +569,10 @@
 
   Editor.bindKey(TextWindow, 'Enter',
     /**
-     * @param {number=} opt_count
+     * @param {number=} count
      * @this {!TextWindow}
      */
-    function(opt_count) {
-      var count = arguments.length >= 1 ? /** @type {number} */(opt_count) : 1;
+    function(count = 1) {
       if (count <= 0)
         return;
       var selection = this.selection;
@@ -595,7 +580,7 @@
           .moveEndWhile(' \t').text;
       selection.document.undoGroup('TypeEnter', function() {
         selection.range.moveStartWhile(' \t', Count.BACKWARD);
-        selection.range.text = '\n'.repeat(count);
+        selection.range.text = '\n'.repeat(/** @type {number} */(count));
         selection.range.collapseTo(selection.range.end)
             .moveEndWhile(' \t').text = leadingWhitespaces;
         selection.range.collapseTo(selection.range.end);
@@ -644,10 +629,8 @@
   var TAB_WIDTH = 4;
 
   Editor.bindKey(TextWindow, 'Shift+Tab',
-    /** @param {number=} opt_count */
-    function(opt_count) {
-      var tabWidth = arguments.length >= 1 ? /** @type{number} */(opt_count) :
-                                            TAB_WIDTH;
+    /** @param {number=} tabWidth*/
+    function(tabWidth = TAB_WIDTH) {
       var range = this.selection.range;
       if (range.start == range.end) {
         // Move to previous tab stop
@@ -656,7 +639,7 @@
                          tabWidth + range.end);
         return;
       }
-      // Exapnd range to contain whole lines
+      // Expand range to contain whole lines
       range.startOf(Unit.LINE, Alter.EXTEND);
       // Remove leading whitespaces
       range.document.undoGroup('Outdent', function() {
@@ -679,10 +662,8 @@
        'Remove leading whitespaces from lines in selection.');
 
   Editor.bindKey(TextWindow, 'Tab',
-    /** @param {number=} opt_count */
-    function(opt_count) {
-      var tabWidth = arguments.length >= 1 ? /** @type{number} */(opt_count) :
-                                            TAB_WIDTH;
+    /** @param {number=} tabWidth */
+    function(tabWidth = TAB_WIDTH) {
       var range = this.selection.range;
       if (range.start == range.end) {
         var current = range.start;
@@ -693,13 +674,13 @@
         return;
       }
 
-      // Exapnd range to contain whole lines
+      // Expand range to contain whole lines
       range.startOf(Unit.LINE, Alter.EXTEND);
       range.document.undoGroup('Indent', function() {
         var lineRange = new Range(range);
         lineRange.collapseTo(lineRange.start);
         while (lineRange.start < range.end) {
-          var spaces = ' '.repeat(tabWidth);
+          var spaces = ' '.repeat(/** @type{number} */(tabWidth));
           lineRange.endOf(Unit.LINE, Alter.EXTEND);
           if (lineRange.start != lineRange.end)
             lineRange.insertBefore(spaces);

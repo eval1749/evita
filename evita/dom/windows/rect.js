@@ -4,20 +4,20 @@
 
 /**
  * @constructor
- * @param {number=} opt_x
- * @param {number=} opt_y
- * @param {number=} opt_width
- * @param {number=} opt_height
+ * @param {number=} x
+ * @param {number=} y
+ * @param {number=} width
+ * @param {number=} height
  *
  * Note: Closure compiler doesn't allow to write |function Rect|, we use
  * IIFE to set constructor name to |Rect| rather than |global.Rect|.
  */
 global.Rect = (function() {
-  function Rect(opt_x, opt_y, opt_width, opt_height) {
-    this.x = opt_x || 0;
-    this.y = opt_y || 0;
-    this.width = opt_width || 0;
-    this.height = opt_height || 0;
+  function Rect(x = 0, y = 0, width = 0, height = 0) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
   }
   return Rect;
 })();

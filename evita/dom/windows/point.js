@@ -4,16 +4,16 @@
 
 /**
  * @constructor
- * @param {number=} opt_x
- * @param {number=} opt_y
+ * @param {number=} x
+ * @param {number=} y
  *
  * Note: Closure compiler doesn't allow to write |function Point|, we use
  * IIFE to set constructor name to |Point| rather than |global.Point|.
  */
 global.Point = (function() {
-  function Point(opt_x, opt_y) {
-    this.x = opt_x || 0;
-    this.y = opt_y || 0;
+  function Point(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
   }
   return Point;
 })();

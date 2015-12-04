@@ -128,10 +128,6 @@ char kTSanDefaultSuppressions[] =
 // http://crbug.com/272095
 "race:base::g_top_manager\n"
 
-// http://crbug.com/273047
-"race:base::*::g_lazy_tls_ptr\n"
-"race:IPC::SyncChannel::ReceivedSyncMsgQueue::lazy_tls_ptr_\n"
-
 // http://crbug.com/280466
 "race:content::WebRtcAudioCapturer::SetCapturerSource\n"
 
@@ -143,9 +139,6 @@ char kTSanDefaultSuppressions[] =
 
 // http://crbug.com/310851
 "race:net::ProxyResolverV8Tracing::Job::~Job\n"
-
-// http://crbug.com/313726
-"race:CallbackWasCalled\n"
 
 // http://crbug.com/327330
 "race:PrepareTextureMailbox\n"

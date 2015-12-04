@@ -196,7 +196,6 @@ component("base") {
     "containers/linked_list.h",
     "containers/mru_cache.h",
     "containers/scoped_ptr_hash_map.h",
-    "containers/scoped_ptr_map.h",
     "containers/small_map.h",
     "containers/stack_container.h",
     "cpu.cc",
@@ -700,7 +699,7 @@ component("base") {
   ]
 
   deps = [
-    "//base/allocator:allocator_extension_thunks",
+    "//base/allocator:extension_thunks",
     "//base/third_party/dynamic_annotations",
     "//third_party/modp_b64",
   ]
@@ -1006,6 +1005,8 @@ component("i18n") {
   output_name = "base_i18n"
   sources = [
     "i18n/base_i18n_export.h",
+    "i18n/base_i18n_switches.cc",
+    "i18n/base_i18n_switches.h",
     "i18n/bidi_line_iterator.cc",
     "i18n/bidi_line_iterator.h",
     "i18n/break_iterator.cc",
@@ -1289,7 +1290,6 @@ test("base_unittests") {
     "containers/linked_list_unittest.cc",
     "containers/mru_cache_unittest.cc",
     "containers/scoped_ptr_hash_map_unittest.cc",
-    "containers/scoped_ptr_map_unittest.cc",
     "containers/small_map_unittest.cc",
     "containers/stack_container_unittest.cc",
     "cpu_unittest.cc",
@@ -1375,11 +1375,11 @@ test("base_unittests") {
     "metrics/histogram_macros_unittest.cc",
     "metrics/histogram_snapshot_manager_unittest.cc",
     "metrics/histogram_unittest.cc",
+    "metrics/metrics_hashes_unittest.cc",
     "metrics/sample_map_unittest.cc",
     "metrics/sample_vector_unittest.cc",
     "metrics/sparse_histogram_unittest.cc",
     "metrics/statistics_recorder_unittest.cc",
-    "move_unittest.cc",
     "native_library_unittest.cc",
     "numerics/safe_numerics_unittest.cc",
     "observer_list_unittest.cc",
@@ -1525,7 +1525,7 @@ test("base_unittests") {
   }
 
   if (is_android) {
-    apk_deps = [
+    deps += [
       ":base_java",
       ":base_java_unittest_support",
     ]

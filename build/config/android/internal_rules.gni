@@ -341,7 +341,8 @@ template("write_build_config") {
 
     assert(type == "android_apk" || type == "java_library" ||
            type == "android_resources" || type == "deps_dex" ||
-           type == "android_assets" || type == "resource_rewriter")
+           type == "android_assets" || type == "resource_rewriter" ||
+           type == "java_binary")
 
     deps = []
     forward_variables_from(invoker,
@@ -379,7 +380,7 @@ template("write_build_config") {
       rebase_path(build_config, root_build_dir),
     ]
 
-    is_java_library = type == "java_library"
+    is_java = type == "java_library" || type == "java_binary"
     is_apk = type == "android_apk"
     is_android_assets = type == "android_assets"
     is_android_resources = type == "android_resources"
@@ -387,30 +388,30 @@ template("write_build_config") {
 
     supports_android =
         is_apk || is_android_assets || is_android_resources || is_deps_dex ||
-        (is_java_library && defined(invoker.supports_android) &&
+        (is_java && defined(invoker.supports_android) &&
          invoker.supports_android)
     requires_android =
         is_apk || is_android_assets || is_android_resources || is_deps_dex ||
-        (is_java_library && defined(invoker.requires_android) &&
+        (is_java && defined(invoker.requires_android) &&
          invoker.requires_android)
 
     assert(!requires_android || supports_android,
            "requires_android requires" + " supports_android")
 
     # Mark these variables as used.
-    assert(is_java_library || true)
+    assert(is_java || true)
     assert(is_apk || true)
     assert(is_android_resources || true)
     assert(is_deps_dex || true)
 
-    if (is_java_library || is_apk) {
+    if (is_java || is_apk) {
       args += [
         "--jar-path",
         rebase_path(invoker.jar_path, root_build_dir),
       ]
     }
 
-    if (is_apk || is_deps_dex || (is_java_library && supports_android)) {
+    if (is_apk || is_deps_dex || (is_java && supports_android)) {
       args += [
         "--dex-path",
         rebase_path(invoker.dex_path, root_build_dir),
@@ -667,7 +668,8 @@ template("emma_instr") {
 #   output_apk_path: Output path for the generated .apk.
 #   native_lib_placeholders: List of placeholder filenames to add to the apk
 #     (optional).
-#   native_libs_dir: Directory containing native libraries.
+#   native_libs: List of native libraries.
+#   native_libs_filearg: @FileArg() of additionaly native libraries.
 #   write_asset_list: Adds an extra file to the assets, which contains a list of
 #     all other asset files.
 template("package_apk") {
@@ -689,9 +691,7 @@ template("package_apk") {
       "//tools/android/md5sum",
     ]  # Used when deploying APKs
 
-    inputs = [
-      invoker.resource_packaged_apk_path,
-    ]
+    inputs = invoker.native_libs + [ invoker.resource_packaged_apk_path ]
     if (defined(invoker.dex_path)) {
       inputs += [ invoker.dex_path ]
     }
@@ -727,13 +727,16 @@ template("package_apk") {
       _rebased_dex_path = rebase_path(invoker.dex_path, root_build_dir)
       args += [ "--dex-file=$_rebased_dex_path" ]
     }
-    if (defined(invoker.native_libs_dir) || _native_lib_placeholders != []) {
+    if (invoker.native_libs != [] || defined(invoker.native_libs_filearg) ||
+        _native_lib_placeholders != []) {
       args += [ "--android-abi=$android_app_abi" ]
     }
-    if (defined(invoker.native_libs_dir)) {
-      _rebased_native_libs_dir =
-          rebase_path(invoker.native_libs_dir, root_build_dir)
-      args += [ "--native-libs-dir=$_rebased_native_libs_dir/$android_app_abi" ]
+    if (invoker.native_libs != []) {
+      _rebased_native_libs = rebase_path(invoker.native_libs, root_build_dir)
+      args += [ "--native-libs=$_rebased_native_libs" ]
+    }
+    if (defined(invoker.native_libs_filearg)) {
+      args += [ "--native-libs=${invoker.native_libs_filearg}" ]
     }
     if (_native_lib_placeholders != []) {
       args += [ "--native-lib-placeholders=$_native_lib_placeholders" ]
@@ -839,6 +842,15 @@ template("create_apk") {
   _incremental_deps = []
   if (defined(invoker.incremental_deps)) {
     _incremental_deps = invoker.incremental_deps
+  }
+  _native_libs = []
+  if (defined(invoker.native_libs)) {
+    _native_libs = invoker.native_libs
+  }
+  _native_libs_even_when_incremental = []
+  if (defined(invoker.native_libs_even_when_incremental)) {
+    _native_libs_even_when_incremental =
+        invoker.native_libs_even_when_incremental
   }
 
   # TODO(agrieve): Remove support for asset_location in favor of using
@@ -1014,10 +1026,11 @@ template("create_apk") {
                              "assets_build_config",
                              "emma_instrument",
                              "native_lib_placeholders",
-                             "native_libs_dir",
+                             "native_libs_filearg",
                              "write_asset_list",
                            ])
     deps = _deps + [ ":${_package_resources_target_name}" ]
+    native_libs = _native_libs + _native_libs_even_when_incremental
 
     if (defined(_dex_path)) {
       dex_path = _dex_path
@@ -1045,8 +1058,12 @@ template("create_apk") {
           get_label_info(_dex_target, "target_gen_dir") + "/bootstrap.dex"
     }
 
+    native_libs = _native_libs_even_when_incremental
+
     # http://crbug.com/384638
-    if (defined(invoker.native_libs_dir)) {
+    _has_native_libs =
+        defined(invoker.native_libs_filearg) || _native_libs != []
+    if (_has_native_libs && _native_libs_even_when_incremental == []) {
       native_lib_placeholders = [ "libfix.crbug.384638.so" ]
     }
 
@@ -1531,7 +1548,11 @@ template("java_library_impl") {
 
     write_build_config(build_config_target_name) {
       forward_variables_from(invoker, [ "deps" ])
-      type = "java_library"
+      if (defined(invoker.is_java_binary) && invoker.is_java_binary) {
+        type = "java_binary"
+      } else {
+        type = "java_library"
+      }
       supports_android = _supports_android
       requires_android = _requires_android
       bypass_platform_checks = defined(invoker.bypass_platform_checks) &&

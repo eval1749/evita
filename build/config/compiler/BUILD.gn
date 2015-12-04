@@ -53,7 +53,7 @@ declare_args() {
   # TODO(GYP): We should be using 64-bit gold for linking on both 64-bit Linux
   # and 32-bit linux; 32-bit Gold runs out of address-space on 32-bit builds.
   # However, something isn't quite working right on the 32-bit builds.
-  use_gold = is_linux && current_cpu == "x64"
+  use_gold = is_linux && (current_cpu == "x64" || current_cpu == "arm")
 
   # When we are going to use gold we need to find it.
   # This is initialized below, after use_gold might have been overridden.
@@ -303,6 +303,10 @@ config("compiler") {
     #    "-Wl,--detect-odr-violations",
     #  ]
     #}
+  } else if (linux_use_bundled_binutils) {
+    # Gold is the default linker for the bundled binutils so we explicitly
+    # enable the bfd linker when use_gold is not set.
+    ldflags += [ "-fuse-ld=bfd" ]
   }
 
   if (linux_use_bundled_binutils) {
@@ -425,29 +429,93 @@ config("compiler_cpu_abi") {
       }
     } else if (current_cpu == "mipsel") {
       if (mips_arch_variant == "r6") {
-        cflags += [
-          "-mips32r6",
-          "-Wa,-mips32r6",
-        ]
-        if (is_android) {
-          ldflags += [
-            "-mips32r6",
-            "-Wl,-melf32ltsmip",
+        if (is_clang) {
+          cflags += [
+            "-target",
+            "mipsel-linux-gnu",
+            "-march=mips32r6",
           ]
+          ldflags += [
+            "-target",
+            "mipsel-linux-gnu",
+          ]
+        } else {
+          cflags += [
+            "-mips32r6",
+            "-Wa,-mips32r6",
+          ]
+          if (is_android) {
+            ldflags += [
+              "-mips32r6",
+              "-Wl,-melf32ltsmip",
+            ]
+          }
         }
       } else if (mips_arch_variant == "r2") {
-        cflags += [
-          "-mips32r2",
-          "-Wa,-mips32r2",
-        ]
-        if (mips_float_abi == "hard" && mips_fpu_mode != "") {
-          cflags += [ "-m$mips_fpu_mode" ]
+        if (is_clang) {
+          if (is_android) {
+            cflags += [
+              "-target",
+              "mipsel-linux-android",
+              "-march=mipsel",
+              "-mcpu=mips32r2",
+            ]
+            ldflags += [
+              "-target",
+              "mipsel-linux-android",
+            ]
+          } else {
+            cflags += [
+              "-target",
+              "mipsel-linux-gnu",
+              "-march=mipsel",
+              "-mcpu=mips32r2",
+            ]
+            ldflags += [
+              "-target",
+              "mipsel-linux-gnu",
+            ]
+          }
+        } else {
+          cflags += [
+            "-mips32r2",
+            "-Wa,-mips32r2",
+          ]
+          if (mips_float_abi == "hard" && mips_fpu_mode != "") {
+            cflags += [ "-m$mips_fpu_mode" ]
+          }
         }
       } else if (mips_arch_variant == "r1") {
-        cflags += [
-          "-mips32",
-          "-Wa,-mips32",
-        ]
+        if (is_clang) {
+          if (is_android) {
+            cflags += [
+              "-target",
+              "mipsel-linux-android",
+              "-march=mipsel",
+              "-mcpu=mips32",
+            ]
+            ldflags += [
+              "-target",
+              "mipsel-linux-android",
+            ]
+          } else {
+            cflags += [
+              "-target",
+              "mipsel-linux-gnu",
+              "-march=mipsel",
+              "-mcpu=mips32",
+            ]
+            ldflags += [
+              "-target",
+              "mipsel-linux-gnu",
+            ]
+          }
+        } else {
+          cflags += [
+            "-mips32",
+            "-Wa,-mips32",
+          ]
+        }
       }
 
       if (mips_dsp_rev == 1) {
@@ -489,10 +557,12 @@ config("compiler_cpu_abi") {
           "-arch",
           "arm-nonsfi",
           "--pnacl-bias=arm-nonsfi",
+          "--target=armv7-unknown-nacl-gnueabihf",
         ]
         ldflags += [
           "-arch",
           "arm-nonsfi",
+          "--target=armv7-unknown-nacl-gnueabihf",
         ]
       }
     }
@@ -524,13 +594,7 @@ config("compiler_codegen") {
         ]
       }
     } else if (current_cpu == "arm") {
-      if (is_clang) {
-        if (!is_android) {
-          # We need to disable clang's builtin assembler as it can't
-          # handle several asm files, crbug.com/124610
-          cflags += [ "-no-integrated-as" ]
-        }
-      } else {
+      if (!is_clang) {
         # Clang doesn't support these flags.
         cflags += [
           # The tree-sra optimization (scalar replacement for
@@ -706,6 +770,14 @@ config("default_warnings") {
       "/wd4458",
       "/wd4459",
     ]
+
+    if (visual_studio_version == "2015") {
+      # VC++ 2015 changes 32-bit size_t truncation warnings from 4244 to 4267.
+      # Example: short TruncTest(size_t x) { return x; }
+      # Since we already disable 4244 we need to disable 4267 during migration.
+      # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+      cflags += [ "/wd4267" ]
+    }
 
     # VS xtree header file needs to be patched or 4702 (unreachable code
     # warning) is reported if _HAS_EXCEPTIONS=0. Disable the warning if xtree is

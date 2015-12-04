@@ -295,11 +295,8 @@
             'mips_arch_variant%': 'r1',
           }],
 
-          # The system root for linux compiles.
-          # Not used when chromecast=1 since ozone_platform_gbm doesn't
-          # currently build against the linux sysroot
-          # TODO(sbc): http://crbug.com/559708
-          ['OS=="linux" and chromeos==0 and chromecast==0 and use_sysroot==1', {
+          # The system root for linux builds.
+          ['OS=="linux" and chromeos==0 and use_sysroot==1', {
             # sysroot needs to be an absolute path otherwise it generates
             # incorrect results when passed to pkg-config
             'conditions': [
@@ -446,7 +443,7 @@
       'mac_want_real_dsym%': 'default',
 
       # If this is set, the clang plugins used on the buildbot will be used.
-      # Run tools/clang/scripts/update.sh to make sure they are compiled.
+      # Run tools/clang/scripts/update.py to make sure they are compiled.
       # This causes 'clang_chrome_plugins_flags' to be set.
       # Has no effect if 'clang' is not set as well.
       'clang_use_chrome_plugins%': 1,
@@ -540,9 +537,6 @@
 
       # Whether one-click signin is enabled or not.
       'enable_one_click_signin%': 0,
-
-      # Whether to back up data before sync.
-      'enable_pre_sync_backup%': 0,
 
       # Enable Chrome browser extensions
       'enable_extensions%': 1,
@@ -664,6 +658,10 @@
       # build only explicitly selected platforms.
       'ozone_auto_platforms%': 1,
 
+      # Disable the display for a chromecast build. Set to 1 perform an audio-
+      # only build.
+      'disable_display%': 0,
+
       # If this is set clang is used as host compiler, but not as target
       # compiler. Always do this by default.
       'host_clang%': 1,
@@ -758,7 +756,7 @@
         }],
 
         # Flags to use Wayland server support.
-        ['chromeos==1 and use_ozone==1', {
+        ['chromeos==1', {
           'enable_wayland_server%': 1,
         }, {
           'enable_wayland_server%': 0,
@@ -811,7 +809,6 @@
 
         ['OS=="win" or OS=="mac" or (OS=="linux" and chromeos==0)', {
           'enable_one_click_signin%': 1,
-          'enable_pre_sync_backup%': 1,
         }],
 
         ['OS=="android"', {
@@ -1162,7 +1159,6 @@
     'use_titlecase_in_grd%': '<(use_titlecase_in_grd)',
     'remoting%': '<(remoting)',
     'enable_one_click_signin%': '<(enable_one_click_signin)',
-    'enable_pre_sync_backup%': '<(enable_pre_sync_backup)',
     'enable_media_router%': '<(enable_media_router)',
     'enable_webrtc%': '<(enable_webrtc)',
     'chromium_win_pch%': '<(chromium_win_pch)',
@@ -1515,9 +1511,12 @@
     # Be sure to synchronize with build/module_args/v8.gni
 
     'v8_extra_library_files': [
+      '../third_party/WebKit/Source/core/streams/ReadableStreamTempStub.js',
     ],
     'v8_experimental_extra_library_files': [
       '../third_party/WebKit/Source/core/streams/ByteLengthQueuingStrategy.js',
+      '../third_party/WebKit/Source/core/streams/CountQueuingStrategy.js',
+      '../third_party/WebKit/Source/core/streams/ReadableStream.js',
     ],
 
     # Use brlapi from brltty for braille display support.
@@ -1881,9 +1880,6 @@
             'arm_thumb%': 1,
           }],
         ],
-      }],
-      ['chromecast==1 and OS!="android"', {
-        'ozone_platform_cast%': 1
       }],
       ['OS=="linux"', {
         'clang%': 1,
@@ -2380,12 +2376,34 @@
       ['use_ozone==1 and ozone_auto_platforms==1', {
         # Use headless as the default platform.
         'ozone_platform%': 'headless',
-
-        # Build all platforms whose deps are in install-build-deps.sh.
-        # Only these platforms will be compile tested by buildbots.
-        'ozone_platform_gbm%': 1,
         'ozone_platform_headless%': 1,
-        'ozone_platform_egltest%': 1,
+        'conditions': [
+          ['chromecast==1', {
+            'conditions': [
+              ['disable_display==0', {
+                # Enable the Cast ozone platform on all A/V Cast builds.
+                'ozone_platform_cast%': 1,
+                'conditions': [
+                  ['OS=="linux" and target_arch!="arm"', {
+                    'ozone_platform_egltest%': 1,
+                    'ozone_platform_ozonex%': 1,
+                  }],
+                ],
+              }],
+            ],
+          }, {  # chromecast!=1
+            'conditions': [
+              ['OS=="chromeos"', {
+                'ozone_platform_gbm%': 1,
+                'ozone_platform_egltest%': 1,
+              }, {
+                # Build all platforms whose deps are in install-build-deps.sh.
+                # Only these platforms will be compile tested by buildbots.
+                'ozone_platform_egltest%': 1,
+              }],
+            ],
+          }],
+        ],
       }],
 
       ['desktop_linux==1 and use_aura==1 and use_x11==1', {
@@ -2717,9 +2735,6 @@
       }],
       ['enable_one_click_signin==1', {
         'defines': ['ENABLE_ONE_CLICK_SIGNIN'],
-      }],
-      ['enable_pre_sync_backup==1', {
-        'defines': ['ENABLE_PRE_SYNC_BACKUP'],
       }],
       ['image_loader_extension==1', {
         'defines': ['IMAGE_LOADER_EXTENSION=1'],
@@ -3981,13 +3996,6 @@
                       }],
                     ],
                   }],
-                  ['clang==1 and OS!="android"', {
-                    'cflags': [
-                      # We need to disable clang's builtin assembler as it can't
-                      # handle several asm files, crbug.com/124610
-                      '-no-integrated-as',
-                    ],
-                  }],
                   ['arm_tune!=""', {
                     'cflags': [
                       '-mtune=<(arm_tune)',
@@ -4100,11 +4108,6 @@
                           '-fno-tree-sra',
                           '-fno-caller-saves',
                           '-Wno-psabi',
-                        ],
-                        'cflags': [
-                          # TODO(hans) Enable integrated-as (crbug.com/124610).
-                          '-no-integrated-as',
-                          '-B<(android_toolchain)',  # Else /usr/bin/as gets picked up.
                         ],
                       }],
                       ['clang==1 and linux_use_bundled_gold==0', {
@@ -4229,9 +4232,6 @@
                     ],
                   }],
                   ['clang==1 and OS=="android"', {
-                    'cflags': [
-                      '-B<(android_toolchain)',  # Else /usr/bin/as gets picked up.
-                    ],
                     'ldflags': [
                       # Let clang find the ld in the NDK.
                       '--gcc-toolchain=<(android_toolchain)/..',
@@ -4577,8 +4577,16 @@
           ['order_profiling!=0 and OS=="android"', {
             'target_conditions' : [
               ['_toolset=="target"', {
+                'cflags': ['-finstrument-functions'],
+                'defines': ['CYGPROFILE_INSTRUMENTATION'],
+              }],
+            ],
+          }],
+          # Clang doesn't understand -finstrument-functions-exclude-file-list=.
+          ['order_profiling!=0 and OS=="android" and clang==0', {
+            'target_conditions' : [
+              ['_toolset=="target"', {
                 'cflags': [
-                  '-finstrument-functions',
                   # Allow mmx intrinsics to inline, so that the
                   # compiler can expand the intrinsics.
                   '-finstrument-functions-exclude-file-list=mmintrin.h',
@@ -4586,7 +4594,6 @@
                   # "third_party/android_tools/ndk/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.6/include/arm_neon.h:3426:3: error: argument must be a constant"
                   '-finstrument-functions-exclude-file-list=arm_neon.h',
                 ],
-                'defines': ['CYGPROFILE_INSTRUMENTATION'],
               }],
             ],
           }],

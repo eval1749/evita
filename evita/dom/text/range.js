@@ -158,11 +158,10 @@
   /**
    * Delete
    * @param {Unit} unit
-   * @param {number=} opt_count, default is one.
+   * @param {number=} count, default is one.
    * @return {!Range}
    */
-  Range.prototype.delete = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? opt_count : 1;
+  Range.prototype.delete = function(unit, count = 1) {
     var delta = unit == Unit.CHARACTER && this.start != this.end ? 1 : 0;
     if (count < 0)
       this.moveStart(unit, count + delta);
@@ -176,11 +175,10 @@
    * Move end position of Range at end of specified unit.
    * @this {!Range}
    * @param {Unit} unit
-   * @param {Alter=} opt_alter, default is Alter.MOVE.
+   * @param {Alter=} alter, default is Alter.MOVE.
    * @return {!Range}
    */
-  Range.prototype.endOf = function(unit, opt_alter) {
-    var alter = arguments.length >= 2 ? opt_alter : Alter.MOVE;
+  Range.prototype.endOf = function(unit, alter = Alter.MOVE) {
     this.end = this.document.computeEndOf_(unit, this.end);
     switch (alter) {
       case Alter.EXTEND:
@@ -216,11 +214,10 @@
   /**
    * @this {!Range}
    * @param {Unit} unit
-   * @param {number=} opt_count, default is one.
+   * @param {number=} count, default is one.
    * @return {!Range}
    */
-  Range.prototype.move = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+  Range.prototype.move = function(unit, count = 1) {
     var position = count > 0 ? this.end : this.start;
     this.collapseTo(this.document.computeMotion_(unit, count, position));
     return this;
@@ -229,11 +226,10 @@
   /**
    * @this {!Range}
    * @param {Unit} unit
-   * @param {number=} opt_count, default is one.
+   * @param {number=} count, default is one.
    * @return {!Range}
    */
-  Range.prototype.moveEnd = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+  Range.prototype.moveEnd = function(unit, count = 1) {
     var position = this.document.computeMotion_(unit, count, this.end);
     if (position >= this.start)
       this.end = position;
@@ -244,12 +240,10 @@
 
   /**
    * @param {string} charSet
-   * @param {number=} opt_count, default is Count.FORWARD
+   * @param {number=} count, default is Count.FORWARD
    * @return {!Range}
    */
-  Range.prototype.moveEndWhile = function(charSet, opt_count) {
-    var count = arguments.length >= 2 ? /** @type{number} */(opt_count) :
-        Count.FORWARD;
+  Range.prototype.moveEndWhile = function(charSet, count = Count.FORWARD) {
     var position = this.document.computeWhile_(charSet, count, this.end);
     if (position < this.start)
       this.collapseTo(position);
@@ -261,11 +255,10 @@
   /**
    * @this {!Range}
    * @param {Unit} unit
-   * @param {number=} opt_count, default is one.
+   * @param {number=} count, default is one.
    * @return {!Range}
    */
-  Range.prototype.moveStart = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? /** @type {number} */(opt_count) : 1;
+  Range.prototype.moveStart = function(unit, count = 1) {
     var position = this.document.computeMotion_(unit, count, this.start);
     if (position <= this.end)
       this.start = position;
@@ -276,12 +269,10 @@
 
   /**
    * @param {string} charSet
-   * @param {number=} opt_count, default is Count.FORWARD
+   * @param {number=} count, default is Count.FORWARD
    * @return {!Range}
    */
-  Range.prototype.moveStartWhile = function(charSet, opt_count) {
-    var count = arguments.length >= 2 ? /** @type{number} */(opt_count) :
-        Count.FORWARD;
+  Range.prototype.moveStartWhile = function(charSet, count = Count.FORWARD) {
     var position = this.document.computeWhile_(charSet, count, this.end);
     if (position > this.end)
       this.collapseTo(position);
@@ -293,11 +284,10 @@
   /**
    * Move start position of Range at start of specified unit.
    * @param {Unit} unit
-   * @param {Alter=} opt_alter, default is Alter.MOVE.
+   * @param {Alter=} alter, default is Alter.MOVE.
    * @return {!Range}
    */
-  Range.prototype.startOf = function(unit, opt_alter) {
-    var alter = arguments.length >= 2 ? opt_alter : Alter.MOVE;
+  Range.prototype.startOf = function(unit, alter = Alter.MOVE) {
     this.start = this.document.computeStartOf_(unit, this.start);
     switch (alter) {
       case Alter.EXTEND:
@@ -318,7 +308,7 @@
     this.text = this.text.toLocaleLowerCase();
     return this;
   };
-  
+
   /**
    * @return {!Range}
    */
@@ -326,7 +316,7 @@
     this.text = this.text.toLocaleUpperCase();
     return this;
   };
-  
+
   /**
    * @return {!Range}
    */
@@ -334,7 +324,7 @@
     this.text = this.text.toLowerCase();
     return this;
   };
-  
+
   /**
    * @return {!Range}
    */

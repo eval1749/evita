@@ -42,10 +42,9 @@
 
     /**
      * @param {Runnable} task
-     * @param {number=} opt_delay
+     * @param {number=} delay
      */
-    schedule(task, opt_delay) {
-      const delay = opt_delay ? /** @type {number} */(opt_delay) : 0;
+    schedule(task, delay = 0) {
       this.tasks_.add(task);
       this.wait(delay);
     }

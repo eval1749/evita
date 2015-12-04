@@ -210,10 +210,9 @@
   /**
    * @this {!TextPosition}
    * @param {!Unit} unit
-   * @param {number=} opt_count, default is one.
+   * @param {number=} count, default is one.
    */
-  global.TextPosition.prototype.move = function(unit, opt_count) {
-    var count = arguments.length >= 2 ? /** @type{number} */(opt_count) : 1;
+  global.TextPosition.prototype.move = function(unit, count = 1) {
     if (unit != Unit.BRACKET)
       this.offset = this.document.computeMotion_(unit, count, this.offset);
     else if (count > 0)
@@ -226,11 +225,10 @@
   /**
    * @this {!TextPosition}
    * @param {function() : boolean} callback
-   * @param {number=} opt_count, default is one
+   * @param {number=} count, default is one
    * @return {!TextPosition}
    */
-  global.TextPosition.prototype.moveWhile = function(callback, opt_count) {
-    var count = arguments.length >= 2 ? /** @type{number} */(opt_count) : 1;
+  global.TextPosition.prototype.moveWhile = function(callback, count = 1) {
     if (count < 0) {
       while (count && this.offset) {
         --this.offset;

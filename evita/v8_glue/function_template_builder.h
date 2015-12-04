@@ -5,6 +5,8 @@
 #ifndef EVITA_V8_GLUE_FUNCTION_TEMPLATE_BUILDER_H_
 #define EVITA_V8_GLUE_FUNCTION_TEMPLATE_BUILDER_H_
 
+#include <type_traits>
+
 #include "evita/v8_glue/function_template.h"
 BEGIN_V8_INCLUDE
 #include "gin/object_template_builder.h"
@@ -42,9 +44,9 @@ struct CallbackTraits<base::Callback<T>> {
 // come from the the JavaScript "this" object the function was called on, not
 // from the first normal parameter.
 template <typename T>
-struct CallbackTraits<T,
-                      typename base::enable_if<
-                          base::is_member_function_pointer<T>::value>::type> {
+struct CallbackTraits<
+    T,
+    typename std::enable_if<base::is_member_function_pointer<T>::value>::type> {
   static v8::Handle<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
                                                          T callback) {
     return gin::CreateFunctionTemplate(isolate, base::Bind(callback),

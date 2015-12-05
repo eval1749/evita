@@ -195,6 +195,16 @@
   }
 
   /**
+   * @param {!Document} document
+   * @param {!Document.Obsolete} obsolete
+   */
+  function finishLoad(document, obsolete) {
+    document.obsolete = obsolete;
+    document.lastStatTime_ = new Date();
+    document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
+  }
+
+  /**
    * @this {!Document}
    * @param {string=} opt_fileName
    * @return {!Promise.<number>}
@@ -212,9 +222,6 @@
       if (present && present !== this)
         throw fileName + ' is already bound to ' + present;
       document.fileName = absoluteFile_name;
-      const newMode = Mode.chooseModeByFileName(absoluteFile_name);
-      if (document.mode !== newMode)
-        document.mode = newMode;
     }
 
     document.obsolete = Document.Obsolete.CHECKING;
@@ -229,23 +236,12 @@
           loader.close();
           Editor.messageBox(null, 'Loaded ' + document.fileName,
                             MessageBox.ICONINFORMATION);
-          document.obsolete = Document.Obsolete.NO;
-          document.lastStatTime_ = new Date();
-          document.parseFileProperties();
-          const newMode = Mode.chooseMode(document);
-          if (newMode.name !== document.mode.name) {
-            Editor.messageBox(null, 'Change mode to ' + newMode.name,
-                              MessageBox.ICONINFORMATION);
-            document.mode = newMode;
-          }
-          document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
+          finishLoad(document, Document.Obsolete.NO);
           return length;
         })
         .catch(function(exception) {
           loader.close();
-          document.lastStatTime_ = new Date();
-          document.obsolete = Document.Obsolete.UNKNOWN;
-          document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
+          finishLoad(document, Document.Obsolete.UNKNOWN);
           throw exception;
         });
   }

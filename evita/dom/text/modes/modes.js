@@ -213,7 +213,7 @@
         if (mode_ctor)
           return new mode_ctor();
       }
-      if (document.fileName != '')
+      if (document.fileName !== '')
         return Mode.chooseModeByFileName(document.fileName);
       return Mode.chooseModeByFileName(document.name);
     }
@@ -237,5 +237,56 @@
         return new Mode.defaultMode.constructor();
       return new description.mode();
     }
+  });
+
+  /** @param {!Document} document */
+  function didAddDocument(document) {
+    document.addEventListener(Event.Names.BEFORELOAD,
+                              willLoadDocument.bind(document));
+    document.addEventListener(Event.Names.LOAD,
+                              didLoadDocument.bind(document));
+  }
+
+  /**
+   * @this {!Document}
+   *
+   * Updates document mode by mode property in contents or file name.
+   */
+  function didLoadDocument() {
+    /** @type {!Document} */
+    const document = this;
+    document.parseFileProperties();
+    /** @type {!Mode} */
+    const newMode = Mode.chooseMode(document);
+    /** @type {string} */
+    const currentModeName = document.mode ? document.mode.name : '';
+    if (newMode.name === currentModeName)
+      return;
+    Editor.messageBox(null, `Change mode to ${newMode.name}`,
+                      MessageBox.ICONINFORMATION);
+    document.mode = newMode;
+  }
+
+  /** @param {!Document} document */
+  function didRemoveDocument(document) {
+    document.mode = null;
+  }
+
+  /** @this {!Document} */
+  function willLoadDocument() {
+    const document = this;
+  }
+
+  $initialize(function() {
+    Document.addObserver(function(action, document) {
+      switch (action) {
+        case 'add':
+          didAddDocument(document);
+          break;
+        case 'remove':
+          didRemoveDocument(document);
+          break;
+      }
+    });
   });
 })();

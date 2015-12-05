@@ -141,7 +141,6 @@ void SwapChain::DidChangeBounds(const RectF& new_bounds) {
 bool SwapChain::IsReady() {
   if (is_ready_)
     return true;
-  TRACE_EVENT0("gfx", "SwapChain::IsReady");
   auto const wait = ::WaitForSingleObject(swap_chain_waitable_, 0);
   switch (wait) {
     case WAIT_OBJECT_0:
@@ -158,8 +157,12 @@ bool SwapChain::IsReady() {
 void SwapChain::Present() {
   if (dirty_rects_.empty())
     return;
-  TRACE_EVENT2("gfx", "SwapChain::Present", "first", is_first_present_,
-               "count", dirty_rects_.size());
+  if (!IsReady()) {
+    TRACE_EVENT_INSTANT0("gfx", "SwapChain::Present::NotReady",
+                         TRACE_EVENT_SCOPE_THREAD);
+    return;
+  }
+  TRACE_EVENT1("gfx", "SwapChain::Present", "count", dirty_rects_.size());
   DXGI_PRESENT_PARAMETERS parameters = {0};
   std::vector<RECT> dirty_rects;
   if (!is_first_present_) {

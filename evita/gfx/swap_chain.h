@@ -19,7 +19,7 @@ class DxDevice;
 //
 // SwapChain
 //
-class SwapChain {
+class SwapChain final {
  public:
   ~SwapChain();
 
@@ -31,12 +31,12 @@ class SwapChain {
   static SwapChain* CreateForComposition(const RectF& bounds);
   static SwapChain* CreateForHwnd(HWND hwnd);
   void DidChangeBounds(const RectF& new_bounds);
-  bool IsReady();
   void Present();
 
  private:
   explicit SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain);
 
+  bool IsReady();
   void UpdateDeviceContext();
 
   RectF bounds_;

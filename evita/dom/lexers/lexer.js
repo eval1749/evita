@@ -7,55 +7,18 @@
  * IIFE to set constructor name to |Lexer| rather than |global.Lexer|.
  */
 (function() {
-  /**
-   * @this {!Lexer}
-   */
-  function didLoadDocument() {
-    setupMutationObserver(this);
-    this.clear();
-    this.doColor(this.document.length);
-  }
-
-  /**
-   * @this {!Lexer}
-   */
-  function willLoadDocument() {
-    this.mutationObserver_.disconnect();
-  }
-
-  /**
-   * @this {!Lexer}
-   * @param {!Array.<!MutationRecord>} mutations
-   * @param {!MutationObserver} observer
-   */
-  function mutationCallback(mutations, observer) {
-    const lexer = this;
-    const changedOffset = mutations.reduce(function(previousValue, mutation) {
-      return Math.min(previousValue, mutation.offset);
-    }, lexer.document.length);
-    lexer.adjustScanOffset(changedOffset);
-    lexer.doColor(100);
-    taskScheduler.schedule(this, 1000);
-  }
-
-  /**
-   * @param {!Lexer} lexer
-   */
-  function setupMutationObserver(lexer) {
-    lexer.mutationObserver_.observe(lexer.document, {summary: true});
-  }
-
-  /**
-   * @class
-   * @implements {Runnable}
-   */
-  class Lexer {
+  //////////////////////////////////////////////////////////////////////
+  //
+  // Lexer
+  //
+  class Lexer extends text.SimpleMutationObserverBase {
     /**
      * @param {!Document} document
      * @param {!LexerOptions} options
      * @return {undefined}
      */
     constructor(document, options) {
+      super(document);
       this.characters_ = options.characters;
       this.debug_ = 0;
       this.keywords = options.keywords;
@@ -65,24 +28,34 @@
       this.range = new Range(document);
       this.scanOffset = 0;
       this.state = Lexer.State.ZERO;
-      this.tokens = new OrderedSet(function(a, b) {
-        return a.end < b.end;
-      });
+      this.tokens = new OrderedSet((a, b) => a.end < b.end);
+    }
 
-      if (this.parentLexer_)
-        return;
-
-      this.mutationObserver_ = new MutationObserver(
-          mutationCallback.bind(this));
-      this.eventHandlers_ = new Map();
-      function installEventHandler(eventType, lexer, callback) {
-        let handler = callback.bind(lexer);
-        lexer.eventHandlers_.set(eventType, handler);
-        document.addEventListener(eventType, handler);
+    /**
+     * @private
+     * Implements text.SimpleMutationObserver.didChangeDocument
+     * @param {number} offset
+     */
+    didChangeDocument(offset) {
+      const delta = offset - this.scanOffset;
+      if (delta > 0) {
+        this.doColor(delta);
+      } else {
+        this.adjustScanOffset(offset);
+        this.doColor(100);
       }
-      installEventHandler(Event.Names.BEFORELOAD, this, willLoadDocument);
-      installEventHandler(Event.Names.LOAD, this, didLoadDocument);
-      setupMutationObserver(this);
+      if (this.scanOffset >= this.document.length)
+        return;
+      taskScheduler.schedule(this, 500);
+    }
+
+    /**
+     * @private
+     * Implements text.SimpleMutationObserver.didChangeDocument
+     */
+    didLoadDocument() {
+      this.adjustScanOffset(0);
+      this.doColor(this.document.length);
     }
 
     /**
@@ -91,9 +64,6 @@
     didShrinkLastToken(token) {
       // nothing to do
     }
-
-    /** @return {!Document} */
-    get document() { return this.range.document; }
 
     run() {
       /** @type {number}
@@ -292,11 +262,7 @@
   function detach() {
     if (!this.range)
       throw new Error(`${this} isn't attached to document.`);
-    let document = this.document;
-    this.eventHandlers_.forEach(function(handler, eventType) {
-        document.removeEventListener(eventType, handler);
-    });
-    this.mutationObserver_.disconnect();
+    this.stopObserving();
     this.range = null;
   }
 

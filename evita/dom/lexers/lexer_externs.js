@@ -12,6 +12,7 @@ var LexerOptions;
 
 /**
  * @constructor
+ * @extends {text.SimpleMutationObserverBase}
  * @implements {Runnable}
  * @param {!Document} document
  * @param {!LexerOptions} options

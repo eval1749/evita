@@ -632,7 +632,7 @@
   // 
   //  Note: To reduce misspelling in source code, e.g. function name, and
   //  variable names, we don't check character syntax.
-  class SpellChecker {
+  class SpellChecker extends text.SimpleMutationObserverBase {
     /**
      * Spell checker for specified document. Each document is associated to
      * separate |SpellChecker| instance.
@@ -640,8 +640,7 @@
      * @param {!Document} document
      */
     constructor(document) {
-      /** @type {!Document} */
-      this.document_ = document;
+      super(document);
 
       /** @type {!Range} */
       const range = new Range(document);
@@ -652,20 +651,8 @@
       /** @type {?} TODO(eval1749): We should use |HotScanner| here. */
       this.hotScanner_ = new HotScanner(range);
 
-      /** @const @type {!MutationObserver} */
-      this.mutationObserver_ = new MutationObserver(
-          this.mutationCallback.bind(this));
-
       document.addEventListener(Event.Names.ATTACH,
                                 this.didAttachWindow.bind(this));
-
-      // Ignore document mutation during loading contents.
-      document.addEventListener(Event.Names.BEFORELOAD,
-                                this.willLoadDocument.bind(this));
-
-      // Restart spell checking from start of document after loading.
-      document.addEventListener(Event.Names.LOAD,
-                                this.didLoadDocument.bind(this));
 
       this.didLoadDocument();
     }
@@ -700,6 +687,18 @@
 
     /**
      * @private
+     * Implements text.SimpleMutationObserver.didChangeDocument
+     * @param {number} offset
+     *
+     * Resets hot offset to minimal changed offset and kicks word scanner.
+     */
+    didChangeDocument(offset) {
+      this.coldScanner_.didChangeDocument(offset);
+      this.hotScanner_.didChangeDocument(offset);
+    }
+
+    /**
+     * @private
      * Spell checking is started when window is focused.
      */
     didFocusWindow() {
@@ -708,39 +707,11 @@
 
     /**
      * @private
-     * We do cold spell checking after load document.
+     * Implements text.SimpleMutationObserver.didChangeDocument
      */
     didLoadDocument() {
-      this.mutationObserver_.observe(this.document_, {summary: true});
       this.coldScanner_.didLoadDocument();
       this.hotScanner_.didLoadDocument();
-    }
-
-    /**
-     * @param {!Array.<!MutationRecord>} mutations
-     * @param {!MutationObserver} observer
-     *
-     * Resets hot offset to minimal changed offset and kicks word scanner.
-     */
-    mutationCallback(mutations, observer) {
-      /** @type {!Document} */
-      const document = this.document_;
-      /** @type {number} */
-      const minOffset = mutations.reduce((previousValue, mutation) => {
-        return Math.min(previousValue, mutation.offset);
-      }, document.length);
-      this.coldScanner_.didChangeDocument(minOffset);
-      this.hotScanner_.didChangeDocument(minOffset);
-    }
-
-    /**
-     * @private
-     * We don't do spell checking during load document.
-     */
-    willLoadDocument() {
-      this.mutationObserver_.disconnect();
-      taskScheduler.remove(this.coldScanner_);
-      taskScheduler.remove(this.hotScanner_);
     }
   }
 
@@ -749,8 +720,8 @@
   Document.addObserver(function(action, document) {
     /** @param {!Document} document */
     function installSpellChecker(document) {
-      // TODO(eval1749): We should have generic way to disable spell checking for
-      // document.
+      // TODO(eval1749): We should have generic way to disable spell checking
+      // for document.
       if (document.name === '*javascript*')
         return;
       const spellChecker = new SpellChecker(document);

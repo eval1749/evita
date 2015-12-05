@@ -68,19 +68,6 @@
   };
 
   /**
-   * @param {string} name
-   * @return {function(*)}
-   */
-  function logErrorInPromise(name) {
-    return function(error) {
-      Editor.messageBox(null, name + '\n' + error + '\n' + error['stack'],
-                        MessageBox.ICONERROR);
-      console.log(name, error, error.stack);
-      return Promise.reject(error);
-    };
-  }
-
-  /**
    * @param {!Document} document
    */
   function resetSelections(document) {
@@ -252,16 +239,14 @@
             document.mode = newMode;
           }
           document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
-          return Promise.resolve(length);
+          return length;
         })
         .catch(function(exception) {
-          console.log('load.catch', exception, 'during loading',
-                      document.fileName, 'into', document, exception.stack);
           loader.close();
           document.lastStatTime_ = new Date();
           document.obsolete = Document.Obsolete.UNKNOWN;
           document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
-          return Promise.reject(exception);
+          throw exception;
         });
   }
 

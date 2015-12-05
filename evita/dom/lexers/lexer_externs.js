@@ -113,11 +113,6 @@ Lexer.Token.prototype.type;
 Lexer.createKeywords;
 
 /**
- * @type {number}
- */
-Lexer.prototype.changedOffset;
-
-/**
  * @type {!Map.<number, !symbol>}
  */
 Lexer.prototype.characters_;
@@ -185,9 +180,9 @@ Lexer.prototype.tokenData;
 Lexer.prototype.tokens;
 
 /**
- * @type {!function()}
+ * @param {number} offset
  */
-Lexer.prototype.adjustScanOffset = function() {};
+Lexer.prototype.adjustScanOffset = function(offset) {};
 
 /**
  * @type {!function()}

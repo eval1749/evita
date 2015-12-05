@@ -87,15 +87,12 @@
 
     /**
      * @override
+     * @param {number} changedOffset
      */
-    adjustScanOffset() {
-      var changedOffset = this.changedOffset;
-      if (changedOffset === Count.FORWARD || !this.lastToken)
-        return;
-      Lexer.prototype.adjustScanOffset.call(this);
-      this.childLexerMap_.forEach(function(childLexer) {
-        childLexer.changedOffset = changedOffset;
-        childLexer.adjustScanOffset();
+    adjustScanOffset(changedOffset) {
+      super.adjustScanOffset(changedOffset);
+      this.childLexerMap_.forEach(childLexer => {
+        childLexer.adjustScanOffset(changedOffset);
       });
     }
 
@@ -821,8 +818,7 @@
     var scriptLexer = tokenData.scriptLexer;
     lexer.tokenData = null;
     // Remove tokens after "</script>".
-    scriptLexer.changedOffset = lexer.lastToken.start;
-    scriptLexer.adjustScanOffset();
+    scriptLexer.adjustScanOffset(lexer.lastToken.start);
   }
 
   /**

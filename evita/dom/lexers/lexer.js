@@ -7,12 +7,6 @@
  * IIFE to set constructor name to |Lexer| rather than |global.Lexer|.
  */
 (function() {
-  /** @type {number}
-   * Number of characters to color during scheduled task.
-   * This is an experiment for searching right value.
-   */
-  const kIncrementalCount = 100;
-
   /**
    * @this {!Lexer}
    */
@@ -33,15 +27,15 @@
    * @this {!Lexer}
    * @param {!Array.<!MutationRecord>} mutations
    * @param {!MutationObserver} observer
-   *
-   * Resets |changedOffset| to minimal changed offset.
    */
   function mutationCallback(mutations, observer) {
-    let lexer = this;
-    lexer.changedOffset = mutations.reduce(function(previousValue, mutation) {
+    const lexer = this;
+    const changedOffset = mutations.reduce(function(previousValue, mutation) {
       return Math.min(previousValue, mutation.offset);
-    }, lexer.changedOffset);
+    }, lexer.range.document.length);
+    lexer.adjustScanOffset(changedOffset);
     lexer.doColor(100);
+    taskScheduler.schedule(this, 1000);
   }
 
   /**
@@ -63,7 +57,6 @@
      */
     constructor(document, options) {
       this.characters_ = options.characters;
-      this.changedOffset = Count.FORWARD;
       this.debug_ = 0;
       this.keywords = options.keywords;
       this.lastToken = null;
@@ -100,7 +93,16 @@
     }
 
     run() {
+      /** @type {number}
+       * Number of characters to color during scheduled task.
+       * This is an experiment for searching right value.
+       */
+      const kIncrementalCount = 1000;
       this.doColor(kIncrementalCount);
+      if (this.scanOffset >= this.range.document.length)
+        return;
+      // Continue coloring after one second.
+      taskScheduler.schedule(this, 500);
     }
   }
 
@@ -161,18 +163,17 @@
 
   /**
    * @this {!Lexer}
+   * @param {number} changedOffset
    */
-  function adjustScanOffset() {
-    if (!this.lastToken || this.changedOffset === Count.FORWARD)
+  function adjustScanOffset(changedOffset) {
+    if (!this.lastToken)
       return;
-    let document = this.range.document;
-    let newScanOffset = Math.min(this.changedOffset, this.lastToken.end,
-                                 document.length);
+    const document = this.range.document;
+    const newScanOffset = Math.min(changedOffset, this.lastToken.end);
     if (this.debug_ > 0)
       console.log('adjustScanOffset', newScanOffset, this);
 
     this.scanOffset = newScanOffset;
-    this.changedOffset = Count.FORWARD;
     if (!newScanOffset || newScanOffset <= this.tokens.minimum.start) {
       // All tokens in token list are dirty.
       this.clear();
@@ -304,8 +305,6 @@
   function doColor(maxCount) {
     if (!this.range)
       throw new Error("Can't use disconnected lexer.");
-
-    this.adjustScanOffset();
     let document = this.range.document;
     let maxOffset = Math.min(this.scanOffset + maxCount, document.length);
     let startOffset = this.scanOffset;
@@ -316,8 +315,6 @@
     let count = this.scanOffset - startOffset;
     if (count && this.lastToken)
       this.colorLastToken();
-    if (this.scanOffset < document.length)
-      taskScheduler.schedule(this, 100);
     return maxCount - count;
   }
 

@@ -262,6 +262,9 @@ void MessageView::View::Animate(base::Time now) {
   else if (canvas_->GetLocalBounds() != animator_->GetContentsBounds())
     canvas_->SetBounds(animator_->GetContentsBounds());
 
+  if (!canvas_->IsReady())
+    return animator_->RequestAnimationFrame();
+
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   if (canvas_->should_clear())
     canvas_->Clear(gfx::ColorF());

@@ -437,7 +437,8 @@ FormWindow::FormWindow(dom::WindowId window_id,
     : views::Window(ui::NativeWindow::Create(this), window_id),
       model_(new FormViewModel(form, this)),
       offset_(offset),
-      owner_(owner) {}
+      owner_(owner),
+      should_clear_canvas_(true) {}
 
 FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form)
     : FormWindow(window_id, form, nullptr, gfx::Point()) {}
@@ -447,6 +448,11 @@ FormWindow::~FormWindow() {}
 void FormWindow::Paint() {
   TRACE_EVENT0("view", "FormWindow::Paint");
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
+  if (should_clear_canvas_) {
+    should_clear_canvas_ = false;
+    canvas_->AddDirtyRect(GetContentsBounds());
+    canvas_->Clear(ui::SystemMetrics::instance()->bgcolor());
+  }
   Window::OnDraw(canvas_.get());
 }
 
@@ -523,6 +529,9 @@ void FormWindow::DidBeginAnimationFrame(base::Time) {
     UpdateView();
   }
 
+  if (!canvas_->IsReady())
+    return RequestAnimationFrame();
+
   Paint();
 }
 
@@ -593,11 +602,6 @@ void FormWindow::CreateNativeWindow() const {
 
 void FormWindow::DidChangeBounds() {
   canvas_->SetBounds(GetContentsBounds());
-  {
-    gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-    canvas_->AddDirtyRect(GetContentsBounds());
-    canvas_->Clear(ui::SystemMetrics::instance()->bgcolor());
-  }
   SchedulePaint();
   Window::DidChangeBounds();
 }

@@ -211,6 +211,8 @@ void TableWindow::DidInsertAt(Posn, size_t) {
 void TableWindow::DidBeginAnimationFrame(base::Time) {
   if (!visible())
     return;
+  if (!canvas()->IsReady())
+    return RequestAnimationFrame();
   TRACE_EVENT0("scheduler", "TableWindow::DidBeginAnimationFrame");
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   if (!lock_scope.locked()) {

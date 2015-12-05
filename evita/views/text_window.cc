@@ -357,7 +357,11 @@ void TextWindow::DidChangeSelection() {
 void TextWindow::DidBeginAnimationFrame(base::Time now) {
   if (!visible())
     return;
+  if (!canvas()->IsReady())
+    return RequestAnimationFrame();
   TRACE_EVENT0("scheduler", "TextWindow::DidBeginAnimationFrame");
+  // TODO(eval1749): We should narrow drawing scope just enclosing |OnDraw()|.
+  gfx::Canvas::DrawingScope drawing_scope(canvas());
   {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock_scope);
     if (!dom_lock_scope.locked()) {
@@ -373,7 +377,6 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
 
   {
     TRACE_EVENT0("view", "TextWindow::DidBeginAnimationFrame/1");
-    gfx::Canvas::DrawingScope drawing_scope(canvas());
     OnDraw(canvas());
   }
   NotifyUpdateContent();

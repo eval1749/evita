@@ -28,6 +28,7 @@ class CanvasForSurface final : public gfx::Canvas {
   void DidChangeBounds(const gfx::RectF& new_bounds) final;
   void DidLostRenderTarget() final;
   ID2D1RenderTarget* GetRenderTarget() const final;
+  bool IsReady() final;
 
   common::ComPtr<ID2D1DeviceContext> d2d_device_context_;
 
@@ -55,6 +56,11 @@ void CanvasForSurface::DidLostRenderTarget() {
 ID2D1RenderTarget* CanvasForSurface::GetRenderTarget() const {
   return d2d_device_context_;
 }
+
+bool CanvasForSurface::IsReady() {
+  return true;
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////

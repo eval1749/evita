@@ -60,7 +60,8 @@ class MetricsView::View final : public ui::LayerOwnerDelegate {
   explicit View(ui::Widget* widget);
   ~View() final = default;
 
-  void Paint();
+  // Returns true if painting is completed, otherwise returns false.
+  bool Paint();
   void RecordTime();
 
  private:
@@ -86,13 +87,15 @@ MetricsView::View::View(ui::Widget* widget)
       text_format_(new gfx::TextFormat(L"Consolas", 11.5)),
       widget_(widget) {}
 
-void MetricsView::View::Paint() {
+bool MetricsView::View::Paint() {
   if (!canvas_)
     canvas_.reset(widget_->layer()->CreateCanvas());
   else if (canvas_->GetLocalBounds() != widget_->GetContentsBounds())
     canvas_->SetBounds(widget_->GetContentsBounds());
 
   auto const canvas = canvas_.get();
+  if (!canvas->IsReady())
+    return false;
   auto const bounds = canvas->GetLocalBounds();
 
   std::basic_ostringstream<base::char16> stream;
@@ -126,6 +129,7 @@ void MetricsView::View::Paint() {
 
   (*canvas)->DrawTextLayout(gfx::PointF(10, 10), *text_layout, text_brush,
                             D2D1_DRAW_TEXT_OPTIONS_CLIP);
+  return true;
 }
 
 void MetricsView::View::RecordTime() {
@@ -175,7 +179,9 @@ void MetricsView::DidRealize() {
 }
 
 void MetricsView::DidBeginAnimationFrame(base::Time time) {
-  view_->Paint();
+  if (view_->Paint())
+    return;
+  RequestAnimationFrame();
 }
 
 }  // namespace views

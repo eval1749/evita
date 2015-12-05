@@ -75,6 +75,7 @@ class FormWindow final : public views::Window,
   const std::unique_ptr<FormViewModel> model_;
   gfx::Point offset_;
   Window* owner_;
+  bool should_clear_canvas_;
   base::string16 title_;
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);

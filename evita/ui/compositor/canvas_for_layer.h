@@ -31,6 +31,7 @@ class CanvasForLayer final : public Canvas {
   void DidChangeBounds(const RectF& new_bounds) final;
   void DidLostRenderTarget() final;
   ID2D1RenderTarget* GetRenderTarget() const final;
+  bool IsReady() final;
 
   ui::Layer* layer_;
   std::unique_ptr<SwapChain> swap_chain_;

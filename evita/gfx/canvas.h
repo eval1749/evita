@@ -104,6 +104,7 @@ class Canvas : public Object, public DpiHandler {
   void Flush();
   gfx::RectF GetLocalBounds() const;
   virtual ID2D1RenderTarget* GetRenderTarget() const = 0;
+  virtual bool IsReady() = 0;
   void RemoveObserver(CanvasObserver* observer);
   void RestoreScreenImage(const RectF& bounds);
   bool Canvas::SaveScreenImage(const RectF& bounds);
@@ -150,15 +151,16 @@ class Canvas : public Object, public DpiHandler {
 class CanvasForHwnd final : public Canvas {
  public:
   explicit CanvasForHwnd(HWND hwnd);
-  ~CanvasForHwnd() override;
+  ~CanvasForHwnd() final;
 
  private:
-  // Canvas
-  void AddDirtyRectImpl(const RectF& new_dirty_rect) override;
-  void DidCallEndDraw() override;
-  void DidChangeBounds(const RectF& new_bounds) override;
-  void DidLostRenderTarget() override;
-  ID2D1RenderTarget* GetRenderTarget() const override;
+  // Implements |Canvas| member functions.
+  void AddDirtyRectImpl(const RectF& new_dirty_rect) final;
+  void DidCallEndDraw() final;
+  void DidChangeBounds(const RectF& new_bounds) final;
+  void DidLostRenderTarget() final;
+  ID2D1RenderTarget* GetRenderTarget() const final;
+  bool IsReady() final;
 
   HWND hwnd_;
   std::unique_ptr<SwapChain> swap_chain_;

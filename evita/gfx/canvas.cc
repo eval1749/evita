@@ -332,4 +332,8 @@ ID2D1RenderTarget* CanvasForHwnd::GetRenderTarget() const {
   return swap_chain_->d2d_device_context();
 }
 
+bool CanvasForHwnd::IsReady() {
+  return swap_chain_->IsReady();
+}
+
 }  // namespace gfx

@@ -157,11 +157,7 @@ bool SwapChain::IsReady() {
 void SwapChain::Present() {
   if (dirty_rects_.empty())
     return;
-  if (!IsReady()) {
-    TRACE_EVENT_INSTANT0("gfx", "SwapChain::Present::NotReady",
-                         TRACE_EVENT_SCOPE_THREAD);
-    return;
-  }
+  DCHECK(is_ready_);
   TRACE_EVENT1("gfx", "SwapChain::Present", "count", dirty_rects_.size());
   DXGI_PRESENT_PARAMETERS parameters = {0};
   std::vector<RECT> dirty_rects;

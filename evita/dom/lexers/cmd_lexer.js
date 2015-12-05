@@ -89,7 +89,7 @@ global.CmdLexer = (function() {
   function nextToken(lexer) {
     if (!lexer.count)
       return null;
-    var document = lexer.range.document;
+    var document = lexer.document;
     var maxOffset = document.length;
     if (lexer.scanOffset == maxOffset)
       return null;

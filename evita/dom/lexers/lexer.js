@@ -13,7 +13,7 @@
   function didLoadDocument() {
     setupMutationObserver(this);
     this.clear();
-    this.doColor(this.range.document.length);
+    this.doColor(this.document.length);
   }
 
   /**
@@ -32,7 +32,7 @@
     const lexer = this;
     const changedOffset = mutations.reduce(function(previousValue, mutation) {
       return Math.min(previousValue, mutation.offset);
-    }, lexer.range.document.length);
+    }, lexer.document.length);
     lexer.adjustScanOffset(changedOffset);
     lexer.doColor(100);
     taskScheduler.schedule(this, 1000);
@@ -42,7 +42,7 @@
    * @param {!Lexer} lexer
    */
   function setupMutationObserver(lexer) {
-    lexer.mutationObserver_.observe(lexer.range.document, {summary: true});
+    lexer.mutationObserver_.observe(lexer.document, {summary: true});
   }
 
   /**
@@ -92,6 +92,9 @@
       // nothing to do
     }
 
+    /** @return {!Document} */
+    get document() { return this.range.document; }
+
     run() {
       /** @type {number}
        * Number of characters to color during scheduled task.
@@ -99,7 +102,7 @@
        */
       const kIncrementalCount = 1000;
       this.doColor(kIncrementalCount);
-      if (this.scanOffset >= this.range.document.length)
+      if (this.scanOffset >= this.document.length)
         return;
       // Continue coloring after one second.
       taskScheduler.schedule(this, 500);
@@ -168,7 +171,7 @@
   function adjustScanOffset(changedOffset) {
     if (!this.lastToken)
       return;
-    const document = this.range.document;
+    const document = this.document;
     const newScanOffset = Math.min(changedOffset, this.lastToken.end);
     if (this.debug_ > 0)
       console.log('adjustScanOffset', newScanOffset, this);
@@ -289,7 +292,7 @@
   function detach() {
     if (!this.range)
       throw new Error(`${this} isn't attached to document.`);
-    let document = this.range.document;
+    let document = this.document;
     this.eventHandlers_.forEach(function(handler, eventType) {
         document.removeEventListener(eventType, handler);
     });
@@ -305,7 +308,7 @@
   function doColor(maxCount) {
     if (!this.range)
       throw new Error("Can't use disconnected lexer.");
-    let document = this.range.document;
+    let document = this.document;
     let maxOffset = Math.min(this.scanOffset + maxCount, document.length);
     let startOffset = this.scanOffset;
     while (this.scanOffset < maxOffset) {
@@ -461,8 +464,8 @@
    * @return {string}
    */
   function syntaxOfTokens(range, tokens) {
-    let lexer = this;
-    let document = range.document;
+    const lexer = this;
+    const document = lexer.document;
     let words = tokens.map(function(token) {
       return document.slice(token.start, token.end);
     });

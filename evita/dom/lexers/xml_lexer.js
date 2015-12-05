@@ -685,8 +685,8 @@
         }
 
         {
-          var document = this.range.document;
-          var end = this.lastToken.end;
+          const document = this.document;
+          const end = this.lastToken.end;
           for (var offset = this.lastToken.start; offset < end; ++offset) {
             feedCharToScriptLexer(this, document.charCodeAt_(offset));
           }

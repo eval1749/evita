@@ -128,6 +128,11 @@ Lexer.prototype.count;
 Lexer.prototype.debug_;
 
 /**
+ * @type {!Document}
+ */
+Lexer.prototype.document;
+
+/**
  * @type {!Map.<string, string>}
  */
 Lexer.prototype.keywords;

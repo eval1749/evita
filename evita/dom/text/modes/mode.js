@@ -51,16 +51,10 @@ global.Mode = (function() {
       return this.lexer_.doColor(hint);
     }
 
-    //get document() { return this.document_; }
-    //get keymap() { return this.keymap_; }
-    //get name() { return this.name_; }
+    get document() { return this.document_; }
+    get keymap() { return this.keymap_; }
+    get name() { return this.name_; }
   }
-
-  Object.defineProperties(Mode.prototype, {
-    document: {get: function() { return this.document_; }},
-    keymap: {get: function() { return this.keymap_; }},
-    name: {get: function() { return this.name_; }},
-  });
 
   return Mode;
 })();

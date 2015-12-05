@@ -140,6 +140,19 @@ global.TextWindow.prototype.clone = function() {
 
   /**
    * @param {!TextWindow} window
+   * @return {!DragController}
+   */
+  function ensureDragController(window) {
+    const dragController = window.dragController_;
+    if (dragController)
+      return dragController;
+    const newDragController = new DragController(window);
+    window.dragController_ = newDragController;
+    return newDragController;
+  }
+
+  /**
+   * @param {!TextWindow} window
    * @param {!CompositionEvent} event
    */
   function handleCompositionEvent(window, event) {
@@ -236,9 +249,7 @@ global.TextWindow.prototype.clone = function() {
         return;
       }
 
-      if (!window.dragController_)
-        window.dragController_ = new DragController(window);
-      window.dragController_.start();
+      ensureDragController(window).start();
     });
   }
 

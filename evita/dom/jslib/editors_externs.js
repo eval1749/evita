@@ -3,14 +3,20 @@
 // found in the LICENSE file.
 
 
-/**
- * @const @type{{
- *  start: function(!Array.<string>)
- * }}
- */
+/** @const @type{!Object} */
 var editors;
+
+/** @param {!Array.<string>} args */
+editors.start = function(args) {}
 
 /**
  * @const @type {!TaskScheduler}
  */
 var taskScheduler;
+
+/**
+ * @param {!function():*} initializer
+ */
+var $initialize = function(initializer) {};
+
+var initialize = function() {};

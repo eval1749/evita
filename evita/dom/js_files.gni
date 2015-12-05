@@ -12,6 +12,7 @@ js_defs_files = [
 
 js_lib_files = [
   "polyfill.js",
+  "initialize.js",
   "key_names.js",
 
   "base/define.js",

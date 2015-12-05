@@ -85,6 +85,7 @@ function load(scriptPath, opt_options) {
    * @param {!Array.<string>} args
    */
   function start(args) {
+    initialize();
     loadUserScript();
     let editor_window = new EditorWindow();
     let doc = Document.new('*scratch*');

@@ -527,10 +527,10 @@
     documentNameMap.set(this.name_, this);
   }
 
-  function resetForTesting() {
+  $initialize(function() {
     documentNameMap.clear();
     documentObservers.clear();
-  }
+  });
 
   Object.defineProperties(Document, {
     addObserver: {value: addObserver},
@@ -539,7 +539,6 @@
     new: {value: newDocument},
     remove: {value: removeDocument},
     removeObserver: {value: removeObserver},
-    resetForTesting: {value: resetForTesting},
   });
 
   Object.defineProperties(Document.prototype, {

@@ -277,16 +277,14 @@
     const document = this;
   }
 
-  $initialize(function() {
-    Document.addObserver(function(action, document) {
-      switch (action) {
-        case 'add':
-          didAddDocument(document);
-          break;
-        case 'remove':
-          didRemoveDocument(document);
-          break;
-      }
-    });
+  Document.addObserver(function(action, document) {
+    switch (action) {
+      case 'add':
+        didAddDocument(document);
+        break;
+      case 'remove':
+        didRemoveDocument(document);
+        break;
+    }
   });
 })();

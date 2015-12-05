@@ -443,7 +443,10 @@
   const documentNameMap = new Map();
 
   /** @type {!Set.<!DocumentObserverCallback>} */
-  const documentObservers = new Set();
+  let documentObservers = new Set();
+
+  /** @type {!Set.<!DocumentObserverCallback>} */
+  let internalDocumentObservers = new Set();
 
   /** @param {!DocumentObserverCallback} callback */
   function addObserver(callback) {
@@ -529,7 +532,11 @@
 
   $initialize(function() {
     documentNameMap.clear();
-    documentObservers.clear();
+    if (internalDocumentObservers.size === 0) {
+      internalDocumentObservers = new Set(documentObservers);
+      return;
+    }
+    documentObservers = new Set(internalDocumentObservers);
   });
 
   Object.defineProperties(Document, {

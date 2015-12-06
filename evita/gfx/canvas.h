@@ -11,8 +11,6 @@
 #include "base/strings/string16.h"
 #include "evita/gfx_base.h"
 
-struct IDXGISwapChain1;
-
 namespace gfx {
 
 class Bitmap;
@@ -135,7 +133,6 @@ class Canvas : public Object, public DpiHandler {
   int batch_nesting_level_;
   int bitmap_id_;
   gfx::RectF bounds_;
-  scoped_refptr<FactorySet> factory_set_;
   base::ObserverList<CanvasObserver> observers_;
   gfx::PointF offset_;
   std::unique_ptr<Bitmap> screen_bitmap_;

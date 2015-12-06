@@ -94,7 +94,6 @@ Canvas::ScopedState::~ScopedState() {
 Canvas::Canvas()
     : batch_nesting_level_(0),
       bitmap_id_(0),
-      factory_set_(FactorySet::instance()),
       should_clear_(true) {}
 
 Canvas::~Canvas() {}

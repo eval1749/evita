@@ -72,7 +72,7 @@ text::Buffer* TextWindow::buffer() const {
   return text_view_->buffer();
 }
 
-text::Posn TextWindow::ComputeScreenMotion(Count n,
+text::Posn TextWindow::ComputeScreenMotion(text::Count n,
                                            const gfx::PointF& pt,
                                            text::Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
@@ -86,7 +86,7 @@ text::Posn TextWindow::ComputeScreenMotion(Count n,
   return lPosn;
 }
 
-text::Posn TextWindow::ComputeWindowLineMotion(Count n,
+text::Posn TextWindow::ComputeWindowLineMotion(text::Count n,
                                                const gfx::PointF& pt,
                                                text::Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
@@ -121,7 +121,7 @@ text::Posn TextWindow::ComputeWindowLineMotion(Count n,
   return lPosn;
 }
 
-text::Posn TextWindow::ComputeWindowMotion(Count n, text::Posn offset) {
+text::Posn TextWindow::ComputeWindowMotion(text::Count n, text::Posn offset) {
   UI_ASSERT_DOM_LOCKED();
   text_view_->FormatIfNeeded();
   if (n > 0)

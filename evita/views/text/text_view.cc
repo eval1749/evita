@@ -138,10 +138,10 @@ void TextView::Paint(gfx::Canvas* canvas,
   DCHECK(!ShouldFormat());
   TRACE_EVENT0("view", "TextView::Paint");
   if (!should_paint_ && canvas->screen_bitmap()) {
-    screen_text_block_->RenderSelectionIfNeeded(canvas, selection, now);
+    screen_text_block_->PaintSelectionIfNeeded(canvas, selection, now);
     return;
   }
-  screen_text_block_->Render(canvas, text_block_.get(), selection, now);
+  screen_text_block_->Paint(canvas, text_block_.get(), selection, now);
   PaintRuler(canvas);
   format_counter_ = text_block_->format_counter();
   should_paint_ = false;

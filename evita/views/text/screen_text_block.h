@@ -34,25 +34,25 @@ class ScreenTextBlock final {
 
   bool dirty() const { return dirty_; }
 
-  void Render(gfx::Canvas* canvas,
-              const TextBlock* text_block,
-              const TextSelection& selection,
-              base::Time now);
-  void RenderSelectionIfNeeded(gfx::Canvas* canvas,
-                               const TextSelection& selection,
-                               base::Time now);
+  void Paint(gfx::Canvas* canvas,
+             const TextBlock* text_block,
+             const TextSelection& selection,
+             base::Time now);
+  void PaintSelectionIfNeeded(gfx::Canvas* canvas,
+                              const TextSelection& selection,
+                              base::Time now);
   void Reset();
   void SetBounds(const gfx::RectF& new_bounds);
 
  private:
   class Caret;
-  class RenderContext;
-  friend class RenderContext;
+  class PaintContext;
+  friend class PaintContext;
 
   gfx::RectF HitTestTextPosition(text::Posn offset) const;
-  void RenderSelection(gfx::Canvas* canvas,
-                       const TextSelection& selection,
-                       base::Time now);
+  void PaintSelection(gfx::Canvas* canvas,
+                      const TextSelection& selection,
+                      base::Time now);
   void UpdateCaret(gfx::Canvas* canvas, base::Time now);
 
   gfx::RectF bounds_;

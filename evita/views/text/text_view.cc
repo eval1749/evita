@@ -133,12 +133,10 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 }
 
 void TextView::Paint(gfx::Canvas* canvas,
-                     const TextSelectionModel& selection_model,
+                     const TextSelection& selection,
                      base::Time now) {
   DCHECK(!ShouldFormat());
   TRACE_EVENT0("view", "TextView::Paint");
-  const auto selection =
-      TextFormatter::FormatSelection(buffer_, selection_model);
   if (!should_paint_ && canvas->screen_bitmap()) {
     screen_text_block_->RenderSelectionIfNeeded(canvas, selection, now);
     return;
@@ -217,12 +215,15 @@ text::Posn TextView::StartOfLine(text::Posn text_offset) const {
 }
 
 void TextView::UpdateAndPaint(gfx::Canvas* canvas,
-                              const TextSelectionModel& selection,
+                              const TextSelectionModel& selection_model,
                               base::Time now) {
   TRACE_EVENT0("view", "TextView::UpdateAndPaint");
   auto const new_caret_offset =
-      GetCaretOffset(buffer(), selection, caret_offset_);
+      GetCaretOffset(buffer_, selection_model, caret_offset_);
   DCHECK_GE(new_caret_offset, 0);
+
+  const auto selection =
+      TextFormatter::FormatSelection(buffer_, selection_model);
 
   if (FormatIfNeeded()) {
     if (caret_offset_ != new_caret_offset) {

@@ -43,6 +43,7 @@ class TextView final {
   typedef rendering::TextSelectionModel TextSelectionModel;
   typedef rendering::TextBlock TextBlock;
   typedef rendering::TextLine TextLine;
+  typedef rendering::TextSelection TextSelection;
 
   TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner);
   ~TextView();
@@ -82,7 +83,7 @@ class TextView final {
   bool FormatIfNeeded();
   bool IsPositionFullyVisible(text::Posn text_offset) const;
   void Paint(gfx::Canvas* canvas,
-             const TextSelectionModel& selection,
+             const TextSelection& selection,
              base::Time now);
   void PaintRuler(gfx::Canvas* canvas);
   void ScrollToPosition(text::Posn offset);

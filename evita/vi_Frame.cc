@@ -27,7 +27,6 @@
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/ui/animation/animator.h"
-#include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/root_layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/content_window.h"
@@ -292,7 +291,6 @@ void Frame::DidChangeBounds() {
       L"Resizing... %dx%d", bounds().width(), bounds().height()));
 
   DrawForResize();
-  ui::Compositor::instance()->CommitIfNeeded();
 }
 
 void Frame::DidRealize() {

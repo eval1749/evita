@@ -207,9 +207,6 @@ struct RegKey final {
 
 #include "evita/ed_defs.h"
 
-#define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)
-#define myMoveMemory(d, s, n) ::MoveMemory(d, s, n)
-
 #if defined(_DEBUG)
 #define _ITERATOR_DEBUG_LEVEL 2
 #endif

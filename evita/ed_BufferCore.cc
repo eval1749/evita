@@ -54,7 +54,7 @@ void BufferCore::extend(Posn lPosn, int cwchExtent) {
       ::HeapReAlloc(m_hHeap, 0, m_pwch, sizeof(base::char16) * m_cwch));
   DCHECK(m_pwch);
   // Extend GAP
-  myMoveMemory(m_pwch + m_lGapEnd + nExtension, m_pwch + m_lGapEnd,
+  ::MoveMemory(m_pwch + m_lGapEnd + nExtension, m_pwch + m_lGapEnd,
                sizeof(base::char16) * (m_lEnd - m_lGapStart));
 
   m_lGapEnd += nExtension;
@@ -80,7 +80,7 @@ Count BufferCore::GetText(base::char16* prgwch, Posn lStart, Posn lEnd) const {
   if (lStart >= m_lGapStart) {
     // We extract text after gap.
     // gggggg<....>
-    myCopyMemory(prgwch, m_pwch + m_lGapEnd + (lStart - m_lGapStart),
+    ::CopyMemory(prgwch, m_pwch + m_lGapEnd + (lStart - m_lGapStart),
                  sizeof(base::char16) * (lEnd - lStart));
   } else {
     // We extract text before gap.
@@ -88,9 +88,9 @@ Count BufferCore::GetText(base::char16* prgwch, Posn lStart, Posn lEnd) const {
     // <...ggg>ggg
     // <...ggg...>
     auto const lMiddle = std::min(m_lGapStart, lEnd);
-    myCopyMemory(prgwch, m_pwch + lStart,
+    ::CopyMemory(prgwch, m_pwch + lStart,
                  sizeof(base::char16) * (lMiddle - lStart));
-    myCopyMemory(prgwch + (lMiddle - lStart), m_pwch + m_lGapEnd,
+    ::CopyMemory(prgwch + (lMiddle - lStart), m_pwch + m_lGapEnd,
                  sizeof(base::char16) * (lEnd - lMiddle));
   }
 
@@ -118,7 +118,7 @@ base::string16 BufferCore::GetText(Posn start, Posn end) const {
 void BufferCore::insert(Posn lPosn, const base::char16* pwch, Count n) {
   DCHECK(IsValidPosn(lPosn));
   extend(lPosn, n);
-  myCopyMemory(m_pwch + lPosn, pwch, sizeof(base::char16) * n);
+  ::CopyMemory(m_pwch + lPosn, pwch, sizeof(base::char16) * n);
   m_lGapStart += n;
   m_lEnd += n;
 }
@@ -142,7 +142,7 @@ void BufferCore::moveGap(Posn lNewStart) {
     //    ^  s   e
     // abc....defghijk
     //    s   e
-    myMoveMemory(m_pwch + lNewEnd, m_pwch + lNewStart,
+    ::MoveMemory(m_pwch + lNewEnd, m_pwch + lNewStart,
                  sizeof(base::char16) * iDiff);
   } else if (iDiff < 0) {
     // Move GAP forward
@@ -156,7 +156,7 @@ void BufferCore::moveGap(Posn lNewStart) {
     //      V   V
     // abcdefghi...jk
     //          s  e
-    myMoveMemory(m_pwch + lCurStart, m_pwch + lCurEnd,
+    ::MoveMemory(m_pwch + lCurStart, m_pwch + lCurEnd,
                  sizeof(base::char16) * -iDiff);
   }
 }

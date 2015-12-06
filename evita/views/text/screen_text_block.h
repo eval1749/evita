@@ -21,8 +21,9 @@ class CaretOwner;
 }
 
 namespace views {
-namespace rendering {
+class PaintTextBlock;
 
+namespace rendering {
 class Font;
 class TextLine;
 class TextBlock;
@@ -35,11 +36,10 @@ class ScreenTextBlock final {
   bool dirty() const { return dirty_; }
 
   void Paint(gfx::Canvas* canvas,
-             const TextBlock* text_block,
-             const TextSelection& selection,
+             const PaintTextBlock& paint_text_block,
              base::Time now);
   void PaintSelectionIfNeeded(gfx::Canvas* canvas,
-                              const TextSelection& selection,
+                              const TextSelection& new_selection,
                               base::Time now);
   void Reset();
   void SetBounds(const gfx::RectF& new_bounds);

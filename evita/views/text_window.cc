@@ -197,15 +197,6 @@ Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
   return std::min(text_view_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
-void TextWindow::Redraw(base::Time now) {
-  UI_ASSERT_DOM_LOCKED();
-  DCHECK(visible());
-  TRACE_EVENT0("view", "TextWindow::Redraw");
-  MetricsView::TimingScope timing_scope(metrics_view_);
-  auto const selection = GetTextSelectionModel(this, *selection_);
-  text_view_->UpdateAndPaint(canvas(), selection, now);
-}
-
 void TextWindow::SetZoom(float new_zoom) {
   text_view_->SetZoom(new_zoom);
 }
@@ -323,11 +314,14 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
     editor::Application::instance()->NotifyViewReady();
     metrics_view_->RecordTime();
 
-    // TODO(eval1749): We should narrow drawing scope just enclosing |OnDraw()|.
-    gfx::Canvas::DrawingScope drawing_scope(canvas());
-    Redraw(now);
-    TRACE_EVENT0("view", "TextWindow::DidBeginAnimationFrame/1");
+    MetricsView::TimingScope timing_scope(metrics_view_);
+    auto const selection = GetTextSelectionModel(this, *selection_);
+    text_view_->Update(selection);
     UpdateScrollBar();
+  }
+  {
+    gfx::Canvas::DrawingScope drawing_scope(canvas());
+    text_view_->Paint(canvas(), now);
     OnDraw(canvas());
   }
   NotifyUpdateContent();

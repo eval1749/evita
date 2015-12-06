@@ -29,7 +29,9 @@ class TextBlock;
 class TextFormatter;
 class TextBlock;
 class TextLine;
-};
+}
+
+class PaintTextBlock;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -68,23 +70,19 @@ class TextView final {
   void MakeSelectionVisible();
   text::Posn MapPointToPosition(gfx::PointF point);
   text::Posn MapPointXToOffset(text::Posn text_offset, float point_x) const;
+  void Paint(gfx::Canvas* canvas, base::Time now);
   bool ScrollDown();
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
   // Returns start of line offset containing |text_offset|.
   text::Posn StartOfLine(text::Posn text_offset) const;
-  void UpdateAndPaint(gfx::Canvas* canvas,
-                      const TextSelectionModel& selection,
-                      base::Time now);
+  void Update(const TextSelectionModel& selection);
 
  private:
   // Returns true if text format is taken place.
   bool FormatIfNeeded();
   bool IsPositionFullyVisible(text::Posn text_offset) const;
-  void Paint(gfx::Canvas* canvas,
-             const TextSelection& selection,
-             base::Time now);
   void PaintRuler(gfx::Canvas* canvas);
   void ScrollToPosition(text::Posn offset);
   bool ShouldPaint() const;
@@ -94,6 +92,7 @@ class TextView final {
   text::Buffer* const buffer_;
   text::Posn caret_offset_;
   int format_counter_;
+  std::unique_ptr<PaintTextBlock> paint_text_block_;
   std::unique_ptr<ScreenTextBlock> screen_text_block_;
   bool should_paint_;
   std::unique_ptr<TextBlock> text_block_;

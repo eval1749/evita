@@ -43,6 +43,8 @@ class RenderStyle {
   css::TextDecoration text_decoration_;
 };
 
+gfx::ColorF ColorToColorF(const css::Color& color);
+
 }  // namespace rendering
 }  // namespace views
 

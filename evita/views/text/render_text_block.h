@@ -15,7 +15,6 @@
 namespace views {
 namespace rendering {
 
-class RenderStyle;
 class TextFormatter;
 class TextLine;
 
@@ -24,7 +23,6 @@ class TextBlock final {
   explicit TextBlock(text::Buffer* buffer);
   ~TextBlock();
 
-  const RenderStyle& default_style() const { return default_style_; }
   bool dirty() const { return dirty_; }
   int format_counter() const { return format_counter_; }
   const std::list<TextLine*>& lines() const { return lines_; }
@@ -75,7 +73,6 @@ class TextBlock final {
   void Prepend(TextLine* line);
 
   gfx::RectF bounds_;
-  RenderStyle default_style_;
   bool dirty_;
   bool dirty_line_point_;
   int format_counter_;

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "evita/views/text/text_view.h"
 
@@ -13,6 +14,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
 #include "evita/text/buffer.h"
+#include "evita/views/text/paint_text_block.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/text/render_text_block.h"
@@ -132,16 +134,15 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
   return text_block_->MapPointXToOffset(text_offset, point_x);
 }
 
-void TextView::Paint(gfx::Canvas* canvas,
-                     const TextSelection& selection,
-                     base::Time now) {
-  DCHECK(!ShouldFormat());
+void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
+  DCHECK(paint_text_block_);
   TRACE_EVENT0("view", "TextView::Paint");
   if (!should_paint_ && canvas->screen_bitmap()) {
-    screen_text_block_->PaintSelectionIfNeeded(canvas, selection, now);
+    screen_text_block_->PaintSelectionIfNeeded(
+        canvas, paint_text_block_->selection(), now);
     return;
   }
-  screen_text_block_->Paint(canvas, text_block_.get(), selection, now);
+  screen_text_block_->Paint(canvas, *paint_text_block_, now);
   PaintRuler(canvas);
   format_counter_ = text_block_->format_counter();
   should_paint_ = false;
@@ -214,32 +215,34 @@ text::Posn TextView::StartOfLine(text::Posn text_offset) const {
   return text_block_->StartOfLine(text_offset);
 }
 
-void TextView::UpdateAndPaint(gfx::Canvas* canvas,
-                              const TextSelectionModel& selection_model,
-                              base::Time now) {
-  TRACE_EVENT0("view", "TextView::UpdateAndPaint");
+void TextView::Update(const TextSelectionModel& selection_model) {
+  UI_ASSERT_DOM_LOCKED();
+  TRACE_EVENT0("view", "TextView::Update");
   auto const new_caret_offset =
       GetCaretOffset(buffer_, selection_model, caret_offset_);
   DCHECK_GE(new_caret_offset, 0);
-
-  const auto selection =
-      TextFormatter::FormatSelection(buffer_, selection_model);
 
   if (FormatIfNeeded()) {
     if (caret_offset_ != new_caret_offset) {
       ScrollToPosition(new_caret_offset);
       caret_offset_ = new_caret_offset;
     }
-    return Paint(canvas, selection, now);
+  } else if (caret_offset_ != new_caret_offset) {
+    caret_offset_ = new_caret_offset;
+    if (!IsPositionFullyVisible(new_caret_offset))
+      ScrollToPosition(new_caret_offset);
   }
 
-  if (caret_offset_ == new_caret_offset)
-    return Paint(canvas, selection, now);
-
-  caret_offset_ = new_caret_offset;
-  if (!IsPositionFullyVisible(new_caret_offset))
-    ScrollToPosition(new_caret_offset);
-  Paint(canvas, selection, now);
+  const auto selection =
+      TextFormatter::FormatSelection(buffer_, selection_model);
+  // TODO(eval1749): We should recompute default style when style is changed,
+  // rather than every |Format| call.
+  const auto& style = buffer_->GetDefaultStyle();
+  std::vector<TextLine*> lines;
+  for (const auto& line : text_block_->lines())
+    lines.push_back(line->Copy());
+  paint_text_block_.reset(
+      new PaintTextBlock(lines, selection, ColorToColorF(style.bgcolor())));
 }
 
 }  // namespace views

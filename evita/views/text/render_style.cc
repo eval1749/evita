@@ -9,13 +9,11 @@
 namespace views {
 namespace rendering {
 
-namespace {
-inline gfx::ColorF ColorToColorF(const css::Color& color) {
+gfx::ColorF ColorToColorF(const css::Color& color) {
   return gfx::ColorF(static_cast<float>(color.red()) / 255,
                      static_cast<float>(color.green()) / 255,
                      static_cast<float>(color.blue()) / 255, color.alpha());
 }
-}  // namespace
 
 RenderStyle::RenderStyle(const css::Style& values, const Font* font)
     : bgcolor_(ColorToColorF(values.bgcolor())),

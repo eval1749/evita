@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <algorithm>
-#include <list>
 #include <unordered_set>
 
 #include "evita/views/text/screen_text_block.h"
@@ -14,9 +13,9 @@
 #include "evita/gfx/bitmap.h"
 #include "evita/ui/caret.h"
 #include "evita/views/switches.h"
+#include "evita/views/text/paint_text_block.h"
 #include "evita/views/text/render_cell.h"
 #include "evita/views/text/render_selection.h"
-#include "evita/views/text/render_text_block.h"
 #include "evita/views/text/render_text_line.h"
 
 #define DEBUG_DRAW 0
@@ -91,7 +90,7 @@ inline void FillRect(gfx::Canvas* canvas,
 
 }  // namespace
 
-using FormatLineIterator = std::list<TextLine*>::const_iterator;
+using FormatLineIterator = std::vector<TextLine*>::const_iterator;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -133,7 +132,7 @@ class ScreenTextBlock::PaintContext final {
  public:
   PaintContext(const ScreenTextBlock* screen_text_block,
                gfx::Canvas* canvas,
-               const TextBlock* format_text_block);
+               const PaintTextBlock& paint_text_block);
   ~PaintContext() = default;
 
   void Finish();
@@ -159,7 +158,7 @@ class ScreenTextBlock::PaintContext final {
   gfx::Canvas* canvas_;
   mutable std::vector<gfx::RectF> copy_rects_;
   mutable std::vector<gfx::RectF> dirty_rects_;
-  const std::list<TextLine*>& format_lines_;
+  const std::vector<TextLine*>& format_lines_;
   const std::vector<TextLine*>& screen_lines_;
   const ScreenTextBlock* screen_text_block_;
   mutable std::vector<gfx::RectF> skip_rects_;
@@ -170,11 +169,11 @@ class ScreenTextBlock::PaintContext final {
 ScreenTextBlock::PaintContext::PaintContext(
     const ScreenTextBlock* screen_text_block,
     gfx::Canvas* canvas,
-    const TextBlock* format_text_block)
-    : bgcolor_(format_text_block->default_style().bgcolor()),
+    const PaintTextBlock& paint_text_block)
+    : bgcolor_(paint_text_block.bgcolor()),
       bounds_(screen_text_block->bounds_),
       canvas_(canvas),
-      format_lines_(format_text_block->lines()),
+      format_lines_(paint_text_block.lines()),
       screen_text_block_(screen_text_block),
       screen_lines_(screen_text_block->lines_) {}
 
@@ -457,10 +456,8 @@ gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
 }
 
 void ScreenTextBlock::Paint(gfx::Canvas* canvas,
-                            const TextBlock* text_block,
-                            const TextSelection& selection,
+                            const PaintTextBlock& text_block,
                             base::Time now) {
-  DCHECK(!text_block->dirty());
   DCHECK(!has_screen_bitmap_ || canvas->screen_bitmap());
   PaintContext paint_context(this, canvas, text_block);
   dirty_ = paint_context.Paint();
@@ -470,14 +467,14 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
     // Contents of lines aren't changed. But, text offset of lines may be
     // changed.
     auto runner = lines_.begin();
-    for (auto line : text_block->lines()) {
+    for (const auto& line : text_block.lines()) {
       if (line->text_start() != (*runner)->text_start()) {
         delete *runner;
         *runner = line->Copy();
       }
       ++runner;
     }
-    PaintSelection(canvas, selection, now);
+    PaintSelection(canvas, text_block.selection(), now);
     return;
   }
 
@@ -488,12 +485,12 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
   // but we render all lines next time.
   if (has_screen_bitmap_) {
     // TODO(eval1749): We should use existing TextLine's in ScreenTextBlock.
-    for (auto line : text_block->lines()) {
+    for (const auto& line : text_block.lines()) {
       lines_.push_back(line->Copy());
     }
   }
   paint_context.Finish();
-  PaintSelection(canvas, selection, now);
+  PaintSelection(canvas, text_block.selection(), now);
   dirty_ = false;
 }
 

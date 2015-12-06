@@ -4,6 +4,8 @@
 
 source_set("text") {
   sources = [
+    "paint_text_block.cc",
+    "paint_text_block.h",
     "render_cell.cc",
     "render_cell.h",
     "render_font.cc",

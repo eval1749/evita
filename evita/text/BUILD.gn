@@ -6,9 +6,10 @@ import("//testing/test.gni")
 
 source_set("text") {
   sources = [
-    "../ed_BufferCore.cc",
     "buffer.cc",
     "buffer.h",
+    "buffer_core.cc",
+    "buffer_core.h",
     "buffer_mutation_observer.cc",
     "buffer_mutation_observer.h",
     "interval.cc",

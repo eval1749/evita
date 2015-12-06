@@ -11,7 +11,7 @@
 #include "base/strings/string16.h"
 #include "base/time/time.h"
 #include "evita/IStringCursor.h"
-#include "evita/ed_BufferCore.h"
+#include "evita/text/buffer_core.h"
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/marker_set_observer.h"
 

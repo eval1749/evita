@@ -1,15 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit buffer
-// listener/winapp/ed_buffer.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/ed_BufferCore.h#1 $
-//
-#ifndef EVITA_ED_BUFFERCORE_H_
-#define EVITA_ED_BUFFERCORE_H_
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_TEXT_BUFFER_CORE_H_
+#define EVITA_TEXT_BUFFER_CORE_H_
 
 #include "base/strings/string16.h"
 #include "evita/precomp.h"
@@ -73,4 +67,4 @@ class BufferCore {
 
 }  // namespace text
 
-#endif  // EVITA_ED_BUFFERCORE_H_
+#endif  // EVITA_TEXT_BUFFER_CORE_H_

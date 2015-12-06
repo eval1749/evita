@@ -4,10 +4,9 @@
 
 #include <algorithm>
 
-#include "evita/ed_BufferCore.h"
+#include "evita/text/buffer_core.h"
 
 #include "base/logging.h"
-#include "evita/precomp.h"
 
 namespace text {
 

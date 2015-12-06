@@ -15,13 +15,19 @@
 
 namespace gfx {
 
+namespace {
+SwapChain* CreateSwapChain(ui::Layer* layer) {
+  return SwapChain::CreateForComposition(DxDevice::instance(), layer->bounds());
+}
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // CanvasForLayer
 //
 CanvasForLayer::CanvasForLayer(ui::Layer* layer)
     : layer_(layer),
-      swap_chain_(SwapChain::CreateForComposition(layer->bounds())) {
+      swap_chain_(CreateSwapChain(layer)) {
   DCHECK_EQ(swap_chain_->bounds().size(), layer->bounds().size());
   SetInitialBounds(swap_chain_->bounds());
 }
@@ -44,7 +50,7 @@ void CanvasForLayer::DidChangeBounds(const RectF& new_bounds) {
 void CanvasForLayer::DidLostRenderTarget() {
   DCHECK(!layer_->bounds().empty());
   layer_->visual()->SetContent(nullptr);
-  swap_chain_.reset(SwapChain::CreateForComposition(layer_->bounds()));
+  swap_chain_.reset(CreateSwapChain(layer_));
   layer_->visual()->SetContent(swap_chain_->swap_chain());
   DidCreateRenderTarget();
 }

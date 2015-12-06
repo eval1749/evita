@@ -28,7 +28,7 @@ class SwapChain final {
   IDXGISwapChain2* swap_chain() const { return swap_chain_; }
 
   void AddDirtyRect(const RectF& dirty_rects);
-  static SwapChain* CreateForComposition(const RectF& bounds);
+  static SwapChain* CreateForComposition(DxDevice* device, const RectF& bounds);
   static SwapChain* CreateForHwnd(HWND hwnd);
   void DidChangeBounds(const RectF& new_bounds);
   bool IsReady();

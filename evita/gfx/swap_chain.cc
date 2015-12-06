@@ -58,14 +58,13 @@ void SwapChain::AddDirtyRect(const RectF& new_dirty_rect_f) {
   dirty_rects_ = new_dirty_rects;
 }
 
-SwapChain* SwapChain::CreateForComposition(const RectF& bounds) {
+SwapChain* SwapChain::CreateForComposition(DxDevice* device,
+                                           const RectF& bounds) {
   DCHECK(!bounds.empty());
   TRACE_EVENT0("gfx", "SwapChain::CreateForComposition");
   // TODO(eval1749): We should use ToEnclosedRect().
   const auto size = gfx::SizeU(static_cast<uint32_t>(bounds.width()),
                                static_cast<uint32_t>(bounds.height()));
-
-  auto const device = DxDevice::instance();
 
   DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {0};
   swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;

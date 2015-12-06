@@ -31,21 +31,4 @@ enum {
   Count_Max = Count_Forward,
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// Unit
-//
-enum Unit {
-  Unit_Buffer,
-  Unit_Char,
-  Unit_Line,
-  Unit_Page,
-  Unit_Paragraph,
-  Unit_Screen,  // valid only for selection
-  Unit_Sentence,
-  Unit_Window,      // valid only for selection
-  Unit_WindowLine,  // valid only for selection
-  Unit_Word,
-};
-
 #endif  // EVITA_ED_DEFS_H_

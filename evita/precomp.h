@@ -97,12 +97,7 @@ typedef _IMAGELIST* HIMAGELIST;
 #include "base/strings/string16.h"
 typedef base::char16 char16;
 
-#define NoReturn __declspec(noreturn)
-
 #include "evita/z_debug.h"
-
-#define foreach(mp_ty, mp_enum, mp_init) \
-  for (mp_ty mp_enum(mp_init); !mp_enum.AtEnd(); mp_enum.Next())
 
 // warning C6400: Using 'lstrcmpiW' to perform a case-insensitive compare to
 // constant string
@@ -120,10 +115,6 @@ class ObjectInHeap final {
   void* operator new(size_t) = delete;
   void operator delete(void*) = delete;
 };
-
-#if !defined(SUPPORT_IME)
-#define SUPPORT_IME 1
-#endif
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -223,12 +214,9 @@ typedef uint32 uint;
 
 #define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)
 #define myMoveMemory(d, s, n) ::MoveMemory(d, s, n)
-#define myZeroMemory(d, n) ::ZeroMemory(d, n)
 
 char16* lstrchrW(const char16*, char16);
 char16* lstrrchrW(const char16*, char16);
-
-#define DEBUG_DESTROY _DEBUG
 
 #if defined(_DEBUG)
 #define _ITERATOR_DEBUG_LEVEL 2

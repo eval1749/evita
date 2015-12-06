@@ -84,9 +84,9 @@ class TextView final {
   void Paint(gfx::Canvas* canvas,
              const TextSelectionModel& selection,
              base::Time now);
-  void RenderRuler(gfx::Canvas* canvas);
+  void PaintRuler(gfx::Canvas* canvas);
   void ScrollToPosition(text::Posn offset);
-  bool ShouldRender() const;
+  bool ShouldPaint() const;
   bool ShouldFormat() const;
 
   gfx::RectF bounds_;
@@ -94,7 +94,7 @@ class TextView final {
   text::Posn caret_offset_;
   int format_counter_;
   std::unique_ptr<ScreenTextBlock> screen_text_block_;
-  bool should_render_;
+  bool should_paint_;
   std::unique_ptr<TextBlock> text_block_;
   float zoom_;
 

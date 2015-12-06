@@ -1,11 +1,6 @@
-// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-#define DEBUG_DIRTY 0
-#define DEBUG_DISPBUF 0
-#define DEBUG_FORMAT 0
-#define DEBUG_RENDER 0
 
 #include <algorithm>
 #include <memory>
@@ -50,7 +45,7 @@ TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
       caret_offset_(-1),
       format_counter_(0),
       screen_text_block_(new ScreenTextBlock(caret_owner)),
-      should_render_(true),
+      should_paint_(true),
       text_block_(new TextBlock(buffer)),
       zoom_(1.0f) {}
 
@@ -97,7 +92,7 @@ text::Posn TextView::GetVisibleEnd() {
 
 void TextView::Format(text::Posn text_offset) {
   text_block_->Format(text_offset);
-  should_render_ = true;
+  should_paint_ = true;
 }
 
 bool TextView::FormatIfNeeded() {
@@ -105,7 +100,7 @@ bool TextView::FormatIfNeeded() {
       format_counter_ == text_block_->format_counter()) {
     return false;
   }
-  should_render_ = true;
+  should_paint_ = true;
   return true;
 }
 
@@ -144,18 +139,18 @@ void TextView::Paint(gfx::Canvas* canvas,
   TRACE_EVENT0("view", "TextView::Paint");
   const auto selection =
       TextFormatter::FormatSelection(buffer_, selection_model);
-  if (!should_render_ && canvas->screen_bitmap()) {
+  if (!should_paint_ && canvas->screen_bitmap()) {
     screen_text_block_->RenderSelectionIfNeeded(canvas, selection, now);
     return;
   }
   screen_text_block_->Render(canvas, text_block_.get(), selection, now);
-  RenderRuler(canvas);
+  PaintRuler(canvas);
   format_counter_ = text_block_->format_counter();
-  should_render_ = false;
+  should_paint_ = false;
 }
 
-void TextView::RenderRuler(gfx::Canvas* canvas) {
-  // FIXME 2007-08-05 We should expose show/hide and ruler settings to both
+void TextView::PaintRuler(gfx::Canvas* canvas) {
+  // TODO(eval1749): We should expose show/hide and ruler settings to both
   // script and UI.
   auto style = buffer_->GetDefaultStyle();
   style.set_font_size(style.font_size() * zoom_);
@@ -175,20 +170,20 @@ void TextView::RenderRuler(gfx::Canvas* canvas) {
 bool TextView::ScrollDown() {
   if (!text_block_->ScrollDown())
     return false;
-  should_render_ = true;
+  should_paint_ = true;
   return true;
 }
 
 void TextView::ScrollToPosition(text::Posn offset) {
   if (!text_block_->ScrollToPosition(offset))
     return;
-  should_render_ = true;
+  should_paint_ = true;
 }
 
 bool TextView::ScrollUp() {
   if (!text_block_->ScrollUp())
     return false;
-  should_render_ = true;
+  should_paint_ = true;
   return true;
 }
 
@@ -199,7 +194,7 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
   bounds_ = new_bounds;
   text_block_->SetBounds(bounds_);
   screen_text_block_->SetBounds(bounds_);
-  should_render_ = true;
+  should_paint_ = true;
 }
 
 void TextView::SetZoom(float new_zoom) {
@@ -214,8 +209,8 @@ bool TextView::ShouldFormat() const {
   return text_block_->ShouldFormat();
 }
 
-bool TextView::ShouldRender() const {
-  return should_render_ || screen_text_block_->dirty();
+bool TextView::ShouldPaint() const {
+  return should_paint_ || screen_text_block_->dirty();
 }
 text::Posn TextView::StartOfLine(text::Posn text_offset) const {
   return text_block_->StartOfLine(text_offset);

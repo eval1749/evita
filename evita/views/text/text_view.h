@@ -57,14 +57,12 @@ class TextView final {
   void DidRecreateCanvas();
   // Returns end of line offset containing |text_offset|.
   text::Posn EndOfLine(text::Posn text_offset) const;
-  void Format(text::Posn text_offset);
-  // Returns true if text format is taken place.
-  bool FormatIfNeeded();
   Posn GetStart();
   Posn GetEnd();
   // Returns fully visible end offset or end of line position if there is only
   // one line.
   Posn GetVisibleEnd();
+  void Format(text::Posn text_offset);
   gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
   void MakeSelectionVisible();
   text::Posn MapPointToPosition(gfx::PointF point);
@@ -73,7 +71,6 @@ class TextView final {
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
-  bool ShouldRender() const;
   // Returns start of line offset containing |text_offset|.
   text::Posn StartOfLine(text::Posn text_offset) const;
   void UpdateAndPaint(gfx::Canvas* canvas,
@@ -81,12 +78,15 @@ class TextView final {
                       base::Time now);
 
  private:
+  // Returns true if text format is taken place.
+  bool FormatIfNeeded();
   bool IsPositionFullyVisible(text::Posn text_offset) const;
   void Paint(gfx::Canvas* canvas,
              const TextSelectionModel& selection,
              base::Time now);
   void RenderRuler(gfx::Canvas* canvas);
   void ScrollToPosition(text::Posn offset);
+  bool ShouldRender() const;
   bool ShouldFormat() const;
 
   gfx::RectF bounds_;

@@ -42,10 +42,10 @@ float AlignWidthToPixel(float width) {
   return width;
 }
 
-inline char16 toxdigit(int k) {
+inline base::char16 toxdigit(int k) {
   if (k <= 9)
-    return static_cast<char16>(k + '0');
-  return static_cast<char16>(k - 10 + 'A');
+    return static_cast<base::char16>(k + '0');
+  return static_cast<base::char16>(k - 10 + 'A');
 }
 
 gfx::ColorF CssColorToColorF(const css::Color& color) {
@@ -269,7 +269,9 @@ TextLine* TextFormatter::FormatLine() {
   return line;
 }
 
-Cell* TextFormatter::FormatChar(Cell* previous_cell, float x, char16 wch) {
+Cell* TextFormatter::FormatChar(Cell* previous_cell,
+                                float x,
+                                base::char16 wch) {
   auto const lPosn = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
 

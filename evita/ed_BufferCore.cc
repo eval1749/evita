@@ -16,7 +16,7 @@ BufferCore::BufferCore()
     : m_cwch(MIN_GAP_LENGTH * 3), m_lEnd(0), m_lGapEnd(m_cwch), m_lGapStart(0) {
   m_hHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
   DCHECK(m_hHeap);
-  m_pwch = reinterpret_cast<char16*>(
+  m_pwch = reinterpret_cast<base::char16*>(
       ::HeapAlloc(m_hHeap, 0, sizeof(base::char16) * m_cwch));
 }
 
@@ -70,7 +70,7 @@ base::char16 BufferCore::GetCharAt(Posn lPosn) const {
   return m_pwch[lPosn];
 }
 
-Count BufferCore::GetText(char16* prgwch, Posn lStart, Posn lEnd) const {
+Count BufferCore::GetText(base::char16* prgwch, Posn lStart, Posn lEnd) const {
   if (lStart < 0)
     lStart = 0;
   if (lEnd > GetEnd())
@@ -116,7 +116,7 @@ base::string16 BufferCore::GetText(Posn start, Posn end) const {
 }
 
 // Inserts specified string (pwch, n) before lPosn.
-void BufferCore::insert(Posn lPosn, const char16* pwch, Count n) {
+void BufferCore::insert(Posn lPosn, const base::char16* pwch, Count n) {
   DCHECK(IsValidPosn(lPosn));
   extend(lPosn, n);
   myCopyMemory(m_pwch + lPosn, pwch, sizeof(base::char16) * n);

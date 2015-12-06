@@ -90,13 +90,10 @@ typedef _IMAGELIST* HIMAGELIST;
 // (performance warning)
 #pragma warning(disable : 4800)
 
+#include <string>
+
 #include "base/basictypes.h"
-
-// TODO(yosi): We should not include string16.h in precomp.h. This is for
-// |char16|.
 #include "base/strings/string16.h"
-typedef base::char16 char16;
-
 #include "evita/z_debug.h"
 
 // warning C6400: Using 'lstrcmpiW' to perform a case-insensitive compare to
@@ -213,8 +210,8 @@ struct RegKey final {
 #define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)
 #define myMoveMemory(d, s, n) ::MoveMemory(d, s, n)
 
-char16* lstrchrW(const char16*, char16);
-char16* lstrrchrW(const char16*, char16);
+base::char16* lstrchrW(const base::char16* string, base::char16 ch);
+base::char16* lstrrchrW(const base::char16* string, base::char16 ch);
 
 #if defined(_DEBUG)
 #define _ITERATOR_DEBUG_LEVEL 2

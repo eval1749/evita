@@ -38,9 +38,9 @@ class BufferCore {
   }
 
   // [G]
-  char16 GetCharAt(Posn) const;
+  base::char16 GetCharAt(Posn) const;
   Posn GetEnd() const { return m_lEnd; }
-  Count GetText(char16*, Posn, Posn) const;
+  Count GetText(base::char16*, Posn, Posn) const;
   base::string16 GetText(Posn start, Posn end) const;
 
   // [I]
@@ -55,7 +55,7 @@ class BufferCore {
 
   Count deleteChars(Posn, Posn);
   void extend(Posn, int);
-  void insert(Posn, const char16*, Count);
+  void insert(Posn, const base::char16*, Count);
 
  private:
   static const Count MIN_GAP_LENGTH = 1024;
@@ -63,7 +63,7 @@ class BufferCore {
 
   void moveGap(Posn);
 
-  char16* m_pwch;
+  base::char16* m_pwch;
   Count m_cwch;
   HANDLE m_hHeap;
   Posn m_lEnd;

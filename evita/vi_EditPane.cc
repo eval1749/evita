@@ -396,12 +396,12 @@ class StockCursor final {
   }
 
  private:
-  StockCursor(HINSTANCE instance, const char16* id)
+  StockCursor(HINSTANCE instance, const base::char16* id)
       : hCursor_(nullptr), hInstance_(instance), id_(id) {}
 
   HCURSOR hCursor_;
   HINSTANCE hInstance_;
-  const char16* id_;
+  const base::char16* id_;
   DISALLOW_COPY_AND_ASSIGN(StockCursor);
 };
 

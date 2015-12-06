@@ -87,12 +87,12 @@ class Buffer : public BufferCore,
 
   // [I]
   Count IncCharTick(int n) { return m_nCharTick += n; }
-  Count Insert(Posn, const char16*, Count);
+  Count Insert(Posn, const base::char16*, Count);
   bool IsModified() const { return m_nCharTick != m_nSaveTick; }
   bool IsNotReady() const;
   bool IsReadOnly() const { return m_fReadOnly; }
 
-  void Insert(Posn lPosn, const char16* pwsz) {
+  void Insert(Posn lPosn, const base::char16* pwsz) {
     Insert(lPosn, pwsz, ::lstrlenW(pwsz));
   }
 
@@ -148,7 +148,7 @@ class Buffer : public BufferCore,
 
     bool AtEnd() const { return m_lPosn >= m_lEnd; }
 
-    char16 Get() const {
+    base::char16 Get() const {
       DCHECK(!AtEnd());
       return m_pBuffer->GetCharAt(m_lPosn);
     }
@@ -199,7 +199,7 @@ class Buffer : public BufferCore,
 
     bool AtEnd() const { return m_lPosn <= m_lStart; }
 
-    char16 Get() const {
+    base::char16 Get() const {
       DCHECK(!AtEnd());
       return m_pBuffer->GetCharAt(m_lPosn - 1);
     }

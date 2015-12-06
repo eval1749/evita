@@ -12,23 +12,23 @@
 
 #include "evita/precomp.h"
 
-char16* lstrchrW(const char16* pwsz, char16 wch) {
+base::char16* lstrchrW(const base::char16* pwsz, base::char16 wch) {
   while (0 != *pwsz) {
     if (wch == *pwsz) {
-      return const_cast<char16*>(pwsz);
+      return const_cast<base::char16*>(pwsz);
     }  // if
     pwsz++;
   }  // while
   return NULL;
 }  // lstrchrW
 
-char16* lstrrchrW(const char16* pwsz, char16 wch) {
-  const char16* pFound = NULL;
+base::char16* lstrrchrW(const base::char16* pwsz, base::char16 wch) {
+  const base::char16* pFound = NULL;
   while (0 != *pwsz) {
     if (wch == *pwsz) {
       pFound = pwsz;
     }  // if
     pwsz++;
   }  // while
-  return const_cast<char16*>(pFound);
+  return const_cast<base::char16*>(pFound);
 }  // lstrchrW

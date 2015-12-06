@@ -18,7 +18,7 @@
 struct IStringCursor {
   virtual bool CanMove(int count) = 0;
 
-  virtual char16 GetChar(int offset) = 0;
+  virtual base::char16 GetChar(int offset) = 0;
   virtual text::Posn GetPosition() = 0;
 
   // TODO(eval1749): We should use |int| for |FindBackward()|

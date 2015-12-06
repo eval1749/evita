@@ -129,7 +129,7 @@ const css::Style& Buffer::GetStyleAt(Posn lPosn) const {
   return GetIntervalAt(lPosn)->style();
 }
 
-Count Buffer::Insert(Posn lPosn, const char16* pwch, Count n) {
+Count Buffer::Insert(Posn lPosn, const base::char16* pwch, Count n) {
   DCHECK(IsValidPosn(lPosn));
 
   if (IsReadOnly())

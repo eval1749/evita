@@ -124,7 +124,7 @@ class RegularExpression::Compiler final : public ::Regex::ICompileContext {
  private:
   // RegularExpression::ICompileContext
   void* AllocRegex(size_t cb, int num_matches) final;
-  bool SetCapture(int iNth, const char16* pwsz) final;
+  bool SetCapture(int iNth, const base::char16* pwsz) final;
   void SetError(int nPosn, int nError) final;
 
   std::unique_ptr<RegularExpressionImpl> regex_;
@@ -166,7 +166,8 @@ void* RegularExpression::Compiler::AllocRegex(size_t size, int num_matches) {
   return regex_->blob();
 }
 
-bool RegularExpression::Compiler::SetCapture(int nth, const char16* name) {
+bool RegularExpression::Compiler::SetCapture(int nth,
+                                             const base::char16* name) {
   regex_->set_match_name(nth, base::string16(name));
   return true;
 }
@@ -190,20 +191,20 @@ class RegularExpression::BufferMatcher final : public ::Regex::IMatchContext {
 
  private:
   // RegularExpression::IMatchContext
-  bool BackwardFindCharCi(char16, text::Posn*, text::Posn) const final;
-  bool BackwardFindCharCs(char16, text::Posn*, text::Posn) const final;
-  bool ForwardFindCharCi(char16, text::Posn*, text::Posn) const final;
-  bool ForwardFindCharCs(char16, text::Posn*, text::Posn) const final;
+  bool BackwardFindCharCi(base::char16, text::Posn*, text::Posn) const final;
+  bool BackwardFindCharCs(base::char16, text::Posn*, text::Posn) const final;
+  bool ForwardFindCharCi(base::char16, text::Posn*, text::Posn) const final;
+  bool ForwardFindCharCs(base::char16, text::Posn*, text::Posn) const final;
   bool GetCapture(int index, text::Posn*, text::Posn*) const final;
-  char16 GetChar(text::Posn lPosn) const final;
+  base::char16 GetChar(text::Posn lPosn) const final;
   text::Posn GetEnd() const final { return end_; }
   void GetInfo(::Regex::SourceInfo* source_info) const final;
   text::Posn GetStart() const final { return start_; }
   void ResetCapture(int index) final;
   void ResetCaptures() final;
   void SetCapture(int, text::Posn, text::Posn) final;
-  bool StringEqCi(const char16*, int, text::Posn) const final;
-  bool StringEqCs(const char16*, int, text::Posn) const final;
+  bool StringEqCi(const base::char16*, int, text::Posn) const final;
+  bool StringEqCs(const base::char16*, int, text::Posn) const final;
 
   text::Buffer* buffer_;
   int end_;
@@ -224,7 +225,7 @@ RegularExpression::BufferMatcher::~BufferMatcher() {}
 // RegularExpression::IMatchContext
 // [B]
 bool RegularExpression::BufferMatcher::BackwardFindCharCi(
-    char16 wchFind,
+    base::char16 wchFind,
     text::Posn* inout_lPosn,
     text::Posn lStop) const {
   text::Buffer::EnumCharRev::Arg oArg(buffer_, *inout_lPosn, lStop);
@@ -238,7 +239,7 @@ bool RegularExpression::BufferMatcher::BackwardFindCharCi(
 }
 
 bool RegularExpression::BufferMatcher::BackwardFindCharCs(
-    char16 wchFind,
+    base::char16 wchFind,
     text::Posn* inout_lPosn,
     text::Posn lStop) const {
   text::Buffer::EnumCharRev::Arg oArg(buffer_, *inout_lPosn, lStop);
@@ -252,7 +253,7 @@ bool RegularExpression::BufferMatcher::BackwardFindCharCs(
 }
 
 bool RegularExpression::BufferMatcher::ForwardFindCharCi(
-    char16 wchFind,
+    base::char16 wchFind,
     text::Posn* inout_lPosn,
     text::Posn lStop) const {
   text::Buffer::EnumChar::Arg oArg(buffer_, *inout_lPosn, lStop);
@@ -267,7 +268,7 @@ bool RegularExpression::BufferMatcher::ForwardFindCharCi(
 
 // [F]
 bool RegularExpression::BufferMatcher::ForwardFindCharCs(
-    char16 wchFind,
+    base::char16 wchFind,
     text::Posn* inout_lPosn,
     text::Posn lStop) const {
   text::Buffer::EnumChar::Arg oArg(buffer_, *inout_lPosn, lStop);
@@ -293,7 +294,7 @@ bool RegularExpression::BufferMatcher::GetCapture(int nth,
   return true;
 }
 
-char16 RegularExpression::BufferMatcher::GetChar(text::Posn lPosn) const {
+base::char16 RegularExpression::BufferMatcher::GetChar(text::Posn lPosn) const {
   return buffer_->GetCharAt(lPosn);
 }
 
@@ -326,7 +327,7 @@ void RegularExpression::BufferMatcher::SetCapture(int nth,
   const_cast<Match*>(&regex_->matches()[index])->Set(start, end);
 }
 
-bool RegularExpression::BufferMatcher::StringEqCi(const char16* pwchStart,
+bool RegularExpression::BufferMatcher::StringEqCi(const base::char16* pwchStart,
                                                   int cwch,
                                                   text::Posn lPosn) const {
   text::Buffer::EnumChar::Arg oArg(buffer_, lPosn);
@@ -342,13 +343,13 @@ bool RegularExpression::BufferMatcher::StringEqCi(const char16* pwchStart,
   return true;
 }
 
-bool RegularExpression::BufferMatcher::StringEqCs(const char16* pwchStart,
+bool RegularExpression::BufferMatcher::StringEqCs(const base::char16* pwchStart,
                                                   int cwch,
                                                   text::Posn lPosn) const {
   text::Buffer::EnumChar::Arg oArg(buffer_, lPosn);
   text::Buffer::EnumChar oEnum(oArg);
-  const char16* pwchEnd = pwchStart + cwch;
-  for (const char16* pwch = pwchStart; pwch < pwchEnd; pwch++) {
+  const base::char16* pwchEnd = pwchStart + cwch;
+  for (const base::char16* pwch = pwchStart; pwch < pwchEnd; pwch++) {
     if (oEnum.AtEnd())
       return false;
 

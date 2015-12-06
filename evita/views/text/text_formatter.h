@@ -47,7 +47,7 @@ class TextFormatter final {
  private:
   class TextScanner;
 
-  Cell* FormatChar(Cell*, float x, char16);
+  Cell* FormatChar(Cell*, float x, base::char16);
 
   gfx::RectF bounds_;
   RenderStyle default_render_style_;

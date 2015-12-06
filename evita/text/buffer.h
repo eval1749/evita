@@ -10,8 +10,6 @@
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
 #include "base/time/time.h"
-#include "evita/li_util.h"
-
 #include "evita/IStringCursor.h"
 #include "evita/ed_BufferCore.h"
 #include "evita/text/buffer_mutation_observer.h"

@@ -8,7 +8,6 @@ source_set("text") {
   sources = [
     "../ed_BufferCore.cc",
     "../ed_BufferFind.cc",
-    "../li_util.cc",
     "../z_debug.cc",
     "buffer.cc",
     "buffer.h",

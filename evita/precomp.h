@@ -210,9 +210,6 @@ struct RegKey final {
 #define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)
 #define myMoveMemory(d, s, n) ::MoveMemory(d, s, n)
 
-base::char16* lstrchrW(const base::char16* string, base::char16 ch);
-base::char16* lstrrchrW(const base::char16* string, base::char16 ch);
-
 #if defined(_DEBUG)
 #define _ITERATOR_DEBUG_LEVEL 2
 #endif

@@ -48,10 +48,13 @@ class TextWindow final : public ContentWindow,
   TextWindow(WindowId window_id, text::Selection* selection);
   ~TextWindow() final;
 
-  text::Posn ComputeMotion(Unit unit,
-                           Count count,
-                           const gfx::PointF& point,
-                           text::Posn position);
+  text::Posn ComputeScreenMotion(Count count,
+                                 const gfx::PointF& point,
+                                 text::Posn offset);
+  text::Posn ComputeWindowLineMotion(Count count,
+                                     const gfx::PointF& point,
+                                     text::Posn offset);
+  text::Posn ComputeWindowMotion(Count count, text::Posn offset);
   text::Posn EndOfLine(text::Posn offset);
   text::Posn GetEnd();
   text::Posn GetStart();

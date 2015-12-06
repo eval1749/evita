@@ -158,14 +158,11 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
     case dom::TextWindowCompute::Method::EndOfWindowLine:
       return window->EndOfLine(data.position);
     case dom::TextWindowCompute::Method::MoveScreen:
-      return window->ComputeMotion(Unit_Screen, data.count, point,
-                                   data.position);
+      return window->ComputeScreenMotion(data.count, point, data.position);
     case dom::TextWindowCompute::Method::MoveWindow:
-      return window->ComputeMotion(Unit_Window, data.count, point,
-                                   data.position);
+      return window->ComputeWindowMotion(data.count, data.position);
     case dom::TextWindowCompute::Method::MoveWindowLine:
-      return window->ComputeMotion(Unit_WindowLine, data.count, point,
-                                   data.position);
+      return window->ComputeWindowLineMotion(data.count, point, data.position);
     case dom::TextWindowCompute::Method::StartOfWindow:
       return window->GetStart();
     case dom::TextWindowCompute::Method::StartOfWindowLine:

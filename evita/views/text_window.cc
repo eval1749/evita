@@ -72,65 +72,62 @@ text::Buffer* TextWindow::buffer() const {
   return text_view_->buffer();
 }
 
-text::Posn TextWindow::ComputeMotion(Unit eUnit,
-                                     Count n,
-                                     const gfx::PointF& pt,
-                                     text::Posn lPosn) {
+text::Posn TextWindow::ComputeScreenMotion(Count n,
+                                           const gfx::PointF& pt,
+                                           text::Posn lPosn) {
   UI_ASSERT_DOM_LOCKED();
-  switch (eUnit) {
-    case Unit_WindowLine:
-      if (n > 0) {
-        auto const lBufEnd = buffer()->GetEnd();
-        if (lPosn >= lBufEnd)
-          return lBufEnd;
-        auto lGoal = lPosn;
-        auto k = 0;
-        for (k = 0; k < n; ++k) {
-          lGoal = EndOfLine(lGoal);
-          if (lGoal >= lBufEnd)
-            break;
-          ++lGoal;
-        }
-        return text_view_->MapPointXToOffset(std::min(lGoal, lBufEnd), pt.x);
-      }
-      if (n < 0) {
-        n = -n;
-        auto const lBufStart = buffer()->GetStart();
-        auto lStart = lPosn;
-        auto k = 0;
-        for (k = 0; k < n; ++k) {
-          lStart = StartOfLine(lStart);
-          if (lStart <= lBufStart)
-            break;
-          --lStart;
-        }
+  // TODO(eval1749): We should not call |LargetScroll()| in |ComputeMotion|.
+  if (LargeScroll(0, n))
+    return MapPointToPosition(pt);
+  if (n > 0)
+    return std::min(GetEnd(), buffer()->GetEnd());
+  if (n < 0)
+    return GetStart();
+  return lPosn;
+}
 
-        return text_view_->MapPointXToOffset(std::max(lStart, lBufStart), pt.x);
-      }
-      return lPosn;
-
-    case Unit_Screen: {
-      // TODO(eval1749): We should not call |LargetScroll()| in |ComputeMotion|.
-      if (LargeScroll(0, n))
-        return MapPointToPosition(pt);
-      if (n > 0)
-        return std::min(GetEnd(), buffer()->GetEnd());
-      if (n < 0)
-        return GetStart();
-      return lPosn;
+text::Posn TextWindow::ComputeWindowLineMotion(Count n,
+                                               const gfx::PointF& pt,
+                                               text::Posn lPosn) {
+  UI_ASSERT_DOM_LOCKED();
+  if (n > 0) {
+    auto const lBufEnd = buffer()->GetEnd();
+    if (lPosn >= lBufEnd)
+      return lBufEnd;
+    auto lGoal = lPosn;
+    auto k = 0;
+    for (k = 0; k < n; ++k) {
+      lGoal = EndOfLine(lGoal);
+      if (lGoal >= lBufEnd)
+        break;
+      ++lGoal;
+    }
+    return text_view_->MapPointXToOffset(std::min(lGoal, lBufEnd), pt.x);
+  }
+  if (n < 0) {
+    n = -n;
+    auto const lBufStart = buffer()->GetStart();
+    auto lStart = lPosn;
+    auto k = 0;
+    for (k = 0; k < n; ++k) {
+      lStart = StartOfLine(lStart);
+      if (lStart <= lBufStart)
+        break;
+      --lStart;
     }
 
-    case Unit_Window:
-      if (n > 0) {
-        return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()), GetStart());
-      }
-      if (n < 0)
-        return GetStart();
-      return lPosn;
+    return text_view_->MapPointXToOffset(std::max(lStart, lBufStart), pt.x);
   }
-
-  LOG(ERROR) << "Unsupported unit " << eUnit;
   return lPosn;
+}
+
+text::Posn TextWindow::ComputeWindowMotion(Count n, text::Posn offset) {
+  UI_ASSERT_DOM_LOCKED();
+  if (n > 0)
+    return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()), GetStart());
+  if (n < 0)
+    return GetStart();
+  return offset;
 }
 
 Posn TextWindow::EndOfLine(text::Posn text_offset) {

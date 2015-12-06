@@ -11,19 +11,19 @@
    * @return {number}
    */
   function computeMotion(selection, unit, count, offset) {
-    if (unit == Unit.SCREEN) {
+    if (unit === Unit.SCREEN) {
       if (!selection.goal_point_)
         throw 'Goal X point must be initialized.';
       return selection.window.compute_(TextWindowComputeMethod.MOVE_SCREEN,
           offset, count, selection.goal_point_);
     }
 
-    if (unit == Unit.WINDOW) {
+    if (unit === Unit.WINDOW) {
       return selection.window.compute_(TextWindowComputeMethod.MOVE_WINDOW,
                                        offset, count);
     }
 
-    if (unit == Unit.WINDOW_LINE) {
+    if (unit === Unit.WINDOW_LINE) {
       if (!selection.goal_point_)
         throw 'Goal X point must be initialized.';
       return selection.window.compute_(
@@ -70,13 +70,13 @@
    * @param {!Unit} unit
    */
   function updateGoalX(selection, unit) {
-    if (unit != Unit.SCREEN && unit != Unit.WINDOW_LINE) {
+    if (unit !== Unit.SCREEN && unit !== Unit.WINDOW_LINE) {
       selection.goal_point_ = null;
       return;
     }
     var focus = selection.startIsActive ? selection.range.start :
                                           selection.range.end;
-    if (selection.goal_position_ == focus && selection.goal_point_)
+    if (selection.goal_position_ === focus && selection.goal_point_)
       return;
     var rect = selection.window.hitTestTextPosition_(focus);
     selection.goal_point_ = rect.leftTop;
@@ -95,12 +95,12 @@
     var focus = this.range.end;
     this.endOf(unit);
     var new_focus = this.range.end;
-    if (unit == Unit.LINE || unit == Unit.WINDOW_LINE) {
+    if (unit === Unit.LINE || unit === Unit.WINDOW_LINE) {
       this.range.moveEndWhile(' \t', Count.BACKWARD);
       // Skip trailing whitespace if
       //   - The selection were at end of line.
       //   - The selection was at middle of line.
-      if (focus == new_focus || focus != this.range.end)
+      if (focus === new_focus || focus !== this.range.end)
         new_focus = this.range.end;
     }
     return updateSelection(this, alter, anchor, new_focus);
@@ -142,12 +142,12 @@
     var focus = this.range.start;
     this.startOf(unit);
     var new_focus = this.range.start;
-    if (unit == Unit.LINE || unit == Unit.WINDOW_LINE) {
+    if (unit === Unit.LINE || unit === Unit.WINDOW_LINE) {
       this.range.moveStartWhile(' \t', Count.FORWARD);
       // Skip leading whitespace if
       //   - The selection were at end of line.
       //   - The selection was at middle of line.
-      if (focus == new_focus || focus != this.range.start)
+      if (focus === new_focus || focus !== this.range.start)
         new_focus = this.range.start;
     }
     return updateSelection(this, alter, anchor, new_focus);
@@ -164,7 +164,7 @@
     updateGoalX(this, unit);
     switch (alter) {
       case Alter.EXTEND: {
-        if (this.range.start == this.range.end)
+        if (this.range.start === this.range.end)
           this.startIsActive = count < 0;
         if (this.startIsActive)
           this.moveStart(unit, count);
@@ -173,7 +173,7 @@
         break;
       }
       case Alter.MOVE:
-        if (this.range.start == this.range.end)
+        if (this.range.start === this.range.end)
             this.move(unit, count);
         else if (count < 0)
           this.range.collapseTo(this.range.start);

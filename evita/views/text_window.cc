@@ -81,6 +81,8 @@ text::Posn TextWindow::ComputeMotion(Unit eUnit,
     case Unit_WindowLine:
       if (n > 0) {
         auto const lBufEnd = buffer()->GetEnd();
+        if (lPosn >= lBufEnd)
+          return lBufEnd;
         auto lGoal = lPosn;
         auto k = 0;
         for (k = 0; k < n; ++k) {

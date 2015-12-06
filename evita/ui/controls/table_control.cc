@@ -162,6 +162,9 @@ void CanvasWindow::DidBeginAnimationFrame(base::Time) {
     DidChangeCanvas();
   }
 
+  if (!canvas_->IsReady())
+    return RequestAnimationFrame();
+
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   OnDraw(canvas_.get());
 }

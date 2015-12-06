@@ -1,12 +1,10 @@
 // Copyright (c) 1996-2014 Project Vogue. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-#pragma warning(push)
-#pragma warning(disable : 4365 4625 4626 4826)
-#include "gtest/gtest.h"
-#pragma warning(pop)
 
 #include "evita/text/marker_set.h"
+
+#include "gtest/gtest.h"
 
 namespace {
 
@@ -21,9 +19,6 @@ class MockBufferMutationObservee : public text::BufferMutationObservee {
 };
 
 class MarkerSetTest : public ::testing::Test {
- public:
-  virtual ~MarkerSetTest() {}
-
  protected:
   MarkerSetTest()
       : Correct(L"Correct"),
@@ -41,7 +36,7 @@ class MarkerSetTest : public ::testing::Test {
     marker_set()->RemoveMarkerForTesting(start, end);
   }
 
-  Marker GetAt(Posn offset) {
+  Marker GetAt(text::Posn offset) {
     auto const marker = marker_set_.GetMarkerAt(offset);
     return marker ? *marker : Marker();
   }

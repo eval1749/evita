@@ -35,7 +35,7 @@ class Range final : public v8_glue::Scriptable<Range> {
   void set_text(const base::string16& text);
   text::Range* text_range() const { return range_; }
 
-  Range* CollapseTo(Posn position);
+  Range* CollapseTo(text::Posn position);
   Range* InsertBefore(const base::string16& text);
   static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range);
   static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range,

@@ -75,9 +75,9 @@ class TextWindow final : public ContentWindow,
   void DidRecreateCanvas() final;
 
   // text::BufferMutationObserver
-  void DidChangeStyle(Posn offset, size_t length) final;
-  void DidDeleteAt(Posn offset, size_t length) final;
-  void DidInsertAt(Posn offset, size_t length) final;
+  void DidChangeStyle(text::Posn offset, size_t length) final;
+  void DidDeleteAt(text::Posn offset, size_t length) final;
+  void DidInsertAt(text::Posn offset, size_t length) final;
 
   // text::SelectionChangeObserver
   void DidChangeSelection() final;

@@ -47,10 +47,10 @@ class Cell : public common::Castable {
 
   virtual Cell* Copy() const = 0;
   virtual bool Equal(const Cell* pCell) const;
-  virtual Posn Fix(float line_height, float line_descent);
+  virtual text::Posn Fix(float line_height, float line_descent);
   virtual uint32_t Hash() const;
-  virtual gfx::RectF HitTestTextPosition(Posn position) const;
-  virtual Posn MapXToPosn(float x) const;
+  virtual gfx::RectF HitTestTextPosition(text::Posn position) const;
+  virtual text::Posn MapXToPosn(float x) const;
   virtual bool Merge(const RenderStyle& style, float width);
   virtual void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const;
 
@@ -141,7 +141,7 @@ class MarkerCell final : public Cell, private WithFont {
   MarkerCell(const RenderStyle& style,
              float width,
              float height,
-             Posn lPosn,
+             text::Posn lPosn,
              TextMarker marker_name);
   MarkerCell(const MarkerCell& other);
   virtual ~MarkerCell();
@@ -152,14 +152,14 @@ class MarkerCell final : public Cell, private WithFont {
   // rendering::Cell
   Cell* Copy() const final;
   bool Equal(const Cell* pCell) const final;
-  Posn Fix(float iHeight, float iDescent) final;
+  text::Posn Fix(float iHeight, float iDescent) final;
   uint32_t Hash() const final;
-  gfx::RectF HitTestTextPosition(Posn lPosn) const final;
-  Posn MapXToPosn(float x) const final;
+  gfx::RectF HitTestTextPosition(text::Posn lPosn) const final;
+  text::Posn MapXToPosn(float x) const final;
   void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
-  Posn end_;
+  text::Posn end_;
   TextMarker marker_name_;
-  Posn start_;
+  text::Posn start_;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -173,22 +173,22 @@ class TextCell : public Cell, private WithFont {
   TextCell(const RenderStyle& style,
            float width,
            float height,
-           Posn lPosn,
+           text::Posn lPosn,
            const base::string16& characters);
   TextCell(const TextCell& other);
   virtual ~TextCell();
 
   const base::string16 characters() const { return characters_; }
-  Posn end() const { return end_; }
-  Posn start() const { return start_; }
+  text::Posn end() const { return end_; }
+  text::Posn start() const { return start_; }
 
   void AddChar(base::char16 char_code);
 
   bool Equal(const Cell* pCell) const override;
-  Posn Fix(float iHeight, float iDescent) override;
+  text::Posn Fix(float iHeight, float iDescent) override;
   uint32_t Hash() const override;
-  gfx::RectF HitTestTextPosition(Posn position) const override;
-  Posn MapXToPosn(float x) const override;
+  gfx::RectF HitTestTextPosition(text::Posn position) const override;
+  text::Posn MapXToPosn(float x) const override;
   bool Merge(const RenderStyle& style, float width) override;
   void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const override;
 
@@ -197,8 +197,8 @@ class TextCell : public Cell, private WithFont {
   Cell* Copy() const override;
 
   base::string16 characters_;
-  Posn end_;
-  Posn start_;
+  text::Posn end_;
+  text::Posn start_;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ class UnicodeCell final : public TextCell {
   UnicodeCell(const RenderStyle& style,
               float width,
               float height,
-              Posn lPosn,
+              text::Posn lPosn,
               const base::string16& characters);
   UnicodeCell(const UnicodeCell& other);
   ~UnicodeCell() final;
@@ -220,7 +220,7 @@ class UnicodeCell final : public TextCell {
  private:
   // rendering::Cell
   Cell* Copy() const final;
-  gfx::RectF HitTestTextPosition(Posn lPosn) const final;
+  gfx::RectF HitTestTextPosition(text::Posn lPosn) const final;
   bool Merge(const RenderStyle& style, float width) final;
   void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
 };

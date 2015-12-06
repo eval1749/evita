@@ -54,7 +54,7 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   text::LineAndColumn GetLineAndColumn(text::Posn offset) const;
   bool IsValidPosition(text::Posn position) const;
   v8::Handle<v8::Value> Match(RegularExpression* regexp, int start, int end);
-  Posn Redo(Posn position);
+  text::Posn Redo(text::Posn position);
   void RenameTo(const base::string16& new_name);
   void SetSpelling(text::Posn start, text::Posn end, int spelling);
   void SetSyntax(text::Posn start,
@@ -63,7 +63,7 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   base::string16 Slice(int start, int end);
   base::string16 Slice(int start);
   void StartUndoGroup(const base::string16& name);
-  Posn Undo(Posn position);
+  text::Posn Undo(text::Posn position);
 
   // Implementation of Document static method
   static Document* NewDocument();

@@ -48,8 +48,8 @@ class MutationObserverController::Tracker final
   void ScheduleNotification();
 
   // text::BufferMutationObserver
-  void DidDeleteAt(Posn offset, size_t length) override;
-  void DidInsertAt(Posn offset, size_t length) override;
+  void DidDeleteAt(text::Posn offset, size_t length) override;
+  void DidInsertAt(text::Posn offset, size_t length) override;
 
   gc::Member<Document> document_;
   bool is_observing_;
@@ -118,7 +118,7 @@ void MutationObserverController::Tracker::Unregister(
 }
 
 // text::BufferMutationObserver
-void MutationObserverController::Tracker::DidDeleteAt(Posn offset,
+void MutationObserverController::Tracker::DidDeleteAt(text::Posn offset,
                                                       size_t length) {
   for (auto observer : observers_) {
     observer->DidDeleteAt(document_, offset, length);
@@ -126,7 +126,7 @@ void MutationObserverController::Tracker::DidDeleteAt(Posn offset,
   ScheduleNotification();
 }
 
-void MutationObserverController::Tracker::DidInsertAt(Posn offset,
+void MutationObserverController::Tracker::DidInsertAt(text::Posn offset,
                                                       size_t length) {
   for (auto observer : observers_) {
     observer->DidInsertAt(document_, offset, length);

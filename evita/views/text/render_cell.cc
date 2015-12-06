@@ -83,7 +83,7 @@ bool Cell::Equal(const Cell* other) const {
          other->line_height_ == line_height_ && other->style_ == style_;
 }
 
-Posn Cell::Fix(float line_height, float line_descent) {
+text::Posn Cell::Fix(float line_height, float line_descent) {
   line_descent_ = line_descent;
   line_height_ = line_height;
   return -1;
@@ -96,11 +96,11 @@ uint32_t Cell::Hash() const {
   return nHash;
 }
 
-gfx::RectF Cell::HitTestTextPosition(Posn) const {
+gfx::RectF Cell::HitTestTextPosition(text::Posn) const {
   return gfx::RectF();
 }
 
-Posn Cell::MapXToPosn(float x) const {
+text::Posn Cell::MapXToPosn(float x) const {
   return -1;
 }
 
@@ -201,7 +201,7 @@ void WithFont::DrawWave(gfx::Canvas* canvas,
 MarkerCell::MarkerCell(const RenderStyle& style,
                        float width,
                        float height,
-                       Posn lPosn,
+                       text::Posn lPosn,
                        TextMarker marker_name)
     : Cell(style, width, height, style.font().descent()),
       WithFont(style.font()),
@@ -230,7 +230,7 @@ bool MarkerCell::Equal(const Cell* other) const {
   return marker_name_ == marker_cell->marker_name_;
 }
 
-Posn MarkerCell::Fix(float line_height, float line_descent) {
+text::Posn MarkerCell::Fix(float line_height, float line_descent) {
   Cell::Fix(line_height, line_descent);
   return end_;
 }
@@ -242,13 +242,13 @@ uint32_t MarkerCell::Hash() const {
   return nHash;
 }
 
-gfx::RectF MarkerCell::HitTestTextPosition(Posn lPosn) const {
+gfx::RectF MarkerCell::HitTestTextPosition(text::Posn lPosn) const {
   if (lPosn < start_ || lPosn >= end_)
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
 }
 
-Posn MarkerCell::MapXToPosn(float x) const {
+text::Posn MarkerCell::MapXToPosn(float x) const {
   return start_;
 }
 
@@ -318,7 +318,7 @@ void MarkerCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
 TextCell::TextCell(const RenderStyle& style,
                    float width,
                    float height,
-                   Posn lPosn,
+                   text::Posn lPosn,
                    const base::string16& characters)
     : Cell(style, width, height, style.font().descent()),
       WithFont(style.font()),
@@ -350,7 +350,7 @@ bool TextCell::Equal(const Cell* other) const {
   return characters_ == other->as<TextCell>()->characters_;
 }
 
-Posn TextCell::Fix(float line_height, float descent) {
+text::Posn TextCell::Fix(float line_height, float descent) {
   Cell::Fix(line_height, descent);
   DCHECK_LT(start_, end_);
   return end_;
@@ -364,7 +364,7 @@ uint32_t TextCell::Hash() const {
 // Returns bounds rectangle of caret at |offset|. Caret is placed before
 // character at |offset|. So, height of caret is height of character before
 // |offset|.
-gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
+gfx::RectF TextCell::HitTestTextPosition(text::Posn offset) const {
   if (offset < start_ || offset > end_)
     return gfx::RectF();
   auto const length = static_cast<size_t>(offset - start_);
@@ -373,13 +373,13 @@ gfx::RectF TextCell::HitTestTextPosition(Posn offset) const {
   return gfx::RectF(gfx::PointF(left, top()), gfx::SizeF(1.0f, height()));
 }
 
-Posn TextCell::MapXToPosn(float x) const {
+text::Posn TextCell::MapXToPosn(float x) const {
   if (x >= width())
     return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
     auto const cx = style().font().GetTextWidth(characters_.data(), k);
     if (x < cx)
-      return static_cast<Posn>(start_ + k - 1);
+      return static_cast<text::Posn>(start_ + k - 1);
   }
   return end_;
 }
@@ -446,7 +446,7 @@ void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
 UnicodeCell::UnicodeCell(const RenderStyle& style,
                          float width,
                          float height,
-                         Posn lPosn,
+                         text::Posn lPosn,
                          const base::string16& characters)
     : TextCell(style, width, height + 4.0f, lPosn, characters) {}
 
@@ -459,7 +459,7 @@ Cell* UnicodeCell::Copy() const {
   return new UnicodeCell(*this);
 }
 
-gfx::RectF UnicodeCell::HitTestTextPosition(Posn offset) const {
+gfx::RectF UnicodeCell::HitTestTextPosition(text::Posn offset) const {
   if (offset < start() || offset > end())
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(width(), top()), gfx::SizeF(1.0f, height()));

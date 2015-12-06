@@ -27,9 +27,9 @@ class TextBlock final {
   int format_counter() const { return format_counter_; }
   const std::list<TextLine*>& lines() const { return lines_; }
 
-  void DidChangeStyle(Posn offset, size_t length);
-  void DidDeleteAt(Posn offset, size_t length);
-  void DidInsertAt(Posn offset, size_t length);
+  void DidChangeStyle(text::Posn offset, size_t length);
+  void DidDeleteAt(text::Posn offset, size_t length);
+  void DidInsertAt(text::Posn offset, size_t length);
   // Returns end of line offset containing |text_offset|.
   text::Posn EndOfLine(text::Posn text_offset);
   void Format(text::Posn text_offset);

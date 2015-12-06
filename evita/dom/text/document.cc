@@ -122,7 +122,7 @@ Document* Document::NewDocument() {
   return new Document();
 }
 
-Posn Document::Redo(Posn position) {
+text::Posn Document::Redo(text::Posn position) {
   return buffer_->Redo(position);
 }
 
@@ -171,7 +171,7 @@ void Document::StartUndoGroup(const base::string16& name) {
   buffer_->StartUndoGroup(name);
 }
 
-Posn Document::Undo(Posn position) {
+text::Posn Document::Undo(text::Posn position) {
   return buffer_->Undo(position);
 }
 

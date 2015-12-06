@@ -39,7 +39,7 @@ class TextLine final {
   float top() const { return bounds_.top; }
   const gfx::PointF origin() const { return bounds_.origin(); }
   void set_origin(const gfx::PointF& origin);
-  void set_start(Posn start) { m_lStart = start; }
+  void set_start(text::Posn start) { m_lStart = start; }
   text::Posn text_end() const { return m_lEnd; }
   text::Posn text_start() const { return m_lStart; }
 
@@ -48,14 +48,14 @@ class TextLine final {
   TextLine* Copy() const;
   bool Equal(const TextLine*) const;
   void Fix(float ascent, float descent);
-  Posn GetEnd() const { return m_lEnd; }
+  text::Posn GetEnd() const { return m_lEnd; }
   float GetHeight() const { return bounds_.height(); }
-  Posn GetStart() const { return m_lStart; }
+  text::Posn GetStart() const { return m_lStart; }
   float GetWidth() const { return bounds_.width(); }
   uint Hash() const;
-  gfx::RectF HitTestTextPosition(Posn lPosn) const;
+  gfx::RectF HitTestTextPosition(text::Posn lPosn) const;
   bool IsEndOfDocument() const;
-  Posn MapXToPosn(float x) const;
+  text::Posn MapXToPosn(float x) const;
   void Render(gfx::Canvas* canvas) const;
 
  private:
@@ -66,8 +66,8 @@ class TextLine final {
   gfx::RectF bounds_;
   std::vector<Cell*> cells_;
   mutable uint32_t m_nHash;
-  Posn m_lStart;
-  Posn m_lEnd;
+  text::Posn m_lStart;
+  text::Posn m_lEnd;
 };
 
 }  // namespace rendering

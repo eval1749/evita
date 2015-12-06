@@ -221,8 +221,6 @@ struct RegKey final {
 typedef uint32 uint;
 #include "evita/ed_defs.h"
 
-typedef text::Posn Posn;
-
 #define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)
 #define myMoveMemory(d, s, n) ::MoveMemory(d, s, n)
 #define myZeroMemory(d, n) ::ZeroMemory(d, n)

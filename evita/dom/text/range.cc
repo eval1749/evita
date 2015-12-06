@@ -61,7 +61,7 @@ void Range::set_text(const base::string16& text) {
   range_->set_text(text);
 }
 
-Range* Range::CollapseTo(Posn offset) {
+Range* Range::CollapseTo(text::Posn offset) {
   if (!document_->IsValidPosition(offset))
     return this;
   range_->SetRange(offset, offset);

@@ -73,14 +73,18 @@ MutationObserver::MutationObserver(v8::Handle<v8::Function> callback)
 
 MutationObserver::~MutationObserver() {}
 
-void MutationObserver::DidDeleteAt(Document* document, Posn offset, size_t) {
+void MutationObserver::DidDeleteAt(Document* document,
+                                   text::Posn offset,
+                                   size_t) {
   auto const tracker = GetTracker(document);
   if (!tracker)
     return;
   tracker->Update(offset);
 }
 
-void MutationObserver::DidInsertAt(Document* document, Posn offset, size_t) {
+void MutationObserver::DidInsertAt(Document* document,
+                                   text::Posn offset,
+                                   size_t) {
   auto const tracker = GetTracker(document);
   if (!tracker)
     return;

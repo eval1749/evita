@@ -52,18 +52,18 @@ class TextView final {
   text::Buffer* buffer() const { return buffer_; }
   float zoom() const { return zoom_; }
 
-  void DidChangeStyle(Posn offset, size_t length);
-  void DidDeleteAt(Posn offset, size_t length);
+  void DidChangeStyle(text::Posn offset, size_t length);
+  void DidDeleteAt(text::Posn offset, size_t length);
   void DidHide();
-  void DidInsertAt(Posn offset, size_t length);
+  void DidInsertAt(text::Posn offset, size_t length);
   void DidRecreateCanvas();
   // Returns end of line offset containing |text_offset|.
   text::Posn EndOfLine(text::Posn text_offset) const;
-  Posn GetStart();
-  Posn GetEnd();
+  text::Posn GetStart();
+  text::Posn GetEnd();
   // Returns fully visible end offset or end of line position if there is only
   // one line.
-  Posn GetVisibleEnd();
+  text::Posn GetVisibleEnd();
   void Format(text::Posn text_offset);
   // Returns true if text format is taken place.
   bool FormatIfNeeded();

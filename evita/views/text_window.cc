@@ -132,7 +132,7 @@ text::Posn TextWindow::ComputeWindowMotion(text::Count n, text::Posn offset) {
   return offset;
 }
 
-Posn TextWindow::EndOfLine(text::Posn text_offset) {
+text::Posn TextWindow::EndOfLine(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
   return text_view_->EndOfLine(text_offset);
 }
@@ -183,7 +183,7 @@ bool TextWindow::LargeScroll(int, int iDy) {
   return scrolled;
 }
 
-Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
+text::Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
   return std::min(text_view_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
@@ -214,7 +214,7 @@ bool TextWindow::SmallScroll(int, int y_count) {
   return scrolled;
 }
 
-Posn TextWindow::StartOfLine(text::Posn text_offset) {
+text::Posn TextWindow::StartOfLine(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
   return text_view_->StartOfLine(text_offset);
 }

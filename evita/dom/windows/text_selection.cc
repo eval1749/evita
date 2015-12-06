@@ -29,11 +29,11 @@ TextSelection::~TextSelection() {
   text_selection_->RemoveObserver(this);
 }
 
-Posn TextSelection::anchor_offset() const {
+text::Posn TextSelection::anchor_offset() const {
   return start_is_active() ? range_->end() : range_->start();
 }
 
-Posn TextSelection::focus_offset() const {
+text::Posn TextSelection::focus_offset() const {
   return start_is_active() ? range_->start() : range_->end();
 }
 

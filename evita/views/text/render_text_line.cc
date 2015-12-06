@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/text/render_text_line.h"
-
 #include <cmath>
+
+#include "evita/views/text/render_text_line.h"
 
 #include "base/logging.h"
 #include "evita/views/text/render_cell.h"
@@ -105,7 +105,7 @@ uint TextLine::Hash() const {
   return m_nHash;
 }
 
-gfx::RectF TextLine::HitTestTextPosition(Posn offset) const {
+gfx::RectF TextLine::HitTestTextPosition(text::Posn offset) const {
   if (offset < m_lStart || offset >= m_lEnd)
     return gfx::RectF();
 
@@ -125,7 +125,7 @@ bool TextLine::IsEndOfDocument() const {
   return last_marker_cell->marker_name() == TextMarker::EndOfDocument;
 }
 
-Posn TextLine::MapXToPosn(float xGoal) const {
+text::Posn TextLine::MapXToPosn(float xGoal) const {
   auto xCell = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto cell : cells_) {

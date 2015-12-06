@@ -51,8 +51,8 @@ class TableWindow final : public text::BufferMutationObserver,
   void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
   // text::BufferMutationObserver
-  void DidDeleteAt(Posn offset, size_t length) final;
-  void DidInsertAt(Posn offset, size_t length) final;
+  void DidDeleteAt(text::Posn offset, size_t length) final;
+  void DidInsertAt(text::Posn offset, size_t length) final;
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;
@@ -65,8 +65,7 @@ class TableWindow final : public text::BufferMutationObserver,
   // ui::TableModel
   int GetRowCount() const final;
   int GetRowId(int index) const final;
-  base::string16 GetCellText(
-      int row_id, int column_id) const final;
+  base::string16 GetCellText(int row_id, int column_id) const final;
 
   // views::ContentWindow
   void MakeSelectionVisible() final;

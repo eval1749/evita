@@ -46,4 +46,12 @@ DxDevice::DxDevice() {
 
 DxDevice::~DxDevice() {}
 
+// static
+DxDevice* DxDevice::instance() {
+  static DxDevice* static_device;
+  if (!static_device)
+    static_device = new DxDevice();
+  return static_device;
+}
+
 }  // namespace gfx

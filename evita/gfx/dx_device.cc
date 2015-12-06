@@ -15,6 +15,23 @@
 
 namespace gfx {
 
+namespace {
+
+common::ComPtr<ID2D1Factory1> CreateD2D1Factory() {
+  common::ComPtr<ID2D1Factory1> factory;
+  D2D1_FACTORY_OPTIONS options;
+#if _DEBUG
+  options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
+#else
+  options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
+#endif
+  COM_VERIFY(::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, options,
+                                 &factory));
+  return std::move(factory);
+}
+
+}  // namespace
+
 DxDevice::DxDevice() {
   // Create Direct 3D device.
   D3D_FEATURE_LEVEL feature_levels[] = {
@@ -40,8 +57,8 @@ DxDevice::DxDevice() {
   dxgi_adapter->GetParent(IID_PPV_ARGS(&dxgi_factory_));
 
   // Create d2d device
-  COM_VERIFY(
-      FactorySet::instance()->d2d1().CreateDevice(dxgi_device_, &d2d_device_));
+  auto d2d1_factory = CreateD2D1Factory();
+  COM_VERIFY(d2d1_factory->CreateDevice(dxgi_device_, &d2d_device_));
 }
 
 DxDevice::~DxDevice() {}

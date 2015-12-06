@@ -67,7 +67,6 @@ class TextWindow final : public ContentWindow,
   text::Buffer* buffer() const;
 
   bool LargeScroll(int x_count, int y_count);
-  void Paint(const TextSelectionModel& selection, base::Time now);
   void Redraw(base::Time now);
   void UpdateBounds();
   void UpdateScrollBar();
@@ -119,7 +118,6 @@ class TextWindow final : public ContentWindow,
   // views::ContentWindow
   void MakeSelectionVisible() final;
 
-  text::Posn caret_offset_;
   MetricsView* metrics_view_;
   // TODO(eval1749): Manage life time of selection.
   text::Selection* const selection_;

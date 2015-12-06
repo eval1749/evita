@@ -6,12 +6,14 @@
 #define DEBUG_DISPBUF 0
 #define DEBUG_FORMAT 0
 #define DEBUG_RENDER 0
-#include "evita/views/text/text_view.h"
 
 #include <algorithm>
 #include <memory>
 #include <utility>
 
+#include "evita/views/text/text_view.h"
+
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
@@ -26,12 +28,26 @@
 namespace views {
 using namespace rendering;  // NOLINT
 
+namespace {
+text::Posn GetCaretOffset(const text::Buffer* buffer,
+                          const TextSelectionModel& selection,
+                          text::Posn caret_offset) {
+  if (!selection.disabled())
+    return selection.focus_offset();
+  auto const max_offset = buffer->GetEnd();
+  if (selection.start() == max_offset && selection.end() == max_offset)
+    return max_offset;
+  return caret_offset == -1 ? selection.focus_offset() : caret_offset;
+}
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // TextView
 //
 TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
     : buffer_(buffer),
+      caret_offset_(-1),
       format_counter_(0),
       screen_text_block_(new ScreenTextBlock(caret_owner)),
       should_render_(true),
@@ -106,19 +122,26 @@ bool TextView::IsPositionFullyVisible(text::Posn offset) const {
   return text_block_->IsPositionFullyVisible(offset);
 }
 
+void TextView::MakeSelectionVisible() {
+  // |UpdateAndPaint()| will format text view to place caret at selection
+  // focus offset.
+  caret_offset_ = -1;
+}
+
 text::Posn TextView::MapPointToPosition(gfx::PointF point) {
   return text_block_->MapPointToPosition(point);
 }
 
 text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
-                                           float point_x) const {
+                                       float point_x) const {
   return text_block_->MapPointXToOffset(text_offset, point_x);
 }
 
 void TextView::Paint(gfx::Canvas* canvas,
-                         const TextSelectionModel& selection_model,
-                         base::Time now) {
+                     const TextSelectionModel& selection_model,
+                     base::Time now) {
   DCHECK(!ShouldFormat());
+  TRACE_EVENT0("view", "TextView::Paint");
   const auto selection =
       TextFormatter::FormatSelection(buffer_, selection_model);
   if (!should_render_ && canvas->screen_bitmap()) {
@@ -196,6 +219,31 @@ bool TextView::ShouldRender() const {
 }
 text::Posn TextView::StartOfLine(text::Posn text_offset) const {
   return text_block_->StartOfLine(text_offset);
+}
+
+void TextView::UpdateAndPaint(gfx::Canvas* canvas,
+                              const TextSelectionModel& selection,
+                              base::Time now) {
+  TRACE_EVENT0("view", "TextView::UpdateAndPaint");
+  auto const new_caret_offset =
+      GetCaretOffset(buffer(), selection, caret_offset_);
+  DCHECK_GE(new_caret_offset, 0);
+
+  if (FormatIfNeeded()) {
+    if (caret_offset_ != new_caret_offset) {
+      ScrollToPosition(new_caret_offset);
+      caret_offset_ = new_caret_offset;
+    }
+    return Paint(canvas, selection, now);
+  }
+
+  if (caret_offset_ == new_caret_offset)
+    return Paint(canvas, selection, now);
+
+  caret_offset_ = new_caret_offset;
+  if (!IsPositionFullyVisible(new_caret_offset))
+    ScrollToPosition(new_caret_offset);
+  Paint(canvas, selection, now);
 }
 
 }  // namespace views

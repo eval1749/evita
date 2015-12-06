@@ -66,27 +66,32 @@ class TextView final {
   // one line.
   Posn GetVisibleEnd();
   gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
-  bool IsPositionFullyVisible(text::Posn text_offset) const;
+  void MakeSelectionVisible();
   text::Posn MapPointToPosition(gfx::PointF point);
   text::Posn MapPointXToOffset(text::Posn text_offset, float point_x) const;
-  void Paint(gfx::Canvas* canvas,
-             const TextSelectionModel& selection,
-             base::Time now);
   bool ScrollDown();
-  void ScrollToPosition(text::Posn offset);
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
   bool ShouldRender() const;
   // Returns start of line offset containing |text_offset|.
   text::Posn StartOfLine(text::Posn text_offset) const;
+  void UpdateAndPaint(gfx::Canvas* canvas,
+                      const TextSelectionModel& selection,
+                      base::Time now);
 
  private:
+  bool IsPositionFullyVisible(text::Posn text_offset) const;
+  void Paint(gfx::Canvas* canvas,
+             const TextSelectionModel& selection,
+             base::Time now);
   void RenderRuler(gfx::Canvas* canvas);
+  void ScrollToPosition(text::Posn offset);
   bool ShouldFormat() const;
 
   gfx::RectF bounds_;
   text::Buffer* const buffer_;
+  text::Posn caret_offset_;
   int format_counter_;
   std::unique_ptr<ScreenTextBlock> screen_text_block_;
   bool should_render_;

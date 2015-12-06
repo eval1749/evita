@@ -35,17 +35,6 @@ using rendering::TextSelectionModel;
 
 namespace {
 
-text::Posn GetCaretOffset(const text::Buffer* buffer,
-                          const TextSelectionModel& selection,
-                          text::Posn caret_offset) {
-  if (!selection.disabled())
-    return selection.focus_offset();
-  auto const max_offset = buffer->GetEnd();
-  if (selection.start() == max_offset && selection.end() == max_offset)
-    return max_offset;
-  return caret_offset == -1 ? selection.focus_offset() : caret_offset;
-}
-
 TextSelectionModel GetTextSelectionModel(TextWindow* window,
                                          const text::Selection& selection) {
   return TextSelectionModel(
@@ -61,7 +50,6 @@ TextSelectionModel GetTextSelectionModel(TextWindow* window,
 //
 TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
     : ContentWindow(window_id),
-      caret_offset_(-1),
       metrics_view_(new MetricsView()),
       text_view_(new TextView(selection->buffer(), this)),
       selection_(selection),
@@ -209,45 +197,13 @@ Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
   return std::min(text_view_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
-void TextWindow::Paint(const TextSelectionModel& selection, base::Time now) {
-  DCHECK(visible());
-  TRACE_EVENT0("view", "TextWindow::Paint");
-  gfx::Canvas::DrawingScope drawing_scope(canvas());
-  text_view_->Paint(canvas(), selection, now);
-}
-
 void TextWindow::Redraw(base::Time now) {
+  UI_ASSERT_DOM_LOCKED();
   DCHECK(visible());
   TRACE_EVENT0("view", "TextWindow::Redraw");
   MetricsView::TimingScope timing_scope(metrics_view_);
-  UI_ASSERT_DOM_LOCKED();
-
   auto const selection = GetTextSelectionModel(this, *selection_);
-  auto const new_caret_offset =
-      GetCaretOffset(buffer(), selection, caret_offset_);
-  DCHECK_GE(new_caret_offset, 0);
-
-  if (text_view_->FormatIfNeeded()) {
-    if (caret_offset_ != new_caret_offset) {
-      text_view_->ScrollToPosition(new_caret_offset);
-      caret_offset_ = new_caret_offset;
-    }
-    Paint(selection, now);
-    return;
-  }
-
-  if (caret_offset_ != new_caret_offset) {
-    caret_offset_ = new_caret_offset;
-    if (text_view_->IsPositionFullyVisible(new_caret_offset)) {
-      Paint(selection, now);
-      return;
-    }
-    text_view_->ScrollToPosition(new_caret_offset);
-    Paint(selection, now);
-    return;
-  }
-
-  Paint(selection, now);
+  text_view_->UpdateAndPaint(canvas(), selection, now);
 }
 
 void TextWindow::SetZoom(float new_zoom) {
@@ -493,8 +449,7 @@ HCURSOR TextWindow::GetCursorAt(const gfx::Point&) const {
 
 // views::ContentWindow
 void TextWindow::MakeSelectionVisible() {
-  // Redraw() will format text buffer to place caret on center of screen.
-  caret_offset_ = -1;
+  text_view_->MakeSelectionVisible();
   RequestAnimationFrame();
 }
 

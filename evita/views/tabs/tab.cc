@@ -339,7 +339,7 @@ void Tab::OnDraw(gfx::Canvas* canvas) {
   canvas->Clear(ComputeBackgroundColor());
   {
     common::ComPtr<ID2D1PathGeometry> geometry;
-    gfx::FactorySet::d2d1().CreatePathGeometry(&geometry);
+    canvas->GetD2D1Factory()->CreatePathGeometry(&geometry);
     {
       common::ComPtr<ID2D1GeometrySink> sink;
       geometry->Open(&sink);

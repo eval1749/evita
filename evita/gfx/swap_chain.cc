@@ -193,8 +193,11 @@ void SwapChain::UpdateDeviceContext() {
     common::ComPtr<IDXGISurface> dxgi_back_buffer;
     swap_chain_->GetBuffer(0, IID_PPV_ARGS(&dxgi_back_buffer));
 
+    common::ComPtr<ID2D1Factory> d2d_factory;
+    d2d_device_context_->GetFactory(&d2d_factory);
+
     float dpi_x, dpi_y;
-    FactorySet::instance()->d2d1().GetDesktopDpi(&dpi_x, &dpi_y);
+    d2d_factory->GetDesktopDpi(&dpi_x, &dpi_y);
     auto const bitmap_properties = D2D1::BitmapProperties1(
         D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
         D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,

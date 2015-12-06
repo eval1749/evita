@@ -17,7 +17,8 @@ namespace gfx {
 
 namespace {
 SwapChain* CreateSwapChain(ui::Layer* layer) {
-  return SwapChain::CreateForComposition(DxDevice::instance(), layer->bounds());
+  auto const device = layer->compositor()->device();
+  return SwapChain::CreateForComposition(device, layer->bounds());
 }
 }  // namespace
 
@@ -26,8 +27,7 @@ SwapChain* CreateSwapChain(ui::Layer* layer) {
 // CanvasForLayer
 //
 CanvasForLayer::CanvasForLayer(ui::Layer* layer)
-    : layer_(layer),
-      swap_chain_(CreateSwapChain(layer)) {
+    : layer_(layer), swap_chain_(CreateSwapChain(layer)) {
   DCHECK_EQ(swap_chain_->bounds().size(), layer->bounds().size());
   SetInitialBounds(swap_chain_->bounds());
 }

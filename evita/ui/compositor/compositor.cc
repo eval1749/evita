@@ -19,9 +19,10 @@
 
 namespace ui {
 
-Compositor::Compositor() : need_commit_(false) {
-  COM_VERIFY(::DCompositionCreateDevice2(
-      gfx::DxDevice::instance()->d2d_device(), IID_PPV_ARGS(&desktop_device_)));
+Compositor::Compositor()
+    : device_(gfx::DxDevice::instance()), need_commit_(false) {
+  COM_VERIFY(::DCompositionCreateDevice2(device_->d2d_device(),
+                                         IID_PPV_ARGS(&desktop_device_)));
 
 #if _DEBUG
   common::ComPtr<IDCompositionDeviceDebug> debug_device;

@@ -15,6 +15,10 @@ interface IDCompositionDesktopDevice;
 interface IDCompositionVisual2;
 interface ID2D1Device;
 
+namespace gfx {
+class DxDevice;
+}
+
 namespace ui {
 
 class Layer;
@@ -31,6 +35,7 @@ class Compositor final : public common::Singleton<Compositor> {
   virtual ~Compositor();
 
   IDCompositionDesktopDevice* desktop_device() const { return desktop_device_; }
+  gfx::DxDevice* device() const { return device_; }
   void CommitIfNeeded();
   common::ComPtr<IDCompositionVisual2> CreateVisual();
   void NeedCommit() { need_commit_ = true; }
@@ -40,6 +45,7 @@ class Compositor final : public common::Singleton<Compositor> {
   Compositor();
 
   common::ComPtr<IDCompositionDesktopDevice> desktop_device_;
+  gfx::DxDevice* const device_;
   bool need_commit_;
 
   DISALLOW_COPY_AND_ASSIGN(Compositor);

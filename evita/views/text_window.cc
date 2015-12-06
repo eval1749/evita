@@ -123,6 +123,7 @@ text::Posn TextWindow::ComputeWindowLineMotion(Count n,
 
 text::Posn TextWindow::ComputeWindowMotion(Count n, text::Posn offset) {
   UI_ASSERT_DOM_LOCKED();
+  text_view_->FormatIfNeeded();
   if (n > 0)
     return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()), GetStart());
   if (n < 0)

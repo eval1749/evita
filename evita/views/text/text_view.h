@@ -66,6 +66,8 @@ class TextView final {
   // one line.
   Posn GetVisibleEnd();
   void Format(text::Posn text_offset);
+  // Returns true if text format is taken place.
+  bool FormatIfNeeded();
   gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
   void MakeSelectionVisible();
   text::Posn MapPointToPosition(gfx::PointF point);
@@ -80,8 +82,6 @@ class TextView final {
   void Update(const TextSelectionModel& selection);
 
  private:
-  // Returns true if text format is taken place.
-  bool FormatIfNeeded();
   bool IsPositionFullyVisible(text::Posn text_offset) const;
   void PaintRuler(gfx::Canvas* canvas);
   void ScrollToPosition(text::Posn offset);

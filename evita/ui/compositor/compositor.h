@@ -28,7 +28,7 @@ class Layer;
 //
 class Compositor final {
  public:
-  Compositor();
+  explicit Compositor(gfx::DxDevice* device);
   ~Compositor();
 
   IDCompositionDesktopDevice* desktop_device() const { return desktop_device_; }

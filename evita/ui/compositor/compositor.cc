@@ -19,8 +19,8 @@
 
 namespace ui {
 
-Compositor::Compositor()
-    : device_(gfx::DxDevice::instance()), need_commit_(false) {
+Compositor::Compositor(gfx::DxDevice* device)
+    : device_(device), need_commit_(false) {
   COM_VERIFY(::DCompositionCreateDevice2(device_->d2d_device(),
                                          IID_PPV_ARGS(&desktop_device_)));
 #if _DEBUG
@@ -37,7 +37,7 @@ Compositor* Compositor::instance() {
   static Compositor* static_compositor;
   if (static_compositor)
     return static_compositor;
-  static_compositor = new Compositor();
+  static_compositor = new Compositor(gfx::DxDevice::instance());
   return static_compositor;
 }
 

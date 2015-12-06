@@ -163,7 +163,7 @@ void TextBlock::TextLineCache::RemoveDirtyLines() {
   }
   while (it != lines_.begin() && it->second->GetStart() > dirty_start)
     --it;
-  ASSERT(it != lines_.end());
+  DCHECK(it != lines_.end());
 
   if (it == lines_.begin()) {
     RemoveAllLines();

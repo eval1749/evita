@@ -18,7 +18,8 @@ namespace gfx {
 //
 // SwapChain
 //
-SwapChain::SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain)
+SwapChain::SwapChain(ID2D1Device* d2d_device,
+                     common::ComPtr<IDXGISwapChain2> swap_chain)
     : is_first_present_(true),
       is_ready_(false),
       swap_chain_(swap_chain),
@@ -26,7 +27,7 @@ SwapChain::SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain)
   // Antialias Mode = D2D1_ANTIALIAS_MODE_PER_PRIMITIVE
   // Primitive Blend = D2D1_PRIMITIVE_BLEND_SOURCE_OVER
   // Text Antialias Mode = D2D1_TEXT_ANTIALIAS_MODE_DEFAULT
-  COM_VERIFY(DxDevice::instance()->d2d_device()->CreateDeviceContext(
+  COM_VERIFY(d2d_device->CreateDeviceContext(
       D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &d2d_device_context_));
   UpdateDeviceContext();
 }
@@ -94,7 +95,7 @@ SwapChain* SwapChain::CreateForComposition(const RectF& bounds) {
   // and ensures that the application will only render after each VSync,
   // minimizing power consumption.
   COM_VERIFY(swap_chain2->SetMaximumFrameLatency(1));
-  return new SwapChain(swap_chain2);
+  return new SwapChain(device->d2d_device(), swap_chain2);
 }
 
 SwapChain* SwapChain::CreateForHwnd(HWND hwnd) {
@@ -123,7 +124,7 @@ SwapChain* SwapChain::CreateForHwnd(HWND hwnd) {
 
   common::ComPtr<IDXGISwapChain2> swap_chain2;
   COM_VERIFY(swap_chain2.QueryFrom(swap_chain1));
-  return new SwapChain(swap_chain2);
+  return new SwapChain(device->d2d_device(), swap_chain2);
 }
 
 void SwapChain::DidChangeBounds(const RectF& new_bounds) {

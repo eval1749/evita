@@ -35,7 +35,8 @@ class SwapChain final {
   void Present();
 
  private:
-  explicit SwapChain(common::ComPtr<IDXGISwapChain2> swap_chain);
+  SwapChain(ID2D1Device* d2d_device,
+            common::ComPtr<IDXGISwapChain2> swap_chain);
 
   void UpdateDeviceContext();
 

@@ -360,8 +360,6 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
   if (!canvas()->IsReady())
     return RequestAnimationFrame();
   TRACE_EVENT0("scheduler", "TextWindow::DidBeginAnimationFrame");
-  // TODO(eval1749): We should narrow drawing scope just enclosing |OnDraw()|.
-  gfx::Canvas::DrawingScope drawing_scope(canvas());
   {
     UI_DOM_AUTO_TRY_LOCK_SCOPE(dom_lock_scope);
     if (!dom_lock_scope.locked()) {
@@ -372,10 +370,10 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
 
     editor::Application::instance()->NotifyViewReady();
     metrics_view_->RecordTime();
-    Redraw(now);
-  }
 
-  {
+    // TODO(eval1749): We should narrow drawing scope just enclosing |OnDraw()|.
+    gfx::Canvas::DrawingScope drawing_scope(canvas());
+    Redraw(now);
     TRACE_EVENT0("view", "TextWindow::DidBeginAnimationFrame/1");
     OnDraw(canvas());
   }

@@ -154,7 +154,7 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
   DCHECK(lock_scope.locked());
   switch (data.method) {
     case dom::TextWindowCompute::Method::EndOfWindow:
-      return window->GetEnd();
+      return window->ComputeWindowMotion(1, 0);
     case dom::TextWindowCompute::Method::EndOfWindowLine:
       return window->EndOfLine(data.position);
     case dom::TextWindowCompute::Method::MoveScreen:
@@ -164,7 +164,7 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
     case dom::TextWindowCompute::Method::MoveWindowLine:
       return window->ComputeWindowLineMotion(data.count, point, data.position);
     case dom::TextWindowCompute::Method::StartOfWindow:
-      return window->GetStart();
+      return window->ComputeWindowMotion(-1, 0);
     case dom::TextWindowCompute::Method::StartOfWindowLine:
       return window->StartOfLine(data.position);
     default:

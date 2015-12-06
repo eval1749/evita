@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_TEXT_RENDERER_H_
-#define EVITA_VIEWS_TEXT_TEXT_RENDERER_H_
+#ifndef EVITA_VIEWS_TEXT_TEXT_VIEW_H_
+#define EVITA_VIEWS_TEXT_TEXT_VIEW_H_
 
 #include <memory>
 
@@ -33,9 +33,9 @@ class TextLine;
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextRenderer
+// TextView
 //
-class TextRenderer final {
+class TextView final {
  public:
   using Cell = rendering::Cell;
 
@@ -44,8 +44,8 @@ class TextRenderer final {
   typedef rendering::TextBlock TextBlock;
   typedef rendering::TextLine TextLine;
 
-  TextRenderer(text::Buffer* buffer, ui::CaretOwner* caret_owner);
-  ~TextRenderer();
+  TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner);
+  ~TextView();
 
   text::Buffer* buffer() const { return buffer_; }
   float zoom() const { return zoom_; }
@@ -93,9 +93,9 @@ class TextRenderer final {
   std::unique_ptr<TextBlock> text_block_;
   float zoom_;
 
-  DISALLOW_COPY_AND_ASSIGN(TextRenderer);
+  DISALLOW_COPY_AND_ASSIGN(TextView);
 };
 
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_TEXT_RENDERER_H_
+#endif  // EVITA_VIEWS_TEXT_TEXT_VIEW_H_

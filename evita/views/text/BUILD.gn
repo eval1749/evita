@@ -22,8 +22,8 @@ source_set("text") {
     "screen_text_block.h",
     "text_formatter.cc",
     "text_formatter.h",
-    "text_renderer.cc",
-    "text_renderer.h",
+    "text_view.cc",
+    "text_view.h",
   ]
 
   public_deps = [

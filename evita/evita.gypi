@@ -141,7 +141,7 @@
         'views/text/render_text_line.cc',
         'views/text/screen_text_block.cc',
         'views/text/text_formatter.cc',
-        'views/text/text_renderer.cc',
+        'views/text/text_view.cc',
         'views/text_window.cc',
         'views/text_window.h',
         'vi_EditPane.cc',

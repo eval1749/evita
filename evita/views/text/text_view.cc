@@ -6,7 +6,7 @@
 #define DEBUG_DISPBUF 0
 #define DEBUG_FORMAT 0
 #define DEBUG_RENDER 0
-#include "evita/views/text/text_renderer.h"
+#include "evita/views/text/text_view.h"
 
 #include <algorithm>
 #include <memory>
@@ -28,9 +28,9 @@ using namespace rendering;  // NOLINT
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextRenderer
+// TextView
 //
-TextRenderer::TextRenderer(text::Buffer* buffer, ui::CaretOwner* caret_owner)
+TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
     : buffer_(buffer),
       format_counter_(0),
       screen_text_block_(new ScreenTextBlock(caret_owner)),
@@ -38,53 +38,53 @@ TextRenderer::TextRenderer(text::Buffer* buffer, ui::CaretOwner* caret_owner)
       text_block_(new TextBlock(buffer)),
       zoom_(1.0f) {}
 
-TextRenderer::~TextRenderer() {}
+TextView::~TextView() {}
 
-void TextRenderer::DidChangeStyle(text::Posn offset, size_t length) {
+void TextView::DidChangeStyle(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
   text_block_->DidChangeStyle(offset, length);
 }
 
-void TextRenderer::DidDeleteAt(text::Posn offset, size_t length) {
+void TextView::DidDeleteAt(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
   text_block_->DidDeleteAt(offset, length);
 }
 
-void TextRenderer::DidHide() {
+void TextView::DidHide() {
   screen_text_block_->Reset();
 }
 
-void TextRenderer::DidInsertAt(text::Posn offset, size_t length) {
+void TextView::DidInsertAt(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
   text_block_->DidInsertAt(offset, length);
 }
 
-void TextRenderer::DidRecreateCanvas() {
+void TextView::DidRecreateCanvas() {
   screen_text_block_->Reset();
 }
 
-text::Posn TextRenderer::EndOfLine(text::Posn text_offset) const {
+text::Posn TextView::EndOfLine(text::Posn text_offset) const {
   return text_block_->EndOfLine(text_offset);
 }
 
-text::Posn TextRenderer::GetEnd() {
+text::Posn TextView::GetEnd() {
   return text_block_->GetEnd();
 }
 
-text::Posn TextRenderer::GetStart() {
+text::Posn TextView::GetStart() {
   return text_block_->GetStart();
 }
 
-text::Posn TextRenderer::GetVisibleEnd() {
+text::Posn TextView::GetVisibleEnd() {
   return text_block_->GetVisibleEnd();
 }
 
-void TextRenderer::Format(text::Posn text_offset) {
+void TextView::Format(text::Posn text_offset) {
   text_block_->Format(text_offset);
   should_render_ = true;
 }
 
-bool TextRenderer::FormatIfNeeded() {
+bool TextView::FormatIfNeeded() {
   if (!text_block_->FormatIfNeeded() &&
       format_counter_ == text_block_->format_counter()) {
     return false;
@@ -96,26 +96,26 @@ bool TextRenderer::FormatIfNeeded() {
 // Maps specified buffer position to window point and returns true. If
 // specified buffer point isn't in window, this function returns false.
 //
-// A TextRenderer object must be formatted with the latest buffer.
+// A TextView object must be formatted with the latest buffer.
 //
-gfx::RectF TextRenderer::HitTestTextPosition(text::Posn text_offset) const {
+gfx::RectF TextView::HitTestTextPosition(text::Posn text_offset) const {
   return text_block_->HitTestTextPosition(text_offset);
 }
 
-bool TextRenderer::IsPositionFullyVisible(text::Posn offset) const {
+bool TextView::IsPositionFullyVisible(text::Posn offset) const {
   return text_block_->IsPositionFullyVisible(offset);
 }
 
-text::Posn TextRenderer::MapPointToPosition(gfx::PointF point) {
+text::Posn TextView::MapPointToPosition(gfx::PointF point) {
   return text_block_->MapPointToPosition(point);
 }
 
-text::Posn TextRenderer::MapPointXToOffset(text::Posn text_offset,
+text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
                                            float point_x) const {
   return text_block_->MapPointXToOffset(text_offset, point_x);
 }
 
-void TextRenderer::Paint(gfx::Canvas* canvas,
+void TextView::Paint(gfx::Canvas* canvas,
                          const TextSelectionModel& selection_model,
                          base::Time now) {
   DCHECK(!ShouldFormat());
@@ -131,7 +131,7 @@ void TextRenderer::Paint(gfx::Canvas* canvas,
   should_render_ = false;
 }
 
-void TextRenderer::RenderRuler(gfx::Canvas* canvas) {
+void TextView::RenderRuler(gfx::Canvas* canvas) {
   // FIXME 2007-08-05 We should expose show/hide and ruler settings to both
   // script and UI.
   auto style = buffer_->GetDefaultStyle();
@@ -149,27 +149,27 @@ void TextRenderer::RenderRuler(gfx::Canvas* canvas) {
   canvas->DrawRectangle(brush, ruler_bounds);
 }
 
-bool TextRenderer::ScrollDown() {
+bool TextView::ScrollDown() {
   if (!text_block_->ScrollDown())
     return false;
   should_render_ = true;
   return true;
 }
 
-void TextRenderer::ScrollToPosition(text::Posn offset) {
+void TextView::ScrollToPosition(text::Posn offset) {
   if (!text_block_->ScrollToPosition(offset))
     return;
   should_render_ = true;
 }
 
-bool TextRenderer::ScrollUp() {
+bool TextView::ScrollUp() {
   if (!text_block_->ScrollUp())
     return false;
   should_render_ = true;
   return true;
 }
 
-void TextRenderer::SetBounds(const gfx::RectF& new_bounds) {
+void TextView::SetBounds(const gfx::RectF& new_bounds) {
   DCHECK(!new_bounds.empty());
   if (bounds_.size() == new_bounds.size())
     return;
@@ -179,7 +179,7 @@ void TextRenderer::SetBounds(const gfx::RectF& new_bounds) {
   should_render_ = true;
 }
 
-void TextRenderer::SetZoom(float new_zoom) {
+void TextView::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
   if (zoom_ == new_zoom)
     return;
@@ -187,14 +187,14 @@ void TextRenderer::SetZoom(float new_zoom) {
   text_block_->SetZoom(zoom_);
 }
 
-bool TextRenderer::ShouldFormat() const {
+bool TextView::ShouldFormat() const {
   return text_block_->ShouldFormat();
 }
 
-bool TextRenderer::ShouldRender() const {
+bool TextView::ShouldRender() const {
   return should_render_ || screen_text_block_->dirty();
 }
-text::Posn TextRenderer::StartOfLine(text::Posn text_offset) const {
+text::Posn TextView::StartOfLine(text::Posn text_offset) const {
   return text_block_->StartOfLine(text_offset);
 }
 

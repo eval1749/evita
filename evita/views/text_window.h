@@ -26,7 +26,7 @@ class ScrollBar;
 
 namespace views {
 class MetricsView;
-class TextRenderer;
+class TextView;
 namespace rendering {
 class TextSelectionModel;
 }
@@ -48,8 +48,10 @@ class TextWindow final : public ContentWindow,
   TextWindow(WindowId window_id, text::Selection* selection);
   ~TextWindow() final;
 
-  text::Posn ComputeMotion(
-      Unit unit, Count count, const gfx::PointF& point, text::Posn position);
+  text::Posn ComputeMotion(Unit unit,
+                           Count count,
+                           const gfx::PointF& point,
+                           text::Posn position);
   text::Posn EndOfLine(text::Posn offset);
   text::Posn GetEnd();
   text::Posn GetStart();
@@ -97,12 +99,10 @@ class TextWindow final : public ContentWindow,
   void DidMoveThumb(int value) final;
 
   // ui::TextInputDelegate
-  void DidCommitComposition(
-      const ui::TextComposition& composition) final;
+  void DidCommitComposition(const ui::TextComposition& composition) final;
   void DidFinishComposition() final;
   void DidStartComposition() final;
-  void DidUpdateComposition(
-      const ui::TextComposition& composition) final;
+  void DidUpdateComposition(const ui::TextComposition& composition) final;
   Widget* GetClientWindow() final;
 
   // ui::Widget
@@ -122,7 +122,7 @@ class TextWindow final : public ContentWindow,
   MetricsView* metrics_view_;
   // TODO(eval1749): Manage life time of selection.
   text::Selection* const selection_;
-  std::unique_ptr<TextRenderer> text_renderer_;
+  std::unique_ptr<TextView> text_view_;
   ui::ScrollBar* const vertical_scroll_bar_;
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);

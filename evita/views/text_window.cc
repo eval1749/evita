@@ -27,7 +27,7 @@
 #include "evita/ui/focus_controller.h"
 #include "evita/views/metrics_view.h"
 #include "evita/views/text/render_selection.h"
-#include "evita/views/text/text_renderer.h"
+#include "evita/views/text/text_view.h"
 
 namespace views {
 
@@ -63,7 +63,7 @@ TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
     : ContentWindow(window_id),
       caret_offset_(-1),
       metrics_view_(new MetricsView()),
-      text_renderer_(new TextRenderer(selection->buffer(), this)),
+      text_view_(new TextView(selection->buffer(), this)),
       selection_(selection),
       vertical_scroll_bar_(
           new ui::ScrollBar(ui::ScrollBar::Type::Vertical, this)) {
@@ -81,7 +81,7 @@ TextWindow::~TextWindow() {
 }
 
 text::Buffer* TextWindow::buffer() const {
-  return text_renderer_->buffer();
+  return text_view_->buffer();
 }
 
 text::Posn TextWindow::ComputeMotion(Unit eUnit,
@@ -101,8 +101,7 @@ text::Posn TextWindow::ComputeMotion(Unit eUnit,
             break;
           ++lGoal;
         }
-        return text_renderer_->MapPointXToOffset(std::min(lGoal, lBufEnd),
-                                                 pt.x);
+        return text_view_->MapPointXToOffset(std::min(lGoal, lBufEnd), pt.x);
       }
       if (n < 0) {
         n = -n;
@@ -116,8 +115,7 @@ text::Posn TextWindow::ComputeMotion(Unit eUnit,
           --lStart;
         }
 
-        return text_renderer_->MapPointXToOffset(std::max(lStart, lBufStart),
-                                                 pt.x);
+        return text_view_->MapPointXToOffset(std::max(lStart, lBufStart), pt.x);
       }
       return lPosn;
 
@@ -147,19 +145,19 @@ text::Posn TextWindow::ComputeMotion(Unit eUnit,
 
 Posn TextWindow::EndOfLine(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
-  return text_renderer_->EndOfLine(text_offset);
+  return text_view_->EndOfLine(text_offset);
 }
 
 // For Selection.MoveDown Screen
 Posn TextWindow::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
-  return text_renderer_->GetVisibleEnd();
+  return text_view_->GetVisibleEnd();
 }
 
 // For Selection.MoveUp Screen
 Posn TextWindow::GetStart() {
   UI_ASSERT_DOM_LOCKED();
-  return text_renderer_->GetStart();
+  return text_view_->GetStart();
 }
 // Maps position specified buffer position and returns height
 // of caret, If specified buffer position isn't in window, this function
@@ -167,7 +165,7 @@ Posn TextWindow::GetStart() {
 gfx::RectF TextWindow::HitTestTextPosition(text::Posn text_offset) {
   DCHECK_GE(text_offset, 0);
   UI_ASSERT_DOM_LOCKED();
-  return text_renderer_->HitTestTextPosition(text_offset);
+  return text_view_->HitTestTextPosition(text_offset);
 }
 
 bool TextWindow::LargeScroll(int, int iDy) {
@@ -180,25 +178,25 @@ bool TextWindow::LargeScroll(int, int iDy) {
 
     auto const lBufStart = buffer()->GetStart();
     for (auto k = 0; k < iDy; ++k) {
-      auto const lStart = text_renderer_->GetStart();
+      auto const lStart = text_view_->GetStart();
       if (lStart == lBufStart)
         break;
 
       // Scroll down until page start goes out to page.
       do {
-        if (!text_renderer_->ScrollDown())
+        if (!text_view_->ScrollDown())
           break;
         scrolled = true;
-      } while (text_renderer_->GetEnd() != lStart);
+      } while (text_view_->GetEnd() != lStart);
     }
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
     auto const lBufEnd = buffer()->GetEnd();
     for (auto k = 0; k < iDy; ++k) {
-      auto const lStart = text_renderer_->GetEnd();
+      auto const lStart = text_view_->GetEnd();
       if (lStart >= lBufEnd)
         break;
-      text_renderer_->Format(lStart);
+      text_view_->Format(lStart);
       scrolled = true;
     }
   }
@@ -208,7 +206,7 @@ bool TextWindow::LargeScroll(int, int iDy) {
 }
 
 Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
-  return std::min(text_renderer_->MapPointToPosition(pt), buffer()->GetEnd());
+  return std::min(text_view_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
 void TextWindow::Paint(const TextSelectionModel& selection, base::Time now) {
@@ -219,14 +217,13 @@ void TextWindow::Paint(const TextSelectionModel& selection, base::Time now) {
   {
     ui::ScrollBar::Data data;
     data.minimum = 0;
-    data.thumb_size =
-        text_renderer_->GetVisibleEnd() - text_renderer_->GetStart();
-    data.thumb_value = text_renderer_->GetStart();
+    data.thumb_size = text_view_->GetVisibleEnd() - text_view_->GetStart();
+    data.thumb_value = text_view_->GetStart();
     data.maximum = buffer()->GetEnd() + 1;
     vertical_scroll_bar_->SetData(data);
   }
   gfx::Canvas::DrawingScope drawing_scope(canvas());
-  text_renderer_->Paint(canvas(), selection, now);
+  text_view_->Paint(canvas(), selection, now);
 }
 
 void TextWindow::Redraw(base::Time now) {
@@ -240,9 +237,9 @@ void TextWindow::Redraw(base::Time now) {
       GetCaretOffset(buffer(), selection, caret_offset_);
   DCHECK_GE(new_caret_offset, 0);
 
-  if (text_renderer_->FormatIfNeeded()) {
+  if (text_view_->FormatIfNeeded()) {
     if (caret_offset_ != new_caret_offset) {
-      text_renderer_->ScrollToPosition(new_caret_offset);
+      text_view_->ScrollToPosition(new_caret_offset);
       caret_offset_ = new_caret_offset;
     }
     Paint(selection, now);
@@ -251,11 +248,11 @@ void TextWindow::Redraw(base::Time now) {
 
   if (caret_offset_ != new_caret_offset) {
     caret_offset_ = new_caret_offset;
-    if (text_renderer_->IsPositionFullyVisible(new_caret_offset)) {
+    if (text_view_->IsPositionFullyVisible(new_caret_offset)) {
       Paint(selection, now);
       return;
     }
-    text_renderer_->ScrollToPosition(new_caret_offset);
+    text_view_->ScrollToPosition(new_caret_offset);
     Paint(selection, now);
     return;
   }
@@ -264,7 +261,7 @@ void TextWindow::Redraw(base::Time now) {
 }
 
 void TextWindow::SetZoom(float new_zoom) {
-  text_renderer_->SetZoom(new_zoom);
+  text_view_->SetZoom(new_zoom);
 }
 
 bool TextWindow::SmallScroll(int, int y_count) {
@@ -273,13 +270,13 @@ bool TextWindow::SmallScroll(int, int y_count) {
   auto scrolled = false;
   if (y_count < 0) {
     for (auto k = y_count; k; ++k) {
-      if (!text_renderer_->ScrollDown())
+      if (!text_view_->ScrollDown())
         break;
       scrolled = true;
     }
   } else if (y_count > 0) {
     for (auto k = 0; k < y_count; ++k) {
-      if (!text_renderer_->ScrollUp())
+      if (!text_view_->ScrollUp())
         break;
       scrolled = true;
     }
@@ -292,7 +289,7 @@ bool TextWindow::SmallScroll(int, int y_count) {
 
 Posn TextWindow::StartOfLine(text::Posn text_offset) {
   UI_ASSERT_DOM_LOCKED();
-  return text_renderer_->StartOfLine(text_offset);
+  return text_view_->StartOfLine(text_offset);
 }
 
 void TextWindow::UpdateLayout() {
@@ -306,7 +303,7 @@ void TextWindow::UpdateLayout() {
 
   auto const text_block_bounds = gfx::RectF(
       canvas_bounds.size() - gfx::SizeF(vertical_scroll_bar_width, 0.0f));
-  text_renderer_->SetBounds(text_block_bounds);
+  text_view_->SetBounds(text_block_bounds);
 
   // Place vertical scroll bar at right edge of text block.
   auto const vertical_scroll_bar_bounds = gfx::RectF(
@@ -326,25 +323,25 @@ void TextWindow::UpdateLayout() {
 
 // gfx::CanvasObserver
 void TextWindow::DidRecreateCanvas() {
-  text_renderer_->DidRecreateCanvas();
+  text_view_->DidRecreateCanvas();
 }
 
 // text::BufferMutationObserver
 void TextWindow::DidChangeStyle(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
-  text_renderer_->DidChangeStyle(offset, length);
+  text_view_->DidChangeStyle(offset, length);
   RequestAnimationFrame();
 }
 
 void TextWindow::DidDeleteAt(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
-  text_renderer_->DidDeleteAt(offset, length);
+  text_view_->DidDeleteAt(offset, length);
   RequestAnimationFrame();
 }
 
 void TextWindow::DidInsertAt(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
-  text_renderer_->DidInsertAt(offset, length);
+  text_view_->DidInsertAt(offset, length);
   RequestAnimationFrame();
 }
 
@@ -390,7 +387,7 @@ void TextWindow::DidRecreateLayer(ui::Layer* old_layer) {
   ContentWindow::DidRecreateLayer(old_layer);
   if (!canvas())
     return;
-  text_renderer_->DidRecreateCanvas();
+  text_view_->DidRecreateCanvas();
   old_layer->AppendLayer(metrics_view_->RecreateLayer().release());
   layer()->AppendLayer(metrics_view_->layer());
 }
@@ -418,7 +415,7 @@ void TextWindow::DidClickPageUp() {
 
 void TextWindow::DidMoveThumb(int value) {
   UI_DOM_AUTO_LOCK_SCOPE();
-  text_renderer_->Format(value);
+  text_view_->Format(value);
   RequestAnimationFrame();
 }
 
@@ -461,7 +458,7 @@ void TextWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
   ContentWindow::DidHide();
   vertical_scroll_bar_->Hide();
-  text_renderer_->DidHide();
+  text_view_->DidHide();
 }
 
 void TextWindow::DidKillFocus(ui::Widget* will_focus_widget) {

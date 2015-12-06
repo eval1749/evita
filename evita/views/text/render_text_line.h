@@ -14,7 +14,7 @@
 
 namespace views {
 
-class TextRenderer;
+class TextView;
 
 namespace rendering {
 

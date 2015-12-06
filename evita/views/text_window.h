@@ -56,8 +56,6 @@ class TextWindow final : public ContentWindow,
                                      text::Posn offset);
   text::Posn ComputeWindowMotion(Count count, text::Posn offset);
   text::Posn EndOfLine(text::Posn offset);
-  text::Posn GetEnd();
-  text::Posn GetStart();
   gfx::RectF HitTestTextPosition(text::Posn offset);
   text::Posn MapPointToPosition(const gfx::PointF point);
   void SetZoom(float new_zoom);

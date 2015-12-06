@@ -80,9 +80,9 @@ text::Posn TextWindow::ComputeScreenMotion(Count n,
   if (LargeScroll(0, n))
     return MapPointToPosition(pt);
   if (n > 0)
-    return std::min(GetEnd(), buffer()->GetEnd());
+    return std::min(text_view_->GetEnd(), buffer()->GetEnd());
   if (n < 0)
-    return GetStart();
+    return text_view_->GetStart();
   return lPosn;
 }
 
@@ -125,9 +125,10 @@ text::Posn TextWindow::ComputeWindowMotion(Count n, text::Posn offset) {
   UI_ASSERT_DOM_LOCKED();
   text_view_->FormatIfNeeded();
   if (n > 0)
-    return std::max(std::min(GetEnd() - 1, buffer()->GetEnd()), GetStart());
+    return std::max(std::min(text_view_->GetEnd() - 1, buffer()->GetEnd()),
+                    text_view_->GetStart());
   if (n < 0)
-    return GetStart();
+    return text_view_->GetStart();
   return offset;
 }
 
@@ -136,17 +137,6 @@ Posn TextWindow::EndOfLine(text::Posn text_offset) {
   return text_view_->EndOfLine(text_offset);
 }
 
-// For Selection.MoveDown Screen
-Posn TextWindow::GetEnd() {
-  UI_ASSERT_DOM_LOCKED();
-  return text_view_->GetVisibleEnd();
-}
-
-// For Selection.MoveUp Screen
-Posn TextWindow::GetStart() {
-  UI_ASSERT_DOM_LOCKED();
-  return text_view_->GetStart();
-}
 // Maps position specified buffer position and returns height
 // of caret, If specified buffer position isn't in window, this function
 // returns 0.

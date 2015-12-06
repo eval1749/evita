@@ -35,9 +35,8 @@ Compositor::~Compositor() {}
 // static
 Compositor* Compositor::instance() {
   static Compositor* static_compositor;
-  if (static_compositor)
-    return static_compositor;
-  static_compositor = new Compositor(gfx::DxDevice::instance());
+  if (!static_compositor)
+    static_compositor = new Compositor(gfx::DxDevice::instance());
   return static_compositor;
 }
 

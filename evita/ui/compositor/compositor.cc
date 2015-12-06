@@ -23,7 +23,6 @@ Compositor::Compositor()
     : device_(gfx::DxDevice::instance()), need_commit_(false) {
   COM_VERIFY(::DCompositionCreateDevice2(device_->d2d_device(),
                                          IID_PPV_ARGS(&desktop_device_)));
-
 #if _DEBUG
   common::ComPtr<IDCompositionDeviceDebug> debug_device;
   COM_VERIFY(debug_device.QueryFrom(desktop_device_));
@@ -32,6 +31,15 @@ Compositor::Compositor()
 }
 
 Compositor::~Compositor() {}
+
+// static
+Compositor* Compositor::instance() {
+  static Compositor* static_compositor;
+  if (static_compositor)
+    return static_compositor;
+  static_compositor = new Compositor();
+  return static_compositor;
+}
 
 void Compositor::CommitIfNeeded() {
   if (!need_commit_)

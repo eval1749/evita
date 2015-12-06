@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "base/basictypes.h"
-#include "common/memory/singleton.h"
 #include "common/win/scoped_comptr.h"
 
 interface IDCompositionDesktopDevice;
@@ -27,23 +26,21 @@ class Layer;
 //
 // Compositor
 //
-class Compositor final : public common::Singleton<Compositor> {
-  DECLARE_SINGLETON_CLASS(Compositor);
-
+class Compositor final {
  public:
-  // TODO(eval1749): We should destruct Compositor by Singleton destructor.
-  virtual ~Compositor();
+  Compositor();
+  ~Compositor();
 
   IDCompositionDesktopDevice* desktop_device() const { return desktop_device_; }
   gfx::DxDevice* device() const { return device_; }
+  static Compositor* instance();
+
   void CommitIfNeeded();
   common::ComPtr<IDCompositionVisual2> CreateVisual();
   void NeedCommit() { need_commit_ = true; }
   void WaitForCommitCompletion();
 
  private:
-  Compositor();
-
   common::ComPtr<IDCompositionDesktopDevice> desktop_device_;
   gfx::DxDevice* const device_;
   bool need_commit_;

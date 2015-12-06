@@ -25,10 +25,4 @@ class Interval;
 
 }  // namespace text
 
-enum {
-  Count_Backward = -1 << 28,
-  Count_Forward = +1 << 28,
-  Count_Max = Count_Forward,
-};
-
 #endif  // EVITA_ED_DEFS_H_

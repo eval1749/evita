@@ -288,7 +288,7 @@ void Arrow::PaintArrow(gfx::Canvas* canvas,
   // TODO(eval1749): We should have only one arrow figure as singleton and
   // paint with rotation for all directions.
   common::ComPtr<ID2D1PathGeometry> geometry;
-  gfx::FactorySet::d2d1().CreatePathGeometry(&geometry);
+  canvas->GetD2D1Factory()->CreatePathGeometry(&geometry);
   {
     common::ComPtr<ID2D1GeometrySink> sink;
     geometry->Open(&sink);

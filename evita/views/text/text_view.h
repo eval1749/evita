@@ -40,12 +40,11 @@ class PaintTextBlock;
 class TextView final {
  public:
   using Cell = rendering::Cell;
-
-  typedef rendering::ScreenTextBlock ScreenTextBlock;
-  typedef rendering::TextSelectionModel TextSelectionModel;
-  typedef rendering::TextBlock TextBlock;
-  typedef rendering::TextLine TextLine;
-  typedef rendering::TextSelection TextSelection;
+  using ScreenTextBlock = rendering::ScreenTextBlock;
+  using TextSelectionModel = rendering::TextSelectionModel;
+  using TextBlock = rendering::TextBlock;
+  using TextLine = rendering::TextLine;
+  using TextSelection = rendering::TextSelection;
 
   TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner);
   ~TextView();

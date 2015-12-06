@@ -73,7 +73,6 @@ class Canvas : public Object, public DpiHandler {
   int bitmap_id() const { return bitmap_id_; }
   // |drawing()| is for debugging.
   bool drawing() const { return batch_nesting_level_ != 0; }
-  const FactorySet& factory_set() const { return *factory_set_; }
   float height() const { return bounds_.height(); }
   Bitmap* screen_bitmap() const { return screen_bitmap_.get(); }
   bool should_clear() const { return should_clear_; }

@@ -76,15 +76,6 @@ class Layer : private ui::AnimationObserver {
   DISALLOW_COPY_AND_ASSIGN(Layer);
 };
 
-class HwndLayer final : public Layer {
- public:
-  explicit HwndLayer(HWND hwnd);
-  ~HwndLayer() final;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(HwndLayer);
-};
-
 }  // namespace ui
 
 #endif  // EVITA_UI_COMPOSITOR_LAYER_H_

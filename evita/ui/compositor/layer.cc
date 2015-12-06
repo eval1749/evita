@@ -199,30 +199,4 @@ void Layer::DidFinishAnimation(Animatable* animatable) {
   animatable_ = nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-// HwndLayer
-//
-HwndLayer::HwndLayer(HWND hwnd) {
-  ::SetLastError(0);
-  ::SetWindowLong(hwnd, GWL_EXSTYLE,
-                  ::GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
-  if (auto const last_error = ::GetLastError()) {
-    DVLOG(ERROR) << "SetWindowLong GWL_EXSTYLE err=" << last_error;
-    NOTREACHED();
-  }
-  DVLOG(0) << "ex_style=0x" << std::hex << ::GetWindowLong(hwnd, GWL_EXSTYLE);
-  // DCHECK(::GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_LAYERED);
-  common::ComPtr<IUnknown> surface;
-  COM_VERIFY(Compositor::instance()->desktop_device()->CreateSurfaceFromHwnd(
-      hwnd, &surface));
-  visual()->SetContent(surface);
-  RECT bounds;
-  ::GetClientRect(hwnd, &bounds);
-  visual()->SetOffsetX(static_cast<float>(bounds.left));
-  visual()->SetOffsetY(static_cast<float>(bounds.top));
-}
-
-HwndLayer::~HwndLayer() {}
-
 }  // namespace ui

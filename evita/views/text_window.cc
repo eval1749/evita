@@ -282,7 +282,7 @@ Posn TextWindow::StartOfLine(text::Posn text_offset) {
   return text_view_->StartOfLine(text_offset);
 }
 
-void TextWindow::UpdateLayout() {
+void TextWindow::UpdateBounds() {
   DCHECK(!bounds().empty());
   auto const canvas_bounds = GetContentsBounds();
   if (canvas())
@@ -451,7 +451,7 @@ void TextWindow::DidActivate() {
 
 void TextWindow::DidChangeBounds() {
   ContentWindow::DidChangeBounds();
-  UpdateLayout();
+  UpdateBounds();
 }
 
 void TextWindow::DidHide() {
@@ -470,7 +470,7 @@ void TextWindow::DidKillFocus(ui::Widget* will_focus_widget) {
 }
 
 void TextWindow::DidRealize() {
-  UpdateLayout();
+  UpdateBounds();
   ContentWindow::DidRealize();
   layer()->AppendLayer(metrics_view_->layer());
 }

@@ -69,7 +69,7 @@ class TextWindow final : public ContentWindow,
   bool LargeScroll(int x_count, int y_count);
   void Paint(const TextSelectionModel& selection, base::Time now);
   void Redraw(base::Time now);
-  void UpdateLayout();
+  void UpdateBounds();
   void UpdateScrollBar();
 
   // gfx::CanvasObserver

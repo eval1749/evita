@@ -70,6 +70,7 @@ class TextWindow final : public ContentWindow,
   void Paint(const TextSelectionModel& selection, base::Time now);
   void Redraw(base::Time now);
   void UpdateLayout();
+  void UpdateScrollBar();
 
   // gfx::CanvasObserver
   void DidRecreateCanvas() final;

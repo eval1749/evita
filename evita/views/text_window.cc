@@ -212,16 +212,6 @@ Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
 void TextWindow::Paint(const TextSelectionModel& selection, base::Time now) {
   DCHECK(visible());
   TRACE_EVENT0("view", "TextWindow::Paint");
-
-  // Update scroll bar
-  {
-    ui::ScrollBar::Data data;
-    data.minimum = 0;
-    data.thumb_size = text_view_->GetVisibleEnd() - text_view_->GetStart();
-    data.thumb_value = text_view_->GetStart();
-    data.maximum = buffer()->GetEnd() + 1;
-    vertical_scroll_bar_->SetData(data);
-  }
   gfx::Canvas::DrawingScope drawing_scope(canvas());
   text_view_->Paint(canvas(), selection, now);
 }
@@ -321,6 +311,15 @@ void TextWindow::UpdateLayout() {
   metrics_view_->SetBounds(gfx::ToEnclosingRect(metrics_view_bounds));
 }
 
+void TextWindow::UpdateScrollBar() {
+  ui::ScrollBar::Data data;
+  data.minimum = 0;
+  data.thumb_size = text_view_->GetVisibleEnd() - text_view_->GetStart();
+  data.thumb_value = text_view_->GetStart();
+  data.maximum = buffer()->GetEnd() + 1;
+  vertical_scroll_bar_->SetData(data);
+}
+
 // gfx::CanvasObserver
 void TextWindow::DidRecreateCanvas() {
   text_view_->DidRecreateCanvas();
@@ -372,6 +371,7 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
     gfx::Canvas::DrawingScope drawing_scope(canvas());
     Redraw(now);
     TRACE_EVENT0("view", "TextWindow::DidBeginAnimationFrame/1");
+    UpdateScrollBar();
     OnDraw(canvas());
   }
   NotifyUpdateContent();

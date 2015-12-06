@@ -90,8 +90,8 @@ text::Posn Cell::Fix(float line_height, float line_descent) {
 }
 
 uint32_t Cell::Hash() const {
-  auto nHash = static_cast<uint>(width_);
-  nHash ^= static_cast<uint>(line_height_);
+  auto nHash = static_cast<uint32_t>(width_);
+  nHash ^= static_cast<uint32_t>(line_height_);
   nHash ^= std::hash<RenderStyle>()(style_);
   return nHash;
 }

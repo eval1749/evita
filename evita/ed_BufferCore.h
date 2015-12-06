@@ -61,7 +61,6 @@ class BufferCore {
   static const Count MIN_GAP_LENGTH = 1024;
   static const Count EXTENSION_LENGTH = 1024;
 
-  bool Match(Posn, const char16*, int, uint) const;
   void moveGap(Posn);
 
   char16* m_pwch;

@@ -52,7 +52,7 @@ class TextLine final {
   float GetHeight() const { return bounds_.height(); }
   text::Posn GetStart() const { return m_lStart; }
   float GetWidth() const { return bounds_.width(); }
-  uint Hash() const;
+  uint32_t Hash() const;
   gfx::RectF HitTestTextPosition(text::Posn lPosn) const;
   bool IsEndOfDocument() const;
   text::Posn MapXToPosn(float x) const;

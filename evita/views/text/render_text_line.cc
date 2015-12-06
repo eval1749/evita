@@ -94,7 +94,7 @@ void TextLine::Fix(float ascent, float descent) {
   DCHECK_EQ(bounds_.bottom, ::floor(bounds_.bottom));
 }
 
-uint TextLine::Hash() const {
+uint32_t TextLine::Hash() const {
   if (m_nHash)
     return m_nHash;
   for (const auto cell : cells_) {

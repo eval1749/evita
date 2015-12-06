@@ -208,8 +208,6 @@ struct RegKey final {
   operator HKEY() const { return h; }
 };
 
-// TODO(yosi): We should not use |uint|.
-typedef uint32 uint;
 #include "evita/ed_defs.h"
 
 #define myCopyMemory(d, s, n) ::CopyMemory(d, s, n)

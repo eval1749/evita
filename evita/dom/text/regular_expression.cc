@@ -30,6 +30,105 @@ struct ErrorInfo final {
   ErrorInfo() : error_code(0), offset(0) {}
 };
 
+class EnumChar final {
+ public:
+  struct Arg final {
+    text::Posn end_;
+    text::Posn offset_;
+    const text::Buffer* buffer_;
+
+    Arg(const text::Buffer* pBuffer, text::Posn lPosn, text::Posn lEnd)
+        : end_(lEnd), offset_(lPosn), buffer_(pBuffer) {}
+
+    Arg(const text::Buffer* pBuffer, text::Posn lPosn)
+        : end_(pBuffer->GetEnd()), offset_(lPosn), buffer_(pBuffer) {}
+  };
+
+  explicit EnumChar(const text::Buffer* pBuffer)
+      : end_(pBuffer->GetEnd()), offset_(0), buffer_(pBuffer) {
+    DCHECK(buffer_->IsValidRange(offset_, end_));
+  }
+
+  explicit EnumChar(Arg oArg)
+      : end_(oArg.end_), offset_(oArg.offset_), buffer_(oArg.buffer_) {
+    DCHECK(buffer_->IsValidRange(offset_, end_));
+  }
+
+  bool AtEnd() const { return offset_ >= end_; }
+
+  base::char16 Get() const {
+    DCHECK(!AtEnd());
+    return buffer_->GetCharAt(offset_);
+  }
+
+  text::Posn GetPosn() const { return offset_; }
+
+  const css::Style& GetStyle() const {
+    DCHECK(!AtEnd());
+    return buffer_->GetStyleAt(offset_);
+  }
+
+  text::Posn GoTo(text::Posn lPosn) { return offset_ = lPosn; }
+  void Next() {
+    DCHECK(!AtEnd());
+    offset_ += 1;
+  }
+  void Prev() { offset_ -= 1; }
+
+  void SyncEnd() { end_ = buffer_->GetEnd(); }
+
+ private:
+  text::Posn end_;
+  text::Posn offset_;
+  const text::Buffer* buffer_;
+
+  DISALLOW_COPY_AND_ASSIGN(EnumChar);
+};
+
+class EnumCharRev final {
+ public:
+  struct Arg {
+    text::Posn offset_;
+    text::Posn start_;
+    const text::Buffer* buffer_;
+    Arg(const text::Buffer* pBuffer, text::Posn lPosn, text::Posn lStart = 0)
+        : offset_(lPosn), start_(lStart), buffer_(pBuffer) {}
+  };
+
+  explicit EnumCharRev(Arg oArg)
+      : offset_(oArg.offset_), start_(oArg.start_), buffer_(oArg.buffer_) {}
+
+  bool AtEnd() const { return offset_ <= start_; }
+
+  base::char16 Get() const {
+    DCHECK(!AtEnd());
+    return buffer_->GetCharAt(offset_ - 1);
+  }
+
+  text::Posn GetPosn() const {
+    DCHECK(!AtEnd());
+    return offset_;
+  }
+
+  const css::Style& GetStyle() const {
+    DCHECK(!AtEnd());
+    return buffer_->GetStyleAt(offset_ - 1);
+  }
+
+  void Next() {
+    DCHECK(!AtEnd());
+    --offset_;
+  }
+  void Prev() { ++offset_; }
+
+ private:
+  text::Posn offset_;
+  text::Posn start_;
+  const text::Buffer* buffer_;
+
+  DISALLOW_COPY_AND_ASSIGN(EnumCharRev);
+};
+
 base::char16 CharUpcase(base::char16 wch) {
   return static_cast<base::char16>(reinterpret_cast<UINT_PTR>(
       ::CharUpper(reinterpret_cast<base::char16*>(wch))));
@@ -228,8 +327,8 @@ bool RegularExpression::BufferMatcher::BackwardFindCharCi(
     base::char16 wchFind,
     text::Posn* inout_lPosn,
     text::Posn lStop) const {
-  text::Buffer::EnumCharRev::Arg oArg(buffer_, *inout_lPosn, lStop);
-  for (text::Buffer::EnumCharRev oEnum(oArg); !oEnum.AtEnd(); oEnum.Next()) {
+  EnumCharRev::Arg oArg(buffer_, *inout_lPosn, lStop);
+  for (EnumCharRev oEnum(oArg); !oEnum.AtEnd(); oEnum.Next()) {
     if (CharEqCi(oEnum.Get(), wchFind)) {
       *inout_lPosn = oEnum.GetPosn();
       return true;
@@ -242,8 +341,8 @@ bool RegularExpression::BufferMatcher::BackwardFindCharCs(
     base::char16 wchFind,
     text::Posn* inout_lPosn,
     text::Posn lStop) const {
-  text::Buffer::EnumCharRev::Arg oArg(buffer_, *inout_lPosn, lStop);
-  for (text::Buffer::EnumCharRev oEnum(oArg); !oEnum.AtEnd(); oEnum.Next()) {
+  EnumCharRev::Arg oArg(buffer_, *inout_lPosn, lStop);
+  for (EnumCharRev oEnum(oArg); !oEnum.AtEnd(); oEnum.Next()) {
     if (CharEqCs(oEnum.Get(), wchFind)) {
       *inout_lPosn = oEnum.GetPosn();
       return true;
@@ -256,8 +355,8 @@ bool RegularExpression::BufferMatcher::ForwardFindCharCi(
     base::char16 wchFind,
     text::Posn* inout_lPosn,
     text::Posn lStop) const {
-  text::Buffer::EnumChar::Arg oArg(buffer_, *inout_lPosn, lStop);
-  for (text::Buffer::EnumChar oEnum(oArg); !oEnum.AtEnd(); oEnum.Next()) {
+  EnumChar::Arg oArg(buffer_, *inout_lPosn, lStop);
+  for (EnumChar oEnum(oArg); !oEnum.AtEnd(); oEnum.Next()) {
     if (CharEqCi(oEnum.Get(), wchFind)) {
       *inout_lPosn = oEnum.GetPosn();
       return true;
@@ -271,8 +370,8 @@ bool RegularExpression::BufferMatcher::ForwardFindCharCs(
     base::char16 wchFind,
     text::Posn* inout_lPosn,
     text::Posn lStop) const {
-  text::Buffer::EnumChar::Arg oArg(buffer_, *inout_lPosn, lStop);
-  for (text::Buffer::EnumChar oEnum(oArg); !oEnum.AtEnd(); oEnum.Next()) {
+  EnumChar::Arg oArg(buffer_, *inout_lPosn, lStop);
+  for (EnumChar oEnum(oArg); !oEnum.AtEnd(); oEnum.Next()) {
     if (CharEqCs(oEnum.Get(), wchFind)) {
       *inout_lPosn = oEnum.GetPosn();
       return true;
@@ -330,8 +429,8 @@ void RegularExpression::BufferMatcher::SetCapture(int nth,
 bool RegularExpression::BufferMatcher::StringEqCi(const base::char16* pwchStart,
                                                   int cwch,
                                                   text::Posn lPosn) const {
-  text::Buffer::EnumChar::Arg oArg(buffer_, lPosn);
-  text::Buffer::EnumChar oEnum(oArg);
+  EnumChar::Arg oArg(buffer_, lPosn);
+  EnumChar oEnum(oArg);
   auto const pwchEnd = pwchStart + cwch;
   for (auto pwch = pwchStart; pwch < pwchEnd; pwch++) {
     if (oEnum.AtEnd())
@@ -346,8 +445,8 @@ bool RegularExpression::BufferMatcher::StringEqCi(const base::char16* pwchStart,
 bool RegularExpression::BufferMatcher::StringEqCs(const base::char16* pwchStart,
                                                   int cwch,
                                                   text::Posn lPosn) const {
-  text::Buffer::EnumChar::Arg oArg(buffer_, lPosn);
-  text::Buffer::EnumChar oEnum(oArg);
+  EnumChar::Arg oArg(buffer_, lPosn);
+  EnumChar oEnum(oArg);
   const base::char16* pwchEnd = pwchStart + cwch;
   for (const base::char16* pwch = pwchStart; pwch < pwchEnd; pwch++) {
     if (oEnum.AtEnd())

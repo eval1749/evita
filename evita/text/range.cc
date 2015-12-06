@@ -77,14 +77,4 @@ void Range::set_text(const base::string16& text) {
   SetRange(start, EnsureOffset(static_cast<Posn>(start + text.length())));
 }
 
-Buffer::EnumChar::EnumChar(const Range* range)
-    : m_lEnd(range->end()),
-      m_lPosn(range->start()),
-      m_pBuffer(range->buffer()) {}
-
-Buffer::EnumCharRev::EnumCharRev(const Range* range)
-    : m_lStart(range->start()),
-      m_lPosn(range->end()),
-      m_pBuffer(range->buffer()) {}
-
 }  // namespace text

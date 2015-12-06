@@ -30,7 +30,7 @@ class Compositor final : public common::Singleton<Compositor> {
   // TODO(eval1749): We should destruct Compositor by Singleton destructor.
   virtual ~Compositor();
 
-  IDCompositionDesktopDevice* device() const { return composition_device_; }
+  IDCompositionDesktopDevice* desktop_device() const { return desktop_device_; }
   void CommitIfNeeded();
   common::ComPtr<IDCompositionVisual2> CreateVisual();
   void NeedCommit() { need_commit_ = true; }
@@ -39,7 +39,7 @@ class Compositor final : public common::Singleton<Compositor> {
  private:
   Compositor();
 
-  common::ComPtr<IDCompositionDesktopDevice> composition_device_;
+  common::ComPtr<IDCompositionDesktopDevice> desktop_device_;
   bool need_commit_;
 
   DISALLOW_COPY_AND_ASSIGN(Compositor);

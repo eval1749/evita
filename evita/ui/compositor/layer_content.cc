@@ -77,7 +77,7 @@ LayerContent::DrawingScope::DrawingScope(LayerContent* content)
 
   if (!content_->surface_) {
     auto const enclosing_bounds = gfx::ToEnclosingRect(layer_bounds);
-    COM_VERIFY(Compositor::instance()->device()->CreateSurface(
+    COM_VERIFY(Compositor::instance()->desktop_device()->CreateSurface(
         static_cast<UINT>(enclosing_bounds.width()),
         static_cast<UINT>(enclosing_bounds.height()),
         DXGI_FORMAT_B8G8R8A8_UNORM, DXGI_ALPHA_MODE_PREMULTIPLIED,

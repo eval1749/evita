@@ -20,13 +20,12 @@
 namespace ui {
 
 Compositor::Compositor() : need_commit_(false) {
-  COM_VERIFY(
-      ::DCompositionCreateDevice2(gfx::DxDevice::instance()->d2d_device(),
-                                  IID_PPV_ARGS(&composition_device_)));
+  COM_VERIFY(::DCompositionCreateDevice2(
+      gfx::DxDevice::instance()->d2d_device(), IID_PPV_ARGS(&desktop_device_)));
 
 #if _DEBUG
   common::ComPtr<IDCompositionDeviceDebug> debug_device;
-  COM_VERIFY(debug_device.QueryFrom(composition_device_));
+  COM_VERIFY(debug_device.QueryFrom(desktop_device_));
   debug_device->EnableDebugCounters();
 #endif
 }
@@ -40,23 +39,23 @@ void Compositor::CommitIfNeeded() {
 #if _DEBUG
   common::ComPtr<IDCompositionDevice> device;
   BOOL is_valid;
-  COM_VERIFY(device.QueryFrom(composition_device_));
+  COM_VERIFY(device.QueryFrom(desktop_device_));
   COM_VERIFY(device->CheckDeviceState(&is_valid));
   DCHECK(is_valid);
 #endif
-  COM_VERIFY(composition_device_->Commit());
+  COM_VERIFY(desktop_device_->Commit());
   need_commit_ = false;
 }
 
 common::ComPtr<IDCompositionVisual2> Compositor::CreateVisual() {
   common::ComPtr<IDCompositionVisual2> visual;
-  COM_VERIFY(composition_device_->CreateVisual(&visual));
+  COM_VERIFY(desktop_device_->CreateVisual(&visual));
   return visual;
 }
 
 void Compositor::WaitForCommitCompletion() {
   TRACE_EVENT0("ui", "ui::Compositor::WaitForCommitCompletion");
-  COM_VERIFY(composition_device_->WaitForCommitCompletion());
+  COM_VERIFY(desktop_device_->WaitForCommitCompletion());
 }
 
 }  // namespace ui

@@ -13,7 +13,7 @@
 namespace ui {
 
 RootLayer::RootLayer(Widget* widget) {
-  COM_VERIFY(Compositor::instance()->desktop_device()->CreateTargetForHwnd(
+  COM_VERIFY(compositor()->desktop_device()->CreateTargetForHwnd(
       widget->AssociatedHwnd(), false, &composition_target_));
   composition_target_->SetRoot(visual());
   SetBounds(widget->bounds());

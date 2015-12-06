@@ -22,6 +22,7 @@ class Canvas;
 namespace ui {
 
 class Animatable;
+class Compositor;
 class LayerOwner;
 
 //////////////////////////////////////////////////////////////////////
@@ -30,12 +31,14 @@ class LayerOwner;
 //
 class Layer : private ui::AnimationObserver {
  public:
+  explicit Layer(Compositor* compositor);
   Layer();
   ~Layer() override;
 
   operator IDCompositionVisual2*() const { return visual_; }
 
   const gfx::RectF& bounds() const { return bounds_; }
+  Compositor* compositor() const { return compositor_; }
   Layer* first_child() const;
   gfx::PointF origin() const { return bounds_.origin(); }
   LayerOwner* owner() { return owner_; }
@@ -69,6 +72,7 @@ class Layer : private ui::AnimationObserver {
   ui::Animatable* animatable_;
   gfx::RectF bounds_;
   std::list<Layer*> child_layers_;
+  ui::Compositor* const compositor_;
   LayerOwner* owner_;
   Layer* parent_layer_;
   common::ComPtr<IDCompositionVisual2> visual_;

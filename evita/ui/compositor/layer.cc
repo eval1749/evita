@@ -22,11 +22,12 @@ namespace ui {
 //
 // Layer
 //
-Layer::Layer()
+Layer::Layer(Compositor* compositor)
     : animatable_(nullptr),
+      compositor_(compositor),
       owner_(nullptr),
       parent_layer_(nullptr),
-      visual_(Compositor::instance()->CreateVisual()) {
+      visual_(compositor_->CreateVisual()) {
   COM_VERIFY(visual_->SetBitmapInterpolationMode(
       DCOMPOSITION_BITMAP_INTERPOLATION_MODE_LINEAR));
   COM_VERIFY(visual_->SetBorderMode(DCOMPOSITION_BORDER_MODE_SOFT));
@@ -37,6 +38,8 @@ Layer::Layer()
   // Node: EnableRedrawRegions() makes too many color changes.
   // COM_VERIFY(debug_visual->EnableRedrawRegions());
 }
+
+Layer::Layer() : Layer(Compositor::instance()) {}
 
 Layer::~Layer() {
   DCHECK(!owner_);
@@ -71,7 +74,7 @@ void Layer::AppendLayer(Layer* new_child) {
   auto const ref_visual = static_cast<IDCompositionVisual*>(nullptr);
   COM_VERIFY(
       visual_->AddVisual(new_child->visual_, is_insert_above, ref_visual));
-  Compositor::instance()->NeedCommit();
+  compositor_->NeedCommit();
 }
 
 gfx::Canvas* Layer::CreateCanvas() {
@@ -83,7 +86,7 @@ gfx::Canvas* Layer::CreateCanvas() {
 }
 
 void Layer::DidChangeBounds() {
-  Compositor::instance()->NeedCommit();
+  compositor_->NeedCommit();
 }
 
 void Layer::DidRegisterAnimation(ui::Animatable* animatable) {
@@ -119,7 +122,7 @@ void Layer::InsertLayer(Layer* new_child, Layer* ref_child) {
   auto const is_insert_above = false;
   COM_VERIFY(visual_->AddVisual(new_child->visual_, is_insert_above,
                                 ref_child->visual_));
-  Compositor::instance()->NeedCommit();
+  compositor_->NeedCommit();
 }
 
 bool Layer::IsDescendantOf(const Layer* other) const {
@@ -132,7 +135,7 @@ bool Layer::IsDescendantOf(const Layer* other) const {
 
 void Layer::RemoveClip() {
   visual_->SetClip(nullptr);
-  Compositor::instance()->NeedCommit();
+  compositor_->NeedCommit();
 }
 
 void Layer::RemoveLayer(Layer* old_layer) {
@@ -143,7 +146,7 @@ void Layer::RemoveLayer(Layer* old_layer) {
   child_layers_.erase(it);
   visual_->RemoveVisual(old_layer->visual_);
   old_layer->parent_layer_ = nullptr;
-  Compositor::instance()->NeedCommit();
+  compositor_->NeedCommit();
 }
 
 void Layer::SetBounds(const gfx::RectF& new_bounds) {
@@ -179,7 +182,7 @@ void Layer::SetBounds(const gfx::Rect& new_bounds) {
 void Layer::SetClip(const gfx::RectF& bounds) {
   DCHECK_EQ(bounds, gfx::RectF(gfx::ToEnclosingRect(bounds)));
   visual_->SetClip(bounds);
-  Compositor::instance()->NeedCommit();
+  compositor_->NeedCommit();
 }
 
 void Layer::SetOrigin(const gfx::PointF& new_origin) {

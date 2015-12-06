@@ -77,12 +77,13 @@ LayerContent::DrawingScope::DrawingScope(LayerContent* content)
 
   if (!content_->surface_) {
     auto const enclosing_bounds = gfx::ToEnclosingRect(layer_bounds);
-    COM_VERIFY(Compositor::instance()->desktop_device()->CreateSurface(
+    auto const layer = content_->layer();
+    COM_VERIFY(layer->compositor()->desktop_device()->CreateSurface(
         static_cast<UINT>(enclosing_bounds.width()),
         static_cast<UINT>(enclosing_bounds.height()),
         DXGI_FORMAT_B8G8R8A8_UNORM, DXGI_ALPHA_MODE_PREMULTIPLIED,
         &content_->surface_));
-    COM_VERIFY(content_->layer()->visual()->SetContent(content_->surface_));
+    COM_VERIFY(layer->visual()->SetContent(content_->surface_));
   }
 
   canvas_.reset(new CanvasForSurface(content_));
@@ -90,7 +91,7 @@ LayerContent::DrawingScope::DrawingScope(LayerContent* content)
 
 LayerContent::DrawingScope::~DrawingScope() {
   COM_VERIFY(content_->surface_->EndDraw());
-  Compositor::instance()->NeedCommit();
+  content_->layer()->compositor()->NeedCommit();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -175,7 +175,6 @@ void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
   pending_handlers_.insert(handler);
   switch (state_) {
     case State::Idle:
-      script_delegate_->DidExitViewIdle();
       ChangeState(State::Sleeping);
       ScheduleNextFrame();
       return;

@@ -225,6 +225,12 @@ void Canvas::Flush() {
   DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
 }
 
+common::ComPtr<ID2D1Factory> Canvas::GetD2D1Factory() const {
+  common::ComPtr<ID2D1Factory> factory;
+  GetRenderTarget()->GetFactory(&factory);
+  return std::move(factory);
+}
+
 gfx::RectF Canvas::GetLocalBounds() const {
   return gfx::RectF(bounds_.size());
 }

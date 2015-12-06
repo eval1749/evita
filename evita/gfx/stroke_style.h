@@ -50,7 +50,7 @@ class StrokeStyle final {
   void set_dash_style(DashStyle dash_style);
   void set_line_join(LineJoin line_join);
 
-  void Realize();
+  void Realize(Canvas* canvas);
 
  private:
   std::vector<float> dashes_;

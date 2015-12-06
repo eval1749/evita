@@ -103,6 +103,7 @@ class Canvas : public Object, public DpiHandler {
   void FillRectangle(const Brush& brush, const RectF& rect);
   void Flush();
   gfx::RectF GetLocalBounds() const;
+  common::ComPtr<ID2D1Factory> GetD2D1Factory() const;
   virtual ID2D1RenderTarget* GetRenderTarget() const = 0;
   virtual bool IsReady() = 0;
   void RemoveObserver(CanvasObserver* observer);

@@ -308,7 +308,7 @@ void Arrow::PaintArrow(gfx::Canvas* canvas,
   gfx::StrokeStyle stroke_style;
   stroke_style.set_cap_style(gfx::CapStyle::Flat);
   stroke_style.set_line_join(gfx::LineJoin::Miter);
-  stroke_style.Realize();
+  stroke_style.Realize(canvas);
 
   gfx::Brush arrow_brush(canvas, color());
   (*canvas)->DrawGeometry(geometry, arrow_brush, pen_width, stroke_style);

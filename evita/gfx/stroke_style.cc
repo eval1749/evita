@@ -54,9 +54,9 @@ void StrokeStyle::set_line_join(LineJoin line_join) {
   properties_.lineJoin = static_cast<D2D1_LINE_JOIN>(line_join);
 }
 
-void StrokeStyle::Realize() {
+void StrokeStyle::Realize(Canvas* canvas) {
   DCHECK(!is_realized());
-  COM_VERIFY(FactorySet::instance()->d2d1().CreateStrokeStyle(
+  COM_VERIFY(canvas->GetD2D1Factory()->CreateStrokeStyle(
       properties_, dashes_.data(), static_cast<UINT>(dashes_.size()),
       &platform_style_));
 }

@@ -7,7 +7,6 @@ import("//testing/test.gni")
 source_set("text") {
   sources = [
     "../ed_BufferCore.cc",
-    "../ed_BufferFind.cc",
     "buffer.cc",
     "buffer.h",
     "buffer_mutation_observer.cc",

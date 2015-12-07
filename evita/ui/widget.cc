@@ -327,10 +327,10 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
   auto const client_point = GetClientPointFromNativeEvent(native_event);
   auto const screen_point = GetScreenPointFromNativeEvent(native_event);
   auto const message = native_event.message;
+  auto const result = HitTestForMouseEventTarget(client_point);
   if (message == WM_MOUSEWHEEL) {
     // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
     // rather than active widget.
-    auto const result = HitTestForMouseEventTarget(client_point);
     if (!result)
       return true;
     MouseWheelEvent event(result.widget(), result.local_point(), screen_point,
@@ -342,60 +342,64 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
     return result.widget()->DispatchEvent(&event);
   }
 
-  auto const result = HitTestForMouseEventTarget(client_point);
   DCHECK(result);
-  if (message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE) {
-    if (!hover_widget) {
-      TRACKMOUSEEVENT track;
-      track.cbSize = sizeof(track);
-      track.dwFlags = static_cast<DWORD>(
-          message == WM_NCMOUSEMOVE ? TME_NONCLIENT | TME_LEAVE : TME_LEAVE);
-      track.hwndTrack = *native_window();
-      WIN32_VERIFY(::TrackMouseEvent(&track));
-      hover_widget = result.widget();
-      MouseEvent event(EventType::MouseEntered, MouseButton::None, 0, 0,
-                       hover_widget, result.local_point(), screen_point);
-      DispatchMouseEvent(hover_widget, &event);
-    } else if (hover_widget != result.widget()) {
-      MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
-                       hover_widget, result.local_point(), screen_point);
-      DispatchMouseEvent(hover_widget, &event);
-      hover_widget = result.widget();
-      if (hover_widget) {
-        MouseEvent entered_event(EventType::MouseEntered, MouseButton::None, 0,
-                                 0, hover_widget, result.local_point(),
-                                 screen_point);
-        DispatchMouseEvent(hover_widget, &entered_event);
-      }
-    }
-  }
-
   MouseEvent event(native_event, result.widget(), result.local_point(),
                    screen_point);
-  if (event.type() == EventType::MouseMoved)
-    return DispatchMouseEvent(result.widget(), &event);
-
-  if (event.type() == EventType::MousePressed) {
-    MouseClickTracker::instance()->OnMousePressed(event);
-    return DispatchMouseEvent(result.widget(), &event);
+  switch (event.type()) {
+    case EventType::MouseMoved: {
+      if (!hover_widget) {
+        TRACKMOUSEEVENT track;
+        track.cbSize = sizeof(track);
+        track.dwFlags = static_cast<DWORD>(
+            message == WM_NCMOUSEMOVE ? TME_NONCLIENT | TME_LEAVE : TME_LEAVE);
+        track.hwndTrack = *native_window();
+        WIN32_VERIFY(::TrackMouseEvent(&track));
+        hover_widget = result.widget();
+        MouseEvent event(EventType::MouseEntered, MouseButton::None, 0, 0,
+                         hover_widget, result.local_point(), screen_point);
+        DispatchMouseEvent(hover_widget, &event);
+      } else if (hover_widget != result.widget()) {
+        MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0,
+                         hover_widget, result.local_point(), screen_point);
+        DispatchMouseEvent(hover_widget, &event);
+        hover_widget = result.widget();
+        if (hover_widget) {
+          MouseEvent entered_event(EventType::MouseEntered, MouseButton::None,
+                                   0, 0, hover_widget, result.local_point(),
+                                   screen_point);
+          DispatchMouseEvent(hover_widget, &entered_event);
+        }
+      }
+      DCHECK_EQ(event.type(), EventType::MouseMoved);
+      return DispatchMouseEvent(result.widget(), &event);
+    }
+    case EventType::MousePressed: {
+      auto const focus_widget = FocusController::instance()->focus_widget();
+      if (result.widget() != focus_widget) {
+        // Move focus to clicked window
+        result.widget()->RequestFocus();
+      }
+      MouseClickTracker::instance()->OnMousePressed(event);
+      return DispatchMouseEvent(result.widget(), &event);
+    }
+    case EventType::MouseReleased: {
+      // TODO(eval1749): Should we dispatch |MouseReleased| event to focus
+      // widget?
+      MouseClickTracker::instance()->OnMouseReleased(event);
+      if (!DispatchMouseEvent(result.widget(), &event))
+        return false;
+      auto const click_count = MouseClickTracker::instance()->click_count();
+      if (!click_count)
+        return !event.default_prevented();
+      if (event.default_prevented())
+        return false;
+      MouseEvent click_event(
+          EventType::MousePressed, MouseEvent::ConvertToButton(native_event),
+          MouseEvent::ConvertToEventFlags(native_event), click_count,
+          result.widget(), result.local_point(), screen_point);
+      return DispatchMouseEvent(result.widget(), &click_event);
+    }
   }
-
-  if (event.type() == EventType::MouseReleased) {
-    MouseClickTracker::instance()->OnMouseReleased(event);
-    if (!DispatchMouseEvent(result.widget(), &event))
-      return false;
-    auto const click_count = MouseClickTracker::instance()->click_count();
-    if (!click_count)
-      return !event.default_prevented();
-    if (event.default_prevented())
-      return false;
-    MouseEvent click_event(
-        EventType::MousePressed, MouseEvent::ConvertToButton(native_event),
-        MouseEvent::ConvertToEventFlags(native_event), click_count,
-        result.widget(), result.local_point(), screen_point);
-    return DispatchMouseEvent(result.widget(), &click_event);
-  }
-
   return true;
 }
 

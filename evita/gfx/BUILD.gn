@@ -9,6 +9,8 @@ source_set("gfx") {
     "canvas.cc",
     "canvas_observer.cc",
     "canvas_observer.h",
+    "canvas_owner.cc",
+    "canvas_owner.h",
     "color_f.cc",
     "dx_device.cc",
     "dx_device.h",

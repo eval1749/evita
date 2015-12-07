@@ -27,8 +27,8 @@ SwapChain::SwapChain(ID2D1Device* d2d_device,
   // Antialias Mode = D2D1_ANTIALIAS_MODE_PER_PRIMITIVE
   // Primitive Blend = D2D1_PRIMITIVE_BLEND_SOURCE_OVER
   // Text Antialias Mode = D2D1_TEXT_ANTIALIAS_MODE_DEFAULT
-  COM_VERIFY(d2d_device->CreateDeviceContext(
-      D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &d2d_device_context_));
+  COM_VERIFY(d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
+                                             &d2d_device_context_));
   UpdateDeviceContext();
 }
 
@@ -58,8 +58,9 @@ void SwapChain::AddDirtyRect(const RectF& new_dirty_rect_f) {
   dirty_rects_ = new_dirty_rects;
 }
 
-SwapChain* SwapChain::CreateForComposition(DxDevice* device,
-                                           const RectF& bounds) {
+std::unique_ptr<SwapChain> SwapChain::CreateForComposition(
+    DxDevice* device,
+    const RectF& bounds) {
   DCHECK(!bounds.empty());
   TRACE_EVENT0("gfx", "SwapChain::CreateForComposition");
   // TODO(eval1749): We should use ToEnclosedRect().
@@ -94,10 +95,11 @@ SwapChain* SwapChain::CreateForComposition(DxDevice* device,
   // and ensures that the application will only render after each VSync,
   // minimizing power consumption.
   COM_VERIFY(swap_chain2->SetMaximumFrameLatency(1));
-  return new SwapChain(device->d2d_device(), swap_chain2);
+  return std::unique_ptr<SwapChain>(
+      new SwapChain(device->d2d_device(), swap_chain2));
 }
 
-SwapChain* SwapChain::CreateForHwnd(HWND hwnd) {
+std::unique_ptr<SwapChain> SwapChain::CreateForHwnd(HWND hwnd) {
   DCHECK(hwnd);
 
   auto const device = DxDevice::instance();
@@ -123,7 +125,8 @@ SwapChain* SwapChain::CreateForHwnd(HWND hwnd) {
 
   common::ComPtr<IDXGISwapChain2> swap_chain2;
   COM_VERIFY(swap_chain2.QueryFrom(swap_chain1));
-  return new SwapChain(device->d2d_device(), swap_chain2);
+  return std::unique_ptr<SwapChain>(
+      new SwapChain(device->d2d_device(), swap_chain2));
 }
 
 void SwapChain::DidChangeBounds(const RectF& new_bounds) {
@@ -138,7 +141,7 @@ void SwapChain::DidChangeBounds(const RectF& new_bounds) {
   UpdateDeviceContext();
 }
 
-bool SwapChain::IsReady() {
+bool SwapChain::IsReady() const {
   if (is_ready_)
     return true;
   auto const wait = ::WaitForSingleObject(swap_chain_waitable_, 0);

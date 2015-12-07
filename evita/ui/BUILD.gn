@@ -39,8 +39,6 @@ source_set("ui") {
     "caret.h",
     "caret_owner.cc",
     "caret_owner.h",
-    "compositor/canvas_for_layer.cc",
-    "compositor/canvas_for_layer.h",
     "compositor/compositor.cc",
     "compositor/compositor.h",
     "compositor/layer.cc",

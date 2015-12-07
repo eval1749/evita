@@ -6,9 +6,11 @@
 #define EVITA_UI_COMPOSITOR_LAYER_H_
 
 #include <list>
+#include <memory>
 
 #include "base/basictypes.h"
 #include "common/win/scoped_comptr.h"
+#include "evita/gfx/canvas_owner.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/ui/animation/animation_observer.h"
@@ -29,7 +31,7 @@ class LayerOwner;
 //
 // Layer
 //
-class Layer : private ui::AnimationObserver {
+class Layer : private gfx::CanvasOwner, private ui::AnimationObserver {
  public:
   explicit Layer(Compositor* compositor);
   Layer();
@@ -64,6 +66,9 @@ class Layer : private ui::AnimationObserver {
   friend class LayerOwner;
 
   bool IsDescendantOf(const Layer* other) const;
+
+  // gfx::CanvasOwner
+  std::unique_ptr<gfx::SwapChain> CreateSwapChain() final;
 
   // AnimationObserver
   void DidCancelAnimation(Animatable* animatable) override;

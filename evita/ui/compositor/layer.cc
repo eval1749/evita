@@ -10,11 +10,11 @@
 #include "base/logging.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
+#include "evita/gfx/dx_device.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/swap_chain.h"
 #include "evita/ui/animation/animatable.h"
 #include "evita/ui/compositor/compositor.h"
-#include "evita/ui/compositor/canvas_for_layer.h"
 
 namespace ui {
 
@@ -74,9 +74,7 @@ void Layer::AppendLayer(Layer* new_child) {
 gfx::Canvas* Layer::CreateCanvas() {
   DCHECK(!bounds_.empty());
   DCHECK_EQ(bounds_, gfx::RectF(gfx::ToEnclosingRect(bounds_)));
-  auto canvas = new gfx::CanvasForLayer(this);
-  COM_VERIFY(visual_->SetContent(canvas->swap_chain()->swap_chain()));
-  return canvas;
+  return new gfx::Canvas(this);
 }
 
 void Layer::DidChangeBounds() {
@@ -194,6 +192,14 @@ void Layer::DidFinishAnimation(Animatable* animatable) {
   DCHECK_EQ(animatable_, animatable);
   animatable_->RemoveObserver(this);
   animatable_ = nullptr;
+}
+
+// gfx::CanvasOwner
+std::unique_ptr<gfx::SwapChain> Layer::CreateSwapChain() {
+  auto const device = compositor_->device();
+  auto swap_chain = gfx::SwapChain::CreateForComposition(device, bounds());
+  COM_VERIFY(visual_->SetContent(swap_chain->swap_chain()));
+  return swap_chain;
 }
 
 }  // namespace ui

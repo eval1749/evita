@@ -14,6 +14,7 @@
 #include "common/win/win32_verify.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
+#include "evita/gfx/swap_chain.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/form_observer.h"
@@ -499,6 +500,11 @@ void FormWindow::UpdateView() {
   focus_control->RequestFocus();
 }
 
+// gfx::CanvasOwner
+std::unique_ptr<gfx::SwapChain> FormWindow::CreateSwapChain() {
+  return gfx::SwapChain::CreateForHwnd(AssociatedHwnd());
+}
+
 // ui::Animatable
 void FormWindow::DidBeginAnimationFrame(base::Time) {
   if (!is_realized()) {
@@ -616,7 +622,7 @@ void FormWindow::DidRealize() {
   // from CSS.
   ::SetLayeredWindowAttributes(*native_window(), RGB(0, 0, 0), 80 * 255 / 100,
                                LWA_ALPHA);
-  canvas_.reset(new gfx::CanvasForHwnd(*native_window()));
+  canvas_.reset(new gfx::Canvas(this));
   ui::SystemMetrics::instance()->AddObserver(this);
   Window::DidRealize();
 }

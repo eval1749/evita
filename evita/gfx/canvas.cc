@@ -12,6 +12,7 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas_observer.h"
+#include "evita/gfx/canvas_owner.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/swap_chain.h"
 #include "evita/gfx/text_format.h"
@@ -91,10 +92,15 @@ Canvas::ScopedState::~ScopedState() {
 //
 // Canvas
 //
-Canvas::Canvas()
+Canvas::Canvas(CanvasOwner* owner)
     : batch_nesting_level_(0),
       bitmap_id_(0),
-      should_clear_(true) {}
+      owner_(owner),
+      should_clear_(true),
+      swap_chain_(owner->CreateSwapChain()) {
+  bounds_ = swap_chain_->bounds();
+  AddDirtyRect(bounds_);
+}
 
 Canvas::~Canvas() {}
 
@@ -104,10 +110,8 @@ void Canvas::AddDirtyRect(const RectF& local_bounds) {
           .Intersect(bounds_);
   if (bounds.empty())
     return;
-  AddDirtyRectImpl(bounds);
+  swap_chain_->AddDirtyRect(bounds);
 }
-
-void Canvas::AddDirtyRectImpl(const RectF&) {}
 
 void Canvas::AddObserver(CanvasObserver* observer) {
   observers_.AddObserver(observer);
@@ -134,7 +138,7 @@ void Canvas::CommitDraw() {
   TRACE_EVENT0("gfx", "Canvas::CommitDraw");
   auto const hr = GetRenderTarget()->EndDraw();
   if (SUCCEEDED(hr)) {
-    DidCallEndDraw();
+    swap_chain_->Present();
     should_clear_ = false;
     return;
   }
@@ -148,9 +152,8 @@ void Canvas::CommitDraw() {
   DVLOG(0) << "ID2D1RenderTarget::Flush: hr=" << std::hex << hr;
 }
 
-void Canvas::DidCallEndDraw() {}
-
-void Canvas::DidCreateRenderTarget() {
+void Canvas::DidLostRenderTarget() {
+  swap_chain_ = owner_->CreateSwapChain();
   bitmap_id_ = ++global_bitmap_id;
   should_clear_ = true;
   SizeF dpi;
@@ -234,6 +237,14 @@ gfx::RectF Canvas::GetLocalBounds() const {
   return gfx::RectF(bounds_.size());
 }
 
+ID2D1RenderTarget* Canvas::GetRenderTarget() const {
+  return swap_chain_->d2d_device_context();
+}
+
+bool Canvas::IsReady() const {
+  return swap_chain_->IsReady();
+}
+
 void Canvas::RemoveObserver(CanvasObserver* observer) {
   observers_.RemoveObserver(observer);
 }
@@ -277,15 +288,7 @@ void Canvas::SetBounds(const RectF& new_bounds) {
   screen_bitmap_.reset();
   bitmap_id_ = ++global_bitmap_id;
   should_clear_ = true;
-  DidChangeBounds(new_bounds);
-}
-
-void Canvas::SetInitialBounds(const RectF& bounds) {
-  DCHECK(!bitmap_id_);
-  DCHECK(bounds_.empty());
-  bitmap_id_ = ++global_bitmap_id;
-  bounds_ = bounds;
-  AddDirtyRect(bounds_);
+  swap_chain_->DidChangeBounds(new_bounds);
 }
 
 void Canvas::SetOffsetBounds(const gfx::RectF& bounds) {
@@ -302,43 +305,6 @@ bool Canvas::TryAddDirtyRect(const gfx::RectF& bounds) {
     return false;
   AddDirtyRect(dirty_bounds);
   return true;
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// CanvasForHwnd
-//
-CanvasForHwnd::CanvasForHwnd(HWND hwnd)
-    : hwnd_(hwnd), swap_chain_(SwapChain::CreateForHwnd(hwnd)) {
-  SetInitialBounds(swap_chain_->bounds());
-}
-
-CanvasForHwnd::~CanvasForHwnd() {}
-
-// Canvas
-void CanvasForHwnd::AddDirtyRectImpl(const RectF& new_dirty_rect) {
-  swap_chain_->AddDirtyRect(new_dirty_rect);
-}
-
-void CanvasForHwnd::DidCallEndDraw() {
-  swap_chain_->Present();
-}
-
-void CanvasForHwnd::DidChangeBounds(const RectF& new_bounds) {
-  swap_chain_->DidChangeBounds(new_bounds);
-}
-
-void CanvasForHwnd::DidLostRenderTarget() {
-  swap_chain_.reset(SwapChain::CreateForHwnd(hwnd_));
-  DidCreateRenderTarget();
-}
-
-ID2D1RenderTarget* CanvasForHwnd::GetRenderTarget() const {
-  return swap_chain_->d2d_device_context();
-}
-
-bool CanvasForHwnd::IsReady() {
-  return swap_chain_->IsReady();
 }
 
 }  // namespace gfx

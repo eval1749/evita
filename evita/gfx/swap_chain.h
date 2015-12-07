@@ -5,6 +5,7 @@
 #ifndef EVITA_GFX_SWAP_CHAIN_H_
 #define EVITA_GFX_SWAP_CHAIN_H_
 
+#include <memory>
 #include <vector>
 
 #include "evita/gfx_base.h"
@@ -28,10 +29,11 @@ class SwapChain final {
   IDXGISwapChain2* swap_chain() const { return swap_chain_; }
 
   void AddDirtyRect(const RectF& dirty_rects);
-  static SwapChain* CreateForComposition(DxDevice* device, const RectF& bounds);
-  static SwapChain* CreateForHwnd(HWND hwnd);
+  static std::unique_ptr<SwapChain> CreateForComposition(DxDevice* device,
+                                                         const RectF& bounds);
+  static std::unique_ptr<SwapChain> CreateForHwnd(HWND hwnd);
   void DidChangeBounds(const RectF& new_bounds);
-  bool IsReady();
+  bool IsReady() const;
   void Present();
 
  private:
@@ -44,7 +46,9 @@ class SwapChain final {
   common::ComPtr<ID2D1DeviceContext> d2d_device_context_;
   std::vector<Rect> dirty_rects_;
   bool is_first_present_;
-  bool is_ready_;
+  // To avoid calling |WaitForSingleObject()|, |is_ready_| holds last checked
+  // result.
+  mutable bool is_ready_;
   const common::ComPtr<IDXGISwapChain2> swap_chain_;
   HANDLE const swap_chain_waitable_;
 

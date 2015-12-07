@@ -15,13 +15,14 @@ namespace gfx {
 
 class Bitmap;
 class CanvasObserver;
+class CanvasOwner;
 class SwapChain;
 
 //////////////////////////////////////////////////////////////////////
 //
 // Canvas
 //
-class Canvas : public Object, public DpiHandler {
+class Canvas final : public Object, public DpiHandler {
  public:
   class AxisAlignedClipScope final {
    public:
@@ -60,6 +61,7 @@ class Canvas : public Object, public DpiHandler {
     DISALLOW_COPY_AND_ASSIGN(ScopedState);
   };
 
+  explicit Canvas(CanvasOwner* owner);
   virtual ~Canvas();
 
   explicit operator bool() const { return GetRenderTarget() != nullptr; }
@@ -101,8 +103,8 @@ class Canvas : public Object, public DpiHandler {
   void Flush();
   gfx::RectF GetLocalBounds() const;
   common::ComPtr<ID2D1Factory> GetD2D1Factory() const;
-  virtual ID2D1RenderTarget* GetRenderTarget() const = 0;
-  virtual bool IsReady() = 0;
+  ID2D1RenderTarget* GetRenderTarget() const;
+  bool IsReady() const;
   void RemoveObserver(CanvasObserver* observer);
   void RestoreScreenImage(const RectF& bounds);
   bool Canvas::SaveScreenImage(const RectF& bounds);
@@ -112,22 +114,13 @@ class Canvas : public Object, public DpiHandler {
   // [T]
   bool TryAddDirtyRect(const gfx::RectF& bounds);
 
- protected:
-  Canvas();
-
-  virtual void AddDirtyRectImpl(const RectF& new_dirty_rect);
-  virtual void DidCallEndDraw();
-  void DidCreateRenderTarget();
-  virtual void DidChangeBounds(const RectF& new_bounds) = 0;
-  virtual void DidLostRenderTarget() = 0;
-  void SetInitialBounds(const RectF& bounds);
-
  private:
   friend class DrawingScope;
   friend class ScopedState;
 
   void BeginDraw();
   void CommitDraw();
+  void DidLostRenderTarget();
   void EndDraw();
 
   int batch_nesting_level_;
@@ -135,34 +128,12 @@ class Canvas : public Object, public DpiHandler {
   gfx::RectF bounds_;
   base::ObserverList<CanvasObserver> observers_;
   gfx::PointF offset_;
+  CanvasOwner* const owner_;
   std::unique_ptr<Bitmap> screen_bitmap_;
   bool should_clear_;
-
-  DISALLOW_COPY_AND_ASSIGN(Canvas);
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// CanvasForHwnd
-//
-class CanvasForHwnd final : public Canvas {
- public:
-  explicit CanvasForHwnd(HWND hwnd);
-  ~CanvasForHwnd() final;
-
- private:
-  // Implements |Canvas| member functions.
-  void AddDirtyRectImpl(const RectF& new_dirty_rect) final;
-  void DidCallEndDraw() final;
-  void DidChangeBounds(const RectF& new_bounds) final;
-  void DidLostRenderTarget() final;
-  ID2D1RenderTarget* GetRenderTarget() const final;
-  bool IsReady() final;
-
-  HWND hwnd_;
   std::unique_ptr<SwapChain> swap_chain_;
 
-  DISALLOW_COPY_AND_ASSIGN(CanvasForHwnd);
+  DISALLOW_COPY_AND_ASSIGN(Canvas);
 };
 
 }  // namespace gfx

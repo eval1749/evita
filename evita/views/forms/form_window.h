@@ -10,6 +10,7 @@
 #include "evita/views/window.h"
 
 #include "evita/gc/member.h"
+#include "evita/gfx/canvas_owner.h"
 #include "evita/ui/animation/animatable.h"
 #include "evita/ui/system_metrics_observer.h"
 
@@ -35,6 +36,7 @@ namespace views {
 // FormWindow
 //
 class FormWindow final : public views::Window,
+                         private gfx::CanvasOwner,
                          private ui::SystemMetricsObserver {
   DECLARE_CASTABLE_CLASS(FormWindow, views::Window);
 
@@ -53,6 +55,9 @@ class FormWindow final : public views::Window,
   // Returns true if model is updated.
   bool UpdateModel();
   void UpdateView();
+
+  // gfx::CanvasOwner
+  std::unique_ptr<gfx::SwapChain> CreateSwapChain() final;
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

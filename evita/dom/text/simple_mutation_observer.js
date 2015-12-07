@@ -18,15 +18,12 @@ $define(global, 'text', function($export) {
       /** @const @type {!Document} */
       this.document_ = document;
 
-      /** @type {boolean} */
-      this.isLoading_ = false;
-
       /** @type {!Set.<!text.SimpleMutationObserver>} */
       this.observers_ = new Set();
 
-      const newObserver = new MutationObserver(
+      this.observer_ = new MutationObserver(
           this.mutationCallback_.bind(this));
-      newObserver.observe(document, {summary: true});
+      this.startObserving_();
       document.addEventListener(Event.Names.BEFORELOAD,
                                 this.willLoadDocument_.bind(this));
       document.addEventListener(Event.Names.LOAD,
@@ -41,7 +38,7 @@ $define(global, 'text', function($export) {
     }
 
     didLoadDocument_() {
-      this.isLoading_ = false;
+      this.startObserving_();
       for (let observer of this.observers_.values())
         observer.didLoadDocument();
     }
@@ -66,8 +63,6 @@ $define(global, 'text', function($export) {
      * Resets hot offset to minimal changed offset and kicks word scanner.
      */
     mutationCallback_(mutations, observer) {
-      if (this.isLoading_)
-        return;
       /** @type {number} */
       const offset = mutations.reduce((previousValue, mutation) => {
         return Math.min(previousValue, mutation.offset);
@@ -83,11 +78,16 @@ $define(global, 'text', function($export) {
       this.observers_.delete(observer);
     }
 
+    /** @private */
+    startObserving_() {
+      this.observer_.observe(this.document_, {summary: true});
+    }
+
     /**
      * @private
      */
     willLoadDocument_() {
-      this.isLoading_ = true;
+      this.observer_.disconnect();
     }
   }
 

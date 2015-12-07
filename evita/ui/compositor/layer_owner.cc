@@ -52,7 +52,7 @@ std::unique_ptr<Layer> LayerOwner::RecreateLayer() {
 
   // Since, |new_layer| doesn't have content yet. We don't insert |new_layer|
   // into layer tree for not displaying it. We also don't move child layers.
-  auto const new_layer = new Layer();
+  auto const new_layer = new Layer(old_layer->compositor());
   new_layer->SetBounds(old_layer->bounds());
   SetLayer(new_layer);
 

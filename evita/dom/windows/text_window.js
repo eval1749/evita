@@ -227,28 +227,19 @@ global.TextWindow.prototype.clone = function() {
     window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
       if (offset < 0)
         return;
-      if (Window.focus !== window) {
-        window.focus();
-        if (offset >= window.selection.range.start &&
-            offset < window.selection.range.end) {
-          return
-        }
-      }
-
       if (event.shiftKey) {
         if (window.selection.startIsActive)
           window.selection.range.start = offset;
         else
           window.selection.range.end = offset;
-      } else {
-        window.selection.range.collapseTo(offset);
+        return;
       }
-
       if (event.ctrlKey) {
+        window.selection.range.collapseTo(offset);
         selectWord(window);
         return;
       }
-
+      window.selection.range.collapseTo(offset);
       ensureDragController(window).start();
     });
   }
@@ -258,12 +249,10 @@ global.TextWindow.prototype.clone = function() {
    * @param {!MouseEvent} event
    */
   function handleMouseMove(window, event) {
-    const dragController = window.dragController_;
-    if (!dragController || !dragController.dragging)
-      return;
     window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
-      if (offset < 0)
-        return;
+       const dragController = window.dragController_;
+       if (offset < 0 || !dragController || !dragController.dragging)
+         return;
 
       const selection = window.selection;
       if (offset <= selection.range.start) {
@@ -295,7 +284,11 @@ global.TextWindow.prototype.clone = function() {
   function handleMouseUp(window, event) {
     if (event.button)
      return;
-    stopControllers(window);
+    // To make sure, handling "mouseup" event after "mousedown" and
+    // "movemouse", we handle "mouseup" with |mapPointToPosition()|.
+    window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
+      stopControllers(window);
+    });
   }
 
   /**

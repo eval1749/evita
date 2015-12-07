@@ -24,7 +24,7 @@ class LayerOwner {
 
   Layer* layer() { return layer_; }
   const Layer* layer() const { return layer_; }
-  void set_layer_owner_delegate(LayerOwnerDelegate* delgate);
+  void set_layer_owner_delegate(LayerOwnerDelegate* delegate);
 
   std::unique_ptr<Layer> AcquireLayerTree();
   std::unique_ptr<Layer> RecreateLayer();

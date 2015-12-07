@@ -36,6 +36,10 @@ namespace metrics {
 class TimeScope;
 }
 
+namespace paint {
+class PaintThread;
+}
+
 namespace views {
 class ViewThreadProxy;
 }
@@ -51,6 +55,7 @@ class Application final : public common::Singleton<Application> {
  public:
   editor::DomLock* dom_lock() const { return dom_lock_.get(); }
   io::IoManager* io_manager() const { return io_manager_.get(); }
+  paint::PaintThread* paint_thread() const { return paint_thread_.get(); }
   Scheduler* scheduler() const { return scheduler_.get(); }
   const base::string16& title() const;
   TraceLogController* trace_log_controller() const {
@@ -71,18 +76,19 @@ class Application final : public common::Singleton<Application> {
   ~Application() final;
 
   std::unique_ptr<editor::DomLock> dom_lock_;
-  std::unique_ptr<io::IoManager> io_manager_;
+  const std::unique_ptr<io::IoManager> io_manager_;
   bool is_quit_;
-  std::unique_ptr<base::MessageLoop> message_loop_;
-  std::unique_ptr<TraceLogController> trace_log_controller_;
-  std::unique_ptr<views::ViewThreadProxy> view_delegate_;
+  const std::unique_ptr<base::MessageLoop> message_loop_;
+  const std::unique_ptr<paint::PaintThread> paint_thread_;
+  const std::unique_ptr<TraceLogController> trace_log_controller_;
+  const std::unique_ptr<views::ViewThreadProxy> view_delegate_;
 
   // |dom::ScriptThread| uses |IoDelegate| and |ViewDelegate|.
-  std::unique_ptr<dom::ScriptThread> script_thread_;
+  const std::unique_ptr<dom::ScriptThread> script_thread_;
   base::Time busy_start_time_;
 
   // |Scheduler| uses |domapi::ViewEventHandler|.
-  std::unique_ptr<Scheduler> scheduler_;
+  const std::unique_ptr<Scheduler> scheduler_;
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

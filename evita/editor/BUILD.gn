@@ -21,6 +21,7 @@ source_set("editor") {
     "//base",
     "//evita/dom",
     "//evita/io",
+    "//evita/paint",
     "//evita/views",
   ]
 }

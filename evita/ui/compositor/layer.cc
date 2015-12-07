@@ -31,12 +31,6 @@ Layer::Layer(Compositor* compositor)
   COM_VERIFY(visual_->SetBitmapInterpolationMode(
       DCOMPOSITION_BITMAP_INTERPOLATION_MODE_LINEAR));
   COM_VERIFY(visual_->SetBorderMode(DCOMPOSITION_BORDER_MODE_SOFT));
-
-  common::ComPtr<IDCompositionVisualDebug> debug_visual;
-  COM_VERIFY(debug_visual.QueryFrom(visual_));
-  // COM_VERIFY(debug_visual->EnableHeatMap(gfx::ColorF(255, 255, 0, 0.1)));
-  // Node: EnableRedrawRegions() makes too many color changes.
-  // COM_VERIFY(debug_visual->EnableRedrawRegions());
 }
 
 Layer::Layer() : Layer(Compositor::instance()) {}

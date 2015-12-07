@@ -374,10 +374,11 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       return DispatchMouseEvent(result.widget(), &event);
     }
     case EventType::MousePressed: {
-      auto const focus_widget = FocusController::instance()->focus_widget();
-      if (result.widget() != focus_widget) {
+      if (!event.is_non_client()) {
         // Move focus to clicked window
-        result.widget()->RequestFocus();
+        auto const focus_widget = FocusController::instance()->focus_widget();
+        if (result.widget() != focus_widget)
+          result.widget()->RequestFocus();
       }
       MouseClickTracker::instance()->OnMousePressed(event);
       return DispatchMouseEvent(result.widget(), &event);

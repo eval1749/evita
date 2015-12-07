@@ -6,12 +6,14 @@
 
 #include "evita/views/message_view.h"
 
+#include "base/bind.h"
+#include "base/location.h"
 #include "base/logging.h"
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
-
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
+#include "evita/paint/paint_thread.h"
 #include "evita/ui/animation/animation_value.h"
 #include "evita/ui/controls/status_bar.h"
 #include "evita/ui/compositor/layer.h"
@@ -234,13 +236,15 @@ class MessageView::View final {
   explicit View(ui::AnimatableWindow* animator);
   ~View() = default;
 
-  void Animate(base::Time time);
+  void DidBeginAnimationFrame(base::Time time);
+  void InitLayer(ui::Layer* parent_layer);
   void SetMessage(const base::string16& text);
   void SetStatus(const std::vector<base::string16>& texts);
 
  private:
   ui::AnimatableWindow* const animator_;
   std::unique_ptr<gfx::Canvas> canvas_;
+  ui::Layer* layer_;
   std::unique_ptr<Painter> painter_;
   std::vector<PartView> parts_;
   std::unique_ptr<ui::AnimationFloat> main_text_alpha_;
@@ -251,14 +255,19 @@ class MessageView::View final {
 };
 
 MessageView::View::View(ui::AnimatableWindow* animator)
-    : animator_(animator), painter_(new Painter()), parts_(1) {}
+    : animator_(animator),
+      layer_(nullptr),
+      painter_(new Painter()),
+      parts_(1) {}
 
-void MessageView::View::Animate(base::Time now) {
+void MessageView::View::DidBeginAnimationFrame(base::Time now) {
   if (!animator_->visible())
     return;
 
+  TRACE_EVENT_WITH_FLOW0("paint", "MessageView::DidBeginAnimationFrame", this,
+                         TRACE_EVENT_FLAG_FLOW_IN);
   if (!canvas_)
-    canvas_.reset(animator_->layer()->CreateCanvas());
+    canvas_.reset(layer_->CreateCanvas());
   else if (canvas_->GetLocalBounds() != animator_->GetContentsBounds())
     canvas_->SetBounds(animator_->GetContentsBounds());
 
@@ -293,6 +302,16 @@ void MessageView::View::Animate(base::Time now) {
   animator_->RequestAnimationFrame();
 }
 
+void MessageView::View::InitLayer(ui::Layer* parent_layer) {
+  DCHECK(!layer_);
+  auto const compositor = paint::PaintThread::instance()->compositor();
+  layer_ = new ui::Layer(compositor);
+  parent_layer->AppendLayer(layer_);
+  layer_->SetBounds(animator_->GetContentsBounds());
+  // Note: It is too early to call Compositor::CommitIfNeeded(), since
+  // main visual tree isn't committed yet.
+}
+
 void MessageView::View::SetMessage(const base::string16& text) {
   if (message_text_ == text)
     return;
@@ -325,24 +344,34 @@ MessageView::~MessageView() {}
 
 void MessageView::SetMessage(const base::string16& text) {
   TRACE_EVENT0("view", "MessageView::SetMessage");
-  view_->SetMessage(text);
+  paint::PaintThread::instance()->PostTask(
+      FROM_HERE, base::Bind(&MessageView::View::SetMessage,
+                            base::Unretained(view_.get()), text));
 }
 
 void MessageView::SetStatus(const std::vector<base::string16>& texts) {
   TRACE_EVENT1("view", "MessageView::SetStatusText", "texts", texts.size());
-  view_->SetStatus(texts);
+  paint::PaintThread::instance()->PostTask(
+      FROM_HERE, base::Bind(&MessageView::View::SetStatus,
+                            base::Unretained(view_.get()), texts));
 }
 
 // ui::AnimationFrameHandler
 void MessageView::DidBeginAnimationFrame(base::Time time) {
-  TRACE_EVENT0("view", "MessageView::DidBeginAnimationFrame");
-  view_->Animate(time);
+  TRACE_EVENT_WITH_FLOW0("paint", "MessageView::DidBeginAnimationFrame",
+                         view_.get(), TRACE_EVENT_FLAG_FLOW_OUT);
+  paint::PaintThread::instance()->SchedulePaintTask(
+      base::Bind(&MessageView::View::DidBeginAnimationFrame,
+                 base::Unretained(view_.get()), time));
 }
 
 // ui::Widget
 void MessageView::DidRealize() {
   ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
+  paint::PaintThread::instance()->PostTask(
+      FROM_HERE, base::Bind(&MessageView::View::InitLayer,
+                            base::Unretained(view_.get()), layer()));
 }
 
 gfx::Size MessageView::GetPreferredSize() const {

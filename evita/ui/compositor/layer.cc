@@ -199,6 +199,7 @@ std::unique_ptr<gfx::SwapChain> Layer::CreateSwapChain() {
   auto const device = compositor_->device();
   auto swap_chain = gfx::SwapChain::CreateForComposition(device, bounds());
   COM_VERIFY(visual_->SetContent(swap_chain->swap_chain()));
+  compositor_->NeedCommit();
   return swap_chain;
 }
 

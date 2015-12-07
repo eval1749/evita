@@ -47,8 +47,6 @@ source_set("ui") {
     "compositor/layer.h",
     "compositor/layer_animation.cc",
     "compositor/layer_animation.h",
-    "compositor/layer_content.cc",
-    "compositor/layer_content.h",
     "compositor/layer_owner.cc",
     "compositor/layer_owner.h",
     "compositor/layer_owner_delegate.cc",

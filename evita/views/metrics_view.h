@@ -9,6 +9,7 @@
 
 #include "base/time/time.h"
 #include "evita/ui/animation/animatable_window.h"
+#include "evita/ui/compositor/layer_owner_delegate.h"
 
 namespace views {
 
@@ -16,7 +17,8 @@ namespace views {
 //
 // MetricsView
 //
-class MetricsView final : public ui::AnimatableWindow {
+class MetricsView final : public ui::AnimatableWindow,
+                          public ui::LayerOwnerDelegate {
   DECLARE_CASTABLE_CLASS(MetricsView, ui::AnimatableWindow);
 
  public:
@@ -43,8 +45,12 @@ class MetricsView final : public ui::AnimatableWindow {
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;
 
+  // ui::LayerOwnerDelegate
+  void DidRecreateLayer(ui::Layer* old_layer) final;
+
   // ui::Widget
   void DidRealize() final;
+  void WillDestroyWidget() final;
 
   std::unique_ptr<View> view_;
 

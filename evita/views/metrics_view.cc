@@ -16,7 +16,7 @@
 #include "evita/metrics/sampling.h"
 #include "evita/paint/paint_thread.h"
 #include "evita/ui/compositor/layer.h"
-#include "evita/ui/compositor/layer_owner_delegate.h"
+#include "evita/ui/compositor/layer_owner.h"
 
 namespace views {
 
@@ -59,17 +59,20 @@ void PaintSamples(gfx::Canvas* canvas,
 //
 // MetricsView::View
 //
-class MetricsView::View final : public ui::LayerOwnerDelegate {
+class MetricsView::View final : public ui::LayerOwner,
+                                public ui::LayerOwnerDelegate {
  public:
   explicit View(ui::AnimatableWindow* widget);
   ~View() final = default;
 
   void DidBeginAnimationFrame(base::Time now);
-  void InitLayer(ui::Layer* parent_layer);
+  void DidCreateParentLayer(ui::Layer* parent_layer);
+  void DidRecreateParentLayer(ui::Layer* parent_layer);
 
   // Returns true if painting is completed, otherwise returns false.
   bool Paint();
   void RecordTime(const base::TimeTicks& now);
+  void WillDestroyWidget();
 
  private:
   friend class TimingScope;
@@ -80,7 +83,6 @@ class MetricsView::View final : public ui::LayerOwnerDelegate {
   std::unique_ptr<gfx::Canvas> canvas_;
   metrics::Sampling frame_duration_data_;
   metrics::Sampling frame_latency_data_;
-  ui::Layer* layer_;
   base::TimeTicks last_record_time_;
   std::unique_ptr<gfx::TextFormat> text_format_;
   ui::AnimatableWindow* const widget_;
@@ -92,9 +94,10 @@ MetricsView::View::View(ui::AnimatableWindow* widget)
     : frame_duration_data_(kNumberOfSamples),
       frame_latency_data_(kNumberOfSamples),
       last_record_time_(metrics::Sampling::NowTimeTicks()),
-      layer_(nullptr),
       text_format_(new gfx::TextFormat(L"Consolas", 11.5)),
-      widget_(widget) {}
+      widget_(widget) {
+  set_layer_owner_delegate(this);
+}
 
 void MetricsView::View::DidBeginAnimationFrame(base::Time now) {
   TRACE_EVENT_WITH_FLOW0("paint", "MetricsView::DidBeginAnimationFrame", this,
@@ -104,19 +107,23 @@ void MetricsView::View::DidBeginAnimationFrame(base::Time now) {
   widget_->RequestAnimationFrame();
 }
 
-void MetricsView::View::InitLayer(ui::Layer* parent_layer) {
-  DCHECK(!layer_);
+void MetricsView::View::DidCreateParentLayer(ui::Layer* parent_layer) {
   auto const compositor = paint::PaintThread::instance()->compositor();
-  layer_ = new ui::Layer(compositor);
-  parent_layer->AppendLayer(layer_);
-  layer_->SetBounds(widget_->GetContentsBounds());
+  SetLayer(new ui::Layer(compositor));
+  parent_layer->AppendLayer(layer());
+  layer()->SetBounds(widget_->GetContentsBounds());
   // Note: It is too early to call Compositor::CommitIfNeeded(), since
   // main visual tree isn't committed yet.
 }
 
+void MetricsView::View::DidRecreateParentLayer(ui::Layer* parent_layer) {
+  RecreateLayer();
+  parent_layer->AppendLayer(layer());
+}
+
 bool MetricsView::View::Paint() {
   if (!canvas_)
-    canvas_.reset(layer_->CreateCanvas());
+    canvas_.reset(layer()->CreateCanvas());
   else if (canvas_->GetLocalBounds() != widget_->GetContentsBounds())
     canvas_->SetBounds(widget_->GetContentsBounds());
 
@@ -164,8 +171,12 @@ void MetricsView::View::RecordTime(const base::TimeTicks& now) {
   last_record_time_ = now;
 }
 
+void MetricsView::View::WillDestroyWidget() {
+  DestroyLayer();
+}
+
 // ui::LayerOwnerDelegate
-void MetricsView::View::DidRecreateLayer(ui::Layer*) {
+void MetricsView::View::DidRecreateLayer(ui::Layer* old_layer) {
   canvas_.reset();
 }
 
@@ -200,22 +211,36 @@ void MetricsView::RecordTime() {
   RequestAnimationFrame();
 }
 
-// ui::Widget
-void MetricsView::DidRealize() {
-  ui::Widget::DidRealize();
-  SetLayer(new ui::Layer());
-  set_layer_owner_delegate(view_.get());
-  paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&MetricsView::View::InitLayer,
-                            base::Unretained(view_.get()), layer()));
-}
-
+// ui::AnimationFrameHandler
 void MetricsView::DidBeginAnimationFrame(base::Time now) {
   TRACE_EVENT_WITH_FLOW0("paint", "MetricsView::DidBeginAnimationFrame",
                          view_.get(), TRACE_EVENT_FLAG_FLOW_OUT);
   paint::PaintThread::instance()->SchedulePaintTask(
       base::Bind(&MetricsView::View::DidBeginAnimationFrame,
                  base::Unretained(view_.get()), now));
+}
+
+// ui::LayerOwnerDelegate
+void MetricsView::DidRecreateLayer(ui::Layer* old_layer) {
+  layer()->RemoveLayer(view_->layer());
+  paint::PaintThread::instance()->PostTask(
+      FROM_HERE, base::Bind(&MetricsView::View::DidRecreateParentLayer,
+                            base::Unretained(view_.get()), layer()));
+}
+
+// ui::Widget
+void MetricsView::DidRealize() {
+  ui::Widget::DidRealize();
+  SetLayer(new ui::Layer());
+  set_layer_owner_delegate(this);
+  paint::PaintThread::instance()->PostTask(
+      FROM_HERE, base::Bind(&MetricsView::View::DidCreateParentLayer,
+                            base::Unretained(view_.get()), layer()));
+}
+
+void MetricsView::WillDestroyWidget() {
+  AnimatableWindow::WillDestroyWidget();
+  view_->WillDestroyWidget();
 }
 
 }  // namespace views

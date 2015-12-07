@@ -95,8 +95,8 @@ void PaintThread::Scheduler::ProcessTasks() {
       break;
     maybe_task.FromJust().Run();
   }
-  paint_thread_->CommitIfNeeded();
   state_.store(State::Sleeping);
+  paint_thread_->CommitIfNeeded();
 }
 
 void PaintThread::Scheduler::ScheduleTask(const base::Closure& task) {

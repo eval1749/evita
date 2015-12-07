@@ -19,6 +19,7 @@ namespace views {
 //
 class MessageView final : public ui::AnimatableWindow {
   DECLARE_CASTABLE_CLASS(MessageView, ui::AnimatableWindow);
+
  public:
   MessageView();
   ~MessageView() final;
@@ -35,6 +36,7 @@ class MessageView final : public ui::AnimatableWindow {
   // ui::Widget
   void DidRealize() final;
   gfx::Size GetPreferredSize() const final;
+  void WillDestroyWidget() final;
 
   std::unique_ptr<View> view_;
 

@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_SCHEDULER_IMPL_H_
 #define EVITA_DOM_SCHEDULER_IMPL_H_
 
+#include <atomic>
 #include <memory>
 #include <queue>
 
@@ -49,7 +50,7 @@ class SchedulerImpl final : public Scheduler {
   std::unique_ptr<TaskQueue> normal_task_queue_;
   SchedulerClient* const scheduler_client_;
   base::MessageLoop* script_message_loop_;
-  State state_;
+  std::atomic<State> state_;
   base::MessageLoop* const view_message_loop_;
 
   DISALLOW_COPY_AND_ASSIGN(SchedulerImpl);

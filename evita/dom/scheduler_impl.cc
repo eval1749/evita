@@ -188,7 +188,7 @@ SchedulerImpl::~SchedulerImpl() {}
 
 void SchedulerImpl::ProcessTasks() {
   ASSERT_ON_SCRIPT_THREAD();
-  state_ = State::Running;
+  state_.store(State::Running);
   for (;;) {
     auto maybe_task = normal_task_queue_->TakeTask();
     if (maybe_task.IsNothing()) {
@@ -199,8 +199,8 @@ void SchedulerImpl::ProcessTasks() {
     }
     maybe_task.FromJust().Run();
   }
+  state_.store(State::Sleep);
   RunIdleTasks();
-  state_ = State::Sleep;
 }
 
 void SchedulerImpl::Start(base::MessageLoop* script_message_loop) {
@@ -264,7 +264,7 @@ void SchedulerImpl::ScheduleTask(const base::Closure& task) {
   DCHECK(script_message_loop_->task_runner());
   normal_task_queue_->GiveTask(task);
   idle_task_queue_->StopIdleTasks();
-  if (state_ == State::Running)
+  if (state_.load() == State::Running)
     return;
   script_message_loop_->task_runner()->PostTask(
       FROM_HERE,

@@ -81,7 +81,6 @@ class MetricsView::View final : public ui::LayerOwnerDelegate {
   metrics::Sampling frame_duration_data_;
   metrics::Sampling frame_latency_data_;
   ui::Layer* layer_;
-  ui::Layer* parent_layer_;
   base::TimeTicks last_record_time_;
   std::unique_ptr<gfx::TextFormat> text_format_;
   ui::AnimatableWindow* const widget_;
@@ -94,7 +93,6 @@ MetricsView::View::View(ui::AnimatableWindow* widget)
       frame_latency_data_(kNumberOfSamples),
       last_record_time_(metrics::Sampling::NowTimeTicks()),
       layer_(nullptr),
-      parent_layer_(nullptr),
       text_format_(new gfx::TextFormat(L"Consolas", 11.5)),
       widget_(widget) {}
 
@@ -107,11 +105,10 @@ void MetricsView::View::DidBeginAnimationFrame(base::Time now) {
 }
 
 void MetricsView::View::InitLayer(ui::Layer* parent_layer) {
-  DCHECK(!parent_layer_);
-  parent_layer_ = parent_layer;
+  DCHECK(!layer_);
   auto const compositor = paint::PaintThread::instance()->compositor();
   layer_ = new ui::Layer(compositor);
-  parent_layer_->AppendLayer(layer_);
+  parent_layer->AppendLayer(layer_);
   layer_->SetBounds(widget_->GetContentsBounds());
   // Note: It is too early to call Compositor::CommitIfNeeded(), since
   // main visual tree isn't committed yet.

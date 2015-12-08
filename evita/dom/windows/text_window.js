@@ -208,6 +208,22 @@ global.TextWindow.prototype.clone = function() {
 
   /**
    * @param {!TextWindow} window
+   * @param {!MouseEvent} event
+   *
+   * Selects word at left button double clicking.
+   */
+  function handleDoubleClick(window, event) {
+    if (event.button)
+      return;
+    window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
+      if (offset < 0)
+        return;
+      selectWordAt(window, offset);
+    });
+  }
+
+  /**
+   * @param {!TextWindow} window
    */
   function handleFocus(window) {
     updateObsolete(window);
@@ -235,8 +251,7 @@ global.TextWindow.prototype.clone = function() {
         return;
       }
       if (event.ctrlKey) {
-        window.selection.range.collapseTo(offset);
-        selectWord(window);
+        selectWordAt(window, offset);
         return;
       }
       window.selection.range.collapseTo(offset);
@@ -423,9 +438,13 @@ global.TextWindow.prototype.clone = function() {
     });
   }
 
-  /** @param {!TextWindow} window */
-  function selectWord(window) {
+  /**
+   * @param {!TextWindow} window
+   * @param {number} offset
+   */
+  function selectWordAt(window, offset) {
     const selection = window.selection;
+    selection.range.collapseTo(offset);
     selection.startOf(Unit.WORD);
     selection.endOf(Unit.WORD, Alter.EXTEND);
     selection.startIsActive = false;
@@ -529,14 +548,14 @@ global.TextWindow.prototype.clone = function() {
 
   /** @type {!Map.<string, !function(!TextWindow, !Event)>} */
   const handlerMap = new Map([
-    [ Event.Names.BLUR, stopControllers ],
-    [ Event.Names.DBLCLICK, selectWord ],
-    [ Event.Names.FOCUS, handleFocus ],
-    [ Event.Names.MOUSEDOWN, handleMouseDown ],
-    [ Event.Names.MOUSEMOVE, handleMouseMove ],
-    [ Event.Names.MOUSEUP, handleMouseUp ],
-    [ Event.Names.SELECTIONCHANGE, handleSelectionChange ],
-    [ Event.Names.WHEEL, handleWheel ]
+    [Event.Names.BLUR, stopControllers],
+    [Event.Names.DBLCLICK, handleDoubleClick],
+    [Event.Names.FOCUS, handleFocus],
+    [Event.Names.MOUSEDOWN, handleMouseDown],
+    [Event.Names.MOUSEMOVE, handleMouseMove],
+    [Event.Names.MOUSEUP, handleMouseUp],
+    [Event.Names.SELECTIONCHANGE, handleSelectionChange],
+    [Event.Names.WHEEL, handleWheel]
   ]);
 
   /**

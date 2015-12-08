@@ -127,22 +127,11 @@ $define(global, 'repl', function($export) {
       this.useHistory();
     }
 
-    /**
-     * @param {string} text
-     */
-    emit(text) {
-      this.document_.readonly = false;
-      //this.range_.move(Unit.DOCUMENT, 1);
-      this.range_.collapseTo(this.document_.length);
-      this.range_.insertBefore(text);
-      this.document_.readonly = true;
-    }
-
     emitPrompt() {
       this.promiseTimer_.stop();
       ++this.lineNumber_;
-      this.freshLine();
-      this.emit('js:' + this.lineNumber_ + '> ');
+      console.freshLine();
+      console.emit('js:' + this.lineNumber_ + '> ');
       // Off by one to keep |this.range_.end| before user input.
       this.range_.collapseTo(this.document_.length - 1);
       this.document_.readonly = false;
@@ -172,8 +161,8 @@ $define(global, 'repl', function($export) {
                   stackFrame.column + ')';
             }).join('');
         }
-        this.freshLine();
-        this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
+        console.freshLine();
+        console.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
         this.emitPrompt();
         return;
       }
@@ -184,7 +173,7 @@ $define(global, 'repl', function($export) {
 
       if (value !== undefined) {
         $0 = value;
-        this.emit(repl.stringify(value));
+        console.emit(repl.stringify(value));
       }
       this.emitPrompt();
     }
@@ -193,18 +182,6 @@ $define(global, 'repl', function($export) {
       if (!this.history_.forward())
         return;
       this.useHistory();
-    }
-
-    /**
-     * @private
-     * Emits new line if console doesn't end with newline.
-     */
-    freshLine() {
-      if (this.document_.length === 0)
-        return;
-      if (this.document_.charCodeAt_(this.document_.length - 1) === Unicode.LF)
-        return;
-      this.emit('\n');
     }
 
     /** @return {!Document} */
@@ -226,12 +203,12 @@ $define(global, 'repl', function($export) {
       });
       promise.then((value) => {
         console.log(LINE_COMMENT, 'Value of', promise, 'is:');
-        this.emit(repl.stringify(value));
+        console.emit(repl.stringify(value));
         this.emitPrompt();
       }).catch((reason) => {
-        this.freshLine();
+        console.freshLine();
         console.log(BLOCK_COMMENT, promise, 'is rejected with:');
-        this.emit(formatReason(reason));
+        console.emit(formatReason(reason));
         console.log(BLOCK_COMMENT_END);
         this.emitPrompt();
       });
@@ -251,6 +228,8 @@ $define(global, 'repl', function($export) {
      * |v8::Isolate::SetPromiseRejectCallback()|.
      */
     static handleRejectedPromise(promise, reason, event) {
+      // TODO(eval1749): We should annotate |history_| with |History| once
+      // Closure compiler recognize class |History|.
       const instance = /** @type {!JsConsole} */(
           console.document.properties.get(repl.JsConsole.name));
       instance.handleRejection_(promise, reason, event);
@@ -262,9 +241,9 @@ $define(global, 'repl', function($export) {
      * @param {number} event
      */
     handleRejection_(promise, reason, event) {
-      this.freshLine();
+      console.freshLine();
       console.log(BLOCK_COMMENT, 'Unhandled promise rejection:', event);
-      this.emit(formatReason(reason));
+      console.emit(formatReason(reason));
       console.log(BLOCK_COMMENT_END);
     }
 

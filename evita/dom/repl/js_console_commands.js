@@ -31,8 +31,10 @@
     });
   }
 
+  // Install JsConsole specific commands when "*javascript*" document is
+  // created.
   Document.addObserver((type, document) => {
-    if (type !== 'and')
+    if (type !== 'add')
       return;
     /** @type {!repl.JsConsole} */
     const instance = new repl.JsConsole(document);
@@ -45,7 +47,17 @@
    * @this {Window}
    */
   function switchToJsConsoleCommand() {
-     windows.activate(this.selection.window, console.document);
+     const document = console.document;
+     const isFirstTime = document.listWindows().length === 0;
+     const window = windows.activate(this.selection.window, document);
+     if (!isFirstTime)
+       return;
+     const instance = document.properties.get(repl.JsConsole.name);
+     console.freshLine();
+     console.emit(`\x2F/ JavaScript Console ${Editor.version},` +
+                  ` v8:${Editor.v8Version}\n\n`);
+     instance.emitPrompt();
+     window.selection.endOf(Unit.DOCUMENT);
   }
 
   Editor.bindKey(Window, 'Ctrl+Shift+J', switchToJsConsoleCommand);

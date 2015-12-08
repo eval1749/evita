@@ -14,9 +14,6 @@ repl.JsConsole.prototype.backwardHistory;
 /** @type {!Document} */
 repl.JsConsole.prototype.document;
 
-/** @param {string} text */
-repl.JsConsole.prototype.emit = function(text) {};
-
 /** @type {function()} */
 repl.JsConsole.prototype.emitPrompt;
 
@@ -25,12 +22,6 @@ repl.JsConsole.prototype.evalLastLine;
 
 /** @type {function()} */
 repl.JsConsole.prototype.forwardHistory;
-
-/** @type {function()} */
-repl.JsConsole.prototype.freshLine;
-
-/** @type {!Range} */
-repl.JsConsole.prototype.range;
 
 /** @type {function()} */
 repl.JsConsole.prototype.useHistory;

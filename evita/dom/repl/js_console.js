@@ -25,33 +25,23 @@ $define(global, 'repl', function($export) {
   /** @const @type {string} */ const LINE_COMMENT = '\x2F/';
   /** @const @type {number} */ const MAX_HISTORY_LINES = 20;
 
-  function installKeyBindings(jsConsole) {
-    /** @const @type {!Document} */ let document = jsConsole.document_;
-    // JavaScript console specific key bindings.
-    document.bindKey('Ctrl+ArrowDown', function() {
-      jsConsole.forwardHistory();
-      this.selection.range.collapseTo(jsConsole.document_.length);
-    });
-    document.bindKey('Ctrl+L', function() {
-      const document = jsConsole.range_.document;
-      const readonly = document.readonly;
-      document.readonly = false;
-      jsConsole.range_.startOf(Unit.DOCUMENT);
-      jsConsole.range_.endOf(Unit.DOCUMENT, Alter.EXTEND);
-      jsConsole.range_.text = '';
-      document.readonly = readonly;
-      jsConsole.emitPrompt();
-      this.selection.range.collapseTo(jsConsole.document_.length);
-    });
-    document.bindKey('Ctrl+ArrowUp', function() {
-      jsConsole.backwardHistory();
-      this.selection.range.collapseTo(jsConsole.document_.length);
-    });
-    document.bindKey('Enter', function() {
-      this.selection.range.collapseTo(jsConsole.document_.length);
-      jsConsole.evalLastLine();
-    });
-  }
+    /**
+     * @param {*} reason
+     * @return {string}
+     */
+    function formatReason(reason) {
+      $0 = reason;
+      if (reason instanceof Error) {
+        const stack = reason['stack'];
+        if (stack)
+          return stack.toString();
+        const message = reason['message'];
+        if (message) {
+          return 'Exception: ' + message;
+        }
+      }
+      return repl.stringify(reason);
+   }
 
   //////////////////////////////////////////////////////////////////////
   //
@@ -115,11 +105,8 @@ $define(global, 'repl', function($export) {
   // JsConsole
   //
   class JsConsole {
-    constructor() {
-      /** @const @type {!Document} */
-      let document = console.document;
-      // TODO(eval1749): We should make |*javascript*| document with JavaScript
-      // syntax coloring.
+    /** @param {!Document} document */
+    constructor(document) {
       /** @type {!Document} */
       this.document_ = document;
       // TODO(eval1749): We should annotate |history_| with |History| once
@@ -132,40 +119,8 @@ $define(global, 'repl', function($export) {
       this.promiseTimer_ = new RepeatingTimer();
       /** @const @type {!Range} */
       this.range_ = new Range(document);
-      installKeyBindings(this);
-      Object.seal(this);
     }
 
-    /**
-     * @this {!JsConsole}
-     * @param {Window} activeWindow
-     */
-    activate(activeWindow) {
-      if (!activeWindow) {
-        this.newConsoleWindow();
-        return;
-      }
-
-      let activeEditorWindow = activeWindow instanceof EditorWindow ?
-        activeWindow : activeWindow.parent;
-      let document = this.document_;
-      let present = activeEditorWindow.children.find(function(window) {
-        return window.document === document
-      });
-      if (present) {
-        present.selection.range.collapseTo(document.length);
-        present.focus();
-        return;
-      }
-
-      let newWindow = new TextWindow(new Range(document));
-      activeEditorWindow.appendChild(newWindow);
-      newWindow.selection.range.collapseTo(document.length);
-    }
-
-    /**
-     * @this {!JsConsole}
-     */
     backwardHistory() {
       if (!this.history_.backward())
         return;
@@ -173,7 +128,6 @@ $define(global, 'repl', function($export) {
     }
 
     /**
-     * @this {!JsConsole}
      * @param {string} text
      */
     emit(text) {
@@ -184,22 +138,16 @@ $define(global, 'repl', function($export) {
       this.document_.readonly = true;
     }
 
-    /**
-     * @this {!JsConsole}
-     */
     emitPrompt() {
       this.promiseTimer_.stop();
       ++this.lineNumber_;
-      this.freshLine_();
+      this.freshLine();
       this.emit('js:' + this.lineNumber_ + '> ');
       // Off by one to keep |this.range_.end| before user input.
       this.range_.collapseTo(this.document_.length - 1);
       this.document_.readonly = false;
     }
 
-    /**
-     * @this {!JsConsole}
-     */
     evalLastLine() {
       const range = this.range_;
       range.end = this.document_.length;
@@ -224,7 +172,7 @@ $define(global, 'repl', function($export) {
                   stackFrame.column + ')';
             }).join('');
         }
-        this.freshLine_();
+        this.freshLine();
         this.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
         this.emitPrompt();
         return;
@@ -241,31 +189,6 @@ $define(global, 'repl', function($export) {
       this.emitPrompt();
     }
 
-    /**
-     * @private
-     * @this {!JsConsole}
-     * @param {*} reason
-     */
-    emitReason(reason) {
-      $0 = reason;
-      if (reason instanceof Error) {
-        const stack = reason['stack'];
-        if (stack) {
-          this.emit(stack);
-          return;
-        }
-        const message = reason['message'];
-        if (message) {
-          this.emit('Exception: ' + message);
-          return;
-        }
-      }
-      this.emit(repl.stringify(reason));
-    }
-
-    /**
-     * @this {!JsConsole}
-     */
     forwardHistory() {
       if (!this.history_.forward())
         return;
@@ -276,13 +199,19 @@ $define(global, 'repl', function($export) {
      * @private
      * Emits new line if console doesn't end with newline.
      */
-    freshLine_() {
+    freshLine() {
       if (this.document_.length === 0)
         return;
       if (this.document_.charCodeAt_(this.document_.length - 1) === Unicode.LF)
         return;
       this.emit('\n');
     }
+
+    /** @return {!Document} */
+    get document() { return this.document_; }
+
+    /** @return {!Range} */
+    get range() { return this.range_; }
 
     /**
      * @private
@@ -300,9 +229,9 @@ $define(global, 'repl', function($export) {
         this.emit(repl.stringify(value));
         this.emitPrompt();
       }).catch((reason) => {
-        this.freshLine_();
+        this.freshLine();
         console.log(BLOCK_COMMENT, promise, 'is rejected with:');
-        this.emitReason(reason);
+        this.emit(formatReason(reason));
         console.log(BLOCK_COMMENT_END);
         this.emitPrompt();
       });
@@ -322,60 +251,28 @@ $define(global, 'repl', function($export) {
      * |v8::Isolate::SetPromiseRejectCallback()|.
      */
     static handleRejectedPromise(promise, reason, event) {
-      let jsConsole = ensureJsConsole();
-      jsConsole.freshLine_();
+      const instance = /** @type {!JsConsole} */(
+          console.document.properties.get(repl.JsConsole.name));
+      instance.handleRejection_(promise, reason, event);
+    }
+
+    /**
+     * @param {!Promise} promise
+     * @param {*} reason
+     * @param {number} event
+     */
+    handleRejection_(promise, reason, event) {
+      this.freshLine();
       console.log(BLOCK_COMMENT, 'Unhandled promise rejection:', event);
-      jsConsole.emitReason(reason);
+      this.emit(formatReason(reason));
       console.log(BLOCK_COMMENT_END);
     }
 
-    /**
-     * @this {!JsConsole}
-     */
-    newConsoleWindow() {
-      let editorWindow = new EditorWindow();
-      let textWindow = new TextWindow(new Range(this.document_));
-      editorWindow.appendChild(textWindow);
-      editorWindow.realize();
-    }
-
-    /**
-     * @this {!JsConsole}
-     */
     useHistory() {
       this.range_.end = this.document_.length;
       this.range_.text = ' ' + this.history_.current;
     }
   }
-  Object.freeze(JsConsole.prototype);
-  Object.seal(JsConsole);
-
-  /** @type {JsConsole} */
-  let instance = null;
-
-  /**
-   * @return {!JsConsole}
-   */
-  function ensureJsConsole() {
-    if (instance)
-      return instance;
-    instance = new JsConsole();
-    instance.emit(`\x2F/ JavaScript Console ${Editor.version},` +
-                  ` v8:${Editor.v8Version}\n\n`);
-    instance.emitPrompt();
-    return instance;
-  }
-
-  /**
-   * Switch to JavaScript command.
-   * @this {Window}
-   */
-  function switchToJsConsoleCommand() {
-     ensureJsConsole().activate(this.selection.window);
-  }
-
-  Editor.bindKey(Window, 'Ctrl+Shift+I', switchToJsConsoleCommand);
-  Editor.bindKey(Window, 'Ctrl+Shift+J', switchToJsConsoleCommand);
 
   $export({JsConsole});
 });

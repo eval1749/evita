@@ -57,7 +57,7 @@
       case Alter.MOVE:
         selection.range.collapseTo(focus);
         // TODO(eval1749): This is temporary hack for forgetting goal x-point.
-        // Once, we implment new goal x-point tracking, we should remove
+        // Once, we implement new goal x-point tracking, we should remove
         // this hack.
         selection.startIsActive = true;
         return selection;

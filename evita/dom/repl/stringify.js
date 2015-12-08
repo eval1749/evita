@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-Editor.stringify = (function() {
+$define(global, 'repl', function($export) {
   // TODO(eval1749): Once v8 provide |TypedArray| class, we can replace this
   // |isTypedArray()|.
   function isTypedArray(object) {
@@ -92,14 +92,14 @@ Editor.stringify = (function() {
   /**
     * Stringify value.
     * @param{*} value
-    * @param{number=} MAX_LEVEL Default is 10.
-    * @param{number=} MAX_LENGTH Default is 10.
+    * @param{number=} opt_maxLevel Default is 10.
+    * @param{number=} opt_maxLength Default is 10.
     * @return {string}
     */
-  function stringify(value, MAX_LEVEL, MAX_LENGTH) {
-    MAX_LEVEL = arguments.length >= 1 ? MAX_LEVEL : 10;
-    MAX_LENGTH = arguments.length >= 2 ? MAX_LENGTH : 10;
-    let visitedMap = new Map();
+  function stringify(value, opt_maxLevel, opt_maxLength) {
+    const maxLevel = /** @type {number} */(opt_maxLevel);
+    const maxLength = /** @type {number} */(opt_maxLength);
+    const visitedMap = new Map();
     let numOf_labels = 0;
 
     /**
@@ -196,7 +196,7 @@ Editor.stringify = (function() {
       visitedMap.set(object, 0);
 
       ++level;
-      if (level > MAX_LEVEL)
+      if (level > maxLevel)
         return visitor.visitAtom('#');
 
       visitor.visitFirstTime(object);
@@ -205,12 +205,12 @@ Editor.stringify = (function() {
       if (Array.isArray(object)) {
         let array = /** @type{!Array} */(object);
         visitor.startArray(array);
-        let length = Math.min(array.length, MAX_LENGTH);
+        let length = Math.min(array.length, maxLength);
         for (var index = 0; index < length; ++index) {
           visitor.visitArrayElement(index);
           visit(array[index], level, visitor);
         }
-        return visitor.endArray(array, array.length >= MAX_LENGTH);
+        return visitor.endArray(array, array.length >= maxLength);
       }
 
       if (isTypedArray(object))
@@ -230,7 +230,7 @@ Editor.stringify = (function() {
       visitor.startObject(ctorName, props);
       let count = 0;
       for (let prop of props) {
-        if (count > MAX_LENGTH)
+        if (count > maxLength)
           break;
         visitor.visitKey(prop.name, count);
         visit(prop.value, level, visitor);
@@ -372,5 +372,5 @@ Editor.stringify = (function() {
     return printer.result;
   }
 
-  return stringify;
-})();
+  $export({stringify});
+});

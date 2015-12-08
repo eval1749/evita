@@ -24,7 +24,7 @@ Object.defineProperty(/** @type {!Object} */(global), 'console', (function() {
       let message = Array.prototype.slice.call(arguments, 1).map(function(arg) {
         if (typeof(arg) === 'string')
           return arg;
-        return Editor.stringify(arg);
+        return repl.stringify(arg);
       }).join(' ');
       throw new Error('Assertion failed: ' + message);
     }
@@ -58,9 +58,9 @@ Object.defineProperty(/** @type {!Object} */(global), 'console', (function() {
         try {
           if (typeof(arg) === 'string')
             return arg;
-          return Editor.stringify(arg);
+          return repl.stringify(arg);
         } catch (e) {
-          return Editor.stringify(e);
+          return repl.stringify(e);
         }
       }).join(' ');
       let document = this.ensureDocument();

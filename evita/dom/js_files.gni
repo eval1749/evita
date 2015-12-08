@@ -48,7 +48,6 @@ js_lib_files = [
 
   "jslib/editors.js",
   "jslib/ordered_set.js",
-  "jslib/stringify.js",
   "jslib/task_scheduler.js",
   "jslib/windows.js",
 
@@ -95,6 +94,7 @@ js_lib_files = [
 
   "repl/describe.js",
   "repl/load.js",
+  "repl/stringify.js",
 
   "jslib/install_stringify.js",
 

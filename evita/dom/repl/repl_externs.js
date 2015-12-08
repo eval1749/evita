@@ -21,3 +21,11 @@ repl.describe = function(object) {};
  *  verbose: boolean
  */
 repl.load = function(scriptPath, opt_options) {};
+
+/**
+  * @param{*} value
+  * @param{number=} opt_maxLevel Default is 10.
+  * @param{number=} opt_maxLength Default is 10.
+  * @return {string}
+  */
+repl.stringify = function(value, opt_maxLevel, opt_maxLength) {};

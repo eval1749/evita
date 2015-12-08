@@ -236,7 +236,7 @@ global.JsConsole = (function() {
 
       if (value !== undefined)
         $0 = value;
-      this.emit(Editor.stringify(value));
+      this.emit(repl.stringify(value));
       this.emitPrompt();
     }
 
@@ -259,7 +259,7 @@ global.JsConsole = (function() {
           return;
         }
       }
-      this.emit(Editor.stringify(reason));
+      this.emit(repl.stringify(reason));
     }
 
     /**
@@ -296,7 +296,7 @@ global.JsConsole = (function() {
       });
       promise.then((value) => {
         console.log(LINE_COMMENT, 'Value of', promise, 'is:');
-        this.emit(Editor.stringify(value));
+        this.emit(repl.stringify(value));
         this.emitPrompt();
       }).catch((reason) => {
         this.freshLine_();

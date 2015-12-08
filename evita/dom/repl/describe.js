@@ -41,9 +41,15 @@ $define(global, 'repl', function($export) {
         console.log('Prototype', runner.constructor.name);
       }
 
-      printAsTable(Object.getOwnPropertyNames(runner).map((name) => {
+      const keys = Object.getOwnPropertyNames(runner).concat(
+          // TODO(eval1749): We should use '.'-syntax once closure compiler
+          // having correct declaration.
+          Object['getOwnPropertySymbols'](runner));
+
+      printAsTable(keys.map(key => {
         const descriptor = Object.getOwnPropertyDescriptor(
-            /** @type {!Object} */(runner), name);
+            /** @type {!Object} */(runner), key);
+        const name = key.toString();
         const isGetter = 'get' in descriptor;
         const isSetter = 'get' in descriptor;
         if (isGetter && isSetter)

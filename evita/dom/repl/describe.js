@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 $define(global, 'repl', function($export) {
+  const kFunction = 'function ';
   const kNativeCode = ' { [native code] }';
   const kMaxLength = 40;
 
@@ -50,14 +51,14 @@ $define(global, 'repl', function($export) {
         const descriptor = Object.getOwnPropertyDescriptor(
             /** @type {!Object} */(runner), key);
         const name = key.toString();
-        const hasGetter = 'get' in descriptor;
-        const hasSetter = 'set' in descriptor;
-        if (hasGetter && hasSetter)
-          return {key: name, value: 'getter and setter'};
-        if (hasGetter)
-          return {key: name, value: 'getter'};
-        if (hasSetter)
-          return {key: name, value: 'setter'};
+        const getter = descriptor['get'];
+        const setter = descriptor['set'];
+        if (getter && setter)
+          return {key: name, value: {get: getter, set: setter}};
+        if (getter)
+          return {key: name, value: {get: getter}};
+        if (setter)
+          return {key: name, value: {set: setter}};
         return {key: name, value: descriptor.value};
       }).sort((a, b) => a.key.localeCompare(b.key)));
     }
@@ -89,9 +90,11 @@ $define(global, 'repl', function($export) {
    * @return {string}
    */
   function formatFunction(value) {
-    const string = value.toString().replace(/\s+/g, ' ');
+    let string = value.toString().replace(/\s+/g, ' ');
+    if (string.startsWith(kFunction))
+      string = string.substr(kFunction.length);
     if (string.endsWith(kNativeCode))
-      return string.substr(0, string.length - kNativeCode.length);
+      string = string.substr(0, string.length - kNativeCode.length);
     if (string.length < kMaxLength)
       return string;
     return string.substring(0, kMaxLength) + '...';

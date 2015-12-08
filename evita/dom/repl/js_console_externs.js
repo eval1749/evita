@@ -23,5 +23,11 @@ repl.JsConsole.prototype.evalLastLine;
 /** @type {function()} */
 repl.JsConsole.prototype.forwardHistory;
 
+/** @type {string} */
+repl.JsConsole.prototype.lastLine;
+
+/** @type {number} */
+repl.JsConsole.prototype.lastLineStart;
+
 /** @type {function()} */
 repl.JsConsole.prototype.useHistory;

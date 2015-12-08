@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 var $0;
+var $1;
+var $2;
 
 /**
  * The JavaScript Console.
@@ -30,7 +32,6 @@ $define(global, 'repl', function($export) {
      * @return {string}
      */
     function formatReason(reason) {
-      $0 = reason;
       if (reason instanceof Error) {
         const stack = reason['stack'];
         if (stack)
@@ -119,6 +120,8 @@ $define(global, 'repl', function($export) {
       this.promiseTimer_ = new RepeatingTimer();
       /** @const @type {!Range} */
       this.range_ = new Range(document);
+      /** @const @type {!Array} */
+      this.results_ = [];
     }
 
     backwardHistory() {
@@ -138,41 +141,43 @@ $define(global, 'repl', function($export) {
     }
 
     evalLastLine() {
-      const range = this.range_;
-      range.end = this.document_.length;
-      const line = range.text.trim();
+      const line = this.lastLine.trim();
       if (line === '') {
         this.emitPrompt();
         return;
       }
       this.history_.add(line);
-      range.collapseTo(range.end);
-      range.text = '\n';
-
+      console.freshLine();
       const result = Editor.runScript(line, console.document.name);
-      range.collapseTo(range.end);
       if (result.exception) {
-        $0 = result.exception;
+        this.rememberResult_(result.exception);
         if (result.stackTraceString === '') {
           result.stackTraceString = result.exception +
             result.stackTrace.map(function(stackFrame) {
-              return '\n  at ' + stackFrame.functionName + ' (' +
+              return '  at ' + stackFrame.functionName + ' (' +
                   stackFrame.scriptName + '(' + stackFrame.lineNumber + ':' +
                   stackFrame.column + ')';
-            }).join('');
+            }).join('\n');
         }
         console.freshLine();
-        console.emit('\x2F*\nException: ' + result.stackTraceString + '\n*\x2F\n');
+        console.emit(BLOCK_COMMENT);
+        console.emit('\nException: ');
+        console.emit(result.stackTraceString);
+        console.emit('\n');
+        console.emit(BLOCK_COMMENT_END);
         this.emitPrompt();
         return;
       }
 
       const value = result.value;
-      if (value instanceof Promise)
+      if (value instanceof Promise) {
+        this.rememberResult_(value);
         return this.handlePromiseResult(value);
+      }
 
       if (value !== undefined) {
-        $0 = value;
+        this.rememberResult_(value);
+        console.freshLine();
         console.emit(repl.stringify(value));
       }
       this.emitPrompt();
@@ -187,6 +192,17 @@ $define(global, 'repl', function($export) {
     /** @return {!Document} */
     get document() { return this.document_; }
 
+    /** @return {string} */
+    get lastLine() {
+      return this.document_.slice(this.lastLineStart, this.document_.length);
+    }
+
+    /** @param {string} string */
+    set lastLine(string) { this.range_.text = string; }
+
+    /** @return {number} */
+    get lastLineStart() { return this.range_.start; }
+
     /** @return {!Range} */
     get range() { return this.range_; }
 
@@ -195,6 +211,7 @@ $define(global, 'repl', function($export) {
      * @param {!Promise} promise
      */
     handlePromiseResult(promise) {
+      console.freshLine();
       console.log(LINE_COMMENT, 'Waiting for', promise);
       let counter = 0;
       this.promiseTimer_.start(1000, () => {
@@ -208,6 +225,7 @@ $define(global, 'repl', function($export) {
       }).catch((reason) => {
         console.freshLine();
         console.log(BLOCK_COMMENT, promise, 'is rejected with:');
+        this.rememberResult_(reason);
         console.emit(formatReason(reason));
         console.log(BLOCK_COMMENT_END);
         this.emitPrompt();
@@ -245,6 +263,16 @@ $define(global, 'repl', function($export) {
       console.log(BLOCK_COMMENT, 'Unhandled promise rejection:', event);
       console.emit(formatReason(reason));
       console.log(BLOCK_COMMENT_END);
+    }
+
+    /** @param {*} result */
+    rememberResult_(result) {
+      $2 = $1;
+      $1 = $2;
+      $0 = result;
+      if (this.results_.length >= 10)
+        this.results_.shift();
+      this.results_.push($0);
     }
 
     useHistory() {

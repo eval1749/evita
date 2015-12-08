@@ -18,9 +18,6 @@ $define(global, 'repl', function($export) {
   }
 
   class Visitor {
-    /** @param {number} index */
-    visitArrayElement(index) {}
-
     /** @param {*} atom */
     visitAtom(atom) {}
 
@@ -43,7 +40,7 @@ $define(global, 'repl', function($export) {
     visitKey(key, index) {}
 
     /** @param {number} index */
-    visitSetMember(index) {}
+    visitMember(index) {}
 
     /** @param {string} string */
     visitString(string) {}
@@ -63,17 +60,18 @@ $define(global, 'repl', function($export) {
       /** @param {!Array} array @param {boolean} limited */
     endArray(array, limited) {}
 
-      /** @param {!Set} set */
-    startSet(set) {}
+      /**
+       * @param {string} startMark
+       * @param {boolean} needSpace
+       */
+    startContainer(startMark, needSpace) {}
 
-      /** @param {!Set} set @param {boolean} limited */
-    endSet(set, limited) {}
-
-      /** @param {!Object} props @param {string} ctorName */
-    startObject(ctorName, props) {}
-
-      /** @param {boolean} limited */
-    endObject(limited) {}
+      /**
+       * @param {string} endMark
+       * @param {number} index
+       * @param {number} size
+       */
+    endContainer(endMark, index, size) {}
   }
 
   ////////////////////////////////////////////////////////////
@@ -168,13 +166,35 @@ $define(global, 'repl', function($export) {
      * @param {number} level
      */
     function visitArray(visitor, array, level) {
-      visitor.startArray(array);
+      visitor.startContainer('[', false);
       const length = Math.min(array.length, maxLength);
-      for (let index = 0; index < length; ++index) {
-        visitor.visitArrayElement(index);
+      let index = 0;
+      while (index < array.length) {
+        if (index >= maxLength)
+          break;
+        visitor.visitMember(index);
         visit(array[index], level, visitor);
+        ++index;
       }
-      visitor.endArray(array, array.length >= maxLength);
+      visitor.endContainer(']', index, array.length);
+    }
+
+    /**
+     * @param {!Visitor} visitor
+     * @param {!Map} map
+     * @param {number} level
+     */
+    function visitMap(visitor, map, level) {
+      visitor.startContainer('#\u007BMap', !!map.size);
+      let index = 0;
+      for (const key of map.keys()) {
+        if (index >= maxLength)
+          break;
+        visitor.visitKey(key, index);
+        visit(map.get(key), level + 1, visitor);
+        ++index;
+      }
+      visitor.endContainer('\u007D', index, map.size);
     }
 
     /**
@@ -183,16 +203,16 @@ $define(global, 'repl', function($export) {
      * @param {number} level
      */
     function visitSet(visitor, set, level) {
-      visitor.startSet(set);
+      visitor.startContainer('#\u007BSet', !!set.size);
       let index = 0;
       for (const member of set) {
         if (index >= maxLength)
           break;
-        visitor.visitSetMember(index);
+        visitor.visitMember(index);
         visit(member, level + 1, visitor);
         ++index;
       }
-      visitor.endSet(set, set.size > index);
+      visitor.endContainer('\u007D', index, set.size);
     }
 
     /**
@@ -251,6 +271,9 @@ $define(global, 'repl', function($export) {
       if (object instanceof Date)
         return visitor.visitDate(/** @type{!Date} */(object));
 
+      if (object instanceof Map)
+        return visitMap(visitor, /** @type {!Map} */(object), level);
+
       if (object instanceof Set)
         return visitSet(visitor, /** @type {!Set} */(object), level);
 
@@ -262,16 +285,19 @@ $define(global, 'repl', function($export) {
           return visitor.visitConstructed(object, id);
       }
       const props = collectProperties(object);
-      visitor.startObject(ctorName, props);
-      let count = 0;
+      if (ctorName)
+        visitor.startContainer(`#\u007B${ctorName}`, !!props.length);
+      else
+        visitor.startContainer(`\u007B`, false);
+      let index = 0;
       for (let prop of props) {
-        if (count > maxLength)
+        if (index >= maxLength)
           break;
-        visitor.visitKey(prop.name, count);
+        visitor.visitKey(prop.name, index);
         visit(prop.value, level, visitor);
-        ++count;
+        ++index;
       }
-      visitor.endObject(count > props.length);
+      visitor.endContainer('\u007D', index, props.length);
     }
 
     /** @const @type{{9: string, 10: string, 13:string}} */
@@ -333,7 +359,13 @@ $define(global, 'repl', function($export) {
       visitKey(key, index) {
         if (index)
           this.emit(', ');
-        this.emit(key.toString(), ': ');
+        this.emit(key, ': ');
+      }
+
+      visitMember(index) {
+        if (index === 0)
+          return;
+        this.emit(', ');
       }
 
       visitString(str) {
@@ -372,46 +404,16 @@ $define(global, 'repl', function($export) {
         this.emit('#', label, '#');
       }
 
-      startArray() {
-        this.emit('\u005b');
+      startContainer(startMark, needSpace) {
+        if (needSpace)
+          return this.emit(`${startMark} `);
+        return this.emit(startMark);
       }
 
-      visitArrayElement(index) {
-        if (!index)
-          return;
-        this.emit(', ');
-      }
-
-      endArray(array, limited) {
-        if (limited)
-          this.emit(', ...' + array.length);
-        this.emit('\u005d');
-      }
-
-      startObject(ctorName, props) {
-        if (ctorName) {
-          this.emit('#{', ctorName, props.length ? ' ' : '');
-          return;
-        }
-        this.emit('\u007b');
-      }
-
-      endObject(limited) {
-        this.emit(limited ? ', ...}' : '}');
-      }
-
-      startSet() {
-        this.emit('#\u007bSet');
-      }
-
-      visitSetMember(index) {
-        this.emit(index ? ', ' : ' ');
-      }
-
-      endSet(set, limited) {
-        if (limited)
-          this.emit(', ...' + set.size);
-        this.emit('\u007d');
+      endContainer(endMark, index, size) {
+        if (index == size)
+          return this.emit(endMark);
+        return this.emit(`, ...${size}${endMark}`);
       }
     }
 

@@ -179,6 +179,16 @@ global.JavaScriptLexer = (function(options) {
       'Intl.DateTimeFormat',
       'Intl.NumberFormat',
 
+      'Symbol.for',
+      'Symbol.hasInstance',
+      'Symbol.isConcatSpreadable', 'Symbol.iterator',
+      'Symbol.keyFor',
+      'Symbol.match',
+      'Symbol.replace',
+      'Symbol.search', 'Symbol.split', 'Symbol.species',
+      'Symbol.toPrimitive', 'Symbol.toStringTag',
+      'Symbol.unscopables',
+
       // Other
       'arguments',
 

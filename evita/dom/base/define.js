@@ -12,10 +12,18 @@ function $define(parentModule, moduleName, moduleFunction) {
     return newModule;
   }
   const toModule = moduleOf(moduleName);
+  let isExportCalled = false;
   function $export(moduleObject) {
-    Object.keys(moduleObject).forEach(name => {
+    const keys = Object.keys(moduleObject);
+    if (keys.length === 0)
+      throw 'No names to export';
+    keys.forEach(name => {
       toModule[name] = moduleObject[name];
     });
+    isExportCalled = true;
   }
   moduleFunction.call(parentModule, $export);
+  if (isExportCalled)
+    return;
+  throw 'You should call $export() in $define()';
 }

@@ -144,6 +144,8 @@ $define(global, 'repl', function($export) {
     }
   }
 
+  Object.defineProperty(Console, 'DOCUMENT_NAME', {value: DOCUMENT_NAME});
+
   const console = new Console();
   $export({Console, console});
 });

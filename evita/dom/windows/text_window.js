@@ -114,8 +114,8 @@ global.TextWindow.prototype.clone = function() {
   /** @suppress {suspiciousCode} */
   TextWindow.prototype.dragController_;
 
-  /** @type {OneShotTimer} */
-  TextWindow.prototype.selectionTimer_;
+  /** @type {boolean} */
+  TextWindow.prototype.isSelectionChanged_;
 
   /** @type {!Range} */
   TextWindow.prototype.textCompositionRange;
@@ -295,16 +295,14 @@ global.TextWindow.prototype.clone = function() {
    * @param {!TextWindow} window
    */
   function handleSelectionChange(window) {
-    if (!window.selectionTimer_)
-        window.selectionTimer_ = new OneShotTimer();
-    if (window.selectionTimer_.isRunning)
+    if (window.isSelectionChanged_)
       return;
-    // TODO(eval1749): We should use |requestIdleCallback()| rather than
-    // |OneShotTimer|.
-    window.selectionTimer_.start(50, () => {
+    window.isSelectionChanged_ = true;
+    Editor.requestIdleCallback(() => {
+      window.isSelectionChanged_ = false;
       updateStatusBar(window);
       highlightMatchedBrackets(window);
-    });
+    }, {timeout: 100});
   }
 
   /**

@@ -234,9 +234,10 @@ global.JsConsole = (function() {
       if (value instanceof Promise)
         return this.handlePromiseResult(value);
 
-      if (value !== undefined)
+      if (value !== undefined) {
         $0 = value;
-      this.emit(repl.stringify(value));
+        this.emit(repl.stringify(value));
+      }
       this.emitPrompt();
     }
 

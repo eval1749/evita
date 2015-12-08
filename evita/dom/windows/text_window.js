@@ -215,8 +215,8 @@ global.TextWindow.prototype.clone = function() {
   function handleDoubleClick(window, event) {
     if (event.button)
       return;
-    window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
-      if (offset < 0)
+    mapPointToOffset(event).then(offset => {
+    if (offset < 0)
         return;
       selectWordAt(window, offset);
     });
@@ -240,7 +240,7 @@ global.TextWindow.prototype.clone = function() {
   function handleMouseDown(window, event) {
     if (event.button)
       return;
-    window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
+    mapPointToOffset(event).then(offset => {
       if (offset < 0)
         return;
       if (event.shiftKey) {
@@ -264,7 +264,7 @@ global.TextWindow.prototype.clone = function() {
    * @param {!MouseEvent} event
    */
   function handleMouseMove(window, event) {
-    window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
+    mapPointToOffset(event).then(offset => {
        const dragController = window.dragController_;
        if (offset < 0 || !dragController || !dragController.dragging)
          return;
@@ -299,11 +299,7 @@ global.TextWindow.prototype.clone = function() {
   function handleMouseUp(window, event) {
     if (event.button)
      return;
-    // To make sure, handling "mouseup" event after "mousedown" and
-    // "movemouse", we handle "mouseup" with |mapPointToPosition()|.
-    window.mapPointToPosition_(event.clientX, event.clientY).then((offset) => {
-      stopControllers(window);
-    });
+    mapPointToOffset(event).then(offset => stopControllers(window));
   }
 
   /**
@@ -416,6 +412,15 @@ global.TextWindow.prototype.clone = function() {
     if (tryRight(range))
       return colorMatching(range);
     return reportNoMatching(window);
+  }
+
+  /**
+   * @param {!MouseEvent} event
+   * @return {!Promise.<number>}
+   */
+  function mapPointToOffset(event) {
+    const textWindow = /** @type {!TextWindow} */(event.target);
+    return textWindow.mapPointToPosition_(event.clientX, event.clientY);
   }
 
   /**

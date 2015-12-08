@@ -93,6 +93,8 @@ js_lib_files = [
   "commands/text_window_commands.js",
   "commands/window_commands.js",
 
+  "repl/describe.js",
+
   "jslib/install_stringify.js",
 
   "testing/test.js",

@@ -124,6 +124,7 @@ static_js_externs_files = [
   "//evita/dom/lexers/lexer_externs.js",
   "//evita/dom/lexers/lexers_externs.js",
   "//evita/dom/os/os_externs.js",
+  "//evita/dom/repl/repl_externs.js",
   "//evita/dom/testing/testing_externs.js",
   "//evita/dom/testing/test_externs.js",
   "//evita/dom/text/text_externs.js",

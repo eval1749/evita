@@ -3,6 +3,21 @@
 // found in the LICENSE file.
 
 $define(global, 'repl', function($export) {
+  /**
+   * @param {!Object} object
+   * @return {string}
+   */
+  function computeClassName(object) {
+    if (Symbol.toStringTag in object)
+      return object[Symbol.toStringTag];
+    const constructor = object.constructor;
+    if (!constructor || constructor === Object)
+      return '';
+    if ('name' in constructor)
+      return constructor.name;
+    return '';
+  }
+
   // TODO(eval1749): Once v8 provide |TypedArray| class, we can replace this
   // |isTypedArray()|.
   function isTypedArray(object) {
@@ -197,6 +212,35 @@ $define(global, 'repl', function($export) {
       visitor.endContainer('\u007D', index, map.size);
     }
 
+
+    /**
+     * @param {!Visitor} visitor
+     * @param {!Object} object
+     * @param {number} level
+     */
+    function visitObject(visitor, object, level) {
+      const className = computeClassName(object);
+      if (className) {
+        const id = getObjectIdLikeThing(object);
+        if (id !== undefined)
+          return visitor.visitConstructed(object, id);
+      }
+      const props = collectProperties(object);
+      if (className)
+        visitor.startContainer(`#\u007B${className}`, !!props.length);
+      else
+        visitor.startContainer(`\u007B`, false);
+      let index = 0;
+      for (let prop of props) {
+        if (index >= maxLength)
+          break;
+        visitor.visitKey(prop.name, index);
+        visit(prop.value, level, visitor);
+        ++index;
+      }
+      visitor.endContainer('\u007D', index, props.length);
+    }
+
     /**
      * @param {!Visitor} visitor
      * @param {!Set} set
@@ -277,27 +321,7 @@ $define(global, 'repl', function($export) {
       if (object instanceof Set)
         return visitSet(visitor, /** @type {!Set} */(object), level);
 
-      const realCtorName = object.constructor ? object.constructor.name : '';
-      const ctorName = realCtorName === 'Object' ? '' : realCtorName;
-      if (ctorName) {
-        const id = getObjectIdLikeThing(object);
-        if (id !== undefined)
-          return visitor.visitConstructed(object, id);
-      }
-      const props = collectProperties(object);
-      if (ctorName)
-        visitor.startContainer(`#\u007B${ctorName}`, !!props.length);
-      else
-        visitor.startContainer(`\u007B`, false);
-      let index = 0;
-      for (let prop of props) {
-        if (index >= maxLength)
-          break;
-        visitor.visitKey(prop.name, index);
-        visit(prop.value, level, visitor);
-        ++index;
-      }
-      visitor.endContainer('\u007D', index, props.length);
+      return visitObject(visitor, /** @type {!Object} */(object), level);
     }
 
     /** @const @type{{9: string, 10: string, 13:string}} */

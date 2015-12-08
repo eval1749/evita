@@ -50,13 +50,13 @@ $define(global, 'repl', function($export) {
         const descriptor = Object.getOwnPropertyDescriptor(
             /** @type {!Object} */(runner), key);
         const name = key.toString();
-        const isGetter = 'get' in descriptor;
-        const isSetter = 'get' in descriptor;
-        if (isGetter && isSetter)
+        const hasGetter = 'get' in descriptor;
+        const hasSetter = 'set' in descriptor;
+        if (hasGetter && hasSetter)
           return {key: name, value: 'getter and setter'};
-        if (isGetter)
+        if (hasGetter)
           return {key: name, value: 'getter'};
-        if (isSetter)
+        if (hasSetter)
           return {key: name, value: 'setter'};
         return {key: name, value: descriptor.value};
       }).sort((a, b) => a.key.localeCompare(b.key)));

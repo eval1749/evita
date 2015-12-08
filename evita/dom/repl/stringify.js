@@ -109,51 +109,49 @@ $define(global, 'repl', function($export) {
     const maxLevel = /** @type {number} */(opt_maxLevel);
     const maxLength = /** @type {number} */(opt_maxLength);
     const visitedMap = new Map();
-    let numOf_labels = 0;
+    let numLabels = 0;
 
     /**
      * @param {!Object} object
      * @return {!Array}
      */
     function collectProperties(object) {
-      let override = object['stringifyProperties'];
+      const override = object['stringifyProperties'];
       if (object !== object.constructor.prototype &&
           typeof(override) === 'function') {
         return override.call(object);
       }
       let props = [];
-      let removeFunction = object.constructor !== Object;
+      const removeFunction = object.constructor !== Object;
       for (let runner = object; runner;
            runner = Object.getPrototypeOf(runner)) {
         if (runner === Object.prototype)
           break;
-        let current = /** @type {!Object} */(runner);
+        const current = /** @type {!Object} */(runner);
         props = props.concat(
             Object.getOwnPropertyNames(current).map(function(name) {
-              let desc = Object.getOwnPropertyDescriptor(
+              const desc = Object.getOwnPropertyDescriptor(
                 /** @type {!Object} */(current), name);
               desc['name'] = name;
               return desc;
             }).filter(function(desc) {
-              let name = desc['name'];
+              const name = desc['name'];
               if (name.charCodeAt(name.length - 1) === Unicode.LOW_LINE)
                 return false;
-              let value = desc['value'];
+              const value = desc['value'];
               if (removeFunction && typeof(value) === 'function')
                 return false;
               return value !== undefined;
             }));
       }
-      return props.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-      });
+      return props.sort((a, b) => a.name.localeCompare(b.name));
     }
 
     /** @param {!Object} object @return {string|undefined} */
     function getObjectIdLikeThing(object) {
       try {
-        let key = ['id', 'name'].find(function(key) {
-          let value = object[key];
+        const key = ['id', 'name'].find(function(key) {
+          const value = object[key];
           return value !== undefined && value.toString().length;
         });
         return key ? object[key] : undefined;
@@ -162,6 +160,21 @@ $define(global, 'repl', function($export) {
         // object associated it.
         return undefined;
       }
+    }
+
+    /**
+     * @param {!Visitor} visitor
+     * @param {!Array} array
+     * @param {number} level
+     */
+    function visitArray(visitor, array, level) {
+      visitor.startArray(array);
+      const length = Math.min(array.length, maxLength);
+      for (let index = 0; index < length; ++index) {
+        visitor.visitArrayElement(index);
+        visit(array[index], level, visitor);
+      }
+      visitor.endArray(array, array.length >= maxLength);
     }
 
     /**
@@ -216,7 +229,7 @@ $define(global, 'repl', function($export) {
           return visitor.visitSymbol(/** @type{!symbol} */(value));
       }
 
-      let object = /** @type{!Object} */(value);
+      const object = /** @type{!Object} */(value);
 
       if (visitedMap.has(object))
         return visitor.visitVisited(object);
@@ -229,16 +242,8 @@ $define(global, 'repl', function($export) {
       visitor.visitFirstTime(object);
       visitedMap.set(object, 0);
 
-      if (Array.isArray(object)) {
-        let array = /** @type{!Array} */(object);
-        visitor.startArray(array);
-        let length = Math.min(array.length, maxLength);
-        for (var index = 0; index < length; ++index) {
-          visitor.visitArrayElement(index);
-          visit(array[index], level, visitor);
-        }
-        return visitor.endArray(array, array.length >= maxLength);
-      }
+      if (Array.isArray(object))
+        return visitArray(visitor, /** @type{!Array} */(object), level);
 
       if (isTypedArray(object))
         return visitor.visitTypedArray(/** @type{!ArrayBufferView}*/(object));
@@ -249,14 +254,14 @@ $define(global, 'repl', function($export) {
       if (object instanceof Set)
         return visitSet(visitor, /** @type {!Set} */(object), level);
 
-      let realCtorName = object.constructor ? object.constructor.name : '';
-      let ctorName = realCtorName === 'Object' ? '' : realCtorName;
+      const realCtorName = object.constructor ? object.constructor.name : '';
+      const ctorName = realCtorName === 'Object' ? '' : realCtorName;
       if (ctorName) {
-        let id = getObjectIdLikeThing(object);
+        const id = getObjectIdLikeThing(object);
         if (id !== undefined)
           return visitor.visitConstructed(object, id);
       }
-      let props = collectProperties(object);
+      const props = collectProperties(object);
       visitor.startObject(ctorName, props);
       let count = 0;
       for (let prop of props) {
@@ -270,7 +275,7 @@ $define(global, 'repl', function($export) {
     }
 
     /** @const @type{{9: string, 10: string, 13:string}} */
-    let ESCAPE_MAP = {
+    const ESCAPE_MAP = {
       0x09: 't',
       0x0A: 'n',
       0x0D: 'r'
@@ -297,8 +302,8 @@ $define(global, 'repl', function($export) {
       }
 
       visitConstructed(object, id) {
-        let ctor = object.constructor;
-        let ctorName = ctor && ctor.name !== '' ? ctor.name : '(anonymous)';
+        const ctor = object.constructor;
+        const ctorName = ctor && ctor.name !== '' ? ctor.name : '(anonymous)';
         this.emit('#{', ctorName, ' ' , id, '}');
       }
 
@@ -307,7 +312,7 @@ $define(global, 'repl', function($export) {
       }
 
       visitFirstTime(object) {
-        let label = this.labeler_.labelOf(object);
+        const label = this.labeler_.labelOf(object);
         if (!label)
           return;
         this.emit('#', label, '=');
@@ -333,14 +338,14 @@ $define(global, 'repl', function($export) {
 
       visitString(str) {
         this.emit('"');
-        for (var index = 0; index < str.length; ++index) {
-          let code = str.charCodeAt(index);
+        for (let index = 0; index < str.length; ++index) {
+          const code = str.charCodeAt(index);
           if (code < 0x20 || (code >= 0x7F && code <= 0x9F)) {
-            let escape = ESCAPE_MAP[code];
+            const escape = ESCAPE_MAP[code];
             if (escape) {
               this.emit('\\', escape);
             } else {
-              let hex = ('0' + code.toString(16)).substr(code >= 0x10 ? 1 : 0);
+              const hex = ('0' + code.toString(16)).substr(-2);
               this.emit('\\0x', hex);
             }
           } else if (code === 0x22) {
@@ -363,7 +368,7 @@ $define(global, 'repl', function($export) {
       }
 
       visitVisited(value) {
-        let label = this.labeler_.labelOf(value);
+        const label = this.labeler_.labelOf(value);
         this.emit('#', label, '#');
       }
 
@@ -410,10 +415,10 @@ $define(global, 'repl', function($export) {
       }
     }
 
-    let labeler = new Labeler();
+    const labeler = new Labeler();
     visit(value, 0, labeler);
     visitedMap.clear();
-    let printer = new Printer(labeler);
+    const printer = new Printer(labeler);
     visit(value, 0, printer);
     return printer.result;
   }

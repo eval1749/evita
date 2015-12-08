@@ -4,3 +4,20 @@
 
 /** @type {!Object} */
 var repl;
+
+/**
+ * @param {*} object
+ * @return {undefined}
+ */
+repl.describe = function(object) {};
+
+/**
+ * @param {string} scriptPath
+ * @param {!Object=} opt_options
+ * @return {!Promise}
+ *
+ * Options:
+ *  encoding: string
+ *  verbose: boolean
+ */
+repl.load = function(scriptPath, opt_options) {};

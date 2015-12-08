@@ -85,7 +85,6 @@ js_lib_files = [
   "console.js",
   "commands/document_list.js",
   "commands/dynamic_abbrev.js",
-  "commands/js_console.js",
   "commands/find_and_replace.js",
   "commands/find_and_replace_commands.js",
   "commands/spell_checker.js",
@@ -93,6 +92,7 @@ js_lib_files = [
   "commands/window_commands.js",
 
   "repl/describe.js",
+  "repl/js_console.js",
   "repl/load.js",
   "repl/stringify.js",
 

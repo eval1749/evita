@@ -7,38 +7,38 @@
  * @struct
  * @return {undefined}
  */
-function JsConsole() {};
+repl.JsConsole = function() {};
 
 /**
  * @param {*} reason
  */
-JsConsole.errorHandler = function(reason) {};
+repl.JsConsole.errorHandler = function(reason) {};
 
 /** @type {function(Window)} */
-JsConsole.prototype.activate;
+repl.JsConsole.prototype.activate;
 
 /** @type {function()} */
-JsConsole.prototype.backwardHistory;
+repl.JsConsole.prototype.backwardHistory;
 
 /** @type {!Document} */
-JsConsole.prototype.document;
+repl.JsConsole.prototype.document;
 
 /** @param {string} text */
-JsConsole.prototype.emit = function(text) {};
+repl.JsConsole.prototype.emit = function(text) {};
 
 /** @type {function()} */
-JsConsole.prototype.emitPrompt;
+repl.JsConsole.prototype.emitPrompt;
 
 /**
  * @param {*} reason
  */
-JsConsole.prototype.errorHandler = function(reason) {};
+repl.JsConsole.prototype.errorHandler = function(reason) {};
 
 /** @type {function()} */
-JsConsole.prototype.evalLastLine;
+repl.JsConsole.prototype.evalLastLine;
 
 /** @type {function()} */
-JsConsole.prototype.forwardHistory;
+repl.JsConsole.prototype.forwardHistory;
 
 /** @type {function()} */
-JsConsole.prototype.useHistory;
+repl.JsConsole.prototype.useHistory;

@@ -19,7 +19,7 @@ var $0;
  *  Ctlr+Up Backward history
  *
  */
-global.JsConsole = (function() {
+$define(global, 'repl', function($export) {
   /** @const @type {string} */ const BLOCK_COMMENT = '\x2F*';
   /** @const @type {string} */ const BLOCK_COMMENT_END = '*\x2F';
   /** @const @type {string} */ const LINE_COMMENT = '\x2F/';
@@ -377,5 +377,7 @@ global.JsConsole = (function() {
   Editor.bindKey(Window, 'Ctrl+Shift+I', switchToJsConsoleCommand);
   Editor.bindKey(Window, 'Ctrl+Shift+J', switchToJsConsoleCommand);
 
-  return JsConsole;
-})();
+  $export({JsConsole});
+});
+
+global.JsConsole = repl.JsConsole;

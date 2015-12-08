@@ -26,20 +26,21 @@
     });
 
     document.bindKey('Enter', /** @this {!TextWindow} */ function() {
-      this.selection.endOf(Unit.DOCUMENT);
       instance.evalLastLine();
+      this.selection.endOf(Unit.DOCUMENT);
     });
   }
 
   // Install JsConsole specific commands when "*javascript*" document is
   // created.
   Document.addObserver((type, document) => {
-    if (type !== 'add')
+    if (type !== 'add' || document.name != repl.Console.DOCUMENT_NAME)
       return;
     /** @type {!repl.JsConsole} */
     const instance = new repl.JsConsole(document);
     document.properties.set(repl.JsConsole.name, instance);
     installCommands(document, instance);
+    $0 = instance;
   });
 
   /**

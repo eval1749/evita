@@ -19,6 +19,12 @@ repl.Console.prototype.clear;
 /** @type {!Document} */
 repl.Console.prototype.document;
 
+/** @param {string} string */
+repl.Console.prototype.emit = function(string) {};
+
+/** @type {!function()} */
+repl.Console.prototype.freshLine;
+
 /**
  * @param {...*} params
  */

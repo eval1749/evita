@@ -68,6 +68,16 @@ $define(global, 'repl', function($export) {
       this.update();
     }
 
+    /**
+     * @param {string} text
+     */
+    emit(text) {
+      this.document_.readonly = false;
+      this.range_.endOf(Unit.DOCUMENT);
+      this.range_.insertBefore(text);
+      this.document_.readonly = true;
+    }
+
     /** @return {!Document} */
     ensureDocument_() {
       if (this.document_)
@@ -75,6 +85,17 @@ $define(global, 'repl', function($export) {
       this.document_ = ensureDocument();
       this.range_ = new Range(this.document_);
       return this.document;
+    }
+
+    /**
+     * Emits new line if console doesn't end with newline.
+     */
+    freshLine() {
+      if (this.document_.length === 0)
+        return;
+      if (this.document_.charCodeAt_(this.document_.length - 1) === Unicode.LF)
+        return;
+      this.emit('\n');
     }
 
     /** @return {!Document} */

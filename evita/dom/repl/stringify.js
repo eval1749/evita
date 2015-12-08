@@ -368,9 +368,10 @@ $define(global, 'repl', function($export) {
         this.emit('#', label, '=');
       }
 
+      /** @override */
       visitFunction(fun, level) {
         if (!level) {
-          this.emit('(', fun.toString(), ')');
+          this.emit('(', fun.toString().replace(/\s+/g, ' '), ')');
           return;
         }
         if (fun.name) {

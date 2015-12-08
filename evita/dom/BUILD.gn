@@ -198,7 +198,6 @@ action("check_jslib") {
 test("evita_dom_unittests") {
   sources = [
     "abstract_dom_test.cc",
-    "console_unittest.cc",
     "css/style_unittest.cc",
     "editor_unittest.cc",
     "encodings/text_decoder_unittest.cc",
@@ -232,6 +231,7 @@ test("evita_dom_unittests") {
     "os/file_unittest.cc",
     "os/process_unittest.cc",
     "polyfill_unittest.cc",
+     "repl/console_unittest.cc",
     "text/document_unittest.cc",
     "text/modes/modes_unittest.cc",
     "text/mutation_observer_unittest.cc",

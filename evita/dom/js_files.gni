@@ -82,7 +82,6 @@ js_lib_files = [
   "windows/text_window.js",
   "windows/window.js",
 
-  "console.js",
   "commands/document_list.js",
   "commands/dynamic_abbrev.js",
   "commands/find_and_replace.js",
@@ -91,6 +90,7 @@ js_lib_files = [
   "commands/text_window_commands.js",
   "commands/window_commands.js",
 
+  "repl/console.js",
   "repl/describe.js",
   "repl/js_console.js",
   "repl/load.js",

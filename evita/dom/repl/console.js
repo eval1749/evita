@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-Object.defineProperty(/** @type {!Object} */(global), 'console', (function() {
-  'use strict';
-
+$define(global, 'repl', function($export) {
   const DOCUMENT_NAME = '*javascript*';
 
   ////////////////////////////////////////////////////////////
@@ -110,5 +108,7 @@ Object.defineProperty(/** @type {!Object} */(global), 'console', (function() {
   });
   Object.seal(console);
 
-  return {value: console};
-})())
+  $export({Console, console});
+});
+
+global.console = repl.console;

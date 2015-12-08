@@ -42,6 +42,9 @@ $define(global, 'repl', function($export) {
       /** @param {*} key @param {number} index */
     visitKey(key, index) {}
 
+    /** @param {number} index */
+    visitSetMember(index) {}
+
     /** @param {string} string */
     visitString(string) {}
 
@@ -59,6 +62,12 @@ $define(global, 'repl', function($export) {
 
       /** @param {!Array} array @param {boolean} limited */
     endArray(array, limited) {}
+
+      /** @param {!Set} set */
+    startSet(set) {}
+
+      /** @param {!Set} set @param {boolean} limited */
+    endSet(set, limited) {}
 
       /** @param {!Object} props @param {string} ctorName */
     startObject(ctorName, props) {}
@@ -96,7 +105,7 @@ $define(global, 'repl', function($export) {
     * @param{number=} opt_maxLength Default is 10.
     * @return {string}
     */
-  function stringify(value, opt_maxLevel, opt_maxLength) {
+  function stringify(value, opt_maxLevel = 10, opt_maxLength = 10) {
     const maxLevel = /** @type {number} */(opt_maxLevel);
     const maxLength = /** @type {number} */(opt_maxLength);
     const visitedMap = new Map();
@@ -153,6 +162,24 @@ $define(global, 'repl', function($export) {
         // object associated it.
         return undefined;
       }
+    }
+
+    /**
+     * @param {!Visitor} visitor
+     * @param {!Set} set
+     * @param {number} level
+     */
+    function visitSet(visitor, set, level) {
+      visitor.startSet(set);
+      let index = 0;
+      for (const member of set) {
+        if (index >= maxLength)
+          break;
+        visitor.visitSetMember(index);
+        visit(member, level + 1, visitor);
+        ++index;
+      }
+      visitor.endSet(set, set.size > index);
     }
 
     /**
@@ -218,6 +245,9 @@ $define(global, 'repl', function($export) {
 
       if (object instanceof Date)
         return visitor.visitDate(/** @type{!Date} */(object));
+
+      if (object instanceof Set)
+        return visitSet(visitor, /** @type {!Set} */(object), level);
 
       let realCtorName = object.constructor ? object.constructor.name : '';
       let ctorName = realCtorName === 'Object' ? '' : realCtorName;
@@ -338,11 +368,7 @@ $define(global, 'repl', function($export) {
       }
 
       startArray() {
-        this.emit('[');
-      }
-
-      endArray(array, limited) {
-        this.emit(limited ? ', ...' + array.length + ']' : ']');
+        this.emit('\u005b');
       }
 
       visitArrayElement(index) {
@@ -351,16 +377,36 @@ $define(global, 'repl', function($export) {
         this.emit(', ');
       }
 
+      endArray(array, limited) {
+        if (limited)
+          this.emit(', ...' + array.length);
+        this.emit('\u005d');
+      }
+
       startObject(ctorName, props) {
         if (ctorName) {
           this.emit('#{', ctorName, props.length ? ' ' : '');
           return;
         }
-        this.emit('{');
+        this.emit('\u007b');
       }
 
       endObject(limited) {
         this.emit(limited ? ', ...}' : '}');
+      }
+
+      startSet() {
+        this.emit('#\u007bSet');
+      }
+
+      visitSetMember(index) {
+        this.emit(index ? ', ' : ' ');
+      }
+
+      endSet(set, limited) {
+        if (limited)
+          this.emit(', ...' + set.size);
+        this.emit('\u007d');
       }
     }
 

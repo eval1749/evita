@@ -8,6 +8,7 @@ var windows;
 /**
  * @param {!Window} window
  * @param {!Document} document
+ * @return {!TextWindow}
  */
 windows.activate = function(window, document) {};
 
@@ -29,6 +30,7 @@ windows.newEditorWindow = function(document) {};
 /**
  * @param {!Window} window
  * @param {!Document} document
+ * @return {!TextWindow}
  */
 windows.newTextWindow = function(window, document) {};
 

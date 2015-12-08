@@ -4,7 +4,7 @@
 
 $define(global, 'repl', function($export) {
   const kNativeCode = ' { [native code] }';
-  const kMaxFunctionLen = 40;
+  const kMaxLength = 40;
 
   /**
    * @param {!Function} thing
@@ -61,7 +61,7 @@ $define(global, 'repl', function($export) {
    * @param {!string} thing
    */
   function describeString(thing) {
-    console.log('A string', thing);
+    console.log('A string', formatValue(thing));
     printAsTable([
       {key: 'HasNonAscii', value: hasNonAscii(thing)},
       {key: 'Length', value: thing.length},
@@ -79,18 +79,41 @@ $define(global, 'repl', function($export) {
   }
 
   /**
+   * @param {!Function} value
+   * @return {string}
+   */
+  function formatFunction(value) {
+    const string = value.toString().replace(/\s+/g, ' ');
+    if (string.endsWith(kNativeCode))
+      return string.substr(0, string.length - kNativeCode.length);
+    if (string.length < kMaxLength)
+      return string;
+    return string.substring(0, kMaxLength) + '...';
+  }
+
+  /**
+   * @param {string} value
+   * @return {string}
+   */
+  function formatString(value) {
+    const formatted = repl.stringify(value);
+    if (formatted.length <= kMaxLength)
+      return formatted;
+    return formatted.substr(0, 40) + `...${value.length}"`;
+  }
+
+  /**
    * @param {*} value
    * @return {*}
    */
   function formatValue(value) {
-    if (typeof(value) !== 'function')
-      return value;
-    const string = value.toString().replace(/\s+/g, ' ');
-    if (string.endsWith(kNativeCode))
-      return string.substr(0, string.length - kNativeCode.length);
-    if (string.length < kMaxFunctionLen)
-      return string;
-    return string.substring(0, 40) + '...';
+    switch (typeof(value)) {
+      case 'function':
+        return formatFunction(value);
+      case 'string':
+        return formatString(value);
+    }
+    return value;
   }
 
   /**

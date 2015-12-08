@@ -157,6 +157,10 @@ $define(global, 'repl', function($export) {
    */
   function describe(object) {
     switch (typeof(object)) {
+      case 'boolean':
+        console.log('A Boolean', object);
+        describeObject(new Boolean(object));
+        break;
       case 'function':
         describeFunction(/** @type {!Function} */(object));
         break;

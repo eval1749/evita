@@ -3,27 +3,53 @@
 // found in the LICENSE file.
 
 $define(global, 'repl', function($export) {
+  /** @const @type {string } */
   const DOCUMENT_NAME = '*javascript*';
+
+  /** @return {!Document} */
+  function ensureDocument() {
+    const present = Document.find(DOCUMENT_NAME);
+    if (present)
+      return present;
+    const newDocument = Document.new(DOCUMENT_NAME);
+    newDocument.mode = Mode.chooseModeByFileName('foo.js');
+    return newDocument;
+  }
+
+  /**
+   * @param {*} value
+   * @return {string}
+   */
+  function formatValue(value) {
+    if (typeof(value) === 'string')
+      return value;
+    try {
+      return repl.stringify(value);
+    } catch (exception) {
+      return formatValue(exception);
+    }
+  }
 
   ////////////////////////////////////////////////////////////
   //
   // Console
   //
   class Console {
+    constructor() {
+      this.document_ = null;
+      this.range_ = null;
+    }
+
     /**
      * @param {*} expression
-     * @param {...} args
+     * @param {...*} params
      */
-    assert(expression, args) {
+    assert(expression, ...params) {
       if (expression)
         return;
-      if (arguments.length === 1)
+      if (params.length === 0)
         throw new Error('Assertion failed');
-      let message = Array.prototype.slice.call(arguments, 1).map(function(arg) {
-        if (typeof(arg) === 'string')
-          return arg;
-        return repl.stringify(arg);
-      }).join(' ');
+      const message = params.map(formatValue).join(' ');
       throw new Error('Assertion failed: ' + message);
     }
 
@@ -31,83 +57,73 @@ $define(global, 'repl', function($export) {
      * Clear console log contents.
      */
     clear() {
-      let document = this.ensureDocument();
-      let range = new Range(document, 0, document.length);
+      const document = this.ensureDocument_();
+      const range = this.range_;
+      range.collapseTo(0);
+      range.end = document.length;
+      const readonly = document.readonly;
+      document.readonly = false;
       range.text = '';
-      console.update();
+      document.readonly = readonly;
+      this.update();
     }
 
     /** @return {!Document} */
-    ensureDocument() {
-      let present = Document.find(DOCUMENT_NAME);
-      if (present)
-        return present;
-      let document = Document.new(DOCUMENT_NAME);
-      document.mode = Mode.chooseModeByFileName('foo.js');
-      return document;
+    ensureDocument_() {
+      if (this.document_)
+        return this.document_;
+      this.document_ = ensureDocument();
+      this.range_ = new Range(this.document_);
+      return this.document;
     }
 
-    // Output arguments to console log.
+    /** @return {!Document} */
+    get document() { return this.ensureDocument_(); }
+
     /**
-     * @param {...} varArgs
+     * @param {...*} params
+     *
+     *  Output arguments to console log.
      */
-    log(varArgs) {
-      let message = Array.prototype.slice.call(arguments, 0).map(function(arg) {
-        try {
-          if (typeof(arg) === 'string')
-            return arg;
-          return repl.stringify(arg);
-        } catch (e) {
-          return repl.stringify(e);
-        }
-      }).join(' ');
-      let document = this.ensureDocument();
-      let range = new Range(document);
+    log(...params) {
+      const message = params.map(formatValue).join(' ');
+      const document = this.ensureDocument_();
+      const readonly = document.readonly;
+      document.readonly = false;
+      const range = this.range_;
       range.collapseTo(document.length);
-      let start = range.start;
+      const start = range.start;
       range.startOf(Unit.LINE, Alter.EXTEND);
       if (start !== range.start) {
         range.collapseTo(range.end);
-        message = '\n' + message;
+        range.insertBefore('\n');
       }
-      let readonly = document.readonly;
-      document.readonly = false;
       range.insertBefore(message + '\n');
       document.readonly = readonly;
-      console.update();
+      this.update();
     }
 
-    // Active or create window to show console log.
+    // Activate or create window to show console log.
     show() {
-      let document = this.ensureDocument();
-      let windows = document.listWindows();
+      const document = this.ensureDocument_();
+      const windows = document.listWindows();
       if (windows.length) {
         windows[0].focus();
         return;
       }
-      let editorWindow = new EditorWindow();
-      let window = new TextWindow(new Range(document));
+      const editorWindow = new EditorWindow();
+      const window = new TextWindow(/** @type {!Range} */(this.range_));
       editorWindow.appendChild(window);
       editorWindow.realize();
     }
 
     update() {
-      for (let window of this.ensureDocument().listWindows()) {
+      for (const window of this.document_.listWindows())
         window.update();
-      }
     }
   }
-  Object.seal(Console.prototype);
-  Object.seal(Console);
 
-  let console = new Console();
-  // TODO(eval1749): Once closure compiler supports getter in class, we should
-  // use getter syntax.
-  Object.defineProperties(console, {
-    document: { get: function() { return this.ensureDocument(); } }
-  });
-  Object.seal(console);
-
+  const console = new Console();
   $export({Console, console});
 });
 

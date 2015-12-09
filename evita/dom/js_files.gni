@@ -93,9 +93,11 @@ js_lib_files = [
   "repl/console.js",
   "repl/describe.js",
   "repl/js_console.js",
-  "repl/js_console_commands.js",
   "repl/load.js",
   "repl/stringify.js",
+
+  "repl/js_completer.js",
+  "repl/js_console_commands.js",
 
   "jslib/install_stringify.js",
 

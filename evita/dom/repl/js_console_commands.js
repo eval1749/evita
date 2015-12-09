@@ -6,27 +6,33 @@
 (function() {
   /**
    * @param {!Document} document
-   * @param {!repl.JsConsole} instance
+   * @param {!repl.JsConsole} commandLoop
    */
-  function installCommands(document, instance) {
+  function installCommands(document, commandLoop) {
     document.bindKey('Ctrl+ArrowDown', /** @this {!TextWindow} */ function() {
-      instance.forwardHistory();
+      commandLoop.forwardHistory();
       this.selection.endOf(Unit.DOCUMENT);
     });
 
     document.bindKey('Ctrl+L', /** @this {!TextWindow} */ function() {
       console.clear();
-      instance.emitPrompt();
+      commandLoop.emitPrompt();
       this.selection.endOf(Unit.DOCUMENT);
     });
 
     document.bindKey('Ctrl+ArrowUp', /** @this {!TextWindow} */ function() {
-      instance.backwardHistory();
+      commandLoop.backwardHistory();
       this.selection.endOf(Unit.DOCUMENT);
     });
 
+    console.document.bindKey('Ctrl+I', /** @this {!TextWindow} */ function() {
+      const selection = /** @type {!TextSelection} */(this.selection);
+      const completer = repl.JsCompleter.ensure(commandLoop, selection);
+      completer.perform();
+    });
+
     document.bindKey('Enter', /** @this {!TextWindow} */ function() {
-      instance.evalLastLine();
+      commandLoop.evalLastLine();
       this.selection.endOf(Unit.DOCUMENT);
     });
   }
@@ -37,10 +43,10 @@
     if (type !== 'add' || document.name != repl.Console.DOCUMENT_NAME)
       return;
     /** @type {!repl.JsConsole} */
-    const instance = new repl.JsConsole(document);
-    document.properties.set(repl.JsConsole.name, instance);
-    installCommands(document, instance);
-    $0 = instance;
+    const commandLoop = new repl.JsConsole(document);
+    document.properties.set(repl.JsConsole.name, commandLoop);
+    installCommands(document, commandLoop);
+    $0 = commandLoop;
   });
 
   /**
@@ -53,11 +59,11 @@
      const window = windows.activate(this.selection.window, document);
      if (!isFirstTime)
        return;
-     const instance = document.properties.get(repl.JsConsole.name);
+     const commandLoop = document.properties.get(repl.JsConsole.name);
      console.freshLine();
      console.emit(`\x2F/ JavaScript Console ${Editor.version},` +
                   ` v8:${Editor.v8Version}\n\n`);
-     instance.emitPrompt();
+     commandLoop.emitPrompt();
      window.selection.endOf(Unit.DOCUMENT);
   }
 

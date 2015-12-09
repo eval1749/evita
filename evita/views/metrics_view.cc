@@ -65,6 +65,7 @@ class MetricsView::View final : public ui::LayerOwner,
   explicit View(ui::AnimatableWindow* widget);
   ~View() final = default;
 
+  void AddSample(base::TimeDelta sample);
   void DidBeginAnimationFrame(base::Time now);
   void DidCreateParentLayer(ui::Layer* parent_layer);
   void DidRecreateParentLayer(ui::Layer* parent_layer);
@@ -75,8 +76,6 @@ class MetricsView::View final : public ui::LayerOwner,
   void WillDestroyWidget();
 
  private:
-  friend class TimingScope;
-
   // ui::LayerOwnerDelegate
   void DidRecreateLayer(ui::Layer* old_layer) final;
 
@@ -105,6 +104,10 @@ void MetricsView::View::DidBeginAnimationFrame(base::Time now) {
   if (Paint())
     return;
   widget_->RequestAnimationFrame();
+}
+
+void MetricsView::View::AddSample(base::TimeDelta sample) {
+  frame_duration_data_.AddSample(sample);
 }
 
 void MetricsView::View::DidCreateParentLayer(ui::Layer* parent_layer) {
@@ -189,7 +192,10 @@ MetricsView::TimingScope::TimingScope(MetricsView* view)
 
 MetricsView::TimingScope::~TimingScope() {
   auto const end = metrics::Sampling::NowTimeTicks();
-  view_->view_->frame_duration_data_.AddSample(end - start_);
+  paint::PaintThread::instance()->PostTask(
+      FROM_HERE,
+      base::Bind(&MetricsView::View::AddSample,
+                 base::Unretained(view_->view_.get()), end - start_));
   view_->RequestAnimationFrame();
 }
 

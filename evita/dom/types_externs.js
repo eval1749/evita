@@ -7,6 +7,17 @@
  */
 
 /**
+ * @template T
+ * @template U
+ * @param {!Iterable<T>} arrayLike
+ * @param {!function(T):U=} opt_mapFn
+ * @param {*=} opt_thisArg
+ * TODO(eval1749): |Array.from()| should return |!Array.<U>|.
+ * @return {!Array.<T|U>}
+ */
+Array.from = function(arrayLike, opt_mapFn, opt_thisArg) {};
+
+/**
  * @type {!Object}
  */
 var global;

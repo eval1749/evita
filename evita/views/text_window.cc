@@ -189,6 +189,9 @@ text::Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
 
 void TextWindow::SetZoom(float new_zoom) {
   text_view_->SetZoom(new_zoom);
+  // TODO(eval1749) If |new_zoom| equals to old zoom value, we should not
+  // request animation frame.
+  RequestAnimationFrame();
 }
 
 bool TextWindow::SmallScroll(int, int y_count) {

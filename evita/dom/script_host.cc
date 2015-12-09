@@ -55,16 +55,16 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
-  auto const js_console = runner->GetGlobalProperty("JsConsole");
-  if (js_console.IsEmpty()) {
-    DVLOG(0) << "No JsConsole";
+  auto const js_editor = runner->GetGlobalProperty("Editor");
+  if (js_editor.IsEmpty()) {
+    DVLOG(0) << "No Editor";
     return;
   }
-  auto const handler = js_console->ToObject()->Get(
+  auto const handler = js_editor->ToObject()->Get(
       v8Strings::handleRejectedPromise.Get(isolate));
   if (handler.IsEmpty() || !handler->IsObject() ||
       !handler->ToObject()->IsFunction()) {
-    DVLOG(0) << "No JsConsole.handleRejectedPromise";
+    DVLOG(0) << "No Editor.handleRejectedPromise";
     return;
   }
   auto const event = static_cast<int>(reject_message.GetEvent());

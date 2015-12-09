@@ -239,27 +239,6 @@ $define(global, 'repl', function($export) {
      * @param {!Promise} promise
      * @param {*} reason
      * @param {number} event
-     *
-     * enum PromiseRejectEvent {
-     *   kPromiseRejectWithNoHandler = 0,
-     *   kPromiseHandlerAddedAfterReject = 1
-     * };
-     *
-     * This function is called from C++ via
-     * |v8::Isolate::SetPromiseRejectCallback()|.
-     */
-    static handleRejectedPromise(promise, reason, event) {
-      // TODO(eval1749): We should annotate |history_| with |History| once
-      // Closure compiler recognize class |History|.
-      const instance = /** @type {!JsConsole} */(
-          console.document.properties.get(repl.JsConsole.name));
-      instance.handleRejection_(promise, reason, event);
-    }
-
-    /**
-     * @param {!Promise} promise
-     * @param {*} reason
-     * @param {number} event
      */
     handleRejection_(promise, reason, event) {
       console.freshLine();
@@ -282,6 +261,29 @@ $define(global, 'repl', function($export) {
       this.lastLine = this.history_.current;
     }
   }
+
+  /**
+   * @param {!Promise} promise
+   * @param {*} reason
+   * @param {number} event
+   *
+   * enum PromiseRejectEvent {
+   *   kPromiseRejectWithNoHandler = 0,
+   *   kPromiseHandlerAddedAfterReject = 1
+   * };
+   *
+   * This function is called from C++ via
+   * |v8::Isolate::SetPromiseRejectCallback()|.
+   */
+  function handleRejectedPromise(promise, reason, event) {
+    // TODO(eval1749): We should annotate |history_| with |History| once
+    // Closure compiler recognize class |History|.
+    const commandLoop = /** @type {!JsConsole} */(
+        console.document.properties.get(repl.JsConsole.name));
+    commandLoop.handleRejection_(promise, reason, event);
+  };
+
+  Editor.handleRejectedPromise = handleRejectedPromise;
 
   $export({JsConsole});
 });

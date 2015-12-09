@@ -99,7 +99,7 @@ bold
 # IdleRequestOptions
 timeout
 
-# JsConsole
+# Editor
 handleRejectedPromise
 
 # KeyboardEventInit

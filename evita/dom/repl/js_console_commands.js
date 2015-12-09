@@ -4,38 +4,34 @@
 
 // JavaScript console specific key bindings.
 (function() {
-  /**
-   * @param {!Document} document
-   * @param {!repl.JsConsole} commandLoop
-   */
-  function installCommands(document, commandLoop) {
-    document.bindKey('Ctrl+ArrowDown', /** @this {!TextWindow} */ function() {
-      commandLoop.forwardHistory();
-      this.selection.endOf(Unit.DOCUMENT);
-    });
+  const JsConsole = repl.JsConsole;
 
-    document.bindKey('Ctrl+L', /** @this {!TextWindow} */ function() {
-      console.clear();
-      commandLoop.emitPrompt();
-      this.selection.endOf(Unit.DOCUMENT);
-    });
+  JsConsole.bindKey('Ctrl+ArrowDown', /** @this {!TextWindow} */ function() {
+    JsConsole.instance.forwardHistory();
+    this.selection.endOf(Unit.DOCUMENT);
+  });
 
-    document.bindKey('Ctrl+ArrowUp', /** @this {!TextWindow} */ function() {
-      commandLoop.backwardHistory();
-      this.selection.endOf(Unit.DOCUMENT);
-    });
+  JsConsole.bindKey('Ctrl+L', /** @this {!TextWindow} */ function() {
+    console.clear();
+    JsConsole.instance.emitPrompt();
+    this.selection.endOf(Unit.DOCUMENT);
+  });
 
-    console.document.bindKey('Ctrl+I', /** @this {!TextWindow} */ function() {
-      const selection = /** @type {!TextSelection} */(this.selection);
-      const completer = repl.JsCompleter.ensure(commandLoop, selection);
-      completer.perform();
-    });
+  JsConsole.bindKey('Ctrl+ArrowUp', /** @this {!TextWindow} */ function() {
+    JsConsole.instance.backwardHistory();
+    this.selection.endOf(Unit.DOCUMENT);
+  });
 
-    document.bindKey('Enter', /** @this {!TextWindow} */ function() {
-      commandLoop.evalLastLine();
-      this.selection.endOf(Unit.DOCUMENT);
-    });
-  }
+  JsConsole.bindKey('Ctrl+I', /** @this {!TextWindow} */ function() {
+    const selection = /** @type {!TextSelection} */(this.selection);
+    const completer = repl.JsCompleter.ensure(JsConsole.instance, selection);
+    completer.perform();
+  });
+
+  JsConsole.bindKey('Enter', /** @this {!TextWindow} */ function() {
+    JsConsole.instance.evalLastLine();
+    this.selection.endOf(Unit.DOCUMENT);
+  });
 
   // Install JsConsole specific commands when "*javascript*" document is
   // created.
@@ -45,7 +41,6 @@
     /** @type {!repl.JsConsole} */
     const commandLoop = new repl.JsConsole(document);
     document.properties.set(repl.JsConsole.name, commandLoop);
-    installCommands(document, commandLoop);
     $0 = commandLoop;
   });
 
@@ -59,7 +54,7 @@
      const window = windows.activate(this.selection.window, document);
      if (!isFirstTime)
        return;
-     const commandLoop = document.properties.get(repl.JsConsole.name);
+     const commandLoop = JsConsole.instance;
      console.freshLine();
      console.emit(`\x2F/ JavaScript Console ${Editor.version},` +
                   ` v8:${Editor.v8Version}\n\n`);

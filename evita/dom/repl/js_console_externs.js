@@ -8,6 +8,15 @@
  */
 repl.JsConsole = function(document) {};
 
+/**
+ * @param {string} keyCombination
+ * @param {!Object} command
+ */
+repl.JsConsole.bindKey = function(keyCombination, command) {};
+
+/** @type {!repl.JsConsole} */
+repl.JsConsole.instance;
+
 /** @type {function()} */
 repl.JsConsole.prototype.backwardHistory;
 

@@ -27,6 +27,12 @@ $define(global, 'repl', function($export) {
   /** @const @type {string} */ const LINE_COMMENT = '\x2F/';
   /** @const @type {number} */ const MAX_HISTORY_LINES = 20;
 
+  /** @const @type {!Map.<string, !Object>} */
+  const keyBindings = new Map();
+
+  /** @type {JsConsole} */
+  let staticInstance = null;
+
   /**
    * @param {*} reason
    * @return {string}
@@ -122,6 +128,11 @@ $define(global, 'repl', function($export) {
       this.range_ = new Range(document);
       /** @const @type {!Array} */
       this.results_ = [];
+
+      for (const [key, command] of keyBindings.entries())
+        document.bindKey(key, command);
+
+      staticInstance = this;
     }
 
     backwardHistory() {
@@ -235,18 +246,6 @@ $define(global, 'repl', function($export) {
       });
     }
 
-    /**
-     * @param {!Promise} promise
-     * @param {*} reason
-     * @param {number} event
-     */
-    handleRejection_(promise, reason, event) {
-      console.freshLine();
-      console.log(BLOCK_COMMENT, 'Unhandled promise rejection:', event);
-      console.emit(formatReason(reason));
-      console.log(BLOCK_COMMENT_END);
-    }
-
     /** @param {*} result */
     rememberResult_(result) {
       $2 = $1;
@@ -255,6 +254,25 @@ $define(global, 'repl', function($export) {
       if (this.results_.length >= 10)
         this.results_.shift();
       this.results_.push($0);
+    }
+
+    /**
+     * @param {string} keyCombination
+     * @param {!Object} command
+     */
+    static bindKey(keyCombination, command) {
+      if (!staticInstance) {
+        keyBindings.set(keyCombination, command);
+        return;
+      }
+      staticInstance.document.bindKey(keyCombination, command);
+    }
+
+    /** @return {!JsConsole} */
+    static get instance() {
+      if (!staticInstance)
+        throw new Error('JsConsole is not initialized.');
+      return staticInstance;
     }
 
     useHistory() {
@@ -276,12 +294,11 @@ $define(global, 'repl', function($export) {
    * |v8::Isolate::SetPromiseRejectCallback()|.
    */
   function handleRejectedPromise(promise, reason, event) {
-    // TODO(eval1749): We should annotate |history_| with |History| once
-    // Closure compiler recognize class |History|.
-    const commandLoop = /** @type {!JsConsole} */(
-        console.document.properties.get(repl.JsConsole.name));
-    commandLoop.handleRejection_(promise, reason, event);
-  };
+    console.freshLine();
+    console.log(BLOCK_COMMENT, 'Unhandled promise rejection:', event);
+    console.emit(formatReason(reason));
+    console.log(BLOCK_COMMENT_END);
+  }
 
   Editor.handleRejectedPromise = handleRejectedPromise;
 

@@ -27,22 +27,22 @@ $define(global, 'repl', function($export) {
   /** @const @type {string} */ const LINE_COMMENT = '\x2F/';
   /** @const @type {number} */ const MAX_HISTORY_LINES = 20;
 
-    /**
-     * @param {*} reason
-     * @return {string}
-     */
-    function formatReason(reason) {
-      if (reason instanceof Error) {
-        const stack = reason['stack'];
-        if (stack)
-          return stack.toString();
-        const message = reason['message'];
-        if (message) {
-          return 'Exception: ' + message;
-        }
+  /**
+   * @param {*} reason
+   * @return {string}
+   */
+  function formatReason(reason) {
+    if (reason instanceof Error) {
+      const stack = reason['stack'];
+      if (stack)
+        return stack.toString();
+      const message = reason['message'];
+      if (message) {
+        return 'Exception: ' + message;
       }
-      return repl.stringify(reason);
-   }
+    }
+    return repl.stringify(reason);
+  }
 
   //////////////////////////////////////////////////////////////////////
   //

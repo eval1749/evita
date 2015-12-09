@@ -135,7 +135,7 @@ $define(global, 'repl', function($export) {
       ++this.lineNumber_;
       console.freshLine();
       console.emit('js:' + this.lineNumber_ + '> ');
-      // Off by one to keep |this.range_.end| before user input.
+      // Off by one to keep |this.range_.start| before user input.
       this.range_.collapseTo(this.document_.length - 1);
       this.document_.readonly = false;
     }
@@ -198,10 +198,13 @@ $define(global, 'repl', function($export) {
     }
 
     /** @param {string} string */
-    set lastLine(string) { this.range_.text = string; }
+    set lastLine(string) {
+      this.range.endOf(Unit.DOCUMENT, Alter.EXTEND);
+      this.range_.text = ' ' + string;
+    }
 
     /** @return {number} */
-    get lastLineStart() { return this.range_.start; }
+    get lastLineStart() { return this.range_.start + 1; }
 
     /** @return {!Range} */
     get range() { return this.range_; }
@@ -276,8 +279,7 @@ $define(global, 'repl', function($export) {
     }
 
     useHistory() {
-      this.range_.end = this.document_.length;
-      this.range_.text = ' ' + this.history_.current;
+      this.lastLine = this.history_.current;
     }
   }
 

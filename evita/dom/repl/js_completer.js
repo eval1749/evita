@@ -63,11 +63,11 @@ $define(global, 'repl', ($export) => {
       /** @type {number} */
       this.index_ = 0;
       /** const @type {!repl.JsConsole} */
-      this.repl_ = repl;
+      this.commandLoop_ = commandLoop;
       /** @const @type {number} */
-      this.lastLineStart_ = this.repl_.lastLineStart;
+      this.lastLineStart_ = this.commandLoop_.lastLineStart;
       /** @type {string} */
-      this.lastLine_ = this.repl_.lastLine;
+      this.lastLine_ = this.commandLoop_.lastLine;
       this.setupCandiates_();
     }
 
@@ -76,15 +76,15 @@ $define(global, 'repl', ($export) => {
       if (this.candidates_.length === 1)
         return false;
       this.lastLine_ = this.beforeText_ + this.candidates_[this.index_];
-      this.repl_.lastLine = this.lastLine_;
+      this.commandLoop_.lastLine = this.lastLine_;
       this.index_ = (this.index_ + 1) % this.candidates_.length;
       return true;
     }
 
     /** @return {boolean} */
     isAlive() {
-      return this.lastLineStart_ === this.repl_.lastLineStart &&
-             this.lastLine_ === this.repl_.lastLine;
+      return this.lastLineStart_ === this.commandLoop_.lastLineStart &&
+             this.lastLine_ === this.commandLoop_.lastLine;
     }
 
     /** @param {!Set.<string>} nameSet */

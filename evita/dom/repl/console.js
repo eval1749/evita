@@ -124,6 +124,10 @@ $define(global, 'repl', function($export) {
       this.update();
     }
 
+    reset_() {
+      this.document_ = null;
+    }
+
     // Activate or create window to show console log.
     show() {
       const document = this.ensureDocument_();
@@ -147,6 +151,11 @@ $define(global, 'repl', function($export) {
   Object.defineProperty(Console, 'DOCUMENT_NAME', {value: DOCUMENT_NAME});
 
   const console = new Console();
+
+  $initialize(function() {
+    console.reset_();
+  });
+
   $export({Console, console});
 });
 

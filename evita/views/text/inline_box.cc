@@ -15,25 +15,6 @@
 namespace views {
 namespace rendering {
 
-namespace {
-
-void DrawText(gfx::Canvas* canvas,
-              const Font& font,
-              const gfx::Brush& text_brush,
-              const gfx::RectF& rect,
-              const base::string16& string) {
-  font.DrawText(canvas, text_brush, rect, string);
-}
-
-inline void FillRect(gfx::Canvas* canvas,
-                     const gfx::RectF& rect,
-                     gfx::ColorF color) {
-  gfx::Brush fill_brush(canvas, color);
-  canvas->FillRectangle(fill_brush, rect);
-}
-
-}  // namespace
-
 #define V(name) \
   void name::Accept(InlineBoxVisitor* visitor) { visitor->Visit##name(this); }
 FOR_EACH_INLINE_BOX(V)
@@ -66,21 +47,6 @@ InlineBox::~InlineBox() {}
 
 float InlineBox::top() const {
   return line_height() - line_descent() - height() + descent();
-}
-
-void InlineBox::FillBackground(gfx::Canvas* canvas,
-                               const gfx::RectF& rect) const {
-  FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
-                              ::ceilf(rect.bottom)),
-           style_.bgcolor());
-}
-
-void InlineBox::FillOverlay(gfx::Canvas* canvas, const gfx::RectF& rect) const {
-  if (style_.overlay_color().alpha() == 0.0f)
-    return;
-  FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
-                              ::ceilf(rect.bottom)),
-           style_.overlay_color());
 }
 
 void InlineBox::IncrementWidth(float amount) {
@@ -118,10 +84,6 @@ bool InlineBox::Merge(const RenderStyle&, float) {
   return false;
 }
 
-void InlineBox::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
-  FillBackground(canvas, rect);
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // InlineFillerBox
@@ -149,63 +111,6 @@ WithFont::WithFont(const Font& font) : font_(&font) {}
 WithFont::WithFont(const WithFont& other) : font_(other.font_) {}
 
 WithFont::~WithFont() {}
-
-float WithFont::underline() const {
-  return font_->underline();
-}
-
-float WithFont::underline_thickness() const {
-  return font_->underline_thickness();
-}
-
-void WithFont::DrawHLine(gfx::Canvas* canvas,
-                         const gfx::Brush& brush,
-                         float sx,
-                         float ex,
-                         float y) const {
-  canvas->DrawLine(brush, gfx::PointF(sx, y), gfx::PointF(ex, y),
-                   font_->underline_thickness());
-}
-
-void WithFont::DrawLine(gfx::Canvas* canvas,
-                        const gfx::Brush& brush,
-                        float sx,
-                        float sy,
-                        float ex,
-                        float ey,
-                        float width) const {
-  canvas->DrawLine(brush, gfx::PointF(sx, sy), gfx::PointF(ex, ey),
-                   width * font_->underline_thickness());
-}
-
-void WithFont::DrawVLine(gfx::Canvas* canvas,
-                         const gfx::Brush& brush,
-                         float x,
-                         float sy,
-                         float ey) const {
-  canvas->DrawLine(brush, gfx::PointF(x, sy), gfx::PointF(x, ey),
-                   font_->underline_thickness());
-}
-
-void WithFont::DrawWave(gfx::Canvas* canvas,
-                        const gfx::Brush& brush,
-                        const gfx::RectF& bounds,
-                        float baseline) const {
-  auto const wave = std::max(font_->underline() * 1.3f, 2.0f);
-  auto const pen_width = font_->underline_thickness();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-  for (auto x = bounds.left; x < bounds.right; x += wave) {
-    auto const bottom = baseline + wave;
-    auto const top = baseline;
-    // top to bottom
-    canvas->DrawLine(brush, gfx::PointF(x, top), gfx::PointF(x + wave, bottom),
-                     pen_width);
-    x += wave;
-    // bottom to top
-    canvas->DrawLine(brush, gfx::PointF(x, bottom), gfx::PointF(x + wave, top),
-                     pen_width);
-  }
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -263,66 +168,6 @@ gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Posn lPosn) const {
 
 text::Posn InlineMarkerBox::MapXToPosn(float x) const {
   return start_;
-}
-
-// Render marker above baseline.
-void InlineMarkerBox::Render(gfx::Canvas* canvas,
-                             const gfx::RectF& rect) const {
-  InlineBox::Render(canvas, rect);
-
-  auto const ascent = height() - descent();
-  auto const marker_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
-                                      gfx::SizeF(width(), height()));
-  gfx::Brush stroke_brush(canvas, style().color());
-  auto const baseline = marker_rect.bottom - descent();
-  switch (marker_name_) {
-    case TextMarker::EndOfDocument: {  // Draw <-
-      auto const wing = underline() * 3;
-      auto const w = std::max(ascent / 6, 2.0f);
-      auto const y = baseline - (ascent - wing) / 2;
-      auto const sx = marker_rect.left;
-      auto const ex = marker_rect.right;
-      DrawHLine(canvas, stroke_brush, sx, ex, y);
-      DrawLine(canvas, stroke_brush, sx + w, y - w, sx, y, 1.0f);
-      DrawLine(canvas, stroke_brush, sx + w, y + w, sx, y, 1.0f);
-      break;
-    }
-
-    case TextMarker::EndOfLine: {  // Draw V
-      auto const ey = baseline;
-      auto const sy = ey - ascent * 3 / 5;
-      auto const w = std::max(ascent / 6, 2.0f);
-      auto const x = marker_rect.left + width() / 2;
-      DrawVLine(canvas, stroke_brush, x, sy, ey);
-      DrawLine(canvas, stroke_brush, x - w, ey - w, x, ey, 1.0f);
-      DrawLine(canvas, stroke_brush, x + w, ey - w, x, ey, 1.0f);
-      break;
-    }
-
-    case TextMarker::LineWrap: {  // Draw ->
-      auto const wing = underline() * 3;
-      auto const w = std::max(ascent / 6, 2.0f);
-      auto const y = baseline - (ascent - wing) / 2;
-      auto const sx = marker_rect.left;
-      auto const ex = marker_rect.right - underline_thickness();
-      DrawHLine(canvas, stroke_brush, sx, ex, y);
-      DrawLine(canvas, stroke_brush, ex - w, y - w, ex, y, 1.0f);
-      DrawLine(canvas, stroke_brush, ex - w, y + w, ex, y, 1.0f);
-      break;
-    }
-
-    case TextMarker::Tab: {  // Draw |_|
-      auto const sx = marker_rect.left + underline_thickness() * 2;
-      auto const ex = marker_rect.right - underline_thickness() * 2;
-      auto const y = baseline;
-      auto const w = std::max(ascent / 6, 2.0f);
-      DrawHLine(canvas, stroke_brush, sx, ex, y);
-      DrawVLine(canvas, stroke_brush, sx, y, y - w * 2);
-      DrawVLine(canvas, stroke_brush, ex, y, y - w * 2);
-      break;
-    }
-  }
-  FillOverlay(canvas, marker_rect);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -426,53 +271,6 @@ bool InlineTextBox::Merge(const RenderStyle& style, float width) {
   return true;
 }
 
-void InlineTextBox::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
-  DCHECK(!characters().empty());
-  auto const text_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
-                                    gfx::SizeF(rect.width(), height()));
-  FillBackground(canvas, rect);
-  gfx::Brush text_brush(canvas, style().color());
-  DrawText(canvas, style().font(), text_brush, text_rect, characters());
-
-  auto const baseline = text_rect.bottom - descent();
-  auto const underline = baseline + this->underline();
-  switch (style().text_decoration()) {
-    case css::TextDecoration::ImeInput:
-      DrawWave(canvas, text_brush, rect, underline);
-      break;
-
-    case css::TextDecoration::ImeInactiveA:
-      DrawHLine(canvas, text_brush, rect.left, rect.right, underline);
-      break;
-
-    case css::TextDecoration::ImeInactiveB:
-      DrawHLine(canvas, text_brush, rect.left, rect.right, underline);
-      break;
-
-    case css::TextDecoration::ImeActive:
-      DrawLine(canvas, text_brush, rect.left, underline, rect.right, underline,
-               2.0f);
-      break;
-
-    case css::TextDecoration::None:
-      break;
-
-    case css::TextDecoration::GreenWave:
-      DrawWave(canvas, gfx::Brush(canvas, gfx::ColorF::Green), rect, baseline);
-      break;
-
-    case css::TextDecoration::RedWave:
-      DrawWave(canvas, gfx::Brush(canvas, gfx::ColorF::Red), rect, baseline);
-      break;
-
-    case css::TextDecoration::Underline:
-      DrawHLine(canvas, text_brush, rect.left, rect.right, underline);
-      break;
-  }
-
-  FillOverlay(canvas, text_rect);
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // InlineUnicodeBox
@@ -502,20 +300,6 @@ gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Posn offset) const {
 
 bool InlineUnicodeBox::Merge(const RenderStyle&, float) {
   return false;
-}
-
-void InlineUnicodeBox::Render(gfx::Canvas* canvas,
-                              const gfx::RectF& rect) const {
-  auto const text_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
-                                    gfx::SizeF(rect.width(), height())) -
-                         gfx::SizeF(1, 1);
-  FillBackground(canvas, rect);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, text_rect);
-  gfx::Brush text_brush(canvas, style().color());
-  DrawText(canvas, style().font(), text_brush, text_rect - gfx::SizeF(1, 1),
-           characters());
-  canvas->DrawRectangle(text_brush, text_rect);
-  FillOverlay(canvas, text_rect);
 }
 
 }  // namespace rendering

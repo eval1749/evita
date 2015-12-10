@@ -6,8 +6,8 @@
 #define EVITA_VIEWS_TEXT_INLINE_BOX_H_
 
 #include "common/castable.h"
-#include "evita/gfx_base.h"
-#include "evita/precomp.h"
+#include "evita/ed_defs.h"
+#include "evita/gfx/rect.h"
 #include "evita/views/text/inline_box_forward.h"
 #include "evita/views/text/render_style.h"
 
@@ -55,6 +55,8 @@ class InlineBox : public common::Castable {
   float descent() const { return descent_; }
   float height() const { return height_; }
   float line_height() const { return line_height_; }
+  const RenderStyle& style() const { return style_; }
+  float top() const;
   float width() const { return width_; }
 
   virtual void Accept(InlineBoxVisitor* visitor) = 0;
@@ -65,17 +67,12 @@ class InlineBox : public common::Castable {
   virtual gfx::RectF HitTestTextPosition(text::Posn position) const;
   virtual text::Posn MapXToPosn(float x) const;
   virtual bool Merge(const RenderStyle& style, float width);
-  virtual void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const;
 
  protected:
   InlineBox(const RenderStyle& style, float width, float height, float descent);
 
   float line_descent() const { return line_descent_; }
-  float top() const;
-  const RenderStyle& style() const { return style_; }
 
-  void FillOverlay(gfx::Canvas* canvas, const gfx::RectF& rect) const;
-  void FillBackground(gfx::Canvas* canvas, const gfx::RectF& rect) const;
   void IncrementWidth(float amount);
 
  private:
@@ -109,35 +106,13 @@ class InlineFillerBox final : public InlineBox {
 // WithFont
 //
 class WithFont {
+ public:
+  const Font& font() { return *font_; }
+
  protected:
   explicit WithFont(const Font& font);
   WithFont(const WithFont& other);
   ~WithFont();
-
-  float underline() const;
-  float underline_thickness() const;
-
-  void DrawHLine(gfx::Canvas* canvas,
-                 const gfx::Brush& brush,
-                 float sx,
-                 float sy,
-                 float y) const;
-  void DrawLine(gfx::Canvas* canvas,
-                const gfx::Brush& brush,
-                float x1,
-                float y1,
-                float x2,
-                float y2,
-                float width) const;
-  void DrawVLine(gfx::Canvas* canvas,
-                 const gfx::Brush& brush,
-                 float x,
-                 float sy,
-                 float ey) const;
-  void DrawWave(gfx::Canvas* canvas,
-                const gfx::Brush& brush,
-                const gfx::RectF& bounds,
-                float baseline) const;
 
  private:
   const Font* font_;
@@ -169,7 +144,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
   uint32_t Hash() const final;
   gfx::RectF HitTestTextPosition(text::Posn lPosn) const final;
   text::Posn MapXToPosn(float x) const final;
-  void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
+
   text::Posn end_;
   TextMarker marker_name_;
   text::Posn start_;
@@ -183,6 +158,8 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
   DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineTextBoxBase, InlineBox);
 
  public:
+  const base::string16 characters() const { return characters_; }
+
   void AddChar(base::char16 char_code);
 
  protected:
@@ -194,9 +171,9 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
   InlineTextBoxBase(const InlineTextBoxBase& other);
   ~InlineTextBoxBase() override;
 
-  const base::string16 characters() const { return characters_; }
   text::Posn end() const { return end_; }
   text::Posn start() const { return start_; }
+
   void ExtendEnd();
 
  private:
@@ -232,7 +209,6 @@ class InlineTextBox final : public InlineTextBoxBase {
   InlineBox* Copy() const final;
   gfx::RectF HitTestTextPosition(text::Posn position) const final;
   bool Merge(const RenderStyle& style, float width) final;
-  void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -256,7 +232,6 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
   InlineBox* Copy() const final;
   gfx::RectF HitTestTextPosition(text::Posn lPosn) const final;
   bool Merge(const RenderStyle& style, float width) final;
-  void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
 };
 
 }  // namespace rendering

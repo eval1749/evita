@@ -7,6 +7,7 @@
 #include "evita/views/text/root_inline_box.h"
 
 #include "base/logging.h"
+#include "evita/paint/inline_box_painter.h"
 #include "evita/views/text/inline_box.h"
 #include "evita/views/text/render_selection.h"
 
@@ -145,7 +146,8 @@ void RootInlineBox::Render(gfx::Canvas* canvas) const {
   for (auto cell : cells_) {
     gfx::RectF rect(x, bounds_.top, x + cell->width(),
                     ::ceil(bounds_.top + cell->line_height()));
-    cell->Render(canvas, rect);
+    paint::InlineBoxPainter painter(canvas, rect);
+    painter.Paint(*cell);
     x = rect.right;
   }
 }

@@ -15,6 +15,7 @@ namespace rendering {
   V(InlineUnicodeBox)
 
 // Forward declarations
+class InlineBox;
 #define V(name) class name;
 FOR_EACH_INLINE_BOX(V)
 #undef V

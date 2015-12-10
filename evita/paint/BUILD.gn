@@ -4,6 +4,8 @@
 
 source_set("paint") {
   sources = [
+    "inline_box_painter.cc",
+    "inline_box_painter.h",
     "paint_thread.cc",
     "paint_thread.h",
   ]

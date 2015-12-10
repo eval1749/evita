@@ -39,6 +39,14 @@ IoContextId IoContextId::New() {
 
 //////////////////////////////////////////////////////////////////////
 //
+// DirectoryId
+//
+DirectoryId::DirectoryId(IoContextId context_id) : IoContextId(context_id) {}
+
+DirectoryId::~DirectoryId() {}
+
+//////////////////////////////////////////////////////////////////////
+//
 // FileId
 //
 FileId::FileId(IoContextId context_id) : IoContextId(context_id) {}

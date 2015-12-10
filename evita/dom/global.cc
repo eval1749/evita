@@ -36,6 +36,7 @@
 #include "evita/dom/file_path.h"
 #include "evita/dom/text/mutation_observer.h"
 #include "evita/dom/text/mutation_record.h"
+#include "evita/dom/os/directory.h"
 #include "evita/dom/os/file.h"
 #include "evita/dom/os/process.h"
 #include "evita/dom/text/range.h"
@@ -138,6 +139,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     auto const os_templ = v8::ObjectTemplate::New(isolate);
     global_templ->Set(gin::StringToV8(isolate, "Os"), os_templ);
     INSTALL_IN(os_templ, AbstractFile);
+    INSTALL_IN(os_templ, Directory);
     INSTALL_IN(os_templ, File);
     INSTALL_IN(os_templ, Process);
 

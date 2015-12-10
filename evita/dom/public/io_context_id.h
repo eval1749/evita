@@ -30,6 +30,12 @@ class IoContextId {
   int value_;
 };
 
+class DirectoryId final : public IoContextId {
+ public:
+  explicit DirectoryId(IoContextId context_id);
+  ~DirectoryId();
+};
+
 class FileId final : public IoContextId {
  public:
   explicit FileId(IoContextId context_id);

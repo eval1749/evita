@@ -12,10 +12,7 @@
 #include "base/strings/string_piece.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_delegate.h"
-#pragma warning(push)
-#pragma warning(disable : 4365 4628)
 #include "gmock/gmock.h"
-#pragma warning(pop)
 
 namespace dom {
 
@@ -42,11 +39,15 @@ class MockIoDelegate final : public domapi::IoDelegate {
                      int num_transferred);
   void SetMakeTempFileName(const base::string16 file_name, int error_code);
   void SetFileStatus(const domapi::FileStatus& data, int error_code);
+  void SetOpenDirectoryResult(domapi::IoContextId context_id, int error_code);
   void SetOpenFileResult(domapi::IoContextId context_id, int error_code);
+  void SetReadDirectoryResult(const std::vector<domapi::FileStatus>& entries);
 
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
                      const CheckSpellingResolver& deferred) final;
+  void CloseDirectory(domapi::IoContextId,
+                      const domapi::FileIoDeferred& promise);
   void CloseFile(domapi::IoContextId, const domapi::FileIoDeferred& deferred);
   void GetSpellingSuggestions(
       const base::string16& wrong_word,
@@ -58,11 +59,16 @@ class MockIoDelegate final : public domapi::IoDelegate {
                 const base::string16& dst_path,
                 const domapi::MoveFileOptions& options,
                 const domapi::IoResolver& resolver) final;
+  void OpenDirectory(const base::string16& dir_name,
+                     const domapi::OpenDirectoryPromise&) final;
   void OpenFile(const base::string16& file_name,
                 const base::string16& mode,
                 const domapi::OpenFileDeferred&) final;
   void OpenProcess(const base::string16& command_line,
                    const domapi::OpenProcessDeferred&) final;
+  void ReadDirectory(domapi::IoContextId context_id,
+                     size_t num_read,
+                     const domapi::ReadDirectoryPromise& promise) final;
   void ReadFile(domapi::IoContextId context_id,
                 void* buffer,
                 size_t num_read,
@@ -88,6 +94,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
   std::vector<uint8_t> bytes_;
   domapi::IoContextId context_id_;
   std::deque<CallResult> call_results_;
+  std::vector<domapi::FileStatus> directory_entries_;
   domapi::FileStatus file_status_;
   int num_close_called_;
   int num_remove_called_;

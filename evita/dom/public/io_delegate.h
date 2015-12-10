@@ -28,6 +28,9 @@ class IoDelegate {
   virtual void CheckSpelling(const base::string16& word_to_check,
                              const CheckSpellingResolver& callback) = 0;
 
+  virtual void CloseDirectory(IoContextId context_id,
+                              const FileIoDeferred& deferred) = 0;
+
   virtual void CloseFile(IoContextId context_id,
                          const FileIoDeferred& deferred) = 0;
 
@@ -47,6 +50,10 @@ class IoDelegate {
                         const MoveFileOptions& options,
                         const IoResolver& resolver) = 0;
 
+  // Open directory for reading entries
+  virtual void OpenDirectory(const base::string16& dir_name,
+                             const OpenDirectoryPromise& promise) = 0;
+
   virtual void OpenFile(const base::string16& file_name,
                         const base::string16& mode,
                         const OpenFileDeferred& deferred) = 0;
@@ -54,6 +61,11 @@ class IoDelegate {
                            const OpenProcessDeferred& deferred) = 0;
   virtual void QueryFileStatus(const base::string16& file_name,
                                const QueryFileStatusDeferred& deferred) = 0;
+
+  virtual void ReadDirectory(IoContextId context_id,
+                             size_t num_read,
+                             const ReadDirectoryPromise& promise) = 0;
+
   virtual void ReadFile(IoContextId context_id,
                         void* buffer,
                         size_t num_read,

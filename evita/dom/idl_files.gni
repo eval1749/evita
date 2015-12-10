@@ -40,7 +40,10 @@ interface_idl_files = [
   # TODO(eval1749): We should use "Runnable.idl" instead of "types_externs.js".
   #"//evita/dom/jslib/Runnable.idl",
   "//evita/dom/jslib/TaskScheduler.idl",
+
+  # namespace Os
   "//evita/dom/os/AbstractFile.idl",
+  "//evita/dom/os/Directory.idl",
   "//evita/dom/os/File.idl",
   "//evita/dom/os/Process.idl",
 

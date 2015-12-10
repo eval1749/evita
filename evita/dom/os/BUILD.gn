@@ -8,6 +8,8 @@ source_set("os") {
   sources = [
     "abstract_file.cc",
     "abstract_file.h",
+    "directory.cc",
+    "directory.h",
     "file.cc",
     "file.h",
     "file_status.cc",

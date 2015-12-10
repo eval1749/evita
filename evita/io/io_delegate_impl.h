@@ -24,6 +24,8 @@ class IoDelegateImpl final : public domapi::IoDelegate {
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
                      const CheckSpellingResolver& deferred) final;
+  void CloseDirectory(domapi::IoContextId context_id,
+                      const domapi::FileIoDeferred& deferred) final;
   void CloseFile(domapi::IoContextId context_id,
                  const domapi::FileIoDeferred& deferred) final;
   void GetSpellingSuggestions(
@@ -36,6 +38,8 @@ class IoDelegateImpl final : public domapi::IoDelegate {
                 const base::string16& dst_path,
                 const domapi::MoveFileOptions& options,
                 const domapi::IoResolver& resolver) final;
+  void OpenDirectory(const base::string16& dir_name,
+                     const domapi::OpenDirectoryPromise& promise) final;
   void OpenFile(const base::string16& file_name,
                 const base::string16& mode,
                 const domapi::OpenFileDeferred& deferred) final;
@@ -43,6 +47,9 @@ class IoDelegateImpl final : public domapi::IoDelegate {
                    const domapi::OpenProcessDeferred& deferred) final;
   void QueryFileStatus(const base::string16& file_name,
                        const domapi::QueryFileStatusDeferred& deferred) final;
+  void ReadDirectory(domapi::IoContextId context_id,
+                     size_t num_read,
+                     const domapi::ReadDirectoryPromise& promise) final;
   void ReadFile(domapi::IoContextId context_id,
                 void* buffer,
                 size_t num_read,

@@ -47,10 +47,22 @@ void MockIoDelegate::SetCallResult(const base::StringPiece& name,
   call_results_.push_back(result);
 }
 
+void MockIoDelegate::SetFileStatus(const domapi::FileStatus& file_status,
+                                   int error_code) {
+  SetCallResult("QueryFileStatus", error_code);
+  file_status_ = file_status;
+}
+
 void MockIoDelegate::SetMakeTempFileName(const base::string16 file_name,
                                          int error_code) {
   SetCallResult("MakeTempFileName", error_code);
   temp_file_name_ = file_name;
+}
+
+void MockIoDelegate::SetOpenDirectoryResult(domapi::IoContextId context_id,
+                                            int error_code) {
+  SetCallResult("OpenDirectory", error_code);
+  context_id_ = context_id;
 }
 
 void MockIoDelegate::SetOpenFileResult(domapi::IoContextId context_id,
@@ -59,16 +71,27 @@ void MockIoDelegate::SetOpenFileResult(domapi::IoContextId context_id,
   context_id_ = context_id;
 }
 
-void MockIoDelegate::SetFileStatus(const domapi::FileStatus& file_status,
-                                   int error_code) {
-  SetCallResult("QueryFileStatus", error_code);
-  file_status_ = file_status;
+void MockIoDelegate::SetReadDirectoryResult(
+    const std::vector<domapi::FileStatus>& entries) {
+  SetCallResult("ReadDirectory", 0);
+  directory_entries_ = entries;
 }
 
 // domapi::IoDelegate
 void MockIoDelegate::CheckSpelling(const base::string16&,
                                    const CheckSpellingResolver& deferred) {
   deferred.resolve.Run(check_spelling_result_);
+}
+
+void MockIoDelegate::CloseDirectory(domapi::IoContextId,
+                                    const domapi::FileIoDeferred& promise) {
+  ++num_close_called_;
+  auto const result = PopCallResult("CloseDirectory");
+  if (auto const error_code = result.error_code) {
+    promise.reject.Run(domapi::IoError(error_code));
+    return;
+  }
+  promise.resolve.Run(true);
 }
 
 void MockIoDelegate::CloseFile(domapi::IoContextId,
@@ -109,6 +132,17 @@ void MockIoDelegate::MoveFile(const base::string16&,
     resolver.resolve.Run(options.no_overwrite);
 }
 
+void MockIoDelegate::OpenDirectory(
+    const base::string16&,
+    const domapi::OpenDirectoryPromise& promise) {
+  auto const result = PopCallResult("OpenDirectory");
+  if (auto const error_code = result.error_code) {
+    promise.reject.Run(domapi::IoError(error_code));
+    return;
+  }
+  promise.resolve.Run(domapi::DirectoryId(context_id_));
+}
+
 void MockIoDelegate::OpenFile(const base::string16&,
                               const base::string16&,
                               const domapi::OpenFileDeferred& deferred) {
@@ -116,7 +150,7 @@ void MockIoDelegate::OpenFile(const base::string16&,
   if (auto const error_code = result.error_code)
     deferred.reject.Run(domapi::IoError(error_code));
   else
-    deferred.resolve.Run(domapi::FileId(domapi::IoContextId::New()));
+    deferred.resolve.Run(domapi::FileId(context_id_));
 }
 
 void MockIoDelegate::OpenProcess(const base::string16&,
@@ -125,7 +159,7 @@ void MockIoDelegate::OpenProcess(const base::string16&,
   if (auto const error_code = result.error_code)
     deferred.reject.Run(domapi::IoError(error_code));
   else
-    deferred.resolve.Run(domapi::ProcessId(domapi::IoContextId::New()));
+    deferred.resolve.Run(domapi::ProcessId(context_id_));
 }
 
 void MockIoDelegate::QueryFileStatus(
@@ -136,6 +170,18 @@ void MockIoDelegate::QueryFileStatus(
     deferred.reject.Run(domapi::IoError(error_code));
   else
     deferred.resolve.Run(file_status_);
+}
+
+void MockIoDelegate::ReadDirectory(
+    domapi::IoContextId,
+    size_t num_read,
+    const domapi::ReadDirectoryPromise& promise) {
+  auto const result = PopCallResult("ReadDirectory");
+  if (auto const error_code = result.error_code) {
+    promise.reject.Run(domapi::IoError(error_code));
+    return;
+  }
+  promise.resolve.Run(directory_entries_);
 }
 
 void MockIoDelegate::ReadFile(domapi::IoContextId,

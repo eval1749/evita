@@ -41,6 +41,9 @@ IoThreadProxy::~IoThreadProxy() {}
 DEFINE_DELEGATE_2(CheckSpelling,
                   const base::string16&,
                   const CheckSpellingResolver&)
+DEFINE_DELEGATE_2(CloseDirectory,
+                  domapi::IoContextId,
+                  const domapi::FileIoDeferred&)
 DEFINE_DELEGATE_2(CloseFile, domapi::IoContextId, const domapi::FileIoDeferred&)
 DEFINE_DELEGATE_2(GetSpellingSuggestions,
                   const base::string16&,
@@ -54,6 +57,9 @@ DEFINE_DELEGATE_4(MoveFile,
                   const base::string16&,
                   const domapi::MoveFileOptions&,
                   const domapi::IoResolver&)
+DEFINE_DELEGATE_2(OpenDirectory,
+                  const base::string16&,
+                  const domapi::OpenDirectoryPromise&)
 DEFINE_DELEGATE_3(OpenFile,
                   const base::string16&,
                   const base::string16&,
@@ -64,6 +70,10 @@ DEFINE_DELEGATE_2(OpenProcess,
 DEFINE_DELEGATE_2(QueryFileStatus,
                   const base::string16&,
                   const domapi::QueryFileStatusDeferred&)
+DEFINE_DELEGATE_3(ReadDirectory,
+                  domapi::IoContextId,
+                  size_t,
+                  const domapi::ReadDirectoryPromise&)
 DEFINE_DELEGATE_4(ReadFile,
                   domapi::IoContextId,
                   void*,

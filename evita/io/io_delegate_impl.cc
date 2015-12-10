@@ -74,6 +74,11 @@ void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
           word_to_check)));
 }
 
+void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
+                                    const domapi::FileIoDeferred& deferred) {
+  // TODO(eval1749): NYI IoDelegateImpl::CloseDirectory()
+}
+
 void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
                                const domapi::FileIoDeferred& deferred) {
   auto const it = context_map_.find(context_id);
@@ -142,6 +147,13 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
       base::Bind(resolver.resolve, true));
 }
 
+void IoDelegateImpl::OpenDirectory(
+    const base::string16& dir_name,
+    const domapi::OpenDirectoryPromise& promise) {
+  // TODO(eval1749): NYI IoDelegateImpl::OpenDirectory()
+  Reject(promise.reject, ERROR_PATH_NOT_FOUND);
+}
+
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
                               const domapi::OpenFileDeferred& deferred) {
@@ -201,6 +213,14 @@ void IoDelegateImpl::QueryFileStatus(
 
   editor::Application::instance()->view_event_handler()->RunCallback(
       base::Bind(deferred.resolve, data));
+}
+
+void IoDelegateImpl::ReadDirectory(
+    domapi::IoContextId context_id,
+    size_t num_read,
+    const domapi::ReadDirectoryPromise& promise) {
+  // TODO(eval1749): NYI IoDelegateImpl::ReadDirectory()
+  Reject(promise.reject, ERROR_INVALID_HANDLE);
 }
 
 void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,

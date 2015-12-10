@@ -6,6 +6,10 @@
 #define EVITA_DOM_DICTIONARY_H_
 
 #include "base/basictypes.h"
+// TODO(eval1749): We should include "dom/time_stamp.h" here, instead of
+// IDL compiler should insert include directive for generated files. This is
+// workaround for "dom/os/DirectoryEntry.idl".
+#include "evita/dom/time_stamp.h"
 #include "evita/v8_glue/converter.h"
 
 namespace dom {

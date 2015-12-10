@@ -19,6 +19,8 @@ void Reject(const base::Callback<void(domapi::IoError)>& reject,
 void Resolve(const base::Callback<void(int)>& resolve,
              uint32_t num_transferred);
 
+void RunCallback(const base::Closure& callback);
+
 }  // namespace io
 
 #endif  // EVITA_IO_IO_CONTEXT_UTILS_H_

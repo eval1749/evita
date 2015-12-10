@@ -13,14 +13,17 @@ namespace io {
 
 void Reject(const base::Callback<void(domapi::IoError)>& reject,
             uint32_t last_error) {
-  editor::Application::instance()->view_event_handler()->RunCallback(
+  RunCallback(
       base::Bind(reject, domapi::IoError(static_cast<int>(last_error))));
 }
 
 void Resolve(const base::Callback<void(int)>& resolve,
              uint32_t num_transferred) {
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolve, static_cast<int>(num_transferred)));
+  RunCallback(base::Bind(resolve, static_cast<int>(num_transferred)));
+}
+
+void RunCallback(const base::Closure& callback) {
+  editor::Application::instance()->view_event_handler()->RunCallback(callback);
 }
 
 }  // namespace io

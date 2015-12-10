@@ -17,7 +17,6 @@
 #include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/public/view_event_handler.h"
-#include "evita/editor/application.h"
 #include "evita/io/file_io_context.h"
 #include "evita/io/io_context_utils.h"
 #include "evita/io/process_io_context.h"
@@ -48,11 +47,6 @@ class scoped_find_handle final {
   DISALLOW_COPY_AND_ASSIGN(scoped_find_handle);
 };
 
-void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
-             domapi::FileId context_id) {
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolve, context_id));
-}
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -76,7 +70,7 @@ void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::CheckSpelling");
-  editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
+  RunCallback(base::Bind(
       deferred.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->CheckSpelling(
           word_to_check)));
@@ -84,7 +78,14 @@ void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
 
 void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
                                     const domapi::FileIoDeferred& deferred) {
-  // TODO(eval1749): NYI IoDelegateImpl::CloseDirectory()
+  auto const it = context_map_.find(context_id);
+  if (it == context_map_.end())
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  auto const context = it->second->as<DirectoryIoContext>();
+  if (!context)
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  context->Close(promise);
+  context_map_.erase(it);
 }
 
 void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
@@ -105,7 +106,7 @@ void IoDelegateImpl::GetSpellingSuggestions(
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::GetSpellingSuggestions");
-  editor::Application::instance()->view_event_handler()->RunCallback(base::Bind(
+  RunCallback(base::Bind(
       deferred.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->GetSpellingSuggestions(
           wrong_word)));
@@ -130,8 +131,7 @@ void IoDelegateImpl::MakeTempFileName(
   auto const nul_pos = file_name.find(static_cast<base::char16>(0));
   if (nul_pos != base::string16::npos)
     file_name.resize(nul_pos);
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolver.resolve, file_name));
+  RunCallback(base::Bind(resolver.resolve, file_name));
 }
 
 void IoDelegateImpl::MoveFile(const base::string16& src_path,
@@ -153,15 +153,13 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
     Reject(resolver.reject, last_error);
     return;
   }
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolver.resolve, true));
+  RunCallback(base::Bind(resolver.resolve, true));
 }
 
 void IoDelegateImpl::OpenDirectory(
     const base::string16& dir_name,
     const domapi::OpenDirectoryPromise& promise) {
   // TODO(eval1749): NYI IoDelegateImpl::OpenDirectory()
-  Reject(promise.reject, ERROR_PATH_NOT_FOUND);
 }
 
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
@@ -176,7 +174,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
     return;
   auto const file_id = domapi::IoContextId::New();
   context_map_.insert(std::make_pair(file_id, file.release()));
-  Resolve(deferred.resolve, domapi::FileId(file_id));
+  RunCallback(base::Bind(deferred.resolve, domapi::FileId(file_id)));
 }
 
 void IoDelegateImpl::OpenProcess(const base::string16& command_line,
@@ -223,8 +221,7 @@ void IoDelegateImpl::QueryFileStatus(
   data.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
   data.readonly = (find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(deferred.resolve, data));
+  RunCallback(base::Bind(deferred.resolve, data));
 }
 
 void IoDelegateImpl::ReadDirectory(
@@ -232,7 +229,6 @@ void IoDelegateImpl::ReadDirectory(
     size_t num_read,
     const domapi::ReadDirectoryPromise& promise) {
   // TODO(eval1749): NYI IoDelegateImpl::ReadDirectory()
-  Reject(promise.reject, ERROR_INVALID_HANDLE);
 }
 
 void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
@@ -256,8 +252,7 @@ void IoDelegateImpl::RemoveFile(const base::string16& file_name,
     Reject(resolver.reject, last_error);
     return;
   }
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolver.resolve, true));
+  RunCallback(base::Bind(resolver.resolve, true));
 }
 
 void IoDelegateImpl::WriteFile(domapi::IoContextId context_id,

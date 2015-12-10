@@ -57,8 +57,7 @@ HANDLE OpenFile(const base::string16& file_name,
 
 void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
              domapi::FileId context_id) {
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolve, context_id));
+  RunCallback(base::Bind(resolve, context_id));
 }
 
 FileIoContext::FileIoContext(const base::string16& file_name,
@@ -121,7 +120,8 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
 void FileIoContext::Read(void* buffer,
                          size_t num_read,
                          const domapi::FileIoDeferred& deferred) {
-  TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Read", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Read",
+                         deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (IsRunning()) {
     Reject(deferred.reject, ERROR_BUSY);

@@ -22,12 +22,6 @@
 
 namespace io {
 
-void Resolve(const base::Callback<void(domapi::ProcessId)>& resolve,
-             domapi::ProcessId context_id) {
-  editor::Application::instance()->view_event_handler()->RunCallback(
-      base::Bind(resolve, context_id));
-}
-
 ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
                                    const base::string16& command_line,
                                    const domapi::OpenProcessDeferred& deferred)
@@ -180,7 +174,7 @@ void ProcessIoContext::StartProcess(
   ::ResumeThread(process_info.hThread);
   process_.reset(process_info.hProcess);
   ::CloseHandle(process_info.hThread);
-  Resolve(deferred.resolve, domapi::ProcessId(context_id));
+  RunCallback(base::Bind(deferred.resolve, domapi::ProcessId(context_id)));
   stdin_read.release();
   stdin_write_.reset(stdin_write.release());
   stdout_write.release();

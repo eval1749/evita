@@ -30,12 +30,12 @@ struct MoveFileOptions final {
   bool no_overwrite;
 };
 
-typedef Deferred<bool, IoError> IoResolver;
-typedef Deferred<int, IoError> FileIoDeferred;
-typedef Deferred<base::string16, IoError> MakeTempFileNameResolver;
-typedef Deferred<FileId, IoError> OpenFileDeferred;
-typedef Deferred<ProcessId, IoError> OpenProcessDeferred;
-typedef Deferred<FileStatus, IoError> QueryFileStatusDeferred;
+using IoResolver = Deferred<bool, IoError>;
+using FileIoDeferred = Deferred<int, IoError>;
+using MakeTempFileNameResolver = Deferred<base::string16, IoError>;
+using OpenFileDeferred = Deferred<FileId, IoError>;
+using OpenProcessDeferred = Deferred<ProcessId, IoError>;
+using QueryFileStatusDeferred = Deferred<FileStatus, IoError>;
 
 }  // namespace domapi
 

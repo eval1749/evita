@@ -26,6 +26,8 @@ v8::Handle<v8::Value> Converter<domapi::FileStatus>::ToV8(
                gin::ConvertToV8(isolate, data.is_symlink));
   js_data->Set(dom::v8Strings::lastModificationDate.Get(isolate),
                gin::ConvertToV8(isolate, data.last_write_time));
+  js_data->Set(dom::v8Strings::name.Get(isolate),
+               gin::ConvertToV8(isolate, data.name));
   js_data->Set(dom::v8Strings::readonly.Get(isolate),
                gin::ConvertToV8(isolate, data.readonly));
   js_data->Set(dom::v8Strings::size.Get(isolate),

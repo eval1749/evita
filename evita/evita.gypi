@@ -129,7 +129,7 @@
         'views/tabs/tab_strip_animator.cc',
         'views/tabs/tab_strip_animator.h',
         'views/tabs/tab_strip_delegate.cc',
-        'views/text/render_cell.cc',
+        'views/text/inline_box.cc',
         'views/text/render_font.cc',
         'views/text/render_font.h',
         'views/text/render_font_set.cc',

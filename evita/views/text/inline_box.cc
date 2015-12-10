@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <string>
 
-#include "evita/views/text/render_cell.h"
+#include "evita/views/text/inline_box.h"
 
 #include "base/logging.h"
 #include "evita/views/text/render_font.h"
@@ -35,9 +35,12 @@ inline void FillRect(gfx::Canvas* canvas,
 
 //////////////////////////////////////////////////////////////////////
 //
-// Cell
+// InlineBox
 //
-Cell::Cell(const RenderStyle& style, float width, float height, float descent)
+InlineBox::InlineBox(const RenderStyle& style,
+                     float width,
+                     float height,
+                     float descent)
     : descent_(descent),
       height_(height),
       line_height_(height),
@@ -47,25 +50,26 @@ Cell::Cell(const RenderStyle& style, float width, float height, float descent)
   DCHECK_GE(height, 1.0f);
 }
 
-Cell::Cell(const Cell& other)
-    : Cell(other.style_, other.width_, other.height_, other.descent_) {
+InlineBox::InlineBox(const InlineBox& other)
+    : InlineBox(other.style_, other.width_, other.height_, other.descent_) {
   line_descent_ = other.line_descent_;
   line_height_ = other.line_height_;
 }
 
-Cell::~Cell() {}
+InlineBox::~InlineBox() {}
 
-float Cell::top() const {
+float InlineBox::top() const {
   return line_height() - line_descent() - height() + descent();
 }
 
-void Cell::FillBackground(gfx::Canvas* canvas, const gfx::RectF& rect) const {
+void InlineBox::FillBackground(gfx::Canvas* canvas,
+                               const gfx::RectF& rect) const {
   FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
                               ::ceilf(rect.bottom)),
            style_.bgcolor());
 }
 
-void Cell::FillOverlay(gfx::Canvas* canvas, const gfx::RectF& rect) const {
+void InlineBox::FillOverlay(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   if (style_.overlay_color().alpha() == 0.0f)
     return;
   FillRect(canvas, gfx::RectF(rect.left, rect.top, ::ceilf(rect.right),
@@ -73,58 +77,61 @@ void Cell::FillOverlay(gfx::Canvas* canvas, const gfx::RectF& rect) const {
            style_.overlay_color());
 }
 
-void Cell::IncrementWidth(float amount) {
+void InlineBox::IncrementWidth(float amount) {
   width_ += amount;
 }
 
-// rendering::Cell
-bool Cell::Equal(const Cell* other) const {
+// rendering::InlineBox
+bool InlineBox::Equal(const InlineBox* other) const {
   return other->class_name() == class_name() && other->width_ == width_ &&
          other->line_height_ == line_height_ && other->style_ == style_;
 }
 
-text::Posn Cell::Fix(float line_height, float line_descent) {
+text::Posn InlineBox::Fix(float line_height, float line_descent) {
   line_descent_ = line_descent;
   line_height_ = line_height;
   return -1;
 }
 
-uint32_t Cell::Hash() const {
+uint32_t InlineBox::Hash() const {
   auto nHash = static_cast<uint32_t>(width_);
   nHash ^= static_cast<uint32_t>(line_height_);
   nHash ^= std::hash<RenderStyle>()(style_);
   return nHash;
 }
 
-gfx::RectF Cell::HitTestTextPosition(text::Posn) const {
+gfx::RectF InlineBox::HitTestTextPosition(text::Posn) const {
   return gfx::RectF();
 }
 
-text::Posn Cell::MapXToPosn(float x) const {
+text::Posn InlineBox::MapXToPosn(float x) const {
   return -1;
 }
 
-bool Cell::Merge(const RenderStyle&, float) {
+bool InlineBox::Merge(const RenderStyle&, float) {
   return false;
 }
 
-void Cell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
+void InlineBox::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   FillBackground(canvas, rect);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// FillerCell
+// InlineFillerBox
 //
-FillerCell::FillerCell(const RenderStyle& style, float width, float height)
-    : Cell(style, width, height, 0.0f) {}
+InlineFillerBox::InlineFillerBox(const RenderStyle& style,
+                                 float width,
+                                 float height)
+    : InlineBox(style, width, height, 0.0f) {}
 
-FillerCell::FillerCell(const FillerCell& other) : Cell(other) {}
+InlineFillerBox::InlineFillerBox(const InlineFillerBox& other)
+    : InlineBox(other) {}
 
-FillerCell::~FillerCell() {}
+InlineFillerBox::~InlineFillerBox() {}
 
-Cell* FillerCell::Copy() const {
-  return new FillerCell(*this);
+InlineBox* InlineFillerBox::Copy() const {
+  return new InlineFillerBox(*this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -196,65 +203,66 @@ void WithFont::DrawWave(gfx::Canvas* canvas,
 
 //////////////////////////////////////////////////////////////////////
 //
-// MarkerCell
+// InlineMarkerBox
 //
-MarkerCell::MarkerCell(const RenderStyle& style,
-                       float width,
-                       float height,
-                       text::Posn lPosn,
-                       TextMarker marker_name)
-    : Cell(style, width, height, style.font().descent()),
+InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
+                                 float width,
+                                 float height,
+                                 text::Posn lPosn,
+                                 TextMarker marker_name)
+    : InlineBox(style, width, height, style.font().descent()),
       WithFont(style.font()),
       end_(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
       marker_name_(marker_name),
       start_(lPosn) {}
 
-MarkerCell::MarkerCell(const MarkerCell& other)
-    : Cell(other),
+InlineMarkerBox::InlineMarkerBox(const InlineMarkerBox& other)
+    : InlineBox(other),
       WithFont(other),
       end_(other.end_),
       marker_name_(other.marker_name_),
       start_(other.start_) {}
 
-MarkerCell::~MarkerCell() {}
+InlineMarkerBox::~InlineMarkerBox() {}
 
-// rendering::Cell
-Cell* MarkerCell::Copy() const {
-  return new MarkerCell(*this);
+// rendering::InlineBox
+InlineBox* InlineMarkerBox::Copy() const {
+  return new InlineMarkerBox(*this);
 }
 
-bool MarkerCell::Equal(const Cell* other) const {
-  if (!Cell::Equal(other))
+bool InlineMarkerBox::Equal(const InlineBox* other) const {
+  if (!InlineBox::Equal(other))
     return false;
-  auto const marker_cell = other->as<MarkerCell>();
+  auto const marker_cell = other->as<InlineMarkerBox>();
   return marker_name_ == marker_cell->marker_name_;
 }
 
-text::Posn MarkerCell::Fix(float line_height, float line_descent) {
-  Cell::Fix(line_height, line_descent);
+text::Posn InlineMarkerBox::Fix(float line_height, float line_descent) {
+  InlineBox::Fix(line_height, line_descent);
   return end_;
 }
 
-uint32_t MarkerCell::Hash() const {
-  auto nHash = Cell::Hash();
+uint32_t InlineMarkerBox::Hash() const {
+  auto nHash = InlineBox::Hash();
   nHash <<= 8;
   nHash ^= static_cast<int>(marker_name_);
   return nHash;
 }
 
-gfx::RectF MarkerCell::HitTestTextPosition(text::Posn lPosn) const {
+gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Posn lPosn) const {
   if (lPosn < start_ || lPosn >= end_)
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
 }
 
-text::Posn MarkerCell::MapXToPosn(float x) const {
+text::Posn InlineMarkerBox::MapXToPosn(float x) const {
   return start_;
 }
 
 // Render marker above baseline.
-void MarkerCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
-  Cell::Render(canvas, rect);
+void InlineMarkerBox::Render(gfx::Canvas* canvas,
+                             const gfx::RectF& rect) const {
+  InlineBox::Render(canvas, rect);
 
   auto const ascent = height() - descent();
   auto const marker_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
@@ -313,58 +321,58 @@ void MarkerCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextCell
+// InlineTextBox
 //
-TextCell::TextCell(const RenderStyle& style,
-                   float width,
-                   float height,
-                   text::Posn lPosn,
-                   const base::string16& characters)
-    : Cell(style, width, height, style.font().descent()),
+InlineTextBox::InlineTextBox(const RenderStyle& style,
+                             float width,
+                             float height,
+                             text::Posn lPosn,
+                             const base::string16& characters)
+    : InlineBox(style, width, height, style.font().descent()),
       WithFont(style.font()),
       characters_(characters),
       end_(lPosn + 1),
       start_(lPosn) {}
 
-TextCell::TextCell(const TextCell& other)
-    : Cell(other),
+InlineTextBox::InlineTextBox(const InlineTextBox& other)
+    : InlineBox(other),
       WithFont(other),
       characters_(other.characters_),
       end_(other.end_),
       start_(other.start_) {}
 
-TextCell::~TextCell() {}
+InlineTextBox::~InlineTextBox() {}
 
-void TextCell::AddChar(base::char16 char_code) {
+void InlineTextBox::AddChar(base::char16 char_code) {
   characters_.push_back(char_code);
 }
 
-// rendering::Cell
-Cell* TextCell::Copy() const {
-  return new TextCell(*this);
+// rendering::InlineBox
+InlineBox* InlineTextBox::Copy() const {
+  return new InlineTextBox(*this);
 }
 
-bool TextCell::Equal(const Cell* other) const {
-  if (!Cell::Equal(other))
+bool InlineTextBox::Equal(const InlineBox* other) const {
+  if (!InlineBox::Equal(other))
     return false;
-  return characters_ == other->as<TextCell>()->characters_;
+  return characters_ == other->as<InlineTextBox>()->characters_;
 }
 
-text::Posn TextCell::Fix(float line_height, float descent) {
-  Cell::Fix(line_height, descent);
+text::Posn InlineTextBox::Fix(float line_height, float descent) {
+  InlineBox::Fix(line_height, descent);
   DCHECK_LT(start_, end_);
   return end_;
 }
 
-uint32_t TextCell::Hash() const {
-  return static_cast<uint32_t>((Cell::Hash() << 3) ^
+uint32_t InlineTextBox::Hash() const {
+  return static_cast<uint32_t>((InlineBox::Hash() << 3) ^
                                std::hash<base::string16>()(characters_));
 }
 
 // Returns bounds rectangle of caret at |offset|. Caret is placed before
 // character at |offset|. So, height of caret is height of character before
 // |offset|.
-gfx::RectF TextCell::HitTestTextPosition(text::Posn offset) const {
+gfx::RectF InlineTextBox::HitTestTextPosition(text::Posn offset) const {
   if (offset < start_ || offset > end_)
     return gfx::RectF();
   auto const length = static_cast<size_t>(offset - start_);
@@ -373,7 +381,7 @@ gfx::RectF TextCell::HitTestTextPosition(text::Posn offset) const {
   return gfx::RectF(gfx::PointF(left, top()), gfx::SizeF(1.0f, height()));
 }
 
-text::Posn TextCell::MapXToPosn(float x) const {
+text::Posn InlineTextBox::MapXToPosn(float x) const {
   if (x >= width())
     return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
@@ -384,7 +392,7 @@ text::Posn TextCell::MapXToPosn(float x) const {
   return end_;
 }
 
-bool TextCell::Merge(const RenderStyle& style, float width) {
+bool InlineTextBox::Merge(const RenderStyle& style, float width) {
   if (this->style() != style)
     return false;
   IncrementWidth(width);
@@ -392,7 +400,7 @@ bool TextCell::Merge(const RenderStyle& style, float width) {
   return true;
 }
 
-void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
+void InlineTextBox::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
   DCHECK(!characters_.empty());
   auto const text_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
                                     gfx::SizeF(rect.width(), height()));
@@ -441,35 +449,37 @@ void TextCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
 
 //////////////////////////////////////////////////////////////////////
 //
-// UnicodeCell
+// InlineUnicodeBox
 //
-UnicodeCell::UnicodeCell(const RenderStyle& style,
-                         float width,
-                         float height,
-                         text::Posn lPosn,
-                         const base::string16& characters)
-    : TextCell(style, width, height + 4.0f, lPosn, characters) {}
+InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
+                                   float width,
+                                   float height,
+                                   text::Posn lPosn,
+                                   const base::string16& characters)
+    : InlineTextBox(style, width, height + 4.0f, lPosn, characters) {}
 
-UnicodeCell::UnicodeCell(const UnicodeCell& other) : TextCell(other) {}
+InlineUnicodeBox::InlineUnicodeBox(const InlineUnicodeBox& other)
+    : InlineTextBox(other) {}
 
-UnicodeCell::~UnicodeCell() {}
+InlineUnicodeBox::~InlineUnicodeBox() {}
 
-// rendering::Cell
-Cell* UnicodeCell::Copy() const {
-  return new UnicodeCell(*this);
+// rendering::InlineBox
+InlineBox* InlineUnicodeBox::Copy() const {
+  return new InlineUnicodeBox(*this);
 }
 
-gfx::RectF UnicodeCell::HitTestTextPosition(text::Posn offset) const {
+gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Posn offset) const {
   if (offset < start() || offset > end())
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(width(), top()), gfx::SizeF(1.0f, height()));
 }
 
-bool UnicodeCell::Merge(const RenderStyle&, float) {
+bool InlineUnicodeBox::Merge(const RenderStyle&, float) {
   return false;
 }
 
-void UnicodeCell::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
+void InlineUnicodeBox::Render(gfx::Canvas* canvas,
+                              const gfx::RectF& rect) const {
   auto const text_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
                                     gfx::SizeF(rect.width(), height())) -
                          gfx::SizeF(1, 1);

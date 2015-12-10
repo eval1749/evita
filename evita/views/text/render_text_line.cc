@@ -7,7 +7,7 @@
 #include "evita/views/text/render_text_line.h"
 
 #include "base/logging.h"
-#include "evita/views/text/render_cell.h"
+#include "evita/views/text/inline_box.h"
 #include "evita/views/text/render_selection.h"
 
 namespace views {
@@ -71,7 +71,7 @@ bool TextLine::Equal(const TextLine* other) const {
   return true;
 }
 
-void TextLine::AddCell(Cell* cell) {
+void TextLine::AddInlineBox(InlineBox* cell) {
   cells_.push_back(cell);
 }
 
@@ -121,16 +121,16 @@ gfx::RectF TextLine::HitTestTextPosition(text::Posn offset) const {
 }
 
 bool TextLine::IsEndOfDocument() const {
-  auto const last_marker_cell = last_cell()->as<MarkerCell>();
+  auto const last_marker_cell = last_cell()->as<InlineMarkerBox>();
   return last_marker_cell->marker_name() == TextMarker::EndOfDocument;
 }
 
 text::Posn TextLine::MapXToPosn(float xGoal) const {
-  auto xCell = 0.0f;
+  auto xInlineBox = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto cell : cells_) {
-    auto const x = xGoal - xCell;
-    xCell += cell->width();
+    auto const x = xGoal - xInlineBox;
+    xInlineBox += cell->width();
     auto const lMap = cell->MapXToPosn(x);
     if (lMap >= 0)
       lPosn = lMap;

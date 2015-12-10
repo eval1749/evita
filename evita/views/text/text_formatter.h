@@ -19,7 +19,7 @@ class Buffer;
 namespace views {
 namespace rendering {
 
-class Cell;
+class InlineBox;
 class TextLine;
 enum class TextMarker;
 class TextSelection;
@@ -38,7 +38,7 @@ class TextFormatter final {
 
   TextLine* FormatLine(text::Posn text_offset);
   TextLine* FormatLine();
-  Cell* FormatMarker(TextMarker marker_name);
+  InlineBox* FormatMarker(TextMarker marker_name);
 
   static TextSelection FormatSelection(
       const text::Buffer* buffer,
@@ -47,7 +47,7 @@ class TextFormatter final {
  private:
   class TextScanner;
 
-  Cell* FormatChar(Cell*, float x, base::char16);
+  InlineBox* FormatChar(InlineBox*, float x, base::char16);
 
   gfx::RectF bounds_;
   RenderStyle default_render_style_;

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_RENDER_CELL_H_
-#define EVITA_VIEWS_TEXT_RENDER_CELL_H_
+#ifndef EVITA_VIEWS_TEXT_INLINE_BOX_H_
+#define EVITA_VIEWS_TEXT_INLINE_BOX_H_
 
 #include "common/castable.h"
 #include "evita/gfx_base.h"
@@ -31,22 +31,22 @@ class RenderStyle;
 
 //////////////////////////////////////////////////////////////////////
 //
-// Cell
+// InlineBox
 //
-class Cell : public common::Castable {
-  DECLARE_CASTABLE_CLASS(Cell, Castable);
+class InlineBox : public common::Castable {
+  DECLARE_CASTABLE_CLASS(InlineBox, Castable);
 
  public:
-  explicit Cell(const Cell& other);
-  virtual ~Cell();
+  explicit InlineBox(const InlineBox& other);
+  virtual ~InlineBox();
 
   float descent() const { return descent_; }
   float height() const { return height_; }
   float line_height() const { return line_height_; }
   float width() const { return width_; }
 
-  virtual Cell* Copy() const = 0;
-  virtual bool Equal(const Cell* pCell) const;
+  virtual InlineBox* Copy() const = 0;
+  virtual bool Equal(const InlineBox* pInlineBox) const;
   virtual text::Posn Fix(float line_height, float line_descent);
   virtual uint32_t Hash() const;
   virtual gfx::RectF HitTestTextPosition(text::Posn position) const;
@@ -55,7 +55,7 @@ class Cell : public common::Castable {
   virtual void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const;
 
  protected:
-  Cell(const RenderStyle& style, float width, float height, float descent);
+  InlineBox(const RenderStyle& style, float width, float height, float descent);
 
   float line_descent() const { return line_descent_; }
   float top() const;
@@ -76,19 +76,19 @@ class Cell : public common::Castable {
 
 //////////////////////////////////////////////////////////////////////
 //
-// FillerCell
+// InlineFillerBox
 //
-class FillerCell final : public Cell {
-  DECLARE_CASTABLE_CLASS(FillerCell, Cell);
+class InlineFillerBox final : public InlineBox {
+  DECLARE_CASTABLE_CLASS(InlineFillerBox, InlineBox);
 
  public:
-  FillerCell(const RenderStyle& style, float width, float height);
-  FillerCell(const FillerCell& other);
-  ~FillerCell() final;
+  InlineFillerBox(const RenderStyle& style, float width, float height);
+  InlineFillerBox(const InlineFillerBox& other);
+  ~InlineFillerBox() final;
 
  private:
-  // rendering::Cell
-  Cell* Copy() const final;
+  // rendering::InlineBox
+  InlineBox* Copy() const final;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -132,26 +132,26 @@ class WithFont {
 
 //////////////////////////////////////////////////////////////////////
 //
-// MarkerCell
+// InlineMarkerBox
 //
-class MarkerCell final : public Cell, private WithFont {
-  DECLARE_CASTABLE_CLASS(MarkerCell, Cell);
+class InlineMarkerBox final : public InlineBox, private WithFont {
+  DECLARE_CASTABLE_CLASS(InlineMarkerBox, InlineBox);
 
  public:
-  MarkerCell(const RenderStyle& style,
-             float width,
-             float height,
-             text::Posn lPosn,
-             TextMarker marker_name);
-  MarkerCell(const MarkerCell& other);
-  virtual ~MarkerCell();
+  InlineMarkerBox(const RenderStyle& style,
+                  float width,
+                  float height,
+                  text::Posn lPosn,
+                  TextMarker marker_name);
+  InlineMarkerBox(const InlineMarkerBox& other);
+  virtual ~InlineMarkerBox();
 
   TextMarker marker_name() const { return marker_name_; }
 
  private:
-  // rendering::Cell
-  Cell* Copy() const final;
-  bool Equal(const Cell* pCell) const final;
+  // rendering::InlineBox
+  InlineBox* Copy() const final;
+  bool Equal(const InlineBox* pInlineBox) const final;
   text::Posn Fix(float iHeight, float iDescent) final;
   uint32_t Hash() const final;
   gfx::RectF HitTestTextPosition(text::Posn lPosn) const final;
@@ -164,19 +164,19 @@ class MarkerCell final : public Cell, private WithFont {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextCell
+// InlineTextBox
 //
-class TextCell : public Cell, private WithFont {
-  DECLARE_CASTABLE_CLASS(TextCell, Cell);
+class InlineTextBox : public InlineBox, private WithFont {
+  DECLARE_CASTABLE_CLASS(InlineTextBox, InlineBox);
 
  public:
-  TextCell(const RenderStyle& style,
-           float width,
-           float height,
-           text::Posn lPosn,
-           const base::string16& characters);
-  TextCell(const TextCell& other);
-  virtual ~TextCell();
+  InlineTextBox(const RenderStyle& style,
+                float width,
+                float height,
+                text::Posn lPosn,
+                const base::string16& characters);
+  InlineTextBox(const InlineTextBox& other);
+  virtual ~InlineTextBox();
 
   const base::string16 characters() const { return characters_; }
   text::Posn end() const { return end_; }
@@ -184,7 +184,7 @@ class TextCell : public Cell, private WithFont {
 
   void AddChar(base::char16 char_code);
 
-  bool Equal(const Cell* pCell) const override;
+  bool Equal(const InlineBox* pInlineBox) const override;
   text::Posn Fix(float iHeight, float iDescent) override;
   uint32_t Hash() const override;
   gfx::RectF HitTestTextPosition(text::Posn position) const override;
@@ -193,8 +193,8 @@ class TextCell : public Cell, private WithFont {
   void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const override;
 
  private:
-  // rendering::Cell
-  Cell* Copy() const override;
+  // rendering::InlineBox
+  InlineBox* Copy() const override;
 
   base::string16 characters_;
   text::Posn end_;
@@ -203,23 +203,23 @@ class TextCell : public Cell, private WithFont {
 
 //////////////////////////////////////////////////////////////////////
 //
-// UnicodeCell
+// InlineUnicodeBox
 //
-class UnicodeCell final : public TextCell {
-  DECLARE_CASTABLE_CLASS(UnicodeCell, TextCell);
+class InlineUnicodeBox final : public InlineTextBox {
+  DECLARE_CASTABLE_CLASS(InlineUnicodeBox, InlineTextBox);
 
  public:
-  UnicodeCell(const RenderStyle& style,
-              float width,
-              float height,
-              text::Posn lPosn,
-              const base::string16& characters);
-  UnicodeCell(const UnicodeCell& other);
-  ~UnicodeCell() final;
+  InlineUnicodeBox(const RenderStyle& style,
+                   float width,
+                   float height,
+                   text::Posn lPosn,
+                   const base::string16& characters);
+  InlineUnicodeBox(const InlineUnicodeBox& other);
+  ~InlineUnicodeBox() final;
 
  private:
-  // rendering::Cell
-  Cell* Copy() const final;
+  // rendering::InlineBox
+  InlineBox* Copy() const final;
   gfx::RectF HitTestTextPosition(text::Posn lPosn) const final;
   bool Merge(const RenderStyle& style, float width) final;
   void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
@@ -228,4 +228,4 @@ class UnicodeCell final : public TextCell {
 }  // namespace rendering
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_RENDER_CELL_H_
+#endif  // EVITA_VIEWS_TEXT_INLINE_BOX_H_

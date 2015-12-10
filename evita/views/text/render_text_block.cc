@@ -13,7 +13,7 @@
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
-#include "evita/views/text/render_cell.h"
+#include "evita/views/text/inline_box.h"
 #include "evita/views/text/render_style.h"
 #include "evita/views/text/render_text_line.h"
 #include "evita/views/text/text_formatter.h"

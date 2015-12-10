@@ -14,7 +14,7 @@
 #include "evita/ui/caret.h"
 #include "evita/views/switches.h"
 #include "evita/views/text/paint_text_block.h"
-#include "evita/views/text/render_cell.h"
+#include "evita/views/text/inline_box.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/render_text_line.h"
 
@@ -321,7 +321,7 @@ bool ScreenTextBlock::PaintContext::Paint() {
   if (VLOG_IS_ON(0)) {
     // TextBlock must cover whole screen area.
     auto const last_format_line = format_lines_.back();
-    if (!last_format_line->cells().back()->is<MarkerCell>())
+    if (!last_format_line->cells().back()->is<InlineMarkerBox>())
       DCHECK_GE(last_format_line->bounds().bottom, bounds_.bottom);
   }
 

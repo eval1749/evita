@@ -18,7 +18,7 @@ class TextView;
 
 namespace rendering {
 
-class Cell;
+class InlineBox;
 class Formatter;
 class TextBlock;
 class TextSelection;
@@ -31,9 +31,9 @@ class TextLine final {
   float bottom() const { return bounds_.bottom; }
   const gfx::PointF& bottom_right() const { return bounds_.bottom_right(); }
   const gfx::RectF& bounds() const { return bounds_; }
-  const std::vector<Cell*>& cells() const { return cells_; }
+  const std::vector<InlineBox*>& cells() const { return cells_; }
   float height() const { return bounds_.height(); }
-  Cell* last_cell() const { return cells_.back(); }
+  InlineBox* last_cell() const { return cells_.back(); }
   float left() const { return bounds_.left; }
   float right() const { return bounds_.right; }
   float top() const { return bounds_.top; }
@@ -43,7 +43,7 @@ class TextLine final {
   text::Posn text_end() const { return m_lEnd; }
   text::Posn text_start() const { return m_lStart; }
 
-  void AddCell(Cell* cell);
+  void AddInlineBox(InlineBox* cell);
   gfx::RectF CalculateSelectionRect(const TextSelection& selection) const;
   TextLine* Copy() const;
   bool Equal(const TextLine*) const;
@@ -64,7 +64,7 @@ class TextLine final {
   bool Contains(text::Posn offset) const;
 
   gfx::RectF bounds_;
-  std::vector<Cell*> cells_;
+  std::vector<InlineBox*> cells_;
   mutable uint32_t m_nHash;
   text::Posn m_lStart;
   text::Posn m_lEnd;

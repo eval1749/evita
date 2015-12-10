@@ -4,10 +4,10 @@
 
 source_set("text") {
   sources = [
+    "inline_box.cc",
+    "inline_box.h",
     "paint_text_block.cc",
     "paint_text_block.h",
-    "render_cell.cc",
-    "render_cell.h",
     "render_font.cc",
     "render_font.h",
     "render_font_set.cc",

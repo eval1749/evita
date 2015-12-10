@@ -16,7 +16,7 @@
 #include "evita/text/interval.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
-#include "evita/views/text/render_cell.h"
+#include "evita/views/text/inline_box.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/text/render_style.h"
@@ -211,14 +211,14 @@ TextLine* TextFormatter::FormatLine() {
   auto descent = 0.0f;
   auto ascent = 0.0f;
 
-  Cell* cell;
+  InlineBox* cell;
 
   // Left margin
   {
     auto const cyMinHeight = 1.0f;
 
-    cell = new FillerCell(default_render_style_, kLeftMargin, cyMinHeight);
-    line->AddCell(cell);
+    cell = new InlineFillerBox(default_render_style_, kLeftMargin, cyMinHeight);
+    line->AddInlineBox(cell);
     x += kLeftMargin;
   }
 
@@ -247,7 +247,7 @@ TextLine* TextFormatter::FormatLine() {
     if (line->last_cell() == cell) {
       x -= width;
     } else {
-      line->AddCell(cell);
+      line->AddInlineBox(cell);
     }
 
     x += cell->width();
@@ -256,11 +256,11 @@ TextLine* TextFormatter::FormatLine() {
   }
 
   // We have at least one cell.
-  // o end of buffer: End-Of-Buffer MarkerCell
-  // o end of line: End-Of-Line MarkerCell
-  // o wrapped line: Warp MarkerCell
+  // o end of buffer: End-Of-Buffer InlineMarkerBox
+  // o end of line: End-Of-Line InlineMarkerBox
+  // o wrapped line: Warp InlineMarkerBox
   DCHECK(cell);
-  line->AddCell(cell);
+  line->AddInlineBox(cell);
 
   x += cell->width();
   descent = std::max(cell->descent(), descent);
@@ -269,9 +269,9 @@ TextLine* TextFormatter::FormatLine() {
   return line;
 }
 
-Cell* TextFormatter::FormatChar(Cell* previous_cell,
-                                float x,
-                                base::char16 wch) {
+InlineBox* TextFormatter::FormatChar(InlineBox* previous_cell,
+                                     float x,
+                                     base::char16 wch) {
   auto const lPosn = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
 
@@ -304,8 +304,8 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell,
       return nullptr;
 
     auto const height = AlignHeightToPixel(font->height());
-    return new MarkerCell(MakeRenderStyle(style, font), width, height, lPosn,
-                          TextMarker::Tab);
+    return new InlineMarkerBox(MakeRenderStyle(style, font), width, height,
+                               lPosn, TextMarker::Tab);
   }
 
   auto const font =
@@ -332,8 +332,8 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell,
     if (previous_cell && x + width + char_width > bounds_.right)
       return nullptr;
     auto const height = AlignHeightToPixel(font2->height());
-    return new UnicodeCell(MakeRenderStyle(style, font2), width, height, lPosn,
-                           string);
+    return new InlineUnicodeBox(MakeRenderStyle(style, font2), width, height,
+                                lPosn, string);
   }
 
   auto render_style = MakeRenderStyle(style, font);
@@ -346,17 +346,17 @@ Cell* TextFormatter::FormatChar(Cell* previous_cell,
     }
 
     if (previous_cell->Merge(render_style, width)) {
-      previous_cell->as<TextCell>()->AddChar(wch);
+      previous_cell->as<InlineTextBox>()->AddChar(wch);
       return previous_cell;
     }
   }
 
   auto const height = AlignHeightToPixel(font->height());
-  return new TextCell(render_style, width, height, lPosn,
-                      base::string16(1u, wch));
+  return new InlineTextBox(render_style, width, height, lPosn,
+                           base::string16(1u, wch));
 }
 
-Cell* TextFormatter::FormatMarker(TextMarker marker_name) {
+InlineBox* TextFormatter::FormatMarker(TextMarker marker_name) {
   auto style = text_scanner_->GetStyle();
   style.Merge(
       text_scanner_->style_resolver()->Resolve(css::StyleSelector::defaults()));
@@ -367,8 +367,8 @@ Cell* TextFormatter::FormatMarker(TextMarker marker_name) {
   auto const font = FontSet::GetFont(style, 'x');
   auto const width = AlignWidthToPixel(font->GetCharWidth('x'));
   auto const height = AlignHeightToPixel(font->height());
-  return new MarkerCell(MakeRenderStyle(style, font), width, height,
-                        text_scanner_->text_offset(), marker_name);
+  return new InlineMarkerBox(MakeRenderStyle(style, font), width, height,
+                             text_scanner_->text_offset(), marker_name);
 }
 
 TextSelection TextFormatter::FormatSelection(

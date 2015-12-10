@@ -13,8 +13,6 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/public/promise.h"
-#include "evita/dom/public/view_event_handler.h"
-#include "evita/editor/application.h"
 #include "evita/io/io_context_utils.h"
 
 #define DVLOG_WIN32_ERROR(level, name, last_error) \

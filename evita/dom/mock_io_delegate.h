@@ -64,7 +64,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
                 const base::string16& mode,
                 const domapi::OpenFilePromise&) final;
   void OpenProcess(const base::string16& command_line,
-                   const domapi::OpenProcessDeferred&) final;
+                   const domapi::OpenProcessPromise&) final;
   void ReadDirectory(domapi::IoContextId context_id,
                      size_t num_read,
                      const domapi::ReadDirectoryPromise& promise) final;

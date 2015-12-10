@@ -66,7 +66,7 @@ DEFINE_DELEGATE_3(OpenFile,
                   const domapi::OpenFilePromise&)
 DEFINE_DELEGATE_2(OpenProcess,
                   const base::string16&,
-                  const domapi::OpenProcessDeferred&)
+                  const domapi::OpenProcessPromise&)
 DEFINE_DELEGATE_2(QueryFileStatus,
                   const base::string16&,
                   const domapi::QueryFileStatusDeferred&)

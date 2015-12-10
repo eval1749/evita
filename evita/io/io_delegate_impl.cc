@@ -182,7 +182,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
 }
 
 void IoDelegateImpl::OpenProcess(const base::string16& command_line,
-                                 const domapi::OpenProcessDeferred& deferred) {
+                                 const domapi::OpenProcessPromise& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenProcess");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,

@@ -39,7 +39,7 @@ using IoIntPromise = Deferred<int, IoError>;
 using MakeTempFileNamePromise = Deferred<base::string16, IoError>;
 using OpenDirectoryPromise = Deferred<DirectoryId, IoError>;
 using OpenFilePromise = Deferred<FileId, IoError>;
-using OpenProcessDeferred = Deferred<ProcessId, IoError>;
+using OpenProcessPromise = Deferred<ProcessId, IoError>;
 using QueryFileStatusDeferred = Deferred<FileStatus, IoError>;
 using ReadDirectoryPromise = Deferred<const std::vector<FileStatus>&, IoError>;
 

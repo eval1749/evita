@@ -46,7 +46,7 @@ class IoDelegateImpl final : public domapi::IoDelegate {
                 const base::string16& mode,
                 const domapi::OpenFilePromise& deferred) final;
   void OpenProcess(const base::string16& command_line,
-                   const domapi::OpenProcessDeferred& deferred) final;
+                   const domapi::OpenProcessPromise& deferred) final;
   void QueryFileStatus(const base::string16& file_name,
                        const domapi::QueryFileStatusDeferred& deferred) final;
   void ReadDirectory(domapi::IoContextId context_id,

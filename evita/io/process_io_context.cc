@@ -24,7 +24,7 @@ namespace io {
 
 ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
                                    const base::string16& command_line,
-                                   const domapi::OpenProcessDeferred& deferred)
+                                   const domapi::OpenProcessPromise& deferred)
     : gateway_thread_(new base::Thread("process")) {
   TRACE_EVENT_ASYNC_BEGIN1("io", "ProcessContext", this, "command_line",
                            base::UTF16ToUTF8(command_line).c_str());
@@ -110,7 +110,7 @@ void ProcessIoContext::ReadFromProcess(void* buffer,
 void ProcessIoContext::StartProcess(
     domapi::IoContextId context_id,
     const base::string16& command_line,
-    const domapi::OpenProcessDeferred& deferred) {
+    const domapi::OpenProcessPromise& deferred) {
   TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::StartProcess",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,

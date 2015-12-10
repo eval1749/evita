@@ -19,7 +19,6 @@
 // TODO(eval1749): We should not use DOM object in DOM API.
 namespace dom {
 class Document;
-class EditorWindow;
 class Form;
 }
 
@@ -78,7 +77,7 @@ class ViewDelegate {
                                   WindowId new_parent_window_id) = 0;
   virtual text::Posn ComputeOnTextWindow(WindowId window_id,
                                          const TextWindowCompute& data) = 0;
-  virtual void CreateEditorWindow(const dom::EditorWindow* window) = 0;
+  virtual void CreateEditorWindow(domapi::WindowId window_id) = 0;
 
   // Create Form window
   virtual void CreateFormWindow(WindowId window_id,

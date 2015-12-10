@@ -172,9 +172,8 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
   }
 }
 
-void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
-  DCHECK(window);
-  new Frame(window->window_id());
+void ViewDelegateImpl::CreateEditorWindow(domapi::WindowId window_id) {
+  new Frame(window_id);
 }
 
 void ViewDelegateImpl::CreateFormWindow(domapi::WindowId window_id,

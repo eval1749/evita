@@ -191,7 +191,7 @@ ViewThreadProxy::~ViewThreadProxy() {}
 
 DEFINE_DELEGATE_2(AddWindow, domapi::WindowId, domapi::WindowId)
 DEFINE_DELEGATE_2(ChangeParentWindow, domapi::WindowId, domapi::WindowId)
-DEFINE_DELEGATE_1(CreateEditorWindow, const dom::EditorWindow*)
+DEFINE_DELEGATE_1(CreateEditorWindow, domapi::WindowId)
 DEFINE_DELEGATE_3(CreateFormWindow,
                   domapi::WindowId,
                   dom::Form*,

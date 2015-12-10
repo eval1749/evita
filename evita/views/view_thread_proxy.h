@@ -33,7 +33,7 @@ class ViewThreadProxy : public domapi::ViewDelegate {
                           domapi::WindowId new_parent_id) final;
   text::Posn ComputeOnTextWindow(domapi::WindowId window_id,
                                  const domapi::TextWindowCompute& data) final;
-  void CreateEditorWindow(const dom::EditorWindow* window) final;
+  void CreateEditorWindow(const domapi::WindowId window_id) final;
   void CreateFormWindow(domapi::WindowId window_id,
                         dom::Form* form,
                         const domapi::PopupWindowInit& init) final;

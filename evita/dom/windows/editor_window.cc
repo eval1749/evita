@@ -55,7 +55,7 @@ class EditorWindowList final : public common::Singleton<EditorWindowList> {
 //
 EditorWindow::EditorWindow() {
   EditorWindowList::instance()->Register(this);
-  ScriptHost::instance()->view_delegate()->CreateEditorWindow(this);
+  ScriptHost::instance()->view_delegate()->CreateEditorWindow(window_id());
 }
 
 EditorWindow::~EditorWindow() {}

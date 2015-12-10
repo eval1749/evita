@@ -8,8 +8,8 @@
 #include "base/callback.h"
 #include "base/message_loop/message_pump_win.h"
 #include "common/win/scoped_handle.h"
-#include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_context_id.h"
+#include "evita/dom/public/promise.h"
 #include "evita/io/block_io_context.h"
 
 namespace io {
@@ -22,7 +22,7 @@ class FileIoContext final : private base::MessagePumpForIO::IOContext,
  public:
   FileIoContext(const base::string16& file_name,
                 const base::string16& mode,
-                const domapi::OpenFilePromise& deferred);
+                const domapi::OpenFilePromise& promise);
   ~FileIoContext() final;
 
   bool is_valid() const { return file_handle_.is_valid(); }
@@ -36,15 +36,15 @@ class FileIoContext final : private base::MessagePumpForIO::IOContext,
                      DWORD error) override;
 
   // io::IoContext
-  void Close(const domapi::IoIntPromise& deferred) override;
+  void Close(const domapi::IoIntPromise& promise) override;
   void Read(void* buffer,
             size_t num_read,
-            const domapi::IoIntPromise& deferred) override;
+            const domapi::IoIntPromise& promise) override;
   void Write(void* buffer,
              size_t num_write,
-             const domapi::IoIntPromise& deferred) override;
+             const domapi::IoIntPromise& promise) override;
 
-  domapi::IoIntPromise deferred_;
+  domapi::IoIntPromise promise_;
   common::win::scoped_handle file_handle_;
   const char* operation_;
 

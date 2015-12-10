@@ -60,8 +60,8 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
     DVLOG(0) << "No Editor";
     return;
   }
-  auto const handler = js_editor->ToObject()->Get(
-      v8Strings::handleRejectedPromise.Get(isolate));
+  auto const handler =
+      js_editor->ToObject()->Get(v8Strings::handleRejectedPromise.Get(isolate));
   if (handler.IsEmpty() || !handler->IsObject() ||
       !handler->ToObject()->IsFunction()) {
     DVLOG(0) << "No Editor.handleRejectedPromise";
@@ -69,10 +69,8 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
   }
   auto const event = static_cast<int>(reject_message.GetEvent());
   ASSERT_DOM_LOCKED();
-  runner->Call(handler, runner->global(),
-               reject_message.GetPromise(),
-               reject_message.GetValue(),
-               gin::ConvertToV8(isolate, event));
+  runner->Call(handler, runner->global(), reject_message.GetPromise(),
+               reject_message.GetValue(), gin::ConvertToV8(isolate, event));
 }
 
 // Note: The constructor returned by v8::Object::GetConstructor() doesn't
@@ -97,7 +95,7 @@ void MessageBox(const base::string16& message, int flags) {
   DVLOG(0) << message;
   if (suppress_message_box)
     return;
-  domapi::Deferred<int, int> resolver;
+  domapi::Promise<int, int> resolver;
   resolver.reject = base::Bind(MessageBoxCallback);
   resolver.resolve = base::Bind(MessageBoxCallback);
   ScriptHost::instance()->view_delegate()->MessageBox(

@@ -14,7 +14,7 @@
 namespace domapi {
 
 template <typename ResolveType, typename RejectType>
-struct Deferred;
+struct Promise;
 class DirectoryId;
 class FileId;
 class IoContextId;
@@ -34,14 +34,14 @@ struct MoveFileOptions final {
   bool no_overwrite;
 };
 
-using IoBoolPromise = Deferred<bool, IoError>;
-using IoIntPromise = Deferred<int, IoError>;
-using MakeTempFileNamePromise = Deferred<base::string16, IoError>;
-using OpenDirectoryPromise = Deferred<DirectoryId, IoError>;
-using OpenFilePromise = Deferred<FileId, IoError>;
-using OpenProcessPromise = Deferred<ProcessId, IoError>;
-using QueryFileStatusPromise = Deferred<FileStatus, IoError>;
-using ReadDirectoryPromise = Deferred<const std::vector<FileStatus>&, IoError>;
+using IoBoolPromise = Promise<bool, IoError>;
+using IoIntPromise = Promise<int, IoError>;
+using MakeTempFileNamePromise = Promise<base::string16, IoError>;
+using OpenDirectoryPromise = Promise<DirectoryId, IoError>;
+using OpenFilePromise = Promise<FileId, IoError>;
+using OpenProcessPromise = Promise<ProcessId, IoError>;
+using QueryFileStatusPromise = Promise<FileStatus, IoError>;
+using ReadDirectoryPromise = Promise<const std::vector<FileStatus>&, IoError>;
 
 }  // namespace domapi
 

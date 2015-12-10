@@ -11,7 +11,7 @@
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
 #include "evita/precomp.h"
-#include "evita/dom/public/deferred.h"
+#include "evita/dom/public/promise.h"
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/switch_value.h"
 #include "evita/dom/windows/window_id.h"
@@ -70,9 +70,9 @@ struct TextWindowCompute final {
 
 class ViewDelegate {
  public:
-  using GetFileNameForLoadResolver = domapi::Deferred<base::string16>;
-  using GetFileNameForSaveResolver = domapi::Deferred<base::string16>;
-  using MessageBoxResolver = domapi::Deferred<int>;
+  using GetFileNameForLoadResolver = domapi::Promise<base::string16>;
+  using GetFileNameForSaveResolver = domapi::Promise<base::string16>;
+  using MessageBoxResolver = domapi::Promise<int>;
 
   virtual ~ViewDelegate() = default;
 

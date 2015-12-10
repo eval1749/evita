@@ -7,9 +7,9 @@
 
 #include <vector>
 
-#include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_callback.h"
 #include "evita/dom/public/io_context_id.h"
+#include "evita/dom/public/promise.h"
 
 #undef MoveFile
 
@@ -17,10 +17,10 @@ namespace domapi {
 
 class IoDelegate {
  public:
-  using CheckSpellingResolver = domapi::Deferred<bool>;
+  using CheckSpellingResolver = domapi::Promise<bool>;
 
   using GetSpellingSuggestionsResolver =
-      domapi::Deferred<std::vector<base::string16>>;
+      domapi::Promise<std::vector<base::string16>>;
 
   virtual ~IoDelegate();
 
@@ -29,10 +29,10 @@ class IoDelegate {
                              const CheckSpellingResolver& callback) = 0;
 
   virtual void CloseDirectory(IoContextId context_id,
-                              const IoIntPromise& deferred) = 0;
+                              const IoIntPromise& promise) = 0;
 
   virtual void CloseFile(IoContextId context_id,
-                         const IoIntPromise& deferred) = 0;
+                         const IoIntPromise& promise) = 0;
 
   // Returns list of suggested words for |wrong_word|.
   virtual void GetSpellingSuggestions(
@@ -56,11 +56,11 @@ class IoDelegate {
 
   virtual void OpenFile(const base::string16& file_name,
                         const base::string16& mode,
-                        const OpenFilePromise& deferred) = 0;
+                        const OpenFilePromise& promise) = 0;
   virtual void OpenProcess(const base::string16& command_line,
-                           const OpenProcessPromise& deferred) = 0;
+                           const OpenProcessPromise& promise) = 0;
   virtual void QueryFileStatus(const base::string16& file_name,
-                               const QueryFileStatusPromise& deferred) = 0;
+                               const QueryFileStatusPromise& promise) = 0;
 
   virtual void ReadDirectory(IoContextId context_id,
                              size_t num_read,
@@ -69,7 +69,7 @@ class IoDelegate {
   virtual void ReadFile(IoContextId context_id,
                         void* buffer,
                         size_t num_read,
-                        const IoIntPromise& deferred) = 0;
+                        const IoIntPromise& promise) = 0;
   // Remove file
   virtual void RemoveFile(const base::string16& file_name,
                           const IoBoolPromise& resolver) = 0;
@@ -77,7 +77,7 @@ class IoDelegate {
   virtual void WriteFile(IoContextId context_id,
                          void* buffer,
                          size_t num_write,
-                         const IoIntPromise& deferred) = 0;
+                         const IoIntPromise& promise) = 0;
 
  protected:
   IoDelegate();

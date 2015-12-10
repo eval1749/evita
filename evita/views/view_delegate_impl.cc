@@ -46,7 +46,7 @@ domapi::ViewEventHandler* ScriptDelegate() {
 }
 
 template <typename ResolveType>
-void Reject(const domapi::Deferred<ResolveType, int>& promise, int value) {
+void Reject(const domapi::Promise<ResolveType, int>& promise, int value) {
   ScriptDelegate()->RunCallback(base::Bind(promise.reject, value));
 }
 

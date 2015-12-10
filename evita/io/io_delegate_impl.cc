@@ -13,9 +13,9 @@
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
 #include "common/win/scoped_handle.h"
-#include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/io_error.h"
+#include "evita/dom/public/promise.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/io/directory_io_context.h"
 #include "evita/io/file_io_context.h"
@@ -67,12 +67,12 @@ IoContext* IoDelegateImpl::IoContextOf(domapi::IoContextId context_id) const {
 
 // domapi::IoDelegate
 void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
-                                   const CheckSpellingResolver& deferred) {
-  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
+                                   const CheckSpellingResolver& promise) {
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::CheckSpelling");
   RunCallback(base::Bind(
-      deferred.resolve,
+      promise.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->CheckSpelling(
           word_to_check)));
 }
@@ -103,12 +103,12 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
 
 void IoDelegateImpl::GetSpellingSuggestions(
     const base::string16& wrong_word,
-    const GetSpellingSuggestionsResolver& deferred) {
-  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
+    const GetSpellingSuggestionsResolver& promise) {
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::GetSpellingSuggestions");
   RunCallback(base::Bind(
-      deferred.resolve,
+      promise.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->GetSpellingSuggestions(
           wrong_word)));
 }
@@ -168,27 +168,27 @@ void IoDelegateImpl::OpenDirectory(
 
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
-                              const domapi::OpenFilePromise& deferred) {
+                              const domapi::OpenFilePromise& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenFile");
-  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::OpenFile");
-  auto file = std::make_unique<FileIoContext>(file_name, mode, deferred);
+  auto file = std::make_unique<FileIoContext>(file_name, mode, promise);
   if (!file->is_valid())
     return;
   auto const file_id = domapi::IoContextId::New();
   context_map_.insert(std::make_pair(file_id, file.release()));
-  RunCallback(base::Bind(deferred.resolve, domapi::FileId(file_id)));
+  RunCallback(base::Bind(promise.resolve, domapi::FileId(file_id)));
 }
 
 void IoDelegateImpl::OpenProcess(const base::string16& command_line,
-                                 const domapi::OpenProcessPromise& deferred) {
+                                 const domapi::OpenProcessPromise& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenProcess");
-  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::OpenProcess");
   auto const process_id = domapi::IoContextId::New();
-  auto const process = new ProcessIoContext(process_id, command_line, deferred);
+  auto const process = new ProcessIoContext(process_id, command_line, promise);
   context_map_.insert(std::make_pair(process_id, process));
   // Note: |ProcessIoContext| constructor delegate promise resolution to the
   // gateway thread which spawns process with specified command line.
@@ -196,9 +196,9 @@ void IoDelegateImpl::OpenProcess(const base::string16& command_line,
 
 void IoDelegateImpl::QueryFileStatus(
     const base::string16& file_name,
-    const domapi::QueryFileStatusPromise& deferred) {
+    const domapi::QueryFileStatusPromise& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::QueryFileStatus");
-  TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
+  TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::QueryFileStatus");
   WIN32_FIND_DATAW find_data;
@@ -207,12 +207,12 @@ void IoDelegateImpl::QueryFileStatus(
   if (!find_handle.is_valid()) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "FindFirstFileW error=" << last_error;
-    Reject(deferred.reject, last_error);
+    Reject(promise.reject, last_error);
     return;
   }
 
   if (find_data.nFileSizeHigh || find_data.nFileSizeLow > kHugeFileSize) {
-    Reject(deferred.reject, ERROR_NOT_ENOUGH_MEMORY);
+    Reject(promise.reject, ERROR_NOT_ENOUGH_MEMORY);
     return;
   }
 
@@ -225,7 +225,7 @@ void IoDelegateImpl::QueryFileStatus(
   data.last_write_time = base::Time::FromFileTime(find_data.ftLastWriteTime);
   data.readonly = (find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 
-  RunCallback(base::Bind(deferred.resolve, data));
+  RunCallback(base::Bind(promise.resolve, data));
 }
 
 void IoDelegateImpl::ReadDirectory(

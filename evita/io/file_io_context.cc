@@ -39,7 +39,7 @@ struct CreateFileParams {
 
 HANDLE OpenFile(const base::string16& file_name,
                 const base::string16& mode,
-                const domapi::OpenFilePromise& deferred) {
+                const domapi::OpenFilePromise& promise) {
   CreateFileParams params(mode);
   common::win::scoped_handle handle(
       ::CreateFileW(file_name.c_str(), params.access, params.share_mode,
@@ -47,7 +47,7 @@ HANDLE OpenFile(const base::string16& file_name,
   if (!handle) {
     auto const last_error = ::GetLastError();
     DVLOG(0) << "CreateFileW " << file_name << " error=" << last_error;
-    Reject(deferred.reject, last_error);
+    Reject(promise.reject, last_error);
     return INVALID_HANDLE_VALUE;
   }
   return handle.release();
@@ -62,8 +62,8 @@ void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
 
 FileIoContext::FileIoContext(const base::string16& file_name,
                              const base::string16& mode,
-                             const domapi::OpenFilePromise& deferred)
-    : file_handle_(OpenFile(file_name, mode, deferred)), operation_(nullptr) {
+                             const domapi::OpenFilePromise& promise)
+    : file_handle_(OpenFile(file_name, mode, promise)), operation_(nullptr) {
   TRACE_EVENT_ASYNC_BEGIN0("io", "FileContext", this);
   if (!file_handle_.is_valid())
     return;
@@ -83,54 +83,53 @@ void FileIoContext::OnIOCompleted(IOContext*,
                                   DWORD error) {
   DCHECK(IsRunning());
   TRACE_EVENT_WITH_FLOW1("promise", "FileIoContext::OnIOCompleted",
-                         deferred_.sequence_num,
+                         promise_.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "operation", operation_);
   overlapped.Offset += bytes_transferred;
   auto const operation = operation_;
   operation_ = nullptr;
   if (!error || error == ERROR_HANDLE_EOF)
-    Resolve(deferred_.resolve, bytes_transferred);
+    Resolve(promise_.resolve, bytes_transferred);
   else
-    Reject(deferred_.reject, error);
+    Reject(promise_.reject, error);
   if (!file_handle_.is_valid())
     delete this;
-  TRACE_EVENT_ASYNC_END0("io", operation, deferred_.sequence_num);
+  TRACE_EVENT_ASYNC_END0("io", operation, promise_.sequence_num);
 }
 
 // io::IoContext
-void FileIoContext::Close(const domapi::IoIntPromise& deferred) {
+void FileIoContext::Close(const domapi::IoIntPromise& promise) {
   TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Close",
-                         deferred.sequence_num,
+                         promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (file_handle_.is_valid()) {
     if (!::CloseHandle(file_handle_.get())) {
       auto const last_error = ::GetLastError();
       DVLOG(0) << "CloseHandle error=" << last_error;
-      Reject(deferred.reject, last_error);
+      Reject(promise.reject, last_error);
       return;
     }
     file_handle_.release();
   }
   if (!IsRunning())
     delete this;
-  Resolve(deferred.resolve, 0u);
+  Resolve(promise.resolve, 0u);
 }
 
 void FileIoContext::Read(void* buffer,
                          size_t num_read,
-                         const domapi::IoIntPromise& deferred) {
-  TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Read",
-                         deferred.sequence_num,
+                         const domapi::IoIntPromise& promise) {
+  TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Read", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (IsRunning()) {
-    Reject(deferred.reject, ERROR_BUSY);
+    Reject(promise.reject, ERROR_BUSY);
     return;
   }
 
-  deferred_ = deferred;
+  promise_ = promise;
   operation_ = "ReadFile";
-  TRACE_EVENT_ASYNC_BEGIN0("io", operation_, deferred.sequence_num);
+  TRACE_EVENT_ASYNC_BEGIN0("io", operation_, promise.sequence_num);
   DWORD read;
   auto const succeeded =
       ::ReadFile(file_handle_.get(), buffer, static_cast<DWORD>(num_read),
@@ -146,18 +145,18 @@ void FileIoContext::Read(void* buffer,
 
 void FileIoContext::Write(void* buffer,
                           size_t num_write,
-                          const domapi::IoIntPromise& deferred) {
+                          const domapi::IoIntPromise& promise) {
   TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Write",
-                         deferred.sequence_num,
+                         promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (IsRunning()) {
-    Reject(deferred.reject, ERROR_BUSY);
+    Reject(promise.reject, ERROR_BUSY);
     return;
   }
 
-  deferred_ = deferred;
+  promise_ = promise;
   operation_ = "WriteFile";
-  TRACE_EVENT_ASYNC_BEGIN0("io", operation_, deferred.sequence_num);
+  TRACE_EVENT_ASYNC_BEGIN0("io", operation_, promise.sequence_num);
   DWORD written;
   auto const succeeded =
       ::WriteFile(file_handle_.get(), buffer, static_cast<DWORD>(num_write),

@@ -8,7 +8,7 @@
 
 #include "base/bind.h"
 #include "base/files/file_enumerator.h"
-#include "evita/dom/public/deferred.h"
+#include "evita/dom/public/promise.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/io/io_context_utils.h"
 

@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "base/strings/string_piece.h"
-#include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_delegate.h"
+#include "evita/dom/public/promise.h"
 #include "gmock/gmock.h"
 
 namespace dom {
@@ -45,12 +45,12 @@ class MockIoDelegate final : public domapi::IoDelegate {
 
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
-                     const CheckSpellingResolver& deferred) final;
+                     const CheckSpellingResolver& promise) final;
   void CloseDirectory(domapi::IoContextId, const domapi::IoIntPromise& promise);
-  void CloseFile(domapi::IoContextId, const domapi::IoIntPromise& deferred);
+  void CloseFile(domapi::IoContextId, const domapi::IoIntPromise& promise);
   void GetSpellingSuggestions(
       const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& deferred) final;
+      const GetSpellingSuggestionsResolver& promise) final;
   void MakeTempFileName(const base::string16& dir_name,
                         const base::string16& prefix,
                         const domapi::MakeTempFileNamePromise& resolver) final;
@@ -71,13 +71,13 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void ReadFile(domapi::IoContextId context_id,
                 void* buffer,
                 size_t num_read,
-                const domapi::IoIntPromise& deferred) final;
+                const domapi::IoIntPromise& promise) final;
   void RemoveFile(const base::string16& file_name,
                   const domapi::IoBoolPromise& resolver) final;
   void WriteFile(domapi::IoContextId context_id,
                  void* buffer,
                  size_t num_write,
-                 const domapi::IoIntPromise& deferred) final;
+                 const domapi::IoIntPromise& promise) final;
 
  private:
   struct CallResult final {
@@ -88,7 +88,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
 
   CallResult PopCallResult(const base::StringPiece& name);
   void QueryFileStatus(const base::string16& file_name,
-                       const domapi::QueryFileStatusPromise& deferred) final;
+                       const domapi::QueryFileStatusPromise& promise) final;
 
   std::vector<uint8_t> bytes_;
   domapi::IoContextId context_id_;

@@ -8,9 +8,9 @@
 
 #include "base/logging.h"
 #include "base/callback.h"
-#include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_callback.h"
 #include "evita/dom/public/io_error.h"
+#include "evita/dom/public/promise.h"
 
 namespace dom {
 
@@ -79,8 +79,8 @@ void MockIoDelegate::SetReadDirectoryResult(
 
 // domapi::IoDelegate
 void MockIoDelegate::CheckSpelling(const base::string16&,
-                                   const CheckSpellingResolver& deferred) {
-  deferred.resolve.Run(check_spelling_result_);
+                                   const CheckSpellingResolver& promise) {
+  promise.resolve.Run(check_spelling_result_);
 }
 
 void MockIoDelegate::CloseDirectory(domapi::IoContextId,
@@ -106,8 +106,8 @@ void MockIoDelegate::CloseFile(domapi::IoContextId,
 
 void MockIoDelegate::GetSpellingSuggestions(
     const base::string16&,
-    const GetSpellingSuggestionsResolver& deferred) {
-  deferred.resolve.Run(spelling_suggestions_);
+    const GetSpellingSuggestionsResolver& promise) {
+  promise.resolve.Run(spelling_suggestions_);
 }
 
 void MockIoDelegate::MakeTempFileName(
@@ -145,31 +145,31 @@ void MockIoDelegate::OpenDirectory(
 
 void MockIoDelegate::OpenFile(const base::string16&,
                               const base::string16&,
-                              const domapi::OpenFilePromise& deferred) {
+                              const domapi::OpenFilePromise& promise) {
   auto const result = PopCallResult("OpenFile");
   if (auto const error_code = result.error_code)
-    deferred.reject.Run(domapi::IoError(error_code));
+    promise.reject.Run(domapi::IoError(error_code));
   else
-    deferred.resolve.Run(domapi::FileId(context_id_));
+    promise.resolve.Run(domapi::FileId(context_id_));
 }
 
 void MockIoDelegate::OpenProcess(const base::string16&,
-                                 const domapi::OpenProcessPromise& deferred) {
+                                 const domapi::OpenProcessPromise& promise) {
   auto const result = PopCallResult("OpenFile");
   if (auto const error_code = result.error_code)
-    deferred.reject.Run(domapi::IoError(error_code));
+    promise.reject.Run(domapi::IoError(error_code));
   else
-    deferred.resolve.Run(domapi::ProcessId(context_id_));
+    promise.resolve.Run(domapi::ProcessId(context_id_));
 }
 
 void MockIoDelegate::QueryFileStatus(
     const base::string16&,
-    const domapi::QueryFileStatusPromise& deferred) {
+    const domapi::QueryFileStatusPromise& promise) {
   auto const result = PopCallResult("QueryFileStatus");
   if (auto const error_code = result.error_code)
-    deferred.reject.Run(domapi::IoError(error_code));
+    promise.reject.Run(domapi::IoError(error_code));
   else
-    deferred.resolve.Run(file_status_);
+    promise.resolve.Run(file_status_);
 }
 
 void MockIoDelegate::ReadDirectory(
@@ -187,13 +187,13 @@ void MockIoDelegate::ReadDirectory(
 void MockIoDelegate::ReadFile(domapi::IoContextId,
                               void* bytes,
                               size_t num_bytes,
-                              const domapi::IoIntPromise& deferred) {
+                              const domapi::IoIntPromise& promise) {
   auto const result = PopCallResult("ReadFile");
   if (auto const error_code = result.error_code) {
-    deferred.reject.Run(domapi::IoError(error_code));
+    promise.reject.Run(domapi::IoError(error_code));
     return;
   }
-  deferred.resolve.Run(result.num_transferred);
+  promise.resolve.Run(result.num_transferred);
   ::memcpy(bytes, bytes_.data(), std::min(bytes_.size(), num_bytes));
 }
 
@@ -210,15 +210,15 @@ void MockIoDelegate::RemoveFile(const base::string16&,
 void MockIoDelegate::WriteFile(domapi::IoContextId,
                                void* bytes,
                                size_t num_bytes,
-                               const domapi::IoIntPromise& deferred) {
+                               const domapi::IoIntPromise& promise) {
   auto const result = PopCallResult("WriteFile");
   if (auto const error_code = result.error_code) {
-    deferred.reject.Run(domapi::IoError(error_code));
+    promise.reject.Run(domapi::IoError(error_code));
     return;
   }
   bytes_.resize(num_bytes);
   ::memcpy(&bytes_[0], bytes, num_bytes);
-  deferred.resolve.Run(result.num_transferred);
+  promise.resolve.Run(result.num_transferred);
 }
 
 }  // namespace dom

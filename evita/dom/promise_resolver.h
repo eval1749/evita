@@ -8,7 +8,7 @@
 #include "base/location.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
-#include "evita/dom/public/deferred.h"
+#include "evita/dom/public/promise.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/scoped_persistent.h"
@@ -30,7 +30,7 @@ class PromiseResolver final
   static v8::Handle<v8::Promise> Call(
       const tracked_objects::Location& from_here,
       const base::Callback<
-          void(const domapi::Deferred<ResolveType, RejectType>&)> closure);
+          void(const domapi::Promise<ResolveType, RejectType>&)> closure);
 
   v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) const;
 
@@ -60,18 +60,18 @@ class PromiseResolver final
 template <typename T, typename U>
 v8::Handle<v8::Promise> PromiseResolver::Call(
     const tracked_objects::Location& from_here,
-    const base::Callback<void(const domapi::Deferred<T, U>&)> closure) {
+    const base::Callback<void(const domapi::Promise<T, U>&)> closure) {
   auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
   auto const resolver =
       make_scoped_refptr(new PromiseResolver(from_here, runner));
 
-  domapi::Deferred<T, U> deferred;
-  deferred.reject = base::Bind(&PromiseResolver::Reject<U>, resolver);
-  deferred.resolve = base::Bind(&PromiseResolver::Resolve<T>, resolver);
-  deferred.sequence_num = resolver->sequence_num_;
-  closure.Run(deferred);
+  domapi::Promise<T, U> promise;
+  promise.reject = base::Bind(&PromiseResolver::Reject<U>, resolver);
+  promise.resolve = base::Bind(&PromiseResolver::Resolve<T>, resolver);
+  promise.sequence_num = resolver->sequence_num_;
+  closure.Run(promise);
   return runner_scope.Escape(resolver->GetPromise(runner->isolate()));
 }
 

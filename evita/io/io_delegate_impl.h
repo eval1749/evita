@@ -25,14 +25,14 @@ class IoDelegateImpl final : public domapi::IoDelegate {
 
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
-                     const CheckSpellingResolver& deferred) final;
+                     const CheckSpellingResolver& promise) final;
   void CloseDirectory(domapi::IoContextId context_id,
-                      const domapi::IoIntPromise& deferred) final;
+                      const domapi::IoIntPromise& promise) final;
   void CloseFile(domapi::IoContextId context_id,
-                 const domapi::IoIntPromise& deferred) final;
+                 const domapi::IoIntPromise& promise) final;
   void GetSpellingSuggestions(
       const base::string16& wrong_word,
-      const GetSpellingSuggestionsResolver& deferred) final;
+      const GetSpellingSuggestionsResolver& promise) final;
   void MakeTempFileName(const base::string16& dir_name,
                         const base::string16& prefix,
                         const domapi::MakeTempFileNamePromise& resolver) final;
@@ -44,24 +44,24 @@ class IoDelegateImpl final : public domapi::IoDelegate {
                      const domapi::OpenDirectoryPromise& promise) final;
   void OpenFile(const base::string16& file_name,
                 const base::string16& mode,
-                const domapi::OpenFilePromise& deferred) final;
+                const domapi::OpenFilePromise& promise) final;
   void OpenProcess(const base::string16& command_line,
-                   const domapi::OpenProcessPromise& deferred) final;
+                   const domapi::OpenProcessPromise& promise) final;
   void QueryFileStatus(const base::string16& file_name,
-                       const domapi::QueryFileStatusPromise& deferred) final;
+                       const domapi::QueryFileStatusPromise& promise) final;
   void ReadDirectory(domapi::IoContextId context_id,
                      size_t num_read,
                      const domapi::ReadDirectoryPromise& promise) final;
   void ReadFile(domapi::IoContextId context_id,
                 void* buffer,
                 size_t num_read,
-                const domapi::IoIntPromise& deferred) final;
+                const domapi::IoIntPromise& promise) final;
   void RemoveFile(const base::string16& file_name,
                   const domapi::IoBoolPromise& resolver) final;
   void WriteFile(domapi::IoContextId context_id,
                  void* buffer,
                  size_t num_write,
-                 const domapi::IoIntPromise& deferred) final;
+                 const domapi::IoIntPromise& promise) final;
 
   std::unordered_map<domapi::IoContextId, IoContext*> context_map_;
 

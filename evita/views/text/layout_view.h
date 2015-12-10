@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_PAINT_TEXT_BLOCK_H_
-#define EVITA_VIEWS_TEXT_PAINT_TEXT_BLOCK_H_
+#ifndef EVITA_VIEWS_TEXT_LAYOUT_VIEW_H_
+#define EVITA_VIEWS_TEXT_LAYOUT_VIEW_H_
 
 #include <vector>
 
@@ -17,15 +17,15 @@ namespace rendering {
 class RootInlineBox;
 };
 
-class PaintTextBlock final {
+class LayoutView final {
  public:
   using RootInlineBox = rendering::RootInlineBox;
   using TextSelection = rendering::TextSelection;
 
-  PaintTextBlock(const std::vector<RootInlineBox*>& lines,
-                 const TextSelection& selection,
-                 const gfx::ColorF& bgcolor);
-  ~PaintTextBlock();
+  LayoutView(const std::vector<RootInlineBox*>& lines,
+             const TextSelection& selection,
+             const gfx::ColorF& bgcolor);
+  ~LayoutView();
 
   const gfx::ColorF& bgcolor() const { return bgcolor_; }
   const std::vector<RootInlineBox*>& lines() const { return lines_; }
@@ -36,9 +36,9 @@ class PaintTextBlock final {
   const std::vector<RootInlineBox*> lines_;
   const TextSelection selection_;
 
-  DISALLOW_COPY_AND_ASSIGN(PaintTextBlock);
+  DISALLOW_COPY_AND_ASSIGN(LayoutView);
 };
 
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_PAINT_TEXT_BLOCK_H_
+#endif  // EVITA_VIEWS_TEXT_LAYOUT_VIEW_H_

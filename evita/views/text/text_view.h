@@ -27,7 +27,7 @@ class LayoutBlockFlow;
 class ScreenTextBlock;
 }
 
-class PaintTextBlock;
+class LayoutView;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -86,7 +86,7 @@ class TextView final {
   text::Posn caret_offset_;
   int format_counter_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
-  std::unique_ptr<PaintTextBlock> paint_text_block_;
+  std::unique_ptr<LayoutView> layout_view_;
   std::unique_ptr<ScreenTextBlock> screen_text_block_;
   bool should_paint_;
   float zoom_;

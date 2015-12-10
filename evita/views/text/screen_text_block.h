@@ -21,7 +21,7 @@ class CaretOwner;
 }
 
 namespace views {
-class PaintTextBlock;
+class LayoutView;
 
 namespace rendering {
 class Font;
@@ -35,7 +35,7 @@ class ScreenTextBlock final {
   bool dirty() const { return dirty_; }
 
   void Paint(gfx::Canvas* canvas,
-             const PaintTextBlock& paint_text_block,
+             const LayoutView& layout_view,
              base::Time now);
   void PaintSelectionIfNeeded(gfx::Canvas* canvas,
                               const TextSelection& new_selection,

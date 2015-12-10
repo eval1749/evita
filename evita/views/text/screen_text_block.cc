@@ -14,7 +14,7 @@
 #include "evita/paint/root_inline_box_painter.h"
 #include "evita/ui/caret.h"
 #include "evita/views/switches.h"
-#include "evita/views/text/paint_text_block.h"
+#include "evita/views/text/layout_view.h"
 #include "evita/views/text/inline_box.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/root_inline_box.h"
@@ -133,7 +133,7 @@ class ScreenTextBlock::PaintContext final {
  public:
   PaintContext(gfx::Canvas* canvas,
                const gfx::RectF& bounds,
-               const PaintTextBlock& paint_text_block,
+               const LayoutView& layout_view,
                const std::vector<RootInlineBox*>& screen_lines);
   ~PaintContext() = default;
 
@@ -172,12 +172,12 @@ class ScreenTextBlock::PaintContext final {
 ScreenTextBlock::PaintContext::PaintContext(
     gfx::Canvas* canvas,
     const gfx::RectF& bounds,
-    const PaintTextBlock& paint_text_block,
+    const LayoutView& layout_view,
     const std::vector<RootInlineBox*>& screen_lines)
-    : bgcolor_(paint_text_block.bgcolor()),
+    : bgcolor_(layout_view.bgcolor()),
       bounds_(bounds),
       canvas_(canvas),
-      format_lines_(paint_text_block.lines()),
+      format_lines_(layout_view.lines()),
       root_box_painter_(canvas),
       screen_lines_(screen_lines) {}
 
@@ -461,7 +461,7 @@ gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
 }
 
 void ScreenTextBlock::Paint(gfx::Canvas* canvas,
-                            const PaintTextBlock& text_block,
+                            const LayoutView& text_block,
                             base::Time now) {
   if (has_screen_bitmap_) {
     DCHECK(canvas->screen_bitmap());

@@ -14,7 +14,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx_base.h"
 #include "evita/text/buffer.h"
-#include "evita/views/text/paint_text_block.h"
+#include "evita/views/text/layout_view.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/text/layout_block_flow.h"
@@ -135,14 +135,14 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 }
 
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
-  DCHECK(paint_text_block_);
+  DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
   if (!should_paint_ && canvas->screen_bitmap()) {
-    screen_text_block_->PaintSelectionIfNeeded(
-        canvas, paint_text_block_->selection(), now);
+    screen_text_block_->PaintSelectionIfNeeded(canvas,
+                                               layout_view_->selection(), now);
     return;
   }
-  screen_text_block_->Paint(canvas, *paint_text_block_, now);
+  screen_text_block_->Paint(canvas, *layout_view_, now);
   PaintRuler(canvas);
   format_counter_ = layout_block_flow_->format_counter();
   should_paint_ = false;
@@ -241,8 +241,8 @@ void TextView::Update(const TextSelectionModel& selection_model) {
   std::vector<RootInlineBox*> lines;
   for (const auto& line : layout_block_flow_->lines())
     lines.push_back(line->Copy());
-  paint_text_block_.reset(
-      new PaintTextBlock(lines, selection, ColorToColorF(style.bgcolor())));
+  layout_view_.reset(
+      new LayoutView(lines, selection, ColorToColorF(style.bgcolor())));
 }
 
 }  // namespace views

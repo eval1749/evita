@@ -46,7 +46,6 @@ class ScreenTextBlock final {
  private:
   class Caret;
   class PaintContext;
-  friend class PaintContext;
 
   gfx::RectF HitTestTextPosition(text::Posn offset) const;
   void PaintSelection(gfx::Canvas* canvas,

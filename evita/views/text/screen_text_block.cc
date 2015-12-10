@@ -131,9 +131,10 @@ void ScreenTextBlock::Caret::Paint(gfx::Canvas* canvas,
 //
 class ScreenTextBlock::PaintContext final {
  public:
-  PaintContext(const ScreenTextBlock* screen_text_block,
-               gfx::Canvas* canvas,
-               const PaintTextBlock& paint_text_block);
+  PaintContext(gfx::Canvas* canvas,
+               const gfx::RectF& bounds,
+               const PaintTextBlock& paint_text_block,
+               const std::vector<RootInlineBox*>& screen_lines);
   ~PaintContext() = default;
 
   void Finish();
@@ -156,30 +157,29 @@ class ScreenTextBlock::PaintContext final {
   void RestoreSkipRect(const gfx::RectF& rect) const;
 
   const gfx::ColorF bgcolor_;
-  const gfx::RectF bounds_;
+  const gfx::RectF& bounds_;
   gfx::Canvas* canvas_;
   mutable std::vector<gfx::RectF> copy_rects_;
   mutable std::vector<gfx::RectF> dirty_rects_;
   const std::vector<RootInlineBox*>& format_lines_;
   paint::RootInlineBoxPainter root_box_painter_;
   const std::vector<RootInlineBox*>& screen_lines_;
-  const ScreenTextBlock* screen_text_block_;
   mutable std::vector<gfx::RectF> skip_rects_;
 
   DISALLOW_COPY_AND_ASSIGN(PaintContext);
 };
 
 ScreenTextBlock::PaintContext::PaintContext(
-    const ScreenTextBlock* screen_text_block,
     gfx::Canvas* canvas,
-    const PaintTextBlock& paint_text_block)
+    const gfx::RectF& bounds,
+    const PaintTextBlock& paint_text_block,
+    const std::vector<RootInlineBox*>& screen_lines)
     : bgcolor_(paint_text_block.bgcolor()),
-      bounds_(screen_text_block->bounds_),
+      bounds_(bounds),
       canvas_(canvas),
       format_lines_(paint_text_block.lines()),
       root_box_painter_(canvas),
-      screen_text_block_(screen_text_block),
-      screen_lines_(screen_text_block->lines_) {}
+      screen_lines_(screen_lines) {}
 
 void ScreenTextBlock::PaintContext::Copy(float dst_top,
                                          float dst_bottom,
@@ -377,7 +377,7 @@ void ScreenTextBlock::PaintContext::RestoreSkipRect(
   marker_rect.right = marker_rect.left + kMarkerWidth;
   canvas_->FillRectangle(gfx::Brush(canvas_, gfx::ColorF::White), marker_rect);
   canvas_->AddDirtyRect(bounds_.Intersect(marker_rect));
-  if (!screen_text_block_->has_screen_bitmap_)
+  if (screen_lines_.empty())
     return;
   auto const line_rect = gfx::RectF(gfx::PointF(bounds_.left, rect.top),
                                     gfx::SizeF(bounds_.width(), rect.height()))
@@ -391,7 +391,7 @@ void ScreenTextBlock::PaintContext::RestoreSkipRect(
 FormatLineIterator ScreenTextBlock::PaintContext::TryCopy(
     const FormatLineIterator& format_current,
     const FormatLineIterator& format_end) const {
-  if (!screen_text_block_->has_screen_bitmap_)
+  if (screen_lines_.empty())
     return format_current;
 
   auto const screen_end = screen_lines_.end();
@@ -463,8 +463,13 @@ gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
 void ScreenTextBlock::Paint(gfx::Canvas* canvas,
                             const PaintTextBlock& text_block,
                             base::Time now) {
-  DCHECK(!has_screen_bitmap_ || canvas->screen_bitmap());
-  PaintContext paint_context(this, canvas, text_block);
+  if (has_screen_bitmap_) {
+    DCHECK(canvas->screen_bitmap());
+    DCHECK(!lines_.empty());
+  } else {
+    DCHECK(lines_.empty());
+  }
+  PaintContext paint_context(canvas, bounds_, text_block, lines_);
   dirty_ = paint_context.Paint();
   caret_->DidPaint(bounds_);
   if (!dirty_) {

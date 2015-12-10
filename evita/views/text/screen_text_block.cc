@@ -11,6 +11,7 @@
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx/bitmap.h"
+#include "evita/paint/root_inline_box_painter.h"
 #include "evita/ui/caret.h"
 #include "evita/views/switches.h"
 #include "evita/views/text/paint_text_block.h"
@@ -160,6 +161,7 @@ class ScreenTextBlock::PaintContext final {
   mutable std::vector<gfx::RectF> copy_rects_;
   mutable std::vector<gfx::RectF> dirty_rects_;
   const std::vector<RootInlineBox*>& format_lines_;
+  paint::RootInlineBoxPainter root_box_painter_;
   const std::vector<RootInlineBox*>& screen_lines_;
   const ScreenTextBlock* screen_text_block_;
   mutable std::vector<gfx::RectF> skip_rects_;
@@ -175,6 +177,7 @@ ScreenTextBlock::PaintContext::PaintContext(
       bounds_(screen_text_block->bounds_),
       canvas_(canvas),
       format_lines_(paint_text_block.lines()),
+      root_box_painter_(canvas),
       screen_text_block_(screen_text_block),
       screen_lines_(screen_text_block->lines_) {}
 
@@ -344,7 +347,7 @@ bool ScreenTextBlock::PaintContext::Paint() {
       if (dirty_line_runner == clean_line_start)
         break;
       auto const format_line = *dirty_line_runner;
-      format_line->Render(canvas_);
+      root_box_painter_.Paint(*format_line);
       FillRight(format_line);
       AddRect(&dirty_rects_, format_line->bounds());
       canvas_->Flush();

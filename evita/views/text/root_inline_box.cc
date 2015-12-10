@@ -141,16 +141,5 @@ text::Posn RootInlineBox::MapXToPosn(float xGoal) const {
   return lPosn;
 }
 
-void RootInlineBox::Render(gfx::Canvas* canvas) const {
-  auto x = bounds_.left;
-  for (auto cell : cells_) {
-    gfx::RectF rect(x, bounds_.top, x + cell->width(),
-                    ::ceil(bounds_.top + cell->line_height()));
-    paint::InlineBoxPainter painter(canvas, rect);
-    painter.Paint(*cell);
-    x = rect.right;
-  }
-}
-
 }  // namespace rendering
 }  // namespace views

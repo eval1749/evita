@@ -9,8 +9,8 @@
 
 #include <vector>
 
-#include "evita/gfx_base.h"
-#include "evita/precomp.h"
+#include "evita/ed_defs.h"
+#include "evita/gfx/rect_f.h"
 
 namespace views {
 
@@ -56,7 +56,6 @@ class RootInlineBox final {
   gfx::RectF HitTestTextPosition(text::Posn lPosn) const;
   bool IsEndOfDocument() const;
   text::Posn MapXToPosn(float x) const;
-  void Render(gfx::Canvas* canvas) const;
 
  private:
   RootInlineBox(const RootInlineBox& other);

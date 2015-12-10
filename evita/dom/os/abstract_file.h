@@ -40,12 +40,4 @@ class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
 
 }  // namespace dom
 
-namespace gin {
-template <>
-struct Converter<domapi::IoError> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const domapi::IoError& error);
-};
-}  // namespace gin
-
 #endif  // EVITA_DOM_OS_ABSTRACT_FILE_H_

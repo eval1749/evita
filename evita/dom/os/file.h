@@ -64,12 +64,6 @@ struct Converter<domapi::FileId> {
 };
 
 template <>
-struct Converter<domapi::FileStatus> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const domapi::FileStatus& data);
-};
-
-template <>
 struct Converter<domapi::MoveFileOptions> {
   static bool FromV8(v8::Isolate* isolate,
                      v8::Handle<v8::Value> val,

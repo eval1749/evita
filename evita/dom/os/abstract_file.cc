@@ -7,6 +7,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "evita/dom/converter.h"
+#include "evita/dom/os/io_error.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/io_error.h"
@@ -14,22 +15,6 @@
 #include "evita/v8_glue/runner.h"
 #include "gin/array_buffer.h"
 #include "v8_strings.h"  // NOLINT(build/include)
-
-namespace gin {
-v8::Handle<v8::Value> Converter<domapi::IoError>::ToV8(
-    v8::Isolate* isolate,
-    const domapi::IoError& error) {
-  auto const runner = v8_glue::Runner::current_runner(isolate);
-  auto const os_file_error_ctor = runner->global()
-                                      ->Get(dom::v8Strings::Os.Get(isolate))
-                                      ->ToObject()
-                                      ->Get(dom::v8Strings::File.Get(isolate))
-                                      ->ToObject()
-                                      ->Get(dom::v8Strings::Error.Get(isolate));
-  return runner->CallAsConstructor(os_file_error_ctor,
-                                   v8::Integer::New(isolate, error.error_code));
-}
-}  // namespace gin
 
 namespace dom {
 

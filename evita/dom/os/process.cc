@@ -4,6 +4,7 @@
 
 #include "evita/dom/os/process.h"
 
+#include "evita/dom/os/io_error.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/script_host.h"

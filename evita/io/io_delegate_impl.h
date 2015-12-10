@@ -27,9 +27,9 @@ class IoDelegateImpl final : public domapi::IoDelegate {
   void CheckSpelling(const base::string16& word_to_check,
                      const CheckSpellingResolver& deferred) final;
   void CloseDirectory(domapi::IoContextId context_id,
-                      const domapi::FileIoDeferred& deferred) final;
+                      const domapi::IoIntPromise& deferred) final;
   void CloseFile(domapi::IoContextId context_id,
-                 const domapi::FileIoDeferred& deferred) final;
+                 const domapi::IoIntPromise& deferred) final;
   void GetSpellingSuggestions(
       const base::string16& wrong_word,
       const GetSpellingSuggestionsResolver& deferred) final;
@@ -55,13 +55,13 @@ class IoDelegateImpl final : public domapi::IoDelegate {
   void ReadFile(domapi::IoContextId context_id,
                 void* buffer,
                 size_t num_read,
-                const domapi::FileIoDeferred& deferred) final;
+                const domapi::IoIntPromise& deferred) final;
   void RemoveFile(const base::string16& file_name,
                   const domapi::IoResolver& resolver) final;
   void WriteFile(domapi::IoContextId context_id,
                  void* buffer,
                  size_t num_write,
-                 const domapi::FileIoDeferred& deferred) final;
+                 const domapi::IoIntPromise& deferred) final;
 
   std::unordered_map<domapi::IoContextId, IoContext*> context_map_;
 

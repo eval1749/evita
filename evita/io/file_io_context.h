@@ -36,15 +36,15 @@ class FileIoContext final : private base::MessagePumpForIO::IOContext,
                      DWORD error) override;
 
   // io::IoContext
-  void Close(const domapi::FileIoDeferred& deferred) override;
+  void Close(const domapi::IoIntPromise& deferred) override;
   void Read(void* buffer,
             size_t num_read,
-            const domapi::FileIoDeferred& deferred) override;
+            const domapi::IoIntPromise& deferred) override;
   void Write(void* buffer,
              size_t num_write,
-             const domapi::FileIoDeferred& deferred) override;
+             const domapi::IoIntPromise& deferred) override;
 
-  domapi::FileIoDeferred deferred_;
+  domapi::IoIntPromise deferred_;
   common::win::scoped_handle file_handle_;
   const char* operation_;
 

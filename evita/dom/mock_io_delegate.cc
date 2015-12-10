@@ -84,7 +84,7 @@ void MockIoDelegate::CheckSpelling(const base::string16&,
 }
 
 void MockIoDelegate::CloseDirectory(domapi::IoContextId,
-                                    const domapi::FileIoDeferred& promise) {
+                                    const domapi::IoIntPromise& promise) {
   ++num_close_called_;
   auto const result = PopCallResult("CloseDirectory");
   if (auto const error_code = result.error_code) {
@@ -95,7 +95,7 @@ void MockIoDelegate::CloseDirectory(domapi::IoContextId,
 }
 
 void MockIoDelegate::CloseFile(domapi::IoContextId,
-                               const domapi::FileIoDeferred& resolver) {
+                               const domapi::IoIntPromise& resolver) {
   ++num_close_called_;
   auto const result = PopCallResult("CloseFile");
   if (auto const error_code = result.error_code)
@@ -187,7 +187,7 @@ void MockIoDelegate::ReadDirectory(
 void MockIoDelegate::ReadFile(domapi::IoContextId,
                               void* bytes,
                               size_t num_bytes,
-                              const domapi::FileIoDeferred& deferred) {
+                              const domapi::IoIntPromise& deferred) {
   auto const result = PopCallResult("ReadFile");
   if (auto const error_code = result.error_code) {
     deferred.reject.Run(domapi::IoError(error_code));
@@ -210,7 +210,7 @@ void MockIoDelegate::RemoveFile(const base::string16&,
 void MockIoDelegate::WriteFile(domapi::IoContextId,
                                void* bytes,
                                size_t num_bytes,
-                               const domapi::FileIoDeferred& deferred) {
+                               const domapi::IoIntPromise& deferred) {
   auto const result = PopCallResult("WriteFile");
   if (auto const error_code = result.error_code) {
     deferred.reject.Run(domapi::IoError(error_code));

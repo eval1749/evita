@@ -78,7 +78,7 @@ void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
 }
 
 void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
-                                    const domapi::FileIoDeferred& promise) {
+                                    const domapi::IoIntPromise& promise) {
   auto const it = context_map_.find(context_id);
   if (it == context_map_.end())
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
@@ -90,7 +90,7 @@ void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
 }
 
 void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
-                               const domapi::FileIoDeferred& promise) {
+                               const domapi::IoIntPromise& promise) {
   auto const it = context_map_.find(context_id);
   if (it == context_map_.end())
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
@@ -241,7 +241,7 @@ void IoDelegateImpl::ReadDirectory(
 void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
                               void* buffer,
                               size_t num_read,
-                              const domapi::FileIoDeferred& promise) {
+                              const domapi::IoIntPromise& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::ReadFile");
   auto const context = IoContextOf(context_id)->as<BlockIoContext>();
   if (!context)
@@ -265,7 +265,7 @@ void IoDelegateImpl::RemoveFile(const base::string16& file_name,
 void IoDelegateImpl::WriteFile(domapi::IoContextId context_id,
                                void* buffer,
                                size_t num_write,
-                               const domapi::FileIoDeferred& promise) {
+                               const domapi::IoIntPromise& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::WriteFile");
   auto const context = IoContextOf(context_id)->as<BlockIoContext>();
   if (!context)

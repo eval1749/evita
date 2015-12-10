@@ -29,7 +29,7 @@ class DirectoryIoContext final : public IoContext {
   explicit DirectoryIoContext(const base::string16& dir_name);
   ~DirectoryIoContext() final;
 
-  void Close(const domapi::FileIoDeferred& promise);
+  void Close(const domapi::IoIntPromise& promise);
   void Read(size_t num_read, const domapi::ReadDirectoryPromise& promise);
 
  private:

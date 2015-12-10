@@ -43,8 +43,8 @@ DEFINE_DELEGATE_2(CheckSpelling,
                   const CheckSpellingResolver&)
 DEFINE_DELEGATE_2(CloseDirectory,
                   domapi::IoContextId,
-                  const domapi::FileIoDeferred&)
-DEFINE_DELEGATE_2(CloseFile, domapi::IoContextId, const domapi::FileIoDeferred&)
+                  const domapi::IoIntPromise&)
+DEFINE_DELEGATE_2(CloseFile, domapi::IoContextId, const domapi::IoIntPromise&)
 DEFINE_DELEGATE_2(GetSpellingSuggestions,
                   const base::string16&,
                   const GetSpellingSuggestionsResolver&)
@@ -78,12 +78,12 @@ DEFINE_DELEGATE_4(ReadFile,
                   domapi::IoContextId,
                   void*,
                   size_t,
-                  const domapi::FileIoDeferred&)
+                  const domapi::IoIntPromise&)
 DEFINE_DELEGATE_2(RemoveFile, const base::string16&, const domapi::IoResolver&)
 DEFINE_DELEGATE_4(WriteFile,
                   domapi::IoContextId,
                   void*,
                   size_t,
-                  const domapi::FileIoDeferred&)
+                  const domapi::IoIntPromise&)
 
 }  // namespace io

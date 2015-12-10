@@ -33,7 +33,7 @@ DirectoryIoContext::DirectoryIoContext(const base::string16& dir_name)
 
 DirectoryIoContext::~DirectoryIoContext() {}
 
-void DirectoryIoContext::Close(const domapi::FileIoDeferred& promise) {
+void DirectoryIoContext::Close(const domapi::IoIntPromise& promise) {
   Resolve(promise.resolve, 0);
 }
 

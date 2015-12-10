@@ -40,7 +40,7 @@ ProcessIoContext::~ProcessIoContext() {
 }
 
 void ProcessIoContext::CloseAndWaitProcess(
-    const domapi::FileIoDeferred& deferred) {
+    const domapi::IoIntPromise& deferred) {
   TRACE_EVENT0("io", "ProcessIoContext::CloseAndWaitProcess");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -88,7 +88,7 @@ uint32_t ProcessIoContext::CloseProcess() {
 
 void ProcessIoContext::ReadFromProcess(void* buffer,
                                        size_t num_read,
-                                       const domapi::FileIoDeferred& deferred) {
+                                       const domapi::IoIntPromise& deferred) {
   TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::ReadFromProcess",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -183,7 +183,7 @@ void ProcessIoContext::StartProcess(
 
 void ProcessIoContext::WriteToProcess(void* buffer,
                                       size_t num_write,
-                                      const domapi::FileIoDeferred& deferred) {
+                                      const domapi::IoIntPromise& deferred) {
   TRACE_EVENT_WITH_FLOW1("promise", "ProcessIoContext::WriteToProcess",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -204,7 +204,7 @@ void ProcessIoContext::WriteToProcess(void* buffer,
 }
 
 // io::IoContext
-void ProcessIoContext::Close(const domapi::FileIoDeferred& deferred) {
+void ProcessIoContext::Close(const domapi::IoIntPromise& deferred) {
   TRACE_EVENT0("io", "ProcessIoContext::Close");
   if (!gateway_thread_->IsRunning()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
@@ -217,7 +217,7 @@ void ProcessIoContext::Close(const domapi::FileIoDeferred& deferred) {
 
 void ProcessIoContext::Read(void* buffer,
                             size_t num_read,
-                            const domapi::FileIoDeferred& deferred) {
+                            const domapi::IoIntPromise& deferred) {
   if (!gateway_thread_->IsRunning() || !stdout_read_.is_valid()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;
@@ -230,7 +230,7 @@ void ProcessIoContext::Read(void* buffer,
 
 void ProcessIoContext::Write(void* buffer,
                              size_t num_write,
-                             const domapi::FileIoDeferred& deferred) {
+                             const domapi::IoIntPromise& deferred) {
   if (!gateway_thread_->IsRunning() || !stdin_write_.is_valid()) {
     Reject(deferred.reject, ERROR_INVALID_HANDLE);
     return;

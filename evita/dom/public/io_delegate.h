@@ -29,10 +29,10 @@ class IoDelegate {
                              const CheckSpellingResolver& callback) = 0;
 
   virtual void CloseDirectory(IoContextId context_id,
-                              const FileIoDeferred& deferred) = 0;
+                              const IoIntPromise& deferred) = 0;
 
   virtual void CloseFile(IoContextId context_id,
-                         const FileIoDeferred& deferred) = 0;
+                         const IoIntPromise& deferred) = 0;
 
   // Returns list of suggested words for |wrong_word|.
   virtual void GetSpellingSuggestions(
@@ -69,7 +69,7 @@ class IoDelegate {
   virtual void ReadFile(IoContextId context_id,
                         void* buffer,
                         size_t num_read,
-                        const FileIoDeferred& deferred) = 0;
+                        const IoIntPromise& deferred) = 0;
   // Remove file
   virtual void RemoveFile(const base::string16& file_name,
                           const IoResolver& resolver) = 0;
@@ -77,7 +77,7 @@ class IoDelegate {
   virtual void WriteFile(IoContextId context_id,
                          void* buffer,
                          size_t num_write,
-                         const FileIoDeferred& deferred) = 0;
+                         const IoIntPromise& deferred) = 0;
 
  protected:
   IoDelegate();

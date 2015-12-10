@@ -16,7 +16,7 @@ class IoContext : public common::Castable {
  public:
   virtual ~IoContext();
 
-  virtual void Close(const domapi::FileIoDeferred& deferred) = 0;
+  virtual void Close(const domapi::IoIntPromise& deferred) = 0;
 
  protected:
   IoContext();

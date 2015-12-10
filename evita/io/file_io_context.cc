@@ -99,7 +99,7 @@ void FileIoContext::OnIOCompleted(IOContext*,
 }
 
 // io::IoContext
-void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
+void FileIoContext::Close(const domapi::IoIntPromise& deferred) {
   TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Close",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
@@ -119,7 +119,7 @@ void FileIoContext::Close(const domapi::FileIoDeferred& deferred) {
 
 void FileIoContext::Read(void* buffer,
                          size_t num_read,
-                         const domapi::FileIoDeferred& deferred) {
+                         const domapi::IoIntPromise& deferred) {
   TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Read",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
@@ -146,7 +146,7 @@ void FileIoContext::Read(void* buffer,
 
 void FileIoContext::Write(void* buffer,
                           size_t num_write,
-                          const domapi::FileIoDeferred& deferred) {
+                          const domapi::IoIntPromise& deferred) {
   TRACE_EVENT_WITH_FLOW0("promise", "FileIoContext::Write",
                          deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);

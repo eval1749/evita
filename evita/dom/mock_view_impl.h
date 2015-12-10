@@ -20,7 +20,7 @@
 
 namespace dom {
 
-class MockViewImpl final : public dom::ViewDelegate {
+class MockViewImpl final : public domapi::ViewDelegate {
  public:
   MockViewImpl();
   ~MockViewImpl() final;
@@ -29,14 +29,14 @@ class MockViewImpl final : public dom::ViewDelegate {
   MOCK_METHOD2(AddWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(WindowId, WindowId));
   MOCK_METHOD2(ComputeOnTextWindow,
-               text::Posn(WindowId, const TextWindowCompute&));
+               text::Posn(WindowId, const domapi::TextWindowCompute&));
   MOCK_METHOD1(CreateEditorWindow, void(const EditorWindow*));
   MOCK_METHOD3(CreateFormWindow,
                void(WindowId, Form*, const domapi::PopupWindowInit&));
   MOCK_METHOD2(CreateTableWindow, void(WindowId, Document*));
   MOCK_METHOD2(CreateTextWindow, void(WindowId, text::Selection*));
   MOCK_METHOD1(DestroyWindow, void(WindowId));
-  MOCK_METHOD1(DidStartScriptHost, void(ScriptHostState));
+  MOCK_METHOD1(DidStartScriptHost, void(domapi::ScriptHostState));
   MOCK_METHOD0(DidUpdateDom, void());
   MOCK_METHOD1(FocusWindow, void(WindowId));
   void GetFileNameForLoad(WindowId window_id,

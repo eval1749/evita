@@ -4,10 +4,10 @@
 
 #include "evita/dom/public/view_delegate.h"
 
-namespace dom {
+namespace domapi {
 
 ViewDelegate::ViewDelegate() {}
 
 ViewDelegate::~ViewDelegate() {}
 
-}  // namespace dom
+}  // namespace domapi

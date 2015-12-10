@@ -16,10 +16,23 @@
 #include "evita/dom/public/switch_value.h"
 #include "evita/dom/windows/window_id.h"
 
+namespace dom {
+class Document;
+class EditorWindow;
+class Form;
+class Window;
+}
+
+namespace text {
+class Selection;
+}
+
 namespace domapi {
+
 class FloatRect;
 struct TabData;
 class ViewEventHandler;
+using WindowId = dom::WindowId;
 
 struct PopupWindowInit {
   dom::WindowId owner_id;
@@ -27,26 +40,8 @@ struct PopupWindowInit {
   int offset_y;
 };
 
-}  // namespace domapi
-
-namespace text {
-class Selection;
-}
-
-namespace domapi {
 using TraceLogOutputCallback =
     base::Callback<void(const std::string& chunk, bool has_more_events)>;
-};
-
-namespace dom {
-
-class Document;
-class EditorWindow;
-class Form;
-class FormWindow;
-class TextWindow;
-class Window;
-using domapi::ScriptHostState;
 
 struct TextWindowCompute final {
   // Note: Value of |WindowCompute::Method| must match with JavaScript.
@@ -68,11 +63,15 @@ struct TextWindowCompute final {
   float y;
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// ViewDelegate
+//
 class ViewDelegate {
  public:
-  using GetFileNameForLoadResolver = domapi::Promise<base::string16>;
-  using GetFileNameForSaveResolver = domapi::Promise<base::string16>;
-  using MessageBoxResolver = domapi::Promise<int>;
+  using GetFileNameForLoadResolver = Promise<base::string16>;
+  using GetFileNameForSaveResolver = Promise<base::string16>;
+  using MessageBoxResolver = Promise<int>;
 
   virtual ~ViewDelegate();
 
@@ -81,14 +80,15 @@ class ViewDelegate {
                                   WindowId new_parent_window_id) = 0;
   virtual text::Posn ComputeOnTextWindow(WindowId window_id,
                                          const TextWindowCompute& data) = 0;
-  virtual void CreateEditorWindow(const EditorWindow* window) = 0;
+  virtual void CreateEditorWindow(const dom::EditorWindow* window) = 0;
 
   // Create Form window
   virtual void CreateFormWindow(WindowId window_id,
-                                Form* form,
-                                const domapi::PopupWindowInit& init) = 0;
+                                dom::Form* form,
+                                const PopupWindowInit& init) = 0;
 
-  virtual void CreateTableWindow(WindowId window_id, Document* document) = 0;
+  virtual void CreateTableWindow(WindowId window_id,
+                                 dom::Document* document) = 0;
   virtual void CreateTextWindow(WindowId window_id,
                                 text::Selection* selection) = 0;
   virtual void DestroyWindow(WindowId window_id) = 0;
@@ -116,10 +116,10 @@ class ViewDelegate {
       const GetFileNameForSaveResolver& resolver) = 0;
 
   virtual void GetMetrics(const base::string16& name,
-                          const domapi::StringPromise& promise) = 0;
+                          const StringPromise& promise) = 0;
 
   // Get switch bool value
-  virtual domapi::SwitchValue GetSwitch(const base::string16& name) = 0;
+  virtual SwitchValue GetSwitch(const base::string16& name) = 0;
 
   // Get switch names
   virtual std::vector<base::string16> GetSwitchNames() = 0;
@@ -130,20 +130,18 @@ class ViewDelegate {
   virtual void HideWindow(WindowId window_id) = 0;
 
   // Get bounding rectangle of character at text offset.
-  virtual domapi::FloatRect HitTestTextPosition(WindowId window_id,
-                                                text::Posn offset) = 0;
+  virtual FloatRect HitTestTextPosition(WindowId window_id,
+                                        text::Posn offset) = 0;
 
   virtual void MakeSelectionVisible(WindowId window_id) = 0;
-  virtual void MapTextFieldPointToOffset(
-      domapi::EventTargetId event_target_id,
-      float x,
-      float y,
-      const domapi::IntegerPromise& promise) = 0;
-  virtual void MapTextWindowPointToOffset(
-      domapi::EventTargetId event_target_id,
-      float x,
-      float y,
-      const domapi::IntegerPromise& promise) = 0;
+  virtual void MapTextFieldPointToOffset(EventTargetId event_target_id,
+                                         float x,
+                                         float y,
+                                         const IntegerPromise& promise) = 0;
+  virtual void MapTextWindowPointToOffset(EventTargetId event_target_id,
+                                          float x,
+                                          float y,
+                                          const IntegerPromise& promise) = 0;
   // Popup message box dialog box and return response code.
   virtual void MessageBox(WindowId window_id,
                           const base::string16& message,
@@ -155,12 +153,12 @@ class ViewDelegate {
   virtual void RealizeWindow(WindowId window_id) = 0;
 
   // Release capture from window or form control.
-  virtual void ReleaseCapture(domapi::EventTargetId event_target_id) = 0;
+  virtual void ReleaseCapture(EventTargetId event_target_id) = 0;
 
   /* synchronous */ virtual void ScrollTextWindow(WindowId windowId,
                                                   int direction) = 0;
   // Release capture from window or form control.
-  virtual void SetCapture(domapi::EventTargetId event_target_id) = 0;
+  virtual void SetCapture(EventTargetId event_target_id) = 0;
 
   // Set text contents of status bar of specified top level window.
   virtual void SetStatusBar(WindowId window_id,
@@ -168,10 +166,9 @@ class ViewDelegate {
 
   // Set switch value
   virtual void SetSwitch(const base::string16& name,
-                         const domapi::SwitchValue& new_value) = 0;
+                         const SwitchValue& new_value) = 0;
 
-  virtual void SetTabData(WindowId window_id,
-                          const domapi::TabData& tab_data) = 0;
+  virtual void SetTabData(WindowId window_id, const TabData& tab_data) = 0;
   // Set |TextWindow| zoom factor.
   virtual void SetTextWindowZoom(WindowId window_id, float zoom) = 0;
 
@@ -183,7 +180,7 @@ class ViewDelegate {
 
   // Trace Log
   virtual void StartTraceLog(const std::string& config) = 0;
-  virtual void StopTraceLog(const domapi::TraceLogOutputCallback& callback) = 0;
+  virtual void StopTraceLog(const TraceLogOutputCallback& callback) = 0;
 
   // Synchronous: Update window contents
   virtual void UpdateWindow(WindowId window_id) = 0;
@@ -195,6 +192,6 @@ class ViewDelegate {
   DISALLOW_COPY_AND_ASSIGN(ViewDelegate);
 };
 
-}  // namespace dom
+}  // namespace domapi
 
 #endif  // EVITA_DOM_PUBLIC_VIEW_DELEGATE_H_

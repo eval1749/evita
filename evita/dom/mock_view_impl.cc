@@ -12,7 +12,7 @@ MockViewImpl::MockViewImpl() : check_spelling_result_(false) {}
 
 MockViewImpl::~MockViewImpl() {}
 
-// dom::ViewDelegate
+// domapi::ViewDelegate
 void MockViewImpl::GetFileNameForLoad(
     WindowId,
     const base::string16& dir_path,

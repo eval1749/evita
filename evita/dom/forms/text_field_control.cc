@@ -56,7 +56,7 @@ v8::Handle<v8::Promise> TextFieldControl::MapPointToOffset(float x,
                                                            float y) const {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&ViewDelegate::MapTextFieldPointToOffset,
+      base::Bind(&domapi::ViewDelegate::MapTextFieldPointToOffset,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
                  event_target_id(), x, y));
 }

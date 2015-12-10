@@ -45,8 +45,8 @@ text::Posn TextWindow::ComputeMotion(int method,
                                      text::Posn position,
                                      int count,
                                      const domapi::FloatPoint& point) {
-  TextWindowCompute data;
-  data.method = static_cast<TextWindowCompute::Method>(method);
+  domapi::TextWindowCompute data;
+  data.method = static_cast<domapi::TextWindowCompute::Method>(method);
   data.count = count;
   data.position = position;
   data.x = point.x();
@@ -81,7 +81,7 @@ void TextWindow::MakeSelectionVisible() {
 v8::Handle<v8::Promise> TextWindow::MapPointToPosition(float x, float y) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&ViewDelegate::MapTextWindowPointToOffset,
+      base::Bind(&domapi::ViewDelegate::MapTextWindowPointToOffset,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
                  window_id(), x, y));
 }

@@ -25,6 +25,7 @@ class MessageLoop;
 
 namespace domapi {
 class IoDelegate;
+class ViewDelegate;
 }
 
 namespace v8_glue {
@@ -38,7 +39,6 @@ class EventTarget;
 class IdleTask;
 class Performance;
 class Scheduler;
-class ViewDelegate;
 class ViewEventHandlerImpl;
 
 //////////////////////////////////////////////////////////////////////
@@ -70,12 +70,12 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   v8_glue::Runner* runner() const;
   void set_testing_runner(v8_glue::Runner* runner);
   Scheduler* scheduler() const { return scheduler_; }
-  ViewDelegate* view_delegate() const;
+  domapi::ViewDelegate* view_delegate() const;
 
   // Call |handleEvent()| function in the class of |target| with |event|.
   void CallClassEventHandler(EventTarget* target, Event* event);
   static void CreateAndStart(Scheduler* scheduler,
-                             ViewDelegate* view_delegate,
+                             domapi::ViewDelegate* view_delegate,
                              domapi::IoDelegate* io_delegate);
   void PlatformError(const char* name);
   void ResetForTesting();
@@ -85,7 +85,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   void ScheduleIdleTask(const base::Closure& task);
 
   static ScriptHost* StartForTesting(Scheduler* scheduler,
-                                     ViewDelegate* view_delegate,
+                                     domapi::ViewDelegate* view_delegate,
                                      domapi::IoDelegate* io_delegate);
 
   // Terminate script execution from another thread.
@@ -97,11 +97,11 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
 
  private:
   ScriptHost(Scheduler* scheduler,
-             ViewDelegate* view_delegate,
+             domapi::ViewDelegate* view_delegate,
              domapi::IoDelegate* io_delegate);
 
   static ScriptHost* Create(Scheduler* scheduler,
-                            ViewDelegate* view_delegate,
+                            domapi::ViewDelegate* view_delegate,
                             domapi::IoDelegate* io_delegate);
 
   void DidStartScriptHost();
@@ -125,7 +125,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   domapi::ScriptHostState state_;
   bool testing_;
   v8_glue::Runner* testing_runner_;
-  ViewDelegate* view_delegate_;
+  domapi::ViewDelegate* view_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptHost);
 };

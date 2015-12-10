@@ -224,7 +224,7 @@ v8::Handle<v8::Promise> Editor::GetFileNameForLoad(
     const base::string16& dir_path) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&ViewDelegate::GetFileNameForLoad,
+      base::Bind(&domapi::ViewDelegate::GetFileNameForLoad,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
                  window ? window->window_id() : dom::kInvalidWindowId,
                  dir_path));
@@ -235,7 +235,7 @@ v8::Handle<v8::Promise> Editor::GetFileNameForSave(
     const base::string16& dir_path) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&ViewDelegate::GetFileNameForSave,
+      base::Bind(&domapi::ViewDelegate::GetFileNameForSave,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
                  window ? window->window_id() : dom::kInvalidWindowId,
                  dir_path));
@@ -244,7 +244,7 @@ v8::Handle<v8::Promise> Editor::GetFileNameForSave(
 v8::Handle<v8::Promise> Editor::GetMetrics(const base::string16& name) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&ViewDelegate::GetMetrics,
+      base::Bind(&domapi::ViewDelegate::GetMetrics,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
                  name));
 }
@@ -272,7 +272,7 @@ v8::Handle<v8::Promise> Editor::MessageBox(Window* maybe_window,
                                            const base::string16& title) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&ViewDelegate::MessageBox,
+      base::Bind(&domapi::ViewDelegate::MessageBox,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
                  maybe_window ? maybe_window->window_id() : kInvalidWindowId,
                  message, title, flags));

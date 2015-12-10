@@ -12,7 +12,7 @@
 
 namespace views {
 
-class ViewDelegateImpl final : public dom::ViewDelegate {
+class ViewDelegateImpl final : public domapi::ViewDelegate {
  public:
   ViewDelegateImpl();
   ~ViewDelegateImpl() final;
@@ -23,7 +23,7 @@ class ViewDelegateImpl final : public dom::ViewDelegate {
   void ChangeParentWindow(dom::WindowId window_id,
                           dom::WindowId new_parent_id) final;
   text::Posn ComputeOnTextWindow(dom::WindowId window_id,
-                                 const dom::TextWindowCompute& data) final;
+                                 const domapi::TextWindowCompute& data) final;
   void CreateEditorWindow(const dom::EditorWindow* window) final;
   void CreateFormWindow(dom::WindowId window_id,
                         dom::Form* form,

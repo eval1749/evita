@@ -39,7 +39,7 @@ bool IsScriptBreakEvent(const domapi::KeyboardEvent& event) {
 //
 // ScriptThread
 //
-ScriptThread::ScriptThread(ViewDelegate* view_delegate,
+ScriptThread::ScriptThread(domapi::ViewDelegate* view_delegate,
                            domapi::IoDelegate* io_delegate)
     : io_delegate_(io_delegate),
       scheduler_(new SchedulerImpl(this)),

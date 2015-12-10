@@ -216,7 +216,7 @@ SuppressMessageBoxScope::~SuppressMessageBoxScope() {
 // ScriptHost
 //
 ScriptHost::ScriptHost(Scheduler* scheduler,
-                       ViewDelegate* view_delegate,
+                       domapi::ViewDelegate* view_delegate,
                        domapi::IoDelegate* io_delegate)
     : event_handler_(new ViewEventHandlerImpl(this)),
       io_delegate_(io_delegate),
@@ -256,7 +256,7 @@ void ScriptHost::set_testing_runner(v8_glue::Runner* runner) {
   PopulateEnviromentStrings(runner);
 }
 
-ViewDelegate* ScriptHost::view_delegate() const {
+domapi::ViewDelegate* ScriptHost::view_delegate() const {
   DCHECK(view_delegate_);
   return view_delegate_;
 }
@@ -279,7 +279,7 @@ void ScriptHost::CallClassEventHandler(EventTarget* event_target,
 }
 
 ScriptHost* ScriptHost::Create(Scheduler* scheduler,
-                               ViewDelegate* view_delegate,
+                               domapi::ViewDelegate* view_delegate,
                                domapi::IoDelegate* io_delegate) {
   // See v8/src/flag-definitions.h
   // Note: |EnsureV8Initialized()| in "gin/isolate_holder.cc" also sets
@@ -293,7 +293,7 @@ ScriptHost* ScriptHost::Create(Scheduler* scheduler,
 }
 
 void ScriptHost::CreateAndStart(Scheduler* scheduler,
-                                ViewDelegate* view_delegate,
+                                domapi::ViewDelegate* view_delegate,
                                 domapi::IoDelegate* io_delegate) {
   DCHECK(!script_host);
   script_host = Create(scheduler, view_delegate, io_delegate);
@@ -393,7 +393,7 @@ void ScriptHost::Start() {
 }
 
 ScriptHost* ScriptHost::StartForTesting(Scheduler* scheduler,
-                                        ViewDelegate* view_delegate,
+                                        domapi::ViewDelegate* view_delegate,
                                         domapi::IoDelegate* io_delegate) {
   if (!script_host) {
     script_host = ScriptHost::Create(scheduler, view_delegate, io_delegate);

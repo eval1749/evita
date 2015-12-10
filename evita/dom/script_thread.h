@@ -31,7 +31,8 @@ class SchedulerImpl;
 class ScriptThread final : public domapi::ViewEventHandler,
                            public SchedulerClient {
  public:
-  ScriptThread(ViewDelegate* view_delegate, domapi::IoDelegate* io_delegate);
+  ScriptThread(domapi::ViewDelegate* view_delegate,
+               domapi::IoDelegate* io_delegate);
   ~ScriptThread() final;
 
   void Start();
@@ -75,7 +76,7 @@ class ScriptThread final : public domapi::ViewEventHandler,
   domapi::IoDelegate* const io_delegate_;
   const std::unique_ptr<SchedulerImpl> scheduler_;
   const std::unique_ptr<base::Thread> thread_;
-  ViewDelegate* const view_delegate_;
+  domapi::ViewDelegate* const view_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptThread);
 };

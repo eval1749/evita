@@ -143,7 +143,7 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
 // asynchronously.
 text::Posn ViewDelegateImpl::ComputeOnTextWindow(
     dom::WindowId window_id,
-    const dom::TextWindowCompute& data) {
+    const domapi::TextWindowCompute& data) {
   TRACE_EVENT0("view", "ViewDelegateImpl::ComputeOnTextWindow");
   auto const window =
       FromWindowId("ComputeOnTextWindow", window_id)->as<TextWindow>();
@@ -153,19 +153,19 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
   switch (data.method) {
-    case dom::TextWindowCompute::Method::EndOfWindow:
+    case domapi::TextWindowCompute::Method::EndOfWindow:
       return window->ComputeWindowMotion(1, 0);
-    case dom::TextWindowCompute::Method::EndOfWindowLine:
+    case domapi::TextWindowCompute::Method::EndOfWindowLine:
       return window->EndOfLine(data.position);
-    case dom::TextWindowCompute::Method::MoveScreen:
+    case domapi::TextWindowCompute::Method::MoveScreen:
       return window->ComputeScreenMotion(data.count, point, data.position);
-    case dom::TextWindowCompute::Method::MoveWindow:
+    case domapi::TextWindowCompute::Method::MoveWindow:
       return window->ComputeWindowMotion(data.count, data.position);
-    case dom::TextWindowCompute::Method::MoveWindowLine:
+    case domapi::TextWindowCompute::Method::MoveWindowLine:
       return window->ComputeWindowLineMotion(data.count, point, data.position);
-    case dom::TextWindowCompute::Method::StartOfWindow:
+    case domapi::TextWindowCompute::Method::StartOfWindow:
       return window->ComputeWindowMotion(-1, 0);
-    case dom::TextWindowCompute::Method::StartOfWindowLine:
+    case domapi::TextWindowCompute::Method::StartOfWindowLine:
       return window->StartOfLine(data.position);
     default:
       return -1;

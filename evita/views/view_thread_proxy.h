@@ -21,18 +21,18 @@ namespace views {
 
 class ViewDelegateImpl;
 
-class ViewThreadProxy : public dom::ViewDelegate {
+class ViewThreadProxy : public domapi::ViewDelegate {
  public:
   explicit ViewThreadProxy(base::MessageLoop* message_loop);
   ~ViewThreadProxy() final;
 
  private:
-  // dom::ViewDelegate
+  // domapi::ViewDelegate
   void AddWindow(dom::WindowId parent_id, dom::WindowId child_id) final;
   void ChangeParentWindow(dom::WindowId window_id,
                           dom::WindowId new_parent_id) final;
   text::Posn ComputeOnTextWindow(dom::WindowId window_id,
-                                 const dom::TextWindowCompute& data) final;
+                                 const domapi::TextWindowCompute& data) final;
   void CreateEditorWindow(const dom::EditorWindow* window) final;
   void CreateFormWindow(dom::WindowId window_id,
                         dom::Form* form,

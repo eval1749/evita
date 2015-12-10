@@ -19,21 +19,21 @@ IoThreadProxy::~IoThreadProxy() {}
 // IoDelegate
 #define DEFINE_DELEGATE_2(name, type1, type2)                                \
   void IoThreadProxy::name(type1 p1, type2 p2) {                             \
-    thread_->message_loop()->PostTask(                                       \
+    thread_->task_runner()->PostTask(                                        \
         FROM_HERE,                                                           \
         base::Bind(&IoDelegate::name, base::Unretained(delegate_), p1, p2)); \
   }
 
 #define DEFINE_DELEGATE_3(name, type1, type2, type3)                          \
   void IoThreadProxy::name(type1 p1, type2 p2, type3 p3) {                    \
-    thread_->message_loop()->PostTask(                                        \
+    thread_->task_runner()->PostTask(                                         \
         FROM_HERE, base::Bind(&IoDelegate::name, base::Unretained(delegate_), \
                               p1, p2, p3));                                   \
   }
 
 #define DEFINE_DELEGATE_4(name, type1, type2, type3, type4)                   \
   void IoThreadProxy::name(type1 p1, type2 p2, type3 p3, type4 p4) {          \
-    thread_->message_loop()->PostTask(                                        \
+    thread_->task_runner()->PostTask(                                         \
         FROM_HERE, base::Bind(&IoDelegate::name, base::Unretained(delegate_), \
                               p1, p2, p3, p4));                               \
   }

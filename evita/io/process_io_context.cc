@@ -27,7 +27,7 @@ ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
   TRACE_EVENT_ASYNC_BEGIN1("io", "ProcessContext", this, "command_line",
                            base::UTF16ToUTF8(command_line).c_str());
   gateway_thread_->Start();
-  gateway_thread_->message_loop()->PostTask(
+  gateway_thread_->task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&ProcessIoContext::StartProcess, base::Unretained(this),
                  context_id, command_line, promise));
@@ -207,7 +207,7 @@ void ProcessIoContext::Close(const domapi::IoIntPromise& promise) {
     Reject(promise.reject, ERROR_INVALID_HANDLE);
     return;
   }
-  gateway_thread_->message_loop()->PostTask(
+  gateway_thread_->task_runner()->PostTask(
       FROM_HERE, base::Bind(&ProcessIoContext::CloseAndWaitProcess,
                             base::Unretained(this), promise));
 }
@@ -219,7 +219,7 @@ void ProcessIoContext::Read(void* buffer,
     Reject(promise.reject, ERROR_INVALID_HANDLE);
     return;
   }
-  gateway_thread_->message_loop()->PostTask(
+  gateway_thread_->task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&ProcessIoContext::ReadFromProcess, base::Unretained(this),
                  base::Unretained(buffer), num_read, promise));
@@ -246,7 +246,7 @@ void ProcessIoContext::Write(void* buffer,
     }
   }
 
-  gateway_thread_->message_loop()->PostTask(
+  gateway_thread_->task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&ProcessIoContext::WriteToProcess, base::Unretained(this),
                  base::Unretained(buffer), num_write, promise));

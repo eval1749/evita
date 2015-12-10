@@ -66,7 +66,7 @@ Application::Application()
   ui::TextInputClientWin::instance()->Start();
   paint_thread_->Start();
   script_thread_->Start();
-  io_manager_->message_loop()->PostTask(
+  io_manager_->message_loop()->task_runner()->PostTask(
       FROM_HERE,
       base::Bind(
           base::IgnoreResult(&spellchecker::SpellingEngine::EnsureInitialized),

@@ -4,8 +4,8 @@
 #include "evita/dom/windows/table_selection.h"
 
 #include "evita/dom/script_host.h"
+#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/windows/table_window.h"
-#include "evita/dom/view_delegate.h"
 
 namespace dom {
 

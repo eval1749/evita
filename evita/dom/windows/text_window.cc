@@ -11,8 +11,8 @@
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/windows/text_selection.h"
-#include "evita/dom/view_delegate.h"
 
 namespace dom {
 

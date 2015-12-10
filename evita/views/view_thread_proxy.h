@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/dom/view_delegate.h"
+#include "evita/dom/public/view_delegate.h"
 
 namespace base {
 class MessageLoop;

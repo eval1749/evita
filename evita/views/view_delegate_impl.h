@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "evita/dom/view_delegate.h"
+#include "evita/dom/public/view_delegate.h"
 
 namespace views {
 

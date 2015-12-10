@@ -8,8 +8,8 @@
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/promise_resolver.h"
+#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/view_delegate.h"
 
 namespace dom {
 

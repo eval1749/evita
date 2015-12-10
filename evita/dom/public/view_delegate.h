@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_VIEW_DELEGATE_H_
-#define EVITA_DOM_VIEW_DELEGATE_H_
+#ifndef EVITA_DOM_PUBLIC_VIEW_DELEGATE_H_
+#define EVITA_DOM_PUBLIC_VIEW_DELEGATE_H_
 
 #include <string>
 #include <vector>
@@ -74,7 +74,7 @@ class ViewDelegate {
   using GetFileNameForSaveResolver = domapi::Promise<base::string16>;
   using MessageBoxResolver = domapi::Promise<int>;
 
-  virtual ~ViewDelegate() = default;
+  virtual ~ViewDelegate();
 
   virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;
   virtual void ChangeParentWindow(WindowId window_id,
@@ -189,7 +189,7 @@ class ViewDelegate {
   virtual void UpdateWindow(WindowId window_id) = 0;
 
  protected:
-  ViewDelegate() = default;
+  ViewDelegate();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ViewDelegate);
@@ -197,4 +197,4 @@ class ViewDelegate {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_VIEW_DELEGATE_H_
+#endif  // EVITA_DOM_PUBLIC_VIEW_DELEGATE_H_

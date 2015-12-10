@@ -9,7 +9,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/dom/public/tab_data.h"
-#include "evita/dom/view_delegate.h"
+#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/scriptable.h"
 

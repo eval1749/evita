@@ -13,7 +13,10 @@ source_set("public") {
     "switch_value.h",
     "tab_data.cc",
     "tab_data.h",
+    "view_delegate.cc",
+    "view_delegate.h",
     "view_event_handler.cc",
+    "view_event_handler.h",
   ]
 
   public_deps = [

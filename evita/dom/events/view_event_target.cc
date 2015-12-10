@@ -5,7 +5,7 @@
 #include "evita/dom/events/view_event_target.h"
 
 #include "evita/dom/events/view_event_target_set.h"
-#include "evita/dom/view_delegate.h"
+#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
 
 namespace dom {

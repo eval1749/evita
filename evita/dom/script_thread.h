@@ -11,9 +11,9 @@
 
 #include "base/basictypes.h"
 #include "base/callback_forward.h"
+#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/scheduler_client.h"
-#include "evita/dom/view_delegate.h"
 
 namespace base {
 class Thread;

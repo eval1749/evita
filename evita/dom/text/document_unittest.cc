@@ -13,8 +13,8 @@
 #include "evita/dom/file_path.h"
 #include "evita/dom/mock_io_delegate.h"
 #include "evita/dom/mock_view_impl.h"
+#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/view_delegate.h"
 #include "evita/text/buffer.h"
 
 namespace dom {

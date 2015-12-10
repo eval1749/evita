@@ -16,7 +16,7 @@
 #pragma warning(pop)
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/tab_data.h"
-#include "evita/dom/view_delegate.h"
+#include "evita/dom/public/view_delegate.h"
 
 namespace dom {
 

@@ -32,7 +32,7 @@ class IoThreadProxy : public domapi::IoDelegate {
       const GetSpellingSuggestionsResolver& deferred) final;
   void MakeTempFileName(const base::string16& dir_name,
                         const base::string16& prefix,
-                        const domapi::MakeTempFileNameResolver& resolver) final;
+                        const domapi::MakeTempFileNamePromise& resolver) final;
   void MoveFile(const base::string16& src_path,
                 const base::string16& dst_path,
                 const domapi::MoveFileOptions& options,

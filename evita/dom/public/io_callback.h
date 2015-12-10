@@ -36,7 +36,7 @@ struct MoveFileOptions final {
 
 using IoBoolPromise = Deferred<bool, IoError>;
 using IoIntPromise = Deferred<int, IoError>;
-using MakeTempFileNameResolver = Deferred<base::string16, IoError>;
+using MakeTempFileNamePromise = Deferred<base::string16, IoError>;
 using OpenDirectoryPromise = Deferred<DirectoryId, IoError>;
 using OpenFileDeferred = Deferred<FileId, IoError>;
 using OpenProcessDeferred = Deferred<ProcessId, IoError>;

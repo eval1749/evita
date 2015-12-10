@@ -42,7 +42,7 @@ class IoDelegate {
   // Make temporary file and returns its name.
   virtual void MakeTempFileName(const base::string16& dir_name,
                                 const base::string16& prefix,
-                                const MakeTempFileNameResolver& resolver) = 0;
+                                const MakeTempFileNamePromise& resolver) = 0;
 
   // Move file
   virtual void MoveFile(const base::string16& src_path,

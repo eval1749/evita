@@ -116,7 +116,7 @@ void IoDelegateImpl::GetSpellingSuggestions(
 void IoDelegateImpl::MakeTempFileName(
     const base::string16& dir_name,
     const base::string16& prefix,
-    const domapi::MakeTempFileNameResolver& resolver) {
+    const domapi::MakeTempFileNamePromise& resolver) {
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::MakeTempFileName");

@@ -113,7 +113,7 @@ void MockIoDelegate::GetSpellingSuggestions(
 void MockIoDelegate::MakeTempFileName(
     const base::string16& dir_name,
     const base::string16& prefix,
-    const domapi::MakeTempFileNameResolver& resolver) {
+    const domapi::MakeTempFileNamePromise& resolver) {
   auto const result = PopCallResult("MakeTempFileName");
   if (auto const error_code = result.error_code)
     resolver.reject.Run(domapi::IoError(error_code));

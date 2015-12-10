@@ -51,7 +51,7 @@ DEFINE_DELEGATE_2(GetSpellingSuggestions,
 DEFINE_DELEGATE_3(MakeTempFileName,
                   const base::string16&,
                   const base::string16&,
-                  const domapi::MakeTempFileNameResolver&)
+                  const domapi::MakeTempFileNamePromise&)
 DEFINE_DELEGATE_4(MoveFile,
                   const base::string16&,
                   const base::string16&,

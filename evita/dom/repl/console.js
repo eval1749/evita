@@ -91,9 +91,10 @@ $define(global, 'repl', function($export) {
      * Emits new line if console doesn't end with newline.
      */
     freshLine() {
-      if (this.document_.length === 0)
+      const document = this.ensureDocument_();
+      if (document.length === 0)
         return;
-      if (this.document_.charCodeAt_(this.document_.length - 1) === Unicode.LF)
+      if (document.charCodeAt_(document.length - 1) === Unicode.LF)
         return;
       this.emit('\n');
     }

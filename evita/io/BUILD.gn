@@ -6,6 +6,8 @@ source_set("io") {
   sources = [
     "block_io_context.cc",
     "block_io_context.h",
+    "directory_io_context.cc",
+    "directory_io_context.h",
     "file_io_context.cc",
     "file_io_context.h",
     "io_context.cc",

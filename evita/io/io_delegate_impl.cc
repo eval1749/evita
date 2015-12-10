@@ -17,6 +17,7 @@
 #include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/public/view_event_handler.h"
+#include "evita/io/directory_io_context.h"
 #include "evita/io/file_io_context.h"
 #include "evita/io/io_context_utils.h"
 #include "evita/io/process_io_context.h"
@@ -77,7 +78,7 @@ void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
 }
 
 void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
-                                    const domapi::FileIoDeferred& deferred) {
+                                    const domapi::FileIoDeferred& promise) {
   auto const it = context_map_.find(context_id);
   if (it == context_map_.end())
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
@@ -159,7 +160,10 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
 void IoDelegateImpl::OpenDirectory(
     const base::string16& dir_name,
     const domapi::OpenDirectoryPromise& promise) {
-  // TODO(eval1749): NYI IoDelegateImpl::OpenDirectory()
+  auto directory = std::make_unique<DirectoryIoContext>(dir_name);
+  auto const directory_id = domapi::IoContextId::New();
+  context_map_.insert(std::make_pair(directory_id, directory.release()));
+  RunCallback(base::Bind(promise.resolve, domapi::DirectoryId(directory_id)));
 }
 
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
@@ -228,7 +232,10 @@ void IoDelegateImpl::ReadDirectory(
     domapi::IoContextId context_id,
     size_t num_read,
     const domapi::ReadDirectoryPromise& promise) {
-  // TODO(eval1749): NYI IoDelegateImpl::ReadDirectory()
+  auto const context = IoContextOf(context_id)->as<DirectoryIoContext>();
+  if (!context)
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  context->Read(num_read, promise);
 }
 
 void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,

@@ -39,7 +39,7 @@ struct CreateFileParams {
 
 HANDLE OpenFile(const base::string16& file_name,
                 const base::string16& mode,
-                const domapi::OpenFileDeferred& deferred) {
+                const domapi::OpenFilePromise& deferred) {
   CreateFileParams params(mode);
   common::win::scoped_handle handle(
       ::CreateFileW(file_name.c_str(), params.access, params.share_mode,
@@ -62,7 +62,7 @@ void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
 
 FileIoContext::FileIoContext(const base::string16& file_name,
                              const base::string16& mode,
-                             const domapi::OpenFileDeferred& deferred)
+                             const domapi::OpenFilePromise& deferred)
     : file_handle_(OpenFile(file_name, mode, deferred)), operation_(nullptr) {
   TRACE_EVENT_ASYNC_BEGIN0("io", "FileContext", this);
   if (!file_handle_.is_valid())

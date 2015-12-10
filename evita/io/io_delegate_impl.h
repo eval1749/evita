@@ -44,7 +44,7 @@ class IoDelegateImpl final : public domapi::IoDelegate {
                      const domapi::OpenDirectoryPromise& promise) final;
   void OpenFile(const base::string16& file_name,
                 const base::string16& mode,
-                const domapi::OpenFileDeferred& deferred) final;
+                const domapi::OpenFilePromise& deferred) final;
   void OpenProcess(const base::string16& command_line,
                    const domapi::OpenProcessDeferred& deferred) final;
   void QueryFileStatus(const base::string16& file_name,

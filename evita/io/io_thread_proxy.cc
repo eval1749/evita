@@ -63,7 +63,7 @@ DEFINE_DELEGATE_2(OpenDirectory,
 DEFINE_DELEGATE_3(OpenFile,
                   const base::string16&,
                   const base::string16&,
-                  const domapi::OpenFileDeferred&)
+                  const domapi::OpenFilePromise&)
 DEFINE_DELEGATE_2(OpenProcess,
                   const base::string16&,
                   const domapi::OpenProcessDeferred&)

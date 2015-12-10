@@ -168,7 +168,7 @@ void IoDelegateImpl::OpenDirectory(
 
 void IoDelegateImpl::OpenFile(const base::string16& file_name,
                               const base::string16& mode,
-                              const domapi::OpenFileDeferred& deferred) {
+                              const domapi::OpenFilePromise& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::OpenFile");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,

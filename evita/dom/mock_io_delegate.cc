@@ -145,7 +145,7 @@ void MockIoDelegate::OpenDirectory(
 
 void MockIoDelegate::OpenFile(const base::string16&,
                               const base::string16&,
-                              const domapi::OpenFileDeferred& deferred) {
+                              const domapi::OpenFilePromise& deferred) {
   auto const result = PopCallResult("OpenFile");
   if (auto const error_code = result.error_code)
     deferred.reject.Run(domapi::IoError(error_code));

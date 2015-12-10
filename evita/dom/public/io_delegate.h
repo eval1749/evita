@@ -56,7 +56,7 @@ class IoDelegate {
 
   virtual void OpenFile(const base::string16& file_name,
                         const base::string16& mode,
-                        const OpenFileDeferred& deferred) = 0;
+                        const OpenFilePromise& deferred) = 0;
   virtual void OpenProcess(const base::string16& command_line,
                            const OpenProcessDeferred& deferred) = 0;
   virtual void QueryFileStatus(const base::string16& file_name,

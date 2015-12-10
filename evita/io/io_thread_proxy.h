@@ -36,7 +36,7 @@ class IoThreadProxy : public domapi::IoDelegate {
   void MoveFile(const base::string16& src_path,
                 const base::string16& dst_path,
                 const domapi::MoveFileOptions& options,
-                const domapi::IoResolver& resolver) final;
+                const domapi::IoBoolPromise& resolver) final;
   void OpenDirectory(const base::string16& dir_name,
                      const domapi::OpenDirectoryPromise& promise) final;
   void OpenFile(const base::string16& file_name,
@@ -54,7 +54,7 @@ class IoThreadProxy : public domapi::IoDelegate {
                 size_t num_read,
                 const domapi::IoIntPromise& deferred) final;
   void RemoveFile(const base::string16& file_name,
-                  const domapi::IoResolver& resolver) final;
+                  const domapi::IoBoolPromise& resolver) final;
   void WriteFile(domapi::IoContextId context_id,
                  void* buffer,
                  size_t num_write,

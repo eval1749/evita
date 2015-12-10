@@ -56,7 +56,7 @@ DEFINE_DELEGATE_4(MoveFile,
                   const base::string16&,
                   const base::string16&,
                   const domapi::MoveFileOptions&,
-                  const domapi::IoResolver&)
+                  const domapi::IoBoolPromise&)
 DEFINE_DELEGATE_2(OpenDirectory,
                   const base::string16&,
                   const domapi::OpenDirectoryPromise&)
@@ -79,7 +79,9 @@ DEFINE_DELEGATE_4(ReadFile,
                   void*,
                   size_t,
                   const domapi::IoIntPromise&)
-DEFINE_DELEGATE_2(RemoveFile, const base::string16&, const domapi::IoResolver&)
+DEFINE_DELEGATE_2(RemoveFile,
+                  const base::string16&,
+                  const domapi::IoBoolPromise&)
 DEFINE_DELEGATE_4(WriteFile,
                   domapi::IoContextId,
                   void*,

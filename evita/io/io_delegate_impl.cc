@@ -138,7 +138,7 @@ void IoDelegateImpl::MakeTempFileName(
 void IoDelegateImpl::MoveFile(const base::string16& src_path,
                               const base::string16& dst_path,
                               const domapi::MoveFileOptions& options,
-                              const domapi::IoResolver& resolver) {
+                              const domapi::IoBoolPromise& resolver) {
   TRACE_EVENT0("io", "IoDelegateImpl::MoveFile");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
@@ -250,7 +250,7 @@ void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
 }
 
 void IoDelegateImpl::RemoveFile(const base::string16& file_name,
-                                const domapi::IoResolver& resolver) {
+                                const domapi::IoBoolPromise& resolver) {
   TRACE_EVENT0("io", "IoDelegateImpl::RemoveFile");
   auto const succeeded = ::DeleteFileW(file_name.c_str());
   if (!succeeded) {

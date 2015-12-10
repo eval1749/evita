@@ -48,7 +48,7 @@ class IoDelegate {
   virtual void MoveFile(const base::string16& src_path,
                         const base::string16& dst_path,
                         const MoveFileOptions& options,
-                        const IoResolver& resolver) = 0;
+                        const IoBoolPromise& resolver) = 0;
 
   // Open directory for reading entries
   virtual void OpenDirectory(const base::string16& dir_name,
@@ -72,7 +72,7 @@ class IoDelegate {
                         const IoIntPromise& deferred) = 0;
   // Remove file
   virtual void RemoveFile(const base::string16& file_name,
-                          const IoResolver& resolver) = 0;
+                          const IoBoolPromise& resolver) = 0;
 
   virtual void WriteFile(IoContextId context_id,
                          void* buffer,

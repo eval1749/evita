@@ -124,7 +124,7 @@ void MockIoDelegate::MakeTempFileName(
 void MockIoDelegate::MoveFile(const base::string16&,
                               const base::string16&,
                               const domapi::MoveFileOptions& options,
-                              const domapi::IoResolver& resolver) {
+                              const domapi::IoBoolPromise& resolver) {
   auto const result = PopCallResult("MoveFile");
   if (auto const error_code = result.error_code)
     resolver.reject.Run(domapi::IoError(error_code));
@@ -198,7 +198,7 @@ void MockIoDelegate::ReadFile(domapi::IoContextId,
 }
 
 void MockIoDelegate::RemoveFile(const base::string16&,
-                                const domapi::IoResolver& resolver) {
+                                const domapi::IoBoolPromise& resolver) {
   ++num_remove_called_;
   auto const result = PopCallResult("RemoveFile");
   if (auto const error_code = result.error_code)

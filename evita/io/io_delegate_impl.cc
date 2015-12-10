@@ -196,7 +196,7 @@ void IoDelegateImpl::OpenProcess(const base::string16& command_line,
 
 void IoDelegateImpl::QueryFileStatus(
     const base::string16& file_name,
-    const domapi::QueryFileStatusDeferred& deferred) {
+    const domapi::QueryFileStatusPromise& deferred) {
   TRACE_EVENT0("io", "IoDelegateImpl::QueryFileStatus");
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", deferred.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,

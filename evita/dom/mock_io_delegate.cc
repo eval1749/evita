@@ -164,7 +164,7 @@ void MockIoDelegate::OpenProcess(const base::string16&,
 
 void MockIoDelegate::QueryFileStatus(
     const base::string16&,
-    const domapi::QueryFileStatusDeferred& deferred) {
+    const domapi::QueryFileStatusPromise& deferred) {
   auto const result = PopCallResult("QueryFileStatus");
   if (auto const error_code = result.error_code)
     deferred.reject.Run(domapi::IoError(error_code));

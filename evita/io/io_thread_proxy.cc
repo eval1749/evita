@@ -69,7 +69,7 @@ DEFINE_DELEGATE_2(OpenProcess,
                   const domapi::OpenProcessPromise&)
 DEFINE_DELEGATE_2(QueryFileStatus,
                   const base::string16&,
-                  const domapi::QueryFileStatusDeferred&)
+                  const domapi::QueryFileStatusPromise&)
 DEFINE_DELEGATE_3(ReadDirectory,
                   domapi::IoContextId,
                   size_t,

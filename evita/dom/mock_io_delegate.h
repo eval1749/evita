@@ -88,7 +88,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
 
   CallResult PopCallResult(const base::StringPiece& name);
   void QueryFileStatus(const base::string16& file_name,
-                       const domapi::QueryFileStatusDeferred& deferred) final;
+                       const domapi::QueryFileStatusPromise& deferred) final;
 
   std::vector<uint8_t> bytes_;
   domapi::IoContextId context_id_;

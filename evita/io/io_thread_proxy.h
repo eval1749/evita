@@ -45,7 +45,7 @@ class IoThreadProxy : public domapi::IoDelegate {
   void OpenProcess(const base::string16& command_line,
                    const domapi::OpenProcessPromise& deferred) final;
   void QueryFileStatus(const base::string16& file_name,
-                       const domapi::QueryFileStatusDeferred& deferred) final;
+                       const domapi::QueryFileStatusPromise& deferred) final;
   void ReadDirectory(domapi::IoContextId context_id,
                      size_t num_read,
                      const domapi::ReadDirectoryPromise& promise) final;

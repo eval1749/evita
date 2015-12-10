@@ -40,7 +40,7 @@ using MakeTempFileNamePromise = Deferred<base::string16, IoError>;
 using OpenDirectoryPromise = Deferred<DirectoryId, IoError>;
 using OpenFilePromise = Deferred<FileId, IoError>;
 using OpenProcessPromise = Deferred<ProcessId, IoError>;
-using QueryFileStatusDeferred = Deferred<FileStatus, IoError>;
+using QueryFileStatusPromise = Deferred<FileStatus, IoError>;
 using ReadDirectoryPromise = Deferred<const std::vector<FileStatus>&, IoError>;
 
 }  // namespace domapi

@@ -18,7 +18,7 @@
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/text/render_text_block.h"
-#include "evita/views/text/render_text_line.h"
+#include "evita/views/text/root_inline_box.h"
 #include "evita/views/text/screen_text_block.h"
 #include "evita/views/text/text_formatter.h"
 
@@ -238,7 +238,7 @@ void TextView::Update(const TextSelectionModel& selection_model) {
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
   const auto& style = buffer_->GetDefaultStyle();
-  std::vector<TextLine*> lines;
+  std::vector<RootInlineBox*> lines;
   for (const auto& line : text_block_->lines())
     lines.push_back(line->Copy());
   paint_text_block_.reset(

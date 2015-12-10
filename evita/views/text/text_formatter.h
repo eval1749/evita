@@ -20,7 +20,7 @@ namespace views {
 namespace rendering {
 
 class InlineBox;
-class TextLine;
+class RootInlineBox;
 enum class TextMarker;
 class TextSelection;
 class TextSelectionModel;
@@ -36,8 +36,8 @@ class TextFormatter final {
   text::Posn text_offset() const;
   void set_text_offset(text::Posn new_text_offset);
 
-  TextLine* FormatLine(text::Posn text_offset);
-  TextLine* FormatLine();
+  RootInlineBox* FormatLine(text::Posn text_offset);
+  RootInlineBox* FormatLine();
   InlineBox* FormatMarker(TextMarker marker_name);
 
   static TextSelection FormatSelection(

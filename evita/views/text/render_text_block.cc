@@ -15,7 +15,7 @@
 #include "evita/text/buffer.h"
 #include "evita/views/text/inline_box.h"
 #include "evita/views/text/render_style.h"
-#include "evita/views/text/render_text_line.h"
+#include "evita/views/text/root_inline_box.h"
 #include "evita/views/text/text_formatter.h"
 
 namespace views {
@@ -23,51 +23,52 @@ namespace rendering {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextBlock::TextLineCache
+// TextBlock::RootInlineBoxCache
 //
-class TextBlock::TextLineCache final {
+class TextBlock::RootInlineBoxCache final {
  public:
-  explicit TextLineCache(const text::Buffer* buffer);
-  ~TextLineCache();
+  explicit RootInlineBoxCache(const text::Buffer* buffer);
+  ~RootInlineBoxCache();
 
   void DidChangeBuffer(text::Posn offset);
-  TextLine* FindLine(text::Posn text_offset) const;
+  RootInlineBox* FindLine(text::Posn text_offset) const;
   void Invalidate(const gfx::RectF& bounds, float zoom);
   bool IsDirty(const gfx::RectF& bounds, float zoom) const;
-  void Register(TextLine* line);
+  void Register(RootInlineBox* line);
 
  private:
-  bool IsAfterNewline(const TextLine* text_line) const;
-  bool IsEndWithNewline(const TextLine* text_line) const;
+  bool IsAfterNewline(const RootInlineBox* text_line) const;
+  bool IsEndWithNewline(const RootInlineBox* text_line) const;
   void RemoveDirtyLines();
   void RemoveAllLines();
 
   gfx::RectF bounds_;
   const text::Buffer* const buffer_;
   text::Posn dirty_start_;
-  std::map<text::Posn, TextLine*> lines_;
+  std::map<text::Posn, RootInlineBox*> lines_;
   float zoom_;
 
-  DISALLOW_COPY_AND_ASSIGN(TextLineCache);
+  DISALLOW_COPY_AND_ASSIGN(RootInlineBoxCache);
 };
 
-TextBlock::TextLineCache::TextLineCache(const text::Buffer* buffer)
+TextBlock::RootInlineBoxCache::RootInlineBoxCache(const text::Buffer* buffer)
     : buffer_(buffer),
       dirty_start_(std::numeric_limits<text::Posn>::max()),
       zoom_(0.0f) {}
 
-TextBlock::TextLineCache::~TextLineCache() {
+TextBlock::RootInlineBoxCache::~RootInlineBoxCache() {
   for (auto& entry : lines_) {
     delete entry.second;
   }
 }
 
-void TextBlock::TextLineCache::DidChangeBuffer(text::Posn offset) {
+void TextBlock::RootInlineBoxCache::DidChangeBuffer(text::Posn offset) {
   ASSERT_DOM_LOCKED();
   dirty_start_ = std::min(dirty_start_, offset);
 }
 
-TextLine* TextBlock::TextLineCache::FindLine(text::Posn text_offset) const {
+RootInlineBox* TextBlock::RootInlineBoxCache::FindLine(
+    text::Posn text_offset) const {
   UI_ASSERT_DOM_LOCKED();
   const auto it = lines_.find(text_offset);
   if (it == lines_.end())
@@ -77,8 +78,8 @@ TextLine* TextBlock::TextLineCache::FindLine(text::Posn text_offset) const {
   return line;
 }
 
-void TextBlock::TextLineCache::Invalidate(const gfx::RectF& new_bounds,
-                                          float new_zoom) {
+void TextBlock::RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
+                                               float new_zoom) {
   UI_ASSERT_DOM_LOCKED();
   if (zoom_ != new_zoom || !dirty_start_) {
     RemoveAllLines();
@@ -111,13 +112,14 @@ void TextBlock::TextLineCache::Invalidate(const gfx::RectF& new_bounds,
   bounds_ = new_bounds;
 }
 
-bool TextBlock::TextLineCache::IsAfterNewline(const TextLine* text_line) const {
+bool TextBlock::RootInlineBoxCache::IsAfterNewline(
+    const RootInlineBox* text_line) const {
   auto const start = text_line->GetStart();
   return !start || buffer_->GetCharAt(start - 1) == '\n';
 }
 
-bool TextBlock::TextLineCache::IsDirty(const gfx::RectF& bounds,
-                                       float zoom) const {
+bool TextBlock::RootInlineBoxCache::IsDirty(const gfx::RectF& bounds,
+                                            float zoom) const {
   if (zoom_ != zoom)
     return false;
   if (dirty_start_ != std::numeric_limits<text::Posn>::max())
@@ -125,13 +127,13 @@ bool TextBlock::TextLineCache::IsDirty(const gfx::RectF& bounds,
   return bounds_ != bounds;
 }
 
-bool TextBlock::TextLineCache::IsEndWithNewline(
-    const TextLine* text_line) const {
+bool TextBlock::RootInlineBoxCache::IsEndWithNewline(
+    const RootInlineBox* text_line) const {
   auto const end = text_line->GetEnd();
   return end >= buffer_->GetEnd() || buffer_->GetCharAt(end) == '\n';
 }
 
-void TextBlock::TextLineCache::Register(TextLine* line) {
+void TextBlock::RootInlineBoxCache::Register(RootInlineBox* line) {
   UI_ASSERT_DOM_LOCKED();
   DCHECK_GE(line->GetEnd(), line->GetStart());
   lines_[line->GetStart()] = line;
@@ -148,7 +150,7 @@ void TextBlock::TextLineCache::Register(TextLine* line) {
 #endif
 }
 
-void TextBlock::TextLineCache::RemoveDirtyLines() {
+void TextBlock::RootInlineBoxCache::RemoveDirtyLines() {
   auto const dirty_start = dirty_start_;
   dirty_start_ = std::numeric_limits<text::Posn>::max();
   if (lines_.empty() || dirty_start >= lines_.rbegin()->second->GetEnd())
@@ -190,7 +192,7 @@ void TextBlock::TextLineCache::RemoveDirtyLines() {
   }
 }
 
-void TextBlock::TextLineCache::RemoveAllLines() {
+void TextBlock::RootInlineBoxCache::RemoveAllLines() {
   for (auto entry : lines_) {
     delete entry.second;
   }
@@ -208,13 +210,13 @@ TextBlock::TextBlock(text::Buffer* text_buffer)
       lines_height_(0),
       need_format_(false),
       text_buffer_(text_buffer),
-      text_line_cache_(new TextLineCache(text_buffer)),
+      text_line_cache_(new RootInlineBoxCache(text_buffer)),
       view_start_(0),
       zoom_(1.0f) {}
 
 TextBlock::~TextBlock() {}
 
-void TextBlock::Append(TextLine* line) {
+void TextBlock::Append(RootInlineBox* line) {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty()) {
     DCHECK_EQ(lines_height_, 0.0f);
@@ -360,7 +362,7 @@ bool TextBlock::FormatIfNeeded() {
   return true;
 }
 
-TextLine* TextBlock::FormatLine(TextFormatter* formatter) {
+RootInlineBox* TextBlock::FormatLine(TextFormatter* formatter) {
   UI_ASSERT_DOM_LOCKED();
   auto const cached_line = text_line_cache_->FindLine(formatter->text_offset());
   if (cached_line) {
@@ -507,7 +509,7 @@ bool TextBlock::NeedFormat() const {
   return false;
 }
 
-void TextBlock::Prepend(TextLine* line) {
+void TextBlock::Prepend(RootInlineBox* line) {
   UI_ASSERT_DOM_LOCKED();
   lines_.push_front(line);
   lines_height_ += line->GetHeight();

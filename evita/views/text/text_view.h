@@ -28,7 +28,7 @@ class ScreenTextBlock;
 class TextBlock;
 class TextFormatter;
 class TextBlock;
-class TextLine;
+class RootInlineBox;
 }
 
 class PaintTextBlock;
@@ -43,7 +43,7 @@ class TextView final {
   using ScreenTextBlock = rendering::ScreenTextBlock;
   using TextSelectionModel = rendering::TextSelectionModel;
   using TextBlock = rendering::TextBlock;
-  using TextLine = rendering::TextLine;
+  using RootInlineBox = rendering::RootInlineBox;
   using TextSelection = rendering::TextSelection;
 
   TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner);

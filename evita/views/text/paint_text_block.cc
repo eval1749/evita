@@ -4,11 +4,11 @@
 
 #include "evita/views/text/paint_text_block.h"
 
-#include "evita/views/text/render_text_line.h"
+#include "evita/views/text/root_inline_box.h"
 
 namespace views {
 
-PaintTextBlock::PaintTextBlock(const std::vector<TextLine*>& lines,
+PaintTextBlock::PaintTextBlock(const std::vector<RootInlineBox*>& lines,
                                const TextSelection& selection,
                                const gfx::ColorF& bgcolor)
     : bgcolor_(bgcolor), lines_(lines), selection_(selection) {}

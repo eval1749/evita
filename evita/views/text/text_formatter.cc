@@ -21,7 +21,7 @@
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/text/render_style.h"
 #include "evita/views/text/render_selection.h"
-#include "evita/views/text/render_text_line.h"
+#include "evita/views/text/root_inline_box.h"
 #include "evita/text/spelling.h"
 
 namespace views {
@@ -197,14 +197,14 @@ void TextFormatter::set_text_offset(text::Posn new_text_offset) {
 }
 
 // Returns true if more contents is available, otherwise returns false.
-TextLine* TextFormatter::FormatLine(text::Posn text_offset) {
+RootInlineBox* TextFormatter::FormatLine(text::Posn text_offset) {
   text_scanner_->set_text_offset(text_offset);
   return FormatLine();
 }
 
-TextLine* TextFormatter::FormatLine() {
+RootInlineBox* TextFormatter::FormatLine() {
   DCHECK(!bounds_.empty());
-  auto const line = new TextLine();
+  auto const line = new RootInlineBox();
   line->set_start(text_scanner_->text_offset());
 
   auto x = bounds_.left;

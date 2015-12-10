@@ -16,7 +16,7 @@ namespace views {
 namespace rendering {
 
 class TextFormatter;
-class TextLine;
+class RootInlineBox;
 
 class TextBlock final {
  public:
@@ -25,7 +25,7 @@ class TextBlock final {
 
   bool dirty() const { return dirty_; }
   int format_counter() const { return format_counter_; }
-  const std::list<TextLine*>& lines() const { return lines_; }
+  const std::list<RootInlineBox*>& lines() const { return lines_; }
 
   void DidChangeStyle(text::Posn offset, size_t length);
   void DidDeleteAt(text::Posn offset, size_t length);
@@ -55,34 +55,34 @@ class TextBlock final {
   text::Posn StartOfLine(text::Posn text_offset);
 
  private:
-  class TextLineCache;
+  class RootInlineBoxCache;
 
-  void Append(TextLine* line);
+  void Append(RootInlineBox* line);
   // Returns true if discarded the first line.
   bool DiscardFirstLine();
   // Returns true if discarded the last line.
   bool DiscardLastLine();
   void EnsureLinePoints();
-  TextLine* FormatLine(TextFormatter* formatter);
+  RootInlineBox* FormatLine(TextFormatter* formatter);
   void InvalidateCache();
   void InvalidateLines(text::Posn offset);
   bool IsShowEndOfDocument() const;
 
   // Returns true if we need to format all lines.
   bool NeedFormat() const;
-  void Prepend(TextLine* line);
+  void Prepend(RootInlineBox* line);
 
   gfx::RectF bounds_;
   bool dirty_;
   bool dirty_line_point_;
   int format_counter_;
-  std::list<TextLine*> lines_;
+  std::list<RootInlineBox*> lines_;
   float lines_height_;
 
   // True if we need to format all lines.
   bool need_format_;
   text::Buffer* const text_buffer_;
-  std::unique_ptr<TextLineCache> text_line_cache_;
+  std::unique_ptr<RootInlineBoxCache> text_line_cache_;
   text::Posn view_start_;
   float zoom_;
 

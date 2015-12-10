@@ -14,26 +14,26 @@
 namespace views {
 
 namespace rendering {
-class TextLine;
+class RootInlineBox;
 };
 
 class PaintTextBlock final {
  public:
-  using TextLine = rendering::TextLine;
+  using RootInlineBox = rendering::RootInlineBox;
   using TextSelection = rendering::TextSelection;
 
-  PaintTextBlock(const std::vector<TextLine*>& lines,
+  PaintTextBlock(const std::vector<RootInlineBox*>& lines,
                  const TextSelection& selection,
                  const gfx::ColorF& bgcolor);
   ~PaintTextBlock();
 
   const gfx::ColorF& bgcolor() const { return bgcolor_; }
-  const std::vector<TextLine*>& lines() const { return lines_; }
+  const std::vector<RootInlineBox*>& lines() const { return lines_; }
   const TextSelection& selection() const { return selection_; }
 
  private:
   const gfx::ColorF bgcolor_;
-  const std::vector<TextLine*> lines_;
+  const std::vector<RootInlineBox*> lines_;
   const TextSelection selection_;
 
   DISALLOW_COPY_AND_ASSIGN(PaintTextBlock);

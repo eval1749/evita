@@ -25,7 +25,7 @@ class PaintTextBlock;
 
 namespace rendering {
 class Font;
-class TextLine;
+class RootInlineBox;
 class TextBlock;
 
 class ScreenTextBlock final {
@@ -59,7 +59,7 @@ class ScreenTextBlock final {
   const std::unique_ptr<Caret> caret_;
   bool dirty_;
   bool has_screen_bitmap_;
-  std::vector<TextLine*> lines_;
+  std::vector<RootInlineBox*> lines_;
   TextSelection selection_;
 
   DISALLOW_COPY_AND_ASSIGN(ScreenTextBlock);

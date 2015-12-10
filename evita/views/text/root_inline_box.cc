@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-#include "evita/views/text/render_text_line.h"
+#include "evita/views/text/root_inline_box.h"
 
 #include "base/logging.h"
 #include "evita/views/text/inline_box.h"
@@ -13,7 +13,7 @@
 namespace views {
 namespace rendering {
 
-TextLine::TextLine(const TextLine& other)
+RootInlineBox::RootInlineBox(const RootInlineBox& other)
     : m_nHash(other.m_nHash),
       m_lEnd(other.m_lEnd),
       m_lStart(other.m_lStart),
@@ -23,18 +23,18 @@ TextLine::TextLine(const TextLine& other)
   }
 }
 
-TextLine::TextLine() : m_nHash(0), m_lStart(0), m_lEnd(0) {}
+RootInlineBox::RootInlineBox() : m_nHash(0), m_lStart(0), m_lEnd(0) {}
 
-TextLine::~TextLine() {}
+RootInlineBox::~RootInlineBox() {}
 
-void TextLine::set_origin(const gfx::PointF& origin) {
+void RootInlineBox::set_origin(const gfx::PointF& origin) {
   bounds_.right = bounds_.width() + origin.x;
   bounds_.bottom = bounds_.height() + origin.y;
   bounds_.left = origin.x;
   bounds_.top = origin.y;
 }
 
-gfx::RectF TextLine::CalculateSelectionRect(
+gfx::RectF RootInlineBox::CalculateSelectionRect(
     const TextSelection& selection) const {
   DCHECK(selection.is_range());
   if (selection.start() >= text_end() || selection.end() <= text_start())
@@ -49,15 +49,15 @@ gfx::RectF TextLine::CalculateSelectionRect(
   return gfx::RectF(left, bounds_.top, right, bounds_.bottom);
 }
 
-bool TextLine::Contains(text::Posn offset) const {
+bool RootInlineBox::Contains(text::Posn offset) const {
   return offset >= text_start() && offset < text_end();
 }
 
-TextLine* TextLine::Copy() const {
-  return new TextLine(*this);
+RootInlineBox* RootInlineBox::Copy() const {
+  return new RootInlineBox(*this);
 }
 
-bool TextLine::Equal(const TextLine* other) const {
+bool RootInlineBox::Equal(const RootInlineBox* other) const {
   if (Hash() != other->Hash())
     return false;
   if (cells_.size() != other->cells_.size())
@@ -71,11 +71,11 @@ bool TextLine::Equal(const TextLine* other) const {
   return true;
 }
 
-void TextLine::AddInlineBox(InlineBox* cell) {
+void RootInlineBox::AddInlineBox(InlineBox* cell) {
   cells_.push_back(cell);
 }
 
-void TextLine::Fix(float ascent, float descent) {
+void RootInlineBox::Fix(float ascent, float descent) {
   auto const left = 0.0f;
   auto const top = 0.0f;
   auto const height = ascent + descent;
@@ -94,7 +94,7 @@ void TextLine::Fix(float ascent, float descent) {
   DCHECK_EQ(bounds_.bottom, ::floor(bounds_.bottom));
 }
 
-uint32_t TextLine::Hash() const {
+uint32_t RootInlineBox::Hash() const {
   if (m_nHash)
     return m_nHash;
   for (const auto cell : cells_) {
@@ -105,7 +105,7 @@ uint32_t TextLine::Hash() const {
   return m_nHash;
 }
 
-gfx::RectF TextLine::HitTestTextPosition(text::Posn offset) const {
+gfx::RectF RootInlineBox::HitTestTextPosition(text::Posn offset) const {
   if (offset < m_lStart || offset >= m_lEnd)
     return gfx::RectF();
 
@@ -120,12 +120,12 @@ gfx::RectF TextLine::HitTestTextPosition(text::Posn offset) const {
   return gfx::RectF();
 }
 
-bool TextLine::IsEndOfDocument() const {
+bool RootInlineBox::IsEndOfDocument() const {
   auto const last_marker_cell = last_cell()->as<InlineMarkerBox>();
   return last_marker_cell->marker_name() == TextMarker::EndOfDocument;
 }
 
-text::Posn TextLine::MapXToPosn(float xGoal) const {
+text::Posn RootInlineBox::MapXToPosn(float xGoal) const {
   auto xInlineBox = 0.0f;
   auto lPosn = GetEnd() - 1;
   for (const auto cell : cells_) {
@@ -140,7 +140,7 @@ text::Posn TextLine::MapXToPosn(float xGoal) const {
   return lPosn;
 }
 
-void TextLine::Render(gfx::Canvas* canvas) const {
+void RootInlineBox::Render(gfx::Canvas* canvas) const {
   auto x = bounds_.left;
   for (auto cell : cells_) {
     gfx::RectF rect(x, bounds_.top, x + cell->width(),

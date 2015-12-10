@@ -16,7 +16,7 @@
 #include "evita/views/text/paint_text_block.h"
 #include "evita/views/text/inline_box.h"
 #include "evita/views/text/render_selection.h"
-#include "evita/views/text/render_text_line.h"
+#include "evita/views/text/root_inline_box.h"
 
 #define DEBUG_DRAW 0
 // USE_OVERLAY controls how redraw marker rendered. If USE_OVERLAY is true,
@@ -60,7 +60,7 @@ inline gfx::RectF RoundBounds(const gfx::RectF& bounds) {
 }
 
 std::unordered_set<gfx::RectF> CalculateSelectionRects(
-    const std::vector<TextLine*>& lines,
+    const std::vector<RootInlineBox*>& lines,
     const TextSelection& selection,
     const gfx::RectF& bounds) {
   std::unordered_set<gfx::RectF> rects;
@@ -90,7 +90,7 @@ inline void FillRect(gfx::Canvas* canvas,
 
 }  // namespace
 
-using FormatLineIterator = std::vector<TextLine*>::const_iterator;
+using FormatLineIterator = std::vector<RootInlineBox*>::const_iterator;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -146,11 +146,12 @@ class ScreenTextBlock::PaintContext final {
                      float red,
                      float green,
                      float blue) const;
-  void FillBottom(const TextLine* line) const;
-  void FillRight(const TextLine* line) const;
+  void FillBottom(const RootInlineBox* line) const;
+  void FillRight(const RootInlineBox* line) const;
   FormatLineIterator FindFirstMismatch() const;
   FormatLineIterator FindLastMatch() const;
-  std::vector<TextLine*>::const_iterator FindCopyable(TextLine* line) const;
+  std::vector<RootInlineBox*>::const_iterator FindCopyable(
+      RootInlineBox* line) const;
   void RestoreSkipRect(const gfx::RectF& rect) const;
 
   const gfx::ColorF bgcolor_;
@@ -158,8 +159,8 @@ class ScreenTextBlock::PaintContext final {
   gfx::Canvas* canvas_;
   mutable std::vector<gfx::RectF> copy_rects_;
   mutable std::vector<gfx::RectF> dirty_rects_;
-  const std::vector<TextLine*>& format_lines_;
-  const std::vector<TextLine*>& screen_lines_;
+  const std::vector<RootInlineBox*>& format_lines_;
+  const std::vector<RootInlineBox*>& screen_lines_;
   const ScreenTextBlock* screen_text_block_;
   mutable std::vector<gfx::RectF> skip_rects_;
 
@@ -213,7 +214,8 @@ void ScreenTextBlock::PaintContext::DrawDirtyRect(const gfx::RectF& rect,
   }
 }
 
-void ScreenTextBlock::PaintContext::FillBottom(const TextLine* line) const {
+void ScreenTextBlock::PaintContext::FillBottom(
+    const RootInlineBox* line) const {
   auto const rect = gfx::RectF(gfx::PointF(bounds_.left, line->bottom()),
                                bounds_.bottom_right())
                         .Intersect(bounds_);
@@ -224,7 +226,7 @@ void ScreenTextBlock::PaintContext::FillBottom(const TextLine* line) const {
   canvas_->AddDirtyRect(rect);
 }
 
-void ScreenTextBlock::PaintContext::FillRight(const TextLine* line) const {
+void ScreenTextBlock::PaintContext::FillRight(const RootInlineBox* line) const {
   auto const rect =
       gfx::RectF(line->origin() + gfx::SizeF(line->GetWidth(), 0.0f),
                  gfx::PointF(bounds_.right, line->bottom()))
@@ -280,8 +282,8 @@ FormatLineIterator ScreenTextBlock::PaintContext::FindLastMatch() const {
                          *format_last_match);
 }
 
-std::vector<TextLine*>::const_iterator
-ScreenTextBlock::PaintContext::FindCopyable(TextLine* format_line) const {
+std::vector<RootInlineBox*>::const_iterator
+ScreenTextBlock::PaintContext::FindCopyable(RootInlineBox* format_line) const {
   for (auto runner = screen_lines_.begin(); runner != screen_lines_.end();
        ++runner) {
     auto const screen_line = *runner;
@@ -484,7 +486,8 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
   // Event if we can't get bitmap from render target, screen is up-to-date,
   // but we render all lines next time.
   if (has_screen_bitmap_) {
-    // TODO(eval1749): We should use existing TextLine's in ScreenTextBlock.
+    // TODO(eval1749): We should use existing RootInlineBox's in
+    // ScreenTextBlock.
     for (const auto& line : text_block.lines()) {
       lines_.push_back(line->Copy());
     }

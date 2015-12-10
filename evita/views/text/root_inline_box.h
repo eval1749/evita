@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_RENDER_TEXT_LINE_H_
-#define EVITA_VIEWS_TEXT_RENDER_TEXT_LINE_H_
+#ifndef EVITA_VIEWS_TEXT_ROOT_INLINE_BOX_H_
+#define EVITA_VIEWS_TEXT_ROOT_INLINE_BOX_H_
 
 #include <stdint.h>
 
@@ -23,10 +23,10 @@ class Formatter;
 class TextBlock;
 class TextSelection;
 
-class TextLine final {
+class RootInlineBox final {
  public:
-  TextLine();
-  ~TextLine();
+  RootInlineBox();
+  ~RootInlineBox();
 
   float bottom() const { return bounds_.bottom; }
   const gfx::PointF& bottom_right() const { return bounds_.bottom_right(); }
@@ -45,8 +45,8 @@ class TextLine final {
 
   void AddInlineBox(InlineBox* cell);
   gfx::RectF CalculateSelectionRect(const TextSelection& selection) const;
-  TextLine* Copy() const;
-  bool Equal(const TextLine*) const;
+  RootInlineBox* Copy() const;
+  bool Equal(const RootInlineBox*) const;
   void Fix(float ascent, float descent);
   text::Posn GetEnd() const { return m_lEnd; }
   float GetHeight() const { return bounds_.height(); }
@@ -59,7 +59,7 @@ class TextLine final {
   void Render(gfx::Canvas* canvas) const;
 
  private:
-  TextLine(const TextLine& other);
+  RootInlineBox(const RootInlineBox& other);
 
   bool Contains(text::Posn offset) const;
 
@@ -73,4 +73,4 @@ class TextLine final {
 }  // namespace rendering
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_RENDER_TEXT_LINE_H_
+#endif  // EVITA_VIEWS_TEXT_ROOT_INLINE_BOX_H_

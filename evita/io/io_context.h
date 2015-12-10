@@ -5,21 +5,18 @@
 #ifndef EVITA_IO_IO_CONTEXT_H_
 #define EVITA_IO_IO_CONTEXT_H_
 
+#include "common/castable.h"
 #include "evita/dom/public/io_callback.h"
 
 namespace io {
 
-class IoContext {
+class IoContext : public common::Castable {
+  DECLARE_CASTABLE_CLASS(IoContext, Castable);
+
  public:
   virtual ~IoContext();
 
   virtual void Close(const domapi::FileIoDeferred& deferred) = 0;
-  virtual void Read(void* buffer,
-                    size_t num_read,
-                    const domapi::FileIoDeferred& deferred) = 0;
-  virtual void Write(void* buffer,
-                     size_t num_write,
-                     const domapi::FileIoDeferred& deferred) = 0;
 
  protected:
   IoContext();

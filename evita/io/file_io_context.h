@@ -6,20 +6,19 @@
 #define EVITA_IO_FILE_IO_CONTEXT_H_
 
 #include "base/callback.h"
-#pragma warning(push)
-#pragma warning(disable : 4100 4625 4626)
 #include "base/message_loop/message_pump_win.h"
-#pragma warning(pop)
 #include "common/win/scoped_handle.h"
 #include "evita/dom/public/deferred.h"
 #include "evita/dom/public/io_context_id.h"
-#include "evita/io/io_context.h"
+#include "evita/io/block_io_context.h"
 
 namespace io {
 
 class FileIoContext final : private base::MessagePumpForIO::IOContext,
                             private base::MessagePumpForIO::IOHandler,
-                            public IoContext {
+                            public BlockIoContext {
+  DECLARE_CASTABLE_CLASS(FileIoContext, BlockIoContext);
+
  public:
   FileIoContext(const base::string16& file_name,
                 const base::string16& mode,

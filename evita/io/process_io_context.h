@@ -11,7 +11,7 @@
 #include "base/strings/string16.h"
 #include "common/win/scoped_handle.h"
 #include "evita/dom/public/io_context_id.h"
-#include "evita//io/io_context.h"
+#include "evita//io/block_io_context.h"
 
 namespace base {
 class Thread;
@@ -19,7 +19,9 @@ class Thread;
 
 namespace io {
 
-class ProcessIoContext final : public IoContext {
+class ProcessIoContext final : public BlockIoContext {
+  DECLARE_CASTABLE_CLASS(ProcessIoContext, BlockIoContext);
+
  public:
   ProcessIoContext(domapi::IoContextId context_id,
                    const base::string16& command_line,

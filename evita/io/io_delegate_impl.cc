@@ -62,6 +62,13 @@ IoDelegateImpl::IoDelegateImpl() {}
 
 IoDelegateImpl::~IoDelegateImpl() {}
 
+IoContext* IoDelegateImpl::IoContextOf(domapi::IoContextId context_id) const {
+  auto const it = context_map_.find(context_id);
+  if (it == context_map_.end())
+    return nullptr;
+  return it->second;
+}
+
 // domapi::IoDelegate
 void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
                                    const CheckSpellingResolver& deferred) {
@@ -80,12 +87,14 @@ void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
 }
 
 void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
-                               const domapi::FileIoDeferred& deferred) {
+                               const domapi::FileIoDeferred& promise) {
   auto const it = context_map_.find(context_id);
-  if (it == context_map_.end()) {
-    return;
-  }
-  it->second->Close(deferred);
+  if (it == context_map_.end())
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  auto const context = it->second->as<BlockIoContext>();
+  if (!context)
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  context->Close(promise);
   context_map_.erase(it);
 }
 
@@ -165,6 +174,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
   if (!file->is_valid())
     return;
   auto const file_id = domapi::IoContextId::New();
+  // TODO(eval1749): We should insert function.
   context_map_[file_id] = file.release();
   Resolve(deferred.resolve, domapi::FileId(file_id));
 }
@@ -177,7 +187,10 @@ void IoDelegateImpl::OpenProcess(const base::string16& command_line,
                          "step", "IoDelegateImpl::OpenProcess");
   auto const process_id = domapi::IoContextId::New();
   auto const process = new ProcessIoContext(process_id, command_line, deferred);
+  // TODO(eval1749): We should insert function.
   context_map_[process_id] = process;
+  // Note: |ProcessIoContext| constructor delegate promise resolution to the
+  // gateway thread which spawns process with specified command line.
 }
 
 void IoDelegateImpl::QueryFileStatus(
@@ -226,14 +239,12 @@ void IoDelegateImpl::ReadDirectory(
 void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
                               void* buffer,
                               size_t num_read,
-                              const domapi::FileIoDeferred& deferred) {
+                              const domapi::FileIoDeferred& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::ReadFile");
-  auto const it = context_map_.find(context_id);
-  if (it == context_map_.end()) {
-    Reject(deferred.reject, ERROR_INVALID_HANDLE);
-    return;
-  }
-  it->second->Read(buffer, num_read, deferred);
+  auto const context = IoContextOf(context_id)->as<BlockIoContext>();
+  if (!context)
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  context->Read(buffer, num_read, promise);
 }
 
 void IoDelegateImpl::RemoveFile(const base::string16& file_name,
@@ -253,14 +264,12 @@ void IoDelegateImpl::RemoveFile(const base::string16& file_name,
 void IoDelegateImpl::WriteFile(domapi::IoContextId context_id,
                                void* buffer,
                                size_t num_write,
-                               const domapi::FileIoDeferred& deferred) {
+                               const domapi::FileIoDeferred& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::WriteFile");
-  auto const it = context_map_.find(context_id);
-  if (it == context_map_.end()) {
-    Reject(deferred.reject, ERROR_INVALID_HANDLE);
-    return;
-  }
-  it->second->Write(buffer, num_write, deferred);
+  auto const context = IoContextOf(context_id)->as<BlockIoContext>();
+  if (!context)
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  context->Write(buffer, num_write, promise);
 }
 
 }  // namespace io

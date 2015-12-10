@@ -21,6 +21,8 @@ class IoDelegateImpl final : public domapi::IoDelegate {
   ~IoDelegateImpl() final;
 
  private:
+  IoContext* IoContextOf(domapi::IoContextId context_id) const;
+
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
                      const CheckSpellingResolver& deferred) final;

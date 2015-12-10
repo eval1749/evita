@@ -1,0 +1,34 @@
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_VIEWS_TEXT_INLINE_BOX_VISITOR_H_
+#define EVITA_VIEWS_TEXT_INLINE_BOX_VISITOR_H_
+
+#include "base/macros.h"
+#include "evita/views/text/inline_box_forward.h"
+
+namespace views {
+namespace rendering {
+
+//////////////////////////////////////////////////////////////////////
+//
+// InlineBoxVisitor
+//
+class InlineBoxVisitor {
+ public:
+#define V(name) virtual void Visit##name(name* inline_box) = 0;
+  FOR_EACH_INLINE_BOX(V)
+#undef V
+ protected:
+  InlineBoxVisitor();
+  ~InlineBoxVisitor();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(InlineBoxVisitor);
+};
+
+}  // namespace rendering
+}  // namespace views
+
+#endif  // EVITA_VIEWS_TEXT_INLINE_BOX_VISITOR_H_

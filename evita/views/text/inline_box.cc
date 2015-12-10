@@ -8,6 +8,7 @@
 #include "evita/views/text/inline_box.h"
 
 #include "base/logging.h"
+#include "evita/views/text/inline_box_visitor.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_style.h"
 
@@ -32,6 +33,11 @@ inline void FillRect(gfx::Canvas* canvas,
 }
 
 }  // namespace
+
+#define V(name) \
+  void name::Accept(InlineBoxVisitor* visitor) { visitor->Visit##name(this); }
+FOR_EACH_INLINE_BOX(V)
+#undef V
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -321,67 +327,55 @@ void InlineMarkerBox::Render(gfx::Canvas* canvas,
 
 //////////////////////////////////////////////////////////////////////
 //
-// InlineTextBox
+// InlineTextBoxBase
 //
-InlineTextBox::InlineTextBox(const RenderStyle& style,
-                             float width,
-                             float height,
-                             text::Posn lPosn,
-                             const base::string16& characters)
+InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
+                                     float width,
+                                     float height,
+                                     text::Posn lPosn,
+                                     const base::string16& characters)
     : InlineBox(style, width, height, style.font().descent()),
       WithFont(style.font()),
       characters_(characters),
       end_(lPosn + 1),
       start_(lPosn) {}
 
-InlineTextBox::InlineTextBox(const InlineTextBox& other)
+InlineTextBoxBase::InlineTextBoxBase(const InlineTextBoxBase& other)
     : InlineBox(other),
       WithFont(other),
       characters_(other.characters_),
       end_(other.end_),
       start_(other.start_) {}
 
-InlineTextBox::~InlineTextBox() {}
+InlineTextBoxBase::~InlineTextBoxBase() {}
 
-void InlineTextBox::AddChar(base::char16 char_code) {
+void InlineTextBoxBase::AddChar(base::char16 char_code) {
   characters_.push_back(char_code);
 }
 
-// rendering::InlineBox
-InlineBox* InlineTextBox::Copy() const {
-  return new InlineTextBox(*this);
+void InlineTextBoxBase::ExtendEnd() {
+  end_ += 1;
 }
 
-bool InlineTextBox::Equal(const InlineBox* other) const {
+// rendering::InlineBox
+bool InlineTextBoxBase::Equal(const InlineBox* other) const {
   if (!InlineBox::Equal(other))
     return false;
   return characters_ == other->as<InlineTextBox>()->characters_;
 }
 
-text::Posn InlineTextBox::Fix(float line_height, float descent) {
+text::Posn InlineTextBoxBase::Fix(float line_height, float descent) {
   InlineBox::Fix(line_height, descent);
   DCHECK_LT(start_, end_);
   return end_;
 }
 
-uint32_t InlineTextBox::Hash() const {
+uint32_t InlineTextBoxBase::Hash() const {
   return static_cast<uint32_t>((InlineBox::Hash() << 3) ^
                                std::hash<base::string16>()(characters_));
 }
 
-// Returns bounds rectangle of caret at |offset|. Caret is placed before
-// character at |offset|. So, height of caret is height of character before
-// |offset|.
-gfx::RectF InlineTextBox::HitTestTextPosition(text::Posn offset) const {
-  if (offset < start_ || offset > end_)
-    return gfx::RectF();
-  auto const length = static_cast<size_t>(offset - start_);
-  auto const left =
-      length ? style().font().GetTextWidth(characters_.data(), length) : 0.0f;
-  return gfx::RectF(gfx::PointF(left, top()), gfx::SizeF(1.0f, height()));
-}
-
-text::Posn InlineTextBox::MapXToPosn(float x) const {
+text::Posn InlineTextBoxBase::MapXToPosn(float x) const {
   if (x >= width())
     return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
@@ -392,21 +386,53 @@ text::Posn InlineTextBox::MapXToPosn(float x) const {
   return end_;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// InlineTextBox
+//
+InlineTextBox::InlineTextBox(const RenderStyle& style,
+                             float width,
+                             float height,
+                             text::Posn offset,
+                             const base::string16& characters)
+    : InlineTextBoxBase(style, width, height, offset, characters) {}
+
+InlineTextBox::InlineTextBox(const InlineTextBox& other)
+    : InlineTextBoxBase(other) {}
+
+InlineTextBox::~InlineTextBox() {}
+
+InlineBox* InlineTextBox::Copy() const {
+  return new InlineTextBox(*this);
+}
+
+// Returns bounds rectangle of caret at |offset|. Caret is placed before
+// character at |offset|. So, height of caret is height of character before
+// |offset|.
+gfx::RectF InlineTextBox::HitTestTextPosition(text::Posn offset) const {
+  if (offset < start() || offset > end())
+    return gfx::RectF();
+  auto const length = static_cast<size_t>(offset - start());
+  auto const left =
+      length ? style().font().GetTextWidth(characters().data(), length) : 0.0f;
+  return gfx::RectF(gfx::PointF(left, top()), gfx::SizeF(1.0f, height()));
+}
+
 bool InlineTextBox::Merge(const RenderStyle& style, float width) {
   if (this->style() != style)
     return false;
   IncrementWidth(width);
-  end_ += 1;
+  ExtendEnd();
   return true;
 }
 
 void InlineTextBox::Render(gfx::Canvas* canvas, const gfx::RectF& rect) const {
-  DCHECK(!characters_.empty());
+  DCHECK(!characters().empty());
   auto const text_rect = gfx::RectF(gfx::PointF(rect.left, rect.top + top()),
                                     gfx::SizeF(rect.width(), height()));
   FillBackground(canvas, rect);
   gfx::Brush text_brush(canvas, style().color());
-  DrawText(canvas, style().font(), text_brush, text_rect, characters_);
+  DrawText(canvas, style().font(), text_brush, text_rect, characters());
 
   auto const baseline = text_rect.bottom - descent();
   auto const underline = baseline + this->underline();
@@ -456,10 +482,10 @@ InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
                                    float height,
                                    text::Posn lPosn,
                                    const base::string16& characters)
-    : InlineTextBox(style, width, height + 4.0f, lPosn, characters) {}
+    : InlineTextBoxBase(style, width, height + 4.0f, lPosn, characters) {}
 
 InlineUnicodeBox::InlineUnicodeBox(const InlineUnicodeBox& other)
-    : InlineTextBox(other) {}
+    : InlineTextBoxBase(other) {}
 
 InlineUnicodeBox::~InlineUnicodeBox() {}
 

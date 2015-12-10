@@ -8,6 +8,7 @@
 #include "common/castable.h"
 #include "evita/gfx_base.h"
 #include "evita/precomp.h"
+#include "evita/views/text/inline_box_forward.h"
 #include "evita/views/text/render_style.h"
 
 namespace views {
@@ -29,12 +30,23 @@ enum class TextMarker {
 
 class RenderStyle;
 
+#define DECLARE_INLINE_BOX_CLASS(self, super) \
+  DECLARE_CASTABLE_CLASS(self, super)
+
+#define DECLARE_INLINE_BOX_ABSTRACT_CLASS(self, super) \
+  DECLARE_INLINE_BOX_CLASS(self, super)
+
+#define DECLARE_INLINE_BOX_FINAL_CLASS(self, super) \
+  DECLARE_INLINE_BOX_CLASS(self, super)             \
+ private:                                           \
+  void Accept(InlineBoxVisitor* visitor) final;
+
 //////////////////////////////////////////////////////////////////////
 //
 // InlineBox
 //
 class InlineBox : public common::Castable {
-  DECLARE_CASTABLE_CLASS(InlineBox, Castable);
+  DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
 
  public:
   explicit InlineBox(const InlineBox& other);
@@ -45,6 +57,7 @@ class InlineBox : public common::Castable {
   float line_height() const { return line_height_; }
   float width() const { return width_; }
 
+  virtual void Accept(InlineBoxVisitor* visitor) = 0;
   virtual InlineBox* Copy() const = 0;
   virtual bool Equal(const InlineBox* pInlineBox) const;
   virtual text::Posn Fix(float line_height, float line_descent);
@@ -79,7 +92,7 @@ class InlineBox : public common::Castable {
 // InlineFillerBox
 //
 class InlineFillerBox final : public InlineBox {
-  DECLARE_CASTABLE_CLASS(InlineFillerBox, InlineBox);
+  DECLARE_INLINE_BOX_FINAL_CLASS(InlineFillerBox, InlineBox);
 
  public:
   InlineFillerBox(const RenderStyle& style, float width, float height);
@@ -134,8 +147,8 @@ class WithFont {
 //
 // InlineMarkerBox
 //
-class InlineMarkerBox final : public InlineBox, private WithFont {
-  DECLARE_CASTABLE_CLASS(InlineMarkerBox, InlineBox);
+class InlineMarkerBox final : public InlineBox, public WithFont {
+  DECLARE_INLINE_BOX_FINAL_CLASS(InlineMarkerBox, InlineBox);
 
  public:
   InlineMarkerBox(const RenderStyle& style,
@@ -164,37 +177,34 @@ class InlineMarkerBox final : public InlineBox, private WithFont {
 
 //////////////////////////////////////////////////////////////////////
 //
-// InlineTextBox
+// InlineTextBoxBase
 //
-class InlineTextBox : public InlineBox, private WithFont {
-  DECLARE_CASTABLE_CLASS(InlineTextBox, InlineBox);
+class InlineTextBoxBase : public InlineBox, public WithFont {
+  DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineTextBoxBase, InlineBox);
 
  public:
-  InlineTextBox(const RenderStyle& style,
-                float width,
-                float height,
-                text::Posn lPosn,
-                const base::string16& characters);
-  InlineTextBox(const InlineTextBox& other);
-  virtual ~InlineTextBox();
+  void AddChar(base::char16 char_code);
+
+ protected:
+  InlineTextBoxBase(const RenderStyle& style,
+                    float width,
+                    float height,
+                    text::Posn lPosn,
+                    const base::string16& characters);
+  InlineTextBoxBase(const InlineTextBoxBase& other);
+  ~InlineTextBoxBase() override;
 
   const base::string16 characters() const { return characters_; }
   text::Posn end() const { return end_; }
   text::Posn start() const { return start_; }
+  void ExtendEnd();
 
-  void AddChar(base::char16 char_code);
-
+ private:
+  // InlineBox
   bool Equal(const InlineBox* pInlineBox) const override;
   text::Posn Fix(float iHeight, float iDescent) override;
   uint32_t Hash() const override;
-  gfx::RectF HitTestTextPosition(text::Posn position) const override;
   text::Posn MapXToPosn(float x) const override;
-  bool Merge(const RenderStyle& style, float width) override;
-  void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const override;
-
- private:
-  // rendering::InlineBox
-  InlineBox* Copy() const override;
 
   base::string16 characters_;
   text::Posn end_;
@@ -203,10 +213,34 @@ class InlineTextBox : public InlineBox, private WithFont {
 
 //////////////////////////////////////////////////////////////////////
 //
+// InlineTextBox
+//
+class InlineTextBox final : public InlineTextBoxBase {
+  DECLARE_INLINE_BOX_FINAL_CLASS(InlineTextBox, InlineTextBoxBase);
+
+ public:
+  InlineTextBox(const RenderStyle& style,
+                float width,
+                float height,
+                text::Posn lPosn,
+                const base::string16& characters);
+  InlineTextBox(const InlineTextBox& other);
+  ~InlineTextBox() final;
+
+ private:
+  // rendering::InlineBox
+  InlineBox* Copy() const final;
+  gfx::RectF HitTestTextPosition(text::Posn position) const final;
+  bool Merge(const RenderStyle& style, float width) final;
+  void Render(gfx::Canvas* canvas, const gfx::RectF& rect) const final;
+};
+
+//////////////////////////////////////////////////////////////////////
+//
 // InlineUnicodeBox
 //
-class InlineUnicodeBox final : public InlineTextBox {
-  DECLARE_CASTABLE_CLASS(InlineUnicodeBox, InlineTextBox);
+class InlineUnicodeBox final : public InlineTextBoxBase {
+  DECLARE_INLINE_BOX_FINAL_CLASS(InlineUnicodeBox, InlineTextBoxBase);
 
  public:
   InlineUnicodeBox(const RenderStyle& style,

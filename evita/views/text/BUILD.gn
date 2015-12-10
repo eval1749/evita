@@ -6,6 +6,9 @@ source_set("text") {
   sources = [
     "inline_box.cc",
     "inline_box.h",
+    "inline_box_forward.h",
+    "inline_box_visitor.cc",
+    "inline_box_visitor.h",
     "paint_text_block.cc",
     "paint_text_block.h",
     "render_font.cc",

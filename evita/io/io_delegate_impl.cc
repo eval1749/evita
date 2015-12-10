@@ -5,6 +5,7 @@
 #include "evita/io/io_delegate_impl.h"
 
 #include <unordered_map>
+#include <utility>
 
 #include "base/bind.h"
 #include "base/callback.h"
@@ -174,8 +175,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
   if (!file->is_valid())
     return;
   auto const file_id = domapi::IoContextId::New();
-  // TODO(eval1749): We should insert function.
-  context_map_[file_id] = file.release();
+  context_map_.insert(std::make_pair(file_id, file.release()));
   Resolve(deferred.resolve, domapi::FileId(file_id));
 }
 
@@ -187,8 +187,7 @@ void IoDelegateImpl::OpenProcess(const base::string16& command_line,
                          "step", "IoDelegateImpl::OpenProcess");
   auto const process_id = domapi::IoContextId::New();
   auto const process = new ProcessIoContext(process_id, command_line, deferred);
-  // TODO(eval1749): We should insert function.
-  context_map_[process_id] = process;
+  context_map_.insert(std::make_pair(process_id, process));
   // Note: |ProcessIoContext| constructor delegate promise resolution to the
   // gateway thread which spawns process with specified command line.
 }

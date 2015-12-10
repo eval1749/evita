@@ -16,11 +16,11 @@
 #include "evita/dom/public/switch_value.h"
 #include "evita/dom/public/window_id.h"
 
+// TODO(eval1749): We should not use DOM object in DOM API.
 namespace dom {
 class Document;
 class EditorWindow;
 class Form;
-class Window;
 }
 
 namespace text {
@@ -31,7 +31,6 @@ namespace domapi {
 
 class FloatRect;
 struct TabData;
-class ViewEventHandler;
 
 struct PopupWindowInit {
   domapi::WindowId owner_id;

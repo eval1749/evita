@@ -78,7 +78,10 @@ $define(global, 'repl', function($export) {
       this.document_.readonly = true;
     }
 
-    /** @return {!Document} */
+    /**
+     * @private
+     * @return {!Document}
+     */
     ensureDocument_() {
       if (this.document_)
         return this.document_;
@@ -108,25 +111,15 @@ $define(global, 'repl', function($export) {
      *  Output arguments to console log.
      */
     log(...params) {
-      const message = params.map(formatValue).join(' ');
-      const document = this.ensureDocument_();
-      const readonly = document.readonly;
-      document.readonly = false;
-      const range = this.range_;
-      range.collapseTo(document.length);
-      const start = range.start;
-      range.startOf(Unit.LINE, Alter.EXTEND);
-      if (start !== range.start) {
-        range.collapseTo(range.end);
-        range.insertBefore('\n');
-      }
-      range.insertBefore(message + '\n');
-      document.readonly = readonly;
+      this.freshLine();
+      this.emit(params.map(formatValue).join(' '));
+      this.emit('\n');
       this.update();
     }
 
     reset_() {
       this.document_ = null;
+      this.range_ = null;
     }
 
     // Activate or create window to show console log.

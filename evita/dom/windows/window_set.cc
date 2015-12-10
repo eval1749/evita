@@ -14,8 +14,8 @@ WindowSet::WindowSet() {}
 
 WindowSet::~WindowSet() {}
 
-void WindowSet::DidDestroyWidget(WindowId window_id) {
-  DCHECK_NE(kInvalidWindowId, window_id);
+void WindowSet::DidDestroyWidget(domapi::WindowId window_id) {
+  DCHECK_NE(domapi::kInvalidWindowId, window_id);
   auto it = map_.find(window_id);
   if (it == map_.end()) {
     DVLOG(0) << "Why we don't have a widget for WindowId " << window_id
@@ -30,8 +30,8 @@ void WindowSet::DidDestroyWidget(WindowId window_id) {
   }
 }
 
-Window* WindowSet::Find(WindowId window_id) const {
-  DCHECK_NE(kInvalidWindowId, window_id);
+Window* WindowSet::Find(domapi::WindowId window_id) const {
+  DCHECK_NE(domapi::kInvalidWindowId, window_id);
   auto it = map_.find(window_id);
   return it == map_.end() ? nullptr : it->second.get();
 }
@@ -44,8 +44,8 @@ void WindowSet::ResetForTesting() {
   map_.clear();
 }
 
-void WindowSet::Unregister(WindowId window_id) {
-  DCHECK_NE(kInvalidWindowId, window_id);
+void WindowSet::Unregister(domapi::WindowId window_id) {
+  DCHECK_NE(domapi::kInvalidWindowId, window_id);
   map_.erase(window_id);
 }
 

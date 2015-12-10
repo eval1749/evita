@@ -14,7 +14,7 @@
 #include "evita/dom/public/promise.h"
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/switch_value.h"
-#include "evita/dom/windows/window_id.h"
+#include "evita/dom/public/window_id.h"
 
 namespace dom {
 class Document;
@@ -32,10 +32,9 @@ namespace domapi {
 class FloatRect;
 struct TabData;
 class ViewEventHandler;
-using WindowId = dom::WindowId;
 
 struct PopupWindowInit {
-  dom::WindowId owner_id;
+  domapi::WindowId owner_id;
   int offset_x;
   int offset_y;
 };

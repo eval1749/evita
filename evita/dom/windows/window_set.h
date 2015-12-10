@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 #include "common/memory/singleton.h"
-#include "evita/dom/windows/window_id.h"
+#include "evita/dom/public/window_id.h"
 #include "evita/gc/weak_ptr.h"
 
 namespace dom {
@@ -21,16 +21,16 @@ class WindowSet final : public common::Singleton<WindowSet> {
  public:
   ~WindowSet() final;
 
-  void DidDestroyWidget(WindowId window_id);
-  Window* Find(WindowId window_id) const;
+  void DidDestroyWidget(domapi::WindowId window_id);
+  Window* Find(domapi::WindowId window_id) const;
   void Register(Window* window);
   void ResetForTesting();
-  void Unregister(WindowId window_id);
+  void Unregister(domapi::WindowId window_id);
 
  private:
   WindowSet();
 
-  std::unordered_map<WindowId, gc::WeakPtr<Window>> map_;
+  std::unordered_map<domapi::WindowId, gc::WeakPtr<Window>> map_;
 
   DISALLOW_COPY_AND_ASSIGN(WindowSet);
 };

@@ -431,7 +431,7 @@ void FormWindow::FormViewModel::DidChangeForm() {
 //
 // FormWindow
 //
-FormWindow::FormWindow(dom::WindowId window_id,
+FormWindow::FormWindow(domapi::WindowId window_id,
                        dom::Form* form,
                        Window* owner,
                        gfx::Point offset)
@@ -441,7 +441,7 @@ FormWindow::FormWindow(dom::WindowId window_id,
       owner_(owner),
       should_clear_canvas_(true) {}
 
-FormWindow::FormWindow(dom::WindowId window_id, dom::Form* form)
+FormWindow::FormWindow(domapi::WindowId window_id, dom::Form* form)
     : FormWindow(window_id, form, nullptr, gfx::Point()) {}
 
 FormWindow::~FormWindow() {}

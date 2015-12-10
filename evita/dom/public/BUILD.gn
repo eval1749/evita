@@ -4,6 +4,7 @@
 
 source_set("public") {
   sources = [
+    "event_target_id.h",
     "float_point.cc",
     "float_rect.cc",
     "io_context_id.cc",
@@ -17,6 +18,7 @@ source_set("public") {
     "view_delegate.h",
     "view_event_handler.cc",
     "view_event_handler.h",
+    "window_id.h",
   ]
 
   public_deps = [

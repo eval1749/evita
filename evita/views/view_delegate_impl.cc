@@ -80,7 +80,7 @@ void TraceLogClient::DidGetEvent(const std::string& chunk,
   delete this;
 }
 
-Window* FromWindowId(const char* name, dom::WindowId window_id) {
+Window* FromWindowId(const char* name, domapi::WindowId window_id) {
   auto const window = Window::FromWindowId(window_id);
   if (!window) {
     DVLOG(0) << name << ": No such window " << window_id;
@@ -89,8 +89,8 @@ Window* FromWindowId(const char* name, dom::WindowId window_id) {
   return window;
 }
 
-Frame* GetFrameForMessage(dom::WindowId window_id) {
-  if (window_id == dom::kInvalidWindowId)
+Frame* GetFrameForMessage(domapi::WindowId window_id) {
+  if (window_id == domapi::kInvalidWindowId)
     return FrameList::instance()->active_frame();
   auto const window = FromWindowId("GetFrameForMessage", window_id);
   if (!window)
@@ -109,9 +109,9 @@ ViewDelegateImpl::ViewDelegateImpl() {}
 
 ViewDelegateImpl::~ViewDelegateImpl() {}
 
-void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
-                                 dom::WindowId child_id) {
-  DCHECK_NE(dom::kInvalidWindowId, parent_id);
+void ViewDelegateImpl::AddWindow(domapi::WindowId parent_id,
+                                 domapi::WindowId child_id) {
+  DCHECK_NE(domapi::kInvalidWindowId, parent_id);
   auto const parent = Window::FromWindowId(parent_id);
   if (!parent) {
     DVLOG(0) << "AddWindow: no such parent " << parent_id;
@@ -128,8 +128,8 @@ void ViewDelegateImpl::AddWindow(dom::WindowId parent_id,
       child->as<views::ContentWindow>());
 }
 
-void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
-                                          dom::WindowId new_parent_id) {
+void ViewDelegateImpl::ChangeParentWindow(domapi::WindowId window_id,
+                                          domapi::WindowId new_parent_id) {
   auto const window = FromWindowId("ChangeParentWindow", window_id);
   if (!window)
     return;
@@ -142,7 +142,7 @@ void ViewDelegateImpl::ChangeParentWindow(dom::WindowId window_id,
 // TODO(eval1749): We should make |ComputeOnTextWindow()| to return value
 // asynchronously.
 text::Posn ViewDelegateImpl::ComputeOnTextWindow(
-    dom::WindowId window_id,
+    domapi::WindowId window_id,
     const domapi::TextWindowCompute& data) {
   TRACE_EVENT0("view", "ViewDelegateImpl::ComputeOnTextWindow");
   auto const window =
@@ -177,10 +177,10 @@ void ViewDelegateImpl::CreateEditorWindow(const dom::EditorWindow* window) {
   new Frame(window->window_id());
 }
 
-void ViewDelegateImpl::CreateFormWindow(dom::WindowId window_id,
+void ViewDelegateImpl::CreateFormWindow(domapi::WindowId window_id,
                                         dom::Form* form,
                                         const domapi::PopupWindowInit& init) {
-  if (init.owner_id == dom::kInvalidWindowId) {
+  if (init.owner_id == domapi::kInvalidWindowId) {
     new FormWindow(window_id, form);
     return;
   }
@@ -193,18 +193,18 @@ void ViewDelegateImpl::CreateFormWindow(dom::WindowId window_id,
                  gfx::Point(init.offset_x, init.offset_y));
 }
 
-void ViewDelegateImpl::CreateTableWindow(dom::WindowId window_id,
+void ViewDelegateImpl::CreateTableWindow(domapi::WindowId window_id,
                                          dom::Document* document) {
   new views::TableWindow(window_id, document);
 }
 
-void ViewDelegateImpl::CreateTextWindow(dom::WindowId window_id,
+void ViewDelegateImpl::CreateTextWindow(domapi::WindowId window_id,
                                         text::Selection* selection) {
   new TextWindow(window_id, selection);
 }
 
-void ViewDelegateImpl::DestroyWindow(dom::WindowId window_id) {
-  DCHECK_NE(dom::kInvalidWindowId, window_id);
+void ViewDelegateImpl::DestroyWindow(domapi::WindowId window_id) {
+  DCHECK_NE(domapi::kInvalidWindowId, window_id);
   auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "DestroyWindow: no such widget " << window_id;
@@ -222,7 +222,7 @@ void ViewDelegateImpl::DidUpdateDom() {
   editor::Application::instance()->scheduler()->DidUpdateDom();
 }
 
-void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
+void ViewDelegateImpl::FocusWindow(domapi::WindowId window_id) {
   auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "FocusWindow: no such widget " << window_id;
@@ -232,13 +232,13 @@ void ViewDelegateImpl::FocusWindow(dom::WindowId window_id) {
 }
 
 void ViewDelegateImpl::GetFileNameForLoad(
-    dom::WindowId window_id,
+    domapi::WindowId window_id,
     const base::string16& dir_path,
     const GetFileNameForLoadResolver& resolver) {
   TRACE_EVENT_WITH_FLOW0("promise", "ViewDelegateImpl::GetFileNameForLoad",
                          resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
-  auto const widget = window_id == dom::kInvalidWindowId
+  auto const widget = window_id == domapi::kInvalidWindowId
                           ? FrameList::instance()->active_frame()
                           : Window::FromWindowId(window_id);
   if (!widget) {
@@ -258,13 +258,13 @@ void ViewDelegateImpl::GetFileNameForLoad(
 }
 
 void ViewDelegateImpl::GetFileNameForSave(
-    dom::WindowId window_id,
+    domapi::WindowId window_id,
     const base::string16& dir_path,
     const GetFileNameForSaveResolver& resolver) {
   TRACE_EVENT_WITH_FLOW0("promise", "ViewDelegateImpl::GetFileNameForSave",
                          resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
-  auto const widget = window_id == dom::kInvalidWindowId
+  auto const widget = window_id == domapi::kInvalidWindowId
                           ? FrameList::instance()->active_frame()
                           : Window::FromWindowId(window_id);
   if (!widget) {
@@ -350,7 +350,7 @@ std::vector<int> ViewDelegateImpl::GetTableRowStates(
   return std::move(table_view->GetRowStates(keys));
 }
 
-void ViewDelegateImpl::HideWindow(dom::WindowId window_id) {
+void ViewDelegateImpl::HideWindow(domapi::WindowId window_id) {
   auto const window = FromWindowId("HideWindow", window_id);
   if (!window)
     return;
@@ -373,9 +373,9 @@ domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(WindowId window_id,
 }
 
 // TODO(eval1749): We should not have |MakeSelectionVisible()|.
-void ViewDelegateImpl::MakeSelectionVisible(dom::WindowId window_id) {
+void ViewDelegateImpl::MakeSelectionVisible(domapi::WindowId window_id) {
   TRACE_EVENT0("view", "ViewDelegateImpl::MakeSelectionVisible");
-  DCHECK_NE(dom::kInvalidWindowId, window_id);
+  DCHECK_NE(domapi::kInvalidWindowId, window_id);
   auto const widget = Window::FromWindowId(window_id);
   if (!widget) {
     DVLOG(0) << "MakeSelectionVisible: no such widget " << window_id;
@@ -434,7 +434,7 @@ void ViewDelegateImpl::MapTextWindowPointToOffset(
   return Resolve(promise, offset);
 }
 
-void ViewDelegateImpl::MessageBox(dom::WindowId window_id,
+void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,
                                   const base::string16& message,
                                   const base::string16& title,
                                   int flags,
@@ -484,8 +484,8 @@ void ViewDelegateImpl::Reconvert(WindowId window_id,
   ui::TextInputClient::Get()->Reconvert(text_window, text);
 }
 
-void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
-  DCHECK_NE(dom::kInvalidWindowId, window_id);
+void ViewDelegateImpl::RealizeWindow(domapi::WindowId window_id) {
+  DCHECK_NE(domapi::kInvalidWindowId, window_id);
   auto const widget = Window::FromWindowId(window_id);
   if (!widget)
     return;
@@ -493,7 +493,8 @@ void ViewDelegateImpl::RealizeWindow(dom::WindowId window_id) {
   widget->RealizeWidget();
 }
 
-void ViewDelegateImpl::SetTextWindowZoom(dom::WindowId window_id, float zoom) {
+void ViewDelegateImpl::SetTextWindowZoom(domapi::WindowId window_id,
+                                         float zoom) {
   DCHECK_GT(zoom, 0.0f);
   auto const window = FromWindowId("SetTextWindowZoom", window_id);
   if (!window)
@@ -504,7 +505,7 @@ void ViewDelegateImpl::SetTextWindowZoom(dom::WindowId window_id, float zoom) {
   text_window->SetZoom(zoom);
 }
 
-void ViewDelegateImpl::ShowWindow(dom::WindowId window_id) {
+void ViewDelegateImpl::ShowWindow(domapi::WindowId window_id) {
   auto const window = FromWindowId("ShowWindow", window_id);
   if (!window)
     return;
@@ -557,7 +558,7 @@ void ViewDelegateImpl::SetCapture(domapi::EventTargetId event_target_id) {
   DVLOG(0) << "SetCapture: no such target " << event_target_id;
 }
 
-void ViewDelegateImpl::SetStatusBar(dom::WindowId window_id,
+void ViewDelegateImpl::SetStatusBar(domapi::WindowId window_id,
                                     const std::vector<base::string16>& texts) {
   auto const window = FromWindowId("SetStatusBar", window_id);
   if (!window)
@@ -578,13 +579,13 @@ void ViewDelegateImpl::SetSwitch(const base::string16& name,
   editor::SwitchSet::instance()->Set(name, new_value);
 }
 
-void ViewDelegateImpl::SetTabData(dom::WindowId window_id,
+void ViewDelegateImpl::SetTabData(domapi::WindowId window_id,
                                   const domapi::TabData& tab_data) {
   TabDataSet::instance()->SetTabData(window_id, tab_data);
 }
 
-void ViewDelegateImpl::SplitHorizontally(dom::WindowId left_window_id,
-                                         dom::WindowId new_right_window_id) {
+void ViewDelegateImpl::SplitHorizontally(domapi::WindowId left_window_id,
+                                         domapi::WindowId new_right_window_id) {
   auto const left_window = Window::FromWindowId(left_window_id);
   if (!left_window)
     return;
@@ -598,8 +599,8 @@ void ViewDelegateImpl::SplitHorizontally(dom::WindowId left_window_id,
                             new_right_window->as<ContentWindow>());
 }
 
-void ViewDelegateImpl::SplitVertically(dom::WindowId above_window_id,
-                                       dom::WindowId new_below_window_id) {
+void ViewDelegateImpl::SplitVertically(domapi::WindowId above_window_id,
+                                       domapi::WindowId new_below_window_id) {
   auto const above_window = Window::FromWindowId(above_window_id);
   if (!above_window)
     return;
@@ -626,7 +627,7 @@ void ViewDelegateImpl::StopTraceLog(
                  base::Unretained(trace_log_client)));
 }
 
-void ViewDelegateImpl::UpdateWindow(dom::WindowId window_id) {
+void ViewDelegateImpl::UpdateWindow(domapi::WindowId window_id) {
   TRACE_EVENT0("view", "ViewDelegateImpl::UpdateWindow");
   auto const window = FromWindowId("UpdateWindow", window_id);
   if (!window)

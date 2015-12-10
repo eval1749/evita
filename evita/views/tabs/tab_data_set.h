@@ -9,7 +9,7 @@
 
 #include "base/observer_list.h"
 #include "common/memory/singleton.h"
-#include "evita/dom/windows/window_id.h"
+#include "evita/dom/public/window_id.h"
 
 namespace domapi {
 struct TabData;
@@ -27,7 +27,7 @@ class TabDataSet final : public common::Singleton<TabDataSet> {
    public:
     virtual ~Observer();
 
-    virtual void DidSetTabData(dom::WindowId window_id,
+    virtual void DidSetTabData(domapi::WindowId window_id,
                                const TabData& tab_data) = 0;
 
    protected:
@@ -40,10 +40,10 @@ class TabDataSet final : public common::Singleton<TabDataSet> {
   ~TabDataSet();
 
   void AddObserver(Observer* observer);
-  const TabData* GetTabData(dom::WindowId window_id);
+  const TabData* GetTabData(domapi::WindowId window_id);
   void RemoveObserver(Observer* observer);
-  void RemoveTabData(dom::WindowId window_id);
-  void SetTabData(dom::WindowId window_id, const TabData& tab_data);
+  void RemoveTabData(domapi::WindowId window_id);
+  void SetTabData(domapi::WindowId window_id, const TabData& tab_data);
 
  private:
   TabDataSet();

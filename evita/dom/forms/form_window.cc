@@ -19,7 +19,7 @@ FormWindow::FormWindow(Form* form, const FormWindowInit& init) : form_(form) {
   window_init.offset_x = init.offset_x();
   window_init.offset_y = init.offset_y();
   window_init.owner_id =
-      init.owner() ? init.owner()->window_id() : dom::kInvalidWindowId;
+      init.owner() ? init.owner()->window_id() : domapi::kInvalidWindowId;
   ScriptHost::instance()->view_delegate()->CreateFormWindow(window_id(), form,
                                                             window_init);
 }

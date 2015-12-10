@@ -54,8 +54,8 @@ ViewEventTarget* FromEventTargetId(domapi::EventTargetId event_target_id) {
   return target;
 }
 
-Window* FromWindowId(WindowId window_id) {
-  DCHECK_NE(kInvalidWindowId, window_id);
+Window* FromWindowId(domapi::WindowId window_id) {
+  DCHECK_NE(domapi::kInvalidWindowId, window_id);
   auto const window = WindowSet::instance()->Find(window_id);
   if (!window)
     DVLOG(0) << "No such window " << window_id << ".";
@@ -76,9 +76,9 @@ EventTarget* GetFocusWindow(v8_glue::Runner* runner) {
 }
 
 v8::Handle<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
-                                         WindowId window_id) {
+                                         domapi::WindowId window_id) {
   auto const isolate = runner->isolate();
-  if (window_id == kInvalidWindowId)
+  if (window_id == domapi::kInvalidWindowId)
     return runner->global()->Get(gin::StringToV8(isolate, "Editor"));
 
   auto const window = FromWindowId(window_id);
@@ -93,9 +93,9 @@ ViewEventTarget* MaybeEventTarget(domapi::EventTargetId event_target_id) {
   return FromEventTargetId(event_target_id);
 }
 
-Window* NewOrFromWindowId(WindowId window_id) {
-  return window_id == kInvalidWindowId ? new EditorWindow()
-                                       : FromWindowId(window_id);
+Window* NewOrFromWindowId(domapi::WindowId window_id) {
+  return window_id == domapi::kInvalidWindowId ? new EditorWindow()
+                                               : FromWindowId(window_id);
 }
 
 }  // namespace
@@ -122,7 +122,7 @@ void ViewEventHandlerImpl::DidBeginFrame(const base::Time& deadline) {
   NOTREACHED();
 }
 
-void ViewEventHandlerImpl::DidChangeWindowBounds(WindowId window_id,
+void ViewEventHandlerImpl::DidChangeWindowBounds(domapi::WindowId window_id,
                                                  int left,
                                                  int top,
                                                  int right,
@@ -134,7 +134,7 @@ void ViewEventHandlerImpl::DidChangeWindowBounds(WindowId window_id,
 }
 
 void ViewEventHandlerImpl::DidChangeWindowVisibility(
-    WindowId window_id,
+    domapi::WindowId window_id,
     domapi::Visibility visibility) {
   auto const target = FromEventTargetId(window_id);
   if (!target)
@@ -145,15 +145,15 @@ void ViewEventHandlerImpl::DidChangeWindowVisibility(
                   UiEventInit()));
 }
 
-void ViewEventHandlerImpl::DidDestroyWidget(WindowId window_id) {
+void ViewEventHandlerImpl::DidDestroyWidget(domapi::WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
   window->DidDestroyWindow();
 }
 
-void ViewEventHandlerImpl::DidDropWidget(WindowId source_id,
-                                         WindowId target_id) {
+void ViewEventHandlerImpl::DidDropWidget(domapi::WindowId source_id,
+                                         domapi::WindowId target_id) {
   auto const source_window = FromWindowId(source_id);
   if (!source_window)
     return;
@@ -176,7 +176,7 @@ void ViewEventHandlerImpl::DidExitViewIdle() {
   NOTREACHED();
 }
 
-void ViewEventHandlerImpl::DidRealizeWidget(WindowId window_id) {
+void ViewEventHandlerImpl::DidRealizeWidget(domapi::WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;
@@ -242,7 +242,7 @@ void ViewEventHandlerImpl::DispatchWheelEvent(
   DispatchEventWithInLock(window, new WheelEvent(api_event));
 }
 
-void ViewEventHandlerImpl::OpenFile(WindowId window_id,
+void ViewEventHandlerImpl::OpenFile(domapi::WindowId window_id,
                                     const base::string16& file_name) {
   auto const runner = host_->runner();
   v8_glue::Runner::Scope runner_scope(runner);
@@ -279,7 +279,7 @@ void ViewEventHandlerImpl::ProcessCommandLine(
                gin::ConvertToV8(runner->context(), args).ToLocalChecked());
 }
 
-void ViewEventHandlerImpl::QueryClose(WindowId window_id) {
+void ViewEventHandlerImpl::QueryClose(domapi::WindowId window_id) {
   auto const window = WindowSet::instance()->Find(window_id);
   if (!window)
     return;

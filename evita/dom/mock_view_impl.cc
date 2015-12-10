@@ -14,21 +14,21 @@ MockViewImpl::~MockViewImpl() {}
 
 // domapi::ViewDelegate
 void MockViewImpl::GetFileNameForLoad(
-    WindowId,
+    domapi::WindowId,
     const base::string16& dir_path,
     const GetFileNameForLoadResolver& resolver) {
   resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
 void MockViewImpl::GetFileNameForSave(
-    WindowId,
+    domapi::WindowId,
     const base::string16& dir_path,
     const GetFileNameForSaveResolver& resolver) {
   resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
 std::vector<int> MockViewImpl::GetTableRowStates(
-    WindowId,
+    domapi::WindowId,
     const std::vector<base::string16>& keys) {
   std::vector<int> states;
   for (auto index = 0u; index < keys.size(); ++index) {
@@ -37,7 +37,7 @@ std::vector<int> MockViewImpl::GetTableRowStates(
   return std::move(states);
 }
 
-void MockViewImpl::MessageBox(WindowId,
+void MockViewImpl::MessageBox(domapi::WindowId,
                               const base::string16&,
                               const base::string16&,
                               int flags,

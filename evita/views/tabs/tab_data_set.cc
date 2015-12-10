@@ -28,7 +28,7 @@ void TabDataSet::AddObserver(Observer* observer) {
   observers_.AddObserver(observer);
 }
 
-const TabDataSet::TabData* TabDataSet::GetTabData(dom::WindowId window_id) {
+const TabDataSet::TabData* TabDataSet::GetTabData(domapi::WindowId window_id) {
   auto const it = map_.find(window_id);
   return it == map_.end() ? nullptr : it->second;
 }
@@ -37,7 +37,7 @@ void TabDataSet::RemoveObserver(Observer* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void TabDataSet::RemoveTabData(dom::WindowId window_id) {
+void TabDataSet::RemoveTabData(domapi::WindowId window_id) {
   auto const it = map_.find(window_id);
   if (it == map_.end())
     return;
@@ -45,7 +45,8 @@ void TabDataSet::RemoveTabData(dom::WindowId window_id) {
   map_.erase(it);
 }
 
-void TabDataSet::SetTabData(dom::WindowId window_id, const TabData& tab_data) {
+void TabDataSet::SetTabData(domapi::WindowId window_id,
+                            const TabData& tab_data) {
   auto const it = map_.find(window_id);
   if (it == map_.end()) {
     map_[window_id] = new TabData(tab_data);

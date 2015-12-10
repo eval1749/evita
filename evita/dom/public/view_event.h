@@ -6,7 +6,7 @@
 #define EVITA_DOM_PUBLIC_VIEW_EVENT_H_
 
 #include "base/strings/string16.h"
-#include "evita/dom/windows/window_id.h"
+#include "evita/dom/public/window_id.h"
 
 namespace domapi {
 

@@ -62,7 +62,7 @@ Window::Window() : state_(State::NotRealized) {
 }
 
 Window::~Window() {
-  if (window_id() == kInvalidWindowId)
+  if (window_id() == domapi::kInvalidWindowId)
     return;
   WindowSet::instance()->Unregister(window_id());
   ScriptHost::instance()->view_delegate()->DestroyWindow(window_id());
@@ -217,7 +217,7 @@ bool Window::IsDescendantOf(Window* other) const {
 
 void Window::Realize() {
   if (state_ == State::Destroyed) {
-    DCHECK_EQ(kInvalidWindowId, window_id());
+    DCHECK_EQ(domapi::kInvalidWindowId, window_id());
     ScriptHost::instance()->ThrowError("Can't realize deatched window.");
     return;
   }
@@ -285,7 +285,7 @@ static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
 }
 
 void Window::ReleaseCapture() {
-  if (window_id() == kInvalidWindowId) {
+  if (window_id() == domapi::kInvalidWindowId) {
     ScriptHost::instance()->ThrowError(
         "Can't release capture to unralized window.");
     return;

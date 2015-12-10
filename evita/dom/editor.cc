@@ -226,7 +226,7 @@ v8::Handle<v8::Promise> Editor::GetFileNameForLoad(
       FROM_HERE,
       base::Bind(&domapi::ViewDelegate::GetFileNameForLoad,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
-                 window ? window->window_id() : dom::kInvalidWindowId,
+                 window ? window->window_id() : domapi::kInvalidWindowId,
                  dir_path));
 }
 
@@ -237,7 +237,7 @@ v8::Handle<v8::Promise> Editor::GetFileNameForSave(
       FROM_HERE,
       base::Bind(&domapi::ViewDelegate::GetFileNameForSave,
                  base::Unretained(ScriptHost::instance()->view_delegate()),
-                 window ? window->window_id() : dom::kInvalidWindowId,
+                 window ? window->window_id() : domapi::kInvalidWindowId,
                  dir_path));
 }
 
@@ -272,10 +272,11 @@ v8::Handle<v8::Promise> Editor::MessageBox(Window* maybe_window,
                                            const base::string16& title) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::ViewDelegate::MessageBox,
-                 base::Unretained(ScriptHost::instance()->view_delegate()),
-                 maybe_window ? maybe_window->window_id() : kInvalidWindowId,
-                 message, title, flags));
+      base::Bind(
+          &domapi::ViewDelegate::MessageBox,
+          base::Unretained(ScriptHost::instance()->view_delegate()),
+          maybe_window ? maybe_window->window_id() : domapi::kInvalidWindowId,
+          message, title, flags));
 }
 
 v8::Handle<v8::Promise> Editor::MessageBox(Window* maybe_window,

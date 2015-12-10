@@ -45,16 +45,17 @@ class ScriptThread final : public domapi::ViewEventHandler,
 
   // domapi::ViewEventHandler
   void DidBeginFrame(const base::Time& deadline);
-  void DidChangeWindowBounds(WindowId window_id,
+  void DidChangeWindowBounds(domapi::WindowId window_id,
                              int left,
                              int top,
                              int right,
                              int bottom) final;
-  void DidChangeWindowVisibility(WindowId window_id,
+  void DidChangeWindowVisibility(domapi::WindowId window_id,
                                  domapi::Visibility visibility) final;
-  void DidDestroyWidget(WindowId window_id) final;
-  void DidDropWidget(WindowId source_id, WindowId target_id) final;
-  void DidRealizeWidget(WindowId window_id) final;
+  void DidDestroyWidget(domapi::WindowId window_id) final;
+  void DidDropWidget(domapi::WindowId source_id,
+                     domapi::WindowId target_id) final;
+  void DidRealizeWidget(domapi::WindowId window_id) final;
   void DidEnterViewIdle(const base::Time& deadline) final;
   void DidExitViewIdle() final;
   void DispatchFocusEvent(const domapi::FocusEvent& event) final;
@@ -63,10 +64,11 @@ class ScriptThread final : public domapi::ViewEventHandler,
   void DispatchTextCompositionEvent(
       const domapi::TextCompositionEvent& event) final;
   void DispatchWheelEvent(const domapi::WheelEvent& event) final;
-  void OpenFile(WindowId window_id, const base::string16& file_name) final;
+  void OpenFile(domapi::WindowId window_id,
+                const base::string16& file_name) final;
   void ProcessCommandLine(const base::string16& working_directory,
                           const std::vector<base::string16>& args) final;
-  void QueryClose(WindowId window_id) final;
+  void QueryClose(domapi::WindowId window_id) final;
   void RunCallback(const base::Closure& callback) final;
   void WillDestroyViewHost() final;
 

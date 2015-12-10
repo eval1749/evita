@@ -99,7 +99,8 @@ void MessageBox(const base::string16& message, int flags) {
   resolver.reject = base::Bind(MessageBoxCallback);
   resolver.resolve = base::Bind(MessageBoxCallback);
   ScriptHost::instance()->view_delegate()->MessageBox(
-      kInvalidWindowId, message, L"Evita System Message", flags, resolver);
+      domapi::kInvalidWindowId, message, L"Evita System Message", flags,
+      resolver);
 }
 
 const char* GcTypeToString(v8::GCType type) {

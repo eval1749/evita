@@ -204,8 +204,8 @@ void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
 }
 
 void Frame::UpdateTitleBar(const domapi::TabData& tab_data) {
-  auto const window_title = base::StringPrintf(L"%ls %lc %ls",
-      tab_data.title.c_str(),
+  auto const window_title = base::StringPrintf(
+      L"%ls %lc %ls", tab_data.title.c_str(),
       tab_data.state == domapi::TabData::State::Modified ? '*' : '-',
       editor::Application::instance()->title().c_str());
   title_bar_->SetText(window_title);
@@ -501,7 +501,7 @@ void Frame::DidActivateTabContent(TabContent* tab_content) {
 }
 
 // views::TabDataSet::Observer
-void Frame::DidSetTabData(dom::WindowId window_id,
+void Frame::DidSetTabData(domapi::WindowId window_id,
                           const domapi::TabData& tab_data) {
   auto const window = Window::FromWindowId(window_id);
   if (!window)

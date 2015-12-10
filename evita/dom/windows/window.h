@@ -9,7 +9,7 @@
 
 #include "common/tree/node.h"
 #include "evita/dom/events/view_event_target.h"
-#include "evita/dom/windows/window_id.h"
+#include "evita/dom/public/window_id.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
@@ -44,7 +44,7 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   Window* previous_sibling() const { return Node::previous_sibling(); }
   Window* parent_window() const { return parent_node(); }
   State state() const { return state_; }
-  WindowId window_id() const { return event_target_id(); }
+  domapi::WindowId window_id() const { return event_target_id(); }
 
   void DidChangeBounds(int left, int top, int right, int bottom);
   virtual void DidDestroyWindow();

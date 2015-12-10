@@ -189,36 +189,36 @@ ViewThreadProxy::~ViewThreadProxy() {}
                    p2, p3, p4, p5));                                           \
   }
 
-DEFINE_DELEGATE_2(AddWindow, dom::WindowId, dom::WindowId)
-DEFINE_DELEGATE_2(ChangeParentWindow, dom::WindowId, dom::WindowId)
+DEFINE_DELEGATE_2(AddWindow, domapi::WindowId, domapi::WindowId)
+DEFINE_DELEGATE_2(ChangeParentWindow, domapi::WindowId, domapi::WindowId)
 DEFINE_DELEGATE_1(CreateEditorWindow, const dom::EditorWindow*)
 DEFINE_DELEGATE_3(CreateFormWindow,
-                  dom::WindowId,
+                  domapi::WindowId,
                   dom::Form*,
                   const domapi::PopupWindowInit&)
-DEFINE_DELEGATE_2(CreateTableWindow, dom::WindowId, dom::Document*)
-DEFINE_DELEGATE_2(CreateTextWindow, dom::WindowId, text::Selection*)
-DEFINE_DELEGATE_1(DestroyWindow, dom::WindowId)
+DEFINE_DELEGATE_2(CreateTableWindow, domapi::WindowId, dom::Document*)
+DEFINE_DELEGATE_2(CreateTextWindow, domapi::WindowId, text::Selection*)
+DEFINE_DELEGATE_1(DestroyWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
 
 void ViewThreadProxy::DidUpdateDom() {
   delegate_->DidUpdateDom();
 }
 
-DEFINE_DELEGATE_1(FocusWindow, dom::WindowId)
+DEFINE_DELEGATE_1(FocusWindow, domapi::WindowId)
 DEFINE_DELEGATE_3(GetFileNameForLoad,
-                  dom::WindowId,
+                  domapi::WindowId,
                   const base::string16&,
                   const GetFileNameForLoadResolver&)
 DEFINE_DELEGATE_3(GetFileNameForSave,
-                  dom::WindowId,
+                  domapi::WindowId,
                   const base::string16&,
                   const GetFileNameForSaveResolver&)
 DEFINE_DELEGATE_2(GetMetrics,
                   const base::string16&,
                   const domapi::StringPromise&)
-DEFINE_DELEGATE_1(HideWindow, dom::WindowId)
-DEFINE_DELEGATE_1(MakeSelectionVisible, dom::WindowId)
+DEFINE_DELEGATE_1(HideWindow, domapi::WindowId)
+DEFINE_DELEGATE_1(MakeSelectionVisible, domapi::WindowId)
 DEFINE_DELEGATE_4(MapTextFieldPointToOffset,
                   domapi::EventTargetId,
                   float,
@@ -230,23 +230,23 @@ DEFINE_DELEGATE_4(MapTextWindowPointToOffset,
                   float,
                   const domapi::IntegerPromise&)
 DEFINE_DELEGATE_5(MessageBox,
-                  dom::WindowId,
+                  domapi::WindowId,
                   const base::string16&,
                   const base::string16&,
                   int,
                   const MessageBoxResolver&)
-DEFINE_DELEGATE_2(Reconvert, dom::WindowId, const base::string16&);
-DEFINE_DELEGATE_1(RealizeWindow, dom::WindowId)
+DEFINE_DELEGATE_2(Reconvert, domapi::WindowId, const base::string16&);
+DEFINE_DELEGATE_1(RealizeWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(ReleaseCapture, domapi::EventTargetId)
 DEFINE_DELEGATE_1(SetCapture, domapi::EventTargetId)
 DEFINE_DELEGATE_2(SetStatusBar,
-                  dom::WindowId,
+                  domapi::WindowId,
                   const std::vector<base::string16>&)
-DEFINE_DELEGATE_2(SetTabData, dom::WindowId, const domapi::TabData&)
-DEFINE_DELEGATE_2(SetTextWindowZoom, dom::WindowId, float)
-DEFINE_DELEGATE_1(ShowWindow, dom::WindowId)
-DEFINE_DELEGATE_2(SplitHorizontally, dom::WindowId, dom::WindowId)
-DEFINE_DELEGATE_2(SplitVertically, dom::WindowId, dom::WindowId)
+DEFINE_DELEGATE_2(SetTabData, domapi::WindowId, const domapi::TabData&)
+DEFINE_DELEGATE_2(SetTextWindowZoom, domapi::WindowId, float)
+DEFINE_DELEGATE_1(ShowWindow, domapi::WindowId)
+DEFINE_DELEGATE_2(SplitHorizontally, domapi::WindowId, domapi::WindowId)
+DEFINE_DELEGATE_2(SplitVertically, domapi::WindowId, domapi::WindowId)
 DEFINE_DELEGATE_1(StartTraceLog, const std::string&)
 DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
 
@@ -299,20 +299,21 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
 
 DEFINE_SYNC_DELEGATE_2(ComputeOnTextWindow,
                        text::Posn,
-                       dom::WindowId,
+                       domapi::WindowId,
                        const domapi::TextWindowCompute&);
 DEFINE_SYNC_DELEGATE_1(GetSwitch, domapi::SwitchValue, const base::string16&)
 DEFINE_SYNC_DELEGATE_0(GetSwitchNames, std::vector<base::string16>)
 DEFINE_SYNC_DELEGATE_2(GetTableRowStates,
                        std::vector<int>,
-                       dom::WindowId,
+                       domapi::WindowId,
                        const std::vector<base::string16>&)
 DEFINE_SYNC_DELEGATE_2(HitTestTextPosition,
                        domapi::FloatRect,
-                       dom::WindowId,
+                       domapi::WindowId,
                        text::Posn)
 
-void ViewThreadProxy::ScrollTextWindow(dom::WindowId window_id, int direction) {
+void ViewThreadProxy::ScrollTextWindow(domapi::WindowId window_id,
+                                       int direction) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!message_loop_)
     return;
@@ -335,7 +336,7 @@ void ViewThreadProxy::SetSwitch(const base::string16& name,
       message_loop_, waitable_event_.get());
 }
 
-void ViewThreadProxy::UpdateWindow(dom::WindowId window_id) {
+void ViewThreadProxy::UpdateWindow(domapi::WindowId window_id) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   if (!message_loop_)
     return;

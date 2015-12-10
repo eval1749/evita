@@ -48,7 +48,7 @@ TEST_F(ViewEventHandlerImplTest, DidDropWidget_InvalidWindowId) {
       "  target = this;"
       "  result = event;"
       "}");
-  view_event_handler()->DidDropWidget(1, kInvalidWindowId);
+  view_event_handler()->DidDropWidget(1, domapi::kInvalidWindowId);
   EXPECT_SCRIPT_EQ("dropwindow", "result.type");
   EXPECT_SCRIPT_EQ("2", "target.id");
 }

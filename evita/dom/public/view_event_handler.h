@@ -11,7 +11,7 @@
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
 #include "evita/dom/public/event_target_id.h"
-#include "evita/dom/windows/window_id.h"
+#include "evita/dom/public/window_id.h"
 
 namespace base {
 class Time;
@@ -30,7 +30,7 @@ struct MouseEvent;
 struct TextCompositionEvent;
 enum class Visibility;
 struct WheelEvent;
-using dom::WindowId;
+using domapi::WindowId;
 
 class ViewEventHandler {
  public:

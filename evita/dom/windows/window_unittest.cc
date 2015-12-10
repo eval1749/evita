@@ -183,8 +183,8 @@ TEST_F(WindowTest, Add) {
   EXPECT_SCRIPT_TRUE("child1.previousSibling === null");
   EXPECT_SCRIPT_TRUE("child2.nextSibling === null");
   EXPECT_SCRIPT_TRUE("child2.previousSibling === child1");
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
-  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(2));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(1));
+  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(2));
   EXPECT_SCRIPT_EQ("1", "parent.children.length");
   EXPECT_SCRIPT_TRUE("parent.firstChild === child2");
   EXPECT_SCRIPT_TRUE("parent.lastChild === child2");
@@ -208,15 +208,15 @@ TEST_F(WindowTest, Destroy) {
       "child1.appendChild(child3);"
       "sample1.realize();"
       "sample1.destroy();");
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(1));
   EXPECT_SCRIPT_EQ("realized", "sample1.state");
   EXPECT_SCRIPT_EQ("destroying", "child1.state");
   EXPECT_SCRIPT_EQ("destroying", "child2.state");
   EXPECT_SCRIPT_EQ("destroying", "child3.state");
-  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(1));
-  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(2));
-  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(3));
-  view_event_handler()->DidDestroyWidget(static_cast<WindowId>(4));
+  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(1));
+  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(2));
+  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(3));
+  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(4));
   EXPECT_SCRIPT_EQ("destroyed", "sample1.state");
   EXPECT_SCRIPT_EQ("destroyed", "child1.state");
   EXPECT_SCRIPT_EQ("destroyed", "child2.state");
@@ -249,8 +249,8 @@ TEST_F(WindowTest, DidResize) {
   EXPECT_SCRIPT_EQ("0", "sample.clientWidth");
   EXPECT_SCRIPT_EQ("0", "sample.clientHeight");
 
-  view_event_handler()->DidChangeWindowBounds(static_cast<WindowId>(1), 11, 22,
-                                              33 + 11, 44 + 22);
+  view_event_handler()->DidChangeWindowBounds(static_cast<domapi::WindowId>(1),
+                                              11, 22, 33 + 11, 44 + 22);
   EXPECT_SCRIPT_EQ("11", "sample.clientLeft");
   EXPECT_SCRIPT_EQ("22", "sample.clientTop");
   EXPECT_SCRIPT_EQ("33", "sample.clientWidth");
@@ -264,7 +264,7 @@ TEST_F(WindowTest, focus) {
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("sample.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(1));
 
   EXPECT_CALL(*mock_view_impl(), FocusWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("sample.focus();");
@@ -296,7 +296,7 @@ TEST_F(WindowTest, Realize) {
   EXPECT_SCRIPT_EQ("realizing", "sample1.state");
   EXPECT_SCRIPT_EQ("Error: This window is being realized.",
                    "sample1.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(1));
   EXPECT_SCRIPT_EQ("realized", "sample1.state");
 }
 
@@ -328,9 +328,9 @@ TEST_F(WindowTest, splitHorizontally) {
       "parent2.appendChild(child2);"
       "parent1.realize();"
       "parent3.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(3));
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(4));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(3));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(4));
 
   EXPECT_SCRIPT_EQ("Error: Can't split top-level window.",
                    "parent1.splitHorizontally(parent1);");
@@ -369,9 +369,9 @@ TEST_F(WindowTest, splitVertically) {
       "parent2.appendChild(child2);"
       "parent1.realize();"
       "parent3.realize();");
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(1));
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(3));
-  view_event_handler()->DidRealizeWidget(static_cast<WindowId>(4));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(1));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(3));
+  view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(4));
 
   EXPECT_SCRIPT_EQ("Error: Can't split top-level window.",
                    "parent1.splitVertically(parent1);");
@@ -404,8 +404,8 @@ TEST_F(WindowTest, update) {
 TEST_F(WindowTest, visible) {
   EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow();");
   EXPECT_SCRIPT_TRUE("sample1.visible === false");
-  view_event_handler()->DidChangeWindowVisibility(static_cast<WindowId>(1),
-                                                  domapi::Visibility::Visible);
+  view_event_handler()->DidChangeWindowVisibility(
+      static_cast<domapi::WindowId>(1), domapi::Visibility::Visible);
   EXPECT_SCRIPT_TRUE("sample1.visible === true");
 }
 

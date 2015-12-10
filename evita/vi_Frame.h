@@ -107,7 +107,7 @@ class Frame final : public views::Window,
   void DidActivateTabContent(TabContent* tab_content);
 
   // views::TabDataSet::Observer
-  void DidSetTabData(dom::WindowId window_id,
+  void DidSetTabData(domapi::WindowId window_id,
                      const domapi::TabData& tab_data) final;
 
   // views::TabStripDelegate

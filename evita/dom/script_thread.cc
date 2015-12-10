@@ -127,12 +127,17 @@ void ScriptThread::DidBeginFrame(const base::Time& deadline) {
   scheduler()->DidBeginFrame(deadline);
 }
 
-DEFINE_VIEW_EVENT_HANDLER5(DidChangeWindowBounds, WindowId, int, int, int, int)
+DEFINE_VIEW_EVENT_HANDLER5(DidChangeWindowBounds,
+                           domapi::WindowId,
+                           int,
+                           int,
+                           int,
+                           int)
 DEFINE_VIEW_EVENT_HANDLER2(DidChangeWindowVisibility,
-                           WindowId,
+                           domapi::WindowId,
                            domapi::Visibility)
-DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWidget, WindowId)
-DEFINE_VIEW_EVENT_HANDLER2(DidDropWidget, WindowId, WindowId)
+DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWidget, domapi::WindowId)
+DEFINE_VIEW_EVENT_HANDLER2(DidDropWidget, domapi::WindowId, domapi::WindowId)
 
 void ScriptThread::DidEnterViewIdle(const base::Time& deadline) {
   scheduler()->DidEnterViewIdle(deadline);
@@ -142,7 +147,7 @@ void ScriptThread::DidExitViewIdle() {
   scheduler()->DidExitViewIdle();
 }
 
-DEFINE_VIEW_EVENT_HANDLER1(DidRealizeWidget, WindowId)
+DEFINE_VIEW_EVENT_HANDLER1(DidRealizeWidget, domapi::WindowId)
 DEFINE_VIEW_EVENT_HANDLER1(DispatchFocusEvent, const domapi::FocusEvent&)
 
 void ScriptThread::DispatchKeyboardEvent(const domapi::KeyboardEvent& event) {
@@ -162,11 +167,11 @@ DEFINE_VIEW_EVENT_HANDLER1(DispatchTextCompositionEvent,
                            const domapi::TextCompositionEvent&)
 DEFINE_VIEW_EVENT_HANDLER1(DispatchWheelEvent, const domapi::WheelEvent&)
 
-DEFINE_VIEW_EVENT_HANDLER2(OpenFile, WindowId, const base::string16&)
+DEFINE_VIEW_EVENT_HANDLER2(OpenFile, domapi::WindowId, const base::string16&)
 DEFINE_VIEW_EVENT_HANDLER2(ProcessCommandLine,
                            const base::string16&,
                            const std::vector<base::string16>&)
-DEFINE_VIEW_EVENT_HANDLER1(QueryClose, WindowId)
+DEFINE_VIEW_EVENT_HANDLER1(QueryClose, domapi::WindowId)
 DEFINE_VIEW_EVENT_HANDLER1(RunCallback, const base::Closure&)
 
 void ScriptThread::WillDestroyViewHost() {

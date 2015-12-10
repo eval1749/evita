@@ -65,7 +65,7 @@ $define(global, 'repl', function($export) {
       document.readonly = false;
       range.text = '';
       document.readonly = readonly;
-      this.update();
+      this.update_();
     }
 
     /**
@@ -114,29 +114,24 @@ $define(global, 'repl', function($export) {
       this.freshLine();
       this.emit(params.map(formatValue).join(' '));
       this.emit('\n');
-      this.update();
+      this.update_();
     }
 
+    /**
+     * @private
+     * Disconnect console instance from document. This method is used for
+     * resetting console output during testing.
+     */
     reset_() {
       this.document_ = null;
       this.range_ = null;
     }
 
-    // Activate or create window to show console log.
-    show() {
-      const document = this.ensureDocument_();
-      const windows = document.listWindows();
-      if (windows.length) {
-        windows[0].focus();
-        return;
-      }
-      const editorWindow = new EditorWindow();
-      const window = new TextWindow(/** @type {!Range} */(this.range_));
-      editorWindow.appendChild(window);
-      editorWindow.realize();
-    }
-
-    update() {
+    /**
+     * @private
+     * Updates windows showing console.
+     */
+    update_() {
       for (const window of this.document_.listWindows())
         window.update();
     }

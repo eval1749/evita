@@ -30,6 +30,7 @@ source_set("test_files") {
   ]
 
   public_deps = [
+    "//testing/gmock",
     "//testing/gtest",
   ]
 }

@@ -23,12 +23,8 @@ class CaretOwner;
 namespace views {
 
 namespace rendering {
-class Cell;
+class LayoutBlockFlow;
 class ScreenTextBlock;
-class TextBlock;
-class TextFormatter;
-class TextBlock;
-class RootInlineBox;
 }
 
 class PaintTextBlock;
@@ -39,11 +35,9 @@ class PaintTextBlock;
 //
 class TextView final {
  public:
-  using Cell = rendering::Cell;
+  using LayoutBlockFlow = rendering::LayoutBlockFlow;
   using ScreenTextBlock = rendering::ScreenTextBlock;
   using TextSelectionModel = rendering::TextSelectionModel;
-  using TextBlock = rendering::TextBlock;
-  using RootInlineBox = rendering::RootInlineBox;
   using TextSelection = rendering::TextSelection;
 
   TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner);
@@ -91,10 +85,10 @@ class TextView final {
   text::Buffer* const buffer_;
   text::Posn caret_offset_;
   int format_counter_;
+  std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
   std::unique_ptr<PaintTextBlock> paint_text_block_;
   std::unique_ptr<ScreenTextBlock> screen_text_block_;
   bool should_paint_;
-  std::unique_ptr<TextBlock> text_block_;
   float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(TextView);

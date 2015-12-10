@@ -26,7 +26,6 @@ class PaintTextBlock;
 namespace rendering {
 class Font;
 class RootInlineBox;
-class TextBlock;
 
 class ScreenTextBlock final {
  public:

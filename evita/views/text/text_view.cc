@@ -17,7 +17,7 @@
 #include "evita/views/text/paint_text_block.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
-#include "evita/views/text/render_text_block.h"
+#include "evita/views/text/layout_block_flow.h"
 #include "evita/views/text/root_inline_box.h"
 #include "evita/views/text/screen_text_block.h"
 #include "evita/views/text/text_formatter.h"
@@ -46,21 +46,21 @@ TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
     : buffer_(buffer),
       caret_offset_(-1),
       format_counter_(0),
+      layout_block_flow_(new LayoutBlockFlow(buffer)),
       screen_text_block_(new ScreenTextBlock(caret_owner)),
       should_paint_(true),
-      text_block_(new TextBlock(buffer)),
       zoom_(1.0f) {}
 
 TextView::~TextView() {}
 
 void TextView::DidChangeStyle(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
-  text_block_->DidChangeStyle(offset, length);
+  layout_block_flow_->DidChangeStyle(offset, length);
 }
 
 void TextView::DidDeleteAt(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
-  text_block_->DidDeleteAt(offset, length);
+  layout_block_flow_->DidDeleteAt(offset, length);
 }
 
 void TextView::DidHide() {
@@ -69,7 +69,7 @@ void TextView::DidHide() {
 
 void TextView::DidInsertAt(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();
-  text_block_->DidInsertAt(offset, length);
+  layout_block_flow_->DidInsertAt(offset, length);
 }
 
 void TextView::DidRecreateCanvas() {
@@ -77,29 +77,29 @@ void TextView::DidRecreateCanvas() {
 }
 
 text::Posn TextView::EndOfLine(text::Posn text_offset) const {
-  return text_block_->EndOfLine(text_offset);
+  return layout_block_flow_->EndOfLine(text_offset);
 }
 
 text::Posn TextView::GetEnd() {
-  return text_block_->GetEnd();
+  return layout_block_flow_->GetEnd();
 }
 
 text::Posn TextView::GetStart() {
-  return text_block_->GetStart();
+  return layout_block_flow_->GetStart();
 }
 
 text::Posn TextView::GetVisibleEnd() {
-  return text_block_->GetVisibleEnd();
+  return layout_block_flow_->GetVisibleEnd();
 }
 
 void TextView::Format(text::Posn text_offset) {
-  text_block_->Format(text_offset);
+  layout_block_flow_->Format(text_offset);
   should_paint_ = true;
 }
 
 bool TextView::FormatIfNeeded() {
-  if (!text_block_->FormatIfNeeded() &&
-      format_counter_ == text_block_->format_counter()) {
+  if (!layout_block_flow_->FormatIfNeeded() &&
+      format_counter_ == layout_block_flow_->format_counter()) {
     return false;
   }
   should_paint_ = true;
@@ -112,11 +112,11 @@ bool TextView::FormatIfNeeded() {
 // A TextView object must be formatted with the latest buffer.
 //
 gfx::RectF TextView::HitTestTextPosition(text::Posn text_offset) const {
-  return text_block_->HitTestTextPosition(text_offset);
+  return layout_block_flow_->HitTestTextPosition(text_offset);
 }
 
 bool TextView::IsPositionFullyVisible(text::Posn offset) const {
-  return text_block_->IsPositionFullyVisible(offset);
+  return layout_block_flow_->IsPositionFullyVisible(offset);
 }
 
 void TextView::MakeSelectionVisible() {
@@ -126,12 +126,12 @@ void TextView::MakeSelectionVisible() {
 }
 
 text::Posn TextView::MapPointToPosition(gfx::PointF point) {
-  return text_block_->MapPointToPosition(point);
+  return layout_block_flow_->MapPointToPosition(point);
 }
 
 text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
                                        float point_x) const {
-  return text_block_->MapPointXToOffset(text_offset, point_x);
+  return layout_block_flow_->MapPointXToOffset(text_offset, point_x);
 }
 
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
@@ -144,7 +144,7 @@ void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   }
   screen_text_block_->Paint(canvas, *paint_text_block_, now);
   PaintRuler(canvas);
-  format_counter_ = text_block_->format_counter();
+  format_counter_ = layout_block_flow_->format_counter();
   should_paint_ = false;
 }
 
@@ -167,20 +167,20 @@ void TextView::PaintRuler(gfx::Canvas* canvas) {
 }
 
 bool TextView::ScrollDown() {
-  if (!text_block_->ScrollDown())
+  if (!layout_block_flow_->ScrollDown())
     return false;
   should_paint_ = true;
   return true;
 }
 
 void TextView::ScrollToPosition(text::Posn offset) {
-  if (!text_block_->ScrollToPosition(offset))
+  if (!layout_block_flow_->ScrollToPosition(offset))
     return;
   should_paint_ = true;
 }
 
 bool TextView::ScrollUp() {
-  if (!text_block_->ScrollUp())
+  if (!layout_block_flow_->ScrollUp())
     return false;
   should_paint_ = true;
   return true;
@@ -191,7 +191,7 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
   if (bounds_.size() == new_bounds.size())
     return;
   bounds_ = new_bounds;
-  text_block_->SetBounds(bounds_);
+  layout_block_flow_->SetBounds(bounds_);
   screen_text_block_->SetBounds(bounds_);
   should_paint_ = true;
 }
@@ -201,18 +201,18 @@ void TextView::SetZoom(float new_zoom) {
   if (zoom_ == new_zoom)
     return;
   zoom_ = new_zoom;
-  text_block_->SetZoom(zoom_);
+  layout_block_flow_->SetZoom(zoom_);
 }
 
 bool TextView::ShouldFormat() const {
-  return text_block_->ShouldFormat();
+  return layout_block_flow_->ShouldFormat();
 }
 
 bool TextView::ShouldPaint() const {
   return should_paint_ || screen_text_block_->dirty();
 }
 text::Posn TextView::StartOfLine(text::Posn text_offset) const {
-  return text_block_->StartOfLine(text_offset);
+  return layout_block_flow_->StartOfLine(text_offset);
 }
 
 void TextView::Update(const TextSelectionModel& selection_model) {
@@ -239,7 +239,7 @@ void TextView::Update(const TextSelectionModel& selection_model) {
   // rather than every |Format| call.
   const auto& style = buffer_->GetDefaultStyle();
   std::vector<RootInlineBox*> lines;
-  for (const auto& line : text_block_->lines())
+  for (const auto& line : layout_block_flow_->lines())
     lines.push_back(line->Copy());
   paint_text_block_.reset(
       new PaintTextBlock(lines, selection, ColorToColorF(style.bgcolor())));

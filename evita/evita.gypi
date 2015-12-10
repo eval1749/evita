@@ -137,7 +137,7 @@
         'views/text/render_selection.cc',
         'views/text/render_selection.h',
         'views/text/render_style.cc',
-        'views/text/render_text_block.cc',
+        'views/text/layout_block_flow.cc',
         'views/text/root_inline_box.cc',
         'views/text/screen_text_block.cc',
         'views/text/text_formatter.cc',

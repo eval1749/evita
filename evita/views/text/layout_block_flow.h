@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_RENDER_TEXT_BLOCK_H_
-#define EVITA_VIEWS_TEXT_RENDER_TEXT_BLOCK_H_
+#ifndef EVITA_VIEWS_TEXT_LAYOUT_BLOCK_FLOW_H_
+#define EVITA_VIEWS_TEXT_LAYOUT_BLOCK_FLOW_H_
 
 #include <list>
 #include <memory>
@@ -18,10 +18,10 @@ namespace rendering {
 class TextFormatter;
 class RootInlineBox;
 
-class TextBlock final {
+class LayoutBlockFlow final {
  public:
-  explicit TextBlock(text::Buffer* buffer);
-  ~TextBlock();
+  explicit LayoutBlockFlow(text::Buffer* buffer);
+  ~LayoutBlockFlow();
 
   bool dirty() const { return dirty_; }
   int format_counter() const { return format_counter_; }
@@ -42,11 +42,11 @@ class TextBlock final {
   bool IsPositionFullyVisible(text::Posn text_offset);
   text::Posn MapPointToPosition(gfx::PointF point);
   text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
-  // Returns true if this |TextBlock| is modified.
+  // Returns true if this |LayoutBlockFlow| is modified.
   bool ScrollDown();
-  // Returns true if this |TextBlock| is modified.
+  // Returns true if this |LayoutBlockFlow| is modified.
   bool ScrollToPosition(text::Posn offset);
-  // Returns true if this |TextBlock| is modified.
+  // Returns true if this |LayoutBlockFlow| is modified.
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
@@ -86,10 +86,10 @@ class TextBlock final {
   text::Posn view_start_;
   float zoom_;
 
-  DISALLOW_COPY_AND_ASSIGN(TextBlock);
+  DISALLOW_COPY_AND_ASSIGN(LayoutBlockFlow);
 };
 
 }  // namespace rendering
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_RENDER_TEXT_BLOCK_H_
+#endif  // EVITA_VIEWS_TEXT_LAYOUT_BLOCK_FLOW_H_

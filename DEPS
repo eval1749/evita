@@ -11,7 +11,7 @@ vars = {
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': '70ee80e82bacf2d7816a56f792bb33587b04c338',
   'icu_revision': '42c58d4e49f2250039f0e98d43e0b76e8f5ca024',
-  'v8_revision': '366fa3fda6016dd232d50a7b4d0134e53902e97e', # 4.9.170
+  'v8_revision': '473780edb633fb6194dc540ff070b357437aa42f', # 4.9.188
 }
 
 deps = {

@@ -11,7 +11,7 @@ vars = {
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': '70ee80e82bacf2d7816a56f792bb33587b04c338',
   'icu_revision': '42c58d4e49f2250039f0e98d43e0b76e8f5ca024',
-  'v8_revision': '80d095d6b09f190ac629cd1a9a256a3e57f988a9', # 4.9.195
+  'v8_revision': '65013c1d17092a8cad8cd9518d3e877ae96927ff', # 4.9.201
 }
 
 deps = {
@@ -30,11 +30,11 @@ deps = {
   'src/tools/gyp':
     Var('chromium_git') + '/external/gyp.git' + '@' + Var('gyp_revision'),
 
-  'src/third_party/icu':
-    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + Var('icu_revision'),
-
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
+
+  'src/third_party/icu':
+    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + Var('icu_revision'),
 }
 
 hooks = [

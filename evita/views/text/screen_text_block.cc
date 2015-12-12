@@ -133,7 +133,8 @@ class ScreenTextBlock::PaintContext final {
  public:
   PaintContext(gfx::Canvas* canvas,
                const gfx::RectF& bounds,
-               const LayoutView& layout_view,
+               const gfx::ColorF& bgcolor,
+               const std::vector<RootInlineBox*>& format_lines,
                const std::vector<RootInlineBox*>& screen_lines);
   ~PaintContext() = default;
 
@@ -172,12 +173,13 @@ class ScreenTextBlock::PaintContext final {
 ScreenTextBlock::PaintContext::PaintContext(
     gfx::Canvas* canvas,
     const gfx::RectF& bounds,
-    const LayoutView& layout_view,
+    const gfx::ColorF& bgcolor,
+    const std::vector<RootInlineBox*>& format_lines,
     const std::vector<RootInlineBox*>& screen_lines)
-    : bgcolor_(layout_view.bgcolor()),
+    : bgcolor_(bgcolor),
       bounds_(bounds),
       canvas_(canvas),
-      format_lines_(layout_view.lines()),
+      format_lines_(format_lines),
       root_box_painter_(canvas),
       screen_lines_(screen_lines) {}
 
@@ -469,7 +471,8 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
   } else {
     DCHECK(lines_.empty());
   }
-  PaintContext paint_context(canvas, bounds_, text_block, lines_);
+  PaintContext paint_context(canvas, bounds_, text_block.bgcolor(),
+                             text_block.lines(), lines_);
   dirty_ = paint_context.Paint();
   caret_->DidPaint(bounds_);
   if (!dirty_) {

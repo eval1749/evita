@@ -14,12 +14,9 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/layout_view.h"
-#include "evita/views/text/render_font.h"
-#include "evita/views/text/render_font_set.h"
 #include "evita/views/text/layout_block_flow.h"
 #include "evita/views/text/layout_view_builder.h"
 #include "evita/views/text/screen_text_block.h"
-#include "evita/views/text/text_formatter.h"
 #include "evita/views/text/text_view_caret.h"
 
 namespace views {

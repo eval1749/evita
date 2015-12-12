@@ -4,6 +4,7 @@
 
 #include "evita/views/text/layout_view_builder.h"
 
+#include "base/logging.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/layout_block_flow.h"
 #include "evita/views/text/layout_view.h"
@@ -72,6 +73,7 @@ void LayoutViewBuilder::SetBounds(const gfx::RectF& new_bounds) {
 }
 
 void LayoutViewBuilder::SetZoom(float new_zoom) {
+  DCHECK_GT(new_zoom, 0.0f);
   zoom_ = new_zoom;
 }
 

@@ -49,8 +49,7 @@ TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
       layout_block_flow_(new LayoutBlockFlow(buffer)),
       layout_view_builder_(new LayoutViewBuilder(buffer)),
       screen_text_block_(new ScreenTextBlock(caret_owner)),
-      should_paint_(true),
-      zoom_(1.0f) {}
+      should_paint_(true) {}
 
 TextView::~TextView() {}
 
@@ -183,10 +182,8 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
 
 void TextView::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
-  if (zoom_ == new_zoom)
-    return;
-  zoom_ = new_zoom;
-  layout_block_flow_->SetZoom(zoom_);
+  layout_block_flow_->SetZoom(new_zoom);
+  layout_view_builder_->SetZoom(new_zoom);
 }
 
 text::Posn TextView::StartOfLine(text::Posn text_offset) const {

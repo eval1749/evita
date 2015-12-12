@@ -46,7 +46,6 @@ class TextView final {
   ~TextView();
 
   text::Buffer* buffer() const { return buffer_; }
-  float zoom() const { return zoom_; }
 
   void DidChangeStyle(text::Posn offset, size_t length);
   void DidDeleteAt(text::Posn offset, size_t length);
@@ -89,7 +88,6 @@ class TextView final {
   scoped_refptr<LayoutView> layout_view_;
   std::unique_ptr<ScreenTextBlock> screen_text_block_;
   bool should_paint_;
-  float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(TextView);
 };

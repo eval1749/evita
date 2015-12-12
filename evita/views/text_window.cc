@@ -260,11 +260,6 @@ void TextWindow::UpdateScrollBar() {
   vertical_scroll_bar_->SetData(data);
 }
 
-// gfx::CanvasObserver
-void TextWindow::DidRecreateCanvas() {
-  text_view_->DidRecreateCanvas();
-}
-
 // text::BufferMutationObserver
 void TextWindow::DidChangeStyle(text::Posn offset, size_t length) {
   ASSERT_DOM_LOCKED();

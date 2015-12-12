@@ -67,10 +67,6 @@ void TextView::DidInsertAt(text::Posn offset, size_t length) {
   layout_block_flow_->DidInsertAt(offset, length);
 }
 
-void TextView::DidRecreateCanvas() {
-  last_layout_view_ = nullptr;
-}
-
 text::Posn TextView::EndOfLine(text::Posn text_offset) const {
   return layout_block_flow_->EndOfLine(text_offset);
 }
@@ -189,6 +185,11 @@ void TextView::Update(const TextSelectionModel& selection_model) {
 
   layout_view_ =
       layout_view_builder_->Build(*layout_block_flow_, selection_model);
+}
+
+// gfx::CanvasObserver
+void TextView::DidRecreateCanvas() {
+  last_layout_view_ = nullptr;
 }
 
 }  // namespace views

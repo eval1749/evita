@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "evita/gfx/canvas_observer.h"
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/selection_change_observer.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
@@ -36,7 +35,6 @@ class TextSelectionModel;
 // TextWindow
 //
 class TextWindow final : public ContentWindow,
-                         private gfx::CanvasObserver,
                          private text::BufferMutationObserver,
                          private text::SelectionChangeObserver,
                          private ui::CaretOwner,
@@ -70,9 +68,6 @@ class TextWindow final : public ContentWindow,
   bool LargeScroll(int x_count, int y_count);
   void UpdateBounds();
   void UpdateScrollBar();
-
-  // gfx::CanvasObserver
-  void DidRecreateCanvas() final;
 
   // text::BufferMutationObserver
   void DidChangeStyle(text::Posn offset, size_t length) final;

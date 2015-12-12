@@ -9,6 +9,7 @@
 
 #include "base/memory/ref_counted.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/canvas_observer.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/views/text/render_selection.h"
@@ -35,7 +36,7 @@ class TextViewCaret;
 //
 // TextView
 //
-class TextView final {
+class TextView final : private gfx::CanvasObserver {
  public:
   using LayoutBlockFlow = rendering::LayoutBlockFlow;
   using TextSelectionModel = rendering::TextSelectionModel;
@@ -50,7 +51,6 @@ class TextView final {
   void DidDeleteAt(text::Posn offset, size_t length);
   void DidHide();
   void DidInsertAt(text::Posn offset, size_t length);
-  void DidRecreateCanvas();
   // Returns end of line offset containing |text_offset|.
   text::Posn EndOfLine(text::Posn text_offset) const;
   text::Posn GetStart();
@@ -77,6 +77,9 @@ class TextView final {
  private:
   bool IsPositionFullyVisible(text::Posn text_offset) const;
   void ScrollToPosition(text::Posn offset);
+
+  // gfx::CanvasObserver
+  void DidRecreateCanvas() final;
 
   gfx::RectF bounds_;
   text::Buffer* const buffer_;

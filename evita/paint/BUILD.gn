@@ -10,6 +10,8 @@ source_set("paint") {
     "layout_view_painter.h",
     "paint_thread.cc",
     "paint_thread.h",
+    "paint_thread_canvas_owner.cc",
+    "paint_thread_canvas_owner.h",
     "root_inline_box_painter.cc",
     "root_inline_box_painter.h",
     "root_inline_box_list_painter.cc",

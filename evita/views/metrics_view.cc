@@ -15,8 +15,8 @@
 #include "evita/gfx/text_layout.h"
 #include "evita/metrics/sampling.h"
 #include "evita/paint/paint_thread.h"
+#include "evita/paint/paint_thread_canvas_owner.h"
 #include "evita/ui/compositor/layer.h"
-#include "evita/ui/compositor/layer_owner.h"
 
 namespace views {
 
@@ -59,80 +59,38 @@ void PaintSamples(gfx::Canvas* canvas,
 //
 // MetricsView::View
 //
-class MetricsView::View final : public ui::LayerOwner,
-                                public ui::LayerOwnerDelegate {
+class MetricsView::View final : public paint::PaintThreadCanvasOwner {
  public:
   explicit View(ui::AnimatableWindow* widget);
   ~View() final = default;
 
   void AddSample(base::TimeDelta sample);
-  void DidBeginAnimationFrame(base::Time now);
-  void DidRealize();
-  void DidRecreateParentLayer(ui::Layer* parent_layer);
-
-  // Returns true if painting is completed, otherwise returns false.
-  bool Paint();
   void RecordTime(const base::TimeTicks& now);
-  void WillDestroyWidget();
 
  private:
-  // ui::LayerOwnerDelegate
-  void DidRecreateLayer(ui::Layer* old_layer) final;
+  // paint::PaintThreadCanvasOwner
+  void Paint(gfx::Canvas* canvas, base::Time now) final;
 
-  std::unique_ptr<gfx::Canvas> canvas_;
   metrics::Sampling frame_duration_data_;
   metrics::Sampling frame_latency_data_;
   base::TimeTicks last_record_time_;
   std::unique_ptr<gfx::TextFormat> text_format_;
-  ui::AnimatableWindow* const widget_;
 
   DISALLOW_COPY_AND_ASSIGN(View);
 };
 
-MetricsView::View::View(ui::AnimatableWindow* widget)
-    : frame_duration_data_(kNumberOfSamples),
+MetricsView::View::View(ui::AnimatableWindow* window)
+    : paint::PaintThreadCanvasOwner(window),
+      frame_duration_data_(kNumberOfSamples),
       frame_latency_data_(kNumberOfSamples),
       last_record_time_(metrics::Sampling::NowTimeTicks()),
-      text_format_(new gfx::TextFormat(L"Consolas", 11.5)),
-      widget_(widget) {
-  set_layer_owner_delegate(this);
-}
-
-void MetricsView::View::DidBeginAnimationFrame(base::Time now) {
-  TRACE_EVENT_WITH_FLOW0("paint", "MetricsView::DidBeginAnimationFrame", this,
-                         TRACE_EVENT_FLAG_FLOW_IN);
-  if (Paint())
-    return;
-  widget_->RequestAnimationFrame();
-}
+      text_format_(new gfx::TextFormat(L"Consolas", 11.5)) {}
 
 void MetricsView::View::AddSample(base::TimeDelta sample) {
   frame_duration_data_.AddSample(sample);
 }
 
-void MetricsView::View::DidRealize() {
-  auto const compositor = paint::PaintThread::instance()->compositor();
-  SetLayer(new ui::Layer(compositor));
-  widget_->layer()->AppendLayer(layer());
-  layer()->SetBounds(widget_->GetContentsBounds());
-  // Note: It is too early to call Compositor::CommitIfNeeded(), since
-  // main visual tree isn't committed yet.
-}
-
-void MetricsView::View::DidRecreateParentLayer(ui::Layer* parent_layer) {
-  RecreateLayer();
-  parent_layer->AppendLayer(layer());
-}
-
-bool MetricsView::View::Paint() {
-  if (!canvas_)
-    canvas_.reset(layer()->CreateCanvas());
-  else if (canvas_->GetLocalBounds() != widget_->GetContentsBounds())
-    canvas_->SetBounds(widget_->GetContentsBounds());
-
-  auto const canvas = canvas_.get();
-  if (!canvas->IsReady())
-    return false;
+void MetricsView::View::Paint(gfx::Canvas* canvas, base::Time now) {
   auto const bounds = canvas->GetLocalBounds();
 
   std::basic_ostringstream<base::char16> stream;
@@ -166,21 +124,11 @@ bool MetricsView::View::Paint() {
 
   (*canvas)->DrawTextLayout(gfx::PointF(10, 10), *text_layout, text_brush,
                             D2D1_DRAW_TEXT_OPTIONS_CLIP);
-  return true;
 }
 
 void MetricsView::View::RecordTime(const base::TimeTicks& now) {
   frame_latency_data_.AddSample(now - last_record_time_);
   last_record_time_ = now;
-}
-
-void MetricsView::View::WillDestroyWidget() {
-  DestroyLayer();
-}
-
-// ui::LayerOwnerDelegate
-void MetricsView::View::DidRecreateLayer(ui::Layer* old_layer) {
-  canvas_.reset();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -219,29 +167,20 @@ void MetricsView::RecordTime() {
 
 // ui::AnimationFrameHandler
 void MetricsView::DidBeginAnimationFrame(base::Time now) {
-  TRACE_EVENT_WITH_FLOW0("paint", "MetricsView::DidBeginAnimationFrame",
-                         view_.get(), TRACE_EVENT_FLAG_FLOW_OUT);
-  paint::PaintThread::instance()->SchedulePaintTask(
-      base::Bind(&MetricsView::View::DidBeginAnimationFrame,
-                 base::Unretained(view_.get()), now));
+  view_->DidBeginAnimationFrame(now);
 }
 
 // ui::LayerOwnerDelegate
 void MetricsView::DidRecreateLayer(ui::Layer* old_layer) {
-  layer()->RemoveLayer(view_->layer());
-  paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&MetricsView::View::DidRecreateParentLayer,
-                            base::Unretained(view_.get()), layer()));
+  view_->DidRecreateParentLayer();
 }
 
 // ui::Widget
 void MetricsView::DidRealize() {
-  ui::Widget::DidRealize();
+  ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
   set_layer_owner_delegate(this);
-  paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&MetricsView::View::DidRealize,
-                            base::Unretained(view_.get())));
+  view_->DidRealize();
 }
 
 void MetricsView::WillDestroyWidget() {

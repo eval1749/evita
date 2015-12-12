@@ -14,11 +14,10 @@
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/paint/paint_thread.h"
+#include "evita/paint/paint_thread_canvas_owner.h"
 #include "evita/ui/animation/animation_value.h"
 #include "evita/ui/controls/status_bar.h"
 #include "evita/ui/compositor/layer.h"
-#include "evita/ui/compositor/layer_owner.h"
-#include "evita/ui/compositor/layer_owner_delegate.h"
 #include "evita/ui/system_metrics.h"
 
 namespace views {
@@ -233,24 +232,18 @@ void Painter::Paint(gfx::Canvas* canvas,
 //
 // MessageView::View
 //
-class MessageView::View final : public ui::LayerOwner,
-                                public ui::LayerOwnerDelegate {
+class MessageView::View final : public paint::PaintThreadCanvasOwner {
  public:
-  explicit View(ui::AnimatableWindow* animator);
-  ~View() = default;
+  explicit View(ui::AnimatableWindow* widget);
+  ~View() final = default;
 
-  void DidBeginAnimationFrame(base::Time time);
-  void DidRealize();
   void SetMessage(const base::string16& text);
   void SetStatus(const std::vector<base::string16>& texts);
-  void WillDestroyWidget();
 
  private:
-  // ui::LayerOwnerDelegate
-  void DidRecreateLayer(ui::Layer* old_layer) final;
+  // paint::PaintThreadCanvasOwner
+  void Paint(gfx::Canvas* canvas, base::Time now) final;
 
-  ui::AnimatableWindow* const widget_;
-  std::unique_ptr<gfx::Canvas> canvas_;
   std::unique_ptr<Painter> painter_;
   std::vector<PartView> parts_;
   std::unique_ptr<ui::AnimationFloat> main_text_alpha_;
@@ -260,26 +253,15 @@ class MessageView::View final : public ui::LayerOwner,
   DISALLOW_COPY_AND_ASSIGN(View);
 };
 
-MessageView::View::View(ui::AnimatableWindow* animator)
-    : widget_(animator), painter_(new Painter()), parts_(1) {}
+MessageView::View::View(ui::AnimatableWindow* window)
+    : paint::PaintThreadCanvasOwner(window),
+      painter_(new Painter()),
+      parts_(1) {}
 
-void MessageView::View::DidBeginAnimationFrame(base::Time now) {
-  if (!widget_->visible())
-    return;
-
-  TRACE_EVENT_WITH_FLOW0("paint", "MessageView::DidBeginAnimationFrame", this,
-                         TRACE_EVENT_FLAG_FLOW_IN);
-  if (!canvas_)
-    canvas_.reset(layer()->CreateCanvas());
-  else if (canvas_->GetLocalBounds() != widget_->GetContentsBounds())
-    canvas_->SetBounds(widget_->GetContentsBounds());
-
-  if (!canvas_->IsReady())
-    return widget_->RequestAnimationFrame();
-
-  gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  if (canvas_->should_clear())
-    canvas_->Clear(gfx::ColorF());
+void MessageView::View::Paint(gfx::Canvas* canvas, base::Time now) {
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
+  if (canvas->should_clear())
+    canvas->Clear(gfx::ColorF());
 
   if (!main_text_alpha_) {
     // Hide main text after 3 seconds.
@@ -290,11 +272,9 @@ void MessageView::View::DidBeginAnimationFrame(base::Time now) {
 
   auto const new_alpha = main_text_alpha_->Compute(now);
   parts_[0].alpha = new_alpha;
-  painter_->Paint(canvas_.get(), parts_);
-  if (new_alpha != main_text_alpha_->end_value()) {
-    widget_->RequestAnimationFrame();
-    return;
-  }
+  painter_->Paint(canvas, parts_);
+  if (new_alpha != main_text_alpha_->end_value())
+    return RequestAnimationFrame();
 
   // Main text animation is finished.
   if (message_text_.empty())
@@ -302,16 +282,7 @@ void MessageView::View::DidBeginAnimationFrame(base::Time now) {
   // We'll display status text
   main_text_alpha_.reset();
   message_text_.clear();
-  widget_->RequestAnimationFrame();
-}
-
-void MessageView::View::DidRealize() {
-  auto const compositor = paint::PaintThread::instance()->compositor();
-  SetLayer(new ui::Layer(compositor));
-  widget_->layer()->AppendLayer(layer());
-  layer()->SetBounds(widget_->GetContentsBounds());
-  // Note: It is too early to call Compositor::CommitIfNeeded(), since
-  // main visual tree isn't committed yet.
+  RequestAnimationFrame();
 }
 
 void MessageView::View::SetMessage(const base::string16& text) {
@@ -319,7 +290,7 @@ void MessageView::View::SetMessage(const base::string16& text) {
     return;
   message_text_ = text;
   main_text_alpha_.reset();
-  widget_->RequestAnimationFrame();
+  RequestAnimationFrame();
 }
 
 void MessageView::View::SetStatus(const std::vector<base::string16>& texts) {
@@ -333,16 +304,7 @@ void MessageView::View::SetStatus(const std::vector<base::string16>& texts) {
   }
   parts_[0].text = current_text;
   main_text_alpha_.reset();
-  widget_->RequestAnimationFrame();
-}
-
-void MessageView::View::WillDestroyWidget() {
-  DestroyLayer();
-}
-
-// ui::LayerOwnerDelegate
-void MessageView::View::DidRecreateLayer(ui::Layer* old_layer) {
-  canvas_.reset();
+  RequestAnimationFrame();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -368,21 +330,15 @@ void MessageView::SetStatus(const std::vector<base::string16>& texts) {
 }
 
 // ui::AnimationFrameHandler
-void MessageView::DidBeginAnimationFrame(base::Time time) {
-  TRACE_EVENT_WITH_FLOW0("paint", "MessageView::DidBeginAnimationFrame",
-                         view_.get(), TRACE_EVENT_FLAG_FLOW_OUT);
-  paint::PaintThread::instance()->SchedulePaintTask(
-      base::Bind(&MessageView::View::DidBeginAnimationFrame,
-                 base::Unretained(view_.get()), time));
+void MessageView::DidBeginAnimationFrame(base::Time now) {
+  view_->DidBeginAnimationFrame(now);
 }
 
 // ui::Widget
 void MessageView::DidRealize() {
   ui::AnimatableWindow::DidRealize();
   SetLayer(new ui::Layer());
-  paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&MessageView::View::DidRealize,
-                            base::Unretained(view_.get())));
+  view_->DidRealize();
 }
 
 gfx::Size MessageView::GetPreferredSize() const {

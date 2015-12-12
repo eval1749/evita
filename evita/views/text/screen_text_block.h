@@ -9,8 +9,9 @@
 #include <vector>
 
 #include "base/basictypes.h"
+#include "base/memory/ref_counted.h"
+#include "evita/ed_defs.h"
 #include "evita/gfx_base.h"
-#include "evita/views/text/render_selection.h"
 
 namespace base {
 class Time;
@@ -33,10 +34,10 @@ class ScreenTextBlock final {
   ~ScreenTextBlock();
 
   void Paint(gfx::Canvas* canvas,
-             const LayoutView& layout_view,
+             scoped_refptr<LayoutView> layout_view,
              base::Time now);
   void PaintSelectionIfNeeded(gfx::Canvas* canvas,
-                              const TextSelection& new_selection,
+                              scoped_refptr<LayoutView> layout_view,
                               base::Time now);
   void Reset();
   void SetBounds(const gfx::RectF& new_bounds);
@@ -45,17 +46,13 @@ class ScreenTextBlock final {
   class Caret;
 
   gfx::RectF HitTestTextPosition(text::Posn offset) const;
-  void PaintSelection(gfx::Canvas* canvas,
-                      const TextSelection& selection,
-                      base::Time now);
+  void PaintSelection(gfx::Canvas* canvas, base::Time now);
   void UpdateCaret(gfx::Canvas* canvas, base::Time now);
 
   gfx::RectF bounds_;
   const std::unique_ptr<Caret> caret_;
-  bool dirty_;
-  bool has_screen_bitmap_;
-  std::vector<RootInlineBox*> lines_;
-  TextSelection selection_;
+  // The |LayoutView| in screen.
+  scoped_refptr<LayoutView> layout_view_;
 
   DISALLOW_COPY_AND_ASSIGN(ScreenTextBlock);
 };

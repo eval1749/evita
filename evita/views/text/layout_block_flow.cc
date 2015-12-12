@@ -523,6 +523,7 @@ bool LayoutBlockFlow::ScrollDown() {
   FormatIfNeeded();
   if (!lines_.front()->GetStart())
     return false;
+  ++format_counter_;
   auto const goal_offset = lines_.front()->GetStart() - 1;
   auto const start_offset = text_buffer_->ComputeStartOfLine(goal_offset);
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
@@ -620,6 +621,8 @@ bool LayoutBlockFlow::ScrollUp() {
   EnsureLinePoints();
   if (IsShowEndOfDocument())
     return false;
+
+  ++format_counter_;
 
   for (;;) {
     if (!DiscardFirstLine())

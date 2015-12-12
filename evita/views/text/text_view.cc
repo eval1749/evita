@@ -138,11 +138,10 @@ void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
   if (!should_paint_ && canvas->screen_bitmap()) {
-    screen_text_block_->PaintSelectionIfNeeded(canvas,
-                                               layout_view_->selection(), now);
+    screen_text_block_->PaintSelectionIfNeeded(canvas, layout_view_, now);
     return;
   }
-  screen_text_block_->Paint(canvas, *layout_view_, now);
+  screen_text_block_->Paint(canvas, layout_view_, now);
   paint::LayoutViewPainter painter(canvas);
   painter.Paint(*layout_view_);
   format_counter_ = layout_block_flow_->format_counter();

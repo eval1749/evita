@@ -9,6 +9,7 @@
 
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
+#include "evita/gfx/rect_f.h"
 
 namespace text {
 class Buffer;
@@ -40,9 +41,16 @@ class LayoutViewBuilder final {
   scoped_refptr<LayoutView> Build(const LayoutBlockFlow& layout_block_flow,
                                   const TextSelectionModel& selection_model);
 
+  void SetBounds(const gfx::RectF& new_bounds);
+  void SetZoom(float new_zoom);
+
  private:
+  gfx::RectF ComputeRulerBounds() const;
+
+  gfx::RectF bounds_;
   const text::Buffer* const buffer_;
   scoped_refptr<LayoutView> last_layout_view_;
+  float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(LayoutViewBuilder);
 };

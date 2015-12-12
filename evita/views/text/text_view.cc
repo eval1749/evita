@@ -12,7 +12,7 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/gfx_base.h"
+#include "evita/paint/layout_view_painter.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/render_font.h"
@@ -144,27 +144,10 @@ void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
     return;
   }
   screen_text_block_->Paint(canvas, *layout_view_, now);
-  PaintRuler(canvas);
+  paint::LayoutViewPainter painter(canvas);
+  painter.Paint(*layout_view_);
   format_counter_ = layout_block_flow_->format_counter();
   should_paint_ = false;
-}
-
-void TextView::PaintRuler(gfx::Canvas* canvas) {
-  // TODO(eval1749): We should expose show/hide and ruler settings to both
-  // script and UI.
-  auto style = buffer_->GetDefaultStyle();
-  style.set_font_size(style.font_size() * zoom_);
-  auto const font = FontSet::GetFont(style, 'x');
-
-  auto const num_columns = 81;
-  auto const width_of_M = font->GetCharWidth('M');
-  auto const ruler_x = ::floor(bounds_.left + width_of_M * num_columns);
-  auto const ruler_bounds = gfx::RectF(gfx::PointF(ruler_x, bounds_.top),
-                                       gfx::SizeF(1.0f, bounds_.height()));
-
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, ruler_bounds);
-  gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));
-  canvas->DrawRectangle(brush, ruler_bounds);
 }
 
 bool TextView::ScrollDown() {
@@ -193,6 +176,7 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
     return;
   bounds_ = new_bounds;
   layout_block_flow_->SetBounds(bounds_);
+  layout_view_builder_->SetBounds(bounds_);
   screen_text_block_->SetBounds(bounds_);
   should_paint_ = true;
 }

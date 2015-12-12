@@ -78,7 +78,6 @@ class TextView final {
 
  private:
   bool IsPositionFullyVisible(text::Posn text_offset) const;
-  void PaintRuler(gfx::Canvas* canvas);
   void ScrollToPosition(text::Posn offset);
 
   gfx::RectF bounds_;

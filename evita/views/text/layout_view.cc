@@ -11,10 +11,12 @@ namespace views {
 LayoutView::LayoutView(int layout_version,
                        const std::vector<RootInlineBox*>& lines,
                        const TextSelection& selection,
-                       const gfx::ColorF& bgcolor)
+                       const gfx::ColorF& bgcolor,
+                       const gfx::RectF& ruler_bounds)
     : bgcolor_(bgcolor),
       layout_version_(layout_version),
       lines_(lines),
+      ruler_bounds_(ruler_bounds),
       selection_(selection) {}
 
 LayoutView::~LayoutView() {

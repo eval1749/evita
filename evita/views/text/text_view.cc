@@ -60,7 +60,7 @@ void TextView::DidDeleteAt(text::Posn offset, size_t length) {
 }
 
 void TextView::DidHide() {
-  screen_text_block_->Reset();
+  last_layout_view_ = nullptr;
 }
 
 void TextView::DidInsertAt(text::Posn offset, size_t length) {
@@ -69,7 +69,7 @@ void TextView::DidInsertAt(text::Posn offset, size_t length) {
 }
 
 void TextView::DidRecreateCanvas() {
-  screen_text_block_->Reset();
+  last_layout_view_ = nullptr;
 }
 
 text::Posn TextView::EndOfLine(text::Posn text_offset) const {
@@ -127,7 +127,13 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  screen_text_block_->Paint(canvas, layout_view_, now);
+  screen_text_block_->Paint(canvas, now, last_layout_view_.get(),
+                            *layout_view_);
+  if (canvas->screen_bitmap()) {
+    last_layout_view_ = layout_view_;
+    return;
+  }
+  last_layout_view_ = nullptr;
 }
 
 bool TextView::ScrollDown() {
@@ -147,9 +153,10 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
   if (bounds_.size() == new_bounds.size())
     return;
   bounds_ = new_bounds;
+  caret_->Reset();
+  last_layout_view_ = nullptr;
   layout_block_flow_->SetBounds(bounds_);
   layout_view_builder_->SetBounds(bounds_);
-  screen_text_block_->Reset();
 }
 
 void TextView::SetZoom(float new_zoom) {

@@ -34,20 +34,24 @@ class ScreenTextBlock final {
   ~ScreenTextBlock();
 
   void Paint(gfx::Canvas* canvas,
-             scoped_refptr<LayoutView> layout_view,
-             base::Time now);
+             base::Time now,
+             const LayoutView* last_layout_view,
+             const LayoutView& layout_view);
   void Reset();
 
  private:
-  void PaintSelection(gfx::Canvas* canvas, base::Time now);
+  void PaintSelection(gfx::Canvas* canvas,
+                      base::Time now,
+                      const LayoutView& layout_view);
   void PaintSelectionIfNeeded(gfx::Canvas* canvas,
-                              scoped_refptr<LayoutView> layout_view,
-                              base::Time now);
-  void UpdateCaret(gfx::Canvas* canvas, base::Time now);
+                              base::Time now,
+                              const LayoutView* last_layout_view,
+                              const LayoutView& layout_view);
+  void UpdateCaret(gfx::Canvas* canvas,
+                   base::Time now,
+                   const LayoutView& layout_view);
 
   ui::Caret* const caret_;
-  // The |LayoutView| in screen.
-  scoped_refptr<LayoutView> layout_view_;
 
   DISALLOW_COPY_AND_ASSIGN(ScreenTextBlock);
 };

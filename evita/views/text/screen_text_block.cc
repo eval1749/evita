@@ -61,44 +61,43 @@ ScreenTextBlock::ScreenTextBlock(ui::Caret* caret) : caret_(caret) {}
 ScreenTextBlock::~ScreenTextBlock() {}
 
 void ScreenTextBlock::Paint(gfx::Canvas* canvas,
-                            scoped_refptr<LayoutView> layout_view,
-                            base::Time now) {
-  if (layout_view_ &&
-      layout_view_->layout_version() == layout_view->layout_version()) {
-    PaintSelectionIfNeeded(canvas, layout_view, now);
+                            base::Time now,
+                            const LayoutView* last_layout_view,
+                            const LayoutView& layout_view) {
+  if (last_layout_view &&
+      last_layout_view->layout_version() == layout_view.layout_version()) {
+    PaintSelectionIfNeeded(canvas, now, last_layout_view, layout_view);
     return;
   }
   paint::RootInlineBoxListPainter painter(
-      canvas, layout_view->bounds(), layout_view->bgcolor(),
-      layout_view->lines(),
-      layout_view_ ? layout_view_->lines() : std::vector<RootInlineBox*>{});
-  caret_->DidPaint(layout_view->bounds());
-  layout_view_ = layout_view;
+      canvas, layout_view.bounds(), layout_view.bgcolor(), layout_view.lines(),
+      last_layout_view ? last_layout_view->lines()
+                       : std::vector<RootInlineBox*>{});
+  caret_->DidPaint(layout_view.bounds());
   if (!painter.Paint()) {
     TRACE_EVENT0("view", "ScreenTextBlock::PaintClean");
-    PaintSelection(canvas, now);
+    PaintSelection(canvas, now, layout_view);
     return;
   }
 
   TRACE_EVENT0("view", "ScreenTextBlock::PaintDirty");
-  auto const saved = canvas->SaveScreenImage(layout_view->bounds());
+  canvas->SaveScreenImage(layout_view.bounds());
   painter.Finish();
-  PaintSelection(canvas, now);
-  paint::LayoutViewPainter(canvas).Paint(*layout_view_);
-  if (saved)
-    return;
-  layout_view_ = nullptr;
+  PaintSelection(canvas, now, layout_view);
+  paint::LayoutViewPainter(canvas).Paint(layout_view);
 }
 
-void ScreenTextBlock::PaintSelection(gfx::Canvas* canvas, base::Time now) {
+void ScreenTextBlock::PaintSelection(gfx::Canvas* canvas,
+                                     base::Time now,
+                                     const LayoutView& layout_view) {
   TRACE_EVENT0("view", "ScreenTextBlock::PaintSelection");
-  const auto& lines = layout_view_->lines();
-  const auto& selection = layout_view_->selection();
+  const auto& lines = layout_view.lines();
+  const auto& selection = layout_view.selection();
   if (selection.start() >= lines.back()->text_end()) {
     caret_->Hide(canvas);
     return;
   }
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, layout_view_->bounds());
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, layout_view.bounds());
   if (selection.is_range() && selection.end() > lines.front()->text_start()) {
     gfx::Brush fill_brush(canvas, selection.color());
     for (auto line : lines) {
@@ -110,24 +109,23 @@ void ScreenTextBlock::PaintSelection(gfx::Canvas* canvas, base::Time now) {
       canvas->FillRectangle(fill_brush, rect);
     }
   }
-  UpdateCaret(canvas, now);
+  UpdateCaret(canvas, now, layout_view);
 }
 
-void ScreenTextBlock::PaintSelectionIfNeeded(
-    gfx::Canvas* canvas,
-    scoped_refptr<LayoutView> layout_view,
-    base::Time now) {
-  const auto& new_selection = layout_view->selection();
-  const auto& old_selection = layout_view_->selection();
-  layout_view_ = layout_view;
+void ScreenTextBlock::PaintSelectionIfNeeded(gfx::Canvas* canvas,
+                                             base::Time now,
+                                             const LayoutView* last_layout_view,
+                                             const LayoutView& layout_view) {
+  const auto& new_selection = layout_view.selection();
+  const auto& old_selection = last_layout_view->selection();
   if (old_selection == new_selection) {
     if (!old_selection.has_focus())
       return;
     caret_->Blink(canvas, now);
     return;
   }
-  const auto& bounds = layout_view_->bounds();
-  const auto& lines = layout_view_->lines();
+  const auto& bounds = last_layout_view->bounds();
+  const auto& lines = last_layout_view->lines();
   auto new_old_selection_rects =
       CalculateSelectionRects(lines, new_selection, bounds);
   auto old_old_selection_rects =
@@ -159,21 +157,18 @@ void ScreenTextBlock::PaintSelectionIfNeeded(
   }
 
   caret_->Hide(canvas);
-  UpdateCaret(canvas, now);
+  UpdateCaret(canvas, now, layout_view);
 }
 
-void ScreenTextBlock::Reset() {
-  layout_view_ = nullptr;
-  caret_->Reset();
-}
-
-void ScreenTextBlock::UpdateCaret(gfx::Canvas* canvas, base::Time now) {
+void ScreenTextBlock::UpdateCaret(gfx::Canvas* canvas,
+                                  base::Time now,
+                                  const LayoutView& layout_view) {
   DCHECK(!caret_->visible());
-  const auto& selection = layout_view_->selection();
+  const auto& selection = layout_view.selection();
   if (!selection.has_focus())
     return;
   auto const char_rect =
-      RoundBounds(layout_view_->HitTestTextPosition(selection.focus_offset()));
+      RoundBounds(layout_view.HitTestTextPosition(selection.focus_offset()));
   if (char_rect.empty())
     return;
   auto const caret_width = 2;

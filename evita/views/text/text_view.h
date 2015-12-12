@@ -84,6 +84,8 @@ class TextView final {
   text::Buffer* const buffer_;
   std::unique_ptr<TextViewCaret> caret_;
   text::Posn caret_offset_;
+  // The last |LayoutView| in screen.
+  scoped_refptr<LayoutView> last_layout_view_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
   std::unique_ptr<LayoutViewBuilder> layout_view_builder_;
   scoped_refptr<LayoutView> layout_view_;

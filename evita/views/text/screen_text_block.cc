@@ -121,6 +121,11 @@ gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
 void ScreenTextBlock::Paint(gfx::Canvas* canvas,
                             scoped_refptr<LayoutView> layout_view,
                             base::Time now) {
+  if (layout_view_ &&
+     layout_view_->layout_version() == layout_view->layout_version()) {
+    PaintSelectionIfNeeded(canvas, layout_view, now);
+    return;
+  }
   paint::RootInlineBoxListPainter painter(
       canvas, bounds_, layout_view->bgcolor(), layout_view->lines(),
       layout_view_ ? layout_view_->lines() : std::vector<RootInlineBox*>{});

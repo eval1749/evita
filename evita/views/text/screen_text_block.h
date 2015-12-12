@@ -38,9 +38,6 @@ class ScreenTextBlock final {
   void Paint(gfx::Canvas* canvas,
              scoped_refptr<LayoutView> layout_view,
              base::Time now);
-  void PaintSelectionIfNeeded(gfx::Canvas* canvas,
-                              scoped_refptr<LayoutView> layout_view,
-                              base::Time now);
   void Reset();
   void SetBounds(const gfx::RectF& new_bounds);
 
@@ -49,6 +46,9 @@ class ScreenTextBlock final {
 
   gfx::RectF HitTestTextPosition(text::Posn offset) const;
   void PaintSelection(gfx::Canvas* canvas, base::Time now);
+  void PaintSelectionIfNeeded(gfx::Canvas* canvas,
+                              scoped_refptr<LayoutView> layout_view,
+                              base::Time now);
   void UpdateCaret(gfx::Canvas* canvas, base::Time now);
 
   gfx::RectF bounds_;

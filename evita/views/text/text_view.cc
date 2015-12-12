@@ -128,10 +128,6 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  if (layout_view_->layout_version() == screen_text_block_->layout_version()) {
-    screen_text_block_->PaintSelectionIfNeeded(canvas, layout_view_, now);
-    return;
-  }
   screen_text_block_->Paint(canvas, layout_view_, now);
 }
 

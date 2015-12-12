@@ -39,7 +39,6 @@ class ScreenTextBlock final {
              scoped_refptr<LayoutView> layout_view,
              base::Time now);
   void Reset();
-  void SetBounds(const gfx::RectF& new_bounds);
 
  private:
   class Caret;
@@ -51,7 +50,6 @@ class ScreenTextBlock final {
                               base::Time now);
   void UpdateCaret(gfx::Canvas* canvas, base::Time now);
 
-  gfx::RectF bounds_;
   const std::unique_ptr<Caret> caret_;
   // The |LayoutView| in screen.
   scoped_refptr<LayoutView> layout_view_;

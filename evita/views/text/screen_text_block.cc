@@ -122,14 +122,15 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
                             scoped_refptr<LayoutView> layout_view,
                             base::Time now) {
   if (layout_view_ &&
-     layout_view_->layout_version() == layout_view->layout_version()) {
+      layout_view_->layout_version() == layout_view->layout_version()) {
     PaintSelectionIfNeeded(canvas, layout_view, now);
     return;
   }
   paint::RootInlineBoxListPainter painter(
-      canvas, bounds_, layout_view->bgcolor(), layout_view->lines(),
+      canvas, layout_view->bounds(), layout_view->bgcolor(),
+      layout_view->lines(),
       layout_view_ ? layout_view_->lines() : std::vector<RootInlineBox*>{});
-  caret_->DidPaint(bounds_);
+  caret_->DidPaint(layout_view->bounds());
   layout_view_ = layout_view;
   if (!painter.Paint()) {
     TRACE_EVENT0("view", "ScreenTextBlock::PaintClean");
@@ -138,7 +139,7 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
   }
 
   TRACE_EVENT0("view", "ScreenTextBlock::PaintDirty");
-  auto const saved = canvas->SaveScreenImage(bounds_);
+  auto const saved = canvas->SaveScreenImage(layout_view->bounds());
   painter.Finish();
   PaintSelection(canvas, now);
   paint::LayoutViewPainter(canvas).Paint(*layout_view_);
@@ -155,7 +156,7 @@ void ScreenTextBlock::PaintSelection(gfx::Canvas* canvas, base::Time now) {
     caret_->Hide(canvas);
     return;
   }
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds_);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, layout_view_->bounds());
   if (selection.is_range() && selection.end() > lines.front()->text_start()) {
     gfx::Brush fill_brush(canvas, selection.color());
     for (auto line : lines) {
@@ -183,14 +184,15 @@ void ScreenTextBlock::PaintSelectionIfNeeded(
     caret_->Blink(canvas, now);
     return;
   }
+  const auto& bounds = layout_view_->bounds();
   const auto& lines = layout_view_->lines();
   auto new_old_selection_rects =
-      CalculateSelectionRects(lines, new_selection, bounds_);
+      CalculateSelectionRects(lines, new_selection, bounds);
   auto old_old_selection_rects =
-      CalculateSelectionRects(lines, old_selection, bounds_);
+      CalculateSelectionRects(lines, old_selection, bounds);
 
   gfx::Canvas::DrawingScope drawing_scope(canvas);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds_);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   for (const auto& old_rect : old_old_selection_rects) {
     if (new_old_selection_rects.find(old_rect) != new_old_selection_rects.end())
       continue;
@@ -221,11 +223,6 @@ void ScreenTextBlock::PaintSelectionIfNeeded(
 void ScreenTextBlock::Reset() {
   layout_view_ = nullptr;
   caret_->Reset();
-}
-
-void ScreenTextBlock::SetBounds(const gfx::RectF& new_bounds) {
-  Reset();
-  bounds_ = new_bounds;
 }
 
 void ScreenTextBlock::UpdateCaret(gfx::Canvas* canvas, base::Time now) {

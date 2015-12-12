@@ -150,7 +150,7 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
   bounds_ = new_bounds;
   layout_block_flow_->SetBounds(bounds_);
   layout_view_builder_->SetBounds(bounds_);
-  screen_text_block_->SetBounds(bounds_);
+  screen_text_block_->Reset();
 }
 
 void TextView::SetZoom(float new_zoom) {

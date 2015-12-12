@@ -6,10 +6,15 @@
 #define EVITA_PAINT_ROOT_INLINE_BOX_PAINTER_H_
 
 #include "base/macros.h"
-#include "evita/views/text/root_inline_box.h"
 
 namespace gfx {
 class Canvas;
+}
+
+namespace views {
+namespace rendering {
+class RootInlineBox;
+}
 }
 
 namespace paint {

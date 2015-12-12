@@ -12,6 +12,8 @@ source_set("paint") {
     "paint_thread.h",
     "root_inline_box_painter.cc",
     "root_inline_box_painter.h",
+    "root_inline_box_list_painter.cc",
+    "root_inline_box_list_painter.h",
   ]
 
   public_deps = [

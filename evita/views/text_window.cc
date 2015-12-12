@@ -49,7 +49,7 @@ TextSelectionModel GetTextSelectionModel(TextWindow* window,
 // TextWindow
 //
 TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
-    : ContentWindow(window_id),
+    : CanvasContentWindow(window_id),
       metrics_view_(new MetricsView()),
       text_view_(new TextView(selection->buffer(), this)),
       selection_(selection),
@@ -322,7 +322,7 @@ void TextWindow::DidFireCaretTimer() {
 
 // ui::LayerOwnerDelegate
 void TextWindow::DidRecreateLayer(ui::Layer* old_layer) {
-  ContentWindow::DidRecreateLayer(old_layer);
+  CanvasContentWindow::DidRecreateLayer(old_layer);
   if (!canvas())
     return;
   old_layer->AppendLayer(metrics_view_->RecreateLayer().release());
@@ -387,19 +387,19 @@ void TextWindow::DidActivate() {
 }
 
 void TextWindow::DidChangeBounds() {
-  ContentWindow::DidChangeBounds();
+  CanvasContentWindow::DidChangeBounds();
   UpdateBounds();
 }
 
 void TextWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
-  ContentWindow::DidHide();
+  CanvasContentWindow::DidHide();
   vertical_scroll_bar_->Hide();
   text_view_->DidHide();
 }
 
 void TextWindow::DidKillFocus(ui::Widget* will_focus_widget) {
-  ContentWindow::DidKillFocus(will_focus_widget);
+  CanvasContentWindow::DidKillFocus(will_focus_widget);
   ui::TextInputClient::Get()->CommitComposition(this);
   ui::TextInputClient::Get()->CancelComposition(this);
   ui::TextInputClient::Get()->set_delegate(nullptr);
@@ -408,19 +408,19 @@ void TextWindow::DidKillFocus(ui::Widget* will_focus_widget) {
 
 void TextWindow::DidRealize() {
   UpdateBounds();
-  ContentWindow::DidRealize();
+  CanvasContentWindow::DidRealize();
   layer()->AppendLayer(metrics_view_->layer());
 }
 
 void TextWindow::DidSetFocus(ui::Widget* last_focused) {
   // Note: It is OK to set focus to hidden window.
-  ContentWindow::DidSetFocus(last_focused);
+  CanvasContentWindow::DidSetFocus(last_focused);
   ui::TextInputClient::Get()->set_delegate(this);
   RequestAnimationFrame();
 }
 
 void TextWindow::DidShow() {
-  ContentWindow::DidShow();
+  CanvasContentWindow::DidShow();
   vertical_scroll_bar_->Show();
 }
 
@@ -428,7 +428,7 @@ HCURSOR TextWindow::GetCursorAt(const gfx::Point&) const {
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }
 
-// views::ContentWindow
+// views::CanvasContentWindow
 void TextWindow::MakeSelectionVisible() {
   text_view_->MakeSelectionVisible();
   RequestAnimationFrame();

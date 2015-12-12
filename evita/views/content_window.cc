@@ -4,7 +4,6 @@
 
 #include "evita/views/content_window.h"
 
-#include "evita/editor/application.h"
 #include "evita/gfx/canvas.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/views/content_observer.h"
@@ -35,29 +34,10 @@ void ContentWindow::RemoveObserver(ContentObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-// ui::LayerOwnerDelegate
-void ContentWindow::DidRecreateLayer(ui::Layer*) {
-  if (!canvas_)
-    return;
-  canvas_.reset(layer()->CreateCanvas());
-}
-
 // ui::Widget
-void ContentWindow::DidChangeBounds() {
-  Window::DidChangeBounds();
-  if (!canvas_)
-    return;
-  canvas_->SetBounds(GetContentsBounds());
-}
-
 void ContentWindow::DidChangeHierarchy() {
   Window::DidChangeHierarchy();
   container_widget()->layer()->AppendLayer(layer());
-}
-
-void ContentWindow::DidHide() {
-  Window::DidHide();
-  canvas_.reset();
 }
 
 void ContentWindow::DidRealize() {
@@ -69,20 +49,6 @@ void ContentWindow::DidRealize() {
 void ContentWindow::DidSetFocus(ui::Widget* widget) {
   Window::DidSetFocus(widget);
   FOR_EACH_OBSERVER(ContentObserver, observers_, DidActivateContent(this));
-}
-
-void ContentWindow::DidShow() {
-  Window::DidShow();
-  DCHECK(!canvas_);
-  if (bounds().empty())
-    return;
-  canvas_.reset(layer()->CreateCanvas());
-}
-
-void ContentWindow::OnDraw(gfx::Canvas* canvas) {
-  Window::OnDraw(canvas);
-  gfx::Brush edge_brush(canvas, gfx::ColorF(0, 0, 0, 0.1f));
-  canvas->DrawRectangle(edge_brush, GetContentsBounds());
 }
 
 }  // namespace views

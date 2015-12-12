@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "evita/views/content_window.h"
+#include "evita/views/canvas_content_window.h"
 
 #include "base/basictypes.h"
 #include "evita/gc/member.h"
@@ -31,8 +31,8 @@ class TableControl;
 
 namespace views {
 
-class TableWindow final : public text::BufferMutationObserver,
-                          public views::ContentWindow,
+class TableWindow final : public CanvasContentWindow,
+                          public text::BufferMutationObserver,
                           public ui::TableControlObserver,
                           public ui::TableModel {
   DECLARE_CASTABLE_CLASS(TableView, ContentWindow);

@@ -12,7 +12,7 @@
 #include "evita/ui/base/ime/text_input_delegate.h"
 #include "evita/ui/caret_owner.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
-#include "evita/views/content_window.h"
+#include "evita/views/canvas_content_window.h"
 
 namespace text {
 class Buffer;
@@ -34,10 +34,10 @@ class TextSelectionModel;
 //
 // TextWindow
 //
-class TextWindow final : public ContentWindow,
-                         private text::BufferMutationObserver,
-                         private text::SelectionChangeObserver,
-                         private ui::CaretOwner,
+class TextWindow final : public CanvasContentWindow,
+                         public text::BufferMutationObserver,
+                         public text::SelectionChangeObserver,
+                         public ui::CaretOwner,
                          public ui::ScrollBarObserver,
                          public ui::TextInputDelegate {
   DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);

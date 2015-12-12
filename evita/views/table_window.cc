@@ -59,7 +59,7 @@ std::vector<ui::TableColumn> BuildColumns(const TableViewModel::Row* row) {
 // TableView
 //
 TableWindow::TableWindow(WindowId window_id, dom::Document* document)
-    : ContentWindow(window_id),
+    : CanvasContentWindow(window_id),
       control_(nullptr),
       document_(document),
       model_(new TableViewModel()),
@@ -232,11 +232,11 @@ void TableWindow::DidBeginAnimationFrame(base::Time) {
 
 // ui::TableControlObserver
 void TableWindow::OnKeyPressed(const ui::KeyEvent& event) {
-  ContentWindow::OnKeyPressed(event);
+  CanvasContentWindow::OnKeyPressed(event);
 }
 
 void TableWindow::OnMousePressed(const ui::MouseEvent& event) {
-  ContentWindow::OnMousePressed(event);
+  CanvasContentWindow::OnMousePressed(event);
 }
 
 void TableWindow::OnSelectionChanged() {}
@@ -266,7 +266,7 @@ void TableWindow::DidActivate() {
 }
 
 void TableWindow::DidChangeBounds() {
-  ContentWindow::DidChangeBounds();
+  CanvasContentWindow::DidChangeBounds();
   if (!control_)
     return;
   // Make |ui::TableControl| to cover all client area.
@@ -274,12 +274,12 @@ void TableWindow::DidChangeBounds() {
 }
 
 void TableWindow::DidSetFocus(ui::Widget* last_focused) {
-  ContentWindow::DidSetFocus(last_focused);
+  CanvasContentWindow::DidSetFocus(last_focused);
   // We'll move focus to |TableControl| in |OnDraw()|.
   RequestAnimationFrame();
 }
 
-// views::ContentWindow
+// views::CanvasContentWindow
 void TableWindow::MakeSelectionVisible() {}
 
 }  // namespace views

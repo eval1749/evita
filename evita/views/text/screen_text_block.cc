@@ -50,13 +50,6 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
   return rects;
 }
 
-inline void FillRect(gfx::Canvas* canvas,
-                     const gfx::RectF& rect,
-                     gfx::ColorF color) {
-  gfx::Brush fill_brush(canvas, color);
-  canvas->FillRectangle(fill_brush, rect);
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////

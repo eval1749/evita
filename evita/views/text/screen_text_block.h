@@ -32,8 +32,6 @@ class ScreenTextBlock final {
   explicit ScreenTextBlock(ui::CaretOwner* caret_owner);
   ~ScreenTextBlock();
 
-  bool dirty() const { return dirty_; }
-
   void Paint(gfx::Canvas* canvas,
              const LayoutView& layout_view,
              base::Time now);

@@ -40,7 +40,7 @@ class PaintThreadCanvasOwner {
  protected:
   PaintThreadCanvasOwner(ui::AnimatableWindow* widget);
 
-  virtual void Paint(gfx::Canvas* canvas, base::Time now) = 0;
+  virtual void PaintAnimationFrame(gfx::Canvas* canvas, base::Time now) = 0;
   void RequestAnimationFrame();
 
  private:

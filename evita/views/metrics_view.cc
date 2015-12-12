@@ -69,7 +69,7 @@ class MetricsView::View final : public paint::PaintThreadCanvasOwner {
 
  private:
   // paint::PaintThreadCanvasOwner
-  void Paint(gfx::Canvas* canvas, base::Time now) final;
+  void PaintAnimationFrame(gfx::Canvas* canvas, base::Time now) final;
 
   metrics::Sampling frame_duration_data_;
   metrics::Sampling frame_latency_data_;
@@ -90,7 +90,8 @@ void MetricsView::View::AddSample(base::TimeDelta sample) {
   frame_duration_data_.AddSample(sample);
 }
 
-void MetricsView::View::Paint(gfx::Canvas* canvas, base::Time now) {
+void MetricsView::View::PaintAnimationFrame(gfx::Canvas* canvas,
+                                            base::Time now) {
   auto const bounds = canvas->GetLocalBounds();
 
   std::basic_ostringstream<base::char16> stream;

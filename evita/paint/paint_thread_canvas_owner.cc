@@ -56,7 +56,7 @@ void PaintThreadCanvasOwner::Impl::DidBeginAnimationFrame(base::Time now) {
                          TRACE_EVENT_FLAG_FLOW_IN);
   if (!EnsureCanvas())
     return window_->RequestAnimationFrame();
-  owner_->Paint(canvas_.get(), now);
+  owner_->PaintAnimationFrame(canvas_.get(), now);
 }
 
 void PaintThreadCanvasOwner::Impl::DidRealize() {

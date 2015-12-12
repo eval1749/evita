@@ -208,9 +208,6 @@ bool TextView::ShouldFormat() const {
   return layout_block_flow_->ShouldFormat();
 }
 
-bool TextView::ShouldPaint() const {
-  return should_paint_ || screen_text_block_->dirty();
-}
 text::Posn TextView::StartOfLine(text::Posn text_offset) const {
   return layout_block_flow_->StartOfLine(text_offset);
 }

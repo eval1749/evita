@@ -120,7 +120,7 @@ gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
 }
 
 void ScreenTextBlock::Paint(gfx::Canvas* canvas,
-                            const LayoutView& text_block,
+                            const LayoutView& layout_view,
                             base::Time now) {
   if (has_screen_bitmap_) {
     DCHECK(canvas->screen_bitmap());
@@ -129,8 +129,8 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
     DCHECK(lines_.empty());
   }
 
-  paint::RootInlineBoxListPainter painter(canvas, bounds_, text_block.bgcolor(),
-                                          text_block.lines(), lines_);
+  paint::RootInlineBoxListPainter painter(
+      canvas, bounds_, layout_view.bgcolor(), layout_view.lines(), lines_);
   dirty_ = painter.Paint();
   caret_->DidPaint(bounds_);
   if (!dirty_) {
@@ -138,14 +138,14 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
     // Contents of lines aren't changed. But, text offset of lines may be
     // changed.
     auto runner = lines_.begin();
-    for (const auto& line : text_block.lines()) {
+    for (const auto& line : layout_view.lines()) {
       if (line->text_start() != (*runner)->text_start()) {
         delete *runner;
         *runner = line->Copy();
       }
       ++runner;
     }
-    PaintSelection(canvas, text_block.selection(), now);
+    PaintSelection(canvas, layout_view.selection(), now);
     return;
   }
 
@@ -157,12 +157,12 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
   if (has_screen_bitmap_) {
     // TODO(eval1749): We should use existing RootInlineBox's in
     // ScreenTextBlock.
-    for (const auto& line : text_block.lines()) {
+    for (const auto& line : layout_view.lines()) {
       lines_.push_back(line->Copy());
     }
   }
   painter.Finish();
-  PaintSelection(canvas, text_block.selection(), now);
+  PaintSelection(canvas, layout_view.selection(), now);
   dirty_ = false;
 }
 

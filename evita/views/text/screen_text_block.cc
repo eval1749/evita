@@ -11,6 +11,7 @@
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx/bitmap.h"
+#include "evita/paint/layout_view_painter.h"
 #include "evita/paint/root_inline_box_list_painter.h"
 #include "evita/ui/caret.h"
 #include "evita/views/text/layout_view.h"
@@ -135,6 +136,7 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
   auto const saved = canvas->SaveScreenImage(bounds_);
   painter.Finish();
   PaintSelection(canvas, now);
+  paint::LayoutViewPainter(canvas).Paint(*layout_view_);
   if (saved)
     return;
   layout_view_ = nullptr;

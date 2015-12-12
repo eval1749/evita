@@ -12,7 +12,6 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/paint/layout_view_painter.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/render_font.h"
@@ -134,8 +133,6 @@ void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
     return;
   }
   screen_text_block_->Paint(canvas, layout_view_, now);
-  paint::LayoutViewPainter painter(canvas);
-  painter.Paint(*layout_view_);
 }
 
 bool TextView::ScrollDown() {

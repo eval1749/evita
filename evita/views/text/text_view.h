@@ -82,12 +82,10 @@ class TextView final {
   gfx::RectF bounds_;
   text::Buffer* const buffer_;
   text::Posn caret_offset_;
-  int format_counter_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
   std::unique_ptr<LayoutViewBuilder> layout_view_builder_;
   scoped_refptr<LayoutView> layout_view_;
   std::unique_ptr<ScreenTextBlock> screen_text_block_;
-  bool should_paint_;
 
   DISALLOW_COPY_AND_ASSIGN(TextView);
 };

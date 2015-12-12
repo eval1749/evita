@@ -99,6 +99,10 @@ ScreenTextBlock::ScreenTextBlock(ui::CaretOwner* caret_owner)
 
 ScreenTextBlock::~ScreenTextBlock() {}
 
+int ScreenTextBlock::layout_version() const {
+  return layout_view_ ? layout_view_->layout_version() : 0;
+}
+
 gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
   const auto& lines = layout_view_->lines();
   if (offset < lines.front()->text_start() ||

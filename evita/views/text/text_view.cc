@@ -45,11 +45,9 @@ text::Posn GetCaretOffset(const text::Buffer* buffer,
 TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
     : buffer_(buffer),
       caret_offset_(-1),
-      format_counter_(0),
       layout_block_flow_(new LayoutBlockFlow(buffer)),
       layout_view_builder_(new LayoutViewBuilder(buffer)),
-      screen_text_block_(new ScreenTextBlock(caret_owner)),
-      should_paint_(true) {}
+      screen_text_block_(new ScreenTextBlock(caret_owner)) {}
 
 TextView::~TextView() {}
 
@@ -94,16 +92,10 @@ text::Posn TextView::GetVisibleEnd() {
 
 void TextView::Format(text::Posn text_offset) {
   layout_block_flow_->Format(text_offset);
-  should_paint_ = true;
 }
 
 bool TextView::FormatIfNeeded() {
-  if (!layout_block_flow_->FormatIfNeeded() &&
-      format_counter_ == layout_block_flow_->format_counter()) {
-    return false;
-  }
-  should_paint_ = true;
-  return true;
+  return layout_block_flow_->FormatIfNeeded();
 }
 
 // Maps specified buffer position to window point and returns true. If
@@ -137,35 +129,25 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  if (!should_paint_ && canvas->screen_bitmap()) {
+  if (layout_view_->layout_version() == screen_text_block_->layout_version()) {
     screen_text_block_->PaintSelectionIfNeeded(canvas, layout_view_, now);
     return;
   }
   screen_text_block_->Paint(canvas, layout_view_, now);
   paint::LayoutViewPainter painter(canvas);
   painter.Paint(*layout_view_);
-  format_counter_ = layout_block_flow_->format_counter();
-  should_paint_ = false;
 }
 
 bool TextView::ScrollDown() {
-  if (!layout_block_flow_->ScrollDown())
-    return false;
-  should_paint_ = true;
-  return true;
+  return layout_block_flow_->ScrollDown();
 }
 
 void TextView::ScrollToPosition(text::Posn offset) {
-  if (!layout_block_flow_->ScrollToPosition(offset))
-    return;
-  should_paint_ = true;
+  layout_block_flow_->ScrollToPosition(offset);
 }
 
 bool TextView::ScrollUp() {
-  if (!layout_block_flow_->ScrollUp())
-    return false;
-  should_paint_ = true;
-  return true;
+  return layout_block_flow_->ScrollUp();
 }
 
 void TextView::SetBounds(const gfx::RectF& new_bounds) {
@@ -176,7 +158,6 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
   layout_block_flow_->SetBounds(bounds_);
   layout_view_builder_->SetBounds(bounds_);
   screen_text_block_->SetBounds(bounds_);
-  should_paint_ = true;
 }
 
 void TextView::SetZoom(float new_zoom) {

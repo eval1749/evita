@@ -33,8 +33,6 @@ class ScreenTextBlock final {
   explicit ScreenTextBlock(ui::CaretOwner* caret_owner);
   ~ScreenTextBlock();
 
-  int layout_version() const;
-
   void Paint(gfx::Canvas* canvas,
              scoped_refptr<LayoutView> layout_view,
              base::Time now);

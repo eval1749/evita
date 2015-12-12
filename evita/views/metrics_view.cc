@@ -67,7 +67,7 @@ class MetricsView::View final : public ui::LayerOwner,
 
   void AddSample(base::TimeDelta sample);
   void DidBeginAnimationFrame(base::Time now);
-  void DidCreateParentLayer(ui::Layer* parent_layer);
+  void DidRealize();
   void DidRecreateParentLayer(ui::Layer* parent_layer);
 
   // Returns true if painting is completed, otherwise returns false.
@@ -110,10 +110,10 @@ void MetricsView::View::AddSample(base::TimeDelta sample) {
   frame_duration_data_.AddSample(sample);
 }
 
-void MetricsView::View::DidCreateParentLayer(ui::Layer* parent_layer) {
+void MetricsView::View::DidRealize() {
   auto const compositor = paint::PaintThread::instance()->compositor();
   SetLayer(new ui::Layer(compositor));
-  parent_layer->AppendLayer(layer());
+  widget_->layer()->AppendLayer(layer());
   layer()->SetBounds(widget_->GetContentsBounds());
   // Note: It is too early to call Compositor::CommitIfNeeded(), since
   // main visual tree isn't committed yet.
@@ -240,8 +240,8 @@ void MetricsView::DidRealize() {
   SetLayer(new ui::Layer());
   set_layer_owner_delegate(this);
   paint::PaintThread::instance()->PostTask(
-      FROM_HERE, base::Bind(&MetricsView::View::DidCreateParentLayer,
-                            base::Unretained(view_.get()), layer()));
+      FROM_HERE, base::Bind(&MetricsView::View::DidRealize,
+                            base::Unretained(view_.get())));
 }
 
 void MetricsView::WillDestroyWidget() {

@@ -204,10 +204,6 @@ void TextView::SetZoom(float new_zoom) {
   layout_block_flow_->SetZoom(zoom_);
 }
 
-bool TextView::ShouldFormat() const {
-  return layout_block_flow_->ShouldFormat();
-}
-
 text::Posn TextView::StartOfLine(text::Posn text_offset) const {
   return layout_block_flow_->StartOfLine(text_offset);
 }

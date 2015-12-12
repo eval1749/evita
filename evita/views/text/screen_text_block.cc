@@ -125,18 +125,20 @@ void ScreenTextBlock::Caret::Paint(gfx::Canvas* canvas,
   canvas->RestoreScreenImage(bounds);
 }
 
+namespace {
+
 //////////////////////////////////////////////////////////////////////
 //
-// ScreenTextBlock::PaintContext
+// RootInlineBoxListPainter
 //
-class ScreenTextBlock::PaintContext final {
+class RootInlineBoxListPainter final {
  public:
-  PaintContext(gfx::Canvas* canvas,
-               const gfx::RectF& bounds,
-               const gfx::ColorF& bgcolor,
-               const std::vector<RootInlineBox*>& format_lines,
-               const std::vector<RootInlineBox*>& screen_lines);
-  ~PaintContext() = default;
+  RootInlineBoxListPainter(gfx::Canvas* canvas,
+                           const gfx::RectF& bounds,
+                           const gfx::ColorF& bgcolor,
+                           const std::vector<RootInlineBox*>& format_lines,
+                           const std::vector<RootInlineBox*>& screen_lines);
+  ~RootInlineBoxListPainter() = default;
 
   void Finish();
   bool Paint();
@@ -167,10 +169,10 @@ class ScreenTextBlock::PaintContext final {
   const std::vector<RootInlineBox*>& screen_lines_;
   mutable std::vector<gfx::RectF> skip_rects_;
 
-  DISALLOW_COPY_AND_ASSIGN(PaintContext);
+  DISALLOW_COPY_AND_ASSIGN(RootInlineBoxListPainter);
 };
 
-ScreenTextBlock::PaintContext::PaintContext(
+RootInlineBoxListPainter::RootInlineBoxListPainter(
     gfx::Canvas* canvas,
     const gfx::RectF& bounds,
     const gfx::ColorF& bgcolor,
@@ -183,9 +185,9 @@ ScreenTextBlock::PaintContext::PaintContext(
       root_box_painter_(canvas),
       screen_lines_(screen_lines) {}
 
-void ScreenTextBlock::PaintContext::Copy(float dst_top,
-                                         float dst_bottom,
-                                         float src_top) const {
+void RootInlineBoxListPainter::Copy(float dst_top,
+                                    float dst_bottom,
+                                    float src_top) const {
   auto const height = dst_bottom - dst_top;
   DCHECK_GT(height, 0.0f);
   DCHECK_LE(src_top + height, bounds_.bottom);
@@ -200,10 +202,10 @@ void ScreenTextBlock::PaintContext::Copy(float dst_top,
   canvas_->Flush();
 }
 
-void ScreenTextBlock::PaintContext::DrawDirtyRect(const gfx::RectF& rect,
-                                                  float red,
-                                                  float green,
-                                                  float blue) const {
+void RootInlineBoxListPainter::DrawDirtyRect(const gfx::RectF& rect,
+                                             float red,
+                                             float green,
+                                             float blue) const {
   RestoreSkipRect(rect);
   if (views::switches::text_window_display_paint) {
 #if USE_OVERLAY
@@ -219,8 +221,7 @@ void ScreenTextBlock::PaintContext::DrawDirtyRect(const gfx::RectF& rect,
   }
 }
 
-void ScreenTextBlock::PaintContext::FillBottom(
-    const RootInlineBox* line) const {
+void RootInlineBoxListPainter::FillBottom(const RootInlineBox* line) const {
   auto const rect = gfx::RectF(gfx::PointF(bounds_.left, line->bottom()),
                                bounds_.bottom_right())
                         .Intersect(bounds_);
@@ -231,7 +232,7 @@ void ScreenTextBlock::PaintContext::FillBottom(
   canvas_->AddDirtyRect(rect);
 }
 
-void ScreenTextBlock::PaintContext::FillRight(const RootInlineBox* line) const {
+void RootInlineBoxListPainter::FillRight(const RootInlineBox* line) const {
   auto const rect =
       gfx::RectF(line->origin() + gfx::SizeF(line->GetWidth(), 0.0f),
                  gfx::PointF(bounds_.right, line->bottom()))
@@ -243,7 +244,7 @@ void ScreenTextBlock::PaintContext::FillRight(const RootInlineBox* line) const {
   canvas_->AddDirtyRect(rect);
 }
 
-FormatLineIterator ScreenTextBlock::PaintContext::FindFirstMismatch() const {
+FormatLineIterator RootInlineBoxListPainter::FindFirstMismatch() const {
   auto screen_line_runner = screen_lines_.cbegin();
   for (auto format_line_runner = format_lines_.cbegin();
        format_line_runner != format_lines_.cend(); ++format_line_runner) {
@@ -261,7 +262,7 @@ FormatLineIterator ScreenTextBlock::PaintContext::FindFirstMismatch() const {
   return format_lines_.cend();
 }
 
-FormatLineIterator ScreenTextBlock::PaintContext::FindLastMatch() const {
+FormatLineIterator RootInlineBoxListPainter::FindLastMatch() const {
   auto screen_line_runner = screen_lines_.crbegin();
   auto format_last_match = format_lines_.crbegin();
   for (auto format_line_runner = format_lines_.crbegin();
@@ -288,7 +289,7 @@ FormatLineIterator ScreenTextBlock::PaintContext::FindLastMatch() const {
 }
 
 std::vector<RootInlineBox*>::const_iterator
-ScreenTextBlock::PaintContext::FindCopyable(RootInlineBox* format_line) const {
+RootInlineBoxListPainter::FindCopyable(RootInlineBox* format_line) const {
   for (auto runner = screen_lines_.begin(); runner != screen_lines_.end();
        ++runner) {
     auto const screen_line = *runner;
@@ -301,7 +302,7 @@ ScreenTextBlock::PaintContext::FindCopyable(RootInlineBox* format_line) const {
   return screen_lines_.end();
 }
 
-void ScreenTextBlock::PaintContext::Finish() {
+void RootInlineBoxListPainter::Finish() {
   // Draw dirty rectangles for debugging.
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, bounds_);
   for (auto rect : copy_rects_) {
@@ -320,7 +321,7 @@ void ScreenTextBlock::PaintContext::Finish() {
   }
 }
 
-bool ScreenTextBlock::PaintContext::Paint() {
+bool RootInlineBoxListPainter::Paint() {
 #if DEBUG_DRAW
   DVLOG(0) << "Start painting";
 #endif
@@ -372,8 +373,7 @@ bool ScreenTextBlock::PaintContext::Paint() {
   return dirty;
 }
 
-void ScreenTextBlock::PaintContext::RestoreSkipRect(
-    const gfx::RectF& rect) const {
+void RootInlineBoxListPainter::RestoreSkipRect(const gfx::RectF& rect) const {
   auto marker_rect = rect;
   marker_rect.left += kMarkerLeftMargin;
   marker_rect.right = marker_rect.left + kMarkerWidth;
@@ -390,7 +390,7 @@ void ScreenTextBlock::PaintContext::RestoreSkipRect(
   canvas_->AddDirtyRect(line_rect);
 }
 
-FormatLineIterator ScreenTextBlock::PaintContext::TryCopy(
+FormatLineIterator RootInlineBoxListPainter::TryCopy(
     const FormatLineIterator& format_current,
     const FormatLineIterator& format_end) const {
   if (screen_lines_.empty())
@@ -440,6 +440,8 @@ FormatLineIterator ScreenTextBlock::PaintContext::TryCopy(
   return format_runner;
 }
 
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // ScreenTextBlock
@@ -471,8 +473,8 @@ void ScreenTextBlock::Paint(gfx::Canvas* canvas,
   } else {
     DCHECK(lines_.empty());
   }
-  PaintContext paint_context(canvas, bounds_, text_block.bgcolor(),
-                             text_block.lines(), lines_);
+  RootInlineBoxListPainter paint_context(canvas, bounds_, text_block.bgcolor(),
+                                         text_block.lines(), lines_);
   dirty_ = paint_context.Paint();
   caret_->DidPaint(bounds_);
   if (!dirty_) {

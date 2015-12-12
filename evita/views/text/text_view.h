@@ -25,7 +25,6 @@ namespace views {
 
 namespace rendering {
 class LayoutBlockFlow;
-class ScreenTextBlock;
 }
 
 class LayoutView;
@@ -39,7 +38,6 @@ class TextViewCaret;
 class TextView final {
  public:
   using LayoutBlockFlow = rendering::LayoutBlockFlow;
-  using ScreenTextBlock = rendering::ScreenTextBlock;
   using TextSelectionModel = rendering::TextSelectionModel;
   using TextSelection = rendering::TextSelection;
 
@@ -89,7 +87,6 @@ class TextView final {
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
   std::unique_ptr<LayoutViewBuilder> layout_view_builder_;
   scoped_refptr<LayoutView> layout_view_;
-  std::unique_ptr<ScreenTextBlock> screen_text_block_;
 
   DISALLOW_COPY_AND_ASSIGN(TextView);
 };

@@ -12,11 +12,11 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/paint/layout_view_painter.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/layout_block_flow.h"
 #include "evita/views/text/layout_view_builder.h"
-#include "evita/views/text/screen_text_block.h"
 #include "evita/views/text/text_view_caret.h"
 
 namespace views {
@@ -44,8 +44,7 @@ TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
       caret_(new TextViewCaret(caret_owner)),
       caret_offset_(-1),
       layout_block_flow_(new LayoutBlockFlow(buffer)),
-      layout_view_builder_(new LayoutViewBuilder(buffer)),
-      screen_text_block_(new ScreenTextBlock(caret_.get())) {}
+      layout_view_builder_(new LayoutViewBuilder(buffer)) {}
 
 TextView::~TextView() {}
 
@@ -127,8 +126,9 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  screen_text_block_->Paint(canvas, now, last_layout_view_.get(),
-                            *layout_view_);
+  paint::LayoutViewPainter painter(canvas, now, caret_.get(),
+                                   last_layout_view_.get());
+  painter.Paint(*layout_view_);
   if (canvas->screen_bitmap()) {
     last_layout_view_ = layout_view_;
     return;

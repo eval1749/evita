@@ -25,8 +25,6 @@ source_set("text") {
     "layout_block_flow.h",
     "root_inline_box.cc",
     "root_inline_box.h",
-    "screen_text_block.cc",
-    "screen_text_block.h",
     "text_formatter.cc",
     "text_formatter.h",
     "text_view.cc",

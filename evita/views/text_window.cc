@@ -330,7 +330,6 @@ void TextWindow::DidRecreateLayer(ui::Layer* old_layer) {
   ContentWindow::DidRecreateLayer(old_layer);
   if (!canvas())
     return;
-  text_view_->DidRecreateCanvas();
   old_layer->AppendLayer(metrics_view_->RecreateLayer().release());
   layer()->AppendLayer(metrics_view_->layer());
 }

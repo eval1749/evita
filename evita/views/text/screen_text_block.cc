@@ -18,12 +18,6 @@
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/root_inline_box.h"
 
-#define DEBUG_DRAW 0
-// USE_OVERLAY controls how redraw marker rendered. If USE_OVERLAY is true,
-// redraw marker is drawn as overlay rectangle, otherwise, redraw marker
-// is rendered at left border.
-#define USE_OVERLAY 1
-
 namespace views {
 namespace rendering {
 

@@ -249,7 +249,7 @@ class MessageView::View final : public ui::LayerOwner,
   // ui::LayerOwnerDelegate
   void DidRecreateLayer(ui::Layer* old_layer) final;
 
-  ui::AnimatableWindow* const animator_;
+  ui::AnimatableWindow* const widget_;
   std::unique_ptr<gfx::Canvas> canvas_;
   std::unique_ptr<Painter> painter_;
   std::vector<PartView> parts_;
@@ -261,21 +261,21 @@ class MessageView::View final : public ui::LayerOwner,
 };
 
 MessageView::View::View(ui::AnimatableWindow* animator)
-    : animator_(animator), painter_(new Painter()), parts_(1) {}
+    : widget_(animator), painter_(new Painter()), parts_(1) {}
 
 void MessageView::View::DidBeginAnimationFrame(base::Time now) {
-  if (!animator_->visible())
+  if (!widget_->visible())
     return;
 
   TRACE_EVENT_WITH_FLOW0("paint", "MessageView::DidBeginAnimationFrame", this,
                          TRACE_EVENT_FLAG_FLOW_IN);
   if (!canvas_)
     canvas_.reset(layer()->CreateCanvas());
-  else if (canvas_->GetLocalBounds() != animator_->GetContentsBounds())
-    canvas_->SetBounds(animator_->GetContentsBounds());
+  else if (canvas_->GetLocalBounds() != widget_->GetContentsBounds())
+    canvas_->SetBounds(widget_->GetContentsBounds());
 
   if (!canvas_->IsReady())
-    return animator_->RequestAnimationFrame();
+    return widget_->RequestAnimationFrame();
 
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
   if (canvas_->should_clear())
@@ -292,7 +292,7 @@ void MessageView::View::DidBeginAnimationFrame(base::Time now) {
   parts_[0].alpha = new_alpha;
   painter_->Paint(canvas_.get(), parts_);
   if (new_alpha != main_text_alpha_->end_value()) {
-    animator_->RequestAnimationFrame();
+    widget_->RequestAnimationFrame();
     return;
   }
 
@@ -302,14 +302,14 @@ void MessageView::View::DidBeginAnimationFrame(base::Time now) {
   // We'll display status text
   main_text_alpha_.reset();
   message_text_.clear();
-  animator_->RequestAnimationFrame();
+  widget_->RequestAnimationFrame();
 }
 
 void MessageView::View::DidRealize() {
   auto const compositor = paint::PaintThread::instance()->compositor();
   SetLayer(new ui::Layer(compositor));
-  animator_->layer()->AppendLayer(layer());
-  layer()->SetBounds(animator_->GetContentsBounds());
+  widget_->layer()->AppendLayer(layer());
+  layer()->SetBounds(widget_->GetContentsBounds());
   // Note: It is too early to call Compositor::CommitIfNeeded(), since
   // main visual tree isn't committed yet.
 }
@@ -319,7 +319,7 @@ void MessageView::View::SetMessage(const base::string16& text) {
     return;
   message_text_ = text;
   main_text_alpha_.reset();
-  animator_->RequestAnimationFrame();
+  widget_->RequestAnimationFrame();
 }
 
 void MessageView::View::SetStatus(const std::vector<base::string16>& texts) {
@@ -333,7 +333,7 @@ void MessageView::View::SetStatus(const std::vector<base::string16>& texts) {
   }
   parts_[0].text = current_text;
   main_text_alpha_.reset();
-  animator_->RequestAnimationFrame();
+  widget_->RequestAnimationFrame();
 }
 
 void MessageView::View::WillDestroyWidget() {

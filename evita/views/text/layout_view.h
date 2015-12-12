@@ -42,6 +42,8 @@ class LayoutView final : public base::RefCounted<LayoutView> {
   const TextSelection& selection() const { return selection_; }
   int layout_version() const { return layout_version_; }
 
+  gfx::RectF HitTestTextPosition(text::Posn offset) const;
+
  private:
   const gfx::ColorF bgcolor_;
   const gfx::RectF bounds_;

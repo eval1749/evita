@@ -93,20 +93,6 @@ ScreenTextBlock::ScreenTextBlock(ui::CaretOwner* caret_owner)
 
 ScreenTextBlock::~ScreenTextBlock() {}
 
-gfx::RectF ScreenTextBlock::HitTestTextPosition(text::Posn offset) const {
-  const auto& lines = layout_view_->lines();
-  if (offset < lines.front()->text_start() ||
-      offset > lines.back()->text_end()) {
-    return gfx::RectF();
-  }
-  for (auto const line : lines) {
-    auto const rect = line->HitTestTextPosition(offset);
-    if (!rect.empty())
-      return RoundBounds(rect);
-  }
-  return gfx::RectF();
-}
-
 void ScreenTextBlock::Paint(gfx::Canvas* canvas,
                             scoped_refptr<LayoutView> layout_view,
                             base::Time now) {
@@ -219,7 +205,8 @@ void ScreenTextBlock::UpdateCaret(gfx::Canvas* canvas, base::Time now) {
   const auto& selection = layout_view_->selection();
   if (!selection.has_focus())
     return;
-  auto const char_rect = HitTestTextPosition(selection.focus_offset());
+  auto const char_rect =
+      RoundBounds(layout_view_->HitTestTextPosition(selection.focus_offset()));
   if (char_rect.empty())
     return;
   auto const caret_width = 2;

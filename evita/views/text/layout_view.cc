@@ -26,4 +26,17 @@ LayoutView::~LayoutView() {
     delete line;
 }
 
+gfx::RectF LayoutView::HitTestTextPosition(text::Posn offset) const {
+  if (offset < lines_.front()->text_start() ||
+      offset > lines_.back()->text_end()) {
+    return gfx::RectF();
+  }
+  for (auto const line : lines_) {
+    auto const rect = line->HitTestTextPosition(offset);
+    if (!rect.empty())
+      return rect;
+  }
+  return gfx::RectF();
+}
+
 }  // namespace views

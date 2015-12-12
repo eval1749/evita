@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "base/macros.h"
+#include "base/memory/ref_counted.h"
 #include "evita/gfx_base.h"
 #include "evita/views/text/render_selection.h"
 
@@ -17,12 +18,17 @@ namespace rendering {
 class RootInlineBox;
 };
 
-class LayoutView final {
+//////////////////////////////////////////////////////////////////////
+//
+// LayoutView
+//
+class LayoutView final : public base::RefCounted<LayoutView> {
  public:
   using RootInlineBox = rendering::RootInlineBox;
   using TextSelection = rendering::TextSelection;
 
-  LayoutView(const std::vector<RootInlineBox*>& lines,
+  LayoutView(int layout_version,
+             const std::vector<RootInlineBox*>& lines,
              const TextSelection& selection,
              const gfx::ColorF& bgcolor);
   ~LayoutView();
@@ -30,9 +36,11 @@ class LayoutView final {
   const gfx::ColorF& bgcolor() const { return bgcolor_; }
   const std::vector<RootInlineBox*>& lines() const { return lines_; }
   const TextSelection& selection() const { return selection_; }
+  int layout_version() const { return layout_version_; }
 
  private:
   const gfx::ColorF bgcolor_;
+  const int layout_version_;
   const std::vector<RootInlineBox*> lines_;
   const TextSelection selection_;
 

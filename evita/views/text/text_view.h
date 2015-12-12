@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "base/memory/ref_counted.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
@@ -28,6 +29,7 @@ class ScreenTextBlock;
 }
 
 class LayoutView;
+class LayoutViewBuilder;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -84,7 +86,8 @@ class TextView final {
   text::Posn caret_offset_;
   int format_counter_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
-  std::unique_ptr<LayoutView> layout_view_;
+  std::unique_ptr<LayoutViewBuilder> layout_view_builder_;
+  scoped_refptr<LayoutView> layout_view_;
   std::unique_ptr<ScreenTextBlock> screen_text_block_;
   bool should_paint_;
   float zoom_;

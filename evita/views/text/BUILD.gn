@@ -11,6 +11,8 @@ source_set("text") {
     "inline_box_visitor.h",
     "layout_view.cc",
     "layout_view.h",
+    "layout_view_builder.cc",
+    "layout_view_builder.h",
     "render_font.cc",
     "render_font.h",
     "render_font_set.cc",

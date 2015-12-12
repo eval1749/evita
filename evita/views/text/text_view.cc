@@ -18,7 +18,7 @@
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_font_set.h"
 #include "evita/views/text/layout_block_flow.h"
-#include "evita/views/text/root_inline_box.h"
+#include "evita/views/text/layout_view_builder.h"
 #include "evita/views/text/screen_text_block.h"
 #include "evita/views/text/text_formatter.h"
 
@@ -47,6 +47,7 @@ TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
       caret_offset_(-1),
       format_counter_(0),
       layout_block_flow_(new LayoutBlockFlow(buffer)),
+      layout_view_builder_(new LayoutViewBuilder(buffer)),
       screen_text_block_(new ScreenTextBlock(caret_owner)),
       should_paint_(true),
       zoom_(1.0f) {}
@@ -226,16 +227,8 @@ void TextView::Update(const TextSelectionModel& selection_model) {
       ScrollToPosition(new_caret_offset);
   }
 
-  const auto selection =
-      TextFormatter::FormatSelection(buffer_, selection_model);
-  // TODO(eval1749): We should recompute default style when style is changed,
-  // rather than every |Format| call.
-  const auto& style = buffer_->GetDefaultStyle();
-  std::vector<RootInlineBox*> lines;
-  for (const auto& line : layout_block_flow_->lines())
-    lines.push_back(line->Copy());
-  layout_view_.reset(
-      new LayoutView(lines, selection, ColorToColorF(style.bgcolor())));
+  layout_view_ =
+      layout_view_builder_->Build(*layout_block_flow_, selection_model);
 }
 
 }  // namespace views

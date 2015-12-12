@@ -8,10 +8,14 @@
 
 namespace views {
 
-LayoutView::LayoutView(const std::vector<RootInlineBox*>& lines,
+LayoutView::LayoutView(int layout_version,
+                       const std::vector<RootInlineBox*>& lines,
                        const TextSelection& selection,
                        const gfx::ColorF& bgcolor)
-    : bgcolor_(bgcolor), lines_(lines), selection_(selection) {}
+    : bgcolor_(bgcolor),
+      layout_version_(layout_version),
+      lines_(lines),
+      selection_(selection) {}
 
 LayoutView::~LayoutView() {
   for (const auto& line : lines_)

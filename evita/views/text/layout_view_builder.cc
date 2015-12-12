@@ -49,7 +49,8 @@ scoped_refptr<LayoutView> LayoutViewBuilder::Build(
   std::vector<RootInlineBox*> lines;
   for (const auto& line : layout_block_flow.lines())
     lines.push_back(line->Copy());
-  last_layout_view_ = new LayoutView(layout_block_flow.format_counter(), lines,
+  last_layout_view_ = new LayoutView(layout_block_flow.format_counter(),
+                                     layout_block_flow.bounds(), lines,
                                      selection, bgcolor, ruler_bounds);
   return last_layout_view_;
 }

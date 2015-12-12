@@ -23,6 +23,7 @@ class LayoutBlockFlow final {
   explicit LayoutBlockFlow(text::Buffer* buffer);
   ~LayoutBlockFlow();
 
+  const gfx::RectF& bounds() const { return bounds_; }
   bool dirty() const { return dirty_; }
   int format_counter() const { return format_counter_; }
   const std::list<RootInlineBox*>& lines() const { return lines_; }

@@ -28,6 +28,7 @@ class LayoutView final : public base::RefCounted<LayoutView> {
   using TextSelection = rendering::TextSelection;
 
   LayoutView(int layout_version,
+             const gfx::RectF& bounds,
              const std::vector<RootInlineBox*>& lines,
              const TextSelection& selection,
              const gfx::ColorF& bgcolor,
@@ -35,6 +36,7 @@ class LayoutView final : public base::RefCounted<LayoutView> {
   ~LayoutView();
 
   const gfx::ColorF& bgcolor() const { return bgcolor_; }
+  const gfx::RectF& bounds() const { return bounds_; }
   const std::vector<RootInlineBox*>& lines() const { return lines_; }
   const gfx::RectF& ruler_bounds() const { return ruler_bounds_; }
   const TextSelection& selection() const { return selection_; }
@@ -42,6 +44,7 @@ class LayoutView final : public base::RefCounted<LayoutView> {
 
  private:
   const gfx::ColorF bgcolor_;
+  const gfx::RectF bounds_;
   const int layout_version_;
   const std::vector<RootInlineBox*> lines_;
   const gfx::RectF ruler_bounds_;

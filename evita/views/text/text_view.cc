@@ -20,6 +20,7 @@
 #include "evita/views/text/layout_view_builder.h"
 #include "evita/views/text/screen_text_block.h"
 #include "evita/views/text/text_formatter.h"
+#include "evita/views/text/text_view_caret.h"
 
 namespace views {
 using namespace rendering;  // NOLINT
@@ -43,10 +44,11 @@ text::Posn GetCaretOffset(const text::Buffer* buffer,
 //
 TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
     : buffer_(buffer),
+      caret_(new TextViewCaret(caret_owner)),
       caret_offset_(-1),
       layout_block_flow_(new LayoutBlockFlow(buffer)),
       layout_view_builder_(new LayoutViewBuilder(buffer)),
-      screen_text_block_(new ScreenTextBlock(caret_owner)) {}
+      screen_text_block_(new ScreenTextBlock(caret_.get())) {}
 
 TextView::~TextView() {}
 

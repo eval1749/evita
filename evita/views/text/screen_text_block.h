@@ -18,7 +18,7 @@ class Time;
 }
 
 namespace ui {
-class CaretOwner;
+class Caret;
 }
 
 namespace views {
@@ -30,7 +30,7 @@ class RootInlineBox;
 
 class ScreenTextBlock final {
  public:
-  explicit ScreenTextBlock(ui::CaretOwner* caret_owner);
+  explicit ScreenTextBlock(ui::Caret* caret);
   ~ScreenTextBlock();
 
   void Paint(gfx::Canvas* canvas,
@@ -39,15 +39,13 @@ class ScreenTextBlock final {
   void Reset();
 
  private:
-  class Caret;
-
   void PaintSelection(gfx::Canvas* canvas, base::Time now);
   void PaintSelectionIfNeeded(gfx::Canvas* canvas,
                               scoped_refptr<LayoutView> layout_view,
                               base::Time now);
   void UpdateCaret(gfx::Canvas* canvas, base::Time now);
 
-  const std::unique_ptr<Caret> caret_;
+  ui::Caret* const caret_;
   // The |LayoutView| in screen.
   scoped_refptr<LayoutView> layout_view_;
 

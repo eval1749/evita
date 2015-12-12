@@ -54,42 +54,9 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
 
 //////////////////////////////////////////////////////////////////////
 //
-// ScreenTextBlock::Caret
-//
-class ScreenTextBlock::Caret final : public ui::Caret {
- public:
-  explicit Caret(ui::CaretOwner* owner);
-  ~Caret() final = default;
-
- private:
-  void Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) final;
-
-  DISALLOW_COPY_AND_ASSIGN(Caret);
-};
-
-ScreenTextBlock::Caret::Caret(ui::CaretOwner* owner) : ui::Caret(owner) {}
-
-void ScreenTextBlock::Caret::Paint(gfx::Canvas* canvas,
-                                   const gfx::RectF& bounds) {
-  if (visible()) {
-    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-    canvas->AddDirtyRect(bounds);
-    canvas->Clear(gfx::ColorF::Black);
-    return;
-  }
-  if (!canvas->screen_bitmap())
-    return;
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-  canvas->AddDirtyRect(bounds);
-  canvas->RestoreScreenImage(bounds);
-}
-
-//////////////////////////////////////////////////////////////////////
-//
 // ScreenTextBlock
 //
-ScreenTextBlock::ScreenTextBlock(ui::CaretOwner* caret_owner)
-    : caret_(new Caret(caret_owner)) {}
+ScreenTextBlock::ScreenTextBlock(ui::Caret* caret) : caret_(caret) {}
 
 ScreenTextBlock::~ScreenTextBlock() {}
 

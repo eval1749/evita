@@ -31,6 +31,8 @@ source_set("text") {
     "text_formatter.h",
     "text_view.cc",
     "text_view.h",
+    "text_view_caret.cc",
+    "text_view_caret.h",
   ]
 
   public_deps = [

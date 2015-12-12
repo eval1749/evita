@@ -30,6 +30,7 @@ class ScreenTextBlock;
 
 class LayoutView;
 class LayoutViewBuilder;
+class TextViewCaret;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -81,6 +82,7 @@ class TextView final {
 
   gfx::RectF bounds_;
   text::Buffer* const buffer_;
+  std::unique_ptr<TextViewCaret> caret_;
   text::Posn caret_offset_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
   std::unique_ptr<LayoutViewBuilder> layout_view_builder_;

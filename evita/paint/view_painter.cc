@@ -61,7 +61,9 @@ ViewPainter::~ViewPainter() {}
 std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
     gfx::Canvas* canvas,
     std::unique_ptr<ViewPaintCache> view_cache) {
+  TRACE_EVENT0("view", "ViewPainter::Paint");
   if (view_cache && !view_cache->NeedsTextPaint(canvas, layout_view_)) {
+    TRACE_EVENT0("view", "ViewPainter::Paint.Selection");
     PaintSelectionWithCache(canvas, *view_cache);
     view_cache->UpdateSelection(layout_view_.selection(), caret_bounds_);
     return std::move(view_cache);
@@ -75,14 +77,15 @@ std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
   if (view_cache)
     RestoreCaretBackgroundIfNeeded(canvas, *view_cache);
   if (!painter.Paint()) {
-    TRACE_EVENT0("view", "ViewPainter::PaintClean");
+    TRACE_EVENT0("view", "ViewPainter::Paint.Clean");
     PaintSelection(canvas);
     PaintCaretIfNeeded(canvas);
+    PaintRuler(canvas);
     view_cache->UpdateSelection(layout_view_.selection(), caret_bounds_);
     return std::move(view_cache);
   }
 
-  TRACE_EVENT0("view", "ViewPainter::PaintDirty");
+  TRACE_EVENT0("view", "ViewPainter::Paint.Dirty");
   canvas->SaveScreenImage(layout_view_.bounds());
   painter.Finish();
   PaintSelection(canvas);

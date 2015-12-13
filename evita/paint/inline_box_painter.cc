@@ -24,81 +24,56 @@ using TextMarker = views::rendering::TextMarker;
 
 namespace {
 
-//////////////////////////////////////////////////////////////////////
-//
-// LinePainer
-//
-class LinePainer {
- public:
-  explicit LinePainer(gfx::Canvas* canvas, const Font& font);
-  ~LinePainer();
-
-  void DrawHLine(const gfx::Brush& brush, float sx, float sy, float y) const;
-  void DrawLine(const gfx::Brush& brush,
-                float x1,
-                float y1,
-                float x2,
-                float y2,
-                float width) const;
-  void DrawVLine(const gfx::Brush& brush, float x, float sy, float ey) const;
-  void DrawWave(const gfx::Brush& brush,
-                const gfx::RectF& bounds,
-                float baseline) const;
-
- private:
-  gfx::Canvas* const canvas_;
-  const Font& font_;
-
-  DISALLOW_COPY_AND_ASSIGN(LinePainer);
-};
-
-LinePainer::LinePainer(gfx::Canvas* canvas, const Font& font)
-    : canvas_(canvas), font_(font) {}
-
-LinePainer::~LinePainer() {}
-
-void LinePainer::DrawHLine(const gfx::Brush& brush,
-                           float sx,
-                           float ex,
-                           float y) const {
-  canvas_->DrawLine(brush, gfx::PointF(sx, y), gfx::PointF(ex, y),
-                    font_.underline_thickness());
+void DrawHLine(gfx::Canvas* canvas,
+               const Font& font,
+               const gfx::Brush& brush,
+               float sx,
+               float ex,
+               float y) {
+  canvas->DrawLine(brush, gfx::PointF(sx, y), gfx::PointF(ex, y),
+                   font.underline_thickness());
 }
 
-void LinePainer::DrawLine(const gfx::Brush& brush,
-                          float sx,
-                          float sy,
-                          float ex,
-                          float ey,
-                          float width) const {
-  canvas_->DrawLine(brush, gfx::PointF(sx, sy), gfx::PointF(ex, ey),
-                    width * font_.underline_thickness());
+void DrawLine(gfx::Canvas* canvas,
+              const Font& font,
+              const gfx::Brush& brush,
+              float sx,
+              float sy,
+              float ex,
+              float ey,
+              float width) {
+  canvas->DrawLine(brush, gfx::PointF(sx, sy), gfx::PointF(ex, ey),
+                   width * font.underline_thickness());
 }
 
-void LinePainer::DrawVLine(const gfx::Brush& brush,
-                           float x,
-                           float sy,
-                           float ey) const {
-  canvas_->DrawLine(brush, gfx::PointF(x, sy), gfx::PointF(x, ey),
-                    font_.underline_thickness());
+void DrawVLine(gfx::Canvas* canvas,
+               const Font& font,
+               const gfx::Brush& brush,
+               float x,
+               float sy,
+               float ey) {
+  canvas->DrawLine(brush, gfx::PointF(x, sy), gfx::PointF(x, ey),
+                   font.underline_thickness());
 }
 
-void LinePainer::DrawWave(const gfx::Brush& brush,
-                          const gfx::RectF& bounds,
-                          float baseline) const {
-  auto const wave = std::max(font_.underline() * 1.3f, 2.0f);
-  auto const pen_width = font_.underline_thickness();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, bounds);
+void DrawWave(gfx::Canvas* canvas,
+              const Font& font,
+              const gfx::Brush& brush,
+              const gfx::RectF& bounds,
+              float baseline) {
+  auto const wave = std::max(font.underline() * 1.3f, 2.0f);
+  auto const pen_width = font.underline_thickness();
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   for (auto x = bounds.left; x < bounds.right; x += wave) {
     auto const bottom = baseline + wave;
     auto const top = baseline;
     // top to bottom
-    canvas_->DrawLine(brush, gfx::PointF(x, top), gfx::PointF(x + wave, bottom),
-                      pen_width);
+    canvas->DrawLine(brush, gfx::PointF(x, top), gfx::PointF(x + wave, bottom),
+                     pen_width);
     x += wave;
     // bottom to top
-    canvas_->DrawLine(brush, gfx::PointF(x, bottom), gfx::PointF(x + wave, top),
-                      pen_width);
+    canvas->DrawLine(brush, gfx::PointF(x, bottom), gfx::PointF(x + wave, top),
+                     pen_width);
   }
 }
 
@@ -163,7 +138,7 @@ void InlineBoxPainter::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
                  gfx::SizeF(inline_box->width(), inline_box->height()));
   gfx::Brush stroke_brush(canvas_, inline_box->style().color());
   auto const baseline = marker_rect.bottom - inline_box->descent();
-  LinePainer line_painter(canvas_, inline_box->font());
+  const auto& font = inline_box->font();
   auto const underline = inline_box->font().underline();
   auto const underline_thickness = inline_box->font().underline_thickness();
   switch (inline_box->marker_name()) {
@@ -173,9 +148,9 @@ void InlineBoxPainter::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
       auto const y = baseline - (ascent - wing) / 2;
       auto const sx = marker_rect.left;
       auto const ex = marker_rect.right;
-      line_painter.DrawHLine(stroke_brush, sx, ex, y);
-      line_painter.DrawLine(stroke_brush, sx + w, y - w, sx, y, 1.0f);
-      line_painter.DrawLine(stroke_brush, sx + w, y + w, sx, y, 1.0f);
+      DrawHLine(canvas_, font, stroke_brush, sx, ex, y);
+      DrawLine(canvas_, font, stroke_brush, sx + w, y - w, sx, y, 1.0f);
+      DrawLine(canvas_, font, stroke_brush, sx + w, y + w, sx, y, 1.0f);
       break;
     }
 
@@ -184,9 +159,9 @@ void InlineBoxPainter::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
       auto const sy = ey - ascent * 3 / 5;
       auto const w = std::max(ascent / 6, 2.0f);
       auto const x = marker_rect.left + inline_box->width() / 2;
-      line_painter.DrawVLine(stroke_brush, x, sy, ey);
-      line_painter.DrawLine(stroke_brush, x - w, ey - w, x, ey, 1.0f);
-      line_painter.DrawLine(stroke_brush, x + w, ey - w, x, ey, 1.0f);
+      DrawVLine(canvas_, font, stroke_brush, x, sy, ey);
+      DrawLine(canvas_, font, stroke_brush, x - w, ey - w, x, ey, 1.0f);
+      DrawLine(canvas_, font, stroke_brush, x + w, ey - w, x, ey, 1.0f);
       break;
     }
 
@@ -196,9 +171,9 @@ void InlineBoxPainter::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
       auto const y = baseline - (ascent - wing) / 2;
       auto const sx = marker_rect.left;
       auto const ex = marker_rect.right - underline_thickness;
-      line_painter.DrawHLine(stroke_brush, sx, ex, y);
-      line_painter.DrawLine(stroke_brush, ex - w, y - w, ex, y, 1.0f);
-      line_painter.DrawLine(stroke_brush, ex - w, y + w, ex, y, 1.0f);
+      DrawHLine(canvas_, font, stroke_brush, sx, ex, y);
+      DrawLine(canvas_, font, stroke_brush, ex - w, y - w, ex, y, 1.0f);
+      DrawLine(canvas_, font, stroke_brush, ex - w, y + w, ex, y, 1.0f);
       break;
     }
 
@@ -207,9 +182,9 @@ void InlineBoxPainter::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
       auto const ex = marker_rect.right - underline_thickness * 2;
       auto const y = baseline;
       auto const w = std::max(ascent / 6, 2.0f);
-      line_painter.DrawHLine(stroke_brush, sx, ex, y);
-      line_painter.DrawVLine(stroke_brush, sx, y, y - w * 2);
-      line_painter.DrawVLine(stroke_brush, ex, y, y - w * 2);
+      DrawHLine(canvas_, font, stroke_brush, sx, ex, y);
+      DrawVLine(canvas_, font, stroke_brush, sx, y, y - w * 2);
+      DrawVLine(canvas_, font, stroke_brush, ex, y, y - w * 2);
       break;
     }
   }
@@ -228,40 +203,40 @@ void InlineBoxPainter::VisitInlineTextBox(InlineTextBox* inline_box) {
 
   auto const baseline = text_rect.bottom - inline_box->descent();
   auto const underline = baseline + inline_box->font().underline();
-  LinePainer line_painter(canvas_, inline_box->font());
+  const auto& font = inline_box->font();
   switch (inline_box->style().text_decoration()) {
     case css::TextDecoration::ImeInput:
-      line_painter.DrawWave(text_brush, rect_, underline);
+      DrawWave(canvas_, font, text_brush, rect_, underline);
       break;
 
     case css::TextDecoration::ImeInactiveA:
-      line_painter.DrawHLine(text_brush, rect_.left, rect_.right, underline);
+      DrawHLine(canvas_, font, text_brush, rect_.left, rect_.right, underline);
       break;
 
     case css::TextDecoration::ImeInactiveB:
-      line_painter.DrawHLine(text_brush, rect_.left, rect_.right, underline);
+      DrawHLine(canvas_, font, text_brush, rect_.left, rect_.right, underline);
       break;
 
     case css::TextDecoration::ImeActive:
-      line_painter.DrawLine(text_brush, rect_.left, underline, rect_.right,
-                            underline, 2.0f);
+      DrawLine(canvas_, font, text_brush, rect_.left, underline, rect_.right,
+               underline, 2.0f);
       break;
 
     case css::TextDecoration::None:
       break;
 
     case css::TextDecoration::GreenWave:
-      line_painter.DrawWave(gfx::Brush(canvas_, gfx::ColorF::Green), rect_,
-                            baseline);
+      DrawWave(canvas_, font, gfx::Brush(canvas_, gfx::ColorF::Green), rect_,
+               baseline);
       break;
 
     case css::TextDecoration::RedWave:
-      line_painter.DrawWave(gfx::Brush(canvas_, gfx::ColorF::Red), rect_,
-                            baseline);
+      DrawWave(canvas_, font, gfx::Brush(canvas_, gfx::ColorF::Red), rect_,
+               baseline);
       break;
 
     case css::TextDecoration::Underline:
-      line_painter.DrawHLine(text_brush, rect_.left, rect_.right, underline);
+      DrawHLine(canvas_, font, text_brush, rect_.left, rect_.right, underline);
       break;
   }
 

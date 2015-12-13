@@ -22,7 +22,7 @@ class InlineBoxVisitor {
 #undef V
  protected:
   InlineBoxVisitor();
-  ~InlineBoxVisitor();
+  virtual ~InlineBoxVisitor();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(InlineBoxVisitor);

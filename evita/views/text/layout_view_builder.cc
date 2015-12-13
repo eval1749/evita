@@ -22,8 +22,9 @@ using FontSet = rendering::FontSet;
 using RootInlineBox = rendering::RootInlineBox;
 using TextFormatter = rendering::TextFormatter;
 
-LayoutViewBuilder::LayoutViewBuilder(const text::Buffer* buffer)
-    : buffer_(buffer), zoom_(1.0f) {}
+LayoutViewBuilder::LayoutViewBuilder(const text::Buffer* buffer,
+                                     ui::Caret* caret)
+    : buffer_(buffer), caret_(caret), zoom_(1.0f) {}
 
 LayoutViewBuilder::~LayoutViewBuilder() {}
 
@@ -49,7 +50,7 @@ scoped_refptr<LayoutView> LayoutViewBuilder::Build(
   std::vector<RootInlineBox*> lines;
   for (const auto& line : layout_block_flow.lines())
     lines.push_back(line->Copy());
-  last_layout_view_ = new LayoutView(layout_block_flow.format_counter(),
+  last_layout_view_ = new LayoutView(caret_, layout_block_flow.format_counter(),
                                      layout_block_flow.bounds(), lines,
                                      selection, bgcolor, ruler_bounds);
   return last_layout_view_;

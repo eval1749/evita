@@ -54,12 +54,8 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
 //
 ViewPainter::ViewPainter(gfx::Canvas* canvas,
                          base::Time now,
-                         ui::Caret* caret,
                          const LayoutView* last_layout_view)
-    : caret_(caret),
-      canvas_(canvas),
-      last_layout_view_(last_layout_view),
-      now_(now) {}
+    : canvas_(canvas), last_layout_view_(last_layout_view), now_(now) {}
 
 ViewPainter::~ViewPainter() {}
 
@@ -73,7 +69,7 @@ void ViewPainter::Paint(const LayoutView& layout_view) {
       canvas_, layout_view.bounds(), layout_view.bgcolor(), layout_view.lines(),
       last_layout_view_ ? last_layout_view_->lines()
                         : std::vector<RootInlineBox*>{});
-  caret_->DidPaint(layout_view.bounds());
+  layout_view.caret()->DidPaint(layout_view.bounds());
   if (!painter.Paint()) {
     TRACE_EVENT0("view", "ViewPainter::PaintClean");
     PaintSelection(layout_view);
@@ -92,7 +88,7 @@ void ViewPainter::PaintSelection(const LayoutView& layout_view) {
   const auto& lines = layout_view.lines();
   const auto& selection = layout_view.selection();
   if (selection.start() >= lines.back()->text_end()) {
-    caret_->Hide(canvas_);
+    layout_view.caret()->Hide(canvas_);
     return;
   }
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, layout_view.bounds());
@@ -116,7 +112,7 @@ void ViewPainter::PaintSelectionIfNeeded(const LayoutView& layout_view) {
   if (old_selection == new_selection) {
     if (!old_selection.has_focus())
       return;
-    caret_->Blink(canvas_, now_);
+    layout_view.caret()->Blink(canvas_, now_);
     return;
   }
   const auto& bounds = last_layout_view_->bounds();
@@ -133,7 +129,7 @@ void ViewPainter::PaintSelectionIfNeeded(const LayoutView& layout_view) {
       continue;
     canvas_->AddDirtyRect(old_rect);
     canvas_->RestoreScreenImage(old_rect);
-    caret_->DidPaint(old_rect);
+    layout_view.caret()->DidPaint(old_rect);
   }
 
   if (old_selection.color() != new_selection.color())
@@ -147,16 +143,16 @@ void ViewPainter::PaintSelectionIfNeeded(const LayoutView& layout_view) {
       canvas_->AddDirtyRect(new_rect);
       canvas_->RestoreScreenImage(new_rect);
       canvas_->FillRectangle(fill_brush, new_rect);
-      caret_->DidPaint(new_rect);
+      layout_view.caret()->DidPaint(new_rect);
     }
   }
 
-  caret_->Hide(canvas_);
+  layout_view.caret()->Hide(canvas_);
   UpdateCaret(layout_view);
 }
 
 void ViewPainter::UpdateCaret(const LayoutView& layout_view) {
-  DCHECK(!caret_->visible());
+  DCHECK(!layout_view.caret()->visible());
   const auto& selection = layout_view.selection();
   if (!selection.has_focus())
     return;
@@ -167,7 +163,7 @@ void ViewPainter::UpdateCaret(const LayoutView& layout_view) {
   auto const caret_width = 2;
   gfx::RectF caret_bounds(char_rect.left, char_rect.top,
                           char_rect.left + caret_width, char_rect.bottom);
-  caret_->Update(canvas_, now_, caret_bounds);
+  layout_view.caret()->Update(canvas_, now_, caret_bounds);
 }
 
 void ViewPainter::PaintRuler(const LayoutView& layout_view) {

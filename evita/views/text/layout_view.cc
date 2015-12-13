@@ -8,7 +8,8 @@
 
 namespace views {
 
-LayoutView::LayoutView(int layout_version,
+LayoutView::LayoutView(ui::Caret* caret,
+                       int layout_version,
                        const gfx::RectF& bounds,
                        const std::vector<RootInlineBox*>& lines,
                        const TextSelection& selection,
@@ -16,6 +17,7 @@ LayoutView::LayoutView(int layout_version,
                        const gfx::RectF& ruler_bounds)
     : bgcolor_(bgcolor),
       bounds_(bounds),
+      caret_(caret),
       layout_version_(layout_version),
       lines_(lines),
       ruler_bounds_(ruler_bounds),

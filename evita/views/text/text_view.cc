@@ -44,7 +44,7 @@ TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
       caret_(new TextViewCaret(caret_owner)),
       caret_offset_(-1),
       layout_block_flow_(new LayoutBlockFlow(buffer)),
-      layout_view_builder_(new LayoutViewBuilder(buffer)) {}
+      layout_view_builder_(new LayoutViewBuilder(buffer, caret_.get())) {}
 
 TextView::~TextView() {}
 
@@ -122,8 +122,7 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  paint::ViewPainter painter(canvas, now, caret_.get(),
-                             last_layout_view_.get());
+  paint::ViewPainter painter(canvas, now, last_layout_view_.get());
   painter.Paint(*layout_view_);
   if (canvas->screen_bitmap()) {
     last_layout_view_ = layout_view_;

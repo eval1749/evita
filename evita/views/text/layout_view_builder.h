@@ -15,6 +15,10 @@ namespace text {
 class Buffer;
 }
 
+namespace ui {
+class Caret;
+}
+
 namespace views {
 
 namespace rendering {
@@ -35,7 +39,7 @@ class LayoutViewBuilder final {
   using RenderStyle = rendering::RenderStyle;
   using TextSelectionModel = rendering::TextSelectionModel;
 
-  explicit LayoutViewBuilder(const text::Buffer* buffer_);
+  explicit LayoutViewBuilder(const text::Buffer* buffer_, ui::Caret* caret);
   ~LayoutViewBuilder();
 
   scoped_refptr<LayoutView> Build(const LayoutBlockFlow& layout_block_flow,
@@ -49,6 +53,7 @@ class LayoutViewBuilder final {
 
   gfx::RectF bounds_;
   const text::Buffer* const buffer_;
+  ui::Caret* const caret_;
   scoped_refptr<LayoutView> last_layout_view_;
   float zoom_;
 

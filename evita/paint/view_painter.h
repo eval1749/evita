@@ -29,7 +29,6 @@ class ViewPainter final {
 
   ViewPainter(gfx::Canvas* canvas,
               base::Time now,
-              ui::Caret* caret,
               const LayoutView* last_layout_view);
   ~ViewPainter();
 
@@ -41,7 +40,6 @@ class ViewPainter final {
   void PaintSelectionIfNeeded(const LayoutView& layout_view);
   void UpdateCaret(const LayoutView& layout_view);
 
-  ui::Caret* const caret_;
   gfx::Canvas* const canvas_;
   const LayoutView* last_layout_view_;
   const base::Time now_;

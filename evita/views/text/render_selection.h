@@ -22,6 +22,8 @@ class TextSelectionModel final {
   TextSelectionModel();
   ~TextSelectionModel();
 
+  TextSelectionModel& operator=(const TextSelectionModel& other);
+
   bool operator==(const TextSelectionModel& other) const;
   bool operator!=(const TextSelectionModel& other) const;
 
@@ -51,6 +53,8 @@ class TextSelection final {
   TextSelection(const TextSelection& other);
   TextSelection();
   ~TextSelection();
+
+  TextSelection& operator=(const TextSelection& other);
 
   bool operator==(const TextSelection& other) const;
   bool operator!=(const TextSelection& other) const;

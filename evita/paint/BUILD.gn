@@ -16,6 +16,8 @@ source_set("paint") {
     "root_inline_box_list_painter.h",
     "view_painter.cc",
     "view_painter.h",
+    "view_paint_cache.cc",
+    "view_paint_cache.h",
   ]
 
   public_deps = [

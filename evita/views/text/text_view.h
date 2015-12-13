@@ -18,6 +18,10 @@ namespace base {
 class Time;
 }
 
+namespace paint {
+class ViewPaintCache;
+}
+
 namespace ui {
 class CaretOwner;
 }
@@ -83,13 +87,12 @@ class TextView final : private gfx::CanvasObserver {
 
   gfx::RectF bounds_;
   text::Buffer* const buffer_;
-  std::unique_ptr<TextViewCaret> caret_;
+  const std::unique_ptr<TextViewCaret> caret_;
   text::Posn caret_offset_;
-  // The last |LayoutView| in screen.
-  scoped_refptr<LayoutView> last_layout_view_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
-  std::unique_ptr<LayoutViewBuilder> layout_view_builder_;
   scoped_refptr<LayoutView> layout_view_;
+  const std::unique_ptr<LayoutViewBuilder> layout_view_builder_;
+  std::unique_ptr<paint::ViewPaintCache> view_paint_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(TextView);
 };

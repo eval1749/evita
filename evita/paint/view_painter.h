@@ -5,6 +5,8 @@
 #ifndef EVITA_PAINT_VIEW_PAINTER_H_
 #define EVITA_PAINT_VIEW_PAINTER_H_
 
+#include <memory>
+
 #include "base/macros.h"
 #include "base/time/time.h"
 #include "evita/gfx/forward.h"
@@ -19,6 +21,8 @@ class LayoutView;
 
 namespace paint {
 
+class ViewPaintCache;
+
 //////////////////////////////////////////////////////////////////////
 //
 // ViewPainter
@@ -29,10 +33,10 @@ class ViewPainter final {
 
   ViewPainter(gfx::Canvas* canvas,
               base::Time now,
-              const LayoutView* last_layout_view);
+              std::unique_ptr<ViewPaintCache> view_cache);
   ~ViewPainter();
 
-  void Paint(const LayoutView& layout_view);
+  std::unique_ptr<ViewPaintCache> Paint(const LayoutView& layout_view);
 
  private:
   void PaintRuler(const LayoutView& layout_view);
@@ -41,8 +45,8 @@ class ViewPainter final {
   void UpdateCaret(const LayoutView& layout_view);
 
   gfx::Canvas* const canvas_;
-  const LayoutView* last_layout_view_;
   const base::Time now_;
+  std::unique_ptr<ViewPaintCache> view_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewPainter);
 };

@@ -7,6 +7,7 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx_base.h"
 #include "evita/paint/root_inline_box_list_painter.h"
+#include "evita/paint/view_paint_cache.h"
 #include "evita/ui/caret.h"
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/render_selection.h"
@@ -54,26 +55,29 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
 //
 ViewPainter::ViewPainter(gfx::Canvas* canvas,
                          base::Time now,
-                         const LayoutView* last_layout_view)
-    : canvas_(canvas), last_layout_view_(last_layout_view), now_(now) {}
+                         std::unique_ptr<ViewPaintCache> view_cache)
+    : canvas_(canvas), now_(now), view_cache_(std::move(view_cache)) {}
 
 ViewPainter::~ViewPainter() {}
 
-void ViewPainter::Paint(const LayoutView& layout_view) {
-  if (last_layout_view_ &&
-      last_layout_view_->layout_version() == layout_view.layout_version()) {
+std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
+    const LayoutView& layout_view) {
+  if (view_cache_ && !view_cache_->NeedsTextPaint(canvas_, layout_view)) {
     PaintSelectionIfNeeded(layout_view);
-    return;
+    view_cache_->UpdateSelection(layout_view.selection());
+    return std::move(view_cache_);
   }
   paint::RootInlineBoxListPainter painter(
       canvas_, layout_view.bounds(), layout_view.bgcolor(), layout_view.lines(),
-      last_layout_view_ ? last_layout_view_->lines()
-                        : std::vector<RootInlineBox*>{});
+      view_cache_ && view_cache_->CanUseTextImage(canvas_)
+          ? view_cache_->lines()
+          : std::vector<RootInlineBox*>{});
   layout_view.caret()->DidPaint(layout_view.bounds());
   if (!painter.Paint()) {
     TRACE_EVENT0("view", "ViewPainter::PaintClean");
     PaintSelection(layout_view);
-    return;
+    view_cache_->UpdateSelection(layout_view.selection());
+    return std::move(view_cache_);
   }
 
   TRACE_EVENT0("view", "ViewPainter::PaintDirty");
@@ -81,6 +85,7 @@ void ViewPainter::Paint(const LayoutView& layout_view) {
   painter.Finish();
   PaintSelection(layout_view);
   PaintRuler(layout_view);
+  return std::make_unique<ViewPaintCache>(canvas_, layout_view);
 }
 
 void ViewPainter::PaintSelection(const LayoutView& layout_view) {
@@ -107,16 +112,17 @@ void ViewPainter::PaintSelection(const LayoutView& layout_view) {
 }
 
 void ViewPainter::PaintSelectionIfNeeded(const LayoutView& layout_view) {
+  DCHECK(!view_cache_->NeedsTextPaint(canvas_, layout_view));
   const auto& new_selection = layout_view.selection();
-  const auto& old_selection = last_layout_view_->selection();
+  const auto& old_selection = view_cache_->selection();
   if (old_selection == new_selection) {
     if (!old_selection.has_focus())
       return;
     layout_view.caret()->Blink(canvas_, now_);
     return;
   }
-  const auto& bounds = last_layout_view_->bounds();
-  const auto& lines = last_layout_view_->lines();
+  const auto& bounds = layout_view.bounds();
+  const auto& lines = view_cache_->lines();
   auto new_old_selection_rects =
       CalculateSelectionRects(lines, new_selection, bounds);
   auto old_old_selection_rects =

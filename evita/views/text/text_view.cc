@@ -13,6 +13,7 @@
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/paint/view_painter.h"
+#include "evita/paint/view_paint_cache.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/layout_block_flow.h"
@@ -59,7 +60,7 @@ void TextView::DidDeleteAt(text::Posn offset, size_t length) {
 }
 
 void TextView::DidHide() {
-  last_layout_view_ = nullptr;
+  view_paint_cache_.reset();
 }
 
 void TextView::DidInsertAt(text::Posn offset, size_t length) {
@@ -122,13 +123,8 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  paint::ViewPainter painter(canvas, now, last_layout_view_.get());
-  painter.Paint(*layout_view_);
-  if (canvas->screen_bitmap()) {
-    last_layout_view_ = layout_view_;
-    return;
-  }
-  last_layout_view_ = nullptr;
+  paint::ViewPainter painter(canvas, now, std::move(view_paint_cache_));
+  view_paint_cache_ = painter.Paint(*layout_view_);
 }
 
 bool TextView::ScrollDown() {
@@ -149,7 +145,7 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
     return;
   bounds_ = new_bounds;
   caret_->Reset();
-  last_layout_view_ = nullptr;
+  view_paint_cache_.reset();
   layout_block_flow_->SetBounds(bounds_);
   layout_view_builder_->SetBounds(bounds_);
 }
@@ -188,7 +184,7 @@ void TextView::Update(const TextSelectionModel& selection_model) {
 
 // gfx::CanvasObserver
 void TextView::DidRecreateCanvas() {
-  last_layout_view_ = nullptr;
+  view_paint_cache_.reset();
 }
 
 }  // namespace views

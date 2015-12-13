@@ -33,6 +33,15 @@ TextSelectionModel::TextSelectionModel()
 
 TextSelectionModel::~TextSelectionModel() {}
 
+TextSelectionModel& TextSelectionModel::operator=(
+    const TextSelectionModel& other) {
+  end_ = other.end_;
+  focus_offset_ = other.focus_offset_;
+  state_ = other.state_;
+  start_ = other.start_;
+  return *this;
+}
+
 bool TextSelectionModel::operator==(const TextSelectionModel& other) const {
   return end_ == other.end_ && focus_offset_ == other.focus_offset_ &&
          state_ == other.state_ && start_ == other.start_;
@@ -61,6 +70,12 @@ TextSelection::TextSelection()
     : TextSelection(TextSelectionModel(), gfx::ColorF()) {}
 
 TextSelection::~TextSelection() {}
+
+TextSelection& TextSelection::operator=(const TextSelection& other) {
+  color_ = other.color_;
+  model_ = other.model_;
+  return *this;
+}
 
 bool TextSelection::operator==(const TextSelection& other) const {
   return model_ == other.model_ && color_ == other.color_;

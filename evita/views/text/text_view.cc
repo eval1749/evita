@@ -123,8 +123,8 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  paint::ViewPainter painter(canvas, now, std::move(view_paint_cache_));
-  view_paint_cache_ = painter.Paint(*layout_view_);
+  view_paint_cache_ = paint::ViewPainter(*layout_view_)
+                          .Paint(canvas, now, std::move(view_paint_cache_));
 }
 
 bool TextView::ScrollDown() {

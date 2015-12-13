@@ -31,22 +31,25 @@ class ViewPainter final {
  public:
   using LayoutView = views::LayoutView;
 
-  ViewPainter(gfx::Canvas* canvas,
-              base::Time now,
-              std::unique_ptr<ViewPaintCache> view_cache);
+  ViewPainter(const LayoutView& layout_view);
   ~ViewPainter();
 
-  std::unique_ptr<ViewPaintCache> Paint(const LayoutView& layout_view);
+  std::unique_ptr<ViewPaintCache> Paint(
+      gfx::Canvas* canvas,
+      base::Time now,
+      std::unique_ptr<ViewPaintCache> view_cache);
 
  private:
-  void PaintRuler(const LayoutView& layout_view);
-  void PaintSelection(const LayoutView& layout_view);
-  void PaintSelectionIfNeeded(const LayoutView& layout_view);
-  void UpdateCaret(const LayoutView& layout_view);
+  ui::Caret* caret() const;
 
-  gfx::Canvas* const canvas_;
-  const base::Time now_;
-  std::unique_ptr<ViewPaintCache> view_cache_;
+  void PaintRuler(gfx::Canvas* canvas);
+  void PaintSelection(gfx::Canvas* canvas, base::Time now);
+  void PaintSelectionIfNeeded(gfx::Canvas* canvas,
+                              base::Time now,
+                              const ViewPaintCache& view_cache);
+  void UpdateCaret(gfx::Canvas* canvas, base::Time now);
+
+  const LayoutView& layout_view_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewPainter);
 };

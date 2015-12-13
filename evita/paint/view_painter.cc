@@ -53,131 +53,137 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
 //
 // ViewPainter
 //
-ViewPainter::ViewPainter(gfx::Canvas* canvas,
-                         base::Time now,
-                         std::unique_ptr<ViewPaintCache> view_cache)
-    : canvas_(canvas), now_(now), view_cache_(std::move(view_cache)) {}
+ViewPainter::ViewPainter(const LayoutView& layout_view)
+    : layout_view_(layout_view) {}
 
 ViewPainter::~ViewPainter() {}
 
+ui::Caret* ViewPainter::caret() const {
+  return layout_view_.caret();
+}
+
 std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
-    const LayoutView& layout_view) {
-  if (view_cache_ && !view_cache_->NeedsTextPaint(canvas_, layout_view)) {
-    PaintSelectionIfNeeded(layout_view);
-    view_cache_->UpdateSelection(layout_view.selection());
-    return std::move(view_cache_);
+    gfx::Canvas* canvas,
+    base::Time now,
+    std::unique_ptr<ViewPaintCache> view_cache) {
+  if (view_cache && !view_cache->NeedsTextPaint(canvas, layout_view_)) {
+    PaintSelectionIfNeeded(canvas, now, *view_cache);
+    view_cache->UpdateSelection(layout_view_.selection());
+    return std::move(view_cache);
   }
   paint::RootInlineBoxListPainter painter(
-      canvas_, layout_view.bounds(), layout_view.bgcolor(), layout_view.lines(),
-      view_cache_ && view_cache_->CanUseTextImage(canvas_)
-          ? view_cache_->lines()
-          : std::vector<RootInlineBox*>{});
-  layout_view.caret()->DidPaint(layout_view.bounds());
+      canvas, layout_view_.bounds(), layout_view_.bgcolor(),
+      layout_view_.lines(), view_cache && view_cache->CanUseTextImage(canvas)
+                                ? view_cache->lines()
+                                : std::vector<RootInlineBox*>{});
+  caret()->DidPaint(layout_view_.bounds());
   if (!painter.Paint()) {
     TRACE_EVENT0("view", "ViewPainter::PaintClean");
-    PaintSelection(layout_view);
-    view_cache_->UpdateSelection(layout_view.selection());
-    return std::move(view_cache_);
+    PaintSelection(canvas, now);
+    view_cache->UpdateSelection(layout_view_.selection());
+    return std::move(view_cache);
   }
 
   TRACE_EVENT0("view", "ViewPainter::PaintDirty");
-  canvas_->SaveScreenImage(layout_view.bounds());
+  canvas->SaveScreenImage(layout_view_.bounds());
   painter.Finish();
-  PaintSelection(layout_view);
-  PaintRuler(layout_view);
-  return std::make_unique<ViewPaintCache>(canvas_, layout_view);
+  PaintSelection(canvas, now);
+  PaintRuler(canvas);
+  return std::make_unique<ViewPaintCache>(canvas, layout_view_);
 }
 
-void ViewPainter::PaintSelection(const LayoutView& layout_view) {
+void ViewPainter::PaintSelection(gfx::Canvas* canvas, base::Time now) {
   TRACE_EVENT0("view", "ViewPainter::PaintSelection");
-  const auto& lines = layout_view.lines();
-  const auto& selection = layout_view.selection();
+  const auto& lines = layout_view_.lines();
+  const auto& selection = layout_view_.selection();
   if (selection.start() >= lines.back()->text_end()) {
-    layout_view.caret()->Hide(canvas_);
+    caret()->Hide(canvas);
     return;
   }
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, layout_view.bounds());
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, layout_view_.bounds());
   if (selection.is_range() && selection.end() > lines.front()->text_start()) {
-    gfx::Brush fill_brush(canvas_, selection.color());
+    gfx::Brush fill_brush(canvas, selection.color());
     for (auto line : lines) {
       if (selection.end() <= line->text_start())
         break;
       auto const rect = line->CalculateSelectionRect(selection);
       if (rect.empty())
         continue;
-      canvas_->FillRectangle(fill_brush, rect);
+      canvas->FillRectangle(fill_brush, rect);
     }
   }
-  UpdateCaret(layout_view);
+  UpdateCaret(canvas, now);
 }
 
-void ViewPainter::PaintSelectionIfNeeded(const LayoutView& layout_view) {
-  DCHECK(!view_cache_->NeedsTextPaint(canvas_, layout_view));
-  const auto& new_selection = layout_view.selection();
-  const auto& old_selection = view_cache_->selection();
+void ViewPainter::PaintSelectionIfNeeded(gfx::Canvas* canvas,
+                                         base::Time now,
+                                         const ViewPaintCache& view_cache) {
+  DCHECK(!view_cache.NeedsTextPaint(canvas, layout_view_));
+  const auto& new_selection = layout_view_.selection();
+  const auto& old_selection = view_cache.selection();
   if (old_selection == new_selection) {
     if (!old_selection.has_focus())
       return;
-    layout_view.caret()->Blink(canvas_, now_);
+    caret()->Blink(canvas, now);
     return;
   }
-  const auto& bounds = layout_view.bounds();
-  const auto& lines = view_cache_->lines();
+  const auto& bounds = layout_view_.bounds();
+  const auto& lines = view_cache.lines();
   auto new_old_selection_rects =
       CalculateSelectionRects(lines, new_selection, bounds);
   auto old_old_selection_rects =
       CalculateSelectionRects(lines, old_selection, bounds);
 
-  gfx::Canvas::DrawingScope drawing_scope(canvas_);
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, bounds);
+  gfx::Canvas::DrawingScope drawing_scope(canvas);
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   for (const auto& old_rect : old_old_selection_rects) {
     if (new_old_selection_rects.find(old_rect) != new_old_selection_rects.end())
       continue;
-    canvas_->AddDirtyRect(old_rect);
-    canvas_->RestoreScreenImage(old_rect);
-    layout_view.caret()->DidPaint(old_rect);
+    canvas->AddDirtyRect(old_rect);
+    canvas->RestoreScreenImage(old_rect);
+    caret()->DidPaint(old_rect);
   }
 
   if (old_selection.color() != new_selection.color())
     old_old_selection_rects.clear();
   if (!new_old_selection_rects.empty()) {
-    gfx::Brush fill_brush(canvas_, new_selection.color());
+    gfx::Brush fill_brush(canvas, new_selection.color());
     for (const auto& new_rect : new_old_selection_rects) {
       if (old_old_selection_rects.find(new_rect) !=
           old_old_selection_rects.end())
         continue;
-      canvas_->AddDirtyRect(new_rect);
-      canvas_->RestoreScreenImage(new_rect);
-      canvas_->FillRectangle(fill_brush, new_rect);
-      layout_view.caret()->DidPaint(new_rect);
+      canvas->AddDirtyRect(new_rect);
+      canvas->RestoreScreenImage(new_rect);
+      canvas->FillRectangle(fill_brush, new_rect);
+      caret()->DidPaint(new_rect);
     }
   }
 
-  layout_view.caret()->Hide(canvas_);
-  UpdateCaret(layout_view);
+  caret()->Hide(canvas);
+  UpdateCaret(canvas, now);
 }
 
-void ViewPainter::UpdateCaret(const LayoutView& layout_view) {
-  DCHECK(!layout_view.caret()->visible());
-  const auto& selection = layout_view.selection();
+void ViewPainter::UpdateCaret(gfx::Canvas* canvas, base::Time now) {
+  DCHECK(!caret()->visible());
+  const auto& selection = layout_view_.selection();
   if (!selection.has_focus())
     return;
   auto const char_rect =
-      RoundBounds(layout_view.HitTestTextPosition(selection.focus_offset()));
+      RoundBounds(layout_view_.HitTestTextPosition(selection.focus_offset()));
   if (char_rect.empty())
     return;
   auto const caret_width = 2;
   gfx::RectF caret_bounds(char_rect.left, char_rect.top,
                           char_rect.left + caret_width, char_rect.bottom);
-  layout_view.caret()->Update(canvas_, now_, caret_bounds);
+  caret()->Update(canvas, now, caret_bounds);
 }
 
-void ViewPainter::PaintRuler(const LayoutView& layout_view) {
-  const auto& ruler_bounds = layout_view.ruler_bounds();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, ruler_bounds);
+void ViewPainter::PaintRuler(gfx::Canvas* canvas) {
+  const auto& ruler_bounds = layout_view_.ruler_bounds();
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, ruler_bounds);
   // TODO(eval1749): We should get ruler color from CSS.
-  gfx::Brush brush(canvas_, gfx::ColorF(0, 0, 0, 0.3f));
-  canvas_->DrawRectangle(brush, ruler_bounds);
+  gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));
+  canvas->DrawRectangle(brush, ruler_bounds);
 }
 
 }  // namespace pain

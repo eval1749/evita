@@ -63,7 +63,6 @@ RootInlineBoxListPainter::RootInlineBoxListPainter(
       bounds_(bounds),
       canvas_(canvas),
       format_lines_(format_lines),
-      root_box_painter_(new RootInlineBoxPainter(canvas)),
       screen_lines_(screen_lines) {}
 
 RootInlineBoxListPainter::~RootInlineBoxListPainter() {}
@@ -235,7 +234,7 @@ bool RootInlineBoxListPainter::Paint() {
       if (dirty_line_runner == clean_line_start)
         break;
       auto const format_line = *dirty_line_runner;
-      root_box_painter_->Paint(*format_line);
+      RootInlineBoxPainter(*format_line).Paint(canvas_);
       FillRight(format_line);
       AddRect(&dirty_rects_, format_line->bounds());
       canvas_->Flush();

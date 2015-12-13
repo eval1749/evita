@@ -24,14 +24,16 @@ namespace paint {
 // RootInlineBoxPainter
 //
 class RootInlineBoxPainter final {
+  using RootInlineBox = views::rendering::RootInlineBox;
+
  public:
-  explicit RootInlineBoxPainter(gfx::Canvas* canvas);
+  explicit RootInlineBoxPainter(const RootInlineBox& root_inline_box);
   ~RootInlineBoxPainter();
 
-  void Paint(const views::rendering::RootInlineBox& inline_box);
+  void Paint(gfx::Canvas* canvas);
 
  private:
-  gfx::Canvas* const canvas_;
+  const RootInlineBox& root_inline_box_;
 
   DISALLOW_COPY_AND_ASSIGN(RootInlineBoxPainter);
 };

@@ -18,8 +18,6 @@ class RootInlineBox;
 
 namespace paint {
 
-class RootInlineBoxPainter;
-
 //////////////////////////////////////////////////////////////////////
 //
 // RootInlineBoxListPainter
@@ -61,7 +59,6 @@ class RootInlineBoxListPainter final {
   mutable std::vector<gfx::RectF> copy_rects_;
   mutable std::vector<gfx::RectF> dirty_rects_;
   const std::vector<RootInlineBox*>& format_lines_;
-  std::unique_ptr<RootInlineBoxPainter> root_box_painter_;
   const std::vector<RootInlineBox*>& screen_lines_;
   mutable std::vector<gfx::RectF> skip_rects_;
 

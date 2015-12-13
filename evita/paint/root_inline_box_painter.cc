@@ -17,18 +17,18 @@ using RootInlineBox = views::rendering::RootInlineBox;
 //
 // RootInlineBoxPainter
 //
-RootInlineBoxPainter::RootInlineBoxPainter(gfx::Canvas* canvas)
-    : canvas_(canvas) {}
+RootInlineBoxPainter::RootInlineBoxPainter(const RootInlineBox& root_inline_box)
+    : root_inline_box_(root_inline_box) {}
 
 RootInlineBoxPainter::~RootInlineBoxPainter() {}
 
-void RootInlineBoxPainter::Paint(const RootInlineBox& root_box) {
-  auto const& bounds = root_box.bounds();
+void RootInlineBoxPainter::Paint(gfx::Canvas* canvas) {
+  auto const& bounds = root_inline_box_.bounds();
   auto x = bounds.left;
-  for (auto inline_box : root_box.cells()) {
+  for (auto inline_box : root_inline_box_.cells()) {
     gfx::RectF rect(x, bounds.top, x + inline_box->width(),
                     ::ceil(bounds.top + inline_box->line_height()));
-    InlineBoxPainter(*inline_box).Paint(canvas_, rect);
+    InlineBoxPainter(*inline_box).Paint(canvas, rect);
     x = rect.right;
   }
 }

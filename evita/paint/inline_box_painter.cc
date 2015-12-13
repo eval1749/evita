@@ -9,6 +9,7 @@
 
 #include "evita/gfx_base.h"
 #include "evita/views/text/inline_box.h"
+#include "evita/views/text/inline_box_visitor.h"
 #include "evita/views/text/render_font.h"
 #include "evita/views/text/render_style.h"
 
@@ -108,28 +109,36 @@ void FillOverlay(gfx::Canvas* canvas,
            inline_box.style().overlay_color());
 }
 
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
-// InlineBoxPainter
+// PaintVisitor
 //
-InlineBoxPainter::InlineBoxPainter(gfx::Canvas* canvas, const gfx::RectF& rect)
+class PaintVisitor final : public views::rendering::InlineBoxVisitor {
+ public:
+  PaintVisitor(gfx::Canvas* canvas, const gfx::RectF& rect);
+  ~PaintVisitor() final = default;
+
+ private:
+#define V(name) void Visit##name(views::rendering::name* inline_box) final;
+  FOR_EACH_INLINE_BOX(V)
+#undef V
+
+  gfx::Canvas* const canvas_;
+  const gfx::RectF& rect_;
+
+  DISALLOW_COPY_AND_ASSIGN(PaintVisitor);
+};
+
+PaintVisitor::PaintVisitor(gfx::Canvas* canvas, const gfx::RectF& rect)
     : canvas_(canvas), rect_(rect) {}
 
-InlineBoxPainter::~InlineBoxPainter() {}
-
-void InlineBoxPainter::Paint(const InlineBox& inline_box) {
-  const_cast<InlineBox*>(&inline_box)->Accept(this);
-}
-
 // Implements InlineBoxVisitor member functions
-void InlineBoxPainter::VisitInlineFillerBox(InlineFillerBox* inline_box) {
+void PaintVisitor::VisitInlineFillerBox(InlineFillerBox* inline_box) {
   FillBackground(canvas_, rect_, *inline_box);
 }
 
 // Paint marker above baseline.
-void InlineBoxPainter::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
+void PaintVisitor::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
   FillBackground(canvas_, rect_, *inline_box);
 
   auto const ascent = inline_box->height() - inline_box->descent();
@@ -191,7 +200,7 @@ void InlineBoxPainter::VisitInlineMarkerBox(InlineMarkerBox* inline_box) {
   FillOverlay(canvas_, marker_rect, *inline_box);
 }
 
-void InlineBoxPainter::VisitInlineTextBox(InlineTextBox* inline_box) {
+void PaintVisitor::VisitInlineTextBox(InlineTextBox* inline_box) {
   DCHECK(!inline_box->characters().empty());
   auto const text_rect =
       gfx::RectF(gfx::PointF(rect_.left, rect_.top + inline_box->top()),
@@ -243,7 +252,7 @@ void InlineBoxPainter::VisitInlineTextBox(InlineTextBox* inline_box) {
   FillOverlay(canvas_, text_rect, *inline_box);
 }
 
-void InlineBoxPainter::VisitInlineUnicodeBox(InlineUnicodeBox* inline_box) {
+void PaintVisitor::VisitInlineUnicodeBox(InlineUnicodeBox* inline_box) {
   auto const text_rect =
       gfx::RectF(gfx::PointF(rect_.left, rect_.top + inline_box->top()),
                  gfx::SizeF(rect_.width(), inline_box->height())) -
@@ -256,6 +265,22 @@ void InlineBoxPainter::VisitInlineUnicodeBox(InlineUnicodeBox* inline_box) {
            inline_box->characters());
   canvas_->DrawRectangle(text_brush, text_rect);
   FillOverlay(canvas_, text_rect, *inline_box);
+}
+
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// InlineBoxPainter
+//
+InlineBoxPainter::InlineBoxPainter(const InlineBox& inline_box)
+    : inline_box_(inline_box) {}
+
+InlineBoxPainter::~InlineBoxPainter() {}
+
+void InlineBoxPainter::Paint(gfx::Canvas* canvas, const gfx::RectF& rect) {
+  PaintVisitor visitor(canvas, rect);
+  const_cast<InlineBox&>(inline_box_).Accept(&visitor);
 }
 
 }  // namespace paint

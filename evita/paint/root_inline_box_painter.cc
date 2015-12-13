@@ -28,8 +28,7 @@ void RootInlineBoxPainter::Paint(const RootInlineBox& root_box) {
   for (auto inline_box : root_box.cells()) {
     gfx::RectF rect(x, bounds.top, x + inline_box->width(),
                     ::ceil(bounds.top + inline_box->line_height()));
-    paint::InlineBoxPainter painter(canvas_, rect);
-    painter.Paint(*inline_box);
+    InlineBoxPainter(*inline_box).Paint(canvas_, rect);
     x = rect.right;
   }
 }

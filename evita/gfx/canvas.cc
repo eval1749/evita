@@ -274,6 +274,7 @@ bool Canvas::SaveScreenImage(const RectF& rect_in) {
           ->CopyFromRenderTarget(&dest_point, GetRenderTarget(), &source_rect);
   if (FAILED(hr))
     DVLOG(0) << "ID2D1Bitmap->CopyFromRenderTarget hr=" << std::hex << hr;
+  bitmap_id_ = ++global_bitmap_id;
   return SUCCEEDED(hr);
 }
 

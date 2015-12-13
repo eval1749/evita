@@ -6,8 +6,6 @@ source_set("paint") {
   sources = [
     "inline_box_painter.cc",
     "inline_box_painter.h",
-    "layout_view_painter.cc",
-    "layout_view_painter.h",
     "paint_thread.cc",
     "paint_thread.h",
     "paint_thread_canvas_owner.cc",
@@ -16,6 +14,8 @@ source_set("paint") {
     "root_inline_box_painter.h",
     "root_inline_box_list_painter.cc",
     "root_inline_box_list_painter.h",
+    "view_painter.cc",
+    "view_painter.h",
   ]
 
   public_deps = [

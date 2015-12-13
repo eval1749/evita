@@ -12,7 +12,7 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/paint/layout_view_painter.h"
+#include "evita/paint/view_painter.h"
 #include "evita/text/buffer.h"
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/layout_block_flow.h"
@@ -122,8 +122,8 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
 void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  paint::LayoutViewPainter painter(canvas, now, caret_.get(),
-                                   last_layout_view_.get());
+  paint::ViewPainter painter(canvas, now, caret_.get(),
+                             last_layout_view_.get());
   painter.Paint(*layout_view_);
   if (canvas->screen_bitmap()) {
     last_layout_view_ = layout_view_;

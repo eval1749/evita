@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_PAINT_LAYOUT_VIEW_PAINTER_H_
-#define EVITA_PAINT_LAYOUT_VIEW_PAINTER_H_
+#ifndef EVITA_PAINT_VIEW_PAINTER_H_
+#define EVITA_PAINT_VIEW_PAINTER_H_
 
 #include "base/macros.h"
 #include "base/time/time.h"
@@ -21,17 +21,17 @@ namespace paint {
 
 //////////////////////////////////////////////////////////////////////
 //
-// LayoutViewPainter
+// ViewPainter
 //
-class LayoutViewPainter final {
+class ViewPainter final {
  public:
   using LayoutView = views::LayoutView;
 
-  LayoutViewPainter(gfx::Canvas* canvas,
-                    base::Time now,
-                    ui::Caret* caret,
-                    const LayoutView* last_layout_view);
-  ~LayoutViewPainter();
+  ViewPainter(gfx::Canvas* canvas,
+              base::Time now,
+              ui::Caret* caret,
+              const LayoutView* last_layout_view);
+  ~ViewPainter();
 
   void Paint(const LayoutView& layout_view);
 
@@ -46,9 +46,9 @@ class LayoutViewPainter final {
   const LayoutView* last_layout_view_;
   const base::Time now_;
 
-  DISALLOW_COPY_AND_ASSIGN(LayoutViewPainter);
+  DISALLOW_COPY_AND_ASSIGN(ViewPainter);
 };
 
 }  // namespace paint
 
-#endif  // EVITA_PAINT_LAYOUT_VIEW_PAINTER_H_
+#endif  // EVITA_PAINT_VIEW_PAINTER_H_

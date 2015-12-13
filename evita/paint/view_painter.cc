@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/paint/layout_view_painter.h"
+#include "evita/paint/view_painter.h"
 
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx_base.h"
@@ -50,20 +50,20 @@ std::unordered_set<gfx::RectF> CalculateSelectionRects(
 
 //////////////////////////////////////////////////////////////////////
 //
-// LayoutViewPainter
+// ViewPainter
 //
-LayoutViewPainter::LayoutViewPainter(gfx::Canvas* canvas,
-                                     base::Time now,
-                                     ui::Caret* caret,
-                                     const LayoutView* last_layout_view)
+ViewPainter::ViewPainter(gfx::Canvas* canvas,
+                         base::Time now,
+                         ui::Caret* caret,
+                         const LayoutView* last_layout_view)
     : caret_(caret),
       canvas_(canvas),
       last_layout_view_(last_layout_view),
       now_(now) {}
 
-LayoutViewPainter::~LayoutViewPainter() {}
+ViewPainter::~ViewPainter() {}
 
-void LayoutViewPainter::Paint(const LayoutView& layout_view) {
+void ViewPainter::Paint(const LayoutView& layout_view) {
   if (last_layout_view_ &&
       last_layout_view_->layout_version() == layout_view.layout_version()) {
     PaintSelectionIfNeeded(layout_view);
@@ -75,20 +75,20 @@ void LayoutViewPainter::Paint(const LayoutView& layout_view) {
                         : std::vector<RootInlineBox*>{});
   caret_->DidPaint(layout_view.bounds());
   if (!painter.Paint()) {
-    TRACE_EVENT0("view", "LayoutViewPainter::PaintClean");
+    TRACE_EVENT0("view", "ViewPainter::PaintClean");
     PaintSelection(layout_view);
     return;
   }
 
-  TRACE_EVENT0("view", "LayoutViewPainter::PaintDirty");
+  TRACE_EVENT0("view", "ViewPainter::PaintDirty");
   canvas_->SaveScreenImage(layout_view.bounds());
   painter.Finish();
   PaintSelection(layout_view);
   PaintRuler(layout_view);
 }
 
-void LayoutViewPainter::PaintSelection(const LayoutView& layout_view) {
-  TRACE_EVENT0("view", "LayoutViewPainter::PaintSelection");
+void ViewPainter::PaintSelection(const LayoutView& layout_view) {
+  TRACE_EVENT0("view", "ViewPainter::PaintSelection");
   const auto& lines = layout_view.lines();
   const auto& selection = layout_view.selection();
   if (selection.start() >= lines.back()->text_end()) {
@@ -110,7 +110,7 @@ void LayoutViewPainter::PaintSelection(const LayoutView& layout_view) {
   UpdateCaret(layout_view);
 }
 
-void LayoutViewPainter::PaintSelectionIfNeeded(const LayoutView& layout_view) {
+void ViewPainter::PaintSelectionIfNeeded(const LayoutView& layout_view) {
   const auto& new_selection = layout_view.selection();
   const auto& old_selection = last_layout_view_->selection();
   if (old_selection == new_selection) {
@@ -155,7 +155,7 @@ void LayoutViewPainter::PaintSelectionIfNeeded(const LayoutView& layout_view) {
   UpdateCaret(layout_view);
 }
 
-void LayoutViewPainter::UpdateCaret(const LayoutView& layout_view) {
+void ViewPainter::UpdateCaret(const LayoutView& layout_view) {
   DCHECK(!caret_->visible());
   const auto& selection = layout_view.selection();
   if (!selection.has_focus())
@@ -170,7 +170,7 @@ void LayoutViewPainter::UpdateCaret(const LayoutView& layout_view) {
   caret_->Update(canvas_, now_, caret_bounds);
 }
 
-void LayoutViewPainter::PaintRuler(const LayoutView& layout_view) {
+void ViewPainter::PaintRuler(const LayoutView& layout_view) {
   const auto& ruler_bounds = layout_view.ruler_bounds();
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, ruler_bounds);
   // TODO(eval1749): We should get ruler color from CSS.

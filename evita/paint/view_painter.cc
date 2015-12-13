@@ -66,11 +66,12 @@ std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
     view_cache->UpdateSelection(layout_view_.selection(), caret_bounds_);
     return std::move(view_cache);
   }
-  paint::RootInlineBoxListPainter painter(
-      canvas, layout_view_.bounds(), layout_view_.bgcolor(),
-      layout_view_.lines(), view_cache && view_cache->CanUseTextImage(canvas)
-                                ? view_cache->lines()
-                                : std::vector<RootInlineBox*>{});
+  const auto& cached_lines = view_cache && view_cache->CanUseTextImage(canvas)
+                                 ? view_cache->lines()
+                                 : std::vector<RootInlineBox*>();
+  paint::RootInlineBoxListPainter painter(canvas, layout_view_.bounds(),
+                                          layout_view_.bgcolor(),
+                                          layout_view_.lines(), cached_lines);
   if (view_cache)
     RestoreCaretBackgroundIfNeeded(canvas, *view_cache);
   if (!painter.Paint()) {
@@ -111,10 +112,10 @@ void ViewPainter::PaintSelection(gfx::Canvas* canvas) {
     return;
   }
 
- if (selection.end() <= lines.front()->text_start()) {
-   // The selection ends before the view.
-   return;
- }
+  if (selection.end() <= lines.front()->text_start()) {
+    // The selection ends before the view.
+    return;
+  }
 
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, layout_view_.bounds());
   gfx::Brush fill_brush(canvas, selection.color());

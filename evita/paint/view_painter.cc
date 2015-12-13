@@ -101,22 +101,30 @@ void ViewPainter::PaintCaretIfNeeded(gfx::Canvas* canvas) {
 }
 
 void ViewPainter::PaintSelection(gfx::Canvas* canvas) {
+  const auto& selection = layout_view_.selection();
+  if (!selection.is_range())
+    return;
   TRACE_EVENT0("view", "ViewPainter::PaintSelection");
   const auto& lines = layout_view_.lines();
-  const auto& selection = layout_view_.selection();
-  if (selection.start() >= lines.back()->text_end())
+  if (selection.start() >= lines.back()->text_end()) {
+    // The selection starts after the view.
     return;
+  }
+
+ if (selection.end() <= lines.front()->text_start()) {
+   // The selection ends before the view.
+   return;
+ }
+
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, layout_view_.bounds());
-  if (selection.is_range() && selection.end() > lines.front()->text_start()) {
-    gfx::Brush fill_brush(canvas, selection.color());
-    for (auto line : lines) {
-      if (selection.end() <= line->text_start())
-        break;
-      auto const rect = line->CalculateSelectionRect(selection);
-      if (rect.empty())
-        continue;
-      canvas->FillRectangle(fill_brush, rect);
-    }
+  gfx::Brush fill_brush(canvas, selection.color());
+  for (auto line : lines) {
+    if (selection.end() <= line->text_start())
+      break;
+    auto const rect = line->CalculateSelectionRect(selection);
+    if (rect.empty())
+      continue;
+    canvas->FillRectangle(fill_brush, rect);
   }
 }
 

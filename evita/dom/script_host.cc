@@ -287,6 +287,10 @@ ScriptHost* ScriptHost::Create(Scheduler* scheduler,
   // flags.
   // char flags[] = "--use_strict" " --harmony";
   // v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
+  char flags[] =
+      " --harmony-function-name"
+      " --harmony-do-expressions";
+  v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
                                  gin::ArrayBufferAllocator::SharedInstance());
   v8::V8::InitializeICU();

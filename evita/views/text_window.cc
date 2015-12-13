@@ -304,20 +304,15 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
 
     MetricsView::TimingScope timing_scope(metrics_view_);
     auto const selection = GetTextSelectionModel(this, *selection_);
-    text_view_->Update(selection);
+    text_view_->Update(selection, now);
     UpdateScrollBar();
   }
   {
     gfx::Canvas::DrawingScope drawing_scope(canvas());
-    text_view_->Paint(canvas(), now);
+    text_view_->Paint(canvas());
     OnDraw(canvas());
   }
   NotifyUpdateContent();
-}
-
-// ui::CaretOwner
-void TextWindow::DidFireCaretTimer() {
-  RequestAnimationFrame();
 }
 
 // ui::LayerOwnerDelegate

@@ -9,14 +9,17 @@
 
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
+#include "base/time/time.h"
+#include "base/timer/timer.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/views/text/layout_caret.h"
 
 namespace text {
 class Buffer;
 }
 
 namespace ui {
-class Caret;
+class AnimatableWindow;
 }
 
 namespace views {
@@ -39,22 +42,36 @@ class LayoutViewBuilder final {
   using RenderStyle = rendering::RenderStyle;
   using TextSelectionModel = rendering::TextSelectionModel;
 
-  explicit LayoutViewBuilder(const text::Buffer* buffer_, ui::Caret* caret);
+  explicit LayoutViewBuilder(const text::Buffer* buffer_,
+                             ui::AnimatableWindow* caret_owner);
   ~LayoutViewBuilder();
 
   scoped_refptr<LayoutView> Build(const LayoutBlockFlow& layout_block_flow,
-                                  const TextSelectionModel& selection_model);
+                                  const TextSelectionModel& selection_model,
+                                  base::Time now);
 
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
 
  private:
+  gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
+      const LayoutBlockFlow& layout_block_flow,
+      const TextSelectionModel& selection_model) const;
+  LayoutCaret::State ComputeCaretState(const gfx::RectF& bounds,
+                                       base::Time now) const;
+
   gfx::RectF ComputeRulerBounds() const;
+  void DidFireCaretTimer();
+  void StartCaretTimer();
+  void StopCaretTimer();
 
   gfx::RectF bounds_;
   const text::Buffer* const buffer_;
-  ui::Caret* const caret_;
-  scoped_refptr<LayoutView> last_layout_view_;
+  gfx::RectF caret_bounds_;
+  ui::AnimatableWindow* const caret_owner_;
+  LayoutCaret::State caret_state_;
+  base::Time caret_time_;
+  base::RepeatingTimer caret_timer_;
   float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(LayoutViewBuilder);

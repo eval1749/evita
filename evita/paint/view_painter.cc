@@ -8,7 +8,7 @@
 #include "evita/gfx_base.h"
 #include "evita/paint/root_inline_box_list_painter.h"
 #include "evita/paint/view_paint_cache.h"
-#include "evita/ui/caret.h"
+#include "evita/views/text/layout_caret.h"
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/render_selection.h"
 #include "evita/views/text/root_inline_box.h"
@@ -25,7 +25,7 @@ gfx::RectF RoundBounds(const gfx::RectF& bounds) {
                     ::floor(bounds.right), ::floor(bounds.bottom));
 }
 
-std::unordered_set<gfx::RectF> CalculateSelectionRects(
+std::unordered_set<gfx::RectF> CalculateSelectionBoundsList(
     const std::vector<RootInlineBox*>& lines,
     const TextSelection& selection,
     const gfx::RectF& bounds) {
@@ -58,17 +58,12 @@ ViewPainter::ViewPainter(const LayoutView& layout_view)
 
 ViewPainter::~ViewPainter() {}
 
-ui::Caret* ViewPainter::caret() const {
-  return layout_view_.caret();
-}
-
 std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
     gfx::Canvas* canvas,
-    base::Time now,
     std::unique_ptr<ViewPaintCache> view_cache) {
   if (view_cache && !view_cache->NeedsTextPaint(canvas, layout_view_)) {
-    PaintSelectionIfNeeded(canvas, now, *view_cache);
-    view_cache->UpdateSelection(layout_view_.selection());
+    PaintSelectionWithCache(canvas, *view_cache);
+    view_cache->UpdateSelection(layout_view_.selection(), caret_bounds_);
     return std::move(view_cache);
   }
   paint::RootInlineBoxListPainter painter(
@@ -76,30 +71,41 @@ std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
       layout_view_.lines(), view_cache && view_cache->CanUseTextImage(canvas)
                                 ? view_cache->lines()
                                 : std::vector<RootInlineBox*>{});
-  caret()->DidPaint(layout_view_.bounds());
+  if (view_cache)
+    RestoreCaretBackgroundIfNeeded(canvas, *view_cache);
   if (!painter.Paint()) {
     TRACE_EVENT0("view", "ViewPainter::PaintClean");
-    PaintSelection(canvas, now);
-    view_cache->UpdateSelection(layout_view_.selection());
+    PaintSelection(canvas);
+    PaintCaretIfNeeded(canvas);
+    view_cache->UpdateSelection(layout_view_.selection(), caret_bounds_);
     return std::move(view_cache);
   }
 
   TRACE_EVENT0("view", "ViewPainter::PaintDirty");
   canvas->SaveScreenImage(layout_view_.bounds());
   painter.Finish();
-  PaintSelection(canvas, now);
+  PaintSelection(canvas);
   PaintRuler(canvas);
-  return std::make_unique<ViewPaintCache>(canvas, layout_view_);
+  PaintCaretIfNeeded(canvas);
+  return std::make_unique<ViewPaintCache>(canvas, layout_view_, caret_bounds_);
 }
 
-void ViewPainter::PaintSelection(gfx::Canvas* canvas, base::Time now) {
+void ViewPainter::PaintCaretIfNeeded(gfx::Canvas* canvas) {
+  if (!layout_view_.caret().is_show())
+    return;
+  caret_bounds_ = layout_view_.caret().bounds();
+  DCHECK(!caret_bounds_.empty());
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, caret_bounds_);
+  canvas->AddDirtyRect(caret_bounds_);
+  canvas->Clear(gfx::ColorF::Black);
+}
+
+void ViewPainter::PaintSelection(gfx::Canvas* canvas) {
   TRACE_EVENT0("view", "ViewPainter::PaintSelection");
   const auto& lines = layout_view_.lines();
   const auto& selection = layout_view_.selection();
-  if (selection.start() >= lines.back()->text_end()) {
-    caret()->Hide(canvas);
+  if (selection.start() >= lines.back()->text_end())
     return;
-  }
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, layout_view_.bounds());
   if (selection.is_range() && selection.end() > lines.front()->text_start()) {
     gfx::Brush fill_brush(canvas, selection.color());
@@ -112,70 +118,45 @@ void ViewPainter::PaintSelection(gfx::Canvas* canvas, base::Time now) {
       canvas->FillRectangle(fill_brush, rect);
     }
   }
-  UpdateCaret(canvas, now);
 }
 
-void ViewPainter::PaintSelectionIfNeeded(gfx::Canvas* canvas,
-                                         base::Time now,
-                                         const ViewPaintCache& view_cache) {
+void ViewPainter::PaintSelectionWithCache(gfx::Canvas* canvas,
+                                          const ViewPaintCache& view_cache) {
   DCHECK(!view_cache.NeedsTextPaint(canvas, layout_view_));
   const auto& new_selection = layout_view_.selection();
   const auto& old_selection = view_cache.selection();
-  if (old_selection == new_selection) {
-    if (!old_selection.has_focus())
-      return;
-    caret()->Blink(canvas, now);
-    return;
-  }
   const auto& bounds = layout_view_.bounds();
   const auto& lines = view_cache.lines();
-  auto new_old_selection_rects =
-      CalculateSelectionRects(lines, new_selection, bounds);
-  auto old_old_selection_rects =
-      CalculateSelectionRects(lines, old_selection, bounds);
+  auto new_selection_bounds_list =
+      CalculateSelectionBoundsList(lines, new_selection, bounds);
+  auto old_selection_bounds_list =
+      CalculateSelectionBoundsList(lines, old_selection, bounds);
 
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
-  for (const auto& old_rect : old_old_selection_rects) {
-    if (new_old_selection_rects.find(old_rect) != new_old_selection_rects.end())
+  for (const auto& old_rect : old_selection_bounds_list) {
+    if (new_selection_bounds_list.find(old_rect) !=
+        new_selection_bounds_list.end())
       continue;
     canvas->AddDirtyRect(old_rect);
     canvas->RestoreScreenImage(old_rect);
-    caret()->DidPaint(old_rect);
   }
+  RestoreCaretBackgroundIfNeeded(canvas, view_cache);
 
   if (old_selection.color() != new_selection.color())
-    old_old_selection_rects.clear();
-  if (!new_old_selection_rects.empty()) {
+    old_selection_bounds_list.clear();
+  if (!new_selection_bounds_list.empty()) {
     gfx::Brush fill_brush(canvas, new_selection.color());
-    for (const auto& new_rect : new_old_selection_rects) {
-      if (old_old_selection_rects.find(new_rect) !=
-          old_old_selection_rects.end())
+    for (const auto& new_rect : new_selection_bounds_list) {
+      if (old_selection_bounds_list.find(new_rect) !=
+          old_selection_bounds_list.end())
         continue;
       canvas->AddDirtyRect(new_rect);
       canvas->RestoreScreenImage(new_rect);
       canvas->FillRectangle(fill_brush, new_rect);
-      caret()->DidPaint(new_rect);
     }
   }
-
-  caret()->Hide(canvas);
-  UpdateCaret(canvas, now);
-}
-
-void ViewPainter::UpdateCaret(gfx::Canvas* canvas, base::Time now) {
-  DCHECK(!caret()->visible());
-  const auto& selection = layout_view_.selection();
-  if (!selection.has_focus())
-    return;
-  auto const char_rect =
-      RoundBounds(layout_view_.HitTestTextPosition(selection.focus_offset()));
-  if (char_rect.empty())
-    return;
-  auto const caret_width = 2;
-  gfx::RectF caret_bounds(char_rect.left, char_rect.top,
-                          char_rect.left + caret_width, char_rect.bottom);
-  caret()->Update(canvas, now, caret_bounds);
+  PaintCaretIfNeeded(canvas);
 }
 
 void ViewPainter::PaintRuler(gfx::Canvas* canvas) {
@@ -184,6 +165,16 @@ void ViewPainter::PaintRuler(gfx::Canvas* canvas) {
   // TODO(eval1749): We should get ruler color from CSS.
   gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));
   canvas->DrawRectangle(brush, ruler_bounds);
+}
+
+void ViewPainter::RestoreCaretBackgroundIfNeeded(
+    gfx::Canvas* canvas,
+    const ViewPaintCache& view_cache) {
+  const auto& bounds = view_cache.caret_bounds();
+  if (bounds.empty())
+    return;
+  canvas->AddDirtyRect(bounds);
+  canvas->RestoreScreenImage(bounds);
 }
 
 }  // namespace pain

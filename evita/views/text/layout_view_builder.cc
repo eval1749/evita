@@ -6,6 +6,8 @@
 
 #include "base/logging.h"
 #include "evita/text/buffer.h"
+#include "evita/ui/animation/animatable_window.h"
+#include "evita/ui/base/ime/text_input_client.h"
 #include "evita/views/text/layout_block_flow.h"
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/render_font.h"
@@ -22,15 +24,43 @@ using FontSet = rendering::FontSet;
 using RootInlineBox = rendering::RootInlineBox;
 using TextFormatter = rendering::TextFormatter;
 
-LayoutViewBuilder::LayoutViewBuilder(const text::Buffer* buffer,
-                                     ui::Caret* caret)
-    : buffer_(buffer), caret_(caret), zoom_(1.0f) {}
+namespace {
+const auto kBlinkInterval = 16 * 20;  // milliseconds
 
-LayoutViewBuilder::~LayoutViewBuilder() {}
+base::TimeDelta GetCaretBlinkInterval() {
+  auto const interval = ::GetCaretBlinkTime();
+  if (!interval)
+    return base::TimeDelta::FromMilliseconds(kBlinkInterval);
+  if (interval == INFINITE)
+    return base::TimeDelta();
+  return base::TimeDelta::FromMilliseconds(interval);
+}
+
+gfx::RectF RoundBounds(const gfx::RectF& bounds) {
+  return gfx::RectF(::floor(bounds.left), ::floor(bounds.top),
+                    ::floor(bounds.right), ::floor(bounds.bottom));
+}
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+//
+// LayoutViewBuilder
+//
+LayoutViewBuilder::LayoutViewBuilder(const text::Buffer* buffer,
+                                     ui::AnimatableWindow* caret_owner)
+    : buffer_(buffer),
+      caret_owner_(caret_owner),
+      caret_state_(LayoutCaret::State::None),
+      zoom_(1.0f) {}
+
+LayoutViewBuilder::~LayoutViewBuilder() {
+  caret_timer_.Stop();
+}
 
 scoped_refptr<LayoutView> LayoutViewBuilder::Build(
     const LayoutBlockFlow& layout_block_flow,
-    const TextSelectionModel& selection_model) {
+    const TextSelectionModel& selection_model,
+    base::Time now) {
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
   const auto& bgcolor =
@@ -38,22 +68,70 @@ scoped_refptr<LayoutView> LayoutViewBuilder::Build(
   const auto& ruler_bounds = ComputeRulerBounds();
   const auto& selection =
       TextFormatter::FormatSelection(buffer_, selection_model);
-  if (last_layout_view_ &&
-      last_layout_view_->layout_version() ==
-          layout_block_flow.format_counter() &&
-      last_layout_view_->ruler_bounds() == ruler_bounds &&
-      last_layout_view_->selection() == selection &&
-      last_layout_view_->bgcolor() == bgcolor) {
-    return last_layout_view_;
+  const auto& caret_bounds =
+      ComputeCaretBounds(layout_block_flow, selection_model);
+  const auto caret_state = ComputeCaretState(caret_bounds, now);
+
+  if (caret_bounds.empty()) {
+    StopCaretTimer();
+  } else if (caret_bounds_ != caret_bounds) {
+    ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
+    caret_time_ = now;
+    StartCaretTimer();
   }
+
+  caret_bounds_ = caret_bounds;
+  caret_state_ = caret_state;
 
   std::vector<RootInlineBox*> lines;
   for (const auto& line : layout_block_flow.lines())
     lines.push_back(line->Copy());
-  last_layout_view_ = new LayoutView(caret_, layout_block_flow.format_counter(),
-                                     layout_block_flow.bounds(), lines,
-                                     selection, bgcolor, ruler_bounds);
-  return last_layout_view_;
+  return new LayoutView(
+      layout_block_flow.format_counter(), layout_block_flow.bounds(), lines,
+      selection, bgcolor, ruler_bounds,
+      std::make_unique<LayoutCaret>(caret_state, caret_bounds));
+}
+
+gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
+    const LayoutBlockFlow& layout_block_flow,
+    const TextSelectionModel& selection_model) const {
+  if (!selection_model.has_focus())
+    return gfx::RectF();
+  // TODO(eval1749): We should make |LayoutBlockFlow::HitTestTextPosition()|
+  // as const function.
+  auto const& char_rect =
+      RoundBounds(const_cast<LayoutBlockFlow&>(layout_block_flow)
+                      .HitTestTextPosition(selection_model.focus_offset()));
+  if (char_rect.empty())
+    return gfx::RectF();
+  auto const caret_width = 2;
+  return gfx::RectF(char_rect.left, char_rect.top, char_rect.left + caret_width,
+                    char_rect.bottom);
+}
+
+LayoutCaret::State LayoutViewBuilder::ComputeCaretState(
+    const gfx::RectF& bounds,
+    base::Time now) const {
+  if (bounds.empty())
+    return LayoutCaret::State::None;
+
+  if (caret_state_ == LayoutCaret::State::None) {
+    // This view starts showing caret.
+    return LayoutCaret::State::Show;
+  }
+
+  if (caret_bounds_ != bounds) {
+    // The caret is moved.
+    return LayoutCaret::State::Show;
+  }
+
+  // When the caret stays at same point, caret is blinking.
+  auto const interval = GetCaretBlinkInterval();
+  if (interval == base::TimeDelta())
+    return LayoutCaret::State::Show;
+  auto const delta = now - caret_time_;
+  auto const index = delta / interval;
+  return index % 2 ? LayoutCaret::State::Hide : LayoutCaret::State::Show;
 }
 
 gfx::RectF LayoutViewBuilder::ComputeRulerBounds() const {
@@ -70,13 +148,31 @@ gfx::RectF LayoutViewBuilder::ComputeRulerBounds() const {
                     gfx::SizeF(1.0f, bounds_.height()));
 }
 
+void LayoutViewBuilder::DidFireCaretTimer() {
+  caret_owner_->RequestAnimationFrame();
+}
+
 void LayoutViewBuilder::SetBounds(const gfx::RectF& new_bounds) {
   bounds_ = new_bounds;
+  caret_bounds_ = gfx::RectF();
 }
 
 void LayoutViewBuilder::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
   zoom_ = new_zoom;
+}
+
+void LayoutViewBuilder::StartCaretTimer() {
+  const auto interval = GetCaretBlinkInterval();
+  if (interval == base::TimeDelta())
+    return;
+  caret_timer_.Start(FROM_HERE, interval,
+                     base::Bind(&LayoutViewBuilder::DidFireCaretTimer,
+                                base::Unretained(this)));
+}
+
+void LayoutViewBuilder::StopCaretTimer() {
+  caret_timer_.Stop();
 }
 
 }  // namespace views

@@ -9,6 +9,8 @@ source_set("text") {
     "inline_box_forward.h",
     "inline_box_visitor.cc",
     "inline_box_visitor.h",
+    "layout_caret.cc",
+    "layout_caret.h",
     "layout_view.cc",
     "layout_view.h",
     "layout_view_builder.cc",
@@ -29,8 +31,6 @@ source_set("text") {
     "text_formatter.h",
     "text_view.cc",
     "text_view.h",
-    "text_view_caret.cc",
-    "text_view_caret.h",
   ]
 
   public_deps = [

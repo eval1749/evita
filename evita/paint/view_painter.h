@@ -8,11 +8,10 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "base/time/time.h"
-#include "evita/gfx/forward.h"
+#include "evita/gfx/rect_f.h"
 
-namespace ui {
-class Caret;
+namespace gfx {
+class Canvas;
 }
 
 namespace views {
@@ -36,20 +35,19 @@ class ViewPainter final {
 
   std::unique_ptr<ViewPaintCache> Paint(
       gfx::Canvas* canvas,
-      base::Time now,
       std::unique_ptr<ViewPaintCache> view_cache);
 
  private:
-  ui::Caret* caret() const;
-
+  void PaintCaretIfNeeded(gfx::Canvas* canvas);
   void PaintRuler(gfx::Canvas* canvas);
-  void PaintSelection(gfx::Canvas* canvas, base::Time now);
-  void PaintSelectionIfNeeded(gfx::Canvas* canvas,
-                              base::Time now,
-                              const ViewPaintCache& view_cache);
-  void UpdateCaret(gfx::Canvas* canvas, base::Time now);
+  void PaintSelection(gfx::Canvas* canvas);
+  void PaintSelectionWithCache(gfx::Canvas* canvas,
+                               const ViewPaintCache& view_cache);
+  void RestoreCaretBackgroundIfNeeded(gfx::Canvas* canvas,
+                                      const ViewPaintCache& view_cache);
 
   const LayoutView& layout_view_;
+  gfx::RectF caret_bounds_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewPainter);
 };

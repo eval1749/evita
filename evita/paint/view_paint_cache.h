@@ -8,8 +8,12 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/gfx/forward.h"
+#include "evita/gfx/rect_f.h"
 #include "evita/views/text/render_selection.h"
+
+namespace gfx {
+class Canvas;
+}
 
 namespace views {
 class LayoutView;
@@ -30,19 +34,24 @@ class ViewPaintCache final {
   using TextSelection = views::rendering::TextSelection;
 
  public:
-  ViewPaintCache(gfx::Canvas* canvas, const LayoutView& view);
+  ViewPaintCache(gfx::Canvas* canvas,
+                 const LayoutView& view,
+                 const gfx::RectF& caret_bounds);
   ~ViewPaintCache();
 
+  const gfx::RectF& caret_bounds() const { return caret_bounds_; }
   const std::vector<RootInlineBox*>& lines() const { return lines_; }
   const TextSelection& selection() const { return selection_; }
 
   bool CanUseTextImage(gfx::Canvas* canvas) const;
   bool NeedsTextPaint(gfx::Canvas* canvas, const LayoutView& view) const;
-  void UpdateSelection(const TextSelection& selection);
+  void UpdateSelection(const TextSelection& selection,
+                       const gfx::RectF& caret_bounds);
 
  private:
   const int bitmap_id_;
   const gfx::Canvas* const canvas_;
+  gfx::RectF caret_bounds_;
   const int layout_version_;
   std::vector<RootInlineBox*> lines_;
   TextSelection selection_;

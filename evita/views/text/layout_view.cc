@@ -4,20 +4,21 @@
 
 #include "evita/views/text/layout_view.h"
 
+#include "evita/views/text/layout_caret.h"
 #include "evita/views/text/root_inline_box.h"
 
 namespace views {
 
-LayoutView::LayoutView(ui::Caret* caret,
-                       int layout_version,
+LayoutView::LayoutView(int layout_version,
                        const gfx::RectF& bounds,
                        const std::vector<RootInlineBox*>& lines,
                        const TextSelection& selection,
                        const gfx::ColorF& bgcolor,
-                       const gfx::RectF& ruler_bounds)
+                       const gfx::RectF& ruler_bounds,
+                       std::unique_ptr<LayoutCaret> caret)
     : bgcolor_(bgcolor),
       bounds_(bounds),
-      caret_(caret),
+      caret_(std::move(caret)),
       layout_version_(layout_version),
       lines_(lines),
       ruler_bounds_(ruler_bounds),

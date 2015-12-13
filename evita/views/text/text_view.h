@@ -23,7 +23,7 @@ class ViewPaintCache;
 }
 
 namespace ui {
-class CaretOwner;
+class AnimatableWindow;
 }
 
 namespace views {
@@ -34,7 +34,6 @@ class LayoutBlockFlow;
 
 class LayoutView;
 class LayoutViewBuilder;
-class TextViewCaret;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -46,7 +45,7 @@ class TextView final : private gfx::CanvasObserver {
   using TextSelectionModel = rendering::TextSelectionModel;
   using TextSelection = rendering::TextSelection;
 
-  TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner);
+  TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner);
   ~TextView();
 
   text::Buffer* buffer() const { return buffer_; }
@@ -69,14 +68,14 @@ class TextView final : private gfx::CanvasObserver {
   void MakeSelectionVisible();
   text::Posn MapPointToPosition(gfx::PointF point);
   text::Posn MapPointXToOffset(text::Posn text_offset, float point_x) const;
-  void Paint(gfx::Canvas* canvas, base::Time now);
+  void Paint(gfx::Canvas* canvas);
   bool ScrollDown();
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
   // Returns start of line offset containing |text_offset|.
   text::Posn StartOfLine(text::Posn text_offset) const;
-  void Update(const TextSelectionModel& selection);
+  void Update(const TextSelectionModel& selection, base::Time now);
 
  private:
   bool IsPositionFullyVisible(text::Posn text_offset) const;
@@ -87,7 +86,6 @@ class TextView final : private gfx::CanvasObserver {
 
   gfx::RectF bounds_;
   text::Buffer* const buffer_;
-  const std::unique_ptr<TextViewCaret> caret_;
   text::Posn caret_offset_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
   scoped_refptr<LayoutView> layout_view_;

@@ -18,7 +18,6 @@
 #include "evita/views/text/layout_view.h"
 #include "evita/views/text/layout_block_flow.h"
 #include "evita/views/text/layout_view_builder.h"
-#include "evita/views/text/text_view_caret.h"
 
 namespace views {
 using namespace rendering;  // NOLINT
@@ -40,12 +39,11 @@ text::Posn GetCaretOffset(const text::Buffer* buffer,
 //
 // TextView
 //
-TextView::TextView(text::Buffer* buffer, ui::CaretOwner* caret_owner)
+TextView::TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner)
     : buffer_(buffer),
-      caret_(new TextViewCaret(caret_owner)),
       caret_offset_(-1),
       layout_block_flow_(new LayoutBlockFlow(buffer)),
-      layout_view_builder_(new LayoutViewBuilder(buffer, caret_.get())) {}
+      layout_view_builder_(new LayoutViewBuilder(buffer, caret_owner)) {}
 
 TextView::~TextView() {}
 
@@ -120,11 +118,11 @@ text::Posn TextView::MapPointXToOffset(text::Posn text_offset,
   return layout_block_flow_->MapPointXToOffset(text_offset, point_x);
 }
 
-void TextView::Paint(gfx::Canvas* canvas, base::Time now) {
+void TextView::Paint(gfx::Canvas* canvas) {
   DCHECK(layout_view_);
   TRACE_EVENT0("view", "TextView::Paint");
   view_paint_cache_ = paint::ViewPainter(*layout_view_)
-                          .Paint(canvas, now, std::move(view_paint_cache_));
+                          .Paint(canvas, std::move(view_paint_cache_));
 }
 
 bool TextView::ScrollDown() {
@@ -144,7 +142,6 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
   if (bounds_.size() == new_bounds.size())
     return;
   bounds_ = new_bounds;
-  caret_->Reset();
   view_paint_cache_.reset();
   layout_block_flow_->SetBounds(bounds_);
   layout_view_builder_->SetBounds(bounds_);
@@ -160,7 +157,8 @@ text::Posn TextView::StartOfLine(text::Posn text_offset) const {
   return layout_block_flow_->StartOfLine(text_offset);
 }
 
-void TextView::Update(const TextSelectionModel& selection_model) {
+void TextView::Update(const TextSelectionModel& selection_model,
+                      base::Time now) {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("view", "TextView::Update");
   auto const new_caret_offset =
@@ -179,7 +177,7 @@ void TextView::Update(const TextSelectionModel& selection_model) {
   }
 
   layout_view_ =
-      layout_view_builder_->Build(*layout_block_flow_, selection_model);
+      layout_view_builder_->Build(*layout_block_flow_, selection_model, now);
 }
 
 // gfx::CanvasObserver

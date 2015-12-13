@@ -10,7 +10,6 @@
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/selection_change_observer.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
-#include "evita/ui/caret_owner.h"
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/canvas_content_window.h"
 
@@ -34,10 +33,12 @@ class TextSelectionModel;
 //
 // TextWindow
 //
+// TextWindow manages caret by itself instead of using |ui::Caret|. See
+// |LayoutViewBuilder| class about caret management.
+//
 class TextWindow final : public CanvasContentWindow,
                          public text::BufferMutationObserver,
                          public text::SelectionChangeObserver,
-                         public ui::CaretOwner,
                          public ui::ScrollBarObserver,
                          public ui::TextInputDelegate {
   DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
@@ -79,9 +80,6 @@ class TextWindow final : public CanvasContentWindow,
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;
-
-  // ui::CaretOwner
-  void DidFireCaretTimer() final;
 
   // ui::LayerOwnerDelegate
   void DidRecreateLayer(ui::Layer* old_layer) final;

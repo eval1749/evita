@@ -52,7 +52,7 @@ class TableWindow final : public CanvasContentWindow,
 
   // text::BufferMutationObserver
   void DidDeleteAt(text::Offset offset, text::OffsetDelta length) final;
-  void DidInsertAt(text::Offset offset, text::OffsetDelta length) final;
+  void DidInsertBefore(text::Offset offset, text::OffsetDelta length) final;
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

@@ -31,9 +31,9 @@ class MutationObserver final : public v8_glue::Scriptable<MutationObserver> {
   void DidDeleteAt(Document* document,
                    text::Offset offset,
                    text::OffsetDelta length);
-  void DidInsertAt(Document* document,
-                   text::Offset offset,
-                   text::OffsetDelta length);
+  void DidInsertBefore(Document* document,
+                       text::Offset offset,
+                       text::OffsetDelta length);
   void DidMutateDocument(Document* document);
 
  private:

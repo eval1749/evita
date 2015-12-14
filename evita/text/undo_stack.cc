@@ -147,7 +147,7 @@ Offset UndoStack::Undo(Offset offset, int count) {
 }
 
 // BufferMutationObserver
-void UndoStack::DidInsertAt(Offset start, OffsetDelta length) {
+void UndoStack::DidInsertBefore(Offset start, OffsetDelta length) {
   auto const end = start + length;
 
   if (state_ == State::Redo) {

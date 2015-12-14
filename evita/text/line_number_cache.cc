@@ -78,7 +78,7 @@ void LineNumberCache::DidDeleteAt(Offset offset, OffsetDelta) {
   InvalidateCache(offset);
 }
 
-void LineNumberCache::DidInsertAt(Offset offset, OffsetDelta) {
+void LineNumberCache::DidInsertBefore(Offset offset, OffsetDelta) {
   InvalidateCache(offset);
 }
 

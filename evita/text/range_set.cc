@@ -40,15 +40,6 @@ void RangeSet::DidDeleteAt(Offset start, OffsetDelta length) {
   }
 }
 
-void RangeSet::DidInsertAt(Offset offset, OffsetDelta length) {
-  for (auto* range : ranges_) {
-    if (range->start_ > offset)
-      range->start_ = range->start_ + length;
-    if (range->end_ > offset)
-      range->end_ = range->end_ + length;
-  }
-}
-
 void RangeSet::DidInsertBefore(Offset offset, OffsetDelta length) {
   for (auto* range : ranges_) {
     if (range->start_ >= offset)

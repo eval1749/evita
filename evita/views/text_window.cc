@@ -121,8 +121,7 @@ text::Offset TextWindow::ComputeWindowLineMotion(int n,
   return lPosn;
 }
 
-text::Offset TextWindow::ComputeWindowMotion(int n,
-                                             text::Offset offset) {
+text::Offset TextWindow::ComputeWindowMotion(int n, text::Offset offset) {
   UI_ASSERT_DOM_LOCKED();
   text_view_->FormatIfNeeded();
   if (n > 0)
@@ -276,9 +275,10 @@ void TextWindow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   RequestAnimationFrame();
 }
 
-void TextWindow::DidInsertAt(text::Offset offset, text::OffsetDelta length) {
+void TextWindow::DidInsertBefore(text::Offset offset,
+                                 text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  text_view_->DidInsertAt(offset, length);
+  text_view_->DidInsertBefore(offset, length);
   RequestAnimationFrame();
 }
 

@@ -35,7 +35,7 @@ class UndoStack final : public BufferMutationObserver {
 
  private:
   // BufferMutationObserver
-  void DidInsertAt(Offset offset, OffsetDelta length) final;
+  void DidInsertBefore(Offset offset, OffsetDelta length) final;
   void WillDeleteAt(Offset offset, OffsetDelta length) final;
 
   Buffer* buffer_;

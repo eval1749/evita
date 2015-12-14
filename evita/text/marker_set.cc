@@ -248,16 +248,6 @@ void MarkerSet::DidDeleteAt(Offset start, OffsetDelta length) {
   }
 }
 
-void MarkerSet::DidInsertAt(Offset offset, OffsetDelta length) {
-  auto const start = offset + OffsetDelta(1);
-  for (auto runner = lower_bound(start); runner != markers_.end(); ++runner) {
-    auto const marker = *runner;
-    if (marker->start_ > offset)
-      marker->start_ = marker->start_ + length;
-    marker->end_ = marker->end_ + length;
-  }
-}
-
 void MarkerSet::DidInsertBefore(Offset offset, OffsetDelta length) {
   auto const start = offset + OffsetDelta(1);
   for (auto runner = lower_bound(start); runner != markers_.end(); ++runner) {

@@ -67,7 +67,6 @@ class IntervalSet::Impl final : public RangeSetBase,
 
   // BufferMutationObserver
   void DidDeleteAt(Offset offset, OffsetDelta length) override;
-  void DidInsertAt(Offset offset, OffsetDelta length) override;
   void DidInsertBefore(Offset offset, OffsetDelta length) override;
 
   Buffer* const buffer_;
@@ -252,48 +251,38 @@ void IntervalSet::Impl::DidDeleteAt(Offset delete_start, OffsetDelta length) {
   }
 }
 
-void IntervalSet::Impl::DidInsertAt(Offset offset, OffsetDelta length) {
-  for (auto it = intervals_.rbegin();
-       it != intervals_.rend() && (*it)->end() > offset; ++it) {
-    auto interval = *it;
-    if (interval->start() > offset) {
-      set_range(interval, interval->start() + length, interval->end() + length);
-    } else {
-      set_range_end(interval, interval->end() + length);
-    }
-  }
-}
-
 void IntervalSet::Impl::DidInsertBefore(Offset offset, OffsetDelta length) {
   for (auto it = intervals_.rbegin();
        it != intervals_.rend() && (*it)->end() >= offset; ++it) {
     auto interval = *it;
     if (interval->start() >= offset) {
       set_range(interval, interval->start() + length, interval->end() + length);
-    } else {
-      set_range_end(interval, interval->end() + length);
+      continue;
     }
+    set_range_end(interval, interval->end() + length);
   }
 
-  if (!offset) {
-    // Set default style to new text inserted at start of document.
-    auto const head = *intervals_.begin();
-    DCHECK_EQ(Offset(length.value()), head->start());
-    // TODO(eval1749): We should check head interval has default style or not
-    // without creating Interval object.
-    auto const interval = new Interval(Offset(), head->start());
-    if (CanMergeIntervals(interval, head)) {
-      set_range_start(head, Offset());
-      delete interval;
-    } else {
-      intervals_.insert(interval);
-    }
+  if (offset.value())
+    return;
+
+  // Set default style to new text inserted at start of document.
+  auto const head = *intervals_.begin();
+  DCHECK_EQ(Offset(length.value()), head->start());
+  // TODO(eval1749): We should check head interval has default style or not
+  // without creating Interval object.
+  auto const interval = new Interval(Offset(), head->start());
+  if (CanMergeIntervals(interval, head)) {
+    set_range_start(head, Offset());
+    delete interval;
+    return;
   }
+  intervals_.insert(interval);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // IntervalSet
+//
 IntervalSet::IntervalSet(Buffer* buffer) : impl_(new Impl(buffer)) {}
 
 IntervalSet::~IntervalSet() {}

@@ -20,12 +20,8 @@ void BufferMutationObserver::DidChangeStyle(Offset, OffsetDelta) {}
 
 void BufferMutationObserver::DidDeleteAt(Offset, OffsetDelta) {}
 
-void BufferMutationObserver::DidInsertAt(Offset, OffsetDelta) {}
-
 void BufferMutationObserver::DidInsertBefore(Offset offset,
-                                             OffsetDelta length) {
-  DidInsertAt(offset, length);
-}
+                                             OffsetDelta length) {}
 
 void BufferMutationObserver::WillDeleteAt(Offset, OffsetDelta) {}
 

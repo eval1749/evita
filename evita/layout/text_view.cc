@@ -60,9 +60,9 @@ void TextView::DidHide() {
   view_paint_cache_.reset();
 }
 
-void TextView::DidInsertAt(text::Offset offset, text::OffsetDelta length) {
+void TextView::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  layout_block_flow_->DidInsertAt(offset, length);
+  layout_block_flow_->DidInsertBefore(offset, length);
 }
 
 text::Offset TextView::EndOfLine(text::Offset text_offset) const {

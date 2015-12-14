@@ -74,7 +74,7 @@ class TextWindow final : public CanvasContentWindow,
   // text::BufferMutationObserver
   void DidChangeStyle(text::Offset offset, text::OffsetDelta length) final;
   void DidDeleteAt(text::Offset offset, text::OffsetDelta length) final;
-  void DidInsertAt(text::Offset offset, text::OffsetDelta length) final;
+  void DidInsertBefore(text::Offset offset, text::OffsetDelta length) final;
 
   // text::SelectionChangeObserver
   void DidChangeSelection() final;

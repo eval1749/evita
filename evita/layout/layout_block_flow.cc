@@ -243,8 +243,8 @@ void LayoutBlockFlow::DidDeleteAt(text::Offset offset,
   view_start_ = std::max(view_start_ - length, offset);
 }
 
-void LayoutBlockFlow::DidInsertAt(text::Offset offset,
-                                  text::OffsetDelta length) {
+void LayoutBlockFlow::DidInsertBefore(text::Offset offset,
+                                      text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
   if (view_start_ <= offset)

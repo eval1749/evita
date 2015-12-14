@@ -33,7 +33,7 @@ class LayoutBlockFlow final {
 
   void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
   void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
-  void DidInsertAt(text::Offset offset, text::OffsetDelta length);
+  void DidInsertBefore(text::Offset offset, text::OffsetDelta length);
   // Returns end of line offset containing |text_offset|.
   text::Offset EndOfLine(text::Offset text_offset);
   void Format(text::Offset text_offset);

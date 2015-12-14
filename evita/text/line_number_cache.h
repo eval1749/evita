@@ -38,7 +38,7 @@ class LineNumberCache final : public BufferMutationObserver {
 
   // BufferMutationObserver
   void DidDeleteAt(Offset offset, OffsetDelta length) final;
-  void DidInsertAt(Offset offset, OffsetDelta length) final;
+  void DidInsertBefore(Offset offset, OffsetDelta length) final;
 
   Buffer* buffer_;
   std::map<Offset, int> map_;

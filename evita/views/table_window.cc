@@ -203,7 +203,8 @@ void TableWindow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   should_update_model_ = true;
 }
 
-void TableWindow::DidInsertAt(text::Offset offset, text::OffsetDelta length) {
+void TableWindow::DidInsertBefore(text::Offset offset,
+                                  text::OffsetDelta length) {
   should_update_model_ = true;
 }
 

@@ -23,7 +23,6 @@ class BufferMutationObserver {
 
   virtual void DidChangeStyle(Offset offset, OffsetDelta length);
   virtual void DidDeleteAt(Offset offset, OffsetDelta length);
-  virtual void DidInsertAt(Offset offset, OffsetDelta length);
   virtual void DidInsertBefore(Offset offset, OffsetDelta length);
   virtual void WillDeleteAt(Offset offset, OffsetDelta length);
 

@@ -84,9 +84,9 @@ void MutationObserver::DidDeleteAt(Document* document,
   tracker->Update(offset);
 }
 
-void MutationObserver::DidInsertAt(Document* document,
-                                   text::Offset offset,
-                                   text::OffsetDelta length) {
+void MutationObserver::DidInsertBefore(Document* document,
+                                       text::Offset offset,
+                                       text::OffsetDelta length) {
   auto const tracker = GetTracker(document);
   if (!tracker)
     return;

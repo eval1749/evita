@@ -168,10 +168,10 @@ void Buffer::InsertBefore(Offset position, const base::string16& text) {
   UpdateChangeTick();
 }
 
-Offset Buffer::Redo(Offset lPosn, int n) {
+Offset Buffer::Redo(Offset offset) {
   if (IsReadOnly())
     return Offset::Invalid();
-  return undo_stack_->Redo(lPosn, n);
+  return undo_stack_->Redo(offset, 1);
 }
 
 void Buffer::RemoveObserver(BufferMutationObserver* observer) {
@@ -205,10 +205,10 @@ void Buffer::StartUndoGroup(const base::string16& name) {
   undo_stack_->BeginUndoGroup(name);
 }
 
-Offset Buffer::Undo(Offset lPosn, int n) {
+Offset Buffer::Undo(Offset offset) {
   if (IsReadOnly())
     return Offset::Invalid();
-  return undo_stack_->Undo(lPosn, n);
+  return undo_stack_->Undo(offset, 1);
 }
 
 void Buffer::UpdateChangeTick() {

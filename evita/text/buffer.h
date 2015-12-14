@@ -99,8 +99,9 @@ class Buffer : public BufferCore,
 
   void InsertBefore(Offset position, const base::string16& text);
 
-  // [R]
-  Offset Redo(Offset, int = 1);
+  // Does redo last undo operation if it starts at |offset| and returns
+  // |offset|, otherwise returns starting offset of the last undo operation.
+  Offset Redo(Offset offset);
 
   // [S]
   void SetNotModifiedForTesting() { m_nSaveTick = m_nCharTick; }
@@ -109,8 +110,9 @@ class Buffer : public BufferCore,
   void SetStyle(Offset, Offset, const css::Style& style_values);
   void StartUndoGroup(const base::string16& name);
 
-  // [U]
-  Offset Undo(Offset, int = 1);
+  // Does undo last modification if it starts at |offset| and returns
+  // |offset|, otherwise returns starting offset of the last modification.
+  Offset Undo(Offset offset);
 
   // BufferMutationObservee
   void AddObserver(BufferMutationObserver* observer) final;

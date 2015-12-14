@@ -29,9 +29,7 @@ Buffer::Buffer()
       style_resolver_(new css::StyleResolver()),
       syntax_markers_(new MarkerSet(this)),
       undo_stack_(new UndoStack(this)),
-      m_fReadOnly(false),
-      m_nCharTick(1),
-      m_nSaveTick(1) {
+      m_fReadOnly(false) {
   spelling_markers_->AddObserver(this);
   syntax_markers_->AddObserver(this);
 }
@@ -178,15 +176,6 @@ void Buffer::RemoveObserver(BufferMutationObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void text::Buffer::SetModified(bool new_modified) {
-  if (IsModified() == new_modified)
-    return;
-  if (new_modified)
-    UpdateChangeTick();
-  else
-    m_nSaveTick = m_nCharTick;
-}
-
 void Buffer::SetStyle(Offset lStart, Offset lEnd, const css::Style& style) {
   if (lEnd > GetEnd())
     lEnd = GetEnd();
@@ -212,9 +201,7 @@ Offset Buffer::Undo(Offset offset) {
 }
 
 void Buffer::UpdateChangeTick() {
-  if (m_nCharTick < m_nSaveTick)
-    m_nCharTick = m_nSaveTick;
-  ++m_nCharTick;
+  ++revision_;
 }
 
 // MarkerSetObserver

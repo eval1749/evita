@@ -38,9 +38,8 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   text::Buffer* buffer() { return buffer_.get(); }
   base::char16 charCodeAt(text::Offset position) const;
   int length() const;
-  bool modified() const;
-  void set_modified(bool new_modified);
   bool read_only() const;
+  int revision() const;
   void set_read_only(bool read_only) const;
   // Returns spelling at |offset|.
   const base::string16& spelling_at(text::Offset offset) const;

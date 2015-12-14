@@ -52,6 +52,7 @@ interface Document : EventTarget {
     [ImplementedAs=JavaScript]
     attribute Mode? mode;
 
+    [ImplementedAs=JavaScript]
     attribute boolean modified;
 
     [ImplementedAs=JavaScript]
@@ -62,6 +63,9 @@ interface Document : EventTarget {
 
     [ImplementedAs=read_only]
     attribute boolean _readonly;
+
+    [ImplementedAs=revision]
+    readonly attribute boolean revision_;
 
     [ImplementedAs=JavaScript]
     attribute long state;

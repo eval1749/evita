@@ -25,6 +25,15 @@
     return map;
   })();
 
+  /** @type {Keymap} */
+  Document.prototype.keymap_;
+
+  /** @type {Mode} */
+  Document.prototype.mode_;
+
+  /** @type {string} */
+  Document.prototype.name_;
+
   function throwInvalidUnit(unit) { throw 'Invalid unit: ' + unit; }
 
   function throwNYI(name, unit) {
@@ -394,6 +403,14 @@
 
   /**
    * @this {!Document}
+   * @return {boolean}
+   */
+  function getDocumentModified() {
+    return this.revision_ !== this.savedRevision_;
+  }
+
+  /**
+   * @this {!Document}
    *
    * Returns generator object which returns line, including newline
    * character, in a document.
@@ -421,6 +438,16 @@
     }
     return windows;
   };
+
+  /**
+   * @this {!Document}
+   * @param {boolean} newModified
+   */
+  function setDocumentModified(newModified) {
+    if (this.modified === !!newModified)
+      return;
+    this.savedRevision_ = newModified ? -1 : this.revision_;
+  }
 
   /**
    * @this {!Document}
@@ -551,7 +578,7 @@
   Object.defineProperties(Document.prototype, {
     fileName: {value: '', writable: true},
     keymap: {
-      get: /** @return {!Map} */ function() {
+      get: /** @return {!Keymap} */ function() {
         if (!this.keymap_)
           this.keymap_ = new Map();
         return this.keymap_;
@@ -570,6 +597,7 @@
       }
     },
     mode_: {value: null, writable: true},
+    modified: {get: getDocumentModified, set: setDocumentModified},
     name_: {value: '', writable: true},
     name: {get: function() { return this.name_; }},
     newline: {value: 0, writable: true},
@@ -582,6 +610,7 @@
     },
     properties_: {value: null, writable: true},
     state: {value: 0, writable: true},
+    savedRevision_: {value: 0, writable: true},
 
     bindKey: {value: bindKey},
     computeEndOf_: {value: computeEndOf},

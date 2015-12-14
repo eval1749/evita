@@ -58,6 +58,7 @@ class Buffer : public BufferCore,
   virtual ~Buffer();
 
   RangeSet* ranges() const { return ranges_.get(); }
+  int revision() const { return revision_; }
   MarkerSet* spelling_markers() const { return spelling_markers_.get(); }
   MarkerSet* syntax_markers() const { return syntax_markers_.get(); }
 
@@ -87,9 +88,8 @@ class Buffer : public BufferCore,
   UndoStack* GetUndo() const { return undo_stack_.get(); }
 
   // [I]
-  int IncCharTick(int n) { return m_nCharTick += n; }
+  int IncCharTick(int n) { return revision_ += n; }
   int Insert(Offset, const base::char16*, int);
-  bool IsModified() const { return m_nCharTick != m_nSaveTick; }
   bool IsNotReady() const;
   bool IsReadOnly() const { return m_fReadOnly; }
 
@@ -104,8 +104,6 @@ class Buffer : public BufferCore,
   Offset Redo(Offset offset);
 
   // [S]
-  void SetNotModifiedForTesting() { m_nSaveTick = m_nCharTick; }
-  void SetModified(bool new_modifier);
   bool SetReadOnly(bool f) { return m_fReadOnly = f; }
   void SetStyle(Offset, Offset, const css::Style& style_values);
   void StartUndoGroup(const base::string16& name);
@@ -133,8 +131,10 @@ class Buffer : public BufferCore,
   // MarkerSetObserver
   void DidChangeMarker(Offset start, Offset end) override;
 
-  int m_nCharTick;
-  int m_nSaveTick;
+  // |revision_| holds buffer revision, which incremented by one at each
+  // deletion and insertion. Undo operation restores resets buffer revision
+  // at revision before roll backed operation executed.
+  int revision_ = 0;
   bool m_fReadOnly;
 
   DISALLOW_COPY_AND_ASSIGN(Buffer);

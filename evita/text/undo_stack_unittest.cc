@@ -28,21 +28,20 @@ class UndoStackTest : public ::testing::Test {
 
 TEST_F(UndoStackTest, Delete) {
   buffer()->Insert(Offset(0), L"foo");
-  // Simulate for load file.
-  buffer()->SetNotModifiedForTesting();
+  auto const anchor_revision = buffer()->revision();
 
   buffer()->Delete(Offset(0), Offset(3));
   buffer()->Undo(Offset(0));
   EXPECT_EQ(Offset(3), buffer()->GetEnd());
-  EXPECT_FALSE(buffer()->IsModified())
+  EXPECT_EQ(anchor_revision, buffer()->revision())
       << "Undo delete should make document not modified.";
 
   buffer()->Redo(Offset(3));
   EXPECT_EQ(Offset(0), buffer()->GetEnd());
-  EXPECT_TRUE(buffer()->IsModified());
+  EXPECT_NE(anchor_revision, buffer()->revision());
 
   buffer()->Undo(Offset(0));
-  EXPECT_FALSE(buffer()->IsModified())
+  EXPECT_EQ(anchor_revision, buffer()->revision())
       << "Undo should make document not modified even if after redo.";
 }
 
@@ -54,7 +53,7 @@ TEST_F(UndoStackTest, Group) {
   }
   buffer()->Undo(Offset(4));
   EXPECT_EQ(Offset(0), buffer()->GetEnd());
-  EXPECT_FALSE(buffer()->IsModified())
+  EXPECT_EQ(0, buffer()->revision())
       << "Undo should make document not modified even if after redo.";
 }
 
@@ -67,15 +66,15 @@ TEST_F(UndoStackTest, Insert) {
   EXPECT_EQ(0, buffer()->Undo(Offset(3)))
       << "Undo at the last editing position";
   EXPECT_EQ(Offset(0), buffer()->GetEnd());
-  EXPECT_FALSE(buffer()->IsModified())
+  EXPECT_EQ(0, buffer()->revision())
       << "Undo should make document not modified.";
 
   buffer()->Redo(Offset(0));
   EXPECT_EQ(Offset(3), buffer()->GetEnd());
-  EXPECT_TRUE(buffer()->IsModified());
+  EXPECT_NE(0, buffer()->revision());
 
   buffer()->Undo(Offset(3));
-  EXPECT_FALSE(buffer()->IsModified())
+  EXPECT_EQ(0, buffer()->revision())
       << "Undo should make document not modified.";
 }
 
@@ -91,7 +90,7 @@ TEST_F(UndoStackTest, Merge) {
   EXPECT_EQ(3, buffer()->Undo(Offset(6)));
   EXPECT_EQ(Offset(3), buffer()->GetEnd());
   EXPECT_EQ(Offset(), buffer()->Undo(Offset(3)));
-  EXPECT_FALSE(buffer()->IsModified())
+  EXPECT_EQ(0, buffer()->revision())
       << "Undo should make document not modified.";
 }
 

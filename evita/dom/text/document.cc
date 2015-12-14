@@ -45,16 +45,12 @@ int Document::length() const {
   return text::OffsetDelta(buffer_->GetEnd().value());
 }
 
-bool Document::modified() const {
-  return buffer_->IsModified();
-}
-
-void Document::set_modified(bool new_modified) {
-  buffer_->SetModified(new_modified);
-}
-
 bool Document::read_only() const {
   return buffer_->IsReadOnly();
+}
+
+int Document::revision() const {
+  return buffer_->revision();
 }
 
 void Document::set_read_only(bool read_only) const {

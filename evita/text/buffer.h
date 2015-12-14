@@ -1,5 +1,7 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_TEXT_BUFFER_H_
 #define EVITA_TEXT_BUFFER_H_
 
@@ -71,7 +73,7 @@ class Buffer : public BufferCore,
   Offset ComputeStartOfLine(Offset offset) const;
 
   // [D]
-  Count Delete(Offset, Offset);
+  int Delete(Offset, Offset);
 
   // [E]
   void EndUndoGroup(const base::string16& name);
@@ -85,8 +87,8 @@ class Buffer : public BufferCore,
   UndoStack* GetUndo() const { return undo_stack_.get(); }
 
   // [I]
-  Count IncCharTick(int n) { return m_nCharTick += n; }
-  Count Insert(Offset, const base::char16*, Count);
+  int IncCharTick(int n) { return m_nCharTick += n; }
+  int Insert(Offset, const base::char16*, int);
   bool IsModified() const { return m_nCharTick != m_nSaveTick; }
   bool IsNotReady() const;
   bool IsReadOnly() const { return m_fReadOnly; }
@@ -98,7 +100,7 @@ class Buffer : public BufferCore,
   void InsertBefore(Offset position, const base::string16& text);
 
   // [R]
-  Offset Redo(Offset, Count = 1);
+  Offset Redo(Offset, int = 1);
 
   // [S]
   void SetNotModifiedForTesting() { m_nSaveTick = m_nCharTick; }
@@ -108,7 +110,7 @@ class Buffer : public BufferCore,
   void StartUndoGroup(const base::string16& name);
 
   // [U]
-  Offset Undo(Offset, Count = 1);
+  Offset Undo(Offset, int = 1);
 
   // BufferMutationObservee
   void AddObserver(BufferMutationObserver* observer) final;

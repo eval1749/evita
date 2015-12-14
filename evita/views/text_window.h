@@ -48,13 +48,13 @@ class TextWindow final : public CanvasContentWindow,
   TextWindow(WindowId window_id, text::Selection* selection);
   ~TextWindow() final;
 
-  text::Offset ComputeScreenMotion(text::Count count,
+  text::Offset ComputeScreenMotion(int count,
                                    const gfx::PointF& point,
                                    text::Offset offset);
-  text::Offset ComputeWindowLineMotion(text::Count count,
+  text::Offset ComputeWindowLineMotion(int count,
                                        const gfx::PointF& point,
                                        text::Offset offset);
-  text::Offset ComputeWindowMotion(text::Count count, text::Offset offset);
+  text::Offset ComputeWindowMotion(int count, text::Offset offset);
   text::Offset EndOfLine(text::Offset offset);
   gfx::RectF HitTestTextPosition(text::Offset offset);
   text::Offset MapPointToPosition(const gfx::PointF point);

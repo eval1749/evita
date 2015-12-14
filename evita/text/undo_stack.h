@@ -30,8 +30,8 @@ class UndoStack final : public BufferMutationObserver {
   bool CanUndo() const;
   void Clear();
   void EndUndoGroup(const base::string16& name);
-  Offset Redo(Offset offset, Count count);
-  Offset Undo(Offset offset, Count count);
+  Offset Redo(Offset offset, int count);
+  Offset Undo(Offset offset, int count);
 
  private:
   // BufferMutationObserver

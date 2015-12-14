@@ -82,7 +82,7 @@ Offset Buffer::ComputeStartOfLine(Offset lPosn) const {
   return lPosn;
 }
 
-Count Buffer::Delete(Offset lStart, Offset lEnd) {
+int Buffer::Delete(Offset lStart, Offset lEnd) {
   if (IsReadOnly())
     return 0;
 
@@ -134,7 +134,7 @@ const css::Style& Buffer::GetStyleAt(Offset lPosn) const {
   return GetIntervalAt(lPosn)->style();
 }
 
-Count Buffer::Insert(Offset lPosn, const base::char16* pwch, Count n) {
+int Buffer::Insert(Offset lPosn, const base::char16* pwch, int n) {
   DCHECK(IsValidPosn(lPosn));
 
   if (IsReadOnly())
@@ -168,7 +168,7 @@ void Buffer::InsertBefore(Offset position, const base::string16& text) {
   UpdateChangeTick();
 }
 
-Offset Buffer::Redo(Offset lPosn, Count n) {
+Offset Buffer::Redo(Offset lPosn, int n) {
   if (IsReadOnly())
     return Offset::Invalid();
   return undo_stack_->Redo(lPosn, n);
@@ -205,7 +205,7 @@ void Buffer::StartUndoGroup(const base::string16& name) {
   undo_stack_->BeginUndoGroup(name);
 }
 
-Offset Buffer::Undo(Offset lPosn, Count n) {
+Offset Buffer::Undo(Offset lPosn, int n) {
   if (IsReadOnly())
     return Offset::Invalid();
   return undo_stack_->Undo(lPosn, n);

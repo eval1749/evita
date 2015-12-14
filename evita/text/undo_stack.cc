@@ -107,7 +107,7 @@ Offset UndoStack::Redo(Offset offset, int count) {
   return result_offset;
 }
 
-Offset UndoStack::Undo(Offset offset, Count count) {
+Offset UndoStack::Undo(Offset offset, int count) {
   if (undo_steps_.empty())
     return Offset::Invalid();
 

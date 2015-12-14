@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "base/basictypes.h"
-#include "evita/precomp.h"
 
 namespace css {
 class Style;
@@ -16,6 +15,7 @@ class Style;
 
 namespace text {
 
+class Buffer;
 class Interval;
 class Offset;
 

@@ -5,8 +5,6 @@
 #ifndef EVITA_TEXT_RANGE_SET_BASE_H_
 #define EVITA_TEXT_RANGE_SET_BASE_H_
 
-#include "evita/precomp.h"
-
 namespace text {
 
 class Offset;

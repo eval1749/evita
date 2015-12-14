@@ -9,7 +9,6 @@
 
 #include "base/macros.h"
 #include "evita/css/style.h"
-#include "evita/precomp.h"
 
 namespace text {
 

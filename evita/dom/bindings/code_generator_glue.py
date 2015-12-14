@@ -500,6 +500,7 @@ def attribute_context(attribute):
     return {
         'can_fast_return': can_fast_return_of(glue_type),
         'cpp_name': cpp_name,
+        'display_type': glue_type.display_str(),
         'from_v8_type': glue_type.from_v8_str(),
         'is_read_only': attribute.is_read_only,
         'is_static': attribute.is_static,

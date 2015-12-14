@@ -8,6 +8,7 @@
 #include "evita/views/text/text_formatter.h"
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "common/memory/singleton.h"
 #include "evita/css/style.h"
 #include "evita/css/style_resolver.h"
@@ -203,6 +204,7 @@ RootInlineBox* TextFormatter::FormatLine(text::Posn text_offset) {
 }
 
 RootInlineBox* TextFormatter::FormatLine() {
+  TRACE_EVENT0("views", "TextFormatter::FormatLine");
   DCHECK(!bounds_.empty());
   auto const line = new RootInlineBox();
   line->set_start(text_scanner_->text_offset());

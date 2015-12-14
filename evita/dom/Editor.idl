@@ -32,10 +32,7 @@ interface Editor {
 
   [ImplementedAs=JavaScript]
   static void bindKey(Function window_class, DOMString key_combination,
-                      Function command);
-  [ImplementedAs=JavaScript]
-  static void bindKey(Function window_class, DOMString key_combination,
-                     Function command, DOMString description);
+                      Function command, optional DOMString description);
 
   static Promise<boolean> checkSpelling(DOMString word_to_check);
 
@@ -70,10 +67,8 @@ interface Editor {
    * @param {string=} opt_title
    * @return {!Promise.<number>}
    */
-  static Promise/** number */ messageBox(Window? window, DOMString message,
-                                         long flags);
-  static Promise/** long */ messageBox(Window? window, DOMString message,
-                                       long flags, DOMString title);
+  static Promise<long> messageBox(Window? window, DOMString message,
+                                  long flags, optional DOMString title);
 
   [ImplementedAs=GetMetrics]
   static Promise<DOMString> metrics(DOMString name);
@@ -102,8 +97,8 @@ interface Editor {
    * @param {string=} opt_file_name
    * @return {!RunScriptResult}
    */
-  static RunScriptResult runScript(DOMString script_text);
-  static RunScriptResult runScript(DOMString script_text, DOMString file_name);
+  static RunScriptResult runScript(DOMString script_text,
+                                   optional DOMString file_name);
 
   [ImplementedAs=JavaScript]
   static DOMString stringify(any value);

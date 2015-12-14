@@ -65,7 +65,8 @@ class CanvasPainter {
   bool IsDirty(const gfx::Canvas* canvas) const;
 
   gfx::RectF bounds_;
-  int canvas_bitmap_id_;
+  gfx::Canvas* last_canvas_;
+  int last_canvas_bitmap_id_;
   bool dirty_;
   PaintScheduler* const paint_scheduler_;
 
@@ -73,12 +74,13 @@ class CanvasPainter {
 };
 
 CanvasPainter::CanvasPainter(PaintScheduler* paint_scheduler)
-    : canvas_bitmap_id_(0), dirty_(true), paint_scheduler_(paint_scheduler) {}
+    : last_canvas_bitmap_id_(0), dirty_(true), paint_scheduler_(paint_scheduler) {}
 
 CanvasPainter::~CanvasPainter() {}
 
 bool CanvasPainter::IsDirty(const gfx::Canvas* canvas) const {
-  return dirty_ || canvas_bitmap_id_ != canvas->bitmap_id();
+  return dirty_ || last_canvas_ != canvas ||
+         last_canvas_bitmap_id_ != canvas->bitmap_id();
 }
 
 void CanvasPainter::MarkDirty() {
@@ -91,7 +93,8 @@ void CanvasPainter::MarkDirty() {
 void CanvasPainter::Paint(gfx::Canvas* canvas) {
   if (!IsDirty(canvas))
     return;
-  canvas_bitmap_id_ = canvas->bitmap_id();
+  last_canvas_ = canvas;
+  last_canvas_bitmap_id_ = canvas->bitmap_id();
   dirty_ = false;
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   OnPaintCanvas(canvas);

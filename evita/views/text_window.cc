@@ -143,6 +143,7 @@ text::Posn TextWindow::EndOfLine(text::Posn text_offset) {
 gfx::RectF TextWindow::HitTestTextPosition(text::Posn text_offset) {
   DCHECK_GE(text_offset, 0);
   UI_ASSERT_DOM_LOCKED();
+  text_view_->FormatIfNeeded();
   return text_view_->HitTestTextPosition(text_offset);
 }
 

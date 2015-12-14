@@ -400,19 +400,20 @@ text::Posn LayoutBlockFlow::GetVisibleEnd() {
   return lines_.front()->GetEnd();
 }
 
-gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Posn text_offset) {
+gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Posn offset) const {
   UI_ASSERT_DOM_LOCKED();
-  InvalidateCache();
-  if (auto const line = text_line_cache_->FindLine(text_offset))
-    return line->HitTestTextPosition(text_offset);
-
-  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
-  for (;;) {
-    auto const line = FormatLine(&formatter);
-    if (text_offset < line->GetEnd())
-      return line->HitTestTextPosition(text_offset);
+  DCHECK(!dirty_);
+  DCHECK(!dirty_line_point_);
+  if (offset < lines_.front()->text_start() ||
+      offset > lines_.back()->text_end()) {
+    return gfx::RectF();
   }
+  for (auto const line : lines_) {
+    auto const rect = line->HitTestTextPosition(offset);
+    if (!rect.empty())
+      return rect;
+  }
+  return gfx::RectF();
 }
 
 void LayoutBlockFlow::InvalidateCache() {

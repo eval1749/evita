@@ -97,11 +97,8 @@ gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
     const TextSelectionModel& selection_model) const {
   if (!selection_model.has_focus())
     return gfx::RectF();
-  // TODO(eval1749): We should make |LayoutBlockFlow::HitTestTextPosition()|
-  // as const function.
   auto const& char_rect =
-      RoundBounds(const_cast<LayoutBlockFlow&>(layout_block_flow)
-                      .HitTestTextPosition(selection_model.focus_offset()));
+      RoundBounds(layout_block_flow.HitTestTextPosition(selection_model.focus_offset()));
   if (char_rect.empty())
     return gfx::RectF();
   auto const caret_width = 2;

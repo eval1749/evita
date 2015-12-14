@@ -39,7 +39,7 @@ class LayoutBlockFlow final {
   text::Posn GetEnd();
   text::Posn GetStart();
   text::Posn GetVisibleEnd();
-  gfx::RectF HitTestTextPosition(text::Posn text_offset);
+  gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
   bool IsPositionFullyVisible(text::Posn text_offset);
   text::Posn MapPointToPosition(gfx::PointF point);
   text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);

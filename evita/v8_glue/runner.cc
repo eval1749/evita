@@ -4,8 +4,8 @@
 
 #include "evita/v8_glue/runner.h"
 
+#include "base/auto_reset.h"
 #include "base/trace_event/trace_event.h"
-#include "common/temporary_change_value.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner_delegate.h"
 #include "evita/v8_glue/per_isolate_data.h"
@@ -112,7 +112,7 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
-  common::TemporaryChangeValue<int> call_depth(call_depth_, call_depth_ + 1);
+  base::AutoReset<int> call_depth(&call_depth_, call_depth_ + 1);
   if (!CheckCallDepth())
     return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);
@@ -207,7 +207,7 @@ v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
-  common::TemporaryChangeValue<int> call_depth(call_depth_, call_depth_ + 1);
+  base::AutoReset<int> call_depth(&call_depth_, call_depth_ + 1);
   if (!CheckCallDepth())
     return v8::Handle<v8::Value>();
   delegate_->WillRunScript(this);

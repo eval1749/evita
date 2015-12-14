@@ -4,9 +4,9 @@
 
 #include "evita/ui/animation/animation_group.h"
 
+#include "base/auto_reset.h"
 #include "base/logging.h"
 #include "base/time/time.h"
-#include "common/temporary_change_value.h"
 #include "evita/ui/animation/animation_group_member.h"
 
 namespace ui {
@@ -21,7 +21,7 @@ void AnimationGroup::AddMember(AnimationGroupMember* member) {
 
 bool AnimationGroup::Animate(base::Time time) {
   DCHECK(!is_running_);
-  common::TemporaryChangeValue<bool> running_scope(is_running_, true);
+  base::AutoReset<bool> running_scope(&is_running_, true);
   const auto members = members_;
   members_.clear();
   for (auto member : members) {

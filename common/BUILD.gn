@@ -11,7 +11,6 @@ component("common") {
     "maybe.h",
     "strings/atomic_string.cc",
     "strings/atomic_string.h",
-    "temporary_change_value.h",
     "timer/timer.cc",
     "win/native_window.cc",
     "win/point.cc",

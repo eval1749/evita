@@ -19,7 +19,7 @@
 
 namespace paint {
 
-using InlineMarkerBox = views::rendering::InlineMarkerBox;
+using InlineMarkerBox = layout::InlineMarkerBox;
 
 namespace {
 const auto kMarkerLeftMargin = 2.0f;

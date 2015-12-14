@@ -22,15 +22,12 @@ namespace ui {
 class AnimatableWindow;
 }
 
-namespace views {
+namespace layout {
 
-namespace rendering {
 class RenderStyle;
 class LayoutBlockFlow;
-class TextSelectionModel;
-}
-
 class LayoutView;
+class TextSelectionModel;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -38,10 +35,6 @@ class LayoutView;
 //
 class LayoutViewBuilder final {
  public:
-  using LayoutBlockFlow = rendering::LayoutBlockFlow;
-  using RenderStyle = rendering::RenderStyle;
-  using TextSelectionModel = rendering::TextSelectionModel;
-
   explicit LayoutViewBuilder(const text::Buffer* buffer_,
                              ui::AnimatableWindow* caret_owner);
   ~LayoutViewBuilder();
@@ -77,6 +70,6 @@ class LayoutViewBuilder final {
   DISALLOW_COPY_AND_ASSIGN(LayoutViewBuilder);
 };
 
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_LAYOUT_VIEW_BUILDER_H_

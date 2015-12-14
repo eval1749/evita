@@ -16,8 +16,7 @@ namespace text {
 class Buffer;
 }
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 class InlineBox;
 class RootInlineBox;
@@ -57,7 +56,6 @@ class TextFormatter final {
   DISALLOW_COPY_AND_ASSIGN(TextFormatter);
 };
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_TEXT_FORMATTER_H_

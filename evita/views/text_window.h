@@ -13,6 +13,11 @@
 #include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/canvas_content_window.h"
 
+namespace layout {
+class TextSelectionModel;
+class TextView;
+}
+
 namespace text {
 class Buffer;
 class Selection;
@@ -24,10 +29,6 @@ class ScrollBar;
 
 namespace views {
 class MetricsView;
-class TextView;
-namespace rendering {
-class TextSelectionModel;
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -62,7 +63,7 @@ class TextWindow final : public CanvasContentWindow,
   text::Posn StartOfLine(text::Posn offset);
 
  private:
-  typedef rendering::TextSelectionModel TextSelectionModel;
+  using TextSelectionModel = layout::TextSelectionModel;
 
   text::Buffer* buffer() const;
 
@@ -114,7 +115,7 @@ class TextWindow final : public CanvasContentWindow,
   MetricsView* metrics_view_;
   // TODO(eval1749): Manage life time of selection.
   text::Selection* const selection_;
-  std::unique_ptr<TextView> text_view_;
+  std::unique_ptr<layout::TextView> text_view_;
   ui::ScrollBar* const vertical_scroll_bar_;
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);

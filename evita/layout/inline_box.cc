@@ -12,8 +12,7 @@
 #include "evita/layout/render_font.h"
 #include "evita/layout/render_style.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 #define V(name) \
   void name::Accept(InlineBoxVisitor* visitor) { visitor->Visit##name(this); }
@@ -53,7 +52,7 @@ void InlineBox::IncrementWidth(float amount) {
   width_ += amount;
 }
 
-// rendering::InlineBox
+// InlineBox
 bool InlineBox::Equal(const InlineBox* other) const {
   return other->class_name() == class_name() && other->width_ == width_ &&
          other->line_height_ == line_height_ && other->style_ == style_;
@@ -136,7 +135,7 @@ InlineMarkerBox::InlineMarkerBox(const InlineMarkerBox& other)
 
 InlineMarkerBox::~InlineMarkerBox() {}
 
-// rendering::InlineBox
+// InlineBox
 InlineBox* InlineMarkerBox::Copy() const {
   return new InlineMarkerBox(*this);
 }
@@ -202,7 +201,7 @@ void InlineTextBoxBase::ExtendEnd() {
   end_ += 1;
 }
 
-// rendering::InlineBox
+// InlineBox
 bool InlineTextBoxBase::Equal(const InlineBox* other) const {
   if (!InlineBox::Equal(other))
     return false;
@@ -287,7 +286,7 @@ InlineUnicodeBox::InlineUnicodeBox(const InlineUnicodeBox& other)
 
 InlineUnicodeBox::~InlineUnicodeBox() {}
 
-// rendering::InlineBox
+// InlineBox
 InlineBox* InlineUnicodeBox::Copy() const {
   return new InlineUnicodeBox(*this);
 }
@@ -302,5 +301,4 @@ bool InlineUnicodeBox::Merge(const RenderStyle&, float) {
   return false;
 }
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout

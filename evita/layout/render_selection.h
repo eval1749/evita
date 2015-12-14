@@ -10,8 +10,7 @@
 #include "evita/precomp.h"
 #include "evita/ui/base/selection_state.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 class TextSelectionModel final {
  public:
@@ -74,7 +73,6 @@ class TextSelection final {
   TextSelectionModel model_;
 };
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_RENDER_SELECTION_H_

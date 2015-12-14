@@ -31,7 +31,7 @@
 
 namespace views {
 
-using rendering::TextSelectionModel;
+using layout::TextSelectionModel;
 
 namespace {
 
@@ -51,7 +51,7 @@ TextSelectionModel GetTextSelectionModel(TextWindow* window,
 TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
     : CanvasContentWindow(window_id),
       metrics_view_(new MetricsView()),
-      text_view_(new TextView(selection->buffer(), this)),
+      text_view_(new layout::TextView(selection->buffer(), this)),
       selection_(selection),
       vertical_scroll_bar_(
           new ui::ScrollBar(ui::ScrollBar::Type::Vertical, this)) {

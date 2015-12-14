@@ -11,8 +11,7 @@
 #include "evita/gfx_base.h"
 #include "evita/css/style.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 class Font;
 
@@ -45,13 +44,12 @@ class RenderStyle {
 
 gfx::ColorF ColorToColorF(const css::Color& color);
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 namespace std {
 template <>
-struct hash<views::rendering::RenderStyle> {
-  size_t operator()(const views::rendering::RenderStyle& style) const;
+struct hash<layout::RenderStyle> {
+  size_t operator()(const layout::RenderStyle& style) const;
 };
 }  // namespace std
 

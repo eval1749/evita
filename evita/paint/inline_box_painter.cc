@@ -15,13 +15,13 @@
 
 namespace paint {
 
-using Font = views::rendering::Font;
-using InlineBox = views::rendering::InlineBox;
-using InlineFillerBox = views::rendering::InlineFillerBox;
-using InlineMarkerBox = views::rendering::InlineMarkerBox;
-using InlineTextBox = views::rendering::InlineTextBox;
-using InlineUnicodeBox = views::rendering::InlineUnicodeBox;
-using TextMarker = views::rendering::TextMarker;
+using Font = layout::Font;
+using InlineBox = layout::InlineBox;
+using InlineFillerBox = layout::InlineFillerBox;
+using InlineMarkerBox = layout::InlineMarkerBox;
+using InlineTextBox = layout::InlineTextBox;
+using InlineUnicodeBox = layout::InlineUnicodeBox;
+using TextMarker = layout::TextMarker;
 
 namespace {
 
@@ -113,13 +113,13 @@ void FillOverlay(gfx::Canvas* canvas,
 //
 // PaintVisitor
 //
-class PaintVisitor final : public views::rendering::InlineBoxVisitor {
+class PaintVisitor final : public layout::InlineBoxVisitor {
  public:
   PaintVisitor(gfx::Canvas* canvas, const gfx::RectF& rect);
   ~PaintVisitor() final = default;
 
  private:
-#define V(name) void Visit##name(views::rendering::name* inline_box) final;
+#define V(name) void Visit##name(layout::name* inline_box) final;
   FOR_EACH_INLINE_BOX(V)
 #undef V
 

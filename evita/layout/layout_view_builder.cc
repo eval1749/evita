@@ -17,12 +17,7 @@
 #include "evita/layout/root_inline_box.h"
 #include "evita/layout/text_formatter.h"
 
-namespace views {
-
-using Font = rendering::Font;
-using FontSet = rendering::FontSet;
-using RootInlineBox = rendering::RootInlineBox;
-using TextFormatter = rendering::TextFormatter;
+namespace layout {
 
 namespace {
 const auto kBlinkInterval = 16 * 20;  // milliseconds
@@ -63,8 +58,7 @@ scoped_refptr<LayoutView> LayoutViewBuilder::Build(
     base::Time now) {
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
-  const auto& bgcolor =
-      rendering::ColorToColorF(buffer_->GetDefaultStyle().bgcolor());
+  const auto& bgcolor = ColorToColorF(buffer_->GetDefaultStyle().bgcolor());
   const auto& ruler_bounds = ComputeRulerBounds();
   const auto& selection =
       TextFormatter::FormatSelection(buffer_, selection_model);
@@ -97,8 +91,8 @@ gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
     const TextSelectionModel& selection_model) const {
   if (!selection_model.has_focus())
     return gfx::RectF();
-  auto const& char_rect =
-      RoundBounds(layout_block_flow.HitTestTextPosition(selection_model.focus_offset()));
+  auto const& char_rect = RoundBounds(
+      layout_block_flow.HitTestTextPosition(selection_model.focus_offset()));
   if (char_rect.empty())
     return gfx::RectF();
   auto const caret_width = 2;
@@ -172,4 +166,4 @@ void LayoutViewBuilder::StopCaretTimer() {
   caret_timer_.Stop();
 }
 
-}  // namespace views
+}  // namespace layout

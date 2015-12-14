@@ -11,8 +11,7 @@
 #include "evita/layout/inline_box_forward.h"
 #include "evita/layout/render_style.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 enum class TextMarker {
   EndOfDocument,
@@ -97,7 +96,7 @@ class InlineFillerBox final : public InlineBox {
   ~InlineFillerBox() final;
 
  private:
-  // rendering::InlineBox
+  // InlineBox
   InlineBox* Copy() const final;
 };
 
@@ -137,7 +136,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
   TextMarker marker_name() const { return marker_name_; }
 
  private:
-  // rendering::InlineBox
+  // InlineBox
   InlineBox* Copy() const final;
   bool Equal(const InlineBox* pInlineBox) const final;
   text::Posn Fix(float iHeight, float iDescent) final;
@@ -205,7 +204,7 @@ class InlineTextBox final : public InlineTextBoxBase {
   ~InlineTextBox() final;
 
  private:
-  // rendering::InlineBox
+  // InlineBox
   InlineBox* Copy() const final;
   gfx::RectF HitTestTextPosition(text::Posn position) const final;
   bool Merge(const RenderStyle& style, float width) final;
@@ -228,13 +227,12 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
   ~InlineUnicodeBox() final;
 
  private:
-  // rendering::InlineBox
+  // InlineBox
   InlineBox* Copy() const final;
   gfx::RectF HitTestTextPosition(text::Posn lPosn) const final;
   bool Merge(const RenderStyle& style, float width) final;
 };
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_INLINE_BOX_H_

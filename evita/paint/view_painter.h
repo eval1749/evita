@@ -14,7 +14,7 @@ namespace gfx {
 class Canvas;
 }
 
-namespace views {
+namespace layout {
 class LayoutView;
 }
 
@@ -27,9 +27,9 @@ class ViewPaintCache;
 // ViewPainter
 //
 class ViewPainter final {
- public:
-  using LayoutView = views::LayoutView;
+  using LayoutView = layout::LayoutView;
 
+ public:
   ViewPainter(const LayoutView& layout_view);
   ~ViewPainter();
 

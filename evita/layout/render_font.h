@@ -16,8 +16,7 @@ namespace gfx {
 struct FontProperties;
 }
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -71,13 +70,12 @@ class Font {
   DISALLOW_COPY_AND_ASSIGN(Font);
 };
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 namespace std {
 template <>
-struct hash<views::rendering::Font> {
-  size_t operator()(const views::rendering::Font& font) const;
+struct hash<layout::Font> {
+  size_t operator()(const layout::Font& font) const;
 };
 }  // namespace std
 

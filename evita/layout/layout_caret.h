@@ -9,7 +9,7 @@
 #include "evita/gfx/forward.h"
 #include "evita/ui/caret.h"
 
-namespace views {
+namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -39,6 +39,6 @@ class LayoutCaret final {
   DISALLOW_COPY_AND_ASSIGN(LayoutCaret);
 };
 
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_LAYOUT_CARET_H_

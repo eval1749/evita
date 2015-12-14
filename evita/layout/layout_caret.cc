@@ -4,7 +4,7 @@
 
 #include "evita/layout/layout_caret.h"
 
-namespace views {
+namespace layout {
 
 LayoutCaret::LayoutCaret(State state, const gfx::RectF& bounds)
     : bounds_(bounds), state_(state) {
@@ -17,4 +17,4 @@ LayoutCaret::LayoutCaret(State state, const gfx::RectF& bounds)
 
 LayoutCaret::~LayoutCaret() {}
 
-}  // namespace views
+}  // namespace layout

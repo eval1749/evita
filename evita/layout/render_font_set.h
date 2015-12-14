@@ -13,8 +13,7 @@ namespace css {
 class Style;
 }
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 class Font;
 
@@ -43,7 +42,6 @@ class FontSet {
   DISALLOW_COPY_AND_ASSIGN(FontSet);
 };
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_RENDER_FONT_SET_H_

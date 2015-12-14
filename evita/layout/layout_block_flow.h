@@ -12,8 +12,7 @@
 #include "evita/precomp.h"
 #include "evita/layout/render_style.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 class TextFormatter;
 class RootInlineBox;
@@ -90,7 +89,6 @@ class LayoutBlockFlow final {
   DISALLOW_COPY_AND_ASSIGN(LayoutBlockFlow);
 };
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_LAYOUT_BLOCK_FLOW_H_

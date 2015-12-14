@@ -8,8 +8,7 @@
 
 #include "base/logging.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -85,5 +84,4 @@ bool TextSelection::operator!=(const TextSelection& other) const {
   return !operator==(other);
 }
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout

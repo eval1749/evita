@@ -5,8 +5,7 @@
 #ifndef EVITA_LAYOUT_INLINE_BOX_FORWARD_H_
 #define EVITA_LAYOUT_INLINE_BOX_FORWARD_H_
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 #define FOR_EACH_INLINE_BOX(V) \
   V(InlineFillerBox)           \
@@ -21,7 +20,6 @@ FOR_EACH_INLINE_BOX(V)
 #undef V
 class InlineBoxVisitor;
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_INLINE_BOX_FORWARD_H_

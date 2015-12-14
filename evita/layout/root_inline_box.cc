@@ -11,8 +11,7 @@
 #include "evita/layout/inline_box.h"
 #include "evita/layout/render_selection.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 RootInlineBox::RootInlineBox(const RootInlineBox& other)
     : m_nHash(other.m_nHash),
@@ -141,5 +140,4 @@ text::Posn RootInlineBox::MapXToPosn(float xGoal) const {
   return lPosn;
 }
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout

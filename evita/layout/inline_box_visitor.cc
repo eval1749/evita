@@ -4,11 +4,9 @@
 
 #include "evita/layout/inline_box_visitor.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 InlineBoxVisitor::InlineBoxVisitor() {}
 InlineBoxVisitor::~InlineBoxVisitor() {}
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout

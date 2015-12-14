@@ -19,8 +19,7 @@
 #include "evita/layout/layout_block_flow.h"
 #include "evita/layout/layout_view_builder.h"
 
-namespace views {
-using namespace rendering;  // NOLINT
+namespace layout {
 
 namespace {
 text::Posn GetCaretOffset(const text::Buffer* buffer,
@@ -185,4 +184,4 @@ void TextView::DidRecreateCanvas() {
   view_paint_cache_.reset();
 }
 
-}  // namespace views
+}  // namespace layout

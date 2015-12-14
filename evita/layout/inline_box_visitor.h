@@ -8,8 +8,7 @@
 #include "base/macros.h"
 #include "evita/layout/inline_box_forward.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -28,7 +27,6 @@ class InlineBoxVisitor {
   DISALLOW_COPY_AND_ASSIGN(InlineBoxVisitor);
 };
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_INLINE_BOX_VISITOR_H_

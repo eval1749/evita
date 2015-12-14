@@ -15,8 +15,8 @@
 
 namespace paint {
 
-using RootInlineBox = views::rendering::RootInlineBox;
-using TextSelection = views::rendering::TextSelection;
+using RootInlineBox = layout::RootInlineBox;
+using TextSelection = layout::TextSelection;
 
 namespace {
 

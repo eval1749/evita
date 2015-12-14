@@ -11,7 +11,7 @@
 
 namespace paint {
 
-using RootInlineBox = views::rendering::RootInlineBox;
+using RootInlineBox = layout::RootInlineBox;
 
 //////////////////////////////////////////////////////////////////////
 //

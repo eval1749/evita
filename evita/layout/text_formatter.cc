@@ -25,8 +25,7 @@
 #include "evita/layout/root_inline_box.h"
 #include "evita/text/spelling.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 namespace {
 
@@ -382,5 +381,4 @@ TextSelection TextFormatter::FormatSelection(
   return TextSelection(selection_model, CssColorToColorF(style.bgcolor()));
 }
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout

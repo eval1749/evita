@@ -16,7 +16,7 @@ namespace paint {
 // InlineBoxPainter
 //
 class InlineBoxPainter final {
-  using InlineBox = views::rendering::InlineBox;
+  using InlineBox = layout::InlineBox;
 
  public:
   InlineBoxPainter(const InlineBox& inline_box);

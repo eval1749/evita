@@ -29,20 +29,19 @@ gfx::FontProperties ComputeFontProperties(const base::string16& family_name,
 
 namespace std {
 template <>
-struct hash<views::rendering::FontSet::FontList> {
-  size_t operator()(const views::rendering::FontSet::FontList& fonts) const {
+struct hash<layout::FontSet::FontList> {
+  size_t operator()(const layout::FontSet::FontList& fonts) const {
     size_t result = 137u;
     for (auto const font : fonts) {
       result <<= 1;
-      result ^= hash<const views::rendering::Font*>()(font);
+      result ^= hash<const layout::Font*>()(font);
     }
     return result;
   }
 };
 }  // namespace std
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -102,5 +101,4 @@ const Font* FontSet::GetFont(const css::Style& style, base::char16 sample) {
   return Get(style).FindFont(sample);
 }
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout

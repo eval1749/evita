@@ -28,8 +28,7 @@ bool IsCachableString(const base::char16* pwch, size_t cwch) {
 
 }  // namespace
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -293,12 +292,10 @@ bool Font::HasCharacter(base::char16 sample) const {
   return font_impl_->HasCharacter(sample);
 }
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 namespace std {
-size_t hash<views::rendering::Font>::operator()(
-    const views::rendering::Font& font) const {
-  return hash<const views::rendering::Font*>()(&font);
+size_t hash<layout::Font>::operator()(const layout::Font& font) const {
+  return hash<const layout::Font*>()(&font);
 }
 }  // namespace std

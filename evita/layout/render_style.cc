@@ -6,8 +6,7 @@
 
 #include "evita/layout/render_font.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 gfx::ColorF ColorToColorF(const css::Color& color) {
   return gfx::ColorF(static_cast<float>(color.red()) / 255,
@@ -50,16 +49,15 @@ void RenderStyle::set_overlay_color(const css::Color& color) {
   overlay_color_ = ColorToColorF(color);
 }
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 namespace std {
-size_t hash<views::rendering::RenderStyle>::operator()(
-    const views::rendering::RenderStyle& style) const {
+size_t hash<layout::RenderStyle>::operator()(
+    const layout::RenderStyle& style) const {
   auto result = static_cast<size_t>(0);
   result ^= std::hash<gfx::ColorF>()(style.bgcolor());
   result ^= std::hash<gfx::ColorF>()(style.color());
-  result ^= std::hash<views::rendering::Font>()(style.font());
+  result ^= std::hash<layout::Font>()(style.font());
   result ^= std::hash<gfx::ColorF>()(style.overlay_color());
   result ^= std::hash<css::TextDecoration>()(style.text_decoration());
   return result;

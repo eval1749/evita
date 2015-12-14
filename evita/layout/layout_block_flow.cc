@@ -18,8 +18,7 @@
 #include "evita/layout/root_inline_box.h"
 #include "evita/layout/text_formatter.h"
 
-namespace views {
-namespace rendering {
+namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -690,5 +689,4 @@ text::Posn LayoutBlockFlow::StartOfLine(text::Posn text_offset) {
   }
 }
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout

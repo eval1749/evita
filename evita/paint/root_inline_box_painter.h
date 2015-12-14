@@ -11,10 +11,8 @@ namespace gfx {
 class Canvas;
 }
 
-namespace views {
-namespace rendering {
+namespace layout {
 class RootInlineBox;
-}
 }
 
 namespace paint {
@@ -24,7 +22,7 @@ namespace paint {
 // RootInlineBoxPainter
 //
 class RootInlineBoxPainter final {
-  using RootInlineBox = views::rendering::RootInlineBox;
+  using RootInlineBox = layout::RootInlineBox;
 
  public:
   explicit RootInlineBoxPainter(const RootInlineBox& root_inline_box);

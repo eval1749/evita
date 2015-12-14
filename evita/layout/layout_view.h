@@ -12,13 +12,10 @@
 #include "evita/gfx_base.h"
 #include "evita/layout/render_selection.h"
 
-namespace views {
-
-namespace rendering {
-class RootInlineBox;
-}
+namespace layout {
 
 class LayoutCaret;
+class RootInlineBox;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -26,9 +23,6 @@ class LayoutCaret;
 //
 class LayoutView final : public base::RefCounted<LayoutView> {
  public:
-  using RootInlineBox = rendering::RootInlineBox;
-  using TextSelection = rendering::TextSelection;
-
   LayoutView(int layout_version,
              const gfx::RectF& bounds,
              const std::vector<RootInlineBox*>& lines,
@@ -58,6 +52,6 @@ class LayoutView final : public base::RefCounted<LayoutView> {
   DISALLOW_COPY_AND_ASSIGN(LayoutView);
 };
 
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_LAYOUT_VIEW_H_

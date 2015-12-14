@@ -7,7 +7,7 @@
 #include "evita/layout/layout_caret.h"
 #include "evita/layout/root_inline_box.h"
 
-namespace views {
+namespace layout {
 
 LayoutView::LayoutView(int layout_version,
                        const gfx::RectF& bounds,
@@ -29,4 +29,4 @@ LayoutView::~LayoutView() {
     delete line;
 }
 
-}  // namespace views
+}  // namespace layout

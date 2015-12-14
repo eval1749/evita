@@ -12,11 +12,7 @@
 #include "evita/ed_defs.h"
 #include "evita/gfx/rect_f.h"
 
-namespace views {
-
-class TextView;
-
-namespace rendering {
+namespace layout {
 
 class InlineBox;
 class Formatter;
@@ -69,7 +65,6 @@ class RootInlineBox final {
   text::Posn m_lEnd;
 };
 
-}  // namespace rendering
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_ROOT_INLINE_BOX_H_

@@ -26,12 +26,9 @@ namespace ui {
 class AnimatableWindow;
 }
 
-namespace views {
+namespace layout {
 
-namespace rendering {
 class LayoutBlockFlow;
-}
-
 class LayoutView;
 class LayoutViewBuilder;
 
@@ -41,10 +38,6 @@ class LayoutViewBuilder;
 //
 class TextView final : private gfx::CanvasObserver {
  public:
-  using LayoutBlockFlow = rendering::LayoutBlockFlow;
-  using TextSelectionModel = rendering::TextSelectionModel;
-  using TextSelection = rendering::TextSelection;
-
   TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner);
   ~TextView();
 
@@ -95,6 +88,6 @@ class TextView final : private gfx::CanvasObserver {
   DISALLOW_COPY_AND_ASSIGN(TextView);
 };
 
-}  // namespace views
+}  // namespace layout
 
 #endif  // EVITA_LAYOUT_TEXT_VIEW_H_

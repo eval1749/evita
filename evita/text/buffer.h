@@ -26,6 +26,7 @@ class Buffer;
 class Interval;
 class IntervalSet;
 class LineNumberCache;
+class Offset;
 class Range;
 class RangeSet;
 class Marker;
@@ -66,48 +67,48 @@ class Buffer : public BufferCore,
   bool CanRedo() const;
   bool CanUndo() const;
   void ClearUndo();
-  Posn ComputeEndOfLine(Posn offset) const;
-  Posn ComputeStartOfLine(Posn offset) const;
+  Offset ComputeEndOfLine(Offset offset) const;
+  Offset ComputeStartOfLine(Offset offset) const;
 
   // [D]
-  Count Delete(Posn, Posn);
+  Count Delete(Offset, Offset);
 
   // [E]
   void EndUndoGroup(const base::string16& name);
 
   // [G]
   const css::Style& GetDefaultStyle() const;
-  Interval* GetIntervalAt(Posn) const;
-  LineAndColumn GetLineAndColumn(Posn offset) const;
-  Posn GetStart() const { return 0; }
-  const css::Style& GetStyleAt(Posn) const;
+  Interval* GetIntervalAt(Offset) const;
+  LineAndColumn GetLineAndColumn(Offset offset) const;
+  Offset GetStart() const;
+  const css::Style& GetStyleAt(Offset) const;
   UndoStack* GetUndo() const { return undo_stack_.get(); }
 
   // [I]
   Count IncCharTick(int n) { return m_nCharTick += n; }
-  Count Insert(Posn, const base::char16*, Count);
+  Count Insert(Offset, const base::char16*, Count);
   bool IsModified() const { return m_nCharTick != m_nSaveTick; }
   bool IsNotReady() const;
   bool IsReadOnly() const { return m_fReadOnly; }
 
-  void Insert(Posn lPosn, const base::char16* pwsz) {
-    Insert(lPosn, pwsz, ::lstrlenW(pwsz));
+  void Insert(Offset lOffset, const base::char16* pwsz) {
+    Insert(lOffset, pwsz, ::lstrlenW(pwsz));
   }
 
-  void InsertBefore(Posn position, const base::string16& text);
+  void InsertBefore(Offset position, const base::string16& text);
 
   // [R]
-  Posn Redo(Posn, Count = 1);
+  Offset Redo(Offset, Count = 1);
 
   // [S]
   void SetNotModifiedForTesting() { m_nSaveTick = m_nCharTick; }
   void SetModified(bool new_modifier);
   bool SetReadOnly(bool f) { return m_fReadOnly = f; }
-  void SetStyle(Posn, Posn, const css::Style& style_values);
+  void SetStyle(Offset, Offset, const css::Style& style_values);
   void StartUndoGroup(const base::string16& name);
 
   // [U]
-  Posn Undo(Posn, Count = 1);
+  Offset Undo(Offset, Count = 1);
 
   // BufferMutationObservee
   void AddObserver(BufferMutationObserver* observer) final;
@@ -126,7 +127,7 @@ class Buffer : public BufferCore,
   std::unique_ptr<UndoStack> undo_stack_;
 
   // MarkerSetObserver
-  void DidChangeMarker(Posn start, Posn end) override;
+  void DidChangeMarker(Offset start, Offset end) override;
 
   int m_nCharTick;
   int m_nSaveTick;

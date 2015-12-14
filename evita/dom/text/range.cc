@@ -1,5 +1,6 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/text/range.h"
 
@@ -10,6 +11,7 @@
 #include "evita/dom/text/document.h"
 #include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
+#include "evita/text/offset.h"
 #include "evita/text/range.h"
 #include "evita/text/spelling.h"
 
@@ -19,7 +21,7 @@ namespace dom {
 //
 // Range
 //
-Range::Range(Document* document, text::Posn start, text::Posn end)
+Range::Range(Document* document, text::Offset start, text::Offset end)
     : Range(document, new text::Range(document->buffer(), start, end)) {}
 
 Range::Range(Document* document, text::Range* range)
@@ -31,11 +33,11 @@ bool Range::collapsed() const {
   return range_->start() == range_->end();
 }
 
-int Range::end() const {
+text::Offset Range::end() const {
   return range_->end();
 }
 
-int Range::start() const {
+text::Offset Range::start() const {
   return range_->start();
 }
 
@@ -43,14 +45,16 @@ base::string16 Range::text() const {
   return std::move(range_->text());
 }
 
-void Range::set_end(int offset) {
-  if (!document_->IsValidPosition(offset))
+void Range::set_end(int offsetLike) {
+  const auto offset = document_->ValidateOffset(offsetLike);
+  if (!offset.IsValid())
     return;
   range_->set_end(offset);
 }
 
-void Range::set_start(int offset) {
-  if (!document_->IsValidPosition(offset))
+void Range::set_start(int offsetLike) {
+  const auto offset = document_->ValidateOffset(offsetLike);
+  if (!offset.IsValid())
     return;
   range_->set_start(offset);
 }
@@ -61,8 +65,9 @@ void Range::set_text(const base::string16& text) {
   range_->set_text(text);
 }
 
-Range* Range::CollapseTo(text::Posn offset) {
-  if (!document_->IsValidPosition(offset))
+Range* Range::CollapseTo(int offsetLike) {
+  const auto offset = document_->ValidateOffset(offsetLike);
+  if (!offset.IsValid())
     return this;
   range_->SetRange(offset, offset);
   return this;
@@ -83,17 +88,25 @@ Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range) {
 }
 
 Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range,
-                       int offset) {
-  return NewRange(document_or_range, offset, offset);
+                       int offsetLike) {
+  return NewRange(document_or_range, offsetLike, offsetLike);
 }
 
 Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range,
-                       int start,
-                       int end) {
-  if (document_or_range.is_left)
-    return new Range(document_or_range.left, start, end);
-  auto const range = document_or_range.right;
-  return new Range(range->document(), start, end);
+                       int startLike,
+                       int endLike) {
+  auto const document = document_or_range.is_left
+                            ? document_or_range.left
+                            : document_or_range.right->document();
+  const auto start = document->ValidateOffset(startLike);
+  if (!start.IsValid())
+    return nullptr;
+  const auto end = document->ValidateOffset(endLike);
+  if (!end.IsValid())
+    return nullptr;
+  if (!document->IsValidRange(start, end))
+    return nullptr;
+  return new Range(document, start, end);
 }
 
 void Range::SetSpelling(int spelling_code) const {

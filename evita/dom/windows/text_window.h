@@ -43,14 +43,14 @@ class TextWindow final
   float zoom() const { return zoom_; }
   void set_zoom(float new_zoom);
 
-  text::Posn ComputeMotion(int method);
-  text::Posn ComputeMotion(int method, text::Posn position);
-  text::Posn ComputeMotion(int method, text::Posn position, int count);
-  text::Posn ComputeMotion(int method,
-                           text::Posn position,
-                           int count,
-                           const domapi::FloatPoint& point);
-  domapi::FloatRect HitTestTextPosition(text::Posn position);
+  text::Offset ComputeMotion(int method);
+  text::Offset ComputeMotion(int method, text::Offset position);
+  text::Offset ComputeMotion(int method, text::Offset position, int count);
+  text::Offset ComputeMotion(int method,
+                             text::Offset position,
+                             int count,
+                             const domapi::FloatPoint& point);
+  domapi::FloatRect HitTestTextPosition(text::Offset position);
   void MakeSelectionVisible();
   TextWindow* NewTextWindow(Range* range);
   v8::Handle<v8::Promise> MapPointToPosition(float x, float y);

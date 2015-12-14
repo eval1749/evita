@@ -183,8 +183,8 @@ std::unique_ptr<TableViewModel> TableWindow::UpdateModelIfNeeded() {
   should_update_model_ = false;
   std::unique_ptr<TableViewModel> model(new TableViewModel());
   auto const buffer = document_->buffer();
-  auto position = buffer->ComputeEndOfLine(0);
-  auto header_line = buffer->GetText(0, position);
+  auto position = buffer->ComputeEndOfLine(text::Offset());
+  auto header_line = buffer->GetText(text::Offset(), position);
   model->SetHeaderRow(header_line);
   for (;;) {
     ++position;
@@ -199,11 +199,11 @@ std::unique_ptr<TableViewModel> TableWindow::UpdateModelIfNeeded() {
 }
 
 // text::BufferMutationObserver
-void TableWindow::DidDeleteAt(text::Posn, size_t) {
+void TableWindow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   should_update_model_ = true;
 }
 
-void TableWindow::DidInsertAt(text::Posn, size_t) {
+void TableWindow::DidInsertAt(text::Offset offset, text::OffsetDelta length) {
   should_update_model_ = true;
 }
 

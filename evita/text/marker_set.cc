@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "base/logging.h"
+#include "evita/text/offset.h"
 
 namespace text {
 
@@ -20,14 +21,14 @@ class MarkerSet::ChangeScope final {
   explicit ChangeScope(MarkerSetImpl* markers);
   ~ChangeScope();
 
-  void Insert(Posn start, Posn end, const common::AtomicString& type);
+  void Insert(Offset start, Offset end, const common::AtomicString& type);
   void Remove(Marker* marker);
-  void Update(Marker* marker, Posn new_start, Posn new_end);
+  void Update(Marker* marker, Offset new_start, Offset new_end);
 
  private:
   struct InsertOperation {
-    Posn start;
-    Posn end;
+    Offset start;
+    Offset end;
     const common::AtomicString* type;
   };
 
@@ -37,8 +38,8 @@ class MarkerSet::ChangeScope final {
 
   struct UpdateOperation final {
     Marker* marker;
-    Posn start;
-    Posn end;
+    Offset start;
+    Offset end;
   };
 
   MarkerSetImpl* markers_;
@@ -67,8 +68,8 @@ MarkerSet::ChangeScope::~ChangeScope() {
   }
 }
 
-void MarkerSet::ChangeScope::Insert(Posn start,
-                                    Posn end,
+void MarkerSet::ChangeScope::Insert(Offset start,
+                                    Offset end,
                                     const common::AtomicString& type) {
   inserts_.push_back(InsertOperation{start, end, &type});
 }
@@ -78,8 +79,8 @@ void MarkerSet::ChangeScope::Remove(Marker* marker) {
 }
 
 void MarkerSet::ChangeScope::Update(Marker* marker,
-                                    Posn new_start,
-                                    Posn new_end) {
+                                    Offset new_start,
+                                    Offset new_end) {
   if (marker->start_ == new_start && marker->end_ == new_end)
     return;
   if (new_start >= new_end) {
@@ -103,7 +104,7 @@ MarkerSet::~MarkerSet() {
   Clear();
 }
 
-MarkerSet::MarkerSetImpl::iterator MarkerSet::lower_bound(Posn offset) {
+MarkerSet::MarkerSetImpl::iterator MarkerSet::lower_bound(Offset offset) {
   Marker marker(offset);
   return markers_.lower_bound(&marker);
 }
@@ -126,15 +127,15 @@ void MarkerSet::Clear() {
   NotifyChange(start, end);
 }
 
-const Marker* MarkerSet::GetMarkerAt(Posn offset) const {
+const Marker* MarkerSet::GetMarkerAt(Offset offset) const {
   auto const marker = GetLowerBoundMarker(offset);
   return marker && marker->Contains(offset) ? marker : nullptr;
 }
 
-const Marker* MarkerSet::GetLowerBoundMarker(Posn offset) const {
+const Marker* MarkerSet::GetLowerBoundMarker(Offset offset) const {
   if (markers_.empty())
     return nullptr;
-  Marker marker(offset + 1);
+  Marker marker(offset + OffsetDelta(1));
   auto const present = markers_.lower_bound(&marker);
   if (present == markers_.end())
     return nullptr;
@@ -142,8 +143,8 @@ const Marker* MarkerSet::GetLowerBoundMarker(Posn offset) const {
   return *present;
 }
 
-void MarkerSet::InsertMarker(Posn start,
-                             Posn end,
+void MarkerSet::InsertMarker(Offset start,
+                             Offset end,
                              const common::AtomicString& type) {
   DCHECK_LT(start, end);
   RemoveMarker(start, end);
@@ -177,11 +178,11 @@ void MarkerSet::InsertMarker(Posn start,
   markers_.insert(new Marker(start, end, type));
 }
 
-void MarkerSet::NotifyChange(Posn start, Posn end) {
+void MarkerSet::NotifyChange(Offset start, Offset end) {
   FOR_EACH_OBSERVER(MarkerSetObserver, observers_, DidChangeMarker(start, end));
 }
 
-void MarkerSet::RemoveMarker(Posn start, Posn end) {
+void MarkerSet::RemoveMarker(Offset start, Offset end) {
   DCHECK_LT(start, end);
   if (markers_.empty())
     return;
@@ -189,7 +190,7 @@ void MarkerSet::RemoveMarker(Posn start, Posn end) {
   ChangeScope change_scope(&markers_);
 
   auto offset = start;
-  auto runner = lower_bound(offset + 1);
+  auto runner = lower_bound(offset + OffsetDelta(1));
   while (offset < end) {
     if (runner == markers_.end() || (*runner)->start_ >= end)
       return;
@@ -230,37 +231,40 @@ void MarkerSet::RemoveObserver(MarkerSetObserver* observer) {
 }
 
 // BufferMutationObserver
-void MarkerSet::DidDeleteAt(Posn offset, size_t length) {
+void MarkerSet::DidDeleteAt(Offset start, OffsetDelta length) {
+  auto const end = start + length;
   ChangeScope change_scope(&markers_);
   for (auto runner = markers_.rbegin();
-       runner != markers_.rend() && (*runner)->end_ > offset; ++runner) {
+       runner != markers_.rend() && (*runner)->end_ > start; ++runner) {
     auto const marker = *runner;
-    change_scope.Update(
-        marker,
-        marker->start_ > offset
-            ? std::max(static_cast<Posn>(marker->start_ - length), offset)
-            : marker->start_,
-        std::max(static_cast<Posn>(marker->end_ - length), offset));
+    auto const marker_end = marker->end_ >= end ? marker->end_ - length : start;
+    if (marker->start_ <= start) {
+      change_scope.Update(marker, marker->start_, marker_end);
+      continue;
+    }
+    auto const marker_start =
+        marker->start_ >= end ? marker->start_ - length : start;
+    change_scope.Update(marker, marker_start, marker_end);
   }
 }
 
-void MarkerSet::DidInsertAt(Posn offset, size_t length) {
-  for (auto runner = lower_bound(offset + 1); runner != markers_.end();
-       ++runner) {
+void MarkerSet::DidInsertAt(Offset offset, OffsetDelta length) {
+  auto const start = offset + OffsetDelta(1);
+  for (auto runner = lower_bound(start); runner != markers_.end(); ++runner) {
     auto const marker = *runner;
     if (marker->start_ > offset)
-      marker->start_ = static_cast<Posn>(marker->start_ + length);
-    marker->end_ = static_cast<Posn>(marker->end_ + length);
+      marker->start_ = marker->start_ + length;
+    marker->end_ = marker->end_ + length;
   }
 }
 
-void MarkerSet::DidInsertBefore(Posn offset, size_t length) {
-  for (auto runner = lower_bound(offset + 1); runner != markers_.end();
-       ++runner) {
+void MarkerSet::DidInsertBefore(Offset offset, OffsetDelta length) {
+  auto const start = offset + OffsetDelta(1);
+  for (auto runner = lower_bound(start); runner != markers_.end(); ++runner) {
     auto const marker = *runner;
     if (marker->start_ >= offset)
-      marker->start_ = static_cast<Posn>(marker->start_ + length);
-    marker->end_ = static_cast<Posn>(marker->end_ + length);
+      marker->start_ = marker->start_ + length;
+    marker->end_ = marker->end_ + length;
   }
 }
 

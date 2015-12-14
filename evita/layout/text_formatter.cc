@@ -83,8 +83,8 @@ class TextFormatter::TextScanner final {
     return buffer_->style_resolver();
   }
   const common::AtomicString& syntax() const;
-  text::Posn text_offset() const { return text_offset_; }
-  void set_text_offset(text::Posn new_text_offset) {
+  text::Offset text_offset() const { return text_offset_; }
+  void set_text_offset(text::Offset new_text_offset) {
     text_offset_ = new_text_offset;
   }
 
@@ -96,12 +96,12 @@ class TextFormatter::TextScanner final {
  private:
   base::char16 buffer_cache_[80];
   const text::Buffer* const buffer_;
-  text::Posn buffer_cache_end_;
-  text::Posn buffer_cache_start_;
+  text::Offset buffer_cache_end_;
+  text::Offset buffer_cache_start_;
   text::Interval* interval_;
   mutable const text::Marker* spelling_marker_;
   mutable const text::Marker* syntax_marker_;
-  text::Posn text_offset_;
+  text::Offset text_offset_;
 
   DISALLOW_COPY_AND_ASSIGN(TextScanner);
 };
@@ -146,7 +146,7 @@ base::char16 TextFormatter::TextScanner::GetChar() {
   if (text_offset_ < buffer_cache_start_ || text_offset_ >= buffer_cache_end_) {
     buffer_cache_start_ = text_offset_;
     buffer_cache_end_ = std::min(
-        static_cast<text::Posn>(buffer_cache_start_ + arraysize(buffer_cache_)),
+        buffer_cache_start_ + text::OffsetDelta(arraysize(buffer_cache_)),
         buffer_->GetEnd());
     buffer_->GetText(buffer_cache_, buffer_cache_start_, buffer_cache_end_);
   }
@@ -174,7 +174,7 @@ void TextFormatter::TextScanner::Next() {
 // TextFormatter
 //
 TextFormatter::TextFormatter(const text::Buffer* text_buffer,
-                             text::Posn text_offset,
+                             text::Offset text_offset,
                              const gfx::RectF& bounds,
                              float zoom)
     : bounds_(bounds),
@@ -188,16 +188,16 @@ TextFormatter::TextFormatter(const text::Buffer* text_buffer,
 
 TextFormatter::~TextFormatter() {}
 
-text::Posn TextFormatter::text_offset() const {
+text::Offset TextFormatter::text_offset() const {
   return text_scanner_->text_offset();
 }
 
-void TextFormatter::set_text_offset(text::Posn new_text_offset) {
+void TextFormatter::set_text_offset(text::Offset new_text_offset) {
   return text_scanner_->set_text_offset(new_text_offset);
 }
 
 // Returns true if more contents is available, otherwise returns false.
-RootInlineBox* TextFormatter::FormatLine(text::Posn text_offset) {
+RootInlineBox* TextFormatter::FormatLine(text::Offset text_offset) {
   text_scanner_->set_text_offset(text_offset);
   return FormatLine();
 }

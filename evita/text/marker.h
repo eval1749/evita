@@ -10,15 +10,19 @@
 
 #include "base/basictypes.h"
 #include "common/strings/atomic_string.h"
-#include "evita/precomp.h"
+#include "evita/text/offset.h"
 
 namespace text {
 
 class MarkerSet;
 
+//////////////////////////////////////////////////////////////////////
+//
+// Marker
+//
 class Marker final {
  public:
-  Marker(Posn start, Posn end, const common::AtomicString& type);
+  Marker(Offset start, Offset end, const common::AtomicString& type);
   Marker(const Marker& other);
   Marker();
   ~Marker();
@@ -28,19 +32,19 @@ class Marker final {
   bool operator==(const Marker& other) const;
   bool operator!=(const Marker& other) const;
 
-  Posn end() const { return end_; }
-  Posn start() const { return start_; }
+  Offset end() const { return end_; }
+  Offset start() const { return start_; }
   const common::AtomicString& type() const { return type_; }
 
-  bool Contains(Posn offset) const;
+  bool Contains(Offset offset) const;
 
  private:
   friend class MarkerSet;
 
-  explicit Marker(Posn start);
+  explicit Marker(Offset start);
 
-  Posn end_;
-  Posn start_;
+  Offset end_;
+  Offset start_;
   common::AtomicString type_;
 };
 

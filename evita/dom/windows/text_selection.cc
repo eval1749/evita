@@ -10,6 +10,7 @@
 #include "evita/dom/text/document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/windows/text_window.h"
+#include "evita/text/offset.h"
 #include "evita/text/selection.h"
 
 namespace dom {
@@ -29,11 +30,11 @@ TextSelection::~TextSelection() {
   text_selection_->RemoveObserver(this);
 }
 
-text::Posn TextSelection::anchor_offset() const {
+text::Offset TextSelection::anchor_offset() const {
   return start_is_active() ? range_->end() : range_->start();
 }
 
-text::Posn TextSelection::focus_offset() const {
+text::Offset TextSelection::focus_offset() const {
   return start_is_active() ? range_->start() : range_->end();
 }
 

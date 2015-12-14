@@ -22,6 +22,11 @@ namespace paint {
 class ViewPaintCache;
 }
 
+namespace text {
+class Buffer;
+class Offset;
+}
+
 namespace ui {
 class AnimatableWindow;
 }
@@ -43,43 +48,43 @@ class TextView final : private gfx::CanvasObserver {
 
   text::Buffer* buffer() const { return buffer_; }
 
-  void DidChangeStyle(text::Posn offset, size_t length);
-  void DidDeleteAt(text::Posn offset, size_t length);
+  void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
+  void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
   void DidHide();
-  void DidInsertAt(text::Posn offset, size_t length);
+  void DidInsertAt(text::Offset offset, text::OffsetDelta length);
   // Returns end of line offset containing |text_offset|.
-  text::Posn EndOfLine(text::Posn text_offset) const;
-  text::Posn GetStart();
-  text::Posn GetEnd();
+  text::Offset EndOfLine(text::Offset text_offset) const;
+  text::Offset GetStart();
+  text::Offset GetEnd();
   // Returns fully visible end offset or end of line position if there is only
   // one line.
-  text::Posn GetVisibleEnd();
-  void Format(text::Posn text_offset);
+  text::Offset GetVisibleEnd();
+  void Format(text::Offset text_offset);
   // Returns true if text format is taken place.
   bool FormatIfNeeded();
-  gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
+  gfx::RectF HitTestTextPosition(text::Offset text_offset) const;
   void MakeSelectionVisible();
-  text::Posn MapPointToPosition(gfx::PointF point);
-  text::Posn MapPointXToOffset(text::Posn text_offset, float point_x) const;
+  text::Offset MapPointToPosition(gfx::PointF point);
+  text::Offset MapPointXToOffset(text::Offset text_offset, float point_x) const;
   void Paint(gfx::Canvas* canvas);
   bool ScrollDown();
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
   // Returns start of line offset containing |text_offset|.
-  text::Posn StartOfLine(text::Posn text_offset) const;
+  text::Offset StartOfLine(text::Offset text_offset) const;
   void Update(const TextSelectionModel& selection, base::Time now);
 
  private:
-  bool IsPositionFullyVisible(text::Posn text_offset) const;
-  void ScrollToPosition(text::Posn offset);
+  bool IsPositionFullyVisible(text::Offset text_offset) const;
+  void ScrollToPosition(text::Offset offset);
 
   // gfx::CanvasObserver
   void DidRecreateCanvas() final;
 
   gfx::RectF bounds_;
   text::Buffer* const buffer_;
-  text::Posn caret_offset_;
+  text::Offset caret_offset_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
   scoped_refptr<LayoutView> layout_view_;
   const std::unique_ptr<LayoutViewBuilder> layout_view_builder_;

@@ -10,11 +10,11 @@
 
 #include "base/callback_forward.h"
 #include "base/strings/string16.h"
-#include "evita/precomp.h"
 #include "evita/dom/public/promise.h"
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/switch_value.h"
 #include "evita/dom/public/window_id.h"
+#include "evita/text/offset.h"
 
 // TODO(eval1749): We should not use DOM object in DOM API.
 namespace dom {
@@ -54,7 +54,7 @@ struct TextWindowCompute final {
     StartOfWindowLine,
   };
   Method method;
-  text::Posn position;
+  text::Offset position;
   int count;
   float x;
   float y;
@@ -75,8 +75,8 @@ class ViewDelegate {
   virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;
   virtual void ChangeParentWindow(WindowId window_id,
                                   WindowId new_parent_window_id) = 0;
-  virtual text::Posn ComputeOnTextWindow(WindowId window_id,
-                                         const TextWindowCompute& data) = 0;
+  virtual text::Offset ComputeOnTextWindow(WindowId window_id,
+                                           const TextWindowCompute& data) = 0;
   virtual void CreateEditorWindow(domapi::WindowId window_id) = 0;
 
   // Create Form window
@@ -128,7 +128,7 @@ class ViewDelegate {
 
   // Get bounding rectangle of character at text offset.
   virtual FloatRect HitTestTextPosition(WindowId window_id,
-                                        text::Posn offset) = 0;
+                                        text::Offset offset) = 0;
 
   virtual void MakeSelectionVisible(WindowId window_id) = 0;
   virtual void MapTextFieldPointToOffset(EventTargetId event_target_id,
@@ -139,7 +139,8 @@ class ViewDelegate {
                                           float x,
                                           float y,
                                           const IntegerPromise& promise) = 0;
-  // Popup message box dialog box and return response code.
+// Popup message box dialog box and return response code.
+#undef MessageBox
   virtual void MessageBox(WindowId window_id,
                           const base::string16& message,
                           const base::string16& title,

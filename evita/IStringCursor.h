@@ -13,13 +13,13 @@
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
-#include "evita/precomp.h"
+#include "evita/text/offset.h"
 
 struct IStringCursor {
   virtual bool CanMove(int count) = 0;
 
   virtual base::char16 GetChar(int offset) = 0;
-  virtual text::Posn GetPosition() = 0;
+  virtual text::Offset GetPosition() = 0;
 
   // TODO(eval1749): We should use |int| for |FindBackward()|
   virtual bool FindBackward(base::char16 ch, uint32_t count) = 0;
@@ -27,10 +27,10 @@ struct IStringCursor {
   virtual bool FindForward(base::char16 ch, uint32_t count) = 0;
   // TODO(eval1749): We should use |int| for |Match()|
   virtual bool Match(const base::char16* sting, int offset, uint32_t count) = 0;
-  virtual text::Posn Move(int count) = 0;
-  virtual text::Posn MoveToEnd() = 0;
+  virtual text::Offset Move(int count) = 0;
+  virtual text::Offset MoveToEnd() = 0;
 
-  virtual text::Posn MoveToStart() = 0;
+  virtual text::Offset MoveToStart() = 0;
 };
 
 struct StringRange {

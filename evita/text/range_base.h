@@ -5,29 +5,33 @@
 #ifndef EVITA_TEXT_RANGE_BASE_H_
 #define EVITA_TEXT_RANGE_BASE_H_
 
-#include "evita/precomp.h"
+#include "evita/text/offset.h"
 
 namespace text {
 
 class RangeSetBase;
 
+//////////////////////////////////////////////////////////////////////
+//
+// RangeSetBase
+//
 class RangeBase {
  public:
-  Posn end() const { return end_; }
-  Posn start() const { return start_; }
+  Offset end() const { return end_; }
+  Offset start() const { return start_; }
 
-  bool Contains(Posn offset) const;
+  bool Contains(Offset offset) const;
 
  protected:
-  RangeBase(Posn start, Posn end);
+  RangeBase(Offset start, Offset end);
   RangeBase(const RangeBase& other);
   ~RangeBase();
 
  private:
   friend class RangeSetBase;
 
-  Posn end_;
-  Posn start_;
+  Offset end_;
+  Offset start_;
 };
 
 }  // namespace text

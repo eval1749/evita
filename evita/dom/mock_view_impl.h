@@ -29,7 +29,8 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD2(AddWindow, void(domapi::WindowId, domapi::WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(domapi::WindowId, domapi::WindowId));
   MOCK_METHOD2(ComputeOnTextWindow,
-               text::Posn(domapi::WindowId, const domapi::TextWindowCompute&));
+               text::Offset(domapi::WindowId,
+                            const domapi::TextWindowCompute&));
   MOCK_METHOD1(CreateEditorWindow, void(domapi::WindowId));
   MOCK_METHOD3(CreateFormWindow,
                void(domapi::WindowId, Form*, const domapi::PopupWindowInit&));
@@ -54,7 +55,7 @@ class MockViewImpl final : public domapi::ViewDelegate {
       const std::vector<base::string16>& keys) final;
   MOCK_METHOD1(HideWindow, void(domapi::WindowId));
   MOCK_METHOD2(HitTestTextPosition,
-               domapi::FloatRect(domapi::WindowId, text::Posn));
+               domapi::FloatRect(domapi::WindowId, text::Offset));
   MOCK_METHOD1(MakeSelectionVisible, void(domapi::WindowId));
   MOCK_METHOD4(MapTextFieldPointToOffset,
                void(domapi::EventTargetId,

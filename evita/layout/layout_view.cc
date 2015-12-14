@@ -26,7 +26,7 @@ LayoutView::LayoutView(int layout_version,
 
 LayoutView::~LayoutView() {
   for (const auto& line : lines_)
-    delete line;
+    line->Release();
 }
 
 }  // namespace layout

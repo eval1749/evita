@@ -12,6 +12,7 @@
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set_observer.h"
+#include "evita/text/offset.h"
 
 namespace common {
 class AtomicString;
@@ -28,17 +29,17 @@ class MarkerSet final : public BufferMutationObserver {
   void AddObserver(MarkerSetObserver* observer);
 
   // Get marker at |offset|.
-  const Marker* GetMarkerAt(Posn offset) const;
+  const Marker* GetMarkerAt(Offset offset) const;
 
   // Get marker starting at |offset| or after |offset|. This function is
   // provided for reducing call for |GetMarkerAt()| on every position in
   // document. See |TextFormatter::TextScanner::spelling()|.
-  const Marker* GetLowerBoundMarker(Posn offset) const;
+  const Marker* GetLowerBoundMarker(Offset offset) const;
 
   // Insert marker from |start| to |end|, exclusive.
-  void InsertMarker(Posn start, Posn end, const common::AtomicString& type);
+  void InsertMarker(Offset start, Offset end, const common::AtomicString& type);
 
-  void RemoveMarkerForTesting(Posn start, Posn end) {
+  void RemoveMarkerForTesting(Offset start, Offset end) {
     RemoveMarker(start, end);
   }
 
@@ -49,21 +50,21 @@ class MarkerSet final : public BufferMutationObserver {
   using MarkerSetImpl = std::set<Marker*>;
   class ChangeScope;
 
-  MarkerSetImpl::iterator lower_bound(Posn offset);
+  MarkerSetImpl::iterator lower_bound(Offset offset);
 
   // Remove all markers in this |MarkerSet|.
   void Clear();
 
   // Notify marker changes to observers.
-  void NotifyChange(Posn start, Posn end);
+  void NotifyChange(Offset start, Offset end);
 
   // Remove marker from |start| to |end|, exclusive.
-  void RemoveMarker(Posn start, Posn end);
+  void RemoveMarker(Offset start, Offset end);
 
   // BufferMutationObserver
-  void DidDeleteAt(Posn offset, size_t length) final;
-  void DidInsertAt(Posn offset, size_t length) final;
-  void DidInsertBefore(Posn offset, size_t length) final;
+  void DidDeleteAt(Offset offset, OffsetDelta length) final;
+  void DidInsertAt(Offset offset, OffsetDelta length) final;
+  void DidInsertBefore(Offset offset, OffsetDelta length) final;
 
   MarkerSetImpl markers_;
   BufferMutationObservee* const mutation_observee_;

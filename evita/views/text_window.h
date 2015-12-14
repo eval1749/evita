@@ -48,19 +48,19 @@ class TextWindow final : public CanvasContentWindow,
   TextWindow(WindowId window_id, text::Selection* selection);
   ~TextWindow() final;
 
-  text::Posn ComputeScreenMotion(text::Count count,
-                                 const gfx::PointF& point,
-                                 text::Posn offset);
-  text::Posn ComputeWindowLineMotion(text::Count count,
-                                     const gfx::PointF& point,
-                                     text::Posn offset);
-  text::Posn ComputeWindowMotion(text::Count count, text::Posn offset);
-  text::Posn EndOfLine(text::Posn offset);
-  gfx::RectF HitTestTextPosition(text::Posn offset);
-  text::Posn MapPointToPosition(const gfx::PointF point);
+  text::Offset ComputeScreenMotion(text::Count count,
+                                   const gfx::PointF& point,
+                                   text::Offset offset);
+  text::Offset ComputeWindowLineMotion(text::Count count,
+                                       const gfx::PointF& point,
+                                       text::Offset offset);
+  text::Offset ComputeWindowMotion(text::Count count, text::Offset offset);
+  text::Offset EndOfLine(text::Offset offset);
+  gfx::RectF HitTestTextPosition(text::Offset offset);
+  text::Offset MapPointToPosition(const gfx::PointF point);
   void SetZoom(float new_zoom);
   bool SmallScroll(int x_count, int y_count);
-  text::Posn StartOfLine(text::Posn offset);
+  text::Offset StartOfLine(text::Offset offset);
 
  private:
   using TextSelectionModel = layout::TextSelectionModel;
@@ -72,9 +72,9 @@ class TextWindow final : public CanvasContentWindow,
   void UpdateScrollBar();
 
   // text::BufferMutationObserver
-  void DidChangeStyle(text::Posn offset, size_t length) final;
-  void DidDeleteAt(text::Posn offset, size_t length) final;
-  void DidInsertAt(text::Posn offset, size_t length) final;
+  void DidChangeStyle(text::Offset offset, text::OffsetDelta length) final;
+  void DidDeleteAt(text::Offset offset, text::OffsetDelta length) final;
+  void DidInsertAt(text::Offset offset, text::OffsetDelta length) final;
 
   // text::SelectionChangeObserver
   void DidChangeSelection() final;

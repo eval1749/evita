@@ -24,6 +24,8 @@ source_set("text") {
     "marker_set.h",
     "marker_set_observer.cc",
     "marker_set_observer.h",
+    "offset.cc",
+    "offset.h",
     "range.cc",
     "range.h",
     "range_base.cc",

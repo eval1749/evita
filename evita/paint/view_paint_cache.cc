@@ -29,7 +29,7 @@ ViewPaintCache::ViewPaintCache(gfx::Canvas* canvas,
 
 ViewPaintCache::~ViewPaintCache() {
   for (const auto& line : lines_)
-    delete line;
+    line->Release();
 }
 
 bool ViewPaintCache::CanUseTextImage(gfx::Canvas* canvas) const {

@@ -15,8 +15,8 @@ namespace layout {
 // TextSelectionModel
 //
 TextSelectionModel::TextSelectionModel(State state,
-                                       text::Posn anchor_offset,
-                                       text::Posn focus_offset)
+                                       text::Offset anchor_offset,
+                                       text::Offset focus_offset)
     : end_(std::max(anchor_offset, focus_offset)),
       focus_offset_(focus_offset),
       state_(state),
@@ -28,7 +28,7 @@ TextSelectionModel::TextSelectionModel(const TextSelectionModel& other)
                          other.focus_offset_) {}
 
 TextSelectionModel::TextSelectionModel()
-    : TextSelectionModel(State::Disabled, 0, 0) {}
+    : TextSelectionModel(State::Disabled, text::Offset(), text::Offset()) {}
 
 TextSelectionModel::~TextSelectionModel() {}
 
@@ -50,7 +50,7 @@ bool TextSelectionModel::operator!=(const TextSelectionModel& other) const {
   return !operator==(other);
 }
 
-text::Posn TextSelectionModel::anchor_offset() const {
+text::Offset TextSelectionModel::anchor_offset() const {
   return focus_offset_ == end_ ? start_ : end_;
 }
 

@@ -37,8 +37,8 @@ class TextSelection final
   TextSelection(TextWindow* text_window, Range* range);
   ~TextSelection() final;
 
-  text::Posn anchor_offset() const;
-  text::Posn focus_offset() const;
+  text::Offset anchor_offset() const;
+  text::Offset focus_offset() const;
   Range* range() const { return range_.get(); }
   bool start_is_active() const;
   void set_start_is_active(bool start_is_active);

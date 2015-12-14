@@ -8,7 +8,7 @@
 
 namespace text {
 
-Marker::Marker(Posn start, Posn end, const common::AtomicString& type)
+Marker::Marker(Offset start, Offset end, const common::AtomicString& type)
     : end_(end), start_(start), type_(type) {
   DCHECK(!type.empty());
   DCHECK_LT(start, end);
@@ -17,10 +17,10 @@ Marker::Marker(Posn start, Posn end, const common::AtomicString& type)
 Marker::Marker(const Marker& other)
     : end_(other.end_), start_(other.start_), type_(other.type_) {}
 
-Marker::Marker(Posn offset)
+Marker::Marker(Offset offset)
     : end_(offset), start_(offset), type_(common::AtomicString::Empty()) {}
 
-Marker::Marker() : Marker(0) {}
+Marker::Marker() : Marker(Offset()) {}
 
 Marker::~Marker() {}
 
@@ -39,7 +39,7 @@ bool Marker::operator!=(const Marker& other) const {
   return !operator==(other);
 }
 
-bool Marker::Contains(Posn offset) const {
+bool Marker::Contains(Offset offset) const {
   return offset >= start_ && offset < end_;
 }
 

@@ -141,20 +141,20 @@ void ViewDelegateImpl::ChangeParentWindow(domapi::WindowId window_id,
 
 // TODO(eval1749): We should make |ComputeOnTextWindow()| to return value
 // asynchronously.
-text::Posn ViewDelegateImpl::ComputeOnTextWindow(
+text::Offset ViewDelegateImpl::ComputeOnTextWindow(
     domapi::WindowId window_id,
     const domapi::TextWindowCompute& data) {
   TRACE_EVENT0("view", "ViewDelegateImpl::ComputeOnTextWindow");
   auto const window =
       FromWindowId("ComputeOnTextWindow", window_id)->as<TextWindow>();
   if (!window)
-    return -1;
+    return text::Offset::Invalid();
   gfx::PointF point(data.x, data.y);
   UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
   DCHECK(lock_scope.locked());
   switch (data.method) {
     case domapi::TextWindowCompute::Method::EndOfWindow:
-      return window->ComputeWindowMotion(1, 0);
+      return window->ComputeWindowMotion(1, text::Offset(0));
     case domapi::TextWindowCompute::Method::EndOfWindowLine:
       return window->EndOfLine(data.position);
     case domapi::TextWindowCompute::Method::MoveScreen:
@@ -164,11 +164,11 @@ text::Posn ViewDelegateImpl::ComputeOnTextWindow(
     case domapi::TextWindowCompute::Method::MoveWindowLine:
       return window->ComputeWindowLineMotion(data.count, point, data.position);
     case domapi::TextWindowCompute::Method::StartOfWindow:
-      return window->ComputeWindowMotion(-1, 0);
+      return window->ComputeWindowMotion(-1, text::Offset(0));
     case domapi::TextWindowCompute::Method::StartOfWindowLine:
       return window->StartOfLine(data.position);
     default:
-      return -1;
+      return text::Offset::Invalid();
   }
 }
 
@@ -359,7 +359,7 @@ void ViewDelegateImpl::HideWindow(domapi::WindowId window_id) {
 // TODO(eval1749): We should make |HitTestTextPosition()| to return value
 // asynchronously.
 domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(WindowId window_id,
-                                                        text::Posn position) {
+                                                        text::Offset position) {
   TRACE_EVENT0("view", "ViewDelegateImpl::HitTestTextPosition");
   auto const window =
       FromWindowId("HitTestTextPosition", window_id)->as<TextWindow>();

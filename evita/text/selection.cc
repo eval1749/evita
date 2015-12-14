@@ -74,7 +74,7 @@ Selection::Selection(const Range* range) : model_(new Model(range)) {}
 
 Selection::~Selection() {}
 
-Posn Selection::anchor_offset() const {
+Offset Selection::anchor_offset() const {
   return model_->IsStartActive() ? model_->end() : model_->start();
 }
 
@@ -82,11 +82,11 @@ Buffer* Selection::buffer() const {
   return model_->buffer();
 }
 
-Posn Selection::end() const {
+Offset Selection::end() const {
   return model_->end();
 }
 
-Posn Selection::focus_offset() const {
+Offset Selection::focus_offset() const {
   return model_->IsStartActive() ? model_->start() : model_->end();
 }
 
@@ -94,7 +94,7 @@ Range* Selection::range() const {
   return model_.get();
 }
 
-Posn Selection::start() const {
+Offset Selection::start() const {
   return model_->start();
 }
 

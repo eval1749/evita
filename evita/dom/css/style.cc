@@ -196,7 +196,7 @@ void InvalidStyleAttributeValue(v8::Isolate* isolate,
 }
 }  // namespace
 
-v8::Handle<v8::Object> Document::style_at(text::Posn position) const {
+v8::Handle<v8::Object> Document::style_at(text::Offset position) const {
   if (!IsValidPosition(position))
     return v8::Handle<v8::Object>();
   const auto& style_values = buffer_->GetStyleAt(position);

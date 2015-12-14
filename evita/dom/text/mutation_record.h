@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
-#include "evita/precomp.h"
+#include "evita/text/offset.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {
@@ -25,19 +25,19 @@ class MutationRecord final : public v8_glue::Scriptable<MutationRecord> {
  public:
   MutationRecord(const base::string16& type,
                  Document* document,
-                 text::Posn offset);
+                 text::Offset offset);
   ~MutationRecord() final;
 
  private:
   friend class bindings::MutationRecordClass;
 
   Document* document() const { return document_.get(); }
-  text::Posn offset() const { return offset_; }
+  text::Offset offset() const { return offset_; }
   const base::string16& type() const { return type_; }
 
   gc::Member<Document> document_;
   base::string16 type_;
-  text::Posn offset_;
+  text::Offset offset_;
 
   DISALLOW_COPY_AND_ASSIGN(MutationRecord);
 };

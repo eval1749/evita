@@ -11,7 +11,7 @@ namespace text {
 //
 // RangeBase
 //
-RangeBase::RangeBase(Posn start, Posn end) : end_(end), start_(start) {
+RangeBase::RangeBase(Offset start, Offset end) : end_(end), start_(start) {
   DCHECK_LE(start_, end_);
   DCHECK_GE(start_, 0);
 }
@@ -21,7 +21,7 @@ RangeBase::RangeBase(const RangeBase& other)
 
 RangeBase::~RangeBase() {}
 
-bool RangeBase::Contains(Posn offset) const {
+bool RangeBase::Contains(Offset offset) const {
   return offset >= start() && offset < end();
 }
 

@@ -7,8 +7,12 @@
 #include "evita/text/buffer_core.h"
 
 #include "base/logging.h"
+#include "evita/text/offset.h"
 
 namespace text {
+
+const int MIN_GAP_LENGTH = 1024;
+const int EXTENSION_LENGTH = 1024;
 
 BufferCore::BufferCore()
     : m_cwch(MIN_GAP_LENGTH * 3), m_lEnd(0), m_lGapEnd(m_cwch), m_lGapStart(0) {
@@ -23,7 +27,7 @@ BufferCore::~BufferCore() {
     ::HeapDestroy(m_hHeap);
 }
 
-Count BufferCore::deleteChars(Posn lStart, Posn lEnd) {
+OffsetDelta BufferCore::deleteChars(Offset lStart, Offset lEnd) {
   DCHECK(IsValidRange(lStart, lEnd));
   auto const n = lEnd - lStart;
   moveGap(lStart);
@@ -32,7 +36,15 @@ Count BufferCore::deleteChars(Posn lStart, Posn lEnd) {
   return n;
 }
 
-void BufferCore::extend(Posn lPosn, int cwchExtent) {
+Offset BufferCore::EnsurePosn(int offset) const {
+  if (offset < 0)
+    return Offset(0);
+  if (offset > m_lEnd)
+    return Offset(m_lEnd);
+  return Offset(offset);
+}
+
+void BufferCore::extend(Offset lPosn, int cwchExtent) {
   if (cwchExtent <= 0)
     return;
 
@@ -56,10 +68,10 @@ void BufferCore::extend(Posn lPosn, int cwchExtent) {
   ::MoveMemory(m_pwch + m_lGapEnd + nExtension, m_pwch + m_lGapEnd,
                sizeof(base::char16) * (m_lEnd - m_lGapStart));
 
-  m_lGapEnd += nExtension;
+  m_lGapEnd += OffsetDelta(nExtension);
 }
 
-base::char16 BufferCore::GetCharAt(Posn lPosn) const {
+base::char16 BufferCore::GetCharAt(Offset lPosn) const {
   DCHECK(IsValidPosn(lPosn));
   if (lPosn >= GetEnd())
     return 0;
@@ -68,13 +80,15 @@ base::char16 BufferCore::GetCharAt(Posn lPosn) const {
   return m_pwch[lPosn];
 }
 
-Count BufferCore::GetText(base::char16* prgwch, Posn lStart, Posn lEnd) const {
+OffsetDelta BufferCore::GetText(base::char16* prgwch,
+                                Offset lStart,
+                                Offset lEnd) const {
   if (lStart < 0)
-    lStart = 0;
+    lStart = Offset();
   if (lEnd > GetEnd())
     lEnd = GetEnd();
   if (lStart >= lEnd)
-    return 0;
+    return OffsetDelta();
 
   if (lStart >= m_lGapStart) {
     // We extract text after gap.
@@ -96,37 +110,33 @@ Count BufferCore::GetText(base::char16* prgwch, Posn lStart, Posn lEnd) const {
   return lEnd - lStart;
 }
 
-base::string16 BufferCore::GetText(Posn start, Posn end) const {
-  if (start < 0)
-    start = std::max(GetEnd() + start, static_cast<Posn>(0));
-  else if (start > GetEnd())
+base::string16 BufferCore::GetText(Offset start, Offset end) const {
+  if (start > GetEnd())
     start = GetEnd();
-  if (end < 0)
-    end = std::max(GetEnd() + end, static_cast<Posn>(0));
-  else if (end > GetEnd())
+  if (end > GetEnd())
     end = GetEnd();
   auto const cwch = end - start;
   if (cwch <= 0)
     return base::string16();
-  base::string16 text(static_cast<size_t>(cwch), ' ');
+  base::string16 text(static_cast<size_t>(cwch.value()), ' ');
   GetText(&text[0], start, end);
   return std::move(text);
 }
 
 // Inserts specified string (pwch, n) before lPosn.
-void BufferCore::insert(Posn lPosn, const base::char16* pwch, Count n) {
+void BufferCore::insert(Offset lPosn, const base::char16* pwch, size_t n) {
   DCHECK(IsValidPosn(lPosn));
   extend(lPosn, n);
   ::CopyMemory(m_pwch + lPosn, pwch, sizeof(base::char16) * n);
-  m_lGapStart += n;
-  m_lEnd += n;
+  m_lGapStart += OffsetDelta(n);
+  m_lEnd += OffsetDelta(n);
 }
 
 // User 1 2 3 4 5 6 7 8           9 A B
 //       M i n n e a p o _ _ _ _ _ l i s
 // Gap  1 2 3 4 5 6 7 8 9 A B C D E F 10
-//              Posn     Gap
-void BufferCore::moveGap(Posn lNewStart) {
+//              Offset     Gap
+void BufferCore::moveGap(Offset lNewStart) {
   auto const lCurEnd = m_lGapEnd;
   auto const lCurStart = m_lGapStart;
   auto const iDiff = m_lGapStart - lNewStart;

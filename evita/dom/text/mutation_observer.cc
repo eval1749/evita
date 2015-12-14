@@ -27,17 +27,19 @@ class MutationObserver::Tracker final {
   explicit Tracker(Document* document);
   ~Tracker();
 
-  bool has_records() const { return minimum_change_offset_ != text::Posn_Max; }
+  bool has_records() const {
+    return minimum_change_offset_ != text::Offset::Max();
+  }
 
   void Reset();
   std::vector<MutationRecord*> TakeRecords();
-  void Update(text::Posn offset);
+  void Update(text::Offset offset);
 
  private:
   // TODO(eval1749): Reference to |Document| from |Tracker| should be a weak
   // reference.
   Document* document_;
-  text::Posn minimum_change_offset_;
+  text::Offset minimum_change_offset_;
 };
 
 MutationObserver::Tracker::Tracker(Document* document) : document_(document) {
@@ -47,7 +49,7 @@ MutationObserver::Tracker::Tracker(Document* document) : document_(document) {
 MutationObserver::Tracker::~Tracker() {}
 
 void MutationObserver::Tracker::Reset() {
-  minimum_change_offset_ = text::Posn_Max;
+  minimum_change_offset_ = text::Offset::Max();
 }
 
 std::vector<MutationRecord*> MutationObserver::Tracker::TakeRecords() {
@@ -60,7 +62,7 @@ std::vector<MutationRecord*> MutationObserver::Tracker::TakeRecords() {
   };
 }
 
-void MutationObserver::Tracker::Update(text::Posn offset) {
+void MutationObserver::Tracker::Update(text::Offset offset) {
   minimum_change_offset_ = std::min(minimum_change_offset_, offset);
 }
 
@@ -74,8 +76,8 @@ MutationObserver::MutationObserver(v8::Handle<v8::Function> callback)
 MutationObserver::~MutationObserver() {}
 
 void MutationObserver::DidDeleteAt(Document* document,
-                                   text::Posn offset,
-                                   size_t) {
+                                   text::Offset offset,
+                                   text::OffsetDelta length) {
   auto const tracker = GetTracker(document);
   if (!tracker)
     return;
@@ -83,8 +85,8 @@ void MutationObserver::DidDeleteAt(Document* document,
 }
 
 void MutationObserver::DidInsertAt(Document* document,
-                                   text::Posn offset,
-                                   size_t) {
+                                   text::Offset offset,
+                                   text::OffsetDelta length) {
   auto const tracker = GetTracker(document);
   if (!tracker)
     return;

@@ -1,13 +1,19 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_DOM_TEXT_RANGE_H_
 #define EVITA_DOM_TEXT_RANGE_H_
 
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
-#include "evita/precomp.h"
 #include "evita/v8_glue/either.h"
 #include "evita/v8_glue/scriptable.h"
+
+namespace text {
+class Offset;
+class Range;
+}
 
 namespace dom {
 
@@ -21,21 +27,21 @@ class Range final : public v8_glue::Scriptable<Range> {
   DECLARE_SCRIPTABLE_OBJECT(Range);
 
  public:
-  Range(Document* document, text::Posn start, text::Posn end);
+  Range(Document* document, text::Offset start, text::Offset end);
   Range(Document* document, text::Range* range);
   ~Range() final;
 
   bool collapsed() const;
   Document* document() const { return document_.get(); }
-  int end() const;
-  int start() const;
+  text::Offset end() const;
+  text::Offset start() const;
   void set_end(int position);
   void set_start(int position);
   base::string16 text() const;
   void set_text(const base::string16& text);
   text::Range* text_range() const { return range_; }
 
-  Range* CollapseTo(text::Posn position);
+  Range* CollapseTo(int position);
   Range* InsertBefore(const base::string16& text);
   static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range);
   static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range,

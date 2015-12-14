@@ -17,19 +17,19 @@ RangeSetBase::RangeSetBase() {}
 
 RangeSetBase::~RangeSetBase() {}
 
-void RangeSetBase::set_range(RangeBase* range, Posn start, Posn end) {
+void RangeSetBase::set_range(RangeBase* range, Offset start, Offset end) {
   DCHECK_LE(start, end);
   DCHECK_GE(start, 0);
   range->start_ = start;
   range->end_ = end;
 }
 
-void RangeSetBase::set_range_end(RangeBase* range, Posn end) {
+void RangeSetBase::set_range_end(RangeBase* range, Offset end) {
   DCHECK_LE(range->start_, end);
   range->end_ = end;
 }
 
-void RangeSetBase::set_range_start(RangeBase* range, Posn start) {
+void RangeSetBase::set_range_start(RangeBase* range, Offset start) {
   DCHECK_LE(start, range->end_);
   DCHECK_GE(start, 0);
   range->start_ = start;

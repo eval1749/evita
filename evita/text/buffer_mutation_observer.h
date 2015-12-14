@@ -11,16 +11,22 @@
 namespace text {
 
 class Buffer;
+class Offset;
+class OffsetDelta;
 
+//////////////////////////////////////////////////////////////////////
+//
+// BufferMutationObserver
+//
 class BufferMutationObserver {
  public:
   virtual ~BufferMutationObserver();
 
-  virtual void DidChangeStyle(Posn offset, size_t length);
-  virtual void DidDeleteAt(Posn offset, size_t length);
-  virtual void DidInsertAt(Posn offset, size_t length);
-  virtual void DidInsertBefore(Posn offset, size_t length);
-  virtual void WillDeleteAt(Posn offset, size_t length);
+  virtual void DidChangeStyle(Offset offset, OffsetDelta length);
+  virtual void DidDeleteAt(Offset offset, OffsetDelta length);
+  virtual void DidInsertAt(Offset offset, OffsetDelta length);
+  virtual void DidInsertBefore(Offset offset, OffsetDelta length);
+  virtual void WillDeleteAt(Offset offset, OffsetDelta length);
 
  protected:
   BufferMutationObserver();

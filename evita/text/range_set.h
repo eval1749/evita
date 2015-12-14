@@ -23,9 +23,9 @@ class RangeSet final : public BufferMutationObserver {
 
  private:
   // BufferMutationObserver
-  void DidDeleteAt(Posn offset, size_t length) final;
-  void DidInsertAt(Posn offset, size_t length) final;
-  void DidInsertBefore(Posn offset, size_t length) final;
+  void DidDeleteAt(Offset offset, OffsetDelta length) final;
+  void DidInsertAt(Offset offset, OffsetDelta length) final;
+  void DidInsertBefore(Offset offset, OffsetDelta length) final;
 
   std::unordered_set<Range*> ranges_;
 

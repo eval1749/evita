@@ -12,21 +12,27 @@
 #include "evita/precomp.h"
 
 namespace text {
+
 class Buffer;
+class Offset;
 class Range;
 class SelectionChangeObserver;
 
+//////////////////////////////////////////////////////////////////////
+//
+// Selection
+//
 class Selection final {
  public:
   explicit Selection(const Range* range);
   ~Selection();
 
-  Posn anchor_offset() const;
+  Offset anchor_offset() const;
   Buffer* buffer() const;
-  Posn end() const;
-  Posn focus_offset() const;
+  Offset end() const;
+  Offset focus_offset() const;
   Range* range() const;
-  Posn start() const;
+  Offset start() const;
 
   void AddObserver(SelectionChangeObserver* observer);
   bool IsStartActive() const;

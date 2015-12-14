@@ -9,8 +9,12 @@
 #include <memory>
 
 #include "evita/gfx_base.h"
-#include "evita/precomp.h"
 #include "evita/layout/render_style.h"
+#include "evita/text/offset.h"
+
+namespace text {
+class Buffer;
+}
 
 namespace layout {
 
@@ -27,32 +31,32 @@ class LayoutBlockFlow final {
   int format_counter() const { return format_counter_; }
   const std::list<RootInlineBox*>& lines() const { return lines_; }
 
-  void DidChangeStyle(text::Posn offset, size_t length);
-  void DidDeleteAt(text::Posn offset, size_t length);
-  void DidInsertAt(text::Posn offset, size_t length);
+  void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
+  void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
+  void DidInsertAt(text::Offset offset, text::OffsetDelta length);
   // Returns end of line offset containing |text_offset|.
-  text::Posn EndOfLine(text::Posn text_offset);
-  void Format(text::Posn text_offset);
+  text::Offset EndOfLine(text::Offset text_offset);
+  void Format(text::Offset text_offset);
   // Returns true if text format is taken place.
   bool FormatIfNeeded();
-  text::Posn GetEnd();
-  text::Posn GetStart();
-  text::Posn GetVisibleEnd();
-  gfx::RectF HitTestTextPosition(text::Posn text_offset) const;
-  bool IsPositionFullyVisible(text::Posn text_offset);
-  text::Posn MapPointToPosition(gfx::PointF point);
-  text::Posn MapPointXToOffset(text::Posn text_offset, float point_x);
+  text::Offset GetEnd();
+  text::Offset GetStart();
+  text::Offset GetVisibleEnd();
+  gfx::RectF HitTestTextPosition(text::Offset text_offset) const;
+  bool IsPositionFullyVisible(text::Offset text_offset);
+  text::Offset MapPointToPosition(gfx::PointF point);
+  text::Offset MapPointXToOffset(text::Offset text_offset, float point_x);
   // Returns true if this |LayoutBlockFlow| is modified.
   bool ScrollDown();
   // Returns true if this |LayoutBlockFlow| is modified.
-  bool ScrollToPosition(text::Posn offset);
+  bool ScrollToPosition(text::Offset offset);
   // Returns true if this |LayoutBlockFlow| is modified.
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
   bool ShouldFormat() const;
   // Returns start of line offset containing |text_offset|.
-  text::Posn StartOfLine(text::Posn text_offset);
+  text::Offset StartOfLine(text::Offset text_offset);
 
  private:
   class RootInlineBoxCache;
@@ -65,7 +69,7 @@ class LayoutBlockFlow final {
   void EnsureLinePoints();
   RootInlineBox* FormatLine(TextFormatter* formatter);
   void InvalidateCache();
-  void InvalidateLines(text::Posn offset);
+  void InvalidateLines(text::Offset offset);
   bool IsShowEndOfDocument() const;
 
   // Returns true if we need to format all lines.
@@ -83,7 +87,7 @@ class LayoutBlockFlow final {
   bool need_format_;
   text::Buffer* const text_buffer_;
   std::unique_ptr<RootInlineBoxCache> text_line_cache_;
-  text::Posn view_start_;
+  text::Offset view_start_;
   float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(LayoutBlockFlow);

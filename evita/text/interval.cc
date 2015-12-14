@@ -6,6 +6,7 @@
 
 #include "base/logging.h"
 #include "evita/text/buffer.h"
+#include "evita/text/offset.h"
 
 namespace text {
 
@@ -18,7 +19,7 @@ Interval::Interval(const Interval& other)
   DCHECK_LT(start(), end());
 }
 
-Interval::Interval(Posn start, Posn end) : RangeBase(start, end) {
+Interval::Interval(Offset start, Offset end) : RangeBase(start, end) {
   DCHECK_LT(start, end);
 }
 

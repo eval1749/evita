@@ -4,6 +4,8 @@
 
 #include "evita/text/buffer_mutation_observer.h"
 
+#include "evita/text/offset.h"
+
 namespace text {
 
 //////////////////////////////////////////////////////////////////////
@@ -14,17 +16,18 @@ BufferMutationObserver::BufferMutationObserver() {}
 
 BufferMutationObserver::~BufferMutationObserver() {}
 
-void BufferMutationObserver::DidChangeStyle(Posn, size_t) {}
+void BufferMutationObserver::DidChangeStyle(Offset, OffsetDelta) {}
 
-void BufferMutationObserver::DidDeleteAt(Posn, size_t) {}
+void BufferMutationObserver::DidDeleteAt(Offset, OffsetDelta) {}
 
-void BufferMutationObserver::DidInsertAt(Posn, size_t) {}
+void BufferMutationObserver::DidInsertAt(Offset, OffsetDelta) {}
 
-void BufferMutationObserver::DidInsertBefore(Posn offset, size_t length) {
+void BufferMutationObserver::DidInsertBefore(Offset offset,
+                                             OffsetDelta length) {
   DidInsertAt(offset, length);
 }
 
-void BufferMutationObserver::WillDeleteAt(Posn, size_t) {}
+void BufferMutationObserver::WillDeleteAt(Offset, OffsetDelta) {}
 
 //////////////////////////////////////////////////////////////////////
 //

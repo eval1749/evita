@@ -41,10 +41,10 @@ void TextWindow::set_zoom(float new_zoom) {
                                                              zoom_);
 }
 
-text::Posn TextWindow::ComputeMotion(int method,
-                                     text::Posn position,
-                                     int count,
-                                     const domapi::FloatPoint& point) {
+text::Offset TextWindow::ComputeMotion(int method,
+                                       text::Offset position,
+                                       int count,
+                                       const domapi::FloatPoint& point) {
   domapi::TextWindowCompute data;
   data.method = static_cast<domapi::TextWindowCompute::Method>(method);
   data.count = count;
@@ -55,21 +55,22 @@ text::Posn TextWindow::ComputeMotion(int method,
       window_id(), data);
 }
 
-text::Posn TextWindow::ComputeMotion(int method,
-                                     text::Posn position,
-                                     int count) {
+text::Offset TextWindow::ComputeMotion(int method,
+                                       text::Offset position,
+                                       int count) {
   return ComputeMotion(method, position, count, domapi::FloatPoint());
 }
 
-text::Posn TextWindow::ComputeMotion(int method, text::Posn position) {
+text::Offset TextWindow::ComputeMotion(int method, text::Offset position) {
   return ComputeMotion(method, position, 1, domapi::FloatPoint());
 }
 
-text::Posn TextWindow::ComputeMotion(int method) {
-  return ComputeMotion(method, 0, 1, domapi::FloatPoint());
+text::Offset TextWindow::ComputeMotion(int method) {
+  return ComputeMotion(method, text::Offset(0), text::Offset(1),
+                       domapi::FloatPoint());
 }
 
-domapi::FloatRect TextWindow::HitTestTextPosition(text::Posn position) {
+domapi::FloatRect TextWindow::HitTestTextPosition(text::Offset position) {
   return ScriptHost::instance()->view_delegate()->HitTestTextPosition(
       window_id(), position);
 }

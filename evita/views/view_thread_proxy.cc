@@ -298,7 +298,7 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
   }
 
 DEFINE_SYNC_DELEGATE_2(ComputeOnTextWindow,
-                       text::Posn,
+                       text::Offset,
                        domapi::WindowId,
                        const domapi::TextWindowCompute&);
 DEFINE_SYNC_DELEGATE_1(GetSwitch, domapi::SwitchValue, const base::string16&)
@@ -310,7 +310,7 @@ DEFINE_SYNC_DELEGATE_2(GetTableRowStates,
 DEFINE_SYNC_DELEGATE_2(HitTestTextPosition,
                        domapi::FloatRect,
                        domapi::WindowId,
-                       text::Posn)
+                       text::Offset)
 
 void ViewThreadProxy::ScrollTextWindow(domapi::WindowId window_id,
                                        int direction) {

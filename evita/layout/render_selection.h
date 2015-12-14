@@ -7,16 +7,20 @@
 
 #include "evita/css/style.h"
 #include "evita/gfx/color_f.h"
-#include "evita/precomp.h"
+#include "evita/text/offset.h"
 #include "evita/ui/base/selection_state.h"
 
 namespace layout {
 
+//////////////////////////////////////////////////////////////////////
+//
+// TextSelectionModel
+//
 class TextSelectionModel final {
  public:
   typedef ui::SelectionState State;
 
-  TextSelectionModel(State state, text::Posn anchor, text::Posn focus);
+  TextSelectionModel(State state, text::Offset anchor, text::Offset focus);
   TextSelectionModel(const TextSelectionModel& model);
   TextSelectionModel();
   ~TextSelectionModel();
@@ -26,9 +30,9 @@ class TextSelectionModel final {
   bool operator==(const TextSelectionModel& other) const;
   bool operator!=(const TextSelectionModel& other) const;
 
-  text::Posn end() const { return end_; }
-  text::Posn focus_offset() const { return focus_offset_; }
-  text::Posn start() const { return start_; }
+  text::Offset end() const { return end_; }
+  text::Offset focus_offset() const { return focus_offset_; }
+  text::Offset start() const { return start_; }
 
   bool disabled() const { return state_ == State::Disabled; }
   bool has_focus() const { return state_ == State::HasFocus; }
@@ -36,14 +40,14 @@ class TextSelectionModel final {
   bool is_range() const { return start_ != end_; }
 
  private:
-  text::Posn anchor_offset() const;
+  text::Offset anchor_offset() const;
 
   // For fast access to start and end positions of selection,
   // |TextSelectionModel| has |start_| and |end_| instead of anchor offset.
-  text::Posn end_;
-  text::Posn focus_offset_;
+  text::Offset end_;
+  text::Offset focus_offset_;
   State state_;
-  text::Posn start_;
+  text::Offset start_;
 };
 
 class TextSelection final {
@@ -59,9 +63,9 @@ class TextSelection final {
   bool operator!=(const TextSelection& other) const;
 
   gfx::ColorF color() const { return color_; }
-  text::Posn end() const { return model_.end(); }
-  text::Posn focus_offset() const { return model_.focus_offset(); }
-  text::Posn start() const { return model_.start(); }
+  text::Offset end() const { return model_.end(); }
+  text::Offset focus_offset() const { return model_.focus_offset(); }
+  text::Offset start() const { return model_.start(); }
 
   bool disabled() const { return model_.disabled(); }
   bool has_focus() const { return model_.has_focus(); }

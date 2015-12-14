@@ -7,11 +7,11 @@ interface TextWindow : DocumentWindow {
   attribute float zoom;
 
   [ImplementedAs=ComputeMotion]
-  long compute_(long method, optional long offset, optional long count,
+  long compute_(long method, optional TextOffset offset, optional long count,
                 optional Point point);
 
   [ImplementedAs=HitTestTextPosition]
-  Rect hitTestTextPosition_(long offset);
+  Rect hitTestTextPosition_(TextOffset offset);
 
   void makeSelectionVisible();
 

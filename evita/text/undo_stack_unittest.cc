@@ -11,86 +11,88 @@
 #include "evita/text/range.h"
 #include "evita/text/scoped_undo_group.h"
 
-namespace {
+namespace text {
 
 class UndoStackTest : public ::testing::Test {
  public:
-  text::Buffer* buffer() const { return buffer_.get(); }
+  Buffer* buffer() const { return buffer_.get(); }
 
  protected:
-  UndoStackTest() : buffer_(new text::Buffer()) {}
+  UndoStackTest() : buffer_(new Buffer()) {}
 
  private:
-  std::unique_ptr<text::Buffer> buffer_;
+  std::unique_ptr<Buffer> buffer_;
 
   DISALLOW_COPY_AND_ASSIGN(UndoStackTest);
 };
 
 TEST_F(UndoStackTest, Delete) {
-  buffer()->Insert(0, L"foo");
+  buffer()->Insert(Offset(0), L"foo");
   // Simulate for load file.
   buffer()->SetNotModifiedForTesting();
 
-  buffer()->Delete(0, 3);
-  buffer()->Undo(0);
-  EXPECT_EQ(3, buffer()->GetEnd());
+  buffer()->Delete(Offset(0), Offset(3));
+  buffer()->Undo(Offset(0));
+  EXPECT_EQ(Offset(3), buffer()->GetEnd());
   EXPECT_FALSE(buffer()->IsModified())
       << "Undo delete should make document not modified.";
 
-  buffer()->Redo(3);
-  EXPECT_EQ(0, buffer()->GetEnd());
+  buffer()->Redo(Offset(3));
+  EXPECT_EQ(Offset(0), buffer()->GetEnd());
   EXPECT_TRUE(buffer()->IsModified());
 
-  buffer()->Undo(0);
+  buffer()->Undo(Offset(0));
   EXPECT_FALSE(buffer()->IsModified())
       << "Undo should make document not modified even if after redo.";
 }
 
 TEST_F(UndoStackTest, Group) {
   {
-    text::ScopedUndoGroup undo_group(buffer(), L"test");
-    buffer()->Insert(0, L"foo");
-    buffer()->Insert(1, L"bar");
+    ScopedUndoGroup undo_group(buffer(), L"test");
+    buffer()->Insert(Offset(0), L"foo");
+    buffer()->Insert(Offset(1), L"bar");
   }
-  buffer()->Undo(4);
-  EXPECT_EQ(0, buffer()->GetEnd());
+  buffer()->Undo(Offset(4));
+  EXPECT_EQ(Offset(0), buffer()->GetEnd());
   EXPECT_FALSE(buffer()->IsModified())
       << "Undo should make document not modified even if after redo.";
 }
 
 TEST_F(UndoStackTest, Insert) {
-  buffer()->Insert(0, L"foo");
-  EXPECT_EQ(3, buffer()->Undo(2)) << "Move to the last editing position";
-  EXPECT_EQ(3, buffer()->GetEnd())
+  buffer()->Insert(Offset(0), L"foo");
+  EXPECT_EQ(3, buffer()->Undo(Offset(2)))
+      << "Move to the last editing position";
+  EXPECT_EQ(Offset(3), buffer()->GetEnd())
       << "Undo isn't occured position other than last editing position.";
-  EXPECT_EQ(0, buffer()->Undo(3)) << "Undo at the last editing position";
-  EXPECT_EQ(0, buffer()->GetEnd());
+  EXPECT_EQ(0, buffer()->Undo(Offset(3)))
+      << "Undo at the last editing position";
+  EXPECT_EQ(Offset(0), buffer()->GetEnd());
   EXPECT_FALSE(buffer()->IsModified())
       << "Undo should make document not modified.";
 
-  buffer()->Redo(0);
-  EXPECT_EQ(3, buffer()->GetEnd());
+  buffer()->Redo(Offset(0));
+  EXPECT_EQ(Offset(3), buffer()->GetEnd());
   EXPECT_TRUE(buffer()->IsModified());
 
-  buffer()->Undo(3);
+  buffer()->Undo(Offset(3));
   EXPECT_FALSE(buffer()->IsModified())
       << "Undo should make document not modified.";
 }
 
 TEST_F(UndoStackTest, Merge) {
   {
-    text::ScopedUndoGroup undo_group(buffer(), L"test");
-    buffer()->Insert(0, L"foo");
+    ScopedUndoGroup undo_group(buffer(), L"test");
+    buffer()->Insert(Offset(0), L"foo");
   }
   {
-    text::ScopedUndoGroup undo_group(buffer(), L"test");
-    buffer()->Insert(3, L"bar");
+    ScopedUndoGroup undo_group(buffer(), L"test");
+    buffer()->Insert(Offset(3), L"bar");
   }
-  EXPECT_EQ(3, buffer()->Undo(6));
-  EXPECT_EQ(3, buffer()->GetEnd());
-  EXPECT_EQ(0, buffer()->Undo(3));
+  EXPECT_EQ(3, buffer()->Undo(Offset(6)));
+  EXPECT_EQ(Offset(3), buffer()->GetEnd());
+  EXPECT_EQ(Offset(), buffer()->Undo(Offset(3)));
   EXPECT_FALSE(buffer()->IsModified())
       << "Undo should make document not modified.";
 }
 
-}  // namespace
+}  // namespace text

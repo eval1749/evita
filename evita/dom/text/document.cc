@@ -17,6 +17,7 @@
 #include "evita/text/buffer.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
+#include "evita/text/offset.h"
 #include "evita/text/spelling.h"
 #include "evita/v8_glue/runner.h"
 #include "v8_strings.h"  // NOLINT(build/include)
@@ -31,17 +32,17 @@ Document::Document() : buffer_(new text::Buffer()) {}
 
 Document::~Document() {}
 
-base::char16 Document::charCodeAt(text::Posn position) const {
+base::char16 Document::charCodeAt(text::Offset position) const {
   if (position >= 0 && position < length())
     return buffer_->GetCharAt(position);
   ScriptHost::instance()->ThrowRangeError(
       base::StringPrintf("Bad index %d, valid index is [%d, %d]", position, 0,
-                         buffer_->GetEnd() - 1));
+                         (buffer_->GetEnd() - text::OffsetDelta(1)).value()));
   return 0;
 }
 
-text::Posn Document::length() const {
-  return buffer_->GetEnd();
+int Document::length() const {
+  return text::OffsetDelta(buffer_->GetEnd().value());
 }
 
 bool Document::modified() const {
@@ -60,14 +61,14 @@ void Document::set_read_only(bool read_only) const {
   buffer_->SetReadOnly(read_only);
 }
 
-const base::string16& Document::spelling_at(text::Posn offset) const {
+const base::string16& Document::spelling_at(text::Offset offset) const {
   if (!IsValidPosition(offset))
     return common::AtomicString::Empty();
   auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
   return marker ? marker->type() : common::AtomicString::Empty();
 }
 
-const base::string16& Document::syntax_at(text::Posn offset) const {
+const base::string16& Document::syntax_at(text::Offset offset) const {
   if (!IsValidPosition(offset))
     return common::AtomicString::Empty();
   auto const marker = buffer_->syntax_markers()->GetMarkerAt(offset);
@@ -96,25 +97,34 @@ void Document::EndUndoGroup(const base::string16& name) {
   buffer_->EndUndoGroup(name);
 }
 
-text::LineAndColumn Document::GetLineAndColumn(text::Posn offset) const {
+text::LineAndColumn Document::GetLineAndColumn(text::Offset offset) const {
   if (!IsValidPosition(offset))
-    return buffer_->GetLineAndColumn(0);
+    return buffer_->GetLineAndColumn(text::Offset());
   METRICS_TIME_SCOPE();
   return buffer_->GetLineAndColumn(offset);
 }
 
-bool Document::IsValidPosition(text::Posn position) const {
-  if (position >= 0 && position <= buffer_->GetEnd())
+bool Document::IsValidPosition(text::Offset offset) const {
+  if (offset.IsValid() && offset <= buffer_->GetEnd())
     return true;
   ScriptHost::instance()->ThrowRangeError(
-      base::StringPrintf("Invalid position %d, valid range is [%d, %d]",
-                         position, 0, buffer_->GetEnd()));
+      base::StringPrintf("Invalid offset %d, valid range is [%d, %d]",
+                         offset.value(), 0, buffer_->GetEnd()));
+  return false;
+}
+
+bool Document::IsValidRange(text::Offset start, text::Offset end) const {
+  if (start <= end)
+    return true;
+  ScriptHost::instance()->ThrowRangeError(
+      base::StringPrintf("Invalid range %d, valid range is [%d, %d]",
+                         end.value(), start.value(), buffer_->GetEnd()));
   return false;
 }
 
 v8::Handle<v8::Value> Document::Match(RegularExpression* regexp,
-                                      int start,
-                                      int end) {
+                                      text::Offset start,
+                                      text::Offset end) {
   return regexp->ExecuteOnDocument(this, start, end);
 }
 
@@ -122,12 +132,12 @@ Document* Document::NewDocument() {
   return new Document();
 }
 
-text::Posn Document::Redo(text::Posn position) {
+text::Offset Document::Redo(text::Offset position) {
   return buffer_->Redo(position);
 }
 
-void Document::SetSpelling(text::Posn start,
-                           text::Posn end,
+void Document::SetSpelling(text::Offset start,
+                           text::Offset end,
                            int spelling_code) {
   struct Local {
     static const common::AtomicString& MapToSpelling(int spelling_code) {
@@ -150,8 +160,8 @@ void Document::SetSpelling(text::Posn start,
       start, end, Local::MapToSpelling(spelling_code));
 }
 
-void Document::SetSyntax(text::Posn start,
-                         text::Posn end,
+void Document::SetSyntax(text::Offset start,
+                         text::Offset end,
                          const base::string16& syntax) {
   if (!IsValidPosition(start) || !IsValidPosition(end) || start >= end)
     return;
@@ -159,20 +169,38 @@ void Document::SetSyntax(text::Posn start,
                                            common::AtomicString(syntax));
 }
 
-base::string16 Document::Slice(int start, int end) {
+base::string16 Document::Slice(int startLike, int endLike) {
+  auto const start =
+      text::Offset(startLike >= 0 ? startLike : length() + startLike);
+  auto const end = text::Offset(endLike >= 0 ? endLike : length() + endLike);
+  if (!start.IsValid() || !end.IsValid() || start >= end)
+    return base::string16();
   return buffer_->GetText(start, end);
 }
 
-base::string16 Document::Slice(int start) {
-  return Slice(start, buffer_->GetEnd());
+base::string16 Document::Slice(int startLike) {
+  auto const start =
+      text::Offset(startLike >= 0 ? startLike : length() + startLike);
+  if (!start.IsValid() || start >= buffer_->GetEnd())
+    return base::string16();
+  return Slice(startLike, length());
 }
 
 void Document::StartUndoGroup(const base::string16& name) {
   buffer_->StartUndoGroup(name);
 }
 
-text::Posn Document::Undo(text::Posn position) {
+text::Offset Document::Undo(text::Offset position) {
   return buffer_->Undo(position);
+}
+
+text::Offset Document::ValidateOffset(int offsetLike) const {
+  if (offsetLike >= 0 && offsetLike <= buffer_->GetEnd())
+    return text::Offset(offsetLike);
+  ScriptHost::instance()->ThrowRangeError(
+      base::StringPrintf("Invalid offset %d, valid range is [%d, %d]",
+                         offsetLike, 0, buffer_->GetEnd()));
+  return text::Offset::Invalid();
 }
 
 }  // namespace dom

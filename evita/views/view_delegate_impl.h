@@ -22,8 +22,8 @@ class ViewDelegateImpl final : public domapi::ViewDelegate {
   void AddWindow(domapi::WindowId parent_id, domapi::WindowId child_id) final;
   void ChangeParentWindow(domapi::WindowId window_id,
                           domapi::WindowId new_parent_id) final;
-  text::Posn ComputeOnTextWindow(domapi::WindowId window_id,
-                                 const domapi::TextWindowCompute& data) final;
+  text::Offset ComputeOnTextWindow(domapi::WindowId window_id,
+                                   const domapi::TextWindowCompute& data) final;
   void CreateEditorWindow(domapi::WindowId window_id) final;
   void CreateFormWindow(domapi::WindowId window_id,
                         dom::Form* form,
@@ -51,7 +51,7 @@ class ViewDelegateImpl final : public domapi::ViewDelegate {
       const std::vector<base::string16>& keys) final;
   void HideWindow(domapi::WindowId window_id) final;
   domapi::FloatRect HitTestTextPosition(domapi::WindowId window_id,
-                                        text::Posn position);
+                                        text::Offset position);
   void MakeSelectionVisible(domapi::WindowId window_id) final;
   void MapTextFieldPointToOffset(domapi::EventTargetId event_target_id,
                                  float x,
@@ -61,6 +61,7 @@ class ViewDelegateImpl final : public domapi::ViewDelegate {
                                   float x,
                                   float y,
                                   const domapi::IntegerPromise& promise) final;
+#undef MessageBox
   void MessageBox(domapi::WindowId window_id,
                   const base::string16& message,
                   const base::string16& title,

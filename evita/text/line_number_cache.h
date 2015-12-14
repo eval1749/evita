@@ -8,6 +8,7 @@
 #include <map>
 
 #include "evita/text/buffer_mutation_observer.h"
+#include "evita/text/offset.h"
 
 namespace text {
 
@@ -15,7 +16,7 @@ class Buffer;
 
 struct LineNumberAndOffset {
   int number;
-  Posn offset;
+  Offset offset;
 };
 
 class LineNumberCache final : public BufferMutationObserver {
@@ -23,24 +24,24 @@ class LineNumberCache final : public BufferMutationObserver {
   explicit LineNumberCache(Buffer* buffer);
   ~LineNumberCache() final;
 
-  LineNumberAndOffset Get(Posn offset);
+  LineNumberAndOffset Get(Offset offset);
 
  private:
   // Invalidate cache entries after |offset|, inclusive.
-  void InvalidateCache(Posn offset);
+  void InvalidateCache(Offset offset);
 
   // Scan buffer from |line_start_offset| which line number is |line_number|,
   // to |offset| and returns line number for |offset|.
-  LineNumberAndOffset UpdateCache(Posn line_start_offset,
+  LineNumberAndOffset UpdateCache(Offset line_start_offset,
                                   int line_number,
-                                  Posn offset);
+                                  Offset offset);
 
   // BufferMutationObserver
-  void DidDeleteAt(Posn offset, size_t length) final;
-  void DidInsertAt(Posn offset, size_t length) final;
+  void DidDeleteAt(Offset offset, OffsetDelta length) final;
+  void DidInsertAt(Offset offset, OffsetDelta length) final;
 
   Buffer* buffer_;
-  std::map<Posn, int> map_;
+  std::map<Offset, int> map_;
 
   DISALLOW_COPY_AND_ASSIGN(LineNumberCache);
 };

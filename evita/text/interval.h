@@ -12,10 +12,16 @@
 
 namespace text {
 
+class Offset;
+
+//////////////////////////////////////////////////////////////////////
+//
+// Interval
+//
 class Interval final : public RangeBase {
  public:
   Interval(const Interval& other);
-  Interval(Posn start, Posn end);
+  Interval(Offset start, Offset end);
   ~Interval();
 
   const css::Style& style() const { return style_; }

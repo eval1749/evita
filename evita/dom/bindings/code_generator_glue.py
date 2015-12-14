@@ -178,6 +178,7 @@ IDL_TO_CPP_TYPE_MAP = {
     # For Editor.localizeText
     'StringDict': CppType('v8::Handle<v8::Object>'),
     'Style': CppType('v8::Handle<v8::Object>'),
+    'TextOffset': CppType('text::Offset'),
     'Unit': CppType('Unit'),
 
     # V8 types

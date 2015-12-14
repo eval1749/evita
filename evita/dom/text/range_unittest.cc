@@ -490,13 +490,13 @@ TEST_F(RangeTest, set_start_end) {
       "range1.start = 5;");
   EXPECT_SCRIPT_EQ("5", "range1.start");
   EXPECT_SCRIPT_EQ("1 5", "range1.end = 1; range1.start + ' ' + range1.end");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid position -1, valid range is [0, 12]",
+  EXPECT_SCRIPT_EQ("TypeError: Expect argument[0] as TextOffset but -1",
                    "range1.start = -1");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid position 100, valid range is [0, 12]",
+  EXPECT_SCRIPT_EQ("RangeError: Invalid offset 100, valid range is [0, 12]",
                    "range1.start = 100");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid position -1, valid range is [0, 12]",
+  EXPECT_SCRIPT_EQ("TypeError: Expect argument[0] as TextOffset but -1",
                    "range1.end = -1");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid position 100, valid range is [0, 12]",
+  EXPECT_SCRIPT_EQ("RangeError: Invalid offset 100, valid range is [0, 12]",
                    "range1.end = 100");
 }
 

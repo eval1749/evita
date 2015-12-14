@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(eval1749): We should not include "windows.h" here.
+#include <windows.h>
+
+#include <commctrl.h>
+
 #include "evita/editor/application.h"
 
 #include "base/bind.h"
@@ -76,12 +81,12 @@ Application::Application()
 Application::~Application() {}
 
 const base::string16& Application::title() const {
-  DEFINE_STATIC_LOCAL(base::string16, title, (APP_TITLE L" " APP_VERSION));
+  CR_DEFINE_STATIC_LOCAL(base::string16, title, (APP_TITLE L" " APP_VERSION));
   return title;
 }
 
 const base::string16& Application::version() const {
-  DEFINE_STATIC_LOCAL(base::string16, version, (APP_VERSION));
+  CR_DEFINE_STATIC_LOCAL(base::string16, version, (APP_VERSION));
   return version;
 }
 

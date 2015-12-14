@@ -9,8 +9,9 @@
 
 #include <vector>
 
-#include "evita/ed_defs.h"
+#include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/text/offset.h"
 
 namespace layout {
 
@@ -19,10 +20,9 @@ class Formatter;
 class TextBlock;
 class TextSelection;
 
-class RootInlineBox final {
+class RootInlineBox final : public base::RefCounted<RootInlineBox> {
  public:
   RootInlineBox();
-  ~RootInlineBox();
 
   float bottom() const { return bounds_.bottom; }
   const gfx::PointF& bottom_right() const { return bounds_.bottom_right(); }
@@ -35,34 +35,37 @@ class RootInlineBox final {
   float top() const { return bounds_.top; }
   const gfx::PointF origin() const { return bounds_.origin(); }
   void set_origin(const gfx::PointF& origin);
-  void set_start(text::Posn start) { m_lStart = start; }
-  text::Posn text_end() const { return m_lEnd; }
-  text::Posn text_start() const { return m_lStart; }
+  void set_start(text::Offset start) { m_lStart = start; }
+  text::Offset text_end() const { return m_lEnd; }
+  text::Offset text_start() const { return m_lStart; }
 
   void AddInlineBox(InlineBox* cell);
   gfx::RectF CalculateSelectionRect(const TextSelection& selection) const;
   RootInlineBox* Copy() const;
   bool Equal(const RootInlineBox*) const;
   void Fix(float ascent, float descent);
-  text::Posn GetEnd() const { return m_lEnd; }
+  text::Offset GetEnd() const { return m_lEnd; }
   float GetHeight() const { return bounds_.height(); }
-  text::Posn GetStart() const { return m_lStart; }
+  text::Offset GetStart() const { return m_lStart; }
   float GetWidth() const { return bounds_.width(); }
   uint32_t Hash() const;
-  gfx::RectF HitTestTextPosition(text::Posn lPosn) const;
+  gfx::RectF HitTestTextPosition(text::Offset lPosn) const;
   bool IsEndOfDocument() const;
-  text::Posn MapXToPosn(float x) const;
+  text::Offset MapXToPosn(float x) const;
 
  private:
-  RootInlineBox(const RootInlineBox& other);
+  friend class base::RefCounted<RootInlineBox>;
 
-  bool Contains(text::Posn offset) const;
+  RootInlineBox(const RootInlineBox& other);
+  ~RootInlineBox();
+
+  bool Contains(text::Offset offset) const;
 
   gfx::RectF bounds_;
   std::vector<InlineBox*> cells_;
   mutable uint32_t m_nHash;
-  text::Posn m_lStart;
-  text::Posn m_lEnd;
+  text::Offset m_lStart;
+  text::Offset m_lEnd;
 };
 
 }  // namespace layout

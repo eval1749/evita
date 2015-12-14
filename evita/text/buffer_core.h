@@ -5,8 +5,11 @@
 #ifndef EVITA_TEXT_BUFFER_CORE_H_
 #define EVITA_TEXT_BUFFER_CORE_H_
 
+// TOOD(eval1749): We should not include "windows.h" here.
+#include <windows.h>
+
 #include "base/strings/string16.h"
-#include "evita/precomp.h"
+#include "evita/text/offset.h"
 
 namespace text {
 
@@ -23,46 +26,37 @@ class BufferCore {
   bool operator!=(const BufferCore* other) const { return this != other; }
 
   // [E]
-  Posn EnsurePosn(Posn lPosn) const {
-    if (lPosn < 0)
-      return 0;
-    if (lPosn > m_lEnd)
-      return m_lEnd;
-    return lPosn;
-  }
+  Offset EnsurePosn(int offset) const;
 
   // [G]
-  base::char16 GetCharAt(Posn) const;
-  Posn GetEnd() const { return m_lEnd; }
-  Count GetText(base::char16*, Posn, Posn) const;
-  base::string16 GetText(Posn start, Posn end) const;
+  base::char16 GetCharAt(Offset) const;
+  Offset GetEnd() const { return m_lEnd; }
+  OffsetDelta GetText(base::char16*, Offset, Offset) const;
+  base::string16 GetText(Offset start, Offset end) const;
 
   // [I]
-  bool IsValidPosn(Posn p) const { return p >= 0 && p <= m_lEnd; }
+  bool IsValidPosn(Offset p) const { return p >= 0 && p <= m_lEnd; }
 
-  bool IsValidRange(Posn s, Posn e) const {
+  bool IsValidRange(Offset s, Offset e) const {
     return IsValidPosn(s) && IsValidPosn(e) && s <= e;
   }
 
  protected:
   BufferCore();
 
-  Count deleteChars(Posn, Posn);
-  void extend(Posn, int);
-  void insert(Posn, const base::char16*, Count);
+  OffsetDelta deleteChars(Offset from, Offset to);
+  void extend(Offset from, int);
+  void insert(Offset offset, const base::char16* chars, size_t length);
 
  private:
-  static const Count MIN_GAP_LENGTH = 1024;
-  static const Count EXTENSION_LENGTH = 1024;
-
-  void moveGap(Posn);
+  void moveGap(Offset offset);
 
   base::char16* m_pwch;
-  Count m_cwch;
+  int m_cwch;
   HANDLE m_hHeap;
-  Posn m_lEnd;
-  Posn m_lGapEnd;
-  Posn m_lGapStart;
+  Offset m_lEnd;
+  Offset m_lGapEnd;
+  Offset m_lGapStart;
 };
 
 }  // namespace text

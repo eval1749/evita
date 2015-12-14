@@ -13,7 +13,7 @@
 
 namespace text {
 
-Range::Range(Buffer* buffer, Posn start, Posn end)
+Range::Range(Buffer* buffer, Offset start, Offset end)
     : end_(end), start_(start), buffer_(buffer) {
   DCHECK(buffer_->IsValidRange(start_, end_));
   buffer_->ranges()->AddRange(this);
@@ -27,9 +27,9 @@ Range::~Range() {
 
 void Range::DidChangeRange() {}
 
-Posn Range::EnsureOffset(Posn offset) const {
-  if (offset < 0)
-    return 0;
+Offset Range::EnsureOffset(Offset offset) const {
+  if (!offset.IsValid())
+    return Offset();
   if (offset > buffer_->GetEnd())
     return buffer_->GetEnd();
   return offset;
@@ -39,11 +39,11 @@ base::string16 Range::text() const {
   return buffer_->GetText(start_, end_);
 }
 
-void Range::set_end(Posn offset) {
+void Range::set_end(Offset offset) {
   SetRange(start_, offset);
 }
 
-void Range::SetRange(Posn new_start, Posn new_end) {
+void Range::SetRange(Offset new_start, Offset new_end) {
   new_start = EnsureOffset(new_start);
   new_end = EnsureOffset(new_end);
   if (new_start > new_end)
@@ -55,7 +55,7 @@ void Range::SetRange(Posn new_start, Posn new_end) {
   DidChangeRange();
 }
 
-void Range::set_start(Posn offset) {
+void Range::set_start(Offset offset) {
   SetRange(offset, end_);
 }
 
@@ -74,7 +74,8 @@ void Range::set_text(const base::string16& text) {
     buffer_->Delete(start_, end_);
     buffer_->InsertBefore(start_, text);
   }
-  SetRange(start, EnsureOffset(static_cast<Posn>(start + text.length())));
+  auto const end = start + OffsetDelta(text.length());
+  SetRange(start, EnsureOffset(end));
 }
 
 }  // namespace text

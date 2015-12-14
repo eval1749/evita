@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "evita/precomp.h"
+#include "evita/text/offset.h"
 #include "evita/v8_glue/scriptable.h"
 #include "evita/v8_glue/scoped_persistent.h"
 
@@ -28,8 +28,12 @@ class MutationObserver final : public v8_glue::Scriptable<MutationObserver> {
  public:
   ~MutationObserver() final;
 
-  void DidDeleteAt(Document* document, text::Posn offset, size_t length);
-  void DidInsertAt(Document* document, text::Posn offset, size_t length);
+  void DidDeleteAt(Document* document,
+                   text::Offset offset,
+                   text::OffsetDelta length);
+  void DidInsertAt(Document* document,
+                   text::Offset offset,
+                   text::OffsetDelta length);
   void DidMutateDocument(Document* document);
 
  private:

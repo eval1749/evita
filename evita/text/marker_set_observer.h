@@ -9,12 +9,20 @@
 
 namespace text {
 
+class Offset;
+
+//////////////////////////////////////////////////////////////////////
+//
+// MarkerSetObserver
+//
 class MarkerSetObserver {
  public:
-  MarkerSetObserver();
   virtual ~MarkerSetObserver();
 
-  virtual void DidChangeMarker(Posn start, Posn end) = 0;
+  virtual void DidChangeMarker(Offset start, Offset end) = 0;
+
+ protected:
+  MarkerSetObserver();
 };
 
 }  // namespace text

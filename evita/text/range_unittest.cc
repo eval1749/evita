@@ -13,37 +13,38 @@
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
 
-namespace {
+namespace text {
+
 class RangeTest : public ::testing::Test {
  public:
-  text::Buffer* buffer() const { return buffer_.get(); }
+  Buffer* buffer() const { return buffer_.get(); }
 
  protected:
-  RangeTest() : buffer_(new text::Buffer()) {}
+  RangeTest() : buffer_(new Buffer()) {}
 
  private:
-  std::unique_ptr<text::Buffer> buffer_;
+  std::unique_ptr<Buffer> buffer_;
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
 };
 
 TEST_F(RangeTest, SetText) {
-  auto const range1 = std::make_unique<text::Range>(buffer(), 0, 0);
+  auto const range1 = std::make_unique<Range>(buffer(), Offset(), Offset());
   range1->set_text(L"foo");
-  EXPECT_EQ(0, range1->start());
-  EXPECT_EQ(3, range1->end());
+  EXPECT_EQ(Offset(0), range1->start());
+  EXPECT_EQ(Offset(3), range1->end());
 
-  auto const range2 = std::make_unique<text::Range>(buffer(), 3, 3);
-  auto const range3 = std::make_unique<text::Range>(buffer(), 0, 3);
+  auto const range2 = std::make_unique<Range>(buffer(), Offset(3), Offset(3));
+  auto const range3 = std::make_unique<Range>(buffer(), Offset(0), Offset(3));
   range2->set_text(L"bar");
 
-  EXPECT_EQ(0, range1->start());
-  EXPECT_EQ(6, range1->end());
+  EXPECT_EQ(Offset(0), range1->start());
+  EXPECT_EQ(Offset(6), range1->end());
 
-  EXPECT_EQ(3, range2->start());
-  EXPECT_EQ(6, range2->end());
+  EXPECT_EQ(Offset(3), range2->start());
+  EXPECT_EQ(Offset(6), range2->end());
 
-  EXPECT_EQ(0, range3->start());
-  EXPECT_EQ(6, range3->end());
+  EXPECT_EQ(Offset(0), range3->start());
+  EXPECT_EQ(Offset(6), range3->end());
 }
 
-}  // namespace
+}  // namespace text

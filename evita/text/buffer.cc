@@ -14,6 +14,7 @@
 #include "evita/text/interval_set.h"
 #include "evita/text/line_number_cache.h"
 #include "evita/text/marker_set.h"
+#include "evita/text/offset.h"
 #include "evita/text/range.h"
 #include "evita/text/range_set.h"
 #include "evita/text/undo_stack.h"
@@ -59,7 +60,7 @@ void Buffer::ClearUndo() {
   undo_stack_->Clear();
 }
 
-Posn Buffer::ComputeEndOfLine(Posn lPosn) const {
+Offset Buffer::ComputeEndOfLine(Offset lPosn) const {
   DCHECK(IsValidPosn(lPosn));
   while (lPosn < GetEnd()) {
     if (0x0A == GetCharAt(lPosn))
@@ -69,7 +70,7 @@ Posn Buffer::ComputeEndOfLine(Posn lPosn) const {
   return lPosn;
 }
 
-Posn Buffer::ComputeStartOfLine(Posn lPosn) const {
+Offset Buffer::ComputeStartOfLine(Offset lPosn) const {
   DCHECK(IsValidPosn(lPosn));
   while (lPosn > 0) {
     --lPosn;
@@ -81,11 +82,11 @@ Posn Buffer::ComputeStartOfLine(Posn lPosn) const {
   return lPosn;
 }
 
-Count Buffer::Delete(Posn lStart, Posn lEnd) {
+Count Buffer::Delete(Offset lStart, Offset lEnd) {
   if (IsReadOnly())
     return 0;
 
-  lStart = std::max(lStart, static_cast<Posn>(0));
+  lStart = std::max(lStart, Offset());
   lEnd = std::min(lEnd, GetEnd());
 
   auto const length = lEnd - lStart;
@@ -93,12 +94,12 @@ Count Buffer::Delete(Posn lStart, Posn lEnd) {
     return 0;
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    WillDeleteAt(lStart, static_cast<size_t>(length)));
+                    WillDeleteAt(lStart, length));
 
   deleteChars(lStart, lEnd);
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidDeleteAt(lStart, static_cast<size_t>(length)));
+                    DidDeleteAt(lStart, length));
 
   UpdateChangeTick();
   return length;
@@ -112,11 +113,11 @@ const css::Style& Buffer::GetDefaultStyle() const {
   return *css::Style::Default();
 }
 
-Interval* Buffer::GetIntervalAt(Posn lPosn) const {
+Interval* Buffer::GetIntervalAt(Offset lPosn) const {
   return intervals_->GetIntervalAt(std::min(lPosn, GetEnd()));
 }
 
-LineAndColumn Buffer::GetLineAndColumn(Posn offset) const {
+LineAndColumn Buffer::GetLineAndColumn(Offset offset) const {
   DCHECK(IsValidPosn(offset)) << "offset=" << offset << " length=" << GetEnd();
   auto const line_number_result = line_number_cache_->Get(offset);
   LineAndColumn result;
@@ -125,11 +126,15 @@ LineAndColumn Buffer::GetLineAndColumn(Posn offset) const {
   return result;
 }
 
-const css::Style& Buffer::GetStyleAt(Posn lPosn) const {
+Offset Buffer::GetStart() const {
+  return Offset(0);
+}
+
+const css::Style& Buffer::GetStyleAt(Offset lPosn) const {
   return GetIntervalAt(lPosn)->style();
 }
 
-Count Buffer::Insert(Posn lPosn, const base::char16* pwch, Count n) {
+Count Buffer::Insert(Offset lPosn, const base::char16* pwch, Count n) {
   DCHECK(IsValidPosn(lPosn));
 
   if (IsReadOnly())
@@ -140,13 +145,13 @@ Count Buffer::Insert(Posn lPosn, const base::char16* pwch, Count n) {
   lPosn = std::min(lPosn, GetEnd());
   insert(lPosn, pwch, n);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidInsertAt(lPosn, static_cast<size_t>(n)));
+                    DidInsertAt(lPosn, OffsetDelta(n)));
   UpdateChangeTick();
 
   return n;
 }
 
-void Buffer::InsertBefore(Posn position, const base::string16& text) {
+void Buffer::InsertBefore(Offset position, const base::string16& text) {
   DCHECK(IsValidPosn(position));
   DCHECK(!IsReadOnly());
 
@@ -154,17 +159,18 @@ void Buffer::InsertBefore(Posn position, const base::string16& text) {
   if (!text_length)
     return;
 
-  insert(position, text.data(), static_cast<Count>(text_length));
+  insert(position, text.data(), text_length);
 
+  auto const delta = OffsetDelta(text_length);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidInsertBefore(position, text_length));
+                    DidInsertBefore(position, delta));
 
   UpdateChangeTick();
 }
 
-Posn Buffer::Redo(Posn lPosn, Count n) {
+Offset Buffer::Redo(Offset lPosn, Count n) {
   if (IsReadOnly())
-    return -1;
+    return Offset::Invalid();
   return undo_stack_->Redo(lPosn, n);
 }
 
@@ -181,9 +187,7 @@ void text::Buffer::SetModified(bool new_modified) {
     m_nSaveTick = m_nCharTick;
 }
 
-void Buffer::SetStyle(Posn lStart, Posn lEnd, const css::Style& style) {
-  if (lStart < 0)
-    lStart = 0;
+void Buffer::SetStyle(Offset lStart, Offset lEnd, const css::Style& style) {
   if (lEnd > GetEnd())
     lEnd = GetEnd();
   if (lStart == lEnd)
@@ -192,17 +196,18 @@ void Buffer::SetStyle(Posn lStart, Posn lEnd, const css::Style& style) {
   // To improve performance, we don't check contents of |style|.
   // This may be enough for syntax coloring.
   intervals_->SetStyle(lStart, lEnd, style);
+  auto const length = lEnd - lStart;
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidChangeStyle(lStart, static_cast<size_t>(lEnd - lStart)));
+                    DidChangeStyle(lStart, length));
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {
   undo_stack_->BeginUndoGroup(name);
 }
 
-Posn Buffer::Undo(Posn lPosn, Count n) {
+Offset Buffer::Undo(Offset lPosn, Count n) {
   if (IsReadOnly())
-    return -1;
+    return Offset::Invalid();
   return undo_stack_->Undo(lPosn, n);
 }
 
@@ -213,10 +218,11 @@ void Buffer::UpdateChangeTick() {
 }
 
 // MarkerSetObserver
-void Buffer::DidChangeMarker(Posn start, Posn end) {
+void Buffer::DidChangeMarker(Offset start, Offset end) {
   DCHECK_LT(start, end);
+  auto const length = end - start;
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidChangeStyle(start, static_cast<size_t>(end - start)));
+                    DidChangeStyle(start, length));
 }
 
 }  // namespace text

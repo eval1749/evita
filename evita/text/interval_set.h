@@ -17,14 +17,19 @@ class Style;
 namespace text {
 
 class Interval;
+class Offset;
 
+//////////////////////////////////////////////////////////////////////
+//
+// IntervalSet
+//
 class IntervalSet final {
  public:
   explicit IntervalSet(Buffer* buffer);
   ~IntervalSet();
 
-  Interval* GetIntervalAt(Posn offset) const;
-  void SetStyle(Posn, Posn, const css::Style& style_values);
+  Interval* GetIntervalAt(Offset offset) const;
+  void SetStyle(Offset start, Offset end, const css::Style& style_values);
 
  private:
   class Impl;

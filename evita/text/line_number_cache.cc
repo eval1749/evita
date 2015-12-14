@@ -9,7 +9,7 @@
 namespace text {
 
 namespace {
-LineNumberAndOffset MakeLineNumberAndOffset(Posn offset, int line_number) {
+LineNumberAndOffset MakeLineNumberAndOffset(Offset offset, int line_number) {
   LineNumberAndOffset result;
   result.number = line_number;
   result.offset = offset;
@@ -19,17 +19,17 @@ LineNumberAndOffset MakeLineNumberAndOffset(Posn offset, int line_number) {
 
 LineNumberCache::LineNumberCache(Buffer* buffer) : buffer_(buffer) {
   buffer_->AddObserver(this);
-  map_[0] = 1;
+  map_[Offset()] = 1;
 }
 
 LineNumberCache::~LineNumberCache() {
   buffer_->RemoveObserver(this);
 }
 
-LineNumberAndOffset LineNumberCache::Get(Posn offset) {
+LineNumberAndOffset LineNumberCache::Get(Offset offset) {
   DCHECK(!map_.empty());
   if (!offset)
-    return MakeLineNumberAndOffset(0, 1);
+    return MakeLineNumberAndOffset(Offset(), Offset(1));
   auto it = map_.lower_bound(offset);
   if (it == map_.end()) {
     // offset is after cache.
@@ -44,10 +44,10 @@ LineNumberAndOffset LineNumberCache::Get(Posn offset) {
   return MakeLineNumberAndOffset(it->first, it->second);
 }
 
-void LineNumberCache::InvalidateCache(Posn offset) {
+void LineNumberCache::InvalidateCache(Offset offset) {
   if (!offset) {
     map_.clear();
-    map_[0] = 1;
+    map_[Offset(0)] = 1;
     return;
   }
   for (;;) {
@@ -58,15 +58,15 @@ void LineNumberCache::InvalidateCache(Posn offset) {
   }
 }
 
-LineNumberAndOffset LineNumberCache::UpdateCache(Posn line_start_offset,
+LineNumberAndOffset LineNumberCache::UpdateCache(Offset line_start_offset,
                                                  int line_number,
-                                                 Posn goal_offset) {
+                                                 Offset goal_offset) {
   DCHECK(!map_.empty());
   auto start_offset = line_start_offset;
   for (auto offset = line_start_offset; offset < goal_offset; ++offset) {
     if (buffer_->GetCharAt(offset) == 0x0A) {
       ++line_number;
-      start_offset = offset + 1;
+      start_offset = offset + OffsetDelta(1);
       map_[start_offset] = line_number;
     }
   }
@@ -74,11 +74,11 @@ LineNumberAndOffset LineNumberCache::UpdateCache(Posn line_start_offset,
 }
 
 // BufferMutationObserver
-void LineNumberCache::DidDeleteAt(Posn offset, size_t) {
+void LineNumberCache::DidDeleteAt(Offset offset, OffsetDelta) {
   InvalidateCache(offset);
 }
 
-void LineNumberCache::DidInsertAt(Posn offset, size_t) {
+void LineNumberCache::DidInsertAt(Offset offset, OffsetDelta) {
   InvalidateCache(offset);
 }
 

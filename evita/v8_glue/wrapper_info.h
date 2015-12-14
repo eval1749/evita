@@ -123,6 +123,9 @@ class DerivedWrapperInfo : public WrapperInfo {
   DISALLOW_COPY_AND_ASSIGN(DerivedWrapperInfo);
 };
 
+// TODO(eval1749): Workaround for dom::Editor::MessageBox
+#undef MessageBox
+
 }  // namespace v8_glue
 
 #endif  // EVITA_V8_GLUE_WRAPPER_INFO_H_

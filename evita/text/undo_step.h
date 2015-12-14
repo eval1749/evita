@@ -8,10 +8,11 @@
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "common/castable.h"
-#include "evita/precomp.h"
+#include "evita/text/offset.h"
 
 namespace text {
 
+class Buffer;
 class UndoStack;
 
 //////////////////////////////////////////////////////////////////////
@@ -24,10 +25,10 @@ class UndoStep : public common::Castable {
  public:
   virtual ~UndoStep();
 
-  virtual Posn GetAfterRedo() const;
-  virtual Posn GetAfterUndo() const;
-  virtual Posn GetBeforeRedo() const;
-  virtual Posn GetBeforeUndo() const;
+  virtual Offset GetAfterRedo() const;
+  virtual Offset GetAfterUndo() const;
+  virtual Offset GetBeforeRedo() const;
+  virtual Offset GetBeforeUndo() const;
   virtual void Redo(Buffer* buffer);
   virtual bool TryMerge(const Buffer* buffer, const UndoStep* other) = 0;
   virtual void Undo(Buffer* buffer);
@@ -67,20 +68,20 @@ class TextUndoStep : public UndoStep {
   DECLARE_CASTABLE_CLASS(TextUndoStep, UndoStep);
 
  public:
-  Posn end() const { return end_; }
-  void set_end(Posn end) { end_ = end; }
-  Posn start() const { return start_; }
-  void set_start(Posn start) { start_ = start; }
+  Offset end() const { return end_; }
+  void set_end(Offset end) { end_ = end; }
+  Offset start() const { return start_; }
+  void set_start(Offset start) { start_ = start; }
   const base::string16& text() const { return text_; }
   void set_text(const base::string16& text);
 
  protected:
-  TextUndoStep(Posn start, Posn end);
+  TextUndoStep(Offset start, Offset end);
   ~TextUndoStep() override;
 
  private:
-  Posn end_;
-  Posn start_;
+  Offset end_;
+  Offset start_;
   base::string16 text_;
 
   DISALLOW_COPY_AND_ASSIGN(TextUndoStep);
@@ -112,15 +113,15 @@ class DeleteUndoStep final : public TextUndoStep {
   DECLARE_CASTABLE_CLASS(DeleteUndoStep, TextUndoStep);
 
  public:
-  DeleteUndoStep(Posn start, Posn end, const base::string16& text);
+  DeleteUndoStep(Offset start, Offset end, const base::string16& text);
   ~DeleteUndoStep() final;
 
  private:
   // Recrod
-  Posn GetAfterRedo() const final;
-  Posn GetAfterUndo() const final;
-  Posn GetBeforeRedo() const final;
-  Posn GetBeforeUndo() const final;
+  Offset GetAfterRedo() const final;
+  Offset GetAfterUndo() const final;
+  Offset GetBeforeRedo() const final;
+  Offset GetBeforeUndo() const final;
   void Redo(Buffer* buffer) final;
   bool TryMerge(const Buffer* buffer, const UndoStep* other) final;
   void Undo(Buffer* buffer) final;
@@ -154,15 +155,15 @@ class InsertUndoStep final : public TextUndoStep {
   DECLARE_CASTABLE_CLASS(InsertUndoStep, TextUndoStep);
 
  public:
-  InsertUndoStep(Posn lStart, Posn lEnd);
+  InsertUndoStep(Offset lStart, Offset lEnd);
   ~InsertUndoStep() final;
 
  private:
   // UndoStep
-  Posn GetAfterRedo() const final;
-  Posn GetAfterUndo() const final;
-  Posn GetBeforeRedo() const final;
-  Posn GetBeforeUndo() const final;
+  Offset GetAfterRedo() const final;
+  Offset GetAfterUndo() const final;
+  Offset GetBeforeRedo() const final;
+  Offset GetBeforeUndo() const final;
   void Redo(Buffer* buffer) final;
 
   bool TryMerge(const Buffer* buffer, const UndoStep* other) final;

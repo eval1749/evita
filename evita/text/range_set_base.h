@@ -9,6 +9,7 @@
 
 namespace text {
 
+class Offset;
 class RangeBase;
 
 class RangeSetBase {
@@ -16,9 +17,9 @@ class RangeSetBase {
   RangeSetBase();
   ~RangeSetBase();
 
-  void set_range(RangeBase* range, Posn start, Posn end);
-  void set_range_end(RangeBase* range, Posn end);
-  void set_range_start(RangeBase* range, Posn start);
+  void set_range(RangeBase* range, Offset start, Offset end);
+  void set_range_end(RangeBase* range, Offset end);
+  void set_range_start(RangeBase* range, Offset start);
 };
 
 }  // namespace text

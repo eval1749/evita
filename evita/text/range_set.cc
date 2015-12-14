@@ -30,33 +30,31 @@ void RangeSet::RemoveRange(Range* range) {
 }
 
 // BufferMutationObserver
-void RangeSet::DidDeleteAt(Posn offset, size_t length) {
+void RangeSet::DidDeleteAt(Offset start, OffsetDelta length) {
+  auto const end = start + length;
   for (auto* range : ranges_) {
-    if (range->start_ > offset) {
-      range->start_ =
-          std::max(static_cast<Posn>(range->start_ - length), offset);
-    }
-    if (range->end_ > offset) {
-      range->end_ = std::max(static_cast<Posn>(range->end_ - length), offset);
-    }
+    if (range->start_ > start)
+      range->start_ = range->start_ >= end ? range->start_ - length : start;
+    if (range->end_ > start)
+      range->end_ = range->end_ >= end ? range->end_ - length : start;
   }
 }
 
-void RangeSet::DidInsertAt(Posn offset, size_t length) {
+void RangeSet::DidInsertAt(Offset offset, OffsetDelta length) {
   for (auto* range : ranges_) {
     if (range->start_ > offset)
-      range->start_ = static_cast<Posn>(range->start_ + length);
+      range->start_ = range->start_ + length;
     if (range->end_ > offset)
-      range->end_ = static_cast<Posn>(range->end_ + length);
+      range->end_ = range->end_ + length;
   }
 }
 
-void RangeSet::DidInsertBefore(Posn offset, size_t length) {
+void RangeSet::DidInsertBefore(Offset offset, OffsetDelta length) {
   for (auto* range : ranges_) {
     if (range->start_ >= offset)
-      range->start_ = static_cast<Posn>(range->start_ + length);
+      range->start_ = range->start_ + length;
     if (range->end_ >= offset)
-      range->end_ = static_cast<Posn>(range->end_ + length);
+      range->end_ = range->end_ + length;
   }
 }
 

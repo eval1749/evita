@@ -12,7 +12,7 @@ namespace dom {
 //
 MutationRecord::MutationRecord(const base::string16& type,
                                Document* document,
-                               text::Posn offset)
+                               text::Offset offset)
     : document_(document), offset_(offset), type_(type) {}
 
 MutationRecord::~MutationRecord() {}

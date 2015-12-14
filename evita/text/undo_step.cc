@@ -18,20 +18,20 @@ UndoStep::UndoStep() {}
 
 UndoStep::~UndoStep() {}
 
-Posn UndoStep::GetAfterRedo() const {
-  return -1;
+Offset UndoStep::GetAfterRedo() const {
+  return Offset::Invalid();
 }
 
-Posn UndoStep::GetAfterUndo() const {
-  return -1;
+Offset UndoStep::GetAfterUndo() const {
+  return Offset::Invalid();
 }
 
-Posn UndoStep::GetBeforeRedo() const {
-  return -1;
+Offset UndoStep::GetBeforeRedo() const {
+  return Offset::Invalid();
 }
 
-Posn UndoStep::GetBeforeUndo() const {
-  return -1;
+Offset UndoStep::GetBeforeUndo() const {
+  return Offset::Invalid();
 }
 
 void UndoStep::Redo(Buffer* buffer) {
@@ -56,7 +56,8 @@ NamedUndoStep::~NamedUndoStep() {}
 //
 // TextUndoStep
 //
-TextUndoStep::TextUndoStep(Posn start, Posn end) : end_(end), start_(start) {
+TextUndoStep::TextUndoStep(Offset start, Offset end)
+    : end_(end), start_(start) {
   DCHECK_LE(start_, end_);
 }
 
@@ -91,7 +92,9 @@ bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep* new_undo_step) {
 //
 // DeleteUndoStep
 //
-DeleteUndoStep::DeleteUndoStep(Posn start, Posn end, const base::string16& text)
+DeleteUndoStep::DeleteUndoStep(Offset start,
+                               Offset end,
+                               const base::string16& text)
     : TextUndoStep(start, end) {
   set_text(text);
 }
@@ -99,19 +102,19 @@ DeleteUndoStep::DeleteUndoStep(Posn start, Posn end, const base::string16& text)
 DeleteUndoStep::~DeleteUndoStep() {}
 
 // UndoStep
-Posn DeleteUndoStep::GetAfterRedo() const {
+Offset DeleteUndoStep::GetAfterRedo() const {
   return start();
 }
 
-Posn DeleteUndoStep::GetAfterUndo() const {
+Offset DeleteUndoStep::GetAfterUndo() const {
   return end();
 }
 
-Posn DeleteUndoStep::GetBeforeRedo() const {
+Offset DeleteUndoStep::GetBeforeRedo() const {
   return end();
 }
 
-Posn DeleteUndoStep::GetBeforeUndo() const {
+Offset DeleteUndoStep::GetBeforeUndo() const {
   return start();
 }
 
@@ -146,7 +149,7 @@ bool DeleteUndoStep::TryMerge(const Buffer*, const UndoStep* other) {
   // 2. a|c
   if (start() == delete_step->start()) {
     set_text(std::move(text() + delete_step->text()));
-    set_end(end() + delete_step->end() - delete_step->start());
+    set_end(end() + (delete_step->end() - delete_step->start()));
     return true;
   }
 
@@ -177,7 +180,7 @@ bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
 //
 // InsertUndoStep
 //
-InsertUndoStep::InsertUndoStep(Posn start, Posn end)
+InsertUndoStep::InsertUndoStep(Offset start, Offset end)
     : TextUndoStep(start, end) {}
 
 InsertUndoStep::~InsertUndoStep() {}
@@ -193,13 +196,13 @@ bool InsertUndoStep::TryMerge(const Buffer* buffer, const UndoStep* other) {
 
   if (end() == insert_step->start()) {
     // [last][new]
-    if (buffer->GetCharAt(end() - 1) != 0x0A) {
+    if (buffer->GetCharAt(end() - OffsetDelta(1)) != 0x0A) {
       set_end(insert_step->end());
       return true;
     }
   } else if (start() == insert_step->end()) {
     // [new][last]
-    if (buffer->GetCharAt(start() - 1) != 0x0A) {
+    if (buffer->GetCharAt(start() - OffsetDelta(1)) != 0x0A) {
       set_start(insert_step->start());
       return true;
     }
@@ -208,25 +211,25 @@ bool InsertUndoStep::TryMerge(const Buffer* buffer, const UndoStep* other) {
 }
 
 // UndoStep
-Posn InsertUndoStep::GetAfterRedo() const {
+Offset InsertUndoStep::GetAfterRedo() const {
   return end();
 }
 
-Posn InsertUndoStep::GetAfterUndo() const {
+Offset InsertUndoStep::GetAfterUndo() const {
   return start();
 }
 
-Posn InsertUndoStep::GetBeforeRedo() const {
+Offset InsertUndoStep::GetBeforeRedo() const {
   return start();
 }
 
-Posn InsertUndoStep::GetBeforeUndo() const {
+Offset InsertUndoStep::GetBeforeUndo() const {
   return end();
 }
 
 void InsertUndoStep::Redo(Buffer* buffer) {
-  DCHECK_EQ(text().length(), static_cast<size_t>(end() - start()));
-  buffer->Insert(start(), text().data(), static_cast<Count>(text().length()));
+  DCHECK_EQ(text().length(), static_cast<size_t>((end() - start()).value()));
+  buffer->Insert(start(), text().data(), text().length());
 }
 
 void InsertUndoStep::Undo(Buffer* buffer) {

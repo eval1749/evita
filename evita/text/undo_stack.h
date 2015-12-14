@@ -30,13 +30,13 @@ class UndoStack final : public BufferMutationObserver {
   bool CanUndo() const;
   void Clear();
   void EndUndoGroup(const base::string16& name);
-  Posn Redo(Posn offset, Count count);
-  Posn Undo(Posn offset, Count count);
+  Offset Redo(Offset offset, Count count);
+  Offset Undo(Offset offset, Count count);
 
  private:
   // BufferMutationObserver
-  void DidInsertAt(Posn offset, size_t length) override;
-  void WillDeleteAt(Posn offset, size_t length) override;
+  void DidInsertAt(Offset offset, OffsetDelta length) final;
+  void WillDeleteAt(Offset offset, OffsetDelta length) final;
 
   Buffer* buffer_;
   std::vector<UndoStep*> redo_steps_;

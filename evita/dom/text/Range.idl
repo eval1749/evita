@@ -24,10 +24,10 @@ enum RangeCase {
 interface Range {
   readonly attribute boolean collapsed;
   readonly attribute Document document;
-  attribute long end;
+  attribute TextOffset end;
   [ImplementedAs=JavaScript]
   attribute long length;
-  attribute long start;
+  attribute TextOffset start;
   attribute DOMString text;
 
   // TODO(yosin) We should make |analyzeCase()| as global function

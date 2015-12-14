@@ -58,10 +58,10 @@ bool InlineBox::Equal(const InlineBox* other) const {
          other->line_height_ == line_height_ && other->style_ == style_;
 }
 
-text::Posn InlineBox::Fix(float line_height, float line_descent) {
+text::Offset InlineBox::Fix(float line_height, float line_descent) {
   line_descent_ = line_descent;
   line_height_ = line_height;
-  return -1;
+  return text::Offset::Invalid();
 }
 
 uint32_t InlineBox::Hash() const {
@@ -71,12 +71,12 @@ uint32_t InlineBox::Hash() const {
   return nHash;
 }
 
-gfx::RectF InlineBox::HitTestTextPosition(text::Posn) const {
+gfx::RectF InlineBox::HitTestTextPosition(text::Offset) const {
   return gfx::RectF();
 }
 
-text::Posn InlineBox::MapXToPosn(float x) const {
-  return -1;
+text::Offset InlineBox::MapXToPosn(float x) const {
+  return text::Offset::Invalid();
 }
 
 bool InlineBox::Merge(const RenderStyle&, float) {
@@ -118,11 +118,12 @@ WithFont::~WithFont() {}
 InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
                                  float width,
                                  float height,
-                                 text::Posn lPosn,
+                                 text::Offset lPosn,
                                  TextMarker marker_name)
     : InlineBox(style, width, height, style.font().descent()),
       WithFont(style.font()),
-      end_(marker_name == TextMarker::LineWrap ? lPosn : lPosn + 1),
+      end_(marker_name == TextMarker::LineWrap ? lPosn
+                                               : lPosn + text::OffsetDelta(1)),
       marker_name_(marker_name),
       start_(lPosn) {}
 
@@ -147,7 +148,7 @@ bool InlineMarkerBox::Equal(const InlineBox* other) const {
   return marker_name_ == marker_cell->marker_name_;
 }
 
-text::Posn InlineMarkerBox::Fix(float line_height, float line_descent) {
+text::Offset InlineMarkerBox::Fix(float line_height, float line_descent) {
   InlineBox::Fix(line_height, line_descent);
   return end_;
 }
@@ -159,13 +160,13 @@ uint32_t InlineMarkerBox::Hash() const {
   return nHash;
 }
 
-gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Posn lPosn) const {
+gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset lPosn) const {
   if (lPosn < start_ || lPosn >= end_)
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
 }
 
-text::Posn InlineMarkerBox::MapXToPosn(float x) const {
+text::Offset InlineMarkerBox::MapXToPosn(float x) const {
   return start_;
 }
 
@@ -176,12 +177,12 @@ text::Posn InlineMarkerBox::MapXToPosn(float x) const {
 InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
                                      float width,
                                      float height,
-                                     text::Posn lPosn,
+                                     text::Offset lPosn,
                                      const base::string16& characters)
     : InlineBox(style, width, height, style.font().descent()),
       WithFont(style.font()),
       characters_(characters),
-      end_(lPosn + 1),
+      end_(lPosn + text::OffsetDelta(1)),
       start_(lPosn) {}
 
 InlineTextBoxBase::InlineTextBoxBase(const InlineTextBoxBase& other)
@@ -198,7 +199,7 @@ void InlineTextBoxBase::AddChar(base::char16 char_code) {
 }
 
 void InlineTextBoxBase::ExtendEnd() {
-  end_ += 1;
+  ++end_;
 }
 
 // InlineBox
@@ -208,7 +209,7 @@ bool InlineTextBoxBase::Equal(const InlineBox* other) const {
   return characters_ == other->as<InlineTextBox>()->characters_;
 }
 
-text::Posn InlineTextBoxBase::Fix(float line_height, float descent) {
+text::Offset InlineTextBoxBase::Fix(float line_height, float descent) {
   InlineBox::Fix(line_height, descent);
   DCHECK_LT(start_, end_);
   return end_;
@@ -219,13 +220,13 @@ uint32_t InlineTextBoxBase::Hash() const {
                                std::hash<base::string16>()(characters_));
 }
 
-text::Posn InlineTextBoxBase::MapXToPosn(float x) const {
+text::Offset InlineTextBoxBase::MapXToPosn(float x) const {
   if (x >= width())
     return end_;
   for (auto k = 1u; k <= characters_.length(); ++k) {
     auto const cx = style().font().GetTextWidth(characters_.data(), k);
     if (x < cx)
-      return static_cast<text::Posn>(start_ + k - 1);
+      return start_ + text::OffsetDelta(static_cast<int>(k - 1));
   }
   return end_;
 }
@@ -237,7 +238,7 @@ text::Posn InlineTextBoxBase::MapXToPosn(float x) const {
 InlineTextBox::InlineTextBox(const RenderStyle& style,
                              float width,
                              float height,
-                             text::Posn offset,
+                             text::Offset offset,
                              const base::string16& characters)
     : InlineTextBoxBase(style, width, height, offset, characters) {}
 
@@ -253,7 +254,7 @@ InlineBox* InlineTextBox::Copy() const {
 // Returns bounds rectangle of caret at |offset|. Caret is placed before
 // character at |offset|. So, height of caret is height of character before
 // |offset|.
-gfx::RectF InlineTextBox::HitTestTextPosition(text::Posn offset) const {
+gfx::RectF InlineTextBox::HitTestTextPosition(text::Offset offset) const {
   if (offset < start() || offset > end())
     return gfx::RectF();
   auto const length = static_cast<size_t>(offset - start());
@@ -277,7 +278,7 @@ bool InlineTextBox::Merge(const RenderStyle& style, float width) {
 InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
                                    float width,
                                    float height,
-                                   text::Posn lPosn,
+                                   text::Offset lPosn,
                                    const base::string16& characters)
     : InlineTextBoxBase(style, width, height + 4.0f, lPosn, characters) {}
 
@@ -291,7 +292,7 @@ InlineBox* InlineUnicodeBox::Copy() const {
   return new InlineUnicodeBox(*this);
 }
 
-gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Posn offset) const {
+gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset) const {
   if (offset < start() || offset > end())
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(width(), top()), gfx::SizeF(1.0f, height()));

@@ -69,9 +69,9 @@ void UndoStack::EndUndoGroup(const base::string16& name) {
   undo_steps_.push_back(end_step.release());
 }
 
-Posn UndoStack::Redo(Posn offset, Count count) {
+Offset UndoStack::Redo(Offset offset, int count) {
   if (redo_steps_.empty())
-    return -1;
+    return Offset::Invalid();
 
   for (const auto step : common::adopters::reverse(redo_steps_)) {
     DCHECK(!step->is<EndUndoStep>());
@@ -107,9 +107,9 @@ Posn UndoStack::Redo(Posn offset, Count count) {
   return result_offset;
 }
 
-Posn UndoStack::Undo(Posn offset, Count count) {
+Offset UndoStack::Undo(Offset offset, Count count) {
   if (undo_steps_.empty())
-    return -1;
+    return Offset::Invalid();
 
   common::ScopedChange<State> state_scope(state_, State::Undo);
 
@@ -147,8 +147,8 @@ Posn UndoStack::Undo(Posn offset, Count count) {
 }
 
 // BufferMutationObserver
-void UndoStack::DidInsertAt(Posn start, size_t length) {
-  auto const end = static_cast<Posn>(start + length);
+void UndoStack::DidInsertAt(Offset start, OffsetDelta length) {
+  auto const end = start + length;
 
   if (state_ == State::Redo) {
     DCHECK(undo_steps_.back()->is<InsertUndoStep>());
@@ -168,8 +168,8 @@ void UndoStack::DidInsertAt(Posn start, size_t length) {
   undo_steps_.push_back(insert_step.release());
 }
 
-void UndoStack::WillDeleteAt(Posn start, size_t length) {
-  auto const end = static_cast<Posn>(start + length);
+void UndoStack::WillDeleteAt(Offset start, OffsetDelta length) {
+  auto const end = start + length;
   auto text = buffer_->GetText(start, end);
   if (state_ == State::Redo) {
     DCHECK(undo_steps_.back()->is<DeleteUndoStep>());

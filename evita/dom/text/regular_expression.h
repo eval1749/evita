@@ -11,6 +11,10 @@
 #include "base/strings/string16.h"
 #include "evita/v8_glue/scriptable.h"
 
+namespace text {
+class Offset;
+}
+
 namespace dom {
 
 class Document;
@@ -31,8 +35,8 @@ class RegularExpression final : public v8_glue::Scriptable<RegularExpression> {
   ~RegularExpression() final;
 
   v8::Handle<v8::Value> ExecuteOnDocument(Document* document,
-                                          int start,
-                                          int end);
+                                          text::Offset start,
+                                          text::Offset end);
 
  private:
   friend class bindings::RegularExpressionClass;
@@ -44,8 +48,8 @@ class RegularExpression final : public v8_glue::Scriptable<RegularExpression> {
   class RegularExpressionImpl;
 
   RegularExpression(RegularExpressionImpl* regex,
-         const base::string16& source,
-         const RegExpInit& init_dict);
+                    const base::string16& source,
+                    const RegExpInit& init_dict);
 
   bool backward() const { return backward_; }
   bool global() const { return global_; }
@@ -59,7 +63,7 @@ class RegularExpression final : public v8_glue::Scriptable<RegularExpression> {
   v8::Local<v8::Value> MakeMatchArray(const std::vector<Match>& matchs);
 
   static RegularExpression* NewRegularExpression(const base::string16& source,
-                           const RegExpInit& options);
+                                                 const RegExpInit& options);
   static RegularExpression* NewRegularExpression(const base::string16& source);
 
   bool backward_;

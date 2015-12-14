@@ -31,9 +31,9 @@ class ViewThreadProxy : public domapi::ViewDelegate {
   void AddWindow(domapi::WindowId parent_id, domapi::WindowId child_id) final;
   void ChangeParentWindow(domapi::WindowId window_id,
                           domapi::WindowId new_parent_id) final;
-  text::Posn ComputeOnTextWindow(domapi::WindowId window_id,
-                                 const domapi::TextWindowCompute& data) final;
-  void CreateEditorWindow(const domapi::WindowId window_id) final;
+  text::Offset ComputeOnTextWindow(domapi::WindowId window_id,
+                                   const domapi::TextWindowCompute& data) final;
+  void CreateEditorWindow(domapi::WindowId window_id) final;
   void CreateFormWindow(domapi::WindowId window_id,
                         dom::Form* form,
                         const domapi::PopupWindowInit& init) final;
@@ -60,7 +60,7 @@ class ViewThreadProxy : public domapi::ViewDelegate {
       const std::vector<base::string16>& keys) final;
   void HideWindow(domapi::WindowId window_id) final;
   domapi::FloatRect HitTestTextPosition(domapi::WindowId window_id,
-                                        text::Posn position);
+                                        text::Offset position);
   void MakeSelectionVisible(domapi::WindowId window_id) final;
   void MapTextFieldPointToOffset(domapi::EventTargetId event_target_id,
                                  float x,

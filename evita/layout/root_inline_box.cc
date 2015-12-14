@@ -18,9 +18,8 @@ RootInlineBox::RootInlineBox(const RootInlineBox& other)
       m_lEnd(other.m_lEnd),
       m_lStart(other.m_lStart),
       bounds_(other.bounds_) {
-  for (auto cell : other.cells_) {
+  for (auto cell : other.cells_)
     cells_.push_back(cell->Copy());
-  }
 }
 
 RootInlineBox::RootInlineBox() : m_nHash(0), m_lStart(0), m_lEnd(0) {}
@@ -37,6 +36,7 @@ void RootInlineBox::set_origin(const gfx::PointF& origin) {
 gfx::RectF RootInlineBox::CalculateSelectionRect(
     const TextSelection& selection) const {
   DCHECK(selection.is_range());
+  DCHECK(!cells_.empty());
   if (selection.start() >= text_end() || selection.end() <= text_start())
     return gfx::RectF();
   auto const left =
@@ -49,15 +49,19 @@ gfx::RectF RootInlineBox::CalculateSelectionRect(
   return gfx::RectF(left, bounds_.top, right, bounds_.bottom);
 }
 
-bool RootInlineBox::Contains(text::Posn offset) const {
+bool RootInlineBox::Contains(text::Offset offset) const {
+  DCHECK(offset.IsValid());
+  DCHECK(!cells_.empty());
   return offset >= text_start() && offset < text_end();
 }
 
 RootInlineBox* RootInlineBox::Copy() const {
+  DCHECK(!cells_.empty());
   return new RootInlineBox(*this);
 }
 
 bool RootInlineBox::Equal(const RootInlineBox* other) const {
+  DCHECK(!cells_.empty());
   if (Hash() != other->Hash())
     return false;
   if (cells_.size() != other->cells_.size())
@@ -76,6 +80,7 @@ void RootInlineBox::AddInlineBox(InlineBox* cell) {
 }
 
 void RootInlineBox::Fix(float ascent, float descent) {
+  DCHECK(!cells_.empty());
   auto const left = 0.0f;
   auto const top = 0.0f;
   auto const height = ascent + descent;
@@ -95,6 +100,7 @@ void RootInlineBox::Fix(float ascent, float descent) {
 }
 
 uint32_t RootInlineBox::Hash() const {
+  DCHECK(!cells_.empty());
   if (m_nHash)
     return m_nHash;
   for (const auto cell : cells_) {
@@ -105,7 +111,9 @@ uint32_t RootInlineBox::Hash() const {
   return m_nHash;
 }
 
-gfx::RectF RootInlineBox::HitTestTextPosition(text::Posn offset) const {
+gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
+  DCHECK(offset.IsValid());
+  DCHECK(!cells_.empty());
   if (offset < m_lStart || offset >= m_lEnd)
     return gfx::RectF();
 
@@ -121,13 +129,15 @@ gfx::RectF RootInlineBox::HitTestTextPosition(text::Posn offset) const {
 }
 
 bool RootInlineBox::IsEndOfDocument() const {
+  DCHECK(!cells_.empty());
   auto const last_marker_cell = last_cell()->as<InlineMarkerBox>();
   return last_marker_cell->marker_name() == TextMarker::EndOfDocument;
 }
 
-text::Posn RootInlineBox::MapXToPosn(float xGoal) const {
+text::Offset RootInlineBox::MapXToPosn(float xGoal) const {
+  DCHECK(!cells_.empty());
   auto xInlineBox = 0.0f;
-  auto lPosn = GetEnd() - 1;
+  auto lPosn = GetEnd() - text::OffsetDelta(1);
   for (const auto cell : cells_) {
     auto const x = xGoal - xInlineBox;
     xInlineBox += cell->width();

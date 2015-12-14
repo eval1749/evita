@@ -72,9 +72,9 @@ text::Buffer* TextWindow::buffer() const {
   return text_view_->buffer();
 }
 
-text::Posn TextWindow::ComputeScreenMotion(text::Count n,
-                                           const gfx::PointF& pt,
-                                           text::Posn lPosn) {
+text::Offset TextWindow::ComputeScreenMotion(text::Count n,
+                                             const gfx::PointF& pt,
+                                             text::Offset lPosn) {
   UI_ASSERT_DOM_LOCKED();
   // TODO(eval1749): We should not call |LargetScroll()| in |ComputeMotion|.
   if (LargeScroll(0, n))
@@ -86,9 +86,9 @@ text::Posn TextWindow::ComputeScreenMotion(text::Count n,
   return lPosn;
 }
 
-text::Posn TextWindow::ComputeWindowLineMotion(text::Count n,
-                                               const gfx::PointF& pt,
-                                               text::Posn lPosn) {
+text::Offset TextWindow::ComputeWindowLineMotion(text::Count n,
+                                                 const gfx::PointF& pt,
+                                                 text::Offset lPosn) {
   UI_ASSERT_DOM_LOCKED();
   if (n > 0) {
     auto const lBufEnd = buffer()->GetEnd();
@@ -121,18 +121,20 @@ text::Posn TextWindow::ComputeWindowLineMotion(text::Count n,
   return lPosn;
 }
 
-text::Posn TextWindow::ComputeWindowMotion(text::Count n, text::Posn offset) {
+text::Offset TextWindow::ComputeWindowMotion(text::Count n,
+                                             text::Offset offset) {
   UI_ASSERT_DOM_LOCKED();
   text_view_->FormatIfNeeded();
   if (n > 0)
-    return std::max(std::min(text_view_->GetEnd() - 1, buffer()->GetEnd()),
+    return std::max(std::min(text_view_->GetEnd() - text::OffsetDelta(1),
+                             buffer()->GetEnd()),
                     text_view_->GetStart());
   if (n < 0)
     return text_view_->GetStart();
   return offset;
 }
 
-text::Posn TextWindow::EndOfLine(text::Posn text_offset) {
+text::Offset TextWindow::EndOfLine(text::Offset text_offset) {
   UI_ASSERT_DOM_LOCKED();
   return text_view_->EndOfLine(text_offset);
 }
@@ -140,7 +142,7 @@ text::Posn TextWindow::EndOfLine(text::Posn text_offset) {
 // Maps position specified buffer position and returns height
 // of caret, If specified buffer position isn't in window, this function
 // returns 0.
-gfx::RectF TextWindow::HitTestTextPosition(text::Posn text_offset) {
+gfx::RectF TextWindow::HitTestTextPosition(text::Offset text_offset) {
   DCHECK_GE(text_offset, 0);
   UI_ASSERT_DOM_LOCKED();
   text_view_->FormatIfNeeded();
@@ -184,7 +186,7 @@ bool TextWindow::LargeScroll(int, int iDy) {
   return scrolled;
 }
 
-text::Posn TextWindow::MapPointToPosition(const gfx::PointF pt) {
+text::Offset TextWindow::MapPointToPosition(const gfx::PointF pt) {
   return std::min(text_view_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
@@ -218,7 +220,7 @@ bool TextWindow::SmallScroll(int, int y_count) {
   return scrolled;
 }
 
-text::Posn TextWindow::StartOfLine(text::Posn text_offset) {
+text::Offset TextWindow::StartOfLine(text::Offset text_offset) {
   UI_ASSERT_DOM_LOCKED();
   return text_view_->StartOfLine(text_offset);
 }
@@ -257,24 +259,24 @@ void TextWindow::UpdateScrollBar() {
   data.minimum = 0;
   data.thumb_size = text_view_->GetVisibleEnd() - text_view_->GetStart();
   data.thumb_value = text_view_->GetStart();
-  data.maximum = buffer()->GetEnd() + 1;
+  data.maximum = buffer()->GetEnd() + text::OffsetDelta(1);
   vertical_scroll_bar_->SetData(data);
 }
 
 // text::BufferMutationObserver
-void TextWindow::DidChangeStyle(text::Posn offset, size_t length) {
+void TextWindow::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   text_view_->DidChangeStyle(offset, length);
   RequestAnimationFrame();
 }
 
-void TextWindow::DidDeleteAt(text::Posn offset, size_t length) {
+void TextWindow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   text_view_->DidDeleteAt(offset, length);
   RequestAnimationFrame();
 }
 
-void TextWindow::DidInsertAt(text::Posn offset, size_t length) {
+void TextWindow::DidInsertAt(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   text_view_->DidInsertAt(offset, length);
   RequestAnimationFrame();
@@ -348,7 +350,9 @@ void TextWindow::DidClickPageUp() {
 
 void TextWindow::DidMoveThumb(int value) {
   UI_DOM_AUTO_LOCK_SCOPE();
-  text_view_->Format(value);
+  if (value < 0)
+    return;
+  text_view_->Format(text::Offset(value));
   RequestAnimationFrame();
 }
 

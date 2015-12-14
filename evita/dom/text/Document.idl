@@ -70,7 +70,7 @@ interface Document : EventTarget {
     void bindKey(DOMString keyCombination, Object command);
 
     [ImplementedAs=charCodeAt]
-    long charCodeAt_(long offset);
+    long charCodeAt_(TextOffset offset);
 
     void clearUndo();
 
@@ -78,16 +78,16 @@ interface Document : EventTarget {
     void close();
 
     [ImplementedAs=JavaScript]
-    long computeEndOf_(Unit unit, long offset);
+    long computeEndOf_(Unit unit, TextOffset offset);
 
     [ImplementedAs=JavaScript]
-    long computeMotion_(Unit unit, long count, long offset);
+    long computeMotion_(Unit unit, long count, TextOffset offset);
 
     [ImplementedAs=JavaScript]
-    long computeStartOf_(Unit unit, long offset);
+    long computeStartOf_(Unit unit, TextOffset offset);
 
     [ImplementedAs=JavaScript]
-    long computeWhile_(DOMString charSet, long count, long offset);
+    long computeWhile_(DOMString charSet, long count, TextOffset offset);
 
     [ImplementedAs=JavaScript]
     void doColor_(long hint);
@@ -100,7 +100,7 @@ interface Document : EventTarget {
 
     // {column: long, lineNumber: long}
     [ImplementedAs=GetLineAndColumn]
-    LineAndColumn getLineAndColumn_(long offset);
+    LineAndColumn getLineAndColumn_(TextOffset offset);
 
     [ImplementedAs=JavaScript]
     DocumentWindow[] listWindows();
@@ -109,12 +109,13 @@ interface Document : EventTarget {
     Promise<long> load(optional DOMString fileName);
 
     [ImplementedAs=Match]
-    RegExpMatch[] match_(RegularExpression regexp, long start, long end);
+    RegExpMatch[] match_(RegularExpression regexp, TextOffset start,
+                         TextOffset end);
 
     [ImplementedAs=JavaScript]
     boolean needSave();
 
-    long redo(long offset);
+    long redo(TextOffset offset);
 
     [ImplementedAs=JavaScript]
     static void renameTo(DOMString newName);
@@ -128,15 +129,15 @@ interface Document : EventTarget {
     void startUndoGroup_(DOMString name);
 
     [ImplementedAs=spelling_at]
-    DOMString spellingAt(long offset);
-    void setSpelling(long start, long end, long spelling);
+    DOMString spellingAt(TextOffset offset);
+    void setSpelling(TextOffset start, TextOffset end, long spelling);
 
     [ImplementedAs=style_at]
-    Style styleAt(long offset);
-    void setSyntax(long start, long end, DOMString syntax);
+    Style styleAt(TextOffset offset);
+    void setSyntax(TextOffset start, TextOffset end, DOMString syntax);
 
     [ImplementedAs=syntax_at]
-    DOMString syntaxAt(long offset);
+    DOMString syntaxAt(TextOffset offset);
 
-    long undo(long offset);
+    long undo(TextOffset offset);
 };

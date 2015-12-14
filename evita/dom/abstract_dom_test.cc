@@ -268,7 +268,7 @@ void AbstractDomTest::RunMessageLoopUntilIdle() {
 }
 
 void AbstractDomTest::SetUp() {
-  DEFINE_STATIC_LOCAL(base::MessageLoop, message_loop, ());
+  CR_DEFINE_STATIC_LOCAL(base::MessageLoop, message_loop, ());
 
   RunnerDelegate::instance()->set_test_instance(this);
 

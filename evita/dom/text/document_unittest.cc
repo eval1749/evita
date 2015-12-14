@@ -158,7 +158,7 @@ TEST_F(DocumentTest, getLineAndColumn) {
   EXPECT_SCRIPT_EQ("1,2", "testIt(2)");
   EXPECT_SCRIPT_EQ("2,0", "testIt(3)");
   EXPECT_SCRIPT_EQ("2,1", "testIt(4)");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid position 100, valid range is [0, 12]",
+  EXPECT_SCRIPT_EQ("RangeError: Invalid offset 100, valid range is [0, 12]",
                    "testIt(100)");
 }
 

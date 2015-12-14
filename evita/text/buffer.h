@@ -90,7 +90,6 @@ class Buffer : public BufferCore,
   // [I]
   int IncCharTick(int n) { return revision_ += n; }
   int Insert(Offset, const base::char16*, int);
-  bool IsNotReady() const;
   bool IsReadOnly() const { return m_fReadOnly; }
 
   void Insert(Offset lOffset, const base::char16* pwsz) {

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_RENDER_SELECTION_H_
-#define EVITA_VIEWS_TEXT_RENDER_SELECTION_H_
+#ifndef EVITA_LAYOUT_RENDER_SELECTION_H_
+#define EVITA_LAYOUT_RENDER_SELECTION_H_
 
 #include "evita/css/style.h"
 #include "evita/gfx/color_f.h"
@@ -77,4 +77,4 @@ class TextSelection final {
 }  // namespace rendering
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_RENDER_SELECTION_H_
+#endif  // EVITA_LAYOUT_RENDER_SELECTION_H_

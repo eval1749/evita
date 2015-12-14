@@ -5,12 +5,12 @@
 #include <algorithm>
 #include <string>
 
-#include "evita/views/text/inline_box.h"
+#include "evita/layout/inline_box.h"
 
 #include "base/logging.h"
-#include "evita/views/text/inline_box_visitor.h"
-#include "evita/views/text/render_font.h"
-#include "evita/views/text/render_style.h"
+#include "evita/layout/inline_box_visitor.h"
+#include "evita/layout/render_font.h"
+#include "evita/layout/render_style.h"
 
 namespace views {
 namespace rendering {

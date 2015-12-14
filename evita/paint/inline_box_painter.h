@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 #include "evita/gfx/forward.h"
-#include "evita/views/text/inline_box_forward.h"
+#include "evita/layout/inline_box_forward.h"
 
 namespace paint {
 

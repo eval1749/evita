@@ -4,12 +4,12 @@
 
 #include <cmath>
 
-#include "evita/views/text/root_inline_box.h"
+#include "evita/layout/root_inline_box.h"
 
 #include "base/logging.h"
 #include "evita/paint/inline_box_painter.h"
-#include "evita/views/text/inline_box.h"
-#include "evita/views/text/render_selection.h"
+#include "evita/layout/inline_box.h"
+#include "evita/layout/render_selection.h"
 
 namespace views {
 namespace rendering {

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <string>
 
-#include "evita/views/text/text_formatter.h"
+#include "evita/layout/text_formatter.h"
 
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
@@ -17,12 +17,12 @@
 #include "evita/text/interval.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
-#include "evita/views/text/inline_box.h"
-#include "evita/views/text/render_font.h"
-#include "evita/views/text/render_font_set.h"
-#include "evita/views/text/render_style.h"
-#include "evita/views/text/render_selection.h"
-#include "evita/views/text/root_inline_box.h"
+#include "evita/layout/inline_box.h"
+#include "evita/layout/render_font.h"
+#include "evita/layout/render_font_set.h"
+#include "evita/layout/render_style.h"
+#include "evita/layout/render_selection.h"
+#include "evita/layout/root_inline_box.h"
 #include "evita/text/spelling.h"
 
 namespace views {

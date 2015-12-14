@@ -7,8 +7,8 @@
 #include "base/logging.h"
 #include "evita/gfx_base.h"
 #include "evita/paint/root_inline_box_painter.h"
-#include "evita/views/text/inline_box.h"
-#include "evita/views/text/root_inline_box.h"
+#include "evita/layout/inline_box.h"
+#include "evita/layout/root_inline_box.h"
 #include "evita/views/switches.h"
 
 #define DEBUG_DRAW 0

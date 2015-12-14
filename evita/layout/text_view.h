@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_TEXT_VIEW_H_
-#define EVITA_VIEWS_TEXT_TEXT_VIEW_H_
+#ifndef EVITA_LAYOUT_TEXT_VIEW_H_
+#define EVITA_LAYOUT_TEXT_VIEW_H_
 
 #include <memory>
 
@@ -12,7 +12,7 @@
 #include "evita/gfx/canvas_observer.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/views/text/render_selection.h"
+#include "evita/layout/render_selection.h"
 
 namespace base {
 class Time;
@@ -97,4 +97,4 @@ class TextView final : private gfx::CanvasObserver {
 
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_TEXT_VIEW_H_
+#endif  // EVITA_LAYOUT_TEXT_VIEW_H_

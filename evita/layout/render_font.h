@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_RENDER_FONT_H_
-#define EVITA_VIEWS_TEXT_RENDER_FONT_H_
+#ifndef EVITA_LAYOUT_RENDER_FONT_H_
+#define EVITA_LAYOUT_RENDER_FONT_H_
 
 #include <functional>
 #include <memory>
@@ -81,4 +81,4 @@ struct hash<views::rendering::Font> {
 };
 }  // namespace std
 
-#endif  // EVITA_VIEWS_TEXT_RENDER_FONT_H_
+#endif  // EVITA_LAYOUT_RENDER_FONT_H_

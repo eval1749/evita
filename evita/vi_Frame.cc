@@ -36,8 +36,8 @@
 #include "evita/views/switches.h"
 #include "evita/views/tabs/tab_strip.h"
 #include "evita/views/tabs/tab_strip_animator.h"
-#include "evita/views/text/render_font.h"
-#include "evita/views/text/render_font_set.h"
+#include "evita/layout/render_font.h"
+#include "evita/layout/render_font_set.h"
 #include "evita/views/window_set.h"
 #include "evita/vi_EditPane.h"
 

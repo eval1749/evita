@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_RENDER_STYLE_H_
-#define EVITA_VIEWS_TEXT_RENDER_STYLE_H_
+#ifndef EVITA_LAYOUT_RENDER_STYLE_H_
+#define EVITA_LAYOUT_RENDER_STYLE_H_
 
 #include <functional>
 
@@ -55,4 +55,4 @@ struct hash<views::rendering::RenderStyle> {
 };
 }  // namespace std
 
-#endif  // EVITA_VIEWS_TEXT_RENDER_STYLE_H_
+#endif  // EVITA_LAYOUT_RENDER_STYLE_H_

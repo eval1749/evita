@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/text/layout_view.h"
+#include "evita/layout/layout_view.h"
 
-#include "evita/views/text/layout_caret.h"
-#include "evita/views/text/root_inline_box.h"
+#include "evita/layout/layout_caret.h"
+#include "evita/layout/root_inline_box.h"
 
 namespace views {
 

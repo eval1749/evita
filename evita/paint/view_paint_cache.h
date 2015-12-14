@@ -9,7 +9,7 @@
 
 #include "base/macros.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/views/text/render_selection.h"
+#include "evita/layout/render_selection.h"
 
 namespace gfx {
 class Canvas;

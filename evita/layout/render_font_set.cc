@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/text/render_font_set.h"
+#include "evita/layout/render_font_set.h"
 
 #include <functional>
 #include <unordered_map>
@@ -11,7 +11,7 @@
 #include "common/memory/singleton.h"
 #include "evita/css/style.h"
 #include "evita/gfx/font_face.h"
-#include "evita/views/text/render_font.h"
+#include "evita/layout/render_font.h"
 
 namespace {
 

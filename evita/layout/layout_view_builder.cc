@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/text/layout_view_builder.h"
+#include "evita/layout/layout_view_builder.h"
 
 #include "base/logging.h"
 #include "evita/text/buffer.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/ime/text_input_client.h"
-#include "evita/views/text/layout_block_flow.h"
-#include "evita/views/text/layout_view.h"
-#include "evita/views/text/render_font.h"
-#include "evita/views/text/render_font_set.h"
-#include "evita/views/text/render_selection.h"
-#include "evita/views/text/render_style.h"
-#include "evita/views/text/root_inline_box.h"
-#include "evita/views/text/text_formatter.h"
+#include "evita/layout/layout_block_flow.h"
+#include "evita/layout/layout_view.h"
+#include "evita/layout/render_font.h"
+#include "evita/layout/render_font_set.h"
+#include "evita/layout/render_selection.h"
+#include "evita/layout/render_style.h"
+#include "evita/layout/root_inline_box.h"
+#include "evita/layout/text_formatter.h"
 
 namespace views {
 

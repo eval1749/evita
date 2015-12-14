@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_INLINE_BOX_FORWARD_H_
-#define EVITA_VIEWS_TEXT_INLINE_BOX_FORWARD_H_
+#ifndef EVITA_LAYOUT_INLINE_BOX_FORWARD_H_
+#define EVITA_LAYOUT_INLINE_BOX_FORWARD_H_
 
 namespace views {
 namespace rendering {
@@ -24,4 +24,4 @@ class InlineBoxVisitor;
 }  // namespace rendering
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_INLINE_BOX_FORWARD_H_
+#endif  // EVITA_LAYOUT_INLINE_BOX_FORWARD_H_

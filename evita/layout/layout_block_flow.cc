@@ -7,16 +7,16 @@
 #include <map>
 #include <vector>
 
-#include "evita/views/text/layout_block_flow.h"
+#include "evita/layout/layout_block_flow.h"
 
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
-#include "evita/views/text/inline_box.h"
-#include "evita/views/text/render_style.h"
-#include "evita/views/text/root_inline_box.h"
-#include "evita/views/text/text_formatter.h"
+#include "evita/layout/inline_box.h"
+#include "evita/layout/render_style.h"
+#include "evita/layout/root_inline_box.h"
+#include "evita/layout/text_formatter.h"
 
 namespace views {
 namespace rendering {

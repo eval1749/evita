@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_LAYOUT_BLOCK_FLOW_H_
-#define EVITA_VIEWS_TEXT_LAYOUT_BLOCK_FLOW_H_
+#ifndef EVITA_LAYOUT_LAYOUT_BLOCK_FLOW_H_
+#define EVITA_LAYOUT_LAYOUT_BLOCK_FLOW_H_
 
 #include <list>
 #include <memory>
 
 #include "evita/gfx_base.h"
 #include "evita/precomp.h"
-#include "evita/views/text/render_style.h"
+#include "evita/layout/render_style.h"
 
 namespace views {
 namespace rendering {
@@ -93,4 +93,4 @@ class LayoutBlockFlow final {
 }  // namespace rendering
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_LAYOUT_BLOCK_FLOW_H_
+#endif  // EVITA_LAYOUT_LAYOUT_BLOCK_FLOW_H_

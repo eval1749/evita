@@ -8,10 +8,10 @@
 #include "evita/gfx_base.h"
 #include "evita/paint/root_inline_box_list_painter.h"
 #include "evita/paint/view_paint_cache.h"
-#include "evita/views/text/layout_caret.h"
-#include "evita/views/text/layout_view.h"
-#include "evita/views/text/render_selection.h"
-#include "evita/views/text/root_inline_box.h"
+#include "evita/layout/layout_caret.h"
+#include "evita/layout/layout_view.h"
+#include "evita/layout/render_selection.h"
+#include "evita/layout/root_inline_box.h"
 
 namespace paint {
 

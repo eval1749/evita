@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_INLINE_BOX_H_
-#define EVITA_VIEWS_TEXT_INLINE_BOX_H_
+#ifndef EVITA_LAYOUT_INLINE_BOX_H_
+#define EVITA_LAYOUT_INLINE_BOX_H_
 
 #include "common/castable.h"
 #include "evita/ed_defs.h"
 #include "evita/gfx/rect.h"
-#include "evita/views/text/inline_box_forward.h"
-#include "evita/views/text/render_style.h"
+#include "evita/layout/inline_box_forward.h"
+#include "evita/layout/render_style.h"
 
 namespace views {
 namespace rendering {
@@ -237,4 +237,4 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
 }  // namespace rendering
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_INLINE_BOX_H_
+#endif  // EVITA_LAYOUT_INLINE_BOX_H_

@@ -26,8 +26,8 @@
 #include "evita/ui/controls/scroll_bar.h"
 #include "evita/ui/focus_controller.h"
 #include "evita/views/metrics_view.h"
-#include "evita/views/text/render_selection.h"
-#include "evita/views/text/text_view.h"
+#include "evita/layout/render_selection.h"
+#include "evita/layout/text_view.h"
 
 namespace views {
 

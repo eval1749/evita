@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/text/render_font.h"
+#include "evita/layout/render_font.h"
 
 #include <unordered_map>
 #include <vector>

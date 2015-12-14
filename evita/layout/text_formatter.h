@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_TEXT_FORMATTER_H_
-#define EVITA_VIEWS_TEXT_TEXT_FORMATTER_H_
+#ifndef EVITA_LAYOUT_TEXT_FORMATTER_H_
+#define EVITA_LAYOUT_TEXT_FORMATTER_H_
 
 #include <memory>
 
 #include "base/basictypes.h"
 #include "evita/gfx_base.h"
 #include "evita/precomp.h"
-#include "evita/views/text/render_style.h"
+#include "evita/layout/render_style.h"
 
 namespace text {
 class Buffer;
@@ -60,4 +60,4 @@ class TextFormatter final {
 }  // namespace rendering
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_TEXT_FORMATTER_H_
+#endif  // EVITA_LAYOUT_TEXT_FORMATTER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_LAYOUT_VIEW_BUILDER_H_
-#define EVITA_VIEWS_TEXT_LAYOUT_VIEW_BUILDER_H_
+#ifndef EVITA_LAYOUT_LAYOUT_VIEW_BUILDER_H_
+#define EVITA_LAYOUT_LAYOUT_VIEW_BUILDER_H_
 
 #include <memory>
 
@@ -12,7 +12,7 @@
 #include "base/time/time.h"
 #include "base/timer/timer.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/views/text/layout_caret.h"
+#include "evita/layout/layout_caret.h"
 
 namespace text {
 class Buffer;
@@ -79,4 +79,4 @@ class LayoutViewBuilder final {
 
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_LAYOUT_VIEW_BUILDER_H_
+#endif  // EVITA_LAYOUT_LAYOUT_VIEW_BUILDER_H_

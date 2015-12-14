@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_LAYOUT_VIEW_H_
-#define EVITA_VIEWS_TEXT_LAYOUT_VIEW_H_
+#ifndef EVITA_LAYOUT_LAYOUT_VIEW_H_
+#define EVITA_LAYOUT_LAYOUT_VIEW_H_
 
 #include <vector>
 
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "evita/gfx_base.h"
-#include "evita/views/text/render_selection.h"
+#include "evita/layout/render_selection.h"
 
 namespace views {
 
@@ -60,4 +60,4 @@ class LayoutView final : public base::RefCounted<LayoutView> {
 
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_LAYOUT_VIEW_H_
+#endif  // EVITA_LAYOUT_LAYOUT_VIEW_H_

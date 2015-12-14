@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_TEXT_LAYOUT_CARET_H_
-#define EVITA_VIEWS_TEXT_LAYOUT_CARET_H_
+#ifndef EVITA_LAYOUT_LAYOUT_CARET_H_
+#define EVITA_LAYOUT_LAYOUT_CARET_H_
 
 #include "base/macros.h"
 #include "evita/gfx/forward.h"
@@ -41,4 +41,4 @@ class LayoutCaret final {
 
 }  // namespace views
 
-#endif  // EVITA_VIEWS_TEXT_LAYOUT_CARET_H_
+#endif  // EVITA_LAYOUT_LAYOUT_CARET_H_

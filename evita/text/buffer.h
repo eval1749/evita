@@ -49,11 +49,10 @@ struct LineAndColumn {
 //
 // Buffer
 //
-class Buffer : public BufferCore,
+class Buffer final : public BufferCore,
                public BufferMutationObservee,
                public MarkerSetObserver {
  public:
-  // ctor/dtor
   Buffer();
   virtual ~Buffer();
 
@@ -66,43 +65,30 @@ class Buffer : public BufferCore,
     return style_resolver_.get();
   }
 
-  // [C]
   bool CanRedo() const;
   bool CanUndo() const;
   void ClearUndo();
   Offset ComputeEndOfLine(Offset offset) const;
   Offset ComputeStartOfLine(Offset offset) const;
-
-  // [D]
   int Delete(Offset, Offset);
-
-  // [E]
   void EndUndoGroup(const base::string16& name);
-
-  // [G]
   const css::Style& GetDefaultStyle() const;
   Interval* GetIntervalAt(Offset) const;
   LineAndColumn GetLineAndColumn(Offset offset) const;
   Offset GetStart() const;
   const css::Style& GetStyleAt(Offset) const;
   UndoStack* GetUndo() const { return undo_stack_.get(); }
-
-  // [I]
   int IncCharTick(int n) { return revision_ += n; }
   int Insert(Offset, const base::char16*, int);
   bool IsReadOnly() const { return read_only_; }
-
   void Insert(Offset lOffset, const base::char16* pwsz) {
     Insert(lOffset, pwsz, ::lstrlenW(pwsz));
   }
-
-  void InsertBefore(Offset position, const base::string16& text);
+  void InsertBefore(Offset offset, const base::string16& text);
 
   // Does redo last undo operation if it starts at |offset| and returns
   // |offset|, otherwise returns starting offset of the last undo operation.
   Offset Redo(Offset offset);
-
-  // [S]
   bool SetReadOnly(bool read_only) { return read_only_ = read_only; }
   void SetStyle(Offset, Offset, const css::Style& style_values);
   void StartUndoGroup(const base::string16& name);
@@ -111,12 +97,15 @@ class Buffer : public BufferCore,
   // |offset|, otherwise returns starting offset of the last modification.
   Offset Undo(Offset offset);
 
-  // BufferMutationObservee
+  // Implements BufferMutationObservee
   void AddObserver(BufferMutationObserver* observer) final;
   void RemoveObserver(BufferMutationObserver* observer) final;
 
  private:
   void UpdateChangeTick();
+
+  // Implements MarkerSetObserver
+  void DidChangeMarker(Offset start, Offset end) final;
 
   base::ObserverList<BufferMutationObserver> observers_;
   std::unique_ptr<IntervalSet> intervals_;
@@ -126,9 +115,6 @@ class Buffer : public BufferCore,
   std::unique_ptr<RangeSet> ranges_;
   std::unique_ptr<css::StyleResolver> style_resolver_;
   std::unique_ptr<UndoStack> undo_stack_;
-
-  // MarkerSetObserver
-  void DidChangeMarker(Offset start, Offset end) override;
 
   // |revision_| holds buffer revision, which incremented by one at each
   // deletion and insertion. Undo operation restores resets buffer revision

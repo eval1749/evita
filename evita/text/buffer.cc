@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define DEBUG_INTERVAL 0
-#define DEBUG_STYLE 0
 #include "evita/text/buffer.h"
 
 #include <algorithm>
@@ -21,6 +19,10 @@
 
 namespace text {
 
+//////////////////////////////////////////////////////////////////////
+//
+// Buffer
+//
 Buffer::Buffer()
     : intervals_(new IntervalSet(this)),
       line_number_cache_(new LineNumberCache(this)),
@@ -46,9 +48,6 @@ bool Buffer::CanRedo() const {
   return undo_stack_->CanRedo();
 }
 
-/// <summary>
-///   Returns true if this buffer undo-able.
-/// </summary>
 bool Buffer::CanUndo() const {
   return undo_stack_->CanUndo();
 }
@@ -57,46 +56,46 @@ void Buffer::ClearUndo() {
   undo_stack_->Clear();
 }
 
-Offset Buffer::ComputeEndOfLine(Offset lPosn) const {
-  DCHECK(IsValidPosn(lPosn));
-  while (lPosn < GetEnd()) {
-    if (0x0A == GetCharAt(lPosn))
+Offset Buffer::ComputeEndOfLine(Offset offset) const {
+  DCHECK(IsValidPosn(offset));
+  while (offset < GetEnd()) {
+    if (GetCharAt(offset) == 0x0A)
       break;
-    ++lPosn;
+    ++offset;
   }
-  return lPosn;
+  return offset;
 }
 
-Offset Buffer::ComputeStartOfLine(Offset lPosn) const {
-  DCHECK(IsValidPosn(lPosn));
-  while (lPosn > 0) {
-    --lPosn;
-    if (0x0A == GetCharAt(lPosn)) {
-      ++lPosn;
+Offset Buffer::ComputeStartOfLine(Offset offset) const {
+  DCHECK(IsValidPosn(offset));
+  while (offset > 0) {
+    --offset;
+    if (GetCharAt(offset) == 0x0A) {
+      ++offset;
       break;
     }
   }
-  return lPosn;
+  return offset;
 }
 
-int Buffer::Delete(Offset lStart, Offset lEnd) {
+int Buffer::Delete(Offset start, Offset end) {
   if (IsReadOnly())
     return 0;
 
-  lStart = std::max(lStart, Offset());
-  lEnd = std::min(lEnd, GetEnd());
+  start = std::max(start, Offset());
+  end = std::min(end, GetEnd());
 
-  auto const length = lEnd - lStart;
+  auto const length = end - start;
   if (!length)
     return 0;
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    WillDeleteAt(lStart, length));
+                    WillDeleteAt(start, length));
 
-  deleteChars(lStart, lEnd);
+  deleteChars(start, end);
 
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidDeleteAt(lStart, length));
+                    DidDeleteAt(start, length));
 
   UpdateChangeTick();
   return length;
@@ -110,8 +109,8 @@ const css::Style& Buffer::GetDefaultStyle() const {
   return *css::Style::Default();
 }
 
-Interval* Buffer::GetIntervalAt(Offset lPosn) const {
-  return intervals_->GetIntervalAt(std::min(lPosn, GetEnd()));
+Interval* Buffer::GetIntervalAt(Offset offset) const {
+  return intervals_->GetIntervalAt(std::min(offset, GetEnd()));
 }
 
 LineAndColumn Buffer::GetLineAndColumn(Offset offset) const {
@@ -127,40 +126,40 @@ Offset Buffer::GetStart() const {
   return Offset(0);
 }
 
-const css::Style& Buffer::GetStyleAt(Offset lPosn) const {
-  return GetIntervalAt(lPosn)->style();
+const css::Style& Buffer::GetStyleAt(Offset offset) const {
+  return GetIntervalAt(offset)->style();
 }
 
-int Buffer::Insert(Offset lPosn, const base::char16* pwch, int n) {
-  DCHECK(IsValidPosn(lPosn));
+int Buffer::Insert(Offset offset, const base::char16* pwch, int n) {
+  DCHECK(IsValidPosn(offset));
 
   if (IsReadOnly())
     return 0;
 
   if (n <= 0)
     return 0;
-  lPosn = std::min(lPosn, GetEnd());
-  insert(lPosn, pwch, n);
+  offset = std::min(offset, GetEnd());
+  insert(offset, pwch, n);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidInsertAt(lPosn, OffsetDelta(n)));
+                    DidInsertAt(offset, OffsetDelta(n)));
   UpdateChangeTick();
 
   return n;
 }
 
-void Buffer::InsertBefore(Offset position, const base::string16& text) {
-  DCHECK(IsValidPosn(position));
+void Buffer::InsertBefore(Offset offset, const base::string16& text) {
+  DCHECK(IsValidPosn(offset));
   DCHECK(!IsReadOnly());
 
   auto const text_length = text.length();
   if (!text_length)
     return;
 
-  insert(position, text.data(), text_length);
+  insert(offset, text.data(), text_length);
 
   auto const delta = OffsetDelta(text_length);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidInsertBefore(position, delta));
+                    DidInsertBefore(offset, delta));
 
   UpdateChangeTick();
 }
@@ -175,18 +174,18 @@ void Buffer::RemoveObserver(BufferMutationObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void Buffer::SetStyle(Offset lStart, Offset lEnd, const css::Style& style) {
-  if (lEnd > GetEnd())
-    lEnd = GetEnd();
-  if (lStart == lEnd)
+void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
+  if (end > GetEnd())
+    end = GetEnd();
+  if (start == end)
     return;
-  DCHECK_LT(lStart, lEnd);
+  DCHECK_LT(start, end);
   // To improve performance, we don't check contents of |style|.
   // This may be enough for syntax coloring.
-  intervals_->SetStyle(lStart, lEnd, style);
-  auto const length = lEnd - lStart;
+  intervals_->SetStyle(start, end, style);
+  auto const length = end - start;
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidChangeStyle(lStart, length));
+                    DidChangeStyle(start, length));
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {

@@ -7,9 +7,9 @@
 #include <memory>
 #include <ostream>
 
+#include "base/auto_reset.h"
 #include "base/logging.h"
 #include "common/adopters/reverse.h"
-#include "common/memory/scoped_change.h"
 #include "evita/text/buffer.h"
 #include "evita/text/undo_step.h"
 
@@ -82,7 +82,7 @@ Offset UndoStack::Redo(Offset offset, int count) {
     break;
   }
 
-  common::ScopedChange<State> state_scope(state_, State::Redo);
+  base::AutoReset<State> state_scope(&state_, State::Redo);
 
   auto depth = 0;
   auto result_offset = offset;
@@ -111,7 +111,7 @@ Offset UndoStack::Undo(Offset offset, int count) {
   if (undo_steps_.empty())
     return Offset::Invalid();
 
-  common::ScopedChange<State> state_scope(state_, State::Undo);
+  base::AutoReset<State> state_scope(&state_, State::Undo);
 
   for (const auto step : common::adopters::reverse(undo_steps_)) {
     DCHECK(!step->is<BeginUndoStep>());

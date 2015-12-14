@@ -13,7 +13,6 @@
 #include "common/tree/descendants_or_self.h"
 #include "common/tree/node.h"
 #include "evita/gfx/rect_conversions.h"
-#include "evita/precomp.h"
 #include "evita/resource.h"
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/compositor/layer.h"
@@ -125,7 +124,7 @@ struct HitTestResult {
     DCHECK_NE(type, None);
   }
 
-  explicit operator bool() const { return box; }
+  explicit operator bool() const { return box != nullptr; }
 
   ContentWindow* window() const;
 };
@@ -1384,12 +1383,12 @@ HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
   switch (result.type) {
     case ::HitTestResult::HSplitter:
     case ::HitTestResult::HSplitterBig: {
-      DEFINE_STATIC_LOCAL(StockCursor, hsplit_cursor, (IDC_HSPLIT));
+      CR_DEFINE_STATIC_LOCAL(StockCursor, hsplit_cursor, (IDC_HSPLIT));
       return hsplit_cursor;
     }
 
     case ::HitTestResult::VSplitter: {
-      DEFINE_STATIC_LOCAL(StockCursor, vsplit_cursor, (IDC_VSPLIT));
+      CR_DEFINE_STATIC_LOCAL(StockCursor, vsplit_cursor, (IDC_VSPLIT));
       return vsplit_cursor;
     }
 
@@ -1397,7 +1396,7 @@ HCURSOR EditPane::GetCursorAt(const gfx::Point& point) const {
       return nullptr;
 
     default: {
-      DEFINE_STATIC_LOCAL(StockCursor, arrow_cursor, (IDC_ARROW));
+      CR_DEFINE_STATIC_LOCAL(StockCursor, arrow_cursor, (IDC_ARROW));
       return arrow_cursor;
     }
   }

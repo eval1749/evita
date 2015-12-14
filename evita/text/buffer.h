@@ -79,11 +79,7 @@ class Buffer final : public BufferCore,
   const css::Style& GetStyleAt(Offset) const;
   UndoStack* GetUndo() const { return undo_stack_.get(); }
   int IncCharTick(int n) { return revision_ += n; }
-  int Insert(Offset, const base::char16*, int);
   bool IsReadOnly() const { return read_only_; }
-  void Insert(Offset lOffset, const base::char16* pwsz) {
-    Insert(lOffset, pwsz, ::lstrlenW(pwsz));
-  }
   void InsertBefore(Offset offset, const base::string16& text);
 
   // Does redo last undo operation if it starts at |offset| and returns

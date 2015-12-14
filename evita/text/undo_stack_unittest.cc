@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #pragma warning(pop)
 
+#include "base/strings/utf_string_conversions.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
 #include "evita/text/scoped_undo_group.h"
@@ -16,6 +17,10 @@ namespace text {
 class UndoStackTest : public ::testing::Test {
  public:
   Buffer* buffer() const { return buffer_.get(); }
+
+  void InsertBefore(Offset offset, const char* text) {
+    buffer()->InsertBefore(offset, base::ASCIIToUTF16(text));
+  }
 
  protected:
   UndoStackTest() : buffer_(new Buffer()) {}
@@ -27,7 +32,7 @@ class UndoStackTest : public ::testing::Test {
 };
 
 TEST_F(UndoStackTest, Delete) {
-  buffer()->Insert(Offset(0), L"foo");
+  InsertBefore(Offset(0), "foo");
   auto const anchor_revision = buffer()->revision();
 
   buffer()->Delete(Offset(0), Offset(3));
@@ -48,8 +53,8 @@ TEST_F(UndoStackTest, Delete) {
 TEST_F(UndoStackTest, Group) {
   {
     ScopedUndoGroup undo_group(buffer(), L"test");
-    buffer()->Insert(Offset(0), L"foo");
-    buffer()->Insert(Offset(1), L"bar");
+    InsertBefore(Offset(0), "foo");
+    InsertBefore(Offset(1), "bar");
   }
   buffer()->Undo(Offset(4));
   EXPECT_EQ(Offset(0), buffer()->GetEnd());
@@ -58,7 +63,7 @@ TEST_F(UndoStackTest, Group) {
 }
 
 TEST_F(UndoStackTest, Insert) {
-  buffer()->Insert(Offset(0), L"foo");
+  InsertBefore(Offset(0), "foo");
   EXPECT_EQ(3, buffer()->Undo(Offset(2)))
       << "Move to the last editing position";
   EXPECT_EQ(Offset(3), buffer()->GetEnd())
@@ -81,11 +86,11 @@ TEST_F(UndoStackTest, Insert) {
 TEST_F(UndoStackTest, Merge) {
   {
     ScopedUndoGroup undo_group(buffer(), L"test");
-    buffer()->Insert(Offset(0), L"foo");
+    InsertBefore(Offset(0), "foo");
   }
   {
     ScopedUndoGroup undo_group(buffer(), L"test");
-    buffer()->Insert(Offset(3), L"bar");
+    buffer()->InsertBefore(Offset(3), L"bar");
   }
   EXPECT_EQ(3, buffer()->Undo(Offset(6)));
   EXPECT_EQ(Offset(3), buffer()->GetEnd());

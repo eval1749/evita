@@ -130,23 +130,6 @@ const css::Style& Buffer::GetStyleAt(Offset offset) const {
   return GetIntervalAt(offset)->style();
 }
 
-int Buffer::Insert(Offset offset, const base::char16* pwch, int n) {
-  DCHECK(IsValidPosn(offset));
-
-  if (IsReadOnly())
-    return 0;
-
-  if (n <= 0)
-    return 0;
-  offset = std::min(offset, GetEnd());
-  insert(offset, pwch, n);
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidInsertAt(offset, OffsetDelta(n)));
-  UpdateChangeTick();
-
-  return n;
-}
-
 void Buffer::InsertBefore(Offset offset, const base::string16& text) {
   DCHECK(IsValidPosn(offset));
   DCHECK(!IsReadOnly());

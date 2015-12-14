@@ -157,7 +157,7 @@ bool DeleteUndoStep::TryMerge(const Buffer*, const UndoStep* other) {
 }
 
 void DeleteUndoStep::Undo(Buffer* buffer) {
-  buffer->Insert(start(), text().data(), text().length());
+  buffer->InsertBefore(start(), text());
   // -1 for |Buffer::Insert()| in this function.
   // -1 for |Buffer::Delete()| which creates this |DeleteUndoStep|.
   buffer->IncCharTick(-2);
@@ -229,7 +229,7 @@ Offset InsertUndoStep::GetBeforeUndo() const {
 
 void InsertUndoStep::Redo(Buffer* buffer) {
   DCHECK_EQ(text().length(), static_cast<size_t>((end() - start()).value()));
-  buffer->Insert(start(), text().data(), text().length());
+  buffer->InsertBefore(start(), text());
 }
 
 void InsertUndoStep::Undo(Buffer* buffer) {

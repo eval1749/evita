@@ -56,6 +56,8 @@ class IntervalSet::Impl final : public RangeSetBase,
   Interval* SplitAt(Interval* interval, Offset offset);
 
  private:
+  class Editor;
+
   // Merge |interval2| into |interval1| if possible and return true if merged.
   bool MergeAdjacentIntervalsIfPossible(Interval* interval1,
                                         Interval* interval2);
@@ -78,6 +80,55 @@ class IntervalSet::Impl final : public RangeSetBase,
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// IntervalSet::Impl::Editor
+//
+class IntervalSet::Impl::Editor final : public RangeSetBase {
+ public:
+  explicit Editor(Impl* interval_set);
+  ~Editor();
+
+  void Update(Interval* interval, Offset new_start, Offset new_end);
+
+ private:
+  struct UpdateOperation {
+    Interval* interval;
+    Offset start;
+    Offset end;
+  };
+
+  Impl* const interval_set_;
+  std::vector<Interval*> removes_;
+  std::vector<UpdateOperation> updates_;
+
+  DISALLOW_COPY_AND_ASSIGN(Editor);
+};
+
+IntervalSet::Impl::Editor::Editor(Impl* interval_set)
+    : interval_set_(interval_set) {}
+
+IntervalSet::Impl::Editor::~Editor() {
+  for (const auto& interval : removes_) {
+    interval_set_->intervals_.erase(interval);
+    delete interval;
+  }
+  for (const auto& update : updates_)
+    set_range(update.interval, update.start, update.end);
+}
+
+void IntervalSet::Impl::Editor::Update(Interval* interval,
+                                       Offset start,
+                                       Offset end) {
+  if (start == end)
+    return removes_.push_back(interval);
+  updates_.push_back({interval, start, end});
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// IntervalSet::Impl
+//
 IntervalSet::Impl::Impl(Buffer* buffer) : buffer_(buffer) {
   buffer_->AddObserver(this);
 
@@ -186,7 +237,7 @@ Interval* IntervalSet::Impl::TryMergeInterval(Interval* interval) {
 // BufferMutationObserver
 void IntervalSet::Impl::DidDeleteAt(Offset delete_start, OffsetDelta length) {
   auto const delete_end = delete_start + length;
-  std::vector<Interval*> intervals_to_remove;
+  Editor editor(this);
   for (auto it = intervals_.rbegin();
        it != intervals_.rend() && (*it)->end() > delete_start; ++it) {
     auto const interval = *it;
@@ -197,28 +248,7 @@ void IntervalSet::Impl::DidDeleteAt(Offset delete_start, OffsetDelta length) {
                            : interval->start();
     auto const end =
         interval->end() > delete_end ? interval->end() - length : delete_start;
-    if (start == end)
-      intervals_to_remove.push_back(*it);
-  }
-  DCHECK_LT(intervals_to_remove.size(), intervals_.size());
-
-  for (auto interval : intervals_to_remove) {
-    intervals_.erase(interval);
-    delete interval;
-  }
-  DCHECK(!intervals_.empty());
-
-  for (auto it = intervals_.rbegin();
-       it != intervals_.rend() && (*it)->end() > delete_start; ++it) {
-    auto const interval = *it;
-    auto const start = interval->start() > delete_start
-                           ? interval->start() > delete_end
-                                 ? interval->start() - length
-                                 : delete_start
-                           : interval->start();
-    auto const end =
-        interval->end() > delete_end ? interval->end() - length : delete_start;
-    set_range(interval, start, end);
+    editor.Update(interval, start, end);
   }
 }
 

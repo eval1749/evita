@@ -28,8 +28,7 @@ Buffer::Buffer()
       spelling_markers_(new MarkerSet(this)),
       style_resolver_(new css::StyleResolver()),
       syntax_markers_(new MarkerSet(this)),
-      undo_stack_(new UndoStack(this)),
-      m_fReadOnly(false) {
+      undo_stack_(new UndoStack(this)) {
   spelling_markers_->AddObserver(this);
   syntax_markers_->AddObserver(this);
 }

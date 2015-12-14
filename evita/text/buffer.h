@@ -90,7 +90,7 @@ class Buffer : public BufferCore,
   // [I]
   int IncCharTick(int n) { return revision_ += n; }
   int Insert(Offset, const base::char16*, int);
-  bool IsReadOnly() const { return m_fReadOnly; }
+  bool IsReadOnly() const { return read_only_; }
 
   void Insert(Offset lOffset, const base::char16* pwsz) {
     Insert(lOffset, pwsz, ::lstrlenW(pwsz));
@@ -103,7 +103,7 @@ class Buffer : public BufferCore,
   Offset Redo(Offset offset);
 
   // [S]
-  bool SetReadOnly(bool f) { return m_fReadOnly = f; }
+  bool SetReadOnly(bool read_only) { return read_only_ = read_only; }
   void SetStyle(Offset, Offset, const css::Style& style_values);
   void StartUndoGroup(const base::string16& name);
 
@@ -134,7 +134,7 @@ class Buffer : public BufferCore,
   // deletion and insertion. Undo operation restores resets buffer revision
   // at revision before roll backed operation executed.
   int revision_ = 0;
-  bool m_fReadOnly;
+  bool read_only_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(Buffer);
 };

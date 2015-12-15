@@ -249,7 +249,7 @@ text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
       auto x = point.x - cell_left;
       cell_left += cell->width();
       const auto offset = cell->MapXToPosn(x);
-      if (offset >= 0)
+      if (offset.IsValid())
         result_offset = offset;
       if (x >= 0 && x < cell->width())
         break;

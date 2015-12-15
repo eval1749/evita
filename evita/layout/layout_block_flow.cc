@@ -482,8 +482,9 @@ bool LayoutBlockFlow::ShouldFormat() const {
 text::Offset LayoutBlockFlow::StartOfLine(text::Offset text_offset) {
   TRACE_EVENT0("views", "LayoutBlockFlow::StartOfLine");
   UI_ASSERT_DOM_LOCKED();
+  DCHECK(text_offset.IsValid());
 
-  if (text_offset <= 0)
+  if (text_offset == text::Offset(0))
     return text::Offset(0);
 
   InvalidateCache();
@@ -491,9 +492,6 @@ text::Offset LayoutBlockFlow::StartOfLine(text::Offset text_offset) {
     return line->text_start();
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  if (!start_offset)
-    return text::Offset(0);
-
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     auto const line = FormatLine(&formatter);

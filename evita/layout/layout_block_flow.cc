@@ -232,29 +232,9 @@ text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
   if (point.y >= bounds_.bottom)
     return lines_.back()->text_end();
 
-  auto line_top = bounds_.top;
   for (const auto line : lines_) {
-    auto const y = point.y - line_top;
-    line_top += line->height();
-
-    if (y >= line->height())
-      continue;
-
-    auto cell_left = bounds_.left;
-    if (point.x < cell_left)
-      return line->text_start();
-
-    auto result_offset = line->text_end() - text::OffsetDelta(1);
-    for (const auto cell : line->cells()) {
-      auto x = point.x - cell_left;
-      cell_left += cell->width();
-      const auto offset = cell->MapXToPosn(x);
-      if (offset.IsValid())
-        result_offset = offset;
-      if (x >= 0 && x < cell->width())
-        break;
-    }
-    return result_offset;
+    if (point.y >= line->top() && point.y < line->bottom())
+      return line->MapXToPosn(point.x);
   }
   return lines_.back()->text_end() - text::OffsetDelta(1);
 }

@@ -101,6 +101,7 @@ bool LayoutBlockFlow::DiscardLastLine() {
 }
 
 text::Offset LayoutBlockFlow::EndOfLine(text::Offset text_offset) {
+  TRACE_EVENT0("views", "LayoutBlockFlow::EndOfLine");
   UI_ASSERT_DOM_LOCKED();
 
   if (text_offset >= text_buffer_->GetEnd())
@@ -133,8 +134,8 @@ void LayoutBlockFlow::EnsureLinePoints() {
 }
 
 void LayoutBlockFlow::Format(text::Offset text_offset) {
-  TRACE_EVENT0("view", "LayoutBlockFlow::Format");
   UI_ASSERT_DOM_LOCKED();
+  TRACE_EVENT0("view", "LayoutBlockFlow::Format");
   InvalidateCache();
   lines_.clear();
   lines_height_ = 0;
@@ -212,6 +213,7 @@ text::Offset LayoutBlockFlow::GetStart() {
 
 text::Offset LayoutBlockFlow::GetVisibleEnd() {
   UI_ASSERT_DOM_LOCKED();
+  TRACE_EVENT0("view", "LayoutBlockFlow::GetVisibleEnd");
   FormatIfNeeded();
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
@@ -224,6 +226,7 @@ text::Offset LayoutBlockFlow::GetVisibleEnd() {
 
 text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
   UI_ASSERT_DOM_LOCKED();
+  TRACE_EVENT0("views", "LayoutBlockFlow::HitTestPoint");
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
 
@@ -241,6 +244,7 @@ text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
 
 gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
+  TRACE_EVENT0("views", "LayoutBlockFlow::HitTestTextPosition");
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   if (offset < lines_.front()->text_start() ||
@@ -272,6 +276,7 @@ void LayoutBlockFlow::InvalidateLines(text::Offset offset) {
 
 bool LayoutBlockFlow::IsPositionFullyVisible(text::Offset offset) {
   UI_ASSERT_DOM_LOCKED();
+  TRACE_EVENT0("view", "LayoutBlockFlow::IsPositionFullyVisible");
   FormatIfNeeded();
   return offset >= GetStart() && offset < GetVisibleEnd();
 }
@@ -287,6 +292,7 @@ bool LayoutBlockFlow::IsShowEndOfDocument() const {
 text::Offset LayoutBlockFlow::MapPointXToOffset(text::Offset text_offset,
                                                 float point_x) {
   UI_ASSERT_DOM_LOCKED();
+  TRACE_EVENT0("views", "LayoutBlockFlow::MapPointXToOffset");
   InvalidateCache();
   if (auto const line = text_line_cache_->FindLine(text_offset))
     return line->MapXToPosn(point_x);
@@ -324,6 +330,7 @@ void LayoutBlockFlow::Prepend(RootInlineBox* line) {
 }
 
 bool LayoutBlockFlow::ScrollDown() {
+  TRACE_EVENT0("views", "LayoutBlockFlow::ScrollDown");
   FormatIfNeeded();
   if (!lines_.front()->text_start())
     return false;
@@ -349,6 +356,7 @@ bool LayoutBlockFlow::ScrollDown() {
 }
 
 bool LayoutBlockFlow::ScrollToPosition(text::Offset offset) {
+  TRACE_EVENT0("views", "LayoutBlockFlow::ScrollToPosition");
   FormatIfNeeded();
 
   if (IsPositionFullyVisible(offset))
@@ -421,6 +429,7 @@ bool LayoutBlockFlow::ScrollToPosition(text::Offset offset) {
 }
 
 bool LayoutBlockFlow::ScrollUp() {
+  TRACE_EVENT0("views", "LayoutBlockFlow::ScrollUp");
   FormatIfNeeded();
   EnsureLinePoints();
   if (IsShowEndOfDocument())
@@ -471,6 +480,7 @@ bool LayoutBlockFlow::ShouldFormat() const {
 }
 
 text::Offset LayoutBlockFlow::StartOfLine(text::Offset text_offset) {
+  TRACE_EVENT0("views", "LayoutBlockFlow::StartOfLine");
   UI_ASSERT_DOM_LOCKED();
 
   if (text_offset <= 0)

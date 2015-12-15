@@ -36,7 +36,7 @@ RootInlineBox* RootInlineBoxCache::FindLine(
   if (it == lines_.end())
     return nullptr;
   auto const line = it->second;
-  DCHECK_EQ(line->GetStart(), text_offset);
+  DCHECK_EQ(line->text_start(), text_offset);
   return line;
 }
 
@@ -62,7 +62,7 @@ void RootInlineBoxCache::Invalidate(
       auto const line = it.second;
       if (line->right() > new_bounds.right || !IsAfterNewline(line) ||
           !IsEndWithNewline(line)) {
-        dirty_offsets.push_back(line->GetStart());
+        dirty_offsets.push_back(line->text_start());
       }
     }
     for (auto offset : dirty_offsets) {
@@ -77,7 +77,7 @@ void RootInlineBoxCache::Invalidate(
 
 bool RootInlineBoxCache::IsAfterNewline(
     const RootInlineBox* text_line) const {
-  auto const start = text_line->GetStart();
+  auto const start = text_line->text_start();
   return !start || buffer_->GetCharAt(start - text::OffsetDelta(1)) == '\n';
 }
 
@@ -92,41 +92,41 @@ bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds,
 
 bool RootInlineBoxCache::IsEndWithNewline(
     const RootInlineBox* text_line) const {
-  auto const end = text_line->GetEnd();
+  auto const end = text_line->text_end();
   return end >= buffer_->GetEnd() || buffer_->GetCharAt(end) == '\n';
 }
 
 void RootInlineBoxCache::Register(RootInlineBox* line) {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK_GE(line->GetEnd(), line->GetStart());
-  lines_[line->GetStart()] = line;
+  DCHECK_GE(line->text_end(), line->text_start());
+  lines_[line->text_start()] = line;
 #if _DEBUG
-  auto it = lines_.find(line->GetStart());
+  auto it = lines_.find(line->text_start());
   if (it != lines_.begin()) {
     --it;
-    DCHECK_LE(it->second->GetEnd(), line->GetStart());
+    DCHECK_LE(it->second->text_end(), line->text_start());
     ++it;
   }
   ++it;
   if (it != lines_.end())
-    DCHECK_GE(it->second->GetStart(), line->GetEnd());
+    DCHECK_GE(it->second->text_start(), line->text_end());
 #endif
 }
 
 void RootInlineBoxCache::RemoveDirtyLines() {
   auto const dirty_start = dirty_start_;
   dirty_start_ = text::Offset::Max();
-  if (lines_.empty() || dirty_start >= lines_.rbegin()->second->GetEnd())
+  if (lines_.empty() || dirty_start >= lines_.rbegin()->second->text_end())
     return;
   auto it = lines_.lower_bound(dirty_start);
   if (it == lines_.end()) {
     it = lines_.find(lines_.rbegin()->first);
-    if (it->second->GetEnd() < dirty_start)
+    if (it->second->text_end() < dirty_start)
       return;
   } else {
-    DCHECK_GE(it->second->GetStart(), dirty_start);
+    DCHECK_GE(it->second->text_start(), dirty_start);
   }
-  while (it != lines_.begin() && it->second->GetStart() > dirty_start)
+  while (it != lines_.begin() && it->second->text_start() > dirty_start)
     --it;
   DCHECK(it != lines_.end());
 
@@ -135,9 +135,9 @@ void RootInlineBoxCache::RemoveDirtyLines() {
     return;
   }
 
-  DCHECK_GE(dirty_start, it->second->GetStart());
-  while (it != lines_.end() && it->second->GetStart() < dirty_start &&
-         it->second->GetEnd() < dirty_start) {
+  DCHECK_GE(dirty_start, it->second->text_start());
+  while (it != lines_.end() && it->second->text_start() < dirty_start &&
+         it->second->text_end() < dirty_start) {
     ++it;
   }
 

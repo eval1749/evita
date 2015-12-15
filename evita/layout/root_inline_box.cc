@@ -137,7 +137,7 @@ bool RootInlineBox::IsEndOfDocument() const {
 text::Offset RootInlineBox::MapXToPosn(float xGoal) const {
   DCHECK(!cells_.empty());
   auto xInlineBox = 0.0f;
-  auto lPosn = GetEnd() - text::OffsetDelta(1);
+  auto lPosn = text_end() - text::OffsetDelta(1);
   for (const auto cell : cells_) {
     auto const x = xGoal - xInlineBox;
     xInlineBox += cell->width();

@@ -38,16 +38,13 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   void set_start(text::Offset start) { m_lStart = start; }
   text::Offset text_end() const { return m_lEnd; }
   text::Offset text_start() const { return m_lStart; }
+  float width() const { return bounds_.width(); }
 
   void AddInlineBox(InlineBox* cell);
   gfx::RectF CalculateSelectionRect(const TextSelection& selection) const;
   RootInlineBox* Copy() const;
   bool Equal(const RootInlineBox*) const;
   void Fix(float ascent, float descent);
-  text::Offset GetEnd() const { return m_lEnd; }
-  float GetHeight() const { return bounds_.height(); }
-  text::Offset GetStart() const { return m_lStart; }
-  float GetWidth() const { return bounds_.width(); }
   uint32_t Hash() const;
   gfx::RectF HitTestTextPosition(text::Offset lPosn) const;
   bool IsEndOfDocument() const;

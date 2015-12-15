@@ -116,7 +116,7 @@ void RootInlineBoxListPainter::FillBottom(const RootInlineBox* line) const {
 
 void RootInlineBoxListPainter::FillRight(const RootInlineBox* line) const {
   auto const rect =
-      gfx::RectF(line->origin() + gfx::SizeF(line->GetWidth(), 0.0f),
+      gfx::RectF(line->origin() + gfx::SizeF(line->width(), 0.0f),
                  gfx::PointF(bounds_.right, line->bottom()))
           .Intersect(bounds_);
   if (rect.empty())

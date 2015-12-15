@@ -44,14 +44,14 @@ void LayoutBlockFlow::Append(RootInlineBox* line) {
     DCHECK_EQ(lines_height_, 0.0f);
     line->set_origin(bounds_.origin());
   } else {
-    DCHECK(lines_.back()->GetEnd() == line->GetStart());
+    DCHECK(lines_.back()->text_end() == line->text_start());
     if (!dirty_line_point_) {
       auto const last_line = lines_.back();
       line->set_origin(gfx::PointF(last_line->left(), last_line->bottom()));
     }
   }
   lines_.push_back(line);
-  lines_height_ += line->GetHeight();
+  lines_height_ += line->height();
 }
 
 void LayoutBlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta) {
@@ -83,7 +83,7 @@ bool LayoutBlockFlow::DiscardFirstLine() {
     return false;
 
   auto const line = lines_.front();
-  lines_height_ -= line->GetHeight();
+  lines_height_ -= line->height();
   lines_.pop_front();
   dirty_line_point_ = true;
   return true;
@@ -95,7 +95,7 @@ bool LayoutBlockFlow::DiscardLastLine() {
     return false;
 
   auto const line = lines_.back();
-  lines_height_ -= line->GetHeight();
+  lines_height_ -= line->height();
   lines_.pop_back();
   return true;
 }
@@ -108,14 +108,14 @@ text::Offset LayoutBlockFlow::EndOfLine(text::Offset text_offset) {
 
   InvalidateCache();
   if (auto const line = text_line_cache_->FindLine(text_offset))
-    return line->GetEnd() - text::OffsetDelta(1);
+    return line->text_end() - text::OffsetDelta(1);
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     auto const line = FormatLine(&formatter);
-    if (text_offset < line->GetEnd())
-      return line->GetEnd() - text::OffsetDelta(1);
+    if (text_offset < line->text_end())
+      return line->text_end() - text::OffsetDelta(1);
   }
 }
 
@@ -150,28 +150,28 @@ void LayoutBlockFlow::Format(text::Offset text_offset) {
     Append(line);
 
     // Line must have at least one cell other than filler.
-    DCHECK_GE(line->GetEnd(), line->GetStart());
+    DCHECK_GE(line->text_end(), line->text_start());
 
     if (lines_height_ >= bounds_.height()) {
       // LayoutBlockFlow is filled up with lines.
       break;
     }
 
-    if (line->GetEnd() > text_buffer_->GetEnd()) {
+    if (line->text_end() > text_buffer_->GetEnd()) {
       // We have no more contents.
       break;
     }
   }
 
   // Scroll up until we have |text_offset| in this |LayoutBlockFlow|.
-  while (lines_.back()->GetEnd() < text_buffer_->GetEnd() &&
-         text_offset > lines_.front()->GetEnd()) {
+  while (lines_.back()->text_end() < text_buffer_->GetEnd() &&
+         text_offset > lines_.front()->text_end()) {
     DiscardFirstLine();
     auto const line = FormatLine(&formatter);
     Append(line);
   }
   EnsureLinePoints();
-  view_start_ = lines_.front()->GetStart();
+  view_start_ = lines_.front()->text_start();
   ++format_counter_;
 }
 
@@ -190,7 +190,7 @@ RootInlineBox* LayoutBlockFlow::FormatLine(TextFormatter* formatter) {
   UI_ASSERT_DOM_LOCKED();
   auto const cached_line = text_line_cache_->FindLine(formatter->text_offset());
   if (cached_line) {
-    formatter->set_text_offset(cached_line->GetEnd());
+    formatter->set_text_offset(cached_line->text_end());
     return cached_line;
   }
   auto const line = formatter->FormatLine();
@@ -201,13 +201,13 @@ RootInlineBox* LayoutBlockFlow::FormatLine(TextFormatter* formatter) {
 text::Offset LayoutBlockFlow::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
   FormatIfNeeded();
-  return lines_.back()->GetEnd();
+  return lines_.back()->text_end();
 }
 
 text::Offset LayoutBlockFlow::GetStart() {
   UI_ASSERT_DOM_LOCKED();
   FormatIfNeeded();
-  return lines_.front()->GetStart();
+  return lines_.front()->text_start();
 }
 
 text::Offset LayoutBlockFlow::GetVisibleEnd() {
@@ -217,9 +217,9 @@ text::Offset LayoutBlockFlow::GetVisibleEnd() {
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
     auto const line = *it;
     if (line->bounds().bottom <= bounds_.bottom)
-      return line->GetEnd();
+      return line->text_end();
   }
-  return lines_.front()->GetEnd();
+  return lines_.front()->text_end();
 }
 
 text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
@@ -228,23 +228,23 @@ text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
   DCHECK(!dirty_line_point_);
 
   if (point.y < bounds_.top)
-    return lines_.front()->GetStart();
+    return lines_.front()->text_start();
   if (point.y >= bounds_.bottom)
-    return lines_.back()->GetEnd();
+    return lines_.back()->text_end();
 
   auto line_top = bounds_.top;
   for (const auto line : lines_) {
     auto const y = point.y - line_top;
-    line_top += line->GetHeight();
+    line_top += line->height();
 
-    if (y >= line->GetHeight())
+    if (y >= line->height())
       continue;
 
     auto cell_left = bounds_.left;
     if (point.x < cell_left)
-      return line->GetStart();
+      return line->text_start();
 
-    auto result_offset = line->GetEnd() - text::OffsetDelta(1);
+    auto result_offset = line->text_end() - text::OffsetDelta(1);
     for (const auto cell : line->cells()) {
       auto x = point.x - cell_left;
       cell_left += cell->width();
@@ -256,7 +256,7 @@ text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
     }
     return result_offset;
   }
-  return lines_.back()->GetEnd() - text::OffsetDelta(1);
+  return lines_.back()->text_end() - text::OffsetDelta(1);
 }
 
 gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Offset offset) const {
@@ -315,7 +315,7 @@ text::Offset LayoutBlockFlow::MapPointXToOffset(text::Offset text_offset,
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     auto const line = FormatLine(&formatter);
-    if (text_offset < line->GetEnd())
+    if (text_offset < line->text_end())
       return line->MapXToPosn(point_x);
   }
 }
@@ -339,21 +339,21 @@ bool LayoutBlockFlow::NeedFormat() const {
 void LayoutBlockFlow::Prepend(RootInlineBox* line) {
   UI_ASSERT_DOM_LOCKED();
   lines_.push_front(line);
-  lines_height_ += line->GetHeight();
+  lines_height_ += line->height();
   dirty_line_point_ = true;
 }
 
 bool LayoutBlockFlow::ScrollDown() {
   FormatIfNeeded();
-  if (!lines_.front()->GetStart())
+  if (!lines_.front()->text_start())
     return false;
   ++format_counter_;
-  auto const goal_offset = lines_.front()->GetStart() - text::OffsetDelta(1);
+  auto const goal_offset = lines_.front()->text_start() - text::OffsetDelta(1);
   auto const start_offset = text_buffer_->ComputeStartOfLine(goal_offset);
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     auto const line = FormatLine(&formatter);
-    if (goal_offset < line->GetEnd()) {
+    if (goal_offset < line->text_end()) {
       Prepend(line);
       break;
     }
@@ -364,7 +364,7 @@ bool LayoutBlockFlow::ScrollDown() {
   while (lines_.back()->top() >= bounds_.bottom) {
     DiscardLastLine();
   }
-  view_start_ = lines_.front()->GetStart();
+  view_start_ = lines_.front()->text_start();
   return true;
 }
 
@@ -453,14 +453,14 @@ bool LayoutBlockFlow::ScrollUp() {
       return false;
     EnsureLinePoints();
 
-    view_start_ = lines_.front()->GetStart();
+    view_start_ = lines_.front()->text_start();
     if (!lines_.back()->IsEndOfDocument())
       break;
     if (IsShowEndOfDocument())
       return true;
   }
 
-  auto const start_offset = lines_.back()->GetEnd();
+  auto const start_offset = lines_.back()->text_end();
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   auto const line = FormatLine(&formatter);
   Append(line);
@@ -498,7 +498,7 @@ text::Offset LayoutBlockFlow::StartOfLine(text::Offset text_offset) {
 
   InvalidateCache();
   if (auto const line = text_line_cache_->FindLine(text_offset))
-    return line->GetStart();
+    return line->text_start();
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
   if (!start_offset)
@@ -507,9 +507,9 @@ text::Offset LayoutBlockFlow::StartOfLine(text::Offset text_offset) {
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     auto const line = FormatLine(&formatter);
-    start_offset = line->GetEnd();
+    start_offset = line->text_end();
     if (text_offset < start_offset)
-      return line->GetStart();
+      return line->text_start();
   }
 }
 

@@ -29,6 +29,7 @@ js_lib_files = [
   "text/document_file_io.js",
   "text/document_file_load.js",
   "text/document_file_save.js",
+  "text/document_template.js",
   "editor.js",
   "windows/editor_window.js",
   "encodings/text_decoder.js",

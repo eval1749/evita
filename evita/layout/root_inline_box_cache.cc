@@ -28,13 +28,19 @@ void RootInlineBoxCache::DidChangeBuffer(text::Offset offset) {
   dirty_start_ = std::min(dirty_start_, offset);
 }
 
-RootInlineBox* RootInlineBoxCache::FindLine(text::Offset text_offset) const {
+RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
-  const auto it = lines_.find(text_offset);
+  auto it = lines_.lower_bound(offset);
   if (it == lines_.end())
     return nullptr;
+  if (it->first == offset)
+    return it->second;
+  if (it == lines_.begin())
+    return nullptr;
+  --it;
   auto const line = it->second;
-  DCHECK_EQ(line->text_start(), text_offset);
+  if (offset < line->text_start() || offset >= line->text_end())
+    return nullptr;
   return line;
 }
 

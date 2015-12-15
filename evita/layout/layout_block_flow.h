@@ -20,7 +20,12 @@ namespace layout {
 
 class TextFormatter;
 class RootInlineBox;
+class RootInlineBoxCache;
 
+//////////////////////////////////////////////////////////////////////
+//
+// LayoutBlockFlow
+//
 class LayoutBlockFlow final {
  public:
   explicit LayoutBlockFlow(text::Buffer* buffer);
@@ -59,8 +64,6 @@ class LayoutBlockFlow final {
   text::Offset StartOfLine(text::Offset text_offset);
 
  private:
-  class RootInlineBoxCache;
-
   void Append(RootInlineBox* line);
   // Returns true if discarded the first line.
   bool DiscardFirstLine();

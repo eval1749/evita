@@ -27,6 +27,8 @@ source_set("layout") {
     "layout_block_flow.h",
     "root_inline_box.cc",
     "root_inline_box.h",
+    "root_inline_box_cache.cc",
+    "root_inline_box_cache.h",
     "text_formatter.cc",
     "text_formatter.h",
     "text_view.cc",

@@ -78,7 +78,7 @@ text::Offset TextWindow::ComputeScreenMotion(int n,
   UI_ASSERT_DOM_LOCKED();
   // TODO(eval1749): We should not call |LargetScroll()| in |ComputeMotion|.
   if (LargeScroll(0, n))
-    return MapPointToPosition(pt);
+    return HitTestPoint(pt);
   if (n > 0)
     return std::min(text_view_->GetEnd(), buffer()->GetEnd());
   if (n < 0)
@@ -138,6 +138,10 @@ text::Offset TextWindow::EndOfLine(text::Offset text_offset) {
   return text_view_->EndOfLine(text_offset);
 }
 
+text::Offset TextWindow::HitTestPoint(const gfx::PointF pt) {
+  return std::min(text_view_->HitTestPoint(pt), buffer()->GetEnd());
+}
+
 // Maps position specified buffer position and returns height
 // of caret, If specified buffer position isn't in window, this function
 // returns 0.
@@ -183,10 +187,6 @@ bool TextWindow::LargeScroll(int, int iDy) {
   if (scrolled)
     RequestAnimationFrame();
   return scrolled;
-}
-
-text::Offset TextWindow::MapPointToPosition(const gfx::PointF pt) {
-  return std::min(text_view_->MapPointToPosition(pt), buffer()->GetEnd());
 }
 
 void TextWindow::SetZoom(float new_zoom) {

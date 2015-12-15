@@ -56,8 +56,8 @@ class TextWindow final : public CanvasContentWindow,
                                        text::Offset offset);
   text::Offset ComputeWindowMotion(int count, text::Offset offset);
   text::Offset EndOfLine(text::Offset offset);
+  text::Offset HitTestPoint(const gfx::PointF point);
   gfx::RectF HitTestTextPosition(text::Offset offset);
-  text::Offset MapPointToPosition(const gfx::PointF point);
   void SetZoom(float new_zoom);
   bool SmallScroll(int x_count, int y_count);
   text::Offset StartOfLine(text::Offset offset);

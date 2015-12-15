@@ -45,7 +45,7 @@ struct TextWindowCompute final {
   enum class Method {
     EndOfWindow,
     EndOfWindowLine,
-    MapPointToPositionShoultNotUse,
+    HitTestPointShoultNotUse,
     HitTestTextPositionShouldNotUse,
     MoveScreen,
     MoveWindow,

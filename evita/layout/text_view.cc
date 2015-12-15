@@ -108,8 +108,8 @@ void TextView::MakeSelectionVisible() {
   caret_offset_ = text::Offset::Invalid();
 }
 
-text::Offset TextView::MapPointToPosition(gfx::PointF point) {
-  return layout_block_flow_->MapPointToPosition(point);
+text::Offset TextView::HitTestPoint(gfx::PointF point) {
+  return layout_block_flow_->HitTestPoint(point);
 }
 
 text::Offset TextView::MapPointXToOffset(text::Offset text_offset,

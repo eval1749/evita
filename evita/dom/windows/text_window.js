@@ -420,7 +420,7 @@ global.TextWindow.prototype.clone = function() {
    */
   function mapPointToOffset(event) {
     const textWindow = /** @type {!TextWindow} */(event.target);
-    return textWindow.mapPointToPosition_(event.clientX, event.clientY);
+    return textWindow.hitTestPoint(event.clientX, event.clientY);
   }
 
   /**

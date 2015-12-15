@@ -222,6 +222,42 @@ text::Offset LayoutBlockFlow::GetVisibleEnd() {
   return lines_.front()->GetEnd();
 }
 
+text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) {
+  UI_ASSERT_DOM_LOCKED();
+  FormatIfNeeded();
+
+  if (point.y < bounds_.top)
+    return GetStart();
+  if (point.y >= bounds_.bottom)
+    return GetEnd();
+
+  auto line_top = bounds_.top;
+  for (const auto line : lines_) {
+    auto const y = point.y - line_top;
+    line_top += line->GetHeight();
+
+    if (y >= line->GetHeight())
+      continue;
+
+    auto cell_left = bounds_.left;
+    if (point.x < cell_left)
+      return line->GetStart();
+
+    auto result_offset = line->GetEnd() - text::OffsetDelta(1);
+    for (const auto cell : line->cells()) {
+      auto x = point.x - cell_left;
+      cell_left += cell->width();
+      const auto offset = cell->MapXToPosn(x);
+      if (offset >= 0)
+        result_offset = offset;
+      if (x >= 0 && x < cell->width())
+        break;
+    }
+    return result_offset;
+  }
+  return GetEnd() - text::OffsetDelta(1);
+}
+
 gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
@@ -265,42 +301,6 @@ bool LayoutBlockFlow::IsShowEndOfDocument() const {
   DCHECK(!dirty_line_point_);
   auto const last_line = lines_.back();
   return last_line->IsEndOfDocument() && last_line->bottom() <= bounds_.bottom;
-}
-
-text::Offset LayoutBlockFlow::MapPointToPosition(gfx::PointF point) {
-  UI_ASSERT_DOM_LOCKED();
-  FormatIfNeeded();
-
-  if (point.y < bounds_.top)
-    return GetStart();
-  if (point.y >= bounds_.bottom)
-    return GetEnd();
-
-  auto line_top = bounds_.top;
-  for (const auto line : lines_) {
-    auto const y = point.y - line_top;
-    line_top += line->GetHeight();
-
-    if (y >= line->GetHeight())
-      continue;
-
-    auto cell_left = bounds_.left;
-    if (point.x < cell_left)
-      return line->GetStart();
-
-    auto result_offset = line->GetEnd() - text::OffsetDelta(1);
-    for (const auto cell : line->cells()) {
-      auto x = point.x - cell_left;
-      cell_left += cell->width();
-      const auto offset = cell->MapXToPosn(x);
-      if (offset >= 0)
-        result_offset = offset;
-      if (x >= 0 && x < cell->width())
-        break;
-    }
-    return result_offset;
-  }
-  return GetEnd() - text::OffsetDelta(1);
 }
 
 text::Offset LayoutBlockFlow::MapPointXToOffset(text::Offset text_offset,

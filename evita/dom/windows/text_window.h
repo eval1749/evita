@@ -50,10 +50,10 @@ class TextWindow final
                              text::Offset position,
                              int count,
                              const domapi::FloatPoint& point);
+  v8::Handle<v8::Promise> HitTestPoint(float x, float y);
   domapi::FloatRect HitTestTextPosition(text::Offset position);
   void MakeSelectionVisible();
   TextWindow* NewTextWindow(Range* range);
-  v8::Handle<v8::Promise> MapPointToPosition(float x, float y);
   void Reconvert(const base::string16& text);
   void Scroll(int direction);
 

@@ -64,7 +64,7 @@ class TextView final : private gfx::CanvasObserver {
   bool FormatIfNeeded();
   gfx::RectF HitTestTextPosition(text::Offset text_offset) const;
   void MakeSelectionVisible();
-  text::Offset MapPointToPosition(gfx::PointF point);
+  text::Offset HitTestPoint(gfx::PointF point);
   text::Offset MapPointXToOffset(text::Offset text_offset, float point_x) const;
   void Paint(gfx::Canvas* canvas);
   bool ScrollDown();

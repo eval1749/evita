@@ -79,7 +79,7 @@ void TextWindow::MakeSelectionVisible() {
   ScriptHost::instance()->view_delegate()->MakeSelectionVisible(window_id());
 }
 
-v8::Handle<v8::Promise> TextWindow::MapPointToPosition(float x, float y) {
+v8::Handle<v8::Promise> TextWindow::HitTestPoint(float x, float y) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::ViewDelegate::MapTextWindowPointToOffset,

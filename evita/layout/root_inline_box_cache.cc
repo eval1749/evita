@@ -15,8 +15,7 @@ namespace layout {
 //
 // RootInlineBoxCache
 //
-RootInlineBoxCache::RootInlineBoxCache(
-    const text::Buffer* buffer)
+RootInlineBoxCache::RootInlineBoxCache(const text::Buffer* buffer)
     : buffer_(buffer), dirty_start_(text::Offset::Max()), zoom_(0.0f) {}
 
 RootInlineBoxCache::~RootInlineBoxCache() {
@@ -29,8 +28,7 @@ void RootInlineBoxCache::DidChangeBuffer(text::Offset offset) {
   dirty_start_ = std::min(dirty_start_, offset);
 }
 
-RootInlineBox* RootInlineBoxCache::FindLine(
-    text::Offset text_offset) const {
+RootInlineBox* RootInlineBoxCache::FindLine(text::Offset text_offset) const {
   UI_ASSERT_DOM_LOCKED();
   const auto it = lines_.find(text_offset);
   if (it == lines_.end())
@@ -40,9 +38,8 @@ RootInlineBox* RootInlineBoxCache::FindLine(
   return line;
 }
 
-void RootInlineBoxCache::Invalidate(
-    const gfx::RectF& new_bounds,
-    float new_zoom) {
+void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
+                                    float new_zoom) {
   UI_ASSERT_DOM_LOCKED();
   if (zoom_ != new_zoom || !dirty_start_) {
     RemoveAllLines();
@@ -75,14 +72,12 @@ void RootInlineBoxCache::Invalidate(
   bounds_ = new_bounds;
 }
 
-bool RootInlineBoxCache::IsAfterNewline(
-    const RootInlineBox* text_line) const {
+bool RootInlineBoxCache::IsAfterNewline(const RootInlineBox* text_line) const {
   auto const start = text_line->text_start();
   return !start || buffer_->GetCharAt(start - text::OffsetDelta(1)) == '\n';
 }
 
-bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds,
-                                                  float zoom) const {
+bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds, float zoom) const {
   if (zoom_ != zoom)
     return false;
   if (dirty_start_ != text::Offset::Max())

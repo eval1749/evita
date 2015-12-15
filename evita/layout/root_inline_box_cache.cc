@@ -37,8 +37,7 @@ RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
     return it->second;
   if (it == lines_.begin())
     return nullptr;
-  --it;
-  auto const line = it->second;
+  auto const line = std::prev(it)->second;
   if (offset < line->text_start() || offset >= line->text_end())
     return nullptr;
   return line;

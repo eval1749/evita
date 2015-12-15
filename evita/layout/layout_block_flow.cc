@@ -222,14 +222,15 @@ text::Offset LayoutBlockFlow::GetVisibleEnd() {
   return lines_.front()->GetEnd();
 }
 
-text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) {
+text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
   UI_ASSERT_DOM_LOCKED();
-  FormatIfNeeded();
+  DCHECK(!dirty_);
+  DCHECK(!dirty_line_point_);
 
   if (point.y < bounds_.top)
-    return GetStart();
+    return lines_.front()->GetStart();
   if (point.y >= bounds_.bottom)
-    return GetEnd();
+    return lines_.back()->GetEnd();
 
   auto line_top = bounds_.top;
   for (const auto line : lines_) {
@@ -255,7 +256,7 @@ text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) {
     }
     return result_offset;
   }
-  return GetEnd() - text::OffsetDelta(1);
+  return lines_.back()->GetEnd() - text::OffsetDelta(1);
 }
 
 gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Offset offset) const {

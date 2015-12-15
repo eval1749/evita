@@ -139,6 +139,7 @@ text::Offset TextWindow::EndOfLine(text::Offset text_offset) {
 }
 
 text::Offset TextWindow::HitTestPoint(const gfx::PointF pt) {
+  text_view_->FormatIfNeeded();
   return std::min(text_view_->HitTestPoint(pt), buffer()->GetEnd());
 }
 

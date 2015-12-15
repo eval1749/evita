@@ -106,7 +106,7 @@ text::Offset TextWindow::ComputeWindowLineMotion(int n,
   }
   if (n < 0) {
     n = -n;
-    auto const lBufStart = buffer()->GetStart();
+    auto const lBufStart = text::Offset(0);
     auto lStart = lPosn;
     auto k = 0;
     for (k = 0; k < n; ++k) {
@@ -161,7 +161,7 @@ bool TextWindow::LargeScroll(int, int iDy) {
     // Scroll Down -- place top line out of window.
     iDy = -iDy;
 
-    auto const lBufStart = buffer()->GetStart();
+    auto const lBufStart = text::Offset(0);
     for (auto k = 0; k < iDy; ++k) {
       auto const lStart = text_view_->GetStart();
       if (lStart == lBufStart)

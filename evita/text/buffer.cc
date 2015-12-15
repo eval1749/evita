@@ -122,10 +122,6 @@ LineAndColumn Buffer::GetLineAndColumn(Offset offset) const {
   return result;
 }
 
-Offset Buffer::GetStart() const {
-  return Offset(0);
-}
-
 const css::Style& Buffer::GetStyleAt(Offset offset) const {
   return GetIntervalAt(offset)->style();
 }

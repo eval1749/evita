@@ -75,7 +75,6 @@ class Buffer final : public BufferCore,
   const css::Style& GetDefaultStyle() const;
   Interval* GetIntervalAt(Offset) const;
   LineAndColumn GetLineAndColumn(Offset offset) const;
-  Offset GetStart() const;
   const css::Style& GetStyleAt(Offset) const;
   UndoStack* GetUndo() const { return undo_stack_.get(); }
   int IncCharTick(int n) { return revision_ += n; }

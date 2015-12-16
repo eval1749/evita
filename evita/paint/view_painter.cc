@@ -58,9 +58,7 @@ std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
     RestoreCaretBackgroundIfNeeded(canvas, *view_cache);
   if (!painter.Paint()) {
     TRACE_EVENT0("view", "ViewPainter::Paint.Clean");
-    PaintSelection(canvas);
-    PaintCaretIfNeeded(canvas);
-    PaintRuler(canvas);
+    PaintSelectionWithCache(canvas, *view_cache);
     view_cache->UpdateSelection(layout_view_.selection(), caret_bounds_);
     return std::move(view_cache);
   }
@@ -103,9 +101,11 @@ void ViewPainter::PaintSelection(gfx::Canvas* canvas) {
     canvas->FillRectangle(fill_brush, bounds);
 }
 
+// Note: This function is called even if layout tree version is different
+// between cached view and new view, e.g. style change doesn't affect
+// text image cache.
 void ViewPainter::PaintSelectionWithCache(gfx::Canvas* canvas,
                                           const ViewPaintCache& view_cache) {
-  DCHECK(!view_cache.NeedsTextPaint(canvas, layout_view_));
   const auto& new_selection = *layout_view_.selection();
   const auto& old_selection = view_cache.selection();
 

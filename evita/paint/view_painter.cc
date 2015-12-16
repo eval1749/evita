@@ -59,6 +59,8 @@ std::unique_ptr<ViewPaintCache> ViewPainter::Paint(
   if (!painter.Paint()) {
     TRACE_EVENT0("view", "ViewPainter::Paint.Clean");
     PaintSelection(canvas);
+    PaintRuler(canvas);
+    PaintCaretIfNeeded(canvas);
     view_cache->UpdateSelection(layout_view_.selection(), caret_bounds_);
     return std::move(view_cache);
   }

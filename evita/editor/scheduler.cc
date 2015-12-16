@@ -109,10 +109,11 @@ void Scheduler::BeginFrame() {
 
 void Scheduler::CancelAnimationFrameRequest(
     ui::AnimationFrameHandler* handler) {
-  TRACE_EVENT0("scheduler", "Scheduler::CancelAnimationFrameRequest");
+    TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::CancelAnimationFrame",
+                           handler, TRACE_EVENT_FLAG_FLOW_IN, "type",
+                           handler->GetAnimationFrameType());
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.erase(handler);
-  canceled_handlers_.insert(handler);
 }
 
 void Scheduler::ChangeState(State new_state) {
@@ -176,13 +177,13 @@ void Scheduler::HandleAnimationFrame() {
 }
 
 void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
+  TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::RequestAnimationFrame",
+                         handler, TRACE_EVENT_FLAG_FLOW_OUT, "type",
+                         handler->GetAnimationFrameType());
   base::AutoLock lock_scope(*lock_);
   const auto& result = pending_handlers_.insert(handler);
   if (!result.second)
     return;
-  TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::RequestAnimationFrame",
-                         handler, TRACE_EVENT_FLAG_FLOW_OUT, "type",
-                         handler->GetAnimationFrameType());
   switch (state_) {
     case State::Idle:
       ChangeState(State::Sleeping);

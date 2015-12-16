@@ -261,6 +261,10 @@ void TextWindow::UpdateScrollBar() {
   data.thumb_value = text_view_->GetStart();
   data.maximum = buffer()->GetEnd() + text::OffsetDelta(1);
   vertical_scroll_bar_->SetData(data);
+  // TODO(eval1749): Once we have scroll bar for |ui::TextWindow|, we don't
+  // need to call |CancelAnimationFrameRequest()| to cancel request by
+  // |ui::ScrollBar| control
+  CancelAnimationFrameRequest();
 }
 
 // text::BufferMutationObserver
@@ -285,6 +289,8 @@ void TextWindow::DidInsertBefore(text::Offset offset,
 
 // text::SelectionChangeObserver
 void TextWindow::DidChangeSelection() {
+  TRACE_EVENT_WITH_FLOW0("views", "TextWindow::DidChangeSelection",
+                         selection_, TRACE_EVENT_FLAG_FLOW_IN);
   RequestAnimationFrame();
 }
 
@@ -305,7 +311,6 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
 
     editor::Application::instance()->NotifyViewReady();
     metrics_view_->RecordTime();
-
     MetricsView::TimingScope timing_scope(metrics_view_);
     auto const selection = GetTextSelectionModel(this, *selection_);
     text_view_->Update(selection, now);
@@ -317,10 +322,6 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
     OnDraw(canvas());
   }
   NotifyUpdateContent();
-  // TODO(eval1749): Once we have scroll bar for |ui::TextWindow|, we don't
-  // need to call |CancelAnimationFrameRequest()| to cancel request by
-  // |ui::ScrollBar| control
-  CancelAnimationFrameRequest();
 }
 
 // ui::LayerOwnerDelegate

@@ -5,6 +5,7 @@
 #include "evita/text/selection.h"
 
 #include "base/observer_list.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
 #include "evita/text/selection_change_observer.h"
@@ -17,7 +18,7 @@ namespace text {
 //
 class Selection::Model final : public Range {
  public:
-  explicit Model(const Range* range);
+  explicit Model(const Selection& selection, const Range* range);
   ~Model() final;
 
   void AddObserver(SelectionChangeObserver* observer);
@@ -32,14 +33,16 @@ class Selection::Model final : public Range {
   void DidChangeRange() final;
 
   base::ObserverList<SelectionChangeObserver> observers_;
+  // Used only for trace logging.
+  const Selection& selection_;
   bool start_is_active_;
 
   DISALLOW_COPY_AND_ASSIGN(Model);
 };
 
-Selection::Model::Model(const Range* range)
+Selection::Model::Model(const Selection& selection, const Range* range)
     : Range(range->buffer(), range->start(), range->end()),
-      start_is_active_(false) {}
+      selection_(selection), start_is_active_(false) {}
 
 Selection::Model::~Model() {}
 
@@ -52,6 +55,8 @@ void Selection::Model::DidChangeRange() {
 }
 
 void Selection::Model::NotifyChange() {
+  TRACE_EVENT_WITH_FLOW0("views", "Selection::NotifyChange",
+                         &selection_, TRACE_EVENT_FLAG_FLOW_OUT);
   FOR_EACH_OBSERVER(SelectionChangeObserver, observers_, DidChangeSelection());
 }
 
@@ -70,7 +75,7 @@ void Selection::Model::SetStartIsActive(bool new_start_is_active) {
 //
 // Selection
 //
-Selection::Selection(const Range* range) : model_(new Model(range)) {}
+Selection::Selection(const Range* range) : model_(new Model(*this, range)) {}
 
 Selection::~Selection() {}
 

@@ -12,12 +12,13 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/paint/view_painter.h"
-#include "evita/paint/view_paint_cache.h"
-#include "evita/text/buffer.h"
 #include "evita/layout/layout_view.h"
 #include "evita/layout/layout_block_flow.h"
 #include "evita/layout/layout_view_builder.h"
+#include "evita/paint/selection.h"
+#include "evita/paint/view_painter.h"
+#include "evita/paint/view_paint_cache.h"
+#include "evita/text/buffer.h"
 
 namespace layout {
 

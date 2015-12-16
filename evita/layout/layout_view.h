@@ -12,6 +12,10 @@
 #include "evita/gfx_base.h"
 #include "evita/layout/render_selection.h"
 
+namespace paint {
+class Selection;
+}
+
 namespace layout {
 
 class LayoutCaret;
@@ -26,7 +30,7 @@ class LayoutView final : public base::RefCounted<LayoutView> {
   LayoutView(int layout_version,
              const gfx::RectF& bounds,
              const std::vector<RootInlineBox*>& lines,
-             const TextSelection& selection,
+             scoped_refptr<paint::Selection> selection,
              const gfx::ColorF& bgcolor,
              const gfx::RectF& ruler_bounds,
              std::unique_ptr<LayoutCaret> caret);
@@ -37,7 +41,7 @@ class LayoutView final : public base::RefCounted<LayoutView> {
   const LayoutCaret& caret() const { return *caret_; }
   const std::vector<RootInlineBox*>& lines() const { return lines_; }
   const gfx::RectF& ruler_bounds() const { return ruler_bounds_; }
-  const TextSelection& selection() const { return selection_; }
+  scoped_refptr<paint::Selection> selection() const { return selection_; }
   int layout_version() const { return layout_version_; }
 
  private:
@@ -47,7 +51,7 @@ class LayoutView final : public base::RefCounted<LayoutView> {
   const int layout_version_;
   const std::vector<RootInlineBox*> lines_;
   const gfx::RectF ruler_bounds_;
-  const TextSelection selection_;
+  const scoped_refptr<paint::Selection> selection_;
 
   DISALLOW_COPY_AND_ASSIGN(LayoutView);
 };

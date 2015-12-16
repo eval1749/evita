@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <list>
 #include <vector>
 
 #include "evita/layout/layout_view_builder.h"
@@ -18,11 +19,64 @@
 #include "evita/layout/render_selection.h"
 #include "evita/layout/render_style.h"
 #include "evita/layout/text_formatter.h"
+#include "evita/paint/selection.h"
 
 namespace layout {
 
 namespace {
 const auto kBlinkInterval = 16 * 20;  // milliseconds
+
+gfx::RectF RoundBounds(const gfx::RectF& bounds) {
+  return gfx::RectF(::floor(bounds.left), ::floor(bounds.top),
+                    ::floor(bounds.right), ::floor(bounds.bottom));
+}
+
+gfx::PointF CalculateSelectionStartPoint(const RootInlineBox& root_box,
+                                         const TextSelection& selection) {
+  if (root_box.Contains(selection.start()))
+    return root_box.HitTestTextPosition(selection.start()).origin();
+  return root_box.HitTestTextPosition(root_box.text_start()).origin();
+}
+
+gfx::PointF CalculateSelectionEndPoint(const RootInlineBox& root_box,
+                                       const TextSelection& selection) {
+  if (root_box.Contains(selection.end()))
+    return root_box.HitTestTextPosition(selection.end()).bottom_left();
+  return root_box.bounds().bottom_right();
+}
+
+gfx::RectF CalculateSelectionBounds(const RootInlineBox& root_box,
+                                    const TextSelection& selection) {
+  DCHECK(selection.is_range());
+  if (selection.start() >= root_box.text_end() ||
+      selection.end() <= root_box.text_start()) {
+    return gfx::RectF();
+  }
+  return gfx::RectF(CalculateSelectionStartPoint(root_box, selection),
+                    CalculateSelectionEndPoint(root_box, selection));
+}
+
+std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
+    const std::list<scoped_refptr<RootInlineBox>>& lines,
+    const TextSelection& selection,
+    const gfx::RectF& block_bounds) {
+  std::unordered_set<gfx::RectF> bounds_set;
+  if (selection.is_caret())
+    return bounds_set;
+  if (selection.start() >= lines.back()->text_end())
+    return bounds_set;
+  if (selection.end() <= lines.front()->text_start())
+    return bounds_set;
+  for (auto line : lines) {
+    if (selection.end() <= line->text_start())
+      break;
+    const auto& bounds = CalculateSelectionBounds(*line, selection);
+    if (bounds.empty())
+      continue;
+    bounds_set.insert(block_bounds.Intersect(RoundBounds(bounds)));
+  }
+  return bounds_set;
+}
 
 base::TimeDelta GetCaretBlinkInterval() {
   auto const interval = ::GetCaretBlinkTime();
@@ -33,10 +87,6 @@ base::TimeDelta GetCaretBlinkInterval() {
   return base::TimeDelta::FromMilliseconds(interval);
 }
 
-gfx::RectF RoundBounds(const gfx::RectF& bounds) {
-  return gfx::RectF(::floor(bounds.left), ::floor(bounds.top),
-                    ::floor(bounds.right), ::floor(bounds.bottom));
-}
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -79,12 +129,17 @@ scoped_refptr<LayoutView> LayoutViewBuilder::Build(
   caret_bounds_ = caret_bounds;
   caret_state_ = caret_state;
 
+  const auto& selection_bounds_set = CalculateSelectionBoundsSet(
+      layout_block_flow.lines(), selection, layout_block_flow.bounds());
+
   std::vector<RootInlineBox*> lines;
   for (const auto& line : layout_block_flow.lines())
     lines.push_back(line->Copy());
   return new LayoutView(
       layout_block_flow.format_counter(), layout_block_flow.bounds(), lines,
-      selection, bgcolor, ruler_bounds,
+      make_scoped_refptr(
+          new paint::Selection(selection.color(), selection_bounds_set)),
+      bgcolor, ruler_bounds,
       std::make_unique<LayoutCaret>(caret_state, caret_bounds));
 }
 

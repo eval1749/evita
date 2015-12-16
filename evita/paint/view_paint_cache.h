@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "base/macros.h"
+#include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/layout/render_selection.h"
 
 namespace gfx {
 class Canvas;
@@ -22,6 +22,8 @@ class RootInlineBox;
 
 namespace paint {
 
+class Selection;
+
 //////////////////////////////////////////////////////////////////////
 //
 // ViewPaintCache
@@ -29,7 +31,6 @@ namespace paint {
 class ViewPaintCache final {
   using LayoutView = layout::LayoutView;
   using RootInlineBox = layout::RootInlineBox;
-  using TextSelection = layout::TextSelection;
 
  public:
   ViewPaintCache(gfx::Canvas* canvas,
@@ -39,11 +40,11 @@ class ViewPaintCache final {
 
   const gfx::RectF& caret_bounds() const { return caret_bounds_; }
   const std::vector<RootInlineBox*>& lines() const { return lines_; }
-  const TextSelection& selection() const { return selection_; }
+  const Selection& selection() const { return *selection_; }
 
   bool CanUseTextImage(gfx::Canvas* canvas) const;
   bool NeedsTextPaint(gfx::Canvas* canvas, const LayoutView& view) const;
-  void UpdateSelection(const TextSelection& selection,
+  void UpdateSelection(scoped_refptr<Selection> selection,
                        const gfx::RectF& caret_bounds);
 
  private:
@@ -52,7 +53,7 @@ class ViewPaintCache final {
   gfx::RectF caret_bounds_;
   const int layout_version_;
   std::vector<RootInlineBox*> lines_;
-  TextSelection selection_;
+  scoped_refptr<Selection> selection_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewPaintCache);
 };

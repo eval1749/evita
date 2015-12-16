@@ -6,13 +6,14 @@
 
 #include "evita/layout/layout_caret.h"
 #include "evita/layout/line/root_inline_box.h"
+#include "evita/paint/selection.h"
 
 namespace layout {
 
 LayoutView::LayoutView(int layout_version,
                        const gfx::RectF& bounds,
                        const std::vector<RootInlineBox*>& lines,
-                       const TextSelection& selection,
+                       scoped_refptr<paint::Selection> selection,
                        const gfx::ColorF& bgcolor,
                        const gfx::RectF& ruler_bounds,
                        std::unique_ptr<LayoutCaret> caret)

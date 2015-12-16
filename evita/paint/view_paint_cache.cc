@@ -8,6 +8,7 @@
 #include "evita/layout/layout_caret.h"
 #include "evita/layout/layout_view.h"
 #include "evita/layout/line/root_inline_box.h"
+#include "evita/paint/selection.h"
 
 namespace paint {
 
@@ -41,7 +42,7 @@ bool ViewPaintCache::NeedsTextPaint(gfx::Canvas* canvas,
   return CanUseTextImage(canvas) && layout_version_ != view.layout_version();
 }
 
-void ViewPaintCache::UpdateSelection(const TextSelection& selection,
+void ViewPaintCache::UpdateSelection(scoped_refptr<Selection> selection,
                                      const gfx::RectF& caret_bounds) {
   caret_bounds_ = caret_bounds;
   selection_ = selection;

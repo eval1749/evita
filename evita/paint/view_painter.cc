@@ -84,9 +84,17 @@ void ViewPainter::PaintCaretIfNeeded(gfx::Canvas* canvas) {
   canvas->Clear(gfx::ColorF::Black);
 }
 
+void ViewPainter::PaintRuler(gfx::Canvas* canvas) {
+  const auto& ruler_bounds = layout_view_.ruler_bounds();
+  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, ruler_bounds);
+  // TODO(eval1749): We should get ruler color from CSS.
+  gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));
+  canvas->DrawRectangle(brush, ruler_bounds);
+}
+
 void ViewPainter::PaintSelection(gfx::Canvas* canvas) {
   const auto& selection = *layout_view_.selection();
-  if (!selection.bounds_set().empty())
+  if (selection.bounds_set().empty())
     return;
   TRACE_EVENT0("view", "ViewPainter::PaintSelection");
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, layout_view_.bounds());
@@ -140,14 +148,6 @@ void ViewPainter::PaintSelectionWithCache(gfx::Canvas* canvas,
     }
   }
   PaintCaretIfNeeded(canvas);
-}
-
-void ViewPainter::PaintRuler(gfx::Canvas* canvas) {
-  const auto& ruler_bounds = layout_view_.ruler_bounds();
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, ruler_bounds);
-  // TODO(eval1749): We should get ruler color from CSS.
-  gfx::Brush brush(canvas, gfx::ColorF(0, 0, 0, 0.3f));
-  canvas->DrawRectangle(brush, ruler_bounds);
 }
 
 void ViewPainter::RestoreCaretBackgroundIfNeeded(

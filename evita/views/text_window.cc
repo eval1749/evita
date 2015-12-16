@@ -317,6 +317,10 @@ void TextWindow::DidBeginAnimationFrame(base::Time now) {
     OnDraw(canvas());
   }
   NotifyUpdateContent();
+  // TODO(eval1749): Once we have scroll bar for |ui::TextWindow|, we don't
+  // need to call |CancelAnimationFrameRequest()| to cancel request by
+  // |ui::ScrollBar| control
+  CancelAnimationFrameRequest();
 }
 
 // ui::LayerOwnerDelegate

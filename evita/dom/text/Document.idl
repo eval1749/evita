@@ -23,6 +23,10 @@ interface Document : EventTarget {
     [ImplementedAs=JavaScript]
     static Document new(DOMString name);
 
+    // Experimental: Implements document template at "NewDocument" command.
+    [ImplementedAs=JavaScript]
+    static Document notifyObservers(DOMString type, Document document);
+
     [ImplementedAs=JavaScript]
     static Document open(DOMString fileName);
 

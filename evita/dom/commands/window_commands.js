@@ -38,6 +38,7 @@
     Editor.getFileNameForSave(this, this.selection.document.fileName)
         .then(function(fileName) {
           const document = Document.open(fileName);
+          Document.notifyObservers('new', document);
           windows.newTextWindow(editorWindow, document)
         });
   }

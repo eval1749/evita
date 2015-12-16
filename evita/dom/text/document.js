@@ -528,9 +528,17 @@
     const document = new Document();
     document.name_ = makeUniqueName(name);
     documentNameMap.set(document.name, document);
-    for (let observer of documentObservers)
-      observer.call(Document, 'add', document);
+    Document.notifyObservers('add', document);
     return document;
+  }
+
+  /**
+   * @param {string} type
+   * @param {!Document} document
+   */
+  function notifyObservers(type, document) {
+    for (let observer of documentObservers)
+      observer.call(Document, type, document);
   }
 
   /** @param {!Document} document */
@@ -538,8 +546,7 @@
     if (!documentNameMap.has(document.name))
       throw new Error(`${document.name} isn't in list`);
     documentNameMap.delete(document.name);
-    for (let observer of documentObservers)
-      observer.call(Document, 'remove', document);
+    Document.notifyObservers('remove', document);
   }
 
   /** @param {!DocumentObserverCallback} callback */
@@ -571,7 +578,7 @@
     find: {value: findDocument},
     list: {get: () => listDocument()},
     new: {value: newDocument},
-    remove: {value: removeDocument},
+    notifyObservers: {value: notifyObservers},
     removeObserver: {value: removeObserver},
   });
 

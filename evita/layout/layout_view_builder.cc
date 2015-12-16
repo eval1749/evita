@@ -97,7 +97,7 @@ LayoutViewBuilder::LayoutViewBuilder(const text::Buffer* buffer,
                                      ui::AnimatableWindow* caret_owner)
     : buffer_(buffer),
       caret_owner_(caret_owner),
-      caret_state_(paint::Caret::State::None),
+      caret_state_(paint::CaretState::None),
       zoom_(1.0f) {}
 
 LayoutViewBuilder::~LayoutViewBuilder() {
@@ -157,29 +157,29 @@ gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
                     char_rect.bottom);
 }
 
-paint::Caret::State LayoutViewBuilder::ComputeCaretState(
+paint::CaretState LayoutViewBuilder::ComputeCaretState(
     const gfx::RectF& bounds,
     base::Time now) const {
   if (bounds.empty())
-    return paint::Caret::State::None;
+    return paint::CaretState::None;
 
-  if (caret_state_ == paint::Caret::State::None) {
+  if (caret_state_ == paint::CaretState::None) {
     // This view starts showing caret.
-    return paint::Caret::State::Show;
+    return paint::CaretState::Show;
   }
 
   if (caret_bounds_ != bounds) {
     // The caret is moved.
-    return paint::Caret::State::Show;
+    return paint::CaretState::Show;
   }
 
   // When the caret stays at same point, caret is blinking.
   auto const interval = GetCaretBlinkInterval();
   if (interval == base::TimeDelta())
-    return paint::Caret::State::Show;
+    return paint::CaretState::Show;
   auto const delta = now - caret_time_;
   auto const index = delta / interval;
-  return index % 2 ? paint::Caret::State::Hide : paint::Caret::State::Show;
+  return index % 2 ? paint::CaretState::Hide : paint::CaretState::Show;
 }
 
 gfx::RectF LayoutViewBuilder::ComputeRulerBounds() const {

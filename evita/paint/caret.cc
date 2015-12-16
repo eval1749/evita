@@ -6,7 +6,7 @@
 
 namespace paint {
 
-Caret::Caret(State state, const gfx::RectF& bounds)
+Caret::Caret(CaretState state, const gfx::RectF& bounds)
     : bounds_(bounds), state_(state) {
   if (is_none()) {
     DCHECK(bounds_.empty());

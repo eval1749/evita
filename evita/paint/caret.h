@@ -10,30 +10,30 @@
 
 namespace paint {
 
+enum class CaretState {
+  Hide,
+  None,
+  Show,
+};
+
 //////////////////////////////////////////////////////////////////////
 //
 // Caret
 //
 class Caret final {
  public:
-  enum class State {
-    Hide,
-    None,
-    Show,
-  };
-
-  Caret(State state, const gfx::RectF& bounds);
+  Caret(CaretState state, const gfx::RectF& bounds);
   ~Caret();
 
   const gfx::RectF& bounds() const { return bounds_; }
 
-  bool is_hide() const { return state_ == State::Hide; }
-  bool is_none() const { return state_ == State::None; }
-  bool is_show() const { return state_ == State::Show; }
+  bool is_hide() const { return state_ == CaretState::Hide; }
+  bool is_none() const { return state_ == CaretState::None; }
+  bool is_show() const { return state_ == CaretState::Show; }
 
  private:
   gfx::RectF bounds_;
-  State state_;
+  CaretState state_;
 
   DISALLOW_COPY_AND_ASSIGN(Caret);
 };

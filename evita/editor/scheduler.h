@@ -58,6 +58,8 @@ class Scheduler final {
   void ScheduleNextFrame();
 
   std::unordered_set<ui::AnimationFrameHandler*> canceled_handlers_;
+  // Monotonically incremented frame id. It is used for trace logging.
+  int frame_id_;
   int idle_sequence_num_;
   base::Time last_frame_time_;
   base::Time last_paint_time_;

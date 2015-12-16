@@ -20,10 +20,10 @@
 
 namespace editor {
 
+// Note: To update view after blur, we don't use longer period for
+// non-foreground window.
 static base::TimeDelta ComputeFrameDelay() {
-  return ui::FocusController::instance()->IsForeground()
-      ? base::TimeDelta::FromMilliseconds(1000 / 60)
-      : base::TimeDelta::FromMilliseconds(1000);
+  return base::TimeDelta::FromMilliseconds(1000 / 60);
 }
 
 static base::TimeDelta ComputeFrameDelay(const base::Time& last_frame_time,
@@ -35,8 +35,8 @@ static base::TimeDelta ComputeFrameDelay(const base::Time& last_frame_time,
 
 static base::TimeDelta ComputeIdleDelay() {
   return ui::FocusController::instance()->IsForeground()
-      ? base::TimeDelta::FromMilliseconds(50)
-      : base::TimeDelta::FromMilliseconds(5000);
+             ? base::TimeDelta::FromMilliseconds(50)
+             : base::TimeDelta::FromMilliseconds(5000);
 }
 
 #define FOR_EACH_STATE(V) V(Idle) V(Running) V(Sleeping) V(Waiting)
@@ -65,7 +65,8 @@ std::ostream& operator<<(std::ostream& ostream, Scheduler::State state) {
 // Scheduler
 //
 Scheduler::Scheduler(domapi::ViewEventHandler* script_delegate)
-    : idle_sequence_num_(0),
+    : frame_id_(0),
+      idle_sequence_num_(0),
       lock_(new base::Lock()),
       message_loop_(base::MessageLoop::current()),
       script_delegate_(script_delegate),
@@ -79,8 +80,12 @@ Scheduler::~Scheduler() {}
 
 void Scheduler::BeginFrame() {
   DCHECK_EQ(State::Waiting, state_);
-  TRACE_EVENT0("scheduler", "Scheduler::BeginFrame");
-  last_frame_time_ = base::Time::Now();
+  const auto& now = base::Time::Now();
+  TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::BeginFrame", frame_id_,
+                         TRACE_EVENT_FLAG_FLOW_IN, "delay",
+                         (now - last_frame_time_).InMilliseconds());
+  ++frame_id_;
+  last_frame_time_ = now;
   script_delegate_->DidExitViewIdle();
   {
     base::AutoLock lock_scope(*lock_);
@@ -163,16 +168,21 @@ void Scheduler::HandleAnimationFrame() {
   for (auto handler : running_handlers) {
     if (canceling_handlers.find(handler) != canceling_handlers.end())
       continue;
-    TRACE_EVENT1("scheduler", "Scheduler::HandleAnimationFrame", "type",
-                 handler->GetAnimationFrameType());
+    TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::HandleAnimationFrame",
+                           handler, TRACE_EVENT_FLAG_FLOW_IN, "type",
+                           handler->GetAnimationFrameType());
     handler->HandleAnimationFrame(time);
   }
 }
 
 void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
-  TRACE_EVENT0("scheduler", "Scheduler::RequestAnimationFrame");
   base::AutoLock lock_scope(*lock_);
-  pending_handlers_.insert(handler);
+  const auto& result = pending_handlers_.insert(handler);
+  if (!result.second)
+    return;
+  TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::RequestAnimationFrame",
+                         handler, TRACE_EVENT_FLAG_FLOW_OUT, "type",
+                         handler->GetAnimationFrameType());
   switch (state_) {
     case State::Idle:
       ChangeState(State::Sleeping);
@@ -195,6 +205,9 @@ void Scheduler::ScheduleNextFrame() {
   ChangeState(State::Waiting);
   auto const delay = ComputeFrameDelay(last_frame_time_, now);
   script_delegate_->DidEnterViewIdle(now + delay);
+  TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::ScheduleNextFrame", frame_id_,
+                         TRACE_EVENT_FLAG_FLOW_OUT, "delay",
+                         delay.InMilliseconds());
   message_loop_->PostNonNestableDelayedTask(
       FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)),
       delay);

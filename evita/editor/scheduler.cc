@@ -83,7 +83,7 @@ void Scheduler::BeginFrame() {
   const auto& now = base::Time::Now();
   TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::BeginFrame", frame_id_,
                          TRACE_EVENT_FLAG_FLOW_IN, "delay",
-                         (now - last_frame_time_).InMilliseconds());
+                         (now - last_frame_time_).InMillisecondsF());
   ++frame_id_;
   last_frame_time_ = now;
   script_delegate_->DidExitViewIdle();
@@ -207,7 +207,7 @@ void Scheduler::ScheduleNextFrame() {
   script_delegate_->DidEnterViewIdle(now + delay);
   TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::ScheduleNextFrame", frame_id_,
                          TRACE_EVENT_FLAG_FLOW_OUT, "delay",
-                         delay.InMilliseconds());
+                         delay.InMillisecondsF());
   message_loop_->PostNonNestableDelayedTask(
       FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)),
       delay);

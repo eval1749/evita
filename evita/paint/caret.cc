@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/layout/layout_caret.h"
+#include "evita/paint/caret.h"
 
-namespace layout {
+namespace paint {
 
-LayoutCaret::LayoutCaret(State state, const gfx::RectF& bounds)
+Caret::Caret(State state, const gfx::RectF& bounds)
     : bounds_(bounds), state_(state) {
   if (is_none()) {
     DCHECK(bounds_.empty());
@@ -15,6 +15,6 @@ LayoutCaret::LayoutCaret(State state, const gfx::RectF& bounds)
   DCHECK(!bounds_.empty());
 }
 
-LayoutCaret::~LayoutCaret() {}
+Caret::~Caret() {}
 
-}  // namespace layout
+}  // namespace paint

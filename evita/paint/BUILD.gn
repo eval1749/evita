@@ -4,6 +4,8 @@
 
 source_set("paint") {
   sources = [
+    "caret.cc",
+    "caret.h",
     "inline_box_painter.cc",
     "inline_box_painter.h",
     "paint_thread.cc",

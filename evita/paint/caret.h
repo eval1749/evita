@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_LAYOUT_CARET_H_
-#define EVITA_LAYOUT_LAYOUT_CARET_H_
+#ifndef EVITA_PAINT_CARET_H_
+#define EVITA_PAINT_CARET_H_
 
 #include "base/macros.h"
-#include "evita/gfx/forward.h"
-#include "evita/ui/caret.h"
+#include "evita/gfx/rect_f.h"
 
-namespace layout {
+namespace paint {
 
 //////////////////////////////////////////////////////////////////////
 //
-// LayoutCaret
+// Caret
 //
-class LayoutCaret final {
+class Caret final {
  public:
   enum class State {
     Hide,
@@ -23,8 +22,8 @@ class LayoutCaret final {
     Show,
   };
 
-  LayoutCaret(State state, const gfx::RectF& bounds);
-  ~LayoutCaret();
+  Caret(State state, const gfx::RectF& bounds);
+  ~Caret();
 
   const gfx::RectF& bounds() const { return bounds_; }
 
@@ -36,9 +35,9 @@ class LayoutCaret final {
   gfx::RectF bounds_;
   State state_;
 
-  DISALLOW_COPY_AND_ASSIGN(LayoutCaret);
+  DISALLOW_COPY_AND_ASSIGN(Caret);
 };
 
-}  // namespace layout
+}  // namespace paint
 
-#endif  // EVITA_LAYOUT_LAYOUT_CARET_H_
+#endif  // EVITA_PAINT_CARET_H_

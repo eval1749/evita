@@ -12,7 +12,7 @@
 #include "base/time/time.h"
 #include "base/timer/timer.h"
 #include "evita/gfx/rect_f.h"
-#include "evita/layout/layout_caret.h"
+#include "evita/paint/caret.h"
 
 namespace text {
 class Buffer;
@@ -50,7 +50,7 @@ class LayoutViewBuilder final {
   gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
       const LayoutBlockFlow& layout_block_flow,
       const TextSelectionModel& selection_model) const;
-  LayoutCaret::State ComputeCaretState(const gfx::RectF& bounds,
+  paint::Caret::State ComputeCaretState(const gfx::RectF& bounds,
                                        base::Time now) const;
 
   gfx::RectF ComputeRulerBounds() const;
@@ -62,7 +62,7 @@ class LayoutViewBuilder final {
   const text::Buffer* const buffer_;
   gfx::RectF caret_bounds_;
   ui::AnimatableWindow* const caret_owner_;
-  LayoutCaret::State caret_state_;
+  paint::Caret::State caret_state_;
   base::Time caret_time_;
   base::RepeatingTimer caret_timer_;
   float zoom_;

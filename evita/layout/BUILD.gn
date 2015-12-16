@@ -4,8 +4,6 @@
 
 source_set("layout") {
   sources = [
-    "layout_caret.cc",
-    "layout_caret.h",
     "layout_view.cc",
     "layout_view.h",
     "layout_view_builder.cc",

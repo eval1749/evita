@@ -97,7 +97,7 @@ LayoutViewBuilder::LayoutViewBuilder(const text::Buffer* buffer,
                                      ui::AnimatableWindow* caret_owner)
     : buffer_(buffer),
       caret_owner_(caret_owner),
-      caret_state_(LayoutCaret::State::None),
+      caret_state_(paint::Caret::State::None),
       zoom_(1.0f) {}
 
 LayoutViewBuilder::~LayoutViewBuilder() {
@@ -140,7 +140,7 @@ scoped_refptr<LayoutView> LayoutViewBuilder::Build(
       make_scoped_refptr(
           new paint::Selection(selection.color(), selection_bounds_set)),
       bgcolor, ruler_bounds,
-      std::make_unique<LayoutCaret>(caret_state, caret_bounds));
+      std::make_unique<paint::Caret>(caret_state, caret_bounds));
 }
 
 gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
@@ -157,29 +157,29 @@ gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
                     char_rect.bottom);
 }
 
-LayoutCaret::State LayoutViewBuilder::ComputeCaretState(
+paint::Caret::State LayoutViewBuilder::ComputeCaretState(
     const gfx::RectF& bounds,
     base::Time now) const {
   if (bounds.empty())
-    return LayoutCaret::State::None;
+    return paint::Caret::State::None;
 
-  if (caret_state_ == LayoutCaret::State::None) {
+  if (caret_state_ == paint::Caret::State::None) {
     // This view starts showing caret.
-    return LayoutCaret::State::Show;
+    return paint::Caret::State::Show;
   }
 
   if (caret_bounds_ != bounds) {
     // The caret is moved.
-    return LayoutCaret::State::Show;
+    return paint::Caret::State::Show;
   }
 
   // When the caret stays at same point, caret is blinking.
   auto const interval = GetCaretBlinkInterval();
   if (interval == base::TimeDelta())
-    return LayoutCaret::State::Show;
+    return paint::Caret::State::Show;
   auto const delta = now - caret_time_;
   auto const index = delta / interval;
-  return index % 2 ? LayoutCaret::State::Hide : LayoutCaret::State::Show;
+  return index % 2 ? paint::Caret::State::Hide : paint::Caret::State::Show;
 }
 
 gfx::RectF LayoutViewBuilder::ComputeRulerBounds() const {

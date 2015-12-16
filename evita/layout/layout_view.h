@@ -11,6 +11,7 @@
 #include "base/memory/ref_counted.h"
 #include "evita/gfx_base.h"
 #include "evita/layout/render_selection.h"
+#include "evita/paint/caret.h"
 
 namespace paint {
 class Selection;
@@ -18,7 +19,6 @@ class Selection;
 
 namespace layout {
 
-class LayoutCaret;
 class RootInlineBox;
 
 //////////////////////////////////////////////////////////////////////
@@ -33,12 +33,12 @@ class LayoutView final : public base::RefCounted<LayoutView> {
              scoped_refptr<paint::Selection> selection,
              const gfx::ColorF& bgcolor,
              const gfx::RectF& ruler_bounds,
-             std::unique_ptr<LayoutCaret> caret);
+             std::unique_ptr<paint::Caret> caret);
   ~LayoutView();
 
   const gfx::ColorF& bgcolor() const { return bgcolor_; }
   const gfx::RectF& bounds() const { return bounds_; }
-  const LayoutCaret& caret() const { return *caret_; }
+  const paint::Caret& caret() const { return *caret_; }
   const std::vector<RootInlineBox*>& lines() const { return lines_; }
   const gfx::RectF& ruler_bounds() const { return ruler_bounds_; }
   scoped_refptr<paint::Selection> selection() const { return selection_; }
@@ -47,7 +47,7 @@ class LayoutView final : public base::RefCounted<LayoutView> {
  private:
   const gfx::ColorF bgcolor_;
   const gfx::RectF bounds_;
-  const std::unique_ptr<LayoutCaret> caret_;
+  const std::unique_ptr<paint::Caret> caret_;
   const int layout_version_;
   const std::vector<RootInlineBox*> lines_;
   const gfx::RectF ruler_bounds_;

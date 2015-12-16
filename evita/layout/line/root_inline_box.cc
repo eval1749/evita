@@ -64,22 +64,6 @@ void RootInlineBox::set_origin(const gfx::PointF& origin) {
   bounds_.top = origin.y;
 }
 
-gfx::RectF RootInlineBox::CalculateSelectionRect(
-    const TextSelection& selection) const {
-  DCHECK(selection.is_range());
-  DCHECK(!cells_.empty());
-  if (selection.start() >= text_end() || selection.end() <= text_start())
-    return gfx::RectF();
-  auto const left =
-      HitTestTextPosition(Contains(selection.start()) ? selection.start()
-                                                      : text_start())
-          .left;
-  auto const right = Contains(selection.end())
-                         ? HitTestTextPosition(selection.end()).left
-                         : bounds_.right;
-  return gfx::RectF(left, bounds_.top, right, bounds_.bottom);
-}
-
 bool RootInlineBox::Contains(text::Offset offset) const {
   DCHECK(offset.IsValid());
   DCHECK(!cells_.empty());

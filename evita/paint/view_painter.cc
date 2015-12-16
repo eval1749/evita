@@ -27,26 +27,62 @@ gfx::RectF RoundBounds(const gfx::RectF& bounds) {
                     ::floor(bounds.right), ::floor(bounds.bottom));
 }
 
+// TODO(eval1749): We should not use |TextSelection| and text offsets in
+// |RootInlineBox|.
+gfx::PointF CalculateSelectionStartPoint(
+    const RootInlineBox& root_box,
+    const TextSelection& selection) {
+  if (root_box.Contains(selection.start()))
+    return root_box.HitTestTextPosition(selection.start()).origin();
+  return root_box.origin();
+}
+
+// TODO(eval1749): We should not use |TextSelection| and text offsets in
+// |RootInlineBox|.
+gfx::PointF CalculateSelectionEndPoint(
+    const RootInlineBox& root_box,
+    const TextSelection& selection) {
+  if (root_box.Contains(selection.end()))
+    return root_box.HitTestTextPosition(selection.end()).bottom_right();
+  return root_box.bottom_right();
+}
+
+// TODO(eval1749): We should not use |TextSelection| and text offsets in
+// |RootInlineBox|.
+gfx::RectF CalculateSelectionBounds(
+    const RootInlineBox& root_box,
+    const TextSelection& selection) {
+  DCHECK(selection.is_range());
+  if (selection.start() >= root_box.text_end() ||
+      selection.end() <= root_box.text_start()) {
+    return gfx::RectF();
+  }
+  return gfx::RectF(CalculateSelectionStartPoint(root_box, selection),
+                    CalculateSelectionEndPoint(root_box, selection));
+}
+
+// TODO(eval1749): We should not use |TextSelection| and text offsets in
+// |RootInlineBox|.
 std::unordered_set<gfx::RectF> CalculateSelectionBoundsList(
     const std::vector<RootInlineBox*>& lines,
     const TextSelection& selection,
     const gfx::RectF& bounds) {
-  std::unordered_set<gfx::RectF> rects;
+  std::unordered_set<gfx::RectF> bounds_list;
   if (selection.is_caret())
-    return rects;
+    return bounds_list;
   if (selection.start() >= lines.back()->text_end())
-    return rects;
+    return bounds_list;
   if (selection.end() <= lines.front()->text_start())
-    return rects;
+    return bounds_list;
   for (auto line : lines) {
     if (selection.end() <= line->text_start())
       break;
-    auto const rect = line->CalculateSelectionRect(selection);
-    if (rect.empty())
+    const auto& bounds = CalculateSelectionBounds(*line, selection);
+    if (bounds.empty())
       continue;
-    rects.insert(bounds.Intersect(RoundBounds(rect)));
+    bounds_list.insert(bounds.Intersect(RoundBounds(bounds)));
   }
-  return rects;
+  return bounds_list;
 }
 
 }  // namespace
@@ -127,10 +163,10 @@ void ViewPainter::PaintSelection(gfx::Canvas* canvas) {
   for (auto line : lines) {
     if (selection.end() <= line->text_start())
       break;
-    auto const rect = line->CalculateSelectionRect(selection);
-    if (rect.empty())
+    const auto& bounds = CalculateSelectionBounds(*line, selection);
+    if (bounds.empty())
       continue;
-    canvas->FillRectangle(fill_brush, rect);
+    canvas->FillRectangle(fill_brush, bounds);
   }
 }
 

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_INLINE_BOX_H_
-#define EVITA_LAYOUT_INLINE_BOX_H_
+#ifndef EVITA_LAYOUT_LINE_INLINE_BOX_H_
+#define EVITA_LAYOUT_LINE_INLINE_BOX_H_
 
 #include "common/castable.h"
 #include "evita/gfx/rect.h"
-#include "evita/layout/inline_box_forward.h"
+#include "evita/layout/line/inline_box_forward.h"
 #include "evita/layout/render_style.h"
 #include "evita/text/offset.h"
 
@@ -235,4 +235,4 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
 
 }  // namespace layout
 
-#endif  // EVITA_LAYOUT_INLINE_BOX_H_
+#endif  // EVITA_LAYOUT_LINE_INLINE_BOX_H_

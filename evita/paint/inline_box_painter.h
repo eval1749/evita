@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 #include "evita/gfx/forward.h"
-#include "evita/layout/inline_box_forward.h"
+#include "evita/layout/line/inline_box_forward.h"
 
 namespace paint {
 
@@ -19,7 +19,7 @@ class InlineBoxPainter final {
   using InlineBox = layout::InlineBox;
 
  public:
-  InlineBoxPainter(const InlineBox& inline_box);
+  explicit InlineBoxPainter(const InlineBox& inline_box);
   ~InlineBoxPainter();
 
   void Paint(gfx::Canvas* canvas, const gfx::RectF& rect);

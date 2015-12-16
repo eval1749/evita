@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
+
 #include "evita/paint/view_painter.h"
 
 #include "base/trace_event/trace_event.h"
@@ -11,7 +13,7 @@
 #include "evita/layout/layout_caret.h"
 #include "evita/layout/layout_view.h"
 #include "evita/layout/render_selection.h"
-#include "evita/layout/root_inline_box.h"
+#include "evita/layout/line/root_inline_box.h"
 
 namespace paint {
 
@@ -189,4 +191,4 @@ void ViewPainter::RestoreCaretBackgroundIfNeeded(
   canvas->RestoreScreenImage(bounds);
 }
 
-}  // namespace pain
+}  // namespace paint

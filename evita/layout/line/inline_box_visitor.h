@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_INLINE_BOX_VISITOR_H_
-#define EVITA_LAYOUT_INLINE_BOX_VISITOR_H_
+#ifndef EVITA_LAYOUT_LINE_INLINE_BOX_VISITOR_H_
+#define EVITA_LAYOUT_LINE_INLINE_BOX_VISITOR_H_
 
 #include "base/macros.h"
-#include "evita/layout/inline_box_forward.h"
+#include "evita/layout/line/inline_box_forward.h"
 
 namespace layout {
 
@@ -29,4 +29,4 @@ class InlineBoxVisitor {
 
 }  // namespace layout
 
-#endif  // EVITA_LAYOUT_INLINE_BOX_VISITOR_H_
+#endif  // EVITA_LAYOUT_LINE_INLINE_BOX_VISITOR_H_

@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <string>
 
-#include "evita/layout/inline_box.h"
+#include "evita/layout/line/inline_box.h"
 
 #include "base/logging.h"
-#include "evita/layout/inline_box_visitor.h"
+#include "evita/layout/line/inline_box_visitor.h"
 #include "evita/layout/render_font.h"
 #include "evita/layout/render_style.h"
 

@@ -13,10 +13,10 @@
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
-#include "evita/layout/inline_box.h"
+#include "evita/layout/line/inline_box.h"
+#include "evita/layout/line/root_inline_box.h"
+#include "evita/layout/line/root_inline_box_cache.h"
 #include "evita/layout/render_style.h"
-#include "evita/layout/root_inline_box.h"
-#include "evita/layout/root_inline_box_cache.h"
 #include "evita/layout/text_formatter.h"
 
 namespace layout {

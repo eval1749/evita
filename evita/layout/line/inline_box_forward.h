@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_INLINE_BOX_FORWARD_H_
-#define EVITA_LAYOUT_INLINE_BOX_FORWARD_H_
+#ifndef EVITA_LAYOUT_LINE_INLINE_BOX_FORWARD_H_
+#define EVITA_LAYOUT_LINE_INLINE_BOX_FORWARD_H_
 
 namespace layout {
 
@@ -22,4 +22,4 @@ class InlineBoxVisitor;
 
 }  // namespace layout
 
-#endif  // EVITA_LAYOUT_INLINE_BOX_FORWARD_H_
+#endif  // EVITA_LAYOUT_LINE_INLINE_BOX_FORWARD_H_

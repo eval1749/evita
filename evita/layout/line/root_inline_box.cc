@@ -4,11 +4,11 @@
 
 #include <cmath>
 
-#include "evita/layout/root_inline_box.h"
+#include "evita/layout/line/root_inline_box.h"
 
 #include "base/logging.h"
 #include "evita/paint/inline_box_painter.h"
-#include "evita/layout/inline_box.h"
+#include "evita/layout/line/inline_box.h"
 #include "evita/layout/render_selection.h"
 
 namespace layout {

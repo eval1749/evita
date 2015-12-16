@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include "evita/paint/root_inline_box_list_painter.h"
 
 #include "base/logging.h"
 #include "evita/gfx_base.h"
 #include "evita/paint/root_inline_box_painter.h"
-#include "evita/layout/inline_box.h"
-#include "evita/layout/root_inline_box.h"
+#include "evita/layout/line/inline_box.h"
+#include "evita/layout/line/root_inline_box.h"
 #include "evita/views/switches.h"
 
 #define DEBUG_DRAW 0

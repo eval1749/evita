@@ -7,7 +7,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/layout/layout_caret.h"
 #include "evita/layout/layout_view.h"
-#include "evita/layout/root_inline_box.h"
+#include "evita/layout/line/root_inline_box.h"
 
 namespace paint {
 
@@ -47,4 +47,4 @@ void ViewPaintCache::UpdateSelection(const TextSelection& selection,
   selection_ = selection;
 }
 
-}  // namespace pain
+}  // namespace paint

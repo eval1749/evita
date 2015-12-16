@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/layout/root_inline_box_cache.h"
+#include <algorithm>
+#include <vector>
+
+#include "evita/layout/line/root_inline_box_cache.h"
 
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/layout/root_inline_box.h"
+#include "evita/layout/line/root_inline_box.h"
 #include "evita/text/buffer.h"
 
 namespace layout {

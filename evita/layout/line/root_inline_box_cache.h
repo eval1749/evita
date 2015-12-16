@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_ROOT_INLINE_BOX_CACHE_H_
-#define EVITA_LAYOUT_ROOT_INLINE_BOX_CACHE_H_
+#ifndef EVITA_LAYOUT_LINE_ROOT_INLINE_BOX_CACHE_H_
+#define EVITA_LAYOUT_LINE_ROOT_INLINE_BOX_CACHE_H_
 
 #include <map>
 
@@ -51,4 +51,4 @@ class RootInlineBoxCache final {
 
 }  // namespace layout
 
-#endif  // EVITA_LAYOUT_ROOT_INLINE_BOX_CACHE_H_
+#endif  // EVITA_LAYOUT_LINE_ROOT_INLINE_BOX_CACHE_H_

@@ -22,7 +22,11 @@ class TextSelection;
 
 class RootInlineBox final : public base::RefCounted<RootInlineBox> {
  public:
-  RootInlineBox();
+  RootInlineBox(const std::vector<InlineBox*>& boxes,
+                text::Offset text_start,
+                text::Offset text_end,
+                float ascent,
+                float descent);
 
   float bottom() const { return bounds_.bottom; }
   const gfx::PointF& bottom_right() const { return bounds_.bottom_right(); }
@@ -40,11 +44,9 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   text::Offset text_start() const { return m_lStart; }
   float width() const { return bounds_.width(); }
 
-  void AddInlineBox(InlineBox* cell);
   gfx::RectF CalculateSelectionRect(const TextSelection& selection) const;
   RootInlineBox* Copy() const;
   bool Equal(const RootInlineBox*) const;
-  void Fix(float ascent, float descent);
   uint32_t Hash() const;
   gfx::RectF HitTestTextPosition(text::Offset lPosn) const;
   bool IsEndOfDocument() const;
@@ -59,7 +61,7 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   bool Contains(text::Offset offset) const;
 
   gfx::RectF bounds_;
-  std::vector<InlineBox*> cells_;
+  const std::vector<InlineBox*> cells_;
   mutable uint32_t m_nHash;
   text::Offset m_lStart;
   text::Offset m_lEnd;

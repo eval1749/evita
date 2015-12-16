@@ -8,6 +8,7 @@
 #include <map>
 
 #include "base/macros.h"
+#include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/text/offset.h"
 
@@ -29,10 +30,10 @@ class RootInlineBoxCache final {
   ~RootInlineBoxCache();
 
   void DidChangeBuffer(text::Offset offset);
-  RootInlineBox* FindLine(text::Offset text_offset) const;
+  scoped_refptr<RootInlineBox> FindLine(text::Offset text_offset) const;
   void Invalidate(const gfx::RectF& bounds, float zoom);
   bool IsDirty(const gfx::RectF& bounds, float zoom) const;
-  void Register(RootInlineBox* line);
+  void Register(scoped_refptr<RootInlineBox> line);
 
  private:
   bool IsAfterNewline(const RootInlineBox* text_line) const;
@@ -43,7 +44,7 @@ class RootInlineBoxCache final {
   gfx::RectF bounds_;
   const text::Buffer* const buffer_;
   text::Offset dirty_start_;
-  std::map<text::Offset, RootInlineBox*> lines_;
+  std::map<text::Offset, scoped_refptr<RootInlineBox>> lines_;
   float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(RootInlineBoxCache);

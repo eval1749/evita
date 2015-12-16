@@ -8,6 +8,7 @@
 #include <list>
 #include <memory>
 
+#include "base/memory/ref_counted.h"
 #include "evita/gfx_base.h"
 #include "evita/layout/render_style.h"
 #include "evita/text/offset.h"
@@ -34,7 +35,9 @@ class LayoutBlockFlow final {
   const gfx::RectF& bounds() const { return bounds_; }
   bool dirty() const { return dirty_; }
   int format_counter() const { return format_counter_; }
-  const std::list<RootInlineBox*>& lines() const { return lines_; }
+  const std::list<scoped_refptr<RootInlineBox>>& lines() const {
+    return lines_;
+  }
 
   void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
   void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
@@ -64,26 +67,26 @@ class LayoutBlockFlow final {
   text::Offset StartOfLine(text::Offset text_offset);
 
  private:
-  void Append(RootInlineBox* line);
+  void Append(scoped_refptr<RootInlineBox> line);
   // Returns true if discarded the first line.
   bool DiscardFirstLine();
   // Returns true if discarded the last line.
   bool DiscardLastLine();
   void EnsureLinePoints();
-  RootInlineBox* FormatLine(TextFormatter* formatter);
+  scoped_refptr<RootInlineBox> FormatLine(TextFormatter* formatter);
   void InvalidateCache();
   void InvalidateLines(text::Offset offset);
   bool IsShowEndOfDocument() const;
 
   // Returns true if we need to format all lines.
   bool NeedFormat() const;
-  void Prepend(RootInlineBox* line);
+  void Prepend(scoped_refptr<RootInlineBox> line);
 
   gfx::RectF bounds_;
   bool dirty_;
   bool dirty_line_point_;
   int format_counter_;
-  std::list<RootInlineBox*> lines_;
+  std::list<scoped_refptr<RootInlineBox>> lines_;
   float lines_height_;
 
   // True if we need to format all lines.

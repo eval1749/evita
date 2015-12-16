@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "base/basictypes.h"
+#include "base/memory/ref_counted.h"
 #include "evita/gfx_base.h"
 #include "evita/layout/render_style.h"
 
@@ -19,6 +20,7 @@ class Offset;
 namespace layout {
 
 class InlineBox;
+class LineBuilder;
 class RootInlineBox;
 enum class TextMarker;
 class TextSelection;
@@ -35,8 +37,8 @@ class TextFormatter final {
   text::Offset text_offset() const;
   void set_text_offset(text::Offset new_text_offset);
 
-  RootInlineBox* FormatLine(text::Offset text_offset);
-  RootInlineBox* FormatLine();
+  scoped_refptr<RootInlineBox> FormatLine(text::Offset text_offset);
+  scoped_refptr<RootInlineBox> FormatLine();
   InlineBox* FormatMarker(TextMarker marker_name);
 
   static TextSelection FormatSelection(

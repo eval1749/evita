@@ -13,16 +13,47 @@
 
 namespace layout {
 
-RootInlineBox::RootInlineBox(const RootInlineBox& other)
-    : m_nHash(other.m_nHash),
-      m_lEnd(other.m_lEnd),
-      m_lStart(other.m_lStart),
-      bounds_(other.bounds_) {
-  for (auto cell : other.cells_)
-    cells_.push_back(cell->Copy());
+namespace {
+std::vector<InlineBox*> CopyInlineBoxList(const std::vector<InlineBox*> boxes) {
+  std::vector<InlineBox*> copy;
+  copy.reserve(boxes.size());
+  for (auto const& box : boxes)
+    copy.push_back(box->Copy());
+  return std::move(copy);
+}
+}  // namespace
+
+RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& cells,
+                             text::Offset text_start,
+                             text::Offset text_end,
+                             float ascent,
+                             float descent)
+    : cells_(cells), m_nHash(0), m_lStart(text_start), m_lEnd(text_end) {
+  DCHECK(!cells_.empty());
+  auto const left = 0.0f;
+  auto const top = 0.0f;
+  auto const height = ascent + descent;
+  auto right = left;
+  for (auto cell : cells_) {
+    auto const lEnd = cell->Fix(height, descent);
+    if (lEnd >= 0)
+      m_lEnd = lEnd;
+    right += cell->width();
+  }
+  bounds_.left = left;
+  bounds_.top = top;
+  bounds_.right = right;
+  bounds_.bottom = top + height;
+  DCHECK_EQ(bounds_.top, ::floor(bounds_.top));
+  DCHECK_EQ(bounds_.bottom, ::floor(bounds_.bottom));
 }
 
-RootInlineBox::RootInlineBox() : m_nHash(0), m_lStart(0), m_lEnd(0) {}
+RootInlineBox::RootInlineBox(const RootInlineBox& other)
+    : cells_(CopyInlineBoxList(other.cells_)),
+      m_nHash(other.m_nHash),
+      m_lEnd(other.m_lEnd),
+      m_lStart(other.m_lStart),
+      bounds_(other.bounds_) {}
 
 RootInlineBox::~RootInlineBox() {}
 
@@ -73,30 +104,6 @@ bool RootInlineBox::Equal(const RootInlineBox* other) const {
     ++other_it;
   }
   return true;
-}
-
-void RootInlineBox::AddInlineBox(InlineBox* cell) {
-  cells_.push_back(cell);
-}
-
-void RootInlineBox::Fix(float ascent, float descent) {
-  DCHECK(!cells_.empty());
-  auto const left = 0.0f;
-  auto const top = 0.0f;
-  auto const height = ascent + descent;
-  auto right = left;
-  for (auto cell : cells_) {
-    auto const lEnd = cell->Fix(height, descent);
-    if (lEnd >= 0)
-      m_lEnd = lEnd;
-    right += cell->width();
-  }
-  bounds_.left = left;
-  bounds_.top = top;
-  bounds_.right = right;
-  bounds_.bottom = top + height;
-  DCHECK_EQ(bounds_.top, ::floor(bounds_.top));
-  DCHECK_EQ(bounds_.bottom, ::floor(bounds_.bottom));
 }
 
 uint32_t RootInlineBox::Hash() const {

@@ -18,6 +18,7 @@
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
 #include "evita/layout/line/inline_box.h"
+#include "evita/layout/line/line_builder.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/render_font.h"
 #include "evita/layout/render_font_set.h"
@@ -30,14 +31,19 @@ namespace layout {
 namespace {
 
 const float kLeftMargin = 10.0f;
+auto const kMinHeight = 1.0f;
 const int kTabWidth = 4;
 
+// TODO(eval1749): We should move |AlignHeightToPixel()| to another place
+// to share code.
 float AlignHeightToPixel(float height) {
   return gfx::FactorySet::instance()
       ->AlignToPixel(gfx::SizeF(0.0f, height))
       .height;
 }
 
+// TODO(eval1749): We should move |AlignWidthToPixel()| to another place
+// to share code.
 float AlignWidthToPixel(float width) {
   return width;
 }
@@ -197,77 +203,43 @@ void TextFormatter::set_text_offset(text::Offset new_text_offset) {
 }
 
 // Returns true if more contents is available, otherwise returns false.
-RootInlineBox* TextFormatter::FormatLine(text::Offset text_offset) {
+scoped_refptr<RootInlineBox> TextFormatter::FormatLine(
+    text::Offset text_offset) {
   text_scanner_->set_text_offset(text_offset);
-  return FormatLine();
+  return std::move(FormatLine());
 }
 
-RootInlineBox* TextFormatter::FormatLine() {
+scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
   TRACE_EVENT0("views", "TextFormatter::FormatLine");
   DCHECK(!bounds_.empty());
-  auto const line = new RootInlineBox();
-  line->set_start(text_scanner_->text_offset());
 
-  auto x = bounds_.left;
-  auto descent = 0.0f;
-  auto ascent = 0.0f;
-
-  InlineBox* cell;
-
-  // Left margin
-  {
-    auto const cyMinHeight = 1.0f;
-
-    cell = new InlineFillerBox(default_render_style_, kLeftMargin, cyMinHeight);
-    line->AddInlineBox(cell);
-    x += kLeftMargin;
-  }
-
+  LineBuilder line_builder(text_scanner_->text_offset());
+  line_builder.Add(
+      new InlineFillerBox(default_render_style_, kLeftMargin, kMinHeight));
   for (;;) {
     if (text_scanner_->AtEnd()) {
-      cell = FormatMarker(TextMarker::EndOfDocument);
+      line_builder.Add(FormatMarker(TextMarker::EndOfDocument));
       break;
     }
 
     auto const wch = text_scanner_->GetChar();
     if (wch == 0x0A) {
-      cell = FormatMarker(TextMarker::EndOfLine);
+      line_builder.Add(FormatMarker(TextMarker::EndOfLine));
       text_scanner_->Next();
       break;
     }
 
-    auto const width = cell->width();
-    cell = FormatChar(cell, x, wch);
-    if (!cell) {
-      cell = FormatMarker(TextMarker::LineWrap);
+    auto const box =
+        FormatChar(line_builder.last_box(), line_builder.current_x(), wch);
+    if (!box) {
+      line_builder.Add(FormatMarker(TextMarker::LineWrap));
       break;
     }
 
     text_scanner_->Next();
-
-    if (line->last_cell() == cell) {
-      x -= width;
-    } else {
-      line->AddInlineBox(cell);
-    }
-
-    x += cell->width();
-    descent = std::max(cell->descent(), descent);
-    ascent = std::max(cell->height() - cell->descent(), ascent);
+    line_builder.Add(box);
   }
-
-  // We have at least one cell.
-  // o end of buffer: End-Of-Buffer InlineMarkerBox
-  // o end of line: End-Of-Line InlineMarkerBox
-  // o wrapped line: Warp InlineMarkerBox
-  DCHECK(cell);
-  line->AddInlineBox(cell);
-
-  x += cell->width();
-  descent = std::max(cell->descent(), descent);
-  ascent = std::max(cell->height() - cell->descent(), ascent);
-  line->Fix(AlignHeightToPixel(ascent), AlignHeightToPixel(descent));
-  return line;
+  return std::move(line_builder.Build(text_scanner_->text_offset()));
 }
 
 InlineBox* TextFormatter::FormatChar(InlineBox* previous_cell,

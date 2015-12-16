@@ -21,17 +21,15 @@ namespace layout {
 RootInlineBoxCache::RootInlineBoxCache(const text::Buffer* buffer)
     : buffer_(buffer), dirty_start_(text::Offset::Max()), zoom_(0.0f) {}
 
-RootInlineBoxCache::~RootInlineBoxCache() {
-  for (const auto& entry : lines_)
-    entry.second->Release();
-}
+RootInlineBoxCache::~RootInlineBoxCache() {}
 
 void RootInlineBoxCache::DidChangeBuffer(text::Offset offset) {
   ASSERT_DOM_LOCKED();
   dirty_start_ = std::min(dirty_start_, offset);
 }
 
-RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
+scoped_refptr<RootInlineBox> RootInlineBoxCache::FindLine(
+    text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
   auto it = lines_.lower_bound(offset);
   if (it == lines_.end())
@@ -65,15 +63,14 @@ void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
     std::vector<text::Offset> dirty_offsets;
     for (auto it : lines_) {
       auto const line = it.second;
-      if (line->right() > new_bounds.right || !IsAfterNewline(line) ||
-          !IsEndWithNewline(line)) {
+      if (line->right() > new_bounds.right || !IsAfterNewline(line.get()) ||
+          !IsEndWithNewline(line.get())) {
         dirty_offsets.push_back(line->text_start());
       }
     }
     for (auto offset : dirty_offsets) {
       const auto it = lines_.find(offset);
       DCHECK(it != lines_.end());
-      it->second->Release();
       lines_.erase(it);
     }
   }
@@ -99,7 +96,7 @@ bool RootInlineBoxCache::IsEndWithNewline(
   return end >= buffer_->GetEnd() || buffer_->GetCharAt(end) == '\n';
 }
 
-void RootInlineBoxCache::Register(RootInlineBox* line) {
+void RootInlineBoxCache::Register(scoped_refptr<RootInlineBox> line) {
   UI_ASSERT_DOM_LOCKED();
   DCHECK_GE(line->text_end(), line->text_start());
   lines_[line->text_start()] = line;
@@ -153,14 +150,11 @@ void RootInlineBoxCache::RemoveDirtyLines() {
   for (auto offset : dirty_offsets) {
     const auto present = lines_.find(offset);
     DCHECK(present != lines_.end());
-    present->second->Release();
     lines_.erase(present);
   }
 }
 
 void RootInlineBoxCache::RemoveAllLines() {
-  for (const auto& entry : lines_)
-    entry.second->Release();
   lines_.clear();
 }
 

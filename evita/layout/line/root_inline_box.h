@@ -39,9 +39,9 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   float top() const { return bounds_.top; }
   const gfx::PointF origin() const { return bounds_.origin(); }
   void set_origin(const gfx::PointF& origin);
-  void set_start(text::Offset start) { m_lStart = start; }
-  text::Offset text_end() const { return m_lEnd; }
-  text::Offset text_start() const { return m_lStart; }
+  void set_start(text::Offset start) { text_start_ = start; }
+  text::Offset text_end() const { return text_end_; }
+  text::Offset text_start() const { return text_start_; }
   float width() const { return bounds_.width(); }
 
   bool Contains(text::Offset offset) const;
@@ -61,8 +61,8 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   gfx::RectF bounds_;
   const std::vector<InlineBox*> cells_;
   mutable uint32_t m_nHash;
-  text::Offset m_lStart;
-  text::Offset m_lEnd;
+  text::Offset text_start_;
+  text::Offset text_end_;
 };
 
 }  // namespace layout

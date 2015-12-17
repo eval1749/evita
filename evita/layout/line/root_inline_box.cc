@@ -28,16 +28,16 @@ RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& cells,
                              text::Offset text_end,
                              float ascent,
                              float descent)
-    : cells_(cells), m_nHash(0), m_lStart(text_start), m_lEnd(text_end) {
+    : cells_(cells), m_nHash(0), text_start_(text_start), text_end_(text_end) {
   DCHECK(!cells_.empty());
   auto const left = 0.0f;
   auto const top = 0.0f;
   auto const height = ascent + descent;
   auto right = left;
   for (auto cell : cells_) {
-    auto const lEnd = cell->Fix(height, descent);
-    if (lEnd >= 0)
-      m_lEnd = lEnd;
+    auto const text_end = cell->Fix(height, descent);
+    if (text_end >= 0)
+      text_end_ = text_end;
     right += cell->width();
   }
   bounds_.left = left;
@@ -51,8 +51,8 @@ RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& cells,
 RootInlineBox::RootInlineBox(const RootInlineBox& other)
     : cells_(CopyInlineBoxList(other.cells_)),
       m_nHash(other.m_nHash),
-      m_lEnd(other.m_lEnd),
-      m_lStart(other.m_lStart),
+      text_end_(other.text_end_),
+      text_start_(other.text_start_),
       bounds_(other.bounds_) {}
 
 RootInlineBox::~RootInlineBox() {}
@@ -105,7 +105,7 @@ uint32_t RootInlineBox::Hash() const {
 gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
   DCHECK(offset.IsValid());
   DCHECK(!cells_.empty());
-  if (offset < m_lStart || offset >= m_lEnd)
+  if (offset < text_start_ || offset >= text_end_)
     return gfx::RectF();
 
   auto origin = bounds_.origin();

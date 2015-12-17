@@ -39,6 +39,7 @@ source_set("views") {
     "//base",
 
     "//evita/layout",
+    "//evita/metrics",
     "//evita/spellchecker",
     "//evita/ui",
     "//evita/views/events",

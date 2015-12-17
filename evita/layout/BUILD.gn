@@ -48,6 +48,7 @@ source_set("layout") {
 test("evita_layout_tests") {
   sources = [
     "line/root_inline_box_test.cc",
+    "text_formatter_test.cc",
   ]
 
   deps = [

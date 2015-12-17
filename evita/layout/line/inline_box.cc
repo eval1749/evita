@@ -45,7 +45,7 @@ InlineBox::InlineBox(const InlineBox& other)
 InlineBox::~InlineBox() {}
 
 float InlineBox::top() const {
-  return line_height() - line_descent() - height() + descent();
+  return ::floor(line_height() - line_descent() - height() + descent());
 }
 
 void InlineBox::IncrementWidth(float amount) {
@@ -163,7 +163,7 @@ uint32_t InlineMarkerBox::Hash() const {
 gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset lPosn) const {
   if (lPosn < start_ || lPosn >= end_)
     return gfx::RectF();
-  return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(width(), height()));
+  return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(1.0f, height()));
 }
 
 text::Offset InlineMarkerBox::MapXToPosn(float x) const {
@@ -182,7 +182,7 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
     : InlineBox(style, width, height, style.font().descent()),
       WithFont(style.font()),
       characters_(characters),
-      end_(lPosn + text::OffsetDelta(1)),
+      end_(lPosn + text::OffsetDelta(characters.size())),
       start_(lPosn) {}
 
 InlineTextBoxBase::InlineTextBoxBase(const InlineTextBoxBase& other)
@@ -258,9 +258,11 @@ gfx::RectF InlineTextBox::HitTestTextPosition(text::Offset offset) const {
   if (offset < start() || offset > end())
     return gfx::RectF();
   auto const length = static_cast<size_t>(offset - start());
-  auto const left =
-      length ? style().font().GetTextWidth(characters().data(), length) : 0.0f;
-  return gfx::RectF(gfx::PointF(left, top()), gfx::SizeF(1.0f, height()));
+  if (length == 0)
+    return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(1.0f, height()));
+  auto const width = font().GetTextWidth(characters().data(), length);
+  return gfx::RectF(gfx::PointF(::ceil(width), top()),
+                    gfx::SizeF(1.0f, height()));
 }
 
 bool InlineTextBox::Merge(const RenderStyle& style, float width) {

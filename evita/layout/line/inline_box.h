@@ -109,7 +109,7 @@ class InlineFillerBox final : public InlineBox {
 //
 class WithFont {
  public:
-  const Font& font() { return *font_; }
+  const Font& font() const { return *font_; }
 
  protected:
   explicit WithFont(const Font& font);

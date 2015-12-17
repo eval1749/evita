@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cmath>
 #include <vector>
 
 #include "evita/css/style.h"
@@ -49,9 +50,8 @@ LineBuilder::LineBuilder(text::Offset start, const RenderStyle& style)
     : offset_(start), style_(style), start_(start) {}
 
 void LineBuilder::AddMarker(TextMarker marker) {
-  boxes_.push_back(new InlineMarkerBox(style_, WidthOf(L"x"),
-                                       style_.font().height(), offset_,
-                                       marker));
+  boxes_.push_back(new InlineMarkerBox(
+      style_, WidthOf(L"x"), style_.font().height(), offset_, marker));
   offset_ += text::OffsetDelta(1);
 }
 
@@ -75,7 +75,7 @@ RenderStyle CreateStyle() {
 }
 
 float LineBuilder::WidthOf(const base::string16& text) const {
-  return style_.font().GetTextWidth(text);
+  return ::ceil(style_.font().GetTextWidth(text));
 }
 
 }  // namespace
@@ -102,7 +102,52 @@ class RootInlineBoxTest : public ::testing::Test {
 RootInlineBoxTest::RootInlineBoxTest() : style_(CreateStyle()) {}
 
 float RootInlineBoxTest::WidthOf(const base::string16& text) const {
-  return style_.font().GetTextWidth(text);
+  return ::ceil(style_.font().GetTextWidth(text));
+}
+
+TEST_F(RootInlineBoxTest, HitTestTextPosition) {
+  LineBuilder line(text::Offset(100), style());
+  line.AddText(L"foo");
+  line.AddText(L"bar");
+  line.AddText(L"baz");
+  line.AddMarker(TextMarker::EndOfLine);
+  const auto root_box = make_scoped_refptr(
+      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
+                        line.ascent(), line.descent()));
+  root_box->set_origin(gfx::PointF(10.0f, 20.0f));
+  const auto height = root_box->height();
+  const auto& size = gfx::SizeF(1.0f, height);
+  EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(90)))
+      << "If RootInlineBox contains specified offset, HitTestTextPosition "
+         "returns empty rectangle";
+  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f, 20.0f), size),
+            root_box->HitTestTextPosition(text::Offset(100)));
+  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"f"), 20.0f), size),
+            root_box->HitTestTextPosition(text::Offset(101)));
+  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"fo"), 20.0f), size),
+            root_box->HitTestTextPosition(text::Offset(102)));
+  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo"), 20.0f), size),
+            root_box->HitTestTextPosition(text::Offset(103)));
+  EXPECT_EQ(
+      gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo") + WidthOf(L"b"), 20.0f),
+                 size),
+      root_box->HitTestTextPosition(text::Offset(104)));
+  EXPECT_EQ(
+      gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo") + WidthOf(L"ba"), 20.0f),
+                 size),
+      root_box->HitTestTextPosition(text::Offset(105)));
+  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo") + WidthOf(L"bar") +
+                                       WidthOf(L"b"),
+                                   20.0f),
+                       size),
+            root_box->HitTestTextPosition(text::Offset(107)));
+  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo") + WidthOf(L"bar") +
+                                       WidthOf(L"baz"),
+                                   20.0f),
+                       size),
+            root_box->HitTestTextPosition(text::Offset(109)));
+  EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(110)))
+      << "root_box contains 100 to 109.";
 }
 
 TEST_F(RootInlineBoxTest, MapXToPosn) {

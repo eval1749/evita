@@ -52,8 +52,7 @@ source_set("text") {
   ]
 }
 
-# TODO(eval1749): We should rename to "evita_text_tests"
-test("evita_text_unittests") {
+test("evita_text_tests") {
   sources = [
     # TODO(evita) Move "style_sheet_unittest.cc" to "css/"
     "../css/style_sheet_unittest.cc",

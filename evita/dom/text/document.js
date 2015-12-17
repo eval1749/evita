@@ -579,6 +579,7 @@
     list: {get: () => listDocument()},
     new: {value: newDocument},
     notifyObservers: {value: notifyObservers},
+    remove: {value: removeDocument},
     removeObserver: {value: removeObserver},
   });
 

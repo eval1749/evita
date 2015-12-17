@@ -192,8 +192,7 @@ action("check_jslib") {
   ]
 }
 
-# TODO(eval1749): We should rename to "evita_dom_tests"
-test("evita_dom_unittests") {
+test("evita_dom_tests") {
   sources = [
     "abstract_dom_test.cc",
     "css/style_unittest.cc",

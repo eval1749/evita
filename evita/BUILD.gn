@@ -17,6 +17,11 @@ executable("evita") {
     "//build/win:default_exe_manifest",
   ]
 
+  if (!is_debug) {
+    configs -= [ "//build/config/compiler:default_optimization" ]
+    configs += [ "//build/config/compiler:optimize_max" ]
+  }
+
   configs -= [ "//build/config/win:console" ]
   configs += [ "//build/config/win:windowed" ]
 }

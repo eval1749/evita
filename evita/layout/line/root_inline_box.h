@@ -47,7 +47,7 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   RootInlineBox* Copy() const;
   bool Equal(const RootInlineBox*) const;
   uint32_t Hash() const;
-  gfx::RectF HitTestTextPosition(text::Offset lPosn) const;
+  gfx::RectF HitTestTextPosition(text::Offset offset) const;
   bool IsEndOfDocument() const;
   text::Offset MapXToPosn(float x) const;
 

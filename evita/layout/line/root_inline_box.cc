@@ -128,17 +128,17 @@ bool RootInlineBox::IsEndOfDocument() const {
 text::Offset RootInlineBox::MapXToPosn(float xGoal) const {
   DCHECK(!cells_.empty());
   auto xInlineBox = 0.0f;
-  auto lPosn = text_end() - text::OffsetDelta(1);
+  auto offset = text_end() - text::OffsetDelta(1);
   for (const auto cell : cells_) {
     auto const x = xGoal - xInlineBox;
     xInlineBox += cell->width();
     auto const lMap = cell->MapXToPosn(x);
     if (lMap >= 0)
-      lPosn = lMap;
+      offset = lMap;
     if (x >= 0 && x < cell->width())
       break;
   }
-  return lPosn;
+  return offset;
 }
 
 }  // namespace layout

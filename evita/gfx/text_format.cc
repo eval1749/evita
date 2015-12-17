@@ -33,13 +33,11 @@ common::ComPtr<IDWriteTextFormat> CreateTextFormat(
 // TextFormat
 //
 TextFormat::TextFormat(const base::string16& font_face_name, float font_size)
-    : SimpleObject_(CreateTextFormat(font_face_name, font_size)),
-      factory_set_(FactorySet::instance()) {}
+    : SimpleObject_(CreateTextFormat(font_face_name, font_size)) {}
 
 TextFormat::TextFormat(const LOGFONT& log_font)
     : SimpleObject_(
-          CreateTextFormat(log_font.lfFaceName, pt2dip(-log_font.lfHeight))),
-      factory_set_(FactorySet::instance()) {}
+          CreateTextFormat(log_font.lfFaceName, pt2dip(-log_font.lfHeight))) {}
 
 std::unique_ptr<TextLayout> TextFormat::CreateLayout(const base::string16& text,
                                                      const SizeF& size) const {

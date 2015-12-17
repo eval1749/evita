@@ -1,13 +1,11 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Graphics
-//
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
+// Copyright (c) 2013 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include <math.h>
 #include <utility>
 
+#include "base/memory/singleton.h"
 #include "evita/gfx_base.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/precomp.h"
@@ -123,6 +121,13 @@ FactorySet::FactorySet()
   SizeF dpi;
   d2d1_factory_->GetDesktopDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);
+}
+
+FactorySet::~FactorySet() {}
+
+// static
+FactorySet* FactorySet::GetInstance() {
+  return base::Singleton<FactorySet>::get();
 }
 
 }  // namespace gfx

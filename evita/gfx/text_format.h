@@ -19,8 +19,6 @@ class TextFormat final : public SimpleObject_<IDWriteTextFormat> {
   float GetWidth(const base::string16& text) const;
 
  private:
-  const scoped_refptr<FactorySet> factory_set_;
-
   DISALLOW_COPY_AND_ASSIGN(TextFormat);
 };
 

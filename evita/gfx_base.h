@@ -1,36 +1,19 @@
-// Graphics
-//
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
+// Copyright (c) 2013 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_GFX_BASE_H_
 #define EVITA_GFX_BASE_H_
 
-#pragma warning(push)
-// warning C4263: 'function' : member function does not override any base
-// class virtual member function
-#pragma warning(disable : 4263)
-// warning C4264: 'virtual_function' : no override available for virtual
-// member function from base 'class'; function is hidden
-#pragma warning(disable : 4264)
-
 #include <dwrite.h>
-#pragma warning(pop)
-
-// warning C4625: derived class' : copy constructor could not be generated
-// because a base class copy constructor is inaccessible
-#pragma warning(push)
-#pragma warning(disable : 4625)
 #include <wincodec.h>
-#pragma warning(pop)
 
 #include <memory>
 
 #include "base/basictypes.h"
+#include "base/memory/singleton.h"
 #include "base/observer_list.h"
 #include "base/logging.h"
-#include "base/memory/ref_counted.h"
-#include "common/memory/singleton.h"
 #include "common/win/rect.h"
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/color_f.h"
@@ -106,16 +89,14 @@ class DpiHandler {
   SizeF pixels_per_dip_;
 };
 
-class FactorySet final : public base::RefCounted<FactorySet>,
-                         public common::ComInit,
-                         public common::Singleton<FactorySet>,
+class FactorySet final : public common::ComInit,
                          public DpiHandler,
                          public Object {
  public:
-  ~FactorySet() = default;
   static ID2D1Factory1& d2d1() { return *instance()->d2d1_factory_; }
   static IDWriteFactory& dwrite() { return *instance()->dwrite_factory_; }
   static IWICImagingFactory& image() { return *instance()->image_factory_; }
+  static FactorySet* instance() { return GetInstance(); }
 
   static SizeF AlignToPixel(const SizeF& size) {
     return instance()->DpiHandler::AlignToPixel(size);
@@ -124,14 +105,18 @@ class FactorySet final : public base::RefCounted<FactorySet>,
     return instance()->DpiHandler::CeilToPixel(size);
   }
 
+  static FactorySet* GetInstance();
+
  private:
-  friend class common::Singleton<FactorySet>;
+  friend struct base::DefaultSingletonTraits<FactorySet>;
+
+  FactorySet();
+  ~FactorySet();
 
   common::ComPtr<ID2D1Factory1> d2d1_factory_;
   common::ComPtr<IDWriteFactory> dwrite_factory_;
   common::ComPtr<IWICImagingFactory> image_factory_;
 
-  FactorySet();
   DISALLOW_COPY_AND_ASSIGN(FactorySet);
 };
 

@@ -14,19 +14,11 @@
 namespace layout {
 
 namespace {
-RenderStyle CreateStyle() {
-  css::Style css_style;
-  css_style.set_bgcolor(css::Color());
-  css_style.set_color(css::Color());
-  css_style.set_font_family(L"Consolas");
-  css_style.set_font_weight(css::FontWeight::Normal);
-  css_style.set_font_size(10);
-  css_style.set_font_style(css::FontStyle::Normal);
-  css_style.set_text_decoration(css::TextDecoration::None);
-  auto const font = FontSet::GetFont(css_style, 'x');
-  return RenderStyle(css_style, font);
-}
 
+//////////////////////////////////////////////////////////////////////
+//
+// LineBuilder
+//
 class LineBuilder final {
  public:
   LineBuilder(text::Offset start, const RenderStyle& style);
@@ -43,6 +35,8 @@ class LineBuilder final {
   float WidthOf(const base::string16& text) const;
 
  private:
+  static RenderStyle CreateStyle();
+
   std::vector<InlineBox*> boxes_;
   text::Offset offset_;
   text::Offset start_;
@@ -67,12 +61,29 @@ void LineBuilder::AddText(const base::string16& text) {
   offset_ += text::OffsetDelta(text.size());
 }
 
+RenderStyle CreateStyle() {
+  css::Style css_style;
+  css_style.set_bgcolor(css::Color());
+  css_style.set_color(css::Color());
+  css_style.set_font_family(L"Consolas");
+  css_style.set_font_weight(css::FontWeight::Normal);
+  css_style.set_font_size(10);
+  css_style.set_font_style(css::FontStyle::Normal);
+  css_style.set_text_decoration(css::TextDecoration::None);
+  auto const font = FontSet::GetFont(css_style, 'x');
+  return RenderStyle(css_style, font);
+}
+
 float LineBuilder::WidthOf(const base::string16& text) const {
   return style_.font().GetTextWidth(text);
 }
 
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// RootInlineBoxTest
+//
 class RootInlineBoxTest : public ::testing::Test {
  protected:
   RootInlineBoxTest();

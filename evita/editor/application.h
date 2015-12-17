@@ -9,7 +9,6 @@
 
 #include "base/strings/string16.h"
 #include "base/time/time.h"
-#include "common/memory/singleton.h"
 
 namespace base {
 class MessageLoop;
@@ -49,10 +48,11 @@ namespace editor {
 class Scheduler;
 class TraceLogController;
 
-class Application final : public common::Singleton<Application> {
-  DECLARE_SINGLETON_CLASS(Application);
-
+class Application final {
  public:
+  Application();
+  ~Application();
+
   editor::DomLock* dom_lock() const { return dom_lock_.get(); }
   io::IoManager* io_manager() const { return io_manager_.get(); }
   paint::PaintThread* paint_thread() const { return paint_thread_.get(); }
@@ -71,10 +71,10 @@ class Application final : public common::Singleton<Application> {
   void Quit();
   void Run();
 
- private:
-  Application();
-  ~Application() final;
+  static Application* instance() { return GetInstance(); }
+  static Application* GetInstance();
 
+ private:
   std::unique_ptr<editor::DomLock> dom_lock_;
   const std::unique_ptr<io::IoManager> io_manager_;
   bool is_quit_;

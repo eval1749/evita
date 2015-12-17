@@ -117,10 +117,9 @@ void RootInlineBoxListPainter::FillBottom(const RootInlineBox* line) const {
 }
 
 void RootInlineBoxListPainter::FillRight(const RootInlineBox* line) const {
-  auto const rect =
-      gfx::RectF(line->origin() + gfx::SizeF(line->width(), 0.0f),
-                 gfx::PointF(bounds_.right, line->bottom()))
-          .Intersect(bounds_);
+  auto const rect = gfx::RectF(line->origin() + gfx::SizeF(line->width(), 0.0f),
+                               gfx::PointF(bounds_.right, line->bottom()))
+                        .Intersect(bounds_);
   if (rect.empty())
     return;
   gfx::Brush fill_brush(canvas_, bgcolor_);
@@ -215,7 +214,7 @@ bool RootInlineBoxListPainter::Paint() {
   if (VLOG_IS_ON(0)) {
     // TextBlock must cover whole screen area.
     auto const last_format_line = format_lines_.back();
-    if (!last_format_line->cells().back()->is<InlineMarkerBox>())
+    if (!last_format_line->last_box()->is<InlineMarkerBox>())
       DCHECK_GE(last_format_line->bounds().bottom, bounds_.bottom);
   }
 

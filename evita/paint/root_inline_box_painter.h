@@ -25,13 +25,13 @@ class RootInlineBoxPainter final {
   using RootInlineBox = layout::RootInlineBox;
 
  public:
-  explicit RootInlineBoxPainter(const RootInlineBox& root_inline_box);
+  explicit RootInlineBoxPainter(const RootInlineBox& root_box);
   ~RootInlineBoxPainter();
 
   void Paint(gfx::Canvas* canvas);
 
  private:
-  const RootInlineBox& root_inline_box_;
+  const RootInlineBox& root_box_;
 
   DISALLOW_COPY_AND_ASSIGN(RootInlineBoxPainter);
 };

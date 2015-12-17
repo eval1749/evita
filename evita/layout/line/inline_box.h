@@ -64,7 +64,7 @@ class InlineBox : public common::Castable {
   virtual text::Offset Fix(float line_height, float line_descent);
   virtual uint32_t Hash() const;
   virtual gfx::RectF HitTestTextPosition(text::Offset position) const;
-  virtual text::Offset MapXToPosn(float x) const;
+  virtual text::Offset MapXToPosn(float x) const = 0;
   virtual bool Merge(const RenderStyle& style, float width);
 
  protected:
@@ -87,6 +87,8 @@ class InlineBox : public common::Castable {
 //
 // InlineFillerBox
 //
+// TODO(eval1749): We should use |LayoutBlockFlow|'s padding-left instead of
+// |InlineFillerBox|.
 class InlineFillerBox final : public InlineBox {
   DECLARE_INLINE_BOX_FINAL_CLASS(InlineFillerBox, InlineBox);
 
@@ -98,6 +100,7 @@ class InlineFillerBox final : public InlineBox {
  private:
   // InlineBox
   InlineBox* Copy() const final;
+  text::Offset MapXToPosn(float x) const final;
 };
 
 //////////////////////////////////////////////////////////////////////

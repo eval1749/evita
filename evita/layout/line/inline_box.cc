@@ -75,10 +75,6 @@ gfx::RectF InlineBox::HitTestTextPosition(text::Offset) const {
   return gfx::RectF();
 }
 
-text::Offset InlineBox::MapXToPosn(float x) const {
-  return text::Offset::Invalid();
-}
-
 bool InlineBox::Merge(const RenderStyle&, float) {
   return false;
 }
@@ -99,6 +95,10 @@ InlineFillerBox::~InlineFillerBox() {}
 
 InlineBox* InlineFillerBox::Copy() const {
   return new InlineFillerBox(*this);
+}
+
+text::Offset InlineFillerBox::MapXToPosn(float x) const {
+  return text::Offset::Invalid();
 }
 
 //////////////////////////////////////////////////////////////////////

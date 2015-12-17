@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//testing/test.gni")
+
 source_set("layout") {
   sources = [
     "layout_view.cc",
@@ -40,6 +42,19 @@ source_set("layout") {
     "//evita/css",
     "//evita/gfx",
     "//evita/text",
-    "//evita/ui",
+  ]
+}
+
+test("evita_layout_tests") {
+  sources = [
+    "line/root_inline_box_test.cc",
+  ]
+
+  deps = [
+    ":layout",
+    "//base/test:run_all_unittests",
+    # TODO(eval1749): We should make layout independent from
+    # "//evita/application".
+    "//evita:application",
   ]
 }

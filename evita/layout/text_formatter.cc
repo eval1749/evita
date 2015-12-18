@@ -226,15 +226,15 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
       break;
     }
 
-    auto const wch = text_scanner_->GetChar();
-    if (wch == 0x0A) {
+    auto const char_code = text_scanner_->GetChar();
+    if (char_code == 0x0A) {
       line_builder.AddTextBoxIfNeeded();
       line_builder.AddBox(FormatMarker(TextMarker::EndOfLine));
       text_scanner_->Next();
       break;
     }
 
-    if (!FormatChar(&line_builder, wch)) {
+    if (!FormatChar(&line_builder, char_code)) {
       line_builder.AddTextBoxIfNeeded();
       line_builder.AddBox(FormatMarker(TextMarker::LineWrap));
       break;
@@ -245,9 +245,10 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
   return std::move(line_builder.Build(text_scanner_->text_offset()));
 }
 
-bool TextFormatter::FormatChar(LineBuilder* line_builder, base::char16 wch) {
+bool TextFormatter::FormatChar(LineBuilder* line_builder,
+                               base::char16 char_code) {
   const auto x = line_builder->current_x();
-  auto const lPosn = text_scanner_->text_offset();
+  auto const offset = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
 
   auto const spelling = text_scanner_->spelling();
@@ -266,7 +267,7 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder, base::char16 wch) {
       text_scanner_->style_resolver()->Resolve(css::StyleSelector::defaults()));
   style.set_font_size(style.font_size() * zoom_);
 
-  if (wch == 0x09) {
+  if (char_code == 0x09) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
     auto const font = FontSet::GetFont(style, 'x');
@@ -278,27 +279,28 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder, base::char16 wch) {
       return false;
     auto const height = AlignHeightToPixel(font->height());
     line_builder->AddBox(new InlineMarkerBox(
-        MakeRenderStyle(style, *font), width, height, lPosn, TextMarker::Tab));
+        MakeRenderStyle(style, *font), width, height, offset, TextMarker::Tab));
     return true;
   }
 
-  auto const font =
-      wch < 0x20 || wch == 0xFEFF ? nullptr : FontSet::GetFont(style, wch);
+  auto const font = char_code < 0x20 || char_code == 0xFEFF
+                        ? nullptr
+                        : FontSet::GetFont(style, char_code);
 
   if (!font) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
     auto const font2 = FontSet::GetFont(style, 'u');
     base::string16 string;
-    if (wch < 0x20) {
+    if (char_code < 0x20) {
       string.push_back('^');
-      string.push_back(static_cast<base::char16>(wch + 0x40));
+      string.push_back(static_cast<base::char16>(char_code + 0x40));
     } else {
       string.push_back('u');
-      string.push_back(IntToHex((wch >> 12) & 15));
-      string.push_back(IntToHex((wch >> 8) & 15));
-      string.push_back(IntToHex((wch >> 4) & 15));
-      string.push_back(IntToHex((wch >> 0) & 15));
+      string.push_back(IntToHex((char_code >> 12) & 15));
+      string.push_back(IntToHex((char_code >> 8) & 15));
+      string.push_back(IntToHex((char_code >> 4) & 15));
+      string.push_back(IntToHex((char_code >> 0) & 15));
     }
 
     auto const width = font2->GetTextWidth(string) + 4;
@@ -306,11 +308,12 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder, base::char16 wch) {
       return false;
     auto const height = AlignHeightToPixel(font2->height()) + 4;
     line_builder->AddBox(new InlineUnicodeBox(MakeRenderStyle(style, *font2),
-                                              width, height, lPosn, string));
+                                              width, height, offset, string));
     return true;
   }
 
-  return line_builder->TryAddChar(MakeRenderStyle(style, *font), lPosn, wch);
+  return line_builder->TryAddChar(MakeRenderStyle(style, *font), offset,
+                                  char_code);
 }
 
 InlineBox* TextFormatter::FormatMarker(TextMarker marker_name) {
@@ -328,6 +331,8 @@ InlineBox* TextFormatter::FormatMarker(TextMarker marker_name) {
                              text_scanner_->text_offset(), marker_name);
 }
 
+// TODO(eval1749): We should move |TextFormatter::FormatSelection()| somewhere
+// other than her.
 TextSelection TextFormatter::FormatSelection(
     const text::Buffer& buffer,
     const TextSelectionModel& selection_model) {

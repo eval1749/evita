@@ -156,13 +156,10 @@ TEST_F(RootInlineBoxTest, MapXToPosn) {
   line.AddText(L"bar");
   line.AddText(L"baz");
   line.AddMarker(TextMarker::EndOfLine);
-  const auto ascent = 1.0f;
-  const auto descent = 1.0f;
   const auto root_box = make_scoped_refptr(
       new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
                         line.ascent(), line.descent()));
   const auto width = root_box->width();
-  const auto unit = width / 9;
   EXPECT_EQ(100, root_box->MapXToPosn(0));
   EXPECT_EQ(100, root_box->MapXToPosn(WidthOf(L"f") / 2));
   EXPECT_EQ(100, root_box->MapXToPosn(WidthOf(L"f") - 1));

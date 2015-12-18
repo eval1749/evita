@@ -8,7 +8,7 @@
 
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx_base.h"
-#include "evita/layout/layout_view.h"
+#include "evita/paint/public/view.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/paint/public/caret.h"
 #include "evita/paint/public/selection.h"
@@ -33,8 +33,7 @@ gfx::RectF RoundBounds(const gfx::RectF& bounds) {
 //
 // ViewPainter
 //
-ViewPainter::ViewPainter(const LayoutView& layout_view)
-    : layout_view_(layout_view) {}
+ViewPainter::ViewPainter(const View& layout_view) : layout_view_(layout_view) {}
 
 ViewPainter::~ViewPainter() {}
 

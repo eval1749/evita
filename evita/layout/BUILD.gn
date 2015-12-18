@@ -6,10 +6,6 @@ import("//testing/test.gni")
 
 source_set("layout") {
   sources = [
-    "layout_view.cc",
-    "layout_view.h",
-    "layout_view_builder.cc",
-    "layout_view_builder.h",
     "line/inline_box.cc",
     "line/inline_box.h",
     "line/inline_box_forward.h",
@@ -21,6 +17,8 @@ source_set("layout") {
     "line/root_inline_box.h",
     "line/root_inline_box_cache.cc",
     "line/root_inline_box_cache.h",
+    "paint_view_builder.cc",
+    "paint_view_builder.h",
     "render_font.cc",
     "render_font.h",
     "render_font_set.cc",

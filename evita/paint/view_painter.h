@@ -14,12 +14,9 @@ namespace gfx {
 class Canvas;
 }
 
-namespace layout {
-class LayoutView;
-}
-
 namespace paint {
 
+class View;
 class ViewPaintCache;
 
 //////////////////////////////////////////////////////////////////////
@@ -27,10 +24,8 @@ class ViewPaintCache;
 // ViewPainter
 //
 class ViewPainter final {
-  using LayoutView = layout::LayoutView;
-
  public:
-  ViewPainter(const LayoutView& layout_view);
+  explicit ViewPainter(const View& layout_view);
   ~ViewPainter();
 
   std::unique_ptr<ViewPaintCache> Paint(
@@ -46,7 +41,7 @@ class ViewPainter final {
   void RestoreCaretBackgroundIfNeeded(gfx::Canvas* canvas,
                                       const ViewPaintCache& view_cache);
 
-  const LayoutView& layout_view_;
+  const View& layout_view_;
   gfx::RectF caret_bounds_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewPainter);

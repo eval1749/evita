@@ -5,10 +5,10 @@
 #include "evita/paint/view_paint_cache.h"
 
 #include "evita/gfx/canvas.h"
-#include "evita/layout/layout_view.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/paint/public/caret.h"
 #include "evita/paint/public/selection.h"
+#include "evita/paint/public/view.h"
 
 namespace paint {
 
@@ -17,7 +17,7 @@ namespace paint {
 // ViewPaintCache
 //
 ViewPaintCache::ViewPaintCache(gfx::Canvas* canvas,
-                               const LayoutView& view,
+                               const View& view,
                                const gfx::RectF& caret_bounds)
     : bitmap_id_(canvas->bitmap_id()),
       caret_bounds_(caret_bounds),
@@ -38,7 +38,7 @@ bool ViewPaintCache::CanUseTextImage(gfx::Canvas* canvas) const {
 }
 
 bool ViewPaintCache::NeedsTextPaint(gfx::Canvas* canvas,
-                                    const LayoutView& view) const {
+                                    const View& view) const {
   return CanUseTextImage(canvas) && layout_version_ != view.layout_version();
 }
 

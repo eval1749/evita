@@ -5,14 +5,13 @@
 #include <list>
 #include <vector>
 
-#include "evita/layout/layout_view_builder.h"
+#include "evita/layout/paint_view_builder.h"
 
 #include "base/logging.h"
 #include "evita/text/buffer.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/layout/layout_block_flow.h"
-#include "evita/layout/layout_view.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/render_font.h"
 #include "evita/layout/render_font_set.h"
@@ -20,6 +19,7 @@
 #include "evita/layout/render_style.h"
 #include "evita/layout/text_formatter.h"
 #include "evita/paint/public/selection.h"
+#include "evita/paint/public/view.h"
 
 namespace layout {
 
@@ -91,20 +91,20 @@ base::TimeDelta GetCaretBlinkInterval() {
 
 //////////////////////////////////////////////////////////////////////
 //
-// LayoutViewBuilder
+// PaintViewBuilder
 //
-LayoutViewBuilder::LayoutViewBuilder(const text::Buffer* buffer,
-                                     ui::AnimatableWindow* caret_owner)
+PaintViewBuilder::PaintViewBuilder(const text::Buffer* buffer,
+                                   ui::AnimatableWindow* caret_owner)
     : buffer_(buffer),
       caret_owner_(caret_owner),
       caret_state_(paint::CaretState::None),
       zoom_(1.0f) {}
 
-LayoutViewBuilder::~LayoutViewBuilder() {
+PaintViewBuilder::~PaintViewBuilder() {
   caret_timer_.Stop();
 }
 
-scoped_refptr<LayoutView> LayoutViewBuilder::Build(
+scoped_refptr<paint::View> PaintViewBuilder::Build(
     const LayoutBlockFlow& layout_block_flow,
     const TextSelectionModel& selection_model,
     base::Time now) {
@@ -135,7 +135,7 @@ scoped_refptr<LayoutView> LayoutViewBuilder::Build(
   std::vector<RootInlineBox*> lines;
   for (const auto& line : layout_block_flow.lines())
     lines.push_back(line->Copy());
-  return new LayoutView(
+  return new paint::View(
       layout_block_flow.format_counter(), layout_block_flow.bounds(), lines,
       make_scoped_refptr(
           new paint::Selection(selection.color(), selection_bounds_set)),
@@ -143,7 +143,7 @@ scoped_refptr<LayoutView> LayoutViewBuilder::Build(
       std::make_unique<paint::Caret>(caret_state, caret_bounds));
 }
 
-gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
+gfx::RectF PaintViewBuilder::ComputeCaretBounds(
     const LayoutBlockFlow& layout_block_flow,
     const TextSelectionModel& selection_model) const {
   if (!selection_model.has_focus())
@@ -157,8 +157,8 @@ gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
                     char_rect.bottom);
 }
 
-paint::CaretState LayoutViewBuilder::ComputeCaretState(const gfx::RectF& bounds,
-                                                       base::Time now) const {
+paint::CaretState PaintViewBuilder::ComputeCaretState(const gfx::RectF& bounds,
+                                                      base::Time now) const {
   if (bounds.empty())
     return paint::CaretState::None;
 
@@ -181,7 +181,7 @@ paint::CaretState LayoutViewBuilder::ComputeCaretState(const gfx::RectF& bounds,
   return index % 2 ? paint::CaretState::Hide : paint::CaretState::Show;
 }
 
-gfx::RectF LayoutViewBuilder::ComputeRulerBounds() const {
+gfx::RectF PaintViewBuilder::ComputeRulerBounds() const {
   // TODO(eval1749): We should expose show/hide and ruler settings to both
   // script and UI.
   auto style = buffer_->GetDefaultStyle();
@@ -195,30 +195,30 @@ gfx::RectF LayoutViewBuilder::ComputeRulerBounds() const {
                     gfx::SizeF(1.0f, bounds_.height()));
 }
 
-void LayoutViewBuilder::DidFireCaretTimer() {
+void PaintViewBuilder::DidFireCaretTimer() {
   caret_owner_->RequestAnimationFrame();
 }
 
-void LayoutViewBuilder::SetBounds(const gfx::RectF& new_bounds) {
+void PaintViewBuilder::SetBounds(const gfx::RectF& new_bounds) {
   bounds_ = new_bounds;
   caret_bounds_ = gfx::RectF();
 }
 
-void LayoutViewBuilder::SetZoom(float new_zoom) {
+void PaintViewBuilder::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
   zoom_ = new_zoom;
 }
 
-void LayoutViewBuilder::StartCaretTimer() {
+void PaintViewBuilder::StartCaretTimer() {
   const auto interval = GetCaretBlinkInterval();
   if (interval == base::TimeDelta())
     return;
-  caret_timer_.Start(FROM_HERE, interval,
-                     base::Bind(&LayoutViewBuilder::DidFireCaretTimer,
-                                base::Unretained(this)));
+  caret_timer_.Start(
+      FROM_HERE, interval,
+      base::Bind(&PaintViewBuilder::DidFireCaretTimer, base::Unretained(this)));
 }
 
-void LayoutViewBuilder::StopCaretTimer() {
+void PaintViewBuilder::StopCaretTimer() {
   caret_timer_.Stop();
 }
 

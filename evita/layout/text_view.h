@@ -20,6 +20,7 @@ class Time;
 
 namespace paint {
 class ViewPaintCache;
+class View;
 }
 
 namespace text {
@@ -34,8 +35,7 @@ class AnimatableWindow;
 namespace layout {
 
 class LayoutBlockFlow;
-class LayoutView;
-class LayoutViewBuilder;
+class PaintViewBuilder;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -86,8 +86,8 @@ class TextView final : private gfx::CanvasObserver {
   text::Buffer* const buffer_;
   text::Offset caret_offset_;
   std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
-  scoped_refptr<LayoutView> layout_view_;
-  const std::unique_ptr<LayoutViewBuilder> layout_view_builder_;
+  scoped_refptr<paint::View> paint_view_;
+  const std::unique_ptr<PaintViewBuilder> paint_view_builder_;
   std::unique_ptr<paint::ViewPaintCache> view_paint_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(TextView);

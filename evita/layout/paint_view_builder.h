@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_LAYOUT_VIEW_BUILDER_H_
-#define EVITA_LAYOUT_LAYOUT_VIEW_BUILDER_H_
+#ifndef EVITA_LAYOUT_PAINT_VIEW_BUILDER_H_
+#define EVITA_LAYOUT_PAINT_VIEW_BUILDER_H_
 
 #include <memory>
 
@@ -16,6 +16,7 @@
 namespace paint {
 enum class CaretState;
 class Caret;
+class View;
 }
 
 namespace text {
@@ -30,32 +31,31 @@ namespace layout {
 
 class RenderStyle;
 class LayoutBlockFlow;
-class LayoutView;
 class TextSelectionModel;
 
 //////////////////////////////////////////////////////////////////////
 //
-// LayoutViewBuilder
+// PaintViewBuilder
 //
-class LayoutViewBuilder final {
+class PaintViewBuilder final {
  public:
-  explicit LayoutViewBuilder(const text::Buffer* buffer_,
-                             ui::AnimatableWindow* caret_owner);
-  ~LayoutViewBuilder();
+  explicit PaintViewBuilder(const text::Buffer* buffer_,
+                            ui::AnimatableWindow* caret_owner);
+  ~PaintViewBuilder();
 
-  scoped_refptr<LayoutView> Build(const LayoutBlockFlow& layout_block_flow,
-                                  const TextSelectionModel& selection_model,
-                                  base::Time now);
+  scoped_refptr<paint::View> Build(const LayoutBlockFlow& layout_block_flow,
+                                   const TextSelectionModel& selection_model,
+                                   base::Time now);
 
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
 
  private:
-  gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
+  gfx::RectF PaintViewBuilder::ComputeCaretBounds(
       const LayoutBlockFlow& layout_block_flow,
       const TextSelectionModel& selection_model) const;
   paint::CaretState ComputeCaretState(const gfx::RectF& bounds,
-                                       base::Time now) const;
+                                      base::Time now) const;
 
   gfx::RectF ComputeRulerBounds() const;
   void DidFireCaretTimer();
@@ -71,9 +71,9 @@ class LayoutViewBuilder final {
   base::RepeatingTimer caret_timer_;
   float zoom_;
 
-  DISALLOW_COPY_AND_ASSIGN(LayoutViewBuilder);
+  DISALLOW_COPY_AND_ASSIGN(PaintViewBuilder);
 };
 
 }  // namespace layout
 
-#endif  // EVITA_LAYOUT_LAYOUT_VIEW_BUILDER_H_
+#endif  // EVITA_LAYOUT_PAINT_VIEW_BUILDER_H_

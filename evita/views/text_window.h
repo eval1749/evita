@@ -35,7 +35,7 @@ class MetricsView;
 // TextWindow
 //
 // TextWindow manages caret by itself instead of using |ui::Caret|. See
-// |LayoutViewBuilder| class about caret management.
+// |PaintViewBuilder| class about caret management.
 //
 class TextWindow final : public CanvasContentWindow,
                          public text::BufferMutationObserver,

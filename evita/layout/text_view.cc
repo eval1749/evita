@@ -12,10 +12,10 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/layout/layout_view.h"
 #include "evita/layout/layout_block_flow.h"
-#include "evita/layout/layout_view_builder.h"
+#include "evita/layout/paint_view_builder.h"
 #include "evita/paint/public/selection.h"
+#include "evita/paint/public/view.h"
 #include "evita/paint/view_painter.h"
 #include "evita/paint/view_paint_cache.h"
 #include "evita/text/buffer.h"
@@ -43,7 +43,7 @@ TextView::TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner)
     : buffer_(buffer),
       caret_offset_(text::Offset::Invalid()),
       layout_block_flow_(new LayoutBlockFlow(buffer)),
-      layout_view_builder_(new LayoutViewBuilder(buffer, caret_owner)) {}
+      paint_view_builder_(new PaintViewBuilder(buffer, caret_owner)) {}
 
 TextView::~TextView() {}
 
@@ -119,9 +119,9 @@ text::Offset TextView::MapPointXToOffset(text::Offset text_offset,
 }
 
 void TextView::Paint(gfx::Canvas* canvas) {
-  DCHECK(layout_view_);
+  DCHECK(paint_view_);
   TRACE_EVENT0("view", "TextView::Paint");
-  view_paint_cache_ = paint::ViewPainter(*layout_view_)
+  view_paint_cache_ = paint::ViewPainter(*paint_view_)
                           .Paint(canvas, std::move(view_paint_cache_));
 }
 
@@ -144,13 +144,13 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
   bounds_ = new_bounds;
   view_paint_cache_.reset();
   layout_block_flow_->SetBounds(bounds_);
-  layout_view_builder_->SetBounds(bounds_);
+  paint_view_builder_->SetBounds(bounds_);
 }
 
 void TextView::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
   layout_block_flow_->SetZoom(new_zoom);
-  layout_view_builder_->SetZoom(new_zoom);
+  paint_view_builder_->SetZoom(new_zoom);
 }
 
 text::Offset TextView::StartOfLine(text::Offset text_offset) const {
@@ -176,8 +176,8 @@ void TextView::Update(const TextSelectionModel& selection_model,
       ScrollToPosition(new_caret_offset);
   }
 
-  layout_view_ =
-      layout_view_builder_->Build(*layout_block_flow_, selection_model, now);
+  paint_view_ =
+      paint_view_builder_->Build(*layout_block_flow_, selection_model, now);
 }
 
 // gfx::CanvasObserver

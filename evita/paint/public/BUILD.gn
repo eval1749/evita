@@ -8,6 +8,8 @@ source_set("public") {
     "caret.h",
     "selection.cc",
     "selection.h",
+    "view.cc",
+    "view.h",
   ]
 
   public_deps = [

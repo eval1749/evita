@@ -16,25 +16,24 @@ class Canvas;
 }
 
 namespace layout {
-class LayoutView;
 class RootInlineBox;
 }
 
 namespace paint {
 
 class Selection;
+class View;
 
 //////////////////////////////////////////////////////////////////////
 //
 // ViewPaintCache
 //
 class ViewPaintCache final {
-  using LayoutView = layout::LayoutView;
   using RootInlineBox = layout::RootInlineBox;
 
  public:
   ViewPaintCache(gfx::Canvas* canvas,
-                 const LayoutView& view,
+                 const View& view,
                  const gfx::RectF& caret_bounds);
   ~ViewPaintCache();
 
@@ -43,7 +42,7 @@ class ViewPaintCache final {
   const Selection& selection() const { return *selection_; }
 
   bool CanUseTextImage(gfx::Canvas* canvas) const;
-  bool NeedsTextPaint(gfx::Canvas* canvas, const LayoutView& view) const;
+  bool NeedsTextPaint(gfx::Canvas* canvas, const View& view) const;
   void UpdateSelection(scoped_refptr<Selection> selection,
                        const gfx::RectF& caret_bounds);
 

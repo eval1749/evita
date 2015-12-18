@@ -72,7 +72,11 @@ text::Offset InlineFillerBox::MapXToPosn(float x) const {
 //
 // WithFont
 //
-WithFont::WithFont(const gfx::Font& font) : font_(font) {}
+WithFont::WithFont(const gfx::Font& font, text::Offset start, text::Offset end)
+    : end_(end), font_(font), start_(start) {
+  DCHECK_LT(start_, end_);
+}
+
 WithFont::~WithFont() {}
 
 //////////////////////////////////////////////////////////////////////
@@ -85,28 +89,32 @@ InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
                                  text::Offset start,
                                  TextMarker marker_name)
     : InlineBox(style, width, height, style.font().descent()),
-      WithFont(style.font()),
-      end_(marker_name == TextMarker::LineWrap ? start
-                                               : start + text::OffsetDelta(1)),
-      marker_name_(marker_name),
-      start_(start) {}
+      WithFont(style.font(), start, ComputeEndOffset(start, marker_name)),
+      marker_name_(marker_name) {}
 
 InlineMarkerBox::~InlineMarkerBox() {}
+
+// static
+text::Offset InlineMarkerBox::ComputeEndOffset(text::Offset offset,
+                                               TextMarker marker_name) {
+  return marker_name == TextMarker::LineWrap ? offset
+                                             : offset + text::OffsetDelta(1);
+}
 
 // InlineBox
 text::Offset InlineMarkerBox::Fix(float line_height, float line_descent) {
   InlineBox::Fix(line_height, line_descent);
-  return end_;
+  return end();
 }
 
 gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset offset) const {
-  if (offset < start_ || offset >= end_)
+  if (offset < start() || offset >= end())
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(1.0f, height()));
 }
 
 text::Offset InlineMarkerBox::MapXToPosn(float x) const {
-  return start_;
+  return start();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -120,29 +128,26 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
                                      text::Offset end,
                                      const base::string16& characters)
     : InlineBox(style, width, height, style.font().descent()),
-      WithFont(style.font()),
-      characters_(characters),
-      end_(end),
-      start_(start) {}
+      WithFont(style.font(), start, end),
+      characters_(characters) {}
 
 InlineTextBoxBase::~InlineTextBoxBase() {}
 
 // InlineBox
 text::Offset InlineTextBoxBase::Fix(float line_height, float descent) {
   InlineBox::Fix(line_height, descent);
-  DCHECK_LT(start_, end_);
-  return end_;
+  return end();
 }
 
 text::Offset InlineTextBoxBase::MapXToPosn(float x) const {
   if (x >= width())
-    return end_;
+    return end();
   for (auto k = 1u; k <= characters_.length(); ++k) {
     auto const cx = style().font().GetTextWidth(characters_.data(), k);
     if (x < cx)
-      return start_ + text::OffsetDelta(static_cast<int>(k - 1));
+      return start() + text::OffsetDelta(static_cast<int>(k - 1));
   }
-  return end_;
+  return end();
 }
 
 //////////////////////////////////////////////////////////////////////

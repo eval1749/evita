@@ -112,11 +112,16 @@ class WithFont {
   const gfx::Font& font() const { return font_; }
 
  protected:
-  explicit WithFont(const gfx::Font& font);
+  WithFont(const gfx::Font& font, text::Offset start, text::Offset end);
   ~WithFont();
 
+  text::Offset end() const { return end_; }
+  text::Offset start() const { return start_; }
+
  private:
+  const text::Offset end_;
   const gfx::Font& font_;
+  const text::Offset start_;
 
   DISALLOW_COPY_AND_ASSIGN(WithFont);
 };
@@ -139,14 +144,15 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
   TextMarker marker_name() const { return marker_name_; }
 
  private:
+  static text::Offset ComputeEndOffset(text::Offset offset,
+                                       TextMarker marker_name);
+
   // InlineBox
   text::Offset Fix(float iHeight, float iDescent) final;
   gfx::RectF HitTestTextPosition(text::Offset offset) const final;
   text::Offset MapXToPosn(float x) const final;
 
-  const text::Offset end_;
   const TextMarker marker_name_;
-  const text::Offset start_;
 
   DISALLOW_COPY_AND_ASSIGN(InlineMarkerBox);
 };
@@ -170,17 +176,12 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
                     const base::string16& characters);
   ~InlineTextBoxBase() override;
 
-  text::Offset end() const { return end_; }
-  text::Offset start() const { return start_; }
-
  private:
   // InlineBox
   text::Offset Fix(float iHeight, float iDescent) override;
   text::Offset MapXToPosn(float x) const override;
 
   const base::string16 characters_;
-  const text::Offset end_;
-  const text::Offset start_;
 
   DISALLOW_COPY_AND_ASSIGN(InlineTextBoxBase);
 };

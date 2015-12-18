@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/layout/render_font.h"
+#include "evita/gfx/font.h"
 
 #include <unordered_map>
 #include <vector>
@@ -28,7 +28,7 @@ bool IsCachableString(const base::char16* pwch, size_t cwch) {
 
 }  // namespace
 
-namespace layout {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -292,10 +292,10 @@ bool Font::HasCharacter(base::char16 sample) const {
   return font_impl_->HasCharacter(sample);
 }
 
-}  // namespace layout
+}  // namespace gfx
 
 namespace std {
-size_t hash<layout::Font>::operator()(const layout::Font& font) const {
-  return hash<const layout::Font*>()(&font);
+size_t hash<gfx::Font>::operator()(const gfx::Font& font) const {
+  return hash<const gfx::Font*>()(&font);
 }
 }  // namespace std

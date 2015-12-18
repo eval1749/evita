@@ -4,7 +4,7 @@
 
 #include "evita/layout/render_style.h"
 
-#include "evita/layout/render_font.h"
+#include "evita/gfx/font.h"
 
 namespace layout {
 
@@ -14,13 +14,13 @@ gfx::ColorF ColorToColorF(const css::Color& color) {
                      static_cast<float>(color.blue()) / 255, color.alpha());
 }
 
-RenderStyle::RenderStyle(const css::Style& values, const Font* font)
+RenderStyle::RenderStyle(const css::Style& values, const gfx::Font* font)
     : bgcolor_(ColorToColorF(values.bgcolor())),
       color_(ColorToColorF(values.color())),
       font_(font),
       text_decoration_(values.text_decoration()) {}
 
-RenderStyle::RenderStyle(const css::Style& values, const Font& font)
+RenderStyle::RenderStyle(const css::Style& values, const gfx::Font& font)
     : RenderStyle(values, &font) {}
 
 RenderStyle::RenderStyle(const RenderStyle& other)
@@ -57,7 +57,7 @@ size_t hash<layout::RenderStyle>::operator()(
   auto result = static_cast<size_t>(0);
   result ^= std::hash<gfx::ColorF>()(style.bgcolor());
   result ^= std::hash<gfx::ColorF>()(style.color());
-  result ^= std::hash<layout::Font>()(style.font());
+  result ^= std::hash<gfx::Font>()(style.font());
   result ^= std::hash<gfx::ColorF>()(style.overlay_color());
   result ^= std::hash<css::TextDecoration>()(style.text_decoration());
   return result;

@@ -11,8 +11,11 @@
 #include "evita/layout/render_style.h"
 #include "evita/paint/public/line/inline_box_forward.h"
 
-namespace layout {
+namespace gfx {
 class Font;
+}
+
+namespace layout {
 class RenderStyle;
 }
 
@@ -111,17 +114,14 @@ class InlineFillerBox final : public InlineBox {
 //
 class WithFont {
  public:
-  // We should use |gfx::Font| instead of |layout::Font|.
-  using Font = layout::Font;
-
-  const Font& font() const { return font_; }
+  const gfx::Font& font() const { return font_; }
 
  protected:
-  explicit WithFont(const Font& font);
+  explicit WithFont(const gfx::Font& font);
   ~WithFont();
 
  private:
-  const Font& font_;
+  const gfx::Font& font_;
 
   DISALLOW_COPY_AND_ASSIGN(WithFont);
 };

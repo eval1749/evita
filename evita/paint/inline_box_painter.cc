@@ -8,19 +8,17 @@
 #include "evita/paint/inline_box_painter.h"
 
 #include "evita/gfx_base.h"
-#include "evita/layout/render_font.h"
+#include "evita/gfx/font.h"
 #include "evita/layout/render_style.h"
 #include "evita/paint/public/line/inline_box.h"
 #include "evita/paint/public/line/inline_box_visitor.h"
 
 namespace paint {
 
-using Font = layout::Font;
-
 namespace {
 
 void DrawHLine(gfx::Canvas* canvas,
-               const Font& font,
+               const gfx::Font& font,
                const gfx::Brush& brush,
                float sx,
                float ex,
@@ -30,7 +28,7 @@ void DrawHLine(gfx::Canvas* canvas,
 }
 
 void DrawLine(gfx::Canvas* canvas,
-              const Font& font,
+              const gfx::Font& font,
               const gfx::Brush& brush,
               float sx,
               float sy,
@@ -42,7 +40,7 @@ void DrawLine(gfx::Canvas* canvas,
 }
 
 void DrawVLine(gfx::Canvas* canvas,
-               const Font& font,
+               const gfx::Font& font,
                const gfx::Brush& brush,
                float x,
                float sy,
@@ -52,7 +50,7 @@ void DrawVLine(gfx::Canvas* canvas,
 }
 
 void DrawWave(gfx::Canvas* canvas,
-              const Font& font,
+              const gfx::Font& font,
               const gfx::Brush& brush,
               const gfx::RectF& bounds,
               float baseline) {
@@ -73,7 +71,7 @@ void DrawWave(gfx::Canvas* canvas,
 }
 
 void DrawText(gfx::Canvas* canvas,
-              const Font& font,
+              const gfx::Font& font,
               const gfx::Brush& text_brush,
               const gfx::RectF& rect,
               const base::string16& string) {

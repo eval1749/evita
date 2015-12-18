@@ -13,9 +13,11 @@ namespace css {
 class Style;
 }
 
-namespace layout {
-
+namespace gfx {
 class Font;
+}
+
+namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -23,18 +25,18 @@ class Font;
 //
 class FontSet {
  public:
-  using FontList = std::vector<const Font*>;
+  using FontList = std::vector<const gfx::Font*>;
 
-  static const Font* GetFont(const css::Style& style, base::char16 sample);
+  static const gfx::Font* GetFont(const css::Style& style, base::char16 sample);
 
  private:
   class Cache;
   friend class Cache;
 
-  explicit FontSet(const std::vector<const Font*>& fonts);
+  explicit FontSet(const FontList& fonts);
   ~FontSet();
 
-  const Font* FindFont(base::char16 sample) const;
+  const gfx::Font* FindFont(base::char16 sample) const;
   static const FontSet& Get(const css::Style& style);
 
   FontList fonts_;

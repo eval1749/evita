@@ -19,8 +19,6 @@ source_set("layout") {
     "line/root_inline_box_cache.h",
     "paint_view_builder.cc",
     "paint_view_builder.h",
-    "render_font.cc",
-    "render_font.h",
     "render_font_set.cc",
     "render_font_set.h",
     "render_selection.cc",

@@ -9,7 +9,7 @@
 #include "evita/paint/public/line/inline_box.h"
 
 #include "base/logging.h"
-#include "evita/layout/render_font.h"
+#include "evita/gfx/font.h"
 #include "evita/layout/render_style.h"
 #include "evita/paint/public/line/inline_box_visitor.h"
 
@@ -83,7 +83,7 @@ InlineBox* InlineFillerBox::Copy() const {
 //
 // WithFont
 //
-WithFont::WithFont(const Font& font) : font_(font) {}
+WithFont::WithFont(const gfx::Font& font) : font_(font) {}
 
 WithFont::WithFont(const WithFont& other) : font_(other.font_) {}
 

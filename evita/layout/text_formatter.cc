@@ -13,6 +13,7 @@
 #include "evita/css/style.h"
 #include "evita/css/style_resolver.h"
 #include "evita/css/style_selector.h"
+#include "evita/gfx/font.h"
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
 #include "evita/text/marker.h"
@@ -20,7 +21,6 @@
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/line_builder.h"
 #include "evita/layout/line/root_inline_box.h"
-#include "evita/layout/render_font.h"
 #include "evita/layout/render_font_set.h"
 #include "evita/layout/render_style.h"
 #include "evita/layout/render_selection.h"
@@ -60,7 +60,7 @@ gfx::ColorF CssColorToColorF(const css::Color& color) {
                      static_cast<float>(color.blue()) / 255, color.alpha());
 }
 
-const Font* GetFont(const css::Style& style) {
+const gfx::Font* GetFont(const css::Style& style) {
   return FontSet::GetFont(style, 'x');
 }
 
@@ -68,7 +68,7 @@ RenderStyle GetRenderStyle(const css::Style& style) {
   return RenderStyle(style, *GetFont(style));
 }
 
-RenderStyle MakeRenderStyle(const css::Style& style, const Font* font) {
+RenderStyle MakeRenderStyle(const css::Style& style, const gfx::Font* font) {
   return RenderStyle(style, font);
 }
 

@@ -8,6 +8,7 @@
 #include "evita/layout/paint_view_builder.h"
 
 #include "base/logging.h"
+#include "evita/gfx/font.h"
 #include "evita/text/buffer.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/ime/text_input_client.h"
@@ -15,7 +16,6 @@
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/inline_box_visitor.h"
 #include "evita/layout/line/root_inline_box.h"
-#include "evita/layout/render_font.h"
 #include "evita/layout/render_font_set.h"
 #include "evita/layout/render_selection.h"
 #include "evita/layout/render_style.h"

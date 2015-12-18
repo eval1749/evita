@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "evita/css/style.h"
+#include "evita/gfx/font.h"
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/root_inline_box.h"
-#include "evita/layout/render_font.h"
 #include "evita/layout/render_font_set.h"
 #include "gtest/gtest.h"
 
@@ -170,10 +170,8 @@ TEST_F(RootInlineBoxTest, HitTestTextPositionCodeUnit) {
   root_box->set_origin(gfx::PointF(10.0f, 20.0f));
   const auto height = root_box->height();
   const auto& size = gfx::SizeF(1.0f, height);
-  EXPECT_EQ(
-      gfx::RectF(gfx::PointF(10.0f + WidthOf(L"a"), 20.0f),
-                 size),
-      root_box->HitTestTextPosition(text::Offset(101)));
+  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"a"), 20.0f), size),
+            root_box->HitTestTextPosition(text::Offset(101)));
   EXPECT_EQ(
       gfx::RectF(gfx::PointF(10.0f + WidthOf(L"a") + WidthOf(L"uFFFF"), 20.0f),
                  size),

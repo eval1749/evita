@@ -11,7 +11,7 @@
 #include "common/memory/singleton.h"
 #include "evita/css/style.h"
 #include "evita/gfx/font_face.h"
-#include "evita/layout/render_font.h"
+#include "evita/gfx/font.h"
 
 namespace {
 
@@ -34,7 +34,7 @@ struct hash<layout::FontSet::FontList> {
     size_t result = 137u;
     for (auto const font : fonts) {
       result <<= 1;
-      result ^= hash<const layout::Font*>()(font);
+      result ^= hash<const gfx::Font*>()(font);
     }
     return result;
   }
@@ -75,11 +75,11 @@ const FontSet& FontSet::Cache::GetOrCreate(const FontList& fonts) {
 //
 // FontSet
 //
-FontSet::FontSet(const std::vector<const Font*>& fonts) : fonts_(fonts) {}
+FontSet::FontSet(const std::vector<const gfx::Font*>& fonts) : fonts_(fonts) {}
 
 FontSet::~FontSet() {}
 
-const Font* FontSet::FindFont(base::char16 sample) const {
+const gfx::Font* FontSet::FindFont(base::char16 sample) const {
   for (auto const font : fonts_) {
     if (font->HasCharacter(sample))
       return font;
@@ -91,13 +91,14 @@ const FontSet& FontSet::Get(const css::Style& style) {
   FontList fonts;
   for (auto const font_family : style.font_families()) {
     const auto font_props = ComputeFontProperties(font_family, style);
-    fonts.push_back(&Font::Get(font_props));
+    fonts.push_back(&gfx::Font::Get(font_props));
   }
 
   return FontSet::Cache::instance()->GetOrCreate(fonts);
 }
 
-const Font* FontSet::GetFont(const css::Style& style, base::char16 sample) {
+const gfx::Font* FontSet::GetFont(const css::Style& style,
+                                  base::char16 sample) {
   return Get(style).FindFont(sample);
 }
 

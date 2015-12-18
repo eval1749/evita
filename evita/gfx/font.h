@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_RENDER_FONT_H_
-#define EVITA_LAYOUT_RENDER_FONT_H_
+#ifndef EVITA_GFX_FONT_H_
+#define EVITA_GFX_FONT_H_
 
 #include <functional>
 #include <memory>
@@ -14,9 +14,6 @@
 
 namespace gfx {
 struct FontProperties;
-}
-
-namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -70,13 +67,13 @@ class Font {
   DISALLOW_COPY_AND_ASSIGN(Font);
 };
 
-}  // namespace layout
+}  // namespace gfx
 
 namespace std {
 template <>
-struct hash<layout::Font> {
-  size_t operator()(const layout::Font& font) const;
+struct hash<gfx::Font> {
+  size_t operator()(const gfx::Font& font) const;
 };
 }  // namespace std
 
-#endif  // EVITA_LAYOUT_RENDER_FONT_H_
+#endif  // EVITA_GFX_FONT_H_

@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 #include <algorithm>
-#include <limits>
-#include <map>
+#include <iterator>
 #include <vector>
 
 #include "evita/layout/layout_block_flow.h"
@@ -230,17 +229,16 @@ text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
   TRACE_EVENT0("views", "LayoutBlockFlow::HitTestPoint");
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
-
-  if (point.y < bounds_.top)
+  const auto& it =
+      std::lower_bound(lines_.begin(), lines_.end(), point.y,
+                       [](const scoped_refptr<RootInlineBox>& box,
+                          float point_y) { return box->top() < point_y; });
+  if (it == lines_.begin())
     return lines_.front()->text_start();
-  if (point.y >= bounds_.bottom)
+  if (it == lines_.end())
     return lines_.back()->text_end();
-
-  for (const auto& line : lines_) {
-    if (point.y >= line->top() && point.y < line->bottom())
-      return line->MapXToPosn(point.x);
-  }
-  return lines_.back()->text_end() - text::OffsetDelta(1);
+  const auto line = *std::prev(it);
+  return line->MapXToPosn(point.x);
 }
 
 gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Offset offset) const {

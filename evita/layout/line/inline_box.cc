@@ -36,12 +36,6 @@ InlineBox::InlineBox(const RenderStyle& style,
   DCHECK_GE(height, 1.0f);
 }
 
-InlineBox::InlineBox(const InlineBox& other)
-    : InlineBox(other.style_, other.width_, other.height_, other.descent_) {
-  line_descent_ = other.line_descent_;
-  line_height_ = other.line_height_;
-}
-
 InlineBox::~InlineBox() {}
 
 float InlineBox::top() const {
@@ -53,22 +47,10 @@ void InlineBox::IncrementWidth(float amount) {
 }
 
 // InlineBox
-bool InlineBox::Equal(const InlineBox* other) const {
-  return other->class_name() == class_name() && other->width_ == width_ &&
-         other->line_height_ == line_height_ && other->style_ == style_;
-}
-
 text::Offset InlineBox::Fix(float line_height, float line_descent) {
   line_descent_ = line_descent;
   line_height_ = line_height;
   return text::Offset::Invalid();
-}
-
-uint32_t InlineBox::Hash() const {
-  auto nHash = static_cast<uint32_t>(width_);
-  nHash ^= static_cast<uint32_t>(line_height_);
-  nHash ^= std::hash<RenderStyle>()(style_);
-  return nHash;
 }
 
 gfx::RectF InlineBox::HitTestTextPosition(text::Offset) const {
@@ -88,14 +70,7 @@ InlineFillerBox::InlineFillerBox(const RenderStyle& style,
                                  float height)
     : InlineBox(style, width, height, 0.0f) {}
 
-InlineFillerBox::InlineFillerBox(const InlineFillerBox& other)
-    : InlineBox(other) {}
-
 InlineFillerBox::~InlineFillerBox() {}
-
-InlineBox* InlineFillerBox::Copy() const {
-  return new InlineFillerBox(*this);
-}
 
 text::Offset InlineFillerBox::MapXToPosn(float x) const {
   return text::Offset::Invalid();
@@ -105,10 +80,7 @@ text::Offset InlineFillerBox::MapXToPosn(float x) const {
 //
 // WithFont
 //
-WithFont::WithFont(const Font& font) : font_(&font) {}
-
-WithFont::WithFont(const WithFont& other) : font_(other.font_) {}
-
+WithFont::WithFont(const Font& font) : font_(font) {}
 WithFont::~WithFont() {}
 
 //////////////////////////////////////////////////////////////////////
@@ -127,37 +99,12 @@ InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
       marker_name_(marker_name),
       start_(lPosn) {}
 
-InlineMarkerBox::InlineMarkerBox(const InlineMarkerBox& other)
-    : InlineBox(other),
-      WithFont(other),
-      end_(other.end_),
-      marker_name_(other.marker_name_),
-      start_(other.start_) {}
-
 InlineMarkerBox::~InlineMarkerBox() {}
 
 // InlineBox
-InlineBox* InlineMarkerBox::Copy() const {
-  return new InlineMarkerBox(*this);
-}
-
-bool InlineMarkerBox::Equal(const InlineBox* other) const {
-  if (!InlineBox::Equal(other))
-    return false;
-  auto const marker_cell = other->as<InlineMarkerBox>();
-  return marker_name_ == marker_cell->marker_name_;
-}
-
 text::Offset InlineMarkerBox::Fix(float line_height, float line_descent) {
   InlineBox::Fix(line_height, line_descent);
   return end_;
-}
-
-uint32_t InlineMarkerBox::Hash() const {
-  auto nHash = InlineBox::Hash();
-  nHash <<= 8;
-  nHash ^= static_cast<int>(marker_name_);
-  return nHash;
 }
 
 gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset lPosn) const {
@@ -185,13 +132,6 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
       end_(lPosn + text::OffsetDelta(characters.size())),
       start_(lPosn) {}
 
-InlineTextBoxBase::InlineTextBoxBase(const InlineTextBoxBase& other)
-    : InlineBox(other),
-      WithFont(other),
-      characters_(other.characters_),
-      end_(other.end_),
-      start_(other.start_) {}
-
 InlineTextBoxBase::~InlineTextBoxBase() {}
 
 void InlineTextBoxBase::AddChar(base::char16 char_code) {
@@ -203,21 +143,10 @@ void InlineTextBoxBase::ExtendEnd() {
 }
 
 // InlineBox
-bool InlineTextBoxBase::Equal(const InlineBox* other) const {
-  if (!InlineBox::Equal(other))
-    return false;
-  return characters_ == other->as<InlineTextBox>()->characters_;
-}
-
 text::Offset InlineTextBoxBase::Fix(float line_height, float descent) {
   InlineBox::Fix(line_height, descent);
   DCHECK_LT(start_, end_);
   return end_;
-}
-
-uint32_t InlineTextBoxBase::Hash() const {
-  return static_cast<uint32_t>((InlineBox::Hash() << 3) ^
-                               std::hash<base::string16>()(characters_));
 }
 
 text::Offset InlineTextBoxBase::MapXToPosn(float x) const {
@@ -242,14 +171,7 @@ InlineTextBox::InlineTextBox(const RenderStyle& style,
                              const base::string16& characters)
     : InlineTextBoxBase(style, width, height, offset, characters) {}
 
-InlineTextBox::InlineTextBox(const InlineTextBox& other)
-    : InlineTextBoxBase(other) {}
-
 InlineTextBox::~InlineTextBox() {}
-
-InlineBox* InlineTextBox::Copy() const {
-  return new InlineTextBox(*this);
-}
 
 // Returns bounds rectangle of caret at |offset|. Caret is placed before
 // character at |offset|. So, height of caret is height of character before
@@ -284,16 +206,9 @@ InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
                                    const base::string16& characters)
     : InlineTextBoxBase(style, width, height, lPosn, characters) {}
 
-InlineUnicodeBox::InlineUnicodeBox(const InlineUnicodeBox& other)
-    : InlineTextBoxBase(other) {}
-
 InlineUnicodeBox::~InlineUnicodeBox() {}
 
 // InlineBox
-InlineBox* InlineUnicodeBox::Copy() const {
-  return new InlineUnicodeBox(*this);
-}
-
 gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset) const {
   if (offset < start() || offset > end())
     return gfx::RectF();

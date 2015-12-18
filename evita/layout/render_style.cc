@@ -14,14 +14,11 @@ gfx::ColorF ColorToColorF(const css::Color& color) {
                      static_cast<float>(color.blue()) / 255, color.alpha());
 }
 
-RenderStyle::RenderStyle(const css::Style& values, const gfx::Font* font)
+RenderStyle::RenderStyle(const css::Style& values, const gfx::Font& font)
     : bgcolor_(ColorToColorF(values.bgcolor())),
       color_(ColorToColorF(values.color())),
-      font_(font),
+      font_(&font),
       text_decoration_(values.text_decoration()) {}
-
-RenderStyle::RenderStyle(const css::Style& values, const gfx::Font& font)
-    : RenderStyle(values, &font) {}
 
 RenderStyle::RenderStyle(const RenderStyle& other)
     : bgcolor_(other.bgcolor_),

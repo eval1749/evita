@@ -24,7 +24,6 @@ namespace layout {
 class RenderStyle {
  public:
   RenderStyle(const css::Style& values, const gfx::Font& font);
-  RenderStyle(const css::Style& values, const gfx::Font* font);
   RenderStyle(const RenderStyle& other);
   RenderStyle();
   ~RenderStyle();

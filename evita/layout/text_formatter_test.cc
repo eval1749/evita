@@ -45,7 +45,7 @@ RenderStyle TextFormatterTest::StyleAt(text::Offset offset) const {
   const auto sample =
       offset < buffer()->GetEnd() ? buffer()->GetCharAt(offset) : 'x';
   const auto font = FontSet::GetFont(style, sample);
-  return RenderStyle(style, font);
+  return RenderStyle(style, *font);
 }
 
 float TextFormatterTest::WidthOf(const RenderStyle& style,

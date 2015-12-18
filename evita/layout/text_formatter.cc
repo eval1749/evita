@@ -68,7 +68,7 @@ RenderStyle GetRenderStyle(const css::Style& style) {
   return RenderStyle(style, *GetFont(style));
 }
 
-RenderStyle MakeRenderStyle(const css::Style& style, const gfx::Font* font) {
+RenderStyle MakeRenderStyle(const css::Style& style, const gfx::Font& font) {
   return RenderStyle(style, font);
 }
 
@@ -277,7 +277,7 @@ InlineBox* TextFormatter::FormatChar(InlineBox* previous_cell,
       return nullptr;
 
     auto const height = AlignHeightToPixel(font->height());
-    return new InlineMarkerBox(MakeRenderStyle(style, font), width, height,
+    return new InlineMarkerBox(MakeRenderStyle(style, *font), width, height,
                                lPosn, TextMarker::Tab);
   }
 
@@ -305,11 +305,11 @@ InlineBox* TextFormatter::FormatChar(InlineBox* previous_cell,
     if (previous_cell && x + width + char_width > bounds_.right)
       return nullptr;
     auto const height = AlignHeightToPixel(font2->height()) + 4;
-    return new InlineUnicodeBox(MakeRenderStyle(style, font2), width, height,
+    return new InlineUnicodeBox(MakeRenderStyle(style, *font2), width, height,
                                 lPosn, string);
   }
 
-  auto render_style = MakeRenderStyle(style, font);
+  auto render_style = MakeRenderStyle(style, *font);
   auto const width = AlignWidthToPixel(font->GetCharWidth(wch));
   if (previous_cell) {
     auto const width_of_M = AlignWidthToPixel(font->GetCharWidth('M'));
@@ -340,7 +340,7 @@ InlineBox* TextFormatter::FormatMarker(TextMarker marker_name) {
   auto const font = FontSet::GetFont(style, 'x');
   auto const width = AlignWidthToPixel(font->GetCharWidth('x'));
   auto const height = AlignHeightToPixel(font->height());
-  return new InlineMarkerBox(MakeRenderStyle(style, font), width, height,
+  return new InlineMarkerBox(MakeRenderStyle(style, *font), width, height,
                              text_scanner_->text_offset(), marker_name);
 }
 

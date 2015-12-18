@@ -79,7 +79,7 @@ RenderStyle CreateStyle() {
   css_style.set_font_style(css::FontStyle::Normal);
   css_style.set_text_decoration(css::TextDecoration::None);
   auto const font = FontSet::GetFont(css_style, 'x');
-  return RenderStyle(css_style, font);
+  return RenderStyle(css_style, *font);
 }
 
 float LineBuilder::WidthOf(const base::string16& text) const {

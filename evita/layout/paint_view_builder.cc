@@ -220,6 +220,8 @@ gfx::RectF PaintViewBuilder::ComputeCaretBounds(
       RoundBounds(block_.HitTestTextPosition(selection_model.focus_offset()));
   if (char_rect.empty())
     return gfx::RectF();
+  // TODO(eval1749): Height of caret should be height of inserted character
+  // instead of height of character after caret.
   const auto caret_width = 2;
   return gfx::RectF(char_rect.left, char_rect.top, char_rect.left + caret_width,
                     char_rect.bottom);

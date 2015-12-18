@@ -185,7 +185,7 @@ gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset,
                                                  float baseline) const {
   if (offset < start() || offset >= end())
     return gfx::RectF();
-  return gfx::RectF(gfx::PointF(width(), baseline - ascent()),
+  return gfx::RectF(gfx::PointF(0.0f, baseline - ascent()),
                     gfx::SizeF(1.0f, height()));
 }
 

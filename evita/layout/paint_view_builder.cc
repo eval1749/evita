@@ -112,10 +112,9 @@ gfx::RectF CalculateSelectionBounds(const RootInlineBox& root_box,
       selection.end() <= root_box.text_start()) {
     return gfx::RectF();
   }
-  return gfx::RectF(CalculateSelectionStartPoint(root_box, selection).x,
-                    root_box.top(),
-                    CalculateSelectionEndPoint(root_box, selection).x,
-                    root_box.bottom());
+  return gfx::RectF(
+      CalculateSelectionStartPoint(root_box, selection).x, root_box.top(),
+      CalculateSelectionEndPoint(root_box, selection).x, root_box.bottom());
 }
 
 std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
@@ -164,9 +163,9 @@ base::TimeDelta GetCaretBlinkInterval() {
 //
 // PaintViewBuilder
 //
-PaintViewBuilder::PaintViewBuilder(const text::Buffer* buffer,
+PaintViewBuilder::PaintViewBuilder(const LayoutBlockFlow& block,
                                    ui::AnimatableWindow* caret_owner)
-    : buffer_(buffer),
+    : block_(block),
       caret_owner_(caret_owner),
       caret_state_(paint::CaretState::None),
       zoom_(1.0f) {}
@@ -176,17 +175,16 @@ PaintViewBuilder::~PaintViewBuilder() {
 }
 
 scoped_refptr<paint::View> PaintViewBuilder::Build(
-    const LayoutBlockFlow& layout_block_flow,
     const TextSelectionModel& selection_model,
     base::Time now) {
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
-  const auto& bgcolor = ColorToColorF(buffer_->GetDefaultStyle().bgcolor());
+  const auto& bgcolor =
+      ColorToColorF(block_.text_buffer().GetDefaultStyle().bgcolor());
   const auto& ruler_bounds = ComputeRulerBounds();
   const auto& selection =
-      TextFormatter::FormatSelection(buffer_, selection_model);
-  const auto& caret_bounds =
-      ComputeCaretBounds(layout_block_flow, selection_model);
+      TextFormatter::FormatSelection(&block_.text_buffer(), selection_model);
+  const auto& caret_bounds = ComputeCaretBounds(selection_model);
   const auto caret_state = ComputeCaretState(caret_bounds, now);
 
   if (caret_bounds.empty()) {
@@ -200,28 +198,26 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
   caret_bounds_ = caret_bounds;
   caret_state_ = caret_state;
 
-  const auto& selection_bounds_set = CalculateSelectionBoundsSet(
-      layout_block_flow.lines(), selection, layout_block_flow.bounds());
+  const auto& selection_bounds_set =
+      CalculateSelectionBoundsSet(block_.lines(), selection, block_.bounds());
 
   std::vector<paint::RootInlineBox*> lines;
-  lines.reserve(layout_block_flow.lines().size());
-  for (const auto& line : layout_block_flow.lines())
+  lines.reserve(block_.lines().size());
+  for (const auto& line : block_.lines())
     lines.push_back(CreatePaintRootInlineBox(*line));
-  return new paint::View(
-      layout_block_flow.format_counter(), layout_block_flow.bounds(), lines,
-      make_scoped_refptr(
-          new paint::Selection(selection.color(), selection_bounds_set)),
-      bgcolor, ruler_bounds,
-      std::make_unique<paint::Caret>(caret_state, caret_bounds));
+  return new paint::View(block_.format_counter(), block_.bounds(), lines,
+                         make_scoped_refptr(new paint::Selection(
+                             selection.color(), selection_bounds_set)),
+                         bgcolor, ruler_bounds, std::make_unique<paint::Caret>(
+                                                    caret_state, caret_bounds));
 }
 
 gfx::RectF PaintViewBuilder::ComputeCaretBounds(
-    const LayoutBlockFlow& layout_block_flow,
     const TextSelectionModel& selection_model) const {
   if (!selection_model.has_focus())
     return gfx::RectF();
-  auto const& char_rect = RoundBounds(
-      layout_block_flow.HitTestTextPosition(selection_model.focus_offset()));
+  auto const& char_rect =
+      RoundBounds(block_.HitTestTextPosition(selection_model.focus_offset()));
   if (char_rect.empty())
     return gfx::RectF();
   auto const caret_width = 2;
@@ -256,7 +252,7 @@ paint::CaretState PaintViewBuilder::ComputeCaretState(const gfx::RectF& bounds,
 gfx::RectF PaintViewBuilder::ComputeRulerBounds() const {
   // TODO(eval1749): We should expose show/hide and ruler settings to both
   // script and UI.
-  auto style = buffer_->GetDefaultStyle();
+  auto style = block_.text_buffer().GetDefaultStyle();
   style.set_font_size(style.font_size() * zoom_);
   auto const font = FontSet::GetFont(style, 'x');
 

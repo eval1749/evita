@@ -39,12 +39,11 @@ class TextSelectionModel;
 //
 class PaintViewBuilder final {
  public:
-  explicit PaintViewBuilder(const text::Buffer* buffer_,
+  explicit PaintViewBuilder(const LayoutBlockFlow& layout_block_flow,
                             ui::AnimatableWindow* caret_owner);
   ~PaintViewBuilder();
 
-  scoped_refptr<paint::View> Build(const LayoutBlockFlow& layout_block_flow,
-                                   const TextSelectionModel& selection_model,
+  scoped_refptr<paint::View> Build(const TextSelectionModel& selection_model,
                                    base::Time now);
 
   void SetBounds(const gfx::RectF& new_bounds);
@@ -52,7 +51,6 @@ class PaintViewBuilder final {
 
  private:
   gfx::RectF PaintViewBuilder::ComputeCaretBounds(
-      const LayoutBlockFlow& layout_block_flow,
       const TextSelectionModel& selection_model) const;
   paint::CaretState ComputeCaretState(const gfx::RectF& bounds,
                                       base::Time now) const;
@@ -63,7 +61,7 @@ class PaintViewBuilder final {
   void StopCaretTimer();
 
   gfx::RectF bounds_;
-  const text::Buffer* const buffer_;
+  const LayoutBlockFlow& block_;
   gfx::RectF caret_bounds_;
   ui::AnimatableWindow* const caret_owner_;
   paint::CaretState caret_state_;

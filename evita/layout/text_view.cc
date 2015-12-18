@@ -43,7 +43,8 @@ TextView::TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner)
     : buffer_(buffer),
       caret_offset_(text::Offset::Invalid()),
       layout_block_flow_(new LayoutBlockFlow(buffer)),
-      paint_view_builder_(new PaintViewBuilder(buffer, caret_owner)) {}
+      paint_view_builder_(
+          new PaintViewBuilder(*layout_block_flow_, caret_owner)) {}
 
 TextView::~TextView() {}
 
@@ -176,8 +177,7 @@ void TextView::Update(const TextSelectionModel& selection_model,
       ScrollToPosition(new_caret_offset);
   }
 
-  paint_view_ =
-      paint_view_builder_->Build(*layout_block_flow_, selection_model, now);
+  paint_view_ = paint_view_builder_->Build(selection_model, now);
 }
 
 // gfx::CanvasObserver

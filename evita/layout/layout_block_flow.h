@@ -38,6 +38,7 @@ class LayoutBlockFlow final {
   const std::list<scoped_refptr<RootInlineBox>>& lines() const {
     return lines_;
   }
+  const text::Buffer& text_buffer() const { return *text_buffer_; }
 
   void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
   void DidDeleteAt(text::Offset offset, text::OffsetDelta length);

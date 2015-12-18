@@ -31,7 +31,7 @@ namespace layout {
 namespace {
 
 const float kLeftMargin = 10.0f;
-auto const kMinHeight = 1.0f;
+const auto kMinHeight = 1.0f;
 const int kTabWidth = 4;
 
 // TODO(eval1749): We should move |AlignHeightToPixel()| to another place
@@ -225,7 +225,7 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
       break;
     }
 
-    auto const char_code = text_scanner_->GetChar();
+    const auto char_code = text_scanner_->GetChar();
     if (char_code == 0x0A) {
       FormatMarker(&line_builder, TextMarker::EndOfLine);
       text_scanner_->Next();
@@ -245,16 +245,16 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
 bool TextFormatter::FormatChar(LineBuilder* line_builder,
                                base::char16 char_code) {
   const auto x = line_builder->current_x();
-  auto const offset = text_scanner_->text_offset();
+  const auto offset = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
 
-  auto const spelling = text_scanner_->spelling();
+  const auto spelling = text_scanner_->spelling();
   if (!spelling.empty()) {
     style.Merge(
         text_scanner_->style_resolver()->ResolveWithoutDefaults(spelling));
   }
 
-  auto const syntax = text_scanner_->syntax();
+  const auto syntax = text_scanner_->syntax();
   if (!syntax.empty()) {
     style.Merge(
         text_scanner_->style_resolver()->ResolveWithoutDefaults(syntax));
@@ -267,28 +267,28 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
   if (char_code == 0x09) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
-    auto const font = FontSet::GetFont(style, 'x');
-    auto const widthTab =
+    const auto font = FontSet::GetFont(style, 'x');
+    const auto widthTab =
         AlignWidthToPixel(font->GetCharWidth(' ')) * kTabWidth;
-    auto const x2 = (x + widthTab - kLeftMargin) / widthTab * widthTab;
-    auto const width = (x2 + kLeftMargin) - x;
+    const auto x2 = (x + widthTab - kLeftMargin) / widthTab * widthTab;
+    const auto width = (x2 + kLeftMargin) - x;
     if (!line_builder->HasRoomFor(width))
       return false;
-    auto const height = AlignHeightToPixel(font->height());
+    const auto height = AlignHeightToPixel(font->height());
     line_builder->AddBox(new InlineMarkerBox(MakeRenderStyle(style, *font), x,
                                              width, height, offset,
                                              TextMarker::Tab));
     return true;
   }
 
-  auto const font = char_code < 0x20 || char_code == 0xFEFF
+  const auto font = char_code < 0x20 || char_code == 0xFEFF
                         ? nullptr
                         : FontSet::GetFont(style, char_code);
 
   if (!font) {
     style.OverrideBy(text_scanner_->style_resolver()->ResolveWithoutDefaults(
         css::StyleSelector::end_of_file_marker()));
-    auto const font2 = FontSet::GetFont(style, 'u');
+    const auto font2 = FontSet::GetFont(style, 'u');
     base::string16 string;
     if (char_code < 0x20) {
       string.push_back('^');
@@ -301,10 +301,10 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
       string.push_back(IntToHex((char_code >> 0) & 15));
     }
 
-    auto const width = font2->GetTextWidth(string) + 4;
+    const auto width = font2->GetTextWidth(string) + 4;
     if (!line_builder->HasRoomFor(width))
       return false;
-    auto const height = AlignHeightToPixel(font2->height()) + 4;
+    const auto height = AlignHeightToPixel(font2->height()) + 4;
     line_builder->AddBox(new InlineUnicodeBox(MakeRenderStyle(style, *font2), x,
                                               width, height, offset, string));
     return true;
@@ -324,9 +324,9 @@ void TextFormatter::FormatMarker(LineBuilder* line_builder,
       css::StyleSelector::end_of_line_marker()));
   style.set_font_size(style.font_size() * zoom_);
 
-  auto const font = FontSet::GetFont(style, 'x');
-  auto const width = AlignWidthToPixel(font->GetCharWidth('x'));
-  auto const height = AlignHeightToPixel(font->height());
+  const auto font = FontSet::GetFont(style, 'x');
+  const auto width = AlignWidthToPixel(font->GetCharWidth('x'));
+  const auto height = AlignHeightToPixel(font->height());
   line_builder->AddBox(new InlineMarkerBox(
       MakeRenderStyle(style, *font), line_builder->current_x(), width, height,
       text_scanner_->text_offset(), marker_name));

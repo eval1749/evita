@@ -244,7 +244,7 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
 
 bool TextFormatter::FormatChar(LineBuilder* line_builder,
                                base::char16 char_code) {
-  const auto x = line_builder->current_x();
+  const auto current_x = line_builder->current_x();
   const auto offset = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
 
@@ -270,13 +270,13 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
     const auto font = FontSet::GetFont(style, 'x');
     const auto widthTab =
         AlignWidthToPixel(font->GetCharWidth(' ')) * kTabWidth;
-    const auto x2 = (x + widthTab - kLeftMargin) / widthTab * widthTab;
-    const auto width = (x2 + kLeftMargin) - x;
+    const auto x2 = (current_x + widthTab - kLeftMargin) / widthTab * widthTab;
+    const auto width = (x2 + kLeftMargin) - current_x;
     if (!line_builder->HasRoomFor(width))
       return false;
     const auto height = AlignHeightToPixel(font->height());
-    line_builder->AddBox(new InlineMarkerBox(MakeRenderStyle(style, *font), x,
-                                             width, height, offset,
+    line_builder->AddBox(new InlineMarkerBox(MakeRenderStyle(style, *font),
+                                             current_x, width, height, offset,
                                              TextMarker::Tab));
     return true;
   }
@@ -305,8 +305,9 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
     if (!line_builder->HasRoomFor(width))
       return false;
     const auto height = AlignHeightToPixel(font2->height()) + 4;
-    line_builder->AddBox(new InlineUnicodeBox(MakeRenderStyle(style, *font2), x,
-                                              width, height, offset, string));
+    line_builder->AddBox(new InlineUnicodeBox(MakeRenderStyle(style, *font2),
+                                              current_x, width, height, offset,
+                                              string));
     return true;
   }
 

@@ -17,8 +17,6 @@
 
 namespace paint {
 
-using TextSelection = layout::TextSelection;
-
 namespace {
 
 gfx::RectF RoundBounds(const gfx::RectF& bounds) {

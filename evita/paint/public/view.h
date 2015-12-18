@@ -10,7 +10,6 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "evita/gfx_base.h"
-#include "evita/layout/render_selection.h"
 #include "evita/paint/public/caret.h"
 
 namespace layout {

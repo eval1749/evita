@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/paint/selection.h"
+#include "evita/paint/public/selection.h"
 
 namespace paint {
 

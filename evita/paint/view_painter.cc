@@ -10,9 +10,9 @@
 #include "evita/gfx_base.h"
 #include "evita/layout/layout_view.h"
 #include "evita/layout/line/root_inline_box.h"
-#include "evita/paint/caret.h"
+#include "evita/paint/public/caret.h"
+#include "evita/paint/public/selection.h"
 #include "evita/paint/root_inline_box_list_painter.h"
-#include "evita/paint/selection.h"
 #include "evita/paint/view_paint_cache.h"
 
 namespace paint {

@@ -19,7 +19,7 @@
 #include "evita/layout/render_selection.h"
 #include "evita/layout/render_style.h"
 #include "evita/layout/text_formatter.h"
-#include "evita/paint/selection.h"
+#include "evita/paint/public/selection.h"
 
 namespace layout {
 
@@ -157,9 +157,8 @@ gfx::RectF LayoutViewBuilder::ComputeCaretBounds(
                     char_rect.bottom);
 }
 
-paint::CaretState LayoutViewBuilder::ComputeCaretState(
-    const gfx::RectF& bounds,
-    base::Time now) const {
+paint::CaretState LayoutViewBuilder::ComputeCaretState(const gfx::RectF& bounds,
+                                                       base::Time now) const {
   if (bounds.empty())
     return paint::CaretState::None;
 

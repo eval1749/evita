@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_PAINT_SELECTION_H_
-#define EVITA_PAINT_SELECTION_H_
+#ifndef EVITA_PAINT_PUBLIC_SELECTION_H_
+#define EVITA_PAINT_PUBLIC_SELECTION_H_
 
 #include <unordered_set>
 
@@ -41,4 +41,4 @@ class Selection final : public base::RefCounted<Selection> {
 
 }  // namespace paint
 
-#endif  // EVITA_PAINT_SELECTION_H_
+#endif  // EVITA_PAINT_PUBLIC_SELECTION_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_PAINT_CARET_H_
-#define EVITA_PAINT_CARET_H_
+#ifndef EVITA_PAINT_PUBLIC_CARET_H_
+#define EVITA_PAINT_PUBLIC_CARET_H_
 
 #include "base/macros.h"
 #include "evita/gfx/rect_f.h"
@@ -40,4 +40,4 @@ class Caret final {
 
 }  // namespace paint
 
-#endif  // EVITA_PAINT_CARET_H_
+#endif  // EVITA_PAINT_PUBLIC_CARET_H_

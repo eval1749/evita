@@ -56,7 +56,7 @@ void LineBuilder::AddTextBoxIfNeeded() {
     return;
   DCHECK_GT(pending_text_width_, 0.0f);
   AddBoxInternal(new InlineTextBox(
-      style_, pending_text_width_, ::ceil(style_.font().height()),
+      style_, current_x_, pending_text_width_, ::ceil(style_.font().height()),
       current_offset_,
       base::string16(pending_text_.data(), pending_text_.size())));
   pending_text_.clear();

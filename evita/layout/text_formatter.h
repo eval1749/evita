@@ -39,7 +39,6 @@ class TextFormatter final {
 
   scoped_refptr<RootInlineBox> FormatLine(text::Offset text_offset);
   scoped_refptr<RootInlineBox> FormatLine();
-  InlineBox* FormatMarker(TextMarker marker_name);
 
   static TextSelection FormatSelection(
       const text::Buffer& buffer,
@@ -49,6 +48,7 @@ class TextFormatter final {
   class TextScanner;
 
   bool FormatChar(LineBuilder* line_builder, base::char16 char_code);
+  void FormatMarker(LineBuilder* line_buffer, TextMarker marker_name);
 
   gfx::RectF bounds_;
   RenderStyle default_render_style_;

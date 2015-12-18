@@ -40,6 +40,7 @@ class LineBuilder final {
   static RenderStyle CreateStyle();
 
   std::vector<InlineBox*> boxes_;
+  float left_ = 0;
   text::Offset offset_;
   text::Offset start_;
   const RenderStyle& style_;
@@ -52,20 +53,26 @@ LineBuilder::LineBuilder(text::Offset start, const RenderStyle& style)
 
 void LineBuilder::AddCodeUnit(const base::char16 code_unit) {
   base::string16 text = L"uFFFF";
+  const auto width = WidthOf(text);
   boxes_.push_back(new InlineUnicodeBox(
-      style_, WidthOf(text), style_.font().height() + 4, offset_, text));
+      style_, left_, width, style_.font().height() + 4, offset_, text));
+  left_ += width;
   offset_ += text::OffsetDelta(1);
 }
 
 void LineBuilder::AddMarker(TextMarker marker) {
+  const auto width = WidthOf(L"x");
   boxes_.push_back(new InlineMarkerBox(
-      style_, WidthOf(L"x"), style_.font().height(), offset_, marker));
+      style_, left_, width, style_.font().height(), offset_, marker));
+  left_ += width;
   offset_ += text::OffsetDelta(1);
 }
 
 void LineBuilder::AddText(const base::string16& text) {
-  boxes_.push_back(new InlineTextBox(style_, WidthOf(text),
+  auto const width = WidthOf(text);
+  boxes_.push_back(new InlineTextBox(style_, left_, width,
                                      style_.font().height(), offset_, text));
+  left_ += width;
   offset_ += text::OffsetDelta(text.size());
 }
 

@@ -60,11 +60,16 @@ class InlineBox : public common::Castable {
   virtual text::Offset MapXToPosn(float x) const = 0;
 
  protected:
-  InlineBox(const RenderStyle& style, float width, float height, float descent);
+  InlineBox(const RenderStyle& style,
+            float left,
+            float width,
+            float height,
+            float descent);
 
  private:
   const float descent_;
   const float height_;
+  const float left_;
   const RenderStyle style_;
   const float width_;
 
@@ -81,7 +86,10 @@ class InlineFillerBox final : public InlineBox {
   DECLARE_INLINE_BOX_FINAL_CLASS(InlineFillerBox, InlineBox);
 
  public:
-  InlineFillerBox(const RenderStyle& style, float width, float height);
+  InlineFillerBox(const RenderStyle& style,
+                  float left,
+                  float width,
+                  float height);
   ~InlineFillerBox() final;
 
  private:
@@ -124,6 +132,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
 
  public:
   InlineMarkerBox(const RenderStyle& style,
+                  float left,
                   float width,
                   float height,
                   text::Offset start,
@@ -158,6 +167,7 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
 
  protected:
   InlineTextBoxBase(const RenderStyle& style,
+                    float left,
                     float width,
                     float height,
                     text::Offset start,
@@ -183,6 +193,7 @@ class InlineTextBox final : public InlineTextBoxBase {
 
  public:
   InlineTextBox(const RenderStyle& style,
+                float left,
                 float width,
                 float height,
                 text::Offset start,
@@ -206,6 +217,7 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
 
  public:
   InlineUnicodeBox(const RenderStyle& style,
+                   float left,
                    float width,
                    float height,
                    text::Offset start,

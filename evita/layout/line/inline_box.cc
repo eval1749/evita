@@ -24,10 +24,15 @@ FOR_EACH_INLINE_BOX(V)
 // InlineBox
 //
 InlineBox::InlineBox(const RenderStyle& style,
+                     float left,
                      float width,
                      float height,
                      float descent)
-    : descent_(descent), height_(height), style_(style), width_(width) {
+    : descent_(descent),
+      height_(height),
+      left_(left),
+      style_(style),
+      width_(width) {
   DCHECK_GE(width, 1.0f);
   DCHECK_GE(height, 1.0f);
 }
@@ -39,9 +44,10 @@ InlineBox::~InlineBox() {}
 // InlineFillerBox
 //
 InlineFillerBox::InlineFillerBox(const RenderStyle& style,
+                                 float left,
                                  float width,
                                  float height)
-    : InlineBox(style, width, height, 0.0f) {}
+    : InlineBox(style, left, width, height, 0.0f) {}
 
 InlineFillerBox::~InlineFillerBox() {}
 
@@ -70,11 +76,12 @@ WithFont::~WithFont() {}
 // InlineMarkerBox
 //
 InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
+                                 float left,
                                  float width,
                                  float height,
                                  text::Offset start,
                                  TextMarker marker_name)
-    : InlineBox(style, width, height, style.font().descent()),
+    : InlineBox(style, left, width, height, style.font().descent()),
       WithFont(style.font(), start, ComputeEndOffset(start, marker_name)),
       marker_name_(marker_name) {}
 
@@ -105,12 +112,13 @@ text::Offset InlineMarkerBox::MapXToPosn(float x) const {
 // InlineTextBoxBase
 //
 InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
+                                     float left,
                                      float width,
                                      float height,
                                      text::Offset start,
                                      text::Offset end,
                                      const base::string16& characters)
-    : InlineBox(style, width, height, style.font().descent()),
+    : InlineBox(style, left, width, height, style.font().descent()),
       WithFont(style.font(), start, end),
       characters_(characters) {}
 
@@ -133,11 +141,13 @@ text::Offset InlineTextBoxBase::MapXToPosn(float x) const {
 // InlineTextBox
 //
 InlineTextBox::InlineTextBox(const RenderStyle& style,
+                             float left,
                              float width,
                              float height,
                              text::Offset start,
                              const base::string16& characters)
     : InlineTextBoxBase(style,
+                        left,
                         width,
                         height,
                         start,
@@ -167,11 +177,13 @@ gfx::RectF InlineTextBox::HitTestTextPosition(text::Offset offset,
 // InlineUnicodeBox
 //
 InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
+                                   float left,
                                    float width,
                                    float height,
                                    text::Offset start,
                                    const base::string16& characters)
     : InlineTextBoxBase(style,
+                        left,
                         width,
                         height,
                         start,

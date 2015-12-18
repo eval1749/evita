@@ -48,7 +48,7 @@ class TextFormatter final {
  private:
   class TextScanner;
 
-  InlineBox* FormatChar(LineBuilder* line_builder, base::char16 char_code);
+  bool FormatChar(LineBuilder* line_builder, base::char16 char_code);
 
   gfx::RectF bounds_;
   RenderStyle default_render_style_;

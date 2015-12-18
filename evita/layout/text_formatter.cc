@@ -213,37 +213,37 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
   TRACE_EVENT0("views", "TextFormatter::FormatLine");
   DCHECK(!bounds_.empty());
 
-  LineBuilder line_builder(text_scanner_->text_offset());
+  LineBuilder line_builder(default_render_style_, text_scanner_->text_offset(),
+                           bounds_.width());
   line_builder.AddBox(
       new InlineFillerBox(default_render_style_, kLeftMargin, kMinHeight));
   for (;;) {
     if (text_scanner_->AtEnd()) {
+      line_builder.AddTextBoxIfNeeded();
       line_builder.AddBox(FormatMarker(TextMarker::EndOfDocument));
       break;
     }
 
     auto const wch = text_scanner_->GetChar();
     if (wch == 0x0A) {
+      line_builder.AddTextBoxIfNeeded();
       line_builder.AddBox(FormatMarker(TextMarker::EndOfLine));
       text_scanner_->Next();
       break;
     }
 
-    auto const box = FormatChar(&line_builder, wch);
-    if (!box) {
+    if (!FormatChar(&line_builder, wch)) {
+      line_builder.AddTextBoxIfNeeded();
       line_builder.AddBox(FormatMarker(TextMarker::LineWrap));
       break;
     }
 
     text_scanner_->Next();
-    line_builder.AddBox(box);
   }
   return std::move(line_builder.Build(text_scanner_->text_offset()));
 }
 
-InlineBox* TextFormatter::FormatChar(LineBuilder* line_builder,
-                                     base::char16 wch) {
-  const auto previous_cell = line_builder->last_box();
+bool TextFormatter::FormatChar(LineBuilder* line_builder, base::char16 wch) {
   const auto x = line_builder->current_x();
   auto const lPosn = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
@@ -272,13 +272,12 @@ InlineBox* TextFormatter::FormatChar(LineBuilder* line_builder,
         AlignWidthToPixel(font->GetCharWidth(' ')) * kTabWidth;
     auto const x2 = (x + widthTab - kLeftMargin) / widthTab * widthTab;
     auto const width = (x2 + kLeftMargin) - x;
-    auto const width_of_M = AlignWidthToPixel(font->GetCharWidth('M'));
-    if (previous_cell && x2 + width_of_M > bounds_.right)
-      return nullptr;
-
+    if (!line_builder->HasRoomFor(width))
+      return false;
     auto const height = AlignHeightToPixel(font->height());
-    return new InlineMarkerBox(MakeRenderStyle(style, *font), width, height,
-                               lPosn, TextMarker::Tab);
+    line_builder->AddBox(new InlineMarkerBox(
+        MakeRenderStyle(style, *font), width, height, lPosn, TextMarker::Tab));
+    return true;
   }
 
   auto const font =
@@ -301,32 +300,15 @@ InlineBox* TextFormatter::FormatChar(LineBuilder* line_builder,
     }
 
     auto const width = font2->GetTextWidth(string) + 4;
-    auto const char_width = font2->GetCharWidth('M');
-    if (previous_cell && x + width + char_width > bounds_.right)
-      return nullptr;
+    if (!line_builder->HasRoomFor(width))
+      return false;
     auto const height = AlignHeightToPixel(font2->height()) + 4;
-    return new InlineUnicodeBox(MakeRenderStyle(style, *font2), width, height,
-                                lPosn, string);
+    line_builder->AddBox(new InlineUnicodeBox(MakeRenderStyle(style, *font2),
+                                              width, height, lPosn, string));
+    return true;
   }
 
-  auto render_style = MakeRenderStyle(style, *font);
-  auto const width = AlignWidthToPixel(font->GetCharWidth(wch));
-  if (previous_cell) {
-    auto const width_of_M = AlignWidthToPixel(font->GetCharWidth('M'));
-    if (x + width + width_of_M > bounds_.right) {
-      // We doesn't have enough room for a char in the line.
-      return nullptr;
-    }
-
-    if (previous_cell->Merge(render_style, width)) {
-      previous_cell->as<InlineTextBox>()->AddChar(wch);
-      return previous_cell;
-    }
-  }
-
-  auto const height = AlignHeightToPixel(font->height());
-  return new InlineTextBox(render_style, width, height, lPosn,
-                           base::string16(1u, wch));
+  return line_builder->TryAddChar(MakeRenderStyle(style, *font), lPosn, wch);
 }
 
 InlineBox* TextFormatter::FormatMarker(TextMarker marker_name) {

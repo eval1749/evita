@@ -50,17 +50,19 @@ RenderStyle TextFormatterTest::StyleAt(text::Offset offset) const {
 
 float TextFormatterTest::WidthOf(const RenderStyle& style,
                                  const base::string16& text) const {
-  return style.font().GetTextWidth(text);
+  return ::ceil(style.font().GetTextWidth(text));
 }
 
 TEST_F(TextFormatterTest, FormatLineBasic) {
   buffer()->InsertBefore(text::Offset(0), L"foo");
-  const auto& origin = gfx::PointF(10.0f, 200.0f);
+  const auto& origin = gfx::PointF(300.0f, 200.0f);
   const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
 
   TextFormatter formatter1(buffer(), text::Offset(0), bounds, 1.0f);
   auto line1 = formatter1.FormatLine(text::Offset(0));
   line1->set_origin(origin);
+  const auto height = line1->height();
+
   EXPECT_EQ(3, line1->boxes().size());
   EXPECT_TRUE(line1->boxes()[0]->is<InlineFillerBox>());
   EXPECT_TRUE(line1->boxes()[1]->is<InlineTextBox>());
@@ -75,6 +77,12 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
                       });
   EXPECT_EQ(gfx::RectF(origin, gfx::SizeF(boxes_width, boxes_height)),
             line1->bounds());
+  EXPECT_EQ(
+      gfx::RectF(gfx::PointF(origin.x + line1->boxes()[0]->width() +
+                                 WidthOf(line1->boxes()[1]->style(), L"f"),
+                             origin.y),
+                 gfx::SizeF(1.0f, line1->boxes()[1]->height())),
+      line1->HitTestTextPosition(text::Offset(1)));
 
   // Change background color offset 1 and format again
   css::Style style;
@@ -104,7 +112,7 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
   TextFormatter formatter1(buffer(), text::Offset(0), bounds, 1.0f);
   auto line1 = formatter1.FormatLine(text::Offset(0));
   line1->set_origin(origin);
-  EXPECT_EQ(5, line1->boxes().size());
+  EXPECT_EQ(5, line1->boxes().size()) << "line width is " << line1->width();
   EXPECT_TRUE(line1->boxes()[0]->is<InlineFillerBox>());
   EXPECT_TRUE(line1->boxes()[1]->is<InlineTextBox>());
   EXPECT_TRUE(line1->boxes()[2]->is<InlineUnicodeBox>());

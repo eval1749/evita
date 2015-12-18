@@ -34,7 +34,7 @@ class LineBuilder final {
 
   void AddBox(InlineBox* inline_box);
   void AddTextBoxIfNeeded();
-  scoped_refptr<RootInlineBox> Build(text::Offset text_end);
+  scoped_refptr<RootInlineBox> Build();
   bool HasRoomFor(float width) const;
   bool TryAddChar(const RenderStyle& style,
                   text::Offset offset,

@@ -7,6 +7,7 @@
 #include "evita/layout/line/root_inline_box.h"
 
 #include "base/logging.h"
+#include "evita/gfx/rect_conversions.h"
 #include "evita/paint/inline_box_painter.h"
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/render_selection.h"
@@ -27,20 +28,11 @@ RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& boxes,
       text_start_(text_start),
       text_end_(text_end) {
   DCHECK(!boxes_.empty());
-  auto const left = 0.0f;
-  auto const top = 0.0f;
-  auto const height = ascent + descent;
-  auto right = left;
-  for (auto box : boxes_) {
-    auto const text_end = box->Fix(height, descent);
-    if (text_end >= 0)
-      text_end_ = text_end;
+  auto right = 0.0f;
+  for (const auto& box : boxes_)
     right += box->width();
-  }
-  bounds_.left = left;
-  bounds_.top = top;
   bounds_.right = right;
-  bounds_.bottom = top + height;
+  bounds_.bottom = ascent + descent;
   DCHECK_EQ(bounds_.top, ::floor(bounds_.top));
   DCHECK_EQ(bounds_.bottom, ::floor(bounds_.bottom));
 }
@@ -66,11 +58,14 @@ gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
   if (offset < text_start_ || offset >= text_end_)
     return gfx::RectF();
 
+  const auto baseline = height() - descent_;
   auto origin = bounds_.origin();
   for (const auto box : boxes_) {
-    auto const rect = box->HitTestTextPosition(offset);
-    if (!rect.empty())
-      return gfx::RectF(origin + rect.origin(), rect.size());
+    auto const rect = box->HitTestTextPosition(offset, baseline);
+    if (!rect.empty()) {
+      return gfx::RectF(gfx::ToEnclosingRect(
+          gfx::RectF(origin + rect.origin(), rect.size())));
+    }
     origin.x += box->width();
   }
 

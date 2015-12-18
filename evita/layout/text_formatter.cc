@@ -242,7 +242,7 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
 
     text_scanner_->Next();
   }
-  return std::move(line_builder.Build(text_scanner_->text_offset()));
+  return std::move(line_builder.Build());
 }
 
 bool TextFormatter::FormatChar(LineBuilder* line_builder,

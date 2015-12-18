@@ -27,31 +27,12 @@ InlineBox::InlineBox(const RenderStyle& style,
                      float width,
                      float height,
                      float descent)
-    : descent_(descent),
-      height_(height),
-      line_height_(height),
-      style_(style),
-      width_(width) {
+    : descent_(descent), height_(height), style_(style), width_(width) {
   DCHECK_GE(width, 1.0f);
   DCHECK_GE(height, 1.0f);
 }
 
 InlineBox::~InlineBox() {}
-
-float InlineBox::top() const {
-  return ::floor(line_height() - line_descent() - height() + descent());
-}
-
-// InlineBox
-text::Offset InlineBox::Fix(float line_height, float line_descent) {
-  line_descent_ = line_descent;
-  line_height_ = line_height;
-  return text::Offset::Invalid();
-}
-
-gfx::RectF InlineBox::HitTestTextPosition(text::Offset) const {
-  return gfx::RectF();
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -66,6 +47,11 @@ InlineFillerBox::~InlineFillerBox() {}
 
 text::Offset InlineFillerBox::MapXToPosn(float x) const {
   return text::Offset::Invalid();
+}
+
+gfx::RectF InlineFillerBox::HitTestTextPosition(text::Offset offset,
+                                                float baseline) const {
+  return gfx::RectF();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -102,15 +88,12 @@ text::Offset InlineMarkerBox::ComputeEndOffset(text::Offset offset,
 }
 
 // InlineBox
-text::Offset InlineMarkerBox::Fix(float line_height, float line_descent) {
-  InlineBox::Fix(line_height, line_descent);
-  return end();
-}
-
-gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset offset) const {
+gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset offset,
+                                                float baseline) const {
   if (offset < start() || offset >= end())
     return gfx::RectF();
-  return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(1.0f, height()));
+  return gfx::RectF(gfx::PointF(0.0f, baseline - ascent()),
+                    gfx::SizeF(1.0f, height()));
 }
 
 text::Offset InlineMarkerBox::MapXToPosn(float x) const {
@@ -134,11 +117,6 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
 InlineTextBoxBase::~InlineTextBoxBase() {}
 
 // InlineBox
-text::Offset InlineTextBoxBase::Fix(float line_height, float descent) {
-  InlineBox::Fix(line_height, descent);
-  return end();
-}
-
 text::Offset InlineTextBoxBase::MapXToPosn(float x) const {
   if (x >= width())
     return end();
@@ -171,14 +149,16 @@ InlineTextBox::~InlineTextBox() {}
 // Returns bounds rectangle of caret at |offset|. Caret is placed before
 // character at |offset|. So, height of caret is height of character before
 // |offset|.
-gfx::RectF InlineTextBox::HitTestTextPosition(text::Offset offset) const {
+gfx::RectF InlineTextBox::HitTestTextPosition(text::Offset offset,
+                                              float baseline) const {
   if (offset < start() || offset > end())
     return gfx::RectF();
-  auto const length = static_cast<size_t>(offset - start());
+  const auto length = static_cast<size_t>(offset - start());
+  const auto top = baseline - ascent();
   if (length == 0)
-    return gfx::RectF(gfx::PointF(0.0f, top()), gfx::SizeF(1.0f, height()));
+    return gfx::RectF(gfx::PointF(0.0f, top), gfx::SizeF(1.0f, height()));
   auto const width = font().GetTextWidth(characters().data(), length);
-  return gfx::RectF(gfx::PointF(::ceil(width), top()),
+  return gfx::RectF(gfx::PointF(::ceil(width), top),
                     gfx::SizeF(1.0f, height()));
 }
 
@@ -201,10 +181,12 @@ InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
 InlineUnicodeBox::~InlineUnicodeBox() {}
 
 // InlineBox
-gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset) const {
+gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset,
+                                                 float baseline) const {
   if (offset < start() || offset >= end())
     return gfx::RectF();
-  return gfx::RectF(gfx::PointF(width(), top()), gfx::SizeF(1.0f, height()));
+  return gfx::RectF(gfx::PointF(width(), baseline - ascent()),
+                    gfx::SizeF(1.0f, height()));
 }
 
 text::Offset InlineUnicodeBox::MapXToPosn(float x) const {

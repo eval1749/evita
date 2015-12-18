@@ -48,28 +48,23 @@ class InlineBox : public common::Castable {
  public:
   virtual ~InlineBox();
 
+  float ascent() const { return height_ - descent_; }
   float descent() const { return descent_; }
   float height() const { return height_; }
-  float line_height() const { return line_height_; }
   const RenderStyle& style() const { return style_; }
-  float top() const;
   float width() const { return width_; }
 
   virtual void Accept(InlineBoxVisitor* visitor) = 0;
-  virtual text::Offset Fix(float line_height, float line_descent);
-  virtual gfx::RectF HitTestTextPosition(text::Offset position) const;
+  virtual gfx::RectF HitTestTextPosition(text::Offset position,
+                                         float baseline) const = 0;
   virtual text::Offset MapXToPosn(float x) const = 0;
 
  protected:
   InlineBox(const RenderStyle& style, float width, float height, float descent);
 
-  float line_descent() const { return line_descent_; }
-
  private:
   const float descent_;
   const float height_;
-  float line_descent_;
-  float line_height_;
   const RenderStyle style_;
   const float width_;
 
@@ -91,6 +86,8 @@ class InlineFillerBox final : public InlineBox {
 
  private:
   // InlineBox
+  gfx::RectF HitTestTextPosition(text::Offset offset,
+                                 float baseline) const final;
   text::Offset MapXToPosn(float x) const final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineFillerBox);
@@ -102,14 +99,13 @@ class InlineFillerBox final : public InlineBox {
 //
 class WithFont {
  public:
+  text::Offset end() const { return end_; }
   const gfx::Font& font() const { return font_; }
+  text::Offset start() const { return start_; }
 
  protected:
   WithFont(const gfx::Font& font, text::Offset start, text::Offset end);
   ~WithFont();
-
-  text::Offset end() const { return end_; }
-  text::Offset start() const { return start_; }
 
  private:
   const text::Offset end_;
@@ -141,8 +137,8 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
                                        TextMarker marker_name);
 
   // InlineBox
-  text::Offset Fix(float iHeight, float iDescent) final;
-  gfx::RectF HitTestTextPosition(text::Offset offset) const final;
+  gfx::RectF HitTestTextPosition(text::Offset offset,
+                                 float baseline) const final;
   text::Offset MapXToPosn(float x) const final;
 
   const TextMarker marker_name_;
@@ -171,7 +167,6 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
 
  private:
   // InlineBox
-  text::Offset Fix(float iHeight, float iDescent) override;
   text::Offset MapXToPosn(float x) const override;
 
   const base::string16 characters_;
@@ -196,7 +191,8 @@ class InlineTextBox final : public InlineTextBoxBase {
 
  private:
   // InlineBox
-  gfx::RectF HitTestTextPosition(text::Offset position) const final;
+  gfx::RectF HitTestTextPosition(text::Offset position,
+                                 float baseline) const final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineTextBox);
 };
@@ -218,7 +214,8 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
 
  private:
   // InlineBox
-  gfx::RectF HitTestTextPosition(text::Offset offset) const final;
+  gfx::RectF HitTestTextPosition(text::Offset offset,
+                                 float baseline) const final;
   text::Offset MapXToPosn(float x) const final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineUnicodeBox);

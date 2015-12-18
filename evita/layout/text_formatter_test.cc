@@ -70,11 +70,13 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   const auto boxes_width = std::accumulate(
       line1->boxes().begin(), line1->boxes().end(), 0.0f,
       [](float sum, InlineBox* box) { return sum + box->width(); });
-  const auto boxes_height =
-      std::accumulate(line1->boxes().begin(), line1->boxes().end(), 0.0f,
-                      [](float max, InlineBox* box) {
-                        return std::max(max, box->line_height());
-                      });
+  const auto boxes_ascent = std::accumulate(
+      line1->boxes().begin(), line1->boxes().end(), 0.0f,
+      [](float max, InlineBox* box) { return std::max(max, box->ascent()); });
+  const auto boxes_descent = std::accumulate(
+      line1->boxes().begin(), line1->boxes().end(), 0.0f,
+      [](float max, InlineBox* box) { return std::max(max, box->descent()); });
+  const auto boxes_height = boxes_ascent + boxes_descent;
   EXPECT_EQ(gfx::RectF(origin, gfx::SizeF(boxes_width, boxes_height)),
             line1->bounds());
   EXPECT_EQ(
@@ -121,11 +123,13 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
   const auto boxes_width = std::accumulate(
       line1->boxes().begin(), line1->boxes().end(), 0.0f,
       [](float sum, InlineBox* box) { return sum + box->width(); });
-  const auto boxes_height =
-      std::accumulate(line1->boxes().begin(), line1->boxes().end(), 0.0f,
-                      [](float max, InlineBox* box) {
-                        return std::max(max, box->line_height());
-                      });
+  const auto boxes_ascent = std::accumulate(
+      line1->boxes().begin(), line1->boxes().end(), 0.0f,
+      [](float max, InlineBox* box) { return std::max(max, box->ascent()); });
+  const auto boxes_descent = std::accumulate(
+      line1->boxes().begin(), line1->boxes().end(), 0.0f,
+      [](float max, InlineBox* box) { return std::max(max, box->descent()); });
+  const auto boxes_height = boxes_ascent + boxes_descent;
   EXPECT_EQ(gfx::RectF(origin, gfx::SizeF(boxes_width, boxes_height)),
             line1->bounds());
 }

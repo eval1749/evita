@@ -18,11 +18,17 @@ namespace {
 
 // TODO(eval1749): We should move |AlignHeightToPixel()| to another place
 // to share code.
+#if 0
 float AlignHeightToPixel(float height) {
   return gfx::FactorySet::instance()
       ->AlignToPixel(gfx::SizeF(0.0f, height))
       .height;
 }
+#else
+float AlignHeightToPixel(float height) {
+  return height;
+}
+#endif
 
 }  // namespace
 
@@ -61,8 +67,9 @@ void LineBuilder::AddTextBoxIfNeeded() {
 // o end of buffer: End-Of-Buffer InlineMarkerBox
 // o end of line: End-Of-Line InlineMarkerBox
 // o wrapped line: Warp InlineMarkerBox
-scoped_refptr<RootInlineBox> LineBuilder::Build(text::Offset text_end) {
+scoped_refptr<RootInlineBox> LineBuilder::Build() {
   DCHECK(!boxes_.empty());
+  const auto text_end = boxes_.back()->as<InlineMarkerBox>()->end();
   return make_scoped_refptr(new RootInlineBox(boxes_, text_start_, text_end,
                                               AlignHeightToPixel(ascent_),
                                               AlignHeightToPixel(descent_)));

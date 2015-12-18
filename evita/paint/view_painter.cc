@@ -9,15 +9,14 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx_base.h"
 #include "evita/paint/public/view.h"
-#include "evita/layout/line/root_inline_box.h"
 #include "evita/paint/public/caret.h"
+#include "evita/paint/public/line/root_inline_box.h"
 #include "evita/paint/public/selection.h"
 #include "evita/paint/root_inline_box_list_painter.h"
 #include "evita/paint/view_paint_cache.h"
 
 namespace paint {
 
-using RootInlineBox = layout::RootInlineBox;
 using TextSelection = layout::TextSelection;
 
 namespace {

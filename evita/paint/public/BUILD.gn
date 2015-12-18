@@ -6,6 +6,8 @@ source_set("public") {
   sources = [
     "caret.cc",
     "caret.h",
+    "line/root_inline_box.cc",
+    "line/root_inline_box.h",
     "selection.cc",
     "selection.h",
     "view.cc",

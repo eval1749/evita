@@ -5,8 +5,8 @@
 #include "evita/paint/view_paint_cache.h"
 
 #include "evita/gfx/canvas.h"
-#include "evita/layout/line/root_inline_box.h"
 #include "evita/paint/public/caret.h"
+#include "evita/paint/public/line/root_inline_box.h"
 #include "evita/paint/public/selection.h"
 #include "evita/paint/public/view.h"
 

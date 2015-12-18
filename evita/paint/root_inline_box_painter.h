@@ -11,19 +11,15 @@ namespace gfx {
 class Canvas;
 }
 
-namespace layout {
-class RootInlineBox;
-}
-
 namespace paint {
+
+class RootInlineBox;
 
 //////////////////////////////////////////////////////////////////////
 //
 // RootInlineBoxPainter
 //
 class RootInlineBoxPainter final {
-  using RootInlineBox = layout::RootInlineBox;
-
  public:
   explicit RootInlineBoxPainter(const RootInlineBox& root_box);
   ~RootInlineBoxPainter();

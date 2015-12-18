@@ -21,14 +21,13 @@ class RootInlineBox;
 namespace paint {
 
 class Selection;
+class RootInlineBox;
 
 //////////////////////////////////////////////////////////////////////
 //
 // View
 //
 class View final : public base::RefCounted<View> {
-  using RootInlineBox = layout::RootInlineBox;
-
  public:
   View(int layout_version,
        const gfx::RectF& bounds,

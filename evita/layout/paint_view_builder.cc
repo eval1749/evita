@@ -12,12 +12,14 @@
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/layout/layout_block_flow.h"
+#include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/render_font.h"
 #include "evita/layout/render_font_set.h"
 #include "evita/layout/render_selection.h"
 #include "evita/layout/render_style.h"
 #include "evita/layout/text_formatter.h"
+#include "evita/paint/public/line/root_inline_box.h"
 #include "evita/paint/public/selection.h"
 #include "evita/paint/public/view.h"
 
@@ -78,6 +80,14 @@ std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
   return bounds_set;
 }
 
+paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
+  std::vector<InlineBox*> boxes;
+  boxes.reserve(line.boxes().size());
+  for (const auto& box : line.boxes())
+    boxes.push_back(box->Copy());
+  return new paint::RootInlineBox(boxes, line.bounds());
+}
+
 base::TimeDelta GetCaretBlinkInterval() {
   auto const interval = ::GetCaretBlinkTime();
   if (!interval)
@@ -132,9 +142,10 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
   const auto& selection_bounds_set = CalculateSelectionBoundsSet(
       layout_block_flow.lines(), selection, layout_block_flow.bounds());
 
-  std::vector<RootInlineBox*> lines;
+  std::vector<paint::RootInlineBox*> lines;
+  lines.reserve(layout_block_flow.lines().size());
   for (const auto& line : layout_block_flow.lines())
-    lines.push_back(line->Copy());
+    lines.push_back(CreatePaintRootInlineBox(*line));
   return new paint::View(
       layout_block_flow.format_counter(), layout_block_flow.bounds(), lines,
       make_scoped_refptr(

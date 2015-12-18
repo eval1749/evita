@@ -15,12 +15,9 @@ namespace gfx {
 class Canvas;
 }
 
-namespace layout {
-class RootInlineBox;
-}
-
 namespace paint {
 
+class RootInlineBox;
 class Selection;
 class View;
 
@@ -29,8 +26,6 @@ class View;
 // ViewPaintCache
 //
 class ViewPaintCache final {
-  using RootInlineBox = layout::RootInlineBox;
-
  public:
   ViewPaintCache(gfx::Canvas* canvas,
                  const View& view,

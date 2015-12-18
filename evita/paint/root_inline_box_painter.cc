@@ -5,13 +5,11 @@
 #include "evita/paint/root_inline_box_painter.h"
 
 #include "evita/gfx_base.h"
-#include "evita/paint/inline_box_painter.h"
 #include "evita/layout/line/inline_box.h"
-#include "evita/layout/line/root_inline_box.h"
+#include "evita/paint/inline_box_painter.h"
+#include "evita/paint/public/line/root_inline_box.h"
 
 namespace paint {
-
-using RootInlineBox = layout::RootInlineBox;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -26,6 +24,7 @@ void RootInlineBoxPainter::Paint(gfx::Canvas* canvas) {
   auto const& bounds = root_box_.bounds();
   auto x = bounds.left;
   for (auto box : root_box_.boxes()) {
+    // TODO(eval1749): We should not use |ceil()| here.
     gfx::RectF rect(x, bounds.top, x + box->width(),
                     ::ceil(bounds.top + box->line_height()));
     InlineBoxPainter(*box).Paint(canvas, rect);

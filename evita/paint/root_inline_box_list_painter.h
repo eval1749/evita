@@ -10,11 +10,9 @@
 #include "base/macros.h"
 #include "evita/gfx_base.h"
 
-namespace layout {
-class RootInlineBox;
-}
-
 namespace paint {
+
+class RootInlineBox;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -22,7 +20,6 @@ namespace paint {
 //
 class RootInlineBoxListPainter final {
  public:
-  using RootInlineBox = layout::RootInlineBox;
   using FormatLineIterator = std::vector<RootInlineBox*>::const_iterator;
 
   RootInlineBoxListPainter(gfx::Canvas* canvas,

@@ -124,13 +124,14 @@ text::Offset InlineMarkerBox::MapXToPosn(float x) const {
 InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
                                      float width,
                                      float height,
-                                     text::Offset lPosn,
+                                     text::Offset start,
+                                     text::Offset end,
                                      const base::string16& characters)
     : InlineBox(style, width, height, style.font().descent()),
       WithFont(style.font()),
       characters_(characters),
-      end_(lPosn + text::OffsetDelta(characters.size())),
-      start_(lPosn) {}
+      end_(end),
+      start_(start) {}
 
 InlineTextBoxBase::~InlineTextBoxBase() {}
 
@@ -167,9 +168,14 @@ text::Offset InlineTextBoxBase::MapXToPosn(float x) const {
 InlineTextBox::InlineTextBox(const RenderStyle& style,
                              float width,
                              float height,
-                             text::Offset offset,
+                             text::Offset start,
                              const base::string16& characters)
-    : InlineTextBoxBase(style, width, height, offset, characters) {}
+    : InlineTextBoxBase(style,
+                        width,
+                        height,
+                        start,
+                        start + text::OffsetDelta(characters.size()),
+                        characters) {}
 
 InlineTextBox::~InlineTextBox() {}
 
@@ -202,17 +208,26 @@ bool InlineTextBox::Merge(const RenderStyle& style, float width) {
 InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
                                    float width,
                                    float height,
-                                   text::Offset lPosn,
+                                   text::Offset start,
                                    const base::string16& characters)
-    : InlineTextBoxBase(style, width, height, lPosn, characters) {}
+    : InlineTextBoxBase(style,
+                        width,
+                        height,
+                        start,
+                        start + text::OffsetDelta(1),
+                        characters) {}
 
 InlineUnicodeBox::~InlineUnicodeBox() {}
 
 // InlineBox
 gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset) const {
-  if (offset < start() || offset > end())
+  if (offset < start() || offset >= end())
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(width(), top()), gfx::SizeF(1.0f, height()));
+}
+
+text::Offset InlineUnicodeBox::MapXToPosn(float x) const {
+  return start();
 }
 
 bool InlineUnicodeBox::Merge(const RenderStyle&, float) {

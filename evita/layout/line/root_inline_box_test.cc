@@ -31,6 +31,7 @@ class LineBuilder final {
   text::Offset text_end() const { return offset_; }
   text::Offset text_start() const { return start_; }
 
+  void AddCodeUnit(const base::char16 code_unit);
   void AddMarker(TextMarker marker);
   void AddText(const base::string16& text);
   float WidthOf(const base::string16& text) const;
@@ -48,6 +49,13 @@ class LineBuilder final {
 
 LineBuilder::LineBuilder(text::Offset start, const RenderStyle& style)
     : offset_(start), style_(style), start_(start) {}
+
+void LineBuilder::AddCodeUnit(const base::char16 code_unit) {
+  base::string16 text = L"uFFFF";
+  boxes_.push_back(new InlineUnicodeBox(
+      style_, WidthOf(text), style_.font().height() + 4, offset_, text));
+  offset_ += text::OffsetDelta(1);
+}
 
 void LineBuilder::AddMarker(TextMarker marker) {
   boxes_.push_back(new InlineMarkerBox(
@@ -150,6 +158,28 @@ TEST_F(RootInlineBoxTest, HitTestTextPosition) {
       << "root_box contains 100 to 109.";
 }
 
+TEST_F(RootInlineBoxTest, HitTestTextPositionCodeUnit) {
+  LineBuilder line(text::Offset(100), style());
+  line.AddText(L"a");
+  line.AddCodeUnit(0xFFFF);
+  line.AddText(L"b");
+  line.AddMarker(TextMarker::EndOfLine);
+  const auto root_box = make_scoped_refptr(
+      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
+                        line.ascent(), line.descent()));
+  root_box->set_origin(gfx::PointF(10.0f, 20.0f));
+  const auto height = root_box->height();
+  const auto& size = gfx::SizeF(1.0f, height);
+  EXPECT_EQ(
+      gfx::RectF(gfx::PointF(10.0f + WidthOf(L"a"), 20.0f),
+                 size),
+      root_box->HitTestTextPosition(text::Offset(101)));
+  EXPECT_EQ(
+      gfx::RectF(gfx::PointF(10.0f + WidthOf(L"a") + WidthOf(L"uFFFF"), 20.0f),
+                 size),
+      root_box->HitTestTextPosition(text::Offset(102)));
+}
+
 TEST_F(RootInlineBoxTest, MapXToPosn) {
   LineBuilder line(text::Offset(100), style());
   line.AddText(L"foo");
@@ -170,6 +200,25 @@ TEST_F(RootInlineBoxTest, MapXToPosn) {
   EXPECT_EQ(105, root_box->MapXToPosn(WidthOf(L"fooba") + 1));
   EXPECT_EQ(108, root_box->MapXToPosn(WidthOf(L"foobarbaz") - 1));
   EXPECT_EQ(109, root_box->MapXToPosn(width));
+}
+
+TEST_F(RootInlineBoxTest, MapXToPosnCodeUnit) {
+  LineBuilder line(text::Offset(100), style());
+  line.AddText(L"a");
+  line.AddCodeUnit(0xFFFF);
+  line.AddText(L"b");
+  line.AddMarker(TextMarker::EndOfLine);
+  const auto root_box = make_scoped_refptr(
+      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
+                        line.ascent(), line.descent()));
+  const auto width = root_box->width();
+  EXPECT_EQ(100, root_box->MapXToPosn(0));
+  EXPECT_EQ(100, root_box->MapXToPosn(WidthOf(L"a") / 2));
+  EXPECT_EQ(100, root_box->MapXToPosn(WidthOf(L"a") - 1));
+  EXPECT_EQ(101, root_box->MapXToPosn(WidthOf(L"a")));
+  EXPECT_EQ(101, root_box->MapXToPosn(WidthOf(L"au")));
+  EXPECT_EQ(102, root_box->MapXToPosn(width - 10));
+  EXPECT_EQ(103, root_box->MapXToPosn(width));
 }
 
 }  // namespace layout

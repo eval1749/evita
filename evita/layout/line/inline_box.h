@@ -166,7 +166,8 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
   InlineTextBoxBase(const RenderStyle& style,
                     float width,
                     float height,
-                    text::Offset lPosn,
+                    text::Offset start,
+                    text::Offset end,
                     const base::string16& characters);
   ~InlineTextBoxBase() override;
 
@@ -198,7 +199,7 @@ class InlineTextBox final : public InlineTextBoxBase {
   InlineTextBox(const RenderStyle& style,
                 float width,
                 float height,
-                text::Offset lPosn,
+                text::Offset start,
                 const base::string16& characters);
   ~InlineTextBox() final;
 
@@ -228,6 +229,7 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
  private:
   // InlineBox
   gfx::RectF HitTestTextPosition(text::Offset lPosn) const final;
+  text::Offset MapXToPosn(float x) const final;
   bool Merge(const RenderStyle& style, float width) final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineUnicodeBox);

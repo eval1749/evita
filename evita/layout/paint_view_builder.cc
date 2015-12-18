@@ -112,8 +112,10 @@ gfx::RectF CalculateSelectionBounds(const RootInlineBox& root_box,
       selection.end() <= root_box.text_start()) {
     return gfx::RectF();
   }
-  return gfx::RectF(CalculateSelectionStartPoint(root_box, selection),
-                    CalculateSelectionEndPoint(root_box, selection));
+  return gfx::RectF(CalculateSelectionStartPoint(root_box, selection).x,
+                    root_box.top(),
+                    CalculateSelectionEndPoint(root_box, selection).x,
+                    root_box.bottom());
 }
 
 std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(

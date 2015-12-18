@@ -229,8 +229,7 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
       break;
     }
 
-    auto const box =
-        FormatChar(line_builder.last_box(), line_builder.current_x(), wch);
+    auto const box = FormatChar(&line_builder, wch);
     if (!box) {
       line_builder.AddBox(FormatMarker(TextMarker::LineWrap));
       break;
@@ -242,9 +241,10 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
   return std::move(line_builder.Build(text_scanner_->text_offset()));
 }
 
-InlineBox* TextFormatter::FormatChar(InlineBox* previous_cell,
-                                     float x,
+InlineBox* TextFormatter::FormatChar(LineBuilder* line_builder,
                                      base::char16 wch) {
+  const auto previous_cell = line_builder->last_box();
+  const auto x = line_builder->current_x();
   auto const lPosn = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
 

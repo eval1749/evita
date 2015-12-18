@@ -149,7 +149,7 @@ paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
 }
 
 base::TimeDelta GetCaretBlinkInterval() {
-  auto const interval = ::GetCaretBlinkTime();
+  const auto interval = ::GetCaretBlinkTime();
   if (!interval)
     return base::TimeDelta::FromMilliseconds(kBlinkInterval);
   if (interval == INFINITE)
@@ -216,11 +216,11 @@ gfx::RectF PaintViewBuilder::ComputeCaretBounds(
     const TextSelectionModel& selection_model) const {
   if (!selection_model.has_focus())
     return gfx::RectF();
-  auto const& char_rect =
+  const auto& char_rect =
       RoundBounds(block_.HitTestTextPosition(selection_model.focus_offset()));
   if (char_rect.empty())
     return gfx::RectF();
-  auto const caret_width = 2;
+  const auto caret_width = 2;
   return gfx::RectF(char_rect.left, char_rect.top, char_rect.left + caret_width,
                     char_rect.bottom);
 }
@@ -241,11 +241,11 @@ paint::CaretState PaintViewBuilder::ComputeCaretState(const gfx::RectF& bounds,
   }
 
   // When the caret stays at same point, caret is blinking.
-  auto const interval = GetCaretBlinkInterval();
+  const auto interval = GetCaretBlinkInterval();
   if (interval == base::TimeDelta())
     return paint::CaretState::Show;
-  auto const delta = now - caret_time_;
-  auto const index = delta / interval;
+  const auto delta = now - caret_time_;
+  const auto index = delta / interval;
   return index % 2 ? paint::CaretState::Hide : paint::CaretState::Show;
 }
 
@@ -254,11 +254,11 @@ gfx::RectF PaintViewBuilder::ComputeRulerBounds() const {
   // script and UI.
   auto style = block_.text_buffer().GetDefaultStyle();
   style.set_font_size(style.font_size() * zoom_);
-  auto const font = FontSet::GetFont(style, 'x');
+  const auto font = FontSet::GetFont(style, 'x');
 
-  auto const num_columns = 81;
-  auto const width_of_M = font->GetCharWidth('M');
-  auto const ruler_x = ::floor(bounds_.left + width_of_M * num_columns);
+  const auto num_columns = 81;
+  const auto width_of_M = font->GetCharWidth('M');
+  const auto ruler_x = ::floor(bounds_.left + width_of_M * num_columns);
   return gfx::RectF(gfx::PointF(ruler_x, bounds_.top),
                     gfx::SizeF(1.0f, bounds_.height()));
 }

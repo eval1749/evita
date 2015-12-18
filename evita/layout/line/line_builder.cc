@@ -33,7 +33,7 @@ LineBuilder::LineBuilder(text::Offset text_start)
 
 LineBuilder::~LineBuilder() {}
 
-void LineBuilder::Add(InlineBox* box) {
+void LineBuilder::AddBox(InlineBox* box) {
   if (boxes_.empty() || boxes_.back() != box)
     boxes_.push_back(box);
   else

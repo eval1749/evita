@@ -214,17 +214,17 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
   DCHECK(!bounds_.empty());
 
   LineBuilder line_builder(text_scanner_->text_offset());
-  line_builder.Add(
+  line_builder.AddBox(
       new InlineFillerBox(default_render_style_, kLeftMargin, kMinHeight));
   for (;;) {
     if (text_scanner_->AtEnd()) {
-      line_builder.Add(FormatMarker(TextMarker::EndOfDocument));
+      line_builder.AddBox(FormatMarker(TextMarker::EndOfDocument));
       break;
     }
 
     auto const wch = text_scanner_->GetChar();
     if (wch == 0x0A) {
-      line_builder.Add(FormatMarker(TextMarker::EndOfLine));
+      line_builder.AddBox(FormatMarker(TextMarker::EndOfLine));
       text_scanner_->Next();
       break;
     }
@@ -232,12 +232,12 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
     auto const box =
         FormatChar(line_builder.last_box(), line_builder.current_x(), wch);
     if (!box) {
-      line_builder.Add(FormatMarker(TextMarker::LineWrap));
+      line_builder.AddBox(FormatMarker(TextMarker::LineWrap));
       break;
     }
 
     text_scanner_->Next();
-    line_builder.Add(box);
+    line_builder.AddBox(box);
   }
   return std::move(line_builder.Build(text_scanner_->text_offset()));
 }

@@ -28,7 +28,7 @@ class LineBuilder final {
   float current_x() const { return current_x_; }
   InlineBox* last_box() const { return boxes_.back(); }
 
-  void Add(InlineBox* inline_box);
+  void AddBox(InlineBox* inline_box);
   scoped_refptr<RootInlineBox> Build(text::Offset text_end);
 
  private:

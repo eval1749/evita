@@ -50,8 +50,10 @@ class InlineBox : public common::Castable {
 
   float ascent() const { return height_ - descent_; }
   float descent() const { return descent_; }
+  text::Offset end() const { return end_; }
   float height() const { return height_; }
   float left() const { return left_; }
+  text::Offset start() const { return start_; }
   const RenderStyle& style() const { return style_; }
   float width() const { return width_; }
 
@@ -65,12 +67,16 @@ class InlineBox : public common::Castable {
             float left,
             float width,
             float height,
+            text::Offset start,
+            text::Offset end,
             float descent);
 
  private:
   const float descent_;
+  const text::Offset end_;
   const float height_;
   const float left_;
+  const text::Offset start_;
   const RenderStyle style_;
   const float width_;
 
@@ -90,7 +96,8 @@ class InlineFillerBox final : public InlineBox {
   InlineFillerBox(const RenderStyle& style,
                   float left,
                   float width,
-                  float height);
+                  float height,
+                  text::Offset offset);
   ~InlineFillerBox() final;
 
  private:
@@ -108,18 +115,14 @@ class InlineFillerBox final : public InlineBox {
 //
 class WithFont {
  public:
-  text::Offset end() const { return end_; }
   const gfx::Font& font() const { return font_; }
-  text::Offset start() const { return start_; }
 
  protected:
-  WithFont(const gfx::Font& font, text::Offset start, text::Offset end);
+  explicit WithFont(const gfx::Font& font);
   ~WithFont();
 
  private:
-  const text::Offset end_;
   const gfx::Font& font_;
-  const text::Offset start_;
 
   DISALLOW_COPY_AND_ASSIGN(WithFont);
 };
@@ -137,6 +140,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
                   float width,
                   float height,
                   text::Offset start,
+                  text::Offset end,
                   TextMarker marker_name);
   virtual ~InlineMarkerBox();
 

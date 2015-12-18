@@ -52,20 +52,23 @@ LineBuilder::LineBuilder(text::Offset start, const RenderStyle& style)
     : offset_(start), style_(style), start_(start) {}
 
 void LineBuilder::AddCodeUnit(const base::char16 code_unit) {
+  const auto next_offset = offset_ + text::OffsetDelta(1);
   base::string16 text = L"uFFFF";
   const auto width = WidthOf(text);
   boxes_.push_back(new InlineUnicodeBox(
       style_, left_, width, style_.font().height() + 4, offset_, text));
   left_ += width;
-  offset_ += text::OffsetDelta(1);
+  offset_ = next_offset;
 }
 
 void LineBuilder::AddMarker(TextMarker marker) {
+  const auto next_offset = offset_ + text::OffsetDelta(1);
   const auto width = WidthOf(L"x");
-  boxes_.push_back(new InlineMarkerBox(
-      style_, left_, width, style_.font().height(), offset_, marker));
+  boxes_.push_back(new InlineMarkerBox(style_, left_, width,
+                                       style_.font().height(), offset_,
+                                       next_offset, marker));
   left_ += width;
-  offset_ += text::OffsetDelta(1);
+  offset_ = next_offset;
 }
 
 void LineBuilder::AddText(const base::string16& text) {

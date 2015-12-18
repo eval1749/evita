@@ -217,23 +217,25 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
 
   LineBuilder line_builder(default_render_style_, text_scanner_->text_offset(),
                            bounds_.width());
-  line_builder.AddBox(
-      new InlineFillerBox(default_render_style_, 0, kLeftMargin, kMinHeight));
+  line_builder.AddBox(new InlineFillerBox(default_render_style_, 0, kLeftMargin,
+                                          kMinHeight,
+                                          text_scanner_->text_offset()));
   for (;;) {
     if (text_scanner_->AtEnd()) {
-      FormatMarker(&line_builder, TextMarker::EndOfDocument);
+      FormatMarker(&line_builder, TextMarker::EndOfDocument,
+                   text::OffsetDelta(1));
       break;
     }
 
     const auto char_code = text_scanner_->GetChar();
     if (char_code == 0x0A) {
-      FormatMarker(&line_builder, TextMarker::EndOfLine);
+      FormatMarker(&line_builder, TextMarker::EndOfLine, text::OffsetDelta(1));
       text_scanner_->Next();
       break;
     }
 
     if (!FormatChar(&line_builder, char_code)) {
-      FormatMarker(&line_builder, TextMarker::LineWrap);
+      FormatMarker(&line_builder, TextMarker::LineWrap, text::OffsetDelta(0));
       break;
     }
 
@@ -275,9 +277,9 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
     if (!line_builder->HasRoomFor(width))
       return false;
     const auto height = AlignHeightToPixel(font->height());
-    line_builder->AddBox(new InlineMarkerBox(MakeRenderStyle(style, *font),
-                                             current_x, width, height, offset,
-                                             TextMarker::Tab));
+    line_builder->AddBox(new InlineMarkerBox(
+        MakeRenderStyle(style, *font), current_x, width, height, offset,
+        offset + text::OffsetDelta(1), TextMarker::Tab));
     return true;
   }
 
@@ -316,7 +318,8 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
 }
 
 void TextFormatter::FormatMarker(LineBuilder* line_builder,
-                                 TextMarker marker_name) {
+                                 TextMarker marker_name,
+                                 text::OffsetDelta length) {
   line_builder->AddTextBoxIfNeeded();
   auto style = text_scanner_->GetStyle();
   style.Merge(
@@ -330,7 +333,8 @@ void TextFormatter::FormatMarker(LineBuilder* line_builder,
   const auto height = AlignHeightToPixel(font->height());
   line_builder->AddBox(new InlineMarkerBox(
       MakeRenderStyle(style, *font), line_builder->current_x(), width, height,
-      text_scanner_->text_offset(), marker_name));
+      text_scanner_->text_offset(), text_scanner_->text_offset() + length,
+      marker_name));
 }
 
 // TODO(eval1749): We should move |TextFormatter::FormatSelection()| somewhere

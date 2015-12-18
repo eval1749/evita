@@ -27,14 +27,20 @@ InlineBox::InlineBox(const RenderStyle& style,
                      float left,
                      float width,
                      float height,
+                     text::Offset start,
+                     text::Offset end,
                      float descent)
     : descent_(descent),
+      end_(end),
       height_(height),
       left_(left),
+      start_(start),
       style_(style),
       width_(width) {
   DCHECK_GE(width, 1.0f);
   DCHECK_GE(height, 1.0f);
+  // |InlineFillerBox| and |LineWrap| marker hold |start| == |end|.
+  DCHECK_LE(start_, end_);
 }
 
 InlineBox::~InlineBox() {}
@@ -46,8 +52,15 @@ InlineBox::~InlineBox() {}
 InlineFillerBox::InlineFillerBox(const RenderStyle& style,
                                  float left,
                                  float width,
-                                 float height)
-    : InlineBox(style, left, width, height, 0.0f) {}
+                                 float height,
+                                 text::Offset start)
+    : InlineBox(style,
+                left,
+                width,
+                height,
+                start,
+                start + text::OffsetDelta(1),
+                0.0f) {}
 
 InlineFillerBox::~InlineFillerBox() {}
 
@@ -64,11 +77,7 @@ gfx::RectF InlineFillerBox::HitTestTextPosition(text::Offset offset,
 //
 // WithFont
 //
-WithFont::WithFont(const gfx::Font& font, text::Offset start, text::Offset end)
-    : end_(end), font_(font), start_(start) {
-  DCHECK_LT(start_, end_);
-}
-
+WithFont::WithFont(const gfx::Font& font) : font_(font) {}
 WithFont::~WithFont() {}
 
 //////////////////////////////////////////////////////////////////////
@@ -80,19 +89,13 @@ InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
                                  float width,
                                  float height,
                                  text::Offset start,
+                                 text::Offset end,
                                  TextMarker marker_name)
-    : InlineBox(style, left, width, height, style.font().descent()),
-      WithFont(style.font(), start, ComputeEndOffset(start, marker_name)),
+    : InlineBox(style, left, width, height, start, end, style.font().descent()),
+      WithFont(style.font()),
       marker_name_(marker_name) {}
 
 InlineMarkerBox::~InlineMarkerBox() {}
-
-// static
-text::Offset InlineMarkerBox::ComputeEndOffset(text::Offset offset,
-                                               TextMarker marker_name) {
-  return marker_name == TextMarker::LineWrap ? offset
-                                             : offset + text::OffsetDelta(1);
-}
 
 // InlineBox
 gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset offset,
@@ -118,8 +121,8 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
                                      text::Offset start,
                                      text::Offset end,
                                      const base::string16& characters)
-    : InlineBox(style, left, width, height, style.font().descent()),
-      WithFont(style.font(), start, end),
+    : InlineBox(style, left, width, height, start, end, style.font().descent()),
+      WithFont(style.font()),
       characters_(characters) {}
 
 InlineTextBoxBase::~InlineTextBoxBase() {}

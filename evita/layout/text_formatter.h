@@ -15,6 +15,7 @@
 namespace text {
 class Buffer;
 class Offset;
+class OffsetDelta;
 }
 
 namespace layout {
@@ -48,7 +49,9 @@ class TextFormatter final {
   class TextScanner;
 
   bool FormatChar(LineBuilder* line_builder, base::char16 char_code);
-  void FormatMarker(LineBuilder* line_buffer, TextMarker marker_name);
+  void FormatMarker(LineBuilder* line_buffer,
+                    TextMarker marker_name,
+                    text::OffsetDelta length);
 
   gfx::RectF bounds_;
   RenderStyle default_render_style_;

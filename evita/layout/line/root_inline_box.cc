@@ -60,8 +60,8 @@ gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
 
   const auto baseline = height() - descent_;
   auto origin = bounds_.origin();
-  for (const auto box : boxes_) {
-    auto const rect = box->HitTestTextPosition(offset, baseline);
+  for (const auto& box : boxes_) {
+    const auto rect = box->HitTestTextPosition(offset, baseline);
     if (!rect.empty()) {
       return gfx::RectF(gfx::ToEnclosingRect(
           gfx::RectF(origin + rect.origin(), rect.size())));
@@ -74,7 +74,7 @@ gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
 
 bool RootInlineBox::IsEndOfDocument() const {
   DCHECK(!boxes_.empty());
-  auto const last_marker_box = last_box()->as<InlineMarkerBox>();
+  const auto last_marker_box = last_box()->as<InlineMarkerBox>();
   return last_marker_box->marker_name() == TextMarker::EndOfDocument;
 }
 
@@ -82,10 +82,10 @@ text::Offset RootInlineBox::MapXToPosn(float xGoal) const {
   DCHECK(!boxes_.empty());
   auto xInlineBox = 0.0f;
   auto offset = text_end() - text::OffsetDelta(1);
-  for (const auto box : boxes_) {
-    auto const x = xGoal - xInlineBox;
+  for (const auto& box : boxes_) {
+    const auto x = xGoal - xInlineBox;
     xInlineBox += box->width();
-    auto const lMap = box->MapXToPosn(x);
+    const auto lMap = box->MapXToPosn(x);
     if (lMap >= 0)
       offset = lMap;
     if (x >= 0 && x < box->width())

@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 #include "evita/gfx/forward.h"
-#include "evita/layout/line/inline_box_forward.h"
+#include "evita/paint/public/line/inline_box_forward.h"
 
 namespace paint {
 
@@ -16,8 +16,6 @@ namespace paint {
 // InlineBoxPainter
 //
 class InlineBoxPainter final {
-  using InlineBox = layout::InlineBox;
-
  public:
   explicit InlineBoxPainter(const InlineBox& inline_box);
   ~InlineBoxPainter();

@@ -28,7 +28,11 @@ RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& boxes,
                              text::Offset text_end,
                              float ascent,
                              float descent)
-    : boxes_(boxes), m_nHash(0), text_start_(text_start), text_end_(text_end) {
+    : boxes_(boxes),
+      descent_(descent),
+      m_nHash(0),
+      text_start_(text_start),
+      text_end_(text_end) {
   DCHECK(!boxes_.empty());
   auto const left = 0.0f;
   auto const top = 0.0f;

@@ -7,13 +7,9 @@
 #include "evita/paint/public/line/root_inline_box.h"
 
 #include "base/logging.h"
-#include "evita/layout/line/inline_box.h"
+#include "evita/paint/public/line/inline_box.h"
 
 namespace paint {
-
-// TODO(eval1749): We should use |paint::InlineBox| instead of
-// |layout::InlineBox|.
-using InlineBox = layout::InlineBox;
 
 namespace {
 std::vector<InlineBox*> CopyInlineBoxList(const std::vector<InlineBox*> boxes) {
@@ -25,14 +21,16 @@ std::vector<InlineBox*> CopyInlineBoxList(const std::vector<InlineBox*> boxes) {
 }
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// RootInlineBox
+//
 RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& boxes,
                              const gfx::RectF& bounds)
-    : bounds_(bounds), boxes_(boxes), hash_code_(0) {}
-
-RootInlineBox::RootInlineBox(const RootInlineBox& other)
-    : bounds_(other.bounds_),
-      boxes_(CopyInlineBoxList(other.boxes_)),
-      hash_code_(other.hash_code_) {}
+    : bounds_(bounds), boxes_(boxes) {
+  DCHECK(!boxes.empty());
+  DCHECK(!boxes_.empty());
+}
 
 RootInlineBox::~RootInlineBox() {}
 
@@ -50,11 +48,12 @@ size_t RootInlineBox::ComputeHashCode() const {
 
 RootInlineBox* RootInlineBox::Copy() const {
   DCHECK(!boxes_.empty());
-  return new RootInlineBox(*this);
+  auto const copy = new RootInlineBox(CopyInlineBoxList(boxes_), bounds_);
+  copy->hash_code_ = hash_code_;
+  return copy;
 }
 
 bool RootInlineBox::Equal(const RootInlineBox* other) const {
-  DCHECK(!boxes_.empty());
   if (ComputeHashCode() != other->ComputeHashCode())
     return false;
   if (boxes_.size() != other->boxes_.size())

@@ -32,6 +32,7 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   const gfx::PointF bottom_right() const { return bounds_.bottom_right(); }
   const gfx::RectF& bounds() const { return bounds_; }
   const std::vector<InlineBox*>& boxes() const { return boxes_; }
+  float descent() const { return descent_; }
   float height() const { return bounds_.height(); }
   InlineBox* last_box() const { return boxes_.back(); }
   float left() const { return bounds_.left; }
@@ -59,6 +60,7 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
 
   gfx::RectF bounds_;
   const std::vector<InlineBox*> boxes_;
+  float descent_;
   mutable uint32_t m_nHash;
   text::Offset text_start_;
   text::Offset text_end_;

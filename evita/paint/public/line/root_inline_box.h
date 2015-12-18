@@ -9,24 +9,21 @@
 
 #include <vector>
 
+#include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
 
-namespace layout {
-// TODO(eval1749) We should have paint::InlineBox.
-class InlineBox;
-}
-
 namespace paint {
 
-class RootInlineBox final : public base::RefCounted<RootInlineBox> {
-  // TODO(eval1749): We should use |paint::InlineBox| instead of
-  // |layout::InlineBox|.
-  using InlineBox = layout::InlineBox;
+class InlineBox;
 
+//////////////////////////////////////////////////////////////////////
+//
+// RootInlineBox
+//
+class RootInlineBox final : public base::RefCounted<RootInlineBox> {
  public:
   RootInlineBox(const std::vector<InlineBox*>& boxes, const gfx::RectF& bounds);
-  RootInlineBox(const RootInlineBox& other);
 
   float bottom() const { return bounds_.bottom; }
   const gfx::PointF bottom_right() const { return bounds_.bottom_right(); }
@@ -52,7 +49,9 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
 
   const gfx::RectF bounds_;
   const std::vector<InlineBox*> boxes_;
-  mutable size_t hash_code_;
+  mutable size_t hash_code_ = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(RootInlineBox);
 };
 
 }  // namespace paint

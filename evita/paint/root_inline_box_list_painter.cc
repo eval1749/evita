@@ -8,7 +8,7 @@
 
 #include "base/logging.h"
 #include "evita/gfx_base.h"
-#include "evita/layout/line/inline_box.h"
+#include "evita/paint/public/line/inline_box.h"
 #include "evita/paint/public/line/root_inline_box.h"
 #include "evita/paint/root_inline_box_painter.h"
 #include "evita/views/switches.h"
@@ -20,8 +20,6 @@
 #define USE_OVERLAY 1
 
 namespace paint {
-
-using InlineMarkerBox = layout::InlineMarkerBox;
 
 namespace {
 const auto kMarkerLeftMargin = 2.0f;

@@ -5,8 +5,8 @@
 #include "evita/paint/root_inline_box_painter.h"
 
 #include "evita/gfx_base.h"
-#include "evita/layout/line/inline_box.h"
 #include "evita/paint/inline_box_painter.h"
+#include "evita/paint/public/line/inline_box.h"
 #include "evita/paint/public/line/root_inline_box.h"
 
 namespace paint {

@@ -8,20 +8,14 @@
 #include "evita/paint/inline_box_painter.h"
 
 #include "evita/gfx_base.h"
-#include "evita/layout/line/inline_box.h"
-#include "evita/layout/line/inline_box_visitor.h"
 #include "evita/layout/render_font.h"
 #include "evita/layout/render_style.h"
+#include "evita/paint/public/line/inline_box.h"
+#include "evita/paint/public/line/inline_box_visitor.h"
 
 namespace paint {
 
 using Font = layout::Font;
-using InlineBox = layout::InlineBox;
-using InlineFillerBox = layout::InlineFillerBox;
-using InlineMarkerBox = layout::InlineMarkerBox;
-using InlineTextBox = layout::InlineTextBox;
-using InlineUnicodeBox = layout::InlineUnicodeBox;
-using TextMarker = layout::TextMarker;
 
 namespace {
 
@@ -113,14 +107,14 @@ void FillOverlay(gfx::Canvas* canvas,
 //
 // PaintVisitor
 //
-class PaintVisitor final : public layout::InlineBoxVisitor {
+class PaintVisitor final : public InlineBoxVisitor {
  public:
   PaintVisitor(gfx::Canvas* canvas, const gfx::RectF& rect);
   ~PaintVisitor() final = default;
 
  private:
-#define V(name) void Visit##name(layout::name* inline_box) final;
-  FOR_EACH_INLINE_BOX(V)
+#define V(name) void Visit##name(name* inline_box) final;
+  FOR_EACH_PAINT_INLINE_BOX(V)
 #undef V
 
   gfx::Canvas* const canvas_;

@@ -13,12 +13,14 @@
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/layout/layout_block_flow.h"
 #include "evita/layout/line/inline_box.h"
+#include "evita/layout/line/inline_box_visitor.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/render_font.h"
 #include "evita/layout/render_font_set.h"
 #include "evita/layout/render_selection.h"
 #include "evita/layout/render_style.h"
 #include "evita/layout/text_formatter.h"
+#include "evita/paint/public/line/inline_box.h"
 #include "evita/paint/public/line/root_inline_box.h"
 #include "evita/paint/public/selection.h"
 #include "evita/paint/public/view.h"
@@ -27,6 +29,62 @@ namespace layout {
 
 namespace {
 const auto kBlinkInterval = 16 * 20;  // milliseconds
+
+class PaintInlineBoxBuilder : public InlineBoxVisitor {
+ public:
+  PaintInlineBoxBuilder(float line_height, float line_descent);
+  ~PaintInlineBoxBuilder() final = default;
+
+  paint::InlineBox* Build(const InlineBox& box);
+
+ private:
+#define V(name) void Visit##name(layout::name* box) final;
+  FOR_EACH_INLINE_BOX(V)
+#undef V
+  const float line_descent_;
+  const float line_height_;
+  paint::InlineBox* paint_box_ = nullptr;
+
+  DISALLOW_COPY_AND_ASSIGN(PaintInlineBoxBuilder);
+};
+
+PaintInlineBoxBuilder::PaintInlineBoxBuilder(float line_height,
+                                             float line_descent)
+    : line_descent_(line_descent), line_height_(line_height) {}
+
+paint::InlineBox* PaintInlineBoxBuilder::Build(const InlineBox& box) {
+  paint_box_ = nullptr;
+  const_cast<InlineBox&>(box).Accept(this);
+  return paint_box_;
+}
+
+void PaintInlineBoxBuilder::VisitInlineFillerBox(InlineFillerBox* box) {
+  DCHECK(!paint_box_);
+  paint_box_ = new paint::InlineFillerBox(
+      box->style(), box->width(), box->height(), line_height_, line_descent_);
+}
+
+void PaintInlineBoxBuilder::VisitInlineMarkerBox(InlineMarkerBox* box) {
+  DCHECK(!paint_box_);
+  paint_box_ = new paint::InlineMarkerBox(
+      box->style(), box->width(), box->height(),
+      static_cast<paint::TextMarker>(box->marker_name()), line_height_,
+      line_descent_);
+}
+
+void PaintInlineBoxBuilder::VisitInlineTextBox(InlineTextBox* box) {
+  DCHECK(!paint_box_);
+  paint_box_ =
+      new paint::InlineTextBox(box->style(), box->width(), box->height(),
+                               box->characters(), line_height_, line_descent_);
+}
+
+void PaintInlineBoxBuilder::VisitInlineUnicodeBox(InlineUnicodeBox* box) {
+  DCHECK(!paint_box_);
+  paint_box_ = new paint::InlineUnicodeBox(box->style(), box->width(),
+                                           box->height(), box->characters(),
+                                           line_height_, line_descent_);
+}
 
 gfx::RectF RoundBounds(const gfx::RectF& bounds) {
   return gfx::RectF(::floor(bounds.left), ::floor(bounds.top),
@@ -81,10 +139,11 @@ std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
 }
 
 paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
-  std::vector<InlineBox*> boxes;
+  std::vector<paint::InlineBox*> boxes;
   boxes.reserve(line.boxes().size());
+  PaintInlineBoxBuilder builder(line.height(), line.descent());
   for (const auto& box : line.boxes())
-    boxes.push_back(box->Copy());
+    boxes.push_back(builder.Build(*box));
   return new paint::RootInlineBox(boxes, line.bounds());
 }
 

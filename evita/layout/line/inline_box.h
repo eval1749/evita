@@ -25,13 +25,6 @@ enum class TextMarker {
   Tab,
 };
 
-// TODO(eval1749): We should remove |using css::Color|.
-// using css::Color;
-// TODO(eval1749): We should remove |using css::Style|.
-// using css::Style;
-// TODO(eval1749): We should remove |using text::TextDecoration|.
-// using text::TextDecoration;
-
 class RenderStyle;
 
 #define DECLARE_INLINE_BOX_CLASS(self, super) \

@@ -48,12 +48,6 @@ float AlignWidthToPixel(float width) {
   return width;
 }
 
-inline base::char16 toxdigit(int k) {
-  if (k <= 9)
-    return static_cast<base::char16>(k + '0');
-  return static_cast<base::char16>(k - 10 + 'A');
-}
-
 gfx::ColorF CssColorToColorF(const css::Color& color) {
   return gfx::ColorF(static_cast<float>(color.red()) / 255,
                      static_cast<float>(color.green()) / 255,
@@ -66,6 +60,14 @@ const gfx::Font* GetFont(const css::Style& style) {
 
 RenderStyle GetRenderStyle(const css::Style& style) {
   return RenderStyle(style, *GetFont(style));
+}
+
+base::char16 IntToHex(int k) {
+  DCHECK_GE(k, 0);
+  DCHECK_LE(k, 15);
+  if (k <= 9)
+    return static_cast<base::char16>(k + '0');
+  return static_cast<base::char16>(k - 10 + 'A');
 }
 
 RenderStyle MakeRenderStyle(const css::Style& style, const gfx::Font& font) {
@@ -293,10 +295,10 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder, base::char16 wch) {
       string.push_back(static_cast<base::char16>(wch + 0x40));
     } else {
       string.push_back('u');
-      string.push_back(toxdigit((wch >> 12) & 15));
-      string.push_back(toxdigit((wch >> 8) & 15));
-      string.push_back(toxdigit((wch >> 4) & 15));
-      string.push_back(toxdigit((wch >> 0) & 15));
+      string.push_back(IntToHex((wch >> 12) & 15));
+      string.push_back(IntToHex((wch >> 8) & 15));
+      string.push_back(IntToHex((wch >> 4) & 15));
+      string.push_back(IntToHex((wch >> 0) & 15));
     }
 
     auto const width = font2->GetTextWidth(string) + 4;

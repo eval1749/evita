@@ -51,6 +51,7 @@ class InlineBox : public common::Castable {
   float ascent() const { return height_ - descent_; }
   float descent() const { return descent_; }
   float height() const { return height_; }
+  float left() const { return left_; }
   const RenderStyle& style() const { return style_; }
   float width() const { return width_; }
 

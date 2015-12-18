@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <cmath>
+#include <iterator>
 
 #include "evita/layout/line/root_inline_box.h"
 
@@ -78,19 +80,19 @@ bool RootInlineBox::IsEndOfDocument() const {
   return last_marker_box->marker_name() == TextMarker::EndOfDocument;
 }
 
-text::Offset RootInlineBox::MapXToPosn(float xGoal) const {
-  DCHECK(!boxes_.empty());
-  auto xInlineBox = 0.0f;
-  auto offset = text_end() - text::OffsetDelta(1);
-  for (const auto& box : boxes_) {
-    const auto x = xGoal - xInlineBox;
-    xInlineBox += box->width();
-    const auto lMap = box->MapXToPosn(x);
-    if (lMap >= 0)
-      offset = lMap;
-    if (x >= 0 && x < box->width())
-      break;
-  }
+// Map x-coordinate in content space to text offset.
+text::Offset RootInlineBox::MapXToPosn(float point_x) const {
+  const auto& it = std::lower_bound(
+      boxes_.begin(), boxes_.end(), point_x,
+      [](const InlineBox* box1, float value) { return box1->left() < value; });
+  if (it == boxes_.begin())
+    return text_start();
+  if (it == boxes_.end())
+    return text_end() - text::OffsetDelta(1);
+  const auto box = (*it)->left() == point_x ? *it : *std::prev(it);
+  const auto offset = box->MapXToPosn(point_x - box->left());
+  if (!offset.IsValid())
+    return text_end() - text::OffsetDelta(1);
   return offset;
 }
 

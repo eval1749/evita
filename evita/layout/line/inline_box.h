@@ -131,7 +131,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
   InlineMarkerBox(const RenderStyle& style,
                   float width,
                   float height,
-                  text::Offset lPosn,
+                  text::Offset start,
                   TextMarker marker_name);
   virtual ~InlineMarkerBox();
 
@@ -140,7 +140,7 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
  private:
   // InlineBox
   text::Offset Fix(float iHeight, float iDescent) final;
-  gfx::RectF HitTestTextPosition(text::Offset lPosn) const final;
+  gfx::RectF HitTestTextPosition(text::Offset offset) const final;
   text::Offset MapXToPosn(float x) const final;
 
   text::Offset end_;
@@ -222,13 +222,13 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
   InlineUnicodeBox(const RenderStyle& style,
                    float width,
                    float height,
-                   text::Offset lPosn,
+                   text::Offset start,
                    const base::string16& characters);
   ~InlineUnicodeBox() final;
 
  private:
   // InlineBox
-  gfx::RectF HitTestTextPosition(text::Offset lPosn) const final;
+  gfx::RectF HitTestTextPosition(text::Offset offset) const final;
   text::Offset MapXToPosn(float x) const final;
   bool Merge(const RenderStyle& style, float width) final;
 

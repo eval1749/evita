@@ -253,9 +253,9 @@ void PaintVisitor::VisitInlineUnicodeBox(InlineUnicodeBox* inline_box) {
   FillBackground(canvas_, rect_, *inline_box);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas_, text_rect);
   gfx::Brush text_brush(canvas_, style.color());
-  DrawText(canvas_, style.font(), text_brush, text_rect - gfx::SizeF(1, 1),
+  DrawText(canvas_, style.font(), text_brush, text_rect - gfx::SizeF(2, 2),
            inline_box->characters());
-  canvas_->DrawRectangle(text_brush, text_rect);
+  canvas_->DrawRectangle(text_brush, text_rect - gfx::SizeF(1, 1));
   FillOverlay(canvas_, text_rect, *inline_box);
 }
 

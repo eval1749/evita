@@ -9,6 +9,7 @@
 
 #include <vector>
 
+#include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/text/offset.h"
@@ -45,9 +46,6 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   float width() const { return bounds_.width(); }
 
   bool Contains(text::Offset offset) const;
-  RootInlineBox* Copy() const;
-  bool Equal(const RootInlineBox*) const;
-  uint32_t Hash() const;
   gfx::RectF HitTestTextPosition(text::Offset offset) const;
   bool IsEndOfDocument() const;
   text::Offset MapXToPosn(float x) const;
@@ -55,15 +53,15 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
  private:
   friend class base::RefCounted<RootInlineBox>;
 
-  RootInlineBox(const RootInlineBox& other);
   ~RootInlineBox();
 
   gfx::RectF bounds_;
   const std::vector<InlineBox*> boxes_;
   float descent_;
-  mutable uint32_t m_nHash;
   text::Offset text_start_;
   text::Offset text_end_;
+
+  DISALLOW_COPY_AND_ASSIGN(RootInlineBox);
 };
 
 }  // namespace layout

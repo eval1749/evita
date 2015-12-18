@@ -13,16 +13,10 @@
 
 namespace layout {
 
-namespace {
-std::vector<InlineBox*> CopyInlineBoxList(const std::vector<InlineBox*> boxes) {
-  std::vector<InlineBox*> copy;
-  copy.reserve(boxes.size());
-  for (auto const& box : boxes)
-    copy.push_back(box->Copy());
-  return std::move(copy);
-}
-}  // namespace
-
+//////////////////////////////////////////////////////////////////////
+//
+// RootInlineBox
+//
 RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& boxes,
                              text::Offset text_start,
                              text::Offset text_end,
@@ -30,7 +24,6 @@ RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& boxes,
                              float descent)
     : boxes_(boxes),
       descent_(descent),
-      m_nHash(0),
       text_start_(text_start),
       text_end_(text_end) {
   DCHECK(!boxes_.empty());
@@ -52,13 +45,6 @@ RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& boxes,
   DCHECK_EQ(bounds_.bottom, ::floor(bounds_.bottom));
 }
 
-RootInlineBox::RootInlineBox(const RootInlineBox& other)
-    : boxes_(CopyInlineBoxList(other.boxes_)),
-      m_nHash(other.m_nHash),
-      text_end_(other.text_end_),
-      text_start_(other.text_start_),
-      bounds_(other.bounds_) {}
-
 RootInlineBox::~RootInlineBox() {}
 
 void RootInlineBox::set_origin(const gfx::PointF& origin) {
@@ -72,38 +58,6 @@ bool RootInlineBox::Contains(text::Offset offset) const {
   DCHECK(offset.IsValid());
   DCHECK(!boxes_.empty());
   return offset >= text_start() && offset < text_end();
-}
-
-RootInlineBox* RootInlineBox::Copy() const {
-  DCHECK(!boxes_.empty());
-  return new RootInlineBox(*this);
-}
-
-bool RootInlineBox::Equal(const RootInlineBox* other) const {
-  DCHECK(!boxes_.empty());
-  if (Hash() != other->Hash())
-    return false;
-  if (boxes_.size() != other->boxes_.size())
-    return false;
-  auto other_it = other->boxes_.begin();
-  for (auto box : boxes_) {
-    if (!box->Equal(*other_it))
-      return false;
-    ++other_it;
-  }
-  return true;
-}
-
-uint32_t RootInlineBox::Hash() const {
-  DCHECK(!boxes_.empty());
-  if (m_nHash)
-    return m_nHash;
-  for (const auto box : boxes_) {
-    m_nHash <<= 5;
-    m_nHash ^= box->Hash();
-    m_nHash >>= 3;
-  }
-  return m_nHash;
 }
 
 gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {

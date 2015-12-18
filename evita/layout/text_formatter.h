@@ -42,7 +42,7 @@ class TextFormatter final {
   InlineBox* FormatMarker(TextMarker marker_name);
 
   static TextSelection FormatSelection(
-      const text::Buffer* buffer,
+      const text::Buffer& buffer,
       const TextSelectionModel& selection_model);
 
  private:

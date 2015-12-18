@@ -345,9 +345,9 @@ InlineBox* TextFormatter::FormatMarker(TextMarker marker_name) {
 }
 
 TextSelection TextFormatter::FormatSelection(
-    const text::Buffer* buffer,
+    const text::Buffer& buffer,
     const TextSelectionModel& selection_model) {
-  const auto& style = buffer->style_resolver()->ResolveWithoutDefaults(
+  const auto& style = buffer.style_resolver()->ResolveWithoutDefaults(
       selection_model.disabled() ? css::StyleSelector::inactive_selection()
                                  : css::StyleSelector::active_selection());
   return TextSelection(selection_model, CssColorToColorF(style.bgcolor()));

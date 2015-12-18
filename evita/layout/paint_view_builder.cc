@@ -183,7 +183,7 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
       ColorToColorF(block_.text_buffer().GetDefaultStyle().bgcolor());
   const auto& ruler_bounds = ComputeRulerBounds();
   const auto& selection =
-      TextFormatter::FormatSelection(&block_.text_buffer(), selection_model);
+      TextFormatter::FormatSelection(block_.text_buffer(), selection_model);
   const auto& caret_bounds = ComputeCaretBounds(selection_model);
   const auto caret_state = ComputeCaretState(caret_bounds, now);
 

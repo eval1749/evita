@@ -42,10 +42,6 @@ float InlineBox::top() const {
   return ::floor(line_height() - line_descent() - height() + descent());
 }
 
-void InlineBox::IncrementWidth(float amount) {
-  width_ += amount;
-}
-
 // InlineBox
 text::Offset InlineBox::Fix(float line_height, float line_descent) {
   line_descent_ = line_descent;
@@ -55,10 +51,6 @@ text::Offset InlineBox::Fix(float line_height, float line_descent) {
 
 gfx::RectF InlineBox::HitTestTextPosition(text::Offset) const {
   return gfx::RectF();
-}
-
-bool InlineBox::Merge(const RenderStyle&, float) {
-  return false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -135,14 +127,6 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
 
 InlineTextBoxBase::~InlineTextBoxBase() {}
 
-void InlineTextBoxBase::AddChar(base::char16 char_code) {
-  characters_.push_back(char_code);
-}
-
-void InlineTextBoxBase::ExtendEnd() {
-  ++end_;
-}
-
 // InlineBox
 text::Offset InlineTextBoxBase::Fix(float line_height, float descent) {
   InlineBox::Fix(line_height, descent);
@@ -193,14 +177,6 @@ gfx::RectF InlineTextBox::HitTestTextPosition(text::Offset offset) const {
                     gfx::SizeF(1.0f, height()));
 }
 
-bool InlineTextBox::Merge(const RenderStyle& style, float width) {
-  if (this->style() != style)
-    return false;
-  IncrementWidth(width);
-  ExtendEnd();
-  return true;
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // InlineUnicodeBox
@@ -228,10 +204,6 @@ gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset) const {
 
 text::Offset InlineUnicodeBox::MapXToPosn(float x) const {
   return start();
-}
-
-bool InlineUnicodeBox::Merge(const RenderStyle&, float) {
-  return false;
 }
 
 }  // namespace layout

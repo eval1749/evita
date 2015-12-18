@@ -66,22 +66,19 @@ class InlineBox : public common::Castable {
   virtual text::Offset Fix(float line_height, float line_descent);
   virtual gfx::RectF HitTestTextPosition(text::Offset position) const;
   virtual text::Offset MapXToPosn(float x) const = 0;
-  virtual bool Merge(const RenderStyle& style, float width);
 
  protected:
   InlineBox(const RenderStyle& style, float width, float height, float descent);
 
   float line_descent() const { return line_descent_; }
 
-  void IncrementWidth(float amount);
-
  private:
-  float descent_;
-  float height_;
+  const float descent_;
+  const float height_;
   float line_descent_;
   float line_height_;
-  RenderStyle style_;
-  float width_;
+  const RenderStyle style_;
+  const float width_;
 
   DISALLOW_COPY_AND_ASSIGN(InlineBox);
 };
@@ -147,9 +144,9 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
   gfx::RectF HitTestTextPosition(text::Offset offset) const final;
   text::Offset MapXToPosn(float x) const final;
 
-  text::Offset end_;
-  TextMarker marker_name_;
-  text::Offset start_;
+  const text::Offset end_;
+  const TextMarker marker_name_;
+  const text::Offset start_;
 
   DISALLOW_COPY_AND_ASSIGN(InlineMarkerBox);
 };
@@ -164,8 +161,6 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
  public:
   const base::string16 characters() const { return characters_; }
 
-  void AddChar(base::char16 char_code);
-
  protected:
   InlineTextBoxBase(const RenderStyle& style,
                     float width,
@@ -178,16 +173,14 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
   text::Offset end() const { return end_; }
   text::Offset start() const { return start_; }
 
-  void ExtendEnd();
-
  private:
   // InlineBox
   text::Offset Fix(float iHeight, float iDescent) override;
   text::Offset MapXToPosn(float x) const override;
 
-  base::string16 characters_;
-  text::Offset end_;
-  text::Offset start_;
+  const base::string16 characters_;
+  const text::Offset end_;
+  const text::Offset start_;
 
   DISALLOW_COPY_AND_ASSIGN(InlineTextBoxBase);
 };
@@ -210,7 +203,6 @@ class InlineTextBox final : public InlineTextBoxBase {
  private:
   // InlineBox
   gfx::RectF HitTestTextPosition(text::Offset position) const final;
-  bool Merge(const RenderStyle& style, float width) final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineTextBox);
 };
@@ -234,7 +226,6 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
   // InlineBox
   gfx::RectF HitTestTextPosition(text::Offset offset) const final;
   text::Offset MapXToPosn(float x) const final;
-  bool Merge(const RenderStyle& style, float width) final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineUnicodeBox);
 };

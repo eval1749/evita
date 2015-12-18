@@ -282,7 +282,7 @@ InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
                                    float height,
                                    text::Offset lPosn,
                                    const base::string16& characters)
-    : InlineTextBoxBase(style, width, height + 4.0f, lPosn, characters) {}
+    : InlineTextBoxBase(style, width, height, lPosn, characters) {}
 
 InlineUnicodeBox::InlineUnicodeBox(const InlineUnicodeBox& other)
     : InlineTextBoxBase(other) {}

@@ -304,7 +304,7 @@ InlineBox* TextFormatter::FormatChar(InlineBox* previous_cell,
     auto const char_width = font2->GetCharWidth('M');
     if (previous_cell && x + width + char_width > bounds_.right)
       return nullptr;
-    auto const height = AlignHeightToPixel(font2->height());
+    auto const height = AlignHeightToPixel(font2->height()) + 4;
     return new InlineUnicodeBox(MakeRenderStyle(style, font2), width, height,
                                 lPosn, string);
   }

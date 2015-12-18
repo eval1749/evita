@@ -41,6 +41,7 @@ source_set("layout") {
     "//base",
     "//evita/css",
     "//evita/gfx",
+    "//evita/paint/public",
     "//evita/text",
   ]
 }

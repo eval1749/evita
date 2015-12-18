@@ -10,10 +10,6 @@ source_set("paint") {
     "paint_thread.h",
     "paint_thread_canvas_owner.cc",
     "paint_thread_canvas_owner.h",
-    "public/caret.cc",
-    "public/caret.h",
-    "public/selection.cc",
-    "public/selection.h",
     "root_inline_box_painter.cc",
     "root_inline_box_painter.h",
     "root_inline_box_list_painter.cc",
@@ -27,5 +23,6 @@ source_set("paint") {
   public_deps = [
     "//evita/gfx",
     "//evita/layout",
+    "//evita/paint/public",
   ]
 }

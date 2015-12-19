@@ -313,7 +313,8 @@ gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
 
 bool BlockFlow::IsFullyVisibleTextPosition(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(dirty_);
+  DCHECK(!dirty_);
+  DCHECK(!dirty_line_point_);
   return offset >= text_start() && offset < ComputeVisibleEnd();
 }
 

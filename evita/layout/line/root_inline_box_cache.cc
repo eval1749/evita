@@ -19,9 +19,15 @@ namespace layout {
 // RootInlineBoxCache
 //
 RootInlineBoxCache::RootInlineBoxCache(const text::Buffer* buffer)
-    : buffer_(buffer), dirty_start_(text::Offset::Max()), zoom_(0.0f) {}
+    : buffer_(buffer), dirty_start_(text::Offset::Max()), zoom_(0.0f) {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  const_cast<text::Buffer*>(buffer_)->AddObserver(this);
+}
 
-RootInlineBoxCache::~RootInlineBoxCache() {}
+RootInlineBoxCache::~RootInlineBoxCache() {
+  UI_DOM_AUTO_LOCK_SCOPE();
+  const_cast<text::Buffer*>(buffer_)->RemoveObserver(this);
+}
 
 void RootInlineBoxCache::DidChangeBuffer(text::Offset offset) {
   ASSERT_DOM_LOCKED();

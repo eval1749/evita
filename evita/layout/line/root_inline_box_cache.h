@@ -10,6 +10,7 @@
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/offset.h"
 
 namespace text {
@@ -24,15 +25,10 @@ class RootInlineBox;
 //
 // RootInlineBoxCache
 //
-class RootInlineBoxCache final {
+class RootInlineBoxCache final : public text::BufferMutationObserver {
  public:
   explicit RootInlineBoxCache(const text::Buffer* buffer);
   ~RootInlineBoxCache();
-
-  // Callback for buffer mutation observer
-  void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
-  void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
-  void DidInsertBefore(text::Offset offset, text::OffsetDelta length);
 
   scoped_refptr<RootInlineBox> FindLine(text::Offset text_offset) const;
   void Invalidate(const gfx::RectF& bounds, float zoom);
@@ -45,6 +41,11 @@ class RootInlineBoxCache final {
   bool IsEndWithNewline(const RootInlineBox* text_line) const;
   void RemoveDirtyLines();
   void RemoveAllLines();
+
+  // text::BufferMutationObserver
+  void DidChangeStyle(text::Offset offset, text::OffsetDelta length) final;
+  void DidDeleteAt(text::Offset offset, text::OffsetDelta length) final;
+  void DidInsertBefore(text::Offset offset, text::OffsetDelta length) final;
 
   gfx::RectF bounds_;
   const text::Buffer* const buffer_;

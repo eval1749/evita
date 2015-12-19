@@ -25,15 +25,8 @@ namespace layout {
 // BlockFlow
 //
 BlockFlow::BlockFlow(text::Buffer* text_buffer)
-    : dirty_(true),
-      dirty_line_point_(true),
-      lines_height_(0),
-      needs_format_(false),
-      text_buffer_(text_buffer),
-      text_line_cache_(new RootInlineBoxCache(text_buffer)),
-      version_(0),
-      view_start_(0),
-      zoom_(1.0f) {}
+    : text_buffer_(text_buffer),
+      text_line_cache_(new RootInlineBoxCache(text_buffer)) {}
 
 BlockFlow::~BlockFlow() {}
 
@@ -107,7 +100,7 @@ text::Offset BlockFlow::ComputeStartOfLine(text::Offset text_offset) {
 
 text::Offset BlockFlow::ComputeVisibleEnd() const {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!dirty_);
+  DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
     auto const line = *it;
@@ -119,13 +112,11 @@ text::Offset BlockFlow::ComputeVisibleEnd() const {
 
 void BlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  text_line_cache_->DidChangeStyle(offset, length);
   MarkDirty();
 }
 
 void BlockFlow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  text_line_cache_->DidDeleteAt(offset, length);
   MarkDirty();
   if (view_start_ <= offset)
     return;
@@ -134,7 +125,6 @@ void BlockFlow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
 
 void BlockFlow::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  text_line_cache_->DidInsertBefore(offset, length);
   MarkDirty();
   if (view_start_ <= offset)
     return;
@@ -180,16 +170,12 @@ void BlockFlow::EnsureLinePoints() {
 void BlockFlow::EnsureTextLineCache() {
   UI_ASSERT_DOM_LOCKED();
   text_line_cache_->Invalidate(bounds_, zoom_);
-  if (!dirty_)
-    return;
-  lines_.clear();
-  lines_height_ = 0;
 }
 
 RootInlineBox* BlockFlow::FindLineContainng(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::HitTestTextPosition");
-  DCHECK(!dirty_);
+  DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   if (offset < lines_.front()->text_start())
     return nullptr;
@@ -216,9 +202,7 @@ void BlockFlow::Format(text::Offset text_offset) {
   EnsureTextLineCache();
   lines_.clear();
   lines_height_ = 0;
-  dirty_ = false;
   dirty_line_point_ = false;
-  needs_format_ = false;
 
   auto const line_start = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, line_start, bounds_, zoom_);
@@ -255,10 +239,8 @@ void BlockFlow::Format(text::Offset text_offset) {
 bool BlockFlow::FormatIfNeeded() {
   UI_ASSERT_DOM_LOCKED();
   text_line_cache_->Invalidate(bounds_, zoom_);
-  if (!NeedsFormat()) {
-    dirty_ = false;
+  if (!NeedsFormat())
     return false;
-  }
   Format(view_start_);
   return true;
 }
@@ -279,7 +261,7 @@ scoped_refptr<RootInlineBox> BlockFlow::FormatLine(TextFormatter* formatter) {
 text::Offset BlockFlow::HitTestPoint(gfx::PointF block_point) const {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::HitTestPoint");
-  DCHECK(!dirty_);
+  DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   // TODO(eval1749): We should transform |block_point| to content point for
   // considering margin, border and padding.
@@ -300,7 +282,7 @@ text::Offset BlockFlow::HitTestPoint(gfx::PointF block_point) const {
 gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::HitTestTextPosition");
-  DCHECK(!dirty_);
+  DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   const auto line = FindLineContainng(offset);
   if (!line)
@@ -313,14 +295,14 @@ gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
 
 bool BlockFlow::IsFullyVisibleTextPosition(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!dirty_);
+  DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   return offset >= text_start() && offset < ComputeVisibleEnd();
 }
 
 bool BlockFlow::IsShowEndOfDocument() const {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!dirty_);
+  DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   auto const last_line = lines_.back();
   return last_line->IsEndOfDocument() && last_line->bottom() <= bounds_.bottom;
@@ -345,18 +327,13 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
 
 void BlockFlow::MarkDirty() {
   lines_.clear();
-  dirty_ = true;
   dirty_line_point_ = true;
-  needs_format_ = true;
+  lines_height_ = 0;
 }
 
 bool BlockFlow::NeedsFormat() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!text_line_cache_->IsDirty(bounds_, zoom_));
-  if (needs_format_)
-    return true;
-  if (!dirty_)
-    return false;
   if (lines_.empty())
     return true;
   for (const auto& line : lines_) {
@@ -517,7 +494,7 @@ void BlockFlow::SetZoom(float new_zoom) {
 
 bool BlockFlow::ShouldFormat() const {
   UI_ASSERT_DOM_LOCKED();
-  return dirty_;
+  return lines_.empty();
 }
 
 }  // namespace layout

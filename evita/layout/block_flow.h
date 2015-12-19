@@ -33,7 +33,6 @@ class BlockFlow final {
   ~BlockFlow();
 
   const gfx::RectF& bounds() const { return bounds_; }
-  bool dirty() const { return dirty_; }
   int version() const { return version_; }
   const std::list<scoped_refptr<RootInlineBox>>& lines() const {
     return lines_;
@@ -88,18 +87,14 @@ class BlockFlow final {
   void Prepend(scoped_refptr<RootInlineBox> line);
 
   gfx::RectF bounds_;
-  bool dirty_;
-  bool dirty_line_point_;
+  bool dirty_line_point_ = true;
   std::list<scoped_refptr<RootInlineBox>> lines_;
-  float lines_height_;
-
-  // True if we need to format all lines.
-  bool needs_format_;
+  float lines_height_ = 0.0f;
   text::Buffer* const text_buffer_;
   std::unique_ptr<RootInlineBoxCache> text_line_cache_;
-  int version_;
+  int version_ = 0;
   text::Offset view_start_;
-  float zoom_;
+  float zoom_ = 1.0f;
 
   DISALLOW_COPY_AND_ASSIGN(BlockFlow);
 };

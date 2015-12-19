@@ -34,6 +34,8 @@ class BlockFlowTest : public ::testing::Test {
   BlockFlow* block() const { return block_.get(); }
   text::Buffer* buffer() const { return buffer_.get(); }
 
+  text::Offset HitTestPoint(const gfx::PointF& view_point) const;
+
  private:
   const std::unique_ptr<text::Buffer> buffer_;
 
@@ -52,6 +54,26 @@ BlockFlowTest::BlockFlowTest()
 
 BlockFlowTest::~BlockFlowTest() {
   editor::DomLock::GetInstance()->Release(FROM_HERE);
+}
+
+text::Offset BlockFlowTest::HitTestPoint(const gfx::PointF& view_point) const {
+  const auto& block_point = view_point - block()->origin();
+  return block()->HitTestPoint(block_point);
+}
+
+TEST_F(BlockFlowTest, HitTestPoint) {
+  buffer()->InsertBefore(text::Offset(0), L"foo\nbar\nbarz\n");
+  block()->Format(text::Offset(0));
+
+  EXPECT_EQ(text::Offset(0), HitTestPoint(gfx::PointF(310, 200)));
+  EXPECT_EQ(text::Offset(1), HitTestPoint(gfx::PointF(318, 200)));
+  EXPECT_EQ(text::Offset(2), HitTestPoint(gfx::PointF(331, 200)));
+  EXPECT_EQ(text::Offset(4), HitTestPoint(gfx::PointF(310, 215)));
+  EXPECT_EQ(text::Offset(5), HitTestPoint(gfx::PointF(318, 215)));
+
+  // Points outsize block
+  EXPECT_EQ(text::Offset(0), HitTestPoint(gfx::PointF(0, 0)));
+  EXPECT_EQ(text::Offset(13), HitTestPoint(gfx::PointF(999, 999)));
 }
 
 TEST_F(BlockFlowTest, HitTestTextPosition) {

@@ -38,6 +38,7 @@ class BlockFlow final {
   const std::list<scoped_refptr<RootInlineBox>>& lines() const {
     return lines_;
   }
+  gfx::PointF origin() const { return bounds_.origin(); }
   const text::Buffer& text_buffer() const { return *text_buffer_; }
 
   void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
@@ -74,6 +75,7 @@ class BlockFlow final {
   // Returns true if discarded the last line.
   bool DiscardLastLine();
   void EnsureLinePoints();
+  RootInlineBox* FindLineContainng(text::Offset offset) const;
   scoped_refptr<RootInlineBox> FormatLine(TextFormatter* formatter);
   void InvalidateCache();
   void InvalidateLines(text::Offset offset);

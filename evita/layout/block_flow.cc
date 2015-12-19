@@ -41,7 +41,7 @@ void BlockFlow::Append(scoped_refptr<RootInlineBox> line) {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty()) {
     DCHECK_EQ(lines_height_, 0.0f);
-    line->set_origin(bounds_.origin());
+    line->set_origin(gfx::PointF());
   } else {
     DCHECK(lines_.back()->text_end() == line->text_start());
     if (!dirty_line_point_) {
@@ -121,13 +121,37 @@ void BlockFlow::EnsureLinePoints() {
   UI_ASSERT_DOM_LOCKED();
   if (!dirty_line_point_)
     return;
-  auto line_top = bounds_.top;
+  auto line_top = 0.0f;
   for (const auto& line : lines_) {
-    line->set_origin(gfx::PointF(bounds_.left, line_top));
+    line->set_origin(gfx::PointF(0.0f, line_top));
     line_top = line->bottom();
   }
 
   dirty_line_point_ = false;
+}
+
+RootInlineBox* BlockFlow::FindLineContainng(text::Offset offset) const {
+  UI_ASSERT_DOM_LOCKED();
+  TRACE_EVENT0("views", "BlockFlow::HitTestTextPosition");
+  DCHECK(!dirty_);
+  DCHECK(!dirty_line_point_);
+  if (offset < lines_.front()->text_start())
+    return nullptr;
+  if (offset >= lines_.back()->text_end())
+    return nullptr;
+  // Get line after |offset|.
+  const auto& it = std::lower_bound(
+      lines_.begin(), lines_.end(), offset,
+      [](const scoped_refptr<RootInlineBox>& box, text::Offset value) {
+        return box->text_start() < value;
+      });
+  if (it == lines_.begin())
+    return lines_.front().get();
+  if (it == lines_.end())
+    return lines_.back().get();
+  if ((*it)->text_start() == offset)
+    return (*it).get();
+  return (*std::prev(it)).get();
 }
 
 void BlockFlow::Format(text::Offset text_offset) {
@@ -221,21 +245,25 @@ text::Offset BlockFlow::GetVisibleEnd() {
   return lines_.front()->text_end();
 }
 
-text::Offset BlockFlow::HitTestPoint(gfx::PointF point) const {
+text::Offset BlockFlow::HitTestPoint(gfx::PointF block_point) const {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::HitTestPoint");
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
+  // TODO(eval1749): We should transform |block_point| to content point for
+  // considering margin, border and padding.
+  const auto& content_point = block_point;
   const auto& it =
-      std::lower_bound(lines_.begin(), lines_.end(), point.y,
+      std::lower_bound(lines_.begin(), lines_.end(), content_point.y,
                        [](const scoped_refptr<RootInlineBox>& box,
                           float point_y) { return box->top() < point_y; });
   if (it == lines_.begin())
-    return lines_.front()->HitTestPoint(point.x);
+    return lines_.front()->HitTestPoint(content_point.x);
   if (it == lines_.end())
-    return lines_.back()->HitTestPoint(point.x);
-  const auto line = *std::prev(it);
-  return line->HitTestPoint(point.x);
+    return lines_.back()->HitTestPoint(content_point.x);
+  if ((*it)->top() == content_point.y)
+    return (*it)->HitTestPoint(content_point.x);
+  return (*std::prev(it))->HitTestPoint(content_point.x);
 }
 
 gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
@@ -243,18 +271,13 @@ gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
   TRACE_EVENT0("views", "BlockFlow::HitTestTextPosition");
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
-  // Get line after |offset|.
-  const auto& it = std::lower_bound(
-      lines_.begin(), lines_.end(), offset,
-      [](const scoped_refptr<RootInlineBox>& box, text::Offset value) {
-        return box->text_start() < value;
-      });
-  if (it == lines_.begin())
-    return lines_.front()->HitTestTextPosition(offset);
-  if (it == lines_.end())
-    return lines_.back()->HitTestTextPosition(offset);
-  const auto& line = (*it)->text_start() == offset ? *it : *std::prev(it);
-  return line->HitTestTextPosition(offset);
+  const auto line = FindLineContainng(offset);
+  if (!line)
+    return gfx::RectF();
+  const auto& rect = line->HitTestTextPosition(offset);
+  if (rect.empty())
+    return gfx::RectF();
+  return gfx::RectF(rect.origin() + bounds_.origin(), rect.size());
 }
 
 void BlockFlow::InvalidateCache() {

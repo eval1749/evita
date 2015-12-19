@@ -45,6 +45,10 @@ InlineBox::InlineBox(const RenderStyle& style,
 
 InlineBox::~InlineBox() {}
 
+text::Offset InlineBox::HitTestPoint(float point_x) const {
+  return point_x >= width() ? end() : start();
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // InlineFillerBox
@@ -63,10 +67,6 @@ InlineFillerBox::InlineFillerBox(const RenderStyle& style,
                 0.0f) {}
 
 InlineFillerBox::~InlineFillerBox() {}
-
-text::Offset InlineFillerBox::HitTestPoint(float x) const {
-  return text::Offset::Invalid();
-}
 
 gfx::RectF InlineFillerBox::HitTestTextPosition(text::Offset offset,
                                                 float baseline) const {
@@ -104,10 +104,6 @@ gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset offset,
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(0.0f, baseline - ascent()),
                     gfx::SizeF(1.0f, height()));
-}
-
-text::Offset InlineMarkerBox::HitTestPoint(float x) const {
-  return start();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -202,10 +198,6 @@ gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset,
     return gfx::RectF();
   return gfx::RectF(gfx::PointF(0.0f, baseline - ascent()),
                     gfx::SizeF(1.0f, height()));
-}
-
-text::Offset InlineUnicodeBox::HitTestPoint(float x) const {
-  return start();
 }
 
 }  // namespace layout

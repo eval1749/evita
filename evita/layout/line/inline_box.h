@@ -59,9 +59,13 @@ class InlineBox : public common::Castable {
 
   virtual void Accept(InlineBoxVisitor* visitor) = 0;
   bool HasText() const { return start_ < end_; }
+
+  // Returns text offset at |point_x| in box local coordinate, or |start()|
+  // for negative |point_x|, or |end()| for |point_x| grater than or equal to
+  // |width()|. This function never return |text::Offset::Invalid()|.
+  virtual text::Offset HitTestPoint(float point_x) const;
   virtual gfx::RectF HitTestTextPosition(text::Offset position,
                                          float baseline) const = 0;
-  virtual text::Offset HitTestPoint(float x) const = 0;
 
  protected:
   InlineBox(const RenderStyle& style,
@@ -105,8 +109,6 @@ class InlineFillerBox final : public InlineBox {
   // InlineBox
   gfx::RectF HitTestTextPosition(text::Offset offset,
                                  float baseline) const final;
-  text::Offset HitTestPoint(float x) const final;
-
   DISALLOW_COPY_AND_ASSIGN(InlineFillerBox);
 };
 
@@ -154,7 +156,6 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
   // InlineBox
   gfx::RectF HitTestTextPosition(text::Offset offset,
                                  float baseline) const final;
-  text::Offset HitTestPoint(float x) const final;
 
   const TextMarker marker_name_;
 
@@ -234,7 +235,6 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
   // InlineBox
   gfx::RectF HitTestTextPosition(text::Offset offset,
                                  float baseline) const final;
-  text::Offset HitTestPoint(float x) const final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineUnicodeBox);
 };

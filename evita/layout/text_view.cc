@@ -57,6 +57,14 @@ text::Offset TextView::text_start() const {
   return block_->text_start();
 }
 
+text::Offset TextView::ComputeEndOfLine(text::Offset text_offset) const {
+  return block_->ComputeEndOfLine(text_offset);
+}
+
+text::Offset TextView::ComputeStartOfLine(text::Offset text_offset) const {
+  return block_->ComputeStartOfLine(text_offset);
+}
+
 text::Offset TextView::ComputeVisibleEnd() const {
   return block_->ComputeVisibleEnd();
 }
@@ -78,10 +86,6 @@ void TextView::DidHide() {
 void TextView::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   block_->DidInsertBefore(offset, length);
-}
-
-text::Offset TextView::EndOfLine(text::Offset text_offset) const {
-  return block_->EndOfLine(text_offset);
 }
 
 void TextView::Format(text::Offset text_offset) {
@@ -149,10 +153,6 @@ void TextView::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
   block_->SetZoom(new_zoom);
   paint_view_builder_->SetZoom(new_zoom);
-}
-
-text::Offset TextView::StartOfLine(text::Offset text_offset) const {
-  return block_->StartOfLine(text_offset);
 }
 
 void TextView::Update(const TextSelectionModel& selection_model,

@@ -50,6 +50,10 @@ class TextView final : private gfx::CanvasObserver {
   text::Offset text_end() const;
   text::Offset text_start() const;
 
+  // Returns end of line offset containing |text_offset|.
+  text::Offset ComputeEndOfLine(text::Offset text_offset) const;
+  // Returns start of line offset containing |text_offset|.
+  text::Offset ComputeStartOfLine(text::Offset text_offset) const;
   // Returns fully visible end offset or end of line position if there is only
   // one line.
   text::Offset ComputeVisibleEnd() const;
@@ -57,8 +61,6 @@ class TextView final : private gfx::CanvasObserver {
   void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
   void DidHide();
   void DidInsertBefore(text::Offset offset, text::OffsetDelta length);
-  // Returns end of line offset containing |text_offset|.
-  text::Offset EndOfLine(text::Offset text_offset) const;
   void Format(text::Offset text_offset);
   // Returns true if text format is taken place.
   bool FormatIfNeeded();
@@ -71,8 +73,6 @@ class TextView final : private gfx::CanvasObserver {
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
-  // Returns start of line offset containing |text_offset|.
-  text::Offset StartOfLine(text::Offset text_offset) const;
   void Update(const TextSelectionModel& selection, base::Time now);
 
  private:

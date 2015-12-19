@@ -156,7 +156,7 @@ text::Offset ViewDelegateImpl::ComputeOnTextWindow(
     case domapi::TextWindowCompute::Method::EndOfWindow:
       return window->ComputeWindowMotion(1, text::Offset(0));
     case domapi::TextWindowCompute::Method::EndOfWindowLine:
-      return window->EndOfLine(data.position);
+      return window->ComputeEndOfLine(data.position);
     case domapi::TextWindowCompute::Method::MoveScreen:
       return window->ComputeScreenMotion(data.count, point, data.position);
     case domapi::TextWindowCompute::Method::MoveWindow:
@@ -166,7 +166,7 @@ text::Offset ViewDelegateImpl::ComputeOnTextWindow(
     case domapi::TextWindowCompute::Method::StartOfWindow:
       return window->ComputeWindowMotion(-1, text::Offset(0));
     case domapi::TextWindowCompute::Method::StartOfWindowLine:
-      return window->StartOfLine(data.position);
+      return window->ComputeStartOfLine(data.position);
     default:
       return text::Offset::Invalid();
   }

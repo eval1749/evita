@@ -72,6 +72,11 @@ text::Buffer* TextWindow::buffer() const {
   return text_view_->buffer();
 }
 
+text::Offset TextWindow::ComputeEndOfLine(text::Offset text_offset) {
+  UI_ASSERT_DOM_LOCKED();
+  return text_view_->ComputeEndOfLine(text_offset);
+}
+
 text::Offset TextWindow::ComputeScreenMotion(int n,
                                              const gfx::PointF& pt,
                                              text::Offset lPosn) {
@@ -86,6 +91,11 @@ text::Offset TextWindow::ComputeScreenMotion(int n,
   return lPosn;
 }
 
+text::Offset TextWindow::ComputeStartOfLine(text::Offset text_offset) {
+  UI_ASSERT_DOM_LOCKED();
+  return text_view_->ComputeStartOfLine(text_offset);
+}
+
 text::Offset TextWindow::ComputeWindowLineMotion(int n,
                                                  const gfx::PointF& pt,
                                                  text::Offset lPosn) {
@@ -98,7 +108,7 @@ text::Offset TextWindow::ComputeWindowLineMotion(int n,
     auto lGoal = lPosn;
     auto k = 0;
     for (k = 0; k < n; ++k) {
-      lGoal = EndOfLine(lGoal);
+      lGoal = ComputeEndOfLine(lGoal);
       if (lGoal >= lBufEnd)
         break;
       ++lGoal;
@@ -111,7 +121,7 @@ text::Offset TextWindow::ComputeWindowLineMotion(int n,
     auto lStart = lPosn;
     auto k = 0;
     for (k = 0; k < n; ++k) {
-      lStart = StartOfLine(lStart);
+      lStart = ComputeStartOfLine(lStart);
       if (lStart <= lBufStart)
         break;
       --lStart;
@@ -132,11 +142,6 @@ text::Offset TextWindow::ComputeWindowMotion(int n, text::Offset offset) {
   if (n < 0)
     return text_view_->text_start();
   return offset;
-}
-
-text::Offset TextWindow::EndOfLine(text::Offset text_offset) {
-  UI_ASSERT_DOM_LOCKED();
-  return text_view_->EndOfLine(text_offset);
 }
 
 text::Offset TextWindow::HitTestPoint(const gfx::PointF pt) {
@@ -219,11 +224,6 @@ bool TextWindow::SmallScroll(int, int y_count) {
   if (scrolled)
     RequestAnimationFrame();
   return scrolled;
-}
-
-text::Offset TextWindow::StartOfLine(text::Offset text_offset) {
-  UI_ASSERT_DOM_LOCKED();
-  return text_view_->StartOfLine(text_offset);
 }
 
 void TextWindow::UpdateBounds() {

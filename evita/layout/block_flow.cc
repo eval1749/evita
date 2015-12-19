@@ -63,6 +63,48 @@ void BlockFlow::Append(scoped_refptr<RootInlineBox> line) {
   lines_.push_back(std::move(line));
 }
 
+text::Offset BlockFlow::ComputeEndOfLine(text::Offset text_offset) {
+  TRACE_EVENT0("views", "BlockFlow::ComputeEndOfLine");
+  UI_ASSERT_DOM_LOCKED();
+
+  if (text_offset >= text_buffer_->GetEnd())
+    return text_buffer_->GetEnd();
+
+  EnsureTextLineCache();
+  if (const auto& line = text_line_cache_->FindLine(text_offset))
+    return line->text_end() - text::OffsetDelta(1);
+
+  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  for (;;) {
+    const auto& line = FormatLine(&formatter);
+    if (text_offset < line->text_end())
+      return line->text_end() - text::OffsetDelta(1);
+  }
+}
+
+text::Offset BlockFlow::ComputeStartOfLine(text::Offset text_offset) {
+  TRACE_EVENT0("views", "BlockFlow::ComputeStartOfLine");
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(text_offset.IsValid());
+
+  if (text_offset == text::Offset(0))
+    return text::Offset(0);
+
+  EnsureTextLineCache();
+  if (const auto& line = text_line_cache_->FindLine(text_offset))
+    return line->text_start();
+
+  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  for (;;) {
+    const auto& line = FormatLine(&formatter);
+    start_offset = line->text_end();
+    if (text_offset < start_offset)
+      return line->text_start();
+  }
+}
+
 text::Offset BlockFlow::ComputeVisibleEnd() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
@@ -117,26 +159,6 @@ bool BlockFlow::DiscardLastLine() {
   lines_height_ -= line->height();
   lines_.pop_back();
   return true;
-}
-
-text::Offset BlockFlow::EndOfLine(text::Offset text_offset) {
-  TRACE_EVENT0("views", "BlockFlow::EndOfLine");
-  UI_ASSERT_DOM_LOCKED();
-
-  if (text_offset >= text_buffer_->GetEnd())
-    return text_buffer_->GetEnd();
-
-  EnsureTextLineCache();
-  if (const auto& line = text_line_cache_->FindLine(text_offset))
-    return line->text_end() - text::OffsetDelta(1);
-
-  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
-  for (;;) {
-    const auto& line = FormatLine(&formatter);
-    if (text_offset < line->text_end())
-      return line->text_end() - text::OffsetDelta(1);
-  }
 }
 
 void BlockFlow::EnsureLinePoints() {
@@ -493,28 +515,6 @@ void BlockFlow::SetZoom(float new_zoom) {
 bool BlockFlow::ShouldFormat() const {
   UI_ASSERT_DOM_LOCKED();
   return dirty_;
-}
-
-text::Offset BlockFlow::StartOfLine(text::Offset text_offset) {
-  TRACE_EVENT0("views", "BlockFlow::StartOfLine");
-  UI_ASSERT_DOM_LOCKED();
-  DCHECK(text_offset.IsValid());
-
-  if (text_offset == text::Offset(0))
-    return text::Offset(0);
-
-  EnsureTextLineCache();
-  if (const auto& line = text_line_cache_->FindLine(text_offset))
-    return line->text_start();
-
-  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
-  for (;;) {
-    const auto& line = FormatLine(&formatter);
-    start_offset = line->text_end();
-    if (text_offset < start_offset)
-      return line->text_start();
-  }
 }
 
 }  // namespace layout

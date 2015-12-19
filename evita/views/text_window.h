@@ -48,19 +48,19 @@ class TextWindow final : public CanvasContentWindow,
   TextWindow(WindowId window_id, text::Selection* selection);
   ~TextWindow() final;
 
+  text::Offset ComputeEndOfLine(text::Offset offset);
   text::Offset ComputeScreenMotion(int count,
                                    const gfx::PointF& point,
                                    text::Offset offset);
+  text::Offset ComputeStartOfLine(text::Offset offset);
   text::Offset ComputeWindowLineMotion(int count,
                                        const gfx::PointF& point,
                                        text::Offset offset);
   text::Offset ComputeWindowMotion(int count, text::Offset offset);
-  text::Offset EndOfLine(text::Offset offset);
   text::Offset HitTestPoint(const gfx::PointF point);
   gfx::RectF HitTestTextPosition(text::Offset offset);
   void SetZoom(float new_zoom);
   bool SmallScroll(int x_count, int y_count);
-  text::Offset StartOfLine(text::Offset offset);
 
  private:
   using TextSelectionModel = layout::TextSelectionModel;

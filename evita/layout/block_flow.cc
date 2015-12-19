@@ -126,7 +126,7 @@ text::Offset BlockFlow::EndOfLine(text::Offset text_offset) {
   if (text_offset >= text_buffer_->GetEnd())
     return text_buffer_->GetEnd();
 
-  InvalidateCache();
+  EnsureTextLineCache();
   if (const auto& line = text_line_cache_->FindLine(text_offset))
     return line->text_end() - text::OffsetDelta(1);
 
@@ -150,6 +150,15 @@ void BlockFlow::EnsureLinePoints() {
   }
 
   dirty_line_point_ = false;
+}
+
+void BlockFlow::EnsureTextLineCache() {
+  UI_ASSERT_DOM_LOCKED();
+  text_line_cache_->Invalidate(bounds_, zoom_);
+  if (!dirty_)
+    return;
+  lines_.clear();
+  lines_height_ = 0;
 }
 
 RootInlineBox* BlockFlow::FindLineContainng(text::Offset offset) const {
@@ -179,7 +188,7 @@ RootInlineBox* BlockFlow::FindLineContainng(text::Offset offset) const {
 void BlockFlow::Format(text::Offset text_offset) {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("view", "BlockFlow::Format");
-  InvalidateCache();
+  EnsureTextLineCache();
   lines_.clear();
   lines_height_ = 0;
   dirty_ = false;
@@ -277,15 +286,6 @@ gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
   return gfx::RectF(rect.origin() + bounds_.origin(), rect.size());
 }
 
-void BlockFlow::InvalidateCache() {
-  UI_ASSERT_DOM_LOCKED();
-  text_line_cache_->Invalidate(bounds_, zoom_);
-  if (!dirty_)
-    return;
-  lines_.clear();
-  lines_height_ = 0;
-}
-
 void BlockFlow::InvalidateLines(text::Offset offset) {
   ASSERT_DOM_LOCKED();
   text_line_cache_->DidChangeBuffer(offset);
@@ -310,7 +310,7 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
                                           float point_x) {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::MapPointXToOffset");
-  InvalidateCache();
+  EnsureTextLineCache();
   if (const auto& line = text_line_cache_->FindLine(text_offset))
     return line->HitTestPoint(point_x);
 
@@ -503,7 +503,7 @@ text::Offset BlockFlow::StartOfLine(text::Offset text_offset) {
   if (text_offset == text::Offset(0))
     return text::Offset(0);
 
-  InvalidateCache();
+  EnsureTextLineCache();
   if (const auto& line = text_line_cache_->FindLine(text_offset))
     return line->text_start();
 

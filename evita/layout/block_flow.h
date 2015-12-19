@@ -77,9 +77,9 @@ class BlockFlow final {
   // Returns true if discarded the last line.
   bool DiscardLastLine();
   void EnsureLinePoints();
+  void EnsureTextLineCache();
   RootInlineBox* FindLineContainng(text::Offset offset) const;
   scoped_refptr<RootInlineBox> FormatLine(TextFormatter* formatter);
-  void InvalidateCache();
   void InvalidateLines(text::Offset offset);
   bool IsShowEndOfDocument() const;
 

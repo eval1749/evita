@@ -47,6 +47,14 @@ bool OffsetDelta::operator>=(const OffsetDelta& other) const {
   return value_ >= other.value_;
 }
 
+OffsetDelta OffsetDelta::operator+(const OffsetDelta& other) const {
+  return OffsetDelta(value_ + other.value_);
+}
+
+OffsetDelta OffsetDelta::operator-(const OffsetDelta& other) const {
+  return OffsetDelta(value_ - other.value_);
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Offset

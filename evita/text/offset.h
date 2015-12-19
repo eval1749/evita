@@ -37,6 +37,9 @@ class OffsetDelta final {
   bool operator>(const OffsetDelta& other) const;
   bool operator>=(const OffsetDelta& other) const;
 
+  OffsetDelta operator+(const OffsetDelta& other) const;
+  OffsetDelta operator-(const OffsetDelta& other) const;
+
  private:
   int value_;
 };

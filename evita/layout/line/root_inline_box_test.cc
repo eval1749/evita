@@ -28,15 +28,10 @@ class LineBuilder final {
   LineBuilder(text::Offset start, const RenderStyle& style);
   ~LineBuilder() = default;
 
-  float ascent() const { return ::ceil(ascent_); }
-  const std::vector<InlineBox*> boxes() const { return boxes_; }
-  float descent() const { return ::ceil(descent_); }
-  text::Offset text_end() const { return start_ + offset_; }
-  text::Offset text_start() const { return start_; }
-
   void AddCodeUnit(const base::char16 code_unit);
   void AddMarker(TextMarker marker);
   void AddText(const base::string16& text);
+  scoped_refptr<RootInlineBox> Build() const;
   float WidthOf(const base::string16& text) const;
 
  private:
@@ -86,6 +81,11 @@ void LineBuilder::AddMarker(TextMarker marker) {
 void LineBuilder::AddText(const base::string16& text) {
   AddBoxInternal(new InlineTextBox(style_, left_, WidthOf(text),
                                    style_.font().height(), offset_, text));
+}
+
+scoped_refptr<RootInlineBox> LineBuilder::Build() const {
+  return make_scoped_refptr(
+      new RootInlineBox(boxes_, start_, start_ + offset_, ascent_, descent_));
 }
 
 gfx::RectF CaretBoundsOf(int origin_x, int origin_y, int height) {
@@ -150,14 +150,12 @@ float RootInlineBoxTest::WidthOf(const base::string16& text) const {
 }
 
 TEST_F(RootInlineBoxTest, HitTestPoint) {
-  LineBuilder line(text::Offset(100), style());
-  line.AddText(L"foo");
-  line.AddText(L"bar");
-  line.AddText(L"baz");
-  line.AddMarker(TextMarker::EndOfLine);
-  const auto root_box = make_scoped_refptr(
-      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
-                        line.ascent(), line.descent()));
+  LineBuilder builder(text::Offset(100), style());
+  builder.AddText(L"foo");
+  builder.AddText(L"bar");
+  builder.AddText(L"baz");
+  builder.AddMarker(TextMarker::EndOfLine);
+  const auto& root_box = builder.Build();
   const auto width = root_box->width();
   EXPECT_EQ(100, root_box->HitTestPoint(-1));
   EXPECT_EQ(100, root_box->HitTestPoint(0));
@@ -176,14 +174,12 @@ TEST_F(RootInlineBoxTest, HitTestPoint) {
 }
 
 TEST_F(RootInlineBoxTest, HitTestPointCodeUnit) {
-  LineBuilder line(text::Offset(100), style());
-  line.AddText(L"a");
-  line.AddCodeUnit(0xFFFF);
-  line.AddText(L"b");
-  line.AddMarker(TextMarker::EndOfLine);
-  const auto root_box = make_scoped_refptr(
-      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
-                        line.ascent(), line.descent()));
+  LineBuilder builder(text::Offset(100), style());
+  builder.AddText(L"a");
+  builder.AddCodeUnit(0xFFFF);
+  builder.AddText(L"b");
+  builder.AddMarker(TextMarker::EndOfLine);
+  const auto& root_box = builder.Build();
   const auto width = root_box->width();
   EXPECT_EQ(100, root_box->HitTestPoint(-1));
   EXPECT_EQ(100, root_box->HitTestPoint(0));
@@ -201,14 +197,12 @@ TEST_F(RootInlineBoxTest, HitTestPointCodeUnit) {
 }
 
 TEST_F(RootInlineBoxTest, HitTestTextPosition) {
-  LineBuilder line(text::Offset(100), style());
-  line.AddText(L"foo");
-  line.AddText(L"bar");
-  line.AddText(L"baz");
-  line.AddMarker(TextMarker::EndOfLine);
-  const auto root_box = make_scoped_refptr(
-      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
-                        line.ascent(), line.descent()));
+  LineBuilder builder(text::Offset(100), style());
+  builder.AddText(L"foo");
+  builder.AddText(L"bar");
+  builder.AddText(L"baz");
+  builder.AddMarker(TextMarker::EndOfLine);
+  const auto& root_box = builder.Build();
   const auto& origin = gfx::PointF(100.0f, 200.0f);
   root_box->set_origin(origin);
   EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(90)))
@@ -235,14 +229,12 @@ TEST_F(RootInlineBoxTest, HitTestTextPosition) {
 }
 
 TEST_F(RootInlineBoxTest, HitTestTextPositionCodeUnit) {
-  LineBuilder line(text::Offset(100), style());
-  line.AddText(L"a");
-  line.AddCodeUnit(0xFFFF);
-  line.AddText(L"b");
-  line.AddMarker(TextMarker::EndOfLine);
-  const auto root_box = make_scoped_refptr(
-      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
-                        line.ascent(), line.descent()));
+  LineBuilder builder(text::Offset(100), style());
+  builder.AddText(L"a");
+  builder.AddCodeUnit(0xFFFF);
+  builder.AddText(L"b");
+  builder.AddMarker(TextMarker::EndOfLine);
+  const auto& root_box = builder.Build();
   root_box->set_origin(gfx::PointF(10.0f, 20.0f));
   EXPECT_EQ(CaretBoundsOf(20, 24, 15),
             root_box->HitTestTextPosition(text::Offset(100)));

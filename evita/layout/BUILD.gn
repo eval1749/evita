@@ -8,17 +8,6 @@ source_set("layout") {
   sources = [
     "block_flow.cc",
     "block_flow.h",
-    "line/inline_box.cc",
-    "line/inline_box.h",
-    "line/inline_box_forward.h",
-    "line/inline_box_visitor.cc",
-    "line/inline_box_visitor.h",
-    "line/line_builder.cc",
-    "line/line_builder.h",
-    "line/root_inline_box.cc",
-    "line/root_inline_box.h",
-    "line/root_inline_box_cache.cc",
-    "line/root_inline_box_cache.h",
     "paint_view_builder.cc",
     "paint_view_builder.h",
     "render_font_set.cc",
@@ -37,6 +26,7 @@ source_set("layout") {
     "//base",
     "//evita/css",
     "//evita/gfx",
+    "//evita/layout/line",
     "//evita/paint/public",
     "//evita/text",
   ]
@@ -44,7 +34,6 @@ source_set("layout") {
 
 test("evita_layout_tests") {
   sources = [
-    "line/root_inline_box_test.cc",
     "text_formatter_test.cc",
   ]
 
@@ -54,5 +43,6 @@ test("evita_layout_tests") {
     # TODO(eval1749): We should make layout independent from
     # "//evita/application".
     "//evita:application",
+    "//evita/layout/line:tests",
   ]
 }

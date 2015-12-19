@@ -1,0 +1,37 @@
+# Copyright (c) 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+source_set("line") {
+  sources = [
+    "inline_box.cc",
+    "inline_box.h",
+    "inline_box_forward.h",
+    "inline_box_visitor.cc",
+    "inline_box_visitor.h",
+    "line_builder.cc",
+    "line_builder.h",
+    "root_inline_box.cc",
+    "root_inline_box.h",
+    "root_inline_box_cache.cc",
+    "root_inline_box_cache.h",
+  ]
+
+  public_deps = [
+    "//base",
+    "//evita/text",
+  ]
+}
+
+source_set("tests") {
+  testonly = true
+  sources = [
+    "root_inline_box_test.cc",
+  ]
+
+  public_deps = [
+    "//testing/gtest",
+  ]
+}

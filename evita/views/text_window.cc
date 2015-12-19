@@ -80,9 +80,9 @@ text::Offset TextWindow::ComputeScreenMotion(int n,
   if (LargeScroll(0, n))
     return HitTestPoint(pt);
   if (n > 0)
-    return std::min(text_view_->GetEnd(), buffer()->GetEnd());
+    return std::min(text_view_->text_end(), buffer()->GetEnd());
   if (n < 0)
-    return text_view_->GetStart();
+    return text_view_->text_start();
   return lPosn;
 }
 
@@ -90,6 +90,7 @@ text::Offset TextWindow::ComputeWindowLineMotion(int n,
                                                  const gfx::PointF& pt,
                                                  text::Offset lPosn) {
   UI_ASSERT_DOM_LOCKED();
+  text_view_->FormatIfNeeded();
   if (n > 0) {
     auto const lBufEnd = buffer()->GetEnd();
     if (lPosn >= lBufEnd)
@@ -125,11 +126,11 @@ text::Offset TextWindow::ComputeWindowMotion(int n, text::Offset offset) {
   UI_ASSERT_DOM_LOCKED();
   text_view_->FormatIfNeeded();
   if (n > 0)
-    return std::max(std::min(text_view_->GetEnd() - text::OffsetDelta(1),
+    return std::max(std::min(text_view_->text_end() - text::OffsetDelta(1),
                              buffer()->GetEnd()),
-                    text_view_->GetStart());
+                    text_view_->text_start());
   if (n < 0)
-    return text_view_->GetStart();
+    return text_view_->text_start();
   return offset;
 }
 
@@ -155,7 +156,7 @@ gfx::RectF TextWindow::HitTestTextPosition(text::Offset text_offset) {
 
 bool TextWindow::LargeScroll(int, int iDy) {
   UI_ASSERT_DOM_LOCKED();
-
+  text_view_->FormatIfNeeded();
   auto scrolled = false;
   if (iDy < 0) {
     // Scroll Down -- place top line out of window.
@@ -163,7 +164,7 @@ bool TextWindow::LargeScroll(int, int iDy) {
 
     auto const lBufStart = text::Offset(0);
     for (auto k = 0; k < iDy; ++k) {
-      auto const lStart = text_view_->GetStart();
+      auto const lStart = text_view_->text_start();
       if (lStart == lBufStart)
         break;
 
@@ -172,13 +173,13 @@ bool TextWindow::LargeScroll(int, int iDy) {
         if (!text_view_->ScrollDown())
           break;
         scrolled = true;
-      } while (text_view_->GetEnd() != lStart);
+      } while (text_view_->text_end() != lStart);
     }
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
     auto const lBufEnd = buffer()->GetEnd();
     for (auto k = 0; k < iDy; ++k) {
-      auto const lStart = text_view_->GetEnd();
+      auto const lStart = text_view_->text_end();
       if (lStart >= lBufEnd)
         break;
       text_view_->Format(lStart);
@@ -257,8 +258,8 @@ void TextWindow::UpdateBounds() {
 void TextWindow::UpdateScrollBar() {
   ui::ScrollBar::Data data;
   data.minimum = 0;
-  data.thumb_size = text_view_->GetVisibleEnd() - text_view_->GetStart();
-  data.thumb_value = text_view_->GetStart();
+  data.thumb_size = text_view_->GetVisibleEnd() - text_view_->text_start();
+  data.thumb_value = text_view_->text_start();
   data.maximum = buffer()->GetEnd() + text::OffsetDelta(1);
   vertical_scroll_bar_->SetData(data);
   // TODO(eval1749): Once we have scroll bar for |ui::TextWindow|, we don't
@@ -289,8 +290,8 @@ void TextWindow::DidInsertBefore(text::Offset offset,
 
 // text::SelectionChangeObserver
 void TextWindow::DidChangeSelection() {
-  TRACE_EVENT_WITH_FLOW0("views", "TextWindow::DidChangeSelection",
-                         selection_, TRACE_EVENT_FLAG_FLOW_IN);
+  TRACE_EVENT_WITH_FLOW0("views", "TextWindow::DidChangeSelection", selection_,
+                         TRACE_EVENT_FLAG_FLOW_IN);
   RequestAnimationFrame();
 }
 

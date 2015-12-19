@@ -47,6 +47,8 @@ class TextView final : private gfx::CanvasObserver {
   ~TextView();
 
   text::Buffer* buffer() const { return buffer_; }
+  text::Offset text_end() const;
+  text::Offset text_start() const;
 
   void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
   void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
@@ -54,8 +56,6 @@ class TextView final : private gfx::CanvasObserver {
   void DidInsertBefore(text::Offset offset, text::OffsetDelta length);
   // Returns end of line offset containing |text_offset|.
   text::Offset EndOfLine(text::Offset text_offset) const;
-  text::Offset GetStart();
-  text::Offset GetEnd();
   // Returns fully visible end offset or end of line position if there is only
   // one line.
   text::Offset GetVisibleEnd();

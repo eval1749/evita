@@ -47,6 +47,16 @@ TextView::TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner)
 
 TextView::~TextView() {}
 
+text::Offset TextView::text_end() const {
+  DCHECK(!block_->NeedFormat());
+  return block_->text_end();
+}
+
+text::Offset TextView::text_start() const {
+  DCHECK(!block_->NeedFormat());
+  return block_->text_start();
+}
+
 void TextView::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   block_->DidChangeStyle(offset, length);
@@ -68,16 +78,6 @@ void TextView::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
 
 text::Offset TextView::EndOfLine(text::Offset text_offset) const {
   return block_->EndOfLine(text_offset);
-}
-
-text::Offset TextView::GetEnd() {
-  FormatIfNeeded();
-  return block_->text_end();
-}
-
-text::Offset TextView::GetStart() {
-  FormatIfNeeded();
-  return block_->text_start();
 }
 
 text::Offset TextView::GetVisibleEnd() {

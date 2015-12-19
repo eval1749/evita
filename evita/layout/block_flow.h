@@ -56,6 +56,8 @@ class BlockFlow final {
   gfx::RectF HitTestTextPosition(text::Offset text_offset) const;
   bool IsPositionFullyVisible(text::Offset text_offset);
   text::Offset MapPointXToOffset(text::Offset text_offset, float point_x);
+  // Returns true if we need to format all lines.
+  bool NeedFormat() const;
   // Returns true if this |BlockFlow| is modified.
   bool ScrollDown();
   // Returns true if this |BlockFlow| is modified.
@@ -81,8 +83,6 @@ class BlockFlow final {
   void InvalidateLines(text::Offset offset);
   bool IsShowEndOfDocument() const;
 
-  // Returns true if we need to format all lines.
-  bool NeedFormat() const;
   void Prepend(scoped_refptr<RootInlineBox> line);
 
   gfx::RectF bounds_;

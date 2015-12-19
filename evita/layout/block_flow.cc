@@ -333,7 +333,7 @@ void BlockFlow::MarkDirty() {
 
 bool BlockFlow::NeedsFormat() const {
   UI_ASSERT_DOM_LOCKED();
-  DCHECK(!text_line_cache_->IsDirty(bounds_, zoom_));
+  DCHECK(!text_line_cache_->IsDirty(gfx::RectF(bounds_.size()), zoom_));
   if (lines_.empty())
     return true;
   for (const auto& line : lines_) {

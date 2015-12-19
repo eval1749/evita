@@ -169,7 +169,7 @@ void BlockFlow::EnsureLinePoints() {
 
 void BlockFlow::EnsureTextLineCache() {
   UI_ASSERT_DOM_LOCKED();
-  text_line_cache_->Invalidate(bounds_, zoom_);
+  text_line_cache_->Invalidate(gfx::RectF(bounds_.size()), zoom_);
 }
 
 RootInlineBox* BlockFlow::FindLineContainng(text::Offset offset) const {
@@ -238,7 +238,7 @@ void BlockFlow::Format(text::Offset text_offset) {
 
 bool BlockFlow::FormatIfNeeded() {
   UI_ASSERT_DOM_LOCKED();
-  text_line_cache_->Invalidate(bounds_, zoom_);
+  EnsureTextLineCache();
   if (!NeedsFormat())
     return false;
   Format(view_start_);

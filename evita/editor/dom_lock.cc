@@ -4,6 +4,7 @@
 
 #include "evita/editor/dom_lock.h"
 
+#include "base/memory/singleton.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/application.h"
@@ -17,14 +18,14 @@ namespace editor {
 DomLock::AutoLock::AutoLock(const Location& location) {
   TRACE_EVENT_ASYNC_BEGIN2("view", "ViewLock", this, "function",
                            location.function_name(), "type", "AutoLock");
-  if (DomLock::instance()->TryLock(location))
+  if (DomLock::GetInstance()->TryLock(location))
     return;
   TRACE_EVENT1("view", "AutoLock Wait", "function", location.function_name());
-  DomLock::instance()->Acquire(location);
+  DomLock::GetInstance()->Acquire(location);
 }
 
 DomLock::AutoLock::~AutoLock() {
-  DomLock::instance()->Release(DomLock::instance()->location());
+  DomLock::GetInstance()->Release(DomLock::GetInstance()->location());
   TRACE_EVENT_ASYNC_END0("view", "ViewLock", this);
 }
 
@@ -33,7 +34,7 @@ DomLock::AutoLock::~AutoLock() {
 // DomLock::AutoTryLock
 //
 DomLock::AutoTryLock::AutoTryLock(const Location& location)
-    : locked_(DomLock::instance()->TryLock(location)) {
+    : locked_(DomLock::GetInstance()->TryLock(location)) {
   if (!locked_) {
     TRACE_EVENT_INSTANT1("view", "ViewTryLock", TRACE_EVENT_SCOPE_THREAD,
                          "function", location.function_name());
@@ -46,7 +47,7 @@ DomLock::AutoTryLock::AutoTryLock(const Location& location)
 DomLock::AutoTryLock::~AutoTryLock() {
   if (!locked_)
     return;
-  DomLock::instance()->Release(DomLock::instance()->location());
+  DomLock::GetInstance()->Release(DomLock::GetInstance()->location());
   TRACE_EVENT_ASYNC_END0("view", "ViewLock", this);
 }
 
@@ -57,11 +58,11 @@ DomLock::AutoTryLock::~AutoTryLock() {
 DomLock::AutoUnlock::AutoUnlock(const Location& location) {
   TRACE_EVENT_ASYNC_BEGIN2("view", "ViewLock", this, "function",
                            location.function_name(), "type", "AutoUnlock");
-  DomLock::instance()->Release(location);
+  DomLock::GetInstance()->Release(location);
 }
 
 DomLock::AutoUnlock::~AutoUnlock() {
-  DomLock::instance()->Acquire(DomLock::instance()->location());
+  DomLock::GetInstance()->Acquire(DomLock::GetInstance()->location());
   TRACE_EVENT_ASYNC_END0("view", "ViewLock", this);
 }
 
@@ -72,10 +73,6 @@ DomLock::AutoUnlock::~AutoUnlock() {
 DomLock::DomLock() : locked_(false) {}
 
 DomLock::~DomLock() {}
-
-DomLock* DomLock::instance() {
-  return editor::Application::instance()->dom_lock();
-}
 
 const tracked_objects::Location& DomLock::location() const {
   return dom::Lock::instance()->location();
@@ -93,6 +90,11 @@ void DomLock::AssertLocked(const Location& location) {
   LOG(ERROR) << "Assert locked at " << location.ToString() << ", but locked by "
              << this->location().ToString();
   NOTREACHED();
+}
+
+// static
+DomLock* DomLock::GetInstance() {
+  return base::Singleton<DomLock>::get();
 }
 
 void DomLock::Release(const Location& location) {

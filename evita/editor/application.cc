@@ -58,8 +58,7 @@ namespace editor {
 // Application
 //
 Application::Application()
-    : dom_lock_(new editor::DomLock()),
-      is_quit_(false),
+    : is_quit_(false),
       io_manager_(new io::IoManager()),
       message_loop_(new base::MessageLoop(base::MessageLoop::TYPE_UI)),
       paint_thread_(new paint::PaintThread()),

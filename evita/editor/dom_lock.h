@@ -1,18 +1,13 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_EDITOR_DOM_LOCK_H_
 #define EVITA_EDITOR_DOM_LOCK_H_
 
 #include "base/location.h"
 #include "base/logging.h"
-// L4 C4625: 'derived class' : copy constructor could not be generated because
-// a base class copy constructor is inaccessible
-// L4 C4626: 'derived class' : assignment operator could not be generated
-// because a base class assignment operator is inaccessible
-#pragma warning(push)
-#pragma warning(disable : 4625 4626)
 #include "base/threading/thread_checker.h"
-#pragma warning(pop)
 
 namespace editor {
 
@@ -54,7 +49,6 @@ class DomLock {
   DomLock();
   ~DomLock();
 
-  static DomLock* instance();
   const Location& location() const;
   bool locked() const {
     DCHECK(thread_checker_.CalledOnValidThread());
@@ -65,6 +59,8 @@ class DomLock {
   void AssertLocked(const Location& location);
   void Release(const Location& location);
   bool TryLock(const Location& location);
+
+  static DomLock* GetInstance();
 
  private:
   friend class AutoLock;
@@ -80,7 +76,7 @@ class DomLock {
 }  // namespace editor
 
 #define UI_ASSERT_DOM_LOCKED() \
-  editor::DomLock::instance()->AssertLocked(FROM_HERE);
+  editor::DomLock::GetInstance()->AssertLocked(FROM_HERE);
 
 #define UI_DOM_AUTO_LOCK_SCOPE() editor::DomLock::AutoLock dom_scope(FROM_HERE)
 

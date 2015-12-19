@@ -23,10 +23,6 @@ enum class ScriptHostState;
 class ViewEventHandler;
 }
 
-namespace editor {
-class DomLock;
-}
-
 namespace io {
 class IoManager;
 }
@@ -53,7 +49,6 @@ class Application final {
   Application();
   ~Application();
 
-  editor::DomLock* dom_lock() const { return dom_lock_.get(); }
   io::IoManager* io_manager() const { return io_manager_.get(); }
   paint::PaintThread* paint_thread() const { return paint_thread_.get(); }
   Scheduler* scheduler() const { return scheduler_.get(); }
@@ -75,7 +70,6 @@ class Application final {
   static Application* GetInstance();
 
  private:
-  std::unique_ptr<editor::DomLock> dom_lock_;
   const std::unique_ptr<io::IoManager> io_manager_;
   bool is_quit_;
   const std::unique_ptr<base::MessageLoop> message_loop_;

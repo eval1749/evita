@@ -58,6 +58,7 @@ class InlineBox : public common::Castable {
   float width() const { return width_; }
 
   virtual void Accept(InlineBoxVisitor* visitor) = 0;
+  bool HasText() const { return start_ < end_; }
   virtual gfx::RectF HitTestTextPosition(text::Offset position,
                                          float baseline) const = 0;
   virtual text::Offset MapXToPosn(float x) const = 0;

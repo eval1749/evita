@@ -82,10 +82,15 @@ bool RootInlineBox::IsEndOfDocument() const {
 
 // Map x-coordinate in content space to text offset.
 text::Offset RootInlineBox::MapXToPosn(float point_x) const {
-  if (point_x <= boxes_[1]->left())
+  DCHECK(boxes_.front()->is<InlineFillerBox>());
+  DCHECK(boxes_.back()->is<InlineMarkerBox>());
+  // Skip non-text boxes
+  auto runner = std::next(boxes_.begin());
+  if (point_x <= (*runner)->left())
     return text_start();
+  // Get box after |point_x|
   const auto& it = std::lower_bound(
-      std::next(boxes_.begin()), boxes_.end(), point_x,
+      runner, boxes_.end(), point_x,
       [](const InlineBox* box1, float value) { return box1->left() < value; });
   if (it == boxes_.end())
     return text_end() - text::OffsetDelta(1);

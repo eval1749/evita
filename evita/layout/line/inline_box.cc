@@ -59,7 +59,7 @@ InlineFillerBox::InlineFillerBox(const RenderStyle& style,
                 width,
                 height,
                 start,
-                start + text::OffsetDelta(1),
+                start + text::OffsetDelta(0),
                 0.0f) {}
 
 InlineFillerBox::~InlineFillerBox() {}

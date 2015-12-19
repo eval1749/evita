@@ -16,6 +16,8 @@ namespace layout {
 
 namespace {
 
+const auto kLeadingWidth = 10.0f;
+
 //////////////////////////////////////////////////////////////////////
 //
 // LineBuilder
@@ -49,7 +51,10 @@ class LineBuilder final {
 };
 
 LineBuilder::LineBuilder(text::Offset start, const RenderStyle& style)
-    : offset_(start), style_(style), start_(start) {}
+    : offset_(start), style_(style), start_(start) {
+  boxes_.push_back(new InlineFillerBox(style_, 0, kLeadingWidth, 10, start));
+  left_ += kLeadingWidth;
+}
 
 void LineBuilder::AddCodeUnit(const base::char16 code_unit) {
   const auto next_offset = offset_ + text::OffsetDelta(1);
@@ -109,6 +114,8 @@ class RootInlineBoxTest : public ::testing::Test {
 
   const RenderStyle& style() const { return style_; }
 
+  gfx::PointF PointFor(const RootInlineBox& line,
+                       const std::vector<base::string16>& texts) const;
   float WidthOf(const base::string16& text) const;
 
  private:
@@ -118,6 +125,15 @@ class RootInlineBoxTest : public ::testing::Test {
 };
 
 RootInlineBoxTest::RootInlineBoxTest() : style_(CreateStyle()) {}
+
+gfx::PointF RootInlineBoxTest::PointFor(
+    const RootInlineBox& root_box,
+    const std::vector<base::string16>& texts) const {
+  auto width = root_box.boxes().front()->width();
+  for (const auto& text : texts)
+    width += WidthOf(text);
+  return root_box.origin() + gfx::SizeF(width, 0.0f);
+}
 
 float RootInlineBoxTest::WidthOf(const base::string16& text) const {
   return ::ceil(style_.font().GetTextWidth(text));
@@ -132,37 +148,28 @@ TEST_F(RootInlineBoxTest, HitTestTextPosition) {
   const auto root_box = make_scoped_refptr(
       new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
                         line.ascent(), line.descent()));
-  root_box->set_origin(gfx::PointF(10.0f, 20.0f));
+  const auto& origin = gfx::PointF(100.0f, 200.0f);
+  root_box->set_origin(origin);
   const auto height = root_box->height();
   const auto& size = gfx::SizeF(1.0f, height);
   EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(90)))
       << "If RootInlineBox contains specified offset, HitTestTextPosition "
          "returns empty rectangle";
-  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f, 20.0f), size),
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {}), size),
             root_box->HitTestTextPosition(text::Offset(100)));
-  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"f"), 20.0f), size),
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"f"}), size),
             root_box->HitTestTextPosition(text::Offset(101)));
-  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"fo"), 20.0f), size),
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"fo"}), size),
             root_box->HitTestTextPosition(text::Offset(102)));
-  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo"), 20.0f), size),
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo"}), size),
             root_box->HitTestTextPosition(text::Offset(103)));
-  EXPECT_EQ(
-      gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo") + WidthOf(L"b"), 20.0f),
-                 size),
-      root_box->HitTestTextPosition(text::Offset(104)));
-  EXPECT_EQ(
-      gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo") + WidthOf(L"ba"), 20.0f),
-                 size),
-      root_box->HitTestTextPosition(text::Offset(105)));
-  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo") + WidthOf(L"bar") +
-                                       WidthOf(L"b"),
-                                   20.0f),
-                       size),
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo", L"b"}), size),
+            root_box->HitTestTextPosition(text::Offset(104)));
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo", L"ba"}), size),
+            root_box->HitTestTextPosition(text::Offset(105)));
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo", L"bar", L"b"}), size),
             root_box->HitTestTextPosition(text::Offset(107)));
-  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"foo") + WidthOf(L"bar") +
-                                       WidthOf(L"baz"),
-                                   20.0f),
-                       size),
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo", L"bar", L"baz"}), size),
             root_box->HitTestTextPosition(text::Offset(109)));
   EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(110)))
       << "root_box contains 100 to 109.";
@@ -180,12 +187,10 @@ TEST_F(RootInlineBoxTest, HitTestTextPositionCodeUnit) {
   root_box->set_origin(gfx::PointF(10.0f, 20.0f));
   const auto height = root_box->height();
   const auto& size = gfx::SizeF(1.0f, height);
-  EXPECT_EQ(gfx::RectF(gfx::PointF(10.0f + WidthOf(L"a"), 20.0f), size),
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"a"}), size),
             root_box->HitTestTextPosition(text::Offset(101)));
-  EXPECT_EQ(
-      gfx::RectF(gfx::PointF(10.0f + WidthOf(L"a") + WidthOf(L"uFFFF"), 20.0f),
-                 size),
-      root_box->HitTestTextPosition(text::Offset(102)));
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"a", L"uFFFF"}), size),
+            root_box->HitTestTextPosition(text::Offset(102)));
 }
 
 TEST_F(RootInlineBoxTest, MapXToPosn) {
@@ -198,16 +203,20 @@ TEST_F(RootInlineBoxTest, MapXToPosn) {
       new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
                         line.ascent(), line.descent()));
   const auto width = root_box->width();
+  EXPECT_EQ(100, root_box->MapXToPosn(-1));
   EXPECT_EQ(100, root_box->MapXToPosn(0));
-  EXPECT_EQ(100, root_box->MapXToPosn(WidthOf(L"f") / 2));
-  EXPECT_EQ(100, root_box->MapXToPosn(WidthOf(L"f") - 1));
-  EXPECT_EQ(101, root_box->MapXToPosn(WidthOf(L"fo") - 1));
-  EXPECT_EQ(102, root_box->MapXToPosn(WidthOf(L"fo")));
-  EXPECT_EQ(103, root_box->MapXToPosn(WidthOf(L"foo")));
-  EXPECT_EQ(103, root_box->MapXToPosn(WidthOf(L"foo") + 1));
-  EXPECT_EQ(105, root_box->MapXToPosn(WidthOf(L"fooba") + 1));
-  EXPECT_EQ(108, root_box->MapXToPosn(WidthOf(L"foobarbaz") - 1));
-  EXPECT_EQ(109, root_box->MapXToPosn(width));
+  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth));
+  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"f") / 2));
+  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"f") - 1));
+  EXPECT_EQ(101, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"fo") - 1));
+  EXPECT_EQ(102, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"fo")));
+  EXPECT_EQ(103, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"foo")));
+  EXPECT_EQ(103, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"foo") + 1));
+  EXPECT_EQ(105, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"fooba") + 1));
+  EXPECT_EQ(108,
+            root_box->MapXToPosn(kLeadingWidth + WidthOf(L"foobarbaz") - 1));
+  EXPECT_EQ(109, root_box->MapXToPosn(kLeadingWidth + width));
+  EXPECT_EQ(109, root_box->MapXToPosn(99999));
 }
 
 TEST_F(RootInlineBoxTest, MapXToPosnCodeUnit) {
@@ -220,13 +229,16 @@ TEST_F(RootInlineBoxTest, MapXToPosnCodeUnit) {
       new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
                         line.ascent(), line.descent()));
   const auto width = root_box->width();
+  EXPECT_EQ(100, root_box->MapXToPosn(-1));
   EXPECT_EQ(100, root_box->MapXToPosn(0));
-  EXPECT_EQ(100, root_box->MapXToPosn(WidthOf(L"a") / 2));
-  EXPECT_EQ(100, root_box->MapXToPosn(WidthOf(L"a") - 1));
-  EXPECT_EQ(101, root_box->MapXToPosn(WidthOf(L"a")));
-  EXPECT_EQ(101, root_box->MapXToPosn(WidthOf(L"au")));
+  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth));
+  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"a") / 2));
+  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"a") - 1));
+  EXPECT_EQ(101, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"a")));
+  EXPECT_EQ(101, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"au")));
   EXPECT_EQ(102, root_box->MapXToPosn(width - 10));
   EXPECT_EQ(103, root_box->MapXToPosn(width));
+  EXPECT_EQ(103, root_box->MapXToPosn(99999));
 }
 
 }  // namespace layout

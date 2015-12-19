@@ -83,7 +83,6 @@ class BlockFlow final {
   void EnsureTextLineCache();
   RootInlineBox* FindLineContainng(text::Offset offset) const;
   scoped_refptr<RootInlineBox> FormatLine(TextFormatter* formatter);
-  void InvalidateLines(text::Offset offset);
   bool IsShowEndOfDocument() const;
 
   void Prepend(scoped_refptr<RootInlineBox> line);

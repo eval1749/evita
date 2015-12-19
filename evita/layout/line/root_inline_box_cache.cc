@@ -28,6 +28,21 @@ void RootInlineBoxCache::DidChangeBuffer(text::Offset offset) {
   dirty_start_ = std::min(dirty_start_, offset);
 }
 
+void RootInlineBoxCache::DidChangeStyle(text::Offset offset,
+                                        text::OffsetDelta length) {
+  DidChangeBuffer(offset);
+}
+
+void RootInlineBoxCache::DidDeleteAt(text::Offset offset,
+                                     text::OffsetDelta length) {
+  DidChangeBuffer(offset);
+}
+
+void RootInlineBoxCache::DidInsertBefore(text::Offset offset,
+                                         text::OffsetDelta length) {
+  DidChangeBuffer(offset);
+}
+
 scoped_refptr<RootInlineBox> RootInlineBoxCache::FindLine(
     text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();

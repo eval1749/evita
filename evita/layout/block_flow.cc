@@ -117,14 +117,16 @@ text::Offset BlockFlow::ComputeVisibleEnd() const {
   return lines_.front()->text_end();
 }
 
-void BlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta) {
+void BlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  InvalidateLines(offset);
+  text_line_cache_->DidChangeStyle(offset, length);
+  dirty_ = true;
 }
 
 void BlockFlow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  InvalidateLines(offset);
+  text_line_cache_->DidDeleteAt(offset, length);
+  dirty_ = true;
   if (view_start_ <= offset)
     return;
   view_start_ = std::max(view_start_ - length, offset);
@@ -132,7 +134,8 @@ void BlockFlow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
 
 void BlockFlow::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  InvalidateLines(offset);
+  text_line_cache_->DidInsertBefore(offset, length);
+  dirty_ = true;
   if (view_start_ <= offset)
     return;
   view_start_ = view_start_ + length;
@@ -306,12 +309,6 @@ gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
   if (rect.empty())
     return gfx::RectF();
   return gfx::RectF(rect.origin() + bounds_.origin(), rect.size());
-}
-
-void BlockFlow::InvalidateLines(text::Offset offset) {
-  ASSERT_DOM_LOCKED();
-  text_line_cache_->DidChangeBuffer(offset);
-  dirty_ = true;
 }
 
 bool BlockFlow::IsFullyVisibleTextPosition(text::Offset offset) const {

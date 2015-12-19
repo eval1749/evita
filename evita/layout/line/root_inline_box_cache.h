@@ -29,13 +29,18 @@ class RootInlineBoxCache final {
   explicit RootInlineBoxCache(const text::Buffer* buffer);
   ~RootInlineBoxCache();
 
-  void DidChangeBuffer(text::Offset offset);
+  // Callback for buffer mutation observer
+  void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
+  void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
+  void DidInsertBefore(text::Offset offset, text::OffsetDelta length);
+
   scoped_refptr<RootInlineBox> FindLine(text::Offset text_offset) const;
   void Invalidate(const gfx::RectF& bounds, float zoom);
   bool IsDirty(const gfx::RectF& bounds, float zoom) const;
   void Register(scoped_refptr<RootInlineBox> line);
 
  private:
+  void DidChangeBuffer(text::Offset offset);
   bool IsAfterNewline(const RootInlineBox* text_line) const;
   bool IsEndWithNewline(const RootInlineBox* text_line) const;
   void RemoveDirtyLines();

@@ -64,7 +64,7 @@ InlineFillerBox::InlineFillerBox(const RenderStyle& style,
 
 InlineFillerBox::~InlineFillerBox() {}
 
-text::Offset InlineFillerBox::MapXToPosn(float x) const {
+text::Offset InlineFillerBox::HitTestPoint(float x) const {
   return text::Offset::Invalid();
 }
 
@@ -106,7 +106,7 @@ gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset offset,
                     gfx::SizeF(1.0f, height()));
 }
 
-text::Offset InlineMarkerBox::MapXToPosn(float x) const {
+text::Offset InlineMarkerBox::HitTestPoint(float x) const {
   return start();
 }
 
@@ -128,7 +128,7 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
 InlineTextBoxBase::~InlineTextBoxBase() {}
 
 // InlineBox
-text::Offset InlineTextBoxBase::MapXToPosn(float x) const {
+text::Offset InlineTextBoxBase::HitTestPoint(float x) const {
   if (x >= width())
     return end();
   for (auto k = 1u; k <= characters_.length(); ++k) {
@@ -204,7 +204,7 @@ gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset,
                     gfx::SizeF(1.0f, height()));
 }
 
-text::Offset InlineUnicodeBox::MapXToPosn(float x) const {
+text::Offset InlineUnicodeBox::HitTestPoint(float x) const {
   return start();
 }
 

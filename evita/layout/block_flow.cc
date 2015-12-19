@@ -235,7 +235,7 @@ text::Offset BlockFlow::HitTestPoint(gfx::PointF point) const {
   if (it == lines_.end())
     return lines_.back()->text_end();
   const auto line = *std::prev(it);
-  return line->MapXToPosn(point.x);
+  return line->HitTestPoint(point.x);
 }
 
 gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
@@ -291,14 +291,14 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
   TRACE_EVENT0("views", "BlockFlow::MapPointXToOffset");
   InvalidateCache();
   if (const auto& line = text_line_cache_->FindLine(text_offset))
-    return line->MapXToPosn(point_x);
+    return line->HitTestPoint(point_x);
 
   auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
-      return line->MapXToPosn(point_x);
+      return line->HitTestPoint(point_x);
   }
 }
 

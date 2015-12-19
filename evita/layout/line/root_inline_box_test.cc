@@ -139,6 +139,54 @@ float RootInlineBoxTest::WidthOf(const base::string16& text) const {
   return ::ceil(style_.font().GetTextWidth(text));
 }
 
+TEST_F(RootInlineBoxTest, HitTestPoint) {
+  LineBuilder line(text::Offset(100), style());
+  line.AddText(L"foo");
+  line.AddText(L"bar");
+  line.AddText(L"baz");
+  line.AddMarker(TextMarker::EndOfLine);
+  const auto root_box = make_scoped_refptr(
+      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
+                        line.ascent(), line.descent()));
+  const auto width = root_box->width();
+  EXPECT_EQ(100, root_box->HitTestPoint(-1));
+  EXPECT_EQ(100, root_box->HitTestPoint(0));
+  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth));
+  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"f") / 2));
+  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"f") - 1));
+  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fo") - 1));
+  EXPECT_EQ(102, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fo")));
+  EXPECT_EQ(103, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"foo")));
+  EXPECT_EQ(103, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"foo") + 1));
+  EXPECT_EQ(105, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fooba") + 1));
+  EXPECT_EQ(108,
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"foobarbaz") - 1));
+  EXPECT_EQ(109, root_box->HitTestPoint(kLeadingWidth + width));
+  EXPECT_EQ(109, root_box->HitTestPoint(99999));
+}
+
+TEST_F(RootInlineBoxTest, HitTestPointCodeUnit) {
+  LineBuilder line(text::Offset(100), style());
+  line.AddText(L"a");
+  line.AddCodeUnit(0xFFFF);
+  line.AddText(L"b");
+  line.AddMarker(TextMarker::EndOfLine);
+  const auto root_box = make_scoped_refptr(
+      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
+                        line.ascent(), line.descent()));
+  const auto width = root_box->width();
+  EXPECT_EQ(100, root_box->HitTestPoint(-1));
+  EXPECT_EQ(100, root_box->HitTestPoint(0));
+  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth));
+  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a") / 2));
+  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a") - 1));
+  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a")));
+  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"au")));
+  EXPECT_EQ(102, root_box->HitTestPoint(width - 10));
+  EXPECT_EQ(103, root_box->HitTestPoint(width));
+  EXPECT_EQ(103, root_box->HitTestPoint(99999));
+}
+
 TEST_F(RootInlineBoxTest, HitTestTextPosition) {
   LineBuilder line(text::Offset(100), style());
   line.AddText(L"foo");
@@ -191,54 +239,6 @@ TEST_F(RootInlineBoxTest, HitTestTextPositionCodeUnit) {
             root_box->HitTestTextPosition(text::Offset(101)));
   EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"a", L"uFFFF"}), size),
             root_box->HitTestTextPosition(text::Offset(102)));
-}
-
-TEST_F(RootInlineBoxTest, MapXToPosn) {
-  LineBuilder line(text::Offset(100), style());
-  line.AddText(L"foo");
-  line.AddText(L"bar");
-  line.AddText(L"baz");
-  line.AddMarker(TextMarker::EndOfLine);
-  const auto root_box = make_scoped_refptr(
-      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
-                        line.ascent(), line.descent()));
-  const auto width = root_box->width();
-  EXPECT_EQ(100, root_box->MapXToPosn(-1));
-  EXPECT_EQ(100, root_box->MapXToPosn(0));
-  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth));
-  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"f") / 2));
-  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"f") - 1));
-  EXPECT_EQ(101, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"fo") - 1));
-  EXPECT_EQ(102, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"fo")));
-  EXPECT_EQ(103, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"foo")));
-  EXPECT_EQ(103, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"foo") + 1));
-  EXPECT_EQ(105, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"fooba") + 1));
-  EXPECT_EQ(108,
-            root_box->MapXToPosn(kLeadingWidth + WidthOf(L"foobarbaz") - 1));
-  EXPECT_EQ(109, root_box->MapXToPosn(kLeadingWidth + width));
-  EXPECT_EQ(109, root_box->MapXToPosn(99999));
-}
-
-TEST_F(RootInlineBoxTest, MapXToPosnCodeUnit) {
-  LineBuilder line(text::Offset(100), style());
-  line.AddText(L"a");
-  line.AddCodeUnit(0xFFFF);
-  line.AddText(L"b");
-  line.AddMarker(TextMarker::EndOfLine);
-  const auto root_box = make_scoped_refptr(
-      new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
-                        line.ascent(), line.descent()));
-  const auto width = root_box->width();
-  EXPECT_EQ(100, root_box->MapXToPosn(-1));
-  EXPECT_EQ(100, root_box->MapXToPosn(0));
-  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth));
-  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"a") / 2));
-  EXPECT_EQ(100, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"a") - 1));
-  EXPECT_EQ(101, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"a")));
-  EXPECT_EQ(101, root_box->MapXToPosn(kLeadingWidth + WidthOf(L"au")));
-  EXPECT_EQ(102, root_box->MapXToPosn(width - 10));
-  EXPECT_EQ(103, root_box->MapXToPosn(width));
-  EXPECT_EQ(103, root_box->MapXToPosn(99999));
 }
 
 }  // namespace layout

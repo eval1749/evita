@@ -46,9 +46,9 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   float width() const { return bounds_.width(); }
 
   bool Contains(text::Offset offset) const;
+  text::Offset HitTestPoint(float x) const;
   gfx::RectF HitTestTextPosition(text::Offset offset) const;
   bool IsEndOfDocument() const;
-  text::Offset MapXToPosn(float x) const;
 
  private:
   friend class base::RefCounted<RootInlineBox>;

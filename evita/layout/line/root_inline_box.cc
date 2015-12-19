@@ -54,6 +54,27 @@ bool RootInlineBox::Contains(text::Offset offset) const {
   return offset >= text_start() && offset < text_end();
 }
 
+// Map x-coordinate in content space to text offset.
+text::Offset RootInlineBox::HitTestPoint(float point_x) const {
+  DCHECK(boxes_.front()->is<InlineFillerBox>());
+  DCHECK(boxes_.back()->is<InlineMarkerBox>());
+  // Skip non-text boxes
+  auto runner = std::next(boxes_.begin());
+  if (point_x <= (*runner)->left())
+    return text_start();
+  // Get box after |point_x|
+  const auto& it = std::lower_bound(
+      runner, boxes_.end(), point_x,
+      [](const InlineBox* box1, float value) { return box1->left() < value; });
+  if (it == boxes_.end())
+    return text_end() - text::OffsetDelta(1);
+  const auto box = (*it)->left() == point_x ? *it : *std::prev(it);
+  const auto offset = box->HitTestPoint(point_x - box->left());
+  if (!offset.IsValid())
+    return text_end() - text::OffsetDelta(1);
+  return offset;
+}
+
 gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
   DCHECK(offset.IsValid());
   DCHECK(!boxes_.empty());
@@ -78,27 +99,6 @@ bool RootInlineBox::IsEndOfDocument() const {
   DCHECK(!boxes_.empty());
   const auto last_marker_box = last_box()->as<InlineMarkerBox>();
   return last_marker_box->marker_name() == TextMarker::EndOfDocument;
-}
-
-// Map x-coordinate in content space to text offset.
-text::Offset RootInlineBox::MapXToPosn(float point_x) const {
-  DCHECK(boxes_.front()->is<InlineFillerBox>());
-  DCHECK(boxes_.back()->is<InlineMarkerBox>());
-  // Skip non-text boxes
-  auto runner = std::next(boxes_.begin());
-  if (point_x <= (*runner)->left())
-    return text_start();
-  // Get box after |point_x|
-  const auto& it = std::lower_bound(
-      runner, boxes_.end(), point_x,
-      [](const InlineBox* box1, float value) { return box1->left() < value; });
-  if (it == boxes_.end())
-    return text_end() - text::OffsetDelta(1);
-  const auto box = (*it)->left() == point_x ? *it : *std::prev(it);
-  const auto offset = box->MapXToPosn(point_x - box->left());
-  if (!offset.IsValid())
-    return text_end() - text::OffsetDelta(1);
-  return offset;
 }
 
 }  // namespace layout

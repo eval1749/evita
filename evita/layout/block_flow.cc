@@ -209,7 +209,7 @@ void BlockFlow::Format(text::Offset text_offset) {
 bool BlockFlow::FormatIfNeeded() {
   UI_ASSERT_DOM_LOCKED();
   text_line_cache_->Invalidate(bounds_, zoom_);
-  if (!NeedFormat()) {
+  if (!NeedsFormat()) {
     dirty_ = false;
     return false;
   }
@@ -325,7 +325,7 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
   }
 }
 
-bool BlockFlow::NeedFormat() const {
+bool BlockFlow::NeedsFormat() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!text_line_cache_->IsDirty(bounds_, zoom_));
   if (need_format_)

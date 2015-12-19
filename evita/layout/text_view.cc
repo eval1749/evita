@@ -48,12 +48,12 @@ TextView::TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner)
 TextView::~TextView() {}
 
 text::Offset TextView::text_end() const {
-  DCHECK(!block_->NeedFormat());
+  DCHECK(!block_->NeedsFormat());
   return block_->text_end();
 }
 
 text::Offset TextView::text_start() const {
-  DCHECK(!block_->NeedFormat());
+  DCHECK(!block_->NeedsFormat());
   return block_->text_start();
 }
 

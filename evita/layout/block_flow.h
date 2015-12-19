@@ -57,7 +57,7 @@ class BlockFlow final {
   bool IsPositionFullyVisible(text::Offset text_offset);
   text::Offset MapPointXToOffset(text::Offset text_offset, float point_x);
   // Returns true if we need to format all lines.
-  bool NeedFormat() const;
+  bool NeedsFormat() const;
   // Returns true if this |BlockFlow| is modified.
   bool ScrollDown();
   // Returns true if this |BlockFlow| is modified.

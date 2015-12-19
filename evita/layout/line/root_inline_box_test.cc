@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -27,9 +28,9 @@ class LineBuilder final {
   LineBuilder(text::Offset start, const RenderStyle& style);
   ~LineBuilder() = default;
 
-  float ascent() const { return style_.font().height() - descent(); }
+  float ascent() const { return ::ceil(ascent_); }
   const std::vector<InlineBox*> boxes() const { return boxes_; }
-  float descent() const { return style_.font().descent(); }
+  float descent() const { return ::ceil(descent_); }
   text::Offset text_end() const { return offset_; }
   text::Offset text_start() const { return start_; }
 
@@ -39,9 +40,12 @@ class LineBuilder final {
   float WidthOf(const base::string16& text) const;
 
  private:
+  void AddBoxInternal(InlineBox* box);
   static RenderStyle CreateStyle();
 
+  float ascent_ = 0;
   std::vector<InlineBox*> boxes_;
+  float descent_ = 0;
   float left_ = 0;
   text::Offset offset_;
   text::Offset start_;
@@ -52,36 +56,35 @@ class LineBuilder final {
 
 LineBuilder::LineBuilder(text::Offset start, const RenderStyle& style)
     : offset_(start), style_(style), start_(start) {
-  boxes_.push_back(new InlineFillerBox(style_, 0, kLeadingWidth, 10, start));
-  left_ += kLeadingWidth;
+  AddBoxInternal(new InlineFillerBox(style_, 0, kLeadingWidth, 10, start));
+}
+
+void LineBuilder::AddBoxInternal(InlineBox* box) {
+  boxes_.push_back(box);
+  left_ += box->width();
+  ascent_ = std::max(ascent_, box->ascent());
+  descent_ = std::max(descent_, box->descent());
+  offset_ = box->end();
 }
 
 void LineBuilder::AddCodeUnit(const base::char16 code_unit) {
   const auto next_offset = offset_ + text::OffsetDelta(1);
   base::string16 text = L"uFFFF";
-  const auto width = WidthOf(text);
-  boxes_.push_back(new InlineUnicodeBox(
-      style_, left_, width, style_.font().height() + 4, offset_, text));
-  left_ += width;
-  offset_ = next_offset;
+  AddBoxInternal(new InlineUnicodeBox(
+      style_, left_, WidthOf(text), style_.font().height() + 4, offset_, text));
 }
 
 void LineBuilder::AddMarker(TextMarker marker) {
-  const auto next_offset = offset_ + text::OffsetDelta(1);
-  const auto width = WidthOf(L"x");
-  boxes_.push_back(new InlineMarkerBox(style_, left_, width,
-                                       style_.font().height(), offset_,
-                                       next_offset, marker));
-  left_ += width;
-  offset_ = next_offset;
+  const auto next_offset =
+      marker == TextMarker::LineWrap ? offset_ : offset_ + text::OffsetDelta(1);
+  AddBoxInternal(new InlineMarkerBox(style_, left_, WidthOf(L"x"),
+                                     style_.font().height(), offset_,
+                                     next_offset, marker));
 }
 
 void LineBuilder::AddText(const base::string16& text) {
-  auto const width = WidthOf(text);
-  boxes_.push_back(new InlineTextBox(style_, left_, width,
-                                     style_.font().height(), offset_, text));
-  left_ += width;
-  offset_ += text::OffsetDelta(text.size());
+  AddBoxInternal(new InlineTextBox(style_, left_, WidthOf(text),
+                                   style_.font().height(), offset_, text));
 }
 
 RenderStyle CreateStyle() {
@@ -235,10 +238,15 @@ TEST_F(RootInlineBoxTest, HitTestTextPositionCodeUnit) {
   root_box->set_origin(gfx::PointF(10.0f, 20.0f));
   const auto height = root_box->height();
   const auto& size = gfx::SizeF(1.0f, height);
+  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {}) + gfx::SizeF(0.0f, 4.0f),
+                       gfx::SizeF(1.0f, 16.0f)),
+            root_box->HitTestTextPosition(text::Offset(100)));
   EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"a"}), size),
             root_box->HitTestTextPosition(text::Offset(101)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"a", L"uFFFF"}), size),
-            root_box->HitTestTextPosition(text::Offset(102)));
+  EXPECT_EQ(
+      gfx::RectF(PointFor(*root_box, {L"a", L"uFFFF"}) + gfx::SizeF(0.0f, 4.0f),
+                 gfx::SizeF(1.0f, 16.0f)),
+      root_box->HitTestTextPosition(text::Offset(102)));
 }
 
 }  // namespace layout

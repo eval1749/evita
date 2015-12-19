@@ -72,19 +72,24 @@ gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
   DCHECK(!boxes_.empty());
   if (offset < text_start_ || offset >= text_end_)
     return gfx::RectF();
-
-  const auto baseline = height() - descent_;
-  auto origin = bounds_.origin();
-  for (const auto& box : boxes_) {
-    const auto rect = box->HitTestTextPosition(offset, baseline);
-    if (!rect.empty()) {
-      return gfx::RectF(gfx::ToEnclosingRect(
-          gfx::RectF(origin + rect.origin(), rect.size())));
-    }
-    origin.x += box->width();
-  }
-
-  return gfx::RectF();
+  // Search box after filler box
+  const auto& first = std::next(boxes_.begin());
+  const auto& it =
+      std::lower_bound(first, boxes_.end(), offset,
+                       [](const InlineBox* box, text::Offset value) {
+                         return box->start() < value;
+                       });
+  if (it == boxes_.end())
+    return gfx::RectF();
+  const auto baseline = bounds_.height() - descent_;
+  const auto box =
+      it == first || (*it)->start() == offset ? *it : *std::prev(it);
+  const auto& rect = box->HitTestTextPosition(offset, baseline);
+  if (rect.empty())
+    return rect;
+  const auto box_origin = origin() + gfx::SizeF(box->left(), 0.0f);
+  return gfx::RectF(gfx::ToEnclosingRect(
+      gfx::RectF(rect.origin() + box_origin, rect.size())));
 }
 
 bool RootInlineBox::IsEndOfDocument() const {

@@ -50,10 +50,10 @@ class InlineBox : public common::Castable {
 
   float ascent() const { return height_ - descent_; }
   float descent() const { return descent_; }
-  text::Offset end() const { return end_; }
+  text::OffsetDelta end() const { return end_; }
   float height() const { return height_; }
   float left() const { return left_; }
-  text::Offset start() const { return start_; }
+  text::OffsetDelta start() const { return start_; }
   const RenderStyle& style() const { return style_; }
   float width() const { return width_; }
 
@@ -61,9 +61,9 @@ class InlineBox : public common::Castable {
 
   // Returns text offset at |point_x| in box local coordinate, or |start()|
   // for negative |point_x|, or |end()| for |point_x| grater than or equal to
-  // |width()|. This function never return |text::Offset::Invalid()|.
-  virtual text::Offset HitTestPoint(float point_x) const;
-  virtual gfx::RectF HitTestTextPosition(text::Offset position,
+  // |width()|. This function never return |text::OffsetDelta::Invalid()|.
+  virtual text::OffsetDelta HitTestPoint(float point_x) const;
+  virtual gfx::RectF HitTestTextPosition(text::OffsetDelta position,
                                          float baseline) const = 0;
 
  protected:
@@ -71,16 +71,16 @@ class InlineBox : public common::Castable {
             float left,
             float width,
             float height,
-            text::Offset start,
-            text::Offset end,
+            text::OffsetDelta start,
+            text::OffsetDelta end,
             float descent);
 
  private:
   const float descent_;
-  const text::Offset end_;
+  const text::OffsetDelta end_;
   const float height_;
   const float left_;
-  const text::Offset start_;
+  const text::OffsetDelta start_;
   const RenderStyle style_;
   const float width_;
 
@@ -101,12 +101,12 @@ class InlineFillerBox final : public InlineBox {
                   float left,
                   float width,
                   float height,
-                  text::Offset offset);
+                  text::OffsetDelta offset);
   ~InlineFillerBox() final;
 
  private:
   // InlineBox
-  gfx::RectF HitTestTextPosition(text::Offset offset,
+  gfx::RectF HitTestTextPosition(text::OffsetDelta offset,
                                  float baseline) const final;
   DISALLOW_COPY_AND_ASSIGN(InlineFillerBox);
 };
@@ -141,19 +141,19 @@ class InlineMarkerBox final : public InlineBox, public WithFont {
                   float left,
                   float width,
                   float height,
-                  text::Offset start,
-                  text::Offset end,
+                  text::OffsetDelta start,
+                  text::OffsetDelta end,
                   TextMarker marker_name);
   virtual ~InlineMarkerBox();
 
   TextMarker marker_name() const { return marker_name_; }
 
  private:
-  static text::Offset ComputeEndOffset(text::Offset offset,
-                                       TextMarker marker_name);
+  static text::OffsetDelta ComputeEndOffset(text::OffsetDelta offset,
+                                            TextMarker marker_name);
 
   // InlineBox
-  gfx::RectF HitTestTextPosition(text::Offset offset,
+  gfx::RectF HitTestTextPosition(text::OffsetDelta offset,
                                  float baseline) const final;
 
   const TextMarker marker_name_;
@@ -176,14 +176,14 @@ class InlineTextBoxBase : public InlineBox, public WithFont {
                     float left,
                     float width,
                     float height,
-                    text::Offset start,
-                    text::Offset end,
+                    text::OffsetDelta start,
+                    text::OffsetDelta end,
                     const base::string16& characters);
   ~InlineTextBoxBase() override;
 
  private:
   // InlineBox
-  text::Offset HitTestPoint(float x) const override;
+  text::OffsetDelta HitTestPoint(float x) const override;
 
   const base::string16 characters_;
 
@@ -202,13 +202,13 @@ class InlineTextBox final : public InlineTextBoxBase {
                 float left,
                 float width,
                 float height,
-                text::Offset start,
+                text::OffsetDelta start,
                 const base::string16& characters);
   ~InlineTextBox() final;
 
  private:
   // InlineBox
-  gfx::RectF HitTestTextPosition(text::Offset position,
+  gfx::RectF HitTestTextPosition(text::OffsetDelta position,
                                  float baseline) const final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineTextBox);
@@ -226,14 +226,14 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
                    float left,
                    float width,
                    float height,
-                   text::Offset start,
+                   text::OffsetDelta start,
                    const base::string16& characters);
   ~InlineUnicodeBox() final;
 
  private:
   // InlineBox
-  text::Offset HitTestPoint(float x) const override;
-  gfx::RectF HitTestTextPosition(text::Offset offset,
+  text::OffsetDelta HitTestPoint(float x) const override;
+  gfx::RectF HitTestTextPosition(text::OffsetDelta offset,
                                  float baseline) const final;
 
   DISALLOW_COPY_AND_ASSIGN(InlineUnicodeBox);

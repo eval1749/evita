@@ -64,7 +64,7 @@ text::Offset RootInlineBox::HitTestPoint(float point_x) const {
   if (it == boxes_.end())
     return text_end() - text::OffsetDelta(1);
   const auto box = it == boxes_.begin() ? *it : *std::prev(it);
-  return box->HitTestPoint(point_x - box->left());
+  return text_start_ + box->HitTestPoint(point_x - box->left());
 }
 
 gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
@@ -72,19 +72,20 @@ gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
   DCHECK(!boxes_.empty());
   if (offset < text_start_ || offset >= text_end_)
     return gfx::RectF();
+  const auto offset_in_line = offset - text_start_;
   // Search box after filler box
   const auto& first = std::next(boxes_.begin());
   const auto& it =
-      std::lower_bound(first, boxes_.end(), offset,
-                       [](const InlineBox* box, text::Offset value) {
+      std::lower_bound(first, boxes_.end(), offset_in_line,
+                       [](const InlineBox* box, text::OffsetDelta value) {
                          return box->start() < value;
                        });
   if (it == boxes_.end())
     return gfx::RectF();
   const auto baseline = bounds_.height() - descent_;
   const auto box =
-      it == first || (*it)->start() == offset ? *it : *std::prev(it);
-  const auto& rect = box->HitTestTextPosition(offset, baseline);
+      it == first || (*it)->start() == offset_in_line ? *it : *std::prev(it);
+  const auto& rect = box->HitTestTextPosition(offset_in_line, baseline);
   if (rect.empty())
     return rect;
   const auto box_origin = origin() + gfx::SizeF(box->left(), 0.0f);

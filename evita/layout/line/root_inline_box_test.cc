@@ -31,7 +31,7 @@ class LineBuilder final {
   float ascent() const { return ::ceil(ascent_); }
   const std::vector<InlineBox*> boxes() const { return boxes_; }
   float descent() const { return ::ceil(descent_); }
-  text::Offset text_end() const { return offset_; }
+  text::Offset text_end() const { return start_ + offset_; }
   text::Offset text_start() const { return start_; }
 
   void AddCodeUnit(const base::char16 code_unit);
@@ -47,7 +47,7 @@ class LineBuilder final {
   std::vector<InlineBox*> boxes_;
   float descent_ = 0;
   float left_ = 0;
-  text::Offset offset_;
+  text::OffsetDelta offset_;
   text::Offset start_;
   const RenderStyle& style_;
 
@@ -55,8 +55,9 @@ class LineBuilder final {
 };
 
 LineBuilder::LineBuilder(text::Offset start, const RenderStyle& style)
-    : offset_(start), style_(style), start_(start) {
-  AddBoxInternal(new InlineFillerBox(style_, 0, kLeadingWidth, 10, start));
+    : style_(style), start_(start) {
+  AddBoxInternal(
+      new InlineFillerBox(style_, 0, kLeadingWidth, 10, text::OffsetDelta(0)));
 }
 
 void LineBuilder::AddBoxInternal(InlineBox* box) {

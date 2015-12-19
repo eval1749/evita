@@ -27,8 +27,8 @@ InlineBox::InlineBox(const RenderStyle& style,
                      float left,
                      float width,
                      float height,
-                     text::Offset start,
-                     text::Offset end,
+                     text::OffsetDelta start,
+                     text::OffsetDelta end,
                      float descent)
     : descent_(descent),
       end_(end),
@@ -45,7 +45,7 @@ InlineBox::InlineBox(const RenderStyle& style,
 
 InlineBox::~InlineBox() {}
 
-text::Offset InlineBox::HitTestPoint(float point_x) const {
+text::OffsetDelta InlineBox::HitTestPoint(float point_x) const {
   return point_x >= width() ? end() : start();
 }
 
@@ -57,7 +57,7 @@ InlineFillerBox::InlineFillerBox(const RenderStyle& style,
                                  float left,
                                  float width,
                                  float height,
-                                 text::Offset start)
+                                 text::OffsetDelta start)
     : InlineBox(style,
                 left,
                 width,
@@ -68,7 +68,7 @@ InlineFillerBox::InlineFillerBox(const RenderStyle& style,
 
 InlineFillerBox::~InlineFillerBox() {}
 
-gfx::RectF InlineFillerBox::HitTestTextPosition(text::Offset offset,
+gfx::RectF InlineFillerBox::HitTestTextPosition(text::OffsetDelta offset,
                                                 float baseline) const {
   return gfx::RectF();
 }
@@ -88,8 +88,8 @@ InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
                                  float left,
                                  float width,
                                  float height,
-                                 text::Offset start,
-                                 text::Offset end,
+                                 text::OffsetDelta start,
+                                 text::OffsetDelta end,
                                  TextMarker marker_name)
     : InlineBox(style, left, width, height, start, end, style.font().descent()),
       WithFont(style.font()),
@@ -98,7 +98,7 @@ InlineMarkerBox::InlineMarkerBox(const RenderStyle& style,
 InlineMarkerBox::~InlineMarkerBox() {}
 
 // InlineBox
-gfx::RectF InlineMarkerBox::HitTestTextPosition(text::Offset offset,
+gfx::RectF InlineMarkerBox::HitTestTextPosition(text::OffsetDelta offset,
                                                 float baseline) const {
   if (offset < start() || offset >= end())
     return gfx::RectF();
@@ -114,8 +114,8 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
                                      float left,
                                      float width,
                                      float height,
-                                     text::Offset start,
-                                     text::Offset end,
+                                     text::OffsetDelta start,
+                                     text::OffsetDelta end,
                                      const base::string16& characters)
     : InlineBox(style, left, width, height, start, end, style.font().descent()),
       WithFont(style.font()),
@@ -124,7 +124,7 @@ InlineTextBoxBase::InlineTextBoxBase(const RenderStyle& style,
 InlineTextBoxBase::~InlineTextBoxBase() {}
 
 // InlineBox
-text::Offset InlineTextBoxBase::HitTestPoint(float x) const {
+text::OffsetDelta InlineTextBoxBase::HitTestPoint(float x) const {
   if (x >= width())
     return end();
   for (auto k = 1u; k <= characters_.length(); ++k) {
@@ -143,7 +143,7 @@ InlineTextBox::InlineTextBox(const RenderStyle& style,
                              float left,
                              float width,
                              float height,
-                             text::Offset start,
+                             text::OffsetDelta start,
                              const base::string16& characters)
     : InlineTextBoxBase(style,
                         left,
@@ -158,7 +158,7 @@ InlineTextBox::~InlineTextBox() {}
 // Returns bounds rectangle of caret at |offset|. Caret is placed before
 // character at |offset|. So, height of caret is height of character before
 // |offset|.
-gfx::RectF InlineTextBox::HitTestTextPosition(text::Offset offset,
+gfx::RectF InlineTextBox::HitTestTextPosition(text::OffsetDelta offset,
                                               float baseline) const {
   if (offset < start() || offset > end())
     return gfx::RectF();
@@ -179,7 +179,7 @@ InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
                                    float left,
                                    float width,
                                    float height,
-                                   text::Offset start,
+                                   text::OffsetDelta start,
                                    const base::string16& characters)
     : InlineTextBoxBase(style,
                         left,
@@ -192,13 +192,13 @@ InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
 InlineUnicodeBox::~InlineUnicodeBox() {}
 
 // InlineBox
-text::Offset InlineUnicodeBox::HitTestPoint(float point_x) const {
+text::OffsetDelta InlineUnicodeBox::HitTestPoint(float point_x) const {
   if (point_x >= width())
     return end();
   return start();
 }
 
-gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset,
+gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::OffsetDelta offset,
                                                  float baseline) const {
   if (offset < start() || offset >= end())
     return gfx::RectF();

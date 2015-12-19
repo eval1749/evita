@@ -52,8 +52,8 @@ void LineBuilder::AddCodeUnitBox(const RenderStyle& style,
                                  text::Offset offset,
                                  const base::string16& text) {
   AddTextBoxIfNeeded();
-  AddBoxInternal(
-      new InlineUnicodeBox(style, current_x_, width, height, offset, text));
+  AddBoxInternal(new InlineUnicodeBox(style, current_x_, width, height,
+                                      offset - text_start_, text));
 }
 
 void LineBuilder::AddFillerBox(const RenderStyle& style,
@@ -61,7 +61,8 @@ void LineBuilder::AddFillerBox(const RenderStyle& style,
                                float height,
                                text::Offset offset) {
   AddTextBoxIfNeeded();
-  AddBoxInternal(new InlineFillerBox(style, current_x_, width, height, offset));
+  AddBoxInternal(new InlineFillerBox(style, current_x_, width, height,
+                                     offset - text_start_));
 }
 
 void LineBuilder::AddMarkerBox(const RenderStyle& style,
@@ -71,8 +72,9 @@ void LineBuilder::AddMarkerBox(const RenderStyle& style,
                                text::Offset end,
                                TextMarker marker_name) {
   AddTextBoxIfNeeded();
-  AddBoxInternal(new InlineMarkerBox(style, current_x_, width, height, start,
-                                     end, marker_name));
+  AddBoxInternal(new InlineMarkerBox(style, current_x_, width, height,
+                                     start - text_start_, end - text_start_,
+                                     marker_name));
 }
 
 void LineBuilder::AddTextBoxIfNeeded() {
@@ -81,7 +83,7 @@ void LineBuilder::AddTextBoxIfNeeded() {
   DCHECK_GT(pending_text_width_, 0.0f);
   AddBoxInternal(new InlineTextBox(
       style_, current_x_, pending_text_width_, ::ceil(style_.font().height()),
-      current_offset_,
+      current_offset_ - text_start_,
       base::string16(pending_text_.data(), pending_text_.size())));
   pending_text_.clear();
   pending_text_width_ = 0.0f;
@@ -93,10 +95,10 @@ void LineBuilder::AddTextBoxIfNeeded() {
 // o wrapped line: Warp InlineMarkerBox
 scoped_refptr<RootInlineBox> LineBuilder::Build() {
   DCHECK(!boxes_.empty());
-  const auto text_end = boxes_.back()->as<InlineMarkerBox>()->end();
-  return make_scoped_refptr(new RootInlineBox(boxes_, text_start_, text_end,
-                                              AlignHeightToPixel(ascent_),
-                                              AlignHeightToPixel(descent_)));
+  const auto end = boxes_.back()->as<InlineMarkerBox>()->end();
+  return make_scoped_refptr(new RootInlineBox(
+      boxes_, text_start_, text_start_ + end, AlignHeightToPixel(ascent_),
+      AlignHeightToPixel(descent_)));
 }
 
 bool LineBuilder::HasRoomFor(float width) const {

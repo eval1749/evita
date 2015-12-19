@@ -134,4 +134,12 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
             line1->bounds());
 }
 
+TEST_F(TextFormatterTest, FormatLineWrap) {
+  buffer()->InsertBefore(text::Offset(0), L"0123456");
+  const auto& bounds = gfx::RectF(gfx::SizeF(40.0f, 50.0f));
+  TextFormatter formatter1(buffer(), text::Offset(0), bounds, 1.0f);
+  auto line1 = formatter1.FormatLine(text::Offset(0));
+  EXPECT_EQ(TextMarker::LineWrap,
+            line1->boxes().back()->as<InlineMarkerBox>()->marker_name());
+}
 }  // namespace layout

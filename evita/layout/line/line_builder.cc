@@ -103,7 +103,7 @@ scoped_refptr<RootInlineBox> LineBuilder::Build() {
 
 bool LineBuilder::HasRoomFor(float width) const {
   DCHECK(!boxes_.empty());
-  if (boxes_.size() == 1)
+  if (boxes_.size() == 1 && pending_text_.empty())
     return true;
   const auto marker_width = ::ceil(style_.font().GetCharWidth('M'));
   return current_x_ + pending_text_width_ + width + marker_width < line_width_;

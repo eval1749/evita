@@ -29,7 +29,7 @@ BlockFlow::BlockFlow(text::Buffer* text_buffer)
       dirty_line_point_(true),
       format_counter_(0),
       lines_height_(0),
-      need_format_(false),
+      needs_format_(false),
       text_buffer_(text_buffer),
       text_line_cache_(new RootInlineBoxCache(text_buffer)),
       view_start_(0),
@@ -215,7 +215,7 @@ void BlockFlow::Format(text::Offset text_offset) {
   lines_height_ = 0;
   dirty_ = false;
   dirty_line_point_ = false;
-  need_format_ = false;
+  needs_format_ = false;
 
   auto const line_start = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, line_start, bounds_, zoom_);
@@ -348,7 +348,7 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
 bool BlockFlow::NeedsFormat() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!text_line_cache_->IsDirty(bounds_, zoom_));
-  if (need_format_)
+  if (needs_format_)
     return true;
   if (!dirty_)
     return false;
@@ -500,7 +500,7 @@ void BlockFlow::SetBounds(const gfx::RectF& new_bounds) {
     return;
   bounds_ = new_bounds;
   dirty_ = true;
-  need_format_ = true;
+  needs_format_ = true;
 }
 
 void BlockFlow::SetZoom(float new_zoom) {
@@ -509,7 +509,7 @@ void BlockFlow::SetZoom(float new_zoom) {
     return;
   zoom_ = new_zoom;
   dirty_ = true;
-  need_format_ = true;
+  needs_format_ = true;
 }
 
 bool BlockFlow::ShouldFormat() const {

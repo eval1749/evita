@@ -96,7 +96,7 @@ class BlockFlow final {
   float lines_height_;
 
   // True if we need to format all lines.
-  bool need_format_;
+  bool needs_format_;
   text::Buffer* const text_buffer_;
   std::unique_ptr<RootInlineBoxCache> text_line_cache_;
   text::Offset view_start_;

@@ -57,6 +57,10 @@ text::Offset TextView::text_start() const {
   return block_->text_start();
 }
 
+text::Offset TextView::ComputeVisibleEnd() const {
+  return block_->ComputeVisibleEnd();
+}
+
 void TextView::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   block_->DidChangeStyle(offset, length);
@@ -78,10 +82,6 @@ void TextView::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
 
 text::Offset TextView::EndOfLine(text::Offset text_offset) const {
   return block_->EndOfLine(text_offset);
-}
-
-text::Offset TextView::GetVisibleEnd() {
-  return block_->GetVisibleEnd();
 }
 
 void TextView::Format(text::Offset text_offset) {

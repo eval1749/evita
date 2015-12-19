@@ -63,6 +63,18 @@ void BlockFlow::Append(scoped_refptr<RootInlineBox> line) {
   lines_.push_back(std::move(line));
 }
 
+text::Offset BlockFlow::ComputeVisibleEnd() const {
+  UI_ASSERT_DOM_LOCKED();
+  DCHECK(!dirty_);
+  DCHECK(!dirty_line_point_);
+  for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
+    auto const line = *it;
+    if (line->bounds().bottom <= bounds_.bottom)
+      return line->text_end();
+  }
+  return lines_.front()->text_end();
+}
+
 void BlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta) {
   ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
@@ -230,19 +242,6 @@ scoped_refptr<RootInlineBox> BlockFlow::FormatLine(TextFormatter* formatter) {
   return line;
 }
 
-text::Offset BlockFlow::GetVisibleEnd() {
-  UI_ASSERT_DOM_LOCKED();
-  TRACE_EVENT0("view", "BlockFlow::GetVisibleEnd");
-  FormatIfNeeded();
-  DCHECK(!dirty_line_point_);
-  for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
-    auto const line = *it;
-    if (line->bounds().bottom <= bounds_.bottom)
-      return line->text_end();
-  }
-  return lines_.front()->text_end();
-}
-
 text::Offset BlockFlow::HitTestPoint(gfx::PointF block_point) const {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::HitTestPoint");
@@ -297,7 +296,7 @@ bool BlockFlow::IsPositionFullyVisible(text::Offset offset) {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("view", "BlockFlow::IsPositionFullyVisible");
   FormatIfNeeded();
-  return offset >= text_start() && offset < GetVisibleEnd();
+  return offset >= text_start() && offset < ComputeVisibleEnd();
 }
 
 bool BlockFlow::IsShowEndOfDocument() const {

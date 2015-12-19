@@ -258,7 +258,7 @@ void TextWindow::UpdateBounds() {
 void TextWindow::UpdateScrollBar() {
   ui::ScrollBar::Data data;
   data.minimum = 0;
-  data.thumb_size = text_view_->GetVisibleEnd() - text_view_->text_start();
+  data.thumb_size = text_view_->ComputeVisibleEnd() - text_view_->text_start();
   data.thumb_value = text_view_->text_start();
   data.maximum = buffer()->GetEnd() + text::OffsetDelta(1);
   vertical_scroll_bar_->SetData(data);

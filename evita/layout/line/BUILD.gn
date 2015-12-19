@@ -28,6 +28,7 @@ source_set("line") {
 source_set("tests") {
   testonly = true
   sources = [
+    "root_inline_box_cache_test.cc",
     "root_inline_box_test.cc",
   ]
 

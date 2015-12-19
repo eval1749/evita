@@ -52,14 +52,20 @@ void RootInlineBoxCache::DidInsertBefore(text::Offset offset,
 scoped_refptr<RootInlineBox> RootInlineBoxCache::FindLine(
     text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
-  auto it = lines_.lower_bound(offset);
-  if (it == lines_.end())
+  if (lines_.empty())
     return nullptr;
+  const auto& it = lines_.lower_bound(offset);
+  if (it == lines_.end()) {
+    const auto& last = lines_.rbegin()->second;
+    if (offset < last->text_start() || offset >= last->text_end())
+      return nullptr;
+    return last;
+  }
   if (it->first == offset)
     return it->second;
   if (it == lines_.begin())
     return nullptr;
-  auto const line = std::prev(it)->second;
+  const auto& line = std::prev(it)->second;
   if (offset < line->text_start() || offset >= line->text_end())
     return nullptr;
   return line;

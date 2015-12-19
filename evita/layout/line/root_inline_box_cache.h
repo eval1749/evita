@@ -50,6 +50,8 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
   gfx::RectF bounds_;
   const text::Buffer* const buffer_;
   text::Offset dirty_start_;
+  // TODO(eval1749): Since, |RootInlineBox| has |text_end()|, We should use
+  // |std::set<T>|
   std::map<text::Offset, scoped_refptr<RootInlineBox>> lines_;
   float zoom_;
 

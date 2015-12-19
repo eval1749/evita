@@ -88,8 +88,10 @@ gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
   if (rect.empty())
     return rect;
   const auto box_origin = origin() + gfx::SizeF(box->left(), 0.0f);
-  return gfx::RectF(gfx::ToEnclosingRect(
-      gfx::RectF(rect.origin() + box_origin, rect.size())));
+  const auto caret_origin = rect.origin() + box_origin;
+  return gfx::RectF(
+      gfx::PointF(::floor(caret_origin.x), ::floor(caret_origin.y)),
+      rect.size());
 }
 
 bool RootInlineBox::IsEndOfDocument() const {

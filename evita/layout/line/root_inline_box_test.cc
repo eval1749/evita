@@ -87,6 +87,12 @@ void LineBuilder::AddText(const base::string16& text) {
                                    style_.font().height(), offset_, text));
 }
 
+gfx::RectF CaretBoundsOf(int origin_x, int origin_y, int height) {
+  return gfx::RectF(
+      gfx::PointF(static_cast<float>(origin_x), static_cast<float>(origin_y)),
+      gfx::SizeF(1.0f, static_cast<float>(height)));
+}
+
 RenderStyle CreateStyle() {
   css::Style css_style;
   css_style.set_bgcolor(css::Color());
@@ -204,26 +210,24 @@ TEST_F(RootInlineBoxTest, HitTestTextPosition) {
                         line.ascent(), line.descent()));
   const auto& origin = gfx::PointF(100.0f, 200.0f);
   root_box->set_origin(origin);
-  const auto height = root_box->height();
-  const auto& size = gfx::SizeF(1.0f, height);
   EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(90)))
       << "If RootInlineBox contains specified offset, HitTestTextPosition "
          "returns empty rectangle";
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {}), size),
+  EXPECT_EQ(CaretBoundsOf(110, 200, 15),
             root_box->HitTestTextPosition(text::Offset(100)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"f"}), size),
+  EXPECT_EQ(CaretBoundsOf(118, 200, 15),
             root_box->HitTestTextPosition(text::Offset(101)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"fo"}), size),
+  EXPECT_EQ(CaretBoundsOf(125, 200, 15),
             root_box->HitTestTextPosition(text::Offset(102)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo"}), size),
+  EXPECT_EQ(CaretBoundsOf(132, 200, 15),
             root_box->HitTestTextPosition(text::Offset(103)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo", L"b"}), size),
+  EXPECT_EQ(CaretBoundsOf(140, 200, 15),
             root_box->HitTestTextPosition(text::Offset(104)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo", L"ba"}), size),
+  EXPECT_EQ(CaretBoundsOf(147, 200, 15),
             root_box->HitTestTextPosition(text::Offset(105)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo", L"bar", L"b"}), size),
+  EXPECT_EQ(CaretBoundsOf(162, 200, 15),
             root_box->HitTestTextPosition(text::Offset(107)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"foo", L"bar", L"baz"}), size),
+  EXPECT_EQ(CaretBoundsOf(176, 200, 15),
             root_box->HitTestTextPosition(text::Offset(109)));
   EXPECT_EQ(gfx::RectF(), root_box->HitTestTextPosition(text::Offset(110)))
       << "root_box contains 100 to 109.";
@@ -239,17 +243,12 @@ TEST_F(RootInlineBoxTest, HitTestTextPositionCodeUnit) {
       new RootInlineBox(line.boxes(), line.text_start(), line.text_end(),
                         line.ascent(), line.descent()));
   root_box->set_origin(gfx::PointF(10.0f, 20.0f));
-  const auto height = root_box->height();
-  const auto& size = gfx::SizeF(1.0f, height);
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {}) + gfx::SizeF(0.0f, 4.0f),
-                       gfx::SizeF(1.0f, 16.0f)),
+  EXPECT_EQ(CaretBoundsOf(20, 24, 15),
             root_box->HitTestTextPosition(text::Offset(100)));
-  EXPECT_EQ(gfx::RectF(PointFor(*root_box, {L"a"}), size),
+  EXPECT_EQ(CaretBoundsOf(28, 20, 19),
             root_box->HitTestTextPosition(text::Offset(101)));
-  EXPECT_EQ(
-      gfx::RectF(PointFor(*root_box, {L"a", L"uFFFF"}) + gfx::SizeF(0.0f, 4.0f),
-                 gfx::SizeF(1.0f, 16.0f)),
-      root_box->HitTestTextPosition(text::Offset(102)));
+  EXPECT_EQ(CaretBoundsOf(64, 24, 15),
+            root_box->HitTestTextPosition(text::Offset(102)));
 }
 
 }  // namespace layout

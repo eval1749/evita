@@ -54,7 +54,7 @@ class BlockFlow final {
   bool FormatIfNeeded();
   text::Offset HitTestPoint(gfx::PointF point) const;
   gfx::RectF HitTestTextPosition(text::Offset text_offset) const;
-  bool IsPositionFullyVisible(text::Offset text_offset);
+  bool IsFullyVisibleTextPosition(text::Offset text_offset) const;
   text::Offset MapPointXToOffset(text::Offset text_offset, float point_x);
   // Returns true if we need to format all lines.
   bool NeedsFormat() const;

@@ -292,10 +292,9 @@ void BlockFlow::InvalidateLines(text::Offset offset) {
   dirty_ = true;
 }
 
-bool BlockFlow::IsPositionFullyVisible(text::Offset offset) {
+bool BlockFlow::IsFullyVisibleTextPosition(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
-  TRACE_EVENT0("view", "BlockFlow::IsPositionFullyVisible");
-  FormatIfNeeded();
+  DCHECK(dirty_);
   return offset >= text_start() && offset < ComputeVisibleEnd();
 }
 
@@ -377,7 +376,7 @@ bool BlockFlow::ScrollToPosition(text::Offset offset) {
   TRACE_EVENT0("views", "BlockFlow::ScrollToPosition");
   FormatIfNeeded();
 
-  if (IsPositionFullyVisible(offset))
+  if (IsFullyVisibleTextPosition(offset))
     return false;
 
   const auto scrollable = bounds_.height() / 2;
@@ -388,7 +387,7 @@ bool BlockFlow::ScrollToPosition(text::Offset offset) {
       const auto scroll_height = lines_.front()->height();
       if (!ScrollUp())
         return scrolled > 0.0f;
-      if (IsPositionFullyVisible(offset))
+      if (IsFullyVisibleTextPosition(offset))
         return true;
       scrolled += scroll_height;
     }
@@ -398,7 +397,7 @@ bool BlockFlow::ScrollToPosition(text::Offset offset) {
       auto const scroll_height = lines_.back()->height();
       if (!ScrollDown())
         return scrolled > 0.0f;
-      if (IsPositionFullyVisible(offset))
+      if (IsFullyVisibleTextPosition(offset))
         return true;
       scrolled += scroll_height;
     }
@@ -407,7 +406,7 @@ bool BlockFlow::ScrollToPosition(text::Offset offset) {
   Format(offset);
   // When start of line is very far from |offset|, |offset| is below view port.
   // We scroll up until |offset| is in view port.
-  while (!IsPositionFullyVisible(offset)) {
+  while (!IsFullyVisibleTextPosition(offset)) {
     if (!ScrollUp())
       return true;
   }
@@ -416,7 +415,7 @@ bool BlockFlow::ScrollToPosition(text::Offset offset) {
   // possible to fit in page.
   auto const buffer_end = text_buffer_->GetEnd();
   if (text_end() >= buffer_end) {
-    while (IsPositionFullyVisible(buffer_end)) {
+    while (IsFullyVisibleTextPosition(buffer_end)) {
       if (!ScrollDown())
         return true;
     }

@@ -170,7 +170,7 @@ void TextView::Update(const TextSelectionModel& selection_model,
     }
   } else if (caret_offset_ != new_caret_offset) {
     caret_offset_ = new_caret_offset;
-    if (!block_->IsPositionFullyVisible(new_caret_offset))
+    if (!block_->IsFullyVisibleTextPosition(new_caret_offset))
       ScrollToPosition(new_caret_offset);
   }
 

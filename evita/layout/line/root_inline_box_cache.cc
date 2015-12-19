@@ -119,8 +119,10 @@ bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds, float zoom) const {
 
 bool RootInlineBoxCache::IsEndWithNewline(
     const RootInlineBox* text_line) const {
-  auto const end = text_line->text_end();
-  return end >= buffer_->GetEnd() || buffer_->GetCharAt(end) == '\n';
+  const auto end = text_line->text_end();
+  if (end >= buffer_->GetEnd())
+    return true;
+  return buffer_->GetCharAt(end - text::OffsetDelta(1)) == '\n';
 }
 
 void RootInlineBoxCache::Register(scoped_refptr<RootInlineBox> line) {

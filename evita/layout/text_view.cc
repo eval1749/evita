@@ -99,10 +99,6 @@ gfx::RectF TextView::HitTestTextPosition(text::Offset text_offset) const {
   return block_->HitTestTextPosition(text_offset);
 }
 
-bool TextView::IsPositionFullyVisible(text::Offset offset) const {
-  return block_->IsPositionFullyVisible(offset);
-}
-
 void TextView::MakeSelectionVisible() {
   // |UpdateAndPaint()| will format text view to place caret at selection
   // focus offset.
@@ -172,7 +168,7 @@ void TextView::Update(const TextSelectionModel& selection_model,
     }
   } else if (caret_offset_ != new_caret_offset) {
     caret_offset_ = new_caret_offset;
-    if (!IsPositionFullyVisible(new_caret_offset))
+    if (!block_->IsPositionFullyVisible(new_caret_offset))
       ScrollToPosition(new_caret_offset);
   }
 

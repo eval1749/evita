@@ -76,7 +76,6 @@ class TextView final : private gfx::CanvasObserver {
   void Update(const TextSelectionModel& selection, base::Time now);
 
  private:
-  bool IsPositionFullyVisible(text::Offset text_offset) const;
   void ScrollToPosition(text::Offset offset);
 
   // gfx::CanvasObserver

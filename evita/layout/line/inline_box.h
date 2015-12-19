@@ -58,7 +58,6 @@ class InlineBox : public common::Castable {
   float width() const { return width_; }
 
   virtual void Accept(InlineBoxVisitor* visitor) = 0;
-  bool HasText() const { return start_ < end_; }
 
   // Returns text offset at |point_x| in box local coordinate, or |start()|
   // for negative |point_x|, or |end()| for |point_x| grater than or equal to

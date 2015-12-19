@@ -39,16 +39,40 @@ LineBuilder::LineBuilder(const RenderStyle& style,
 
 LineBuilder::~LineBuilder() {}
 
-void LineBuilder::AddBox(InlineBox* box) {
-  AddTextBoxIfNeeded();
-  AddBoxInternal(box);
-}
-
 void LineBuilder::AddBoxInternal(InlineBox* box) {
   boxes_.push_back(box);
   current_x_ += box->width();
   ascent_ = std::max(box->height() - box->descent(), ascent_);
   descent_ = std::max(box->descent(), descent_);
+}
+
+void LineBuilder::AddCodeUnitBox(const RenderStyle& style,
+                                 float width,
+                                 float height,
+                                 text::Offset offset,
+                                 const base::string16& text) {
+  AddTextBoxIfNeeded();
+  AddBoxInternal(
+      new InlineUnicodeBox(style, current_x_, width, height, offset, text));
+}
+
+void LineBuilder::AddFillerBox(const RenderStyle& style,
+                               float width,
+                               float height,
+                               text::Offset offset) {
+  AddTextBoxIfNeeded();
+  AddBoxInternal(new InlineFillerBox(style, current_x_, width, height, offset));
+}
+
+void LineBuilder::AddMarkerBox(const RenderStyle& style,
+                               float width,
+                               float height,
+                               text::Offset start,
+                               text::Offset end,
+                               TextMarker marker_name) {
+  AddTextBoxIfNeeded();
+  AddBoxInternal(new InlineMarkerBox(style, current_x_, width, height, start,
+                                     end, marker_name));
 }
 
 void LineBuilder::AddTextBoxIfNeeded() {

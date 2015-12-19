@@ -18,6 +18,7 @@ namespace layout {
 class InlineBox;
 class RenderStyle;
 class RootInlineBox;
+enum class TextMarker;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -32,7 +33,21 @@ class LineBuilder final {
 
   float current_x() const { return current_x_; }
 
-  void AddBox(InlineBox* inline_box);
+  void AddCodeUnitBox(const RenderStyle& style,
+                      float width,
+                      float height,
+                      text::Offset offset,
+                      const base::string16& text);
+  void AddFillerBox(const RenderStyle& style,
+                    float width,
+                    float height,
+                    text::Offset offset);
+  void AddMarkerBox(const RenderStyle& style,
+                    float width,
+                    float height,
+                    text::Offset start,
+                    text::Offset end,
+                    TextMarker marker_name);
   void AddTextBoxIfNeeded();
   scoped_refptr<RootInlineBox> Build();
   bool HasRoomFor(float width) const;

@@ -18,6 +18,8 @@
 #include "evita/text/interval.h"
 #include "evita/text/marker.h"
 #include "evita/text/marker_set.h"
+// TODO(eval1749): We should have "evita/layout/public/text_marker.h" to avoid
+// include "inline_box.h" in "text_formatter.cc".
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/line_builder.h"
 #include "evita/layout/line/root_inline_box.h"
@@ -217,9 +219,8 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
 
   LineBuilder line_builder(default_render_style_, text_scanner_->text_offset(),
                            bounds_.width());
-  line_builder.AddBox(new InlineFillerBox(default_render_style_, 0, kLeftMargin,
-                                          kMinHeight,
-                                          text_scanner_->text_offset()));
+  line_builder.AddFillerBox(default_render_style_, kLeftMargin, kMinHeight,
+                            text_scanner_->text_offset());
   for (;;) {
     if (text_scanner_->AtEnd()) {
       FormatMarker(&line_builder, TextMarker::EndOfDocument,
@@ -246,7 +247,6 @@ scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
 
 bool TextFormatter::FormatChar(LineBuilder* line_builder,
                                base::char16 char_code) {
-  const auto current_x = line_builder->current_x();
   const auto offset = text_scanner_->text_offset();
   auto style = text_scanner_->GetStyle();
 
@@ -272,14 +272,15 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
     const auto font = FontSet::GetFont(style, 'x');
     const auto widthTab =
         AlignWidthToPixel(font->GetCharWidth(' ')) * kTabWidth;
+    const auto current_x = line_builder->current_x();
     const auto x2 = (current_x + widthTab - kLeftMargin) / widthTab * widthTab;
     const auto width = (x2 + kLeftMargin) - current_x;
     if (!line_builder->HasRoomFor(width))
       return false;
     const auto height = AlignHeightToPixel(font->height());
-    line_builder->AddBox(new InlineMarkerBox(
-        MakeRenderStyle(style, *font), current_x, width, height, offset,
-        offset + text::OffsetDelta(1), TextMarker::Tab));
+    line_builder->AddMarkerBox(MakeRenderStyle(style, *font), width, height,
+                               offset, offset + text::OffsetDelta(1),
+                               TextMarker::Tab);
     return true;
   }
 
@@ -307,9 +308,8 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
     if (!line_builder->HasRoomFor(width))
       return false;
     const auto height = AlignHeightToPixel(font2->height()) + 4;
-    line_builder->AddBox(new InlineUnicodeBox(MakeRenderStyle(style, *font2),
-                                              current_x, width, height, offset,
-                                              string));
+    line_builder->AddCodeUnitBox(MakeRenderStyle(style, *font2), width, height,
+                                 offset, string);
     return true;
   }
 
@@ -320,7 +320,6 @@ bool TextFormatter::FormatChar(LineBuilder* line_builder,
 void TextFormatter::FormatMarker(LineBuilder* line_builder,
                                  TextMarker marker_name,
                                  text::OffsetDelta length) {
-  line_builder->AddTextBoxIfNeeded();
   auto style = text_scanner_->GetStyle();
   style.Merge(
       text_scanner_->style_resolver()->Resolve(css::StyleSelector::defaults()));
@@ -331,10 +330,10 @@ void TextFormatter::FormatMarker(LineBuilder* line_builder,
   const auto font = FontSet::GetFont(style, 'x');
   const auto width = AlignWidthToPixel(font->GetCharWidth('x'));
   const auto height = AlignHeightToPixel(font->height());
-  line_builder->AddBox(new InlineMarkerBox(
-      MakeRenderStyle(style, *font), line_builder->current_x(), width, height,
-      text_scanner_->text_offset(), text_scanner_->text_offset() + length,
-      marker_name));
+  line_builder->AddMarkerBox(MakeRenderStyle(style, *font), width, height,
+                             text_scanner_->text_offset(),
+                             text_scanner_->text_offset() + length,
+                             marker_name);
 }
 
 // TODO(eval1749): We should move |TextFormatter::FormatSelection()| somewhere

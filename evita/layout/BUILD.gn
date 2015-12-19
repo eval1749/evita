@@ -34,6 +34,7 @@ source_set("layout") {
 
 test("evita_layout_tests") {
   sources = [
+    "block_flow_test.cc",
     "text_formatter_test.cc",
   ]
 

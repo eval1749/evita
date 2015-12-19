@@ -243,16 +243,18 @@ gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
   TRACE_EVENT0("views", "BlockFlow::HitTestTextPosition");
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
-  if (offset < lines_.front()->text_start() ||
-      offset > lines_.back()->text_end()) {
-    return gfx::RectF();
-  }
-  for (const auto& line : lines_) {
-    auto const rect = line->HitTestTextPosition(offset);
-    if (!rect.empty())
-      return rect;
-  }
-  return gfx::RectF();
+  // Get line after |offset|.
+  const auto& it = std::lower_bound(
+      lines_.begin(), lines_.end(), offset,
+      [](const scoped_refptr<RootInlineBox>& box, text::Offset value) {
+        return box->text_start() < value;
+      });
+  if (it == lines_.begin())
+    return lines_.front()->HitTestTextPosition(offset);
+  if (it == lines_.end())
+    return lines_.back()->HitTestTextPosition(offset);
+  const auto& line = (*it)->text_start() == offset ? *it : *std::prev(it);
+  return line->HitTestTextPosition(offset);
 }
 
 void BlockFlow::InvalidateCache() {

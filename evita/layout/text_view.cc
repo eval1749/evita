@@ -71,11 +71,13 @@ text::Offset TextView::EndOfLine(text::Offset text_offset) const {
 }
 
 text::Offset TextView::GetEnd() {
-  return block_->GetEnd();
+  FormatIfNeeded();
+  return block_->text_end();
 }
 
 text::Offset TextView::GetStart() {
-  return block_->GetStart();
+  FormatIfNeeded();
+  return block_->text_start();
 }
 
 text::Offset TextView::GetVisibleEnd() {

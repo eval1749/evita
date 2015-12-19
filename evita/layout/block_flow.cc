@@ -37,6 +37,16 @@ BlockFlow::BlockFlow(text::Buffer* text_buffer)
 
 BlockFlow::~BlockFlow() {}
 
+text::Offset BlockFlow::text_end() const {
+  UI_ASSERT_DOM_LOCKED();
+  return lines_.back()->text_end();
+}
+
+text::Offset BlockFlow::text_start() const {
+  UI_ASSERT_DOM_LOCKED();
+  return lines_.front()->text_start();
+}
+
 void BlockFlow::Append(scoped_refptr<RootInlineBox> line) {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty()) {
@@ -220,18 +230,6 @@ scoped_refptr<RootInlineBox> BlockFlow::FormatLine(TextFormatter* formatter) {
   return line;
 }
 
-text::Offset BlockFlow::GetEnd() {
-  UI_ASSERT_DOM_LOCKED();
-  FormatIfNeeded();
-  return lines_.back()->text_end();
-}
-
-text::Offset BlockFlow::GetStart() {
-  UI_ASSERT_DOM_LOCKED();
-  FormatIfNeeded();
-  return lines_.front()->text_start();
-}
-
 text::Offset BlockFlow::GetVisibleEnd() {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("view", "BlockFlow::GetVisibleEnd");
@@ -299,7 +297,7 @@ bool BlockFlow::IsPositionFullyVisible(text::Offset offset) {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("view", "BlockFlow::IsPositionFullyVisible");
   FormatIfNeeded();
-  return offset >= GetStart() && offset < GetVisibleEnd();
+  return offset >= text_start() && offset < GetVisibleEnd();
 }
 
 bool BlockFlow::IsShowEndOfDocument() const {
@@ -385,7 +383,7 @@ bool BlockFlow::ScrollToPosition(text::Offset offset) {
 
   const auto scrollable = bounds_.height() / 2;
 
-  if (offset > GetStart()) {
+  if (offset > text_start()) {
     auto scrolled = 0.0f;
     while (scrolled < scrollable) {
       const auto scroll_height = lines_.front()->height();
@@ -418,7 +416,7 @@ bool BlockFlow::ScrollToPosition(text::Offset offset) {
   // If this page shows end of buffer, we shows lines as much as
   // possible to fit in page.
   auto const buffer_end = text_buffer_->GetEnd();
-  if (GetEnd() >= buffer_end) {
+  if (text_end() >= buffer_end) {
     while (IsPositionFullyVisible(buffer_end)) {
       if (!ScrollDown())
         return true;

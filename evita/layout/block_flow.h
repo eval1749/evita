@@ -40,6 +40,8 @@ class BlockFlow final {
   }
   gfx::PointF origin() const { return bounds_.origin(); }
   const text::Buffer& text_buffer() const { return *text_buffer_; }
+  text::Offset text_end() const;
+  text::Offset text_start() const;
 
   void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
   void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
@@ -49,8 +51,6 @@ class BlockFlow final {
   void Format(text::Offset text_offset);
   // Returns true if text format is taken place.
   bool FormatIfNeeded();
-  text::Offset GetEnd();
-  text::Offset GetStart();
   text::Offset GetVisibleEnd();
   text::Offset HitTestPoint(gfx::PointF point) const;
   gfx::RectF HitTestTextPosition(text::Offset text_offset) const;

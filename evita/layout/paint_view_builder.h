@@ -29,8 +29,8 @@ class AnimatableWindow;
 
 namespace layout {
 
+class BlockFlow;
 class RenderStyle;
-class LayoutBlockFlow;
 class TextSelectionModel;
 
 //////////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ class TextSelectionModel;
 //
 class PaintViewBuilder final {
  public:
-  explicit PaintViewBuilder(const LayoutBlockFlow& layout_block_flow,
+  explicit PaintViewBuilder(const BlockFlow& block,
                             ui::AnimatableWindow* caret_owner);
   ~PaintViewBuilder();
 
@@ -61,7 +61,7 @@ class PaintViewBuilder final {
   void StopCaretTimer();
 
   gfx::RectF bounds_;
-  const LayoutBlockFlow& block_;
+  const BlockFlow& block_;
   gfx::RectF caret_bounds_;
   ui::AnimatableWindow* const caret_owner_;
   paint::CaretState caret_state_;

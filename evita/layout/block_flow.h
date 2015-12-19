@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_LAYOUT_LAYOUT_BLOCK_FLOW_H_
-#define EVITA_LAYOUT_LAYOUT_BLOCK_FLOW_H_
+#ifndef EVITA_LAYOUT_BLOCK_FLOW_H_
+#define EVITA_LAYOUT_BLOCK_FLOW_H_
 
 #include <list>
 #include <memory>
@@ -25,12 +25,12 @@ class RootInlineBoxCache;
 
 //////////////////////////////////////////////////////////////////////
 //
-// LayoutBlockFlow
+// BlockFlow
 //
-class LayoutBlockFlow final {
+class BlockFlow final {
  public:
-  explicit LayoutBlockFlow(text::Buffer* buffer);
-  ~LayoutBlockFlow();
+  explicit BlockFlow(text::Buffer* buffer);
+  ~BlockFlow();
 
   const gfx::RectF& bounds() const { return bounds_; }
   bool dirty() const { return dirty_; }
@@ -55,11 +55,11 @@ class LayoutBlockFlow final {
   gfx::RectF HitTestTextPosition(text::Offset text_offset) const;
   bool IsPositionFullyVisible(text::Offset text_offset);
   text::Offset MapPointXToOffset(text::Offset text_offset, float point_x);
-  // Returns true if this |LayoutBlockFlow| is modified.
+  // Returns true if this |BlockFlow| is modified.
   bool ScrollDown();
-  // Returns true if this |LayoutBlockFlow| is modified.
+  // Returns true if this |BlockFlow| is modified.
   bool ScrollToPosition(text::Offset offset);
-  // Returns true if this |LayoutBlockFlow| is modified.
+  // Returns true if this |BlockFlow| is modified.
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
@@ -97,9 +97,9 @@ class LayoutBlockFlow final {
   text::Offset view_start_;
   float zoom_;
 
-  DISALLOW_COPY_AND_ASSIGN(LayoutBlockFlow);
+  DISALLOW_COPY_AND_ASSIGN(BlockFlow);
 };
 
 }  // namespace layout
 
-#endif  // EVITA_LAYOUT_LAYOUT_BLOCK_FLOW_H_
+#endif  // EVITA_LAYOUT_BLOCK_FLOW_H_

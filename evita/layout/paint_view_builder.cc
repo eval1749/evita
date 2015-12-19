@@ -12,7 +12,7 @@
 #include "evita/text/buffer.h"
 #include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/base/ime/text_input_client.h"
-#include "evita/layout/layout_block_flow.h"
+#include "evita/layout/block_flow.h"
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/inline_box_visitor.h"
 #include "evita/layout/line/root_inline_box.h"
@@ -163,7 +163,7 @@ base::TimeDelta GetCaretBlinkInterval() {
 //
 // PaintViewBuilder
 //
-PaintViewBuilder::PaintViewBuilder(const LayoutBlockFlow& block,
+PaintViewBuilder::PaintViewBuilder(const BlockFlow& block,
                                    ui::AnimatableWindow* caret_owner)
     : block_(block),
       caret_owner_(caret_owner),

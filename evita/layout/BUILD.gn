@@ -6,6 +6,8 @@ import("//testing/test.gni")
 
 source_set("layout") {
   sources = [
+    "block_flow.cc",
+    "block_flow.h",
     "line/inline_box.cc",
     "line/inline_box.h",
     "line/inline_box_forward.h",
@@ -25,8 +27,6 @@ source_set("layout") {
     "render_selection.h",
     "render_style.cc",
     "render_style.h",
-    "layout_block_flow.cc",
-    "layout_block_flow.h",
     "text_formatter.cc",
     "text_formatter.h",
     "text_view.cc",

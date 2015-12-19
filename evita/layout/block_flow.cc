@@ -6,7 +6,7 @@
 #include <iterator>
 #include <vector>
 
-#include "evita/layout/layout_block_flow.h"
+#include "evita/layout/block_flow.h"
 
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
@@ -22,9 +22,9 @@ namespace layout {
 
 //////////////////////////////////////////////////////////////////////
 //
-// LayoutBlockFlow
+// BlockFlow
 //
-LayoutBlockFlow::LayoutBlockFlow(text::Buffer* text_buffer)
+BlockFlow::BlockFlow(text::Buffer* text_buffer)
     : dirty_(true),
       dirty_line_point_(true),
       format_counter_(0),
@@ -35,9 +35,9 @@ LayoutBlockFlow::LayoutBlockFlow(text::Buffer* text_buffer)
       view_start_(0),
       zoom_(1.0f) {}
 
-LayoutBlockFlow::~LayoutBlockFlow() {}
+BlockFlow::~BlockFlow() {}
 
-void LayoutBlockFlow::Append(scoped_refptr<RootInlineBox> line) {
+void BlockFlow::Append(scoped_refptr<RootInlineBox> line) {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty()) {
     DCHECK_EQ(lines_height_, 0.0f);
@@ -53,13 +53,12 @@ void LayoutBlockFlow::Append(scoped_refptr<RootInlineBox> line) {
   lines_.push_back(std::move(line));
 }
 
-void LayoutBlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta) {
+void BlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta) {
   ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
 }
 
-void LayoutBlockFlow::DidDeleteAt(text::Offset offset,
-                                  text::OffsetDelta length) {
+void BlockFlow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
   if (view_start_ <= offset)
@@ -67,8 +66,7 @@ void LayoutBlockFlow::DidDeleteAt(text::Offset offset,
   view_start_ = std::max(view_start_ - length, offset);
 }
 
-void LayoutBlockFlow::DidInsertBefore(text::Offset offset,
-                                      text::OffsetDelta length) {
+void BlockFlow::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   InvalidateLines(offset);
   if (view_start_ <= offset)
@@ -76,7 +74,7 @@ void LayoutBlockFlow::DidInsertBefore(text::Offset offset,
   view_start_ = view_start_ + length;
 }
 
-bool LayoutBlockFlow::DiscardFirstLine() {
+bool BlockFlow::DiscardFirstLine() {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return false;
@@ -88,7 +86,7 @@ bool LayoutBlockFlow::DiscardFirstLine() {
   return true;
 }
 
-bool LayoutBlockFlow::DiscardLastLine() {
+bool BlockFlow::DiscardLastLine() {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return false;
@@ -99,8 +97,8 @@ bool LayoutBlockFlow::DiscardLastLine() {
   return true;
 }
 
-text::Offset LayoutBlockFlow::EndOfLine(text::Offset text_offset) {
-  TRACE_EVENT0("views", "LayoutBlockFlow::EndOfLine");
+text::Offset BlockFlow::EndOfLine(text::Offset text_offset) {
+  TRACE_EVENT0("views", "BlockFlow::EndOfLine");
   UI_ASSERT_DOM_LOCKED();
 
   if (text_offset >= text_buffer_->GetEnd())
@@ -119,7 +117,7 @@ text::Offset LayoutBlockFlow::EndOfLine(text::Offset text_offset) {
   }
 }
 
-void LayoutBlockFlow::EnsureLinePoints() {
+void BlockFlow::EnsureLinePoints() {
   UI_ASSERT_DOM_LOCKED();
   if (!dirty_line_point_)
     return;
@@ -132,9 +130,9 @@ void LayoutBlockFlow::EnsureLinePoints() {
   dirty_line_point_ = false;
 }
 
-void LayoutBlockFlow::Format(text::Offset text_offset) {
+void BlockFlow::Format(text::Offset text_offset) {
   UI_ASSERT_DOM_LOCKED();
-  TRACE_EVENT0("view", "LayoutBlockFlow::Format");
+  TRACE_EVENT0("view", "BlockFlow::Format");
   InvalidateCache();
   lines_.clear();
   lines_height_ = 0;
@@ -153,7 +151,7 @@ void LayoutBlockFlow::Format(text::Offset text_offset) {
     DCHECK_GE(line->text_end(), line->text_start());
 
     if (lines_height_ >= bounds_.height()) {
-      // LayoutBlockFlow is filled up with lines.
+      // BlockFlow is filled up with lines.
       break;
     }
 
@@ -163,7 +161,7 @@ void LayoutBlockFlow::Format(text::Offset text_offset) {
     }
   }
 
-  // Scroll up until we have |text_offset| in this |LayoutBlockFlow|.
+  // Scroll up until we have |text_offset| in this |BlockFlow|.
   while (lines_.back()->text_end() < text_buffer_->GetEnd() &&
          text_offset > lines_.front()->text_end()) {
     DiscardFirstLine();
@@ -174,7 +172,7 @@ void LayoutBlockFlow::Format(text::Offset text_offset) {
   ++format_counter_;
 }
 
-bool LayoutBlockFlow::FormatIfNeeded() {
+bool BlockFlow::FormatIfNeeded() {
   UI_ASSERT_DOM_LOCKED();
   text_line_cache_->Invalidate(bounds_, zoom_);
   if (!NeedFormat()) {
@@ -185,8 +183,7 @@ bool LayoutBlockFlow::FormatIfNeeded() {
   return true;
 }
 
-scoped_refptr<RootInlineBox> LayoutBlockFlow::FormatLine(
-    TextFormatter* formatter) {
+scoped_refptr<RootInlineBox> BlockFlow::FormatLine(TextFormatter* formatter) {
   UI_ASSERT_DOM_LOCKED();
   const auto& cached_line =
       text_line_cache_->FindLine(formatter->text_offset());
@@ -199,21 +196,21 @@ scoped_refptr<RootInlineBox> LayoutBlockFlow::FormatLine(
   return line;
 }
 
-text::Offset LayoutBlockFlow::GetEnd() {
+text::Offset BlockFlow::GetEnd() {
   UI_ASSERT_DOM_LOCKED();
   FormatIfNeeded();
   return lines_.back()->text_end();
 }
 
-text::Offset LayoutBlockFlow::GetStart() {
+text::Offset BlockFlow::GetStart() {
   UI_ASSERT_DOM_LOCKED();
   FormatIfNeeded();
   return lines_.front()->text_start();
 }
 
-text::Offset LayoutBlockFlow::GetVisibleEnd() {
+text::Offset BlockFlow::GetVisibleEnd() {
   UI_ASSERT_DOM_LOCKED();
-  TRACE_EVENT0("view", "LayoutBlockFlow::GetVisibleEnd");
+  TRACE_EVENT0("view", "BlockFlow::GetVisibleEnd");
   FormatIfNeeded();
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
@@ -224,9 +221,9 @@ text::Offset LayoutBlockFlow::GetVisibleEnd() {
   return lines_.front()->text_end();
 }
 
-text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
+text::Offset BlockFlow::HitTestPoint(gfx::PointF point) const {
   UI_ASSERT_DOM_LOCKED();
-  TRACE_EVENT0("views", "LayoutBlockFlow::HitTestPoint");
+  TRACE_EVENT0("views", "BlockFlow::HitTestPoint");
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   const auto& it =
@@ -241,9 +238,9 @@ text::Offset LayoutBlockFlow::HitTestPoint(gfx::PointF point) const {
   return line->MapXToPosn(point.x);
 }
 
-gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Offset offset) const {
+gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
-  TRACE_EVENT0("views", "LayoutBlockFlow::HitTestTextPosition");
+  TRACE_EVENT0("views", "BlockFlow::HitTestTextPosition");
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
   if (offset < lines_.front()->text_start() ||
@@ -258,7 +255,7 @@ gfx::RectF LayoutBlockFlow::HitTestTextPosition(text::Offset offset) const {
   return gfx::RectF();
 }
 
-void LayoutBlockFlow::InvalidateCache() {
+void BlockFlow::InvalidateCache() {
   UI_ASSERT_DOM_LOCKED();
   text_line_cache_->Invalidate(bounds_, zoom_);
   if (!dirty_)
@@ -267,20 +264,20 @@ void LayoutBlockFlow::InvalidateCache() {
   lines_height_ = 0;
 }
 
-void LayoutBlockFlow::InvalidateLines(text::Offset offset) {
+void BlockFlow::InvalidateLines(text::Offset offset) {
   ASSERT_DOM_LOCKED();
   text_line_cache_->DidChangeBuffer(offset);
   dirty_ = true;
 }
 
-bool LayoutBlockFlow::IsPositionFullyVisible(text::Offset offset) {
+bool BlockFlow::IsPositionFullyVisible(text::Offset offset) {
   UI_ASSERT_DOM_LOCKED();
-  TRACE_EVENT0("view", "LayoutBlockFlow::IsPositionFullyVisible");
+  TRACE_EVENT0("view", "BlockFlow::IsPositionFullyVisible");
   FormatIfNeeded();
   return offset >= GetStart() && offset < GetVisibleEnd();
 }
 
-bool LayoutBlockFlow::IsShowEndOfDocument() const {
+bool BlockFlow::IsShowEndOfDocument() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!dirty_);
   DCHECK(!dirty_line_point_);
@@ -288,10 +285,10 @@ bool LayoutBlockFlow::IsShowEndOfDocument() const {
   return last_line->IsEndOfDocument() && last_line->bottom() <= bounds_.bottom;
 }
 
-text::Offset LayoutBlockFlow::MapPointXToOffset(text::Offset text_offset,
-                                                float point_x) {
+text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
+                                          float point_x) {
   UI_ASSERT_DOM_LOCKED();
-  TRACE_EVENT0("views", "LayoutBlockFlow::MapPointXToOffset");
+  TRACE_EVENT0("views", "BlockFlow::MapPointXToOffset");
   InvalidateCache();
   if (const auto& line = text_line_cache_->FindLine(text_offset))
     return line->MapXToPosn(point_x);
@@ -305,7 +302,7 @@ text::Offset LayoutBlockFlow::MapPointXToOffset(text::Offset text_offset,
   }
 }
 
-bool LayoutBlockFlow::NeedFormat() const {
+bool BlockFlow::NeedFormat() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!text_line_cache_->IsDirty(bounds_, zoom_));
   if (need_format_)
@@ -321,15 +318,15 @@ bool LayoutBlockFlow::NeedFormat() const {
   return false;
 }
 
-void LayoutBlockFlow::Prepend(scoped_refptr<RootInlineBox> line) {
+void BlockFlow::Prepend(scoped_refptr<RootInlineBox> line) {
   UI_ASSERT_DOM_LOCKED();
   lines_height_ += line->height();
   lines_.push_front(std::move(line));
   dirty_line_point_ = true;
 }
 
-bool LayoutBlockFlow::ScrollDown() {
-  TRACE_EVENT0("views", "LayoutBlockFlow::ScrollDown");
+bool BlockFlow::ScrollDown() {
+  TRACE_EVENT0("views", "BlockFlow::ScrollDown");
   FormatIfNeeded();
   if (!lines_.front()->text_start())
     return false;
@@ -354,8 +351,8 @@ bool LayoutBlockFlow::ScrollDown() {
   return true;
 }
 
-bool LayoutBlockFlow::ScrollToPosition(text::Offset offset) {
-  TRACE_EVENT0("views", "LayoutBlockFlow::ScrollToPosition");
+bool BlockFlow::ScrollToPosition(text::Offset offset) {
+  TRACE_EVENT0("views", "BlockFlow::ScrollToPosition");
   FormatIfNeeded();
 
   if (IsPositionFullyVisible(offset))
@@ -427,8 +424,8 @@ bool LayoutBlockFlow::ScrollToPosition(text::Offset offset) {
   return true;
 }
 
-bool LayoutBlockFlow::ScrollUp() {
-  TRACE_EVENT0("views", "LayoutBlockFlow::ScrollUp");
+bool BlockFlow::ScrollUp() {
+  TRACE_EVENT0("views", "BlockFlow::ScrollUp");
   FormatIfNeeded();
   EnsureLinePoints();
   if (IsShowEndOfDocument())
@@ -454,7 +451,7 @@ bool LayoutBlockFlow::ScrollUp() {
   return true;
 }
 
-void LayoutBlockFlow::SetBounds(const gfx::RectF& new_bounds) {
+void BlockFlow::SetBounds(const gfx::RectF& new_bounds) {
   DCHECK(!new_bounds.empty());
   if (bounds_ == new_bounds)
     return;
@@ -463,7 +460,7 @@ void LayoutBlockFlow::SetBounds(const gfx::RectF& new_bounds) {
   need_format_ = true;
 }
 
-void LayoutBlockFlow::SetZoom(float new_zoom) {
+void BlockFlow::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
   if (zoom_ == new_zoom)
     return;
@@ -472,13 +469,13 @@ void LayoutBlockFlow::SetZoom(float new_zoom) {
   need_format_ = true;
 }
 
-bool LayoutBlockFlow::ShouldFormat() const {
+bool BlockFlow::ShouldFormat() const {
   UI_ASSERT_DOM_LOCKED();
   return dirty_;
 }
 
-text::Offset LayoutBlockFlow::StartOfLine(text::Offset text_offset) {
-  TRACE_EVENT0("views", "LayoutBlockFlow::StartOfLine");
+text::Offset BlockFlow::StartOfLine(text::Offset text_offset) {
+  TRACE_EVENT0("views", "BlockFlow::StartOfLine");
   UI_ASSERT_DOM_LOCKED();
   DCHECK(text_offset.IsValid());
 

@@ -12,7 +12,7 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/layout/layout_block_flow.h"
+#include "evita/layout/block_flow.h"
 #include "evita/layout/paint_view_builder.h"
 #include "evita/paint/public/selection.h"
 #include "evita/paint/public/view.h"
@@ -40,22 +40,21 @@ text::Offset GetCaretOffset(const text::Buffer* buffer,
 // TextView
 //
 TextView::TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner)
-    : buffer_(buffer),
+    : block_(new BlockFlow(buffer)),
+      buffer_(buffer),
       caret_offset_(text::Offset::Invalid()),
-      layout_block_flow_(new LayoutBlockFlow(buffer)),
-      paint_view_builder_(
-          new PaintViewBuilder(*layout_block_flow_, caret_owner)) {}
+      paint_view_builder_(new PaintViewBuilder(*block_, caret_owner)) {}
 
 TextView::~TextView() {}
 
 void TextView::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  layout_block_flow_->DidChangeStyle(offset, length);
+  block_->DidChangeStyle(offset, length);
 }
 
 void TextView::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  layout_block_flow_->DidDeleteAt(offset, length);
+  block_->DidDeleteAt(offset, length);
 }
 
 void TextView::DidHide() {
@@ -64,31 +63,31 @@ void TextView::DidHide() {
 
 void TextView::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
-  layout_block_flow_->DidInsertBefore(offset, length);
+  block_->DidInsertBefore(offset, length);
 }
 
 text::Offset TextView::EndOfLine(text::Offset text_offset) const {
-  return layout_block_flow_->EndOfLine(text_offset);
+  return block_->EndOfLine(text_offset);
 }
 
 text::Offset TextView::GetEnd() {
-  return layout_block_flow_->GetEnd();
+  return block_->GetEnd();
 }
 
 text::Offset TextView::GetStart() {
-  return layout_block_flow_->GetStart();
+  return block_->GetStart();
 }
 
 text::Offset TextView::GetVisibleEnd() {
-  return layout_block_flow_->GetVisibleEnd();
+  return block_->GetVisibleEnd();
 }
 
 void TextView::Format(text::Offset text_offset) {
-  layout_block_flow_->Format(text_offset);
+  block_->Format(text_offset);
 }
 
 bool TextView::FormatIfNeeded() {
-  return layout_block_flow_->FormatIfNeeded();
+  return block_->FormatIfNeeded();
 }
 
 // Maps specified buffer position to window point and returns true. If
@@ -97,11 +96,11 @@ bool TextView::FormatIfNeeded() {
 // A TextView object must be formatted with the latest buffer.
 //
 gfx::RectF TextView::HitTestTextPosition(text::Offset text_offset) const {
-  return layout_block_flow_->HitTestTextPosition(text_offset);
+  return block_->HitTestTextPosition(text_offset);
 }
 
 bool TextView::IsPositionFullyVisible(text::Offset offset) const {
-  return layout_block_flow_->IsPositionFullyVisible(offset);
+  return block_->IsPositionFullyVisible(offset);
 }
 
 void TextView::MakeSelectionVisible() {
@@ -111,12 +110,12 @@ void TextView::MakeSelectionVisible() {
 }
 
 text::Offset TextView::HitTestPoint(gfx::PointF point) {
-  return layout_block_flow_->HitTestPoint(point);
+  return block_->HitTestPoint(point);
 }
 
 text::Offset TextView::MapPointXToOffset(text::Offset text_offset,
                                          float point_x) const {
-  return layout_block_flow_->MapPointXToOffset(text_offset, point_x);
+  return block_->MapPointXToOffset(text_offset, point_x);
 }
 
 void TextView::Paint(gfx::Canvas* canvas) {
@@ -127,15 +126,15 @@ void TextView::Paint(gfx::Canvas* canvas) {
 }
 
 bool TextView::ScrollDown() {
-  return layout_block_flow_->ScrollDown();
+  return block_->ScrollDown();
 }
 
 void TextView::ScrollToPosition(text::Offset offset) {
-  layout_block_flow_->ScrollToPosition(offset);
+  block_->ScrollToPosition(offset);
 }
 
 bool TextView::ScrollUp() {
-  return layout_block_flow_->ScrollUp();
+  return block_->ScrollUp();
 }
 
 void TextView::SetBounds(const gfx::RectF& new_bounds) {
@@ -144,18 +143,18 @@ void TextView::SetBounds(const gfx::RectF& new_bounds) {
     return;
   bounds_ = new_bounds;
   view_paint_cache_.reset();
-  layout_block_flow_->SetBounds(bounds_);
+  block_->SetBounds(bounds_);
   paint_view_builder_->SetBounds(bounds_);
 }
 
 void TextView::SetZoom(float new_zoom) {
   DCHECK_GT(new_zoom, 0.0f);
-  layout_block_flow_->SetZoom(new_zoom);
+  block_->SetZoom(new_zoom);
   paint_view_builder_->SetZoom(new_zoom);
 }
 
 text::Offset TextView::StartOfLine(text::Offset text_offset) const {
-  return layout_block_flow_->StartOfLine(text_offset);
+  return block_->StartOfLine(text_offset);
 }
 
 void TextView::Update(const TextSelectionModel& selection_model,

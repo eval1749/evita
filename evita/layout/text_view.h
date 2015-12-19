@@ -34,7 +34,7 @@ class AnimatableWindow;
 
 namespace layout {
 
-class LayoutBlockFlow;
+class BlockFlow;
 class PaintViewBuilder;
 
 //////////////////////////////////////////////////////////////////////
@@ -82,10 +82,10 @@ class TextView final : private gfx::CanvasObserver {
   // gfx::CanvasObserver
   void DidRecreateCanvas() final;
 
+  std::unique_ptr<BlockFlow> block_;
   gfx::RectF bounds_;
   text::Buffer* const buffer_;
   text::Offset caret_offset_;
-  std::unique_ptr<LayoutBlockFlow> layout_block_flow_;
   scoped_refptr<paint::View> paint_view_;
   const std::unique_ptr<PaintViewBuilder> paint_view_builder_;
   std::unique_ptr<paint::ViewPaintCache> view_paint_cache_;

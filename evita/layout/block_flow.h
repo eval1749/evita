@@ -84,7 +84,7 @@ class BlockFlow final {
   RootInlineBox* FindLineContainng(text::Offset offset) const;
   scoped_refptr<RootInlineBox> FormatLine(TextFormatter* formatter);
   bool IsShowEndOfDocument() const;
-
+  void MarkDirty();
   void Prepend(scoped_refptr<RootInlineBox> line);
 
   gfx::RectF bounds_;

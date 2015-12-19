@@ -120,13 +120,13 @@ text::Offset BlockFlow::ComputeVisibleEnd() const {
 void BlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   text_line_cache_->DidChangeStyle(offset, length);
-  dirty_ = true;
+  MarkDirty();
 }
 
 void BlockFlow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   text_line_cache_->DidDeleteAt(offset, length);
-  dirty_ = true;
+  MarkDirty();
   if (view_start_ <= offset)
     return;
   view_start_ = std::max(view_start_ - length, offset);
@@ -135,7 +135,7 @@ void BlockFlow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
 void BlockFlow::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
   ASSERT_DOM_LOCKED();
   text_line_cache_->DidInsertBefore(offset, length);
-  dirty_ = true;
+  MarkDirty();
   if (view_start_ <= offset)
     return;
   view_start_ = view_start_ + length;
@@ -343,6 +343,13 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
   }
 }
 
+void BlockFlow::MarkDirty() {
+  lines_.clear();
+  dirty_ = true;
+  dirty_line_point_ = true;
+  needs_format_ = true;
+}
+
 bool BlockFlow::NeedsFormat() const {
   UI_ASSERT_DOM_LOCKED();
   DCHECK(!text_line_cache_->IsDirty(bounds_, zoom_));
@@ -497,8 +504,7 @@ void BlockFlow::SetBounds(const gfx::RectF& new_bounds) {
   if (bounds_ == new_bounds)
     return;
   bounds_ = new_bounds;
-  dirty_ = true;
-  needs_format_ = true;
+  MarkDirty();
 }
 
 void BlockFlow::SetZoom(float new_zoom) {
@@ -506,8 +512,7 @@ void BlockFlow::SetZoom(float new_zoom) {
   if (zoom_ == new_zoom)
     return;
   zoom_ = new_zoom;
-  dirty_ = true;
-  needs_format_ = true;
+  MarkDirty();
 }
 
 bool BlockFlow::ShouldFormat() const {

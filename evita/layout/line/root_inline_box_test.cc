@@ -185,6 +185,9 @@ TEST_F(RootInlineBoxTest, HitTestPointCodeUnit) {
   EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a") - 1));
   EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a")));
   EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"au")));
+  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auF")));
+  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auFF")));
+  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auFFF")));
   EXPECT_EQ(102, root_box->HitTestPoint(width - 10));
   EXPECT_EQ(103, root_box->HitTestPoint(width));
   EXPECT_EQ(103, root_box->HitTestPoint(99999));

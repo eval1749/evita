@@ -232,6 +232,7 @@ class InlineUnicodeBox final : public InlineTextBoxBase {
 
  private:
   // InlineBox
+  text::Offset HitTestPoint(float x) const override;
   gfx::RectF HitTestTextPosition(text::Offset offset,
                                  float baseline) const final;
 

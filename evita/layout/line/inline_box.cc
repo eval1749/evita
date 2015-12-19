@@ -192,6 +192,12 @@ InlineUnicodeBox::InlineUnicodeBox(const RenderStyle& style,
 InlineUnicodeBox::~InlineUnicodeBox() {}
 
 // InlineBox
+text::Offset InlineUnicodeBox::HitTestPoint(float point_x) const {
+  if (point_x >= width())
+    return end();
+  return start();
+}
+
 gfx::RectF InlineUnicodeBox::HitTestTextPosition(text::Offset offset,
                                                  float baseline) const {
   if (offset < start() || offset >= end())

@@ -231,9 +231,9 @@ text::Offset BlockFlow::HitTestPoint(gfx::PointF point) const {
                        [](const scoped_refptr<RootInlineBox>& box,
                           float point_y) { return box->top() < point_y; });
   if (it == lines_.begin())
-    return lines_.front()->text_start();
+    return lines_.front()->HitTestPoint(point.x);
   if (it == lines_.end())
-    return lines_.back()->text_end();
+    return lines_.back()->HitTestPoint(point.x);
   const auto line = *std::prev(it);
   return line->HitTestPoint(point.x);
 }

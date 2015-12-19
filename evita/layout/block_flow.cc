@@ -27,11 +27,11 @@ namespace layout {
 BlockFlow::BlockFlow(text::Buffer* text_buffer)
     : dirty_(true),
       dirty_line_point_(true),
-      format_counter_(0),
       lines_height_(0),
       needs_format_(false),
       text_buffer_(text_buffer),
       text_line_cache_(new RootInlineBoxCache(text_buffer)),
+      version_(0),
       view_start_(0),
       zoom_(1.0f) {}
 
@@ -246,7 +246,7 @@ void BlockFlow::Format(text::Offset text_offset) {
   }
   EnsureLinePoints();
   view_start_ = lines_.front()->text_start();
-  ++format_counter_;
+  ++version_;
 }
 
 bool BlockFlow::FormatIfNeeded() {
@@ -373,7 +373,7 @@ bool BlockFlow::ScrollDown() {
   FormatIfNeeded();
   if (!lines_.front()->text_start())
     return false;
-  ++format_counter_;
+  ++version_;
   auto const goal_offset = lines_.front()->text_start() - text::OffsetDelta(1);
   auto const start_offset = text_buffer_->ComputeStartOfLine(goal_offset);
   TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
@@ -474,7 +474,7 @@ bool BlockFlow::ScrollUp() {
   if (IsShowEndOfDocument())
     return false;
 
-  ++format_counter_;
+  ++version_;
 
   for (;;) {
     if (!DiscardFirstLine())

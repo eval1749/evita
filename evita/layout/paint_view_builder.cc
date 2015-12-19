@@ -205,7 +205,7 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
   lines.reserve(block_.lines().size());
   for (const auto& line : block_.lines())
     lines.push_back(CreatePaintRootInlineBox(*line));
-  return new paint::View(block_.format_counter(), block_.bounds(), lines,
+  return new paint::View(block_.version(), block_.bounds(), lines,
                          make_scoped_refptr(new paint::Selection(
                              selection.color(), selection_bounds_set)),
                          bgcolor, ruler_bounds, std::make_unique<paint::Caret>(

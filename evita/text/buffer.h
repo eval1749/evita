@@ -6,6 +6,7 @@
 #define EVITA_TEXT_BUFFER_H_
 
 #include <memory>
+#include <set>
 
 #include "base/logging.h"
 #include "base/basictypes.h"
@@ -28,11 +29,12 @@ class Buffer;
 class Interval;
 class IntervalSet;
 class LineNumberCache;
+class Marker;
+class MarkerSet;
 class Offset;
 class Range;
 class RangeSet;
-class Marker;
-class MarkerSet;
+class StaticRange;
 class UndoStack;
 
 //////////////////////////////////////////////////////////////////////
@@ -50,8 +52,8 @@ struct LineAndColumn {
 // Buffer
 //
 class Buffer final : public BufferCore,
-               public BufferMutationObservee,
-               public MarkerSetObserver {
+                     public BufferMutationObservee,
+                     public MarkerSetObserver {
  public:
   Buffer();
   virtual ~Buffer();
@@ -96,6 +98,12 @@ class Buffer final : public BufferCore,
   void AddObserver(BufferMutationObserver* observer) final;
   void RemoveObserver(BufferMutationObserver* observer) final;
 
+#if DCHECK_IS_ON()
+  // StaticRange
+  void RegisterStaticRange(const StaticRange& range);
+  void UnregisterStaticRange(const StaticRange& range);
+#endif
+
  private:
   void UpdateChangeTick();
 
@@ -116,6 +124,10 @@ class Buffer final : public BufferCore,
   // at revision before roll backed operation executed.
   int revision_ = 0;
   bool read_only_ = false;
+
+#if DCHECK_IS_ON()
+  std::set<const StaticRange*> static_ranges_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(Buffer);
 };

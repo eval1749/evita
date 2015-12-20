@@ -19,6 +19,12 @@
 
 namespace text {
 
+#if DCHECK_IS_ON()
+#define DCHECK_NO_STATIC_RANGE() DCHECK(static_ranges_.empty());
+#else
+#define DCHECK_NO_STATIC_RANGE()
+#endif
+
 //////////////////////////////////////////////////////////////////////
 //
 // Buffer
@@ -79,6 +85,7 @@ Offset Buffer::ComputeStartOfLine(Offset offset) const {
 }
 
 int Buffer::Delete(Offset start, Offset end) {
+  DCHECK_NO_STATIC_RANGE();
   if (IsReadOnly())
     return 0;
 
@@ -129,6 +136,7 @@ const css::Style& Buffer::GetStyleAt(Offset offset) const {
 void Buffer::InsertBefore(Offset offset, const base::string16& text) {
   DCHECK(IsValidPosn(offset));
   DCHECK(!IsReadOnly());
+  DCHECK_NO_STATIC_RANGE();
 
   auto const text_length = text.length();
   if (!text_length)
@@ -154,6 +162,7 @@ void Buffer::RemoveObserver(BufferMutationObserver* observer) {
 }
 
 void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
+  DCHECK_NO_STATIC_RANGE();
   if (end > GetEnd())
     end = GetEnd();
   if (start == end)
@@ -188,5 +197,19 @@ void Buffer::DidChangeMarker(Offset start, Offset end) {
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
                     DidChangeStyle(start, length));
 }
+
+#if DCHECK_IS_ON()
+// StaticRange
+void Buffer::RegisterStaticRange(const StaticRange& range) {
+  DCHECK(static_ranges_.find(&range) == static_ranges_.end());
+  static_ranges_.insert(&range);
+}
+
+void Buffer::UnregisterStaticRange(const StaticRange& range) {
+  const auto& it = static_ranges_.find(&range);
+  DCHECK(it != static_ranges_.end());
+  static_ranges_.erase(it);
+}
+#endif
 
 }  // namespace text

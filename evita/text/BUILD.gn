@@ -40,6 +40,8 @@ source_set("text") {
     "selection.h",
     "selection_change_observer.cc",
     "selection_change_observer.h",
+    "static_range.cc",
+    "static_range.h",
     "undo_stack.cc",
     "undo_step.cc",
   ]
@@ -47,6 +49,7 @@ source_set("text") {
   public_deps = [
     "//base",
     "//common",
+    "//evita/base",
     "//evita/css",
     "//evita/text/encodings",
   ]

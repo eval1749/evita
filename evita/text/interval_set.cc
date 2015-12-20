@@ -209,17 +209,13 @@ Interval* IntervalSet::Impl::SplitAt(Interval* interval, Offset offset) {
 }
 
 Interval* IntervalSet::Impl::TryMergeInterval(Interval* interval) {
-  auto it = intervals_.lower_bound(interval);
+  const auto& it = intervals_.lower_bound(interval);
   DCHECK(intervals_.end() != it);
-
-  auto previous_it = it;
-  auto next_it = it;
-  ++next_it;
+  const auto& next_it = std::next(it);
 
   // Merge to previous
-  if (previous_it != intervals_.begin()) {
-    --previous_it;
-    const auto previous = *previous_it;
+  if (it != intervals_.begin()) {
+    const auto previous = *std::prev(it);
     if (MergeAdjacentIntervalsIfPossible(previous, interval))
       interval = previous;
   }

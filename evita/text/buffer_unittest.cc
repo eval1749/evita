@@ -122,6 +122,11 @@ TEST_F(BufferTest, SetStyle) {
 
   EXPECT_EQ(30, buffer()->GetStyleAt(Offset(4)).font_size())
       << "Set color doesn't affect font size.";
+
+  const auto version = buffer()->version();
+  buffer()->SetStyle(Offset(4), Offset(7), style_color_red);
+  EXPECT_EQ(version, buffer()->version())
+      << "Set same style doesn't change buffer";
 }
 
 }  // namespace text

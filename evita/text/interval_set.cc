@@ -50,8 +50,9 @@ class IntervalSet::Impl final : public RangeSetBase,
   // Get |Interval| contains |offset|.
   Interval* GetIntervalAt(Offset offset) const;
 
-  // Set style on specified range.
-  void SetStyle(Offset start, Offset end, const css::Style& style_values);
+  // Returns true if style is changed for start until end, or false if nothing
+  // is changed.
+  bool SetStyle(Offset start, Offset end, const css::Style& style_values);
 
   // Split |interval| at |offset| and return new interval starts at |offset|.
   Interval* SplitAt(Interval* interval, Offset offset);
@@ -170,32 +171,43 @@ bool IntervalSet::Impl::MergeAdjacentIntervalsIfPossible(Interval* interval1,
   return true;
 }
 
-void IntervalSet::Impl::SetStyle(Offset start,
+bool IntervalSet::Impl::SetStyle(Offset start,
                                  Offset end,
                                  const css::Style& style) {
   DCHECK_LT(start, end);
   auto offset = start;
+  auto changed = false;
   while (offset < end) {
     const auto interval = GetIntervalAt(offset);
     DCHECK_LE(interval->start(), offset);
     const auto target =
         interval->start() == offset ? interval : SplitAt(interval, offset);
     if (target->end() == end) {
+      if (style.IsSubsetOf(target->style()))
+        return changed;
       target->set_style(style);
       TryMergeInterval(target);
-      break;
+      return true;
     }
 
     if (target->end() > end) {
+      if (style.IsSubsetOf(target->style()))
+        return changed;
       SplitAt(target, end);
       target->set_style(style);
       TryMergeInterval(target);
-      break;
+      return true;
     }
 
+    if (style.IsSubsetOf(target->style())) {
+      offset = target->end();
+      continue;
+    }
     target->set_style(style);
     offset = TryMergeInterval(target)->end();
+    changed = true;
   }
+  return changed;
 }
 
 Interval* IntervalSet::Impl::SplitAt(Interval* interval, Offset offset) {
@@ -292,7 +304,7 @@ Interval* IntervalSet::GetIntervalAt(Offset offset) const {
   return impl_->GetIntervalAt(offset);
 }
 
-void IntervalSet::SetStyle(Offset start, Offset end, const css::Style& style) {
+bool IntervalSet::SetStyle(Offset start, Offset end, const css::Style& style) {
   return impl_->SetStyle(start, end, style);
 }
 

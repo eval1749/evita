@@ -169,9 +169,8 @@ void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
   if (start == end)
     return;
   DCHECK_LT(start, end);
-  // To improve performance, we don't check contents of |style|.
-  // This may be enough for syntax coloring.
-  intervals_->SetStyle(start, end, style);
+  if (!intervals_->SetStyle(start, end, style))
+    return;
   ++version_;
   const auto& range = StaticRange(*this, start, end);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));

@@ -58,7 +58,6 @@ source_set("text") {
 test("evita_text_tests") {
   sources = [
     "buffer_test.cc",
-    "encodings/encodings_unittest.cc",
     "marker_set_test.cc",
     "range_test.cc",
     "undo_stack_test.cc",
@@ -68,5 +67,6 @@ test("evita_text_tests") {
     ":text",
     "//base/test:run_all_unittests",
     "//evita/css:tests",
+    "//evita/text/encodings:tests",
   ]
 }

@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//testing/test.gni")
+
 source_set("encodings") {
   sources = [
     "decoder.cc",
@@ -22,5 +24,16 @@ source_set("encodings") {
     "utf8_decoder.h",
     "utf8_encoder.cc",
     "utf8_encoder.h",
+  ]
+}
+
+source_set("tests") {
+  testonly = true
+  sources = [
+    "encodings_test.cc",
+  ]
+  public_deps = [
+    ":encodings",
+    "//testing/gtest",
   ]
 }

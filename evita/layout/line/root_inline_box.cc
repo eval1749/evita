@@ -107,6 +107,7 @@ bool RootInlineBox::IsEndOfDocument() const {
 }
 
 void RootInlineBox::UpdateTextStart(text::OffsetDelta delta) {
+  line_start_ += delta;
   text_start_ += delta;
   text_end_ += delta;
 }

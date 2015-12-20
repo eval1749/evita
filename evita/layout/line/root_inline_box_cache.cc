@@ -7,20 +7,29 @@
 
 #include "evita/layout/line/root_inline_box_cache.h"
 
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/text/buffer.h"
 #include "evita/text/static_range.h"
 
 namespace layout {
 
+namespace {
+bool IsWrappedLine(const RootInlineBox& line) {
+  return line.boxes().back()->as<InlineMarkerBox>()->marker_name() ==
+         TextMarker::LineWrap;
+}
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // RootInlineBoxCache
 //
 RootInlineBoxCache::RootInlineBoxCache(const text::Buffer* buffer)
-    : buffer_(buffer), dirty_start_(text::Offset::Max()), zoom_(0.0f) {
+    : buffer_(buffer), zoom_(0.0f) {
   UI_DOM_AUTO_LOCK_SCOPE();
   const_cast<text::Buffer*>(buffer_)->AddObserver(this);
 }
@@ -28,23 +37,6 @@ RootInlineBoxCache::RootInlineBoxCache(const text::Buffer* buffer)
 RootInlineBoxCache::~RootInlineBoxCache() {
   UI_DOM_AUTO_LOCK_SCOPE();
   const_cast<text::Buffer*>(buffer_)->RemoveObserver(this);
-}
-
-void RootInlineBoxCache::DidChangeBuffer(text::Offset offset) {
-  ASSERT_DOM_LOCKED();
-  dirty_start_ = std::min(dirty_start_, offset);
-}
-
-void RootInlineBoxCache::DidChangeStyle(const text::StaticRange& range) {
-  DidChangeBuffer(range.start());
-}
-
-void RootInlineBoxCache::DidDeleteAt(const text::StaticRange& range) {
-  DidChangeBuffer(range.start());
-}
-
-void RootInlineBoxCache::DidInsertBefore(const text::StaticRange& range) {
-  DidChangeBuffer(range.start());
 }
 
 RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
@@ -71,34 +63,34 @@ RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
 void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
                                     float new_zoom) {
   UI_ASSERT_DOM_LOCKED();
-  if (zoom_ != new_zoom || !dirty_start_) {
-    RemoveAllLines();
+  if (zoom_ != new_zoom) {
+    lines_.clear();
     bounds_ = new_bounds;
-    dirty_start_ = text::Offset::Max();
     zoom_ = new_zoom;
     return;
   }
 
-  RemoveDirtyLines();
   if (bounds_ == new_bounds)
     return;
+  const auto is_width_changed = bounds_.width() != new_bounds.width();
+  bounds_ = new_bounds;
+  if (lines_.empty() || !is_width_changed)
+    return;
 
-  if (!lines_.empty() && bounds_.width() != new_bounds.width()) {
-    std::vector<text::Offset> dirty_offsets;
-    for (const auto& it : lines_) {
-      const auto& line = it.second;
-      if (line->right() > new_bounds.right || !IsAfterNewline(line.get()) ||
-          !IsEndWithNewline(line.get())) {
-        dirty_offsets.push_back(line->text_start());
-      }
-    }
-    for (auto offset : dirty_offsets) {
-      const auto& it = lines_.find(offset);
-      DCHECK(it != lines_.end());
-      lines_.erase(it);
+  // Remove lines longer than |bounds_.width()|
+  std::vector<text::Offset> dirty_offsets;
+  for (const auto& pair : lines_) {
+    const auto& line = pair.second;
+    if (line->right() > new_bounds.right || !IsAfterNewline(line.get()) ||
+        !IsEndWithNewline(line.get())) {
+      dirty_offsets.push_back(line->text_start());
     }
   }
-  bounds_ = new_bounds;
+  for (auto offset : dirty_offsets) {
+    const auto& it = lines_.find(offset);
+    DCHECK(it != lines_.end());
+    lines_.erase(it);
+  }
 }
 
 bool RootInlineBoxCache::IsAfterNewline(const RootInlineBox* text_line) const {
@@ -108,8 +100,6 @@ bool RootInlineBoxCache::IsAfterNewline(const RootInlineBox* text_line) const {
 
 bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds, float zoom) const {
   if (zoom_ != zoom)
-    return false;
-  if (dirty_start_ != text::Offset::Max())
     return false;
   return bounds_ != bounds;
 }
@@ -127,7 +117,10 @@ RootInlineBox* RootInlineBoxCache::Register(
   UI_ASSERT_DOM_LOCKED();
   const auto line = line_ptr.get();
   DCHECK_GE(line->text_end(), line->text_start());
-  lines_[line->text_start()] = std::move(line_ptr);
+  auto const present = lines_.find(line->text_start());
+  if (present != lines_.end())
+    lines_.erase(present);
+  lines_.insert(std::make_pair(line->text_start(), std::move(line_ptr)));
 #if _DEBUG
   const auto& it = lines_.find(line->text_start());
   if (it != lines_.begin())
@@ -138,49 +131,76 @@ RootInlineBox* RootInlineBoxCache::Register(
   return line;
 }
 
-void RootInlineBoxCache::RemoveDirtyLines() {
-  const auto dirty_start = dirty_start_;
-  dirty_start_ = text::Offset::Max();
-  if (lines_.empty() || dirty_start >= lines_.rbegin()->second->text_end())
-    return;
-  auto it = lines_.lower_bound(dirty_start);
-  if (it == lines_.end()) {
-    it = lines_.find(lines_.rbegin()->first);
-    if (it->second->text_end() < dirty_start)
-      return;
-  } else {
-    DCHECK_GE(it->second->text_start(), dirty_start);
+void RootInlineBoxCache::RelocateLines(text::Offset offset,
+                                       text::OffsetDelta delta) {
+  ASSERT_DOM_LOCKED();
+  std::vector<RootInlineBox*> lines;
+  for (;;) {
+    const auto& it = lines_.lower_bound(offset);
+    if (it == lines_.end())
+      break;
+    lines.push_back(it->second.release());
+    lines_.erase(it);
   }
-  while (it != lines_.begin() && it->second->text_start() > dirty_start)
-    --it;
-  DCHECK(it != lines_.end());
-
-  if (it == lines_.begin()) {
-    RemoveAllLines();
-    return;
-  }
-
-  DCHECK_GE(dirty_start, it->second->text_start());
-  while (it != lines_.end() && it->second->text_start() < dirty_start &&
-         it->second->text_end() < dirty_start) {
-    ++it;
-  }
-
-  std::vector<text::Offset> dirty_offsets;
-  while (it != lines_.end()) {
-    dirty_offsets.push_back(it->first);
-    ++it;
-  }
-
-  for (auto offset : dirty_offsets) {
-    const auto present = lines_.find(offset);
-    DCHECK(present != lines_.end());
-    lines_.erase(present);
+  for (auto line : lines) {
+    line->UpdateTextStart(delta);
+    DCHECK(lines_.find(line->text_start()) == lines_.end());
+    lines_.insert(std::make_pair(line->text_start(),
+                                 std::unique_ptr<RootInlineBox>(line)));
   }
 }
 
-void RootInlineBoxCache::RemoveAllLines() {
-  lines_.clear();
+void RootInlineBoxCache::RemoveOverwapLines(const text::StaticRange& range) {
+  ASSERT_DOM_LOCKED();
+  if (lines_.empty())
+    return;
+  const auto& last_line = lines_.rbegin()->second;
+  if (last_line->text_end() <= range.start()) {
+    // All cached lines end before |range.start()|.
+    return;
+  }
+  const auto& it = lines_.lower_bound(range.start());
+  if (it == lines_.end()) {
+    // All lines start before |range.start()|.
+    DCHECK_LT(range.start(), last_line->text_end());
+    lines_.erase(lines_.find(lines_.rbegin()->first));
+    if (lines_.empty())
+      return;
+    DCHECK_LE(lines_.rbegin()->second->text_end(), range.start());
+    return;
+  }
+  // |start| line contains |offset| or after |offset|.
+  const auto& start =
+      it == lines_.begin() || std::prev(it)->second->text_end() <= range.start()
+          ? it
+          : std::prev(it);
+  DCHECK_LT(range.start(), start->second->text_end());
+  auto end = std::next(start);
+  while (end != lines_.end()) {
+    const auto line = end->second.get();
+    if (line->text_start() >= range.end() && !line->IsContinuedLine())
+      break;
+    ++end;
+  }
+  lines_.erase(start, end);
+}
+
+// text::BufferMutationObserver
+void RootInlineBoxCache::DidChangeStyle(const text::StaticRange& range) {
+  TRACE_EVENT0("layout", "RootInlineBoxCache::DidChangeStyle");
+  RemoveOverwapLines(range);
+}
+
+void RootInlineBoxCache::DidDeleteAt(const text::StaticRange& range) {
+  TRACE_EVENT0("layout", "RootInlineBoxCache::DidDeleteAt");
+  RemoveOverwapLines(range);
+  RelocateLines(range.start(), text::OffsetDelta(-range.length().value()));
+}
+
+void RootInlineBoxCache::DidInsertBefore(const text::StaticRange& range) {
+  TRACE_EVENT0("layout", "RootInlineBoxCache::DidInsertBefore");
+  RemoveOverwapLines(range);
+  RelocateLines(range.end(), range.length());
 }
 
 }  // namespace layout

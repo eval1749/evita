@@ -37,11 +37,10 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
   RootInlineBox* Register(std::unique_ptr<RootInlineBox> line);
 
  private:
-  void DidChangeBuffer(text::Offset offset);
   bool IsAfterNewline(const RootInlineBox* text_line) const;
   bool IsEndWithNewline(const RootInlineBox* text_line) const;
-  void RemoveDirtyLines();
-  void RemoveAllLines();
+  void RelocateLines(text::Offset offset, text::OffsetDelta delta);
+  void RemoveOverwapLines(const text::StaticRange& range);
 
   // text::BufferMutationObserver
   void DidChangeStyle(const text::StaticRange& range) final;
@@ -50,7 +49,6 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
 
   gfx::RectF bounds_;
   const text::Buffer* const buffer_;
-  text::Offset dirty_start_;
   std::map<text::Offset, std::unique_ptr<RootInlineBox>> lines_;
   float zoom_;
 

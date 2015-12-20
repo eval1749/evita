@@ -33,6 +33,7 @@ source_set("tests") {
   ]
 
   public_deps = [
+    ":line",
     "//testing/gtest",
   ]
 }

@@ -93,12 +93,12 @@ void LineBuilder::AddTextBoxIfNeeded() {
 // o end of buffer: End-Of-Buffer InlineMarkerBox
 // o end of line: End-Of-Line InlineMarkerBox
 // o wrapped line: Warp InlineMarkerBox
-scoped_refptr<RootInlineBox> LineBuilder::Build() {
+std::unique_ptr<RootInlineBox> LineBuilder::Build() {
   DCHECK(!boxes_.empty());
   const auto end = boxes_.back()->end();
-  return make_scoped_refptr(new RootInlineBox(
-      boxes_, text_start_, text_start_ + end, AlignHeightToPixel(ascent_),
-      AlignHeightToPixel(descent_)));
+  return std::make_unique<RootInlineBox>(boxes_, text_start_, text_start_ + end,
+                                         AlignHeightToPixel(ascent_),
+                                         AlignHeightToPixel(descent_));
 }
 
 bool LineBuilder::HasRoomFor(float width) const {

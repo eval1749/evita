@@ -5,11 +5,11 @@
 #ifndef EVITA_LAYOUT_LINE_LINE_BUILDER_H_
 #define EVITA_LAYOUT_LINE_LINE_BUILDER_H_
 
+#include <memory>
 #include <vector>
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "base/memory/ref_counted.h"
 #include "evita/layout/render_style.h"
 #include "evita/text/offset.h"
 
@@ -49,7 +49,7 @@ class LineBuilder final {
                     text::Offset end,
                     TextMarker marker_name);
   void AddTextBoxIfNeeded();
-  scoped_refptr<RootInlineBox> Build();
+  std::unique_ptr<RootInlineBox> Build();
   bool HasRoomFor(float width) const;
   bool TryAddChar(const RenderStyle& style,
                   text::Offset offset,

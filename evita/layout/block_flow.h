@@ -34,9 +34,7 @@ class BlockFlow final {
 
   const gfx::RectF& bounds() const { return bounds_; }
   int version() const { return version_; }
-  const std::list<scoped_refptr<RootInlineBox>>& lines() const {
-    return lines_;
-  }
+  const std::list<RootInlineBox*>& lines() const { return lines_; }
   gfx::PointF origin() const { return bounds_.origin(); }
   const text::Buffer& text_buffer() const { return *text_buffer_; }
   text::Offset text_end() const;
@@ -73,7 +71,7 @@ class BlockFlow final {
   bool ShouldFormat() const;
 
  private:
-  void Append(scoped_refptr<RootInlineBox> line);
+  void Append(RootInlineBox* line);
   // Returns true if discarded the first line.
   bool DiscardFirstLine();
   // Returns true if discarded the last line.
@@ -81,14 +79,14 @@ class BlockFlow final {
   void EnsureLinePoints();
   void EnsureTextLineCache();
   RootInlineBox* FindLineContainng(text::Offset offset) const;
-  scoped_refptr<RootInlineBox> FormatLine(TextFormatter* formatter);
+  RootInlineBox* FormatLine(TextFormatter* formatter);
   bool IsShowEndOfDocument() const;
   void MarkDirty();
-  void Prepend(scoped_refptr<RootInlineBox> line);
+  void Prepend(RootInlineBox* line);
 
   gfx::RectF bounds_;
   bool dirty_line_point_ = true;
-  std::list<scoped_refptr<RootInlineBox>> lines_;
+  std::list<RootInlineBox*> lines_;
   float lines_height_ = 0.0f;
   text::Buffer* const text_buffer_;
   std::unique_ptr<RootInlineBoxCache> text_line_cache_;

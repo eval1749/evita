@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "base/basictypes.h"
-#include "base/memory/ref_counted.h"
 #include "evita/gfx_base.h"
 #include "evita/layout/render_style.h"
 
@@ -38,8 +37,8 @@ class TextFormatter final {
   text::Offset text_offset() const;
   void set_text_offset(text::Offset new_text_offset);
 
-  scoped_refptr<RootInlineBox> FormatLine(text::Offset text_offset);
-  scoped_refptr<RootInlineBox> FormatLine();
+  std::unique_ptr<RootInlineBox> FormatLine(text::Offset text_offset);
+  std::unique_ptr<RootInlineBox> FormatLine();
 
   static TextSelection FormatSelection(
       const text::Buffer& buffer,

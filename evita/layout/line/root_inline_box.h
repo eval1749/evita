@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "base/memory/ref_counted.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/text/offset.h"
 
@@ -21,13 +20,14 @@ class Formatter;
 class TextBlock;
 class TextSelection;
 
-class RootInlineBox final : public base::RefCounted<RootInlineBox> {
+class RootInlineBox final {
  public:
   RootInlineBox(const std::vector<InlineBox*>& boxes,
                 text::Offset text_start,
                 text::Offset text_end,
                 float ascent,
                 float descent);
+  ~RootInlineBox();
 
   float bottom() const { return bounds_.bottom; }
   const gfx::PointF bottom_right() const { return bounds_.bottom_right(); }
@@ -51,10 +51,6 @@ class RootInlineBox final : public base::RefCounted<RootInlineBox> {
   bool IsEndOfDocument() const;
 
  private:
-  friend class base::RefCounted<RootInlineBox>;
-
-  ~RootInlineBox();
-
   gfx::RectF bounds_;
   const std::vector<InlineBox*> boxes_;
   float descent_;

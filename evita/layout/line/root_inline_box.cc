@@ -39,7 +39,10 @@ RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& boxes,
   DCHECK_EQ(bounds_.bottom, ::floor(bounds_.bottom));
 }
 
-RootInlineBox::~RootInlineBox() {}
+RootInlineBox::~RootInlineBox() {
+  for (const auto& box : boxes_)
+    delete box;
+}
 
 void RootInlineBox::set_origin(const gfx::PointF& origin) {
   bounds_.right = bounds_.width() + origin.x;

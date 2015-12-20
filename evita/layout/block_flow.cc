@@ -40,7 +40,7 @@ text::Offset BlockFlow::text_start() const {
   return lines_.front()->text_start();
 }
 
-void BlockFlow::Append(scoped_refptr<RootInlineBox> line) {
+void BlockFlow::Append(RootInlineBox* line) {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty()) {
     DCHECK_EQ(lines_height_, 0.0f);
@@ -182,18 +182,18 @@ RootInlineBox* BlockFlow::FindLineContainng(text::Offset offset) const {
   if (offset >= lines_.back()->text_end())
     return nullptr;
   // Get line after |offset|.
-  const auto& it = std::lower_bound(
-      lines_.begin(), lines_.end(), offset,
-      [](const scoped_refptr<RootInlineBox>& box, text::Offset value) {
-        return box->text_start() < value;
-      });
+  const auto& it =
+      std::lower_bound(lines_.begin(), lines_.end(), offset,
+                       [](const RootInlineBox* box, text::Offset value) {
+                         return box->text_start() < value;
+                       });
   if (it == lines_.begin())
-    return lines_.front().get();
+    return lines_.front();
   if (it == lines_.end())
-    return lines_.back().get();
+    return lines_.back();
   if ((*it)->text_start() == offset)
-    return (*it).get();
-  return (*std::prev(it)).get();
+    return *it;
+  return *std::prev(it);
 }
 
 void BlockFlow::Format(text::Offset text_offset) {
@@ -207,7 +207,7 @@ void BlockFlow::Format(text::Offset text_offset) {
   auto const line_start = text_buffer_->ComputeStartOfLine(text_offset);
   TextFormatter formatter(text_buffer_, line_start, bounds_, zoom_);
   for (;;) {
-    const auto& line = FormatLine(&formatter);
+    const auto line = FormatLine(&formatter);
     DCHECK_GT(line->bounds().height(), 0.0f);
     Append(line);
 
@@ -245,7 +245,7 @@ bool BlockFlow::FormatIfNeeded() {
   return true;
 }
 
-scoped_refptr<RootInlineBox> BlockFlow::FormatLine(TextFormatter* formatter) {
+RootInlineBox* BlockFlow::FormatLine(TextFormatter* formatter) {
   UI_ASSERT_DOM_LOCKED();
   const auto& cached_line =
       text_line_cache_->FindLine(formatter->text_offset());
@@ -253,9 +253,7 @@ scoped_refptr<RootInlineBox> BlockFlow::FormatLine(TextFormatter* formatter) {
     formatter->set_text_offset(cached_line->text_end());
     return cached_line;
   }
-  const auto& line = formatter->FormatLine();
-  text_line_cache_->Register(line.get());
-  return line;
+  return text_line_cache_->Register(std::move(formatter->FormatLine()));
 }
 
 text::Offset BlockFlow::HitTestPoint(gfx::PointF block_point) const {
@@ -268,8 +266,9 @@ text::Offset BlockFlow::HitTestPoint(gfx::PointF block_point) const {
   const auto& content_point = block_point;
   const auto& it =
       std::lower_bound(lines_.begin(), lines_.end(), content_point.y,
-                       [](const scoped_refptr<RootInlineBox>& box,
-                          float point_y) { return box->top() < point_y; });
+                       [](const RootInlineBox* box, float point_y) {
+                         return box->top() < point_y;
+                       });
   if (it == lines_.begin())
     return lines_.front()->HitTestPoint(content_point.x);
   if (it == lines_.end())
@@ -343,7 +342,7 @@ bool BlockFlow::NeedsFormat() const {
   return false;
 }
 
-void BlockFlow::Prepend(scoped_refptr<RootInlineBox> line) {
+void BlockFlow::Prepend(RootInlineBox* line) {
   UI_ASSERT_DOM_LOCKED();
   lines_height_ += line->height();
   lines_.push_front(std::move(line));

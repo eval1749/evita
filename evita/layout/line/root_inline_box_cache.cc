@@ -49,8 +49,7 @@ void RootInlineBoxCache::DidInsertBefore(text::Offset offset,
   DidChangeBuffer(offset);
 }
 
-scoped_refptr<RootInlineBox> RootInlineBoxCache::FindLine(
-    text::Offset offset) const {
+RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return nullptr;
@@ -59,16 +58,16 @@ scoped_refptr<RootInlineBox> RootInlineBoxCache::FindLine(
     const auto& last = lines_.rbegin()->second;
     if (offset < last->text_start() || offset >= last->text_end())
       return nullptr;
-    return last;
+    return last.get();
   }
   if (it->first == offset)
-    return it->second;
+    return it->second.get();
   if (it == lines_.begin())
     return nullptr;
   const auto& line = std::prev(it)->second;
   if (offset < line->text_start() || offset >= line->text_end())
     return nullptr;
-  return line;
+  return line.get();
 }
 
 void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
@@ -88,15 +87,15 @@ void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
 
   if (!lines_.empty() && bounds_.width() != new_bounds.width()) {
     std::vector<text::Offset> dirty_offsets;
-    for (auto it : lines_) {
-      auto const line = it.second;
+    for (const auto& it : lines_) {
+      const auto& line = it.second;
       if (line->right() > new_bounds.right || !IsAfterNewline(line.get()) ||
           !IsEndWithNewline(line.get())) {
         dirty_offsets.push_back(line->text_start());
       }
     }
     for (auto offset : dirty_offsets) {
-      const auto it = lines_.find(offset);
+      const auto& it = lines_.find(offset);
       DCHECK(it != lines_.end());
       lines_.erase(it);
     }
@@ -105,7 +104,7 @@ void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
 }
 
 bool RootInlineBoxCache::IsAfterNewline(const RootInlineBox* text_line) const {
-  auto const start = text_line->text_start();
+  const auto start = text_line->text_start();
   return !start || buffer_->GetCharAt(start - text::OffsetDelta(1)) == '\n';
 }
 
@@ -125,25 +124,24 @@ bool RootInlineBoxCache::IsEndWithNewline(
   return buffer_->GetCharAt(end - text::OffsetDelta(1)) == '\n';
 }
 
-void RootInlineBoxCache::Register(scoped_refptr<RootInlineBox> line) {
+RootInlineBox* RootInlineBoxCache::Register(
+    std::unique_ptr<RootInlineBox> line_ptr) {
   UI_ASSERT_DOM_LOCKED();
+  const auto line = line_ptr.get();
   DCHECK_GE(line->text_end(), line->text_start());
-  lines_[line->text_start()] = line;
+  lines_[line->text_start()] = std::move(line_ptr);
 #if _DEBUG
-  auto it = lines_.find(line->text_start());
-  if (it != lines_.begin()) {
-    --it;
-    DCHECK_LE(it->second->text_end(), line->text_start());
-    ++it;
-  }
-  ++it;
-  if (it != lines_.end())
-    DCHECK_GE(it->second->text_start(), line->text_end());
+  const auto& it = lines_.find(line->text_start());
+  if (it != lines_.begin())
+    DCHECK_LE(std::prev(it)->second->text_end(), line->text_start());
+  if (std::next(it) != lines_.end())
+    DCHECK_GE(std::next(it)->second->text_start(), line->text_end());
 #endif
+  return line;
 }
 
 void RootInlineBoxCache::RemoveDirtyLines() {
-  auto const dirty_start = dirty_start_;
+  const auto dirty_start = dirty_start_;
   dirty_start_ = text::Offset::Max();
   if (lines_.empty() || dirty_start >= lines_.rbegin()->second->text_end())
     return;

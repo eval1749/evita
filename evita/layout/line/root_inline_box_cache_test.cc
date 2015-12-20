@@ -58,9 +58,8 @@ void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
   cache_->Invalidate(bounds_, zoom_);
   TextFormatter formatter(buffer(), text::Offset(0), bounds_, zoom_);
   for (;;) {
-    const auto& line = formatter.FormatLine();
-    cache_->Register(line);
-    lines_.push_back(line.get());
+    const auto line = cache_->Register(formatter.FormatLine());
+    lines_.push_back(line);
     if (line->IsEndOfDocument())
       break;
   }

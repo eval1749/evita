@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "base/memory/ref_counted.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/canvas_observer.h"
 #include "evita/gfx/rect.h"

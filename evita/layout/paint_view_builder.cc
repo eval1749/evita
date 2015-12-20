@@ -118,7 +118,7 @@ gfx::RectF CalculateSelectionBounds(const RootInlineBox& root_box,
 }
 
 std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
-    const std::list<scoped_refptr<RootInlineBox>>& lines,
+    const std::list<RootInlineBox*>& lines,
     const TextSelection& selection,
     const gfx::RectF& block_bounds) {
   std::unordered_set<gfx::RectF> bounds_set;

@@ -207,13 +207,13 @@ void TextFormatter::set_text_offset(text::Offset new_text_offset) {
 }
 
 // Returns true if more contents is available, otherwise returns false.
-scoped_refptr<RootInlineBox> TextFormatter::FormatLine(
+std::unique_ptr<RootInlineBox> TextFormatter::FormatLine(
     text::Offset text_offset) {
   text_scanner_->set_text_offset(text_offset);
   return std::move(FormatLine());
 }
 
-scoped_refptr<RootInlineBox> TextFormatter::FormatLine() {
+std::unique_ptr<RootInlineBox> TextFormatter::FormatLine() {
   TRACE_EVENT0("views", "TextFormatter::FormatLine");
   DCHECK(!bounds_.empty());
 

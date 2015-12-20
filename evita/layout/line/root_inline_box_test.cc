@@ -31,7 +31,7 @@ class LineBuilder final {
   void AddCodeUnit(const base::char16 code_unit);
   void AddMarker(TextMarker marker);
   void AddText(const base::string16& text);
-  scoped_refptr<RootInlineBox> Build() const;
+  std::unique_ptr<RootInlineBox> Build() const;
   float WidthOf(const base::string16& text) const;
 
  private:
@@ -83,9 +83,9 @@ void LineBuilder::AddText(const base::string16& text) {
                                    style_.font().height(), offset_, text));
 }
 
-scoped_refptr<RootInlineBox> LineBuilder::Build() const {
-  return make_scoped_refptr(
-      new RootInlineBox(boxes_, start_, start_ + offset_, ascent_, descent_));
+std::unique_ptr<RootInlineBox> LineBuilder::Build() const {
+  return std::make_unique<RootInlineBox>(boxes_, start_, start_ + offset_,
+                                         ascent_, descent_);
 }
 
 gfx::RectF CaretBoundsOf(int origin_x, int origin_y, int height) {

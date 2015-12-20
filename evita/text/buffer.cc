@@ -167,6 +167,7 @@ void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
   // To improve performance, we don't check contents of |style|.
   // This may be enough for syntax coloring.
   intervals_->SetStyle(start, end, style);
+  ++version_;
   const auto& range = StaticRange(*this, start, end);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
 }
@@ -183,6 +184,7 @@ Offset Buffer::Undo(Offset offset) {
 
 void Buffer::UpdateChangeTick() {
   ++revision_;
+  ++version_;
 }
 
 // MarkerSetObserver

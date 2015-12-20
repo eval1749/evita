@@ -62,10 +62,10 @@ class Buffer final : public BufferCore,
   int revision() const { return revision_; }
   MarkerSet* spelling_markers() const { return spelling_markers_.get(); }
   MarkerSet* syntax_markers() const { return syntax_markers_.get(); }
-
   const css::StyleResolver* style_resolver() const {
     return style_resolver_.get();
   }
+  int version() const { return version_; }
 
   bool CanRedo() const;
   bool CanUndo() const;
@@ -124,6 +124,10 @@ class Buffer final : public BufferCore,
   // at revision before roll backed operation executed.
   int revision_ = 0;
   bool read_only_ = false;
+
+  // |version_| holds monotonically increased buffer version.
+  // Unlike |revision_|, |version_| is incremented style change.
+  int version_ = 0;
 
 #if DCHECK_IS_ON()
   std::set<const StaticRange*> static_ranges_;

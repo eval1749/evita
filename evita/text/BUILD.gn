@@ -57,13 +57,12 @@ source_set("text") {
 
 test("evita_text_tests") {
   sources = [
-    # TODO(evita) Move "style_sheet_unittest.cc" to "css/"
     "../css/style_sheet_unittest.cc",
-    "buffer_unittest.cc",
+    "buffer_test.cc",
     "encodings/encodings_unittest.cc",
-    "marker_set_unittest.cc",
-    "range_unittest.cc",
-    "undo_stack_unittest.cc",
+    "marker_set_test.cc",
+    "range_test.cc",
+    "undo_stack_test.cc",
   ]
 
   deps = [

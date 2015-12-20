@@ -58,8 +58,9 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   const auto& origin = gfx::PointF(300.0f, 200.0f);
   const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
 
-  TextFormatter formatter1(buffer(), text::Offset(0), bounds, 1.0f);
-  auto line1 = formatter1.FormatLine(text::Offset(0));
+  TextFormatter formatter1(buffer(), text::Offset(0), text::Offset(0), bounds,
+                           1.0f);
+  const auto line1 = formatter1.FormatLine();
   line1->set_origin(origin);
   const auto height = line1->height();
 
@@ -90,8 +91,9 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   css::Style style;
   style.set_bgcolor(css::Color(255, 0, 0));
   buffer()->SetStyle(text::Offset(1), text::Offset(2), style);
-  TextFormatter formatter2(buffer(), text::Offset(0), bounds, 1.0f);
-  auto line2 = formatter2.FormatLine(text::Offset(0));
+  TextFormatter formatter2(buffer(), text::Offset(0), text::Offset(0), bounds,
+                           1.0f);
+  const auto line2 = formatter2.FormatLine();
   line2->set_origin(origin);
   EXPECT_EQ(5, line2->boxes().size());
   EXPECT_TRUE(line2->boxes()[0]->is<InlineFillerBox>());
@@ -111,8 +113,9 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
   const auto& origin = gfx::PointF(10.0f, 200.0f);
   const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
 
-  TextFormatter formatter1(buffer(), text::Offset(0), bounds, 1.0f);
-  auto line1 = formatter1.FormatLine(text::Offset(0));
+  TextFormatter formatter1(buffer(), text::Offset(0), text::Offset(0), bounds,
+                           1.0f);
+  const auto line1 = formatter1.FormatLine();
   line1->set_origin(origin);
   EXPECT_EQ(5, line1->boxes().size()) << "line width is " << line1->width();
   EXPECT_TRUE(line1->boxes()[0]->is<InlineFillerBox>());
@@ -137,9 +140,30 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
 TEST_F(TextFormatterTest, FormatLineWrap) {
   buffer()->InsertBefore(text::Offset(0), L"0123456");
   const auto& bounds = gfx::RectF(gfx::SizeF(40.0f, 50.0f));
-  TextFormatter formatter1(buffer(), text::Offset(0), bounds, 1.0f);
-  auto line1 = formatter1.FormatLine(text::Offset(0));
+  TextFormatter formatter1(buffer(), text::Offset(0), text::Offset(0), bounds,
+                           1.0f);
+  // View:
+  //    012>
+  //    345>
+  //    6<
+  const auto line1 = formatter1.FormatLine();
   EXPECT_EQ(TextMarker::LineWrap,
             line1->boxes().back()->as<InlineMarkerBox>()->marker_name());
+  EXPECT_FALSE(line1->IsContinuedLine());
+  EXPECT_EQ(0, line1->line_start());
+  EXPECT_EQ(0, line1->text_start());
+  EXPECT_EQ(3, line1->text_end());
+
+  const auto line2 = formatter1.FormatLine();
+  EXPECT_EQ(line1->line_start(), line2->line_start());
+  EXPECT_EQ(3, line2->text_start());
+  EXPECT_EQ(6, line2->text_end());
+  EXPECT_TRUE(line2->IsContinuedLine());
+
+  const auto line3 = formatter1.FormatLine();
+  EXPECT_EQ(line1->line_start(), line3->line_start());
+  EXPECT_EQ(6, line3->text_start());
+  EXPECT_EQ(8, line3->text_end()) << "document.length + 1";
+  EXPECT_TRUE(line3->IsContinuedLine());
 }
 }  // namespace layout

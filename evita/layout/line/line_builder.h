@@ -26,9 +26,10 @@ enum class TextMarker;
 //
 class LineBuilder final {
  public:
-  explicit LineBuilder(const RenderStyle& style,
-                       text::Offset text_start,
-                       float line_width);
+  LineBuilder(const RenderStyle& style,
+              text::Offset line_start,
+              text::Offset text_start,
+              float line_width);
   ~LineBuilder();
 
   float current_x() const { return current_x_; }
@@ -64,6 +65,7 @@ class LineBuilder final {
   text::Offset current_offset_;
   float current_x_ = 0.0f;
   const float line_width_;
+  const text::Offset line_start_;
   RenderStyle style_;
   const text::Offset text_start_;
   float pending_text_width_ = 0.0f;

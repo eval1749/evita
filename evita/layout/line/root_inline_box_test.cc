@@ -84,8 +84,8 @@ void LineBuilder::AddText(const base::string16& text) {
 }
 
 std::unique_ptr<RootInlineBox> LineBuilder::Build() const {
-  return std::make_unique<RootInlineBox>(boxes_, start_, start_ + offset_,
-                                         ascent_, descent_);
+  return std::make_unique<RootInlineBox>(boxes_, start_, start_,
+                                         start_ + offset_, ascent_, descent_);
 }
 
 gfx::RectF CaretBoundsOf(int origin_x, int origin_y, int height) {

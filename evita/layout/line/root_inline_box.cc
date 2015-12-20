@@ -21,12 +21,14 @@ namespace layout {
 // RootInlineBox
 //
 RootInlineBox::RootInlineBox(const std::vector<InlineBox*>& boxes,
+                             text::Offset line_start,
                              text::Offset text_start,
                              text::Offset text_end,
                              float ascent,
                              float descent)
     : boxes_(boxes),
       descent_(descent),
+      line_start_(line_start),
       text_start_(text_start),
       text_end_(text_end) {
   DCHECK(!boxes_.empty());
@@ -102,6 +104,11 @@ bool RootInlineBox::IsEndOfDocument() const {
   DCHECK(!boxes_.empty());
   const auto last_marker_box = last_box()->as<InlineMarkerBox>();
   return last_marker_box->marker_name() == TextMarker::EndOfDocument;
+}
+
+void RootInlineBox::UpdateTextStart(text::OffsetDelta delta) {
+  text_start_ += delta;
+  text_end_ += delta;
 }
 
 }  // namespace layout

@@ -23,6 +23,7 @@ class TextSelection;
 class RootInlineBox final {
  public:
   RootInlineBox(const std::vector<InlineBox*>& boxes,
+                text::Offset line_start,
                 text::Offset text_start,
                 text::Offset text_end,
                 float ascent,
@@ -37,6 +38,7 @@ class RootInlineBox final {
   float height() const { return bounds_.height(); }
   InlineBox* last_box() const { return boxes_.back(); }
   float left() const { return bounds_.left; }
+  text::Offset line_start() const { return line_start_; }
   float right() const { return bounds_.right; }
   float top() const { return bounds_.top; }
   const gfx::PointF origin() const { return bounds_.origin(); }
@@ -48,12 +50,15 @@ class RootInlineBox final {
   bool Contains(text::Offset offset) const;
   text::Offset HitTestPoint(float x) const;
   gfx::RectF HitTestTextPosition(text::Offset offset) const;
+  bool IsContinuedLine() const { return line_start_ != text_start_; }
   bool IsEndOfDocument() const;
+  void UpdateTextStart(text::OffsetDelta delta);
 
  private:
   gfx::RectF bounds_;
   const std::vector<InlineBox*> boxes_;
-  float descent_;
+  const float descent_;
+  text::Offset line_start_;
   text::Offset text_start_;
   text::Offset text_end_;
 

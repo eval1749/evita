@@ -56,7 +56,8 @@ void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
   }
   UI_DOM_AUTO_LOCK_SCOPE();
   cache_->Invalidate(bounds_, zoom_);
-  TextFormatter formatter(buffer(), text::Offset(0), bounds_, zoom_);
+  TextFormatter formatter(buffer(), text::Offset(0), text::Offset(0), bounds_,
+                          zoom_);
   for (;;) {
     const auto line = cache_->Register(formatter.FormatLine());
     lines_.push_back(line);

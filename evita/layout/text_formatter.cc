@@ -184,15 +184,18 @@ void TextFormatter::TextScanner::Next() {
 // TextFormatter
 //
 TextFormatter::TextFormatter(const text::Buffer* text_buffer,
+                             text::Offset line_start,
                              text::Offset text_offset,
                              const gfx::RectF& bounds,
                              float zoom)
     : bounds_(bounds),
       default_render_style_(GetRenderStyle(text_buffer->GetDefaultStyle())),
+      line_start_(line_start),
       text_scanner_(new TextScanner(text_buffer)),
       zoom_(zoom) {
   DCHECK(!bounds_.empty());
   DCHECK_GT(zoom_, 0.0f);
+  DCHECK_EQ(line_start, text_buffer->ComputeStartOfLine(text_offset));
   text_scanner_->set_text_offset(text_offset);
 }
 
@@ -202,23 +205,17 @@ text::Offset TextFormatter::text_offset() const {
   return text_scanner_->text_offset();
 }
 
-void TextFormatter::set_text_offset(text::Offset new_text_offset) {
-  return text_scanner_->set_text_offset(new_text_offset);
-}
-
-// Returns true if more contents is available, otherwise returns false.
-std::unique_ptr<RootInlineBox> TextFormatter::FormatLine(
-    text::Offset text_offset) {
-  text_scanner_->set_text_offset(text_offset);
-  return std::move(FormatLine());
+void TextFormatter::DidFormat(const RootInlineBox* line) {
+  line_start_ = line->IsContinuedLine() ? line->line_start() : line->text_end();
+  text_scanner_->set_text_offset(line->text_end());
 }
 
 std::unique_ptr<RootInlineBox> TextFormatter::FormatLine() {
   TRACE_EVENT0("views", "TextFormatter::FormatLine");
   DCHECK(!bounds_.empty());
 
-  LineBuilder line_builder(default_render_style_, text_scanner_->text_offset(),
-                           bounds_.width());
+  LineBuilder line_builder(default_render_style_, line_start_,
+                           text_scanner_->text_offset(), bounds_.width());
   line_builder.AddFillerBox(default_render_style_, kLeftMargin, kMinHeight,
                             text_scanner_->text_offset());
   for (;;) {
@@ -232,6 +229,7 @@ std::unique_ptr<RootInlineBox> TextFormatter::FormatLine() {
     if (char_code == 0x0A) {
       FormatMarker(&line_builder, TextMarker::EndOfLine, text::OffsetDelta(1));
       text_scanner_->Next();
+      line_start_ = text_scanner_->text_offset();
       break;
     }
 

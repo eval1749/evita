@@ -10,11 +10,10 @@
 #include "base/basictypes.h"
 #include "evita/gfx_base.h"
 #include "evita/layout/render_style.h"
+#include "evita/text/offset.h"
 
 namespace text {
 class Buffer;
-class Offset;
-class OffsetDelta;
 }
 
 namespace layout {
@@ -29,15 +28,15 @@ class TextSelectionModel;
 class TextFormatter final {
  public:
   TextFormatter(const text::Buffer* buffer,
+                text::Offset line_start,
                 text::Offset text_offset,
                 const gfx::RectF& bounds,
                 float zoom);
   ~TextFormatter();
 
   text::Offset text_offset() const;
-  void set_text_offset(text::Offset new_text_offset);
 
-  std::unique_ptr<RootInlineBox> FormatLine(text::Offset text_offset);
+  void DidFormat(const RootInlineBox* line);
   std::unique_ptr<RootInlineBox> FormatLine();
 
   static TextSelection FormatSelection(
@@ -52,10 +51,11 @@ class TextFormatter final {
                     TextMarker marker_name,
                     text::OffsetDelta length);
 
-  gfx::RectF bounds_;
+  const gfx::RectF bounds_;
   RenderStyle default_render_style_;
+  text::Offset line_start_;
   std::unique_ptr<TextScanner> text_scanner_;
-  float zoom_;
+  const float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(TextFormatter);
 };

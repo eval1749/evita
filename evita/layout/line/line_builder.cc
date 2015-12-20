@@ -33,9 +33,13 @@ float AlignHeightToPixel(float height) {
 }  // namespace
 
 LineBuilder::LineBuilder(const RenderStyle& style,
+                         text::Offset line_start,
                          text::Offset text_start,
                          float line_width)
-    : line_width_(line_width), style_(style), text_start_(text_start) {}
+    : line_start_(line_start),
+      line_width_(line_width),
+      style_(style),
+      text_start_(text_start) {}
 
 LineBuilder::~LineBuilder() {}
 
@@ -96,9 +100,9 @@ void LineBuilder::AddTextBoxIfNeeded() {
 std::unique_ptr<RootInlineBox> LineBuilder::Build() {
   DCHECK(!boxes_.empty());
   const auto end = boxes_.back()->end();
-  return std::make_unique<RootInlineBox>(boxes_, text_start_, text_start_ + end,
-                                         AlignHeightToPixel(ascent_),
-                                         AlignHeightToPixel(descent_));
+  return std::make_unique<RootInlineBox>(
+      boxes_, line_start_, text_start_, text_start_ + end,
+      AlignHeightToPixel(ascent_), AlignHeightToPixel(descent_));
 }
 
 bool LineBuilder::HasRoomFor(float width) const {

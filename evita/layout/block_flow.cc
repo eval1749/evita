@@ -68,8 +68,8 @@ text::Offset BlockFlow::ComputeEndOfLine(text::Offset text_offset) {
   if (const auto& line = text_line_cache_->FindLine(text_offset))
     return line->text_end() - text::OffsetDelta(1);
 
-  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  const auto line_start = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
@@ -89,12 +89,11 @@ text::Offset BlockFlow::ComputeStartOfLine(text::Offset text_offset) {
   if (const auto& line = text_line_cache_->FindLine(text_offset))
     return line->text_start();
 
-  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  const auto line_start = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
-    start_offset = line->text_end();
-    if (text_offset < start_offset)
+    if (text_offset < line->text_end())
       return line->text_start();
   }
 }
@@ -205,8 +204,8 @@ void BlockFlow::Format(text::Offset text_offset) {
   lines_height_ = 0;
   dirty_line_point_ = false;
 
-  auto const line_start = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, bounds_, zoom_);
+  const auto line_start = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
   for (;;) {
     const auto line = FormatLine(&formatter);
     DCHECK_GT(line->bounds().height(), 0.0f);
@@ -251,7 +250,7 @@ RootInlineBox* BlockFlow::FormatLine(TextFormatter* formatter) {
   const auto& cached_line =
       text_line_cache_->FindLine(formatter->text_offset());
   if (cached_line) {
-    formatter->set_text_offset(cached_line->text_end());
+    formatter->DidFormat(cached_line);
     return cached_line;
   }
   return text_line_cache_->Register(std::move(formatter->FormatLine()));
@@ -316,8 +315,8 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
   if (const auto& line = text_line_cache_->FindLine(text_offset))
     return line->HitTestPoint(point_x);
 
-  auto start_offset = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  const auto line_start = text_buffer_->ComputeStartOfLine(text_offset);
+  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
@@ -356,9 +355,9 @@ bool BlockFlow::ScrollDown() {
   if (!lines_.front()->text_start())
     return false;
   ++version_;
-  auto const goal_offset = lines_.front()->text_start() - text::OffsetDelta(1);
-  auto const start_offset = text_buffer_->ComputeStartOfLine(goal_offset);
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  const auto goal_offset = lines_.front()->text_start() - text::OffsetDelta(1);
+  const auto line_start = text_buffer_->ComputeStartOfLine(goal_offset);
+  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (goal_offset < line->text_end()) {
@@ -470,8 +469,11 @@ bool BlockFlow::ScrollUp() {
       return true;
   }
 
-  auto const start_offset = lines_.back()->text_end();
-  TextFormatter formatter(text_buffer_, start_offset, bounds_, zoom_);
+  const auto last_line = lines_.back();
+  const auto offset = last_line->text_end();
+  const auto line_start =
+      last_line->IsContinuedLine() ? last_line->line_start() : offset;
+  TextFormatter formatter(text_buffer_, line_start, offset, bounds_, zoom_);
   Append(FormatLine(&formatter));
   return true;
 }

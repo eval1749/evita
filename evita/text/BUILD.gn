@@ -57,7 +57,6 @@ source_set("text") {
 
 test("evita_text_tests") {
   sources = [
-    "../css/style_sheet_unittest.cc",
     "buffer_test.cc",
     "encodings/encodings_unittest.cc",
     "marker_set_test.cc",

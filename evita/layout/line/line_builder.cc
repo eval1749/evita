@@ -95,7 +95,7 @@ void LineBuilder::AddTextBoxIfNeeded() {
 // o wrapped line: Warp InlineMarkerBox
 scoped_refptr<RootInlineBox> LineBuilder::Build() {
   DCHECK(!boxes_.empty());
-  const auto end = boxes_.back()->as<InlineMarkerBox>()->end();
+  const auto end = boxes_.back()->end();
   return make_scoped_refptr(new RootInlineBox(
       boxes_, text_start_, text_start_ + end, AlignHeightToPixel(ascent_),
       AlignHeightToPixel(descent_)));

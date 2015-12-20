@@ -26,7 +26,7 @@ struct LineNumberAndOffset {
 //
 class LineNumberCache final : public BufferMutationObserver {
  public:
-  explicit LineNumberCache(Buffer* buffer);
+  explicit LineNumberCache(const Buffer& buffer);
   ~LineNumberCache() final;
 
   LineNumberAndOffset Get(Offset offset);
@@ -45,7 +45,7 @@ class LineNumberCache final : public BufferMutationObserver {
   void DidDeleteAt(const StaticRange& range) final;
   void DidInsertBefore(const StaticRange& range) final;
 
-  Buffer* buffer_;
+  const Buffer& buffer_;
   std::map<Offset, int> map_;
 
   DISALLOW_COPY_AND_ASSIGN(LineNumberCache);

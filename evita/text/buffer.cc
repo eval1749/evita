@@ -32,7 +32,7 @@ namespace text {
 //
 Buffer::Buffer()
     : intervals_(new IntervalSet(this)),
-      line_number_cache_(new LineNumberCache(this)),
+      line_number_cache_(new LineNumberCache(*this)),
       ranges_(new RangeSet(this)),
       spelling_markers_(new MarkerSet(this)),
       style_resolver_(new css::StyleResolver()),

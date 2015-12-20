@@ -18,13 +18,13 @@ LineNumberAndOffset MakeLineNumberAndOffset(Offset offset, int line_number) {
 }
 }  // namespace
 
-LineNumberCache::LineNumberCache(Buffer* buffer) : buffer_(buffer) {
-  buffer_->AddObserver(this);
+LineNumberCache::LineNumberCache(const Buffer& buffer) : buffer_(buffer) {
+  const_cast<Buffer&>(buffer_).AddObserver(this);
   map_[Offset()] = 1;
 }
 
 LineNumberCache::~LineNumberCache() {
-  buffer_->RemoveObserver(this);
+  const_cast<Buffer&>(buffer_).RemoveObserver(this);
 }
 
 LineNumberAndOffset LineNumberCache::Get(Offset offset) {
@@ -65,7 +65,7 @@ LineNumberAndOffset LineNumberCache::UpdateCache(Offset line_start_offset,
   DCHECK(!map_.empty());
   auto start_offset = line_start_offset;
   for (auto offset = line_start_offset; offset < goal_offset; ++offset) {
-    if (buffer_->GetCharAt(offset) == 0x0A) {
+    if (buffer_.GetCharAt(offset) == 0x0A) {
       ++line_number;
       start_offset = offset + OffsetDelta(1);
       map_[start_offset] = line_number;

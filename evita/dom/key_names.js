@@ -203,12 +203,12 @@ global.KEY_NAMES = (function() {
   return names;
 })();
 
-/** @const @type {!Object.<string, number>} */
+/** @const @type {!Map.<string, number>} */
 global.KEY_CODE_MAP = (function() {
-  var map = {};
+  const map = new Map()
   KEY_NAMES.forEach(function(name, index) {
     if (name) {
-      map[name.toLowerCase()] = index;
+      map.set(name.toLowerCase(), index);
     }
   });
   return map;

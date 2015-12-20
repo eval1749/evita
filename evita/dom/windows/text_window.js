@@ -104,15 +104,19 @@ global.TextWindow.prototype.clone = function() {
     }
   }
 
-  /* TODO(eval1749): Once closure compiler support lcoal class name, we enable
+  /* TODO(eval1749): Once closure compiler support local class name, we enable
    annotation: type {Autoscroller} */
-  /** @suppress {suspiciousCode} */
-  TextWindow.prototype.autoscroller_;
+  // TODO(eval1749): Since 20151216 version, closure compiler doesn't recognize
+  // suppress {suspiciousCode}
+  /* $suppress {suspiciousCode} */
+  // TextWindow.prototype.autoscroller_;
 
-  /* TODO(eval1749): Once closure compiler support lcoal class name, we enable
+  /* TODO(eval1749): Once closure compiler support local class name, we enable
    annotation: type {DragController} */
-  /** @suppress {suspiciousCode} */
-  TextWindow.prototype.dragController_;
+  // TODO(eval1749): Since 20151216 version, closure compiler doesn't recognize
+  // suppress {suspiciousCode}
+  /* $suppress {suspiciousCode} */
+  // TextWindow.prototype.dragController_;
 
   /** @type {boolean} */
   TextWindow.prototype.isSelectionChanged_;

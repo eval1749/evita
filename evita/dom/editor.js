@@ -193,7 +193,7 @@
         if (!matches)
           return;
         var key_name = matches[1];
-        var key_code = KEY_CODE_MAP[key_name.toLowerCase()];
+        var key_code = KEY_CODE_MAP.get(key_name.toLowerCase());
         if (!key_code)
           throw new Error('Invalid key name: ' + key_name);
         code = rule.modifiers | key_code;

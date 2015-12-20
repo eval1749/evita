@@ -8,8 +8,9 @@
    * @param {!MouseEvent} event
    */
   function handleDoubleClick(window, event) {
-    if (event.button == 0) {
-      window.document.keymap.get(KEY_CODE_MAP['enter']).call(window);
+    if (event.button === 0) {
+      const enter_key = /** @type{number} */(KEY_CODE_MAP.get('enter'));
+      window.document.keymap.get(enter_key).call(window);
       return;
     }
   }

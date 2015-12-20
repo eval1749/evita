@@ -219,6 +219,21 @@ Style* Style::Default() {
   return &default_style;
 }
 
+bool Style::IsSubsetOf(const Style& other) const {
+  if (this == &other)
+    return true;
+  if ((masks_ & other.masks_) != masks_) {
+    // |this| has more properties than |other|
+    return false;
+  }
+#define V(name, ...)                                                  \
+  if (has_##name() && other.has_##name() && name##_ != other.name##_) \
+    return false;
+  FOR_EACH_CSS_PROPERTY(V)
+#undef V
+  return true;
+}
+
 void Style::Merge(const Style& other) {
   other.Prepare();
   if (!has_bgcolor() && other.has_bgcolor())

@@ -36,6 +36,17 @@ enum class TextDecoration {
   ImeInactiveB,  // 1 pixel underline
 };
 
+// name, CapitalName, type
+#define FOR_EACH_CSS_PROPERTY(V)      \
+  V(bgcolor, BgColor, Color)          \
+  V(color, Color, Color)              \
+  V(font_family, FontFamily)          \
+  V(font_size, FontSize)              \
+  V(font_style, FontStyle)            \
+  V(font_weight, FontWeight)          \
+  V(marker_color, MarkerColor, Color) \
+  V(text_decoration, TextDecoration, TextDecoration)
+
 //////////////////////////////////////////////////////////////////////
 //
 // Style
@@ -86,6 +97,8 @@ class Style final {
   void set_text_decoration(TextDecoration text_decoration);
 
   static Style* Default();
+
+  bool IsSubsetOf(const Style& other) const;
   void Merge(const Style& style);
   void OverrideBy(const Style& style);
 

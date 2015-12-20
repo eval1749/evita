@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//testing/test.gni")
+
 source_set("css") {
   sources = [
     "color.cc",
@@ -11,5 +13,17 @@ source_set("css") {
     "style_selector.cc",
     "style_sheet.cc",
     "style_sheet_observer.cc",
+  ]
+}
+
+source_set("tests") {
+  testonly = true
+  sources = [
+    "style_test.cc",
+  ]
+
+  public_deps = [
+    ":css",
+    "//testing/gtest",
   ]
 }

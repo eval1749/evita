@@ -69,5 +69,6 @@ test("evita_text_tests") {
   deps = [
     ":text",
     "//base/test:run_all_unittests",
+    "//evita/css:tests",
   ]
 }

@@ -158,6 +158,11 @@ void Buffer::RemoveObserver(BufferMutationObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
+void Buffer::ResetRevision(int revision) {
+  DCHECK_NO_STATIC_RANGE();
+  revision_ = revision;
+}
+
 void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
   if (end > GetEnd())
     end = GetEnd();

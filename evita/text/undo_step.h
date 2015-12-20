@@ -70,19 +70,21 @@ class TextUndoStep : public UndoStep {
  public:
   Offset end() const { return end_; }
   void set_end(Offset end) { end_ = end; }
+  int revision() const { return revision_; }
   Offset start() const { return start_; }
   void set_start(Offset start) { start_ = start; }
   const base::string16& text() const { return text_; }
   void set_text(const base::string16& text);
 
  protected:
-  TextUndoStep(Offset start, Offset end);
+  TextUndoStep(int revision, Offset start, Offset end);
   ~TextUndoStep() override;
 
  private:
   Offset end_;
   Offset start_;
   base::string16 text_;
+  int revision_;
 
   DISALLOW_COPY_AND_ASSIGN(TextUndoStep);
 };
@@ -113,7 +115,10 @@ class DeleteUndoStep final : public TextUndoStep {
   DECLARE_CASTABLE_CLASS(DeleteUndoStep, TextUndoStep);
 
  public:
-  DeleteUndoStep(Offset start, Offset end, const base::string16& text);
+  DeleteUndoStep(int revision,
+                 Offset start,
+                 Offset end,
+                 const base::string16& text);
   ~DeleteUndoStep() final;
 
  private:
@@ -155,7 +160,7 @@ class InsertUndoStep final : public TextUndoStep {
   DECLARE_CASTABLE_CLASS(InsertUndoStep, TextUndoStep);
 
  public:
-  InsertUndoStep(Offset lStart, Offset lEnd);
+  InsertUndoStep(int revision, Offset start, Offset end);
   ~InsertUndoStep() final;
 
  private:

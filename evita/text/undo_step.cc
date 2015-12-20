@@ -56,8 +56,8 @@ NamedUndoStep::~NamedUndoStep() {}
 //
 // TextUndoStep
 //
-TextUndoStep::TextUndoStep(Offset start, Offset end)
-    : end_(end), start_(start) {
+TextUndoStep::TextUndoStep(int revision, Offset start, Offset end)
+    : end_(end), revision_(revision), start_(start) {
   DCHECK_LE(start_, end_);
 }
 
@@ -92,10 +92,11 @@ bool BeginUndoStep::TryMerge(const Buffer*, const UndoStep* new_undo_step) {
 //
 // DeleteUndoStep
 //
-DeleteUndoStep::DeleteUndoStep(Offset start,
+DeleteUndoStep::DeleteUndoStep(int revision,
+                               Offset start,
                                Offset end,
                                const base::string16& text)
-    : TextUndoStep(start, end) {
+    : TextUndoStep(revision, start, end) {
   set_text(text);
 }
 
@@ -160,7 +161,7 @@ void DeleteUndoStep::Undo(Buffer* buffer) {
   buffer->InsertBefore(start(), text());
   // -1 for |Buffer::Insert()| in this function.
   // -1 for |Buffer::Delete()| which creates this |DeleteUndoStep|.
-  buffer->IncCharTick(-2);
+  buffer->ResetRevision(revision());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -180,8 +181,8 @@ bool EndUndoStep::TryMerge(const Buffer*, const UndoStep*) {
 //
 // InsertUndoStep
 //
-InsertUndoStep::InsertUndoStep(Offset start, Offset end)
-    : TextUndoStep(start, end) {}
+InsertUndoStep::InsertUndoStep(int revision, Offset start, Offset end)
+    : TextUndoStep(revision, start, end) {}
 
 InsertUndoStep::~InsertUndoStep() {}
 
@@ -234,9 +235,7 @@ void InsertUndoStep::Redo(Buffer* buffer) {
 
 void InsertUndoStep::Undo(Buffer* buffer) {
   buffer->Delete(start(), end());
-  // -1 for |Buffer::Delete()| in this function.
-  // -1 for |Buffer::Insert()| which creates this |InsertUndoStep|.
-  buffer->IncCharTick(-2);
+  buffer->ResetRevision(revision());
 }
 
 }  // namespace text

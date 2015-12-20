@@ -79,13 +79,13 @@ class Buffer final : public BufferCore,
   LineAndColumn GetLineAndColumn(Offset offset) const;
   const css::Style& GetStyleAt(Offset) const;
   UndoStack* GetUndo() const { return undo_stack_.get(); }
-  int IncCharTick(int n) { return revision_ += n; }
   bool IsReadOnly() const { return read_only_; }
   void InsertBefore(Offset offset, const base::string16& text);
 
   // Does redo last undo operation if it starts at |offset| and returns
   // |offset|, otherwise returns starting offset of the last undo operation.
   Offset Redo(Offset offset);
+  void ResetRevision(int revision);
   bool SetReadOnly(bool read_only) { return read_only_ = read_only; }
   void SetStyle(Offset, Offset, const css::Style& style_values);
   void StartUndoGroup(const base::string16& name);

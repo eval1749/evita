@@ -167,11 +167,10 @@ void UndoStack::DidInsertBefore(const StaticRange& range) {
     return;
   }
 
-  auto insert_step = std::make_unique<InsertUndoStep>(start, end);
-  if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, insert_step.get())) {
-    buffer_->IncCharTick(-1);
+  auto insert_step =
+      std::make_unique<InsertUndoStep>(buffer_->revision(), start, end);
+  if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, insert_step.get()))
     return;
-  }
   undo_steps_.push_back(insert_step.release());
 }
 
@@ -191,11 +190,10 @@ void UndoStack::WillDeleteAt(const StaticRange& range) {
     return;
   }
 
-  auto delete_step = std::make_unique<DeleteUndoStep>(start, end, text);
-  if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, delete_step.get())) {
-    buffer_->IncCharTick(-1);
+  auto delete_step =
+      std::make_unique<DeleteUndoStep>(buffer_->revision(), start, end, text);
+  if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, delete_step.get()))
     return;
-  }
   undo_steps_.push_back(delete_step.release());
 }
 

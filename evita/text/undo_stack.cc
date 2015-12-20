@@ -42,43 +42,30 @@ bool UndoStack::CanUndo() const {
 }
 
 void UndoStack::Clear() {
-  for (auto undo_step : undo_steps_) {
-    delete undo_step;
-  }
-  undo_steps_.clear();
-  for (auto redo_step : redo_steps_) {
-    delete redo_step;
-  }
   redo_steps_.clear();
 }
 
 void UndoStack::BeginUndoGroup(const base::string16& name) {
   DCHECK_EQ(State::Normal, state_);
   auto begin_step = std::make_unique<BeginUndoStep>(name);
-  if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, begin_step.get())) {
-    delete undo_steps_.back();
-    undo_steps_.pop_back();
-    return;
-  }
-  undo_steps_.push_back(begin_step.release());
+  if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, begin_step.get()))
+    return undo_steps_.pop_back();
+  undo_steps_.push_back(std::move(begin_step));
 }
 
 void UndoStack::EndUndoGroup(const base::string16& name) {
   DCHECK_EQ(State::Normal, state_);
   auto end_step = std::make_unique<EndUndoStep>(name);
-  if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, end_step.get())) {
-    delete undo_steps_.back();
-    undo_steps_.pop_back();
-    return;
-  }
-  undo_steps_.push_back(end_step.release());
+  if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, end_step.get()))
+    return undo_steps_.pop_back();
+  undo_steps_.push_back(std::move(end_step));
 }
 
 Offset UndoStack::Redo(Offset offset, int count) {
   if (redo_steps_.empty())
     return Offset::Invalid();
 
-  for (const auto step : common::adopters::reverse(redo_steps_)) {
+  for (const auto& step : common::adopters::reverse(redo_steps_)) {
     DCHECK(!step->is<EndUndoStep>());
     if (step->is<BeginUndoStep>())
       continue;
@@ -93,9 +80,9 @@ Offset UndoStack::Redo(Offset offset, int count) {
   auto result_offset = offset;
   while (count > 0) {
     DCHECK(!redo_steps_.empty());
-    auto const step = redo_steps_.back();
+    undo_steps_.push_back(std::move(redo_steps_.back()));
     redo_steps_.pop_back();
-    undo_steps_.push_back(step);
+    const auto step = undo_steps_.back().get();
     if (step->is<BeginUndoStep>()) {
       ++depth;
     } else if (step->is<EndUndoStep>()) {
@@ -118,7 +105,7 @@ Offset UndoStack::Undo(Offset offset, int count) {
 
   base::AutoReset<State> state_scope(&state_, State::Undo);
 
-  for (const auto step : common::adopters::reverse(undo_steps_)) {
+  for (const auto& step : common::adopters::reverse(undo_steps_)) {
     DCHECK(!step->is<BeginUndoStep>());
     if (step->is<EndUndoStep>())
       continue;
@@ -131,9 +118,9 @@ Offset UndoStack::Undo(Offset offset, int count) {
   auto result_offset = offset;
   while (count > 0) {
     DCHECK(!undo_steps_.empty());
-    auto const step = undo_steps_.back();
+    redo_steps_.push_back(std::move(undo_steps_.back()));
     undo_steps_.pop_back();
-    redo_steps_.push_back(step);
+    const auto step = redo_steps_.back().get();
     if (step->is<EndUndoStep>()) {
       ++depth;
     } else if (step->is<BeginUndoStep>()) {
@@ -171,7 +158,7 @@ void UndoStack::DidInsertBefore(const StaticRange& range) {
       std::make_unique<InsertUndoStep>(buffer_->revision(), start, end);
   if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, insert_step.get()))
     return;
-  undo_steps_.push_back(insert_step.release());
+  undo_steps_.push_back(std::move(insert_step));
 }
 
 void UndoStack::WillDeleteAt(const StaticRange& range) {
@@ -194,7 +181,7 @@ void UndoStack::WillDeleteAt(const StaticRange& range) {
       std::make_unique<DeleteUndoStep>(buffer_->revision(), start, end, text);
   if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, delete_step.get()))
     return;
-  undo_steps_.push_back(delete_step.release());
+  undo_steps_.push_back(std::move(delete_step));
 }
 
 }  // namespace text

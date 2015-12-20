@@ -5,6 +5,7 @@
 #ifndef EVITA_TEXT_UNDO_STACK_H_
 #define EVITA_TEXT_UNDO_STACK_H_
 
+#include <memory>
 #include <vector>
 
 #include "base/strings/string16.h"
@@ -43,10 +44,10 @@ class UndoStack final : public BufferMutationObserver {
   void DidInsertBefore(const StaticRange& range) final;
   void WillDeleteAt(const StaticRange& range) final;
 
-  Buffer* buffer_;
-  std::vector<UndoStep*> redo_steps_;
+  Buffer* const buffer_;
+  std::vector<std::unique_ptr<UndoStep>> redo_steps_;
   State state_;
-  std::vector<UndoStep*> undo_steps_;
+  std::vector<std::unique_ptr<UndoStep>> undo_steps_;
 
   DISALLOW_COPY_AND_ASSIGN(UndoStack);
 };

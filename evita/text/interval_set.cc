@@ -149,7 +149,7 @@ Interval* IntervalSet::Impl::GetIntervalAt(Offset offset) const {
   if (!offset)
     return *intervals_.begin();
   Interval interval(offset, offset + OffsetDelta(1));
-  auto const it = intervals_.lower_bound(&interval);
+  const auto& it = intervals_.lower_bound(&interval);
   DCHECK(intervals_.end() != it);
   DCHECK((*it)->Contains(offset));
   return *it;
@@ -160,8 +160,8 @@ bool IntervalSet::Impl::MergeAdjacentIntervalsIfPossible(Interval* interval1,
   DCHECK_EQ(interval1->end(), interval2->start());
   if (!CanMergeIntervals(interval1, interval2))
     return false;
-  auto const end = interval2->end();
-  auto const it = intervals_.find(interval2);
+  const auto end = interval2->end();
+  const auto& it = intervals_.find(interval2);
   DCHECK(intervals_.end() != it);
   intervals_.erase(it);
   DCHECK(!intervals_.empty());
@@ -176,9 +176,9 @@ void IntervalSet::Impl::SetStyle(Offset start,
   DCHECK_LT(start, end);
   auto offset = start;
   while (offset < end) {
-    auto const interval = GetIntervalAt(offset);
+    const auto interval = GetIntervalAt(offset);
     DCHECK_LE(interval->start(), offset);
-    auto const target =
+    const auto target =
         interval->start() == offset ? interval : SplitAt(interval, offset);
     if (target->end() == end) {
       target->set_style(style);
@@ -201,7 +201,7 @@ void IntervalSet::Impl::SetStyle(Offset start,
 Interval* IntervalSet::Impl::SplitAt(Interval* interval, Offset offset) {
   DCHECK_GT(offset, interval->start());
   DCHECK_LT(offset, interval->end());
-  auto const new_interval = new Interval(*interval);
+  const auto new_interval = new Interval(*interval);
   set_range_end(interval, offset);
   set_range_start(new_interval, offset);
   intervals_.insert(new_interval);
@@ -219,14 +219,14 @@ Interval* IntervalSet::Impl::TryMergeInterval(Interval* interval) {
   // Merge to previous
   if (previous_it != intervals_.begin()) {
     --previous_it;
-    auto const previous = *previous_it;
+    const auto previous = *previous_it;
     if (MergeAdjacentIntervalsIfPossible(previous, interval))
       interval = previous;
   }
 
   // Absorb next
   if (next_it != intervals_.end()) {
-    auto const next = *next_it;
+    const auto next = *next_it;
     DCHECK_EQ(interval->end(), next->start());
     MergeAdjacentIntervalsIfPossible(interval, next);
   }

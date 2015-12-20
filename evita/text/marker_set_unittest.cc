@@ -53,8 +53,11 @@ class MarkerSetTest : public ::testing::Test {
 
  private:
   const std::unique_ptr<Buffer> buffer_;
-  MarkerSet marker_set_;
+
+  // |mutation_observee_| is passed to |MarkerSet| constructor.
   MockBufferMutationObservee mutation_observee_;
+
+  MarkerSet marker_set_;
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSetTest);
 };

@@ -117,7 +117,7 @@ class DeleteUndoStep final : public TextUndoStep {
   ~DeleteUndoStep() final;
 
  private:
-  // Recrod
+  // Record
   Offset GetAfterRedo() const final;
   Offset GetAfterUndo() const final;
   Offset GetBeforeRedo() const final;

@@ -8,9 +8,14 @@
 
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
+#include "evita/text/static_range.h"
 
 namespace text {
 
+//////////////////////////////////////////////////////////////////////
+//
+// RangeSet
+//
 RangeSet::RangeSet(Buffer* buffer) {
   buffer->AddObserver(this);
 }
@@ -30,9 +35,11 @@ void RangeSet::RemoveRange(Range* range) {
 }
 
 // BufferMutationObserver
-void RangeSet::DidDeleteAt(Offset start, OffsetDelta length) {
-  auto const end = start + length;
-  for (auto* range : ranges_) {
+void RangeSet::DidDeleteAt(const StaticRange& static_range) {
+  const auto start = static_range.start();
+  const auto end = static_range.end();
+  const auto length = static_range.length();
+  for (const auto& range : ranges_) {
     if (range->start_ > start)
       range->start_ = range->start_ >= end ? range->start_ - length : start;
     if (range->end_ > start)
@@ -40,8 +47,10 @@ void RangeSet::DidDeleteAt(Offset start, OffsetDelta length) {
   }
 }
 
-void RangeSet::DidInsertBefore(Offset offset, OffsetDelta length) {
-  for (auto* range : ranges_) {
+void RangeSet::DidInsertBefore(const StaticRange& static_range) {
+  const auto offset = static_range.start();
+  const auto length = static_range.length();
+  for (const auto& range : ranges_) {
     if (range->start_ >= offset)
       range->start_ = range->start_ + length;
     if (range->end_ >= offset)

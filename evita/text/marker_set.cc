@@ -9,6 +9,7 @@
 
 #include "base/logging.h"
 #include "evita/text/offset.h"
+#include "evita/text/static_range.h"
 
 namespace text {
 
@@ -231,8 +232,10 @@ void MarkerSet::RemoveObserver(MarkerSetObserver* observer) {
 }
 
 // BufferMutationObserver
-void MarkerSet::DidDeleteAt(Offset start, OffsetDelta length) {
-  auto const end = start + length;
+void MarkerSet::DidDeleteAt(const StaticRange& range) {
+  const auto start = range.start();
+  const auto end = range.end();
+  const auto length = range.length();
   ChangeScope change_scope(&markers_);
   for (auto runner = markers_.rbegin();
        runner != markers_.rend() && (*runner)->end_ > start; ++runner) {
@@ -248,8 +251,10 @@ void MarkerSet::DidDeleteAt(Offset start, OffsetDelta length) {
   }
 }
 
-void MarkerSet::DidInsertBefore(Offset offset, OffsetDelta length) {
-  auto const start = offset + OffsetDelta(1);
+void MarkerSet::DidInsertBefore(const StaticRange& range) {
+  const auto offset = range.start();
+  const auto length = range.length();
+  const auto start = offset + OffsetDelta(1);
   for (auto runner = lower_bound(start); runner != markers_.end(); ++runner) {
     auto const marker = *runner;
     if (marker->start_ >= offset)

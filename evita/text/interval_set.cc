@@ -16,6 +16,7 @@
 #include "evita/text/interval.h"
 #include "evita/text/offset.h"
 #include "evita/text/range_set_base.h"
+#include "evita/text/static_range.h"
 
 namespace std {
 template <>
@@ -66,8 +67,8 @@ class IntervalSet::Impl final : public RangeSetBase,
   Interval* TryMergeInterval(Interval* interval);
 
   // BufferMutationObserver
-  void DidDeleteAt(Offset offset, OffsetDelta length) override;
-  void DidInsertBefore(Offset offset, OffsetDelta length) override;
+  void DidDeleteAt(const StaticRange& range) final;
+  void DidInsertBefore(const StaticRange& range) final;
 
   Buffer* const buffer_;
 
@@ -234,24 +235,28 @@ Interval* IntervalSet::Impl::TryMergeInterval(Interval* interval) {
 }
 
 // BufferMutationObserver
-void IntervalSet::Impl::DidDeleteAt(Offset delete_start, OffsetDelta length) {
-  auto const delete_end = delete_start + length;
+void IntervalSet::Impl::DidDeleteAt(const StaticRange& range) {
+  const auto delete_start = range.start();
+  const auto length = range.length();
+  const auto delete_end = range.end();
   Editor editor(this);
   for (auto it = intervals_.rbegin();
        it != intervals_.rend() && (*it)->end() > delete_start; ++it) {
-    auto const interval = *it;
-    auto const start = interval->start() > delete_start
+    const auto interval = *it;
+    const auto start = interval->start() > delete_start
                            ? interval->start() > delete_end
                                  ? interval->start() - length
                                  : delete_start
                            : interval->start();
-    auto const end =
+    const auto end =
         interval->end() > delete_end ? interval->end() - length : delete_start;
     editor.Update(interval, start, end);
   }
 }
 
-void IntervalSet::Impl::DidInsertBefore(Offset offset, OffsetDelta length) {
+void IntervalSet::Impl::DidInsertBefore(const StaticRange& range) {
+  const auto offset = range.start();
+  const auto length = range.length();
   for (auto it = intervals_.rbegin();
        it != intervals_.rend() && (*it)->end() >= offset; ++it) {
     auto interval = *it;
@@ -266,11 +271,11 @@ void IntervalSet::Impl::DidInsertBefore(Offset offset, OffsetDelta length) {
     return;
 
   // Set default style to new text inserted at start of document.
-  auto const head = *intervals_.begin();
+  const auto head = *intervals_.begin();
   DCHECK_EQ(Offset(length.value()), head->start());
   // TODO(eval1749): We should check head interval has default style or not
   // without creating Interval object.
-  auto const interval = new Interval(Offset(), head->start());
+  const auto interval = new Interval(Offset(), head->start());
   if (CanMergeIntervals(interval, head)) {
     set_range_start(head, Offset());
     delete interval;

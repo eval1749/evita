@@ -12,6 +12,7 @@
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/text/buffer.h"
+#include "evita/text/static_range.h"
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/line/root_inline_box_cache.h"
@@ -110,25 +111,25 @@ text::Offset BlockFlow::ComputeVisibleEnd() const {
   return lines_.front()->text_end();
 }
 
-void BlockFlow::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
+void BlockFlow::DidChangeStyle(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
   MarkDirty();
 }
 
-void BlockFlow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
+void BlockFlow::DidDeleteAt(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
   MarkDirty();
-  if (view_start_ <= offset)
+  if (view_start_ <= range.start())
     return;
-  view_start_ = std::max(view_start_ - length, offset);
+  view_start_ = std::max(view_start_ - range.length(), range.start());
 }
 
-void BlockFlow::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
+void BlockFlow::DidInsertBefore(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
   MarkDirty();
-  if (view_start_ <= offset)
+  if (view_start_ <= range.start())
     return;
-  view_start_ = view_start_ + length;
+  view_start_ = view_start_ + range.length();
 }
 
 bool BlockFlow::DiscardFirstLine() {

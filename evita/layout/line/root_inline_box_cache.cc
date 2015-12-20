@@ -11,6 +11,7 @@
 #include "evita/editor/dom_lock.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/text/buffer.h"
+#include "evita/text/static_range.h"
 
 namespace layout {
 
@@ -34,19 +35,16 @@ void RootInlineBoxCache::DidChangeBuffer(text::Offset offset) {
   dirty_start_ = std::min(dirty_start_, offset);
 }
 
-void RootInlineBoxCache::DidChangeStyle(text::Offset offset,
-                                        text::OffsetDelta length) {
-  DidChangeBuffer(offset);
+void RootInlineBoxCache::DidChangeStyle(const text::StaticRange& range) {
+  DidChangeBuffer(range.start());
 }
 
-void RootInlineBoxCache::DidDeleteAt(text::Offset offset,
-                                     text::OffsetDelta length) {
-  DidChangeBuffer(offset);
+void RootInlineBoxCache::DidDeleteAt(const text::StaticRange& range) {
+  DidChangeBuffer(range.start());
 }
 
-void RootInlineBoxCache::DidInsertBefore(text::Offset offset,
-                                         text::OffsetDelta length) {
-  DidChangeBuffer(offset);
+void RootInlineBoxCache::DidInsertBefore(const text::StaticRange& range) {
+  DidChangeBuffer(range.start());
 }
 
 RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {

@@ -199,12 +199,11 @@ std::unique_ptr<TableViewModel> TableWindow::UpdateModelIfNeeded() {
 }
 
 // text::BufferMutationObserver
-void TableWindow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
+void TableWindow::DidDeleteAt(const text::StaticRange& range) {
   should_update_model_ = true;
 }
 
-void TableWindow::DidInsertBefore(text::Offset offset,
-                                  text::OffsetDelta length) {
+void TableWindow::DidInsertBefore(const text::StaticRange& range) {
   should_update_model_ = true;
 }
 

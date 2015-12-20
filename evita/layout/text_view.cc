@@ -19,6 +19,7 @@
 #include "evita/paint/view_painter.h"
 #include "evita/paint/view_paint_cache.h"
 #include "evita/text/buffer.h"
+#include "evita/text/static_range.h"
 
 namespace layout {
 
@@ -69,23 +70,23 @@ text::Offset TextView::ComputeVisibleEnd() const {
   return block_->ComputeVisibleEnd();
 }
 
-void TextView::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
+void TextView::DidChangeStyle(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
-  block_->DidChangeStyle(offset, length);
+  block_->DidChangeStyle(range);
 }
 
-void TextView::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
+void TextView::DidDeleteAt(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
-  block_->DidDeleteAt(offset, length);
+  block_->DidDeleteAt(range);
 }
 
 void TextView::DidHide() {
   view_paint_cache_.reset();
 }
 
-void TextView::DidInsertBefore(text::Offset offset, text::OffsetDelta length) {
+void TextView::DidInsertBefore(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
-  block_->DidInsertBefore(offset, length);
+  block_->DidInsertBefore(range);
 }
 
 void TextView::Format(text::Offset text_offset) {

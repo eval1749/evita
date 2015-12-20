@@ -5,6 +5,7 @@
 #include "evita/text/buffer_mutation_observer.h"
 
 #include "evita/text/offset.h"
+#include "evita/text/static_range.h"
 
 namespace text {
 
@@ -16,14 +17,10 @@ BufferMutationObserver::BufferMutationObserver() {}
 
 BufferMutationObserver::~BufferMutationObserver() {}
 
-void BufferMutationObserver::DidChangeStyle(Offset, OffsetDelta) {}
-
-void BufferMutationObserver::DidDeleteAt(Offset, OffsetDelta) {}
-
-void BufferMutationObserver::DidInsertBefore(Offset offset,
-                                             OffsetDelta length) {}
-
-void BufferMutationObserver::WillDeleteAt(Offset, OffsetDelta) {}
+void BufferMutationObserver::DidChangeStyle(const StaticRange& range) {}
+void BufferMutationObserver::DidDeleteAt(const StaticRange& range) {}
+void BufferMutationObserver::DidInsertBefore(const StaticRange& range) {}
+void BufferMutationObserver::WillDeleteAt(const StaticRange& range) {}
 
 //////////////////////////////////////////////////////////////////////
 //

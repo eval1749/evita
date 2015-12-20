@@ -15,6 +15,7 @@
 
 namespace text {
 class Buffer;
+class StaticRange;
 }
 
 namespace layout {
@@ -47,9 +48,9 @@ class BlockFlow final {
   text::Offset ComputeVisibleEnd() const;
 
   // Callback for buffer mutation observer
-  void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
-  void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
-  void DidInsertBefore(text::Offset offset, text::OffsetDelta length);
+  void DidChangeStyle(const text::StaticRange& range);
+  void DidDeleteAt(const text::StaticRange& range);
+  void DidInsertBefore(const text::StaticRange& range);
 
   void Format(text::Offset text_offset);
   // Returns true if text format is taken place.

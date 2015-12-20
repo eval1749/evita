@@ -12,7 +12,12 @@
 namespace text {
 
 class Range;
+class StaticRange;
 
+//////////////////////////////////////////////////////////////////////
+//
+// RangeSet
+//
 class RangeSet final : public BufferMutationObserver {
  public:
   explicit RangeSet(Buffer* buffer);
@@ -23,8 +28,8 @@ class RangeSet final : public BufferMutationObserver {
 
  private:
   // BufferMutationObserver
-  void DidDeleteAt(Offset offset, OffsetDelta length) final;
-  void DidInsertBefore(Offset offset, OffsetDelta length) final;
+  void DidDeleteAt(const StaticRange& range) final;
+  void DidInsertBefore(const StaticRange& range) final;
 
   std::unordered_set<Range*> ranges_;
 

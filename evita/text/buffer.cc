@@ -15,6 +15,7 @@
 #include "evita/text/offset.h"
 #include "evita/text/range.h"
 #include "evita/text/range_set.h"
+#include "evita/text/static_range.h"
 #include "evita/text/undo_stack.h"
 
 namespace text {
@@ -96,13 +97,12 @@ int Buffer::Delete(Offset start, Offset end) {
   if (!length)
     return 0;
 
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    WillDeleteAt(start, length));
+  const auto& range = StaticRange(*this, start, end);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, WillDeleteAt(range));
 
   deleteChars(start, end);
 
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidDeleteAt(start, length));
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidDeleteAt(range));
 
   UpdateChangeTick();
   return length;
@@ -137,16 +137,13 @@ void Buffer::InsertBefore(Offset offset, const base::string16& text) {
   DCHECK(IsValidPosn(offset));
   DCHECK(!IsReadOnly());
   DCHECK_NO_STATIC_RANGE();
-
-  auto const text_length = text.length();
-  if (!text_length)
+  if (text.empty())
     return;
+  insert(offset, text.data(), text.size());
 
-  insert(offset, text.data(), text_length);
-
-  auto const delta = OffsetDelta(text_length);
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidInsertBefore(offset, delta));
+  const auto& range =
+      StaticRange(*this, offset, offset + OffsetDelta(text.size()));
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidInsertBefore(range));
 
   UpdateChangeTick();
 }
@@ -162,7 +159,6 @@ void Buffer::RemoveObserver(BufferMutationObserver* observer) {
 }
 
 void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
-  DCHECK_NO_STATIC_RANGE();
   if (end > GetEnd())
     end = GetEnd();
   if (start == end)
@@ -171,9 +167,8 @@ void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
   // To improve performance, we don't check contents of |style|.
   // This may be enough for syntax coloring.
   intervals_->SetStyle(start, end, style);
-  auto const length = end - start;
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidChangeStyle(start, length));
+  const auto& range = StaticRange(*this, start, end);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {
@@ -193,9 +188,8 @@ void Buffer::UpdateChangeTick() {
 // MarkerSetObserver
 void Buffer::DidChangeMarker(Offset start, Offset end) {
   DCHECK_LT(start, end);
-  auto const length = end - start;
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
-                    DidChangeStyle(start, length));
+  const auto& range = StaticRange(*this, start, end);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
 }
 
 #if DCHECK_IS_ON()

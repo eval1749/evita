@@ -269,22 +269,21 @@ void TextWindow::UpdateScrollBar() {
 }
 
 // text::BufferMutationObserver
-void TextWindow::DidChangeStyle(text::Offset offset, text::OffsetDelta length) {
+void TextWindow::DidChangeStyle(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
-  text_view_->DidChangeStyle(offset, length);
+  text_view_->DidChangeStyle(range);
   RequestAnimationFrame();
 }
 
-void TextWindow::DidDeleteAt(text::Offset offset, text::OffsetDelta length) {
+void TextWindow::DidDeleteAt(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
-  text_view_->DidDeleteAt(offset, length);
+  text_view_->DidDeleteAt(range);
   RequestAnimationFrame();
 }
 
-void TextWindow::DidInsertBefore(text::Offset offset,
-                                 text::OffsetDelta length) {
+void TextWindow::DidInsertBefore(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
-  text_view_->DidInsertBefore(offset, length);
+  text_view_->DidInsertBefore(range);
   RequestAnimationFrame();
 }
 

@@ -4,6 +4,8 @@
 
 #include "evita/text/marker_set.h"
 
+#include "evita/text/buffer.h"
+#include "evita/text/static_range.h"
 #include "gtest/gtest.h"
 
 namespace text {
@@ -14,18 +16,23 @@ class MockBufferMutationObservee : public BufferMutationObservee {
   void RemoveObserver(BufferMutationObserver* observer) final {}
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// MarkerSetTest
+//
 class MarkerSetTest : public ::testing::Test {
  protected:
   MarkerSetTest()
       : Correct(L"Correct"),
         Misspelled(L"Misspelled"),
+        buffer_(new Buffer()),
         marker_set_(&mutation_observee_) {}
 
+  Buffer* buffer() const { return buffer_.get(); }
   MarkerSet* marker_set() { return &marker_set_; }
 
-  void DidDeleteAt(Offset offset, OffsetDelta length) {
-    static_cast<BufferMutationObserver*>(marker_set())
-        ->DidDeleteAt(offset, length);
+  void DidDeleteAt(const StaticRange& range) {
+    static_cast<BufferMutationObserver*>(marker_set())->DidDeleteAt(range);
   }
 
   void RemoveMarker(int start, int end) {
@@ -45,9 +52,9 @@ class MarkerSetTest : public ::testing::Test {
   const common::AtomicString Misspelled;
 
  private:
-  MockBufferMutationObservee mutation_observee_;
-
+  const std::unique_ptr<Buffer> buffer_;
   MarkerSet marker_set_;
+  MockBufferMutationObservee mutation_observee_;
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSetTest);
 };
@@ -125,7 +132,7 @@ TEST_F(MarkerSetTest, DidDeleteAt) {
   // delete: --"foo"---
   InsertMarker(0, 5, Correct);
   InsertMarker(5, 6, Misspelled);
-  DidDeleteAt(Offset(5), OffsetDelta(1));
+  DidDeleteAt(StaticRange(*buffer(), Offset(5), Offset(6)));
   EXPECT_EQ(Marker(Offset(0), Offset(5), Correct), GetAt(0));
 }
 
@@ -252,4 +259,4 @@ TEST_F(MarkerSetTest, InsertMarker_split) {
   EXPECT_EQ(Marker(), GetAt(400));
 }
 
-}  // namespace
+}  // namespace text

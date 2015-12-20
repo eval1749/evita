@@ -25,6 +25,7 @@ class View;
 namespace text {
 class Buffer;
 class Offset;
+class StaticRange;
 }
 
 namespace ui {
@@ -56,10 +57,10 @@ class TextView final : private gfx::CanvasObserver {
   // Returns fully visible end offset or end of line position if there is only
   // one line.
   text::Offset ComputeVisibleEnd() const;
-  void DidChangeStyle(text::Offset offset, text::OffsetDelta length);
-  void DidDeleteAt(text::Offset offset, text::OffsetDelta length);
+  void DidChangeStyle(const text::StaticRange& range);
+  void DidDeleteAt(const text::StaticRange& range);
   void DidHide();
-  void DidInsertBefore(text::Offset offset, text::OffsetDelta length);
+  void DidInsertBefore(const text::StaticRange& range);
   void Format(text::Offset text_offset);
   // Returns true if text format is taken place.
   bool FormatIfNeeded();

@@ -12,6 +12,7 @@ namespace text {
 class Buffer;
 class Offset;
 class OffsetDelta;
+class StaticRange;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -21,10 +22,10 @@ class BufferMutationObserver {
  public:
   virtual ~BufferMutationObserver();
 
-  virtual void DidChangeStyle(Offset offset, OffsetDelta length);
-  virtual void DidDeleteAt(Offset offset, OffsetDelta length);
-  virtual void DidInsertBefore(Offset offset, OffsetDelta length);
-  virtual void WillDeleteAt(Offset offset, OffsetDelta length);
+  virtual void DidChangeStyle(const StaticRange& range);
+  virtual void DidDeleteAt(const StaticRange& range);
+  virtual void DidInsertBefore(const StaticRange& range);
+  virtual void WillDeleteAt(const StaticRange& range);
 
  protected:
   BufferMutationObserver();

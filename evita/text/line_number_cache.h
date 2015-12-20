@@ -13,12 +13,17 @@
 namespace text {
 
 class Buffer;
+class StaticRange;
 
 struct LineNumberAndOffset {
   int number;
   Offset offset;
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// LineNumberCache
+//
 class LineNumberCache final : public BufferMutationObserver {
  public:
   explicit LineNumberCache(Buffer* buffer);
@@ -37,8 +42,8 @@ class LineNumberCache final : public BufferMutationObserver {
                                   Offset offset);
 
   // BufferMutationObserver
-  void DidDeleteAt(Offset offset, OffsetDelta length) final;
-  void DidInsertBefore(Offset offset, OffsetDelta length) final;
+  void DidDeleteAt(const StaticRange& range) final;
+  void DidInsertBefore(const StaticRange& range) final;
 
   Buffer* buffer_;
   std::map<Offset, int> map_;

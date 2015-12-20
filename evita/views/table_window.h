@@ -51,8 +51,8 @@ class TableWindow final : public CanvasContentWindow,
   void UpdateControl(std::unique_ptr<TableViewModel> new_model);
 
   // text::BufferMutationObserver
-  void DidDeleteAt(text::Offset offset, text::OffsetDelta length) final;
-  void DidInsertBefore(text::Offset offset, text::OffsetDelta length) final;
+  void DidDeleteAt(const text::StaticRange& range) final;
+  void DidInsertBefore(const text::StaticRange& range) final;
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

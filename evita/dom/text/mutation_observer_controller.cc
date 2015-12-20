@@ -22,6 +22,7 @@
 #include "evita/dom/text/mutation_record.h"
 #include "evita/text/buffer.h"
 #include "evita/text/buffer_mutation_observer.h"
+#include "evita/text/static_range.h"
 
 namespace dom {
 
@@ -48,8 +49,8 @@ class MutationObserverController::Tracker final
   void ScheduleNotification();
 
   // text::BufferMutationObserver
-  void DidDeleteAt(text::Offset offset, text::OffsetDelta length) override;
-  void DidInsertBefore(text::Offset offset, text::OffsetDelta length) override;
+  void DidDeleteAt(const text::StaticRange& range) final;
+  void DidInsertBefore(const text::StaticRange& range) final;
 
   gc::Member<Document> document_;
   bool is_observing_;
@@ -119,20 +120,16 @@ void MutationObserverController::Tracker::Unregister(
 
 // text::BufferMutationObserver
 void MutationObserverController::Tracker::DidDeleteAt(
-    text::Offset offset,
-    text::OffsetDelta length) {
-  for (auto observer : observers_) {
-    observer->DidDeleteAt(document_, offset, length);
-  }
+    const text::StaticRange& range) {
+  for (auto observer : observers_)
+    observer->DidDeleteAt(document_, range.start(), range.length());
   ScheduleNotification();
 }
 
 void MutationObserverController::Tracker::DidInsertBefore(
-    text::Offset offset,
-    text::OffsetDelta length) {
-  for (auto observer : observers_) {
-    observer->DidInsertBefore(document_, offset, length);
-  }
+    const text::StaticRange& range) {
+  for (auto observer : observers_)
+    observer->DidInsertBefore(document_, range.start(), range.length());
   ScheduleNotification();
 }
 

@@ -15,6 +15,7 @@
 
 namespace text {
 class Buffer;
+class StaticRange;
 }
 
 namespace layout {
@@ -43,9 +44,9 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
   void RemoveAllLines();
 
   // text::BufferMutationObserver
-  void DidChangeStyle(text::Offset offset, text::OffsetDelta length) final;
-  void DidDeleteAt(text::Offset offset, text::OffsetDelta length) final;
-  void DidInsertBefore(text::Offset offset, text::OffsetDelta length) final;
+  void DidChangeStyle(const text::StaticRange& range) final;
+  void DidDeleteAt(const text::StaticRange& range) final;
+  void DidInsertBefore(const text::StaticRange& range) final;
 
   gfx::RectF bounds_;
   const text::Buffer* const buffer_;

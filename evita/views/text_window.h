@@ -72,9 +72,9 @@ class TextWindow final : public CanvasContentWindow,
   void UpdateScrollBar();
 
   // text::BufferMutationObserver
-  void DidChangeStyle(text::Offset offset, text::OffsetDelta length) final;
-  void DidDeleteAt(text::Offset offset, text::OffsetDelta length) final;
-  void DidInsertBefore(text::Offset offset, text::OffsetDelta length) final;
+  void DidChangeStyle(const text::StaticRange& range) final;
+  void DidDeleteAt(const text::StaticRange& range) final;
+  void DidInsertBefore(const text::StaticRange& range) final;
 
   // text::SelectionChangeObserver
   void DidChangeSelection() final;

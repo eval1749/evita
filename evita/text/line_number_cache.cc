@@ -5,6 +5,7 @@
 #include "evita/text/line_number_cache.h"
 
 #include "evita/text/buffer.h"
+#include "evita/text/static_range.h"
 
 namespace text {
 
@@ -74,12 +75,12 @@ LineNumberAndOffset LineNumberCache::UpdateCache(Offset line_start_offset,
 }
 
 // BufferMutationObserver
-void LineNumberCache::DidDeleteAt(Offset offset, OffsetDelta) {
-  InvalidateCache(offset);
+void LineNumberCache::DidDeleteAt(const StaticRange& range) {
+  InvalidateCache(range.start());
 }
 
-void LineNumberCache::DidInsertBefore(Offset offset, OffsetDelta) {
-  InvalidateCache(offset);
+void LineNumberCache::DidInsertBefore(const StaticRange& range) {
+  InvalidateCache(range.start());
 }
 
 }  // namespace text

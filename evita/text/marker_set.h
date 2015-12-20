@@ -20,6 +20,12 @@ class AtomicString;
 
 namespace text {
 
+class StaticRange;
+
+//////////////////////////////////////////////////////////////////////
+//
+// MarkerSet
+//
 class MarkerSet final : public BufferMutationObserver {
  public:
   explicit MarkerSet(BufferMutationObservee* provider);
@@ -62,8 +68,8 @@ class MarkerSet final : public BufferMutationObserver {
   void RemoveMarker(Offset start, Offset end);
 
   // BufferMutationObserver
-  void DidDeleteAt(Offset offset, OffsetDelta length) final;
-  void DidInsertBefore(Offset offset, OffsetDelta length) final;
+  void DidDeleteAt(const StaticRange& range) final;
+  void DidInsertBefore(const StaticRange& range) final;
 
   MarkerSetImpl markers_;
   BufferMutationObservee* const mutation_observee_;

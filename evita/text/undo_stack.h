@@ -12,8 +12,13 @@
 
 namespace text {
 
+class StaticRange;
 class UndoStep;
 
+//////////////////////////////////////////////////////////////////////
+//
+// UndoStack
+//
 class UndoStack final : public BufferMutationObserver {
  public:
   enum class State {
@@ -35,8 +40,8 @@ class UndoStack final : public BufferMutationObserver {
 
  private:
   // BufferMutationObserver
-  void DidInsertBefore(Offset offset, OffsetDelta length) final;
-  void WillDeleteAt(Offset offset, OffsetDelta length) final;
+  void DidInsertBefore(const StaticRange& range) final;
+  void WillDeleteAt(const StaticRange& range) final;
 
   Buffer* buffer_;
   std::vector<UndoStep*> redo_steps_;

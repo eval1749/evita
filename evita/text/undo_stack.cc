@@ -12,6 +12,7 @@
 #include "common/adopters/reverse.h"
 #include "evita/text/buffer.h"
 #include "evita/text/undo_step.h"
+#include "evita/text/static_range.h"
 
 std::ostream& operator<<(std::ostream& ostream, text::UndoStack::State state) {
   return ostream << static_cast<int>(state);
@@ -19,6 +20,10 @@ std::ostream& operator<<(std::ostream& ostream, text::UndoStack::State state) {
 
 namespace text {
 
+//////////////////////////////////////////////////////////////////////
+//
+// UndoStack
+//
 UndoStack::UndoStack(Buffer* pBuffer)
     : buffer_(pBuffer), state_(State::Normal) {
   buffer_->AddObserver(this);
@@ -147,8 +152,10 @@ Offset UndoStack::Undo(Offset offset, int count) {
 }
 
 // BufferMutationObserver
-void UndoStack::DidInsertBefore(Offset start, OffsetDelta length) {
-  auto const end = start + length;
+void UndoStack::DidInsertBefore(const StaticRange& range) {
+  const auto start = range.start();
+  const auto end = range.end();
+  const auto length = range.length();
 
   if (state_ == State::Redo) {
     DCHECK(undo_steps_.back()->is<InsertUndoStep>());
@@ -168,16 +175,18 @@ void UndoStack::DidInsertBefore(Offset start, OffsetDelta length) {
   undo_steps_.push_back(insert_step.release());
 }
 
-void UndoStack::WillDeleteAt(Offset start, OffsetDelta length) {
-  auto const end = start + length;
-  auto text = buffer_->GetText(start, end);
+void UndoStack::WillDeleteAt(const StaticRange& range) {
+  const auto start = range.start();
+  const auto end = range.end();
+  const auto length = range.length();
+  const auto& text = buffer_->GetText(start, end);
   if (state_ == State::Redo) {
     DCHECK(undo_steps_.back()->is<DeleteUndoStep>());
     return;
   }
 
   if (state_ == State::Undo) {
-    auto const insert_step = redo_steps_.back()->as<InsertUndoStep>();
+    const auto& insert_step = redo_steps_.back()->as<InsertUndoStep>();
     insert_step->set_text(text);
     return;
   }

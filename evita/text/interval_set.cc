@@ -52,7 +52,7 @@ class IntervalSet::Impl final : public RangeSetBase,
 
   // Returns true if style is changed for start until end, or false if nothing
   // is changed.
-  bool SetStyle(Offset start, Offset end, const css::Style& style_values);
+  void SetStyle(Offset start, Offset end, const css::Style& style_values);
 
   // Split |interval| at |offset| and return new interval starts at |offset|.
   Interval* SplitAt(Interval* interval, Offset offset);
@@ -63,6 +63,8 @@ class IntervalSet::Impl final : public RangeSetBase,
   // Merge |interval2| into |interval1| if possible and return true if merged.
   bool MergeAdjacentIntervalsIfPossible(Interval* interval1,
                                         Interval* interval2);
+
+  void NotifyChange(const Interval& interval);
 
   // Try merge interval with adjacent intervals.
   Interval* TryMergeInterval(Interval* interval);
@@ -171,12 +173,16 @@ bool IntervalSet::Impl::MergeAdjacentIntervalsIfPossible(Interval* interval1,
   return true;
 }
 
-bool IntervalSet::Impl::SetStyle(Offset start,
+void IntervalSet::Impl::NotifyChange(const Interval& interval) {
+  static_cast<IntervalSetObserver*>(buffer_)
+      ->DidChangeInterval(interval.start(), interval.end());
+}
+
+void IntervalSet::Impl::SetStyle(Offset start,
                                  Offset end,
                                  const css::Style& style) {
   DCHECK_LT(start, end);
   auto offset = start;
-  auto changed = false;
   while (offset < end) {
     const auto interval = GetIntervalAt(offset);
     DCHECK_LE(interval->start(), offset);
@@ -184,19 +190,21 @@ bool IntervalSet::Impl::SetStyle(Offset start,
         interval->start() == offset ? interval : SplitAt(interval, offset);
     if (target->end() == end) {
       if (style.IsSubsetOf(target->style()))
-        return changed;
+        return;
       target->set_style(style);
+      NotifyChange(*target);
       TryMergeInterval(target);
-      return true;
+      return;
     }
 
     if (target->end() > end) {
       if (style.IsSubsetOf(target->style()))
-        return changed;
+        return;
       SplitAt(target, end);
       target->set_style(style);
+      NotifyChange(*target);
       TryMergeInterval(target);
-      return true;
+      return;
     }
 
     if (style.IsSubsetOf(target->style())) {
@@ -204,10 +212,9 @@ bool IntervalSet::Impl::SetStyle(Offset start,
       continue;
     }
     target->set_style(style);
+    NotifyChange(*target);
     offset = TryMergeInterval(target)->end();
-    changed = true;
   }
-  return changed;
 }
 
 Interval* IntervalSet::Impl::SplitAt(Interval* interval, Offset offset) {
@@ -304,8 +311,8 @@ Interval* IntervalSet::GetIntervalAt(Offset offset) const {
   return impl_->GetIntervalAt(offset);
 }
 
-bool IntervalSet::SetStyle(Offset start, Offset end, const css::Style& style) {
-  return impl_->SetStyle(start, end, style);
+void IntervalSet::SetStyle(Offset start, Offset end, const css::Style& style) {
+  impl_->SetStyle(start, end, style);
 }
 
 }  // namespace text

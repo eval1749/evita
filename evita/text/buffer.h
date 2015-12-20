@@ -16,6 +16,7 @@
 #include "evita/IStringCursor.h"
 #include "evita/text/buffer_core.h"
 #include "evita/text/buffer_mutation_observer.h"
+#include "evita/text/interval_set_observer.h"
 #include "evita/text/marker_set_observer.h"
 
 namespace css {
@@ -53,6 +54,7 @@ struct LineAndColumn {
 //
 class Buffer final : public BufferCore,
                      public BufferMutationObservee,
+                     public IntervalSetObserver,
                      public MarkerSetObserver {
  public:
   Buffer();
@@ -106,6 +108,9 @@ class Buffer final : public BufferCore,
 
  private:
   void UpdateChangeTick();
+
+  // Implements IntervalSetObserver
+  void DidChangeInterval(Offset start, Offset end) final;
 
   // Implements MarkerSetObserver
   void DidChangeMarker(Offset start, Offset end) final;

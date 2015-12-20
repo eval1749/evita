@@ -31,7 +31,7 @@ class IntervalSet final {
   Interval* GetIntervalAt(Offset offset) const;
   // Returns true if style is changed between |start| until |end|, otherwise
   // returns to false.
-  bool SetStyle(Offset start, Offset end, const css::Style& style);
+  void SetStyle(Offset start, Offset end, const css::Style& style);
 
  private:
   class Impl;

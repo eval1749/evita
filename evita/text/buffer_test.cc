@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <sstream>
+#include <string>
 
 #include "base/strings/utf_string_conversions.h"
 #include "evita/css/style.h"
 #include "evita/text/buffer.h"
 #include "evita/text/offset.h"
 #include "evita/text/range.h"
+#include "evita/text/static_range.h"
 #include "gtest/gtest.h"
 
 namespace {
@@ -47,22 +50,45 @@ ostream& operator<<(ostream& ostream, const MyLineAndColumn& line_and_column) {
 
 namespace text {
 
-class BufferTest : public ::testing::Test {
- public:
-  text::Buffer* buffer() const { return buffer_.get(); }
-
+class BufferTest : public ::testing::Test, public BufferMutationObserver {
  protected:
   BufferTest() : buffer_(new text::Buffer()) {}
+
+  text::Buffer* buffer() const { return buffer_.get(); }
+  const std::string style_changes() const { return style_changes_.str(); }
 
   MyLineAndColumn GetLineAndColumn(int offset) const {
     return MyLineAndColumn(buffer()->GetLineAndColumn(Offset(offset)));
   }
 
+  void EndObserve();
+  void StartObserve();
+
  private:
+  // BufferMutationObserver
+  void DidChangeStyle(const StaticRange& range) final;
+
   std::unique_ptr<text::Buffer> buffer_;
+  std::ostringstream style_changes_;
 
   DISALLOW_COPY_AND_ASSIGN(BufferTest);
 };
+
+void BufferTest::StartObserve() {
+  style_changes_ = std::ostringstream();
+  buffer_->AddObserver(this);
+}
+
+void BufferTest::EndObserve() {
+  buffer_->RemoveObserver(this);
+}
+
+// BufferMutationObserver
+void BufferTest::DidChangeStyle(const StaticRange& range) {
+  if (style_changes_.tellp())
+    style_changes_ << " ";
+  style_changes_ << range.start().value() << "," << range.end().value();
+}
 
 TEST_F(BufferTest, GetLineAndColumn) {
   buffer()->InsertBefore(Offset(0), base::ASCIIToUTF16("01\n02\n03\04\05\n"));
@@ -127,6 +153,24 @@ TEST_F(BufferTest, SetStyle) {
   buffer()->SetStyle(Offset(4), Offset(7), style_color_red);
   EXPECT_EQ(version, buffer()->version())
       << "Set same style doesn't change buffer";
+}
+
+TEST_F(BufferTest, SetStyleWithObserver) {
+  buffer()->InsertBefore(Offset(0), L"012345678");
+  css::Style style1(css::Color(1, 0, 0), css::Color(2, 0, 0));
+  buffer()->SetStyle(text::Offset(0), text::Offset(9), style1);
+
+  css::Style style2(css::Color(3, 0, 0), css::Color(2, 0, 0));
+  StartObserve();
+  buffer()->SetStyle(text::Offset(2), text::Offset(4), style2);
+  buffer()->SetStyle(text::Offset(6), text::Offset(8), style2);
+  EXPECT_EQ("2,4 6,8", style_changes());
+  EndObserve();
+
+  StartObserve();
+  buffer()->SetStyle(text::Offset(0), text::Offset(9), style2);
+  EndObserve();
+  EXPECT_EQ("0,2 4,6 8,9", style_changes());
 }
 
 }  // namespace text

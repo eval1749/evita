@@ -16,6 +16,8 @@ source_set("text") {
     "interval.h",
     "interval_set.cc",
     "interval_set.h",
+    "interval_set_observer.cc",
+    "interval_set_observer.h",
     "line_number_cache.cc",
     "line_number_cache.h",
     "marker.cc",

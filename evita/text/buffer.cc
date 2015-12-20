@@ -169,11 +169,7 @@ void Buffer::SetStyle(Offset start, Offset end, const css::Style& style) {
   if (start == end)
     return;
   DCHECK_LT(start, end);
-  if (!intervals_->SetStyle(start, end, style))
-    return;
-  ++version_;
-  const auto& range = StaticRange(*this, start, end);
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
+  intervals_->SetStyle(start, end, style);
 }
 
 void Buffer::StartUndoGroup(const base::string16& name) {
@@ -191,9 +187,18 @@ void Buffer::UpdateChangeTick() {
   ++version_;
 }
 
+// IntervalSetObserver
+void Buffer::DidChangeInterval(Offset start, Offset end) {
+  DCHECK_LT(start, end);
+  ++version_;
+  const auto& range = StaticRange(*this, start, end);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
+}
+
 // MarkerSetObserver
 void Buffer::DidChangeMarker(Offset start, Offset end) {
   DCHECK_LT(start, end);
+  ++version_;
   const auto& range = StaticRange(*this, start, end);
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidChangeStyle(range));
 }

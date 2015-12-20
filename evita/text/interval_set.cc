@@ -51,7 +51,7 @@ class IntervalSet::Impl final : public RangeSetBase,
   Interval* GetIntervalAt(Offset offset) const;
 
   // Set style on specified range.
-  void set_style(Offset start, Offset end, const css::Style& style_values);
+  void SetStyle(Offset start, Offset end, const css::Style& style_values);
 
   // Split |interval| at |offset| and return new interval starts at |offset|.
   Interval* SplitAt(Interval* interval, Offset offset);
@@ -170,9 +170,9 @@ bool IntervalSet::Impl::MergeAdjacentIntervalsIfPossible(Interval* interval1,
   return true;
 }
 
-void IntervalSet::Impl::set_style(Offset start,
-                                  Offset end,
-                                  const css::Style& style) {
+void IntervalSet::Impl::SetStyle(Offset start,
+                                 Offset end,
+                                 const css::Style& style) {
   DCHECK_LT(start, end);
   auto offset = start;
   while (offset < end) {
@@ -297,7 +297,7 @@ Interval* IntervalSet::GetIntervalAt(Offset offset) const {
 }
 
 void IntervalSet::SetStyle(Offset start, Offset end, const css::Style& style) {
-  return impl_->set_style(start, end, style);
+  return impl_->SetStyle(start, end, style);
 }
 
 }  // namespace text

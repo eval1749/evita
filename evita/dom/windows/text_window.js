@@ -321,7 +321,10 @@ global.TextWindow.prototype.clone = function() {
    * @param {!WheelEvent} event
    */
   function handleWheel(window, event) {
-    window.scroll(event.deltaY > 0 ? -2 : 2);
+    // TODO(eval1749): We should retrieve number of scroll line from
+    // |SPI_GETWHEELSCROLLLINES|.
+    /** @type {number} */ const lines = 3;
+    window.scroll(event.deltaY > 0 ? -lines : lines);
   }
 
   /**

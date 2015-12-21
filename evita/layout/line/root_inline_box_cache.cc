@@ -28,15 +28,15 @@ bool IsWrappedLine(const RootInlineBox& line) {
 //
 // RootInlineBoxCache
 //
-RootInlineBoxCache::RootInlineBoxCache(const text::Buffer* buffer)
+RootInlineBoxCache::RootInlineBoxCache(const text::Buffer& buffer)
     : buffer_(buffer), zoom_(0.0f) {
   UI_DOM_AUTO_LOCK_SCOPE();
-  const_cast<text::Buffer*>(buffer_)->AddObserver(this);
+  buffer_.AddObserver(this);
 }
 
 RootInlineBoxCache::~RootInlineBoxCache() {
   UI_DOM_AUTO_LOCK_SCOPE();
-  const_cast<text::Buffer*>(buffer_)->RemoveObserver(this);
+  buffer_.RemoveObserver(this);
 }
 
 RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
@@ -95,7 +95,7 @@ void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
 
 bool RootInlineBoxCache::IsAfterNewline(const RootInlineBox* text_line) const {
   const auto start = text_line->text_start();
-  return !start || buffer_->GetCharAt(start - text::OffsetDelta(1)) == '\n';
+  return !start || buffer_.GetCharAt(start - text::OffsetDelta(1)) == '\n';
 }
 
 bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds, float zoom) const {
@@ -107,9 +107,9 @@ bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds, float zoom) const {
 bool RootInlineBoxCache::IsEndWithNewline(
     const RootInlineBox* text_line) const {
   const auto end = text_line->text_end();
-  if (end >= buffer_->GetEnd())
+  if (end >= buffer_.GetEnd())
     return true;
-  return buffer_->GetCharAt(end - text::OffsetDelta(1)) == '\n';
+  return buffer_.GetCharAt(end - text::OffsetDelta(1)) == '\n';
 }
 
 RootInlineBox* RootInlineBoxCache::Register(

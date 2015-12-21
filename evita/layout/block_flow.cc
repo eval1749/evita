@@ -27,7 +27,7 @@ namespace layout {
 //
 BlockFlow::BlockFlow(text::Buffer* text_buffer)
     : text_buffer_(text_buffer),
-      text_line_cache_(new RootInlineBoxCache(text_buffer)) {}
+      text_line_cache_(new RootInlineBoxCache(*text_buffer)) {}
 
 BlockFlow::~BlockFlow() {}
 

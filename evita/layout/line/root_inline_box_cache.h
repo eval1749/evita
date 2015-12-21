@@ -28,7 +28,7 @@ class RootInlineBox;
 //
 class RootInlineBoxCache final : public text::BufferMutationObserver {
  public:
-  explicit RootInlineBoxCache(const text::Buffer* buffer);
+  explicit RootInlineBoxCache(const text::Buffer& buffer);
   ~RootInlineBoxCache();
 
   RootInlineBox* FindLine(text::Offset text_offset) const;
@@ -48,7 +48,7 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
   void DidInsertBefore(const text::StaticRange& range) final;
 
   gfx::RectF bounds_;
-  const text::Buffer* const buffer_;
+  const text::Buffer& buffer_;
   std::map<text::Offset, std::unique_ptr<RootInlineBox>> lines_;
   float zoom_;
 

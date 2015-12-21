@@ -48,7 +48,7 @@ class RootInlineBoxCacheTest : public ::testing::Test {
 RootInlineBoxCacheTest::RootInlineBoxCacheTest()
     : bounds_(gfx::PointF(), gfx::SizeF(640.0f, 480.0f)),
       buffer_(new text::Buffer()),
-      cache_(new RootInlineBoxCache(buffer())) {}
+      cache_(new RootInlineBoxCache(*buffer())) {}
 
 void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
   {

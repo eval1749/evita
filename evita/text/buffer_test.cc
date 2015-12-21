@@ -91,7 +91,9 @@ void BufferTest::DidChangeStyle(const StaticRange& range) {
 }
 
 TEST_F(BufferTest, GetLineAndColumn) {
-  buffer()->InsertBefore(Offset(0), base::ASCIIToUTF16("01\n02\n03\04\05\n"));
+  buffer()->InsertBefore(Offset(0), base::ASCIIToUTF16("01\n02\n030405\n"));
+  // 012_345_678901_
+  // 01\n02\n030405\n
   EXPECT_EQ(MyLineAndColumn(1, 0), GetLineAndColumn(0));
   // No cache update.
   EXPECT_EQ(MyLineAndColumn(1, 1), GetLineAndColumn(1));
@@ -100,6 +102,24 @@ TEST_F(BufferTest, GetLineAndColumn) {
   EXPECT_EQ(MyLineAndColumn(1, 1), GetLineAndColumn(1));
   EXPECT_EQ(MyLineAndColumn(1, 2), GetLineAndColumn(2));
   EXPECT_EQ(MyLineAndColumn(2, 0), GetLineAndColumn(3));
+
+  // Delete one character from line 2
+  buffer()->Delete(Offset(3), Offset(4));
+  // 012_34_5678901_
+  // 01\n2\n030405\n
+  EXPECT_EQ(MyLineAndColumn(3, 1), GetLineAndColumn(6));
+
+  // Delete line 2
+  buffer()->Delete(Offset(3), Offset(5));
+  // 012_345678901_
+  // 01\n030405\n
+  EXPECT_EQ(MyLineAndColumn(2, 3), GetLineAndColumn(6));
+
+  // Insert line 2
+  buffer()->InsertBefore(Offset(3), L"02\n");
+  // 012_345_678901_
+  // 01\n02\n030405\n
+  EXPECT_EQ(MyLineAndColumn(3, 0), GetLineAndColumn(6));
 }
 
 TEST_F(BufferTest, InsertBefore) {

@@ -75,7 +75,7 @@ Offset Buffer::ComputeEndOfLine(Offset offset) const {
 
 Offset Buffer::ComputeStartOfLine(Offset offset) const {
   DCHECK(IsValidPosn(offset));
-  while (offset > 0) {
+  while (offset > Offset(0)) {
     --offset;
     if (GetCharAt(offset) == 0x0A) {
       ++offset;

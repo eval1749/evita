@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 interface TextSelection : Selection {
-  readonly attribute long anchorOffset;
-  readonly attribute long focusOffset;
+  [ImplementedAs=anchor_offset_value] readonly attribute long anchorOffset;
+  [ImplementedAs=focus_offset_value] readonly attribute long focusOffset;
   [ImplementedAs=JavaScript] attribute Point? goal_point_;
   [ImplementedAs=JavaScript] attribute long goal_position_;
   readonly attribute Range range;

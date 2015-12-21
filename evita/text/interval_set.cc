@@ -149,7 +149,7 @@ IntervalSet::Impl::~Impl() {
 
 Interval* IntervalSet::Impl::GetIntervalAt(Offset offset) const {
   DCHECK(!intervals_.empty());
-  if (!offset)
+  if (offset == Offset(0))
     return *intervals_.begin();
   Interval interval(offset, offset + OffsetDelta(1));
   const auto& it = intervals_.lower_bound(&interval);

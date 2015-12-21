@@ -4,6 +4,7 @@
 
 interface MutationRecord {
   readonly attribute Document document;
+  [ImplementedAs=offset_value]
   readonly attribute long offset;
   readonly attribute DOMString type;
 };

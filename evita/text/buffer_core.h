@@ -35,7 +35,7 @@ class BufferCore {
   base::string16 GetText(Offset start, Offset end) const;
 
   // [I]
-  bool IsValidPosn(Offset p) const { return p >= 0 && p <= m_lEnd; }
+  bool IsValidPosn(Offset p) const { return p >= Offset(0) && p <= m_lEnd; }
 
   bool IsValidRange(Offset s, Offset e) const {
     return IsValidPosn(s) && IsValidPosn(e) && s <= e;

@@ -66,8 +66,7 @@ text::Offset TextWindow::ComputeMotion(int method, text::Offset position) {
 }
 
 text::Offset TextWindow::ComputeMotion(int method) {
-  return ComputeMotion(method, text::Offset(0), text::Offset(1),
-                       domapi::FloatPoint());
+  return ComputeMotion(method, text::Offset(0), 1, domapi::FloatPoint());
 }
 
 domapi::FloatRect TextWindow::HitTestTextPosition(text::Offset position) {

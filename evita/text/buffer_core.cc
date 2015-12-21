@@ -39,8 +39,8 @@ OffsetDelta BufferCore::deleteChars(Offset lStart, Offset lEnd) {
 Offset BufferCore::EnsurePosn(int offset) const {
   if (offset < 0)
     return Offset(0);
-  if (offset > m_lEnd)
-    return Offset(m_lEnd);
+  if (offset > m_lEnd.value())
+    return m_lEnd;
   return Offset(offset);
 }
 
@@ -65,7 +65,8 @@ void BufferCore::extend(Offset lPosn, int cwchExtent) {
       ::HeapReAlloc(m_hHeap, 0, m_pwch, sizeof(base::char16) * m_cwch));
   DCHECK(m_pwch);
   // Extend GAP
-  ::MoveMemory(m_pwch + m_lGapEnd + nExtension, m_pwch + m_lGapEnd,
+  ::MoveMemory(m_pwch + m_lGapEnd.value() + nExtension,
+               m_pwch + m_lGapEnd.value(),
                sizeof(base::char16) * (m_lEnd - m_lGapStart));
 
   m_lGapEnd += OffsetDelta(nExtension);
@@ -77,23 +78,21 @@ base::char16 BufferCore::GetCharAt(Offset lPosn) const {
     return 0;
   if (lPosn >= m_lGapStart)
     lPosn += m_lGapEnd - m_lGapStart;
-  return m_pwch[lPosn];
+  return m_pwch[lPosn.value()];
 }
 
 OffsetDelta BufferCore::GetText(base::char16* prgwch,
                                 Offset lStart,
                                 Offset lEnd) const {
-  if (lStart < 0)
-    lStart = Offset();
   if (lEnd > GetEnd())
     lEnd = GetEnd();
   if (lStart >= lEnd)
-    return OffsetDelta();
+    return OffsetDelta(0);
 
   if (lStart >= m_lGapStart) {
     // We extract text after gap.
     // gggggg<....>
-    ::CopyMemory(prgwch, m_pwch + m_lGapEnd + (lStart - m_lGapStart),
+    ::CopyMemory(prgwch, m_pwch + m_lGapEnd.value() + (lStart - m_lGapStart),
                  sizeof(base::char16) * (lEnd - lStart));
   } else {
     // We extract text before gap.
@@ -101,9 +100,9 @@ OffsetDelta BufferCore::GetText(base::char16* prgwch,
     // <...ggg>ggg
     // <...ggg...>
     auto const lMiddle = std::min(m_lGapStart, lEnd);
-    ::CopyMemory(prgwch, m_pwch + lStart,
+    ::CopyMemory(prgwch, m_pwch + lStart.value(),
                  sizeof(base::char16) * (lMiddle - lStart));
-    ::CopyMemory(prgwch + (lMiddle - lStart), m_pwch + m_lGapEnd,
+    ::CopyMemory(prgwch + (lMiddle - lStart), m_pwch + m_lGapEnd.value(),
                  sizeof(base::char16) * (lEnd - lMiddle));
   }
 
@@ -127,7 +126,7 @@ base::string16 BufferCore::GetText(Offset start, Offset end) const {
 void BufferCore::insert(Offset lPosn, const base::char16* pwch, size_t n) {
   DCHECK(IsValidPosn(lPosn));
   extend(lPosn, n);
-  ::CopyMemory(m_pwch + lPosn, pwch, sizeof(base::char16) * n);
+  ::CopyMemory(m_pwch + lPosn.value(), pwch, sizeof(base::char16) * n);
   m_lGapStart += OffsetDelta(n);
   m_lEnd += OffsetDelta(n);
 }
@@ -151,7 +150,7 @@ void BufferCore::moveGap(Offset lNewStart) {
     //    ^  s   e
     // abc....defghijk
     //    s   e
-    ::MoveMemory(m_pwch + lNewEnd, m_pwch + lNewStart,
+    ::MoveMemory(m_pwch + lNewEnd.value(), m_pwch + lNewStart.value(),
                  sizeof(base::char16) * iDiff);
   } else if (iDiff < 0) {
     // Move GAP forward
@@ -165,7 +164,7 @@ void BufferCore::moveGap(Offset lNewStart) {
     //      V   V
     // abcdefghi...jk
     //          s  e
-    ::MoveMemory(m_pwch + lCurStart, m_pwch + lCurEnd,
+    ::MoveMemory(m_pwch + lCurStart.value(), m_pwch + lCurEnd.value(),
                  sizeof(base::char16) * -iDiff);
   }
 }

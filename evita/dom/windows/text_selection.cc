@@ -34,8 +34,16 @@ text::Offset TextSelection::anchor_offset() const {
   return start_is_active() ? range_->end() : range_->start();
 }
 
+int TextSelection::anchor_offset_value() const {
+  return anchor_offset().value();
+}
+
 text::Offset TextSelection::focus_offset() const {
   return start_is_active() ? range_->start() : range_->end();
+}
+
+int TextSelection::focus_offset_value() const {
+  return focus_offset().value();
 }
 
 bool TextSelection::start_is_active() const {

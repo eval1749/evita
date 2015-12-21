@@ -33,6 +33,8 @@ class MutationRecord final : public v8_glue::Scriptable<MutationRecord> {
 
   Document* document() const { return document_.get(); }
   text::Offset offset() const { return offset_; }
+  // For IDL
+  int offset_value() const { return offset_.value(); }
   const base::string16& type() const { return type_; }
 
   gc::Member<Document> document_;

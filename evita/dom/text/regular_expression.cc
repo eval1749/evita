@@ -65,7 +65,7 @@ class EnumChar final {
     return buffer_->GetCharAt(offset_);
   }
 
-  text::Offset GetPosn() const { return offset_; }
+  int GetPosn() const { return offset_.value(); }
 
   const css::Style& GetStyle() const {
     DCHECK(!AtEnd());
@@ -111,9 +111,9 @@ class EnumCharRev final {
     return buffer_->GetCharAt(offset_ - text::OffsetDelta(1));
   }
 
-  text::Offset GetPosn() const {
+  int GetPosn() const {
     DCHECK(!AtEnd());
-    return offset_;
+    return offset_.value();
   }
 
   const css::Style& GetStyle() const {
@@ -302,9 +302,9 @@ class RegularExpression::BufferMatcher final : public ::Regex::IMatchContext {
   bool ForwardFindCharCs(base::char16, int*, int) const final;
   bool GetCapture(int index, int*, int*) const final;
   base::char16 GetChar(int lPosn) const final;
-  int GetEnd() const final { return end_; }
+  int GetEnd() const final { return end_.value(); }
   void GetInfo(::Regex::SourceInfo* source_info) const final;
-  int GetStart() const final { return start_; }
+  int GetStart() const final { return start_.value(); }
   void ResetCapture(int index) final;
   void ResetCaptures() final;
   void SetCapture(int, int, int) final;
@@ -401,9 +401,9 @@ base::char16 RegularExpression::BufferMatcher::GetChar(int lPosn) const {
 
 void RegularExpression::BufferMatcher::GetInfo(::Regex::SourceInfo* p) const {
   p->m_lStart = 0;
-  p->m_lEnd = buffer_->GetEnd();
-  p->m_lScanStart = start_;
-  p->m_lScanEnd = end_;
+  p->m_lEnd = buffer_->GetEnd().value();
+  p->m_lScanStart = start_.value();
+  p->m_lScanEnd = end_.value();
 }
 
 // [R]

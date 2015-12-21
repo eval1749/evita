@@ -150,20 +150,20 @@ TEST_F(TextFormatterTest, FormatLineWrap) {
   EXPECT_EQ(TextMarker::LineWrap,
             line1->boxes().back()->as<InlineMarkerBox>()->marker_name());
   EXPECT_FALSE(line1->IsContinuedLine());
-  EXPECT_EQ(0, line1->line_start());
-  EXPECT_EQ(0, line1->text_start());
-  EXPECT_EQ(3, line1->text_end());
+  EXPECT_EQ(text::Offset(0), line1->line_start());
+  EXPECT_EQ(text::Offset(0), line1->text_start());
+  EXPECT_EQ(text::Offset(3), line1->text_end());
 
   const auto line2 = formatter1.FormatLine();
   EXPECT_EQ(line1->line_start(), line2->line_start());
-  EXPECT_EQ(3, line2->text_start());
-  EXPECT_EQ(6, line2->text_end());
+  EXPECT_EQ(text::Offset(3), line2->text_start());
+  EXPECT_EQ(text::Offset(6), line2->text_end());
   EXPECT_TRUE(line2->IsContinuedLine());
 
   const auto line3 = formatter1.FormatLine();
   EXPECT_EQ(line1->line_start(), line3->line_start());
-  EXPECT_EQ(6, line3->text_start());
-  EXPECT_EQ(8, line3->text_end()) << "document.length + 1";
+  EXPECT_EQ(text::Offset(6), line3->text_start());
+  EXPECT_EQ(text::Offset(8), line3->text_end()) << "document.length + 1";
   EXPECT_TRUE(line3->IsContinuedLine());
 }
 }  // namespace layout

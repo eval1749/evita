@@ -29,8 +29,8 @@ LineNumberCache::~LineNumberCache() {
 
 LineNumberAndOffset LineNumberCache::Get(Offset offset) {
   DCHECK(!map_.empty());
-  if (!offset)
-    return MakeLineNumberAndOffset(Offset(), Offset(1));
+  if (offset == Offset(0))
+    return MakeLineNumberAndOffset(Offset(0), 1);
   auto it = map_.lower_bound(offset);
   if (it == map_.end()) {
     // offset is after cache.
@@ -46,7 +46,7 @@ LineNumberAndOffset LineNumberCache::Get(Offset offset) {
 }
 
 void LineNumberCache::InvalidateCache(Offset offset) {
-  if (!offset) {
+  if (offset == Offset(0)) {
     map_.clear();
     map_[Offset(0)] = 1;
     return;

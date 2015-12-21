@@ -17,6 +17,10 @@ class Range;
 
 namespace dom {
 
+namespace bindings {
+class RangeClass;
+}
+
 class Document;
 
 //////////////////////////////////////////////////////////////////////
@@ -54,6 +58,14 @@ class Range final : public v8_glue::Scriptable<Range> {
   void SetSyntax(const base::string16& syntax) const;
 
  private:
+  friend class bindings::RangeClass;
+
+  // For IDL
+  int end_value() const;
+  void set_end_value(int value) { set_end(value); }
+  int start_value() const;
+  void set_start_value(int value) { set_start(value); }
+
   gc::Member<Document> document_;
   // TODO(yosi): We should manage life time of text::Range.
   text::Range* range_;

@@ -430,7 +430,7 @@ void ViewDelegateImpl::MapTextWindowPointToOffset(
 
   UI_DOM_AUTO_LOCK_SCOPE();
   auto const offset = text_window->HitTestPoint(gfx::PointF(x, y));
-  return Resolve(promise, offset);
+  return Resolve(promise, offset.value());
 }
 
 void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,

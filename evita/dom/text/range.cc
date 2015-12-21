@@ -37,8 +37,16 @@ text::Offset Range::end() const {
   return range_->end();
 }
 
+int Range::end_value() const {
+  return end().value();
+}
+
 text::Offset Range::start() const {
   return range_->start();
+}
+
+int Range::start_value() const {
+  return start().value();
 }
 
 base::string16 Range::text() const {

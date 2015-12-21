@@ -157,20 +157,27 @@ TEST_F(RootInlineBoxTest, HitTestPoint) {
   builder.AddMarker(TextMarker::EndOfLine);
   const auto& root_box = builder.Build();
   const auto width = root_box->width();
-  EXPECT_EQ(100, root_box->HitTestPoint(-1));
-  EXPECT_EQ(100, root_box->HitTestPoint(0));
-  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth));
-  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"f") / 2));
-  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"f") - 1));
-  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fo") - 1));
-  EXPECT_EQ(102, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fo")));
-  EXPECT_EQ(103, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"foo")));
-  EXPECT_EQ(103, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"foo") + 1));
-  EXPECT_EQ(105, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fooba") + 1));
-  EXPECT_EQ(108,
+  EXPECT_EQ(text::Offset(100), root_box->HitTestPoint(-1));
+  EXPECT_EQ(text::Offset(100), root_box->HitTestPoint(0));
+  EXPECT_EQ(text::Offset(100), root_box->HitTestPoint(kLeadingWidth));
+  EXPECT_EQ(text::Offset(100),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"f") / 2));
+  EXPECT_EQ(text::Offset(100),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"f") - 1));
+  EXPECT_EQ(text::Offset(101),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fo") - 1));
+  EXPECT_EQ(text::Offset(102),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fo")));
+  EXPECT_EQ(text::Offset(103),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"foo")));
+  EXPECT_EQ(text::Offset(103),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"foo") + 1));
+  EXPECT_EQ(text::Offset(105),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"fooba") + 1));
+  EXPECT_EQ(text::Offset(108),
             root_box->HitTestPoint(kLeadingWidth + WidthOf(L"foobarbaz") - 1));
-  EXPECT_EQ(109, root_box->HitTestPoint(kLeadingWidth + width));
-  EXPECT_EQ(109, root_box->HitTestPoint(99999));
+  EXPECT_EQ(text::Offset(109), root_box->HitTestPoint(kLeadingWidth + width));
+  EXPECT_EQ(text::Offset(109), root_box->HitTestPoint(99999));
 }
 
 TEST_F(RootInlineBoxTest, HitTestPointCodeUnit) {
@@ -181,19 +188,26 @@ TEST_F(RootInlineBoxTest, HitTestPointCodeUnit) {
   builder.AddMarker(TextMarker::EndOfLine);
   const auto& root_box = builder.Build();
   const auto width = root_box->width();
-  EXPECT_EQ(100, root_box->HitTestPoint(-1));
-  EXPECT_EQ(100, root_box->HitTestPoint(0));
-  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth));
-  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a") / 2));
-  EXPECT_EQ(100, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a") - 1));
-  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a")));
-  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"au")));
-  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auF")));
-  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auFF")));
-  EXPECT_EQ(101, root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auFFF")));
-  EXPECT_EQ(102, root_box->HitTestPoint(width - 10));
-  EXPECT_EQ(103, root_box->HitTestPoint(width));
-  EXPECT_EQ(103, root_box->HitTestPoint(99999));
+  EXPECT_EQ(text::Offset(100), root_box->HitTestPoint(-1));
+  EXPECT_EQ(text::Offset(100), root_box->HitTestPoint(0));
+  EXPECT_EQ(text::Offset(100), root_box->HitTestPoint(kLeadingWidth));
+  EXPECT_EQ(text::Offset(100),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a") / 2));
+  EXPECT_EQ(text::Offset(100),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a") - 1));
+  EXPECT_EQ(text::Offset(101),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"a")));
+  EXPECT_EQ(text::Offset(101),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"au")));
+  EXPECT_EQ(text::Offset(101),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auF")));
+  EXPECT_EQ(text::Offset(101),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auFF")));
+  EXPECT_EQ(text::Offset(101),
+            root_box->HitTestPoint(kLeadingWidth + WidthOf(L"auFFF")));
+  EXPECT_EQ(text::Offset(102), root_box->HitTestPoint(width - 10));
+  EXPECT_EQ(text::Offset(103), root_box->HitTestPoint(width));
+  EXPECT_EQ(text::Offset(103), root_box->HitTestPoint(99999));
 }
 
 TEST_F(RootInlineBoxTest, HitTestTextPosition) {

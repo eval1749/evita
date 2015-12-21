@@ -47,6 +47,10 @@ class TextSelection final
  private:
   friend class bindings::TextSelectionClass;
 
+  // For IDL
+  int anchor_offset_value() const;
+  int focus_offset_value() const;
+
   // text::SelectionChangeObserver
   void DidChangeSelection() final;
 

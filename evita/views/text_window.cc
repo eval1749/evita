@@ -153,7 +153,7 @@ text::Offset TextWindow::HitTestPoint(const gfx::PointF pt) {
 // of caret, If specified buffer position isn't in window, this function
 // returns 0.
 gfx::RectF TextWindow::HitTestTextPosition(text::Offset text_offset) {
-  DCHECK_GE(text_offset, 0);
+  DCHECK(text_offset.IsValid());
   UI_ASSERT_DOM_LOCKED();
   text_view_->FormatIfNeeded();
   return text_view_->HitTestTextPosition(text_offset);
@@ -259,8 +259,8 @@ void TextWindow::UpdateScrollBar() {
   ui::ScrollBar::Data data;
   data.minimum = 0;
   data.thumb_size = text_view_->ComputeVisibleEnd() - text_view_->text_start();
-  data.thumb_value = text_view_->text_start();
-  data.maximum = buffer().GetEnd() + text::OffsetDelta(1);
+  data.thumb_value = text_view_->text_start().value();
+  data.maximum = buffer().GetEnd().value() + 1;
   vertical_scroll_bar_->SetData(data);
   // TODO(eval1749): Once we have scroll bar for |ui::TextWindow|, we don't
   // need to call |CancelAnimationFrameRequest()| to cancel request by

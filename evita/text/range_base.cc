@@ -13,7 +13,7 @@ namespace text {
 //
 RangeBase::RangeBase(Offset start, Offset end) : end_(end), start_(start) {
   DCHECK_LE(start_, end_);
-  DCHECK_GE(start_, 0);
+  DCHECK_GE(start_, Offset(0));
 }
 
 RangeBase::RangeBase(const RangeBase& other)

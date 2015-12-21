@@ -64,11 +64,11 @@ TEST_F(UndoStackTest, Group) {
 
 TEST_F(UndoStackTest, Insert) {
   InsertBefore(Offset(0), "foo");
-  EXPECT_EQ(3, buffer()->Undo(Offset(2)))
+  EXPECT_EQ(Offset(3), buffer()->Undo(Offset(2)))
       << "Move to the last editing position";
   EXPECT_EQ(Offset(3), buffer()->GetEnd())
       << "Undo isn't occured position other than last editing position.";
-  EXPECT_EQ(0, buffer()->Undo(Offset(3)))
+  EXPECT_EQ(Offset(0), buffer()->Undo(Offset(3)))
       << "Undo at the last editing position";
   EXPECT_EQ(Offset(0), buffer()->GetEnd());
   EXPECT_EQ(0, buffer()->revision())
@@ -92,7 +92,7 @@ TEST_F(UndoStackTest, Merge) {
     ScopedUndoGroup undo_group(buffer(), L"test");
     buffer()->InsertBefore(Offset(3), L"bar");
   }
-  EXPECT_EQ(3, buffer()->Undo(Offset(6)));
+  EXPECT_EQ(Offset(3), buffer()->Undo(Offset(6)));
   EXPECT_EQ(Offset(3), buffer()->GetEnd());
   EXPECT_EQ(Offset(), buffer()->Undo(Offset(3)));
   EXPECT_EQ(0, buffer()->revision())

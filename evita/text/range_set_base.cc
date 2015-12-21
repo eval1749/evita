@@ -19,7 +19,7 @@ RangeSetBase::~RangeSetBase() {}
 
 void RangeSetBase::set_range(RangeBase* range, Offset start, Offset end) {
   DCHECK_LE(start, end);
-  DCHECK_GE(start, 0);
+  DCHECK_GE(start, Offset(0));
   range->start_ = start;
   range->end_ = end;
 }
@@ -31,7 +31,7 @@ void RangeSetBase::set_range_end(RangeBase* range, Offset end) {
 
 void RangeSetBase::set_range_start(RangeBase* range, Offset start) {
   DCHECK_LE(start, range->end_);
-  DCHECK_GE(start, 0);
+  DCHECK_GE(start, Offset(0));
   range->start_ = start;
 }
 

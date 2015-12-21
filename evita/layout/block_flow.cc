@@ -352,7 +352,7 @@ void BlockFlow::Prepend(RootInlineBox* line) {
 bool BlockFlow::ScrollDown() {
   TRACE_EVENT0("views", "BlockFlow::ScrollDown");
   FormatIfNeeded();
-  if (!lines_.front()->text_start())
+  if (lines_.front()->text_start() == text::Offset(0))
     return false;
   ++version_;
   const auto goal_offset = lines_.front()->text_start() - text::OffsetDelta(1);

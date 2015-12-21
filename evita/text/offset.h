@@ -57,7 +57,6 @@ class Offset final {
 
   Offset& operator=(const Offset& other);
 
-  operator int() const { return value_; }
   int value() const { return value_; }
 
   bool operator==(const Offset& other) const;

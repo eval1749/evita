@@ -34,7 +34,7 @@ Document::Document() : buffer_(new text::Buffer()) {}
 Document::~Document() {}
 
 base::char16 Document::charCodeAt(text::Offset position) const {
-  if (position >= 0 && position < length())
+  if (position >= text::Offset(0) && position < buffer_->GetEnd())
     return buffer_->GetCharAt(position);
   ScriptHost::instance()->ThrowRangeError(
       base::StringPrintf("Bad index %d, valid index is [%d, %d]", position, 0,
@@ -193,7 +193,7 @@ text::Offset Document::Undo(text::Offset position) {
 }
 
 text::Offset Document::ValidateOffset(int offsetLike) const {
-  if (offsetLike >= 0 && offsetLike <= buffer_->GetEnd())
+  if (offsetLike >= 0 && offsetLike <= length())
     return text::Offset(offsetLike);
   ScriptHost::instance()->ThrowRangeError(
       base::StringPrintf("Invalid offset %d, valid range is [%d, %d]",

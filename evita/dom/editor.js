@@ -138,12 +138,12 @@
       present.focus();
       return;
     }
-    const text_windows = document.listWindows();
-    if (text_windows.length != 0) {
-      text_windows[0].focus();
+    const windows = document.listWindows();
+    if (windows.length != 0) {
+      windows[0].focus();
       return;
     }
-    text_windows.newTextWindow(parent, document);
+    windows.newTextWindow(parent, document);
   };
 
   /**

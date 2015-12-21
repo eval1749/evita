@@ -89,39 +89,27 @@ void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
   if (lines_.empty() || !is_width_changed)
     return;
 
-  // Remove lines longer than |bounds_.width()|
-  std::vector<text::Offset> dirty_offsets;
+  // Collect lines longer than |bounds_.width()|
+  std::vector<text::Offset> dirty_lines;
   for (const auto& pair : lines_) {
-    const auto& line = pair.second;
-    if (line->right() > new_bounds.right || !IsAfterNewline(line.get()) ||
-        !IsEndWithNewline(line.get())) {
-      dirty_offsets.push_back(line->text_end());
+    const auto& line = *pair.second;
+    if (line.right() > new_bounds.right || IsWrappedLine(line) ||
+        line.IsContinuedLine()) {
+      dirty_lines.push_back(line.text_end());
     }
   }
-  for (auto offset : dirty_offsets) {
+  // Remove dirty lines
+  for (auto offset : dirty_lines) {
     const auto& it = lines_.find(offset);
     DCHECK(it != lines_.end());
     lines_.erase(it);
   }
 }
 
-bool RootInlineBoxCache::IsAfterNewline(const RootInlineBox* text_line) const {
-  const auto start = text_line->text_start();
-  return !start || buffer_.GetCharAt(start - text::OffsetDelta(1)) == '\n';
-}
-
 bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds, float zoom) const {
   if (zoom_ != zoom)
     return false;
   return bounds_ != bounds;
-}
-
-bool RootInlineBoxCache::IsEndWithNewline(
-    const RootInlineBox* text_line) const {
-  const auto end = text_line->text_end();
-  if (end >= buffer_.GetEnd())
-    return true;
-  return buffer_.GetCharAt(end - text::OffsetDelta(1)) == '\n';
 }
 
 RootInlineBox* RootInlineBoxCache::Register(

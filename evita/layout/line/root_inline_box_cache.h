@@ -39,8 +39,6 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
 
  private:
   RootInlineBox* Insert(std::unique_ptr<RootInlineBox> line);
-  bool IsAfterNewline(const RootInlineBox* text_line) const;
-  bool IsEndWithNewline(const RootInlineBox* text_line) const;
   void RelocateLines(text::Offset offset, text::OffsetDelta delta);
   void RemoveOverwapLines(const text::StaticRange& range);
 

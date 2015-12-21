@@ -30,7 +30,7 @@ bool IsWrappedLine(const RootInlineBox& line) {
 // RootInlineBoxCache
 //
 RootInlineBoxCache::RootInlineBoxCache(const text::Buffer& buffer)
-    : buffer_(buffer), zoom_(0.0f) {
+    : buffer_(buffer) {
   UI_DOM_AUTO_LOCK_SCOPE();
   buffer_.AddObserver(this);
 }

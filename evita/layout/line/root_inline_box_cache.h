@@ -54,7 +54,7 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
   // |lines_| keeps |RootInlineBox| indexed by end offset and manages
   // life time of |RootInlineBox|.
   std::map<text::Offset, std::unique_ptr<RootInlineBox>> lines_;
-  float zoom_;
+  float zoom_ = 0.0f;
 
   DISALLOW_COPY_AND_ASSIGN(RootInlineBoxCache);
 };

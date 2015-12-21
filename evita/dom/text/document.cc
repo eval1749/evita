@@ -19,6 +19,7 @@
 #include "evita/text/marker_set.h"
 #include "evita/text/offset.h"
 #include "evita/text/spelling.h"
+#include "evita/text/static_range.h"
 #include "evita/v8_glue/runner.h"
 #include "v8_strings.h"  // NOLINT(build/include)
 
@@ -153,7 +154,8 @@ void Document::SetSpelling(text::Offset start,
   if (!IsValidPosition(start) || !IsValidPosition(end) || start >= end)
     return;
   buffer()->spelling_markers()->InsertMarker(
-      start, end, Local::MapToSpelling(spelling_code));
+      text::StaticRange(*buffer(), start, end),
+      Local::MapToSpelling(spelling_code));
 }
 
 void Document::SetSyntax(text::Offset start,
@@ -161,8 +163,8 @@ void Document::SetSyntax(text::Offset start,
                          const base::string16& syntax) {
   if (!IsValidPosition(start) || !IsValidPosition(end) || start >= end)
     return;
-  buffer()->syntax_markers()->InsertMarker(start, end,
-                                           common::AtomicString(syntax));
+  buffer()->syntax_markers()->InsertMarker(
+      text::StaticRange(*buffer(), start, end), common::AtomicString(syntax));
 }
 
 base::string16 Document::Slice(int startLike, int endLike) {

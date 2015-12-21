@@ -42,10 +42,10 @@ class MarkerSet final {
   // document. See |TextFormatter::TextScanner::spelling()|.
   const Marker* GetLowerBoundMarker(Offset offset) const;
 
-  // Insert marker from |start| to |end|, exclusive.
-  void InsertMarker(Offset start, Offset end, const common::AtomicString& type);
+  // Insert marker to |range| with |type|.
+  void InsertMarker(const StaticRange& range, const common::AtomicString& type);
 
-  void RemoveMarkerForTesting(Offset start, Offset end);
+  void RemoveMarkerForTesting(const StaticRange& range);
 
   // Remove |observer|
   void RemoveObserver(MarkerSetObserver* observer);

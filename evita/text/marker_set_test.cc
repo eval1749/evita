@@ -24,18 +24,13 @@ class MarkerSetTest : public ::testing::Test {
   Buffer* buffer() const { return buffer_.get(); }
   MarkerSet* marker_set() { return &marker_set_; }
 
-  void RemoveMarker(int start, int end) {
-    marker_set()->RemoveMarkerForTesting(Offset(start), Offset(end));
-  }
-
   Marker GetAt(int offset) {
     auto const marker = marker_set_.GetMarkerAt(Offset(offset));
     return marker ? *marker : Marker();
   }
 
-  void InsertMarker(int start, int end, const common::AtomicString& type) {
-    marker_set()->InsertMarker(Offset(start), Offset(end), type);
-  }
+  void InsertMarker(int start, int end, const common::AtomicString& type);
+  void RemoveMarker(int start, int end);
 
   const common::AtomicString Correct;
   const common::AtomicString Misspelled;
@@ -53,6 +48,18 @@ MarkerSetTest::MarkerSetTest()
       buffer_(new Buffer()),
       marker_set_(buffer_.get()) {
   buffer_->InsertBefore(Offset(0), base::string16(999, 'x'));
+}
+
+void MarkerSetTest::InsertMarker(int start,
+                                 int end,
+                                 const common::AtomicString& type) {
+  marker_set()->InsertMarker(StaticRange(*buffer_, Offset(start), Offset(end)),
+                             type);
+}
+
+void MarkerSetTest::RemoveMarker(int start, int end) {
+  marker_set()->RemoveMarkerForTesting(
+      StaticRange(*buffer_, Offset(start), Offset(end)));
 }
 
 TEST_F(MarkerSetTest, DeleteMarker_cover) {

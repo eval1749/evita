@@ -232,8 +232,8 @@ class MarkerSet::Impl final : public BufferMutationObserver {
   void AddObserver(MarkerSetObserver* observer);
   const Marker* GetMarkerAt(Offset offset) const;
   const Marker* GetLowerBoundMarker(Offset offset) const;
-  void InsertMarker(Offset start, Offset end, const common::AtomicString& type);
-  void RemoveMarker(Offset start, Offset end);
+  void InsertMarker(const StaticRange& range, const common::AtomicString& type);
+  void RemoveMarker(const StaticRange& range);
   void RemoveObserver(MarkerSetObserver* observer);
 
  private:
@@ -280,10 +280,10 @@ const Marker* MarkerSet::Impl::GetLowerBoundMarker(Offset offset) const {
   return next_it->second.get();
 }
 
-void MarkerSet::Impl::InsertMarker(Offset start,
-                                   Offset end,
+void MarkerSet::Impl::InsertMarker(const StaticRange& range,
                                    const common::AtomicString& type) {
-  DCHECK_LT(start, end);
+  const auto start = range.start();
+  const auto end = range.end();
 
   SimpleEditor editor(&markers_);
   Notifier notifier(&observers_);
@@ -361,9 +361,8 @@ void MarkerSet::Impl::InsertMarker(Offset start,
   editor.InsertOrMerge(start, end, type);
 }
 
-void MarkerSet::Impl::RemoveMarker(Offset start, Offset end) {
-  DCHECK_LT(start, end);
-  InsertMarker(start, end, common::AtomicString::Empty());
+void MarkerSet::Impl::RemoveMarker(const StaticRange& range) {
+  InsertMarker(range, common::AtomicString::Empty());
 }
 
 void MarkerSet::Impl::RemoveObserver(MarkerSetObserver* observer) {
@@ -429,14 +428,13 @@ const Marker* MarkerSet::GetLowerBoundMarker(Offset offset) const {
 }
 
 // Insert marker from |start| to |end|, exclusive.
-void MarkerSet::InsertMarker(Offset start,
-                             Offset end,
+void MarkerSet::InsertMarker(const StaticRange& range,
                              const common::AtomicString& type) {
-  impl_->InsertMarker(start, end, type);
+  impl_->InsertMarker(range, type);
 }
 
-void MarkerSet::RemoveMarkerForTesting(Offset start, Offset end) {
-  impl_->RemoveMarker(start, end);
+void MarkerSet::RemoveMarkerForTesting(const StaticRange& range) {
+  impl_->RemoveMarker(range);
 }
 
 void MarkerSet::RemoveObserver(MarkerSetObserver* observer) {

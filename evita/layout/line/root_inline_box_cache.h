@@ -31,12 +31,14 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
   explicit RootInlineBoxCache(const text::Buffer& buffer);
   ~RootInlineBoxCache();
 
+  // Returns |RootInlineBox| containing |text_offset|.
   RootInlineBox* FindLine(text::Offset text_offset) const;
   void Invalidate(const gfx::RectF& bounds, float zoom);
   bool IsDirty(const gfx::RectF& bounds, float zoom) const;
   RootInlineBox* Register(std::unique_ptr<RootInlineBox> line);
 
  private:
+  RootInlineBox* Insert(std::unique_ptr<RootInlineBox> line);
   bool IsAfterNewline(const RootInlineBox* text_line) const;
   bool IsEndWithNewline(const RootInlineBox* text_line) const;
   void RelocateLines(text::Offset offset, text::OffsetDelta delta);
@@ -49,6 +51,8 @@ class RootInlineBoxCache final : public text::BufferMutationObserver {
 
   gfx::RectF bounds_;
   const text::Buffer& buffer_;
+  // |lines_| keeps |RootInlineBox| indexed by end offset and manages
+  // life time of |RootInlineBox|.
   std::map<text::Offset, std::unique_ptr<RootInlineBox>> lines_;
   float zoom_;
 

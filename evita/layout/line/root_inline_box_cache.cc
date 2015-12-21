@@ -22,6 +22,7 @@ bool IsWrappedLine(const RootInlineBox& line) {
   return line.boxes().back()->as<InlineMarkerBox>()->marker_name() ==
          TextMarker::LineWrap;
 }
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -43,21 +44,32 @@ RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
   UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return nullptr;
-  const auto& it = lines_.lower_bound(offset);
-  if (it == lines_.end()) {
-    const auto& last = lines_.rbegin()->second;
-    if (offset < last->text_start() || offset >= last->text_end())
+  auto it = lines_.lower_bound(offset);
+  if (it == lines_.end())
+    return nullptr;
+  if (it->second->text_end() == offset) {
+    ++it;
+    if (it == lines_.end())
       return nullptr;
-    return last.get();
   }
-  if (it->first == offset)
-    return it->second.get();
-  if (it == lines_.begin())
-    return nullptr;
-  const auto& line = std::prev(it)->second;
-  if (offset < line->text_start() || offset >= line->text_end())
-    return nullptr;
-  return line.get();
+  const auto line = it->second.get();
+  return line->Contains(offset) ? line : nullptr;
+}
+
+RootInlineBox* RootInlineBoxCache::Insert(
+    std::unique_ptr<RootInlineBox> line_ptr) {
+  const auto line = line_ptr.get();
+  DCHECK(lines_.find(line->text_end()) == lines_.end())
+      << "We've already have RootInlineBox ends with " << line->text_end();
+  lines_.insert(std::make_pair(line->text_end(), std::move(line_ptr)));
+#if _DEBUG
+  const auto& it = lines_.find(line->text_end());
+  if (it != lines_.begin())
+    DCHECK_LE(std::prev(it)->second->text_end(), line->text_start());
+  if (std::next(it) != lines_.end())
+    DCHECK_GE(std::next(it)->second->text_start(), line->text_end());
+#endif
+  return line;
 }
 
 void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
@@ -83,7 +95,7 @@ void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
     const auto& line = pair.second;
     if (line->right() > new_bounds.right || !IsAfterNewline(line.get()) ||
         !IsEndWithNewline(line.get())) {
-      dirty_offsets.push_back(line->text_start());
+      dirty_offsets.push_back(line->text_end());
     }
   }
   for (auto offset : dirty_offsets) {
@@ -113,76 +125,54 @@ bool RootInlineBoxCache::IsEndWithNewline(
 }
 
 RootInlineBox* RootInlineBoxCache::Register(
-    std::unique_ptr<RootInlineBox> line_ptr) {
+    std::unique_ptr<RootInlineBox> line) {
   UI_ASSERT_DOM_LOCKED();
-  const auto line = line_ptr.get();
   DCHECK_GE(line->text_end(), line->text_start());
-  auto const present = lines_.find(line->text_start());
+  auto const present = lines_.find(line->text_end());
   if (present != lines_.end())
     lines_.erase(present);
-  lines_.insert(std::make_pair(line->text_start(), std::move(line_ptr)));
-#if _DEBUG
-  const auto& it = lines_.find(line->text_start());
-  if (it != lines_.begin())
-    DCHECK_LE(std::prev(it)->second->text_end(), line->text_start());
-  if (std::next(it) != lines_.end())
-    DCHECK_GE(std::next(it)->second->text_start(), line->text_end());
-#endif
-  return line;
+  return Insert(std::move(line));
 }
 
 void RootInlineBoxCache::RelocateLines(text::Offset offset,
                                        text::OffsetDelta delta) {
   ASSERT_DOM_LOCKED();
   std::vector<RootInlineBox*> lines;
-  for (;;) {
-    const auto& it = lines_.lower_bound(offset);
-    if (it == lines_.end())
-      break;
+  auto it = lines_.lower_bound(offset);
+  if (it != lines_.end() && it->second->text_end() == offset)
+    ++it;
+  const auto start = it;
+  while (it != lines_.end()) {
     lines.push_back(it->second.release());
-    lines_.erase(it);
+    ++it;
   }
+  lines_.erase(start, it);
   for (auto line : lines) {
     line->UpdateTextStart(delta);
-    DCHECK(lines_.find(line->text_start()) == lines_.end());
-    lines_.insert(std::make_pair(line->text_start(),
-                                 std::unique_ptr<RootInlineBox>(line)));
+    Insert(std::unique_ptr<RootInlineBox>(line));
   }
 }
 
+// Remove lines crossing |range|.
 void RootInlineBoxCache::RemoveOverwapLines(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return;
-  const auto& last_line = lines_.rbegin()->second;
-  if (last_line->text_end() <= range.start()) {
-    // All cached lines end before |range.start()|.
-    return;
-  }
-  const auto& it = lines_.lower_bound(range.start());
+  auto it = lines_.lower_bound(range.start());
   if (it == lines_.end()) {
-    // All lines start before |range.start()|.
-    DCHECK_LT(range.start(), last_line->text_end());
-    lines_.erase(lines_.find(lines_.rbegin()->first));
-    if (lines_.empty())
-      return;
-    DCHECK_LE(lines_.rbegin()->second->text_end(), range.start());
+    // All lines ends before |range.start()|
     return;
   }
-  // |start| line contains |offset| or after |offset|.
-  const auto& start =
-      it == lines_.begin() || std::prev(it)->second->text_end() <= range.start()
-          ? it
-          : std::prev(it);
-  DCHECK_LT(range.start(), start->second->text_end());
-  auto end = std::next(start);
-  while (end != lines_.end()) {
-    const auto line = end->second.get();
-    if (line->text_start() >= range.end() && !line->IsContinuedLine())
-      break;
-    ++end;
+  if (it->second->text_end() == range.start()) {
+    // Skip line ends with |range.start()|.
+    ++it;
   }
-  lines_.erase(start, end);
+  const auto start = it;
+  while (it != lines_.end() && it->second->text_start() < range.end())
+    ++it;
+  while (it != lines_.end() && it->second->IsContinuedLine())
+    ++it;
+  lines_.erase(start, it);
 }
 
 // text::BufferMutationObserver

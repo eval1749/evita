@@ -12,7 +12,8 @@
     'Decrement', 'decrement', 'destructor', 'doesn', 'dom', 'domapi',
     'Dominatee', 'dominatee', 'Dominator', 'dominator', 'dtor',
     // E
-    'elang', 'endl', 'enum', 'evita', 'evaluator', 'Expander', 'expander',
+    'elang', 'emplace', 'endl', 'enum', 'evita', 'evaluator', 'Expander',
+    'expander',
     // F
     'focusable', 'Formatter', 'formatter',
     // G
@@ -28,7 +29,7 @@
     // N
     'nullable', 'nullptr',
     // O
-    'Opcode', 'opcode', 'ostream',
+    'Opcode', 'opcode', 'ostream', 'observee',
     // P
     'Posn', 'Prepend', 'pointee',
     // R

@@ -24,12 +24,12 @@
 namespace layout {
 
 namespace {
-text::Offset GetCaretOffset(const text::Buffer* buffer,
+text::Offset GetCaretOffset(const text::Buffer& buffer,
                             const TextSelectionModel& selection,
                             text::Offset caret_offset) {
   if (!selection.disabled())
     return selection.focus_offset();
-  auto const max_offset = buffer->GetEnd();
+  auto const max_offset = buffer.GetEnd();
   if (selection.start() == max_offset && selection.end() == max_offset)
     return max_offset;
   return caret_offset.IsValid() ? caret_offset : selection.focus_offset();
@@ -40,8 +40,9 @@ text::Offset GetCaretOffset(const text::Buffer* buffer,
 //
 // TextView
 //
-TextView::TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner)
-    : block_(new BlockFlow(*buffer)),
+TextView::TextView(const text::Buffer& buffer,
+                   ui::AnimatableWindow* caret_owner)
+    : block_(new BlockFlow(buffer)),
       buffer_(buffer),
       caret_offset_(text::Offset::Invalid()),
       paint_view_builder_(new PaintViewBuilder(*block_, caret_owner)) {}

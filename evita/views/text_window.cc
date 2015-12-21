@@ -51,7 +51,7 @@ TextSelectionModel GetTextSelectionModel(TextWindow* window,
 TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
     : CanvasContentWindow(window_id),
       metrics_view_(new MetricsView()),
-      text_view_(new layout::TextView(selection->buffer(), this)),
+      text_view_(new layout::TextView(*selection->buffer(), this)),
       selection_(selection),
       vertical_scroll_bar_(
           new ui::ScrollBar(ui::ScrollBar::Type::Vertical, this)) {
@@ -68,8 +68,8 @@ TextWindow::~TextWindow() {
   selection_->RemoveObserver(this);
 }
 
-text::Buffer* TextWindow::buffer() const {
-  return text_view_->buffer();
+const text::Buffer* TextWindow::buffer() const {
+  return &text_view_->buffer();
 }
 
 text::Offset TextWindow::ComputeEndOfLine(text::Offset text_offset) {

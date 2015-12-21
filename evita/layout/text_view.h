@@ -43,10 +43,10 @@ class PaintViewBuilder;
 //
 class TextView final : private gfx::CanvasObserver {
  public:
-  TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner);
+  TextView(const text::Buffer& buffer, ui::AnimatableWindow* caret_owner);
   ~TextView();
 
-  text::Buffer* buffer() const { return buffer_; }
+  const text::Buffer& buffer() const { return buffer_; }
   text::Offset text_end() const;
   text::Offset text_start() const;
 
@@ -83,7 +83,7 @@ class TextView final : private gfx::CanvasObserver {
 
   std::unique_ptr<BlockFlow> block_;
   gfx::RectF bounds_;
-  text::Buffer* const buffer_;
+  const text::Buffer& buffer_;
   text::Offset caret_offset_;
   scoped_refptr<paint::View> paint_view_;
   const std::unique_ptr<PaintViewBuilder> paint_view_builder_;

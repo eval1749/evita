@@ -85,12 +85,12 @@ RenderStyle MakeRenderStyle(const css::Style& style, const gfx::Font& font) {
 //
 class TextFormatter::TextScanner final {
  public:
-  explicit TextScanner(const text::Buffer* buffer);
+  explicit TextScanner(const text::Buffer& buffer);
   ~TextScanner() = default;
 
   const common::AtomicString& spelling() const;
   const css::StyleResolver* style_resolver() const {
-    return buffer_->style_resolver();
+    return buffer_.style_resolver();
   }
   const common::AtomicString& syntax() const;
   text::Offset text_offset() const { return text_offset_; }
@@ -105,7 +105,7 @@ class TextFormatter::TextScanner final {
 
  private:
   base::char16 buffer_cache_[80];
-  const text::Buffer* const buffer_;
+  const text::Buffer& buffer_;
   text::Offset buffer_cache_end_;
   text::Offset buffer_cache_start_;
   text::Interval* interval_;
@@ -116,7 +116,7 @@ class TextFormatter::TextScanner final {
   DISALLOW_COPY_AND_ASSIGN(TextScanner);
 };
 
-TextFormatter::TextScanner::TextScanner(const text::Buffer* buffer)
+TextFormatter::TextScanner::TextScanner(const text::Buffer& buffer)
     : buffer_(buffer),
       buffer_cache_end_(0),
       buffer_cache_start_(0),
@@ -128,7 +128,7 @@ TextFormatter::TextScanner::TextScanner(const text::Buffer* buffer)
 const common::AtomicString& TextFormatter::TextScanner::spelling() const {
   if (!spelling_marker_ || text_offset_ >= spelling_marker_->end()) {
     spelling_marker_ =
-        buffer_->spelling_markers()->GetLowerBoundMarker(text_offset_);
+        buffer_.spelling_markers()->GetLowerBoundMarker(text_offset_);
   }
   return spelling_marker_ && spelling_marker_->Contains(text_offset_)
              ? spelling_marker_->type()
@@ -138,7 +138,7 @@ const common::AtomicString& TextFormatter::TextScanner::spelling() const {
 const common::AtomicString& TextFormatter::TextScanner::syntax() const {
   if (!syntax_marker_ || text_offset_ >= syntax_marker_->end()) {
     syntax_marker_ =
-        buffer_->syntax_markers()->GetLowerBoundMarker(text_offset_);
+        buffer_.syntax_markers()->GetLowerBoundMarker(text_offset_);
   }
   return syntax_marker_ && syntax_marker_->Contains(text_offset_)
              ? syntax_marker_->type()
@@ -146,8 +146,8 @@ const common::AtomicString& TextFormatter::TextScanner::syntax() const {
 }
 
 bool TextFormatter::TextScanner::AtEnd() const {
-  DCHECK_LE(text_offset_, buffer_->GetEnd());
-  return text_offset_ == buffer_->GetEnd();
+  DCHECK_LE(text_offset_, buffer_.GetEnd());
+  return text_offset_ == buffer_.GetEnd();
 }
 
 base::char16 TextFormatter::TextScanner::GetChar() {
@@ -157,8 +157,8 @@ base::char16 TextFormatter::TextScanner::GetChar() {
     buffer_cache_start_ = text_offset_;
     buffer_cache_end_ = std::min(
         buffer_cache_start_ + text::OffsetDelta(arraysize(buffer_cache_)),
-        buffer_->GetEnd());
-    buffer_->GetText(buffer_cache_, buffer_cache_start_, buffer_cache_end_);
+        buffer_.GetEnd());
+    buffer_.GetText(buffer_cache_, buffer_cache_start_, buffer_cache_end_);
   }
   DCHECK_GE(text_offset_, buffer_cache_start_);
   DCHECK_LT(text_offset_, buffer_cache_end_);
@@ -167,9 +167,9 @@ base::char16 TextFormatter::TextScanner::GetChar() {
 
 const css::Style& TextFormatter::TextScanner::GetStyle() {
   if (AtEnd())
-    return buffer_->GetDefaultStyle();
+    return buffer_.GetDefaultStyle();
   if (!interval_ || !interval_->Contains(text_offset_))
-    interval_ = buffer_->GetIntervalAt(text_offset_);
+    interval_ = buffer_.GetIntervalAt(text_offset_);
   return interval_->style();
 }
 
@@ -183,19 +183,19 @@ void TextFormatter::TextScanner::Next() {
 //
 // TextFormatter
 //
-TextFormatter::TextFormatter(const text::Buffer* text_buffer,
+TextFormatter::TextFormatter(const text::Buffer& text_buffer,
                              text::Offset line_start,
                              text::Offset text_offset,
                              const gfx::RectF& bounds,
                              float zoom)
     : bounds_(bounds),
-      default_render_style_(GetRenderStyle(text_buffer->GetDefaultStyle())),
+      default_render_style_(GetRenderStyle(text_buffer.GetDefaultStyle())),
       line_start_(line_start),
       text_scanner_(new TextScanner(text_buffer)),
       zoom_(zoom) {
   DCHECK(!bounds_.empty());
   DCHECK_GT(zoom_, 0.0f);
-  DCHECK_EQ(line_start, text_buffer->ComputeStartOfLine(text_offset));
+  DCHECK_EQ(line_start, text_buffer.ComputeStartOfLine(text_offset));
   text_scanner_->set_text_offset(text_offset);
 }
 

@@ -58,7 +58,7 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   const auto& origin = gfx::PointF(300.0f, 200.0f);
   const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
 
-  TextFormatter formatter1(buffer(), text::Offset(0), text::Offset(0), bounds,
+  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0), bounds,
                            1.0f);
   const auto line1 = formatter1.FormatLine();
   line1->set_origin(origin);
@@ -91,7 +91,7 @@ TEST_F(TextFormatterTest, FormatLineBasic) {
   css::Style style;
   style.set_bgcolor(css::Color(255, 0, 0));
   buffer()->SetStyle(text::Offset(1), text::Offset(2), style);
-  TextFormatter formatter2(buffer(), text::Offset(0), text::Offset(0), bounds,
+  TextFormatter formatter2(*buffer(), text::Offset(0), text::Offset(0), bounds,
                            1.0f);
   const auto line2 = formatter2.FormatLine();
   line2->set_origin(origin);
@@ -113,7 +113,7 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
   const auto& origin = gfx::PointF(10.0f, 200.0f);
   const auto& bounds = gfx::RectF(origin, gfx::SizeF(100.0f, 50.0f));
 
-  TextFormatter formatter1(buffer(), text::Offset(0), text::Offset(0), bounds,
+  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0), bounds,
                            1.0f);
   const auto line1 = formatter1.FormatLine();
   line1->set_origin(origin);
@@ -140,7 +140,7 @@ TEST_F(TextFormatterTest, FormatLineMissingCharacter) {
 TEST_F(TextFormatterTest, FormatLineWrap) {
   buffer()->InsertBefore(text::Offset(0), L"0123456");
   const auto& bounds = gfx::RectF(gfx::SizeF(40.0f, 50.0f));
-  TextFormatter formatter1(buffer(), text::Offset(0), text::Offset(0), bounds,
+  TextFormatter formatter1(*buffer(), text::Offset(0), text::Offset(0), bounds,
                            1.0f);
   // View:
   //    012>

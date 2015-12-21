@@ -27,7 +27,7 @@ class TextSelectionModel;
 
 class TextFormatter final {
  public:
-  TextFormatter(const text::Buffer* buffer,
+  TextFormatter(const text::Buffer& buffer,
                 text::Offset line_start,
                 text::Offset text_offset,
                 const gfx::RectF& bounds,

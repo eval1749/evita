@@ -69,7 +69,8 @@ text::Offset BlockFlow::ComputeEndOfLine(text::Offset text_offset) {
     return line->text_end() - text::OffsetDelta(1);
 
   const auto line_start = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(*text_buffer_, line_start, line_start, bounds_,
+                          zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
@@ -90,7 +91,8 @@ text::Offset BlockFlow::ComputeStartOfLine(text::Offset text_offset) {
     return line->text_start();
 
   const auto line_start = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(*text_buffer_, line_start, line_start, bounds_,
+                          zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
@@ -205,7 +207,8 @@ void BlockFlow::Format(text::Offset text_offset) {
   dirty_line_point_ = false;
 
   const auto line_start = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(*text_buffer_, line_start, line_start, bounds_,
+                          zoom_);
   for (;;) {
     const auto line = FormatLine(&formatter);
     DCHECK_GT(line->bounds().height(), 0.0f);
@@ -316,7 +319,8 @@ text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
     return line->HitTestPoint(point_x);
 
   const auto line_start = text_buffer_->ComputeStartOfLine(text_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(*text_buffer_, line_start, line_start, bounds_,
+                          zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (text_offset < line->text_end())
@@ -357,7 +361,8 @@ bool BlockFlow::ScrollDown() {
   ++version_;
   const auto goal_offset = lines_.front()->text_start() - text::OffsetDelta(1);
   const auto line_start = text_buffer_->ComputeStartOfLine(goal_offset);
-  TextFormatter formatter(text_buffer_, line_start, line_start, bounds_, zoom_);
+  TextFormatter formatter(*text_buffer_, line_start, line_start, bounds_,
+                          zoom_);
   for (;;) {
     const auto& line = FormatLine(&formatter);
     if (goal_offset < line->text_end()) {
@@ -473,7 +478,7 @@ bool BlockFlow::ScrollUp() {
   const auto offset = last_line->text_end();
   const auto line_start =
       last_line->IsContinuedLine() ? last_line->line_start() : offset;
-  TextFormatter formatter(text_buffer_, line_start, offset, bounds_, zoom_);
+  TextFormatter formatter(*text_buffer_, line_start, offset, bounds_, zoom_);
   Append(FormatLine(&formatter));
   return true;
 }

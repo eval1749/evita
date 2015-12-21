@@ -46,7 +46,7 @@ class BlockFlowTest : public ::testing::Test {
 };
 
 BlockFlowTest::BlockFlowTest()
-    : buffer_(new text::Buffer()), block_(new BlockFlow(buffer_.get())) {
+    : buffer_(new text::Buffer()), block_(new BlockFlow(*buffer_)) {
   block()->SetBounds(
       gfx::RectF(gfx::PointF(300.0f, 200.0f), gfx::SizeF(100.0f, 150.0f)));
   editor::DomLock::GetInstance()->Acquire(FROM_HERE);

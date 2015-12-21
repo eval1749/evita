@@ -30,14 +30,14 @@ class RootInlineBoxCache;
 //
 class BlockFlow final {
  public:
-  explicit BlockFlow(text::Buffer* buffer);
+  explicit BlockFlow(const text::Buffer& buffer);
   ~BlockFlow();
 
   const gfx::RectF& bounds() const { return bounds_; }
   int version() const { return version_; }
   const std::list<RootInlineBox*>& lines() const { return lines_; }
   gfx::PointF origin() const { return bounds_.origin(); }
-  const text::Buffer& text_buffer() const { return *text_buffer_; }
+  const text::Buffer& text_buffer() const { return text_buffer_; }
   text::Offset text_end() const;
   text::Offset text_start() const;
 
@@ -89,7 +89,7 @@ class BlockFlow final {
   bool dirty_line_point_ = true;
   std::list<RootInlineBox*> lines_;
   float lines_height_ = 0.0f;
-  text::Buffer* const text_buffer_;
+  const text::Buffer& text_buffer_;
   std::unique_ptr<RootInlineBoxCache> text_line_cache_;
   int version_ = 0;
   text::Offset view_start_;

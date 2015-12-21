@@ -41,7 +41,7 @@ text::Offset GetCaretOffset(const text::Buffer* buffer,
 // TextView
 //
 TextView::TextView(text::Buffer* buffer, ui::AnimatableWindow* caret_owner)
-    : block_(new BlockFlow(buffer)),
+    : block_(new BlockFlow(*buffer)),
       buffer_(buffer),
       caret_offset_(text::Offset::Invalid()),
       paint_view_builder_(new PaintViewBuilder(*block_, caret_owner)) {}

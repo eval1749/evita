@@ -12,61 +12,17 @@
 
 namespace text {
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// MockBufferMutationObservee
-//
-class MockBufferMutationObservee final : public BufferMutationObservee {
- public:
-  MockBufferMutationObservee() = default;
-  ~MockBufferMutationObservee() final = default;
-
-  void DidDeleteAt(const StaticRange& range);
-
- private:
-  void AddObserver(BufferMutationObserver* observer) final;
-  void RemoveObserver(BufferMutationObserver* observer) final;
-
-  base::ObserverList<BufferMutationObserver> observers_;
-
-  DISALLOW_COPY_AND_ASSIGN(MockBufferMutationObservee);
-};
-
-void MockBufferMutationObservee::AddObserver(BufferMutationObserver* observer) {
-  observers_.AddObserver(observer);
-}
-
-void MockBufferMutationObservee::RemoveObserver(
-    BufferMutationObserver* observer) {
-  observers_.RemoveObserver(observer);
-}
-
-void MockBufferMutationObservee::DidDeleteAt(const StaticRange& range) {
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidDeleteAt(range));
-}
-
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // MarkerSetTest
 //
 class MarkerSetTest : public ::testing::Test {
  protected:
-  MarkerSetTest()
-      : Correct(L"Correct"),
-        Misspelled(L"Misspelled"),
-        buffer_(new Buffer()),
-        marker_set_(&mutation_observee_) {}
+  MarkerSetTest();
+  ~MarkerSetTest() override = default;
 
   Buffer* buffer() const { return buffer_.get(); }
   MarkerSet* marker_set() { return &marker_set_; }
-
-  void DidDeleteAt(const StaticRange& range) {
-    mutation_observee_.DidDeleteAt(range);
-  }
 
   void RemoveMarker(int start, int end) {
     marker_set()->RemoveMarkerForTesting(Offset(start), Offset(end));
@@ -86,14 +42,18 @@ class MarkerSetTest : public ::testing::Test {
 
  private:
   const std::unique_ptr<Buffer> buffer_;
-
-  // |mutation_observee_| is passed to |MarkerSet| constructor.
-  MockBufferMutationObservee mutation_observee_;
-
   MarkerSet marker_set_;
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSetTest);
 };
+
+MarkerSetTest::MarkerSetTest()
+    : Correct(L"Correct"),
+      Misspelled(L"Misspelled"),
+      buffer_(new Buffer()),
+      marker_set_(buffer_.get()) {
+  buffer_->InsertBefore(Offset(0), base::string16(999, 'x'));
+}
 
 TEST_F(MarkerSetTest, DeleteMarker_cover) {
   // before: --CC--
@@ -168,7 +128,7 @@ TEST_F(MarkerSetTest, DidDeleteAt) {
   // delete: --"foo"---
   InsertMarker(0, 5, Correct);
   InsertMarker(5, 6, Misspelled);
-  DidDeleteAt(StaticRange(*buffer(), Offset(5), Offset(6)));
+  buffer()->Delete(Offset(5), Offset(6));
   EXPECT_EQ(Marker(Offset(0), Offset(5), Correct), GetAt(0));
 }
 

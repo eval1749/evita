@@ -5,6 +5,7 @@
 #ifndef COMMON_STRINGS_ATOMIC_STRING_H_
 #define COMMON_STRINGS_ATOMIC_STRING_H_
 
+#include <iosfwd>
 #include <string>
 
 #include "base/strings/string16.h"
@@ -37,6 +38,7 @@ class COMMON_EXPORT AtomicString {
 
   bool empty() const { return string_->empty(); }
   const base::string16* get() const { return string_; }
+  const base::string16& str() const { return *string_; }
 
   static const AtomicString& Empty();
 
@@ -44,6 +46,11 @@ class COMMON_EXPORT AtomicString {
   class Set;
   const base::string16* string_;
 };
+
+COMMON_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                       const AtomicString& string);
+COMMON_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                       const AtomicString* string);
 
 }  // namespace common
 

@@ -4,8 +4,10 @@
 
 #include "common/strings/atomic_string.h"
 
+#include <ostream>
 #include <unordered_map>
 
+#include "base/strings/utf_string_conversions.h"
 #include "common/memory/singleton.h"
 
 namespace common {
@@ -60,6 +62,16 @@ AtomicString::~AtomicString() {}
 const AtomicString& AtomicString::Empty() {
   CR_DEFINE_STATIC_LOCAL(AtomicString, empty, (base::string16()));
   return empty;
+}
+
+std::ostream& operator<<(std::ostream& ostream, const AtomicString& string) {
+  return ostream << base::UTF16ToUTF8(string.str());
+}
+
+std::ostream& operator<<(std::ostream& ostream, const AtomicString* string) {
+  if (!string)
+    return ostream << "NullAtomicString";
+  return ostream << *string;
 }
 
 }  // namespace common

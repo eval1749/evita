@@ -85,27 +85,23 @@ Offset Buffer::ComputeStartOfLine(Offset offset) const {
   return offset;
 }
 
-int Buffer::Delete(Offset start, Offset end) {
+void Buffer::Delete(Offset start, Offset end) {
   DCHECK_NO_STATIC_RANGE();
   if (IsReadOnly())
-    return 0;
-
+    return;
   start = std::max(start, Offset());
   end = std::min(end, GetEnd());
-
-  auto const length = end - start;
-  if (!length)
-    return 0;
-
-  const auto& range = StaticRange(*this, start, end);
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, WillDeleteAt(range));
-
+  if (start == end)
+    return;
+  {
+    const auto& range_for_will = StaticRange(*this, start, end);
+    FOR_EACH_OBSERVER(BufferMutationObserver, observers_,
+                      WillDeleteAt(range_for_will));
+  }
   deleteChars(start, end);
-
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidDeleteAt(range));
-
   UpdateChangeTick();
-  return length;
+  const auto& range = StaticRange(*this, start, end);
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidDeleteAt(range));
 }
 
 void Buffer::EndUndoGroup(const base::string16& name) {

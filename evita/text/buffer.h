@@ -74,7 +74,10 @@ class Buffer final : public BufferCore,
   void ClearUndo();
   Offset ComputeEndOfLine(Offset offset) const;
   Offset ComputeStartOfLine(Offset offset) const;
-  int Delete(Offset, Offset);
+  // Delete characters between |start| and |end|, exclusive.
+  // Note: Since |StaticRange| can't live after buffer modification, we don't
+  // use |StaticRange| as parameter for |Delete()|.
+  void Delete(Offset start, Offset end);
   void EndUndoGroup(const base::string16& name);
   const css::Style& GetDefaultStyle() const;
   Interval* GetIntervalAt(Offset) const;

@@ -139,9 +139,8 @@ void Buffer::InsertBefore(Offset offset, const base::string16& text) {
 
   const auto& range =
       StaticRange(*this, offset, offset + OffsetDelta(text.size()));
-  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidInsertBefore(range));
-
   UpdateChangeTick();
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidInsertBefore(range));
 }
 
 Offset Buffer::Redo(Offset offset) {

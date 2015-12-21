@@ -58,7 +58,8 @@ NamedUndoStep::~NamedUndoStep() {}
 //
 TextUndoStep::TextUndoStep(int revision, Offset start, Offset end)
     : end_(end), revision_(revision), start_(start) {
-  DCHECK_LE(start_, end_);
+  DCHECK_LT(start_, end_);
+  DCHECK_GE(revision_, 0);
 }
 
 TextUndoStep::~TextUndoStep() {}

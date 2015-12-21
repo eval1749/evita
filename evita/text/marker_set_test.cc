@@ -4,17 +4,50 @@
 
 #include "evita/text/marker_set.h"
 
+#include "base/observer_list.h"
 #include "evita/text/buffer.h"
+#include "evita/text/marker.h"
 #include "evita/text/static_range.h"
 #include "gtest/gtest.h"
 
 namespace text {
 
-class MockBufferMutationObservee : public BufferMutationObservee {
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+//
+// MockBufferMutationObservee
+//
+class MockBufferMutationObservee final : public BufferMutationObservee {
+ public:
+  MockBufferMutationObservee() = default;
+  ~MockBufferMutationObservee() final = default;
+
+  void DidDeleteAt(const StaticRange& range);
+
  private:
-  void AddObserver(BufferMutationObserver* observer) final {}
-  void RemoveObserver(BufferMutationObserver* observer) final {}
+  void AddObserver(BufferMutationObserver* observer) final;
+  void RemoveObserver(BufferMutationObserver* observer) final;
+
+  base::ObserverList<BufferMutationObserver> observers_;
+
+  DISALLOW_COPY_AND_ASSIGN(MockBufferMutationObservee);
 };
+
+void MockBufferMutationObservee::AddObserver(BufferMutationObserver* observer) {
+  observers_.AddObserver(observer);
+}
+
+void MockBufferMutationObservee::RemoveObserver(
+    BufferMutationObserver* observer) {
+  observers_.RemoveObserver(observer);
+}
+
+void MockBufferMutationObservee::DidDeleteAt(const StaticRange& range) {
+  FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidDeleteAt(range));
+}
+
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -32,7 +65,7 @@ class MarkerSetTest : public ::testing::Test {
   MarkerSet* marker_set() { return &marker_set_; }
 
   void DidDeleteAt(const StaticRange& range) {
-    static_cast<BufferMutationObserver*>(marker_set())->DidDeleteAt(range);
+    mutation_observee_.DidDeleteAt(range);
   }
 
   void RemoveMarker(int start, int end) {

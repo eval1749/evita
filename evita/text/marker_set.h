@@ -5,12 +5,11 @@
 #ifndef EVITA_TEXT_MARKER_SET_H_
 #define EVITA_TEXT_MARKER_SET_H_
 
-#include <set>
+#include <memory>
 
 #include "base/basictypes.h"
 #include "base/observer_list.h"
 #include "evita/text/buffer_mutation_observer.h"
-#include "evita/text/marker.h"
 #include "evita/text/marker_set_observer.h"
 #include "evita/text/offset.h"
 
@@ -20,18 +19,19 @@ class AtomicString;
 
 namespace text {
 
+class Marker;
 class StaticRange;
 
 //////////////////////////////////////////////////////////////////////
 //
 // MarkerSet
 //
-class MarkerSet final : public BufferMutationObserver {
+class MarkerSet final {
  public:
   explicit MarkerSet(BufferMutationObservee* provider);
-  ~MarkerSet() final;
+  ~MarkerSet();
 
-  // Remove |observer|
+  // Add |observer|
   void AddObserver(MarkerSetObserver* observer);
 
   // Get marker at |offset|.
@@ -45,35 +45,15 @@ class MarkerSet final : public BufferMutationObserver {
   // Insert marker from |start| to |end|, exclusive.
   void InsertMarker(Offset start, Offset end, const common::AtomicString& type);
 
-  void RemoveMarkerForTesting(Offset start, Offset end) {
-    RemoveMarker(start, end);
-  }
+  void RemoveMarkerForTesting(Offset start, Offset end);
 
   // Remove |observer|
   void RemoveObserver(MarkerSetObserver* observer);
 
  private:
-  using MarkerSetImpl = std::set<Marker*>;
-  class ChangeScope;
+  class Impl;
 
-  MarkerSetImpl::iterator lower_bound(Offset offset);
-
-  // Remove all markers in this |MarkerSet|.
-  void Clear();
-
-  // Notify marker changes to observers.
-  void NotifyChange(Offset start, Offset end);
-
-  // Remove marker from |start| to |end|, exclusive.
-  void RemoveMarker(Offset start, Offset end);
-
-  // BufferMutationObserver
-  void DidDeleteAt(const StaticRange& range) final;
-  void DidInsertBefore(const StaticRange& range) final;
-
-  MarkerSetImpl markers_;
-  BufferMutationObservee* const mutation_observee_;
-  base::ObserverList<MarkerSetObserver> observers_;
+  std::unique_ptr<Impl> impl_;
 
   DISALLOW_COPY_AND_ASSIGN(MarkerSet);
 };

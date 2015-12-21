@@ -5,8 +5,7 @@
 #ifndef EVITA_TEXT_MARKER_H_
 #define EVITA_TEXT_MARKER_H_
 
-#include <functional>
-#include <ostream>
+#include <iosfwd>
 
 #include "base/basictypes.h"
 #include "common/strings/atomic_string.h"
@@ -39,7 +38,7 @@ class Marker final {
   bool Contains(Offset offset) const;
 
  private:
-  friend class MarkerSet;
+  class Editor;
 
   explicit Marker(Offset start);
 
@@ -48,18 +47,29 @@ class Marker final {
   common::AtomicString type_;
 };
 
-}  // namespace text
+//////////////////////////////////////////////////////////////////////
+//
+// Marker::Editor
+//
+class Marker::Editor final {
+ public:
+  explicit Editor(Marker* marker);
+  ~Editor();
 
-namespace std {
-template <>
-struct less<text::Marker*> {
-  bool operator()(const text::Marker* x, const text::Marker* y) const {
-    return x->end() < y->end();
-  }
+  void SetEnd(Offset new_end);
+  void SetRange(Offset start, Offset end);
+  void SetStart(Offset new_start);
+  void SetType(const common::AtomicString& type);
+
+ private:
+  Marker* const marker_;
+
+  DISALLOW_COPY_AND_ASSIGN(Editor);
 };
 
-ostream& operator<<(ostream& ostream, const text::Marker& marker);
-ostream& operator<<(ostream& ostream, const text::Marker* marker);
-}  // namespace std
+std::ostream& operator<<(std::ostream& ostream, const Marker& marker);
+std::ostream& operator<<(std::ostream& ostream, const Marker* marker);
+
+}  // namespace text
 
 #endif  // EVITA_TEXT_MARKER_H_

@@ -22,12 +22,4 @@ void BufferMutationObserver::DidDeleteAt(const StaticRange& range) {}
 void BufferMutationObserver::DidInsertBefore(const StaticRange& range) {}
 void BufferMutationObserver::WillDeleteAt(const StaticRange& range) {}
 
-//////////////////////////////////////////////////////////////////////
-//
-// BufferMutationObservee
-//
-BufferMutationObservee::BufferMutationObservee() {}
-
-BufferMutationObservee::~BufferMutationObservee() {}
-
 }  // namespace text

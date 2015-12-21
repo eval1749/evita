@@ -34,19 +34,6 @@ class BufferMutationObserver {
   DISALLOW_COPY_AND_ASSIGN(BufferMutationObserver);
 };
 
-class BufferMutationObservee {
- public:
-  virtual ~BufferMutationObservee();
-
-  virtual void AddObserver(BufferMutationObserver* observer) = 0;
-  virtual void RemoveObserver(BufferMutationObserver* observer) = 0;
-
-  BufferMutationObservee();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(BufferMutationObservee);
-};
-
 }  // namespace text
 
 #endif  // EVITA_TEXT_BUFFER_MUTATION_OBSERVER_H_

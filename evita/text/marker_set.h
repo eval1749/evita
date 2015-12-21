@@ -9,7 +9,6 @@
 
 #include "base/basictypes.h"
 #include "base/observer_list.h"
-#include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/marker_set_observer.h"
 #include "evita/text/offset.h"
 
@@ -19,6 +18,7 @@ class AtomicString;
 
 namespace text {
 
+class Buffer;
 class Marker;
 class StaticRange;
 
@@ -28,7 +28,7 @@ class StaticRange;
 //
 class MarkerSet final {
  public:
-  explicit MarkerSet(BufferMutationObservee* provider);
+  explicit MarkerSet(const Buffer& buffer);
   ~MarkerSet();
 
   // Add |observer|

@@ -34,9 +34,9 @@ Buffer::Buffer()
     : intervals_(new IntervalSet(this)),
       line_number_cache_(new LineNumberCache(*this)),
       ranges_(new RangeSet(this)),
-      spelling_markers_(new MarkerSet(this)),
+      spelling_markers_(new MarkerSet(*this)),
       style_resolver_(new css::StyleResolver()),
-      syntax_markers_(new MarkerSet(this)),
+      syntax_markers_(new MarkerSet(*this)),
       undo_stack_(new UndoStack(this)) {
   spelling_markers_->AddObserver(this);
   syntax_markers_->AddObserver(this);
@@ -47,8 +47,8 @@ Buffer::~Buffer() {
   syntax_markers_->RemoveObserver(this);
 }
 
-void Buffer::AddObserver(BufferMutationObserver* observer) {
-  observers_.AddObserver(observer);
+void Buffer::AddObserver(BufferMutationObserver* observer) const {
+  const_cast<Buffer*>(this)->observers_.AddObserver(observer);
 }
 
 bool Buffer::CanRedo() const {
@@ -149,8 +149,8 @@ Offset Buffer::Redo(Offset offset) {
   return undo_stack_->Redo(offset, 1);
 }
 
-void Buffer::RemoveObserver(BufferMutationObserver* observer) {
-  observers_.RemoveObserver(observer);
+void Buffer::RemoveObserver(BufferMutationObserver* observer) const {
+  const_cast<Buffer*>(this)->observers_.RemoveObserver(observer);
 }
 
 void Buffer::ResetRevision(int revision) {

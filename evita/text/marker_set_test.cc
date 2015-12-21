@@ -46,7 +46,7 @@ MarkerSetTest::MarkerSetTest()
     : Correct(L"Correct"),
       Misspelled(L"Misspelled"),
       buffer_(new Buffer()),
-      marker_set_(buffer_.get()) {
+      marker_set_(*buffer_) {
   buffer_->InsertBefore(Offset(0), base::string16(999, 'x'));
 }
 

@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "base/logging.h"
+#include "evita/text/buffer.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/marker.h"
 #include "evita/text/offset.h"
 #include "evita/text/static_range.h"
@@ -226,7 +228,7 @@ void Notifier::NotifyChange(Offset start, Offset end) {
 //
 class MarkerSet::Impl final : public BufferMutationObserver {
  public:
-  explicit Impl(BufferMutationObservee* mutation_observee);
+  explicit Impl(const Buffer& buffer);
   ~Impl() final;
 
   void AddObserver(MarkerSetObserver* observer);
@@ -241,19 +243,19 @@ class MarkerSet::Impl final : public BufferMutationObserver {
   void DidInsertBefore(const StaticRange& range) final;
 
   Markers markers_;
-  BufferMutationObservee* const mutation_observee_;
+  const Buffer& buffer_;
   base::ObserverList<MarkerSetObserver> observers_;
 
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-MarkerSet::Impl::Impl(BufferMutationObservee* mutation_observee)
-    : mutation_observee_(mutation_observee) {
-  mutation_observee_->AddObserver(this);
+MarkerSet::Impl::Impl(const Buffer& buffer)
+    : buffer_(buffer) {
+  buffer_.AddObserver(this);
 }
 
 MarkerSet::Impl::~Impl() {
-  mutation_observee_->RemoveObserver(this);
+  buffer_.RemoveObserver(this);
   markers_.clear();
 }
 
@@ -405,8 +407,8 @@ void MarkerSet::Impl::DidInsertBefore(const StaticRange& range) {
 //////////////////////////////////////////////////////////////////////
 //
 // MarkSet
-MarkerSet::MarkerSet(BufferMutationObservee* mutation_observee)
-    : impl_(new Impl(mutation_observee)) {}
+MarkerSet::MarkerSet(const Buffer& buffer)
+    : impl_(new Impl(buffer)) {}
 
 MarkerSet::~MarkerSet() {}
 

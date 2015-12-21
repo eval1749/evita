@@ -53,7 +53,6 @@ struct LineAndColumn {
 // Buffer
 //
 class Buffer final : public BufferCore,
-                     public BufferMutationObservee,
                      public IntervalSetObserver,
                      public MarkerSetObserver {
  public:
@@ -99,9 +98,9 @@ class Buffer final : public BufferCore,
   // |offset|, otherwise returns starting offset of the last modification.
   Offset Undo(Offset offset);
 
-  // Implements BufferMutationObservee
-  void AddObserver(BufferMutationObserver* observer) final;
-  void RemoveObserver(BufferMutationObserver* observer) final;
+  // BufferMutationObserver supports
+  void AddObserver(BufferMutationObserver* observer) const;
+  void RemoveObserver(BufferMutationObserver* observer) const;
 
 #if DCHECK_IS_ON()
   // StaticRange

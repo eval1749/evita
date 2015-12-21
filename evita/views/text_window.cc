@@ -58,18 +58,18 @@ TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
   AppendChild(vertical_scroll_bar_);
   AppendChild(metrics_view_);
   UI_DOM_AUTO_LOCK_SCOPE();
-  buffer()->AddObserver(this);
+  buffer().AddObserver(this);
   selection_->AddObserver(this);
 }
 
 TextWindow::~TextWindow() {
   UI_DOM_AUTO_LOCK_SCOPE();
-  buffer()->RemoveObserver(this);
+  buffer().RemoveObserver(this);
   selection_->RemoveObserver(this);
 }
 
-const text::Buffer* TextWindow::buffer() const {
-  return &text_view_->buffer();
+const text::Buffer& TextWindow::buffer() const {
+  return text_view_->buffer();
 }
 
 text::Offset TextWindow::ComputeEndOfLine(text::Offset text_offset) {
@@ -85,7 +85,7 @@ text::Offset TextWindow::ComputeScreenMotion(int n,
   if (LargeScroll(0, n))
     return HitTestPoint(pt);
   if (n > 0)
-    return std::min(text_view_->text_end(), buffer()->GetEnd());
+    return std::min(text_view_->text_end(), buffer().GetEnd());
   if (n < 0)
     return text_view_->text_start();
   return lPosn;
@@ -102,7 +102,7 @@ text::Offset TextWindow::ComputeWindowLineMotion(int n,
   UI_ASSERT_DOM_LOCKED();
   text_view_->FormatIfNeeded();
   if (n > 0) {
-    auto const lBufEnd = buffer()->GetEnd();
+    auto const lBufEnd = buffer().GetEnd();
     if (lPosn >= lBufEnd)
       return lBufEnd;
     auto lGoal = lPosn;
@@ -137,7 +137,7 @@ text::Offset TextWindow::ComputeWindowMotion(int n, text::Offset offset) {
   text_view_->FormatIfNeeded();
   if (n > 0)
     return std::max(std::min(text_view_->text_end() - text::OffsetDelta(1),
-                             buffer()->GetEnd()),
+                             buffer().GetEnd()),
                     text_view_->text_start());
   if (n < 0)
     return text_view_->text_start();
@@ -146,7 +146,7 @@ text::Offset TextWindow::ComputeWindowMotion(int n, text::Offset offset) {
 
 text::Offset TextWindow::HitTestPoint(const gfx::PointF pt) {
   text_view_->FormatIfNeeded();
-  return std::min(text_view_->HitTestPoint(pt), buffer()->GetEnd());
+  return std::min(text_view_->HitTestPoint(pt), buffer().GetEnd());
 }
 
 // Maps position specified buffer position and returns height
@@ -182,7 +182,7 @@ bool TextWindow::LargeScroll(int, int iDy) {
     }
   } else if (iDy > 0) {
     // Scroll Up -- format page from page end.
-    auto const lBufEnd = buffer()->GetEnd();
+    auto const lBufEnd = buffer().GetEnd();
     for (auto k = 0; k < iDy; ++k) {
       auto const lStart = text_view_->text_end();
       if (lStart >= lBufEnd)
@@ -260,7 +260,7 @@ void TextWindow::UpdateScrollBar() {
   data.minimum = 0;
   data.thumb_size = text_view_->ComputeVisibleEnd() - text_view_->text_start();
   data.thumb_value = text_view_->text_start();
-  data.maximum = buffer()->GetEnd() + text::OffsetDelta(1);
+  data.maximum = buffer().GetEnd() + text::OffsetDelta(1);
   vertical_scroll_bar_->SetData(data);
   // TODO(eval1749): Once we have scroll bar for |ui::TextWindow|, we don't
   // need to call |CancelAnimationFrameRequest()| to cancel request by

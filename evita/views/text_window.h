@@ -65,7 +65,7 @@ class TextWindow final : public CanvasContentWindow,
  private:
   using TextSelectionModel = layout::TextSelectionModel;
 
-  const text::Buffer* buffer() const;
+  const text::Buffer& buffer() const;
 
   bool LargeScroll(int x_count, int y_count);
   void UpdateBounds();

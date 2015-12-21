@@ -155,7 +155,7 @@ void UndoStack::DidInsertBefore(const StaticRange& range) {
   }
 
   auto insert_step =
-      std::make_unique<InsertUndoStep>(buffer_->revision(), start, end);
+      std::make_unique<InsertUndoStep>(buffer_->revision() - 1, start, end);
   if (CanUndo() && undo_steps_.back()->TryMerge(buffer_, insert_step.get()))
     return;
   undo_steps_.push_back(std::move(insert_step));

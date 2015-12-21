@@ -137,9 +137,9 @@ void Buffer::InsertBefore(Offset offset, const base::string16& text) {
     return;
   insert(offset, text.data(), text.size());
 
+  UpdateChangeTick();
   const auto& range =
       StaticRange(*this, offset, offset + OffsetDelta(text.size()));
-  UpdateChangeTick();
   FOR_EACH_OBSERVER(BufferMutationObserver, observers_, DidInsertBefore(range));
 }
 

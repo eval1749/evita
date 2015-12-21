@@ -58,8 +58,8 @@ void MarkerSetTest::InsertMarker(int start,
 }
 
 void MarkerSetTest::RemoveMarker(int start, int end) {
-  marker_set()->RemoveMarkerForTesting(
-      StaticRange(*buffer_, Offset(start), Offset(end)));
+  marker_set()->InsertMarker(StaticRange(*buffer_, Offset(start), Offset(end)),
+                             common::AtomicString::Empty());
 }
 
 TEST_F(MarkerSetTest, DeleteMarker_cover) {

@@ -45,8 +45,6 @@ class MarkerSet final {
   // Insert marker to |range| with |type|.
   void InsertMarker(const StaticRange& range, const common::AtomicString& type);
 
-  void RemoveMarkerForTesting(const StaticRange& range);
-
   // Remove |observer|
   void RemoveObserver(MarkerSetObserver* observer);
 

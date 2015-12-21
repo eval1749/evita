@@ -233,7 +233,6 @@ class MarkerSet::Impl final : public BufferMutationObserver {
   const Marker* GetMarkerAt(Offset offset) const;
   const Marker* GetLowerBoundMarker(Offset offset) const;
   void InsertMarker(const StaticRange& range, const common::AtomicString& type);
-  void RemoveMarker(const StaticRange& range);
   void RemoveObserver(MarkerSetObserver* observer);
 
  private:
@@ -361,10 +360,6 @@ void MarkerSet::Impl::InsertMarker(const StaticRange& range,
   editor.InsertOrMerge(start, end, type);
 }
 
-void MarkerSet::Impl::RemoveMarker(const StaticRange& range) {
-  InsertMarker(range, common::AtomicString::Empty());
-}
-
 void MarkerSet::Impl::RemoveObserver(MarkerSetObserver* observer) {
   observers_.RemoveObserver(observer);
 }
@@ -431,10 +426,6 @@ const Marker* MarkerSet::GetLowerBoundMarker(Offset offset) const {
 void MarkerSet::InsertMarker(const StaticRange& range,
                              const common::AtomicString& type) {
   impl_->InsertMarker(range, type);
-}
-
-void MarkerSet::RemoveMarkerForTesting(const StaticRange& range) {
-  impl_->RemoveMarker(range);
 }
 
 void MarkerSet::RemoveObserver(MarkerSetObserver* observer) {

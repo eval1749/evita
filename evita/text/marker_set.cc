@@ -94,7 +94,8 @@ void SimpleEditor::InsertOrMerge(Offset start,
     return;
   }
   if (can_merge_after) {
-    Marker::Editor(after->second.get()).SetStart(before->second->start());
+    DCHECK_GE(end, after->second->start());
+    Marker::Editor(after->second.get()).SetStart(start);
     return;
   }
   Insert(start, end, type);
@@ -249,8 +250,7 @@ class MarkerSet::Impl final : public BufferMutationObserver {
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-MarkerSet::Impl::Impl(const Buffer& buffer)
-    : buffer_(buffer) {
+MarkerSet::Impl::Impl(const Buffer& buffer) : buffer_(buffer) {
   buffer_.AddObserver(this);
 }
 
@@ -407,8 +407,7 @@ void MarkerSet::Impl::DidInsertBefore(const StaticRange& range) {
 //////////////////////////////////////////////////////////////////////
 //
 // MarkSet
-MarkerSet::MarkerSet(const Buffer& buffer)
-    : impl_(new Impl(buffer)) {}
+MarkerSet::MarkerSet(const Buffer& buffer) : impl_(new Impl(buffer)) {}
 
 MarkerSet::~MarkerSet() {}
 

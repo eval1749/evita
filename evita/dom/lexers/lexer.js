@@ -2,6 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+$define(global, 'lexers', function($export) {
+  class Token {
+    /**
+     * @param {!Lexer.State} state
+     * @param {number} start
+     */
+    constructor(state, start) {
+      this.end = start + 1;
+      this.start = start;
+      this.state = state;
+    }
+  }
+
+  $export({Token});
+});
+
 /**
  * Note: Closure compiler doesn't allow to write |function Lexer|, we use
  * IIFE to set constructor name to |Lexer| rather than |global.Lexer|.
@@ -59,7 +75,7 @@
     }
 
     /**
-     * @param {!Lexer.Token} token
+     * @param {!lexers.Token} token
      */
     didShrinkLastToken(token) {
       // nothing to do
@@ -109,20 +125,6 @@
   };
 
   /**
-   * @constructor
-   * @param {!Lexer.State} state
-   * @param {number} start
-   */
-  Lexer.Token = (function() {
-    function Token(state, start) {
-      this.end = start + 1;
-      this.start = start;
-      this.state = state;
-    }
-    return Token;
-  })();
-
-  /**
    * @param {!Array.<string>} keywords
    * @return {!Map.<string, string>}
    */
@@ -153,7 +155,7 @@
       return;
     }
 
-    let dummyToken = new Lexer.Token(Lexer.State.ZERO, newScanOffset - 1);
+    let dummyToken = new lexers.Token(Lexer.State.ZERO, newScanOffset - 1);
     let it = this.tokens.lowerBound(dummyToken);
     console.assert(it, newScanOffset);
 
@@ -210,9 +212,9 @@
 
   /**
    * @this {!Lexer}
-   * @param {!OrderedSetNode.<!Lexer.Token>} itDelimiter
-   * @param {!Lexer.Token} token
-   * @return {!Array.<!Lexer.Token>}
+   * @param {!OrderedSetNode.<!lexers.Token>} itDelimiter
+   * @param {!lexers.Token} token
+   * @return {!Array.<!lexers.Token>}
    */
   function collectTokens(itDelimiter, token) {
     let delimiter = itDelimiter.data;
@@ -244,7 +246,7 @@
 
   /**
    * @this {!Lexer}
-   * @param {!Lexer.Token} token
+   * @param {!lexers.Token} token
    */
   function colorToken(token) {
     let range = this.range;
@@ -384,7 +386,7 @@
     console.assert(state !== Lexer.State.ZERO, 'state must not be zero.');
     if (this.debug_ > 2)
       console.log('startToken', state, this.scanOffset);
-    let token = new Lexer.Token(state, this.scanOffset);
+    let token = new lexers.Token(state, this.scanOffset);
     token.data = this.tokenData;
     if (this.debug_ > 0)
       console.assert(!this.tokens.find(token));
@@ -413,7 +415,7 @@
     map.set(Lexer.State.WORD, 'identifier');
 
     /**
-     * @param {!Lexer.Token} token
+     * @param {!lexers.Token} token
      * @param {!Range} range
      * @return {string}
      */
@@ -426,7 +428,7 @@
   /**
    * @this {!Lexer} lexer
    * @param {!Range} range
-   * @param {!Array.<!Lexer.Token>} tokens
+   * @param {!Array.<!lexers.Token>} tokens
    * @return {string}
    */
   function syntaxOfTokens(range, tokens) {

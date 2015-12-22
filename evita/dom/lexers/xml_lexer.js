@@ -108,7 +108,7 @@
 
     /**
      * @override
-     * @param {!Lexer.Token} token
+     * @param {!lexers.Token} token
      */
     colorToken(token) {
       if (token.state === XmlLexer.State.SCRIPT)
@@ -132,7 +132,7 @@
 
     /**
      * @override
-     * @param {!Lexer.Token} token
+     * @param {!lexers.Token} token
      * @param {!Range} range
      * @return {string}
      */
@@ -284,7 +284,7 @@
 
   /**
    * @this {!XmlLexer}
-   * @param {!Lexer.Token} token
+   * @param {!lexers.Token} token
    * @return {!Lexer.State}
    */
   function didShrinkLastToken(token) {
@@ -777,7 +777,7 @@
 
   /**
    * @param {!XmlLexer} lexer
-   * @param {!Lexer.Token} token
+   * @param {!lexers.Token} token
    * @return {string}
    */
   function getTagNameFromToken(lexer, token) {
@@ -802,7 +802,7 @@
    * @return {boolean}
    */
   function isEndOfScript(lexer) {
-    var lastToken = /** @type {!Lexer.Token}*/ (lexer.lastToken);
+    var lastToken = /** @type {!lexers.Token}*/ (lexer.lastToken);
     var tagName = getTagNameFromToken(lexer, lastToken);
     return tagName === lexer.tokenData.scriptTagName;
   }
@@ -851,7 +851,7 @@
     lexer.endToken();
     if (!lexer.childLexerMap_.size)
       return;
-    var it = lexer.tokens.find(/** @type {!Lexer.Token} */(lexer.lastToken));
+    var it = lexer.tokens.find(/** @type {!lexers.Token} */(lexer.lastToken));
     while (it.data.state !== XmlLexer.State.STARTTAG) {
       it = it.previous();
     }

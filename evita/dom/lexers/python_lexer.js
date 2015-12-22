@@ -52,7 +52,7 @@ global.PythonLexer = (function(keywords) {
 
     /**
      * @this {!PythonLexer}
-     * @param {!Lexer.Token} token
+     * @param {!lexers.Token} token
      * @return {!Lexer.State}
      */
     didShrinkLastToken(token) {
@@ -85,7 +85,7 @@ global.PythonLexer = (function(keywords) {
 
     /**
      * @this {!PythonLexer}
-     * @param {!Lexer.Token} token
+     * @param {!lexers.Token} token
      * @param {!Range} range
      * @return {string}
      */

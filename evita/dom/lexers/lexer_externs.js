@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/** @type {!Object} */
+var lexers;
+
 /**
  * @typedef {{
  *  characters: !Map.<number, !symbol>,
@@ -91,22 +94,22 @@ Lexer.State.ZERO;
  * @param {!Lexer.State} state
  * @param {number} start
  */
-Lexer.Token = function(state, start) {};
+lexers.Token = function(state, start) {};
 
 /** @type {?Object} */
-Lexer.Token.prototype.data;
+lexers.Token.prototype.data;
 
 /** @type {number} */
-Lexer.Token.prototype.end;
+lexers.Token.prototype.end;
 
 /** @type {number} */
-Lexer.Token.prototype.start;
+lexers.Token.prototype.start;
 
 /** @type {!Lexer.State} */
-Lexer.Token.prototype.state;
+lexers.Token.prototype.state;
 
 /** @type {string} */
-Lexer.Token.prototype.type;
+lexers.Token.prototype.type;
 
 /**
  * @type {!function(!Array.<string>): !Map.<string, string>}
@@ -149,7 +152,7 @@ Lexer.prototype.maxChainWords_;
 Lexer.prototype.mutationObserver_;
 
 /**
- * @type {?Lexer.Token}
+ * @type {?lexers.Token}
  */
 Lexer.prototype.lastToken;
 
@@ -180,8 +183,8 @@ Lexer.prototype.tokenData;
 
 /**
  * TODO(eval1749): Closure compiler doesn't recognize
- * OrderedSetNode<Lexer.Token>.prototype.previous.
- * @type {?} !OrderedSet.<!Lexer.Token>
+ * OrderedSetNode<lexers.Token>.prototype.previous.
+ * @type {?} !OrderedSet.<!lexers.Token>
  */
 Lexer.prototype.tokens;
 
@@ -196,9 +199,9 @@ Lexer.prototype.adjustScanOffset = function(offset) {};
 Lexer.prototype.clear = function() {};
 
 /**
- * @param {OrderedSetNode.<!Lexer.Token>} itDelimiter
- * @param {!Lexer.Token} token
- * @return {!Array.<!Lexer.Token>}
+ * @param {OrderedSetNode.<!lexers.Token>} itDelimiter
+ * @param {!lexers.Token} token
+ * @return {!Array.<!lexers.Token>}
  */
 Lexer.prototype.collectTokens = function(itDelimiter, token) {};
 
@@ -208,7 +211,7 @@ Lexer.prototype.collectTokens = function(itDelimiter, token) {};
 Lexer.prototype.colorLastToken = function() {};
 
 /**
- * @param {!Lexer.Token} token
+ * @param {!lexers.Token} token
  */
 Lexer.prototype.colorToken = function(token) {};
 
@@ -218,7 +221,7 @@ Lexer.prototype.colorToken = function(token) {};
 Lexer.prototype.detach = function() {};
 
 /**
- * @param {!Lexer.Token} token
+ * @param {!lexers.Token} token
  * @return {!Lexer.State}
  */
 Lexer.prototype.didShrinkLastToken = function(token) {};
@@ -286,7 +289,7 @@ Lexer.prototype.isWordChar = function(charCode) {};
 
 /**
  * @param {number} maxOffset
- * @return {?Lexer.Token}
+ * @return {?lexers.Token}
  */
 Lexer.prototype.nextToken = function(maxOffset) {};
 
@@ -302,7 +305,7 @@ Lexer.prototype.startToken = function(state) {};
 
 /**
  * @param {!Range} range
- * @param {!Lexer.Token} token
+ * @param {!lexers.Token} token
  * @return {string}
  */
 Lexer.prototype.syntaxOfToken = function(range, token) {};
@@ -317,7 +320,7 @@ Lexer.prototype.syntaxOfWord = function(word) {};
 /**
  * @this {!Lexer}
  * @param {!Range} range
- * @param {!Array.<!Lexer.Token>} tokens
+ * @param {!Array.<!lexers.Token>} tokens
  * @return {string}
  */
 Lexer.prototype.syntaxOfTokens = function(range, tokens) {};

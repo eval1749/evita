@@ -105,7 +105,7 @@
 
   /**
    * @this {!ClikeLexer}
-   * @param {!Lexer.Token} token
+   * @param {!lexers.Token} token
    * @return {!Lexer.State}
    */
   function didShrinkLastToken(token) {
@@ -256,7 +256,7 @@
   /**
    * @this {!CppLexer}
    * @param {!Range} range
-   * @param {!Lexer.Token} token
+   * @param {!lexers.Token} token
    * @return {string}
    *
    * Determine syntax for chained word, e.g. namespace.class.property, from

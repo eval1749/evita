@@ -77,7 +77,7 @@ void SimpleEditor::InsertOrMerge(Offset start,
   const auto& after = markers_->lower_bound(end);
   const auto can_merge_after = after != markers_->end() &&
                                after->second->start() == end &&
-                               before->second->type() == type;
+                               after->second->type() == type;
   if (before != markers_->end() && after != markers_->end()) {
     DCHECK(before == after || std::next(before) == after)
         << "We should not have markers between " << start << " and " << end;

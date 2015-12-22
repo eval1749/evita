@@ -111,6 +111,11 @@ bool RootInlineBox::IsEndOfDocument() const {
   return last_marker_box->marker_name() == TextMarker::EndOfDocument;
 }
 
+bool RootInlineBox::IsEndOfLine() const {
+  return boxes_.back()->as<InlineMarkerBox>()->marker_name() ==
+         TextMarker::EndOfLine;
+}
+
 void RootInlineBox::UpdateTextStart(text::OffsetDelta delta) {
   line_start_ += delta;
   text_start_ += delta;

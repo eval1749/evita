@@ -53,6 +53,7 @@ class RootInlineBox final {
   bool IsContinuedLine() const { return line_start_ != text_start_; }
   bool IsContinuingLine() const;
   bool IsEndOfDocument() const;
+  bool IsEndOfLine() const;
   void UpdateTextStart(text::OffsetDelta delta);
 
  private:

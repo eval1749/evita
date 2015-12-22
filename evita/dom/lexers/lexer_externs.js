@@ -224,7 +224,6 @@ Lexer.prototype.didShrinkLastToken = function(token) {};
 
 /**
  * @param {number} hint
- * @return {number}
  */
 Lexer.prototype.doColor = function(hint) {};
 

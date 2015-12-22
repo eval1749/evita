@@ -16,7 +16,7 @@ interface Lexer {
   void detach();
   void didChangeScanOffset();
   DOMString extractWord(Range range, object token);
-  long doColor(long hint);
+  void doColor(long hint);
   DOMString finishToken();
   /* lexers.Token */object nextToken(long maxOffset);
   void setSyntax(/* lexers.Token */ object token);

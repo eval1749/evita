@@ -20,5 +20,5 @@ interface Mode {
 
   void attach(Document document);
   void detach();
-  long doColor(Document document, long hint);
+  void doColor(Document document, long hint);
 };

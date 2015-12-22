@@ -43,12 +43,11 @@ global.Mode = (function() {
      * @this {!Mode}
      * @param {!Document} document
      * @param {number} hint
-     * @return {number}
      */
     doColor(document, hint) {
       if (!this.document_)
         throw new Error(this + ' is detached.');
-      return this.lexer_.doColor(hint);
+      this.lexer_.doColor(hint);
     }
 
     get document() { return this.document_; }

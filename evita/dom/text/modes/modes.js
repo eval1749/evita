@@ -9,7 +9,7 @@
      */
     constructor(document) { super(document, {}); }
     detach() {}
-    doColor(hint) { return hint; }
+    doColor(hint) {}
   }
 
   function inheritMode(ctor) {

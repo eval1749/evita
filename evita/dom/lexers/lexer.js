@@ -270,7 +270,6 @@ $define(global, 'lexers', function($export) {
   /**
    * @this {!Lexer}
    * @param {number} maxCount
-   * @return number
    */
   function doColor(maxCount) {
     if (!this.range)
@@ -282,15 +281,14 @@ $define(global, 'lexers', function($export) {
       let charCode = document.charCodeAt(this.scanOffset);
       this.feedCharacter(charCode);
     }
-    const count = this.scanOffset - startOffset;
-    if (count === 0)
-      return maxCount;
+    if (this.scanOffset === startOffset)
+      return;
 
     // Color tokens
     /** @type {OrderedSetNode<!lexers.Token>} */
     const startTokenIt = this.lowerBound(startOffset);
     if (!startToken)
-      return maxCount - count;
+      return;
     /** @type {OrderedSetNode<!lexers.Token>} */
     const endTokenIt = this.lowerBound(this.scanOffset);
     /** @type {OrderedSetNode<!lexers.Token>} */
@@ -300,11 +298,10 @@ $define(global, 'lexers', function($export) {
       tokenIt = tokenIt.next();
     }
     if (!this.lastToken)
-      return maxCount - count;
+      return;
     if (this.debug_ > 2)
       console.log('doColor', 'lastToken', this.lastToken);
     this.colorToken(this.lastToken);
-    return maxCount - count;
   }
 
   /**

@@ -282,6 +282,19 @@
   }
 
   /**
+   * @param {base.OrderedSetNode.<!lexers.Token>} it
+   * @return {boolean}
+   */
+  function isNsSeparator(it) {
+    if (!it)
+      return false;
+    /** @const @type {!lexers.Token} */
+    const token = it.data;
+    return token.state === ClikeLexer.State.COLON_COLON ||
+           token.state === lexers.State.DOT;
+  }
+
+  /**
    * @this {!CppLexer}
    * @param {!Range} range
    * @param {!lexers.Token} token
@@ -291,15 +304,7 @@
    * right to left.
    */
   function syntaxOfToken(range, token) {
-    function isNsSeparator(it) {
-      if (!it)
-        return false;
-      var token = it.data;
-      return token.state == ClikeLexer.State.COLON_COLON ||
-             token.state == lexers.State.DOT;
-    }
-
-    var lexer = this;
+    const lexer = this;
 
     if (token.state == ClikeLexer.State.COLON) {
       var it = lexer.tokens.find(token);

@@ -112,6 +112,17 @@ $define(global, 'lexers', function($export) {
       // Continue coloring after one second.
       taskScheduler.schedule(this, 500);
     }
+
+    /**
+     * @param {!Iterable<string>|!Array<string>} keywords
+     * @return {!Map.<string, string>}
+     */
+    static createKeywords(keywords) {
+      const map = new Map();
+      for (const keyword of keywords)
+        map.set(keyword, 'keyword');
+      return map;
+    }
   }
 
   Lexer.DOT_CHAR = Symbol('dot');
@@ -123,18 +134,6 @@ $define(global, 'lexers', function($export) {
   Lexer.STRING1_CHAR = Symbol('string1');
   Lexer.STRING2_CHAR = Symbol('string2');
   Lexer.STRING3_CHAR = Symbol('string3');
-
-  /**
-   * @param {!Array.<string>} keywords
-   * @return {!Map.<string, string>}
-   */
-  Lexer.createKeywords = function(keywords) {
-    let map = new Map();
-    keywords.forEach(function(keyword) {
-      map.set(keyword, 'keyword');
-    });
-    return map;
-  }
 
   /**
    * @this {!Lexer}

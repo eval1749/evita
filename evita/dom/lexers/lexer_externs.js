@@ -112,9 +112,10 @@ lexers.Token.prototype.state;
 lexers.Token.prototype.type;
 
 /**
- * @type {!function(!Array.<string>): !Map.<string, string>}
+ * @param {!Iterable<string>|!Array<string>} keywords
+ * @return {!Map.<string, string>}
  */
-Lexer.createKeywords;
+Lexer.createKeywords = function(keywords) {};
 
 /**
  * @type {!Map.<number, !symbol>}

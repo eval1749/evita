@@ -118,9 +118,17 @@ void BlockFlow::DidChangeStyle(const text::StaticRange& range) {
 void BlockFlow::DidDeleteAt(const text::StaticRange& range) {
   ASSERT_DOM_LOCKED();
   MarkDirty();
-  if (view_start_ <= range.start())
+  if (view_start_ <= range.start()) {
+    // |view_start_| is before deleted range.
     return;
-  view_start_ = std::max(view_start_ - range.length(), range.start());
+  }
+  if (view_start_ <= range.end()) {
+    // |view_start_| is in deleted range.
+    view_start_ = range.start();
+    return;
+  }
+  // |view_start_| is after deleted range.
+  view_start_ -= range.length();
 }
 
 void BlockFlow::DidInsertBefore(const text::StaticRange& range) {

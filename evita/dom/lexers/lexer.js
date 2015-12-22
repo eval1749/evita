@@ -204,7 +204,6 @@ $define(global, 'lexers', function($export) {
     this.lastToken = lastToken;
     this.state = lastToken.state;
     this.tokenData = lastToken.data;
-    this.colorToken(lastToken);
   }
 
   /**

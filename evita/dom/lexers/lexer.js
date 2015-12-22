@@ -245,18 +245,6 @@ $define(global, 'lexers', function($export) {
 
   /**
    * @this {!Lexer}
-   */
-  function colorLastToken() {
-    /*
-      let token = this.lastToken;
-      if (!token)
-        return;
-      this.colorToken(token);
-    */
-  }
-
-  /**
-   * @this {!Lexer}
    * @param {!lexers.Token} token
    */
   function colorToken(token) {
@@ -323,7 +311,6 @@ $define(global, 'lexers', function($export) {
    * @this {!Lexer}
    */
   function endToken() {
-    this.colorLastToken();
     this.state = lexers.State.ZERO;
   }
 
@@ -342,7 +329,6 @@ $define(global, 'lexers', function($export) {
   function finishToken(nextState) {
     if (this.debug_ > 2)
       console.log('finishToken', this.lastToken);
-    this.colorLastToken();
     this.startToken(nextState);
   }
 
@@ -405,7 +391,6 @@ $define(global, 'lexers', function($export) {
       console.log('restartToken', newState, this.lastToken);
     this.state = newState;
     this.lastToken.state = newState;
-    this.colorLastToken();
   }
 
   /**
@@ -628,7 +613,6 @@ $define(global, 'lexers', function($export) {
     adjustScanOffset: {value: adjustScanOffset},
     clear: {value: clear},
     collectTokens: {value: collectTokens},
-    colorLastToken: {value: colorLastToken},
     colorToken: {value: colorToken},
     detach: {value: detach},
     doColor: {value: doColor},

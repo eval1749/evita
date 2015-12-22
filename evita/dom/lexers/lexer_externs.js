@@ -207,11 +207,6 @@ Lexer.prototype.clear = function() {};
 Lexer.prototype.collectTokens = function(itDelimiter, token) {};
 
 /**
- * @type {!function()}
- */
-Lexer.prototype.colorLastToken = function() {};
-
-/**
  * @param {!lexers.Token} token
  */
 Lexer.prototype.colorToken = function(token) {};

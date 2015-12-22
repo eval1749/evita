@@ -72,16 +72,10 @@ lexers.State.SPACE;
 lexers.State.STRING1;
 
 /** @const @type {!lexers.State} */
-lexers.State.STRING1_END;
-
-/** @const @type {!lexers.State} */
 lexers.State.STRING1_ESCAPE;
 
 /** @const @type {!lexers.State} */
 lexers.State.STRING2;
-
-/** @const @type {!lexers.State} */
-lexers.State.STRING2_END;
 
 /** @const @type {!lexers.State} */
 lexers.State.STRING2_ESCAPE;

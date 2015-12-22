@@ -472,7 +472,9 @@ bool BlockFlow::ScrollUp() {
   const auto last_line = lines_.back();
   const auto offset = last_line->text_end();
   const auto line_start =
-      last_line->IsContinuedLine() ? last_line->line_start() : offset;
+      last_line->IsContinuedLine() || last_line->IsContinuedLine()
+          ? last_line->line_start()
+          : offset;
   TextFormatter formatter(text_buffer_, line_start, offset, bounds_, zoom_);
   Append(FormatLine(&formatter));
   return true;

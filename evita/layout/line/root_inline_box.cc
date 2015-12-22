@@ -100,6 +100,11 @@ gfx::RectF RootInlineBox::HitTestTextPosition(text::Offset offset) const {
       rect.size());
 }
 
+bool RootInlineBox::IsContinuingLine() const {
+  return boxes_.back()->as<InlineMarkerBox>()->marker_name() ==
+         TextMarker::LineWrap;
+}
+
 bool RootInlineBox::IsEndOfDocument() const {
   DCHECK(!boxes_.empty());
   const auto last_marker_box = last_box()->as<InlineMarkerBox>();

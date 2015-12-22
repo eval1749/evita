@@ -206,7 +206,7 @@ text::Offset TextFormatter::text_offset() const {
 }
 
 void TextFormatter::DidFormat(const RootInlineBox* line) {
-  line_start_ = line->IsContinuedLine() ? line->line_start() : line->text_end();
+  line_start_ = line->IsEndOfLine() ? line->text_end() : line->line_start();
   text_scanner_->set_text_offset(line->text_end());
 }
 

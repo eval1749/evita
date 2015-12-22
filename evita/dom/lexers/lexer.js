@@ -56,6 +56,8 @@ $define(global, 'lexers', function($export) {
       super(document);
       this.characters_ = options.characters;
       this.debug_ = 0;
+      /** @const @type {!lexers.Token} */
+      this.dummyToken_ = new lexers.Token(lexers.State.ZERO, 0);
       this.keywords = options.keywords;
       this.lastToken = null;
       // TODO(eval1749): |maxChainWords_| should be part of |LexerOptions|.
@@ -98,6 +100,15 @@ $define(global, 'lexers', function($export) {
      */
     didShrinkLastToken(token) {
       // nothing to do
+    }
+
+    /**
+     * @param {number} offset
+     * @return {OrderedSetNode<!lexers.Token>}
+     */
+    lowerBound(offset) {
+      this.dummyToken_.end = offset;
+      return this.tokens.lowerBound(this.dummyToken_);
     }
 
     run() {
@@ -154,8 +165,7 @@ $define(global, 'lexers', function($export) {
       return;
     }
 
-    let dummyToken = new lexers.Token(lexers.State.ZERO, newScanOffset - 1);
-    let it = this.tokens.lowerBound(dummyToken);
+    let it = this.lowerBound(newScanOffset);
     console.assert(it, newScanOffset);
 
     if (this.debug_ > 1)
@@ -169,9 +179,10 @@ $define(global, 'lexers', function($export) {
     // Remove dirty tokens
     if (it) {
       // Collect dirty tokens
+      /** @type {!Array.<!lexers.Token>} */
       const dirtyTokens = new Array();
       while (it) {
-        dirtyTokens.push(it.data);
+        dirtyTokens.push(/** @type {!lexers.Token} */(it.data));
         it = it.next();
       }
       if (this.debug_ > 4)
@@ -236,10 +247,12 @@ $define(global, 'lexers', function($export) {
    * @this {!Lexer}
    */
   function colorLastToken() {
-    let token = this.lastToken;
-    if (!token)
-      return;
-    this.colorToken(token);
+    /*
+      let token = this.lastToken;
+      if (!token)
+        return;
+      this.colorToken(token);
+    */
   }
 
   /**
@@ -274,16 +287,35 @@ $define(global, 'lexers', function($export) {
   function doColor(maxCount) {
     if (!this.range)
       throw new Error("Can't use disconnected lexer.");
-    let document = this.document;
-    let maxOffset = Math.min(this.scanOffset + maxCount, document.length);
-    let startOffset = this.scanOffset;
+    const document = this.document;
+    const maxOffset = Math.min(this.scanOffset + maxCount, document.length);
+    const startOffset = this.scanOffset;
     while (this.scanOffset < maxOffset) {
       let charCode = document.charCodeAt(this.scanOffset);
       this.feedCharacter(charCode);
     }
-    let count = this.scanOffset - startOffset;
-    if (count && this.lastToken)
-      this.colorLastToken();
+    const count = this.scanOffset - startOffset;
+    if (count === 0)
+      return maxCount;
+
+    // Color tokens
+    /** @type {OrderedSetNode<!lexers.Token>} */
+    const startTokenIt = this.lowerBound(startOffset);
+    if (!startToken)
+      return maxCount - count;
+    /** @type {OrderedSetNode<!lexers.Token>} */
+    const endTokenIt = this.lowerBound(this.scanOffset);
+    /** @type {OrderedSetNode<!lexers.Token>} */
+    let tokenIt = startTokenIt;
+    while (tokenIt != endTokenIt) {
+      this.colorToken(tokenIt.data);
+      tokenIt = tokenIt.next();
+    }
+    if (!this.lastToken)
+      return maxCount - count;
+    if (this.debug_ > 2)
+      console.log('doColor', 'lastToken', this.lastToken);
+    this.colorToken(this.lastToken);
     return maxCount - count;
   }
 

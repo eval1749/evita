@@ -111,23 +111,33 @@
      * @param {!lexers.Token} token
      */
     colorToken(token) {
-      if (token.state === XmlLexer.State.SCRIPT)
-        return;
-      if (token.state !== XmlLexer.State.SCRIPT_END) {
-        Lexer.prototype.colorToken.call(this, token);
+      console.log('XmlLexer', 'colorToken', token);
+      if (token.state === XmlLexer.State.SCRIPT) {
+        const tokenData = token.data;
+        const scriptLexer = /** @type {!Lexer} */(tokenData.scriptLexer);
+        const startTokenIt = scriptLexer.lowerBound(token.start);
+        const endTokenIt = scriptLexer.lowerBound(token.end);
+        for (let tokenIt = startTokenIt; tokenIt !== endTokenIt;
+             tokenIt = tokenIt.next()) {
+          scriptLexer.colorToken(tokenIt.data);
+        }
         return;
       }
-      // Color "</script>" as "</" + "script" + ">"
-      var range = this.range;
-      range.collapseTo(token.start);
-      range.end = token.start + 2;
-      range.setSyntax('keyword');
-      range.collapseTo(token.start + 2);
-      range.end = token.end - 1;
-      range.setSyntax('html_element_name');
-      range.collapseTo(token.end - 1);
-      range.end = token.end;
-      range.setSyntax('keyword');
+      if (token.state === XmlLexer.State.SCRIPT_END) {
+        // Color "</script>" as "</" + "script" + ">"
+        var range = this.range;
+        range.collapseTo(token.start);
+        range.end = token.start + 2;
+        range.setSyntax('keyword');
+        range.collapseTo(token.start + 2);
+        range.end = token.end - 1;
+        range.setSyntax('html_element_name');
+        range.collapseTo(token.end - 1);
+        range.end = token.end;
+        range.setSyntax('keyword');
+        return;
+      }
+      super.colorToken(token);
     }
 
     /**

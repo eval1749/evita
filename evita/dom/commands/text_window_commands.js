@@ -650,7 +650,7 @@
           lineRange.moveEndWhile(' ', tabWidth);
           if (lineRange.end < document.length &&
               lineRange.end - lineRange.start < tabWidth &&
-              document.charCodeAt_(lineRange.end) == 0x09) {
+              document.charCodeAt(lineRange.end) == 0x09) {
             lineRange.moveEnd(Unit.CHARACTER);
           }
           lineRange.text = '';

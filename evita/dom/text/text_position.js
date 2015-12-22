@@ -199,7 +199,7 @@
 
   /** * @return {number} */
   global.TextPosition.prototype.charCode = function() {
-    return this.document.charCodeAt_(this.offset);
+    return this.document.charCodeAt(this.offset);
   }
 
   /** * @return {string} */

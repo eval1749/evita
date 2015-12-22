@@ -62,7 +62,7 @@
    * @return {string|null}
    */
   function wordClassAt(document, position) {
-    return wordClassOf(document.charCodeAt_(position));
+    return wordClassOf(document.charCodeAt(position));
   }
 
   /**
@@ -71,7 +71,7 @@
    * @return {string|null}
    */
   function wordClassBefore(document, position) {
-    return wordClassOf(document.charCodeAt_(position - 1));
+    return wordClassOf(document.charCodeAt(position - 1));
   }
 
   /**
@@ -91,7 +91,7 @@
    */
   function computeEndOfLine(document, offset) {
     while (offset < document.length) {
-      if (document.charCodeAt_(offset) === Unicode.LF)
+      if (document.charCodeAt(offset) === Unicode.LF)
         return offset;
       ++offset;
     }
@@ -303,7 +303,7 @@
   function computeStartOfLine(document, offset) {
     while (offset > 0) {
       --offset;
-      if (document.charCodeAt_(offset) === Unicode.LF)
+      if (document.charCodeAt(offset) === Unicode.LF)
         return offset + 1;
     }
     return offset;
@@ -375,7 +375,7 @@
     if (count > 0) {
       const maxOffset = Math.min(start + count, this.length);
       for (let offset = start; offset < maxOffset; ++offset) {
-        const charCode = this.charCodeAt_(offset);
+        const charCode = this.charCodeAt(offset);
         if (!charCodeSet.has(charCode))
           return offset;
       }
@@ -384,7 +384,7 @@
 
     const minOffset = Math.max(start + count, 0);
     for (let offset = start; offset > minOffset; --offset) {
-      const charCode = this.charCodeAt_(offset - 1);
+      const charCode = this.charCodeAt(offset - 1);
       if (!charCodeSet.has(charCode))
         return offset;
     }

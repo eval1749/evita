@@ -688,7 +688,7 @@
           const document = this.document;
           const end = this.lastToken.end;
           for (var offset = this.lastToken.start; offset < end; ++offset) {
-            feedCharToScriptLexer(this, document.charCodeAt_(offset));
+            feedCharToScriptLexer(this, document.charCodeAt(offset));
           }
         }
         if (charCode === Unicode.LESS_THAN_SIGN) {

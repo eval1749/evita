@@ -78,7 +78,7 @@ interface Document : EventTarget {
     void bindKey(DOMString keyCombination, Object command);
 
     [ImplementedAs=charCodeAt]
-    long charCodeAt_(TextOffset offset);
+    long charCodeAt(TextOffset offset);
 
     void clearUndo();
 

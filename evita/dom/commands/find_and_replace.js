@@ -534,7 +534,7 @@ global.FindAndReplace = (function() {
     /** @type {!Document} */
     const document = range.document;
     for (let offset = range.start; offset < range.end; ++offset) {
-      if (document.charCodeAt_(offset) === Unicode.LF)
+      if (document.charCodeAt(offset) === Unicode.LF)
         return true;
     }
     return false;

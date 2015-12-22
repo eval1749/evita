@@ -101,7 +101,7 @@ DynamicAbbrevExpander.prototype.findCandidate = function(current_word) {
    */
   function matchAt(text, document, offset) {
     for (var k = 0; k < text.length; ++k) {
-      if (document.charCodeAt_(offset) != text.charCodeAt(k))
+      if (document.charCodeAt(offset) != text.charCodeAt(k))
         return false;
       ++offset;
     }

@@ -97,7 +97,7 @@ global.CmdLexer = (function() {
       --lexer.count;
       if (lexer.scanOffset == maxOffset)
         break;
-      var charCode = document.charCodeAt_(lexer.scanOffset);
+      var charCode = document.charCodeAt(lexer.scanOffset);
       ++lexer.scanOffset;
       switch (lexer.state) {
 

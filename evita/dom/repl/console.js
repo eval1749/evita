@@ -97,7 +97,7 @@ $define(global, 'repl', function($export) {
       const document = this.ensureDocument_();
       if (document.length === 0)
         return;
-      if (document.charCodeAt_(document.length - 1) === Unicode.LF)
+      if (document.charCodeAt(document.length - 1) === Unicode.LF)
         return;
       this.emit('\n');
     }

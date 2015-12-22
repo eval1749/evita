@@ -47,7 +47,7 @@
     var stringCase = Range.Case.MIXED;
     var state = State.START;
     for (var offset = start; offset < end; ++offset) {
-      var charCode = document.charCodeAt_(offset);
+      var charCode = document.charCodeAt(offset);
       var ucd = Unicode.UCD[charCode];
       var lowerCase = ucd.category == Unicode.Category.Ll ||
                        ucd.category == Unicode.Category.Lt;

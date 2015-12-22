@@ -356,7 +356,7 @@ global.TextWindow.prototype.clone = function() {
     function isLeftBracket(range) {
       if (range.start == range.document.length)
         return false;
-      const leftBracket = Bracket.DATA[document.charCodeAt_(range.start)];
+      const leftBracket = Bracket.DATA[document.charCodeAt(range.start)];
       return leftBracket && leftBracket.type === Bracket.Type.LEFT;
     }
 
@@ -364,7 +364,7 @@ global.TextWindow.prototype.clone = function() {
       if (range.start === 0)
         return false;
 
-      const rightBracket = Bracket.DATA[document.charCodeAt_(range.start - 1)];
+      const rightBracket = Bracket.DATA[document.charCodeAt(range.start - 1)];
       return rightBracket && rightBracket.type === Bracket.Type.RIGHT;
     }
 

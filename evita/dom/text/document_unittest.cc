@@ -126,11 +126,11 @@ TEST_F(DocumentTest, Document_remove) {
   EXPECT_SCRIPT_EQ("0", "Document.list.length");
 }
 
-TEST_F(DocumentTest, charCodeAt_) {
+TEST_F(DocumentTest, charCodeAt) {
   EXPECT_SCRIPT_VALID(
       "var doc = Document.new('foo');"
       "new Range(doc).text = 'foobar';");
-  EXPECT_SCRIPT_EQ("111", "doc.charCodeAt_(1)");
+  EXPECT_SCRIPT_EQ("111", "doc.charCodeAt(1)");
 }
 
 TEST_F(DocumentTest, dispatchEvent) {

@@ -278,7 +278,7 @@
     let maxOffset = Math.min(this.scanOffset + maxCount, document.length);
     let startOffset = this.scanOffset;
     while (this.scanOffset < maxOffset) {
-      let charCode = document.charCodeAt_(this.scanOffset);
+      let charCode = document.charCodeAt(this.scanOffset);
       this.feedCharacter(charCode);
     }
     let count = this.scanOffset - startOffset;

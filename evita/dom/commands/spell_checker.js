@@ -154,7 +154,7 @@
     }
 
     /** @return {number} */
-    charCode() { return this.document_.charCodeAt_(this.offset_); }
+    charCode() { return this.document_.charCodeAt(this.offset_); }
 
     /** @return {!Document} */
     get document() { return this.document_; }

@@ -169,17 +169,16 @@ $define(global, 'lexers', function($export) {
     // Remove dirty tokens
     if (it) {
       // Collect dirty tokens
-      let tokensToRemove = new Array();
+      const dirtyTokens = new Array();
       while (it) {
-        tokensToRemove.push(it.data);
+        dirtyTokens.push(it.data);
         it = it.next();
       }
       if (this.debug_ > 4)
-        console.log('tokensToRemove', tokensToRemove);
+        console.log('dirtyTokens', dirtyTokens);
       // Remove dirty tokens from set.
-      tokensToRemove.forEach(function(token) {
-        this.tokens.remove(token);
-      }, this);
+      for (const dirtyToken of dirtyTokens)
+        this.tokens.remove(dirtyToken);
     }
 
     // Shrink last clean token

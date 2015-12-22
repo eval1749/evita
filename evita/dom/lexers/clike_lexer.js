@@ -21,6 +21,34 @@
       this.useColonColon = options.useColonColon;
       this.useDot = options.useDot;
     }
+
+    /** @override */
+    didEndToken(token) {
+      if (token.state !== lexers.State.WORD)
+        return;
+      const word = this.document.slice(token.start, token.end);
+      if (this.keywords.get(word))
+        token.type = 'keyword';
+      let previous = this.lowerBound(token.start);
+      if (!previous)
+        return;
+      while (previous && previous.data.state === lexers.State.SPACE)
+        previous = previous.previous();
+      if (!previous)
+        return;
+      const previousToken = previous.data;
+      if (previousToken.state === ClikeLexer.State.NUMBER_SIGN) {
+        const number_sign_word = '#' + word;
+        if (this.keywords.get(number_sign_word)) {
+          this.tokens.remove(token);
+          previousToken.state = ClikeLexer.State.NUMBER_SIGN;
+          previousToken.end = token.end;
+          previousToken.type = 'keyword';
+          this.lastToken = previousToken;
+          return;
+        }
+      }
+    }
   }
 
   /** @enum{!symbol} */
@@ -311,10 +339,6 @@
     } while (it && it.data.state == lexers.State.SPACE);
 
     if (it){
-      if (it.data.state == ClikeLexer.State.NUMBER_SIGN) {
-        return lexer.syntaxOfTokens(range, [it.data, token]);
-      }
-
       if (isNsSeparator(it)) {
         var tokens = lexer.collectTokens(it, token);
         return lexer.syntaxOfTokens(range, tokens);

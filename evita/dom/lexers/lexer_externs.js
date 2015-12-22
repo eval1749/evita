@@ -153,7 +153,7 @@ Lexer.prototype.maxChainWords_;
 Lexer.prototype.mutationObserver_;
 
 /**
- * @type {?lexers.Token}
+ * @type {!lexers.Token}
  */
 Lexer.prototype.lastToken;
 
@@ -219,6 +219,11 @@ Lexer.prototype.detach = function() {};
  * @return {!lexers.State}
  */
 Lexer.prototype.didShrinkLastToken = function(token) {};
+
+/**
+ * @param {!lexers.Token} token
+ */
+Lexer.prototype.didEndToken = function(token) {};
 
 /**
  * @param {number} hint

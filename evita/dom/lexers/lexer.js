@@ -31,6 +31,7 @@ $define(global, 'lexers', function($export) {
       this.end = start + 1;
       this.start = start;
       this.state = state;
+      this.type = '';
     }
   }
 
@@ -59,7 +60,7 @@ $define(global, 'lexers', function($export) {
       /** @const @type {!lexers.Token} */
       this.dummyToken_ = new lexers.Token(lexers.State.ZERO, 0);
       this.keywords = options.keywords;
-      this.lastToken = null;
+      this.lastToken = this.dummyToken_;
       // TODO(eval1749): |maxChainWords_| should be part of |LexerOptions|.
       this.maxChainWords_ = 3;
       this.range = new Range(document);
@@ -85,6 +86,9 @@ $define(global, 'lexers', function($export) {
         return;
       taskScheduler.schedule(this, 500);
     }
+
+    /** @param {!lexers.Token} token */
+    didEndToken(token) {}
 
     /**
      * @private
@@ -212,7 +216,7 @@ $define(global, 'lexers', function($export) {
   function clear() {
     if (this.debug_ > 0)
       console.log('Lexer.clear', this);
-    this.lastToken = null;
+    this.lastToken = this.dummyToken_;
     this.scanOffset = 0;
     this.state = lexers.State.ZERO;
     this.tokens.clear();
@@ -247,6 +251,10 @@ $define(global, 'lexers', function($export) {
    * @param {!lexers.Token} token
    */
   function colorToken(token) {
+    if (token.type != '') {
+      this.document.setSyntax(token.start, token.end, token.type);
+      return;
+    }
     let range = this.range;
     range.collapseTo(token.start);
     range.end = token.end;
@@ -307,6 +315,7 @@ $define(global, 'lexers', function($export) {
    * @this {!Lexer}
    */
   function endToken() {
+    this.didEndToken(this.lastToken);
     this.state = lexers.State.ZERO;
   }
 
@@ -325,6 +334,7 @@ $define(global, 'lexers', function($export) {
   function finishToken(nextState) {
     if (this.debug_ > 2)
       console.log('finishToken', this.lastToken);
+    this.didEndToken(this.lastToken);
     this.startToken(nextState);
   }
 

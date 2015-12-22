@@ -10,20 +10,11 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/text/buffer.h"
 #include "evita/text/static_range.h"
 
 namespace layout {
-
-namespace {
-bool IsWrappedLine(const RootInlineBox& line) {
-  return line.boxes().back()->as<InlineMarkerBox>()->marker_name() ==
-         TextMarker::LineWrap;
-}
-
-}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -93,7 +84,7 @@ void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
   std::vector<text::Offset> dirty_lines;
   for (const auto& pair : lines_) {
     const auto& line = *pair.second;
-    if (line.right() > new_bounds.right || IsWrappedLine(line) ||
+    if (line.right() > new_bounds.right || line.IsContinuingLine() ||
         line.IsContinuedLine()) {
       dirty_lines.push_back(line.text_end());
     }

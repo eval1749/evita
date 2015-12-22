@@ -106,7 +106,7 @@
   /**
    * @this {!ClikeLexer}
    * @param {!lexers.Token} token
-   * @return {!Lexer.State}
+   * @return {!lexers.State}
    */
   function didShrinkLastToken(token) {
     if (this.debug_ > 1)
@@ -118,8 +118,8 @@
         return ClikeLexer.State.SOLIDUS;
       case ClikeLexer.State.COLON_COLON:
         return ClikeLexer.State.COLON;
-      case Lexer.State.DOT:
-        return Lexer.State.ZERO;
+      case lexers.State.DOT:
+        return lexers.State.ZERO;
       case ClikeLexer.State.LINE_COMMENT_START:
         return ClikeLexer.State.SOLIDUS;
     }
@@ -149,7 +149,7 @@
         return;
 
       case ClikeLexer.State.BLOCK_COMMENT_END:
-        this.state = Lexer.State.ZERO;
+        this.state = lexers.State.ZERO;
         return;
 
       case ClikeLexer.State.BLOCK_COMMENT_START:
@@ -167,7 +167,7 @@
         return;
 
       case ClikeLexer.State.COLON_COLON:
-        this.state = Lexer.State.ZERO;
+        this.state = lexers.State.ZERO;
         return;
 
       case ClikeLexer.State.LINE_COMMENT:
@@ -185,7 +185,7 @@
 
       case ClikeLexer.State.LINE_COMMENT_START:
         if (charCode == Unicode.LF) {
-          this.state = Lexer.State.ZERO;
+          this.state = lexers.State.ZERO;
           return;
         }
         if (charCode == Unicode.REVERSE_SOLIDUS)
@@ -202,7 +202,7 @@
         return;
 
       case ClikeLexer.State.NUMBER_SIGN:
-        this.state = Lexer.State.ZERO;
+        this.state = lexers.State.ZERO;
         return;
 
       case ClikeLexer.State.SOLIDUS:
@@ -214,7 +214,7 @@
           this.endToken();
         return;
 
-      case Lexer.State.ZERO:
+      case lexers.State.ZERO:
         switch (charCode) {
           case Unicode.LF:
             this.startToken(ClikeLexer.State.NEWLINE);
@@ -230,7 +230,7 @@
                 this.endToken();
                 return;
               }
-              this.startToken(Lexer.State.OPERATOR);
+              this.startToken(lexers.State.OPERATOR);
               return;
             }
 
@@ -242,7 +242,7 @@
             }
 
             if (this.useDot && charCode == Unicode.FULL_STOP) {
-              this.startToken(Lexer.State.DOT);
+              this.startToken(lexers.State.DOT);
               this.endToken();
               return;
             }
@@ -268,7 +268,7 @@
         return false;
       var token = it.data;
       return token.state == ClikeLexer.State.COLON_COLON ||
-             token.state == Lexer.State.DOT;
+             token.state == lexers.State.DOT;
     }
 
     var lexer = this;
@@ -277,7 +277,7 @@
       var it = lexer.tokens.find(token);
       console.assert(it, token);
       it = it.previous();
-      if (it && it.data.state == Lexer.State.WORD &&
+      if (it && it.data.state == lexers.State.WORD &&
           !isNsSeparator(it.previous())) {
         var syntax = lexer.syntaxOfTokens(range, [it.data, token]);
         if (syntax)
@@ -291,14 +291,14 @@
       var it = lexer.tokens.find(token);
       console.assert(it, token);
       it = it.previous();
-      if (it && it.data.state == Lexer.State.WORD) {
+      if (it && it.data.state == lexers.State.WORD) {
         // Override "label" syntax.
         range.start = it.data.start;
         return 'cpp_namespace_prefix';
       }
     }
 
-    if (token.state != Lexer.State.WORD) {
+    if (token.state != lexers.State.WORD) {
       return STATE_TO_SYNTAX.get(token.state) ||
              Lexer.prototype.syntaxOfToken.call(this, range, token);
     }
@@ -308,7 +308,7 @@
     console.assert(it, token);
     do {
       it = it.previous();
-    } while (it && it.data.state == Lexer.State.SPACE);
+    } while (it && it.data.state == lexers.State.SPACE);
 
     if (it){
       if (it.data.state == ClikeLexer.State.NUMBER_SIGN) {

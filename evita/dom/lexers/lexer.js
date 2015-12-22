@@ -3,9 +3,28 @@
 // found in the LICENSE file.
 
 $define(global, 'lexers', function($export) {
+  const State = {
+    DOT: Symbol('.'),
+    LINE_COMMENT: Symbol('line_comment'),
+    OPERATOR: Symbol('operator'),
+    OTHER: Symbol('other'),
+    SPACE: Symbol('space'),
+    STRING1: Symbol('string1'),
+    STRING1_END: Symbol('string1_end'),
+    STRING1_ESCAPE: Symbol('string1_escape'),
+    STRING2: Symbol('string2'),
+    STRING2_END: Symbol('string2_end'),
+    STRING2_ESCAPE: Symbol('string2_escape'),
+    STRING3: Symbol('string3'),
+    STRING3_END: Symbol('string3_end'),
+    STRING3_ESCAPE: Symbol('string3_escape'),
+    WORD: Symbol('word'),
+    ZERO: Symbol('zero'),
+  };
+
   class Token {
     /**
-     * @param {!Lexer.State} state
+     * @param {!lexers.State} state
      * @param {number} start
      */
     constructor(state, start) {
@@ -15,7 +34,7 @@ $define(global, 'lexers', function($export) {
     }
   }
 
-  $export({Token});
+  $export({State, Token});
 });
 
 /**
@@ -43,7 +62,7 @@ $define(global, 'lexers', function($export) {
       this.maxChainWords_ = 3;
       this.range = new Range(document);
       this.scanOffset = 0;
-      this.state = Lexer.State.ZERO;
+      this.state = lexers.State.ZERO;
       this.tokens = new OrderedSet((a, b) => a.end < b.end);
     }
 
@@ -105,25 +124,6 @@ $define(global, 'lexers', function($export) {
   Lexer.STRING2_CHAR = Symbol('string2');
   Lexer.STRING3_CHAR = Symbol('string3');
 
-  Lexer.State = {
-    DOT: Symbol('.'),
-    LINE_COMMENT: Symbol('line_comment'),
-    OPERATOR: Symbol('operator'),
-    OTHER: Symbol('other'),
-    SPACE: Symbol('space'),
-    STRING1: Symbol('string1'),
-    STRING1_END: Symbol('string1_end'),
-    STRING1_ESCAPE: Symbol('string1_escape'),
-    STRING2: Symbol('string2'),
-    STRING2_END: Symbol('string2_end'),
-    STRING2_ESCAPE: Symbol('string2_escape'),
-    STRING3: Symbol('string3'),
-    STRING3_END: Symbol('string3_end'),
-    STRING3_ESCAPE: Symbol('string3_escape'),
-    WORD: Symbol('word'),
-    ZERO: Symbol('zero'),
-  };
-
   /**
    * @param {!Array.<string>} keywords
    * @return {!Map.<string, string>}
@@ -155,7 +155,7 @@ $define(global, 'lexers', function($export) {
       return;
     }
 
-    let dummyToken = new lexers.Token(Lexer.State.ZERO, newScanOffset - 1);
+    let dummyToken = new lexers.Token(lexers.State.ZERO, newScanOffset - 1);
     let it = this.tokens.lowerBound(dummyToken);
     console.assert(it, newScanOffset);
 
@@ -206,7 +206,7 @@ $define(global, 'lexers', function($export) {
       console.log('Lexer.clear', this);
     this.lastToken = null;
     this.scanOffset = 0;
-    this.state = Lexer.State.ZERO;
+    this.state = lexers.State.ZERO;
     this.tokens.clear();
   }
 
@@ -225,8 +225,8 @@ $define(global, 'lexers', function($export) {
       tokens.unshift(it.data);
       do {
         it = it.previous();
-      } while (it && it.data.state === Lexer.State.SPACE);
-      if (!it || it.data.state !== Lexer.State.WORD)
+      } while (it && it.data.state === lexers.State.SPACE);
+      if (!it || it.data.state !== lexers.State.WORD)
         break;
       tokens.unshift(it.data);
       it = it.previous();
@@ -294,7 +294,7 @@ $define(global, 'lexers', function($export) {
    */
   function endToken() {
     this.colorLastToken();
-    this.state = Lexer.State.ZERO;
+    this.state = lexers.State.ZERO;
   }
 
   /**
@@ -307,7 +307,7 @@ $define(global, 'lexers', function($export) {
 
   /**
    * @this {!Lexer}
-   * @param {!Lexer.State} nextState
+   * @param {!lexers.State} nextState
    */
   function finishToken(nextState) {
     if (this.debug_ > 2)
@@ -365,10 +365,10 @@ $define(global, 'lexers', function($export) {
 
   /**
    * @this {!Lexer}
-   * @param {!Lexer.State} newState
+   * @param {!lexers.State} newState
    */
   function restartToken(newState) {
-    console.assert(newState !== Lexer.State.ZERO,
+    console.assert(newState !== lexers.State.ZERO,
                    'newState must not be zero.');
     this.extendToken();
     if (this.debug_ > 2)
@@ -380,10 +380,10 @@ $define(global, 'lexers', function($export) {
 
   /**
    * @this {!Lexer}
-   * @param {!Lexer.State} state
+   * @param {!lexers.State} state
    */
   function startToken(state) {
-    console.assert(state !== Lexer.State.ZERO, 'state must not be zero.');
+    console.assert(state !== lexers.State.ZERO, 'state must not be zero.');
     if (this.debug_ > 2)
       console.log('startToken', state, this.scanOffset);
     let token = new lexers.Token(state, this.scanOffset);
@@ -398,21 +398,21 @@ $define(global, 'lexers', function($export) {
 
   let syntaxOfToken = (function() {
     let map = new Map();
-    map.set(Lexer.State.DOT, 'operators');
-    map.set(Lexer.State.LINE_COMMENT, 'comment');
-    map.set(Lexer.State.OPERATOR, 'operators');
-    map.set(Lexer.State.OTHER, '');
-    map.set(Lexer.State.SPACE, '');
-    map.set(Lexer.State.STRING1, 'string_literal');
-    map.set(Lexer.State.STRING1_END, 'string_literal');
-    map.set(Lexer.State.STRING1_ESCAPE, 'string_literal');
-    map.set(Lexer.State.STRING2, 'string_literal');
-    map.set(Lexer.State.STRING2_END, 'string_literal');
-    map.set(Lexer.State.STRING2_ESCAPE, 'string_literal');
-    map.set(Lexer.State.STRING3, 'string_literal');
-    map.set(Lexer.State.STRING3_END, 'string_literal');
-    map.set(Lexer.State.STRING3_ESCAPE, 'string_literal');
-    map.set(Lexer.State.WORD, 'identifier');
+    map.set(lexers.State.DOT, 'operators');
+    map.set(lexers.State.LINE_COMMENT, 'comment');
+    map.set(lexers.State.OPERATOR, 'operators');
+    map.set(lexers.State.OTHER, '');
+    map.set(lexers.State.SPACE, '');
+    map.set(lexers.State.STRING1, 'string_literal');
+    map.set(lexers.State.STRING1_END, 'string_literal');
+    map.set(lexers.State.STRING1_ESCAPE, 'string_literal');
+    map.set(lexers.State.STRING2, 'string_literal');
+    map.set(lexers.State.STRING2_END, 'string_literal');
+    map.set(lexers.State.STRING2_ESCAPE, 'string_literal');
+    map.set(lexers.State.STRING3, 'string_literal');
+    map.set(lexers.State.STRING3_END, 'string_literal');
+    map.set(lexers.State.STRING3_ESCAPE, 'string_literal');
+    map.set(lexers.State.WORD, 'identifier');
 
     /**
      * @param {!lexers.Token} token
@@ -470,83 +470,83 @@ $define(global, 'lexers', function($export) {
     let lexer = this;
     let charSyntax = lexer.characters_.get(charCode);
     switch (lexer.state){
-     case Lexer.State.DOT:
-       lexer.state = Lexer.State.ZERO;
+     case lexers.State.DOT:
+       lexer.state = lexers.State.ZERO;
        break;
-     case Lexer.State.LINE_COMMENT:
+     case lexers.State.LINE_COMMENT:
        if (charCode === Unicode.LF)
          lexer.endToken();
        else
          lexer.extendToken();
        break;
 
-     case Lexer.State.OPERATOR:
+     case lexers.State.OPERATOR:
        if (charSyntax === Lexer.OPERATOR_CHAR)
          lexer.extendToken();
        else
          lexer.endToken();
        break;
 
-     case Lexer.State.OTHER:
+     case lexers.State.OTHER:
        if (this.isOtherChar(charCode))
          lexer.extendToken();
        else
          lexer.endToken();
        break;
 
-     case Lexer.State.SPACE:
+     case lexers.State.SPACE:
        if (charCode === Unicode.SPACE || charCode === Unicode.TAB)
          lexer.extendToken();
        else
          lexer.endToken();
        break;
 
-     case Lexer.State.STRING1:
+     case lexers.State.STRING1:
        if (charSyntax === Lexer.STRING1_CHAR)
-         lexer.finishToken(Lexer.State.STRING1_END);
+         lexer.finishToken(lexers.State.STRING1_END);
        else if (charCode === Unicode.REVERSE_SOLIDUS)
-         lexer.finishToken(Lexer.State.STRING1_ESCAPE);
+         lexer.finishToken(lexers.State.STRING1_ESCAPE);
        else
          lexer.extendToken();
        break;
-     case Lexer.State.STRING1_END:
+     case lexers.State.STRING1_END:
        lexer.endToken();
        break;
-     case Lexer.State.STRING1_ESCAPE:
-       lexer.finishToken(Lexer.State.STRING1);
+     case lexers.State.STRING1_ESCAPE:
+       lexer.finishToken(lexers.State.STRING1);
        break;
 
-     case Lexer.State.STRING2:
+     case lexers.State.STRING2:
        if (charSyntax === Lexer.STRING2_CHAR)
-         lexer.finishToken(Lexer.State.STRING2_END);
+         lexer.finishToken(lexers.State.STRING2_END);
        else if (charCode === Unicode.REVERSE_SOLIDUS)
-         lexer.finishToken(Lexer.State.STRING2_ESCAPE);
+         lexer.finishToken(lexers.State.STRING2_ESCAPE);
        else
          lexer.extendToken();
        break;
-     case Lexer.State.STRING2_END:
+     case lexers.State.STRING2_END:
        lexer.endToken();
        break;
-     case Lexer.State.STRING2_ESCAPE:
-       lexer.finishToken(Lexer.State.STRING2);
+     case lexers.State.STRING2_ESCAPE:
+       lexer.finishToken(lexers.State.STRING2);
        break;
 
-     case Lexer.State.STRING3:
+     case lexers.State.STRING3:
        if (charSyntax === Lexer.STRING3_CHAR)
-         lexer.finishToken(Lexer.State.STRING3_END);
+         lexer.finishToken(lexers.State.STRING3_END);
        else if (charCode === Unicode.REVERSE_SOLIDUS)
-         lexer.finishToken(Lexer.State.STRING3_ESCAPE);
+         lexer.finishToken(lexers.State.STRING3_ESCAPE);
        else
          lexer.extendToken();
        break;
-     case Lexer.State.STRING3_END:
+     case lexers.State.STRING3_END:
        lexer.endToken();
        break;
-     case Lexer.State.STRING3_ESCAPE:
-       lexer.finishToken(Lexer.State.STRING3);
+     case lexers.State.STRING3_ESCAPE:
+       lexer.finishToken(lexers.State.STRING3);
        break;
 
-     case Lexer.State.WORD:
+     case lexers.State.WORD:
        if (charSyntax === Lexer.NAMESTART_CHAR ||
            charSyntax === Lexer.NAME_CHAR) {
          lexer.extendToken();
@@ -555,29 +555,29 @@ $define(global, 'lexers', function($export) {
        lexer.endToken();
        break;
 
-     case Lexer.State.ZERO:
+     case lexers.State.ZERO:
        switch (charSyntax) {
          case Lexer.NAMESTART_CHAR:
          case Lexer.NAME_CHAR:
-           lexer.startToken(Lexer.State.WORD);
+           lexer.startToken(lexers.State.WORD);
            break;
          case Lexer.OPERATOR_CHAR:
-           lexer.startToken(Lexer.State.OPERATOR);
+           lexer.startToken(lexers.State.OPERATOR);
            break;
          case Lexer.STRING1_CHAR:
-           lexer.startToken(Lexer.State.STRING1);
+           lexer.startToken(lexers.State.STRING1);
            break;
          case Lexer.STRING2_CHAR:
-           lexer.startToken(Lexer.State.STRING2);
+           lexer.startToken(lexers.State.STRING2);
            break;
          case Lexer.STRING3_CHAR:
-           lexer.startToken(Lexer.State.STRING3);
+           lexer.startToken(lexers.State.STRING3);
            break;
          case Lexer.WHITESPACE_CHAR:
-           lexer.startToken(Lexer.State.SPACE);
+           lexer.startToken(lexers.State.SPACE);
            break;
          default:
-           lexer.startToken(Lexer.State.OTHER);
+           lexer.startToken(lexers.State.OTHER);
            break;
        }
        break;

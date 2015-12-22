@@ -51,47 +51,47 @@ Lexer.STRING3_CHAR;
 Lexer.WHITESPACE_CHAR;
 
 /** @typedef {!symbol} */
-Lexer.State;
+lexers.State;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.DOT;
+/** @const @type {!lexers.State} */
+lexers.State.DOT;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.LINE_COMMENT;
+/** @const @type {!lexers.State} */
+lexers.State.LINE_COMMENT;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.OPERATOR;
+/** @const @type {!lexers.State} */
+lexers.State.OPERATOR;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.OTHER;
+/** @const @type {!lexers.State} */
+lexers.State.OTHER;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.SPACE;
+/** @const @type {!lexers.State} */
+lexers.State.SPACE;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.STRING1;
+/** @const @type {!lexers.State} */
+lexers.State.STRING1;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.STRING1_END;
+/** @const @type {!lexers.State} */
+lexers.State.STRING1_END;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.STRING1_ESCAPE;
+/** @const @type {!lexers.State} */
+lexers.State.STRING1_ESCAPE;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.STRING2;
+/** @const @type {!lexers.State} */
+lexers.State.STRING2;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.STRING2_END;
+/** @const @type {!lexers.State} */
+lexers.State.STRING2_END;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.STRING2_ESCAPE;
+/** @const @type {!lexers.State} */
+lexers.State.STRING2_ESCAPE;
 
-/** @const @type {!Lexer.State} */
-Lexer.State.ZERO;
+/** @const @type {!lexers.State} */
+lexers.State.ZERO;
 
 /**
  * @constructor
- * @param {!Lexer.State} state
+ * @param {!lexers.State} state
  * @param {number} start
  */
 lexers.Token = function(state, start) {};
@@ -105,7 +105,7 @@ lexers.Token.prototype.end;
 /** @type {number} */
 lexers.Token.prototype.start;
 
-/** @type {!Lexer.State} */
+/** @type {!lexers.State} */
 lexers.Token.prototype.state;
 
 /** @type {string} */
@@ -222,7 +222,7 @@ Lexer.prototype.detach = function() {};
 
 /**
  * @param {!lexers.Token} token
- * @return {!Lexer.State}
+ * @return {!lexers.State}
  */
 Lexer.prototype.didShrinkLastToken = function(token) {};
 
@@ -248,7 +248,7 @@ Lexer.prototype.extendToken = function() {};
 Lexer.prototype.feedCharacter = function(charCode) {};
 
 /**
- * @param {!Lexer.State} nextState
+ * @param {!lexers.State} nextState
  */
 Lexer.prototype.finishToken = function(nextState) {};
 
@@ -294,12 +294,12 @@ Lexer.prototype.isWordChar = function(charCode) {};
 Lexer.prototype.nextToken = function(maxOffset) {};
 
 /**
- * @param {!Lexer.State} newState
+ * @param {!lexers.State} newState
  */
 Lexer.prototype.restartToken = function(newState) {};
 
 /**
- * @param {!Lexer.State} state
+ * @param {!lexers.State} state
  */
 Lexer.prototype.startToken = function(state) {};
 

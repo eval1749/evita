@@ -53,13 +53,13 @@ global.PythonLexer = (function(keywords) {
     /**
      * @this {!PythonLexer}
      * @param {!lexers.Token} token
-     * @return {!Lexer.State}
+     * @return {!lexers.State}
      */
     didShrinkLastToken(token) {
       if (this.debug_ > 1)
         console.log('didShrinkLastToken', token);
-      if (token.state == Lexer.State.DOT) {
-        return Lexer.State.ZERO;
+      if (token.state == lexers.State.DOT) {
+        return lexers.State.ZERO;
       }
       return token.state;
     }
@@ -69,14 +69,14 @@ global.PythonLexer = (function(keywords) {
      * @param {number} charCode
      */
     feedCharacter(charCode) {
-      if (this.state == Lexer.State.ZERO) {
+      if (this.state == lexers.State.ZERO) {
         switch (charCode) {
           case Unicode.FULL_STOP:
-            this.startToken(Lexer.State.DOT);
+            this.startToken(lexers.State.DOT);
             this.endToken();
             return;
           case Unicode.NUMBER_SIGN:
-            this.startToken(Lexer.State.LINE_COMMENT);
+            this.startToken(lexers.State.LINE_COMMENT);
             return;
         }
       }
@@ -90,7 +90,7 @@ global.PythonLexer = (function(keywords) {
      * @return {string}
      */
     syntaxOfToken(range, token) {
-      if (token.state != Lexer.State.WORD)
+      if (token.state != lexers.State.WORD)
         return Lexer.prototype.syntaxOfToken.call(this, range, token);
       var lexer = this;
       var word = range.text;
@@ -98,9 +98,9 @@ global.PythonLexer = (function(keywords) {
       console.assert(it, token);
       do {
         it = it.previous();
-      } while (it && it.data.state == Lexer.State.SPACE);
+      } while (it && it.data.state == lexers.State.SPACE);
 
-      if (it && it.data.state == Lexer.State.DOT) {
+      if (it && it.data.state == lexers.State.DOT) {
         var tokens = lexer.collectTokens(it, token);
         return lexer.syntaxOfTokens(range, tokens);
       }

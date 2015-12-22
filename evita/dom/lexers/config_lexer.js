@@ -32,8 +32,8 @@ global.ConfigLexer = (function() {
      * @param {number} charCode
      */
     feedCharacter(charCode) {
-      if (this.state == Lexer.State.ZERO && charCode == Unicode.NUMBER_SIGN) {
-        this.startToken(Lexer.State.LINE_COMMENT);
+      if (this.state == lexers.State.ZERO && charCode == Unicode.NUMBER_SIGN) {
+        this.startToken(lexers.State.LINE_COMMENT);
         return;
       }
       this.updateState(charCode);

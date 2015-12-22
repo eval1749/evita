@@ -285,7 +285,7 @@
   /**
    * @this {!XmlLexer}
    * @param {!lexers.Token} token
-   * @return {!Lexer.State}
+   * @return {!lexers.State}
    */
   function didShrinkLastToken(token) {
     if (this.debug_ > 1)
@@ -352,7 +352,7 @@
    */
   function feedCharacter(charCode) {
     switch (this.state) {
-      case Lexer.State.ZERO:
+      case lexers.State.ZERO:
         switch (charCode) {
           case Unicode.AMPERSAND:
             this.startToken(XmlLexer.State.AMPERSAND);
@@ -376,7 +376,7 @@
         else if (this.isNameStartChar(charCode))
           this.restartToken(XmlLexer.State.ENTITYREF);
         else
-          this.state = Lexer.State.ZERO;
+          this.state = lexers.State.ZERO;
         return;
 
       case XmlLexer.State.CHARREF:

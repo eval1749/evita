@@ -65,7 +65,7 @@ $define(global, 'lexers', function($export) {
       this.range = new Range(document);
       this.scanOffset = 0;
       this.state = lexers.State.ZERO;
-      this.tokens = new OrderedSet((a, b) => a.end < b.end);
+      this.tokens = new base.OrderedSet((a, b) => a.end < b.end);
     }
 
     /**
@@ -220,7 +220,7 @@ $define(global, 'lexers', function($export) {
 
   /**
    * @this {!Lexer}
-   * @param {!OrderedSetNode.<!lexers.Token>} itDelimiter
+   * @param {!base.OrderedSetNode.<!lexers.Token>} itDelimiter
    * @param {!lexers.Token} token
    * @return {!Array.<!lexers.Token>}
    */

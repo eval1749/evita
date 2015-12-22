@@ -195,6 +195,7 @@ action("check_jslib") {
 test("evita_dom_tests") {
   sources = [
     "abstract_dom_test.cc",
+    "base/ordered_set_test.cc",
     "css/style_unittest.cc",
     "editor_unittest.cc",
     "encodings/text_decoder_unittest.cc",
@@ -221,7 +222,6 @@ test("evita_dom_tests") {
     "forms/radio_button_control_unittest.cc",
     "forms/text_field_control_unittest.cc",
     "forms/text_field_selection_unittest.cc",
-    "jslib/ordered_set_unittest.cc",
     "lexers/lexers_unittest.cc",
     "mock_io_delegate.cc",
     "mock_view_impl.cc",

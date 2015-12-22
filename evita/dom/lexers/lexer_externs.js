@@ -183,9 +183,7 @@ Lexer.prototype.state;
 Lexer.prototype.tokenData;
 
 /**
- * TODO(eval1749): Closure compiler doesn't recognize
- * OrderedSetNode<lexers.Token>.prototype.previous.
- * @type {?} !OrderedSet.<!lexers.Token>
+ * @type {!base.OrderedSet<!lexers.Token>}
  */
 Lexer.prototype.tokens;
 
@@ -200,7 +198,7 @@ Lexer.prototype.adjustScanOffset = function(offset) {};
 Lexer.prototype.clear = function() {};
 
 /**
- * @param {OrderedSetNode.<!lexers.Token>} itDelimiter
+ * @param {base.OrderedSetNode<!lexers.Token>} itDelimiter
  * @param {!lexers.Token} token
  * @return {!Array.<!lexers.Token>}
  */

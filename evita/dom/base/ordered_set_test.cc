@@ -19,7 +19,7 @@ class OrderedSetTest : public AbstractDomTest {
 
 TEST_F(OrderedSetTest, all) {
   EXPECT_SCRIPT_VALID(
-      "var set = new OrderedSet(function(a, b) { return a < b; });"
+      "var set = new base.OrderedSet(function(a, b) { return a < b; });"
       "for (var data = 0; data < 30; data += 5) {"
       "  set.add(data);"
       "}");
@@ -46,7 +46,7 @@ TEST_F(OrderedSetTest, all) {
 
   EXPECT_SCRIPT_VALID(
       "var result = [];"
-      "set.forEach(function(data) { result.push(data) });");
+      "set.forEach(data => result.push(data));");
   EXPECT_SCRIPT_EQ("0 5 10 15 20 25", "result.join(' ')");
 
   EXPECT_SCRIPT_EQ("false", "set.remove(-1);");

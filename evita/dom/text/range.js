@@ -193,23 +193,17 @@
   };
 
   /**
+   * @this {!Range}
    * @param {!Editor.RegExp} regexp
    * @return {?Array.<string>}
    */
-  Range.prototype.match = function(regexp) {
-    var range = this;
-    var start = range.start;
-    var end = range.end;
-    var matches = range.document.match_(regexp, start, end);
+  function rangeMatch(regexp) {
+    const document = this.document;
+    const matches = document.match_(regexp, this.start, this.end);
     if (!matches)
       return null;
-    var strings = matches.map(function(match) {
-      return range.document.slice(match.start, match.end);
-    });
-    range.collapseTo(start);
-    range.end = end;
-    return strings;
-  };
+    return matches.map(match => document.slice(match.start, match.end));
+  }
 
   /**
    * @this {!Range}
@@ -350,6 +344,7 @@
   };
 
   Object.defineProperties(Range.prototype, {
+    match: {value: rangeMatch},
     matches: {value: rangeMatches},
   });
 })();

@@ -1,0 +1,37 @@
+# Copyright 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+source_set("text") {
+  sources = [
+    "document.cc",
+    "mutation_observer.cc",
+    "mutation_observer_controller.cc",
+    "mutation_record.cc",
+    "range.cc",
+    "regular_expression.cc",
+    "regular_expression.h",
+  ]
+
+  public_deps = [
+    "//evita/v8_glue",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "document_test.cc",
+    "mutation_observer_test.cc",
+    "range_test.cc",
+    "regular_expression_test.cc",
+    "text_position_test.cc",
+  ]
+
+  public_deps = [
+    "//evita/dom/testing:test_support",
+    "//evita/dom/text/modes:test_files",
+  ]
+}

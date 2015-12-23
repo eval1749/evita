@@ -58,13 +58,6 @@ source_set("dom") {
     "scheduler_impl.h",
     "script_host.cc",
     "script_thread.cc",
-    "text/document.cc",
-    "text/mutation_observer.cc",
-    "text/mutation_observer_controller.cc",
-    "text/mutation_record.cc",
-    "text/range.cc",
-    "text/regular_expression.cc",
-    "text/regular_expression.h",
     "time_stamp.cc",
     "timers/one_shot_timer.cc",
     "timers/one_shot_timer.h",
@@ -110,10 +103,10 @@ source_set("dom") {
     "//evita/dom/bindings",
     "//evita/dom/os",
     "//evita/dom/public",
+    "//evita/dom/text",
     "//evita/dom/timing",
     "//evita/v8_glue",
     "//regex",
-    "//v8",
   ]
 
   include_dirs = [
@@ -225,13 +218,7 @@ test("evita_dom_tests") {
     "mock_io_delegate.cc",
     "mock_view_impl.cc",
     "polyfill_unittest.cc",
-     "repl/console_unittest.cc",
-    "text/document_unittest.cc",
-    "text/modes/modes_unittest.cc",
-    "text/mutation_observer_unittest.cc",
-    "text/range_unittest.cc",
-    "text/regular_expression_unittest.cc",
-    "text/text_position_unittest.cc",
+    "repl/console_unittest.cc",
     "timers/timer_test.cc",
     "unicode_unittest.cc",
     "windows/editor_window_unittest.cc",
@@ -248,8 +235,8 @@ test("evita_dom_tests") {
     # "evita_dom_test".
     "//evita:application",
     "//evita/dom/os:test_files",
+    "//evita/dom/text:test_files",
     "//evita/dom/timing:test_files",
     "//evita/dom/testing:test_support",
-    "//v8",
   ]
 }

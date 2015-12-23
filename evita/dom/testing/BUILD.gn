@@ -10,10 +10,13 @@ source_set("test_support") {
   sources = [
     "abstract_dom_test.cc",
     "abstract_dom_test.h",
+    "gtest.cc",
+    "gtest.h",
   ]
 
   public_deps = [
     "//base/test:test_support",
+    "//evita/v8_glue",
     "//testing/gmock",
     "//testing/gtest",
   ]

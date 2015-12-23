@@ -25,6 +25,7 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/static_script_source.h"
 #include "evita/dom/timing/mock_scheduler.h"
+#include "evita/dom/testing/gtest.h"
 #include "evita/v8_glue/runner_delegate.h"
 
 namespace dom {
@@ -133,6 +134,7 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(v8_glue::Runner* runner) {
   auto const context = v8::Context::New(isolate);
   v8::Context::Scope context_scope(context);
   test_instance_->PopulateGlobalTemplate(isolate, templ);
+  GTest::Install(isolate, templ);
   return templ;
 }
 

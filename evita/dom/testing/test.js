@@ -132,6 +132,16 @@ $define(global, 'testing', function($export) {
       throw error;
     }
     const endAt = Editor.performance.now();
+    if ('gtest' in testing) {
+      let succeeded = true;
+      fixtures.filter(fixture => fixture.failed).forEach(fixture => {
+        succeeded = false;
+        testing.gtest.fail(fixture.asPrettyString());
+      });
+      if (succeeded)
+        testing.gtest.succeed();
+      return;
+    }
     errors.forEach(error => console.log(error));
     fixtures.filter(fixture => fixture.failed).forEach(fixture => {
       console.log(' ', fixture.asPrettyString());

@@ -130,6 +130,7 @@ static_js_externs_files = [
   "//evita/dom/repl/js_console_externs.js",
   "//evita/dom/repl/repl_externs.js",
   "//evita/dom/testing/testing_externs.js",
+  "//evita/dom/testing/gtest_externs.js",
   "//evita/dom/testing/test_externs.js",
   "//evita/dom/text/text_externs.js",
   "//evita/dom/text/document_externs.js",

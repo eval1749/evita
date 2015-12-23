@@ -7,11 +7,12 @@ global.PythonLexer = (function(keywords) {
   const MAX_WORDS_IN_SYMBOL = 3;
 
   /** @const @type {!Map.<number, number>} */
-  var CHARACTERS = (function() {
-    var map = new Map();
+  const CHARACTERS = (function() {
+    /** @const @type {!Map.<number, number>} */
+    const map = new Map();
 
     function setRange(type, min, max) {
-      for (var charCode = min; charCode <= max; ++charCode) {
+      for (let charCode = min; charCode <= max; ++charCode) {
         map.set(charCode, type);
       }
     }
@@ -42,6 +43,14 @@ global.PythonLexer = (function(keywords) {
     return map;
   })();
 
+  //////////////////////////////////////////////////////////////////////
+  //
+  // PythonLexer
+  //
+  // Note: There are no states for long string literal, e.g. """...""".
+  // Long string literals are treated as string literal enclosed with
+  // empty string literal, e.g. "", "...", ""
+  //
   class PythonLexer extends global.Lexer {
     /**
      * @param {!Document} document
@@ -91,6 +100,8 @@ global.PythonLexer = (function(keywords) {
       }
       this.updateState(charCode);
     }
+
+    static get keywords() { return keywords; }
   }
 
   /**
@@ -149,11 +160,6 @@ global.PythonLexer = (function(keywords) {
     dotName.forEach(token => lexer.changeTokenType(token, dotNameType));
   }
 
-  // TODO(eval1749): Once closure compiler support |static get|, we should use
-  // it.
-  Object.defineProperty(PythonLexer, 'keywords', {
-    get: function() { return keywords; }
-  });
   return PythonLexer;
 })(Lexer.createKeywords([
   // Keywords

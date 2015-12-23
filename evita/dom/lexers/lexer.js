@@ -484,39 +484,6 @@ $define(global, 'lexers', function($export) {
   })();
 
   /**
-   * @this {!Lexer} lexer
-   * @param {!Range} range
-   * @param {!Array.<!lexers.Token>} tokens
-   * @return {string}
-   */
-  function syntaxOfTokens(range, tokens) {
-    const lexer = this;
-    const document = lexer.document;
-    let words = tokens.map(function(token) {
-      return document.slice(token.start, token.end);
-    });
-    while (words.length) {
-      let syntax = lexer.keywords.get(words.join(''));
-      if (syntax) {
-        range.start = tokens[0].start;
-        return syntax;
-      }
-      words.shift();
-      tokens.shift();
-    }
-    return '';
-  }
-
-  /**
-   * @this {!Lexer}
-   * @param {string} word
-   * @return {string}
-   */
-  function syntaxOfWord(word) {
-    return this.keywords.has(word) ? 'keyword' : 'identifier';
-  }
-
-  /**
    * @this {!Lexer}
    * @param {number} charCode
    *  Implements common tokens:
@@ -670,8 +637,6 @@ $define(global, 'lexers', function($export) {
     restartToken: {value: restartToken},
     startToken: {value: startToken},
     syntaxOfToken: {value: syntaxOfToken},
-    syntaxOfTokens: {value: syntaxOfTokens},
-    syntaxOfWord: {value: syntaxOfWord},
     updateState: {value: updateState},
   });
 

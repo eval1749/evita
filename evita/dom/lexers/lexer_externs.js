@@ -292,12 +292,6 @@ Lexer.prototype.isWhitespaceChar = function(charCode) {};
 Lexer.prototype.isWordChar = function(charCode) {};
 
 /**
- * @param {number} maxOffset
- * @return {?lexers.Token}
- */
-Lexer.prototype.nextToken = function(maxOffset) {};
-
-/**
  * @param {!lexers.State} newState
  */
 Lexer.prototype.restartToken = function(newState) {};
@@ -312,21 +306,6 @@ Lexer.prototype.startToken = function(state) {};
  * @return {string}
  */
 Lexer.prototype.syntaxOfToken = function(token) {};
-
-/**
- * @this {!Lexer}
- * @param {string} word
- * @return {string}
- */
-Lexer.prototype.syntaxOfWord = function(word) {};
-
-/**
- * @this {!Lexer}
- * @param {!Range} range
- * @param {!Array.<!lexers.Token>} tokens
- * @return {string}
- */
-Lexer.prototype.syntaxOfTokens = function(range, tokens) {};
 
 /**
  * @this {!Lexer}

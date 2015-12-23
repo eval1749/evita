@@ -111,7 +111,6 @@
      * @param {!lexers.Token} token
      */
     colorToken(token) {
-      console.log('XmlLexer', 'colorToken', token);
       if (token.state === XmlLexer.State.SCRIPT) {
         const tokenData = token.data;
         const scriptLexer = /** @type {!Lexer} */(tokenData.scriptLexer);

@@ -193,6 +193,12 @@ Lexer.prototype.tokens;
 Lexer.prototype.adjustScanOffset = function(offset) {};
 
 /**
+ * @param {!lexers.Token} token
+ * @param {string} type
+ */
+Lexer.prototype.changeTokenType = function(token, type) {};
+
+/**
  * @type {!function()}
  */
 Lexer.prototype.clear = function() {};
@@ -322,6 +328,13 @@ Lexer.prototype.syntaxOfWord = function(word) {};
  * @return {string}
  */
 Lexer.prototype.syntaxOfTokens = function(range, tokens) {};
+
+/**
+ * @this {!Lexer}
+ * @param {!lexers.Token} token
+ * @return {string}
+ */
+Lexer.prototype.tokenTextof = function(token) {};
 
 /**
  * TODO(eval1749): Once, Closure compiler recognizes |ClikeLexer| is subclass of

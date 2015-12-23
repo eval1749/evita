@@ -66,6 +66,8 @@ $define(global, 'lexers', function($export) {
       super(document);
       this.characters_ = options.characters;
       this.debug_ = 0;
+      /** @type {number} */
+      this.dirtyTokenStart_ = 0;
       /** @const @type {!lexers.Token} */
       this.dummyToken_ = new lexers.Token(lexers.State.ZERO, 0);
       this.keywords = options.keywords;
@@ -76,6 +78,17 @@ $define(global, 'lexers', function($export) {
       this.scanOffset = 0;
       this.state = lexers.State.ZERO;
       this.tokens = new base.OrderedSet((a, b) => a.end < b.end);
+    }
+
+    /**
+     * @param {!lexers.Token} token
+     * @param {string} type
+     */
+    changeTokenType(token, type) {
+      if (token.type === type)
+        return;
+      token.type = type;
+      this.didChangeToken(token);
     }
 
     /**
@@ -94,6 +107,13 @@ $define(global, 'lexers', function($export) {
       if (this.scanOffset >= this.document.length)
         return;
       taskScheduler.schedule(this, 500);
+    }
+
+    /**
+     * @param {!lexers.Token} token
+     */
+    didChangeToken(token) {
+      this.dirtyTokenStart_ = Math.min(this.dirtyTokenStart_, token.start);
     }
 
     /** @param {!lexers.Token} token */
@@ -135,6 +155,14 @@ $define(global, 'lexers', function($export) {
         return;
       // Continue coloring after one second.
       taskScheduler.schedule(this, 500);
+    }
+
+    /**
+     * @param {!lexers.Token} token
+     * @return {string}
+     */
+    tokenTextOf(token) {
+      return this.document.slice(token.start, token.end);
     }
 
     /**
@@ -292,28 +320,28 @@ $define(global, 'lexers', function($export) {
       throw new Error("Can't use disconnected lexer.");
     const document = this.document;
     const maxOffset = Math.min(this.scanOffset + maxCount, document.length);
-    const startOffset = this.scanOffset;
+    this.dirtyTokenStart_ = this.scanOffset;
     while (this.scanOffset < maxOffset) {
       let charCode = document.charCodeAt(this.scanOffset);
       this.feedCharacter(charCode);
     }
-    if (this.scanOffset === startOffset)
-      return;
-
+    const startOffset = this.dirtyTokenStart_;
+    const endOffset = this.scanOffset;
+    this.dirtyTokenStart_= this.scanOffset;
     // Color tokens
     /** @type {OrderedSetNode<!lexers.Token>} */
     const startTokenIt = this.lowerBound(startOffset);
     if (!startToken)
       return;
     /** @type {OrderedSetNode<!lexers.Token>} */
-    const endTokenIt = this.lowerBound(this.scanOffset);
+    const endTokenIt = this.lowerBound(endOffset);
     /** @type {OrderedSetNode<!lexers.Token>} */
     let tokenIt = startTokenIt;
     while (tokenIt != endTokenIt) {
       this.colorToken(tokenIt.data);
       tokenIt = tokenIt.next();
     }
-    if (!this.lastToken)
+    if (this.lastToken.state === lexers.State.ZERO)
       return;
     if (this.debug_ > 2)
       console.log('doColor', 'lastToken', this.lastToken);

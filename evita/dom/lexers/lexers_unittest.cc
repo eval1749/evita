@@ -80,7 +80,7 @@ TEST_F(LexersTest, CppLexer) {
       "])");
 
   EXPECT_SCRIPT_EQ(
-      "n1 k15 o1 n1 o1 n1 c5 n10 o1 n1 o1 n1 c6 n8",
+      "n1 k15 o1 n1 o1 n4 o2 n10 o1 n1 o1 n5 o2 n8",
       "applySyntax(CppLexer, ['"
       " std::unique_ptr<T>"
       " std::vector_ptr<T>"  // not extended keyword

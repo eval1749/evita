@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 (function() {
+  // Maximum number of words in symbol, e.g. Foo::Bar::Baz
+  const MAX_WORDS_IN_SYMBOL = 3;
+
   //////////////////////////////////////////////////////////////////////
   //
   // ClikeLexer
@@ -24,30 +27,18 @@
 
     /** @override */
     didEndToken(token) {
-      if (token.state !== lexers.State.WORD)
-        return;
-      const word = this.document.slice(token.start, token.end);
-      if (this.keywords.get(word))
-        token.type = 'keyword';
-      let previous = this.lowerBound(token.start);
-      if (!previous)
-        return;
-      while (previous && previous.data.state === lexers.State.SPACE)
-        previous = previous.previous();
-      if (!previous)
-        return;
-      const previousToken = previous.data;
-      if (previousToken.state === ClikeLexer.State.NUMBER_SIGN) {
-        const number_sign_word = '#' + word;
-        if (this.keywords.get(number_sign_word)) {
-          this.tokens.remove(token);
-          previousToken.state = ClikeLexer.State.NUMBER_SIGN;
-          previousToken.end = token.end;
-          previousToken.type = 'keyword';
-          this.lastToken = previousToken;
-          return;
-        }
+      switch (token.state) {
+        case ClikeLexer.State.COLON:
+          return handleColonToken(this, token);
+        case lexers.State.WORD:
+          return handleWordToken(this, token);
       }
+    }
+
+    /** * @override */
+    syntaxOfToken(range, token) {
+      return STATE_TO_SYNTAX.get(token.state) ||
+             super.syntaxOfToken(range, token);
     }
   }
 
@@ -282,75 +273,97 @@
   }
 
   /**
-   * @param {base.OrderedSetNode.<!lexers.Token>} it
-   * @return {boolean}
+   * @param {base.OrderedSetNode.<!lexers.Token>} startNode
+   * @param {number} maxWords
+   * @return {!Array.<!lexers.Token>}
+   *
+   * Collects words separated by '::' or '.'.
    */
-  function isNsSeparator(it) {
-    if (!it)
-      return false;
-    /** @const @type {!lexers.Token} */
-    const token = it.data;
-    return token.state === ClikeLexer.State.COLON_COLON ||
-           token.state === lexers.State.DOT;
+  function extractSymbol(startNode, maxWords) {
+    const tokens = [];
+    let node = startNode;
+    while (node) {
+      const token = node.data;
+      if (token.state !== lexers.State.WORD)
+        break;
+      tokens.push(token);
+      --maxWords;
+      if (maxWords === 0)
+        break;
+      do {
+        node = node.previous();
+      } while (node && node.data.state === lexers.State.SPACE);
+      if (!node)
+        break;
+      if (!isNsSeparator(node.data))
+        break;
+      tokens.push(node.data);
+      do {
+        node = node.previous();
+      } while (node && node.data.state === lexers.State.SPACE);
+      if (!node)
+        break;
+    }
+    return tokens.reverse();
   }
 
   /**
-   * @this {!CppLexer}
-   * @param {!Range} range
-   * @param {!lexers.Token} token
-   * @return {string}
-   *
-   * Determine syntax for chained word, e.g. namespace.class.property, from
-   * right to left.
+   * @param {!ClikeLexer} lexer
+   * @param {!lexers.Token} colonToken
+   * Marks word token before colon to label.
    */
-  function syntaxOfToken(range, token) {
-    const lexer = this;
+  function handleColonToken(lexer, colonToken) {
+    console.assert(colonToken.state === ClikeLexer.State.COLON, colonToken);
+    const colonNode = lexer.lowerBound(colonToken.start + 1);
+    const tokens = extractSymbol(colonNode.previous(), MAX_WORDS_IN_SYMBOL);
+    if (tokens.length === 0)
+      return;
+    const text = tokens.map(token => lexer.tokenTextOf(token)).join('');
+    const type = lexer.keywords.get(text + ':') ? 'keyword' : 'label';
+    tokens.forEach(token => lexer.changeTokenType(token, type));
+  }
 
-    if (token.state == ClikeLexer.State.COLON) {
-      var it = lexer.tokens.find(token);
-      console.assert(it, token);
-      it = it.previous();
-      if (it && it.data.state == lexers.State.WORD &&
-          !isNsSeparator(it.previous())) {
-        var syntax = lexer.syntaxOfTokens(range, [it.data, token]);
-        if (syntax)
-          return syntax;
-        range.start = it.data.start;
-        return 'label';
-      }
+  /**
+   * @param {!ClikeLexer} lexer
+   * @param {!lexers.Token} wordToken
+   */
+  function handleWordToken(lexer, wordToken) {
+    console.assert(wordToken.state === lexers.State.WORD, wordToken);
+    const wordIt = lexer.lowerBound(wordToken.start + 1);
+    let sharpIt = wordIt.previous();
+
+    while (sharpIt && sharpIt.data.state === lexers.State.SPACE)
+      sharpIt = sharpIt.previous();
+
+    if (sharpIt && sharpIt.data.state === ClikeLexer.State.NUMBER_SIGN) {
+      const text = lexer.tokenTextOf(wordToken);
+      const type = lexer.keywords.get('#' + text) || '';
+      lexer.changeTokenType(sharpIt.data, type);
+      lexer.changeTokenType(wordToken, type);
+      return;
     }
 
-    if (token.state == ClikeLexer.State.COLON_COLON) {
-      var it = lexer.tokens.find(token);
-      console.assert(it, token);
-      it = it.previous();
-      if (it && it.data.state == lexers.State.WORD) {
-        // Override "label" syntax.
-        range.start = it.data.start;
-        return 'cpp_namespace_prefix';
-      }
-    }
+    const tokens = extractSymbol(wordIt, MAX_WORDS_IN_SYMBOL);
+    const text = tokens.map(token => lexer.tokenTextOf(token)).join('');
+    const type = lexer.keywords.get(text) || '';
+    if (type !== '' || tokens.length === 1)
+      return tokens.forEach(token => lexer.changeTokenType(token, type));
+    // Handle reserved property
+    const dotName = tokens.slice(-2);
+    if (dotName[0].state !== lexers.State.DOT)
+      return tokens.forEach(token => lexer.changeTokenType(token, ''));
+    const dotNameText = '.' + lexer.tokenTextOf(wordToken);
+    const dotNameType = lexer.keywords.get(dotNameText) || '';
+    dotName.forEach(token => lexer.changeTokenType(token, dotNameType));
+  }
 
-    if (token.state != lexers.State.WORD) {
-      return STATE_TO_SYNTAX.get(token.state) ||
-             Lexer.prototype.syntaxOfToken.call(this, range, token);
-    }
-
-    var word = range.text;
-    var it = lexer.tokens.find(token);
-    console.assert(it, token);
-    do {
-      it = it.previous();
-    } while (it && it.data.state == lexers.State.SPACE);
-
-    if (it){
-      if (isNsSeparator(it)) {
-        var tokens = lexer.collectTokens(it, token);
-        return lexer.syntaxOfTokens(range, tokens);
-      }
-    }
-
-    return lexer.syntaxOfWord(word);
+  /**
+   * @param {!lexers.Token} token
+   * @return {boolean}
+   */
+  function isNsSeparator(token) {
+    return token.state === ClikeLexer.State.COLON_COLON ||
+           token.state === lexers.State.DOT;
   }
 
   ClikeLexer.newCharacters = function() {
@@ -364,7 +377,6 @@
   Object.defineProperties(ClikeLexer.prototype, {
     didShrinkLastToken: {value: didShrinkLastToken },
     feedCharacter: {value: feedCharacter},
-    syntaxOfToken: {value: syntaxOfToken}
   });
 
   global['ClikeLexer'] = ClikeLexer;

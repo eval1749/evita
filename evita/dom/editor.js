@@ -126,7 +126,7 @@
     const document = Document.open(file_name);
     if (document.length == 0) {
       document.load(file_name).then(function() {
-        windows.activate(Editor.activeWindow(), document);
+        global.windows.activate(Editor.activeWindow(), document);
       });
       return;
     }
@@ -143,7 +143,7 @@
       windows[0].focus();
       return;
     }
-    windows.newTextWindow(parent, document);
+    global.windows.newTextWindow(parent, document);
   };
 
   /**

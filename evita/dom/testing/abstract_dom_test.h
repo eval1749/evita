@@ -14,6 +14,10 @@
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/v8.h"
 
+namespace base {
+class FilePath;
+}
+
 namespace domapi {
 class ViewEventHandler;
 }
@@ -86,12 +90,15 @@ class AbstractDomTest : public ::testing::Test {
       v8::Isolate* isolate,
       v8::Handle<v8::ObjectTemplate> global_tempalte);
 
+  void RunFile(const base::FilePath& path);
+  void RunFile(const std::vector<base::StringPiece>& components);
+
   // When test case posts a task to message loop, it should call
   // |RunMessageLoopUntilIdle()| to run posted tasks.
   void RunMessageLoopUntilIdle();
 
   bool RunScript(const base::StringPiece& text,
-                 const char* file_name,
+                 const base::StringPiece& file_name,
                  int line_number);
   void SetUp() override;
   void TearDown() override;
@@ -100,6 +107,7 @@ class AbstractDomTest : public ::testing::Test {
   class RunnerDelegate;
   friend class RunnerDelegate;
 
+  base::FilePath BuildPath(const std::vector<base::StringPiece>& components);
   void UnhandledException(v8_glue::Runner* runner,
                           const v8::TryCatch& try_catch);
 

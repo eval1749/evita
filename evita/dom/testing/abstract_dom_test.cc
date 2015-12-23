@@ -1,13 +1,18 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/testing/abstract_dom_test.h"
 
 #include <vector>
 
+#include "base/files/file_path.h"
+#include "base/files/file_util.h"
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
+#include "base/path_service.h"
 #include "base/run_loop.h"
+#include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/converter.h"
@@ -134,7 +139,35 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(v8_glue::Runner* runner) {
 void AbstractDomTest::RunnerDelegate::UnhandledException(
     v8_glue::Runner*,
     const v8::TryCatch& try_catch) {
-  LOG(0) << V8ToString(try_catch.StackTrace());
+  base::string16 text;
+  auto const error = try_catch.Exception();
+  auto const message = try_catch.Message();
+  if (!message.IsEmpty()) {
+    text = base::StringPrintf(
+        L"Exception: %ls\n"
+        L"Source: %ls\n"
+        L"Source name: %ls(%d)\n",
+        V8ToString(error).c_str(), V8ToString(message->GetSourceLine()).c_str(),
+        V8ToString(message->GetScriptResourceName()).c_str(),
+        message->GetLineNumber());
+    auto const stack_trace = message->GetStackTrace();
+    if (!stack_trace.IsEmpty()) {
+      text += L"Stack trace:\n";
+      auto const length = static_cast<size_t>(stack_trace->GetFrameCount());
+      for (auto index = 0u; index < length; ++index) {
+        auto const frame = stack_trace->GetFrame(index);
+        text += base::StringPrintf(L"  at %ls (%ls(%d))\n",
+                                   V8ToString(frame->GetFunctionName()).c_str(),
+                                   V8ToString(frame->GetScriptName()).c_str(),
+                                   frame->GetLineNumber());
+      }
+    }
+  } else if (try_catch.HasTerminated()) {
+    text = L"Script execution is terminated.";
+  } else if (message.IsEmpty()) {
+    text = L"No details";
+  }
+  LOG(0) << text;
   test_instance_->exception_ =
       base::UTF16ToUTF8(V8ToString(try_catch.Exception()));
 }
@@ -179,6 +212,16 @@ domapi::ViewEventHandler* AbstractDomTest::view_event_handler() const {
   return script_host_->event_handler();
 }
 
+base::FilePath AbstractDomTest::BuildPath(
+    const std::vector<base::StringPiece>& components) {
+  base::FilePath path;
+  PathService::Get(base::DIR_SOURCE_ROOT, &path);
+  path = path.AppendASCII("src").AppendASCII("evita").AppendASCII("dom");
+  for (const auto& component : components)
+    path = path.AppendASCII(component);
+  return path;
+}
+
 bool AbstractDomTest::DoCall(const base::StringPiece& name, const Argv& argv) {
   v8_glue::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
@@ -215,8 +258,19 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
 void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
                                              v8::Handle<v8::ObjectTemplate>) {}
 
+void AbstractDomTest::RunFile(const base::FilePath& path) {
+  std::string source;
+  ASSERT_TRUE(base::ReadFileToString(path, &source)) << path.LossyDisplayName();
+  ASSERT_TRUE(RunScript(source, base::UTF16ToUTF8(path.LossyDisplayName()), 0));
+}
+
+void AbstractDomTest::RunFile(
+    const std::vector<base::StringPiece>& components) {
+  RunFile(BuildPath(components));
+}
+
 bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
-                                const char* file_name,
+                                const base::StringPiece& file_name,
                                 int line_number) {
   v8_glue::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();

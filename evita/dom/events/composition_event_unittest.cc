@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 
 #include "evita/bindings/v8_glue_CompositionEventInit.h"
 #include "evita/dom/events/composition_event.h"

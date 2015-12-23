@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "base/macros.h"
-#include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 
 namespace dom {
 

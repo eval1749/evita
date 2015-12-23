@@ -1,7 +1,9 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#ifndef EVITA_DOM_ABSTRACT_DOM_TEST_H_
-#define EVITA_DOM_ABSTRACT_DOM_TEST_H_
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_DOM_TESTING_ABSTRACT_DOM_TEST_H_
+#define EVITA_DOM_TESTING_ABSTRACT_DOM_TEST_H_
 
 #include <memory>
 #include <string>
@@ -23,6 +25,10 @@ class MockScheduler;
 class MockViewImpl;
 class ScriptHost;
 
+//////////////////////////////////////////////////////////////////////
+//
+// AbstractDomTest - The base class for testing JavaScript.
+//
 class AbstractDomTest : public ::testing::Test {
  protected:
   typedef std::vector<v8::Handle<v8::Value>> Argv;
@@ -127,4 +133,4 @@ bool AbstractDomTest::Call(const base::StringPiece& name, Params... params) {
 #define EXPECT_SCRIPT_FALSE(script) EXPECT_SCRIPT_EQ("false", (script))
 #define EXPECT_SCRIPT_TRUE(script) EXPECT_SCRIPT_EQ("true", (script))
 
-#endif  // EVITA_DOM_ABSTRACT_DOM_TEST_H_
+#endif  // EVITA_DOM_TESTING_ABSTRACT_DOM_TEST_H_

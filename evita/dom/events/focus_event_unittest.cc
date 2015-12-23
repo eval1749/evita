@@ -1,7 +1,7 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 
 #include "evita/bindings/v8_glue_FocusEventInit.h"
 #include "evita/dom/events/focus_event.h"

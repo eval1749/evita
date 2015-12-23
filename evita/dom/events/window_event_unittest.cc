@@ -2,7 +2,7 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 #include "gmock/gmock.h"
-#include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
 
 namespace dom {

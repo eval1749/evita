@@ -7,7 +7,7 @@
 
 #include "base/basictypes.h"
 #include "base/strings/string16.h"
-#include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_event.h"

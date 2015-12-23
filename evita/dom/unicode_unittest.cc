@@ -4,7 +4,7 @@
 #include <string>
 
 #include "base/basictypes.h"
-#include "evita/dom/abstract_dom_test.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 
 namespace {
 

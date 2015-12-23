@@ -194,7 +194,6 @@ action("check_jslib") {
 
 test("evita_dom_tests") {
   sources = [
-    "abstract_dom_test.cc",
     "base/ordered_set_test.cc",
     "css/style_unittest.cc",
     "editor_unittest.cc",
@@ -245,15 +244,12 @@ test("evita_dom_tests") {
   ]
 
   deps = [
-    "//base/test:test_support",
-
     # TODO(eval1749): We should not have "application" dependency on
-    # "evita_dom_unittests".
+    # "evita_dom_test".
     "//evita:application",
     "//evita/dom/os:test_files",
     "//evita/dom/timing:test_files",
-    "//testing/gmock",
-    "//testing/gtest",
+    "//evita/dom/testing:test_support",
     "//v8",
   ]
 }

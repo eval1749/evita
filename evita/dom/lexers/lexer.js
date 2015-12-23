@@ -10,10 +10,13 @@ $define(global, 'lexers', function($export) {
     OTHER: Symbol('other'),
     SPACE: Symbol('space'),
     STRING1: Symbol('string1'),
+    STRING1_END: Symbol('string1_end'),
     STRING1_ESCAPE: Symbol('string1_escape'),
     STRING2: Symbol('string2'),
+    STRING2_END: Symbol('string2_end'),
     STRING2_ESCAPE: Symbol('string2_escape'),
     STRING3: Symbol('string3'),
+    STRING3_END: Symbol('string3_end'),
     STRING3_ESCAPE: Symbol('string3_escape'),
     WORD: Symbol('word'),
     ZERO: Symbol('zero'),
@@ -422,10 +425,13 @@ $define(global, 'lexers', function($export) {
     map.set(lexers.State.OTHER, '');
     map.set(lexers.State.SPACE, '');
     map.set(lexers.State.STRING1, 'string_literal');
+    map.set(lexers.State.STRING1_END, 'string_literal');
     map.set(lexers.State.STRING1_ESCAPE, 'string_literal');
     map.set(lexers.State.STRING2, 'string_literal');
+    map.set(lexers.State.STRING2_END, 'string_literal');
     map.set(lexers.State.STRING2_ESCAPE, 'string_literal');
     map.set(lexers.State.STRING3, 'string_literal');
+    map.set(lexers.State.STRING3_END, 'string_literal');
     map.set(lexers.State.STRING3_ESCAPE, 'string_literal');
     map.set(lexers.State.WORD, 'identifier');
 
@@ -517,49 +523,46 @@ $define(global, 'lexers', function($export) {
        break;
 
      case lexers.State.STRING1:
-       if (charSyntax === Lexer.STRING1_CHAR) {
-         lexer.extendToken();
-         lexer.endToken();
-         return;
-       }
-       if (charCode === Unicode.REVERSE_SOLIDUS) {
+       if (charSyntax === Lexer.STRING1_CHAR)
+         lexer.finishToken(lexers.State.STRING1_END);
+       else if (charCode === Unicode.REVERSE_SOLIDUS)
          lexer.finishToken(lexers.State.STRING1_ESCAPE);
-         return;
-       }
-       lexer.extendToken();
-       return;
+       else
+         lexer.extendToken();
+       break;
+     case lexers.State.STRING1_END:
+       lexer.endToken();
+       break;
      case lexers.State.STRING1_ESCAPE:
        lexer.finishToken(lexers.State.STRING1);
        break;
 
      case lexers.State.STRING2:
-       if (charSyntax === Lexer.STRING2_CHAR) {
-         lexer.extendToken();
-         lexer.endToken();
-         return;
-       }
-       if (charCode === Unicode.REVERSE_SOLIDUS) {
+       if (charSyntax === Lexer.STRING2_CHAR)
+         lexer.finishToken(lexers.State.STRING2_END);
+       else if (charCode === Unicode.REVERSE_SOLIDUS)
          lexer.finishToken(lexers.State.STRING2_ESCAPE);
-         return;
-       }
-       lexer.extendToken();
-       return;
+       else
+         lexer.extendToken();
+       break;
+     case lexers.State.STRING2_END:
+       lexer.endToken();
+       break;
      case lexers.State.STRING2_ESCAPE:
        lexer.finishToken(lexers.State.STRING2);
        break;
 
      case lexers.State.STRING3:
-       if (charSyntax === Lexer.STRING3_CHAR) {
-         lexer.extendToken();
-         lexer.endToken();
-         return;
-       }
-       if (charCode === Unicode.REVERSE_SOLIDUS) {
+       if (charSyntax === Lexer.STRING3_CHAR)
+         lexer.finishToken(lexers.State.STRING3_END);
+       else if (charCode === Unicode.REVERSE_SOLIDUS)
          lexer.finishToken(lexers.State.STRING3_ESCAPE);
-         return;
-       }
-       lexer.extendToken();
-       return;
+       else
+         lexer.extendToken();
+       break;
+     case lexers.State.STRING3_END:
+       lexer.endToken();
+       break;
      case lexers.State.STRING3_ESCAPE:
        lexer.finishToken(lexers.State.STRING3);
        break;

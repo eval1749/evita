@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 global.PythonLexer = (function(keywords) {
+  // Maximum number of words in symbol, e.g. Foo.Bar.Baz
+  const MAX_WORDS_IN_SYMBOL = 3;
+
   /** @const @type {!Map.<number, number>} */
   var CHARACTERS = (function() {
     var map = new Map();
@@ -50,6 +53,12 @@ global.PythonLexer = (function(keywords) {
       });
     }
 
+    /** @override */
+    didEndToken(token) {
+      if (token.state == lexers.State.WORD)
+        return handleWordToken(this, token);
+    }
+
     /**
      * @this {!PythonLexer}
      * @param {!lexers.Token} token
@@ -82,31 +91,62 @@ global.PythonLexer = (function(keywords) {
       }
       this.updateState(charCode);
     }
+  }
 
-    /**
-     * @this {!PythonLexer}
-     * @param {!lexers.Token} token
-     * @param {!Range} range
-     * @return {string}
-     */
-    syntaxOfToken(range, token) {
-      if (token.state != lexers.State.WORD)
-        return Lexer.prototype.syntaxOfToken.call(this, range, token);
-      var lexer = this;
-      var word = range.text;
-      var it = lexer.tokens.find(token);
-      console.assert(it, token);
+  /**
+   * @param {base.OrderedSetNode.<!lexers.Token>} startNode
+   * @param {number} maxWords
+   * @return {!Array.<!lexers.Token>}
+   *
+   * Collects words separated by '.'.
+   */
+  function extractSymbol(startNode, maxWords) {
+    const tokens = [];
+    let node = startNode;
+    while (node) {
+      const token = node.data;
+      if (token.state !== lexers.State.WORD)
+        break;
+      tokens.push(token);
+      --maxWords;
+      if (maxWords === 0)
+        break;
       do {
-        it = it.previous();
-      } while (it && it.data.state == lexers.State.SPACE);
-
-      if (it && it.data.state == lexers.State.DOT) {
-        var tokens = lexer.collectTokens(it, token);
-        return lexer.syntaxOfTokens(range, tokens);
-      }
-
-      return lexer.syntaxOfWord(word);
+        node = node.previous();
+      } while (node && node.data.state === lexers.State.SPACE);
+      if (!node)
+        break;
+      if (node.data !== lexers.State.DOT)
+        break;
+      tokens.push(node.data);
+      do {
+        node = node.previous();
+      } while (node && node.data.state === lexers.State.SPACE);
+      if (!node)
+        break;
     }
+    return tokens.reverse();
+  }
+
+  /**
+   * @param {!PythonLexer} lexer
+   * @param {!lexers.Token} wordToken
+   */
+  function handleWordToken(lexer, wordToken) {
+    console.assert(wordToken.state === lexers.State.WORD, wordToken);
+    const wordIt = lexer.lowerBound(wordToken.start + 1);
+    const tokens = extractSymbol(wordIt, MAX_WORDS_IN_SYMBOL);
+    const text = tokens.map(token => lexer.tokenTextOf(token)).join('');
+    const type = lexer.keywords.get(text) || '';
+    if (type !== '' || tokens.length === 1)
+      return tokens.forEach(token => lexer.changeTokenType(token, type));
+    // Handle reserved property
+    const dotName = tokens.slice(-2);
+    if (dotName[0].state !== lexers.State.DOT)
+      return tokens.forEach(token => lexer.changeTokenType(token, ''));
+    const dotNameText = '.' + lexer.tokenTextOf(wordToken);
+    const dotNameType = lexer.keywords.get(dotNameText) || '';
+    dotName.forEach(token => lexer.changeTokenType(token, dotNameType));
   }
 
   // TODO(eval1749): Once closure compiler support |static get|, we should use

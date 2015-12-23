@@ -31,16 +31,6 @@ base::string16 V8ToString(v8::Handle<v8::Value> value);
 namespace {
 v8_glue::Runner* static_runner;
 
-void LogCallback(const v8::FunctionCallbackInfo<v8::Value>& info) {
-  base::string16 message;
-  for (int index = 0; index < info.Length(); ++index) {
-    if (index)
-      message += L" ";
-    message += V8ToString(info[index]);
-  }
-  LOG(0) << message;
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // StaticScript
@@ -132,21 +122,12 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(v8_glue::Runner* runner) {
   auto const templ =
       static_cast<v8_glue::RunnerDelegate*>(test_instance_->script_host_)
           ->GetGlobalTemplate(runner);
-
   auto const isolate = runner->isolate();
   RunnerDelegateMock temp_delegate;
   v8_glue::Runner temp_runner(isolate, &temp_delegate);
   auto const context = v8::Context::New(isolate);
   v8::Context::Scope context_scope(context);
   test_instance_->PopulateGlobalTemplate(isolate, templ);
-
-  static bool did_install_log;
-  if (!did_install_log) {
-    did_install_log = true;
-    templ->Set(gin::StringToV8(isolate, "log"),
-               v8::FunctionTemplate::New(isolate, LogCallback));
-  }
-
   return templ;
 }
 

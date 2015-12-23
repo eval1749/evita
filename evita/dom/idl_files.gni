@@ -135,6 +135,7 @@ static_js_externs_files = [
   "//evita/dom/text/text_externs.js",
   "//evita/dom/text/document_externs.js",
   "//evita/dom/text/modes/modes_externs.js",
+  "//evita/dom/text/range_externs.js",
   "//evita/dom/text/simple_mutation_observer_externs.js",
   "//evita/dom/text/text_position_externs.js",
   "//evita/dom/types_externs.js",

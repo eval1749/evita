@@ -213,6 +213,22 @@
 
   /**
    * @this {!Range}
+   * @param {!Editor.RegExp} regexp
+   */
+  function* rangeMatches(regexp) {
+    /** @type {number} */
+    let runner = this.start;
+    while (runner < this.end) {
+      const matches = this.document.match_(regexp, runner, this.end);
+      if (!matches)
+        return;
+      runner = matches[0].end;
+      yield matches;
+    }
+  }
+
+  /**
+   * @this {!Range}
    * @param {Unit} unit
    * @param {number=} count, default is one.
    * @return {!Range}
@@ -332,4 +348,8 @@
     this.text = this.text.toUpperCase();
     return this;
   };
+
+  Object.defineProperties(Range.prototype, {
+    matches: {value: rangeMatches},
+  });
 })();

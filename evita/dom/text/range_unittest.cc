@@ -1,5 +1,6 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include <string>
 
@@ -13,8 +14,10 @@
 
 namespace dom {
 
-using ::testing::_;
-
+//////////////////////////////////////////////////////////////////////
+//
+// RangeTest
+//
 class RangeTest : public AbstractDomTest {
  protected:
   RangeTest() = default;
@@ -81,6 +84,10 @@ class RangeTest : public AbstractDomTest {
 
   DISALLOW_COPY_AND_ASSIGN(RangeTest);
 };
+
+TEST_F(RangeTest, FromFile) {
+  RunFile({"text", "range_test.js"});
+}
 
 TEST_F(RangeTest, analyzeCase) {
   EXPECT_SCRIPT_VALID(

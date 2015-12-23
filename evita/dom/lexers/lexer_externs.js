@@ -308,11 +308,10 @@ Lexer.prototype.restartToken = function(newState) {};
 Lexer.prototype.startToken = function(state) {};
 
 /**
- * @param {!Range} range
  * @param {!lexers.Token} token
  * @return {string}
  */
-Lexer.prototype.syntaxOfToken = function(range, token) {};
+Lexer.prototype.syntaxOfToken = function(token) {};
 
 /**
  * @this {!Lexer}

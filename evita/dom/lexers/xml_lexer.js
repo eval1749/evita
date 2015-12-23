@@ -142,10 +142,9 @@
     /**
      * @override
      * @param {!lexers.Token} token
-     * @param {!Range} range
      * @return {string}
      */
-    syntaxOfToken(range, token) {
+    syntaxOfToken(token) {
       return STATE_TO_SYNTAX.get(token.state) || '';
     }
   }

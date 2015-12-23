@@ -36,9 +36,8 @@
     }
 
     /** * @override */
-    syntaxOfToken(range, token) {
-      return STATE_TO_SYNTAX.get(token.state) ||
-             super.syntaxOfToken(range, token);
+    syntaxOfToken(token) {
+      return STATE_TO_SYNTAX.get(token.state) || super.syntaxOfToken(token);
     }
   }
 

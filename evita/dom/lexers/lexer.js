@@ -292,13 +292,11 @@ $define(global, 'lexers', function($export) {
       this.document.setSyntax(token.start, token.end, token.type);
       return;
     }
-    let range = this.range;
-    range.collapseTo(token.start);
-    range.end = token.end;
-    let syntax = this.syntaxOfToken(range, token) || '';
+    let syntax = this.syntaxOfToken(token) || '';
     if (this.debug_ > 4)
       console.log(`setSyntax "${syntax}"`, token);
-    range.setSyntax(syntax === 'identifier' ? '' : syntax);
+    this.document.setSyntax(token.start, token.end,
+                            syntax === 'identifier' ? '' : syntax);
   }
 
   /**
@@ -457,7 +455,7 @@ $define(global, 'lexers', function($export) {
     ++this.scanOffset;
   }
 
-  let syntaxOfToken = (function() {
+  const syntaxOfToken = (function() {
     let map = new Map();
     map.set(lexers.State.DOT, 'operators');
     map.set(lexers.State.LINE_COMMENT, 'comment');
@@ -477,10 +475,9 @@ $define(global, 'lexers', function($export) {
 
     /**
      * @param {!lexers.Token} token
-     * @param {!Range} range
      * @return {string}
      */
-    function syntaxOfToken(range, token) {
+    function syntaxOfToken(token) {
       return map.get(token.state) || '';
     }
     return syntaxOfToken;

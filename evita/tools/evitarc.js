@@ -222,11 +222,6 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   });
 })();
 
-// Python special methods
-"__new__, __init__, __delattr__, __getattribute__, __setattr__, __hash__, __repr__, and __str__";
-"self";
-
-
 // Templates
 (function() {
   const copyrightLines = [

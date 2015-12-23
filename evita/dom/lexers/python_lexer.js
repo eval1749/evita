@@ -130,7 +130,48 @@ global.PythonLexer = (function(keywords) {
   'complex', 'float', 'int', 'long',
   'str', 'unicode', 'list', 'tuple', 'bytearray', 'xrange',
   'set', 'frozenset', 'dict',
+
+  // 3.1 Objects, values and types
+  '__*item__', '__*slice__',
+  '__abs__', '__add__', '__and__',
+  '__bases__', '__call__',
+  '__class__', '__closure__', '__cmp__', '__code__', '__coerce__',
+    '__complex__', '__contains__',
+  '__defaults__', '__del__', '__delattr__', '__delete__', '__delitem__',
+    '__delslice__', '__dict__', '__div__', '__divmod__', '__doc__',
+  '__enter__', '__eq__', '__exit__',
+  '__file__', '__float__', '__floordiv__', '__func__', '__future__',
+  '__ge__', '__get__', '__getattr__', '__getattribute__', '__getitem__',
+    '__getslice__', '__globals__', '__gt__',
+  '__hash__', '__hex__',
+  '__iadd__', '__iand__', '__idiv__', '__ifloordiv__', '__ilshift__',
+    '__imod__', '__imul__', '__index__', '__init__', '__instancecheck__',
+    '__int__', '__invert__', '__iop__', '__ior__', '__ipow__', '__irshift__',
+    '__isub__', '__iter__', '__itruediv__', '__ixor__',
+  '__le__', '__len__', '__long__', '__lshift__', '__lt__',
+  '__metaclass__', '__missing__', '__mod__', '__module__', '__mro__',
+    '__mul__',
+  '__name__', '__ne__', '__neg__', '__new__', '__nonzero__',
+  '__oct__', '__op__', '__or__',
+  '__pos__', '__pow__',
+  '__radd__', '__rand__', '__rcmp__', '__rdiv__', '__rdivmod__', '__repr__',
+    '__reversed__', '__rfloordiv__', '__rlshift__', '__rmod__', '__rmul__',
+    '__rop__', '__ror__', '__rpow__', '__rrshift__', '__rshift__', '__rsub__',
+    '__rtruediv__', '__rxor__',
+  '__self__', '__set__', '__setattr__', '__setitem__', '__setslice__',
+    '__slots__', '__str__', '__sub__', '__subclasscheck__',
+  '__truediv__',
+  '__unicode__',
+  '__weakref__',
+  '__xor__',
+
   // 5.13. Special Attributes
   '__dict__', '__class__', '__bases__', '__name__', '__mro__',
   '__subclasses__',
+
+  // 28.5 __main__ -- Top-level script environment
+  '__main__',
+
+  // Commonly used word
+  'self',
 ]));

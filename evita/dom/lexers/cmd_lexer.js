@@ -108,7 +108,7 @@ global.CmdLexer = (function() {
           switch (charCode) {
             case Unicode.LF:
               --lexer.scanOffset;
-              return lexer.finishToken();
+              return lexer.finishState();
             case Unicode.TAB:
             case Unicode.SPACE:
               --lexer.scanOffset;
@@ -124,18 +124,18 @@ global.CmdLexer = (function() {
           if (charCode != Unicode.LF)
             break;
           --lexer.scanOffset;
-          return lexer.finishToken();
+          return lexer.finishState();
         case State.LABEL:
           if (charCode != Unicode.LF)
             break;
           --lexer.scanOffset;
-          return lexer.finishToken();
+          return lexer.finishState();
         case State.STRING:
           if (charCode == Unicode.QUOTATION_MARK)
-            return lexer.finishToken();
+            return lexer.finishState();
           if (charCode == Unicode.LF) {
             --lexer.scanOffset;
-            return lexer.finishToken();
+            return lexer.finishState();
           }
           break;
 
@@ -147,7 +147,7 @@ global.CmdLexer = (function() {
             case Unicode.SPACE:
             case Unicode.TAB:
               --lexer.scanOffset;
-              return lexer.finishToken();
+              return lexer.finishState();
            }
            break;
         case State.ZERO:
@@ -160,7 +160,7 @@ global.CmdLexer = (function() {
               break;
             case Unicode.LF:
               lexer.startToken(State.NEWLINE, 'cmd_newline');
-              return lexer.finishToken();
+              return lexer.finishState();
             case Unicode.SPACE:
             case Unicode.TAB:
               break;

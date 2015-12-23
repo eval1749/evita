@@ -248,7 +248,7 @@ Lexer.prototype.feedCharacter = function(charCode) {};
 /**
  * @param {!lexers.State} nextState
  */
-Lexer.prototype.finishToken = function(nextState) {};
+Lexer.prototype.finishState = function(nextState) {};
 
 /**
  * @this {!Lexer}

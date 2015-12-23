@@ -162,7 +162,7 @@
     switch (this.state) {
       case ClikeLexer.State.BLOCK_COMMENT:
         if (charCode == Unicode.ASTERISK)
-          this.finishToken(ClikeLexer.State.BLOCK_COMMENT_ASTERISK);
+          this.finishState(ClikeLexer.State.BLOCK_COMMENT_ASTERISK);
         else
           this.extendToken();
         return;
@@ -173,7 +173,7 @@
         else if (charCode == Unicode.SOLIDUS)
           this.restartToken(ClikeLexer.State.BLOCK_COMMENT_END);
         else
-          this.finishToken(ClikeLexer.State.BLOCK_COMMENT);
+          this.finishState(ClikeLexer.State.BLOCK_COMMENT);
         return;
 
       case ClikeLexer.State.BLOCK_COMMENT_END:
@@ -202,13 +202,13 @@
         if (charCode == Unicode.LF)
           this.endToken();
         else if (charCode == Unicode.REVERSE_SOLIDUS)
-          this.finishToken(ClikeLexer.State.LINE_COMMENT_ESCAPE);
+          this.finishState(ClikeLexer.State.LINE_COMMENT_ESCAPE);
         else
           this.extendToken();
         return;
 
       case ClikeLexer.State.LINE_COMMENT_ESCAPE:
-        this.finishToken(ClikeLexer.State.LINE_COMMENT);
+        this.finishState(ClikeLexer.State.LINE_COMMENT);
         return;
 
       case ClikeLexer.State.LINE_COMMENT_START:

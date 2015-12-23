@@ -3,6 +3,15 @@
 // found in the LICENSE file.
 
 $define(global, 'lexers', function($export) {
+  // For ease of restarting lexer, we have string escape and string end tokens
+  // to avoid backward scanning to determine escape character and string ending
+  // character.
+  // For example, when buffer has just string "foo", including double quote,
+  // we have following tokens:
+  //    STRING2 [0, 3] "12
+  //    STRING2_END [3, 4] "
+  // Typing "x" at offset 4, |doColor()| starts with |STRING2_END|, then
+  // moves to |ZERO|.
   const State = {
     DOT: Symbol('.'),
     LINE_COMMENT: Symbol('line_comment'),
@@ -313,6 +322,8 @@ $define(global, 'lexers', function($export) {
 
   /**
    * @this {!Lexer}
+   * End lexical token.
+   * Note: lexical token is consists with multiple |Lexer.Token| objects.
    */
   function endToken() {
     this.didEndToken(this.lastToken);
@@ -330,11 +341,12 @@ $define(global, 'lexers', function($export) {
   /**
    * @this {!Lexer}
    * @param {!lexers.State} nextState
+   * Moves to new state.
+   * Note: lexical token has not been ended.
    */
-  function finishToken(nextState) {
+  function finishState(nextState) {
     if (this.debug_ > 2)
-      console.log('finishToken', this.lastToken);
-    this.didEndToken(this.lastToken);
+      console.log('finishState', this.lastToken);
     this.startToken(nextState);
   }
 
@@ -524,9 +536,9 @@ $define(global, 'lexers', function($export) {
 
      case lexers.State.STRING1:
        if (charSyntax === Lexer.STRING1_CHAR)
-         lexer.finishToken(lexers.State.STRING1_END);
+         lexer.finishState(lexers.State.STRING1_END);
        else if (charCode === Unicode.REVERSE_SOLIDUS)
-         lexer.finishToken(lexers.State.STRING1_ESCAPE);
+         lexer.finishState(lexers.State.STRING1_ESCAPE);
        else
          lexer.extendToken();
        break;
@@ -534,14 +546,14 @@ $define(global, 'lexers', function($export) {
        lexer.endToken();
        break;
      case lexers.State.STRING1_ESCAPE:
-       lexer.finishToken(lexers.State.STRING1);
+       lexer.finishState(lexers.State.STRING1);
        break;
 
      case lexers.State.STRING2:
        if (charSyntax === Lexer.STRING2_CHAR)
-         lexer.finishToken(lexers.State.STRING2_END);
+         lexer.finishState(lexers.State.STRING2_END);
        else if (charCode === Unicode.REVERSE_SOLIDUS)
-         lexer.finishToken(lexers.State.STRING2_ESCAPE);
+         lexer.finishState(lexers.State.STRING2_ESCAPE);
        else
          lexer.extendToken();
        break;
@@ -549,14 +561,14 @@ $define(global, 'lexers', function($export) {
        lexer.endToken();
        break;
      case lexers.State.STRING2_ESCAPE:
-       lexer.finishToken(lexers.State.STRING2);
+       lexer.finishState(lexers.State.STRING2);
        break;
 
      case lexers.State.STRING3:
        if (charSyntax === Lexer.STRING3_CHAR)
-         lexer.finishToken(lexers.State.STRING3_END);
+         lexer.finishState(lexers.State.STRING3_END);
        else if (charCode === Unicode.REVERSE_SOLIDUS)
-         lexer.finishToken(lexers.State.STRING3_ESCAPE);
+         lexer.finishState(lexers.State.STRING3_ESCAPE);
        else
          lexer.extendToken();
        break;
@@ -564,7 +576,7 @@ $define(global, 'lexers', function($export) {
        lexer.endToken();
        break;
      case lexers.State.STRING3_ESCAPE:
-       lexer.finishToken(lexers.State.STRING3);
+       lexer.finishState(lexers.State.STRING3);
        break;
 
      case lexers.State.WORD:
@@ -624,7 +636,7 @@ $define(global, 'lexers', function($export) {
     doColor: {value: doColor},
     endToken: {value: endToken},
     extendToken: {value: extendToken},
-    finishToken: {value: finishToken},
+    finishState: {value: finishState},
     isNameChar: {value: isNameChar},
     isNameStartChar: {value: isNameStartChar},
     isOtherChar: {value: isOtherChar},

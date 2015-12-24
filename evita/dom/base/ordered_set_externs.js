@@ -67,6 +67,12 @@ base.OrderedSet.prototype.find = function(data) {};
 
 /**
  * @template T
+ * @return {!Generator<T>}
+ */
+base.OrderedSet.prototype.entries = function() {};
+
+/**
+ * @template T
  * @param {!function(T)} callback
  */
 base.OrderedSet.prototype.forEach = function(callback) {};

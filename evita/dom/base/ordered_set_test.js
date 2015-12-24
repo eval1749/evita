@@ -28,9 +28,11 @@ testing.test('OrderedSet', function(t) {
   t.expect(set.minimum).toEqual(0);
   t.expect(set.maximum).toEqual(25);
 
-  const result = [];
-  set.forEach(data => result.push(data));
-  t.expect(result.join(' ')).toEqual('0 5 10 15 20 25');
+  const forEachResult = [];
+  set.forEach(data => forEachResult.push(data));
+  t.expect(forEachResult.join(' ')).toEqual('0 5 10 15 20 25');
+
+  t.expect([...set.entries()].join(' ')).toEqual('0 5 10 15 20 25');
 
   t.expect(set.remove(-1)).toEqual(false);
   t.expect(set.remove(1)).toEqual(false);

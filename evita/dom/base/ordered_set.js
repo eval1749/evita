@@ -191,6 +191,19 @@ $define(global, 'base', function($export) {
       this.size_ = 0;
     }
 
+    /** @return {!Generator.<!base.OrderedSetNode<T>>} */
+    *entries() {
+      let node = this.root_;
+      while (node) {
+        while (node.left_)
+          node = node.left_;
+        while (node) {
+          yield node.data;
+          node = node.next();
+        }
+      }
+    }
+
     /**
      * @param {T} data
      * @return {base.OrderedSetNode<T>}
@@ -204,15 +217,8 @@ $define(global, 'base', function($export) {
      * @param {!function(T)} callback
      */
     forEach(callback) {
-      if (!this.root_)
-        return;
-      let node = this.root_;
-      while (node.left_)
-        node = node.left_;
-      while (node) {
-        callback(node.data_);
-        node = node.next();
-      }
+      for (const data of this.entries())
+        callback(data);
     }
 
     /** TODO(eval1749) Closure compiler doesn't recognize: $return {T} */

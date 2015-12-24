@@ -10,12 +10,9 @@ global.HtmlLexer = (function(options) {
     constructor(document) {
       super(document, options);
     }
+
+    static get keywords() { return options.keywords; }
   }
-  // TODO(eval1749): Once closure compiler support |static get|, we should use
-  // it.
-  Object.defineProperty(HtmlLexer, 'keywords', {
-    get: function() { return options.keywords; }
-  });
   return HtmlLexer;
 })({
   childLexers: {

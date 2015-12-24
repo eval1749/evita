@@ -191,19 +191,6 @@ $define(global, 'base', function($export) {
       this.size_ = 0;
     }
 
-    /** @return {!Generator.<!base.OrderedSetNode<T>>} */
-    *entries() {
-      let node = this.root_;
-      while (node) {
-        while (node.left_)
-          node = node.left_;
-        while (node) {
-          yield node.data;
-          node = node.next();
-        }
-      }
-    }
-
     /**
      * @param {T} data
      * @return {base.OrderedSetNode<T>}
@@ -217,7 +204,7 @@ $define(global, 'base', function($export) {
      * @param {!function(T)} callback
      */
     forEach(callback) {
-      for (const data of this.entries())
+      for (const data of this.values())
         callback(data);
     }
 
@@ -284,6 +271,19 @@ $define(global, 'base', function($export) {
         child.parent_ = parent;
       --this.size_;
       return true;
+    }
+
+    /** @return {!Generator.<!base.OrderedSetNode<T>>} */
+    *values() {
+      let node = this.root_;
+      while (node) {
+        while (node.left_)
+          node = node.left_;
+        while (node) {
+          yield node.data;
+          node = node.next();
+        }
+      }
     }
   }
 

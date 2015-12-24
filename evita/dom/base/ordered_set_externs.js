@@ -67,12 +67,6 @@ base.OrderedSet.prototype.find = function(data) {};
 
 /**
  * @template T
- * @return {!Generator<T>}
- */
-base.OrderedSet.prototype.entries = function() {};
-
-/**
- * @template T
  * @param {!function(T)} callback
  */
 base.OrderedSet.prototype.forEach = function(callback) {};
@@ -89,6 +83,12 @@ base.OrderedSet.prototype.lowerBound= function(data) {};
  * @param {T} data
  */
 base.OrderedSet.prototype.remove = function(data) {};
+
+/**
+ * @template T
+ * @return {!Generator<T>}
+ */
+base.OrderedSet.prototype.values = function() {};
 
 /**
  * @typedef {base.OrderedSetNode}

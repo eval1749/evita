@@ -32,7 +32,7 @@ testing.test('OrderedSet', function(t) {
   set.forEach(data => forEachResult.push(data));
   t.expect(forEachResult.join(' ')).toEqual('0 5 10 15 20 25');
 
-  t.expect([...set.entries()].join(' ')).toEqual('0 5 10 15 20 25');
+  t.expect([...set.values()].join(' ')).toEqual('0 5 10 15 20 25');
 
   t.expect(set.remove(-1)).toEqual(false);
   t.expect(set.remove(1)).toEqual(false);

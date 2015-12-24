@@ -5,7 +5,7 @@
 // TODO(eval1749): Should we color entity reference in attribute value? VS2013
 // doesn't color.
 // TODO(eval1749): NYI: <![CDATA[ ... ]]>
-(function(xmlOptions) {
+global.XmlLexer = (function(xmlOptions) {
 
   /** @const @type {!Map.<number, number>} */
   var CHARACTERS = (function() {
@@ -138,6 +138,8 @@
       }
       super.colorToken(token);
     }
+
+    static get keywords() { return xmlOptions.keywords; }
 
     /**
      * @override
@@ -895,13 +897,7 @@
     feedCharacter: {value: feedCharacter},
   });
 
-  // TODO(eval1749): Once closure compiler support |static get|, we should use
-  // it.
-  Object.defineProperty(XmlLexer, 'keywords', {
-    get: function() { return xmlOptions.keywords; }
-  });
-
-  global['XmlLexer'] = XmlLexer;
+  return XmlLexer;
 })({
   keywords: Lexer.createKeywords([
       'xi:include',

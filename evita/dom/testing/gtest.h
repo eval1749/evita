@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_TESTING_GTEST_H_
 #define EVITA_DOM_TESTING_GTEST_H_
 
+#include "base/macros.h"
 #include "v8/include/v8.h"
 
 namespace dom {
@@ -15,11 +16,11 @@ namespace dom {
 //
 class GTest final {
  public:
-  GTest() = delete;
-  ~GTest() = delete;
-
   static void Install(v8::Isolate* isolate,
                       v8::Local<v8::ObjectTemplate> global);
+
+ private:
+  DISALLOW_IMPLICIT_CONSTRUCTORS(GTest);
 };
 
 }  // namespace dom

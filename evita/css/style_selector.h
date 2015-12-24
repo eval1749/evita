@@ -11,9 +11,6 @@ namespace css {
 
 class StyleSelector {
  public:
-  StyleSelector() = delete;
-  ~StyleSelector() = delete;
-
   static const common::AtomicString& active_selection();
   static const common::AtomicString& bad_grammar();
   static const common::AtomicString& comment();
@@ -42,6 +39,9 @@ class StyleSelector {
   static const common::AtomicString& operators();
   static const common::AtomicString& string_literal();
   static const common::AtomicString& tab_marker();
+
+ private:
+  DISALLOW_IMPLICIT_CONSTRUCTORS(StyleSelector);
 };
 
 }  // namespace css

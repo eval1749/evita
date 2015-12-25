@@ -20,7 +20,7 @@ namespace {
 // to share code.
 #if 0
 float AlignHeightToPixel(float height) {
-  return gfx::FactorySet::instance()
+  return gfx::Direct2DFactory::GetInstance()
       ->AlignToPixel(gfx::SizeF(0.0f, height))
       .height;
 }

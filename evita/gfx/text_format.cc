@@ -5,7 +5,7 @@
 #include "evita/gfx/text_format.h"
 
 #include "evita/gfx/direct_write_factory_win.h"
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/text_layout.h"
 
 namespace gfx {
@@ -19,7 +19,7 @@ static float pt2dip(int pt) {
 common::ComPtr<IDWriteTextFormat> CreateTextFormat(
     const base::string16 font_face_name,
     float font_size) {
-  auto size = FactorySet::CeilToPixel(SizeF(0.0f, font_size));
+  auto size = Direct2DFactory::CeilToPixel(SizeF(0.0f, font_size));
   common::ComPtr<IDWriteTextFormat> text_format;
   COM_VERIFY(DirectWriteFactory::GetInstance()->impl()->CreateTextFormat(
       font_face_name.c_str(), nullptr, DWRITE_FONT_WEIGHT_REGULAR,

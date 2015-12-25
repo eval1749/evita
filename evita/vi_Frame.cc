@@ -22,7 +22,7 @@
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/gfx/dx_device.h"
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/editor/application.h"
@@ -229,7 +229,7 @@ void Frame::CreateNativeWindow() const {
 
   const auto& font = *layout::FontSet::GetFont(*css::Style::Default(), 'x');
   gfx::SizeF size(font.GetCharWidth('M') * cColumns, font.height() * cRows);
-  gfx::RectF rect(gfx::PointF(), gfx::FactorySet::AlignToPixel(size));
+  gfx::RectF rect(gfx::PointF(), gfx::Direct2DFactory::AlignToPixel(size));
 
   RECT raw_original_bounds(gfx::ToEnclosingRect(rect));
   ::AdjustWindowRectEx(&raw_original_bounds, dwStyle, TRUE, dwExStyle);

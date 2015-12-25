@@ -13,7 +13,7 @@
 #include "evita/css/style.h"
 #include "evita/css/style_resolver.h"
 #include "evita/css/style_selector.h"
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font.h"
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"
@@ -40,7 +40,7 @@ const int kTabWidth = 4;
 // TODO(eval1749): We should move |AlignHeightToPixel()| to another place
 // to share code.
 float AlignHeightToPixel(float height) {
-  return gfx::FactorySet::instance()
+  return gfx::Direct2DFactory::GetInstance()
       ->AlignToPixel(gfx::SizeF(0.0f, height))
       .height;
 }

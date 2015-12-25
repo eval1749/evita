@@ -11,7 +11,7 @@
 #include "common/memory/singleton.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/direct2d_factory_win.h"
 #include "evita/gfx/font_face.h"
 
 namespace {
@@ -105,7 +105,9 @@ class Font::FontImpl {
 Font::FontImpl::FontImpl(const gfx::FontProperties& properties)
     : font_face_(new gfx::FontFace(properties)),
       em_size_(properties.font_size_pt * 96.0f / 72.0f),
-      pixels_per_dip_(gfx::FactorySet::instance()->pixels_per_dip().height),
+      pixels_per_dip_(gfx::Direct2DFactory::GetInstance()
+                          ->pixels_per_dip()
+                          .height),
       metrics_(GetMetrics()) {}
 
 Font::SimpleMetrics Font::FontImpl::CalculateMetrics() const {

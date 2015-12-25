@@ -5,7 +5,7 @@ if "%outdir%"=="" goto no_outdir
 setlocal
 setlocal enabledelayedexpansion
 
-set tests=dom layout text
+set tests=dom layout text visuals
 set test_log=%TEMP%\evita_all_tests.txt
 echo. > %test_log%
 

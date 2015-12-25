@@ -5,7 +5,15 @@
 import("//build/config/win/manifest.gni")
 import("//testing/test.gni")
 
-executable("evita") {
+group("evita") {
+  deps = [
+    ":evita_exe",
+    "//evita/visuals:demo",
+  ]
+}
+
+executable("evita_exe") {
+  output_name = "evita"
   sources = [
     "ap_main.cc",
     "evita.rc",
@@ -49,5 +57,6 @@ group("evita_tests") {
     "//evita/dom:evita_dom_tests",
     "//evita/layout:evita_layout_tests",
     "//evita/text:evita_text_tests",
+    "//evita/visuals:tests",
   ]
 }

@@ -1,0 +1,68 @@
+# Copyright (c) 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+source_set("visuals") {
+  sources = [
+    "geometry/float_point.h",
+    "geometry/float_point.cc",
+    "geometry/float_rect.h",
+    "geometry/float_rect.cc",
+    "geometry/float_size.h",
+    "geometry/float_size.cc",
+
+    "model/block_box.cc",
+    "model/block_box.h",
+    "model/box.h",
+    "model/box.cc",
+    "model/box_forward.h",
+    "model/box_visitor.cc",
+    "model/box_visitor.h",
+    "model/container_box.cc",
+    "model/container_box.h",
+    "model/inline_box.cc",
+    "model/inline_box.h",
+    "model/inline_block_box.cc",
+    "model/inline_block_box.h",
+    "model/text_box.cc",
+    "model/text_box.h",
+
+    "style/display.cc",
+    "style/display.h",
+  ]
+
+  public_deps = [
+    "//base",
+  ]
+}
+
+executable("demo") {
+  output_name = "visuals_demo"
+  sources = [
+    "demo/demo_main.cc",
+  ]
+
+  deps = [
+    ":visuals",
+  ]
+}
+
+test("tests") {
+  output_name = "evita_visuals_tests"
+
+  sources = [
+    "geometry/float_point_test.cc",
+    "geometry/float_rect_test.cc",
+    "geometry/float_size_test.cc",
+
+    "model/box_test.cc",
+    "model/container_box_test.cc",
+  ]
+
+  deps = [
+    ":visuals",
+    "//base/test:run_all_unittests",
+  ]
+}

@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/gfx_base.h"
 #include "evita/layout/render_style.h"
 #include "evita/text/offset.h"

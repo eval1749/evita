@@ -7,7 +7,7 @@
 
 #include <functional>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/gfx_base.h"
 #include "evita/css/style.h"
 

@@ -5,7 +5,7 @@
 #ifndef EVITA_GFX_DX_DEVICE_H_
 #define EVITA_GFX_DX_DEVICE_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "common/win/scoped_comptr.h"
 
 interface ID2D1Device;

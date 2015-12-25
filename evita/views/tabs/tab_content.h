@@ -5,7 +5,7 @@
 #ifndef EVITA_VIEWS_TABS_TAB_CONTENT_H_
 #define EVITA_VIEWS_TABS_TAB_CONTENT_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
 #include "evita/ui/widget.h"

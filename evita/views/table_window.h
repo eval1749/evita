@@ -10,7 +10,7 @@
 
 #include "evita/views/canvas_content_window.h"
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/gc/member.h"
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/ui/base/table_model.h"

@@ -6,28 +6,9 @@
 #include <unknwn.h>
 
 #include "base/logging.h"
+#include "common/win/com_verify.h"
 
 namespace common {
-
-#if defined(_DEBUG)
-#define COM_VERIFY(expr)                                             \
-  {                                                                  \
-    auto const macro_hr = (expr);                                    \
-    if (FAILED(macro_hr)) {                                          \
-      DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " << #expr; \
-      NOTREACHED();                                                  \
-    }                                                                \
-  \
-}
-#else
-#define COM_VERIFY(expr)                                             \
-  {                                                                  \
-    auto const macro_hr = (expr);                                    \
-    if (FAILED(macro_hr))                                            \
-      DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " << #expr; \
-  \
-}
-#endif
 
 template <class T>
 class ComPtr final {

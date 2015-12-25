@@ -12,6 +12,7 @@ component("common") {
     "strings/atomic_string.cc",
     "strings/atomic_string.h",
     "timer/timer.cc",
+    "win/com_verify.h",
     "win/native_window.cc",
     "win/point.cc",
     "win/point.h",

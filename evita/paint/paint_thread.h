@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/callback_forward.h"
 
 namespace base {

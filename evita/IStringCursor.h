@@ -1,17 +1,10 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - edit buffer
-// listener/winapp/ed_buffer.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/IStringCursor.h#1 $
-//
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_ISTRINGCURSOR_H_
 #define EVITA_ISTRINGCURSOR_H_
 
-#include "base/basictypes.h"
 #include "base/strings/string16.h"
 #include "evita/text/offset.h"
 

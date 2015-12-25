@@ -10,7 +10,7 @@
 
 #include <memory>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/memory/singleton.h"
 #include "base/observer_list.h"
 #include "base/logging.h"

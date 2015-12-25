@@ -1,13 +1,7 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - winapp - pre-compiled header
-// precomp.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/precomp.h#2 $
-//
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_PRECOMP_H_
 #define EVITA_PRECOMP_H_
 
@@ -92,7 +86,6 @@ typedef _IMAGELIST* HIMAGELIST;
 
 #include <string>
 
-#include "base/basictypes.h"
 #include "base/strings/string16.h"
 
 // warning C6400: Using 'lstrcmpiW' to perform a case-insensitive compare to

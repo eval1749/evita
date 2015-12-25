@@ -87,6 +87,4 @@ class FactorySet final : public common::ComInit,
 
 }  // namespace gfx
 
-#include "evita/gfx/canvas.h"
-
 #endif  // EVITA_GFX_BASE_H_

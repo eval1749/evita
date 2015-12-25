@@ -5,10 +5,20 @@
 #ifndef EVITA_GFX_TEXT_FORMAT_H_
 #define EVITA_GFX_TEXT_FORMAT_H_
 
-#include "evita/gfx_base.h"
+#include <memory>
+
+#include "base/strings/string16.h"
+#include "evita/gfx/forward.h"
+#include "evita/gfx/simple_object.h"
 
 namespace gfx {
 
+class TextLayout;
+
+//////////////////////////////////////////////////////////////////////
+//
+// TextFormat
+//
 class TextFormat final : public SimpleObject_<IDWriteTextFormat> {
  public:
   TextFormat(const base::string16& font_face_name, float font_size);

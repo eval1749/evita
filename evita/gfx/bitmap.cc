@@ -4,6 +4,8 @@
 
 #include "evita/gfx/bitmap.h"
 
+#include "evita/gfx/canvas.h"
+
 namespace gfx {
 
 namespace {
@@ -42,6 +44,7 @@ Bitmap::Bitmap(Canvas* canvas, HICON hIcon)
 Bitmap::Bitmap(Canvas* canvas, SizeU size)
     : SimpleObject_(CreateBitmap(canvas, size)) {}
 
+// TODO(eval1749): We should not u
 Bitmap::Bitmap(Canvas* canvas)
     : Bitmap(canvas, SizeU((*canvas)->GetPixelSize())) {}
 

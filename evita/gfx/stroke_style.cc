@@ -5,7 +5,7 @@
 #include "evita/gfx/stroke_style.h"
 
 #include "base/logging.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/canvas.h"
 
 namespace gfx {
 

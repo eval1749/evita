@@ -10,6 +10,7 @@
 
 #include "base/logging.h"
 #include "evita/gfx/bitmap.h"
+#include "evita/gfx/canvas.h"
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/caret_owner.h"
 

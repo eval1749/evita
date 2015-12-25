@@ -12,6 +12,7 @@
 #include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx/brush.h"
+#include "evita/gfx/canvas.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/paint/paint_thread.h"

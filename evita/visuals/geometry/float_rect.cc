@@ -24,6 +24,12 @@ FloatRect::FloatRect() {}
 
 FloatRect::~FloatRect() {}
 
+FloatRect& FloatRect::operator=(const FloatRect& other) {
+  origin_ = other.origin_;
+  size_ = other.size_;
+  return *this;
+}
+
 bool FloatRect::operator==(const FloatRect& other) const {
   return origin_ == other.origin_ && size_ == other.size_;
 }

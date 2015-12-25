@@ -22,7 +22,7 @@ class InlineBox : public Box {
   ~InlineBox() override;
 
  protected:
-  explicit InlineBox(const FloatRect& bounds);
+  InlineBox();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(InlineBox);

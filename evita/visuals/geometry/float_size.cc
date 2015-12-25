@@ -26,6 +26,12 @@ FloatSize::FloatSize(const FloatSize& other)
 FloatSize::FloatSize() {}
 FloatSize::~FloatSize() {}
 
+FloatSize& FloatSize::operator=(const FloatSize& other) {
+  width_ = other.width_;
+  height_ = other.height_;
+  return *this;
+}
+
 bool FloatSize::operator==(const FloatSize& other) const {
   return width_ == other.width_ && height_ == other.height_;
 }

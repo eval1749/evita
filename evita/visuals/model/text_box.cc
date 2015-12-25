@@ -10,9 +10,7 @@ namespace visuals {
 //
 // TextBox
 //
-TextBox::TextBox(const FloatRect& bounds, const base::string16 text)
-    : InlineBox(bounds), text_(text) {}
-
+TextBox::TextBox(const base::string16 text) : text_(text) {}
 TextBox::~TextBox() {}
 
 }  // namespace visuals

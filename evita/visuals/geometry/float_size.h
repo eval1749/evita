@@ -20,6 +20,8 @@ class FloatSize final {
   FloatSize();
   ~FloatSize();
 
+  FloatSize& operator=(const FloatSize& other);
+
   bool operator==(const FloatSize& other) const;
   bool operator!=(const FloatSize& other) const;
 
@@ -29,8 +31,8 @@ class FloatSize final {
   bool IsEmpty() const { return width_ == 0 && height_ == 0; }
 
  private:
-  const float height_ = 0.0f;
-  const float width_ = 0.0f;
+  float height_ = 0.0f;
+  float width_ = 0.0f;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const FloatSize& size);

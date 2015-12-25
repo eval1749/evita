@@ -24,6 +24,8 @@ class FloatRect final {
   FloatRect();
   ~FloatRect();
 
+  FloatRect& operator=(const FloatRect& other);
+
   bool operator==(const FloatRect& other) const;
   bool operator!=(const FloatRect& other) const;
 
@@ -60,8 +62,8 @@ class FloatRect final {
   bool IsEmpty() const { return size_.IsEmpty(); }
 
  private:
-  const FloatPoint origin_;
-  const FloatSize size_;
+  FloatPoint origin_;
+  FloatSize size_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const FloatRect& rect);

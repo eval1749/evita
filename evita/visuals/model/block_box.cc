@@ -8,8 +8,7 @@
 
 namespace visuals {
 
-BlockBox::BlockBox(const FloatRect& bounds, const FloatRect& content_bounds)
-    : ContainerBox(Display::Block, bounds, content_bounds) {}
+BlockBox::BlockBox() : ContainerBox(Display::Block) {}
 
 BlockBox::~BlockBox() {}
 

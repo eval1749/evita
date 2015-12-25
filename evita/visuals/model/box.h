@@ -44,9 +44,12 @@ class Box : public common::Castable {
   bool IsBlock() const;
   bool IsDescendantOf(const Box& other) const;
   bool IsInline() const;
+  void SetBounds(const FloatRect& new_bounds);
 
  protected:
-  Box(Display display, const FloatRect& bounds);
+  explicit Box(Display display);
+
+  void DidChangeContent();
 
  private:
   class Editor;

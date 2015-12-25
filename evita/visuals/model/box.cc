@@ -14,12 +14,12 @@ namespace visuals {
 //
 // Box
 //
-Box::Box(Display display, const FloatRect& bounds)
-    : bounds_(bounds), display_(display) {
-  DCHECK(!bounds_.IsEmpty());
-}
-
+Box::Box(Display display) : display_(display) {}
 Box::~Box() {}
+
+void Box::DidChangeContent() {
+  dirty_ = true;
+}
 
 bool Box::IsBlock() const {
   return display_ == Display::Block || display_ == Display::InlineBlock;
@@ -35,6 +35,13 @@ bool Box::IsDescendantOf(const Box& other) const {
 
 bool Box::IsInline() const {
   return display_ == Display::Inline || display_ == Display::InlineBlock;
+}
+
+void Box::SetBounds(const FloatRect& new_bounds) {
+  if (bounds_ == new_bounds)
+    return;
+  bounds_ = new_bounds;
+  dirty_ = true;
 }
 
 //////////////////////////////////////////////////////////////////////

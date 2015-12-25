@@ -21,6 +21,12 @@ FloatPoint::FloatPoint(const FloatPoint& other)
 FloatPoint::FloatPoint() {}
 FloatPoint::~FloatPoint() {}
 
+FloatPoint& FloatPoint::operator=(const FloatPoint& other) {
+  x_ = other.x_;
+  y_ = other.y_;
+  return *this;
+}
+
 bool FloatPoint::operator==(const FloatPoint& other) const {
   return x_ == other.x_ && y_ == other.y_;
 }

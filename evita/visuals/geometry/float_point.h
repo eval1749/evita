@@ -20,6 +20,8 @@ class FloatPoint final {
   FloatPoint();
   ~FloatPoint();
 
+  FloatPoint& operator=(const FloatPoint& other);
+
   bool operator==(const FloatPoint& other) const;
   bool operator!=(const FloatPoint& other) const;
 

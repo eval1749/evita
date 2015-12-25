@@ -17,7 +17,7 @@ class InlineBlockBox final : public ContainerBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(InlineBlockBox, ContainerBox);
 
  public:
-  InlineBlockBox(const FloatRect& bounds, const FloatRect& content_bounds);
+  InlineBlockBox();
   ~InlineBlockBox() final;
 
  private:

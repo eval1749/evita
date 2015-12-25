@@ -63,12 +63,9 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 }
 
 void DemoMain() {
-  auto root_box = std::make_unique<BlockBox>(FloatRect(FloatSize(640, 480)),
-                                             FloatRect(FloatSize(640, 480)));
-  auto text_box1 = std::make_unique<TextBox>(
-      FloatRect(FloatPoint(10, 10), FloatSize(100, 20)), L"foo");
-  auto text_box2 = std::make_unique<TextBox>(
-      FloatRect(FloatPoint(10, 40), FloatSize(100, 20)), L"bar");
+  auto root_box = std::make_unique<BlockBox>();
+  auto text_box1 = std::make_unique<TextBox>(L"foo");
+  auto text_box2 = std::make_unique<TextBox>(L"bar");
   root_box->AppendChild(text_box1.get());
   root_box->AppendChild(text_box2.get());
 

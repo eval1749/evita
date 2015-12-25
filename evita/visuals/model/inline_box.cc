@@ -12,7 +12,7 @@ namespace visuals {
 //
 // InlineBox
 //
-InlineBox::InlineBox(const FloatRect& bounds) : Box(Display::Inline, bounds) {}
+InlineBox::InlineBox() : Box(Display::Inline) {}
 
 InlineBox::~InlineBox() {}
 

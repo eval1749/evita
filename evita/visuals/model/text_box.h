@@ -18,7 +18,7 @@ class TextBox final : public InlineBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(TextBox, InlineBox);
 
  public:
-  TextBox(const FloatRect& bounds, const base::string16 text);
+  explicit TextBox(const base::string16 text);
   ~TextBox() final;
 
   const base::string16& text() const { return text_; }

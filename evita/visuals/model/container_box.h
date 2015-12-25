@@ -26,11 +26,10 @@ class ContainerBox : public Box {
 
   void AppendChild(Box* child);
   void RemoveChild(Box* child);
+  void SetContentBounds(const FloatRect& new_bounds);
 
  protected:
-  ContainerBox(Display display,
-               const FloatRect& bounds,
-               const FloatRect& content_bounds);
+  explicit ContainerBox(Display display);
 
  private:
   std::vector<Box*> child_boxes_;

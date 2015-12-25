@@ -8,9 +8,7 @@
 
 namespace visuals {
 
-InlineBlockBox::InlineBlockBox(const FloatRect& bounds,
-                               const FloatRect& content_bounds)
-    : ContainerBox(Display::InlineBlock, bounds, content_bounds) {}
+InlineBlockBox::InlineBlockBox() : ContainerBox(Display::InlineBlock) {}
 
 InlineBlockBox::~InlineBlockBox() {}
 

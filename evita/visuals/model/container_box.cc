@@ -12,13 +12,7 @@ namespace visuals {
 //
 // ContainerBox
 //
-ContainerBox::ContainerBox(Display display,
-                           const FloatRect& bounds,
-                           const FloatRect& content_bounds)
-    : Box(display, bounds), content_bounds_(content_bounds) {
-  DCHECK(bounds.Contains(content_bounds_));
-  DCHECK(!content_bounds_.IsEmpty());
-}
+ContainerBox::ContainerBox(Display display) : Box(display) {}
 
 ContainerBox::~ContainerBox() {}
 
@@ -38,6 +32,13 @@ void ContainerBox::RemoveChild(Box* box) {
   DCHECK(it != child_boxes_.end());
   Editor(box).SetParent(nullptr);
   child_boxes_.erase(it);
+}
+
+void ContainerBox::SetContentBounds(const FloatRect& new_bounds) {
+  if (content_bounds_ == new_bounds)
+    return;
+  content_bounds_ = new_bounds;
+  DidChangeContent();
 }
 
 }  // namespace visuals

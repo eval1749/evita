@@ -5,9 +5,8 @@
 #ifndef EVITA_CSS_COLOR_H_
 #define EVITA_CSS_COLOR_H_
 
+#include <stdint.h>
 #include <functional>
-
-#include "base/basictypes.h"
 
 namespace css {
 

@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "base/basictypes.h"
-#include "gmock/gmock.h"
+#include "base/macros.h"
 #include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
+#include "gmock/gmock.h"
 
 namespace {
 

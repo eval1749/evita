@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace dom {

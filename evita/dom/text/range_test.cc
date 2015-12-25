@@ -4,13 +4,13 @@
 
 #include <string>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/strings/stringprintf.h"
-#include "gmock/gmock.h"
 #include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
+#include "gmock/gmock.h"
 
 namespace dom {
 

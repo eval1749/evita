@@ -1,9 +1,11 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_DOM_EVENTS_EVENT_H_
 #define EVITA_DOM_EVENTS_EVENT_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
 #include "evita/dom/time_stamp.h"

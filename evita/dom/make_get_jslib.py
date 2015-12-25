@@ -19,7 +19,7 @@ SOURCE = """\
 // L1 C4530: C++ exception handler used, but unwind semantics are not enabled.
 // Specify /EHsc
 #pragma warning(disable: 4127 4350 4365 4530)
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/dom/static_script_source.h"
 
 namespace dom {

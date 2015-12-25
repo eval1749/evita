@@ -8,15 +8,12 @@
 #include <string>
 #include <vector>
 
-#include "base/basictypes.h"
 #include "base/callback.h"
-#pragma warning(push)
-#pragma warning(disable : 4365 4628)
-#include "gmock/gmock.h"
-#pragma warning(pop)
+#include "base/macros.h"
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_delegate.h"
+#include "gmock/gmock.h"
 
 namespace dom {
 

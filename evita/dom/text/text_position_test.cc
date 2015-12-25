@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/basictypes.h"
-#include "evita/dom/testing/abstract_dom_test.h"
+#include "base/macros.h"
 #include "evita/css/style.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 
 namespace dom {
 

@@ -5,7 +5,7 @@
 #ifndef EVITA_DOM_DICTIONARY_H_
 #define EVITA_DOM_DICTIONARY_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 // TODO(eval1749): We should include "dom/time_stamp.h" here, instead of
 // IDL compiler should insert include directive for generated files. This is
 // workaround for "dom/os/DirectoryEntry.idl".

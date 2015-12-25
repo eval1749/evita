@@ -1,15 +1,17 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_DOM_EVENTS_EVENT_TARGET_H_
 #define EVITA_DOM_EVENTS_EVENT_TARGET_H_
 
 #include <vector>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/strings/string16.h"
-#include "evita/gc/member.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/public/event_target_id.h"
+#include "evita/gc/member.h"
 #include "evita/v8_glue/scriptable.h"
 
 namespace v8_glue {

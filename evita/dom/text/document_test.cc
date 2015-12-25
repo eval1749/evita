@@ -5,9 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/strings/utf_string_conversions.h"
-#include "gmock/gmock.h"
 #include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/text/document.h"
 #include "evita/dom/file_path.h"
@@ -16,6 +15,7 @@
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
 #include "evita/text/buffer.h"
+#include "gmock/gmock.h"
 
 namespace dom {
 

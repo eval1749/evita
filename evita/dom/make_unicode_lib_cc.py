@@ -57,11 +57,8 @@ def emitJs(output_file, ucd):
 
 #include <memory>
 
-#include "base/basictypes.h"
-#pragma warning(push)
-#pragma warning(disable: 4100 4127 4530)
+#include "base/macros.h"
 #include "gin/converter.h"
-#pragma warning(pop)
 
 namespace dom {
 namespace internal {

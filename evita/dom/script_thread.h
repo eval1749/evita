@@ -9,8 +9,8 @@
 #include <string>
 #include <vector>
 
-#include "base/basictypes.h"
 #include "base/callback_forward.h"
+#include "base/macros.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/scheduler_client.h"

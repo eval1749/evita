@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/dom/testing/abstract_dom_test.h"
 
 namespace {

@@ -1,11 +1,8 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#pragma warning(push)
-#pragma warning(disable : 4365 4625 4626)
-#include "gtest/gtest.h"
-#pragma warning(pop)
+// Copyright (c) 2013 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
@@ -15,6 +12,8 @@
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
+#include "gtest/gtest.h"
+
 
 namespace dom {
 

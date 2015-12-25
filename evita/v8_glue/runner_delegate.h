@@ -1,11 +1,11 @@
-// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Copyright (c) 2015 Project Vogue. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 #ifndef EVITA_V8_GLUE_RUNNER_DELEGATE_H_
 #define EVITA_V8_GLUE_RUNNER_DELEGATE_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/v8_glue/v8.h"
 
 namespace v8_glue {

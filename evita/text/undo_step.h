@@ -5,7 +5,7 @@
 #ifndef EVITA_TEXT_UNDO_STEP_H_
 #define EVITA_TEXT_UNDO_STEP_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/castable.h"
 #include "evita/text/offset.h"

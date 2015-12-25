@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/observer_list.h"
 #include "evita/text/marker_set_observer.h"
 #include "evita/text/offset.h"

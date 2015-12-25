@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "common/strings/atomic_string.h"
 #include "evita/text/offset.h"
 

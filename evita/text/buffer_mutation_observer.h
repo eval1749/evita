@@ -5,7 +5,7 @@
 #ifndef EVITA_TEXT_BUFFER_MUTATION_OBSERVER_H_
 #define EVITA_TEXT_BUFFER_MUTATION_OBSERVER_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 
 namespace text {
 

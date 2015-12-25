@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 
 namespace css {
 class Style;

@@ -22,6 +22,8 @@ source_set("gfx") {
     "rect_conversions.cc",
     "rect_conversions.h",
     "rect_f.cc",
+    "simple_object.cc",
+    "simple_object.h",
     "size_f.cc",
     "stroke_style.cc",
     "swap_chain.cc",

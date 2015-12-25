@@ -18,37 +18,13 @@
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/color_f.h"
 #include "evita/gfx/rect_f.h"
+#include "evita/gfx/simple_object.h"
 
 namespace gfx {
 
 typedef common::win::Point Point;
 typedef common::win::Rect Rect;
 typedef common::win::Size Size;
-
-class Object {
- protected:
-  Object() {}
-  ~Object() {}
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(Object);
-};
-
-template <class T>
-class SimpleObject_ : public Object {
- public:
-  operator T*() const { return ptr_; }
-  T* operator->() const { return ptr_; }
-
- protected:
-  explicit SimpleObject_(T* ptr) : ptr_(ptr) {}
-  explicit SimpleObject_(common::ComPtr<T>&& ptr) : ptr_(std::move(ptr)) {}
-
- private:
-  const common::ComPtr<T> ptr_;
-
-  DISALLOW_COPY_AND_ASSIGN(SimpleObject_);
-};
 
 //////////////////////////////////////////////////////////////////////
 //

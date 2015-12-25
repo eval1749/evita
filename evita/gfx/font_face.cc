@@ -4,7 +4,7 @@
 
 #include "evita/gfx/font_face.h"
 
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/direct_write_factory_win.h"
 
 namespace gfx {
 
@@ -13,8 +13,8 @@ namespace {
 common::ComPtr<IDWriteFontFace> CreateFontFace(
     const FontProperties& properties) {
   common::ComPtr<IDWriteFontCollection> font_collection;
-  COM_VERIFY(gfx::FactorySet::dwrite().GetSystemFontCollection(&font_collection,
-                                                               false));
+  COM_VERIFY(DirectWriteFactory::GetInstance()->impl()->GetSystemFontCollection(
+      &font_collection, false));
 
   uint32 index;
   BOOL exists;

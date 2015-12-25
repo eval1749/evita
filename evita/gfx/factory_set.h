@@ -11,9 +11,6 @@
 #include "evita/gfx/dpi_handler.h"
 #include "evita/gfx/size_f.h"
 
-interface IDWriteFactory;
-interface IWICImagingFactory;
-
 namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
@@ -23,8 +20,6 @@ namespace gfx {
 class FactorySet final : public common::ComInit, public DpiHandler {
  public:
   static ID2D1Factory1& d2d1() { return *instance()->d2d1_factory_; }
-  static IDWriteFactory& dwrite() { return *instance()->dwrite_factory_; }
-  static IWICImagingFactory& image() { return *instance()->image_factory_; }
   static FactorySet* instance() { return GetInstance(); }
 
   static SizeF AlignToPixel(const SizeF& size) {
@@ -43,8 +38,6 @@ class FactorySet final : public common::ComInit, public DpiHandler {
   ~FactorySet();
 
   common::ComPtr<ID2D1Factory1> d2d1_factory_;
-  common::ComPtr<IDWriteFactory> dwrite_factory_;
-  common::ComPtr<IWICImagingFactory> image_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(FactorySet);
 };

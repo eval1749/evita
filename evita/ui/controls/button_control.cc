@@ -6,7 +6,7 @@
 
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/direct_write_factory_win.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
 
@@ -41,8 +41,9 @@ std::unique_ptr<gfx::TextLayout> CreateTextLayout(
     const gfx::SizeF& size) {
   gfx::TextFormat text_format(style.font_family, style.font_size);
   common::ComPtr<IDWriteInlineObject> inline_object;
-  COM_VERIFY(gfx::FactorySet::instance()->dwrite().CreateEllipsisTrimmingSign(
-      text_format, &inline_object));
+  COM_VERIFY(gfx::DirectWriteFactory::GetInstance()
+                 ->impl()
+                 ->CreateEllipsisTrimmingSign(text_format, &inline_object));
   DWRITE_TRIMMING trimming{DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
   text_format->SetTrimming(&trimming, inline_object);
   return text_format.CreateLayout(text, size);

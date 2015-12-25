@@ -7,7 +7,7 @@
 #include "evita/gfx/bitmap.h"
 
 #include "evita/gfx/canvas.h"
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/imaging_factory_win.h"
 
 namespace gfx {
 
@@ -15,9 +15,11 @@ namespace {
 
 common::ComPtr<ID2D1Bitmap> CreateBitmap(Canvas* canvas, HICON hIcon) {
   common::ComPtr<IWICBitmap> icon;
-  COM_VERIFY(gfx::FactorySet::image().CreateBitmapFromHICON(hIcon, &icon));
+  COM_VERIFY(ImagingFactory::GetInstance()->impl()->CreateBitmapFromHICON(
+      hIcon, &icon));
   common::ComPtr<IWICFormatConverter> converter;
-  COM_VERIFY(gfx::FactorySet::image().CreateFormatConverter(&converter));
+  COM_VERIFY(
+      ImagingFactory::GetInstance()->impl()->CreateFormatConverter(&converter));
   COM_VERIFY(converter->Initialize(icon, GUID_WICPixelFormat32bppPBGRA,
                                    WICBitmapDitherTypeNone, nullptr, 0,
                                    WICBitmapPaletteTypeMedianCut));

@@ -12,7 +12,7 @@
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/direct_write_factory_win.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/ui/animation/animatable_window.h"
@@ -210,8 +210,10 @@ std::unique_ptr<gfx::TextFormat> CreateTextFormat() {
   auto text_format =
       std::make_unique<gfx::TextFormat>(L"MS Shell Dlg 2", font_size);
   common::ComPtr<IDWriteInlineObject> inline_object;
-  COM_VERIFY(gfx::FactorySet::instance()->dwrite().CreateEllipsisTrimmingSign(
-      *text_format.get(), &inline_object));
+  COM_VERIFY(
+      gfx::DirectWriteFactory::GetInstance()
+          ->impl()
+          ->CreateEllipsisTrimmingSign(*text_format.get(), &inline_object));
   DWRITE_TRIMMING trimming{DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
   (*text_format.get())->SetTrimming(&trimming, inline_object);
   (*text_format.get())

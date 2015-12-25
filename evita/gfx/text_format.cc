@@ -4,6 +4,7 @@
 
 #include "evita/gfx/text_format.h"
 
+#include "evita/gfx/direct_write_factory_win.h"
 #include "evita/gfx/factory_set.h"
 #include "evita/gfx/text_layout.h"
 
@@ -20,7 +21,7 @@ common::ComPtr<IDWriteTextFormat> CreateTextFormat(
     float font_size) {
   auto size = FactorySet::CeilToPixel(SizeF(0.0f, font_size));
   common::ComPtr<IDWriteTextFormat> text_format;
-  COM_VERIFY(FactorySet::instance()->dwrite().CreateTextFormat(
+  COM_VERIFY(DirectWriteFactory::GetInstance()->impl()->CreateTextFormat(
       font_face_name.c_str(), nullptr, DWRITE_FONT_WEIGHT_REGULAR,
       DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, size.height,
       L"en-us", &text_format));
@@ -44,7 +45,7 @@ std::unique_ptr<TextLayout> TextFormat::CreateLayout(const base::string16& text,
                                                      const SizeF& size) const {
   DCHECK(!size.empty());
   common::ComPtr<IDWriteTextLayout> text_layout;
-  COM_VERIFY(FactorySet::instance()->dwrite().CreateTextLayout(
+  COM_VERIFY(DirectWriteFactory::GetInstance()->impl()->CreateTextLayout(
       text.data(), static_cast<UINT32>(text.length()), *this, size.width,
       size.height, &text_layout));
   if (!text_layout)
@@ -55,7 +56,7 @@ std::unique_ptr<TextLayout> TextFormat::CreateLayout(const base::string16& text,
 float TextFormat::GetWidth(const base::string16& text) const {
   common::ComPtr<IDWriteTextLayout> text_layout;
   auto const kHuge = 1e6f;
-  COM_VERIFY(FactorySet::instance()->dwrite().CreateTextLayout(
+  COM_VERIFY(DirectWriteFactory::GetInstance()->impl()->CreateTextLayout(
       text.data(), static_cast<UINT32>(text.length()), *this, kHuge, kHuge,
       &text_layout));
   auto width = 0.0f;

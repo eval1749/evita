@@ -4,12 +4,7 @@
 
 #include "evita/gfx/factory_set.h"
 
-#include <dwrite.h>
-#include <wincodec.h>
-
 #pragma comment(lib, "d2d1.lib")
-#pragma comment(lib, "dwrite.lib")
-#pragma comment(lib, "windowscodecs.lib")
 
 namespace gfx {
 
@@ -28,31 +23,13 @@ ID2D1Factory1& CreateD2D1Factory() {
   return *factory;
 }
 
-IDWriteFactory& CreateDWriteFactory() {
-  IDWriteFactory* factory;
-  COM_VERIFY(::DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
-                                   __uuidof(IDWriteFactory),
-                                   reinterpret_cast<IUnknown**>(&factory)));
-  return *factory;
-}
-
-IWICImagingFactory& CreateImageFactory() {
-  IWICImagingFactory* factory;
-  COM_VERIFY(::CoCreateInstance(CLSID_WICImagingFactory, nullptr,
-                                CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory)));
-  return *factory;
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // FactorySet
 //
-FactorySet::FactorySet()
-    : d2d1_factory_(CreateD2D1Factory()),
-      dwrite_factory_(CreateDWriteFactory()),
-      image_factory_(CreateImageFactory()) {
+FactorySet::FactorySet() : d2d1_factory_(CreateD2D1Factory()) {
   SizeF dpi;
   d2d1_factory_->GetDesktopDpi(&dpi.width, &dpi.height);
   UpdateDpi(dpi);

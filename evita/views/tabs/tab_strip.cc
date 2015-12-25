@@ -16,7 +16,7 @@
 #include "evita/dom/public/tab_data.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
-#include "evita/gfx/factory_set.h"
+#include "evita/gfx/direct_write_factory_win.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/ui/animation/animatable_window.h"
@@ -549,8 +549,9 @@ void TabCollection::UpdateTextFont() {
       ui::SystemMetrics::instance()->icon_font_family(), kLabelFontSize));
   {
     common::ComPtr<IDWriteInlineObject> inline_object;
-    COM_VERIFY(gfx::FactorySet::instance()->dwrite().CreateEllipsisTrimmingSign(
-        *text_format_, &inline_object));
+    COM_VERIFY(gfx::DirectWriteFactory::GetInstance()
+                   ->impl()
+                   ->CreateEllipsisTrimmingSign(*text_format_, &inline_object));
     DWRITE_TRIMMING trimming{DWRITE_TRIMMING_GRANULARITY_CHARACTER, 0, 0};
     (*text_format_)->SetTrimming(&trimming, inline_object);
   }

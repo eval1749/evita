@@ -8,7 +8,7 @@
 #include <list>
 #include <memory>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "common/win/scoped_comptr.h"
 #include "evita/gfx/canvas_owner.h"
 #include "evita/gfx/rect.h"

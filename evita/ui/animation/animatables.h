@@ -7,7 +7,7 @@
 
 #include <unordered_set>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/ui/animation/animation_observer.h"
 
 namespace ui {

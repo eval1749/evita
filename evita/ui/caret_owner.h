@@ -5,7 +5,7 @@
 #ifndef EVITA_UI_CARET_OWNER_H_
 #define EVITA_UI_CARET_OWNER_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "evita/gfx/rect_f.h"
 
 namespace gfx {

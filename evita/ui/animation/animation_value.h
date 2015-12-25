@@ -7,7 +7,7 @@
 
 #include <unordered_set>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/time/time.h"
 #include "common/memory/singleton.h"
 #include "evita/gfx/point_f.h"

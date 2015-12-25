@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "common/memory/singleton.h"
 
 namespace ui {

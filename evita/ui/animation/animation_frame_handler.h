@@ -5,7 +5,7 @@
 #ifndef EVITA_UI_ANIMATION_ANIMATION_FRAME_HANDLER_H_
 #define EVITA_UI_ANIMATION_ANIMATION_FRAME_HANDLER_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 
 namespace base {
 class Time;

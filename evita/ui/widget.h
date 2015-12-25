@@ -1,12 +1,14 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 1996-2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_UI_WIDGET_H_
 #define EVITA_UI_WIDGET_H_
 
 #include <memory>
 #include <ostream>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 #include "base/event_types.h"
 #include "base/logging.h"
 #include "common/tree/node.h"

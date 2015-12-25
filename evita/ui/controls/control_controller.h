@@ -5,7 +5,7 @@
 #ifndef EVITA_UI_CONTROLS_CONTROL_CONTROLLER_H_
 #define EVITA_UI_CONTROLS_CONTROL_CONTROLLER_H_
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 
 namespace ui {
 

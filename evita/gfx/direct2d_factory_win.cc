@@ -5,6 +5,7 @@
 #include "evita/gfx/direct2d_factory_win.h"
 
 #include "base/memory/singleton.h"
+#include "common/win/com_verify.h"
 
 #pragma comment(lib, "d2d1.lib")
 

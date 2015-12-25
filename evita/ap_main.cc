@@ -6,6 +6,7 @@
 #include "base/command_line.h"
 #include "base/i18n/icu_util.h"
 #include "base/logging.h"
+#include "common/win/com_init.h"
 #include "common/win/native_window.h"
 #include "evita/editor/application_proxy.h"
 
@@ -24,6 +25,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   }
 
   common::win::NativeWindow::Init(hInstance);
+  common::win::ComInit com_init;
   g_hInstance = hInstance;
   g_hResource = hInstance;
 

@@ -88,12 +88,6 @@ class ComPtr final {
   T* ptr_;
 };
 
-class ComInit {
- public:
-  ComInit() { COM_VERIFY(::CoInitialize(nullptr)); }
-  ~ComInit() { ::CoUninitialize(); }
-};
-
 }  // namespace common
 
 #endif  // COMMON_WIN_SCOPED_COMPTR_H_

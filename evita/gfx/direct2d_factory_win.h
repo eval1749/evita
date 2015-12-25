@@ -7,7 +7,6 @@
 
 #include "base/macros.h"
 #include "base/win/scoped_comptr.h"
-#include "common/win/scoped_comptr.h"
 #include "evita/gfx/dpi_handler.h"
 #include "evita/gfx/size_f.h"
 
@@ -17,7 +16,7 @@ namespace gfx {
 //
 // Direct2DFactory
 //
-class Direct2DFactory final : public common::ComInit, public DpiHandler {
+class Direct2DFactory final : public DpiHandler {
  public:
   Direct2DFactory();
   ~Direct2DFactory();

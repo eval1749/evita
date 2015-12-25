@@ -6,9 +6,10 @@
 #define EVITA_IO_IO_MANAGER_H_
 
 #include <windows.h>
+
 #include <memory>
 
-#include "base/basictypes.h"
+#include "base/macros.h"
 
 namespace base {
 class MessageLoopForIO;

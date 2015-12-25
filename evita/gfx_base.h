@@ -39,17 +39,6 @@ class Canvas;
 class TextFormat;
 class TextLayout;
 
-class Brush final : public SimpleObject_<ID2D1SolidColorBrush> {
- public:
-  Brush(Canvas* canvas, ColorF color);
-  Brush(Canvas* canvas, D2D1::ColorF::Enum name);
-  Brush(Canvas* canvas, float red, float green, float blue, float alpha = 1.0f);
-  ~Brush();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(Brush);
-};
-
 class DpiHandler {
  public:
   const SizeF& pixels_per_dip() const { return pixels_per_dip_; }

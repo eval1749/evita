@@ -14,8 +14,9 @@
 
 namespace gfx {
 class Brush;
-class FontFace;
 class Canvas;
+class ColorF;
+class FontFace;
 template <typename base, typename element>
 class Size_;
 template <typename base, typename size>

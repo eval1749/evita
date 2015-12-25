@@ -6,6 +6,7 @@
 
 #include "evita/ui/controls/text_field_control.h"
 
+#include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/text_format.h"

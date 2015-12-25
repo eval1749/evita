@@ -7,7 +7,8 @@
 #include "evita/paint/view_painter.h"
 
 #include "base/trace_event/trace_event.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/brush.h"
+#include "evita/gfx/canvas.h"
 #include "evita/paint/public/view.h"
 #include "evita/paint/public/caret.h"
 #include "evita/paint/public/line/root_inline_box.h"

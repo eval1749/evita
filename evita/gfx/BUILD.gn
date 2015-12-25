@@ -6,6 +6,8 @@ source_set("gfx") {
   sources = [
     "../gfx_base.cc",
     "bitmap.cc",
+    "brush.cc",
+    "brush.h",
     "canvas.cc",
     "canvas_observer.cc",
     "canvas_observer.h",

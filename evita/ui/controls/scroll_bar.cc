@@ -7,7 +7,8 @@
 
 #include "evita/ui/controls/scroll_bar.h"
 
-#include "evita/gfx_base.h"
+#include "evita/gfx/brush.h"
+#include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/stroke_style.h"
 #include "evita/ui/controls/scroll_bar_observer.h"

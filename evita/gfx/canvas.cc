@@ -11,6 +11,7 @@
 
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx/bitmap.h"
+#include "evita/gfx/brush.h"
 #include "evita/gfx/canvas_observer.h"
 #include "evita/gfx/canvas_owner.h"
 #include "evita/gfx/rect_conversions.h"

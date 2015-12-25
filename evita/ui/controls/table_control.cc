@@ -10,6 +10,7 @@
 
 #include "common/castable.h"
 #include "common/win/scoped_comptr.h"
+#include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
@@ -74,7 +75,9 @@ class CanvasPainter {
 };
 
 CanvasPainter::CanvasPainter(PaintScheduler* paint_scheduler)
-    : last_canvas_bitmap_id_(0), dirty_(true), paint_scheduler_(paint_scheduler) {}
+    : last_canvas_bitmap_id_(0),
+      dirty_(true),
+      paint_scheduler_(paint_scheduler) {}
 
 CanvasPainter::~CanvasPainter() {}
 

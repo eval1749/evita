@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "evita/gfx/bitmap.h"
+#include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/ui/animation/animation_value.h"

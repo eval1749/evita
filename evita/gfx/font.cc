@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/gfx/font.h"
-
 #include <unordered_map>
 #include <vector>
 
+#include "evita/gfx/font.h"
+
 #include "base/logging.h"
 #include "common/memory/singleton.h"
+#include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/font_face.h"
 

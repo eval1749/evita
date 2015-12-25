@@ -4,7 +4,8 @@
 
 #include "evita/ui/controls/radio_button_control.h"
 
-#include "evita/gfx_base.h"
+#include "evita/gfx/brush.h"
+#include "evita/gfx/canvas.h"
 
 namespace ui {
 

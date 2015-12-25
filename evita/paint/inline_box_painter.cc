@@ -7,7 +7,8 @@
 
 #include "evita/paint/inline_box_painter.h"
 
-#include "evita/gfx_base.h"
+#include "evita/gfx/brush.h"
+#include "evita/gfx/canvas.h"
 #include "evita/gfx/font.h"
 #include "evita/layout/render_style.h"
 #include "evita/paint/public/line/inline_box.h"

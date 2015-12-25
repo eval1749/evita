@@ -46,40 +46,11 @@ IWICImagingFactory& CreateImageFactory() {
   return *factory;
 }
 
-common::ComPtr<ID2D1SolidColorBrush> CreateSolidColorBrush(Canvas* canvas,
-                                                           ColorF color) {
-  common::ComPtr<ID2D1SolidColorBrush> brush;
-  COM_VERIFY((*canvas)->CreateSolidColorBrush(color, &brush));
-  return brush;
-}
-
 float MultipleOf(float x, float unit) {
   return ::ceilf(x / unit) * unit;
 }
 
 }  // namespace
-
-//////////////////////////////////////////////////////////////////////
-//
-// Brush
-//
-Brush::Brush(Canvas* canvas, ColorF color)
-    : SimpleObject_(CreateSolidColorBrush(canvas, color)) {}
-
-Brush::Brush(Canvas* canvas, D2D1::ColorF::Enum name)
-    : Brush(canvas, ColorF(name)) {}
-
-Brush::Brush(Canvas* canvas, float red, float green, float blue, float alpha)
-    : SimpleObject_(
-          CreateSolidColorBrush(canvas, ColorF(red, green, blue, alpha))) {}
-
-Brush::~Brush() {
-#if _DEBUG
-  auto const ref_count = (*this)->AddRef();
-  DCHECK_EQ(2u, ref_count);
-  (*this)->Release();
-#endif
-}
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -4,6 +4,7 @@
 
 #include "evita/ui/controls/arrow_button.h"
 
+#include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 
 namespace ui {

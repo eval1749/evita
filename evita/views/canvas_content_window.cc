@@ -4,6 +4,7 @@
 
 #include "evita/views/canvas_content_window.h"
 
+#include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/views/content_observer.h"

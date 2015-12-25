@@ -4,6 +4,7 @@
 
 #include "evita/ui/controls/button.h"
 
+#include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/ui/events/event.h"
 

@@ -11,7 +11,7 @@
 
 #include <dxgi1_3.h>
 
-#include "evita/gfx_base.h"
+#include "evita/gfx/forward.h"
 
 namespace gfx {
 

@@ -8,7 +8,7 @@
 #include <functional>
 
 #include "base/macros.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/color_f.h"
 #include "evita/css/style.h"
 
 namespace gfx {

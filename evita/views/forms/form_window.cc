@@ -13,7 +13,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/win/win32_verify.h"
 #include "evita/editor/dom_lock.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/forward.h"
 #include "evita/gfx/swap_chain.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_control.h"

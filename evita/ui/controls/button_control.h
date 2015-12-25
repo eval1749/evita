@@ -10,7 +10,7 @@
 #include "evita/ui/controls/control.h"
 
 #include "base/strings/string16.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/forward.h"
 
 namespace ui {
 

@@ -8,7 +8,8 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/color_f.h"
+#include "evita/gfx/rect_f.h"
 
 namespace paint {
 

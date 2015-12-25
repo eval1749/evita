@@ -7,7 +7,7 @@
 
 #include "evita/ui/controls/control.h"
 
-#include "evita/gfx_base.h"
+#include "evita/gfx/forward.h"
 
 namespace ui {
 

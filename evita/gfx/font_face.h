@@ -5,10 +5,13 @@
 #ifndef EVITA_GFX_FONT_FACE_H_
 #define EVITA_GFX_FONT_FACE_H_
 
+#include <dwrite.h>
+
 #include <functional>
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/simple_object.h"
 
 namespace gfx {
 

@@ -5,10 +5,17 @@
 #ifndef EVITA_GFX_TEXT_LAYOUT_H_
 #define EVITA_GFX_TEXT_LAYOUT_H_
 
-#include "evita/gfx_base.h"
+#include <dwrite.h>
+
+#include "evita/gfx/forward.h"
+#include "evita/gfx/simple_object.h"
 
 namespace gfx {
 
+//////////////////////////////////////////////////////////////////////
+//
+// TextLayout
+//
 class TextLayout final : public SimpleObject_<IDWriteTextLayout> {
  public:
   explicit TextLayout(IDWriteTextLayout* text_layout);

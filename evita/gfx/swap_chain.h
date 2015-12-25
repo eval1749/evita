@@ -8,7 +8,8 @@
 #include <memory>
 #include <vector>
 
-#include "evita/gfx_base.h"
+#include "common/win/scoped_comptr.h"
+#include "evita/gfx/rect_f.h"
 
 interface IDXGISwapChain2;
 

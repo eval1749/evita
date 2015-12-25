@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/rect_f.h"
 #include "evita/layout/render_style.h"
 #include "evita/text/offset.h"
 

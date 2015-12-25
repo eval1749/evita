@@ -21,7 +21,6 @@
 #include "evita/ctrl_TitleBar.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_event_handler.h"
-#include "evita/gfx_base.h"
 #include "evita/gfx/dx_device.h"
 #include "evita/gfx/factory_set.h"
 #include "evita/gfx/font.h"

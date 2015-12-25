@@ -14,6 +14,7 @@
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas_observer.h"
 #include "evita/gfx/canvas_owner.h"
+#include "evita/gfx/color_f.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/swap_chain.h"
 #include "evita/gfx/text_format.h"

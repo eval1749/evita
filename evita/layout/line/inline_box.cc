@@ -9,6 +9,7 @@
 
 #include "base/logging.h"
 #include "evita/gfx/font.h"
+#include "evita/gfx/rect_f.h"
 #include "evita/layout/line/inline_box_visitor.h"
 #include "evita/layout/render_style.h"
 

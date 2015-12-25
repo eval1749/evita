@@ -9,7 +9,8 @@
 
 #include "base/macros.h"
 #include "base/memory/ref_counted.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/color_f.h"
+#include "evita/gfx/rect_f.h"
 
 namespace paint {
 

@@ -8,7 +8,7 @@
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
-#include "evita/gfx_base.h"
+#include "evita/gfx/color_f.h"
 
 namespace ui {
 

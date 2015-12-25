@@ -5,10 +5,19 @@
 #ifndef EVITA_GFX_BITMAP_H_
 #define EVITA_GFX_BITMAP_H_
 
-#include "evita/gfx_base.h"
+#include "evita/gfx/simple_object.h"
+#include "evita/gfx/size_f.h"
+
+interface ID2D1Bitmap;
 
 namespace gfx {
 
+class Canvas;
+
+//////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
 class Bitmap final : public SimpleObject_<ID2D1Bitmap> {
  public:
   Bitmap(Canvas* canvas, HICON hIcon);

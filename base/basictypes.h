@@ -23,12 +23,4 @@ typedef uint32_t uint32;
 typedef int64_t int64;
 typedef uint64_t uint64;
 
-// DEPRECATED: Use std::numeric_limits (from <limits>) or
-// (U)INT{8,16,32,64}_{MIN,MAX} in case of globals (and include <stdint.h>).
-// http://crbug.com/138542
-const uint32 kuint32max =  0xFFFFFFFF;
-const uint64 kuint64max =  0xFFFFFFFFFFFFFFFFULL;
-const  int32 kint32max  =  0x7FFFFFFF;
-const  int64 kint64max  =  0x7FFFFFFFFFFFFFFFLL;
-
 #endif  // BASE_BASICTYPES_H_

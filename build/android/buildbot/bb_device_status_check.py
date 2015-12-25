@@ -16,6 +16,7 @@ import signal
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import devil_chromium
 from devil.android import battery_utils
 from devil.android import device_blacklist
 from devil.android import device_errors
@@ -209,10 +210,10 @@ def RecoverDevices(devices, blacklist):
   should_restart_usb = set(
       status['serial'] for status in statuses
       if (not status['usb_status']
-          or status['adb_status'] == 'unknown'))
+          or status['adb_status'] in ('offline', 'unknown')))
   should_restart_adb = should_restart_usb.union(set(
       status['serial'] for status in statuses
-      if status['adb_status'] in ('offline', 'unauthorized')))
+      if status['adb_status'] == 'unauthorized'))
   should_reboot_device = should_restart_adb.union(set(
       status['serial'] for status in statuses
       if status['blacklisted']))
@@ -309,6 +310,8 @@ def main():
   args = parser.parse_args()
 
   run_tests_helper.SetLogLevel(args.verbose)
+
+  devil_chromium.Initialize()
 
   blacklist = (device_blacklist.Blacklist(args.blacklist_file)
                if args.blacklist_file

@@ -12,6 +12,8 @@ import logging
 import os
 import sys
 
+import devil_chromium
+
 from devil.android import apk_helper
 from devil.android import device_blacklist
 from devil.android import device_errors
@@ -51,16 +53,21 @@ def main():
                       dest='build_type',
                       help='If set, run test suites under out/Release. '
                            'Default is env var BUILDTYPE or Debug.')
-  parser.add_argument('-d', '--device', dest='device',
-                      help='Target device for apk to install on.')
+  parser.add_argument('-d', '--device', dest='devices', action='append',
+                      help='Target device for apk to install on. Enter multiple'
+                           ' times for multiple devices.')
   parser.add_argument('--blacklist-file', help='Device blacklist JSON file.')
   parser.add_argument('-v', '--verbose', action='count',
                       help='Enable verbose logging.')
+  parser.add_argument('--downgrade', action='store_true',
+                      help='If set, allows downgrading of apk.')
 
   args = parser.parse_args()
 
   run_tests_helper.SetLogLevel(args.verbose)
   constants.SetBuildType(args.build_type)
+
+  devil_chromium.Initialize(output_directory=constants.GetOutDirectory())
 
   apk = args.apk_path or args.apk_name
   if not apk.endswith('.apk'):
@@ -88,19 +95,21 @@ def main():
                else None)
   devices = device_utils.DeviceUtils.HealthyDevices(blacklist)
 
-  if args.device:
-    devices = [d for d in devices if d == args.device]
+  if args.devices:
+    devices = [d for d in devices if d in args.devices]
     if not devices:
-      raise device_errors.DeviceUnreachableError(args.device)
+      raise device_errors.DeviceUnreachableError(args.devices)
   elif not devices:
     raise device_errors.NoDevicesError()
 
   def blacklisting_install(device):
     try:
       if args.splits:
-        device.InstallSplitApk(apk, splits, reinstall=args.keep_data)
+        device.InstallSplitApk(apk, splits, reinstall=args.keep_data,
+                               allow_downgrade=args.downgrade)
       else:
-        device.Install(apk, reinstall=args.keep_data)
+        device.Install(apk, reinstall=args.keep_data,
+                       allow_downgrade=args.downgrade)
     except device_errors.CommandFailedError:
       logging.exception('Failed to install %s', args.apk_name)
       if blacklist:

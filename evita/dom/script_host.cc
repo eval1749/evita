@@ -292,6 +292,7 @@ ScriptHost* ScriptHost::Create(Scheduler* scheduler,
       " --harmony-do-expressions";
   v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,
+                                 gin::IsolateHolder::kStableV8Extras,
                                  gin::ArrayBufferAllocator::SharedInstance());
   v8::V8::InitializeICU();
   return new ScriptHost(scheduler, view_delegate, io_delegate);

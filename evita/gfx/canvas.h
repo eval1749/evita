@@ -8,8 +8,11 @@
 #include <memory>
 #include <vector>
 
+#include "base/observer_list.h"
 #include "base/strings/string16.h"
-#include "evita/gfx_base.h"
+#include "common/win/scoped_comptr.h"
+#include "evita/gfx/dpi_handler.h"
+#include "evita/gfx/rect_f.h"
 
 namespace gfx {
 
@@ -17,12 +20,13 @@ class Bitmap;
 class CanvasObserver;
 class CanvasOwner;
 class SwapChain;
+class TextFormat;
 
 //////////////////////////////////////////////////////////////////////
 //
 // Canvas
 //
-class Canvas final : public Object, public DpiHandler {
+class Canvas final : public DpiHandler {
  public:
   class AxisAlignedClipScope final {
    public:

@@ -5,6 +5,7 @@
 #include "evita/gfx/brush.h"
 
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/color_f.h"
 
 namespace gfx {
 

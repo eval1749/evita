@@ -6,6 +6,7 @@
 
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/factory_set.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"
 

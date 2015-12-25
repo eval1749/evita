@@ -4,6 +4,7 @@
 
 #include "evita/gfx/text_format.h"
 
+#include "evita/gfx/factory_set.h"
 #include "evita/gfx/text_layout.h"
 
 namespace gfx {

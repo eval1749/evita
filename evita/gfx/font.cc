@@ -11,6 +11,7 @@
 #include "common/memory/singleton.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/factory_set.h"
 #include "evita/gfx/font_face.h"
 
 namespace {

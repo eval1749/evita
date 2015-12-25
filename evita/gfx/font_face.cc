@@ -4,6 +4,8 @@
 
 #include "evita/gfx/font_face.h"
 
+#include "evita/gfx/factory_set.h"
+
 namespace gfx {
 
 namespace {

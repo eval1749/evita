@@ -6,6 +6,7 @@
 
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
+#include "evita/gfx/factory_set.h"
 
 namespace gfx {
 

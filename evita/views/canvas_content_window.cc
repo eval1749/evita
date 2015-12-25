@@ -6,6 +6,7 @@
 
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/color_f.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/views/content_observer.h"
 

@@ -23,6 +23,7 @@
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/gfx_base.h"
 #include "evita/gfx/dx_device.h"
+#include "evita/gfx/factory_set.h"
 #include "evita/gfx/font.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/editor/application.h"

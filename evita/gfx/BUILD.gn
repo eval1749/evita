@@ -4,7 +4,6 @@
 
 source_set("gfx") {
   sources = [
-    "../gfx_base.cc",
     "bitmap.cc",
     "brush.cc",
     "brush.h",
@@ -18,6 +17,8 @@ source_set("gfx") {
     "dpi_handler.h",
     "dx_device.cc",
     "dx_device.h",
+    "factory_set.cc",
+    "factory_set.h",
     "font.cc",
     "font.h",
     "font_face.cc",

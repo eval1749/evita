@@ -12,6 +12,7 @@
 #include "evita/dom/text/document.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/color_f.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/text/buffer.h"
 #include "evita/ui/animation/animator.h"

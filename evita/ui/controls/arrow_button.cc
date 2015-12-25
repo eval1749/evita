@@ -5,10 +5,15 @@
 #include "evita/ui/controls/arrow_button.h"
 
 #include "evita/gfx/brush.h"
+#include "evita/gfx/color_f.h"
 #include "evita/gfx/canvas.h"
 
 namespace ui {
 
+//////////////////////////////////////////////////////////////////////
+//
+// ArrowButton
+//
 ArrowButton::ArrowButton(Direction direction, ButtonListener* listener)
     : Button(listener), direction_(direction) {}
 

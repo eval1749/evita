@@ -13,6 +13,7 @@
 #include "evita/css/style.h"
 #include "evita/css/style_resolver.h"
 #include "evita/css/style_selector.h"
+#include "evita/gfx/factory_set.h"
 #include "evita/gfx/font.h"
 #include "evita/text/buffer.h"
 #include "evita/text/interval.h"

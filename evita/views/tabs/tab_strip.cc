@@ -16,6 +16,7 @@
 #include "evita/dom/public/tab_data.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/factory_set.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/text_layout.h"
 #include "evita/ui/animation/animatable_window.h"

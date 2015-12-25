@@ -85,26 +85,6 @@ class FactorySet final : public common::ComInit,
   DISALLOW_COPY_AND_ASSIGN(FactorySet);
 };
 
-// Helper functions
-inline ColorF blackColor() {
-  return ColorF(ColorF::Black);
-}
-
-inline ColorF grayColor() {
-  return ColorF(ColorF::LightGray);
-}
-
-inline ColorF sysColor(int name, float alpha = 1) {
-  auto const colorRef = ::GetSysColor(name);
-  return ColorF(static_cast<float>(GetRValue(colorRef)) / 255,
-                static_cast<float>(GetGValue(colorRef)) / 255,
-                static_cast<float>(GetBValue(colorRef)) / 255, alpha);
-}
-
-inline ColorF whiteColor() {
-  return ColorF(ColorF::White);
-}
-
 }  // namespace gfx
 
 #include "evita/gfx/canvas.h"

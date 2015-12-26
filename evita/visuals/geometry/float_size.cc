@@ -40,6 +40,14 @@ bool FloatSize::operator!=(const FloatSize& other) const {
   return !operator==(other);
 }
 
+FloatSize FloatSize::operator+(const FloatSize& size) const {
+  return FloatSize(width_ + size.width(), height_ + size.height());
+}
+
+FloatSize FloatSize::operator-(const FloatSize& size) const {
+  return FloatSize(width_ - size.width(), height_ - size.height());
+}
+
 std::ostream& operator<<(std::ostream& ostream, const FloatSize& size) {
   return ostream << size.width() << 'x' << size.height();
 }

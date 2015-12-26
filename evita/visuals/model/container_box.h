@@ -22,18 +22,15 @@ class ContainerBox : public Box {
   ~ContainerBox() override;
 
   const std::vector<Box*> child_boxes() const { return child_boxes_; }
-  const FloatRect& content_bounds() const { return content_bounds_; }
 
   void AppendChild(Box* child);
   void RemoveChild(Box* child);
-  void SetContentBounds(const FloatRect& new_bounds);
 
  protected:
-  explicit ContainerBox(Display display);
+  ContainerBox();
 
  private:
   std::vector<Box*> child_boxes_;
-  FloatRect content_bounds_;
 
   DISALLOW_COPY_AND_ASSIGN(ContainerBox);
 };

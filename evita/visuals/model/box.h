@@ -11,6 +11,9 @@
 #include "common/castable.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/model/box_forward.h"
+#include "evita/visuals/style/border.h"
+#include "evita/visuals/style/margin.h"
+#include "evita/visuals/style/padding.h"
 
 namespace visuals {
 
@@ -35,28 +38,43 @@ class Box : public common::Castable {
   DECLARE_VISUAL_BOX_ABSTRACT_CLASS(Box, Castable);
 
  public:
-  virtual ~Box();
-
-  const FloatRect& bounds() const { return bounds_; }
-  ContainerBox* parent() const { return parent_; }
-
-  virtual void Accept(BoxVisitor* visitor) = 0;
-  bool IsBlock() const;
-  bool IsDescendantOf(const Box& other) const;
-  bool IsInline() const;
-  void SetBounds(const FloatRect& new_bounds);
-
- protected:
-  explicit Box(Display display);
-
-  void DidChangeContent();
-
- private:
   class Editor;
 
+  virtual ~Box();
+
+  // Box tree related values
+  ContainerBox* parent() const { return parent_; }
+
+  // Layout related values
+  const FloatRect& bounds() const { return bounds_; }
+  const FloatRect& content_bounds() const { return content_bounds_; }
+
+  // CSS Box model related values
+  const Border& border() const { return border_; }
+  const Margin& margin() const { return margin_; }
+  const Padding& padding() const { return padding_; }
+
+  virtual void Accept(BoxVisitor* visitor) = 0;
+  virtual FloatSize ComputePreferredSize() const = 0;
+  bool IsContentDirty() const { return is_content_dirty_; }
+  bool IsDescendantOf(const Box& other) const;
+  bool IsLayoutClean() const { return !is_layout_dirty_; }
+  bool IsLayoutDirty() const { return is_layout_dirty_; }
+
+ protected:
+  Box();
+
+  void DidChangeContent();
+  void DidChangeLayout();
+
+ private:
+  Border border_;
   FloatRect bounds_;
-  bool dirty_ = true;
-  const Display display_;
+  FloatRect content_bounds_;
+  bool is_content_dirty_ = true;
+  bool is_layout_dirty_ = true;
+  Margin margin_;
+  Padding padding_;
   ContainerBox* parent_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(Box);
@@ -71,7 +89,9 @@ class Box::Editor final {
   explicit Editor(Box* box);
   ~Editor();
 
-  void SetParent(ContainerBox* parentBox);
+  void SetBounds(const FloatRect& new_bounds);
+  void SetLayoutClean();
+  void SetParent(ContainerBox* parent);
 
  private:
   Box* const box_;

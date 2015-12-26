@@ -24,6 +24,9 @@ class TextBox final : public InlineBox {
   const base::string16& text() const { return text_; }
 
  private:
+  // Box
+  FloatSize ComputePreferredSize() const final;
+
   base::string16 text_;
 
   DISALLOW_COPY_AND_ASSIGN(TextBox);

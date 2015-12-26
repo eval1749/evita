@@ -21,6 +21,9 @@ class BlockBox final : public ContainerBox {
   ~BlockBox() final;
 
  private:
+  // Box
+  FloatSize ComputePreferredSize() const final;
+
   DISALLOW_COPY_AND_ASSIGN(BlockBox);
 };
 

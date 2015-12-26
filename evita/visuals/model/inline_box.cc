@@ -12,7 +12,7 @@ namespace visuals {
 //
 // InlineBox
 //
-InlineBox::InlineBox() : Box(Display::Inline) {}
+InlineBox::InlineBox() {}
 
 InlineBox::~InlineBox() {}
 

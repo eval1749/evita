@@ -4,22 +4,22 @@
 
 #include <algorithm>
 
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/line_box.h"
 
 #include "evita/visuals/style/display.h"
 
 namespace visuals {
 
-BlockBox::BlockBox() {}
+LineBox::LineBox() {}
 
-BlockBox::~BlockBox() {}
+LineBox::~LineBox() {}
 
-FloatSize BlockBox::ComputePreferredSize() const {
+FloatSize LineBox::ComputePreferredSize() const {
   auto size = border().size() + padding().size();
   for (const auto& child : child_boxes()) {
     const auto& child_size = child->ComputePreferredSize();
-    size = FloatSize(std::max(size.width(), child_size.width()),
-                     size.height() + child_size.height());
+    size = FloatSize(size.width() + child_size.width(),
+                     std::max(size.height(), child_size.height()));
   }
   return size;
 }

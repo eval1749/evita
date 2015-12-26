@@ -6,9 +6,10 @@
 #include <memory>
 
 #include "base/macros.h"
+#include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/block_box.h"
-#include "evita/visuals/model/inline_block_box.h"
+#include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"
 
 namespace visuals {
@@ -46,7 +47,7 @@ void BoxPrinter::VisitBlockBox(BlockBox* box) {
   --indent_;
 }
 
-void BoxPrinter::VisitInlineBlockBox(InlineBlockBox* box) {
+void BoxPrinter::VisitLineBox(LineBox* box) {
   Indent();
   std::cout << *box << std::endl;
   ++indent_;
@@ -64,10 +65,13 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 
 void DemoMain() {
   auto root_box = std::make_unique<BlockBox>();
+  auto line_box = std::make_unique<LineBox>();
   auto text_box1 = std::make_unique<TextBox>(L"foo");
   auto text_box2 = std::make_unique<TextBox>(L"bar");
-  root_box->AppendChild(text_box1.get());
-  root_box->AppendChild(text_box2.get());
+  line_box->AppendChild(text_box1.get());
+  line_box->AppendChild(text_box2.get());
+  root_box->AppendChild(line_box.get());
+  Layouter().Layout(root_box.get(), FloatRect(FloatSize(640, 480)));
 
   BoxPrinter printer;
   printer.Visit(*root_box);

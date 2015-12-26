@@ -9,6 +9,8 @@
 
 namespace visuals {
 
+class FloatSize;
+
 //////////////////////////////////////////////////////////////////////
 //
 // FloatPoint
@@ -24,6 +26,9 @@ class FloatPoint final {
 
   bool operator==(const FloatPoint& other) const;
   bool operator!=(const FloatPoint& other) const;
+
+  FloatPoint operator+(const FloatSize& size) const;
+  FloatPoint operator-(const FloatSize& size) const;
 
   // A point is less than another point if its y-value is closer
   // to the origin. If the y-values are the same, then point with

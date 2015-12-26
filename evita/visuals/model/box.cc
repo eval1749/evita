@@ -14,15 +14,21 @@ namespace visuals {
 //
 // Box
 //
-Box::Box(Display display) : display_(display) {}
+Box::Box() {}
 Box::~Box() {}
 
 void Box::DidChangeContent() {
-  dirty_ = true;
+  is_content_dirty_ = true;
+  if (!parent_ || parent_->is_content_dirty_)
+    return;
+  parent_->DidChangeContent();
 }
 
-bool Box::IsBlock() const {
-  return display_ == Display::Block || display_ == Display::InlineBlock;
+void Box::DidChangeLayout() {
+  is_layout_dirty_ = true;
+  if (!parent_ || parent_->is_layout_dirty_)
+    return;
+  parent_->DidChangeLayout();
 }
 
 bool Box::IsDescendantOf(const Box& other) const {
@@ -33,23 +39,28 @@ bool Box::IsDescendantOf(const Box& other) const {
   return false;
 }
 
-bool Box::IsInline() const {
-  return display_ == Display::Inline || display_ == Display::InlineBlock;
-}
-
-void Box::SetBounds(const FloatRect& new_bounds) {
-  if (bounds_ == new_bounds)
-    return;
-  bounds_ = new_bounds;
-  dirty_ = true;
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // Box::Editor
 //
 Box::Editor::Editor(Box* box) : box_(box) {}
 Box::Editor::~Editor() {}
+
+void Box::Editor::SetBounds(const FloatRect& new_bounds) {
+  if (box_->bounds_ == new_bounds)
+    return;
+  box_->bounds_ = new_bounds;
+  box_->content_bounds_ = FloatRect(
+      FloatPoint() + box_->border().top_left() + box_->padding().top_left(),
+      new_bounds.size() - box_->border().top_left() -
+          box_->padding().top_left() - box_->border().bottom_right() -
+          box_->padding().bottom_right());
+}
+
+void Box::Editor::SetLayoutClean() {
+  DCHECK(box_->is_layout_dirty_);
+  box_->is_layout_dirty_ = false;
+}
 
 void Box::Editor::SetParent(ContainerBox* new_parent) {
   DCHECK_NE(box_->parent_, new_parent);

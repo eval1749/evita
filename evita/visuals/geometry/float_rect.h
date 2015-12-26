@@ -29,6 +29,9 @@ class FloatRect final {
   bool operator==(const FloatRect& other) const;
   bool operator!=(const FloatRect& other) const;
 
+  FloatRect operator+(const FloatSize& size) const;
+  FloatRect operator-(const FloatSize& size) const;
+
   // A rect is less than another rect if its origin is less than
   // the other rect's origin. If the origins are equal, then the
   // shortest rect is less than the other. If the origin and the

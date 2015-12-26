@@ -25,6 +25,9 @@ class FloatSize final {
   bool operator==(const FloatSize& other) const;
   bool operator!=(const FloatSize& other) const;
 
+  FloatSize operator+(const FloatSize& other) const;
+  FloatSize operator-(const FloatSize& other) const;
+
   float height() const { return height_; }
   float width() const { return width_; }
 

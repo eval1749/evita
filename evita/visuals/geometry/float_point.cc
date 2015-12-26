@@ -7,6 +7,8 @@
 
 #include "evita/visuals/geometry/float_point.h"
 
+#include "evita/visuals/geometry/float_size.h"
+
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
@@ -37,6 +39,14 @@ bool FloatPoint::operator!=(const FloatPoint& other) const {
 
 bool FloatPoint::operator<(const FloatPoint& other) const {
   return std::tie(y_, x_) < std::tie(other.y_, other.x_);
+}
+
+FloatPoint FloatPoint::operator+(const FloatSize& size) const {
+  return FloatPoint(x_ + size.width(), y_ + size.height());
+}
+
+FloatPoint FloatPoint::operator-(const FloatSize& size) const {
+  return FloatPoint(x_ - size.width(), y_ - size.height());
 }
 
 std::ostream& operator<<(std::ostream& ostream, const FloatPoint& point) {

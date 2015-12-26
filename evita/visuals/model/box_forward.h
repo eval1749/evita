@@ -9,7 +9,7 @@ namespace visuals {
 
 #define FOR_EACH_VISUAL_BOX(V) \
   V(BlockBox)                  \
-  V(InlineBlockBox)            \
+  V(LineBox)                   \
   V(TextBox)
 
 #define FOR_EACH_ABSTRACT_VISUAL_BOX(V) \

@@ -46,6 +46,14 @@ bool FloatRect::operator<(const FloatRect& other) const {
   return width() < other.width();
 }
 
+FloatRect FloatRect::operator+(const FloatSize& size) const {
+  return FloatRect(origin(), this->size() + size);
+}
+
+FloatRect FloatRect::operator-(const FloatSize& size) const {
+  return FloatRect(origin(), this->size() - size);
+}
+
 bool FloatRect::Contains(float point_x, float point_y) const {
   return (point_x >= x()) && (point_x < right()) && (point_y >= y()) &&
          (point_y < bottom());

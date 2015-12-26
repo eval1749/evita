@@ -13,6 +13,9 @@ source_set("visuals") {
     "geometry/float_size.h",
     "geometry/float_size.cc",
 
+    "layout/layouter.h",
+    "layout/layouter.cc",
+
     "model/block_box.cc",
     "model/block_box.h",
     "model/box.h",
@@ -24,13 +27,21 @@ source_set("visuals") {
     "model/container_box.h",
     "model/inline_box.cc",
     "model/inline_box.h",
-    "model/inline_block_box.cc",
-    "model/inline_block_box.h",
+    "model/line_box.cc",
+    "model/line_box.h",
     "model/text_box.cc",
     "model/text_box.h",
 
+    "style/border.cc",
+    "style/border.h",
     "style/display.cc",
     "style/display.h",
+    "style/margin.cc",
+    "style/margin.h",
+    "style/padding.cc",
+    "style/padding.h",
+    "style/thickness.cc",
+    "style/thickness.h",
   ]
 
   public_deps = [
@@ -39,7 +50,7 @@ source_set("visuals") {
 }
 
 executable("demo") {
-  output_name = "visuals_demo"
+  output_name = "evita_visuals_demo"
   sources = [
     "demo/demo_main.cc",
   ]

@@ -36,6 +36,8 @@ source_set("visuals") {
     "style/border.h",
     "style/display.cc",
     "style/display.h",
+    "style/float_color.cc",
+    "style/float_color.h",
     "style/margin.cc",
     "style/margin.h",
     "style/padding.cc",
@@ -70,6 +72,8 @@ test("tests") {
 
     "model/box_test.cc",
     "model/container_box_test.cc",
+
+    "style/float_color_test.cc",
   ]
 
   deps = [

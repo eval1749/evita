@@ -5,9 +5,6 @@
 #ifndef EVITA_VISUALS_LAYOUT_LAYOUTER_H_
 #define EVITA_VISUALS_LAYOUT_LAYOUTER_H_
 
-#include <vector>
-#include <utility>
-
 #include "base/macros.h"
 
 namespace visuals {

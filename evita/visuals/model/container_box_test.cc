@@ -12,10 +12,8 @@ namespace visuals {
 
 TEST(ContainerBoxTest, AppendChild) {
   auto root_box = std::make_unique<BlockBox>();
-  auto text_box1 = std::make_unique<TextBox>(L"foo");
-  auto text_box2 = std::make_unique<TextBox>(L"bar");
-  root_box->AppendChild(text_box1.get());
-  root_box->AppendChild(text_box2.get());
+  const auto& text_box1 = root_box->AppendNew<TextBox>(L"foo");
+  const auto& text_box2 = root_box->AppendNew<TextBox>(L"bar");
 
   EXPECT_EQ(root_box.get(), text_box1->parent());
   EXPECT_EQ(root_box.get(), text_box2->parent());
@@ -23,14 +21,12 @@ TEST(ContainerBoxTest, AppendChild) {
 
 TEST(ContainerBoxTest, RemoveChild) {
   auto root_box = std::make_unique<BlockBox>();
-  auto text_box1 = std::make_unique<TextBox>(L"foo");
-  auto text_box2 = std::make_unique<TextBox>(L"bar");
-  root_box->AppendChild(text_box1.get());
-  root_box->AppendChild(text_box2.get());
-
-  root_box->RemoveChild(text_box2.get());
+  const auto& text_box1 = root_box->AppendNew<TextBox>(L"foo");
+  const auto& text_box2 = root_box->AppendNew<TextBox>(L"bar");
+  const auto& removed_child = root_box->RemoveChild(text_box2);
 
   EXPECT_EQ(root_box.get(), text_box1->parent());
   EXPECT_EQ(nullptr, text_box2->parent());
+  EXPECT_EQ(text_box2, removed_child.get());
 }
 }  // namespace visuals

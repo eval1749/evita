@@ -15,24 +15,31 @@ namespace visuals {
 //
 ContainerBox::ContainerBox() {}
 
-ContainerBox::~ContainerBox() {}
-
-void ContainerBox::AppendChild(Box* box) {
-  DCHECK_NE(this, box);
-  DCHECK(!box->IsDescendantOf(*this));
-  DCHECK(!IsDescendantOf(*box));
-  if (auto old_parent = box->parent())
-    old_parent->RemoveChild(box);
-  Box::Editor(box).SetParent(this);
-  child_boxes_.push_back(box);
+ContainerBox::~ContainerBox() {
+  DCHECK_EQ(static_cast<ContainerBox*>(nullptr), parent());
+  for (const auto& child : child_boxes_) {
+    Box::Editor(child).SetParent(nullptr);
+    delete child;
+  }
 }
 
-void ContainerBox::RemoveChild(Box* box) {
+Box* ContainerBox::AppendChild(std::unique_ptr<Box> child) {
+  DCHECK_NE(this, child.get());
+  DCHECK(!child->IsDescendantOf(*this));
+  DCHECK(!IsDescendantOf(*child));
+  DCHECK_EQ(static_cast<ContainerBox*>(nullptr), child->parent());
+  Box::Editor(child.get()).SetParent(this);
+  child_boxes_.push_back(child.release());
+  return child_boxes_.back();
+}
+
+std::unique_ptr<Box> ContainerBox::RemoveChild(Box* box) {
   DCHECK_EQ(this, box->parent());
   const auto it = std::find(child_boxes_.begin(), child_boxes_.end(), box);
   DCHECK(it != child_boxes_.end());
   Box::Editor(box).SetParent(nullptr);
   child_boxes_.erase(it);
+  return std::unique_ptr<Box>(box);
 }
 
 }  // namespace visuals

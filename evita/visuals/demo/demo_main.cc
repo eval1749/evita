@@ -74,24 +74,13 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 
 void DemoMain() {
   auto root_box = std::make_unique<BlockBox>();
-  std::vector<std::unique_ptr<Box>> boxes;
   for (auto index = 0; index < 10; ++index) {
     auto line_box = std::make_unique<LineBox>();
-    auto text_box1 =
-        std::make_unique<TextBox>(base::StringPrintf(L"line %d", index));
-    auto text_box2 = std::make_unique<TextBox>(L"size");
-    auto text_box3 = std::make_unique<TextBox>(L"status");
-    auto text_box4 = std::make_unique<TextBox>(L"file");
-    line_box->AppendChild(text_box1.get());
-    line_box->AppendChild(text_box2.get());
-    line_box->AppendChild(text_box3.get());
-    line_box->AppendChild(text_box4.get());
-    root_box->AppendChild(line_box.get());
-    boxes.emplace_back(line_box.release());
-    boxes.emplace_back(text_box1.release());
-    boxes.emplace_back(text_box2.release());
-    boxes.emplace_back(text_box3.release());
-    boxes.emplace_back(text_box4.release());
+    line_box->AppendNew<TextBox>(base::StringPrintf(L"line %d", index));
+    line_box->AppendNew<TextBox>(L"size");
+    line_box->AppendNew<TextBox>(L"status");
+    line_box->AppendNew<TextBox>(L"file");
+    root_box->AppendChild(std::move(line_box));
   }
   Layouter().Layout(root_box.get(), FloatRect(FloatSize(640, 480)));
 

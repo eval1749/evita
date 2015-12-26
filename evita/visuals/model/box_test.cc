@@ -12,10 +12,8 @@ namespace visuals {
 
 TEST(BoxTest, IsDescendantOf) {
   auto root_box = std::make_unique<BlockBox>();
-  auto text_box1 = std::make_unique<TextBox>(L"foo");
-  auto text_box2 = std::make_unique<TextBox>(L"bar");
-  root_box->AppendChild(text_box1.get());
-  root_box->AppendChild(text_box2.get());
+  const auto& text_box1 = root_box->AppendNew<TextBox>(L"foo");
+  const auto& text_box2 = root_box->AppendNew<TextBox>(L"bar");
 
   EXPECT_FALSE(root_box->IsDescendantOf(*root_box));
   EXPECT_TRUE(text_box1->IsDescendantOf(*root_box));

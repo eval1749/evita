@@ -7,8 +7,23 @@
 
 namespace visuals {
 
+TEST(FloatRectTest, properties) {
+  FloatRect rect1(FloatPoint(1, 2), FloatSize(3, 4));
+  EXPECT_EQ(1, rect1.x());
+  EXPECT_EQ(2, rect1.y());
+  EXPECT_EQ(3, rect1.width());
+  EXPECT_EQ(4, rect1.height());
+  EXPECT_EQ(4, rect1.right());
+  EXPECT_EQ(6, rect1.bottom());
+  EXPECT_EQ(FloatPoint(1, 2), rect1.origin());
+  EXPECT_EQ(FloatSize(3, 4), rect1.size());
+  EXPECT_EQ(FloatPoint(4, 2), rect1.top_right());
+  EXPECT_EQ(FloatPoint(1, 6), rect1.bottom_left());
+  EXPECT_EQ(FloatPoint(4, 6), rect1.bottom_right());
+}
+
 TEST(FloatRectTest, Equals) {
-  FloatRect rect1(FloatPoint(1, 2), FloatSize(4, 5));
+  FloatRect rect1(FloatPoint(1, 2), FloatSize(3, 4));
   FloatRect rect2(FloatPoint(1, 2), FloatSize(5, 6));
 
   EXPECT_TRUE(FloatRect() == FloatRect());

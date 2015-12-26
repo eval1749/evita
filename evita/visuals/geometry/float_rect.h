@@ -40,18 +40,20 @@ class FloatRect final {
   // vectors.
   bool operator<(const FloatRect& other) const;
 
-  float bottom() const { return x() + width(); }
+  float bottom() const { return y() + height(); }
+  float right() const { return x() + width(); }
   FloatPoint bottom_left() const { return FloatPoint(x(), bottom()); }
   FloatPoint bottom_right() const { return FloatPoint(right(), bottom()); }
-
-  float height() const { return size_.height(); }
-  const FloatPoint& origin() const { return origin_; }
-  float right() const { return x() + width(); }
-  const FloatSize& size() const { return size_; }
   FloatPoint top_right() const { return FloatPoint(right(), y()); }
-  float width() const { return size_.width(); }
+
+  const FloatPoint& origin() const { return origin_; }
+  const FloatSize& size() const { return size_; }
+
   float x() const { return origin_.x(); }
   float y() const { return origin_.y(); }
+
+  float height() const { return size_.height(); }
+  float width() const { return size_.width(); }
 
   // Returns true if the point identified by point_x and point_y falls
   // inside

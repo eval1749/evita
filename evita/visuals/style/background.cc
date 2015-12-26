@@ -1,0 +1,30 @@
+// Copyright (c) 2015 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/visuals/style/background.h"
+
+namespace visuals {
+
+//////////////////////////////////////////////////////////////////////
+//
+// Background
+//
+Background::Background(const FloatColor& color) : color_(color) {}
+
+Background::Background(const Background& other) : Background(other.color_) {}
+
+Background::Background() {}
+Background::~Background() {}
+
+bool Background::operator==(const Background& other) const {
+  if (this == &other)
+    return true;
+  return color_ == other.color_;
+}
+
+bool Background::operator!=(const Background& other) const {
+  return !operator==(other);
+}
+
+}  // namespace visuals

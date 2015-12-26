@@ -32,6 +32,8 @@ source_set("visuals") {
     "model/text_box.cc",
     "model/text_box.h",
 
+    "style/background.cc",
+    "style/background.h",
     "style/border.cc",
     "style/border.h",
     "style/display.cc",
@@ -73,6 +75,7 @@ test("tests") {
     "model/box_test.cc",
     "model/container_box_test.cc",
 
+    "style/background_test.cc",
     "style/float_color_test.cc",
   ]
 

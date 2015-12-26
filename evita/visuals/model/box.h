@@ -11,7 +11,9 @@
 #include "common/castable.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/model/box_forward.h"
+#include "evita/visuals/style/background.h"
 #include "evita/visuals/style/border.h"
+#include "evita/visuals/style/float_color.h"
 #include "evita/visuals/style/margin.h"
 #include "evita/visuals/style/padding.h"
 
@@ -68,6 +70,7 @@ class Box : public common::Castable {
   void DidChangeLayout();
 
  private:
+  Background background_;
   Border border_;
   FloatRect bounds_;
   FloatRect content_bounds_;

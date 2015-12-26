@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/visuals/geometry/float_point.h"
 #include "gtest/gtest.h"
 
 namespace visuals {

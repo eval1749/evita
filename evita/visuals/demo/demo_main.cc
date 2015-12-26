@@ -4,8 +4,11 @@
 
 #include <iostream>
 #include <memory>
+#include <vector>
 
 #include "base/macros.h"
+#include "base/strings/stringprintf.h"
+#include "base/strings/utf_string_conversions.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/block_box.h"
@@ -40,10 +43,8 @@ void BoxPrinter::VisitBlockBox(BlockBox* box) {
   Indent();
   std::cout << *box << std::endl;
   ++indent_;
-  for (const auto& child : box->child_boxes()) {
+  for (const auto& child : box->child_boxes())
     Visit(child);
-    std::cout << std::endl;
-  }
   --indent_;
 }
 
@@ -51,26 +52,47 @@ void BoxPrinter::VisitLineBox(LineBox* box) {
   Indent();
   std::cout << *box << std::endl;
   ++indent_;
-  for (const auto& child : box->child_boxes()) {
+  for (const auto& child : box->child_boxes())
     Visit(child);
-    std::cout << std::endl;
-  }
   --indent_;
 }
 
 void BoxPrinter::VisitTextBox(TextBox* box) {
   Indent();
-  std::cout << *box;
+  std::cout << *box << " \"";
+  for (const auto& char_code : box->text()) {
+    if (char_code < 0x20 || char_code >= 0x7F) {
+      std::cout << base::StringPrintf("\\u%04X", char_code);
+      continue;
+    }
+    if (char_code == '"' || char_code == '\\')
+      std::cout << '\\';
+    std::cout << static_cast<char>(char_code);
+  }
+  std::cout << '"' << std::endl;
 }
 
 void DemoMain() {
   auto root_box = std::make_unique<BlockBox>();
-  auto line_box = std::make_unique<LineBox>();
-  auto text_box1 = std::make_unique<TextBox>(L"foo");
-  auto text_box2 = std::make_unique<TextBox>(L"bar");
-  line_box->AppendChild(text_box1.get());
-  line_box->AppendChild(text_box2.get());
-  root_box->AppendChild(line_box.get());
+  std::vector<std::unique_ptr<Box>> boxes;
+  for (auto index = 0; index < 10; ++index) {
+    auto line_box = std::make_unique<LineBox>();
+    auto text_box1 =
+        std::make_unique<TextBox>(base::StringPrintf(L"line %d", index));
+    auto text_box2 = std::make_unique<TextBox>(L"size");
+    auto text_box3 = std::make_unique<TextBox>(L"status");
+    auto text_box4 = std::make_unique<TextBox>(L"file");
+    line_box->AppendChild(text_box1.get());
+    line_box->AppendChild(text_box2.get());
+    line_box->AppendChild(text_box3.get());
+    line_box->AppendChild(text_box4.get());
+    root_box->AppendChild(line_box.get());
+    boxes.emplace_back(line_box.release());
+    boxes.emplace_back(text_box1.release());
+    boxes.emplace_back(text_box2.release());
+    boxes.emplace_back(text_box3.release());
+    boxes.emplace_back(text_box4.release());
+  }
   Layouter().Layout(root_box.get(), FloatRect(FloatSize(640, 480)));
 
   BoxPrinter printer;

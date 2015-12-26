@@ -58,14 +58,14 @@ void LayoutVisitor::VisitBlockBox(BlockBox* box) {
   }
 }
 
-void LayoutVisitor::VisitLineBox(LineBox* box) {
-  auto child_origin = box->content_bounds().origin();
-  const auto child_height = box->content_bounds().height();
-  for (const auto& child : box->child_boxes()) {
+void LayoutVisitor::VisitLineBox(LineBox* line) {
+  auto child_origin = line->content_bounds().origin();
+  const auto line_height = line->content_bounds().height();
+  for (const auto& child : line->child_boxes()) {
     const auto& child_size = child->ComputePreferredSize();
     LayoutVisitor().Layout(
         child, FloatRect(child_origin + child->margin().top_left(),
-                         FloatSize(child_size.width(), child_height)));
+                         FloatSize(child_size.width(), line_height)));
     child_origin = FloatPoint(child->bounds().right() + child->margin().right(),
                               child_origin.y());
   }

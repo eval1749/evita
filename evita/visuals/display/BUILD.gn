@@ -17,10 +17,10 @@ source_set("public") {
     "public/display_items.cc",
     "public/display_items.h",
     "public/display_items_forward.h",
-    "public/display_item_visitor.cc",
-    "public/display_item_visitor.h",
     "public/display_item_list.cc",
     "public/display_item_list.h",
+    "public/display_item_visitor.cc",
+    "public/display_item_visitor.h",
   ]
   public_deps = [
     "//base",

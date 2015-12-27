@@ -41,15 +41,6 @@ class BoxEditor final {
   }
 
   Box* AppendChild(ContainerBox* container, std::unique_ptr<Box> child);
-
-  template <typename T, typename... Args>
-  T* AppendNew(ContainerBox* container, Args&&... args) {
-    static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
-    const auto& child = new T(args...);
-    AppendChild(container, std::unique_ptr<Box>(child));
-    return child;
-  }
-
   std::unique_ptr<Box> RemoveChild(ContainerBox* container, Box* child);
 
   // TextBox

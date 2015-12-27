@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <ostream>
+
 #include "evita/visuals/style/style.h"
 
 #include "base/logging.h"
@@ -51,5 +53,19 @@ bool Style::operator!=(const Style& other) const {
 
 FOR_EACH_VISUAL_STYLE_PROPERTY(V)
 #undef V
+
+std::ostream& operator<<(std::ostream& ostream, const Style& style) {
+  ostream << "Style(";
+  auto delimiter = "";
+#define V(Name, name, type, text)         \
+  if (style.has_##name()) {               \
+    ostream << delimiter << style.name(); \
+    delimiter = ", ";                     \
+  }
+  FOR_EACH_VISUAL_STYLE_PROPERTY(V)
+#undef V
+
+  return ostream << ')';
+}
 
 }  // namespace visuals

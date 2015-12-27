@@ -5,6 +5,7 @@
 #ifndef EVITA_VISUALS_STYLE_STYLE_H_
 #define EVITA_VISUALS_STYLE_STYLE_H_
 
+#include <iosfwd>
 #include <unordered_set>
 
 #include "evita/visuals/style/background.h"
@@ -49,6 +50,8 @@ class Style final {
   std::unordered_set<StylePropertyId> contains_;
   int dummy_;
 };
+
+std::ostream& operator<<(std::ostream& ostream, const Style& style);
 
 }  // namespace visuals
 

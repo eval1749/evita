@@ -90,6 +90,7 @@ test("tests") {
     "model/container_box_test.cc",
 
     "style/background_test.cc",
+    "style/border_test.cc",
     "style/float_color_test.cc",
     "style/style_test.cc",
   ]

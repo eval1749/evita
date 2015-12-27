@@ -2,7 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("display_item") {
+source_set("display") {
+  sources = [
+    "display_item_list_builder.cc",
+    "display_item_list_builder.h",
+  ]
   public_deps = [
     ":public",
   ]
@@ -15,6 +19,8 @@ source_set("public") {
     "public/display_items_forward.h",
     "public/display_item_visitor.cc",
     "public/display_item_visitor.h",
+    "public/display_item_list.cc",
+    "public/display_item_list.h",
   ]
   public_deps = [
     "//base",
@@ -25,9 +31,10 @@ source_set("test_files") {
   testonly = true
   sources = [
     "public/display_items_test.cc",
+    "public/display_item_list_test.cc",
   ]
   public_deps = [
-    ":public",
+    ":display",
     "//testing/gtest",
   ]
 }

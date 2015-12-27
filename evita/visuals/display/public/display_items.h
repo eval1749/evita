@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/castable.h"
 #include "evita/visuals/display/public/display_items_forward.h"

@@ -41,4 +41,12 @@ bool FloatColor::operator!=(const FloatColor& other) const {
   return !operator==(other);
 }
 
+std::ostream& operator<<(std::ostream& ostream, const FloatColor& color) {
+  ostream << "FloatColor(" << color.red() << ", " << color.green() << ", "
+          << color.blue();
+  if (color.alpha() != 1)
+    ostream << ", " << color.alpha();
+  return ostream << ')';
+}
+
 }  // namespace visuals

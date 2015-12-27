@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_STYLE_FLOAT_COLOR_H_
 #define EVITA_VISUALS_STYLE_FLOAT_COLOR_H_
 
+#include <iosfwd>
+
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
@@ -21,6 +23,7 @@ class FloatColor final {
   bool operator==(const FloatColor& other) const;
   bool operator!=(const FloatColor& other) const;
 
+  float alpha() const { return alpha_; }
   float blue() const { return blue_; }
   float green() const { return green_; }
   float red() const { return red_; }
@@ -31,6 +34,8 @@ class FloatColor final {
   float green_ = 0;
   float red_ = 0;
 };
+
+std::ostream& operator<<(std::ostream& ostream, const FloatColor& color);
 
 }  // namespace visuals
 

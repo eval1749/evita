@@ -10,6 +10,8 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "evita/visuals/layout/layouter.h"
+#include "evita/visuals/model/box_builder.h"
+#include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
@@ -73,15 +75,22 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 }
 
 void DemoMain() {
-  auto root_box = std::make_unique<BlockBox>();
+  BoxBuilder builder(new BlockBox());
+
+  const auto& kBlack = FloatColor(0, 0, 0);
   for (auto index = 0; index < 10; ++index) {
-    auto line_box = std::make_unique<LineBox>();
-    line_box->AppendNew<TextBox>(base::StringPrintf(L"line %d", index));
-    line_box->AppendNew<TextBox>(L"size");
-    line_box->AppendNew<TextBox>(L"status");
-    line_box->AppendNew<TextBox>(L"file");
-    root_box->AppendChild(std::move(line_box));
+    BoxBuilder line_builder(new LineBox());
+    line_builder.Append(BoxBuilder(
+                            new TextBox(base::StringPrintf(L"line %d", index)))
+                            .SetColor(kBlack)
+                            .Finish())
+        .Append(BoxBuilder(new TextBox(L"size")).SetColor(kBlack).Finish())
+        .Append(BoxBuilder(new TextBox(L"status")).SetColor(kBlack).Finish())
+        .Append(BoxBuilder(new TextBox(L"file")).SetColor(kBlack).Finish());
+    builder.Append(line_builder.Finish());
   }
+
+  const auto& root_box = builder.Finish();
   Layouter().Layout(root_box.get(), FloatRect(FloatSize(640, 480)));
 
   BoxPrinter printer;

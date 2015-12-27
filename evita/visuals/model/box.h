@@ -19,10 +19,12 @@
 
 namespace visuals {
 
+class BoxEditor;
 enum class Display;
 
 #define DECLARE_VISUAL_BOX_CLASS(self, super) \
-  DECLARE_CASTABLE_CLASS(self, super)
+  DECLARE_CASTABLE_CLASS(self, super)         \
+  friend class BoxEditor;
 
 #define DECLARE_VISUAL_BOX_ABSTRACT_CLASS(self, super) \
   DECLARE_VISUAL_BOX_CLASS(self, super)
@@ -40,7 +42,7 @@ class Box : public common::Castable {
   DECLARE_VISUAL_BOX_ABSTRACT_CLASS(Box, Castable);
 
  public:
-  class Editor;
+  class AncestorsOrSelfOf;
 
   virtual ~Box();
 
@@ -66,9 +68,6 @@ class Box : public common::Castable {
  protected:
   Box();
 
-  void DidChangeContent();
-  void DidChangeLayout();
-
  private:
   Background background_;
   Border border_;
@@ -83,27 +82,43 @@ class Box : public common::Castable {
   DISALLOW_COPY_AND_ASSIGN(Box);
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// Box::Editor
-//
-class Box::Editor final {
- public:
-  explicit Editor(Box* box);
-  ~Editor();
-
-  void SetBounds(const FloatRect& new_bounds);
-  void SetLayoutClean();
-  void SetParent(ContainerBox* parent);
-
- private:
-  Box* const box_;
-
-  DISALLOW_COPY_AND_ASSIGN(Editor);
-};
-
 std::ostream& operator<<(std::ostream& ostream, const Box& box);
 std::ostream& operator<<(std::ostream& ostream, const Box* box);
+
+//////////////////////////////////////////////////////////////////////
+//
+// Box::AncestorsOrSelfOf
+//
+class Box::AncestorsOrSelfOf final {
+ public:
+  class Iterator final {
+   public:
+    explicit Iterator(Box* box);
+    Iterator(const Iterator& other);
+    ~Iterator();
+
+    Box* operator*() const;
+    Box* operator->() const;
+    Iterator& operator++();
+
+    bool operator==(const Iterator& other) const;
+    bool operator!=(const Iterator& other) const;
+
+   private:
+    Box* box_;
+  };
+
+  explicit AncestorsOrSelfOf(const Box& box);
+  ~AncestorsOrSelfOf();
+
+  Iterator begin() const;
+  Iterator end() const;
+
+ private:
+  const Box* box_;
+
+  DISALLOW_COPY_AND_ASSIGN(AncestorsOrSelfOf);
+};
 
 }  // namespace visuals
 

@@ -7,6 +7,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/visuals/model/inline_box.h"
+#include "evita/visuals/style/float_color.h"
 
 namespace visuals {
 
@@ -21,12 +22,16 @@ class TextBox final : public InlineBox {
   explicit TextBox(const base::string16 text);
   ~TextBox() final;
 
+  const FloatColor& color() const { return color_; }
+  float baseline() const { return baseline_; }
   const base::string16& text() const { return text_; }
 
  private:
   // Box
   FloatSize ComputePreferredSize() const final;
 
+  float baseline_ = 0.0f;
+  FloatColor color_;
   base::string16 text_;
 
   DISALLOW_COPY_AND_ASSIGN(TextBox);

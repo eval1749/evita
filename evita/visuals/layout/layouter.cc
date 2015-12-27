@@ -10,6 +10,7 @@
 #include "base/logging.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/line_box.h"
 
@@ -39,9 +40,9 @@ class LayoutVisitor final : public BoxVisitor {
 void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
   if (box->bounds() == bounds && box->IsLayoutClean())
     return;
-  Box::Editor(box).SetBounds(bounds);
+  BoxEditor().SetBounds(box, bounds);
   Visit(box);
-  Box::Editor(box).SetLayoutClean();
+  BoxEditor().SetLayoutClean(box);
 }
 
 // BoxVisitor

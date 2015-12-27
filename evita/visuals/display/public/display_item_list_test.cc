@@ -11,11 +11,10 @@ namespace visuals {
 
 TEST(DisplayItemList, Basic) {
   DisplayItemListBuilder builder;
-  builder.Add(
-      std::make_unique<BeginBoxDisplayItem>(1, FloatRect(FloatSize(1, 2))));
-  builder.Add(std::make_unique<FillRectDisplayItem>(FloatRect(FloatSize(1, 2)),
-                                                    FloatColor(1, 1, 1)));
-  builder.Add(std::make_unique<EndBoxDisplayItem>(1));
+  builder.AddNew<BeginBoxDisplayItem>(1, FloatRect(FloatSize(1, 2)));
+  builder.AddNew<FillRectDisplayItem>(FloatRect(FloatSize(1, 2)),
+                                      FloatColor(1, 1, 1));
+  builder.AddNew<EndBoxDisplayItem>(1);
   const auto& list = builder.Build();
 
   EXPECT_EQ(3, list->items().size());

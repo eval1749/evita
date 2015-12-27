@@ -7,9 +7,14 @@
 #include "base/logging.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
+#include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
+//////////////////////////////////////////////////////////////////////
+//
+// DisplayItemListBuilder
+//
 DisplayItemListBuilder::DisplayItemListBuilder()
     : list_(new DisplayItemList()) {}
 

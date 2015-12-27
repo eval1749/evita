@@ -13,6 +13,7 @@ namespace visuals {
 
 class DisplayItem;
 class DisplayItemList;
+class FloatRect;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -23,15 +24,16 @@ class DisplayItemListBuilder final {
   DisplayItemListBuilder();
   ~DisplayItemListBuilder();
 
-  template <typename T>
-  void Add(std::unique_ptr<T>&& child) {
-    Add(std::unique_ptr<DisplayItem>(child.release()));
+  template <typename T, typename... Args>
+  void AddNew(Args&&... args) {
+    Add(std::move(std::unique_ptr<DisplayItem>(new T(args...))));
   }
 
-  void Add(std::unique_ptr<DisplayItem> item);
   std::unique_ptr<DisplayItemList> Build();
 
  private:
+  void Add(std::unique_ptr<DisplayItem> item);
+
   std::unique_ptr<DisplayItemList> list_;
 
   DISALLOW_COPY_AND_ASSIGN(DisplayItemListBuilder);

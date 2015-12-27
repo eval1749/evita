@@ -21,6 +21,7 @@ source_set("public") {
     "public/display_item_list.h",
     "public/display_item_visitor.cc",
     "public/display_item_visitor.h",
+    "public/display_item_printers.cc",
   ]
   public_deps = [
     "//base",

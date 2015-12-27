@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <ostream>
-
 #include "evita/visuals/display/public/display_items.h"
 
 namespace visuals {
@@ -27,16 +25,6 @@ bool DisplayItem::operator==(const DisplayItem& other) const {
 
 bool DisplayItem::operator!=(const DisplayItem& other) const {
   return !operator==(other);
-}
-
-std::ostream& operator<<(std::ostream& ostream, const DisplayItem& item) {
-  return ostream << item.class_name() << '.' << item.id();
-}
-
-std::ostream& operator<<(std::ostream& ostream, const DisplayItem* item) {
-  if (!item)
-    return ostream << "nullptr";
-  return ostream << *item;
 }
 
 //////////////////////////////////////////////////////////////////////

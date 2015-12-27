@@ -4,9 +4,9 @@
 
 #include <ostream>
 
-#include "base/maccro.h"
+#include "base/macros.h"
 #include "base/strings/stringprintf.h"
-#include "evita/visuals/display/public/display_item.h"
+#include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_visitor.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/style/float_color.h"
@@ -27,7 +27,7 @@ class Printer final : public DisplayItemVisitor {
   void Print(std::ostream* ostream, const DisplayItem& item);
 
  private:
-  // DisplayItemVisitor
+// DisplayItemVisitor
 #define V(name) void Visit##name(name##DisplayItem* item) final;
   FOR_EACH_DISPLAY_ITEM(V)
 #undef V
@@ -36,7 +36,7 @@ class Printer final : public DisplayItemVisitor {
   DISALLOW_COPY_AND_ASSIGN(Printer);
 };
 
-Printer::Print(std::ostream* ostream, const DisplayItem& item) {
+void Printer::Print(std::ostream* ostream, const DisplayItem& item) {
   *ostream << item.class_name() << '.' << item.id();
   ostream_ = ostream;
   Visit(item);
@@ -47,12 +47,14 @@ void Printer::VisitBeginClip(BeginClipDisplayItem* item) {
 }
 
 void Printer::VisitDrawRect(DrawRectDisplayItem* item) {
-  *ostream_ << item->bounds() << ' ' << item->color() << "thickness=" << item->thickness();
+  *ostream_ << item->bounds() << ' ' << item->color()
+            << " thickness=" << item->thickness();
 }
 
 void Printer::VisitDrawText(DrawTextDisplayItem* item) {
-  *ostream_ << item->bounds() << item->color() << "baseline=" << item->thickness() << '"';
-  for (const auto& char_code : box->text()) {
+  *ostream_ << item->bounds() << ' ' << item->color()
+            << " baseline=" << item->baseline() << " \"";
+  for (const auto& char_code : item->text()) {
     if (char_code < 0x20 || char_code >= 0x7F) {
       *ostream_ << base::StringPrintf("\\u%04X", char_code);
       continue;
@@ -61,12 +63,10 @@ void Printer::VisitDrawText(DrawTextDisplayItem* item) {
       *ostream_ << '\\';
     *ostream_ << static_cast<char>(char_code);
   }
-  const auto& style = box->ComputeActualStyle();
   *ostream_ << '"';
 }
 
-void Printer::VisitEndClip(EndClipDisplayItem* item) {
-}
+void Printer::VisitEndClip(EndClipDisplayItem* item) {}
 
 void Printer::VisitFillRect(FillRectDisplayItem* item) {
   *ostream_ << item->bounds() << ' ' << item->color();
@@ -76,6 +76,7 @@ void Printer::VisitFillRect(FillRectDisplayItem* item) {
 
 std::ostream& operator<<(std::ostream& ostream, const DisplayItem& item) {
   Printer().Print(&ostream, item);
+  return ostream;
 }
 
 std::ostream& operator<<(std::ostream& ostream, const DisplayItem* item) {

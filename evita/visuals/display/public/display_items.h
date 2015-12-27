@@ -55,6 +55,7 @@ class DisplayItem : public common::Castable {
   DISALLOW_COPY_AND_ASSIGN(DisplayItem);
 };
 
+// See "display_item_printers.cc" for implementation.
 std::ostream& operator<<(std::ostream& ostream, const DisplayItem& item);
 std::ostream& operator<<(std::ostream& ostream, const DisplayItem* item);
 
@@ -68,6 +69,8 @@ class BeginClipDisplayItem final : public DisplayItem {
  public:
   explicit BeginClipDisplayItem(const FloatRect& bounds);
   ~BeginClipDisplayItem();
+
+  const FloatRect& bounds() const { return bounds_; }
 
  private:
   // DisplayItem

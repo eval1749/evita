@@ -85,41 +85,6 @@ class Box : public common::Castable {
 std::ostream& operator<<(std::ostream& ostream, const Box& box);
 std::ostream& operator<<(std::ostream& ostream, const Box* box);
 
-//////////////////////////////////////////////////////////////////////
-//
-// Box::AncestorsOrSelfOf
-//
-class Box::AncestorsOrSelfOf final {
- public:
-  class Iterator final {
-   public:
-    explicit Iterator(Box* box);
-    Iterator(const Iterator& other);
-    ~Iterator();
-
-    Box* operator*() const;
-    Box* operator->() const;
-    Iterator& operator++();
-
-    bool operator==(const Iterator& other) const;
-    bool operator!=(const Iterator& other) const;
-
-   private:
-    Box* box_;
-  };
-
-  explicit AncestorsOrSelfOf(const Box& box);
-  ~AncestorsOrSelfOf();
-
-  Iterator begin() const;
-  Iterator end() const;
-
- private:
-  const Box* box_;
-
-  DISALLOW_COPY_AND_ASSIGN(AncestorsOrSelfOf);
-};
-
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_MODEL_BOX_H_

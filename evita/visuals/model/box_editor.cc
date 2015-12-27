@@ -5,6 +5,7 @@
 #include "evita/visuals/model/box_editor.h"
 
 #include "base/logging.h"
+#include "evita/visuals/model/ancestors_or_self.h"
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"

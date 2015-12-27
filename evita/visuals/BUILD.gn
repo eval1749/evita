@@ -16,6 +16,8 @@ source_set("visuals") {
     "layout/layouter.h",
     "layout/layouter.cc",
 
+    "model/ancestors_or_self.cc",
+    "model/ancestors_or_self.h",
     "model/block_box.cc",
     "model/block_box.h",
     "model/box.h",

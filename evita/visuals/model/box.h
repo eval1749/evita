@@ -48,6 +48,9 @@ class Box : public common::Castable {
 
   virtual ~Box();
 
+  // Box identification number
+  int id() const { return id_; }
+
   // Box tree related values
   ContainerBox* parent() const { return parent_; }
 
@@ -79,6 +82,7 @@ class Box : public common::Castable {
   Border border_;
   FloatRect bounds_;
   FloatRect content_bounds_;
+  const int id_;
   bool is_content_dirty_ = true;
   bool is_layout_dirty_ = true;
   Margin margin_;

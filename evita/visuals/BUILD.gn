@@ -50,6 +50,13 @@ source_set("visuals") {
     "style/margin.h",
     "style/padding.cc",
     "style/padding.h",
+    "style/style.cc",
+    "style/style.h",
+    "style/style_builder.cc",
+    "style/style_builder.h",
+    "style/style_properties.cc",
+    "style/style_properties.h",
+    "style/style_properties_forward.h",
     "style/thickness.cc",
     "style/thickness.h",
   ]
@@ -83,6 +90,7 @@ test("tests") {
 
     "style/background_test.cc",
     "style/float_color_test.cc",
+    "style/style_test.cc",
   ]
 
   deps = [

@@ -16,7 +16,7 @@ namespace visuals {
 //
 // BoxBuilder
 //
-BoxBuilder::BoxBuilder(Box* box) : box_(box) {}
+BoxBuilder::BoxBuilder(std::unique_ptr<Box> box) : box_(std::move(box)) {}
 
 BoxBuilder::~BoxBuilder() {
   DCHECK(!box_) << "You should call Build()";

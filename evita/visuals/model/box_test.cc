@@ -12,9 +12,9 @@
 namespace visuals {
 
 TEST(BoxTest, IsDescendantOf) {
-  const auto& root_box = BoxBuilder(new BlockBox())
-                             .Append(BoxBuilder(new TextBox(L"foo")).Finish())
-                             .Append(BoxBuilder(new TextBox(L"bar")).Finish())
+  const auto& root_box = BoxBuilder::New<BlockBox>()
+                             .Append(BoxBuilder::New<TextBox>(L"foo").Finish())
+                             .Append(BoxBuilder::New<TextBox>(L"bar").Finish())
                              .Finish();
   const auto text_box1 = root_box->as<ContainerBox>()->child_boxes()[0];
   const auto text_box2 = root_box->as<ContainerBox>()->child_boxes()[1];

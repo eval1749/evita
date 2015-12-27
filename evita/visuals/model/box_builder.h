@@ -20,7 +20,7 @@ class FloatColor;
 //
 class BoxBuilder final {
  public:
-  explicit BoxBuilder(Box* box);
+  BoxBuilder(BoxBuilder&& other) : box_(std::move(other.box_)) {}
   ~BoxBuilder();
 
   std::unique_ptr<Box> Finish();
@@ -30,7 +30,15 @@ class BoxBuilder final {
   BoxBuilder& SetBaseline(float baseline);
   BoxBuilder& SetColor(const FloatColor& color);
 
+  template <typename T, typename... Args>
+  static BoxBuilder New(Args&&... args) {
+    static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
+    return std::move(BoxBuilder(std::unique_ptr<Box>(new T(args...))));
+  }
+
  private:
+  explicit BoxBuilder(std::unique_ptr<Box> box);
+
   std::unique_ptr<Box> box_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxBuilder);

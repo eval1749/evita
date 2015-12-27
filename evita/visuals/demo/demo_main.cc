@@ -75,18 +75,18 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 }
 
 void DemoMain() {
-  BoxBuilder builder(new BlockBox());
+  BoxBuilder builder(BoxBuilder::New<BlockBox>());
 
   const auto& kBlack = FloatColor(0, 0, 0);
   for (auto index = 0; index < 10; ++index) {
-    BoxBuilder line_builder(new LineBox());
-    line_builder.Append(BoxBuilder(
-                            new TextBox(base::StringPrintf(L"line %d", index)))
+    auto line_builder = BoxBuilder::New<LineBox>();
+    line_builder.Append(BoxBuilder::New<TextBox>(
+                            base::StringPrintf(L"line %d", index))
                             .SetColor(kBlack)
                             .Finish())
-        .Append(BoxBuilder(new TextBox(L"size")).SetColor(kBlack).Finish())
-        .Append(BoxBuilder(new TextBox(L"status")).SetColor(kBlack).Finish())
-        .Append(BoxBuilder(new TextBox(L"file")).SetColor(kBlack).Finish());
+        .Append(BoxBuilder::New<TextBox>(L"size").SetColor(kBlack).Finish())
+        .Append(BoxBuilder::New<TextBox>(L"status").SetColor(kBlack).Finish())
+        .Append(BoxBuilder::New<TextBox>(L"file").SetColor(kBlack).Finish());
     builder.Append(line_builder.Finish());
   }
 

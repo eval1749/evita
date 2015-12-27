@@ -69,8 +69,14 @@ class Box : public common::Castable {
   virtual void Accept(BoxVisitor* visitor) = 0;
   virtual FloatSize ComputePreferredSize() const = 0;
   std::unique_ptr<Style> ComputeActualStyle() const;
-  bool IsContentDirty() const { return is_content_dirty_; }
+
   bool IsDescendantOf(const Box& other) const;
+
+  // Paint
+  bool IsContentClean() const { return !is_content_dirty_; }
+  bool IsContentDirty() const { return is_content_dirty_; }
+
+  // Layout
   bool IsLayoutClean() const { return !is_layout_dirty_; }
   bool IsLayoutDirty() const { return is_layout_dirty_; }
 

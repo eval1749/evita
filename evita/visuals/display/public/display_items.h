@@ -60,25 +60,22 @@ std::ostream& operator<<(std::ostream& ostream, const DisplayItem* item);
 
 //////////////////////////////////////////////////////////////////////
 //
-// BeginBoxDisplayItem
+// BeginClipDisplayItem
 //
-class BeginBoxDisplayItem final : public DisplayItem {
-  DECLARE_DISPLAY_ITEM_FINAL_CLASS(BeginBoxDisplayItem, DisplayItem)
+class BeginClipDisplayItem final : public DisplayItem {
+  DECLARE_DISPLAY_ITEM_FINAL_CLASS(BeginClipDisplayItem, DisplayItem)
 
  public:
-  BeginBoxDisplayItem(int box_id, const FloatRect& bounds);
-  ~BeginBoxDisplayItem();
-
-  int box_id() const { return box_id_; }
+  explicit BeginClipDisplayItem(const FloatRect& bounds);
+  ~BeginClipDisplayItem();
 
  private:
   // DisplayItem
   bool EqualsTo(const DisplayItem& other) const final;
 
   const FloatRect bounds_;
-  const int box_id_;
 
-  DISALLOW_COPY_AND_ASSIGN(BeginBoxDisplayItem);
+  DISALLOW_COPY_AND_ASSIGN(BeginClipDisplayItem);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -142,24 +139,20 @@ class DrawTextDisplayItem final : public DisplayItem {
 
 //////////////////////////////////////////////////////////////////////
 //
-// EndBoxDisplayItem
+// EndClipDisplayItem
 //
-class EndBoxDisplayItem final : public DisplayItem {
-  DECLARE_DISPLAY_ITEM_FINAL_CLASS(EndBoxDisplayItem, DisplayItem)
+class EndClipDisplayItem final : public DisplayItem {
+  DECLARE_DISPLAY_ITEM_FINAL_CLASS(EndClipDisplayItem, DisplayItem)
 
  public:
-  explicit EndBoxDisplayItem(int box_id);
-  ~EndBoxDisplayItem();
-
-  int box_id() const { return box_id_; }
+  EndClipDisplayItem();
+  ~EndClipDisplayItem();
 
  private:
   // DisplayItem
   bool EqualsTo(const DisplayItem& other) const final;
 
-  const int box_id_;
-
-  DISALLOW_COPY_AND_ASSIGN(EndBoxDisplayItem);
+  DISALLOW_COPY_AND_ASSIGN(EndClipDisplayItem);
 };
 
 //////////////////////////////////////////////////////////////////////

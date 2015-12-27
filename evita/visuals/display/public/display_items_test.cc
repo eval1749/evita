@@ -9,15 +9,13 @@
 
 namespace visuals {
 
-TEST(BeginBoxDisplayItemsTest, EqualsTo) {
+TEST(BeginClipDisplayItemsTest, EqualsTo) {
   const auto& item1 =
-      std::make_unique<BeginBoxDisplayItem>(1, FloatRect(FloatSize(1, 2)));
+      std::make_unique<BeginClipDisplayItem>(FloatRect(FloatSize(1, 2)));
   const auto& item2 =
-      std::make_unique<BeginBoxDisplayItem>(1, FloatRect(FloatSize(1, 2)));
+      std::make_unique<BeginClipDisplayItem>(FloatRect(FloatSize(1, 2)));
   const auto& item3 =
-      std::make_unique<BeginBoxDisplayItem>(1, FloatRect(FloatSize(3, 4)));
-  const auto& item4 =
-      std::make_unique<BeginBoxDisplayItem>(2, FloatRect(FloatSize(1, 2)));
+      std::make_unique<BeginClipDisplayItem>(FloatRect(FloatSize(3, 4)));
 
   EXPECT_TRUE(*item1 == *item1);
   EXPECT_TRUE(*item2 == *item2);
@@ -32,11 +30,6 @@ TEST(BeginBoxDisplayItemsTest, EqualsTo) {
   EXPECT_FALSE(*item3 == *item1);
   EXPECT_TRUE(*item1 != *item3);
   EXPECT_TRUE(*item3 != *item1);
-
-  EXPECT_FALSE(*item1 == *item4);
-  EXPECT_FALSE(*item4 == *item1);
-  EXPECT_TRUE(*item1 != *item4);
-  EXPECT_TRUE(*item4 != *item1);
 }
 
 TEST(DrawRectDisplayItemsTest, EqualsTo) {
@@ -118,24 +111,18 @@ TEST(DrawTextDisplayItemsTest, EqualsTo) {
   EXPECT_TRUE(*item6 != *item1);
 }
 
-TEST(EndBoxDisplayItemsTest, EqualsTo) {
-  const auto& item1 = std::make_unique<EndBoxDisplayItem>(1);
-  const auto& item2 = std::make_unique<EndBoxDisplayItem>(1);
-  const auto& item3 = std::make_unique<EndBoxDisplayItem>(2);
+TEST(EndClipDisplayItemsTest, EqualsTo) {
+  const auto& item1 = std::make_unique<EndClipDisplayItem>();
+  const auto& item2 = std::make_unique<EndClipDisplayItem>();
 
   EXPECT_TRUE(*item1 == *item1);
   EXPECT_TRUE(*item1 == *item2);
-  EXPECT_FALSE(*item1 == *item3);
 
   EXPECT_FALSE(*item1 != *item1);
   EXPECT_FALSE(*item1 != *item2);
-  EXPECT_TRUE(*item1 != *item3);
 
   EXPECT_TRUE(*item2 == *item1);
   EXPECT_FALSE(*item2 != *item1);
-
-  EXPECT_FALSE(*item3 == *item1);
-  EXPECT_TRUE(*item3 != *item1);
 }
 
 TEST(FillRectDisplayItemsTest, EqualsTo) {

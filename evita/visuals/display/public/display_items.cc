@@ -41,19 +41,19 @@ std::ostream& operator<<(std::ostream& ostream, const DisplayItem* item) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// BeginBoxDisplayItem
+// BeginClipDisplayItem
 //
-BeginBoxDisplayItem::BeginBoxDisplayItem(int box_id, const FloatRect& bounds)
-    : bounds_(bounds), box_id_(box_id) {}
-BeginBoxDisplayItem::~BeginBoxDisplayItem() {}
+BeginClipDisplayItem::BeginClipDisplayItem(const FloatRect& bounds)
+    : bounds_(bounds) {}
+BeginClipDisplayItem::~BeginClipDisplayItem() {}
 
-bool BeginBoxDisplayItem::EqualsTo(const DisplayItem& other) const {
+bool BeginClipDisplayItem::EqualsTo(const DisplayItem& other) const {
   if (this == &other)
     return false;
-  const auto& item = other.as<BeginBoxDisplayItem>();
+  const auto& item = other.as<BeginClipDisplayItem>();
   if (!item)
     return false;
-  return box_id_ == item->box_id_ && bounds_ == item->bounds_;
+  return bounds_ == item->bounds_;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -99,18 +99,15 @@ bool DrawTextDisplayItem::EqualsTo(const DisplayItem& other) const {
 
 //////////////////////////////////////////////////////////////////////
 //
-// EndBoxDisplayItem
+// EndClipDisplayItem
 //
-EndBoxDisplayItem::EndBoxDisplayItem(int box_id) : box_id_(box_id) {}
-EndBoxDisplayItem::~EndBoxDisplayItem() {}
+EndClipDisplayItem::EndClipDisplayItem() {}
+EndClipDisplayItem::~EndClipDisplayItem() {}
 
-bool EndBoxDisplayItem::EqualsTo(const DisplayItem& other) const {
+bool EndClipDisplayItem::EqualsTo(const DisplayItem& other) const {
   if (this == &other)
     return false;
-  const auto& item = other.as<EndBoxDisplayItem>();
-  if (!item)
-    return false;
-  return box_id_ == item->box_id_;
+  return other.is<EndClipDisplayItem>();
 }
 
 //////////////////////////////////////////////////////////////////////

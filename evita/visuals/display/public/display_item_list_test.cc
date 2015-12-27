@@ -11,10 +11,10 @@ namespace visuals {
 
 TEST(DisplayItemList, Basic) {
   DisplayItemListBuilder builder;
-  builder.AddNew<BeginBoxDisplayItem>(1, FloatRect(FloatSize(1, 2)));
+  builder.AddNew<BeginClipDisplayItem>(FloatRect(FloatSize(1, 2)));
   builder.AddNew<FillRectDisplayItem>(FloatRect(FloatSize(1, 2)),
                                       FloatColor(1, 1, 1));
-  builder.AddNew<EndBoxDisplayItem>(1);
+  builder.AddNew<EndClipDisplayItem>();
   const auto& list = builder.Build();
 
   EXPECT_EQ(3, list->items().size());

@@ -9,6 +9,8 @@
 #include "base/macros.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
+#include "evita/visuals/display/public/display_items.h"
+#include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/box_builder.h"
 #include "evita/visuals/model/box_editor.h"
@@ -16,6 +18,7 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"
+#include "evita/visuals/paint/painter.h"
 #include "evita/visuals/style/style.h"
 #include "evita/visuals/style/style_builder.h"
 
@@ -101,6 +104,20 @@ void DemoMain() {
 
   BoxPrinter printer;
   printer.Visit(*root_box);
+
+  const auto& display_item_list = Painter().Paint(*root_box);
+  {
+    auto indent = 0;
+    for (const auto& item : display_item_list->items()) {
+      for (auto count = indent; count > 0; --count)
+        std::cout << "  ";
+      std::cout << item << std::endl;
+      if (item->is<BeginClipDisplayItem>())
+        ++indent;
+      if (item->is<EndClipDisplayItem>())
+        --indent;
+    }
+  }
 }
 
 }  // namespace visuals

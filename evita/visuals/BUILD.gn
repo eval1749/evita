@@ -97,5 +97,6 @@ test("tests") {
   deps = [
     ":visuals",
     "//base/test:run_all_unittests",
+    "//evita/visuals/display:test_files",
   ]
 }

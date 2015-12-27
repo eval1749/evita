@@ -15,6 +15,7 @@ class Box;
 class ContainerBox;
 class FloatColor;
 class FloatRect;
+class Style;
 class TextBox;
 
 //////////////////////////////////////////////////////////////////////
@@ -42,10 +43,10 @@ class BoxEditor final {
 
   Box* AppendChild(ContainerBox* container, std::unique_ptr<Box> child);
   std::unique_ptr<Box> RemoveChild(ContainerBox* container, Box* child);
+  void SetStyle(Box* box, const Style& style);
 
   // TextBox
   void SetBaseline(TextBox* box, float new_baseline);
-  void SetColor(TextBox* box, const FloatColor& new_color);
 
  private:
   void DidChangeContent(Box* box);

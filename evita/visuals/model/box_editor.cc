@@ -9,9 +9,7 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"
-#include "evita/visuals/style/border.h"
-#include "evita/visuals/style/margin.h"
-#include "evita/visuals/style/padding.h"
+#include "evita/visuals/style/style.h"
 
 namespace visuals {
 
@@ -75,13 +73,6 @@ void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {
   DidChangeContent(box);
 }
 
-void BoxEditor::SetColor(TextBox* box, const FloatColor& new_color) {
-  if (box->color_ == new_color)
-    return;
-  box->color_ = new_color;
-  DidChangeContent(box);
-}
-
 void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
   if (box->bounds_ == new_bounds)
     return;
@@ -101,6 +92,40 @@ void BoxEditor::SetParent(Box* box, ContainerBox* new_parent) {
   DCHECK_NE(box->parent_, new_parent);
   box->parent_ = new_parent;
   DidChangeLayout(box);
+}
+
+void BoxEditor::SetStyle(Box* box, const Style& new_style) {
+  auto is_content_dirty = false;
+  auto is_layout_dirty = false;
+  if (new_style.has_background() &&
+      new_style.background() != box->background_) {
+    box->background_ = new_style.background();
+    is_content_dirty = true;
+  }
+  if (new_style.has_border() && new_style.border() != box->border_) {
+    box->border_ = new_style.border();
+    is_content_dirty = true;
+  }
+  if (new_style.has_padding() && new_style.padding() != box->padding_) {
+    box->padding_ = new_style.padding();
+    is_content_dirty = true;
+  }
+  if (new_style.has_margin() && new_style.margin() != box->margin_) {
+    box->margin_ = new_style.margin();
+    is_layout_dirty = true;
+  }
+
+  if (const auto& text = box->as<TextBox>()) {
+    if (new_style.has_color() && new_style.color() != text->color_) {
+      text->color_ = new_style.color();
+      is_content_dirty = true;
+    }
+  }
+
+  if (is_content_dirty)
+    DidChangeContent(box);
+  if (is_layout_dirty)
+    DidChangeLayout(box);
 }
 
 }  // namespace visuals

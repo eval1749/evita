@@ -40,10 +40,8 @@ BoxBuilder& BoxBuilder::SetBaseline(float baseline) {
   return *this;
 }
 
-BoxBuilder& BoxBuilder::SetColor(const FloatColor& color) {
-  const auto& text = box_->as<TextBox>();
-  DCHECK(text) << box_->class_name();
-  BoxEditor().SetColor(text, color);
+BoxBuilder& BoxBuilder::SetStyle(const Style& style) {
+  BoxEditor().SetStyle(box_.get(), style);
   return *this;
 }
 

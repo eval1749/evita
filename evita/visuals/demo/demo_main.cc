@@ -16,6 +16,8 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"
+#include "evita/visuals/style/style.h"
+#include "evita/visuals/style/style_builder.h"
 
 namespace visuals {
 
@@ -76,17 +78,18 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 
 void DemoMain() {
   BoxBuilder builder(BoxBuilder::New<BlockBox>());
-
-  const auto& kBlack = FloatColor(0, 0, 0);
+  builder.SetStyle(
+      *StyleBuilder().SetBackground(Background(FloatColor(1, 1, 1))).Build());
+  const auto& kBlack = StyleBuilder().SetColor(FloatColor(0, 0, 0)).Build();
   for (auto index = 0; index < 10; ++index) {
     auto line_builder = BoxBuilder::New<LineBox>();
     line_builder.Append(BoxBuilder::New<TextBox>(
                             base::StringPrintf(L"line %d", index))
-                            .SetColor(kBlack)
+                            .SetStyle(*kBlack)
                             .Finish())
-        .Append(BoxBuilder::New<TextBox>(L"size").SetColor(kBlack).Finish())
-        .Append(BoxBuilder::New<TextBox>(L"status").SetColor(kBlack).Finish())
-        .Append(BoxBuilder::New<TextBox>(L"file").SetColor(kBlack).Finish());
+        .Append(BoxBuilder::New<TextBox>(L"size").SetStyle(*kBlack).Finish())
+        .Append(BoxBuilder::New<TextBox>(L"status").SetStyle(*kBlack).Finish())
+        .Append(BoxBuilder::New<TextBox>(L"file").SetStyle(*kBlack).Finish());
     builder.Append(line_builder.Finish());
   }
 

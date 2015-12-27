@@ -6,6 +6,7 @@
 #define EVITA_VISUALS_MODEL_BOX_H_
 
 #include <iosfwd>
+#include <memory>
 
 #include "base/macros.h"
 #include "common/castable.h"
@@ -21,6 +22,7 @@ namespace visuals {
 
 class BoxEditor;
 enum class Display;
+class Style;
 
 #define DECLARE_VISUAL_BOX_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)         \
@@ -53,13 +55,17 @@ class Box : public common::Castable {
   const FloatRect& bounds() const { return bounds_; }
   const FloatRect& content_bounds() const { return content_bounds_; }
 
-  // CSS Box model related values
+  // CSS background and background
+  const Background& background() const { return background_; }
   const Border& border() const { return border_; }
+
+  // CSS Box model related values
   const Margin& margin() const { return margin_; }
   const Padding& padding() const { return padding_; }
 
   virtual void Accept(BoxVisitor* visitor) = 0;
   virtual FloatSize ComputePreferredSize() const = 0;
+  std::unique_ptr<Style> ComputeActualStyle() const;
   bool IsContentDirty() const { return is_content_dirty_; }
   bool IsDescendantOf(const Box& other) const;
   bool IsLayoutClean() const { return !is_layout_dirty_; }

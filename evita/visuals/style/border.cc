@@ -27,6 +27,10 @@ bool Border::operator!=(const Border& other) const {
   return !operator==(other);
 }
 
+bool Border::HasValue() const {
+  return thickness_.HasValue();
+}
+
 std::ostream& operator<<(std::ostream& ostream, const Border& border) {
   ostream << "Border(";
   auto delimiter = "";

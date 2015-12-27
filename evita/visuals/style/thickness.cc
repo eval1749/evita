@@ -40,6 +40,10 @@ FloatSize Thickness::top_left() const {
   return FloatSize(left_, top_);
 }
 
+bool Thickness::HasValue() const {
+  return bottom_ != 0 || left_ != 0 || right_ != 0 || top_ != 0;
+}
+
 std::ostream& operator<<(std::ostream& ostream, const Thickness& thickness) {
   ostream << "Thickness(";
   auto delimiter = "";

@@ -50,6 +50,8 @@ class Background final {
 
   const FloatColor& color() const { return color_; }
 
+  bool HasValue() const;
+
  private:
   FloatColor color_;
 };

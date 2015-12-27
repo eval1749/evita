@@ -45,7 +45,8 @@ void BoxPrinter::Indent() const {
 
 void BoxPrinter::VisitBlockBox(BlockBox* box) {
   Indent();
-  std::cout << *box << std::endl;
+  const auto& style = box->ComputeActualStyle();
+  std::cout << *box << ' ' << *style << std::endl;
   ++indent_;
   for (const auto& child : box->child_boxes())
     Visit(child);
@@ -54,7 +55,8 @@ void BoxPrinter::VisitBlockBox(BlockBox* box) {
 
 void BoxPrinter::VisitLineBox(LineBox* box) {
   Indent();
-  std::cout << *box << std::endl;
+  const auto& style = box->ComputeActualStyle();
+  std::cout << *box << ' ' << *style << std::endl;
   ++indent_;
   for (const auto& child : box->child_boxes())
     Visit(child);
@@ -73,7 +75,8 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
       std::cout << '\\';
     std::cout << static_cast<char>(char_code);
   }
-  std::cout << '"' << std::endl;
+  const auto& style = box->ComputeActualStyle();
+  std::cout << '"' << ' ' << *style << std::endl;
 }
 
 void DemoMain() {

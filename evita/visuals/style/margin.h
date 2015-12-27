@@ -35,6 +35,8 @@ class Margin final {
   float top() const { return thickness_.top(); }
   FloatSize top_left() const { return thickness_.top_left(); }
 
+  bool HasValue() const { return thickness_.HasValue(); }
+
  private:
   Thickness thickness_;
 };

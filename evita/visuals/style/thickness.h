@@ -33,6 +33,8 @@ class Thickness {
   float top() const { return top_; }
   FloatSize top_left() const;
 
+  bool HasValue() const;
+
  private:
   float bottom_ = 0.0f;
   float left_ = 0.0f;

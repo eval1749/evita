@@ -29,6 +29,10 @@ bool Background::operator!=(const Background& other) const {
   return !operator==(other);
 }
 
+bool Background::HasValue() const {
+  return color_ != FloatColor();
+}
+
 std::ostream& operator<<(std::ostream& ostream, const Background& background) {
   ostream << "Background(";
   if (background.HasValue())

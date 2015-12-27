@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_STYLE_BACKGROUND_H_
 #define EVITA_VISUALS_STYLE_BACKGROUND_H_
 
+#include <iosfwd>
+
 #include "evita/visuals/style/float_color.h"
 
 namespace visuals {
@@ -51,6 +53,8 @@ class Background final {
  private:
   FloatColor color_;
 };
+
+std::ostream& operator<<(std::ostream& ostream, const Background& background);
 
 }  // namespace visuals
 

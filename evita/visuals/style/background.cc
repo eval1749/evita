@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <ostream>
+
 #include "evita/visuals/style/background.h"
 
 namespace visuals {
@@ -25,6 +27,13 @@ bool Background::operator==(const Background& other) const {
 
 bool Background::operator!=(const Background& other) const {
   return !operator==(other);
+}
+
+std::ostream& operator<<(std::ostream& ostream, const Background& background) {
+  ostream << "Background(";
+  if (background.HasValue())
+    ostream << background.color();
+  return ostream << ')';
 }
 
 }  // namespace visuals

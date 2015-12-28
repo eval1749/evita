@@ -12,6 +12,8 @@ source_set("visuals") {
     "geometry/float_point.cc",
     "geometry/float_rect.h",
     "geometry/float_rect.cc",
+    "geometry/float_quad.cc",
+    "geometry/float_quad.h",
     "geometry/float_size.h",
     "geometry/float_size.cc",
 
@@ -95,6 +97,7 @@ test("tests") {
     "geometry/float_matrix3x2_test.cc",
     "geometry/float_point_test.cc",
     "geometry/float_rect_test.cc",
+    "geometry/float_quad_test.cc",
     "geometry/float_size_test.cc",
 
     "model/box_test.cc",

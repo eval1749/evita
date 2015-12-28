@@ -11,52 +11,51 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Box::AncestorsOrSelfOf
+// Box::AncestorsOrSelf
 //
-Box::AncestorsOrSelfOf::AncestorsOrSelfOf(const Box& box) : box_(&box) {}
-Box::AncestorsOrSelfOf::~AncestorsOrSelfOf() {}
+Box::AncestorsOrSelf::AncestorsOrSelf(const Box& box) : box_(&box) {}
+Box::AncestorsOrSelf::~AncestorsOrSelf() {}
 
-Box::AncestorsOrSelfOf::Iterator Box::AncestorsOrSelfOf::begin() const {
+Box::AncestorsOrSelf::Iterator Box::AncestorsOrSelf::begin() const {
   return Iterator(const_cast<Box*>(box_));
 }
 
-Box::AncestorsOrSelfOf::Iterator Box::AncestorsOrSelfOf::end() const {
+Box::AncestorsOrSelf::Iterator Box::AncestorsOrSelf::end() const {
   return Iterator(nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// Box::AncestorsOrSelfOf::Iterator
+// Box::AncestorsOrSelf::Iterator
 //
-Box::AncestorsOrSelfOf::Iterator::Iterator(Box* box) : box_(box) {}
+Box::AncestorsOrSelf::Iterator::Iterator(Box* box) : box_(box) {}
 
-Box::AncestorsOrSelfOf::Iterator::Iterator(const Iterator& other)
+Box::AncestorsOrSelf::Iterator::Iterator(const Iterator& other)
     : box_(other.box_) {}
 
-Box::AncestorsOrSelfOf::Iterator::~Iterator() {}
+Box::AncestorsOrSelf::Iterator::~Iterator() {}
 
-Box* Box::AncestorsOrSelfOf::Iterator::operator*() const {
+Box* Box::AncestorsOrSelf::Iterator::operator*() const {
   DCHECK(box_);
   return box_;
 }
 
-Box* Box::AncestorsOrSelfOf::Iterator::operator->() const {
+Box* Box::AncestorsOrSelf::Iterator::operator->() const {
   DCHECK(box_);
   return box_;
 }
 
-Box::AncestorsOrSelfOf::Iterator& Box::AncestorsOrSelfOf::Iterator::
-operator++() {
+Box::AncestorsOrSelf::Iterator& Box::AncestorsOrSelf::Iterator::operator++() {
   DCHECK(box_);
   box_ = box_->parent();
   return *this;
 }
 
-bool Box::AncestorsOrSelfOf::Iterator::operator==(const Iterator& other) const {
+bool Box::AncestorsOrSelf::Iterator::operator==(const Iterator& other) const {
   return box_ == other.box_;
 }
 
-bool Box::AncestorsOrSelfOf::Iterator::operator!=(const Iterator& other) const {
+bool Box::AncestorsOrSelf::Iterator::operator!=(const Iterator& other) const {
   return !operator==(other);
 }
 

@@ -11,9 +11,9 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Box::AncestorsOrSelfOf
+// Box::AncestorsOrSelf
 //
-class Box::AncestorsOrSelfOf final {
+class Box::AncestorsOrSelf final {
  public:
   class Iterator final {
    public:
@@ -32,8 +32,8 @@ class Box::AncestorsOrSelfOf final {
     Box* box_;
   };
 
-  explicit AncestorsOrSelfOf(const Box& box);
-  ~AncestorsOrSelfOf();
+  explicit AncestorsOrSelf(const Box& box);
+  ~AncestorsOrSelf();
 
   Iterator begin() const;
   Iterator end() const;
@@ -41,7 +41,7 @@ class Box::AncestorsOrSelfOf final {
  private:
   const Box* box_;
 
-  DISALLOW_COPY_AND_ASSIGN(AncestorsOrSelfOf);
+  DISALLOW_COPY_AND_ASSIGN(AncestorsOrSelf);
 };
 
 }  // namespace visuals

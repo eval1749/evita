@@ -48,7 +48,7 @@ void BoxEditor::DidChangeContent(Box* box) {
 }
 
 void BoxEditor::DidChangeLayout(Box* box) {
-  for (const auto& runner : Box::AncestorsOrSelfOf(*box)) {
+  for (const auto& runner : Box::AncestorsOrSelf(*box)) {
     if (runner->is_layout_dirty_)
       return;
     runner->is_layout_dirty_ = true;

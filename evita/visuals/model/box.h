@@ -45,7 +45,7 @@ class Box : public common::Castable {
 
  public:
   class Ancestors;
-  class AncestorsOrSelfOf;
+  class AncestorsOrSelf;
 
   virtual ~Box();
 

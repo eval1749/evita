@@ -33,6 +33,11 @@ class FloatMatrix3x2 final {
 
   const std::array<float, 6>& data() const { return data_; }
 
+  double ComputeDeterminant() const;
+  FloatMatrix3x2 Inverse() const;
+  bool IsIdentity() const;
+  bool IsIdentityOrTranslation() const;
+
   static FloatMatrix3x2 Identity();
 
  private:

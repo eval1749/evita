@@ -44,4 +44,14 @@ TEST(FloatMatrix3x2Test, Equals) {
   EXPECT_TRUE(matrix2 != matrix3);
 }
 
+TEST(FloatMatrix3x2Test, Inverse) {
+  EXPECT_EQ(FloatMatrix3x2(), FloatMatrix3x2().Inverse());
+  EXPECT_EQ(FloatMatrix3x2({1, 0, 0, 1, -10, -20}),
+            FloatMatrix3x2({1, 0, 0, 1, 10, 20}).Inverse());
+  EXPECT_EQ(FloatMatrix3x2({0.5, 0, 0, 0.5, 0, 0}),
+            FloatMatrix3x2({2, 0, 0, 2, 0, 0}).Inverse());
+  EXPECT_EQ(FloatMatrix3x2({0.5, 0, 0, 0.5, -1.5, -2}),
+            FloatMatrix3x2({2, 0, 0, 2, 3, 4}).Inverse());
+}
+
 }  // namespace visuals

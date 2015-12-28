@@ -21,6 +21,12 @@ int last_box_id;
 Box::Box() : id_(++last_box_id) {}
 Box::~Box() {}
 
+FloatRect Box::content_bounds() const {
+  return FloatRect(FloatPoint() + border_.top_left() + padding_.top_left(),
+                   bounds_.size() - border_.top_left() - padding_.top_left() -
+                       border_.bottom_right() - padding_.bottom_right());
+}
+
 bool Box::IsDescendantOf(const Box& other) const {
   for (auto runner = parent(); runner; runner = runner->parent()) {
     if (runner == &other)

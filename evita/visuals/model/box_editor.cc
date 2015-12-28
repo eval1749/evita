@@ -81,10 +81,6 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
   if (box->bounds_ == new_bounds)
     return;
   box->bounds_ = new_bounds;
-  box->content_bounds_ = FloatRect(
-      FloatPoint() + box->border().top_left() + box->padding().top_left(),
-      new_bounds.size() - box->border().top_left() - box->padding().top_left() -
-          box->border().bottom_right() - box->padding().bottom_right());
 }
 
 void BoxEditor::SetLayoutClean(Box* box) {

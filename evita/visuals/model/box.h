@@ -57,7 +57,7 @@ class Box : public common::Castable {
 
   // Layout related values
   const FloatRect& bounds() const { return bounds_; }
-  const FloatRect& content_bounds() const { return content_bounds_; }
+  FloatRect content_bounds() const;
 
   // CSS background and background
   const Background& background() const { return background_; }
@@ -88,7 +88,6 @@ class Box : public common::Castable {
   Background background_;
   Border border_;
   FloatRect bounds_;
-  FloatRect content_bounds_;
   const int id_;
   // When |is_content_dirty_| is true, we send bounds of this box to
   // compositor to display on screen.

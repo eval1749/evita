@@ -44,6 +44,7 @@ class Box : public common::Castable {
   DECLARE_VISUAL_BOX_ABSTRACT_CLASS(Box, Castable);
 
  public:
+  class Ancestors;
   class AncestorsOrSelfOf;
 
   virtual ~Box();
@@ -89,6 +90,8 @@ class Box : public common::Castable {
   FloatRect bounds_;
   FloatRect content_bounds_;
   const int id_;
+  // When |is_content_dirty_| is true, we send bounds of this box to
+  // compositor to display on screen.
   bool is_content_dirty_ = true;
   bool is_layout_dirty_ = true;
   Margin margin_;

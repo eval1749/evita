@@ -5,6 +5,7 @@
 #include "evita/visuals/model/box_editor.h"
 
 #include "base/logging.h"
+#include "evita/visuals/model/ancestors.h"
 #include "evita/visuals/model/ancestors_or_self.h"
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
@@ -36,10 +37,13 @@ Box* BoxEditor::AppendChild(ContainerBox* container,
 }
 
 void BoxEditor::DidChangeContent(Box* box) {
-  for (const auto& runner : Box::AncestorsOrSelfOf(*box)) {
-    if (runner->is_content_dirty_)
+  if (box->is_content_dirty_)
+    return;
+  box->is_content_dirty_ = true;
+  for (const auto& runner : Box::Ancestors(*box)) {
+    if (runner->is_content_dirty_ || runner->is_child_content_dirty_)
       return;
-    runner->is_content_dirty_ = true;
+    runner->is_child_content_dirty_ = true;
   }
 }
 

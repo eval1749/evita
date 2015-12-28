@@ -27,6 +27,8 @@ class ContainerBox : public Box {
 
   const std::vector<Box*> child_boxes() const { return child_boxes_; }
 
+  bool IsChildContentDirty() const { return is_child_content_dirty_; }
+
  protected:
   ContainerBox();
 
@@ -36,6 +38,13 @@ class ContainerBox : public Box {
   // For ease of using list of child boxes, we don't use |std::unique_ptr<Box>|
   // for elements of |std::vector<T>|.
   std::vector<Box*> child_boxes_;
+
+  // |is_child_content_dirty_| is true when at least one of child box has an
+  // updated content. We paint background, border, and padding of this container
+  // box for painting child boxes.
+  // Note: If child box is independent from background of its container box, we
+  // don't need to paint container box, e.g. child box has background color.
+  bool is_child_content_dirty_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(ContainerBox);
 };

@@ -30,6 +30,10 @@ AffineTransformer& AffineTransformer::operator=(
   return *this;
 }
 
+AffineTransformer AffineTransformer::Inverse() const {
+  return AffineTransformer(matrix_.Inverse());
+}
+
 FloatPoint AffineTransformer::MapPoint(const FloatPoint& point) const {
   return FloatPoint(matrix_ * std::make_pair(point.x(), point.y()));
 }
@@ -53,18 +57,21 @@ FloatRect AffineTransformer::MapRect(const FloatRect& rect) const {
 }
 
 bool AffineTransformer::IsIdentity() const {
-  return matrix_ == FloatMatrix3x2::Identity();
+  return matrix_.IsIdentity();
 }
 
 bool AffineTransformer::IsIdentityOrTranslation() const {
-  return matrix_.data()[0] == 1 && matrix_.data()[1] == 0 &&
-         matrix_.data()[2] == 0 && matrix_.data()[3] == 1;
+  return matrix_.IsIdentityOrTranslation();
 }
 
 void AffineTransformer::Scale(float sx, float sy, const FloatPoint& center) {
   matrix_ =
       matrix_ * FloatMatrix3x2({sx, 0, 0, sy, center.x() - sx * center.x(),
                                 center.y() - sy * center.y()});
+}
+
+void AffineTransformer::Translate(const FloatPoint& point) {
+  Translate(point.x(), point.y());
 }
 
 void AffineTransformer::Translate(float x, float y) {

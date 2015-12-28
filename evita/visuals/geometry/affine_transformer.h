@@ -28,6 +28,10 @@ class AffineTransformer final {
 
   AffineTransformer& operator=(const AffineTransformer& other);
 
+  const FloatMatrix3x2& matrix() const { return matrix_; }
+  void set_matrix(const FloatMatrix3x2& matrix) { matrix_ = matrix; }
+
+  AffineTransformer Inverse() const;
   FloatPoint MapPoint(const FloatPoint& point) const;
   FloatSize MapSize(const FloatSize& size) const;
   FloatRect MapRect(const FloatRect& rect) const;
@@ -35,6 +39,7 @@ class AffineTransformer final {
   bool IsIdentity() const;
   bool IsIdentityOrTranslation() const;
   void Scale(float x, float y, const FloatPoint& center);
+  void Translate(const FloatPoint& point);
   void Translate(float x, float y);
 
  private:

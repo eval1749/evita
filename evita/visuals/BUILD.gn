@@ -6,6 +6,8 @@ import("//testing/test.gni")
 
 source_set("visuals") {
   sources = [
+    "geometry/float_matrix3x2.h",
+    "geometry/float_matrix3x2.cc",
     "geometry/float_point.h",
     "geometry/float_point.cc",
     "geometry/float_rect.h",
@@ -90,6 +92,7 @@ test("tests") {
   output_name = "evita_visuals_tests"
 
   sources = [
+    "geometry/float_matrix3x2_test.cc",
     "geometry/float_point_test.cc",
     "geometry/float_rect_test.cc",
     "geometry/float_size_test.cc",

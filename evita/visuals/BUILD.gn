@@ -6,18 +6,18 @@ import("//testing/test.gni")
 
 source_set("visuals") {
   sources = [
-    "geometry/affine_transformer.h",
     "geometry/affine_transformer.cc",
-    "geometry/float_matrix3x2.h",
+    "geometry/affine_transformer.h",
     "geometry/float_matrix3x2.cc",
-    "geometry/float_point.h",
+    "geometry/float_matrix3x2.h",
     "geometry/float_point.cc",
-    "geometry/float_rect.h",
-    "geometry/float_rect.cc",
+    "geometry/float_point.h",
     "geometry/float_quad.cc",
     "geometry/float_quad.h",
-    "geometry/float_size.h",
+    "geometry/float_rect.cc",
+    "geometry/float_rect.h",
     "geometry/float_size.cc",
+    "geometry/float_size.h",
 
     "layout/layouter.h",
     "layout/layouter.cc",

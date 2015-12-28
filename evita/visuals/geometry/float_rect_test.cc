@@ -36,4 +36,21 @@ TEST(FloatRectTest, Equals) {
   EXPECT_TRUE(rect1 != rect2);
 }
 
+TEST(FloatFloatRectTest, Intersect) {
+  EXPECT_EQ(FloatRect(FloatPoint(10, 20), FloatSize(30, 40)),
+            FloatRect(FloatPoint(10, 20), FloatSize(30, 40))
+                .Intersect(FloatRect(FloatSize(100, 100))));
+  EXPECT_EQ(FloatRect(),
+            FloatRect(FloatPoint(10, 20), FloatSize(30, 40))
+                .Intersect(FloatRect(FloatSize(1, 1))));
+}
+
+TEST(FloatFloatRectTest, Intersects) {
+  EXPECT_TRUE(
+      FloatRect(FloatPoint(10, 20), FloatSize(30, 40))
+          .Intersects(FloatRect(FloatSize(100, 100))));
+  EXPECT_FALSE(FloatRect(FloatPoint(10, 20), FloatSize(30, 40))
+                   .Intersects(FloatRect(FloatSize(1, 1))));
+}
+
 }  // namespace visuals

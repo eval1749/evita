@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <ostream>
 
 #include "evita/visuals/geometry/float_rect.h"
@@ -66,6 +67,24 @@ bool FloatRect::Contains(const FloatPoint& point) const {
 bool FloatRect::Contains(const FloatRect& rect) const {
   return (rect.x() >= x() && rect.right() <= right() && rect.y() >= y() &&
           rect.bottom() <= bottom());
+}
+
+FloatRect FloatRect::Intersect(const FloatRect& other) const {
+  if (IsEmpty() || other.IsEmpty())
+    return FloatRect();
+  const auto rx = std::max(x(), other.x());
+  const auto ry = std::max(y(), other.y());
+  const auto rr = std::min(right(), other.right());
+  const auto rb = std::min(bottom(), other.bottom());
+  if (rx >= rr || ry >= rb)
+    return FloatRect();
+  return FloatRect(FloatPoint(rx, ry), FloatSize(rr - rx, rb - ry));
+}
+
+bool FloatRect::Intersects(const FloatRect& other) const {
+  return !(IsEmpty() || other.IsEmpty() || other.x() >= right() ||
+           other.right() <= x() || other.y() >= bottom() ||
+           other.bottom() <= y());
 }
 
 std::ostream& operator<<(std::ostream& ostream, const FloatRect& rect) {

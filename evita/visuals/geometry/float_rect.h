@@ -63,6 +63,13 @@ class FloatRect final {
   bool Contains(const FloatPoint& point) const;
   bool Contains(const FloatRect& rect) const;
 
+  // Computes the intersection of this rectangle with the given rectangle.
+  FloatRect Intersect(const FloatRect& other) const;
+
+  // Returns true if this rectangle intersects the specified rectangle.
+  // An empty rectangle doesn't intersect any rectangle.
+  bool Intersects(const FloatRect& other) const;
+
   // Returns true if the area of the rectangle is zero.
   bool IsEmpty() const { return size_.IsEmpty(); }
 

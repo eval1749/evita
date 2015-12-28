@@ -12,6 +12,7 @@
 #include "common/castable.h"
 #include "evita/visuals/display/public/display_items_forward.h"
 #include "evita/visuals/style/float_color.h"
+#include "evita/visuals/geometry/float_matrix3x2.h"
 #include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
@@ -79,6 +80,28 @@ class BeginClipDisplayItem final : public DisplayItem {
   const FloatRect bounds_;
 
   DISALLOW_COPY_AND_ASSIGN(BeginClipDisplayItem);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// BeginTransformDisplayItem
+//
+class BeginTransformDisplayItem final : public DisplayItem {
+  DECLARE_DISPLAY_ITEM_FINAL_CLASS(BeginTransformDisplayItem, DisplayItem)
+
+ public:
+  explicit BeginTransformDisplayItem(const FloatMatrix3x2& matrix);
+  ~BeginTransformDisplayItem();
+
+  const FloatMatrix3x2& matrix() const { return matrix_; }
+
+ private:
+  // DisplayItem
+  bool EqualsTo(const DisplayItem& other) const final;
+
+  const FloatMatrix3x2 matrix_;
+
+  DISALLOW_COPY_AND_ASSIGN(BeginTransformDisplayItem);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -156,6 +179,24 @@ class EndClipDisplayItem final : public DisplayItem {
   bool EqualsTo(const DisplayItem& other) const final;
 
   DISALLOW_COPY_AND_ASSIGN(EndClipDisplayItem);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// EndTransformDisplayItem
+//
+class EndTransformDisplayItem final : public DisplayItem {
+  DECLARE_DISPLAY_ITEM_FINAL_CLASS(EndTransformDisplayItem, DisplayItem)
+
+ public:
+  EndTransformDisplayItem();
+  ~EndTransformDisplayItem();
+
+ private:
+  // DisplayItem
+  bool EqualsTo(const DisplayItem& other) const final;
+
+  DISALLOW_COPY_AND_ASSIGN(EndTransformDisplayItem);
 };
 
 //////////////////////////////////////////////////////////////////////

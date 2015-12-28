@@ -9,9 +9,11 @@ namespace visuals {
 
 #define FOR_EACH_DISPLAY_ITEM(V) \
   V(BeginClip)                   \
+  V(BeginTransform)              \
   V(DrawRect)                    \
   V(DrawText)                    \
   V(EndClip)                     \
+  V(EndTransform)                \
   V(FillRect)
 
 #define FOR_EACH_ABSTRACT_DISPLAY_ITEM(V) V(DisplayItem)

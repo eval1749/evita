@@ -46,6 +46,24 @@ bool BeginClipDisplayItem::EqualsTo(const DisplayItem& other) const {
 
 //////////////////////////////////////////////////////////////////////
 //
+// BeginTransformDisplayItem
+//
+BeginTransformDisplayItem::BeginTransformDisplayItem(
+    const FloatMatrix3x2& matrix)
+    : matrix_(matrix) {}
+BeginTransformDisplayItem::~BeginTransformDisplayItem() {}
+
+bool BeginTransformDisplayItem::EqualsTo(const DisplayItem& other) const {
+  if (this == &other)
+    return false;
+  const auto& item = other.as<BeginTransformDisplayItem>();
+  if (!item)
+    return false;
+  return matrix_ == item->matrix_;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // DrawRectDisplayItem
 //
 DrawRectDisplayItem::DrawRectDisplayItem(const FloatRect& bounds,
@@ -96,6 +114,19 @@ bool EndClipDisplayItem::EqualsTo(const DisplayItem& other) const {
   if (this == &other)
     return false;
   return other.is<EndClipDisplayItem>();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// EndTransformDisplayItem
+//
+EndTransformDisplayItem::EndTransformDisplayItem() {}
+EndTransformDisplayItem::~EndTransformDisplayItem() {}
+
+bool EndTransformDisplayItem::EqualsTo(const DisplayItem& other) const {
+  if (this == &other)
+    return false;
+  return other.is<EndTransformDisplayItem>();
 }
 
 //////////////////////////////////////////////////////////////////////

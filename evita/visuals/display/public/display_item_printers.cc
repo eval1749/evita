@@ -46,6 +46,10 @@ void Printer::VisitBeginClip(BeginClipDisplayItem* item) {
   *ostream_ << item->bounds();
 }
 
+void Printer::VisitBeginTransform(BeginTransformDisplayItem* item) {
+  *ostream_ << item->matrix();
+}
+
 void Printer::VisitDrawRect(DrawRectDisplayItem* item) {
   *ostream_ << item->bounds() << ' ' << item->color()
             << " thickness=" << item->thickness();
@@ -67,6 +71,7 @@ void Printer::VisitDrawText(DrawTextDisplayItem* item) {
 }
 
 void Printer::VisitEndClip(EndClipDisplayItem* item) {}
+void Printer::VisitEndTransform(EndTransformDisplayItem* item) {}
 
 void Printer::VisitFillRect(FillRectDisplayItem* item) {
   *ostream_ << item->bounds() << ' ' << item->color();

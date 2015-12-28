@@ -11,9 +11,11 @@
 #include "evita/visuals/style/background.h"
 #include "evita/visuals/style/border.h"
 #include "evita/visuals/style/float_color.h"
+#include "evita/visuals/style/height.h"
 #include "evita/visuals/style/padding.h"
 #include "evita/visuals/style/margin.h"
 #include "evita/visuals/style/style_properties_forward.h"
+#include "evita/visuals/style/width.h"
 
 namespace visuals {
 

@@ -60,6 +60,8 @@ source_set("visuals") {
     "style/display.h",
     "style/float_color.cc",
     "style/float_color.h",
+    "style/height.cc",
+    "style/height.h",
     "style/margin.cc",
     "style/margin.h",
     "style/padding.cc",
@@ -73,6 +75,8 @@ source_set("visuals") {
     "style/style_properties_forward.h",
     "style/thickness.cc",
     "style/thickness.h",
+    "style/width.cc",
+    "style/width.h",
   ]
 
   public_deps = [

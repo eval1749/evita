@@ -74,6 +74,7 @@ Scheduler::Scheduler(domapi::ViewEventHandler* script_delegate)
       state_sequence_num_(1) {
   TRACE_EVENT_ASYNC_BEGIN1("view", "ViewState", state_sequence_num_, "state",
                            StateNameOf(state_));
+  ui::AnimationScheduler::GetInstance()->SetScheduler(this);
 }
 
 Scheduler::~Scheduler() {}
@@ -109,9 +110,9 @@ void Scheduler::BeginFrame() {
 
 void Scheduler::CancelAnimationFrameRequest(
     ui::AnimationFrameHandler* handler) {
-    TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::CancelAnimationFrame",
-                           handler, TRACE_EVENT_FLAG_FLOW_IN, "type",
-                           handler->GetAnimationFrameType());
+  TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::CancelAnimationFrame",
+                         handler, TRACE_EVENT_FLAG_FLOW_IN, "type",
+                         handler->GetAnimationFrameType());
   base::AutoLock lock_scope(*lock_);
   pending_handlers_.erase(handler);
 }

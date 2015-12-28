@@ -10,6 +10,7 @@
 
 #include "base/macros.h"
 #include "base/time/time.h"
+#include "evita/ui/animation/animation_scheduler.h"
 
 namespace base {
 class Lock;
@@ -30,12 +31,12 @@ namespace editor {
 //
 // Scheduler
 //
-class Scheduler final {
+class Scheduler final : public ui::AnimationScheduler {
  public:
   enum class State;
 
   explicit Scheduler(domapi::ViewEventHandler* script_delegate);
-  ~Scheduler();
+  ~Scheduler() final;
 
   // Request animation frame.
   void CancelAnimationFrameRequest(ui::AnimationFrameHandler* handler);

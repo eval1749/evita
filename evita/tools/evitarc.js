@@ -1,6 +1,6 @@
 [
     // A
-    'accessor', 'allocator', 'allocatable', 'Allocatable',
+    'accessor', 'affine', 'allocator', 'allocatable', 'Allocatable',
     'Animatable', 'animatable', 'Animatables', 'animatables',
     'Arity', 'arity', 'ast',
     // B

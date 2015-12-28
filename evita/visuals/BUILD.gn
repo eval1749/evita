@@ -88,12 +88,24 @@ source_set("visuals") {
 executable("demo") {
   output_name = "evita_visuals_demo"
   sources = [
+    "demo/demo_application.cc",
+    "demo/demo_application.h",
     "demo/demo_main.cc",
+    "demo/demo_window.cc",
+    "demo/demo_window.h",
   ]
 
   deps = [
     ":visuals",
+    "//evita/ui:widget",
   ]
+
+  if (is_win) {
+    sources += [ "demo/demo_window_win.cc" ]
+  }
+
+  configs -= [ "//build/config/win:console" ]
+  configs += [ "//build/config/win:windowed" ]
 }
 
 test("tests") {

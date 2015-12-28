@@ -13,6 +13,7 @@
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"
+#include "evita/visuals/paint/paint_info.h"
 
 namespace visuals {
 
@@ -31,7 +32,7 @@ bool IsSimpleBorder(const Border& border) {
 //
 class PaintVisitor final : public BoxVisitor {
  public:
-  PaintVisitor() = default;
+  explicit PaintVisitor(const PaintInfo& paint_info);
   ~PaintVisitor() final = default;
 
   std::unique_ptr<DisplayItemList> Paint(const Box& box);
@@ -51,18 +52,36 @@ class PaintVisitor final : public BoxVisitor {
 #define V(name) void Visit##name(name* box) final;
   FOR_EACH_VISUAL_BOX(V)
 #undef V
+
+  bool NeedsPaintContainerBox(const ContainerBox& box) const;
+  bool NeedsPaintInlineBox(const InlineBox& box) const;
   void PaintDecoration(const Box& box);
 
   DisplayItemListBuilder builder_;
+  const PaintInfo& paint_info_;
 
   DISALLOW_COPY_AND_ASSIGN(PaintVisitor);
 };
 
+PaintVisitor::PaintVisitor(const PaintInfo& paint_info)
+    : paint_info_(paint_info) {}
+
+bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
+  if (!box.IsContentDirty() && !box.IsChildContentDirty())
+    return false;
+  return !paint_info_.cull_rect().Intersects(box.bounds());
+}
+
 std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const Box& box) {
   DCHECK(box.IsLayoutClean());
-  if (box.IsContentDirty())
-    Visit(box);
+  Visit(box);
   return builder_.Build();
+}
+
+bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
+  if (!box.IsContentDirty())
+    return false;
+  return !paint_info_.cull_rect().Intersects(box.bounds());
 }
 
 void PaintVisitor::PaintDecoration(const Box& box) {
@@ -89,6 +108,8 @@ void PaintVisitor::PaintDecoration(const Box& box) {
 
 // BoxVisitor
 void PaintVisitor::VisitBlockBox(BlockBox* block) {
+  if (NeedsPaintContainerBox(*block))
+    return;
   PaintDecoration(*block);
   ClipScope clip_scope(this, block->content_bounds());
   for (const auto& child : block->child_boxes())
@@ -96,6 +117,8 @@ void PaintVisitor::VisitBlockBox(BlockBox* block) {
 }
 
 void PaintVisitor::VisitLineBox(LineBox* line) {
+  if (NeedsPaintContainerBox(*line))
+    return;
   PaintDecoration(*line);
   ClipScope clip_scope(this, line->content_bounds());
   for (const auto& child : line->child_boxes())
@@ -103,6 +126,8 @@ void PaintVisitor::VisitLineBox(LineBox* line) {
 }
 
 void PaintVisitor::VisitTextBox(TextBox* text) {
+  if (NeedsPaintInlineBox(*text))
+    return;
   PaintDecoration(*text);
   ClipScope clip_scope(this, text->content_bounds());
   builder_.AddNew<DrawTextDisplayItem>(text->content_bounds(), text->color(),
@@ -132,8 +157,9 @@ PaintVisitor::ClipScope::~ClipScope() {
 Painter::Painter() {}
 Painter::~Painter() {}
 
-std::unique_ptr<DisplayItemList> Painter::Paint(const Box& box) {
-  return PaintVisitor().Paint(box);
+std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
+                                                const Box& box) {
+  return PaintVisitor(paint_info).Paint(box);
 }
 
 }  // namespace visuals

@@ -18,6 +18,7 @@
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/paint/painter.h"
+#include "evita/visuals/paint/paint_info.h"
 #include "evita/visuals/style/style.h"
 #include "evita/visuals/style/style_builder.h"
 
@@ -104,7 +105,8 @@ void DemoMain() {
   BoxPrinter printer;
   printer.Visit(*root_box);
 
-  const auto& display_item_list = Painter().Paint(*root_box);
+  PaintInfo paint_info(FloatRect(FloatSize(640, 480)));
+  const auto& display_item_list = Painter().Paint(paint_info, *root_box);
   {
     auto indent = 0;
     for (const auto& item : display_item_list->items()) {

@@ -43,6 +43,8 @@ source_set("visuals") {
 
     "paint/painter.cc",
     "paint/painter.h",
+    "paint/paint_info.cc",
+    "paint/paint_info.h",
 
     "style/background.cc",
     "style/background.h",

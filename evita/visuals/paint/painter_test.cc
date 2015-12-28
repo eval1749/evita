@@ -10,6 +10,7 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/box_builder.h"
 #include "evita/visuals/paint/painter.h"
+#include "evita/visuals/paint/paint_info.h"
 #include "evita/visuals/style/float_color.h"
 #include "evita/visuals/style/style.h"
 #include "evita/visuals/style/style_builder.h"
@@ -18,14 +19,16 @@
 namespace visuals {
 
 TEST(PainterTest, Basic) {
+  const auto& viewport_bounds = FloatRect(FloatSize(200, 100));
   const auto& root_box =
       BoxBuilder::New<BlockBox>()
           .SetStyle(*StyleBuilder()
                          .SetBackground(Background(FloatColor(1, 1, 1)))
                          .Build())
           .Finish();
-  Layouter().Layout(root_box.get(), FloatRect(FloatSize(200, 100)));
-  const auto& display_item_list = Painter().Paint(*root_box);
+  Layouter().Layout(root_box.get(), viewport_bounds);
+  PaintInfo paint_info(viewport_bounds);
+  const auto& display_item_list = Painter().Paint(paint_info, *root_box);
   EXPECT_EQ(3, display_item_list->items().size());
 }
 

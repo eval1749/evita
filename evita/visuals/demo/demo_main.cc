@@ -87,7 +87,7 @@ void DemoMain() {
   builder.SetStyle(
       *StyleBuilder().SetBackground(Background(FloatColor(1, 1, 1))).Build());
   const auto& kBlack = StyleBuilder().SetColor(FloatColor(0, 0, 0)).Build();
-  for (auto index = 0; index < 10; ++index) {
+  for (auto index = 0; index < 15; ++index) {
     auto line_builder = BoxBuilder::New<LineBox>();
     line_builder.Append(BoxBuilder::New<TextBox>(
                             base::StringPrintf(L"line %d", index))
@@ -99,24 +99,31 @@ void DemoMain() {
     builder.Append(line_builder.Finish());
   }
 
+  const auto& viewport_bounds = FloatRect(FloatSize(640, 480));
   const auto& root_box = builder.Finish();
-  Layouter().Layout(root_box.get(), FloatRect(FloatSize(640, 480)));
+  Layouter().Layout(root_box.get(), viewport_bounds);
 
+  std::cout << "Box Tree:" << std::endl;
   BoxPrinter printer;
   printer.Visit(*root_box);
 
-  PaintInfo paint_info(FloatRect(FloatSize(640, 480)));
+  std::cout << std::endl << "Display Item List:" << std::endl;
+  PaintInfo paint_info(viewport_bounds);
   const auto& display_item_list = Painter().Paint(paint_info, *root_box);
   {
     auto indent = 0;
     for (const auto& item : display_item_list->items()) {
+      if (item->is<EndClipDisplayItem>() ||
+                 item->is<EndTransformDisplayItem>()) {
+        --indent;
+      }
       for (auto count = indent; count > 0; --count)
         std::cout << "  ";
       std::cout << item << std::endl;
-      if (item->is<BeginClipDisplayItem>())
+      if (item->is<BeginClipDisplayItem>() ||
+          item->is<BeginTransformDisplayItem>()) {
         ++indent;
-      if (item->is<EndClipDisplayItem>())
-        --indent;
+      }
     }
   }
 }

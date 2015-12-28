@@ -44,6 +44,8 @@
     'unordered',
     // V
     'Validator', 'validator', 'Variadic', 'variadic', 'Visitable', 'visitable',
+    'viewport',
+    // W
     'waitable', 'whitespace',
     'yosi', 'yosin',
 ].forEach(function(word) {

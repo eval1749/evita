@@ -194,7 +194,7 @@ void Widget::DidRealizeChildWidget(Widget* widget) {}
 void Widget::DidRemoveChildWidget(Widget* widget) {}
 
 void Widget::DidRequestDestroy() {
-  ::DestroyWindow(AssociatedHwnd());
+  DestroyWidget();
 }
 
 void Widget::DidChangeBounds() {

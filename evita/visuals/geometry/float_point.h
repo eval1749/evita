@@ -6,6 +6,7 @@
 #define EVITA_VISUALS_GEOMETRY_FLOAT_POINT_H_
 
 #include <iosfwd>
+#include <utility>
 
 namespace visuals {
 
@@ -17,6 +18,7 @@ class FloatSize;
 //
 class FloatPoint final {
  public:
+  explicit FloatPoint(const std::pair<float, float> pair);
   FloatPoint(float x, float y);
   FloatPoint(const FloatPoint& other);
   FloatPoint();

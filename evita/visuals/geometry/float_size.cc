@@ -14,6 +14,9 @@ namespace visuals {
 //
 // FloatSize
 //
+FloatSize::FloatSize(const std::pair<float, float> pair)
+    : FloatSize(pair.first, pair.second) {}
+
 FloatSize::FloatSize(float width, float height)
     : height_(height), width_(width) {
   DCHECK_GE(height_, 0.0f);

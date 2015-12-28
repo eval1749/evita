@@ -7,10 +7,9 @@
 
 #include <array>
 #include <iosfwd>
+#include <utility>
 
 namespace visuals {
-
-class FloatPoint;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -30,12 +29,11 @@ class FloatMatrix3x2 final {
   bool operator!=(const FloatMatrix3x2& other) const;
 
   FloatMatrix3x2 operator*(const FloatMatrix3x2& other) const;
+  std::pair<float, float> operator*(const std::pair<float, float> pair) const;
 
   const std::array<float, 6>& data() const { return data_; }
 
   static FloatMatrix3x2 Identity();
-  static FloatMatrix3x2 Scale(float sx, float sy, const FloatPoint& center);
-  static FloatMatrix3x2 Translation(float x, float y);
 
  private:
   std::array<float, 6> data_;

@@ -15,6 +15,9 @@ namespace visuals {
 //
 // FloatPoint
 //
+FloatPoint::FloatPoint(const std::pair<float, float> pair)
+    : FloatPoint(pair.first, pair.second) {}
+
 FloatPoint::FloatPoint(float x, float y) : x_(x), y_(y) {}
 
 FloatPoint::FloatPoint(const FloatPoint& other)

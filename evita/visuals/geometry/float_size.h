@@ -6,6 +6,7 @@
 #define EVITA_VISUALS_GEOMETRY_FLOAT_SIZE_H_
 
 #include <iosfwd>
+#include <utility>
 
 namespace visuals {
 
@@ -15,6 +16,7 @@ namespace visuals {
 //
 class FloatSize final {
  public:
+  explicit FloatSize(const std::pair<float, float> pair);
   FloatSize(float width, float height);
   FloatSize(const FloatSize& other);
   FloatSize();

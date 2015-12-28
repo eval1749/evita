@@ -8,16 +8,22 @@
 #include <array>
 #include <iosfwd>
 
-#include "evita/visuals/geometry/float_point.h"
+#include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// FloatQuad
+// FloatQuad represents a collection of 4 points, often representing the result
+// of // mapping a rectangle through transforms. When initialized from a rect,
+// the points are in clockwise order from top left.
 //
 class FloatQuad final {
  public:
+  FloatQuad(const FloatPoint& point1,
+            const FloatPoint& point2,
+            const FloatPoint& point3,
+            const FloatPoint& point4);
   explicit FloatQuad(const std::array<FloatPoint, 4>& data);
   FloatQuad(const FloatQuad& other);
   FloatQuad();
@@ -31,6 +37,8 @@ class FloatQuad final {
   FloatQuad operator*(const FloatQuad& other) const;
 
   const std::array<FloatPoint, 4>& data() const { return data_; }
+
+  FloatRect ComputeBoundingBox() const;
 
  private:
   std::array<FloatPoint, 4> data_;

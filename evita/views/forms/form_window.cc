@@ -438,8 +438,7 @@ FormWindow::FormWindow(domapi::WindowId window_id,
     : views::Window(ui::NativeWindow::Create(this), window_id),
       model_(new FormViewModel(form, this)),
       offset_(offset),
-      owner_(owner),
-      should_clear_canvas_(true) {}
+      owner_(owner) {}
 
 FormWindow::FormWindow(domapi::WindowId window_id, dom::Form* form)
     : FormWindow(window_id, form, nullptr, gfx::Point()) {}
@@ -449,8 +448,7 @@ FormWindow::~FormWindow() {}
 void FormWindow::Paint() {
   TRACE_EVENT0("view", "FormWindow::Paint");
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());
-  if (should_clear_canvas_) {
-    should_clear_canvas_ = false;
+  if (canvas_->should_clear()) {
     canvas_->AddDirtyRect(GetContentsBounds());
     canvas_->Clear(ui::SystemMetrics::instance()->bgcolor());
   }

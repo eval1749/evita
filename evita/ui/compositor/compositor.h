@@ -29,16 +29,21 @@ class Layer;
 class Compositor final {
  public:
   explicit Compositor(gfx::DxDevice* device);
+  Compositor();
   ~Compositor();
 
   IDCompositionDesktopDevice* desktop_device() const { return desktop_device_; }
   gfx::DxDevice* device() const { return device_; }
-  static Compositor* instance();
 
   void CommitIfNeeded();
   common::ComPtr<IDCompositionVisual2> CreateVisual();
   void NeedCommit() { need_commit_ = true; }
   void WaitForCommitCompletion();
+
+  // TODO(eval1749): We should use |ui::Compositor::GetInstance()| instead of
+  // |ui::Compositor::instance()|.
+  static Compositor* instance();
+  static Compositor* GetInstance();
 
  private:
   common::ComPtr<IDCompositionDesktopDevice> desktop_device_;

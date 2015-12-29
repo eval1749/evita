@@ -31,7 +31,6 @@
 #include "evita/paint/paint_thread.h"
 #include "evita/spellchecker/spelling_engine.h"
 #include "evita/ui/base/ime/text_input_client_win.h"
-#include "evita/ui/compositor/compositor.h"
 #include "evita/ui/widget.h"
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
@@ -180,9 +179,6 @@ void Application::Run() {
   // TODO(eval1749): We should use Singleton destructor for destructing
   // |gfx::DxDevice|.
   delete gfx::DxDevice::instance();
-  // TODO(eval1749): We should use Singleton destructor for destructing
-  // |ui::Compositor|.
-  delete ui::Compositor::instance();
 }
 
 }  // namespace editor

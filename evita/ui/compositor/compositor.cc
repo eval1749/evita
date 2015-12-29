@@ -3,16 +3,12 @@
 // found in the LICENSE file.
 
 #include <windows.h>
-// L1 C4917 'declarator' : a GUID can only be associated with a class, interface
-// or namespace
-#pragma warning(push)
-#pragma warning(disable : 4917)
 #include <dcomp.h>
-#pragma warning(pop)
 #pragma comment(lib, "dcomp.lib")
 
 #include "evita/ui/compositor/compositor.h"
 
+#include "base/memory/singleton.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx/dx_device.h"
 #include "evita/ui/compositor/layer.h"
@@ -30,14 +26,13 @@ Compositor::Compositor(gfx::DxDevice* device)
 #endif
 }
 
+Compositor::Compositor() : Compositor(gfx::DxDevice::instance()) {}
+
 Compositor::~Compositor() {}
 
 // static
 Compositor* Compositor::instance() {
-  static Compositor* static_compositor;
-  if (!static_compositor)
-    static_compositor = new Compositor(gfx::DxDevice::instance());
-  return static_compositor;
+  return GetInstance();
 }
 
 void Compositor::CommitIfNeeded() {
@@ -59,6 +54,11 @@ common::ComPtr<IDCompositionVisual2> Compositor::CreateVisual() {
   common::ComPtr<IDCompositionVisual2> visual;
   COM_VERIFY(desktop_device_->CreateVisual(&visual));
   return visual;
+}
+
+// static
+Compositor* Compositor::GetInstance() {
+  return base::Singleton<Compositor>().get();
 }
 
 void Compositor::WaitForCommitCompletion() {

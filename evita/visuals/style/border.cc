@@ -26,7 +26,13 @@ Border::Border(const FloatColor& color,
 Border::Border(const FloatColor& color, float width)
     : Border(color, width, width, width, width) {}
 
-Border::Border(const Border& other) : thickness_(other.thickness_) {}
+Border::Border(const Border& other)
+    : bottom_color_(other.bottom_color_),
+      left_color_(other.left_color_),
+      right_color_(other.right_color_),
+      top_color_(other.top_color_),
+      thickness_(other.thickness_) {}
+
 Border::Border() {}
 Border::~Border() {}
 

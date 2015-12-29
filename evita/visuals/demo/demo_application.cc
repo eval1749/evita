@@ -8,7 +8,6 @@
 
 #include "evita/visuals/demo/demo_application.h"
 
-#include "base/at_exit.h"
 #include "base/bind.h"
 #include "base/macros.h"
 #include "base/message_loop/message_loop.h"
@@ -29,9 +28,8 @@ namespace {
 //
 class DemoScheduler : public ui::AnimationScheduler {
  public:
-  DemoScheduler() { ui::AnimationScheduler::GetInstance()->SetScheduler(this); }
-
-  ~DemoScheduler() = default;
+  DemoScheduler();
+  ~DemoScheduler();
 
  private:
   void BeginFrame();
@@ -46,6 +44,15 @@ class DemoScheduler : public ui::AnimationScheduler {
 
   DISALLOW_COPY_AND_ASSIGN(DemoScheduler);
 };
+
+DemoScheduler::DemoScheduler() {
+  ui::AnimationScheduler::GetInstance()->SetScheduler(this);
+}
+
+DemoScheduler::~DemoScheduler() {
+  ui::AnimationScheduler::GetInstance()->SetScheduler(nullptr);
+}
+
 
 void DemoScheduler::BeginFrame() {
   std::unordered_set<ui::AnimationFrameHandler*> ready_handlers;
@@ -86,7 +93,6 @@ DemoApplication::DemoApplication() : model_(new DemoModel()) {}
 DemoApplication::~DemoApplication() {}
 
 void DemoApplication::Run() {
-  base::AtExitManager at_exit;
   DemoScheduler scheduler;
   base::RouteStdioToConsole(true);
   auto message_loop =

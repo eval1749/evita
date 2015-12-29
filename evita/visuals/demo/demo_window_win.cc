@@ -4,6 +4,7 @@
 
 #include <windows.h>
 
+#include "base/at_exit.h"
 #include "evita/visuals/demo/demo_application.h"
 #include "evita/visuals/demo/demo_window.h"
 
@@ -33,6 +34,7 @@ void DemoWindow::CreateNativeWindow() const {
 // WinMain
 //
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
+  base::AtExitManager at_exit;
   common::win::NativeWindow::Init(hInstance);
   visuals::DemoApplication().Run();
   return 0;

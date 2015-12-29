@@ -156,7 +156,8 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
   if (!canvas)
     return RequestAnimationFrame();
 
-  const auto& viewport_bounds = FloatRect(FloatSize(640, 480));
+  const auto& viewport_bounds = FloatRect(
+      FloatSize(window_->bounds().width(), window_->bounds().height()));
   Layouter().Layout(root_box_.get(), viewport_bounds);
 
   PaintInfo paint_info(viewport_bounds);

@@ -47,7 +47,7 @@ void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
 
 // BoxVisitor
 void LayoutVisitor::VisitBlockBox(BlockBox* box) {
-  auto child_origin = box->content_bounds().origin();
+  auto child_origin = FloatPoint();
   const auto child_width = box->content_bounds().width();
   for (const auto& child : box->child_boxes()) {
     const auto& child_size = child->ComputePreferredSize();
@@ -60,7 +60,7 @@ void LayoutVisitor::VisitBlockBox(BlockBox* box) {
 }
 
 void LayoutVisitor::VisitLineBox(LineBox* line) {
-  auto child_origin = line->content_bounds().origin();
+  auto child_origin = FloatPoint();
   const auto line_height = line->content_bounds().height();
   for (const auto& child : line->child_boxes()) {
     const auto& child_size = child->ComputePreferredSize();

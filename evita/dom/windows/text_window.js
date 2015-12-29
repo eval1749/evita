@@ -230,7 +230,7 @@ global.TextWindow.prototype.clone = function() {
    * @param {!TextWindow} window
    */
   function handleFocus(window) {
-    Editor.requestIdleCallback(updateObsolete.bind(window));
+    Editor.requestIdleCallback(updateObsolete.bind(window), {timeout:500});
     updateStatusBar(window);
     window.status = `Switch to ${window.document.name}`;
   }

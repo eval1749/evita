@@ -4,10 +4,10 @@
 
 /**
  * @constructor
- * @param {!Document|!DocumentState} document_or_state
+ * @param {!Document} document
  * @return {undefined}
  */
-function DocumentState(document_or_state) {}
+function DocumentState(document) {}
 
 /**
  * @typedef {function(!Document, !DocumentState)}
@@ -18,11 +18,6 @@ var DocumentStateCallback;
  * @param {!DocumentStateCallback} callback
  */
 DocumentState.addObserver = function(callback) {};
-
-/**
- * @param {!Document} document
- */
-DocumentState.update = function(document) {};
 
 /** @type {string} */
 DocumentState.prototype.fileName;
@@ -37,13 +32,7 @@ DocumentState.prototype.lastWriteTime;
 DocumentState.prototype.name;
 
 /** @type {number} */
+DocumentState.prototype.revision;
+
+/** @type {number} */
 DocumentState.prototype.state;
-
-/** @return {!DocumentState} */
-DocumentState.prototype.clone = function() {};
-
-/**
- * @param {!DocumentState} other
- * @return {boolean}
- */
-DocumentState.prototype.equals = function(other) {};

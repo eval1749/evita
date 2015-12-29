@@ -4,9 +4,9 @@
 
 /**
  * @constructor
- * @param {!DocumentState=} opt_state
+ * @return {undefined}
  */
-function TabData(opt_state) {}
+function TabData() {}
 
 /**
  * @param {!DocumentWindow} window

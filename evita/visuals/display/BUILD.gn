@@ -12,6 +12,17 @@ source_set("display") {
   ]
 }
 
+source_set("processor") {
+  sources = [
+    "display_item_list_processor.cc",
+    "display_item_list_processor.h",
+  ]
+  public_deps = [
+    ":public",
+    "//evita/gfx",
+  ]
+}
+
 source_set("public") {
   sources = [
     "public/display_items.cc",

@@ -187,6 +187,7 @@ void PaintVisitor::VisitTextBox(TextBox* text) {
 PaintVisitor::BoxPaintScope::BoxPaintScope(PaintVisitor* painter,
                                            const Box& box)
     : painter_(painter) {
+  painter_->builder_.AddRect(painter_->transformer_.MapRect(box.bounds()));
   painter_->transformer_.Translate(box.bounds().origin());
   painter_->PushTransform();
   painter_->PaintDecoration(box);

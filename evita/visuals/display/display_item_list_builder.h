@@ -6,14 +6,15 @@
 #define EVITA_VISUALS_DISPLAY_DISPLAY_ITEM_LIST_BUILDER_H_
 
 #include <memory>
+#include <vector>
 
 #include "base/macros.h"
+#include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
 class DisplayItem;
 class DisplayItemList;
-class FloatRect;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -26,15 +27,17 @@ class DisplayItemListBuilder final {
 
   template <typename T, typename... Args>
   void AddNew(Args&&... args) {
-    Add(std::move(std::unique_ptr<DisplayItem>(new T(args...))));
+    AddItem(std::move(std::unique_ptr<DisplayItem>(new T(args...))));
   }
 
+  void AddRect(const FloatRect& rect);
   std::unique_ptr<DisplayItemList> Build();
 
  private:
-  void Add(std::unique_ptr<DisplayItem> item);
+  void AddItem(std::unique_ptr<DisplayItem> item);
 
   std::unique_ptr<DisplayItemList> list_;
+  std::vector<FloatRect> rects_;
 
   DISALLOW_COPY_AND_ASSIGN(DisplayItemListBuilder);
 };

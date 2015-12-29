@@ -22,8 +22,12 @@ DisplayItemListBuilder::~DisplayItemListBuilder() {
   DCHECK(!list_);
 }
 
-void DisplayItemListBuilder::Add(std::unique_ptr<DisplayItem> item) {
+void DisplayItemListBuilder::AddItem(std::unique_ptr<DisplayItem> item) {
   list_->items_.push_back(item.release());
+}
+
+void DisplayItemListBuilder::AddRect(const FloatRect& rect) {
+  list_->rects_.push_back(rect);
 }
 
 std::unique_ptr<DisplayItemList> DisplayItemListBuilder::Build() {

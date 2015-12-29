@@ -79,16 +79,12 @@
     const document = Document.new('*document list*');
     document.bindKey('Delete', closeSelectedDocuments);
     document.bindKey('Enter', openSelectedDocuments);
-    Document.list.forEach(function(document) {
-      document.addEventListener(Event.Names.ATTACH, updateDocumentList);
-      document.addEventListener(Event.Names.DETACH, updateDocumentList);
-    });
-    Document.addObserver(function(type, document) {
-      document.addEventListener(Event.Names.ATTACH, updateDocumentList);
-      document.addEventListener(Event.Names.DETACH, updateDocumentList);
+    documentListDocument = document;
+    DocumentState.addObserver(function(document, state) {
+      if (document === documentListDocument)
+        return;
       updateDocumentList();
     });
-    documentListDocument = document;
     updateDocumentList();
     return document;
   }

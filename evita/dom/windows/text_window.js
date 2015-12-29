@@ -230,7 +230,7 @@ global.TextWindow.prototype.clone = function() {
    * @param {!TextWindow} window
    */
   function handleFocus(window) {
-    updateObsolete(window);
+    Editor.requestIdleCallback(updateObsolete.bind(window));
     const document = window.document;
     DocumentState.update(document);
     updateStatusBar(window);
@@ -479,7 +479,11 @@ global.TextWindow.prototype.clone = function() {
   const NEWLINE_MODES = [
     '--', 'LF', 'CR', 'CRLF'
   ];
-  function updateObsolete(window) {
+  /**
+   * @this {!TextWindow}
+   */
+  function updateObsolete() {
+    const window = this;
     const document = window.document;
     if (document.fileName === '')
       return;

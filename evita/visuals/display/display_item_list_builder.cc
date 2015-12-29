@@ -27,6 +27,8 @@ void DisplayItemListBuilder::AddItem(std::unique_ptr<DisplayItem> item) {
 }
 
 void DisplayItemListBuilder::AddRect(const FloatRect& rect) {
+  if (!list_->rects_.empty() && list_->rects_.front().Contains(rect))
+    return;
   list_->rects_.push_back(rect);
 }
 

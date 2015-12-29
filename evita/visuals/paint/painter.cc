@@ -18,9 +18,15 @@
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/paint/paint_info.h"
 
+// TODO(eval1749): Drawing rectangle with thickness doesn't work as expected.
+// I get 1 pixel vertical line for 4 pixel border.
+#define USE_SIMPLE_BORDER 0
+
 namespace visuals {
 
 namespace {
+
+#if USE_SIMPLE_BORDER
 bool IsSimpleBorder(const Border& border) {
   return border.top() == border.bottom() && border.top() == border.left() &&
          border.top() == border.right() &&
@@ -28,6 +34,7 @@ bool IsSimpleBorder(const Border& border) {
          border.top_color() == border.left_color() &&
          border.top_color() == border.right_color();
 }
+#endif
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -108,32 +115,35 @@ void PaintVisitor::PaintDecoration(const Box& box) {
   const auto& border = box.border();
   if (!border.HasValue())
     return;
+
+#if USE_SIMPLE_BORDER
   if (IsSimpleBorder(border) && border.top_color() != FloatColor()) {
-    builder_.AddNew<DrawRectDisplayItem>(box.bounds(), border.top_color(),
-                                         border.top());
+    builder_.AddNew<DrawRectDisplayItem>(FloatRect(box.bounds().size()),
+                                         border.top_color(), border.top());
     return;
   }
+#endif
+
   if (border.top() && border.top_color() != FloatColor()) {
     builder_.AddNew<FillRectDisplayItem>(
-        FloatRect(box.bounds().origin(),
-                  FloatSize(box.bounds().width(), border.top())),
+        FloatRect(FloatPoint(), FloatSize(box.bounds().width(), border.top())),
         border.top_color());
   }
   if (border.left() && border.left_color() != FloatColor()) {
     builder_.AddNew<FillRectDisplayItem>(
-        FloatRect(box.bounds().origin(),
+        FloatRect(FloatPoint(),
                   FloatSize(border.left(), box.bounds().height())),
         border.left_color());
   }
   if (border.right() && border.right_color() != FloatColor()) {
     builder_.AddNew<FillRectDisplayItem>(
-        FloatRect(box.bounds().top_right() - FloatSize(border.right(), 0),
+        FloatRect(FloatPoint(box.bounds().width() - border.right(), 0),
                   FloatSize(border.right(), box.bounds().height())),
         border.right_color());
   }
   if (border.bottom() && border.bottom_color() != FloatColor()) {
     builder_.AddNew<FillRectDisplayItem>(
-        FloatRect(box.bounds().bottom_left() - FloatSize(0, border.bottom()),
+        FloatRect(FloatPoint(0, box.bounds().height() - border.bottom()),
                   FloatSize(box.bounds().width(), border.bottom())),
         border.bottom_color());
   }

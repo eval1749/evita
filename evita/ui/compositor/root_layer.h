@@ -5,21 +5,26 @@
 #ifndef EVITA_UI_COMPOSITOR_ROOT_LAYER_H_
 #define EVITA_UI_COMPOSITOR_ROOT_LAYER_H_
 
-#include "evita/ui/compositor/layer.h"
+#include <memory>
 
-interface IDCompositionTarget;
+#include "evita/ui/compositor/layer.h"
 
 namespace ui {
 
+class NativeRootLayer;
 class Widget;
 
+//////////////////////////////////////////////////////////////////////
+//
+// RootLayer represents a topmost layer of DirectComposition.
+//
 class RootLayer final : public Layer {
  public:
   explicit RootLayer(Widget* widget);
-  ~RootLayer();
+  ~RootLayer() final;
 
  private:
-  common::ComPtr<IDCompositionTarget> composition_target_;
+  std::unique_ptr<NativeRootLayer> impl_;
 
   DISALLOW_COPY_AND_ASSIGN(RootLayer);
 };

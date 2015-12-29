@@ -84,7 +84,6 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
 }
 
 void BoxEditor::SetLayoutClean(Box* box) {
-  DCHECK(box->is_layout_dirty_);
   box->is_layout_dirty_ = false;
 }
 

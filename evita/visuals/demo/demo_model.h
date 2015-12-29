@@ -9,6 +9,7 @@
 
 #include "base/macros.h"
 #include "evita/ui/animation/animation_frame_handler.h"
+#include "evita/visuals/demo/demo_window.h"
 
 namespace visuals {
 
@@ -19,7 +20,8 @@ class DemoWindow;
 //
 // DemoModel
 //
-class DemoModel final : public ui::AnimationFrameHandler {
+class DemoModel final : public ui::AnimationFrameHandler,
+                        public WindowEventHandler {
  public:
   DemoModel();
   ~DemoModel() final;
@@ -30,6 +32,9 @@ class DemoModel final : public ui::AnimationFrameHandler {
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;
   const char* GetAnimationFrameType() const final;
+
+  // WindowEventHandler
+  void DidChangeWindowBounds(const FloatRect& bounds) final;
 
   std::unique_ptr<Box> root_box_;
   DemoWindow* window_ = nullptr;

@@ -53,7 +53,6 @@ DemoScheduler::~DemoScheduler() {
   ui::AnimationScheduler::GetInstance()->SetScheduler(nullptr);
 }
 
-
 void DemoScheduler::BeginFrame() {
   std::unordered_set<ui::AnimationFrameHandler*> ready_handlers;
   ready_handlers.swap(pending_handlers_);
@@ -98,7 +97,7 @@ void DemoApplication::Run() {
   auto message_loop =
       std::make_unique<base::MessageLoop>(base::MessageLoop::TYPE_UI);
   base::RunLoop run_loop;
-  const auto& window = new DemoWindow(run_loop.QuitClosure());
+  const auto& window = new DemoWindow(model_.get(), run_loop.QuitClosure());
   window->RealizeWidget();
   model_->AttachWindow(window);
   run_loop.Run();

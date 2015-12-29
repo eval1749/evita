@@ -17,6 +17,25 @@ class Canvas;
 
 namespace visuals {
 
+class FloatRect;
+
+//////////////////////////////////////////////////////////////////////
+//
+// WindowEventHandler
+//
+class WindowEventHandler {
+ public:
+  virtual ~WindowEventHandler();
+
+  virtual void DidChangeWindowBounds(const FloatRect& bounds) = 0;
+
+ protected:
+  WindowEventHandler();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(WindowEventHandler);
+};
+
 //////////////////////////////////////////////////////////////////////
 //
 // DemoWindow
@@ -24,7 +43,8 @@ namespace visuals {
 class DemoWindow final : public ui::AnimatableWindow,
                          public ui::LayerOwnerDelegate {
  public:
-  explicit DemoWindow(const base::Closure& quit_closure);
+  DemoWindow(WindowEventHandler* event_handler,
+             const base::Closure& quit_closure);
   ~DemoWindow() final;
 
   gfx::Canvas* GetCanvas() const;
@@ -43,9 +63,9 @@ class DemoWindow final : public ui::AnimatableWindow,
   void DidRealize() final;
   void DidShow() final;
 
-  base::Closure quit_closure_;
-
   std::unique_ptr<gfx::Canvas> canvas_;
+  WindowEventHandler* const event_handler_;
+  base::Closure quit_closure_;
 
   DISALLOW_COPY_AND_ASSIGN(DemoWindow);
 };

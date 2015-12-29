@@ -11,15 +11,25 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
 #include "evita/ui/compositor/root_layer.h"
+#include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
+// WindowEventHandler
+//
+WindowEventHandler::WindowEventHandler() {}
+WindowEventHandler::~WindowEventHandler() {}
+
+//////////////////////////////////////////////////////////////////////
+//
 // DemoWindow
 //
-DemoWindow::DemoWindow(const base::Closure& quit_closure)
+DemoWindow::DemoWindow(WindowEventHandler* event_handler,
+                       const base::Closure& quit_closure)
     : ui::AnimatableWindow(ui::NativeWindow::Create(this)),
+      event_handler_(event_handler),
       quit_closure_(quit_closure) {}
 
 DemoWindow::~DemoWindow() {
@@ -34,14 +44,7 @@ gfx::Canvas* DemoWindow::GetCanvas() const {
 }
 
 // ui::AnimationFrameHandler
-void DemoWindow::DidBeginAnimationFrame(base::Time time) {
-  if (!canvas_->IsReady())
-    return RequestAnimationFrame();
-  gfx::Canvas::DrawingScope scope(canvas_.get());
-  canvas_->AddDirtyRect(GetContentsBounds());
-  gfx::Brush edge_brush(canvas_.get(), gfx::ColorF(0.5f, 0.5f, 0.5f));
-  canvas_->FillRectangle(edge_brush, GetContentsBounds());
-}
+void DemoWindow::DidBeginAnimationFrame(base::Time time) {}
 
 // ui::LayerOwnerDelegate
 void DemoWindow::DidRecreateLayer(ui::Layer*) {
@@ -56,6 +59,9 @@ void DemoWindow::DidChangeBounds() {
   if (!canvas_)
     return;
   canvas_->SetBounds(GetContentsBounds());
+  const auto& bounds = GetContentsBounds();
+  event_handler_->DidChangeWindowBounds(
+      FloatRect(FloatSize(bounds.width(), bounds.height())));
 }
 
 void DemoWindow::DidHide() {

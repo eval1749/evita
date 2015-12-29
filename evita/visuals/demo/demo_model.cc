@@ -173,6 +173,11 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
   processor.Paint(canvas, std::move(list));
 }
 
+// WindowEventHandler
+void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
+  RequestAnimationFrame();
+}
+
 const char* DemoModel::GetAnimationFrameType() const {
   return "DemoModel";
 }

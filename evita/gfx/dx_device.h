@@ -26,7 +26,12 @@ class DxDevice {
   ID2D1Device* d2d_device() const { return d2d_device_; }
   IDXGIDevice3* dxgi_device() const { return dxgi_device_; }
   IDXGIFactory2* dxgi_factory() const { return dxgi_factory_; }
+
+
+  // TODO(eval1749): We should use |ui::DxDevice::GetInstance()| instead of
+  // |ui::DxDevice::instance()|.
   static DxDevice* instance();
+  static DxDevice* GetInstance();
 
  private:
   common::ComPtr<ID2D1Device> d2d_device_;

@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/gfx/dx_device.h"
-
-#pragma warning(push)
-#pragma warning(disable : 4061 4365 4917)
+#include <d2d1_1.h>
 #include <d3d11_1.h>
-#pragma warning(pop)
-
 #include <dxgi1_3.h>
 
-#include "evita/gfx/forward.h"
+#include "base/memory/singleton.h"
+#include "evita/gfx/dx_device.h"
 
 namespace gfx {
 
@@ -65,10 +61,12 @@ DxDevice::~DxDevice() {}
 
 // static
 DxDevice* DxDevice::instance() {
-  static DxDevice* static_device;
-  if (!static_device)
-    static_device = new DxDevice();
-  return static_device;
+  return GetInstance();
+}
+
+// static
+DxDevice* DxDevice::GetInstance() {
+  return base::Singleton<DxDevice>::get();
 }
 
 }  // namespace gfx

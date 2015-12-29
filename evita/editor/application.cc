@@ -23,7 +23,6 @@
 #include "evita/editor/scheduler.h"
 #include "evita/editor/switch_set.h"
 #include "evita/editor/trace_log_controller.h"
-#include "evita/gfx/dx_device.h"
 #include "evita/io/io_manager.h"
 #include "evita/io/io_thread.h"
 #include "evita/metrics/counter.h"
@@ -175,10 +174,6 @@ void Application::Run() {
   ApplicationProxy::instance()->WillStartApplication();
   base::RunLoop run_loop;
   run_loop.Run();
-
-  // TODO(eval1749): We should use Singleton destructor for destructing
-  // |gfx::DxDevice|.
-  delete gfx::DxDevice::instance();
 }
 
 }  // namespace editor

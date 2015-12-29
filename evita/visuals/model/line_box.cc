@@ -15,6 +15,8 @@ LineBox::LineBox() {}
 LineBox::~LineBox() {}
 
 FloatSize LineBox::ComputePreferredSize() const {
+  if (display() == Display::None)
+    return FloatSize();
   auto size = border().size() + padding().size();
   for (const auto& child : child_boxes()) {
     const auto& child_size = child->ComputePreferredSize();

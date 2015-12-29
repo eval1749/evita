@@ -14,6 +14,7 @@
 #include "evita/visuals/model/box_forward.h"
 #include "evita/visuals/style/background.h"
 #include "evita/visuals/style/border.h"
+#include "evita/visuals/style/display.h"
 #include "evita/visuals/style/float_color.h"
 #include "evita/visuals/style/margin.h"
 #include "evita/visuals/style/padding.h"
@@ -67,6 +68,9 @@ class Box : public common::Castable {
   const Margin& margin() const { return margin_; }
   const Padding& padding() const { return padding_; }
 
+  // CSS Formatting model
+  Display display() const { return display_; }
+
   virtual void Accept(BoxVisitor* visitor) = 0;
   virtual FloatSize ComputePreferredSize() const = 0;
   std::unique_ptr<Style> ComputeActualStyle() const;
@@ -88,6 +92,7 @@ class Box : public common::Castable {
   Background background_;
   Border border_;
   FloatRect bounds_;
+  Display display_ = Display::Inline;
   const int id_;
   // When |is_content_dirty_| is true, we send bounds of this box to
   // compositor to display on screen.

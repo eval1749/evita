@@ -88,6 +88,8 @@ PaintVisitor::~PaintVisitor() {
 }
 
 bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
+  if (box.display() == Display::None || box.bounds().size() == FloatSize())
+    return false;
   if (!box.IsContentDirty() && !box.IsChildContentDirty())
     return false;
   const auto& bounds = transformer_.MapRect(box.bounds());
@@ -95,6 +97,8 @@ bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
 }
 
 bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
+  if (box.display() == Display::None || box.bounds().size() == FloatSize())
+    return false;
   if (!box.IsContentDirty())
     return false;
   const auto& bounds = transformer_.MapRect(box.bounds());

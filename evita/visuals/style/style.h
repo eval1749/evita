@@ -10,6 +10,7 @@
 
 #include "evita/visuals/style/background.h"
 #include "evita/visuals/style/border.h"
+#include "evita/visuals/style/display.h"
 #include "evita/visuals/style/float_color.h"
 #include "evita/visuals/style/height.h"
 #include "evita/visuals/style/padding.h"

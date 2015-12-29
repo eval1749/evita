@@ -12,6 +12,7 @@ namespace visuals {
   V(Background, background, Background, "background") \
   V(Border, border, Border, "border")                 \
   V(Color, color, FloatColor, "color")                \
+  V(Display, display, Display, "display")             \
   V(Height, height, Height, "height")                 \
   V(Margin, margin, Margin, "margin")                 \
   V(Padding, padding, Padding, "padding")             \
@@ -19,6 +20,7 @@ namespace visuals {
 
 class Background;
 class Border;
+enum class Display;
 class FloatColor;
 class Height;
 class Padding;

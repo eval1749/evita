@@ -116,6 +116,8 @@ std::unique_ptr<Box> CreateRootBox() {
         .Append(BoxBuilder::New<TextBox>(L"size").SetStyle(*kBlack).Finish())
         .Append(BoxBuilder::New<TextBox>(L"status").SetStyle(*kBlack).Finish())
         .Append(BoxBuilder::New<TextBox>(L"file").SetStyle(*kBlack).Finish());
+    if (index == 0)
+      line.SetStyle(*StyleBuilder().SetDisplay(Display::None).Build());
     root.Append(line.Finish());
   }
 

@@ -105,6 +105,11 @@ void BoxEditor::SetStyle(Box* box, const Style& new_style) {
     box->border_ = new_style.border();
     is_content_dirty = true;
   }
+  if (new_style.has_display() && new_style.display() != box->display_) {
+    box->display_ = new_style.display();
+    // Affects both content layout and parent's content layout.
+    is_layout_dirty = true;
+  }
   if (new_style.has_padding() && new_style.padding() != box->padding_) {
     box->padding_ = new_style.padding();
     is_content_dirty = true;

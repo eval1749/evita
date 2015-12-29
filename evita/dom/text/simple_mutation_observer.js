@@ -108,6 +108,8 @@ $define(global, 'text', function($export) {
     /** @return {!Document} */
     get document() { return this.document_; }
 
+    didLoadDocument() {}
+
     /*
      * implements text.SimpleMutationObserver.stopObserving()
      */

@@ -120,7 +120,7 @@ $define(global, 'lexers', function($export) {
     didEndToken(token) {}
 
     /**
-     * @private
+     * @override
      * Implements text.SimpleMutationObserver.didChangeDocument
      */
     didLoadDocument() {

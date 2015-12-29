@@ -128,9 +128,6 @@
         this.firstRead_ = false;
         resetSelections(document);
       }
-
-      // Color portion of text.
-      document.doColor_(string.length);
     }
 
     load(fileName) {

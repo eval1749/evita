@@ -26,4 +26,5 @@ text.SimpleMutationObserverBase = function(document) {};
 /** @type {!Document} */
 text.SimpleMutationObserverBase.prototype.document;
 
+text.SimpleMutationObserverBase.prototype.didLoadDocument = function() {};
 text.SimpleMutationObserverBase.prototype.stopObserving = function() {};

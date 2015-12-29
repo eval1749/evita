@@ -5,6 +5,7 @@
 /**
  * @constructor
  * @param {!Document|!DocumentState} document_or_state
+ * @return {undefined}
  */
 function DocumentState(document_or_state) {}
 
@@ -20,7 +21,6 @@ DocumentState.addObserver = function(callback) {};
 
 /**
  * @param {!Document} document
- * @return {!DocumentState}
  */
 DocumentState.update = function(document) {};
 

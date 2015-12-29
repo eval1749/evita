@@ -176,14 +176,14 @@ void Canvas::DrawLine(const Brush& brush,
                       const PointF& point1,
                       const PointF& point2,
                       float pen_width) {
-  DCHECK(drawing());
+  DCHECK(drawing()) << "You should call gfx::Canvas::BeginDraw()";
   GetRenderTarget()->DrawLine(point1, point2, brush, pen_width);
 }
 
 void Canvas::DrawRectangle(const Brush& brush,
                            const RectF& rect,
                            float strokeWidth) {
-  DCHECK(drawing());
+  DCHECK(drawing()) << "You should call gfx::Canvas::BeginDraw()";
   DCHECK(!rect.empty());
   GetRenderTarget()->DrawRectangle(rect, brush, strokeWidth);
 }
@@ -192,14 +192,14 @@ void Canvas::DrawText(const TextFormat& text_format,
                       const Brush& brush,
                       const RectF& bounds,
                       const base::string16& text) {
-  DCHECK(drawing());
+  DCHECK(drawing()) << "You should call gfx::Canvas::BeginDraw()";
   DCHECK(!bounds.empty());
   GetRenderTarget()->DrawText(text.data(), static_cast<uint32_t>(text.length()),
                               text_format, bounds, brush);
 }
 
 void Canvas::EndDraw() {
-  DCHECK(drawing());
+  DCHECK(drawing()) << "You should call gfx::Canvas::BeginDraw()";
   DCHECK(GetRenderTarget());
   --batch_nesting_level_;
   if (batch_nesting_level_ == 0)
@@ -208,13 +208,13 @@ void Canvas::EndDraw() {
 }
 
 void Canvas::FillRectangle(const Brush& brush, const RectF& rect) {
-  DCHECK(drawing());
+  DCHECK(drawing()) << "You should call gfx::Canvas::BeginDraw()";
   DCHECK(rect);
   GetRenderTarget()->FillRectangle(rect, brush);
 }
 
 void Canvas::Flush() {
-  DCHECK(drawing());
+  DCHECK(drawing()) << "You should call gfx::Canvas::BeginDraw()";
   TRACE_EVENT0("gfx", "Canvas::Flush");
   auto const hr = GetRenderTarget()->Flush();
   if (SUCCEEDED(hr))

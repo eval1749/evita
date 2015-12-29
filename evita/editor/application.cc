@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(eval1749): We should not include "windows.h" here.
-#include <windows.h>
-
-#include <commctrl.h>
-
 #include "evita/editor/application.h"
 
 #include "base/bind.h"
@@ -133,17 +128,6 @@ void Application::Quit() {
 }
 
 void Application::Run() {
-  {
-    INITCOMMONCONTROLSEX init_params;
-    init_params.dwSize = sizeof(init_params);
-    init_params.dwICC = ICC_BAR_CLASSES;
-    if (!::InitCommonControlsEx(&init_params)) {
-      ::MessageBoxW(nullptr, L"InitCommonControlsEx",
-                    APP_TITLE L" " APP_VERSION, MB_APPLMODAL | MB_ICONERROR);
-      return;
-    }
-  }
-
 #if _DEBUG
   views::switches::editor_window_display_paint = true;
   views::switches::form_window_display_paint = false;

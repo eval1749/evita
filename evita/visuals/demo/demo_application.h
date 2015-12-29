@@ -5,9 +5,13 @@
 #ifndef EVITA_VISUALS_DEMO_DEMO_APPLICATION_H_
 #define EVITA_VISUALS_DEMO_DEMO_APPLICATION_H_
 
+#include <memory>
+
 #include "base/macros.h"
 
 namespace visuals {
+
+class DemoModel;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -22,6 +26,8 @@ class DemoApplication final {
   void Quit();
 
  private:
+  std::unique_ptr<DemoModel> model_;
+
   DISALLOW_COPY_AND_ASSIGN(DemoApplication);
 };
 

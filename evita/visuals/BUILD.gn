@@ -91,6 +91,8 @@ executable("demo") {
     "demo/demo_application.cc",
     "demo/demo_application.h",
     "demo/demo_main.cc",
+    "demo/demo_model.cc",
+    "demo/demo_model.h",
     "demo/demo_window.cc",
     "demo/demo_window.h",
   ]

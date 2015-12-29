@@ -92,23 +92,34 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 }
 
 std::unique_ptr<Box> CreateRootBox() {
-  BoxBuilder builder(BoxBuilder::New<BlockBox>());
-  builder.SetStyle(
-      *StyleBuilder().SetBackground(Background(FloatColor(1, 1, 1))).Build());
+  // |root| should provide background color. Note: |root| can't have border
+  // and margin.
+  BoxBuilder root(BoxBuilder::New<BlockBox>());
+  root.SetStyle(*StyleBuilder()
+                     .SetBackground(Background(FloatColor(1, 1, 1)))
+                     .SetPadding(Padding(8, 8, 8, 0))
+                     .Build());
   const auto& kBlack = StyleBuilder().SetColor(FloatColor(0, 0, 0)).Build();
   for (auto index = 0; index < 15; ++index) {
-    auto line_builder = BoxBuilder::New<LineBox>();
-    line_builder.Append(BoxBuilder::New<TextBox>(
-                            base::StringPrintf(L"line %d", index))
-                            .SetStyle(*kBlack)
-                            .Finish())
+    BoxBuilder line(BoxBuilder::New<LineBox>());
+    line.SetStyle(*StyleBuilder()
+                       .SetBorder(Border(index & 1 ? FloatColor(0, 0.5f, 0)
+                                                   : FloatColor(0, 0, 0.5f),
+                                         2))
+                       .SetBackground(
+                           Background(index & 1 ? FloatColor(0.9f, 0.9f, 0.9f)
+                                                : FloatColor(1, 1, 1)))
+                       .Build())
+        .Append(BoxBuilder::New<TextBox>(base::StringPrintf(L"line %d", index))
+                    .SetStyle(*kBlack)
+                    .Finish())
         .Append(BoxBuilder::New<TextBox>(L"size").SetStyle(*kBlack).Finish())
         .Append(BoxBuilder::New<TextBox>(L"status").SetStyle(*kBlack).Finish())
         .Append(BoxBuilder::New<TextBox>(L"file").SetStyle(*kBlack).Finish());
-    builder.Append(line_builder.Finish());
+    root.Append(line.Finish());
   }
 
-  return builder.Finish();
+  return root.Finish();
 }
 
 void PrintBox(const Box& box) {
@@ -132,6 +143,10 @@ void PrintPaint(const DisplayItemList& list) {
       ++indent;
     }
   }
+
+  std::cout << std::endl << "Damage rects:" << std::endl;
+  for (const auto& rect : list.rects())
+    std::cout << rect << std::endl;
 }
 
 }  // namespace

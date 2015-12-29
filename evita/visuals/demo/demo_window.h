@@ -27,6 +27,8 @@ class DemoWindow final : public ui::AnimatableWindow,
   explicit DemoWindow(const base::Closure& quit_closure);
   ~DemoWindow() final;
 
+  gfx::Canvas* GetCanvas() const;
+
  private:
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

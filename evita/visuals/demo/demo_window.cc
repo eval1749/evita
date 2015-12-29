@@ -27,6 +27,12 @@ DemoWindow::~DemoWindow() {
                                                         quit_closure_);
 }
 
+gfx::Canvas* DemoWindow::GetCanvas() const {
+  if (!canvas_->IsReady())
+    return nullptr;
+  return canvas_.get();
+}
+
 // ui::AnimationFrameHandler
 void DemoWindow::DidBeginAnimationFrame(base::Time time) {
   if (!canvas_->IsReady())

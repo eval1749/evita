@@ -9,6 +9,8 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "base/time/time.h"
+#include "evita/visuals/demo/demo_window.h"
+#include "evita/visuals/display/display_item_list_processor.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/layout/layouter.h"
@@ -109,6 +111,29 @@ std::unique_ptr<Box> CreateRootBox() {
   return builder.Finish();
 }
 
+void PrintBox(const Box& box) {
+  std::cout << "Box Tree:" << std::endl;
+  BoxPrinter printer;
+  printer.Visit(box);
+}
+
+void PrintPaint(const DisplayItemList& list) {
+  std::cout << std::endl << "Display Item List:" << std::endl;
+  auto indent = 0;
+  for (const auto& item : list.items()) {
+    if (item->is<EndClipDisplayItem>() || item->is<EndTransformDisplayItem>()) {
+      --indent;
+    }
+    for (auto count = indent; count > 0; --count)
+      std::cout << "  ";
+    std::cout << item << std::endl;
+    if (item->is<BeginClipDisplayItem>() ||
+        item->is<BeginTransformDisplayItem>()) {
+      ++indent;
+    }
+  }
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -127,36 +152,24 @@ void DemoModel::AttachWindow(DemoWindow* window) {
 void DemoModel::DidBeginAnimationFrame(base::Time now) {
   static base::Time last_time;
 
+  const auto& canvas = window_->GetCanvas();
+  if (!canvas)
+    return RequestAnimationFrame();
+
   const auto& viewport_bounds = FloatRect(FloatSize(640, 480));
   Layouter().Layout(root_box_.get(), viewport_bounds);
 
-  if (now - last_time < base::TimeDelta::FromMilliseconds(1000))
-    return;
-  last_time = now;
-
-  std::cout << "Box Tree:" << std::endl;
-  BoxPrinter printer;
-  printer.Visit(*root_box_);
-
-  std::cout << std::endl << "Display Item List:" << std::endl;
   PaintInfo paint_info(viewport_bounds);
-  const auto& display_item_list = Painter().Paint(paint_info, *root_box_);
-  {
-    auto indent = 0;
-    for (const auto& item : display_item_list->items()) {
-      if (item->is<EndClipDisplayItem>() ||
-          item->is<EndTransformDisplayItem>()) {
-        --indent;
-      }
-      for (auto count = indent; count > 0; --count)
-        std::cout << "  ";
-      std::cout << item << std::endl;
-      if (item->is<BeginClipDisplayItem>() ||
-          item->is<BeginTransformDisplayItem>()) {
-        ++indent;
-      }
-    }
+  auto list = Painter().Paint(paint_info, *root_box_);
+
+  if (now - last_time >= base::TimeDelta::FromMilliseconds(1000)) {
+    last_time = now;
+    PrintBox(*root_box_);
+    PrintPaint(*list);
   }
+
+  DisplayItemListProcessor processor;
+  processor.Paint(canvas, std::move(list));
 }
 
 const char* DemoModel::GetAnimationFrameType() const {

@@ -7,12 +7,13 @@
 #include "evita/visuals/style/background.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
 // Background
 //
-Background::Background(const FloatColor& color) : color_(color) {}
+Background::Background(const Color& color) : color_(color) {}
 
 Background::Background(const Background& other) : Background(other.color_) {}
 
@@ -30,7 +31,7 @@ bool Background::operator!=(const Background& other) const {
 }
 
 bool Background::HasValue() const {
-  return color_ != FloatColor();
+  return color_ != Color();
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Background& background) {
@@ -40,4 +41,5 @@ std::ostream& operator<<(std::ostream& ostream, const Background& background) {
   return ostream << ')';
 }
 
+}  // namespace css
 }  // namespace visuals

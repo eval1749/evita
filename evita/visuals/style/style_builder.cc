@@ -8,6 +8,7 @@
 #include "evita/visuals/style/style_properties.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -36,4 +37,5 @@ std::unique_ptr<Style> StyleBuilder::Build() {
 FOR_EACH_VISUAL_STYLE_PROPERTY(V)
 #undef V
 
+}  // namespace css
 }  // namespace visuals

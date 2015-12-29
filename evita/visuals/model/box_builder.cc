@@ -40,7 +40,7 @@ BoxBuilder& BoxBuilder::SetBaseline(float baseline) {
   return *this;
 }
 
-BoxBuilder& BoxBuilder::SetStyle(const Style& style) {
+BoxBuilder& BoxBuilder::SetStyle(const css::Style& style) {
   BoxEditor().SetStyle(box_.get(), style);
   return *this;
 }

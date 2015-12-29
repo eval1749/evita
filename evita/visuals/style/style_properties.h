@@ -10,6 +10,7 @@
 #include "evita/visuals/style/style_properties_forward.h"
 
 namespace visuals {
+namespace css {
 
 enum class StylePropertyId {
 #define V(Name, name, type, text) Name,
@@ -19,6 +20,7 @@ enum class StylePropertyId {
 
 std::ostream& operator<<(std::ostream& ostream, StylePropertyId property_id);
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_STYLE_PROPERTIES_H_

@@ -10,6 +10,7 @@
 #include "evita/visuals/style/style_properties.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -68,4 +69,5 @@ std::ostream& operator<<(std::ostream& ostream, const Style& style) {
   return ostream << ')';
 }
 
+}  // namespace css
 }  // namespace visuals

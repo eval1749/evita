@@ -22,8 +22,8 @@ TEST(PainterTest, Basic) {
   const auto& viewport_bounds = FloatRect(FloatSize(200, 100));
   const auto& root_box =
       BoxBuilder::New<BlockBox>()
-          .SetStyle(*StyleBuilder()
-                         .SetBackground(Background(FloatColor(1, 1, 1)))
+          .SetStyle(*css::StyleBuilder()
+                         .SetBackground(css::Background(css::Color(1, 1, 1)))
                          .Build())
           .Finish();
   Layouter().Layout(root_box.get(), viewport_bounds);

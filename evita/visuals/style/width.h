@@ -8,6 +8,7 @@
 #include <iosfwd>
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -45,6 +46,7 @@ class Width final {
 
 std::ostream& operator<<(std::ostream& ostream, const Width& width);
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_WIDTH_H_

@@ -10,6 +10,7 @@
 #include "evita/visuals/style/thickness.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -41,6 +42,7 @@ class Padding final {
 
 std::ostream& operator<<(std::ostream& ostream, const Padding& padding);
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_PADDING_H_

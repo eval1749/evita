@@ -10,6 +10,7 @@
 #include "evita/visuals/style/thickness.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -43,6 +44,7 @@ class Margin final {
 
 std::ostream& operator<<(std::ostream& ostream, const Margin& margin);
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_MARGIN_H_

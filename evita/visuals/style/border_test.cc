@@ -6,12 +6,13 @@
 #include "gtest/gtest.h"
 
 namespace visuals {
+namespace css {
 
 TEST(BorderTest, Equals) {
   const auto& border0 = Border();
-  const auto& border1 = Border(FloatColor(1, 1, 1), 1.0);
-  const auto& border2 = Border(FloatColor(1, 1, 1), 1.0, 1.0, 1.0, 1.0);
-  const auto& border3 = Border(FloatColor(1, 1, 1), 2.0, 1.0, 1.0, 2.0);
+  const auto& border1 = Border(Color(1, 1, 1), 1.0);
+  const auto& border2 = Border(Color(1, 1, 1), 1.0, 1.0, 1.0, 1.0);
+  const auto& border3 = Border(Color(1, 1, 1), 2.0, 1.0, 1.0, 2.0);
 
   EXPECT_TRUE(border0 == border0);
   EXPECT_FALSE(border0 != border0);
@@ -37,4 +38,5 @@ TEST(BorderTest, Equals) {
   EXPECT_TRUE(border2 != border3);
 }
 
+}  // namespace css
 }  // namespace visuals

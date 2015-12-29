@@ -8,6 +8,7 @@
 #include <iosfwd>
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -27,6 +28,7 @@ enum class Display {
 
 std::ostream& operator<<(std::ostream& ostream, Display);
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_DISPLAY_H_

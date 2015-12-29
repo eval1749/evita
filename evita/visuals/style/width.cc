@@ -7,6 +7,7 @@
 #include "base/logging.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -87,4 +88,5 @@ std::ostream& operator<<(std::ostream& ostream, const Width& width) {
   return ostream << "Invalid)";
 }
 
+}  // namespace css
 }  // namespace visuals

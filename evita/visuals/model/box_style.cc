@@ -24,19 +24,19 @@ class ActualStyleVisitor final : public BoxVisitor {
   ActualStyleVisitor() = default;
   ~ActualStyleVisitor() final = default;
 
-  std::unique_ptr<Style> Compute(const Box& box);
+  std::unique_ptr<css::Style> Compute(const Box& box);
 
  private:
 #define V(name) void Visit##name(name* box) final;
   FOR_EACH_VISUAL_BOX(V)
 #undef V
 
-  StyleBuilder builder_;
+  css::StyleBuilder builder_;
 
   DISALLOW_COPY_AND_ASSIGN(ActualStyleVisitor);
 };
 
-std::unique_ptr<Style> ActualStyleVisitor::Compute(const Box& box) {
+std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   if (box.background().HasValue())
     builder_.SetBackground(box.background());
   if (box.border().HasValue())
@@ -49,19 +49,17 @@ std::unique_ptr<Style> ActualStyleVisitor::Compute(const Box& box) {
   return std::move(builder_.Build());
 }
 
-void ActualStyleVisitor::VisitBlockBox(BlockBox* block) {
-}
+void ActualStyleVisitor::VisitBlockBox(BlockBox* block) {}
 
-void ActualStyleVisitor::VisitLineBox(LineBox* line) {
-}
+void ActualStyleVisitor::VisitLineBox(LineBox* line) {}
 
 void ActualStyleVisitor::VisitTextBox(TextBox* text) {
-  builder_.SetColor(text->color());
+  builder_.SetColor(css::Color(text->color()));
 }
 
 }  // namespace
 
-std::unique_ptr<Style> Box::ComputeActualStyle() const {
+std::unique_ptr<css::Style> Box::ComputeActualStyle() const {
   ActualStyleVisitor builder;
   return builder.Compute(*this);
 }

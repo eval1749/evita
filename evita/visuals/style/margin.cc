@@ -7,6 +7,7 @@
 #include "evita/visuals/style/margin.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -49,4 +50,5 @@ std::ostream& operator<<(std::ostream& ostream, const Margin& margin) {
   return ostream << ')';
 }
 
+}  // namespace css
 }  // namespace visuals

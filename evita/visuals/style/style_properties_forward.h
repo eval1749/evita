@@ -6,12 +6,13 @@
 #define EVITA_VISUALS_STYLE_STYLE_PROPERTIES_FORWARD_H_
 
 namespace visuals {
+namespace css {
 
 // Name, name, type, text
 #define FOR_EACH_VISUAL_STYLE_PROPERTY(V)             \
   V(Background, background, Background, "background") \
   V(Border, border, Border, "border")                 \
-  V(Color, color, FloatColor, "color")                \
+  V(Color, color, Color, "color")                     \
   V(Display, display, Display, "display")             \
   V(Height, height, Height, "height")                 \
   V(Margin, margin, Margin, "margin")                 \
@@ -21,7 +22,7 @@ namespace visuals {
 class Background;
 class Border;
 enum class Display;
-class FloatColor;
+class Color;
 class Height;
 class Padding;
 class Margin;
@@ -29,6 +30,7 @@ class Width;
 
 enum class StylePropertyId;
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_STYLE_PROPERTIES_FORWARD_H_

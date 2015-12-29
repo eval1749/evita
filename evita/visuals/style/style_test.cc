@@ -7,12 +7,13 @@
 #include "gtest/gtest.h"
 
 namespace visuals {
+namespace css {
 
 TEST(StyleTest, color) {
-  const auto& style1 = StyleBuilder().SetColor(FloatColor(1, 0, 0)).Build();
+  const auto& style1 = StyleBuilder().SetColor(Color(1, 0, 0)).Build();
 
   EXPECT_TRUE(style1->has_color());
-  EXPECT_EQ(FloatColor(1, 0, 0), style1->color());
+  EXPECT_EQ(Color(1, 0, 0), style1->color());
 }
 
 TEST(StyleTest, has) {
@@ -22,8 +23,8 @@ TEST(StyleTest, has) {
 
 TEST(StyleTest, Equals) {
   const auto& style1 = StyleBuilder().Build();
-  const auto& style2 = StyleBuilder().SetColor(FloatColor(1, 0, 0)).Build();
-  const auto& style3 = StyleBuilder().SetColor(FloatColor(1, 0, 0)).Build();
+  const auto& style2 = StyleBuilder().SetColor(Color(1, 0, 0)).Build();
+  const auto& style3 = StyleBuilder().SetColor(Color(1, 0, 0)).Build();
 
   EXPECT_TRUE(*style1 == *style1);
   EXPECT_FALSE(*style1 != *style1);
@@ -41,4 +42,5 @@ TEST(StyleTest, Equals) {
   EXPECT_FALSE(*style3 != *style2);
 }
 
+}  // namespace css
 }  // namespace visuals

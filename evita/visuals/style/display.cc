@@ -8,6 +8,7 @@
 #include "evita/visuals/style/display.h"
 
 namespace visuals {
+namespace css {
 
 std::ostream& operator<<(std::ostream& ostream, Display display) {
   static const char* texts[] = {
@@ -21,4 +22,5 @@ std::ostream& operator<<(std::ostream& ostream, Display display) {
   return ostream << "visuals::Display::" << *it;
 }
 
+}  // namespace css
 }  // namespace visuals

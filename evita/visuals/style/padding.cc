@@ -7,6 +7,7 @@
 #include "evita/visuals/style/padding.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -49,4 +50,5 @@ std::ostream& operator<<(std::ostream& ostream, const Padding& padding) {
   return ostream << ')';
 }
 
+}  // namespace css
 }  // namespace visuals

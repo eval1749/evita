@@ -93,7 +93,7 @@ void BoxEditor::SetParent(Box* box, ContainerBox* new_parent) {
   DidChangeLayout(box);
 }
 
-void BoxEditor::SetStyle(Box* box, const Style& new_style) {
+void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   auto is_content_dirty = false;
   auto is_layout_dirty = false;
   if (new_style.has_background() &&
@@ -120,8 +120,8 @@ void BoxEditor::SetStyle(Box* box, const Style& new_style) {
   }
 
   if (const auto& text = box->as<TextBox>()) {
-    if (new_style.has_color() && new_style.color() != text->color_) {
-      text->color_ = new_style.color();
+    if (new_style.has_color() && new_style.color().value() != text->color_) {
+      text->color_ = new_style.color().value();
       is_content_dirty = true;
     }
   }

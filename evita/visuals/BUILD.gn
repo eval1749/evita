@@ -54,6 +54,8 @@ source_set("visuals") {
 
     "style/background.cc",
     "style/background.h",
+    "style/color.cc",
+    "style/color.h",
     "style/border.cc",
     "style/border.h",
     "style/display.cc",

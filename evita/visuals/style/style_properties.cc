@@ -7,6 +7,7 @@
 #include "evita/visuals/style/style_properties.h"
 
 namespace visuals {
+namespace css {
 
 std::ostream& operator<<(std::ostream& ostream, StylePropertyId property_id) {
   static const char* texts[] = {
@@ -22,4 +23,5 @@ std::ostream& operator<<(std::ostream& ostream, StylePropertyId property_id) {
   return ostream << *it;
 }
 
+}  // namespace css
 }  // namespace visuals

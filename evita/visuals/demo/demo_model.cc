@@ -95,21 +95,23 @@ std::unique_ptr<Box> CreateRootBox() {
   // |root| should provide background color. Note: |root| can't have border
   // and margin.
   BoxBuilder root(BoxBuilder::New<BlockBox>());
-  root.SetStyle(*StyleBuilder()
-                     .SetBackground(Background(FloatColor(1, 1, 1)))
-                     .SetPadding(Padding(8, 8, 8, 0))
+  root.SetStyle(*css::StyleBuilder()
+                     .SetBackground(css::Background(css::Color(1, 1, 1)))
+                     .SetPadding(css::Padding(8, 8, 8, 0))
                      .Build());
-  const auto& kBlack = StyleBuilder().SetColor(FloatColor(0, 0, 0)).Build();
+  const auto& kBlack =
+      css::StyleBuilder().SetColor(css::Color(0, 0, 0)).Build();
   for (auto index = 0; index < 15; ++index) {
     BoxBuilder line(BoxBuilder::New<LineBox>());
-    line.SetStyle(*StyleBuilder()
-                       .SetBorder(Border(index & 1 ? FloatColor(0, 0.5f, 0)
-                                                   : FloatColor(0, 0, 0.5f),
-                                         2))
-                       .SetBackground(
-                           Background(index & 1 ? FloatColor(0.9f, 0.9f, 0.9f)
-                                                : FloatColor(1, 1, 1)))
-                       .Build())
+    line.SetStyle(
+            *css::StyleBuilder()
+                 .SetBorder(css::Border(index & 1 ? css::Color(0, 0.5f, 0)
+                                                  : css::Color(0, 0, 0.5f),
+                                        2))
+                 .SetBackground(
+                     css::Background(index & 1 ? css::Color(0.9f, 0.9f, 0.9f)
+                                               : css::Color(1, 1, 1)))
+                 .Build())
         .Append(BoxBuilder::New<TextBox>(base::StringPrintf(L"line %d", index))
                     .SetStyle(*kBlack)
                     .Finish())
@@ -117,7 +119,8 @@ std::unique_ptr<Box> CreateRootBox() {
         .Append(BoxBuilder::New<TextBox>(L"status").SetStyle(*kBlack).Finish())
         .Append(BoxBuilder::New<TextBox>(L"file").SetStyle(*kBlack).Finish());
     if (index == 0)
-      line.SetStyle(*StyleBuilder().SetDisplay(Display::None).Build());
+      line.SetStyle(
+          *css::StyleBuilder().SetDisplay(css::Display::None).Build());
     root.Append(line.Finish());
   }
 

@@ -13,7 +13,10 @@ namespace visuals {
 
 class Box;
 class FloatColor;
+
+namespace css {
 class Style;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -27,7 +30,7 @@ class BoxBuilder final {
   std::unique_ptr<Box> Finish();
 
   BoxBuilder& Append(std::unique_ptr<Box> child);
-  BoxBuilder& SetStyle(const Style& style);
+  BoxBuilder& SetStyle(const css::Style& style);
 
   // TextBox
   BoxBuilder& SetBaseline(float baseline);

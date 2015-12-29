@@ -7,9 +7,10 @@
 
 #include <iosfwd>
 
-#include "evita/visuals/style/float_color.h"
+#include "evita/visuals/style/color.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -40,7 +41,7 @@ namespace visuals {
 //
 class Background final {
  public:
-  explicit Background(const FloatColor& color);
+  explicit Background(const Color& color);
   Background(const Background& other);
   Background();
   ~Background();
@@ -48,16 +49,17 @@ class Background final {
   bool operator==(const Background& other) const;
   bool operator!=(const Background& other) const;
 
-  const FloatColor& color() const { return color_; }
+  const Color& color() const { return color_; }
 
   bool HasValue() const;
 
  private:
-  FloatColor color_;
+  Color color_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Background& background);
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_BACKGROUND_H_

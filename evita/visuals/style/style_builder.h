@@ -11,6 +11,7 @@
 #include "evita/visuals/style/style_properties_forward.h"
 
 namespace visuals {
+namespace css {
 
 class Style;
 
@@ -39,6 +40,7 @@ class StyleBuilder final {
   DISALLOW_COPY_AND_ASSIGN(StyleBuilder);
 };
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_STYLE_BUILDER_H_

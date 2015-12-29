@@ -15,7 +15,7 @@ BlockBox::BlockBox() {}
 BlockBox::~BlockBox() {}
 
 FloatSize BlockBox::ComputePreferredSize() const {
-  if (display() == Display::None)
+  if (display() == css::Display::None)
     return FloatSize();
   auto size = border().size() + padding().size();
   for (const auto& child : child_boxes()) {

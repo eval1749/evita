@@ -11,7 +11,7 @@
 #include "evita/visuals/style/background.h"
 #include "evita/visuals/style/border.h"
 #include "evita/visuals/style/display.h"
-#include "evita/visuals/style/float_color.h"
+#include "evita/visuals/style/color.h"
 #include "evita/visuals/style/height.h"
 #include "evita/visuals/style/padding.h"
 #include "evita/visuals/style/margin.h"
@@ -19,6 +19,7 @@
 #include "evita/visuals/style/width.h"
 
 namespace visuals {
+namespace css {
 
 class StyleBuilder;
 class StyleEditor;
@@ -56,6 +57,7 @@ class Style final {
 
 std::ostream& operator<<(std::ostream& ostream, const Style& style);
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_STYLE_H_

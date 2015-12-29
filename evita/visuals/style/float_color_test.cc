@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/style/float_color.h"
+#include "evita/visuals/style/color.h"
 #include "gtest/gtest.h"
 
 namespace visuals {

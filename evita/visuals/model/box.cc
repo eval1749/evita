@@ -18,7 +18,7 @@ int last_box_id;
 //
 // Box
 //
-Box::Box() : id_(++last_box_id) {}
+Box::Box() : display_(css::Display::Inline), id_(++last_box_id) {}
 Box::~Box() {}
 
 FloatRect Box::content_bounds() const {

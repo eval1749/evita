@@ -8,6 +8,7 @@
 #include <iosfwd>
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -45,6 +46,7 @@ class Height final {
 
 std::ostream& operator<<(std::ostream& ostream, const Height& height);
 
+}  // namespace css
 }  // namespace visuals
 
 #endif  // EVITA_VISUALS_STYLE_HEIGHT_H_

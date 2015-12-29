@@ -22,8 +22,10 @@
 namespace visuals {
 
 class BoxEditor;
-enum class Display;
+
+namespace css {
 class Style;
+}
 
 #define DECLARE_VISUAL_BOX_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)         \
@@ -61,19 +63,19 @@ class Box : public common::Castable {
   FloatRect content_bounds() const;
 
   // CSS background and background
-  const Background& background() const { return background_; }
-  const Border& border() const { return border_; }
+  const css::Background& background() const { return background_; }
+  const css::Border& border() const { return border_; }
 
   // CSS Box model related values
-  const Margin& margin() const { return margin_; }
-  const Padding& padding() const { return padding_; }
+  const css::Margin& margin() const { return margin_; }
+  const css::Padding& padding() const { return padding_; }
 
   // CSS Formatting model
-  Display display() const { return display_; }
+  css::Display display() const { return display_; }
 
   virtual void Accept(BoxVisitor* visitor) = 0;
   virtual FloatSize ComputePreferredSize() const = 0;
-  std::unique_ptr<Style> ComputeActualStyle() const;
+  std::unique_ptr<css::Style> ComputeActualStyle() const;
 
   bool IsDescendantOf(const Box& other) const;
 
@@ -89,17 +91,17 @@ class Box : public common::Castable {
   Box();
 
  private:
-  Background background_;
-  Border border_;
+  css::Background background_;
+  css::Border border_;
   FloatRect bounds_;
-  Display display_ = Display::Inline;
+  css::Display display_;
   const int id_;
   // When |is_content_dirty_| is true, we send bounds of this box to
   // compositor to display on screen.
   bool is_content_dirty_ = true;
   bool is_layout_dirty_ = true;
-  Margin margin_;
-  Padding padding_;
+  css::Margin margin_;
+  css::Padding padding_;
   ContainerBox* parent_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(Box);

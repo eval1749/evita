@@ -7,12 +7,13 @@
 #include "evita/visuals/style/border.h"
 
 namespace visuals {
+namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
 // Border
 //
-Border::Border(const FloatColor& color,
+Border::Border(const Color& color,
                float top,
                float left,
                float bottom,
@@ -23,7 +24,7 @@ Border::Border(const FloatColor& color,
       top_color_(color),
       thickness_(top, left, bottom, right) {}
 
-Border::Border(const FloatColor& color, float width)
+Border::Border(const Color& color, float width)
     : Border(color, width, width, width, width) {}
 
 Border::Border(const Border& other)
@@ -76,4 +77,5 @@ std::ostream& operator<<(std::ostream& ostream, const Border& border) {
   return ostream << ')';
 }
 
+}  // namespace css
 }  // namespace visuals

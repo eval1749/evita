@@ -88,7 +88,7 @@ PaintVisitor::~PaintVisitor() {
 }
 
 bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
-  if (box.display() == Display::None || box.bounds().size() == FloatSize())
+  if (box.display() == css::Display::None || box.bounds().size() == FloatSize())
     return false;
   if (!box.IsContentDirty() && !box.IsChildContentDirty())
     return false;
@@ -97,7 +97,7 @@ bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
 }
 
 bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
-  if (box.display() == Display::None || box.bounds().size() == FloatSize())
+  if (box.display() == css::Display::None || box.bounds().size() == FloatSize())
     return false;
   if (!box.IsContentDirty())
     return false;
@@ -112,9 +112,9 @@ std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const Box& box) {
 }
 
 void PaintVisitor::PaintDecoration(const Box& box) {
-  if (box.background().color() != FloatColor()) {
+  if (box.background().color() != css::Color()) {
     builder_.AddNew<FillRectDisplayItem>(FloatRect(box.bounds().size()),
-                                         box.background().color());
+                                         box.background().color().value());
   }
   const auto& border = box.border();
   if (!border.HasValue())
@@ -128,28 +128,28 @@ void PaintVisitor::PaintDecoration(const Box& box) {
   }
 #endif
 
-  if (border.top() && border.top_color() != FloatColor()) {
+  if (border.top() && border.top_color() != css::Color()) {
     builder_.AddNew<FillRectDisplayItem>(
         FloatRect(FloatPoint(), FloatSize(box.bounds().width(), border.top())),
-        border.top_color());
+        border.top_color().value());
   }
-  if (border.left() && border.left_color() != FloatColor()) {
+  if (border.left() && border.left_color() != css::Color()) {
     builder_.AddNew<FillRectDisplayItem>(
         FloatRect(FloatPoint(),
                   FloatSize(border.left(), box.bounds().height())),
-        border.left_color());
+        border.left_color().value());
   }
-  if (border.right() && border.right_color() != FloatColor()) {
+  if (border.right() && border.right_color() != css::Color()) {
     builder_.AddNew<FillRectDisplayItem>(
         FloatRect(FloatPoint(box.bounds().width() - border.right(), 0),
                   FloatSize(border.right(), box.bounds().height())),
-        border.right_color());
+        border.right_color().value());
   }
-  if (border.bottom() && border.bottom_color() != FloatColor()) {
+  if (border.bottom() && border.bottom_color() != css::Color()) {
     builder_.AddNew<FillRectDisplayItem>(
         FloatRect(FloatPoint(0, box.bounds().height() - border.bottom()),
                   FloatSize(box.bounds().width(), border.bottom())),
-        border.bottom_color());
+        border.bottom_color().value());
   }
 }
 

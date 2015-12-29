@@ -17,7 +17,7 @@ namespace visuals {
 //
 class Padding final {
  public:
-  Padding(float top, float left, float bottom, float right);
+  Padding(float left, float top, float right, float bottom);
   Padding(const Padding& other);
   Padding();
   ~Padding();

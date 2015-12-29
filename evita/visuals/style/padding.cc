@@ -12,7 +12,7 @@ namespace visuals {
 //
 // Padding
 //
-Padding::Padding(float top, float left, float bottom, float right)
+Padding::Padding(float left, float top, float right, float bottom)
     : thickness_(top, left, bottom, right) {}
 
 Padding::Padding(const Padding& other) : thickness_(other.thickness_) {}

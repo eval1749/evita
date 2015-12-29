@@ -17,11 +17,15 @@ AnimationScheduler::~AnimationScheduler() {}
 
 void AnimationScheduler::CancelAnimationFrameRequest(
     AnimationFrameHandler* handler) {
+  if (!impl_)
+    return;
   impl_->CancelAnimationFrameRequest(handler);
 }
 
 // Request animation frame.
 void AnimationScheduler::RequestAnimationFrame(AnimationFrameHandler* handler) {
+  if (!impl_)
+    return;
   impl_->RequestAnimationFrame(handler);
 }
 

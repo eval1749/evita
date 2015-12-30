@@ -51,4 +51,6 @@ tools/deps2git/
 tools/gyp/
 testing/gmock/
 third_party/cygwin/
+third_party/autopep8/
+third_party/pep8/
 v8/

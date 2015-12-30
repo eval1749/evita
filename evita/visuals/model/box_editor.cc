@@ -10,7 +10,7 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"
-#include "evita/visuals/style/style.h"
+#include "evita/visuals/css/style.h"
 
 namespace visuals {
 
@@ -105,8 +105,9 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
     box->border_ = new_style.border();
     is_content_dirty = true;
   }
-  if (new_style.has_display() && new_style.display() != box->display_) {
-    box->display_ = new_style.display();
+  if (new_style.has_display() &&
+      new_style.display().is_none() != box->is_display_none_) {
+    box->is_display_none_ = new_style.display().is_none();
     // Affects both content layout and parent's content layout.
     is_layout_dirty = true;
   }

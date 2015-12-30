@@ -22,8 +22,8 @@
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
-#include "evita/visuals/style/style.h"
-#include "evita/visuals/style/style_builder.h"
+#include "evita/visuals/css/style.h"
+#include "evita/visuals/css/style_builder.h"
 
 namespace visuals {
 
@@ -120,7 +120,7 @@ std::unique_ptr<Box> CreateRootBox() {
         .Append(BoxBuilder::New<TextBox>(L"file").SetStyle(*kBlack).Finish());
     if (index == 0)
       line.SetStyle(
-          *css::StyleBuilder().SetDisplay(css::Display::None).Build());
+          *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
     root.Append(line.Finish());
   }
 

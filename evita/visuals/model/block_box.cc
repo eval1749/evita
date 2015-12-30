@@ -6,8 +6,6 @@
 
 #include "evita/visuals/model/block_box.h"
 
-#include "evita/visuals/style/display.h"
-
 namespace visuals {
 
 BlockBox::BlockBox() {}
@@ -15,7 +13,7 @@ BlockBox::BlockBox() {}
 BlockBox::~BlockBox() {}
 
 FloatSize BlockBox::ComputePreferredSize() const {
-  if (display() == css::Display::None)
+  if (is_display_none())
     return FloatSize();
   auto size = border().size() + padding().size();
   for (const auto& child : child_boxes()) {

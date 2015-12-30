@@ -6,7 +6,6 @@
 
 #include "base/logging.h"
 #include "evita/visuals/model/container_box.h"
-#include "evita/visuals/style/display.h"
 
 namespace visuals {
 
@@ -18,7 +17,7 @@ int last_box_id;
 //
 // Box
 //
-Box::Box() : display_(css::Display::Inline), id_(++last_box_id) {}
+Box::Box() : id_(++last_box_id) {}
 Box::~Box() {}
 
 FloatRect Box::content_bounds() const {

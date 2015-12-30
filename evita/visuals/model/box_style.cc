@@ -8,8 +8,8 @@
 
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/text_box.h"
-#include "evita/visuals/style/style.h"
-#include "evita/visuals/style/style_builder.h"
+#include "evita/visuals/css/style.h"
+#include "evita/visuals/css/style_builder.h"
 
 namespace visuals {
 

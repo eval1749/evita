@@ -1,0 +1,97 @@
+# Copyright (c) 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+css_gen_dir = "$root_gen_dir/evita/visuals/css"
+
+source_set("css") {
+  sources = [
+    "$css_gen_dir/properties.cc",
+    "$css_gen_dir/properties.h",
+    "$css_gen_dir/properties_forward.h",
+    "$css_gen_dir/values.cc",
+    "$css_gen_dir/values.h",
+    "$css_gen_dir/values_forward.h",
+    "background.cc",
+    "background.h",
+    "border.cc",
+    "border.h",
+    "color.cc",
+    "color.h",
+    "float_color.cc",
+    "float_color.h",
+    "length.cc",
+    "length.h",
+    "margin.cc",
+    "margin.h",
+    "padding.cc",
+    "padding.h",
+    "percentage.cc",
+    "percentage.h",
+    "property.cc",
+    "property.h",
+    "property_visitor.cc",
+    "property_visitor.h",
+    "style.cc",
+    "style.h",
+    "style_builder.cc",
+    "style_builder.h",
+    "thickness.cc",
+    "thickness.h",
+  ]
+
+  public_deps = [
+    ":properties",
+    "//base",
+  ]
+
+  include_dirs = [ root_gen_dir ]
+}
+
+action("properties") {
+  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+
+  script = "make_properties.py"
+
+  inputs = [
+    "properties.in",
+    "make_properties.py",
+    "templates/properties.cc",
+    "templates/properties.h",
+    "templates/properties_forward.h",
+    "templates/values.cc",
+    "templates/values.h",
+    "templates/values_forward.h",
+  ]
+
+  outputs = [
+    "$css_gen_dir/properties.cc",
+    "$css_gen_dir/properties.h",
+    "$css_gen_dir/properties_forward.h",
+    "$css_gen_dir/values.cc",
+    "$css_gen_dir/values.h",
+    "$css_gen_dir/values_forward.h",
+  ]
+
+  args = [
+    "--output-directory",
+    rebase_path("$css_gen_dir"),
+    rebase_path("properties.in", root_build_dir),
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+
+  sources = [
+    "background_test.cc",
+    "border_test.cc",
+    "float_color_test.cc",
+    "style_test.cc",
+  ]
+
+  public_deps = [
+    ":css",
+    "//testing/gtest",
+  ]
+}

@@ -18,18 +18,16 @@ source_set("visuals") {
     "geometry/float_rect.h",
     "geometry/float_size.cc",
     "geometry/float_size.h",
-
-    "layout/layouter.h",
     "layout/layouter.cc",
-
+    "layout/layouter.h",
     "model/ancestors.cc",
     "model/ancestors.h",
     "model/ancestors_or_self.cc",
     "model/ancestors_or_self.h",
     "model/block_box.cc",
     "model/block_box.h",
-    "model/box.h",
     "model/box.cc",
+    "model/box.h",
     "model/box_builder.cc",
     "model/box_builder.h",
     "model/box_editor.cc",
@@ -46,43 +44,15 @@ source_set("visuals") {
     "model/line_box.h",
     "model/text_box.cc",
     "model/text_box.h",
-
-    "paint/painter.cc",
-    "paint/painter.h",
     "paint/paint_info.cc",
     "paint/paint_info.h",
-
-    "style/background.cc",
-    "style/background.h",
-    "style/color.cc",
-    "style/color.h",
-    "style/border.cc",
-    "style/border.h",
-    "style/display.cc",
-    "style/display.h",
-    "style/float_color.cc",
-    "style/float_color.h",
-    "style/height.cc",
-    "style/height.h",
-    "style/margin.cc",
-    "style/margin.h",
-    "style/padding.cc",
-    "style/padding.h",
-    "style/style.cc",
-    "style/style.h",
-    "style/style_builder.cc",
-    "style/style_builder.h",
-    "style/style_properties.cc",
-    "style/style_properties.h",
-    "style/style_properties_forward.h",
-    "style/thickness.cc",
-    "style/thickness.h",
-    "style/width.cc",
-    "style/width.h",
+    "paint/painter.cc",
+    "paint/painter.h",
   ]
 
   public_deps = [
     "//base",
+    "//evita/visuals/css",
     "//evita/visuals/display",
   ]
 }
@@ -120,24 +90,18 @@ test("tests") {
     "geometry/affine_transformer_test.cc",
     "geometry/float_matrix3x2_test.cc",
     "geometry/float_point_test.cc",
-    "geometry/float_rect_test.cc",
     "geometry/float_quad_test.cc",
+    "geometry/float_rect_test.cc",
     "geometry/float_size_test.cc",
-
     "model/box_test.cc",
     "model/container_box_test.cc",
-
     "paint/painter_test.cc",
-
-    "style/background_test.cc",
-    "style/border_test.cc",
-    "style/float_color_test.cc",
-    "style/style_test.cc",
   ]
 
   deps = [
     ":visuals",
     "//base/test:run_all_unittests",
+    "//evita/visuals/css:test_files",
     "//evita/visuals/display:test_files",
   ]
 }

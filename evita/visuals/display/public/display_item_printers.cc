@@ -9,7 +9,7 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_visitor.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/style/float_color.h"
+#include "evita/visuals/css/float_color.h"
 
 namespace visuals {
 

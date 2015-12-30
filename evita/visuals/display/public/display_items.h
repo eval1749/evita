@@ -11,7 +11,7 @@
 #include "base/strings/string16.h"
 #include "common/castable.h"
 #include "evita/visuals/display/public/display_items_forward.h"
-#include "evita/visuals/style/float_color.h"
+#include "evita/visuals/css/float_color.h"
 #include "evita/visuals/geometry/float_matrix3x2.h"
 #include "evita/visuals/geometry/float_rect.h"
 

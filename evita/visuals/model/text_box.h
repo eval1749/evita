@@ -7,7 +7,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/visuals/model/inline_box.h"
-#include "evita/visuals/style/float_color.h"
+#include "evita/visuals/css/float_color.h"
 
 namespace visuals {
 

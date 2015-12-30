@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "evita/visuals/css/float_color.h"
+#include "evita/visuals/css/style.h"
+#include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
@@ -11,9 +14,6 @@
 #include "evita/visuals/model/box_builder.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
-#include "evita/visuals/style/float_color.h"
-#include "evita/visuals/style/style.h"
-#include "evita/visuals/style/style_builder.h"
 #include "gtest/gtest.h"
 
 namespace visuals {

@@ -4,8 +4,6 @@
 
 #include "evita/visuals/model/inline_box.h"
 
-#include "evita/visuals/style/display.h"
-
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////

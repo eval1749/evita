@@ -10,14 +10,13 @@
 
 #include "base/macros.h"
 #include "common/castable.h"
+#include "evita/visuals/css/background.h"
+#include "evita/visuals/css/border.h"
+#include "evita/visuals/css/float_color.h"
+#include "evita/visuals/css/margin.h"
+#include "evita/visuals/css/padding.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/model/box_forward.h"
-#include "evita/visuals/style/background.h"
-#include "evita/visuals/style/border.h"
-#include "evita/visuals/style/display.h"
-#include "evita/visuals/style/float_color.h"
-#include "evita/visuals/style/margin.h"
-#include "evita/visuals/style/padding.h"
 
 namespace visuals {
 
@@ -71,7 +70,7 @@ class Box : public common::Castable {
   const css::Padding& padding() const { return padding_; }
 
   // CSS Formatting model
-  css::Display display() const { return display_; }
+  bool is_display_none() const { return is_display_none_; }
 
   virtual void Accept(BoxVisitor* visitor) = 0;
   virtual FloatSize ComputePreferredSize() const = 0;
@@ -94,7 +93,7 @@ class Box : public common::Castable {
   css::Background background_;
   css::Border border_;
   FloatRect bounds_;
-  css::Display display_;
+  bool is_display_none_ = false;
   const int id_;
   // When |is_content_dirty_| is true, we send bounds of this box to
   // compositor to display on screen.

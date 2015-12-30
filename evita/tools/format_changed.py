@@ -6,6 +6,10 @@ import os
 import pipes
 import sys
 
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.normpath(os.path.join(_HERE, os.pardir, os.pardir))
+_AUTOPEP8 = os.path.join(_HERE, 'autopep8.py')
+
 FILE_TYPES = {
     '.cc': 'c++',
     '.h': 'c++',
@@ -15,6 +19,7 @@ FILE_TYPES = {
     '.gni': 'gni',
     '.js': 'js',
     '.java': 'java',
+    '.py': 'python',
 }
 
 
@@ -34,6 +39,8 @@ def dispatch(file_name):
         return format_cpp(file_name)
     if file_type == 'gn':
         return format_gn(file_name)
+    if file_type == 'python':
+        return format_python(file_name)
     return None
 
 
@@ -46,6 +53,22 @@ def format_gn(file_name):
     """Format with 'gn format' command. On Windows, output lines end with CRLF.
     """
     os.system('gn format --in-place %s' % file_name)
+
+
+def format_python(file_name):
+    args = {
+        'autopep8': _AUTOPEP8,
+        'file_name': file_name,
+    }
+    autopep8_pipe = pipes.Template()
+    autopep8_pipe.prepend('python %(autopep8)s -d %(file_name)s' % args, '.-')
+    autopep8_output = autopep8_pipe.open('file', 'r')
+    lines = autopep8_output.readlines()
+    if len(lines) == 0:
+        sys.stderr.write('Clean Python "%s"\n' % file_name)
+        return
+    sys.stderr.write('  Formatting Python "%s"\n' % file_name)
+    os.system('python %(autopep8)s -i %(file_name)s' % args)
 
 
 def skip(file_name):

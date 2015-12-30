@@ -240,6 +240,30 @@ global.PythonLexer = (function(keywords) {
   '__dict__', '__class__', '__bases__', '__name__', '__mro__',
   '__subclasses__',
 
+  // 6 Built-in Exceptions
+  'ArithmeticError', 'AssertionError', 'AttributeError',
+  'BaseException', 'BufferError', 'BytesWarning',
+  'DeprecationWarning',
+  'EnvironmentError', 'EOFError', 'Exception',
+  'FloatingPointError', 'FutureWarning',
+  'GeneratorExit',
+  'ImportError', 'ImportWarning', 'IndentationError', 'IndexError', 'IOError',
+  'KeyboardInterrupt', 'KeyError',
+  'LookupError',
+  'MemoryError',
+  'NameError', 'NotImplementedError',
+  'OSError', 'OverflowError',
+  'PendingDeprecationWarning',
+  'ReferenceError', 'RuntimeError', 'RuntimeWarning',
+  'StandardError', 'StopIteration', 'SyntaxError', 'SyntaxWarning',
+    'SystemError', 'SystemExit',
+  'TabError', 'TypeError',
+  'UnboundLocalError', 'UnicodeDecodeError', 'UnicodeEncodeError',
+    'UnicodeError', 'UnicodeTranslateError', 'UnicodeWarning', 'UserWarning',
+  'ValueError',
+  'Warning', 'WindowsError',
+  'ZeroDivisionError',
+
   // 28.5 __main__ -- Top-level script environment
   '__main__',
 

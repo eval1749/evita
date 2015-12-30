@@ -1,6 +1,8 @@
-#
-# Pre-commit check
-#
+# Copyright (c) 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""Pre-commit check"""
 
 import pipes
 import sys
@@ -10,7 +12,6 @@ BLACK_LIST = [
     'build/',
     'buildtools/',
     'gin/',
-    'evita/dom/bindings/templates',
     'testing/',
     'tools/',
     'third_party/',
@@ -18,6 +19,8 @@ BLACK_LIST = [
 
 
 def should_check(path):
+    if path.find('/templates/') >= 0:
+        return False
     for dir in BLACK_LIST:
         if path.startswith(dir):
             return False

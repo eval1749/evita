@@ -235,6 +235,19 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   const copyrightTextCxx = '// ' + copyrightLines.join('\n// ') + '\n\n';
   const copyrightTextSharp = '# ' + copyrightLines.join('\n# ') + '\n\n';
 
+  const pythonTemplate = [
+    copyrightTextSharp,
+    'import os',
+    'import sys',
+    '',
+    'def main():',
+    '',
+    '',
+    'if __name__ == \'__main__\':',
+    'sys.exit(main())',
+    '',
+  ].join('\n');
+
   function sourcePath(document) {
     const fileName = document.fileName || FilePath.fullPath(document.name);
     const path = FilePath.split(fileName).components;
@@ -276,5 +289,5 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   text.DocumentTemplates.addTemplate('gn', copyrightTextSharp);
   text.DocumentTemplates.addTemplate('h', cheaderTemplateFor);
   text.DocumentTemplates.addTemplate('js', copyrightTextCxx);
-  text.DocumentTemplates.addTemplate('py', copyrightTextSharp);
+  text.DocumentTemplates.addTemplate('py', pythonTemplate);
 })();

@@ -36,6 +36,12 @@ class ActualStyleVisitor final : public BoxVisitor {
   DISALLOW_COPY_AND_ASSIGN(ActualStyleVisitor);
 };
 
+#define FOR_EACH_PROPERTY_INITIAL_IS_AUTO(V) \
+  V(Bottom, bottom)                          \
+  V(Left, left)                              \
+  V(Right, right)                            \
+  V(Top, top)
+
 std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   if (box.background().HasValue())
     builder_.SetBackground(box.background());
@@ -47,6 +53,17 @@ std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
     builder_.SetMargin(box.margin());
   if (box.padding().HasValue())
     builder_.SetPadding(box.padding());
+
+  // CSS Position
+  if (!box.position().is_static())
+    builder_.SetPosition(box.position());
+
+#define V(Property, property)    \
+  if (!box.property().is_auto()) \
+    builder_.Set##Property(box.property());
+  FOR_EACH_PROPERTY_INITIAL_IS_AUTO(V)
+#undef V
+
   Visit(box);
   return std::move(builder_.Build());
 }

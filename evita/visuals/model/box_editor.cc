@@ -93,32 +93,68 @@ void BoxEditor::SetParent(Box* box, ContainerBox* new_parent) {
   DidChangeLayout(box);
 }
 
+// When following one of following property is changed, we need to layout
+// contained boxes in this box and need to paint border and content.
+//  border: size of content area is changed.
+//  padding: size of content area is changed.
+// TODO(eval1749): When only border color changed, we should not layout and
+// paint content.
+#define FOR_EACH_PROPERTY_CAUSING_SELF_LAYOUT(V) \
+  V(border)                                      \
+  V(padding)
+
+// When following one of following property is changed, we need to layout
+// contained boxes in parent.
+//  bottom, left, right, top: Asks containing block to calculate position of
+//    this box.
+//  margin: When position == static, following position of following sibling
+//    boxes are dirty.
+//    When position != static, a position of this box is dirty.
+//  position: Position of following boxes are dirty, when position is from/to
+//    static, or a position of this box, when position is not from/to static.
+#define FOR_EACH_PROPERTY_CAUSING_PARENT_LAYOUT(V) \
+  V(bottom)                                        \
+  V(left)                                          \
+  V(margin)                                        \
+  V(position)                                      \
+  V(right)                                         \
+  V(top)
+
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   auto is_content_dirty = false;
   auto is_layout_dirty = false;
+  auto is_parent_layout_dirty = false;
+
   if (new_style.has_background() &&
       new_style.background() != box->background_) {
     box->background_ = new_style.background();
     is_content_dirty = true;
   }
-  if (new_style.has_border() && new_style.border() != box->border_) {
-    box->border_ = new_style.border();
-    is_content_dirty = true;
-  }
+
   if (new_style.has_display() &&
       new_style.display().is_none() != box->is_display_none_) {
     box->is_display_none_ = new_style.display().is_none();
-    // Affects both content layout and parent's content layout.
-    is_layout_dirty = true;
+    is_parent_layout_dirty = true;
   }
-  if (new_style.has_padding() && new_style.padding() != box->padding_) {
-    box->padding_ = new_style.padding();
-    is_content_dirty = true;
+
+#define V(property)                               \
+  if (new_style.has_##property() &&               \
+      new_style.property() != box->property##_) { \
+    box->property##_ = new_style.property();      \
+    is_content_dirty = true;                      \
+    is_layout_dirty = true;                       \
   }
-  if (new_style.has_margin() && new_style.margin() != box->margin_) {
-    box->margin_ = new_style.margin();
-    is_layout_dirty = true;
+  FOR_EACH_PROPERTY_CAUSING_SELF_LAYOUT(V)
+#undef V
+
+#define V(property)                               \
+  if (new_style.has_##property() &&               \
+      new_style.property() != box->property##_) { \
+    box->property##_ = new_style.property();      \
+    is_parent_layout_dirty = true;                \
   }
+  FOR_EACH_PROPERTY_CAUSING_PARENT_LAYOUT(V)
+#undef V
 
   if (const auto& text = box->as<TextBox>()) {
     if (new_style.has_color() && new_style.color().value() != text->color_) {
@@ -131,6 +167,8 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
     DidChangeContent(box);
   if (is_layout_dirty)
     DidChangeLayout(box);
+  if (is_parent_layout_dirty && box->parent_)
+    DidChangeLayout(box->parent_);
 }
 
 }  // namespace visuals

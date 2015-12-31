@@ -17,6 +17,8 @@ FloatSize BlockBox::ComputePreferredSize() const {
     return FloatSize();
   auto size = border().size() + padding().size();
   for (const auto& child : child_boxes()) {
+    if (!child->position().is_static())
+      continue;
     const auto& child_size = child->ComputePreferredSize();
     size = FloatSize(std::max(size.width(), child_size.width()),
                      size.height() + child_size.height());

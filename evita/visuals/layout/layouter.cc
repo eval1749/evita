@@ -27,6 +27,7 @@ class LayoutVisitor final : public BoxVisitor {
   LayoutVisitor() = default;
   ~LayoutVisitor() final = default;
 
+  void Layout(Box* box, const FloatPoint& origin, const FloatSize& size);
   void Layout(Box* box, const FloatRect& bounds);
 
  private:
@@ -36,6 +37,12 @@ class LayoutVisitor final : public BoxVisitor {
 
   DISALLOW_COPY_AND_ASSIGN(LayoutVisitor);
 };
+
+void LayoutVisitor::Layout(Box* box,
+                           const FloatPoint& origin,
+                           const FloatSize& size) {
+  Layout(box, FloatRect(origin, size));
+}
 
 void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
   if (box->bounds() == bounds && box->IsLayoutClean())
@@ -48,14 +55,20 @@ void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
 // BoxVisitor
 void LayoutVisitor::VisitBlockBox(BlockBox* box) {
   auto child_origin = FloatPoint();
-  const auto child_width = box->content_bounds().width();
+  const auto content_width = box->content_bounds().width();
   for (const auto& child : box->child_boxes()) {
     if (child->is_display_none())
       continue;
     const auto& child_size = child->ComputePreferredSize();
+    if (child->position().is_absolute()) {
+      LayoutVisitor().Layout(child, FloatPoint(child->left().length().value(),
+                                               child->top().length().value()),
+                             FloatSize(content_width, child_size.height()));
+      continue;
+    }
     LayoutVisitor().Layout(
         child, FloatRect(child_origin + child->margin().top_left(),
-                         FloatSize(child_width, child_size.height())));
+                         FloatSize(content_width, child_size.height())));
     child_origin = FloatPoint(
         child_origin.x(), child->bounds().bottom() + child->margin().bottom());
   }

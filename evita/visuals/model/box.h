@@ -74,7 +74,11 @@ class Box : public common::Castable {
   bool is_display_none() const { return is_display_none_; }
 
   // CSS Position
+  const css::Bottom& bottom() const { return bottom_; }
+  const css::Left& left() const { return left_; }
   const css::Position& position() const { return position_; }
+  const css::Right& right() const { return right_; }
+  const css::Top& top() const { return top_; }
 
   virtual void Accept(BoxVisitor* visitor) = 0;
   virtual FloatSize ComputePreferredSize() const = 0;
@@ -96,6 +100,8 @@ class Box : public common::Castable {
  private:
   css::Background background_;
   css::Border border_;
+  // TODO(eval1749): We should incorporate |bottom_| to layout.
+  css::Bottom bottom_;
   FloatRect bounds_;
   bool is_display_none_ = false;
   const int id_;
@@ -103,10 +109,14 @@ class Box : public common::Castable {
   // compositor to display on screen.
   bool is_content_dirty_ = true;
   bool is_layout_dirty_ = true;
+  css::Left left_;
   css::Margin margin_;
   css::Padding padding_;
   css::Position position_;
   ContainerBox* parent_ = nullptr;
+  // TODO(eval1749): We should incorporate |right_| to layout.
+  css::Right right_;
+  css::Top top_;
 
   DISALLOW_COPY_AND_ASSIGN(Box);
 };

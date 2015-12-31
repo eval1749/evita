@@ -107,10 +107,7 @@ std::unique_ptr<Box> CreateRootBox() {
             *css::StyleBuilder()
                  .SetBorder(css::Border(index & 1 ? css::Color(0, 0.5f, 0)
                                                   : css::Color(0, 0, 0.5f),
-                                        2))
-                 .SetBackground(
-                     css::Background(index & 1 ? css::Color(0.9f, 0.9f, 0.9f)
-                                               : css::Color(1, 1, 1)))
+                                        1))
                  .Build())
         .Append(BoxBuilder::New<TextBox>(base::StringPrintf(L"line %d", index))
                     .SetStyle(*kBlack)
@@ -118,9 +115,38 @@ std::unique_ptr<Box> CreateRootBox() {
         .Append(BoxBuilder::New<TextBox>(L"size").SetStyle(*kBlack).Finish())
         .Append(BoxBuilder::New<TextBox>(L"status").SetStyle(*kBlack).Finish())
         .Append(BoxBuilder::New<TextBox>(L"file").SetStyle(*kBlack).Finish());
-    if (index == 0)
-      line.SetStyle(
-          *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
+    switch (index) {
+      case 0:
+        line.SetStyle(
+            *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
+        break;
+      case 1:
+        // Hover color
+        line.SetStyle(*css::StyleBuilder()
+                           .SetPosition(css::Position::Absolute())
+                           .SetLeft(css::Left(css::Length(20)))
+                           .SetTop(css::Top(css::Length(120)))
+                           .SetBackground(css::Background(
+                               css::Color::Rgba(51, 153, 255, 0.1f)))
+                           .SetBorder(css::Border(
+                               css::Color::Rgba(51, 153, 255, 1.0f), 2))
+                           .Build());
+        break;
+      case 2:
+        // Selected color
+        line.SetStyle(*css::StyleBuilder()
+                           .SetBackground(css::Background(
+                               css::Color::Rgba(51, 153, 255, 0.5f)))
+                           .Build());
+        break;
+      case 3:
+        // Inactive selection color
+        line.SetStyle(*css::StyleBuilder()
+                           .SetBackground(css::Background(
+                               css::Color::Rgba(191, 205, 191, 0.2f)))
+                           .Build());
+        break;
+    }
     root.Append(line.Finish());
   }
 

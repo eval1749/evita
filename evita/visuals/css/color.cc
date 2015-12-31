@@ -27,7 +27,8 @@ bool Color::operator!=(const Color& other) const {
 
 // static
 Color Color::Rgba(int red, int green, int blue, float alpha) {
-  return Color(red / 255, green / 255, blue / 255, alpha);
+  return Color(static_cast<float>(red) / 255, static_cast<float>(green) / 255,
+               static_cast<float>(blue) / 255, alpha);
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Color& color) {

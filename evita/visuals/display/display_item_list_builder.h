@@ -22,7 +22,7 @@ class DisplayItemList;
 //
 class DisplayItemListBuilder final {
  public:
-  DisplayItemListBuilder();
+  explicit DisplayItemListBuilder(const FloatRect& viewport_bounds);
   ~DisplayItemListBuilder();
 
   template <typename T, typename... Args>
@@ -38,6 +38,9 @@ class DisplayItemListBuilder final {
 
   std::unique_ptr<DisplayItemList> list_;
   std::vector<FloatRect> rects_;
+
+  // Display item list should contains items paint inside |viewport_bounds_|.
+  const FloatRect viewport_bounds_;
 
   DISALLOW_COPY_AND_ASSIGN(DisplayItemListBuilder);
 };

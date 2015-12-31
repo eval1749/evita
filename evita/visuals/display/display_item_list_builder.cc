@@ -15,8 +15,8 @@ namespace visuals {
 //
 // DisplayItemListBuilder
 //
-DisplayItemListBuilder::DisplayItemListBuilder()
-    : list_(new DisplayItemList()) {}
+DisplayItemListBuilder::DisplayItemListBuilder(const FloatRect& viewport_bounds)
+    : list_(new DisplayItemList()), viewport_bounds_(viewport_bounds) {}
 
 DisplayItemListBuilder::~DisplayItemListBuilder() {
   DCHECK(!list_);
@@ -27,9 +27,12 @@ void DisplayItemListBuilder::AddItem(std::unique_ptr<DisplayItem> item) {
 }
 
 void DisplayItemListBuilder::AddRect(const FloatRect& rect) {
-  if (!list_->rects_.empty() && list_->rects_.front().Contains(rect))
+  const auto& clipped = viewport_bounds_.Intersect(rect);
+  if (clipped.IsEmpty())
     return;
-  list_->rects_.push_back(rect);
+  if (!list_->rects_.empty() && list_->rects_.front().Contains(clipped))
+    return;
+  list_->rects_.push_back(clipped);
 }
 
 std::unique_ptr<DisplayItemList> DisplayItemListBuilder::Build() {

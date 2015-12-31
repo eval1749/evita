@@ -10,7 +10,8 @@
 namespace visuals {
 
 TEST(DisplayItemList, Basic) {
-  DisplayItemListBuilder builder;
+  FloatRect viewport_bounds(FloatSize(10, 10));
+  DisplayItemListBuilder builder(viewport_bounds);
   builder.AddNew<BeginClipDisplayItem>(FloatRect(FloatSize(1, 2)));
   builder.AddNew<FillRectDisplayItem>(FloatRect(FloatSize(1, 2)),
                                       FloatColor(1, 1, 1));

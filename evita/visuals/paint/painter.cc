@@ -78,7 +78,7 @@ class PaintVisitor final : public BoxVisitor {
 };
 
 PaintVisitor::PaintVisitor(const PaintInfo& paint_info)
-    : paint_info_(paint_info) {
+    : builder_(paint_info.cull_rect()), paint_info_(paint_info) {
   transforms_.push(transformer_.matrix());
 }
 

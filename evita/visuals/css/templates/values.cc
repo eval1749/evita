@@ -99,9 +99,10 @@ bool {{type.Name}}::is_{{member.name}}() const {
  #
  # Printer
  #}
+// To make |css::Style| printer output simpler, we don't print type name
+// in value printer.
 std::ostream& operator<<(std::ostream& ostream,
                          {{type.Parameter}} {{type.name}}) {
-  ostream << "{{type.name}}:";
 {% for member in type.members %}
   if ({{type.name}}.is_{{member.name}}())
 {%  if member.is_keyword %}

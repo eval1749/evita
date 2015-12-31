@@ -57,10 +57,10 @@ FOR_EACH_VISUAL_CSS_PROPERTY(V)
 std::ostream& operator<<(std::ostream& ostream, const Style& style) {
   ostream << "Style(";
   auto delimiter = "";
-#define V(Name, name, type, text)         \
-  if (style.has_##name()) {               \
-    ostream << delimiter << style.name(); \
-    delimiter = ", ";                     \
+#define V(Name, name, type, text)                        \
+  if (style.has_##name()) {                              \
+    ostream << delimiter << text << ':' << style.name(); \
+    delimiter = ", ";                                    \
   }
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V

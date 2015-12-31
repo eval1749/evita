@@ -31,7 +31,7 @@ bool Background::operator!=(const Background& other) const {
 }
 
 bool Background::HasValue() const {
-  return color_ != Color();
+  return color_.value().alpha() != 0;
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Background& background) {

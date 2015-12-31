@@ -16,7 +16,9 @@ class Buffer;
 
 //////////////////////////////////////////////////////////////////////
 //
-// StaticRange
+// StaticRange represents a range in buffer between start and end(exclusive).
+// Unlike |Range|, an end position can be greater than end of buffer to pass
+// deleted range.
 //
 class StaticRange final {
   STACK_ALLOCATED();

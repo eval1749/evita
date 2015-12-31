@@ -29,6 +29,9 @@ class Color final {
 
   const FloatColor& value() const { return value_; }
 
+  // Returns |Color| object with RGBA value from 0 to 255 RGB values.
+  static Color Rgba(int red, int green, int blue, float alpha = 1);
+
  private:
   FloatColor value_;
 };

@@ -25,6 +25,11 @@ bool Color::operator!=(const Color& other) const {
   return !operator==(other);
 }
 
+// static
+Color Color::Rgba(int red, int green, int blue, float alpha) {
+  return Color(red / 255, green / 255, blue / 255, alpha);
+}
+
 std::ostream& operator<<(std::ostream& ostream, const Color& color) {
   const auto& value = color.value();
   ostream << "Color(" << value.red() << ", " << value.green() << ", "

@@ -15,6 +15,7 @@ class Box;
 class ContainerBox;
 class FloatColor;
 class FloatRect;
+class InlineBox;
 class TextBox;
 
 namespace css {
@@ -31,9 +32,11 @@ class BoxEditor final {
   ~BoxEditor();
 
   // Box
+  void DidLayout(Box* box);
+  void DidMove(Box* box);
+  void DidPaint(Box* box);
   void SetBounds(Box* box, const FloatRect& new_bounds);
   void SetLayoutClean(Box* box);
-  void SetParent(Box* box, ContainerBox* parent);
 
   // ContainerBox
   template <typename T>
@@ -51,9 +54,12 @@ class BoxEditor final {
   // TextBox
   void SetBaseline(TextBox* box, float new_baseline);
 
+  void SetContentChanged(InlineBox* box);
+  void SetShouldPaint(Box* box);
+  void WillDestroy(Box* box);
+
  private:
-  void DidChangeContent(Box* box);
-  void DidChangeLayout(Box* box);
+  void DidChangeChild(ContainerBox* container);
 
   DISALLOW_COPY_AND_ASSIGN(BoxEditor);
 };

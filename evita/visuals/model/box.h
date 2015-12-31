@@ -49,6 +49,8 @@ class Box : public common::Castable {
  public:
   class Ancestors;
   class AncestorsOrSelf;
+  class Descendants;
+  class DescendantsOrSelf;
 
   virtual ~Box();
 
@@ -86,13 +88,16 @@ class Box : public common::Castable {
 
   bool IsDescendantOf(const Box& other) const;
 
-  // Paint
-  bool IsContentClean() const { return !is_content_dirty_; }
-  bool IsContentDirty() const { return is_content_dirty_; }
+  // Change tracking
+  bool IsBackgroundChanged() const { return is_background_changed_; }
+  bool IsBorderChanged() const { return is_border_changed_; }
+  bool IsContentChanged() const { return is_content_changed_; }
+  bool IsOriginChanged() const { return is_origin_changed_; }
+  bool IsPaddingChanged() const { return is_padding_changed_; }
+  bool IsSizeChanged() const { return is_size_changed_; }
 
-  // Layout
-  bool IsLayoutClean() const { return !is_layout_dirty_; }
-  bool IsLayoutDirty() const { return is_layout_dirty_; }
+  // Paint
+  bool ShouldPaint() const { return should_paint_; }
 
  protected:
   Box();
@@ -105,10 +110,15 @@ class Box : public common::Castable {
   FloatRect bounds_;
   bool is_display_none_ = false;
   const int id_;
-  // When |is_content_dirty_| is true, we send bounds of this box to
-  // compositor to display on screen.
-  bool is_content_dirty_ = true;
-  bool is_layout_dirty_ = true;
+  bool is_background_changed_ = true;
+  bool is_border_changed_ = true;
+  // When |is_content_changed_| is true, we send bounds of this box to
+  // compositor to display on screen. Note: On |ContainerBox|,
+  // |is_content_dirty| is always false.
+  bool is_content_changed_ = false;
+  bool is_origin_changed_ = true;
+  bool is_padding_changed_ = true;
+  bool is_size_changed_ = true;
   css::Left left_;
   css::Margin margin_;
   css::Padding padding_;
@@ -116,6 +126,7 @@ class Box : public common::Castable {
   ContainerBox* parent_ = nullptr;
   // TODO(eval1749): We should incorporate |right_| to layout.
   css::Right right_;
+  bool should_paint_ = true;
   css::Top top_;
 
   DISALLOW_COPY_AND_ASSIGN(Box);

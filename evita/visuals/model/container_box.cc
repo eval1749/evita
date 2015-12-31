@@ -18,7 +18,7 @@ ContainerBox::ContainerBox() {}
 ContainerBox::~ContainerBox() {
   DCHECK_EQ(static_cast<ContainerBox*>(nullptr), parent());
   for (const auto& child : child_boxes_) {
-    BoxEditor().SetParent(child, nullptr);
+    BoxEditor().WillDestroy(child);
     delete child;
   }
 }

@@ -4,13 +4,18 @@
 
 #include "evita/visuals/model/text_box.h"
 
+#include "evita/visuals/model/box_editor.h"
+
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
 // TextBox
 //
-TextBox::TextBox(const base::string16 text) : text_(text) {}
+TextBox::TextBox(const base::string16 text) : text_(text) {
+  BoxEditor().SetContentChanged(this);
+}
+
 TextBox::~TextBox() {}
 
 FloatSize TextBox::ComputePreferredSize() const {

@@ -10,7 +10,10 @@ namespace visuals {
 //
 // PaintInfo
 //
-PaintInfo::PaintInfo(const FloatRect& cull_rect) : cull_rect_(cull_rect) {}
+PaintInfo::PaintInfo(const FloatRect& cull_rect,
+                     const std::vector<FloatRect>& exposed_rect_list)
+    : cull_rect_(cull_rect), exposed_rect_list_(exposed_rect_list) {}
+
 PaintInfo::~PaintInfo() {}
 
 }  // namespace visuals

@@ -13,6 +13,7 @@
 #include "evita/visuals/geometry/affine_transformer.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/text_box.h"
@@ -36,6 +37,19 @@ bool IsSimpleBorder(const Border& border) {
 }
 #endif
 
+bool IsBackgroundChanged(const Box& box) {
+  if (!box.background().HasValue())
+    return false;
+  return box.IsBackgroundChanged() || box.IsOriginChanged() ||
+         box.IsSizeChanged() || box.IsPaddingChanged();
+}
+
+bool IsBorderChanged(const Box& box) {
+  if (!box.border().HasValue())
+    return false;
+  return box.IsBorderChanged() || box.IsOriginChanged() || box.IsSizeChanged();
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // PaintVisitor
@@ -54,6 +68,7 @@ class PaintVisitor final : public BoxVisitor {
     ~BoxPaintScope();
 
    private:
+    const Box& box_;
     PaintVisitor* const painter_;
 
     DISALLOW_COPY_AND_ASSIGN(BoxPaintScope);
@@ -63,9 +78,15 @@ class PaintVisitor final : public BoxVisitor {
   FOR_EACH_VISUAL_BOX(V)
 #undef V
 
+  void AddDirtyBounds(const FloatRect& bounds);
+  void FillRect(const FloatRect& rect, const FloatColor& color);
+  void FillRectAndMark(const FloatRect& rect,
+                       const FloatColor& color,
+                       bool mark);
   bool NeedsPaintContainerBox(const ContainerBox& box) const;
   bool NeedsPaintInlineBox(const InlineBox& box) const;
-  void PaintDecoration(const Box& box);
+  void PaintBackgroundINeeded(const Box& box);
+  void PaintBorderINeeded(const Box& box);
   void PopTransform();
   void PushTransform();
 
@@ -79,6 +100,8 @@ class PaintVisitor final : public BoxVisitor {
 
 PaintVisitor::PaintVisitor(const PaintInfo& paint_info)
     : builder_(paint_info.cull_rect()), paint_info_(paint_info) {
+  for (const auto& exposed_rect : paint_info.exposed_rect_list())
+    builder_.AddRect(exposed_rect);
   transforms_.push(transformer_.matrix());
 }
 
@@ -87,10 +110,33 @@ PaintVisitor::~PaintVisitor() {
   DCHECK(transforms_.empty());
 }
 
+void PaintVisitor::AddDirtyBounds(const FloatRect& bounds) {
+  builder_.AddRect(transformer_.MapRect(bounds));
+}
+
+void PaintVisitor::FillRect(const FloatRect& rect, const FloatColor& color) {
+  DCHECK(!rect.IsEmpty());
+  if (color.alpha() == 0)
+    return;
+  builder_.AddNew<FillRectDisplayItem>(rect, color);
+}
+
+void PaintVisitor::FillRectAndMark(const FloatRect& rect,
+                                   const FloatColor& color,
+                                   bool mark) {
+  DCHECK(!rect.IsEmpty());
+  if (color.alpha() == 0)
+    return;
+  if (mark)
+    builder_.AddRect(rect);
+  builder_.AddNew<FillRectDisplayItem>(rect, color);
+}
+
 bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
   if (box.is_display_none() || box.bounds().size().IsEmpty())
     return false;
-  if (!box.IsContentDirty() && !box.IsChildContentDirty())
+  if (!box.ShouldPaint() && !box.IsBackgroundChanged() &&
+      !box.IsBorderChanged())
     return false;
   const auto& bounds = transformer_.MapRect(box.bounds());
   return paint_info_.cull_rect().Intersects(bounds);
@@ -99,64 +145,60 @@ bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
 bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
   if (box.is_display_none() || box.bounds().size().IsEmpty())
     return false;
-  if (!box.IsContentDirty())
+  if (!box.ShouldPaint() && !box.IsBackgroundChanged() &&
+      !box.IsBorderChanged() && !box.IsContentChanged()) {
     return false;
+  }
   const auto& bounds = transformer_.MapRect(box.bounds());
   return paint_info_.cull_rect().Intersects(bounds);
 }
 
 std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const Box& box) {
-  DCHECK(box.IsLayoutClean());
   Visit(box);
   return builder_.Build();
 }
 
-void PaintVisitor::PaintDecoration(const Box& box) {
-  if (box.background().color() != css::Color()) {
-    builder_.AddNew<FillRectDisplayItem>(FloatRect(box.bounds().size()),
-                                         box.background().color().value());
-  }
+void PaintVisitor::PaintBackgroundINeeded(const Box& box) {
+  const auto is_background_changed = IsBackgroundChanged(box);
+  if (!box.ShouldPaint() && !is_background_changed)
+    return;
+  FillRectAndMark(FloatRect(box.bounds().size()),
+                  box.background().color().value(), is_background_changed);
+}
+
+void PaintVisitor::PaintBorderINeeded(const Box& box) {
+  const auto is_border_changed = IsBorderChanged(box);
+  if (!box.ShouldPaint() && !is_border_changed)
+    return;
   const auto& border = box.border();
-  if (!border.HasValue())
-    return;
-
-#if USE_SIMPLE_BORDER
-  if (IsSimpleBorder(border) && border.top_color() != FloatColor()) {
-    builder_.AddNew<DrawRectDisplayItem>(FloatRect(box.bounds().size()),
-                                         border.top_color(), border.top());
-    return;
-  }
-#endif
-
-  if (border.top() && border.top_color() != css::Color()) {
-    builder_.AddNew<FillRectDisplayItem>(
+  if (border.top()) {
+    FillRectAndMark(
         FloatRect(FloatPoint(), FloatSize(box.bounds().width(), border.top())),
-        border.top_color().value());
+        border.top_color().value(), is_border_changed);
   }
-  if (border.left() && border.left_color() != css::Color()) {
-    builder_.AddNew<FillRectDisplayItem>(
-        FloatRect(FloatPoint(),
-                  FloatSize(border.left(), box.bounds().height())),
-        border.left_color().value());
+  if (border.left()) {
+    FillRectAndMark(FloatRect(FloatPoint(),
+                              FloatSize(border.left(), box.bounds().height())),
+                    border.left_color().value(), is_border_changed);
   }
-  if (border.right() && border.right_color() != css::Color()) {
-    builder_.AddNew<FillRectDisplayItem>(
+  if (border.right()) {
+    FillRectAndMark(
         FloatRect(FloatPoint(box.bounds().width() - border.right(), 0),
                   FloatSize(border.right(), box.bounds().height())),
-        border.right_color().value());
+        border.right_color().value(), is_border_changed);
   }
-  if (border.bottom() && border.bottom_color() != css::Color()) {
-    builder_.AddNew<FillRectDisplayItem>(
+  if (border.bottom()) {
+    FillRectAndMark(
         FloatRect(FloatPoint(0, box.bounds().height() - border.bottom()),
                   FloatSize(box.bounds().width(), border.bottom())),
-        border.bottom_color().value());
+        border.bottom_color().value(), is_border_changed);
   }
 }
 
 void PaintVisitor::PopTransform() {
-  const auto& last_transforms = transforms_.top();
+  const auto& last_transform = transforms_.top();
   transforms_.pop();
-  if (last_transforms == transforms_.top())
+  if (last_transform == transforms_.top())
     return;
   transformer_.set_matrix(transforms_.top());
   builder_.AddNew<EndTransformDisplayItem>();
@@ -187,11 +229,17 @@ void PaintVisitor::VisitLineBox(LineBox* line) {
 }
 
 void PaintVisitor::VisitTextBox(TextBox* text) {
-  if (!NeedsPaintInlineBox(*text))
-    return;
+  const auto& bounds = text->content_bounds();
+  if (text->IsContentChanged() || text->IsOriginChanged())
+    AddDirtyBounds(bounds);
   BoxPaintScope paint_scope(this, *text);
-  builder_.AddNew<DrawTextDisplayItem>(text->content_bounds(), text->color(),
-                                       text->baseline(), text->text());
+  if (text->background().HasValue()) {
+    // TODO(eval1749): We should have a member function for painting background
+    // with clip bounds.
+    FillRect(bounds, text->background().color().value());
+  }
+  builder_.AddNew<DrawTextDisplayItem>(bounds, text->color(), text->baseline(),
+                                       text->text());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -200,11 +248,11 @@ void PaintVisitor::VisitTextBox(TextBox* text) {
 //
 PaintVisitor::BoxPaintScope::BoxPaintScope(PaintVisitor* painter,
                                            const Box& box)
-    : painter_(painter) {
-  painter_->builder_.AddRect(painter_->transformer_.MapRect(box.bounds()));
+    : box_(box), painter_(painter) {
   painter_->transformer_.Translate(box.bounds().origin());
   painter_->PushTransform();
-  painter_->PaintDecoration(box);
+  painter_->PaintBackgroundINeeded(box);
+  painter_->PaintBorderINeeded(box);
   const auto& content_bounds = box.content_bounds();
   painter_->transformer_.Translate(content_bounds.origin());
   painter_->PushTransform();
@@ -213,6 +261,7 @@ PaintVisitor::BoxPaintScope::BoxPaintScope(PaintVisitor* painter,
 }
 
 PaintVisitor::BoxPaintScope::~BoxPaintScope() {
+  BoxEditor().DidPaint(&const_cast<Box&>(box_));
   painter_->builder_.AddNew<EndClipDisplayItem>();
   painter_->PopTransform();
   painter_->PopTransform();
@@ -227,6 +276,8 @@ PaintVisitor::BoxPaintScope::~BoxPaintScope() {
 Painter::Painter() {}
 Painter::~Painter() {}
 
+// TODO(eval1749): |Painter::Paint()| should be called after layout. We should
+// make sure to do so.
 std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
                                                 const Box& box) {
   return PaintVisitor(paint_info).Paint(box);

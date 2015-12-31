@@ -18,6 +18,15 @@ namespace visuals {
 
 namespace {
 
+bool NeedsLayout(const Box& box, const FloatRect& bounds) {
+  if (box.bounds() != bounds)
+    return true;
+  const auto container = box.as<ContainerBox>();
+  if (!container)
+    return false;
+  return container->IsChildrenChanged();
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // LayoutVisitor
@@ -45,11 +54,18 @@ void LayoutVisitor::Layout(Box* box,
 }
 
 void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
-  if (box->bounds() == bounds && box->IsLayoutClean())
+  if (NeedsLayout(*box, bounds)) {
+    BoxEditor().SetBounds(box, bounds);
+    Visit(box);
+    BoxEditor().DidLayout(box);
     return;
-  BoxEditor().SetBounds(box, bounds);
-  Visit(box);
-  BoxEditor().SetLayoutClean(box);
+  }
+
+  const auto container = box->as<ContainerBox>();
+  if (!container || !container->IsSubtreeChanged())
+    return;
+  for (const auto& child : container->child_boxes())
+    Visit(child);
 }
 
 // BoxVisitor

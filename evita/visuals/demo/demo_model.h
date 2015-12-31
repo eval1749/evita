@@ -15,6 +15,7 @@ namespace visuals {
 
 class Box;
 class DemoWindow;
+class PaintTracker;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -37,7 +38,10 @@ class DemoModel final : public ui::AnimationFrameHandler,
   void DidChangeWindowBounds(const FloatRect& bounds) final;
   void DidMoveMouse(const FloatPoint& point) final;
 
-  std::unique_ptr<Box> root_box_;
+  const std::unique_ptr<Box> root_box_;
+
+  // |PaintTracker| takes |root_box_| as a constructor parameter.
+  const std::unique_ptr<PaintTracker> paint_tracker_;
   DemoWindow* window_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(DemoModel);

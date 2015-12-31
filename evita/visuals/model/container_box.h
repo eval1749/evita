@@ -27,7 +27,8 @@ class ContainerBox : public Box {
 
   const std::vector<Box*> child_boxes() const { return child_boxes_; }
 
-  bool IsChildContentDirty() const { return is_child_content_dirty_; }
+  bool IsChildrenChanged() const { return is_children_changed_; }
+  bool IsSubtreeChanged() const { return is_subtree_changed_; }
 
  protected:
   ContainerBox();
@@ -39,12 +40,14 @@ class ContainerBox : public Box {
   // for elements of |std::vector<T>|.
   std::vector<Box*> child_boxes_;
 
-  // |is_child_content_dirty_| is true when at least one of child box has an
-  // updated content. We paint background, border, and padding of this container
-  // box for painting child boxes.
-  // Note: If child box is independent from background of its container box, we
-  // don't need to paint container box, e.g. child box has background color.
-  bool is_child_content_dirty_ = false;
+  // |is_children_changed_| is true if one of child is changed affects
+  // siblings or this container box. This flag is also true adding/removing
+  // child.
+  bool is_children_changed_ = false;
+
+  // |is_subtree_changed_| is true if |is_changed_changed_| is true for one of
+  // descendants, otherwise false.
+  bool is_subtree_changed_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(ContainerBox);
 };

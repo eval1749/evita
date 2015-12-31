@@ -11,6 +11,7 @@
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
 #include "evita/ui/compositor/root_layer.h"
+#include "evita/ui/events/event.h"
 #include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
@@ -81,6 +82,11 @@ void DemoWindow::DidShow() {
   if (bounds().empty())
     return;
   canvas_.reset(layer()->CreateCanvas());
+}
+
+void DemoWindow::OnMouseMoved(const ui::MouseEvent& event) {
+  event_handler_->DidMoveMouse(
+      FloatPoint(event.location().x(), event.location().y()));
 }
 
 }  // namespace visuals

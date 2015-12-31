@@ -17,6 +17,7 @@ class Canvas;
 
 namespace visuals {
 
+class FloatPoint;
 class FloatRect;
 
 //////////////////////////////////////////////////////////////////////
@@ -28,6 +29,7 @@ class WindowEventHandler {
   virtual ~WindowEventHandler();
 
   virtual void DidChangeWindowBounds(const FloatRect& bounds) = 0;
+  virtual void DidMoveMouse(const FloatPoint& point) = 0;
 
  protected:
   WindowEventHandler();
@@ -62,6 +64,7 @@ class DemoWindow final : public ui::AnimatableWindow,
   void DidHide() final;
   void DidRealize() final;
   void DidShow() final;
+  void OnMouseMoved(const ui::MouseEvent& event) final;
 
   std::unique_ptr<gfx::Canvas> canvas_;
   WindowEventHandler* const event_handler_;

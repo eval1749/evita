@@ -224,6 +224,14 @@ void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
   RequestAnimationFrame();
 }
 
+void DemoModel::DidMoveMouse(const FloatPoint& point) {
+  const auto hover_box = root_box_->as<ContainerBox>()->child_boxes()[1];
+  BoxEditor().SetStyle(
+      hover_box,
+      *css::StyleBuilder().SetTop(css::Top(css::Length(point.y()))).Build());
+  RequestAnimationFrame();
+}
+
 const char* DemoModel::GetAnimationFrameType() const {
   return "DemoModel";
 }

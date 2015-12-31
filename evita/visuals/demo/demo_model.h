@@ -35,6 +35,7 @@ class DemoModel final : public ui::AnimationFrameHandler,
 
   // WindowEventHandler
   void DidChangeWindowBounds(const FloatRect& bounds) final;
+  void DidMoveMouse(const FloatPoint& point) final;
 
   std::unique_ptr<Box> root_box_;
   DemoWindow* window_ = nullptr;

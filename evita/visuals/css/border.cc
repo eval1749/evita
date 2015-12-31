@@ -49,7 +49,15 @@ bool Border::operator!=(const Border& other) const {
 }
 
 bool Border::HasValue() const {
-  return thickness_.HasValue();
+  if (bottom_color_.value().alpha() != 0 && thickness_.bottom() != 0)
+    return true;
+  if (left_color_.value().alpha() != 0 && thickness_.left() != 0)
+    return true;
+  if (right_color_.value().alpha() != 0 && thickness_.right() != 0)
+    return true;
+  if (top_color_.value().alpha() != 0 && thickness_.top() != 0)
+    return true;
+  return false;
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Border& border) {

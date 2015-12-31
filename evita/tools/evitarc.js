@@ -37,7 +37,7 @@
     'Resize', 'resize', 'resizing', 'Runnable', 'runnable', 'runtime',
     // S
     'scrollable', 'setter', 'Signedness', 'signedness', 'splitter', 'stringify',
-    'substr', 'substring', 'subtype', 'supertype',
+    'substr', 'substring', 'subtree', 'subtype', 'supertype',
     // T
     'Tooltip', 'tooltip', 'toplevel', 'Tuple', 'tuple', 'typedef',
     // U

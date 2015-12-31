@@ -15,6 +15,7 @@
 #include "evita/visuals/css/float_color.h"
 #include "evita/visuals/css/margin.h"
 #include "evita/visuals/css/padding.h"
+#include "evita/visuals/css/values.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/model/box_forward.h"
 
@@ -72,6 +73,9 @@ class Box : public common::Castable {
   // CSS Formatting model
   bool is_display_none() const { return is_display_none_; }
 
+  // CSS Position
+  const css::Position& position() const { return position_; }
+
   virtual void Accept(BoxVisitor* visitor) = 0;
   virtual FloatSize ComputePreferredSize() const = 0;
   std::unique_ptr<css::Style> ComputeActualStyle() const;
@@ -101,6 +105,7 @@ class Box : public common::Castable {
   bool is_layout_dirty_ = true;
   css::Margin margin_;
   css::Padding padding_;
+  css::Position position_;
   ContainerBox* parent_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(Box);

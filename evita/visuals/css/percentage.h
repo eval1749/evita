@@ -25,7 +25,7 @@ class Percentage final {
   float value() const { return value_; }
 
  private:
-  float value_;
+  float value_ = 0;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Percentage& percentage);

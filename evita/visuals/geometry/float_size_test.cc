@@ -14,4 +14,11 @@ TEST(FloatSizeTest, Equals) {
   EXPECT_FALSE(FloatSize(0, 0) == FloatSize(1, 0));
 }
 
+TEST(FloatSizeTest, IsEmpty) {
+  EXPECT_TRUE(FloatSize().IsEmpty());
+  EXPECT_TRUE(FloatSize(0, 1).IsEmpty());
+  EXPECT_TRUE(FloatSize(1, 0).IsEmpty());
+  EXPECT_FALSE(FloatSize(1, 1).IsEmpty());
+}
+
 }  // namespace visuals

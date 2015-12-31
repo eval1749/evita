@@ -33,7 +33,7 @@ class FloatSize final {
   float height() const { return height_; }
   float width() const { return width_; }
 
-  bool IsEmpty() const { return width_ == 0 && height_ == 0; }
+  bool IsEmpty() const { return width_ == 0 || height_ == 0; }
 
  private:
   float height_ = 0.0f;

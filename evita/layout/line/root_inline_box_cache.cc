@@ -162,7 +162,10 @@ void RootInlineBoxCache::DidChangeStyle(const text::StaticRange& range) {
 
 void RootInlineBoxCache::DidDeleteAt(const text::StaticRange& range) {
   TRACE_EVENT0("layout", "RootInlineBoxCache::DidDeleteAt");
-  RemoveOverwapLines(range);
+  // To handling joining lines or removing newline, we remove a cached line
+  // starts at end of deleted |range|.
+  RemoveOverwapLines(text::StaticRange(buffer_, range.start(),
+                                       range.end() + text::OffsetDelta(1)));
   RelocateLines(range.start(), text::OffsetDelta(-range.length().value()));
 }
 

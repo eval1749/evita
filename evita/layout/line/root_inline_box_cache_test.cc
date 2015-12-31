@@ -106,6 +106,22 @@ TEST_F(RootInlineBoxCacheTest, DidDeleteAt) {
   EXPECT_EQ(lines()[2], cache()->FindLine(text::Offset(6)));
 }
 
+TEST_F(RootInlineBoxCacheTest, DidDeleteAtToJoiningLines) {
+  PopulateCache(L"foo\nbar\nbaz");
+  {
+    DOM_AUTO_LOCK_SCOPE();
+    buffer()->Delete(text::Offset(3), text::Offset(4));
+  }
+  UI_DOM_AUTO_LOCK_SCOPE();
+  //       0123456_78
+  // text: foobar\nbaz
+  EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(0)));
+  EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(1)));
+  EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(3)));
+  EXPECT_EQ(lines()[2], cache()->FindLine(text::Offset(7)))
+      << "line 'baz' is still in cache.";
+}
+
 TEST_F(RootInlineBoxCacheTest, DidDeleteAtWithLineWrap) {
   SetBounds(gfx::RectF(gfx::SizeF(60.0f, 100.0f)));
   PopulateCache(L"0123456789\nabcd");

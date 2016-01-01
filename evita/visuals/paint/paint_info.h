@@ -18,18 +18,13 @@ namespace visuals {
 //
 class PaintInfo final {
  public:
-  explicit PaintInfo(const FloatRect& cull_rect,
-                     const std::vector<FloatRect>& exposed_rect_list);
+  explicit PaintInfo(const FloatRect& cull_rect);
   ~PaintInfo();
 
   const FloatRect& cull_rect() const { return cull_rect_; }
-  const std::vector<FloatRect> exposed_rect_list() const {
-    return exposed_rect_list_;
-  }
 
  private:
   const FloatRect cull_rect_;
-  const std::vector<FloatRect> exposed_rect_list_;
 
   DISALLOW_COPY_AND_ASSIGN(PaintInfo);
 };

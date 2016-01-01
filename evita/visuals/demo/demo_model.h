@@ -40,8 +40,6 @@ class DemoModel final : public ui::AnimationFrameHandler,
 
   const std::unique_ptr<Box> root_box_;
 
-  // |PaintTracker| takes |root_box_| as a constructor parameter.
-  const std::unique_ptr<PaintTracker> paint_tracker_;
   DemoWindow* window_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(DemoModel);

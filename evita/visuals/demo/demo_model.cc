@@ -14,7 +14,6 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/layout/layouter.h"
-#include "evita/visuals/paint/paint_tracker.h"
 #include "evita/visuals/model/box_builder.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
@@ -187,10 +186,7 @@ void PrintPaint(const DisplayItemList& list) {
 //
 /// DemoModel
 //
-DemoModel::DemoModel()
-    : root_box_(CreateRootBox()),
-      paint_tracker_(new PaintTracker(*root_box_)) {}
-
+DemoModel::DemoModel() : root_box_(CreateRootBox()) {}
 DemoModel::~DemoModel() {}
 
 void DemoModel::AttachWindow(DemoWindow* window) {
@@ -207,7 +203,7 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
   const auto& viewport_bounds = FloatRect(
       FloatSize(window_->bounds().width(), window_->bounds().height()));
   Layouter().Layout(root_box_.get(), viewport_bounds);
-  PaintInfo paint_info(viewport_bounds, paint_tracker_->Update());
+  PaintInfo paint_info(viewport_bounds);
   auto list = Painter().Paint(paint_info, *root_box_);
 
 #if 0
@@ -225,7 +221,6 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
 
 // WindowEventHandler
 void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
-  paint_tracker_->Clear();
   RequestAnimationFrame();
 }
 

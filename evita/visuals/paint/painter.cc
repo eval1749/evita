@@ -100,8 +100,6 @@ class PaintVisitor final : public BoxVisitor {
 
 PaintVisitor::PaintVisitor(const PaintInfo& paint_info)
     : builder_(paint_info.cull_rect()), paint_info_(paint_info) {
-  for (const auto& exposed_rect : paint_info.exposed_rect_list())
-    builder_.AddRect(exposed_rect);
   transforms_.push(transformer_.matrix());
 }
 
@@ -128,16 +126,18 @@ void PaintVisitor::FillRectAndMark(const FloatRect& rect,
   if (color.alpha() == 0)
     return;
   if (mark)
-    builder_.AddRect(rect);
+    AddDirtyBounds(rect);
   builder_.AddNew<FillRectDisplayItem>(rect, color);
 }
 
 bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
   if (box.is_display_none() || box.bounds().size().IsEmpty())
     return false;
+#if 0
   if (!box.ShouldPaint() && !box.IsBackgroundChanged() &&
       !box.IsBorderChanged())
     return false;
+#endif
   const auto& bounds = transformer_.MapRect(box.bounds());
   return paint_info_.cull_rect().Intersects(bounds);
 }
@@ -145,10 +145,12 @@ bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
 bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
   if (box.is_display_none() || box.bounds().size().IsEmpty())
     return false;
+#if 0
   if (!box.ShouldPaint() && !box.IsBackgroundChanged() &&
       !box.IsBorderChanged() && !box.IsContentChanged()) {
     return false;
   }
+#endif
   const auto& bounds = transformer_.MapRect(box.bounds());
   return paint_info_.cull_rect().Intersects(bounds);
 }
@@ -160,16 +162,20 @@ std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const Box& box) {
 
 void PaintVisitor::PaintBackgroundINeeded(const Box& box) {
   const auto is_background_changed = IsBackgroundChanged(box);
+#if 0
   if (!box.ShouldPaint() && !is_background_changed)
     return;
+#endif
   FillRectAndMark(FloatRect(box.bounds().size()),
                   box.background().color().value(), is_background_changed);
 }
 
 void PaintVisitor::PaintBorderINeeded(const Box& box) {
   const auto is_border_changed = IsBorderChanged(box);
+#if 0
   if (!box.ShouldPaint() && !is_border_changed)
     return;
+#endif
   const auto& border = box.border();
   if (border.top()) {
     FillRectAndMark(

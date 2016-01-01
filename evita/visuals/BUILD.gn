@@ -50,8 +50,9 @@ source_set("visuals") {
     "model/traversal.h",
     "paint/paint_info.cc",
     "paint/paint_info.h",
-    "paint/paint_tracker.cc",
-    "paint/paint_tracker.h",
+
+    #"paint/paint_tracker.cc",
+    #"paint/paint_tracker.h",
     "paint/painter.cc",
     "paint/painter.h",
   ]

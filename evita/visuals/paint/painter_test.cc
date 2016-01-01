@@ -27,7 +27,7 @@ TEST(PainterTest, Basic) {
                          .Build())
           .Finish();
   Layouter().Layout(root_box.get(), viewport_bounds);
-  PaintInfo paint_info(viewport_bounds, {});
+  PaintInfo paint_info(viewport_bounds);
   const auto& display_item_list = Painter().Paint(paint_info, *root_box);
   EXPECT_EQ(3, display_item_list->items().size());
 }

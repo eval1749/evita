@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/model/traversal.h"
+#include "evita/visuals/model/box_traversal.h"
 
 #include "evita/visuals/model/ancestors.h"
 #include "evita/visuals/model/container_box.h"

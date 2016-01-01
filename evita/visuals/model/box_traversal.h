@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_MODEL_TRAVERSAL_H_
-#define EVITA_VISUALS_MODEL_TRAVERSAL_H_
+#ifndef EVITA_VISUALS_MODEL_BOX_TRAVERSAL_H_
+#define EVITA_VISUALS_MODEL_BOX_TRAVERSAL_H_
 
 #include "base/macros.h"
 
@@ -30,4 +30,4 @@ class BoxTraversal {
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_MODEL_TRAVERSAL_H_
+#endif  // EVITA_VISUALS_MODEL_BOX_TRAVERSAL_H_

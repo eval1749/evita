@@ -34,6 +34,8 @@ source_set("visuals") {
     "model/box_editor.h",
     "model/box_forward.h",
     "model/box_style.cc",
+    "model/box_traversal.cc",
+    "model/box_traversal.h",
     "model/box_visitor.cc",
     "model/box_visitor.h",
     "model/container_box.cc",
@@ -48,8 +50,6 @@ source_set("visuals") {
     "model/root_box.h",
     "model/text_box.cc",
     "model/text_box.h",
-    "model/traversal.cc",
-    "model/traversal.h",
     "paint/paint_info.cc",
     "paint/paint_info.h",
 
@@ -103,9 +103,9 @@ test("tests") {
     "geometry/float_rect_test.cc",
     "geometry/float_size_test.cc",
     "model/box_test.cc",
+    "model/box_traversal_test.cc",
     "model/container_box_test.cc",
     "model/descendants_or_self_test.cc",
-    "model/traversal_test.cc",
     "paint/painter_test.cc",
   ]
 

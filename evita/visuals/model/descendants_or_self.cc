@@ -6,7 +6,7 @@
 
 #include "base/logging.h"
 #include "evita/visuals/model/container_box.h"
-#include "evita/visuals/model/traversal.h"
+#include "evita/visuals/model/box_traversal.h"
 
 namespace visuals {
 

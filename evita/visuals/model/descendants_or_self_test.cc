@@ -9,7 +9,7 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/box_builder.h"
 #include "evita/visuals/model/text_box.h"
-#include "evita/visuals/model/traversal.h"
+#include "evita/visuals/model/box_traversal.h"
 #include "gtest/gtest.h"
 
 namespace visuals {

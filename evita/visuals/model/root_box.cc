@@ -4,7 +4,7 @@
 
 #include "evita/visuals/model/root_box.h"
 
-#include "evita/visuals/model/traversal.h"
+#include "evita/visuals/model/box_traversal.h"
 
 namespace visuals {
 

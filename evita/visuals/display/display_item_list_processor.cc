@@ -2,8 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define PRINT_DIRTY 0
+#define PAINT_DIRTY 0
+
 #include <dwrite.h>
 
+#if PRINT_DIRTY
+#include <iostream>
+#endif
 #include <stack>
 
 #include "evita/visuals/display/display_item_list_processor.h"
@@ -118,6 +124,22 @@ void DisplayItemListProcessor::Paint(gfx::Canvas* canvas,
   PaintVisitor painter(canvas);
   for (const auto& item : list->items())
     painter.Visit(item);
+
+#if PRINT_DIRTY
+  std::cout << "DisplayItemListProcessor::Paint(): dirty rects" << std::endl;
+  auto index = 0;
+  for (const auto& rect : list->rects())
+    std::cout << ' ' << ++index << ' ' << rect;
+  std::cout << std::endl;
+#endif
+#if PAINT_DIRTY
+  for (const auto& rect : list->rects()) {
+    gfx::Brush brush(canvas, gfx::ColorF(1, 0, 0, 0.1f));
+    const auto& rect_f = ToRectF(rect);
+    canvas->FillRectangle(brush, rect_f);
+    canvas->DrawRectangle(brush, rect_f);
+  }
+#endif
 }
 
 }  // namespace visuals

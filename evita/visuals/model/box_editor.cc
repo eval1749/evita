@@ -139,8 +139,7 @@ void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {
 }
 
 void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
-  // TODO(eval1749): We should make |Box| always have |RootBox|.
-  DCHECK(FindRootBox(*box)->InLayout());
+  DCHECK(box->root_box()->InLayout());
   if (box->bounds_ == new_bounds)
     return;
   if (box->bounds_.origin() != new_bounds.origin())

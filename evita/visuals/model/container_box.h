@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "evita/visuals/model/box.h"
+#include "evita/visuals/model/children.h"
 
 namespace visuals {
 
@@ -25,9 +26,9 @@ class ContainerBox : public Box {
  public:
   ~ContainerBox() override;
 
-  const std::vector<Box*> child_boxes() const { return child_boxes_; }
-  Box* first_child() const;
-  Box* last_child() const;
+  Children child_boxes() const { return Children(*this); }
+  Box* first_child() const { return first_child_; }
+  Box* last_child() const { return last_child_; }
 
   bool IsChildrenChanged() const { return is_children_changed_; }
   bool IsSubtreeChanged() const { return is_subtree_changed_; }
@@ -40,8 +41,8 @@ class ContainerBox : public Box {
   friend class BoxEditor;
 
   // For ease of using list of child boxes, we don't use |std::unique_ptr<Box>|
-  // for elements of |std::vector<T>|.
-  std::vector<Box*> child_boxes_;
+  Box* first_child_ = nullptr;
+  Box* last_child_ = nullptr;
 
   // |is_children_changed_| is true if one of child is changed affects
   // siblings or this container box. This flag is also true adding/removing

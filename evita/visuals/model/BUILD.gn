@@ -26,6 +26,8 @@ source_set("model") {
     "box_tree_lifecycle.h",
     "box_visitor.cc",
     "box_visitor.h",
+    "children.cc",
+    "children.h",
     "container_box.cc",
     "container_box.h",
     "descendants_or_self.cc",

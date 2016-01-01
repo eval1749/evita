@@ -21,22 +21,13 @@ ContainerBox::ContainerBox(RootBox* root_box) : Box(root_box) {}
 
 ContainerBox::~ContainerBox() {
   DCHECK_EQ(static_cast<ContainerBox*>(nullptr), parent());
-  for (const auto& child : child_boxes_) {
-    BoxEditor().WillDestroy(child);
-    delete child;
+  auto runner = first_child_;
+  while (runner) {
+    const auto next_child = runner->next_sibling();
+    BoxEditor().WillDestroy(runner);
+    delete runner;
+    runner = next_child;
   }
-}
-
-Box* ContainerBox::first_child() const {
-  if (child_boxes_.empty())
-    return nullptr;
-  return child_boxes_.front();
-}
-
-Box* ContainerBox::last_child() const {
-  if (child_boxes_.empty())
-    return nullptr;
-  return child_boxes_.back();
 }
 
 }  // namespace visuals

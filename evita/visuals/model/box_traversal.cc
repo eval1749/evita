@@ -40,22 +40,16 @@ Box* BoxTraversal::NextOf(const Box& box) {
   return nullptr;
 }
 
-// TODO(eval1749): We should have next/previous sibling link for |Box|.
 Box* BoxTraversal::NextSiblingOf(const Box& box) {
-  auto found = false;
-  const auto parent = ParentOf(box);
-  if (!parent)
-    return nullptr;
-  for (const auto& child : parent->child_boxes()) {
-    if (found)
-      return child;
-    found = &box == child;
-  }
-  return nullptr;
+  return box.next_sibling();
 }
 
 ContainerBox* BoxTraversal::ParentOf(const Box& box) {
   return box.parent();
+}
+
+Box* BoxTraversal::PreviousSiblingOf(const Box& box) {
+  return box.previous_sibling();
 }
 
 }  // namespace visuals

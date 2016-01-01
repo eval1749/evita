@@ -19,10 +19,9 @@ TEST(BoxTraversalTest, FirstChildOf) {
                          .Add<TextBox>(L"bar")
                          .End<BlockBox>()
                          .Build();
-  const auto block = root->first_child();
+  const auto block = root->first_child()->as<ContainerBox>();
 
-  EXPECT_EQ(block->as<ContainerBox>()->child_boxes().front(),
-            BoxTraversal::FirstChildOf(*block));
+  EXPECT_EQ(block->first_child(), BoxTraversal::FirstChildOf(*block));
   EXPECT_EQ(nullptr,
             BoxTraversal::FirstChildOf(*BoxTraversal::FirstChildOf(*block)));
 }
@@ -40,10 +39,9 @@ TEST(BoxTraversalTest, LastChildOf) {
                          .Add<TextBox>(L"bar")
                          .End<BlockBox>()
                          .Build();
-  const auto block = root->first_child();
+  const auto block = root->first_child()->as<ContainerBox>();
 
-  EXPECT_EQ(block->as<ContainerBox>()->child_boxes().back(),
-            BoxTraversal::LastChildOf(*block));
+  EXPECT_EQ(block->last_child(), BoxTraversal::LastChildOf(*block));
   EXPECT_EQ(nullptr,
             BoxTraversal::LastChildOf(*BoxTraversal::LastChildOf(*block)));
 }

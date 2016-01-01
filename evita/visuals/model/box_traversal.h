@@ -23,6 +23,7 @@ class BoxTraversal {
   static Box* NextOf(const Box& box);
   static Box* NextSiblingOf(const Box& box);
   static ContainerBox* ParentOf(const Box& box);
+  static Box* PreviousSiblingOf(const Box& box);
 
  private:
   DISALLOW_IMPLICIT_CONSTRUCTORS(BoxTraversal);

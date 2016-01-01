@@ -35,19 +35,28 @@ BoxEditor::BoxEditor() {}
 BoxEditor::~BoxEditor() {}
 
 Box* BoxEditor::AppendChild(ContainerBox* container,
-                            std::unique_ptr<Box> new_child) {
-  DCHECK_NE(container, new_child.get());
+                            std::unique_ptr<Box> new_child_ptr) {
+  const auto new_child = new_child_ptr.release();
+  DCHECK_NE(container, new_child);
   DCHECK(!new_child->IsDescendantOf(*container));
   DCHECK(!container->IsDescendantOf(*new_child));
-  DCHECK_EQ(static_cast<ContainerBox*>(nullptr), new_child->parent());
+  DCHECK_EQ(static_cast<ContainerBox*>(nullptr), new_child->parent_);
+  DCHECK_EQ(static_cast<ContainerBox*>(nullptr), new_child->next_sibling_);
+  DCHECK_EQ(static_cast<ContainerBox*>(nullptr), new_child->previous_sibling_);
   new_child->parent_ = container;
+  if (const auto old_last_child = container->last_child_) {
+    new_child->previous_sibling_ = old_last_child;
+    old_last_child->next_sibling_ = new_child;
+  } else {
+    container->first_child_ = new_child;
+  }
+  container->last_child_ = new_child;
   if (const auto root_box = FindRootBox(*container)) {
     for (const auto runner : Box::DescendantsOrSelf(*new_child))
       root_box->RegisterBoxIdIfNeeded(*runner);
   }
-  container->child_boxes_.push_back(new_child.release());
-  DidChangeChild(container->parent());
-  return container->child_boxes_.back();
+  DidChangeChild(container->parent_);
+  return new_child;
 }
 
 void BoxEditor::DidChangeChild(ContainerBox* container) {
@@ -90,15 +99,26 @@ void BoxEditor::DidPaint(Box* box) {
 
 std::unique_ptr<Box> BoxEditor::RemoveChild(ContainerBox* container,
                                             Box* old_child) {
-  DCHECK_EQ(container, old_child->parent());
-  const auto it = std::find(container->child_boxes_.begin(),
-                            container->child_boxes_.end(), old_child);
-  DCHECK(it != container->child_boxes_.end());
-  container->child_boxes_.erase(it);
+  DCHECK_EQ(container, old_child->parent_);
   if (const auto root_box = FindRootBox(*container)) {
     for (const auto runner : Box::DescendantsOrSelf(*old_child))
       root_box->UnregisterBoxIdIfNeeded(*runner);
   }
+
+  const auto next_sibling = old_child->next_sibling_;
+  const auto previous_sibling = old_child->previous_sibling_;
+
+  if (next_sibling)
+    next_sibling->previous_sibling_ = old_child->previous_sibling_;
+  else
+    container->last_child_ = old_child->previous_sibling_;
+  if (previous_sibling)
+    previous_sibling->next_sibling_ = next_sibling;
+  else
+    container->first_child_ = next_sibling;
+
+  old_child->next_sibling_ = nullptr;
+  old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;
   DidChangeChild(container);
   return std::unique_ptr<Box>(old_child);

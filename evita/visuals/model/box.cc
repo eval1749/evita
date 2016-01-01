@@ -19,8 +19,8 @@ int last_box_sequence_id;
 //
 Box::Box(RootBox* root_box, const base::StringPiece16& id)
     : id_(id.as_string()),
-      root_box_(root_box),
-      sequence_id_(++last_box_sequence_id) {}
+      sequence_id_(++last_box_sequence_id),
+      root_box_(root_box) {}
 
 Box::Box(RootBox* root_box) : Box(root_box, base::StringPiece16()) {}
 Box::~Box() {}

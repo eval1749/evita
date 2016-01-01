@@ -52,12 +52,15 @@ class Box : public common::Castable {
  public:
   class Ancestors;
   class AncestorsOrSelf;
+  class Children;
   class Descendants;
   class DescendantsOrSelf;
 
   virtual ~Box();
 
-  // Tree strucutre
+  // Tree structure
+  Box* next_sibling() const { return next_sibling_; }
+  Box* previous_sibling() const { return previous_sibling_; }
   RootBox* root_box() const { return root_box_; }
 
   // Box identifiers
@@ -111,14 +114,12 @@ class Box : public common::Castable {
   explicit Box(RootBox* root_box);
 
  private:
-  css::Background background_;
-  css::Border border_;
-  // TODO(eval1749): We should incorporate |bottom_| to layout.
-  css::Bottom bottom_;
   FloatRect bounds_;
   // User specified string identifier of this box. Multiple boxes can have
   // same string id.
   const base::string16 id_;
+  const int sequence_id_;
+
   bool is_display_none_ = false;
   bool is_background_changed_ = true;
   bool is_border_changed_ = true;
@@ -129,17 +130,25 @@ class Box : public common::Castable {
   bool is_origin_changed_ = true;
   bool is_padding_changed_ = true;
   bool is_size_changed_ = true;
+  bool should_paint_ = true;
+
+  css::Background background_;
+  css::Border border_;
+  // TODO(eval1749): We should incorporate |bottom_| to layout.
+  css::Bottom bottom_;
   css::Left left_;
   css::Margin margin_;
   css::Padding padding_;
   css::Position position_;
-  ContainerBox* parent_ = nullptr;
   // TODO(eval1749): We should incorporate |right_| to layout.
   css::Right right_;
-  RootBox* root_box_;
-  const int sequence_id_;
-  bool should_paint_ = true;
   css::Top top_;
+
+  // Tree structure
+  Box* next_sibling_ = nullptr;
+  Box* previous_sibling_ = nullptr;
+  ContainerBox* parent_ = nullptr;
+  RootBox* root_box_;
 
   DISALLOW_COPY_AND_ASSIGN(Box);
 };

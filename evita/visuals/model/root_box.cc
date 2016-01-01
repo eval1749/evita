@@ -28,6 +28,10 @@ bool RootBox::InLayout() const {
   return lifecycle_.state() == BoxTreeLifecycle::State::InLayout;
 }
 
+bool RootBox::InPaint() const {
+  return lifecycle_.state() == BoxTreeLifecycle::State::InPaint;
+}
+
 bool RootBox::IsLayoutClean() const {
   return lifecycle_.IsAtLeast(BoxTreeLifecycle::State::LayoutClean);
 }

@@ -29,6 +29,7 @@ class RootBox final : public ContainerBox {
 
   Box* GetBoxById(const base::StringPiece16& id) const;
   bool InLayout() const;
+  bool InPaint() const;
   bool IsLayoutClean() const;
   bool IsPaintClean() const;
 

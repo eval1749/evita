@@ -80,9 +80,8 @@ void BoxEditor::DidMove(Box* box) {
   SetShouldPaint(box);
 }
 
-// TODO(eval1749): We should make sure |BoxEditor::DidPaint()| is called during
-// painting.
 void BoxEditor::DidPaint(Box* box) {
+  DCHECK(box->root_box()->InPaint());
   box->is_background_changed_ = false;
   box->is_border_changed_ = false;
   box->is_content_changed_ = false;

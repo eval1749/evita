@@ -16,6 +16,8 @@ source_set("model") {
     "box.h",
     "box_editor.cc",
     "box_editor.h",
+    "box_finder.cc",
+    "box_finder.h",
     "box_forward.h",
     "box_style.cc",
     "box_traversal.cc",
@@ -52,6 +54,7 @@ source_set("model") {
 source_set("test_files") {
   testonly = true
   sources = [
+    "box_finder_test.cc",
     "box_test.cc",
     "box_traversal_test.cc",
     "container_box_test.cc",
@@ -61,6 +64,7 @@ source_set("test_files") {
 
   deps = [
     ":model",
+    "//evita/visuals/layout",
     "//testing/gtest",
   ]
 }

@@ -290,8 +290,6 @@ PaintVisitor::BoxPaintScope::~BoxPaintScope() {
 Painter::Painter() {}
 Painter::~Painter() {}
 
-// TODO(eval1749): |Painter::Paint()| should be called after layout. We should
-// make sure to do so.
 std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
                                                 const RootBox& root_box) {
   BoxTreeLifecycle::Scope scope(root_box.lifecycle(),

@@ -9,7 +9,7 @@
 
 namespace visuals {
 
-class Box;
+class RootBox;
 class FloatRect;
 
 //////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@ class Layouter final {
   Layouter();
   ~Layouter();
 
-  void Layout(Box* box, const FloatRect& bounds);
+  void Layout(RootBox* root, const FloatRect& bounds);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Layouter);

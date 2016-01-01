@@ -36,6 +36,8 @@ source_set("visuals") {
     "model/box_style.cc",
     "model/box_traversal.cc",
     "model/box_traversal.h",
+    "model/box_tree_builder.cc",
+    "model/box_tree_builder.h",
     "model/box_visitor.cc",
     "model/box_visitor.h",
     "model/container_box.cc",

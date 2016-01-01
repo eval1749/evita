@@ -14,8 +14,10 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/layout/layouter.h"
+#include "evita/visuals/model/ancestors_or_self.h"
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/box_editor.h"
+#include "evita/visuals/model/box_finder.h"
 #include "evita/visuals/model/box_traversal.h"
 #include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/box_visitor.h"
@@ -103,27 +105,23 @@ const auto kBorder = 1;
 std::unique_ptr<RootBox> BuildBoxTree() {
   auto root =
       BoxTreeBuilder()
-          .Begin<BlockBox>()
+          .Begin<BlockBox>(L"main")
           .SetStyle(*css::StyleBuilder()
                          .SetBackground(css::Background(css::Color(1, 1, 1)))
                          .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
                          .Build())
-          .Add<BlockBox>()
+          .Add<BlockBox>(L"list")
           .End<BlockBox>()
           .Build();
-  const auto main = root->first_child()->as<BlockBox>();
-  const auto list = main->first_child()->as<BlockBox>();
+  const auto list = root->GetBoxById(L"list")->as<BlockBox>();
   const auto& kBlack =
       css::StyleBuilder().SetColor(css::Color(0, 0, 0)).Build();
   for (auto index = 0; index < 20; ++index) {
     auto line = std::make_unique<LineBox>(root.get());
     BoxTreeBuilder(line.get())
-        .SetStyle(
-            *css::StyleBuilder()
-                 .SetBorder(css::Border(index & 1 ? css::Color(0, 0.5f, 0)
-                                                  : css::Color(0, 0, 0.5f),
-                                        kBorder))
-                 .Build())
+        .SetStyle(*css::StyleBuilder()
+                       .SetBorder(css::Border(css::Color(), 1))
+                       .Build())
         .Begin<TextBox>(base::StringPrintf(L"line %d", index))
         .SetStyle(*kBlack)
         .End<TextBox>()
@@ -137,28 +135,10 @@ std::unique_ptr<RootBox> BuildBoxTree() {
         .SetStyle(*kBlack)
         .End<TextBox>()
         .Finish<LineBox>(line.get());
-    switch (index) {
-      case 0:
-        BoxEditor().SetStyle(
-            line.get(),
-            *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
-        break;
-      case 2:
-        // Selected color
-        BoxEditor().SetStyle(line.get(),
-                             *css::StyleBuilder()
-                                  .SetBackground(css::Background(
-                                      css::Color::Rgba(51, 153, 255, 0.5f)))
-                                  .Build());
-        break;
-      case 3:
-        // Inactive selection color
-        BoxEditor().SetStyle(line.get(),
-                             *css::StyleBuilder()
-                                  .SetBackground(css::Background(
-                                      css::Color::Rgba(191, 205, 191, 0.2f)))
-                                  .Build());
-        break;
+    if (index == 0) {
+      BoxEditor().SetStyle(
+          line.get(),
+          *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
     }
     BoxEditor().AppendChild(list, std::move(line));
   }
@@ -167,13 +147,13 @@ std::unique_ptr<RootBox> BuildBoxTree() {
       .SetStyle(
           *css::StyleBuilder()
                .SetPosition(css::Position::Absolute())
-               .SetLeft(css::Left(css::Length(20)))
-               .SetTop(css::Top(css::Length(120)))
+               .SetLeft(css::Left(css::Length(0)))
+               .SetTop(css::Top(css::Length(-1000)))
                .SetBackground(
                    css::Background(css::Color::Rgba(51, 153, 255, 0.1f)))
                .SetBorder(css::Border(css::Color::Rgba(51, 153, 255, 1.0f), 1))
                .Build())
-      .Begin<TextBox>(L"hover")
+      .Begin<TextBox>(L" ")
       .SetStyle(*kBlack)
       .End<TextBox>()
       .End<LineBox>()
@@ -222,6 +202,22 @@ void DemoModel::AttachWindow(DemoWindow* window) {
   RequestAnimationFrame();
 }
 
+LineBox* DemoModel::FindLineBox(const FloatPoint& point) const {
+  Layouter().Layout(root_box_.get());
+  const auto& found = BoxFinder(*root_box_).FindByPoint(point);
+  if (!found.box)
+    return nullptr;
+  const auto list = root_box_->GetBoxById(L"list");
+  const auto source = found.box;
+  if (!source->IsDescendantOf(*list))
+    return nullptr;
+  for (const auto& runner : Box::AncestorsOrSelf(*source)) {
+    if (const auto line = runner->as<LineBox>())
+      return line;
+  }
+  return nullptr;
+}
+
 // ui::AnimationFrameHandler
 void DemoModel::DidBeginAnimationFrame(base::Time now) {
   const auto& canvas = window_->GetCanvas();
@@ -254,13 +250,30 @@ void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
 }
 
 void DemoModel::DidMoveMouse(const FloatPoint& point) {
+  const auto line = FindLineBox(point);
+  if (!line)
+    return;
   const auto hover = root_box_->GetBoxById(L"hover");
-  // TODO(eval1749): We should have a mapping function from pageX/pageY to
-  // boxX/boxY.
-  const auto hover_y = point.y() - kMargin - kBorder;
-  BoxEditor().SetStyle(
-      hover,
-      *css::StyleBuilder().SetTop(css::Top(css::Length(hover_y))).Build());
+  const auto hover_point = line->bounds().origin();
+  BoxEditor().SetStyle(hover,
+                       *css::StyleBuilder()
+                            .SetTop(css::Top(css::Length(hover_point.y())))
+                            .SetLeft(css::Left(css::Length(hover_point.x())))
+                            .Build());
+  RequestAnimationFrame();
+}
+
+void DemoModel::DidPressMouse(const FloatPoint& point) {
+  const auto line = FindLineBox(point);
+  if (!line)
+    return;
+  const auto hover = root_box_->GetBoxById(L"hover");
+  const auto hover_point = line->bounds().origin();
+  BoxEditor().SetStyle(hover,
+                       *css::StyleBuilder()
+                            .SetTop(css::Top(css::Length(hover_point.y())))
+                            .SetLeft(css::Left(css::Length(hover_point.x())))
+                            .Build());
   RequestAnimationFrame();
 }
 

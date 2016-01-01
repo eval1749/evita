@@ -10,11 +10,12 @@
 #include "base/macros.h"
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/visuals/demo/demo_window.h"
+#include "evita/visuals/model/box_finder.h"
 
 namespace visuals {
 
 class DemoWindow;
-class PaintTracker;
+class LineBox;
 class RootBox;
 
 //////////////////////////////////////////////////////////////////////
@@ -30,6 +31,8 @@ class DemoModel final : public ui::AnimationFrameHandler,
   void AttachWindow(DemoWindow* window);
 
  private:
+  LineBox* FindLineBox(const FloatPoint& point) const;
+
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;
   const char* GetAnimationFrameType() const final;
@@ -37,6 +40,7 @@ class DemoModel final : public ui::AnimationFrameHandler,
   // WindowEventHandler
   void DidChangeWindowBounds(const FloatRect& bounds) final;
   void DidMoveMouse(const FloatPoint& point) final;
+  void DidPressMouse(const FloatPoint& point) final;
 
   const std::unique_ptr<RootBox> root_box_;
 

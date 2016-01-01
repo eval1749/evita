@@ -89,4 +89,9 @@ void DemoWindow::OnMouseMoved(const ui::MouseEvent& event) {
       FloatPoint(event.location().x(), event.location().y()));
 }
 
+void DemoWindow::OnMousePressed(const ui::MouseEvent& event) {
+  event_handler_->DidPressMouse(
+      FloatPoint(event.location().x(), event.location().y()));
+}
+
 }  // namespace visuals

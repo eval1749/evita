@@ -13,10 +13,6 @@ source_set("gfx") {
     "canvas_owner.cc",
     "canvas_owner.h",
     "color_f.cc",
-    "direct2d_factory_win.cc",
-    "direct2d_factory_win.h",
-    "direct_write_factory_win.cc",
-    "direct_write_factory_win.h",
     "dpi_handler.cc",
     "dpi_handler.h",
     "dx_device.cc",
@@ -25,8 +21,6 @@ source_set("gfx") {
     "font.h",
     "font_face.cc",
     "font_face.h",
-    "imaging_factory_win.cc",
-    "imaging_factory_win.h",
     "point_f.cc",
     "rect_conversions.cc",
     "rect_conversions.h",
@@ -39,5 +33,21 @@ source_set("gfx") {
     "swap_chain.h",
     "text_format.cc",
     "text_layout.cc",
+  ]
+
+  if (is_win) {
+    sources += [
+      "direct2d_factory_win.cc",
+      "direct2d_factory_win.h",
+      "direct_write_factory_win.cc",
+      "direct_write_factory_win.h",
+      "imaging_factory_win.cc",
+      "imaging_factory_win.h",
+    ]
+  }
+
+  deps = [
+    "//base",
+    "//common",
   ]
 }

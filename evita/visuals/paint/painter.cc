@@ -160,6 +160,8 @@ bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
 
 // The entry point of |PaintVisitor|.
 std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const RootBox& root_box) {
+  // TODO(eval1749): Should we need to pass dirty rect list?
+  AddDirtyBounds(root_box.bounds());
   Visit(root_box);
   return builder_.Build();
 }

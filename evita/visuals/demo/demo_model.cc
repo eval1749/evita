@@ -235,9 +235,7 @@ void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
 }
 
 void DemoModel::DidMoveMouse(const FloatPoint& point) {
-  const auto body = BoxTraversal::FirstChildOf(*root_box_);
-  const auto list = BoxTraversal::FirstChildOf(*body);
-  const auto hover = BoxTraversal::LastChildOf(*list);
+  const auto hover = root_box_->GetBoxById(L"hover");
   // TODO(eval1749): We should have a mapping function from pageX/pageY to
   // boxX/boxY.
   const auto hover_y = point.y() - kMargin - kBorder;

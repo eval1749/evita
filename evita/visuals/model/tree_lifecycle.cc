@@ -39,6 +39,10 @@ void TreeLifecycle::AdvanceTo(State new_state) {
   state_ = new_state;
 }
 
+bool TreeLifecycle::AllowsTreeMutaions() const {
+  return state_ == State::VisualUpdatePending || state_ == State::PaintClean;
+}
+
 bool TreeLifecycle::IsAtLeast(State state) const {
   return static_cast<int>(state_) >= static_cast<int>(state);
 }

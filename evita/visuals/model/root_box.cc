@@ -37,6 +37,7 @@ bool RootBox::IsPaintClean() const {
 }
 
 void RootBox::RegisterBoxIdIfNeeded(const Box& box) {
+  DCHECK(lifecycle_.AllowsTreeMutaions()) << lifecycle_;
   if (box.id().empty())
     return;
   const auto& result =
@@ -45,6 +46,7 @@ void RootBox::RegisterBoxIdIfNeeded(const Box& box) {
 }
 
 void RootBox::UnregisterBoxIdIfNeeded(const Box& box) {
+  DCHECK(lifecycle_.AllowsTreeMutaions()) << lifecycle_;
   if (box.id().empty())
     return;
   const auto& start = id_map_.find(box.id());

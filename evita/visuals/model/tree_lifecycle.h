@@ -47,6 +47,7 @@ class TreeLifecycle final {
 
   State state() const { return state_; }
 
+  bool AllowsTreeMutaions() const;
   bool IsAtLeast(State state) const;
   void Reset();
 

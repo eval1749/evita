@@ -205,6 +205,7 @@ void BoxEditor::SetShouldPaint(Box* box) {
 }
 
 void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
+  DCHECK(root_box->lifecycle_.AllowsTreeMutaions()) << root_box->lifecycle_;
   if (root_box->viewport_size_ == size)
     return;
   root_box->viewport_size_ = size;

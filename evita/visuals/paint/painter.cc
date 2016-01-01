@@ -167,6 +167,8 @@ std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const RootBox& root_box) {
 }
 
 void PaintVisitor::PaintBackgroundINeeded(const Box& box) {
+  if (box.bounds().size().IsEmpty())
+    return;
   const auto is_background_changed = IsBackgroundChanged(box);
 #if 0
   if (!box.ShouldPaint() && !is_background_changed)
@@ -246,6 +248,8 @@ void PaintVisitor::VisitRootBox(RootBox* root) {
 
 void PaintVisitor::VisitTextBox(TextBox* text) {
   const auto& bounds = text->content_bounds();
+  if (bounds.size().IsEmpty())
+    return;
   if (text->IsContentChanged() || text->IsOriginChanged())
     AddDirtyBounds(bounds);
   BoxPaintScope paint_scope(this, *text);

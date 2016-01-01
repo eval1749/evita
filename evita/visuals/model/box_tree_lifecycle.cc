@@ -5,7 +5,7 @@
 #include <iterator>
 #include <ostream>
 
-#include "evita/visuals/model/tree_lifecycle.h"
+#include "evita/visuals/model/box_tree_lifecycle.h"
 
 #include "base/logging.h"
 
@@ -13,50 +13,50 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TreeLifecycle::Scope
+// BoxTreeLifecycle::Scope
 //
-TreeLifecycle::Scope::Scope(TreeLifecycle* lifecycle,
-                            State from_state,
-                            State to_state)
+BoxTreeLifecycle::Scope::Scope(BoxTreeLifecycle* lifecycle,
+                               State from_state,
+                               State to_state)
     : lifecycle_(lifecycle), to_state_(to_state) {
   lifecycle_->AdvanceTo(from_state);
 }
 
-TreeLifecycle::Scope::~Scope() {
+BoxTreeLifecycle::Scope::~Scope() {
   lifecycle_->AdvanceTo(to_state_);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// TreeLifecycle
+// BoxTreeLifecycle
 //
-TreeLifecycle::TreeLifecycle() : state_(State::VisualUpdatePending) {}
-TreeLifecycle::~TreeLifecycle() {}
+BoxTreeLifecycle::BoxTreeLifecycle() : state_(State::VisualUpdatePending) {}
+BoxTreeLifecycle::~BoxTreeLifecycle() {}
 
-void TreeLifecycle::AdvanceTo(State new_state) {
+void BoxTreeLifecycle::AdvanceTo(State new_state) {
   DCHECK(static_cast<int>(new_state) == static_cast<int>(state_) + 1)
       << "Can't advance to " << new_state << " from " << state_;
   state_ = new_state;
 }
 
-bool TreeLifecycle::AllowsTreeMutaions() const {
+bool BoxTreeLifecycle::AllowsTreeMutaions() const {
   return state_ == State::VisualUpdatePending || state_ == State::PaintClean;
 }
 
-bool TreeLifecycle::IsAtLeast(State state) const {
+bool BoxTreeLifecycle::IsAtLeast(State state) const {
   return static_cast<int>(state_) >= static_cast<int>(state);
 }
 
-void TreeLifecycle::Reset() {
+void BoxTreeLifecycle::Reset() {
   state_ = State::VisualUpdatePending;
 }
 
 std::ostream& operator<<(std::ostream& ostream,
-                         const TreeLifecycle& lifecycle) {
+                         const BoxTreeLifecycle& lifecycle) {
   return ostream << lifecycle.state();
 }
 
-std::ostream& operator<<(std::ostream& ostream, TreeLifecycle::State state) {
+std::ostream& operator<<(std::ostream& ostream, BoxTreeLifecycle::State state) {
   static const char* texts[] = {
 #define V(name) #name,
       FOR_EACH_TREE_LIFECYCLE_STATE(V)

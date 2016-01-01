@@ -125,9 +125,9 @@ Layouter::~Layouter() {}
 void Layouter::Layout(RootBox* root_box) {
   if (root_box->IsLayoutClean())
     return;
-  TreeLifecycle::Scope scope(root_box->lifecycle(),
-                             TreeLifecycle::State::InLayout,
-                             TreeLifecycle::State::LayoutClean);
+  BoxTreeLifecycle::Scope scope(root_box->lifecycle(),
+                                BoxTreeLifecycle::State::InLayout,
+                                BoxTreeLifecycle::State::LayoutClean);
   LayoutVisitor().Layout(root_box, FloatRect(root_box->viewport_size()));
 }
 

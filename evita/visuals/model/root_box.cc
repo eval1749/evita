@@ -25,15 +25,15 @@ Box* RootBox::GetBoxById(const base::StringPiece16& id) const {
 }
 
 bool RootBox::InLayout() const {
-  return lifecycle_.state() == TreeLifecycle::State::InLayout;
+  return lifecycle_.state() == BoxTreeLifecycle::State::InLayout;
 }
 
 bool RootBox::IsLayoutClean() const {
-  return lifecycle_.IsAtLeast(TreeLifecycle::State::LayoutClean);
+  return lifecycle_.IsAtLeast(BoxTreeLifecycle::State::LayoutClean);
 }
 
 bool RootBox::IsPaintClean() const {
-  return lifecycle_.IsAtLeast(TreeLifecycle::State::PaintClean);
+  return lifecycle_.IsAtLeast(BoxTreeLifecycle::State::PaintClean);
 }
 
 void RootBox::RegisterBoxIdIfNeeded(const Box& box) {

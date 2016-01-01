@@ -24,6 +24,8 @@ source_set("model") {
     "box_traversal.h",
     "box_tree_builder.cc",
     "box_tree_builder.h",
+    "box_tree_lifecycle.cc",
+    "box_tree_lifecycle.h",
     "box_visitor.cc",
     "box_visitor.h",
     "container_box.cc",
@@ -38,8 +40,6 @@ source_set("model") {
     "root_box.h",
     "text_box.cc",
     "text_box.h",
-    "tree_lifecycle.cc",
-    "tree_lifecycle.h",
   ]
 
   deps = [

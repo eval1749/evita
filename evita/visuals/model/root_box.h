@@ -8,8 +8,8 @@
 #include <map>
 
 #include "evita/visuals/geometry/float_size.h"
+#include "evita/visuals/model/box_tree_lifecycle.h"
 #include "evita/visuals/model/container_box.h"
-#include "evita/visuals/model/tree_lifecycle.h"
 
 namespace visuals {
 
@@ -24,7 +24,7 @@ class RootBox final : public ContainerBox {
   RootBox();
   ~RootBox() final;
 
-  TreeLifecycle* lifecycle() const { return &lifecycle_; }
+  BoxTreeLifecycle* lifecycle() const { return &lifecycle_; }
   const FloatSize& viewport_size() const { return viewport_size_; }
 
   Box* GetBoxById(const base::StringPiece16& id) const;
@@ -40,7 +40,7 @@ class RootBox final : public ContainerBox {
   FloatSize ComputePreferredSize() const final;
 
   std::map<base::string16, Box*> id_map_;
-  mutable TreeLifecycle lifecycle_;
+  mutable BoxTreeLifecycle lifecycle_;
   FloatSize viewport_size_;
 
   DISALLOW_COPY_AND_ASSIGN(RootBox);

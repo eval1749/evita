@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_MODEL_TREE_LIFECYCLE_H_
-#define EVITA_VISUALS_MODEL_TREE_LIFECYCLE_H_
+#ifndef EVITA_VISUALS_MODEL_BOX_TREE_LIFECYCLE_H_
+#define EVITA_VISUALS_MODEL_BOX_TREE_LIFECYCLE_H_
 
 #include <iosfwd>
 
@@ -20,9 +20,9 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TreeLifecycle
+// BoxTreeLifecycle
 //
-class TreeLifecycle final {
+class BoxTreeLifecycle final {
  public:
   enum class State {
 #define V(name) name,
@@ -32,18 +32,18 @@ class TreeLifecycle final {
 
   class Scope {
    public:
-    Scope(TreeLifecycle* lifecycle, State from_state, State to_state);
+    Scope(BoxTreeLifecycle* lifecycle, State from_state, State to_state);
     ~Scope();
 
    private:
-    TreeLifecycle* const lifecycle_;
+    BoxTreeLifecycle* const lifecycle_;
     State const to_state_;
 
     DISALLOW_COPY_AND_ASSIGN(Scope);
   };
 
-  TreeLifecycle();
-  ~TreeLifecycle();
+  BoxTreeLifecycle();
+  ~BoxTreeLifecycle();
 
   State state() const { return state_; }
 
@@ -56,12 +56,13 @@ class TreeLifecycle final {
 
   State state_;
 
-  DISALLOW_COPY_AND_ASSIGN(TreeLifecycle);
+  DISALLOW_COPY_AND_ASSIGN(BoxTreeLifecycle);
 };
 
-std::ostream& operator<<(std::ostream& ostream, const TreeLifecycle& lifecycle);
-std::ostream& operator<<(std::ostream& ostream, TreeLifecycle::State state);
+std::ostream& operator<<(std::ostream& ostream,
+                         const BoxTreeLifecycle& lifecycle);
+std::ostream& operator<<(std::ostream& ostream, BoxTreeLifecycle::State state);
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_MODEL_TREE_LIFECYCLE_H_
+#endif  // EVITA_VISUALS_MODEL_BOX_TREE_LIFECYCLE_H_

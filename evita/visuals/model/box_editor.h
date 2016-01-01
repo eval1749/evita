@@ -15,7 +15,9 @@ class Box;
 class ContainerBox;
 class FloatColor;
 class FloatRect;
+class FloatSize;
 class InlineBox;
+class RootBox;
 class TextBox;
 
 namespace css {
@@ -51,12 +53,15 @@ class BoxEditor final {
   std::unique_ptr<Box> RemoveChild(ContainerBox* container, Box* child);
   void SetStyle(Box* box, const css::Style& style);
 
-  // TextBox
-  void SetBaseline(TextBox* box, float new_baseline);
-
   void SetContentChanged(InlineBox* box);
   void SetShouldPaint(Box* box);
   void WillDestroy(Box* box);
+
+  // TextBox
+  void SetBaseline(TextBox* box, float new_baseline);
+
+  // RootBox
+  void SetViewportSize(RootBox* root_box, const FloatSize& size);
 
  private:
   void DidChangeChild(ContainerBox* container);

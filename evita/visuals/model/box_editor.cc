@@ -195,6 +195,13 @@ void BoxEditor::SetShouldPaint(Box* box) {
   }
 }
 
+void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
+  if (root_box->viewport_size_ == size)
+    return;
+  root_box->viewport_size_ = size;
+  root_box->is_size_changed_ = true;
+}
+
 void BoxEditor::WillDestroy(Box* box) {
   box->parent_ = nullptr;
 }

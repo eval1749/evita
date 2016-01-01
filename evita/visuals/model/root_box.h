@@ -8,6 +8,7 @@
 #include <map>
 
 #include "evita/visuals/model/container_box.h"
+#include "evita/visuals/geometry/float_size.h"
 
 namespace visuals {
 
@@ -22,6 +23,8 @@ class RootBox final : public ContainerBox {
   RootBox();
   ~RootBox() final;
 
+  const FloatSize& viewport_size() const { return viewport_size_; }
+
   Box* GetBoxById(const base::StringPiece16& id) const;
 
  private:
@@ -32,6 +35,7 @@ class RootBox final : public ContainerBox {
   FloatSize ComputePreferredSize() const final;
 
   std::map<base::string16, Box*> id_map_;
+  FloatSize viewport_size_;
 
   DISALLOW_COPY_AND_ASSIGN(RootBox);
 };

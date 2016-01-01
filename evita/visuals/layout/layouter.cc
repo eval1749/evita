@@ -122,8 +122,8 @@ Layouter::Layouter() {}
 
 Layouter::~Layouter() {}
 
-void Layouter::Layout(RootBox* root, const FloatRect& bounds) {
-  LayoutVisitor().Layout(root, bounds);
+void Layouter::Layout(RootBox* root) {
+  LayoutVisitor().Layout(root, FloatRect(root->viewport_size()));
 }
 
 }  // namespace visuals

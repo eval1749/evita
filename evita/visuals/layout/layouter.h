@@ -21,7 +21,7 @@ class Layouter final {
   Layouter();
   ~Layouter();
 
-  void Layout(RootBox* root, const FloatRect& bounds);
+  void Layout(RootBox* root);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Layouter);

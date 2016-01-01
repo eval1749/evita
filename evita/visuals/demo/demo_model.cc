@@ -210,10 +210,8 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
   if (!canvas)
     return RequestAnimationFrame();
 
-  const auto& viewport_bounds = FloatRect(
-      FloatSize(window_->bounds().width(), window_->bounds().height()));
-  Layouter().Layout(root_box_.get(), viewport_bounds);
-  PaintInfo paint_info(viewport_bounds);
+  Layouter().Layout(root_box_.get());
+  PaintInfo paint_info(FloatRect(root_box_->viewport_size()));
   auto list = Painter().Paint(paint_info, *root_box_);
 
 #if 0
@@ -232,6 +230,7 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
 // WindowEventHandler
 void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
   RequestAnimationFrame();
+  BoxEditor().SetViewportSize(root_box_.get(), bounds.size());
 }
 
 void DemoModel::DidMoveMouse(const FloatPoint& point) {

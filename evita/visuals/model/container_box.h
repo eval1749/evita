@@ -26,11 +26,14 @@ class ContainerBox : public Box {
   ~ContainerBox() override;
 
   const std::vector<Box*> child_boxes() const { return child_boxes_; }
+  Box* first_child() const;
+  Box* last_child() const;
 
   bool IsChildrenChanged() const { return is_children_changed_; }
   bool IsSubtreeChanged() const { return is_subtree_changed_; }
 
  protected:
+  explicit ContainerBox(const base::StringPiece16& id);
   ContainerBox();
 
  private:

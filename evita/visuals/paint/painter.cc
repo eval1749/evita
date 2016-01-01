@@ -16,7 +16,9 @@
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
+#include "evita/visuals/model/traversal.h"
 #include "evita/visuals/paint/paint_info.h"
 
 // TODO(eval1749): Drawing rectangle with thickness doesn't work as expected.
@@ -232,6 +234,10 @@ void PaintVisitor::VisitLineBox(LineBox* line) {
   BoxPaintScope paint_scope(this, *line);
   for (const auto& child : line->child_boxes())
     Visit(child);
+}
+
+void PaintVisitor::VisitRootBox(RootBox* root) {
+  Visit(root->first_child());
 }
 
 void PaintVisitor::VisitTextBox(TextBox* text) {

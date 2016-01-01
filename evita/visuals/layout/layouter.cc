@@ -13,6 +13,7 @@
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/root_box.h"
 
 namespace visuals {
 
@@ -103,6 +104,10 @@ void LayoutVisitor::VisitLineBox(LineBox* line) {
     child_origin = FloatPoint(child->bounds().right() + child->margin().right(),
                               child_origin.y());
   }
+}
+
+void LayoutVisitor::VisitRootBox(RootBox* root) {
+  LayoutVisitor().Layout(root->first_child(), root->content_bounds());
 }
 
 void LayoutVisitor::VisitTextBox(TextBox* box) {}

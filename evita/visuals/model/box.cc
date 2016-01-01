@@ -17,7 +17,10 @@ int last_box_sequence_id;
 //
 // Box
 //
-Box::Box() : sequence_id_(++last_box_sequence_id) {}
+Box::Box(const base::StringPiece16& id)
+    : id_(id.as_string()), sequence_id_(++last_box_sequence_id) {}
+
+Box::Box() : Box(base::StringPiece16()) {}
 Box::~Box() {}
 
 FloatRect Box::content_bounds() const {

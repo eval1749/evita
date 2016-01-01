@@ -72,6 +72,8 @@ void ActualStyleVisitor::VisitBlockBox(BlockBox* block) {}
 
 void ActualStyleVisitor::VisitLineBox(LineBox* line) {}
 
+void ActualStyleVisitor::VisitRootBox(RootBox* root) {}
+
 void ActualStyleVisitor::VisitTextBox(TextBox* text) {
   builder_.SetColor(css::Color(text->color()));
 }

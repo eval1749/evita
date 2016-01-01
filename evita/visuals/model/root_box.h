@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_MODEL_BLOCK_BOX_H_
-#define EVITA_VISUALS_MODEL_BLOCK_BOX_H_
+#ifndef EVITA_VISUALS_MODEL_ROOT_BOX_H_
+#define EVITA_VISUALS_MODEL_ROOT_BOX_H_
 
 #include "evita/visuals/model/container_box.h"
 
@@ -11,23 +11,22 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// BlockBox
+// RootBox
 //
-class BlockBox final : public ContainerBox {
-  DECLARE_VISUAL_BOX_FINAL_CLASS(BlockBox, ContainerBox);
+class RootBox final : public ContainerBox {
+  DECLARE_VISUAL_BOX_FINAL_CLASS(RootBox, ContainerBox);
 
  public:
-  explicit BlockBox(const base::StringPiece16& id);
-  BlockBox();
-  ~BlockBox() final;
+  RootBox();
+  ~RootBox() final;
 
  private:
   // Box
   FloatSize ComputePreferredSize() const final;
 
-  DISALLOW_COPY_AND_ASSIGN(BlockBox);
+  DISALLOW_COPY_AND_ASSIGN(RootBox);
 };
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_MODEL_BLOCK_BOX_H_
+#endif  // EVITA_VISUALS_MODEL_ROOT_BOX_H_

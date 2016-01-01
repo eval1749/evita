@@ -13,6 +13,8 @@ namespace visuals {
 //
 // ContainerBox
 //
+
+ContainerBox::ContainerBox(const base::StringPiece16& id) : Box(id) {}
 ContainerBox::ContainerBox() {}
 
 ContainerBox::~ContainerBox() {
@@ -21,6 +23,18 @@ ContainerBox::~ContainerBox() {
     BoxEditor().WillDestroy(child);
     delete child;
   }
+}
+
+Box* ContainerBox::first_child() const {
+  if (child_boxes_.empty())
+    return nullptr;
+  return child_boxes_.front();
+}
+
+Box* ContainerBox::last_child() const {
+  if (child_boxes_.empty())
+    return nullptr;
+  return child_boxes_.back();
 }
 
 }  // namespace visuals

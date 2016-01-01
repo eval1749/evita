@@ -17,6 +17,7 @@ class LineBox final : public ContainerBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(LineBox, ContainerBox);
 
  public:
+  explicit LineBox(const base::StringPiece16& id);
   LineBox();
   ~LineBox() final;
 

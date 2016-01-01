@@ -8,6 +8,8 @@
 
 namespace visuals {
 
+BlockBox::BlockBox(const base::StringPiece16& id) : ContainerBox(id) {}
+
 BlockBox::BlockBox() {}
 
 BlockBox::~BlockBox() {}

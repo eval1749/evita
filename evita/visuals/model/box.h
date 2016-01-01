@@ -9,6 +9,8 @@
 #include <memory>
 
 #include "base/macros.h"
+#include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "common/castable.h"
 #include "evita/visuals/css/background.h"
 #include "evita/visuals/css/border.h"
@@ -100,6 +102,7 @@ class Box : public common::Castable {
   bool ShouldPaint() const { return should_paint_; }
 
  protected:
+  explicit Box(const base::StringPiece16& id);
   Box();
 
  private:
@@ -108,6 +111,7 @@ class Box : public common::Castable {
   // TODO(eval1749): We should incorporate |bottom_| to layout.
   css::Bottom bottom_;
   FloatRect bounds_;
+  const base::string16& id_;
   bool is_display_none_ = false;
   bool is_background_changed_ = true;
   bool is_border_changed_ = true;

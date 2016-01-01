@@ -1,0 +1,29 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("fonts") {
+  sources = [
+    "text_format.cc",
+    "text_format.h",
+    "text_layout.cc",
+    "text_layout.h",
+  ]
+
+  if (is_win) {
+    sources += [
+      "direct_write_factory_win.cc",
+      "direct_write_factory_win.h",
+      "native_text_format_win.cc",
+      "native_text_format_win.h",
+      "native_text_layout_win.cc",
+      "native_text_layout_win.h",
+    ]
+  }
+
+  deps = [
+    "//base",
+    "//common",
+    "//evita/visuals/geometry",
+  ]
+}

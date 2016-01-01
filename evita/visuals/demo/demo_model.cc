@@ -19,7 +19,9 @@
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
+#include "evita/visuals/model/traversal.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
 #include "evita/visuals/css/style.h"
@@ -40,6 +42,7 @@ class BoxPrinter final : public BoxVisitor {
 
  private:
   void Indent() const;
+  void PrintAsContainer(const ContainerBox& container);
 
 #define V(name) void Visit##name(name* box) final;
   FOR_EACH_VISUAL_BOX(V)
@@ -55,24 +58,27 @@ void BoxPrinter::Indent() const {
     std::cout << "  ";
 }
 
-void BoxPrinter::VisitBlockBox(BlockBox* box) {
+void BoxPrinter::PrintAsContainer(const ContainerBox& container) {
   Indent();
-  const auto& style = box->ComputeActualStyle();
-  std::cout << *box << ' ' << *style << std::endl;
+  const auto& style = container.ComputeActualStyle();
+  std::cout << container << ' ' << *style << std::endl;
   ++indent_;
-  for (const auto& child : box->child_boxes())
+  for (const auto& child : container.child_boxes())
     Visit(child);
   --indent_;
 }
 
+// BoxVisitor
+void BoxPrinter::VisitBlockBox(BlockBox* box) {
+  PrintAsContainer(*box);
+}
+
 void BoxPrinter::VisitLineBox(LineBox* box) {
-  Indent();
-  const auto& style = box->ComputeActualStyle();
-  std::cout << *box << ' ' << *style << std::endl;
-  ++indent_;
-  for (const auto& child : box->child_boxes())
-    Visit(child);
-  --indent_;
+  PrintAsContainer(*box);
+}
+
+void BoxPrinter::VisitRootBox(RootBox* box) {
+  PrintAsContainer(*box);
 }
 
 void BoxPrinter::VisitTextBox(TextBox* box) {
@@ -91,23 +97,26 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
   std::cout << '"' << ' ' << *style << std::endl;
 }
 
-std::unique_ptr<Box> CreateRootBox() {
-  // |root| should provide background color. Note: |root| can't have border
-  // and margin.
-  BoxBuilder root(BoxBuilder::New<BlockBox>());
-  root.SetStyle(*css::StyleBuilder()
+const auto kMargin = 8;
+const auto kBorder = 1;
+
+std::unique_ptr<RootBox> CreateBoxTree() {
+  BoxBuilder root(BoxBuilder::New<RootBox>());
+  BoxBuilder body(BoxBuilder::New<BlockBox>());
+  body.SetStyle(*css::StyleBuilder()
                      .SetBackground(css::Background(css::Color(1, 1, 1)))
-                     .SetPadding(css::Padding(8, 8, 8, 0))
+                     .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
                      .Build());
+  BoxBuilder list(BoxBuilder::New<BlockBox>());
   const auto& kBlack =
       css::StyleBuilder().SetColor(css::Color(0, 0, 0)).Build();
-  for (auto index = 0; index < 15; ++index) {
+  for (auto index = 0; index < 20; ++index) {
     BoxBuilder line(BoxBuilder::New<LineBox>());
     line.SetStyle(
             *css::StyleBuilder()
                  .SetBorder(css::Border(index & 1 ? css::Color(0, 0.5f, 0)
                                                   : css::Color(0, 0, 0.5f),
-                                        1))
+                                        kBorder))
                  .Build())
         .Append(BoxBuilder::New<TextBox>(base::StringPrintf(L"line %d", index))
                     .SetStyle(*kBlack)
@@ -119,18 +128,6 @@ std::unique_ptr<Box> CreateRootBox() {
       case 0:
         line.SetStyle(
             *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
-        break;
-      case 1:
-        // Hover color
-        line.SetStyle(*css::StyleBuilder()
-                           .SetPosition(css::Position::Absolute())
-                           .SetLeft(css::Left(css::Length(20)))
-                           .SetTop(css::Top(css::Length(120)))
-                           .SetBackground(css::Background(
-                               css::Color::Rgba(51, 153, 255, 0.1f)))
-                           .SetBorder(css::Border(
-                               css::Color::Rgba(51, 153, 255, 1.0f), 2))
-                           .Build());
         break;
       case 2:
         // Selected color
@@ -147,10 +144,23 @@ std::unique_ptr<Box> CreateRootBox() {
                            .Build());
         break;
     }
-    root.Append(line.Finish());
+    list.Append(line.Finish());
   }
-
-  return root.Finish();
+  BoxBuilder hover(BoxBuilder::New<LineBox>(L"hover"));
+  hover.SetStyle(
+           *css::StyleBuilder()
+                .SetPosition(css::Position::Absolute())
+                .SetLeft(css::Left(css::Length(20)))
+                .SetTop(css::Top(css::Length(120)))
+                .SetBackground(
+                    css::Background(css::Color::Rgba(51, 153, 255, 0.1f)))
+                .SetBorder(css::Border(css::Color::Rgba(51, 153, 255, 1.0f), 1))
+                .Build())
+      .Append(BoxBuilder::New<TextBox>(L"hover").SetStyle(*kBlack).Finish());
+  list.Append(hover.Finish());
+  body.Append(list.Finish());
+  root.Append(body.Finish());
+  return std::unique_ptr<RootBox>(root.Finish().release()->as<RootBox>());
 }
 
 void PrintBox(const Box& box) {
@@ -186,7 +196,7 @@ void PrintPaint(const DisplayItemList& list) {
 //
 /// DemoModel
 //
-DemoModel::DemoModel() : root_box_(CreateRootBox()) {}
+DemoModel::DemoModel() : root_box_(CreateBoxTree()) {}
 DemoModel::~DemoModel() {}
 
 void DemoModel::AttachWindow(DemoWindow* window) {
@@ -225,10 +235,15 @@ void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
 }
 
 void DemoModel::DidMoveMouse(const FloatPoint& point) {
-  const auto hover_box = root_box_->as<ContainerBox>()->child_boxes()[1];
+  const auto body = BoxTraversal::FirstChildOf(*root_box_);
+  const auto list = BoxTraversal::FirstChildOf(*body);
+  const auto hover = BoxTraversal::LastChildOf(*list);
+  // TODO(eval1749): We should have a mapping function from pageX/pageY to
+  // boxX/boxY.
+  const auto hover_y = point.y() - kMargin - kBorder;
   BoxEditor().SetStyle(
-      hover_box,
-      *css::StyleBuilder().SetTop(css::Top(css::Length(point.y()))).Build());
+      hover,
+      *css::StyleBuilder().SetTop(css::Top(css::Length(hover_y))).Build());
   RequestAnimationFrame();
 }
 

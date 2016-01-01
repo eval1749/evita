@@ -13,9 +13,9 @@
 
 namespace visuals {
 
-class Box;
 class DemoWindow;
 class PaintTracker;
+class RootBox;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -38,7 +38,7 @@ class DemoModel final : public ui::AnimationFrameHandler,
   void DidChangeWindowBounds(const FloatRect& bounds) final;
   void DidMoveMouse(const FloatPoint& point) final;
 
-  const std::unique_ptr<Box> root_box_;
+  const std::unique_ptr<RootBox> root_box_;
 
   DemoWindow* window_ = nullptr;
 

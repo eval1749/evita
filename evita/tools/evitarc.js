@@ -29,7 +29,7 @@
     // J
     'javascript',
     // L
-    'Layouter', 'layouter', 'Liveness', 'liveness',
+    'Layouter', 'layouter', 'lifecycle', 'Liveness', 'liveness',
     // N
     'nullable', 'nullptr',
     // O

@@ -51,6 +51,7 @@ Box* BoxEditor::AppendChild(ContainerBox* container,
 }
 
 void BoxEditor::DidChangeChild(ContainerBox* container) {
+  ScheduleVisualUpdateIfNeeded(container);
   if (!container || container->is_children_changed_)
     return;
   container->is_children_changed_ = true;
@@ -103,17 +104,24 @@ std::unique_ptr<Box> BoxEditor::RemoveChild(ContainerBox* container,
   return std::unique_ptr<Box>(old_child);
 }
 
+void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {
+  const auto root_box = FindRootBox(*box);
+  if (!root_box)
+    return;
+  root_box->lifecycle()->Reset();
+}
+
 void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {
   if (box->baseline_ == new_baseline)
     return;
   box->baseline_ = new_baseline;
   box->is_content_changed_ = true;
+  ScheduleVisualUpdateIfNeeded(box);
 }
 
-// Note: |BoxEditor::SetBounds()| is called only during layout.
-// TODO(eval1749): We should introduce Box life cycle to ensure
-// |Box::SetBounds()| is called during layout.
 void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
+  // TODO(eval1749): We should make |Box| always have |RootBox|.
+  DCHECK(FindRootBox(*box)->InLayout());
   if (box->bounds_ == new_bounds)
     return;
   if (box->bounds_.origin() != new_bounds.origin())
@@ -130,6 +138,7 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
 
 void BoxEditor::SetContentChanged(InlineBox* box) {
   box->is_content_changed_ = true;
+  ScheduleVisualUpdateIfNeeded(box);
 }
 
 #define FOR_EACH_PROPERTY_CHANGES_PROPERTY(V) \
@@ -200,6 +209,7 @@ void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
     return;
   root_box->viewport_size_ = size;
   root_box->is_size_changed_ = true;
+  ScheduleVisualUpdateIfNeeded(root_box);
 }
 
 void BoxEditor::WillDestroy(Box* box) {

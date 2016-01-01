@@ -65,6 +65,7 @@ class BoxEditor final {
 
  private:
   void DidChangeChild(ContainerBox* container);
+  void ScheduleVisualUpdateIfNeeded(Box* box);
 
   DISALLOW_COPY_AND_ASSIGN(BoxEditor);
 };

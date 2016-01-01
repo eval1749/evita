@@ -38,6 +38,8 @@ source_set("model") {
     "root_box.h",
     "text_box.cc",
     "text_box.h",
+    "tree_lifecycle.cc",
+    "tree_lifecycle.h",
   ]
 
   deps = [

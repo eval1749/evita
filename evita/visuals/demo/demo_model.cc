@@ -211,6 +211,8 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
     return RequestAnimationFrame();
 
   Layouter().Layout(root_box_.get());
+  if (root_box_->IsPaintClean())
+    return;
   PaintInfo paint_info(FloatRect(root_box_->viewport_size()));
   auto list = Painter().Paint(paint_info, *root_box_);
 

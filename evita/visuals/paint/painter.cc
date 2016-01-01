@@ -294,6 +294,9 @@ Painter::~Painter() {}
 // make sure to do so.
 std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
                                                 const RootBox& root_box) {
+  TreeLifecycle::Scope scope(root_box.lifecycle(),
+                             TreeLifecycle::State::InPaint,
+                             TreeLifecycle::State::PaintClean);
   return PaintVisitor(paint_info).Paint(root_box);
 }
 

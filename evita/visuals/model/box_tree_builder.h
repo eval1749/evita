@@ -6,13 +6,19 @@
 #define EVITA_VISUALS_MODEL_BOX_TREE_BUILDER_H_
 
 #include <memory>
+#include <stack>
 
 #include "base/macros.h"
 
 namespace visuals {
 
 class Box;
+class ContainerBox;
 class RootBox;
+
+namespace css {
+class Style;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -20,15 +26,53 @@ class RootBox;
 //
 class BoxTreeBuilder final {
  public:
+  explicit BoxTreeBuilder(ContainerBox* container);
   BoxTreeBuilder();
   ~BoxTreeBuilder();
 
-  std::unique_ptr<RootBox> Finish();
+  std::unique_ptr<RootBox> Build();
 
-  BoxTreeBuilder& Append(std::unique_ptr<Box> child);
+  template <typename T, typename... Args>
+  BoxTreeBuilder& Add(Args&&... args) {
+    static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
+    return AddInternal(
+        std::move(std::unique_ptr<Box>(new T(root_box_, args...))));
+  }
+
+  template <typename T, typename... Args>
+  BoxTreeBuilder& Begin(Args&&... args) {
+    static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
+    return BeginInternal(
+        std::move(std::unique_ptr<Box>(new T(root_box_, args...))));
+  }
+
+  template <typename T>
+  BoxTreeBuilder& End() {
+    DCHECK(boxes_.top()->is<T>());
+    return EndInternal();
+  }
+
+  template <typename T>
+  void Finish(T* box) {
+    static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
+    FinishInternal(box);
+  }
+
+  // Box
+  BoxTreeBuilder& SetStyle(const css::Style& style);
+
+  // TextBox
+  BoxTreeBuilder& SetBaseline(float baseline);
 
  private:
-  std::unique_ptr<RootBox> root_box_;
+  BoxTreeBuilder& AddInternal(std::unique_ptr<Box> box);
+  BoxTreeBuilder& BeginInternal(std::unique_ptr<Box> box);
+  BoxTreeBuilder& EndInternal();
+  void FinishInternal(Box* box);
+
+  std::stack<Box*> boxes_;
+  std::unique_ptr<RootBox> new_root_box_;
+  RootBox* const root_box_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxTreeBuilder);
 };

@@ -14,11 +14,11 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/layout/layouter.h"
-#include "evita/visuals/model/box_builder.h"
+#include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_traversal.h"
+#include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/box_visitor.h"
-#include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/line_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
@@ -100,67 +100,85 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 const auto kMargin = 8;
 const auto kBorder = 1;
 
-std::unique_ptr<RootBox> CreateBoxTree() {
-  BoxBuilder root(BoxBuilder::New<RootBox>());
-  BoxBuilder body(BoxBuilder::New<BlockBox>());
-  body.SetStyle(*css::StyleBuilder()
-                     .SetBackground(css::Background(css::Color(1, 1, 1)))
-                     .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
-                     .Build());
-  BoxBuilder list(BoxBuilder::New<BlockBox>());
+std::unique_ptr<RootBox> BuildBoxTree() {
+  auto root =
+      BoxTreeBuilder()
+          .Begin<BlockBox>()
+          .SetStyle(*css::StyleBuilder()
+                         .SetBackground(css::Background(css::Color(1, 1, 1)))
+                         .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
+                         .Build())
+          .Add<BlockBox>()
+          .End<BlockBox>()
+          .Build();
+  const auto main = root->first_child()->as<BlockBox>();
+  const auto list = main->first_child()->as<BlockBox>();
   const auto& kBlack =
       css::StyleBuilder().SetColor(css::Color(0, 0, 0)).Build();
   for (auto index = 0; index < 20; ++index) {
-    BoxBuilder line(BoxBuilder::New<LineBox>());
-    line.SetStyle(
+    auto line = std::make_unique<LineBox>(root.get());
+    BoxTreeBuilder(line.get())
+        .SetStyle(
             *css::StyleBuilder()
                  .SetBorder(css::Border(index & 1 ? css::Color(0, 0.5f, 0)
                                                   : css::Color(0, 0, 0.5f),
                                         kBorder))
                  .Build())
-        .Append(BoxBuilder::New<TextBox>(base::StringPrintf(L"line %d", index))
-                    .SetStyle(*kBlack)
-                    .Finish())
-        .Append(BoxBuilder::New<TextBox>(L"size").SetStyle(*kBlack).Finish())
-        .Append(BoxBuilder::New<TextBox>(L"status").SetStyle(*kBlack).Finish())
-        .Append(BoxBuilder::New<TextBox>(L"file").SetStyle(*kBlack).Finish());
+        .Begin<TextBox>(base::StringPrintf(L"line %d", index))
+        .SetStyle(*kBlack)
+        .End<TextBox>()
+        .Begin<TextBox>(L"size")
+        .SetStyle(*kBlack)
+        .End<TextBox>()
+        .Begin<TextBox>(L"status")
+        .SetStyle(*kBlack)
+        .End<TextBox>()
+        .Begin<TextBox>(L"file")
+        .SetStyle(*kBlack)
+        .End<TextBox>()
+        .Finish<LineBox>(line.get());
     switch (index) {
       case 0:
-        line.SetStyle(
+        BoxEditor().SetStyle(
+            line.get(),
             *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
         break;
       case 2:
         // Selected color
-        line.SetStyle(*css::StyleBuilder()
-                           .SetBackground(css::Background(
-                               css::Color::Rgba(51, 153, 255, 0.5f)))
-                           .Build());
+        BoxEditor().SetStyle(line.get(),
+                             *css::StyleBuilder()
+                                  .SetBackground(css::Background(
+                                      css::Color::Rgba(51, 153, 255, 0.5f)))
+                                  .Build());
         break;
       case 3:
         // Inactive selection color
-        line.SetStyle(*css::StyleBuilder()
-                           .SetBackground(css::Background(
-                               css::Color::Rgba(191, 205, 191, 0.2f)))
-                           .Build());
+        BoxEditor().SetStyle(line.get(),
+                             *css::StyleBuilder()
+                                  .SetBackground(css::Background(
+                                      css::Color::Rgba(191, 205, 191, 0.2f)))
+                                  .Build());
         break;
     }
-    list.Append(line.Finish());
+    BoxEditor().AppendChild(list, std::move(line));
   }
-  BoxBuilder hover(BoxBuilder::New<LineBox>(L"hover"));
-  hover.SetStyle(
-           *css::StyleBuilder()
-                .SetPosition(css::Position::Absolute())
-                .SetLeft(css::Left(css::Length(20)))
-                .SetTop(css::Top(css::Length(120)))
-                .SetBackground(
-                    css::Background(css::Color::Rgba(51, 153, 255, 0.1f)))
-                .SetBorder(css::Border(css::Color::Rgba(51, 153, 255, 1.0f), 1))
-                .Build())
-      .Append(BoxBuilder::New<TextBox>(L"hover").SetStyle(*kBlack).Finish());
-  list.Append(hover.Finish());
-  body.Append(list.Finish());
-  root.Append(body.Finish());
-  return std::unique_ptr<RootBox>(root.Finish().release()->as<RootBox>());
+  BoxTreeBuilder(list)
+      .Begin<LineBox>(L"hover")
+      .SetStyle(
+          *css::StyleBuilder()
+               .SetPosition(css::Position::Absolute())
+               .SetLeft(css::Left(css::Length(20)))
+               .SetTop(css::Top(css::Length(120)))
+               .SetBackground(
+                   css::Background(css::Color::Rgba(51, 153, 255, 0.1f)))
+               .SetBorder(css::Border(css::Color::Rgba(51, 153, 255, 1.0f), 1))
+               .Build())
+      .Begin<TextBox>(L"hover")
+      .SetStyle(*kBlack)
+      .End<TextBox>()
+      .End<LineBox>()
+      .Finish<BlockBox>(list);
+  return std::move(root);
 }
 
 void PrintBox(const Box& box) {
@@ -196,7 +214,7 @@ void PrintPaint(const DisplayItemList& list) {
 //
 /// DemoModel
 //
-DemoModel::DemoModel() : root_box_(CreateBoxTree()) {}
+DemoModel::DemoModel() : root_box_(BuildBoxTree()) {}
 DemoModel::~DemoModel() {}
 
 void DemoModel::AttachWindow(DemoWindow* window) {

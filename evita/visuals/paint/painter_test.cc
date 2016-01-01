@@ -11,7 +11,6 @@
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/block_box.h"
-#include "evita/visuals/model/box_builder.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/root_box.h"
@@ -22,19 +21,18 @@
 namespace visuals {
 
 TEST(PainterTest, Basic) {
-  const auto& root_box =
+  const auto& root =
       BoxTreeBuilder()
-          .Append(BoxBuilder::New<BlockBox>()
-                      .SetStyle(*css::StyleBuilder()
-                                     .SetBackground(
-                                         css::Background(css::Color(1, 1, 1)))
-                                     .Build())
-                      .Finish())
-          .Finish();
-  BoxEditor().SetViewportSize(root_box.get(), FloatSize(200, 100));
-  Layouter().Layout(root_box.get());
-  PaintInfo paint_info(FloatRect(root_box->viewport_size()));
-  const auto& display_item_list = Painter().Paint(paint_info, *root_box);
+          .Begin<BlockBox>()
+          .SetStyle(*css::StyleBuilder()
+                         .SetBackground(css::Background(css::Color(1, 1, 1)))
+                         .Build())
+          .End<BlockBox>()
+          .Build();
+  BoxEditor().SetViewportSize(root.get(), FloatSize(200, 100));
+  Layouter().Layout(root.get());
+  PaintInfo paint_info(FloatRect(root->viewport_size()));
+  const auto& display_item_list = Painter().Paint(paint_info, *root);
   EXPECT_EQ(3, display_item_list->items().size());
 }
 

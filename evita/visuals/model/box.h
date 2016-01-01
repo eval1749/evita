@@ -24,6 +24,7 @@
 namespace visuals {
 
 class BoxEditor;
+class RootBox;
 
 namespace css {
 class Style;
@@ -55,6 +56,9 @@ class Box : public common::Castable {
   class DescendantsOrSelf;
 
   virtual ~Box();
+
+  // Tree strucutre
+  RootBox* root_box() const { return root_box_; }
 
   // Box identifiers
   const base::string16& id() const { return id_; }
@@ -103,8 +107,8 @@ class Box : public common::Castable {
   bool ShouldPaint() const { return should_paint_; }
 
  protected:
-  explicit Box(const base::StringPiece16& id);
-  Box();
+  Box(RootBox* root_box, const base::StringPiece16& id);
+  explicit Box(RootBox* root_box);
 
  private:
   css::Background background_;
@@ -132,6 +136,7 @@ class Box : public common::Castable {
   ContainerBox* parent_ = nullptr;
   // TODO(eval1749): We should incorporate |right_| to layout.
   css::Right right_;
+  RootBox* root_box_;
   const int sequence_id_;
   bool should_paint_ = true;
   css::Top top_;

@@ -22,7 +22,7 @@ class InlineBox : public Box {
   ~InlineBox() override;
 
  protected:
-  InlineBox();
+  explicit InlineBox(RootBox* root_box);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(InlineBox);

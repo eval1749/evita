@@ -13,7 +13,7 @@ namespace visuals {
 //
 // RootBox
 //
-RootBox::RootBox() {}
+RootBox::RootBox() : ContainerBox(this) {}
 RootBox::~RootBox() {}
 
 Box* RootBox::GetBoxById(const base::StringPiece16& id) const {

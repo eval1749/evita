@@ -8,8 +8,10 @@
 
 namespace visuals {
 
-LineBox::LineBox(const base::StringPiece16& id) : ContainerBox(id) {}
-LineBox::LineBox() {}
+LineBox::LineBox(RootBox* root_box, const base::StringPiece16& id)
+    : ContainerBox(root_box, id) {}
+
+LineBox::LineBox(RootBox* root_box) : ContainerBox(root_box) {}
 LineBox::~LineBox() {}
 
 FloatSize LineBox::ComputePreferredSize() const {

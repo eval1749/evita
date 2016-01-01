@@ -19,7 +19,7 @@ class TextBox final : public InlineBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(TextBox, InlineBox);
 
  public:
-  explicit TextBox(const base::string16 text);
+  TextBox(RootBox* root_box, const base::string16 text);
   ~TextBox() final;
 
   const FloatColor& color() const { return color_; }

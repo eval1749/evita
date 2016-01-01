@@ -5,37 +5,43 @@
 #include <memory>
 
 #include "evita/visuals/model/block_box.h"
-#include "evita/visuals/model/box_builder.h"
 #include "evita/visuals/model/box_editor.h"
+#include "evita/visuals/model/box_tree_builder.h"
+#include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
 
 TEST(ContainerBoxTest, AppendChild) {
-  const auto& root_box = BoxBuilder::New<BlockBox>()
-                             .Append(BoxBuilder::New<TextBox>(L"foo").Finish())
-                             .Append(BoxBuilder::New<TextBox>(L"bar").Finish())
-                             .Finish();
-  const auto text_box1 = root_box->as<ContainerBox>()->child_boxes()[0];
-  const auto text_box2 = root_box->as<ContainerBox>()->child_boxes()[1];
+  const auto& root = BoxTreeBuilder()
+                         .Begin<BlockBox>()
+                         .Add<TextBox>(L"foo")
+                         .Add<TextBox>(L"bar")
+                         .End<BlockBox>()
+                         .Build();
+  const auto main = root->first_child()->as<ContainerBox>();
+  const auto text_box1 = main->first_child();
+  const auto text_box2 = main->last_child();
 
-  EXPECT_EQ(root_box.get(), text_box1->parent());
-  EXPECT_EQ(root_box.get(), text_box2->parent());
+  EXPECT_EQ(main, text_box1->parent());
+  EXPECT_EQ(main, text_box2->parent());
 }
 
 TEST(ContainerBoxTest, RemoveChild) {
-  const auto& root_box = BoxBuilder::New<BlockBox>()
-                             .Append(BoxBuilder::New<TextBox>(L"foo").Finish())
-                             .Append(BoxBuilder::New<TextBox>(L"bar").Finish())
-                             .Finish();
-  const auto text_box1 = root_box->as<ContainerBox>()->child_boxes()[0];
-  const auto text_box2 = root_box->as<ContainerBox>()->child_boxes()[1];
+  const auto& root = BoxTreeBuilder()
+                         .Begin<BlockBox>()
+                         .Add<TextBox>(L"foo")
+                         .Add<TextBox>(L"bar")
+                         .End<BlockBox>()
+                         .Build();
+  const auto main = root->first_child()->as<ContainerBox>();
+  const auto text_box1 = main->first_child();
+  const auto text_box2 = main->last_child();
 
-  const auto& removed_child =
-      BoxEditor().RemoveChild(root_box->as<ContainerBox>(), text_box2);
+  const auto& removed_child = BoxEditor().RemoveChild(main, text_box2);
 
-  EXPECT_EQ(root_box.get(), text_box1->parent());
+  EXPECT_EQ(main, text_box1->parent());
   EXPECT_EQ(nullptr, text_box2->parent());
   EXPECT_EQ(text_box2, removed_child.get());
 }

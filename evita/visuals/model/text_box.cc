@@ -12,7 +12,8 @@ namespace visuals {
 //
 // TextBox
 //
-TextBox::TextBox(const base::string16 text) : text_(text) {
+TextBox::TextBox(RootBox* root_box, const base::string16 text)
+    : InlineBox(root_box), text_(text) {
   BoxEditor().SetContentChanged(this);
 }
 

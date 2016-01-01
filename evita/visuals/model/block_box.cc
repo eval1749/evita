@@ -8,9 +8,10 @@
 
 namespace visuals {
 
-BlockBox::BlockBox(const base::StringPiece16& id) : ContainerBox(id) {}
+BlockBox::BlockBox(RootBox* root_box, const base::StringPiece16& id)
+    : ContainerBox(root_box, id) {}
 
-BlockBox::BlockBox() {}
+BlockBox::BlockBox(RootBox* root_box) : ContainerBox(root_box) {}
 
 BlockBox::~BlockBox() {}
 

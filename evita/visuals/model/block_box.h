@@ -17,8 +17,8 @@ class BlockBox final : public ContainerBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(BlockBox, ContainerBox);
 
  public:
-  explicit BlockBox(const base::StringPiece16& id);
-  BlockBox();
+  BlockBox(RootBox* root_box, const base::StringPiece16& id);
+  explicit BlockBox(RootBox* root_box);
   ~BlockBox() final;
 
  private:

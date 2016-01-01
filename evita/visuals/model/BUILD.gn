@@ -14,8 +14,6 @@ source_set("model") {
     "block_box.h",
     "box.cc",
     "box.h",
-    "box_builder.cc",
-    "box_builder.h",
     "box_editor.cc",
     "box_editor.h",
     "box_forward.h",

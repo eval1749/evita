@@ -8,7 +8,6 @@
 #include "evita/visuals/model/root_box.h"
 
 #include "evita/visuals/model/block_box.h"
-#include "evita/visuals/model/box_builder.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/descendants_or_self.h"
@@ -17,14 +16,13 @@
 namespace visuals {
 
 TEST(RootBoxTest, GetBoxById) {
-  const auto& root =
-      BoxTreeBuilder()
-          .Append(BoxBuilder::New<BlockBox>(L"block1").Finish())
-          .Append(BoxBuilder::New<BlockBox>(L"block2")
-                      .Append(BoxBuilder::New<BlockBox>(L"block3").Finish())
-                      .Append(BoxBuilder::New<BlockBox>(L"block4").Finish())
-                      .Finish())
-          .Finish();
+  const auto& root = BoxTreeBuilder()
+                         .Add<BlockBox>(L"block1")
+                         .Begin<BlockBox>(L"block2")
+                         .Add<BlockBox>(L"block3")
+                         .Add<BlockBox>(L"block4")
+                         .End<BlockBox>()
+                         .Build();
 
   std::map<base::string16, Box*> id_map;
   for (const auto& box : Box::DescendantsOrSelf(*root)) {

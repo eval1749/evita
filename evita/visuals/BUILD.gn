@@ -5,34 +5,13 @@
 import("//testing/test.gni")
 
 source_set("visuals") {
-  sources = [
-    "geometry/affine_transformer.cc",
-    "geometry/affine_transformer.h",
-    "geometry/float_matrix3x2.cc",
-    "geometry/float_matrix3x2.h",
-    "geometry/float_point.cc",
-    "geometry/float_point.h",
-    "geometry/float_quad.cc",
-    "geometry/float_quad.h",
-    "geometry/float_rect.cc",
-    "geometry/float_rect.h",
-    "geometry/float_size.cc",
-    "geometry/float_size.h",
-    "layout/layouter.cc",
-    "layout/layouter.h",
-    "paint/paint_info.cc",
-    "paint/paint_info.h",
-
-    #"paint/paint_tracker.cc",
-    #"paint/paint_tracker.h",
-    "paint/painter.cc",
-    "paint/painter.h",
-  ]
-
   public_deps = [
     "//base",
     "//evita/visuals/display",
+    "//evita/visuals/geometry",
+    "//evita/visuals/layout",
     "//evita/visuals/model",
+    "//evita/visuals/paint",
   ]
 }
 
@@ -66,13 +45,6 @@ test("tests") {
   output_name = "evita_visuals_tests"
 
   sources = [
-    "geometry/affine_transformer_test.cc",
-    "geometry/float_matrix3x2_test.cc",
-    "geometry/float_point_test.cc",
-    "geometry/float_quad_test.cc",
-    "geometry/float_rect_test.cc",
-    "geometry/float_size_test.cc",
-    "paint/painter_test.cc",
   ]
 
   deps = [
@@ -80,6 +52,8 @@ test("tests") {
     "//base/test:run_all_unittests",
     "//evita/visuals/css:test_files",
     "//evita/visuals/display:test_files",
+    "//evita/visuals/geometry:test_files",
     "//evita/visuals/model:test_files",
+    "//evita/visuals/paint:test_files",
   ]
 }

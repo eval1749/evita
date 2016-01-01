@@ -1,0 +1,42 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+source_set("geometry") {
+  sources = [
+    "affine_transformer.cc",
+    "affine_transformer.h",
+    "float_matrix3x2.cc",
+    "float_matrix3x2.h",
+    "float_point.cc",
+    "float_point.h",
+    "float_quad.cc",
+    "float_quad.h",
+    "float_rect.cc",
+    "float_rect.h",
+    "float_size.cc",
+    "float_size.h",
+  ]
+
+  deps = [
+    "//base",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "affine_transformer_test.cc",
+    "float_matrix3x2_test.cc",
+    "float_point_test.cc",
+    "float_quad_test.cc",
+    "float_rect_test.cc",
+    "float_size_test.cc",
+  ]
+  deps = [
+    ":geometry",
+    "//testing/gtest",
+  ]
+}

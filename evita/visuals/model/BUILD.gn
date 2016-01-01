@@ -45,6 +45,7 @@ source_set("model") {
   deps = [
     "//base",
     "//evita/visuals/css",
+    "//evita/visuals/geometry",
   ]
 }
 
@@ -59,6 +60,7 @@ source_set("test_files") {
   ]
 
   deps = [
+    ":model",
     "//testing/gtest",
   ]
 }

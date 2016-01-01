@@ -10,14 +10,14 @@
 namespace visuals {
 
 namespace {
-int last_box_id;
+int last_box_sequence_id;
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // Box
 //
-Box::Box() : id_(++last_box_id) {}
+Box::Box() : sequence_id_(++last_box_sequence_id) {}
 Box::~Box() {}
 
 FloatRect Box::content_bounds() const {
@@ -35,7 +35,8 @@ bool Box::IsDescendantOf(const Box& other) const {
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Box& box) {
-  return ostream << box.class_name() << '.' << box.id() << ' ' << box.bounds();
+  return ostream << box.class_name() << '.' << box.sequence_id() << ' '
+                 << box.bounds();
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Box* box) {

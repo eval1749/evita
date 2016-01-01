@@ -54,8 +54,8 @@ class Box : public common::Castable {
 
   virtual ~Box();
 
-  // Box identification number
-  int id() const { return id_; }
+  // Box sequence number
+  int sequence_id() const { return sequence_id_; }
 
   // Box tree related values
   ContainerBox* parent() const { return parent_; }
@@ -109,7 +109,6 @@ class Box : public common::Castable {
   css::Bottom bottom_;
   FloatRect bounds_;
   bool is_display_none_ = false;
-  const int id_;
   bool is_background_changed_ = true;
   bool is_border_changed_ = true;
   // When |is_content_changed_| is true, we send bounds of this box to
@@ -126,6 +125,7 @@ class Box : public common::Castable {
   ContainerBox* parent_ = nullptr;
   // TODO(eval1749): We should incorporate |right_| to layout.
   css::Right right_;
+  const int sequence_id_;
   bool should_paint_ = true;
   css::Top top_;
 

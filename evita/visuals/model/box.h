@@ -56,7 +56,8 @@ class Box : public common::Castable {
 
   virtual ~Box();
 
-  // Box sequence number
+  // Box identifiers
+  const base::string16& id() const { return id_; }
   int sequence_id() const { return sequence_id_; }
 
   // Box tree related values
@@ -111,7 +112,9 @@ class Box : public common::Castable {
   // TODO(eval1749): We should incorporate |bottom_| to layout.
   css::Bottom bottom_;
   FloatRect bounds_;
-  const base::string16& id_;
+  // User specified string identifier of this box. Multiple boxes can have
+  // same string id.
+  const base::string16 id_;
   bool is_display_none_ = false;
   bool is_background_changed_ = true;
   bool is_border_changed_ = true;

@@ -38,8 +38,11 @@ bool Box::IsDescendantOf(const Box& other) const {
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Box& box) {
-  return ostream << box.class_name() << '.' << box.sequence_id() << ' '
-                 << box.bounds();
+  ostream << box.class_name() << '.' << box.sequence_id();
+  if (!box.id().empty()) {
+    ostream << " \"" << box.id() << '"';
+  }
+  return ostream << ' ' << box.bounds();
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Box* box) {

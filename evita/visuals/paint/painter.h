@@ -11,9 +11,9 @@
 
 namespace visuals {
 
-class Box;
 class DisplayItemList;
 class PaintInfo;
+class RootBox;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -25,7 +25,7 @@ class Painter final {
   ~Painter();
 
   std::unique_ptr<DisplayItemList> Paint(const PaintInfo& paint_info,
-                                         const Box& box);
+                                         const RootBox& root_box);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Painter);

@@ -61,7 +61,8 @@ class PaintVisitor final : public BoxVisitor {
   explicit PaintVisitor(const PaintInfo& paint_info);
   ~PaintVisitor() final;
 
-  std::unique_ptr<DisplayItemList> Paint(const Box& box);
+  // The entry point of |PaintVisitor|.
+  std::unique_ptr<DisplayItemList> Paint(const RootBox& root_box);
 
  private:
   class BoxPaintScope final {
@@ -157,8 +158,9 @@ bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
   return paint_info_.cull_rect().Intersects(bounds);
 }
 
-std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const Box& box) {
-  Visit(box);
+// The entry point of |PaintVisitor|.
+std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const RootBox& root_box) {
+  Visit(root_box);
   return builder_.Build();
 }
 
@@ -291,8 +293,8 @@ Painter::~Painter() {}
 // TODO(eval1749): |Painter::Paint()| should be called after layout. We should
 // make sure to do so.
 std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
-                                                const Box& box) {
-  return PaintVisitor(paint_info).Paint(box);
+                                                const RootBox& root_box) {
+  return PaintVisitor(paint_info).Paint(root_box);
 }
 
 }  // namespace visuals

@@ -1,3 +1,7 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 [
     // A
     'accessor', 'affine', 'allocator', 'allocatable', 'Allocatable',
@@ -227,7 +231,7 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
 // Templates
 (function() {
   const copyrightLines = [
-      'Copyright (c) 2015 Project Vogue. All rights reserved.',
+      'Copyright (c) 2016 Project Vogue. All rights reserved.',
       'Use of this source code is governed by a BSD-style license that can be',
       'found in the LICENSE file.'
   ];

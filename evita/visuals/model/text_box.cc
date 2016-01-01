@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
+
 #include "evita/visuals/model/text_box.h"
 
+#include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/model/box_editor.h"
 
 namespace visuals {
@@ -20,11 +23,14 @@ TextBox::TextBox(RootBox* root_box, const base::string16 text)
 TextBox::~TextBox() {}
 
 FloatSize TextBox::ComputePreferredSize() const {
-  if (is_display_none())
+  if (is_display_none() || text_.empty())
     return FloatSize();
   // TODO(eval1749): Implement computing preferred size for |TextBox|.
-  return FloatSize(text_.size() * 8.0f, 50) + border().size() +
-         padding().size();
+  const auto font_size = 15.0f;
+  const auto& text_format = std::make_unique<TextFormat>(L"Arial", font_size);
+  const auto& width = text_format->ComputeWidth(text_);
+  return FloatSize(width, font_size);
+  return FloatSize(width, font_size) + border().size() + padding().size();
 }
 
 }  // namespace visuals

@@ -20,38 +20,6 @@ source_set("visuals") {
     "geometry/float_size.h",
     "layout/layouter.cc",
     "layout/layouter.h",
-    "model/ancestors.cc",
-    "model/ancestors.h",
-    "model/ancestors_or_self.cc",
-    "model/ancestors_or_self.h",
-    "model/block_box.cc",
-    "model/block_box.h",
-    "model/box.cc",
-    "model/box.h",
-    "model/box_builder.cc",
-    "model/box_builder.h",
-    "model/box_editor.cc",
-    "model/box_editor.h",
-    "model/box_forward.h",
-    "model/box_style.cc",
-    "model/box_traversal.cc",
-    "model/box_traversal.h",
-    "model/box_tree_builder.cc",
-    "model/box_tree_builder.h",
-    "model/box_visitor.cc",
-    "model/box_visitor.h",
-    "model/container_box.cc",
-    "model/container_box.h",
-    "model/descendants_or_self.cc",
-    "model/descendants_or_self.h",
-    "model/inline_box.cc",
-    "model/inline_box.h",
-    "model/line_box.cc",
-    "model/line_box.h",
-    "model/root_box.cc",
-    "model/root_box.h",
-    "model/text_box.cc",
-    "model/text_box.h",
     "paint/paint_info.cc",
     "paint/paint_info.h",
 
@@ -63,8 +31,8 @@ source_set("visuals") {
 
   public_deps = [
     "//base",
-    "//evita/visuals/css",
     "//evita/visuals/display",
+    "//evita/visuals/model",
   ]
 }
 
@@ -104,10 +72,6 @@ test("tests") {
     "geometry/float_quad_test.cc",
     "geometry/float_rect_test.cc",
     "geometry/float_size_test.cc",
-    "model/box_test.cc",
-    "model/box_traversal_test.cc",
-    "model/container_box_test.cc",
-    "model/descendants_or_self_test.cc",
     "paint/painter_test.cc",
   ]
 
@@ -116,5 +80,6 @@ test("tests") {
     "//base/test:run_all_unittests",
     "//evita/visuals/css:test_files",
     "//evita/visuals/display:test_files",
+    "//evita/visuals/model:test_files",
   ]
 }

@@ -1,0 +1,61 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+source_set("model") {
+  sources = [
+    "ancestors.cc",
+    "ancestors.h",
+    "ancestors_or_self.cc",
+    "ancestors_or_self.h",
+    "block_box.cc",
+    "block_box.h",
+    "box.cc",
+    "box.h",
+    "box_builder.cc",
+    "box_builder.h",
+    "box_editor.cc",
+    "box_editor.h",
+    "box_forward.h",
+    "box_style.cc",
+    "box_traversal.cc",
+    "box_traversal.h",
+    "box_tree_builder.cc",
+    "box_tree_builder.h",
+    "box_visitor.cc",
+    "box_visitor.h",
+    "container_box.cc",
+    "container_box.h",
+    "descendants_or_self.cc",
+    "descendants_or_self.h",
+    "inline_box.cc",
+    "inline_box.h",
+    "line_box.cc",
+    "line_box.h",
+    "root_box.cc",
+    "root_box.h",
+    "text_box.cc",
+    "text_box.h",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/visuals/css",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "box_test.cc",
+    "box_traversal_test.cc",
+    "container_box_test.cc",
+    "descendants_or_self_test.cc",
+  ]
+
+  deps = [
+    "//testing/gtest",
+  ]
+}

@@ -18,18 +18,14 @@ Box* BoxTraversal::FirstChildOf(const Box& box) {
   const auto container = box.as<ContainerBox>();
   if (!container)
     return nullptr;
-  if (container->child_boxes().empty())
-    return nullptr;
-  return container->child_boxes().front();
+  return container->first_child();
 }
 
 Box* BoxTraversal::LastChildOf(const Box& box) {
   const auto container = box.as<ContainerBox>();
   if (!container)
     return nullptr;
-  if (container->child_boxes().empty())
-    return nullptr;
-  return container->child_boxes().back();
+  return container->last_child();
 }
 
 Box* BoxTraversal::NextOf(const Box& box) {

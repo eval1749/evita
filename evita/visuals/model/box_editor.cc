@@ -10,10 +10,22 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/descendants_or_self.h"
 #include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/css/style.h"
 
 namespace visuals {
+
+namespace {
+
+RootBox* FindRootBox(const Box& box) {
+  for (const auto& runner : Box::AncestorsOrSelf(box)) {
+    if (const auto root_box = runner->as<RootBox>())
+      return root_box;
+  }
+  return nullptr;
+}
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -29,6 +41,10 @@ Box* BoxEditor::AppendChild(ContainerBox* container,
   DCHECK(!container->IsDescendantOf(*new_child));
   DCHECK_EQ(static_cast<ContainerBox*>(nullptr), new_child->parent());
   new_child->parent_ = container;
+  if (const auto root_box = FindRootBox(*container)) {
+    for (const auto runner : Box::DescendantsOrSelf(*new_child))
+      root_box->RegisterBoxIdIfNeeded(*runner);
+  }
   container->child_boxes_.push_back(new_child.release());
   DidChangeChild(container->parent());
   return container->child_boxes_.back();
@@ -78,6 +94,10 @@ std::unique_ptr<Box> BoxEditor::RemoveChild(ContainerBox* container,
                             container->child_boxes_.end(), old_child);
   DCHECK(it != container->child_boxes_.end());
   container->child_boxes_.erase(it);
+  if (const auto root_box = FindRootBox(*container)) {
+    for (const auto runner : Box::DescendantsOrSelf(*old_child))
+      root_box->UnregisterBoxIdIfNeeded(*runner);
+  }
   old_child->parent_ = nullptr;
   DidChangeChild(container);
   return std::unique_ptr<Box>(old_child);

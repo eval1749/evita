@@ -53,6 +53,7 @@ source_set("test_files") {
     "box_traversal_test.cc",
     "container_box_test.cc",
     "descendants_or_self_test.cc",
+    "root_box_test.cc",
   ]
 
   deps = [

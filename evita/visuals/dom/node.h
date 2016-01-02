@@ -18,7 +18,6 @@
 #include "evita/visuals/css/margin.h"
 #include "evita/visuals/css/padding.h"
 #include "evita/visuals/css/values.h"
-#include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/dom/nodes_forward.h"
 
 namespace visuals {
@@ -71,10 +70,6 @@ class Node : public common::Castable {
   // Node tree related values
   ContainerNode* parent() const { return parent_; }
 
-  // Layout related values
-  const FloatRect& bounds() const { return bounds_; }
-  FloatRect content_bounds() const;
-
   // CSS background and background
   const css::Background& background() const { return background_; }
   const css::Border& border() const { return border_; }
@@ -120,7 +115,6 @@ class Node : public common::Castable {
   Node(Document* document, const base::StringPiece16& tag_name);
 
  private:
-  FloatRect bounds_;
   // User specified string identifier of this node. Multiple nodes can have
   // same string id.
   const base::string16 id_;

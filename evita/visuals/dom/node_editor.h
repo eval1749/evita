@@ -14,7 +14,6 @@ namespace visuals {
 class ContainerNode;
 class Document;
 class FloatColor;
-class FloatRect;
 class FloatSize;
 class Node;
 class TextNode;
@@ -36,7 +35,6 @@ class NodeEditor final {
   void DidLayout(Node* node);
   void DidMove(Node* node);
   void DidPaint(Node* node);
-  void SetBounds(Node* node, const FloatRect& new_bounds);
   void SetLayoutClean(Node* node);
 
   // ContainerNode

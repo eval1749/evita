@@ -137,22 +137,6 @@ void NodeEditor::SetBaseline(TextNode* node, float new_baseline) {
   ScheduleVisualUpdateIfNeeded(node);
 }
 
-void NodeEditor::SetBounds(Node* node, const FloatRect& new_bounds) {
-  DCHECK(node->document()->InLayout());
-  if (node->bounds_ == new_bounds)
-    return;
-  if (node->bounds_.origin() != new_bounds.origin())
-    node->is_origin_changed_ = true;
-  if (node->bounds_.size() != new_bounds.size()) {
-    if (node->background().HasValue())
-      node->is_background_changed_ = true;
-    if (node->border().HasValue())
-      node->is_border_changed_ = true;
-    node->is_size_changed_ = true;
-  }
-  node->bounds_ = new_bounds;
-}
-
 void NodeEditor::SetContentChanged(Node* node) {
   node->is_content_changed_ = true;
   ScheduleVisualUpdateIfNeeded(node);

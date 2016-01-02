@@ -30,12 +30,6 @@ Node::Node(Document* document, const base::StringPiece16& tag_name)
 
 Node::~Node() {}
 
-FloatRect Node::content_bounds() const {
-  return FloatRect(FloatPoint() + border_.top_left() + padding_.top_left(),
-                   bounds_.size() - border_.top_left() - padding_.top_left() -
-                       border_.bottom_right() - padding_.bottom_right());
-}
-
 bool Node::IsDescendantOf(const Node& other) const {
   for (auto runner = parent(); runner; runner = runner->parent()) {
     if (runner == &other)
@@ -47,10 +41,9 @@ bool Node::IsDescendantOf(const Node& other) const {
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
   ostream << node.class_name() << '.' << node.sequence_id() << ' '
           << node.tag_name();
-  if (!node.id().empty()) {
+  if (!node.id().empty())
     ostream << " id=\"" << node.id() << '"';
-  }
-  return ostream << ' ' << node.bounds();
+  return ostream;
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node* node) {

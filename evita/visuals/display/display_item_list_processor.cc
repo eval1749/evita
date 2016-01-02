@@ -88,7 +88,7 @@ void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
 }
 
 void PaintVisitor::VisitDrawText(DrawTextDisplayItem* item) {
-  gfx::TextFormat text_format(L"Arial", 13);
+  gfx::TextFormat text_format(L"MS Shell Dlg 2", 16);
   canvas_->DrawText(text_format, gfx::Brush(canvas_, ToColorF(item->color())),
                     ToRectF(item->bounds()), item->text());
 }

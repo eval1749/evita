@@ -247,7 +247,7 @@ void PaintVisitor::VisitRootBox(RootBox* root) {
 }
 
 void PaintVisitor::VisitTextBox(TextBox* text) {
-  const auto& bounds = text->content_bounds();
+  const auto& bounds = FloatRect(text->content_bounds().size());
   if (bounds.size().IsEmpty())
     return;
   if (text->IsContentChanged() || text->IsOriginChanged())

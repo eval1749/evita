@@ -155,7 +155,7 @@ class Box : public common::Castable {
   Box* next_sibling_ = nullptr;
   Box* previous_sibling_ = nullptr;
   ContainerBox* parent_ = nullptr;
-  RootBox* root_box_;
+  RootBox* const root_box_;
 
   DISALLOW_COPY_AND_ASSIGN(Box);
 };

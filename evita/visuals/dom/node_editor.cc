@@ -134,70 +134,15 @@ void NodeEditor::SetContentChanged(Node* node) {
   ScheduleVisualUpdateIfNeeded(node);
 }
 
-#define FOR_EACH_PROPERTY_CHANGES_PROPERTY(V) \
-  V(background)                               \
-  V(border)                                   \
-  V(padding)
-
-#define FOR_EACH_PROPERTY_AFFECTS_ORIGIN(V) \
-  V(bottom)                                 \
-  V(left)                                   \
-  V(margin)                                 \
-  V(position)                               \
-  V(right)                                  \
-  V(top)
-
-#define FOR_EACH_PROPERTY_AFFECTS_SIZE(V) \
-  V(height)                               \
-  V(width)
-
-void NodeEditor::SetStyle(Node* node, const css::Style& new_style) {
-  if (new_style.has_display() &&
-      new_style.display().is_none() != node->is_display_none_) {
-    node->is_display_none_ = new_style.display().is_none();
-    DidChangeChild(node->parent_);
+void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
+  if (element->inline_style_) {
+    if (*element->inline_style_ == new_style)
+      return;
+    *element->inline_style_ == new_style;
+  } else {
+    element->inline_style_ = std::make_unique<css::Style>(new_style);
   }
-
-#define V(property)                                \
-  if (new_style.has_##property() &&                \
-      new_style.property() != node->property##_) { \
-    node->property##_ = new_style.property();      \
-    node->is_##property##_changed_ = true;         \
-  }
-  FOR_EACH_PROPERTY_CHANGES_PROPERTY(V)
-#undef V
-
-#define V(property)                                \
-  if (new_style.has_##property() &&                \
-      new_style.property() != node->property##_) { \
-    node->property##_ = new_style.property();      \
-    node->is_origin_changed_ = true;               \
-  }
-  FOR_EACH_PROPERTY_AFFECTS_ORIGIN(V)
-#undef V
-
-#define V(property)                                \
-  if (new_style.has_##property() &&                \
-      new_style.property() != node->property##_) { \
-    node->property##_ = new_style.property();      \
-    node->is_size_changed_ = true;                 \
-  }
-  FOR_EACH_PROPERTY_AFFECTS_SIZE(V)
-#undef V
-
-  if (new_style.has_color() && new_style.color() != node->color_) {
-    node->color_ = new_style.color();
-    SetContentChanged(node);
-  }
-
-  if (!node->parent_)
-    return;
-  if (!node->is_origin_changed_ && !node->is_size_changed_)
-    return;
-
-  // Since changing size or origin affects parent's size and sibling's origin,
-  // we should notify to parent.
-  DidChangeChild(node->parent_);
+  // TODO(eval1749): Notify inline style changes
 }
 
 void NodeEditor::SetShouldPaint(Node* node) {

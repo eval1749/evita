@@ -13,6 +13,7 @@ namespace visuals {
 
 class ContainerNode;
 class Document;
+class Element;
 class Node;
 class TextNode;
 
@@ -46,7 +47,7 @@ class NodeEditor final {
 
   Node* AppendChild(ContainerNode* container, std::unique_ptr<Node> child);
   std::unique_ptr<Node> RemoveChild(ContainerNode* container, Node* child);
-  void SetStyle(Node* node, const css::Style& style);
+  void SetStyle(Element* element, const css::Style& style);
 
   void SetContentChanged(Node* node);
   void SetShouldPaint(Node* node);

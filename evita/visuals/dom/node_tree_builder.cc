@@ -77,7 +77,7 @@ void NodeTreeBuilder::Finish(ContainerNode* node) {
 }
 
 NodeTreeBuilder& NodeTreeBuilder::SetStyle(const css::Style& style) {
-  NodeEditor().SetStyle(nodes_.top(), style);
+  NodeEditor().SetStyle(nodes_.top()->as<Element>(), style);
   return *this;
 }
 

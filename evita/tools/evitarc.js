@@ -76,7 +76,7 @@
   'std::ostream', 'std::ostringstream',
   'std::pair', 'std::prev',
   'std::queue',
-  'std::sort', 'std::stringstream',
+  'std::stack', 'std::sort', 'std::stringstream',
   'std::tie', 'std::tuple',
   'std::upper_bound',
 

@@ -159,7 +159,7 @@ class Node : public common::Castable {
   Node* next_sibling_ = nullptr;
   Node* previous_sibling_ = nullptr;
   ContainerNode* parent_ = nullptr;
-  Document* document_;
+  Document* const document_;
 
   DISALLOW_COPY_AND_ASSIGN(Node);
 };

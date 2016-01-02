@@ -37,10 +37,6 @@ StyleBuilder& StyleBuilder::SetWidth(float width) {
     style_->contains_.insert(PropertyId::Name);      \
     style_->name##_ = name;                          \
     return *this;                                    \
-  }                                                  \
-                                                     \
-  void StyleBuilder::Unset##Name() {                 \
-    style_->contains_.erase(PropertyId::Name);       \
   }
 
 FOR_EACH_VISUAL_CSS_PROPERTY(V)

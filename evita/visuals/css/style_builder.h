@@ -32,9 +32,7 @@ class StyleBuilder final {
   StyleBuilder& SetHeight(float height);
   StyleBuilder& SetWidth(float width);
 
-#define V(Name, name, type, text)     \
-  StyleBuilder& Set##Name(type name); \
-  void Unset##Name();
+#define V(Name, name, type, text) StyleBuilder& Set##Name(type name);
 
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V

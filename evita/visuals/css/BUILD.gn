@@ -36,6 +36,8 @@ source_set("css") {
     "style.h",
     "style_builder.cc",
     "style_builder.h",
+    "style_editor.cc",
+    "style_editor.h",
     "thickness.cc",
     "thickness.h",
   ]

@@ -43,9 +43,6 @@ class NodeTreeBuilder final {
   // Node
   NodeTreeBuilder& SetStyle(const css::Style& style);
 
-  // TextNode
-  NodeTreeBuilder& SetBaseline(float baseline);
-
  private:
   NodeTreeBuilder& AddInternal(std::unique_ptr<Node> node);
   NodeTreeBuilder& BeginInternal(std::unique_ptr<Element> node);

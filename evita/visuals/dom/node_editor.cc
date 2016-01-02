@@ -129,14 +129,6 @@ void NodeEditor::ScheduleVisualUpdateIfNeeded(Node* node) {
   document->lifecycle()->Reset();
 }
 
-void NodeEditor::SetBaseline(TextNode* node, float new_baseline) {
-  if (node->baseline_ == new_baseline)
-    return;
-  node->baseline_ = new_baseline;
-  node->is_content_changed_ = true;
-  ScheduleVisualUpdateIfNeeded(node);
-}
-
 void NodeEditor::SetContentChanged(Node* node) {
   node->is_content_changed_ = true;
   ScheduleVisualUpdateIfNeeded(node);
@@ -193,11 +185,9 @@ void NodeEditor::SetStyle(Node* node, const css::Style& new_style) {
   FOR_EACH_PROPERTY_AFFECTS_SIZE(V)
 #undef V
 
-  if (const auto& text = node->as<TextNode>()) {
-    if (new_style.has_color() && new_style.color().value() != text->color_) {
-      text->color_ = new_style.color().value();
-      SetContentChanged(text);
-    }
+  if (new_style.has_color() && new_style.color() != node->color_) {
+    node->color_ = new_style.color();
+    SetContentChanged(node);
   }
 
   if (!node->parent_)

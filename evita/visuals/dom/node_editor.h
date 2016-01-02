@@ -54,9 +54,6 @@ class NodeEditor final {
   void SetShouldPaint(Node* node);
   void WillDestroy(Node* node);
 
-  // TextNode
-  void SetBaseline(TextNode* node, float new_baseline);
-
   // Document
   void SetViewportSize(Document* document, const FloatSize& size);
 

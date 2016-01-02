@@ -76,13 +76,6 @@ void NodeTreeBuilder::Finish(ContainerNode* node) {
   nodes_.pop();
 }
 
-NodeTreeBuilder& NodeTreeBuilder::SetBaseline(float baseline) {
-  const auto& text = nodes_.top()->as<TextNode>();
-  DCHECK(text) << nodes_.top()->class_name();
-  NodeEditor().SetBaseline(text, baseline);
-  return *this;
-}
-
 NodeTreeBuilder& NodeTreeBuilder::SetStyle(const css::Style& style) {
   NodeEditor().SetStyle(nodes_.top(), style);
   return *this;

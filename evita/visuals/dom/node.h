@@ -138,6 +138,9 @@ class Node : public common::Castable {
   css::Margin margin_;
   css::Padding padding_;
 
+  // CSS content related properties
+  css::Color color_;
+
   // CSS Position
   css::Position position_;
   css::Bottom bottom_;

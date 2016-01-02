@@ -7,7 +7,6 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "evita/visuals/css/float_color.h"
 #include "evita/visuals/dom/node.h"
 
 namespace visuals {
@@ -23,13 +22,9 @@ class TextNode final : public Node {
   TextNode(Document* document, const base::StringPiece16& text);
   ~TextNode() final;
 
-  const FloatColor& color() const { return color_; }
-  float baseline() const { return baseline_; }
   const base::string16& text() const { return text_; }
 
  private:
-  float baseline_ = 0.0f;
-  FloatColor color_;
   base::string16 text_;
 
   DISALLOW_COPY_AND_ASSIGN(TextNode);

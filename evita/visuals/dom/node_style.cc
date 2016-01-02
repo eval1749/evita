@@ -74,9 +74,7 @@ void ActualStyleVisitor::VisitDocument(Document* root) {}
 
 void ActualStyleVisitor::VisitElement(Element* line) {}
 
-void ActualStyleVisitor::VisitTextNode(TextNode* text) {
-  builder_.SetColor(css::Color(text->color()));
-}
+void ActualStyleVisitor::VisitTextNode(TextNode* text) {}
 
 }  // namespace
 

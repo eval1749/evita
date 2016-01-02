@@ -28,7 +28,7 @@ class ActualStyleVisitor final : public NodeVisitor {
 
  private:
 #define V(name) void Visit##name(name* node) final;
-  FOR_EACH_VISUAL_BOX(V)
+  FOR_EACH_VISUAL_NODE(V)
 #undef V
 
   css::StyleBuilder builder_;

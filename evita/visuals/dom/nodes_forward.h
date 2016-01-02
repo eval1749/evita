@@ -7,20 +7,20 @@
 
 namespace visuals {
 
-#define FOR_EACH_VISUAL_BOX(V) \
+#define FOR_EACH_VISUAL_NODE(V) \
   V(Document)                  \
   V(Element)                   \
   V(TextNode)
 
-#define FOR_EACH_ABSTRACT_VISUAL_BOX(V) \
+#define FOR_EACH_ABSTRACT_VISUAL_NODE(V) \
   V(Node)                               \
   V(ContainerNode)
 
 // Forward declarations
 class Node;
 #define V(name) class name;
-FOR_EACH_VISUAL_BOX(V)
-FOR_EACH_ABSTRACT_VISUAL_BOX(V)
+FOR_EACH_VISUAL_NODE(V)
+FOR_EACH_ABSTRACT_VISUAL_NODE(V)
 #undef V
 class NodeVisitor;
 

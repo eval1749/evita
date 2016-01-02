@@ -23,7 +23,7 @@ void NodeVisitor::Visit(Node* node) {
 
 #define V(name) \
   void name::Accept(NodeVisitor* visitor) { visitor->Visit##name(this); }
-FOR_EACH_VISUAL_BOX(V)
+FOR_EACH_VISUAL_NODE(V)
 #undef V
 
 }  // namespace visuals

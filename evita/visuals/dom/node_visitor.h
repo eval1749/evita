@@ -20,7 +20,7 @@ class NodeVisitor {
   void Visit(Node* node);
 
 #define V(name) virtual void Visit##name(name* node) = 0;
-  FOR_EACH_VISUAL_BOX(V)
+  FOR_EACH_VISUAL_NODE(V)
 #undef V
  protected:
   NodeVisitor();

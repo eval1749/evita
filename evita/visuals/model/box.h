@@ -92,6 +92,10 @@ class Box : public common::Castable {
   const css::Right& right() const { return right_; }
   const css::Top& top() const { return top_; }
 
+  // CSS Sizing
+  const css::Height height() const { return height_; }
+  const css::Width width() const { return width_; }
+
   virtual void Accept(BoxVisitor* visitor) = 0;
   std::unique_ptr<css::Style> ComputeActualStyle() const;
 
@@ -133,15 +137,19 @@ class Box : public common::Castable {
 
   css::Background background_;
   css::Border border_;
-  // TODO(eval1749): We should incorporate |bottom_| to layout.
-  css::Bottom bottom_;
-  css::Left left_;
   css::Margin margin_;
   css::Padding padding_;
+
+  // CSS Position
   css::Position position_;
-  // TODO(eval1749): We should incorporate |right_| to layout.
+  css::Bottom bottom_;
+  css::Left left_;
   css::Right right_;
   css::Top top_;
+
+  // CSS Sizing
+  css::Width width_;
+  css::Height height_;
 
   // Tree structure
   Box* next_sibling_ = nullptr;

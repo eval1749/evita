@@ -164,13 +164,17 @@ void BoxEditor::SetContentChanged(InlineBox* box) {
   V(border)                                   \
   V(padding)
 
-#define FOR_EACH_PROPERTY_CHANGES_ORIGIN(V) \
+#define FOR_EACH_PROPERTY_AFFECTS_ORIGIN(V) \
   V(bottom)                                 \
   V(left)                                   \
   V(margin)                                 \
   V(position)                               \
   V(right)                                  \
   V(top)
+
+#define FOR_EACH_PROPERTY_AFFECTS_SIZE(V) \
+  V(height)                               \
+  V(width)
 
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   if (new_style.has_display() &&
@@ -194,7 +198,16 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
     box->property##_ = new_style.property();      \
     box->is_origin_changed_ = true;               \
   }
-  FOR_EACH_PROPERTY_CHANGES_ORIGIN(V)
+  FOR_EACH_PROPERTY_AFFECTS_ORIGIN(V)
+#undef V
+
+#define V(property)                               \
+  if (new_style.has_##property() &&               \
+      new_style.property() != box->property##_) { \
+    box->property##_ = new_style.property();      \
+    box->is_size_changed_ = true;                 \
+  }
+  FOR_EACH_PROPERTY_AFFECTS_SIZE(V)
 #undef V
 
   if (const auto& text = box->as<TextBox>()) {

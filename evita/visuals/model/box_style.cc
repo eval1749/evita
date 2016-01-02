@@ -38,9 +38,11 @@ class ActualStyleVisitor final : public BoxVisitor {
 
 #define FOR_EACH_PROPERTY_INITIAL_IS_AUTO(V) \
   V(Bottom, bottom)                          \
+  V(Height, height)                          \
   V(Left, left)                              \
   V(Right, right)                            \
-  V(Top, top)
+  V(Top, top)                                \
+  V(Width, width)
 
 std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   if (box.background().HasValue())

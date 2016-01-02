@@ -50,7 +50,6 @@ class Style final {
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
   std::unordered_set<PropertyId> contains_;
-  int dummy_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Style& style);

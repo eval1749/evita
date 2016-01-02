@@ -16,10 +16,9 @@ namespace css {
 //
 // Style
 //
-#define V(Name, name, type, text) name##_(other.name##_),
-Style::Style(const Style& other) : FOR_EACH_VISUAL_CSS_PROPERTY(V) dummy_(0) {}
-#undef V
-
+Style::Style(const Style& other) {
+  *this = other;
+}
 Style::Style() {}
 Style::~Style() {}
 

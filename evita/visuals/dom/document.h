@@ -7,7 +7,6 @@
 
 #include <map>
 
-#include "evita/visuals/geometry/float_size.h"
 #include "evita/visuals/dom/container_node.h"
 #include "evita/visuals/dom/document_lifecycle.h"
 
@@ -25,7 +24,6 @@ class Document final : public ContainerNode {
   ~Document() final;
 
   DocumentLifecycle* lifecycle() const { return &lifecycle_; }
-  const FloatSize& viewport_size() const { return viewport_size_; }
 
   Node* GetNodeById(const base::StringPiece16& id) const;
   bool InLayout() const;
@@ -39,7 +37,6 @@ class Document final : public ContainerNode {
 
   std::map<base::string16, Node*> id_map_;
   mutable DocumentLifecycle lifecycle_;
-  FloatSize viewport_size_;
 
   DISALLOW_COPY_AND_ASSIGN(Document);
 };

@@ -13,8 +13,6 @@ namespace visuals {
 
 class ContainerNode;
 class Document;
-class FloatColor;
-class FloatSize;
 class Node;
 class TextNode;
 
@@ -53,9 +51,6 @@ class NodeEditor final {
   void SetContentChanged(Node* node);
   void SetShouldPaint(Node* node);
   void WillDestroy(Node* node);
-
-  // Document
-  void SetViewportSize(Document* document, const FloatSize& size);
 
  private:
   void DidChangeChild(ContainerNode* container);

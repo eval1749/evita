@@ -208,15 +208,6 @@ void NodeEditor::SetShouldPaint(Node* node) {
   }
 }
 
-void NodeEditor::SetViewportSize(Document* document, const FloatSize& size) {
-  DCHECK(document->lifecycle_.AllowsTreeMutaions()) << document->lifecycle_;
-  if (document->viewport_size_ == size)
-    return;
-  document->viewport_size_ = size;
-  document->is_size_changed_ = true;
-  ScheduleVisualUpdateIfNeeded(document);
-}
-
 void NodeEditor::WillDestroy(Node* node) {
   node->parent_ = nullptr;
 }

@@ -1,0 +1,62 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+source_set("dom") {
+  sources = [
+    "ancestors.cc",
+    "ancestors.h",
+    "ancestors_or_self.cc",
+    "ancestors_or_self.h",
+    "children.cc",
+    "children.h",
+    "container_node.cc",
+    "container_node.h",
+    "descendants_or_self.cc",
+    "descendants_or_self.h",
+    "document.cc",
+    "document.h",
+    "document_lifecycle.cc",
+    "document_lifecycle.h",
+    "element.cc",
+    "element.h",
+    "node.cc",
+    "node.h",
+    "node_editor.cc",
+    "node_editor.h",
+    "node_style.cc",
+    "node_traversal.cc",
+    "node_traversal.h",
+    "node_tree_builder.cc",
+    "node_tree_builder.h",
+    "node_visitor.cc",
+    "node_visitor.h",
+    "nodes_forward.h",
+    "text_node.cc",
+    "text_node.h",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/visuals/css",
+    "//evita/visuals/geometry",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "container_node_test.cc",
+    "descendants_or_self_test.cc",
+    "document_test.cc",
+    "node_test.cc",
+    "node_traversal_test.cc",
+  ]
+
+  deps = [
+    ":dom",
+    "//testing/gtest",
+  ]
+}

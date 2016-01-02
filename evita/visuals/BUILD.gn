@@ -44,14 +44,14 @@ executable("demo") {
 test("tests") {
   output_name = "evita_visuals_tests"
 
-  sources = [
-  ]
+  sources = []
 
   deps = [
     ":visuals",
     "//base/test:run_all_unittests",
     "//evita/visuals/css:test_files",
     "//evita/visuals/display:test_files",
+    "//evita/visuals/dom:test_files",
     "//evita/visuals/geometry:test_files",
     "//evita/visuals/model:test_files",
     "//evita/visuals/paint:test_files",

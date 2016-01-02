@@ -37,9 +37,6 @@ class RootBox final : public ContainerBox {
   void RegisterBoxIdIfNeeded(const Box& box);
   void UnregisterBoxIdIfNeeded(const Box& box);
 
-  // Box
-  FloatSize ComputePreferredSize() const final;
-
   std::map<base::string16, Box*> id_map_;
   mutable BoxTreeLifecycle lifecycle_;
   FloatSize viewport_size_;

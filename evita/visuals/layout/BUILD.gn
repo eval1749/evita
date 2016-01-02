@@ -8,11 +8,14 @@ source_set("layout") {
   sources = [
     "layouter.cc",
     "layouter.h",
+    "size_calculator.cc",
+    "size_calculator.h",
   ]
 
   deps = [
     "//base",
     "//evita/visuals/css",
+    "//evita/visuals/fonts",
     "//evita/visuals/geometry",
     "//evita/visuals/model",
   ]

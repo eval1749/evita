@@ -5,7 +5,6 @@
 #include "evita/visuals/model/root_box.h"
 
 #include "base/logging.h"
-#include "evita/visuals/model/box_traversal.h"
 
 namespace visuals {
 
@@ -62,11 +61,6 @@ void RootBox::UnregisterBoxIdIfNeeded(const Box& box) {
     }
   }
   DVLOG(ERROR) << "id_map_ should have " << box;
-}
-
-// Box
-FloatSize RootBox::ComputePreferredSize() const {
-  return BoxTraversal::FirstChildOf(*this)->ComputePreferredSize();
 }
 
 }  // namespace visuals

@@ -9,6 +9,7 @@
 
 #include "base/logging.h"
 #include "evita/visuals/geometry/float_rect.h"
+#include "evita/visuals/layout/size_calculator.h"
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
@@ -76,7 +77,7 @@ void LayoutVisitor::VisitBlockBox(BlockBox* box) {
   for (const auto& child : box->child_boxes()) {
     if (child->is_display_none())
       continue;
-    const auto& child_size = child->ComputePreferredSize();
+    const auto& child_size = SizeCalculator().ComputePreferredSize(*child);
     if (child->position().is_absolute()) {
       LayoutVisitor().Layout(child, FloatPoint(child->left().length().value(),
                                                child->top().length().value()),
@@ -97,7 +98,7 @@ void LayoutVisitor::VisitLineBox(LineBox* line) {
   for (const auto& child : line->child_boxes()) {
     if (child->is_display_none())
       continue;
-    const auto& child_size = child->ComputePreferredSize();
+    const auto& child_size = SizeCalculator().ComputePreferredSize(*child);
     LayoutVisitor().Layout(
         child, FloatRect(child_origin + child->margin().top_left(),
                          FloatSize(child_size.width(), line_height)));

@@ -93,7 +93,6 @@ class Box : public common::Castable {
   const css::Top& top() const { return top_; }
 
   virtual void Accept(BoxVisitor* visitor) = 0;
-  virtual FloatSize ComputePreferredSize() const = 0;
   std::unique_ptr<css::Style> ComputeActualStyle() const;
 
   bool IsDescendantOf(const Box& other) const;

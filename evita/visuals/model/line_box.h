@@ -22,9 +22,6 @@ class LineBox final : public ContainerBox {
   ~LineBox() final;
 
  private:
-  // Box
-  FloatSize ComputePreferredSize() const final;
-
   DISALLOW_COPY_AND_ASSIGN(LineBox);
 };
 

@@ -28,6 +28,10 @@ class StyleBuilder final {
 
   std::unique_ptr<Style> Build();
 
+  // Shorthand functions
+  StyleBuilder& SetHeight(float height);
+  StyleBuilder& SetWidth(float width);
+
 #define V(Name, name, type, text)     \
   StyleBuilder& Set##Name(type name); \
   void Unset##Name();

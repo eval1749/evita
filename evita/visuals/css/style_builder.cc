@@ -24,6 +24,14 @@ std::unique_ptr<Style> StyleBuilder::Build() {
   return std::move(style_);
 }
 
+StyleBuilder& StyleBuilder::SetHeight(float height) {
+  return SetHeight(css::Height(css::Length(height)));
+}
+
+StyleBuilder& StyleBuilder::SetWidth(float width) {
+  return SetWidth(css::Width(css::Length(width)));
+}
+
 #define V(Name, name, type, text)                    \
   StyleBuilder& StyleBuilder::Set##Name(type name) { \
     style_->contains_.insert(PropertyId::Name);      \

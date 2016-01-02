@@ -1,0 +1,30 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("style") {
+  sources = [
+    "style_resolver.cc",
+    "style_resolver.h",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/visuals/css",
+    "//evita/visuals/dom",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "style_resolver_test.cc",
+  ]
+
+  deps = [
+    ":style",
+    "//evita/visuals/css",
+    "//evita/visuals/dom",
+    "//testing/gtest",
+  ]
+}

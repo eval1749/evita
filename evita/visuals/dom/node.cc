@@ -45,9 +45,10 @@ bool Node::IsDescendantOf(const Node& other) const {
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
-  ostream << node.class_name() << '.' << node.sequence_id();
+  ostream << node.class_name() << '.' << node.sequence_id() << ' '
+          << node.tag_name();
   if (!node.id().empty()) {
-    ostream << " \"" << node.id() << '"';
+    ostream << " id=\"" << node.id() << '"';
   }
   return ostream << ' ' << node.bounds();
 }

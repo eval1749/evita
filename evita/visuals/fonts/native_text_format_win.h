@@ -31,7 +31,7 @@ class NativeTextFormat final {
     return text_format_;
   }
 
-  float ComputeWidth(const base::string16& text) const;
+  FloatSize ComputeMetrics(const base::string16& text) const;
 
  private:
   base::win::ScopedComPtr<IDWriteTextFormat> text_format_;

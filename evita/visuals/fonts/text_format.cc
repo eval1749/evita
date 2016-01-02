@@ -5,6 +5,7 @@
 #include "evita/visuals/fonts/text_format.h"
 
 #include "build/build_config.h"
+#include "evita/visuals/geometry/float_size.h"
 
 #if OS_WIN
 #include "evita/visuals/fonts/native_text_format_win.h"
@@ -23,8 +24,8 @@ TextFormat::TextFormat(const base::string16& font_face_name, float font_size)
 
 TextFormat::~TextFormat() {}
 
-float TextFormat::ComputeWidth(const base::string16& text) const {
-  return impl_->ComputeWidth(text);
+FloatSize TextFormat::ComputeMetrics(const base::string16& text) const {
+  return impl_->ComputeMetrics(text);
 }
 
 }  // namespace visuals

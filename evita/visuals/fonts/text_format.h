@@ -12,6 +12,7 @@
 
 namespace visuals {
 
+class FloatSize;
 class NativeTextFormat;
 
 //////////////////////////////////////////////////////////////////////
@@ -25,7 +26,7 @@ class TextFormat final {
 
   const NativeTextFormat& impl() const { return *impl_; }
 
-  float ComputeWidth(const base::string16& text) const;
+  FloatSize ComputeMetrics(const base::string16& text) const;
 
  private:
   std::unique_ptr<NativeTextFormat> impl_;

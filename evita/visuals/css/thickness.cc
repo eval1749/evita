@@ -15,7 +15,7 @@ namespace css {
 //
 // Thickness
 //
-Thickness::Thickness(float top, float left, float bottom, float right)
+Thickness::Thickness(float top, float right, float bottom, float left)
     : bottom_(bottom), left_(left), right_(right), top_(top) {}
 
 Thickness::Thickness(const Thickness& other)

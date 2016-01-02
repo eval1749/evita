@@ -18,7 +18,7 @@ namespace css {
 //
 class Thickness {
  public:
-  Thickness(float top, float left, float bottom, float right);
+  Thickness(float top, float right, float bottom, float left);
   Thickness(const Thickness& other);
   Thickness();
   ~Thickness();

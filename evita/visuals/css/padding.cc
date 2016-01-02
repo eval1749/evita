@@ -13,8 +13,17 @@ namespace css {
 //
 // Padding
 //
-Padding::Padding(float left, float top, float right, float bottom)
-    : thickness_(top, left, bottom, right) {}
+Padding::Padding(float top, float right, float bottom, float left)
+    : thickness_(top, right, bottom, left) {}
+
+Padding::Padding(float top, float right_left, float bottom)
+    : Padding(top, right_left, bottom, right_left) {}
+
+Padding::Padding(float top_bottom, float right_left)
+    : Padding(top_bottom, right_left, top_bottom, right_left) {}
+
+Padding::Padding(float width)
+    : Padding(width, width, width, width) {}
 
 Padding::Padding(const Padding& other) : thickness_(other.thickness_) {}
 Padding::Padding() {}

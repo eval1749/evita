@@ -15,9 +15,9 @@ namespace css {
 //
 Border::Border(const Color& color,
                float top,
-               float left,
+               float right,
                float bottom,
-               float right)
+               float left)
     : bottom_color_(color),
       left_color_(color),
       right_color_(color),

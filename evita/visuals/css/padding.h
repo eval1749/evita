@@ -16,9 +16,17 @@ namespace css {
 //
 // Padding
 //
+// padding: top, right, bottom, left
+// padding: top, right_left, bottom
+// padding: top-bottom, right_left
+// padding: top-bottom-right-left
+//
 class Padding final {
  public:
-  Padding(float left, float top, float right, float bottom);
+  Padding(float top, float right, float bottom, float left);
+  Padding(float top, float right_left, float bottom);
+  Padding(float top_bottom, float right_left);
+  explicit Padding(float width);
   Padding(const Padding& other);
   Padding();
   ~Padding();

@@ -13,8 +13,17 @@ namespace css {
 //
 // Margin
 //
-Margin::Margin(float top, float left, float bottom, float right)
-    : thickness_(top, left, bottom, right) {}
+Margin::Margin(float top, float right, float bottom, float left)
+    : thickness_(top, right, bottom, left) {}
+
+Margin::Margin(float top, float right_left, float bottom)
+    : Margin(top, right_left, bottom, right_left) {}
+
+Margin::Margin(float top_bottom, float right_left)
+    : Margin(top_bottom, right_left, top_bottom, right_left) {}
+
+Margin::Margin(float width)
+    : Margin(width, width, width, width) {}
 
 Margin::Margin(const Margin& other) : thickness_(other.thickness_) {}
 Margin::Margin() {}

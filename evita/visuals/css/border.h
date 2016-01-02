@@ -19,7 +19,7 @@ namespace css {
 //
 class Border final {
  public:
-  Border(const Color& color, float top, float left, float bottom, float right);
+  Border(const Color& color, float top, float right, float bottom, float left);
   Border(const Color& color, float width);
   Border(const Border& other);
   Border();

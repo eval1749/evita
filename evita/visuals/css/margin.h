@@ -21,7 +21,10 @@ namespace css {
 //
 class Margin final {
  public:
-  Margin(float top, float left, float bottom, float right);
+  Margin(float top, float right, float bottom, float left);
+  Margin(float top, float right_left, float bottom);
+  Margin(float top_bottom, float right_left);
+  explicit Margin(float width);
   Margin(const Margin& other);
   Margin();
   ~Margin();

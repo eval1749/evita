@@ -114,8 +114,10 @@ std::unique_ptr<RootBox> BuildBoxTree() {
           .End<BlockBox>()
           .Build();
   const auto list = root->GetBoxById(L"list")->as<BlockBox>();
-  const auto& kBlack =
-      css::StyleBuilder().SetColor(css::Color(0, 0, 0)).Build();
+  const auto& kBlack = css::StyleBuilder()
+                           .SetColor(css::Color(0, 0, 0))
+                           .SetPadding(css::Padding(2, 5, 2, 5))
+                           .Build();
   for (auto index = 0; index < 20; ++index) {
     auto line = std::make_unique<LineBox>(root.get());
     BoxTreeBuilder(line.get())
@@ -123,7 +125,11 @@ std::unique_ptr<RootBox> BuildBoxTree() {
                        .SetBorder(css::Border(css::Color(), 1))
                        .Build())
         .Begin<TextBox>(base::StringPrintf(L"line %d", index))
-        .SetStyle(*kBlack)
+        .SetStyle(*css::StyleBuilder()
+                       .SetColor(css::Color(0, 0, 0))
+                       .SetPadding(css::Padding(2, 5, 2, 5))
+                       .SetWidth(150)
+                       .Build())
         .End<TextBox>()
         .Begin<TextBox>(L"size")
         .SetStyle(*kBlack)

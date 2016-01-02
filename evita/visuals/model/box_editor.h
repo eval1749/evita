@@ -59,6 +59,7 @@ class BoxEditor final {
 
   // TextBox
   void SetBaseline(TextBox* box, float new_baseline);
+  void SetTextColor(TextBox* box, const FloatColor& color);
 
   // RootBox
   void SetViewportSize(RootBox* root_box, const FloatSize& size);

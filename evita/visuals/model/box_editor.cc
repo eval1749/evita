@@ -235,6 +235,13 @@ void BoxEditor::SetShouldPaint(Box* box) {
   }
 }
 
+void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
+  if (text_box->color_ == color)
+    return;
+  text_box->color_ = color;
+  SetContentChanged(text_box);
+}
+
 void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
   DCHECK(root_box->lifecycle_.AllowsTreeMutaions()) << root_box->lifecycle_;
   if (root_box->viewport_size_ == size)

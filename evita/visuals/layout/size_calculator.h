@@ -21,6 +21,8 @@ class SizeCalculator final {
   SizeCalculator();
   ~SizeCalculator();
 
+  FloatSize ComputeExtrinsicSize(const Box& box) const;
+  FloatSize ComputeIntrinsicSize(const Box& box) const;
   FloatSize ComputePreferredSize(const Box& box) const;
 
  private:

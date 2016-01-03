@@ -13,7 +13,7 @@
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_visitor.h"
 #include "evita/visuals/dom/text_node.h"
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
@@ -144,11 +144,11 @@ void GenerateVisitor::VisitElement(Element* element) {
     child_boxes.push_back(std::move(inline_flow_box));
   }
   if (style.display().is_block()) {
-    auto block_box = std::make_unique<BlockBox>(root_box_);
-    BoxEditor().SetStyle(block_box.get(), style);
+    auto block_flow_box = std::make_unique<BlockFlowBox>(root_box_);
+    BoxEditor().SetStyle(block_flow_box.get(), style);
     for (auto& child_box : child_boxes)
-      BoxEditor().AppendChild(block_box.get(), std::move(child_box));
-    return ReturnBox(std::move(block_box));
+      BoxEditor().AppendChild(block_flow_box.get(), std::move(child_box));
+    return ReturnBox(std::move(block_flow_box));
   }
   auto inline_box = std::make_unique<InlineFlowBox>(root_box_);
   BoxEditor().SetStyle(inline_box.get(), style);

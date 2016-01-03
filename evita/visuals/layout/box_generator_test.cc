@@ -11,7 +11,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/style/style_resolver.h"

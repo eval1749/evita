@@ -70,7 +70,7 @@ std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   return std::move(builder_.Build());
 }
 
-void ActualStyleVisitor::VisitBlockBox(BlockBox* block) {}
+void ActualStyleVisitor::VisitBlockFlowBox(BlockFlowBox* block) {}
 
 void ActualStyleVisitor::VisitInlineFlowBox(InlineFlowBox* line) {}
 

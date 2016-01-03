@@ -8,7 +8,7 @@
 
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/inline_flow_box.h"
@@ -73,7 +73,7 @@ void ExtrinsicSizeVisitor::ReturnSize(const FloatSize& size) {
 }
 
 // BoxVisitor
-void ExtrinsicSizeVisitor::VisitBlockBox(BlockBox* box) {
+void ExtrinsicSizeVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
   ComputeWithSimpleMethod(*box);
 }
 
@@ -131,7 +131,7 @@ void IntrinsicSizeVisitor::ReturnSize(const FloatSize& size) {
 }
 
 // BoxVisitor
-void IntrinsicSizeVisitor::VisitBlockBox(BlockBox* box) {
+void IntrinsicSizeVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
   auto size = FloatSize();
   for (const auto& child : box->child_boxes()) {
     if (!child->position().is_static())
@@ -206,7 +206,7 @@ void PreferredSizeVisitor::ReturnSize(const FloatSize& size) {
 }
 
 // BoxVisitor
-void PreferredSizeVisitor::VisitBlockBox(BlockBox* box) {
+void PreferredSizeVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
   ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
 }
 

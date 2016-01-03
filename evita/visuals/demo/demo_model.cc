@@ -15,7 +15,7 @@
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/ancestors_or_self.h"
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_finder.h"
 #include "evita/visuals/model/box_traversal.h"
@@ -71,7 +71,7 @@ void BoxPrinter::PrintAsContainer(const ContainerBox& container) {
 }
 
 // BoxVisitor
-void BoxPrinter::VisitBlockBox(BlockBox* box) {
+void BoxPrinter::VisitBlockFlowBox(BlockFlowBox* box) {
   PrintAsContainer(*box);
 }
 
@@ -105,15 +105,15 @@ const auto kBorder = 1;
 std::unique_ptr<RootBox> BuildBoxTree() {
   auto root =
       BoxTreeBuilder()
-          .Begin<BlockBox>(L"main")
+          .Begin<BlockFlowBox>(L"main")
           .SetStyle(*css::StyleBuilder()
                          .SetBackground(css::Background(css::Color(1, 1, 1)))
                          .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
                          .Build())
-          .Add<BlockBox>(L"list")
-          .End<BlockBox>()
+          .Add<BlockFlowBox>(L"list")
+          .End<BlockFlowBox>()
           .Build();
-  const auto list = root->GetBoxById(L"list")->as<BlockBox>();
+  const auto list = root->GetBoxById(L"list")->as<BlockFlowBox>();
   const auto& kBlack = css::StyleBuilder()
                            .SetColor(css::Color(0, 0, 0))
                            .SetPadding(css::Padding(2, 5, 2, 5))
@@ -163,7 +163,7 @@ std::unique_ptr<RootBox> BuildBoxTree() {
       .SetStyle(*kBlack)
       .End<TextBox>()
       .End<InlineFlowBox>()
-      .Finish<BlockBox>(list);
+      .Finish<BlockFlowBox>(list);
   return std::move(root);
 }
 

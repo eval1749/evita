@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "evita/visuals/layout/layouter.h"
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_finder.h"
 #include "evita/visuals/model/box_tree_builder.h"
@@ -15,10 +15,10 @@ namespace visuals {
 
 TEST(BoxFinderTest, Basic) {
   const auto& root = BoxTreeBuilder()
-                         .Begin<BlockBox>()
+                         .Begin<BlockFlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockBox>()
+                         .End<BlockFlowBox>()
                          .Build();
   const auto main = root->first_child()->as<ContainerBox>();
   const auto text_box1 = main->first_child();

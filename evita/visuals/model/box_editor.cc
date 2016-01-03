@@ -7,7 +7,7 @@
 #include "base/logging.h"
 #include "evita/visuals/model/ancestors.h"
 #include "evita/visuals/model/ancestors_or_self.h"
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/descendants_or_self.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"

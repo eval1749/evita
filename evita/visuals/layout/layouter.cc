@@ -10,7 +10,7 @@
 #include "base/logging.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/size_calculator.h"
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/inline_flow_box.h"
@@ -71,7 +71,7 @@ void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
 }
 
 // BoxVisitor
-void LayoutVisitor::VisitBlockBox(BlockBox* box) {
+void LayoutVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
   auto child_origin = FloatPoint();
   const auto content_width = box->content_bounds().width();
   for (const auto& child : box->child_boxes()) {

@@ -4,7 +4,7 @@
 
 #include "evita/visuals/model/box_traversal.h"
 
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
@@ -14,10 +14,10 @@ namespace visuals {
 
 TEST(BoxTraversalTest, FirstChildOf) {
   const auto& root = BoxTreeBuilder()
-                         .Begin<BlockBox>()
+                         .Begin<BlockFlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockBox>()
+                         .End<BlockFlowBox>()
                          .Build();
   const auto block = root->first_child()->as<ContainerBox>();
 
@@ -27,17 +27,17 @@ TEST(BoxTraversalTest, FirstChildOf) {
 }
 
 TEST(BoxTraversalTest, FirstChildOfNoChild) {
-  const auto& root = BoxTreeBuilder().Add<BlockBox>().Build();
+  const auto& root = BoxTreeBuilder().Add<BlockFlowBox>().Build();
   const auto block = root->first_child();
   EXPECT_EQ(nullptr, BoxTraversal::FirstChildOf(*block));
 }
 
 TEST(BoxTraversalTest, LastChildOf) {
   const auto& root = BoxTreeBuilder()
-                         .Begin<BlockBox>()
+                         .Begin<BlockFlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockBox>()
+                         .End<BlockFlowBox>()
                          .Build();
   const auto block = root->first_child()->as<ContainerBox>();
 
@@ -47,17 +47,17 @@ TEST(BoxTraversalTest, LastChildOf) {
 }
 
 TEST(BoxTraversalTest, LastChildOfNoChild) {
-  const auto& root = BoxTreeBuilder().Add<BlockBox>().Build();
+  const auto& root = BoxTreeBuilder().Add<BlockFlowBox>().Build();
   const auto block = root->first_child();
   EXPECT_EQ(nullptr, BoxTraversal::LastChildOf(*block));
 }
 
 TEST(BoxTraversalTest, NextOf) {
   const auto& root = BoxTreeBuilder()
-                         .Begin<BlockBox>()
+                         .Begin<BlockFlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockBox>()
+                         .End<BlockFlowBox>()
                          .Build();
   const auto block = root->first_child();
 
@@ -69,10 +69,10 @@ TEST(BoxTraversalTest, NextOf) {
 
 TEST(BoxTraversalTest, NextSiblingOf) {
   const auto& root = BoxTreeBuilder()
-                         .Begin<BlockBox>()
+                         .Begin<BlockFlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockBox>()
+                         .End<BlockFlowBox>()
                          .Build();
   const auto block = root->first_child();
 

@@ -12,7 +12,7 @@
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/geometry/affine_transformer.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_traversal.h"
 #include "evita/visuals/model/box_visitor.h"
@@ -226,7 +226,7 @@ void PaintVisitor::PushTransform() {
 }
 
 // BoxVisitor
-void PaintVisitor::VisitBlockBox(BlockBox* block) {
+void PaintVisitor::VisitBlockFlowBox(BlockFlowBox* block) {
   if (!NeedsPaintContainerBox(*block))
     return;
   BoxPaintScope paint_scope(this, *block);

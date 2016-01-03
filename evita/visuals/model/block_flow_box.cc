@@ -4,15 +4,15 @@
 
 #include <algorithm>
 
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 
 namespace visuals {
 
-BlockBox::BlockBox(RootBox* root_box, const base::StringPiece16& id)
+BlockFlowBox::BlockFlowBox(RootBox* root_box, const base::StringPiece16& id)
     : ContainerBox(root_box, id) {}
 
-BlockBox::BlockBox(RootBox* root_box) : ContainerBox(root_box) {}
+BlockFlowBox::BlockFlowBox(RootBox* root_box) : ContainerBox(root_box) {}
 
-BlockBox::~BlockBox() {}
+BlockFlowBox::~BlockFlowBox() {}
 
 }  // namespace visuals

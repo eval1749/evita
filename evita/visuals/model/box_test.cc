@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "evita/visuals/model/block_box.h"
+#include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
@@ -25,10 +25,10 @@ TEST(BoxTest, InitialValues) {
 
 TEST(BoxTest, IsDescendantOf) {
   const auto& root = BoxTreeBuilder()
-                         .Begin<BlockBox>()
+                         .Begin<BlockFlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockBox>()
+                         .End<BlockFlowBox>()
                          .Build();
   const auto main = root->first_child()->as<ContainerBox>();
   const auto text_box1 = main->first_child();

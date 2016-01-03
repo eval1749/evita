@@ -24,6 +24,12 @@ source_set("css") {
     "length.h",
     "margin.cc",
     "margin.h",
+    "media.cc",
+    "media.h",
+    "media_observer.cc",
+    "media_observer.h",
+    "media_type.cc",
+    "media_type.h",
     "padding.cc",
     "padding.h",
     "percentage.cc",
@@ -79,6 +85,17 @@ action("properties") {
     "--output-directory",
     rebase_path("$css_gen_dir"),
     rebase_path("properties.in", root_build_dir),
+  ]
+}
+
+source_set("test_supports") {
+  testonly = true
+  sources = [
+    "mock_media.cc",
+    "mock_media.h",
+  ]
+  deps = [
+    ":css",
   ]
 }
 

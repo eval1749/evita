@@ -24,7 +24,6 @@ source_set("dom") {
     "node.h",
     "node_editor.cc",
     "node_editor.h",
-    "node_style.cc",
     "node_traversal.cc",
     "node_traversal.h",
     "node_tree_builder.cc",

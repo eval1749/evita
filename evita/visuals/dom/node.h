@@ -96,7 +96,6 @@ class Node : public common::Castable, public gc::Collectable<Node> {
   const css::Width width() const { return width_; }
 
   virtual void Accept(NodeVisitor* visitor) = 0;
-  std::unique_ptr<css::Style> ComputeActualStyle() const;
 
   bool IsDescendantOf(const Node& other) const;
 

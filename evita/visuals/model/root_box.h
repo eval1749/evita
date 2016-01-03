@@ -13,6 +13,8 @@
 
 namespace visuals {
 
+class Document;
+
 //////////////////////////////////////////////////////////////////////
 //
 // RootBox
@@ -21,7 +23,7 @@ class RootBox final : public ContainerBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(RootBox, ContainerBox);
 
  public:
-  RootBox();
+  explicit RootBox(const Document& document);
   ~RootBox() final;
 
   BoxTreeLifecycle* lifecycle() const { return &lifecycle_; }

@@ -5,6 +5,7 @@
 #include "evita/visuals/model/box_tree_builder.h"
 
 #include "base/logging.h"
+#include "evita/visuals/dom/document.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
@@ -21,7 +22,8 @@ BoxTreeBuilder::BoxTreeBuilder(ContainerBox* container)
 }
 
 BoxTreeBuilder::BoxTreeBuilder()
-    : new_root_box_(new RootBox()), root_box_(new_root_box_.get()) {
+    : new_root_box_(new RootBox(*new Document())),
+      root_box_(new_root_box_.get()) {
   boxes_.push(root_box_);
 }
 

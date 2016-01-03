@@ -5,6 +5,7 @@
 #include "evita/visuals/model/root_box.h"
 
 #include "base/logging.h"
+#include "evita/visuals/dom/document.h"
 
 namespace visuals {
 
@@ -12,7 +13,7 @@ namespace visuals {
 //
 // RootBox
 //
-RootBox::RootBox() : ContainerBox(this) {}
+RootBox::RootBox(const Document& document) : ContainerBox(this, &document) {}
 RootBox::~RootBox() {}
 
 Box* RootBox::GetBoxById(const base::StringPiece16& id) const {

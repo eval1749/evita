@@ -109,11 +109,11 @@ struct Converter<
 };
 }  // namespace gin
 
-#define DECLARE_SCRIPTABLE_OBJECT(name)                        \
-  DECLARE_COLLECTABLE_OBJECT(name)                             \
-                                                               \
- public:                                                       \
-  static v8_glue::WrapperInfo* static_wrapper_info();          \
+#define DECLARE_SCRIPTABLE_OBJECT(name)               \
+  DECLARE_GC_COLLECTABLE_OBJECT(name)                 \
+                                                      \
+ public:                                              \
+  static v8_glue::WrapperInfo* static_wrapper_info(); \
   static const char* scriptable_class_name() { return #name; }
 
 #define DEFINE_SCRIPTABLE_OBJECT(name, wrapper_info_name)   \

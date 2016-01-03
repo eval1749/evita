@@ -50,10 +50,10 @@ class Collectable : public internal::AbstractCollectable {
 
 }  // namespace gc
 
-#define DECLARE_COLLECTABLE_OBJECT(name) DECLARE_GC_VISITABLE_OBJECT(name)
+#define DECLARE_GC_COLLECTABLE_OBJECT(name) DECLARE_GC_VISITABLE_OBJECT(name)
 
 #define DECLARE_GC_VISITABLE_OBJECT(name) \
- private:                              \
+ private:                                 \
   const char* visitable_class_name() const override { return #name; }
 
 std::ostream& operator<<(std::ostream& ostream,

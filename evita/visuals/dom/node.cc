@@ -10,10 +10,6 @@
 
 namespace visuals {
 
-namespace {
-int last_node_sequence_id;
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // Node
@@ -22,7 +18,6 @@ Node::Node(Document* document,
            const base::StringPiece16& tag_name,
            const base::StringPiece16& id)
     : id_(id.as_string()),
-      sequence_id_(++last_node_sequence_id),
       tag_name_(tag_name.as_string()),
       document_(document) {}
 
@@ -40,8 +35,7 @@ bool Node::IsDescendantOf(const Node& other) const {
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
-  ostream << node.class_name() << '.' << node.sequence_id() << ' '
-          << node.tag_name();
+  ostream << node.class_name() << ' ' << node.tag_name();
   if (!node.id().empty())
     ostream << " id=\"" << node.id() << '"';
   return ostream;

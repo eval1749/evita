@@ -5,8 +5,6 @@
 #ifndef EVITA_VISUALS_DOM_NODE_EDITOR_H_
 #define EVITA_VISUALS_DOM_NODE_EDITOR_H_
 
-#include <memory>
-
 #include "base/macros.h"
 
 namespace visuals {
@@ -36,17 +34,8 @@ class NodeEditor final {
   void DidPaint(Node* node);
   void SetLayoutClean(Node* node);
 
-  // ContainerNode
-  template <typename T>
-  T* AppendChild(ContainerNode* container, std::unique_ptr<T>&& child) {
-    static_assert(std::is_base_of<Node, T>::value, "Node should be base of T");
-    const auto& result = child.get();
-    AppendChild(container, std::unique_ptr<Node>(child.release()));
-    return result;
-  }
-
-  Node* AppendChild(ContainerNode* container, std::unique_ptr<Node> child);
-  std::unique_ptr<Node> RemoveChild(ContainerNode* container, Node* child);
+  Node* AppendChild(ContainerNode* container, Node* child);
+  void RemoveChild(ContainerNode* container, Node* child);
   void SetStyle(Element* element, const css::Style& style);
 
   void SetContentChanged(Node* node);

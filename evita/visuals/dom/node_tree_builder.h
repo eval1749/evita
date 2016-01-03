@@ -5,7 +5,6 @@
 #ifndef EVITA_VISUALS_DOM_NODE_TREE_BUILDER_H_
 #define EVITA_VISUALS_DOM_NODE_TREE_BUILDER_H_
 
-#include <memory>
 #include <stack>
 
 #include "base/macros.h"
@@ -36,7 +35,7 @@ class NodeTreeBuilder final {
   NodeTreeBuilder& Begin(const base::StringPiece16& tag_name);
   NodeTreeBuilder& Begin(const base::StringPiece16& tag_name,
                          const base::StringPiece16& id);
-  std::unique_ptr<Document> Build();
+  Document* Build();
   NodeTreeBuilder& End(const base::StringPiece16& tag_name);
   void Finish(ContainerNode* node);
 
@@ -44,11 +43,11 @@ class NodeTreeBuilder final {
   NodeTreeBuilder& SetStyle(const css::Style& style);
 
  private:
-  NodeTreeBuilder& AddInternal(std::unique_ptr<Node> node);
-  NodeTreeBuilder& BeginInternal(std::unique_ptr<Element> node);
+  NodeTreeBuilder& AddInternal(Node* node);
+  NodeTreeBuilder& BeginInternal(Element* node);
 
   std::stack<Node*> nodes_;
-  std::unique_ptr<Document> new_document_;
+  Document* new_document_;
   Document* const document_;
 
   DISALLOW_COPY_AND_ASSIGN(NodeTreeBuilder);

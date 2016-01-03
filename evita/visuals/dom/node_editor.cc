@@ -33,9 +33,7 @@ Document* FindDocument(const Node& node) {
 NodeEditor::NodeEditor() {}
 NodeEditor::~NodeEditor() {}
 
-Node* NodeEditor::AppendChild(ContainerNode* container,
-                              std::unique_ptr<Node> new_child_ptr) {
-  const auto new_child = new_child_ptr.release();
+Node* NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   DCHECK_NE(container, new_child);
   DCHECK(!new_child->IsDescendantOf(*container));
   DCHECK(!container->IsDescendantOf(*new_child));
@@ -95,8 +93,7 @@ void NodeEditor::DidPaint(Node* node) {
   container->is_subtree_changed_ = false;
 }
 
-std::unique_ptr<Node> NodeEditor::RemoveChild(ContainerNode* container,
-                                              Node* old_child) {
+void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   DCHECK_EQ(container, old_child->parent_);
   if (const auto document = FindDocument(*container)) {
     for (const auto runner : Node::DescendantsOrSelf(*old_child))
@@ -119,7 +116,6 @@ std::unique_ptr<Node> NodeEditor::RemoveChild(ContainerNode* container,
   old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;
   DidChangeChild(container);
-  return std::unique_ptr<Node>(old_child);
 }
 
 void NodeEditor::ScheduleVisualUpdateIfNeeded(Node* node) {

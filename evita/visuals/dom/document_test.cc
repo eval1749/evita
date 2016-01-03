@@ -38,7 +38,7 @@ TEST(DocumentTest, GetNodeById) {
   EXPECT_EQ(id_map.find(L"block3")->second, document->GetNodeById(L"block3"));
   EXPECT_EQ(nullptr, document->GetNodeById(L"not exist"));
 
-  NodeEditor().RemoveChild(document.get(), document->GetNodeById(L"block2"));
+  NodeEditor().RemoveChild(document, document->GetNodeById(L"block2"));
   EXPECT_EQ(nullptr, document->GetNodeById(L"block2"));
 }
 

@@ -40,6 +40,7 @@ source_set("dom") {
 
   deps = [
     "//base",
+    "//evita/gc",
     "//evita/visuals/css",
     "//evita/visuals/geometry",
   ]

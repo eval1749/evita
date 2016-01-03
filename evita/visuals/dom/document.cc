@@ -63,4 +63,10 @@ void Document::UnregisterNodeIdIfNeeded(const Node& node) {
   DVLOG(ERROR) << "id_map_ should have " << node;
 }
 
+// gc::Visitable
+void Document::Accept(gc::Visitor* visitor) {
+  for (const auto& entry : id_map_)
+    visitor->Visit(entry.second);
+}
+
 }  // namespace visuals

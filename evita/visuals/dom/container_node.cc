@@ -34,4 +34,10 @@ ContainerNode::~ContainerNode() {
   }
 }
 
+// gc::Visitable
+void ContainerNode::Accept(gc::Visitor* visitor) {
+  visitor->Visit(first_child_);
+  visitor->Visit(last_child_);
+}
+
 }  // namespace visuals

@@ -6,6 +6,7 @@
 
 #include "base/logging.h"
 #include "evita/visuals/dom/container_node.h"
+#include "evita/visuals/dom/document.h"
 
 namespace visuals {
 
@@ -50,6 +51,14 @@ std::ostream& operator<<(std::ostream& ostream, const Node* node) {
   if (!node)
     return ostream << "nullptr";
   return ostream << *node;
+}
+
+// gc::Visitable
+void Node::Accept(gc::Visitor* visitor) {
+  visitor->Visit(next_sibling_);
+  visitor->Visit(previous_sibling_);
+  visitor->Visit(parent_);
+  visitor->Visit(document_);
 }
 
 }  // namespace visuals

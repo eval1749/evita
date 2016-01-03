@@ -43,7 +43,10 @@ class ContainerNode : public Node {
  private:
   friend class NodeEditor;
 
-  // For ease of using list of child nodes, we don't use |std::unique_ptr<Node>|
+  // gc::Visitable
+  void Accept(gc::Visitor* visitor) override;
+
+  // For ease of using list of child nodes, we don't use |Node*|
   Node* first_child_ = nullptr;
   Node* last_child_ = nullptr;
 

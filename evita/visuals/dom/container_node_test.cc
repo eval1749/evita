@@ -25,7 +25,11 @@ TEST(ContainerNodeTest, AppendChild) {
   const auto text_node2 = main->last_child();
 
   EXPECT_EQ(main, text_node1->parent());
+  EXPECT_EQ(text_node2, text_node1->next_sibling());
+  EXPECT_EQ(nullptr, text_node1->previous_sibling());
   EXPECT_EQ(main, text_node2->parent());
+  EXPECT_EQ(nullptr, text_node2->next_sibling());
+  EXPECT_EQ(text_node1, text_node2->previous_sibling());
 }
 
 TEST(ContainerNodeTest, RemoveChild) {
@@ -39,10 +43,11 @@ TEST(ContainerNodeTest, RemoveChild) {
   const auto text_node1 = main->first_child();
   const auto text_node2 = main->last_child();
 
-  const auto& removed_child = NodeEditor().RemoveChild(main, text_node2);
+  NodeEditor().RemoveChild(main, text_node2);
 
   EXPECT_EQ(main, text_node1->parent());
   EXPECT_EQ(nullptr, text_node2->parent());
-  EXPECT_EQ(text_node2, removed_child.get());
+  EXPECT_EQ(nullptr, text_node2->next_sibling());
+  EXPECT_EQ(nullptr, text_node2->previous_sibling());
 }
 }  // namespace visuals

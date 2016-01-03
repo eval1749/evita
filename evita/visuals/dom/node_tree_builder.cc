@@ -22,7 +22,7 @@ NodeTreeBuilder::NodeTreeBuilder(ContainerNode* container)
 }
 
 NodeTreeBuilder::NodeTreeBuilder()
-    : new_document_(new Document()), document_(new_document_.get()) {
+    : new_document_(new Document()), document_(new_document_) {
   nodes_.push(document_);
 }
 
@@ -31,36 +31,36 @@ NodeTreeBuilder::~NodeTreeBuilder() {
 }
 
 NodeTreeBuilder& NodeTreeBuilder::AddText(const base::StringPiece16& text) {
-  return AddInternal(std::make_unique<TextNode>(document_, text));
+  return AddInternal(new TextNode(document_, text));
 }
 
-NodeTreeBuilder& NodeTreeBuilder::AddInternal(std::unique_ptr<Node> child) {
+NodeTreeBuilder& NodeTreeBuilder::AddInternal(Node* child) {
   const auto container = nodes_.top()->as<ContainerNode>();
-  NodeEditor().AppendChild(container, std::move(child));
+  NodeEditor().AppendChild(container, child);
   return *this;
 }
 
 NodeTreeBuilder& NodeTreeBuilder::Begin(const base::StringPiece16& tag_name) {
-  return BeginInternal(std::make_unique<Element>(document_, tag_name));
+  return BeginInternal(new Element(document_, tag_name));
 }
 
 NodeTreeBuilder& NodeTreeBuilder::Begin(const base::StringPiece16& tag_name,
                                         const base::StringPiece16& id) {
-  return BeginInternal(std::make_unique<Element>(document_, tag_name, id));
+  return BeginInternal(new Element(document_, tag_name, id));
 }
 
-NodeTreeBuilder& NodeTreeBuilder::BeginInternal(
-    std::unique_ptr<Element> child) {
-  const auto new_top = child.get();
-  AddInternal(std::move(std::unique_ptr<Node>(child.release())));
-  nodes_.push(new_top);
+NodeTreeBuilder& NodeTreeBuilder::BeginInternal(Element* child) {
+  AddInternal(child);
+  nodes_.push(child);
   return *this;
 }
 
-std::unique_ptr<Document> NodeTreeBuilder::Build() {
+Document* NodeTreeBuilder::Build() {
   DCHECK_EQ(1, nodes_.size());
   nodes_.pop();
-  return std::move(new_document_);
+  const auto document = new_document_;
+  new_document_ = nullptr;
+  return document;
 }
 
 NodeTreeBuilder& NodeTreeBuilder::End(const base::StringPiece16& tag_name) {

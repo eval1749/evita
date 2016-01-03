@@ -35,6 +35,9 @@ class Document final : public ContainerNode {
   void RegisterNodeIdIfNeeded(const Node& node);
   void UnregisterNodeIdIfNeeded(const Node& node);
 
+  // gc::Visitable
+  void Accept(gc::Visitor* visitor) final;
+
   std::map<base::string16, Node*> id_map_;
   mutable DocumentLifecycle lifecycle_;
 

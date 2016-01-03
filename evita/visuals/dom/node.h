@@ -12,6 +12,8 @@
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
 #include "common/castable.h"
+#include "evita/gc/collectable.h"
+#include "evita/gc/visitor.h"
 #include "evita/visuals/css/background.h"
 #include "evita/visuals/css/border.h"
 #include "evita/visuals/css/float_color.h"
@@ -31,6 +33,7 @@ class Style;
 
 #define DECLARE_VISUAL_NODE_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)          \
+  DECLARE_GC_VISITABLE_OBJECT(Node)            \
   friend class NodeEditor;
 
 #define DECLARE_VISUAL_NODE_ABSTRACT_CLASS(self, super) \
@@ -45,7 +48,7 @@ class Style;
 //
 // Node
 //
-class Node : public common::Castable {
+class Node : public common::Castable, public gc::Collectable<Node> {
   DECLARE_VISUAL_NODE_ABSTRACT_CLASS(Node, Castable);
 
  public:
@@ -115,6 +118,9 @@ class Node : public common::Castable {
   Node(Document* document, const base::StringPiece16& tag_name);
 
  private:
+  // gc::Visitable
+  void Accept(gc::Visitor* visitor) override;
+
   // User specified string identifier of this node. Multiple nodes can have
   // same string id.
   const base::string16 id_;

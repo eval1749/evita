@@ -61,16 +61,17 @@ class Box : public common::Castable {
 
   // Tree structure
   Box* next_sibling() const { return next_sibling_; }
+  ContainerBox* parent() const { return parent_; }
   Box* previous_sibling() const { return previous_sibling_; }
   RootBox* root_box() const { return root_box_; }
 
   // Box identifiers
+  // TODO(eval1749): |Box::id()| is deprecated.
   const base::string16& id() const { return id_; }
+  // |node()| is used by |BoxFinder| to map box to node.
   const Node* node() const { return node_; }
+  // |sequence_id()| is used for debugging display tree generation and display.
   int sequence_id() const { return sequence_id_; }
-
-  // Box tree related values
-  ContainerBox* parent() const { return parent_; }
 
   // Layout related values
   const FloatRect& bounds() const { return bounds_; }

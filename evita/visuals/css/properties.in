@@ -6,7 +6,7 @@ background: <background>
 border: <border>
 bottom: auto <length> <percentage>
 color: <color>
-display: block inline inline-block none
+display: inline block inline-block none
 height: auto <length> <percentage>
 left: auto <length> <percentage>
 margin: <margin>

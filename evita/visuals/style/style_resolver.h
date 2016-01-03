@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "base/macros.h"
+#include "evita/visuals/dom/document_observer.h"
 
 namespace visuals {
 
@@ -16,6 +17,7 @@ namespace css {
 class Style;
 }
 
+class Document;
 class Element;
 class Node;
 
@@ -23,11 +25,12 @@ class Node;
 //
 // StyleResolver
 //
-// TODO(eval1749): StyleResolver should be DOM mutation observer.
-class StyleResolver final {
+// TODO(eval1749): StyleResolver should observe media changes, e.g. viewport
+// size change, system color changes, etc.
+class StyleResolver final : public DocumentObserver {
  public:
-  StyleResolver();
-  ~StyleResolver();
+  explicit StyleResolver(const Document& document);
+  ~StyleResolver() final;
 
   const css::Style& default_style() const { return *default_style_; }
 
@@ -37,7 +40,13 @@ class StyleResolver final {
   const css::Style& InlineStyleOf(const Element& element) const;
   std::unique_ptr<css::Style> ComputeStyleFor(const Element& element);
 
+  // DocumentObserver
+  void DidChangeInlineStyle(const Element& element,
+                            const css::Style* old_style) final;
+  void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
+
   std::unique_ptr<css::Style> default_style_;
+  const Document& document_;
   // TODO(eval1749): We should share |css::Style| objects for elements which
   // have same style.
   std::unordered_map<const Element*, std::unique_ptr<css::Style>> style_map_;

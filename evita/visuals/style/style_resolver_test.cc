@@ -21,7 +21,7 @@ TEST(StyleResolverTest, Basic) {
                              .End(L"body")
                              .Build();
   const auto body = document->first_child()->as<Element>();
-  StyleResolver resolver;
+  StyleResolver resolver(*document);
   EXPECT_EQ(resolver.default_style(), resolver.ResolveFor(*body));
   EXPECT_EQ(resolver.default_style(),
             resolver.ResolveFor(*body->first_child()));
@@ -38,7 +38,7 @@ TEST(StyleResolverTest, Inheritance) {
           .End(L"body")
           .Build();
   const auto body = document->first_child()->as<Element>();
-  StyleResolver resolver;
+  StyleResolver resolver(*document);
   EXPECT_EQ(kColorRed, resolver.ResolveFor(*body).color());
   EXPECT_EQ(kColorRed, resolver.ResolveFor(*body->first_child()).color());
 }
@@ -53,7 +53,7 @@ TEST(StyleResolverTest, ResolveForText) {
           .End(L"body")
           .Build();
   const auto body = document->first_child()->as<Element>();
-  StyleResolver resolver;
+  StyleResolver resolver(*document);
   EXPECT_EQ(kColorRed, resolver.ResolveFor(*body).color());
   EXPECT_EQ(kColorRed, resolver.ResolveFor(*body->first_child()).color());
 }

@@ -23,11 +23,15 @@ void InheritStyle(css::Style* style, const css::Style& parent_style) {
 //
 // StyleResolver
 //
-StyleResolver::StyleResolver() : default_style_(new css::Style()) {
+StyleResolver::StyleResolver(const Document& document)
+    : default_style_(new css::Style()), document_(document) {
   css::StyleEditor().SetColor(default_style_.get(), css::Color(0, 0, 0));
+  document_.AddObserver(this);
 }
 
-StyleResolver::~StyleResolver() {}
+StyleResolver::~StyleResolver() {
+  document_.RemoveObserver(this);
+}
 
 std::unique_ptr<css::Style> StyleResolver::ComputeStyleFor(
     const Element& element) {
@@ -47,6 +51,7 @@ const css::Style& StyleResolver::InlineStyleOf(const Element& element) const {
 }
 
 const css::Style& StyleResolver::ResolveFor(const Node& node) {
+  Document::LockScope lock_scope(document_);
   if (node.is<Document>())
     return *default_style_;
   const auto element = node.as<Element>();
@@ -58,6 +63,26 @@ const css::Style& StyleResolver::ResolveFor(const Node& node) {
   auto style = ComputeStyleFor(*element);
   const auto& result = style_map_.emplace(element, std::move(style));
   return *result.first->second;
+}
+
+// DocumentObserver
+void StyleResolver::DidChangeInlineStyle(const Element& element,
+                                         const css::Style* old_style) {
+  const auto& it = style_map_.find(&element);
+  if (it == style_map_.end())
+    return;
+  style_map_.erase(it);
+}
+
+void StyleResolver::WillRemoveChild(const ContainerNode& parent,
+                                    const Node& child) {
+  const auto element = child.as<Element>();
+  if (!element)
+    return;
+  const auto& it = style_map_.find(element);
+  if (it == style_map_.end())
+    return;
+  style_map_.erase(it);
 }
 
 }  // namespace visuals

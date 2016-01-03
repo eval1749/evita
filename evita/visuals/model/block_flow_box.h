@@ -11,7 +11,7 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// BlockFlowBox
+// BlockFlowBox  represents a CSS layout box with "display: block flow".
 //
 class BlockFlowBox final : public ContainerBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(BlockFlowBox, ContainerBox);

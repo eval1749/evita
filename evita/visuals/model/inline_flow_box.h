@@ -11,7 +11,7 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// InlineFlowBox
+// InlineFlowBox represents a CSS layout box with "display: inline flow".
 //
 class InlineFlowBox final : public ContainerBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(InlineFlowBox, ContainerBox);

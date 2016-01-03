@@ -59,6 +59,34 @@ void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
                     DidAppendChild(*container, *new_child));
 }
 
+void NodeEditor::InsertBefore(ContainerNode* container, Node* new_child,
+                              Node* ref_child) {
+  if (!ref_child)
+    return AppendChild(container, new_child);
+  const auto document = container->document_;
+  DCHECK(!document->is_locked());
+  if (new_child->parent_)
+    RemoveChild(new_child->parent_, new_child);
+  DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->parent_);
+  DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->next_sibling_);
+  DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->previous_sibling_);
+  const auto previous_sibling = ref_child->previous_sibling_;
+  if (previous_sibling)
+    previous_sibling->next_sibling_ = new_child;
+  else
+    container->first_child_ = new_child;
+  ref_child->previous_sibling_ = new_child;
+  new_child->parent_ = container;
+  new_child->next_sibling_ = ref_child;
+  new_child->previous_sibling_ = previous_sibling;
+  if (const auto document = FindDocument(*container)) {
+    for (const auto runner : Node::DescendantsOrSelf(*new_child))
+      document->RegisterNodeIdIfNeeded(*runner);
+  }
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
+                    DidInsertBefore(*container, *new_child, *ref_child));
+}
+
 void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   DCHECK(!container->document()->is_locked());
   DCHECK_EQ(container, old_child->parent_);

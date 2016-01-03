@@ -31,6 +31,7 @@ StyleResolver::StyleResolver(const Document& document, const css::Media& media)
   css::StyleEditor().SetBackground(default_style_.get(),
                                    css::Background(css::Color(1, 1, 1)));
   css::StyleEditor().SetColor(default_style_.get(), css::Color(0, 0, 0));
+  css::StyleEditor().SetDisplay(default_style_.get(), css::Display());
   document_.AddObserver(this);
 }
 

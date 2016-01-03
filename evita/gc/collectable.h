@@ -50,9 +50,9 @@ class Collectable : public internal::AbstractCollectable {
 
 }  // namespace gc
 
-#define DECLARE_COLLECTABLE_OBJECT(name) DECLARE_VISITABLE_OBJECT(name)
+#define DECLARE_COLLECTABLE_OBJECT(name) DECLARE_GC_VISITABLE_OBJECT(name)
 
-#define DECLARE_VISITABLE_OBJECT(name) \
+#define DECLARE_GC_VISITABLE_OBJECT(name) \
  private:                              \
   const char* visitable_class_name() const override { return #name; }
 

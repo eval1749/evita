@@ -11,7 +11,7 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
-#include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
 
@@ -77,7 +77,7 @@ void ExtrinsicSizeVisitor::VisitBlockBox(BlockBox* box) {
   ComputeWithSimpleMethod(*box);
 }
 
-void ExtrinsicSizeVisitor::VisitLineBox(LineBox* box) {
+void ExtrinsicSizeVisitor::VisitInlineFlowBox(InlineFlowBox* box) {
   ComputeWithSimpleMethod(*box);
 }
 
@@ -144,7 +144,7 @@ void IntrinsicSizeVisitor::VisitBlockBox(BlockBox* box) {
   ReturnSize(size);
 }
 
-void IntrinsicSizeVisitor::VisitLineBox(LineBox* box) {
+void IntrinsicSizeVisitor::VisitInlineFlowBox(InlineFlowBox* box) {
   auto size = FloatSize();
   for (const auto& child : box->child_boxes()) {
     if (!child->position().is_static())
@@ -210,7 +210,7 @@ void PreferredSizeVisitor::VisitBlockBox(BlockBox* box) {
   ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
 }
 
-void PreferredSizeVisitor::VisitLineBox(LineBox* box) {
+void PreferredSizeVisitor::VisitInlineFlowBox(InlineFlowBox* box) {
   ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
 }
 

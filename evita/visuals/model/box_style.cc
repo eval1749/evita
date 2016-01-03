@@ -72,7 +72,7 @@ std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
 
 void ActualStyleVisitor::VisitBlockBox(BlockBox* block) {}
 
-void ActualStyleVisitor::VisitLineBox(LineBox* line) {}
+void ActualStyleVisitor::VisitInlineFlowBox(InlineFlowBox* line) {}
 
 void ActualStyleVisitor::VisitRootBox(RootBox* root) {}
 

@@ -5,7 +5,7 @@
 #include "evita/visuals/model/box_visitor.h"
 
 #include "evita/visuals/model/block_box.h"
-#include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
 

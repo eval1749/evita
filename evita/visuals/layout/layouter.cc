@@ -13,7 +13,7 @@
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
-#include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 
 namespace visuals {
@@ -93,7 +93,7 @@ void LayoutVisitor::VisitBlockBox(BlockBox* box) {
   }
 }
 
-void LayoutVisitor::VisitLineBox(LineBox* line) {
+void LayoutVisitor::VisitInlineFlowBox(InlineFlowBox* line) {
   auto child_origin = FloatPoint();
   const auto line_height = line->content_bounds().height();
   for (const auto& child : line->child_boxes()) {

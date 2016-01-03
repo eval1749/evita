@@ -15,7 +15,7 @@
 #include "evita/visuals/dom/text_node.h"
 #include "evita/visuals/model/block_box.h"
 #include "evita/visuals/model/box_editor.h"
-#include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/style/style_resolver.h"
@@ -104,7 +104,7 @@ void GenerateVisitor::VisitElement(Element* element) {
   // Does "flow" formatting
   for (const auto& child : element->child_nodes()) {
     auto child_box = GenerateBox(*child);
-    if (child_box->is<InlineBox>() || child_box->is<LineBox>()) {
+    if (child_box->is<InlineBox>() || child_box->is<InlineFlowBox>()) {
       inline_boxes.push_back(std::move(child_box));
       continue;
     }
@@ -124,11 +124,11 @@ void GenerateVisitor::VisitElement(Element* element) {
         inline_boxes.pop_back();
         break;
       default: {
-        auto line_box = std::make_unique<LineBox>(root_box_);
+        auto inline_flow_box = std::make_unique<InlineFlowBox>(root_box_);
         for (auto& inline_box : inline_boxes)
-          BoxEditor().AppendChild(line_box.get(), std::move(inline_box));
+          BoxEditor().AppendChild(inline_flow_box.get(), std::move(inline_box));
         inline_boxes.clear();
-        child_boxes.push_back(std::move(line_box));
+        child_boxes.push_back(std::move(inline_flow_box));
         break;
       }
     }
@@ -137,11 +137,11 @@ void GenerateVisitor::VisitElement(Element* element) {
   if (inline_boxes.size() == 1) {
     child_boxes.push_back(std::move(inline_boxes.front()));
   } else if (!inline_boxes.empty()) {
-    auto line_box = std::make_unique<LineBox>(root_box_);
+    auto inline_flow_box = std::make_unique<InlineFlowBox>(root_box_);
     for (auto& inline_box : inline_boxes)
-      BoxEditor().AppendChild(line_box.get(), std::move(inline_box));
+      BoxEditor().AppendChild(inline_flow_box.get(), std::move(inline_box));
     inline_boxes.clear();
-    child_boxes.push_back(std::move(line_box));
+    child_boxes.push_back(std::move(inline_flow_box));
   }
   if (style.display().is_block()) {
     auto block_box = std::make_unique<BlockBox>(root_box_);
@@ -150,7 +150,7 @@ void GenerateVisitor::VisitElement(Element* element) {
       BoxEditor().AppendChild(block_box.get(), std::move(child_box));
     return ReturnBox(std::move(block_box));
   }
-  auto inline_box = std::make_unique<LineBox>(root_box_);
+  auto inline_box = std::make_unique<InlineFlowBox>(root_box_);
   BoxEditor().SetStyle(inline_box.get(), style);
   for (auto& child_box : child_boxes)
     BoxEditor().AppendChild(inline_box.get(), std::move(child_box));

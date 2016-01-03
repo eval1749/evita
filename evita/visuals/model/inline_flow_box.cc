@@ -4,14 +4,14 @@
 
 #include <algorithm>
 
-#include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/inline_flow_box.h"
 
 namespace visuals {
 
-LineBox::LineBox(RootBox* root_box, const base::StringPiece16& id)
+InlineFlowBox::InlineFlowBox(RootBox* root_box, const base::StringPiece16& id)
     : ContainerBox(root_box, id) {}
 
-LineBox::LineBox(RootBox* root_box) : ContainerBox(root_box) {}
-LineBox::~LineBox() {}
+InlineFlowBox::InlineFlowBox(RootBox* root_box) : ContainerBox(root_box) {}
+InlineFlowBox::~InlineFlowBox() {}
 
 }  // namespace visuals

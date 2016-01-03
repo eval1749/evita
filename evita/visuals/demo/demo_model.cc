@@ -21,7 +21,7 @@
 #include "evita/visuals/model/box_traversal.h"
 #include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/box_visitor.h"
-#include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/paint/painter.h"
@@ -75,7 +75,7 @@ void BoxPrinter::VisitBlockBox(BlockBox* box) {
   PrintAsContainer(*box);
 }
 
-void BoxPrinter::VisitLineBox(LineBox* box) {
+void BoxPrinter::VisitInlineFlowBox(InlineFlowBox* box) {
   PrintAsContainer(*box);
 }
 
@@ -119,7 +119,7 @@ std::unique_ptr<RootBox> BuildBoxTree() {
                            .SetPadding(css::Padding(2, 5, 2, 5))
                            .Build();
   for (auto index = 0; index < 20; ++index) {
-    auto line = std::make_unique<LineBox>(root.get());
+    auto line = std::make_unique<InlineFlowBox>(root.get());
     BoxTreeBuilder(line.get())
         .SetStyle(*css::StyleBuilder()
                        .SetBorder(css::Border(css::Color(), 1))
@@ -140,7 +140,7 @@ std::unique_ptr<RootBox> BuildBoxTree() {
         .Begin<TextBox>(L"file")
         .SetStyle(*kBlack)
         .End<TextBox>()
-        .Finish<LineBox>(line.get());
+        .Finish<InlineFlowBox>(line.get());
     if (index == 0) {
       BoxEditor().SetStyle(
           line.get(),
@@ -149,7 +149,7 @@ std::unique_ptr<RootBox> BuildBoxTree() {
     BoxEditor().AppendChild(list, std::move(line));
   }
   BoxTreeBuilder(list)
-      .Begin<LineBox>(L"hover")
+      .Begin<InlineFlowBox>(L"hover")
       .SetStyle(
           *css::StyleBuilder()
                .SetPosition(css::Position::Absolute())
@@ -162,7 +162,7 @@ std::unique_ptr<RootBox> BuildBoxTree() {
       .Begin<TextBox>(L" ")
       .SetStyle(*kBlack)
       .End<TextBox>()
-      .End<LineBox>()
+      .End<InlineFlowBox>()
       .Finish<BlockBox>(list);
   return std::move(root);
 }
@@ -208,7 +208,7 @@ void DemoModel::AttachWindow(DemoWindow* window) {
   RequestAnimationFrame();
 }
 
-LineBox* DemoModel::FindLineBox(const FloatPoint& point) const {
+InlineFlowBox* DemoModel::FindInlineFlowBox(const FloatPoint& point) const {
   Layouter().Layout(root_box_.get());
   const auto& found = BoxFinder(*root_box_).FindByPoint(point);
   if (!found.box)
@@ -218,7 +218,7 @@ LineBox* DemoModel::FindLineBox(const FloatPoint& point) const {
   if (!source->IsDescendantOf(*list))
     return nullptr;
   for (const auto& runner : Box::AncestorsOrSelf(*source)) {
-    if (const auto line = runner->as<LineBox>())
+    if (const auto line = runner->as<InlineFlowBox>())
       return line;
   }
   return nullptr;
@@ -256,7 +256,7 @@ void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
 }
 
 void DemoModel::DidMoveMouse(const FloatPoint& point) {
-  const auto line = FindLineBox(point);
+  const auto line = FindInlineFlowBox(point);
   if (!line)
     return;
   const auto hover = root_box_->GetBoxById(L"hover");
@@ -270,7 +270,7 @@ void DemoModel::DidMoveMouse(const FloatPoint& point) {
 }
 
 void DemoModel::DidPressMouse(const FloatPoint& point) {
-  const auto line = FindLineBox(point);
+  const auto line = FindInlineFlowBox(point);
   if (!line)
     return;
   const auto hover = root_box_->GetBoxById(L"hover");

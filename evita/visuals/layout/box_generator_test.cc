@@ -12,7 +12,7 @@
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/model/block_box.h"
-#include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/style/style_resolver.h"
 #include "gtest/gtest.h"
@@ -44,7 +44,7 @@ TEST_F(BoxGeneratorTest, Basic) {
                              .Build();
   BoxGenerator builder(*document, mock_media());
   const auto& root_box = builder.Build();
-  EXPECT_TRUE(root_box.first_child()->is<LineBox>());
+  EXPECT_TRUE(root_box.first_child()->is<InlineFlowBox>());
 }
 
 TEST_F(BoxGeneratorTest, Flow) {
@@ -56,7 +56,7 @@ TEST_F(BoxGeneratorTest, Flow) {
                              .Build();
   BoxGenerator builder(*document, mock_media());
   const auto& root_box = builder.Build();
-  EXPECT_TRUE(root_box.first_child()->is<LineBox>());
+  EXPECT_TRUE(root_box.first_child()->is<InlineFlowBox>());
 }
 
 }  // namespace visuals

@@ -15,7 +15,7 @@
 namespace visuals {
 
 class DemoWindow;
-class LineBox;
+class InlineFlowBox;
 class RootBox;
 
 //////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ class DemoModel final : public ui::AnimationFrameHandler,
   void AttachWindow(DemoWindow* window);
 
  private:
-  LineBox* FindLineBox(const FloatPoint& point) const;
+  InlineFlowBox* FindInlineFlowBox(const FloatPoint& point) const;
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;

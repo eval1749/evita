@@ -16,7 +16,7 @@
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_traversal.h"
 #include "evita/visuals/model/box_visitor.h"
-#include "evita/visuals/model/line_box.h"
+#include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/paint/paint_info.h"
@@ -234,7 +234,7 @@ void PaintVisitor::VisitBlockBox(BlockBox* block) {
     Visit(child);
 }
 
-void PaintVisitor::VisitLineBox(LineBox* line) {
+void PaintVisitor::VisitInlineFlowBox(InlineFlowBox* line) {
   if (!NeedsPaintContainerBox(*line))
     return;
   BoxPaintScope paint_scope(this, *line);

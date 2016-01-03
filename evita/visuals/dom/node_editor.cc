@@ -35,7 +35,7 @@ Document* FindDocument(const Node& node) {
 NodeEditor::NodeEditor() {}
 NodeEditor::~NodeEditor() {}
 
-Node* NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
+void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   DCHECK(!container->document()->is_locked());
   DCHECK_NE(container, new_child);
   DCHECK(!new_child->IsDescendantOf(*container));
@@ -57,7 +57,6 @@ Node* NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   }
   FOR_EACH_OBSERVER(DocumentObserver, container->document_->observers_,
                     DidAppendChild(*container, *new_child));
-  return new_child;
 }
 
 void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {

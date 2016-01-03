@@ -28,7 +28,7 @@ class NodeEditor final {
   NodeEditor();
   ~NodeEditor();
 
-  Node* AppendChild(ContainerNode* container, Node* child);
+  void AppendChild(ContainerNode* container, Node* child);
   void RemoveChild(ContainerNode* container, Node* child);
   void SetStyle(Element* element, const css::Style& style);
 

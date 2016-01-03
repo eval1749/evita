@@ -1,0 +1,18 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("gc") {
+  sources = [
+    "collectable.cc",
+    "collectable.h",
+    "collector.cc",
+    "collector.h",
+    "local.h",
+    "member.h",
+    "visitable.cc",
+    "visitable.h",
+    "visitor.h",
+    "weak_ptr.h",
+  ]
+}

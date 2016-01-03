@@ -93,14 +93,15 @@ void NodeEditor::InsertBefore(ContainerNode* container,
 void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   DCHECK(!container->document()->is_locked());
   DCHECK_EQ(container, old_child->parent_);
+  FOR_EACH_OBSERVER(DocumentObserver, container->document_->observers_,
+                    DidRemoveChild(*container, *old_child));
+
   if (const auto document = FindDocument(*container)) {
     for (const auto runner : Node::DescendantsOrSelf(*old_child))
       document->UnregisterNodeIdIfNeeded(*runner);
   }
-
   const auto next_sibling = old_child->next_sibling_;
   const auto previous_sibling = old_child->previous_sibling_;
-
   if (next_sibling)
     next_sibling->previous_sibling_ = old_child->previous_sibling_;
   else
@@ -109,7 +110,6 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
     previous_sibling->next_sibling_ = next_sibling;
   else
     container->first_child_ = next_sibling;
-
   old_child->next_sibling_ = nullptr;
   old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;

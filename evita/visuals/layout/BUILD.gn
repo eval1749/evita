@@ -6,6 +6,8 @@ import("//testing/test.gni")
 
 source_set("layout") {
   sources = [
+    "box_generator.cc",
+    "box_generator.h",
     "layouter.cc",
     "layouter.h",
     "size_calculator.cc",
@@ -15,8 +17,23 @@ source_set("layout") {
   deps = [
     "//base",
     "//evita/visuals/css",
+    "//evita/visuals/dom",
     "//evita/visuals/fonts",
     "//evita/visuals/geometry",
     "//evita/visuals/model",
+    "//evita/visuals/style",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+
+  sources = [
+    "box_generator_test.cc",
+  ]
+
+  public_deps = [
+    ":layout",
+    "//testing/gtest",
   ]
 }

@@ -24,6 +24,7 @@ source_set("test_files") {
   deps = [
     ":style",
     "//evita/visuals/css",
+    "//evita/visuals/css:test_supports",
     "//evita/visuals/dom",
     "//testing/gtest",
   ]

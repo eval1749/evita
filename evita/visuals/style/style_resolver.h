@@ -9,11 +9,13 @@
 #include <unordered_map>
 
 #include "base/macros.h"
+#include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
 
 namespace visuals {
 
 namespace css {
+class Media;
 class Style;
 }
 
@@ -25,20 +27,23 @@ class Node;
 //
 // StyleResolver
 //
-// TODO(eval1749): StyleResolver should observe media changes, e.g. viewport
-// size change, system color changes, etc.
-class StyleResolver final : public DocumentObserver {
+class StyleResolver final : public css::MediaObserver, public DocumentObserver {
  public:
-  explicit StyleResolver(const Document& document);
+  explicit StyleResolver(const Document& document, const css::Media& media);
   ~StyleResolver() final;
 
   const css::Style& default_style() const { return *default_style_; }
+  const css::Media& media() const { return media_; }
 
   const css::Style& ResolveFor(const Node& node);
 
  private:
   const css::Style& InlineStyleOf(const Element& element) const;
   std::unique_ptr<css::Style> ComputeStyleFor(const Element& element);
+
+  // css::MediaObserver
+  void DidChangeViewportSize() final;
+  void DidChangeSystemMetrics() final;
 
   // DocumentObserver
   void DidChangeInlineStyle(const Element& element,
@@ -47,6 +52,7 @@ class StyleResolver final : public DocumentObserver {
 
   std::unique_ptr<css::Style> default_style_;
   const Document& document_;
+  const css::Media& media_;
   // TODO(eval1749): We should share |css::Style| objects for elements which
   // have same style.
   std::unordered_map<const Element*, std::unique_ptr<css::Style>> style_map_;

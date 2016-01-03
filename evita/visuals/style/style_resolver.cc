@@ -23,8 +23,12 @@ void InheritStyle(css::Style* style, const css::Style& parent_style) {
 //
 // StyleResolver
 //
-StyleResolver::StyleResolver(const Document& document)
-    : default_style_(new css::Style()), document_(document) {
+StyleResolver::StyleResolver(const Document& document, const css::Media& media)
+    : default_style_(new css::Style()), document_(document), media_(media) {
+  // TODO(eval1749): We should get default color and background color from
+  // system metrics.
+  css::StyleEditor().SetBackground(default_style_.get(),
+                                   css::Background(css::Color(1, 1, 1)));
   css::StyleEditor().SetColor(default_style_.get(), css::Color(0, 0, 0));
   document_.AddObserver(this);
 }
@@ -63,6 +67,17 @@ const css::Style& StyleResolver::ResolveFor(const Node& node) {
   auto style = ComputeStyleFor(*element);
   const auto& result = style_map_.emplace(element, std::move(style));
   return *result.first->second;
+}
+
+// css::MediaObserver
+void StyleResolver::DidChangeViewportSize() {
+  // TODO(eval1749): Invalidate styles depends on viewport size
+  style_map_.clear();
+}
+
+void StyleResolver::DidChangeSystemMetrics() {
+  // TODO(eval1749): Invalidate styles using system colors.
+  style_map_.clear();
 }
 
 // DocumentObserver

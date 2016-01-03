@@ -6,8 +6,6 @@
 
 #include "evita/visuals/dom/text_node.h"
 
-#include "evita/visuals/dom/node_editor.h"
-
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
@@ -15,9 +13,7 @@ namespace visuals {
 // TextNode
 //
 TextNode::TextNode(Document* document, const base::StringPiece16& text)
-    : Node(document, L"#text"), text_(text.as_string()) {
-  NodeEditor().SetContentChanged(this);
-}
+    : Node(document, L"#text"), text_(text.as_string()) {}
 
 TextNode::~TextNode() {}
 

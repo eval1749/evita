@@ -53,44 +53,7 @@ Node* NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
     for (const auto runner : Node::DescendantsOrSelf(*new_child))
       document->RegisterNodeIdIfNeeded(*runner);
   }
-  DidChangeChild(container->parent_);
   return new_child;
-}
-
-void NodeEditor::DidChangeChild(ContainerNode* container) {
-  ScheduleVisualUpdateIfNeeded(container);
-  if (!container || container->is_children_changed_)
-    return;
-  container->is_children_changed_ = true;
-  for (const auto& runner : Node::Ancestors(*container)) {
-    if (runner->is_subtree_changed_)
-      return;
-    runner->is_subtree_changed_ = true;
-  }
-}
-
-void NodeEditor::DidLayout(Node* node) {
-  // TODO(eval1749): What should we do here?
-}
-
-void NodeEditor::DidMove(Node* node) {
-  node->is_origin_changed_ = true;
-  SetShouldPaint(node);
-}
-
-void NodeEditor::DidPaint(Node* node) {
-  node->is_background_changed_ = false;
-  node->is_border_changed_ = false;
-  node->is_content_changed_ = false;
-  node->is_origin_changed_ = false;
-  node->is_padding_changed_ = false;
-  node->is_size_changed_ = false;
-  node->should_paint_ = false;
-  const auto container = node->as<ContainerNode>();
-  if (!container)
-    return;
-  container->is_children_changed_ = false;
-  container->is_subtree_changed_ = false;
 }
 
 void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
@@ -116,18 +79,6 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   old_child->next_sibling_ = nullptr;
   old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;
-  DidChangeChild(container);
-}
-
-void NodeEditor::ScheduleVisualUpdateIfNeeded(Node* node) {
-  const auto document = FindDocument(*node);
-  if (!document)
-    return;
-}
-
-void NodeEditor::SetContentChanged(Node* node) {
-  node->is_content_changed_ = true;
-  ScheduleVisualUpdateIfNeeded(node);
 }
 
 void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
@@ -142,15 +93,8 @@ void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
   // TODO(eval1749): Notify inline style changes
 }
 
-void NodeEditor::SetShouldPaint(Node* node) {
-  for (const auto& runner : Node::AncestorsOrSelf(*node)) {
-    if (runner->should_paint_)
-      return;
-    runner->should_paint_ = true;
-  }
-}
-
 void NodeEditor::WillDestroy(Node* node) {
+  DCHECK(!node->document()->is_locked());
   node->parent_ = nullptr;
 }
 

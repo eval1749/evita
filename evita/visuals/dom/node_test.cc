@@ -12,17 +12,6 @@
 
 namespace visuals {
 
-TEST(NodeTest, InitialValues) {
-  const auto& document = NodeTreeBuilder().AddText(L"foo").Build();
-  const auto& node = document->first_child();
-  EXPECT_EQ(css::Background(), node->background());
-  EXPECT_EQ(css::Border(), node->border());
-  EXPECT_FALSE(node->is_display_none());
-  EXPECT_EQ(css::Margin(), node->margin());
-  EXPECT_EQ(css::Padding(), node->padding());
-  EXPECT_EQ(css::Position::Static(), node->position());
-}
-
 TEST(NodeTest, IsDescendantOf) {
   const auto& document = NodeTreeBuilder()
                              .Begin(L"block")

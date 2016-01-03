@@ -28,18 +28,10 @@ class NodeEditor final {
   NodeEditor();
   ~NodeEditor();
 
-  // Node
-  void DidLayout(Node* node);
-  void DidMove(Node* node);
-  void DidPaint(Node* node);
-  void SetLayoutClean(Node* node);
-
   Node* AppendChild(ContainerNode* container, Node* child);
   void RemoveChild(ContainerNode* container, Node* child);
   void SetStyle(Element* element, const css::Style& style);
 
-  void SetContentChanged(Node* node);
-  void SetShouldPaint(Node* node);
   void WillDestroy(Node* node);
 
  private:

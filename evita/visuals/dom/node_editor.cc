@@ -36,8 +36,10 @@ NodeEditor::NodeEditor() {}
 NodeEditor::~NodeEditor() {}
 
 void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
-  DCHECK(!container->document()->is_locked());
-  DCHECK_NE(container, new_child);
+  const auto document = container->document_;
+  DCHECK(!document->is_locked());
+  if (new_child->parent_)
+    RemoveChild(new_child->parent_, new_child);
   DCHECK(!new_child->IsDescendantOf(*container));
   DCHECK(!container->IsDescendantOf(*new_child));
   DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->parent_);
@@ -55,11 +57,12 @@ void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
     for (const auto runner : Node::DescendantsOrSelf(*new_child))
       document->RegisterNodeIdIfNeeded(*runner);
   }
-  FOR_EACH_OBSERVER(DocumentObserver, container->document_->observers_,
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidAppendChild(*container, *new_child));
 }
 
-void NodeEditor::InsertBefore(ContainerNode* container, Node* new_child,
+void NodeEditor::InsertBefore(ContainerNode* container,
+                              Node* new_child,
                               Node* ref_child) {
   if (!ref_child)
     return AppendChild(container, new_child);

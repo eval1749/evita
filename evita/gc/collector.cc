@@ -1,10 +1,11 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-
-#include "evita/gc/collector.h"
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include <sstream>
 #include <unordered_map>
+
+#include "evita/gc/collector.h"
 
 #include "base/logging.h"
 #include "base/strings/string_piece.h"
@@ -12,7 +13,6 @@
 #include "base/synchronization/lock.h"
 #include "evita/gc/collectable.h"
 #include "evita/gc/visitor.h"
-#include "evita/editor/dom_lock.h"
 
 namespace gc {
 
@@ -104,7 +104,8 @@ void Collector::CollectGarbage() {
 }
 
 base::string16 Collector::GetJson(const base::string16& name) const {
-  UI_ASSERT_DOM_LOCKED();
+  // TODO(eval1749): Do we really need to have DOM lock here?
+  // UI_ASSERT_DOM_LOCKED();
   if (name != L"all")
     return base::string16();
 

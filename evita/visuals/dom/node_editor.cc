@@ -34,6 +34,7 @@ NodeEditor::NodeEditor() {}
 NodeEditor::~NodeEditor() {}
 
 Node* NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
+  DCHECK(!container->document()->is_locked());
   DCHECK_NE(container, new_child);
   DCHECK(!new_child->IsDescendantOf(*container));
   DCHECK(!container->IsDescendantOf(*new_child));
@@ -78,7 +79,6 @@ void NodeEditor::DidMove(Node* node) {
 }
 
 void NodeEditor::DidPaint(Node* node) {
-  DCHECK(node->document()->InPaint());
   node->is_background_changed_ = false;
   node->is_border_changed_ = false;
   node->is_content_changed_ = false;
@@ -94,6 +94,7 @@ void NodeEditor::DidPaint(Node* node) {
 }
 
 void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
+  DCHECK(!container->document()->is_locked());
   DCHECK_EQ(container, old_child->parent_);
   if (const auto document = FindDocument(*container)) {
     for (const auto runner : Node::DescendantsOrSelf(*old_child))
@@ -122,7 +123,6 @@ void NodeEditor::ScheduleVisualUpdateIfNeeded(Node* node) {
   const auto document = FindDocument(*node);
   if (!document)
     return;
-  document->lifecycle()->Reset();
 }
 
 void NodeEditor::SetContentChanged(Node* node) {
@@ -131,6 +131,7 @@ void NodeEditor::SetContentChanged(Node* node) {
 }
 
 void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
+  DCHECK(!element->document()->is_locked());
   if (element->inline_style_) {
     if (*element->inline_style_ == new_style)
       return;

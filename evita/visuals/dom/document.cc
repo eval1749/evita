@@ -10,6 +10,18 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
+// Document::LockScope
+//
+Document::LockScope::LockScope(const Document& document) : document_(document) {
+  document_.Lock();
+}
+
+Document::LockScope::~LockScope() {
+  document_.Unlock();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // Document
 //
 Document::Document() : ContainerNode(this, L"#document") {}
@@ -23,24 +35,12 @@ Node* Document::GetNodeById(const base::StringPiece16& id) const {
   return it->second;
 }
 
-bool Document::InLayout() const {
-  return lifecycle_.state() == DocumentLifecycle::State::InLayout;
-}
-
-bool Document::InPaint() const {
-  return lifecycle_.state() == DocumentLifecycle::State::InPaint;
-}
-
-bool Document::IsLayoutClean() const {
-  return lifecycle_.IsAtLeast(DocumentLifecycle::State::LayoutClean);
-}
-
-bool Document::IsPaintClean() const {
-  return lifecycle_.IsAtLeast(DocumentLifecycle::State::PaintClean);
+void Document::Lock() const {
+  ++lock_count_;
 }
 
 void Document::RegisterNodeIdIfNeeded(const Node& node) {
-  DCHECK(lifecycle_.AllowsTreeMutaions()) << lifecycle_;
+  DCHECK(!is_locked());
   if (node.id().empty())
     return;
   const auto& result =
@@ -48,8 +48,13 @@ void Document::RegisterNodeIdIfNeeded(const Node& node) {
   DCHECK(result.second) << "id_map_ already has " << node;
 }
 
+void Document::Unlock() const {
+  DCHECK_GT(lock_count_, 0);
+  --lock_count_;
+}
+
 void Document::UnregisterNodeIdIfNeeded(const Node& node) {
-  DCHECK(lifecycle_.AllowsTreeMutaions()) << lifecycle_;
+  DCHECK(!is_locked());
   if (node.id().empty())
     return;
   const auto& start = id_map_.find(node.id());

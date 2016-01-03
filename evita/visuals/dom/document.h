@@ -8,7 +8,6 @@
 #include <map>
 
 #include "evita/visuals/dom/container_node.h"
-#include "evita/visuals/dom/document_lifecycle.h"
 
 namespace visuals {
 
@@ -20,16 +19,25 @@ class Document final : public ContainerNode {
   DECLARE_VISUAL_NODE_FINAL_CLASS(Document, ContainerNode);
 
  public:
+  class LockScope final {
+   public:
+    explicit LockScope(const Document& document);
+    ~LockScope();
+
+   private:
+    const Document& document_;
+
+    DISALLOW_COPY_AND_ASSIGN(LockScope);
+  };
+
   Document();
   ~Document() final;
 
-  DocumentLifecycle* lifecycle() const { return &lifecycle_; }
+  bool is_locked() const { return lock_count_ > 0; }
 
   Node* GetNodeById(const base::StringPiece16& id) const;
-  bool InLayout() const;
-  bool InPaint() const;
-  bool IsLayoutClean() const;
-  bool IsPaintClean() const;
+  void Lock() const;
+  void Unlock() const;
 
  private:
   void RegisterNodeIdIfNeeded(const Node& node);
@@ -39,7 +47,7 @@ class Document final : public ContainerNode {
   void Accept(gc::Visitor* visitor) final;
 
   std::map<base::string16, Node*> id_map_;
-  mutable DocumentLifecycle lifecycle_;
+  mutable int lock_count_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Document);
 };

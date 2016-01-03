@@ -9,6 +9,7 @@
 #include "evita/visuals/css/style_editor.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/style/style_change_observer.h"
 
 namespace visuals {
 
@@ -37,6 +38,10 @@ StyleResolver::~StyleResolver() {
   document_.RemoveObserver(this);
 }
 
+void StyleResolver::AddObserver(StyleChangeObserver* observer) const {
+  observers_.AddObserver(observer);
+}
+
 std::unique_ptr<css::Style> StyleResolver::ComputeStyleFor(
     const Element& element) {
   const auto& parent_style = ResolveFor(*element.parent());
@@ -52,6 +57,10 @@ const css::Style& StyleResolver::InlineStyleOf(const Element& element) const {
   if (const auto inline_style = element.inline_style())
     return *inline_style;
   return *default_style_;
+}
+
+void StyleResolver::RemoveObserver(StyleChangeObserver* observer) const {
+  observers_.RemoveObserver(observer);
 }
 
 const css::Style& StyleResolver::ResolveFor(const Node& node) {
@@ -73,11 +82,13 @@ const css::Style& StyleResolver::ResolveFor(const Node& node) {
 void StyleResolver::DidChangeViewportSize() {
   // TODO(eval1749): Invalidate styles depends on viewport size
   style_map_.clear();
+  FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
 }
 
 void StyleResolver::DidChangeSystemMetrics() {
   // TODO(eval1749): Invalidate styles using system colors.
   style_map_.clear();
+  FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
 }
 
 // DocumentObserver
@@ -86,6 +97,8 @@ void StyleResolver::DidChangeInlineStyle(const Element& element,
   const auto& it = style_map_.find(&element);
   if (it == style_map_.end())
     return;
+  FOR_EACH_OBSERVER(StyleChangeObserver, observers_,
+                    DidRemoveStyleCache(element, *it->second));
   style_map_.erase(it);
 }
 

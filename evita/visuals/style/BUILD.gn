@@ -4,6 +4,8 @@
 
 source_set("style") {
   sources = [
+    "style_change_observer.cc",
+    "style_change_observer.h",
     "style_resolver.cc",
     "style_resolver.h",
   ]

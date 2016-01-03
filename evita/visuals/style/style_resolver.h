@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "base/macros.h"
+#include "base/observer_list.h"
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
 
@@ -22,6 +23,7 @@ class Style;
 class Document;
 class Element;
 class Node;
+class StyleChangeObserver;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -35,7 +37,9 @@ class StyleResolver final : public css::MediaObserver, public DocumentObserver {
   const css::Style& default_style() const { return *default_style_; }
   const css::Media& media() const { return media_; }
 
+  void AddObserver(StyleChangeObserver* observer) const;
   const css::Style& ResolveFor(const Node& node);
+  void RemoveObserver(StyleChangeObserver* observer) const;
 
  private:
   const css::Style& InlineStyleOf(const Element& element) const;
@@ -53,6 +57,7 @@ class StyleResolver final : public css::MediaObserver, public DocumentObserver {
   std::unique_ptr<css::Style> default_style_;
   const Document& document_;
   const css::Media& media_;
+  mutable base::ObserverList<StyleChangeObserver> observers_;
   // TODO(eval1749): We should share |css::Style| objects for elements which
   // have same style.
   std::unordered_map<const Element*, std::unique_ptr<css::Style>> style_map_;

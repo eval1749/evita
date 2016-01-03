@@ -13,4 +13,16 @@ namespace visuals {
 DocumentObserver::DocumentObserver() {}
 DocumentObserver::~DocumentObserver() {}
 
+void DocumentObserver::DidAppendChild(const ContainerNode& parent,
+                                      const Node& child) {}
+void DocumentObserver::DidChangeInlineStyle(const Element& element,
+                                            const css::Style* old_style) {}
+void DocumentObserver::DidInsertBefore(const ContainerNode& parent,
+                                       const Node& child,
+                                       const Node& ref_child) {}
+void DocumentObserver::DidRemoveChild(const ContainerNode& parent,
+                                      const Node& child) {}
+void DocumentObserver::WillRemoveChild(const ContainerNode& parent,
+                                       const Node& child) {}
+
 }  // namespace visuals

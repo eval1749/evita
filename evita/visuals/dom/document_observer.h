@@ -25,17 +25,14 @@ class DocumentObserver {
  public:
   virtual ~DocumentObserver();
 
-  virtual void DidAppendChild(const ContainerNode& parent,
-                              const Node& child) = 0;
+  virtual void DidAppendChild(const ContainerNode& parent, const Node& child);
   virtual void DidChangeInlineStyle(const Element& element,
-                                    const css::Style* old_style) = 0;
+                                    const css::Style* old_style);
   virtual void DidInsertBefore(const ContainerNode& parent,
                                const Node& child,
-                               const Node& ref_child) = 0;
-  virtual void DidRemoveChild(const ContainerNode& parent,
-                              const Node& child) = 0;
-  virtual void WillRemoveChild(const ContainerNode& parent,
-                               const Node& child) = 0;
+                               const Node& ref_child);
+  virtual void DidRemoveChild(const ContainerNode& parent, const Node& child);
+  virtual void WillRemoveChild(const ContainerNode& parent, const Node& child);
 
  protected:
   DocumentObserver();

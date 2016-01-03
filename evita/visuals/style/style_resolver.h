@@ -35,6 +35,7 @@ class StyleResolver final : public css::MediaObserver, public DocumentObserver {
   ~StyleResolver() final;
 
   const css::Style& default_style() const { return *default_style_; }
+  const Document& document() const { return document_; }
   const css::Media& media() const { return media_; }
 
   void AddObserver(StyleChangeObserver* observer) const;

@@ -14,10 +14,13 @@ namespace visuals {
 //
 // TextBox
 //
-TextBox::TextBox(RootBox* root_box, const base::string16 text)
-    : InlineBox(root_box), text_(text) {
+TextBox::TextBox(RootBox* root_box, const base::string16 text, const Node* node)
+    : InlineBox(root_box, node), text_(text) {
   BoxEditor().SetContentChanged(this);
 }
+
+TextBox::TextBox(RootBox* root_box, const base::string16 text)
+    : TextBox(root_box, text, nullptr) {}
 
 TextBox::~TextBox() {}
 

@@ -24,6 +24,7 @@
 namespace visuals {
 
 class BoxEditor;
+class Node;
 class RootBox;
 
 namespace css {
@@ -65,6 +66,7 @@ class Box : public common::Castable {
 
   // Box identifiers
   const base::string16& id() const { return id_; }
+  const Node* node() const { return node_; }
   int sequence_id() const { return sequence_id_; }
 
   // Box tree related values
@@ -114,6 +116,7 @@ class Box : public common::Castable {
 
  protected:
   Box(RootBox* root_box, const base::StringPiece16& id);
+  Box(RootBox* root_box, const Node* node);
   explicit Box(RootBox* root_box);
 
  private:
@@ -121,6 +124,7 @@ class Box : public common::Castable {
   // User specified string identifier of this box. Multiple boxes can have
   // same string id.
   const base::string16 id_;
+  const Node* const node_;
   const int sequence_id_;
 
   bool is_display_none_ = false;

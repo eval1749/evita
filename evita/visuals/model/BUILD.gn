@@ -47,6 +47,7 @@ source_set("model") {
   deps = [
     "//base",
     "//evita/visuals/css",
+    "//evita/visuals/dom",
     "//evita/visuals/geometry",
   ]
 }

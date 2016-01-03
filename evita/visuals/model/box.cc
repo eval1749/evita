@@ -5,6 +5,7 @@
 #include "evita/visuals/model/box.h"
 
 #include "base/logging.h"
+#include "evita/visuals/dom/node.h"
 #include "evita/visuals/model/container_box.h"
 
 namespace visuals {
@@ -17,8 +18,12 @@ int last_box_sequence_id;
 //
 // Box
 //
+Box::Box(RootBox* root_box, const Node* node)
+    : node_(node), sequence_id_(++last_box_sequence_id), root_box_(root_box) {}
+
 Box::Box(RootBox* root_box, const base::StringPiece16& id)
     : id_(id.as_string()),
+      node_(nullptr),
       sequence_id_(++last_box_sequence_id),
       root_box_(root_box) {}
 
@@ -41,9 +46,12 @@ bool Box::IsDescendantOf(const Box& other) const {
 
 std::ostream& operator<<(std::ostream& ostream, const Box& box) {
   ostream << box.class_name() << '.' << box.sequence_id();
-  if (!box.id().empty()) {
+  if (!box.id().empty())
     ostream << " \"" << box.id() << '"';
-  }
+  if (box.node())
+    ostream << ' ' << *box.node();
+  else
+    ostream << "#anonymous";
   return ostream << ' ' << box.bounds();
 }
 

@@ -19,6 +19,7 @@ class TextBox final : public InlineBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(TextBox, InlineBox);
 
  public:
+  TextBox(RootBox* root_box, const base::string16 text, const Node* node);
   TextBox(RootBox* root_box, const base::string16 text);
   ~TextBox() final;
 

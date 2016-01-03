@@ -35,6 +35,7 @@ class ContainerBox : public Box {
 
  protected:
   ContainerBox(RootBox* root_box, const base::StringPiece16& id);
+  ContainerBox(RootBox* root_box, const Node* node);
   explicit ContainerBox(RootBox* root_box);
 
  private:

@@ -11,6 +11,9 @@ namespace visuals {
 InlineFlowBox::InlineFlowBox(RootBox* root_box, const base::StringPiece16& id)
     : ContainerBox(root_box, id) {}
 
+InlineFlowBox::InlineFlowBox(RootBox* root_box, const Node* node)
+    : ContainerBox(root_box, node) {}
+
 InlineFlowBox::InlineFlowBox(RootBox* root_box) : ContainerBox(root_box) {}
 InlineFlowBox::~InlineFlowBox() {}
 

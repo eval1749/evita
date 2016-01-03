@@ -18,6 +18,7 @@ class BlockFlowBox final : public ContainerBox {
 
  public:
   BlockFlowBox(RootBox* root_box, const base::StringPiece16& id);
+  BlockFlowBox(RootBox* root_box, const Node* node);
   explicit BlockFlowBox(RootBox* root_box);
   ~BlockFlowBox() final;
 

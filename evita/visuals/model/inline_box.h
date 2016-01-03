@@ -22,6 +22,7 @@ class InlineBox : public Box {
   ~InlineBox() override;
 
  protected:
+  InlineBox(RootBox* root_box, const Node* node);
   explicit InlineBox(RootBox* root_box);
 
  private:

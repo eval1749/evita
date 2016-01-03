@@ -11,6 +11,9 @@ namespace visuals {
 BlockFlowBox::BlockFlowBox(RootBox* root_box, const base::StringPiece16& id)
     : ContainerBox(root_box, id) {}
 
+BlockFlowBox::BlockFlowBox(RootBox* root_box, const Node* node)
+    : ContainerBox(root_box, node) {}
+
 BlockFlowBox::BlockFlowBox(RootBox* root_box) : ContainerBox(root_box) {}
 
 BlockFlowBox::~BlockFlowBox() {}

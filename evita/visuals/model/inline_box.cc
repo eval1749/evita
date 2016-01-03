@@ -10,7 +10,10 @@ namespace visuals {
 //
 // InlineBox
 //
-InlineBox::InlineBox(RootBox* root_box) : Box(root_box) {}
+InlineBox::InlineBox(RootBox* root_box, const Node* node)
+    : Box(root_box, node) {}
+
+InlineBox::InlineBox(RootBox* root_box) : InlineBox(root_box, nullptr) {}
 
 InlineBox::~InlineBox() {}
 

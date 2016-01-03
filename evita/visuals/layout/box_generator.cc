@@ -144,13 +144,13 @@ void GenerateVisitor::VisitElement(Element* element) {
     child_boxes.push_back(std::move(inline_flow_box));
   }
   if (style.display().is_block()) {
-    auto block_flow_box = std::make_unique<BlockFlowBox>(root_box_);
+    auto block_flow_box = std::make_unique<BlockFlowBox>(root_box_, element);
     BoxEditor().SetStyle(block_flow_box.get(), style);
     for (auto& child_box : child_boxes)
       BoxEditor().AppendChild(block_flow_box.get(), std::move(child_box));
     return ReturnBox(std::move(block_flow_box));
   }
-  auto inline_box = std::make_unique<InlineFlowBox>(root_box_);
+  auto inline_box = std::make_unique<InlineFlowBox>(root_box_, element);
   BoxEditor().SetStyle(inline_box.get(), style);
   for (auto& child_box : child_boxes)
     BoxEditor().AppendChild(inline_box.get(), std::move(child_box));
@@ -158,7 +158,8 @@ void GenerateVisitor::VisitElement(Element* element) {
 }
 
 void GenerateVisitor::VisitTextNode(TextNode* text_node) {
-  auto text_box = std::make_unique<TextBox>(root_box_, text_node->text());
+  auto text_box =
+      std::make_unique<TextBox>(root_box_, text_node->text(), text_node);
   const auto& style = ResolveStyleFor(*text_node);
   BoxEditor().SetTextColor(text_box.get(), style.color().value());
   ReturnBox(std::move(text_box));

@@ -7,9 +7,12 @@
 
 #include <map>
 
+#include "base/observer_list.h"
 #include "evita/visuals/dom/container_node.h"
 
 namespace visuals {
+
+class DocumentObserver;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -35,9 +38,13 @@ class Document final : public ContainerNode {
 
   bool is_locked() const { return lock_count_ > 0; }
 
+  void AddObserver(DocumentObserver* observer) const;
+
   Node* GetNodeById(const base::StringPiece16& id) const;
   void Lock() const;
   void Unlock() const;
+
+  void RemoveObserver(DocumentObserver* observer) const;
 
  private:
   void RegisterNodeIdIfNeeded(const Node& node);
@@ -46,6 +53,7 @@ class Document final : public ContainerNode {
   // gc::Visitable
   void Accept(gc::Visitor* visitor) final;
 
+  base::ObserverList<DocumentObserver> observers_;
   std::map<base::string16, Node*> id_map_;
   mutable int lock_count_ = 0;
 

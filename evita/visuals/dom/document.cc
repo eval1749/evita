@@ -27,6 +27,10 @@ Document::LockScope::~LockScope() {
 Document::Document() : ContainerNode(this, L"#document") {}
 Document::~Document() {}
 
+void Document::AddObserver(DocumentObserver* observer) const {
+  const_cast<Document*>(this)->observers_.AddObserver(observer);
+}
+
 Node* Document::GetNodeById(const base::StringPiece16& id) const {
   const auto& it = id_map_.find(id.as_string());
   if (it == id_map_.end())
@@ -46,6 +50,10 @@ void Document::RegisterNodeIdIfNeeded(const Node& node) {
   const auto& result =
       id_map_.insert(std::make_pair(node.id(), const_cast<Node*>(&node)));
   DCHECK(result.second) << "id_map_ already has " << node;
+}
+
+void Document::RemoveObserver(DocumentObserver* observer) const {
+  const_cast<Document*>(this)->observers_.RemoveObserver(observer);
 }
 
 void Document::Unlock() const {

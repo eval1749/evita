@@ -18,6 +18,8 @@ source_set("dom") {
     "descendants_or_self.h",
     "document.cc",
     "document.h",
+    "document_observer.cc",
+    "document_observer.h",
     "element.cc",
     "element.h",
     "node.cc",

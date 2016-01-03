@@ -25,6 +25,9 @@ class StyleEditor final {
   StyleEditor();
   ~StyleEditor();
 
+  // Merge |right| into |left| if |left| doesn't have property.
+  void Merge(css::Style* left, const css::Style& right);
+
   // Shorthand functions
   void SetHeight(Style* style, float height);
   void SetWidth(Style* style, float width);

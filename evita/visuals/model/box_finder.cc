@@ -23,8 +23,11 @@ BoxFinder::Result WalkInTree(const FloatPoint& point, const Box* box) {
   if (container) {
     for (const auto child : container->child_boxes()) {
       const auto& result = WalkInTree(point_in_box, child);
-      if (result.box)
-        return result;
+      if (result.box) {
+        if (result.box->node())
+          return result;
+        break;
+      }
     }
   }
   return {const_cast<Box*>(box), point_in_box};

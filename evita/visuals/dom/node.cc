@@ -5,6 +5,7 @@
 #include "evita/visuals/dom/node.h"
 
 #include "base/logging.h"
+#include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/dom/container_node.h"
 #include "evita/visuals/dom/document.h"
 
@@ -25,6 +26,14 @@ Node::Node(Document* document, const base::StringPiece16& tag_name)
     : Node(document, tag_name, base::StringPiece16()) {}
 
 Node::~Node() {}
+
+bool Node::InDocument() const {
+  for (const auto& runner : Node::AncestorsOrSelf(*this)) {
+    if (runner->is<Document>())
+      return true;
+  }
+  return false;
+}
 
 bool Node::IsDescendantOf(const Node& other) const {
   for (auto runner = parent(); runner; runner = runner->parent()) {

@@ -63,6 +63,7 @@ class Node : public common::Castable, public gc::Collectable<Node> {
   ContainerNode* parent() const { return parent_; }
 
   virtual void Accept(NodeVisitor* visitor) = 0;
+  bool InDocument() const;
   bool IsDescendantOf(const Node& other) const;
 
  protected:

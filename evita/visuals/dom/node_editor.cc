@@ -17,18 +17,6 @@
 
 namespace visuals {
 
-namespace {
-
-Document* FindDocument(const Node& node) {
-  for (const auto& runner : Node::AncestorsOrSelf(node)) {
-    if (const auto document = runner->as<Document>())
-      return document;
-  }
-  return nullptr;
-}
-
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // NodeEditor
@@ -86,9 +74,7 @@ void NodeEditor::InsertBefore(ContainerNode* container,
 }
 
 void NodeEditor::RegisterElementIdForSubtree(const Node& node) {
-  if (!node.is<ContainerNode>())
-    return;
-  if (!FindDocument(node))
+  if (!node.is<ContainerNode>() || !node.InDocument())
     return;
   const auto& document = node.document();
   for (const auto& runner : Node::DescendantsOrSelf(node)) {
@@ -138,9 +124,8 @@ void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
 }
 
 void NodeEditor::UnregisterElementIdForSubtree(const Node& node) {
-  if (!node.is<ContainerNode>())
+  if (!node.is<ContainerNode>() || !node.InDocument())
     return;
-  DCHECK(FindDocument(node));
   const auto& document = node.document();
   for (const auto& runner : Node::DescendantsOrSelf(node)) {
     if (const auto element = runner->as<Element>())

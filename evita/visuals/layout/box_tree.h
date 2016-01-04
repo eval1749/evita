@@ -31,8 +31,8 @@ class BoxTree final : public DocumentObserver, public StyleTreeObserver {
 
   RootBox* root_box() const;
 
-  RootBox* Build();
   Box* BoxFor(const Node& node) const;
+  void UpdateIfNeeded();
 
  private:
   void Clear();

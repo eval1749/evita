@@ -199,22 +199,21 @@ Box* BoxTree::BoxFor(const Node& node) const {
   return it == box_map_.end() ? nullptr : it->second;
 }
 
-RootBox* BoxTree::Build() {
+void BoxTree::Clear() {
+  box_map_.clear();
+  root_box_.reset();
+}
+
+void BoxTree::UpdateIfNeeded() {
   // TODO(eval1749): We should update box tree rather than build always.
   if (root_box_)
-    return root_box_.get();
+    return;
   DCHECK(box_map_.empty());
   root_box_ = std::make_unique<RootBox>(document_);
   box_map_.emplace(&document_, root_box_.get());
   GenerateVisitor(root_box_.get(), style_tree_, &box_map_).BuildAll();
   BoxEditor().SetViewportSize(root_box_.get(),
                               style_tree_.media().viewport_size());
-  return root_box_.get();
-}
-
-void BoxTree::Clear() {
-  box_map_.clear();
-  root_box_.reset();
 }
 
 // DocumentObserver

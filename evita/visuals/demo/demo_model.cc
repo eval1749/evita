@@ -245,8 +245,8 @@ Element* DemoModel::FindListItem(const FloatPoint& point) {
 
 void DemoModel::UpdateLayoutIfNeeded() {
   UpdateStyleIfNeeded();
-  const auto root_box = box_tree_->Build();
-  Layouter().Layout(root_box);
+  box_tree_->UpdateIfNeeded();
+  Layouter().Layout(box_tree_->root_box());
 }
 
 void DemoModel::UpdateStyleIfNeeded() {

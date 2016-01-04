@@ -45,8 +45,9 @@ TEST_F(BoxTreeTest, Basic) {
 
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
-  BoxTree builder(*document, style_tree);
-  const auto& root_box = builder.Build();
+  BoxTree tree(*document, style_tree);
+  tree.UpdateIfNeeded();
+  const auto root_box = tree.root_box();
   EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }
 
@@ -59,8 +60,9 @@ TEST_F(BoxTreeTest, Flow) {
                              .Build();
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
-  BoxTree builder(*document, style_tree);
-  const auto& root_box = builder.Build();
+  BoxTree tree(*document, style_tree);
+  tree.UpdateIfNeeded();
+  const auto root_box = tree.root_box();
   EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }
 

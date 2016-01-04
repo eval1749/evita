@@ -146,7 +146,7 @@ void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
     if (*element->inline_style_ == new_style)
       return;
     auto old_style = std::move(element->inline_style_);
-    *element->inline_style_ = new_style;
+    element->inline_style_.reset(new css::Style(new_style));
     FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                       DidChangeInlineStyle(*element, old_style.get()));
     return;

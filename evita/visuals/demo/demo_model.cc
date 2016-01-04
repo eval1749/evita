@@ -32,6 +32,7 @@
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/simple_box_tree_builder.h"
 #include "evita/visuals/model/text_box.h"
+#include "evita/visuals/style/style_resolver.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
 
@@ -215,7 +216,8 @@ void PrintPaint(const DisplayItemList& list) {
 DemoModel::DemoModel()
     : document_(LoadDocument()),
       style_sheet_(LoadStyleSheet()),
-      box_tree_(new BoxTreeBuilder(*document_, *this, {style_sheet_})) {}
+      style_resolver_(new StyleResolver(*document_, *this, {style_sheet_})),
+      box_tree_(new BoxTreeBuilder(*document_, *style_resolver_)) {}
 
 DemoModel::~DemoModel() {}
 
@@ -224,9 +226,9 @@ void DemoModel::AttachWindow(DemoWindow* window) {
   RequestAnimationFrame();
 }
 
-Element* DemoModel::FindListItem(const FloatPoint& point) const {
-  const auto root_box = box_tree_->Build();
-  Layouter().Layout(root_box);
+Element* DemoModel::FindListItem(const FloatPoint& point) {
+  UpdateLayoutIfNeeded();
+  const auto root_box = box_tree_->root_box();
   const auto& found = BoxFinder(*root_box).FindByPoint(point);
   if (!found.box)
     return nullptr;
@@ -239,6 +241,16 @@ Element* DemoModel::FindListItem(const FloatPoint& point) const {
       return runner->as<Element>();
   }
   return nullptr;
+}
+
+void DemoModel::UpdateLayoutIfNeeded() {
+  UpdateStyleIfNeeded();
+  const auto root_box = box_tree_->Build();
+  Layouter().Layout(root_box);
+}
+
+void DemoModel::UpdateStyleIfNeeded() {
+  style_resolver_->UpdateIfNeeded();
 }
 
 // css::Media
@@ -258,8 +270,10 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
 
   DCHECK(!viewport_size_.IsEmpty());
 
-  const auto root_box = box_tree_->Build();
-  Layouter().Layout(root_box);
+  UpdateStyleIfNeeded();
+  UpdateLayoutIfNeeded();
+
+  const auto root_box = box_tree_->root_box();
   if (root_box->IsPaintClean()) {
     // Box tree is changed outside viewport(?).
     return;

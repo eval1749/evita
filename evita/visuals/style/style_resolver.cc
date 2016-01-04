@@ -9,6 +9,8 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
 #include "evita/visuals/css/style_sheet.h"
+#include "evita/visuals/css/style_sheet_observer.h"
+#include "evita/visuals/dom/ancestors.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/style/compiled_style_sheet.h"
@@ -17,6 +19,13 @@
 namespace visuals {
 
 namespace {
+struct Item {
+  bool is_child_dirty = true;
+  bool is_dirty = true;
+  std::unique_ptr<css::Style> style;
+  int version;
+};
+
 void InheritStyle(css::Style* style, const css::Style& parent_style) {
   if (!style->has_color() && parent_style.has_color())
     css::StyleEditor().SetColor(style, parent_style.color());
@@ -25,46 +34,80 @@ void InheritStyle(css::Style* style, const css::Style& parent_style) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// StyleResolver
+// StyleResolver::Impl
 //
-StyleResolver::StyleResolver(const Document& document,
-                             const css::Media& media,
-                             const std::vector<css::StyleSheet*>& style_sheets)
-    : default_style_(new css::Style()),
-      document_(document),
-      media_(media),
-      style_sheets_(style_sheets) {
+class StyleResolver::Impl final {
+ public:
+  explicit Impl(const std::vector<css::StyleSheet*>& style_sheets);
+  ~Impl() = default;
+
+  const css::Style& initial_style() const { return *initial_style_; }
+  bool is_dirty() const { return is_dirty_; }
+  int version() const { return version_; }
+
+  void Clear();
+  const css::Style& ComputedStyleOf(const Node& node) const;
+  void MarkDirty(const Element& element);
+  void UpdateIfNeeded(const Document& document);
+
+ private:
+  struct Context {
+    bool is_updated = false;
+  };
+
+  std::unique_ptr<css::Style> ComputeStyleForElement(
+      const Element& element) const;
+  Item* GetOrNewItem(const Element& element);
+  const css::Style& InlineStyleOf(const Element& element) const;
+  void UpdateChildren(Context* context, const Element& element);
+  void UpdateElement(Context* context, const Element& element);
+  void UpdateElementIfNeeded(Context* context, const Element& element);
+  void UpdateNodeIfNeeded(Context* context, const Node& node);
+
+  std::vector<std::unique_ptr<CompiledStyleSheet>> compiled_style_sheets_;
+  // |initial_style_| is computed from media provided values.
+  std::unique_ptr<css::Style> initial_style_;
+  // TODO(eval1749): We should share |css::Style| objects for elements which
+  // have same style, e.g. siblings.
+  std::unordered_map<const Element*, std::unique_ptr<Item>> item_map_;
+  bool is_dirty_ = true;
+  int version_ = 0;
+
+  DISALLOW_COPY_AND_ASSIGN(Impl);
+};
+
+StyleResolver::Impl::Impl(const std::vector<css::StyleSheet*>& style_sheets)
+    : initial_style_(new css::Style()) {
   // TODO(eval1749): We should get default color and background color from
   // system metrics.
-  css::StyleEditor().SetBackground(default_style_.get(),
+  css::StyleEditor().SetBackground(initial_style_.get(),
                                    css::Background(css::Color()));
-  css::StyleEditor().SetColor(default_style_.get(), css::Color(0, 0, 0));
-  css::StyleEditor().SetDisplay(default_style_.get(), css::Display());
-  document_.AddObserver(this);
-  media_.AddObserver(this);
-  for (const auto& style_sheet : style_sheets_) {
-    style_sheet->AddObserver(this);
+  css::StyleEditor().SetColor(initial_style_.get(), css::Color(0, 0, 0));
+  css::StyleEditor().SetDisplay(initial_style_.get(), css::Display());
+  for (const auto& style_sheet : style_sheets)
     compiled_style_sheets_.emplace_back(new CompiledStyleSheet(*style_sheet));
+  DCHECK(initial_style().has_display())
+      << "initial style must have display property. " << initial_style();
+}
+
+void StyleResolver::Impl::Clear() {
+  item_map_.clear();
+  is_dirty_ = true;
+}
+
+const css::Style& StyleResolver::Impl::ComputedStyleOf(const Node& node) const {
+  if (const auto element = node.as<Element>()) {
+    const auto& it = item_map_.find(element);
+    DCHECK(it != item_map_.end());
+    return *it->second->style;
   }
+  if (node.is<Document>())
+    return *initial_style_;
+  return ComputedStyleOf(*node.parent());
 }
 
-StyleResolver::~StyleResolver() {
-  for (const auto& style_sheet : style_sheets_)
-    style_sheet->RemoveObserver(this);
-  document_.RemoveObserver(this);
-}
-
-void StyleResolver::AddObserver(StyleChangeObserver* observer) const {
-  observers_.AddObserver(observer);
-}
-
-void StyleResolver::Clear() {
-  style_map_.clear();
-  FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
-}
-
-std::unique_ptr<css::Style> StyleResolver::ComputeStyleFor(
-    const Element& element) {
+std::unique_ptr<css::Style> StyleResolver::Impl::ComputeStyleForElement(
+    const Element& element) const {
   const auto inline_style = element.inline_style();
   auto style = inline_style ? std::make_unique<css::Style>(*inline_style)
                             : std::make_unique<css::Style>();
@@ -74,34 +117,150 @@ std::unique_ptr<css::Style> StyleResolver::ComputeStyleFor(
       continue;
     css::StyleEditor().Merge(style.get(), *matched);
   }
-  InheritStyle(style.get(), ResolveFor(*element.parent()));
+  InheritStyle(style.get(), ComputedStyleOf(*element.parent()));
+  css::StyleEditor().Merge(style.get(), initial_style());
+  DCHECK(style->has_display()) << "A style must have display property. "
+                               << initial_style();
   return std::move(style);
 }
 
-const css::Style& StyleResolver::InlineStyleOf(const Element& element) const {
-  if (const auto inline_style = element.inline_style())
-    return *inline_style;
-  return *default_style_;
+Item* StyleResolver::Impl::GetOrNewItem(const Element& element) {
+  const auto& it = item_map_.find(&element);
+  if (it != item_map_.end())
+    return it->second.get();
+  // TODO(eval1749): We should notify style change to observers.
+  auto new_item = std::make_unique<Item>();
+  const auto& result = item_map_.emplace(&element, std::move(new_item));
+  return result.first->second.get();
+}
+
+void StyleResolver::Impl::MarkDirty(const Element& element) {
+  is_dirty_ = true;
+  GetOrNewItem(element)->is_dirty = true;
+  for (const auto& ancestor : Node::Ancestors(element)) {
+    const auto ancestor_element = ancestor->as<Element>();
+    if (!ancestor_element)
+      return;
+    const auto item = GetOrNewItem(*ancestor_element);
+    if (item->is_child_dirty)
+      return;
+    item->is_child_dirty = true;
+  }
+}
+
+void StyleResolver::Impl::UpdateChildren(Context* context,
+                                         const Element& element) {
+  for (const auto& child : element.child_nodes()) {
+    const auto child_element = child->as<Element>();
+    if (!child_element)
+      continue;
+    UpdateElement(context, *child_element);
+  }
+}
+
+void StyleResolver::Impl::UpdateElement(Context* context,
+                                        const Element& element) {
+  if (!context->is_updated) {
+    context->is_updated = true;
+    ++version_;
+  }
+  const auto item = GetOrNewItem(element);
+  item->is_child_dirty = false;
+  item->is_dirty = false;
+  item->style = std::move(ComputeStyleForElement(element));
+  item->version = version_;
+  // Simple style merge check.
+  DCHECK(item->style->has_display())
+      << "Style merge failed. We should merge initial style. " << *item->style;
+  UpdateChildren(context, element);
+}
+
+void StyleResolver::Impl::UpdateElementIfNeeded(Context* context,
+                                                const Element& element) {
+  const auto item = GetOrNewItem(element);
+  if (item->is_dirty)
+    return UpdateElement(context, element);
+  if (!item->is_child_dirty)
+    return;
+  item->is_child_dirty = false;
+  for (const auto& child : element.child_nodes())
+    UpdateNodeIfNeeded(context, *child);
+}
+
+// The entry point
+void StyleResolver::Impl::UpdateIfNeeded(const Document& document) {
+#if !DCHECK_IS_ON()
+  if (!is_dirty_)
+    return;
+#endif
+  Context context;
+  for (const auto& child : document.child_nodes())
+    UpdateNodeIfNeeded(&context, *child);
+  DCHECK_EQ(is_dirty_, context.is_updated);
+  is_dirty_ = false;
+}
+
+void StyleResolver::Impl::UpdateNodeIfNeeded(Context* context,
+                                             const Node& node) {
+  const auto element = node.as<Element>();
+  if (!element)
+    return;
+  UpdateElementIfNeeded(context, *element);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// StyleResolver
+//
+StyleResolver::StyleResolver(const Document& document,
+                             const css::Media& media,
+                             const std::vector<css::StyleSheet*>& style_sheets)
+    : document_(document),
+      impl_(new Impl(style_sheets)),
+      media_(media),
+      style_sheets_(style_sheets) {
+  document_.AddObserver(this);
+  media_.AddObserver(this);
+  for (const auto& style_sheet : style_sheets_)
+    style_sheet->AddObserver(this);
+}
+
+StyleResolver::~StyleResolver() {
+  for (const auto& style_sheet : style_sheets_)
+    style_sheet->RemoveObserver(this);
+  document_.RemoveObserver(this);
+}
+
+const css::Style& StyleResolver::initial_style() const {
+  return impl_->initial_style();
+}
+
+int StyleResolver::version() const {
+  return impl_->version();
+}
+
+void StyleResolver::AddObserver(StyleChangeObserver* observer) const {
+  observers_.AddObserver(observer);
+}
+
+void StyleResolver::Clear() {
+  impl_->Clear();
+  FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
+}
+
+const css::Style& StyleResolver::ComputedStyleOf(const Node& node) const {
+  DCHECK(!impl_->is_dirty()) << "You should call "
+                                "StyleResolver::UpdateIfNeeded(), before "
+                                "calling ComputedStyleOf().";
+  return impl_->ComputedStyleOf(node);
 }
 
 void StyleResolver::RemoveObserver(StyleChangeObserver* observer) const {
   observers_.RemoveObserver(observer);
 }
 
-const css::Style& StyleResolver::ResolveFor(const Node& node) {
-  Document::LockScope lock_scope(document_);
-  if (node.is<Document>())
-    return *default_style_;
-  const auto element = node.as<Element>();
-  if (!element)
-    return ResolveFor(*node.parent());
-  const auto& it = style_map_.find(element);
-  if (it != style_map_.end())
-    return *it->second;
-  auto style = ComputeStyleFor(*element);
-  css::StyleEditor().Merge(style.get(), *default_style_);
-  const auto& result = style_map_.emplace(element, std::move(style));
-  return *result.first->second;
+void StyleResolver::UpdateIfNeeded() {
+  impl_->UpdateIfNeeded(document_);
 }
 
 // css::MediaObserver
@@ -125,25 +284,24 @@ void StyleResolver::DidRemoveRule(const css::Rule& rule) {
 }
 
 // DocumentObserver
-void StyleResolver::DidChangeInlineStyle(const Element& element,
-                                         const css::Style* old_style) {
-  const auto& it = style_map_.find(&element);
-  if (it == style_map_.end())
-    return;
-  FOR_EACH_OBSERVER(StyleChangeObserver, observers_,
-                    DidRemoveStyleCache(element, *it->second));
-  style_map_.erase(it);
+void StyleResolver::DidAddClass(const Element& element,
+                                const base::string16& name) {
+  // TODO(eval1749): Implement shortcut for
+  //  - position:absolute + left/top
+  //  - background color change
+  //  - border color change
+  // Since above changes don't affect layout.
+  impl_->MarkDirty(element);
 }
 
-void StyleResolver::WillRemoveChild(const ContainerNode& parent,
-                                    const Node& child) {
-  const auto element = child.as<Element>();
-  if (!element)
-    return;
-  const auto& it = style_map_.find(element);
-  if (it == style_map_.end())
-    return;
-  style_map_.erase(it);
+void StyleResolver::DidChangeInlineStyle(const Element& element,
+                                         const css::Style* old_style) {
+  // TODO(eval1749): Implement shortcut for
+  //  - position:absolute + left/top
+  //  - background color change
+  //  - border color change
+  // Since above changes don't affect layout.
+  impl_->MarkDirty(element);
 }
 
 }  // namespace visuals

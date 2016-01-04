@@ -40,9 +40,11 @@ TEST_F(StyleResolverTest, Basic) {
                              .Build();
   const auto body = document->first_child()->as<Element>();
   StyleResolver resolver(*document, mock_media(), {});
-  EXPECT_EQ(resolver.default_style(), resolver.ResolveFor(*body));
-  EXPECT_EQ(resolver.default_style(),
-            resolver.ResolveFor(*body->first_child()));
+  resolver.UpdateIfNeeded();
+
+  EXPECT_EQ(resolver.initial_style(), resolver.ComputedStyleOf(*body));
+  EXPECT_EQ(resolver.initial_style(),
+            resolver.ComputedStyleOf(*body->first_child()));
 }
 
 TEST_F(StyleResolverTest, Inheritance) {
@@ -57,11 +59,13 @@ TEST_F(StyleResolverTest, Inheritance) {
           .Build();
   const auto body = document->first_child()->as<Element>();
   StyleResolver resolver(*document, mock_media(), {});
-  EXPECT_EQ(kColorRed, resolver.ResolveFor(*body).color());
-  EXPECT_EQ(kColorRed, resolver.ResolveFor(*body->first_child()).color());
+  resolver.UpdateIfNeeded();
+
+  EXPECT_EQ(kColorRed, resolver.ComputedStyleOf(*body).color());
+  EXPECT_EQ(kColorRed, resolver.ComputedStyleOf(*body->first_child()).color());
 }
 
-TEST_F(StyleResolverTest, ResolveForText) {
+TEST_F(StyleResolverTest, ComputedStyleOfText) {
   const auto& kColorRed = css::Color(1, 0, 0);
   const auto& document =
       NodeTreeBuilder()
@@ -72,8 +76,10 @@ TEST_F(StyleResolverTest, ResolveForText) {
           .Build();
   const auto body = document->first_child()->as<Element>();
   StyleResolver resolver(*document, mock_media(), {});
-  EXPECT_EQ(kColorRed, resolver.ResolveFor(*body).color());
-  EXPECT_EQ(kColorRed, resolver.ResolveFor(*body->first_child()).color());
+  resolver.UpdateIfNeeded();
+
+  EXPECT_EQ(kColorRed, resolver.ComputedStyleOf(*body).color());
+  EXPECT_EQ(kColorRed, resolver.ComputedStyleOf(*body->first_child()).color());
 }
 
 }  // namespace visuals

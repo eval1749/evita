@@ -16,12 +16,13 @@
 namespace visuals {
 
 TEST(CompiledStyleSheetTest, Basic) {
-  css::StyleSheet style_sheet;
-  style_sheet.AddRule(
+  const auto style_sheet = new css::StyleSheet();
+  style_sheet->AddRule(
       L"tag", css::StyleBuilder().SetColor(1, 0, 0).SetHeight(20).Build());
-  style_sheet.AddRule(L".class", css::StyleBuilder().SetColor(0, 1, 0).Build());
-  style_sheet.AddRule(L"#id", css::StyleBuilder().SetColor(0, 0, 1).Build());
-  CompiledStyleSheet compiled(style_sheet);
+  style_sheet->AddRule(L".class",
+                       css::StyleBuilder().SetColor(0, 1, 0).Build());
+  style_sheet->AddRule(L"#id", css::StyleBuilder().SetColor(0, 0, 1).Build());
+  CompiledStyleSheet compiled(*style_sheet);
 
   const auto document = NodeTreeBuilder()
                             .Begin(L"tag")

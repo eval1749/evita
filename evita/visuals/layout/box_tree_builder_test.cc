@@ -42,7 +42,10 @@ TEST_F(BoxTreeBuilderTest, Basic) {
                              .AddText(L"Hello world!")
                              .End(L"body")
                              .Build();
-  BoxTreeBuilder builder(*document, mock_media(), {});
+
+  StyleResolver style_resolver(*document, mock_media(), {});
+  style_resolver.UpdateIfNeeded();
+  BoxTreeBuilder builder(*document, style_resolver);
   const auto& root_box = builder.Build();
   EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }
@@ -54,7 +57,9 @@ TEST_F(BoxTreeBuilderTest, Flow) {
                              .AddText(L"bar")
                              .End(L"body")
                              .Build();
-  BoxTreeBuilder builder(*document, mock_media(), {});
+  StyleResolver style_resolver(*document, mock_media(), {});
+  style_resolver.UpdateIfNeeded();
+  BoxTreeBuilder builder(*document, style_resolver);
   const auto& root_box = builder.Build();
   EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }

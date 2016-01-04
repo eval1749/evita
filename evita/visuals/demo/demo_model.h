@@ -20,6 +20,7 @@ class BoxTreeBuilder;
 class DemoWindow;
 class Document;
 class Element;
+class StyleResolver;
 
 namespace css {
 class StyleSheet;
@@ -39,7 +40,9 @@ class DemoModel final : public css::Media,
   void AttachWindow(DemoWindow* window);
 
  private:
-  Element* FindListItem(const FloatPoint& point) const;
+  Element* FindListItem(const FloatPoint& point);
+  void UpdateLayoutIfNeeded();
+  void UpdateStyleIfNeeded();
 
   // css::Media
   css::MediaType media_type() const final;
@@ -58,6 +61,7 @@ class DemoModel final : public css::Media,
   css::StyleSheet* style_sheet_;
   FloatSize viewport_size_;
 
+  std::unique_ptr<StyleResolver> style_resolver_;
   std::unique_ptr<BoxTreeBuilder> box_tree_;
 
   DemoWindow* window_ = nullptr;

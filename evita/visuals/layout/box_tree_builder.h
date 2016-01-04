@@ -32,10 +32,10 @@ class StyleResolver;
 class BoxTreeBuilder final : public DocumentObserver,
                              public StyleChangeObserver {
  public:
-  BoxTreeBuilder(const Document& document,
-                 const css::Media& media,
-                 const std::vector<css::StyleSheet*>& style_sheets);
+  BoxTreeBuilder(const Document& document, const StyleResolver& style_resolver);
   ~BoxTreeBuilder();
+
+  RootBox* root_box() const;
 
   RootBox* Build();
   Box* BoxFor(const Node& node) const;
@@ -60,7 +60,7 @@ class BoxTreeBuilder final : public DocumentObserver,
   std::unordered_map<const Node*, Box*> box_map_;
   const Document& document_;
   std::unique_ptr<RootBox> root_box_;
-  std::unique_ptr<StyleResolver> style_resolver_;
+  const StyleResolver& style_resolver_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxTreeBuilder);
 };

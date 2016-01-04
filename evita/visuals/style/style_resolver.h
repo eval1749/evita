@@ -23,15 +23,16 @@ class Style;
 class StyleSheet;
 }
 
-class CompiledStyleSheet;
 class Document;
 class Element;
 class Node;
 class StyleChangeObserver;
 
+// TODO(eval1749): We should rename |StyleResolver| to |StyleTree|.
 //////////////////////////////////////////////////////////////////////
 //
-// StyleResolver
+// StyleResolver represents a cache of CSS computed value, pre-layout value,
+// for each element.
 //
 class StyleResolver final : public css::MediaObserver,
                             public css::StyleSheetObserver,
@@ -42,19 +43,27 @@ class StyleResolver final : public css::MediaObserver,
                          const std::vector<css::StyleSheet*>& style_sheets);
   ~StyleResolver() final;
 
-  const css::Style& default_style() const { return *default_style_; }
+  // TODO(eval1749): Do we really need to expose |initial_style()|? As of today,
+  // it is used only in tests.
+  const css::Style& initial_style() const;
+
   const Document& document() const { return document_; }
   const css::Media& media() const { return media_; }
 
+  // Monotonically increased style tree version. This version is incremented
+  // when |UpdateIfNeeded()| does updating.
+  // We exposed |version()| for performance measurement.
+  int version() const;
+
   void AddObserver(StyleChangeObserver* observer) const;
-  const css::Style& ResolveFor(const Node& node);
+  const css::Style& ComputedStyleOf(const Node& node) const;
   void RemoveObserver(StyleChangeObserver* observer) const;
+  void UpdateIfNeeded();
 
  private:
-  void Clear();
-  const css::Style& InlineStyleOf(const Element& element) const;
-  std::unique_ptr<css::Style> ComputeStyleFor(const Element& element);
+  class Impl;
 
+  void Clear();
   // css::MediaObserver
   void DidChangeViewportSize() final;
   void DidChangeSystemMetrics() final;
@@ -64,18 +73,14 @@ class StyleResolver final : public css::MediaObserver,
   void DidRemoveRule(const css::Rule& rule) final;
 
   // DocumentObserver
+  void DidAddClass(const Element& element, const base::string16& name);
   void DidChangeInlineStyle(const Element& element,
                             const css::Style* old_style) final;
-  void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
 
-  std::vector<std::unique_ptr<CompiledStyleSheet>> compiled_style_sheets_;
-  std::unique_ptr<css::Style> default_style_;
   const Document& document_;
   const css::Media& media_;
   mutable base::ObserverList<StyleChangeObserver> observers_;
-  // TODO(eval1749): We should share |css::Style| objects for elements which
-  // have same style.
-  std::unordered_map<const Element*, std::unique_ptr<css::Style>> style_map_;
+  std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;
 
   DISALLOW_COPY_AND_ASSIGN(StyleResolver);

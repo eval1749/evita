@@ -6,8 +6,11 @@
 #define EVITA_VISUALS_DOM_ELEMENT_H_
 
 #include <memory>
+#include <vector>
 
 #include "evita/visuals/dom/container_node.h"
+
+#include "base/strings/string16.h"
 
 namespace visuals {
 
@@ -29,9 +32,11 @@ class Element final : public ContainerNode {
   Element(Document* document, const base::StringPiece16& tag_name);
   ~Element() final;
 
+  const std::vector<base::string16>& class_list() const { return class_list_; }
   const css::Style* inline_style() const { return inline_style_.get(); }
 
  private:
+  std::vector<base::string16> class_list_;
   std::unique_ptr<css::Style> inline_style_;
 
   DISALLOW_COPY_AND_ASSIGN(Element);

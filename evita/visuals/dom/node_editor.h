@@ -6,6 +6,7 @@
 #define EVITA_VISUALS_DOM_NODE_EDITOR_H_
 
 #include "base/macros.h"
+#include "base/strings/string_piece.h"
 
 namespace visuals {
 
@@ -29,8 +30,10 @@ class NodeEditor final {
   ~NodeEditor();
 
   void AppendChild(ContainerNode* container, Node* new_child);
+  void AddClass(Element* element, const base::StringPiece16& class_name);
   void InsertBefore(ContainerNode* container, Node* new_child, Node* ref_child);
   void RemoveChild(ContainerNode* container, Node* old_child);
+  void RemoveClass(Element* element, const base::StringPiece16& class_name);
   void SetStyle(Element* element, const css::Style& style);
 
   void WillDestroy(Node* node);

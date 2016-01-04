@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include "evita/visuals/dom/node_editor.h"
 
 #include "base/logging.h"
@@ -45,6 +47,19 @@ void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   RegisterElementIdForSubtree(*new_child);
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidAppendChild(*container, *new_child));
+}
+
+void NodeEditor::AddClass(Element* element,
+                          const base::StringPiece16& class_name) {
+  const auto& it =
+      std::find_if(element->class_list_.begin(), element->class_list_.end(),
+                   [class_name](const base::string16& present) {
+                     return class_name ==
+                            base::StringPiece16(present.data(), present.size());
+                   });
+  if (it != element->class_list_.end())
+    return;
+  element->class_list_.emplace_back(class_name.as_string());
 }
 
 void NodeEditor::InsertBefore(ContainerNode* container,
@@ -104,6 +119,24 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   old_child->parent_ = nullptr;
   FOR_EACH_OBSERVER(DocumentObserver, container->document_->observers_,
                     DidRemoveChild(*container, *old_child));
+}
+
+void NodeEditor::RemoveClass(Element* element,
+                             const base::StringPiece16& class_name) {
+  auto destination =
+      std::find_if(element->class_list_.begin(), element->class_list_.end(),
+                   [class_name](const base::string16& present) {
+                     return class_name ==
+                            base::StringPiece16(present.data(), present.size());
+                   });
+  if (destination == element->class_list_.end())
+    return;
+  for (auto source = std::next(destination);
+       source != element->class_list_.end(); ++source) {
+    *destination = *source;
+    ++destination;
+  }
+  element->class_list_.pop_back();
 }
 
 void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {

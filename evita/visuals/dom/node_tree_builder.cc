@@ -63,6 +63,14 @@ Document* NodeTreeBuilder::Build() {
   return document;
 }
 
+NodeTreeBuilder& NodeTreeBuilder::ClassList(
+    const std::vector<base::string16>& names) {
+  auto const element = nodes_.top()->as<Element>();
+  for (const auto& name : names)
+    NodeEditor().AddClass(element, name);
+  return *this;
+}
+
 NodeTreeBuilder& NodeTreeBuilder::End(const base::StringPiece16& tag_name) {
   auto const element = nodes_.top()->as<Element>();
   DCHECK_EQ(tag_name.as_string(), element->tag_name());

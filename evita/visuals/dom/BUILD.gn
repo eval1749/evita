@@ -51,6 +51,7 @@ source_set("test_files") {
     "container_node_test.cc",
     "descendants_or_self_test.cc",
     "document_test.cc",
+    "element_test.cc",
     "node_test.cc",
     "node_traversal_test.cc",
   ]

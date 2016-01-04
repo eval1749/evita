@@ -6,6 +6,7 @@
 #define EVITA_VISUALS_DOM_NODE_TREE_BUILDER_H_
 
 #include <stack>
+#include <vector>
 
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
@@ -36,6 +37,7 @@ class NodeTreeBuilder final {
   NodeTreeBuilder& Begin(const base::StringPiece16& tag_name,
                          const base::StringPiece16& id);
   Document* Build();
+  NodeTreeBuilder& ClassList(const std::vector<base::string16>& names);
   NodeTreeBuilder& End(const base::StringPiece16& tag_name);
   void Finish(ContainerNode* node);
 

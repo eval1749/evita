@@ -62,7 +62,7 @@
 
   // C++
   'std::all_of', 'std::any_of', 'std::array',
-  'std::begin', 'std::boolalpha',
+  'std::begin', 'std::bitset', 'std::boolalpha',
   'std::count', 'std::count_if',
   'std::deque',
   'std::end', 'std::endl',

@@ -15,11 +15,6 @@
 
 namespace visuals {
 
-namespace css {
-class Media;
-class StyleSheet;
-}
-
 class Box;
 class Document;
 class RootBox;

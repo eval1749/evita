@@ -40,14 +40,14 @@ bool Style::operator!=(const Style& other) const {
   return !operator==(other);
 }
 
-#define V(Name, name, type, text)                  \
-  const type& Style::name() const {                \
-    DCHECK(has_##name());                          \
-    return name##_;                                \
-  }                                                \
-                                                   \
-  bool Style::has_##name() const {                 \
-    return contains_.count(PropertyId::Name) == 1; \
+#define V(Name, name, type, text)                                 \
+  const type& Style::name() const {                               \
+    DCHECK(has_##name());                                         \
+    return name##_;                                               \
+  }                                                               \
+                                                                  \
+  bool Style::has_##name() const {                                \
+    return contains_.test(static_cast<size_t>(PropertyId::Name)); \
   }
 
 FOR_EACH_VISUAL_CSS_PROPERTY(V)

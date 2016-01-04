@@ -34,14 +34,14 @@ void StyleEditor::SetWidth(Style* style, float width) {
   SetWidth(style, css::Width(css::Length(width)));
 }
 
-#define V(Name, name, type, text)                        \
-  void StyleEditor::Set##Name(Style* style, type name) { \
-    style->contains_.insert(PropertyId::Name);           \
-    style->name##_ = name;                               \
-  }                                                      \
-                                                         \
-  void StyleEditor::Unset##Name(Style* style) {          \
-    style->contains_.erase(PropertyId::Name);            \
+#define V(Name, name, type, text)                                  \
+  void StyleEditor::Set##Name(Style* style, type name) {           \
+    style->contains_.set(static_cast<size_t>(PropertyId::Name));   \
+    style->name##_ = name;                                         \
+  }                                                                \
+                                                                   \
+  void StyleEditor::Unset##Name(Style* style) {                    \
+    style->contains_.reset(static_cast<size_t>(PropertyId::Name)); \
   }
 
 FOR_EACH_VISUAL_CSS_PROPERTY(V)

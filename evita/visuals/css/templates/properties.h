@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_CSS_PROPERTIES_H_
 #define EVITA_VISUALS_CSS_PROPERTIES_H_
 
+#include <stdint.h>
+
 #include <iosfwd>
 
 #include "evita/visuals/css/properties_forward.h"

@@ -29,6 +29,8 @@ enum class PropertyId;
 FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
 
+const size_t kMaxPropertyId = {{properties|length() - 1}};
+
 }  // namespace css
 }  // namespace visuals
 

@@ -5,8 +5,8 @@
 #ifndef EVITA_VISUALS_CSS_STYLE_H_
 #define EVITA_VISUALS_CSS_STYLE_H_
 
+#include <bitset>
 #include <iosfwd>
-#include <unordered_set>
 
 #include "evita/visuals/css/background.h"
 #include "evita/visuals/css/border.h"
@@ -19,7 +19,6 @@
 namespace visuals {
 namespace css {
 
-class StyleBuilder;
 class StyleEditor;
 
 //////////////////////////////////////////////////////////////////////
@@ -43,13 +42,12 @@ class Style final {
 #undef V
 
  private:
-  friend class StyleBuilder;
   friend class StyleEditor;
 
 #define V(Name, name, type, text) type name##_;
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
-  std::unordered_set<PropertyId> contains_;
+  std::bitset<kMaxPropertyId + 1> contains_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Style& style);

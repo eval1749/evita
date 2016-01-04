@@ -32,7 +32,7 @@
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/simple_box_tree_builder.h"
 #include "evita/visuals/model/text_box.h"
-#include "evita/visuals/style/style_resolver.h"
+#include "evita/visuals/style/style_tree.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
 
@@ -216,8 +216,8 @@ void PrintPaint(const DisplayItemList& list) {
 DemoModel::DemoModel()
     : document_(LoadDocument()),
       style_sheet_(LoadStyleSheet()),
-      style_resolver_(new StyleResolver(*document_, *this, {style_sheet_})),
-      box_tree_(new BoxTreeBuilder(*document_, *style_resolver_)) {}
+      style_tree_(new StyleTree(*document_, *this, {style_sheet_})),
+      box_tree_(new BoxTreeBuilder(*document_, *style_tree_)) {}
 
 DemoModel::~DemoModel() {}
 
@@ -250,7 +250,7 @@ void DemoModel::UpdateLayoutIfNeeded() {
 }
 
 void DemoModel::UpdateStyleIfNeeded() {
-  style_resolver_->UpdateIfNeeded();
+  style_tree_->UpdateIfNeeded();
 }
 
 // css::Media

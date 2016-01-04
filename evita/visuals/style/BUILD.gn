@@ -8,8 +8,8 @@ source_set("style") {
     "compiled_style_sheet.h",
     "style_change_observer.cc",
     "style_change_observer.h",
-    "style_resolver.cc",
-    "style_resolver.h",
+    "style_tree.cc",
+    "style_tree.h",
   ]
 
   deps = [
@@ -23,7 +23,7 @@ source_set("test_files") {
   testonly = true
   sources = [
     "compiled_style_sheet_test.cc",
-    "style_resolver_test.cc",
+    "style_tree_test.cc",
   ]
 
   deps = [

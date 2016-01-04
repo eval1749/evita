@@ -14,7 +14,7 @@
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
-#include "evita/visuals/style/style_resolver.h"
+#include "evita/visuals/style/style_tree.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
@@ -43,9 +43,9 @@ TEST_F(BoxTreeBuilderTest, Basic) {
                              .End(L"body")
                              .Build();
 
-  StyleResolver style_resolver(*document, mock_media(), {});
-  style_resolver.UpdateIfNeeded();
-  BoxTreeBuilder builder(*document, style_resolver);
+  StyleTree style_tree(*document, mock_media(), {});
+  style_tree.UpdateIfNeeded();
+  BoxTreeBuilder builder(*document, style_tree);
   const auto& root_box = builder.Build();
   EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }
@@ -57,9 +57,9 @@ TEST_F(BoxTreeBuilderTest, Flow) {
                              .AddText(L"bar")
                              .End(L"body")
                              .Build();
-  StyleResolver style_resolver(*document, mock_media(), {});
-  style_resolver.UpdateIfNeeded();
-  BoxTreeBuilder builder(*document, style_resolver);
+  StyleTree style_tree(*document, mock_media(), {});
+  style_tree.UpdateIfNeeded();
+  BoxTreeBuilder builder(*document, style_tree);
   const auto& root_box = builder.Build();
   EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }

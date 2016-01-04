@@ -19,7 +19,7 @@
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
-#include "evita/visuals/style/style_resolver.h"
+#include "evita/visuals/style/style_tree.h"
 
 namespace visuals {
 
@@ -30,7 +30,7 @@ namespace visuals {
 class GenerateVisitor final : public NodeVisitor {
  public:
   GenerateVisitor(RootBox* root_box,
-                  const StyleResolver& style_resolver,
+                  const StyleTree& style_tree,
                   std::unordered_map<const Node*, Box*>* box_map);
   ~GenerateVisitor() final;
 
@@ -49,24 +49,24 @@ class GenerateVisitor final : public NodeVisitor {
   std::unordered_map<const Node*, Box*>* const box_map_;
   std::unique_ptr<Box> result_box_;
   RootBox* const root_box_;
-  const StyleResolver& style_resolver_;
+  const StyleTree& style_tree_;
 
   DISALLOW_COPY_AND_ASSIGN(GenerateVisitor);
 };
 
 GenerateVisitor::GenerateVisitor(RootBox* root_box,
-                                 const StyleResolver& style_resolver,
+                                 const StyleTree& style_tree,
                                  std::unordered_map<const Node*, Box*>* box_map)
-    : box_map_(box_map), root_box_(root_box), style_resolver_(style_resolver) {}
+    : box_map_(box_map), root_box_(root_box), style_tree_(style_tree) {}
 
 GenerateVisitor::~GenerateVisitor() {}
 
 void GenerateVisitor::BuildAll() {
-  Visit(style_resolver_.document());
+  Visit(style_tree_.document());
 }
 
 const css::Style& GenerateVisitor::ComputedStyleOf(const Node& node) const {
-  return style_resolver_.ComputedStyleOf(node);
+  return style_tree_.ComputedStyleOf(node);
 }
 
 std::unique_ptr<Box> GenerateVisitor::GenerateBox(const Node& node) {
@@ -180,14 +180,14 @@ void GenerateVisitor::VisitTextNode(TextNode* text_node) {
 // BoxTreeBuilder
 //
 BoxTreeBuilder::BoxTreeBuilder(const Document& document,
-                               const StyleResolver& style_resolver)
-    : document_(document), style_resolver_(style_resolver) {
+                               const StyleTree& style_tree)
+    : document_(document), style_tree_(style_tree) {
   document_.AddObserver(this);
-  style_resolver_.AddObserver(this);
+  style_tree_.AddObserver(this);
 }
 
 BoxTreeBuilder::~BoxTreeBuilder() {
-  style_resolver_.RemoveObserver(this);
+  style_tree_.RemoveObserver(this);
 }
 
 RootBox* BoxTreeBuilder::root_box() const {
@@ -207,9 +207,9 @@ RootBox* BoxTreeBuilder::Build() {
   DCHECK(box_map_.empty());
   root_box_ = std::make_unique<RootBox>(document_);
   box_map_.emplace(&document_, root_box_.get());
-  GenerateVisitor(root_box_.get(), style_resolver_, &box_map_).BuildAll();
+  GenerateVisitor(root_box_.get(), style_tree_, &box_map_).BuildAll();
   BoxEditor().SetViewportSize(root_box_.get(),
-                              style_resolver_.media().viewport_size());
+                              style_tree_.media().viewport_size());
   return root_box_.get();
 }
 

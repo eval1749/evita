@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_STYLE_STYLE_RESOLVER_H_
-#define EVITA_VISUALS_STYLE_STYLE_RESOLVER_H_
+#ifndef EVITA_VISUALS_STYLE_STYLE_TREE_H_
+#define EVITA_VISUALS_STYLE_STYLE_TREE_H_
 
 #include <memory>
 #include <unordered_map>
@@ -28,20 +28,19 @@ class Element;
 class Node;
 class StyleChangeObserver;
 
-// TODO(eval1749): We should rename |StyleResolver| to |StyleTree|.
 //////////////////////////////////////////////////////////////////////
 //
-// StyleResolver represents a cache of CSS computed value, pre-layout value,
+// StyleTree represents a cache of CSS computed value, pre-layout value,
 // for each element.
 //
-class StyleResolver final : public css::MediaObserver,
-                            public css::StyleSheetObserver,
-                            public DocumentObserver {
+class StyleTree final : public css::MediaObserver,
+                        public css::StyleSheetObserver,
+                        public DocumentObserver {
  public:
-  explicit StyleResolver(const Document& document,
-                         const css::Media& media,
-                         const std::vector<css::StyleSheet*>& style_sheets);
-  ~StyleResolver() final;
+  explicit StyleTree(const Document& document,
+                     const css::Media& media,
+                     const std::vector<css::StyleSheet*>& style_sheets);
+  ~StyleTree() final;
 
   // TODO(eval1749): Do we really need to expose |initial_style()|? As of today,
   // it is used only in tests.
@@ -83,9 +82,9 @@ class StyleResolver final : public css::MediaObserver,
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;
 
-  DISALLOW_COPY_AND_ASSIGN(StyleResolver);
+  DISALLOW_COPY_AND_ASSIGN(StyleTree);
 };
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_STYLE_STYLE_RESOLVER_H_
+#endif  // EVITA_VISUALS_STYLE_STYLE_TREE_H_

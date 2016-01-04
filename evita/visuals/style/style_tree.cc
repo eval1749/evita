@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/style/style_resolver.h"
+#include "evita/visuals/style/style_tree.h"
 
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/properties.h"
@@ -34,9 +34,9 @@ void InheritStyle(css::Style* style, const css::Style& parent_style) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// StyleResolver::Impl
+// StyleTree::Impl
 //
-class StyleResolver::Impl final {
+class StyleTree::Impl final {
  public:
   explicit Impl(const std::vector<css::StyleSheet*>& style_sheets);
   ~Impl() = default;
@@ -76,7 +76,7 @@ class StyleResolver::Impl final {
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-StyleResolver::Impl::Impl(const std::vector<css::StyleSheet*>& style_sheets)
+StyleTree::Impl::Impl(const std::vector<css::StyleSheet*>& style_sheets)
     : initial_style_(new css::Style()) {
   // TODO(eval1749): We should get default color and background color from
   // system metrics.
@@ -90,12 +90,12 @@ StyleResolver::Impl::Impl(const std::vector<css::StyleSheet*>& style_sheets)
       << "initial style must have display property. " << initial_style();
 }
 
-void StyleResolver::Impl::Clear() {
+void StyleTree::Impl::Clear() {
   item_map_.clear();
   is_dirty_ = true;
 }
 
-const css::Style& StyleResolver::Impl::ComputedStyleOf(const Node& node) const {
+const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
   if (const auto element = node.as<Element>()) {
     const auto& it = item_map_.find(element);
     DCHECK(it != item_map_.end());
@@ -106,7 +106,7 @@ const css::Style& StyleResolver::Impl::ComputedStyleOf(const Node& node) const {
   return ComputedStyleOf(*node.parent());
 }
 
-std::unique_ptr<css::Style> StyleResolver::Impl::ComputeStyleForElement(
+std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
     const Element& element) const {
   const auto inline_style = element.inline_style();
   auto style = inline_style ? std::make_unique<css::Style>(*inline_style)
@@ -124,7 +124,7 @@ std::unique_ptr<css::Style> StyleResolver::Impl::ComputeStyleForElement(
   return std::move(style);
 }
 
-Item* StyleResolver::Impl::GetOrNewItem(const Element& element) {
+Item* StyleTree::Impl::GetOrNewItem(const Element& element) {
   const auto& it = item_map_.find(&element);
   if (it != item_map_.end())
     return it->second.get();
@@ -134,7 +134,7 @@ Item* StyleResolver::Impl::GetOrNewItem(const Element& element) {
   return result.first->second.get();
 }
 
-void StyleResolver::Impl::MarkDirty(const Element& element) {
+void StyleTree::Impl::MarkDirty(const Element& element) {
   is_dirty_ = true;
   GetOrNewItem(element)->is_dirty = true;
   for (const auto& ancestor : Node::Ancestors(element)) {
@@ -148,8 +148,7 @@ void StyleResolver::Impl::MarkDirty(const Element& element) {
   }
 }
 
-void StyleResolver::Impl::UpdateChildren(Context* context,
-                                         const Element& element) {
+void StyleTree::Impl::UpdateChildren(Context* context, const Element& element) {
   for (const auto& child : element.child_nodes()) {
     const auto child_element = child->as<Element>();
     if (!child_element)
@@ -158,8 +157,7 @@ void StyleResolver::Impl::UpdateChildren(Context* context,
   }
 }
 
-void StyleResolver::Impl::UpdateElement(Context* context,
-                                        const Element& element) {
+void StyleTree::Impl::UpdateElement(Context* context, const Element& element) {
   if (!context->is_updated) {
     context->is_updated = true;
     ++version_;
@@ -175,8 +173,8 @@ void StyleResolver::Impl::UpdateElement(Context* context,
   UpdateChildren(context, element);
 }
 
-void StyleResolver::Impl::UpdateElementIfNeeded(Context* context,
-                                                const Element& element) {
+void StyleTree::Impl::UpdateElementIfNeeded(Context* context,
+                                            const Element& element) {
   const auto item = GetOrNewItem(element);
   if (item->is_dirty)
     return UpdateElement(context, element);
@@ -188,7 +186,7 @@ void StyleResolver::Impl::UpdateElementIfNeeded(Context* context,
 }
 
 // The entry point
-void StyleResolver::Impl::UpdateIfNeeded(const Document& document) {
+void StyleTree::Impl::UpdateIfNeeded(const Document& document) {
 #if !DCHECK_IS_ON()
   if (!is_dirty_)
     return;
@@ -200,8 +198,7 @@ void StyleResolver::Impl::UpdateIfNeeded(const Document& document) {
   is_dirty_ = false;
 }
 
-void StyleResolver::Impl::UpdateNodeIfNeeded(Context* context,
-                                             const Node& node) {
+void StyleTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
   const auto element = node.as<Element>();
   if (!element)
     return;
@@ -210,11 +207,11 @@ void StyleResolver::Impl::UpdateNodeIfNeeded(Context* context,
 
 //////////////////////////////////////////////////////////////////////
 //
-// StyleResolver
+// StyleTree
 //
-StyleResolver::StyleResolver(const Document& document,
-                             const css::Media& media,
-                             const std::vector<css::StyleSheet*>& style_sheets)
+StyleTree::StyleTree(const Document& document,
+                     const css::Media& media,
+                     const std::vector<css::StyleSheet*>& style_sheets)
     : document_(document),
       impl_(new Impl(style_sheets)),
       media_(media),
@@ -225,67 +222,67 @@ StyleResolver::StyleResolver(const Document& document,
     style_sheet->AddObserver(this);
 }
 
-StyleResolver::~StyleResolver() {
+StyleTree::~StyleTree() {
   for (const auto& style_sheet : style_sheets_)
     style_sheet->RemoveObserver(this);
   document_.RemoveObserver(this);
 }
 
-const css::Style& StyleResolver::initial_style() const {
+const css::Style& StyleTree::initial_style() const {
   return impl_->initial_style();
 }
 
-int StyleResolver::version() const {
+int StyleTree::version() const {
   return impl_->version();
 }
 
-void StyleResolver::AddObserver(StyleChangeObserver* observer) const {
+void StyleTree::AddObserver(StyleChangeObserver* observer) const {
   observers_.AddObserver(observer);
 }
 
-void StyleResolver::Clear() {
+void StyleTree::Clear() {
   impl_->Clear();
   FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
 }
 
-const css::Style& StyleResolver::ComputedStyleOf(const Node& node) const {
+const css::Style& StyleTree::ComputedStyleOf(const Node& node) const {
   DCHECK(!impl_->is_dirty()) << "You should call "
-                                "StyleResolver::UpdateIfNeeded(), before "
+                                "StyleTree::UpdateIfNeeded(), before "
                                 "calling ComputedStyleOf().";
   return impl_->ComputedStyleOf(node);
 }
 
-void StyleResolver::RemoveObserver(StyleChangeObserver* observer) const {
+void StyleTree::RemoveObserver(StyleChangeObserver* observer) const {
   observers_.RemoveObserver(observer);
 }
 
-void StyleResolver::UpdateIfNeeded() {
+void StyleTree::UpdateIfNeeded() {
   impl_->UpdateIfNeeded(document_);
 }
 
 // css::MediaObserver
-void StyleResolver::DidChangeViewportSize() {
+void StyleTree::DidChangeViewportSize() {
   // TODO(eval1749): Invalidate styles depends on viewport size
   Clear();
 }
 
-void StyleResolver::DidChangeSystemMetrics() {
+void StyleTree::DidChangeSystemMetrics() {
   // TODO(eval1749): Invalidate styles using system colors.
   Clear();
 }
 
 // css::StyleSheetObserver
-void StyleResolver::DidAddRule(const css::Rule& rule) {
+void StyleTree::DidAddRule(const css::Rule& rule) {
   Clear();
 }
 
-void StyleResolver::DidRemoveRule(const css::Rule& rule) {
+void StyleTree::DidRemoveRule(const css::Rule& rule) {
   Clear();
 }
 
 // DocumentObserver
-void StyleResolver::DidAddClass(const Element& element,
-                                const base::string16& name) {
+void StyleTree::DidAddClass(const Element& element,
+                            const base::string16& name) {
   // TODO(eval1749): Implement shortcut for
   //  - position:absolute + left/top
   //  - background color change
@@ -294,8 +291,8 @@ void StyleResolver::DidAddClass(const Element& element,
   impl_->MarkDirty(element);
 }
 
-void StyleResolver::DidChangeInlineStyle(const Element& element,
-                                         const css::Style* old_style) {
+void StyleTree::DidChangeInlineStyle(const Element& element,
+                                     const css::Style* old_style) {
   // TODO(eval1749): Implement shortcut for
   //  - position:absolute + left/top
   //  - background color change

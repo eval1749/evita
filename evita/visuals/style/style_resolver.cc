@@ -4,6 +4,7 @@
 
 #include "evita/visuals/style/style_resolver.h"
 
+#include "evita/visuals/css/media.h"
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
@@ -40,6 +41,7 @@ StyleResolver::StyleResolver(const Document& document,
   css::StyleEditor().SetColor(default_style_.get(), css::Color(0, 0, 0));
   css::StyleEditor().SetDisplay(default_style_.get(), css::Display());
   document_.AddObserver(this);
+  media_.AddObserver(this);
   for (const auto& style_sheet : style_sheets_) {
     style_sheet->AddObserver(this);
     compiled_style_sheets_.emplace_back(new CompiledStyleSheet(*style_sheet));

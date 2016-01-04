@@ -11,7 +11,6 @@
 #include "base/bind.h"
 #include "base/macros.h"
 #include "base/message_loop/message_loop.h"
-#include "base/process/launch.h"
 #include "base/run_loop.h"
 #include "evita/ui/animation/animation_scheduler.h"
 #include "evita/ui/compositor/compositor.h"
@@ -93,7 +92,6 @@ DemoApplication::~DemoApplication() {}
 
 void DemoApplication::Run() {
   DemoScheduler scheduler;
-  base::RouteStdioToConsole(true);
   auto message_loop =
       std::make_unique<base::MessageLoop>(base::MessageLoop::TYPE_UI);
   base::RunLoop run_loop;

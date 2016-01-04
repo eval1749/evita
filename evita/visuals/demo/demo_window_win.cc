@@ -5,6 +5,7 @@
 #include <windows.h>
 
 #include "base/at_exit.h"
+#include "base/process/launch.h"
 #include "evita/visuals/demo/demo_application.h"
 #include "evita/visuals/demo/demo_window.h"
 
@@ -35,6 +36,7 @@ void DemoWindow::CreateNativeWindow() const {
 //
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   base::AtExitManager at_exit;
+  base::RouteStdioToConsole(true);
   common::win::NativeWindow::Init(hInstance);
   visuals::DemoApplication().Run();
   return 0;

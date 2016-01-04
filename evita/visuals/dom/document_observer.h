@@ -6,6 +6,7 @@
 #define EVITA_VISUALS_DOM_DOCUMENT_OBSERVER_H_
 
 #include "base/macros.h"
+#include "base/strings/string16.h"
 
 namespace visuals {
 
@@ -25,6 +26,8 @@ class DocumentObserver {
  public:
   virtual ~DocumentObserver();
 
+  virtual void DidAddClass(const Element& element,
+                           const base::string16& new_name);
   virtual void DidAppendChild(const ContainerNode& parent, const Node& child);
   virtual void DidChangeInlineStyle(const Element& element,
                                     const css::Style* old_style);
@@ -32,6 +35,8 @@ class DocumentObserver {
                                const Node& child,
                                const Node& ref_child);
   virtual void DidRemoveChild(const ContainerNode& parent, const Node& child);
+  virtual void DidRemoveClass(const Element& element,
+                              const base::string16& old_name);
   virtual void WillRemoveChild(const ContainerNode& parent, const Node& child);
 
  protected:

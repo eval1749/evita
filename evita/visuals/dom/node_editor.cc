@@ -26,6 +26,23 @@ namespace visuals {
 NodeEditor::NodeEditor() {}
 NodeEditor::~NodeEditor() {}
 
+void NodeEditor::AddClass(Element* element,
+                          const base::StringPiece16& class_name) {
+  const auto& it =
+      std::find_if(element->class_list_.begin(), element->class_list_.end(),
+                   [class_name](const base::string16& present) {
+                     return class_name ==
+                            base::StringPiece16(present.data(), present.size());
+                   });
+  if (it != element->class_list_.end())
+    return;
+  const auto& new_class = class_name.as_string();
+  element->class_list_.emplace_back(new_class);
+  const auto document = element->document();
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
+                    DidAddClass(*element, new_class));
+}
+
 void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   const auto document = container->document_;
   DCHECK(!document->is_locked());
@@ -47,19 +64,6 @@ void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   RegisterElementIdForSubtree(*new_child);
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidAppendChild(*container, *new_child));
-}
-
-void NodeEditor::AddClass(Element* element,
-                          const base::StringPiece16& class_name) {
-  const auto& it =
-      std::find_if(element->class_list_.begin(), element->class_list_.end(),
-                   [class_name](const base::string16& present) {
-                     return class_name ==
-                            base::StringPiece16(present.data(), present.size());
-                   });
-  if (it != element->class_list_.end())
-    return;
-  element->class_list_.emplace_back(class_name.as_string());
 }
 
 void NodeEditor::InsertBefore(ContainerNode* container,
@@ -123,11 +127,11 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
 
 void NodeEditor::RemoveClass(Element* element,
                              const base::StringPiece16& class_name) {
+  const auto& old_class = class_name.as_string();
   auto destination =
       std::find_if(element->class_list_.begin(), element->class_list_.end(),
-                   [class_name](const base::string16& present) {
-                     return class_name ==
-                            base::StringPiece16(present.data(), present.size());
+                   [old_class](const base::string16& present) {
+                     return old_class == present;
                    });
   if (destination == element->class_list_.end())
     return;
@@ -137,6 +141,9 @@ void NodeEditor::RemoveClass(Element* element,
     ++destination;
   }
   element->class_list_.pop_back();
+  const auto document = element->document();
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
+                    DidRemoveClass(*element, old_class));
 }
 
 void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {

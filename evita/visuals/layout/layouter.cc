@@ -126,8 +126,14 @@ Layouter::Layouter() {}
 Layouter::~Layouter() {}
 
 void Layouter::Layout(RootBox* root_box) {
-  if (root_box->IsLayoutClean())
+  if (root_box->IsLayoutClean()) {
+    // TODO(eval1749): We should have better way reset to |LayoutClean| state.
+    root_box->lifecycle()->Reset();
+    BoxTreeLifecycle::Scope scope(root_box->lifecycle(),
+                                  BoxTreeLifecycle::State::InLayout,
+                                  BoxTreeLifecycle::State::LayoutClean);
     return;
+  }
   BoxTreeLifecycle::Scope scope(root_box->lifecycle(),
                                 BoxTreeLifecycle::State::InLayout,
                                 BoxTreeLifecycle::State::LayoutClean);

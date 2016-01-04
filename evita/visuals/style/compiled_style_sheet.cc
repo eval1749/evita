@@ -44,6 +44,7 @@ void CompiledStyleSheet::CompileRule(const css::Rule& rule) {
     class_name_map_.emplace(class_name, &rule.style());
     return;
   }
+
   const auto& tag_name = rule.selector();
   tag_name_map_.emplace(tag_name, &rule.style());
 }
@@ -60,7 +61,7 @@ std::unique_ptr<css::Style> CompiledStyleSheet::Match(
     }
   }
   // TODO(eval1749): NYI selector match to element.classList
-  const auto& tag_name_it = tag_name_map_.find(element.id());
+  const auto& tag_name_it = tag_name_map_.find(element.tag_name());
   if (tag_name_it != tag_name_map_.end()) {
     css::StyleEditor().Merge(&style, *tag_name_it->second);
     matched = true;

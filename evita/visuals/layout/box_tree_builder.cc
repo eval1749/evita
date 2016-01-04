@@ -179,15 +179,15 @@ BoxTreeBuilder::~BoxTreeBuilder() {
   style_resolver_->RemoveObserver(this);
 }
 
-const RootBox& BoxTreeBuilder::Build() {
+RootBox* BoxTreeBuilder::Build() {
   // TODO(eval1749): We should update box tree rather than build always.
   if (root_box_)
-    return *root_box_;
+    return root_box_.get();
   DCHECK(box_map_.empty());
   root_box_ = std::make_unique<RootBox>(document_);
   box_map_.emplace(&document_, root_box_.get());
   GenerateVisitor(root_box_.get(), style_resolver_.get(), &box_map_).BuildAll();
-  return *root_box_;
+  return root_box_.get();
 }
 
 void BoxTreeBuilder::Clear() {

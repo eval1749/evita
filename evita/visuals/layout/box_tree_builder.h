@@ -33,7 +33,7 @@ class BoxTreeBuilder final : public DocumentObserver,
   BoxTreeBuilder(const Document& document, const css::Media& media);
   ~BoxTreeBuilder();
 
-  const RootBox& Build();
+  RootBox* Build();
 
  private:
   void Clear();

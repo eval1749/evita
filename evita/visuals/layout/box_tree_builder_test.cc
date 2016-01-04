@@ -44,7 +44,7 @@ TEST_F(BoxTreeBuilderTest, Basic) {
                              .Build();
   BoxTreeBuilder builder(*document, mock_media());
   const auto& root_box = builder.Build();
-  EXPECT_TRUE(root_box.first_child()->is<InlineFlowBox>());
+  EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }
 
 TEST_F(BoxTreeBuilderTest, Flow) {
@@ -56,7 +56,7 @@ TEST_F(BoxTreeBuilderTest, Flow) {
                              .Build();
   BoxTreeBuilder builder(*document, mock_media());
   const auto& root_box = builder.Build();
-  EXPECT_TRUE(root_box.first_child()->is<InlineFlowBox>());
+  EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }
 
 }  // namespace visuals

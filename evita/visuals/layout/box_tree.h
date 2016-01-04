@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_LAYOUT_BOX_TREE_BUILDER_H_
-#define EVITA_VISUALS_LAYOUT_BOX_TREE_BUILDER_H_
+#ifndef EVITA_VISUALS_LAYOUT_BOX_TREE_H_
+#define EVITA_VISUALS_LAYOUT_BOX_TREE_H_
 
 #include <memory>
 #include <unordered_map>
@@ -27,13 +27,12 @@ class StyleTree;
 
 //////////////////////////////////////////////////////////////////////
 //
-// BoxTreeBuilder generates a CSS Box tree from a Document.
+// BoxTree represents a CSS Box tree for document(node tree) with style tree.
 //
-class BoxTreeBuilder final : public DocumentObserver,
-                             public StyleChangeObserver {
+class BoxTree final : public DocumentObserver, public StyleChangeObserver {
  public:
-  BoxTreeBuilder(const Document& document, const StyleTree& style_tree);
-  ~BoxTreeBuilder();
+  BoxTree(const Document& document, const StyleTree& style_tree);
+  ~BoxTree();
 
   RootBox* root_box() const;
 
@@ -62,9 +61,9 @@ class BoxTreeBuilder final : public DocumentObserver,
   std::unique_ptr<RootBox> root_box_;
   const StyleTree& style_tree_;
 
-  DISALLOW_COPY_AND_ASSIGN(BoxTreeBuilder);
+  DISALLOW_COPY_AND_ASSIGN(BoxTree);
 };
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_LAYOUT_BOX_TREE_BUILDER_H_
+#endif  // EVITA_VISUALS_LAYOUT_BOX_TREE_H_

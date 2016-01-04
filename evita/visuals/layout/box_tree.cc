@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "evita/visuals/layout/box_tree_builder.h"
+#include "evita/visuals/layout/box_tree.h"
 
 #include "base/logging.h"
 #include "evita/visuals/css/media.h"
@@ -177,30 +177,29 @@ void GenerateVisitor::VisitTextNode(TextNode* text_node) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// BoxTreeBuilder
+// BoxTree
 //
-BoxTreeBuilder::BoxTreeBuilder(const Document& document,
-                               const StyleTree& style_tree)
+BoxTree::BoxTree(const Document& document, const StyleTree& style_tree)
     : document_(document), style_tree_(style_tree) {
   document_.AddObserver(this);
   style_tree_.AddObserver(this);
 }
 
-BoxTreeBuilder::~BoxTreeBuilder() {
+BoxTree::~BoxTree() {
   style_tree_.RemoveObserver(this);
 }
 
-RootBox* BoxTreeBuilder::root_box() const {
+RootBox* BoxTree::root_box() const {
   // TODO(eval1749): We should check box tree is clean.
   return root_box_.get();
 }
 
-Box* BoxTreeBuilder::BoxFor(const Node& node) const {
+Box* BoxTree::BoxFor(const Node& node) const {
   const auto& it = box_map_.find(&node);
   return it == box_map_.end() ? nullptr : it->second;
 }
 
-RootBox* BoxTreeBuilder::Build() {
+RootBox* BoxTree::Build() {
   // TODO(eval1749): We should update box tree rather than build always.
   if (root_box_)
     return root_box_.get();
@@ -213,41 +212,39 @@ RootBox* BoxTreeBuilder::Build() {
   return root_box_.get();
 }
 
-void BoxTreeBuilder::Clear() {
+void BoxTree::Clear() {
   box_map_.clear();
   root_box_.reset();
 }
 
 // DocumentObserver
-void BoxTreeBuilder::DidAppendChild(const ContainerNode& parent,
-                                    const Node& child) {
+void BoxTree::DidAppendChild(const ContainerNode& parent, const Node& child) {
   Clear();
 }
 
-void BoxTreeBuilder::DidChangeInlineStyle(const Element& element,
-                                          const css::Style* old_style) {
+void BoxTree::DidChangeInlineStyle(const Element& element,
+                                   const css::Style* old_style) {
   // TODO(eval1749): We should not clear root box to optimize left/top changes.
   Clear();
 }
 
-void BoxTreeBuilder::DidInsertBefore(const ContainerNode& parent,
-                                     const Node& child,
-                                     const Node& ref_child) {
+void BoxTree::DidInsertBefore(const ContainerNode& parent,
+                              const Node& child,
+                              const Node& ref_child) {
   Clear();
 }
 
-void BoxTreeBuilder::WillRemoveChild(const ContainerNode& parent,
-                                     const Node& child) {
+void BoxTree::WillRemoveChild(const ContainerNode& parent, const Node& child) {
   Clear();
 }
 
 // StyleChangeObserver
-void BoxTreeBuilder::DidClearStyleCache() {
+void BoxTree::DidClearStyleCache() {
   Clear();
 }
 
-void BoxTreeBuilder::DidRemoveStyleCache(const Element& element,
-                                         const css::Style& old_style) {
+void BoxTree::DidRemoveStyleCache(const Element& element,
+                                  const css::Style& old_style) {
   Clear();
 }
 

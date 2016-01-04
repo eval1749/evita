@@ -23,7 +23,7 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/layout/box_tree_builder.h"
+#include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_finder.h"
@@ -217,7 +217,7 @@ DemoModel::DemoModel()
     : document_(LoadDocument()),
       style_sheet_(LoadStyleSheet()),
       style_tree_(new StyleTree(*document_, *this, {style_sheet_})),
-      box_tree_(new BoxTreeBuilder(*document_, *style_tree_)) {}
+      box_tree_(new BoxTree(*document_, *style_tree_)) {}
 
 DemoModel::~DemoModel() {}
 

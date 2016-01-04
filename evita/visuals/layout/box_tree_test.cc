@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/layout/box_tree_builder.h"
+#include "evita/visuals/layout/box_tree.h"
 
 #include "evita/visuals/css/mock_media.h"
 #include "evita/visuals/css/properties.h"
@@ -21,22 +21,22 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// BoxTreeBuilderTest
+// BoxTreeTest
 //
-class BoxTreeBuilderTest : public ::testing::Test {
+class BoxTreeTest : public ::testing::Test {
  protected:
-  BoxTreeBuilderTest() = default;
-  ~BoxTreeBuilderTest() override = default;
+  BoxTreeTest() = default;
+  ~BoxTreeTest() override = default;
 
   const css::MockMedia& mock_media() const { return mock_media_; }
 
  private:
   css::MockMedia mock_media_;
 
-  DISALLOW_COPY_AND_ASSIGN(BoxTreeBuilderTest);
+  DISALLOW_COPY_AND_ASSIGN(BoxTreeTest);
 };
 
-TEST_F(BoxTreeBuilderTest, Basic) {
+TEST_F(BoxTreeTest, Basic) {
   const auto& document = NodeTreeBuilder()
                              .Begin(L"body")
                              .AddText(L"Hello world!")
@@ -45,12 +45,12 @@ TEST_F(BoxTreeBuilderTest, Basic) {
 
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
-  BoxTreeBuilder builder(*document, style_tree);
+  BoxTree builder(*document, style_tree);
   const auto& root_box = builder.Build();
   EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }
 
-TEST_F(BoxTreeBuilderTest, Flow) {
+TEST_F(BoxTreeTest, Flow) {
   const auto& document = NodeTreeBuilder()
                              .Begin(L"body")
                              .AddText(L"foo ")
@@ -59,7 +59,7 @@ TEST_F(BoxTreeBuilderTest, Flow) {
                              .Build();
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
-  BoxTreeBuilder builder(*document, style_tree);
+  BoxTree builder(*document, style_tree);
   const auto& root_box = builder.Build();
   EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
 }

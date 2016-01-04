@@ -16,7 +16,7 @@
 
 namespace visuals {
 
-class BoxTreeBuilder;
+class BoxTree;
 class DemoWindow;
 class Document;
 class Element;
@@ -62,7 +62,7 @@ class DemoModel final : public css::Media,
   FloatSize viewport_size_;
 
   std::unique_ptr<StyleTree> style_tree_;
-  std::unique_ptr<BoxTreeBuilder> box_tree_;
+  std::unique_ptr<BoxTree> box_tree_;
 
   DemoWindow* window_ = nullptr;
 

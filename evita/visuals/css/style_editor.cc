@@ -21,7 +21,7 @@ StyleEditor::~StyleEditor() {}
 void StyleEditor::Merge(Style* left, const Style& right) {
 #define V(Property, property, ...)                       \
   if (!left->has_##property() && right.has_##property()) \
-    left->property##_ = right.property##_;
+    Set##Property(left, right.property##_);
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
 }

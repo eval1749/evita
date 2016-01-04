@@ -37,7 +37,9 @@ class NodeEditor final {
 
  private:
   void DidChangeChild(ContainerNode* container);
+  void RegisterElementIdForSubtree(const Node& node);
   void ScheduleVisualUpdateIfNeeded(Node* node);
+  void UnregisterElementIdForSubtree(const Node& node);
 
   DISALLOW_COPY_AND_ASSIGN(NodeEditor);
 };

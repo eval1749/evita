@@ -40,21 +40,21 @@ class Document final : public ContainerNode {
 
   void AddObserver(DocumentObserver* observer) const;
 
-  Node* GetNodeById(const base::StringPiece16& id) const;
+  Element* GetElementById(const base::StringPiece16& id) const;
   void Lock() const;
   void Unlock() const;
 
   void RemoveObserver(DocumentObserver* observer) const;
 
  private:
-  void RegisterNodeIdIfNeeded(const Node& node);
-  void UnregisterNodeIdIfNeeded(const Node& node);
+  void RegisterElementIdIfNeeded(const Element& element);
+  void UnregisterElementIdIfNeeded(const Element& element);
 
   // gc::Visitable
   void Accept(gc::Visitor* visitor) final;
 
   base::ObserverList<DocumentObserver> observers_;
-  std::map<base::string16, Node*> id_map_;
+  std::map<base::string16, Element*> id_map_;
   mutable int lock_count_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Document);

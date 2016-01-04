@@ -31,7 +31,7 @@ TEST(CompiledStyleSheetTest, Basic) {
                             .Build();
 
   const auto tag = document->first_child()->as<Element>();
-  const auto tag_id = document->GetNodeById(L"id")->as<Element>();
+  const auto tag_id = document->GetElementById(L"id");
 
   const auto& tag_style = compiled.Match(*tag);
   const auto& tag_id_style = compiled.Match(*tag_id);

@@ -15,7 +15,7 @@
 
 namespace visuals {
 
-TEST(DocumentTest, GetNodeById) {
+TEST(DocumentTest, GetElementById) {
   const auto& document = NodeTreeBuilder()
                              .Begin(L"block", L"block1")
                              .End(L"block")
@@ -34,12 +34,14 @@ TEST(DocumentTest, GetNodeById) {
     id_map.insert(std::make_pair(node->id(), node));
   }
 
-  EXPECT_EQ(id_map.find(L"block1")->second, document->GetNodeById(L"block1"));
-  EXPECT_EQ(id_map.find(L"block3")->second, document->GetNodeById(L"block3"));
-  EXPECT_EQ(nullptr, document->GetNodeById(L"not exist"));
+  EXPECT_EQ(id_map.find(L"block1")->second,
+            document->GetElementById(L"block1"));
+  EXPECT_EQ(id_map.find(L"block3")->second,
+            document->GetElementById(L"block3"));
+  EXPECT_EQ(nullptr, document->GetElementById(L"not exist"));
 
-  NodeEditor().RemoveChild(document, document->GetNodeById(L"block2"));
-  EXPECT_EQ(nullptr, document->GetNodeById(L"block2"));
+  NodeEditor().RemoveChild(document, document->GetElementById(L"block2"));
+  EXPECT_EQ(nullptr, document->GetElementById(L"block2"));
 }
 
 }  // namespace visuals

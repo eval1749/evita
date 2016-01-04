@@ -26,6 +26,7 @@ Document* FindDocument(const Node& node) {
   }
   return nullptr;
 }
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -53,10 +54,7 @@ void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
     container->first_child_ = new_child;
   }
   container->last_child_ = new_child;
-  if (const auto document = FindDocument(*container)) {
-    for (const auto runner : Node::DescendantsOrSelf(*new_child))
-      document->RegisterNodeIdIfNeeded(*runner);
-  }
+  RegisterElementIdForSubtree(*new_child);
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidAppendChild(*container, *new_child));
 }
@@ -82,12 +80,21 @@ void NodeEditor::InsertBefore(ContainerNode* container,
   new_child->parent_ = container;
   new_child->next_sibling_ = ref_child;
   new_child->previous_sibling_ = previous_sibling;
-  if (const auto document = FindDocument(*container)) {
-    for (const auto runner : Node::DescendantsOrSelf(*new_child))
-      document->RegisterNodeIdIfNeeded(*runner);
-  }
+  RegisterElementIdForSubtree(*new_child);
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidInsertBefore(*container, *new_child, *ref_child));
+}
+
+void NodeEditor::RegisterElementIdForSubtree(const Node& node) {
+  if (!node.is<ContainerNode>())
+    return;
+  if (!FindDocument(node))
+    return;
+  const auto& document = node.document();
+  for (const auto& runner : Node::DescendantsOrSelf(node)) {
+    if (const auto element = runner->as<Element>())
+      document->RegisterElementIdIfNeeded(*element);
+  }
 }
 
 void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
@@ -95,11 +102,7 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   DCHECK_EQ(container, old_child->parent_);
   FOR_EACH_OBSERVER(DocumentObserver, container->document_->observers_,
                     DidRemoveChild(*container, *old_child));
-
-  if (const auto document = FindDocument(*container)) {
-    for (const auto runner : Node::DescendantsOrSelf(*old_child))
-      document->UnregisterNodeIdIfNeeded(*runner);
-  }
+  UnregisterElementIdForSubtree(*old_child);
   const auto next_sibling = old_child->next_sibling_;
   const auto previous_sibling = old_child->previous_sibling_;
   if (next_sibling)
@@ -132,6 +135,17 @@ void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
   element->inline_style_ = std::make_unique<css::Style>(new_style);
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidChangeInlineStyle(*element, nullptr));
+}
+
+void NodeEditor::UnregisterElementIdForSubtree(const Node& node) {
+  if (!node.is<ContainerNode>())
+    return;
+  DCHECK(FindDocument(node));
+  const auto& document = node.document();
+  for (const auto& runner : Node::DescendantsOrSelf(node)) {
+    if (const auto element = runner->as<Element>())
+      document->UnregisterElementIdIfNeeded(*element);
+  }
 }
 
 void NodeEditor::WillDestroy(Node* node) {

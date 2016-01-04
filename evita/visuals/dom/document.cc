@@ -5,6 +5,7 @@
 #include "evita/visuals/dom/document.h"
 
 #include "base/logging.h"
+#include "evita/visuals/dom/element.h"
 
 namespace visuals {
 
@@ -31,7 +32,7 @@ void Document::AddObserver(DocumentObserver* observer) const {
   const_cast<Document*>(this)->observers_.AddObserver(observer);
 }
 
-Node* Document::GetNodeById(const base::StringPiece16& id) const {
+Element* Document::GetElementById(const base::StringPiece16& id) const {
   const auto& it = id_map_.find(id.as_string());
   if (it == id_map_.end())
     return nullptr;
@@ -43,13 +44,13 @@ void Document::Lock() const {
   ++lock_count_;
 }
 
-void Document::RegisterNodeIdIfNeeded(const Node& node) {
+void Document::RegisterElementIdIfNeeded(const Element& element) {
   DCHECK(!is_locked());
-  if (node.id().empty())
+  if (element.id().empty())
     return;
-  const auto& result =
-      id_map_.insert(std::make_pair(node.id(), const_cast<Node*>(&node)));
-  DCHECK(result.second) << "id_map_ already has " << node;
+  const auto& result = id_map_.insert(
+      std::make_pair(element.id(), const_cast<Element*>(&element)));
+  DCHECK(result.second) << "id_map_ already has " << element;
 }
 
 void Document::RemoveObserver(DocumentObserver* observer) const {
@@ -61,19 +62,20 @@ void Document::Unlock() const {
   --lock_count_;
 }
 
-void Document::UnregisterNodeIdIfNeeded(const Node& node) {
+void Document::UnregisterElementIdIfNeeded(const Element& element) {
   DCHECK(!is_locked());
-  if (node.id().empty())
+  if (element.id().empty())
     return;
-  const auto& start = id_map_.find(node.id());
-  DCHECK(start != id_map_.end()) << "id_map_ should have " << node;
-  for (auto it = start; it != id_map_.end() && it->first == node.id(); ++it) {
-    if (it->second == &node) {
+  const auto& start = id_map_.find(element.id());
+  DCHECK(start != id_map_.end()) << "id_map_ should have " << element;
+  for (auto it = start; it != id_map_.end() && it->first == element.id();
+       ++it) {
+    if (it->second == &element) {
       id_map_.erase(it);
       return;
     }
   }
-  DVLOG(ERROR) << "id_map_ should have " << node;
+  DVLOG(ERROR) << "id_map_ should have " << element;
 }
 
 // gc::Visitable

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "evita/visuals/dom/document.h"
+#include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/node_tree_builder.h"
+#include "evita/visuals/dom/text_node.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
@@ -14,10 +18,19 @@
 namespace visuals {
 
 TEST(BoxFinderTest, Basic) {
+  const auto document = NodeTreeBuilder()
+                            .Begin(L"block")
+                            .AddText(L"foo")
+                            .AddText(L"bar")
+                            .End(L"block")
+                            .Build();
+  const auto block = document->first_child()->as<Element>();
+  const auto text_node1 = block->first_child()->as<TextNode>();
+  const auto text_node2 = block->last_child()->as<TextNode>();
   const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<BlockFlowBox>()
-                         .Add<TextBox>(L"foo")
-                         .Add<TextBox>(L"bar")
+                         .Begin<BlockFlowBox>(block)
+                         .Add<TextBox>(text_node1->text(), text_node1)
+                         .Add<TextBox>(text_node2->text(), text_node2)
                          .End<BlockFlowBox>()
                          .Build();
   const auto main = root->first_child()->as<ContainerBox>();

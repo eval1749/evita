@@ -238,7 +238,7 @@ void BoxTree::WillRemoveChild(const ContainerNode& parent, const Node& child) {
   Clear();
 }
 
-// StyleChangeObserver
+// StyleTreeObserver
 void BoxTree::DidClearStyleCache() {
   Clear();
 }

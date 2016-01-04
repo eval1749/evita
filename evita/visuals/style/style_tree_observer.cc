@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/style/style_change_observer.h"
+#include "evita/visuals/style/style_tree_observer.h"
 
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// StyleChangeObserver
+// StyleTreeObserver
 //
-StyleChangeObserver::StyleChangeObserver() {}
-StyleChangeObserver::~StyleChangeObserver() {}
+StyleTreeObserver::StyleTreeObserver() {}
+StyleTreeObserver::~StyleTreeObserver() {}
 
-void StyleChangeObserver::DidClearStyleCache() {}
+void StyleTreeObserver::DidClearStyleCache() {}
 
-void StyleChangeObserver::DidRemoveStyleCache(const Element& element,
+void StyleTreeObserver::DidRemoveStyleCache(const Element& element,
                                               const css::Style& old_style) {}
 
 }  // namespace visuals

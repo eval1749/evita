@@ -26,7 +26,7 @@ class StyleSheet;
 class Document;
 class Element;
 class Node;
-class StyleChangeObserver;
+class StyleTreeObserver;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -54,9 +54,9 @@ class StyleTree final : public css::MediaObserver,
   // We exposed |version()| for performance measurement.
   int version() const;
 
-  void AddObserver(StyleChangeObserver* observer) const;
+  void AddObserver(StyleTreeObserver* observer) const;
   const css::Style& ComputedStyleOf(const Node& node) const;
-  void RemoveObserver(StyleChangeObserver* observer) const;
+  void RemoveObserver(StyleTreeObserver* observer) const;
   void UpdateIfNeeded();
 
  private:
@@ -78,7 +78,7 @@ class StyleTree final : public css::MediaObserver,
 
   const Document& document_;
   const css::Media& media_;
-  mutable base::ObserverList<StyleChangeObserver> observers_;
+  mutable base::ObserverList<StyleTreeObserver> observers_;
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;
 

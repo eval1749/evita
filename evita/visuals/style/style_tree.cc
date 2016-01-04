@@ -14,7 +14,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/style/compiled_style_sheet.h"
-#include "evita/visuals/style/style_change_observer.h"
+#include "evita/visuals/style/style_tree_observer.h"
 
 namespace visuals {
 
@@ -236,13 +236,13 @@ int StyleTree::version() const {
   return impl_->version();
 }
 
-void StyleTree::AddObserver(StyleChangeObserver* observer) const {
+void StyleTree::AddObserver(StyleTreeObserver* observer) const {
   observers_.AddObserver(observer);
 }
 
 void StyleTree::Clear() {
   impl_->Clear();
-  FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
+  FOR_EACH_OBSERVER(StyleTreeObserver, observers_, DidClearStyleCache());
 }
 
 const css::Style& StyleTree::ComputedStyleOf(const Node& node) const {
@@ -252,7 +252,7 @@ const css::Style& StyleTree::ComputedStyleOf(const Node& node) const {
   return impl_->ComputedStyleOf(node);
 }
 
-void StyleTree::RemoveObserver(StyleChangeObserver* observer) const {
+void StyleTree::RemoveObserver(StyleTreeObserver* observer) const {
   observers_.RemoveObserver(observer);
 }
 

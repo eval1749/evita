@@ -11,7 +11,7 @@
 
 #include "base/macros.h"
 #include "evita/visuals/dom/document_observer.h"
-#include "evita/visuals/style/style_change_observer.h"
+#include "evita/visuals/style/style_tree_observer.h"
 
 namespace visuals {
 
@@ -24,7 +24,7 @@ class StyleTree;
 //
 // BoxTree represents a CSS Box tree for document(node tree) with style tree.
 //
-class BoxTree final : public DocumentObserver, public StyleChangeObserver {
+class BoxTree final : public DocumentObserver, public StyleTreeObserver {
  public:
   BoxTree(const Document& document, const StyleTree& style_tree);
   ~BoxTree();
@@ -46,7 +46,7 @@ class BoxTree final : public DocumentObserver, public StyleChangeObserver {
                        const Node& ref_child) final;
   void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
 
-  // StyleChangeObserver
+  // StyleTreeObserver
   void DidClearStyleCache() final;
   void DidRemoveStyleCache(const Element& element,
                            const css::Style& old_style) final;

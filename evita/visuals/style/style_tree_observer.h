@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_STYLE_STYLE_CHANGE_OBSERVER_H_
-#define EVITA_VISUALS_STYLE_STYLE_CHANGE_OBSERVER_H_
+#ifndef EVITA_VISUALS_STYLE_STYLE_TREE_OBSERVER_H_
+#define EVITA_VISUALS_STYLE_STYLE_TREE_OBSERVER_H_
 
 #include "base/macros.h"
 
@@ -17,23 +17,23 @@ class Element;
 
 //////////////////////////////////////////////////////////////////////
 //
-// StyleChangeObserver
+// StyleTreeObserver
 //
-class StyleChangeObserver {
+class StyleTreeObserver {
  public:
-  virtual ~StyleChangeObserver();
+  virtual ~StyleTreeObserver();
 
   virtual void DidClearStyleCache();
   virtual void DidRemoveStyleCache(const Element& element,
                                    const css::Style& old_style);
 
  protected:
-  StyleChangeObserver();
+  StyleTreeObserver();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(StyleChangeObserver);
+  DISALLOW_COPY_AND_ASSIGN(StyleTreeObserver);
 };
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_STYLE_STYLE_CHANGE_OBSERVER_H_
+#endif  // EVITA_VISUALS_STYLE_STYLE_TREE_OBSERVER_H_

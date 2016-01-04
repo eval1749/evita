@@ -60,7 +60,15 @@ std::unique_ptr<css::Style> CompiledStyleSheet::Match(
       style = *id_it->second;
     }
   }
-  // TODO(eval1749): NYI selector match to element.classList
+
+  for (const auto& class_name : element.class_list()) {
+    const auto& class_name_it = class_name_map_.find(class_name);
+    if (class_name_it != class_name_map_.end()) {
+      css::StyleEditor().Merge(&style, *class_name_it->second);
+      matched = true;
+    }
+  }
+
   const auto& tag_name_it = tag_name_map_.find(element.tag_name());
   if (tag_name_it != tag_name_map_.end()) {
     css::StyleEditor().Merge(&style, *tag_name_it->second);

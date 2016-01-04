@@ -10,7 +10,7 @@
 
 namespace io {
 
-class IoContext : public common::Castable {
+class IoContext : public common::Castable<IoContext> {
   DECLARE_CASTABLE_CLASS(IoContext, Castable);
 
  public:

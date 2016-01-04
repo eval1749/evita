@@ -43,7 +43,7 @@ enum class TextMarker {
 //
 // InlineBox
 //
-class InlineBox : public common::Castable {
+class InlineBox : public common::Castable<InlineBox> {
   DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
 
  public:

@@ -1,8 +1,11 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #ifndef COMMON_CASTABLE_H_
 #define COMMON_CASTABLE_H_
+
+#include <type_traits>
 
 namespace common {
 
@@ -10,6 +13,7 @@ namespace common {
 // const char* class_name()
 // bool is<T>()
 // static const char* static_class_name()
+template <typename Base>
 class Castable {
  public:
   template <class Class>
@@ -26,6 +30,7 @@ class Castable {
 
   template <class Class>
   bool is() const {
+    static_assert(std::is_base_of<Base, Class>::value, "Unrelated classes");
     return is_class_of(Class::static_class_name());
   }
 

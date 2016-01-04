@@ -230,8 +230,8 @@ gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
 //
 // Item
 //
-class Item : public ui::CanvasPainter, public common::Castable {
-  DECLARE_CASTABLE_CLASS(Item, common::Castable);
+class Item : public ui::CanvasPainter, public common::Castable<Item> {
+  DECLARE_CASTABLE_CLASS(Item, Castable);
 
  public:
   ~Item() override;

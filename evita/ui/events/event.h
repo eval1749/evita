@@ -33,15 +33,15 @@ enum class EventFlags {
 };
 
 #define FOR_EACH_UI_EVENT_TYPE(V) \
-  V(Invalid) \
-  V(KeyPressed) \
-  V(KeyReleased) \
-  V(MouseEntered) \
-  V(MouseExited) \
-  V(MouseMoved) \
-  V(MousePressed) \
-  V(MouseReleased) \
-  V(MouseWheel) \
+  V(Invalid)                      \
+  V(KeyPressed)                   \
+  V(KeyReleased)                  \
+  V(MouseEntered)                 \
+  V(MouseExited)                  \
+  V(MouseMoved)                   \
+  V(MousePressed)                 \
+  V(MouseReleased)                \
+  V(MouseWheel)
 
 enum class EventType {
 #define V(name) name,
@@ -86,7 +86,7 @@ enum class MouseButton {
 //
 // Event
 //
-class Event : public common::Castable {
+class Event : public common::Castable<Event> {
   DECLARE_CASTABLE_CLASS(Event, Castable);
 
  public:

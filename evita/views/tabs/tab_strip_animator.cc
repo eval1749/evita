@@ -20,7 +20,7 @@ namespace views {
 //
 // TabStripAnimator::Action
 //
-class TabStripAnimator::Action : public common::Castable,
+class TabStripAnimator::Action : public common::Castable<Action>,
                                  private ui::AnimationObserver,
                                  private TabContentObserver {
   DECLARE_CASTABLE_CLASS(Action, Castable);

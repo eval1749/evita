@@ -38,7 +38,7 @@ class Document;
 //
 // Node
 //
-class Node : public common::Castable, public gc::Collectable<Node> {
+class Node : public common::Castable<Node>, public gc::Collectable<Node> {
   DECLARE_VISUAL_NODE_ABSTRACT_CLASS(Node, Castable);
 
  public:

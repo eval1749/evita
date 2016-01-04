@@ -14,7 +14,7 @@ namespace ui {
 //
 // EventTarget
 //
-class EventTarget : public common::Castable, public EventHandler {
+class EventTarget : public common::Castable<EventTarget>, public EventHandler {
   DECLARE_CASTABLE_CLASS(EventTarget, Castable);
 
  public:

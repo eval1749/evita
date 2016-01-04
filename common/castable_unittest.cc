@@ -1,12 +1,13 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "common/castable.h"
 #include "gtest/gtest.h"
 
 namespace {
 
-class Class1 : public common::Castable {
+class Class1 : public common::Castable<Class1> {
   DECLARE_CASTABLE_CLASS(Class1, Castable);
 };
 

@@ -42,7 +42,7 @@ class RenderStyle;
 //
 // InlineBox
 //
-class InlineBox : public common::Castable {
+class InlineBox : public common::Castable<InlineBox> {
   DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
 
  public:

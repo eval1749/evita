@@ -33,7 +33,7 @@ namespace visuals {
 //
 // DisplayItem
 //
-class DisplayItem : public common::Castable {
+class DisplayItem : public common::Castable<DisplayItem> {
   DECLARE_DISPLAY_ITEM_ABSTRACT_CLASS(DisplayItem, Castable)
 
  public:

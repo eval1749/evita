@@ -19,7 +19,7 @@ class UndoStack;
 //
 // UndoStep
 //
-class UndoStep : public common::Castable {
+class UndoStep : public common::Castable<UndoStep> {
   DECLARE_CASTABLE_CLASS(UndoStep, Castable);
 
  public:

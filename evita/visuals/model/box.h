@@ -47,7 +47,7 @@ class Style;
 //
 // Box
 //
-class Box : public common::Castable {
+class Box : public common::Castable<Box> {
   DECLARE_VISUAL_BOX_ABSTRACT_CLASS(Box, Castable);
 
  public:

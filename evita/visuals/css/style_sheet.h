@@ -12,6 +12,7 @@
 #include "base/macros.h"
 #include "base/observer_list.h"
 #include "base/strings/string_piece.h"
+#include "evita/gc/collectable.h"
 
 namespace visuals {
 namespace css {
@@ -24,7 +25,9 @@ class StyleSheetObserver;
 //
 // StyleSheet
 //
-class StyleSheet final {
+class StyleSheet final : public gc::Collectable<StyleSheet> {
+  DECLARE_GC_VISITABLE_OBJECT(StyleSheet)
+
  public:
   StyleSheet();
   ~StyleSheet();

@@ -9,14 +9,14 @@
 
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
-#include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/descendants_or_self.h"
+#include "evita/visuals/model/simple_box_tree_builder.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
 
 TEST(RootBoxTest, GetBoxById) {
-  const auto& root = BoxTreeBuilder()
+  const auto& root = SimpleBoxTreeBuilder()
                          .Add<BlockFlowBox>(L"block1")
                          .Begin<BlockFlowBox>(L"block2")
                          .Add<BlockFlowBox>(L"block3")

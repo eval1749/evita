@@ -7,8 +7,8 @@
 #include "evita/visuals/model/descendants_or_self.h"
 
 #include "evita/visuals/model/block_flow_box.h"
-#include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/root_box.h"
+#include "evita/visuals/model/simple_box_tree_builder.h"
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/model/box_traversal.h"
 #include "gtest/gtest.h"
@@ -16,7 +16,7 @@
 namespace visuals {
 
 TEST(BoxDescendantsOrSelfTest, Basic) {
-  const auto& root = BoxTreeBuilder()
+  const auto& root = SimpleBoxTreeBuilder()
                          .Begin<BlockFlowBox>()
                          .Add<TextBox>(L"a")
                          .Begin<BlockFlowBox>()
@@ -36,7 +36,7 @@ TEST(BoxDescendantsOrSelfTest, Basic) {
 }
 
 TEST(BoxDescendantsOrSelfTest, NoChild) {
-  const auto& root = BoxTreeBuilder().Add<BlockFlowBox>().Build();
+  const auto& root = SimpleBoxTreeBuilder().Add<BlockFlowBox>().Build();
   const auto block = root->first_child();
   std::vector<Box*> visited;
   for (const auto& runner : Box::DescendantsOrSelf(*block))

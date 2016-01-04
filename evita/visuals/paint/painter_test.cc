@@ -12,8 +12,8 @@
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
-#include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/root_box.h"
+#include "evita/visuals/model/simple_box_tree_builder.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
 #include "gtest/gtest.h"
@@ -22,7 +22,7 @@ namespace visuals {
 
 TEST(PainterTest, Basic) {
   const auto& root =
-      BoxTreeBuilder()
+      SimpleBoxTreeBuilder()
           .Begin<BlockFlowBox>()
           .SetStyle(*css::StyleBuilder()
                          .SetBackground(css::Background(css::Color(1, 1, 1)))

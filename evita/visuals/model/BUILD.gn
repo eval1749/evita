@@ -22,8 +22,6 @@ source_set("model") {
     "box_style.cc",
     "box_traversal.cc",
     "box_traversal.h",
-    "box_tree_builder.cc",
-    "box_tree_builder.h",
     "box_tree_lifecycle.cc",
     "box_tree_lifecycle.h",
     "box_visitor.cc",
@@ -40,6 +38,8 @@ source_set("model") {
     "inline_flow_box.h",
     "root_box.cc",
     "root_box.h",
+    "simple_box_tree_builder.cc",
+    "simple_box_tree_builder.h",
     "text_box.cc",
     "text_box.h",
   ]

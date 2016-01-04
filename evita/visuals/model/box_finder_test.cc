@@ -6,15 +6,15 @@
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_finder.h"
-#include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/root_box.h"
+#include "evita/visuals/model/simple_box_tree_builder.h"
 #include "evita/visuals/model/text_box.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
 
 TEST(BoxFinderTest, Basic) {
-  const auto& root = BoxTreeBuilder()
+  const auto& root = SimpleBoxTreeBuilder()
                          .Begin<BlockFlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")

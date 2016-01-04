@@ -19,10 +19,10 @@
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_finder.h"
 #include "evita/visuals/model/box_traversal.h"
-#include "evita/visuals/model/box_tree_builder.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
+#include "evita/visuals/model/simple_box_tree_builder.h"
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
@@ -104,7 +104,7 @@ const auto kBorder = 1;
 
 std::unique_ptr<RootBox> BuildBoxTree() {
   auto root =
-      BoxTreeBuilder()
+      SimpleBoxTreeBuilder()
           .Begin<BlockFlowBox>(L"main")
           .SetStyle(*css::StyleBuilder()
                          .SetBackground(css::Background(css::Color(1, 1, 1)))
@@ -120,7 +120,7 @@ std::unique_ptr<RootBox> BuildBoxTree() {
                            .Build();
   for (auto index = 0; index < 20; ++index) {
     auto line = std::make_unique<InlineFlowBox>(root.get());
-    BoxTreeBuilder(line.get())
+    SimpleBoxTreeBuilder(line.get())
         .SetStyle(*css::StyleBuilder()
                        .SetBorder(css::Border(css::Color(), 1))
                        .Build())
@@ -148,7 +148,7 @@ std::unique_ptr<RootBox> BuildBoxTree() {
     }
     BoxEditor().AppendChild(list, std::move(line));
   }
-  BoxTreeBuilder(list)
+  SimpleBoxTreeBuilder(list)
       .Begin<InlineFlowBox>(L"hover")
       .SetStyle(
           *css::StyleBuilder()

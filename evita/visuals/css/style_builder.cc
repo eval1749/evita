@@ -24,6 +24,13 @@ std::unique_ptr<Style> StyleBuilder::Build() {
   return std::move(style_);
 }
 
+StyleBuilder& StyleBuilder::SetColor(float red,
+                                     float green,
+                                     float blue,
+                                     float alpha) {
+  return SetColor(css::Color(red, green, blue, alpha));
+}
+
 StyleBuilder& StyleBuilder::SetHeight(float height) {
   return SetHeight(css::Height(css::Length(height)));
 }

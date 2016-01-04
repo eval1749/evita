@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/layout/box_generator.h"
+#include "evita/visuals/layout/box_tree_builder.h"
 
 #include "evita/visuals/css/mock_media.h"
 #include "evita/visuals/css/properties.h"
@@ -21,40 +21,40 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// BoxGeneratorTest
+// BoxTreeBuilderTest
 //
-class BoxGeneratorTest : public ::testing::Test {
+class BoxTreeBuilderTest : public ::testing::Test {
  protected:
-  BoxGeneratorTest() = default;
-  ~BoxGeneratorTest() override = default;
+  BoxTreeBuilderTest() = default;
+  ~BoxTreeBuilderTest() override = default;
 
   const css::MockMedia& mock_media() const { return mock_media_; }
 
  private:
   css::MockMedia mock_media_;
 
-  DISALLOW_COPY_AND_ASSIGN(BoxGeneratorTest);
+  DISALLOW_COPY_AND_ASSIGN(BoxTreeBuilderTest);
 };
 
-TEST_F(BoxGeneratorTest, Basic) {
+TEST_F(BoxTreeBuilderTest, Basic) {
   const auto& document = NodeTreeBuilder()
                              .Begin(L"body")
                              .AddText(L"Hello world!")
                              .End(L"body")
                              .Build();
-  BoxGenerator builder(*document, mock_media());
+  BoxTreeBuilder builder(*document, mock_media());
   const auto& root_box = builder.Build();
   EXPECT_TRUE(root_box.first_child()->is<InlineFlowBox>());
 }
 
-TEST_F(BoxGeneratorTest, Flow) {
+TEST_F(BoxTreeBuilderTest, Flow) {
   const auto& document = NodeTreeBuilder()
                              .Begin(L"body")
                              .AddText(L"foo ")
                              .AddText(L"bar")
                              .End(L"body")
                              .Build();
-  BoxGenerator builder(*document, mock_media());
+  BoxTreeBuilder builder(*document, mock_media());
   const auto& root_box = builder.Build();
   EXPECT_TRUE(root_box.first_child()->is<InlineFlowBox>());
 }

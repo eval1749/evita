@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "evita/visuals/layout/box_generator.h"
+#include "evita/visuals/layout/box_tree_builder.h"
 
 #include "base/logging.h"
 #include "evita/visuals/css/style.h"
@@ -167,18 +167,19 @@ void GenerateVisitor::VisitTextNode(TextNode* text_node) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// BoxGenerator
+// BoxTreeBuilder
 //
-BoxGenerator::BoxGenerator(const Document& document, const css::Media& media)
+BoxTreeBuilder::BoxTreeBuilder(const Document& document,
+                               const css::Media& media)
     : document_(document), style_resolver_(new StyleResolver(document, media)) {
   style_resolver_->AddObserver(this);
 }
 
-BoxGenerator::~BoxGenerator() {
+BoxTreeBuilder::~BoxTreeBuilder() {
   style_resolver_->RemoveObserver(this);
 }
 
-const RootBox& BoxGenerator::Build() {
+const RootBox& BoxTreeBuilder::Build() {
   // TODO(eval1749): We should update box tree rather than build always.
   if (root_box_)
     return *root_box_;
@@ -189,37 +190,37 @@ const RootBox& BoxGenerator::Build() {
   return *root_box_;
 }
 
-void BoxGenerator::Clear() {
+void BoxTreeBuilder::Clear() {
   box_map_.clear();
   root_box_.reset();
 }
 
 // DocumentObserver
-void BoxGenerator::DidAppendChild(const ContainerNode& parent,
-                                  const Node& child) {
+void BoxTreeBuilder::DidAppendChild(const ContainerNode& parent,
+                                    const Node& child) {
   Clear();
 }
 
-void BoxGenerator::DidChangeInlineStyle(const Element& element,
-                                        const css::Style* old_style) {}
-void BoxGenerator::DidInsertBefore(const ContainerNode& parent,
-                                   const Node& child,
-                                   const Node& ref_child) {
+void BoxTreeBuilder::DidChangeInlineStyle(const Element& element,
+                                          const css::Style* old_style) {}
+void BoxTreeBuilder::DidInsertBefore(const ContainerNode& parent,
+                                     const Node& child,
+                                     const Node& ref_child) {
   Clear();
 }
 
-void BoxGenerator::WillRemoveChild(const ContainerNode& parent,
-                                   const Node& child) {
+void BoxTreeBuilder::WillRemoveChild(const ContainerNode& parent,
+                                     const Node& child) {
   Clear();
 }
 
 // StyleChangeObserver
-void BoxGenerator::DidClearStyleCache() {
+void BoxTreeBuilder::DidClearStyleCache() {
   Clear();
 }
 
-void BoxGenerator::DidRemoveStyleCache(const Element& element,
-                                       const css::Style& old_style) {
+void BoxTreeBuilder::DidRemoveStyleCache(const Element& element,
+                                         const css::Style& old_style) {
   Clear();
 }
 

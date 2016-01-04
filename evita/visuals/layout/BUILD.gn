@@ -6,8 +6,8 @@ import("//testing/test.gni")
 
 source_set("layout") {
   sources = [
-    "box_generator.cc",
-    "box_generator.h",
+    "box_tree_builder.cc",
+    "box_tree_builder.h",
     "layouter.cc",
     "layouter.h",
     "size_calculator.cc",
@@ -29,7 +29,7 @@ source_set("test_files") {
   testonly = true
 
   sources = [
-    "box_generator_test.cc",
+    "box_tree_builder_test.cc",
   ]
 
   public_deps = [

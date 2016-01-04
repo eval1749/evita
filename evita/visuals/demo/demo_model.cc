@@ -9,16 +9,24 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "base/time/time.h"
+#include "evita/visuals/css/media_type.h"
+#include "evita/visuals/css/style.h"
+#include "evita/visuals/css/style_builder.h"
+#include "evita/visuals/css/style_sheet.h"
+#include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/demo/demo_window.h"
+#include "evita/visuals/dom/document.h"
+#include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/node_editor.h"
+#include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/display/display_item_list_processor.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
+#include "evita/visuals/geometry/float_rect.h"
+#include "evita/visuals/layout/box_tree_builder.h"
 #include "evita/visuals/layout/layouter.h"
-#include "evita/visuals/model/ancestors_or_self.h"
 #include "evita/visuals/model/block_flow_box.h"
-#include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_finder.h"
-#include "evita/visuals/model/box_traversal.h"
 #include "evita/visuals/model/box_visitor.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
@@ -26,8 +34,6 @@
 #include "evita/visuals/model/text_box.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_builder.h"
 
 namespace visuals {
 
@@ -102,69 +108,75 @@ void BoxPrinter::VisitTextBox(TextBox* box) {
 const auto kMargin = 8;
 const auto kBorder = 1;
 
-std::unique_ptr<RootBox> BuildBoxTree() {
-  auto root =
-      SimpleBoxTreeBuilder()
-          .Begin<BlockFlowBox>(L"main")
+Document* LoadDocument() {
+  const auto document =
+      NodeTreeBuilder()
+          .Begin(L"main")
           .SetStyle(*css::StyleBuilder()
                          .SetBackground(css::Background(css::Color(1, 1, 1)))
                          .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
                          .Build())
-          .Add<BlockFlowBox>(L"list")
-          .End<BlockFlowBox>()
+          .Begin(L"list", L"list")
+          .End(L"list")
+          .End(L"main")
           .Build();
-  const auto list = root->GetBoxById(L"list")->as<BlockFlowBox>();
-  const auto& kBlack = css::StyleBuilder()
-                           .SetColor(css::Color(0, 0, 0))
-                           .SetPadding(css::Padding(2, 5, 2, 5))
-                           .Build();
+  const auto list = document->GetElementById(L"list");
   for (auto index = 0; index < 20; ++index) {
-    auto line = std::make_unique<InlineFlowBox>(root.get());
-    SimpleBoxTreeBuilder(line.get())
-        .SetStyle(*css::StyleBuilder()
-                       .SetBorder(css::Border(css::Color(), 1))
-                       .Build())
-        .Begin<TextBox>(base::StringPrintf(L"line %d", index))
-        .SetStyle(*css::StyleBuilder()
-                       .SetColor(css::Color(0, 0, 0))
-                       .SetPadding(css::Padding(2, 5, 2, 5))
-                       .SetWidth(150)
-                       .Build())
-        .End<TextBox>()
-        .Begin<TextBox>(L"size")
-        .SetStyle(*kBlack)
-        .End<TextBox>()
-        .Begin<TextBox>(L"status")
-        .SetStyle(*kBlack)
-        .End<TextBox>()
-        .Begin<TextBox>(L"file")
-        .SetStyle(*kBlack)
-        .End<TextBox>()
-        .Finish<InlineFlowBox>(line.get());
+    NodeTreeBuilder(list)
+        .Begin(L"list_item")
+        .Begin(L"name")
+        .AddText(base::StringPrintf(L"name %d", index))
+        .End(L"name")
+        .AddText(L"size")
+        .AddText(L"status")
+        .AddText(L"file")
+        .End(L"list_item")
+        .Finish(list);
     if (index == 0) {
-      BoxEditor().SetStyle(
-          line.get(),
+      NodeEditor().SetStyle(
+          list->last_child()->as<Element>(),
           *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
     }
-    BoxEditor().AppendChild(list, std::move(line));
   }
-  SimpleBoxTreeBuilder(list)
-      .Begin<InlineFlowBox>(L"hover")
-      .SetStyle(
-          *css::StyleBuilder()
-               .SetPosition(css::Position::Absolute())
-               .SetLeft(css::Left(css::Length(0)))
-               .SetTop(css::Top(css::Length(-1000)))
-               .SetBackground(
-                   css::Background(css::Color::Rgba(51, 153, 255, 0.1f)))
-               .SetBorder(css::Border(css::Color::Rgba(51, 153, 255, 1.0f), 1))
-               .Build())
-      .Begin<TextBox>(L" ")
-      .SetStyle(*kBlack)
-      .End<TextBox>()
-      .End<InlineFlowBox>()
-      .Finish<BlockFlowBox>(list);
-  return std::move(root);
+  NodeTreeBuilder(list)
+      .Begin(L"list_item", L"hover")
+      .SetStyle(*css::StyleBuilder()
+                     .SetLeft(css::Left(css::Length(0)))
+                     .SetTop(css::Top(css::Length(-1000)))
+                     .Build())
+      .AddText(L" ")
+      .End(L"list_item")
+      .Finish(list);
+  return document;
+}
+
+css::StyleSheet* LoadStyleSheet() {
+  const auto style_sheet = new css::StyleSheet();
+  style_sheet->AddRule(
+      L"#hover", std::move(css::StyleBuilder()
+                               .SetPosition(css::Position::Absolute())
+                               .SetLeft(css::Left(css::Length(20)))
+                               .SetTop(css::Top(css::Length(300)))
+                               .SetBackground(css::Background(
+                                   css::Color::Rgba(51, 153, 255, 0.1f)))
+                               .SetBorder(css::Border(
+                                   css::Color::Rgba(51, 153, 255, 1.0f), 1))
+                               .Build()));
+  style_sheet->AddRule(
+      L"list",
+      std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
+  style_sheet->AddRule(L"list_item",
+                       std::move(css::StyleBuilder()
+                                     .SetColor(css::Color(0, 0, 0))
+                                     .SetDisplay(css::Display::Block())
+                                     .SetPadding(css::Padding(2, 5, 2, 5))
+                                     .Build()));
+  style_sheet->AddRule(
+      L"main",
+      std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
+  style_sheet->AddRule(L"name",
+                       std::move(css::StyleBuilder().SetWidth(150).Build()));
+  return style_sheet;
 }
 
 void PrintBox(const Box& box) {
@@ -200,7 +212,11 @@ void PrintPaint(const DisplayItemList& list) {
 //
 /// DemoModel
 //
-DemoModel::DemoModel() : root_box_(BuildBoxTree()) {}
+DemoModel::DemoModel()
+    : document_(LoadDocument()),
+      style_sheet_(LoadStyleSheet()),
+      box_tree_(new BoxTreeBuilder(*document_, *this, {style_sheet_})) {}
+
 DemoModel::~DemoModel() {}
 
 void DemoModel::AttachWindow(DemoWindow* window) {
@@ -208,20 +224,30 @@ void DemoModel::AttachWindow(DemoWindow* window) {
   RequestAnimationFrame();
 }
 
-InlineFlowBox* DemoModel::FindInlineFlowBox(const FloatPoint& point) const {
-  Layouter().Layout(root_box_.get());
-  const auto& found = BoxFinder(*root_box_).FindByPoint(point);
+Element* DemoModel::FindListItem(const FloatPoint& point) const {
+  const auto root_box = box_tree_->Build();
+  Layouter().Layout(root_box);
+  const auto& found = BoxFinder(*root_box).FindByPoint(point);
   if (!found.box)
     return nullptr;
-  const auto list = root_box_->GetBoxById(L"list");
-  const auto source = found.box;
+  const auto list = document_->GetElementById(L"list");
+  const auto source = found.box->node();
   if (!source->IsDescendantOf(*list))
     return nullptr;
-  for (const auto& runner : Box::AncestorsOrSelf(*source)) {
-    if (const auto line = runner->as<InlineFlowBox>())
-      return line;
+  for (const auto& runner : Node::AncestorsOrSelf(*source)) {
+    if (runner->tag_name() == L"list_item")
+      return runner->as<Element>();
   }
   return nullptr;
+}
+
+// css::Media
+css::MediaType DemoModel::media_type() const {
+  return css::MediaType::Screen;
+}
+
+FloatSize DemoModel::viewport_size() const {
+  return viewport_size_;
 }
 
 // ui::AnimationFrameHandler
@@ -230,56 +256,62 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
   if (!canvas)
     return RequestAnimationFrame();
 
-  Layouter().Layout(root_box_.get());
-  if (root_box_->IsPaintClean())
+  DCHECK(!viewport_size_.IsEmpty());
+
+  const auto root_box = box_tree_->Build();
+  Layouter().Layout(root_box);
+  if (root_box->IsPaintClean()) {
+    // Box tree is changed outside viewport(?).
     return;
-  PaintInfo paint_info(FloatRect(root_box_->viewport_size()));
-  auto list = Painter().Paint(paint_info, *root_box_);
+  }
+  PaintInfo paint_info(root_box->bounds());
+  auto display_item_list = Painter().Paint(paint_info, *root_box);
 
 #if 0
   static base::Time last_time;
   if (now - last_time >= base::TimeDelta::FromMilliseconds(1000)) {
     last_time = now;
-    PrintBox(*root_box_);
-    PrintPaint(*list);
+    PrintBox(*root_box);
+    PrintPaint(*display_item_list);
   }
 #endif
 
   DisplayItemListProcessor processor;
-  processor.Paint(canvas, std::move(list));
+  processor.Paint(canvas, std::move(display_item_list));
 }
 
 // WindowEventHandler
 void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
   RequestAnimationFrame();
-  BoxEditor().SetViewportSize(root_box_.get(), bounds.size());
+  viewport_size_ = bounds.size();
+  css::Media::DidChangeViewportSize();
 }
 
 void DemoModel::DidMoveMouse(const FloatPoint& point) {
-  const auto line = FindInlineFlowBox(point);
+  const auto line = FindListItem(point);
   if (!line)
     return;
-  const auto hover = root_box_->GetBoxById(L"hover");
-  const auto hover_point = line->bounds().origin();
-  BoxEditor().SetStyle(hover,
-                       *css::StyleBuilder()
-                            .SetTop(css::Top(css::Length(hover_point.y())))
-                            .SetLeft(css::Left(css::Length(hover_point.x())))
-                            .Build());
+  const auto hover = document_->GetElementById(L"hover");
+  const auto hover_point = box_tree_->BoxFor(*line)->bounds().origin();
+  NodeEditor().SetStyle(hover,
+                        *css::StyleBuilder()
+                             .SetTop(css::Top(css::Length(hover_point.y())))
+                             .SetLeft(css::Left(css::Length(hover_point.x())))
+                             .Build());
   RequestAnimationFrame();
 }
 
 void DemoModel::DidPressMouse(const FloatPoint& point) {
-  const auto line = FindInlineFlowBox(point);
+  const auto line = FindListItem(point);
   if (!line)
     return;
-  const auto hover = root_box_->GetBoxById(L"hover");
-  const auto hover_point = line->bounds().origin();
-  BoxEditor().SetStyle(hover,
-                       *css::StyleBuilder()
-                            .SetTop(css::Top(css::Length(hover_point.y())))
-                            .SetLeft(css::Left(css::Length(hover_point.x())))
-                            .Build());
+  const auto hover = document_->GetElementById(L"hover");
+  const auto hover_point = box_tree_->BoxFor(*line)->bounds().origin();
+  NodeEditor().SetStyle(hover,
+                        *css::StyleBuilder()
+                             .SetTop(css::Top(css::Length(hover_point.y())))
+                             .SetLeft(css::Left(css::Length(hover_point.x())))
+                             .Build());
   RequestAnimationFrame();
 }
 

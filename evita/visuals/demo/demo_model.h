@@ -9,20 +9,28 @@
 
 #include "base/macros.h"
 #include "evita/ui/animation/animation_frame_handler.h"
+#include "evita/visuals/css/media.h"
 #include "evita/visuals/demo/demo_window.h"
+#include "evita/visuals/geometry/float_size.h"
 #include "evita/visuals/model/box_finder.h"
 
 namespace visuals {
 
+class BoxTreeBuilder;
 class DemoWindow;
-class InlineFlowBox;
-class RootBox;
+class Document;
+class Element;
+
+namespace css {
+class StyleSheet;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
 // DemoModel
 //
-class DemoModel final : public ui::AnimationFrameHandler,
+class DemoModel final : public css::Media,
+                        public ui::AnimationFrameHandler,
                         public WindowEventHandler {
  public:
   DemoModel();
@@ -31,7 +39,11 @@ class DemoModel final : public ui::AnimationFrameHandler,
   void AttachWindow(DemoWindow* window);
 
  private:
-  InlineFlowBox* FindInlineFlowBox(const FloatPoint& point) const;
+  Element* FindListItem(const FloatPoint& point) const;
+
+  // css::Media
+  css::MediaType media_type() const final;
+  FloatSize viewport_size() const final;
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(base::Time time) final;
@@ -42,7 +54,11 @@ class DemoModel final : public ui::AnimationFrameHandler,
   void DidMoveMouse(const FloatPoint& point) final;
   void DidPressMouse(const FloatPoint& point) final;
 
-  const std::unique_ptr<RootBox> root_box_;
+  Document* const document_;
+  css::StyleSheet* style_sheet_;
+  FloatSize viewport_size_;
+
+  std::unique_ptr<BoxTreeBuilder> box_tree_;
 
   DemoWindow* window_ = nullptr;
 

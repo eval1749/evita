@@ -22,6 +22,7 @@ source_set("style") {
 source_set("test_files") {
   testonly = true
   sources = [
+    "compiled_style_sheet_test.cc",
     "style_resolver_test.cc",
   ]
 

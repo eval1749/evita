@@ -8,6 +8,7 @@
 #include "evita/visuals/layout/box_tree_builder.h"
 
 #include "base/logging.h"
+#include "evita/visuals/css/media.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
@@ -84,9 +85,16 @@ void GenerateVisitor::ReturnBox(std::unique_ptr<Box> box) {
 void GenerateVisitor::VisitDocument(Document* document) {
   // TODO(eval1749): Load default style sheet
   for (const auto& child : document->child_nodes()) {
-    if (auto const element = child->as<Element>())
-      BoxEditor().AppendChild(root_box_, std::move(GenerateBox(*element)));
-    return;
+    if (auto const document_element = child->as<Element>()) {
+      auto document_element_box = GenerateBox(*document_element);
+      DCHECK(document_element_box) << "Oops, document element "
+                                   << *document_element
+                                   << " doesn't have a "
+                                      "box. Maybe it has display:none: "
+                                   << ResolveStyleFor(*document_element);
+      BoxEditor().AppendChild(root_box_, std::move(document_element_box));
+      return;
+    }
   }
   NOTREACHED() << document << " is empty.";
 }
@@ -104,6 +112,8 @@ void GenerateVisitor::VisitElement(Element* element) {
   // Does "flow" formatting
   for (const auto& child : element->child_nodes()) {
     auto child_box = GenerateBox(*child);
+    if (!child_box)
+      continue;
     if (child_box->is<InlineBox>() || child_box->is<InlineFlowBox>()) {
       inline_boxes.push_back(std::move(child_box));
       continue;
@@ -150,11 +160,11 @@ void GenerateVisitor::VisitElement(Element* element) {
       BoxEditor().AppendChild(block_flow_box.get(), std::move(child_box));
     return ReturnBox(std::move(block_flow_box));
   }
-  auto inline_box = std::make_unique<InlineFlowBox>(root_box_, element);
-  BoxEditor().SetStyle(inline_box.get(), style);
+  auto inline_flow_box = std::make_unique<InlineFlowBox>(root_box_, element);
+  BoxEditor().SetStyle(inline_flow_box.get(), style);
   for (auto& child_box : child_boxes)
-    BoxEditor().AppendChild(inline_box.get(), std::move(child_box));
-  return ReturnBox(std::move(inline_box));
+    BoxEditor().AppendChild(inline_flow_box.get(), std::move(child_box));
+  return ReturnBox(std::move(inline_flow_box));
 }
 
 void GenerateVisitor::VisitTextNode(TextNode* text_node) {
@@ -169,14 +179,23 @@ void GenerateVisitor::VisitTextNode(TextNode* text_node) {
 //
 // BoxTreeBuilder
 //
-BoxTreeBuilder::BoxTreeBuilder(const Document& document,
-                               const css::Media& media)
-    : document_(document), style_resolver_(new StyleResolver(document, media)) {
+BoxTreeBuilder::BoxTreeBuilder(
+    const Document& document,
+    const css::Media& media,
+    const std::vector<css::StyleSheet*>& style_sheets)
+    : document_(document),
+      style_resolver_(new StyleResolver(document, media, style_sheets)) {
+  document_.AddObserver(this);
   style_resolver_->AddObserver(this);
 }
 
 BoxTreeBuilder::~BoxTreeBuilder() {
   style_resolver_->RemoveObserver(this);
+}
+
+Box* BoxTreeBuilder::BoxFor(const Node& node) const {
+  const auto& it = box_map_.find(&node);
+  return it == box_map_.end() ? nullptr : it->second;
 }
 
 RootBox* BoxTreeBuilder::Build() {
@@ -187,6 +206,8 @@ RootBox* BoxTreeBuilder::Build() {
   root_box_ = std::make_unique<RootBox>(document_);
   box_map_.emplace(&document_, root_box_.get());
   GenerateVisitor(root_box_.get(), style_resolver_.get(), &box_map_).BuildAll();
+  BoxEditor().SetViewportSize(root_box_.get(),
+                              style_resolver_->media().viewport_size());
   return root_box_.get();
 }
 
@@ -202,7 +223,11 @@ void BoxTreeBuilder::DidAppendChild(const ContainerNode& parent,
 }
 
 void BoxTreeBuilder::DidChangeInlineStyle(const Element& element,
-                                          const css::Style* old_style) {}
+                                          const css::Style* old_style) {
+  // TODO(eval1749): We should not clear root box to optimize left/top changes.
+  Clear();
+}
+
 void BoxTreeBuilder::DidInsertBefore(const ContainerNode& parent,
                                      const Node& child,
                                      const Node& ref_child) {

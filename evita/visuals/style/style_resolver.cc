@@ -7,8 +7,10 @@
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
+#include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/style/compiled_style_sheet.h"
 #include "evita/visuals/style/style_change_observer.h"
 
 namespace visuals {
@@ -24,18 +26,29 @@ void InheritStyle(css::Style* style, const css::Style& parent_style) {
 //
 // StyleResolver
 //
-StyleResolver::StyleResolver(const Document& document, const css::Media& media)
-    : default_style_(new css::Style()), document_(document), media_(media) {
+StyleResolver::StyleResolver(const Document& document,
+                             const css::Media& media,
+                             const std::vector<css::StyleSheet*>& style_sheets)
+    : default_style_(new css::Style()),
+      document_(document),
+      media_(media),
+      style_sheets_(style_sheets) {
   // TODO(eval1749): We should get default color and background color from
   // system metrics.
   css::StyleEditor().SetBackground(default_style_.get(),
-                                   css::Background(css::Color(1, 1, 1)));
+                                   css::Background(css::Color()));
   css::StyleEditor().SetColor(default_style_.get(), css::Color(0, 0, 0));
   css::StyleEditor().SetDisplay(default_style_.get(), css::Display());
   document_.AddObserver(this);
+  for (const auto& style_sheet : style_sheets_) {
+    style_sheet->AddObserver(this);
+    compiled_style_sheets_.emplace_back(new CompiledStyleSheet(*style_sheet));
+  }
 }
 
 StyleResolver::~StyleResolver() {
+  for (const auto& style_sheet : style_sheets_)
+    style_sheet->RemoveObserver(this);
   document_.RemoveObserver(this);
 }
 
@@ -43,15 +56,24 @@ void StyleResolver::AddObserver(StyleChangeObserver* observer) const {
   observers_.AddObserver(observer);
 }
 
+void StyleResolver::Clear() {
+  style_map_.clear();
+  FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
+}
+
 std::unique_ptr<css::Style> StyleResolver::ComputeStyleFor(
     const Element& element) {
-  const auto& parent_style = ResolveFor(*element.parent());
-  if (const auto inline_style = element.inline_style()) {
-    auto style = std::make_unique<css::Style>(*inline_style);
-    InheritStyle(style.get(), parent_style);
-    return std::move(style);
+  const auto inline_style = element.inline_style();
+  auto style = inline_style ? std::make_unique<css::Style>(*inline_style)
+                            : std::make_unique<css::Style>();
+  for (const auto& style_sheet : compiled_style_sheets_) {
+    auto matched = style_sheet->Match(element);
+    if (!matched)
+      continue;
+    css::StyleEditor().Merge(style.get(), *matched);
   }
-  return std::make_unique<css::Style>(parent_style);
+  InheritStyle(style.get(), ResolveFor(*element.parent()));
+  return std::move(style);
 }
 
 const css::Style& StyleResolver::InlineStyleOf(const Element& element) const {
@@ -75,6 +97,7 @@ const css::Style& StyleResolver::ResolveFor(const Node& node) {
   if (it != style_map_.end())
     return *it->second;
   auto style = ComputeStyleFor(*element);
+  css::StyleEditor().Merge(style.get(), *default_style_);
   const auto& result = style_map_.emplace(element, std::move(style));
   return *result.first->second;
 }
@@ -82,14 +105,21 @@ const css::Style& StyleResolver::ResolveFor(const Node& node) {
 // css::MediaObserver
 void StyleResolver::DidChangeViewportSize() {
   // TODO(eval1749): Invalidate styles depends on viewport size
-  style_map_.clear();
-  FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
+  Clear();
 }
 
 void StyleResolver::DidChangeSystemMetrics() {
   // TODO(eval1749): Invalidate styles using system colors.
-  style_map_.clear();
-  FOR_EACH_OBSERVER(StyleChangeObserver, observers_, DidClearStyleCache());
+  Clear();
+}
+
+// css::StyleSheetObserver
+void StyleResolver::DidAddRule(const css::Rule& rule) {
+  Clear();
+}
+
+void StyleResolver::DidRemoveRule(const css::Rule& rule) {
+  Clear();
 }
 
 // DocumentObserver

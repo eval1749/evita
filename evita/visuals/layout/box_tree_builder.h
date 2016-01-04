@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include "base/macros.h"
 #include "evita/visuals/dom/document_observer.h"
@@ -16,6 +17,7 @@ namespace visuals {
 
 namespace css {
 class Media;
+class StyleSheet;
 }
 
 class Box;
@@ -30,10 +32,13 @@ class StyleResolver;
 class BoxTreeBuilder final : public DocumentObserver,
                              public StyleChangeObserver {
  public:
-  BoxTreeBuilder(const Document& document, const css::Media& media);
+  BoxTreeBuilder(const Document& document,
+                 const css::Media& media,
+                 const std::vector<css::StyleSheet*>& style_sheets);
   ~BoxTreeBuilder();
 
   RootBox* Build();
+  Box* BoxFor(const Node& node) const;
 
  private:
   void Clear();

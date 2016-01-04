@@ -56,7 +56,7 @@ NodeTreeBuilder& NodeTreeBuilder::BeginInternal(Element* child) {
 }
 
 Document* NodeTreeBuilder::Build() {
-  DCHECK_EQ(1, nodes_.size());
+  DCHECK_EQ(1, nodes_.size()) << " You should call End() for " << nodes_.top();
   nodes_.pop();
   const auto document = new_document_;
   new_document_ = nullptr;

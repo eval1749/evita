@@ -5,6 +5,7 @@
 #include "evita/visuals/css/style_builder.h"
 
 #include "evita/visuals/css/style.h"
+#include "evita/visuals/css/style_editor.h"
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/values.h"
 
@@ -41,8 +42,7 @@ StyleBuilder& StyleBuilder::SetWidth(float width) {
 
 #define V(Name, name, type, text)                    \
   StyleBuilder& StyleBuilder::Set##Name(type name) { \
-    style_->contains_.insert(PropertyId::Name);      \
-    style_->name##_ = name;                          \
+    StyleEditor().Set##Name(style_.get(), name);     \
     return *this;                                    \
   }
 

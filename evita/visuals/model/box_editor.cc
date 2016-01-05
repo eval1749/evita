@@ -51,10 +51,6 @@ Box* BoxEditor::AppendChild(ContainerBox* container,
     container->first_child_ = new_child;
   }
   container->last_child_ = new_child;
-  if (const auto root_box = FindRootBox(*container)) {
-    for (const auto runner : Box::DescendantsOrSelf(*new_child))
-      root_box->RegisterBoxIdIfNeeded(*runner);
-  }
   DidChangeChild(container->parent_);
   return new_child;
 }
@@ -99,11 +95,6 @@ void BoxEditor::DidPaint(Box* box) {
 std::unique_ptr<Box> BoxEditor::RemoveChild(ContainerBox* container,
                                             Box* old_child) {
   DCHECK_EQ(container, old_child->parent_);
-  if (const auto root_box = FindRootBox(*container)) {
-    for (const auto runner : Box::DescendantsOrSelf(*old_child))
-      root_box->UnregisterBoxIdIfNeeded(*runner);
-  }
-
   const auto next_sibling = old_child->next_sibling_;
   const auto previous_sibling = old_child->previous_sibling_;
 

@@ -9,6 +9,7 @@
 #include <stack>
 
 #include "base/macros.h"
+#include "base/logging.h"
 
 namespace visuals {
 

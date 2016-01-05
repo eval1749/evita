@@ -34,7 +34,6 @@ class ContainerBox : public Box {
   bool IsSubtreeChanged() const { return is_subtree_changed_; }
 
  protected:
-  ContainerBox(RootBox* root_box, const base::StringPiece16& id);
   ContainerBox(RootBox* root_box, const Node* node);
   explicit ContainerBox(RootBox* root_box);
 

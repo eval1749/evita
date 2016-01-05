@@ -6,6 +6,7 @@
 
 #include "evita/visuals/model/box_finder.h"
 
+#include "base/logging.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/root_box.h"

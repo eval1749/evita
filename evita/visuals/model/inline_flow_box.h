@@ -17,7 +17,6 @@ class InlineFlowBox final : public ContainerBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(InlineFlowBox, ContainerBox);
 
  public:
-  InlineFlowBox(RootBox* root_box, const base::StringPiece16& id);
   InlineFlowBox(RootBox* root_box, const Node* node);
   explicit InlineFlowBox(RootBox* root_box);
   ~InlineFlowBox() final;

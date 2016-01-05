@@ -14,9 +14,6 @@ namespace visuals {
 // ContainerBox
 //
 
-ContainerBox::ContainerBox(RootBox* root_box, const base::StringPiece16& id)
-    : Box(root_box, id) {}
-
 ContainerBox::ContainerBox(RootBox* root_box, const Node* node)
     : Box(root_box, node) {}
 

@@ -6,6 +6,7 @@
 
 #include "evita/visuals/layout/size_calculator.h"
 
+#include "base/logging.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/model/block_flow_box.h"

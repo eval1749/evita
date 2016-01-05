@@ -9,8 +9,6 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "base/strings/string16.h"
-#include "base/strings/string_piece.h"
 #include "common/castable.h"
 #include "evita/visuals/css/background.h"
 #include "evita/visuals/css/border.h"
@@ -66,9 +64,6 @@ class Box : public common::Castable<Box> {
   RootBox* root_box() const { return root_box_; }
 
   // Box identifiers
-  // TODO(eval1749): |Box::id()| is deprecated.
-  const base::string16& id() const { return id_; }
-  // |node()| is used by |BoxFinder| to map box to node.
   const Node* node() const { return node_; }
   // |sequence_id()| is used for debugging display tree generation and display.
   int sequence_id() const { return sequence_id_; }
@@ -116,15 +111,11 @@ class Box : public common::Castable<Box> {
   bool ShouldPaint() const { return should_paint_; }
 
  protected:
-  Box(RootBox* root_box, const base::StringPiece16& id);
   Box(RootBox* root_box, const Node* node);
   explicit Box(RootBox* root_box);
 
  private:
   FloatRect bounds_;
-  // User specified string identifier of this box. Multiple boxes can have
-  // same string id.
-  const base::string16 id_;
   const Node* const node_;
   const int sequence_id_;
 

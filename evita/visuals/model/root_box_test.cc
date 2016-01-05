@@ -13,30 +13,4 @@
 #include "evita/visuals/model/simple_box_tree_builder.h"
 #include "gtest/gtest.h"
 
-namespace visuals {
-
-TEST(RootBoxTest, GetBoxById) {
-  const auto& root = SimpleBoxTreeBuilder()
-                         .Add<BlockFlowBox>(L"block1")
-                         .Begin<BlockFlowBox>(L"block2")
-                         .Add<BlockFlowBox>(L"block3")
-                         .Add<BlockFlowBox>(L"block4")
-                         .End<BlockFlowBox>()
-                         .Build();
-
-  std::map<base::string16, Box*> id_map;
-  for (const auto& box : Box::DescendantsOrSelf(*root)) {
-    if (box->id().empty())
-      continue;
-    id_map.insert(std::make_pair(box->id(), box));
-  }
-
-  EXPECT_EQ(id_map.find(L"block1")->second, root->GetBoxById(L"block1"));
-  EXPECT_EQ(id_map.find(L"block3")->second, root->GetBoxById(L"block3"));
-  EXPECT_EQ(nullptr, root->GetBoxById(L"not exist"));
-
-  BoxEditor().RemoveChild(root.get(), root->GetBoxById(L"block2"));
-  EXPECT_EQ(nullptr, root->GetBoxById(L"block2"));
-}
-
-}  // namespace visuals
+namespace visuals {}  // namespace visuals

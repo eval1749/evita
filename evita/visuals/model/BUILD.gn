@@ -38,8 +38,6 @@ source_set("model") {
     "inline_flow_box.h",
     "root_box.cc",
     "root_box.h",
-    "simple_box_tree_builder.cc",
-    "simple_box_tree_builder.h",
     "text_box.cc",
     "text_box.h",
   ]
@@ -49,6 +47,18 @@ source_set("model") {
     "//evita/visuals/css",
     "//evita/visuals/dom",
     "//evita/visuals/geometry",
+  ]
+}
+
+source_set("test_supports") {
+  testonly = true
+  sources = [
+    "simple_box_tree_builder.cc",
+    "simple_box_tree_builder.h",
+  ]
+  deps = [
+    "//base",
+    ":model",
   ]
 }
 
@@ -64,7 +74,7 @@ source_set("test_files") {
   ]
 
   deps = [
-    ":model",
+    ":test_supports",
     "//evita/visuals/layout",
     "//testing/gtest",
   ]

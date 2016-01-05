@@ -25,6 +25,7 @@ class RootBox final : public ContainerBox {
   ~RootBox() final;
 
   BoxTreeLifecycle* lifecycle() const { return &lifecycle_; }
+  int version() const { return version_; }
   const FloatSize& viewport_size() const { return viewport_size_; }
 
   bool InLayout() const;
@@ -34,6 +35,7 @@ class RootBox final : public ContainerBox {
 
  private:
   mutable BoxTreeLifecycle lifecycle_;
+  int version_ = 0;
   FloatSize viewport_size_;
 
   DISALLOW_COPY_AND_ASSIGN(RootBox);

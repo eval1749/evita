@@ -40,6 +40,7 @@ Box* BoxEditor::AppendChild(ContainerBox* container,
     container->first_child_ = new_child;
   }
   container->last_child_ = new_child;
+  ++container->root_box_->version_;
   DidChangeChild(container->parent_);
   return new_child;
 }
@@ -99,6 +100,7 @@ std::unique_ptr<Box> BoxEditor::RemoveChild(ContainerBox* container,
   old_child->next_sibling_ = nullptr;
   old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;
+  ++container->root_box_->version_;
   DidChangeChild(container);
   return std::unique_ptr<Box>(old_child);
 }
@@ -112,6 +114,7 @@ void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {
 void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {
   if (box->baseline_ == new_baseline)
     return;
+  ++box->root_box_->version_;
   box->baseline_ = new_baseline;
   box->is_content_changed_ = true;
   ScheduleVisualUpdateIfNeeded(box);
@@ -156,6 +159,7 @@ void BoxEditor::SetContentChanged(InlineBox* box) {
   V(width)
 
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
+  ++box->root_box_->version_;
   if (new_style.has_display() &&
       new_style.display().is_none() != box->is_display_none_) {
     box->is_display_none_ = new_style.display().is_none();
@@ -218,6 +222,7 @@ void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
   if (text_box->color_ == color)
     return;
   text_box->color_ = color;
+  ++text_box->root_box_->version_;
   SetContentChanged(text_box);
 }
 
@@ -227,6 +232,7 @@ void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
     return;
   root_box->viewport_size_ = size;
   root_box->is_size_changed_ = true;
+  ++root_box->version_;
   ScheduleVisualUpdateIfNeeded(root_box);
 }
 

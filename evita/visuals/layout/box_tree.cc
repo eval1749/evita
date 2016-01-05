@@ -169,7 +169,7 @@ void GenerateVisitor::VisitElement(Element* element) {
 
 void GenerateVisitor::VisitTextNode(TextNode* text_node) {
   auto text_box =
-      std::make_unique<TextBox>(root_box_, text_node->text(), text_node);
+      std::make_unique<TextBox>(root_box_, text_node->data(), text_node);
   const auto& style = ComputedStyleOf(*text_node);
   BoxEditor().SetTextColor(text_box.get(), style.color().value());
   ReturnBox(std::move(text_box));

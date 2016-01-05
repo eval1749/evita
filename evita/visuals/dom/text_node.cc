@@ -12,8 +12,8 @@ namespace visuals {
 //
 // TextNode
 //
-TextNode::TextNode(Document* document, const base::StringPiece16& text)
-    : Node(document, L"#text"), text_(text.as_string()) {}
+TextNode::TextNode(Document* document, const base::StringPiece16& data)
+    : Node(document, L"#text"), data_(data.as_string()) {}
 
 TextNode::~TextNode() {}
 

@@ -19,13 +19,13 @@ class TextNode final : public Node {
   DECLARE_VISUAL_NODE_FINAL_CLASS(TextNode, Node);
 
  public:
-  TextNode(Document* document, const base::StringPiece16& text);
+  TextNode(Document* document, const base::StringPiece16& data);
   ~TextNode() final;
 
-  const base::string16& text() const { return text_; }
+  const base::string16& data() const { return data_; }
 
  private:
-  base::string16 text_;
+  base::string16 data_;
 
   DISALLOW_COPY_AND_ASSIGN(TextNode);
 };

@@ -29,8 +29,8 @@ TEST(BoxFinderTest, Basic) {
   const auto text_node2 = block->last_child()->as<TextNode>();
   const auto& root = SimpleBoxTreeBuilder()
                          .Begin<BlockFlowBox>(block)
-                         .Add<TextBox>(text_node1->text(), text_node1)
-                         .Add<TextBox>(text_node2->text(), text_node2)
+                         .Add<TextBox>(text_node1->data(), text_node1)
+                         .Add<TextBox>(text_node2->data(), text_node2)
                          .End<BlockFlowBox>()
                          .Build();
   const auto main = root->first_child()->as<ContainerBox>();

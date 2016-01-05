@@ -39,6 +39,7 @@ void NodeEditor::AddClass(Element* element,
   const auto& new_class = class_name.as_string();
   element->class_list_.emplace_back(new_class);
   const auto document = element->document();
+  ++document->version_;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidAddClass(*element, new_class));
 }
@@ -62,6 +63,7 @@ void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   }
   container->last_child_ = new_child;
   RegisterElementIdForSubtree(*new_child);
+  ++document->version_;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidAppendChild(*container, *new_child));
 }
@@ -88,6 +90,7 @@ void NodeEditor::InsertBefore(ContainerNode* container,
   new_child->next_sibling_ = ref_child;
   new_child->previous_sibling_ = previous_sibling;
   RegisterElementIdForSubtree(*new_child);
+  ++document->version_;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidInsertBefore(*container, *new_child, *ref_child));
 }
@@ -103,9 +106,10 @@ void NodeEditor::RegisterElementIdForSubtree(const Node& node) {
 }
 
 void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
-  DCHECK(!container->document()->is_locked());
+  const auto document = container->document_;
+  DCHECK(!document->is_locked());
   DCHECK_EQ(container, old_child->parent_);
-  FOR_EACH_OBSERVER(DocumentObserver, container->document_->observers_,
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidRemoveChild(*container, *old_child));
   UnregisterElementIdForSubtree(*old_child);
   const auto next_sibling = old_child->next_sibling_;
@@ -121,7 +125,8 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   old_child->next_sibling_ = nullptr;
   old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;
-  FOR_EACH_OBSERVER(DocumentObserver, container->document_->observers_,
+  ++document->version_;
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidRemoveChild(*container, *old_child));
 }
 
@@ -142,6 +147,7 @@ void NodeEditor::RemoveClass(Element* element,
   }
   element->class_list_.pop_back();
   const auto document = element->document();
+  ++document->version_;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidRemoveClass(*element, old_class));
 }
@@ -159,6 +165,7 @@ void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
     return;
   }
   element->inline_style_ = std::make_unique<css::Style>(new_style);
+  ++document->version_;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidChangeInlineStyle(*element, nullptr));
 }

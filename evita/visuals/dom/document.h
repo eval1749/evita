@@ -37,6 +37,7 @@ class Document final : public ContainerNode {
   ~Document() final;
 
   bool is_locked() const { return lock_count_ > 0; }
+  int version() const { return version_; }
 
   void AddObserver(DocumentObserver* observer) const;
 
@@ -56,6 +57,7 @@ class Document final : public ContainerNode {
   base::ObserverList<DocumentObserver> observers_;
   std::map<base::string16, Element*> id_map_;
   mutable int lock_count_ = 0;
+  int version_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Document);
 };

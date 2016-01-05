@@ -97,6 +97,7 @@ class Box : public common::Castable<Box> {
   virtual void Accept(BoxVisitor* visitor) = 0;
   std::unique_ptr<css::Style> ComputeActualStyle() const;
 
+  bool InDocument() const;
   bool IsDescendantOf(const Box& other) const;
 
   // Change tracking

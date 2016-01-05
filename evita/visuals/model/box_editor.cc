@@ -16,17 +16,6 @@
 
 namespace visuals {
 
-namespace {
-
-RootBox* FindRootBox(const Box& box) {
-  for (const auto& runner : Box::AncestorsOrSelf(box)) {
-    if (const auto root_box = runner->as<RootBox>())
-      return root_box;
-  }
-  return nullptr;
-}
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // BoxEditor
@@ -115,10 +104,9 @@ std::unique_ptr<Box> BoxEditor::RemoveChild(ContainerBox* container,
 }
 
 void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {
-  const auto root_box = FindRootBox(*box);
-  if (!root_box)
+  if (!box->InDocument())
     return;
-  root_box->lifecycle()->Reset();
+  box->root_box()->lifecycle()->Reset();
 }
 
 void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {

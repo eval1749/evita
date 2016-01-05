@@ -6,7 +6,9 @@
 
 #include "base/logging.h"
 #include "evita/visuals/dom/node.h"
+#include "evita/visuals/model/ancestors_or_self.h"
 #include "evita/visuals/model/container_box.h"
+#include "evita/visuals/model/root_box.h"
 
 namespace visuals {
 
@@ -28,6 +30,14 @@ FloatRect Box::content_bounds() const {
   return FloatRect(FloatPoint() + border_.top_left() + padding_.top_left(),
                    bounds_.size() - border_.top_left() - padding_.top_left() -
                        border_.bottom_right() - padding_.bottom_right());
+}
+
+bool Box::InDocument() const {
+  for (const auto& runner : Box::AncestorsOrSelf(*this)) {
+    if (const auto root_box = runner->as<RootBox>())
+      return true;
+  }
+  return false;
 }
 
 bool Box::IsDescendantOf(const Box& other) const {

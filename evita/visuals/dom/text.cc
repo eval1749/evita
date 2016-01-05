@@ -4,17 +4,17 @@
 
 #include <memory>
 
-#include "evita/visuals/dom/text_node.h"
+#include "evita/visuals/dom/text.h"
 
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextNode
+// Text
 //
-TextNode::TextNode(Document* document, const base::StringPiece16& data)
+Text::Text(Document* document, const base::StringPiece16& data)
     : Node(document, L"#text"), data_(data.as_string()) {}
 
-TextNode::~TextNode() {}
+Text::~Text() {}
 
 }  // namespace visuals

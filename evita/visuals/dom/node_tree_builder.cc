@@ -8,7 +8,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
-#include "evita/visuals/dom/text_node.h"
+#include "evita/visuals/dom/text.h"
 
 namespace visuals {
 
@@ -31,7 +31,7 @@ NodeTreeBuilder::~NodeTreeBuilder() {
 }
 
 NodeTreeBuilder& NodeTreeBuilder::AddText(const base::StringPiece16& text) {
-  return AddInternal(new TextNode(document_, text));
+  return AddInternal(new Text(document_, text));
 }
 
 NodeTreeBuilder& NodeTreeBuilder::AddInternal(Node* child) {

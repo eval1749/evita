@@ -14,7 +14,7 @@
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/document_observer.h"
-#include "evita/visuals/dom/text_node.h"
+#include "evita/visuals/dom/text.h"
 #include "evita/visuals/css/style.h"
 
 namespace visuals {

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_DOM_TEXT_NODE_H_
-#define EVITA_VISUALS_DOM_TEXT_NODE_H_
+#ifndef EVITA_VISUALS_DOM_TEXT_H_
+#define EVITA_VISUALS_DOM_TEXT_H_
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
@@ -13,23 +13,23 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// TextNode
+// Text
 //
-class TextNode final : public Node {
-  DECLARE_VISUAL_NODE_FINAL_CLASS(TextNode, Node);
+class Text final : public Node {
+  DECLARE_VISUAL_NODE_FINAL_CLASS(Text, Node);
 
  public:
-  TextNode(Document* document, const base::StringPiece16& data);
-  ~TextNode() final;
+  Text(Document* document, const base::StringPiece16& data);
+  ~Text() final;
 
   const base::string16& data() const { return data_; }
 
  private:
   base::string16 data_;
 
-  DISALLOW_COPY_AND_ASSIGN(TextNode);
+  DISALLOW_COPY_AND_ASSIGN(Text);
 };
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_DOM_TEXT_NODE_H_
+#endif  // EVITA_VISUALS_DOM_TEXT_H_

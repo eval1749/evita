@@ -5,7 +5,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
-#include "evita/visuals/dom/text_node.h"
+#include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
@@ -25,12 +25,12 @@ TEST(BoxFinderTest, Basic) {
                             .End(L"block")
                             .Build();
   const auto block = document->first_child()->as<Element>();
-  const auto text_node1 = block->first_child()->as<TextNode>();
-  const auto text_node2 = block->last_child()->as<TextNode>();
+  const auto text1 = block->first_child()->as<Text>();
+  const auto text2 = block->last_child()->as<Text>();
   const auto& root = SimpleBoxTreeBuilder()
                          .Begin<BlockFlowBox>(block)
-                         .Add<TextBox>(text_node1->data(), text_node1)
-                         .Add<TextBox>(text_node2->data(), text_node2)
+                         .Add<TextBox>(text1->data(), text1)
+                         .Add<TextBox>(text2->data(), text2)
                          .End<BlockFlowBox>()
                          .Build();
   const auto main = root->first_child()->as<ContainerBox>();

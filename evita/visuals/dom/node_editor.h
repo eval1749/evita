@@ -14,7 +14,7 @@ class ContainerNode;
 class Document;
 class Element;
 class Node;
-class TextNode;
+class Text;
 
 namespace css {
 class Style;

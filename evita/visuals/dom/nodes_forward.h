@@ -8,12 +8,12 @@
 namespace visuals {
 
 #define FOR_EACH_VISUAL_NODE(V) \
-  V(Document)                  \
-  V(Element)                   \
-  V(TextNode)
+  V(Document)                   \
+  V(Element)                    \
+  V(Text)
 
 #define FOR_EACH_ABSTRACT_VISUAL_NODE(V) \
-  V(Node)                               \
+  V(Node)                                \
   V(ContainerNode)
 
 // Forward declarations

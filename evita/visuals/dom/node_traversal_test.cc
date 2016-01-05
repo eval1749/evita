@@ -7,7 +7,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
-#include "evita/visuals/dom/text_node.h"
+#include "evita/visuals/dom/text.h"
 #include "gtest/gtest.h"
 
 namespace visuals {

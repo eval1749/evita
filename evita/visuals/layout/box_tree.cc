@@ -13,7 +13,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_visitor.h"
-#include "evita/visuals/dom/text_node.h"
+#include "evita/visuals/dom/text.h"
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/inline_flow_box.h"
@@ -167,10 +167,9 @@ void GenerateVisitor::VisitElement(Element* element) {
   return ReturnBox(std::move(inline_flow_box));
 }
 
-void GenerateVisitor::VisitTextNode(TextNode* text_node) {
-  auto text_box =
-      std::make_unique<TextBox>(root_box_, text_node->data(), text_node);
-  const auto& style = ComputedStyleOf(*text_node);
+void GenerateVisitor::VisitText(Text* text) {
+  auto text_box = std::make_unique<TextBox>(root_box_, text->data(), text);
+  const auto& style = ComputedStyleOf(*text);
   BoxEditor().SetTextColor(text_box.get(), style.color().value());
   ReturnBox(std::move(text_box));
 }

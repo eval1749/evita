@@ -26,6 +26,8 @@ TEST(ContainerBoxTest, AppendChild) {
 
   EXPECT_EQ(main, text_box1->parent());
   EXPECT_EQ(main, text_box2->parent());
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 TEST(ContainerBoxTest, RemoveChild) {
@@ -43,5 +45,8 @@ TEST(ContainerBoxTest, RemoveChild) {
 
   EXPECT_EQ(main, text_box1->parent());
   EXPECT_EQ(nullptr, text_box2->parent());
+
+  BoxEditor().RemoveDescendants(root.get());
 }
+
 }  // namespace visuals

@@ -30,13 +30,6 @@ namespace visuals {
 namespace {
 
 #if USE_SIMPLE_BORDER
-bool IsSimpleBorder(const Border& border) {
-  return border.top() == border.bottom() && border.top() == border.left() &&
-         border.top() == border.right() &&
-         border.top_color() == border.bottom_color() &&
-         border.top_color() == border.left_color() &&
-         border.top_color() == border.right_color();
-}
 #endif
 
 bool IsBackgroundChanged(const Box& box) {
@@ -250,6 +243,7 @@ void PaintVisitor::VisitInlineFlowBox(InlineFlowBox* line) {
 
 void PaintVisitor::VisitRootBox(RootBox* root) {
   Visit(root->first_child());
+  BoxEditor().DidPaint(root);
 }
 
 void PaintVisitor::VisitTextBox(TextBox* text) {

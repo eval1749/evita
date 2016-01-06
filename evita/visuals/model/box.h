@@ -62,6 +62,7 @@ class Box : public common::Castable<Box> {
   ContainerBox* parent() const { return parent_; }
   Box* previous_sibling() const { return previous_sibling_; }
   RootBox* root_box() const { return root_box_; }
+  int version() const { return version_; }
 
   // Box identifiers
   const Node* node() const { return node_; }
@@ -71,6 +72,8 @@ class Box : public common::Castable<Box> {
   // Layout related values
   const FloatRect& bounds() const { return bounds_; }
   FloatRect content_bounds() const;
+
+  bool is_changed() const { return is_changed_; }
 
   // CSS background and background
   const css::Background& background() const { return background_; }
@@ -119,6 +122,7 @@ class Box : public common::Castable<Box> {
 
   bool is_background_changed_ = true;
   bool is_border_changed_ = true;
+  bool is_changed_ = true;
   // When |is_content_changed_| is true, we send bounds of this box to
   // compositor to display on screen. Note: On |ContainerBox|,
   // |is_content_dirty| is always false.
@@ -149,6 +153,7 @@ class Box : public common::Castable<Box> {
   Box* previous_sibling_ = nullptr;
   ContainerBox* parent_ = nullptr;
   RootBox* const root_box_;
+  int version_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Box);
 };

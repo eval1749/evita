@@ -6,17 +6,14 @@
 #define EVITA_VISUALS_LAYOUT_BOX_TREE_H_
 
 #include <memory>
-#include <unordered_map>
-#include <vector>
 
 #include "base/macros.h"
-#include "evita/visuals/dom/document_observer.h"
-#include "evita/visuals/style/style_tree_observer.h"
 
 namespace visuals {
 
 class Box;
 class Document;
+class Node;
 class RootBox;
 class StyleTree;
 
@@ -24,36 +21,21 @@ class StyleTree;
 //
 // BoxTree represents a CSS Box tree for document(node tree) with style tree.
 //
-class BoxTree final : public DocumentObserver, public StyleTreeObserver {
+class BoxTree final {
  public:
   BoxTree(const Document& document, const StyleTree& style_tree);
   ~BoxTree();
 
   RootBox* root_box() const;
+  int version() const;
 
   Box* BoxFor(const Node& node) const;
   void UpdateIfNeeded();
 
  private:
-  void Clear();
+  class Impl;
 
-  // DocumentObserver
-  void DidAppendChild(const ContainerNode& parent, const Node& child) final;
-  void DidChangeInlineStyle(const Element& element,
-                            const css::Style* old_style) final;
-  void DidInsertBefore(const ContainerNode& parent,
-                       const Node& child,
-                       const Node& ref_child) final;
-  void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
-
-  // StyleTreeObserver
-  void DidChangeComputedStyle(const Element& element,
-                              const css::Style& old_style) final;
-
-  std::unordered_map<const Node*, Box*> box_map_;
-  const Document& document_;
-  std::unique_ptr<RootBox> root_box_;
-  const StyleTree& style_tree_;
+  std::unique_ptr<Impl> impl_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxTree);
 };

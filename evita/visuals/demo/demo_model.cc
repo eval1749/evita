@@ -280,7 +280,7 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
   }
   const auto& debug_text =
       base::StringPrintf(L"dom: %d, css: %d, box: %d", document_->version(),
-                         style_tree_->version(), root_box->version());
+                         style_tree_->version(), box_tree_->version());
   PaintInfo paint_info(root_box->bounds(), debug_text);
   auto display_item_list = Painter().Paint(paint_info, *root_box);
 
@@ -329,6 +329,7 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
                              .SetTop(css::Top(css::Length(hover_point.y())))
                              .SetLeft(css::Left(css::Length(hover_point.x())))
                              .Build());
+  PrintBox(*box_tree_->root_box());
   RequestAnimationFrame();
 }
 

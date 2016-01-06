@@ -34,6 +34,8 @@ TEST(PainterTest, Basic) {
   PaintInfo paint_info(FloatRect(root->viewport_size()));
   const auto& display_item_list = Painter().Paint(paint_info, *root);
   EXPECT_EQ(3, display_item_list->items().size());
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 }  // namespace visuals

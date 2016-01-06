@@ -20,15 +20,6 @@ namespace visuals {
 
 namespace {
 
-bool NeedsLayout(const Box& box, const FloatRect& bounds) {
-  if (box.bounds() != bounds)
-    return true;
-  const auto container = box.as<ContainerBox>();
-  if (!container)
-    return false;
-  return container->IsChildrenChanged();
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // LayoutVisitor
@@ -38,10 +29,14 @@ class LayoutVisitor final : public BoxVisitor {
   LayoutVisitor() = default;
   ~LayoutVisitor() final = default;
 
-  void Layout(Box* box, const FloatPoint& origin, const FloatSize& size);
-  void Layout(Box* box, const FloatRect& bounds);
+  void LayoutIfNeeded(Box* box);
 
  private:
+  void Layout(Box* box, const FloatPoint& origin, const FloatSize& size);
+  void Layout(Box* box, const FloatRect& bounds);
+  void Layout(Box* box);
+
+// BoxVisitor
 #define V(name) void Visit##name(name* box) final;
   FOR_EACH_VISUAL_BOX(V)
 #undef V
@@ -56,18 +51,26 @@ void LayoutVisitor::Layout(Box* box,
 }
 
 void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
-  if (NeedsLayout(*box, bounds)) {
-    BoxEditor().SetBounds(box, bounds);
-    Visit(box);
-    BoxEditor().DidLayout(box);
-    return;
-  }
+  BoxEditor().SetBounds(box, bounds);
+  Layout(box);
+}
 
+void LayoutVisitor::Layout(Box* box) {
+  Visit(box);
+  BoxEditor().DidLayout(box);
+}
+
+void LayoutVisitor::LayoutIfNeeded(Box* box) {
+  if (box->is_changed())
+    return Layout(box);
   const auto container = box->as<ContainerBox>();
-  if (!container || !container->IsSubtreeChanged())
+  if (!container)
+    return;
+  if (!container->is_child_changed())
     return;
   for (const auto& child : container->child_boxes())
-    Visit(child);
+    LayoutIfNeeded(child);
+  return Layout(container);
 }
 
 // BoxVisitor
@@ -122,18 +125,17 @@ Layouter::Layouter() {}
 Layouter::~Layouter() {}
 
 void Layouter::Layout(RootBox* root_box) {
-  if (root_box->IsLayoutClean()) {
-    // TODO(eval1749): We should have better way reset to |LayoutClean| state.
-    root_box->lifecycle()->Reset();
-    BoxTreeLifecycle::Scope scope(root_box->lifecycle(),
-                                  BoxTreeLifecycle::State::InLayout,
-                                  BoxTreeLifecycle::State::LayoutClean);
+  // TODO(eval1749): Once, we get rid of BoxTreeLifeCycle, we don't need to
+  // check |is_changed()| and |is_child_changed()| here.
+  if (!root_box->is_changed() && !root_box->is_child_changed())
     return;
-  }
+  if (root_box->IsLayoutClean())
+    return;
   BoxTreeLifecycle::Scope scope(root_box->lifecycle(),
                                 BoxTreeLifecycle::State::InLayout,
                                 BoxTreeLifecycle::State::LayoutClean);
-  LayoutVisitor().Layout(root_box, FloatRect(root_box->viewport_size()));
+  DCHECK(!root_box->bounds().size().IsEmpty());
+  LayoutVisitor().LayoutIfNeeded(root_box);
 }
 
 }  // namespace visuals

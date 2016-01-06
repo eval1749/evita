@@ -5,6 +5,7 @@
 #include "evita/visuals/model/box_traversal.h"
 
 #include "evita/visuals/model/block_flow_box.h"
+#include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/simple_box_tree_builder.h"
 #include "evita/visuals/model/text_box.h"
@@ -24,12 +25,16 @@ TEST(BoxTraversalTest, FirstChildOf) {
   EXPECT_EQ(block->first_child(), BoxTraversal::FirstChildOf(*block));
   EXPECT_EQ(nullptr,
             BoxTraversal::FirstChildOf(*BoxTraversal::FirstChildOf(*block)));
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 TEST(BoxTraversalTest, FirstChildOfNoChild) {
   const auto& root = SimpleBoxTreeBuilder().Add<BlockFlowBox>().Build();
   const auto block = root->first_child();
   EXPECT_EQ(nullptr, BoxTraversal::FirstChildOf(*block));
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 TEST(BoxTraversalTest, LastChildOf) {
@@ -44,12 +49,16 @@ TEST(BoxTraversalTest, LastChildOf) {
   EXPECT_EQ(block->last_child(), BoxTraversal::LastChildOf(*block));
   EXPECT_EQ(nullptr,
             BoxTraversal::LastChildOf(*BoxTraversal::LastChildOf(*block)));
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 TEST(BoxTraversalTest, LastChildOfNoChild) {
   const auto& root = SimpleBoxTreeBuilder().Add<BlockFlowBox>().Build();
   const auto block = root->first_child();
   EXPECT_EQ(nullptr, BoxTraversal::LastChildOf(*block));
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 TEST(BoxTraversalTest, NextOf) {
@@ -65,6 +74,8 @@ TEST(BoxTraversalTest, NextOf) {
   EXPECT_EQ(BoxTraversal::LastChildOf(*block),
             BoxTraversal::NextOf(*BoxTraversal::FirstChildOf(*block)));
   EXPECT_EQ(nullptr, BoxTraversal::NextOf(*BoxTraversal::LastChildOf(*block)));
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 TEST(BoxTraversalTest, NextSiblingOf) {
@@ -79,6 +90,8 @@ TEST(BoxTraversalTest, NextSiblingOf) {
   EXPECT_EQ(nullptr, BoxTraversal::NextSiblingOf(*block));
   EXPECT_EQ(BoxTraversal::LastChildOf(*block),
             BoxTraversal::NextSiblingOf(*BoxTraversal::FirstChildOf(*block)));
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 }  // namespace visuals

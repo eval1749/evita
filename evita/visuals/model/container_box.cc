@@ -20,14 +20,8 @@ ContainerBox::ContainerBox(RootBox* root_box, const Node* node)
 ContainerBox::ContainerBox(RootBox* root_box) : Box(root_box) {}
 
 ContainerBox::~ContainerBox() {
-  DCHECK_EQ(static_cast<ContainerBox*>(nullptr), parent());
-  auto runner = first_child_;
-  while (runner) {
-    const auto next_child = runner->next_sibling();
-    BoxEditor().WillDestroy(runner);
-    delete runner;
-    runner = next_child;
-  }
+  DCHECK_EQ(static_cast<Box*>(nullptr), first_child_);
+  DCHECK_EQ(static_cast<Box*>(nullptr), last_child_);
 }
 
 }  // namespace visuals

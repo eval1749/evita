@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "evita/visuals/model/block_flow_box.h"
+#include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/simple_box_tree_builder.h"
 #include "evita/visuals/model/text_box.h"
@@ -20,6 +21,8 @@ TEST(BoxTest, InitialValues) {
   EXPECT_EQ(css::Margin(), box->margin());
   EXPECT_EQ(css::Padding(), box->padding());
   EXPECT_EQ(css::Position::Static(), box->position());
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 TEST(BoxTest, IsDescendantOf) {
@@ -38,6 +41,8 @@ TEST(BoxTest, IsDescendantOf) {
   EXPECT_TRUE(text_box1->IsDescendantOf(*main));
   EXPECT_TRUE(text_box2->IsDescendantOf(*main));
   EXPECT_FALSE(text_box2->IsDescendantOf(*text_box1));
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 }  // namespace visuals

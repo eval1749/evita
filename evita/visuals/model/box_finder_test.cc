@@ -47,6 +47,8 @@ TEST(BoxFinderTest, Basic) {
             finder.FindByPoint(text_box1->bounds().origin() + FloatSize(1, 2)));
   EXPECT_EQ(BoxFinder::Result(text_box2, FloatPoint(3, 4)),
             finder.FindByPoint(text_box2->bounds().origin() + FloatSize(3, 4)));
+
+  BoxEditor().RemoveDescendants(root.get());
 }
 
 }  // namespace visuals

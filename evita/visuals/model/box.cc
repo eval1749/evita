@@ -24,7 +24,12 @@ Box::Box(RootBox* root_box, const Node* node)
     : node_(node), sequence_id_(++last_box_sequence_id), root_box_(root_box) {}
 
 Box::Box(RootBox* root_box) : Box(root_box, nullptr) {}
-Box::~Box() {}
+
+Box::~Box() {
+  DCHECK_EQ(static_cast<ContainerBox*>(nullptr), parent_);
+  DCHECK_EQ(static_cast<Box*>(nullptr), next_sibling_);
+  DCHECK_EQ(static_cast<Box*>(nullptr), previous_sibling_);
+}
 
 FloatRect Box::content_bounds() const {
   return FloatRect(FloatPoint() + border_.top_left() + padding_.top_left(),

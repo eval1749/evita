@@ -278,7 +278,10 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
     // Box tree is changed outside viewport(?).
     return;
   }
-  PaintInfo paint_info(root_box->bounds());
+  const auto& debug_text =
+      base::StringPrintf(L"dom: %d, css: %d, box: %d", document_->version(),
+                         style_tree_->version(), root_box->version());
+  PaintInfo paint_info(root_box->bounds(), debug_text);
   auto display_item_list = Painter().Paint(paint_info, *root_box);
 
 #if 0

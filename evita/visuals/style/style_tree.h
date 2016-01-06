@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "base/observer_list.h"
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/css/style_sheet_observer.h"
 #include "evita/visuals/dom/document_observer.h"
@@ -78,7 +77,6 @@ class StyleTree final : public css::MediaObserver,
 
   const Document& document_;
   const css::Media& media_;
-  mutable base::ObserverList<StyleTreeObserver> observers_;
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;
 

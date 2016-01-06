@@ -4,6 +4,7 @@
 
 #include "evita/visuals/style/style_tree.h"
 
+#include "base/observer_list.h"
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/style.h"
@@ -45,9 +46,11 @@ class StyleTree::Impl final {
   bool is_dirty() const { return is_dirty_; }
   int version() const { return version_; }
 
+  void AddObserver(StyleTreeObserver* observer);
   void Clear();
   const css::Style& ComputedStyleOf(const Node& node) const;
   void MarkDirty(const Element& element);
+  void RemoveObserver(StyleTreeObserver* observer);
   void UpdateIfNeeded(const Document& document);
 
  private:
@@ -71,6 +74,7 @@ class StyleTree::Impl final {
   // have same style, e.g. siblings.
   std::unordered_map<const Element*, std::unique_ptr<Item>> item_map_;
   bool is_dirty_ = true;
+  base::ObserverList<StyleTreeObserver> observers_;
   int version_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Impl);
@@ -90,9 +94,14 @@ StyleTree::Impl::Impl(const std::vector<css::StyleSheet*>& style_sheets)
       << "initial style must have display property. " << initial_style();
 }
 
+void StyleTree::Impl::AddObserver(StyleTreeObserver* observer) {
+  observers_.AddObserver(observer);
+}
+
 void StyleTree::Impl::Clear() {
   item_map_.clear();
   is_dirty_ = true;
+  FOR_EACH_OBSERVER(StyleTreeObserver, observers_, DidClearStyleCache());
 }
 
 const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
@@ -146,6 +155,10 @@ void StyleTree::Impl::MarkDirty(const Element& element) {
       return;
     item->is_child_dirty = true;
   }
+}
+
+void StyleTree::Impl::RemoveObserver(StyleTreeObserver* observer) {
+  observers_.RemoveObserver(observer);
 }
 
 void StyleTree::Impl::UpdateChildren(Context* context, const Element& element) {
@@ -237,12 +250,11 @@ int StyleTree::version() const {
 }
 
 void StyleTree::AddObserver(StyleTreeObserver* observer) const {
-  observers_.AddObserver(observer);
+  impl_->AddObserver(observer);
 }
 
 void StyleTree::Clear() {
   impl_->Clear();
-  FOR_EACH_OBSERVER(StyleTreeObserver, observers_, DidClearStyleCache());
 }
 
 const css::Style& StyleTree::ComputedStyleOf(const Node& node) const {
@@ -253,7 +265,7 @@ const css::Style& StyleTree::ComputedStyleOf(const Node& node) const {
 }
 
 void StyleTree::RemoveObserver(StyleTreeObserver* observer) const {
-  observers_.RemoveObserver(observer);
+  impl_->RemoveObserver(observer);
 }
 
 void StyleTree::UpdateIfNeeded() {

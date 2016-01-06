@@ -75,6 +75,7 @@ class StyleTree final : public css::MediaObserver,
   void DidChangeInlineStyle(const Element& element,
                             const css::Style* old_style) final;
 
+  const Document& document_;
   const css::Media& media_;
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;

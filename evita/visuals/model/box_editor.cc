@@ -39,7 +39,19 @@ void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
   }
   container->last_child_ = new_child;
   ++container->root_box_->version_;
-  MarkDirty(container);
+  DidChangeChild(container->parent_);
+}
+
+void BoxEditor::DidChangeChild(ContainerBox* container) {
+  ScheduleVisualUpdateIfNeeded(container);
+  if (!container || container->is_children_changed_)
+    return;
+  container->is_children_changed_ = true;
+  for (const auto& runner : Box::Ancestors(*container)) {
+    if (runner->is_subtree_changed_)
+      return;
+    runner->is_subtree_changed_ = true;
+  }
 }
 
 void BoxEditor::DidLayout(Box* box) {
@@ -63,22 +75,8 @@ void BoxEditor::DidPaint(Box* box) {
   const auto container = box->as<ContainerBox>();
   if (!container)
     return;
-  container->is_child_changed_ = false;
+  container->is_children_changed_ = false;
   container->is_subtree_changed_ = false;
-}
-
-void BoxEditor::MarkDirty(Box* box) {
-  if (box->is_changed_) {
-    DCHECK(box->parent_->is_changed_ || box->parent_->is_child_changed_);
-    return;
-  }
-  box->is_changed_ = true;
-  ScheduleVisualUpdateIfNeeded(container);
-  for (const auto& runner : Box::Ancestors(*container)) {
-    if (runner->is_changed_ || runner->is_child_change_)
-      return;
-    runner->is_child_changed_ = true;
-  }
 }
 
 void BoxEditor::RemoveChild(ContainerBox* container, Box* old_child) {
@@ -99,7 +97,7 @@ void BoxEditor::RemoveChild(ContainerBox* container, Box* old_child) {
   old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;
   ++container->root_box_->version_;
-  MarkDirty(container);
+  DidChangeChild(container);
 }
 
 void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {
@@ -114,7 +112,6 @@ void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {
   ++box->root_box_->version_;
   box->baseline_ = new_baseline;
   box->is_content_changed_ = true;
-  MarkDirty(box);
   ScheduleVisualUpdateIfNeeded(box);
 }
 
@@ -136,7 +133,6 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
 
 void BoxEditor::SetContentChanged(InlineBox* box) {
   box->is_content_changed_ = true;
-  MarkDirty(box);
   ScheduleVisualUpdateIfNeeded(box);
 }
 
@@ -162,7 +158,7 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   if (new_style.has_display() &&
       new_style.display().is_none() != box->is_display_none_) {
     box->is_display_none_ = new_style.display().is_none();
-    MarkDirty(box);
+    DidChangeChild(box->parent_);
   }
 
 #define V(property)                               \
@@ -170,7 +166,6 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
       new_style.property() != box->property##_) { \
     box->property##_ = new_style.property();      \
     box->is_##property##_changed_ = true;         \
-    MarkDirty(box);                               \
   }
   FOR_EACH_PROPERTY_CHANGES_PROPERTY(V)
 #undef V
@@ -180,7 +175,6 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
       new_style.property() != box->property##_) { \
     box->property##_ = new_style.property();      \
     box->is_origin_changed_ = true;               \
-    MarkDirty(box);                               \
   }
   FOR_EACH_PROPERTY_AFFECTS_ORIGIN(V)
 #undef V
@@ -190,7 +184,6 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
       new_style.property() != box->property##_) { \
     box->property##_ = new_style.property();      \
     box->is_size_changed_ = true;                 \
-    MarkDirty(box);                               \
   }
   FOR_EACH_PROPERTY_AFFECTS_SIZE(V)
 #undef V
@@ -201,6 +194,15 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
       SetContentChanged(text);
     }
   }
+
+  if (!box->parent_)
+    return;
+  if (!box->is_origin_changed_ && !box->is_size_changed_)
+    return;
+
+  // Since changing size or origin affects parent's size and sibling's origin,
+  // we should notify to parent.
+  DidChangeChild(box->parent_);
 }
 
 void BoxEditor::SetShouldPaint(Box* box) {
@@ -225,7 +227,7 @@ void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
     return;
   root_box->viewport_size_ = size;
   root_box->is_size_changed_ = true;
-  root_box->bounds_ = ++root_box->version_;
+  ++root_box->version_;
   ScheduleVisualUpdateIfNeeded(root_box);
 }
 

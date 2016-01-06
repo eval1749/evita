@@ -17,7 +17,6 @@
 #include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/css/style_sheet_observer.h"
 #include "evita/visuals/dom/ancestors.h"
-#include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/style/compiled_style_sheet.h"
@@ -70,11 +69,9 @@ std::ostream& operator<<(std::ostream& ostream, StyleTreeState state) {
 //
 class StyleTree::Impl final {
  public:
-  Impl(const Document& document,
-       const std::vector<css::StyleSheet*>& style_sheets);
+  explicit Impl(const std::vector<css::StyleSheet*>& style_sheets);
   ~Impl() = default;
 
-  const Document& document() const { return document_; }
   const css::Style& initial_style() const { return *initial_style_; }
   bool is_dirty() const;
   int version() const { return version_; }
@@ -84,7 +81,7 @@ class StyleTree::Impl final {
   const css::Style& ComputedStyleOf(const Node& node) const;
   void MarkDirty(const Element& element);
   void RemoveObserver(StyleTreeObserver* observer);
-  void UpdateIfNeeded();
+  void UpdateIfNeeded(const Document& document);
 
  private:
   struct Context {
@@ -101,7 +98,6 @@ class StyleTree::Impl final {
   void UpdateNodeIfNeeded(Context* context, const Node& node);
 
   std::vector<std::unique_ptr<CompiledStyleSheet>> compiled_style_sheets_;
-  const Document& document_;
   // |initial_style_| is computed from media provided values.
   std::unique_ptr<css::Style> initial_style_;
   // TODO(eval1749): We should share |css::Style| objects for elements which
@@ -243,27 +239,17 @@ void StyleTree::Impl::UpdateElementIfNeeded(Context* context,
 }
 
 // The entry point
-void StyleTree::Impl::UpdateIfNeeded() {
-  if (state_ == StyleTreeState::Clean) {
+void StyleTree::Impl::UpdateIfNeeded(const Document& document) {
 #if !DCHECK_IS_ON()
-    // All style tree node should be clean.
-    for (const auto& node : Node::DescendantsOrSelf(document_)) {
-      const auto element = node->as<Element>();
-      if (!element)
-        continue;
-      const auto& it = item_map_.find(element);
-      DCHECK(it != item_map_.end());
-      DCHECK(!item->is_dirty_);
-      DCHECK(!item->is_child_dirty_);
-    }
-#endif
+  if (state_ == StyleTreeState::Clean)
     return;
-  }
+#endif
+  const auto is_dirty = state_ == StyleTreeState::Dirty;
   state_ = StyleTreeState::Updating;
   Context context;
-  for (const auto& child : document_.child_nodes())
+  for (const auto& child : document.child_nodes())
     UpdateNodeIfNeeded(&context, *child);
-  DCHECK(context.is_updated);
+  DCHECK_EQ(is_dirty, context.is_updated);
   state_ = StyleTreeState::Clean;
 }
 
@@ -282,10 +268,10 @@ StyleTree::StyleTree(const Document& document,
                      const css::Media& media,
                      const std::vector<css::StyleSheet*>& style_sheets)
     : document_(document),
-      impl_(new Impl(document, style_sheets)),
+      impl_(new Impl(style_sheets)),
       media_(media),
       style_sheets_(style_sheets) {
-  document.AddObserver(this);
+  document_.AddObserver(this);
   media_.AddObserver(this);
   for (const auto& style_sheet : style_sheets_)
     style_sheet->AddObserver(this);
@@ -294,7 +280,7 @@ StyleTree::StyleTree(const Document& document,
 StyleTree::~StyleTree() {
   for (const auto& style_sheet : style_sheets_)
     style_sheet->RemoveObserver(this);
-  impl->document().RemoveObserver(this);
+  document_.RemoveObserver(this);
 }
 
 const css::Style& StyleTree::initial_style() const {
@@ -325,7 +311,7 @@ void StyleTree::RemoveObserver(StyleTreeObserver* observer) const {
 }
 
 void StyleTree::UpdateIfNeeded() {
-  impl_->UpdateIfNeeded();
+  impl_->UpdateIfNeeded(document_);
 }
 
 // css::MediaObserver

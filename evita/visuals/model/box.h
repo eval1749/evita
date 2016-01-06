@@ -72,8 +72,6 @@ class Box : public common::Castable<Box> {
   const FloatRect& bounds() const { return bounds_; }
   FloatRect content_bounds() const;
 
-  bool is_changed() const { return is_changed_; }
-
   // CSS background and background
   const css::Background& background() const { return background_; }
   const css::Border& border() const { return border_; }
@@ -125,7 +123,6 @@ class Box : public common::Castable<Box> {
   bool is_display_none_ = false;
   bool is_background_changed_ = true;
   bool is_border_changed_ = true;
-  bool is_changed_ = true;
   // When |is_content_changed_| is true, we send bounds of this box to
   // compositor to display on screen. Note: On |ContainerBox|,
   // |is_content_dirty| is always false.

@@ -5,8 +5,6 @@
 #ifndef EVITA_VISUALS_MODEL_BOX_EDITOR_H_
 #define EVITA_VISUALS_MODEL_BOX_EDITOR_H_
 
-#include <memory>
-
 #include "base/macros.h"
 
 namespace visuals {
@@ -41,16 +39,8 @@ class BoxEditor final {
   void SetLayoutClean(Box* box);
 
   // ContainerBox
-  template <typename T>
-  T* AppendChild(ContainerBox* container, std::unique_ptr<T>&& child) {
-    static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
-    const auto& result = child.get();
-    AppendChild(container, std::unique_ptr<Box>(child.release()));
-    return result;
-  }
-
-  Box* AppendChild(ContainerBox* container, std::unique_ptr<Box> child);
-  std::unique_ptr<Box> RemoveChild(ContainerBox* container, Box* child);
+  void AppendChild(ContainerBox* container, Box* child);
+  void RemoveChild(ContainerBox* container, Box* child);
   void SetStyle(Box* box, const css::Style& style);
 
   void SetContentChanged(InlineBox* box);

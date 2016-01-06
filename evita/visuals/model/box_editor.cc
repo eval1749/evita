@@ -23,9 +23,7 @@ namespace visuals {
 BoxEditor::BoxEditor() {}
 BoxEditor::~BoxEditor() {}
 
-Box* BoxEditor::AppendChild(ContainerBox* container,
-                            std::unique_ptr<Box> new_child_ptr) {
-  const auto new_child = new_child_ptr.release();
+void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
   DCHECK_NE(container, new_child);
   DCHECK(!new_child->IsDescendantOf(*container));
   DCHECK(!container->IsDescendantOf(*new_child));
@@ -42,7 +40,6 @@ Box* BoxEditor::AppendChild(ContainerBox* container,
   container->last_child_ = new_child;
   ++container->root_box_->version_;
   DidChangeChild(container->parent_);
-  return new_child;
 }
 
 void BoxEditor::DidChangeChild(ContainerBox* container) {
@@ -82,8 +79,7 @@ void BoxEditor::DidPaint(Box* box) {
   container->is_subtree_changed_ = false;
 }
 
-std::unique_ptr<Box> BoxEditor::RemoveChild(ContainerBox* container,
-                                            Box* old_child) {
+void BoxEditor::RemoveChild(ContainerBox* container, Box* old_child) {
   DCHECK_EQ(container, old_child->parent_);
   const auto next_sibling = old_child->next_sibling_;
   const auto previous_sibling = old_child->previous_sibling_;
@@ -102,7 +98,6 @@ std::unique_ptr<Box> BoxEditor::RemoveChild(ContainerBox* container,
   old_child->parent_ = nullptr;
   ++container->root_box_->version_;
   DidChangeChild(container);
-  return std::unique_ptr<Box>(old_child);
 }
 
 void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {

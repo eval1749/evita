@@ -92,7 +92,7 @@ void GenerateVisitor::VisitDocument(Document* document) {
                                    << " doesn't have a "
                                       "box. Maybe it has display:none: "
                                    << ComputedStyleOf(*document_element);
-      BoxEditor().AppendChild(root_box_, std::move(document_element_box));
+      BoxEditor().AppendChild(root_box_, document_element_box.release());
       return;
     }
   }
@@ -136,7 +136,7 @@ void GenerateVisitor::VisitElement(Element* element) {
       default: {
         auto inline_flow_box = std::make_unique<InlineFlowBox>(root_box_);
         for (auto& inline_box : inline_boxes)
-          BoxEditor().AppendChild(inline_flow_box.get(), std::move(inline_box));
+          BoxEditor().AppendChild(inline_flow_box.get(), inline_box.release());
         inline_boxes.clear();
         child_boxes.push_back(std::move(inline_flow_box));
         break;
@@ -149,7 +149,7 @@ void GenerateVisitor::VisitElement(Element* element) {
   } else if (!inline_boxes.empty()) {
     auto inline_flow_box = std::make_unique<InlineFlowBox>(root_box_);
     for (auto& inline_box : inline_boxes)
-      BoxEditor().AppendChild(inline_flow_box.get(), std::move(inline_box));
+      BoxEditor().AppendChild(inline_flow_box.get(), inline_box.release());
     inline_boxes.clear();
     child_boxes.push_back(std::move(inline_flow_box));
   }
@@ -157,13 +157,13 @@ void GenerateVisitor::VisitElement(Element* element) {
     auto block_flow_box = std::make_unique<BlockFlowBox>(root_box_, element);
     BoxEditor().SetStyle(block_flow_box.get(), style);
     for (auto& child_box : child_boxes)
-      BoxEditor().AppendChild(block_flow_box.get(), std::move(child_box));
+      BoxEditor().AppendChild(block_flow_box.get(), child_box.release());
     return ReturnBox(std::move(block_flow_box));
   }
   auto inline_flow_box = std::make_unique<InlineFlowBox>(root_box_, element);
   BoxEditor().SetStyle(inline_flow_box.get(), style);
   for (auto& child_box : child_boxes)
-    BoxEditor().AppendChild(inline_flow_box.get(), std::move(child_box));
+    BoxEditor().AppendChild(inline_flow_box.get(), child_box.release());
   return ReturnBox(std::move(inline_flow_box));
 }
 

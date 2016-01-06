@@ -39,10 +39,9 @@ TEST(ContainerBoxTest, RemoveChild) {
   const auto text_box1 = main->first_child();
   const auto text_box2 = main->last_child();
 
-  const auto& removed_child = BoxEditor().RemoveChild(main, text_box2);
+  BoxEditor().RemoveChild(main, text_box2);
 
   EXPECT_EQ(main, text_box1->parent());
   EXPECT_EQ(nullptr, text_box2->parent());
-  EXPECT_EQ(text_box2, removed_child.get());
 }
 }  // namespace visuals

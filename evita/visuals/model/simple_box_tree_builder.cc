@@ -34,7 +34,7 @@ SimpleBoxTreeBuilder::~SimpleBoxTreeBuilder() {
 SimpleBoxTreeBuilder& SimpleBoxTreeBuilder::AddInternal(
     std::unique_ptr<Box> child) {
   const auto container = boxes_.top()->as<ContainerBox>();
-  BoxEditor().AppendChild(container, std::move(child));
+  BoxEditor().AppendChild(container, child.release());
   return *this;
 }
 

@@ -60,7 +60,19 @@ bool Border::HasValue() const {
   return false;
 }
 
+bool Border::IsSimple() const {
+  return top() == bottom() && top() == left() && top() == right() &&
+         top_color() == bottom_color() && top_color() == left_color() &&
+         top_color() == right_color();
+}
+
 std::ostream& operator<<(std::ostream& ostream, const Border& border) {
+  if (!border.HasValue())
+    return ostream << "Border()";
+  if (border.IsSimple()) {
+    return ostream << "Border(width=" << border.top() << ", "
+                   << border.top_color() << ')';
+  }
   ostream << "Border(";
   auto delimiter = "";
   if (border.top() != 0.0f) {

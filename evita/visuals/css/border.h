@@ -45,6 +45,7 @@ class Border final {
   const Color& top_color() const { return top_color_; }
 
   bool HasValue() const;
+  bool IsSimple() const;
 
  private:
   Color bottom_color_;

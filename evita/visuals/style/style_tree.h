@@ -45,7 +45,7 @@ class StyleTree final : public css::MediaObserver,
   // it is used only in tests.
   const css::Style& initial_style() const;
 
-  const Document& document() const { return document_; }
+  const Document& document() const;
   const css::Media& media() const { return media_; }
 
   // Monotonically increased style tree version. This version is incremented
@@ -75,7 +75,6 @@ class StyleTree final : public css::MediaObserver,
   void DidChangeInlineStyle(const Element& element,
                             const css::Style* old_style) final;
 
-  const Document& document_;
   const css::Media& media_;
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;

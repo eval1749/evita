@@ -28,6 +28,7 @@ class ContainerBox : public Box {
 
   Children child_boxes() const { return Children(*this); }
   Box* first_child() const { return first_child_; }
+  bool is_child_changed() const { return is_child_changed_; }
   Box* last_child() const { return last_child_; }
 
   bool IsChildrenChanged() const { return is_children_changed_; }
@@ -44,14 +45,7 @@ class ContainerBox : public Box {
   Box* first_child_ = nullptr;
   Box* last_child_ = nullptr;
 
-  // |is_children_changed_| is true if one of child is changed affects
-  // siblings or this container box. This flag is also true adding/removing
-  // child.
-  bool is_children_changed_ = false;
-
-  // |is_subtree_changed_| is true if |is_changed_changed_| is true for one of
-  // descendants, otherwise false.
-  bool is_subtree_changed_ = false;
+  bool is_child_changed_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(ContainerBox);
 };

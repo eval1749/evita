@@ -39,8 +39,9 @@ class BoxEditor final {
   void SetLayoutClean(Box* box);
 
   // ContainerBox
-  void AppendChild(ContainerBox* container, Box* child);
-  void RemoveChild(ContainerBox* container, Box* child);
+  void AppendChild(ContainerBox* container, Box* new_child);
+  void MarkDirty(Box* box);
+  void RemoveChild(ContainerBox* container, Box* old_child);
   void SetStyle(Box* box, const css::Style& style);
 
   void SetContentChanged(InlineBox* box);
@@ -55,7 +56,6 @@ class BoxEditor final {
   void SetViewportSize(RootBox* root_box, const FloatSize& size);
 
  private:
-  void DidChangeChild(ContainerBox* container);
   void ScheduleVisualUpdateIfNeeded(Box* box);
 
   DISALLOW_COPY_AND_ASSIGN(BoxEditor);

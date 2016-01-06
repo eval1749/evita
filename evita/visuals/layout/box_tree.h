@@ -6,8 +6,6 @@
 #define EVITA_VISUALS_LAYOUT_BOX_TREE_H_
 
 #include <memory>
-#include <unordered_map>
-#include <vector>
 
 #include "base/macros.h"
 #include "evita/visuals/dom/document_observer.h"
@@ -15,7 +13,6 @@
 
 namespace visuals {
 
-class Box;
 class Document;
 class RootBox;
 class StyleTree;
@@ -30,12 +27,13 @@ class BoxTree final : public DocumentObserver, public StyleTreeObserver {
   ~BoxTree();
 
   RootBox* root_box() const;
+  int version() const;
 
   Box* BoxFor(const Node& node) const;
   void UpdateIfNeeded();
 
  private:
-  void Clear();
+  class Impl;
 
   // DocumentObserver
   void DidAppendChild(const ContainerNode& parent, const Node& child) final;
@@ -50,10 +48,7 @@ class BoxTree final : public DocumentObserver, public StyleTreeObserver {
   void DidChangeComputedStyle(const Element& element,
                               const css::Style& old_style) final;
 
-  std::unordered_map<const Node*, Box*> box_map_;
-  const Document& document_;
-  std::unique_ptr<RootBox> root_box_;
-  const StyleTree& style_tree_;
+  std::unique_ptr<Impl> impl_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxTree);
 };

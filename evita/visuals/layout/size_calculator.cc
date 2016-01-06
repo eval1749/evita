@@ -46,8 +46,6 @@ class ExtrinsicSizeVisitor final : public BoxVisitor {
 };
 
 FloatSize ExtrinsicSizeVisitor::ComputeExtrinsicSize(const Box& box) {
-  if (box.is_display_none())
-    return FloatSize();
   Visit(const_cast<Box*>(&box));
   return result_;
 }
@@ -117,8 +115,6 @@ class IntrinsicSizeVisitor final : public BoxVisitor {
 };
 
 FloatSize IntrinsicSizeVisitor::ComputeIntrinsicSize(const Box& box) {
-  if (box.is_display_none())
-    return FloatSize();
   Visit(const_cast<Box*>(&box));
   return result_;
 }
@@ -196,8 +192,6 @@ class PreferredSizeVisitor final : public BoxVisitor {
 };
 
 FloatSize PreferredSizeVisitor::ComputePreferredSize(const Box& box) {
-  if (box.is_display_none())
-    return FloatSize();
   Visit(const_cast<Box*>(&box));
   return result_;
 }

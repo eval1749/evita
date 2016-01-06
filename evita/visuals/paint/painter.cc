@@ -134,7 +134,7 @@ void PaintVisitor::FillRectAndMark(const FloatRect& rect,
 }
 
 bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
-  if (box.is_display_none() || box.bounds().size().IsEmpty())
+  if (box.bounds().size().IsEmpty())
     return false;
 #if 0
   if (!box.ShouldPaint() && !box.IsBackgroundChanged() &&
@@ -146,7 +146,7 @@ bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
 }
 
 bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
-  if (box.is_display_none() || box.bounds().size().IsEmpty())
+  if (box.bounds().size().IsEmpty())
     return false;
 #if 0
   if (!box.ShouldPaint() && !box.IsBackgroundChanged() &&

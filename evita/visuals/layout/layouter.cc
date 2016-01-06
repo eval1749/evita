@@ -75,8 +75,6 @@ void LayoutVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
   auto child_origin = FloatPoint();
   const auto content_width = box->content_bounds().width();
   for (const auto& child : box->child_boxes()) {
-    if (child->is_display_none())
-      continue;
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child->border().size() + child->padding().size();
     if (child->position().is_absolute()) {
@@ -97,8 +95,6 @@ void LayoutVisitor::VisitInlineFlowBox(InlineFlowBox* line) {
   auto child_origin = FloatPoint();
   const auto line_height = line->content_bounds().height();
   for (const auto& child : line->child_boxes()) {
-    if (child->is_display_none())
-      continue;
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child->border().size() + child->padding().size();
     LayoutVisitor().Layout(

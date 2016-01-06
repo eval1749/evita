@@ -155,11 +155,6 @@ void BoxEditor::SetContentChanged(InlineBox* box) {
 
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   ++box->root_box_->version_;
-  if (new_style.has_display() &&
-      new_style.display().is_none() != box->is_display_none_) {
-    box->is_display_none_ = new_style.display().is_none();
-    DidChangeChild(box->parent_);
-  }
 
 #define V(property)                               \
   if (new_style.has_##property() &&               \

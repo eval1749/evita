@@ -80,9 +80,6 @@ class Box : public common::Castable<Box> {
   const css::Margin& margin() const { return margin_; }
   const css::Padding& padding() const { return padding_; }
 
-  // CSS Formatting model
-  bool is_display_none() const { return is_display_none_; }
-
   // CSS Position
   const css::Bottom& bottom() const { return bottom_; }
   const css::Left& left() const { return left_; }
@@ -120,7 +117,6 @@ class Box : public common::Castable<Box> {
   const Node* const node_;
   const int sequence_id_;
 
-  bool is_display_none_ = false;
   bool is_background_changed_ = true;
   bool is_border_changed_ = true;
   // When |is_content_changed_| is true, we send bounds of this box to

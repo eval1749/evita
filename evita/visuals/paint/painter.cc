@@ -163,10 +163,12 @@ std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const RootBox& root_box) {
   // TODO(eval1749): Should we need to pass dirty rect list?
   AddDirtyBounds(root_box.bounds());
   Visit(root_box);
-  builder_.AddNew<DrawTextDisplayItem>(
-      FloatRect(root_box.bounds().top_right() - FloatSize(200, 0),
-                FloatSize(200, 50)),
-      FloatColor(1, 0, 0), 20, paint_info_.debug_text());
+  if (!paint_info_.debug_text().empty()) {
+    builder_.AddNew<DrawTextDisplayItem>(
+        FloatRect(root_box.bounds().top_right() - FloatSize(200, 0),
+                  FloatSize(200, 50)),
+        FloatColor(1, 0, 0), 20, paint_info_.debug_text());
+  }
   return builder_.Build();
 }
 

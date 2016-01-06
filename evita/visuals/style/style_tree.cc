@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stdint.h>
+
+#include <iterator>
+#include <ostream>
+
 #include "evita/visuals/style/style_tree.h"
 
 #include "base/observer_list.h"
@@ -35,6 +40,31 @@ void InheritStyle(css::Style* style, const css::Style& parent_style) {
 
 //////////////////////////////////////////////////////////////////////
 //
+// StyleTreeState
+//
+#define FOR_EACH_STYLE_TREE_STATE(V) \
+  V(Clean)                           \
+  V(Dirty)                           \
+  V(Updating)
+
+enum class StyleTreeState {
+#define V(name) name,
+  FOR_EACH_STYLE_TREE_STATE(V)
+#undef V
+};
+
+std::ostream& operator<<(std::ostream& ostream, StyleTreeState state) {
+  static const char* texts[] = {
+#define V(name) #name,
+      FOR_EACH_STYLE_TREE_STATE(V)
+#undef V
+  };
+  const auto& it = std::begin(texts) + static_cast<size_t>(state);
+  return ostream << (it < std::end(texts) ? *it : "???");
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // StyleTree::Impl
 //
 class StyleTree::Impl final {
@@ -43,7 +73,7 @@ class StyleTree::Impl final {
   ~Impl() = default;
 
   const css::Style& initial_style() const { return *initial_style_; }
-  bool is_dirty() const { return is_dirty_; }
+  bool is_dirty() const;
   int version() const { return version_; }
 
   void AddObserver(StyleTreeObserver* observer);
@@ -73,8 +103,8 @@ class StyleTree::Impl final {
   // TODO(eval1749): We should share |css::Style| objects for elements which
   // have same style, e.g. siblings.
   std::unordered_map<const Element*, std::unique_ptr<Item>> item_map_;
-  bool is_dirty_ = true;
   base::ObserverList<StyleTreeObserver> observers_;
+  StyleTreeState state_ = StyleTreeState::Dirty;
   int version_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Impl);
@@ -94,15 +124,21 @@ StyleTree::Impl::Impl(const std::vector<css::StyleSheet*>& style_sheets)
       << "initial style must have display property. " << initial_style();
 }
 
+bool StyleTree::Impl::is_dirty() const {
+  DCHECK_NE(StyleTreeState::Updating, state_);
+  return state_ == StyleTreeState::Dirty;
+}
+
 void StyleTree::Impl::AddObserver(StyleTreeObserver* observer) {
   observers_.AddObserver(observer);
 }
 
 void StyleTree::Impl::Clear() {
-  is_dirty_ = true;
+  state_ = StyleTreeState::Dirty;
 }
 
 const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
+  DCHECK_NE(StyleTreeState::Dirty, state_);
   if (const auto element = node.as<Element>()) {
     const auto& it = item_map_.find(element);
     DCHECK(it != item_map_.end());
@@ -115,6 +151,7 @@ const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
 
 std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
     const Element& element) const {
+  DCHECK_NE(StyleTreeState::Dirty, state_);
   const auto inline_style = element.inline_style();
   auto style = inline_style ? std::make_unique<css::Style>(*inline_style)
                             : std::make_unique<css::Style>();
@@ -142,7 +179,7 @@ Item* StyleTree::Impl::GetOrNewItem(const Element& element) {
 }
 
 void StyleTree::Impl::MarkDirty(const Element& element) {
-  is_dirty_ = true;
+  state_ = StyleTreeState::Dirty;
   GetOrNewItem(element)->is_dirty = true;
   for (const auto& ancestor : Node::Ancestors(element)) {
     const auto ancestor_element = ancestor->as<Element>();
@@ -204,14 +241,16 @@ void StyleTree::Impl::UpdateElementIfNeeded(Context* context,
 // The entry point
 void StyleTree::Impl::UpdateIfNeeded(const Document& document) {
 #if !DCHECK_IS_ON()
-  if (!is_dirty_)
+  if (state_ == StyleTreeState::Clean)
     return;
 #endif
+  const auto is_dirty = state_ == StyleTreeState::Dirty;
+  state_ = StyleTreeState::Updating;
   Context context;
   for (const auto& child : document.child_nodes())
     UpdateNodeIfNeeded(&context, *child);
-  DCHECK_EQ(is_dirty_, context.is_updated);
-  is_dirty_ = false;
+  DCHECK_EQ(is_dirty, context.is_updated);
+  state_ = StyleTreeState::Clean;
 }
 
 void StyleTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {

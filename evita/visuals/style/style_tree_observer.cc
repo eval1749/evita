@@ -13,9 +13,7 @@ namespace visuals {
 StyleTreeObserver::StyleTreeObserver() {}
 StyleTreeObserver::~StyleTreeObserver() {}
 
-void StyleTreeObserver::DidClearStyleCache() {}
-
-void StyleTreeObserver::DidRemoveStyleCache(const Element& element,
-                                              const css::Style& old_style) {}
+void StyleTreeObserver::DidChangeComputedStyle(const Element& element,
+                                               const css::Style& old_style) {}
 
 }  // namespace visuals

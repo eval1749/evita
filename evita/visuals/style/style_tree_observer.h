@@ -23,9 +23,8 @@ class StyleTreeObserver {
  public:
   virtual ~StyleTreeObserver();
 
-  virtual void DidClearStyleCache();
-  virtual void DidRemoveStyleCache(const Element& element,
-                                   const css::Style& old_style);
+  virtual void DidChangeComputedStyle(const Element& element,
+                                      const css::Style& old_style);
 
  protected:
   StyleTreeObserver();

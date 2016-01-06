@@ -47,9 +47,8 @@ class BoxTree final : public DocumentObserver, public StyleTreeObserver {
   void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
 
   // StyleTreeObserver
-  void DidClearStyleCache() final;
-  void DidRemoveStyleCache(const Element& element,
-                           const css::Style& old_style) final;
+  void DidChangeComputedStyle(const Element& element,
+                              const css::Style& old_style) final;
 
   std::unordered_map<const Node*, Box*> box_map_;
   const Document& document_;

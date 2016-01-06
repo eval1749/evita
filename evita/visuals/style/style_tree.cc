@@ -99,9 +99,7 @@ void StyleTree::Impl::AddObserver(StyleTreeObserver* observer) {
 }
 
 void StyleTree::Impl::Clear() {
-  item_map_.clear();
   is_dirty_ = true;
-  FOR_EACH_OBSERVER(StyleTreeObserver, observers_, DidClearStyleCache());
 }
 
 const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
@@ -178,11 +176,16 @@ void StyleTree::Impl::UpdateElement(Context* context, const Element& element) {
   const auto item = GetOrNewItem(element);
   item->is_child_dirty = false;
   item->is_dirty = false;
+  const auto old_style = std::move(item->style);
   item->style = std::move(ComputeStyleForElement(element));
   item->version = version_;
   // Simple style merge check.
   DCHECK(item->style->has_display())
       << "Style merge failed. We should merge initial style. " << *item->style;
+  if (old_style) {
+    FOR_EACH_OBSERVER(StyleTreeObserver, observers_,
+                      DidChangeComputedStyle(element, *old_style));
+  }
   UpdateChildren(context, element);
 }
 

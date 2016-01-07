@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_MODEL_INLINE_BOX_H_
-#define EVITA_VISUALS_MODEL_INLINE_BOX_H_
+#ifndef EVITA_VISUALS_MODEL_CONTENT_BOX_H_
+#define EVITA_VISUALS_MODEL_CONTENT_BOX_H_
 
 #include <vector>
 
@@ -31,4 +31,4 @@ class ContentBox : public Box {
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_MODEL_INLINE_BOX_H_
+#endif  // EVITA_VISUALS_MODEL_CONTENT_BOX_H_

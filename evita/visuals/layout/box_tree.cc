@@ -31,18 +31,6 @@ namespace visuals {
 
 namespace {
 
-// TODO(eval1749): We should have |Box::display()|
-css::Display DisplayOf(const Box& box) {
-  if (box.is<BlockFlowBox>())
-    return css::Display::Block();
-  if (box.is<InlineBox>())
-    return css::Display::Inline();
-  if (box.is<InlineFlowBox>())
-    return css::Display::InlineBlock();
-  NOTREACHED() << "Invalid box type " << box;
-  return css::Display::None();
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // BoxTreeState
@@ -175,7 +163,7 @@ Box* BoxTree::Impl::AssignBoxToElement(Context* context,
   if (it != box_map_.end()) {
     const auto container_box = it->second->as<ContainerBox>();
     RemoveAllChildren(container_box);
-    if (DisplayOf(*container_box) == style.display()) {
+    if (container_box->display() == style.display()) {
       BoxEditor().SetStyle(container_box, style);
       return container_box;
     }

@@ -9,6 +9,7 @@
 #include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/box_visitor.h"
+#include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/inline_box.h"
 #include "evita/visuals/layout/inline_flow_box.h"
 #include "evita/visuals/layout/root_box.h"
@@ -60,6 +61,10 @@ void BoxTreePrinter::PrintAsContainer(const ContainerBox& container) {
 
 // BoxVisitor
 void BoxTreePrinter::VisitBlockFlowBox(BlockFlowBox* box) {
+  PrintAsContainer(*box);
+}
+
+void BoxTreePrinter::VisitFlowBox(FlowBox* box) {
   PrintAsContainer(*box);
 }
 

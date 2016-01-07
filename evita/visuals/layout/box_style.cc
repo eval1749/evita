@@ -45,6 +45,7 @@ class ActualStyleVisitor final : public BoxVisitor {
   V(Width, width)
 
 std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
+  builder_.SetDisplay(box.display());
   if (box.background().HasValue())
     builder_.SetBackground(box.background());
   if (box.border().HasValue())
@@ -69,6 +70,8 @@ std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
 }
 
 void ActualStyleVisitor::VisitBlockFlowBox(BlockFlowBox* block) {}
+
+void ActualStyleVisitor::VisitFlowBox(FlowBox* flow_box) {}
 
 void ActualStyleVisitor::VisitInlineBox(InlineBox* line) {}
 

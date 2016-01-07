@@ -13,6 +13,7 @@
 #include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_visitor.h"
+#include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/inline_box.h"
 #include "evita/visuals/layout/inline_flow_box.h"
 #include "evita/visuals/layout/root_box.h"
@@ -20,6 +21,11 @@
 namespace visuals {
 
 namespace {
+
+// TODO(eval1749) We should move |IsDisplayOutsideInline()| to |css::Display|.
+bool IsDisplayOutsideInline(const css::Display& display) {
+  return display.is_inline() || display.is_inline_block();
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -36,6 +42,8 @@ class LayoutVisitor final : public BoxVisitor {
   void Layout(Box* box, const FloatPoint& origin, const FloatSize& size);
   void Layout(Box* box, const FloatRect& bounds);
   void Layout(Box* box);
+  void LayoutFlowBoxHorizontally(const FlowBox& flow_box);
+  void LayoutFlowBoxVertically(const FlowBox& flow_box);
 
 // BoxVisitor
 #define V(name) void Visit##name(name* box) final;
@@ -59,6 +67,42 @@ void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
 void LayoutVisitor::Layout(Box* box) {
   Visit(box);
   BoxEditor().DidLayout(box);
+}
+
+void LayoutVisitor::LayoutFlowBoxHorizontally(const FlowBox& flow_box) {
+  DCHECK(flow_box.first_child()) << flow_box;
+  auto child_origin = FloatPoint();
+  const auto line_height = flow_box.content_bounds().height();
+  for (const auto& child : flow_box.child_boxes()) {
+    const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
+                             child->border().size() + child->padding().size();
+    LayoutVisitor().Layout(
+        child, FloatRect(child_origin + child->margin().top_left(),
+                         FloatSize(child_size.width(), line_height)));
+    child_origin = FloatPoint(child->bounds().right() + child->margin().right(),
+                              child_origin.y());
+  }
+}
+
+void LayoutVisitor::LayoutFlowBoxVertically(const FlowBox& flow_box) {
+  DCHECK(flow_box.first_child()) << flow_box;
+  auto child_origin = FloatPoint();
+  const auto content_width = flow_box.content_bounds().width();
+  for (const auto& child : flow_box.child_boxes()) {
+    const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
+                             child->border().size() + child->padding().size();
+    if (child->position().is_absolute()) {
+      LayoutVisitor().Layout(child, FloatPoint(child->left().length().value(),
+                                               child->top().length().value()),
+                             FloatSize(content_width, child_size.height()));
+      continue;
+    }
+    LayoutVisitor().Layout(
+        child, FloatRect(child_origin + child->margin().top_left(),
+                         FloatSize(content_width, child_size.height())));
+    child_origin = FloatPoint(
+        child_origin.x(), child->bounds().bottom() + child->margin().bottom());
+  }
 }
 
 void LayoutVisitor::LayoutIfNeeded(Box* box) {
@@ -93,6 +137,15 @@ void LayoutVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
     child_origin = FloatPoint(
         child_origin.x(), child->bounds().bottom() + child->margin().bottom());
   }
+}
+
+void LayoutVisitor::VisitFlowBox(FlowBox* flow_box) {
+  const auto first_child = flow_box->first_child();
+  if (!first_child)
+    return;
+  if (IsDisplayOutsideInline(first_child->display()))
+    return LayoutFlowBoxHorizontally(*flow_box);
+  return LayoutFlowBoxVertically(*flow_box);
 }
 
 void LayoutVisitor::VisitInlineBox(InlineBox* line) {

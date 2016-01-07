@@ -16,6 +16,7 @@
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_traversal.h"
 #include "evita/visuals/layout/box_visitor.h"
+#include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/inline_box.h"
 #include "evita/visuals/layout/inline_flow_box.h"
 #include "evita/visuals/layout/root_box.h"
@@ -236,6 +237,10 @@ void PaintVisitor::PushTransform() {
 
 // BoxVisitor
 void PaintVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
+  PaintContainerBox(*box);
+}
+
+void PaintVisitor::VisitFlowBox(FlowBox* box) {
   PaintContainerBox(*box);
 }
 

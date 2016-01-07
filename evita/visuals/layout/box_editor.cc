@@ -9,6 +9,7 @@
 #include "evita/visuals/layout/ancestors_or_self.h"
 #include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/descendants_or_self.h"
+#include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/inline_flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
@@ -153,6 +154,10 @@ void BoxEditor::SetContentChanged(ContentBox* box) {
   box->is_content_changed_ = true;
   MarkDirty(box);
   ScheduleVisualUpdateIfNeeded(box);
+}
+
+void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
+  box->display_ = display;
 }
 
 #define FOR_EACH_PROPERTY_CHANGES_PROPERTY(V) \

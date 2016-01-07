@@ -19,6 +19,7 @@ class RootBox;
 class TextBox;
 
 namespace css {
+class Display;
 class Style;
 }
 
@@ -47,6 +48,7 @@ class BoxEditor final {
   void SetStyle(Box* box, const css::Style& style);
 
   void SetContentChanged(ContentBox* box);
+  void SetDisplay(Box* box, const css::Display& display);
   void SetShouldPaint(Box* box);
   void WillDestroy(Box* box);
 

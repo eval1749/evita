@@ -37,6 +37,8 @@ source_set("layout") {
     "content_box.h",
     "descendants_or_self.cc",
     "descendants_or_self.h",
+    "flow_box.cc",
+    "flow_box.h",
     "inline_box.cc",
     "inline_box.h",
     "inline_flow_box.cc",

@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <winreg.h>
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/common_export.h"
 

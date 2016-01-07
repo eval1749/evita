@@ -4,7 +4,6 @@
 
 #include "common/win/registry.h"
 
-#include "base/basictypes.h"
 #include "common/win/win32_verify.h"
 
 namespace common {

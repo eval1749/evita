@@ -1,12 +1,14 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #ifndef COMMON_MEMORY_SCOPED_REFPTR_H_
 #define COMMON_MEMORY_SCOPED_REFPTR_H_
 
 #include <algorithm>
-#include "base/basictypes.h"
+
 #include "base/logging.h"
+#include "base/macros.h"
 
 namespace common {
 

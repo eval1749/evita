@@ -1,11 +1,11 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef COMMON_TREE_DESCENDANTS_H_
 #define COMMON_TREE_DESCENDANTS_H_
 
 #include "common/tree/descendants_or_self.h"
-
-#include "base/basictypes.h"
 
 namespace common {
 namespace tree {

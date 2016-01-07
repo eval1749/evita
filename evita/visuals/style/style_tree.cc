@@ -94,7 +94,6 @@ class StyleTree::Impl final {
   std::unique_ptr<css::Style> ComputeStyleForElement(
       const Element& element) const;
   Item* GetOrNewItem(const Element& element);
-  const css::Style& InlineStyleOf(const Element& element) const;
   void UpdateChildren(Context* context, const Element& element);
   void UpdateElement(Context* context, const Element& element);
   void UpdateElementIfNeeded(Context* context, const Element& element);

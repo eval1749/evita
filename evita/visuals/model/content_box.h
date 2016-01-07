@@ -13,20 +13,20 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// InlineBox
+// ContentBox
 //
-class InlineBox : public Box {
-  DECLARE_VISUAL_BOX_ABSTRACT_CLASS(InlineBox, Box);
+class ContentBox : public Box {
+  DECLARE_VISUAL_BOX_ABSTRACT_CLASS(ContentBox, Box);
 
  public:
-  ~InlineBox() override;
+  ~ContentBox() override;
 
  protected:
-  InlineBox(RootBox* root_box, const Node* node);
-  explicit InlineBox(RootBox* root_box);
+  ContentBox(RootBox* root_box, const Node* node);
+  explicit ContentBox(RootBox* root_box);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(InlineBox);
+  DISALLOW_COPY_AND_ASSIGN(ContentBox);
 };
 
 }  // namespace visuals

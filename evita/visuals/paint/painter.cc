@@ -80,7 +80,7 @@ class PaintVisitor final : public BoxVisitor {
                        const FloatColor& color,
                        bool mark);
   bool NeedsPaintContainerBox(const ContainerBox& box) const;
-  bool NeedsPaintInlineBox(const InlineBox& box) const;
+  bool NeedsPaintContentBox(const ContentBox& box) const;
   void PaintBackgroundINeeded(const Box& box);
   void PaintBorderINeeded(const Box& box);
   void PopTransform();
@@ -138,7 +138,7 @@ bool PaintVisitor::NeedsPaintContainerBox(const ContainerBox& box) const {
   return paint_info_.cull_rect().Intersects(bounds);
 }
 
-bool PaintVisitor::NeedsPaintInlineBox(const InlineBox& box) const {
+bool PaintVisitor::NeedsPaintContentBox(const ContentBox& box) const {
   if (box.bounds().size().IsEmpty())
     return false;
 #if 0

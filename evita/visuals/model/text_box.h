@@ -6,7 +6,7 @@
 #define EVITA_VISUALS_MODEL_TEXT_BOX_H_
 
 #include "base/strings/string16.h"
-#include "evita/visuals/model/inline_box.h"
+#include "evita/visuals/model/content_box.h"
 #include "evita/visuals/css/float_color.h"
 
 namespace visuals {
@@ -15,8 +15,8 @@ namespace visuals {
 //
 // TextBox
 //
-class TextBox final : public InlineBox {
-  DECLARE_VISUAL_BOX_FINAL_CLASS(TextBox, InlineBox);
+class TextBox final : public ContentBox {
+  DECLARE_VISUAL_BOX_FINAL_CLASS(TextBox, ContentBox);
 
  public:
   TextBox(RootBox* root_box, const base::string16 text, const Node* node);

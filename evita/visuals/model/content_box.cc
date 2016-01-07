@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/model/inline_box.h"
+#include "evita/visuals/model/content_box.h"
 
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// InlineBox
+// ContentBox
 //
-InlineBox::InlineBox(RootBox* root_box, const Node* node)
+ContentBox::ContentBox(RootBox* root_box, const Node* node)
     : Box(root_box, node) {}
 
-InlineBox::InlineBox(RootBox* root_box) : InlineBox(root_box, nullptr) {}
+ContentBox::ContentBox(RootBox* root_box) : ContentBox(root_box, nullptr) {}
 
-InlineBox::~InlineBox() {}
+ContentBox::~ContentBox() {}
 
 }  // namespace visuals

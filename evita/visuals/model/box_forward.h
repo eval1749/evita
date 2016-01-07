@@ -16,7 +16,7 @@ namespace visuals {
 #define FOR_EACH_ABSTRACT_VISUAL_BOX(V) \
   V(Box)                                \
   V(ContainerBox)                       \
-  V(InlineBox)
+  V(ContentBox)
 
 // Forward declarations
 class Box;

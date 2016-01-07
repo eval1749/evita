@@ -185,9 +185,10 @@ Box* BoxTree::Impl::AssignBoxToElement(Context* context,
     return RegisterBoxFor(context, element, std::move(new_block_flow_box));
   }
   if (style.display().is_inline_block() || style.display().is_inline()) {
-    auto new_inline_box = std::make_unique<InlineFlowBox>(root_box_, &element);
-    BoxEditor().SetStyle(new_inline_box.get(), style);
-    return RegisterBoxFor(context, element, std::move(new_inline_box));
+    auto new_inline_flow_box =
+        std::make_unique<InlineFlowBox>(root_box_, &element);
+    BoxEditor().SetStyle(new_inline_flow_box.get(), style);
+    return RegisterBoxFor(context, element, std::move(new_inline_flow_box));
   }
   NOTREACHED() << "Unsupported display:" << style.display() << " of "
                << element;
@@ -262,7 +263,7 @@ void BoxTree::Impl::FormatFlowBox(Context* context,
                                                           << *child;
       continue;
     }
-    if (child_box->is<InlineBox>() || child_box->is<InlineFlowBox>()) {
+    if (child_box->is<ContentBox>() || child_box->is<InlineFlowBox>()) {
       inline_boxes.push_back(child_box);
       continue;
     }

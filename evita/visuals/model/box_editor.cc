@@ -149,7 +149,7 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
   box->bounds_ = new_bounds;
 }
 
-void BoxEditor::SetContentChanged(InlineBox* box) {
+void BoxEditor::SetContentChanged(ContentBox* box) {
   box->is_content_changed_ = true;
   MarkDirty(box);
   ScheduleVisualUpdateIfNeeded(box);

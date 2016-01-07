@@ -30,10 +30,10 @@ source_set("model") {
     "children.h",
     "container_box.cc",
     "container_box.h",
+    "content_box.cc",
+    "content_box.h",
     "descendants_or_self.cc",
     "descendants_or_self.h",
-    "inline_box.cc",
-    "inline_box.h",
     "inline_flow_box.cc",
     "inline_flow_box.h",
     "root_box.cc",
@@ -57,8 +57,8 @@ source_set("test_supports") {
     "simple_box_tree_builder.h",
   ]
   deps = [
-    "//base",
     ":model",
+    "//base",
   ]
 }
 

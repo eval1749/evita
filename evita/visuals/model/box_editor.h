@@ -14,7 +14,7 @@ class ContainerBox;
 class FloatColor;
 class FloatRect;
 class FloatSize;
-class InlineBox;
+class ContentBox;
 class RootBox;
 class TextBox;
 
@@ -46,7 +46,7 @@ class BoxEditor final {
   void RemoveDescendants(ContainerBox* container_box);
   void SetStyle(Box* box, const css::Style& style);
 
-  void SetContentChanged(InlineBox* box);
+  void SetContentChanged(ContentBox* box);
   void SetShouldPaint(Box* box);
   void WillDestroy(Box* box);
 

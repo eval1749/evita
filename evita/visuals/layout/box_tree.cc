@@ -12,6 +12,7 @@
 #include "base/logging.h"
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/style.h"
+#include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/dom/element.h"
@@ -369,10 +370,10 @@ void BoxTree::Impl::UpdateIfNeeded() {
 #if !DCHECK_IS_ON()
     DCHECK_EQ(style_tree_.media().viewport_size(), root_box_->viewport_size());
     for (const auto& node : Node::DescendantsOrSelf(document_)) {
-      const auto box = BoxFor(node);
+      const auto box = BoxFor(*node);
       DCHECK(!box->is_changed());
       const auto container_box = box->as<ContainerBox>();
-      if (!container)
+      if (!container_box)
         continue;
       DCHECK(!container_box->is_child_changed());
     }

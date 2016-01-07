@@ -254,8 +254,9 @@ void StyleTree::Impl::UpdateIfNeeded() {
         continue;
       const auto& it = item_map_.find(element);
       DCHECK(it != item_map_.end());
-      DCHECK(!item->is_dirty_);
-      DCHECK(!item->is_child_dirty_);
+      const auto& item = it->second;
+      DCHECK(!item->is_dirty);
+      DCHECK(!item->is_child_dirty);
     }
 #endif
     return;

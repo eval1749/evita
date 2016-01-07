@@ -62,9 +62,15 @@ Document* LoadDocument() {
         .Begin(L"name")
         .AddText(base::StringPrintf(L"name %d", index))
         .End(L"name")
+        .Begin(L"size")
         .AddText(L"size")
+        .End(L"size")
+        .Begin(L"status")
         .AddText(L"status")
+        .End(L"status")
+        .Begin(L"file")
         .AddText(L"file")
+        .End(L"file")
         .End(L"list_item")
         .Finish(list);
     if (index == 0) {
@@ -111,6 +117,18 @@ css::StyleSheet* LoadStyleSheet() {
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
   style_sheet->AddRule(L"name",
                        std::move(css::StyleBuilder().SetWidth(150).Build()));
+  style_sheet->AddRule(
+      L"size",
+      std::move(
+          css::StyleBuilder().SetMargin(css::Margin(0, 5, 0, 0)).Build()));
+  style_sheet->AddRule(
+      L"status",
+      std::move(
+          css::StyleBuilder().SetMargin(css::Margin(0, 5, 0, 0)).Build()));
+  style_sheet->AddRule(
+      L"file",
+      std::move(
+          css::StyleBuilder().SetMargin(css::Margin(0, 5, 0, 0)).Build()));
   return style_sheet;
 }
 

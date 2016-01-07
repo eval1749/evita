@@ -28,6 +28,7 @@
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_finder.h"
 #include "evita/visuals/model/box_visitor.h"
+#include "evita/visuals/model/inline_box.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/simple_box_tree_builder.h"
@@ -79,6 +80,10 @@ void BoxPrinter::PrintAsContainer(const ContainerBox& container) {
 
 // BoxVisitor
 void BoxPrinter::VisitBlockFlowBox(BlockFlowBox* box) {
+  PrintAsContainer(*box);
+}
+
+void BoxPrinter::VisitInlineBox(InlineBox* box) {
   PrintAsContainer(*box);
 }
 

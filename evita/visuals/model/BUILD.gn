@@ -34,6 +34,8 @@ source_set("model") {
     "content_box.h",
     "descendants_or_self.cc",
     "descendants_or_self.h",
+    "inline_box.cc",
+    "inline_box.h",
     "inline_flow_box.cc",
     "inline_flow_box.h",
     "root_box.cc",

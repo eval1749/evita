@@ -20,6 +20,7 @@
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
+#include "evita/visuals/model/inline_box.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
@@ -29,6 +30,18 @@
 namespace visuals {
 
 namespace {
+
+// TODO(eval1749): We should have |Box::display()|
+css::Display DisplayOf(const Box& box) {
+  if (box.is<BlockFlowBox>())
+    return css::Display::Block();
+  if (box.is<InlineBox>())
+    return css::Display::Inline();
+  if (box.is<InlineFlowBox>())
+    return css::Display::InlineBlock();
+  NOTREACHED() << "Invalid box type " << box;
+  return css::Display::None();
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -62,15 +75,6 @@ std::ostream& operator<<(std::ostream& ostream, BoxTreeState state) {
 struct Context {
   bool is_updated;
 };
-
-// TODO(eval1749): We should have |Box::display()|
-css::Display DisplayOf(const Box& box) {
-  if (box.is<BlockFlowBox>())
-    return css::Display::Block();
-  if (box.is<InlineFlowBox>())
-    return css::Display::InlineBlock();
-  return css::Display::Inline();
-}
 
 }  // namespace
 
@@ -183,6 +187,11 @@ Box* BoxTree::Impl::AssignBoxToElement(Context* context,
         std::make_unique<BlockFlowBox>(root_box_, &element);
     BoxEditor().SetStyle(new_block_flow_box.get(), style);
     return RegisterBoxFor(context, element, std::move(new_block_flow_box));
+  }
+  if (style.display().is_inline()) {
+    auto new_inline_box = std::make_unique<InlineBox>(root_box_, &element);
+    BoxEditor().SetStyle(new_inline_box.get(), style);
+    return RegisterBoxFor(context, element, std::move(new_inline_box));
   }
   if (style.display().is_inline_block() || style.display().is_inline()) {
     auto new_inline_flow_box =

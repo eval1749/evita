@@ -13,6 +13,7 @@
 #include "evita/visuals/model/block_flow_box.h"
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_visitor.h"
+#include "evita/visuals/model/inline_box.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 
@@ -91,6 +92,20 @@ void LayoutVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
                          FloatSize(content_width, child_size.height())));
     child_origin = FloatPoint(
         child_origin.x(), child->bounds().bottom() + child->margin().bottom());
+  }
+}
+
+void LayoutVisitor::VisitInlineBox(InlineBox* line) {
+  auto child_origin = FloatPoint();
+  const auto line_height = line->content_bounds().height();
+  for (const auto& child : line->child_boxes()) {
+    const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
+                             child->border().size() + child->padding().size();
+    LayoutVisitor().Layout(
+        child, FloatRect(child_origin + child->margin().top_left(),
+                         FloatSize(child_size.width(), line_height)));
+    child_origin = FloatPoint(child->bounds().right() + child->margin().right(),
+                              child_origin.y());
   }
 }
 

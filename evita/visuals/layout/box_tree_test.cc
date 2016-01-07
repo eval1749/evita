@@ -12,6 +12,7 @@
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/model/block_flow_box.h"
+#include "evita/visuals/model/inline_box.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/style/style_tree.h"
@@ -48,7 +49,7 @@ TEST_F(BoxTreeTest, Basic) {
   BoxTree tree(*document, style_tree);
   tree.UpdateIfNeeded();
   const auto root_box = tree.root_box();
-  EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
+  EXPECT_TRUE(root_box->first_child()->is<InlineBox>());
 }
 
 TEST_F(BoxTreeTest, Flow) {
@@ -63,7 +64,7 @@ TEST_F(BoxTreeTest, Flow) {
   BoxTree tree(*document, style_tree);
   tree.UpdateIfNeeded();
   const auto root_box = tree.root_box();
-  EXPECT_TRUE(root_box->first_child()->is<InlineFlowBox>());
+  EXPECT_TRUE(root_box->first_child()->is<InlineBox>());
 }
 
 }  // namespace visuals

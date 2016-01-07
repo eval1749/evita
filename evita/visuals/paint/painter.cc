@@ -16,6 +16,7 @@
 #include "evita/visuals/model/box_editor.h"
 #include "evita/visuals/model/box_traversal.h"
 #include "evita/visuals/model/box_visitor.h"
+#include "evita/visuals/model/inline_box.h"
 #include "evita/visuals/model/inline_flow_box.h"
 #include "evita/visuals/model/root_box.h"
 #include "evita/visuals/model/text_box.h"
@@ -83,6 +84,7 @@ class PaintVisitor final : public BoxVisitor {
   bool NeedsPaintContentBox(const ContentBox& box) const;
   void PaintBackgroundINeeded(const Box& box);
   void PaintBorderINeeded(const Box& box);
+  void PaintContainerBox(const ContainerBox& box);
   void PopTransform();
   void PushTransform();
 
@@ -208,6 +210,14 @@ void PaintVisitor::PaintBorderINeeded(const Box& box) {
   }
 }
 
+void PaintVisitor::PaintContainerBox(const ContainerBox& box) {
+  if (!NeedsPaintContainerBox(box))
+    return;
+  BoxPaintScope paint_scope(this, box);
+  for (const auto& child : box.child_boxes())
+    Visit(child);
+}
+
 void PaintVisitor::PopTransform() {
   const auto& last_transform = transforms_.top();
   transforms_.pop();
@@ -225,20 +235,16 @@ void PaintVisitor::PushTransform() {
 }
 
 // BoxVisitor
-void PaintVisitor::VisitBlockFlowBox(BlockFlowBox* block) {
-  if (!NeedsPaintContainerBox(*block))
-    return;
-  BoxPaintScope paint_scope(this, *block);
-  for (const auto& child : block->child_boxes())
-    Visit(child);
+void PaintVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
+  PaintContainerBox(*box);
 }
 
-void PaintVisitor::VisitInlineFlowBox(InlineFlowBox* line) {
-  if (!NeedsPaintContainerBox(*line))
-    return;
-  BoxPaintScope paint_scope(this, *line);
-  for (const auto& child : line->child_boxes())
-    Visit(child);
+void PaintVisitor::VisitInlineBox(InlineBox* box) {
+  PaintContainerBox(*box);
+}
+
+void PaintVisitor::VisitInlineFlowBox(InlineFlowBox* box) {
+  PaintContainerBox(*box);
 }
 
 void PaintVisitor::VisitRootBox(RootBox* root) {

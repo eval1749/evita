@@ -31,6 +31,11 @@ namespace visuals {
 
 namespace {
 
+// TODO(eval1749) We should move |IsDisplayOutsideInline()| to |css::Display|.
+bool IsDisplayOutsideInline(const css::Display& display) {
+  return display.is_inline() || display.is_inline_block();
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // BoxTreeState
@@ -87,10 +92,12 @@ class BoxTree::Impl final : public DocumentObserver, public StyleTreeObserver {
   Box* AssignBoxToNode(Context* context, const Node& node);
   Box* AssignBoxToText(Context* context, const Text& text);
   const css::Style& ComputedStyleOf(const Node& node) const;
-  InlineFlowBox* CreateAnonymousBox(const std::vector<Box*>& children);
+  InlineFlowBox* CreateAnonymousInlineFlowBox(
+      const std::vector<Box*>& children);
   void FormatContainerBox(Context* context, ContainerBox* container_box);
-  void FormatFlowBox(Context* context, ContainerBox* container_box);
+  void FormatBlockFlowBox(Context* context, ContainerBox* container_box);
   void FormatRootBox(Context* context, RootBox* root_box);
+  void FormatInlineFlowBox(Context* context, InlineBox* inline_box);
   void IncrementVersionIfNeeded(Context* context);
   Box* RegisterBoxFor(Context* context,
                       const Node& node,
@@ -181,7 +188,7 @@ Box* BoxTree::Impl::AssignBoxToElement(Context* context,
     BoxEditor().SetStyle(new_inline_box.get(), style);
     return RegisterBoxFor(context, element, std::move(new_inline_box));
   }
-  if (style.display().is_inline_block() || style.display().is_inline()) {
+  if (style.display().is_inline_block()) {
     auto new_inline_flow_box =
         std::make_unique<InlineFlowBox>(root_box_, &element);
     BoxEditor().SetStyle(new_inline_flow_box.get(), style);
@@ -227,7 +234,7 @@ const css::Style& BoxTree::Impl::ComputedStyleOf(const Node& node) const {
   return style_tree_.ComputedStyleOf(node);
 }
 
-InlineFlowBox* BoxTree::Impl::CreateAnonymousBox(
+InlineFlowBox* BoxTree::Impl::CreateAnonymousInlineFlowBox(
     const std::vector<Box*>& children) {
   const auto inline_flow_box = new InlineFlowBox(root_box_);
   for (const auto& child : children)
@@ -243,11 +250,13 @@ void BoxTree::Impl::FormatContainerBox(Context* context,
                                        ContainerBox* container_box) {
   if (auto const root_box = container_box->as<RootBox>())
     return FormatRootBox(context, root_box);
-  FormatFlowBox(context, container_box);
+  if (auto const inline_box = container_box->as<InlineBox>())
+    return FormatInlineFlowBox(context, inline_box);
+  FormatBlockFlowBox(context, container_box);
 }
 
-void BoxTree::Impl::FormatFlowBox(Context* context,
-                                  ContainerBox* container_box) {
+void BoxTree::Impl::FormatBlockFlowBox(Context* context,
+                                       ContainerBox* container_box) {
   DCHECK(container_box->node()->is<Element>());
   std::vector<Box*> child_boxes;
   std::vector<Box*> inline_boxes;
@@ -260,43 +269,44 @@ void BoxTree::Impl::FormatFlowBox(Context* context,
                                                           << *child;
       continue;
     }
-    if (child_box->is<ContentBox>() || child_box->is<InlineFlowBox>()) {
+    if (IsDisplayOutsideInline(child_box->display())) {
       inline_boxes.push_back(child_box);
       continue;
     }
-    const auto child_element = child->as<Element>();
-    DCHECK(child_element) << child;
-    const auto& child_style = ComputedStyleOf(*child_element);
-    if (child_style.display().is_inline() ||
-        child_style.display().is_inline_block()) {
-      inline_boxes.push_back(child_box);
-      continue;
-    }
-    switch (inline_boxes.size()) {
-      case 0:
-        break;
-      case 1:
-        child_boxes.push_back(inline_boxes.front());
-        inline_boxes.pop_back();
-        break;
-      default: {
-        child_boxes.push_back(CreateAnonymousBox(inline_boxes));
-        inline_boxes.clear();
-        break;
-      }
+    if (!inline_boxes.empty()) {
+      child_boxes.push_back(CreateAnonymousInlineFlowBox(inline_boxes));
+      inline_boxes.clear();
     }
     child_boxes.push_back(child_box);
   }
 
-  if (inline_boxes.size() == 1) {
-    child_boxes.push_back(inline_boxes.front());
-  } else if (!inline_boxes.empty()) {
-    child_boxes.push_back(CreateAnonymousBox(inline_boxes));
+  if (!inline_boxes.empty()) {
+    child_boxes.push_back(CreateAnonymousInlineFlowBox(inline_boxes));
     inline_boxes.clear();
   }
 
   for (auto& child_box : child_boxes)
     BoxEditor().AppendChild(container_box, child_box);
+}
+
+// Does "flow" formatting for inline-level element
+void BoxTree::Impl::FormatInlineFlowBox(Context* context,
+                                        InlineBox* inline_box) {
+  DCHECK(inline_box->node()->is<Element>());
+  for (const auto& child :
+       inline_box->node()->as<ContainerNode>()->child_nodes()) {
+    const auto child_box = BoxFor(*child);
+    if (!child_box) {
+      DCHECK(child_box->display().is_none()) << "No box for " << *child;
+      continue;
+    }
+    if (IsDisplayOutsideInline(child_box->display())) {
+      BoxEditor().AppendChild(inline_box, child_box);
+      continue;
+    }
+    BoxEditor().AppendChild(inline_box,
+                            CreateAnonymousInlineFlowBox({child_box}));
+  }
 }
 
 void BoxTree::Impl::FormatRootBox(Context* context, RootBox* root_box) {

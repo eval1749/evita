@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "base/callback_forward.h"
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/dom/public/event_target_id.h"
 #include "evita/dom/public/window_id.h"

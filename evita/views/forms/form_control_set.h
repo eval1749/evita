@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 
+#include "base/macros.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/public/view_event.h"
 

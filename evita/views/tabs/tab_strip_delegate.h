@@ -5,6 +5,7 @@
 #ifndef EVITA_VIEWS_TABS_TAB_STRIP_DELEGATE_H_
 #define EVITA_VIEWS_TABS_TAB_STRIP_DELEGATE_H_
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/gfx/rect.h"
 

@@ -7,6 +7,7 @@
 
 #include <ostream>
 
+#include "base/macros.h"
 #include "evita/css/style.h"
 #include "evita/text/range_base.h"
 

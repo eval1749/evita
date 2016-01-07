@@ -5,6 +5,7 @@
 #ifndef EVITA_CSS_STYLE_SELECTOR_H_
 #define EVITA_CSS_STYLE_SELECTOR_H_
 
+#include "base/macros.h"
 #include "common/strings/atomic_string.h"
 
 namespace css {

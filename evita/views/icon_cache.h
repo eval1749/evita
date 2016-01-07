@@ -8,6 +8,7 @@
 #include <commctrl.h>
 #include <unordered_map>
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 

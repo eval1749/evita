@@ -1,11 +1,14 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_GC_COLLECTOR_H_
 #define EVITA_GC_COLLECTOR_H_
 
 #include <memory>
 #include <unordered_set>
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/memory/singleton.h"
 

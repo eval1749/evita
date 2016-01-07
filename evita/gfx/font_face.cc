@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stdint.h>
+
 #include "evita/gfx/font_face.h"
 
 #include "evita/gfx/direct_write_factory_win.h"
@@ -16,7 +18,7 @@ common::ComPtr<IDWriteFontFace> CreateFontFace(
   COM_VERIFY(DirectWriteFactory::GetInstance()->impl()->GetSystemFontCollection(
       &font_collection, false));
 
-  uint32 index;
+  uint32_t index;
   BOOL exists;
   COM_VERIFY(font_collection->FindFamilyName(properties.family_name.c_str(),
                                              &index, &exists));

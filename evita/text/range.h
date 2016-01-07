@@ -5,6 +5,7 @@
 #ifndef EVITA_TEXT_RANGE_H_
 #define EVITA_TEXT_RANGE_H_
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/text/offset.h"
 

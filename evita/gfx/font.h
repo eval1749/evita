@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/gfx/forward.h"
 

@@ -5,6 +5,7 @@
 #ifndef EVITA_UI_TOOLTIP_H_
 #define EVITA_UI_TOOLTIP_H_
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/gfx/rect.h"
 

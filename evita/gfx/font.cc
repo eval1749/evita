@@ -170,7 +170,7 @@ void Font::FontImpl::DrawText(gfx::Canvas* canvas,
   DWRITE_GLYPH_RUN glyph_run;
   glyph_run.fontFace = *font_face_;
   glyph_run.fontEmSize = em_size_;
-  glyph_run.glyphCount = static_cast<UINT32>(glyph_indexes.size());
+  glyph_run.glyphCount = static_cast<uint32_t>(glyph_indexes.size());
   glyph_run.glyphIndices = &glyph_indexes[0];
   glyph_run.glyphAdvances = &glyph_advances[0];
   glyph_run.glyphOffsets = nullptr;
@@ -185,13 +185,13 @@ void Font::FontImpl::DrawText(gfx::Canvas* canvas,
 std::vector<uint16_t> Font::FontImpl::GetGlyphIndexes(const base::char16* chars,
                                                       size_t num_chars) const {
   DCHECK_GE(num_chars, 1u);
-  std::vector<uint32> code_points(num_chars);
+  std::vector<uint32_t> code_points(num_chars);
   auto it = code_points.begin();
   for (auto s = chars; s < chars + num_chars; ++s) {
     *it = *s;
     ++it;
   }
-  std::vector<uint16> glyph_indexes(num_chars);
+  std::vector<uint16_t> glyph_indexes(num_chars);
   COM_VERIFY((*font_face_)
                  ->GetGlyphIndices(&code_points[0],
                                    static_cast<DWORD>(code_points.size()),
@@ -259,7 +259,7 @@ void Font::DrawText(gfx::Canvas* canvas,
                     const gfx::RectF& rect,
                     const base::string16& string) const {
   DrawText(canvas, text_brush, rect, string.data(),
-           static_cast<uint32>(string.length()));
+           static_cast<uint32_t>(string.length()));
 }
 
 const Font& Font::Get(const gfx::FontProperties& properties) {
@@ -285,7 +285,7 @@ float Font::GetTextWidth(const base::char16* chars, size_t num_chars) const {
 }
 
 float Font::GetTextWidth(const base::string16& string) const {
-  return GetTextWidth(string.data(), static_cast<uint32>(string.length()));
+  return GetTextWidth(string.data(), static_cast<uint32_t>(string.length()));
 }
 
 bool Font::HasCharacter(base::char16 sample) const {

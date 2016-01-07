@@ -7,9 +7,11 @@
 
 #include "base/callback_list.h"
 
-#include "base/basictypes.h"
+#include <utility>
+
 #include "base/bind.h"
 #include "base/bind_helpers.h"
+#include "base/macros.h"
 #include "base/memory/scoped_ptr.h"
 
 namespace base {
@@ -24,7 +26,7 @@ class FooListener {
  public:
   FooListener() {}
 
-  void GotAScopedFoo(scoped_ptr<Foo> f) { foo_ = f.Pass(); }
+  void GotAScopedFoo(scoped_ptr<Foo> f) { foo_ = std::move(f); }
 
   scoped_ptr<Foo> foo_;
 

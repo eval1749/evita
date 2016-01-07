@@ -13,6 +13,7 @@
 #include "base/logging.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_util.h"
+#include "build/build_config.h"
 #include "third_party/zlib/google/zip_internal.h"
 #include "third_party/zlib/google/zip_reader.h"
 
@@ -56,7 +57,7 @@ bool AddEntryToZip(zipFile zip_file, const base::FilePath& path,
   DCHECK(result);
   std::string str_path = relative_path.AsUTF8Unsafe();
 #if defined(OS_WIN)
-  ReplaceSubstringsAfterOffset(&str_path, 0u, "\\", "/");
+  base::ReplaceSubstringsAfterOffset(&str_path, 0u, "\\", "/");
 #endif
 
   bool is_directory = base::DirectoryExists(path);

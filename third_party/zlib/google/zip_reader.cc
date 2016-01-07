@@ -4,12 +4,17 @@
 
 #include "third_party/zlib/google/zip_reader.h"
 
+#include <utility>
+
 #include "base/bind.h"
 #include "base/files/file.h"
 #include "base/logging.h"
+#include "base/macros.h"
 #include "base/message_loop/message_loop.h"
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/thread_task_runner_handle.h"
+#include "build/build_config.h"
 #include "third_party/zlib/google/zip_internal.h"
 
 #if defined(USE_SYSTEM_MINIZIP)
@@ -130,7 +135,8 @@ ZipReader::EntryInfo::EntryInfo(const std::string& file_name_in_zip,
   original_size_ = raw_file_info.uncompressed_size;
 
   // Directory entries in zip files end with "/".
-  is_directory_ = EndsWith(file_name_in_zip, "/", false);
+  is_directory_ = base::EndsWith(file_name_in_zip, "/",
+                                 base::CompareCase::INSENSITIVE_ASCII);
 
   // Check the file name here for directory traversal issues.
   is_unsafe_ = file_path_.ReferencesParent();
@@ -144,7 +150,9 @@ ZipReader::EntryInfo::EntryInfo(const std::string& file_name_in_zip,
 
   // We also consider that the file name is unsafe, if it's absolute.
   // On Windows, IsAbsolute() returns false for paths starting with "/".
-  if (file_path_.IsAbsolute() || StartsWithASCII(file_name_in_zip, "/", false))
+  if (file_path_.IsAbsolute() ||
+      base::StartsWith(file_name_in_zip, "/",
+                       base::CompareCase::INSENSITIVE_ASCII))
     is_unsafe_ = true;
 
   // Construct the last modified time. The timezone info is not present in
@@ -355,24 +363,24 @@ void ZipReader::ExtractCurrentEntryToFilePathAsync(
   // If this is a directory, just create it and return.
   if (current_entry_info()->is_directory()) {
     if (base::CreateDirectory(output_file_path)) {
-      base::MessageLoopProxy::current()->PostTask(FROM_HERE, success_callback);
+      base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, success_callback);
     } else {
       DVLOG(1) << "Unzip failed: unable to create directory.";
-      base::MessageLoopProxy::current()->PostTask(FROM_HERE, failure_callback);
+      base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, failure_callback);
     }
     return;
   }
 
   if (unzOpenCurrentFile(zip_file_) != UNZ_OK) {
     DVLOG(1) << "Unzip failed: unable to open current zip entry.";
-    base::MessageLoopProxy::current()->PostTask(FROM_HERE, failure_callback);
+    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, failure_callback);
     return;
   }
 
   base::FilePath output_dir_path = output_file_path.DirName();
   if (!base::CreateDirectory(output_dir_path)) {
     DVLOG(1) << "Unzip failed: unable to create containing directory.";
-    base::MessageLoopProxy::current()->PostTask(FROM_HERE, failure_callback);
+    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, failure_callback);
     return;
   }
 
@@ -382,19 +390,15 @@ void ZipReader::ExtractCurrentEntryToFilePathAsync(
   if (!output_file.IsValid()) {
     DVLOG(1) << "Unzip failed: unable to create platform file at "
              << output_file_path.value();
-    base::MessageLoopProxy::current()->PostTask(FROM_HERE, failure_callback);
+    base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE, failure_callback);
     return;
   }
 
   base::MessageLoop::current()->PostTask(
       FROM_HERE,
-      base::Bind(&ZipReader::ExtractChunk,
-                 weak_ptr_factory_.GetWeakPtr(),
-                 Passed(output_file.Pass()),
-                 success_callback,
-                 failure_callback,
-                 progress_callback,
-                 0 /* initial offset */));
+      base::Bind(&ZipReader::ExtractChunk, weak_ptr_factory_.GetWeakPtr(),
+                 Passed(std::move(output_file)), success_callback,
+                 failure_callback, progress_callback, 0 /* initial offset */));
 }
 
 bool ZipReader::ExtractCurrentEntryIntoDirectory(
@@ -434,9 +438,9 @@ bool ZipReader::ExtractCurrentEntryToString(size_t max_read_bytes,
   // correct. However, we need to assume that the uncompressed size could be
   // incorrect therefore this function needs to read as much data as possible.
   std::string contents;
-  contents.reserve(static_cast<size_t>(std::min(
-      static_cast<int64>(max_read_bytes),
-      current_entry_info()->original_size())));
+  contents.reserve(
+      static_cast<size_t>(std::min(static_cast<int64_t>(max_read_bytes),
+                                   current_entry_info()->original_size())));
 
   StringWriterDelegate writer(max_read_bytes, &contents);
   if (!ExtractCurrentEntry(&writer))
@@ -472,7 +476,7 @@ void ZipReader::ExtractChunk(base::File output_file,
                              const SuccessCallback& success_callback,
                              const FailureCallback& failure_callback,
                              const ProgressCallback& progress_callback,
-                             const int64 offset) {
+                             const int64_t offset) {
   char buffer[internal::kZipBufSize];
 
   const int num_bytes_read = unzReadCurrentFile(zip_file_,
@@ -493,20 +497,15 @@ void ZipReader::ExtractChunk(base::File output_file,
       return;
     }
 
-    int64 current_progress = offset + num_bytes_read;
+    int64_t current_progress = offset + num_bytes_read;
 
     progress_callback.Run(current_progress);
 
     base::MessageLoop::current()->PostTask(
         FROM_HERE,
-        base::Bind(&ZipReader::ExtractChunk,
-                   weak_ptr_factory_.GetWeakPtr(),
-                   Passed(output_file.Pass()),
-                   success_callback,
-                   failure_callback,
-                   progress_callback,
-                   current_progress));
-
+        base::Bind(&ZipReader::ExtractChunk, weak_ptr_factory_.GetWeakPtr(),
+                   Passed(std::move(output_file)), success_callback,
+                   failure_callback, progress_callback, current_progress));
   }
 }
 

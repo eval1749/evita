@@ -1011,7 +1011,7 @@
           'use_openmax_dl_fft%': 0,
         }],
         ['OS=="win" or OS=="linux"', {
-            'enable_mdns%' : 1,
+          'enable_mdns%' : 1,
         }],
 
         # Disable various features by default on embedded.
@@ -2633,6 +2633,12 @@
       'clang_warning_flags': [
         '-Wheader-hygiene',
 
+        # TODO(thakis): Add -Wfor-loop-analysis to -Wall in clang, remove this:
+        '-Wfor-loop-analysis',
+
+        # TODO(thakis): Consider -Wloop-analysis (turns on
+        # -Wrange-loop-analysis too).
+
         # Don't die on dtoa code that uses a char as an array index.
         # This is required solely for base/third_party/dmg_fp/dtoa.cc.
         '-Wno-char-subscripts',
@@ -2667,9 +2673,6 @@
 
         # TODO(thakis): Enable this, crbug.com/507717
         '-Wno-shift-negative-value',
-
-        # TODO(thakis): Consider enabling this?
-        '-Wno-bitfield-width',
       ],
     },
     'includes': [ 'set_clang_warning_flags.gypi', ],
@@ -3140,39 +3143,22 @@
         },
         'conditions': [
           [ 'os_posix==1 and OS!="mac" and OS!="ios"', {
-            # We don't want to get warnings from third-party code,
-            # so remove any existing warning-enabling flags like -Wall.
-            'cflags!': [
-              '-Wall',
-              '-Wextra',
-            ],
+            # Remove -Wextra for third-party code.
+            'cflags!': [ '-Wextra' ],
             'cflags_cc': [
               # Don't warn about hash_map in third-party code.
               '-Wno-deprecated',
             ],
-            'cflags': [
-              # Don't warn about printf format problems.
-              # This is off by default in gcc but on in Ubuntu's gcc(!).
-              '-Wno-format',
-            ],
-            'cflags_cc!': [
-              # Necessary because llvm.org/PR10448 is WONTFIX (crbug.com/90453).
-              '-Wsign-compare',
-            ]
+          }],
+          [ 'os_posix==1 and clang!=1 and OS!="mac" and OS!="ios"', {
+            # When we don't control the compiler, don't use -Wall for
+            # third-party code either.
+            'cflags!': [ '-Wall' ],
           }],
           # TODO: Fix all warnings on chromeos too.
           [ 'os_posix==1 and OS!="mac" and OS!="ios" and (clang!=1 or chromeos==1)', {
             'cflags!': [
               '-Werror',
-            ],
-          }],
-          [ 'os_posix==1 and os_bsd!=1 and OS!="mac" and OS!="android"', {
-            'cflags': [
-              # Don't warn about ignoring the return value from e.g. close().
-              # This is off by default in some gccs but on by default in others.
-              # BSD systems do not support this option, since they are usually
-              # using gcc 4.2.1, which does not have this flag yet.
-              '-Wno-unused-result',
             ],
           }],
           [ 'OS=="win"', {
@@ -3210,7 +3196,7 @@
 
           [ 'OS=="mac" or OS=="ios"', {
             'xcode_settings': {
-              'WARNING_CFLAGS!': ['-Wall', '-Wextra'],
+              'WARNING_CFLAGS!': ['-Wextra'],
             },
             'conditions': [
               ['buildtype=="Official"', {
@@ -3222,10 +3208,6 @@
           }],
           [ 'OS=="ios"', {
             'xcode_settings': {
-              # TODO(ios): Fix remaining warnings in third-party code, then
-              # remove this; the Mac cleanup didn't get everything that's
-              # flagged in an iOS build.
-              'GCC_TREAT_WARNINGS_AS_ERRORS': 'NO',
               'RUN_CLANG_STATIC_ANALYZER': 'NO',
               # Several internal ios directories generate numerous warnings for
               # -Wobjc-missing-property-synthesis.
@@ -3442,6 +3424,16 @@
             'PreprocessorDefinitions': ['_DEBUG'],
           },
         },
+        'variables': {
+          'clang_warning_flags': [
+            # Allow comparing the address of references and 'this' against 0
+            # in debug builds. Technically, these can never be null in
+            # well-defined C/C++ and Clang can optimize such checks away in
+            # release builds, but they may be used in asserts in debug builds.
+            '-Wno-undefined-bool-conversion',
+            '-Wno-tautological-undefined-compare',
+          ],
+        },
         'conditions': [
           ['OS=="linux" or OS=="android"', {
             'target_conditions': [
@@ -3463,30 +3455,6 @@
               'OTHER_CFLAGS': [
                 '-fstack-protector-all',  # Implies -fstack-protector
               ],
-            },
-          }],
-          ['clang==1', {
-            'cflags': [
-              # Allow comparing the address of references and 'this' against 0
-              # in debug builds. Technically, these can never be null in
-              # well-defined C/C++ and Clang can optimize such checks away in
-              # release builds, but they may be used in asserts in debug builds.
-              '-Wno-undefined-bool-conversion',
-              '-Wno-tautological-undefined-compare',
-            ],
-            'xcode_settings': {
-              'OTHER_CFLAGS': [
-                '-Wno-undefined-bool-conversion',
-                '-Wno-tautological-undefined-compare',
-              ],
-            },
-            'msvs_settings': {
-              'VCCLCompilerTool': {
-                'AdditionalOptions': [
-                  '-Wno-undefined-bool-conversion',
-                  '-Wno-tautological-undefined-compare',
-                ],
-              },
             },
           }],
         ],
@@ -3621,6 +3589,11 @@
               'NS_BLOCK_ASSERTIONS=1',
             ],
           }],
+          # Force disable blink assertions on Cast device builds (overriding DCHECK_ALWAYS_ON)
+          # Only defined for Release builds (NDEBUG), otherwise blink won't compile.
+          ['chromecast==1 and OS=="linux" and is_cast_desktop_build==0', {
+            'defines': ['ENABLE_ASSERT=0'],
+          }],
         ],
       },
       #
@@ -3723,6 +3696,10 @@
         'variables': {
           'werror%': '-Werror',
           'libraries_for_target%': '',
+          'conditions' : [
+            # Enable -Wextra for chromium_code when we control the compiler.
+            ['clang==1', { 'wextra': '-Wextra' }, { 'wextra': '-Wno-extra' }],
+          ],
         },
         'defines': [
           '_FILE_OFFSET_BITS=64',
@@ -3732,6 +3709,7 @@
           '-pthread',
           '-fno-strict-aliasing',  # See http://crbug.com/32204
           '-Wall',
+          '<(wextra)',
           # Don't warn about unused function params.  We use those everywhere.
           '-Wno-unused-parameter',
           # Don't warn about the "struct foo f = {0};" initialization pattern.
@@ -3748,9 +3726,6 @@
           # Make inline functions have hidden visiblity by default.
           # Surprisingly, not covered by -fvisibility=hidden.
           '-fvisibility-inlines-hidden',
-          # GCC turns on -Wsign-compare for C++ under -Wall, but clang doesn't,
-          # so we specify it explicitly.  (llvm.org/PR10448, crbug.com/90453)
-          '-Wsign-compare',
         ],
         'ldflags': [
           '-pthread', '-Wl,-z,noexecstack',
@@ -6374,6 +6349,7 @@
       # configured SDK to show properly in the Xcode UI, SDKROOT must be set
       # here at the project level.
       ['OS=="mac"', {
+        'ARCHS': [ 'x86_64' ],
         'conditions': [
           ['mac_sdk_path==""', {
             'SDKROOT': 'macosx<(mac_sdk)',  # -isysroot
@@ -6383,6 +6359,8 @@
         ],
       }],
       ['OS=="ios"', {
+        # Target both iPhone and iPad.
+        'TARGETED_DEVICE_FAMILY': '1,2',
         'conditions': [
           ['ios_sdk_path==""', {
             'conditions': [
@@ -6395,23 +6373,6 @@
             ],
           }, {
             'SDKROOT': '<(ios_sdk_path)',  # -isysroot
-          }],
-        ],
-      }],
-      ['OS=="ios"', {
-        # Target both iPhone and iPad.
-        'TARGETED_DEVICE_FAMILY': '1,2',
-      }, {  # OS!="ios"
-        'conditions': [
-          ['target_arch=="x64"', {
-            'ARCHS': [
-              'x86_64'
-            ],
-          }],
-          ['target_arch=="ia32"', {
-            'ARCHS': [
-              'i386'
-            ],
           }],
         ],
       }],

@@ -668,18 +668,6 @@ config("default_warnings") {
     cflags += [
       # Warnings permanently disabled:
 
-      # C4311: 'reinterpret_cast': pointer truncation from 'BYTE *' to
-      # 'unsigned int'
-      # v8/src/base/platform-win32.cc
-      # MSVC2015
-      "/wd4311",
-
-      # C4312: 'reinterpret_cast': conversion from 'uint32_t' to
-      # 'v8::internal::Address' of greater size
-      # v8/src/heap/spaces.h, v8/src/types-inl.h, v8/src/ast.h
-      # MSVC2015
-      "/wd4312",
-
       # C4091: 'typedef ': ignored on left of 'X' when no variable is
       #                    declared.
       # This happens in a number of Windows headers. Dumb.
@@ -762,11 +750,17 @@ config("default_warnings") {
     ]
 
     if (visual_studio_version == "2015") {
-      # VC++ 2015 changes 32-bit size_t truncation warnings from 4244 to 4267.
-      # Example: short TruncTest(size_t x) { return x; }
-      # Since we already disable 4244 we need to disable 4267 during migration.
-      # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
-      cflags += [ "/wd4267" ]
+      cflags += [
+        # VC++ 2015 changes 32-bit size_t truncation warnings from 4244 to 4267.
+        # Example: short TruncTest(size_t x) { return x; }
+        # Since we disable 4244 we need to disable 4267 during migration.
+        # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
+        "/wd4267",
+
+        # C4312 is a VS 2015 64-bit warning for integer to larger pointer.
+        # TODO(brucedawson): fix warnings, crbug.com/554200
+        "/wd4312",
+      ]
     }
 
     # VS xtree header file needs to be patched or 4702 (unreachable code
@@ -842,6 +836,12 @@ config("default_warnings") {
 
   if (is_clang) {
     cflags += [
+      # TODO(thakis): Add -Wfor-loop-analysis to -Wall in clang, remove this:
+      "-Wfor-loop-analysis",
+
+      # TODO(thakis): Consider -Wloop-analysis (turns on
+      # -Wrange-loop-analysis too).
+
       # This warns on using ints as initializers for floats in
       # initializer lists (e.g. |int a = f(); CGSize s = { a, a };|),
       # which happens in several places in chrome code. Not sure if
@@ -881,17 +881,6 @@ config("default_warnings") {
       cflags += [
         # TODO(thakis): Enable this, crbug.com/507717
         "-Wno-shift-negative-value",
-
-        # TODO(thakis): Consider enabling this?
-        "-Wno-bitfield-width",
-      ]
-    }
-
-    if (is_nacl_nonsfi) {
-      cflags += [
-        # TODO(phosek): Enable after https://codereview.chromium.org/1419373002/
-        # is rolled into Chrome.
-        "-Wno-sign-compare",
       ]
     }
   }
@@ -906,15 +895,11 @@ config("chromium_code") {
   if (is_win) {
     cflags = [ "/W4" ]  # Warning level 4.
   } else {
-    cflags = [
-      "-Wall",
-
-      # GCC turns on -Wsign-compare for C++ under -Wall, but clang doesn't,
-      # so we specify it explicitly.
-      # TODO(fischman): remove this if http://llvm.org/PR10448 obsoletes it.
-      # http://code.google.com/p/chromium/issues/detail?id=90453
-      "-Wsign-compare",
-    ]
+    cflags = [ "-Wall" ]
+    if (is_clang) {
+      # Enable -Wextra for chromium_code when we control the compiler.
+      cflags += [ "-Wextra" ]
+    }
 
     # In Chromium code, we define __STDC_foo_MACROS in order to get the
     # C99 macros on Mac and Linux.
@@ -956,14 +941,10 @@ config("no_chromium_code") {
       "_CRT_NONSTDC_NO_WARNINGS",
       "_CRT_NONSTDC_NO_DEPRECATE",
     ]
-  }
-
-  if (is_linux) {
-    # Don't warn about ignoring the return value from e.g. close(). This is
-    # off by default in some gccs but on by default in others. BSD systems do
-    # not support this option, since they are usually using gcc 4.2.1, which
-    # does not have this flag yet.
-    cflags += [ "-Wno-unused-result" ]
+  } else if (is_clang && !is_nacl) {
+    # TODO(thakis): Remove !is_nacl once
+    # https://codereview.webrtc.org/1552863002/ made its way into chromium.
+    cflags += [ "-Wall" ]
   }
 
   if (is_clang) {
@@ -975,11 +956,6 @@ config("no_chromium_code") {
   }
 
   if (is_linux || is_android) {
-    cflags += [
-      # Don't warn about printf format problems. This is off by default in gcc
-      # but on in Ubuntu's gcc(!).
-      "-Wno-format",
-    ]
     cflags_cc += [
       # Don't warn about hash_map in third-party code.
       "-Wno-deprecated",
@@ -1184,7 +1160,10 @@ config("no_optimize") {
     if (!using_sanitizer) {
       cflags += [ "-fomit-frame-pointer" ]
     }
-    ldflags = common_optimize_on_ldflags
+
+    # Don't use gc-sections since it can cause links to succeed when they
+    # actually shouldn't. http://crbug.com/159847
+    ldflags = common_optimize_on_ldflags - [ "-Wl,--gc-sections" ]
   } else {
     cflags = [ "-O0" ]
     ldflags = []

@@ -28,6 +28,12 @@ static_library("zlib_x86_simd") {
   configs += [ "//build/config/compiler:no_chromium_code" ]
 }
 
+config("zlib_warnings") {
+  if (is_clang && !is_ios && (current_cpu == "x86" || current_cpu == "x64")) {
+    cflags = [ "-Wno-incompatible-pointer-types" ]
+  }
+}
+
 static_library("zlib") {
   if (!is_win) {
     # Don't stomp on "libzlib" on other platforms.
@@ -70,12 +76,25 @@ static_library("zlib") {
   }
 
   configs -= [ "//build/config/compiler:chromium_code" ]
-  configs += [ "//build/config/compiler:no_chromium_code" ]
+  configs += [
+    "//build/config/compiler:no_chromium_code",
+
+    # Must be after no_chromium_code for warning flags to be ordered correctly.
+    ":zlib_warnings",
+  ]
 
   public_configs = [ ":zlib_config" ]
   deps = [
     ":zlib_x86_simd",
   ]
+}
+
+config("minizip_warnings") {
+  visibility = [ ":*" ]
+  if (is_clang) {
+    # zlib uses `if ((a == b))` for some reason.
+    cflags = [ "-Wno-parentheses-equality" ]
+  }
 }
 
 static_library("minizip") {
@@ -102,17 +121,17 @@ static_library("minizip") {
     defines = [ "USE_FILE32API" ]
   }
 
-  if (is_clang) {
-    # zlib uses `if ((a == b))` for some reason.
-    cflags = [ "-Wno-parentheses-equality" ]
-  }
-
   deps = [
     ":zlib",
   ]
 
   configs -= [ "//build/config/compiler:chromium_code" ]
-  configs += [ "//build/config/compiler:no_chromium_code" ]
+  configs += [
+    "//build/config/compiler:no_chromium_code",
+
+    # Must be after no_chromium_code for warning flags to be ordered correctly.
+    ":minizip_warnings",
+  ]
   public_configs = [ ":zlib_config" ]
 }
 

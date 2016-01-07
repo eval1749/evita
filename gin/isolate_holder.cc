@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <utility>
 
 #include "base/logging.h"
 #include "base/message_loop/message_loop.h"
@@ -84,7 +85,7 @@ void IsolateHolder::Initialize(ScriptMode mode,
 
 void IsolateHolder::AddRunMicrotasksObserver() {
   DCHECK(!task_observer_.get());
-  task_observer_.reset(new RunMicrotasksObserver(isolate_));;
+  task_observer_.reset(new RunMicrotasksObserver(isolate_));
   base::MessageLoop::current()->AddTaskObserver(task_observer_.get());
 }
 
@@ -97,7 +98,7 @@ void IsolateHolder::RemoveRunMicrotasksObserver() {
 void IsolateHolder::EnableIdleTasks(
     scoped_ptr<V8IdleTaskRunner> idle_task_runner) {
   DCHECK(isolate_data_.get());
-  isolate_data_->EnableIdleTasks(idle_task_runner.Pass());
+  isolate_data_->EnableIdleTasks(std::move(idle_task_runner));
 }
 
 }  // namespace gin

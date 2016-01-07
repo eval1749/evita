@@ -91,15 +91,16 @@ class BoxTree::Impl final : public DocumentObserver, public StyleTreeObserver {
   void UpdateIfNeeded();
 
  private:
-  void AssignBoxToDocument(Context* context, const Document& document);
-  void AssignBoxToElement(Context* context, const Element& element);
-  void AssignBoxToNode(Context* context, const Node& node);
-  void AssignBoxToText(Context* context, const Text& text);
+  Box* AssignBoxToElement(Context* context, const Element& element);
+  Box* AssignBoxToNode(Context* context, const Node& node);
+  Box* AssignBoxToText(Context* context, const Text& text);
   const css::Style& ComputedStyleOf(const Node& node) const;
   InlineFlowBox* CreateAnonymousBox(const std::vector<Box*>& children);
-  void FormatFlow(Context* context, const Element& element);
+  void FormatContainerBox(Context* context, ContainerBox* container_box);
+  void FormatFlowBox(Context* context, ContainerBox* container_box);
+  void FormatRootBox(Context* context, RootBox* root_box);
   void IncrementVersionIfNeeded(Context* context);
-  void RegisterBoxFor(Context* context,
+  Box* RegisterBoxFor(Context* context,
                       const Node& node,
                       std::unique_ptr<Box> box);
 
@@ -155,81 +156,67 @@ RootBox* BoxTree::Impl::root_box() const {
   return root_box_;
 }
 
-void BoxTree::Impl::AssignBoxToDocument(Context* context,
-                                        const Document& document) {
-  BoxEditor().RemoveAllChildren(root_box_);
-  for (const auto& child : document.child_nodes()) {
-    if (auto const document_element = child->as<Element>()) {
-      auto document_element_box = BoxFor(*document_element);
-      DCHECK(document_element_box) << "Oops, document element "
-                                   << *document_element
-                                   << " doesn't have a "
-                                      "box. Maybe it has display:none: "
-                                   << ComputedStyleOf(*document_element);
-      BoxEditor().AppendChild(root_box_, document_element_box);
-      return;
-    }
-  }
-  NOTREACHED() << document << " is empty.";
-}
-
-void BoxTree::Impl::AssignBoxToElement(Context* context,
+Box* BoxTree::Impl::AssignBoxToElement(Context* context,
                                        const Element& element) {
   const auto& style = ComputedStyleOf(element);
   const auto& it = box_map_.find(&element);
   if (style.display().is_none()) {
     if (it == box_map_.end())
-      return;
+      return nullptr;
     IncrementVersionIfNeeded(context);
     RemoveAllChildren(it->second->as<ContainerBox>());
     box_map_.erase(it);
-    return;
+    return nullptr;
   }
   if (it != box_map_.end()) {
     const auto container_box = it->second->as<ContainerBox>();
     RemoveAllChildren(container_box);
     if (DisplayOf(*container_box) == style.display()) {
       BoxEditor().SetStyle(container_box, style);
-      return FormatFlow(context, element);
+      return container_box;
     }
+    box_map_.erase(it);
   }
   if (style.display().is_block()) {
     // TODO(eval1749): |Box| constructor should take |css::Style|.
     auto new_block_flow_box =
         std::make_unique<BlockFlowBox>(root_box_, &element);
     BoxEditor().SetStyle(new_block_flow_box.get(), style);
-    RegisterBoxFor(context, element, std::move(new_block_flow_box));
-    return FormatFlow(context, element);
+    return RegisterBoxFor(context, element, std::move(new_block_flow_box));
   }
   if (style.display().is_inline_block() || style.display().is_inline()) {
     auto new_inline_box = std::make_unique<InlineFlowBox>(root_box_, &element);
     BoxEditor().SetStyle(new_inline_box.get(), style);
-    RegisterBoxFor(context, element, std::move(new_inline_box));
-    return FormatFlow(context, element);
+    return RegisterBoxFor(context, element, std::move(new_inline_box));
   }
   NOTREACHED() << "Unsupported display:" << style.display() << " of "
                << element;
+  return nullptr;
 }
 
-void BoxTree::Impl::AssignBoxToNode(Context* context, const Node& node) {
+Box* BoxTree::Impl::AssignBoxToNode(Context* context, const Node& node) {
+  IncrementVersionIfNeeded(context);
   if (const auto text = node.as<Text>())
     return AssignBoxToText(context, *text);
   if (const auto element = node.as<Element>())
     return AssignBoxToElement(context, *element);
   if (&node == &document_)
-    return AssignBoxToDocument(context, document_);
+    return root_box_;
   NOTREACHED();
+  return nullptr;
 }
 
-void BoxTree::Impl::AssignBoxToText(Context* context, const Text& text) {
+Box* BoxTree::Impl::AssignBoxToText(Context* context, const Text& text) {
   const auto& style = ComputedStyleOf(text);
-  if (const auto text_box = BoxFor(text))
-    return BoxEditor().SetStyle(text_box, style);
+  if (const auto text_box = BoxFor(text)) {
+    BoxEditor().SetStyle(text_box, style);
+    return text_box;
+  }
   // TODO(eval1749): We should make |TextBox| constructor to take color.
   // TODO(eval1749): |TextBox| constructor should take |const Text&|.
   auto new_text_box = std::make_unique<TextBox>(root_box_, text.data(), &text);
   BoxEditor().SetStyle(new_text_box.get(), style);
-  RegisterBoxFor(context, text, std::move(new_text_box));
+  return RegisterBoxFor(context, text, std::move(new_text_box));
 }
 
 Box* BoxTree::Impl::BoxFor(const Node& node) const {
@@ -254,11 +241,21 @@ InlineFlowBox* BoxTree::Impl::CreateAnonymousBox(
 //  block           block flow
 //  inline          inline flow
 //  inline-block    inline flow-root
-void BoxTree::Impl::FormatFlow(Context* context, const Element& element) {
+void BoxTree::Impl::FormatContainerBox(Context* context,
+                                       ContainerBox* container_box) {
+  if (auto const root_box = container_box->as<RootBox>())
+    return FormatRootBox(context, root_box);
+  FormatFlowBox(context, container_box);
+}
+
+void BoxTree::Impl::FormatFlowBox(Context* context,
+                                  ContainerBox* container_box) {
+  DCHECK(container_box->node()->is<Element>());
   std::vector<Box*> child_boxes;
   std::vector<Box*> inline_boxes;
   // Does "flow" formatting
-  for (const auto& child : element.child_nodes()) {
+  for (const auto& child :
+       container_box->node()->as<ContainerNode>()->child_nodes()) {
     const auto child_box = BoxFor(*child);
     if (!child_box) {
       DCHECK(ComputedStyleOf(*child).display().is_none()) << "No box for "
@@ -300,11 +297,25 @@ void BoxTree::Impl::FormatFlow(Context* context, const Element& element) {
     inline_boxes.clear();
   }
 
-  const auto container_box = BoxFor(element)->as<ContainerBox>();
-  DCHECK(container_box) << "No container box for " << element << ". It is "
-                        << BoxFor(element);
   for (auto& child_box : child_boxes)
     BoxEditor().AppendChild(container_box, child_box);
+}
+
+void BoxTree::Impl::FormatRootBox(Context* context, RootBox* root_box) {
+  BoxEditor().RemoveAllChildren(root_box_);
+  for (const auto& child : document_.child_nodes()) {
+    if (auto const document_element = child->as<Element>()) {
+      auto document_element_box = BoxFor(*document_element);
+      DCHECK(document_element_box) << "Oops, document element "
+                                   << *document_element
+                                   << " doesn't have a "
+                                      "box. Maybe it has display:none: "
+                                   << ComputedStyleOf(*document_element);
+      BoxEditor().AppendChild(root_box_, document_element_box);
+      return;
+    }
+  }
+  NOTREACHED() << document_ << " is empty.";
 }
 
 void BoxTree::Impl::IncrementVersionIfNeeded(Context* context) {
@@ -324,11 +335,13 @@ void BoxTree::Impl::MarkDirty(const Node& node) {
   BoxEditor().MarkDirty(it->second.get());
 }
 
-void BoxTree::Impl::RegisterBoxFor(Context* context,
+Box* BoxTree::Impl::RegisterBoxFor(Context* context,
                                    const Node& node,
                                    std::unique_ptr<Box> box) {
   IncrementVersionIfNeeded(context);
-  box_map_.emplace(&node, std::move(box));
+  const auto& result = box_map_.emplace(&node, std::move(box));
+  DCHECK(result.second) << node << " is already in box_map_";
+  return result.first->second.get();
 }
 
 void BoxTree::Impl::RemoveAllChildren(ContainerBox* container) {
@@ -345,9 +358,13 @@ void BoxTree::Impl::RemoveAllChildren(ContainerBox* container) {
 
 void BoxTree::Impl::UpdateContainerNode(Context* context,
                                         const ContainerNode& container) {
+  AssignBoxToNode(context, container);
+  const auto container_box = BoxFor(container);
+  if (!container_box)
+    return;
   for (const auto& child : container.child_nodes())
     UpdateNode(context, *child);
-  AssignBoxToNode(context, container);
+  FormatContainerBox(context, container_box->as<ContainerBox>());
 }
 
 void BoxTree::Impl::UpdateContainerNodeIfNeeded(
@@ -359,9 +376,13 @@ void BoxTree::Impl::UpdateContainerNodeIfNeeded(
     if (!box->as<ContainerBox>()->is_child_changed())
       return;
   }
+  AssignBoxToNode(context, container);
+  const auto container_box = BoxFor(container);
+  if (!container_box)
+    return;
   for (const auto& child : container.child_nodes())
     UpdateNodeIfNeeded(context, *child);
-  AssignBoxToNode(context, container);
+  FormatContainerBox(context, container_box->as<ContainerBox>());
 }
 
 void BoxTree::Impl::UpdateIfNeeded() {

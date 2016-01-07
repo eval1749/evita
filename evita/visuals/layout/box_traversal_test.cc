@@ -4,8 +4,8 @@
 
 #include "evita/visuals/layout/box_traversal.h"
 
-#include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_editor.h"
+#include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/simple_box_tree_builder.h"
 #include "evita/visuals/layout/text_box.h"
@@ -15,10 +15,10 @@ namespace visuals {
 
 TEST(BoxTraversalTest, FirstChildOf) {
   const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<BlockFlowBox>()
+                         .Begin<FlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockFlowBox>()
+                         .End<FlowBox>()
                          .Build();
   const auto block = root->first_child()->as<ContainerBox>();
 
@@ -30,7 +30,7 @@ TEST(BoxTraversalTest, FirstChildOf) {
 }
 
 TEST(BoxTraversalTest, FirstChildOfNoChild) {
-  const auto& root = SimpleBoxTreeBuilder().Add<BlockFlowBox>().Build();
+  const auto& root = SimpleBoxTreeBuilder().Add<FlowBox>().Build();
   const auto block = root->first_child();
   EXPECT_EQ(nullptr, BoxTraversal::FirstChildOf(*block));
 
@@ -39,10 +39,10 @@ TEST(BoxTraversalTest, FirstChildOfNoChild) {
 
 TEST(BoxTraversalTest, LastChildOf) {
   const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<BlockFlowBox>()
+                         .Begin<FlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockFlowBox>()
+                         .End<FlowBox>()
                          .Build();
   const auto block = root->first_child()->as<ContainerBox>();
 
@@ -54,7 +54,7 @@ TEST(BoxTraversalTest, LastChildOf) {
 }
 
 TEST(BoxTraversalTest, LastChildOfNoChild) {
-  const auto& root = SimpleBoxTreeBuilder().Add<BlockFlowBox>().Build();
+  const auto& root = SimpleBoxTreeBuilder().Add<FlowBox>().Build();
   const auto block = root->first_child();
   EXPECT_EQ(nullptr, BoxTraversal::LastChildOf(*block));
 
@@ -63,10 +63,10 @@ TEST(BoxTraversalTest, LastChildOfNoChild) {
 
 TEST(BoxTraversalTest, NextOf) {
   const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<BlockFlowBox>()
+                         .Begin<FlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockFlowBox>()
+                         .End<FlowBox>()
                          .Build();
   const auto block = root->first_child();
 
@@ -80,10 +80,10 @@ TEST(BoxTraversalTest, NextOf) {
 
 TEST(BoxTraversalTest, NextSiblingOf) {
   const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<BlockFlowBox>()
+                         .Begin<FlowBox>()
                          .Add<TextBox>(L"foo")
                          .Add<TextBox>(L"bar")
-                         .End<BlockFlowBox>()
+                         .End<FlowBox>()
                          .Build();
   const auto block = root->first_child();
 

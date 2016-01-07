@@ -12,13 +12,10 @@
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/geometry/affine_transformer.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_traversal.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
-#include "evita/visuals/layout/inline_box.h"
-#include "evita/visuals/layout/inline_flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/paint/paint_info.h"
@@ -236,19 +233,7 @@ void PaintVisitor::PushTransform() {
 }
 
 // BoxVisitor
-void PaintVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
-  PaintContainerBox(*box);
-}
-
 void PaintVisitor::VisitFlowBox(FlowBox* box) {
-  PaintContainerBox(*box);
-}
-
-void PaintVisitor::VisitInlineBox(InlineBox* box) {
-  PaintContainerBox(*box);
-}
-
-void PaintVisitor::VisitInlineFlowBox(InlineFlowBox* box) {
   PaintContainerBox(*box);
 }
 

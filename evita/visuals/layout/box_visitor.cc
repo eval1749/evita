@@ -4,10 +4,7 @@
 
 #include "evita/visuals/layout/box_visitor.h"
 
-#include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/flow_box.h"
-#include "evita/visuals/layout/inline_box.h"
-#include "evita/visuals/layout/inline_flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 

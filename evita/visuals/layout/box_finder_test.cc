@@ -6,9 +6,9 @@
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/dom/text.h"
-#include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_finder.h"
+#include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/simple_box_tree_builder.h"
@@ -28,10 +28,10 @@ TEST(BoxFinderTest, Basic) {
   const auto text1 = block->first_child()->as<Text>();
   const auto text2 = block->last_child()->as<Text>();
   const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<BlockFlowBox>(block)
+                         .Begin<FlowBox>(block)
                          .Add<TextBox>(text1->data(), text1)
                          .Add<TextBox>(text2->data(), text2)
-                         .End<BlockFlowBox>()
+                         .End<FlowBox>()
                          .Build();
   const auto main = root->first_child()->as<ContainerBox>();
   const auto text_box1 = main->first_child();

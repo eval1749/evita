@@ -9,12 +9,9 @@
 #include "base/logging.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
-#include "evita/visuals/layout/inline_box.h"
-#include "evita/visuals/layout/inline_flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 
@@ -79,19 +76,7 @@ void ExtrinsicSizeVisitor::ReturnSize(const FloatSize& size) {
 }
 
 // BoxVisitor
-void ExtrinsicSizeVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
-  ComputeWithSimpleMethod(*box);
-}
-
 void ExtrinsicSizeVisitor::VisitFlowBox(FlowBox* box) {
-  ComputeWithSimpleMethod(*box);
-}
-
-void ExtrinsicSizeVisitor::VisitInlineBox(InlineBox* box) {
-  ComputeWithSimpleMethod(*box);
-}
-
-void ExtrinsicSizeVisitor::VisitInlineFlowBox(InlineFlowBox* box) {
   ComputeWithSimpleMethod(*box);
 }
 
@@ -174,19 +159,6 @@ FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(const FlowBox& flow_box) {
 }
 
 // BoxVisitor
-void IntrinsicSizeVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
-  auto size = FloatSize();
-  for (const auto& child : box->child_boxes()) {
-    if (!child->position().is_static())
-      continue;
-    const auto& child_size = ComputePreferredSize(*child) +
-                             child->border().size() + child->padding().size();
-    size = FloatSize(std::max(size.width(), child_size.width()),
-                     size.height() + child_size.height());
-  }
-  ReturnSize(size);
-}
-
 void IntrinsicSizeVisitor::VisitFlowBox(FlowBox* flow_box) {
   const auto first_child = flow_box->first_child();
   if (!first_child)
@@ -194,32 +166,6 @@ void IntrinsicSizeVisitor::VisitFlowBox(FlowBox* flow_box) {
   if (IsDisplayOutsideInline(first_child->display()))
     return ReturnSize(SizeOfHorizontalFlowBox(*flow_box));
   return ReturnSize(SizeOfVerticalFlowBox(*flow_box));
-}
-
-void IntrinsicSizeVisitor::VisitInlineBox(InlineBox* box) {
-  auto size = FloatSize();
-  for (const auto& child : box->child_boxes()) {
-    if (!child->position().is_static())
-      continue;
-    const auto& child_size = ComputePreferredSize(*child) +
-                             child->border().size() + child->padding().size();
-    size = FloatSize(size.width() + child_size.width(),
-                     std::max(size.height(), child_size.height()));
-  }
-  ReturnSize(size);
-}
-
-void IntrinsicSizeVisitor::VisitInlineFlowBox(InlineFlowBox* box) {
-  auto size = FloatSize();
-  for (const auto& child : box->child_boxes()) {
-    if (!child->position().is_static())
-      continue;
-    const auto& child_size = ComputePreferredSize(*child) +
-                             child->border().size() + child->padding().size();
-    size = FloatSize(size.width() + child_size.width(),
-                     std::max(size.height(), child_size.height()));
-  }
-  ReturnSize(size);
 }
 
 void IntrinsicSizeVisitor::VisitRootBox(RootBox* box) {
@@ -269,19 +215,7 @@ void PreferredSizeVisitor::ReturnSize(const FloatSize& size) {
 }
 
 // BoxVisitor
-void PreferredSizeVisitor::VisitBlockFlowBox(BlockFlowBox* box) {
-  ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
-}
-
 void PreferredSizeVisitor::VisitFlowBox(FlowBox* box) {
-  ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
-}
-
-void PreferredSizeVisitor::VisitInlineBox(InlineBox* box) {
-  ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
-}
-
-void PreferredSizeVisitor::VisitInlineFlowBox(InlineFlowBox* box) {
   ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
 }
 

@@ -9,8 +9,8 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_editor.h"
+#include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/simple_box_tree_builder.h"
@@ -23,11 +23,11 @@ namespace visuals {
 TEST(PainterTest, Basic) {
   const auto& root =
       SimpleBoxTreeBuilder()
-          .Begin<BlockFlowBox>()
+          .Begin<FlowBox>()
           .SetStyle(*css::StyleBuilder()
                          .SetBackground(css::Background(css::Color(1, 1, 1)))
                          .Build())
-          .End<BlockFlowBox>()
+          .End<FlowBox>()
           .Build();
   BoxEditor().SetViewportSize(root.get(), FloatSize(200, 100));
   Layouter().Layout(root.get());

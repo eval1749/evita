@@ -7,7 +7,6 @@
 
 #include "evita/visuals/layout/root_box.h"
 
-#include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/descendants_or_self.h"
 #include "evita/visuals/layout/simple_box_tree_builder.h"

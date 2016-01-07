@@ -69,13 +69,7 @@ std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   return std::move(builder_.Build());
 }
 
-void ActualStyleVisitor::VisitBlockFlowBox(BlockFlowBox* block) {}
-
 void ActualStyleVisitor::VisitFlowBox(FlowBox* flow_box) {}
-
-void ActualStyleVisitor::VisitInlineBox(InlineBox* line) {}
-
-void ActualStyleVisitor::VisitInlineFlowBox(InlineFlowBox* line) {}
 
 void ActualStyleVisitor::VisitRootBox(RootBox* root) {}
 

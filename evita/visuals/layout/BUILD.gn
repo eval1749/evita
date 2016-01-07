@@ -26,6 +26,7 @@ source_set("layout") {
     "box_tree.h",
     "box_tree_lifecycle.cc",
     "box_tree_lifecycle.h",
+    "box_tree_printer.cc",
     "box_visitor.cc",
     "box_visitor.h",
     "children.cc",

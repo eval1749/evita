@@ -26,7 +26,6 @@
 #include "evita/visuals/layout/block_flow_box.h"
 #include "evita/visuals/layout/box_finder.h"
 #include "evita/visuals/layout/box_tree.h"
-#include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/inline_box.h"
 #include "evita/visuals/layout/inline_flow_box.h"
 #include "evita/visuals/layout/layouter.h"
@@ -40,76 +39,6 @@
 namespace visuals {
 
 namespace {
-
-//////////////////////////////////////////////////////////////////////
-//
-// BoxPrinter
-//
-class BoxPrinter final : public BoxVisitor {
- public:
-  BoxPrinter() = default;
-  ~BoxPrinter() final = default;
-
- private:
-  void Indent() const;
-  void PrintAsContainer(const ContainerBox& container);
-
-#define V(name) void Visit##name(name* box) final;
-  FOR_EACH_VISUAL_BOX(V)
-#undef V
-
-  int indent_ = 0;
-
-  DISALLOW_COPY_AND_ASSIGN(BoxPrinter);
-};
-
-void BoxPrinter::Indent() const {
-  for (auto i = indent_; i > 0; --i)
-    std::cout << "  ";
-}
-
-void BoxPrinter::PrintAsContainer(const ContainerBox& container) {
-  Indent();
-  const auto& style = container.ComputeActualStyle();
-  std::cout << container << ' ' << *style << std::endl;
-  ++indent_;
-  for (const auto& child : container.child_boxes())
-    Visit(child);
-  --indent_;
-}
-
-// BoxVisitor
-void BoxPrinter::VisitBlockFlowBox(BlockFlowBox* box) {
-  PrintAsContainer(*box);
-}
-
-void BoxPrinter::VisitInlineBox(InlineBox* box) {
-  PrintAsContainer(*box);
-}
-
-void BoxPrinter::VisitInlineFlowBox(InlineFlowBox* box) {
-  PrintAsContainer(*box);
-}
-
-void BoxPrinter::VisitRootBox(RootBox* box) {
-  PrintAsContainer(*box);
-}
-
-void BoxPrinter::VisitTextBox(TextBox* box) {
-  Indent();
-  std::cout << *box << " \"";
-  for (const auto& char_code : box->text()) {
-    if (char_code < 0x20 || char_code >= 0x7F) {
-      std::cout << base::StringPrintf("\\u%04X", char_code);
-      continue;
-    }
-    if (char_code == '"' || char_code == '\\')
-      std::cout << '\\';
-    std::cout << static_cast<char>(char_code);
-  }
-  const auto& style = box->ComputeActualStyle();
-  std::cout << '"' << ' ' << *style << std::endl;
-}
 
 const auto kMargin = 8;
 const auto kBorder = 1;
@@ -185,10 +114,8 @@ css::StyleSheet* LoadStyleSheet() {
   return style_sheet;
 }
 
-void PrintBox(const Box& box) {
-  std::cout << "Box Tree:" << std::endl;
-  BoxPrinter printer;
-  printer.Visit(box);
+void PrintBox(const BoxTree& box_tree) {
+  std::cout << "Box Tree:" << std::endl << box_tree << std::endl;
 }
 
 void PrintPaint(const DisplayItemList& list) {
@@ -293,7 +220,7 @@ void DemoModel::DidBeginAnimationFrame(base::Time now) {
   static base::Time last_time;
   if (now - last_time >= base::TimeDelta::FromMilliseconds(1000)) {
     last_time = now;
-    PrintBox(*root_box);
+    PrintBox(*box_tree_);
     PrintPaint(*display_item_list);
   }
 #endif
@@ -334,7 +261,7 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
                              .SetTop(css::Top(css::Length(hover_point.y())))
                              .SetLeft(css::Left(css::Length(hover_point.x())))
                              .Build());
-  PrintBox(*box_tree_->root_box());
+  PrintBox(*box_tree_);
   RequestAnimationFrame();
 }
 

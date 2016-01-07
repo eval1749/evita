@@ -5,6 +5,7 @@
 #ifndef EVITA_VISUALS_LAYOUT_BOX_TREE_H_
 #define EVITA_VISUALS_LAYOUT_BOX_TREE_H_
 
+#include <iosfwd>
 #include <memory>
 
 #include "base/macros.h"
@@ -39,6 +40,8 @@ class BoxTree final {
 
   DISALLOW_COPY_AND_ASSIGN(BoxTree);
 };
+
+std::ostream& operator<<(std::ostream& ostream, const BoxTree& box_tree);
 
 }  // namespace visuals
 

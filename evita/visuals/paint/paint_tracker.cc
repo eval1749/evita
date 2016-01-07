@@ -12,9 +12,9 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "evita/visuals/geometry/affine_transformer.h"
-#include "evita/visuals/model/box.h"
-#include "evita/visuals/model/box_editor.h"
-#include "evita/visuals/model/container_box.h"
+#include "evita/visuals/layout/box.h"
+#include "evita/visuals/layout/box_editor.h"
+#include "evita/visuals/layout/container_box.h"
 
 namespace visuals {
 

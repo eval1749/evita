@@ -6,12 +6,48 @@ import("//testing/test.gni")
 
 source_set("layout") {
   sources = [
+    "ancestors.cc",
+    "ancestors.h",
+    "ancestors_or_self.cc",
+    "ancestors_or_self.h",
+    "block_flow_box.cc",
+    "block_flow_box.h",
+    "box.cc",
+    "box.h",
+    "box_editor.cc",
+    "box_editor.h",
+    "box_finder.cc",
+    "box_finder.h",
+    "box_forward.h",
+    "box_style.cc",
+    "box_traversal.cc",
+    "box_traversal.h",
     "box_tree.cc",
     "box_tree.h",
+    "box_tree_lifecycle.cc",
+    "box_tree_lifecycle.h",
+    "box_visitor.cc",
+    "box_visitor.h",
+    "children.cc",
+    "children.h",
+    "container_box.cc",
+    "container_box.h",
+    "content_box.cc",
+    "content_box.h",
+    "descendants_or_self.cc",
+    "descendants_or_self.h",
+    "inline_box.cc",
+    "inline_box.h",
+    "inline_flow_box.cc",
+    "inline_flow_box.h",
     "layouter.cc",
     "layouter.h",
+    "root_box.cc",
+    "root_box.h",
     "size_calculator.cc",
     "size_calculator.h",
+    "text_box.cc",
+    "text_box.h",
   ]
 
   deps = [
@@ -20,20 +56,36 @@ source_set("layout") {
     "//evita/visuals/dom",
     "//evita/visuals/fonts",
     "//evita/visuals/geometry",
-    "//evita/visuals/model",
     "//evita/visuals/style",
+  ]
+}
+
+source_set("test_supports") {
+  testonly = true
+  sources = [
+    "simple_box_tree_builder.cc",
+    "simple_box_tree_builder.h",
+  ]
+  deps = [
+    ":layout",
+    "//base",
   ]
 }
 
 source_set("test_files") {
   testonly = true
-
   sources = [
+    "box_finder_test.cc",
+    "box_test.cc",
+    "box_traversal_test.cc",
     "box_tree_test.cc",
+    "container_box_test.cc",
+    "descendants_or_self_test.cc",
+    "root_box_test.cc",
   ]
 
-  public_deps = [
-    ":layout",
+  deps = [
+    ":test_supports",
     "//testing/gtest",
   ]
 }

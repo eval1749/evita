@@ -10,7 +10,6 @@ source_set("visuals") {
     "//evita/visuals/display",
     "//evita/visuals/geometry",
     "//evita/visuals/layout",
-    "//evita/visuals/model",
     "//evita/visuals/paint",
   ]
 }
@@ -54,7 +53,6 @@ test("tests") {
     "//evita/visuals/dom:test_files",
     "//evita/visuals/geometry:test_files",
     "//evita/visuals/layout:test_files",
-    "//evita/visuals/model:test_files",
     "//evita/visuals/paint:test_files",
     "//evita/visuals/style:test_files",
   ]

@@ -9,13 +9,13 @@
 #include "base/logging.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/model/block_flow_box.h"
-#include "evita/visuals/model/box_editor.h"
-#include "evita/visuals/model/box_visitor.h"
-#include "evita/visuals/model/inline_box.h"
-#include "evita/visuals/model/inline_flow_box.h"
-#include "evita/visuals/model/root_box.h"
-#include "evita/visuals/model/text_box.h"
+#include "evita/visuals/layout/block_flow_box.h"
+#include "evita/visuals/layout/box_editor.h"
+#include "evita/visuals/layout/box_visitor.h"
+#include "evita/visuals/layout/inline_box.h"
+#include "evita/visuals/layout/inline_flow_box.h"
+#include "evita/visuals/layout/root_box.h"
+#include "evita/visuals/layout/text_box.h"
 
 namespace visuals {
 

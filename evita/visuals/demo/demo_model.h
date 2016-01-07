@@ -12,7 +12,7 @@
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/demo/demo_window.h"
 #include "evita/visuals/geometry/float_size.h"
-#include "evita/visuals/model/box_finder.h"
+#include "evita/visuals/layout/box_finder.h"
 
 namespace visuals {
 

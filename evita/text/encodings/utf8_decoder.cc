@@ -76,7 +76,7 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
       case State::BadInput:
         return BadInput(base::string16());
       case State::FirstByte:
-        if (byte <= 0x7E) {
+        if (byte <= 0x7F) {
           output.sputc(static_cast<base::char16>(byte));
           break;
         }

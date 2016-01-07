@@ -16,8 +16,10 @@ namespace visuals {
 TEST(BoxTest, InitialValues) {
   const auto& root = SimpleBoxTreeBuilder().Add<TextBox>(L"foo").Build();
   const auto& box = root->first_child();
+
   EXPECT_EQ(css::Background(), box->background());
   EXPECT_EQ(css::Border(), box->border());
+  EXPECT_EQ(css::Display(), box->display());
   EXPECT_EQ(css::Margin(), box->margin());
   EXPECT_EQ(css::Padding(), box->padding());
   EXPECT_EQ(css::Position::Static(), box->position());

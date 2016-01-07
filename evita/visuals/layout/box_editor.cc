@@ -185,6 +185,11 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
     return;
   }
 
+  if (new_style.has_display() && new_style.display() != box->display()) {
+    box->display_ = new_style.display();
+    is_changed = true;
+  }
+
 #define V(property)                               \
   if (new_style.has_##property() &&               \
       new_style.property() != box->property##_) { \

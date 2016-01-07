@@ -72,6 +72,7 @@ class Box : public common::Castable<Box> {
   // Layout related values
   const FloatRect& bounds() const { return bounds_; }
   FloatRect content_bounds() const;
+  const css::Display& display() const { return display_; }
 
   bool is_changed() const { return is_changed_; }
 
@@ -134,6 +135,7 @@ class Box : public common::Castable<Box> {
 
   css::Background background_;
   css::Border border_;
+  css::Display display_;
   css::Margin margin_;
   css::Padding padding_;
 

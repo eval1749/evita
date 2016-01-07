@@ -20,6 +20,7 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/text.h"
 #include "evita/visuals/style/compiled_style_sheet.h"
 #include "evita/visuals/style/style_tree_observer.h"
 
@@ -93,19 +94,21 @@ class StyleTree::Impl final {
 
   std::unique_ptr<css::Style> ComputeStyleForElement(
       const Element& element) const;
-  Item* GetOrNewItem(const Element& element);
-  void UpdateChildren(Context* context, const Element& element);
+  Item* GetOrNewItem(const Node& element);
+  void IncrementVersionIfNeeded(Context* context);
+  void UpdateChildren(Context* context, const ContainerNode& element);
   void UpdateElement(Context* context, const Element& element);
   void UpdateElementIfNeeded(Context* context, const Element& element);
   void UpdateNodeIfNeeded(Context* context, const Node& node);
+  void UpdateText(Context* context, const Text& text);
 
   std::vector<std::unique_ptr<CompiledStyleSheet>> compiled_style_sheets_;
   const Document& document_;
   // |initial_style_| is computed from media provided values.
-  std::unique_ptr<css::Style> initial_style_;
+  css::Style* const initial_style_;
   // TODO(eval1749): We should share |css::Style| objects for elements which
   // have same style, e.g. siblings.
-  std::unordered_map<const Element*, std::unique_ptr<Item>> item_map_;
+  std::unordered_map<const Node*, std::unique_ptr<Item>> item_map_;
   base::ObserverList<StyleTreeObserver> observers_;
   StyleTreeState state_ = StyleTreeState::Dirty;
   int version_ = 0;
@@ -118,14 +121,18 @@ StyleTree::Impl::Impl(const Document& document,
     : document_(document), initial_style_(new css::Style()) {
   // TODO(eval1749): We should get default color and background color from
   // system metrics.
-  css::StyleEditor().SetBackground(initial_style_.get(),
+  css::StyleEditor().SetBackground(initial_style_,
                                    css::Background(css::Color()));
-  css::StyleEditor().SetColor(initial_style_.get(), css::Color(0, 0, 0));
-  css::StyleEditor().SetDisplay(initial_style_.get(), css::Display());
+  css::StyleEditor().SetColor(initial_style_, css::Color(0, 0, 0));
+  css::StyleEditor().SetDisplay(initial_style_, css::Display());
   for (const auto& style_sheet : style_sheets)
     compiled_style_sheets_.emplace_back(new CompiledStyleSheet(*style_sheet));
   DCHECK(initial_style().has_display())
       << "initial style must have display property. " << initial_style();
+  const auto item = GetOrNewItem(document_);
+  item->is_child_dirty = false;
+  item->is_dirty = false;
+  item->style = std::move(std::unique_ptr<css::Style>(initial_style_));
 }
 
 bool StyleTree::Impl::is_dirty() const {
@@ -143,14 +150,12 @@ void StyleTree::Impl::Clear() {
 
 const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
   DCHECK_NE(StyleTreeState::Dirty, state_);
-  if (const auto element = node.as<Element>()) {
-    const auto& it = item_map_.find(element);
-    DCHECK(it != item_map_.end());
-    return *it->second->style;
-  }
-  if (node.is<Document>())
+  const auto& it = item_map_.find(&node);
+  if (it == item_map_.end()) {
+    NOTREACHED() << "No computed style for " << node;
     return *initial_style_;
-  return ComputedStyleOf(*node.parent());
+  }
+  return *it->second->style;
 }
 
 std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
@@ -172,14 +177,22 @@ std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
   return std::move(style);
 }
 
-Item* StyleTree::Impl::GetOrNewItem(const Element& element) {
-  const auto& it = item_map_.find(&element);
+Item* StyleTree::Impl::GetOrNewItem(const Node& node) {
+  const auto& it = item_map_.find(&node);
   if (it != item_map_.end())
     return it->second.get();
   // TODO(eval1749): We should notify style change to observers.
   auto new_item = std::make_unique<Item>();
-  const auto& result = item_map_.emplace(&element, std::move(new_item));
+  new_item->version = version_;
+  const auto& result = item_map_.emplace(&node, std::move(new_item));
   return result.first->second.get();
+}
+
+void StyleTree::Impl::IncrementVersionIfNeeded(Context* context) {
+  if (context->is_updated)
+    return;
+  context->is_updated = true;
+  ++version_;
 }
 
 void StyleTree::Impl::MarkDirty(const Element& element) {
@@ -200,20 +213,23 @@ void StyleTree::Impl::RemoveObserver(StyleTreeObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void StyleTree::Impl::UpdateChildren(Context* context, const Element& element) {
-  for (const auto& child : element.child_nodes()) {
-    const auto child_element = child->as<Element>();
-    if (!child_element)
+void StyleTree::Impl::UpdateChildren(Context* context,
+                                     const ContainerNode& container) {
+  for (const auto& child : container.child_nodes()) {
+    if (const auto element = child->as<Element>()) {
+      UpdateElement(context, *element);
       continue;
-    UpdateElement(context, *child_element);
+    }
+    if (const auto text = child->as<Text>()) {
+      UpdateText(context, *text);
+      continue;
+    }
+    NOTREACHED() << "Unsupported node type " << child;
   }
 }
 
 void StyleTree::Impl::UpdateElement(Context* context, const Element& element) {
-  if (!context->is_updated) {
-    context->is_updated = true;
-    ++version_;
-  }
+  IncrementVersionIfNeeded(context);
   const auto item = GetOrNewItem(element);
   item->is_child_dirty = false;
   item->is_dirty = false;
@@ -269,10 +285,21 @@ void StyleTree::Impl::UpdateIfNeeded() {
 }
 
 void StyleTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
-  const auto element = node.as<Element>();
-  if (!element)
-    return;
-  UpdateElementIfNeeded(context, *element);
+  if (const auto element = node.as<Element>())
+    return UpdateElementIfNeeded(context, *element);
+  DCHECK(!node.is<ContainerNode>()) << "Unsupported node type " << node;
+}
+
+// |Text| node is treated as anonymous inline box which inherits style from
+// its parent.
+void StyleTree::Impl::UpdateText(Context* context, const Text& text) {
+  const auto item = GetOrNewItem(text);
+  item->is_dirty = false;
+  item->is_child_dirty = false;
+  auto style = std::make_unique<css::Style>();
+  InheritStyle(style.get(), ComputedStyleOf(*text.parent()));
+  css::StyleEditor().Merge(style.get(), initial_style());
+  item->style = std::move(style);
 }
 
 //////////////////////////////////////////////////////////////////////

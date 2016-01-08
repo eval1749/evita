@@ -273,7 +273,7 @@ void BoxTree::Impl::FormatFlowBox(Context* context, FlowBox* flow_box) {
     return;
 
   if (block_boxes.empty()) {
-    for (auto& inline_box : inline_boxes)
+    for (const auto& inline_box : inline_boxes)
       BoxEditor().AppendChild(flow_box, inline_box);
     return;
   }
@@ -283,7 +283,7 @@ void BoxTree::Impl::FormatFlowBox(Context* context, FlowBox* flow_box) {
     inline_boxes.clear();
   }
 
-  for (auto& block_box : block_boxes)
+  for (const auto& block_box : block_boxes)
     BoxEditor().AppendChild(flow_box, block_box);
 }
 

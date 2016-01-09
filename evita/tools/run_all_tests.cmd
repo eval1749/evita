@@ -27,7 +27,7 @@ for %%x in (%tests%) do (
       --test-launcher-retry-limit=1 >> %test_log% 2>&1
 )
 
-grep -E -e "CRASHED|FAIL" %test_log%
+grep -E -e "CRASHED|FAIL|Fatal" %test_log%
 
 set end=%TIME%
 

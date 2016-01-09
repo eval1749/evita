@@ -115,9 +115,9 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
   const auto next_sibling = old_child->next_sibling_;
   const auto previous_sibling = old_child->previous_sibling_;
   if (next_sibling)
-    next_sibling->previous_sibling_ = old_child->previous_sibling_;
+    next_sibling->previous_sibling_ = previous_sibling;
   else
-    container->last_child_ = old_child->previous_sibling_;
+    container->last_child_ = previous_sibling;
   if (previous_sibling)
     previous_sibling->next_sibling_ = next_sibling;
   else

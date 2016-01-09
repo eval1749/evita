@@ -40,8 +40,9 @@
     'readonly', 'Rect', 'rect', 'Renderer', 'renderer',
     'Resize', 'resize', 'resizing', 'Runnable', 'runnable', 'runtime',
     // S
-    'scrollable', 'setter', 'Signedness', 'signedness', 'splitter', 'stringify',
-    'substr', 'substring', 'subtree', 'subtype', 'supertype',
+    'Scriptable', 'scriptable', 'scrollable', 'setter', 'Signedness',
+    'signedness', 'splitter', 'stringify', 'substr', 'substring', 'subtree',
+    'subtype', 'supertype',
     // T
     'Tooltip', 'tooltip', 'toplevel', 'Tuple', 'tuple', 'typedef',
     // U

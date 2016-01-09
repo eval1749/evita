@@ -1,0 +1,7 @@
+#! /bin/sh -
+# This file should be placed in .git/hooks
+echo Start pre-commit
+/d/w/depot_tools/python276_bin/python.exe ./tools/razzle/pre-commit.py
+x=$?
+echo End pre-commit: exit_code=$x
+exit $x

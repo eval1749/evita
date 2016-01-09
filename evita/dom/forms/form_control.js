@@ -22,8 +22,10 @@ Object.defineProperties(global.FormControl.prototype, (function() {
 
   return {
     accessKey_: {value: '', writable: true},
-    get accessKey() { return this.accessKey_; },
-    set accessKey(key) { this.accessKey_ = key; },
+    accessKey: {
+        get: function() { return this.accessKey_; },
+        set: function(key) { this.accessKey_ = key; }
+    },
     canFocus: {value: canFocus, writable: true},
     focus: {value: focus}
   };

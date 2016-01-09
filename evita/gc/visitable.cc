@@ -9,6 +9,9 @@
 
 namespace gc {
 
+Visitable::Visitable() {}
+Visitable::~Visitable() {}
+
 void Visitable::Accept(Visitor* visitor) {
   visitor->Visit(this);
 }

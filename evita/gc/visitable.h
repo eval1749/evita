@@ -11,8 +11,8 @@ class Visitor;
 
 class Visitable {
  public:
-  Visitable() = default;
-  ~Visitable() = default;
+  Visitable();
+  virtual ~Visitable();
 
   virtual const char* visitable_class_name() const = 0;
 

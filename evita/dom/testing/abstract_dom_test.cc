@@ -81,7 +81,9 @@ void StaticScript::LoadAll(v8::Isolate* isolate) {
         gin::StringToV8(isolate, script_source.file_name)->ToString());
     v8::ScriptCompiler::Source source(
         gin::StringToV8(isolate, script_source.script_text), script_origin);
-    auto unbound_script = v8::ScriptCompiler::CompileUnbound(isolate, &source);
+    auto unbound_script =
+        v8::ScriptCompiler::CompileUnboundScript(isolate, &source)
+            .ToLocalChecked();
     v8::UniquePersistent<v8::UnboundScript> handle(isolate, unbound_script);
     unbound_scripts_.push_back(std::move(handle));
   }

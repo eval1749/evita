@@ -9,7 +9,7 @@
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/float_rect.h"
-#include "evita/dom/text/range.h"
+#include "evita/dom/text/text_range.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/windows/text_selection.h"
@@ -20,7 +20,7 @@ namespace dom {
 //
 // TextWindow
 //
-TextWindow::TextWindow(Range* selection_range)
+TextWindow::TextWindow(TextRange* selection_range)
     : ScriptableBase(new TextSelection(this, selection_range)), zoom_(1.0f) {
   ScriptHost::instance()->view_delegate()->CreateTextWindow(
       window_id(), static_cast<TextSelection*>(selection())->text_selection());
@@ -87,7 +87,7 @@ v8::Handle<v8::Promise> TextWindow::HitTestPoint(float x, float y) {
 }
 
 // static
-TextWindow* TextWindow::NewTextWindow(Range* selection_range) {
+TextWindow* TextWindow::NewTextWindow(TextRange* selection_range) {
   return new TextWindow(selection_range);
 }
 

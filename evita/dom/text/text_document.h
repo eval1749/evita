@@ -23,7 +23,7 @@ class Offset;
 
 namespace dom {
 
-class Range;
+class TextRange;
 class RegularExpression;
 
 //////////////////////////////////////////////////////////////////////

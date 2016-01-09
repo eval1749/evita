@@ -8,7 +8,7 @@
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
-#include "evita/dom/text/range.h"
+#include "evita/dom/text/text_range.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/text/offset.h"
 #include "evita/text/selection.h"
@@ -19,10 +19,10 @@ namespace dom {
 //
 // TextSelection
 //
-TextSelection::TextSelection(TextWindow* text_window, Range* range)
+TextSelection::TextSelection(TextWindow* text_window, TextRange* range)
     : ScriptableBase(text_window, range->document()),
       text_selection_(new text::Selection(range->text_range())),
-      range_(new Range(range->document(), text_selection_->range())) {
+      range_(new TextRange(range->document(), text_selection_->range())) {
   text_selection_->AddObserver(this);
 }
 

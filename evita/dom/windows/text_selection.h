@@ -17,7 +17,7 @@ class Selection;
 namespace dom {
 
 class TextDocument;
-class Range;
+class TextRange;
 class TextWindow;
 
 namespace bindings {
@@ -34,12 +34,12 @@ class TextSelection final
   DECLARE_SCRIPTABLE_OBJECT(TextSelection);
 
  public:
-  TextSelection(TextWindow* text_window, Range* range);
+  TextSelection(TextWindow* text_window, TextRange* range);
   ~TextSelection() final;
 
   text::Offset anchor_offset() const;
   text::Offset focus_offset() const;
-  Range* range() const { return range_.get(); }
+  TextRange* range() const { return range_.get(); }
   bool start_is_active() const;
   void set_start_is_active(bool start_is_active);
   text::Selection* text_selection() const { return text_selection_; }
@@ -55,7 +55,7 @@ class TextSelection final
   void DidChangeSelection() final;
 
   text::Selection* const text_selection_;
-  gc::Member<Range> range_;
+  gc::Member<TextRange> range_;
 
   DISALLOW_COPY_AND_ASSIGN(TextSelection);
 };

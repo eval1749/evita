@@ -15,7 +15,7 @@
     500,
   ];
 
-  /** @param {!Range} range */
+  /** @param {!TextRange} range */
   function copyToClipboard(range) {
     var items = DataTransfer.clipboard.items;
     items.clear();
@@ -114,8 +114,8 @@
     selection.range.collapseTo(selection.range.end);
     document.doColor_(1000);
 
-    /** @type {!Range} */
-    const enclosingRange = new Range(selection.range);
+    /** @type {!TextRange} */
+    const enclosingRange = new TextRange(selection.range);
     enclosingRange.moveStart(Unit.BRACKET, -1);
     if (enclosingRange.collapsed) {
       window.status = Strings.IDS_NO_MATCHING_PAREN;
@@ -194,7 +194,7 @@
     function(base = 16) {
       if (base < 2 || base > 36)
         return;
-      var range = new Range(this.selection.range);
+      var range = new TextRange(this.selection.range);
       if (range.start == range.end) {
         range.moveStart(Unit.WORD, -1);
         if (range.length > 4)
@@ -453,7 +453,7 @@
     var selection = this.selection;
     var isWhole = selection.range.start == selection.range.end;
     var scriptText = isWhole ?
-        (new Range(this.document, 0, this.document.length)).text :
+        (new TextRange(this.document, 0, this.document.length)).text :
         selection.range.text;
     var result = Editor.runScript(scriptText, this.document.name);
     if (!result.exception) {
@@ -576,7 +576,7 @@
       if (count <= 0)
         return;
       var selection = this.selection;
-      var leadingWhitespaces = (new Range(selection.range)).startOf(Unit.LINE)
+      var leadingWhitespaces = (new TextRange(selection.range)).startOf(Unit.LINE)
           .moveEndWhile(' \t').text;
       selection.document.undoGroup('TypeEnter', function() {
         selection.range.moveStartWhile(' \t', Count.BACKWARD);
@@ -644,7 +644,7 @@
       // Remove leading whitespaces
       range.document.undoGroup('Outdent', function() {
         var document = this;
-        var lineRange = new Range(range);
+        var lineRange = new TextRange(range);
         lineRange.collapseTo(lineRange.start);
         while (lineRange.start < range.end) {
           lineRange.moveEndWhile(' ', tabWidth);
@@ -677,7 +677,7 @@
       // Expand range to contain whole lines
       range.startOf(Unit.LINE, Alter.EXTEND);
       range.document.undoGroup('Indent', function() {
-        var lineRange = new Range(range);
+        var lineRange = new TextRange(range);
         lineRange.collapseTo(lineRange.start);
         while (lineRange.start < range.end) {
           var spaces = ' '.repeat(/** @type{number} */(tabWidth));
@@ -693,7 +693,7 @@
       this.selection.startIsActive = false;
     }, 'indent\n' +
        'Caret: insert spaces until tab stop column.\n' +
-       'Range: insert spaces all lines in range.');
+       'TextRange: insert spaces all lines in range.');
 
   Editor.bindKey(TextWindow, 'ArrowUp',
       makeSelectionMotionCommand(Unit.WINDOW_LINE, -1, Alter.MOVE),

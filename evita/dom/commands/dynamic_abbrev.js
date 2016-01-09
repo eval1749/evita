@@ -7,7 +7,7 @@
  * @param {!TextDocument} document
  */
 function DynamicAbbrevExpander(document) {
-  this.cursor = new Range(document);
+  this.cursor = new TextRange(document);
   this.direction = 0;
   this.last_selection_range = null;
   this.last_selection_start = 0;
@@ -17,13 +17,13 @@ function DynamicAbbrevExpander(document) {
 /** @const @type{string} */
 DynamicAbbrevExpander.PROPERTY_NAME = 'evita.DynamicAbbrevExpander';
 
-/** @type {!Range} */
+/** @type {!TextRange} */
 DynamicAbbrevExpander.cursor;
 
 /** @type {number} */
 DynamicAbbrevExpander.direction;
 
-/** @type {?Range} */
+/** @type {?TextRange} */
 DynamicAbbrevExpander.last_selection_range;
 
 /** @type {number} */
@@ -110,7 +110,7 @@ DynamicAbbrevExpander.prototype.findCandidate = function(current_word) {
 
   /**
    * @param {string} text
-   * @param {!Range} range
+   * @param {!TextRange} range
    * @param {number} direction
    * @return {boolean}
    */

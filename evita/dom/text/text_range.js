@@ -5,7 +5,7 @@
 
 (function() {
   /** @enum{!symbol} */
-  global.Range.Case = {
+  global.TextRange.Case = {
     // "This is capitalized."
     CAPITALIZED_TEXT: Symbol('CAPITALIZED_TEXT'),
     // "This Is Capitalized Words."
@@ -18,7 +18,7 @@
     UPPER: Symbol('UPPER'),
   };
 
-  Object.defineProperties(Range.prototype, {
+  Object.defineProperties(TextRange.prototype, {
     length: {get:
         /** @return {number} */
         function() { return this.end - this.start; }
@@ -26,9 +26,9 @@
   });
 
   /**
-   * @return {!Range.Case}
+   * @return {!TextRange.Case}
    */
-  Range.prototype.analyzeCase = function() {
+  TextRange.prototype.analyzeCase = function() {
     /** @enum{!symbol} */
     var State = {
       FIRST_CAP_IN_WORD: Symbol('FIRST_CAP_IN_WORD'),
@@ -44,7 +44,7 @@
     var document = this.document;
     var start = this.start;
     var end = this.end;
-    var stringCase = Range.Case.MIXED;
+    var stringCase = TextRange.Case.MIXED;
     var state = State.START;
     for (var offset = start; offset < end; ++offset) {
       var charCode = document.charCodeAt(offset);
@@ -55,17 +55,17 @@
       switch (state) {
         case State.START:
           if (upperCase) {
-            stringCase = Range.Case.CAPITALIZED_WORDS;
+            stringCase = TextRange.Case.CAPITALIZED_WORDS;
             state = State.FIRST_CAP_SECOND;
           } else if (lowerCase) {
-            stringCase = Range.Case.LOWER;
+            stringCase = TextRange.Case.LOWER;
             state = State.LOWER;
           }
           break;
         case State.FIRST_CAP_IN_WORD:
           if (upperCase) {
             // We found "FoB".
-            return Range.Case.MIXED;
+            return TextRange.Case.MIXED;
           } else if (lowerCase) {
             // We found "Foo".
           } else {
@@ -79,14 +79,14 @@
             state = State.REST_CAP_IN_WORD;
           } else if (lowerCase) {
             // We found "Foo b"
-            stringCase = Range.Case.CAPITALIZED_TEXT;
+            stringCase = TextRange.Case.CAPITALIZED_TEXT;
             state = State.LOWER;
           }
           break;
         case State.FIRST_CAP_SECOND:
           if (upperCase) {
             // We found "FO"
-            stringCase = Range.Case.UPPER;
+            stringCase = TextRange.Case.UPPER;
             state = State.UPPER;
           } else if (lowerCase) {
             // We found "Fo"
@@ -99,13 +99,13 @@
         case State.LOWER:
           if (upperCase) {
             // We found "foB"
-            return Range.Case.MIXED;
+            return TextRange.Case.MIXED;
           }
           break;
         case State.REST_CAP_IN_WORD:
           if (upperCase) {
             // We found "Foo Bar BaZ"
-            return Range.Case.MIXED;
+            return TextRange.Case.MIXED;
           }
           if (!lowerCase) {
             // We found "Foo Bar+"
@@ -115,7 +115,7 @@
         case State.REST_CAP_NOT_WORD:
           if (lowerCase) {
             // We found "Foo Bar+b"
-            return Range.Case.MIXED;
+            return TextRange.Case.MIXED;
           }
           if (upperCase) {
             // We found "Foo Bar+B"
@@ -125,7 +125,7 @@
         case State.UPPER:
           if (lowerCase) {
             // We found "FOo"
-            return Range.Case.MIXED;
+            return TextRange.Case.MIXED;
           }
           break;
         default:
@@ -137,10 +137,10 @@
 
   /**
    * Capitalize range.
-   * @this {!Range}
-   * @return {!Range}
+   * @this {!TextRange}
+   * @return {!TextRange}
    */
-  Range.prototype.capitalize = function() {
+  TextRange.prototype.capitalize = function() {
     var text = this.text;
     for (var i = 0; i < text.length; ++i) {
       var data = Unicode.UCD[text.charCodeAt(i)];
@@ -159,9 +159,9 @@
    * Delete
    * @param {Unit} unit
    * @param {number=} count, default is one.
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.delete = function(unit, count = 1) {
+  TextRange.prototype.delete = function(unit, count = 1) {
     var delta = unit == Unit.CHARACTER && this.start != this.end ? 1 : 0;
     if (count < 0)
       this.moveStart(unit, count + delta);
@@ -172,13 +172,13 @@
   };
 
   /**
-   * Move end position of Range at end of specified unit.
-   * @this {!Range}
+   * Move end position of TextRange at end of specified unit.
+   * @this {!TextRange}
    * @param {Unit} unit
    * @param {Alter=} alter, default is Alter.MOVE.
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.endOf = function(unit, alter = Alter.MOVE) {
+  TextRange.prototype.endOf = function(unit, alter = Alter.MOVE) {
     this.end = this.document.computeEndOf_(unit, this.end);
     switch (alter) {
       case Alter.EXTEND:
@@ -193,7 +193,7 @@
   };
 
   /**
-   * @this {!Range}
+   * @this {!TextRange}
    * @param {!Editor.RegExp} regexp
    * @return {?Array.<string>}
    */
@@ -206,7 +206,7 @@
   }
 
   /**
-   * @this {!Range}
+   * @this {!TextRange}
    * @param {!Editor.RegExp} regexp
    */
   function* rangeMatches(regexp) {
@@ -222,24 +222,24 @@
   }
 
   /**
-   * @this {!Range}
+   * @this {!TextRange}
    * @param {Unit} unit
    * @param {number=} count, default is one.
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.move = function(unit, count = 1) {
+  TextRange.prototype.move = function(unit, count = 1) {
     var position = count > 0 ? this.end : this.start;
     this.collapseTo(this.document.computeMotion_(unit, count, position));
     return this;
   };
 
   /**
-   * @this {!Range}
+   * @this {!TextRange}
    * @param {Unit} unit
    * @param {number=} count, default is one.
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.moveEnd = function(unit, count = 1) {
+  TextRange.prototype.moveEnd = function(unit, count = 1) {
     var position = this.document.computeMotion_(unit, count, this.end);
     if (position >= this.start)
       this.end = position;
@@ -251,9 +251,9 @@
   /**
    * @param {string} charSet
    * @param {number=} count, default is Count.FORWARD
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.moveEndWhile = function(charSet, count = Count.FORWARD) {
+  TextRange.prototype.moveEndWhile = function(charSet, count = Count.FORWARD) {
     var position = this.document.computeWhile_(charSet, count, this.end);
     if (position < this.start)
       this.collapseTo(position);
@@ -263,12 +263,12 @@
   };
 
   /**
-   * @this {!Range}
+   * @this {!TextRange}
    * @param {Unit} unit
    * @param {number=} count, default is one.
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.moveStart = function(unit, count = 1) {
+  TextRange.prototype.moveStart = function(unit, count = 1) {
     var position = this.document.computeMotion_(unit, count, this.start);
     if (position <= this.end)
       this.start = position;
@@ -280,9 +280,9 @@
   /**
    * @param {string} charSet
    * @param {number=} count, default is Count.FORWARD
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.moveStartWhile = function(charSet, count = Count.FORWARD) {
+  TextRange.prototype.moveStartWhile = function(charSet, count = Count.FORWARD) {
     var position = this.document.computeWhile_(charSet, count, this.end);
     if (position > this.end)
       this.collapseTo(position);
@@ -292,12 +292,12 @@
   };
 
   /**
-   * Move start position of Range at start of specified unit.
+   * Move start position of TextRange at start of specified unit.
    * @param {Unit} unit
    * @param {Alter=} alter, default is Alter.MOVE.
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.startOf = function(unit, alter = Alter.MOVE) {
+  TextRange.prototype.startOf = function(unit, alter = Alter.MOVE) {
     this.start = this.document.computeStartOf_(unit, this.start);
     switch (alter) {
       case Alter.EXTEND:
@@ -312,38 +312,38 @@
   };
 
   /**
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.toLocaleLowerCase = function() {
+  TextRange.prototype.toLocaleLowerCase = function() {
     this.text = this.text.toLocaleLowerCase();
     return this;
   };
 
   /**
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.toLocaleUpperCase = function() {
+  TextRange.prototype.toLocaleUpperCase = function() {
     this.text = this.text.toLocaleUpperCase();
     return this;
   };
 
   /**
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.toLowerCase = function() {
+  TextRange.prototype.toLowerCase = function() {
     this.text = this.text.toLowerCase();
     return this;
   };
 
   /**
-   * @return {!Range}
+   * @return {!TextRange}
    */
-  Range.prototype.toUpperCase = function() {
+  TextRange.prototype.toUpperCase = function() {
     this.text = this.text.toUpperCase();
     return this;
   };
 
-  Object.defineProperties(Range.prototype, {
+  Object.defineProperties(TextRange.prototype, {
     match: {value: rangeMatch},
     matches: {value: rangeMatches},
   });

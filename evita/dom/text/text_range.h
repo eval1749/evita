@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_TEXT_RANGE_H_
-#define EVITA_DOM_TEXT_RANGE_H_
+#ifndef EVITA_DOM_TEXT_TEXT_RANGE_H_
+#define EVITA_DOM_TEXT_TEXT_RANGE_H_
 
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
@@ -18,22 +18,22 @@ class Range;
 namespace dom {
 
 namespace bindings {
-class RangeClass;
+class TextRangeClass;
 }
 
 class TextDocument;
 
 //////////////////////////////////////////////////////////////////////
 //
-// Range
+// TextRange
 //
-class Range final : public v8_glue::Scriptable<Range> {
-  DECLARE_SCRIPTABLE_OBJECT(Range);
+class TextRange final : public v8_glue::Scriptable<TextRange> {
+  DECLARE_SCRIPTABLE_OBJECT(TextRange);
 
  public:
-  Range(TextDocument* document, text::Offset start, text::Offset end);
-  Range(TextDocument* document, text::Range* range);
-  ~Range() final;
+  TextRange(TextDocument* document, text::Offset start, text::Offset end);
+  TextRange(TextDocument* document, text::Range* range);
+  ~TextRange() final;
 
   bool collapsed() const;
   TextDocument* document() const { return document_.get(); }
@@ -45,15 +45,15 @@ class Range final : public v8_glue::Scriptable<Range> {
   void set_text(const base::string16& text);
   text::Range* text_range() const { return range_; }
 
-  Range* CollapseTo(int position);
-  Range* InsertBefore(const base::string16& text);
-  static Range* NewRange(
-      v8_glue::Either<TextDocument*, Range*> document_or_range);
-  static Range* NewRange(
-      v8_glue::Either<TextDocument*, Range*> document_or_range,
+  TextRange* CollapseTo(int position);
+  TextRange* InsertBefore(const base::string16& text);
+  static TextRange* NewTextRange(
+      v8_glue::Either<TextDocument*, TextRange*> document_or_range);
+  static TextRange* NewTextRange(
+      v8_glue::Either<TextDocument*, TextRange*> document_or_range,
       int offset);
-  static Range* NewRange(
-      v8_glue::Either<TextDocument*, Range*> document_or_range,
+  static TextRange* NewTextRange(
+      v8_glue::Either<TextDocument*, TextRange*> document_or_range,
       int start,
       int end);
   void SetSpelling(int spelling) const;
@@ -61,7 +61,7 @@ class Range final : public v8_glue::Scriptable<Range> {
   void SetSyntax(const base::string16& syntax) const;
 
  private:
-  friend class bindings::RangeClass;
+  friend class bindings::TextRangeClass;
 
   // For IDL
   int end_value() const;
@@ -73,9 +73,9 @@ class Range final : public v8_glue::Scriptable<Range> {
   // TODO(yosi): We should manage life time of text::Range.
   text::Range* range_;
 
-  DISALLOW_COPY_AND_ASSIGN(Range);
+  DISALLOW_COPY_AND_ASSIGN(TextRange);
 };
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_TEXT_RANGE_H_
+#endif  // EVITA_DOM_TEXT_TEXT_RANGE_H_

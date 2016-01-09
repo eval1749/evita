@@ -18,7 +18,7 @@ Point.prototype.stringifyProperties = function() {
   return [{name: 'x', value: this.x}, {name: 'y', value: this.y}];
 };
 
-Range.prototype.stringifyProperties = function() {
+TextRange.prototype.stringifyProperties = function() {
   return [{name: 'document', value: this.document},
           {name: 'start', value: this.start},
           {name: 'end', value: this.end}];

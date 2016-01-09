@@ -126,7 +126,7 @@
             this.window.compute_(TextWindowComputeMethod.END_OF_WINDOW_LINE,
                                  this.range.end));
     }
-    Range.prototype.endOf.call(this.range, unit);
+    TextRange.prototype.endOf.call(this.range, unit);
     return updateSelection(this, alter, anchor, this.range.end);
   };
 

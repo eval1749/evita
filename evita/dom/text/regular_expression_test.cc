@@ -17,7 +17,7 @@ class RegExpTest : public AbstractDomTest {
 TEST_F(RegExpTest, execOnTextDocument_) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = 'foo bar baz';"
       "function exec(source, match_exact) {"
       "  var regexp = new Editor.RegExp(source, {matchExact: match_exact});"
@@ -25,7 +25,7 @@ TEST_F(RegExpTest, execOnTextDocument_) {
       "  if (!matches)"
       "    return null;"
       "  return matches.map(function(match) {"
-      "     var range = new Range(doc, match.start, match.end);"
+      "     var range = new TextRange(doc, match.start, match.end);"
       "     return range.text;"
       "  }).join(',');"
       "}");

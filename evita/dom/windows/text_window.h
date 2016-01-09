@@ -20,7 +20,7 @@ class Selection;
 
 namespace dom {
 class TextDocument;
-class Range;
+class TextRange;
 
 namespace bindings {
 class TextWindowClass;
@@ -38,7 +38,7 @@ class TextWindow final
  private:
   friend class bindings::TextWindowClass;
 
-  explicit TextWindow(Range* selection_range);
+  explicit TextWindow(TextRange* selection_range);
 
   float zoom() const { return zoom_; }
   void set_zoom(float new_zoom);
@@ -53,7 +53,7 @@ class TextWindow final
   v8::Handle<v8::Promise> HitTestPoint(float x, float y);
   domapi::FloatRect HitTestTextPosition(text::Offset position);
   void MakeSelectionVisible();
-  TextWindow* NewTextWindow(Range* range);
+  TextWindow* NewTextWindow(TextRange* range);
   void Reconvert(const base::string16& text);
   void Scroll(int direction);
 

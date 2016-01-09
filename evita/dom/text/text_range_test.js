@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-testing.test('Range.prototype.match', function(t) {
+testing.test('TextRange.prototype.match', function(t) {
   const document = new TextDocument();
-  const range = new Range(document);
+  const range = new TextRange(document);
   range.text = 'foo bar baz';
   const matches = range.match(new Editor.RegExp('(b)(ar)'));
   t.expect(matches.join(',')).toEqual('bar,b,ar');
 });
 
-testing.test('Range.prototype.matches', function(t) {
+testing.test('TextRange.prototype.matches', function(t) {
   const document = new TextDocument();
-  const range = new Range(document);
+  const range = new TextRange(document);
   range.text = 'foo bar baz';
   t.expect(range.end).toEqual(document.length);
   testing.gtest.log('range', range.start, range.end);

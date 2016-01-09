@@ -24,7 +24,7 @@ class TextPositionTest : public AbstractDomTest {
 TEST_F(TextPositionTest, Basic) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = 'foo bar baz';"
       "var pos = new TextPosition(doc, 2);");
   EXPECT_SCRIPT_TRUE("pos.document == doc");
@@ -40,7 +40,7 @@ TEST_F(TextPositionTest, Basic) {
 TEST_F(TextPositionTest, move) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = 'foo bar baz';"
       "var pos = new TextPosition(doc, 0);");
   EXPECT_SCRIPT_EQ("1", "pos.move(Unit.CHARACTER).offset");
@@ -51,7 +51,7 @@ TEST_F(TextPositionTest, move) {
 TEST_F(TextPositionTest, moveBracket) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('moveBracket');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "function testIt(sample, direction) {"
       "  range.start = 0;"
       "  range.end = doc.length;"
@@ -69,7 +69,7 @@ TEST_F(TextPositionTest, moveBracket) {
       "function forward(sample) { return testIt(sample, 1); }"
       "function highlight(document) {"
       "  var pos = new TextPosition(document, 0);"
-      "  var range = new Range(document);"
+      "  var range = new TextRange(document);"
       "  var state = 'NORMAL';"
       "  var color = 0;"
       "  var charSyntax = 'other';"
@@ -192,7 +192,7 @@ TEST_F(TextPositionTest, moveBracket) {
 TEST_F(TextPositionTest, moveWhile) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = '   foo bar';"
       "var pos = new TextPosition(doc, 0);"
       "function whitespace() {"

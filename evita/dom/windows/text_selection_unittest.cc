@@ -25,7 +25,7 @@ class TextSelectionTest : public AbstractDomTest {
     EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
     EXPECT_SCRIPT_VALID(
         "var doc = TextDocument.new('delete');"
-        "var window = new TextWindow(new Range(doc));"
+        "var window = new TextWindow(new TextRange(doc));"
         "var selection = window.selection;"
         "var range = selection.range;"
         "function doTest(sample, sampler) {"
@@ -61,7 +61,7 @@ TEST_F(TextSelectionTest, focusOffset) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "var text_window = new TextWindow(range);"
       "var sample = text_window.selection;"
       "sample.range.text = 'foo';");
@@ -254,11 +254,11 @@ TEST_F(TextSelectionTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "var text_window = new TextWindow(range);"
       "var sample = text_window.selection");
   EXPECT_SCRIPT_TRUE("sample instanceof TextSelection");
-  EXPECT_SCRIPT_FALSE("sample instanceof Range");
+  EXPECT_SCRIPT_FALSE("sample instanceof TextRange");
   EXPECT_SCRIPT_TRUE("sample.document == doc");
   EXPECT_SCRIPT_EQ("0", "sample.range.start");
   EXPECT_SCRIPT_EQ("0", "sample.range.end");

@@ -94,7 +94,7 @@
    */
   TextDocument.prototype.parseFileProperties = function() {
     const document = this;
-    const firstLine = new Range(document);
+    const firstLine = new TextRange(document);
     firstLine.endOf(Unit.LINE, Alter.EXTEND);
     const fileVars_matches = /-\*-\s+(.+?)\s+-\*-/.exec(firstLine.text);
     if (!fileVars_matches)

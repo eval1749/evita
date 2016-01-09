@@ -121,7 +121,7 @@ global.TextWindow.prototype.clone = function() {
   /** @type {boolean} */
   TextWindow.prototype.isSelectionChanged_;
 
-  /** @type {!Range} */
+  /** @type {!TextRange} */
   TextWindow.prototype.textCompositionRange;
 
   Object.defineProperties(TextWindow.prototype, {
@@ -161,12 +161,12 @@ global.TextWindow.prototype.clone = function() {
    */
   function handleCompositionEvent(window, event) {
     if (!window.textCompositionRange)
-      window.textCompositionRange = new Range(window.document);
-    /** @type {!Range} */
+      window.textCompositionRange = new TextRange(window.document);
+    /** @type {!TextRange} */
     const range = window.textCompositionRange;
     /** @type {!TextSelection} */
     const selection = /** @type {!TextSelection} */(window.selection);
-    /** @type {!Range} */
+    /** @type {!TextRange} */
     const selectionRange = selection.range;
 
     if (event.type === Event.Names.COMPOSITIONSTART) {
@@ -332,13 +332,13 @@ global.TextWindow.prototype.clone = function() {
   /**
    * @param {!TextDocument} document
    * @param {string} key
-   * @return {!Range}
+   * @return {!TextRange}
    */
   function createOrGetRange(document, key) {
     const present = document.properties.get(key);
-    if (present instanceof Range)
+    if (present instanceof TextRange)
       return present;
-    const newRange = new Range(document);
+    const newRange = new TextRange(document);
     document.properties.set(key, newRange);
     return newRange;
   }

@@ -8,7 +8,7 @@
 #include "base/strings/stringprintf.h"
 #include "evita/bindings/v8_glue_RegExpInit.h"
 #include "evita/dom/text/text_document.h"
-#include "evita/dom/text/range.h"
+#include "evita/dom/text/text_range.h"
 #include "evita/dom/script_host.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/text/buffer.h"

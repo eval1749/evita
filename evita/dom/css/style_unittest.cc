@@ -40,7 +40,7 @@ TEST_F(StyleTest, SetStyle) {
   EXPECT_SCRIPT_EQ("function", "typeof(Style)");
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = 'foo';"
       "range.setStyle({color: 0x00FF00, fontSize: 23});"
       "var style = doc.styleAt(1);");

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/text/range.h"
+#include "evita/dom/text/text_range.h"
 
 #include "base/strings/stringprintf.h"
 #include "evita/css/style_selector.h"
@@ -19,61 +19,63 @@ namespace dom {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Range
+// TextRange
 //
-Range::Range(TextDocument* document, text::Offset start, text::Offset end)
-    : Range(document, new text::Range(document->buffer(), start, end)) {}
+TextRange::TextRange(TextDocument* document,
+                     text::Offset start,
+                     text::Offset end)
+    : TextRange(document, new text::Range(document->buffer(), start, end)) {}
 
-Range::Range(TextDocument* document, text::Range* range)
+TextRange::TextRange(TextDocument* document, text::Range* range)
     : document_(document), range_(range) {}
 
-Range::~Range() {}
+TextRange::~TextRange() {}
 
-bool Range::collapsed() const {
+bool TextRange::collapsed() const {
   return range_->start() == range_->end();
 }
 
-text::Offset Range::end() const {
+text::Offset TextRange::end() const {
   return range_->end();
 }
 
-int Range::end_value() const {
+int TextRange::end_value() const {
   return end().value();
 }
 
-text::Offset Range::start() const {
+text::Offset TextRange::start() const {
   return range_->start();
 }
 
-int Range::start_value() const {
+int TextRange::start_value() const {
   return start().value();
 }
 
-base::string16 Range::text() const {
+base::string16 TextRange::text() const {
   return std::move(range_->text());
 }
 
-void Range::set_end(int offsetLike) {
+void TextRange::set_end(int offsetLike) {
   const auto offset = document_->ValidateOffset(offsetLike);
   if (!offset.IsValid())
     return;
   range_->set_end(offset);
 }
 
-void Range::set_start(int offsetLike) {
+void TextRange::set_start(int offsetLike) {
   const auto offset = document_->ValidateOffset(offsetLike);
   if (!offset.IsValid())
     return;
   range_->set_start(offset);
 }
 
-void Range::set_text(const base::string16& text) {
+void TextRange::set_text(const base::string16& text) {
   if (!document_->CheckCanChange())
     return;
   range_->set_text(text);
 }
 
-Range* Range::CollapseTo(int offsetLike) {
+TextRange* TextRange::CollapseTo(int offsetLike) {
   const auto offset = document_->ValidateOffset(offsetLike);
   if (!offset.IsValid())
     return this;
@@ -81,29 +83,31 @@ Range* Range::CollapseTo(int offsetLike) {
   return this;
 }
 
-Range* Range::InsertBefore(const base::string16& text) {
+TextRange* TextRange::InsertBefore(const base::string16& text) {
   if (!document_->CheckCanChange())
     return this;
   document_->buffer()->InsertBefore(start(), text);
   return this;
 }
 
-Range* Range::NewRange(
-    v8_glue::Either<TextDocument*, Range*> document_or_range) {
+TextRange* TextRange::NewTextRange(
+    v8_glue::Either<TextDocument*, TextRange*> document_or_range) {
   if (document_or_range.is_left)
-    return NewRange(document_or_range, 0, 0);
+    return NewTextRange(document_or_range, 0, 0);
   auto const range = document_or_range.right;
-  return new Range(range->document(), range->start(), range->end());
+  return new TextRange(range->document(), range->start(), range->end());
 }
 
-Range* Range::NewRange(v8_glue::Either<TextDocument*, Range*> document_or_range,
-                       int offsetLike) {
-  return NewRange(document_or_range, offsetLike, offsetLike);
+TextRange* TextRange::NewTextRange(
+    v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+    int offsetLike) {
+  return NewTextRange(document_or_range, offsetLike, offsetLike);
 }
 
-Range* Range::NewRange(v8_glue::Either<TextDocument*, Range*> document_or_range,
-                       int startLike,
-                       int endLike) {
+TextRange* TextRange::NewTextRange(
+    v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+    int startLike,
+    int endLike) {
   auto const document = document_or_range.is_left
                             ? document_or_range.left
                             : document_or_range.right->document();
@@ -115,10 +119,10 @@ Range* Range::NewRange(v8_glue::Either<TextDocument*, Range*> document_or_range,
     return nullptr;
   if (!document->IsValidRange(start, end))
     return nullptr;
-  return new Range(document, start, end);
+  return new TextRange(document, start, end);
 }
 
-void Range::SetSpelling(int spelling_code) const {
+void TextRange::SetSpelling(int spelling_code) const {
   if (collapsed()) {
     ScriptHost::instance()->ThrowError(
         "Can't set spelling for collapsed range.");
@@ -127,7 +131,7 @@ void Range::SetSpelling(int spelling_code) const {
   document_->SetSpelling(range_->start(), range_->end(), spelling_code);
 }
 
-void Range::SetSyntax(const base::string16& syntax) const {
+void TextRange::SetSyntax(const base::string16& syntax) const {
   if (collapsed()) {
     ScriptHost::instance()->ThrowError("Can't set syntax for collapsed range.");
     return;

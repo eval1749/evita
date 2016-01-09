@@ -124,8 +124,8 @@ $define(global, 'repl', function($export) {
       this.lineNumber_ = 0;
       /** @const @type {!RepeatingTimer} */
       this.promiseTimer_ = new RepeatingTimer();
-      /** @const @type {!Range} */
-      this.range_ = new Range(document);
+      /** @const @type {!TextRange} */
+      this.range_ = new TextRange(document);
       /** @const @type {!Array} */
       this.results_ = [];
 
@@ -217,7 +217,7 @@ $define(global, 'repl', function($export) {
     /** @return {number} */
     get lastLineStart() { return this.range_.start + 1; }
 
-    /** @return {!Range} */
+    /** @return {!TextRange} */
     get range() { return this.range_; }
 
     /**

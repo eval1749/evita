@@ -54,7 +54,7 @@ $define(global, 'windows', function($export) {
    * @return {!TextWindow}
    */
   function newTextWindow(parent, document) {
-    const window = new TextWindow(new Range(document));
+    const window = new TextWindow(new TextRange(document));
     parent.appendChild(window);
     return window;
   }

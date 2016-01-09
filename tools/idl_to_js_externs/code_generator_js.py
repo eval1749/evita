@@ -27,7 +27,7 @@ IDL_TO_JS_TYPE_MAP = {
     'DOMString': 'string',
     'DOMHighResTimeStamp': 'number',
     'DOMTimeStamp': 'Date',
-    'RangeCase': 'Range.Case',
+    'RangeCase': 'TextRange.Case',
     'RegExpInit': 'Editor.RegExpInit',
     'any': '*',
     'boolean': 'boolean',

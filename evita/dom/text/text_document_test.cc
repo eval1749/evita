@@ -130,7 +130,7 @@ TEST_F(TextDocumentTest, TextDocument_remove) {
 TEST_F(TextDocumentTest, charCodeAt) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "new Range(doc).text = 'foobar';");
+      "new TextRange(doc).text = 'foobar';");
   EXPECT_SCRIPT_EQ("111", "doc.charCodeAt(1)");
 }
 
@@ -148,7 +148,7 @@ TEST_F(TextDocumentTest, dispatchEvent) {
 TEST_F(TextDocumentTest, getLineAndColumn) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('getLineAndColumn');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = '01\\n02\\n03\\n04\\n';"
       "function testIt(offset) {"
       "  var result = doc.getLineAndColumn_(offset);"
@@ -166,7 +166,7 @@ TEST_F(TextDocumentTest, getLineAndColumn) {
 TEST_F(TextDocumentTest, length) {
   EXPECT_SCRIPT_VALID("var doc = TextDocument.new('length');");
   EXPECT_SCRIPT_EQ("0", "doc.length");
-  EXPECT_SCRIPT_VALID("new Range(doc).text = 'foobar';");
+  EXPECT_SCRIPT_VALID("new TextRange(doc).text = 'foobar';");
   EXPECT_SCRIPT_EQ("6", "doc.length");
 }
 
@@ -272,7 +272,7 @@ TEST_F(TextDocumentTest, mode_auto_mode) {
 TEST_F(TextDocumentTest, modified) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var range = new Range(doc);");
+      "var range = new TextRange(doc);");
   EXPECT_SCRIPT_FALSE("doc.modified");
 
   EXPECT_SCRIPT_VALID("range.text = 'foo';");
@@ -303,7 +303,7 @@ TEST_F(TextDocumentTest, newline) {
 TEST_F(TextDocumentTest, parseFileProperties) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = '-*- var1: foo; VAR2: bar ; var3 : baz; -*-';"
       "doc.parseFileProperties();");
   // Property names are case sensitive
@@ -327,7 +327,7 @@ TEST_F(TextDocumentTest, properties) {
 TEST_F(TextDocumentTest, redo) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('redo');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = 'foo';"
       "doc.undo(3);"
       "doc.redo(0);"
@@ -361,7 +361,7 @@ TEST_F(TextDocumentTest, save_failed_encode) {
 
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "new Range(doc).text = 'f\\u0234o\\nbar\\n';"
+      "new TextRange(doc).text = 'f\\u0234o\\nbar\\n';"
       "doc.encoding = 'shift_jis';"
       "doc.save('foo.cc');");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
@@ -381,7 +381,7 @@ TEST_F(TextDocumentTest, save_failed_write) {
 
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "new Range(doc).text = 'foo\\nbar\\n';"
+      "new TextRange(doc).text = 'foo\\nbar\\n';"
       "doc.save('foo.cc');");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
   EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
@@ -413,7 +413,7 @@ TEST_F(TextDocumentTest, save_succeeded) {
 
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "new Range(doc).text = 'foo\\nbar\\n';"
+      "new TextRange(doc).text = 'foo\\nbar\\n';"
       "doc.save('foo.cc');");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
   EXPECT_EQ(expected_bytes, mock_io_delegate()->bytes());
@@ -427,7 +427,7 @@ TEST_F(TextDocumentTest, save_succeeded) {
 TEST_F(TextDocumentTest, setSpelling) {
   EXPECT_SCRIPT_VALID(
       "var doc1 = TextDocument.new('spelling');"
-      "var range1 = new Range(doc1);"
+      "var range1 = new TextRange(doc1);"
       "range1.text = 'foo bar baz';"
       "doc1.setSpelling(4, 7, 2);");
   EXPECT_SCRIPT_EQ("", "doc1.spellingAt(0)");
@@ -442,7 +442,7 @@ TEST_F(TextDocumentTest, setSpelling) {
 TEST_F(TextDocumentTest, setSyntax) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('syntax');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = 'foo bar baz';"
       "doc.setSyntax(0, 3, 'keyword');"
       "doc.setSyntax(4, 7, 'operator');"
@@ -464,7 +464,7 @@ TEST_F(TextDocumentTest, setSyntax) {
 TEST_F(TextDocumentTest, slice) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('slice');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = '0123456789';");
   EXPECT_SCRIPT_EQ("56789", "doc.slice(5)");
   EXPECT_SCRIPT_EQ("34", "doc.slice(3, 5)");
@@ -483,7 +483,7 @@ TEST_F(TextDocumentTest, state) {
 TEST_F(TextDocumentTest, undo) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('undo');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "range.text = 'foo';"
       "doc.undo(3);"
       "range.start = 0;"

@@ -39,7 +39,7 @@
 #include "evita/dom/os/directory.h"
 #include "evita/dom/os/file.h"
 #include "evita/dom/os/process.h"
-#include "evita/dom/text/range.h"
+#include "evita/dom/text/text_range.h"
 #include "evita/dom/text/regular_expression.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/windows/selection.h"
@@ -95,7 +95,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
 
     auto const editor_templ = INSTALL(Editor);
     INSTALL(FilePath);
-    INSTALL(Range);
+    INSTALL(TextRange);
     INSTALL(RegularExpression);
 
     INSTALL(EventTarget);

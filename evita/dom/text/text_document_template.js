@@ -33,7 +33,7 @@ $define(global, 'text', function($export) {
       const template = templateMap.get(matches[1]);
       if (!template)
         return;
-      const range = new Range(document);
+      const range = new TextRange(document);
       if (typeof(template) === 'string') {
         range.text = template;
         return;

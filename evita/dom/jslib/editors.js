@@ -35,7 +35,7 @@ global.editors = {};
     loadUserScript();
     let editor_window = new EditorWindow();
     let doc = TextDocument.new('*scratch*');
-    let range = new Range(doc);
+    let range = new TextRange(doc);
     let text_window = new TextWindow(range);
     editor_window.appendChild(text_window);
     editor_window.realize();

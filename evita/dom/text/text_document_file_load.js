@@ -94,7 +94,7 @@
       this.file_ = null;
       this.firstRead_ = true;
       this.readonly_ = document.readonly;
-      this.range_ = new Range(document);
+      this.range_ = new TextRange(document);
     }
 
     close() {

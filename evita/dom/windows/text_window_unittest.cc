@@ -31,7 +31,7 @@ TEST_F(TextWindowTest, _ctor) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var range = new Range(doc);"
+      "var range = new TextRange(doc);"
       "var sample = new TextWindow(range);");
   EXPECT_SCRIPT_TRUE("sample instanceof TextWindow");
   EXPECT_SCRIPT_TRUE("sample instanceof Window");
@@ -43,7 +43,7 @@ TEST_F(TextWindowTest, _ctor) {
 TEST_F(TextWindowTest, clone) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _)).Times(2);
   EXPECT_SCRIPT_VALID(
-      "var original = new TextWindow(new Range(TextDocument.new('foo')));"
+      "var original = new TextWindow(new TextRange(TextDocument.new('foo')));"
       "original.selection.range.text = 'foo';"
       "original.selection.range.end = 3;"
       "var sample = original.clone();");
@@ -54,7 +54,7 @@ TEST_F(TextWindowTest, makeSelectionVisible) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_CALL(*mock_view_impl(), MakeSelectionVisible(Eq(1)));
   EXPECT_SCRIPT_VALID(
-      "var sample = new TextWindow(new Range(TextDocument.new('foo')));"
+      "var sample = new TextWindow(new TextRange(TextDocument.new('foo')));"
       "sample.makeSelectionVisible();");
 }
 
@@ -62,7 +62,7 @@ TEST_F(TextWindowTest, realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var sample = new TextWindow(new Range(doc));"
+      "var sample = new TextWindow(new TextRange(doc));"
       "var event;"
       "function event_handler(x) { event = x; }"
       "doc.addEventListener(Event.Names.ATTACH, event_handler);"
@@ -93,7 +93,7 @@ TEST_F(TextWindowTest, zoom) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_CALL(*mock_view_impl(), SetTextWindowZoom(Eq(1), Eq(1.5f)));
   EXPECT_SCRIPT_VALID(
-      "var sample = new TextWindow(new Range(TextDocument.new('foo')));"
+      "var sample = new TextWindow(new TextRange(TextDocument.new('foo')));"
       "sample.zoom = 1.5;");
   EXPECT_SCRIPT_EQ("1.5", "sample.zoom");
   EXPECT_SCRIPT_EQ("RangeError: TextWindow zoom must be greater than zero.",

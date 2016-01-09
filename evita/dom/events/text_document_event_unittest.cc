@@ -25,7 +25,7 @@ TEST_F(TextDocumentEventTest, ctor) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
-      "var window = new TextWindow(new Range(doc));"
+      "var window = new TextWindow(new TextRange(doc));"
       "var event = new TextDocumentEvent('foo', {"
       "  view: window,"
       "});");

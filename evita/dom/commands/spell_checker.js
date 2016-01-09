@@ -469,7 +469,7 @@
   // HotScanner
   //
   class HotScanner extends Scanner {
-    /** @param {!Range} range */
+    /** @param {!TextRange} range */
     constructor(range) {
       super(range.document, 0, 0, 0);
 
@@ -481,12 +481,12 @@
 
       /**
        * @const
-       * @type {!Array.<!Range>}
+       * @type {!Array.<!TextRange>}
        * List of ranges can be used for checking spelling.
        */
       this.freeRanges_ = new Array(10);
       for (var i = 0; i < this.freeRanges_.length; ++i)
-        this.freeRanges_[i] = new Range(range.document);
+        this.freeRanges_[i] = new TextRange(range.document);
     }
 
     /**
@@ -513,7 +513,7 @@
       if (!this.freeRanges_.length || !controller.canRequest())
         return false;
 
-      /** @type {!Range} */
+      /** @type {!TextRange} */
       const markerRange = this.freeRanges_.pop();
       markerRange.collapseTo(wordStart);
       markerRange.end = wordEnd;
@@ -642,8 +642,8 @@
     constructor(document) {
       super(document);
 
-      /** @type {!Range} */
-      const range = new Range(document);
+      /** @type {!TextRange} */
+      const range = new TextRange(document);
 
       /** @type {?} TODO(eval1749): We should use |ColdScanner| here. */
       this.coldScanner_ = new ColdScanner(document);

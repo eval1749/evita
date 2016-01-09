@@ -15,7 +15,7 @@ class Selection;
 namespace dom {
 
 class TextDocument;
-class Range;
+class TextRange;
 class TableWindow;
 
 namespace bindings {

@@ -125,7 +125,7 @@
     }
 
     const document = ensureTextDocumentList();
-    const range = new Range(document, 0, document.length);
+    const range = new TextRange(document, 0, document.length);
     range.text = '';
     range.text = 'Name\tSize\tState\t\Saved At\tFile\n';
     TextDocument.list.forEach(function(document) {

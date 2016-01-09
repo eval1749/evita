@@ -163,7 +163,7 @@ Lexer.prototype.lastToken;
 Lexer.prototype.parentLexer_;
 
 /**
- * @type {?Range}
+ * @type {?TextRange}
  */
 Lexer.prototype.range;
 

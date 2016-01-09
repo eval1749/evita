@@ -37,11 +37,11 @@
   function throwInvalidUnit(unit) { throw 'Invalid unit: ' + unit; }
 
   function throwNYI(name, unit) {
-    throw 'NYI Range.prototype.' + name + ' Unit.' + unit;
+    throw 'NYI TextRange.prototype.' + name + ' Unit.' + unit;
   }
 
   function throwUnsupportedUnit(name, unit) {
-    throw 'Range.prototype.' + name + ' does not support Unit.' + unit;
+    throw 'TextRange.prototype.' + name + ' does not support Unit.' + unit;
   }
 
   /**
@@ -416,7 +416,7 @@
    * character, in a document.
    */
   function* lines() {
-    const range = new Range(this);
+    const range = new TextRange(this);
     while (range.start < this.length) {
       range.moveEnd(Unit.LINE);
       yield range.text;

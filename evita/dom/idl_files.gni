@@ -53,7 +53,7 @@ interface_idl_files = [
   "//evita/dom/text/LineAndColumn.idl",
   "//evita/dom/text/MutationObserver.idl",
   "//evita/dom/text/MutationRecord.idl",
-  "//evita/dom/text/Range.idl",
+  "//evita/dom/text/TextRange.idl",
   "//evita/dom/text/RegularExpression.idl",
   # TODO(eval1749): binding generator and js extern generator should support
   # typedef only file.
@@ -135,7 +135,7 @@ static_js_externs_files = [
   "//evita/dom/text/text_externs.js",
   "//evita/dom/text/text_document_externs.js",
   "//evita/dom/text/modes/modes_externs.js",
-  "//evita/dom/text/range_externs.js",
+  "//evita/dom/text/text_range_externs.js",
   "//evita/dom/text/simple_mutation_observer_externs.js",
   "//evita/dom/text/text_position_externs.js",
   "//evita/dom/types_externs.js",

@@ -5,14 +5,14 @@
 global.FindAndReplace = (function() {
   /**
    * @param {string} string
-   * @param {!Range.Case} stringCase
+   * @param {!TextRange.Case} stringCase
    * @return string
    */
   function caseReplace(string, stringCase) {
     if (!string.length)
       return string;
     switch (stringCase) {
-      case Range.Case.CAPITALIZED_TEXT: {
+      case TextRange.Case.CAPITALIZED_TEXT: {
         for (let index = 0; index < string.length; ++index) {
           let charCode = string.charCodeAt(index);
           let ucd = Unicode.UCD[charCode];
@@ -26,7 +26,7 @@ global.FindAndReplace = (function() {
         }
         return string;
       }
-      case Range.Case.CAPITALIZED_WORDS: {
+      case TextRange.Case.CAPITALIZED_WORDS: {
         /** @type {string} */
         let newString = '';
         /** @type {boolean}*/
@@ -60,16 +60,16 @@ global.FindAndReplace = (function() {
         }
         return newString;
       }
-      case Range.Case.LOWER:
+      case TextRange.Case.LOWER:
         return string.toLocaleLowerCase()
-      case Range.Case.LOWER:
+      case TextRange.Case.LOWER:
         return string.toLocaleLowerCase()
-      case Range.Case.MIXED:
+      case TextRange.Case.MIXED:
         return string;
-      case Range.Case.UPPER:
+      case TextRange.Case.UPPER:
         return string.toLocaleUpperCase()
     }
-    throw `Invalid Range.Case ${stringCase}`;
+    throw `Invalid TextRange.Case ${stringCase}`;
   }
 
   /**
@@ -109,7 +109,7 @@ global.FindAndReplace = (function() {
 
     /** @type{!TextDocument} */
     const document = window.document;
-    /** @type{!Range} */
+    /** @type{!TextRange} */
     const range = window.selection.range;
 
     /**
@@ -481,15 +481,15 @@ global.FindAndReplace = (function() {
     const document = window.document;
     const selection = window.selection;
     const selection_range = selection.range;
-    const replaceRange = new Range(selection_range);
+    const replaceRange = new TextRange(selection_range);
     if (!shouldFindInSelection(findOptions, replaceRange)) {
       replaceRange.start = 0;
       replaceRange.end = document.length;
     }
     /** @type {boolean} */
     const casePreserve = shouldPreserveCase(findOptions, replaceText);
-    /** @type {!Range} */
-    const range = new Range(document);
+    /** @type {!TextRange} */
+    const range = new TextRange(document);
     /** @type {number} */
     let replacedCount = 0;
     document.undoGroup('replace all', function() {
@@ -525,7 +525,7 @@ global.FindAndReplace = (function() {
 
   /**
    * @param {!FindAndReplaceOptions} findOptions
-   * @param {!Range} range
+   * @param {!TextRange} range
    * @return {boolean}
    */
   function shouldFindInSelection(findOptions, range) {

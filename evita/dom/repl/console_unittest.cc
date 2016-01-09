@@ -24,7 +24,7 @@ TEST_F(ConsoleTest, log) {
   EXPECT_SCRIPT_VALID(
       "function consoleContents() {"
       "  var doc = console.document;"
-      "  var range = new Range(doc, 0, doc.length);"
+      "  var range = new TextRange(doc, 0, doc.length);"
       "  return range.text;"
       "}");
 

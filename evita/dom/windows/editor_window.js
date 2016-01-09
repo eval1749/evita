@@ -70,7 +70,7 @@
        return;
      }
      document.load()
-     var new_window = new TextWindow(new Range(document));
+     var new_window = new TextWindow(new TextRange(document));
      this.appendChild(new_window);
    };
 })();

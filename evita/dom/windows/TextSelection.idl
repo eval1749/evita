@@ -7,7 +7,7 @@ interface TextSelection : Selection {
   [ImplementedAs=focus_offset_value] readonly attribute long focusOffset;
   [ImplementedAs=JavaScript] attribute Point? goal_point_;
   [ImplementedAs=JavaScript] attribute long goal_position_;
-  readonly attribute Range range;
+  readonly attribute TextRange range;
   attribute boolean startIsActive;
 
   [ImplementedAs=JavaScript]

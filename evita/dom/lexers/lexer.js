@@ -74,7 +74,7 @@ $define(global, 'lexers', function($export) {
       this.lastToken = this.dummyToken_;
       // TODO(eval1749): |maxChainWords_| should be part of |LexerOptions|.
       this.maxChainWords_ = 3;
-      this.range = new Range(document);
+      this.range = new TextRange(document);
       this.scanOffset = 0;
       this.state = lexers.State.ZERO;
       this.tokens = new base.OrderedSet((a, b) => a.end < b.end);

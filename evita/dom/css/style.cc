@@ -7,7 +7,7 @@
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/text/text_document.h"
-#include "evita/dom/text/range.h"
+#include "evita/dom/text/text_range.h"
 #include "evita/dom/script_host.h"
 #include "evita/css/style.h"
 #include "evita/text/buffer.h"
@@ -242,7 +242,7 @@ v8::Handle<v8::Object> TextDocument::style_at(text::Offset position) const {
   return runner_scope.Escape(js_style);
 }
 
-void Range::SetStyle(v8::Handle<v8::Object> style_dict) const {
+void TextRange::SetStyle(v8::Handle<v8::Object> style_dict) const {
   css::Style style_values;
   bool changed = false;
 

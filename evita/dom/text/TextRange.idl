@@ -16,12 +16,12 @@ enum RangeCase {
 };
 
 [
-    CustomConstructor((TextDocument or Range) document_or_range),
-    CustomConstructor((TextDocument or Range) document_or_range, long offset),
-    CustomConstructor((TextDocument or Range) document_or_range, long start_offset,
+    CustomConstructor((TextDocument or TextRange) document_or_range),
+    CustomConstructor((TextDocument or TextRange) document_or_range, long offset),
+    CustomConstructor((TextDocument or TextRange) document_or_range, long start_offset,
                       long end_offset),
 ]
-interface Range {
+interface TextRange {
   readonly attribute boolean collapsed;
   readonly attribute TextDocument document;
   [ImplementedAs=end_value]
@@ -38,15 +38,15 @@ interface Range {
 
   // TODO(yosin) We should make |capitalized()| as global function
   [ImplementedAs=JavaScript]
-  Range capitalize();
+  TextRange capitalize();
 
-  Range collapseTo(long offset);
-
-  [ImplementedAs=JavaScript]
-  Range delete(Unit unit, optional long count);
+  TextRange collapseTo(long offset);
 
   [ImplementedAs=JavaScript]
-  Range endOf(Unit unit, optional Alter alter);
+  TextRange delete(Unit unit, optional long count);
+
+  [ImplementedAs=JavaScript]
+  TextRange endOf(Unit unit, optional Alter alter);
 
   void insertBefore(DOMString text);
 
@@ -54,19 +54,19 @@ interface Range {
   DOMString[]? match(RegularExpression regexp);
 
   [ImplementedAs=JavaScript]
-  Range move(Unit unit, optional long count);
+  TextRange move(Unit unit, optional long count);
 
   [ImplementedAs=JavaScript]
-  Range moveEnd(Unit unit, optional long count);
+  TextRange moveEnd(Unit unit, optional long count);
 
   [ImplementedAs=JavaScript]
-  Range moveEndWhile(DOMString char_set, optional long count);
+  TextRange moveEndWhile(DOMString char_set, optional long count);
 
   [ImplementedAs=JavaScript]
-  Range moveStart(Unit unit, optional long count);
+  TextRange moveStart(Unit unit, optional long count);
 
   [ImplementedAs=JavaScript]
-  Range moveStartWhile(DOMString char_set, optional long count);
+  TextRange moveStartWhile(DOMString char_set, optional long count);
 
   [ImplementedAs=JavaScript]
   //  @param {string|!function(string, ...):string} replacement
@@ -77,21 +77,21 @@ interface Range {
   void setSyntax(DOMString syntax);
 
   [ImplementedAs=JavaScript]
-  Range startOf(Unit unit, optional Alter alter);
+  TextRange startOf(Unit unit, optional Alter alter);
 
   // TODO(yosin) We should make |toLocaleLowerCase()| as global function
   [ImplementedAs=JavaScript]
-  Range toLocaleLowerCase();
+  TextRange toLocaleLowerCase();
 
   // TODO(yosin) We should make |toLocaleUpperCase()| as global function
   [ImplementedAs=JavaScript]
-  Range toLocaleUpperCase();
+  TextRange toLocaleUpperCase();
 
   // TODO(yosin) We should make |toLowerCase()| as global function
   [ImplementedAs=JavaScript]
-  Range toLowerCase();
+  TextRange toLowerCase();
 
   // TODO(yosin) We should make |toUpperCase()| as global function
   [ImplementedAs=JavaScript]
-  Range toUpperCase();
+  TextRange toUpperCase();
 };

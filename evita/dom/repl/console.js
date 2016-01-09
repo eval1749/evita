@@ -86,7 +86,7 @@ $define(global, 'repl', function($export) {
       if (this.document_)
         return this.document_;
       this.document_ = ensureTextDocument();
-      this.range_ = new Range(this.document_);
+      this.range_ = new TextRange(this.document_);
       return this.document;
     }
 

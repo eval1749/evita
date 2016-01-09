@@ -68,7 +68,7 @@
   };
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    */
   function resetSelections(document) {
     document.listWindows()
@@ -192,17 +192,17 @@
   }
 
   /**
-   * @param {!Document} document
-   * @param {!Document.Obsolete} obsolete
+   * @param {!TextDocument} document
+   * @param {!TextDocument.Obsolete} obsolete
    */
   function finishLoad(document, obsolete) {
     document.obsolete = obsolete;
     document.lastStatTime_ = new Date();
-    document.dispatchEvent(new DocumentEvent(Event.Names.LOAD));
+    document.dispatchEvent(new TextDocumentEvent(Event.Names.LOAD));
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {string=} opt_fileName
    * @return {!Promise.<number>}
    */
@@ -210,21 +210,21 @@
     const document = this;
     if (opt_fileName === undefined) {
       if (document.fileName === '')
-        throw 'Document isn\'t bound to file.';
+        throw 'TextDocument isn\'t bound to file.';
     } else {
       const fileName = /** @type{string} */ (opt_fileName);
       // TODO(eval1749): FilePath.fullPath() will return Promise.
       const absoluteFile_name = FilePath.fullPath(fileName);
-      const present = Document.findFile(absoluteFile_name);
+      const present = TextDocument.findFile(absoluteFile_name);
       if (present && present !== this)
         throw fileName + ' is already bound to ' + present;
       document.fileName = absoluteFile_name;
     }
 
-    document.obsolete = Document.Obsolete.CHECKING;
+    document.obsolete = TextDocument.Obsolete.CHECKING;
     Editor.messageBox(null, 'Loading ' + document.fileName,
                       MessageBox.ICONINFORMATION);
-    document.dispatchEvent(new DocumentEvent(Event.Names.BEFORELOAD));
+    document.dispatchEvent(new TextDocumentEvent(Event.Names.BEFORELOAD));
 
     // Start loading
     const loader = new FileLoader(document);
@@ -233,15 +233,15 @@
           loader.close();
           Editor.messageBox(null, 'Loaded ' + document.fileName,
                             MessageBox.ICONINFORMATION);
-          finishLoad(document, Document.Obsolete.NO);
+          finishLoad(document, TextDocument.Obsolete.NO);
           return length;
         })
         .catch(function(exception) {
           loader.close();
-          finishLoad(document, Document.Obsolete.UNKNOWN);
+          finishLoad(document, TextDocument.Obsolete.UNKNOWN);
           throw exception;
         });
   }
 
-  Object.defineProperty(Document.prototype, 'load', {value: load});
+  Object.defineProperty(TextDocument.prototype, 'load', {value: load});
 })();

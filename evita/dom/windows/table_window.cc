@@ -13,7 +13,7 @@ namespace dom {
 //
 // TableWindow
 //
-TableWindow::TableWindow(Document* document)
+TableWindow::TableWindow(TextDocument* document)
     : ScriptableBase(new TableSelection(this, document)) {
   ScriptHost::instance()->view_delegate()->CreateTableWindow(window_id(),
                                                              document);

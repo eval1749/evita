@@ -13,7 +13,8 @@ namespace dom {
 //
 // TableSelection
 //
-TableSelection::TableSelection(TableWindow* table_window, Document* document)
+TableSelection::TableSelection(TableWindow* table_window,
+                               TextDocument* document)
     : ScriptableBase(table_window, document) {}
 
 TableSelection::~TableSelection() {}

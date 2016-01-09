@@ -29,7 +29,7 @@ class ViewDelegateImpl final : public domapi::ViewDelegate {
                         dom::Form* form,
                         const domapi::PopupWindowInit& init) final;
   void CreateTableWindow(domapi::WindowId window_id,
-                         dom::Document* document) final;
+                         dom::TextDocument* document) final;
   void CreateTextWindow(domapi::WindowId window_id,
                         text::Selection* selection) final;
   void DestroyWindow(domapi::WindowId window_id) final;

@@ -5,7 +5,7 @@
 global.JavaLexer = (function(options) {
   class JavaLexer extends global.ClikeLexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       super(document, options);

@@ -40,7 +40,7 @@ var Direction = {
 /**
  * @enum {!symbol}
  */
-Document.Obsolete = {
+TextDocument.Obsolete = {
   CHECKING: Symbol('CHECKING'),
   IGNORE: Symbol('IGNORE'),
   NO: Symbol('NO'),

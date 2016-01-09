@@ -9,7 +9,8 @@ namespace dom {
 //
 // Selection
 //
-Selection::Selection(DocumentWindow* document_window, Document* document)
+Selection::Selection(TextDocumentWindow* document_window,
+                     TextDocument* document)
     : document_(document), document_window_(document_window) {}
 
 Selection::~Selection() {}

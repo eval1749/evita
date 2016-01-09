@@ -5,7 +5,7 @@
 global.IdlLexer = (function(options) {
   class IdlLexer extends global.ClikeLexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       super(document, options);

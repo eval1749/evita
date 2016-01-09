@@ -58,7 +58,7 @@ $define(global, 'lexers', function($export) {
   //
   class Lexer extends text.SimpleMutationObserverBase {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      * @param {!LexerOptions} options
      * @return {undefined}
      */
@@ -93,10 +93,10 @@ $define(global, 'lexers', function($export) {
 
     /**
      * @private
-     * Implements text.SimpleMutationObserver.didChangeDocument
+     * Implements text.SimpleMutationObserver.didChangeTextDocument
      * @param {number} offset
      */
-    didChangeDocument(offset) {
+    didChangeTextDocument(offset) {
       const delta = offset - this.scanOffset;
       if (delta > 0) {
         this.doColor(delta);
@@ -121,9 +121,9 @@ $define(global, 'lexers', function($export) {
 
     /**
      * @override
-     * Implements text.SimpleMutationObserver.didChangeDocument
+     * Implements text.SimpleMutationObserver.didChangeTextDocument
      */
-    didLoadDocument() {
+    didLoadTextDocument() {
       this.adjustScanOffset(0);
       this.doColor(this.document.length);
     }

@@ -19,7 +19,7 @@ global.ConfigLexer = (function() {
 
   class ConfigLexer extends global.Lexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       super(document, {

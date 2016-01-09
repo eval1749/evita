@@ -8,6 +8,6 @@ callback MutationCallback = void (MutationRecord[] records,
 [Constructor(MutationCallback callback)]
 interface MutationObserver {
   void disconnect();
-  void observe(Document document, MutationObserverInit options);
+  void observe(TextDocument document, MutationObserverInit options);
   MutationRecord[] takeRecords();
 };

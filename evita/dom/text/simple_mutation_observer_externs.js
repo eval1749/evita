@@ -10,21 +10,21 @@ text.SimpleMutationObserver;
 /**
  * @param {number} offset
  */
-text.SimpleMutationObserver.prototype.didChangeDocument = function(offset) {};
+text.SimpleMutationObserver.prototype.didChangeTextDocument = function(offset) {};
 
 /**
  * @param {number} offset
  */
-text.SimpleMutationObserver.prototype.didLoadDocument = function(offset) {};
+text.SimpleMutationObserver.prototype.didLoadTextDocument = function(offset) {};
 
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!TextDocument} document
  */
 text.SimpleMutationObserverBase = function(document) {};
 
-/** @type {!Document} */
+/** @type {!TextDocument} */
 text.SimpleMutationObserverBase.prototype.document;
 
-text.SimpleMutationObserverBase.prototype.didLoadDocument = function() {};
+text.SimpleMutationObserverBase.prototype.didLoadTextDocument = function() {};
 text.SimpleMutationObserverBase.prototype.stopObserving = function() {};

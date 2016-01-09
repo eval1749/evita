@@ -9,7 +9,7 @@
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "base/trace_event/trace_event.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
@@ -59,7 +59,7 @@ std::vector<ui::TableColumn> BuildColumns(const TableViewModel::Row* row) {
 //
 // TableView
 //
-TableWindow::TableWindow(WindowId window_id, dom::Document* document)
+TableWindow::TableWindow(WindowId window_id, dom::TextDocument* document)
     : CanvasContentWindow(window_id),
       control_(nullptr),
       document_(document),

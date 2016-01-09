@@ -107,7 +107,7 @@ global.FindAndReplace = (function() {
     if (!regexp)
       return null;
 
-    /** @type{!Document} */
+    /** @type{!TextDocument} */
     const document = window.document;
     /** @type{!Range} */
     const range = window.selection.range;
@@ -192,7 +192,7 @@ global.FindAndReplace = (function() {
   };
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {string} newSource
    * @param {!Array.<Editor.RegExp.Match>} matches
    * @return string
@@ -531,7 +531,7 @@ global.FindAndReplace = (function() {
   function shouldFindInSelection(findOptions, range) {
     if (range.collapsed)
       return false;
-    /** @type {!Document} */
+    /** @type {!TextDocument} */
     const document = range.document;
     for (let offset = range.start; offset < range.end; ++offset) {
       if (document.charCodeAt(offset) === Unicode.LF)

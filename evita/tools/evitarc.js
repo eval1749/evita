@@ -289,9 +289,9 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
       `#endif  // ${guard}\n`;
   }
 
-  text.DocumentTemplates.addTemplate('cc', cppTemplateFor);
-  text.DocumentTemplates.addTemplate('gn', copyrightTextSharp);
-  text.DocumentTemplates.addTemplate('h', cheaderTemplateFor);
-  text.DocumentTemplates.addTemplate('js', copyrightTextCxx);
-  text.DocumentTemplates.addTemplate('py', pythonTemplate);
+  text.TextDocumentTemplates.addTemplate('cc', cppTemplateFor);
+  text.TextDocumentTemplates.addTemplate('gn', copyrightTextSharp);
+  text.TextDocumentTemplates.addTemplate('h', cheaderTemplateFor);
+  text.TextDocumentTemplates.addTemplate('js', copyrightTextCxx);
+  text.TextDocumentTemplates.addTemplate('py', pythonTemplate);
 })();

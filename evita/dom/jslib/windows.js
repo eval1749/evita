@@ -5,7 +5,7 @@
 $define(global, 'windows', function($export) {
   /**
    * @param {!Window} window
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @return {!TextWindow}
    */
   function activate(window, document) {
@@ -40,7 +40,7 @@ $define(global, 'windows', function($export) {
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    */
   function newEditorWindow(document) {
     const editorWindow = new EditorWindow();
@@ -50,7 +50,7 @@ $define(global, 'windows', function($export) {
 
   /**
    * @param {!Window} parent
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @return {!TextWindow}
    */
   function newTextWindow(parent, document) {

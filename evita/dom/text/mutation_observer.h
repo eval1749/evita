@@ -14,7 +14,7 @@
 
 namespace dom {
 
-class Document;
+class TextDocument;
 class MutationObserverInit;
 class MutationRecord;
 
@@ -28,13 +28,13 @@ class MutationObserver final : public v8_glue::Scriptable<MutationObserver> {
  public:
   ~MutationObserver() final;
 
-  void DidDeleteAt(Document* document,
+  void DidDeleteAt(TextDocument* document,
                    text::Offset offset,
                    text::OffsetDelta length);
-  void DidInsertBefore(Document* document,
+  void DidInsertBefore(TextDocument* document,
                        text::Offset offset,
                        text::OffsetDelta length);
-  void DidMutateDocument(Document* document);
+  void DidMutateTextDocument(TextDocument* document);
 
  private:
   friend class bindings::MutationObserverClass;
@@ -43,12 +43,12 @@ class MutationObserver final : public v8_glue::Scriptable<MutationObserver> {
   explicit MutationObserver(v8::Handle<v8::Function> callback);
 
   void Disconnect();
-  Tracker* GetTracker(Document* document) const;
-  void Observe(Document* document, const MutationObserverInit& options);
+  Tracker* GetTracker(TextDocument* document) const;
+  void Observe(TextDocument* document, const MutationObserverInit& options);
   std::vector<MutationRecord*> TakeRecords();
 
   v8_glue::ScopedPersistent<v8::Function> callback_;
-  std::unordered_map<Document*, Tracker*> tracker_map_;
+  std::unordered_map<TextDocument*, Tracker*> tracker_map_;
 
   DISALLOW_COPY_AND_ASSIGN(MutationObserver);
 };

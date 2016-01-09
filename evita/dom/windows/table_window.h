@@ -3,13 +3,13 @@
 #ifndef EVITA_DOM_WINDOWS_TABLE_WINDOW_H_
 #define EVITA_DOM_WINDOWS_TABLE_WINDOW_H_
 
-#include "evita/dom/windows/document_window.h"
+#include "evita/dom/windows/text_document_window.h"
 
 #include "evita/gc/member.h"
 
 namespace dom {
 
-class Document;
+class TextDocument;
 
 namespace bindings {
 class TableWindowClass;
@@ -18,7 +18,7 @@ class TableWindowClass;
 // The |TableWindow| is DOM world representative of UI world TextWidget, aka
 // TextWindow.
 class TableWindow final
-    : public v8_glue::Scriptable<TableWindow, DocumentWindow> {
+    : public v8_glue::Scriptable<TableWindow, TextDocumentWindow> {
   DECLARE_SCRIPTABLE_OBJECT(TableWindow);
 
  public:
@@ -27,7 +27,7 @@ class TableWindow final
  private:
   friend class bindings::TableWindowClass;
 
-  explicit TableWindow(Document* document);
+  explicit TableWindow(TextDocument* document);
 
   DISALLOW_COPY_AND_ASSIGN(TableWindow);
 };

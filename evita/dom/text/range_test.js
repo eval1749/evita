@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 testing.test('Range.prototype.match', function(t) {
-  const document = new Document();
+  const document = new TextDocument();
   const range = new Range(document);
   range.text = 'foo bar baz';
   const matches = range.match(new Editor.RegExp('(b)(ar)'));
@@ -11,7 +11,7 @@ testing.test('Range.prototype.match', function(t) {
 });
 
 testing.test('Range.prototype.matches', function(t) {
-  const document = new Document();
+  const document = new TextDocument();
   const range = new Range(document);
   range.text = 'foo bar baz';
   t.expect(range.end).toEqual(document.length);

@@ -5,7 +5,7 @@
 (function() {
   class PlainTextLexer extends global.Lexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) { super(document, {}); }
     detach() {}
@@ -122,13 +122,13 @@
   Object.defineProperty(Mode, 'extensionMap', {
     value: (function() {
       var map = /** @type{!ExtensionToModeMap} */(new Map());
-      map.set('asdl', {mode: XmlMode, name: 'ASDL Document'});
+      map.set('asdl', {mode: XmlMode, name: 'ASDL TextDocument'});
       map.set('cc', {mode: CppMode, name: 'C++ Source'});
       map.set('cfg', {mode: ConfigMode, name: 'Config File'});
       map.set('cl', {mode: CppMode, name: 'CommonLisp Source'});
       map.set('cpp', {mode: CppMode, name: 'C++ Source'});
       map.set('cs', {mode: CsharpMode, name: 'C# Source'});
-      map.set('css', {mode: CppMode, name: 'Cascading Style Sheet Document'});
+      map.set('css', {mode: CppMode, name: 'Cascading Style Sheet TextDocument'});
       map.set('cxx', {mode: CppMode, name: 'C++ Source'});
       map.set('el', {mode: LispMode, name: 'EmacsLisp Source'});
       map.set('gyp', {mode: PythonMode, name: 'GYP Source'});
@@ -137,8 +137,8 @@
       map.set('hs', {mode: HaskellMode, name: 'Haskell Source'});
       map.set('hsc', {mode: HaskellMode, name: 'Haskell Component Source'});
       map.set('hpp', {mode: CppMode, name: 'C++ Header'});
-      map.set('htm', {mode: HtmlMode, name: 'HTML Document'});
-      map.set('html', {mode: HtmlMode, name: 'HTML Document'});
+      map.set('htm', {mode: HtmlMode, name: 'HTML TextDocument'});
+      map.set('html', {mode: HtmlMode, name: 'HTML TextDocument'});
       map.set('hxx', {mode: CppMode, name: 'C++ Header'});
       map.set('idl', {mode: IdlMode, name: 'Web IDL Source'});
       map.set('java', {mode: JavaMode, name: 'Java Source'});
@@ -157,11 +157,11 @@
       map.set('scm', {mode: LispMode, name: 'Scheme Source'});
       map.set('stanza', {mode: ConfigMode, name: 'Config File'});
       map.set('t', {mode: PerlMode, name: 'Perl Test Source'});
-      map.set('wsdl', {mode: XmlMode, name: 'WSDL Document'});
-      map.set('xhtml', {mode: HtmlMode, name: 'XHTML Document'});
-      map.set('xml', {mode: XmlMode, name: 'XML Document'});
-      map.set('xsd', {mode: XmlMode, name: 'XSD Document'});
-      map.set('xsl', {mode: XmlMode, name: 'XSLT Document'});
+      map.set('wsdl', {mode: XmlMode, name: 'WSDL TextDocument'});
+      map.set('xhtml', {mode: HtmlMode, name: 'XHTML TextDocument'});
+      map.set('xml', {mode: XmlMode, name: 'XML TextDocument'});
+      map.set('xsd', {mode: XmlMode, name: 'XSD TextDocument'});
+      map.set('xsl', {mode: XmlMode, name: 'XSLT TextDocument'});
       return map;
     })()
   });
@@ -202,7 +202,7 @@
 
   Object.defineProperty(Mode, 'chooseMode', {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      * @return {!Mode}
      */
     value: function(document) {
@@ -239,21 +239,21 @@
     }
   });
 
-  /** @param {!Document} document */
-  function didAddDocument(document) {
+  /** @param {!TextDocument} document */
+  function didAddTextDocument(document) {
     document.addEventListener(Event.Names.BEFORELOAD,
-                              willLoadDocument.bind(document));
+                              willLoadTextDocument.bind(document));
     document.addEventListener(Event.Names.LOAD,
-                              didLoadDocument.bind(document));
+                              didLoadTextDocument.bind(document));
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    *
    * Updates document mode by mode property in contents or file name.
    */
-  function didLoadDocument() {
-    /** @type {!Document} */
+  function didLoadTextDocument() {
+    /** @type {!TextDocument} */
     const document = this;
     document.parseFileProperties();
     /** @type {!Mode} */
@@ -267,23 +267,23 @@
     document.mode = newMode;
   }
 
-  /** @param {!Document} document */
-  function didRemoveDocument(document) {
+  /** @param {!TextDocument} document */
+  function didRemoveTextDocument(document) {
     document.mode = null;
   }
 
-  /** @this {!Document} */
-  function willLoadDocument() {
+  /** @this {!TextDocument} */
+  function willLoadTextDocument() {
     const document = this;
   }
 
-  Document.addObserver(function(action, document) {
+  TextDocument.addObserver(function(action, document) {
     switch (action) {
       case 'add':
-        didAddDocument(document);
+        didAddTextDocument(document);
         break;
       case 'remove':
-        didRemoveDocument(document);
+        didRemoveTextDocument(document);
         break;
     }
   });

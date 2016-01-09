@@ -26,7 +26,7 @@ class TableSelectionTest : public AbstractDomTest {
 TEST_F(TableSelectionTest, Basic) {
   EXPECT_CALL(*mock_view_impl(), CreateTableWindow(_, _));
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var table_window = new TableWindow(doc);"
       "var sample = table_window.selection;");
   EXPECT_SCRIPT_TRUE("sample instanceof Selection");
@@ -36,7 +36,7 @@ TEST_F(TableSelectionTest, Basic) {
 TEST_F(TableSelectionTest, getRowStates) {
   EXPECT_CALL(*mock_view_impl(), CreateTableWindow(_, _));
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var table_window = new TableWindow(doc);"
       "var sample = table_window.selection;"
       "var result = sample.getRowStates(['a', 'b', 'c']);");

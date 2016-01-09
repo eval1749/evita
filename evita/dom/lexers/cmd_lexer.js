@@ -41,7 +41,7 @@ global.CmdLexer = (function() {
   /**
    * @constructor
    * @extends Lexer
-   * @param {!Document} document
+   * @param {!TextDocument} document
    */
   function CmdLexer(document) {
     super(document);

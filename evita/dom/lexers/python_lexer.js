@@ -53,7 +53,7 @@ global.PythonLexer = (function(keywords) {
   //
   class PythonLexer extends global.Lexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       super(document, {

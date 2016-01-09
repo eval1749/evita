@@ -9,7 +9,7 @@
 
 #include "evita/bindings/v8_glue_MutationObserverInit.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/dom/text/mutation_observer_controller.h"
 #include "evita/dom/text/mutation_record.h"
 #include "evita/dom/script_host.h"
@@ -24,7 +24,7 @@ namespace dom {
 //
 class MutationObserver::Tracker final {
  public:
-  explicit Tracker(Document* document);
+  explicit Tracker(TextDocument* document);
   ~Tracker();
 
   bool has_records() const {
@@ -36,13 +36,14 @@ class MutationObserver::Tracker final {
   void Update(text::Offset offset);
 
  private:
-  // TODO(eval1749): Reference to |Document| from |Tracker| should be a weak
+  // TODO(eval1749): Reference to |TextDocument| from |Tracker| should be a weak
   // reference.
-  Document* document_;
+  TextDocument* document_;
   text::Offset minimum_change_offset_;
 };
 
-MutationObserver::Tracker::Tracker(Document* document) : document_(document) {
+MutationObserver::Tracker::Tracker(TextDocument* document)
+    : document_(document) {
   Reset();
 }
 
@@ -75,7 +76,7 @@ MutationObserver::MutationObserver(v8::Handle<v8::Function> callback)
 
 MutationObserver::~MutationObserver() {}
 
-void MutationObserver::DidDeleteAt(Document* document,
+void MutationObserver::DidDeleteAt(TextDocument* document,
                                    text::Offset offset,
                                    text::OffsetDelta length) {
   auto const tracker = GetTracker(document);
@@ -84,7 +85,7 @@ void MutationObserver::DidDeleteAt(Document* document,
   tracker->Update(offset);
 }
 
-void MutationObserver::DidInsertBefore(Document* document,
+void MutationObserver::DidInsertBefore(TextDocument* document,
                                        text::Offset offset,
                                        text::OffsetDelta length) {
   auto const tracker = GetTracker(document);
@@ -93,7 +94,7 @@ void MutationObserver::DidInsertBefore(Document* document,
   tracker->Update(offset);
 }
 
-void MutationObserver::DidMutateDocument(Document* document) {
+void MutationObserver::DidMutateTextDocument(TextDocument* document) {
   auto const tracker = GetTracker(document);
   if (!tracker)
     return;
@@ -115,12 +116,12 @@ void MutationObserver::Disconnect() {
 }
 
 MutationObserver::Tracker* MutationObserver::GetTracker(
-    Document* document) const {
+    TextDocument* document) const {
   auto const it = tracker_map_.find(document);
   return it == tracker_map_.end() ? nullptr : it->second;
 }
 
-void MutationObserver::Observe(Document* document,
+void MutationObserver::Observe(TextDocument* document,
                                const MutationObserverInit& options) {
   DCHECK(options.summary());
   __assume(options.summary());

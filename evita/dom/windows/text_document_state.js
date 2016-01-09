@@ -4,27 +4,27 @@
 
 $define(global, 'windows', function($export) {
   /**
-   * @type {!Array<!DocumentStateCallback>}
+   * @type {!Array<!TextDocumentStateCallback>}
    */
   const observers = [];
 
   /**
-   * @type {!Map<!Document, !DocumentState>}
+   * @type {!Map<!TextDocument, !TextDocumentState>}
    */
   const stateMap = new Map();
 
   //////////////////////////////////////////////////////////////////////
   //
-  // DocumentState
+  // TextDocumentState
   //
-  class DocumentState {
+  class TextDocumentState {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       this.document_ = document;
       this.fileName = document.fileName;
-      // TODO(eval1749): We should specify |DocumentState.prototype.icon| from
+      // TODO(eval1749): We should specify |TextDocumentState.prototype.icon| from
       // IconSet.
       this.icon = -2;
       this.lastWriteTime = document.lastWriteTime;
@@ -36,7 +36,7 @@ $define(global, 'windows', function($export) {
     /**
      * @private
      * Set initial tab data for |TextWindow|.
-     * @param {!DocumentEvent} event
+     * @param {!TextDocumentEvent} event
      */
     didAttachWindow(event) {
       if (event.view === null)
@@ -46,9 +46,9 @@ $define(global, 'windows', function($export) {
 
     /**
      * @private
-     * @param {!DocumentEvent} event
+     * @param {!TextDocumentEvent} event
      */
-    didLoadSaveDocument(event) {
+    didLoadSaveTextDocument(event) {
       const document = this.document_;
       this.fileName = document.fileName;
       this.lastWriteTime = document.lastWriteTime;
@@ -84,11 +84,11 @@ $define(global, 'windows', function($export) {
       document.addEventListener(Event.Names.ATTACH,
                                 this.didAttachWindow.bind(this));
       document.addEventListener(Event.Names.BEFORELOAD,
-                                this.willLoadDocument.bind(this));
+                                this.willLoadTextDocument.bind(this));
       document.addEventListener(Event.Names.LOAD,
-                                this.didLoadSaveDocument.bind(this));
+                                this.didLoadSaveTextDocument.bind(this));
       document.addEventListener(Event.Names.SAVE,
-                                this.didLoadSaveDocument.bind(this));
+                                this.didLoadSaveTextDocument.bind(this));
       const mutationObserver = new MutationObserver(
           this.mutationCallback.bind(this));
       mutationObserver.observe(document, {summary: true});
@@ -97,15 +97,15 @@ $define(global, 'windows', function($export) {
 
     /**
      * @private
-     * @param {!DocumentEvent} event
+     * @param {!TextDocumentEvent} event
      */
-    willLoadDocument(event) {
+    willLoadTextDocument(event) {
       this.state = 1;
       this.notifyChange();
     }
 
     /**
-     * @param {!DocumentStateCallback} callback
+     * @param {!TextDocumentStateCallback} callback
      */
     static addObserver(callback) {
       observers.push(callback);
@@ -113,29 +113,29 @@ $define(global, 'windows', function($export) {
 
     /**
      * For debugging only
-     * @param {!Document} document
-     * @return {DocumentState}
+     * @param {!TextDocument} document
+     * @return {TextDocumentState}
      */
     static get(document) {
       return stateMap.get(document) || null;
     }
 
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     static startTracking(document) {
-      const state = new DocumentState(document);
+      const state = new TextDocumentState(document);
       stateMap.set(document, state);
       state.start();
     }
   }
 
-  Document.addObserver(function(type, document) {
+  TextDocument.addObserver(function(type, document) {
     if (type === 'add')
-      DocumentState.startTracking(document);
+      TextDocumentState.startTracking(document);
   });
 
-  $export({DocumentState});
+  $export({TextDocumentState});
 });
 
-global.DocumentState = windows.DocumentState;
+global.TextDocumentState = windows.TextDocumentState;

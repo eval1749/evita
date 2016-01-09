@@ -19,7 +19,7 @@ repl.Console.prototype.assert = function(expression, ...params) {};
 /** @type {!function()} */
 repl.Console.prototype.clear;
 
-/** @type {!Document} */
+/** @type {!TextDocument} */
 repl.Console.prototype.document;
 
 /** @param {string} string */

@@ -5,7 +5,7 @@
 global.HtmlLexer = (function(options) {
   class HtmlLexer extends global.XmlLexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       super(document, options);

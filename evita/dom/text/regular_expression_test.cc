@@ -14,9 +14,9 @@ class RegExpTest : public AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(RegExpTest);
 };
 
-TEST_F(RegExpTest, execOnDocument_) {
+TEST_F(RegExpTest, execOnTextDocument_) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var range = new Range(doc);"
       "range.text = 'foo bar baz';"
       "function exec(source, match_exact) {"

@@ -4,27 +4,27 @@
 
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @param {string=} opt_message
  */
-var DocumentError = function(document, opt_message) {};
+var TextDocumentError = function(document, opt_message) {};
 
-/** @export @type {!Document} */
-DocumentError.prototype.document;
-
-/**
- * @constructor
- * @extends {DocumentError}
- * @param {!Document} document
- * @param {string=} opt_message
- */
-var DocumentNotReady = function(document, opt_message) {};
+/** @export @type {!TextDocument} */
+TextDocumentError.prototype.document;
 
 /**
  * @constructor
- * @extends {DocumentError}
- * @param {!Document} document
+ * @extends {TextDocumentError}
+ * @param {!TextDocument} document
  * @param {string=} opt_message
  */
-var DocumentReadOnly = function(document, opt_message) {};
+var TextDocumentNotReady = function(document, opt_message) {};
+
+/**
+ * @constructor
+ * @extends {TextDocumentError}
+ * @param {!TextDocument} document
+ * @param {string=} opt_message
+ */
+var TextDocumentReadOnly = function(document, opt_message) {};
 

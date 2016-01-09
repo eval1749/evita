@@ -7,10 +7,10 @@
 
   /**
    * @param {string} absoluteFileName
-   * @return {!Document}
+   * @return {!TextDocument}
    */
   function openFile(absoluteFileName) {
-    const document = Document.open(absoluteFileName);
+    const document = TextDocument.open(absoluteFileName);
     if (!document.length) {
       document.load(absoluteFileName).catch(function(errorCode) {
         console.log('Load error', errorCode);
@@ -26,29 +26,29 @@
    * Open new document in new window in current editor window.
    * @this {!Window}
    */
-  function newDocumentCommand(arg) {
+  function newTextDocumentCommand(arg) {
     if (!this.parent)
       return;
     const editorWindow = /** @type {!Window} */(this.parent);
     if (arg !== undefined) {
-      windows.newTextWindow(editorWindow, Document.new('untitled.txt'));
+      windows.newTextWindow(editorWindow, TextDocument.new('untitled.txt'));
       return;
     }
 
     Editor.getFileNameForSave(this, this.selection.document.fileName)
         .then(function(fileName) {
-          const document = Document.open(fileName);
-          Document.notifyObservers('new', document);
+          const document = TextDocument.open(fileName);
+          TextDocument.notifyObservers('new', document);
           windows.newTextWindow(editorWindow, document)
         });
   }
-  Editor.bindKey(Window, 'Ctrl+N', newDocumentCommand);
+  Editor.bindKey(Window, 'Ctrl+N', newTextDocumentCommand);
 
   /**
    * Open document in new or existing window in current editor window.
    * @this {!Window}
    */
-  function openDocumentCommand() {
+  function openTextDocumentCommand() {
     if (!this.parent)
       return;
     const editorWindow = /** @type {!Window} */(this.parent);
@@ -57,7 +57,7 @@
           windows.activate(editorWindow, openFile(fileName));
         });
   }
-  Editor.bindKey(Window, 'Ctrl+O', openDocumentCommand);
+  Editor.bindKey(Window, 'Ctrl+O', openTextDocumentCommand);
 
   /**
    * Close this window.
@@ -136,31 +136,31 @@
    * Open new document in new editor window.
    * @this {!Window}
    */
-  function newDocumentInNewWindowCommand(arg) {
+  function newTextDocumentInNewWindowCommand(arg) {
     if (arg !== undefined) {
-      windows.newEditorWindow(Document.new('untitled.txt'));
+      windows.newEditorWindow(TextDocument.new('untitled.txt'));
       return;
     }
 
     Editor.getFileNameForSave(this, this.selection.document.fileName)
         .then(function(fileName) {
-          const document = Document.open(fileName);
+          const document = TextDocument.open(fileName);
           windows.newEditorWindow(document);
         });
   }
-  Editor.bindKey(Window, 'Ctrl+Shift+N', newDocumentInNewWindowCommand);
+  Editor.bindKey(Window, 'Ctrl+Shift+N', newTextDocumentInNewWindowCommand);
 
   /**
    * Open document in new editor window.
    * @this {!Window}
    */
-  function openDocumentInNewWindowCommand() {
+  function openTextDocumentInNewWindowCommand() {
     Editor.getFileNameForLoad(this, this.selection.document.fileName)
         .then(function(fileName) {
           windows.newEditorWindow(openFile(fileName));
         });
   }
-  Editor.bindKey(Window, 'Ctrl+Shift+O', openDocumentInNewWindowCommand);
+  Editor.bindKey(Window, 'Ctrl+Shift+O', openTextDocumentInNewWindowCommand);
 
   /**
    * Previous window

@@ -6,9 +6,9 @@
   'use strict';
 
   /**
-   * @type {?Document}
+   * @type {?TextDocument}
    */
-  let documentListDocument = null;
+  let documentListTextDocument = null;
 
   /**
    * @param {!TableSelection} selection
@@ -16,7 +16,7 @@
    * @return {!Map.<string, number>}
    */
   function queryRows(selection, stateMask) {
-    const keys = Document.list.map(function(document) {
+    const keys = TextDocument.list.map(function(document) {
       return document.name;
     });
     const resultSet = new Map();
@@ -30,34 +30,34 @@
   /**
    * @this {!TableWindow}
    */
-  function closeSelectedDocuments() {
+  function closeSelectedTextDocuments() {
     const selection = /** @type{!TableSelection}*/(this.selection);
     const resultSet = queryRows(selection, TableViewRowState.SELECTED);
     let needUpdate = false;
     for (let name of resultSet.keys()) {
-      let document = Document.find(name);
+      let document = TextDocument.find(name);
       if (!document)
         return;
       document.close();
-      // TODO(eval1749): We should handle Document event rather than using
+      // TODO(eval1749): We should handle TextDocument event rather than using
       // |needUpdate| variable. Because |close()| is asynchronous operation
       // and document may not be closed yet or canceled.
       needUpdate = true;
     }
     if (needUpdate)
-      ensureDocumentList();
+      ensureTextDocumentList();
   }
 
   /**
    * @this {!TableWindow}
    */
-  function openSelectedDocuments() {
+  function openSelectedTextDocuments() {
     const selection = /** @type{!TableSelection}*/(this.selection);
     const resultSet = queryRows(selection, TableViewRowState.SELECTED);
     const parent = /** @type {!Window} */(this.parent);
     let openCount = 0;
     for (let name of resultSet.keys()) {
-      const document = Document.find(name);
+      const document = TextDocument.find(name);
       if (!document)
         return;
       if (!openCount)
@@ -67,42 +67,42 @@
       ++openCount;
     }
     if (openCount)
-      ensureDocumentList();
+      ensureTextDocumentList();
   }
 
   /**
-   * @return {!Document}
+   * @return {!TextDocument}
    */
-  function ensureDocumentList() {
-    if (documentListDocument)
-      return documentListDocument;
-    const document = Document.new('*document list*');
-    document.bindKey('Delete', closeSelectedDocuments);
-    document.bindKey('Enter', openSelectedDocuments);
-    documentListDocument = document;
-    DocumentState.addObserver(function(document, state) {
-      if (document === documentListDocument)
+  function ensureTextDocumentList() {
+    if (documentListTextDocument)
+      return documentListTextDocument;
+    const document = TextDocument.new('*document list*');
+    document.bindKey('Delete', closeSelectedTextDocuments);
+    document.bindKey('Enter', openSelectedTextDocuments);
+    documentListTextDocument = document;
+    TextDocumentState.addObserver(function(document, state) {
+      if (document === documentListTextDocument)
         return;
-      updateDocumentList();
+      updateTextDocumentList();
     });
-    updateDocumentList();
+    updateTextDocumentList();
     return document;
   }
 
   /** @type {!Map.<!symbol, string>} */
   const OBSOLETE_MARK_MAP = new Map([
-    [Document.Obsolete.NO, '-'],
-    [Document.Obsolete.CHECKING, '.'],
-    [Document.Obsolete.IGNORE, '%'],
-    [Document.Obsolete.UNKNOWN, '?'],
-    [Document.Obsolete.YES, '*']
+    [TextDocument.Obsolete.NO, '-'],
+    [TextDocument.Obsolete.CHECKING, '.'],
+    [TextDocument.Obsolete.IGNORE, '%'],
+    [TextDocument.Obsolete.UNKNOWN, '?'],
+    [TextDocument.Obsolete.YES, '*']
   ]);
 
-  function updateDocumentList() {
+  function updateTextDocumentList() {
     const documentWindowCountMap = new Map();
     EditorWindow.list.forEach(function(editorWindow) {
       editorWindow.children.forEach(function(window) {
-        if (!(window instanceof DocumentWindow))
+        if (!(window instanceof TextDocumentWindow))
           return;
         const document = window.document;
         const count = documentWindowCountMap.get(document);
@@ -111,7 +111,7 @@
     });
 
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      * @return {!string}
      */
     function stateString(document) {
@@ -124,11 +124,11 @@
       ].join('');
     }
 
-    const document = ensureDocumentList();
+    const document = ensureTextDocumentList();
     const range = new Range(document, 0, document.length);
     range.text = '';
     range.text = 'Name\tSize\tState\t\Saved At\tFile\n';
-    Document.list.forEach(function(document) {
+    TextDocument.list.forEach(function(document) {
       range.collapseTo(range.end);
       const fields = [
         document.name,
@@ -146,8 +146,8 @@
   /**
    * @this {!Window}
    */
-  function listDocumentCommand() {
-    const document = ensureDocumentList();
+  function listTextDocumentCommand() {
+    const document = ensureTextDocumentList();
     const window = this.parent.children.find(function(window) {
       if (!(window instanceof TableWindow))
         return false;
@@ -162,11 +162,11 @@
     const tabData = new TabData();
     tabData.icon = 0;
     tabData.state = 0;
-    tabData.title = 'Document List';
+    tabData.title = 'TextDocument List';
     tabData.tooltip = '';
     Editor.setTabData(tableWindow, tabData);
     this.parent.appendChild(tableWindow);
   }
 
-  Editor.bindKey(Window, 'Ctrl+B', listDocumentCommand);
+  Editor.bindKey(Window, 'Ctrl+B', listTextDocumentCommand);
 })();

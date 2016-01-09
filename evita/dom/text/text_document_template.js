@@ -3,28 +3,28 @@
 // found in the LICENSE file.
 
 $define(global, 'text', function($export) {
-  /** @type {!Map.<string|function(!Document):string>} */
+  /** @type {!Map.<string|function(!TextDocument):string>} */
   const templateMap = new Map();
 
-  class DocumentTemplates {
+  class TextDocumentTemplates {
     constructor() {
-      Document.addObserver(this.didChangeDocuments.bind(this));
+      TextDocument.addObserver(this.didChangeTextDocuments.bind(this));
     }
 
     /**
      * @param {string} type
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
-    didChangeDocuments(type, document) {
+    didChangeTextDocuments(type, document) {
       if (type !== 'new')
         return;
-      this.didNewDocument(document);
+      this.didNewTextDocument(document);
     }
 
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
-    didNewDocument(document) {
+    didNewTextDocument(document) {
       if (document.length > 0)
         return;
       const matches = (new RegExp('[.](.+)$')).exec(document.name);
@@ -53,9 +53,9 @@ $define(global, 'text', function($export) {
     }
   }
 
-  Object.defineProperty(DocumentTemplates, 'instance', {
-    value: new DocumentTemplates()
+  Object.defineProperty(TextDocumentTemplates, 'instance', {
+    value: new TextDocumentTemplates()
   });
 
-  $export({DocumentTemplates});
+  $export({TextDocumentTemplates});
 });

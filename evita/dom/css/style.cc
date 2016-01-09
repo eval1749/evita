@@ -6,7 +6,7 @@
 
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/script_host.h"
 #include "evita/css/style.h"
@@ -196,7 +196,7 @@ void InvalidStyleAttributeValue(v8::Isolate* isolate,
 }
 }  // namespace
 
-v8::Handle<v8::Object> Document::style_at(text::Offset position) const {
+v8::Handle<v8::Object> TextDocument::style_at(text::Offset position) const {
   if (!IsValidPosition(position))
     return v8::Handle<v8::Object>();
   const auto& style_values = buffer_->GetStyleAt(position);

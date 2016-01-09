@@ -51,7 +51,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} start
    * @param {number} end
    * @param {!Spelling} spelling
@@ -123,13 +123,13 @@
    */
   class Scanner {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      * @param {number} start
      * @param {number} end
      * @param {number} life
      */
     constructor(document, start, end, life) {
-      /** @private @const @type {!Document} */
+      /** @private @const @type {!TextDocument} */
       this.document_ = document;
 
       /** @private @type {number} */
@@ -156,7 +156,7 @@
     /** @return {number} */
     charCode() { return this.document_.charCodeAt(this.offset_); }
 
-    /** @return {!Document} */
+    /** @return {!TextDocument} */
     get document() { return this.document_; }
 
     /** @return {number} */
@@ -364,7 +364,7 @@
   // ColdPainter
   //
   class ColdPainter extends Scanner {
-    /** @param {!Document} document */
+    /** @param {!TextDocument} document */
     constructor(document) {
       super(document, 0, 0, 0);
     }
@@ -391,7 +391,7 @@
   // ColdScanner
   //
   class ColdScanner extends Scanner {
-    /** @param {!Document} document */
+    /** @param {!TextDocument} document */
     constructor(document) {
       super(document, 0, 0, 0);
 
@@ -428,7 +428,7 @@
     /**
      * @param {number} hotStart
      */
-    didChangeDocument(hotStart) {
+    didChangeTextDocument(hotStart) {
       this.updateOffset(hotStart, hotStart);
       this.schedule(kColdScanStartDelay);
     }
@@ -436,7 +436,7 @@
     /*
      * Scan and paint on whole document.
      */
-    didLoadDocument() {
+    didLoadTextDocument() {
       this.resetOffset(0, this.document.length);
       this.schedule(0);
     }
@@ -536,7 +536,7 @@
     /**
      * @param {number} hotStart
      */
-    didChangeDocument(hotStart) {
+    didChangeTextDocument(hotStart) {
       this.updateOffset(hotStart, this.document.length);
       this.caretIsHot_ = true;
       this.schedule(kHotScanStartDelay);
@@ -552,7 +552,7 @@
       this.caretIsHot_ = false;
     }
 
-    didLoadDocument() {
+    didLoadTextDocument() {
       this.resetOffset(this.document.length, this.document.length);
       this.caretIsHot_ = false;
     }
@@ -637,7 +637,7 @@
      * Spell checker for specified document. Each document is associated to
      * separate |SpellChecker| instance.
      *
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       super(document);
@@ -654,7 +654,7 @@
       document.addEventListener(Event.Names.ATTACH,
                                 this.didAttachWindow.bind(this));
 
-      this.didLoadDocument();
+      this.didLoadTextDocument();
     }
 
     // Cleanup resources used by spell checker.
@@ -687,14 +687,14 @@
 
     /**
      * @private
-     * Implements text.SimpleMutationObserver.didChangeDocument
+     * Implements text.SimpleMutationObserver.didChangeTextDocument
      * @param {number} offset
      *
      * Resets hot offset to minimal changed offset and kicks word scanner.
      */
-    didChangeDocument(offset) {
-      this.coldScanner_.didChangeDocument(offset);
-      this.hotScanner_.didChangeDocument(offset);
+    didChangeTextDocument(offset) {
+      this.coldScanner_.didChangeTextDocument(offset);
+      this.hotScanner_.didChangeTextDocument(offset);
     }
 
     /**
@@ -707,18 +707,18 @@
 
     /**
      * @private
-     * Implements text.SimpleMutationObserver.didChangeDocument
+     * Implements text.SimpleMutationObserver.didChangeTextDocument
      */
-    didLoadDocument() {
-      this.coldScanner_.didLoadDocument();
-      this.hotScanner_.didLoadDocument();
+    didLoadTextDocument() {
+      this.coldScanner_.didLoadTextDocument();
+      this.hotScanner_.didLoadTextDocument();
     }
   }
 
   // When document is created/destructed, we install/uninstall spell checker
   // to/from document.
-  Document.addObserver(function(action, document) {
-    /** @param {!Document} document */
+  TextDocument.addObserver(function(action, document) {
+    /** @param {!TextDocument} document */
     function installSpellChecker(document) {
       // TODO(eval1749): We should have generic way to disable spell checking
       // for document.
@@ -728,7 +728,7 @@
       document.properties.set(SpellChecker.name, spellChecker);
     }
 
-    /** @param {!Document} document */
+    /** @param {!TextDocument} document */
     function uninstallSpellChecker(document) {
       const spellChecker = document.properties.get(SpellChecker.name);
       if (!spellChecker)

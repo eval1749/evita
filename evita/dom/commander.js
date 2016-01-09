@@ -116,7 +116,7 @@ global.commander =
     var present = get(keymap, code);
     if (present)
       return present;
-    if (event.target instanceof DocumentWindow) {
+    if (event.target instanceof TextDocumentWindow) {
       var text_window = /**@type {TextWindow} */(event.target);
       present = get(text_window.document['keymap'], code);
       if (present)
@@ -164,12 +164,12 @@ global.commander =
         else
           binding.call(event.target);
       } catch (exception) {
-        if (!(exception instanceof DocumentReadOnly))
+        if (!(exception instanceof TextDocumentReadOnly))
           throw exception;
-        if (!(event.target instanceof DocumentWindow))
+        if (!(event.target instanceof TextDocumentWindow))
           throw exception;
-        var window = /** @type{!DocumentWindow} */ (event.target);
-        var error = /** @type{!DocumentReadOnly} */(exception);
+        var window = /** @type{!TextDocumentWindow} */ (event.target);
+        var error = /** @type{!TextDocumentReadOnly} */(exception);
         if (error.document != window.document)
           throw error;
         window.status = 'Can not change readonly document.';

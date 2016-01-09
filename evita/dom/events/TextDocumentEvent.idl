@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 [
-  Constructor(DOMString typeArg, optional DocumentEventInit eventInitDict),
+  Constructor(DOMString typeArg, optional TextDocumentEventInit eventInitDict),
 ]
-interface DocumentEvent : Event {
-  readonly attribute DocumentWindow? view;
+interface TextDocumentEvent : Event {
+  readonly attribute TextDocumentWindow? view;
 };

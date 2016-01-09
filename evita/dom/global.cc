@@ -3,8 +3,8 @@
 
 #include "evita/dom/global.h"
 
-#include "evita/dom/text/document.h"
-#include "evita/dom/windows/document_window.h"
+#include "evita/dom/text/text_document.h"
+#include "evita/dom/windows/text_document_window.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/clipboard/data_transfer.h"
@@ -13,7 +13,7 @@
 #include "evita/dom/encodings/text_decoder.h"
 #include "evita/dom/encodings/text_encoder.h"
 #include "evita/dom/events/composition_event.h"
-#include "evita/dom/events/document_event.h"
+#include "evita/dom/events/text_document_event.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
@@ -83,7 +83,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
 
     // Note: super class must be installed before subclass.
     INSTALL(Event);
-    INSTALL(DocumentEvent);
+    INSTALL(TextDocumentEvent);
     INSTALL(FormEvent);
     INSTALL(UiEvent);
     INSTALL(CompositionEvent);
@@ -99,7 +99,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(RegularExpression);
 
     INSTALL(EventTarget);
-    INSTALL(Document);
+    INSTALL(TextDocument);
     INSTALL(ViewEventTarget);
     INSTALL(Form);
     INSTALL(FormControl);
@@ -109,7 +109,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(RadioButtonControl);
     INSTALL(TextFieldControl);
     INSTALL(Window);
-    INSTALL(DocumentWindow);
+    INSTALL(TextDocumentWindow);
     INSTALL(TableWindow);
     INSTALL(TextWindow);
     INSTALL(EditorWindow);

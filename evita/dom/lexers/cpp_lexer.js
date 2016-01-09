@@ -5,7 +5,7 @@
 global.CppLexer = (function(options) {
   class CppLexer extends global.ClikeLexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       super(document, options);

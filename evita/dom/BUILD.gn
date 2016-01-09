@@ -23,13 +23,13 @@ source_set("dom") {
     "events/composition_event.h",
     "events/composition_span.cc",
     "events/composition_span.h",
-    "events/document_event.cc",
     "events/event.cc",
     "events/event_target.cc",
     "events/focus_event.cc",
     "events/form_event.cc",
     "events/keyboard_event.cc",
     "events/mouse_event.cc",
+    "events/text_document_event.cc",
     "events/ui_event.cc",
     "events/view_event_handler_impl.cc",
     "events/view_event_target.cc",
@@ -65,13 +65,13 @@ source_set("dom") {
     "timers/repeating_timer.h",
     "timers/timer.cc",
     "timers/timer.h",
-    "windows/document_window.cc",
     "windows/editor_window.cc",
     "windows/point.cc",
     "windows/rect.cc",
     "windows/selection.cc",
     "windows/table_selection.cc",
     "windows/table_window.cc",
+    "windows/text_document_window.cc",
     "windows/text_selection.cc",
     "windows/text_window.cc",
     "windows/window.cc",
@@ -136,8 +136,8 @@ source_set("dom_unicode_lib_cc") {
   ]
   deps = [
     "//base:i18n",
-    "//v8",
     "//third_party/icu:icuuc",
+    "//v8",
   ]
 }
 
@@ -194,13 +194,13 @@ test("evita_dom_tests") {
     "encodings/text_encoder_unittest.cc",
     "errors_unittest.cc",
     "events/composition_event_unittest.cc",
-    "events/document_event_unittest.cc",
     "events/event_target_unittest.cc",
     "events/event_unittest.cc",
     "events/focus_event_unittest.cc",
     "events/form_event_unittest.cc",
     "events/keyboard_event_unittest.cc",
     "events/mouse_event_unittest.cc",
+    "events/text_document_event_unittest.cc",
     "events/ui_event_unittest.cc",
     "events/view_event_handler_impl_unittest.cc",
     "events/wheel_event_unittest.cc",
@@ -235,8 +235,8 @@ test("evita_dom_tests") {
     # "evita_dom_test".
     "//evita:application",
     "//evita/dom/os:test_files",
+    "//evita/dom/testing:test_support",
     "//evita/dom/text:test_files",
     "//evita/dom/timing:test_files",
-    "//evita/dom/testing:test_support",
   ]
 }

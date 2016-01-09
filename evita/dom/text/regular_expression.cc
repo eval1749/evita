@@ -7,7 +7,7 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "evita/bindings/v8_glue_RegExpInit.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/script_host.h"
 #include "evita/v8_glue/runner.h"
@@ -479,9 +479,10 @@ RegularExpression::RegularExpression(RegularExpressionImpl* regex,
 
 RegularExpression::~RegularExpression() {}
 
-v8::Handle<v8::Value> RegularExpression::ExecuteOnDocument(Document* document,
-                                                           text::Offset start,
-                                                           text::Offset end) {
+v8::Handle<v8::Value> RegularExpression::ExecuteOnTextDocument(
+    TextDocument* document,
+    text::Offset start,
+    text::Offset end) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   BufferMatcher matcher(regex_.get(), document->buffer(), start, end);

@@ -52,7 +52,7 @@
     var active_window = Editor.activeWindow();
 
     /**
-     * @param {Document} document
+     * @param {TextDocument} document
      * @return {Promise}
      */
     function interactiveSave(document) {
@@ -66,7 +66,7 @@
     }
 
     /**
-     * @param {Document} document
+     * @param {TextDocument} document
      * @return {Promise}
      */
     function confirmForExit(document) {
@@ -89,7 +89,7 @@
       return answer === DialogItemId.CANCEL;
     }
 
-    Promise.all(Document.list.map(confirmForExit)).then(function(answers) {
+    Promise.all(TextDocument.list.map(confirmForExit)).then(function(answers) {
       if (answers.some(isCanceled))
         return;
       Editor.forceExit();
@@ -123,7 +123,7 @@
    * @param {string} file_name
    */
   Editor.open = function(file_name) {
-    const document = Document.open(file_name);
+    const document = TextDocument.open(file_name);
     if (document.length == 0) {
       document.load(file_name).then(function() {
         global.windows.activate(Editor.activeWindow(), document);
@@ -221,7 +221,7 @@
         continue;
       }
       if (arg[0] === '*') {
-        let document = Document.find(arg);
+        let document = TextDocument.find(arg);
         if (!document)
           continue;
         windows.activate(Editor.activeWindow(), document);

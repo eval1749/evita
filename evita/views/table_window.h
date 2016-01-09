@@ -20,7 +20,7 @@
 #include "evita/views/window_id.h"
 
 namespace dom {
-class Document;
+class TextDocument;
 }
 
 namespace ui {
@@ -38,7 +38,7 @@ class TableWindow final : public CanvasContentWindow,
   DECLARE_CASTABLE_CLASS(TableView, ContentWindow);
 
  public:
-  TableWindow(WindowId window_id, dom::Document* document);
+  TableWindow(WindowId window_id, dom::TextDocument* document);
   ~TableWindow() final;
 
   std::vector<int> GetRowStates(const std::vector<base::string16>& keys) const;
@@ -77,7 +77,7 @@ class TableWindow final : public CanvasContentWindow,
 
   std::vector<ui::TableColumn> columns_;
   ui::TableControl* control_;
-  gc::Member<dom::Document> document_;
+  gc::Member<dom::TextDocument> document_;
   std::unique_ptr<TableViewModel> model_;
   std::unordered_map<int, TableViewModel::Row*> row_map_;
   bool should_update_model_;

@@ -25,7 +25,7 @@ void LexersTest::SetUp() {
 
   EXPECT_SCRIPT_VALID(
       "function applySyntax(lexerClass, lines) {"
-      "  var doc = Document.new(lexerClass.name);"
+      "  var doc = TextDocument.new(lexerClass.name);"
       "  var range = new Range(doc);"
       "  range.text = lines.join('\\n');"
       "  (new lexerClass(doc)).doColor(doc.length);"

@@ -4,7 +4,7 @@
 
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!TextDocument} document
  */
 function DynamicAbbrevExpander(document) {
   this.cursor = new Range(document);
@@ -33,7 +33,7 @@ DynamicAbbrevExpander.last_selection_start;
 DynamicAbbrevExpander.prefix;
 
 /**
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {!DynamicAbbrevExpander}
  */
 DynamicAbbrevExpander.getOrCreate = function(document) {
@@ -95,7 +95,7 @@ DynamicAbbrevExpander.prototype.expand = function(selection) {
 DynamicAbbrevExpander.prototype.findCandidate = function(current_word) {
   /**
    * @param {string} text
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} offset
    * @return {boolean}
    */

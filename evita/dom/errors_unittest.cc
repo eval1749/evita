@@ -17,39 +17,39 @@ class ErrorsTest : public dom::AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(ErrorsTest);
 };
 
-TEST_F(ErrorsTest, DocumentError) {
+TEST_F(ErrorsTest, TextDocumentError) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
-      "var e1 = new DocumentError(doc, 'foo');");
+      "var doc = TextDocument.new('foo');"
+      "var e1 = new TextDocumentError(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
-  EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");
+  EXPECT_SCRIPT_TRUE("e1 instanceof TextDocumentError");
   EXPECT_SCRIPT_TRUE("e1.document === doc");
   EXPECT_SCRIPT_EQ("foo", "e1.message");
-  EXPECT_SCRIPT_EQ("DocumentError", "e1.name");
+  EXPECT_SCRIPT_EQ("TextDocumentError", "e1.name");
 }
 
-TEST_F(ErrorsTest, DocumentNotReady) {
+TEST_F(ErrorsTest, TextDocumentNotReady) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
-      "var e1 = new DocumentNotReady(doc, 'foo');");
+      "var doc = TextDocument.new('foo');"
+      "var e1 = new TextDocumentNotReady(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
-  EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");
-  EXPECT_SCRIPT_TRUE("e1 instanceof DocumentNotReady");
+  EXPECT_SCRIPT_TRUE("e1 instanceof TextDocumentError");
+  EXPECT_SCRIPT_TRUE("e1 instanceof TextDocumentNotReady");
   EXPECT_SCRIPT_TRUE("e1.document === doc");
   EXPECT_SCRIPT_EQ("foo", "e1.message");
-  EXPECT_SCRIPT_EQ("DocumentNotReady", "e1.name");
+  EXPECT_SCRIPT_EQ("TextDocumentNotReady", "e1.name");
 }
 
-TEST_F(ErrorsTest, DocumentReadOnly) {
+TEST_F(ErrorsTest, TextDocumentReadOnly) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
-      "var e1 = new DocumentReadOnly(doc, 'foo');");
+      "var doc = TextDocument.new('foo');"
+      "var e1 = new TextDocumentReadOnly(doc, 'foo');");
   EXPECT_SCRIPT_TRUE("e1 instanceof Error");
-  EXPECT_SCRIPT_TRUE("e1 instanceof DocumentError");
-  EXPECT_SCRIPT_TRUE("e1 instanceof DocumentReadOnly");
+  EXPECT_SCRIPT_TRUE("e1 instanceof TextDocumentError");
+  EXPECT_SCRIPT_TRUE("e1 instanceof TextDocumentReadOnly");
   EXPECT_SCRIPT_TRUE("e1.document === doc");
   EXPECT_SCRIPT_EQ("foo", "e1.message");
-  EXPECT_SCRIPT_EQ("DocumentReadOnly", "e1.name");
+  EXPECT_SCRIPT_EQ("TextDocumentReadOnly", "e1.name");
 }
 
 }  // namespace

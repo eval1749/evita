@@ -193,7 +193,7 @@ void ViewDelegateImpl::CreateFormWindow(domapi::WindowId window_id,
 }
 
 void ViewDelegateImpl::CreateTableWindow(domapi::WindowId window_id,
-                                         dom::Document* document) {
+                                         dom::TextDocument* document) {
   new views::TableWindow(window_id, document);
 }
 

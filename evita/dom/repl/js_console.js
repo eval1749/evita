@@ -112,9 +112,9 @@ $define(global, 'repl', function($export) {
   // JsConsole
   //
   class JsConsole {
-    /** @param {!Document} document */
+    /** @param {!TextDocument} document */
     constructor(document) {
-      /** @type {!Document} */
+      /** @type {!TextDocument} */
       this.document_ = document;
       // TODO(eval1749): We should annotate |history_| with |History| once
       // Closure compiler recognize class |History|.
@@ -200,7 +200,7 @@ $define(global, 'repl', function($export) {
       this.useHistory();
     }
 
-    /** @return {!Document} */
+    /** @return {!TextDocument} */
     get document() { return this.document_; }
 
     /** @return {string} */

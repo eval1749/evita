@@ -26,13 +26,13 @@
   })();
 
   /** @type {Keymap} */
-  Document.prototype.keymap_;
+  TextDocument.prototype.keymap_;
 
   /** @type {Mode} */
-  Document.prototype.mode_;
+  TextDocument.prototype.mode_;
 
   /** @type {string} */
-  Document.prototype.name_;
+  TextDocument.prototype.name_;
 
   function throwInvalidUnit(unit) { throw 'Invalid unit: ' + unit; }
 
@@ -57,7 +57,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} position
    * @return {string|null}
    */
@@ -66,7 +66,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} position
    * @return {string|null}
    */
@@ -75,7 +75,7 @@
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {string} keyCombination
    * @param {!Function|!Map} command
    */
@@ -85,7 +85,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} offset
    * @return {number} An offset of end of line containing |offset|.
    */
@@ -99,7 +99,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} offset
    * @return {number} An offset of end of word containing |offset|.
    */
@@ -130,7 +130,7 @@
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {Unit} unit
    * @param {number} offset
    * @return {number} An offset of end of |unit|.
@@ -158,7 +158,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} count
    * @param {number} offset
    * @return {number}
@@ -170,7 +170,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} count
    * @param {number} offset
    * @return {number}
@@ -184,7 +184,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} count
    * @param {number} offset
    * @return {number}
@@ -211,7 +211,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} count
    * @param {number} offset
    * @return {number}
@@ -275,7 +275,7 @@
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {number} count
    * @param {number} offset
    * @return {number}
@@ -296,7 +296,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} offset
    * @return {number} An offset of start of line containing |offset|.
    */
@@ -310,7 +310,7 @@
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {number} offset
    * @return {number} An offset of start of word containing |offset|.
    */
@@ -334,7 +334,7 @@
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {Unit} unit
    * @param {number} offset
    * @return {number} An offset of start of |unit|.
@@ -361,7 +361,7 @@
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {string} charSet
    * @param {number} count
    * @param {number} start
@@ -392,7 +392,7 @@
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {number} hint
    */
   function doColor_(hint) {
@@ -402,15 +402,15 @@
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @return {boolean}
    */
-  function getDocumentModified() {
+  function getTextDocumentModified() {
     return this.revision_ !== this.savedRevision_;
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    *
    * Returns generator object which returns line, including newline
    * character, in a document.
@@ -425,14 +425,14 @@
   }
 
   /**
-   * @this {!Document}
-   * @return {Array.<!DocumentWindow>}
+   * @this {!TextDocument}
+   * @return {Array.<!TextDocumentWindow>}
    */
   function listWindows() {
     const windows = [];
     for (let editorWindow of EditorWindow.list) {
       for (let window of editorWindow.children) {
-        if ((window instanceof DocumentWindow) && window.document === this)
+        if ((window instanceof TextDocumentWindow) && window.document === this)
           windows.push(window);
       }
     }
@@ -440,17 +440,17 @@
   };
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {boolean} newModified
    */
-  function setDocumentModified(newModified) {
+  function setTextDocumentModified(newModified) {
     if (this.modified === !!newModified)
       return;
     this.savedRevision_ = newModified ? -1 : this.revision_;
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {string} name
    * @param {function()} callback
    * @param {!Object=} opt_receiver
@@ -466,32 +466,32 @@
     }
   }
 
-  /** @type {!Map.<string, !Document>} */
+  /** @type {!Map.<string, !TextDocument>} */
   const documentNameMap = new Map();
 
-  /** @type {!Set.<!DocumentObserverCallback>} */
+  /** @type {!Set.<!TextDocumentObserverCallback>} */
   let documentObservers = new Set();
 
-  /** @type {!Set.<!DocumentObserverCallback>} */
-  let internalDocumentObservers = new Set();
+  /** @type {!Set.<!TextDocumentObserverCallback>} */
+  let internalTextDocumentObservers = new Set();
 
-  /** @param {!DocumentObserverCallback} callback */
+  /** @param {!TextDocumentObserverCallback} callback */
   function addObserver(callback) {
     documentObservers.add(callback);
   }
 
   /**
    * @param {string} name
-   * @return {Document}
+   * @return {TextDocument}
    */
-  function findDocument(name) {
+  function findTextDocument(name) {
     return documentNameMap.get(name) || null;
   }
 
   /**
-   * @return {!Array.<!Document>}
+   * @return {!Array.<!TextDocument>}
    */
-  function listDocument() {
+  function listTextDocument() {
     // TODO(eval1749): Once closure compiler support spreading, we should write
     // |return [... documentNameMap.values()];|
     const result = [];
@@ -513,7 +513,7 @@
     let count = 1;
     for (;;) {
       const uniqueName = head + body + tail;
-      if (!findDocument(uniqueName))
+      if (!findTextDocument(uniqueName))
         return uniqueName;
       ++count;
       body = ` (${count})`
@@ -522,40 +522,40 @@
 
   /**
    * @param {string} name
-   * @return {!Document}
+   * @return {!TextDocument}
    */
-  function newDocument(name) {
-    const document = new Document();
+  function newTextDocument(name) {
+    const document = new TextDocument();
     document.name_ = makeUniqueName(name);
     documentNameMap.set(document.name, document);
-    Document.notifyObservers('add', document);
+    TextDocument.notifyObservers('add', document);
     return document;
   }
 
   /**
    * @param {string} type
-   * @param {!Document} document
+   * @param {!TextDocument} document
    */
   function notifyObservers(type, document) {
     for (let observer of documentObservers)
-      observer.call(Document, type, document);
+      observer.call(TextDocument, type, document);
   }
 
-  /** @param {!Document} document */
-  function removeDocument(document) {
+  /** @param {!TextDocument} document */
+  function removeTextDocument(document) {
     if (!documentNameMap.has(document.name))
       throw new Error(`${document.name} isn't in list`);
     documentNameMap.delete(document.name);
-    Document.notifyObservers('remove', document);
+    TextDocument.notifyObservers('remove', document);
   }
 
-  /** @param {!DocumentObserverCallback} callback */
+  /** @param {!TextDocumentObserverCallback} callback */
   function removeObserver(callback) {
     documentObservers.delete(callback);
   }
 
   /**
-   * @this {!Document}
+   * @this {!TextDocument}
    * @param {string} newName
    */
   function renameTo(newName) {
@@ -566,24 +566,24 @@
 
   $initialize(function() {
     documentNameMap.clear();
-    if (internalDocumentObservers.size === 0) {
-      internalDocumentObservers = new Set(documentObservers);
+    if (internalTextDocumentObservers.size === 0) {
+      internalTextDocumentObservers = new Set(documentObservers);
       return;
     }
-    documentObservers = new Set(internalDocumentObservers);
+    documentObservers = new Set(internalTextDocumentObservers);
   });
 
-  Object.defineProperties(Document, {
+  Object.defineProperties(TextDocument, {
     addObserver: {value: addObserver},
-    find: {value: findDocument},
-    list: {get: () => listDocument()},
-    new: {value: newDocument},
+    find: {value: findTextDocument},
+    list: {get: () => listTextDocument()},
+    new: {value: newTextDocument},
     notifyObservers: {value: notifyObservers},
-    remove: {value: removeDocument},
+    remove: {value: removeTextDocument},
     removeObserver: {value: removeObserver},
   });
 
-  Object.defineProperties(Document.prototype, {
+  Object.defineProperties(TextDocument.prototype, {
     fileName: {value: '', writable: true},
     keymap: {
       get: /** @return {!Keymap} */ function() {
@@ -605,7 +605,7 @@
       }
     },
     mode_: {value: null, writable: true},
-    modified: {get: getDocumentModified, set: setDocumentModified},
+    modified: {get: getTextDocumentModified, set: setTextDocumentModified},
     name_: {value: '', writable: true},
     name: {get: function() { return this.name_; }},
     newline: {value: 0, writable: true},

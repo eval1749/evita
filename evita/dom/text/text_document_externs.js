@@ -2,25 +2,25 @@
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
 /**
- * @fileoverview Document externs.
+ * @fileoverview TextDocument externs.
  * @externs
  */
 
 /** @export  @type {!Generator.<string>} */
-Document.prototype.lines;
+TextDocument.prototype.lines;
 
-/** @export @type {!Document.Obsolete} */
-Document.prototype.obsolete;
+/** @export @type {!TextDocument.Obsolete} */
+TextDocument.prototype.obsolete;
 
 /** @export  @type {!Map.<string, *>} */
-Document.prototype.properties;
+TextDocument.prototype.properties;
 
 /** @export @type {function()} */
-Document.prototype.parseFileProperties;
+TextDocument.prototype.parseFileProperties;
 
 /**
  * @param {string} name
  * @param {function()} callback
  * @param {!Object=} opt_receiver
  */
-Document.prototype.undoGroup = function(name, callback, opt_receiver) {};
+TextDocument.prototype.undoGroup = function(name, callback, opt_receiver) {};

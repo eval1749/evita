@@ -184,7 +184,7 @@
 
   /**
    * @constructor
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {!number} offset
    */
   global.TextPosition = (function() {

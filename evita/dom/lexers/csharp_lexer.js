@@ -5,7 +5,7 @@
 global.CsharpLexer = (function(options) {
   class CsharpLexer extends global.ClikeLexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
       super(document, options);

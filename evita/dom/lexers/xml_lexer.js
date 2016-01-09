@@ -65,7 +65,7 @@ global.XmlLexer = (function(xmlOptions) {
   //
   class XmlLexer extends global.Lexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      * @param {!XmlLexerOptions=} opt_options
      */
     constructor(document, opt_options) {

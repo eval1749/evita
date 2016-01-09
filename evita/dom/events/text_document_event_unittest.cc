@@ -1,5 +1,6 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2013 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/mock_view_impl.h"
@@ -9,23 +10,23 @@ namespace dom {
 
 using ::testing::_;
 
-class DocumentEventTest : public AbstractDomTest {
+class TextDocumentEventTest : public AbstractDomTest {
  public:
-  ~DocumentEventTest() override = default;
+  ~TextDocumentEventTest() override = default;
 
  protected:
-  DocumentEventTest() = default;
+  TextDocumentEventTest() = default;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(DocumentEventTest);
+  DISALLOW_COPY_AND_ASSIGN(TextDocumentEventTest);
 };
 
-TEST_F(DocumentEventTest, ctor) {
+TEST_F(TextDocumentEventTest, ctor) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var window = new TextWindow(new Range(doc));"
-      "var event = new DocumentEvent('foo', {"
+      "var event = new TextDocumentEvent('foo', {"
       "  view: window,"
       "});");
   EXPECT_SCRIPT_FALSE("event.bubbles") << "default |bubbles| is false";
@@ -37,7 +38,7 @@ TEST_F(DocumentEventTest, ctor) {
   EXPECT_SCRIPT_TRUE("event.target == null");
   EXPECT_SCRIPT_EQ("foo", "event.type");
 
-  // DocumentEvent
+  // TextDocumentEvent
   EXPECT_SCRIPT_TRUE("event.view == window");
 }
 

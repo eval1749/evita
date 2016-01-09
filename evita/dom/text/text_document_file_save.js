@@ -77,7 +77,7 @@
   };
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @return {!Promise}
    *
    * This function does following steps:
@@ -87,14 +87,14 @@
    *  - Close temporary file
    *  - Rename temporary file to real file name
    *  - Query file information
-   *  - Populate |Document| properties
+   *  - Populate |TextDocument| properties
    *  - Dispatch "save" event
    */
   function save(document) {
     function lineSeparator(document) {
       return document.newline == 1 ? '\n' : '\r\n';
     }
-    document.obsolete = Document.Obsolete.CHECKING;
+    document.obsolete = TextDocument.Obsolete.CHECKING;
     var encoder = new TextEncoder(document.encoding || 'utf-8');
     var readonly = document.readonly;
     document.readonly = true;
@@ -150,9 +150,9 @@
               document.lastStatTime_ = new Date();
               document.lastWriteTime = info.lastModificationDate;
               document.modified = false;
-              document.obsolete = Document.Obsolete.NO;
+              document.obsolete = TextDocument.Obsolete.NO;
               document.readonly = readonly;
-              document.dispatchEvent(new DocumentEvent('save'));
+              document.dispatchEvent(new TextDocumentEvent('save'));
             });
           });
         });
@@ -163,7 +163,7 @@
       if (should_remove)
         Os.File.remove(should_remove);
       document.lastStatTime_ = new Date();
-      document.obsolete = Document.Obsolete.UNKNOWN;
+      document.obsolete = TextDocument.Obsolete.UNKNOWN;
       document.readonly = readonly;
       console.log('save', 'error', error, error.stack);
       throw error;
@@ -174,16 +174,16 @@
    * @param {string=} opt_fileName
    * @return {!Promise}
    */
-  Document.prototype.save = function(opt_fileName) {
+  TextDocument.prototype.save = function(opt_fileName) {
     var document = this;
     if (!arguments.length) {
       if (document.fileName == '')
-        throw 'Document isn\'t bound to file.';
+        throw 'TextDocument isn\'t bound to file.';
     } else {
       var fileName = /** @type{string} */(opt_fileName);
       var absoluteFileName = FilePath.fullPath(fileName);
       // TODO(eval1749): FilePath.fullPath() will return Promise.
-      var present = Document.findFile(absoluteFileName);
+      var present = TextDocument.findFile(absoluteFileName);
       if (present && present !== this)
         throw fileName + ' is already bound to ' + present;
       document.fileName = absoluteFileName;

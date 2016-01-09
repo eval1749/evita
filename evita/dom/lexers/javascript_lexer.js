@@ -5,7 +5,7 @@
 global.JavaScriptLexer = (function(options) {
   class JavaScriptLexer extends global.ClikeLexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      * @param {!Lexer=} opt_parentLexer
      */
     constructor(document, opt_parentLexer) {

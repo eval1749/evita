@@ -13,7 +13,7 @@
 
 namespace dom {
 
-class Document;
+class TextDocument;
 class MutationObserver;
 class MutationRecord;
 
@@ -24,7 +24,7 @@ class MutationObserverController final
  public:
   ~MutationObserverController() final;
 
-  void Register(MutationObserver* observer, Document* document);
+  void Register(MutationObserver* observer, TextDocument* document);
   std::vector<MutationRecord*> TakeRecords(MutationObserver* observer);
   void Unregister(MutationObserver* observer);
 
@@ -33,7 +33,7 @@ class MutationObserverController final
 
   MutationObserverController();
 
-  std::unordered_map<Document*, Tracker*> map_;
+  std::unordered_map<TextDocument*, Tracker*> map_;
 
   DISALLOW_COPY_AND_ASSIGN(MutationObserverController);
 };

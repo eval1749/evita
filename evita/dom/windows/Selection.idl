@@ -18,6 +18,6 @@
 // found in the LICENSE file.
 
 interface Selection {
-  readonly attribute Document document;
-  readonly attribute DocumentWindow window;
+  readonly attribute TextDocument document;
+  readonly attribute TextDocumentWindow window;
 };

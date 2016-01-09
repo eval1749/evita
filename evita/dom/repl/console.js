@@ -6,14 +6,14 @@ $define(global, 'repl', function($export) {
   /** @const @type {string } */
   const DOCUMENT_NAME = '*javascript*';
 
-  /** @return {!Document} */
-  function ensureDocument() {
-    const present = Document.find(DOCUMENT_NAME);
+  /** @return {!TextDocument} */
+  function ensureTextDocument() {
+    const present = TextDocument.find(DOCUMENT_NAME);
     if (present)
       return present;
-    const newDocument = Document.new(DOCUMENT_NAME);
-    newDocument.mode = Mode.chooseModeByFileName('foo.js');
-    return newDocument;
+    const newTextDocument = TextDocument.new(DOCUMENT_NAME);
+    newTextDocument.mode = Mode.chooseModeByFileName('foo.js');
+    return newTextDocument;
   }
 
   /**
@@ -57,7 +57,7 @@ $define(global, 'repl', function($export) {
      * Clear console log contents.
      */
     clear() {
-      const document = this.ensureDocument_();
+      const document = this.ensureTextDocument_();
       const range = this.range_;
       range.collapseTo(0);
       range.end = document.length;
@@ -80,12 +80,12 @@ $define(global, 'repl', function($export) {
 
     /**
      * @private
-     * @return {!Document}
+     * @return {!TextDocument}
      */
-    ensureDocument_() {
+    ensureTextDocument_() {
       if (this.document_)
         return this.document_;
-      this.document_ = ensureDocument();
+      this.document_ = ensureTextDocument();
       this.range_ = new Range(this.document_);
       return this.document;
     }
@@ -94,7 +94,7 @@ $define(global, 'repl', function($export) {
      * Emits new line if console doesn't end with newline.
      */
     freshLine() {
-      const document = this.ensureDocument_();
+      const document = this.ensureTextDocument_();
       if (document.length === 0)
         return;
       if (document.charCodeAt(document.length - 1) === Unicode.LF)
@@ -102,8 +102,8 @@ $define(global, 'repl', function($export) {
       this.emit('\n');
     }
 
-    /** @return {!Document} */
-    get document() { return this.ensureDocument_(); }
+    /** @return {!TextDocument} */
+    get document() { return this.ensureTextDocument_(); }
 
     /**
      * @param {...*} params

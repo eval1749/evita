@@ -1,7 +1,9 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-#ifndef EVITA_DOM_TEXT_DOCUMENT_H_
-#define EVITA_DOM_TEXT_DOCUMENT_H_
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_DOM_TEXT_TEXT_DOCUMENT_H_
+#define EVITA_DOM_TEXT_TEXT_DOCUMENT_H_
 
 #include <memory>
 #include <vector>
@@ -26,13 +28,14 @@ class RegularExpression;
 
 //////////////////////////////////////////////////////////////////////
 //
-// Document
+// TextDocument
 //
-class Document final : public v8_glue::Scriptable<Document, EventTarget> {
-  DECLARE_SCRIPTABLE_OBJECT(Document);
+class TextDocument final
+    : public v8_glue::Scriptable<TextDocument, EventTarget> {
+  DECLARE_SCRIPTABLE_OBJECT(TextDocument);
 
  public:
-  ~Document() final;
+  ~TextDocument() final;
 
   const text::Buffer* buffer() const { return buffer_.get(); }
   text::Buffer* buffer() { return buffer_.get(); }
@@ -68,17 +71,17 @@ class Document final : public v8_glue::Scriptable<Document, EventTarget> {
   text::Offset Undo(text::Offset position);
   text::Offset ValidateOffset(int offsetLike) const;
 
-  // Implementation of Document static method
-  static Document* NewDocument();
+  // Implementation of TextDocument static method
+  static TextDocument* NewTextDocument();
 
  private:
-  Document();
+  TextDocument();
 
   std::unique_ptr<text::Buffer> buffer_;
 
-  DISALLOW_COPY_AND_ASSIGN(Document);
+  DISALLOW_COPY_AND_ASSIGN(TextDocument);
 };
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_TEXT_DOCUMENT_H_
+#endif  // EVITA_DOM_TEXT_TEXT_DOCUMENT_H_

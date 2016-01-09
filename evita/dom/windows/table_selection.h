@@ -14,7 +14,7 @@ class Selection;
 
 namespace dom {
 
-class Document;
+class TextDocument;
 class Range;
 class TableWindow;
 
@@ -31,7 +31,7 @@ class TableSelection final
   DECLARE_SCRIPTABLE_OBJECT(TableSelection);
 
  public:
-  TableSelection(TableWindow* table_window, Document* document);
+  TableSelection(TableWindow* table_window, TextDocument* document);
   ~TableSelection() final;
 
  private:

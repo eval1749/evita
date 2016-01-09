@@ -5,7 +5,7 @@
 #ifndef EVITA_DOM_WINDOWS_TEXT_WINDOW_H_
 #define EVITA_DOM_WINDOWS_TEXT_WINDOW_H_
 
-#include "evita/dom/windows/document_window.h"
+#include "evita/dom/windows/text_document_window.h"
 
 #include "evita/dom/windows/rect.h"
 
@@ -19,7 +19,7 @@ class Selection;
 }
 
 namespace dom {
-class Document;
+class TextDocument;
 class Range;
 
 namespace bindings {
@@ -29,7 +29,7 @@ class TextWindowClass;
 // The |TextWindow| is DOM world representative of UI world TextWidget, aka
 // TextWindow.
 class TextWindow final
-    : public v8_glue::Scriptable<TextWindow, DocumentWindow> {
+    : public v8_glue::Scriptable<TextWindow, TextDocumentWindow> {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
 
  public:

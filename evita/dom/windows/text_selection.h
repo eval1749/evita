@@ -16,7 +16,7 @@ class Selection;
 
 namespace dom {
 
-class Document;
+class TextDocument;
 class Range;
 class TextWindow;
 

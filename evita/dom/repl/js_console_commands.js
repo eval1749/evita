@@ -35,7 +35,7 @@
 
   // Install JsConsole specific commands when "*javascript*" document is
   // created.
-  Document.addObserver((type, document) => {
+  TextDocument.addObserver((type, document) => {
     if (type !== 'add' || document.name != repl.Console.DOCUMENT_NAME)
       return;
     /** @type {!repl.JsConsole} */

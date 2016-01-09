@@ -8,7 +8,7 @@ TextPosition.prototype.charCode = function() {};
 /** @type {function(): string} */
 TextPosition.prototype.charSyntax = function() {};
 
-/** @type {!Document} */
+/** @type {!TextDocument} */
 TextPosition.prototype.document;
 
 /** @type {number} */

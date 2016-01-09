@@ -11,14 +11,14 @@ interface Mode {
   static readonly attribute ExtensionToModeMap extensionMap;
   static readonly attribute NameToModeMap fileNameMap;
   static readonly attribute NameToModeMap nameMap;
-  static Mode chooseMode(Document document);
+  static Mode chooseMode(TextDocument document);
   static Mode chooseModeByFileName(DOMString name);
 
-  readonly attribute Document document;
+  readonly attribute TextDocument document;
   readonly attribute DOMString name;
   readonly attribute Keymap keymap;
 
-  void attach(Document document);
+  void attach(TextDocument document);
   void detach();
-  void doColor(Document document, long hint);
+  void doColor(TextDocument document, long hint);
 };

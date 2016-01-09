@@ -5,7 +5,7 @@
 #include "evita/dom/windows/text_window.h"
 
 #include "base/bind.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/float_rect.h"

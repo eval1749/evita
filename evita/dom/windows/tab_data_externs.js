@@ -9,8 +9,8 @@
 function TabData() {}
 
 /**
- * @param {!DocumentWindow} window
- * @param {!DocumentState} state
+ * @param {!TextDocumentWindow} window
+ * @param {!TextDocumentState} state
  */
 TabData.update = function(window, state) {};
 

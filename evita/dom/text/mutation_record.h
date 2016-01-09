@@ -13,7 +13,7 @@
 
 namespace dom {
 
-class Document;
+class TextDocument;
 
 namespace bindings {
 class MutationRecordClass;
@@ -24,20 +24,20 @@ class MutationRecord final : public v8_glue::Scriptable<MutationRecord> {
 
  public:
   MutationRecord(const base::string16& type,
-                 Document* document,
+                 TextDocument* document,
                  text::Offset offset);
   ~MutationRecord() final;
 
  private:
   friend class bindings::MutationRecordClass;
 
-  Document* document() const { return document_.get(); }
+  TextDocument* document() const { return document_.get(); }
   text::Offset offset() const { return offset_; }
   // For IDL
   int offset_value() const { return offset_.value(); }
   const base::string16& type() const { return type_; }
 
-  gc::Member<Document> document_;
+  gc::Member<TextDocument> document_;
   base::string16 type_;
   text::Offset offset_;
 

@@ -353,7 +353,7 @@ void AbstractDomTest::SetUp() {
 }
 
 void AbstractDomTest::TearDown() {
-  // Discard schedule tasks, e.g. DocumentSet::Observer callbacks.
+  // Discard schedule tasks, e.g. TextDocumentSet::Observer callbacks.
   base::RunLoop run_loop;
   run_loop.RunUntilIdle();
   if (!static_runner || static_runner == runner_.get())

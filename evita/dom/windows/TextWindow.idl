@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 [Constructor(Range range)]
-interface TextWindow : DocumentWindow {
+interface TextWindow : TextDocumentWindow {
   attribute float zoom;
 
   [ImplementedAs=ComputeMotion]

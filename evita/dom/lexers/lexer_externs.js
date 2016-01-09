@@ -17,7 +17,7 @@ var LexerOptions;
  * @constructor
  * @extends {text.SimpleMutationObserverBase}
  * @implements {Runnable}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @param {!LexerOptions} options
  * @return {undefined}
  */
@@ -133,7 +133,7 @@ Lexer.prototype.count;
 Lexer.prototype.debug_;
 
 /**
- * @type {!Document}
+ * @type {!TextDocument}
  */
 Lexer.prototype.document;
 

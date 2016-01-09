@@ -16,14 +16,14 @@ enum RangeCase {
 };
 
 [
-    CustomConstructor((Document or Range) document_or_range),
-    CustomConstructor((Document or Range) document_or_range, long offset),
-    CustomConstructor((Document or Range) document_or_range, long start_offset,
+    CustomConstructor((TextDocument or Range) document_or_range),
+    CustomConstructor((TextDocument or Range) document_or_range, long offset),
+    CustomConstructor((TextDocument or Range) document_or_range, long start_offset,
                       long end_offset),
 ]
 interface Range {
   readonly attribute boolean collapsed;
-  readonly attribute Document document;
+  readonly attribute TextDocument document;
   [ImplementedAs=end_value]
   attribute long end;
   [ImplementedAs=JavaScript]

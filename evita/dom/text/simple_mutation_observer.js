@@ -3,19 +3,19 @@
 // found in the LICENSE file.
 
 $define(global, 'text', function($export) {
-  /** @const @type {!WeakMap.<!Document, !DocumentObserver>} */
+  /** @const @type {!WeakMap.<!TextDocument, !TextDocumentObserver>} */
   const observerMap = new WeakMap();
 
   //////////////////////////////////////////////////////////////////////
   //
-  // DocumentObserver
+  // TextDocumentObserver
   //
-  class DocumentObserver {
+  class TextDocumentObserver {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
-      /** @const @type {!Document} */
+      /** @const @type {!TextDocument} */
       this.document_ = document;
 
       /** @type {!Set.<!text.SimpleMutationObserver>} */
@@ -25,9 +25,9 @@ $define(global, 'text', function($export) {
           this.mutationCallback_.bind(this));
       this.startObserving_();
       document.addEventListener(Event.Names.BEFORELOAD,
-                                this.willLoadDocument_.bind(this));
+                                this.willLoadTextDocument_.bind(this));
       document.addEventListener(Event.Names.LOAD,
-                                this.didLoadDocument_.bind(this));
+                                this.didLoadTextDocument_.bind(this));
     }
 
     /**
@@ -37,20 +37,20 @@ $define(global, 'text', function($export) {
       this.observers_.add(observer);
     }
 
-    didLoadDocument_() {
+    didLoadTextDocument_() {
       this.startObserving_();
       for (let observer of this.observers_.values())
-        observer.didLoadDocument();
+        observer.didLoadTextDocument();
     }
 
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     static getOrCreate(document) {
       const observer = observerMap.get(document);
       if (observer)
         return observer;
-      const newObserver = new DocumentObserver(document);
+      const newObserver = new TextDocumentObserver(document);
       observerMap.set(document, newObserver);
       return newObserver;
     }
@@ -68,7 +68,7 @@ $define(global, 'text', function($export) {
         return Math.min(previousValue, mutation.offset);
       }, this.document_.length);
       for (let observer of this.observers_.values())
-        observer.didChangeDocument(offset);
+        observer.didChangeTextDocument(offset);
     }
 
     /**
@@ -86,7 +86,7 @@ $define(global, 'text', function($export) {
     /**
      * @private
      */
-    willLoadDocument_() {
+    willLoadTextDocument_() {
       this.observer_.disconnect();
     }
   }
@@ -97,24 +97,24 @@ $define(global, 'text', function($export) {
   //
   class SimpleMutationObserverBase {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     constructor(document) {
-      /** @type {!Document} */
+      /** @type {!TextDocument} */
       this.document_ = document;
-      DocumentObserver.getOrCreate(document).add(this);
+      TextDocumentObserver.getOrCreate(document).add(this);
     }
 
-    /** @return {!Document} */
+    /** @return {!TextDocument} */
     get document() { return this.document_; }
 
-    didLoadDocument() {}
+    didLoadTextDocument() {}
 
     /*
      * implements text.SimpleMutationObserver.stopObserving()
      */
     stopObserving() {
-      DocumentObserver.getOrCreate(this.document_).remove(this);
+      TextDocumentObserver.getOrCreate(this.document_).remove(this);
     }
   }
 

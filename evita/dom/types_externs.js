@@ -73,7 +73,7 @@ var TextOffset;
 
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @param {!TextOffset} offset
  */
 var TextPosition = function(document, offset) {};

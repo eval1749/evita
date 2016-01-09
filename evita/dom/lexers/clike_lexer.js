@@ -12,7 +12,7 @@
   //
   class ClikeLexer extends global.Lexer {
     /**
-     * @param {!Document} document
+     * @param {!TextDocument} document
      * @param {!ClikeLexerOptions} options
      */
     constructor(document, options) {

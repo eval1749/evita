@@ -108,7 +108,7 @@
     const window = this;
     /** @type {!TextSelection} */
     const selection = /** @type {!TextSelection} */(window.selection);
-    /** @type {!Document} */
+    /** @type {!TextDocument} */
     const document = selection.document;
     selection.range.text = String.fromCharCode(charCode).repeat(count);
     selection.range.collapseTo(selection.range.end);

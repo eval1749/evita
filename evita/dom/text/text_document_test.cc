@@ -8,7 +8,7 @@
 #include "base/macros.h"
 #include "base/strings/utf_string_conversions.h"
 #include "evita/dom/testing/abstract_dom_test.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/dom/file_path.h"
 #include "evita/dom/mock_io_delegate.h"
 #include "evita/dom/mock_view_impl.h"
@@ -22,61 +22,61 @@ namespace dom {
 using ::testing::Eq;
 using ::testing::_;
 
-class DocumentTest : public AbstractDomTest {
+class TextDocumentTest : public AbstractDomTest {
  protected:
-  DocumentTest() = default;
+  TextDocumentTest() = default;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(DocumentTest);
+  DISALLOW_COPY_AND_ASSIGN(TextDocumentTest);
 };
 
-TEST_F(DocumentTest, Constructor) {
+TEST_F(TextDocumentTest, Constructor) {
   // TODO(yosi): We should remove all buffers for each test case.
   EXPECT_SCRIPT_EQ("bar",
-                   "var sample1 = Document.new('bar');"
+                   "var sample1 = TextDocument.new('bar');"
                    "sample1.name");
   EXPECT_SCRIPT_EQ("bar (2)",
-                   "var sample2 = Document.new('bar'); sample2.name");
+                   "var sample2 = TextDocument.new('bar'); sample2.name");
   EXPECT_SCRIPT_EQ("bar (3)",
-                   "var sample2 = Document.new('bar'); sample2.name");
+                   "var sample2 = TextDocument.new('bar'); sample2.name");
 
-  EXPECT_SCRIPT_VALID("Document.new('bar.cc')");
+  EXPECT_SCRIPT_VALID("TextDocument.new('bar.cc')");
   EXPECT_SCRIPT_EQ("bar (2).cc",
-                   "var sample2 = Document.new('bar.cc'); sample2.name");
+                   "var sample2 = TextDocument.new('bar.cc'); sample2.name");
   EXPECT_SCRIPT_EQ("bar (3).cc",
-                   "var sample2 = Document.new('bar.cc'); sample2.name");
+                   "var sample2 = TextDocument.new('bar.cc'); sample2.name");
 
-  EXPECT_SCRIPT_VALID("Document.new('.bar')");
+  EXPECT_SCRIPT_VALID("TextDocument.new('.bar')");
   EXPECT_SCRIPT_EQ(".bar (2)",
-                   "var sample2 = Document.new('.bar'); sample2.name");
+                   "var sample2 = TextDocument.new('.bar'); sample2.name");
   EXPECT_SCRIPT_EQ(".bar (3)",
-                   "var sample2 = Document.new('.bar'); sample2.name");
+                   "var sample2 = TextDocument.new('.bar'); sample2.name");
 }
 
-TEST_F(DocumentTest, Document_addObserver) {
+TEST_F(TextDocumentTest, TextDocument_addObserver) {
   EXPECT_SCRIPT_VALID(
       "var result_doc, result_type;"
       "function callback(type, doc) {"
       "  result_doc = doc;"
       "  result_type = type;"
       "}"
-      "Document.addObserver(callback);"
-      "var doc1 = Document.new('addObserver');");
+      "TextDocument.addObserver(callback);"
+      "var doc1 = TextDocument.new('addObserver');");
 
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("result_doc === doc1");
   EXPECT_SCRIPT_EQ("add", "result_type")
       << "The observer gets 'add' notification.";
 
-  EXPECT_SCRIPT_VALID("Document.remove(doc1)");
+  EXPECT_SCRIPT_VALID("TextDocument.remove(doc1)");
 
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("result_doc === doc1");
   EXPECT_SCRIPT_EQ("remove", "result_type")
       << "The observer gets 'remove' notification.";
 
-  EXPECT_SCRIPT_VALID("Document.removeObserver(callback)");
-  EXPECT_SCRIPT_VALID("var doc2 = Document.new('addObserver2')");
+  EXPECT_SCRIPT_VALID("TextDocument.removeObserver(callback)");
+  EXPECT_SCRIPT_VALID("var doc2 = TextDocument.new('addObserver2')");
 
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("result_doc === doc1");
@@ -84,12 +84,12 @@ TEST_F(DocumentTest, Document_addObserver) {
       << "The observer doesn't get notification.";
 }
 
-TEST_F(DocumentTest, Document_list) {
+TEST_F(TextDocumentTest, TextDocument_list) {
   EXPECT_SCRIPT_VALID(
       "['foo', 'bar', 'baz'].forEach(function(name) {"
-      "  Document.new(name);"
+      "  TextDocument.new(name);"
       "});"
-      "var samples = Document.list.sort(function(a, b) {"
+      "var samples = TextDocument.list.sort(function(a, b) {"
       "  return a.name.localeCompare(b.name);"
       "});");
   EXPECT_SCRIPT_EQ("3", "samples.length");
@@ -98,55 +98,56 @@ TEST_F(DocumentTest, Document_list) {
   EXPECT_SCRIPT_EQ("foo", "samples[2].name");
 }
 
-TEST_F(DocumentTest, Document_open) {
-  EXPECT_SCRIPT_VALID("var a = Document.open('foo');");
+TEST_F(TextDocumentTest, TextDocument_open) {
+  EXPECT_SCRIPT_VALID("var a = TextDocument.open('foo');");
   auto const absoulte_file_name = FilePath::FullPath(L"foo");
   EXPECT_SCRIPT_VALID(
-      "var b = Document.open('foo');"
-      "var c = Document.open('bar');");
+      "var b = TextDocument.open('foo');"
+      "var c = TextDocument.open('bar');");
   EXPECT_SCRIPT_EQ(base::UTF16ToUTF8(absoulte_file_name), "a.fileName");
   EXPECT_SCRIPT_TRUE("a === b");
   EXPECT_SCRIPT_TRUE("a !== c");
 }
 
-TEST_F(DocumentTest, DocumentFind) {
-  EXPECT_SCRIPT_TRUE("var sample1 = Document.find('foo'); sample1 == null");
-  EXPECT_SCRIPT_VALID("Document.new('foo')");
-  EXPECT_SCRIPT_EQ("foo", "var sample2 = Document.find('foo'); sample2.name");
+TEST_F(TextDocumentTest, TextDocumentFind) {
+  EXPECT_SCRIPT_TRUE("var sample1 = TextDocument.find('foo'); sample1 == null");
+  EXPECT_SCRIPT_VALID("TextDocument.new('foo')");
+  EXPECT_SCRIPT_EQ("foo",
+                   "var sample2 = TextDocument.find('foo'); sample2.name");
 }
 
-TEST_F(DocumentTest, Document_remove) {
+TEST_F(TextDocumentTest, TextDocument_remove) {
   EXPECT_SCRIPT_VALID(
-      "var doc1 = Document.new('foo');"
-      "var doc2 = Document.new('bar');"
-      "Document.remove(doc1);");
-  EXPECT_SCRIPT_TRUE("Document.find('foo') == null");
-  EXPECT_SCRIPT_EQ("1", "Document.list.length");
-  EXPECT_SCRIPT_VALID("Document.remove(doc2);");
-  EXPECT_SCRIPT_EQ("0", "Document.list.length");
+      "var doc1 = TextDocument.new('foo');"
+      "var doc2 = TextDocument.new('bar');"
+      "TextDocument.remove(doc1);");
+  EXPECT_SCRIPT_TRUE("TextDocument.find('foo') == null");
+  EXPECT_SCRIPT_EQ("1", "TextDocument.list.length");
+  EXPECT_SCRIPT_VALID("TextDocument.remove(doc2);");
+  EXPECT_SCRIPT_EQ("0", "TextDocument.list.length");
 }
 
-TEST_F(DocumentTest, charCodeAt) {
+TEST_F(TextDocumentTest, charCodeAt) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "new Range(doc).text = 'foobar';");
   EXPECT_SCRIPT_EQ("111", "doc.charCodeAt(1)");
 }
 
-TEST_F(DocumentTest, dispatchEvent) {
+TEST_F(TextDocumentTest, dispatchEvent) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('dispatchEvent');"
+      "var doc = TextDocument.new('dispatchEvent');"
       "var event_type;"
       "doc.addEventListener('foo', function(e) { event_type = e.type; });");
 
   EXPECT_SCRIPT_VALID("doc.dispatchEvent(new Event('foo'));");
   EXPECT_SCRIPT_EQ("foo", "event_type")
-      << "Instances of Document is an event target.";
+      << "Instances of TextDocument is an event target.";
 }
 
-TEST_F(DocumentTest, getLineAndColumn) {
+TEST_F(TextDocumentTest, getLineAndColumn) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('getLineAndColumn');"
+      "var doc = TextDocument.new('getLineAndColumn');"
       "var range = new Range(doc);"
       "range.text = '01\\n02\\n03\\n04\\n';"
       "function testIt(offset) {"
@@ -162,35 +163,35 @@ TEST_F(DocumentTest, getLineAndColumn) {
                    "testIt(100)");
 }
 
-TEST_F(DocumentTest, length) {
-  EXPECT_SCRIPT_VALID("var doc = Document.new('length');");
+TEST_F(TextDocumentTest, length) {
+  EXPECT_SCRIPT_VALID("var doc = TextDocument.new('length');");
   EXPECT_SCRIPT_EQ("0", "doc.length");
   EXPECT_SCRIPT_VALID("new Range(doc).text = 'foobar';");
   EXPECT_SCRIPT_EQ("6", "doc.length");
 }
 
-TEST_F(DocumentTest, load_failed_open) {
+TEST_F(TextDocumentTest, load_failed_open) {
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId(), 123);
 
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var promise = doc.load('foo.cc')");
   EXPECT_SCRIPT_TRUE("promise instanceof Promise");
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
-  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
+  EXPECT_SCRIPT_TRUE("TextDocument.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_FALSE("doc.readonly");
 }
 
-TEST_F(DocumentTest, load_failed_read) {
+TEST_F(TextDocumentTest, load_failed_read) {
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
   mock_io_delegate()->SetCallResult("ReadFile", 0, 123);
   mock_io_delegate()->SetCallResult("ReadFile", 123, 0);
   mock_io_delegate()->SetCallResult("CloseFile", 0, 0);
 
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var beforeLoad, afterLoad;"
       "doc.addEventListener('beforeload', function() { beforeLoad = true; });"
       "doc.addEventListener('load', function() { afterLoad = true; });"
@@ -201,12 +202,12 @@ TEST_F(DocumentTest, load_failed_read) {
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
-  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
+  EXPECT_SCRIPT_TRUE("TextDocument.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_FALSE("doc.readonly");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
 }
 
-TEST_F(DocumentTest, load_succeeded) {
+TEST_F(TextDocumentTest, load_succeeded) {
   std::vector<uint8_t> bytes{
       102, 111, 111, 13, 10,  // foo\r\n
       98,  97,  114, 13, 10,  // bar\r\n
@@ -226,7 +227,7 @@ TEST_F(DocumentTest, load_succeeded) {
   mock_io_delegate()->SetCallResult("CloseFile", 0, 0);
 
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var beforeLoad, afterLoad;"
       "doc.addEventListener('beforeload', function() { beforeLoad = true; });"
       "doc.addEventListener('load', function() { afterLoad = true; });"
@@ -242,22 +243,22 @@ TEST_F(DocumentTest, load_succeeded) {
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
   EXPECT_SCRIPT_TRUE("doc.lastStatTime_.valueOf() != 0");
   EXPECT_SCRIPT_EQ("C++", "doc.mode.name");
-  EXPECT_SCRIPT_TRUE("Document.Obsolete.NO === doc.obsolete");
+  EXPECT_SCRIPT_TRUE("TextDocument.Obsolete.NO === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.readonly") << "set readonly from file attribute";
 }
 
-TEST_F(DocumentTest, mode) {
+TEST_F(TextDocumentTest, mode) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var mode = Mode.chooseModeByFileName('foo.txt');"
       "doc.mode = mode;");
   EXPECT_SCRIPT_TRUE("doc.mode === mode");
 }
 
-TEST_F(DocumentTest, mode_auto_mode) {
+TEST_F(TextDocumentTest, mode_auto_mode) {
   EXPECT_SCRIPT_VALID(
       "function testIt(fileName) {"
-      "  var doc = Document.new(fileName);"
+      "  var doc = TextDocument.new(fileName);"
       "  doc.mode = Mode.chooseModeByFileName(fileName);"
       "  return doc.mode.constructor.name;"
       "}");
@@ -268,9 +269,9 @@ TEST_F(DocumentTest, mode_auto_mode) {
   EXPECT_SCRIPT_EQ("JavaScriptMode", "testIt('foo.js')");
 }
 
-TEST_F(DocumentTest, modified) {
+TEST_F(TextDocumentTest, modified) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var range = new Range(doc);");
   EXPECT_SCRIPT_FALSE("doc.modified");
 
@@ -286,21 +287,22 @@ TEST_F(DocumentTest, modified) {
 #endif
 }
 
-TEST_F(DocumentTest, name) {
-  EXPECT_SCRIPT_EQ("baz", "var sample1 = Document.new('baz'); sample1.name");
+TEST_F(TextDocumentTest, name) {
+  EXPECT_SCRIPT_EQ("baz",
+                   "var sample1 = TextDocument.new('baz'); sample1.name");
 }
 
-TEST_F(DocumentTest, newline) {
-  EXPECT_SCRIPT_VALID("var doc = Document.new('newline');");
+TEST_F(TextDocumentTest, newline) {
+  EXPECT_SCRIPT_VALID("var doc = TextDocument.new('newline');");
   // See |Newline| in "evita/dom/enums.js"
   EXPECT_SCRIPT_EQ("0", "doc.newline") << "Default newline is detect.";
   EXPECT_SCRIPT_VALID("doc.newline = 1;") << "Set newline to LF.";
   EXPECT_SCRIPT_EQ("1", "doc.newline");
 }
 
-TEST_F(DocumentTest, parseFileProperties) {
+TEST_F(TextDocumentTest, parseFileProperties) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var range = new Range(doc);"
       "range.text = '-*- var1: foo; VAR2: bar ; var3 : baz; -*-';"
       "doc.parseFileProperties();");
@@ -312,19 +314,19 @@ TEST_F(DocumentTest, parseFileProperties) {
   EXPECT_SCRIPT_EQ("baz", "doc.properties.get('var3')");
 }
 
-TEST_F(DocumentTest, properties) {
+TEST_F(TextDocumentTest, properties) {
   EXPECT_SCRIPT_VALID(
-      "var doc1 = Document.new('doc1');"
+      "var doc1 = TextDocument.new('doc1');"
       "doc1.properties.set('foo', 'bar');"
-      "var doc2 = Document.new('doc2');"
+      "var doc2 = TextDocument.new('doc2');"
       "doc2.properties.set('foo', 'baz');");
   EXPECT_SCRIPT_EQ("bar", "doc1.properties.get('foo')");
   EXPECT_SCRIPT_EQ("baz", "doc2.properties.get('foo')");
 }
 
-TEST_F(DocumentTest, redo) {
+TEST_F(TextDocumentTest, redo) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('redo');"
+      "var doc = TextDocument.new('redo');"
       "var range = new Range(doc);"
       "range.text = 'foo';"
       "doc.undo(3);"
@@ -334,31 +336,31 @@ TEST_F(DocumentTest, redo) {
   EXPECT_SCRIPT_EQ("foo", "range.text");
 }
 
-TEST_F(DocumentTest, renameTo) {
-  EXPECT_SCRIPT_VALID("var doc = Document.new('foo'); doc.renameTo('bar')");
+TEST_F(TextDocumentTest, renameTo) {
+  EXPECT_SCRIPT_VALID("var doc = TextDocument.new('foo'); doc.renameTo('bar')");
   EXPECT_SCRIPT_EQ("bar", "doc.name");
 }
 
-TEST_F(DocumentTest, save_failed_open) {
+TEST_F(TextDocumentTest, save_failed_open) {
   mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId(), 123);
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "doc.save('foo.cc');");
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
-  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
+  EXPECT_SCRIPT_TRUE("TextDocument.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
-TEST_F(DocumentTest, save_failed_encode) {
+TEST_F(TextDocumentTest, save_failed_encode) {
   mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
   mock_io_delegate()->SetCallResult("CloseFile", 0);
   mock_io_delegate()->SetCallResult("RemoveFile", 0);
 
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "new Range(doc).text = 'f\\u0234o\\nbar\\n';"
       "doc.encoding = 'shift_jis';"
       "doc.save('foo.cc');");
@@ -366,11 +368,11 @@ TEST_F(DocumentTest, save_failed_encode) {
   EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
-  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
+  EXPECT_SCRIPT_TRUE("TextDocument.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
-TEST_F(DocumentTest, save_failed_write) {
+TEST_F(TextDocumentTest, save_failed_write) {
   mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
   mock_io_delegate()->SetCallResult("WriteFile", 123);
@@ -378,18 +380,18 @@ TEST_F(DocumentTest, save_failed_write) {
   mock_io_delegate()->SetCallResult("RemoveFile", 0);
 
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "new Range(doc).text = 'foo\\nbar\\n';"
       "doc.save('foo.cc');");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
   EXPECT_EQ(1, mock_io_delegate()->num_remove_called());
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("0", "doc.lastWriteTime.valueOf()");
-  EXPECT_SCRIPT_TRUE("Document.Obsolete.UNKNOWN === doc.obsolete");
+  EXPECT_SCRIPT_TRUE("TextDocument.Obsolete.UNKNOWN === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
-TEST_F(DocumentTest, save_succeeded) {
+TEST_F(TextDocumentTest, save_succeeded) {
   std::vector<uint8_t> expected_bytes{
       102, 111, 111, 13, 10,  // foo\r\n
       98,  97,  114, 13, 10,  // bar\r\n
@@ -410,7 +412,7 @@ TEST_F(DocumentTest, save_succeeded) {
   mock_io_delegate()->SetFileStatus(file_status, 0);
 
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "new Range(doc).text = 'foo\\nbar\\n';"
       "doc.save('foo.cc');");
   EXPECT_EQ(1, mock_io_delegate()->num_close_called());
@@ -418,13 +420,13 @@ TEST_F(DocumentTest, save_succeeded) {
 
   EXPECT_SCRIPT_TRUE("doc.fileName.endsWith('foo.cc')");
   EXPECT_SCRIPT_EQ("123456", "doc.lastWriteTime.valueOf()");
-  EXPECT_SCRIPT_TRUE("Document.Obsolete.NO === doc.obsolete");
+  EXPECT_SCRIPT_TRUE("TextDocument.Obsolete.NO === doc.obsolete");
   EXPECT_SCRIPT_TRUE("doc.lastStatusCheckTime_ != new Date(0)");
 }
 
-TEST_F(DocumentTest, setSpelling) {
+TEST_F(TextDocumentTest, setSpelling) {
   EXPECT_SCRIPT_VALID(
-      "var doc1 = Document.new('spelling');"
+      "var doc1 = TextDocument.new('spelling');"
       "var range1 = new Range(doc1);"
       "range1.text = 'foo bar baz';"
       "doc1.setSpelling(4, 7, 2);");
@@ -437,9 +439,9 @@ TEST_F(DocumentTest, setSpelling) {
   EXPECT_SCRIPT_EQ("", "doc1.spellingAt(8)");
 }
 
-TEST_F(DocumentTest, setSyntax) {
+TEST_F(TextDocumentTest, setSyntax) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('syntax');"
+      "var doc = TextDocument.new('syntax');"
       "var range = new Range(doc);"
       "range.text = 'foo bar baz';"
       "doc.setSyntax(0, 3, 'keyword');"
@@ -459,9 +461,9 @@ TEST_F(DocumentTest, setSyntax) {
   EXPECT_SCRIPT_EQ("normal", "doc.syntaxAt(11)");
 }
 
-TEST_F(DocumentTest, slice) {
+TEST_F(TextDocumentTest, slice) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('slice');"
+      "var doc = TextDocument.new('slice');"
       "var range = new Range(doc);"
       "range.text = '0123456789';");
   EXPECT_SCRIPT_EQ("56789", "doc.slice(5)");
@@ -472,15 +474,15 @@ TEST_F(DocumentTest, slice) {
   EXPECT_SCRIPT_EQ("56789", "doc.slice(5, 100)");
 }
 
-TEST_F(DocumentTest, state) {
-  EXPECT_SCRIPT_VALID("var doc = Document.new('state');");
+TEST_F(TextDocumentTest, state) {
+  EXPECT_SCRIPT_VALID("var doc = TextDocument.new('state');");
   // See |text::Buffer::State| for |enum| fields.
   EXPECT_SCRIPT_EQ("0", "doc.state");
 }
 
-TEST_F(DocumentTest, undo) {
+TEST_F(TextDocumentTest, undo) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('undo');"
+      "var doc = TextDocument.new('undo');"
       "var range = new Range(doc);"
       "range.text = 'foo';"
       "doc.undo(3);"

@@ -4,7 +4,7 @@
 
 /**
  * @constructor
- * @param {!Document} document
+ * @param {!TextDocument} document
  */
 repl.JsConsole = function(document) {};
 
@@ -20,7 +20,7 @@ repl.JsConsole.instance;
 /** @type {function()} */
 repl.JsConsole.prototype.backwardHistory;
 
-/** @type {!Document} */
+/** @type {!TextDocument} */
 repl.JsConsole.prototype.document;
 
 /** @type {function()} */

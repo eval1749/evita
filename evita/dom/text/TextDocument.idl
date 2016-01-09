@@ -2,39 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-callback DocumentObserverCallback = void(DOMString name, Document document);
+callback TextDocumentObserverCallback = void(DOMString name, TextDocument document);
 
 [
     CustomConstructor()
 ]
-interface Document : EventTarget {
+interface TextDocument : EventTarget {
     [ImplementedAs=JavaScript]
-    static void addObserver(DocumentObserverCallback observer);
+    static void addObserver(TextDocumentObserverCallback observer);
 
     [ImplementedAs=JavaScript]
-    static Document? find(DOMString name);
+    static TextDocument? find(DOMString name);
 
     [ImplementedAs=JavaScript]
-    static Document? findFile(DOMString absoluteFileName);
+    static TextDocument? findFile(DOMString absoluteFileName);
 
     [ImplementedAs=JavaScript]
-    static readonly attribute Document[] list;
+    static readonly attribute TextDocument[] list;
 
     [ImplementedAs=JavaScript]
-    static Document new(DOMString name);
+    static TextDocument new(DOMString name);
 
-    // Experimental: Implements document template at "NewDocument" command.
+    // Experimental: Implements document template at "NewTextDocument" command.
     [ImplementedAs=JavaScript]
-    static Document notifyObservers(DOMString type, Document document);
-
-    [ImplementedAs=JavaScript]
-    static Document open(DOMString fileName);
+    static TextDocument notifyObservers(DOMString type, TextDocument document);
 
     [ImplementedAs=JavaScript]
-    static void remove(Document document);
+    static TextDocument open(DOMString fileName);
 
     [ImplementedAs=JavaScript]
-    static void removeObserver(DocumentObserverCallback observer);
+    static void remove(TextDocument document);
+
+    [ImplementedAs=JavaScript]
+    static void removeObserver(TextDocumentObserverCallback observer);
 
     [ImplementedAs=JavaScript]
     attribute DOMString encoding;
@@ -111,7 +111,7 @@ interface Document : EventTarget {
     LineAndColumn getLineAndColumn_(TextOffset offset);
 
     [ImplementedAs=JavaScript]
-    DocumentWindow[] listWindows();
+    TextDocumentWindow[] listWindows();
 
     [ImplementedAs=JavaScript]
     Promise<long> load(optional DOMString fileName);

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 
 #include <utility>
 #include <vector>
@@ -27,13 +27,13 @@ namespace dom {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Document
+// TextDocument
 //
-Document::Document() : buffer_(new text::Buffer()) {}
+TextDocument::TextDocument() : buffer_(new text::Buffer()) {}
 
-Document::~Document() {}
+TextDocument::~TextDocument() {}
 
-base::char16 Document::charCodeAt(text::Offset position) const {
+base::char16 TextDocument::charCodeAt(text::Offset position) const {
   if (position >= text::Offset(0) && position < buffer_->GetEnd())
     return buffer_->GetCharAt(position);
   ScriptHost::instance()->ThrowRangeError(
@@ -42,43 +42,43 @@ base::char16 Document::charCodeAt(text::Offset position) const {
   return 0;
 }
 
-int Document::length() const {
+int TextDocument::length() const {
   return text::OffsetDelta(buffer_->GetEnd().value());
 }
 
-bool Document::read_only() const {
+bool TextDocument::read_only() const {
   return buffer_->IsReadOnly();
 }
 
-int Document::revision() const {
+int TextDocument::revision() const {
   return buffer_->revision();
 }
 
-void Document::set_read_only(bool read_only) const {
+void TextDocument::set_read_only(bool read_only) const {
   buffer_->SetReadOnly(read_only);
 }
 
-const base::string16& Document::spelling_at(text::Offset offset) const {
+const base::string16& TextDocument::spelling_at(text::Offset offset) const {
   if (!IsValidPosition(offset))
     return common::AtomicString::Empty();
   auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
   return marker ? marker->type() : common::AtomicString::Empty();
 }
 
-const base::string16& Document::syntax_at(text::Offset offset) const {
+const base::string16& TextDocument::syntax_at(text::Offset offset) const {
   if (!IsValidPosition(offset))
     return common::AtomicString::Empty();
   auto const marker = buffer_->syntax_markers()->GetMarkerAt(offset);
   return marker ? marker->type() : css::StyleSelector::normal();
 }
 
-bool Document::CheckCanChange() const {
+bool TextDocument::CheckCanChange() const {
   if (buffer_->IsReadOnly()) {
     auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
     v8_glue::Runner::Scope runner_scope(runner);
     auto const ctor =
-        runner->global()->Get(v8Strings::DocumentReadOnly.Get(isolate));
+        runner->global()->Get(v8Strings::TextDocumentReadOnly.Get(isolate));
     auto const error = runner->CallAsConstructor(ctor, GetWrapper(isolate));
     ScriptHost::instance()->ThrowException(error);
     return false;
@@ -86,22 +86,22 @@ bool Document::CheckCanChange() const {
   return true;
 }
 
-void Document::ClearUndo() {
+void TextDocument::ClearUndo() {
   buffer_->ClearUndo();
 }
 
-void Document::EndUndoGroup(const base::string16& name) {
+void TextDocument::EndUndoGroup(const base::string16& name) {
   buffer_->EndUndoGroup(name);
 }
 
-text::LineAndColumn Document::GetLineAndColumn(text::Offset offset) const {
+text::LineAndColumn TextDocument::GetLineAndColumn(text::Offset offset) const {
   if (!IsValidPosition(offset))
     return buffer_->GetLineAndColumn(text::Offset());
   METRICS_TIME_SCOPE();
   return buffer_->GetLineAndColumn(offset);
 }
 
-bool Document::IsValidPosition(text::Offset offset) const {
+bool TextDocument::IsValidPosition(text::Offset offset) const {
   if (offset.IsValid() && offset <= buffer_->GetEnd())
     return true;
   ScriptHost::instance()->ThrowRangeError(
@@ -110,7 +110,7 @@ bool Document::IsValidPosition(text::Offset offset) const {
   return false;
 }
 
-bool Document::IsValidRange(text::Offset start, text::Offset end) const {
+bool TextDocument::IsValidRange(text::Offset start, text::Offset end) const {
   if (start <= end)
     return true;
   ScriptHost::instance()->ThrowRangeError(
@@ -119,23 +119,23 @@ bool Document::IsValidRange(text::Offset start, text::Offset end) const {
   return false;
 }
 
-v8::Handle<v8::Value> Document::Match(RegularExpression* regexp,
-                                      text::Offset start,
-                                      text::Offset end) {
-  return regexp->ExecuteOnDocument(this, start, end);
+v8::Handle<v8::Value> TextDocument::Match(RegularExpression* regexp,
+                                          text::Offset start,
+                                          text::Offset end) {
+  return regexp->ExecuteOnTextDocument(this, start, end);
 }
 
-Document* Document::NewDocument() {
-  return new Document();
+TextDocument* TextDocument::NewTextDocument() {
+  return new TextDocument();
 }
 
-text::Offset Document::Redo(text::Offset position) {
+text::Offset TextDocument::Redo(text::Offset position) {
   return buffer_->Redo(position);
 }
 
-void Document::SetSpelling(text::Offset start,
-                           text::Offset end,
-                           int spelling_code) {
+void TextDocument::SetSpelling(text::Offset start,
+                               text::Offset end,
+                               int spelling_code) {
   struct Local {
     static const common::AtomicString& MapToSpelling(int spelling_code) {
       switch (spelling_code) {
@@ -158,16 +158,16 @@ void Document::SetSpelling(text::Offset start,
       Local::MapToSpelling(spelling_code));
 }
 
-void Document::SetSyntax(text::Offset start,
-                         text::Offset end,
-                         const base::string16& syntax) {
+void TextDocument::SetSyntax(text::Offset start,
+                             text::Offset end,
+                             const base::string16& syntax) {
   if (!IsValidPosition(start) || !IsValidPosition(end) || start >= end)
     return;
   buffer()->syntax_markers()->InsertMarker(
       text::StaticRange(*buffer(), start, end), common::AtomicString(syntax));
 }
 
-base::string16 Document::Slice(int startLike, int endLike) {
+base::string16 TextDocument::Slice(int startLike, int endLike) {
   auto const start =
       text::Offset(startLike >= 0 ? startLike : length() + startLike);
   auto const end = text::Offset(endLike >= 0 ? endLike : length() + endLike);
@@ -176,7 +176,7 @@ base::string16 Document::Slice(int startLike, int endLike) {
   return buffer_->GetText(start, end);
 }
 
-base::string16 Document::Slice(int startLike) {
+base::string16 TextDocument::Slice(int startLike) {
   auto const start =
       text::Offset(startLike >= 0 ? startLike : length() + startLike);
   if (!start.IsValid() || start >= buffer_->GetEnd())
@@ -184,15 +184,15 @@ base::string16 Document::Slice(int startLike) {
   return Slice(startLike, length());
 }
 
-void Document::StartUndoGroup(const base::string16& name) {
+void TextDocument::StartUndoGroup(const base::string16& name) {
   buffer_->StartUndoGroup(name);
 }
 
-text::Offset Document::Undo(text::Offset position) {
+text::Offset TextDocument::Undo(text::Offset position) {
   return buffer_->Undo(position);
 }
 
-text::Offset Document::ValidateOffset(int offsetLike) const {
+text::Offset TextDocument::ValidateOffset(int offsetLike) const {
   if (offsetLike >= 0 && offsetLike <= length())
     return text::Offset(offsetLike);
   ScriptHost::instance()->ThrowRangeError(

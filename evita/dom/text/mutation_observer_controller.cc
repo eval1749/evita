@@ -17,7 +17,7 @@
 #include "base/memory/weak_ptr.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/dom/text/mutation_observer.h"
 #include "evita/dom/text/mutation_record.h"
 #include "evita/text/buffer.h"
@@ -29,13 +29,13 @@ namespace dom {
 //////////////////////////////////////////////////////////////////////
 //
 // MutationObserverController::Tracker
-// Instances of |Tracker| track document mutation of assocaited |Document|.
+// Instances of |Tracker| track document mutation of assocaited |TextDocument|.
 //
 class MutationObserverController::Tracker final
     : public base::RefCounted<Tracker>,
       public text::BufferMutationObserver {
  public:
-  explicit Tracker(Document* document);
+  explicit Tracker(TextDocument* document);
   ~Tracker() final;
 
   bool is_tracking() const { return !observers_.empty(); }
@@ -52,7 +52,7 @@ class MutationObserverController::Tracker final
   void DidDeleteAt(const text::StaticRange& range) final;
   void DidInsertBefore(const text::StaticRange& range) final;
 
-  gc::Member<Document> document_;
+  gc::Member<TextDocument> document_;
   bool is_observing_;
   bool is_schedule_notification_;
   std::unordered_set<MutationObserver*> observers_;
@@ -61,7 +61,7 @@ class MutationObserverController::Tracker final
   DISALLOW_COPY_AND_ASSIGN(Tracker);
 };
 
-MutationObserverController::Tracker::Tracker(Document* document)
+MutationObserverController::Tracker::Tracker(TextDocument* document)
     : document_(document),
       is_observing_(false),
       is_schedule_notification_(false),
@@ -89,7 +89,7 @@ void MutationObserverController::Tracker::NotifyObservers(
   scoped_refptr<Tracker> protect(tracker.get());
   DOM_AUTO_LOCK_SCOPE();
   for (auto observer : observers) {
-    observer->DidMutateDocument(tracker->document_);
+    observer->DidMutateTextDocument(tracker->document_);
   }
 }
 
@@ -142,7 +142,7 @@ MutationObserverController::MutationObserverController() {}
 MutationObserverController::~MutationObserverController() {}
 
 void MutationObserverController::Register(MutationObserver* observer,
-                                          Document* document) {
+                                          TextDocument* document) {
   auto const it = map_.find(document);
   if (it != map_.end()) {
     it->second->Register(observer);
@@ -155,7 +155,7 @@ void MutationObserverController::Register(MutationObserver* observer,
 }
 
 void MutationObserverController::Unregister(MutationObserver* observer) {
-  std::vector<Document*> keys_to_remove;
+  std::vector<TextDocument*> keys_to_remove;
   for (auto key_val : map_) {
     auto const tracker = key_val.second;
     tracker->Unregister(observer);

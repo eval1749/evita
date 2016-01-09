@@ -11,7 +11,7 @@ namespace dom {
 // MutationRecord
 //
 MutationRecord::MutationRecord(const base::string16& type,
-                               Document* document,
+                               TextDocument* document,
                                text::Offset offset)
     : document_(document), offset_(offset), type_(type) {}
 

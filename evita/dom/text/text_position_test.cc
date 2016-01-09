@@ -23,7 +23,7 @@ class TextPositionTest : public AbstractDomTest {
 
 TEST_F(TextPositionTest, Basic) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('style');"
+      "var doc = TextDocument.new('style');"
       "var range = new Range(doc);"
       "range.text = 'foo bar baz';"
       "var pos = new TextPosition(doc, 2);");
@@ -31,15 +31,15 @@ TEST_F(TextPositionTest, Basic) {
   EXPECT_SCRIPT_EQ("2", "pos.offset");
   EXPECT_SCRIPT_EQ("111", "pos.charCode()");
 
-  EXPECT_SCRIPT_EQ("RangeError: Invalid offset -1 for [object Document]",
+  EXPECT_SCRIPT_EQ("RangeError: Invalid offset -1 for [object TextDocument]",
                    "new TextPosition(doc, -1)");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid offset 100 for [object Document]",
+  EXPECT_SCRIPT_EQ("RangeError: Invalid offset 100 for [object TextDocument]",
                    "new TextPosition(doc, 100)");
 }
 
 TEST_F(TextPositionTest, move) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('style');"
+      "var doc = TextDocument.new('style');"
       "var range = new Range(doc);"
       "range.text = 'foo bar baz';"
       "var pos = new TextPosition(doc, 0);");
@@ -50,7 +50,7 @@ TEST_F(TextPositionTest, move) {
 
 TEST_F(TextPositionTest, moveBracket) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('moveBracket');"
+      "var doc = TextDocument.new('moveBracket');"
       "var range = new Range(doc);"
       "function testIt(sample, direction) {"
       "  range.start = 0;"
@@ -191,7 +191,7 @@ TEST_F(TextPositionTest, moveBracket) {
 
 TEST_F(TextPositionTest, moveWhile) {
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('style');"
+      "var doc = TextDocument.new('style');"
       "var range = new Range(doc);"
       "range.text = '   foo bar';"
       "var pos = new TextPosition(doc, 0);"

@@ -13,7 +13,7 @@ var ClikeLexerOptions;
 /**
  * @constructor
  * @extends {Lexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * TODO(eval1749): We should use |ClikeLexerOptions| instead of |Object| for
  * |options|.
  * @param {!Object} options
@@ -35,7 +35,7 @@ ClikeLexer.SLASH_CHAR;
 /**
  * @constructor
  * @extends {ClikeLexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {undefined}
  */
 function CppLexer(document) {}
@@ -43,14 +43,14 @@ function CppLexer(document) {}
 /**
  * @constructor
  * @extends {Lexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {undefined}
  */
 function ConfigLexer(document) {}
 /**
  * @constructor
  * @extends {ClikeLexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {undefined}
  */
 function CsharpLexer(document) {}
@@ -58,7 +58,7 @@ function CsharpLexer(document) {}
 /**
  * @constructor
  * @extends {ClikeLexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {undefined}
  */
 function IdlLexer(document) {}
@@ -66,7 +66,7 @@ function IdlLexer(document) {}
 /**
  * @constructor
  * @extends {ClikeLexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {undefined}
  */
 function JavaLexer(document) {}
@@ -74,7 +74,7 @@ function JavaLexer(document) {}
 /**
  * @constructor
  * @extends {ClikeLexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @param {!Lexer=} opt_parentLexer
  * @return {undefined}
  */
@@ -83,7 +83,7 @@ function JavaScriptLexer(document, opt_parentLexer) {}
 /**
  * @constructor
  * @extends {Lexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {undefined}
  */
 function PythonLexer(document) {}
@@ -99,7 +99,7 @@ var XmlLexerOptions;
 /**
  * @constructor
  * @extends {Lexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * TODO(eval1749): We should use |XmlLexerOptions| instead of |Object| for
  * |options|.
  * @param {!Object=} opt_options
@@ -110,7 +110,7 @@ function XmlLexer(document, opt_options) {}
 /**
  * @constructor
  * @extends {XmlLexer}
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {undefined}
  */
 function HtmlLexer(document) {}

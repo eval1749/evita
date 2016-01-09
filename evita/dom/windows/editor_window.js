@@ -61,7 +61,7 @@
    * This function handles drag-and-drop.
    */
   EditorWindow.prototype.open = function(fileName) {
-     var document = Document.open(fileName);
+     var document = TextDocument.open(fileName);
      var window = this.children.find(function(present) {
        return present.document === document;
      });

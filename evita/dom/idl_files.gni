@@ -17,7 +17,7 @@ interface_idl_files = [
   "//evita/dom/encodings/TextEncoder.idl",
   "//evita/dom/events/CompositionEvent.idl",
   "//evita/dom/events/CompositionSpan.idl",
-  "//evita/dom/events/DocumentEvent.idl",
+  "//evita/dom/events/TextDocumentEvent.idl",
   "//evita/dom/events/Event.idl",
   "//evita/dom/events/EventTarget.idl",
   "//evita/dom/events/FocusEvent.idl",
@@ -49,7 +49,7 @@ interface_idl_files = [
 
   # Note: We have "Mode.idl" here for JS externs
   "//evita/dom/text/modes/Mode.idl",
-  "//evita/dom/text/Document.idl",
+  "//evita/dom/text/TextDocument.idl",
   "//evita/dom/text/LineAndColumn.idl",
   "//evita/dom/text/MutationObserver.idl",
   "//evita/dom/text/MutationRecord.idl",
@@ -63,7 +63,7 @@ interface_idl_files = [
   "//evita/dom/timers/OneShotTimer.idl",
   "//evita/dom/timers/RepeatingTimer.idl",
   "//evita/dom/timers/Timer.idl",
-  "//evita/dom/windows/DocumentWindow.idl",
+  "//evita/dom/windows/TextDocumentWindow.idl",
   "//evita/dom/windows/EditorWindow.idl",
 
   # Note: We have "Point.idl" and "Rect.idl" here for JS externs
@@ -82,7 +82,7 @@ dictionary_idl_files = [
   "//evita/dom/encodings/TextDecoderOptions.idl",
   "//evita/dom/encodings/TextEncodeOptions.idl",
   "//evita/dom/events/CompositionEventInit.idl",
-  "//evita/dom/events/DocumentEventInit.idl",
+  "//evita/dom/events/TextDocumentEventInit.idl",
   "//evita/dom/events/EventInit.idl",
   "//evita/dom/events/FocusEventInit.idl",
   "//evita/dom/events/FormEventInit.idl",
@@ -133,12 +133,12 @@ static_js_externs_files = [
   "//evita/dom/testing/gtest_externs.js",
   "//evita/dom/testing/test_externs.js",
   "//evita/dom/text/text_externs.js",
-  "//evita/dom/text/document_externs.js",
+  "//evita/dom/text/text_document_externs.js",
   "//evita/dom/text/modes/modes_externs.js",
   "//evita/dom/text/range_externs.js",
   "//evita/dom/text/simple_mutation_observer_externs.js",
   "//evita/dom/text/text_position_externs.js",
   "//evita/dom/types_externs.js",
-  "//evita/dom/windows/document_state_externs.js",
+  "//evita/dom/windows/text_document_state_externs.js",
   "//evita/dom/windows/tab_data_externs.js",
 ]

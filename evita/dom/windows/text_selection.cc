@@ -7,7 +7,7 @@
 #include "evita/bindings/v8_glue_UiEventInit.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/dom/text/range.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/text/offset.h"

@@ -8,7 +8,7 @@
 #include "evita/css/style_selector.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/text/document.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
 #include "evita/text/offset.h"
@@ -21,10 +21,10 @@ namespace dom {
 //
 // Range
 //
-Range::Range(Document* document, text::Offset start, text::Offset end)
+Range::Range(TextDocument* document, text::Offset start, text::Offset end)
     : Range(document, new text::Range(document->buffer(), start, end)) {}
 
-Range::Range(Document* document, text::Range* range)
+Range::Range(TextDocument* document, text::Range* range)
     : document_(document), range_(range) {}
 
 Range::~Range() {}
@@ -88,19 +88,20 @@ Range* Range::InsertBefore(const base::string16& text) {
   return this;
 }
 
-Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range) {
+Range* Range::NewRange(
+    v8_glue::Either<TextDocument*, Range*> document_or_range) {
   if (document_or_range.is_left)
     return NewRange(document_or_range, 0, 0);
   auto const range = document_or_range.right;
   return new Range(range->document(), range->start(), range->end());
 }
 
-Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range,
+Range* Range::NewRange(v8_glue::Either<TextDocument*, Range*> document_or_range,
                        int offsetLike) {
   return NewRange(document_or_range, offsetLike, offsetLike);
 }
 
-Range* Range::NewRange(v8_glue::Either<Document*, Range*> document_or_range,
+Range* Range::NewRange(v8_glue::Either<TextDocument*, Range*> document_or_range,
                        int startLike,
                        int endLike) {
   auto const document = document_or_range.is_left

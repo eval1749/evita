@@ -19,7 +19,7 @@
 
 // TODO(eval1749): We should not use DOM object in DOM API.
 namespace dom {
-class Document;
+class TextDocument;
 class Form;
 }
 
@@ -86,7 +86,7 @@ class ViewDelegate {
                                 const PopupWindowInit& init) = 0;
 
   virtual void CreateTableWindow(WindowId window_id,
-                                 dom::Document* document) = 0;
+                                 dom::TextDocument* document) = 0;
   virtual void CreateTextWindow(WindowId window_id,
                                 text::Selection* selection) = 0;
   virtual void DestroyWindow(WindowId window_id) = 0;

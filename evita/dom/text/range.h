@@ -21,7 +21,7 @@ namespace bindings {
 class RangeClass;
 }
 
-class Document;
+class TextDocument;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -31,12 +31,12 @@ class Range final : public v8_glue::Scriptable<Range> {
   DECLARE_SCRIPTABLE_OBJECT(Range);
 
  public:
-  Range(Document* document, text::Offset start, text::Offset end);
-  Range(Document* document, text::Range* range);
+  Range(TextDocument* document, text::Offset start, text::Offset end);
+  Range(TextDocument* document, text::Range* range);
   ~Range() final;
 
   bool collapsed() const;
-  Document* document() const { return document_.get(); }
+  TextDocument* document() const { return document_.get(); }
   text::Offset end() const;
   text::Offset start() const;
   void set_end(int position);
@@ -47,12 +47,15 @@ class Range final : public v8_glue::Scriptable<Range> {
 
   Range* CollapseTo(int position);
   Range* InsertBefore(const base::string16& text);
-  static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range);
-  static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range,
-                         int offset);
-  static Range* NewRange(v8_glue::Either<Document*, Range*> document_or_range,
-                         int start,
-                         int end);
+  static Range* NewRange(
+      v8_glue::Either<TextDocument*, Range*> document_or_range);
+  static Range* NewRange(
+      v8_glue::Either<TextDocument*, Range*> document_or_range,
+      int offset);
+  static Range* NewRange(
+      v8_glue::Either<TextDocument*, Range*> document_or_range,
+      int start,
+      int end);
   void SetSpelling(int spelling) const;
   void SetStyle(v8::Handle<v8::Object> style_dict) const;
   void SetSyntax(const base::string16& syntax) const;
@@ -66,7 +69,7 @@ class Range final : public v8_glue::Scriptable<Range> {
   int start_value() const;
   void set_start_value(int value) { set_start(value); }
 
-  gc::Member<Document> document_;
+  gc::Member<TextDocument> document_;
   // TODO(yosi): We should manage life time of text::Range.
   text::Range* range_;
 

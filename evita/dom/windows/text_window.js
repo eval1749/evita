@@ -330,7 +330,7 @@ global.TextWindow.prototype.clone = function() {
   }
 
   /**
-   * @param {!Document} document
+   * @param {!TextDocument} document
    * @param {string} key
    * @return {!Range}
    */
@@ -430,9 +430,9 @@ global.TextWindow.prototype.clone = function() {
 
   /**
    * @param {!TextWindow} textWindow
-   * @param {!Document} document
+   * @param {!TextDocument} document
    */
-  function reloadDocument(textWindow, document) {
+  function reloadTextDocument(textWindow, document) {
     const selectionMap = new Map();
     for (let window of document.listWindows()) {
       const selection = window.selection;
@@ -485,22 +485,22 @@ global.TextWindow.prototype.clone = function() {
     const document = window.document;
     if (document.fileName === '')
       return;
-    if (document.obsolete === Document.Obsolete.CHECKING) {
+    if (document.obsolete === TextDocument.Obsolete.CHECKING) {
       window.status = 'Checking file status...';
       return;
     }
-    if (document.obsolete === Document.Obsolete.YES) {
+    if (document.obsolete === TextDocument.Obsolete.YES) {
       Editor.messageBox(window, 'This document has been stale.',
                         MessageBox.ICONWARNING);
       return;
     }
-    document.obsolete = Document.Obsolete.CHECKING;
+    document.obsolete = TextDocument.Obsolete.CHECKING;
     Os.File.stat(document.fileName).then((info) => {
       document.lastStatTime_ = new Date();
       document.obsolete = info.lastModificationDate.valueOf() ===
                             document.lastWriteTime.valueOf() ?
-          Document.Obsolete.NO : Document.Obsolete.YES;
-      if (document.obsolete === Document.Obsolete.NO) {
+          TextDocument.Obsolete.NO : TextDocument.Obsolete.YES;
+      if (document.obsolete === TextDocument.Obsolete.NO) {
         window.status = 'Healthy';
         return;
       }
@@ -514,12 +514,12 @@ global.TextWindow.prototype.clone = function() {
           document.lastWriteTime = info.lastModificationDate;
           return;
         }
-        reloadDocument(window, document);
+        reloadTextDocument(window, document);
       });
     }).catch((reason) => {
       console.log('Os.File.stat', document.fileName, reason);
       document.lastStatTime_ = new Date();
-      document.obsolete = Document.Obsolete.UNKNOWN;
+      document.obsolete = TextDocument.Obsolete.UNKNOWN;
     });
   }
 

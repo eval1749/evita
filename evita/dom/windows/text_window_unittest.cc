@@ -30,7 +30,7 @@ class TextWindowTest : public AbstractDomTest {
 TEST_F(TextWindowTest, _ctor) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var range = new Range(doc);"
       "var sample = new TextWindow(range);");
   EXPECT_SCRIPT_TRUE("sample instanceof TextWindow");
@@ -43,7 +43,7 @@ TEST_F(TextWindowTest, _ctor) {
 TEST_F(TextWindowTest, clone) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _)).Times(2);
   EXPECT_SCRIPT_VALID(
-      "var original = new TextWindow(new Range(Document.new('foo')));"
+      "var original = new TextWindow(new Range(TextDocument.new('foo')));"
       "original.selection.range.text = 'foo';"
       "original.selection.range.end = 3;"
       "var sample = original.clone();");
@@ -54,14 +54,14 @@ TEST_F(TextWindowTest, makeSelectionVisible) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_CALL(*mock_view_impl(), MakeSelectionVisible(Eq(1)));
   EXPECT_SCRIPT_VALID(
-      "var sample = new TextWindow(new Range(Document.new('foo')));"
+      "var sample = new TextWindow(new Range(TextDocument.new('foo')));"
       "sample.makeSelectionVisible();");
 }
 
 TEST_F(TextWindowTest, realize) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_SCRIPT_VALID(
-      "var doc = Document.new('foo');"
+      "var doc = TextDocument.new('foo');"
       "var sample = new TextWindow(new Range(doc));"
       "var event;"
       "function event_handler(x) { event = x; }"
@@ -74,7 +74,7 @@ TEST_F(TextWindowTest, realize) {
   view_event_handler()->DidRealizeWidget(1);
   RunMessageLoopUntilIdle();
 
-  EXPECT_SCRIPT_TRUE("event instanceof DocumentEvent");
+  EXPECT_SCRIPT_TRUE("event instanceof TextDocumentEvent");
   EXPECT_SCRIPT_EQ("attach", "event.type");
   EXPECT_SCRIPT_TRUE("event.view === sample");
 
@@ -84,7 +84,7 @@ TEST_F(TextWindowTest, realize) {
   view_event_handler()->DidDestroyWidget(1);
   RunMessageLoopUntilIdle();
 
-  EXPECT_SCRIPT_TRUE("event instanceof DocumentEvent");
+  EXPECT_SCRIPT_TRUE("event instanceof TextDocumentEvent");
   EXPECT_SCRIPT_EQ("detach", "event.type");
   EXPECT_SCRIPT_TRUE("event.view === sample");
 }
@@ -93,7 +93,7 @@ TEST_F(TextWindowTest, zoom) {
   EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
   EXPECT_CALL(*mock_view_impl(), SetTextWindowZoom(Eq(1), Eq(1.5f)));
   EXPECT_SCRIPT_VALID(
-      "var sample = new TextWindow(new Range(Document.new('foo')));"
+      "var sample = new TextWindow(new Range(TextDocument.new('foo')));"
       "sample.zoom = 1.5;");
   EXPECT_SCRIPT_EQ("1.5", "sample.zoom");
   EXPECT_SCRIPT_EQ("RangeError: TextWindow zoom must be greater than zero.",

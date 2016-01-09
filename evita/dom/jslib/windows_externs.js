@@ -7,7 +7,7 @@ var windows;
 
 /**
  * @param {!Window} window
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {!TextWindow}
  */
 windows.activate = function(window, document) {};
@@ -23,13 +23,13 @@ windows.firstWindow = function() {};
 windows.lastWindow = function() {};
 
 /**
- * @param {!Document} document
+ * @param {!TextDocument} document
  */
 windows.newEditorWindow = function(document) {};
 
 /**
  * @param {!Window} window
- * @param {!Document} document
+ * @param {!TextDocument} document
  * @return {!TextWindow}
  */
 windows.newTextWindow = function(window, document) {};

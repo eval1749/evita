@@ -16,7 +16,7 @@ $define(global, 'windows', function($export) {
     }
 
     /**
-     * @param {!DocumentState} state
+     * @param {!TextDocumentState} state
      * @return {!TabData}
      */
     static newTabDataFromState(state) {
@@ -40,10 +40,10 @@ $define(global, 'windows', function($export) {
      * This function is called when document is attached to window.
      *
      * @param {!Window} window
-     * @param {!DocumentState} state
+     * @param {!TextDocumentState} state
      */
     static update(window, state) {
-      if (!(window instanceof DocumentWindow))
+      if (!(window instanceof TextDocumentWindow))
         return;
       Editor.setTabData(window, TabData.newTabDataFromState(state));
     }
@@ -51,15 +51,15 @@ $define(global, 'windows', function($export) {
 
   /**
    * Updates tab data for windows attached to |document| with new |state| when
-   * |DocumentState| is changed.
+   * |TextDocumentState| is changed.
    *
-   * @param {!Document} document
-   * @param {!DocumentState} state
+   * @param {!TextDocument} document
+   * @param {!TextDocumentState} state
    */
   function observer(document, state) {
     document.listWindows().forEach(window => TabData.update(window, state));
   }
-  DocumentState.addObserver(observer);
+  TextDocumentState.addObserver(observer);
 
   $export({TabData});
 });

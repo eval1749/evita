@@ -25,7 +25,7 @@
      * @return {number}
      */
     function countSelectedRows(selection) {
-      var keys = Document.list.map(function(document) {
+      var keys = TextDocument.list.map(function(document) {
         return document.name;
       });
       var selected_keys = selection.getRowStates(keys).filter(

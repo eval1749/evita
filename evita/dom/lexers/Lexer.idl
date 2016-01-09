@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[ImplementedAs=JavaScript, Constructor(Document document, object options)]
+[ImplementedAs=JavaScript, Constructor(TextDocument document, object options)]
 interface Lexer {
   attribute long changedOffset;
   attribute long debug;

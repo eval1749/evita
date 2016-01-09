@@ -21,7 +21,7 @@ global.Mode = (function() {
 
     /**
      * @this {!Mode}
-     * @param {!Document} document
+     * @param {!TextDocument} document
      */
     attach(document) {
       if (this.document_)
@@ -41,7 +41,7 @@ global.Mode = (function() {
 
     /**
      * @this {!Mode}
-     * @param {!Document} document
+     * @param {!TextDocument} document
      * @param {number} hint
      */
     doColor(document, hint) {

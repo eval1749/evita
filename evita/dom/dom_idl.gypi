@@ -39,8 +39,8 @@
       'os/Process.idl',
       'text/modes/Mode.idl',
       'text/TextDocument.idl',
-      'text/MutationObserver.idl',
-      'text/MutationRecord.idl',
+      'text/TextMutationObserver.idl',
+      'text/TextMutationRecord.idl',
       'text/TextRange.idl',
       'text/RegExp.idl',
       'timers/OneShotTimer.idl',
@@ -74,7 +74,7 @@
       'events/WindowEventInit.idl',
       'forms/FormWindowInit.idl',
       'os/MoveFileOptions.idl',
-      'text/MutationObserverInit.idl',
+      'text/TextMutationObserverInit.idl',
       'text/RegExpInit.idl',
     ], # dictionary_idl_files
 

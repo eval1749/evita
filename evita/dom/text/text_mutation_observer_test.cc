@@ -21,7 +21,7 @@ TEST_F(MutationObserverTest, ctor) {
       "range.text = 'foo bar baz';"
       "function callback(records, observer) {"
       "}"
-      "var observer = new MutationObserver(callback);"
+      "var observer = new TextMutationObserver(callback);"
       "range.text = ''");
 }
 

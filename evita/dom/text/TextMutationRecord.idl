@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-interface MutationRecord {
+interface TextMutationRecord {
   readonly attribute TextDocument document;
   [ImplementedAs=offset_value]
   readonly attribute long offset;

@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/text/mutation_record.h"
+#include "evita/dom/text/text_mutation_record.h"
 
 namespace dom {
 
 //////////////////////////////////////////////////////////////////////
 //
-// MutationRecord
+// TextMutationRecord
 //
-MutationRecord::MutationRecord(const base::string16& type,
-                               TextDocument* document,
-                               text::Offset offset)
+TextMutationRecord::TextMutationRecord(const base::string16& type,
+                                       TextDocument* document,
+                                       text::Offset offset)
     : document_(document), offset_(offset), type_(type) {}
 
-MutationRecord::~MutationRecord() {}
+TextMutationRecord::~TextMutationRecord() {}
 
 }  // namespace dom

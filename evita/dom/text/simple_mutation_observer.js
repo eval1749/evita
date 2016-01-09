@@ -21,7 +21,7 @@ $define(global, 'text', function($export) {
       /** @type {!Set.<!text.SimpleMutationObserver>} */
       this.observers_ = new Set();
 
-      this.observer_ = new MutationObserver(
+      this.observer_ = new TextMutationObserver(
           this.mutationCallback_.bind(this));
       this.startObserving_();
       document.addEventListener(Event.Names.BEFORELOAD,
@@ -57,8 +57,8 @@ $define(global, 'text', function($export) {
 
     /**
      * @private
-     * @param {!Array.<!MutationRecord>} mutations
-     * @param {!MutationObserver} observer
+     * @param {!Array.<!TextMutationRecord>} mutations
+     * @param {!TextMutationObserver} observer
      *
      * Resets hot offset to minimal changed offset and kicks word scanner.
      */

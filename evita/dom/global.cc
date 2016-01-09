@@ -34,8 +34,8 @@
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/file_path.h"
-#include "evita/dom/text/mutation_observer.h"
-#include "evita/dom/text/mutation_record.h"
+#include "evita/dom/text/text_mutation_observer.h"
+#include "evita/dom/text/text_mutation_record.h"
 #include "evita/dom/os/directory.h"
 #include "evita/dom/os/file.h"
 #include "evita/dom/os/process.h"
@@ -116,8 +116,8 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(FormWindow);
     INSTALL(TextFieldSelection);
 
-    INSTALL(MutationObserver);
-    INSTALL(MutationRecord);
+    INSTALL(TextMutationObserver);
+    INSTALL(TextMutationRecord);
 
     INSTALL(Selection);
     INSTALL(TableSelection);

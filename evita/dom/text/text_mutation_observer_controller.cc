@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/text/mutation_observer_controller.h"
+#include "evita/dom/text/text_mutation_observer_controller.h"
 
 #include <unordered_set>
 #include <vector>
@@ -18,8 +18,8 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
-#include "evita/dom/text/mutation_observer.h"
-#include "evita/dom/text/mutation_record.h"
+#include "evita/dom/text/text_mutation_observer.h"
+#include "evita/dom/text/text_mutation_record.h"
 #include "evita/text/buffer.h"
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/static_range.h"
@@ -28,10 +28,10 @@ namespace dom {
 
 //////////////////////////////////////////////////////////////////////
 //
-// MutationObserverController::Tracker
+// TextMutationObserverController::Tracker
 // Instances of |Tracker| track document mutation of assocaited |TextDocument|.
 //
-class MutationObserverController::Tracker final
+class TextMutationObserverController::Tracker final
     : public base::RefCounted<Tracker>,
       public text::BufferMutationObserver {
  public:
@@ -40,8 +40,8 @@ class MutationObserverController::Tracker final
 
   bool is_tracking() const { return !observers_.empty(); }
 
-  void Register(MutationObserver* observer);
-  void Unregister(MutationObserver* observer);
+  void Register(TextMutationObserver* observer);
+  void Unregister(TextMutationObserver* observer);
 
  private:
   base::WeakPtr<Tracker> GetWeakPtr();
@@ -55,34 +55,34 @@ class MutationObserverController::Tracker final
   gc::Member<TextDocument> document_;
   bool is_observing_;
   bool is_schedule_notification_;
-  std::unordered_set<MutationObserver*> observers_;
+  std::unordered_set<TextMutationObserver*> observers_;
   base::WeakPtrFactory<Tracker> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(Tracker);
 };
 
-MutationObserverController::Tracker::Tracker(TextDocument* document)
+TextMutationObserverController::Tracker::Tracker(TextDocument* document)
     : document_(document),
       is_observing_(false),
       is_schedule_notification_(false),
       weak_factory_(this) {}
 
-MutationObserverController::Tracker::~Tracker() {
+TextMutationObserverController::Tracker::~Tracker() {
   if (is_observing_)
     document_->buffer()->RemoveObserver(this);
 }
 
-base::WeakPtr<MutationObserverController::Tracker>
-MutationObserverController::Tracker::GetWeakPtr() {
+base::WeakPtr<TextMutationObserverController::Tracker>
+TextMutationObserverController::Tracker::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void MutationObserverController::Tracker::NotifyObservers(
+void TextMutationObserverController::Tracker::NotifyObservers(
     base::WeakPtr<Tracker> tracker) {
   if (!tracker)
     return;
   tracker->is_schedule_notification_ = false;
-  std::vector<MutationObserver*> observers;
+  std::vector<TextMutationObserver*> observers;
   for (auto observer : tracker->observers_) {
     observers.push_back(observer);
   }
@@ -93,7 +93,8 @@ void MutationObserverController::Tracker::NotifyObservers(
   }
 }
 
-void MutationObserverController::Tracker::Register(MutationObserver* observer) {
+void TextMutationObserverController::Tracker::Register(
+    TextMutationObserver* observer) {
   observers_.insert(observer);
   if (is_observing_)
     return;
@@ -101,7 +102,7 @@ void MutationObserverController::Tracker::Register(MutationObserver* observer) {
   is_observing_ = true;
 }
 
-void MutationObserverController::Tracker::ScheduleNotification() {
+void TextMutationObserverController::Tracker::ScheduleNotification() {
   if (is_schedule_notification_)
     return;
   is_schedule_notification_ = true;
@@ -109,8 +110,8 @@ void MutationObserverController::Tracker::ScheduleNotification() {
       base::Bind(&Tracker::NotifyObservers, GetWeakPtr()));
 }
 
-void MutationObserverController::Tracker::Unregister(
-    MutationObserver* observer) {
+void TextMutationObserverController::Tracker::Unregister(
+    TextMutationObserver* observer) {
   observers_.erase(observer);
   if (!observers_.empty())
     return;
@@ -119,14 +120,14 @@ void MutationObserverController::Tracker::Unregister(
 }
 
 // text::BufferMutationObserver
-void MutationObserverController::Tracker::DidDeleteAt(
+void TextMutationObserverController::Tracker::DidDeleteAt(
     const text::StaticRange& range) {
   for (auto observer : observers_)
     observer->DidDeleteAt(document_, range.start(), range.length());
   ScheduleNotification();
 }
 
-void MutationObserverController::Tracker::DidInsertBefore(
+void TextMutationObserverController::Tracker::DidInsertBefore(
     const text::StaticRange& range) {
   for (auto observer : observers_)
     observer->DidInsertBefore(document_, range.start(), range.length());
@@ -135,14 +136,14 @@ void MutationObserverController::Tracker::DidInsertBefore(
 
 //////////////////////////////////////////////////////////////////////
 //
-// MutationObserverController
+// TextMutationObserverController
 //
-MutationObserverController::MutationObserverController() {}
+TextMutationObserverController::TextMutationObserverController() {}
 
-MutationObserverController::~MutationObserverController() {}
+TextMutationObserverController::~TextMutationObserverController() {}
 
-void MutationObserverController::Register(MutationObserver* observer,
-                                          TextDocument* document) {
+void TextMutationObserverController::Register(TextMutationObserver* observer,
+                                              TextDocument* document) {
   auto const it = map_.find(document);
   if (it != map_.end()) {
     it->second->Register(observer);
@@ -154,7 +155,8 @@ void MutationObserverController::Register(MutationObserver* observer,
   tracker->Register(observer);
 }
 
-void MutationObserverController::Unregister(MutationObserver* observer) {
+void TextMutationObserverController::Unregister(
+    TextMutationObserver* observer) {
   std::vector<TextDocument*> keys_to_remove;
   for (auto key_val : map_) {
     auto const tracker = key_val.second;

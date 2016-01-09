@@ -51,8 +51,8 @@ interface_idl_files = [
   "//evita/dom/text/modes/Mode.idl",
   "//evita/dom/text/TextDocument.idl",
   "//evita/dom/text/LineAndColumn.idl",
-  "//evita/dom/text/MutationObserver.idl",
-  "//evita/dom/text/MutationRecord.idl",
+  "//evita/dom/text/TextMutationObserver.idl",
+  "//evita/dom/text/TextMutationRecord.idl",
   "//evita/dom/text/TextRange.idl",
   "//evita/dom/text/RegularExpression.idl",
   # TODO(eval1749): binding generator and js extern generator should support
@@ -93,7 +93,7 @@ dictionary_idl_files = [
   "//evita/dom/events/WindowEventInit.idl",
   "//evita/dom/forms/FormWindowInit.idl",
   "//evita/dom/os/MoveFileOptions.idl",
-  "//evita/dom/text/MutationObserverInit.idl",
+  "//evita/dom/text/TextMutationObserverInit.idl",
   "//evita/dom/text/RegExpInit.idl",
   "//evita/dom/timing/IdleRequestOptions.idl",
 ]

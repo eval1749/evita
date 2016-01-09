@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/text/mutation_observer.h"
+#include "evita/dom/text/text_mutation_observer.h"
 
 #include <algorithm>
 #include <vector>
 
-#include "evita/bindings/v8_glue_MutationObserverInit.h"
+#include "evita/bindings/v8_glue_TextMutationObserverInit.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/text/text_document.h"
-#include "evita/dom/text/mutation_observer_controller.h"
-#include "evita/dom/text/mutation_record.h"
+#include "evita/dom/text/text_mutation_observer_controller.h"
+#include "evita/dom/text/text_mutation_record.h"
 #include "evita/dom/script_host.h"
 #include "evita/ed_defs.h"
 #include "evita/v8_glue/runner.h"
@@ -20,9 +20,9 @@ namespace dom {
 
 //////////////////////////////////////////////////////////////////////
 //
-// MutationObserver::Tracker
+// TextMutationObserver::Tracker
 //
-class MutationObserver::Tracker final {
+class TextMutationObserver::Tracker final {
  public:
   explicit Tracker(TextDocument* document);
   ~Tracker();
@@ -32,7 +32,7 @@ class MutationObserver::Tracker final {
   }
 
   void Reset();
-  std::vector<MutationRecord*> TakeRecords();
+  std::vector<TextMutationRecord*> TakeRecords();
   void Update(text::Offset offset);
 
  private:
@@ -42,50 +42,41 @@ class MutationObserver::Tracker final {
   text::Offset minimum_change_offset_;
 };
 
-MutationObserver::Tracker::Tracker(TextDocument* document)
+TextMutationObserver::Tracker::Tracker(TextDocument* document)
     : document_(document) {
   Reset();
 }
 
-MutationObserver::Tracker::~Tracker() {}
+TextMutationObserver::Tracker::~Tracker() {}
 
-void MutationObserver::Tracker::Reset() {
+void TextMutationObserver::Tracker::Reset() {
   minimum_change_offset_ = text::Offset::Max();
 }
 
-std::vector<MutationRecord*> MutationObserver::Tracker::TakeRecords() {
+std::vector<TextMutationRecord*> TextMutationObserver::Tracker::TakeRecords() {
   if (!has_records())
-    return std::vector<MutationRecord*>();
+    return std::vector<TextMutationRecord*>();
   auto const minimum_change_offset = minimum_change_offset_;
   Reset();
-  return std::vector<MutationRecord*>{
-      new MutationRecord(L"summary", document_, minimum_change_offset),
+  return std::vector<TextMutationRecord*>{
+      new TextMutationRecord(L"summary", document_, minimum_change_offset),
   };
 }
 
-void MutationObserver::Tracker::Update(text::Offset offset) {
+void TextMutationObserver::Tracker::Update(text::Offset offset) {
   minimum_change_offset_ = std::min(minimum_change_offset_, offset);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-// MutationObserver
+// TextMutationObserver
 //
-MutationObserver::MutationObserver(v8::Handle<v8::Function> callback)
+TextMutationObserver::TextMutationObserver(v8::Handle<v8::Function> callback)
     : callback_(v8::Isolate::GetCurrent(), callback) {}
 
-MutationObserver::~MutationObserver() {}
+TextMutationObserver::~TextMutationObserver() {}
 
-void MutationObserver::DidDeleteAt(TextDocument* document,
-                                   text::Offset offset,
-                                   text::OffsetDelta length) {
-  auto const tracker = GetTracker(document);
-  if (!tracker)
-    return;
-  tracker->Update(offset);
-}
-
-void MutationObserver::DidInsertBefore(TextDocument* document,
+void TextMutationObserver::DidDeleteAt(TextDocument* document,
                                        text::Offset offset,
                                        text::OffsetDelta length) {
   auto const tracker = GetTracker(document);
@@ -94,7 +85,16 @@ void MutationObserver::DidInsertBefore(TextDocument* document,
   tracker->Update(offset);
 }
 
-void MutationObserver::DidMutateTextDocument(TextDocument* document) {
+void TextMutationObserver::DidInsertBefore(TextDocument* document,
+                                           text::Offset offset,
+                                           text::OffsetDelta length) {
+  auto const tracker = GetTracker(document);
+  if (!tracker)
+    return;
+  tracker->Update(offset);
+}
+
+void TextMutationObserver::DidMutateTextDocument(TextDocument* document) {
   auto const tracker = GetTracker(document);
   if (!tracker)
     return;
@@ -111,26 +111,26 @@ void MutationObserver::DidMutateTextDocument(TextDocument* document) {
                gin::ConvertToV8(isolate, this));
 }
 
-void MutationObserver::Disconnect() {
-  MutationObserverController::instance()->Unregister(this);
+void TextMutationObserver::Disconnect() {
+  TextMutationObserverController::instance()->Unregister(this);
 }
 
-MutationObserver::Tracker* MutationObserver::GetTracker(
+TextMutationObserver::Tracker* TextMutationObserver::GetTracker(
     TextDocument* document) const {
   auto const it = tracker_map_.find(document);
   return it == tracker_map_.end() ? nullptr : it->second;
 }
 
-void MutationObserver::Observe(TextDocument* document,
-                               const MutationObserverInit& options) {
+void TextMutationObserver::Observe(TextDocument* document,
+                                   const TextMutationObserverInit& options) {
   DCHECK(options.summary());
   __assume(options.summary());
   tracker_map_[document] = new Tracker(document);
-  MutationObserverController::instance()->Register(this, document);
+  TextMutationObserverController::instance()->Register(this, document);
 }
 
-std::vector<MutationRecord*> MutationObserver::TakeRecords() {
-  std::vector<MutationRecord*> records;
+std::vector<TextMutationRecord*> TextMutationObserver::TakeRecords() {
+  std::vector<TextMutationRecord*> records;
   for (auto key_val : tracker_map_) {
     auto const tracker = key_val.second;
     for (auto record : tracker->TakeRecords()) {

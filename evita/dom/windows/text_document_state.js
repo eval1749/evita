@@ -59,8 +59,8 @@ $define(global, 'windows', function($export) {
 
     /**
      * @private
-     * @param {!Array.<!MutationRecord>} mutations
-     * @param {!MutationObserver} observer
+     * @param {!Array.<!TextMutationRecord>} mutations
+     * @param {!TextMutationObserver} observer
      */
     mutationCallback(mutations, observer) {
       if (this.modified === this.document_.modified)
@@ -89,7 +89,7 @@ $define(global, 'windows', function($export) {
                                 this.didLoadSaveTextDocument.bind(this));
       document.addEventListener(Event.Names.SAVE,
                                 this.didLoadSaveTextDocument.bind(this));
-      const mutationObserver = new MutationObserver(
+      const mutationObserver = new TextMutationObserver(
           this.mutationCallback.bind(this));
       mutationObserver.observe(document, {summary: true});
       this.notifyChange();

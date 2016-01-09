@@ -6,13 +6,16 @@ import("//testing/test.gni")
 
 source_set("text") {
   sources = [
-    "mutation_observer.cc",
-    "mutation_observer_controller.cc",
-    "mutation_record.cc",
     "regular_expression.cc",
     "regular_expression.h",
     "text_document.cc",
     "text_document.h",
+    "text_mutation_observer.cc",
+    "text_mutation_observer.h",
+    "text_mutation_observer_controller.cc",
+    "text_mutation_observer_controller.h",
+    "text_mutation_record.cc",
+    "text_mutation_record.h",
     "text_range.cc",
     "text_range.h",
   ]
@@ -25,9 +28,9 @@ source_set("text") {
 source_set("test_files") {
   testonly = true
   sources = [
-    "mutation_observer_test.cc",
     "regular_expression_test.cc",
     "text_document_test.cc",
+    "text_mutation_observer_test.cc",
     "text_position_test.cc",
     "text_range_test.cc",
   ]

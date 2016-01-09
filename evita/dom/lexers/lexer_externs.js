@@ -148,7 +148,7 @@ Lexer.prototype.keywords;
 Lexer.prototype.maxChainWords_;
 
 /**
- * @type {!MutationObserver}
+ * @type {!TextMutationObserver}
  */
 Lexer.prototype.mutationObserver_;
 

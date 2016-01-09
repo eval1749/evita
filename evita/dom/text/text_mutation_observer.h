@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_TEXT_MUTATION_OBSERVER_H_
-#define EVITA_DOM_TEXT_MUTATION_OBSERVER_H_
+#ifndef EVITA_DOM_TEXT_TEXT_MUTATION_OBSERVER_H_
+#define EVITA_DOM_TEXT_TEXT_MUTATION_OBSERVER_H_
 
 #include <unordered_map>
 #include <vector>
@@ -15,18 +15,19 @@
 namespace dom {
 
 class TextDocument;
-class MutationObserverInit;
-class MutationRecord;
+class TextMutationObserverInit;
+class TextMutationRecord;
 
 namespace bindings {
-class MutationObserverClass;
+class TextMutationObserverClass;
 }
 
-class MutationObserver final : public v8_glue::Scriptable<MutationObserver> {
-  DECLARE_SCRIPTABLE_OBJECT(MutationObserver);
+class TextMutationObserver final
+    : public v8_glue::Scriptable<TextMutationObserver> {
+  DECLARE_SCRIPTABLE_OBJECT(TextMutationObserver);
 
  public:
-  ~MutationObserver() final;
+  ~TextMutationObserver() final;
 
   void DidDeleteAt(TextDocument* document,
                    text::Offset offset,
@@ -37,22 +38,22 @@ class MutationObserver final : public v8_glue::Scriptable<MutationObserver> {
   void DidMutateTextDocument(TextDocument* document);
 
  private:
-  friend class bindings::MutationObserverClass;
+  friend class bindings::TextMutationObserverClass;
   class Tracker;
 
-  explicit MutationObserver(v8::Handle<v8::Function> callback);
+  explicit TextMutationObserver(v8::Handle<v8::Function> callback);
 
   void Disconnect();
   Tracker* GetTracker(TextDocument* document) const;
-  void Observe(TextDocument* document, const MutationObserverInit& options);
-  std::vector<MutationRecord*> TakeRecords();
+  void Observe(TextDocument* document, const TextMutationObserverInit& options);
+  std::vector<TextMutationRecord*> TakeRecords();
 
   v8_glue::ScopedPersistent<v8::Function> callback_;
   std::unordered_map<TextDocument*, Tracker*> tracker_map_;
 
-  DISALLOW_COPY_AND_ASSIGN(MutationObserver);
+  DISALLOW_COPY_AND_ASSIGN(TextMutationObserver);
 };
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_TEXT_MUTATION_OBSERVER_H_
+#endif  // EVITA_DOM_TEXT_TEXT_MUTATION_OBSERVER_H_

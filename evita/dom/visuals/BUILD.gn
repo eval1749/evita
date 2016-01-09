@@ -1,0 +1,30 @@
+# Copyright 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("visuals") {
+  sources = [
+    "node_handle.cc",
+    "node_handle.h",
+  ]
+
+  public_deps = [
+    "//evita/visuals/dom",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+
+  sources = [
+    "node_test.cc",
+  ]
+
+  data = [
+    "node_test.js",
+  ]
+
+  deps = [
+    "//evita/dom/testing:test_support",
+  ]
+}

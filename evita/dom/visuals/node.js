@@ -1,0 +1,128 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+class Node {
+  /**
+   * @protected
+   * @param {Document} document
+   * @param {!NodeHandle} handle
+   */
+  constructor(document, handle) {
+    /** @const @type {!Document} */
+    this.document_ = document || /** @type {!Document} */(this);
+    /** @const @type {!NodeHandle} */
+    this.handle_ = handle;
+    /** @type {Node} */
+    this.firstChild_ = null;
+    /** @type {Node} */
+    this.lastChild_ = null;
+    /** @type {Node} */
+    this.parentNode_ = null;
+    /** @type {Node} */
+    this.nextSibling_ = null;
+    /** @type {Node} */
+    this.previousSibling_ = null;
+  }
+
+  /** @return {Node} */
+  get firstChild() { return this.firstChild_; }
+
+  /** @return {Node} */
+  get lastChild() { return this.lastChild_; }
+
+  /** @return {Node} */
+  get nextSibling() { return this.nextSibling_; }
+
+  /** @return {string} */
+  get nodeName() {
+    throw new Error('derived class should implement nodeName()')
+  }
+
+  /** @return {!Document} */
+  get ownerDocument() { return this.document_; }
+
+  /** @return {Node} */
+  get parentNode() { return this.parentNode_; }
+
+  /** @return {Node} */
+  get previousSibling() { return this.previousSibling_; }
+
+  /**
+   * @param {!Node} node
+   * @return {!Node}
+   */
+  appendChild(node) {
+    const oldParent = node.parentNode_;
+    if (oldParent)
+      oldParent.removeChild(node);
+    if (node === this || this.isDescendantOf(node))
+      throw new Error(`${node} is descendant or self of ${this}`);
+    node.parentNode_ = this;
+    const oldLastChild = this.lastChild_;
+    if (oldLastChild) {
+      node.previousSibling_ = oldLastChild;
+      oldLastChild.nextSibling_ = node;
+    } else {
+      this.firstChild_ = node;
+    }
+    this.lastChild_ = node;
+    NodeHandle.appendChild(this.handle_, node.handle_);
+    return node;
+  }
+
+  /** @return {boolean} */
+  inDocument() {
+    for (let runner = this; runner; runner = runner.parentNode_) {
+      if (runner === this.document_)
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * @param {!Node} other
+   * @return {boolean}
+   */
+  isDescendantOf(other) {
+    for (let runner = this.parentNode_; runner; runner = runner.parentNode_) {
+      if (runner === other)
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * @param {!Node} child
+   * @return {!Node}
+   */
+  removeChild(child) {
+    if (child.parentNode_ !== this)
+      throw new Error(`${child} isn't child of ${this}`);
+    const nextSibling = child.nextSibling_;
+    const previousSibling = child.previousSibling_;
+    if (nextSibling)
+      nextSibling.previousSibling_ = previousSibling;
+    else
+      this.lastChild_ = previousSibling;
+    if (previousSibling)
+      previousSibling.nextSibling_ = nextSibling;
+    else
+      this.firstChild_ = nextSibling;
+    child.nextSibling_ = null;
+    child.previousSibling_ = null;
+    child.parentNode_ = null;
+    NodeHandle.removeChild(this.handle_, child.handle_);
+    return child;
+  }
+}
+
+Object.defineProperties(Node.prototype, {
+  childNodes: {
+    get: /** @this {!Node} */ function*() {
+      for (let child = this.firstChild; child; child = child.nextSibling_)
+        yield child;
+    }
+  }
+});
+

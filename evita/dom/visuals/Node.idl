@@ -1,0 +1,24 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// TODO(eval1749): We should make |Node| to be derived from |EventTarget|
+[
+  ImplementedAs=JavaScript,
+]
+interface Node {
+  readonly attribute Node? firstChild;
+  readonly attribute Node? lastChild;
+  readonly attribute Node? nextSibling;
+  readonly attribute DOMString nodeName;
+  readonly attribute Document ownerDocument;
+  readonly attribute Node? prviousSibling;
+  readonly attribute Node? parentNode;
+
+  boolean inDocument();
+  Node insertBefore(Node node, Node? child);
+  boolean isDescendantOf(Node other);
+  Node appendChild(Node node);
+  Node replaceChild(Node none, Node child);
+  Node removeChild(Node child);
+};

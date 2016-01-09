@@ -1,0 +1,15 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  ImplementedAs=JavaScript,
+  Constructor(Document document, DOMString tagName, optional DOMString id)
+]
+interface Element : Node {
+  readonly attribute DOMString id;
+  readonly attribute DOMString tagName;
+
+  void addClass(DOMString className);
+  void removeClass(DOMString className);
+};

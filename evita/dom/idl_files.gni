@@ -63,6 +63,11 @@ interface_idl_files = [
   "//evita/dom/timers/OneShotTimer.idl",
   "//evita/dom/timers/RepeatingTimer.idl",
   "//evita/dom/timers/Timer.idl",
+  #"//evita/dom/visuals/Document.idl",
+  #"//evita/dom/visuals/Element.idl",
+  #"//evita/dom/visuals/Node.idl",
+  #"//evita/dom/visuals/Text.idl",
+  "//evita/dom/visuals/NodeHandle.idl",
   "//evita/dom/windows/TextDocumentWindow.idl",
   "//evita/dom/windows/EditorWindow.idl",
 
@@ -139,6 +144,7 @@ static_js_externs_files = [
   "//evita/dom/text/simple_mutation_observer_externs.js",
   "//evita/dom/text/text_position_externs.js",
   "//evita/dom/types_externs.js",
+  "//evita/dom/visuals/visuals_externs.js",
   "//evita/dom/windows/text_document_state_externs.js",
   "//evita/dom/windows/tab_data_externs.js",
 ]

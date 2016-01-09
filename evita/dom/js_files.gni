@@ -74,6 +74,12 @@ js_lib_files = [
   "text/text_position.js",
   "timers/timer.js",
   "trace_logger.js",
+
+  "visuals/node.js",
+  "visuals/document.js",
+  "visuals/element.js",
+  "visuals/text.js",
+
   "windows/table_window.js",
   "windows/text_document_state.js",
   "windows/point.js",

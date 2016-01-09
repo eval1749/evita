@@ -93,7 +93,7 @@ source_set("dom") {
             "$bindings_gen_dir/v8_glue_{{source_name_part}}.h",
           ])
 
-  deps = [
+  public_deps = [
     ":dom_jslib_cc",
     ":dom_unicode_lib_cc",
     ":dom_v8_strings_cc",
@@ -105,6 +105,7 @@ source_set("dom") {
     "//evita/dom/public",
     "//evita/dom/text",
     "//evita/dom/timing",
+    "//evita/dom/visuals",
     "//evita/v8_glue",
     "//regex",
   ]
@@ -238,5 +239,6 @@ test("evita_dom_tests") {
     "//evita/dom/testing:test_support",
     "//evita/dom/text:test_files",
     "//evita/dom/timing:test_files",
+    "//evita/dom/visuals:test_files",
   ]
 }

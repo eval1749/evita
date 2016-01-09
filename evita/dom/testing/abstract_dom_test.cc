@@ -342,7 +342,10 @@ void AbstractDomTest::SetUp() {
 
   // Load library files.
   v8_glue::Runner::Scope runner_scope(runner);
-  for (auto script : StaticScript::instance()->GetAll(isolate)) {
+  for (const auto& script : StaticScript::instance()->GetAll(isolate)) {
+    const auto& unbound_script = script->GetUnboundScript();
+    DVLOG(0) << "Run "
+             << V8ToString(unbound_script->GetScriptName()->ToString());
     auto const result = runner->Run(script);
     if (result.IsEmpty())
       break;

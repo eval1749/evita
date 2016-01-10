@@ -32,6 +32,9 @@ class CanvasContentWindow : public ContentWindow {
   gfx::Canvas* canvas() { return canvas_.get(); }
   const gfx::Canvas* canvas() const { return canvas_.get(); }
 
+  // ui::AnimationFrameHandler
+  bool CanHandleAnimationFrame() const final;
+
   // ui::LayerOwnerDelegate
   void DidRecreateLayer(ui::Layer* old_layer) override;
 

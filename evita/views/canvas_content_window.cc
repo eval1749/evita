@@ -17,6 +17,11 @@ CanvasContentWindow::CanvasContentWindow(views::WindowId window_id)
 
 CanvasContentWindow::~CanvasContentWindow() {}
 
+// ui::AnimationFrameHandler
+bool CanvasContentWindow::CanHandleAnimationFrame() const {
+  return canvas_->IsReady();
+}
+
 // ui::LayerOwnerDelegate
 void CanvasContentWindow::DidRecreateLayer(ui::Layer*) {
   if (!canvas_)

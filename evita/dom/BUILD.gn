@@ -74,6 +74,8 @@ source_set("dom") {
     "windows/text_document_window.cc",
     "windows/text_selection.cc",
     "windows/text_window.cc",
+    "windows/visual_window.cc",
+    "windows/visual_window.h",
     "windows/window.cc",
     "windows/window_ostream.cc",
     "windows/window_set.cc",
@@ -105,7 +107,6 @@ source_set("dom") {
     "//evita/dom/public",
     "//evita/dom/text",
     "//evita/dom/timing",
-    "//evita/dom/visuals",
     "//evita/ui/animation:public",
     "//evita/v8_glue",
     "//regex",
@@ -240,6 +241,5 @@ test("evita_dom_tests") {
     "//evita/dom/testing:test_support",
     "//evita/dom/text:test_files",
     "//evita/dom/timing:test_files",
-    "//evita/dom/visuals:test_files",
   ]
 }

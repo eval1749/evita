@@ -2,14 +2,47 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+css_gen_dir = "$root_gen_dir/evita/dom/visuals"
+
 source_set("visuals") {
   sources = [
+    "$css_gen_dir/css_value_simple_parsers.cc",
+    "css_value_parsers.cc",
     "node_handle.cc",
     "node_handle.h",
+    "node_handle_style.cc",
+    "node_handle_style.h",
   ]
 
   public_deps = [
     "//evita/visuals/dom",
+  ]
+
+  deps = [
+    ":css_properties",
+  ]
+}
+
+action("css_properties") {
+  script = "make_css_style.py"
+
+  inputs = [
+    "//evita/visuals/css/properties.in",
+    "templates/CSSStyleDeclaration.idl",
+    "templates/css_style_declaration.js",
+    "templates/css_value_simple_parsers.cc",
+  ]
+
+  outputs = [
+    "$css_gen_dir/CSSStyleDeclaration.idl",
+    "$css_gen_dir/css_style_declaration.js",
+    "$css_gen_dir/css_value_simple_parsers.cc",
+  ]
+
+  args = [
+    "--output-directory",
+    rebase_path("$css_gen_dir"),
+    rebase_path("//evita/visuals/css/properties.in", root_build_dir),
   ]
 }
 

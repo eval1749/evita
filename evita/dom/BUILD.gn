@@ -126,6 +126,7 @@ source_set("dom") {
 action("dom_jslib_cc") {
   deps = [
     ":check_jslib",
+    "//evita/dom/visuals:css_properties",
   ]
   script = "make_get_jslib.py"
   outputs = [
@@ -171,6 +172,7 @@ action("dom_v8_strings_cc") {
 action("check_jslib") {
   deps = [
     "//evita/dom/bindings:js_externs",
+    "//evita/dom/visuals:css_properties",
   ]
 
   js_files = js_defs_files + js_lib_files

@@ -76,6 +76,7 @@ js_lib_files = [
   "trace_logger.js",
 
   "visuals/node.js",
+  "$root_gen_dir/evita/dom/visuals/css_style_declaration.js",
   "visuals/document.js",
   "visuals/element.js",
   "visuals/text.js",

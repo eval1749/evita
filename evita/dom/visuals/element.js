@@ -13,6 +13,10 @@ class Element extends Node {
     super(document, handle);
     /** @const @type {string} id */
     this.id_ = id;
+    /** @type {Map<number, string>} */
+    this.rawStyle_ = new Map();
+    /** @type {CSSStyleDeclaration} */
+    this.style_ = null;
     /** @const @type {string} id */
     this.tagName_ = tagName;
   }
@@ -25,6 +29,34 @@ class Element extends Node {
 
   /** @override @return {string} */
   get nodeNmae() { return this.tagName; }
+
+  /** @return {!CSSStyleDeclaration} */
+  get style() {
+    this.reloadRawStyle(NodeHandle.getInlineStyle(this.handle_));
+    return /** @type {!CSSStyleDeclaration} */(this.style_);
+  }
+
+  /** @param {!CSSStyleDeclaration} newStyle */
+  set style(newStyle) {
+    this.reloadRawStyle(newStyle.rawStyle_);
+    NodeHandle.setInlineStyle(
+        this.handle_,
+       /** @type {!Map.<number, string>} */(this.rawStyle_));
+  }
+
+  /**
+   * @private
+   * @param {!Map<number, string>} newRawStyle
+   */
+  reloadRawStyle(newRawStyle) {
+    if (!this.style_) {
+      this.rawStyle_ = new Map();
+      this.style_ = new CSSStyleDeclaration(this.rawStyle_, this);
+    }
+    this.rawStyle_.clear();
+    for (const key of newRawStyle.keys())
+      this.rawStyle_.set(key, newRawStyle.get(key) || '');
+  }
 
   /** @return {string} */
   toString() {

@@ -85,7 +85,7 @@ class StyleTree::Impl final {
   void AddObserver(StyleTreeObserver* observer);
   void Clear();
   const css::Style& ComputedStyleOf(const Node& node) const;
-  void MarkDirty(const Element& element);
+  void MarkDirty(const Node& node);
   void RemoveObserver(StyleTreeObserver* observer);
   void UpdateIfNeeded();
 
@@ -202,10 +202,10 @@ void StyleTree::Impl::IncrementVersionIfNeeded(Context* context) {
   ++version_;
 }
 
-void StyleTree::Impl::MarkDirty(const Element& element) {
+void StyleTree::Impl::MarkDirty(const Node& node) {
   state_ = StyleTreeState::Dirty;
-  GetOrNewItem(element)->is_dirty = true;
-  for (const auto& ancestor : Node::Ancestors(element)) {
+  GetOrNewItem(node)->is_dirty = true;
+  for (const auto& ancestor : Node::Ancestors(node)) {
     const auto item = GetOrNewItem(*ancestor);
     if (item->is_child_dirty)
       return;
@@ -416,6 +416,10 @@ void StyleTree::DidAddClass(const Element& element,
   impl_->MarkDirty(element);
 }
 
+void StyleTree::DidAppendChild(const ContainerNode& parent, const Node& child) {
+  impl_->MarkDirty(parent);
+}
+
 void StyleTree::DidChangeInlineStyle(const Element& element,
                                      const css::Style* old_style) {
   // TODO(eval1749): Implement shortcut for
@@ -424,6 +428,16 @@ void StyleTree::DidChangeInlineStyle(const Element& element,
   //  - border color change
   // Since above changes don't affect layout.
   impl_->MarkDirty(element);
+}
+
+void StyleTree::DidInsertBefore(const ContainerNode& parent,
+                                const Node& child,
+                                const Node& ref_child) {
+  impl_->MarkDirty(parent);
+}
+
+void StyleTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
+  impl_->MarkDirty(parent);
 }
 
 }  // namespace visuals

@@ -74,8 +74,13 @@ class StyleTree final : public css::MediaObserver,
 
   // DocumentObserver
   void DidAddClass(const Element& element, const base::string16& name);
+  void DidAppendChild(const ContainerNode& parent, const Node& child) final;
   void DidChangeInlineStyle(const Element& element,
                             const css::Style* old_style) final;
+  void DidInsertBefore(const ContainerNode& parent,
+                       const Node& child,
+                       const Node& ref_child) final;
+  void DidRemoveChild(const ContainerNode& parent, const Node& child) final;
 
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;

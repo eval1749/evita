@@ -34,7 +34,7 @@ source_set("ui") {
   ]
 
   deps = [
-    ":widget"
+    ":widget",
   ]
 }
 
@@ -48,26 +48,6 @@ source_set("widget") {
     "base/ime/text_input_client_win.h",
     "base/ime/text_input_delegate.cc",
     "base/ime/text_input_delegate.h",
-    "animation/animatable.cc",
-    "animation/animatable.h",
-    "animation/animatable_window.cc",
-    "animation/animatable_window.h",
-    "animation/animatables.cc",
-    "animation/animatables.h",
-    "animation/animation_frame_handler.cc",
-    "animation/animation_frame_handler.h",
-    "animation/animation_group.cc",
-    "animation/animation_group.h",
-    "animation/animation_group_member.cc",
-    "animation/animation_group_member.h",
-    "animation/animation_observer.cc",
-    "animation/animation_observer.h",
-    "animation/animation_scheduler.cc",
-    "animation/animation_scheduler.h",
-    "animation/animation_value.cc",
-    "animation/animation_value.h",
-    "animation/animator.cc",
-    "animation/animator.h",
     "compositor/compositor.cc",
     "compositor/compositor.h",
     "compositor/layer.cc",
@@ -108,5 +88,6 @@ source_set("widget") {
     "//base",
     "//common",
     "//evita/gfx",
+    "//evita/ui/animation",
   ]
 }

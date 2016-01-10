@@ -1,0 +1,45 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("animation") {
+  sources = [
+    "animatable.cc",
+    "animatable.h",
+    "animatable_window.cc",
+    "animatable_window.h",
+    "animatables.cc",
+    "animatables.h",
+    "animation_group.cc",
+    "animation_group.h",
+    "animation_group_member.cc",
+    "animation_group_member.h",
+    "animation_observer.cc",
+    "animation_observer.h",
+    "animation_scheduler.cc",
+    "animation_scheduler.h",
+    "animation_value.cc",
+    "animation_value.h",
+    "animator.cc",
+    "animator.h",
+  ]
+
+  deps = [
+    "//base",
+  ]
+
+  public_deps = [
+    ":public",
+  ]
+}
+
+source_set("public") {
+  sources = [
+    "animation_frame_handler.cc",
+    "animation_frame_handler.h",
+  ]
+
+  deps = [
+    "//base",
+  ]
+}

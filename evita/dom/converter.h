@@ -42,6 +42,15 @@ struct Converter<text::Offset> {
                                    const text::Offset& line_and_column);
 };
 
+template <>
+struct Converter<v8::Local<v8::Map>> {
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   v8::Local<v8::Map> val);
+  static bool FromV8(v8::Isolate* isolate,
+                     v8::Local<v8::Value> val,
+                     v8::Local<v8::Map>* out);
+};
+
 }  // namespace gin
 
 #endif  // EVITA_DOM_CONVERTER_H_

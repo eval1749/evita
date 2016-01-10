@@ -53,4 +53,19 @@ v8::Local<v8::Value> Converter<text::Offset>::ToV8(v8::Isolate* isolate,
   return v8::Integer::New(isolate, offset.value()).As<v8::Value>();
 }
 
+v8::Local<v8::Value> Converter<v8::Local<v8::Map>>::ToV8(
+    v8::Isolate* isolate,
+    v8::Local<v8::Map> val) {
+  return val.As<v8::Value>();
+}
+
+bool Converter<v8::Local<v8::Map>>::FromV8(v8::Isolate* isolate,
+                                           v8::Local<v8::Value> val,
+                                           v8::Local<v8::Map>* out) {
+  if (!val->IsMap())
+    return false;
+  *out = v8::Local<v8::Map>::Cast(val);
+  return true;
+}
+
 }  // namespace gin

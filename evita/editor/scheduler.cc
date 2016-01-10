@@ -77,7 +77,9 @@ Scheduler::Scheduler(domapi::ViewEventHandler* script_delegate)
   ui::AnimationScheduler::GetInstance()->SetScheduler(this);
 }
 
-Scheduler::~Scheduler() {}
+Scheduler::~Scheduler() {
+  ui::AnimationScheduler::GetInstance()->SetScheduler(nullptr);
+}
 
 void Scheduler::BeginFrame() {
   DCHECK_EQ(State::Waiting, state_);

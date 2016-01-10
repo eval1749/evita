@@ -160,7 +160,7 @@ CanvasWindow::CanvasWindow() {}
 CanvasWindow::~CanvasWindow() {}
 
 // ui::AnimationFrameHanndler
-void CanvasWindow::DidBeginAnimationFrame(base::Time) {
+void CanvasWindow::DidBeginAnimationFrame(base::Time now) {
   if (!canvas_) {
     canvas_.reset(layer()->CreateCanvas());
     DidChangeCanvas();

@@ -460,7 +460,7 @@ void BoxTree::DidInsertBefore(const ContainerNode& parent,
   impl_->MarkDirty(parent);
 }
 
-void BoxTree::WillRemoveChild(const ContainerNode& parent, const Node& child) {
+void BoxTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
   impl_->MarkDirty(parent);
 }
 

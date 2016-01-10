@@ -52,7 +52,7 @@ class BoxTree final : public css::MediaObserver,
   void DidInsertBefore(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;
-  void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
+  void DidRemoveChild(const ContainerNode& parent, const Node& child) final;
 
   // StyleTreeObserver
   void DidChangeComputedStyle(const Element& element,

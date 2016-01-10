@@ -7,6 +7,7 @@ import os
 import re
 import string
 import sys
+from css_properties import parse_css_model
 
 # module_path = evita/visuals/css
 module_path = os.path.dirname(os.path.realpath(__file__))
@@ -44,169 +45,6 @@ def initialize_jinja_env(cache_dir):
 
 ######################################################################
 #
-# CSS Value Types
-#
-PRIMITIVE_TYPES = frozenset([
-    'background',
-    'border',
-    'color',
-    'length',
-    'margin',
-    'padding',
-    'percentage',
-])
-
-
-class CssType(object):
-
-    def __init__(self, text):
-        self._name = capitalize(text)
-        self._text = text
-        self._underscore = text.replace('-', '_')
-
-    @property
-    def initial_value(self):
-        return '/* no initial value for %s */' % self._name
-
-    @property
-    def is_compound(self):
-        return False
-
-    @property
-    def is_enum(self):
-        return False
-
-    @property
-    def is_keyword(self):
-        return False
-
-    @property
-    def is_primitive(self):
-        return False
-
-    @property
-    def members(self):
-        return []
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def text(self):
-        return self._text
-
-    @property
-    def underscore(self):
-        return self._underscore
-
-    def to_parameter_type(self):
-        return 'const %s&' % self.name
-
-    def __cmp__(self, other):
-        return cmp(self.name, other.name)
-
-    def __str__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.name)
-
-
-class CssCompoundType(CssType):
-
-    def __init__(self, name, members):
-        super(CssCompoundType, self).__init__(name)
-        if not members[0].is_keyword:
-            raise Exception('No initial value for %s' % name)
-        self._initial_value = members[0].name
-        self._members = sorted(members)
-
-    @property
-    def initial_value(self):
-        return self._initial_value
-
-    @property
-    def is_compound(self):
-        return True
-
-    @property
-    def members(self):
-        return self._members
-
-
-class CssEnumType(CssType):
-
-    def __init__(self, name, members):
-        super(CssEnumType, self).__init__(name)
-        self._initial_value = members[0].name
-        self._members = sorted(members)
-
-    @property
-    def initial_value(self):
-        return self._initial_value
-
-    @property
-    def members(self):
-        return self._members
-
-    @property
-    def is_enum(self):
-        return True
-
-
-class CssKeywordType(CssType):
-
-    def __init__(self, text):
-        super(CssKeywordType, self).__init__(text)
-        self._text = text
-
-    @property
-    def is_keyword(self):
-        return True
-
-    @property
-    def text(self):
-        return self._text
-
-    def to_parameter_type(self):
-        return '/* KEYWORD %s */' % self.text
-
-
-class CssPrimitiveType(CssType):
-
-    def __init__(self, name):
-        super(CssPrimitiveType, self).__init__(name)
-
-    @property
-    def is_primitive(self):
-        return True
-
-
-class CssPropty(object):
-
-    def __init__(self, text, css_type):
-        self._css_type = css_type
-        self._name = capitalize(text)
-        self._text = text
-        self._underscore = text.replace('-', '_')
-
-    @property
-    def css_type(self):
-        return self._css_type
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def text(self):
-        return self._text
-
-    @property
-    def underscore(self):
-        return self._underscore
-
-
-######################################################################
-#
 # Generators
 #
 class Generator(object):
@@ -237,23 +75,17 @@ class Generator(object):
 
     def make_context(self, model):
         return {
-            'primitives': self.make_primitives(),
+            'primitives': self.make_primitives(model),
             'properties': self.make_properties(model),
             'types': self.make_types(model),
         }
 
-    def make_primitives(self):
-        return [
-            {
-                'Name': capitalize(name),
-                'name': name,
-            }
-            for name in sorted([name for name in PRIMITIVE_TYPES])
-        ]
+    def make_primitives(self, model):
+        return model.primitive_types
 
     def make_properties(self, model):
         properties = []
-        for css_property in model['properties']:
+        for css_property in model.properties:
             properties.append({
                 'Name': css_property.name,
                 'Parameter': 'const %s&' % css_property.name,
@@ -279,58 +111,7 @@ class Generator(object):
         }
 
     def make_types(self, model):
-        return [self.make_type(css_type) for css_type in model['types']]
-
-
-######################################################################
-#
-# Parser
-#
-def parse_model(lines):
-    model = dict()
-    model['properties'] = []
-    model['types'] = []
-    for raw_line in lines:
-        line = raw_line.lstrip().rstrip()
-        if len(line) == 0 or line[0] == '#':
-            continue
-        tokens = line.split(' ')
-        property_name = tokens[0].replace(':', '')
-        css_type = parse_type(property_name, tokens[1:])
-        model['types'].append(css_type)
-        css_property = CssPropty(property_name, css_type)
-        model['properties'].append(css_property)
-    return model
-
-
-def parse_type(property_name, tokens):
-    """Parse 'property-name: token+' to CssType"""
-    css_type_name = property_name
-    if len(tokens) == 1:
-        return parse_type_name(tokens[0])
-    keywords = [CssKeywordType(token) for token in tokens if token[0] != '<']
-    members = [parse_type_name(token) for token in tokens if token[0] == '<']
-    if len(members) == 0:
-        return CssEnumType(css_type_name, keywords)
-    return CssCompoundType(css_type_name, keywords + members)
-
-
-def parse_type_name(token):
-    assert token[0] == '<'
-    assert token[-1] == '>'
-    name = token[1:-1]
-    if name in PRIMITIVE_TYPES:
-        return CssPrimitiveType(name)
-    return CssType(name)
-
-
-######################################################################
-#
-# Utility Functions
-#
-def capitalize(text):
-    """Convert foo-bar-baz to FooBarBaz."""
-    return string.capwords(text, '-').replace('-', '')
+        return [self.make_type(css_type) for css_type in model.types]
 
 
 ######################################################################
@@ -357,7 +138,7 @@ def parse_options():
 
 def main():
     options, input_file_name = parse_options()
-    model = parse_model(open(input_file_name, 'rt').readlines())
+    model = parse_css_model(open(input_file_name, 'rt').readlines())
     Generator(options).generate(model)
 
 if __name__ == '__main__':

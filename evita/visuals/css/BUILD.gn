@@ -68,6 +68,7 @@ action("properties") {
   script = "make_properties.py"
 
   inputs = [
+    "css_properties.py",
     "properties.in",
     "make_properties.py",
     "templates/properties.cc",

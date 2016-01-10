@@ -106,6 +106,7 @@ source_set("dom") {
     "//evita/dom/text",
     "//evita/dom/timing",
     "//evita/dom/visuals",
+    "//evita/ui/animation:public",
     "//evita/v8_glue",
     "//regex",
   ]

@@ -14,6 +14,7 @@
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/scheduler_client.h"
+#include "evita/ui/animation/animation_frame_handler.h"
 
 namespace base {
 class Thread;
@@ -29,7 +30,8 @@ class Scheduler;
 class SchedulerImpl;
 
 class ScriptThread final : public domapi::ViewEventHandler,
-                           public SchedulerClient {
+                           public SchedulerClient,
+                           public ui::AnimationFrameHandler {
  public:
   ScriptThread(domapi::ViewDelegate* view_delegate,
                domapi::IoDelegate* io_delegate);
@@ -73,8 +75,15 @@ class ScriptThread final : public domapi::ViewEventHandler,
   void WillDestroyViewHost() final;
 
   // SchedulerClient
+  void DidCancelAnimationFrame() final;
   void DidUpdateDom() final;
+  void DidRequestAnimationFrame() final;
 
+  // ui::AnimationFrameHandler
+  const char* GetAnimationFrameType() const final;
+  void DidBeginAnimationFrame(base::Time time) final;
+
+  int animation_frame_request_count_ = 0;
   domapi::IoDelegate* const io_delegate_;
   const std::unique_ptr<SchedulerImpl> scheduler_;
   const std::unique_ptr<base::Thread> thread_;

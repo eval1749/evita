@@ -26,10 +26,12 @@ class SchedulerImpl final : public Scheduler {
   explicit SchedulerImpl(SchedulerClient* scheduler_client);
   ~SchedulerImpl() final;
 
+  void DidBeginAnimationFrame(const base::Time& time);
   void RunIdleTasks();
   void Start(base::MessageLoop* script_message_loop);
 
  private:
+  class AnimationFrameCallbackQueue;
   class IdleTaskQueue;
   enum class State;
   class TaskQueue;
@@ -38,14 +40,18 @@ class SchedulerImpl final : public Scheduler {
   void StartFrame(const base::Time& deadline);
 
   // dom::Scheduler
+  void CancelAnimationFrame(int request_id) final;
   void CancelIdleTask(int task_id) final;
   void DidBeginFrame(const base::Time& deadline) final;
   void DidEnterViewIdle(const base::Time& deadline) final;
   void DidExitViewIdle() final;
   IdleDeadlineProvider* GetIdleDeadlineProvider() final;
+  int RequestAnimationFrame(
+      std::unique_ptr<AnimationFrameCallback> request) final;
   int ScheduleIdleTask(const IdleTask& task) final;
   void ScheduleTask(const base::Closure& task) final;
 
+  std::unique_ptr<AnimationFrameCallbackQueue> animation_frame_callback_queue_;
   std::unique_ptr<IdleTaskQueue> idle_task_queue_;
   std::unique_ptr<TaskQueue> normal_task_queue_;
   SchedulerClient* const scheduler_client_;

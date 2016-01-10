@@ -38,16 +38,22 @@ class MockScheduler final : public IdleDeadlineProvider, public Scheduler {
   bool IsIdle() const final { return !did_timeout_; }
 
   // dom::Scheduler
+  void CancelAnimationFrame(int callback_id) final;
   void CancelIdleTask(int task_id) final;
   void DidBeginFrame(const base::Time& deadline) final { NOTREACHED(); }
   void DidEnterViewIdle(const base::Time& deadline) final { NOTREACHED(); }
   void DidExitViewIdle() final { NOTREACHED(); }
   IdleDeadlineProvider* GetIdleDeadlineProvider() final { return this; }
+  int RequestAnimationFrame(
+      std::unique_ptr<AnimationFrameCallback> callback) final;
   void RunIdleTasks() final { NOTREACHED(); }
   int ScheduleIdleTask(const IdleTask& task) final;
   void ScheduleTask(const base::Closure& task) final;
 
+  std::unordered_map<int, std::unique_ptr<AnimationFrameCallback>>
+      animation_frame_callback_map_;
   bool did_timeout_;
+  int last_animation_frame_callback_id_ = 0;
   std::queue<IdleTask*> ready_idle_tasks_;
   std::queue<base::Closure> normal_tasks_;
   std::unordered_map<int, IdleTask*> idle_task_map_;

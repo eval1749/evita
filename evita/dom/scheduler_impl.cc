@@ -4,6 +4,7 @@
 
 #include <queue>
 #include <unordered_map>
+#include <vector>
 
 #include "evita/dom/scheduler_impl.h"
 
@@ -14,10 +15,57 @@
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/scheduler_client.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/timing/animation_frame_callback.h"
 #include "evita/dom/timing/idle_deadline_provider.h"
 #include "evita/dom/timing/idle_task.h"
 
 namespace dom {
+
+//////////////////////////////////////////////////////////////////////
+//
+// SchedulerImpl::AnimationFrameCallbackQueue
+//
+class SchedulerImpl::AnimationFrameCallbackQueue final {
+ public:
+  AnimationFrameCallbackQueue() = default;
+  ~AnimationFrameCallbackQueue() = default;
+
+  void Cancel(int callback_id);
+  void DidBeginAnimationFrame(const base::Time& time);
+  int Give(std::unique_ptr<AnimationFrameCallback> callback);
+
+ private:
+  int last_callback_id_ = 0;
+  std::unordered_map<int, std::unique_ptr<AnimationFrameCallback>>
+      callback_map_;
+
+  DISALLOW_COPY_AND_ASSIGN(AnimationFrameCallbackQueue);
+};
+
+void SchedulerImpl::AnimationFrameCallbackQueue::Cancel(int callback_id) {
+  const auto& it = callback_map_.find(callback_id);
+  if (it == callback_map_.end())
+    return;
+  callback_map_.erase(it);
+}
+
+void SchedulerImpl::AnimationFrameCallbackQueue::DidBeginAnimationFrame(
+    const base::Time& time) {
+  std::vector<std::unique_ptr<AnimationFrameCallback>> callbacks;
+  callbacks.reserve(callback_map_.size());
+  for (auto& pair : callback_map_)
+    callbacks.emplace_back(std::move(pair.second));
+  callback_map_.clear();
+  for (const auto& callback : callbacks)
+    callback->Run(time);
+}
+
+int SchedulerImpl::AnimationFrameCallbackQueue::Give(
+    std::unique_ptr<AnimationFrameCallback> callback) {
+  ++last_callback_id_;
+  callback_map_.emplace(last_callback_id_, std::move(callback));
+  return last_callback_id_;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -223,8 +271,17 @@ void SchedulerImpl::StartFrame(const base::Time& deadline) {
 }
 
 // dom::Scheduler
+void SchedulerImpl::CancelAnimationFrame(int callback_id) {
+  animation_frame_callback_queue_->Cancel(callback_id);
+  scheduler_client_->DidCancelAnimationFrame();
+}
+
 void SchedulerImpl::CancelIdleTask(int task_id) {
   idle_task_queue_->CancelTask(task_id);
+}
+
+void SchedulerImpl::DidBeginAnimationFrame(const base::Time& time) {
+  animation_frame_callback_queue_->DidBeginAnimationFrame(time);
 }
 
 void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
@@ -247,6 +304,15 @@ void SchedulerImpl::DidExitViewIdle() {
 
 IdleDeadlineProvider* SchedulerImpl::GetIdleDeadlineProvider() {
   return idle_task_queue_.get();
+}
+
+int SchedulerImpl::RequestAnimationFrame(
+    std::unique_ptr<AnimationFrameCallback> callback) {
+  TRACE_EVENT0("script", "SchedulerImpl::RequestAnimationFrame");
+  const auto callback_id =
+      animation_frame_callback_queue_->Give(std::move(callback));
+  scheduler_client_->DidRequestAnimationFrame();
+  return callback_id;
 }
 
 void SchedulerImpl::RunIdleTasks() {

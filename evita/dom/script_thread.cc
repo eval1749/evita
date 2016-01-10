@@ -181,9 +181,37 @@ void ScriptThread::WillDestroyViewHost() {
 }
 
 // SchedulerClient
+void ScriptThread::DidCancelAnimationFrame() {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  DCHECK_GT(animation_frame_request_count_, 0);
+  --animation_frame_request_count_;
+  if (animation_frame_request_count_)
+    return;
+  CancelAnimationFrameRequest();
+}
+
 void ScriptThread::DidUpdateDom() {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   view_delegate_->DidUpdateDom();
+}
+
+void ScriptThread::DidRequestAnimationFrame() {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  ++animation_frame_request_count_;
+  if (animation_frame_request_count_ == 1)
+    return;
+  RequestAnimationFrame();
+}
+
+// ui::AnimationFrameHandler
+const char* ScriptThread::GetAnimationFrameType() const {
+  return "ScriptThread";
+}
+
+void ScriptThread::DidBeginAnimationFrame(base::Time time) {
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
+  ScheduleScriptTask(base::Bind(&SchedulerImpl::DidBeginAnimationFrame,
+                                base::Unretained(scheduler_.get()), time));
 }
 
 }  // namespace dom

@@ -37,6 +37,7 @@ interface_idl_files = [
   "//evita/dom/forms/RadioButtonControl.idl",
   "//evita/dom/forms/TextFieldControl.idl",
   "//evita/dom/forms/TextFieldSelection.idl",
+
   # TODO(eval1749): We should use "Runnable.idl" instead of "types_externs.js".
   #"//evita/dom/jslib/Runnable.idl",
   "//evita/dom/jslib/TaskScheduler.idl",
@@ -55,6 +56,7 @@ interface_idl_files = [
   "//evita/dom/text/TextMutationRecord.idl",
   "//evita/dom/text/TextRange.idl",
   "//evita/dom/text/RegularExpression.idl",
+
   # TODO(eval1749): binding generator and js extern generator should support
   # typedef only file.
   #"//evita/dom/timing/DOMHighResTimeStamp.idl",
@@ -63,6 +65,7 @@ interface_idl_files = [
   "//evita/dom/timers/OneShotTimer.idl",
   "//evita/dom/timers/RepeatingTimer.idl",
   "//evita/dom/timers/Timer.idl",
+
   #"//evita/dom/visuals/Document.idl",
   #"//evita/dom/visuals/Element.idl",
   #"//evita/dom/visuals/Node.idl",

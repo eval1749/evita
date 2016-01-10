@@ -41,6 +41,7 @@ test("evita_layout_tests") {
   deps = [
     ":layout",
     "//base/test:run_all_unittests",
+
     # TODO(eval1749): We should make layout independent from
     # "//evita/application".
     "//evita:application",

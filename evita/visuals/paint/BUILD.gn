@@ -22,7 +22,7 @@ source_set("paint") {
 source_set("test_files") {
   testonly = true
   sources = [
-     "painter_test.cc",
+    "painter_test.cc",
   ]
 
   deps = [

@@ -19,8 +19,8 @@ source_set("css") {
 source_set("tests") {
   testonly = true
   sources = [
-    "style_test.cc",
     "style_sheet_test.cc",
+    "style_test.cc",
   ]
 
   public_deps = [

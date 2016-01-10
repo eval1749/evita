@@ -10,6 +10,8 @@
 
 #include "base/macros.h"
 #include "evita/visuals/css/media_observer.h"
+#include "evita/visuals/dom/document_observer.h"
+#include "evita/visuals/style/style_tree_observer.h"
 
 namespace visuals {
 
@@ -23,7 +25,9 @@ class StyleTree;
 //
 // BoxTree represents a CSS Box tree for document(node tree) with style tree.
 //
-class BoxTree final : public css::MediaObserver {
+class BoxTree final : public css::MediaObserver,
+                      public DocumentObserver,
+                      public StyleTreeObserver {
  public:
   BoxTree(const Document& document, const StyleTree& style_tree);
   ~BoxTree();
@@ -41,6 +45,20 @@ class BoxTree final : public css::MediaObserver {
   void DidChangeViewportSize() final;
   void DidChangeSystemMetrics() final;
 
+  // DocumentObserver
+  void DidAppendChild(const ContainerNode& parent, const Node& child) final;
+  void DidChangeInlineStyle(const Element& element,
+                            const css::Style* old_style) final;
+  void DidInsertBefore(const ContainerNode& parent,
+                       const Node& child,
+                       const Node& ref_child) final;
+  void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
+
+  // StyleTreeObserver
+  void DidChangeComputedStyle(const Element& element,
+                              const css::Style& old_style) final;
+
+  // An implementation of |BoxTree|.
   std::unique_ptr<Impl> impl_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxTree);

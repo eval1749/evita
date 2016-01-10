@@ -14,7 +14,6 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_visitor.h"
 #include "evita/visuals/dom/text.h"
@@ -23,7 +22,6 @@
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/style/style_tree.h"
-#include "evita/visuals/style/style_tree_observer.h"
 
 namespace visuals {
 
@@ -78,12 +76,13 @@ struct Context {
 //
 // BoxTree::Impl
 //
-class BoxTree::Impl final : public DocumentObserver, public StyleTreeObserver {
+class BoxTree::Impl final {
  public:
   Impl(const Document& document, const StyleTree& style_tree);
-  ~Impl() final;
+  ~Impl();
 
   const Document& document() const { return style_tree_.document(); }
+  const css::Media& media() const { return style_tree_.media(); }
   RootBox* root_box() const;
   const StyleTree& style_tree() const { return style_tree_; }
   int version() const { return version_; }
@@ -114,19 +113,6 @@ class BoxTree::Impl final : public DocumentObserver, public StyleTreeObserver {
   void UpdateNode(Context* context, const Node& node);
   void UpdateNodeIfNeeded(Context* context, const Node& node);
 
-  // DocumentObserver
-  void DidAppendChild(const ContainerNode& parent, const Node& child) final;
-  void DidChangeInlineStyle(const Element& element,
-                            const css::Style* old_style) final;
-  void DidInsertBefore(const ContainerNode& parent,
-                       const Node& child,
-                       const Node& ref_child) final;
-  void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
-
-  // StyleTreeObserver
-  void DidChangeComputedStyle(const Element& element,
-                              const css::Style& old_style) final;
-
   std::unordered_map<const Node*, std::unique_ptr<Box>> box_map_;
   const Document& document_;
   RootBox* const root_box_;
@@ -143,13 +129,9 @@ BoxTree::Impl::Impl(const Document& document, const StyleTree& style_tree)
       state_(BoxTreeState::Dirty),
       style_tree_(style_tree) {
   box_map_.emplace(&document_, std::unique_ptr<Box>(root_box_));
-  document_.AddObserver(this);
-  style_tree_.AddObserver(this);
 }
 
 BoxTree::Impl::~Impl() {
-  document_.RemoveObserver(this);
-  style_tree_.RemoveObserver(this);
   BoxEditor().RemoveDescendants(root_box_);
 }
 
@@ -418,47 +400,21 @@ void BoxTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
   AssignBoxToNode(context, node);
 }
 
-// DocumentObserver
-void BoxTree::Impl::DidAppendChild(const ContainerNode& parent,
-                                   const Node& child) {
-  MarkDirty(parent);
-}
-
-void BoxTree::Impl::DidChangeInlineStyle(const Element& element,
-                                         const css::Style* old_style) {
-  // TODO(eval1749): We should not clear root box to optimize left/top
-  // changes.
-  MarkDirty(element);
-}
-
-void BoxTree::Impl::DidInsertBefore(const ContainerNode& parent,
-                                    const Node& child,
-                                    const Node& ref_child) {
-  MarkDirty(parent);
-}
-
-void BoxTree::Impl::WillRemoveChild(const ContainerNode& parent,
-                                    const Node& child) {
-  MarkDirty(parent);
-}
-
-// StyleTreeObserver
-void BoxTree::Impl::DidChangeComputedStyle(const Element& element,
-                                           const css::Style& old_style) {
-  MarkDirty(element);
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // BoxTree
 //
 BoxTree::BoxTree(const Document& document, const StyleTree& style_tree)
     : impl_(new Impl(document, style_tree)) {
-  style_tree.media().AddObserver(this);
+  impl_->document().AddObserver(this);
+  impl_->media().AddObserver(this);
+  impl_->style_tree().AddObserver(this);
 }
 
 BoxTree::~BoxTree() {
-  impl_->style_tree().media().RemoveObserver(this);
+  impl_->document().RemoveObserver(this);
+  impl_->media().RemoveObserver(this);
+  impl_->style_tree().RemoveObserver(this);
 }
 
 RootBox* BoxTree::root_box() const {
@@ -484,6 +440,34 @@ void BoxTree::DidChangeViewportSize() {
 
 void BoxTree::DidChangeSystemMetrics() {
   // Note: system metrics changes affect computed style.
+}
+
+// DocumentObserver
+void BoxTree::DidAppendChild(const ContainerNode& parent, const Node& child) {
+  impl_->MarkDirty(parent);
+}
+
+void BoxTree::DidChangeInlineStyle(const Element& element,
+                                   const css::Style* old_style) {
+  // TODO(eval1749): We should not clear root box to optimize left/top
+  // changes.
+  impl_->MarkDirty(element);
+}
+
+void BoxTree::DidInsertBefore(const ContainerNode& parent,
+                              const Node& child,
+                              const Node& ref_child) {
+  impl_->MarkDirty(parent);
+}
+
+void BoxTree::WillRemoveChild(const ContainerNode& parent, const Node& child) {
+  impl_->MarkDirty(parent);
+}
+
+// StyleTreeObserver
+void BoxTree::DidChangeComputedStyle(const Element& element,
+                                     const css::Style& old_style) {
+  impl_->MarkDirty(element);
 }
 
 }  // namespace visuals

@@ -169,6 +169,8 @@ IDL_TO_CPP_TYPE_MAP = {
     'DataTransferData': CppType('DataTransferData', is_pointer=True),
     'EventListener': CppType('v8::Handle<v8::Object>'),
     'LineAndColumn': CppType('text::LineAndColumn'),
+    # For NodeHandle.getInlineStyle
+    'Map': CppType('v8::Handle<v8::Map>'),
     # For Window.prototype.compute_
     'Point': CppType('domapi::FloatPoint'),
     # For Window.prototype.compute_

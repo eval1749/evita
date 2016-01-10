@@ -8,12 +8,12 @@
 
 namespace {
 
-class StyleTest : public dom::AbstractDomTest {
+class TextStyleTest : public dom::AbstractDomTest {
  public:
-  ~StyleTest() override = default;
+  ~TextStyleTest() override = default;
 
  protected:
-  StyleTest() {
+  TextStyleTest() {
     auto const style = css::Style::Default();
     style->set_bgcolor(css::Color(255, 255, 255));
     style->set_color(css::Color(0x00, 0x00, 0x00));
@@ -21,10 +21,10 @@ class StyleTest : public dom::AbstractDomTest {
   }
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(StyleTest);
+  DISALLOW_COPY_AND_ASSIGN(TextStyleTest);
 };
 
-TEST_F(StyleTest, DefaultStyle) {
+TEST_F(TextStyleTest, DefaultStyle) {
   EXPECT_SCRIPT_EQ("function", "typeof(Style)");
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"
@@ -36,7 +36,7 @@ TEST_F(StyleTest, DefaultStyle) {
   EXPECT_SCRIPT_EQ("undefined", "style.fontWeight");
 }
 
-TEST_F(StyleTest, SetStyle) {
+TEST_F(TextStyleTest, SetStyle) {
   EXPECT_SCRIPT_EQ("function", "typeof(Style)");
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"

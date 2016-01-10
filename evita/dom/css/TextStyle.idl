@@ -9,7 +9,7 @@ enum TextDecoration {
   "imeinput", "imeactive", "imeinactive1", "imeinactive2"
 };
 
-interface Style {
+interface TextStyle {
   long backgroundColor;
   long color;
   DOMString fontFamily;

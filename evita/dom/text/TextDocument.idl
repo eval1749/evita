@@ -141,7 +141,7 @@ interface TextDocument : EventTarget {
     void setSpelling(TextOffset start, TextOffset end, long spelling);
 
     [ImplementedAs=style_at]
-    Style styleAt(TextOffset offset);
+    TextStyle styleAt(TextOffset offset);
     void setSyntax(TextOffset start, TextOffset end, DOMString syntax);
 
     [ImplementedAs=syntax_at]

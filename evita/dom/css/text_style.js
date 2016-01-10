@@ -5,13 +5,13 @@
 /**
  * @constructor
  */
-global.Style = (function () {
-  return function Style() {
+global.TextStyle = (function () {
+  return function TextStyle() {
   };
 })();
 
-global.Style.prototype = Object.create(
-    /** @type {Object} */(Style.prototype), {
+global.TextStyle.prototype = Object.create(
+    /** @type {Object} */(TextStyle.prototype), {
   backgroundColor: {
     enumerable: true,
     writable: true

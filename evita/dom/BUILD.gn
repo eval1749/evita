@@ -14,7 +14,8 @@ source_set("dom") {
     "clipboard/data_transfer_item.cc",
     "clipboard/data_transfer_item_list.cc",
     "converter.cc",
-    "css/style.cc",
+    "css/text_style.cc",
+    "css/text_style.h",
     "dictionary.cc",
     "editor.cc",
     "encodings/text_decoder.cc",
@@ -195,7 +196,7 @@ action("check_jslib") {
 test("evita_dom_tests") {
   sources = [
     "base/ordered_set_test.cc",
-    "css/style_unittest.cc",
+    "css/text_style_test.cc",
     "editor_unittest.cc",
     "encodings/text_decoder_unittest.cc",
     "encodings/text_encoder_unittest.cc",

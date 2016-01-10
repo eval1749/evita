@@ -13,4 +13,4 @@
  *  textDecoration: (string|undefined)
  * }}
  */
-var Style;
+var TextStyle;

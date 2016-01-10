@@ -25,7 +25,7 @@ js_lib_files = [
 
   "bracket.js",
   "commander.js",
-  "css/style.js",
+  "css/text_style.js",
   "text/text_document.js",
   "text/text_document_file_io.js",
   "text/text_document_file_load.js",

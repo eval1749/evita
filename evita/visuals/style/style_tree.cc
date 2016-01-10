@@ -72,12 +72,14 @@ std::ostream& operator<<(std::ostream& ostream, StyleTreeState state) {
 class StyleTree::Impl final {
  public:
   Impl(const Document& document,
+       const css::Media& media,
        const std::vector<css::StyleSheet*>& style_sheets);
   ~Impl() = default;
 
   const Document& document() const { return document_; }
   const css::Style& initial_style() const { return *initial_style_; }
   bool is_dirty() const;
+  const css::Media& media() const { return media_; }
   int version() const { return version_; }
 
   void AddObserver(StyleTreeObserver* observer);
@@ -92,11 +94,13 @@ class StyleTree::Impl final {
     bool is_updated = false;
   };
 
+  std::unique_ptr<css::Style> ComputeStyleForDocument() const;
   std::unique_ptr<css::Style> ComputeStyleForElement(
       const Element& element) const;
   Item* GetOrNewItem(const Node& element);
   void IncrementVersionIfNeeded(Context* context);
   void UpdateChildren(Context* context, const ContainerNode& element);
+  void UpdateDocumentStyleIfNeeded(Context* context);
   void UpdateElement(Context* context, const Element& element);
   void UpdateElementIfNeeded(Context* context, const Element& element);
   void UpdateNodeIfNeeded(Context* context, const Node& node);
@@ -105,10 +109,11 @@ class StyleTree::Impl final {
   std::vector<std::unique_ptr<CompiledStyleSheet>> compiled_style_sheets_;
   const Document& document_;
   // |initial_style_| is computed from media provided values.
-  css::Style* const initial_style_;
+  css::Style* initial_style_ = nullptr;
   // TODO(eval1749): We should share |css::Style| objects for elements which
   // have same style, e.g. siblings.
   std::unordered_map<const Node*, std::unique_ptr<Item>> item_map_;
+  const css::Media& media_;
   base::ObserverList<StyleTreeObserver> observers_;
   StyleTreeState state_ = StyleTreeState::Dirty;
   int version_ = 0;
@@ -117,22 +122,11 @@ class StyleTree::Impl final {
 };
 
 StyleTree::Impl::Impl(const Document& document,
+                      const css::Media& media,
                       const std::vector<css::StyleSheet*>& style_sheets)
-    : document_(document), initial_style_(new css::Style()) {
-  // TODO(eval1749): We should get default color and background color from
-  // system metrics.
-  css::StyleEditor().SetBackground(initial_style_,
-                                   css::Background(css::Color()));
-  css::StyleEditor().SetColor(initial_style_, css::Color(0, 0, 0));
-  css::StyleEditor().SetDisplay(initial_style_, css::Display());
+    : document_(document), media_(media) {
   for (const auto& style_sheet : style_sheets)
     compiled_style_sheets_.emplace_back(new CompiledStyleSheet(*style_sheet));
-  DCHECK(initial_style().has_display())
-      << "initial style must have display property. " << initial_style();
-  const auto item = GetOrNewItem(document_);
-  item->is_child_dirty = false;
-  item->is_dirty = false;
-  item->style = std::move(std::unique_ptr<css::Style>(initial_style_));
 }
 
 bool StyleTree::Impl::is_dirty() const {
@@ -156,6 +150,19 @@ const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
     return *initial_style_;
   }
   return *it->second->style;
+}
+
+std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForDocument() const {
+  DCHECK_NE(StyleTreeState::Dirty, state_);
+  auto style = std::make_unique<css::Style>();
+  // TODO(eval1749): We should get default color and background color from
+  // system metrics.
+  css::StyleEditor().SetBackground(style.get(), css::Background(css::Color()));
+  css::StyleEditor().SetColor(style.get(), css::Color(0, 0, 0));
+  css::StyleEditor().SetDisplay(style.get(), css::Display());
+  DCHECK(style.get()->has_display())
+      << "initial style must have display property. " << initial_style();
+  return std::move(style);
 }
 
 std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
@@ -199,10 +206,7 @@ void StyleTree::Impl::MarkDirty(const Element& element) {
   state_ = StyleTreeState::Dirty;
   GetOrNewItem(element)->is_dirty = true;
   for (const auto& ancestor : Node::Ancestors(element)) {
-    const auto ancestor_element = ancestor->as<Element>();
-    if (!ancestor_element)
-      return;
-    const auto item = GetOrNewItem(*ancestor_element);
+    const auto item = GetOrNewItem(*ancestor);
     if (item->is_child_dirty)
       return;
     item->is_child_dirty = true;
@@ -226,6 +230,25 @@ void StyleTree::Impl::UpdateChildren(Context* context,
     }
     NOTREACHED() << "Unsupported node type " << child;
   }
+}
+
+void StyleTree::Impl::UpdateDocumentStyleIfNeeded(Context* context) {
+  const auto item = GetOrNewItem(document_);
+  if (!item->is_dirty) {
+    if (!item->is_child_dirty)
+      return;
+    for (const auto& child : document_.child_nodes())
+      UpdateNodeIfNeeded(context, *child);
+    return;
+  }
+  IncrementVersionIfNeeded(context);
+  item->is_child_dirty = false;
+  item->is_dirty = false;
+  const auto old_style = std::move(item->style);
+  item->style = std::move(ComputeStyleForDocument());
+  item->version = version_;
+  initial_style_ = item->style.get();
+  UpdateChildren(context, document_);
 }
 
 void StyleTree::Impl::UpdateElement(Context* context, const Element& element) {
@@ -278,8 +301,7 @@ void StyleTree::Impl::UpdateIfNeeded() {
   }
   state_ = StyleTreeState::Updating;
   Context context;
-  for (const auto& child : document_.child_nodes())
-    UpdateNodeIfNeeded(&context, *child);
+  UpdateDocumentStyleIfNeeded(&context);
   DCHECK(context.is_updated);
   state_ = StyleTreeState::Clean;
 }
@@ -309,11 +331,10 @@ void StyleTree::Impl::UpdateText(Context* context, const Text& text) {
 StyleTree::StyleTree(const Document& document,
                      const css::Media& media,
                      const std::vector<css::StyleSheet*>& style_sheets)
-    : impl_(new Impl(document, style_sheets)),
-      media_(media),
+    : impl_(new Impl(document, media, style_sheets)),
       style_sheets_(style_sheets) {
   document.AddObserver(this);
-  media_.AddObserver(this);
+  media.AddObserver(this);
   for (const auto& style_sheet : style_sheets_)
     style_sheet->AddObserver(this);
 }
@@ -322,6 +343,7 @@ StyleTree::~StyleTree() {
   for (const auto& style_sheet : style_sheets_)
     style_sheet->RemoveObserver(this);
   impl_->document().RemoveObserver(this);
+  impl_->media().RemoveObsever(this);
 }
 
 const Document& StyleTree::document() const {
@@ -330,6 +352,10 @@ const Document& StyleTree::document() const {
 
 const css::Style& StyleTree::initial_style() const {
   return impl_->initial_style();
+}
+
+const css::Media& StyleTree::media() const {
+  return impl_->media();
 }
 
 int StyleTree::version() const {
@@ -361,8 +387,8 @@ void StyleTree::UpdateIfNeeded() {
 
 // css::MediaObserver
 void StyleTree::DidChangeViewportSize() {
-  // TODO(eval1749): Invalidate styles depends on viewport size
-  Clear();
+  // Note: viewport size change doesn't affect compute style since we don't
+  // have media query.
 }
 
 void StyleTree::DidChangeSystemMetrics() {

@@ -41,12 +41,13 @@ class StyleTree final : public css::MediaObserver,
                      const std::vector<css::StyleSheet*>& style_sheets);
   ~StyleTree() final;
 
+  const Document& document() const;
+
   // TODO(eval1749): Do we really need to expose |initial_style()|? As of today,
   // it is used only in tests.
   const css::Style& initial_style() const;
 
-  const Document& document() const;
-  const css::Media& media() const { return media_; }
+  const css::Media& media() const;
 
   // Monotonically increased style tree version. This version is incremented
   // when |UpdateIfNeeded()| does updating.
@@ -62,6 +63,7 @@ class StyleTree final : public css::MediaObserver,
   class Impl;
 
   void Clear();
+
   // css::MediaObserver
   void DidChangeViewportSize() final;
   void DidChangeSystemMetrics() final;
@@ -75,7 +77,6 @@ class StyleTree final : public css::MediaObserver,
   void DidChangeInlineStyle(const Element& element,
                             const css::Style* old_style) final;
 
-  const css::Media& media_;
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;
 

@@ -158,7 +158,7 @@ void TextView::SetZoom(float new_zoom) {
 }
 
 void TextView::Update(const TextSelectionModel& selection_model,
-                      base::Time now) {
+                      const base::TimeTicks& now) {
   UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("view", "TextView::Update");
   auto const new_caret_offset =

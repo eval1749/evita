@@ -176,7 +176,7 @@ PaintViewBuilder::~PaintViewBuilder() {
 
 scoped_refptr<paint::View> PaintViewBuilder::Build(
     const TextSelectionModel& selection_model,
-    base::Time now) {
+    const base::TimeTicks& now) {
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
   const auto& bgcolor =
@@ -227,8 +227,9 @@ gfx::RectF PaintViewBuilder::ComputeCaretBounds(
                     char_rect.bottom);
 }
 
-paint::CaretState PaintViewBuilder::ComputeCaretState(const gfx::RectF& bounds,
-                                                      base::Time now) const {
+paint::CaretState PaintViewBuilder::ComputeCaretState(
+    const gfx::RectF& bounds,
+    const base::TimeTicks& now) const {
   if (bounds.empty())
     return paint::CaretState::None;
 

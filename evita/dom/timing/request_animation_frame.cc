@@ -26,7 +26,7 @@ class FrameRequestCallbackWrapper {
                               v8::Handle<v8::Function> callback);
   ~FrameRequestCallbackWrapper() = default;
 
-  void Run(const base::Time& time);
+  void Run(const base::TimeTicks& time);
 
  private:
   v8_glue::ScopedPersistent<v8::Function> callback_;
@@ -40,13 +40,14 @@ FrameRequestCallbackWrapper::FrameRequestCallbackWrapper(
   callback_.Reset(isolate, callback);
 }
 
-void FrameRequestCallbackWrapper::Run(const base::Time& time) {
+void FrameRequestCallbackWrapper::Run(const base::TimeTicks& time) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   DOM_AUTO_LOCK_SCOPE();
-  runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate),
-               gin::ConvertToV8(isolate, time.ToDoubleT()));
+  runner->Call(
+      callback_.NewLocal(isolate), v8::Undefined(isolate),
+      gin::ConvertToV8(isolate, (time - base::TimeTicks()).InMillisecondsF()));
 }
 
 }  // namespace

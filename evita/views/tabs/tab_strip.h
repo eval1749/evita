@@ -51,7 +51,7 @@ class TabStrip final : public ui::AnimatableWindow {
   friend class View;
 
   // ui::AnimationFrameHanndler
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   // ui::Widget
   gfx::Size GetPreferredSize() const final;

@@ -295,7 +295,7 @@ void Tab::UpdateLayout() {
 }
 
 // ui::AnimationGroupMember
-void Tab::Animate(base::Time time) {
+void Tab::Animate(const base::TimeTicks& time) {
   if (!animation_alpha_)
     return;
   if (!animation_alpha_->is_started())

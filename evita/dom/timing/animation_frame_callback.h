@@ -18,13 +18,13 @@ namespace dom {
 //
 class AnimationFrameCallback final : public base::TrackingInfo {
  public:
-  using Callback = base::Callback<void(const base::Time&)>;
+  using Callback = base::Callback<void(const base::TimeTicks&)>;
 
   AnimationFrameCallback(const tracked_objects::Location& posted_from,
                          const Callback& callback);
   ~AnimationFrameCallback();
 
-  void Run(const base::Time& time);
+  void Run(const base::TimeTicks& time);
 
  private:
   Callback callback_;

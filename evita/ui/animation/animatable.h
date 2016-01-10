@@ -27,7 +27,7 @@ class Animatable {
 
  protected:
   Animatable();
-  virtual void Animate(base::Time time) = 0;
+  virtual void Animate(const base::TimeTicks& time) = 0;
   void DidAnimate();
   virtual void FinalizeAnimation();
 

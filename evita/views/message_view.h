@@ -31,7 +31,7 @@ class MessageView final : public ui::AnimatableWindow {
   class View;
 
   // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   // ui::Widget
   void DidRealize() final;

@@ -8,7 +8,7 @@
 #include "base/macros.h"
 
 namespace base {
-class Time;
+class TimeTicks;
 }
 
 namespace ui {
@@ -28,7 +28,7 @@ class AnimationFrameHandler {
   virtual const char* GetAnimationFrameType() const = 0;
 
   virtual bool CanHandleAnimationFrame() const;
-  void HandleAnimationFrame(base::Time time);
+  void HandleAnimationFrame(const base::TimeTicks& time);
 
   // Request animation frame.
   void RequestAnimationFrame();
@@ -37,7 +37,7 @@ class AnimationFrameHandler {
   AnimationFrameHandler();
 
   // Called when animation frame started at |time|.
-  virtual void DidBeginAnimationFrame(base::Time time) = 0;
+  virtual void DidBeginAnimationFrame(const base::TimeTicks& time) = 0;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AnimationFrameHandler);

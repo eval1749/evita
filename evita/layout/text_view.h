@@ -73,7 +73,7 @@ class TextView final : private gfx::CanvasObserver {
   bool ScrollUp();
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
-  void Update(const TextSelectionModel& selection, base::Time now);
+  void Update(const TextSelectionModel& selection, const base::TimeTicks& now);
 
  private:
   void ScrollToPosition(text::Offset offset);

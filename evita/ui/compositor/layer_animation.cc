@@ -58,7 +58,7 @@ class ExtendAnimation final : public ReplaceAnimation {
 
  private:
   // Animatable
-  void Animate(base::Time now) final;
+  void Animate(const base::TimeTicks& now) final;
   void FinalizeAnimation() final;
 
   std::unique_ptr<AnimationSize> animation_size_;
@@ -70,7 +70,7 @@ ExtendAnimation::ExtendAnimation(Layer* new_layer,
                                  std::unique_ptr<Layer> old_layer)
     : ReplaceAnimation(new_layer, std::move(old_layer)) {}
 
-void ExtendAnimation::Animate(base::Time now) {
+void ExtendAnimation::Animate(const base::TimeTicks& now) {
   if (!animation_size_) {
     animation_size_.reset(new AnimationSize(now, animation_duration(),
                                             old_layer()->bounds().size(),
@@ -108,7 +108,7 @@ class MoveAnimation final : public LayerAnimation {
 
  private:
   // Animatable
-  void Animate(base::Time now) final;
+  void Animate(const base::TimeTicks& now) final;
   void FinalizeAnimation() final;
 
   std::unique_ptr<AnimationPoint> animation_origin_;
@@ -129,7 +129,7 @@ MoveAnimation::MoveAnimation(Layer* parent_layer,
   new_layer_->DidRegisterAnimation(this);
 }
 
-void MoveAnimation::Animate(base::Time now) {
+void MoveAnimation::Animate(const base::TimeTicks& now) {
   if (!animation_origin_) {
     animation_origin_.reset(new AnimationPoint(
         now, animation_duration(), old_origin_, new_layer_->bounds().origin()));
@@ -168,7 +168,7 @@ class ShrinkAnimation final : public ReplaceAnimation {
 
  private:
   // Animatable
-  void Animate(base::Time now) final;
+  void Animate(const base::TimeTicks& now) final;
   void FinalizeAnimation() final;
 
   std::unique_ptr<AnimationSize> animation_size_;
@@ -180,7 +180,7 @@ ShrinkAnimation::ShrinkAnimation(Layer* new_layer,
                                  std::unique_ptr<Layer> old_layer)
     : ReplaceAnimation(new_layer, std::move(old_layer)) {}
 
-void ShrinkAnimation::Animate(base::Time now) {
+void ShrinkAnimation::Animate(const base::TimeTicks& now) {
   if (!animation_size_) {
     animation_size_.reset(new AnimationSize(now, animation_duration(),
                                             old_layer()->bounds().size(),
@@ -212,7 +212,7 @@ class SimpleAnimation final : public ReplaceAnimation {
 
  private:
   // Animatable
-  void Animate(base::Time now) final;
+  void Animate(const base::TimeTicks& now) final;
   void FinalizeAnimation() final;
 
   std::unique_ptr<AnimationPoint> animation_origin_;
@@ -225,7 +225,7 @@ SimpleAnimation::SimpleAnimation(Layer* new_layer,
                                  std::unique_ptr<Layer> old_layer)
     : ReplaceAnimation(new_layer, std::move(old_layer)) {}
 
-void SimpleAnimation::Animate(base::Time now) {
+void SimpleAnimation::Animate(const base::TimeTicks& now) {
   if (!animation_size_) {
     animation_origin_.reset(new AnimationPoint(now, animation_duration(),
                                                old_layer()->bounds().origin(),
@@ -275,7 +275,7 @@ class SlideInAnimation final : public LayerAnimation {
 
  private:
   // Animatable
-  void Animate(base::Time now) final;
+  void Animate(const base::TimeTicks& now) final;
   void FinalizeAnimation() final;
 
   std::unique_ptr<AnimationPoint> animation_origin_;
@@ -301,7 +301,7 @@ SlideInAnimation::SlideInAnimation(Layer* parent_layer,
   old_layer_->DidRegisterAnimation(this);
 }
 
-void SlideInAnimation::Animate(base::Time now) {
+void SlideInAnimation::Animate(const base::TimeTicks& now) {
   if (!animation_origin_) {
     animation_origin_.reset(new AnimationPoint(
         now, animation_duration(),
@@ -348,7 +348,7 @@ class SlideOutAnimation final : public LayerAnimation {
 
  private:
   // Animatable
-  void Animate(base::Time now) final;
+  void Animate(const base::TimeTicks& now) final;
   void FinalizeAnimation() final;
 
   std::unique_ptr<AnimationPoint> animation_origin_;
@@ -365,7 +365,7 @@ SlideOutAnimation::SlideOutAnimation(std::unique_ptr<Layer> layer,
   layer_->DidRegisterAnimation(this);
 }
 
-void SlideOutAnimation::Animate(base::Time now) {
+void SlideOutAnimation::Animate(const base::TimeTicks& now) {
   if (!animation_origin_) {
     animation_origin_.reset(new AnimationPoint(
         now, animation_duration(), layer_->bounds().origin(), new_origin_));
@@ -399,7 +399,7 @@ class SlideReplaceAnimation final : public ReplaceAnimation {
 
  private:
   // Animatable
-  void Animate(base::Time now) final;
+  void Animate(const base::TimeTicks& now) final;
   void FinalizeAnimation() final;
 
   std::unique_ptr<AnimationPoint> animation_origin_;
@@ -414,7 +414,7 @@ SlideReplaceAnimation::SlideReplaceAnimation(Layer* new_layer,
     : ReplaceAnimation(new_layer, std::move(old_layer)),
       old_origin_(old_origin) {}
 
-void SlideReplaceAnimation::Animate(base::Time now) {
+void SlideReplaceAnimation::Animate(const base::TimeTicks& now) {
   if (!animation_origin_) {
     animation_origin_.reset(new AnimationPoint(now, animation_duration(),
                                                old_origin_,

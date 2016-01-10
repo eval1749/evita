@@ -49,7 +49,7 @@ class DemoModel final : public css::Media,
   FloatSize viewport_size() const final;
 
   // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
   const char* GetAnimationFrameType() const final;
 
   // WindowEventHandler

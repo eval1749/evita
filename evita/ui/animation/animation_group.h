@@ -10,7 +10,7 @@
 #include "base/macros.h"
 
 namespace base {
-class Time;
+class TimeTicks;
 }
 
 namespace ui {
@@ -23,7 +23,7 @@ class AnimationGroup {
   ~AnimationGroup();
 
   void AddMember(AnimationGroupMember* member);
-  bool Animate(base::Time time);
+  bool Animate(const base::TimeTicks& time);
   void RemoveMember(AnimationGroupMember* member);
 
  private:

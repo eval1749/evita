@@ -8,7 +8,7 @@
 #include "base/macros.h"
 
 namespace base {
-class Time;
+class TimeTicks;
 }
 
 namespace ui {
@@ -17,7 +17,7 @@ class AnimationGroupMember {
  public:
   virtual ~AnimationGroupMember();
 
-  virtual void Animate(base::Time time) = 0;
+  virtual void Animate(const base::TimeTicks& time) = 0;
 
  protected:
   AnimationGroupMember();

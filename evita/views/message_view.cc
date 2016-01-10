@@ -244,7 +244,8 @@ class MessageView::View final : public paint::PaintThreadCanvasOwner {
 
  private:
   // paint::PaintThreadCanvasOwner
-  void PaintAnimationFrame(gfx::Canvas* canvas, base::Time now) final;
+  void PaintAnimationFrame(gfx::Canvas* canvas,
+                           const base::TimeTicks& now) final;
 
   std::unique_ptr<Painter> painter_;
   std::vector<PartView> parts_;
@@ -261,7 +262,7 @@ MessageView::View::View(ui::AnimatableWindow* window)
       parts_(1) {}
 
 void MessageView::View::PaintAnimationFrame(gfx::Canvas* canvas,
-                                            base::Time now) {
+                                            const base::TimeTicks& now) {
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   if (canvas->should_clear())
     canvas->Clear(gfx::ColorF());
@@ -332,7 +333,7 @@ void MessageView::SetStatus(const std::vector<base::string16>& texts) {
 }
 
 // ui::AnimationFrameHandler
-void MessageView::DidBeginAnimationFrame(base::Time now) {
+void MessageView::DidBeginAnimationFrame(const base::TimeTicks& now) {
   view_->DidBeginAnimationFrame(now);
 }
 

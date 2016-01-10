@@ -128,7 +128,7 @@ class Tab final : public ui::Widget,
   void UpdateLayout();
 
   // ui::AnimationGroupMember
-  void Animate(base::Time time) final;
+  void Animate(const base::TimeTicks& time) final;
 
   // ui::Tooltip::ToolDelegate
   base::string16 GetTooltipText() final;

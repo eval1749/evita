@@ -24,7 +24,7 @@ class PaintThreadCanvasOwner::Impl final : public ui::LayerOwner,
   Impl(PaintThreadCanvasOwner* owner, ui::AnimatableWindow* widget);
   virtual ~Impl();
 
-  void DidBeginAnimationFrame(base::Time now);
+  void DidBeginAnimationFrame(const base::TimeTicks& now);
   void DidRealize();
   void DidRecreateParentLayer();
   void RequestAnimationFrame();
@@ -51,7 +51,8 @@ PaintThreadCanvasOwner::Impl::Impl(PaintThreadCanvasOwner* owner,
 
 PaintThreadCanvasOwner::Impl::~Impl() {}
 
-void PaintThreadCanvasOwner::Impl::DidBeginAnimationFrame(base::Time now) {
+void PaintThreadCanvasOwner::Impl::DidBeginAnimationFrame(
+    const base::TimeTicks& now) {
   TRACE_EVENT_WITH_FLOW0("paint", "MetricsView::DidBeginAnimationFrame", owner_,
                          TRACE_EVENT_FLAG_FLOW_IN);
   if (!EnsureCanvas())
@@ -104,7 +105,8 @@ PaintThreadCanvasOwner::PaintThreadCanvasOwner(ui::AnimatableWindow* widget)
 
 PaintThreadCanvasOwner::~PaintThreadCanvasOwner() {}
 
-void PaintThreadCanvasOwner::DidBeginAnimationFrame(base::Time now) {
+void PaintThreadCanvasOwner::DidBeginAnimationFrame(
+    const base::TimeTicks& now) {
   TRACE_EVENT_WITH_FLOW0("paint",
                          "PaintThreadCanvasOwner::DidBeginAnimationFrame", this,
                          TRACE_EVENT_FLAG_FLOW_OUT);

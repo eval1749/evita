@@ -26,7 +26,7 @@ class SchedulerImpl final : public Scheduler {
   explicit SchedulerImpl(SchedulerClient* scheduler_client);
   ~SchedulerImpl() final;
 
-  void DidBeginAnimationFrame(const base::Time& time);
+  void DidBeginAnimationFrame(const base::TimeTicks& time);
   void RunIdleTasks();
   void Start(base::MessageLoop* script_message_loop);
 
@@ -37,13 +37,13 @@ class SchedulerImpl final : public Scheduler {
   class TaskQueue;
 
   void ProcessTasks();
-  void StartFrame(const base::Time& deadline);
+  void StartFrame(const base::TimeTicks& deadline);
 
   // dom::Scheduler
   void CancelAnimationFrame(int request_id) final;
   void CancelIdleTask(int task_id) final;
-  void DidBeginFrame(const base::Time& deadline) final;
-  void DidEnterViewIdle(const base::Time& deadline) final;
+  void DidBeginFrame(const base::TimeTicks& deadline) final;
+  void DidEnterViewIdle(const base::TimeTicks& deadline) final;
   void DidExitViewIdle() final;
   IdleDeadlineProvider* GetIdleDeadlineProvider() final;
   int RequestAnimationFrame(

@@ -129,7 +129,7 @@ void Frame::DrawForResize() {
   if (!tab_content)
     return;
   // TODO(eval1749): Is doing animation for active tab content here right thing?
-  auto const now = base::Time::Now();
+  auto const now = base::TimeTicks::Now();
   for (auto child : tab_content->child_nodes()) {
     auto const window = child->as<Window>();
     if (!window)
@@ -212,7 +212,7 @@ void Frame::UpdateTitleBar(const domapi::TabData& tab_data) {
 }
 
 // ui::AnimationFrameHandler
-void Frame::DidBeginAnimationFrame(base::Time now) {
+void Frame::DidBeginAnimationFrame(const base::TimeTicks& now) {
   // Nothing to do
 }
 

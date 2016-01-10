@@ -31,7 +31,7 @@ void VisualWindow::Paint(std::unique_ptr<DisplayItemList> display_item_list) {
 }
 
 // ui::AnimationFrameHandler
-void VisualWindow::DidBeginAnimationFrame(base::Time time) {
+void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& time) {
   // Nothing to do.
 }
 

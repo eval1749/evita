@@ -71,7 +71,8 @@ class MetricsView::View final : public paint::PaintThreadCanvasOwner {
 
  private:
   // paint::PaintThreadCanvasOwner
-  void PaintAnimationFrame(gfx::Canvas* canvas, base::Time now) final;
+  void PaintAnimationFrame(gfx::Canvas* canvas,
+                           const base::TimeTicks& now) final;
 
   metrics::Sampling frame_duration_data_;
   metrics::Sampling frame_latency_data_;
@@ -93,7 +94,7 @@ void MetricsView::View::AddSample(base::TimeDelta sample) {
 }
 
 void MetricsView::View::PaintAnimationFrame(gfx::Canvas* canvas,
-                                            base::Time now) {
+                                            const base::TimeTicks& now) {
   auto const bounds = canvas->GetLocalBounds();
 
   std::basic_ostringstream<base::char16> stream;
@@ -169,7 +170,7 @@ void MetricsView::RecordTime() {
 }
 
 // ui::AnimationFrameHandler
-void MetricsView::DidBeginAnimationFrame(base::Time now) {
+void MetricsView::DidBeginAnimationFrame(const base::TimeTicks& now) {
   view_->DidBeginAnimationFrame(now);
 }
 

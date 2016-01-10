@@ -19,7 +19,7 @@ void AnimationGroup::AddMember(AnimationGroupMember* member) {
   members_.insert(member);
 }
 
-bool AnimationGroup::Animate(base::Time time) {
+bool AnimationGroup::Animate(const base::TimeTicks& time) {
   DCHECK(!is_running_);
   base::AutoReset<bool> running_scope(&is_running_, true);
   const auto members = members_;

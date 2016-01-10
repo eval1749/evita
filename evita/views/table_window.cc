@@ -209,7 +209,7 @@ void TableWindow::DidInsertBefore(const text::StaticRange& range) {
 }
 
 // ui::AnimationFrameHandler
-void TableWindow::DidBeginAnimationFrame(base::Time now) {
+void TableWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   if (!visible())
     return;
   if (!canvas()->IsReady())

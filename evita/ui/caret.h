@@ -32,12 +32,12 @@ class Caret {
 
   bool visible() const { return visible_; }
 
-  void Blink(gfx::Canvas* canvas, base::Time time);
+  void Blink(gfx::Canvas* canvas, const base::TimeTicks& time);
   void DidPaint(const gfx::RectF& paint_bounds);
   void Hide(gfx::Canvas* canvas);
   void Reset();
   void Update(gfx::Canvas* canvas,
-              base::Time time,
+              const base::TimeTicks& time,
               const gfx::RectF& new_bounds);
 
  protected:
@@ -53,7 +53,7 @@ class Caret {
 
   base::TimeDelta blink_interval_;
   gfx::RectF bounds_;
-  base::Time last_blink_time_;
+  base::TimeTicks last_blink_time_;
   CaretOwner* const owner_;
   base::RepeatingTimer timer_;
   bool visible_;

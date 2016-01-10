@@ -41,7 +41,7 @@ VisualWindow::~VisualWindow() {
   style_tree_->document().RemoveObserver(this);
 }
 
-void VisualWindow::DidBeginAnimationFrame(const base::Time& now) {
+void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   TRACE_EVENT0("script", "VisualWindow::DidBeginAnimationFrame");
   DCHECK(is_waiting_animation_frame_);
   is_waiting_animation_frame_ = false;

@@ -719,7 +719,7 @@ class TabStrip::View final : private ui::ButtonListener,
   View(TabStrip* widget, TabStripDelegate* delegate);
   ~View() final;
 
-  void DidBeginAnimationFrame(base::Time time);
+  void DidBeginAnimationFrame(const base::TimeTicks& time);
   void DidChangeBounds();
   void DidRealize();
   void DeleteTab(size_t tab_index);
@@ -810,7 +810,7 @@ void TabStrip::View::DeleteTab(size_t tab_index) {
   tab_collection_->DeleteTab(tab);
 }
 
-void TabStrip::View::DidBeginAnimationFrame(base::Time time) {
+void TabStrip::View::DidBeginAnimationFrame(const base::TimeTicks& time) {
   UpdateLayout();
   if (animations_.Animate(time))
     widget_->RequestAnimationFrame();
@@ -1053,7 +1053,7 @@ void TabStrip::SetTab(int tab_index, const domapi::TabData& tab_data) {
 }
 
 // ui::AnimationFrameHanndler
-void TabStrip::DidBeginAnimationFrame(base::Time time) {
+void TabStrip::DidBeginAnimationFrame(const base::TimeTicks& time) {
   view_->DidBeginAnimationFrame(time);
 }
 

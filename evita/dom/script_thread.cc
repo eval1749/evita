@@ -56,7 +56,7 @@ domapi::ViewEventHandler* ScriptThread::view_event_handler() const {
   return ScriptHost::instance()->event_handler();
 }
 
-void ScriptThread::BeginAnimationFrame(const base::Time& time) {
+void ScriptThread::BeginAnimationFrame(const base::TimeTicks& time) {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   animation_frame_request_count_ = 0;
   scheduler_->DidBeginAnimationFrame(time);
@@ -129,7 +129,7 @@ void ScriptThread::Start() {
                                   param1, param2, param3, param4, param5)); \
   }
 
-void ScriptThread::DidBeginFrame(const base::Time& deadline) {
+void ScriptThread::DidBeginFrame(const base::TimeTicks& deadline) {
   scheduler()->DidBeginFrame(deadline);
 }
 
@@ -145,7 +145,7 @@ DEFINE_VIEW_EVENT_HANDLER2(DidChangeWindowVisibility,
 DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWidget, domapi::WindowId)
 DEFINE_VIEW_EVENT_HANDLER2(DidDropWidget, domapi::WindowId, domapi::WindowId)
 
-void ScriptThread::DidEnterViewIdle(const base::Time& deadline) {
+void ScriptThread::DidEnterViewIdle(const base::TimeTicks& deadline) {
   scheduler()->DidEnterViewIdle(deadline);
 }
 
@@ -214,7 +214,7 @@ const char* ScriptThread::GetAnimationFrameType() const {
   return "ScriptThread";
 }
 
-void ScriptThread::DidBeginAnimationFrame(base::Time time) {
+void ScriptThread::DidBeginAnimationFrame(const base::TimeTicks& time) {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   ScheduleScriptTask(base::Bind(&ScriptThread::BeginAnimationFrame,
                                 base::Unretained(this), time));

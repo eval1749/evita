@@ -43,11 +43,11 @@ class ScriptThread final : public domapi::ViewEventHandler,
   Scheduler* scheduler() const;
   domapi::ViewEventHandler* view_event_handler() const;
 
-  void BeginAnimationFrame(const base::Time& time);
+  void BeginAnimationFrame(const base::TimeTicks& time);
   void ScheduleScriptTask(const base::Closure& task);
 
   // domapi::ViewEventHandler
-  void DidBeginFrame(const base::Time& deadline);
+  void DidBeginFrame(const base::TimeTicks& deadline);
   void DidChangeWindowBounds(domapi::WindowId window_id,
                              int left,
                              int top,
@@ -59,7 +59,7 @@ class ScriptThread final : public domapi::ViewEventHandler,
   void DidDropWidget(domapi::WindowId source_id,
                      domapi::WindowId target_id) final;
   void DidRealizeWidget(domapi::WindowId window_id) final;
-  void DidEnterViewIdle(const base::Time& deadline) final;
+  void DidEnterViewIdle(const base::TimeTicks& deadline) final;
   void DidExitViewIdle() final;
   void DispatchFocusEvent(const domapi::FocusEvent& event) final;
   void DispatchKeyboardEvent(const domapi::KeyboardEvent& event) final;
@@ -82,7 +82,7 @@ class ScriptThread final : public domapi::ViewEventHandler,
 
   // ui::AnimationFrameHandler
   const char* GetAnimationFrameType() const final;
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   int animation_frame_request_count_ = 0;
   domapi::IoDelegate* const io_delegate_;

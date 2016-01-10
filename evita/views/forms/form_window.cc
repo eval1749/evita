@@ -504,7 +504,7 @@ std::unique_ptr<gfx::SwapChain> FormWindow::CreateSwapChain() {
 }
 
 // ui::Animatable
-void FormWindow::DidBeginAnimationFrame(base::Time now) {
+void FormWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   if (!is_realized()) {
     if (form_size_.empty()) {
       UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);

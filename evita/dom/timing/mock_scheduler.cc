@@ -26,7 +26,7 @@ void MockScheduler::RunPendingTasks() {
     for (auto& pair : animation_frame_callback_map_)
       callbacks.emplace_back(std::move(pair.second));
     animation_frame_callback_map_.clear();
-    const auto& frame_time = base::Time::Now();
+    const auto& frame_time = Now();
     for (const auto& callback : callbacks)
       callback->Run(frame_time);
   }

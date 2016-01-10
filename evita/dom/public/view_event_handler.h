@@ -15,7 +15,7 @@
 #include "evita/dom/public/window_id.h"
 
 namespace base {
-class Time;
+class TimeTicks;
 }
 
 namespace text {
@@ -37,7 +37,7 @@ class ViewEventHandler {
  public:
   virtual ~ViewEventHandler();
 
-  virtual void DidBeginFrame(const base::Time& deadline) = 0;
+  virtual void DidBeginFrame(const base::TimeTicks& deadline) = 0;
   virtual void DidChangeWindowBounds(WindowId window_id,
                                      int left,
                                      int top,
@@ -48,7 +48,7 @@ class ViewEventHandler {
   virtual void DidDestroyWidget(WindowId window_id) = 0;
   virtual void DidDropWidget(WindowId source_id, WindowId target_id) = 0;
   virtual void DidRealizeWidget(WindowId window_id) = 0;
-  virtual void DidEnterViewIdle(const base::Time& deadline) = 0;
+  virtual void DidEnterViewIdle(const base::TimeTicks& deadline) = 0;
   virtual void DidExitViewIdle() = 0;
   virtual void DispatchFocusEvent(const FocusEvent& event) = 0;
   virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;

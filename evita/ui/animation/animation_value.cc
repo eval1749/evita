@@ -26,7 +26,7 @@ float ComputeValue(float start, float end, float factor) {
 //
 // AnimationFloat
 //
-AnimationFloat::AnimationFloat(base::Time start_time,
+AnimationFloat::AnimationFloat(const base::TimeTicks& start_time,
                                base::TimeDelta duration,
                                float start_value,
                                float end_value)
@@ -38,11 +38,11 @@ AnimationFloat::AnimationFloat(base::Time start_time,
 AnimationFloat::AnimationFloat(base::TimeDelta duration,
                                float start_value,
                                float end_value)
-    : AnimationFloat(base::Time(), duration, start_value, end_value) {}
+    : AnimationFloat(base::TimeTicks(), duration, start_value, end_value) {}
 
 AnimationFloat::~AnimationFloat() {}
 
-float AnimationFloat::Compute(base::Time current_time) const {
+float AnimationFloat::Compute(const base::TimeTicks& current_time) const {
   DCHECK(!start_time_.is_null());
   auto const delta = (current_time - start_time_).InMillisecondsF();
   auto const factor =
@@ -51,7 +51,7 @@ float AnimationFloat::Compute(base::Time current_time) const {
   return ComputeValue(start_value_, end_value_, factor);
 }
 
-void AnimationFloat::Start(base::Time start_time) {
+void AnimationFloat::Start(const base::TimeTicks& start_time) {
   DCHECK(start_time_.is_null());
   start_time_ = start_time;
 }
@@ -60,7 +60,7 @@ void AnimationFloat::Start(base::Time start_time) {
 //
 // AnimationPoint
 //
-AnimationPoint::AnimationPoint(base::Time start_time,
+AnimationPoint::AnimationPoint(const base::TimeTicks& start_time,
                                base::TimeDelta duration,
                                const gfx::PointF& start_value,
                                const gfx::PointF& end_value)
@@ -71,7 +71,7 @@ AnimationPoint::AnimationPoint(base::Time start_time,
 
 AnimationPoint::~AnimationPoint() {}
 
-gfx::PointF AnimationPoint::Compute(base::Time current_time) const {
+gfx::PointF AnimationPoint::Compute(const base::TimeTicks& current_time) const {
   auto const delta = (current_time - start_time_).InMillisecondsF();
   auto const factor =
       static_cast<float>(std::min(delta / duration_.InMillisecondsF(), 1.0));
@@ -84,7 +84,7 @@ gfx::PointF AnimationPoint::Compute(base::Time current_time) const {
 //
 // AnimationSize
 //
-AnimationSize::AnimationSize(base::Time start_time,
+AnimationSize::AnimationSize(const base::TimeTicks& start_time,
                              base::TimeDelta duration,
                              const gfx::SizeF& start_value,
                              const gfx::SizeF& end_value)
@@ -95,7 +95,7 @@ AnimationSize::AnimationSize(base::Time start_time,
 
 AnimationSize::~AnimationSize() {}
 
-gfx::SizeF AnimationSize::Compute(base::Time current_time) const {
+gfx::SizeF AnimationSize::Compute(const base::TimeTicks& current_time) const {
   auto const delta = (current_time - start_time_).InMillisecondsF();
   auto const factor =
       static_cast<float>(std::min(delta / duration_.InMillisecondsF(), 1.0));

@@ -43,7 +43,7 @@ class MetricsView final : public ui::AnimatableWindow,
   class View;
 
   // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   // ui::LayerOwnerDelegate
   void DidRecreateLayer(ui::Layer* old_layer) final;

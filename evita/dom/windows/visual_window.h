@@ -63,7 +63,7 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
 
   explicit VisualWindow(visuals::Document* document);
 
-  void DidBeginAnimationFrame(const base::Time& now);
+  void DidBeginAnimationFrame(const base::TimeTicks& now);
   void RequestAnimationFrame();
   void UpdateLayoutIfNeeded();
   void UpdateStyleIfNeeded();

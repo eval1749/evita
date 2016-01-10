@@ -55,7 +55,7 @@ class TableWindow final : public CanvasContentWindow,
   void DidInsertBefore(const text::StaticRange& range) final;
 
   // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   // ui::TableControlObserver
   void OnKeyPressed(const ui::KeyEvent&) final;

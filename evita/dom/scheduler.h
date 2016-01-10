@@ -11,7 +11,7 @@
 #include "base/macros.h"
 
 namespace base {
-class Time;
+class TimeTicks;
 }
 
 namespace dom {
@@ -26,8 +26,8 @@ class Scheduler {
 
   virtual void CancelAnimationFrame(int request_id) = 0;
   virtual void CancelIdleTask(int task_id) = 0;
-  virtual void DidBeginFrame(const base::Time& deadline) = 0;
-  virtual void DidEnterViewIdle(const base::Time& deadline) = 0;
+  virtual void DidBeginFrame(const base::TimeTicks& deadline) = 0;
+  virtual void DidEnterViewIdle(const base::TimeTicks& deadline) = 0;
   virtual void DidExitViewIdle() = 0;
   virtual IdleDeadlineProvider* GetIdleDeadlineProvider() = 0;
   virtual int RequestAnimationFrame(

@@ -88,7 +88,7 @@ class Frame final : public views::Window,
   void UpdateTitleBar(const domapi::TabData& tab_data);
 
   // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   // ui::Widget
   void CreateNativeWindow() const final;

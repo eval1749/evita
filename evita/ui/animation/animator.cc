@@ -15,13 +15,13 @@ Animator::Animator() {}
 
 Animator::~Animator() {}
 
-base::Time Animator::current_time() const {
+const base::TimeTicks& Animator::current_time() const {
   DCHECK(is_playing());
   return current_time_;
 }
 
 bool Animator::is_playing() const {
-  return current_time_ != base::Time();
+  return current_time_ != base::TimeTicks();
 }
 
 void Animator::Animate(Animatable* animatable) {
@@ -55,10 +55,10 @@ void Animator::EndAnimate() {
       animatable->animator_ = nullptr;
   }
   running_animatables_.clear();
-  current_time_ = base::Time();
+  current_time_ = base::TimeTicks();
 }
 
-void Animator::PlayAnimations(base::Time now) {
+void Animator::PlayAnimations(const base::TimeTicks& now) {
   DCHECK(!is_playing());
   DCHECK(running_animatables_.empty());
   if (waiting_animatables_.empty())
@@ -82,13 +82,13 @@ void Animator::ScheduleAnimation(Animatable* animatable) {
   RequestAnimationFrame();
 }
 
-void Animator::StartAnimate(base::Time now) {
+void Animator::StartAnimate(const base::TimeTicks& now) {
   DCHECK(!is_playing());
   current_time_ = now;
 }
 
 // AnimationFrameHandler
-void Animator::DidBeginAnimationFrame(base::Time time) {
+void Animator::DidBeginAnimationFrame(const base::TimeTicks& time) {
   PlayAnimations(time);
 }
 

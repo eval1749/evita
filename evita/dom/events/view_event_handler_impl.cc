@@ -118,7 +118,7 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
 }
 
 // domapi::ViewEventHandler
-void ViewEventHandlerImpl::DidBeginFrame(const base::Time& deadline) {
+void ViewEventHandlerImpl::DidBeginFrame(const base::TimeTicks& deadline) {
   NOTREACHED();
 }
 
@@ -168,7 +168,7 @@ void ViewEventHandlerImpl::DidDropWidget(domapi::WindowId source_id,
                           new WindowEvent(L"dropwindow", init_dict));
 }
 
-void ViewEventHandlerImpl::DidEnterViewIdle(const base::Time& deadline) {
+void ViewEventHandlerImpl::DidEnterViewIdle(const base::TimeTicks& deadline) {
   NOTREACHED();
 }
 

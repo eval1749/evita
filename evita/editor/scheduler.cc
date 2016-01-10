@@ -27,8 +27,8 @@ static base::TimeDelta ComputeFrameDelay() {
   return base::TimeDelta::FromMilliseconds(1000 / 60);
 }
 
-static base::TimeDelta ComputeFrameDelay(const base::Time& last_frame_time,
-                                         const base::Time& now) {
+static base::TimeDelta ComputeFrameDelay(const base::TimeTicks& last_frame_time,
+                                         const base::TimeTicks& now) {
   auto const next_frame_time = last_frame_time + ComputeFrameDelay();
   auto const delta = next_frame_time - now;
   return std::max(delta, base::TimeDelta::FromMilliseconds(3));
@@ -84,7 +84,7 @@ Scheduler::~Scheduler() {
 
 void Scheduler::BeginFrame() {
   DCHECK_EQ(State::Waiting, state_);
-  const auto& now = base::Time::Now();
+  const auto& now = base::TimeTicks::Now();
   TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::BeginFrame", frame_id_,
                          TRACE_EVENT_FLAG_FLOW_IN, "delay",
                          (now - last_frame_time_).InMillisecondsF());
@@ -134,7 +134,7 @@ void Scheduler::CommitFrame() {
   DCHECK_EQ(State::Running, state_);
   TRACE_EVENT0("scheduler", "Scheduler::CommitFrame");
   ui::Compositor::instance()->CommitIfNeeded();
-  last_paint_time_ = base::Time::Now();
+  last_paint_time_ = base::TimeTicks::Now();
 }
 
 void Scheduler::DidUpdateDom() {
@@ -144,7 +144,7 @@ void Scheduler::DidUpdateDom() {
 void Scheduler::EnterIdle() {
   lock_->AssertAcquired();
   DCHECK_EQ(State::Idle, state_);
-  auto const now = base::Time::Now();
+  auto const now = base::TimeTicks::Now();
   auto const idle_deadline = now + base::TimeDelta::FromMilliseconds(50);
   script_delegate_->DidEnterViewIdle(idle_deadline);
   message_loop_->task_runner()->PostNonNestableDelayedTask(
@@ -162,7 +162,7 @@ void Scheduler::ExitIdle() {
 
 void Scheduler::HandleAnimationFrame() {
   DCHECK_EQ(State::Running, state_);
-  auto const time = base::Time::Now();
+  auto const time = base::TimeTicks::Now();
   std::unordered_set<ui::AnimationFrameHandler*> running_handlers;
   std::unordered_set<ui::AnimationFrameHandler*> canceling_handlers;
   {
@@ -216,7 +216,7 @@ void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
 void Scheduler::ScheduleNextFrame() {
   lock_->AssertAcquired();
   DCHECK_EQ(State::Sleeping, state_);
-  auto const now = base::Time::Now();
+  auto const now = base::TimeTicks::Now();
   ChangeState(State::Waiting);
   auto const delay = ComputeFrameDelay(last_frame_time_, now);
   script_delegate_->DidEnterViewIdle(now + delay);

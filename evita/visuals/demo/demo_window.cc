@@ -45,7 +45,7 @@ gfx::Canvas* DemoWindow::GetCanvas() const {
 }
 
 // ui::AnimationFrameHandler
-void DemoWindow::DidBeginAnimationFrame(base::Time time) {}
+void DemoWindow::DidBeginAnimationFrame(const base::TimeTicks& time) {}
 
 // ui::LayerOwnerDelegate
 void DemoWindow::DidRecreateLayer(ui::Layer*) {

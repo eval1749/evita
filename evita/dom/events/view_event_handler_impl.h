@@ -24,7 +24,7 @@ class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
   void DispatchEventWithInLock(EventTarget* event_target, Event* event);
 
   // domapi::ViewEventHandler
-  void DidBeginFrame(const base::Time& deadline);
+  void DidBeginFrame(const base::TimeTicks& deadline);
   void DidChangeWindowBounds(domapi::WindowId window_id,
                              int left,
                              int top,
@@ -35,7 +35,7 @@ class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
   void DidDestroyWidget(domapi::WindowId window_id) final;
   void DidDropWidget(domapi::WindowId source_id,
                      domapi::WindowId target_id) final;
-  void DidEnterViewIdle(const base::Time& deadline) final;
+  void DidEnterViewIdle(const base::TimeTicks& deadline) final;
   void DidExitViewIdle() final;
   void DidRealizeWidget(domapi::WindowId window_id) final;
   void DispatchFocusEvent(const domapi::FocusEvent& event) final;

@@ -210,7 +210,7 @@ FloatSize DemoModel::viewport_size() const {
 }
 
 // ui::AnimationFrameHandler
-void DemoModel::DidBeginAnimationFrame(base::Time now) {
+void DemoModel::DidBeginAnimationFrame(const base::TimeTicks& now) {
   const auto& canvas = window_->GetCanvas();
   if (!canvas)
     return RequestAnimationFrame();

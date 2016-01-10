@@ -651,7 +651,7 @@ void ViewDelegateImpl::UpdateWindow(domapi::WindowId window_id) {
   auto const window = FromWindowId("UpdateWindow", window_id);
   if (!window)
     return;
-  auto const now = base::Time::Now();
+  auto const now = base::TimeTicks::Now();
   window->HandleAnimationFrame(now);
 }
 

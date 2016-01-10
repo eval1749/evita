@@ -137,7 +137,7 @@ class CanvasWindow : public ui::AnimatableWindow,
   virtual void DidChangeCanvas() = 0;
 
   // ui::AnimationFrameHanndler
-  void DidBeginAnimationFrame(base::Time time) override;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) override;
 
   // ui::PaintScheduler
   void SchedulePaintCanvas() override;
@@ -160,7 +160,7 @@ CanvasWindow::CanvasWindow() {}
 CanvasWindow::~CanvasWindow() {}
 
 // ui::AnimationFrameHanndler
-void CanvasWindow::DidBeginAnimationFrame(base::Time now) {
+void CanvasWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   if (!canvas_) {
     canvas_.reset(layer()->CreateCanvas());
     DidChangeCanvas();
@@ -692,7 +692,7 @@ class RowCollection final : public CanvasWindow, public TableModelObserver {
   void UpdateSelectionIfNeeded();
 
   // ui::AnimationFrameHanndler
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   // ui::CanavsWindow
   void DidChangeCanvas() final;
@@ -896,7 +896,7 @@ void RowCollection::UpdateSelectionIfNeeded() {
 }
 
 // ui::AnimationFrameHanndler
-void RowCollection::DidBeginAnimationFrame(base::Time time) {
+void RowCollection::DidBeginAnimationFrame(const base::TimeTicks& time) {
   auto const new_bottom_right = parent_node()->bounds().bottom_right();
   if (new_bottom_right != bounds().bottom_right()) {
     SetBounds(gfx::Point(0, static_cast<int>(header_->window_height())),

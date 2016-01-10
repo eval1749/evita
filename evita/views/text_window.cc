@@ -295,7 +295,7 @@ void TextWindow::DidChangeSelection() {
 }
 
 // ui::AnimationFrameHandler
-void TextWindow::DidBeginAnimationFrame(base::Time now) {
+void TextWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   if (!visible())
     return;
   if (!canvas()->IsReady())

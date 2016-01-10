@@ -40,8 +40,8 @@ class MockScheduler final : public IdleDeadlineProvider, public Scheduler {
   // dom::Scheduler
   void CancelAnimationFrame(int callback_id) final;
   void CancelIdleTask(int task_id) final;
-  void DidBeginFrame(const base::Time& deadline) final { NOTREACHED(); }
-  void DidEnterViewIdle(const base::Time& deadline) final { NOTREACHED(); }
+  void DidBeginFrame(const base::TimeTicks& deadline) final { NOTREACHED(); }
+  void DidEnterViewIdle(const base::TimeTicks& deadline) final { NOTREACHED(); }
   void DidExitViewIdle() final { NOTREACHED(); }
   IdleDeadlineProvider* GetIdleDeadlineProvider() final { return this; }
   int RequestAnimationFrame(

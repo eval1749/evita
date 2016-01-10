@@ -31,7 +31,7 @@ class SchedulerImpl::AnimationFrameCallbackQueue final {
   ~AnimationFrameCallbackQueue() = default;
 
   void Cancel(int callback_id);
-  void DidBeginAnimationFrame(const base::Time& time);
+  void DidBeginAnimationFrame(const base::TimeTicks& time);
   int Give(std::unique_ptr<AnimationFrameCallback> callback);
 
  private:
@@ -50,7 +50,7 @@ void SchedulerImpl::AnimationFrameCallbackQueue::Cancel(int callback_id) {
 }
 
 void SchedulerImpl::AnimationFrameCallbackQueue::DidBeginAnimationFrame(
-    const base::Time& time) {
+    const base::TimeTicks& time) {
   std::vector<std::unique_ptr<AnimationFrameCallback>> callbacks;
   callbacks.reserve(callback_map_.size());
   for (auto& pair : callback_map_)
@@ -77,7 +77,7 @@ class SchedulerImpl::IdleTaskQueue final : public IdleDeadlineProvider {
   ~IdleTaskQueue() = default;
 
   void CancelTask(int task_id);
-  void DidEnterViewIdle(const base::Time& deadline);
+  void DidEnterViewIdle(const base::TimeTicks& deadline);
   void DidExitViewIdle();
   int GiveTask(const IdleTask& task);
   void RunIdleTasks();
@@ -93,7 +93,7 @@ class SchedulerImpl::IdleTaskQueue final : public IdleDeadlineProvider {
   std::queue<IdleTask*> ready_tasks_;
   volatile bool should_stop_;
   std::unordered_map<int, IdleTask*> task_map_;
-  base::Time view_idle_deadline_;
+  base::TimeTicks view_idle_deadline_;
   volatile bool view_is_idle_;
   std::priority_queue<IdleTask*> waiting_tasks_;
 
@@ -111,7 +111,7 @@ void SchedulerImpl::IdleTaskQueue::CancelTask(int task_id) {
 }
 
 void SchedulerImpl::IdleTaskQueue::DidEnterViewIdle(
-    const base::Time& deadline) {
+    const base::TimeTicks& deadline) {
   view_idle_deadline_ = deadline;
   view_is_idle_ = true;
 }
@@ -121,7 +121,7 @@ void SchedulerImpl::IdleTaskQueue::DidExitViewIdle() {
 }
 
 base::TimeDelta SchedulerImpl::IdleTaskQueue::GetTimeRemaining() const {
-  return view_idle_deadline_ - base::Time::Now();
+  return view_idle_deadline_ - base::TimeTicks::Now();
 }
 
 int SchedulerImpl::IdleTaskQueue::GiveTask(const IdleTask& task_in) {
@@ -136,7 +136,7 @@ int SchedulerImpl::IdleTaskQueue::GiveTask(const IdleTask& task_in) {
 
 bool SchedulerImpl::IdleTaskQueue::IsIdle() const {
   return !should_stop_ && view_is_idle_ &&
-         view_idle_deadline_ > base::Time::Now();
+         view_idle_deadline_ > base::TimeTicks::Now();
 }
 
 void SchedulerImpl::IdleTaskQueue::RemoveTask(IdleTask* task) {
@@ -259,11 +259,11 @@ void SchedulerImpl::Start(base::MessageLoop* script_message_loop) {
   script_message_loop_ = script_message_loop;
 }
 
-void SchedulerImpl::StartFrame(const base::Time& deadline) {
+void SchedulerImpl::StartFrame(const base::TimeTicks& deadline) {
   ASSERT_ON_SCRIPT_THREAD();
   TRACE_EVENT0("script", "SchedulerImpl::StartFrame");
   ProcessTasks();
-  if (base::Time::Now() < deadline) {
+  if (base::TimeTicks::Now() < deadline) {
     idle_task_queue_->DidEnterViewIdle(deadline);
     RunIdleTasks();
     idle_task_queue_->DidExitViewIdle();
@@ -281,18 +281,18 @@ void SchedulerImpl::CancelIdleTask(int task_id) {
   idle_task_queue_->CancelTask(task_id);
 }
 
-void SchedulerImpl::DidBeginAnimationFrame(const base::Time& time) {
+void SchedulerImpl::DidBeginAnimationFrame(const base::TimeTicks& time) {
   animation_frame_callback_queue_->DidBeginAnimationFrame(time);
 }
 
-void SchedulerImpl::DidBeginFrame(const base::Time& deadline) {
+void SchedulerImpl::DidBeginFrame(const base::TimeTicks& deadline) {
   ASSERT_ON_VIEW_THREAD();
   script_message_loop_->task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&SchedulerImpl::StartFrame, base::Unretained(this), deadline));
 }
 
-void SchedulerImpl::DidEnterViewIdle(const base::Time& deadline) {
+void SchedulerImpl::DidEnterViewIdle(const base::TimeTicks& deadline) {
   DCHECK(script_message_loop_->task_runner());
   idle_task_queue_->DidEnterViewIdle(deadline);
   script_message_loop_->task_runner()->PostTask(

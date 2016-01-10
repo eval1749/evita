@@ -23,7 +23,7 @@ bool AnimationFrameHandler::CanHandleAnimationFrame() const {
   return true;
 }
 
-void AnimationFrameHandler::HandleAnimationFrame(base::Time time) {
+void AnimationFrameHandler::HandleAnimationFrame(const base::TimeTicks& time) {
   DidBeginAnimationFrame(time);
 }
 

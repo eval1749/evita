@@ -21,7 +21,7 @@ namespace ui {
 //
 class AnimationFloat final {
  public:
-  AnimationFloat(base::Time start_time,
+  AnimationFloat(const base::TimeTicks& start_time,
                  base::TimeDelta duration,
                  float start_value,
                  float end_value);
@@ -31,13 +31,13 @@ class AnimationFloat final {
   float end_value() const { return end_value_; }
   bool is_started() const { return !start_time_.is_null(); }
 
-  float Compute(base::Time current_time) const;
-  void Start(base::Time start_Time);
+  float Compute(const base::TimeTicks& current_time) const;
+  void Start(const base::TimeTicks& start_Time);
 
  private:
   const float end_value_;
   base::TimeDelta duration_;
-  base::Time start_time_;
+  base::TimeTicks start_time_;
   const float start_value_;
 
   DISALLOW_COPY_AND_ASSIGN(AnimationFloat);
@@ -49,7 +49,7 @@ class AnimationFloat final {
 //
 class AnimationPoint final {
  public:
-  AnimationPoint(base::Time start_time,
+  AnimationPoint(const base::TimeTicks& start_time,
                  base::TimeDelta duration,
                  const gfx::PointF& start_value,
                  const gfx::PointF& end_value);
@@ -57,12 +57,12 @@ class AnimationPoint final {
 
   gfx::PointF end_value() const { return end_value_; }
 
-  gfx::PointF Compute(base::Time current_time) const;
+  gfx::PointF Compute(const base::TimeTicks& current_time) const;
 
  private:
   const gfx::PointF end_value_;
   base::TimeDelta duration_;
-  base::Time start_time_;
+  base::TimeTicks start_time_;
   const gfx::PointF start_value_;
 
   DISALLOW_COPY_AND_ASSIGN(AnimationPoint);
@@ -74,7 +74,7 @@ class AnimationPoint final {
 //
 class AnimationSize final {
  public:
-  AnimationSize(base::Time start_time,
+  AnimationSize(const base::TimeTicks& start_time,
                 base::TimeDelta duration,
                 const gfx::SizeF& start_value,
                 const gfx::SizeF& end_value);
@@ -82,12 +82,12 @@ class AnimationSize final {
 
   gfx::SizeF end_value() const { return end_value_; }
 
-  gfx::SizeF Compute(base::Time current_time) const;
+  gfx::SizeF Compute(const base::TimeTicks& current_time) const;
 
  private:
   const gfx::SizeF end_value_;
   base::TimeDelta duration_;
-  base::Time start_time_;
+  base::TimeTicks start_time_;
   const gfx::SizeF start_value_;
 
   DISALLOW_COPY_AND_ASSIGN(AnimationSize);

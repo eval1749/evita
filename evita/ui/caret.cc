@@ -45,7 +45,7 @@ Caret::~Caret() {
   timer_.Stop();
 }
 
-void Caret::Blink(gfx::Canvas* canvas, base::Time now) {
+void Caret::Blink(gfx::Canvas* canvas, const base::TimeTicks& now) {
   auto const bounds = bounds_.Intersect(canvas->GetLocalBounds());
   if (bounds.empty()) {
     Reset();
@@ -92,14 +92,14 @@ void Caret::Hide(gfx::Canvas* canvas) {
 
 void Caret::Reset() {
   bounds_ = gfx::RectF();
-  last_blink_time_ = base::Time();
+  last_blink_time_ = base::TimeTicks();
   timer_.Stop();
   visible_ = false;
   DidChangeCaret();
 }
 
 void Caret::Update(gfx::Canvas* canvas,
-                   base::Time now,
+                   const base::TimeTicks& now,
                    const gfx::RectF& new_bounds) {
   DCHECK(!visible_);
   DCHECK(!new_bounds.empty());

@@ -96,19 +96,19 @@ class TextFieldControl::View final {
   void set_style(const Style& style);
   void set_text(const base::string16& text);
 
-  void Animate(gfx::Canvas* canvas, base::Time now);
+  void Animate(gfx::Canvas* canvas, const base::TimeTicks& now);
   int View::MapPointToOffset(const gfx::PointF& point) const;
   void SetBounds(const gfx::RectF& rect);
 
  private:
   gfx::PointF text_origin() const;
   void MakeSelectionVisible();
-  void PaintSelection(gfx::Canvas* canvas, base::Time now);
+  void PaintSelection(gfx::Canvas* canvas, const base::TimeTicks& now);
   void ResetTextLayout();
   void ResetViewPort();
   void UpdateCaret(gfx::Canvas* canvas,
                    const gfx::RectF& caret_rect,
-                   base::Time now);
+                   const base::TimeTicks& now);
   void UpdateTextLayout();
 
   gfx::RectF bounds_;
@@ -205,7 +205,8 @@ gfx::PointF TextFieldControl::View::text_origin() const {
          gfx::SizeF(0.0f, (view_bounds_.height() - text_size_.height) / 2);
 }
 
-void TextFieldControl::View::Animate(gfx::Canvas* canvas, base::Time now) {
+void TextFieldControl::View::Animate(gfx::Canvas* canvas,
+                                     const base::TimeTicks& now) {
   if (bounds_.empty())
     return;
   if (!dirty_) {
@@ -328,7 +329,7 @@ int TextFieldControl::View::MapPointToOffset(
 }
 
 void TextFieldControl::View::PaintSelection(gfx::Canvas* canvas,
-                                            base::Time now) {
+                                            const base::TimeTicks& now) {
   const auto text_origin = this->text_origin();
   if (selection_.collapsed()) {
     auto caret_x = 0.0f;
@@ -393,7 +394,7 @@ void TextFieldControl::View::SetBounds(const gfx::RectF& new_rect) {
 
 void TextFieldControl::View::UpdateCaret(gfx::Canvas* canvas,
                                          const gfx::RectF& caret_bounds_in,
-                                         base::Time now) {
+                                         const base::TimeTicks& now) {
   const auto bounds = gfx::RectF(gfx::ToEnclosingRect(caret_bounds_in));
   caret_->Update(canvas, now, gfx::RectF(bounds.origin(),
                                          gfx::SizeF(1.0f, bounds.height())));
@@ -496,7 +497,7 @@ HCURSOR TextFieldControl::GetCursorAt(const gfx::Point&) const {
 
 void TextFieldControl::OnDraw(gfx::Canvas* canvas) {
   // TODO(eval1749): We should get current time from animation scheduler.
-  view_->Animate(canvas, base::Time::Now());
+  view_->Animate(canvas, base::TimeTicks::Now());
 }
 
 }  // namespace ui

@@ -60,7 +60,7 @@ class FormWindow final : public views::Window,
   std::unique_ptr<gfx::SwapChain> CreateSwapChain() final;
 
   // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(base::Time time) final;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   // ui::SystemMetricsObserver
   void DidChangeIconFont() final;

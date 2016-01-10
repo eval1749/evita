@@ -23,7 +23,7 @@ class Animator : public common::Singleton<Animator>,
  public:
   ~Animator() override;
 
-  base::Time current_time() const;
+  const base::TimeTicks& current_time() const;
   bool is_playing() const;
 
   void CancelAnimation(Animatable* animatable);
@@ -34,15 +34,15 @@ class Animator : public common::Singleton<Animator>,
 
   void EndAnimate();
   void Animate(Animatable* animatable);
-  void PlayAnimations(base::Time time);
-  void StartAnimate(base::Time time);
+  void PlayAnimations(const base::TimeTicks& time);
+  void StartAnimate(const base::TimeTicks& time);
 
   // AnimationFrameHandler
-  void DidBeginAnimationFrame(base::Time time) override;
+  void DidBeginAnimationFrame(const base::TimeTicks& time) override;
   const char* GetAnimationFrameType() const override;
 
   std::unordered_set<Animatable*> animatables_;
-  base::Time current_time_;
+  base::TimeTicks current_time_;
   std::unordered_set<Animatable*> pending_animatables_;
   std::unordered_set<Animatable*> running_animatables_;
   std::unordered_set<Animatable*> waiting_animatables_;

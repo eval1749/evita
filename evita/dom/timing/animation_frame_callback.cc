@@ -17,7 +17,7 @@ AnimationFrameCallback::AnimationFrameCallback(
 
 AnimationFrameCallback::~AnimationFrameCallback() {}
 
-void AnimationFrameCallback::Run(const base::Time& time) {
+void AnimationFrameCallback::Run(const base::TimeTicks& time) {
   callback_.Run(time);
 }
 

@@ -62,8 +62,8 @@ class Scheduler final : public ui::AnimationScheduler {
   // Monotonically incremented frame id. It is used for trace logging.
   int frame_id_;
   int idle_sequence_num_;
-  base::Time last_frame_time_;
-  base::Time last_paint_time_;
+  base::TimeTicks last_frame_time_;
+  base::TimeTicks last_paint_time_;
   std::unique_ptr<base::Lock> lock_;
   base::MessageLoop* const message_loop_;
   std::unordered_set<ui::AnimationFrameHandler*> pending_handlers_;

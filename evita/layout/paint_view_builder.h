@@ -44,7 +44,7 @@ class PaintViewBuilder final {
   ~PaintViewBuilder();
 
   scoped_refptr<paint::View> Build(const TextSelectionModel& selection_model,
-                                   base::Time now);
+                                   const base::TimeTicks& now);
 
   void SetBounds(const gfx::RectF& new_bounds);
   void SetZoom(float new_zoom);
@@ -53,7 +53,7 @@ class PaintViewBuilder final {
   gfx::RectF PaintViewBuilder::ComputeCaretBounds(
       const TextSelectionModel& selection_model) const;
   paint::CaretState ComputeCaretState(const gfx::RectF& bounds,
-                                      base::Time now) const;
+                                      const base::TimeTicks& now) const;
 
   gfx::RectF ComputeRulerBounds() const;
   void DidFireCaretTimer();
@@ -65,7 +65,7 @@ class PaintViewBuilder final {
   gfx::RectF caret_bounds_;
   ui::AnimatableWindow* const caret_owner_;
   paint::CaretState caret_state_;
-  base::Time caret_time_;
+  base::TimeTicks caret_time_;
   base::RepeatingTimer caret_timer_;
   float zoom_;
 

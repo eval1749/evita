@@ -32,15 +32,16 @@ class PaintThreadCanvasOwner {
  public:
   virtual ~PaintThreadCanvasOwner();
 
-  void DidBeginAnimationFrame(base::Time now);
+  void DidBeginAnimationFrame(const base::TimeTicks& now);
   void DidRealize();
   void DidRecreateParentLayer();
   void WillDestroyWidget();
 
  protected:
-  PaintThreadCanvasOwner(ui::AnimatableWindow* widget);
+  explicit PaintThreadCanvasOwner(ui::AnimatableWindow* widget);
 
-  virtual void PaintAnimationFrame(gfx::Canvas* canvas, base::Time now) = 0;
+  virtual void PaintAnimationFrame(gfx::Canvas* canvas,
+                                   const base::TimeTicks& now) = 0;
   void RequestAnimationFrame();
 
  private:

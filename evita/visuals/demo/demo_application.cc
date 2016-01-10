@@ -38,7 +38,7 @@ class DemoScheduler : public ui::AnimationScheduler {
   void RequestAnimationFrame(ui::AnimationFrameHandler* handler) final;
 
   bool is_waiting_ = false;
-  base::Time last_frame_time_;
+  base::TimeTicks last_frame_time_;
   std::unordered_set<ui::AnimationFrameHandler*> pending_handlers_;
 
   DISALLOW_COPY_AND_ASSIGN(DemoScheduler);
@@ -55,7 +55,7 @@ DemoScheduler::~DemoScheduler() {
 void DemoScheduler::BeginFrame() {
   std::unordered_set<ui::AnimationFrameHandler*> ready_handlers;
   ready_handlers.swap(pending_handlers_);
-  const auto& now = base::Time::Now();
+  const auto& now = base::TimeTicks::Now();
   last_frame_time_ = now;
   for (const auto& handler : ready_handlers)
     handler->HandleAnimationFrame(now);
@@ -74,7 +74,7 @@ void DemoScheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {
     return;
   const auto next_frame_time =
       last_frame_time_ + base::TimeDelta::FromMilliseconds(1000 / 60);
-  const auto delta = next_frame_time - base::Time::Now();
+  const auto delta = next_frame_time - base::TimeTicks::Now();
   base::MessageLoop::current()->task_runner()->PostNonNestableDelayedTask(
       FROM_HERE, base::Bind(&DemoScheduler::BeginFrame, base::Unretained(this)),
       std::min(base::TimeDelta::FromMilliseconds(3),

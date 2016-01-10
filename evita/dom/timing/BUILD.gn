@@ -14,6 +14,7 @@ source_set("timing") {
     "idle_task.h",
     "performance.cc",
     "performance.h",
+    "request_animation_frame.cc",
     "request_idle_callback.cc",
   ]
 
@@ -33,6 +34,7 @@ source_set("test_support") {
 source_set("test_files") {
   testonly = true
   sources = [
+    "request_animation_frame_test.cc",
     "request_idle_callback_test.cc",
   ]
   public_deps = [

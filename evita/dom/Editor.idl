@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+callback FrameRequestCallback = void (DOMHighResTimeStamp time);
 callback IdleRequestCallback = void (IdleDeadline deadline);
 
 // Trace Event JSON
@@ -129,6 +130,10 @@ interface Editor {
   //   }
   static void startTraceLog(DOMString config_string);
   static void stopTraceLog(TraceLogOutputCallback callback);
+
+  // Request animation frame
+  static long requestAnimationFrame(FrameRequestCallback callback);
+  static void cancelAnimationFrame(long handle);
 
   // Request Idle Callback
   static unsigned long requestIdleCallback(IdleRequestCallback callback,

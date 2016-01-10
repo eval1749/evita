@@ -88,6 +88,10 @@ class Editor final : public v8_glue::Scriptable<Editor> {
   static void StartTraceLog(const base::string16& config);
   static void StopTraceLog(v8::Handle<v8::Function> callback);
 
+  // Request animation frame
+  static void CancelAnimationFrame(int callback_id);
+  static int RequestAnimationFrame(v8::Handle<v8::Function> callback);
+
   // Request Idle Callback
   static int RequestIdleCallback(v8::Handle<v8::Function> callback,
                                  const IdleRequestOptions& options);

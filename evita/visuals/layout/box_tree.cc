@@ -83,7 +83,9 @@ class BoxTree::Impl final : public DocumentObserver, public StyleTreeObserver {
   Impl(const Document& document, const StyleTree& style_tree);
   ~Impl() final;
 
+  const Document& document() const { return style_tree_.document(); }
   RootBox* root_box() const;
+  const StyleTree& style_tree() const { return style_tree_; }
   int version() const { return version_; }
 
   Box* BoxFor(const Node& node) const;
@@ -451,9 +453,13 @@ void BoxTree::Impl::DidChangeComputedStyle(const Element& element,
 // BoxTree
 //
 BoxTree::BoxTree(const Document& document, const StyleTree& style_tree)
-    : impl_(new Impl(document, style_tree)) {}
+    : impl_(new Impl(document, style_tree)) {
+  style_tree.media().AddObserver(this);
+}
 
-BoxTree::~BoxTree() {}
+BoxTree::~BoxTree() {
+  impl_->style_tree().media().RemoveObsever(this);
+}
 
 RootBox* BoxTree::root_box() const {
   return impl_->root_box();
@@ -469,6 +475,15 @@ Box* BoxTree::BoxFor(const Node& node) const {
 
 void BoxTree::UpdateIfNeeded() {
   return impl_->UpdateIfNeeded();
+}
+
+// css::MediaObserver
+void BoxTree::DidChangeViewportSize() {
+  impl_->MarkDirty(impl_->document());
+}
+
+void BoxTree::DidChangeSystemMetrics() {
+  // Note: system metrics changes affect computed style.
 }
 
 }  // namespace visuals

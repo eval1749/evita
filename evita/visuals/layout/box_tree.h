@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "base/macros.h"
+#include "evita/visuals/css/media_observer.h"
 
 namespace visuals {
 
@@ -22,7 +23,7 @@ class StyleTree;
 //
 // BoxTree represents a CSS Box tree for document(node tree) with style tree.
 //
-class BoxTree final {
+class BoxTree final : public css::MediaObserver {
  public:
   BoxTree(const Document& document, const StyleTree& style_tree);
   ~BoxTree();
@@ -35,6 +36,10 @@ class BoxTree final {
 
  private:
   class Impl;
+
+  // css::MediaObserver
+  void DidChangeViewportSize() final;
+  void DidChangeSystemMetrics() final;
 
   std::unique_ptr<Impl> impl_;
 

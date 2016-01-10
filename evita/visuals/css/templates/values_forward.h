@@ -24,6 +24,9 @@ namespace css {
 class {{type.Name}};
 {% endfor %}
 
+class Length;
+class Percentage;
+
 }  // namespace css
 }  // namespace visuals
 

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iterator>
 #include <ostream>
+#include <vector>
 
 #include "evita/editor/scheduler.h"
 
@@ -169,14 +170,24 @@ void Scheduler::HandleAnimationFrame() {
     running_handlers.swap(pending_handlers_);
     canceling_handlers.swap(canceled_handlers_);
   }
+  std::vector<ui::AnimationFrameHandler*> pending_handlers;
   for (auto handler : running_handlers) {
     if (canceling_handlers.find(handler) != canceling_handlers.end())
       continue;
+    if (!handler->CanHandleAnimationFrame()) {
+      pending_handlers.push_back(handler);
+      continue;
+    }
     TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::HandleAnimationFrame",
                            handler, TRACE_EVENT_FLAG_FLOW_IN, "type",
                            handler->GetAnimationFrameType());
     handler->HandleAnimationFrame(time);
   }
+  if (pending_handlers.empty())
+    return;
+  base::AutoLock lock_scope(*lock_);
+  for (const auto& handler : pending_handlers)
+    pending_handlers_.insert(handler);
 }
 
 void Scheduler::RequestAnimationFrame(ui::AnimationFrameHandler* handler) {

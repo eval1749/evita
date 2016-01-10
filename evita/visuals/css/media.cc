@@ -21,7 +21,7 @@ void Media::AddObserver(MediaObserver* observer) const {
 }
 
 void Media::RemoveObsever(MediaObserver* observer) const {
-  observers_.AddObserver(observer);
+  observers_.RemoveObserver(observer);
 }
 
 void Media::DidChangeViewportSize() {

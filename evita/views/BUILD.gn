@@ -37,7 +37,6 @@ source_set("views") {
 
   deps = [
     "//base",
-
     "//evita/layout",
     "//evita/metrics",
     "//evita/spellchecker",

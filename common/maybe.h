@@ -15,6 +15,14 @@ namespace common {
 template <typename T>
 class Maybe {
  public:
+  Maybe(const Maybe& other)
+      : has_value_(other.has_value_),
+        value_(other.has_value_ ? other.value_ : T()) {}
+
+  Maybe(Maybe&& other)
+      : has_value_(other.has_value_),
+        value_(other.has_value_ ? std::move(other.value_) : T()) {}
+
   bool operator==(const Maybe& other) const;
   bool operator!=(const Maybe& other) const;
 

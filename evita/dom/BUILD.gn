@@ -107,8 +107,12 @@ source_set("dom") {
     "//evita/dom/public",
     "//evita/dom/text",
     "//evita/dom/timing",
+    "//evita/dom/visuals",
     "//evita/ui/animation:public",
     "//evita/v8_glue",
+    "//evita/visuals/display",
+    "//evita/visuals/layout",
+    "//evita/visuals/paint",
     "//regex",
   ]
 
@@ -241,5 +245,8 @@ test("evita_dom_tests") {
     "//evita/dom/testing:test_support",
     "//evita/dom/text:test_files",
     "//evita/dom/timing:test_files",
+    "//evita/dom/visuals:test_files",
+    "//evita/visuals/css",
+    "//evita/visuals/display:public",
   ]
 }

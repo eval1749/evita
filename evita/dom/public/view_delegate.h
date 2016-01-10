@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_PUBLIC_VIEW_DELEGATE_H_
 #define EVITA_DOM_PUBLIC_VIEW_DELEGATE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,10 @@ class Form;
 
 namespace text {
 class Selection;
+}
+
+namespace visuals {
+class DisplayItemList;
 }
 
 namespace domapi {
@@ -89,6 +94,10 @@ class ViewDelegate {
                                  dom::TextDocument* document) = 0;
   virtual void CreateTextWindow(WindowId window_id,
                                 text::Selection* selection) = 0;
+
+  // Create a window for displaying visual document.
+  virtual void CreateVisualWindow(WindowId window_id) = 0;
+
   virtual void DestroyWindow(WindowId window_id) = 0;
 
   // |DidUpdateDom()| is called when DOM thread finishes DOM
@@ -147,6 +156,11 @@ class ViewDelegate {
                           const base::string16& title,
                           int flags,
                           const MessageBoxResolver& callback) = 0;
+
+  // TODO(eval1749): We should move |PaintVisualDocument()| to paint delegate.
+  virtual void PaintVisualDocument(
+      WindowId window_id,
+      std::unique_ptr<visuals::DisplayItemList> display_item_list) = 0;
 
   virtual void Reconvert(WindowId window_id, const base::string16& text) = 0;
   virtual void RealizeWindow(WindowId window_id) = 0;

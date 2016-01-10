@@ -33,6 +33,7 @@ class MockViewImpl final : public domapi::ViewDelegate {
                void(domapi::WindowId, Form*, const domapi::PopupWindowInit&));
   MOCK_METHOD2(CreateTableWindow, void(domapi::WindowId, TextDocument*));
   MOCK_METHOD2(CreateTextWindow, void(domapi::WindowId, text::Selection*));
+  MOCK_METHOD1(CreateVisualWindow, void(domapi::WindowId window_id));
   MOCK_METHOD1(DestroyWindow, void(domapi::WindowId));
   MOCK_METHOD1(DidStartScriptHost, void(domapi::ScriptHostState));
   MOCK_METHOD0(DidUpdateDom, void());
@@ -69,6 +70,9 @@ class MockViewImpl final : public domapi::ViewDelegate {
                   const base::string16& title,
                   int flags,
                   const MessageBoxResolver& resolver) final;
+  void PaintVisualDocument(
+      domapi::WindowId window_id,
+      std::unique_ptr<visuals::DisplayItemList> display_item_list) final;
   MOCK_METHOD2(Reconvert, void(domapi::WindowId, const base::string16&));
   MOCK_METHOD1(RealizeWindow, void(domapi::WindowId));
   MOCK_METHOD1(ReleaseCapture, void(domapi::EventTargetId));

@@ -47,6 +47,7 @@
 #include "evita/dom/windows/table_window.h"
 #include "evita/dom/windows/text_selection.h"
 #include "evita/dom/windows/text_window.h"
+#include "evita/dom/windows/visual_window.h"
 #include "evita/dom/timers/one_shot_timer.h"
 #include "evita/dom/timers/repeating_timer.h"
 #include "evita/dom/timers/timer.h"
@@ -116,6 +117,7 @@ v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(EditorWindow);
     INSTALL(FormWindow);
     INSTALL(TextFieldSelection);
+    INSTALL(VisualWindow);
 
     INSTALL(TextMutationObserver);
     INSTALL(TextMutationRecord);

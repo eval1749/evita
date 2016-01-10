@@ -56,6 +56,12 @@ domapi::ViewEventHandler* ScriptThread::view_event_handler() const {
   return ScriptHost::instance()->event_handler();
 }
 
+void ScriptThread::BeginAnimationFrame(const base::Time& time) {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  animation_frame_request_count_ = 0;
+  scheduler_->DidBeginAnimationFrame(time);
+}
+
 void ScriptThread::ScheduleScriptTask(const base::Closure& task) {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   scheduler()->ScheduleTask(task);
@@ -198,7 +204,7 @@ void ScriptThread::DidUpdateDom() {
 void ScriptThread::DidRequestAnimationFrame() {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   ++animation_frame_request_count_;
-  if (animation_frame_request_count_ == 1)
+  if (animation_frame_request_count_ != 1)
     return;
   RequestAnimationFrame();
 }
@@ -210,8 +216,8 @@ const char* ScriptThread::GetAnimationFrameType() const {
 
 void ScriptThread::DidBeginAnimationFrame(base::Time time) {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  ScheduleScriptTask(base::Bind(&SchedulerImpl::DidBeginAnimationFrame,
-                                base::Unretained(scheduler_.get()), time));
+  ScheduleScriptTask(base::Bind(&ScriptThread::BeginAnimationFrame,
+                                base::Unretained(this), time));
 }
 
 }  // namespace dom

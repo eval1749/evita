@@ -29,6 +29,8 @@ source_set("views") {
     "view_delegate_impl.cc",
     "view_thread_proxy.cc",
     "view_thread_proxy.h",
+    "visual_window.cc",
+    "visual_window.h",
     "window.cc",
     "window.h",
     "window_set.cc",
@@ -44,5 +46,6 @@ source_set("views") {
     "//evita/views/events",
     "//evita/views/forms",
     "//evita/views/tabs",
+    "//evita/visuals/display:processor",
   ]
 }

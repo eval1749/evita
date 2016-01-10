@@ -34,6 +34,8 @@
 #include "evita/views/table_window.h"
 #include "evita/views/tabs/tab_data_set.h"
 #include "evita/views/text_window.h"
+#include "evita/views/visual_window.h"
+#include "evita/visuals/display/public/display_item_list.h"
 #include "evita/vi_EditPane.h"
 #include "evita/vi_Frame.h"
 
@@ -200,6 +202,10 @@ void ViewDelegateImpl::CreateTableWindow(domapi::WindowId window_id,
 void ViewDelegateImpl::CreateTextWindow(domapi::WindowId window_id,
                                         text::Selection* selection) {
   new TextWindow(window_id, selection);
+}
+
+void ViewDelegateImpl::CreateVisualWindow(domapi::WindowId window_id) {
+  new VisualWindow(window_id);
 }
 
 void ViewDelegateImpl::DestroyWindow(domapi::WindowId window_id) {
@@ -468,6 +474,20 @@ void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,
   auto const response = ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
                                       static_cast<UINT>(flags));
   ScriptDelegate()->RunCallback(base::Bind(resolver.resolve, response));
+}
+
+void ViewDelegateImpl::PaintVisualDocument(
+    domapi::WindowId window_id,
+    std::unique_ptr<visuals::DisplayItemList> display_item_list) {
+  auto const& window = FromWindowId("PaintVisualDocument", window_id);
+  if (!window)
+    return;
+  auto const& visual_window = window->as<VisualWindow>();
+  if (!visual_window) {
+    DVLOG(0) << "WindowId " << window_id << " should be VisualWindow.";
+    return;
+  }
+  visual_window->Paint(std::move(display_item_list));
 }
 
 void ViewDelegateImpl::Reconvert(WindowId window_id,

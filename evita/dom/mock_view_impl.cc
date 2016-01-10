@@ -1,10 +1,12 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/mock_view_impl.h"
 
 #include "base/synchronization/waitable_event.h"
 #include "evita/dom/text/text_document.h"
+#include "evita/visuals/display/public/display_item_list.h"
 
 namespace dom {
 
@@ -44,5 +46,9 @@ void MockViewImpl::MessageBox(domapi::WindowId,
                               const MessageBoxResolver& resolver) {
   resolver.resolve.Run(flags);
 }
+
+void MockViewImpl::PaintVisualDocument(
+    domapi::WindowId window_id,
+    std::unique_ptr<visuals::DisplayItemList> display_item_list) {}
 
 }  // namespace dom

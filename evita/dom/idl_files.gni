@@ -79,6 +79,7 @@ interface_idl_files = [
   "//evita/dom/windows/TableWindow.idl",
   "//evita/dom/windows/TextSelection.idl",
   "//evita/dom/windows/TextWindow.idl",
+  "//evita/dom/windows/VisualWindow.idl",
   "//evita/dom/windows/Window.idl",
 ]
 

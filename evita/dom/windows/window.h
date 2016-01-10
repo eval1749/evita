@@ -46,7 +46,7 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   State state() const { return state_; }
   domapi::WindowId window_id() const { return event_target_id(); }
 
-  void DidChangeBounds(int left, int top, int right, int bottom);
+  virtual void DidChangeBounds(int left, int top, int right, int bottom);
   virtual void DidDestroyWindow();
   virtual void DidRealizeWindow();
   void DidSetFocus();

@@ -43,6 +43,7 @@ class ScriptThread final : public domapi::ViewEventHandler,
   Scheduler* scheduler() const;
   domapi::ViewEventHandler* view_event_handler() const;
 
+  void BeginAnimationFrame(const base::Time& time);
   void ScheduleScriptTask(const base::Closure& task);
 
   // domapi::ViewEventHandler

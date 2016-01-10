@@ -225,7 +225,8 @@ enum class SchedulerImpl::State {
   DCHECK_EQ(script_message_loop_, base::MessageLoop::current())
 
 SchedulerImpl::SchedulerImpl(SchedulerClient* scheduler_client)
-    : idle_task_queue_(new IdleTaskQueue()),
+    : animation_frame_callback_queue_(new AnimationFrameCallbackQueue()),
+      idle_task_queue_(new IdleTaskQueue()),
       normal_task_queue_(new TaskQueue()),
       scheduler_client_(scheduler_client),
       script_message_loop_(nullptr),

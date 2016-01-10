@@ -87,6 +87,7 @@ js_lib_files = [
   "windows/tab_data.js",
   "windows/text_selection.js",
   "windows/text_window.js",
+  "windows/visual_window.js",
   "windows/window.js",
 
   "commands/text_document_list.js",

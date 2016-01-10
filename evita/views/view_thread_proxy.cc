@@ -16,6 +16,7 @@
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/views/view_delegate_impl.h"
+#include "evita/visuals/display/public/display_item_list.h"
 
 namespace views {
 
@@ -198,6 +199,7 @@ DEFINE_DELEGATE_3(CreateFormWindow,
                   const domapi::PopupWindowInit&)
 DEFINE_DELEGATE_2(CreateTableWindow, domapi::WindowId, dom::TextDocument*)
 DEFINE_DELEGATE_2(CreateTextWindow, domapi::WindowId, text::Selection*)
+DEFINE_DELEGATE_1(CreateVisualWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DestroyWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
 
@@ -235,6 +237,19 @@ DEFINE_DELEGATE_5(MessageBox,
                   const base::string16&,
                   int,
                   const MessageBoxResolver&)
+
+void ViewThreadProxy::PaintVisualDocument(
+    domapi::WindowId window_id,
+    std::unique_ptr<visuals::DisplayItemList> display_item_list) {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!message_loop_)
+    return;
+  message_loop_->PostTask(
+      FROM_HERE, base::Bind(&ViewDelegate::PaintVisualDocument,
+                            base::Unretained(delegate_.get()), window_id,
+                            base::Passed(std::move(display_item_list))));
+}
+
 DEFINE_DELEGATE_2(Reconvert, domapi::WindowId, const base::string16&);
 DEFINE_DELEGATE_1(RealizeWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(ReleaseCapture, domapi::EventTargetId)

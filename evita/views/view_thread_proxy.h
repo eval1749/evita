@@ -41,6 +41,7 @@ class ViewThreadProxy : public domapi::ViewDelegate {
                          dom::TextDocument* document) final;
   void CreateTextWindow(domapi::WindowId window_id,
                         text::Selection* selection) final;
+  void CreateVisualWindow(domapi::WindowId window_id) final;
   void DestroyWindow(domapi::WindowId window_id) final;
   void DidStartScriptHost(domapi::ScriptHostState state) final;
   void DidUpdateDom() final;
@@ -75,6 +76,9 @@ class ViewThreadProxy : public domapi::ViewDelegate {
                   const base::string16& title,
                   int flags,
                   const MessageBoxResolver& resolver) final;
+  void PaintVisualDocument(
+      domapi::WindowId window_id,
+      std::unique_ptr<visuals::DisplayItemList> display_item_list) final;
   void Reconvert(domapi::WindowId window_id, const base::string16& text) final;
   void RealizeWindow(domapi::WindowId window_id) final;
   void ReleaseCapture(domapi::EventTargetId event_target_id) final;

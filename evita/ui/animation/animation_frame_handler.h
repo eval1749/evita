@@ -27,6 +27,7 @@ class AnimationFrameHandler {
   // Returns type of animation frame providing this handler.
   virtual const char* GetAnimationFrameType() const = 0;
 
+  virtual bool CanHandleAnimationFrame() const;
   void HandleAnimationFrame(base::Time time);
 
   // Request animation frame.
@@ -34,6 +35,7 @@ class AnimationFrameHandler {
 
  protected:
   AnimationFrameHandler();
+
   // Called when animation frame started at |time|.
   virtual void DidBeginAnimationFrame(base::Time time) = 0;
 

@@ -19,6 +19,10 @@ void AnimationFrameHandler::CancelAnimationFrameRequest() {
   AnimationScheduler::GetInstance()->CancelAnimationFrameRequest(this);
 }
 
+bool AnimationFrameHandler::CanHandleAnimationFrame() const {
+  return true;
+}
+
 void AnimationFrameHandler::HandleAnimationFrame(base::Time time) {
   DidBeginAnimationFrame(time);
 }

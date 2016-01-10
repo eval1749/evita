@@ -20,7 +20,7 @@ void Media::AddObserver(MediaObserver* observer) const {
   observers_.AddObserver(observer);
 }
 
-void Media::RemoveObsever(MediaObserver* observer) const {
+void Media::RemoveObserver(MediaObserver* observer) const {
   observers_.RemoveObserver(observer);
 }
 

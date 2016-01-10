@@ -29,7 +29,7 @@ class Media {
   virtual FloatSize viewport_size() const = 0;
 
   void AddObserver(MediaObserver* observer) const;
-  void RemoveObsever(MediaObserver* observer) const;
+  void RemoveObserver(MediaObserver* observer) const;
 
  protected:
   Media();

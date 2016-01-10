@@ -343,7 +343,7 @@ StyleTree::~StyleTree() {
   for (const auto& style_sheet : style_sheets_)
     style_sheet->RemoveObserver(this);
   impl_->document().RemoveObserver(this);
-  impl_->media().RemoveObsever(this);
+  impl_->media().RemoveObserver(this);
 }
 
 const Document& StyleTree::document() const {

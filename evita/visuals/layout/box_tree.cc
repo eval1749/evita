@@ -458,7 +458,7 @@ BoxTree::BoxTree(const Document& document, const StyleTree& style_tree)
 }
 
 BoxTree::~BoxTree() {
-  impl_->style_tree().media().RemoveObsever(this);
+  impl_->style_tree().media().RemoveObserver(this);
 }
 
 RootBox* BoxTree::root_box() const {

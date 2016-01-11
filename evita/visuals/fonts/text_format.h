@@ -13,6 +13,7 @@
 namespace visuals {
 
 class FloatSize;
+class FontDescription;
 class NativeTextFormat;
 
 //////////////////////////////////////////////////////////////////////
@@ -21,7 +22,7 @@ class NativeTextFormat;
 //
 class TextFormat final {
  public:
-  TextFormat(const base::string16& font_face_name, float font_size);
+  explicit TextFormat(const FontDescription& description);
   ~TextFormat();
 
   const NativeTextFormat& impl() const { return *impl_; }

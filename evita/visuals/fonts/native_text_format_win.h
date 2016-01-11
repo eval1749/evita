@@ -16,6 +16,7 @@
 namespace visuals {
 
 class FloatSize;
+class FontDescription;
 class NativeTextLayout;
 
 //////////////////////////////////////////////////////////////////////
@@ -24,7 +25,7 @@ class NativeTextLayout;
 //
 class NativeTextFormat final {
  public:
-  NativeTextFormat(const base::string16& font_face_name, float font_size);
+  explicit NativeTextFormat(const FontDescription& description);
   ~NativeTextFormat();
 
   const base::win::ScopedComPtr<IDWriteTextFormat>& get() const {

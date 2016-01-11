@@ -8,20 +8,38 @@
 
 #include "common/win/com_verify.h"
 #include "evita/visuals/fonts/direct_write_factory_win.h"
+#include "evita/visuals/fonts/font_description.h"
 #include "evita/visuals/fonts/native_text_layout_win.h"
 #include "evita/visuals/geometry/float_size.h"
 
 namespace visuals {
 
+namespace {
+
+DWRITE_FONT_STRETCH DirectWriteFontStretchOf(
+    const FontDescription& description) {
+  return static_cast<DWRITE_FONT_STRETCH>(description.stretch());
+}
+
+DWRITE_FONT_STYLE DirectWriteFontStyleOf(const FontDescription& description) {
+  return static_cast<DWRITE_FONT_STYLE>(description.style());
+}
+
+DWRITE_FONT_WEIGHT DirectWriteFontWeightOf(const FontDescription& description) {
+  return static_cast<DWRITE_FONT_WEIGHT>(description.weight());
+}
+
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // NativeTextFormat
 //
-NativeTextFormat::NativeTextFormat(const base::string16& font_face_name,
-                                   float font_size) {
+NativeTextFormat::NativeTextFormat(const FontDescription& description) {
   COM_VERIFY(DirectWriteFactory::GetInstance()->get()->CreateTextFormat(
-      font_face_name.c_str(), nullptr, DWRITE_FONT_WEIGHT_REGULAR,
-      DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, font_size, L"en-us",
+      description.family().c_str(), nullptr,
+      DirectWriteFontWeightOf(description), DirectWriteFontStyleOf(description),
+      DirectWriteFontStretchOf(description), description.size(), L"en-us",
       text_format_.Receive()));
 }
 

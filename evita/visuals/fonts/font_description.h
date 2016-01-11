@@ -9,35 +9,38 @@
 
 namespace visuals {
 
+// Note: Order of enum member is matched to |DWRITE_FONT_STRETCH|.
 enum class FontStretch {
-  UltraCondensed,
-  ExtraCondensed,
-  Condensed,
-  SemiCondensed,
-  Normal,
-  Medium,
-  SemiExpanded,
-  Expanded,
-  ExtraExpanded,
-  UltraExpanded,
+  UltraCondensed = 1,
+  ExtraCondensed = 2,
+  Condensed = 3,
+  SemiCondensed = 4,
+  Normal = 5,
+  SemiExpanded = 6,
+  Expanded = 7,
+  ExtraExpanded = 8,
+  UltraExpanded = 9,
 };
 
+// Note: Order of enum members is matched to |DWRITE_FONT_STYLE|.
 enum class FontStyle {
   Normal,
-  Italic,
   Oblique,
+  Italic,
 };
 
 enum class FontWeight {
-  k100,
-  k200,
-  k300,
-  k400,
-  k500,
-  k600,
-  k700,
-  k800,
-  k900,
+  k100 = 100,
+  k200 = 200,
+  k300 = 300,
+  k400 = 400,
+  k500 = 500,
+  k600 = 600,
+  k700 = 700,
+  k800 = 800,
+  k900 = 900,
+  k350 = 350,  // Direct Write SemiLight
+  k950 = 950,  // Direct Write Ultra Black
   Bold = k700,
   Normal = k400,
 };

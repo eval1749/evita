@@ -7,6 +7,7 @@
 #include "evita/visuals/layout/size_calculator.h"
 
 #include "base/logging.h"
+#include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_editor.h"
@@ -177,8 +178,11 @@ void IntrinsicSizeVisitor::VisitTextBox(TextBox* box) {
     return ReturnSize(FloatSize());
   // TODO(eval1749): Implement computing preferred size for |TextBox|.
   const auto font_size = 16.0f;  // 12pt * 96dpi / 72
-  const auto& text_format =
-      std::make_unique<TextFormat>(L"MS Shell Dlg 2", font_size);
+  const auto& font_description = FontDescription::Builder()
+                                     .SetFamily(L"MS Shell Dlg 2")
+                                     .SetSize(font_size)
+                                     .Build();
+  const auto& text_format = std::make_unique<TextFormat>(font_description);
   ReturnSize(text_format->ComputeMetrics(box->text()));
 }
 

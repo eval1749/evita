@@ -19,8 +19,8 @@ namespace visuals {
 //
 // TextFormat
 //
-TextFormat::TextFormat(const base::string16& font_face_name, float font_size)
-    : impl_(new NativeTextFormat(font_face_name, font_size)) {}
+TextFormat::TextFormat(const FontDescription& description)
+    : impl_(new NativeTextFormat(description)) {}
 
 TextFormat::~TextFormat() {}
 

@@ -89,8 +89,14 @@ bool DrawRectDisplayItem::EqualsTo(const DisplayItem& other) const {
 DrawTextDisplayItem::DrawTextDisplayItem(const FloatRect& bounds,
                                          const FloatColor& color,
                                          float baseline,
+                                         const TextFormat& text_format,
                                          const base::string16& text)
-    : baseline_(baseline), bounds_(bounds), color_(color), text_(text) {}
+    : baseline_(baseline),
+      bounds_(bounds),
+      color_(color),
+      text_(text),
+      text_format_(text_format) {}
+
 DrawTextDisplayItem::~DrawTextDisplayItem() {}
 
 bool DrawTextDisplayItem::EqualsTo(const DisplayItem& other) const {
@@ -100,7 +106,8 @@ bool DrawTextDisplayItem::EqualsTo(const DisplayItem& other) const {
   if (!item)
     return false;
   return baseline_ == item->baseline_ && bounds_ == item->bounds_ &&
-         color_ == item->color_ && text_ == item->text_;
+         color_ == item->color_ && text_ == item->text_ &&
+         &text_format_ == &item->text_format_;
 }
 
 //////////////////////////////////////////////////////////////////////

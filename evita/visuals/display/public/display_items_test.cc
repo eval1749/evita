@@ -5,6 +5,8 @@
 #include <memory>
 
 #include "evita/visuals/display/public/display_items.h"
+#include "evita/visuals/fonts/font_description_builder.h"
+#include "evita/visuals/fonts/text_format_factory.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
@@ -69,18 +71,21 @@ TEST(DrawRectDisplayItemsTest, EqualsTo) {
 }
 
 TEST(DrawTextDisplayItemsTest, EqualsTo) {
+  const auto& font =
+      FontDescription::Builder().SetFamily(L"Arial").SetSize(10).Build();
+  const auto& format = TextFormatFactory::GetInstance()->Get(font);
   const auto& item1 = std::make_unique<DrawTextDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 1, L"foo");
+      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 1, format, L"foo");
   const auto& item2 = std::make_unique<DrawTextDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 1, L"foo");
+      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 1, format, L"foo");
   const auto& item3 = std::make_unique<DrawTextDisplayItem>(
-      FloatRect(FloatSize(3, 4)), FloatColor(1, 1, 1), 1, L"foo");
+      FloatRect(FloatSize(3, 4)), FloatColor(1, 1, 1), 1, format, L"foo");
   const auto& item4 = std::make_unique<DrawTextDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(0.5, 1, 1), 1, L"foo");
+      FloatRect(FloatSize(1, 2)), FloatColor(0.5, 1, 1), 1, format, L"foo");
   const auto& item5 = std::make_unique<DrawTextDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 2, L"foo");
+      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 2, format, L"foo");
   const auto& item6 = std::make_unique<DrawTextDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 1, L"bar");
+      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 1, format, L"bar");
 
   EXPECT_TRUE(*item1 == *item1);
   EXPECT_TRUE(*item1 == *item2);

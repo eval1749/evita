@@ -6,6 +6,7 @@
 #define PAINT_DIRTY 0
 
 #include <dwrite.h>
+#include <stdint.h>
 
 #if PRINT_DIRTY
 #include <iostream>
@@ -21,6 +22,8 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/public/display_item_visitor.h"
+#include "evita/visuals/fonts/native_text_format_win.h"
+#include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
@@ -88,9 +91,10 @@ void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
 }
 
 void PaintVisitor::VisitDrawText(DrawTextDisplayItem* item) {
-  gfx::TextFormat text_format(L"MS Shell Dlg 2", 16);
-  canvas_->DrawText(text_format, gfx::Brush(canvas_, ToColorF(item->color())),
-                    ToRectF(item->bounds()), item->text());
+  (*canvas_)->DrawText(
+      item->text().data(), static_cast<uint32_t>(item->text().length()),
+      item->text_format().impl().get().get(), ToRectF(item->bounds()),
+      gfx::Brush(canvas_, ToColorF(item->color())));
 }
 
 void PaintVisitor::VisitEndClip(EndClipDisplayItem* item) {

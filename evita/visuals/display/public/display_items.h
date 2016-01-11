@@ -17,6 +17,8 @@
 
 namespace visuals {
 
+class TextFormat;
+
 #define DECLARE_DISPLAY_ITEM_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)           \
   friend class DisplayItemEditor;
@@ -143,6 +145,7 @@ class DrawTextDisplayItem final : public DisplayItem {
   DrawTextDisplayItem(const FloatRect& bounds,
                       const FloatColor& color,
                       float baseline,
+                      const TextFormat& text_format,
                       const base::string16& text);
   ~DrawTextDisplayItem();
 
@@ -150,6 +153,7 @@ class DrawTextDisplayItem final : public DisplayItem {
   const FloatRect& bounds() const { return bounds_; }
   const FloatColor& color() const { return color_; }
   const base::string16& text() const { return text_; }
+  const TextFormat& text_format() const { return text_format_; }
 
  private:
   // DisplayItem
@@ -159,6 +163,7 @@ class DrawTextDisplayItem final : public DisplayItem {
   const FloatRect bounds_;
   const FloatColor color_;
   const base::string16 text_;
+  const TextFormat& text_format_;
 
   DISALLOW_COPY_AND_ASSIGN(DrawTextDisplayItem);
 };

@@ -10,6 +10,8 @@
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
+#include "evita/visuals/fonts/font_description_builder.h"
+#include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/geometry/affine_transformer.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_editor.h"
@@ -157,10 +159,13 @@ std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const RootBox& root_box) {
   AddDirtyBounds(root_box.bounds());
   Visit(root_box);
   if (!paint_info_.debug_text().empty()) {
+    const auto& font =
+        FontDescription::Builder().SetFamily(L"Arial").SetSize(10).Build();
+    const auto& text_format = TextFormatFactory::GetInstance()->Get(font);
     builder_.AddNew<DrawTextDisplayItem>(
         FloatRect(root_box.bounds().top_right() - FloatSize(200, 0),
                   FloatSize(200, 50)),
-        FloatColor(1, 0, 0), 20, paint_info_.debug_text());
+        FloatColor(1, 0, 0), 20, text_format, paint_info_.debug_text());
   }
   return builder_.Build();
 }
@@ -255,7 +260,7 @@ void PaintVisitor::VisitTextBox(TextBox* text) {
     FillRect(bounds, text->background().color().value());
   }
   builder_.AddNew<DrawTextDisplayItem>(bounds, text->color(), text->baseline(),
-                                       text->text());
+                                       text->text_format(), text->text());
 }
 
 //////////////////////////////////////////////////////////////////////

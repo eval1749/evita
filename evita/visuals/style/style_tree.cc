@@ -168,7 +168,11 @@ std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForDocument() const {
   auto style = std::make_unique<css::Style>();
   // TODO(eval1749): We should get default color and background color from
   // system metrics.
-  css::StyleEditor().SetBackground(style.get(), css::Background(css::Color()));
+  // Note: We should set background other than "transparent".
+  // TODO(eval1749): When canvas is the root layer, "transparent" color seems
+  // to fill window color.
+  css::StyleEditor().SetBackground(style.get(),
+                                   css::Background(css::Color(1, 1, 1)));
   css::StyleEditor().SetColor(style.get(), css::Color(0, 0, 0));
   css::StyleEditor().SetDisplay(style.get(), css::Display());
   css::StyleEditor().SetFontFamily(

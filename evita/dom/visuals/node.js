@@ -9,7 +9,7 @@ class Node {
    * @param {!NodeHandle} handle
    */
   constructor(document, handle) {
-    /** @const @type {!Document} */
+    /** @type {!Document} */
     this.document_ = document || /** @type {!Document} */(this);
     /** @const @type {!NodeHandle} */
     this.handle_ = handle;
@@ -69,6 +69,7 @@ class Node {
       this.firstChild_ = node;
     }
     this.lastChild_ = node;
+    node.document_ = this.document_;
     NodeHandle.appendChild(this.handle_, node.handle_);
     return node;
   }
@@ -80,6 +81,32 @@ class Node {
         return true;
     }
     return false;
+  }
+
+  /**
+   * @param {!Node} node
+   * @param {Node} child
+   * @return {!Node}
+   */
+  insertBefore(node, child) {
+    if (!child)
+      return this.appendChild(node);
+    if (child.parentNode_ !== this)
+      throw new Error(`${child} isn't child of ${this}`);
+    if (node.parentNode_)
+      node.parentNode_.removeChild(node);
+    const nextSibling = child.nextSibling_;
+    const previousSibling = child.previousSibling_;
+    if (previousSibling)
+      previousSibling.nextSibling_ = node;
+    else
+      this.firstChild_ = node;
+    child.previousSibling_ = node;
+    node.document_ = this.document_;
+    node.parentNode_ = this;
+    node.nextSibling_ = child;;
+    node.previousSibling_ = previousSibling;
+    return node;
   }
 
   /**
@@ -123,6 +150,36 @@ class Node {
     child.previousSibling_ = null;
     child.parentNode_ = null;
     NodeHandle.removeChild(this.handle_, child.handle_);
+    return child;
+  }
+
+  /**
+   * @param {!Node} node
+   * @param {!Node} child
+   * @return {!Node}
+   */
+  replaceChild(node, child) {
+    if (child.parentNode_ !== this)
+      throw new Error(`${child} isn't child of ${this}`);
+    if (node.parentNode_)
+      node.parentNode_.removeChild(node);
+    const nextSibling = child.nextSibling_;
+    const previousSibling = child.previousSibling_;
+    if (previousSibling)
+      previousSibling.nextSibling_ = node;
+    else
+      this.firstChild_ = node;
+    if (nextSibling)
+      nextSibling.previousSibling_ = node;
+    else
+      this.lastChild_ = node;
+    child.parentNode_ = null;
+    child.nextSibling_ = null;
+    child.previousSibling_ = null;
+    node.document_ = this.document_;
+    node.parentNode_ = this;
+    node.nextSibling_ = nextSibling;
+    node.previousSibling_ = previousSibling;
     return child;
   }
 }

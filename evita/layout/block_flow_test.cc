@@ -67,7 +67,7 @@ TEST_F(BlockFlowTest, HitTestPoint) {
 
   EXPECT_EQ(text::Offset(0), HitTestPoint(gfx::PointF(310, 200)));
   EXPECT_EQ(text::Offset(1), HitTestPoint(gfx::PointF(318, 200)));
-  EXPECT_EQ(text::Offset(2), HitTestPoint(gfx::PointF(331, 200)));
+  EXPECT_EQ(text::Offset(2), HitTestPoint(gfx::PointF(328, 200)));
   EXPECT_EQ(text::Offset(4), HitTestPoint(gfx::PointF(310, 215)));
   EXPECT_EQ(text::Offset(5), HitTestPoint(gfx::PointF(318, 215)));
 
@@ -82,13 +82,13 @@ TEST_F(BlockFlowTest, HitTestTextPosition) {
 
   EXPECT_EQ(CaretBoundsOf(310, 200, 15),
             block()->HitTestTextPosition(text::Offset(0)));
-  EXPECT_EQ(CaretBoundsOf(318, 200, 15),
+  EXPECT_EQ(CaretBoundsOf(317, 200, 15),
             block()->HitTestTextPosition(text::Offset(1)));
   EXPECT_EQ(CaretBoundsOf(331, 200, 15),
             block()->HitTestTextPosition(text::Offset(3)));
   EXPECT_EQ(CaretBoundsOf(310, 215, 15),
             block()->HitTestTextPosition(text::Offset(4)));
-  EXPECT_EQ(CaretBoundsOf(318, 215, 15),
+  EXPECT_EQ(CaretBoundsOf(317, 215, 15),
             block()->HitTestTextPosition(text::Offset(5)));
 }
 

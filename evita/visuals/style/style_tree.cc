@@ -160,6 +160,9 @@ std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForDocument() const {
   css::StyleEditor().SetBackground(style.get(), css::Background(css::Color()));
   css::StyleEditor().SetColor(style.get(), css::Color(0, 0, 0));
   css::StyleEditor().SetDisplay(style.get(), css::Display());
+  css::StyleEditor().SetFontFamily(
+      style.get(), css::FontFamily(css::String(L"MS Shell Dlg 2")));
+  css::StyleEditor().SetFontSize(style.get(), css::FontSize(css::Length(16)));
   DCHECK(style.get()->has_display())
       << "initial style must have display property. " << initial_style();
   return std::move(style);

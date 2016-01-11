@@ -16,6 +16,7 @@ PRIMITIVE_TYPES = frozenset([
     'margin',
     'padding',
     'percentage',
+    'string',
 ])
 
 
@@ -188,6 +189,7 @@ class Model(object):
             {
                 'Name': capitalize(name),
                 'name': name,
+                'file_name': name.replace('-', '_'),
             }
             for name in sorted([name for name in PRIMITIVE_TYPES])
         ]
@@ -259,4 +261,6 @@ def parse_type_name(token):
 #
 def capitalize(text):
     """Convert foo-bar-baz to FooBarBaz."""
+    if text[0].isdigit():
+        return 'N' + text
     return string.capwords(text, '-').replace('-', '')

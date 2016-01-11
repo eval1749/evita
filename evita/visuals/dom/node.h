@@ -57,6 +57,7 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
 
   // Node identifiers
   const base::string16& id() const { return id_; }
+  int sequence_id() const { return sequence_id_; }
   const base::string16& tag_name() const { return tag_name_; }
 
   // Node tree related values
@@ -82,6 +83,7 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
   const base::string16 id_;
   Node* next_sibling_ = nullptr;
   ContainerNode* parent_ = nullptr;
+  const int sequence_id_;
   Node* previous_sibling_ = nullptr;
   const base::string16 tag_name_;
 

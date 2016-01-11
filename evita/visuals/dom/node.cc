@@ -11,6 +11,10 @@
 
 namespace visuals {
 
+namespace {
+int last_sequence_id;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // Node
@@ -19,6 +23,7 @@ Node::Node(Document* document,
            const base::StringPiece16& tag_name,
            const base::StringPiece16& id)
     : id_(id.as_string()),
+      sequence_id_(++last_sequence_id),
       tag_name_(tag_name.as_string()),
       document_(document) {}
 

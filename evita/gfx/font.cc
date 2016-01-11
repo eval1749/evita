@@ -141,7 +141,7 @@ uint32_t Font::FontImpl::CalculateFixedWidth() const {
 }
 
 float Font::FontImpl::ConvertToDip(uint32_t design_unit) const {
-  return design_unit * em_size_ / metrics_.designUnitsPerEm;
+  return ::round(design_unit * em_size_ / metrics_.designUnitsPerEm);
 }
 
 float Font::FontImpl::ConvertToDip(int design_unit) const {
@@ -179,7 +179,7 @@ void Font::FontImpl::DrawText(gfx::Canvas* canvas,
 
   DCHECK(canvas->drawing());
   (*canvas)->DrawGlyphRun(baseline, &glyph_run, text_brush,
-                          DWRITE_MEASURING_MODE_GDI_NATURAL);
+                          DWRITE_MEASURING_MODE_GDI_CLASSIC);
 }
 
 std::vector<uint16_t> Font::FontImpl::GetGlyphIndexes(const base::char16* chars,

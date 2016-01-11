@@ -105,6 +105,7 @@ class StyleTree::Impl final {
     bool is_updated = false;
   };
 
+  std::unique_ptr<css::Style> ComputeInitialStyle() const;
   std::unique_ptr<css::Style> ComputeStyleForDocument() const;
   std::unique_ptr<css::Style> ComputeStyleForElement(
       const Element& element) const;
@@ -120,7 +121,7 @@ class StyleTree::Impl final {
   std::vector<std::unique_ptr<CompiledStyleSheet>> compiled_style_sheets_;
   const Document& document_;
   // |initial_style_| is computed from media provided values.
-  css::Style* initial_style_ = nullptr;
+  std::unique_ptr<css::Style> initial_style_;
   // TODO(eval1749): We should share |css::Style| objects for elements which
   // have same style, e.g. siblings.
   std::unordered_map<const Node*, std::unique_ptr<Item>> item_map_;
@@ -163,20 +164,24 @@ const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
   return *it->second->style;
 }
 
-std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForDocument() const {
+std::unique_ptr<css::Style> StyleTree::Impl::ComputeInitialStyle() const {
   DCHECK_NE(StyleTreeState::Dirty, state_);
   auto style = std::make_unique<css::Style>();
-  // TODO(eval1749): We should get default color and background color from
-  // system metrics.
-  // Note: We should set background other than "transparent".
-  css::StyleEditor().SetBackgroundColor(style.get(), css::Color(1, 1, 1));
   css::StyleEditor().SetColor(style.get(), css::Color(0, 0, 0));
   css::StyleEditor().SetDisplay(style.get(), css::Display());
   css::StyleEditor().SetFontFamily(
       style.get(), css::FontFamily(css::String(L"MS Shell Dlg 2")));
   css::StyleEditor().SetFontSize(style.get(), css::FontSize(css::Length(16)));
-  DCHECK(style.get()->has_display())
-      << "initial style must have display property. " << initial_style();
+  return std::move(style);
+}
+
+std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForDocument() const {
+  DCHECK_NE(StyleTreeState::Dirty, state_);
+  auto style = std::make_unique<css::Style>(initial_style());
+  // TODO(eval1749): We should get default color and background color from
+  // system metrics.
+  // Note: We should set background other than "transparent".
+  css::StyleEditor().SetBackgroundColor(style.get(), css::Color(1, 1, 1));
   return std::move(style);
 }
 
@@ -257,12 +262,21 @@ void StyleTree::Impl::UpdateDocumentStyleIfNeeded(Context* context) {
     return;
   }
   IncrementVersionIfNeeded(context);
+  initial_style_ = std::move(ComputeInitialStyle());
+  DCHECK(!initial_style().has_background_color())
+      << "initial style should not have background-color property. "
+      << initial_style();
+  DCHECK(initial_style().has_display())
+      << "initial style must have display property. " << initial_style();
+
   item->is_child_dirty = false;
   item->is_dirty = false;
   const auto old_style = std::move(item->style);
   item->style = std::move(ComputeStyleForDocument());
   item->version = version_;
-  initial_style_ = item->style.get();
+  DCHECK(item->style->has_background_color())
+      << "document style should not have background-color property. "
+      << *item->style;
   UpdateChildren(context, document_);
 }
 

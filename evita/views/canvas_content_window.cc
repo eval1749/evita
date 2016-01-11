@@ -19,7 +19,7 @@ CanvasContentWindow::~CanvasContentWindow() {}
 
 // ui::AnimationFrameHandler
 bool CanvasContentWindow::CanHandleAnimationFrame() const {
-  return canvas_->IsReady();
+  return canvas_ && canvas_->IsReady();
 }
 
 // ui::LayerOwnerDelegate

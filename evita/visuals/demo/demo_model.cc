@@ -44,10 +44,11 @@ Document* LoadDocument() {
   const auto document =
       NodeTreeBuilder()
           .Begin(L"main")
-          .SetStyle(*css::StyleBuilder()
-                         .SetBackground(css::Background(css::Color(1, 1, 1)))
-                         .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
-                         .Build())
+          .SetInlineStyle(
+              *css::StyleBuilder()
+                   .SetBackground(css::Background(css::Color(1, 1, 1)))
+                   .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
+                   .Build())
           .Begin(L"list", L"list")
           .End(L"list")
           .End(L"main")
@@ -71,17 +72,17 @@ Document* LoadDocument() {
         .End(L"list_item")
         .Finish(list);
     if (index == 0) {
-      NodeEditor().SetStyle(
+      NodeEditor().SetInlineStyle(
           list->last_child()->as<Element>(),
           *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
     }
   }
   NodeTreeBuilder(list)
       .Begin(L"list_item", L"hover")
-      .SetStyle(*css::StyleBuilder()
-                     .SetLeft(css::Left(css::Length(0)))
-                     .SetTop(css::Top(css::Length(-1000)))
-                     .Build())
+      .SetInlineStyle(*css::StyleBuilder()
+                           .SetLeft(css::Left(css::Length(0)))
+                           .SetTop(css::Top(css::Length(-1000)))
+                           .Build())
       .AddText(L" ")
       .End(L"list_item")
       .Finish(list);
@@ -257,11 +258,11 @@ void DemoModel::DidMoveMouse(const FloatPoint& point) {
     return;
   const auto hover = document_->GetElementById(L"hover");
   const auto hover_point = box_tree_->BoxFor(*line)->bounds().origin();
-  NodeEditor().SetStyle(hover,
-                        *css::StyleBuilder()
-                             .SetTop(css::Top(css::Length(hover_point.y())))
-                             .SetLeft(css::Left(css::Length(hover_point.x())))
-                             .Build());
+  NodeEditor().SetInlineStyle(
+      hover, *css::StyleBuilder()
+                  .SetTop(css::Top(css::Length(hover_point.y())))
+                  .SetLeft(css::Left(css::Length(hover_point.x())))
+                  .Build());
   RequestAnimationFrame();
 }
 
@@ -271,11 +272,11 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
     return;
   const auto hover = document_->GetElementById(L"hover");
   const auto hover_point = box_tree_->BoxFor(*line)->bounds().origin();
-  NodeEditor().SetStyle(hover,
-                        *css::StyleBuilder()
-                             .SetTop(css::Top(css::Length(hover_point.y())))
-                             .SetLeft(css::Left(css::Length(hover_point.x())))
-                             .Build());
+  NodeEditor().SetInlineStyle(
+      hover, *css::StyleBuilder()
+                  .SetTop(css::Top(css::Length(hover_point.y())))
+                  .SetLeft(css::Left(css::Length(hover_point.x())))
+                  .Build());
   PrintBox(*box_tree_);
   RequestAnimationFrame();
 }

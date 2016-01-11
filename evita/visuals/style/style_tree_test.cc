@@ -52,7 +52,7 @@ TEST_F(StyleTreeTest, Inheritance) {
   const auto& document =
       NodeTreeBuilder()
           .Begin(L"body")
-          .SetStyle(*css::StyleBuilder().SetColor(kColorRed).Build())
+          .SetInlineStyle(*css::StyleBuilder().SetColor(kColorRed).Build())
           .Begin(L"foo")
           .End(L"foo")
           .End(L"body")
@@ -70,7 +70,7 @@ TEST_F(StyleTreeTest, ComputedStyleOfText) {
   const auto& document =
       NodeTreeBuilder()
           .Begin(L"body")
-          .SetStyle(*css::StyleBuilder().SetColor(kColorRed).Build())
+          .SetInlineStyle(*css::StyleBuilder().SetColor(kColorRed).Build())
           .AddText(L"Hello world!")
           .End(L"body")
           .Build();

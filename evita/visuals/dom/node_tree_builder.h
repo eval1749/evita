@@ -40,9 +40,7 @@ class NodeTreeBuilder final {
   NodeTreeBuilder& ClassList(const std::vector<base::string16>& names);
   NodeTreeBuilder& End(const base::StringPiece16& tag_name);
   void Finish(ContainerNode* node);
-
-  // Node
-  NodeTreeBuilder& SetStyle(const css::Style& style);
+  NodeTreeBuilder& SetInlineStyle(const css::Style& style);
 
  private:
   NodeTreeBuilder& AddInternal(Node* node);

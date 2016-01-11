@@ -112,10 +112,10 @@ TEST_F(BoxTreeTest, FlowAnonymous) {
       css::StyleBuilder().SetDisplay(css::Display::Block()).Build();
   const auto& document = NodeTreeBuilder()
                              .Begin(L"div")
-                             .SetStyle(*display_block)
+                             .SetInlineStyle(*display_block)
                              .AddText(L"foo")
                              .Begin(L"p")
-                             .SetStyle(*display_block)
+                             .SetInlineStyle(*display_block)
                              .AddText(L"bar")
                              .End(L"p")
                              .AddText(L"baz")

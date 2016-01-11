@@ -105,7 +105,7 @@ void NodeHandle::SetInlineStyle(NodeHandle* handle, v8::Handle<v8::Map> map) {
   }
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
-  visuals::NodeEditor().SetStyle(element, *style);
+  visuals::NodeEditor().SetInlineStyle(element, *style);
 }
 
 }  // namespace dom

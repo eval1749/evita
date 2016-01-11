@@ -84,8 +84,8 @@ void NodeTreeBuilder::Finish(ContainerNode* node) {
   nodes_.pop();
 }
 
-NodeTreeBuilder& NodeTreeBuilder::SetStyle(const css::Style& style) {
-  NodeEditor().SetStyle(nodes_.top()->as<Element>(), style);
+NodeTreeBuilder& NodeTreeBuilder::SetInlineStyle(const css::Style& style) {
+  NodeEditor().SetInlineStyle(nodes_.top()->as<Element>(), style);
   return *this;
 }
 

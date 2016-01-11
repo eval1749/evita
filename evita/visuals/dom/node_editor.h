@@ -34,7 +34,7 @@ class NodeEditor final {
   void InsertBefore(ContainerNode* container, Node* new_child, Node* ref_child);
   void RemoveChild(ContainerNode* container, Node* old_child);
   void RemoveClass(Element* element, const base::StringPiece16& class_name);
-  void SetStyle(Element* element, const css::Style& style);
+  void SetInlineStyle(Element* element, const css::Style& style);
 
   void WillDestroy(Node* node);
 

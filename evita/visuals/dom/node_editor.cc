@@ -152,7 +152,7 @@ void NodeEditor::RemoveClass(Element* element,
                     DidRemoveClass(*element, old_class));
 }
 
-void NodeEditor::SetStyle(Element* element, const css::Style& new_style) {
+void NodeEditor::SetInlineStyle(Element* element, const css::Style& new_style) {
   const auto document = element->document();
   DCHECK(!document->is_locked());
   if (element->inline_style_) {

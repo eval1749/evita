@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_CSS_LENGTH_H_
 #define EVITA_VISUALS_CSS_LENGTH_H_
 
+#include <iosfwd>
+
 namespace visuals {
 namespace css {
 

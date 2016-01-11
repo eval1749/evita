@@ -37,6 +37,8 @@ class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
   explicit NodeHandle(visuals::Node* node);
 
   // Bindings implementations
+  int id() const;
+
   static void AppendChild(NodeHandle* parent, NodeHandle* node);
   static NodeHandle* CreateDocument();
   static NodeHandle* CreateElement(NodeHandle* document,

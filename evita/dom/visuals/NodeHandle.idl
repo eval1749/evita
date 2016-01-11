@@ -13,4 +13,6 @@ interface NodeHandle {
   static void insertBefore(NodeHandle parent, NodeHandle node, NodeHandle child);
   static void removeChild(NodeHandle parent, NodeHandle child);
   static void  setInlineStyle(NodeHandle handle, Map rawStyle);
+
+  readonly attribute long id;
 };

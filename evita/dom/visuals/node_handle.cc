@@ -27,6 +27,10 @@ visuals::ContainerNode* AsContainerNode(NodeHandle* node) {
 NodeHandle::NodeHandle(visuals::Node* node) : value_(node) {}
 NodeHandle::~NodeHandle() {}
 
+int NodeHandle::id() const {
+  return value_->sequence_id();
+}
+
 NodeHandle* NodeHandle::CreateDocument() {
   return new NodeHandle(new visuals::Document());
 }

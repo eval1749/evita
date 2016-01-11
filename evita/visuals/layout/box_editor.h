@@ -11,12 +11,14 @@ namespace visuals {
 
 class Box;
 class ContainerBox;
+class ContentBox;
 class FloatColor;
 class FloatRect;
 class FloatSize;
-class ContentBox;
+class FontDescription;
 class RootBox;
 class TextBox;
+class TextFormat;
 
 namespace css {
 class Display;
@@ -53,6 +55,8 @@ class BoxEditor final {
   void WillDestroy(Box* box);
 
   // TextBox
+  const FontDescription& ComputeFontDescription(const TextBox& box);
+  const TextFormat& EnsureTextFormat(TextBox* box);
   void SetBaseline(TextBox* box, float new_baseline);
   void SetTextColor(TextBox* box, const FloatColor& color);
 
@@ -61,6 +65,7 @@ class BoxEditor final {
 
  private:
   void ScheduleVisualUpdateIfNeeded(Box* box);
+  void SetTextStyle(TextBox* box, const css::Style& style);
 
   DISALLOW_COPY_AND_ASSIGN(BoxEditor);
 };

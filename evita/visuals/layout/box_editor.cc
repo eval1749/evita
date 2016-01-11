@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string>
+
 #include "evita/visuals/layout/box_editor.h"
 
 #include "base/logging.h"
+#include "evita/visuals/fonts/font_description_builder.h"
+#include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/layout/ancestors.h"
 #include "evita/visuals/layout/ancestors_or_self.h"
 #include "evita/visuals/layout/descendants_or_self.h"
@@ -14,6 +18,67 @@
 #include "evita/visuals/css/style.h"
 
 namespace visuals {
+
+FontStretch ConvertFontStretch(const css::FontStretch stretch) {
+  if (stretch.is_condensed())
+    return FontStretch::Condensed;
+  if (stretch.is_expanded())
+    return FontStretch::Condensed;
+  if (stretch.is_extra_condensed())
+    return FontStretch::ExtraCondensed;
+  if (stretch.is_extra_expanded())
+    return FontStretch::ExtraExpanded;
+  if (stretch.is_normal())
+    return FontStretch::Normal;
+  if (stretch.is_semi_condensed())
+    return FontStretch::Condensed;
+  if (stretch.is_semi_expanded())
+    return FontStretch::SemiExpanded;
+  if (stretch.is_ultra_condensed())
+    return FontStretch::UltraCondensed;
+  if (stretch.is_ultra_expanded())
+    return FontStretch::UltraExpanded;
+  NOTREACHED() << "Unsupported font-stretch: " << stretch;
+  return FontStretch::Normal;
+}
+
+FontStyle ConvertFontStyle(const css::FontStyle& style) {
+  if (style.is_italic())
+    return FontStyle::Italic;
+  if (style.is_normal())
+    return FontStyle::Normal;
+  if (style.is_oblique())
+    return FontStyle::Oblique;
+  NOTREACHED() << "Unsupported font-style: " << style;
+  return FontStyle::Normal;
+}
+
+FontWeight ConvertFontWeight(const css::FontWeight& weight) {
+  if (weight.is_bold())
+    return FontWeight::Bold;
+  if (weight.is_normal())
+    return FontWeight::Normal;
+  if (weight.is_100())
+    return FontWeight::k100;
+  if (weight.is_200())
+    return FontWeight::k200;
+  if (weight.is_300())
+    return FontWeight::k300;
+  if (weight.is_400())
+    return FontWeight::k400;
+  if (weight.is_500())
+    return FontWeight::k500;
+  if (weight.is_600())
+    return FontWeight::k600;
+  if (weight.is_700())
+    return FontWeight::k700;
+  if (weight.is_800())
+    return FontWeight::k800;
+  if (weight.is_900())
+    return FontWeight::k900;
+  NOTREACHED() << "Unsupported font-weight: " << weight;
+  return FontWeight::Normal;
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -41,6 +106,16 @@ void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
   new_child->version_ = container->version_;
 }
 
+const FontDescription& BoxEditor::ComputeFontDescription(const TextBox& box) {
+  FontDescription::Builder builder;
+  builder.SetFamily(box.font_family_.string().value());
+  builder.SetSize(box.font_size_.length().value());
+  builder.SetStretch(ConvertFontStretch(box.font_stretch_));
+  builder.SetStyle(ConvertFontStyle(box.font_style_));
+  builder.SetWeight(ConvertFontWeight(box.font_weight_));
+  return builder.Build();
+}
+
 void BoxEditor::DidLayout(Box* box) {
   // TODO(eval1749): What should we do here?
 }
@@ -65,6 +140,13 @@ void BoxEditor::DidPaint(Box* box) {
   if (!container)
     return;
   container->is_child_changed_ = false;
+}
+
+const TextFormat& BoxEditor::EnsureTextFormat(TextBox* box) {
+  const auto& text_format =
+      TextFormatFactory::GetInstance()->Get(ComputeFontDescription(*box));
+  box->text_format_ = &text_format;
+  return text_format;
 }
 
 void BoxEditor::MarkDirty(Box* box) {
@@ -176,18 +258,10 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
   V(width)
 
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
+  if (const auto& text = box->as<TextBox>())
+    return SetTextStyle(text, new_style);
+
   auto is_changed = false;
-
-  if (const auto& text = box->as<TextBox>()) {
-    // |TextBox| uses only color, ant font related CSS properties.
-    if (new_style.has_color() && new_style.color().value() != text->color_) {
-      text->color_ = new_style.color().value();
-      box->is_content_changed_ = true;
-      MarkDirty(text);
-    }
-    return;
-  }
-
   if (new_style.has_display() && new_style.display() != box->display()) {
     box->display_ = new_style.display();
     is_changed = true;
@@ -241,6 +315,36 @@ void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
     return;
   text_box->color_ = color;
   SetContentChanged(text_box);
+}
+
+#define FOR_EACH_PROPERTY_AFFECTS_TEXT_FONT(V) \
+  V(font_family)                               \
+  V(font_size)                                 \
+  V(font_stretch)                              \
+  V(font_style)                                \
+  V(font_weight)
+
+void BoxEditor::SetTextStyle(TextBox* box, const css::Style& new_style) {
+  auto is_changed = false;
+  // |TextBox| uses only color, ant font related CSS properties.
+  if (new_style.has_color() && new_style.color().value() != box->color_) {
+    box->color_ = new_style.color().value();
+    is_changed = true;
+  }
+
+#define V(name)                                                     \
+  if (new_style.has_##name() && new_style.name() != box->name##_) { \
+    box->name##_ = new_style.name();                                \
+    box->text_format_ = nullptr;                                    \
+    is_changed = true;                                              \
+  }
+  FOR_EACH_PROPERTY_AFFECTS_TEXT_FONT(V)
+#undef V
+
+  if (!is_changed)
+    return;
+  box->is_content_changed_ = true;
+  MarkDirty(box);
 }
 
 void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {

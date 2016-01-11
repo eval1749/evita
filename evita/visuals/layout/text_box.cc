@@ -24,4 +24,9 @@ TextBox::TextBox(RootBox* root_box, const base::string16 text)
 
 TextBox::~TextBox() {}
 
+const TextFormat& TextBox::text_format() const {
+  DCHECK(text_format_);
+  return *text_format_;
+}
+
 }  // namespace visuals

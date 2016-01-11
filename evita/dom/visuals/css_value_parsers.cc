@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stdint.h>
+
+#include <cmath>
+#include <limits>
 #include <sstream>
 
 #include "evita/dom/visuals/css_value_parsers.h"
@@ -84,7 +88,76 @@ Maybe<CssColor> ParseColor(const base::StringPiece16& text) {
 }
 
 Maybe<CssLength> ParseLength(const base::StringPiece16& text) {
-  return common::Just<CssLength>(CssLength(0));
+  enum class State {
+    AfterDecimalPoint,
+    DecimalPoint,
+    Digit,
+    SignOrDigit,
+  } state = State::SignOrDigit;
+  auto sign = 1.0f;
+  uint64_t u64 = 0;
+  auto exponent = 0;
+  for (const auto code : text) {
+    switch (state) {
+      case State::SignOrDigit:
+        if (code == '+') {
+          state = State::Digit;
+          break;
+        }
+        if (code == '-') {
+          sign = -1.0f;
+          state = State::Digit;
+          break;
+        }
+        if (base::IsAsciiDigit(code)) {
+          u64 = code - '0';
+          state = State::Digit;
+          break;
+        }
+        return common::Nothing<CssLength>();
+      case State::Digit:
+        if (base::IsAsciiDigit(code)) {
+          if (u64 > std::numeric_limits<uint64_t>::max() / 10)
+            return common::Nothing<CssLength>();
+          u64 *= 10;
+          u64 += code - '0';
+          break;
+        }
+        if (code == '.') {
+          state = State::DecimalPoint;
+          break;
+        }
+        return common::Nothing<CssLength>();
+      case State::DecimalPoint:
+        if (!base::IsAsciiDigit(code))
+          return common::Nothing<CssLength>();
+        if (u64 > std::numeric_limits<uint64_t>::max() / 10)
+          return common::Nothing<CssLength>();
+        --exponent;
+        u64 *= 10;
+        u64 += code - '0';
+        state = State::AfterDecimalPoint;
+        break;
+      case State::AfterDecimalPoint:
+        if (!base::IsAsciiDigit(code))
+          return common::Nothing<CssLength>();
+        if (u64 > std::numeric_limits<uint64_t>::max() / 10)
+          return common::Nothing<CssLength>();
+        --exponent;
+        u64 *= 10;
+        u64 += code - '0';
+        break;
+      default:
+        NOTREACHED() << "Invalid state " << static_cast<int>(state);
+        return common::Nothing<CssLength>();
+    }
+  }
+  if (exponent >= 0) {
+    const auto f32 = static_cast<float>(u64) * std::pow(10.0f, exponent);
+    return common::Just<CssLength>(CssLength(sign * f32));
+  }
+  const auto f32 = static_cast<float>(u64) / std::pow(10.0f, -exponent);
+  return common::Just<CssLength>(CssLength(sign * f32));
 }
 
 Maybe<CssMargin> ParseMargin(const base::StringPiece16& text) {

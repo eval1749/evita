@@ -31,6 +31,12 @@ using CssString = visuals::css::String;
 
 namespace {
 
+int DoubleHex(int value) {
+  DCHECK_GE(value, 0);
+  DCHECK_LE(value, 15);
+  return value * 16 + value;
+}
+
 Maybe<int> ParseHex(const base::StringPiece16& text) {
   auto value = 0;
   for (const auto& code : text) {
@@ -56,22 +62,28 @@ Maybe<CssColor> ParseColor(const base::StringPiece16& text) {
       const auto& maybe_red = ParseHex(text.substr(1, 1));
       const auto& maybe_green = ParseHex(text.substr(2, 1));
       const auto& maybe_blue = ParseHex(text.substr(3, 1));
-      if (maybe_red.IsJust() && maybe_green.IsJust() && maybe_blue.IsJust())
-        return common::Just<CssColor>(
-            CssColor(static_cast<float>(maybe_red.FromJust() * 16) / 255,
-                     static_cast<float>(maybe_green.FromJust() * 16) / 255,
-                     static_cast<float>(maybe_blue.FromJust() * 16) / 255));
+      if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
+          maybe_blue.IsNothing()) {
+        return common::Nothing<CssColor>();
+      }
+      auto const red = DoubleHex(maybe_red.FromJust());
+      auto const green = DoubleHex(maybe_green.FromJust());
+      auto const blue = DoubleHex(maybe_blue.FromJust());
+      return common::Just<CssColor>(CssColor::Rgba(red, green, blue));
     }
     if (text.size() == 7) {
       // #rrggbb
       const auto& maybe_red = ParseHex(text.substr(1, 2));
       const auto& maybe_green = ParseHex(text.substr(3, 2));
       const auto& maybe_blue = ParseHex(text.substr(5, 2));
-      if (maybe_red.IsJust() && maybe_green.IsJust() && maybe_blue.IsJust())
-        return common::Just<CssColor>(
-            CssColor(static_cast<float>(maybe_red.FromJust()) / 255,
-                     static_cast<float>(maybe_green.FromJust()) / 255,
-                     static_cast<float>(maybe_blue.FromJust()) / 255));
+      if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
+          maybe_blue.IsNothing()) {
+        return common::Nothing<CssColor>();
+      }
+      auto const red = maybe_red.FromJust();
+      auto const green = maybe_green.FromJust();
+      auto const blue = maybe_blue.FromJust();
+      return common::Just<CssColor>(CssColor::Rgba(red, green, blue));
     }
   }
   if (text == L"transparent")

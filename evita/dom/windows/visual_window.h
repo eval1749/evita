@@ -69,6 +69,7 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   void UpdateStyleIfNeeded();
 
   // Binding callbacks
+  int HitTest(int x, int y);
   static VisualWindow* NewWindow(NodeHandle* document_handle);
 
   // visuals::css::Media

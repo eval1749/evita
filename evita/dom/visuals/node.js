@@ -23,6 +23,8 @@ class Node {
     this.nextSibling_ = null;
     /** @type {Node} */
     this.previousSibling_ = null;
+
+    Node.nodeIdMap_.set(handle.id, this);
   }
 
   /** @return {Node} */
@@ -93,6 +95,14 @@ class Node {
   }
 
   /**
+   * @param {number} sequenceId
+   * @return {Node}
+   */
+  static nodeFromId(sequenceId) {
+    return Node.nodeIdMap_.get(sequenceId) || null;
+  }
+
+  /**
    * @param {!Node} child
    * @return {!Node}
    */
@@ -117,6 +127,13 @@ class Node {
   }
 }
 
+/** @const @type {!Map<number, !Node>} */
+Node.nodeIdMap_;
+
+Object.defineProperties(Node, {
+  nodeIdMap_: {value: new Map()},
+});
+
 Object.defineProperties(Node.prototype, {
   childNodes: {
     get: /** @this {!Node} */ function*() {
@@ -125,4 +142,3 @@ Object.defineProperties(Node.prototype, {
     }
   }
 });
-

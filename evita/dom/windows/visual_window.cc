@@ -15,6 +15,7 @@
 #include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
+#include "evita/visuals/layout/box_finder.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
@@ -79,6 +80,16 @@ void VisualWindow::UpdateStyleIfNeeded() {
 }
 
 // Binding callbacks
+int VisualWindow::HitTest(int x, int y) {
+  UpdateLayoutIfNeeded();
+  visuals::FloatPoint point(x, y);
+  const auto& found =
+      visuals::BoxFinder(*box_tree_->root_box()).FindByPoint(point);
+  if (!found.box)
+    return -1;
+  return found.box->sequence_id();
+}
+
 VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle) {
   const auto document = document_handle->value()->as<visuals::Document>();
   if (!document) {

@@ -6,6 +6,10 @@ interface VisualWindow : Window {
   [ImplementedAs=JavaScript]
   static void handleEvent(Event event);
 
+  // Returns node sequence id under specified point.
+  [ImplementedAs=HitTest]
+  long hitTest_(long point_x, long point_y);
+
   // Construct new |VisualWindow| and returns it.
   static VisualWindow newWindow(NodeHandle documentHandle);
 };

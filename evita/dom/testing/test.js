@@ -16,7 +16,13 @@ $define(global, 'testing', function($export) {
   }
 
 // Note: As of v8:4.9.41, JSON.stringify yield nothing for symbols.
-  const stringify = JSON.stringify.bind(JSON);
+  function stringify(object) {
+    try {
+      return JSON.stringify(object);
+    } catch (exception) {
+     return object.toString();
+    }
+  }
 
   //////////////////////////////////////////////////////////////////////
   //

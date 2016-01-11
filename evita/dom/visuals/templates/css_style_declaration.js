@@ -35,6 +35,7 @@ class CSSStyleDeclaration {
     this.ownerElement_ = opt_element || null;
     /** @const type {!Map<number, string>} */
     this.rawStyle_ = opt_rawStyle || new Map();
+    Object.seal(this);
   }
 
   /** @return {string} */

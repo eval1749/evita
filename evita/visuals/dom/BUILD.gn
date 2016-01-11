@@ -52,6 +52,7 @@ source_set("test_files") {
     "descendants_or_self_test.cc",
     "document_test.cc",
     "element_test.cc",
+    "node_editor_test.cc",
     "node_test.cc",
     "node_traversal_test.cc",
   ]

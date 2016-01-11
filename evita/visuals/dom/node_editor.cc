@@ -154,6 +154,42 @@ void NodeEditor::RemoveClass(Element* element,
                     DidRemoveClass(*element, old_class));
 }
 
+void NodeEditor::ReplaceChild(ContainerNode* container,
+                              Node* new_child,
+                              Node* old_child) {
+  const auto document = container->document_;
+  DCHECK(!document->is_locked());
+  DCHECK_EQ(container, old_child->parent_);
+  if (new_child->parent_)
+    RemoveChild(new_child->parent_, new_child);
+  DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->parent_);
+  DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->next_sibling_);
+  DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->previous_sibling_);
+  const auto previous_sibling = old_child->previous_sibling_;
+  if (previous_sibling) {
+    previous_sibling->next_sibling_ = new_child;
+  } else {
+    DCHECK_EQ(container->first_child_, old_child);
+    container->first_child_ = new_child;
+  }
+  const auto next_sibling = old_child->next_sibling_;
+  if (next_sibling) {
+    next_sibling->previous_sibling_ = new_child;
+  } else {
+    DCHECK_EQ(container->last_child_, old_child);
+    container->last_child_ = new_child;
+  }
+  old_child->next_sibling_ = nullptr;
+  old_child->previous_sibling_ = nullptr;
+  old_child->parent_ = nullptr;
+  new_child->next_sibling_ = next_sibling;
+  new_child->previous_sibling_ = previous_sibling;
+  new_child->parent_ = container;
+  new_child->document_ = document;
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
+                    DidReplaceChild(*container, *new_child, *old_child));
+}
+
 void NodeEditor::SetInlineStyle(Element* element, const css::Style& new_style) {
   const auto document = element->document();
   DCHECK(!document->is_locked());

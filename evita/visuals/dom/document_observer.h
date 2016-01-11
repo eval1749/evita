@@ -37,6 +37,9 @@ class DocumentObserver {
   virtual void DidRemoveChild(const ContainerNode& parent, const Node& child);
   virtual void DidRemoveClass(const Element& element,
                               const base::string16& old_name);
+  virtual void DidReplaceChild(const ContainerNode& parent,
+                               const Node& new_child,
+                               const Node& old_child);
   virtual void WillRemoveChild(const ContainerNode& parent, const Node& child);
 
  protected:

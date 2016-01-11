@@ -26,6 +26,9 @@ void DocumentObserver::DidRemoveChild(const ContainerNode& parent,
                                       const Node& child) {}
 void DocumentObserver::DidRemoveClass(const Element& element,
                                       const base::string16& old_name) {}
+void DocumentObserver::DidReplaceChild(const ContainerNode& parent,
+                                       const Node& new_child,
+                                       const Node& old_child) {}
 void DocumentObserver::WillRemoveChild(const ContainerNode& parent,
                                        const Node& child) {}
 

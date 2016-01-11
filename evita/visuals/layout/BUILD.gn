@@ -61,6 +61,8 @@ source_set("layout") {
 source_set("values") {
   visibility = [ ":*" ]  # Only targets in this file can depend on this.
   sources = [
+    "border.cc",
+    "border.h",
     "margin.cc",
     "margin.h",
     "padding.cc",
@@ -86,6 +88,7 @@ source_set("test_supports") {
 source_set("test_files") {
   testonly = true
   sources = [
+    "border_test.cc",
     "box_finder_test.cc",
     "box_test.cc",
     "box_traversal_test.cc",

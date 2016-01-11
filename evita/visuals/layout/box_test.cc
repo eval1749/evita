@@ -4,8 +4,11 @@
 
 #include <memory>
 
+#include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/flow_box.h"
+#include "evita/visuals/layout/margin.h"
+#include "evita/visuals/layout/padding.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/simple_box_tree_builder.h"
 #include "evita/visuals/layout/text_box.h"
@@ -20,7 +23,7 @@ TEST(BoxTest, InitialValues) {
   const auto& padding = box->ComputePadding();
 
   EXPECT_EQ(css::Background(), box->background());
-  EXPECT_EQ(css::Border(), box->border());
+  EXPECT_EQ(Border(), box->ComputeBorder());
   EXPECT_EQ(css::Display(), box->display());
   EXPECT_EQ(0.0f, margin.bottom());
   EXPECT_EQ(0.0f, margin.left());

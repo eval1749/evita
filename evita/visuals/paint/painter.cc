@@ -41,7 +41,7 @@ bool IsBackgroundChanged(const Box& box) {
 }
 
 bool IsBorderChanged(const Box& box) {
-  if (!box.border().HasValue())
+  if (!box.ComputeBorder().HasValue())
     return false;
   return box.IsBorderChanged() || box.IsOriginChanged() || box.IsSizeChanged();
 }
@@ -188,28 +188,28 @@ void PaintVisitor::PaintBorderINeeded(const Box& box) {
   if (!box.ShouldPaint() && !is_border_changed)
     return;
 #endif
-  const auto& border = box.border();
+  const auto& border = box.ComputeBorder();
   if (border.top()) {
     FillRectAndMark(
         FloatRect(FloatPoint(), FloatSize(box.bounds().width(), border.top())),
-        border.top_color().value(), is_border_changed);
+        border.top_color(), is_border_changed);
   }
   if (border.left()) {
     FillRectAndMark(FloatRect(FloatPoint(),
                               FloatSize(border.left(), box.bounds().height())),
-                    border.left_color().value(), is_border_changed);
+                    border.left_color(), is_border_changed);
   }
   if (border.right()) {
     FillRectAndMark(
         FloatRect(FloatPoint(box.bounds().width() - border.right(), 0),
                   FloatSize(border.right(), box.bounds().height())),
-        border.right_color().value(), is_border_changed);
+        border.right_color(), is_border_changed);
   }
   if (border.bottom()) {
     FillRectAndMark(
         FloatRect(FloatPoint(0, box.bounds().height() - border.bottom()),
                   FloatSize(box.bounds().width(), border.bottom())),
-        border.bottom_color().value(), is_border_changed);
+        border.bottom_color(), is_border_changed);
   }
 }
 

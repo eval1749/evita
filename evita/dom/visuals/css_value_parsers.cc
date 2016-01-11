@@ -13,7 +13,6 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/string_util.h"
 #include "evita/visuals/css/background.h"
-#include "evita/visuals/css/border.h"
 #include "evita/visuals/css/color.h"
 #include "evita/visuals/css/values.h"
 
@@ -46,10 +45,6 @@ Maybe<int> ParseHex(const base::StringPiece16& text) {
 
 Maybe<CssBackground> ParseBackground(const base::StringPiece16& text) {
   return common::Nothing<CssBackground>();
-}
-
-Maybe<CssBorder> ParseBorder(const base::StringPiece16& text) {
-  return common::Nothing<CssBorder>();
 }
 
 Maybe<CssColor> ParseColor(const base::StringPiece16& text) {
@@ -171,39 +166,6 @@ base::string16 UnparseBackground(const CssBackground& background) {
   if (!background.HasValue())
     return L"";
   return L"NYI(background)";
-}
-
-base::string16 UnparseBorder(const CssBorder& border) {
-  if (!border.HasValue())
-    return L"";
-  std::basic_ostringstream<base::char16> ostream;
-  if (border.IsSimple()) {
-    ostream << L"border: " << border.top() << L" solid "
-            << UnparseColor(border.top_color());
-    return ostream.str();
-  }
-  base::char16* delimiter = L"";
-  if (border.top() != 0.0f) {
-    ostream << delimiter << L"border-top:" << border.top() << L" solid "
-            << UnparseColor(border.top_color());
-    delimiter = L"; ";
-  }
-  if (border.left() != 0.0f) {
-    ostream << delimiter << L"border-left:" << border.left() << L" solid "
-            << UnparseColor(border.left_color());
-    delimiter = L"; ";
-  }
-  if (border.bottom() != 0.0f) {
-    ostream << delimiter << L"border-bottom:" << border.bottom() << L" solid "
-            << UnparseColor(border.bottom_color());
-    delimiter = L"; ";
-  }
-  if (border.right() != 0.0f) {
-    ostream << delimiter << L"border-right:" << border.right() << L" solid "
-            << UnparseColor(border.right_color());
-    delimiter = L"; ";
-  }
-  return ostream.str();
 }
 
 base::string16 UnparseColor(const CssColor& color) {

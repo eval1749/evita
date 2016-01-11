@@ -4,27 +4,36 @@
 
 #include <ostream>
 
-#include "evita/visuals/css/border.h"
+#include "evita/visuals/layout/border.h"
 
 namespace visuals {
-namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
 // Border
 //
-Border::Border(const Color& color,
+Border::Border(const FloatColor& top_color,
+               float top,
+               const FloatColor& right_color,
+               float right,
+               const FloatColor& bottom_color,
+               float bottom,
+               const FloatColor& left_color,
+               float left)
+    : bottom_color_(bottom_color),
+      left_color_(left_color),
+      right_color_(right_color),
+      top_color_(top_color),
+      thickness_(top, left, bottom, right) {}
+
+Border::Border(const FloatColor& color,
                float top,
                float right,
                float bottom,
                float left)
-    : bottom_color_(color),
-      left_color_(color),
-      right_color_(color),
-      top_color_(color),
-      thickness_(top, left, bottom, right) {}
+    : Border(color, top, color, right, color, bottom, color, left) {}
 
-Border::Border(const Color& color, float width)
+Border::Border(const FloatColor& color, float width)
     : Border(color, width, width, width, width) {}
 
 Border::Border(const Border& other)
@@ -49,13 +58,13 @@ bool Border::operator!=(const Border& other) const {
 }
 
 bool Border::HasValue() const {
-  if (bottom_color_.value().alpha() != 0 && thickness_.bottom() != 0)
+  if (bottom_color_.alpha() != 0 && thickness_.bottom() != 0)
     return true;
-  if (left_color_.value().alpha() != 0 && thickness_.left() != 0)
+  if (left_color_.alpha() != 0 && thickness_.left() != 0)
     return true;
-  if (right_color_.value().alpha() != 0 && thickness_.right() != 0)
+  if (right_color_.alpha() != 0 && thickness_.right() != 0)
     return true;
-  if (top_color_.value().alpha() != 0 && thickness_.top() != 0)
+  if (top_color_.alpha() != 0 && thickness_.top() != 0)
     return true;
   return false;
 }
@@ -97,5 +106,4 @@ std::ostream& operator<<(std::ostream& ostream, const Border& border) {
   return ostream << ')';
 }
 
-}  // namespace css
 }  // namespace visuals

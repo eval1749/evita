@@ -9,9 +9,12 @@
 #include "base/logging.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
+#include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
+#include "evita/visuals/layout/margin.h"
+#include "evita/visuals/layout/padding.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 
@@ -136,9 +139,10 @@ FloatSize IntrinsicSizeVisitor::SizeOfHorizontalFlowBox(
   for (const auto& child : flow_box.child_boxes()) {
     if (!child->position().is_static())
       continue;
+    const auto& child_border = child->ComputeBorder();
     const auto& child_padding = child->ComputePadding();
     const auto& child_size = ComputePreferredSize(*child) +
-                             child->border().size() + child_padding.size();
+                             child_border.size() + child_padding.size();
     size = FloatSize(size.width() + child_size.width(),
                      std::max(size.height(), child_size.height()));
   }
@@ -151,9 +155,10 @@ FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(const FlowBox& flow_box) {
   for (const auto& child : flow_box.child_boxes()) {
     if (!child->position().is_static())
       continue;
+    const auto& child_border = child->ComputeBorder();
     const auto& child_padding = child->ComputePadding();
     const auto& child_size = ComputePreferredSize(*child) +
-                             child->border().size() + child_padding.size();
+                             child_border.size() + child_padding.size();
     size = FloatSize(std::max(size.width(), child_size.width()),
                      size.height() + child_size.height());
   }

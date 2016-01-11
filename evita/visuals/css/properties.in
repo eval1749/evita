@@ -3,7 +3,26 @@
 # found in the LICENSE file.
 
 background: <background>
-border: <border>
+
+# line-style ::= none hidden dotted dashed solid double groove ridge inset outset
+# border-bottom-style: <line-style>
+# border-left-style: <line-style>
+# border-right-style: <line-style>
+# border-top-style: <line-style>
+border-bottom-color: <color>
+border-bottom-width: <length>
+border-left-color: <color>
+border-left-width: <length>
+border-right-color: <color>
+border-right-width: <length>
+border-top-color: <color>
+border-top-width: <length>
+
+# border-bottom-left-radius: [<length>|<percentage>]{1,2}
+# border-bottom-right-radius: [<length>|<percentage>]{1,2}
+# border-top-left-radius: [<length>|<percentage>]{1,2}
+# border-top-right-radius: [<length>|<percentage>]{1,2}
+
 bottom: auto <length> <percentage>
 color: <color>
 display: inline block inline-block none

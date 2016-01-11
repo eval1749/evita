@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_CSS_BORDER_H_
-#define EVITA_VISUALS_CSS_BORDER_H_
+#ifndef EVITA_VISUALS_LAYOUT_BORDER_H_
+#define EVITA_VISUALS_LAYOUT_BORDER_H_
 
 #include <iosfwd>
 
-#include "evita/visuals/css/color.h"
+#include "evita/visuals/css/float_color.h"
 #include "evita/visuals/css/thickness.h"
 
 namespace visuals {
-namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -19,8 +18,20 @@ namespace css {
 //
 class Border final {
  public:
-  Border(const Color& color, float top, float right, float bottom, float left);
-  Border(const Color& color, float width);
+  Border(const FloatColor& top_color,
+         float top,
+         const FloatColor& right_color,
+         float right,
+         const FloatColor& bottom_color,
+         float bottom,
+         const FloatColor& left_color,
+         float left);
+  Border(const FloatColor& color,
+         float top,
+         float right,
+         float bottom,
+         float left);
+  Border(const FloatColor& color, float width);
   Border(const Border& other);
   Border();
   ~Border();
@@ -39,25 +50,25 @@ class Border final {
   FloatSize top_left() const { return thickness_.top_left(); }
 
   // Colors
-  const Color& bottom_color() const { return bottom_color_; }
-  const Color& left_color() const { return left_color_; }
-  const Color& right_color() const { return right_color_; }
-  const Color& top_color() const { return top_color_; }
+  const FloatColor& bottom_color() const { return bottom_color_; }
+  const FloatColor& left_color() const { return left_color_; }
+  const FloatColor& right_color() const { return right_color_; }
+  const FloatColor& top_color() const { return top_color_; }
 
   bool HasValue() const;
   bool IsSimple() const;
 
  private:
-  Color bottom_color_;
-  Color left_color_;
-  Color right_color_;
-  Color top_color_;
-  Thickness thickness_;
+  FloatColor bottom_color_;
+  FloatColor left_color_;
+  FloatColor right_color_;
+  FloatColor top_color_;
+  // TODO(eval1749): We should move |Thickness| to "layout/".
+  css::Thickness thickness_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Border& border);
 
-}  // namespace css
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_CSS_BORDER_H_
+#endif  // EVITA_VISUALS_LAYOUT_BORDER_H_

@@ -94,15 +94,15 @@ Document* LoadDocument() {
 css::StyleSheet* LoadStyleSheet() {
   const auto style_sheet = new css::StyleSheet();
   style_sheet->AddRule(
-      L"#hover", std::move(css::StyleBuilder()
-                               .SetPosition(css::Position::Absolute())
-                               .SetLeft(css::Left(css::Length(20)))
-                               .SetTop(css::Top(css::Length(300)))
-                               .SetBackground(css::Background(
-                                   css::Color::Rgba(51, 153, 255, 0.1f)))
-                               .SetBorder(css::Border(
-                                   css::Color::Rgba(51, 153, 255, 1.0f), 1))
-                               .Build()));
+      L"#hover",
+      std::move(css::StyleBuilder()
+                    .SetPosition(css::Position::Absolute())
+                    .SetLeft(css::Left(css::Length(20)))
+                    .SetTop(css::Top(css::Length(300)))
+                    .SetBackground(
+                        css::Background(css::Color::Rgba(51, 153, 255, 0.1f)))
+                    .SetBorder(css::Color::Rgba(51, 153, 255, 1.0f), 1)
+                    .Build()));
   style_sheet->AddRule(
       L"list",
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));

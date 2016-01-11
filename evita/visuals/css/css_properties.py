@@ -10,7 +10,6 @@ import string
 #
 PRIMITIVE_TYPE_NAMES = frozenset([
     'background',
-    'border',
     'color',
     'length',
     'percentage',

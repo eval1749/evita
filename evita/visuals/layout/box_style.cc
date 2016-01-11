@@ -6,7 +6,10 @@
 
 #include "evita/visuals/layout/box.h"
 
+#include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_visitor.h"
+#include "evita/visuals/layout/margin.h"
+#include "evita/visuals/layout/padding.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
@@ -36,6 +39,16 @@ class ActualStyleVisitor final : public BoxVisitor {
   DISALLOW_COPY_AND_ASSIGN(ActualStyleVisitor);
 };
 
+#define FOR_EACH_PROPERTY_INITIAL_IS_ZERO(V) \
+  V(Border, border)                          \
+  V(Margin, margin)                          \
+  V(Padding, padding)
+
+#define SetBorderBottom SetBorderBottomWidth
+#define SetBorderLeft SetBorderLeftWidth
+#define SetBorderRight SetBorderRightWidth
+#define SetBorderTop SetBorderTopWidth
+
 #define FOR_EACH_PROPERTY_INITIAL_IS_AUTO(V) \
   V(Bottom, bottom)                          \
   V(Height, height)                          \
@@ -48,8 +61,23 @@ std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   builder_.SetDisplay(box.display());
   if (box.background().HasValue())
     builder_.SetBackground(box.background());
-  if (box.border().HasValue())
-    builder_.SetBorder(box.border());
+
+  const auto& border = box.ComputeBorder();
+  const auto& margin = box.ComputeMargin();
+  const auto& padding = box.ComputePadding();
+
+// TODO(eval1749): Export border colors
+#define V(Property, property)                                       \
+  if (property.bottom() != 0.0f)                                    \
+    builder_.Set##Property##Bottom(css::Length(property.bottom())); \
+  if (property.left() != 0.0f)                                      \
+    builder_.Set##Property##Left(css::Length(property.left()));     \
+  if (property.right() != 0.0f)                                     \
+    builder_.Set##Property##Right(css::Length(property.right()));   \
+  if (property.top() != 0.0f)                                       \
+    builder_.Set##Property##Top(css::Length(property.top()));
+  FOR_EACH_PROPERTY_INITIAL_IS_ZERO(V)
+#undef V
 
   // CSS Position
   if (!box.position().is_static())

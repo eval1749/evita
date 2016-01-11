@@ -25,6 +25,18 @@ std::unique_ptr<Style> StyleBuilder::Build() {
   return std::move(style_);
 }
 
+StyleBuilder& StyleBuilder::SetBorder(const css::Color color, float width) {
+  SetBorderBottomWidth(css::Length(width));
+  SetBorderBottomColor(color);
+  SetBorderLeftWidth(css::Length(width));
+  SetBorderLeftColor(color);
+  SetBorderRightWidth(css::Length(width));
+  SetBorderRightColor(color);
+  SetBorderTopWidth(css::Length(width));
+  SetBorderTopColor(color);
+  return *this;
+}
+
 StyleBuilder& StyleBuilder::SetColor(float red,
                                      float green,
                                      float blue,

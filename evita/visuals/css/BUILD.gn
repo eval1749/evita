@@ -84,8 +84,6 @@ source_set("values") {
   sources = [
     "background.cc",
     "background.h",
-    "border.cc",
-    "border.h",
     "color.cc",
     "color.h",
     "float_color.cc",
@@ -119,7 +117,6 @@ source_set("test_files") {
 
   sources = [
     "background_test.cc",
-    "border_test.cc",
     "float_color_test.cc",
     "style_test.cc",
   ]

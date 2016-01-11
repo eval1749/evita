@@ -223,7 +223,7 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
   if (box->bounds_.size() != new_bounds.size()) {
     if (box->background().HasValue())
       box->is_background_changed_ = true;
-    if (box->border().HasValue())
+    if (box->ComputeBorder().HasValue())
       box->is_border_changed_ = true;
     box->is_size_changed_ = true;
   }
@@ -242,7 +242,10 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
 
 #define FOR_EACH_PROPERTY_CHANGES_PROPERTY(V) \
   V(background, background)                   \
-  V(border, border)                           \
+  V(border_bottom_width, border)              \
+  V(border_left_width, border)                \
+  V(border_right_width, border)               \
+  V(border_top_width, border)                 \
   V(padding_bottom, padding)                  \
   V(padding_left, padding)                    \
   V(padding_right, padding)                   \
@@ -270,6 +273,32 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   auto is_changed = false;
   if (new_style.has_display() && new_style.display() != box->display()) {
     box->display_ = new_style.display();
+    is_changed = true;
+  }
+
+  // Border colors
+  if (new_style.has_border_bottom_color() &&
+      new_style.border_bottom_color().value() != box->border_bottom_color_) {
+    box->border_bottom_color_ = new_style.border_bottom_color().value();
+    box->is_border_changed_ = true;
+    is_changed = true;
+  }
+  if (new_style.has_border_left_color() &&
+      new_style.border_left_color().value() != box->border_left_color_) {
+    box->border_left_color_ = new_style.border_left_color().value();
+    box->is_border_changed_ = true;
+    is_changed = true;
+  }
+  if (new_style.has_border_right_color() &&
+      new_style.border_right_color().value() != box->border_right_color_) {
+    box->border_right_color_ = new_style.border_right_color().value();
+    box->is_border_changed_ = true;
+    is_changed = true;
+  }
+  if (new_style.has_border_top_color() &&
+      new_style.border_top_color().value() != box->border_top_color_) {
+    box->border_top_color_ = new_style.border_top_color().value();
+    box->is_border_changed_ = true;
     is_changed = true;
   }
 

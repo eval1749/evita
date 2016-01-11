@@ -48,12 +48,24 @@ source_set("layout") {
   ]
 
   deps = [
+    ":values",
     "//base",
     "//evita/visuals/css",
     "//evita/visuals/dom",
     "//evita/visuals/fonts",
     "//evita/visuals/geometry",
     "//evita/visuals/style",
+  ]
+}
+
+source_set("values") {
+  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  sources = [
+    "margin.cc",
+    "margin.h",
+  ]
+  deps = [
+    "//base",
   ]
 }
 

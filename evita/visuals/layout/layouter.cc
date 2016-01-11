@@ -72,10 +72,10 @@ void LayoutVisitor::LayoutFlowBoxHorizontally(const FlowBox& flow_box) {
   for (const auto& child : flow_box.child_boxes()) {
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child->border().size() + child->padding().size();
+    const auto& child_margin = child->ComputeMargin();
     LayoutVisitor().Layout(
-        child,
-        FloatRect(child_origin + child->margin().top_left(), child_size));
-    child_origin = FloatPoint(child->bounds().right() + child->margin().right(),
+        child, FloatRect(child_origin + child_margin.top_left(), child_size));
+    child_origin = FloatPoint(child->bounds().right() + child_margin.right(),
                               child_origin.y());
   }
 }
@@ -87,17 +87,19 @@ void LayoutVisitor::LayoutFlowBoxVertically(const FlowBox& flow_box) {
   for (const auto& child : flow_box.child_boxes()) {
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child->border().size() + child->padding().size();
+    const auto& child_margin = child->ComputeMargin();
     if (child->position().is_absolute()) {
       LayoutVisitor().Layout(child, FloatPoint(child->left().length().value(),
-                                               child->top().length().value()),
+                                               child->top().length().value()) +
+                                        child_margin.top_left(),
                              FloatSize(content_width, child_size.height()));
       continue;
     }
     LayoutVisitor().Layout(
-        child, FloatRect(child_origin + child->margin().top_left(),
+        child, FloatRect(child_origin + child_margin.top_left(),
                          FloatSize(content_width, child_size.height())));
-    child_origin = FloatPoint(
-        child_origin.x(), child->bounds().bottom() + child->margin().bottom());
+    child_origin = FloatPoint(child_origin.x(),
+                              child->bounds().bottom() + child_margin.bottom());
   }
 }
 

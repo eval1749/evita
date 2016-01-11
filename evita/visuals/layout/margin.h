@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_CSS_MARGIN_H_
-#define EVITA_VISUALS_CSS_MARGIN_H_
+#ifndef EVITA_VISUALS_LAYOUT_MARGIN_H_
+#define EVITA_VISUALS_LAYOUT_MARGIN_H_
 
 #include <iosfwd>
 
 #include "evita/visuals/css/thickness.h"
 
 namespace visuals {
-namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -42,12 +41,12 @@ class Margin final {
   bool HasValue() const { return thickness_.HasValue(); }
 
  private:
-  Thickness thickness_;
+  // TODO(eval1749): We should move |Thickness| to "layout/".
+  css::Thickness thickness_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Margin& margin);
 
-}  // namespace css
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_CSS_MARGIN_H_
+#endif  // EVITA_VISUALS_LAYOUT_MARGIN_H_

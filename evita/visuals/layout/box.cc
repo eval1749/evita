@@ -37,6 +37,11 @@ FloatRect Box::content_bounds() const {
                        border_.bottom_right() - padding_.bottom_right());
 }
 
+Margin Box::ComputeMargin() const {
+  return Margin(margin_top_.value(), margin_right_.value(),
+                margin_bottom_.value(), margin_left_.value());
+}
+
 bool Box::InDocument() const {
   for (const auto& runner : Box::AncestorsOrSelf(*this)) {
     if (const auto root_box = runner->as<RootBox>())

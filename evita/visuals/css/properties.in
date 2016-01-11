@@ -14,7 +14,10 @@ font-style: normal italic oblique
 font-weight: normal bold bolder lighter 100 200 300 400 500 600 700 800 900
 height: auto <length> <percentage>
 left: auto <length> <percentage>
-margin: <margin>
+margin-bottom: <length>
+margin-left: <length>
+margin-right: <length>
+margin-top: <length>
 padding: <padding>
 position: static relative absolute fixed
 right: auto <length> <percentage>

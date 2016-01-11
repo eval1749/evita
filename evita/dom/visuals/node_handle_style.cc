@@ -77,7 +77,7 @@ v8::Local<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* handle) {
 #define V(Name, name, type, text)                     \
   if (style->has_##name())                            \
     SetRawProperty(context, map, CssPropertyId::Name, \
-                   Unparse##Name(style->##name()));
+                   Unparse##type(style->##name()));
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
   return runner_scope.Escape(map);
@@ -97,8 +97,8 @@ void NodeHandle::SetInlineStyle(NodeHandle* handle, v8::Local<v8::Map> map) {
     Maybe<base::string16> maybe_##name##_text =                           \
         GetRawProperty(context, map, CssPropertyId::Name);                \
     if (maybe_##name##_text.IsJust()) {                                   \
-      Maybe<visuals::css::Name> maybe_##name =                            \
-          Parse##Name(maybe_##name##_text.FromJust());                    \
+      Maybe<visuals::css::type> maybe_##name =                            \
+          Parse##type(maybe_##name##_text.FromJust());                    \
       if (maybe_##name.IsJust())                                          \
         CssStyleEditor().Set##Name(style.get(), maybe_##name.FromJust()); \
     }                                                                     \

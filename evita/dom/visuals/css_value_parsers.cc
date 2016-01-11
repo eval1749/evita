@@ -15,7 +15,6 @@
 #include "evita/visuals/css/background.h"
 #include "evita/visuals/css/border.h"
 #include "evita/visuals/css/color.h"
-#include "evita/visuals/css/margin.h"
 #include "evita/visuals/css/values.h"
 
 namespace dom {
@@ -160,10 +159,6 @@ Maybe<CssLength> ParseLength(const base::StringPiece16& text) {
   return common::Just<CssLength>(CssLength(sign * f32));
 }
 
-Maybe<CssMargin> ParseMargin(const base::StringPiece16& text) {
-  return common::Nothing<CssMargin>();
-}
-
 Maybe<CssPadding> ParsePadding(const base::StringPiece16& text) {
   return common::Nothing<CssPadding>();
 }
@@ -229,12 +224,6 @@ base::string16 UnparseColor(const CssColor& color) {
 
 base::string16 UnparseLength(const visuals::css::Length& value) {
   return base::StringPrintf(L"%f", value.value());
-}
-
-base::string16 UnparseMargin(const CssMargin& margin) {
-  if (!margin.HasValue())
-    return L"";
-  return L"NYI(margin)";
 }
 
 base::string16 UnparsePadding(const CssPadding& padding) {

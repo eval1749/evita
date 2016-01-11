@@ -13,15 +13,16 @@
 #include "evita/visuals/css/background.h"
 #include "evita/visuals/css/border.h"
 #include "evita/visuals/css/float_color.h"
-#include "evita/visuals/css/margin.h"
 #include "evita/visuals/css/padding.h"
 #include "evita/visuals/css/values.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_forward.h"
+#include "evita/visuals/layout/margin.h"
 
 namespace visuals {
 
 class BoxEditor;
+class Margin;
 class Node;
 class RootBox;
 
@@ -81,7 +82,7 @@ class Box : public common::Castable<Box> {
   const css::Border& border() const { return border_; }
 
   // CSS Box model related values
-  const css::Margin& margin() const { return margin_; }
+  Margin ComputeMargin() const;
   const css::Padding& padding() const { return padding_; }
 
   // CSS Position
@@ -136,7 +137,10 @@ class Box : public common::Castable<Box> {
   css::Background background_;
   css::Border border_;
   css::Display display_;
-  css::Margin margin_;
+  css::Length margin_bottom_;
+  css::Length margin_left_;
+  css::Length margin_right_;
+  css::Length margin_top_;
   css::Padding padding_;
 
   // CSS Position

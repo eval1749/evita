@@ -248,7 +248,10 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
 #define FOR_EACH_PROPERTY_AFFECTS_ORIGIN(V) \
   V(bottom)                                 \
   V(left)                                   \
-  V(margin)                                 \
+  V(margin_bottom)                          \
+  V(margin_left)                            \
+  V(margin_right)                           \
+  V(margin_top)                             \
   V(position)                               \
   V(right)                                  \
   V(top)

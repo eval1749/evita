@@ -8,16 +8,18 @@ import string
 #
 # CSS Value Types
 #
-PRIMITIVE_TYPES = frozenset([
+PRIMITIVE_TYPE_NAMES = frozenset([
     'background',
     'border',
     'color',
     'length',
-    'margin',
     'padding',
     'percentage',
     'string',
 ])
+
+
+PRIMITIVE_TYPES = dict()
 
 
 class CssType(object):
@@ -191,7 +193,7 @@ class Model(object):
                 'name': name,
                 'file_name': name.replace('-', '_'),
             }
-            for name in sorted([name for name in PRIMITIVE_TYPES])
+            for name in sorted([name for name in PRIMITIVE_TYPE_NAMES])
         ]
         self._properties = properties
         self._types = types
@@ -214,6 +216,8 @@ class Model(object):
 # Parser
 #
 def parse_css_model(lines):
+    for name in PRIMITIVE_TYPE_NAMES:
+        PRIMITIVE_TYPES[name] = CssPrimitiveType(name)
     properties = []
     types = []
     for raw_line in lines:
@@ -251,7 +255,7 @@ def parse_type_name(token):
     assert token[-1] == '>'
     name = token[1:-1]
     if name in PRIMITIVE_TYPES:
-        return CssPrimitiveType(name)
+        return PRIMITIVE_TYPES[name]
     return CssType(name)
 
 

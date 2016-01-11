@@ -4,10 +4,9 @@
 
 #include <ostream>
 
-#include "evita/visuals/css/margin.h"
+#include "evita/visuals/layout/margin.h"
 
 namespace visuals {
-namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -22,8 +21,7 @@ Margin::Margin(float top, float right_left, float bottom)
 Margin::Margin(float top_bottom, float right_left)
     : Margin(top_bottom, right_left, top_bottom, right_left) {}
 
-Margin::Margin(float width)
-    : Margin(width, width, width, width) {}
+Margin::Margin(float width) : Margin(width, width, width, width) {}
 
 Margin::Margin(const Margin& other) : thickness_(other.thickness_) {}
 Margin::Margin() {}
@@ -59,5 +57,4 @@ std::ostream& operator<<(std::ostream& ostream, const Margin& margin) {
   return ostream << ')';
 }
 
-}  // namespace css
 }  // namespace visuals

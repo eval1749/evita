@@ -50,8 +50,6 @@ std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
     builder_.SetBackground(box.background());
   if (box.border().HasValue())
     builder_.SetBorder(box.border());
-  if (box.margin().HasValue())
-    builder_.SetMargin(box.margin());
   if (box.padding().HasValue())
     builder_.SetPadding(box.padding());
 

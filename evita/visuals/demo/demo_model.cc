@@ -117,16 +117,13 @@ css::StyleSheet* LoadStyleSheet() {
                        std::move(css::StyleBuilder().SetWidth(150).Build()));
   style_sheet->AddRule(
       L"size",
-      std::move(
-          css::StyleBuilder().SetMargin(css::Margin(0, 5, 0, 0)).Build()));
+      std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
   style_sheet->AddRule(
       L"status",
-      std::move(
-          css::StyleBuilder().SetMargin(css::Margin(0, 5, 0, 0)).Build()));
+      std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
   style_sheet->AddRule(
       L"file",
-      std::move(
-          css::StyleBuilder().SetMargin(css::Margin(0, 5, 0, 0)).Build()));
+      std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
   return style_sheet;
 }
 

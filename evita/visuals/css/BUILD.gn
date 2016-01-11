@@ -92,8 +92,6 @@ source_set("values") {
     "float_color.h",
     "length.cc",
     "length.h",
-    "margin.cc",
-    "margin.h",
     "padding.cc",
     "padding.h",
     "percentage.cc",

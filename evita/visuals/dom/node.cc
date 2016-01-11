@@ -20,15 +20,15 @@ int last_sequence_id;
 // Node
 //
 Node::Node(Document* document,
-           const base::StringPiece16& tag_name,
+           const base::StringPiece16& node_name,
            const base::StringPiece16& id)
-    : id_(id.as_string()),
+    : document_(document),
+      id_(id.as_string()),
       sequence_id_(++last_sequence_id),
-      tag_name_(tag_name.as_string()),
-      document_(document) {}
+      node_name_(node_name.as_string()) {}
 
-Node::Node(Document* document, const base::StringPiece16& tag_name)
-    : Node(document, tag_name, base::StringPiece16()) {}
+Node::Node(Document* document, const base::StringPiece16& node_name)
+    : Node(document, node_name, base::StringPiece16()) {}
 
 Node::~Node() {}
 
@@ -49,7 +49,7 @@ bool Node::IsDescendantOf(const Node& other) const {
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Node& node) {
-  ostream << node.class_name() << ' ' << node.tag_name();
+  ostream << node.class_name() << ' ' << node.node_name();
   if (!node.id().empty())
     ostream << " id=\"" << node.id() << '"';
   return ostream;

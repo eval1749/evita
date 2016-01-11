@@ -58,7 +58,7 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
   // Node identifiers
   const base::string16& id() const { return id_; }
   int sequence_id() const { return sequence_id_; }
-  const base::string16& tag_name() const { return tag_name_; }
+  const base::string16& node_name() const { return node_name_; }
 
   // Node tree related values
   ContainerNode* parent() const { return parent_; }
@@ -69,9 +69,9 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
 
  protected:
   Node(Document* document,
-       const base::StringPiece16& tag_name,
+       const base::StringPiece16& node_name,
        const base::StringPiece16& id);
-  Node(Document* document, const base::StringPiece16& tag_name);
+  Node(Document* document, const base::StringPiece16& node_name);
 
  private:
   // gc::Visitable
@@ -82,10 +82,10 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
   // same string id.
   const base::string16 id_;
   Node* next_sibling_ = nullptr;
+  const base::string16 node_name_;
   ContainerNode* parent_ = nullptr;
-  const int sequence_id_;
   Node* previous_sibling_ = nullptr;
-  const base::string16 tag_name_;
+  const int sequence_id_;
 
   DISALLOW_COPY_AND_ASSIGN(Node);
 };

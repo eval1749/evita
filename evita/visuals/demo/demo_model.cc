@@ -185,7 +185,7 @@ Element* DemoModel::FindListItem(const FloatPoint& point) {
   if (!source->IsDescendantOf(*list))
     return nullptr;
   for (const auto& runner : Node::AncestorsOrSelf(*source)) {
-    if (runner->tag_name() == L"list_item")
+    if (runner->node_name() == L"list_item")
       return runner->as<Element>();
   }
   return nullptr;

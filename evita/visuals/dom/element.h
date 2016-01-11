@@ -34,6 +34,7 @@ class Element final : public ContainerNode {
 
   const std::vector<base::string16>& class_list() const { return class_list_; }
   const css::Style* inline_style() const { return inline_style_.get(); }
+  const base::string16& tag_name() const { return node_name(); }
 
  private:
   std::vector<base::string16> class_list_;

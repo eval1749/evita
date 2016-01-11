@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <ostream>
+
 #include "evita/visuals/fonts/text_format.h"
 
 #include "build/build_config.h"
+#include "evita/visuals/fonts/font_description.h"
 #include "evita/visuals/geometry/float_size.h"
 
 #if OS_WIN
@@ -20,12 +23,17 @@ namespace visuals {
 // TextFormat
 //
 TextFormat::TextFormat(const FontDescription& description)
-    : impl_(new NativeTextFormat(description)) {}
+    : font_description_(description),
+      impl_(new NativeTextFormat(description)) {}
 
 TextFormat::~TextFormat() {}
 
 FloatSize TextFormat::ComputeMetrics(const base::string16& text) const {
   return impl_->ComputeMetrics(text);
+}
+
+std::ostream& operator<<(std::ostream& ostream, const TextFormat& text_format) {
+  return ostream << "TextFormat(" << text_format.font_description() << ')';
 }
 
 }  // namespace visuals

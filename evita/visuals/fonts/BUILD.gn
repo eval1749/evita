@@ -12,6 +12,8 @@ source_set("fonts") {
     "font_description_builder.h",
     "text_format.cc",
     "text_format.h",
+    "text_format_factory.cc",
+    "text_format_factory.h",
     "text_layout.cc",
     "text_layout.h",
   ]

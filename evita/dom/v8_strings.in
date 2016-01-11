@@ -79,7 +79,7 @@ Map
 noOverwrite
 
 # Style
-Style
+TextStyle
 backgroundColor
 color
 fontFamily

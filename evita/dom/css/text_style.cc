@@ -206,7 +206,7 @@ v8::Handle<v8::Object> TextDocument::style_at(text::Offset position) const {
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
   auto const style_ctor =
-      runner->global()->Get(v8Strings::Style.Get(isolate))->ToObject();
+      runner->global()->Get(v8Strings::TextStyle.Get(isolate))->ToObject();
   auto const js_style = style_ctor->CallAsConstructor(0, nullptr)->ToObject();
 
   if (style_values.has_bgcolor()) {

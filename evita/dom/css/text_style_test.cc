@@ -25,7 +25,7 @@ class TextStyleTest : public dom::AbstractDomTest {
 };
 
 TEST_F(TextStyleTest, DefaultStyle) {
-  EXPECT_SCRIPT_EQ("function", "typeof(Style)");
+  EXPECT_SCRIPT_EQ("function", "typeof(TextStyle)");
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"
       "var style = doc.styleAt(doc.length);");
@@ -37,7 +37,7 @@ TEST_F(TextStyleTest, DefaultStyle) {
 }
 
 TEST_F(TextStyleTest, SetStyle) {
-  EXPECT_SCRIPT_EQ("function", "typeof(Style)");
+  EXPECT_SCRIPT_EQ("function", "typeof(TextStyle)");
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"
       "var range = new TextRange(doc);"

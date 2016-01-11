@@ -29,9 +29,9 @@ class Directory final : public v8_glue::Scriptable<Directory> {
  private:
   friend class bindings::DirectoryClass;
 
-  v8::Handle<v8::Promise> Close();
-  static v8::Handle<v8::Promise> Open(const base::string16& dir_name);
-  v8::Handle<v8::Promise> Read(int num_read);
+  v8::Local<v8::Promise> Close();
+  static v8::Local<v8::Promise> Open(const base::string16& dir_name);
+  v8::Local<v8::Promise> Read(int num_read);
 
   domapi::IoContextId context_id_;
 

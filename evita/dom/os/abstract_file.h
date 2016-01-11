@@ -29,9 +29,9 @@ class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
  private:
   friend class bindings::AbstractFileClass;
 
-  v8::Handle<v8::Promise> Close();
-  v8::Handle<v8::Promise> Read(const gin::ArrayBufferView& array_buffer_view);
-  v8::Handle<v8::Promise> Write(const gin::ArrayBufferView& array_buffer_view);
+  v8::Local<v8::Promise> Close();
+  v8::Local<v8::Promise> Read(const gin::ArrayBufferView& array_buffer_view);
+  v8::Local<v8::Promise> Write(const gin::ArrayBufferView& array_buffer_view);
 
   domapi::IoContextId context_id_;
 

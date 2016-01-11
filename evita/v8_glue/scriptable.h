@@ -21,7 +21,7 @@ namespace v8_glue {
 namespace internal {
 
 void* FromV8Impl(v8::Isolate* isolate,
-                 v8::Handle<v8::Value> value,
+                 v8::Local<v8::Value> value,
                  WrapperInfo* info);
 
 }  // namespace internal
@@ -36,10 +36,10 @@ class AbstractScriptable : public gc::Collectable<AbstractScriptable> {
   virtual WrapperInfo* wrapper_info() const = 0;
 
   // For |new ClassName()|. |Scriptable<T>| is create after wrapper.
-  void Bind(v8::Isolate* isolate, v8::Handle<v8::Object> wrapper);
+  void Bind(v8::Isolate* isolate, v8::Local<v8::Object> wrapper);
 
   // Get wrapper for existing |Scriptable<T>|.
-  v8::Handle<v8::Object> GetWrapper(v8::Isolate* isolate) const;
+  v8::Local<v8::Object> GetWrapper(v8::Isolate* isolate) const;
 
  protected:
   AbstractScriptable();
@@ -96,11 +96,11 @@ struct Converter<
     T*,
     typename std::enable_if<
         std::is_convertible<T*, v8_glue::AbstractScriptable*>::value>::type> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T* val) {
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate, T* val) {
     return val->GetWrapper(isolate);
   }
 
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val, T** out) {
+  static bool FromV8(v8::Isolate* isolate, v8::Local<v8::Value> val, T** out) {
     auto const wrapper_info = T::static_wrapper_info();
     *out = static_cast<T*>(static_cast<v8_glue::AbstractScriptable*>(
         v8_glue::internal::FromV8Impl(isolate, val, wrapper_info)));

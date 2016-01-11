@@ -31,25 +31,24 @@ class File final : public v8_glue::Scriptable<File, AbstractFile> {
  private:
   friend class bindings::FileClass;
 
-  static v8::Handle<v8::Promise> MakeTempFileName(
-      const base::string16& dir_name,
-      const base::string16& prefix);
+  static v8::Local<v8::Promise> MakeTempFileName(const base::string16& dir_name,
+                                                 const base::string16& prefix);
 
   // Move |src_path| to |dst_path|
-  static v8::Handle<v8::Promise> Move(const base::string16& src_path,
-                                      const base::string16& dst_path,
-                                      const MoveFileOptions& options);
-  static v8::Handle<v8::Promise> Move(const base::string16& src_path,
-                                      const base::string16& dst_path);
+  static v8::Local<v8::Promise> Move(const base::string16& src_path,
+                                     const base::string16& dst_path,
+                                     const MoveFileOptions& options);
+  static v8::Local<v8::Promise> Move(const base::string16& src_path,
+                                     const base::string16& dst_path);
 
-  static v8::Handle<v8::Promise> Open(const base::string16& file_name,
-                                      const base::string16& opt_mode);
-  static v8::Handle<v8::Promise> Open(const base::string16& file_name);
+  static v8::Local<v8::Promise> Open(const base::string16& file_name,
+                                     const base::string16& opt_mode);
+  static v8::Local<v8::Promise> Open(const base::string16& file_name);
 
   // Remove a existing |file_name|
-  static v8::Handle<v8::Promise> Remove(const base::string16& file_name);
+  static v8::Local<v8::Promise> Remove(const base::string16& file_name);
 
-  static v8::Handle<v8::Promise> Stat(const base::string16& file_name);
+  static v8::Local<v8::Promise> Stat(const base::string16& file_name);
 
   DISALLOW_COPY_AND_ASSIGN(File);
 };
@@ -59,14 +58,14 @@ class File final : public v8_glue::Scriptable<File, AbstractFile> {
 namespace gin {
 template <>
 struct Converter<domapi::FileId> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    domapi::FileId context_id);
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   domapi::FileId context_id);
 };
 
 template <>
 struct Converter<domapi::MoveFileOptions> {
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      domapi::MoveFileOptions* out_options);
 };
 }  // namespace gin

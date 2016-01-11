@@ -41,7 +41,7 @@ class Editor final : public v8_glue::Scriptable<Editor> {
   static base::string16 v8_version();
   static base::string16 version();
 
-  static v8::Handle<v8::Promise> Editor::CheckSpelling(
+  static v8::Local<v8::Promise> Editor::CheckSpelling(
       const base::string16& word_to_check);
 
   // |hint| is 1 to 1000: |v8::V8::IdelNotification(|hint|)| otherwise call
@@ -49,14 +49,14 @@ class Editor final : public v8_glue::Scriptable<Editor> {
   static bool CollectGarbage(int hint);
   static bool CollectGarbage();
 
-  static v8::Handle<v8::Promise> GetFileNameForLoad(
+  static v8::Local<v8::Promise> GetFileNameForLoad(
       Window* window,
       const base::string16& dir_path);
-  static v8::Handle<v8::Promise> GetFileNameForSave(
+  static v8::Local<v8::Promise> GetFileNameForSave(
       Window* window,
       const base::string16& dir_path);
-  static v8::Handle<v8::Promise> GetMetrics(const base::string16& name);
-  static v8::Handle<v8::Promise> GetSpellingSuggestions(
+  static v8::Local<v8::Promise> GetMetrics(const base::string16& name);
+  static v8::Local<v8::Promise> GetSpellingSuggestions(
       const base::string16& wrong_word);
   // Get global switch value.
   static domapi::SwitchValue GetSwitch(const base::string16& name);
@@ -65,18 +65,18 @@ class Editor final : public v8_glue::Scriptable<Editor> {
   static std::vector<base::string16> GetSwitchNames();
 
   // Show message box
-  static v8::Handle<v8::Promise> MessageBox(Window* maybe_window,
-                                            const base::string16& message,
-                                            int flags,
-                                            const base::string16& title);
-  static v8::Handle<v8::Promise> MessageBox(Window* maybe_window,
-                                            const base::string16& message,
-                                            int flags);
+  static v8::Local<v8::Promise> MessageBox(Window* maybe_window,
+                                           const base::string16& message,
+                                           int flags,
+                                           const base::string16& title);
+  static v8::Local<v8::Promise> MessageBox(Window* maybe_window,
+                                           const base::string16& message,
+                                           int flags);
 
   // Run specified script
-  static v8::Handle<v8::Object> RunScript(const base::string16& script_text,
-                                          const base::string16& file_name);
-  static v8::Handle<v8::Object> RunScript(const base::string16& script_text);
+  static v8::Local<v8::Object> RunScript(const base::string16& script_text,
+                                         const base::string16& file_name);
+  static v8::Local<v8::Object> RunScript(const base::string16& script_text);
 
   // Set global switch value.
   static void SetSwitch(const base::string16& name,
@@ -86,16 +86,16 @@ class Editor final : public v8_glue::Scriptable<Editor> {
 
   // Trace logging
   static void StartTraceLog(const base::string16& config);
-  static void StopTraceLog(v8::Handle<v8::Function> callback);
+  static void StopTraceLog(v8::Local<v8::Function> callback);
 
   // Request animation frame
   static void CancelAnimationFrame(int callback_id);
-  static int RequestAnimationFrame(v8::Handle<v8::Function> callback);
+  static int RequestAnimationFrame(v8::Local<v8::Function> callback);
 
   // Request Idle Callback
-  static int RequestIdleCallback(v8::Handle<v8::Function> callback,
+  static int RequestIdleCallback(v8::Local<v8::Function> callback,
                                  const IdleRequestOptions& options);
-  static int RequestIdleCallback(v8::Handle<v8::Function> callback);
+  static int RequestIdleCallback(v8::Local<v8::Function> callback);
   static void CancelIdleCallback(int handle);
 
   DISALLOW_COPY_AND_ASSIGN(Editor);
@@ -107,16 +107,16 @@ namespace gin {
 template <>
 struct Converter<domapi::SwitchValue> {
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      domapi::SwitchValue* out);
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const domapi::SwitchValue& value);
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   const domapi::SwitchValue& value);
 };
 
 template <>
 struct Converter<domapi::TabData> {
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      domapi::TabData* out);
 };
 }  // namespace gin

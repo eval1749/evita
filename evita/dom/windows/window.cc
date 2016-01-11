@@ -36,7 +36,7 @@ const char* WindowStateString(dom::Window::State state) {
 
 namespace gin {
 
-v8::Handle<v8::Value> Converter<dom::Window::State>::ToV8(
+v8::Local<v8::Value> Converter<dom::Window::State>::ToV8(
     v8::Isolate* isolate,
     dom::Window::State state) {
   return gin::StringToSymbol(isolate, dom::internal::WindowStateString(state));

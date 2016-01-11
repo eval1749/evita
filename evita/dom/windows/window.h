@@ -88,8 +88,8 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
 namespace gin {
 template <>
 struct Converter<dom::Window::State> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    dom::Window::State state);
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   dom::Window::State state);
 };
 }  // namespace gin
 

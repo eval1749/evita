@@ -71,7 +71,7 @@ void TextMutationObserver::Tracker::Update(text::Offset offset) {
 //
 // TextMutationObserver
 //
-TextMutationObserver::TextMutationObserver(v8::Handle<v8::Function> callback)
+TextMutationObserver::TextMutationObserver(v8::Local<v8::Function> callback)
     : callback_(v8::Isolate::GetCurrent(), callback) {}
 
 TextMutationObserver::~TextMutationObserver() {}

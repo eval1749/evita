@@ -479,7 +479,7 @@ RegularExpression::RegularExpression(RegularExpressionImpl* regex,
 
 RegularExpression::~RegularExpression() {}
 
-v8::Handle<v8::Value> RegularExpression::ExecuteOnTextDocument(
+v8::Local<v8::Value> RegularExpression::ExecuteOnTextDocument(
     TextDocument* document,
     text::Offset start,
     text::Offset end) {

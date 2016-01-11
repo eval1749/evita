@@ -24,16 +24,16 @@ namespace dom {
 
 namespace {
 
-v8::Handle<v8::Object> GetCallee(v8::Isolate* isolate,
-                                 v8::Handle<v8::Value> object) {
+v8::Local<v8::Object> GetCallee(v8::Isolate* isolate,
+                                v8::Local<v8::Value> object) {
   if (!object->IsObject())
-    return v8::Handle<v8::Object>();
+    return v8::Local<v8::Object>();
   if (object->ToObject()->IsCallable())
     return object->ToObject();
   auto handler =
       object->ToObject()->Get(gin::StringToV8(isolate, "handleEvent"));
   if (handler.IsEmpty() || !handler->IsObject())
-    return v8::Handle<v8::Object>();
+    return v8::Local<v8::Object>();
   return handler->ToObject();
 }
 
@@ -50,7 +50,7 @@ class EventTarget::EventListenerMap final {
     v8_glue::ScopedPersistent<v8::Object> callback;
 
     EventListener(v8::Isolate* isoalte,
-                  v8::Handle<v8::Object> callback,
+                  v8::Local<v8::Object> callback,
                   bool capture)
         : capture(capture), callback(isoalte, callback) {}
 
@@ -64,11 +64,11 @@ class EventTarget::EventListenerMap final {
   ~EventListenerMap() = default;
 
   void Add(const base::string16& type,
-           v8::Handle<v8::Object> callback,
+           v8::Local<v8::Object> callback,
            bool capture);
   EventListenerList* Find(const base::string16& type) const;
   void Remove(const base::string16& type,
-              v8::Handle<v8::Object> callback,
+              v8::Local<v8::Object> callback,
               bool capture);
 
  private:
@@ -78,7 +78,7 @@ class EventTarget::EventListenerMap final {
 };
 
 void EventTarget::EventListenerMap::Add(const base::string16& type,
-                                        v8::Handle<v8::Object> callback,
+                                        v8::Local<v8::Object> callback,
                                         bool capture) {
   auto isolate = v8::Isolate::GetCurrent();
   if (auto const list = Find(type)) {
@@ -104,7 +104,7 @@ EventTarget::EventListenerMap::Find(const base::string16& type) const {
 }
 
 void EventTarget::EventListenerMap::Remove(const base::string16& type,
-                                           v8::Handle<v8::Object> callback,
+                                           v8::Local<v8::Object> callback,
                                            bool capture) {
   auto list = Find(type);
   if (!list)
@@ -126,13 +126,13 @@ EventTarget::EventTarget() : event_listener_map_(new EventListenerMap()) {}
 EventTarget::~EventTarget() {}
 
 void EventTarget::AddEventListener(const base::string16& type,
-                                   v8::Handle<v8::Object> listener,
+                                   v8::Local<v8::Object> listener,
                                    bool capture) {
   event_listener_map_->Add(type, listener, capture);
 }
 
 void EventTarget::AddEventListener(const base::string16& type,
-                                   v8::Handle<v8::Object> listener) {
+                                   v8::Local<v8::Object> listener) {
   AddEventListener(type, listener, false);
 }
 

@@ -21,7 +21,7 @@
 
 namespace gin {
 bool Converter<domapi::SwitchValue>::FromV8(v8::Isolate* isolate,
-                                            v8::Handle<v8::Value> val,
+                                            v8::Local<v8::Value> val,
                                             domapi::SwitchValue* out) {
   if (val.IsEmpty())
     return false;
@@ -43,7 +43,7 @@ bool Converter<domapi::SwitchValue>::FromV8(v8::Isolate* isolate,
   return false;
 }
 
-v8::Handle<v8::Value> Converter<domapi::SwitchValue>::ToV8(
+v8::Local<v8::Value> Converter<domapi::SwitchValue>::ToV8(
     v8::Isolate* isolate,
     const domapi::SwitchValue& val) {
   switch (val.type()) {
@@ -60,7 +60,7 @@ v8::Handle<v8::Value> Converter<domapi::SwitchValue>::ToV8(
 }
 
 bool Converter<domapi::TabData>::FromV8(v8::Isolate* isolate,
-                                        v8::Handle<v8::Value> val,
+                                        v8::Local<v8::Value> val,
                                         domapi::TabData* out) {
   if (val.IsEmpty() || !val->IsObject())
     return false;
@@ -97,7 +97,7 @@ const base::char16 kVersion[] = L"5.0";
 //
 class TraceLogClient final {
  public:
-  TraceLogClient(v8::Isolate* isolate, v8::Handle<v8::Function> callback)
+  TraceLogClient(v8::Isolate* isolate, v8::Local<v8::Function> callback)
       : callback_(isolate, callback) {}
   ~TraceLogClient() = default;
 
@@ -123,7 +123,7 @@ void TraceLogClient::DidGetOutput(const std::string& chunk,
 }
 
 v8::Local<v8::Object> NewRunScriptResult(v8::Isolate* isolate,
-                                         v8::Handle<v8::Value> run_value,
+                                         v8::Local<v8::Value> run_value,
                                          const v8::TryCatch& try_catch) {
   auto const result = v8::Object::New(isolate);
   if (try_catch.HasCaught()) {
@@ -155,8 +155,8 @@ v8::Local<v8::Object> NewRunScriptResult(v8::Isolate* isolate,
   return result;
 }
 
-v8::Handle<v8::Object> RunScriptInternal(const base::string16& script_text,
-                                         const base::string16& file_name) {
+v8::Local<v8::Object> RunScriptInternal(const base::string16& script_text,
+                                        const base::string16& file_name) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
@@ -167,12 +167,12 @@ v8::Handle<v8::Object> RunScriptInternal(const base::string16& script_text,
   auto script = v8::ScriptCompiler::Compile(runner->context(), &source);
   if (script.IsEmpty()) {
     return runner_scope.Escape(
-        NewRunScriptResult(isolate, v8::Handle<v8::Value>(), try_catch));
+        NewRunScriptResult(isolate, v8::Local<v8::Value>(), try_catch));
   }
   auto const run_value = script.ToLocalChecked()->Run();
   if (run_value.IsEmpty()) {
     return runner_scope.Escape(
-        NewRunScriptResult(isolate, v8::Handle<v8::Value>(), try_catch));
+        NewRunScriptResult(isolate, v8::Local<v8::Value>(), try_catch));
   }
   return runner_scope.Escape(NewRunScriptResult(isolate, run_value, try_catch));
 }
@@ -198,7 +198,7 @@ base::string16 Editor::version() {
   return kVersion;
 }
 
-v8::Handle<v8::Promise> Editor::CheckSpelling(
+v8::Local<v8::Promise> Editor::CheckSpelling(
     const base::string16& word_to_check) {
   return PromiseResolver::Call(
       FROM_HERE,
@@ -219,7 +219,7 @@ bool Editor::CollectGarbage() {
   return false;
 }
 
-v8::Handle<v8::Promise> Editor::GetFileNameForLoad(
+v8::Local<v8::Promise> Editor::GetFileNameForLoad(
     Window* window,
     const base::string16& dir_path) {
   return PromiseResolver::Call(
@@ -230,7 +230,7 @@ v8::Handle<v8::Promise> Editor::GetFileNameForLoad(
                  dir_path));
 }
 
-v8::Handle<v8::Promise> Editor::GetFileNameForSave(
+v8::Local<v8::Promise> Editor::GetFileNameForSave(
     Window* window,
     const base::string16& dir_path) {
   return PromiseResolver::Call(
@@ -241,7 +241,7 @@ v8::Handle<v8::Promise> Editor::GetFileNameForSave(
                  dir_path));
 }
 
-v8::Handle<v8::Promise> Editor::GetMetrics(const base::string16& name) {
+v8::Local<v8::Promise> Editor::GetMetrics(const base::string16& name) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::ViewDelegate::GetMetrics,
@@ -249,7 +249,7 @@ v8::Handle<v8::Promise> Editor::GetMetrics(const base::string16& name) {
                  name));
 }
 
-v8::Handle<v8::Promise> Editor::GetSpellingSuggestions(
+v8::Local<v8::Promise> Editor::GetSpellingSuggestions(
     const base::string16& wrong_word) {
   return PromiseResolver::Call(
       FROM_HERE,
@@ -266,10 +266,10 @@ std::vector<base::string16> Editor::GetSwitchNames() {
   return ScriptHost::instance()->view_delegate()->GetSwitchNames();
 }
 
-v8::Handle<v8::Promise> Editor::MessageBox(Window* maybe_window,
-                                           const base::string16& message,
-                                           int flags,
-                                           const base::string16& title) {
+v8::Local<v8::Promise> Editor::MessageBox(Window* maybe_window,
+                                          const base::string16& message,
+                                          int flags,
+                                          const base::string16& title) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(
@@ -279,14 +279,14 @@ v8::Handle<v8::Promise> Editor::MessageBox(Window* maybe_window,
           message, title, flags));
 }
 
-v8::Handle<v8::Promise> Editor::MessageBox(Window* maybe_window,
-                                           const base::string16& message,
-                                           int flags) {
+v8::Local<v8::Promise> Editor::MessageBox(Window* maybe_window,
+                                          const base::string16& message,
+                                          int flags) {
   return MessageBox(maybe_window, message, flags, base::string16());
 }
 
-v8::Handle<v8::Object> Editor::RunScript(const base::string16& script_text,
-                                         const base::string16& file_name) {
+v8::Local<v8::Object> Editor::RunScript(const base::string16& script_text,
+                                        const base::string16& file_name) {
   if (file_name == L"*javascript*") {
     SuppressMessageBoxScope suppress_messagebox_scope;
     return RunScriptInternal(script_text, file_name);
@@ -294,7 +294,7 @@ v8::Handle<v8::Object> Editor::RunScript(const base::string16& script_text,
   return RunScriptInternal(script_text, file_name);
 }
 
-v8::Handle<v8::Object> Editor::RunScript(const base::string16& script_text) {
+v8::Local<v8::Object> Editor::RunScript(const base::string16& script_text) {
   return RunScript(script_text, L"__runscript__");
 }
 
@@ -313,7 +313,7 @@ void Editor::StartTraceLog(const base::string16& config) {
       base::UTF16ToASCII(config));
 }
 
-void Editor::StopTraceLog(v8::Handle<v8::Function> callback) {
+void Editor::StopTraceLog(v8::Local<v8::Function> callback) {
   auto const isolate = ScriptHost::instance()->isolate();
   auto const trace_log_client = new TraceLogClient(isolate, callback);
   ScriptHost::instance()->view_delegate()->StopTraceLog(base::Bind(

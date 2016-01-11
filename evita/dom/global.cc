@@ -57,14 +57,14 @@
 namespace dom {
 
 namespace internal {
-v8::Handle<v8::Object> GetUnicodeObject(v8::Isolate* isoalte);
+v8::Local<v8::Object> GetUnicodeObject(v8::Isolate* isoalte);
 }  // namespace internal
 
 Global::Global() {}
 
 Global::~Global() {}
 
-v8::Handle<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
+v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
   if (!object_template_->IsEmpty())
     return object_template_.NewLocal(isolate);
 

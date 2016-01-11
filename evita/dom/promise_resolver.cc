@@ -71,7 +71,7 @@ PromiseResolver::~PromiseResolver() {
   LivePromiseResolverSet::instance()->Unregister(this);
 }
 
-void PromiseResolver::DoReject(v8::Handle<v8::Value> value) {
+void PromiseResolver::DoReject(v8::Local<v8::Value> value) {
   TRACE_EVENT_WITH_FLOW1("promise", "PromiseResolver::Reject", sequence_num_,
                          TRACE_EVENT_FLAG_FLOW_IN, "function",
                          from_here_.function_name());
@@ -84,7 +84,7 @@ void PromiseResolver::DoReject(v8::Handle<v8::Value> value) {
   TRACE_EVENT_ASYNC_END1("script", "Promise", sequence_num_, "type", "reject");
 }
 
-void PromiseResolver::DoResolve(v8::Handle<v8::Value> value) {
+void PromiseResolver::DoResolve(v8::Local<v8::Value> value) {
   TRACE_EVENT_WITH_FLOW1("promise", "PromiseResolver::Resolver", sequence_num_,
                          TRACE_EVENT_FLAG_FLOW_IN, "function",
                          from_here_.function_name());

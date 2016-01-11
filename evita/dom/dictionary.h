@@ -18,7 +18,7 @@ class Dictionary {
  public:
   virtual ~Dictionary();
 
-  bool Init(v8::Isolate* isolate, v8::Handle<v8::Value> dict);
+  bool Init(v8::Isolate* isolate, v8::Local<v8::Value> dict);
 
  protected:
   enum class HandleResult {
@@ -31,8 +31,8 @@ class Dictionary {
 
   v8::Isolate* isolate() const;
 
-  virtual HandleResult HandleKeyValue(v8::Handle<v8::Value> key,
-                                      v8::Handle<v8::Value> value) = 0;
+  virtual HandleResult HandleKeyValue(v8::Local<v8::Value> key,
+                                      v8::Local<v8::Value> value) = 0;
 };
 
 }  // namespace dom
@@ -42,7 +42,7 @@ template <typename T>
 struct Converter<
     T,
     typename std::enable_if<std::is_base_of<dom::Dictionary, T>::value>::type> {
-  static bool FromV8(v8::Isolate* isolate, v8::Handle<v8::Value> val, T* out) {
+  static bool FromV8(v8::Isolate* isolate, v8::Local<v8::Value> val, T* out) {
     return out->Init(isolate, val->ToObject());
   }
 };

@@ -14,7 +14,6 @@
 #include "evita/v8_glue/converter.h"
 #include "gtest/gtest.h"
 
-
 namespace dom {
 
 using ::testing::Eq;
@@ -57,7 +56,7 @@ class SampleWindowClass final
     v8_glue::internal::FinishConstructCall(info, NewSampleWindow(info));
   }
 
-  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
+  v8::Local<v8::FunctionTemplate> CreateConstructorTemplate(
       v8::Isolate* isolate) override {
     return v8::FunctionTemplate::New(isolate,
                                      &SampleWindowClass::ConstructSampleWindow);
@@ -68,9 +67,9 @@ class SampleWindowClass final
     return new SampleWindow();
   }
 
-  v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+  v8::Local<v8::ObjectTemplate> SetupInstanceTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> base_templ) override {
+      v8::Local<v8::ObjectTemplate> base_templ) override {
     auto const templ = BaseClass::SetupInstanceTemplate(isolate, base_templ);
     templ->SetAccessorProperty(
         gin::StringToSymbol(isolate, "name"),
@@ -134,7 +133,7 @@ class WindowTest : public AbstractDomTest {
  private:
   void PopulateGlobalTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> global_template) override {
+      v8::Local<v8::ObjectTemplate> global_template) override {
     v8_glue::Installer<SampleWindow>::Run(isolate, global_template);
   }
 

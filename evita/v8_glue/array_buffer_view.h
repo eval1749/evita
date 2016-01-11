@@ -12,7 +12,7 @@ namespace gin {
 template <>
 struct Converter<ArrayBufferView*> {
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      ArrayBufferView** out);
 };
 }  // namespace gin

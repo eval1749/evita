@@ -38,25 +38,24 @@ class WrapperInfo {
         reinterpret_cast<const gin::WrapperInfo*>(&embedder_));
   }
 
-  static WrapperInfo* From(v8::Handle<v8::Object> object);
-  v8::Handle<v8::FunctionTemplate> GetOrCreateConstructorTemplate(
+  static WrapperInfo* From(v8::Local<v8::Object> object);
+  v8::Local<v8::FunctionTemplate> GetOrCreateConstructorTemplate(
       v8::Isolate* isolate);
-  v8::Handle<v8::ObjectTemplate> GetOrCreateInstanceTemplate(
+  v8::Local<v8::ObjectTemplate> GetOrCreateInstanceTemplate(
       v8::Isolate* isolate);
-  v8::Handle<v8::FunctionTemplate> Install(
-      v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> global);
+  v8::Local<v8::FunctionTemplate> Install(v8::Isolate* isolate,
+                                          v8::Local<v8::ObjectTemplate> global);
 
  protected:
   explicit WrapperInfo(const char* class_name);
 
-  virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+  virtual v8::Local<v8::ObjectTemplate> SetupInstanceTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> templ);
+      v8::Local<v8::ObjectTemplate> templ);
 
-  virtual v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
+  virtual v8::Local<v8::FunctionTemplate> CreateConstructorTemplate(
       v8::Isolate* isolate);
-  v8::Handle<v8::ObjectTemplate> CreateInstanceTemplate(v8::Isolate* isolate);
+  v8::Local<v8::ObjectTemplate> CreateInstanceTemplate(v8::Isolate* isolate);
 
   // Throw arity error in generated code from IDL.
   static void ThrowArityError(v8::Isolate* isolate,
@@ -67,13 +66,13 @@ class WrapperInfo {
   // Throw argument type error in generated code from IDL.
   static void ThrowArgumentError(v8::Isolate* isolate,
                                  const char* expected_type,
-                                 v8::Handle<v8::Value> value,
+                                 v8::Local<v8::Value> value,
                                  int index);
 
   // Throw receiver type error in generated code from IDL.
   static void ThrowReceiverError(v8::Isolate* isolate,
                                  const char* expected_type,
-                                 v8::Handle<v8::Value> value);
+                                 v8::Local<v8::Value> value);
 
  private:
   gin::GinEmbedder const embedder_;
@@ -89,9 +88,9 @@ class WrapperInfo {
 template <typename T>
 class Installer final {
  public:
-  static v8::Handle<v8::FunctionTemplate> Run(
+  static v8::Local<v8::FunctionTemplate> Run(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> global) {
+      v8::Local<v8::ObjectTemplate> global) {
     return T::static_wrapper_info()->Install(isolate, global);
   }
 

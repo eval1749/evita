@@ -23,8 +23,8 @@ namespace internal {
 // because of base::Bind().
 template <typename T, typename Enable = void>
 struct CallbackTraits {
-  static v8::Handle<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
-                                                         T callback) {
+  static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
+                                                        T callback) {
     return gin::CreateFunctionTemplate(isolate, base::Bind(callback));
   }
 };
@@ -32,7 +32,7 @@ struct CallbackTraits {
 // Specialization for base::Callback.
 template <typename T>
 struct CallbackTraits<base::Callback<T>> {
-  static v8::Handle<v8::FunctionTemplate> CreateTemplate(
+  static v8::Local<v8::FunctionTemplate> CreateTemplate(
       v8::Isolate* isolate,
       const base::Callback<T>& callback) {
     return gin::CreateFunctionTemplate(isolate, callback);
@@ -47,8 +47,8 @@ template <typename T>
 struct CallbackTraits<
     T,
     typename std::enable_if<base::is_member_function_pointer<T>::value>::type> {
-  static v8::Handle<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
-                                                         T callback) {
+  static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
+                                                        T callback) {
     return gin::CreateFunctionTemplate(isolate, base::Bind(callback),
                                        gin::HolderIsFirstArgument);
   }
@@ -57,9 +57,9 @@ struct CallbackTraits<
 // This specialization allows people to construct function templates directly if
 // they need to do fancier stuff.
 template <>
-struct CallbackTraits<v8::Handle<v8::FunctionTemplate>> {
-  static v8::Handle<v8::FunctionTemplate> CreateTemplate(
-      v8::Handle<v8::FunctionTemplate> templ) {
+struct CallbackTraits<v8::Local<v8::FunctionTemplate>> {
+  static v8::Local<v8::FunctionTemplate> CreateTemplate(
+      v8::Local<v8::FunctionTemplate> templ) {
     return templ;
   }
 };
@@ -71,7 +71,7 @@ struct CallbackTraits<v8::Handle<v8::FunctionTemplate>> {
 class FunctionTemplateBuilder final {
  public:
   FunctionTemplateBuilder(v8::Isolate* isolate,
-                          v8::Handle<v8::FunctionTemplate> function_template);
+                          v8::Local<v8::FunctionTemplate> function_template);
   explicit FunctionTemplateBuilder(v8::Isolate* isolate);
   ~FunctionTemplateBuilder();
 
@@ -113,11 +113,11 @@ class FunctionTemplateBuilder final {
 
  private:
   FunctionTemplateBuilder& SetImpl(const base::StringPiece& name,
-                                   v8::Handle<v8::Data> val);
+                                   v8::Local<v8::Data> val);
   FunctionTemplateBuilder& SetPropertyImpl(
       const base::StringPiece& name,
-      v8::Handle<v8::FunctionTemplate> getter,
-      v8::Handle<v8::FunctionTemplate> setter);
+      v8::Local<v8::FunctionTemplate> getter,
+      v8::Local<v8::FunctionTemplate> setter);
 
   v8::Isolate* isolate_;
 

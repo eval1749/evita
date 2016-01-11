@@ -60,14 +60,14 @@ void SetRawProperty(v8::Local<v8::Context> context,
 
 }  // namespace
 
-v8::Handle<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* handle) {
+v8::Local<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* handle) {
   const auto& runner = ScriptHost::instance()->runner();
   const auto& isolate = runner->isolate();
   const auto& context = runner->context();
   const auto& element = handle->value()->as<Element>();
   if (!element) {
     ScriptHost::instance()->ThrowError("Requires element object");
-    return v8::Handle<v8::Map>();
+    return v8::Local<v8::Map>();
   }
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
   const auto map = v8::Map::New(isolate);
@@ -83,7 +83,7 @@ v8::Handle<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* handle) {
   return runner_scope.Escape(map);
 }
 
-void NodeHandle::SetInlineStyle(NodeHandle* handle, v8::Handle<v8::Map> map) {
+void NodeHandle::SetInlineStyle(NodeHandle* handle, v8::Local<v8::Map> map) {
   const auto& runner = ScriptHost::instance()->runner();
   const auto& context = runner->context();
   const auto element = handle->value()->as<Element>();

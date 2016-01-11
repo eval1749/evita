@@ -35,7 +35,7 @@ class {{name}} : public {{parent_name or 'Dictionary'}} {
 {% endfor %}
   // dom::Dictionary
   protected: virtual HandleResult HandleKeyValue(
-      v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) override;
+      v8::Local<v8::Value> key, v8::Local<v8::Value> value) override;
 };
 
 }  // namespace dom

@@ -47,7 +47,7 @@ TimeStamp TimeStamp::Now() {
 
 namespace gin {
 
-v8::Handle<v8::Value> Converter<dom::TimeStamp>::ToV8(
+v8::Local<v8::Value> Converter<dom::TimeStamp>::ToV8(
     v8::Isolate* isolate,
     const dom::TimeStamp& time_stamp) {
   return gin::ConvertToV8(isolate,
@@ -55,7 +55,7 @@ v8::Handle<v8::Value> Converter<dom::TimeStamp>::ToV8(
 }
 
 bool Converter<dom::TimeStamp>::FromV8(v8::Isolate* isolate,
-                                       v8::Handle<v8::Value> val,
+                                       v8::Local<v8::Value> val,
                                        dom::TimeStamp* out) {
   dom::TimeStamp::ValueType value;
   if (!gin::ConvertFromV8(isolate, val, &value))

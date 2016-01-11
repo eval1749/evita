@@ -37,7 +37,7 @@ namespace dom {
 
 namespace {
 
-base::string16 V8ToString(v8::Handle<v8::Value> value) {
+base::string16 V8ToString(v8::Local<v8::Value> value) {
   if (value.IsEmpty())
     return L"(empty)";
   v8::String::Value string_value(value);
@@ -75,15 +75,15 @@ EventTarget* GetFocusWindow(v8_glue::Runner* runner) {
   return event_target;
 }
 
-v8::Handle<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
-                                         domapi::WindowId window_id) {
+v8::Local<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
+                                        domapi::WindowId window_id) {
   auto const isolate = runner->isolate();
   if (window_id == domapi::kInvalidWindowId)
     return runner->global()->Get(gin::StringToV8(isolate, "Editor"));
 
   auto const window = FromWindowId(window_id);
   if (!window)
-    return v8::Handle<v8::Value>();
+    return v8::Local<v8::Value>();
   return window->GetWrapper(isolate);
 }
 
@@ -256,7 +256,7 @@ void ViewEventHandlerImpl::OpenFile(domapi::WindowId window_id,
     DVLOG(0) << "OpenFile: window doesn't have callable open property.";
     return;
   }
-  v8::Handle<v8::Value> js_file_name = gin::StringToV8(isolate, file_name);
+  v8::Local<v8::Value> js_file_name = gin::StringToV8(isolate, file_name);
   DOM_AUTO_LOCK_SCOPE();
   runner->Call(open_file, js_handler, js_file_name);
 }

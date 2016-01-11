@@ -10,10 +10,10 @@ namespace gin {
 template <>
 struct Converter<domapi::FloatPoint> {
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      domapi::FloatPoint* out);
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const domapi::FloatPoint& point);
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   const domapi::FloatPoint& point);
 };
 }  // namespace gin
 

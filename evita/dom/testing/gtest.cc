@@ -10,7 +10,7 @@
 
 namespace dom {
 
-base::string16 V8ToString(v8::Handle<v8::Value> value);
+base::string16 V8ToString(v8::Local<v8::Value> value);
 
 namespace {
 

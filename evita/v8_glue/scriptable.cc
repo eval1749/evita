@@ -17,7 +17,7 @@ AbstractScriptable::~AbstractScriptable() {
 }
 
 void AbstractScriptable::Bind(v8::Isolate* isolate,
-                              v8::Handle<v8::Object> wrapper) {
+                              v8::Local<v8::Object> wrapper) {
   auto const count = wrapper->InternalFieldCount();
   CHECK_EQ(gin::kNumberOfInternalFields, count);
   wrapper->SetAlignedPointerInInternalField(gin::kWrapperInfoIndex,
@@ -28,7 +28,7 @@ void AbstractScriptable::Bind(v8::Isolate* isolate,
   gc::Collector::instance()->AddToRootSet(this);
 }
 
-v8::Handle<v8::Object> AbstractScriptable::GetWrapper(
+v8::Local<v8::Object> AbstractScriptable::GetWrapper(
     v8::Isolate* isolate) const {
   DCHECK(this);
   if (!wrapper_.IsEmpty())
@@ -52,11 +52,11 @@ void AbstractScriptable::WeakCallback(
 namespace internal {
 
 void* FromV8Impl(v8::Isolate*,
-                 v8::Handle<v8::Value> val,
+                 v8::Local<v8::Value> val,
                  WrapperInfo* wrapper_info) {
   if (!val->IsObject())
     return nullptr;
-  auto obj = v8::Handle<v8::Object>::Cast(val);
+  auto obj = v8::Local<v8::Object>::Cast(val);
   auto const info = WrapperInfo::From(obj);
 
   // If this fails, the object is not managed by Gin. It is either a normal JS

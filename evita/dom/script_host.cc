@@ -39,7 +39,7 @@ namespace v8Strings {
 void Init(v8::Isolate* isolate);
 }
 
-base::string16 V8ToString(v8::Handle<v8::Value> value) {
+base::string16 V8ToString(v8::Local<v8::Value> value) {
   v8::String::Value string_value(value);
   if (!string_value.length())
     return base::string16();
@@ -75,13 +75,13 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
 
 // Note: The constructor returned by v8::Object::GetConstructor() doesn't
 // have properties defined in JavaScript.
-v8::Handle<v8::Object> GetClassObject(v8::Isolate* isolate,
-                                      v8::Handle<v8::Object> object) {
+v8::Local<v8::Object> GetClassObject(v8::Isolate* isolate,
+                                     v8::Local<v8::Object> object) {
   auto const name = object->GetConstructorName();
   auto const value = isolate->GetCurrentContext()->Global()->Get(name);
   if (value.IsEmpty() || !value->IsFunction()) {
     LOG(0) << "No such class " << V8ToString(name) << ".";
-    return v8::Handle<v8::Object>();
+    return v8::Local<v8::Object>();
   }
   return value->ToObject();
 }
@@ -137,8 +137,8 @@ void GcPrologueCallback(v8::Isolate* isolate,
   dom::Lock::instance()->Acquire(FROM_HERE);
 }
 
-void MessageCallback(v8::Handle<v8::Message> message,
-                     v8::Handle<v8::Value> error) {
+void MessageCallback(v8::Local<v8::Message> message,
+                     v8::Local<v8::Value> error) {
   auto text = base::StringPrintf(
       L"Exception: %ls\n"
       L"Source: %ls\n"
@@ -183,15 +183,15 @@ void PopulateEnviromentStrings(v8_glue::Runner* runner) {
               v8::String::kNormalString, static_cast<int>(scanner - strings)));
 }
 
-v8::Handle<v8::Object> ToMethodObject(v8::Isolate* isolate,
-                                      v8::Handle<v8::Object> js_class,
-                                      v8::Eternal<v8::String> method_name) {
+v8::Local<v8::Object> ToMethodObject(v8::Isolate* isolate,
+                                     v8::Local<v8::Object> js_class,
+                                     v8::Eternal<v8::String> method_name) {
   auto const value = js_class->Get(method_name.Get(isolate));
   if (value.IsEmpty() || !value->IsFunction()) {
     LOG(0) << "Object " << V8ToString(js_class) << " has no method '"
            << V8ToString(method_name.Get(isolate)) << "', it has "
            << V8ToString(js_class->GetPropertyNames()) << ".";
-    return v8::Handle<v8::Object>();
+    return v8::Local<v8::Object>();
   }
   return value->ToObject();
 }
@@ -434,7 +434,7 @@ void ScriptHost::ThrowRangeError(const std::string& message) {
   isolate()->ThrowException(exception);
 }
 
-void ScriptHost::ThrowException(v8::Handle<v8::Value> exception) {
+void ScriptHost::ThrowException(v8::Local<v8::Value> exception) {
   v8_glue::Runner::Scope runner_scope(runner());
   isolate()->ThrowException(exception);
 }
@@ -443,7 +443,7 @@ void ScriptHost::WillDestroyViewHost() {
   view_delegate_ = nullptr;
 }
 
-v8::Handle<v8::ObjectTemplate> ScriptHost::GetGlobalTemplate(
+v8::Local<v8::ObjectTemplate> ScriptHost::GetGlobalTemplate(
     v8_glue::Runner* runner) {
   return Global::instance()->object_template(runner->isolate());
 }

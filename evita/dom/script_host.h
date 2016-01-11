@@ -92,7 +92,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   void TerminateScriptExecution();
   void ThrowError(const std::string& message);
   void ThrowRangeError(const std::string& message);
-  void ThrowException(v8::Handle<v8::Value> exception);
+  void ThrowException(v8::Local<v8::Value> exception);
   void WillDestroyViewHost();
 
  private:
@@ -107,7 +107,7 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   void DidStartScriptHost();
 
   // v8_glue::RunnerDelegate
-  v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
+  v8::Local<v8::ObjectTemplate> GetGlobalTemplate(
       v8_glue::Runner* runner) final;
   void Start();
   void UnhandledException(v8_glue::Runner* runner,

@@ -32,7 +32,7 @@ namespace dom {
 
 using ::testing::_;
 
-base::string16 V8ToString(v8::Handle<v8::Value> value);
+base::string16 V8ToString(v8::Local<v8::Value> value);
 
 namespace {
 v8_glue::Runner* static_runner;
@@ -116,7 +116,7 @@ class AbstractDomTest::RunnerDelegate final
 
  private:
   // v8_glue::RunnerDelegate
-  v8::Handle<v8::ObjectTemplate> GetGlobalTemplate(
+  v8::Local<v8::ObjectTemplate> GetGlobalTemplate(
       v8_glue::Runner* runner) final;
   void UnhandledException(v8_glue::Runner* runner,
                           const v8::TryCatch& try_catch) final;
@@ -125,7 +125,7 @@ class AbstractDomTest::RunnerDelegate final
 };
 
 // v8_glue::RunnerDelegate
-v8::Handle<v8::ObjectTemplate>
+v8::Local<v8::ObjectTemplate>
 AbstractDomTest::RunnerDelegate::GetGlobalTemplate(v8_glue::Runner* runner) {
   auto const templ =
       static_cast<v8_glue::RunnerDelegate*>(test_instance_->script_host_)
@@ -260,7 +260,7 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
 }
 
 void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,
-                                             v8::Handle<v8::ObjectTemplate>) {}
+                                             v8::Local<v8::ObjectTemplate>) {}
 
 void AbstractDomTest::RunFile(const base::FilePath& path) {
   std::string source;

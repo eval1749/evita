@@ -9,7 +9,7 @@
 #include "evita/dom/script_host.h"
 
 namespace gin {
-v8::Handle<v8::Value> Converter<dom::DataTransferData::Kind>::ToV8(
+v8::Local<v8::Value> Converter<dom::DataTransferData::Kind>::ToV8(
     v8::Isolate* isolate,
     dom::DataTransferData::Kind kind) {
   return StringToV8(isolate, dom::DataTransferData::KindToString(kind));

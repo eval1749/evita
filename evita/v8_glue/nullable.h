@@ -37,14 +37,14 @@ struct Converter<
     v8_glue::Nullable<T>,
     typename std::enable_if<
         std::is_convertible<T*, v8_glue::AbstractScriptable*>::value>::type> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, T* val) {
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate, T* val) {
     if (val)
       return val->GetWrapper(isolate);
     return v8::Null(isolate);
   }
 
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      v8_glue::Nullable<T>* out) {
     if (val->IsNull()) {
       *out = nullptr;

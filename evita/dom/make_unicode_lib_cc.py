@@ -104,7 +104,7 @@ const char* kCategoryNames[] = {
 // Unicode.Bidi : enum
 // Unicode.Category : enum
 // Uicode.UCD : Array.<{bidi: Unicode.Bidi, category: Unicode.Category}>
-v8::Handle<v8::Object> CreateUnicode(v8::Isolate* isolate) {
+v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   v8::EscapableHandleScope handle_scope(isolate);
   auto unicode = v8::Object::New(isolate);
 
@@ -163,7 +163,7 @@ class Unicode final {
   }
   ~Unicode() = default;
 
-  v8::Handle<v8::Object> Get(v8::Isolate* isolate) {
+  v8::Local<v8::Object> Get(v8::Isolate* isolate) {
     return v8::Local<v8::Object>::New(isolate, *unicode_);
   }
 
@@ -175,7 +175,7 @@ class Unicode final {
 
 }  // namespace
 
-v8::Handle<v8::Object> GetUnicodeObject(v8::Isolate* isolate) {
+v8::Local<v8::Object> GetUnicodeObject(v8::Isolate* isolate) {
   CR_DEFINE_STATIC_LOCAL(Unicode, static_unicode, (isolate));
   return static_unicode.Get(isolate);
 }

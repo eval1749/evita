@@ -14,9 +14,9 @@ void RunnerDelegate::DidCreateContext(Runner* runner) {}
 
 void RunnerDelegate::DidRunScript(Runner* runner) {}
 
-v8::Handle<v8::ObjectTemplate> RunnerDelegate::GetGlobalTemplate(
+v8::Local<v8::ObjectTemplate> RunnerDelegate::GetGlobalTemplate(
     Runner* runner) {
-  return v8::Handle<v8::ObjectTemplate>();
+  return v8::Local<v8::ObjectTemplate>();
 }
 
 void RunnerDelegate::UnhandledException(Runner* runner,

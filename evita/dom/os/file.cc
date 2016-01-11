@@ -18,11 +18,11 @@
 #include "gin/array_buffer.h"
 
 namespace dom {
-base::string16 V8ToString(v8::Handle<v8::Value> value);
+base::string16 V8ToString(v8::Local<v8::Value> value);
 }
 
 namespace gin {
-v8::Handle<v8::Value> Converter<domapi::FileId>::ToV8(
+v8::Local<v8::Value> Converter<domapi::FileId>::ToV8(
     v8::Isolate* isolate,
     domapi::FileId context_id) {
   return gin::ConvertToV8(isolate, new dom::File(context_id));
@@ -39,8 +39,8 @@ File::File(domapi::IoContextId context_id) : ScriptableBase(context_id) {}
 
 File::~File() {}
 
-v8::Handle<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
-                                               const base::string16& prefix) {
+v8::Local<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
+                                              const base::string16& prefix) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::MakeTempFileName,
@@ -48,9 +48,9 @@ v8::Handle<v8::Promise> File::MakeTempFileName(const base::string16& dir_name,
                  dir_name, prefix));
 }
 
-v8::Handle<v8::Promise> File::Move(const base::string16& src_path,
-                                   const base::string16& dst_path,
-                                   const MoveFileOptions& options) {
+v8::Local<v8::Promise> File::Move(const base::string16& src_path,
+                                  const base::string16& dst_path,
+                                  const MoveFileOptions& options) {
   domapi::MoveFileOptions api_options;
   api_options.no_overwrite = options.no_overwrite();
   return PromiseResolver::Call(
@@ -60,13 +60,13 @@ v8::Handle<v8::Promise> File::Move(const base::string16& src_path,
                  src_path, dst_path, api_options));
 }
 
-v8::Handle<v8::Promise> File::Move(const base::string16& src_path,
-                                   const base::string16& dst_path) {
+v8::Local<v8::Promise> File::Move(const base::string16& src_path,
+                                  const base::string16& dst_path) {
   return Move(src_path, dst_path, MoveFileOptions());
 }
 
-v8::Handle<v8::Promise> File::Open(const base::string16& file_name,
-                                   const base::string16& mode) {
+v8::Local<v8::Promise> File::Open(const base::string16& file_name,
+                                  const base::string16& mode) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::OpenFile,
@@ -74,11 +74,11 @@ v8::Handle<v8::Promise> File::Open(const base::string16& file_name,
                  file_name, mode));
 }
 
-v8::Handle<v8::Promise> File::Open(const base::string16& file_name) {
+v8::Local<v8::Promise> File::Open(const base::string16& file_name) {
   return Open(file_name, base::string16());
 }
 
-v8::Handle<v8::Promise> File::Remove(const base::string16& file_name) {
+v8::Local<v8::Promise> File::Remove(const base::string16& file_name) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::RemoveFile,
@@ -86,7 +86,7 @@ v8::Handle<v8::Promise> File::Remove(const base::string16& file_name) {
                  file_name));
 }
 
-v8::Handle<v8::Promise> File::Stat(const base::string16& file_name) {
+v8::Local<v8::Promise> File::Stat(const base::string16& file_name) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::QueryFileStatus,

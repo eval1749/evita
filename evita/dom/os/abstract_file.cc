@@ -29,7 +29,7 @@ AbstractFile::~AbstractFile() {
   Close();
 }
 
-v8::Handle<v8::Promise> AbstractFile::Close() {
+v8::Local<v8::Promise> AbstractFile::Close() {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::CloseFile,
@@ -37,7 +37,7 @@ v8::Handle<v8::Promise> AbstractFile::Close() {
                  context_id_));
 }
 
-v8::Handle<v8::Promise> AbstractFile::Read(
+v8::Local<v8::Promise> AbstractFile::Read(
     const gin::ArrayBufferView& array_buffer_view) {
   return PromiseResolver::Call(
       FROM_HERE,
@@ -47,7 +47,7 @@ v8::Handle<v8::Promise> AbstractFile::Read(
                  array_buffer_view.num_bytes()));
 }
 
-v8::Handle<v8::Promise> AbstractFile::Write(
+v8::Local<v8::Promise> AbstractFile::Write(
     const gin::ArrayBufferView& array_buffer_view) {
   return PromiseResolver::Call(
       FROM_HERE,

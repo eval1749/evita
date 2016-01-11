@@ -7,12 +7,12 @@
 namespace gin {
 
 bool Converter<ArrayBufferView*>::FromV8(v8::Isolate* isolate,
-                                         v8::Handle<v8::Value> val,
+                                         v8::Local<v8::Value> val,
                                          ArrayBufferView** out) {
   if (!val->IsArrayBufferView())
     return false;
   *out =
-      new ArrayBufferView(isolate, v8::Handle<v8::ArrayBufferView>::Cast(val));
+      new ArrayBufferView(isolate, v8::Local<v8::ArrayBufferView>::Cast(val));
   return true;
 }
 

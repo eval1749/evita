@@ -22,7 +22,7 @@ namespace dom {
 
 // dom::Dictionary
 Dictionary::HandleResult {{name}}::HandleKeyValue(
-    v8::Handle<v8::Value> key, v8::Handle<v8::Value> value) {
+    v8::Local<v8::Value> key, v8::Local<v8::Value> value) {
 {% for member in members %}
 {%  if member.is_nullable %}
   if (v8Strings::{{member.name}}.Get(isolate())->Equals(key)) {

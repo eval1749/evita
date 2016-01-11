@@ -40,10 +40,10 @@ class TimeStamp final {
 namespace gin {
 template <>
 struct Converter<dom::TimeStamp> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const dom::TimeStamp& time_stamp);
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   const dom::TimeStamp& time_stamp);
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      dom::TimeStamp* out);
 };
 }  // namespace gin

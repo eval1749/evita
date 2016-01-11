@@ -135,7 +135,7 @@
   'v8::Context',
   'v8::EscapableHandleScope', 'v8::Eternal',
   'v8::FunctionCallback', 'v8::FunctionTemplate',
-  'v8::Handle', 'v8::HandleScope',
+  'v8::Local', 'v8::HandleScope',
   'v8::Isolate',
   'v8::Local',
   'v8::Object', 'v8::ObjectTemplate',

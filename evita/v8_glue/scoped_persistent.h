@@ -10,7 +10,7 @@ namespace v8_glue {
 template <typename ObjectType>
 class ScopedPersistent final {
  public:
-  ScopedPersistent(v8::Isolate* isolate, v8::Handle<ObjectType> handle)
+  ScopedPersistent(v8::Isolate* isolate, v8::Local<ObjectType> handle)
       : handle_(isolate, handle) {}
 
   ScopedPersistent() {}
@@ -20,11 +20,11 @@ class ScopedPersistent final {
   const v8::Persistent<ObjectType>* operator->() const { return &handle_; }
   v8::Persistent<ObjectType>* operator->() { return &handle_; }
 
-  bool operator==(v8::Handle<ObjectType> handle) const {
+  bool operator==(v8::Local<ObjectType> handle) const {
     return handle == handle_;
   }
 
-  bool operator!=(v8::Handle<ObjectType> handle) const {
+  bool operator!=(v8::Local<ObjectType> handle) const {
     return handle != handle_;
   }
 
@@ -32,7 +32,7 @@ class ScopedPersistent final {
     return v8::Local<ObjectType>::New(isolate, handle_);
   }
 
-  void Reset(v8::Isolate* isolate, v8::Handle<ObjectType> handle) {
+  void Reset(v8::Isolate* isolate, v8::Local<ObjectType> handle) {
     handle_.Reset(isolate, handle);
   }
 

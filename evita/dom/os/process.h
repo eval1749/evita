@@ -23,7 +23,7 @@ class Process final : public v8_glue::Scriptable<Process, AbstractFile> {
  private:
   friend class bindings::ProcessClass;
 
-  static v8::Handle<v8::Promise> Open(const base::string16& command_line);
+  static v8::Local<v8::Promise> Open(const base::string16& command_line);
 
   DISALLOW_COPY_AND_ASSIGN(Process);
 };

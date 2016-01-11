@@ -57,7 +57,7 @@ class TextRange final : public v8_glue::Scriptable<TextRange> {
       int start,
       int end);
   void SetSpelling(int spelling) const;
-  void SetStyle(v8::Handle<v8::Object> style_dict) const;
+  void SetStyle(v8::Local<v8::Object> style_dict) const;
   void SetSyntax(const base::string16& syntax) const;
 
  private:

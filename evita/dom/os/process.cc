@@ -12,8 +12,8 @@
 namespace gin {
 template <>
 struct Converter<domapi::ProcessId> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    domapi::ProcessId context_id) {
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   domapi::ProcessId context_id) {
     return gin::ConvertToV8(isolate, new dom::Process(context_id));
   }
 };
@@ -29,7 +29,7 @@ Process::Process(domapi::IoContextId context_id) : ScriptableBase(context_id) {}
 
 Process::~Process() {}
 
-v8::Handle<v8::Promise> Process::Open(const base::string16& command_line) {
+v8::Local<v8::Promise> Process::Open(const base::string16& command_line) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::OpenProcess,

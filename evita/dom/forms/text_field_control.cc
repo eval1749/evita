@@ -52,8 +52,8 @@ void TextFieldControl::DidChangeSelection() {
   NotifyControlChange();
 }
 
-v8::Handle<v8::Promise> TextFieldControl::MapPointToOffset(float x,
-                                                           float y) const {
+v8::Local<v8::Promise> TextFieldControl::MapPointToOffset(float x,
+                                                          float y) const {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::ViewDelegate::MapTextFieldPointToOffset,

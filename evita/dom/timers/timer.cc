@@ -84,7 +84,7 @@ void Timer::Stop() {
   TimerList::instance()->Unregister(this);
 }
 
-void Timer::StartInternal(int delay_ms, v8::Handle<v8::Function> callback) {
+void Timer::StartInternal(int delay_ms, v8::Local<v8::Function> callback) {
   auto const isolate = ScriptHost::instance()->isolate();
   callback_.Reset(isolate, callback);
   TimerList::instance()->Register(this);

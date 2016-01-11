@@ -50,7 +50,7 @@ class TextWindow final
                              text::Offset position,
                              int count,
                              const domapi::FloatPoint& point);
-  v8::Handle<v8::Promise> HitTestPoint(float x, float y);
+  v8::Local<v8::Promise> HitTestPoint(float x, float y);
   domapi::FloatRect HitTestTextPosition(text::Offset position);
   void MakeSelectionVisible();
   TextWindow* NewTextWindow(TextRange* range);

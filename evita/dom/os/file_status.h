@@ -15,8 +15,8 @@ struct FileStatus;
 namespace gin {
 template <>
 struct Converter<domapi::FileStatus> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const domapi::FileStatus& data);
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   const domapi::FileStatus& data);
 };
 }  // namespace gin
 

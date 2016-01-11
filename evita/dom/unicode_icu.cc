@@ -200,7 +200,7 @@ static_assert(sizeof(kCategoryNames) / sizeof(*kCategoryNames) ==
 //  category: Unicode.Category,
 //  script: Unicode.Script,
 // }>
-v8::Handle<v8::Object> CreateUnicode(v8::Isolate* isolate) {
+v8::Local<v8::Object> CreateUnicode(v8::Isolate* isolate) {
   DCHECK_EQ_CHAR_1(kBidiClassNames, U_LEFT_TO_RIGHT, "L");
   DCHECK_EQ_CHAR_1(kBidiClassNames, U_RIGHT_TO_LEFT, "R");
   DCHECK_EQ_CHAR_2(kBidiClassNames, U_EUROPEAN_NUMBER, "EN");
@@ -346,7 +346,7 @@ class Unicode final {
   }
   ~Unicode() = default;
 
-  v8::Handle<v8::Object> Get(v8::Isolate* isolate) {
+  v8::Local<v8::Object> Get(v8::Isolate* isolate) {
     return v8::Local<v8::Object>::New(isolate, *unicode_);
   }
 
@@ -358,7 +358,7 @@ class Unicode final {
 
 }  // namespace
 
-v8::Handle<v8::Object> GetUnicodeObject(v8::Isolate* isolate) {
+v8::Local<v8::Object> GetUnicodeObject(v8::Isolate* isolate) {
   CR_DEFINE_STATIC_LOCAL(Unicode, static_unicode, (isolate));
   return static_unicode.Get(isolate);
 }

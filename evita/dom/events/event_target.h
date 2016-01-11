@@ -26,7 +26,7 @@ namespace bindings {
 class EventTargetClass;
 }
 
-typedef v8::Handle<v8::Object> EventListener;
+typedef v8::Local<v8::Object> EventListener;
 
 //////////////////////////////////////////////////////////////////////
 //

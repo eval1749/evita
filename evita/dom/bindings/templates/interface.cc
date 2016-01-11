@@ -298,7 +298,7 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
 {% endfor %}
 // v8_glue::WrapperInfo
 {% if has_static_member or constructor.dispatch != 'none' %}
-v8::Handle<v8::FunctionTemplate>
+v8::Local<v8::FunctionTemplate>
 {{class_name}}::CreateConstructorTemplate(v8::Isolate* isolate) {
 {###############################
  #
@@ -356,9 +356,9 @@ v8::Handle<v8::FunctionTemplate>
  #
  # Interface template
  #}
-v8::Handle<v8::ObjectTemplate> {{class_name}}:: SetupInstanceTemplate(
+v8::Local<v8::ObjectTemplate> {{class_name}}:: SetupInstanceTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> templ) {
+      v8::Local<v8::ObjectTemplate> templ) {
 {% for attribute in attributes if not attribute.is_static %}
 {% if loop.first %}
   // attributes

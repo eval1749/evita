@@ -37,7 +37,7 @@ void ConstructorCallbackForNoConstructor(
   }
 }
 
-base::string16 V8ToString(v8::Handle<v8::Value> value) {
+base::string16 V8ToString(v8::Local<v8::Value> value) {
   v8::String::Value string_value(value);
   if (!string_value.length())
     return base::string16();
@@ -61,14 +61,14 @@ bool WrapperInfo::is_descendant_or_self_of(const WrapperInfo* other) const {
   return false;
 }
 
-v8::Handle<v8::FunctionTemplate> WrapperInfo::CreateConstructorTemplate(
+v8::Local<v8::FunctionTemplate> WrapperInfo::CreateConstructorTemplate(
     v8::Isolate* isolate) {
   auto const templ = v8::FunctionTemplate::New(isolate);
   templ->SetCallHandler(ConstructorCallbackForNoConstructor);
   return templ;
 }
 
-v8::Handle<v8::ObjectTemplate> WrapperInfo::CreateInstanceTemplate(
+v8::Local<v8::ObjectTemplate> WrapperInfo::CreateInstanceTemplate(
     v8::Isolate* isolate) {
   if (!class_name())
     return v8::ObjectTemplate::New(isolate);
@@ -76,7 +76,7 @@ v8::Handle<v8::ObjectTemplate> WrapperInfo::CreateInstanceTemplate(
   return SetupInstanceTemplate(isolate, class_templ->PrototypeTemplate());
 }
 
-WrapperInfo* WrapperInfo::From(v8::Handle<v8::Object> object) {
+WrapperInfo* WrapperInfo::From(v8::Local<v8::Object> object) {
   if (object->InternalFieldCount() != gin::kNumberOfInternalFields)
     return nullptr;
   // TODO(eval1749): We get an unexpected object which doesn't have
@@ -90,7 +90,7 @@ WrapperInfo* WrapperInfo::From(v8::Handle<v8::Object> object) {
 }
 
 // Get or create FunctionTemplate for constructor.
-v8::Handle<v8::FunctionTemplate> WrapperInfo::GetOrCreateConstructorTemplate(
+v8::Local<v8::FunctionTemplate> WrapperInfo::GetOrCreateConstructorTemplate(
     v8::Isolate* isolate) {
   auto const data = gin::PerIsolateData::From(isolate);
   auto present = data->GetFunctionTemplate(gin_wrapper_info());
@@ -121,7 +121,7 @@ v8::Handle<v8::FunctionTemplate> WrapperInfo::GetOrCreateConstructorTemplate(
   return templ;
 }
 
-v8::Handle<v8::ObjectTemplate> WrapperInfo::GetOrCreateInstanceTemplate(
+v8::Local<v8::ObjectTemplate> WrapperInfo::GetOrCreateInstanceTemplate(
     v8::Isolate* isolate) {
   auto const data = gin::PerIsolateData::From(isolate);
   auto present = data->GetObjectTemplate(gin_wrapper_info());
@@ -134,17 +134,17 @@ v8::Handle<v8::ObjectTemplate> WrapperInfo::GetOrCreateInstanceTemplate(
   return templ;
 }
 
-v8::Handle<v8::FunctionTemplate> WrapperInfo::Install(
+v8::Local<v8::FunctionTemplate> WrapperInfo::Install(
     v8::Isolate* isolate,
-    v8::Handle<v8::ObjectTemplate> global) {
+    v8::Local<v8::ObjectTemplate> global) {
   auto constructor = GetOrCreateConstructorTemplate(isolate);
   global->Set(gin::StringToV8(isolate, class_name_), constructor);
   return constructor;
 }
 
-v8::Handle<v8::ObjectTemplate> WrapperInfo::SetupInstanceTemplate(
+v8::Local<v8::ObjectTemplate> WrapperInfo::SetupInstanceTemplate(
     v8::Isolate*,
-    v8::Handle<v8::ObjectTemplate> templ) {
+    v8::Local<v8::ObjectTemplate> templ) {
   return templ;
 }
 
@@ -165,7 +165,7 @@ void WrapperInfo::ThrowArityError(v8::Isolate* isolate,
 
 void WrapperInfo::ThrowArgumentError(v8::Isolate* isolate,
                                      const char* expected_type,
-                                     v8::Handle<v8::Value> value,
+                                     v8::Local<v8::Value> value,
                                      int index) {
   isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
       isolate, base::StringPrintf("Expect argument[%d] as %s but %ls", index,
@@ -174,7 +174,7 @@ void WrapperInfo::ThrowArgumentError(v8::Isolate* isolate,
 
 void WrapperInfo::ThrowReceiverError(v8::Isolate* isolate,
                                      const char* expected_type,
-                                     v8::Handle<v8::Value> value) {
+                                     v8::Local<v8::Value> value) {
   isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
       isolate, base::StringPrintf("Expect receiver as %s but %ls.",
                                   expected_type, V8ToString(value).c_str()))));

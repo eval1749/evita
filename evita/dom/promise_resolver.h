@@ -27,7 +27,7 @@ class PromiseResolver final
   ~PromiseResolver();
 
   template <typename ResolveType, typename RejectType>
-  static v8::Handle<v8::Promise> Call(
+  static v8::Local<v8::Promise> Call(
       const tracked_objects::Location& from_here,
       const base::Callback<
           void(const domapi::Promise<ResolveType, RejectType>&)> closure);
@@ -46,8 +46,8 @@ class PromiseResolver final
 
   v8_glue::Runner* runner() const { return runner_.get(); }
 
-  void DoReject(v8::Handle<v8::Value> reason);
-  void DoResolve(v8::Handle<v8::Value> value);
+  void DoReject(v8::Local<v8::Value> reason);
+  void DoResolve(v8::Local<v8::Value> value);
 
   tracked_objects::Location from_here_;
   v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
@@ -58,7 +58,7 @@ class PromiseResolver final
 };
 
 template <typename T, typename U>
-v8::Handle<v8::Promise> PromiseResolver::Call(
+v8::Local<v8::Promise> PromiseResolver::Call(
     const tracked_objects::Location& from_here,
     const base::Callback<void(const domapi::Promise<T, U>&)> closure) {
   auto const runner = ScriptHost::instance()->runner();

@@ -11,8 +11,8 @@
 namespace gin {
 template <>
 struct Converter<domapi::IoError> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    const domapi::IoError& error);
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   const domapi::IoError& error);
 };
 }  // namespace gin
 

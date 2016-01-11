@@ -23,7 +23,7 @@ namespace {
 class FrameRequestCallbackWrapper {
  public:
   FrameRequestCallbackWrapper(v8::Isolate* isolate,
-                              v8::Handle<v8::Function> callback);
+                              v8::Local<v8::Function> callback);
   ~FrameRequestCallbackWrapper() = default;
 
   void Run(const base::TimeTicks& time);
@@ -36,7 +36,7 @@ class FrameRequestCallbackWrapper {
 
 FrameRequestCallbackWrapper::FrameRequestCallbackWrapper(
     v8::Isolate* isolate,
-    v8::Handle<v8::Function> callback) {
+    v8::Local<v8::Function> callback) {
   callback_.Reset(isolate, callback);
 }
 
@@ -61,7 +61,7 @@ void Editor::CancelAnimationFrame(int handle) {
   ScriptHost::instance()->scheduler()->CancelAnimationFrame(handle);
 }
 
-int Editor::RequestAnimationFrame(v8::Handle<v8::Function> callback) {
+int Editor::RequestAnimationFrame(v8::Local<v8::Function> callback) {
   auto const isolate = ScriptHost::instance()->isolate();
   auto request = std::make_unique<AnimationFrameCallback>(
       FROM_HERE, base::Bind(&FrameRequestCallbackWrapper::Run,

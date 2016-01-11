@@ -30,7 +30,7 @@ class RunnerTest : public ::testing::Test {
   ~RunnerTest() = default;
 
  public:
-  v8::Handle<v8::Object> global() const { return runner_.global(); }
+  v8::Local<v8::Object> global() const { return runner_.global(); }
 
  public:
   v8::Isolate* isolate() { return isolate_holder_.isolate(); }
@@ -39,12 +39,12 @@ class RunnerTest : public ::testing::Test {
   v8_glue::Runner* runner() { return &runner_; }
 
  public:
-  v8::Handle<v8::Value> Get(const std::string& key) {
+  v8::Local<v8::Value> Get(const std::string& key) {
     return runner_.global()->Get(gin::StringToV8(isolate(), key));
   }
 };
 
-base::string16 V8ToString(v8::Handle<v8::Value> value) {
+base::string16 V8ToString(v8::Local<v8::Value> value) {
   v8::String::Value string_value(value);
   if (!string_value.length())
     return base::string16();

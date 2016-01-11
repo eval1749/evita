@@ -15,7 +15,7 @@
 
 namespace gin {
 bool Converter<dom::DataTransferData*>::FromV8(v8::Isolate* isolate,
-                                               v8::Handle<v8::Value> val,
+                                               v8::Local<v8::Value> val,
                                                dom::DataTransferData** out) {
   base::string16 string;
   if (ConvertFromV8(isolate, val, &string)) {

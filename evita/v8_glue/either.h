@@ -34,14 +34,13 @@ struct Either {
 namespace gin {
 template <typename Left, typename Right>
 struct Converter<v8_glue::Either<Left, Right>> {
-  static v8::Handle<v8::Value> ToV8(
-      v8::Isolate* isolate,
-      const v8_glue::Either<Left, Right>& either) {
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   const v8_glue::Either<Left, Right>& either) {
     return either.is_left ? ConvertToV8(isolate, either.left)
                           : ConvertToV8(isolate, either.right);
   }
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      v8_glue::Either<Left, Right>* out) {
     out->is_left = Converter<Left>::FromV8(isolate, val, &out->left);
     return out->is_left || Converter<Right>::FromV8(isolate, val, &out->right);

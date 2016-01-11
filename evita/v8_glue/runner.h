@@ -30,7 +30,7 @@ class Runner : public gin::ContextHolder {
   };
 
  public:
-  typedef std::vector<v8::Handle<v8::Value>> Args;
+  typedef std::vector<v8::Local<v8::Value>> Args;
 
   class EscapableHandleScope final {
    public:
@@ -73,26 +73,26 @@ class Runner : public gin::ContextHolder {
   ~Runner();
 
   static Runner* current_runner(v8::Isolate* isolate);
-  v8::Handle<v8::Object> global() const;
+  v8::Local<v8::Object> global() const;
 
-  v8::Handle<v8::Value> Call(v8::Handle<v8::Value> callee,
-                             v8::Handle<v8::Value> receiver,
-                             const Args& args);
-  v8::Handle<v8::Value> CallAsConstructor(v8::Handle<v8::Value> callee,
-                                          const Args& args);
+  v8::Local<v8::Value> Call(v8::Local<v8::Value> callee,
+                            v8::Local<v8::Value> receiver,
+                            const Args& args);
+  v8::Local<v8::Value> CallAsConstructor(v8::Local<v8::Value> callee,
+                                         const Args& args);
   template <typename... Params>
-  v8::Handle<v8::Value> Call(v8::Handle<v8::Value> callee,
-                             v8::Handle<v8::Value> receiver,
-                             Params... params);
+  v8::Local<v8::Value> Call(v8::Local<v8::Value> callee,
+                            v8::Local<v8::Value> receiver,
+                            Params... params);
   template <typename... Params>
-  v8::Handle<v8::Value> CallAsConstructor(v8::Handle<v8::Value> callee,
-                                          Params... params);
-  v8::Handle<v8::Value> GetGlobalProperty(const base::StringPiece& name);
+  v8::Local<v8::Value> CallAsConstructor(v8::Local<v8::Value> callee,
+                                         Params... params);
+  v8::Local<v8::Value> GetGlobalProperty(const base::StringPiece& name);
   base::WeakPtr<Runner> GetWeakPtr();
   void HandleTryCatch(const v8::TryCatch& try_catch);
-  v8::Handle<v8::Value> Run(const base::string16& script_text,
-                            const base::string16& script_name);
-  v8::Handle<v8::Value> Run(v8::Handle<v8::Script> script);
+  v8::Local<v8::Value> Run(const base::string16& script_text,
+                           const base::string16& script_name);
+  v8::Local<v8::Value> Run(v8::Local<v8::Script> script);
 
  private:
   friend class EscapableHandleScope;
@@ -103,8 +103,8 @@ class Runner : public gin::ContextHolder {
   // Compile |script_text| and returns |v8::Script| handle if succeeded,
   // otherwise returns empty handle and calls |UnhandledException| of
   // |delegate_|.
-  v8::Handle<v8::Script> Compile(const base::string16& script_text,
-                                 const base::string16& script_name);
+  v8::Local<v8::Script> Compile(const base::string16& script_text,
+                                const base::string16& script_name);
 
   int call_depth_;
   RunnerDelegate* delegate_;
@@ -117,15 +117,15 @@ class Runner : public gin::ContextHolder {
 };
 
 template <typename... Params>
-v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
-                                   v8::Handle<v8::Value> receiver,
-                                   Params... params) {
+v8::Local<v8::Value> Runner::Call(v8::Local<v8::Value> callee,
+                                  v8::Local<v8::Value> receiver,
+                                  Params... params) {
   return Call(callee, receiver, Args{params...});
 }
 
 template <typename... Params>
-v8::Handle<v8::Value> Runner::CallAsConstructor(v8::Handle<v8::Value> callee,
-                                                Params... params) {
+v8::Local<v8::Value> Runner::CallAsConstructor(v8::Local<v8::Value> callee,
+                                               Params... params) {
   return CallAsConstructor(callee, Args{params...});
 }
 

@@ -39,7 +39,7 @@ class TextFieldControl final
   // of |new_value|.
   void set_value(const base::string16& new_value);
 
-  v8::Handle<v8::Promise> MapPointToOffset(float x, float y) const;
+  v8::Local<v8::Promise> MapPointToOffset(float x, float y) const;
 
   base::string16 value_;
   gc::Member<TextFieldSelection> selection_;

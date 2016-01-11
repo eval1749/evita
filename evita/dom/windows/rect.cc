@@ -8,7 +8,7 @@
 namespace gin {
 
 bool Converter<domapi::FloatRect>::FromV8(v8::Isolate* isolate,
-                                          v8::Handle<v8::Value> val,
+                                          v8::Local<v8::Value> val,
                                           domapi::FloatRect* out) {
   if (val.IsEmpty() || !val->IsObject())
     return false;
@@ -35,13 +35,13 @@ bool Converter<domapi::FloatRect>::FromV8(v8::Isolate* isolate,
   return true;
 }
 
-v8::Handle<v8::Value> Converter<domapi::FloatRect>::ToV8(
+v8::Local<v8::Value> Converter<domapi::FloatRect>::ToV8(
     v8::Isolate* isolate,
     const domapi::FloatRect& rect) {
   auto const context = isolate->GetCurrentContext();
   auto const rect_ctor =
       context->Global()->Get(dom::v8Strings::Rect.Get(isolate));
-  v8::Handle<v8::Value> argv[]{
+  v8::Local<v8::Value> argv[]{
       ConvertToV8(isolate, rect.x()), ConvertToV8(isolate, rect.y()),
       ConvertToV8(isolate, rect.width()), ConvertToV8(isolate, rect.height()),
   };

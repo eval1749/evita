@@ -43,7 +43,7 @@ class Timer : public v8_glue::Scriptable<Timer> {
   void DidFireTimer();
   void RunCallback();
   void Stop();
-  void StartInternal(int delay_ms, v8::Handle<v8::Function> callback);
+  void StartInternal(int delay_ms, v8::Local<v8::Function> callback);
 
   v8_glue::ScopedPersistent<v8::Function> callback_;
   std::unique_ptr<base::Timer> timer_;

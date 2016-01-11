@@ -10,7 +10,7 @@
 
 namespace dom {
 
-base::string16 V8ToString(v8::Handle<v8::Value> value);
+base::string16 V8ToString(v8::Local<v8::Value> value);
 
 Dictionary::Dictionary() {}
 
@@ -20,7 +20,7 @@ v8::Isolate* Dictionary::isolate() const {
   return v8::Isolate::GetCurrent();
 }
 
-bool Dictionary::Init(v8::Isolate* isolate, v8::Handle<v8::Value> dict) {
+bool Dictionary::Init(v8::Isolate* isolate, v8::Local<v8::Value> dict) {
   if (dict.IsEmpty())
     return true;
   if (!dict->IsObject())

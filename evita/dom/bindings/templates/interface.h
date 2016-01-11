@@ -99,12 +99,12 @@ class {{class_name}} final :
 
   // v8_glue::WrapperInfo
 {% if has_static_member or constructor.dispatch != 'none' %}
-  private: virtual v8::Handle<v8::FunctionTemplate>
+  private: virtual v8::Local<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override;
 {% endif %}
 {% if need_instance_template %}
-  private: virtual v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
-      v8::Isolate* isolate, v8::Handle<v8::ObjectTemplate> templ) override;
+  private: virtual v8::Local<v8::ObjectTemplate> SetupInstanceTemplate(
+      v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> templ) override;
 {% endif %}
 
   DISALLOW_COPY_AND_ASSIGN({{class_name}});

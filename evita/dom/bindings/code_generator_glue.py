@@ -167,33 +167,33 @@ IDL_TO_CPP_TYPE_MAP = {
     'Alter': CppType('Alter'),
     'ArrayBufferView': CppType('gin::ArrayBufferView', is_by_value=False),
     'DataTransferData': CppType('DataTransferData', is_pointer=True),
-    'EventListener': CppType('v8::Handle<v8::Object>'),
+    'EventListener': CppType('v8::Local<v8::Object>'),
     'LineAndColumn': CppType('text::LineAndColumn'),
     # For NodeHandle.getInlineStyle
-    'Map': CppType('v8::Handle<v8::Map>'),
+    'Map': CppType('v8::Local<v8::Map>'),
     # For Window.prototype.compute_
     'Point': CppType('domapi::FloatPoint'),
     # For Window.prototype.compute_
     'Rect': CppType('domapi::FloatRect'),
     # For Editor.runScript
-    'RunScriptResult': CppType('v8::Handle<v8::Object>'),
+    'RunScriptResult': CppType('v8::Local<v8::Object>'),
     # For Editor.localizeText
-    'StringDict': CppType('v8::Handle<v8::Object>'),
-    'TextStyle': CppType('v8::Handle<v8::Object>'),
+    'StringDict': CppType('v8::Local<v8::Object>'),
+    'TextStyle': CppType('v8::Local<v8::Object>'),
     'TextOffset': CppType('text::Offset'),
     'Unit': CppType('Unit'),
 
     # V8 types
-    'Function': CppType('v8::Handle<v8::Function>'),
-    'Object': CppType('v8::Handle<v8::Object>'),
-    'Promise': CppType('v8::Handle<v8::Promise>'),
+    'Function': CppType('v8::Local<v8::Function>'),
+    'Object': CppType('v8::Local<v8::Object>'),
+    'Promise': CppType('v8::Local<v8::Promise>'),
 
     # IDL types
     'DOMString': CppType('base::string16', is_by_value=False),
     # DOMTimeStamp is defined in "core/dom/CommonDefinitions.idl".
     'DOMHighResTimeStamp': CppType('double'),
     'DOMTimeStamp': CppType('TimeStamp'),
-    'any': CppType('v8::Handle<v8::Value>'),
+    'any': CppType('v8::Local<v8::Value>'),
     'boolean': CppType('bool'),
     'byte': CppType('uint8_t'),
     'double': CppType('double'),
@@ -237,7 +237,7 @@ def to_glue_type(idl_type):
         return GlueType(idl_type, type_name, is_struct=True)
 
     if should_be_callback(idl_type):
-        return GlueType(idl_type, 'v8::Handle<v8::Function>', is_struct=True)
+        return GlueType(idl_type, 'v8::Local<v8::Function>', is_struct=True)
 
     if idl_type.is_interface_type:
         assert idl_type.is_interface_type, idl_type

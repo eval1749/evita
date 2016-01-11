@@ -25,7 +25,7 @@ v8::Eternal<v8::Value> idle_deadline_object;
 //
 class IdleTaskWrapper {
  public:
-  IdleTaskWrapper(v8::Isolate* isolate, v8::Handle<v8::Function> callback);
+  IdleTaskWrapper(v8::Isolate* isolate, v8::Local<v8::Function> callback);
   ~IdleTaskWrapper() = default;
 
   void Run();
@@ -37,7 +37,7 @@ class IdleTaskWrapper {
 };
 
 IdleTaskWrapper::IdleTaskWrapper(v8::Isolate* isolate,
-                                 v8::Handle<v8::Function> callback) {
+                                 v8::Local<v8::Function> callback) {
   callback_.Reset(isolate, callback);
 }
 
@@ -65,7 +65,7 @@ void Editor::CancelIdleCallback(int handle) {
   ScriptHost::instance()->scheduler()->CancelIdleTask(handle);
 }
 
-int Editor::RequestIdleCallback(v8::Handle<v8::Function> callback,
+int Editor::RequestIdleCallback(v8::Local<v8::Function> callback,
                                 const IdleRequestOptions& options) {
   auto const timeout = options.timeout();
   auto const isolate = ScriptHost::instance()->isolate();
@@ -80,7 +80,7 @@ int Editor::RequestIdleCallback(v8::Handle<v8::Function> callback,
                run_time));
 }
 
-int Editor::RequestIdleCallback(v8::Handle<v8::Function> callback) {
+int Editor::RequestIdleCallback(v8::Local<v8::Function> callback) {
   IdleRequestOptions options;
   options.set_timeout(0);
   return RequestIdleCallback(callback, options);

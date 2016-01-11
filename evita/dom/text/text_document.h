@@ -48,7 +48,7 @@ class TextDocument final
   const base::string16& spelling_at(text::Offset offset) const;
   // Returns syntax at |offset|.
   const base::string16& syntax_at(text::Offset offset) const;
-  v8::Handle<v8::Object> style_at(text::Offset position) const;
+  v8::Local<v8::Object> style_at(text::Offset position) const;
 
   bool CheckCanChange() const;
   void ClearUndo();
@@ -56,9 +56,9 @@ class TextDocument final
   text::LineAndColumn GetLineAndColumn(text::Offset offset) const;
   bool IsValidPosition(text::Offset offset) const;
   bool IsValidRange(text::Offset start, text::Offset end) const;
-  v8::Handle<v8::Value> Match(RegularExpression* regexp,
-                              text::Offset start,
-                              text::Offset end);
+  v8::Local<v8::Value> Match(RegularExpression* regexp,
+                             text::Offset start,
+                             text::Offset end);
   text::Offset Redo(text::Offset position);
   void RenameTo(const base::string16& new_name);
   void SetSpelling(text::Offset start, text::Offset end, int spelling);

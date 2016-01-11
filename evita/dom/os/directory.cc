@@ -13,8 +13,8 @@
 namespace gin {
 template <>
 struct Converter<domapi::DirectoryId> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    domapi::DirectoryId context_id) {
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   domapi::DirectoryId context_id) {
     return gin::ConvertToV8(isolate, new dom::Directory(context_id));
   }
 };
@@ -33,7 +33,7 @@ Directory::~Directory() {
   Close();
 }
 
-v8::Handle<v8::Promise> Directory::Close() {
+v8::Local<v8::Promise> Directory::Close() {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::CloseDirectory,
@@ -41,7 +41,7 @@ v8::Handle<v8::Promise> Directory::Close() {
                  context_id_));
 }
 
-v8::Handle<v8::Promise> Directory::Open(const base::string16& root_path) {
+v8::Local<v8::Promise> Directory::Open(const base::string16& root_path) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::OpenDirectory,
@@ -49,7 +49,7 @@ v8::Handle<v8::Promise> Directory::Open(const base::string16& root_path) {
                  root_path));
 }
 
-v8::Handle<v8::Promise> Directory::Read(int num_read) {
+v8::Local<v8::Promise> Directory::Read(int num_read) {
   return PromiseResolver::Call(
       FROM_HERE,
       base::Bind(&domapi::IoDelegate::ReadDirectory,

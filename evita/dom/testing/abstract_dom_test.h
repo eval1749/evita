@@ -35,7 +35,7 @@ class ScriptHost;
 //
 class AbstractDomTest : public ::testing::Test {
  protected:
-  typedef std::vector<v8::Handle<v8::Value>> Argv;
+  typedef std::vector<v8::Local<v8::Value>> Argv;
 
   class RunnerScope final {
    public:
@@ -88,7 +88,7 @@ class AbstractDomTest : public ::testing::Test {
                          int line_number);
   virtual void PopulateGlobalTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> global_tempalte);
+      v8::Local<v8::ObjectTemplate> global_tempalte);
 
   void RunFile(const base::FilePath& path);
   void RunFile(const std::vector<base::StringPiece>& components);

@@ -48,8 +48,8 @@ class DataTransferItem final : public v8_glue::Scriptable<DataTransferItem> {
 namespace gin {
 template <>
 struct Converter<dom::DataTransferData::Kind> {
-  static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate,
-                                    dom::DataTransferData::Kind kind);
+  static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
+                                   dom::DataTransferData::Kind kind);
 };
 }  // namespace gin
 

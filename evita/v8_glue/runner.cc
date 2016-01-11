@@ -102,19 +102,19 @@ Runner* Runner::current_runner(v8::Isolate* isolate) {
   return PerIsolateData::From(isolate)->current_runner();
 }
 
-v8::Handle<v8::Object> Runner::global() const {
+v8::Local<v8::Object> Runner::global() const {
   return context()->Global();
 }
 
-v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
-                                   v8::Handle<v8::Value> receiver,
-                                   const Args& args) {
+v8::Local<v8::Value> Runner::Call(v8::Local<v8::Value> callee,
+                                  v8::Local<v8::Value> receiver,
+                                  const Args& args) {
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
   base::AutoReset<int> call_depth(&call_depth_, call_depth_ + 1);
   if (!CheckCallDepth())
-    return v8::Handle<v8::Value>();
+    return v8::Local<v8::Value>();
   delegate_->WillRunScript(this);
   v8::MaybeLocal<v8::Value> maybe_value;
   v8::TryCatch try_catch;
@@ -122,17 +122,17 @@ v8::Handle<v8::Value> Runner::Call(v8::Handle<v8::Value> callee,
     TRACE_EVENT0("script", "Runner::Call");
     maybe_value = callee->ToObject()->CallAsFunction(
         context(), receiver, static_cast<int>(args.size()),
-        const_cast<v8::Handle<v8::Value>*>(args.data()));
+        const_cast<v8::Local<v8::Value>*>(args.data()));
   }
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
   if (maybe_value.IsEmpty())
-    return v8::Handle<v8::Value>();
+    return v8::Local<v8::Value>();
   return maybe_value.ToLocalChecked();
 }
 
-v8::Handle<v8::Value> Runner::CallAsConstructor(v8::Handle<v8::Value> callee,
-                                                const Args& args) {
+v8::Local<v8::Value> Runner::CallAsConstructor(v8::Local<v8::Value> callee,
+                                               const Args& args) {
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
@@ -143,12 +143,12 @@ v8::Handle<v8::Value> Runner::CallAsConstructor(v8::Handle<v8::Value> callee,
     TRACE_EVENT0("script", "Runner::CallAsConstructor");
     maybe_value = callee->ToObject()->CallAsConstructor(
         context(), static_cast<int>(args.size()),
-        const_cast<v8::Handle<v8::Value>*>(args.data()));
+        const_cast<v8::Local<v8::Value>*>(args.data()));
   }
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
   if (maybe_value.IsEmpty())
-    return v8::Handle<v8::Value>();
+    return v8::Local<v8::Value>();
   return maybe_value.ToLocalChecked();
 }
 
@@ -161,8 +161,8 @@ bool Runner::CheckCallDepth() {
   return false;
 }
 
-v8::Handle<v8::Script> Runner::Compile(const base::string16& script_text,
-                                       const base::string16& script_name) {
+v8::Local<v8::Script> Runner::Compile(const base::string16& script_text,
+                                      const base::string16& script_name) {
   v8::TryCatch try_catch;
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate(), script_name));
   v8::ScriptCompiler::Source source(gin::StringToV8(isolate(), script_text),
@@ -170,12 +170,12 @@ v8::Handle<v8::Script> Runner::Compile(const base::string16& script_text,
   auto script = v8::ScriptCompiler::Compile(context(), &source);
   if (script.IsEmpty()) {
     HandleTryCatch(try_catch);
-    return v8::Handle<v8::Script>();
+    return v8::Local<v8::Script>();
   }
   return script.ToLocalChecked();
 }
 
-v8::Handle<v8::Value> Runner::GetGlobalProperty(const base::StringPiece& name) {
+v8::Local<v8::Value> Runner::GetGlobalProperty(const base::StringPiece& name) {
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
@@ -192,24 +192,24 @@ void Runner::HandleTryCatch(const v8::TryCatch& try_catch) {
   delegate_->UnhandledException(this, try_catch);
 }
 
-v8::Handle<v8::Value> Runner::Run(const base::string16& script_text,
-                                  const base::string16& script_name) {
+v8::Local<v8::Value> Runner::Run(const base::string16& script_text,
+                                 const base::string16& script_name) {
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
   auto const script = Compile(script_text, script_name);
   if (script.IsEmpty())
-    return v8::Handle<v8::Value>();
+    return v8::Local<v8::Value>();
   return Run(script);
 }
 
-v8::Handle<v8::Value> Runner::Run(v8::Handle<v8::Script> script) {
+v8::Local<v8::Value> Runner::Run(v8::Local<v8::Script> script) {
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
   base::AutoReset<int> call_depth(&call_depth_, call_depth_ + 1);
   if (!CheckCallDepth())
-    return v8::Handle<v8::Value>();
+    return v8::Local<v8::Value>();
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
   auto const value = script->Run();

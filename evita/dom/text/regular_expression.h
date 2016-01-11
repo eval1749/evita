@@ -34,9 +34,9 @@ class RegularExpression final : public v8_glue::Scriptable<RegularExpression> {
  public:
   ~RegularExpression() final;
 
-  v8::Handle<v8::Value> ExecuteOnTextDocument(TextDocument* document,
-                                              text::Offset start,
-                                              text::Offset end);
+  v8::Local<v8::Value> ExecuteOnTextDocument(TextDocument* document,
+                                             text::Offset start,
+                                             text::Offset end);
 
  private:
   friend class bindings::RegularExpressionClass;

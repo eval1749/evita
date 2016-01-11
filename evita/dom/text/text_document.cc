@@ -119,9 +119,9 @@ bool TextDocument::IsValidRange(text::Offset start, text::Offset end) const {
   return false;
 }
 
-v8::Handle<v8::Value> TextDocument::Match(RegularExpression* regexp,
-                                          text::Offset start,
-                                          text::Offset end) {
+v8::Local<v8::Value> TextDocument::Match(RegularExpression* regexp,
+                                         text::Offset start,
+                                         text::Offset end) {
   return regexp->ExecuteOnTextDocument(this, start, end);
 }
 

@@ -8,7 +8,7 @@
 #include "v8_strings.h"  // NOLINT(build/include)
 
 namespace gin {
-v8::Handle<v8::Value> Converter<domapi::IoError>::ToV8(
+v8::Local<v8::Value> Converter<domapi::IoError>::ToV8(
     v8::Isolate* isolate,
     const domapi::IoError& error) {
   auto const runner = v8_glue::Runner::current_runner(isolate);

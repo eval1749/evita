@@ -56,7 +56,7 @@ class SampleEventTargetClass final
     v8_glue::internal::FinishConstructCall(info, NewSampleEventTarget(info));
   }
 
-  v8::Handle<v8::FunctionTemplate> CreateConstructorTemplate(
+  v8::Local<v8::FunctionTemplate> CreateConstructorTemplate(
       v8::Isolate* isolate) final {
     return v8::FunctionTemplate::New(
         isolate, &SampleEventTargetClass::ConstructSampleEventTarget);
@@ -67,9 +67,9 @@ class SampleEventTargetClass final
     return new SampleEventTarget();
   }
 
-  v8::Handle<v8::ObjectTemplate> SetupInstanceTemplate(
+  v8::Local<v8::ObjectTemplate> SetupInstanceTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> base_templ) final {
+      v8::Local<v8::ObjectTemplate> base_templ) final {
     auto const templ = BaseClass::SetupInstanceTemplate(isolate, base_templ);
     templ->SetAccessorProperty(
         gin::StringToSymbol(isolate, "handled"),
@@ -157,7 +157,7 @@ class EventTargetTest : public AbstractDomTest {
  private:
   void PopulateGlobalTemplate(
       v8::Isolate* isolate,
-      v8::Handle<v8::ObjectTemplate> global_template) final {
+      v8::Local<v8::ObjectTemplate> global_template) final {
     v8_glue::Installer<SampleEventTarget>::Run(isolate, global_template);
   }
 

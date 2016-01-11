@@ -41,7 +41,7 @@ class TextMutationObserver final
   friend class bindings::TextMutationObserverClass;
   class Tracker;
 
-  explicit TextMutationObserver(v8::Handle<v8::Function> callback);
+  explicit TextMutationObserver(v8::Local<v8::Function> callback);
 
   void Disconnect();
   Tracker* GetTracker(TextDocument* document) const;

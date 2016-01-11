@@ -50,7 +50,7 @@ namespace gin {
 template <>
 struct Converter<dom::DataTransferData*> {
   static bool FromV8(v8::Isolate* isolate,
-                     v8::Handle<v8::Value> val,
+                     v8::Local<v8::Value> val,
                      dom::DataTransferData** out);
 };
 }  // namespace gin

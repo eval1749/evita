@@ -243,6 +243,9 @@ void PaintVisitor::VisitFlowBox(FlowBox* box) {
 }
 
 void PaintVisitor::VisitRootBox(RootBox* root) {
+  // TODO(eval1749): We should not paint background if document element, which
+  // size is viewport, has background.
+  BoxPaintScope paint_scope(this, *root);
   Visit(root->first_child());
   BoxEditor().DidPaint(root);
 }

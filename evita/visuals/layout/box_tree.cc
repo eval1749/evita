@@ -373,6 +373,7 @@ void BoxTree::Impl::UpdateIfNeeded() {
   }
   DCHECK(root_box_->is_changed() || root_box_->is_child_changed());
   BoxEditor().SetViewportSize(root_box_, style_tree_.media().viewport_size());
+  BoxEditor().SetStyle(root_box_, ComputedStyleOf(document_));
   Context context;
   context.is_updated = false;
   state_ = BoxTreeState::Updating;

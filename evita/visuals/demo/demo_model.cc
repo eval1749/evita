@@ -45,7 +45,6 @@ Document* LoadDocument() {
       NodeTreeBuilder()
           .Begin(L"main")
           .SetInlineStyle(*css::StyleBuilder()
-                               .SetBackgroundColor(css::Color(1, 1, 1))
                                .SetPaddingBottom(css::Length(kMargin))
                                .SetPaddingRight(css::Length(kMargin))
                                .SetPaddingTop(css::Length(kMargin))

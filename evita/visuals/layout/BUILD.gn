@@ -67,6 +67,8 @@ source_set("values") {
     "margin.h",
     "padding.cc",
     "padding.h",
+    "thickness.cc",
+    "thickness.h",
   ]
   deps = [
     "//base",

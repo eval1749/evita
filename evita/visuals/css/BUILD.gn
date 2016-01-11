@@ -34,8 +34,6 @@ source_set("css") {
     "style_sheet.h",
     "style_sheet_observer.cc",
     "style_sheet_observer.h",
-    "thickness.cc",
-    "thickness.h",
   ]
 
   public_deps = [

@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_CSS_THICKNESS_H_
-#define EVITA_VISUALS_CSS_THICKNESS_H_
+#ifndef EVITA_VISUALS_LAYOUT_THICKNESS_H_
+#define EVITA_VISUALS_LAYOUT_THICKNESS_H_
 
 #include <iosfwd>
 
 #include "evita/visuals/geometry/float_size.h"
 
 namespace visuals {
-namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -45,7 +44,6 @@ class Thickness {
 
 std::ostream& operator<<(std::ostream& ostream, const Thickness& thickness);
 
-}  // namespace css
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_CSS_THICKNESS_H_
+#endif  // EVITA_VISUALS_LAYOUT_THICKNESS_H_

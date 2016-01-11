@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 
-#include "evita/visuals/css/thickness.h"
+#include "evita/visuals/layout/thickness.h"
 
 namespace visuals {
 
@@ -44,8 +44,7 @@ class Padding final {
   bool HasValue() const { return thickness_.HasValue(); }
 
  private:
-  // TODO(eval1749): We should move |Thickness| to "layout/".
-  css::Thickness thickness_;
+  Thickness thickness_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Padding& padding);

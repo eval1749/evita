@@ -4,12 +4,11 @@
 
 #include <ostream>
 
-#include "evita/visuals/css/thickness.h"
+#include "evita/visuals/layout/thickness.h"
 
 #include "evita/visuals/geometry/float_size.h"
 
 namespace visuals {
-namespace css {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -67,5 +66,4 @@ std::ostream& operator<<(std::ostream& ostream, const Thickness& thickness) {
   return ostream << ')';
 }
 
-}  // namespace css
 }  // namespace visuals

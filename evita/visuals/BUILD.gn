@@ -51,6 +51,7 @@ test("tests") {
     "//evita/visuals/css:test_files",
     "//evita/visuals/display:test_files",
     "//evita/visuals/dom:test_files",
+    "//evita/visuals/fonts:test_files",
     "//evita/visuals/geometry:test_files",
     "//evita/visuals/layout:test_files",
     "//evita/visuals/paint:test_files",

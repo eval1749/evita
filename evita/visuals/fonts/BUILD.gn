@@ -2,8 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//testing/test.gni")
+
 source_set("fonts") {
   sources = [
+    "font_description.cc",
+    "font_description.h",
+    "font_description_builder.cc",
+    "font_description_builder.h",
     "text_format.cc",
     "text_format.h",
     "text_layout.cc",
@@ -25,5 +31,17 @@ source_set("fonts") {
     "//base",
     "//common",
     "//evita/visuals/geometry",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "font_description_test.cc",
+  ]
+
+  deps = [
+    ":fonts",
+    "//testing/gtest",
   ]
 }

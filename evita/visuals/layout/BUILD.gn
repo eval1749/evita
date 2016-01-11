@@ -63,6 +63,8 @@ source_set("values") {
   sources = [
     "margin.cc",
     "margin.h",
+    "padding.cc",
+    "padding.h",
   ]
   deps = [
     "//base",

@@ -47,7 +47,9 @@ Document* LoadDocument() {
           .SetInlineStyle(
               *css::StyleBuilder()
                    .SetBackground(css::Background(css::Color(1, 1, 1)))
-                   .SetPadding(css::Padding(kMargin, kMargin, kMargin, 0))
+                   .SetPaddingBottom(css::Length(kMargin))
+                   .SetPaddingRight(css::Length(kMargin))
+                   .SetPaddingTop(css::Length(kMargin))
                    .Build())
           .Begin(L"list", L"list")
           .End(L"list")
@@ -108,7 +110,10 @@ css::StyleSheet* LoadStyleSheet() {
                        std::move(css::StyleBuilder()
                                      .SetColor(css::Color(0, 0, 0))
                                      .SetDisplay(css::Display::Block())
-                                     .SetPadding(css::Padding(2, 5, 2, 5))
+                                     .SetPaddingTop(css::Length(2))
+                                     .SetPaddingRight(css::Length(5))
+                                     .SetPaddingBottom(css::Length(2))
+                                     .SetPaddingLeft(css::Length(5))
                                      .Build()));
   style_sheet->AddRule(
       L"main",

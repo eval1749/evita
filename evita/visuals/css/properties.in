@@ -18,7 +18,10 @@ margin-bottom: <length>
 margin-left: <length>
 margin-right: <length>
 margin-top: <length>
-padding: <padding>
+padding-bottom: <length>
+padding-left: <length>
+padding-right: <length>
+padding-top: <length>
 position: static relative absolute fixed
 right: auto <length> <percentage>
 top: auto <length> <percentage>

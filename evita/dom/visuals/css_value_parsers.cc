@@ -159,10 +159,6 @@ Maybe<CssLength> ParseLength(const base::StringPiece16& text) {
   return common::Just<CssLength>(CssLength(sign * f32));
 }
 
-Maybe<CssPadding> ParsePadding(const base::StringPiece16& text) {
-  return common::Nothing<CssPadding>();
-}
-
 Maybe<CssPercentage> ParsePercentage(const base::StringPiece16& text) {
   return common::Nothing<CssPercentage>();
 }
@@ -224,12 +220,6 @@ base::string16 UnparseColor(const CssColor& color) {
 
 base::string16 UnparseLength(const visuals::css::Length& value) {
   return base::StringPrintf(L"%f", value.value());
-}
-
-base::string16 UnparsePadding(const CssPadding& padding) {
-  if (!padding.HasValue())
-    return L"";
-  return L"NYI(padding)";
 }
 
 base::string16 UnparsePercentage(const visuals::css::Percentage& value) {

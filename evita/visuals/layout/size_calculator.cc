@@ -136,8 +136,9 @@ FloatSize IntrinsicSizeVisitor::SizeOfHorizontalFlowBox(
   for (const auto& child : flow_box.child_boxes()) {
     if (!child->position().is_static())
       continue;
+    const auto& child_padding = child->ComputePadding();
     const auto& child_size = ComputePreferredSize(*child) +
-                             child->border().size() + child->padding().size();
+                             child->border().size() + child_padding.size();
     size = FloatSize(size.width() + child_size.width(),
                      std::max(size.height(), child_size.height()));
   }
@@ -150,8 +151,9 @@ FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(const FlowBox& flow_box) {
   for (const auto& child : flow_box.child_boxes()) {
     if (!child->position().is_static())
       continue;
+    const auto& child_padding = child->ComputePadding();
     const auto& child_size = ComputePreferredSize(*child) +
-                             child->border().size() + child->padding().size();
+                             child->border().size() + child_padding.size();
     size = FloatSize(std::max(size.width(), child_size.width()),
                      size.height() + child_size.height());
   }

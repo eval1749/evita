@@ -32,14 +32,20 @@ Box::~Box() {
 }
 
 FloatRect Box::content_bounds() const {
-  return FloatRect(FloatPoint() + border_.top_left() + padding_.top_left(),
-                   bounds_.size() - border_.top_left() - padding_.top_left() -
-                       border_.bottom_right() - padding_.bottom_right());
+  const auto& padding = ComputePadding();
+  return FloatRect(FloatPoint() + border_.top_left() + padding.top_left(),
+                   bounds_.size() - border_.top_left() - padding.top_left() -
+                       border_.bottom_right() - padding.bottom_right());
 }
 
 Margin Box::ComputeMargin() const {
   return Margin(margin_top_.value(), margin_right_.value(),
                 margin_bottom_.value(), margin_left_.value());
+}
+
+Padding Box::ComputePadding() const {
+  return Padding(padding_top_.value(), padding_right_.value(),
+                 padding_bottom_.value(), padding_left_.value());
 }
 
 bool Box::InDocument() const {

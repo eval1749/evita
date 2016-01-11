@@ -13,11 +13,11 @@
 #include "evita/visuals/css/background.h"
 #include "evita/visuals/css/border.h"
 #include "evita/visuals/css/float_color.h"
-#include "evita/visuals/css/padding.h"
 #include "evita/visuals/css/values.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_forward.h"
 #include "evita/visuals/layout/margin.h"
+#include "evita/visuals/layout/padding.h"
 
 namespace visuals {
 
@@ -83,7 +83,7 @@ class Box : public common::Castable<Box> {
 
   // CSS Box model related values
   Margin ComputeMargin() const;
-  const css::Padding& padding() const { return padding_; }
+  Padding ComputePadding() const;
 
   // CSS Position
   const css::Bottom& bottom() const { return bottom_; }
@@ -141,7 +141,10 @@ class Box : public common::Castable<Box> {
   css::Length margin_left_;
   css::Length margin_right_;
   css::Length margin_top_;
-  css::Padding padding_;
+  css::Length padding_bottom_;
+  css::Length padding_left_;
+  css::Length padding_right_;
+  css::Length padding_top_;
 
   // CSS Position
   css::Position position_;

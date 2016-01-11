@@ -13,7 +13,6 @@ PRIMITIVE_TYPE_NAMES = frozenset([
     'border',
     'color',
     'length',
-    'padding',
     'percentage',
     'string',
 ])

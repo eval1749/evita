@@ -241,9 +241,12 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
 }
 
 #define FOR_EACH_PROPERTY_CHANGES_PROPERTY(V) \
-  V(background)                               \
-  V(border)                                   \
-  V(padding)
+  V(background, background)                   \
+  V(border, border)                           \
+  V(padding_bottom, padding)                  \
+  V(padding_left, padding)                    \
+  V(padding_right, padding)                   \
+  V(padding_top, padding)
 
 #define FOR_EACH_PROPERTY_AFFECTS_ORIGIN(V) \
   V(bottom)                                 \
@@ -270,11 +273,11 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
     is_changed = true;
   }
 
-#define V(property)                               \
+#define V(property, flag)                         \
   if (new_style.has_##property() &&               \
       new_style.property() != box->property##_) { \
     box->property##_ = new_style.property();      \
-    box->is_##property##_changed_ = true;         \
+    box->is_##flag##_changed_ = true;             \
     is_changed = true;                            \
   }
   FOR_EACH_PROPERTY_CHANGES_PROPERTY(V)

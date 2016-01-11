@@ -17,6 +17,7 @@ TEST(BoxTest, InitialValues) {
   const auto& root = SimpleBoxTreeBuilder().Add<TextBox>(L"foo").Build();
   const auto& box = root->first_child();
   const auto& margin = box->ComputeMargin();
+  const auto& padding = box->ComputePadding();
 
   EXPECT_EQ(css::Background(), box->background());
   EXPECT_EQ(css::Border(), box->border());
@@ -25,7 +26,10 @@ TEST(BoxTest, InitialValues) {
   EXPECT_EQ(0.0f, margin.left());
   EXPECT_EQ(0.0f, margin.right());
   EXPECT_EQ(0.0f, margin.top());
-  EXPECT_EQ(css::Padding(), box->padding());
+  EXPECT_EQ(0.0f, padding.bottom());
+  EXPECT_EQ(0.0f, padding.left());
+  EXPECT_EQ(0.0f, padding.right());
+  EXPECT_EQ(0.0f, padding.top());
   EXPECT_EQ(css::Position::Static(), box->position());
 
   BoxEditor().RemoveDescendants(root.get());

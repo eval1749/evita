@@ -5,6 +5,7 @@
 #include "evita/dom/windows/visual_window.h"
 
 #include "base/logging.h"
+#include "base/strings/stringprintf.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
@@ -48,8 +49,11 @@ void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   is_waiting_animation_frame_ = false;
   UpdateStyleIfNeeded();
   UpdateLayoutIfNeeded();
-  visuals::PaintInfo paint_info(box_tree_->root_box()->bounds(),
-                                base::string16());
+
+  const auto& debug_text = base::StringPrintf(
+      L"dom: %d, css: %d, box: %d", style_tree_->document().version(),
+      style_tree_->version(), box_tree_->version());
+  visuals::PaintInfo paint_info(box_tree_->root_box()->bounds(), debug_text);
   auto display_item_list =
       visuals::Painter().Paint(paint_info, *box_tree_->root_box());
   ScriptHost::instance()->view_delegate()->PaintVisualDocument(

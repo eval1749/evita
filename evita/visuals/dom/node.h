@@ -77,7 +77,7 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
   // gc::Visitable
   void Accept(gc::Visitor* visitor) override;
 
-  Document* const document_;
+  Document* document_;
   // User specified string identifier of this node. Multiple nodes can have
   // same string id.
   const base::string16 id_;

@@ -54,6 +54,7 @@ void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
   DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->parent_);
   DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->next_sibling_);
   DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->previous_sibling_);
+  new_child->document_ = container->document_;
   new_child->parent_ = container;
   if (const auto old_last_child = container->last_child_) {
     new_child->previous_sibling_ = old_last_child;
@@ -85,6 +86,7 @@ void NodeEditor::InsertBefore(ContainerNode* container,
     previous_sibling->next_sibling_ = new_child;
   else
     container->first_child_ = new_child;
+  new_child->document_ = container->document_;
   ref_child->previous_sibling_ = new_child;
   new_child->parent_ = container;
   new_child->next_sibling_ = ref_child;

@@ -69,13 +69,12 @@ void LayoutVisitor::Layout(Box* box) {
 void LayoutVisitor::LayoutFlowBoxHorizontally(const FlowBox& flow_box) {
   DCHECK(flow_box.first_child()) << flow_box;
   auto child_origin = FloatPoint();
-  const auto line_height = flow_box.content_bounds().height();
   for (const auto& child : flow_box.child_boxes()) {
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child->border().size() + child->padding().size();
     LayoutVisitor().Layout(
-        child, FloatRect(child_origin + child->margin().top_left(),
-                         FloatSize(child_size.width(), line_height)));
+        child,
+        FloatRect(child_origin + child->margin().top_left(), child_size));
     child_origin = FloatPoint(child->bounds().right() + child->margin().right(),
                               child_origin.y());
   }

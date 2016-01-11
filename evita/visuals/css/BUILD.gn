@@ -80,8 +80,6 @@ action("properties") {
 
 source_set("values") {
   sources = [
-    "background.cc",
-    "background.h",
     "color.cc",
     "color.h",
     "float_color.cc",
@@ -114,7 +112,6 @@ source_set("test_files") {
   testonly = true
 
   sources = [
-    "background_test.cc",
     "float_color_test.cc",
     "style_test.cc",
   ]

@@ -44,13 +44,12 @@ Document* LoadDocument() {
   const auto document =
       NodeTreeBuilder()
           .Begin(L"main")
-          .SetInlineStyle(
-              *css::StyleBuilder()
-                   .SetBackground(css::Background(css::Color(1, 1, 1)))
-                   .SetPaddingBottom(css::Length(kMargin))
-                   .SetPaddingRight(css::Length(kMargin))
-                   .SetPaddingTop(css::Length(kMargin))
-                   .Build())
+          .SetInlineStyle(*css::StyleBuilder()
+                               .SetBackgroundColor(css::Color(1, 1, 1))
+                               .SetPaddingBottom(css::Length(kMargin))
+                               .SetPaddingRight(css::Length(kMargin))
+                               .SetPaddingTop(css::Length(kMargin))
+                               .Build())
           .Begin(L"list", L"list")
           .End(L"list")
           .End(L"main")
@@ -99,8 +98,7 @@ css::StyleSheet* LoadStyleSheet() {
                     .SetPosition(css::Position::Absolute())
                     .SetLeft(css::Left(css::Length(20)))
                     .SetTop(css::Top(css::Length(300)))
-                    .SetBackground(
-                        css::Background(css::Color::Rgba(51, 153, 255, 0.1f)))
+                    .SetBackgroundColor(css::Color::Rgba(51, 153, 255, 0.1f))
                     .SetBorder(css::Color::Rgba(51, 153, 255, 1.0f), 1)
                     .Build()));
   style_sheet->AddRule(

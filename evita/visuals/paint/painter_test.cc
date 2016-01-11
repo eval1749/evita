@@ -21,14 +21,13 @@
 namespace visuals {
 
 TEST(PainterTest, Basic) {
-  const auto& root =
-      SimpleBoxTreeBuilder()
-          .Begin<FlowBox>()
-          .SetStyle(*css::StyleBuilder()
-                         .SetBackground(css::Background(css::Color(1, 1, 1)))
-                         .Build())
-          .End<FlowBox>()
-          .Build();
+  const auto& root = SimpleBoxTreeBuilder()
+                         .Begin<FlowBox>()
+                         .SetStyle(*css::StyleBuilder()
+                                        .SetBackgroundColor(css::Color(1, 1, 1))
+                                        .Build())
+                         .End<FlowBox>()
+                         .Build();
   BoxEditor().SetViewportSize(root.get(), FloatSize(200, 100));
   Layouter().Layout(root.get());
   PaintInfo paint_info(FloatRect(root->viewport_size()));

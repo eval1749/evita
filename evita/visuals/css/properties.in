@@ -2,7 +2,31 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-background: <background>
+# Background is an implementation of CSS Background and Borders Module
+# Level 3.
+#
+# Supports following CSS properties:
+#  background-color: <color>
+# Not yet implemented:
+#  background-attachment: <attachment> [, <attachment>]*
+#  background-clip: <box> [, <box>]*
+#  background-image: <bg-image> [, <bg-image>]*
+#  background-position: <position>, [, <position>]*
+#  background-repeat: <repeat-style> [, <repeat-style>]*
+#  background-size: <bg-size> [, <bg-size>]
+#
+#  <attachment> = scroll | fixed | local
+#  <bg-image> = <image> | none
+#  <bg-size> = [<length> | <percentage> | auto]{1,2} | cover | contain
+#  <box> = border-box | padding-box | content-box
+#  <position> ::= [left | center | right | top | bottom | <percentage> |
+#      <length>] | [left | center |right | <percentage> | <length>]
+#      [top | center | bottom | <percentage> | <length> ]
+#      [center | [left | right] [<percentage> | <length>]?] &&
+#      [center | [top | bottom] [<percentage> | <length>]?]
+#  <repeat-style> = repeat-x | repeat-y |
+#      [repeat | space | round | no-repeat]{1, 2}
+background-color: <color>
 
 # line-style ::= none hidden dotted dashed solid double groove ridge inset outset
 # border-bottom-style: <line-style>

@@ -34,7 +34,7 @@ namespace {
 #endif
 
 bool IsBackgroundChanged(const Box& box) {
-  if (!box.background().HasValue())
+  if (box.background_color() != FloatColor())
     return false;
   return box.IsBackgroundChanged() || box.IsOriginChanged() ||
          box.IsSizeChanged() || box.IsPaddingChanged();
@@ -178,8 +178,8 @@ void PaintVisitor::PaintBackgroundINeeded(const Box& box) {
   if (!box.ShouldPaint() && !is_background_changed)
     return;
 #endif
-  FillRectAndMark(FloatRect(box.bounds().size()),
-                  box.background().color().value(), is_background_changed);
+  FillRectAndMark(FloatRect(box.bounds().size()), box.background_color(),
+                  is_background_changed);
 }
 
 void PaintVisitor::PaintBorderINeeded(const Box& box) {
@@ -254,10 +254,10 @@ void PaintVisitor::VisitTextBox(TextBox* text) {
   if (text->IsContentChanged() || text->IsOriginChanged())
     AddDirtyBounds(bounds);
   BoxPaintScope paint_scope(this, *text);
-  if (text->background().HasValue()) {
+  if (text->background_color() != FloatColor()) {
     // TODO(eval1749): We should have a member function for painting background
     // with clip bounds.
-    FillRect(bounds, text->background().color().value());
+    FillRect(bounds, text->background_color());
   }
   builder_.AddNew<DrawTextDisplayItem>(bounds, text->color(), text->baseline(),
                                        text->text_format(), text->text());

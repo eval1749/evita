@@ -12,7 +12,6 @@
 
 #include "base/strings/stringprintf.h"
 #include "base/strings/string_util.h"
-#include "evita/visuals/css/background.h"
 #include "evita/visuals/css/color.h"
 #include "evita/visuals/css/values.h"
 
@@ -48,10 +47,6 @@ Maybe<int> ParseHex(const base::StringPiece16& text) {
 }
 
 }  // namespace
-
-Maybe<CssBackground> ParseBackground(const base::StringPiece16& text) {
-  return common::Nothing<CssBackground>();
-}
 
 Maybe<CssColor> ParseColor(const base::StringPiece16& text) {
   if (text.size() == 0)
@@ -172,12 +167,6 @@ Maybe<CssPercentage> ParsePercentage(const base::StringPiece16& text) {
 
 Maybe<CssString> ParseString(const base::StringPiece16& text) {
   return common::Just<CssString>(CssString(text));
-}
-
-base::string16 UnparseBackground(const CssBackground& background) {
-  if (!background.HasValue())
-    return L"";
-  return L"NYI(background)";
 }
 
 base::string16 UnparseColor(const CssColor& color) {

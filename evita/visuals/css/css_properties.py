@@ -9,7 +9,6 @@ import string
 # CSS Value Types
 #
 PRIMITIVE_TYPE_NAMES = frozenset([
-    'background',
     'color',
     'length',
     'percentage',

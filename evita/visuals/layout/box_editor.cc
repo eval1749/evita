@@ -221,7 +221,7 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
   if (box->bounds_.origin() != new_bounds.origin())
     box->is_origin_changed_ = true;
   if (box->bounds_.size() != new_bounds.size()) {
-    if (box->background().HasValue())
+    if (box->background_color() != FloatColor())
       box->is_background_changed_ = true;
     if (box->ComputeBorder().HasValue())
       box->is_border_changed_ = true;
@@ -241,7 +241,6 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
 }
 
 #define FOR_EACH_PROPERTY_CHANGES_PROPERTY(V) \
-  V(background, background)                   \
   V(border_bottom_width, border)              \
   V(border_left_width, border)                \
   V(border_right_width, border)               \
@@ -273,6 +272,13 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   auto is_changed = false;
   if (new_style.has_display() && new_style.display() != box->display()) {
     box->display_ = new_style.display();
+    is_changed = true;
+  }
+
+  if (new_style.has_background_color() &&
+      new_style.background_color().value() != box->background_color_) {
+    box->background_color_ = new_style.background_color().value();
+    box->is_background_changed_ = true;
     is_changed = true;
   }
 

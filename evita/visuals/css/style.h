@@ -8,7 +8,6 @@
 #include <bitset>
 #include <iosfwd>
 
-#include "evita/visuals/css/background.h"
 #include "evita/visuals/css/color.h"
 #include "evita/visuals/css/properties_forward.h"
 #include "evita/visuals/css/values.h"

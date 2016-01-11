@@ -22,7 +22,7 @@ TEST(BoxTest, InitialValues) {
   const auto& margin = box->ComputeMargin();
   const auto& padding = box->ComputePadding();
 
-  EXPECT_EQ(css::Background(), box->background());
+  EXPECT_EQ(FloatColor(), box->background_color());
   EXPECT_EQ(Border(), box->ComputeBorder());
   EXPECT_EQ(css::Display(), box->display());
   EXPECT_EQ(0.0f, margin.bottom());

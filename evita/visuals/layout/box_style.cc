@@ -59,8 +59,8 @@ class ActualStyleVisitor final : public BoxVisitor {
 
 std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   builder_.SetDisplay(box.display());
-  if (box.background().HasValue())
-    builder_.SetBackground(box.background());
+  if (box.background_color() != FloatColor())
+    builder_.SetBackgroundColor(css::Color(box.background_color()));
 
   const auto& border = box.ComputeBorder();
   const auto& margin = box.ComputeMargin();

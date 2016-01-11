@@ -34,9 +34,20 @@ struct Item {
   int version;
 };
 
+#define FOR_EACH_INHERITABLE_PROPERTY(V) \
+  V(Color, color)                        \
+  V(FontFamily, font_family)             \
+  V(FontSize, font_size)                 \
+  V(FontStretch, font_stretch)           \
+  V(FontStyle, font_style)               \
+  V(FontWeight, font_weight)
+
 void InheritStyle(css::Style* style, const css::Style& parent_style) {
-  if (!style->has_color() && parent_style.has_color())
-    css::StyleEditor().SetColor(style, parent_style.color());
+#define V(Name, name)                                    \
+  if (!style->has_##name() && parent_style.has_##name()) \
+    css::StyleEditor().Set##Name(style, parent_style.name());
+  FOR_EACH_INHERITABLE_PROPERTY(V)
+#undef V
 }
 }  // namespace
 

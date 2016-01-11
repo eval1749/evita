@@ -17,6 +17,7 @@ using {{type.Name}} = visuals::css::{{type.Name}};
 
 using Length = visuals::css::Length;
 using Percentage = visuals::css::Percentage;
+using String = visuals::css::String;
 
 //////////////////////////////////////////////////////////////////////
 //

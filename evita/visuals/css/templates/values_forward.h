@@ -26,6 +26,7 @@ class {{type.Name}};
 
 class Length;
 class Percentage;
+class String;
 
 }  // namespace css
 }  // namespace visuals

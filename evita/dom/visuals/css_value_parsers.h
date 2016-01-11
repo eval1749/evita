@@ -23,9 +23,12 @@ common::Maybe<visuals::css::Length> ParseLength(
     const base::StringPiece16& text);
 common::Maybe<visuals::css::Percentage> ParsePercentage(
     const base::StringPiece16& text);
+common::Maybe<visuals::css::String> ParseString(
+    const base::StringPiece16& text);
 
 base::string16 UnparseLength(const visuals::css::Length& value);
 base::string16 UnparsePercentage(const visuals::css::Percentage& value);
+base::string16 UnparseString(const visuals::css::String& value);
 
 }  // namespace dom
 

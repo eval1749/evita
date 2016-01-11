@@ -25,6 +25,7 @@ FOR_EACH_VISUAL_CSS_VALUES(V)
 
 using CssLength = visuals::css::Length;
 using CssPercentage = visuals::css::Percentage;
+using CssString = visuals::css::String;
 
 namespace {
 
@@ -98,6 +99,10 @@ Maybe<CssPercentage> ParsePercentage(const base::StringPiece16& text) {
   return common::Nothing<CssPercentage>();
 }
 
+Maybe<CssString> ParseString(const base::StringPiece16& text) {
+  return common::Just<CssString>(CssString(text));
+}
+
 base::string16 UnparseBackground(const CssBackground& background) {
   if (!background.HasValue())
     return L"";
@@ -167,6 +172,10 @@ base::string16 UnparsePadding(const CssPadding& padding) {
 
 base::string16 UnparsePercentage(const visuals::css::Percentage& value) {
   return base::StringPrintf(L"%f%%", value.value());
+}
+
+base::string16 UnparseString(const visuals::css::String& value) {
+  return value.value();
 }
 
 }  // namespace dom

@@ -28,6 +28,7 @@ action("css_properties") {
 
   inputs = [
     "//evita/visuals/css/properties.in",
+    "//evita/visuals/css/css_properties.py",
     "templates/CSSStyleDeclaration.idl",
     "templates/css_style_declaration.js",
     "templates/css_value_simple_parsers.cc",

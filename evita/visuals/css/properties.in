@@ -7,6 +7,11 @@ border: <border>
 bottom: auto <length> <percentage>
 color: <color>
 display: inline block inline-block none
+font-family: <string> serif sans-serif cursive fantasy monospaces
+font-size: medium xx-small x-small small large x-large xx-large larger smaller <length>
+font-stretch: normal ulta-condensed extra-condensed condensed semi-condensed semi-expanded expanded extra-expanded ultra-expanded
+font-style: normal italic oblique
+font-weight: normal bold bolder lighter 100 200 300 400 500 600 700 800 900
 height: auto <length> <percentage>
 left: auto <length> <percentage>
 margin: <margin>

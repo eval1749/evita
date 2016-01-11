@@ -10,7 +10,7 @@
 #include "evita/visuals/css/values_forward.h"
 
 {% for primitive in primitives %}
-#include "evita/visuals/css/{{primitive.name}}.h"
+#include "evita/visuals/css/{{primitive.file_name}}.h"
 {% endfor %}
 
 namespace visuals {

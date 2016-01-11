@@ -12,28 +12,12 @@ source_set("css") {
     "$css_gen_dir/values.cc",
     "$css_gen_dir/values.h",
     "$css_gen_dir/values_forward.h",
-    "background.cc",
-    "background.h",
-    "border.cc",
-    "border.h",
-    "color.cc",
-    "color.h",
-    "float_color.cc",
-    "float_color.h",
-    "length.cc",
-    "length.h",
-    "margin.cc",
-    "margin.h",
     "media.cc",
     "media.h",
     "media_observer.cc",
     "media_observer.h",
     "media_type.cc",
     "media_type.h",
-    "padding.cc",
-    "padding.h",
-    "percentage.cc",
-    "percentage.h",
     "property.cc",
     "property.h",
     "property_visitor.cc",
@@ -56,6 +40,7 @@ source_set("css") {
 
   public_deps = [
     ":properties",
+    ":values",
     "//base",
   ]
 
@@ -92,6 +77,33 @@ action("properties") {
     "--output-directory",
     rebase_path("$css_gen_dir"),
     rebase_path("properties.in", root_build_dir),
+  ]
+}
+
+source_set("values") {
+  sources = [
+    "background.cc",
+    "background.h",
+    "border.cc",
+    "border.h",
+    "color.cc",
+    "color.h",
+    "float_color.cc",
+    "float_color.h",
+    "length.cc",
+    "length.h",
+    "margin.cc",
+    "margin.h",
+    "padding.cc",
+    "padding.h",
+    "percentage.cc",
+    "percentage.h",
+    "string.cc",
+    "string.h",
+  ]
+
+  deps = [
+    "//base",
   ]
 }
 

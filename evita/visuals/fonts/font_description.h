@@ -5,6 +5,9 @@
 #ifndef EVITA_VISUALS_FONTS_FONT_DESCRIPTION_H_
 #define EVITA_VISUALS_FONTS_FONT_DESCRIPTION_H_
 
+#include <iosfwd>
+
+#include "base/macros.h"
 #include "base/strings/string16.h"
 
 namespace visuals {
@@ -53,11 +56,7 @@ class FontDescription final {
  public:
   class Builder;
 
-  FontDescription(const FontDescription& other);
-  FontDescription();
   ~FontDescription();
-
-  FontDescription& operator=(const FontDescription& other);
 
   bool operator==(const FontDescription& other) const;
   bool operator!=(const FontDescription& other) const;
@@ -69,12 +68,20 @@ class FontDescription final {
   FontWeight weight() const { return weight_; }
 
  private:
+  FontDescription(const Builder& builder, const FontDescription& other);
+  FontDescription();
+
   base::string16 family_;
   float size_ = 0;
   FontStretch stretch_ = FontStretch::Normal;
   FontStyle style_ = FontStyle::Normal;
   FontWeight weight_ = FontWeight::Normal;
+
+  DISALLOW_COPY_AND_ASSIGN(FontDescription);
 };
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const FontDescription& description);
 
 }  // namespace visuals
 

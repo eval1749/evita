@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_FONTS_FONT_DESCRIPTION_BUILDER_H_
 #define EVITA_VISUALS_FONTS_FONT_DESCRIPTION_BUILDER_H_
 
+#include <memory>
+
 #include "evita/visuals/fonts/font_description.h"
 
 #include "base/macros.h"
@@ -20,7 +22,7 @@ class FontDescription::Builder final {
   Builder();
   ~Builder();
 
-  FontDescription Build() { return description_; }
+  const FontDescription& Build();
   Builder& SetFamily(const base::string16& family);
   Builder& SetSize(float size);
   Builder& SetStretch(FontStretch stretch);

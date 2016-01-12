@@ -287,8 +287,11 @@ ScriptHost* ScriptHost::Create(Scheduler* scheduler,
   // flags.
   // char flags[] = "--use_strict" " --harmony";
   // v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
+  // TODO(eval1749): Once v8/4659 fixed, we should enable
+  // "--harmony-function_name".
+  // See https://bugs.chromium.org/p/v8/issues/detail?id=4659
   char flags[] =
-      " --harmony-function-name"
+      // " --harmony-function-name"
       " --harmony-do-expressions";
   v8::V8::SetFlagsFromString(flags, sizeof(flags) - 1);
   gin::IsolateHolder::Initialize(gin::IsolateHolder::kStrictMode,

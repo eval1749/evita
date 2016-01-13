@@ -70,6 +70,7 @@ interface_idl_files = [
   #"//evita/dom/visuals/Element.idl",
   #"//evita/dom/visuals/Node.idl",
   #"//evita/dom/visuals/Text.idl",
+  "//evita/dom/visuals/CSSStyleSheetHandle.idl",
   "//evita/dom/visuals/NodeHandle.idl",
   "//evita/dom/windows/TextDocumentWindow.idl",
   "//evita/dom/windows/EditorWindow.idl",

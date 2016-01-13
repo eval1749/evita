@@ -7,7 +7,12 @@ css_gen_dir = "$root_gen_dir/evita/dom/visuals"
 source_set("visuals") {
   sources = [
     "$css_gen_dir/css_value_simple_parsers.cc",
+    "css_style.cc",
+    "css_style.h",
+    "css_style_sheet_handle.cc",
+    "css_style_sheet_handle.h",
     "css_value_parsers.cc",
+    "css_value_parsers.h",
     "node_handle.cc",
     "node_handle.h",
     "node_handle_style.cc",
@@ -51,10 +56,12 @@ source_set("test_files") {
   testonly = true
 
   sources = [
+    "css_style_sheet_test.cc",
     "node_test.cc",
   ]
 
   data = [
+    "css_style_sheet_test.js",
     "node_test.js",
   ]
 

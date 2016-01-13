@@ -1,0 +1,18 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[Constructor()]
+interface CSSStyleSheetHandle {
+  static void appendStyleRule(CSSStyleSheetHandle handle, DOMString selectorText,
+                         Map rawStyle);
+  static long countRules(CSSStyleSheetHandle handle);
+  static void deleteRule(CSSStyleSheetHandle handle, long index);
+
+  // |Map| contains "internal" CSS property id and string representation of
+  // CSS value. Key -1 have selector text.
+  static Map ruleAt(CSSStyleSheetHandle handle, long index);
+
+  static void insertStyleRule(CSSStyleSheetHandle handle, DOMString selectorText,
+                         Map rawStyle, long index);
+};

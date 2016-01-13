@@ -77,6 +77,9 @@ js_lib_files = [
 
   "visuals/node.js",
   "$root_gen_dir/evita/dom/visuals/css_style_declaration.js",
+  "visuals/css_rule.js",
+  "visuals/css_style_rule.js",
+  "visuals/css_style_sheet.js",
   "visuals/document.js",
   "visuals/element.js",
   "visuals/text.js",

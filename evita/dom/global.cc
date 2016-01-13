@@ -52,6 +52,7 @@
 #include "evita/dom/timers/repeating_timer.h"
 #include "evita/dom/timers/timer.h"
 #include "evita/dom/visuals/node_handle.h"
+#include "evita/dom/visuals/css_style_sheet_handle.h"
 #include "evita/dom/windows/window.h"
 
 namespace dom {
@@ -134,6 +135,7 @@ v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(RepeatingTimer);
 
     INSTALL(NodeHandle);
+    INSTALL(CSSStyleSheetHandle);
 
 #define INSTALL_IN(templ, name)        \
   templ->Set(                          \

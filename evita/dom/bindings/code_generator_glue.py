@@ -809,7 +809,7 @@ def underscore(text):
 def union_type_string(type_strings):
     return '|'.join(type_strings)
 
-# Convert lower case cample, lowerCaseCamel, to upper case came, UpperCaseCamel
+# Convert lower case camel, lowerCaseCamel, to upper case camel, UpperCaseCamel
 
 
 def upper_camel_case(lower_camel_case):

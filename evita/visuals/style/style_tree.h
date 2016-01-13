@@ -81,6 +81,7 @@ class StyleTree final : public css::MediaObserver,
                        const Node& child,
                        const Node& ref_child) final;
   void DidRemoveChild(const ContainerNode& parent, const Node& child) final;
+  void DidRemoveClass(const Element& element, const base::string16& name);
 
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;

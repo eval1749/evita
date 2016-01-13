@@ -34,8 +34,6 @@ namespace {
 #endif
 
 bool IsBackgroundChanged(const Box& box) {
-  if (box.background_color() != FloatColor())
-    return false;
   return box.IsBackgroundChanged() || box.IsOriginChanged() ||
          box.IsSizeChanged() || box.IsPaddingChanged();
 }
@@ -121,10 +119,10 @@ void PaintVisitor::FillRectAndMark(const FloatRect& rect,
                                    const FloatColor& color,
                                    bool mark) {
   DCHECK(!rect.IsEmpty());
-  if (color.alpha() == 0)
-    return;
   if (mark)
     AddDirtyBounds(rect);
+  if (color.alpha() == 0)
+    return;
   builder_.AddNew<FillRectDisplayItem>(rect, color);
 }
 

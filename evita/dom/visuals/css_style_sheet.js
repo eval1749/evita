@@ -65,7 +65,9 @@ class CSSStyleSheet {
    * @param {number} index
    */
   didChangeCSSRuleStyle(index) {
-    // TODO(eval1749): Notify to C++ object about rule changed style.
+    const rule = /** @type {!CSSStyleRule} */(this.cssRules_[index]);
+    this.deleteRule(index);
+    this.insertRule(rule, index);
   }
 
   // TODO(eval1749) Make |CSSStyleSheet.prototype.appendRule()| to take

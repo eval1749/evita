@@ -4,6 +4,12 @@
 
 (function() {
   /**
+   * @param {!Event} event
+   */
+  function handleEvent(event) {
+  }
+
+  /**
    * @this {!VisualWindow}
    * @param {number} point_x
    * @param {number} point_y
@@ -17,10 +23,21 @@
     return Node.nodeFromId(foundId);
   }
 
+  /**
+   * @param {!Document} document
+   * @param {!CSSStyleSheet} styleSheet
+   * @return {!VisualWindow}
+   */
+  function newWindow(document, styleSheet) {
+    return VisualWindow.newWindow_(document.handle_, styleSheet.handle_);
+  }
+
   Object.defineProperties(VisualWindow.prototype, {
     hitTest: {value: hitTest},
   });
 
-  VisualWindow.handleEvent = function(event) {
-  };
+  Object.defineProperties(VisualWindow, {
+    handleEvent: {value: handleEvent},
+    newWindow: {value: newWindow},
+  });
 })();

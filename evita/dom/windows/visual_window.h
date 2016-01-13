@@ -34,6 +34,7 @@ class StyleTree;
 namespace dom {
 
 class NodeHandle;
+class CSSStyleSheetHandle;
 
 namespace bindings {
 class VisualWindowClass;
@@ -61,7 +62,8 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   using FloatSize = visuals::FloatSize;
   using Node = visuals::Node;
 
-  explicit VisualWindow(visuals::Document* document);
+  VisualWindow(visuals::Document* document,
+               visuals::css::StyleSheet* style_sheet);
 
   void DidBeginAnimationFrame(const base::TimeTicks& now);
   void RequestAnimationFrame();
@@ -70,7 +72,8 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
 
   // Binding callbacks
   int HitTest(int x, int y);
-  static VisualWindow* NewWindow(NodeHandle* document_handle);
+  static VisualWindow* NewWindow(NodeHandle* document_handle,
+                                 CSSStyleSheetHandle* style_sheet_handle);
 
   // visuals::css::Media
   visuals::css::MediaType media_type() const final;
@@ -95,7 +98,6 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   void DidRealizeWindow() final;
 
   bool is_waiting_animation_frame_ = false;
-  gc::Member<CssStyleSheet> style_sheet_;
   const std::unique_ptr<visuals::StyleTree> style_tree_;
   FloatSize viewport_size_;
 

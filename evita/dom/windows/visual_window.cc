@@ -11,6 +11,7 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/timing/animation_frame_callback.h"
+#include "evita/dom/visuals/css_style_sheet_handle.h"
 #include "evita/dom/visuals/node_handle.h"
 #include "evita/visuals/css/media_type.h"
 #include "evita/visuals/css/style_sheet.h"
@@ -30,10 +31,9 @@ namespace dom {
 //
 // VisualWindow
 //
-VisualWindow::VisualWindow(visuals::Document* document)
-    : style_sheet_(new CssStyleSheet()),
-      style_tree_(
-          new visuals::StyleTree(*document, *this, {style_sheet_.get()})),
+VisualWindow::VisualWindow(visuals::Document* document,
+                           visuals::css::StyleSheet* style_sheet)
+    : style_tree_(new visuals::StyleTree(*document, *this, {style_sheet})),
       box_tree_(new visuals::BoxTree(*document, *style_tree_)) {
   ScriptHost::instance()->view_delegate()->CreateVisualWindow(window_id());
   document->AddObserver(this);
@@ -49,13 +49,17 @@ void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   is_waiting_animation_frame_ = false;
   UpdateStyleIfNeeded();
   UpdateLayoutIfNeeded();
-
+  const auto& root_box = box_tree_->root_box();
+  if (root_box->IsPaintClean()) {
+    // Box tree is changed outside viewport(?).
+    return;
+  }
   const auto& debug_text = base::StringPrintf(
       L"dom: %d, css: %d, box: %d", style_tree_->document().version(),
       style_tree_->version(), box_tree_->version());
-  visuals::PaintInfo paint_info(box_tree_->root_box()->bounds(), debug_text);
+  visuals::PaintInfo paint_info(root_box->bounds(), debug_text);
   auto display_item_list =
-      visuals::Painter().Paint(paint_info, *box_tree_->root_box());
+      visuals::Painter().Paint(paint_info, *root_box);
   ScriptHost::instance()->view_delegate()->PaintVisualDocument(
       window_id(), std::move(display_item_list));
 }
@@ -94,13 +98,14 @@ int VisualWindow::HitTest(int x, int y) {
   return found.box->sequence_id();
 }
 
-VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle) {
+VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle,
+                                      CSSStyleSheetHandle* style_sheet_handle) {
   const auto document = document_handle->value()->as<visuals::Document>();
   if (!document) {
     ScriptHost::instance()->ThrowError("Requires document node");
     return nullptr;
   }
-  return new VisualWindow(document);
+  return new VisualWindow(document, style_sheet_handle->value());
 }
 
 // visuals::css::Media

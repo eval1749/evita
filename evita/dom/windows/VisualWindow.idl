@@ -11,5 +11,7 @@ interface VisualWindow : Window {
   long hitTest_(long point_x, long point_y);
 
   // Construct new |VisualWindow| and returns it.
-  static VisualWindow newWindow(NodeHandle documentHandle);
+  [ImplementedAs=NewWindow]
+  static VisualWindow newWindow_(NodeHandle documentHandle,
+                                 CSSStyleSheetHandle styleSheetHandle);
 };

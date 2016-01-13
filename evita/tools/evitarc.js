@@ -256,7 +256,9 @@ Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {
   function sourcePath(document) {
     const fileName = document.fileName || FilePath.fullPath(document.name);
     const path = FilePath.split(fileName).components;
-    const srcIndex = path.findIndex(element => element === 'src');
+    const srcIndex = path.findIndex((element, index) => {
+      return index > 0 && element === 'src'
+    });
     if (srcIndex < 0)
       return path;
     return path.slice(srcIndex + 1, path.length - 1);

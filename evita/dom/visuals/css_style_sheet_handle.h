@@ -34,6 +34,8 @@ class CSSStyleSheetHandle final
 
   ~CSSStyleSheetHandle() final;
 
+  CssStyleSheet* value() const { return object_.get(); }
+
  private:
   friend class bindings::CSSStyleSheetHandleClass;
 

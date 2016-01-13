@@ -39,6 +39,8 @@ class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
   // Bindings implementations
   int id() const;
 
+  static void AddClass(NodeHandle* element_handle,
+                       const base::string16& class_name);
   static void AppendChild(NodeHandle* parent, NodeHandle* node);
   static NodeHandle* CreateDocument();
   static NodeHandle* CreateElement(NodeHandle* document,
@@ -53,6 +55,8 @@ class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
                            NodeHandle* node,
                            NodeHandle* child);
   static void RemoveChild(NodeHandle* parent, NodeHandle* node);
+  static void RemoveClass(NodeHandle* element_handle,
+                          const base::string16& class_name);
   static void SetInlineStyle(NodeHandle* element, v8::Local<v8::Map> raw_style);
 
   const gc::Member<visuals::Node> value_;

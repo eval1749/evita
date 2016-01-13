@@ -31,6 +31,16 @@ int NodeHandle::id() const {
   return value_->sequence_id();
 }
 
+void NodeHandle::AddClass(NodeHandle* element_handle,
+                          const base::string16& class_name) {
+  const auto element = element_handle->value()->as<visuals::Element>();
+  if (!element) {
+    ScriptHost::instance()->ThrowError("Requires element node");
+    return;
+  }
+  visuals::NodeEditor().AddClass(element, class_name);
+}
+
 NodeHandle* NodeHandle::CreateDocument() {
   return new NodeHandle(new visuals::Document());
 }
@@ -77,6 +87,16 @@ void NodeHandle::RemoveChild(NodeHandle* parent, NodeHandle* child) {
   if (!container)
     return;
   visuals::NodeEditor().RemoveChild(container, child->value());
+}
+
+void NodeHandle::RemoveClass(NodeHandle* element_handle,
+                             const base::string16& class_name) {
+  const auto element = element_handle->value()->as<visuals::Element>();
+  if (!element) {
+    ScriptHost::instance()->ThrowError("Requires element node");
+    return;
+  }
+  visuals::NodeEditor().RemoveClass(element, class_name);
 }
 
 }  // namespace dom

@@ -4,6 +4,7 @@
 
 /**
  * @implements {CSSStyleObserver}
+ * @implements {DOMTokenListOwner}
  */
 class Element extends Node {
   /**
@@ -14,6 +15,8 @@ class Element extends Node {
    */
   constructor(document, handle, tagName, id) {
     super(document, handle);
+    /** @type {DOMTokenList} */
+    this.classList_ = null;
     /** @const @type {string} id */
     this.id_ = id;
     /** @type {Map<number, string>} */
@@ -24,6 +27,13 @@ class Element extends Node {
     this.tagName_ = tagName;
   }
 
+  /** @return {!DOMTokenList} */
+  get classList() {
+    if (!this.classList_)
+      this.classList_ = new DOMTokenList(this);
+    return /** @type {!DOMTokenList} */(this.classList_);
+  }
+
   /** @return {string} */
   get id() { return this.id_; }
 
@@ -31,7 +41,7 @@ class Element extends Node {
   get tagName() { return this.tagName_; }
 
   /** @override @return {string} */
-  get nodeNmae() { return this.tagName; }
+  get nodeName() { return this.tagName; }
 
   /** @return {!CSSStyleDeclaration} */
   get style() {
@@ -74,5 +84,21 @@ class Element extends Node {
     NodeHandle.setInlineStyle(
         this.handle_,
         /** @type {!Map<number, string>} */(this.rawStyle_));
+  }
+
+  /**
+   * DOMTokenListOwner
+   * @param {string} token
+   */
+  didAddToken(token) {
+    NodeHandle.addClass(this.handle_, token);
+  }
+
+  /**
+   * DOMTokenListOwner
+   * @param {string} token
+   */
+  didRemoveToken(token) {
+    NodeHandle.removeClass(this.handle_, token);
   }
 }

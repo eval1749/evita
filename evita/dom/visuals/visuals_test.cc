@@ -25,6 +25,10 @@ TEST_F(VisualsTest, DOMTokenList) {
   RunFile({"visuals", "dom_token_list_test.js"});
 }
 
+TEST_F(VisualsTest, Element) {
+  RunFile({"visuals", "element_test.js"});
+}
+
 TEST_F(VisualsTest, Node) {
   RunFile({"visuals", "node_test.js"});
 }

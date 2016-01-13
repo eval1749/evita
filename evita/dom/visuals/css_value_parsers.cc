@@ -80,6 +80,24 @@ Maybe<CssColor> ParseColor(const base::StringPiece16& text) {
       auto const blue = maybe_blue.FromJust();
       return common::Just<CssColor>(CssColor::Rgba(red, green, blue));
     }
+    // TODO(eval1749): Once we support "rgba(red, green, blue, alpha)", this
+    // syntax should be removed.
+    if (text.size() == 9) {
+      // #rrggbb
+      const auto& maybe_red = ParseHex(text.substr(1, 2));
+      const auto& maybe_green = ParseHex(text.substr(3, 2));
+      const auto& maybe_blue = ParseHex(text.substr(5, 2));
+      const auto& maybe_alpha = ParseHex(text.substr(7, 2));
+      if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
+          maybe_blue.IsNothing() || maybe_alpha.IsNothing()) {
+        return common::Nothing<CssColor>();
+      }
+      auto const red = maybe_red.FromJust();
+      auto const green = maybe_green.FromJust();
+      auto const blue = maybe_blue.FromJust();
+      auto const alpha = maybe_alpha.FromJust() / 255.0f;
+      return common::Just<CssColor>(CssColor::Rgba(red, green, blue, alpha));
+    }
   }
   if (text == L"transparent")
     return common::Just<CssColor>(CssColor());

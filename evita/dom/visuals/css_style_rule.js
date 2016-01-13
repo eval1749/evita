@@ -14,7 +14,7 @@ class CSSStyleRule extends CSSRule {
   constructor(selectorText, style) {
     super();
 
-    /** @const @type {string} */
+    /** @type {string} */
     this.selectorText_ = selectorText;
 
     /** @const @type {!CSSStyleDeclaration} */
@@ -26,12 +26,16 @@ class CSSStyleRule extends CSSRule {
     return `${this.selectorText} { ${this.style_.cssText} }`;
   }
 
-  // TODO(eval1749): NYI CSSStyleRule.prototype.cssText setter
-
   /** @return {string} */
   get selectorText() { return this.selectorText_; }
 
-  // TODO(eval1749): NYI CSSStyleRule.prototype.selectorText setter
+  /** @param {string} newSelectorText */
+  set selectorText(newSelectorText) {
+    if (this.selectorText_ === newSelectorText)
+      return;
+    this.selectorText_ = newSelectorText;
+    this.notifyChanged();
+  }
 
   /** @return {!CSSStyleDeclaration} */
   get style() { return this.style_; }
@@ -44,9 +48,13 @@ class CSSStyleRule extends CSSRule {
    * @param {!CSSStyleDeclaration} style
    */
   didChangeCSSStyle(style) {
+    this.notifyChanged();
+  }
+
+  notifyChanged() {
     if (!this.parentStyleSheet_)
       return;
     console.assert(this.index_ >= 0);
-    this.parentStyleSheet_.didChangeCSSRuleStyle(this.index_);
+    this.parentStyleSheet_.didChangeCSSRule(this.index_);
   }
 }

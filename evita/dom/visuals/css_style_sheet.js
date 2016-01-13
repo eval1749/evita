@@ -64,7 +64,7 @@ class CSSStyleSheet {
   /**
    * @param {number} index
    */
-  didChangeCSSRuleStyle(index) {
+  didChangeCSSRule(index) {
     const rule = /** @type {!CSSStyleRule} */(this.cssRules_[index]);
     this.deleteRule(index);
     this.insertRule(rule, index);

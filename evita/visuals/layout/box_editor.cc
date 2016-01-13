@@ -221,9 +221,8 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
   if (box->bounds_.origin() != new_bounds.origin())
     box->is_origin_changed_ = true;
   if (box->bounds_.size() != new_bounds.size()) {
-    if (box->background_color() != FloatColor())
-      box->is_background_changed_ = true;
-    if (box->ComputeBorder().HasValue())
+    box->is_background_changed_ = true;
+    if (!box->ComputeBorder().IsEmpty())
       box->is_border_changed_ = true;
     box->is_size_changed_ = true;
   }
@@ -265,6 +264,15 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
   V(height)                               \
   V(width)
 
+#define UPDATE_COLOR(property, name)                                          \
+  const auto& new_##name## =                                                  \
+      new_style.has_##name##() ? new_style.##name##().value() : FloatColor(); \
+  if (box->##name##_ != new_##name##) {                                       \
+    box->##name##_ = new_##name##;                                            \
+    box->is_##property##_changed_ = true;                                     \
+    is_changed = true;                                                        \
+  }
+
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   if (const auto& text = box->as<TextBox>())
     return SetTextStyle(text, new_style);
@@ -275,38 +283,11 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
     is_changed = true;
   }
 
-  if (new_style.has_background_color() &&
-      new_style.background_color().value() != box->background_color_) {
-    box->background_color_ = new_style.background_color().value();
-    box->is_background_changed_ = true;
-    is_changed = true;
-  }
-
-  // Border colors
-  if (new_style.has_border_bottom_color() &&
-      new_style.border_bottom_color().value() != box->border_bottom_color_) {
-    box->border_bottom_color_ = new_style.border_bottom_color().value();
-    box->is_border_changed_ = true;
-    is_changed = true;
-  }
-  if (new_style.has_border_left_color() &&
-      new_style.border_left_color().value() != box->border_left_color_) {
-    box->border_left_color_ = new_style.border_left_color().value();
-    box->is_border_changed_ = true;
-    is_changed = true;
-  }
-  if (new_style.has_border_right_color() &&
-      new_style.border_right_color().value() != box->border_right_color_) {
-    box->border_right_color_ = new_style.border_right_color().value();
-    box->is_border_changed_ = true;
-    is_changed = true;
-  }
-  if (new_style.has_border_top_color() &&
-      new_style.border_top_color().value() != box->border_top_color_) {
-    box->border_top_color_ = new_style.border_top_color().value();
-    box->is_border_changed_ = true;
-    is_changed = true;
-  }
+  UPDATE_COLOR(background, background_color);
+  UPDATE_COLOR(border, border_bottom_color);
+  UPDATE_COLOR(border, border_left_color);
+  UPDATE_COLOR(border, border_right_color);
+  UPDATE_COLOR(border, border_top_color);
 
 #define V(property, flag)                         \
   if (new_style.has_##property() &&               \
@@ -368,8 +349,10 @@ void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
 void BoxEditor::SetTextStyle(TextBox* box, const css::Style& new_style) {
   auto is_changed = false;
   // |TextBox| uses only color, ant font related CSS properties.
-  if (new_style.has_color() && new_style.color().value() != box->color_) {
-    box->color_ = new_style.color().value();
+  const auto& new_color =
+      new_style.has_color() ? new_style.color().value() : FloatColor();
+  if (box->color_ != new_color) {
+    box->color_ = new_color;
     is_changed = true;
   }
 

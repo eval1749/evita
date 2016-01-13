@@ -563,7 +563,8 @@ def enumeration_context(enumeration):
     }
 
 
-def fix_include_path(path):
+def fix_include_path(path_in):
+    path = path_in.replace('CSS', 'Css')
     return os.path.join(os.path.dirname(path).replace('../', ''),
                         underscore(os.path.basename(path))).replace('\\', '/')
 

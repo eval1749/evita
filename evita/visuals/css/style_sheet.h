@@ -5,7 +5,7 @@
 #ifndef EVITA_VISUALS_CSS_STYLE_SHEET_H_
 #define EVITA_VISUALS_CSS_STYLE_SHEET_H_
 
-#include <list>
+#include <vector>
 #include <memory>
 #include <utility>
 
@@ -32,17 +32,22 @@ class StyleSheet final : public gc::Collectable<StyleSheet> {
   StyleSheet();
   ~StyleSheet();
 
-  const std::list<Rule*>& rules() const { return rules_; }
+  const std::vector<Rule*>& rules() const { return rules_; }
 
+  // TODO(eval1749): We should rename |StyleSheet::AddRule()| to
+  // |StyleSheet::AppendRule()|.
   void AddRule(const base::StringPiece16& selector,
                std::unique_ptr<css::Style> style);
   void AddObserver(StyleSheetObserver* observer) const;
+  void InsertRule(const base::StringPiece16& selector,
+                  std::unique_ptr<css::Style> style,
+                  size_t index);
   void RemoveObserver(StyleSheetObserver* observer) const;
   void RemoveRule(size_t index);
 
  private:
   mutable base::ObserverList<StyleSheetObserver> observers_;
-  std::list<Rule*> rules_;
+  std::vector<Rule*> rules_;
 
   DISALLOW_COPY_AND_ASSIGN(StyleSheet);
 };

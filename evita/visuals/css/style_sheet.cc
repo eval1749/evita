@@ -32,24 +32,25 @@ void StyleSheet::AddRule(const base::StringPiece16& selector,
 void StyleSheet::AddObserver(StyleSheetObserver* observer) const {
   observers_.AddObserver(observer);
 }
+
+void StyleSheet::InsertRule(const base::StringPiece16& selector,
+                            std::unique_ptr<css::Style> style,
+                            size_t index) {
+  const auto rule = new Rule(selector, std::move(style));
+  rules_.insert(rules_.begin() + index, rule);
+  FOR_EACH_OBSERVER(StyleSheetObserver, observers_, DidAddRule(*rule));
+}
+
 void StyleSheet::RemoveObserver(StyleSheetObserver* observer) const {
   observers_.RemoveObserver(observer);
 }
 
 void StyleSheet::RemoveRule(size_t index) {
-  auto it = rules_.begin();
-  size_t position = 0;
-  while (it != rules_.end()) {
-    if (position == index) {
-      const auto rule = *it;
-      rules_.erase(it);
-      FOR_EACH_OBSERVER(StyleSheetObserver, observers_, DidAddRule(*rule));
-      delete rule;
-      return;
-    }
-    ++position;
-  }
-  NOTREACHED() << "Bad index " << index << " max=" << rules_.size();
+  const auto& it = rules_.begin() + index;
+  const auto& old_rule = *it;
+  rules_.erase(it);
+  FOR_EACH_OBSERVER(StyleSheetObserver, observers_, DidRemoveRule(*old_rule));
+  delete old_rule;
 }
 
 }  // namespace css

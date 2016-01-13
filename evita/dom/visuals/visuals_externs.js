@@ -11,3 +11,15 @@ var CSSStyleObserver;
  * @param {!CSSStyleDeclaration} style
  */
 CSSStyleObserver.didChangeCSSStyle = function(style) {};
+
+
+/**
+ * @interface
+ */
+var DOMTokenListOwner;
+
+/** @param {string} token */
+DOMTokenListOwner.didAddToken = function(token) {};
+
+/** @param {string} token */
+DOMTokenListOwner.didRemoveToken = function(token) {};

@@ -5,3 +5,6 @@
 function NewRegExp(source, options) {
   return new RegExp(source, options)
 }
+
+if (!Array.prototype.values)
+  Array.prototype.values = Array.prototype[Symbol.iterator];

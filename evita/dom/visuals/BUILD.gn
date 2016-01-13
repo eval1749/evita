@@ -56,12 +56,12 @@ source_set("test_files") {
   testonly = true
 
   sources = [
-    "css_style_sheet_test.cc",
-    "node_test.cc",
+    "visuals_test.cc",
   ]
 
   data = [
     "css_style_sheet_test.js",
+    "dom_token_list_test.js",
     "node_test.js",
   ]
 

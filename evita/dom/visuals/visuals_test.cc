@@ -6,19 +6,27 @@
 
 namespace dom {
 
-class CSSStyleSheetTest : public AbstractDomTest {
+class VisualsTest : public AbstractDomTest {
  public:
-  ~CSSStyleSheetTest() override = default;
+  ~VisualsTest() override = default;
 
  protected:
-  CSSStyleSheetTest() = default;
+  VisualsTest() = default;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(CSSStyleSheetTest);
+  DISALLOW_COPY_AND_ASSIGN(VisualsTest);
 };
 
-TEST_F(CSSStyleSheetTest, all) {
+TEST_F(VisualsTest, CSSStyleSheet) {
   RunFile({"visuals", "css_style_sheet_test.js"});
+}
+
+TEST_F(VisualsTest, DOMTokenList) {
+  RunFile({"visuals", "dom_token_list_test.js"});
+}
+
+TEST_F(VisualsTest, Node) {
+  RunFile({"visuals", "node_test.js"});
 }
 
 }  // namespace dom

@@ -30,5 +30,5 @@ testing.test('Node', function(t) {
   element.style.backgroundColor = '#fff';
   element.style.color = '#0f0';
   t.expect(element.style.cssText).toEqual(
-      'background_color: #FFFFFF; color: #00FF00;');
+      'background-color: #FFFFFF; color: #00FF00;');
 });

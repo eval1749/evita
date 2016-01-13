@@ -5,7 +5,7 @@
 /** @const @type {!Array.<string>} */
 const CSS_PROPERTY_NAMES = [
 {% for property in properties %}
-  '{{property.name}}',
+  {{property.text}},
 {% endfor %}
 ];
 

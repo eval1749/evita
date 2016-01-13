@@ -14,7 +14,7 @@ evita_src = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 JAVA_OPTIONS = ['-d64', '-server', '-Xms1G', '-XX:+TieredCompilation']
 CLOSURE_DIR = os.path.join(evita_src, 'third_party', 'closure_compiler')
 CLOSURE_JAR = os.path.join(CLOSURE_DIR, 'compiler.jar')
-# ES6_MORE_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6_more.js')
+ES6_MORE_EXTERNS_JS = os.path.join(CLOSURE_DIR, 'es6_more.js')
 
 # See below folow list of warnings:
 # https://code.google.com/p/closure-compiler/wiki/Warnings
@@ -97,7 +97,7 @@ def readFile(filename):
 
 def main():
     js_codes = []
-    js_externs = []
+    js_externs = [ES6_MORE_EXTERNS_JS]
     js_output_file = ''
     closure_options = []
     externs = None

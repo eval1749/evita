@@ -44,10 +44,12 @@ class CSSStyleDeclaration {
     for (const id of this.rawStyle_.keys()) {
       const name = CSSStyleDeclaration.propertyNameOf_(id);
       const value = this.propertyValueOf_(id);
-      properties.push(`${name}:${value};`);
+      properties.push(`${name}: ${value};`);
     }
     return properties.join(' ');
   }
+
+  // TODO(eval1749): NYI CSSStyleDeclaration.prototype.cssText setter
 
 {% for property in properties %}
   /** @return {string} */

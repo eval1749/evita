@@ -84,6 +84,13 @@ class CSSStyleDeclaration {
     return this.rawStyle_.get(id) || '';
   }
 
+  /** @private */
+  notifyChanged() {
+    if (!this.ownerElement_)
+      return;
+    NodeHandle.setInlineStyle(this.ownerElement_.handle_, this.rawStyle_);
+  }
+
   /**
    * @private
    * @param {number} id
@@ -123,6 +130,7 @@ class CSSStyleDeclaration {
     /** @const @type {string} */
     const value = this.rawStyle_.get(id) || '';
     this.rawStyle_.delete(id);
+    this.notifyChanged();
     return value;
   }
 
@@ -162,8 +170,6 @@ class CSSStyleDeclaration {
    */
   setPropertyValue_(id, newValue) {
     this.rawStyle_.set(id, newValue);
-    if (!this.ownerElement_)
-      return;
-    NodeHandle.setInlineStyle(this.ownerElement_.handle_, this.rawStyle_);
+    this.notifyChanged();
   }
 }

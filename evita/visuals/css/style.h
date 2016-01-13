@@ -30,6 +30,8 @@ class Style final {
   bool operator==(const Style& other) const;
   bool operator!=(const Style& other) const;
 
+  const std::bitset<kMaxPropertyId + 1>& contains() const { return contains_; }
+
 #define V(Name, name, type, text) \
   const type& name() const;       \
   bool has_##name() const;

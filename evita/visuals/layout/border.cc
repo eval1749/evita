@@ -69,6 +69,11 @@ bool Border::HasValue() const {
   return false;
 }
 
+bool Border::IsEmpty() const {
+  return thickness_.bottom() != 0 || thickness_.left() != 0 ||
+         thickness_.right() != 0 || thickness_.top() != 0;
+}
+
 bool Border::IsSimple() const {
   return top() == bottom() && top() == left() && top() == right() &&
          top_color() == bottom_color() && top_color() == left_color() &&

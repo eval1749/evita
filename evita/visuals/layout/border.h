@@ -56,6 +56,7 @@ class Border final {
   const FloatColor& top_color() const { return top_color_; }
 
   bool HasValue() const;
+  bool IsEmpty() const;
   bool IsSimple() const;
 
  private:

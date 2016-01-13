@@ -61,6 +61,13 @@ class CSSStyleSheet {
     this.clearCssRulesCache_();
   }
 
+  /**
+   * @param {number} index
+   */
+  didChangeCSSRuleStyle(index) {
+    // TODO(eval1749): Notify to C++ object about rule changed style.
+  }
+
   // TODO(eval1749) Make |CSSStyleSheet.prototype.appendRule()| to take
   // string instead of |CSSStyleRule|.
   /**

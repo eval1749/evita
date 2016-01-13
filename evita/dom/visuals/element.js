@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/**
+ * @implements {CSSStyleObserver}
+ */
 class Element extends Node {
   /**
    * @param {!Document} document
@@ -61,5 +64,15 @@ class Element extends Node {
   /** @return {string} */
   toString() {
     return `#{Element ${this.tagName_}}`;
+  }
+
+  /**
+   * CSSStyleChangeObserver
+   * @param {!CSSStyleDeclaration} style
+   */
+  didChangeCSSStyle(style) {
+    NodeHandle.setInlineStyle(
+        this.handle_,
+        /** @type {!Map<number, string>} */(this.rawStyle_));
   }
 }

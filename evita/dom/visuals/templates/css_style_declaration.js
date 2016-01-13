@@ -28,11 +28,11 @@ const CSS_PROPERTY_NAME_ID_MAP = (function() {
 class CSSStyleDeclaration {
   /**
    * @param {!Map<number, string>=} opt_rawStyle
-   * @param {!Element=} opt_element
+   * @param {!CSSStyleObserver=} opt_observer
    */
-  constructor(opt_rawStyle, opt_element) {
-    /** @const @type {Element} */
-    this.ownerElement_ = opt_element || null;
+  constructor(opt_rawStyle, opt_observer) {
+    /** @const @type {CSSStyleObserver} */
+    this.observer_ = opt_observer || null;
     /** @const type {!Map<number, string>} */
     this.rawStyle_ = opt_rawStyle || new Map();
     Object.seal(this);
@@ -86,9 +86,9 @@ class CSSStyleDeclaration {
 
   /** @private */
   notifyChanged() {
-    if (!this.ownerElement_)
+    if (!this.observer_)
       return;
-    NodeHandle.setInlineStyle(this.ownerElement_.handle_, this.rawStyle_);
+    this.observer_.didChangeCSSStyle(this);
   }
 
   /**

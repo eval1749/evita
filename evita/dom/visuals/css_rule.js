@@ -8,6 +8,9 @@
 //
 class CSSRule {
   constructor() {
+    /** @type {number} */
+    this.index_ = -1;
+
     /** @const @type {CSSRule} */
     this.parentRule_ = null;
 

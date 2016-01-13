@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-//////////////////////////////////////////////////////////////////////
-//
-// CSSStyleRule
-//
+/**
+ * CSSStyleRule
+ * @implements {CSSStyleObserver}
+ */
 class CSSStyleRule extends CSSRule {
   /**
    * @param {string} selectorText
@@ -38,4 +38,15 @@ class CSSStyleRule extends CSSRule {
 
   /** @override @return {number} */
   get type() { return CSSRule.STYLE_RULE; }
+
+  /**
+   * CSSStyleObserver
+   * @param {!CSSStyleDeclaration} style
+   */
+  didChangeCSSStyle(style) {
+    if (!this.parentStyleSheet_)
+      return;
+    console.assert(this.index_ >= 0);
+    this.parentStyleSheet_.didChangeCSSRuleStyle(this.index_);
+  }
 }

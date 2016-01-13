@@ -426,11 +426,11 @@ void StyleTree::DidChangeSystemMetrics() {
 }
 
 // css::StyleSheetObserver
-void StyleTree::DidAppendRule(const css::Rule& rule) {
+void StyleTree::DidInsertRule(const css::Rule& rule, size_t index) {
   Clear();
 }
 
-void StyleTree::DidRemoveRule(const css::Rule& rule) {
+void StyleTree::DidRemoveRule(const css::Rule& rule, size_t index) {
   Clear();
 }
 

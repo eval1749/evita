@@ -85,14 +85,16 @@ void CompiledStyleSheet::RemoveObserver(
 }
 
 // css::StyleSheetObserver
-void CompiledStyleSheet::DidAppendRule(const css::Rule& new_rule) {
+void CompiledStyleSheet::DidInsertRule(const css::Rule& new_rule,
+                                       size_t index) {
   FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
-                    DidAppendRule(new_rule));
+                    DidInsertRule(new_rule, index));
 }
 
-void CompiledStyleSheet::DidRemoveRule(const css::Rule& old_rule) {
+void CompiledStyleSheet::DidRemoveRule(const css::Rule& old_rule,
+                                       size_t index) {
   FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
-                    DidRemoveRule(old_rule));
+                    DidRemoveRule(old_rule, index));
 }
 
 }  // namespace visuals

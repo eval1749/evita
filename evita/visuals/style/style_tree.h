@@ -69,8 +69,8 @@ class StyleTree final : public css::MediaObserver,
   void DidChangeSystemMetrics() final;
 
   // css::StyleSheetObserver
-  void DidAppendRule(const css::Rule& rule) final;
-  void DidRemoveRule(const css::Rule& rule) final;
+  void DidInsertRule(const css::Rule& rule, size_t index) final;
+  void DidRemoveRule(const css::Rule& rule, size_t index) final;
 
   // DocumentObserver
   void DidAddClass(const Element& element, const base::string16& name);

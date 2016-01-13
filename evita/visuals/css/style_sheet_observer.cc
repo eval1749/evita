@@ -13,8 +13,8 @@ namespace css {
 //
 StyleSheetObserver::StyleSheetObserver() {}
 StyleSheetObserver::~StyleSheetObserver() {}
-void StyleSheetObserver::DidAppendRule(const Rule& new_rule) {}
-void StyleSheetObserver::DidRemoveRule(const Rule& old_rule) {}
+void StyleSheetObserver::DidInsertRule(const Rule& new_rule, size_t index) {}
+void StyleSheetObserver::DidRemoveRule(const Rule& old_rule, size_t index) {}
 
 }  // namespace css
 }  // namespace visuals

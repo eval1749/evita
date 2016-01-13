@@ -85,8 +85,9 @@ void CompiledStyleSheet::RemoveObserver(
 }
 
 // css::StyleSheetObserver
-void CompiledStyleSheet::DidAddRule(const css::Rule& new_rule) {
-  FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_, DidAddRule(new_rule));
+void CompiledStyleSheet::DidAppendRule(const css::Rule& new_rule) {
+  FOR_EACH_OBSERVER(css::StyleSheetObserver, observers_,
+                    DidAppendRule(new_rule));
 }
 
 void CompiledStyleSheet::DidRemoveRule(const css::Rule& old_rule) {

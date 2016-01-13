@@ -91,7 +91,7 @@ Document* LoadDocument() {
 
 css::StyleSheet* LoadStyleSheet() {
   const auto style_sheet = new css::StyleSheet();
-  style_sheet->AddRule(
+  style_sheet->AppendRule(
       L"#hover",
       std::move(css::StyleBuilder()
                     .SetPosition(css::Position::Absolute())
@@ -100,30 +100,30 @@ css::StyleSheet* LoadStyleSheet() {
                     .SetBackgroundColor(css::Color::Rgba(51, 153, 255, 0.1f))
                     .SetBorder(css::Color::Rgba(51, 153, 255, 1.0f), 1)
                     .Build()));
-  style_sheet->AddRule(
+  style_sheet->AppendRule(
       L"list",
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
-  style_sheet->AddRule(L"list_item",
-                       std::move(css::StyleBuilder()
-                                     .SetColor(css::Color(0, 0, 0))
-                                     .SetDisplay(css::Display::Block())
-                                     .SetPaddingTop(css::Length(2))
-                                     .SetPaddingRight(css::Length(5))
-                                     .SetPaddingBottom(css::Length(2))
-                                     .SetPaddingLeft(css::Length(5))
-                                     .Build()));
-  style_sheet->AddRule(
+  style_sheet->AppendRule(L"list_item",
+                          std::move(css::StyleBuilder()
+                                        .SetColor(css::Color(0, 0, 0))
+                                        .SetDisplay(css::Display::Block())
+                                        .SetPaddingTop(css::Length(2))
+                                        .SetPaddingRight(css::Length(5))
+                                        .SetPaddingBottom(css::Length(2))
+                                        .SetPaddingLeft(css::Length(5))
+                                        .Build()));
+  style_sheet->AppendRule(
       L"main",
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
-  style_sheet->AddRule(L"name",
-                       std::move(css::StyleBuilder().SetWidth(150).Build()));
-  style_sheet->AddRule(
+  style_sheet->AppendRule(L"name",
+                          std::move(css::StyleBuilder().SetWidth(150).Build()));
+  style_sheet->AppendRule(
       L"size",
       std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
-  style_sheet->AddRule(
+  style_sheet->AppendRule(
       L"status",
       std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
-  style_sheet->AddRule(
+  style_sheet->AppendRule(
       L"file",
       std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
   return style_sheet;

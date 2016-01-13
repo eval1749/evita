@@ -20,7 +20,7 @@ class StyleSheetObserver {
  public:
   virtual ~StyleSheetObserver();
 
-  virtual void DidAddRule(const Rule& rule);
+  virtual void DidAppendRule(const Rule& rule);
   virtual void DidRemoveRule(const Rule& rule);
 
  protected:

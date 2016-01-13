@@ -426,7 +426,7 @@ void StyleTree::DidChangeSystemMetrics() {
 }
 
 // css::StyleSheetObserver
-void StyleTree::DidAddRule(const css::Rule& rule) {
+void StyleTree::DidAppendRule(const css::Rule& rule) {
   Clear();
 }
 

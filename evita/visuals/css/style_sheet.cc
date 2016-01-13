@@ -22,11 +22,11 @@ StyleSheet::~StyleSheet() {
     delete rule;
 }
 
-void StyleSheet::AddRule(const base::StringPiece16& selector,
-                         std::unique_ptr<css::Style> style) {
+void StyleSheet::AppendRule(const base::StringPiece16& selector,
+                            std::unique_ptr<css::Style> style) {
   const auto rule = new Rule(selector, std::move(style));
   rules_.push_back(rule);
-  FOR_EACH_OBSERVER(StyleSheetObserver, observers_, DidAddRule(*rule));
+  FOR_EACH_OBSERVER(StyleSheetObserver, observers_, DidAppendRule(*rule));
 }
 
 void StyleSheet::AddObserver(StyleSheetObserver* observer) const {
@@ -38,7 +38,7 @@ void StyleSheet::InsertRule(const base::StringPiece16& selector,
                             size_t index) {
   const auto rule = new Rule(selector, std::move(style));
   rules_.insert(rules_.begin() + index, rule);
-  FOR_EACH_OBSERVER(StyleSheetObserver, observers_, DidAddRule(*rule));
+  FOR_EACH_OBSERVER(StyleSheetObserver, observers_, DidAppendRule(*rule));
 }
 
 void StyleSheet::RemoveObserver(StyleSheetObserver* observer) const {

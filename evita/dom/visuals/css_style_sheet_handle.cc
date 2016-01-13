@@ -32,7 +32,7 @@ void CSSStyleSheetHandle::AppendStyleRule(CSSStyleSheetHandle* handle,
   const auto& runner = ScriptHost::instance()->runner();
   const auto& context = runner->context();
   auto style = CSSStyle::ConvertFromV8(context, raw_style);
-  handle->object_->AddRule(selector, std::move(style));
+  handle->object_->AppendRule(selector, std::move(style));
 }
 
 int CSSStyleSheetHandle::CountRules(CSSStyleSheetHandle* handle) {

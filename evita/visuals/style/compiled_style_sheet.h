@@ -39,7 +39,7 @@ class CompiledStyleSheet final : public css::StyleSheetObserver {
   void CompileRule(const css::Rule& rule);
 
   // css::StyleSheetObserver
-  void DidAddRule(const css::Rule& new_rule);
+  void DidAppendRule(const css::Rule& new_rule);
   void DidRemoveRule(const css::Rule& old_rule);
 
   mutable base::ObserverList<css::StyleSheetObserver> observers_;

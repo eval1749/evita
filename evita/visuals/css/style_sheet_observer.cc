@@ -13,7 +13,7 @@ namespace css {
 //
 StyleSheetObserver::StyleSheetObserver() {}
 StyleSheetObserver::~StyleSheetObserver() {}
-void StyleSheetObserver::DidAddRule(const Rule& new_rule) {}
+void StyleSheetObserver::DidAppendRule(const Rule& new_rule) {}
 void StyleSheetObserver::DidRemoveRule(const Rule& old_rule) {}
 
 }  // namespace css

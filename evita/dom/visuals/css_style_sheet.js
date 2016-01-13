@@ -14,7 +14,7 @@ class CSSStyleSheet {
     /** @private @const @type {!Array<!CSSRule>} */
     this.cssRules_ = [];
 
-    /** @private @const @type {!CSSStyleSheetHandle} */
+    /** @const @type {!CSSStyleSheetHandle} */
     this.handle_ = new CSSStyleSheetHandle();
   }
 

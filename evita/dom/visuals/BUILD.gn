@@ -15,8 +15,6 @@ source_set("visuals") {
     "css_value_parsers.h",
     "node_handle.cc",
     "node_handle.h",
-    "node_handle_style.cc",
-    "node_handle_style.h",
   ]
 
   public_deps = [

@@ -36,6 +36,7 @@ class NodeEditor final {
   void RemoveClass(Element* element, const base::StringPiece16& class_name);
   void ReplaceChild(ContainerNode* container, Node* new_child, Node* old_child);
   void SetInlineStyle(Element* element, const css::Style& style);
+  void SetTextData(Text* text, const base::StringPiece16& data);
 
   void WillDestroy(Node* node);
 

@@ -339,6 +339,14 @@ void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
   SetContentChanged(text_box);
 }
 
+void BoxEditor::SetTextData(TextBox* text_box,
+                            const base::StringPiece16& data) {
+  if (text_box->text_ == data)
+    return;
+  text_box->text_ = data.as_string();
+  SetContentChanged(text_box);
+}
+
 #define FOR_EACH_PROPERTY_AFFECTS_TEXT_FONT(V) \
   V(font_family)                               \
   V(font_size)                                 \

@@ -188,6 +188,7 @@ Box* BoxTree::Impl::AssignBoxToNode(Context* context, const Node& node) {
 Box* BoxTree::Impl::AssignBoxToText(Context* context, const Text& text) {
   const auto& style = ComputedStyleOf(text);
   if (const auto text_box = BoxFor(text)) {
+    BoxEditor().SetTextData(text_box->as<TextBox>(), text.data());
     BoxEditor().SetStyle(text_box, style);
     return text_box;
   }
@@ -475,6 +476,12 @@ void BoxTree::DidReplaceChild(const ContainerNode& parent,
 void BoxTree::DidChangeComputedStyle(const Element& element,
                                      const css::Style& old_style) {
   impl_->MarkDirty(element);
+}
+
+void BoxTree::DidSetTextData(const Text& text,
+                             const base::string16& new_data,
+                             const base::string16& old_data) {
+  impl_->MarkDirty(text);
 }
 
 }  // namespace visuals

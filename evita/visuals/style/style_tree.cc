@@ -480,4 +480,10 @@ void StyleTree::DidReplaceChild(const ContainerNode& parent,
   impl_->MarkDirty(parent);
 }
 
+void StyleTree::DidSetTextData(const Text& text,
+                               const base::string16& new_data,
+                               const base::string16& old_data) {
+  // TODO(eval1749): When does |Text| node change affect style tree?
+}
+
 }  // namespace visuals

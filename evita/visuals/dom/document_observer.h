@@ -17,6 +17,7 @@ class Style;
 class ContainerNode;
 class Element;
 class Node;
+class Text;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -40,6 +41,9 @@ class DocumentObserver {
   virtual void DidReplaceChild(const ContainerNode& parent,
                                const Node& new_child,
                                const Node& old_child);
+  virtual void DidSetTextData(const Text& text,
+                              const base::string16& new_data,
+                              const base::string16& old_data);
   virtual void WillRemoveChild(const ContainerNode& parent, const Node& child);
 
  protected:

@@ -6,6 +6,7 @@
 #define EVITA_VISUALS_LAYOUT_BOX_EDITOR_H_
 
 #include "base/macros.h"
+#include "base/strings/string_piece.h"
 
 namespace visuals {
 
@@ -59,6 +60,7 @@ class BoxEditor final {
   const TextFormat& EnsureTextFormat(TextBox* box);
   void SetBaseline(TextBox* box, float new_baseline);
   void SetTextColor(TextBox* box, const FloatColor& color);
+  void SetTextData(TextBox* box, const base::StringPiece16& data);
 
   // RootBox
   void SetViewportSize(RootBox* root_box, const FloatSize& size);

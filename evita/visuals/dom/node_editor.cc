@@ -208,6 +208,19 @@ void NodeEditor::SetInlineStyle(Element* element, const css::Style& new_style) {
                     DidChangeInlineStyle(*element, nullptr));
 }
 
+void NodeEditor::SetTextData(Text* text, const base::StringPiece16& data) {
+  const auto& document = text->document_;
+  DCHECK(!document->is_locked());
+  if (text->data_ == data)
+    return;
+  const auto& new_data = data.as_string();
+  const auto old_data = text->data_;
+  text->data_ = new_data;
+  ++document->version_;
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
+                    DidSetTextData(*text, new_data, old_data));
+}
+
 void NodeEditor::UnregisterElementIdForSubtree(const Node& node) {
   if (!node.is<ContainerNode>() || !node.InDocument())
     return;

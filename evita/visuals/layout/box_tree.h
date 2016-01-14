@@ -56,6 +56,9 @@ class BoxTree final : public css::MediaObserver,
   void DidReplaceChild(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;
+  void DidSetTextData(const Text& text,
+                      const base::string16& new_data,
+                      const base::string16& old_data) final;
 
   // StyleTreeObserver
   void DidChangeComputedStyle(const Element& element,

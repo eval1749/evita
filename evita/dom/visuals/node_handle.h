@@ -57,6 +57,9 @@ class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
   static void RemoveChild(NodeHandle* parent, NodeHandle* node);
   static void RemoveClass(NodeHandle* element_handle,
                           const base::string16& class_name);
+  static void ReplaceChild(NodeHandle* parent,
+                           NodeHandle* node,
+                           NodeHandle* child);
   static void SetInlineStyle(NodeHandle* element, v8::Local<v8::Map> raw_style);
 
   const gc::Member<visuals::Node> value_;

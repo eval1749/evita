@@ -13,7 +13,9 @@ interface NodeHandle {
   static void insertBefore(NodeHandle parent, NodeHandle node, NodeHandle child);
   static void removeChild(NodeHandle parent, NodeHandle child);
   static void removeClass(NodeHandle parent, DOMString className);
-  static void  setInlineStyle(NodeHandle handle, Map rawStyle);
+  static void replaceChild(NodeHandle parent, NodeHandle node,
+                           NodeHandle child);
+  static void setInlineStyle(NodeHandle handle, Map rawStyle);
 
   readonly attribute long id;
 };

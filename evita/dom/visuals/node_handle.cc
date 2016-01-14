@@ -119,6 +119,15 @@ void NodeHandle::RemoveClass(NodeHandle* element_handle,
   visuals::NodeEditor().RemoveClass(element, class_name);
 }
 
+void NodeHandle::ReplaceChild(NodeHandle* parent,
+                              NodeHandle* node,
+                              NodeHandle* child) {
+  const auto container = AsContainerNode(parent);
+  if (!container)
+    return;
+  visuals::NodeEditor().ReplaceChild(container, node->value(), child->value());
+}
+
 void NodeHandle::SetInlineStyle(NodeHandle* handle,
                                 v8::Local<v8::Map> raw_style) {
   const auto& runner = ScriptHost::instance()->runner();

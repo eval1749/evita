@@ -106,6 +106,7 @@ class Node {
     node.parentNode_ = this;
     node.nextSibling_ = child;;
     node.previousSibling_ = previousSibling;
+    NodeHandle.insertBefore(this.handle_, node.handle_, child.handle_);
     return node;
   }
 
@@ -180,6 +181,7 @@ class Node {
     node.parentNode_ = this;
     node.nextSibling_ = nextSibling;
     node.previousSibling_ = previousSibling;
+    NodeHandle.replaceChild(this.handle_, node.handle_, child.handle_);
     return child;
   }
 }

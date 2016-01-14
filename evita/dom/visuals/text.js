@@ -25,5 +25,5 @@ class Text extends Node {
   }
 
   /** @override @return {string} */
-  get nodeNmae() { return '#text'; }
+  get nodeName() { return '#text'; }
 }

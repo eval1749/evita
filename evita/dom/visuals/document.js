@@ -27,5 +27,5 @@ class Document extends Node {
   }
 
   /** @override @return {string} */
-  get nodeNmae() { return '#document'; }
+  get nodeName() { return '#document'; }
 }

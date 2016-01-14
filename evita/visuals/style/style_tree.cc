@@ -474,4 +474,10 @@ void StyleTree::DidRemoveClass(const Element& element,
   impl_->MarkDirty(element);
 }
 
+void StyleTree::DidReplaceChild(const ContainerNode& parent,
+                                const Node& child,
+                                const Node& ref_child) {
+  impl_->MarkDirty(parent);
+}
+
 }  // namespace visuals

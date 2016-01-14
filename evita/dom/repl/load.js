@@ -40,6 +40,7 @@ $define(global, 'repl', function($export) {
         total_read += num_read;
       }
       file.close();
+      file = null;
       text = text.replace(/\r\n/g, '\n');
       if (options.verbose)
         console.log(LINE_COMMENT, 'loaded', scriptPath, total_read);

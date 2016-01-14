@@ -85,6 +85,8 @@ js_lib_files = [
   "visuals/element.js",
   "visuals/text.js",
 
+  "visuals/css_rule_builder.js",
+
   "windows/table_window.js",
   "windows/text_document_state.js",
   "windows/point.js",

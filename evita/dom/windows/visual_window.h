@@ -29,6 +29,7 @@ class Document;
 class Element;
 class Node;
 class StyleTree;
+class Text;
 }  // namespace visuals
 
 namespace dom {
@@ -61,6 +62,7 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   using Element = visuals::Element;
   using FloatSize = visuals::FloatSize;
   using Node = visuals::Node;
+  using Text = visuals::Text;
 
   VisualWindow(visuals::Document* document,
                visuals::css::StyleSheet* style_sheet);
@@ -91,6 +93,12 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   void DidRemoveChild(const ContainerNode& parent, const Node& child) final;
   void DidRemoveClass(const Element& element,
                       const base::string16& old_name) final;
+  void DidReplaceChild(const ContainerNode& parent,
+                       const Node& child,
+                       const Node& ref_child) final;
+  void DidSetTextData(const Text& text,
+                      const base::string16& new_data,
+                      const base::string16& old_data) final;
   void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
 
   // Window

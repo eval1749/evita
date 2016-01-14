@@ -58,8 +58,7 @@ void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
       L"dom: %d, css: %d, box: %d", style_tree_->document().version(),
       style_tree_->version(), box_tree_->version());
   visuals::PaintInfo paint_info(root_box->bounds(), debug_text);
-  auto display_item_list =
-      visuals::Painter().Paint(paint_info, *root_box);
+  auto display_item_list = visuals::Painter().Paint(paint_info, *root_box);
   ScriptHost::instance()->view_delegate()->PaintVisualDocument(
       window_id(), std::move(display_item_list));
 }
@@ -122,27 +121,45 @@ void VisualWindow::DidAddClass(const Element& element,
                                const base::string16& new_name) {
   RequestAnimationFrame();
 }
+
 void VisualWindow::DidAppendChild(const ContainerNode& parent,
                                   const Node& child) {
   RequestAnimationFrame();
 }
+
 void VisualWindow::DidChangeInlineStyle(const Element& element,
                                         const CssStyle* old_style) {
   RequestAnimationFrame();
 }
+
 void VisualWindow::DidInsertBefore(const ContainerNode& parent,
                                    const Node& child,
                                    const Node& ref_child) {
   RequestAnimationFrame();
 }
+
 void VisualWindow::DidRemoveChild(const ContainerNode& parent,
                                   const Node& child) {
   RequestAnimationFrame();
 }
+
 void VisualWindow::DidRemoveClass(const Element& element,
                                   const base::string16& old_name) {
   RequestAnimationFrame();
 }
+
+void VisualWindow::DidReplaceChild(const ContainerNode& parent,
+                                   const Node& child,
+                                   const Node& ref_child) {
+  RequestAnimationFrame();
+}
+
+void VisualWindow::DidSetTextData(const Text& text,
+                                  const base::string16& new_data,
+                                  const base::string16& old_data) {
+  RequestAnimationFrame();
+}
+
 void VisualWindow::WillRemoveChild(const ContainerNode& parent,
                                    const Node& child) {
   RequestAnimationFrame();

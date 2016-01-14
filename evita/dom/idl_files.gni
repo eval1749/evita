@@ -152,4 +152,5 @@ static_js_externs_files = [
   "//evita/dom/visuals/visuals_externs.js",
   "//evita/dom/windows/text_document_state_externs.js",
   "//evita/dom/windows/tab_data_externs.js",
+  "//evita/dom/windows/visual_window_externs.js",
 ]

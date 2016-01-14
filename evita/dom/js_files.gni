@@ -103,6 +103,8 @@ js_lib_files = [
   "commands/text_window_commands.js",
   "commands/window_commands.js",
 
+  "components/launchpad/view_model.js",
+
   "repl/console.js",
   "repl/describe.js",
   "repl/js_console.js",

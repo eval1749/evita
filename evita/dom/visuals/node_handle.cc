@@ -141,4 +141,15 @@ void NodeHandle::SetInlineStyle(NodeHandle* handle,
   visuals::NodeEditor().SetInlineStyle(element, *style);
 }
 
+// static
+void NodeHandle::SetTextData(NodeHandle* text_handle,
+                             const base::string16& data) {
+  const auto text = text_handle->value()->as<visuals::Text>();
+  if (!text) {
+    ScriptHost::instance()->ThrowError("Requires text node");
+    return;
+  }
+  visuals::NodeEditor().SetTextData(text, data);
+}
+
 }  // namespace dom

@@ -16,6 +16,14 @@ class Text extends Node {
   /** @return {string} */
   get data() { return this.data_; }
 
+  /** @param {string} newData */
+  set data(newData) {
+    if (this.data_ === newData)
+      return;
+    this.data_ = newData;
+    NodeHandle.setTextData(this.handle_, newData);
+  }
+
   /** @override @return {string} */
   get nodeNmae() { return '#text'; }
 }

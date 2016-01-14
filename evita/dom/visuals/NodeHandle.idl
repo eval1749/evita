@@ -16,6 +16,7 @@ interface NodeHandle {
   static void replaceChild(NodeHandle parent, NodeHandle node,
                            NodeHandle child);
   static void setInlineStyle(NodeHandle handle, Map rawStyle);
+  static void setTextData(NodeHandle handle, DOMString data);
 
   readonly attribute long id;
 };

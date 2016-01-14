@@ -61,6 +61,7 @@ class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
                            NodeHandle* node,
                            NodeHandle* child);
   static void SetInlineStyle(NodeHandle* element, v8::Local<v8::Map> raw_style);
+  static void SetTextData(NodeHandle* element, const base::string16& data);
 
   const gc::Member<visuals::Node> value_;
 

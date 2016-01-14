@@ -94,7 +94,7 @@ int VisualWindow::HitTest(int x, int y) {
       visuals::BoxFinder(*box_tree_->root_box()).FindByPoint(point);
   if (!found.box)
     return -1;
-  return found.box->sequence_id();
+  return found.box->node()->sequence_id();
 }
 
 VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle,

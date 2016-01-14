@@ -465,6 +465,12 @@ void BoxTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
   impl_->MarkDirty(parent);
 }
 
+void BoxTree::DidReplaceChild(const ContainerNode& parent,
+                              const Node& child,
+                              const Node& ref_child) {
+  impl_->MarkDirty(parent);
+}
+
 // StyleTreeObserver
 void BoxTree::DidChangeComputedStyle(const Element& element,
                                      const css::Style& old_style) {

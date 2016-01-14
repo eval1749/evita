@@ -54,7 +54,7 @@ $define(global, 'windows', function($export) {
       this.lastWriteTime = document.lastWriteTime;
       this.modified = document.modified;
       this.state = 0;
-      this.notifyChange();
+      this.notifyChanged();
     }
 
     /**
@@ -66,13 +66,13 @@ $define(global, 'windows', function($export) {
       if (this.modified === this.document_.modified)
         return;
       this.modified = this.document_.modified;
-      this.notifyChange();
+      this.notifyChanged();
     }
 
     /**
      * @private
      */
-    notifyChange() {
+    notifyChanged() {
       observers.forEach(observer => observer(this.document_, this));
     }
 
@@ -92,7 +92,7 @@ $define(global, 'windows', function($export) {
       const mutationObserver = new TextMutationObserver(
           this.mutationCallback.bind(this));
       mutationObserver.observe(document, {summary: true});
-      this.notifyChange();
+      this.notifyChanged();
     }
 
     /**
@@ -101,7 +101,7 @@ $define(global, 'windows', function($export) {
      */
     willLoadTextDocument(event) {
       this.state = 1;
-      this.notifyChange();
+      this.notifyChanged();
     }
 
     /**

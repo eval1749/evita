@@ -46,7 +46,7 @@ class ViewEventHandler {
                                      int bottom) = 0;
   virtual void DidChangeWindowVisibility(WindowId window_id,
                                          Visibility visibility) = 0;
-  virtual void DidDestroyWidget(WindowId window_id) = 0;
+  virtual void DidDestroyWindow(WindowId window_id) = 0;
   virtual void DidDropWidget(WindowId source_id, WindowId target_id) = 0;
   virtual void DidRealizeWidget(WindowId window_id) = 0;
   virtual void DidEnterViewIdle(const base::TimeTicks& deadline) = 0;

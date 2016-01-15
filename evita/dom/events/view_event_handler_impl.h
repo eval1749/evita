@@ -33,7 +33,7 @@ class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
                              int bottom) final;
   void DidChangeWindowVisibility(domapi::WindowId window_id,
                                  domapi::Visibility visibility) final;
-  void DidDestroyWidget(domapi::WindowId window_id) final;
+  void DidDestroyWindow(domapi::WindowId window_id) final;
   void DidDropWidget(domapi::WindowId source_id,
                      domapi::WindowId target_id) final;
   void DidEnterViewIdle(const base::TimeTicks& deadline) final;

@@ -27,7 +27,7 @@ class ViewEventTargetSet final : public common::Singleton<ViewEventTargetSet> {
  public:
   ~ViewEventTargetSet() final;
 
-  void DidDestroyWidget(domapi::EventTargetId event_target_id);
+  void DidDestroyWindow(domapi::EventTargetId event_target_id);
   ViewEventTarget* Find(domapi::EventTargetId event_target_id) const;
   domapi::EventTargetId Register(ViewEventTarget* event_target);
   void ResetForTesting();

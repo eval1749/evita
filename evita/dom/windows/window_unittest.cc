@@ -182,7 +182,7 @@ TEST_F(WindowTest, Add) {
   EXPECT_SCRIPT_TRUE("child2.nextSibling === null");
   EXPECT_SCRIPT_TRUE("child2.previousSibling === child1");
   view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(1));
-  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(2));
+  view_event_handler()->DidDestroyWindow(static_cast<domapi::WindowId>(2));
   EXPECT_SCRIPT_EQ("1", "parent.children.length");
   EXPECT_SCRIPT_TRUE("parent.firstChild === child2");
   EXPECT_SCRIPT_TRUE("parent.lastChild === child2");
@@ -211,10 +211,10 @@ TEST_F(WindowTest, Destroy) {
   EXPECT_SCRIPT_EQ("destroying", "child1.state");
   EXPECT_SCRIPT_EQ("destroying", "child2.state");
   EXPECT_SCRIPT_EQ("destroying", "child3.state");
-  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(1));
-  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(2));
-  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(3));
-  view_event_handler()->DidDestroyWidget(static_cast<domapi::WindowId>(4));
+  view_event_handler()->DidDestroyWindow(static_cast<domapi::WindowId>(1));
+  view_event_handler()->DidDestroyWindow(static_cast<domapi::WindowId>(2));
+  view_event_handler()->DidDestroyWindow(static_cast<domapi::WindowId>(3));
+  view_event_handler()->DidDestroyWindow(static_cast<domapi::WindowId>(4));
   EXPECT_SCRIPT_EQ("destroyed", "sample1.state");
   EXPECT_SCRIPT_EQ("destroyed", "child1.state");
   EXPECT_SCRIPT_EQ("destroyed", "child2.state");

@@ -14,7 +14,7 @@ WindowSet::WindowSet() {}
 
 WindowSet::~WindowSet() {}
 
-void WindowSet::DidDestroyWidget(domapi::WindowId window_id) {
+void WindowSet::DidDestroyWindow(domapi::WindowId window_id) {
   DCHECK_NE(domapi::kInvalidWindowId, window_id);
   auto it = map_.find(window_id);
   if (it == map_.end()) {

@@ -143,7 +143,7 @@ DEFINE_VIEW_EVENT_HANDLER5(DidChangeWindowBounds,
 DEFINE_VIEW_EVENT_HANDLER2(DidChangeWindowVisibility,
                            domapi::WindowId,
                            domapi::Visibility)
-DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWidget, domapi::WindowId)
+DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWindow, domapi::WindowId)
 DEFINE_VIEW_EVENT_HANDLER2(DidDropWidget, domapi::WindowId, domapi::WindowId)
 
 void ScriptThread::DidEnterViewIdle(const base::TimeTicks& deadline) {

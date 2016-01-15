@@ -81,7 +81,7 @@ TEST_F(TextWindowTest, realize) {
   // The document receives "detach" event when |TextWindow| is destroyed.
   EXPECT_CALL(*mock_view_impl(), DestroyWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("sample.destroy()");
-  view_event_handler()->DidDestroyWidget(1);
+  view_event_handler()->DidDestroyWindow(1);
   RunMessageLoopUntilIdle();
 
   EXPECT_SCRIPT_TRUE("event instanceof TextDocumentEvent");

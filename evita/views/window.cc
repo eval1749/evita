@@ -109,7 +109,7 @@ Window::Window(WindowId window_id)
 
 Window::~Window() {
   WindowIdMapper::instance()->Unregister(window_id_);
-  view_event_handler()->DidDestroyWidget(window_id_);
+  view_event_handler()->DidDestroyWindow(window_id_);
 }
 
 Window* Window::FromWindowId(WindowId window_id) {

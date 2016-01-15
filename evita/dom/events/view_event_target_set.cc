@@ -12,7 +12,7 @@ ViewEventTargetSet::ViewEventTargetSet() : next_event_target_id_(1) {}
 
 ViewEventTargetSet::~ViewEventTargetSet() {}
 
-void ViewEventTargetSet::DidDestroyWidget(
+void ViewEventTargetSet::DidDestroyWindow(
     domapi::EventTargetId event_target_id) {
   DCHECK_NE(domapi::kInvalidEventTargetId, event_target_id);
   auto it = map_.find(event_target_id);

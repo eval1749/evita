@@ -152,7 +152,7 @@ void ViewEventHandlerImpl::DidChangeWindowVisibility(
                   UiEventInit()));
 }
 
-void ViewEventHandlerImpl::DidDestroyWidget(domapi::WindowId window_id) {
+void ViewEventHandlerImpl::DidDestroyWindow(domapi::WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)
     return;

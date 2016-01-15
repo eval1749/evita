@@ -21,7 +21,7 @@ class WindowSet final : public common::Singleton<WindowSet> {
  public:
   ~WindowSet() final;
 
-  void DidDestroyWidget(domapi::WindowId window_id);
+  void DidDestroyWindow(domapi::WindowId window_id);
   Window* Find(domapi::WindowId window_id) const;
   void Register(Window* window);
   void ResetForTesting();

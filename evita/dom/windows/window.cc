@@ -139,7 +139,7 @@ void Window::DidActivateWindow() {
 }
 
 void Window::DidDestroyWindow() {
-  WindowSet::instance()->DidDestroyWidget(window_id());
+  WindowSet::instance()->DidDestroyWindow(window_id());
 }
 
 // Possible state transitions:

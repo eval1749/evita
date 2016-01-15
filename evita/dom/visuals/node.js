@@ -27,6 +27,9 @@ class Node {
     Node.nodeIdMap_.set(handle.id, this);
   }
 
+  /** @return {!Generator<!Node>} */
+  get childNodes() { return this.childNodesFunction(); }
+
   /** @return {Node} */
   get firstChild() { return this.firstChild_; }
 
@@ -72,6 +75,15 @@ class Node {
     node.document_ = this.document_;
     NodeHandle.appendChild(this.handle_, node.handle_);
     return node;
+  }
+
+  /**
+   * @private
+   * @return {!Generator<Node>}
+   */
+  *childNodesFunction() {
+    for (let child = this.firstChild; child; child = child.nextSibling_)
+      yield child;
   }
 
   /** @return {boolean} */
@@ -191,13 +203,4 @@ Node.nodeIdMap_;
 
 Object.defineProperties(Node, {
   nodeIdMap_: {value: new Map()},
-});
-
-Object.defineProperties(Node.prototype, {
-  childNodes: {
-    get: /** @this {!Node} */ function*() {
-      for (let child = this.firstChild; child; child = child.nextSibling_)
-        yield child;
-    }
-  }
 });

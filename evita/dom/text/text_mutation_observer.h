@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_TEXT_TEXT_MUTATION_OBSERVER_H_
 #define EVITA_DOM_TEXT_TEXT_MUTATION_OBSERVER_H_
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -22,6 +23,10 @@ namespace bindings {
 class TextMutationObserverClass;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// TextMutationObserver implements IDL interface |TextMutationObserver|.
+//
 class TextMutationObserver final
     : public v8_glue::Scriptable<TextMutationObserver> {
   DECLARE_SCRIPTABLE_OBJECT(TextMutationObserver);
@@ -43,13 +48,14 @@ class TextMutationObserver final
 
   explicit TextMutationObserver(v8::Local<v8::Function> callback);
 
+  // Bindings
   void Disconnect();
   Tracker* GetTracker(TextDocument* document) const;
   void Observe(TextDocument* document, const TextMutationObserverInit& options);
   std::vector<TextMutationRecord*> TakeRecords();
 
   v8_glue::ScopedPersistent<v8::Function> callback_;
-  std::unordered_map<TextDocument*, Tracker*> tracker_map_;
+  std::unordered_map<TextDocument*, std::unique_ptr<Tracker>> tracker_map_;
 
   DISALLOW_COPY_AND_ASSIGN(TextMutationObserver);
 };

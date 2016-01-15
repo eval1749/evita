@@ -125,14 +125,15 @@ void TextMutationObserver::Disconnect() {
 TextMutationObserver::Tracker* TextMutationObserver::GetTracker(
     TextDocument* document) const {
   const auto& it = tracker_map_.find(document);
-  return it == tracker_map_.end() ? nullptr : it->second;
+  return it == tracker_map_.end() ? nullptr : it->second.get();
 }
 
 void TextMutationObserver::Observe(TextDocument* document,
                                    const TextMutationObserverInit& options) {
   DCHECK(options.summary());
   if (!GetTracker(document)) {
-    const auto& result = tracker_map_.emplace(document, new Tracker(document));
+    const auto& result = tracker_map_.emplace(
+        document, std::move(std::make_unique<Tracker>(document)));
     DCHECK(result.second) << *document << " should be unique in tracker_map_";
   }
   TextMutationObserverController::instance()->Register(this, document);
@@ -142,7 +143,7 @@ std::vector<TextMutationRecord*> TextMutationObserver::TakeRecords() {
   std::vector<TextMutationRecord*> records;
   records.reserve(tracker_map_.size());
   for (const auto& key_val : tracker_map_) {
-    const auto tracker = key_val.second;
+    const auto& tracker = key_val.second;
     for (const auto& record : tracker->TakeRecords())
       records.push_back(record);
   }

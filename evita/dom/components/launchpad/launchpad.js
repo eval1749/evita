@@ -576,14 +576,19 @@ $define(global, 'launchpad', function($export) {
     updateSelected() {
       const add = this.hasFocus_ ? 'activeSelected' : 'inactiveSelected';
       const remove = this.hasFocus_ ? 'inactiveSelected' : 'activeSelected';
+      let count = 0;
       for (const row of this.list_.childNodes) {
         row.classList.remove(remove);
         if (this.selection_.contains(row)) {
           row.classList.add(add);
+          ++count;
           continue;
         }
         row.classList.remove(add);
       }
+      if (!this.window_.parent)
+        return;
+      this.window_.parent.setStatusBar([`$(count) selected`]);
     }
 
     ////////////////////////////////////////////////////////////

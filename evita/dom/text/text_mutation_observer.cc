@@ -56,7 +56,7 @@ void TextMutationObserver::Tracker::Reset() {
 std::vector<TextMutationRecord*> TextMutationObserver::Tracker::TakeRecords() {
   if (!has_records())
     return std::vector<TextMutationRecord*>();
-  auto const minimum_change_offset = minimum_change_offset_;
+  const auto minimum_change_offset = minimum_change_offset_;
   Reset();
   return std::vector<TextMutationRecord*>{
       new TextMutationRecord(L"summary", document_, minimum_change_offset),
@@ -79,7 +79,7 @@ TextMutationObserver::~TextMutationObserver() {}
 void TextMutationObserver::DidDeleteAt(TextDocument* document,
                                        text::Offset offset,
                                        text::OffsetDelta length) {
-  auto const tracker = GetTracker(document);
+  const auto tracker = GetTracker(document);
   if (!tracker)
     return;
   tracker->Update(offset);
@@ -88,21 +88,21 @@ void TextMutationObserver::DidDeleteAt(TextDocument* document,
 void TextMutationObserver::DidInsertBefore(TextDocument* document,
                                            text::Offset offset,
                                            text::OffsetDelta length) {
-  auto const tracker = GetTracker(document);
+  const auto tracker = GetTracker(document);
   if (!tracker)
     return;
   tracker->Update(offset);
 }
 
 void TextMutationObserver::DidMutateTextDocument(TextDocument* document) {
-  auto const tracker = GetTracker(document);
+  const auto tracker = GetTracker(document);
   if (!tracker)
     return;
   if (!tracker->has_records())
     return;
-  auto const runner = ScriptHost::instance()->runner();
+  const auto runner = ScriptHost::instance()->runner();
   v8_glue::Runner::Scope runner_scope(runner);
-  auto const isolate = runner->isolate();
+  const auto isolate = runner->isolate();
   v8::Local<v8::Value> records;
   if (!gin::TryConvertToV8(isolate, tracker->TakeRecords(), &records))
     return;
@@ -117,27 +117,26 @@ void TextMutationObserver::Disconnect() {
 
 TextMutationObserver::Tracker* TextMutationObserver::GetTracker(
     TextDocument* document) const {
-  auto const it = tracker_map_.find(document);
+  const auto& it = tracker_map_.find(document);
   return it == tracker_map_.end() ? nullptr : it->second;
 }
 
 void TextMutationObserver::Observe(TextDocument* document,
                                    const TextMutationObserverInit& options) {
   DCHECK(options.summary());
-  __assume(options.summary());
-  tracker_map_[document] = new Tracker(document);
+  const auto& result = tracker_map_.emplace(document, new Tracker(document));
+  DCHECK(result.second) << *document << " should be unique in tracker_map_";
   TextMutationObserverController::instance()->Register(this, document);
 }
 
 std::vector<TextMutationRecord*> TextMutationObserver::TakeRecords() {
   std::vector<TextMutationRecord*> records;
-  for (auto key_val : tracker_map_) {
-    auto const tracker = key_val.second;
-    for (auto record : tracker->TakeRecords()) {
+  records.reserve(tracker_map_.size());
+  for (const auto& key_val : tracker_map_) {
+    const auto tracker = key_val.second;
+    for (const auto& record : tracker->TakeRecords())
       records.push_back(record);
-    }
   }
-
   return records;
 }
 

@@ -12,8 +12,7 @@
 
 namespace views {
 
-class Window : public ui::AnimatableWindow,
-               protected EventSource {
+class Window : public ui::AnimatableWindow, protected EventSource {
   DECLARE_CASTABLE_CLASS(Window, ui::AnimatableWindow);
 
  public:
@@ -31,6 +30,7 @@ class Window : public ui::AnimatableWindow,
   ~Window() override;
 
   // ui::Widget
+  void DidActivate() override;
   void DidChangeBounds() override;
   void DidHide() override;
   void DidKillFocus(ui::Widget* focused_window) override;

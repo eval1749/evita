@@ -133,6 +133,7 @@ void ScriptThread::DidBeginFrame(const base::TimeTicks& deadline) {
   scheduler()->DidBeginFrame(deadline);
 }
 
+DEFINE_VIEW_EVENT_HANDLER1(DidActivateWindow, domapi::WindowId)
 DEFINE_VIEW_EVENT_HANDLER5(DidChangeWindowBounds,
                            domapi::WindowId,
                            int,

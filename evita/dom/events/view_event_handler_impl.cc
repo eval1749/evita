@@ -118,6 +118,13 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
 }
 
 // domapi::ViewEventHandler
+void ViewEventHandlerImpl::DidActivateWindow(domapi::WindowId window_id) {
+  auto const window = FromWindowId(window_id);
+  if (!window)
+    return;
+  window->DidActivateWindow();
+}
+
 void ViewEventHandlerImpl::DidBeginFrame(const base::TimeTicks& deadline) {
   NOTREACHED();
 }

@@ -122,6 +122,10 @@ void Window::DidDestroyDomWindow() {
 }
 
 // ui::Widget
+void Window::DidActivate() {
+  view_event_handler()->DidActivateWindow(window_id_);
+}
+
 void Window::DidChangeBounds() {
   ui::AnimatableWindow::DidChangeBounds();
   view_event_handler()->DidChangeWindowBounds(window_id_, bounds().left(),

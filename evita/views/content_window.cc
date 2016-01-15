@@ -36,6 +36,7 @@ void ContentWindow::RemoveObserver(ContentObserver* observer) {
 
 // ui::Widget
 void ContentWindow::DidActivate() {
+  Window::DidActivate();
   RequestAnimationFrame();
 }
 

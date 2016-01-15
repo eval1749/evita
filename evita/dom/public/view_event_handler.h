@@ -37,6 +37,7 @@ class ViewEventHandler {
  public:
   virtual ~ViewEventHandler();
 
+  virtual void DidActivateWindow(WindowId window_id) = 0;
   virtual void DidBeginFrame(const base::TimeTicks& deadline) = 0;
   virtual void DidChangeWindowBounds(WindowId window_id,
                                      int left,

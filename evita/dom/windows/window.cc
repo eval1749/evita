@@ -134,6 +134,10 @@ void Window::Destroy() {
   ScriptHost::instance()->view_delegate()->DestroyWindow(window_id());
 }
 
+void Window::DidActivateWindow() {
+  // Nothing to do.
+}
+
 void Window::DidDestroyWindow() {
   WindowSet::instance()->DidDestroyWidget(window_id());
 }

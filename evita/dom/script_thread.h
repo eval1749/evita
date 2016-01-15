@@ -47,6 +47,7 @@ class ScriptThread final : public domapi::ViewEventHandler,
   void ScheduleScriptTask(const base::Closure& task);
 
   // domapi::ViewEventHandler
+  void DidActivateWindow(domapi::WindowId window_id) final;
   void DidBeginFrame(const base::TimeTicks& deadline);
   void DidChangeWindowBounds(domapi::WindowId window_id,
                              int left,

@@ -51,7 +51,7 @@
   function switchToJsConsoleCommand() {
      const document = console.document;
      const isFirstTime = document.listWindows().length === 0;
-     const window = windows.activate(this.selection.window, document);
+     const window = windows.activate(this, document);
      if (!isFirstTime)
        return;
      const commandLoop = JsConsole.instance;

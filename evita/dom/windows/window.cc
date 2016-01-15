@@ -179,6 +179,10 @@ void Window::DidChangeBounds(int clientLeft,
   SET_PROP(clientHeight);
 }
 
+void Window::DidHideWindow() {
+  // Nothing to do.
+}
+
 void Window::DidSetFocus() {
   ++global_focus_tick;
 
@@ -193,6 +197,10 @@ void Window::DidSetFocus() {
                      kDefaultPropertyAttribute);
   klass->ToObject()->ForceSet(v8Strings::focus.Get(isolate), instance,
                               kDefaultPropertyAttribute);
+}
+
+void Window::DidShowWindow() {
+  // Nothing to do.
 }
 
 void Window::Focus() {

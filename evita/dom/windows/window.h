@@ -49,7 +49,9 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   virtual void DidActivateWindow();
   virtual void DidChangeBounds(int left, int top, int right, int bottom);
   virtual void DidDestroyWindow();
+  virtual void DidHideWindow();
   virtual void DidRealizeWindow();
+  virtual void DidShowWindow();
   void DidSetFocus();
   static void ResetForTesting();
 

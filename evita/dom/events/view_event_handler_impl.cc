@@ -146,6 +146,12 @@ void ViewEventHandlerImpl::DidChangeWindowVisibility(
   auto const target = FromEventTargetId(window_id);
   if (!target)
     return;
+  if (const auto window = target->as<Window>()) {
+    if (visibility == domapi::Visibility::Visible)
+      window->DidShowWindow();
+    else
+      window->DidHideWindow();
+  }
   DispatchEventWithInLock(
       target,
       new UiEvent(visibility == domapi::Visibility::Visible ? L"show" : L"hide",

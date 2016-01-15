@@ -29,7 +29,7 @@ namespace dom {
 //////////////////////////////////////////////////////////////////////
 //
 // TextMutationObserverController::Tracker
-// Instances of |Tracker| track document mutation of assocaited |TextDocument|.
+// Instances of |Tracker| track document mutation of associated |TextDocument|.
 //
 class TextMutationObserverController::Tracker final
     : public base::RefCounted<Tracker>,
@@ -83,12 +83,12 @@ void TextMutationObserverController::Tracker::NotifyObservers(
     return;
   tracker->is_schedule_notification_ = false;
   std::vector<TextMutationObserver*> observers;
-  for (auto observer : tracker->observers_) {
+  for (const auto& observer : tracker->observers_) {
     observers.push_back(observer);
   }
   scoped_refptr<Tracker> protect(tracker.get());
   DOM_AUTO_LOCK_SCOPE();
-  for (auto observer : observers) {
+  for (const auto& observer : observers) {
     observer->DidMutateTextDocument(tracker->document_);
   }
 }
@@ -122,14 +122,14 @@ void TextMutationObserverController::Tracker::Unregister(
 // text::BufferMutationObserver
 void TextMutationObserverController::Tracker::DidDeleteAt(
     const text::StaticRange& range) {
-  for (auto observer : observers_)
+  for (const auto& observer : observers_)
     observer->DidDeleteAt(document_, range.start(), range.length());
   ScheduleNotification();
 }
 
 void TextMutationObserverController::Tracker::DidInsertBefore(
     const text::StaticRange& range) {
-  for (auto observer : observers_)
+  for (const auto& observer : observers_)
     observer->DidInsertBefore(document_, range.start(), range.length());
   ScheduleNotification();
 }
@@ -144,13 +144,14 @@ TextMutationObserverController::~TextMutationObserverController() {}
 
 void TextMutationObserverController::Register(TextMutationObserver* observer,
                                               TextDocument* document) {
-  auto const it = map_.find(document);
+  const auto it = map_.find(document);
   if (it != map_.end()) {
     it->second->Register(observer);
     return;
   }
-  auto const tracker = new Tracker(document);
-  map_[document] = tracker;
+  const auto tracker = new Tracker(document);
+  const auto& result = map_.emplace(document, tracker);
+  DCHECK(result.second) << "Tracker should be a singleton: " << document;
   tracker->AddRef();
   tracker->Register(observer);
 }
@@ -158,14 +159,14 @@ void TextMutationObserverController::Register(TextMutationObserver* observer,
 void TextMutationObserverController::Unregister(
     TextMutationObserver* observer) {
   std::vector<TextDocument*> keys_to_remove;
-  for (auto key_val : map_) {
-    auto const tracker = key_val.second;
+  for (const auto& key_val : map_) {
+    const auto tracker = key_val.second;
     tracker->Unregister(observer);
     if (!tracker->is_tracking())
       keys_to_remove.push_back(key_val.first);
   }
-  for (auto document : keys_to_remove) {
-    auto const it = map_.find(document);
+  for (const auto& document : keys_to_remove) {
+    const auto it = map_.find(document);
     if (it == map_.end())
       continue;
     it->second->Release();

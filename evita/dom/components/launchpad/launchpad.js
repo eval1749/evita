@@ -41,6 +41,15 @@ $define(global, 'launchpad', function($export) {
     [TextDocument.Obsolete.YES, '*']
   ]);
 
+  /**
+   * @param {string} string1
+   * @param {string} string2
+   * @return {number}
+   */
+  function compareString(string1, string2) {
+    return string1.localeCompare(string2, void(0), {sensitivity: 'base'});
+  }
+
   // TODO(eval1749): We should move |nodeIndexOf()| to "//evita/dom/visuals".
   /**
    * @param {Node} node
@@ -83,7 +92,12 @@ $define(global, 'launchpad', function($export) {
     const list = document.createElement('list', 'list');
     body.appendChild(list);
 
-    for (const textDocument of TextDocument.list) {
+    /** @const @type {!Array<!TextDocument>} */
+    const textDocuments = TextDocument.list.sort((doc1, doc2) => {
+      return compareString(doc1.name, doc2.name);
+    })
+
+    for (const textDocument of textDocuments) {
       const state = TextDocumentState.get(textDocument);
       if (!state) {
         console.log('WARNING', 'no TextDocumentState for', textDocument);
@@ -141,7 +155,18 @@ $define(global, 'launchpad', function($export) {
     didAddTextDocument(textDocument) {
       const newRow = createRow(this.document_, textDocument);
       this.rowMap_.set(textDocument, newRow);
-      this.list_.appendChild(newRow);
+      let inserted = false;
+      for (const child of this.list_.childNodes) {
+        const row = /** @type {!Element} */(child);
+        const present = /** @type {!TextDocumentModel} */(row.data);
+        if (compareString(textDocument.name, present.name) < 0) {
+          this.list_.insertBefore(newRow, row);
+          inserted = true;
+          break;
+        }
+      }
+      if (!inserted)
+        this.list_.appendChild(newRow);
       this.selection_.didAddNode(newRow);
     }
 
@@ -326,6 +351,9 @@ $define(global, 'launchpad', function($export) {
 
     /** @return {!TextDocument} */
     get document() { return this.document_; }
+
+    /** @return {string} */
+    get name() { return this.document_.name; }
 
     close() { this.observer_.disconnect(); }
 

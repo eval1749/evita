@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/text/text_mutation_observer.h"
-
 #include <algorithm>
 #include <vector>
+
+#include "evita/dom/text/text_mutation_observer.h"
 
 #include "evita/bindings/v8_glue_TextMutationObserverInit.h"
 #include "evita/dom/lock.h"
@@ -13,7 +13,6 @@
 #include "evita/dom/text/text_mutation_observer_controller.h"
 #include "evita/dom/text/text_mutation_record.h"
 #include "evita/dom/script_host.h"
-#include "evita/ed_defs.h"
 #include "evita/v8_glue/runner.h"
 
 namespace dom {
@@ -38,8 +37,10 @@ class TextMutationObserver::Tracker final {
  private:
   // TODO(eval1749): Reference to |TextDocument| from |Tracker| should be a weak
   // reference.
-  TextDocument* document_;
+  TextDocument* const document_;
   text::Offset minimum_change_offset_;
+
+  DISALLOW_COPY_AND_ASSIGN(Tracker);
 };
 
 TextMutationObserver::Tracker::Tracker(TextDocument* document)

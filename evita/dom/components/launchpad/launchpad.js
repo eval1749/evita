@@ -316,6 +316,7 @@ $define(global, 'launchpad', function($export) {
 
       this.observer_ =
           new TextMutationObserver(this.mutationCallback.bind(this));
+      this.observer_.observe(textDocument, {summary: true});
 
       this.document_.addEventListener(Event.Names.BEFORELOAD,
                                       this.willLoadTextDocument.bind(this));

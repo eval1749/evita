@@ -29,11 +29,19 @@
    * @return {!VisualWindow}
    */
   function newWindow(document, styleSheet) {
-    return VisualWindow.newWindow_(document.handle_, styleSheet.handle_);
+    const window = VisualWindow.newWindow_(document.handle_,
+                                           styleSheet.handle_);
+    window.document_ = document;
+    window.styleSheet_ = styleSheet;
+    return window;
   }
 
   Object.defineProperties(VisualWindow.prototype, {
+    document_: {value: null, writable: true},
+    document: {get: function() { return this.document_; }},
     hitTest: {value: hitTest},
+    styleSheet_: {value: null, writable: true},
+    styleSheet: {get: function() { return this.styleSheet_; }},
   });
 
   Object.defineProperties(VisualWindow, {

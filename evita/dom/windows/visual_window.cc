@@ -177,4 +177,9 @@ void VisualWindow::DidRealizeWindow() {
   RequestAnimationFrame();
 }
 
+void VisualWindow::DidShowWindow() {
+  box_tree_->ScheduleForcePaint();
+  RequestAnimationFrame();
+}
+
 }  // namespace dom

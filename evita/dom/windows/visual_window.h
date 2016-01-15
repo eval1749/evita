@@ -104,6 +104,7 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   // Window
   void DidChangeBounds(int left, int top, int right, int bottom) final;
   void DidRealizeWindow() final;
+  void DidShowWindow() final;
 
   bool is_waiting_animation_frame_ = false;
   const std::unique_ptr<visuals::StyleTree> style_tree_;

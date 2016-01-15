@@ -131,6 +131,8 @@ TextMutationObserver::Tracker* TextMutationObserver::GetTracker(
 void TextMutationObserver::Observe(TextDocument* document,
                                    const TextMutationObserverInit& options) {
   DCHECK(options.summary());
+  if (GetTracker(document))
+    return;
   const auto& result = tracker_map_.emplace(document, new Tracker(document));
   DCHECK(result.second) << *document << " should be unique in tracker_map_";
   TextMutationObserverController::instance()->Register(this, document);

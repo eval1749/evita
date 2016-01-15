@@ -88,6 +88,7 @@ class BoxTree::Impl final {
   int version() const { return version_; }
 
   Box* BoxFor(const Node& node) const;
+  bool IsClean() const { return state_ == BoxTreeState::Clean; }
   void MarkDirty(const Node& node);
   void UpdateIfNeeded();
 
@@ -429,6 +430,12 @@ int BoxTree::version() const {
 
 Box* BoxTree::BoxFor(const Node& node) const {
   return impl_->BoxFor(node);
+}
+
+void BoxTree::ScheduleForcePaint() {
+  if (!impl_->IsClean())
+    return;
+  BoxEditor().ScheduleForcePaint(root_box());
 }
 
 void BoxTree::UpdateIfNeeded() {

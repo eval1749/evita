@@ -36,6 +36,7 @@ class BoxTree final : public css::MediaObserver,
   int version() const;
 
   Box* BoxFor(const Node& node) const;
+  void ScheduleForcePaint();
   void UpdateIfNeeded();
 
  private:

@@ -47,6 +47,12 @@ bool BoxTreeLifecycle::IsAtLeast(State state) const {
   return static_cast<int>(state_) >= static_cast<int>(state);
 }
 
+void BoxTreeLifecycle::LimitTo(State limit_state) {
+  if (static_cast<int>(state_) <= static_cast<int>(limit_state))
+    return;
+  state_ = limit_state;
+}
+
 void BoxTreeLifecycle::Reset() {
   state_ = State::VisualUpdatePending;
 }

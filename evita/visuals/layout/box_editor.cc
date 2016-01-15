@@ -199,6 +199,10 @@ void BoxEditor::RemoveDescendants(ContainerBox* container_box) {
   }
 }
 
+void BoxEditor::ScheduleForcePaint(RootBox* root_box) {
+  root_box->lifecycle()->LimitTo(BoxTreeLifecycle::State::LayoutClean);
+}
+
 void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {
   if (!box->InDocument())
     return;

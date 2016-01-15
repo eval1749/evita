@@ -49,6 +49,7 @@ class BoxTreeLifecycle final {
 
   bool AllowsTreeMutaions() const;
   bool IsAtLeast(State state) const;
+  void LimitTo(State state);
   void Reset();
 
  private:

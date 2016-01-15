@@ -63,6 +63,7 @@ class BoxEditor final {
   void SetTextData(TextBox* box, const base::StringPiece16& data);
 
   // RootBox
+  void ScheduleForcePaint(RootBox* root_box);
   void SetViewportSize(RootBox* root_box, const FloatSize& size);
 
  private:

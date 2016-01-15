@@ -194,8 +194,8 @@ void Frame::OnDropFiles(HDROP const drop_handle) {
   ::DragFinish(drop_handle);
 }
 
-// Set status bar formatted message on specified part.
-void Frame::SetStatusBar(const std::vector<base::string16> texts) {
+// Set status bar with formatted message on specified part.
+void Frame::SetStatusBar(const std::vector<base::string16>& texts) {
   message_view_->SetStatus(texts);
 }
 

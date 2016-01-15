@@ -72,7 +72,7 @@ class Frame final : public views::Window,
 
   void AddObserver(views::FrameObserver* observer);
   void AddOrActivateTabContent(views::ContentWindow*);
-  void SetStatusBar(std::vector<base::string16> texts);
+  void SetStatusBar(const std::vector<base::string16>& texts);
   void ShowMessage(MessageLevel, const base::string16& text) const;
 
  private:

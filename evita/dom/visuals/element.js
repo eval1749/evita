@@ -17,6 +17,8 @@ class Element extends Node {
     super(document, handle);
     /** @type {DOMTokenList} */
     this.classList_ = null;
+    /** @type {*} */
+    this.data_ = null;
     /** @const @type {string} id */
     this.id_ = id;
     /** @type {Map<number, string>} */
@@ -33,6 +35,12 @@ class Element extends Node {
       this.classList_ = new DOMTokenList(this);
     return /** @type {!DOMTokenList} */(this.classList_);
   }
+
+  /** @return {*} */
+  get data() { return this.data_; }
+
+  /** @param {*} newData */
+  set data(newData) { this.data_ = newData; }
 
   /** @return {string} */
   get id() { return this.id_; }

@@ -9,6 +9,7 @@
 interface Element : Node {
   readonly attribute DOMString id;
   readonly attribute DOMString tagName;
+  attribute Any data;
 
   void addClass(DOMString className);
   void removeClass(DOMString className);

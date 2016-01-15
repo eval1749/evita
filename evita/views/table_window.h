@@ -71,7 +71,6 @@ class TableWindow final : public CanvasContentWindow,
   void MakeSelectionVisible() final;
 
   // ui::Widget
-  void DidActivate() final;
   void DidChangeBounds() final;
   void DidSetFocus(ui::Widget* last_focused) final;
 

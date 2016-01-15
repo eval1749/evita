@@ -100,7 +100,6 @@ class TextWindow final : public CanvasContentWindow,
   Widget* GetClientWindow() final;
 
   // ui::Widget
-  void DidActivate() final;
   void DidChangeBounds() final;
   void DidHide() final;
   void DidKillFocus(ui::Widget* focused_window) final;

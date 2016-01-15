@@ -6,6 +6,18 @@
   'use strict';
 
   /**
+   * @param {!Window} window
+   * @return {string}
+   */
+  function computeStartDirectory(window) {
+    if (window instanceof TextWindow) {
+      const textWindow = /** @type {!TextWindow} */(window);
+      return textWindow.selection.document.fileName;
+    }
+    return '';
+  }
+
+  /**
    * @param {string} absoluteFileName
    * @return {!TextDocument}
    */
@@ -35,7 +47,7 @@
       return;
     }
 
-    Editor.getFileNameForSave(this, this.selection.document.fileName)
+    Editor.getFileNameForSave(this, computeStartDirectory(this))
         .then(function(fileName) {
           const document = TextDocument.open(fileName);
           TextDocument.notifyObservers('new', document);
@@ -52,7 +64,7 @@
     if (!this.parent)
       return;
     const editorWindow = /** @type {!Window} */(this.parent);
-    Editor.getFileNameForLoad(this, this.selection.document.fileName)
+    Editor.getFileNameForLoad(this, computeStartDirectory(this))
         .then(function(fileName) {
           windows.activate(editorWindow, openFile(fileName));
         });
@@ -142,7 +154,7 @@
       return;
     }
 
-    Editor.getFileNameForSave(this, this.selection.document.fileName)
+    Editor.getFileNameForSave(this, computeStartDirectory(this))
         .then(function(fileName) {
           const document = TextDocument.open(fileName);
           windows.newEditorWindow(document);
@@ -155,7 +167,7 @@
    * @this {!Window}
    */
   function openTextDocumentInNewWindowCommand() {
-    Editor.getFileNameForLoad(this, this.selection.document.fileName)
+    Editor.getFileNameForLoad(this, computeStartDirectory(this))
         .then(function(fileName) {
           windows.newEditorWindow(openFile(fileName));
         });

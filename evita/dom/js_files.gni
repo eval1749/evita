@@ -97,7 +97,6 @@ js_lib_files = [
   "windows/visual_window.js",
   "windows/window.js",
 
-  "commands/text_document_list.js",
   "commands/dynamic_abbrev.js",
   "commands/find_and_replace.js",
   "commands/find_and_replace_commands.js",
@@ -105,7 +104,7 @@ js_lib_files = [
   "commands/text_window_commands.js",
   "commands/window_commands.js",
 
-  "components/launchpad/view_model.js",
+  "components/launchpad/launchpad.js",
 
   "repl/console.js",
   "repl/describe.js",

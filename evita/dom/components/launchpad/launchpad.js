@@ -465,10 +465,10 @@ $define(global, 'launchpad', function($export) {
     return styleSheet;
   }
 
-  class View {
-    /**
-     * $param {!ListModel} model
-     */
+  /** @const @type {!CSSStyleSheet} */
+  const styleSheet = createStyleSheet();
+
+  class LaunchPad {
     constructor() {
       /** @private @type {boolean} */
       this.hasFocus_ = true;
@@ -477,10 +477,9 @@ $define(global, 'launchpad', function($export) {
       /** @private $type {!ListModel} */
       this.model_ = new ListModel();
       /** @private @type {!CSSStyleSheet} */
-      this.styleSheet_ = createStyleSheet();
       /** @private @const @type {!VisualWindow} */
       this.window_ =
-          VisualWindow.newWindow(this.model_.document, this.styleSheet_);
+          VisualWindow.newWindow(this.model_.document, styleSheet);
 
       /** @private @const @type {!Element} */
       this.list_ = /** @type {!Element} */ (
@@ -613,7 +612,7 @@ $define(global, 'launchpad', function($export) {
           this.updateSelected();
           return;
       }
-      console.log('onKeyDown', event.keyCode.toString(16));
+      Window.handleEvent.call(this, event);
     }
 
     /** @private @param {!MouseEvent} event */
@@ -651,12 +650,24 @@ $define(global, 'launchpad', function($export) {
     }
   }
 
-  $export({View});
-});
+  /**
+   * @this {!Window}
+   */
+  function listTextDocumentCommand() {
+    const present = this.parent.children.find(function(child) {
+      if (!(child instanceof VisualWindow))
+        return false;
+      const window = /** @type(!VisualWindow) */(child);
+      return window.styleSheet == styleSheet;
+    });
+    if (present) {
+      present.focus();
+      return;
+    }
+    this.parent.appendChild((new LaunchPad().window));
+  }
 
-if (TextDocument.find('*scratch*')) {
-  var view = new launchpad.View();
-  var editorWindow = new EditorWindow();
-  editorWindow.appendChild(view.window);
-  editorWindow.realize();
-}
+  Editor.bindKey(Window, 'Ctrl+B', listTextDocumentCommand);
+
+  $export({LaunchPad});
+});

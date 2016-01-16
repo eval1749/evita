@@ -63,7 +63,7 @@ void BoxStringify::Visit(const Box& box) {
     return;
   }
   if (const auto text_box = box.as<TextBox>()) {
-    ostream_ << '\'' << text_box->text() << '\'';
+    ostream_ << '\'' << text_box->data() << '\'';
     return;
   }
   ostream_ << box.class_name();

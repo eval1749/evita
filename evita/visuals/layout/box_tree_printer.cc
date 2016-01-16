@@ -68,7 +68,7 @@ void BoxTreePrinter::VisitRootBox(RootBox* box) {
 void BoxTreePrinter::VisitTextBox(TextBox* box) {
   Indent();
   *ostream_ << *box << " \"";
-  for (const auto& char_code : box->text()) {
+  for (const auto& char_code : box->data()) {
     if (char_code < 0x20 || char_code >= 0x7F) {
       *ostream_ << base::StringPrintf("\\u%04X", char_code);
       continue;

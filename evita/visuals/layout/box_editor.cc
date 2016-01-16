@@ -95,7 +95,7 @@ void BoxEditor::AllocateTextLayout(TextBox* box) {
   const auto& size = box->content_bounds().size();
   if (size.IsEmpty())
     return;
-  box->text_layout_.reset(new TextLayout(*box->text_format_, box->text_, size));
+  box->text_layout_.reset(new TextLayout(*box->text_format_, box->data_, size));
 }
 
 void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
@@ -362,9 +362,9 @@ void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
 
 void BoxEditor::SetTextData(TextBox* text_box,
                             const base::StringPiece16& data) {
-  if (text_box->text_ == data)
+  if (text_box->data_ == data)
     return;
-  text_box->text_ = data.as_string();
+  text_box->data_ = data.as_string();
   SetContentChanged(text_box);
 }
 

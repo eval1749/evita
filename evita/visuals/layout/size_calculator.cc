@@ -180,11 +180,11 @@ void IntrinsicSizeVisitor::VisitRootBox(RootBox* box) {
 }
 
 void IntrinsicSizeVisitor::VisitTextBox(TextBox* box) {
-  if (box->text().empty())
+  if (box->data().empty())
     return ReturnSize(FloatSize());
 
   const auto& text_format = BoxEditor().EnsureTextFormat(box);
-  ReturnSize(text_format.ComputeMetrics(box->text()));
+  ReturnSize(text_format.ComputeMetrics(box->data()));
 }
 
 //////////////////////////////////////////////////////////////////////

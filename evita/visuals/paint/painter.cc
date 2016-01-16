@@ -267,7 +267,7 @@ void PaintVisitor::VisitTextBox(TextBox* text) {
   if (!text->has_text_layout())
     return;
   builder_.AddNew<DrawTextDisplayItem>(bounds, text->color(), text->baseline(),
-                                       text->text_layout(), text->text());
+                                       text->text_layout(), text->data());
 }
 
 //////////////////////////////////////////////////////////////////////

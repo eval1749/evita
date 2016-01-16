@@ -24,14 +24,14 @@ class TextBox final : public ContentBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(TextBox, ContentBox);
 
  public:
-  TextBox(RootBox* root_box, const base::string16 text, const Node* node);
-  TextBox(RootBox* root_box, const base::string16 text);
+  TextBox(RootBox* root_box, const base::string16 data, const Node* node);
+  TextBox(RootBox* root_box, const base::string16 data);
   ~TextBox() final;
 
   float baseline() const { return baseline_; }
   const FloatColor& color() const { return color_; }
+  const base::string16& data() const { return data_; }
   bool has_text_layout() const { return !!text_layout_; }
-  const base::string16& text() const { return text_; }
   const TextFormat& text_format() const;
   const TextLayout& text_layout() const;
 
@@ -41,8 +41,7 @@ class TextBox final : public ContentBox {
 
   float baseline_ = 0.0f;
   FloatColor color_;
-
-  base::string16 text_;
+  base::string16 data_;
 
   // CSS font properties
   css::FontFamily font_family_;

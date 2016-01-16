@@ -59,6 +59,10 @@ Padding Box::ComputePadding() const {
                  padding_bottom_.value(), padding_left_.value());
 }
 
+void Box::DidChangeBounds(const FloatRect& old_bounds) {
+  DCHECK(root_box_->InLayout()) << root_box_->lifecycle();
+}
+
 bool Box::InDocument() const {
   for (const auto& runner : Box::AncestorsOrSelf(*this)) {
     if (const auto root_box = runner->as<RootBox>())

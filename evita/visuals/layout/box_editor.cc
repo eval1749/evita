@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
+#include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/layout/ancestors.h"
 #include "evita/visuals/layout/ancestors_or_self.h"
 #include "evita/visuals/layout/descendants_or_self.h"
@@ -87,6 +88,16 @@ FontWeight ConvertFontWeight(const css::FontWeight& weight) {
 BoxEditor::BoxEditor() {}
 BoxEditor::~BoxEditor() {}
 
+void BoxEditor::AllocateTextLayout(TextBox* box) {
+  DCHECK(box->root_box()->InLayout()) << box->root_box()->lifecycle();
+  if (box->text_layout_)
+    return;
+  const auto& size = box->content_bounds().size();
+  if (size.IsEmpty())
+    return;
+  box->text_layout_.reset(new TextLayout(*box->text_format_, box->text_, size));
+}
+
 void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
   DCHECK_NE(container, new_child);
   DCHECK(!new_child->IsDescendantOf(*container));
@@ -143,9 +154,13 @@ void BoxEditor::DidPaint(Box* box) {
 }
 
 const TextFormat& BoxEditor::EnsureTextFormat(TextBox* box) {
+  DCHECK(box->root_box()->InLayout()) << box->root_box()->lifecycle();
   const auto& text_format =
       TextFormatFactory::GetInstance()->Get(ComputeFontDescription(*box));
+  if (box->text_format_ == &text_format)
+    return text_format;
   box->text_format_ = &text_format;
+  box->text_layout_.reset();
   return text_format;
 }
 
@@ -219,7 +234,7 @@ void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {
 }
 
 void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
-  DCHECK(box->root_box()->InLayout());
+  DCHECK(box->root_box()->InLayout()) << box->root_box()->lifecycle();
   if (box->bounds_ == new_bounds)
     return;
   if (box->bounds_.origin() != new_bounds.origin())
@@ -230,7 +245,9 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
       box->is_border_changed_ = true;
     box->is_size_changed_ = true;
   }
+  const auto old_bounds = box->bounds_;
   box->bounds_ = new_bounds;
+  box->DidChangeBounds(old_bounds);
 }
 
 void BoxEditor::SetContentChanged(ContentBox* box) {

@@ -137,7 +137,9 @@ void LayoutVisitor::VisitRootBox(RootBox* root) {
   LayoutVisitor().Layout(root->first_child(), root->content_bounds());
 }
 
-void LayoutVisitor::VisitTextBox(TextBox* box) {}
+void LayoutVisitor::VisitTextBox(TextBox* box) {
+  BoxEditor().AllocateTextLayout(box);
+}
 
 }  // namespace
 

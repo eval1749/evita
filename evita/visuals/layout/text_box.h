@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_LAYOUT_TEXT_BOX_H_
 #define EVITA_VISUALS_LAYOUT_TEXT_BOX_H_
 
+#include <memory>
+
 #include "base/strings/string16.h"
 #include "evita/visuals/layout/content_box.h"
 #include "evita/visuals/css/values.h"
@@ -12,6 +14,7 @@
 namespace visuals {
 
 class TextFormat;
+class TextLayout;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -27,10 +30,15 @@ class TextBox final : public ContentBox {
 
   float baseline() const { return baseline_; }
   const FloatColor& color() const { return color_; }
+  bool has_text_layout() const { return !!text_layout_; }
   const base::string16& text() const { return text_; }
   const TextFormat& text_format() const;
+  const TextLayout& text_layout() const;
 
  private:
+  // Box
+  void TextBox::DidChangeBounds(const FloatRect& old_bounds) final;
+
   float baseline_ = 0.0f;
   FloatColor color_;
 
@@ -43,9 +51,12 @@ class TextBox final : public ContentBox {
   css::FontStyle font_style_;
   css::FontWeight font_weight_;
 
-  // |BoxEditor| will set/reset |font_description_| whenever one of font related
-  // CSS properties changed.
-  mutable const TextFormat* text_format_ = nullptr;
+  // |BoxEditor::EnsureTextFormat()| will set/reset |font_description_| whenever
+  // one of font related CSS properties changed.
+  const TextFormat* text_format_ = nullptr;
+
+  // |Layouter| allocates |TextLayout|.
+  std::unique_ptr<TextLayout> text_layout_;
 
   DISALLOW_COPY_AND_ASSIGN(TextBox);
 };

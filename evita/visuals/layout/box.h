@@ -117,6 +117,8 @@ class Box : public common::Castable<Box> {
   explicit Box(RootBox* root_box);
 
  private:
+  virtual void DidChangeBounds(const FloatRect& old_bounds);
+
   FloatRect bounds_;
   const Node* const node_;
   const int sequence_id_;

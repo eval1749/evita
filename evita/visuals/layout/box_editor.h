@@ -56,6 +56,7 @@ class BoxEditor final {
   void WillDestroy(Box* box);
 
   // TextBox
+  void AllocateTextLayout(TextBox* box);
   const FontDescription& ComputeFontDescription(const TextBox& box);
   const TextFormat& EnsureTextFormat(TextBox* box);
   void SetBaseline(TextBox* box, float new_baseline);

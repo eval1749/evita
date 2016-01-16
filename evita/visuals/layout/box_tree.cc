@@ -70,6 +70,150 @@ struct Context {
   bool is_updated;
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+// BoxMap
+//
+class BoxMap final {
+ public:
+  explicit BoxMap(const Document& document);
+  ~BoxMap();
+
+  RootBox* root_box() const { return root_box_; }
+
+  Box* BoxFor(const Node& node) const;
+
+ private:
+  friend class BoxAssigner;
+
+  std::unordered_map<const Node*, std::unique_ptr<Box>> map_;
+  RootBox* const root_box_;
+
+  DISALLOW_COPY_AND_ASSIGN(BoxMap);
+};
+
+BoxMap::BoxMap(const Document& document) : root_box_(new RootBox(document)) {
+  map_.emplace(&document, std::unique_ptr<Box>(root_box_));
+}
+
+BoxMap::~BoxMap() {
+  BoxEditor().RemoveDescendants(root_box_);
+}
+
+Box* BoxMap::BoxFor(const Node& node) const {
+  const auto& it = map_.find(&node);
+  return it == map_.end() ? nullptr : it->second.get();
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// BoxAssigner
+//
+class BoxAssigner final : public NodeVisitor {
+ public:
+  explicit BoxAssigner(BoxMap* box_map);
+  ~BoxAssigner() final;
+
+  RootBox* root_box() const { return box_map_->root_box_; }
+
+  void Assign(const Node& node, const css::Style& style);
+
+ private:
+  Box* BoxFor(const Node& node) const;
+  void DetachChildren(ContainerBox* container_box);
+  void RegisterBoxFor(const Node& node, std::unique_ptr<Box> box);
+
+// NodeVisitor
+#define V(name) void Visit##name(name* node) final;
+  FOR_EACH_VISUAL_NODE(V)
+#undef V
+
+  BoxMap* const box_map_;
+  const css::Style* style_ = nullptr;
+
+  DISALLOW_COPY_AND_ASSIGN(BoxAssigner);
+};
+
+BoxAssigner::BoxAssigner(BoxMap* box_map) : box_map_(box_map) {}
+BoxAssigner::~BoxAssigner() {}
+
+void BoxAssigner::Assign(const Node& node, const css::Style& style) {
+  DCHECK(!style_);
+  style_ = &style;
+  Visit(node);
+  style_ = nullptr;
+}
+
+Box* BoxAssigner::BoxFor(const Node& node) const {
+  return box_map_->BoxFor(node);
+}
+
+void BoxAssigner::DetachChildren(ContainerBox* container) {
+  while (const auto child = container->first_child()) {
+    BoxEditor().RemoveChild(container, child);
+    if (child->node())
+      continue;
+    // Delete anonymous box.
+    if (const auto anonymous_container = child->as<ContainerBox>())
+      DetachChildren(anonymous_container);
+    delete child;
+  }
+}
+
+void BoxAssigner::RegisterBoxFor(const Node& node, std::unique_ptr<Box> box) {
+  const auto& result = box_map_->map_.emplace(&node, std::move(box));
+  DCHECK(result.second) << node << " is already in box_map_->map_";
+}
+
+// NodeVisitor
+void BoxAssigner::VisitDocument(Document* document) {
+  DCHECK_EQ(root_box()->node(), document);
+}
+
+void BoxAssigner::VisitElement(Element* element) {
+  const auto& it = box_map_->map_.find(element);
+  if (style_->display().is_none()) {
+    if (it == box_map_->map_.end())
+      return;
+    DetachChildren(it->second->as<ContainerBox>());
+    box_map_->map_.erase(it);
+    return;
+  }
+  if (it != box_map_->map_.end()) {
+    const auto container_box = it->second->as<ContainerBox>();
+    DetachChildren(container_box);
+    if (container_box->display() == style_->display()) {
+      BoxEditor().SetStyle(container_box, *style_);
+      return;
+    }
+    box_map_->map_.erase(it);
+  }
+
+  if (!IsDisplayInsideFlow(style_->display())) {
+    NOTREACHED() << "Unsupported display:" << style_->display() << " of "
+                 << *element;
+    return;
+  }
+
+  // TODO(eval1749): |Box| constructor should take |css::Style|.
+  auto new_flow_box = std::make_unique<FlowBox>(root_box(), element);
+  BoxEditor().SetStyle(new_flow_box.get(), *style_);
+  RegisterBoxFor(*element, std::move(new_flow_box));
+}
+
+void BoxAssigner::VisitText(Text* text) {
+  if (const auto text_box = BoxFor(*text)) {
+    BoxEditor().SetTextData(text_box->as<TextBox>(), text->data());
+    BoxEditor().SetStyle(text_box, *style_);
+    return;
+  }
+  // TODO(eval1749): We should make |TextBox| constructor to take color.
+  // TODO(eval1749): |TextBox| constructor should take |const Text&|.
+  auto new_text_box = std::make_unique<TextBox>(root_box(), text->data(), text);
+  BoxEditor().SetStyle(new_text_box.get(), *style_);
+  RegisterBoxFor(*text, std::move(new_text_box));
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -79,7 +223,7 @@ struct Context {
 class BoxTree::Impl final {
  public:
   Impl(const Document& document, const StyleTree& style_tree);
-  ~Impl();
+  ~Impl() = default;
 
   const Document& document() const { return style_tree_.document(); }
   const css::Media& media() const { return style_tree_.media(); }
@@ -93,9 +237,7 @@ class BoxTree::Impl final {
   void UpdateIfNeeded();
 
  private:
-  Box* AssignBoxToElement(Context* context, const ElementNode& element);
-  Box* AssignBoxToNode(Context* context, const Node& node);
-  Box* AssignBoxToText(Context* context, const Text& text);
+  void AssignBoxToNode(Context* context, const Node& node);
   const css::Style& ComputedStyleOf(const Node& node) const;
   std::unique_ptr<FlowBox> CreateAnonymousBlockBox(
       const std::vector<Box*>& inline_boxes);
@@ -103,18 +245,13 @@ class BoxTree::Impl final {
   void FormatFlowBox(Context* context, FlowBox* flow_box);
   void FormatRootBox(Context* context, RootBox* root_box);
   void IncrementVersionIfNeeded(Context* context);
-  Box* RegisterBoxFor(Context* context,
-                      const Node& node,
-                      std::unique_ptr<Box> box);
-
-  void RemoveAllChildren(ContainerBox* container_box);
   void UpdateContainerNode(Context* context, const ContainerNode& container);
   void UpdateContainerNodeIfNeeded(Context* context,
                                    const ContainerNode& container);
   void UpdateNode(Context* context, const Node& node);
   void UpdateNodeIfNeeded(Context* context, const Node& node);
 
-  std::unordered_map<const Node*, std::unique_ptr<Box>> box_map_;
+  BoxMap box_map_;
   const Document& document_;
   RootBox* const root_box_;
   BoxTreeState state_;
@@ -125,16 +262,11 @@ class BoxTree::Impl final {
 };
 
 BoxTree::Impl::Impl(const Document& document, const StyleTree& style_tree)
-    : document_(document),
-      root_box_(new RootBox(document_)),
+    : box_map_(document),
+      document_(document),
+      root_box_(box_map_.root_box()),
       state_(BoxTreeState::Dirty),
-      style_tree_(style_tree) {
-  box_map_.emplace(&document_, std::unique_ptr<Box>(root_box_));
-}
-
-BoxTree::Impl::~Impl() {
-  BoxEditor().RemoveDescendants(root_box_);
-}
+      style_tree_(style_tree) {}
 
 RootBox* BoxTree::Impl::root_box() const {
   DCHECK_NE(BoxTreeState::Updating, state_);
@@ -142,68 +274,14 @@ RootBox* BoxTree::Impl::root_box() const {
   return root_box_;
 }
 
-Box* BoxTree::Impl::AssignBoxToElement(Context* context,
-                                       const ElementNode& element) {
-  const auto& style = ComputedStyleOf(element);
-  const auto& it = box_map_.find(&element);
-  if (style.display().is_none()) {
-    if (it == box_map_.end())
-      return nullptr;
-    IncrementVersionIfNeeded(context);
-    RemoveAllChildren(it->second->as<ContainerBox>());
-    box_map_.erase(it);
-    return nullptr;
-  }
-  if (it != box_map_.end()) {
-    const auto container_box = it->second->as<ContainerBox>();
-    RemoveAllChildren(container_box);
-    if (container_box->display() == style.display()) {
-      BoxEditor().SetStyle(container_box, style);
-      return container_box;
-    }
-    box_map_.erase(it);
-  }
-  if (IsDisplayInsideFlow(style.display())) {
-    // TODO(eval1749): |Box| constructor should take |css::Style|.
-    auto new_flow_box = std::make_unique<FlowBox>(root_box_, &element);
-    BoxEditor().SetStyle(new_flow_box.get(), style);
-    return RegisterBoxFor(context, element, std::move(new_flow_box));
-  }
-  NOTREACHED() << "Unsupported display:" << style.display() << " of "
-               << element;
-  return nullptr;
-}
-
-Box* BoxTree::Impl::AssignBoxToNode(Context* context, const Node& node) {
+void BoxTree::Impl::AssignBoxToNode(Context* context, const Node& node) {
   IncrementVersionIfNeeded(context);
-  if (const auto text = node.as<Text>())
-    return AssignBoxToText(context, *text);
-  if (const auto element = node.as<Element>())
-    return AssignBoxToElement(context, *element);
-  if (&node == &document_)
-    return root_box_;
-  NOTREACHED();
-  return nullptr;
-}
-
-Box* BoxTree::Impl::AssignBoxToText(Context* context, const Text& text) {
-  const auto& style = ComputedStyleOf(text);
-  if (const auto text_box = BoxFor(text)) {
-    BoxEditor().SetTextData(text_box->as<TextBox>(), text.data());
-    BoxEditor().SetStyle(text_box, style);
-    return text_box;
-  }
-  // TODO(eval1749): We should make |TextBox| constructor to take color.
-  // TODO(eval1749): |TextBox| constructor should take |const Text&|.
-  auto new_text_box = std::make_unique<TextBox>(root_box_, text.data(), &text);
-  BoxEditor().SetStyle(new_text_box.get(), style);
-  return RegisterBoxFor(context, text, std::move(new_text_box));
+  BoxAssigner(&box_map_).Assign(node, ComputedStyleOf(node));
 }
 
 Box* BoxTree::Impl::BoxFor(const Node& node) const {
   DCHECK_NE(BoxTreeState::Dirty, state_);
-  const auto& it = box_map_.find(&node);
-  return it == box_map_.end() ? nullptr : it->second.get();
+  return box_map_.BoxFor(node);
 }
 
 const css::Style& BoxTree::Impl::ComputedStyleOf(const Node& node) const {
@@ -301,31 +379,11 @@ void BoxTree::Impl::MarkDirty(const Node& node) {
   if (state_ == BoxTreeState::Updating)
     return;
   state_ = BoxTreeState::Dirty;
-  const auto& it = box_map_.find(&node);
-  if (it == box_map_.end())
+  // Note: When |BoxTree| is dirty, we can't use |BoxTree::Impl::BoxFor()|.
+  const auto box = box_map_.BoxFor(node);
+  if (!box)
     return;
-  BoxEditor().MarkDirty(it->second.get());
-}
-
-Box* BoxTree::Impl::RegisterBoxFor(Context* context,
-                                   const Node& node,
-                                   std::unique_ptr<Box> box) {
-  IncrementVersionIfNeeded(context);
-  const auto& result = box_map_.emplace(&node, std::move(box));
-  DCHECK(result.second) << node << " is already in box_map_";
-  return result.first->second.get();
-}
-
-void BoxTree::Impl::RemoveAllChildren(ContainerBox* container) {
-  while (const auto child = container->first_child()) {
-    BoxEditor().RemoveChild(container, child);
-    if (!child->node()) {
-      // Delete anonymous box.
-      if (const auto anonymous_container = child->as<ContainerBox>())
-        RemoveAllChildren(anonymous_container);
-      delete child;
-    }
-  }
+  BoxEditor().MarkDirty(box);
 }
 
 void BoxTree::Impl::UpdateContainerNode(Context* context,

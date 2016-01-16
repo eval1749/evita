@@ -27,18 +27,21 @@ class NativeTextLayout final {
   NativeTextLayout(const NativeTextFormat& text_format,
                    const base::string16& text,
                    const FloatSize& size);
+  NativeTextLayout(const NativeTextLayout& other);
+  NativeTextLayout(NativeTextLayout&& other);
   ~NativeTextLayout();
 
+  bool operator==(const NativeTextLayout& other) const;
+  bool operator!=(const NativeTextLayout& other) const;
+
   const base::win::ScopedComPtr<IDWriteTextLayout>& get() const {
-    return text_layout_;
+    return value_;
   }
 
   FloatSize GetMetrics() const;
 
  private:
-  base::win::ScopedComPtr<IDWriteTextLayout> text_layout_;
-
-  DISALLOW_COPY_AND_ASSIGN(NativeTextLayout);
+  base::win::ScopedComPtr<IDWriteTextLayout> value_;
 };
 
 }  // namespace visuals

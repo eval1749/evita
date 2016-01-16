@@ -25,14 +25,19 @@ class TextLayout final {
   TextLayout(const TextFormat& text_format,
              const base::string16& text,
              const FloatSize& size);
+  TextLayout(const TextLayout& other);
+  TextLayout(TextLayout&& other);
   ~TextLayout();
+
+  bool operator==(const TextLayout& other) const;
+  bool operator!=(const TextLayout& other) const;
+
+  const NativeTextLayout& impl() const { return *impl_; }
 
   FloatSize GetMetrics() const;
 
  private:
   std::unique_ptr<NativeTextLayout> impl_;
-
-  DISALLOW_COPY_AND_ASSIGN(TextLayout);
 };
 
 }  // namespace visuals

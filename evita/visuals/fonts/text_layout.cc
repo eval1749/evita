@@ -24,7 +24,20 @@ TextLayout::TextLayout(const TextFormat& text_format,
                        const FloatSize& size)
     : impl_(new NativeTextLayout(text_format.impl(), text, size)) {}
 
+TextLayout::TextLayout(const TextLayout& other)
+    : impl_(std::move(std::make_unique<NativeTextLayout>(*other.impl_))) {}
+
+TextLayout::TextLayout(TextLayout&& other) : impl_(std::move(other.impl_)) {}
+
 TextLayout::~TextLayout() {}
+
+bool TextLayout::operator==(const TextLayout& other) const {
+  return *impl_ == *other.impl_;
+}
+
+bool TextLayout::operator!=(const TextLayout& other) const {
+  return !operator==(other);
+}
 
 FloatSize TextLayout::GetMetrics() const {
   return impl_->GetMetrics();

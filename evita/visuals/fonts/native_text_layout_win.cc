@@ -24,15 +24,28 @@ NativeTextLayout::NativeTextLayout(const NativeTextFormat& text_format,
   DCHECK(!size.IsEmpty());
   COM_VERIFY(DirectWriteFactory::GetInstance()->get()->CreateTextLayout(
       text.data(), static_cast<uint32_t>(text.length()),
-      text_format.get().get(), size.width(), size.height(),
-      text_layout_.Receive()));
+      text_format.get().get(), size.width(), size.height(), value_.Receive()));
 }
+
+NativeTextLayout::NativeTextLayout(const NativeTextLayout& other)
+    : value_(other.value_) {}
+
+NativeTextLayout::NativeTextLayout(NativeTextLayout&& other)
+    : value_(std::move(other.value_)) {}
 
 NativeTextLayout::~NativeTextLayout() {}
 
+bool NativeTextLayout::operator==(const NativeTextLayout& other) const {
+  return value_ == other.value_;
+}
+
+bool NativeTextLayout::operator!=(const NativeTextLayout& other) const {
+  return !operator==(other);
+}
+
 FloatSize NativeTextLayout::GetMetrics() const {
   DWRITE_TEXT_METRICS metrics;
-  COM_VERIFY(text_layout_->GetMetrics(&metrics));
+  COM_VERIFY(value_->GetMetrics(&metrics));
   return FloatSize(metrics.width, metrics.height);
 }
 

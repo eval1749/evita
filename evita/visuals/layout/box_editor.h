@@ -57,10 +57,8 @@ class BoxEditor final {
 
   // TextBox
   void AllocateTextLayout(TextBox* box);
-  const FontDescription& ComputeFontDescription(const TextBox& box);
   const TextFormat& EnsureTextFormat(TextBox* box);
   void SetBaseline(TextBox* box, float new_baseline);
-  void SetTextColor(TextBox* box, const FloatColor& color);
   void SetTextData(TextBox* box, const base::StringPiece16& data);
 
   // RootBox
@@ -68,7 +66,9 @@ class BoxEditor final {
   void SetViewportSize(RootBox* root_box, const FloatSize& size);
 
  private:
+  const FontDescription& ComputeFontDescription(const TextBox& box);
   void ScheduleVisualUpdateIfNeeded(Box* box);
+  void SetTextColor(TextBox* box, const FloatColor& color);
   void SetTextStyle(TextBox* box, const css::Style& style);
 
   DISALLOW_COPY_AND_ASSIGN(BoxEditor);

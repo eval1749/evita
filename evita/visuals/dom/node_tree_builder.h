@@ -15,7 +15,7 @@ namespace visuals {
 
 class ContainerNode;
 class Document;
-class Element;
+class ElementNode;
 class Node;
 
 namespace css {
@@ -44,7 +44,7 @@ class NodeTreeBuilder final {
 
  private:
   NodeTreeBuilder& AddInternal(Node* node);
-  NodeTreeBuilder& BeginInternal(Element* node);
+  NodeTreeBuilder& BeginInternal(ElementNode* node);
 
   std::stack<Node*> nodes_;
   Document* new_document_;

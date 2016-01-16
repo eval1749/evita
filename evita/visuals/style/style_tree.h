@@ -23,7 +23,7 @@ class StyleSheet;
 }
 
 class Document;
-class Element;
+class ElementNode;
 class Node;
 class StyleTreeObserver;
 
@@ -73,15 +73,15 @@ class StyleTree final : public css::MediaObserver,
   void DidRemoveRule(const css::Rule& rule, size_t index) final;
 
   // DocumentObserver
-  void DidAddClass(const Element& element, const base::string16& name);
+  void DidAddClass(const ElementNode& element, const base::string16& name);
   void DidAppendChild(const ContainerNode& parent, const Node& child) final;
-  void DidChangeInlineStyle(const Element& element,
+  void DidChangeInlineStyle(const ElementNode& element,
                             const css::Style* old_style) final;
   void DidInsertBefore(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;
   void DidRemoveChild(const ContainerNode& parent, const Node& child) final;
-  void DidRemoveClass(const Element& element, const base::string16& name);
+  void DidRemoveClass(const ElementNode& element, const base::string16& name);
   void DidReplaceChild(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;

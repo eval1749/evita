@@ -19,7 +19,7 @@ namespace visuals {
 class BoxTree;
 class DemoWindow;
 class Document;
-class Element;
+class ElementNode;
 class StyleTree;
 
 namespace css {
@@ -40,7 +40,7 @@ class DemoModel final : public css::Media,
   void AttachWindow(DemoWindow* window);
 
  private:
-  Element* FindListItem(const FloatPoint& point);
+  ElementNode* FindListItem(const FloatPoint& point);
   void UpdateLayoutIfNeeded();
   void UpdateStyleIfNeeded();
 

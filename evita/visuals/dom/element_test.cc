@@ -33,8 +33,8 @@ class ElementTest : public ::testing::Test, public DocumentObserver {
 
  private:
   // DocumentObserver
-  void DidAddClass(const Element& element, const base::string16& name);
-  void DidRemoveClass(const Element& element, const base::string16& name);
+  void DidAddClass(const ElementNode& element, const base::string16& name);
+  void DidRemoveClass(const ElementNode& element, const base::string16& name);
 
   std::vector<base::string16> added_classes_;
   std::vector<base::string16> removed_classes_;
@@ -42,12 +42,12 @@ class ElementTest : public ::testing::Test, public DocumentObserver {
   DISALLOW_COPY_AND_ASSIGN(ElementTest);
 };
 
-void ElementTest::DidAddClass(const Element& element,
+void ElementTest::DidAddClass(const ElementNode& element,
                               const base::string16& name) {
   added_classes_.push_back(name);
 }
 
-void ElementTest::DidRemoveClass(const Element& element,
+void ElementTest::DidRemoveClass(const ElementNode& element,
                                  const base::string16& name) {
   removed_classes_.push_back(name);
 }

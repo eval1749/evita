@@ -15,7 +15,7 @@
 
 namespace visuals {
 
-class Element;
+class ElementNode;
 
 namespace css {
 class Style;
@@ -32,7 +32,7 @@ class CompiledStyleSheet final : public css::StyleSheetObserver {
   ~CompiledStyleSheet();
 
   void AddObserver(css::StyleSheetObserver* observer) const;
-  std::unique_ptr<css::Style> Match(const Element& element) const;
+  std::unique_ptr<css::Style> Match(const ElementNode& element) const;
   void RemoveObserver(css::StyleSheetObserver* observer) const;
 
  private:

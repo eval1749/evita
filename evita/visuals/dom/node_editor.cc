@@ -11,7 +11,7 @@
 #include "evita/visuals/dom/ancestors.h"
 #include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/dom/descendants_or_self.h"
-#include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/element_node.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/dom/text.h"
@@ -26,7 +26,7 @@ namespace visuals {
 NodeEditor::NodeEditor() {}
 NodeEditor::~NodeEditor() {}
 
-void NodeEditor::AddClass(Element* element,
+void NodeEditor::AddClass(ElementNode* element,
                           const base::StringPiece16& class_name) {
   const auto& it =
       std::find_if(element->class_list_.begin(), element->class_list_.end(),
@@ -102,7 +102,7 @@ void NodeEditor::RegisterElementIdForSubtree(const Node& node) {
     return;
   const auto& document = node.document();
   for (const auto& runner : Node::DescendantsOrSelf(node)) {
-    if (const auto element = runner->as<Element>())
+    if (const auto element = runner->as<ElementNode>())
       document->RegisterElementIdIfNeeded(*element);
   }
 }
@@ -132,7 +132,7 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
                     DidRemoveChild(*container, *old_child));
 }
 
-void NodeEditor::RemoveClass(Element* element,
+void NodeEditor::RemoveClass(ElementNode* element,
                              const base::StringPiece16& class_name) {
   const auto& old_class = class_name.as_string();
   auto destination =
@@ -190,7 +190,8 @@ void NodeEditor::ReplaceChild(ContainerNode* container,
                     DidReplaceChild(*container, *new_child, *old_child));
 }
 
-void NodeEditor::SetInlineStyle(Element* element, const css::Style& new_style) {
+void NodeEditor::SetInlineStyle(ElementNode* element,
+                                const css::Style& new_style) {
   const auto document = element->document();
   DCHECK(!document->is_locked());
   if (element->inline_style_) {
@@ -226,7 +227,7 @@ void NodeEditor::UnregisterElementIdForSubtree(const Node& node) {
     return;
   const auto& document = node.document();
   for (const auto& runner : Node::DescendantsOrSelf(node)) {
-    if (const auto element = runner->as<Element>())
+    if (const auto element = runner->as<ElementNode>())
       document->UnregisterElementIdIfNeeded(*element);
   }
 }

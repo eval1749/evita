@@ -73,7 +73,7 @@ Document* LoadDocument() {
         .Finish(list);
     if (index == 0) {
       NodeEditor().SetInlineStyle(
-          list->last_child()->as<Element>(),
+          list->last_child()->as<ElementNode>(),
           *css::StyleBuilder().SetDisplay(css::Display::None()).Build());
     }
   }
@@ -173,7 +173,7 @@ void DemoModel::AttachWindow(DemoWindow* window) {
   RequestAnimationFrame();
 }
 
-Element* DemoModel::FindListItem(const FloatPoint& point) {
+ElementNode* DemoModel::FindListItem(const FloatPoint& point) {
   UpdateLayoutIfNeeded();
   const auto root_box = box_tree_->root_box();
   const auto& found = BoxFinder(*root_box).FindByPoint(point);
@@ -185,7 +185,7 @@ Element* DemoModel::FindListItem(const FloatPoint& point) {
     return nullptr;
   for (const auto& runner : Node::AncestorsOrSelf(*source)) {
     if (runner->node_name() == L"list_item")
-      return runner->as<Element>();
+      return runner->as<ElementNode>();
   }
   return nullptr;
 }

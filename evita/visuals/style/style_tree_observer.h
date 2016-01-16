@@ -13,7 +13,7 @@ namespace css {
 class Style;
 }
 
-class Element;
+class ElementNode;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -23,7 +23,7 @@ class StyleTreeObserver {
  public:
   virtual ~StyleTreeObserver();
 
-  virtual void DidChangeComputedStyle(const Element& element,
+  virtual void DidChangeComputedStyle(const ElementNode& element,
                                       const css::Style& old_style);
 
  protected:

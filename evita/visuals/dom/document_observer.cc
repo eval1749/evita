@@ -13,18 +13,18 @@ namespace visuals {
 DocumentObserver::DocumentObserver() {}
 DocumentObserver::~DocumentObserver() {}
 
-void DocumentObserver::DidAddClass(const Element& element,
+void DocumentObserver::DidAddClass(const ElementNode& element,
                                    const base::string16& new_name) {}
 void DocumentObserver::DidAppendChild(const ContainerNode& parent,
                                       const Node& child) {}
-void DocumentObserver::DidChangeInlineStyle(const Element& element,
+void DocumentObserver::DidChangeInlineStyle(const ElementNode& element,
                                             const css::Style* old_style) {}
 void DocumentObserver::DidInsertBefore(const ContainerNode& parent,
                                        const Node& child,
                                        const Node& ref_child) {}
 void DocumentObserver::DidRemoveChild(const ContainerNode& parent,
                                       const Node& child) {}
-void DocumentObserver::DidRemoveClass(const Element& element,
+void DocumentObserver::DidRemoveClass(const ElementNode& element,
                                       const base::string16& old_name) {}
 void DocumentObserver::DidReplaceChild(const ContainerNode& parent,
                                        const Node& new_child,

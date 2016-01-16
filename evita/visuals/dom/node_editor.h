@@ -12,7 +12,7 @@ namespace visuals {
 
 class ContainerNode;
 class Document;
-class Element;
+class ElementNode;
 class Node;
 class Text;
 
@@ -30,12 +30,12 @@ class NodeEditor final {
   ~NodeEditor();
 
   void AppendChild(ContainerNode* container, Node* new_child);
-  void AddClass(Element* element, const base::StringPiece16& class_name);
+  void AddClass(ElementNode* element, const base::StringPiece16& class_name);
   void InsertBefore(ContainerNode* container, Node* new_child, Node* ref_child);
   void RemoveChild(ContainerNode* container, Node* old_child);
-  void RemoveClass(Element* element, const base::StringPiece16& class_name);
+  void RemoveClass(ElementNode* element, const base::StringPiece16& class_name);
   void ReplaceChild(ContainerNode* container, Node* new_child, Node* old_child);
-  void SetInlineStyle(Element* element, const css::Style& style);
+  void SetInlineStyle(ElementNode* element, const css::Style& style);
   void SetTextData(Text* text, const base::StringPiece16& data);
 
   void WillDestroy(Node* node);

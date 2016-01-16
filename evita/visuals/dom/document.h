@@ -41,21 +41,21 @@ class Document final : public ContainerNode {
 
   void AddObserver(DocumentObserver* observer) const;
 
-  Element* GetElementById(const base::StringPiece16& id) const;
+  ElementNode* GetElementById(const base::StringPiece16& id) const;
   void Lock() const;
   void Unlock() const;
 
   void RemoveObserver(DocumentObserver* observer) const;
 
  private:
-  void RegisterElementIdIfNeeded(const Element& element);
-  void UnregisterElementIdIfNeeded(const Element& element);
+  void RegisterElementIdIfNeeded(const ElementNode& element);
+  void UnregisterElementIdIfNeeded(const ElementNode& element);
 
   // gc::Visitable
   void Accept(gc::Visitor* visitor) final;
 
   base::ObserverList<DocumentObserver> observers_;
-  std::map<base::string16, Element*> id_map_;
+  std::map<base::string16, ElementNode*> id_map_;
   mutable int lock_count_ = 0;
   int version_ = 0;
 

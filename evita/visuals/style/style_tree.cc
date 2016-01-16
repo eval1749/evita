@@ -108,13 +108,13 @@ class StyleTree::Impl final {
   std::unique_ptr<css::Style> ComputeInitialStyle() const;
   std::unique_ptr<css::Style> ComputeStyleForDocument() const;
   std::unique_ptr<css::Style> ComputeStyleForElement(
-      const Element& element) const;
+      const ElementNode& element) const;
   Item* GetOrNewItem(const Node& element);
   void IncrementVersionIfNeeded(Context* context);
   void UpdateChildren(Context* context, const ContainerNode& element);
   void UpdateDocumentStyleIfNeeded(Context* context);
-  void UpdateElement(Context* context, const Element& element);
-  void UpdateElementIfNeeded(Context* context, const Element& element);
+  void UpdateElement(Context* context, const ElementNode& element);
+  void UpdateElementIfNeeded(Context* context, const ElementNode& element);
   void UpdateNodeIfNeeded(Context* context, const Node& node);
   void UpdateText(Context* context, const Text& text);
 
@@ -186,7 +186,7 @@ std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForDocument() const {
 }
 
 std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForElement(
-    const Element& element) const {
+    const ElementNode& element) const {
   DCHECK_NE(StyleTreeState::Dirty, state_);
   const auto inline_style = element.inline_style();
   auto style = inline_style ? std::make_unique<css::Style>(*inline_style)
@@ -280,7 +280,8 @@ void StyleTree::Impl::UpdateDocumentStyleIfNeeded(Context* context) {
   UpdateChildren(context, document_);
 }
 
-void StyleTree::Impl::UpdateElement(Context* context, const Element& element) {
+void StyleTree::Impl::UpdateElement(Context* context,
+                                    const ElementNode& element) {
   IncrementVersionIfNeeded(context);
   const auto item = GetOrNewItem(element);
   item->is_child_dirty = false;
@@ -299,7 +300,7 @@ void StyleTree::Impl::UpdateElement(Context* context, const Element& element) {
 }
 
 void StyleTree::Impl::UpdateElementIfNeeded(Context* context,
-                                            const Element& element) {
+                                            const ElementNode& element) {
   const auto item = GetOrNewItem(element);
   if (item->is_dirty)
     return UpdateElement(context, element);
@@ -435,7 +436,7 @@ void StyleTree::DidRemoveRule(const css::Rule& rule, size_t index) {
 }
 
 // DocumentObserver
-void StyleTree::DidAddClass(const Element& element,
+void StyleTree::DidAddClass(const ElementNode& element,
                             const base::string16& name) {
   // TODO(eval1749): Implement shortcut for
   //  - position:absolute + left/top
@@ -449,7 +450,7 @@ void StyleTree::DidAppendChild(const ContainerNode& parent, const Node& child) {
   impl_->MarkDirty(parent);
 }
 
-void StyleTree::DidChangeInlineStyle(const Element& element,
+void StyleTree::DidChangeInlineStyle(const ElementNode& element,
                                      const css::Style* old_style) {
   // TODO(eval1749): Implement shortcut for
   //  - position:absolute + left/top
@@ -469,7 +470,7 @@ void StyleTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
   impl_->MarkDirty(parent);
 }
 
-void StyleTree::DidRemoveClass(const Element& element,
+void StyleTree::DidRemoveClass(const ElementNode& element,
                                const base::string16& name) {
   impl_->MarkDirty(element);
 }

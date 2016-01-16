@@ -50,7 +50,7 @@ void CompiledStyleSheet::CompileRule(const css::Rule& rule) {
 }
 
 std::unique_ptr<css::Style> CompiledStyleSheet::Match(
-    const Element& element) const {
+    const ElementNode& element) const {
   auto matched = false;
   css::Style style;
   if (!element.id().empty()) {

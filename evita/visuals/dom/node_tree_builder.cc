@@ -49,7 +49,7 @@ NodeTreeBuilder& NodeTreeBuilder::Begin(const base::StringPiece16& tag_name,
   return BeginInternal(new Element(document_, tag_name, id));
 }
 
-NodeTreeBuilder& NodeTreeBuilder::BeginInternal(Element* child) {
+NodeTreeBuilder& NodeTreeBuilder::BeginInternal(ElementNode* child) {
   AddInternal(child);
   nodes_.push(child);
   return *this;

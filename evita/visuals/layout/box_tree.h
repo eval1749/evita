@@ -48,7 +48,7 @@ class BoxTree final : public css::MediaObserver,
 
   // DocumentObserver
   void DidAppendChild(const ContainerNode& parent, const Node& child) final;
-  void DidChangeInlineStyle(const Element& element,
+  void DidChangeInlineStyle(const ElementNode& element,
                             const css::Style* old_style) final;
   void DidInsertBefore(const ContainerNode& parent,
                        const Node& child,
@@ -62,7 +62,7 @@ class BoxTree final : public css::MediaObserver,
                       const base::string16& old_data) final;
 
   // StyleTreeObserver
-  void DidChangeComputedStyle(const Element& element,
+  void DidChangeComputedStyle(const ElementNode& element,
                               const css::Style& old_style) final;
 
   // An implementation of |BoxTree|.

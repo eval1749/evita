@@ -26,7 +26,7 @@ class StyleSheet;
 class BoxTree;
 class ContainerNode;
 class Document;
-class Element;
+class ElementNode;
 class Node;
 class StyleTree;
 class Text;
@@ -59,7 +59,7 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   using CssMedia = visuals::css::Media;
   using CssStyle = visuals::css::Style;
   using CssStyleSheet = visuals::css::StyleSheet;
-  using Element = visuals::Element;
+  using ElementNode = visuals::ElementNode;
   using FloatSize = visuals::FloatSize;
   using Node = visuals::Node;
   using Text = visuals::Text;
@@ -82,16 +82,16 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   visuals::FloatSize viewport_size() const final;
 
   // visuals::DocumentObserver
-  void DidAddClass(const Element& element,
+  void DidAddClass(const ElementNode& element,
                    const base::string16& new_name) final;
   void DidAppendChild(const ContainerNode& parent, const Node& child) final;
-  void DidChangeInlineStyle(const Element& element,
+  void DidChangeInlineStyle(const ElementNode& element,
                             const CssStyle* old_style) final;
   void DidInsertBefore(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;
   void DidRemoveChild(const ContainerNode& parent, const Node& child) final;
-  void DidRemoveClass(const Element& element,
+  void DidRemoveClass(const ElementNode& element,
                       const base::string16& old_name) final;
   void DidReplaceChild(const ContainerNode& parent,
                        const Node& child,

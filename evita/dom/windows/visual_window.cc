@@ -117,7 +117,7 @@ visuals::FloatSize VisualWindow::viewport_size() const {
 }
 
 // visuals::DocumentObserver
-void VisualWindow::DidAddClass(const Element& element,
+void VisualWindow::DidAddClass(const ElementNode& element,
                                const base::string16& new_name) {
   RequestAnimationFrame();
 }
@@ -127,7 +127,7 @@ void VisualWindow::DidAppendChild(const ContainerNode& parent,
   RequestAnimationFrame();
 }
 
-void VisualWindow::DidChangeInlineStyle(const Element& element,
+void VisualWindow::DidChangeInlineStyle(const ElementNode& element,
                                         const CssStyle* old_style) {
   RequestAnimationFrame();
 }
@@ -143,7 +143,7 @@ void VisualWindow::DidRemoveChild(const ContainerNode& parent,
   RequestAnimationFrame();
 }
 
-void VisualWindow::DidRemoveClass(const Element& element,
+void VisualWindow::DidRemoveClass(const ElementNode& element,
                                   const base::string16& old_name) {
   RequestAnimationFrame();
 }

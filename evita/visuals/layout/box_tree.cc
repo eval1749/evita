@@ -93,7 +93,7 @@ class BoxTree::Impl final {
   void UpdateIfNeeded();
 
  private:
-  Box* AssignBoxToElement(Context* context, const Element& element);
+  Box* AssignBoxToElement(Context* context, const ElementNode& element);
   Box* AssignBoxToNode(Context* context, const Node& node);
   Box* AssignBoxToText(Context* context, const Text& text);
   const css::Style& ComputedStyleOf(const Node& node) const;
@@ -143,7 +143,7 @@ RootBox* BoxTree::Impl::root_box() const {
 }
 
 Box* BoxTree::Impl::AssignBoxToElement(Context* context,
-                                       const Element& element) {
+                                       const ElementNode& element) {
   const auto& style = ComputedStyleOf(element);
   const auto& it = box_map_.find(&element);
   if (style.display().is_none()) {
@@ -456,7 +456,7 @@ void BoxTree::DidAppendChild(const ContainerNode& parent, const Node& child) {
   impl_->MarkDirty(parent);
 }
 
-void BoxTree::DidChangeInlineStyle(const Element& element,
+void BoxTree::DidChangeInlineStyle(const ElementNode& element,
                                    const css::Style* old_style) {
   // TODO(eval1749): We should not clear root box to optimize left/top
   // changes.
@@ -480,7 +480,7 @@ void BoxTree::DidReplaceChild(const ContainerNode& parent,
 }
 
 // StyleTreeObserver
-void BoxTree::DidChangeComputedStyle(const Element& element,
+void BoxTree::DidChangeComputedStyle(const ElementNode& element,
                                      const css::Style& old_style) {
   impl_->MarkDirty(element);
 }

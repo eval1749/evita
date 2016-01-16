@@ -13,8 +13,9 @@ namespace visuals {
   V(Text)
 
 #define FOR_EACH_ABSTRACT_VISUAL_NODE(V) \
-  V(Node)                                \
-  V(ContainerNode)
+  V(ContainerNode)                       \
+  V(ElementNode)                         \
+  V(Node)
 
 // Forward declarations
 class Node;

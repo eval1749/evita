@@ -12,12 +12,13 @@
 #include "common/castable.h"
 #include "evita/visuals/display/public/display_items_forward.h"
 #include "evita/visuals/css/float_color.h"
+#include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/geometry/float_matrix3x2.h"
 #include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
-class TextFormat;
+class TextLayout;
 
 #define DECLARE_DISPLAY_ITEM_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)           \
@@ -145,7 +146,7 @@ class DrawTextDisplayItem final : public DisplayItem {
   DrawTextDisplayItem(const FloatRect& bounds,
                       const FloatColor& color,
                       float baseline,
-                      const TextFormat& text_format,
+                      const TextLayout& text_layout,
                       const base::string16& text);
   ~DrawTextDisplayItem();
 
@@ -153,7 +154,7 @@ class DrawTextDisplayItem final : public DisplayItem {
   const FloatRect& bounds() const { return bounds_; }
   const FloatColor& color() const { return color_; }
   const base::string16& text() const { return text_; }
-  const TextFormat& text_format() const { return text_format_; }
+  const TextLayout& text_layout() const { return text_layout_; }
 
  private:
   // DisplayItem
@@ -162,8 +163,9 @@ class DrawTextDisplayItem final : public DisplayItem {
   const float baseline_;
   const FloatRect bounds_;
   const FloatColor color_;
+  // |text_| is used only for debugging.
   const base::string16 text_;
-  const TextFormat& text_format_;
+  const TextLayout text_layout_;
 
   DISALLOW_COPY_AND_ASSIGN(DrawTextDisplayItem);
 };

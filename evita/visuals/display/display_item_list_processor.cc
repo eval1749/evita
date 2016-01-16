@@ -22,8 +22,8 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/public/display_item_visitor.h"
-#include "evita/visuals/fonts/native_text_format_win.h"
-#include "evita/visuals/fonts/text_format.h"
+#include "evita/visuals/fonts/native_text_layout_win.h"
+#include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
@@ -91,10 +91,10 @@ void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
 }
 
 void PaintVisitor::VisitDrawText(DrawTextDisplayItem* item) {
-  (*canvas_)->DrawText(
-      item->text().data(), static_cast<uint32_t>(item->text().length()),
-      item->text_format().impl().get().get(), ToRectF(item->bounds()),
-      gfx::Brush(canvas_, ToColorF(item->color())));
+  (*canvas_)->DrawTextLayout(ToPointF(item->bounds().origin()),
+                             item->text_layout().impl().get().get(),
+                             gfx::Brush(canvas_, ToColorF(item->color())),
+                             D2D1_DRAW_TEXT_OPTIONS_CLIP);
 }
 
 void PaintVisitor::VisitEndClip(EndClipDisplayItem* item) {

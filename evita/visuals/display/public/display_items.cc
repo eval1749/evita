@@ -4,6 +4,8 @@
 
 #include "evita/visuals/display/public/display_items.h"
 
+#include "evita/visuals/fonts/text_layout.h"
+
 namespace visuals {
 
 namespace {
@@ -89,13 +91,13 @@ bool DrawRectDisplayItem::EqualsTo(const DisplayItem& other) const {
 DrawTextDisplayItem::DrawTextDisplayItem(const FloatRect& bounds,
                                          const FloatColor& color,
                                          float baseline,
-                                         const TextFormat& text_format,
+                                         const TextLayout& text_layout,
                                          const base::string16& text)
     : baseline_(baseline),
       bounds_(bounds),
       color_(color),
       text_(text),
-      text_format_(text_format) {}
+      text_layout_(std::move(text_layout)) {}
 
 DrawTextDisplayItem::~DrawTextDisplayItem() {}
 
@@ -106,8 +108,7 @@ bool DrawTextDisplayItem::EqualsTo(const DisplayItem& other) const {
   if (!item)
     return false;
   return baseline_ == item->baseline_ && bounds_ == item->bounds_ &&
-         color_ == item->color_ && text_ == item->text_ &&
-         &text_format_ == &item->text_format_;
+         color_ == item->color_ && text_layout_ == item->text_layout_;
 }
 
 //////////////////////////////////////////////////////////////////////

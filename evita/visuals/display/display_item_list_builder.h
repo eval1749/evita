@@ -27,7 +27,8 @@ class DisplayItemListBuilder final {
 
   template <typename T, typename... Args>
   void AddNew(Args&&... args) {
-    AddItem(std::move(std::unique_ptr<DisplayItem>(new T(args...))));
+    AddItem(std::move(
+        std::unique_ptr<DisplayItem>(new T(std::forward<Args>(args)...))));
   }
 
   void AddRect(const FloatRect& rect);

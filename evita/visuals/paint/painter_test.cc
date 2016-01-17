@@ -13,7 +13,7 @@
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
-#include "evita/visuals/layout/simple_box_tree_builder.h"
+#include "evita/visuals/layout/simple_box_tree.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
 #include "gtest/gtest.h"
@@ -21,20 +21,17 @@
 namespace visuals {
 
 TEST(PainterTest, Basic) {
-  const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<FlowBox>()
-                         .SetStyle(*css::StyleBuilder()
-                                        .SetBackgroundColor(css::Color(1, 1, 1))
-                                        .Build())
-                         .End<FlowBox>()
-                         .Build();
-  BoxEditor().SetViewportSize(root.get(), FloatSize(200, 100));
-  Layouter().Layout(root.get());
+  SimpleBoxTree box_tree;
+  box_tree.Begin<FlowBox>()
+      .SetStyle(
+          *css::StyleBuilder().SetBackgroundColor(css::Color(1, 1, 1)).Build())
+      .End<FlowBox>();
+  const auto root = box_tree.root_box();
+  BoxEditor().SetViewportSize(root, FloatSize(200, 100));
+  Layouter().Layout(root);
   PaintInfo paint_info(FloatRect(root->viewport_size()));
   const auto& display_item_list = Painter().Paint(paint_info, *root);
   EXPECT_EQ(5, display_item_list->items().size());
-
-  BoxEditor().RemoveDescendants(root.get());
 }
 
 }  // namespace visuals

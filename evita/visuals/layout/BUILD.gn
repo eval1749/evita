@@ -86,8 +86,8 @@ source_set("values") {
 source_set("test_supports") {
   testonly = true
   sources = [
-    "simple_box_tree_builder.cc",
-    "simple_box_tree_builder.h",
+    "simple_box_tree.cc",
+    "simple_box_tree.h",
   ]
   deps = [
     ":layout",

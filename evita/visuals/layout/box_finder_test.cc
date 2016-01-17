@@ -14,7 +14,7 @@
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
-#include "evita/visuals/layout/simple_box_tree_builder.h"
+#include "evita/visuals/layout/simple_box_tree.h"
 #include "evita/visuals/layout/text_box.h"
 #include "gtest/gtest.h"
 
@@ -34,21 +34,21 @@ TEST(BoxFinderTest, Basic) {
   const auto block = document->first_child()->as<Element>();
   const auto text1 = block->first_child()->as<Text>();
   const auto text2 = block->last_child()->as<Text>();
-  const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<FlowBox>(block)
-                         .Add<TextBox>(text1->data(), text1)
-                         .Add<TextBox>(text2->data(), text2)
-                         .End<FlowBox>()
-                         .Build();
+  SimpleBoxTree box_tree(*document);
+  box_tree.Begin<FlowBox>(block)
+      .Add<TextBox>(text1->data(), text1)
+      .Add<TextBox>(text2->data(), text2)
+      .End<FlowBox>();
+  const auto root = box_tree.root_box();
   const auto main = root->first_child()->as<ContainerBox>();
   const auto text_box1 = main->first_child();
   const auto text_box2 = main->last_child();
   BoxEditor().SetStyle(text_box1, *style);
   BoxEditor().SetStyle(text_box2, *style);
-  BoxEditor().SetViewportSize(root.get(), FloatSize(640, 480));
-  Layouter().Layout(root.get());
+  BoxEditor().SetViewportSize(root, FloatSize(640, 480));
+  Layouter().Layout(box_tree.root_box());
 
-  BoxFinder finder(*root);
+  BoxFinder finder(*box_tree.root_box());
 
   EXPECT_EQ(BoxFinder::Result(), finder.FindByPoint(FloatPoint(-1, -1)));
   EXPECT_EQ(BoxFinder::Result(), finder.FindByPoint(FloatPoint(9999, 9999)));
@@ -56,8 +56,6 @@ TEST(BoxFinderTest, Basic) {
             finder.FindByPoint(text_box1->bounds().origin() + FloatSize(1, 2)));
   EXPECT_EQ(BoxFinder::Result(text_box2, FloatPoint(3, 4)),
             finder.FindByPoint(text_box2->bounds().origin() + FloatSize(3, 4)));
-
-  BoxEditor().RemoveDescendants(root.get());
 }
 
 }  // namespace visuals

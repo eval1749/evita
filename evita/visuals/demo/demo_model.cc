@@ -31,7 +31,7 @@
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
-#include "evita/visuals/layout/simple_box_tree_builder.h"
+#include "evita/visuals/layout/simple_box_tree.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/style/style_tree.h"
 #include "evita/visuals/paint/painter.h"

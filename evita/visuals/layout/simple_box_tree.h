@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_LAYOUT_SIMPLE_BOX_TREE_BUILDER_H_
-#define EVITA_VISUALS_LAYOUT_SIMPLE_BOX_TREE_BUILDER_H_
+#ifndef EVITA_VISUALS_LAYOUT_SIMPLE_BOX_TREE_H_
+#define EVITA_VISUALS_LAYOUT_SIMPLE_BOX_TREE_H_
 
 #include <memory>
 #include <stack>
 
 #include "base/macros.h"
 #include "base/logging.h"
+#include "evita/gc/member.h"
 
 namespace visuals {
 
 class Box;
 class ContainerBox;
+class Document;
 class RootBox;
 
 namespace css {
@@ -23,32 +25,32 @@ class Style;
 
 //////////////////////////////////////////////////////////////////////
 //
-// SimpleBoxTreeBuilder
+// SimpleBoxTree
 //
-class SimpleBoxTreeBuilder final {
+class SimpleBoxTree final {
  public:
-  explicit SimpleBoxTreeBuilder(ContainerBox* container);
-  SimpleBoxTreeBuilder();
-  ~SimpleBoxTreeBuilder();
+  explicit SimpleBoxTree(const Document& document);
+  SimpleBoxTree();
+  ~SimpleBoxTree();
 
-  std::unique_ptr<RootBox> Build();
+  RootBox* root_box() { return root_box_.get(); }
 
   template <typename T, typename... Args>
-  SimpleBoxTreeBuilder& Add(Args&&... args) {
+  SimpleBoxTree& Add(Args&&... args) {
     static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
     return AddInternal(
-        std::move(std::unique_ptr<Box>(new T(root_box_, args...))));
+        std::move(std::unique_ptr<Box>(new T(root_box(), args...))));
   }
 
   template <typename T, typename... Args>
-  SimpleBoxTreeBuilder& Begin(Args&&... args) {
+  SimpleBoxTree& Begin(Args&&... args) {
     static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
     return BeginInternal(
-        std::move(std::unique_ptr<Box>(new T(root_box_, args...))));
+        std::move(std::unique_ptr<Box>(new T(root_box(), args...))));
   }
 
   template <typename T>
-  SimpleBoxTreeBuilder& End() {
+  SimpleBoxTree& End() {
     DCHECK(boxes_.top()->is<T>());
     return EndInternal();
   }
@@ -60,24 +62,25 @@ class SimpleBoxTreeBuilder final {
   }
 
   // Box
-  SimpleBoxTreeBuilder& SetStyle(const css::Style& style);
+  SimpleBoxTree& SetStyle(const css::Style& style);
 
   // TextBox
-  SimpleBoxTreeBuilder& SetBaseline(float baseline);
+  SimpleBoxTree& SetBaseline(float baseline);
 
  private:
-  SimpleBoxTreeBuilder& AddInternal(std::unique_ptr<Box> box);
-  SimpleBoxTreeBuilder& BeginInternal(std::unique_ptr<Box> box);
-  SimpleBoxTreeBuilder& EndInternal();
+  SimpleBoxTree& AddInternal(std::unique_ptr<Box> box);
+  SimpleBoxTree& BeginInternal(std::unique_ptr<Box> box);
+  SimpleBoxTree& EndInternal();
   void FinishInternal(Box* box);
 
   std::stack<Box*> boxes_;
-  std::unique_ptr<RootBox> new_root_box_;
-  RootBox* const root_box_;
+  const Document& document_;
+  gc::Member<Document> own_document_;
+  std::unique_ptr<RootBox> root_box_;
 
-  DISALLOW_COPY_AND_ASSIGN(SimpleBoxTreeBuilder);
+  DISALLOW_COPY_AND_ASSIGN(SimpleBoxTree);
 };
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_LAYOUT_SIMPLE_BOX_TREE_BUILDER_H_
+#endif  // EVITA_VISUALS_LAYOUT_SIMPLE_BOX_TREE_H_

@@ -9,7 +9,7 @@
 
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/descendants_or_self.h"
-#include "evita/visuals/layout/simple_box_tree_builder.h"
+#include "evita/visuals/layout/simple_box_tree.h"
 #include "gtest/gtest.h"
 
 namespace visuals {}  // namespace visuals

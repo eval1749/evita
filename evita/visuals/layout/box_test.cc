@@ -10,14 +10,16 @@
 #include "evita/visuals/layout/margin.h"
 #include "evita/visuals/layout/padding.h"
 #include "evita/visuals/layout/root_box.h"
-#include "evita/visuals/layout/simple_box_tree_builder.h"
+#include "evita/visuals/layout/simple_box_tree.h"
 #include "evita/visuals/layout/text_box.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
 
 TEST(BoxTest, InitialValues) {
-  const auto& root = SimpleBoxTreeBuilder().Add<TextBox>(L"foo").Build();
+  SimpleBoxTree box_tree;
+  box_tree.Add<TextBox>(L"foo");
+  const auto root = box_tree.root_box();
   const auto& box = root->first_child();
   const auto& margin = box->ComputeMargin();
   const auto& padding = box->ComputePadding();
@@ -34,17 +36,15 @@ TEST(BoxTest, InitialValues) {
   EXPECT_EQ(0.0f, padding.right());
   EXPECT_EQ(0.0f, padding.top());
   EXPECT_EQ(css::Position::Static(), box->position());
-
-  BoxEditor().RemoveDescendants(root.get());
 }
 
 TEST(BoxTest, IsDescendantOf) {
-  const auto& root = SimpleBoxTreeBuilder()
-                         .Begin<FlowBox>()
-                         .Add<TextBox>(L"foo")
-                         .Add<TextBox>(L"bar")
-                         .End<FlowBox>()
-                         .Build();
+  SimpleBoxTree box_tree;
+  box_tree.Begin<FlowBox>()
+      .Add<TextBox>(L"foo")
+      .Add<TextBox>(L"bar")
+      .End<FlowBox>();
+  const auto root = box_tree.root_box();
   const auto main = root->first_child()->as<ContainerBox>();
   const auto text_box1 = main->first_child();
   const auto text_box2 = main->last_child();
@@ -54,8 +54,6 @@ TEST(BoxTest, IsDescendantOf) {
   EXPECT_TRUE(text_box1->IsDescendantOf(*main));
   EXPECT_TRUE(text_box2->IsDescendantOf(*main));
   EXPECT_FALSE(text_box2->IsDescendantOf(*text_box1));
-
-  BoxEditor().RemoveDescendants(root.get());
 }
 
 }  // namespace visuals

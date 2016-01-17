@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/layout/simple_box_tree_builder.h"
+#include "evita/visuals/layout/simple_box_tree.h"
 
 #include "base/logging.h"
 #include "evita/visuals/dom/document.h"
@@ -14,63 +14,55 @@ namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
-// SimpleBoxTreeBuilder
+// SimpleBoxTree
 //
-SimpleBoxTreeBuilder::SimpleBoxTreeBuilder(ContainerBox* container)
-    : root_box_(container->root_box()) {
-  boxes_.push(container);
+SimpleBoxTree::SimpleBoxTree(const Document& document)
+    : document_(document), root_box_(new RootBox(document)) {
+  boxes_.push(root_box_.get());
 }
 
-SimpleBoxTreeBuilder::SimpleBoxTreeBuilder()
-    : new_root_box_(new RootBox(*new Document())),
-      root_box_(new_root_box_.get()) {
-  boxes_.push(root_box_);
+SimpleBoxTree::SimpleBoxTree() : SimpleBoxTree(*new Document()) {
+  own_document_ = const_cast<Document*>(&document_);
 }
 
-SimpleBoxTreeBuilder::~SimpleBoxTreeBuilder() {
+SimpleBoxTree::~SimpleBoxTree() {
+  BoxEditor().RemoveDescendants(root_box_.get());
+  boxes_.pop();
   DCHECK(boxes_.empty());
 }
 
-SimpleBoxTreeBuilder& SimpleBoxTreeBuilder::AddInternal(
-    std::unique_ptr<Box> child) {
+SimpleBoxTree& SimpleBoxTree::AddInternal(std::unique_ptr<Box> child) {
   const auto container = boxes_.top()->as<ContainerBox>();
   BoxEditor().AppendChild(container, child.release());
   return *this;
 }
 
-SimpleBoxTreeBuilder& SimpleBoxTreeBuilder::BeginInternal(
-    std::unique_ptr<Box> child) {
+SimpleBoxTree& SimpleBoxTree::BeginInternal(std::unique_ptr<Box> child) {
   const auto new_top = child.get();
   AddInternal(std::move(child));
   boxes_.push(new_top);
   return *this;
 }
 
-std::unique_ptr<RootBox> SimpleBoxTreeBuilder::Build() {
-  DCHECK_EQ(1, boxes_.size());
-  boxes_.pop();
-  return std::move(new_root_box_);
-}
-
-SimpleBoxTreeBuilder& SimpleBoxTreeBuilder::EndInternal() {
+SimpleBoxTree& SimpleBoxTree::EndInternal() {
   boxes_.pop();
   return *this;
 }
 
-void SimpleBoxTreeBuilder::FinishInternal(Box* box) {
+void SimpleBoxTree::FinishInternal(Box* box) {
   DCHECK_EQ(1, boxes_.size());
   DCHECK_EQ(boxes_.top(), box);
   boxes_.pop();
 }
 
-SimpleBoxTreeBuilder& SimpleBoxTreeBuilder::SetBaseline(float baseline) {
+SimpleBoxTree& SimpleBoxTree::SetBaseline(float baseline) {
   const auto& text = boxes_.top()->as<TextBox>();
   DCHECK(text) << boxes_.top()->class_name();
   BoxEditor().SetBaseline(text, baseline);
   return *this;
 }
 
-SimpleBoxTreeBuilder& SimpleBoxTreeBuilder::SetStyle(const css::Style& style) {
+SimpleBoxTree& SimpleBoxTree::SetStyle(const css::Style& style) {
   BoxEditor().SetStyle(boxes_.top(), style);
   return *this;
 }

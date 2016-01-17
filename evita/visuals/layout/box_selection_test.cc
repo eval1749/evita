@@ -46,6 +46,7 @@ TEST(BoxSelectionTest, Basic) {
 
   EXPECT_EQ(text_box.get(), selection2.anchor_box());
   EXPECT_EQ(5, selection2.anchor_offset());
+  EXPECT_EQ(text_box.get(), selection2.focus_box());
   EXPECT_EQ(3, selection2.focus_offset());
 
   BoxSelectionEditor().Clear(&selection2);

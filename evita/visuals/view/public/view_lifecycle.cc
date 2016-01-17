@@ -12,6 +12,21 @@
 
 namespace visuals {
 
+static_assert(static_cast<int>(ViewLifecycle::State::VisualUpdatePending) == 0,
+              "VisualUpdatePending must be 0.");
+
+static_assert((static_cast<int>(ViewLifecycle::State::LayoutClean) & 1) == 0,
+              "LayoutClean must be an even.");
+
+static_assert((static_cast<int>(ViewLifecycle::State::PaintClean) & 1) == 0,
+              "PaintClean must be an even.");
+
+static_assert((static_cast<int>(ViewLifecycle::State::StyleClean) & 1) == 0,
+              "StyleClean must be an even.");
+
+static_assert((static_cast<int>(ViewLifecycle::State::TreeClean) & 1) == 0,
+              "TreeClean must be an even.");
+
 //////////////////////////////////////////////////////////////////////
 //
 // ViewLifecycle::Scope
@@ -48,14 +63,8 @@ void ViewLifecycle::Advance() {
 }
 
 bool ViewLifecycle::AllowsTreeMutaions() const {
-  static bool allows[static_cast<size_t>(State::PaintClean) + 1];
-  if (!allows[static_cast<size_t>(State::VisualUpdatePending)]) {
-    allows[static_cast<size_t>(State::VisualUpdatePending)] = true;
-    allows[static_cast<size_t>(State::LayoutClean)] = true;
-    allows[static_cast<size_t>(State::PaintClean)] = true;
-    allows[static_cast<size_t>(State::StyleClean)] = true;
-  }
-  return allows[static_cast<size_t>(state_)];
+  const auto value = static_cast<int>(state_);
+  return (value & 1) == 0 && value <= static_cast<int>(State::PaintClean);
 }
 
 void ViewLifecycle::FinishShutdown() {

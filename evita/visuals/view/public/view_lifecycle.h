@@ -35,12 +35,12 @@ class ViewLifecycle final : public DocumentObserver {
 
   class Scope {
    public:
-    Scope(ViewLifecycle* lifecycle, State from_state, State to_state);
+    Scope(ViewLifecycle* lifecycle, State from_state);
     ~Scope();
 
    private:
     ViewLifecycle* const lifecycle_;
-    State const to_state_;
+    State const from_state_;
 
     DISALLOW_COPY_AND_ASSIGN(Scope);
   };
@@ -57,7 +57,7 @@ class ViewLifecycle final : public DocumentObserver {
   void Reset();
 
  private:
-  void AdvanceTo(State state);
+  void Advance();
 
   // DocumentObserver
   void DidAddClass(const ElementNode& element,

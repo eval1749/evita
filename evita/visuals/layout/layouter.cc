@@ -160,8 +160,7 @@ void Layouter::Layout(RootBox* root_box) {
   if (root_box->IsLayoutClean())
     return;
   ViewLifecycle::Scope scope(root_box->lifecycle(),
-                             ViewLifecycle::State::InLayout,
-                             ViewLifecycle::State::LayoutClean);
+                             ViewLifecycle::State::InLayout);
   DCHECK(!root_box->bounds().size().IsEmpty());
   LayoutVisitor().LayoutIfNeeded(root_box);
 }

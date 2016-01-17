@@ -16,15 +16,14 @@ namespace visuals {
 //
 // ViewLifecycle::Scope
 //
-ViewLifecycle::Scope::Scope(ViewLifecycle* lifecycle,
-                            State from_state,
-                            State to_state)
-    : lifecycle_(lifecycle), to_state_(to_state) {
-  lifecycle_->AdvanceTo(from_state);
+ViewLifecycle::Scope::Scope(ViewLifecycle* lifecycle, State from_state)
+    : lifecycle_(lifecycle), from_state_(from_state) {
+  lifecycle_->Advance();
+  DCHECK_EQ(lifecycle_->state_, from_state_);
 }
 
 ViewLifecycle::Scope::~Scope() {
-  lifecycle_->AdvanceTo(to_state_);
+  lifecycle_->Advance();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -40,10 +39,9 @@ ViewLifecycle::~ViewLifecycle() {
   document_.RemoveObserver(this);
 }
 
-void ViewLifecycle::AdvanceTo(State new_state) {
-  DCHECK(static_cast<int>(new_state) == static_cast<int>(state_) + 1)
-      << "Can't advance to " << new_state << " from " << state_;
-  state_ = new_state;
+void ViewLifecycle::Advance() {
+  DCHECK_NE(State::PaintClean, state_);
+  state_ = static_cast<State>(static_cast<int>(state_) + 1);
 }
 
 bool ViewLifecycle::AllowsTreeMutaions() const {

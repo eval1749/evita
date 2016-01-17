@@ -308,8 +308,7 @@ Painter::~Painter() {}
 std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
                                                 const RootBox& root_box) {
   ViewLifecycle::Scope scope(root_box.lifecycle(),
-                             ViewLifecycle::State::InPaint,
-                             ViewLifecycle::State::PaintClean);
+                             ViewLifecycle::State::InPaint);
   return PaintVisitor(paint_info).Paint(root_box);
 }
 

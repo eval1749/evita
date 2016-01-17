@@ -8,7 +8,7 @@ import("//testing/test.gni")
 group("evita") {
   deps = [
     ":evita_exe",
-    "//evita/visuals:demo",
+    "//evita/visuals/demo",
   ]
 }
 

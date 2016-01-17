@@ -1,0 +1,32 @@
+# Copyright (c) 2015 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+executable("demo") {
+  output_name = "evita_visuals_demo"
+  sources = [
+    "demo_application.cc",
+    "demo_application.h",
+    "demo_main.cc",
+    "demo_model.cc",
+    "demo_model.h",
+    "demo_window.cc",
+    "demo_window.h",
+  ]
+
+  deps = [
+    "//evita/ui:widget",
+    "//evita/visuals",
+    "//evita/visuals/display:processor",
+    "//evita/visuals/view/public",
+  ]
+
+  if (is_win) {
+    sources += [ "demo_window_win.cc" ]
+  }
+
+  configs -= [ "//build/config/win:console" ]
+  configs += [ "//build/config/win:windowed" ]
+}

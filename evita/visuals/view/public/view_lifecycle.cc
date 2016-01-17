@@ -113,7 +113,8 @@ void ViewLifecycle::LimitTo(State limit_state) {
     return;
   state_ = limit_state;
 }
-void ViewLifecycle::Reset() {
+
+void ViewLifecycle::StartOver() {
   state_ = State::VisualUpdatePending;
 }
 

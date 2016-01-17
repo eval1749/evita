@@ -401,7 +401,7 @@ void StyleTree::AddObserver(StyleTreeObserver* observer) const {
 }
 
 void StyleTree::Clear() {
-  lifecycle_->Reset();
+  lifecycle_->StartOver();
   impl_->Clear();
 }
 
@@ -450,7 +450,7 @@ const css::Style& StyleTree::ComputedStyleOfSelection(
 }
 
 void StyleTree::MarkDirty(const Node& node) {
-  lifecycle_->Reset();
+  lifecycle_->StartOver();
   impl_->MarkDirty(node);
 }
 
@@ -509,7 +509,7 @@ void StyleTree::DidChangeInlineStyle(const ElementNode& element,
   //  - background color change
   //  - border color change
   // Since above changes don't affect layout.
-  lifecycle_->Reset();
+  lifecycle_->StartOver();
   MarkDirty(element);
 }
 
@@ -538,7 +538,7 @@ void StyleTree::DidSetTextData(const Text& text,
                                const base::string16& new_data,
                                const base::string16& old_data) {
   // TODO(eval1749): When does |Text| node change affect style tree?
-  lifecycle_->Reset();
+  lifecycle_->StartOver();
 }
 
 }  // namespace visuals

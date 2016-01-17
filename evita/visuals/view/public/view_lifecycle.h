@@ -76,7 +76,7 @@ class ViewLifecycle final : public DocumentObserver {
   bool IsTreeClean() const;
   bool IsLayoutClean() const;
   void LimitTo(State state);
-  void Reset();
+  void StartOver();
   void StartShutdown();
 
  private:

@@ -78,6 +78,8 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
                                  CSSStyleSheetHandle* style_sheet_handle);
 
   // visuals::css::Media
+  bool is_caret_on() const final;
+  visuals::css::MediaState media_state() const final;
   visuals::css::MediaType media_type() const final;
   visuals::FloatSize viewport_size() const final;
 

@@ -10,6 +10,7 @@
 #include "base/macros.h"
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/visuals/css/media.h"
+#include "evita/visuals/css/media_state.h"
 #include "evita/visuals/demo/demo_window.h"
 #include "evita/visuals/geometry/float_size.h"
 #include "evita/visuals/layout/box_finder.h"
@@ -45,6 +46,8 @@ class DemoModel final : public css::Media,
   void UpdateStyleIfNeeded();
 
   // css::Media
+  bool is_caret_on() const final;
+  css::MediaState media_state() const final;
   css::MediaType media_type() const final;
   FloatSize viewport_size() const final;
 
@@ -58,6 +61,7 @@ class DemoModel final : public css::Media,
   void DidPressMouse(const FloatPoint& point) final;
 
   Document* const document_;
+  bool is_caret_on_ = false;
   css::StyleSheet* style_sheet_;
   FloatSize viewport_size_;
 

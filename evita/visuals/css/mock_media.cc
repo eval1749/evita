@@ -4,6 +4,7 @@
 
 #include "evita/visuals/css/mock_media.h"
 
+#include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/media_type.h"
 #include "evita/visuals/geometry/float_size.h"
 
@@ -16,6 +17,14 @@ namespace css {
 //
 MockMedia::MockMedia() : viewport_size_(320, 240) {}
 MockMedia::~MockMedia() {}
+
+bool MockMedia::is_caret_on() const {
+  return true;
+}
+
+MediaState MockMedia::media_state() const {
+  return MediaState::Interactive;
+}
 
 MediaType MockMedia::media_type() const {
   return MediaType::Screen;

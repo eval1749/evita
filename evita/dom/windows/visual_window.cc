@@ -13,6 +13,7 @@
 #include "evita/dom/timing/animation_frame_callback.h"
 #include "evita/dom/visuals/css_style_sheet_handle.h"
 #include "evita/dom/visuals/node_handle.h"
+#include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/media_type.h"
 #include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/display/public/display_item_list.h"
@@ -108,6 +109,14 @@ VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle,
 }
 
 // visuals::css::Media
+bool VisualWindow::is_caret_on() const {
+  return true;
+}
+
+visuals::css::MediaState VisualWindow::media_state() const {
+  return visuals::css::MediaState::Interactive;
+}
+
 visuals::css::MediaType VisualWindow::media_type() const {
   return visuals::css::MediaType::Screen;
 }

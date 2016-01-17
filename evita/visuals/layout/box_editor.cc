@@ -13,6 +13,7 @@
 #include "evita/visuals/layout/ancestors.h"
 #include "evita/visuals/layout/ancestors_or_self.h"
 #include "evita/visuals/layout/descendants_or_self.h"
+#include "evita/visuals/layout/box_selection.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
@@ -398,6 +399,13 @@ void BoxEditor::SetTextStyle(TextBox* box, const css::Style& new_style) {
     return;
   box->is_content_changed_ = true;
   MarkDirty(box);
+}
+
+void BoxEditor::SetSelection(RootBox* root_box, const BoxSelection& selection) {
+  if (root_box->selection() == selection)
+    return;
+  *root_box->selection_ = selection;
+  root_box->is_selection_changed_ = true;
 }
 
 void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {

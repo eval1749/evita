@@ -11,6 +11,7 @@
 namespace visuals {
 
 class Box;
+class BoxSelection;
 class ContainerBox;
 class ContentBox;
 class FloatColor;
@@ -63,6 +64,7 @@ class BoxEditor final {
 
   // RootBox
   void ScheduleForcePaint(RootBox* root_box);
+  void SetSelection(RootBox* root_box, const BoxSelection& selection);
   void SetViewportSize(RootBox* root_box, const FloatSize& size);
 
  private:

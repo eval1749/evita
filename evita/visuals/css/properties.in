@@ -48,6 +48,8 @@ border-top-width: <length>
 # border-top-right-radius: [<length>|<percentage>]{1,2}
 
 bottom: auto <length> <percentage>
+caret-color: <color>
+caret-shape: none bar block underscore
 color: <color>
 display: inline block inline-block none
 font-family: <string> serif sans-serif cursive fantasy monospaces

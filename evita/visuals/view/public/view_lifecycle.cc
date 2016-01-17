@@ -47,12 +47,10 @@ ViewLifecycle::Scope::~Scope() {
 //
 ViewLifecycle::ViewLifecycle(const Document& document, const css::Media& media)
     : document_(document), media_(media), state_(State::VisualUpdatePending) {
-  document_.AddObserver(this);
 }
 
 ViewLifecycle::~ViewLifecycle() {
   DCHECK_EQ(State::Shutdown, state_);
-  document_.RemoveObserver(this);
 }
 
 bool ViewLifecycle::operator==(const ViewLifecycle& other) const {
@@ -123,65 +121,6 @@ void ViewLifecycle::StartShutdown() {
   DCHECK_NE(State::Shutdown, state_);
   state_ = State::InShutdown;
 }
-
-// DocumentObserver
-void ViewLifecycle::DidAddClass(const ElementNode& element,
-                                const base::string16& new_name) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
-void ViewLifecycle::DidAppendChild(const ContainerNode& parent,
-                                   const Node& child) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
-void ViewLifecycle::DidChangeInlineStyle(const ElementNode& element,
-                                         const css::Style* old_style) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
-void ViewLifecycle::DidInsertBefore(const ContainerNode& parent,
-                                    const Node& child,
-                                    const Node& ref_child) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
-void ViewLifecycle::DidRemoveChild(const ContainerNode& parent,
-                                   const Node& child) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
-void ViewLifecycle::DidRemoveClass(const ElementNode& element,
-                                   const base::string16& old_name) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
-void ViewLifecycle::DidReplaceChild(const ContainerNode& parent,
-                                    const Node& new_child,
-                                    const Node& old_child) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
-void ViewLifecycle::DidSetTextData(const Text& text,
-                                   const base::string16& new_data,
-                                   const base::string16& old_data) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
-void ViewLifecycle::WillRemoveChild(const ContainerNode& parent,
-                                    const Node& child) {
-  DCHECK(AllowsTreeMutaions()) << state_;
-  state_ = State::VisualUpdatePending;
-}
-
 // Printers
 std::ostream& operator<<(std::ostream& ostream,
                          const ViewLifecycle& lifecycle) {

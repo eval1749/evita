@@ -8,7 +8,6 @@
 #include <iosfwd>
 
 #include "base/macros.h"
-#include "evita/visuals/dom/document_observer.h"
 
 namespace visuals {
 
@@ -35,7 +34,7 @@ class Media;
 //
 // ViewLifecycle
 //
-class ViewLifecycle final : public DocumentObserver {
+class ViewLifecycle final {
  public:
   enum class State {
 #define V(name) name,
@@ -81,26 +80,6 @@ class ViewLifecycle final : public DocumentObserver {
 
  private:
   void Advance();
-
-  // DocumentObserver
-  void DidAddClass(const ElementNode& element,
-                   const base::string16& new_name) final;
-  void DidAppendChild(const ContainerNode& parent, const Node& child) final;
-  void DidChangeInlineStyle(const ElementNode& element,
-                            const css::Style* old_style) final;
-  void DidInsertBefore(const ContainerNode& parent,
-                       const Node& child,
-                       const Node& ref_child) final;
-  void DidRemoveChild(const ContainerNode& parent, const Node& child) final;
-  void DidRemoveClass(const ElementNode& element,
-                      const base::string16& old_name) final;
-  void DidReplaceChild(const ContainerNode& parent,
-                       const Node& new_child,
-                       const Node& old_child) final;
-  void DidSetTextData(const Text& text,
-                      const base::string16& new_data,
-                      const base::string16& old_data) final;
-  void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
 
   const Document& document_;
   const css::Media& media_;

@@ -21,6 +21,10 @@ source_set("layout") {
     "box_forward.h",
     "box_map.cc",
     "box_map.h",
+    "box_selection.cc",
+    "box_selection.h",
+    "box_selection_editor.cc",
+    "box_selection_editor.h",
     "box_style.cc",
     "box_traversal.cc",
     "box_traversal.h",
@@ -96,6 +100,7 @@ source_set("test_files") {
   sources = [
     "border_test.cc",
     "box_finder_test.cc",
+    "box_selection_test.cc",
     "box_test.cc",
     "box_traversal_test.cc",
     "box_tree_test.cc",

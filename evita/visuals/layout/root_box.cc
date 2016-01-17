@@ -13,7 +13,9 @@ namespace visuals {
 //
 // RootBox
 //
-RootBox::RootBox(const Document& document) : ContainerBox(this, &document) {}
+RootBox::RootBox(const Document& document)
+    : ContainerBox(this, &document), selection_(new BoxSelection()) {}
+
 RootBox::~RootBox() {}
 
 bool RootBox::InLayout() const {

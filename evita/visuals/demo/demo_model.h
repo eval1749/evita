@@ -46,7 +46,6 @@ class DemoModel final : public css::Media,
   void UpdateStyleIfNeeded();
 
   // css::Media
-  bool is_caret_on() const final;
   css::MediaState media_state() const final;
   css::MediaType media_type() const final;
   FloatSize viewport_size() const final;

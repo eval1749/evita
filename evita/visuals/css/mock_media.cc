@@ -18,10 +18,6 @@ namespace css {
 MockMedia::MockMedia() : viewport_size_(320, 240) {}
 MockMedia::~MockMedia() {}
 
-bool MockMedia::is_caret_on() const {
-  return true;
-}
-
 MediaState MockMedia::media_state() const {
   return MediaState::Interactive;
 }

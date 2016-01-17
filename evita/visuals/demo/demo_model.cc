@@ -201,10 +201,6 @@ void DemoModel::UpdateStyleIfNeeded() {
 }
 
 // css::Media
-bool DemoModel::is_caret_on() const {
-  return is_caret_on_;
-}
-
 css::MediaState DemoModel::media_state() const {
   // TODO(eval1749): Should we consider popup window?
   return window_->has_focus() ? css::MediaState::Interactive

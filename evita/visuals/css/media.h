@@ -26,7 +26,6 @@ class Media {
  public:
   virtual ~Media();
 
-  virtual bool is_caret_on() const = 0;
   virtual MediaState media_state() const = 0;
   virtual MediaType media_type() const = 0;
   virtual FloatSize viewport_size() const = 0;

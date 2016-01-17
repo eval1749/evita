@@ -431,8 +431,6 @@ const css::Style& StyleTree::ComputedStyleOfSelection(
   if (selection.is_caret()) {
     if (media().media_state() != css::MediaState::Interactive)
       return initial_style();  // caret-shape: none
-    if (!media().is_caret_on())
-      return initial_style();  // caret-shape: none
     css::StyleEditor().SetCaretShape(selection_style_.get(),
                                      css::CaretShape::Bar());
     return *selection_style_;

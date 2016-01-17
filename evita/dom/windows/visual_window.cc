@@ -109,10 +109,6 @@ VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle,
 }
 
 // visuals::css::Media
-bool VisualWindow::is_caret_on() const {
-  return true;
-}
-
 visuals::css::MediaState VisualWindow::media_state() const {
   return visuals::css::MediaState::Interactive;
 }

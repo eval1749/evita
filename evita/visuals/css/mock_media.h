@@ -21,7 +21,6 @@ class MockMedia : public Media {
   MockMedia();
   ~MockMedia();
 
-  bool is_caret_on() const final;
   MediaState media_state() const final;
   MediaType media_type() const final;
   FloatSize viewport_size() const final;

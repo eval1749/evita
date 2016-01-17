@@ -35,6 +35,10 @@ source_set("dom") {
     "node_visitor.cc",
     "node_visitor.h",
     "nodes_forward.h",
+    "selection.cc",
+    "selection.h",
+    "selection_editor.cc",
+    "selection_editor.h",
     "text.cc",
     "text.h",
   ]
@@ -57,6 +61,7 @@ source_set("test_files") {
     "node_editor_test.cc",
     "node_test.cc",
     "node_traversal_test.cc",
+    "selection_test.cc",
   ]
 
   deps = [

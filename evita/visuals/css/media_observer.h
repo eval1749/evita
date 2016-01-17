@@ -18,8 +18,9 @@ class MediaObserver {
  public:
   ~MediaObserver();
 
-  virtual void DidChangeViewportSize();
+  virtual void DidChangeMediaState();
   virtual void DidChangeSystemMetrics();
+  virtual void DidChangeViewportSize();
 
  protected:
   MediaObserver();

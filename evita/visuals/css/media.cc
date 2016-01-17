@@ -24,12 +24,16 @@ void Media::RemoveObserver(MediaObserver* observer) const {
   observers_.RemoveObserver(observer);
 }
 
-void Media::DidChangeViewportSize() {
-  FOR_EACH_OBSERVER(MediaObserver, observers_, DidChangeViewportSize());
+void Media::DidChangeMediaState() {
+  FOR_EACH_OBSERVER(MediaObserver, observers_, DidChangeMediaState());
 }
 
 void Media::DidChangeSystemMetrics() {
   FOR_EACH_OBSERVER(MediaObserver, observers_, DidChangeSystemMetrics());
+}
+
+void Media::DidChangeViewportSize() {
+  FOR_EACH_OBSERVER(MediaObserver, observers_, DidChangeViewportSize());
 }
 
 }  // namespace css

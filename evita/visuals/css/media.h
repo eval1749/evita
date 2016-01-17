@@ -36,8 +36,9 @@ class Media {
  protected:
   Media();
 
-  void DidChangeViewportSize();
+  void DidChangeMediaState();
   void DidChangeSystemMetrics();
+  void DidChangeViewportSize();
 
  private:
   mutable base::ObserverList<MediaObserver> observers_;

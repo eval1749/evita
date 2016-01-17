@@ -14,8 +14,9 @@ namespace css {
 MediaObserver::MediaObserver() {}
 MediaObserver::~MediaObserver() {}
 
-void MediaObserver::DidChangeViewportSize() {}
+void MediaObserver::DidChangeMediaState() {}
 void MediaObserver::DidChangeSystemMetrics() {}
+void MediaObserver::DidChangeViewportSize() {}
 
 }  // namespace css
 }  // namespace visuals

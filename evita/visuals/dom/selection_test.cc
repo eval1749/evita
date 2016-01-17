@@ -38,6 +38,7 @@ TEST(SelectionTest, Basic) {
 
   EXPECT_EQ(node, selection2.anchor_node());
   EXPECT_EQ(5, selection2.anchor_offset());
+  EXPECT_EQ(node, selection2.focus_node());
   EXPECT_EQ(3, selection2.focus_offset());
 
   SelectionEditor().Clear(&selection2);

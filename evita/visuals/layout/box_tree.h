@@ -39,6 +39,8 @@ class BoxTree final : public css::MediaObserver,
           const StyleTree& style_tree);
   ~BoxTree();
 
+  const ViewLifecycle& lifecycle() const { return *lifecycle_; }
+  ViewLifecycle* lifecycle() { return lifecycle_; }
   RootBox* root_box() const;
   int version() const;
 
@@ -82,9 +84,9 @@ class BoxTree final : public css::MediaObserver,
                               const css::Style& old_style) final;
 
   bool is_selection_changed_ = false;
+  ViewLifecycle* const lifecycle_;
   // An implementation of |BoxTree|.
   std::unique_ptr<Impl> impl_;
-  ViewLifecycle* const lifecycle_;
   const Selection& selection_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxTree);

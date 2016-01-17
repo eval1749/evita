@@ -40,8 +40,8 @@ TEST_F(StyleTreeTest, Basic) {
                              .End(L"body")
                              .Build();
   const auto body = document->first_child()->as<Element>();
-  ViewLifecycle lifecycle(*document);
-  StyleTree style_tree(&lifecycle, mock_media(), {});
+  ViewLifecycle lifecycle(*document, mock_media());
+  StyleTree style_tree(&lifecycle, {});
   style_tree.UpdateIfNeeded();
 
   EXPECT_EQ(style_tree.initial_style(), style_tree.ComputedStyleOf(*body));
@@ -63,8 +63,8 @@ TEST_F(StyleTreeTest, Inheritance) {
           .End(L"body")
           .Build();
   const auto body = document->first_child()->as<Element>();
-  ViewLifecycle lifecycle(*document);
-  StyleTree style_tree(&lifecycle, mock_media(), {});
+  ViewLifecycle lifecycle(*document, mock_media());
+  StyleTree style_tree(&lifecycle, {});
   style_tree.UpdateIfNeeded();
 
   EXPECT_EQ(kColorRed, style_tree.ComputedStyleOf(*body).color());
@@ -85,8 +85,8 @@ TEST_F(StyleTreeTest, ComputedStyleOfText) {
           .End(L"body")
           .Build();
   const auto body = document->first_child()->as<Element>();
-  ViewLifecycle lifecycle(*document);
-  StyleTree style_tree(&lifecycle, mock_media(), {});
+  ViewLifecycle lifecycle(*document, mock_media());
+  StyleTree style_tree(&lifecycle, {});
   style_tree.UpdateIfNeeded();
 
   EXPECT_EQ(kColorRed, style_tree.ComputedStyleOf(*body).color());

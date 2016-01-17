@@ -19,10 +19,9 @@ namespace visuals {
 //
 // Selection
 //
-Selection::Selection(const ViewLifecycle& lifecycle, const css::Media& media)
+Selection::Selection(const ViewLifecycle& lifecycle)
     : caret_timer_(new base::RepeatingTimer()),
       lifecycle_(lifecycle),
-      media_(media),
       model_(new SelectionModel()) {
   lifecycle_.document().AddObserver(this);
 }
@@ -61,6 +60,10 @@ bool Selection::is_none() const {
 
 bool Selection::is_range() const {
   return model_->is_range();
+}
+
+const css::Media& Selection::media() const {
+  return lifecycle_.media();
 }
 
 void Selection::AddObserver(SelectionObserver* observer) const {
@@ -128,7 +131,7 @@ void Selection::RemoveObserver(SelectionObserver* observer) const {
 
 // css::MediaObserver
 void Selection::DidChangeMediaState() {
-  if (media_.media_state() != css::MediaState::Inactive)
+  if (media().media_state() != css::MediaState::Inactive)
     return;
   caret_timer_->Stop();
 }

@@ -27,6 +27,10 @@ namespace visuals {
 
 class Document;
 
+namespace css {
+class Media;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // ViewLifecycle
@@ -51,10 +55,16 @@ class ViewLifecycle final : public DocumentObserver {
     DISALLOW_COPY_AND_ASSIGN(Scope);
   };
 
-  explicit ViewLifecycle(const Document& document);
+  ViewLifecycle(const Document& document, const css::Media& media);
   ~ViewLifecycle();
 
+  bool operator==(const ViewLifecycle& other) const;
+  bool operator==(const ViewLifecycle* other) const;
+  bool operator!=(const ViewLifecycle& other) const;
+  bool operator!=(const ViewLifecycle* other) const;
+
   const Document& document() const { return document_; }
+  const css::Media& media() const { return media_; }
   State state() const { return state_; }
 
   bool AllowsSelectionChanges() const;
@@ -93,6 +103,7 @@ class ViewLifecycle final : public DocumentObserver {
   void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
 
   const Document& document_;
+  const css::Media& media_;
   State state_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewLifecycle);

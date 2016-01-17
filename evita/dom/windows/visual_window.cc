@@ -36,10 +36,9 @@ namespace dom {
 //
 VisualWindow::VisualWindow(visuals::Document* document,
                            visuals::css::StyleSheet* style_sheet)
-    : lifecycle_(new visuals::ViewLifecycle(*document)),
-      selection_(new visuals::Selection(*lifecycle_, *this)),
-      style_tree_(
-          new visuals::StyleTree(lifecycle_.get(), *this, {style_sheet})),
+    : lifecycle_(new visuals::ViewLifecycle(*document, *this)),
+      selection_(new visuals::Selection(*lifecycle_)),
+      style_tree_(new visuals::StyleTree(lifecycle_.get(), {style_sheet})),
       box_tree_(
           new visuals::BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
   ScriptHost::instance()->view_delegate()->CreateVisualWindow(window_id());

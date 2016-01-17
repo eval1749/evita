@@ -45,14 +45,30 @@ ViewLifecycle::Scope::~Scope() {
 //
 // ViewLifecycle
 //
-ViewLifecycle::ViewLifecycle(const Document& document)
-    : document_(document), state_(State::VisualUpdatePending) {
+ViewLifecycle::ViewLifecycle(const Document& document, const css::Media& media)
+    : document_(document), media_(media), state_(State::VisualUpdatePending) {
   document_.AddObserver(this);
 }
 
 ViewLifecycle::~ViewLifecycle() {
   DCHECK_EQ(State::Shutdown, state_);
   document_.RemoveObserver(this);
+}
+
+bool ViewLifecycle::operator==(const ViewLifecycle& other) const {
+  return this == &other;
+}
+
+bool ViewLifecycle::operator==(const ViewLifecycle* other) const {
+  return this == other;
+}
+
+bool ViewLifecycle::operator!=(const ViewLifecycle& other) const {
+  return !operator==(other);
+}
+
+bool ViewLifecycle::operator!=(const ViewLifecycle* other) const {
+  return !operator==(other);
 }
 
 void ViewLifecycle::Advance() {

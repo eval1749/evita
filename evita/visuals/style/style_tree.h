@@ -38,9 +38,8 @@ class StyleTree final : public css::MediaObserver,
                         public css::StyleSheetObserver,
                         public DocumentObserver {
  public:
-  explicit StyleTree(ViewLifecycle* lifecycle,
-                     const css::Media& media,
-                     const std::vector<css::StyleSheet*>& style_sheets);
+  StyleTree(ViewLifecycle* lifecycle,
+            const std::vector<css::StyleSheet*>& style_sheets);
   ~StyleTree() final;
 
   const Document& document() const;
@@ -48,7 +47,8 @@ class StyleTree final : public css::MediaObserver,
   // TODO(eval1749): Do we really need to expose |initial_style()|? As of today,
   // it is used only in tests.
   const css::Style& initial_style() const;
-
+  const ViewLifecycle& lifecycle() const { return *lifecycle_; }
+  ViewLifecycle* lifecycle() { return lifecycle_; }
   const css::Media& media() const;
 
   // Monotonically increased style tree version. This version is incremented

@@ -117,7 +117,7 @@ class BoxTree::Impl final {
 
 BoxTree::Impl::Impl(ViewLifecycle* lifecycle, const StyleTree& style_tree)
     : box_map_(lifecycle),
-      document_(lifecycle->document()),
+      document_(style_tree.document()),
       root_box_(box_map_.root_box()),
       state_(BoxTreeState::Dirty),
       style_tree_(style_tree) {}
@@ -325,7 +325,8 @@ BoxTree::BoxTree(ViewLifecycle* lifecycle,
     : impl_(new Impl(lifecycle, style_tree)),
       lifecycle_(lifecycle),
       selection_(selection) {
-  DCHECK_EQ(lifecycle->document(), selection_.document());
+  DCHECK_EQ(selection.lifecycle(), lifecycle);
+  DCHECK_EQ(style_tree.lifecycle(), lifecycle);
   impl_->document().AddObserver(this);
   impl_->media().AddObserver(this);
   impl_->style_tree().AddObserver(this);
@@ -381,12 +382,12 @@ void BoxTree::ScheduleForcePaint() {
 }
 
 void BoxTree::UpdateIfNeeded() {
-  if (lifecycle_->IsTreeClean()) {
+  if (lifecycle()->IsTreeClean()) {
     DCHECK(!is_selection_changed_);
     DCHECK(impl_->IsClean());
     return;
   }
-  ViewLifecycle::Scope scope(lifecycle_, ViewLifecycle::State::InTreeRebuild);
+  ViewLifecycle::Scope scope(lifecycle(), ViewLifecycle::State::InTreeRebuild);
   impl_->UpdateIfNeeded();
   UpdateSelectionIfNeeded();
 }

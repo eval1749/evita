@@ -100,9 +100,9 @@ class MockView final {
 };
 
 MockView::MockView(const Document& document, const css::Media& media)
-    : lifecycle_(new ViewLifecycle(document)),
-      selection_(new Selection(*lifecycle_, media)),
-      style_tree_(new StyleTree(lifecycle_.get(), media, {})),
+    : lifecycle_(new ViewLifecycle(document, media)),
+      selection_(new Selection(*lifecycle_)),
+      style_tree_(new StyleTree(lifecycle_.get(), {})),
       box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
   style_tree_->UpdateIfNeeded();
   box_tree_->UpdateIfNeeded();

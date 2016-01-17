@@ -33,7 +33,7 @@ class Media;
 //
 class Selection final : public css::MediaObserver, public DocumentObserver {
  public:
-  Selection(const ViewLifecycle& lifecycle, const css::Media& media);
+  explicit Selection(const ViewLifecycle& lifecycle);
   ~Selection() final;
 
   const Node& anchor_node() const;
@@ -41,7 +41,8 @@ class Selection final : public css::MediaObserver, public DocumentObserver {
   const Document& document() const;
   const Node& focus_node() const;
   int focus_offset() const;
-  const css::Media& media() const { return media_; }
+  const ViewLifecycle& lifecycle() const { return lifecycle_; }
+  const css::Media& media() const;
 
   bool is_caret_on() const { return is_caret_on_; }
   bool is_caret() const;
@@ -67,7 +68,6 @@ class Selection final : public css::MediaObserver, public DocumentObserver {
   const std::unique_ptr<base::RepeatingTimer> caret_timer_;
   bool is_caret_on_ = false;
   const ViewLifecycle& lifecycle_;
-  const css::Media& media_;
   mutable base::ObserverList<SelectionObserver> observers_;
   const std::unique_ptr<SelectionModel> model_;
 

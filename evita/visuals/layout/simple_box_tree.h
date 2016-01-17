@@ -22,6 +22,8 @@ class ViewLifecycle;
 class RootBox;
 
 namespace css {
+class Media;
+class MockMedia;
 class Style;
 }
 
@@ -73,10 +75,15 @@ class SimpleBoxTree final {
 
   std::stack<Box*> boxes_;
   const Document& document_;
-  std::unique_ptr<ViewLifecycle> lifecycle_;
-  std::unique_ptr<ViewLifecycle::Scope> lifecycle_scope_;
+  std::unique_ptr<css::MockMedia> mock_media_;
   gc::Member<Document> own_document_;
   std::unique_ptr<RootBox> root_box_;
+
+  // |ViewLifecycle| constructor takes |Document| and |css:Media|.
+  std::unique_ptr<ViewLifecycle> lifecycle_;
+
+  // |ViewLifecycle::Scope| constructor takes |ViewLifecycle|.
+  std::unique_ptr<ViewLifecycle::Scope> lifecycle_scope_;
 
   DISALLOW_COPY_AND_ASSIGN(SimpleBoxTree);
 };

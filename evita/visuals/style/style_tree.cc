@@ -362,14 +362,13 @@ void StyleTree::Impl::UpdateText(Context* context, const Text& text) {
 // StyleTree
 //
 StyleTree::StyleTree(ViewLifecycle* lifecycle,
-                     const css::Media& media,
                      const std::vector<css::StyleSheet*>& style_sheets)
-    : impl_(new Impl(lifecycle->document(), media, style_sheets)),
+    : impl_(new Impl(lifecycle->document(), lifecycle->media(), style_sheets)),
       lifecycle_(lifecycle),
       selection_style_(new css::Style()),
       style_sheets_(style_sheets) {
-  lifecycle_->document().AddObserver(this);
-  media.AddObserver(this);
+  document().AddObserver(this);
+  media().AddObserver(this);
   for (const auto& style_sheet : style_sheets_)
     style_sheet->AddObserver(this);
 }
@@ -377,12 +376,12 @@ StyleTree::StyleTree(ViewLifecycle* lifecycle,
 StyleTree::~StyleTree() {
   for (const auto& style_sheet : style_sheets_)
     style_sheet->RemoveObserver(this);
-  impl_->document().RemoveObserver(this);
-  impl_->media().RemoveObserver(this);
+  document().RemoveObserver(this);
+  media().RemoveObserver(this);
 }
 
 const Document& StyleTree::document() const {
-  return impl_->document();
+  return lifecycle_->document();
 }
 
 const css::Style& StyleTree::initial_style() const {
@@ -390,7 +389,7 @@ const css::Style& StyleTree::initial_style() const {
 }
 
 const css::Media& StyleTree::media() const {
-  return impl_->media();
+  return lifecycle_->media();
 }
 
 int StyleTree::version() const {

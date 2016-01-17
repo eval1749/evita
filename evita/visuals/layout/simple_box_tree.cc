@@ -5,6 +5,7 @@
 #include "evita/visuals/layout/simple_box_tree.h"
 
 #include "base/logging.h"
+#include "evita/visuals/css/mock_media.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/root_box.h"
@@ -18,7 +19,8 @@ namespace visuals {
 //
 SimpleBoxTree::SimpleBoxTree(const Document& document)
     : document_(document),
-      lifecycle_(new ViewLifecycle(document_)),
+      mock_media_(new css::MockMedia()),
+      lifecycle_(new ViewLifecycle(document_, *mock_media_)),
       root_box_(new RootBox(lifecycle_.get())) {
   boxes_.push(root_box_.get());
   ViewLifecycle::Scope(lifecycle_.get(), ViewLifecycle::State::InStyleRecalc);

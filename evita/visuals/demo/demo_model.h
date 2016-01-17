@@ -20,6 +20,7 @@ namespace visuals {
 class BoxTree;
 class DemoWindow;
 class Document;
+class DocumentLifecycle;
 class ElementNode;
 class Selection;
 class StyleTree;
@@ -63,6 +64,7 @@ class DemoModel final : public css::Media,
   void DidSetFocus() final;
 
   Document* const document_;
+  const std::unique_ptr<DocumentLifecycle> lifecycle_;
   css::StyleSheet* style_sheet_;
   FloatSize viewport_size_;
 

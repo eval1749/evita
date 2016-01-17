@@ -18,6 +18,7 @@
 #include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/demo/demo_window.h"
 #include "evita/visuals/dom/document.h"
+#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
@@ -175,10 +176,11 @@ void PrintPaint(const DisplayItemList& list) {
 //
 DemoModel::DemoModel()
     : document_(LoadDocument()),
+      lifecycle_(new DocumentLifecycle(*document_)),
       selection_(new Selection(*document_, *this)),
       style_sheet_(LoadStyleSheet()),
       style_tree_(new StyleTree(*document_, *this, {style_sheet_})),
-      box_tree_(new BoxTree(*document_, *selection_, *style_tree_)) {
+      box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
   selection_->Collapse(document_->GetElementById(L"input")->first_child(), 0);
 }
 

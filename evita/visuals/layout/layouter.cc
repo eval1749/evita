@@ -8,6 +8,7 @@
 #include "evita/visuals/layout/layouter.h"
 
 #include "base/logging.h"
+#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_editor.h"
@@ -158,9 +159,9 @@ void Layouter::Layout(RootBox* root_box) {
     return;
   if (root_box->IsLayoutClean())
     return;
-  BoxTreeLifecycle::Scope scope(root_box->lifecycle(),
-                                BoxTreeLifecycle::State::InLayout,
-                                BoxTreeLifecycle::State::LayoutClean);
+  DocumentLifecycle::Scope scope(root_box->lifecycle(),
+                                 DocumentLifecycle::State::InLayout,
+                                 DocumentLifecycle::State::LayoutClean);
   DCHECK(!root_box->bounds().size().IsEmpty());
   LayoutVisitor().LayoutIfNeeded(root_box);
 }

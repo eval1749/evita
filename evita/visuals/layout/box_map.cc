@@ -5,13 +5,15 @@
 #include "evita/visuals/layout/box_map.h"
 
 #include "evita/visuals/dom/document.h"
+#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/root_box.h"
 
 namespace visuals {
 
-BoxMap::BoxMap(const Document& document) : root_box_(new RootBox(document)) {
-  map_.emplace(&document, std::unique_ptr<Box>(root_box_));
+BoxMap::BoxMap(DocumentLifecycle* lifecycle)
+    : root_box_(new RootBox(lifecycle)) {
+  map_.emplace(&lifecycle->document(), std::unique_ptr<Box>(root_box_));
 }
 
 BoxMap::~BoxMap() {

@@ -8,6 +8,7 @@
 #include "evita/visuals/dom/document_lifecycle.h"
 
 #include "base/logging.h"
+#include "evita/visuals/dom/document.h"
 
 namespace visuals {
 
@@ -30,8 +31,14 @@ DocumentLifecycle::Scope::~Scope() {
 //
 // DocumentLifecycle
 //
-DocumentLifecycle::DocumentLifecycle() : state_(State::VisualUpdatePending) {}
-DocumentLifecycle::~DocumentLifecycle() {}
+DocumentLifecycle::DocumentLifecycle(const Document& document)
+    : document_(document), state_(State::VisualUpdatePending) {
+  document_.AddObserver(this);
+}
+
+DocumentLifecycle::~DocumentLifecycle() {
+  document_.RemoveObserver(this);
+}
 
 void DocumentLifecycle::AdvanceTo(State new_state) {
   DCHECK(static_cast<int>(new_state) == static_cast<int>(state_) + 1)
@@ -40,20 +47,92 @@ void DocumentLifecycle::AdvanceTo(State new_state) {
 }
 
 bool DocumentLifecycle::AllowsTreeMutaions() const {
-  return state_ == State::VisualUpdatePending || state_ == State::PaintClean;
+  return state_ == State::VisualUpdatePending || state_ == State::LayoutClean ||
+         state_ == State::PaintClean;
 }
 
 bool DocumentLifecycle::IsAtLeast(State state) const {
   return static_cast<int>(state_) >= static_cast<int>(state);
 }
 
+void DocumentLifecycle::LimitTo(State limit_state) {
+  if (static_cast<int>(state_) <= static_cast<int>(limit_state))
+    return;
+  state_ = limit_state;
+}
 void DocumentLifecycle::Reset() {
   state_ = State::VisualUpdatePending;
 }
 
+// DocumentObserver
+void DocumentLifecycle::DidAddClass(const ElementNode& element,
+                                    const base::string16& new_name) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+void DocumentLifecycle::DidAppendChild(const ContainerNode& parent,
+                                       const Node& child) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+void DocumentLifecycle::DidChangeInlineStyle(const ElementNode& element,
+                                             const css::Style* old_style) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+void DocumentLifecycle::DidInsertBefore(const ContainerNode& parent,
+                                        const Node& child,
+                                        const Node& ref_child) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+void DocumentLifecycle::DidRemoveChild(const ContainerNode& parent,
+                                       const Node& child) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+void DocumentLifecycle::DidRemoveClass(const ElementNode& element,
+                                       const base::string16& old_name) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+void DocumentLifecycle::DidReplaceChild(const ContainerNode& parent,
+                                        const Node& new_child,
+                                        const Node& old_child) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+void DocumentLifecycle::DidSetTextData(const Text& text,
+                                       const base::string16& new_data,
+                                       const base::string16& old_data) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+void DocumentLifecycle::WillRemoveChild(const ContainerNode& parent,
+                                        const Node& child) {
+  DCHECK(AllowsTreeMutaions()) << state_;
+  state_ = State::VisualUpdatePending;
+}
+
+// Printers
 std::ostream& operator<<(std::ostream& ostream,
                          const DocumentLifecycle& lifecycle) {
   return ostream << lifecycle.state();
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const DocumentLifecycle* lifecycle) {
+  if (!lifecycle)
+    return ostream << "null";
+  return ostream << *lifecycle;
 }
 
 std::ostream& operator<<(std::ostream& ostream,
@@ -64,7 +143,9 @@ std::ostream& operator<<(std::ostream& ostream,
 #undef V
   };
   const auto& it = std::begin(texts) + static_cast<size_t>(state);
-  return ostream << (it < std::end(texts) ? *it : "???");
+  if (it < std::begin(texts) || it >= std::end(texts))
+    return ostream << "???";
+  return ostream << *it;
 }
 
 }  // namespace visuals

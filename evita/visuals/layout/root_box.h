@@ -8,13 +8,13 @@
 #include <memory>
 
 #include "evita/visuals/geometry/float_size.h"
-#include "evita/visuals/layout/box_tree_lifecycle.h"
 #include "evita/visuals/layout/container_box.h"
 
 namespace visuals {
 
 class BoxSelection;
 class Document;
+class DocumentLifecycle;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -24,11 +24,12 @@ class RootBox final : public ContainerBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(RootBox, ContainerBox);
 
  public:
-  explicit RootBox(const Document& document);
+  explicit RootBox(DocumentLifecycle* lifecycle);
   ~RootBox() final;
 
+  const Document& document() const;
   const BoxSelection& selection() const { return *selection_; }
-  BoxTreeLifecycle* lifecycle() const { return &lifecycle_; }
+  DocumentLifecycle* lifecycle() const { return lifecycle_; }
   const FloatSize& viewport_size() const { return viewport_size_; }
 
   bool InLayout() const;
@@ -38,7 +39,7 @@ class RootBox final : public ContainerBox {
 
  private:
   bool is_selection_changed_ = false;
-  mutable BoxTreeLifecycle lifecycle_;
+  DocumentLifecycle* const lifecycle_;
   FloatSize viewport_size_;
   std::unique_ptr<BoxSelection> selection_;
 

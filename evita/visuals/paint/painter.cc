@@ -10,6 +10,7 @@
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
+#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/fonts/text_layout.h"
@@ -306,9 +307,9 @@ Painter::~Painter() {}
 
 std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
                                                 const RootBox& root_box) {
-  BoxTreeLifecycle::Scope scope(root_box.lifecycle(),
-                                BoxTreeLifecycle::State::InPaint,
-                                BoxTreeLifecycle::State::PaintClean);
+  DocumentLifecycle::Scope scope(root_box.lifecycle(),
+                                 DocumentLifecycle::State::InPaint,
+                                 DocumentLifecycle::State::PaintClean);
   return PaintVisitor(paint_info).Paint(root_box);
 }
 

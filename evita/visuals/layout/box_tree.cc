@@ -13,6 +13,7 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
+#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/selection.h"
 #include "evita/visuals/dom/text.h"
@@ -75,7 +76,7 @@ struct Context {
 //
 class BoxTree::Impl final {
  public:
-  Impl(const Document& document, const StyleTree& style_tree);
+  Impl(DocumentLifecycle* lifecycle, const StyleTree& style_tree);
   ~Impl() = default;
 
   const Document& document() const { return style_tree_.document(); }
@@ -114,9 +115,9 @@ class BoxTree::Impl final {
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-BoxTree::Impl::Impl(const Document& document, const StyleTree& style_tree)
-    : box_map_(document),
-      document_(document),
+BoxTree::Impl::Impl(DocumentLifecycle* lifecycle, const StyleTree& style_tree)
+    : box_map_(lifecycle),
+      document_(lifecycle->document()),
       root_box_(box_map_.root_box()),
       state_(BoxTreeState::Dirty),
       style_tree_(style_tree) {}
@@ -318,11 +319,11 @@ void BoxTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
 //
 // BoxTree
 //
-BoxTree::BoxTree(const Document& document,
+BoxTree::BoxTree(DocumentLifecycle* lifecycle,
                  const Selection& selection,
                  const StyleTree& style_tree)
-    : impl_(new Impl(document, style_tree)), selection_(selection) {
-  DCHECK_EQ(document, selection_.document());
+    : impl_(new Impl(lifecycle, style_tree)), selection_(selection) {
+  DCHECK_EQ(lifecycle->document(), selection_.document());
   impl_->document().AddObserver(this);
   impl_->media().AddObserver(this);
   impl_->style_tree().AddObserver(this);

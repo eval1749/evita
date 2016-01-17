@@ -7,6 +7,7 @@
 #include "evita/visuals/layout/box_editor.h"
 
 #include "base/logging.h"
+#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/fonts/text_layout.h"
@@ -216,7 +217,7 @@ void BoxEditor::RemoveDescendants(ContainerBox* container_box) {
 }
 
 void BoxEditor::ScheduleForcePaint(RootBox* root_box) {
-  root_box->lifecycle()->LimitTo(BoxTreeLifecycle::State::LayoutClean);
+  root_box->lifecycle()->LimitTo(DocumentLifecycle::State::LayoutClean);
 }
 
 void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {
@@ -409,7 +410,7 @@ void BoxEditor::SetSelection(RootBox* root_box, const BoxSelection& selection) {
 }
 
 void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
-  DCHECK(root_box->lifecycle_.AllowsTreeMutaions()) << root_box->lifecycle_;
+  DCHECK(root_box->lifecycle()->AllowsTreeMutaions()) << root_box->lifecycle();
   if (root_box->viewport_size_ == size)
     return;
   root_box->bounds_ = FloatRect(size);

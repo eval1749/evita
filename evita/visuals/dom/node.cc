@@ -32,6 +32,22 @@ Node::Node(Document* document, const base::StringPiece16& node_name)
 
 Node::~Node() {}
 
+bool Node::operator==(const Node& other) const {
+  return this == &other;
+}
+
+bool Node::operator==(const Node* other) const {
+  return this == other;
+}
+
+bool Node::operator!=(const Node& other) const {
+  return !operator==(other);
+}
+
+bool Node::operator!=(const Node* other) const {
+  return !operator==(other);
+}
+
 bool Node::InDocument() const {
   for (const auto& runner : Node::AncestorsOrSelf(*this)) {
     if (runner->is<Document>())

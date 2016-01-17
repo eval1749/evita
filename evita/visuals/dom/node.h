@@ -50,6 +50,11 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
 
   virtual ~Node();
 
+  bool operator==(const Node& other) const;
+  bool operator==(const Node* other) const;
+  bool operator!=(const Node& other) const;
+  bool operator!=(const Node* other) const;
+
   // Tree structure
   Node* next_sibling() const { return next_sibling_; }
   Node* previous_sibling() const { return previous_sibling_; }

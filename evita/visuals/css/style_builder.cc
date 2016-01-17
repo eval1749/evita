@@ -48,6 +48,14 @@ StyleBuilder& StyleBuilder::SetHeight(float height) {
   return SetHeight(css::Height(css::Length(height)));
 }
 
+StyleBuilder& StyleBuilder::SetPadding(float width) {
+  SetPaddingBottom(css::Length(width));
+  SetPaddingLeft(css::Length(width));
+  SetPaddingRight(css::Length(width));
+  SetPaddingTop(css::Length(width));
+  return *this;
+}
+
 StyleBuilder& StyleBuilder::SetWidth(float width) {
   return SetWidth(css::Width(css::Length(width)));
 }

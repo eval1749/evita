@@ -32,6 +32,7 @@ class StyleBuilder final {
   StyleBuilder& SetBorder(const css::Color color, float width);
   StyleBuilder& SetColor(float red, float green, float blue, float alpha = 1);
   StyleBuilder& SetHeight(float height);
+  StyleBuilder& SetPadding(float height);
   StyleBuilder& SetWidth(float width);
 
 #define V(Name, name, type, text) StyleBuilder& Set##Name(type name);

@@ -14,10 +14,13 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/box_assigner.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_map.h"
+#include "evita/visuals/layout/box_selection.h"
+#include "evita/visuals/layout/box_selection_editor.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/style/style_tree.h"
@@ -315,17 +318,22 @@ void BoxTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
 //
 // BoxTree
 //
-BoxTree::BoxTree(const Document& document, const StyleTree& style_tree)
-    : impl_(new Impl(document, style_tree)) {
+BoxTree::BoxTree(const Document& document,
+                 const Selection& selection,
+                 const StyleTree& style_tree)
+    : impl_(new Impl(document, style_tree)), selection_(selection) {
+  DCHECK_EQ(document, selection_.document());
   impl_->document().AddObserver(this);
   impl_->media().AddObserver(this);
   impl_->style_tree().AddObserver(this);
+  selection_.AddObserver(this);
 }
 
 BoxTree::~BoxTree() {
   impl_->document().RemoveObserver(this);
   impl_->media().RemoveObserver(this);
   impl_->style_tree().RemoveObserver(this);
+  selection_.RemoveObserver(this);
 }
 
 RootBox* BoxTree::root_box() const {
@@ -340,6 +348,29 @@ Box* BoxTree::BoxFor(const Node& node) const {
   return impl_->BoxFor(node);
 }
 
+BoxSelection BoxTree::ComputeSelection() const {
+  if (selection_.is_none())
+    return BoxSelection();
+  const auto& style = impl_->style_tree().ComputedStyleOfSelection(selection_);
+  BoxSelection selection;
+  if (selection_.is_caret()) {
+    BoxSelectionEditor().Collapse(&selection, BoxFor(selection_.focus_node()),
+                                  selection_.focus_offset());
+  } else {
+    BoxSelectionEditor().Collapse(&selection, BoxFor(selection_.anchor_node()),
+                                  selection_.anchor_offset());
+    BoxSelectionEditor().ExtendTo(&selection, BoxFor(selection_.focus_node()),
+                                  selection_.focus_offset());
+    BoxSelectionEditor().SetSelectionColor(&selection,
+                                           style.background_color().value());
+  }
+  if (style.caret_shape().is_none())
+    return selection;
+  BoxSelectionEditor().SetCaretColor(&selection, style.caret_color().value());
+  BoxSelectionEditor().SetCaretShape(&selection, style.caret_shape());
+  return selection;
+}
+
 void BoxTree::ScheduleForcePaint() {
   if (!impl_->IsClean())
     return;
@@ -347,16 +378,28 @@ void BoxTree::ScheduleForcePaint() {
 }
 
 void BoxTree::UpdateIfNeeded() {
-  return impl_->UpdateIfNeeded();
+  impl_->UpdateIfNeeded();
+  UpdateSelectionIfNeeded();
+}
+
+void BoxTree::UpdateSelectionIfNeeded() {
+  if (!is_selection_changed_)
+    return;
+  BoxEditor().SetSelection(root_box(), ComputeSelection());
+  is_selection_changed_ = false;
 }
 
 // css::MediaObserver
-void BoxTree::DidChangeViewportSize() {
-  impl_->MarkDirty(impl_->document());
+void BoxTree::DidChangeMediaState() {
+  // Nothing to do
 }
 
 void BoxTree::DidChangeSystemMetrics() {
   // Note: system metrics changes affect computed style.
+}
+
+void BoxTree::DidChangeViewportSize() {
+  impl_->MarkDirty(impl_->document());
 }
 
 // DocumentObserver
@@ -385,6 +428,16 @@ void BoxTree::DidReplaceChild(const ContainerNode& parent,
                               const Node& child,
                               const Node& ref_child) {
   impl_->MarkDirty(parent);
+}
+
+// SelectionObserver
+void BoxTree::DidChangeCaretBlink() {
+  is_selection_changed_ = true;
+}
+
+void BoxTree::DidChangeSelection(const SelectionModel& new_model,
+                                 const SelectionModel& old_model) {
+  is_selection_changed_ = true;
 }
 
 // StyleTreeObserver

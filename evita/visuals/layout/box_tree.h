@@ -11,14 +11,18 @@
 #include "base/macros.h"
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
+#include "evita/visuals/dom/selection_observer.h"
+#include "evita/visuals/dom/selection_model.h"
 #include "evita/visuals/style/style_tree_observer.h"
 
 namespace visuals {
 
 class Box;
+class BoxSelection;
 class Document;
 class Node;
 class RootBox;
+class Selection;
 class StyleTree;
 
 //////////////////////////////////////////////////////////////////////
@@ -27,9 +31,12 @@ class StyleTree;
 //
 class BoxTree final : public css::MediaObserver,
                       public DocumentObserver,
+                      public SelectionObserver,
                       public StyleTreeObserver {
  public:
-  BoxTree(const Document& document, const StyleTree& style_tree);
+  BoxTree(const Document& document,
+          const Selection& selection,
+          const StyleTree& style_tree);
   ~BoxTree();
 
   RootBox* root_box() const;
@@ -42,9 +49,13 @@ class BoxTree final : public css::MediaObserver,
  private:
   class Impl;
 
+  BoxSelection ComputeSelection() const;
+  void UpdateSelectionIfNeeded();
+
   // css::MediaObserver
-  void DidChangeViewportSize() final;
+  void DidChangeMediaState() final;
   void DidChangeSystemMetrics() final;
+  void DidChangeViewportSize() final;
 
   // DocumentObserver
   void DidAppendChild(const ContainerNode& parent, const Node& child) final;
@@ -61,12 +72,19 @@ class BoxTree final : public css::MediaObserver,
                       const base::string16& new_data,
                       const base::string16& old_data) final;
 
+  // SelectionObserver
+  void DidChangeCaretBlink() final;
+  void DidChangeSelection(const SelectionModel& new_model,
+                          const SelectionModel& old_model) final;
+
   // StyleTreeObserver
   void DidChangeComputedStyle(const ElementNode& element,
                               const css::Style& old_style) final;
 
+  bool is_selection_changed_ = false;
   // An implementation of |BoxTree|.
   std::unique_ptr<Impl> impl_;
+  const Selection& selection_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxTree);
 };

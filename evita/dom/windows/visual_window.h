@@ -28,6 +28,7 @@ class ContainerNode;
 class Document;
 class ElementNode;
 class Node;
+class Selection;
 class StyleTree;
 class Text;
 }  // namespace visuals
@@ -108,6 +109,7 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   void DidShowWindow() final;
 
   bool is_waiting_animation_frame_ = false;
+  const std::unique_ptr<visuals::Selection> selection_;
   const std::unique_ptr<visuals::StyleTree> style_tree_;
   FloatSize viewport_size_;
 

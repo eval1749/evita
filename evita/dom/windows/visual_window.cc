@@ -18,6 +18,7 @@
 #include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
+#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/layout/box_finder.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/layouter.h"
@@ -34,8 +35,9 @@ namespace dom {
 //
 VisualWindow::VisualWindow(visuals::Document* document,
                            visuals::css::StyleSheet* style_sheet)
-    : style_tree_(new visuals::StyleTree(*document, *this, {style_sheet})),
-      box_tree_(new visuals::BoxTree(*document, *style_tree_)) {
+    : selection_(new visuals::Selection(*document, *this)),
+      style_tree_(new visuals::StyleTree(*document, *this, {style_sheet})),
+      box_tree_(new visuals::BoxTree(*document, *selection_, *style_tree_)) {
   ScriptHost::instance()->view_delegate()->CreateVisualWindow(window_id());
   document->AddObserver(this);
 }

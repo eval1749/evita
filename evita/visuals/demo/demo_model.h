@@ -21,6 +21,7 @@ class BoxTree;
 class DemoWindow;
 class Document;
 class ElementNode;
+class Selection;
 class StyleTree;
 
 namespace css {
@@ -62,11 +63,13 @@ class DemoModel final : public css::Media,
   void DidSetFocus() final;
 
   Document* const document_;
-  bool is_caret_on_ = false;
   css::StyleSheet* style_sheet_;
   FloatSize viewport_size_;
 
-  std::unique_ptr<StyleTree> style_tree_;
+  const std::unique_ptr<Selection> selection_;
+  const std::unique_ptr<StyleTree> style_tree_;
+
+  // |BoxTree| constructor takes |Document|, |Selection|, and |StyleTree|.
   std::unique_ptr<BoxTree> box_tree_;
 
   DemoWindow* window_ = nullptr;

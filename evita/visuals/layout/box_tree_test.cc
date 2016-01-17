@@ -16,6 +16,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
+#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/layout/descendants_or_self.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
@@ -98,10 +99,10 @@ TEST_F(BoxTreeTest, Basic) {
                              .AddText(L"Hello world!")
                              .End(L"body")
                              .Build();
-
+  Selection selection(*document, mock_media());
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
-  BoxTree tree(*document, style_tree);
+  BoxTree tree(*document, selection, style_tree);
   tree.UpdateIfNeeded();
   EXPECT_EQ("RootBox:inline(FlowBox:inline('Hello world!'))",
             BoxTreeToString(tree));
@@ -121,9 +122,10 @@ TEST_F(BoxTreeTest, FlowAnonymous) {
                              .AddText(L"baz")
                              .End(L"div")
                              .Build();
+  Selection selection(*document, mock_media());
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
-  BoxTree tree(*document, style_tree);
+  BoxTree tree(*document, selection, style_tree);
   tree.UpdateIfNeeded();
   EXPECT_EQ(
       "RootBox:inline(FlowBox:block(FlowBox:block('foo') FlowBox:block('bar') "
@@ -138,9 +140,10 @@ TEST_F(BoxTreeTest, FlowInline) {
                              .AddText(L"bar")
                              .End(L"body")
                              .Build();
+  Selection selection(*document, mock_media());
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
-  BoxTree tree(*document, style_tree);
+  BoxTree tree(*document, selection, style_tree);
   tree.UpdateIfNeeded();
   EXPECT_EQ("RootBox:inline(FlowBox:inline('foo ' 'bar'))",
             BoxTreeToString(tree));

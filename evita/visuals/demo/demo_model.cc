@@ -6,9 +6,11 @@
 
 #include "evita/visuals/demo/demo_model.h"
 
+#include "base/bind.h"
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "base/time/time.h"
+#include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/media_type.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
@@ -19,11 +21,13 @@
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
+#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/display/display_item_list_processor.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_finder.h"
+#include "evita/visuals/layout/box_selection.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
@@ -49,6 +53,9 @@ Document* LoadDocument() {
                                .SetPaddingRight(css::Length(kMargin))
                                .SetPaddingTop(css::Length(kMargin))
                                .Build())
+          .Begin(L"input", L"input")
+          .AddText(L"this is a text field.")
+          .End(L"input")
           .Begin(L"list", L"list")
           .End(L"list")
           .End(L"main")
@@ -100,6 +107,12 @@ css::StyleSheet* LoadStyleSheet() {
                     .SetBackgroundColor(css::Color::Rgba(51, 153, 255, 0.1f))
                     .SetBorder(css::Color::Rgba(51, 153, 255, 1.0f), 1)
                     .Build()));
+  style_sheet->AppendRule(
+      L"input", std::move(css::StyleBuilder()
+                              .SetBorder(css::Color::Rgba(128, 128, 128), 1)
+                              .SetPadding(2)
+                              .SetWidth(300)
+                              .Build()));
   style_sheet->AppendRule(
       L"list",
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
@@ -162,9 +175,12 @@ void PrintPaint(const DisplayItemList& list) {
 //
 DemoModel::DemoModel()
     : document_(LoadDocument()),
+      selection_(new Selection(*document_, *this)),
       style_sheet_(LoadStyleSheet()),
       style_tree_(new StyleTree(*document_, *this, {style_sheet_})),
-      box_tree_(new BoxTree(*document_, *style_tree_)) {}
+      box_tree_(new BoxTree(*document_, *selection_, *style_tree_)) {
+  selection_->Collapse(document_->GetElementById(L"input")->first_child(), 0);
+}
 
 DemoModel::~DemoModel() {}
 

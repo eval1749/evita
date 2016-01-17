@@ -28,9 +28,12 @@ class BoxSelection final {
 
   Box* anchor_box() const { return anchor_box_; }
   int anchor_offset() const { return anchor_offset_; }
+  const FloatColor& caret_color() const { return caret_color_; }
   const css::CaretShape& caret_shape() const { return caret_shape_; }
   Box* focus_box() const { return focus_box_; }
   int focus_offset() const { return focus_offset_; }
+  const FloatColor& selection_color() const { return selection_color_; }
+
   bool is_caret() const;
   bool is_none() const;
   bool is_range() const;
@@ -44,7 +47,7 @@ class BoxSelection final {
   css::CaretShape caret_shape_;
   Box* focus_box_ = nullptr;
   int focus_offset_ = 0;
-  FloatColor range_color_;
+  FloatColor selection_color_;
 };
 
 }  // namespace visuals

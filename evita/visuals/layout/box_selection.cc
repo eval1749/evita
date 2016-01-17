@@ -17,7 +17,7 @@ BoxSelection::BoxSelection(const BoxSelection& other)
       caret_shape_(other.caret_shape_),
       focus_box_(other.focus_box_),
       focus_offset_(other.focus_offset_),
-      range_color_(other.range_color_) {}
+      selection_color_(other.selection_color_) {}
 
 BoxSelection::BoxSelection() {}
 BoxSelection::~BoxSelection() {}
@@ -41,7 +41,7 @@ bool BoxSelection::operator==(const BoxSelection& other) const {
          anchor_offset_ == other.anchor_offset_ &&
          focus_box_ == other.focus_box_ &&
          focus_offset_ == other.focus_offset_ &&
-         range_color_ == other.range_color_;
+         selection_color_ == other.selection_color_;
 }
 
 bool BoxSelection::operator!=(const BoxSelection& other) const {

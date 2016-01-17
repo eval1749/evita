@@ -28,7 +28,7 @@ class BoxSelectionEditor final {
   void ExtendTo(BoxSelection* selection, Box* box, int offset);
   void SetCaretColor(BoxSelection* selection, const FloatColor& color);
   void SetCaretShape(BoxSelection* selection, const css::CaretShape& shape);
-  void SetRangeColor(BoxSelection* selection, const FloatColor& color);
+  void SetSelectionColor(BoxSelection* selection, const FloatColor& color);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(BoxSelectionEditor);

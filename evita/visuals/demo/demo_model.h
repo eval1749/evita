@@ -56,8 +56,10 @@ class DemoModel final : public css::Media,
 
   // WindowEventHandler
   void DidChangeWindowBounds(const FloatRect& bounds) final;
+  void DidKillFocus() final;
   void DidMoveMouse(const FloatPoint& point) final;
   void DidPressMouse(const FloatPoint& point) final;
+  void DidSetFocus() final;
 
   Document* const document_;
   bool is_caret_on_ = false;

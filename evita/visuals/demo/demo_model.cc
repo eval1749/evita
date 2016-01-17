@@ -257,6 +257,10 @@ void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
   css::Media::DidChangeViewportSize();
 }
 
+void DemoModel::DidKillFocus() {
+  DidChangeMediaState();
+}
+
 void DemoModel::DidMoveMouse(const FloatPoint& point) {
   const auto line = FindListItem(point);
   if (!line)
@@ -286,6 +290,11 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
   RequestAnimationFrame();
 }
 
+void DemoModel::DidSetFocus() {
+  DidChangeMediaState();
+}
+
+// ui::AnimationHandler
 const char* DemoModel::GetAnimationFrameType() const {
   return "DemoModel";
 }

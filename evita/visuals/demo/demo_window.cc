@@ -70,10 +70,18 @@ void DemoWindow::DidHide() {
   canvas_.reset();
 }
 
+void DemoWindow::DidKillFocus(ui::Widget* focused_window) {
+  event_handler_->DidKillFocus();
+}
+
 void DemoWindow::DidRealize() {
   SetLayer(new ui::RootLayer(this));
   set_layer_owner_delegate(this);
   ui::Widget::DidRealize();
+}
+
+void DemoWindow::DidSetFocus(ui::Widget* last_focused) {
+  event_handler_->DidSetFocus();
 }
 
 void DemoWindow::DidShow() {

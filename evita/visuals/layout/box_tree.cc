@@ -431,13 +431,20 @@ void BoxTree::DidInsertBefore(const ContainerNode& parent,
 }
 
 void BoxTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
+  if (lifecycle_->IsAtLeast(ViewLifecycle::State::TreeClean)) {
+    if (!BoxFor(child)) {
+      // When lifecycle is |TreeClean| and |child| is "display:none", removal
+      // of |child| doesn't affect sibling boxes in |parent|.
+      return;
+    }
+  }
   impl_->MarkDirty(parent);
 }
 
 void BoxTree::DidReplaceChild(const ContainerNode& parent,
                               const Node& child,
                               const Node& ref_child) {
-  impl_->MarkDirty(parent);
+  DocumentObserver::DidReplaceChild(parent, child, ref_child);
 }
 
 // SelectionObserver

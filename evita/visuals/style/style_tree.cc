@@ -11,6 +11,7 @@
 
 #include "base/observer_list.h"
 #include "evita/visuals/css/media.h"
+#include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
@@ -20,6 +21,7 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/style/compiled_style_sheet.h"
 #include "evita/visuals/style/style_tree_observer.h"
@@ -362,6 +364,7 @@ StyleTree::StyleTree(const Document& document,
                      const css::Media& media,
                      const std::vector<css::StyleSheet*>& style_sheets)
     : impl_(new Impl(document, media, style_sheets)),
+      selection_style_(new css::Style()),
       style_sheets_(style_sheets) {
   document.AddObserver(this);
   media.AddObserver(this);
@@ -405,6 +408,43 @@ const css::Style& StyleTree::ComputedStyleOf(const Node& node) const {
                                 "StyleTree::UpdateIfNeeded(), before "
                                 "calling ComputedStyleOf().";
   return impl_->ComputedStyleOf(node);
+}
+
+// In CSS Pseudo-Element Level 4 says:
+// The following properties apply to the highlight pseudo-elements:
+//  - color
+//  - background-color
+//  - cursor
+//  - caret-color
+//  - outline and its longhands
+//  - text-decoration and its associated properties
+//  - text-emphasis-color
+//  - text-shadow
+// But, we don't apply them except fro background-color.
+const css::Style& StyleTree::ComputedStyleOfSelection(
+    const Selection& selection) const {
+  DCHECK(!impl_->is_dirty()) << "You should call "
+                                "StyleTree::UpdateIfNeeded(), before "
+                                "calling ComputedStyleOf().";
+  if (selection.is_none())
+    return initial_style();
+  if (selection.is_caret()) {
+    if (media().media_state() != css::MediaState::Interactive)
+      return initial_style();  // caret-shape: none
+    if (!media().is_caret_on())
+      return initial_style();  // caret-shape: none
+    css::StyleEditor().SetCaretShape(selection_style_.get(),
+                                     css::CaretShape::Bar());
+    return *selection_style_;
+  }
+  if (media().media_state() == css::MediaState::Interactive) {
+    css::StyleEditor().SetBackgroundColor(selection_style_.get(),
+                                          css::Color::Rgba(51, 153, 255, 0.3f));
+    return *selection_style_;
+  }
+  css::StyleEditor().SetBackgroundColor(selection_style_.get(),
+                                        css::Color::Rgba(191, 205, 219, 0.3f));
+  return *selection_style_;
 }
 
 void StyleTree::RemoveObserver(StyleTreeObserver* observer) const {

@@ -25,6 +25,7 @@ class StyleSheet;
 class Document;
 class ElementNode;
 class Node;
+class Selection;
 class StyleTreeObserver;
 
 //////////////////////////////////////////////////////////////////////
@@ -56,6 +57,7 @@ class StyleTree final : public css::MediaObserver,
 
   void AddObserver(StyleTreeObserver* observer) const;
   const css::Style& ComputedStyleOf(const Node& node) const;
+  const css::Style& ComputedStyleOfSelection(const Selection& selection) const;
   void RemoveObserver(StyleTreeObserver* observer) const;
   void UpdateIfNeeded();
 
@@ -91,6 +93,7 @@ class StyleTree final : public css::MediaObserver,
 
   std::unique_ptr<Impl> impl_;
   const std::vector<css::StyleSheet*> style_sheets_;
+  const std::unique_ptr<css::Style> selection_style_;
 
   DISALLOW_COPY_AND_ASSIGN(StyleTree);
 };

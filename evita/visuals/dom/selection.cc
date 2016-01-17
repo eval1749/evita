@@ -4,60 +4,130 @@
 
 #include "evita/visuals/dom/selection.h"
 
+#include "base/logging.h"
+#include "base/timer/timer.h"
+#include "evita/visuals/css/media.h"
+#include "evita/visuals/css/media_state.h"
+#include "evita/visuals/dom/document.h"
+#include "evita/visuals/dom/selection_model.h"
+#include "evita/visuals/dom/selection_observer.h"
+
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
 //
 // Selection
 //
-Selection::Selection(const Selection& other)
-    : anchor_node_(other.anchor_node_),
-      anchor_offset_(other.anchor_offset_),
-      focus_node_(other.focus_node_),
-      focus_offset_(other.focus_offset_) {}
-
-Selection::Selection() {}
-Selection::~Selection() {}
-
-bool Selection::operator==(const Selection& other) const {
-  if (this == &other)
-    return true;
-  if (!anchor_node_)
-    return !other.anchor_node_;
-  if (is_caret()) {
-    if (!other.is_caret())
-      return false;
-    return anchor_node_ == other.anchor_node_ &&
-           anchor_offset_ == other.anchor_offset_;
-  }
-  if (!other.is_range())
-    return false;
-  return anchor_node_ == other.anchor_node_ &&
-         anchor_offset_ == other.anchor_offset_ &&
-         focus_node_ == other.focus_node_ &&
-         focus_offset_ == other.focus_offset_;
+Selection::Selection(const Document& document, const css::Media& media)
+    : caret_timer_(new base::RepeatingTimer()),
+      document_(document),
+      media_(media) {
+  document_.AddObserver(this);
 }
 
-bool Selection::operator!=(const Selection& other) const {
-  return !operator==(other);
+Selection::~Selection() {
+  document_.RemoveObserver(this);
+}
+
+const Node& Selection::anchor_node() const {
+  return model_->anchor_node();
+}
+
+int Selection::anchor_offset() const {
+  return model_->anchor_offset();
+}
+
+const Node& Selection::focus_node() const {
+  return model_->focus_node();
+}
+
+int Selection::focus_offset() const {
+  return model_->focus_offset();
 }
 
 bool Selection::is_caret() const {
-  if (is_none())
-    return false;
-  return anchor_node_ == focus_node_ && anchor_offset_ == focus_offset_;
+  return model_->is_caret();
 }
 
 bool Selection::is_none() const {
-  return !anchor_node_;
+  return model_->is_none();
 }
 
 bool Selection::is_range() const {
+  return model_->is_range();
+}
+
+void Selection::AddObserver(SelectionObserver* observer) const {
+  observers_.AddObserver(observer);
+}
+
+void Selection::Clear() {
+  if (model_->is_none())
+    return;
+  const auto old_model = *model_;
+  model_->Clear();
+  caret_timer_->Stop();
+  FOR_EACH_OBSERVER(SelectionObserver, observers_,
+                    DidChangeSelection(old_model, *model_));
+}
+
+void Selection::Collapse(Node* node, int offset) {
+  SelectionModel new_model;
+  new_model.Collapse(node, offset);
+  if (*model_ == new_model)
+    return;
+  const auto old_model = *model_;
+  *model_ = new_model;
+  is_caret_on_ = true;
+  caret_timer_->Stop();
+  FOR_EACH_OBSERVER(SelectionObserver, observers_,
+                    DidChangeSelection(old_model, *model_));
+}
+
+void Selection::DidFireCaretTimer() {
+  is_caret_on_ = !is_caret_on_;
+  FOR_EACH_OBSERVER(SelectionObserver, observers_, DidChangeCaretBlink());
+}
+
+void Selection::DidPaint() {
   if (is_none())
-    return false;
-  if (anchor_node_ != focus_node_)
-    return true;
-  return anchor_offset_ != focus_offset_;
+    return;
+  if (caret_timer_->IsRunning())
+    return;
+  caret_timer_->Start(
+      FROM_HERE, base::TimeDelta::FromMilliseconds(500),
+      base::Bind(&Selection::DidFireCaretTimer, base::Unretained(this)));
+}
+
+void Selection::ExtendTo(Node* node, int offset) {
+  DCHECK(!is_none());
+  SelectionModel new_model(*model_);
+  new_model.ExtendTo(node, offset);
+  if (*model_ == new_model)
+    return;
+  const auto old_model = *model_;
+  *model_ = new_model;
+  is_caret_on_ = true;
+  caret_timer_->Stop();
+  FOR_EACH_OBSERVER(SelectionObserver, observers_,
+                    DidChangeSelection(old_model, *model_));
+}
+
+void Selection::RemoveObserver(SelectionObserver* observer) const {
+  observers_.RemoveObserver(observer);
+}
+
+// css::MediaObserver
+void Selection::DidChangeMediaState() {
+  if (media_.media_state() != css::MediaState::Inactive)
+    return;
+  caret_timer_->Stop();
+}
+
+// DocumentObserver
+void Selection::WillRemoveChild(const ContainerNode& parent,
+                                const Node& child) {
+  model_->WillRemoveChild(parent, child);
 }
 
 }  // namespace visuals

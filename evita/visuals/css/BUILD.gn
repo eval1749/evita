@@ -16,6 +16,8 @@ source_set("css") {
     "media.h",
     "media_observer.cc",
     "media_observer.h",
+    "media_state.cc",
+    "media_state.h",
     "media_type.cc",
     "media_type.h",
     "property.cc",

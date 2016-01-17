@@ -4,8 +4,9 @@
 
 #include "evita/visuals/css/style_editor.h"
 
-#include "evita/visuals/css/style.h"
+#include "evita/visuals/css/float_color.h"
 #include "evita/visuals/css/properties.h"
+#include "evita/visuals/css/style.h"
 #include "evita/visuals/css/values.h"
 
 namespace visuals {
@@ -26,8 +27,29 @@ void StyleEditor::Merge(Style* left, const Style& right) {
 #undef V
 }
 
+void StyleEditor::SetBorder(Style* style,
+                            const FloatColor& color,
+                            float width) {
+  SetBorderBottomWidth(style, css::Length(width));
+  SetBorderLeftWidth(style, css::Length(width));
+  SetBorderRightWidth(style, css::Length(width));
+  SetBorderTopWidth(style, css::Length(width));
+
+  SetBorderBottomColor(style, css::Color(color));
+  SetBorderLeftColor(style, css::Color(color));
+  SetBorderRightColor(style, css::Color(color));
+  SetBorderTopColor(style, css::Color(color));
+}
+
 void StyleEditor::SetHeight(Style* style, float height) {
   SetHeight(style, css::Height(css::Length(height)));
+}
+
+void StyleEditor::SetPadding(Style* style, float width) {
+  SetPaddingBottom(style, css::Length(width));
+  SetPaddingLeft(style, css::Length(width));
+  SetPaddingRight(style, css::Length(width));
+  SetPaddingTop(style, css::Length(width));
 }
 
 void StyleEditor::SetWidth(Style* style, float width) {

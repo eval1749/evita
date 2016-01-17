@@ -12,6 +12,9 @@
 #include "evita/visuals/css/values_forward.h"
 
 namespace visuals {
+
+class FloatColor;
+
 namespace css {
 
 class Style;
@@ -29,7 +32,9 @@ class StyleEditor final {
   void Merge(css::Style* left, const css::Style& right);
 
   // Shorthand functions
+  void SetBorder(Style* style, const FloatColor& color, float width);
   void SetHeight(Style* style, float height);
+  void SetPadding(Style* style, float width);
   void SetWidth(Style* style, float width);
 
 #define V(Name, name, type, text)          \

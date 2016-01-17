@@ -4,6 +4,8 @@
 
 #include "evita/visuals/dom/document_observer.h"
 
+#include "evita/visuals/dom/node.h"
+
 namespace visuals {
 
 //////////////////////////////////////////////////////////////////////
@@ -28,7 +30,12 @@ void DocumentObserver::DidRemoveClass(const ElementNode& element,
                                       const base::string16& old_name) {}
 void DocumentObserver::DidReplaceChild(const ContainerNode& parent,
                                        const Node& new_child,
-                                       const Node& old_child) {}
+                                       const Node& old_child) {
+  DidRemoveChild(parent, old_child);
+  if (auto const next_sibling = new_child.next_sibling())
+    return DidInsertBefore(parent, new_child, *next_sibling);
+  DidAppendChild(parent, new_child);
+}
 void DocumentObserver::DidSetTextData(const Text& text,
                                       const base::string16& new_data,
                                       const base::string16& old_data) {}

@@ -61,6 +61,7 @@ source_set("layout") {
     "//evita/visuals/fonts",
     "//evita/visuals/geometry",
     "//evita/visuals/style",
+    "//evita/visuals/view/public",
   ]
 }
 

@@ -16,6 +16,7 @@ source_set("style") {
     "//base",
     "//evita/visuals/css",
     "//evita/visuals/dom",
+    "//evita/visuals/view/public",
   ]
 }
 

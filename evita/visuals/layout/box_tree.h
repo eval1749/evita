@@ -19,7 +19,7 @@ namespace visuals {
 
 class Box;
 class BoxSelection;
-class DocumentLifecycle;
+class ViewLifecycle;
 class Node;
 class RootBox;
 class Selection;
@@ -34,7 +34,7 @@ class BoxTree final : public css::MediaObserver,
                       public SelectionObserver,
                       public StyleTreeObserver {
  public:
-  BoxTree(DocumentLifecycle* lifecycle,
+  BoxTree(ViewLifecycle* lifecycle,
           const Selection& selection,
           const StyleTree& style_tree);
   ~BoxTree();

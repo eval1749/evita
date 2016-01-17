@@ -17,7 +17,7 @@ namespace visuals {
 class Box;
 class ContainerBox;
 class Document;
-class DocumentLifecycle;
+class ViewLifecycle;
 class RootBox;
 
 namespace css {
@@ -76,7 +76,7 @@ class SimpleBoxTree final {
 
   std::stack<Box*> boxes_;
   const Document& document_;
-  std::unique_ptr<DocumentLifecycle> lifecycle_;
+  std::unique_ptr<ViewLifecycle> lifecycle_;
   gc::Member<Document> own_document_;
   std::unique_ptr<RootBox> root_box_;
 

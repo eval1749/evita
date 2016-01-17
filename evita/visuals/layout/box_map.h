@@ -14,7 +14,7 @@ namespace visuals {
 
 class Box;
 class BoxAssigner;
-class DocumentLifecycle;
+class ViewLifecycle;
 class Node;
 class RootBox;
 
@@ -24,7 +24,7 @@ class RootBox;
 //
 class BoxMap final {
  public:
-  explicit BoxMap(DocumentLifecycle* lifecycle);
+  explicit BoxMap(ViewLifecycle* lifecycle);
   ~BoxMap();
 
   RootBox* root_box() const { return root_box_; }

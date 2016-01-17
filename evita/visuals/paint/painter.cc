@@ -10,7 +10,6 @@
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
-#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/fonts/text_layout.h"
@@ -23,6 +22,7 @@
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/paint/paint_info.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 // TODO(eval1749): Drawing rectangle with thickness doesn't work as expected.
 // I get 1 pixel vertical line for 4 pixel border.
@@ -307,9 +307,9 @@ Painter::~Painter() {}
 
 std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
                                                 const RootBox& root_box) {
-  DocumentLifecycle::Scope scope(root_box.lifecycle(),
-                                 DocumentLifecycle::State::InPaint,
-                                 DocumentLifecycle::State::PaintClean);
+  ViewLifecycle::Scope scope(root_box.lifecycle(),
+                             ViewLifecycle::State::InPaint,
+                             ViewLifecycle::State::PaintClean);
   return PaintVisitor(paint_info).Paint(root_box);
 }
 

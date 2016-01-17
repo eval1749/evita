@@ -14,7 +14,6 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/dom/selection.h"
@@ -22,6 +21,7 @@
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/style/style_tree.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
@@ -100,7 +100,7 @@ TEST_F(BoxTreeTest, Basic) {
                              .AddText(L"Hello world!")
                              .End(L"body")
                              .Build();
-  DocumentLifecycle lifecycle(*document);
+  ViewLifecycle lifecycle(*document);
   Selection selection(*document, mock_media());
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
@@ -124,7 +124,7 @@ TEST_F(BoxTreeTest, FlowAnonymous) {
                              .AddText(L"baz")
                              .End(L"div")
                              .Build();
-  DocumentLifecycle lifecycle(*document);
+  ViewLifecycle lifecycle(*document);
   Selection selection(*document, mock_media());
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();
@@ -143,7 +143,7 @@ TEST_F(BoxTreeTest, FlowInline) {
                              .AddText(L"bar")
                              .End(L"body")
                              .Build();
-  DocumentLifecycle lifecycle(*document);
+  ViewLifecycle lifecycle(*document);
   Selection selection(*document, mock_media());
   StyleTree style_tree(*document, mock_media(), {});
   style_tree.UpdateIfNeeded();

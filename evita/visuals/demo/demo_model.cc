@@ -18,7 +18,6 @@
 #include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/demo/demo_window.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
@@ -37,6 +36,7 @@
 #include "evita/visuals/style/style_tree.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -176,7 +176,7 @@ void PrintPaint(const DisplayItemList& list) {
 //
 DemoModel::DemoModel()
     : document_(LoadDocument()),
-      lifecycle_(new DocumentLifecycle(*document_)),
+      lifecycle_(new ViewLifecycle(*document_)),
       selection_(new Selection(*document_, *this)),
       style_sheet_(LoadStyleSheet()),
       style_tree_(new StyleTree(*document_, *this, {style_sheet_})),

@@ -5,8 +5,8 @@
 #include "evita/visuals/layout/root_box.h"
 
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/layout/box_selection.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -14,7 +14,7 @@ namespace visuals {
 //
 // RootBox
 //
-RootBox::RootBox(DocumentLifecycle* lifecycle)
+RootBox::RootBox(ViewLifecycle* lifecycle)
     : ContainerBox(this, &lifecycle->document()),
       lifecycle_(lifecycle),
       selection_(new BoxSelection()) {}
@@ -26,19 +26,19 @@ const Document& RootBox::document() const {
 }
 
 bool RootBox::InLayout() const {
-  return lifecycle_->state() == DocumentLifecycle::State::InLayout;
+  return lifecycle_->state() == ViewLifecycle::State::InLayout;
 }
 
 bool RootBox::InPaint() const {
-  return lifecycle_->state() == DocumentLifecycle::State::InPaint;
+  return lifecycle_->state() == ViewLifecycle::State::InPaint;
 }
 
 bool RootBox::IsLayoutClean() const {
-  return lifecycle_->IsAtLeast(DocumentLifecycle::State::LayoutClean);
+  return lifecycle_->IsAtLeast(ViewLifecycle::State::LayoutClean);
 }
 
 bool RootBox::IsPaintClean() const {
-  return lifecycle_->IsAtLeast(DocumentLifecycle::State::PaintClean);
+  return lifecycle_->IsAtLeast(ViewLifecycle::State::PaintClean);
 }
 
 }  // namespace visuals

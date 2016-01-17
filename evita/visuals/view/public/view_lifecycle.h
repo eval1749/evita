@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_DOM_DOCUMENT_LIFECYCLE_H_
-#define EVITA_VISUALS_DOM_DOCUMENT_LIFECYCLE_H_
+#ifndef EVITA_VISUALS_VIEW_PUBLIC_VIEW_LIFECYCLE_H_
+#define EVITA_VISUALS_VIEW_PUBLIC_VIEW_LIFECYCLE_H_
 
 #include <iosfwd>
 
@@ -23,9 +23,9 @@ class Document;
 
 //////////////////////////////////////////////////////////////////////
 //
-// DocumentLifecycle
+// ViewLifecycle
 //
-class DocumentLifecycle final : public DocumentObserver {
+class ViewLifecycle final : public DocumentObserver {
  public:
   enum class State {
 #define V(name) name,
@@ -35,18 +35,18 @@ class DocumentLifecycle final : public DocumentObserver {
 
   class Scope {
    public:
-    Scope(DocumentLifecycle* lifecycle, State from_state, State to_state);
+    Scope(ViewLifecycle* lifecycle, State from_state, State to_state);
     ~Scope();
 
    private:
-    DocumentLifecycle* const lifecycle_;
+    ViewLifecycle* const lifecycle_;
     State const to_state_;
 
     DISALLOW_COPY_AND_ASSIGN(Scope);
   };
 
-  explicit DocumentLifecycle(const Document& document);
-  ~DocumentLifecycle();
+  explicit ViewLifecycle(const Document& document);
+  ~ViewLifecycle();
 
   const Document& document() const { return document_; }
   State state() const { return state_; }
@@ -82,15 +82,13 @@ class DocumentLifecycle final : public DocumentObserver {
   const Document& document_;
   State state_;
 
-  DISALLOW_COPY_AND_ASSIGN(DocumentLifecycle);
+  DISALLOW_COPY_AND_ASSIGN(ViewLifecycle);
 };
 
-std::ostream& operator<<(std::ostream& ostream,
-                         const DocumentLifecycle& lifecycle);
-std::ostream& operator<<(std::ostream& ostream,
-                         const DocumentLifecycle* lifecycle);
-std::ostream& operator<<(std::ostream& ostream, DocumentLifecycle::State state);
+std::ostream& operator<<(std::ostream& ostream, const ViewLifecycle& lifecycle);
+std::ostream& operator<<(std::ostream& ostream, const ViewLifecycle* lifecycle);
+std::ostream& operator<<(std::ostream& ostream, ViewLifecycle::State state);
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_DOM_DOCUMENT_LIFECYCLE_H_
+#endif  // EVITA_VISUALS_VIEW_PUBLIC_VIEW_LIFECYCLE_H_

@@ -7,12 +7,12 @@
 #include "evita/visuals/layout/box_selection.h"
 
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_selection_editor.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
@@ -20,7 +20,7 @@ namespace visuals {
 TEST(BoxSelectionTest, Basic) {
   const auto document = new Document();
   const auto node = new Text(document, L"foobar");
-  DocumentLifecycle lifecycle(*document);
+  ViewLifecycle lifecycle(*document);
   const auto root_box = std::make_unique<RootBox>(&lifecycle);
   const auto text_box =
       std::make_unique<TextBox>(root_box.get(), node->data(), node);

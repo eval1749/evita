@@ -13,7 +13,6 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/selection.h"
 #include "evita/visuals/dom/text.h"
@@ -25,6 +24,7 @@
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/style/style_tree.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -76,7 +76,7 @@ struct Context {
 //
 class BoxTree::Impl final {
  public:
-  Impl(DocumentLifecycle* lifecycle, const StyleTree& style_tree);
+  Impl(ViewLifecycle* lifecycle, const StyleTree& style_tree);
   ~Impl() = default;
 
   const Document& document() const { return style_tree_.document(); }
@@ -115,7 +115,7 @@ class BoxTree::Impl final {
   DISALLOW_COPY_AND_ASSIGN(Impl);
 };
 
-BoxTree::Impl::Impl(DocumentLifecycle* lifecycle, const StyleTree& style_tree)
+BoxTree::Impl::Impl(ViewLifecycle* lifecycle, const StyleTree& style_tree)
     : box_map_(lifecycle),
       document_(lifecycle->document()),
       root_box_(box_map_.root_box()),
@@ -319,7 +319,7 @@ void BoxTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
 //
 // BoxTree
 //
-BoxTree::BoxTree(DocumentLifecycle* lifecycle,
+BoxTree::BoxTree(ViewLifecycle* lifecycle,
                  const Selection& selection,
                  const StyleTree& style_tree)
     : impl_(new Impl(lifecycle, style_tree)), selection_(selection) {

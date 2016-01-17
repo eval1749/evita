@@ -7,7 +7,7 @@
 #include "evita/visuals/layout/box_editor.h"
 
 #include "base/logging.h"
-#include "evita/visuals/dom/document_lifecycle.h"
+#include "evita/visuals/css/style.h"
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/fonts/text_layout.h"
@@ -18,7 +18,7 @@
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
-#include "evita/visuals/css/style.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -217,7 +217,7 @@ void BoxEditor::RemoveDescendants(ContainerBox* container_box) {
 }
 
 void BoxEditor::ScheduleForcePaint(RootBox* root_box) {
-  root_box->lifecycle()->LimitTo(DocumentLifecycle::State::LayoutClean);
+  root_box->lifecycle()->LimitTo(ViewLifecycle::State::LayoutClean);
 }
 
 void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {

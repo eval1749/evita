@@ -30,6 +30,7 @@ executable("demo") {
     ":visuals",
     "//evita/ui:widget",
     "//evita/visuals/display:processor",
+    "//evita/visuals/view/public",
   ]
 
   if (is_win) {

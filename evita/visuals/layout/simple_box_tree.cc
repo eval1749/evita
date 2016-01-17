@@ -6,10 +6,10 @@
 
 #include "base/logging.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/document_lifecycle.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -19,7 +19,7 @@ namespace visuals {
 //
 SimpleBoxTree::SimpleBoxTree(const Document& document)
     : document_(document),
-      lifecycle_(new DocumentLifecycle(document_)),
+      lifecycle_(new ViewLifecycle(document_)),
       root_box_(new RootBox(lifecycle_.get())) {
   boxes_.push(root_box_.get());
 }

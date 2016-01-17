@@ -26,7 +26,7 @@ class StyleSheet;
 class BoxTree;
 class ContainerNode;
 class Document;
-class DocumentLifecycle;
+class ViewLifecycle;
 class ElementNode;
 class Node;
 class Selection;
@@ -110,7 +110,7 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   void DidShowWindow() final;
 
   bool is_waiting_animation_frame_ = false;
-  const std::unique_ptr<visuals::DocumentLifecycle> lifecycle_;
+  const std::unique_ptr<visuals::ViewLifecycle> lifecycle_;
   const std::unique_ptr<visuals::Selection> selection_;
   const std::unique_ptr<visuals::StyleTree> style_tree_;
   FloatSize viewport_size_;

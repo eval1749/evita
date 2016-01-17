@@ -53,9 +53,9 @@ void BoxSelectionEditor::SetCaretShape(BoxSelection* selection,
   selection->caret_shape_ = shape;
 }
 
-void BoxSelectionEditor::SetRangeColor(BoxSelection* selection,
-                                       const FloatColor& color) {
-  selection->range_color_ = color;
+void BoxSelectionEditor::SetSelectionColor(BoxSelection* selection,
+                                           const FloatColor& color) {
+  selection->selection_color_ = color;
 }
 
 }  // namespace visuals

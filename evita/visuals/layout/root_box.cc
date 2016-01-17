@@ -5,6 +5,7 @@
 #include "evita/visuals/layout/root_box.h"
 
 #include "evita/visuals/dom/document.h"
+#include "evita/visuals/layout/box_selection.h"
 
 namespace visuals {
 

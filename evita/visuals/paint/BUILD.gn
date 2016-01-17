@@ -16,6 +16,7 @@ source_set("paint") {
     "//base",
     "//evita/visuals/css",
     "//evita/visuals/geometry",
+    "//evita/visuals/layout",
   ]
 }
 

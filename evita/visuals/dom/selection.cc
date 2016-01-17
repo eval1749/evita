@@ -21,7 +21,8 @@ namespace visuals {
 Selection::Selection(const Document& document, const css::Media& media)
     : caret_timer_(new base::RepeatingTimer()),
       document_(document),
-      media_(media) {
+      media_(media),
+      model_(new SelectionModel()) {
   document_.AddObserver(this);
 }
 

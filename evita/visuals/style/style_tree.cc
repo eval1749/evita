@@ -21,10 +21,10 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
-#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/style/compiled_style_sheet.h"
 #include "evita/visuals/style/style_tree_observer.h"
+#include "evita/visuals/view/public/selection.h"
 
 namespace visuals {
 

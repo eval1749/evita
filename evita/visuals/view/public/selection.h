@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_DOM_SELECTION_H_
-#define EVITA_VISUALS_DOM_SELECTION_H_
+#ifndef EVITA_VISUALS_VIEW_PUBLIC_SELECTION_H_
+#define EVITA_VISUALS_VIEW_PUBLIC_SELECTION_H_
 
 #include "base/observer_list.h"
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
-#include "evita/visuals/dom/selection_model.h"
+#include "evita/visuals/view/public/selection_model.h"
 
 namespace base {
 class RepeatingTimer;
@@ -75,4 +75,4 @@ class Selection final : public css::MediaObserver, public DocumentObserver {
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_DOM_SELECTION_H_
+#endif  // EVITA_VISUALS_VIEW_PUBLIC_SELECTION_H_

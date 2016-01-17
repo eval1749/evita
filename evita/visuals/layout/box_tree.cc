@@ -14,7 +14,6 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
-#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/box_assigner.h"
 #include "evita/visuals/layout/box_editor.h"
@@ -24,6 +23,7 @@
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/style/style_tree.h"
+#include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {

@@ -16,11 +16,11 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
-#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/layout/descendants_or_self.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/style/style_tree.h"
+#include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 #include "gtest/gtest.h"
 

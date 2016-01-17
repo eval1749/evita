@@ -18,7 +18,6 @@
 #include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/layout/box_finder.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/layouter.h"
@@ -26,6 +25,7 @@
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
 #include "evita/visuals/style/style_tree.h"
+#include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace dom {

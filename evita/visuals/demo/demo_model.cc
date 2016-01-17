@@ -21,7 +21,6 @@
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
-#include "evita/visuals/dom/selection.h"
 #include "evita/visuals/display/display_item_list_processor.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
@@ -36,6 +35,7 @@
 #include "evita/visuals/style/style_tree.h"
 #include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
+#include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {

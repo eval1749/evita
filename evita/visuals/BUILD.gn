@@ -57,5 +57,6 @@ test("tests") {
     "//evita/visuals/layout:test_files",
     "//evita/visuals/paint:test_files",
     "//evita/visuals/style:test_files",
+    "//evita/visuals/view/public:test_files",
   ]
 }

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_DOM_SELECTION_MODEL_H_
-#define EVITA_VISUALS_DOM_SELECTION_MODEL_H_
+#ifndef EVITA_VISUALS_VIEW_PUBLIC_SELECTION_MODEL_H_
+#define EVITA_VISUALS_VIEW_PUBLIC_SELECTION_MODEL_H_
 
 namespace visuals {
 
@@ -46,4 +46,4 @@ class SelectionModel final {
 
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_DOM_SELECTION_MODEL_H_
+#endif  // EVITA_VISUALS_VIEW_PUBLIC_SELECTION_MODEL_H_

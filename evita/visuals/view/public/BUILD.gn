@@ -1,0 +1,31 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("public") {
+  sources = [
+    "selection.cc",
+    "selection.h",
+    "selection_model.cc",
+    "selection_model.h",
+    "selection_observer.cc",
+    "selection_observer.h",
+    "view_lifecycle.cc",
+    "view_lifecycle.h",
+  ]
+  deps = [
+    "//evita/visuals/dom",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "selection_model_test.cc",
+  ]
+
+  deps = [
+    ":public",
+    "//testing/gtest",
+  ]
+}

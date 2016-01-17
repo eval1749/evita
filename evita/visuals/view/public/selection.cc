@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/dom/selection.h"
+#include "evita/visuals/view/public/selection.h"
 
 #include "base/logging.h"
 #include "base/timer/timer.h"
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/media_state.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/dom/selection_model.h"
-#include "evita/visuals/dom/selection_observer.h"
+#include "evita/visuals/view/public/selection_model.h"
+#include "evita/visuals/view/public/selection_observer.h"
 
 namespace visuals {
 

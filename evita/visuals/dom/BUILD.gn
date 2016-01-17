@@ -39,6 +39,8 @@ source_set("dom") {
     "selection.h",
     "selection_editor.cc",
     "selection_editor.h",
+    "selection_model.cc",
+    "selection_model.h",
     "text.cc",
     "text.h",
   ]
@@ -61,6 +63,7 @@ source_set("test_files") {
     "node_editor_test.cc",
     "node_test.cc",
     "node_traversal_test.cc",
+    "selection_model_test.cc",
     "selection_test.cc",
   ]
 

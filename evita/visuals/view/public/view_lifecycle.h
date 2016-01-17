@@ -14,10 +14,16 @@ namespace visuals {
 
 #define FOR_EACH_TREE_LIFECYCLE_STATE(V) \
   V(VisualUpdatePending)                 \
+  V(InStyleRecalc)                       \
+  V(StyleClean)                          \
+  V(InTreeRebuild)                       \
+  V(TreeClean)                           \
   V(InLayout)                            \
   V(LayoutClean)                         \
   V(InPaint)                             \
-  V(PaintClean)
+  V(PaintClean)                          \
+  V(InShutdown)                          \
+  V(Shutdown)
 
 class Document;
 
@@ -39,8 +45,8 @@ class ViewLifecycle final : public DocumentObserver {
     ~Scope();
 
    private:
-    ViewLifecycle* const lifecycle_;
     State const from_state_;
+    ViewLifecycle* const lifecycle_;
 
     DISALLOW_COPY_AND_ASSIGN(Scope);
   };
@@ -52,9 +58,15 @@ class ViewLifecycle final : public DocumentObserver {
   State state() const { return state_; }
 
   bool AllowsTreeMutaions() const;
+  void FinishShutdown();
+  bool InShutdown() const { return state_ == State::InShutdown; }
   bool IsAtLeast(State state) const;
+  bool IsStyleClean() const;
+  bool IsTreeClean() const;
+  bool IsLayoutClean() const;
   void LimitTo(State state);
   void Reset();
+  void StartShutdown();
 
  private:
   void Advance();

@@ -34,6 +34,7 @@ class RootBox final : public ContainerBox {
 
   bool InLayout() const;
   bool InPaint() const;
+  bool InTreeRebuild() const;
   bool IsLayoutClean() const;
   bool IsPaintClean() const;
 

@@ -11,6 +11,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_tree_builder.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 #include "gtest/gtest.h"
 
 namespace visuals {
@@ -39,12 +40,16 @@ TEST_F(StyleTreeTest, Basic) {
                              .End(L"body")
                              .Build();
   const auto body = document->first_child()->as<Element>();
-  StyleTree resolver(*document, mock_media(), {});
-  resolver.UpdateIfNeeded();
+  ViewLifecycle lifecycle(*document);
+  StyleTree style_tree(&lifecycle, mock_media(), {});
+  style_tree.UpdateIfNeeded();
 
-  EXPECT_EQ(resolver.initial_style(), resolver.ComputedStyleOf(*body));
-  EXPECT_EQ(resolver.initial_style(),
-            resolver.ComputedStyleOf(*body->first_child()));
+  EXPECT_EQ(style_tree.initial_style(), style_tree.ComputedStyleOf(*body));
+  EXPECT_EQ(style_tree.initial_style(),
+            style_tree.ComputedStyleOf(*body->first_child()));
+
+  lifecycle.StartShutdown();
+  lifecycle.FinishShutdown();
 }
 
 TEST_F(StyleTreeTest, Inheritance) {
@@ -58,11 +63,16 @@ TEST_F(StyleTreeTest, Inheritance) {
           .End(L"body")
           .Build();
   const auto body = document->first_child()->as<Element>();
-  StyleTree resolver(*document, mock_media(), {});
-  resolver.UpdateIfNeeded();
+  ViewLifecycle lifecycle(*document);
+  StyleTree style_tree(&lifecycle, mock_media(), {});
+  style_tree.UpdateIfNeeded();
 
-  EXPECT_EQ(kColorRed, resolver.ComputedStyleOf(*body).color());
-  EXPECT_EQ(kColorRed, resolver.ComputedStyleOf(*body->first_child()).color());
+  EXPECT_EQ(kColorRed, style_tree.ComputedStyleOf(*body).color());
+  EXPECT_EQ(kColorRed,
+            style_tree.ComputedStyleOf(*body->first_child()).color());
+
+  lifecycle.StartShutdown();
+  lifecycle.FinishShutdown();
 }
 
 TEST_F(StyleTreeTest, ComputedStyleOfText) {
@@ -75,11 +85,16 @@ TEST_F(StyleTreeTest, ComputedStyleOfText) {
           .End(L"body")
           .Build();
   const auto body = document->first_child()->as<Element>();
-  StyleTree resolver(*document, mock_media(), {});
-  resolver.UpdateIfNeeded();
+  ViewLifecycle lifecycle(*document);
+  StyleTree style_tree(&lifecycle, mock_media(), {});
+  style_tree.UpdateIfNeeded();
 
-  EXPECT_EQ(kColorRed, resolver.ComputedStyleOf(*body).color());
-  EXPECT_EQ(kColorRed, resolver.ComputedStyleOf(*body->first_child()).color());
+  EXPECT_EQ(kColorRed, style_tree.ComputedStyleOf(*body).color());
+  EXPECT_EQ(kColorRed,
+            style_tree.ComputedStyleOf(*body->first_child()).color());
+
+  lifecycle.StartShutdown();
+  lifecycle.FinishShutdown();
 }
 
 }  // namespace visuals

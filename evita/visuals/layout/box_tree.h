@@ -84,6 +84,7 @@ class BoxTree final : public css::MediaObserver,
   bool is_selection_changed_ = false;
   // An implementation of |BoxTree|.
   std::unique_ptr<Impl> impl_;
+  ViewLifecycle* const lifecycle_;
   const Selection& selection_;
 
   DISALLOW_COPY_AND_ASSIGN(BoxTree);

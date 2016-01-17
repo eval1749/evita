@@ -45,7 +45,7 @@ TEST(BoxFinderTest, Basic) {
   const auto text_box2 = main->last_child();
   BoxEditor().SetStyle(text_box1, *style);
   BoxEditor().SetStyle(text_box2, *style);
-  BoxEditor().SetViewportSize(root, FloatSize(640, 480));
+  box_tree.Finish();
   Layouter().Layout(box_tree.root_box());
 
   BoxFinder finder(*box_tree.root_box());

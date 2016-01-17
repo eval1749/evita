@@ -75,6 +75,45 @@ std::string BoxTreeToString(const BoxTree& box_tree) {
   return BoxStringify().ToString(*box_tree.root_box());
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// MockView
+//
+class MockView final {
+ public:
+  MockView(const Document& document, const css::Media& media);
+  ~MockView();
+
+  const BoxTree& box_tree() const { return *box_tree_; }
+
+ private:
+  std::unique_ptr<ViewLifecycle> lifecycle_;
+  std::unique_ptr<Selection> selection_;
+
+  // |StyleTree| takes |ViewLifecycle| and |css::Media|.
+  std::unique_ptr<StyleTree> style_tree_;
+
+  // |BoxTree| takes |ViewLifecycle|, |Selection| and |StyleTree|.
+  std::unique_ptr<BoxTree> box_tree_;
+
+  DISALLOW_COPY_AND_ASSIGN(MockView);
+};
+
+MockView::MockView(const Document& document, const css::Media& media)
+    : lifecycle_(new ViewLifecycle(document)),
+      selection_(new Selection(document, media)),
+      style_tree_(new StyleTree(lifecycle_.get(), media, {})),
+      box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
+  style_tree_->UpdateIfNeeded();
+  box_tree_->UpdateIfNeeded();
+}
+
+MockView::~MockView() {
+  lifecycle_->StartShutdown();
+  box_tree_.reset();
+  lifecycle_->FinishShutdown();
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -100,14 +139,9 @@ TEST_F(BoxTreeTest, Basic) {
                              .AddText(L"Hello world!")
                              .End(L"body")
                              .Build();
-  ViewLifecycle lifecycle(*document);
-  Selection selection(*document, mock_media());
-  StyleTree style_tree(*document, mock_media(), {});
-  style_tree.UpdateIfNeeded();
-  BoxTree tree(&lifecycle, selection, style_tree);
-  tree.UpdateIfNeeded();
+  MockView view(*document, mock_media());
   EXPECT_EQ("RootBox:inline(FlowBox:inline('Hello world!'))",
-            BoxTreeToString(tree));
+            BoxTreeToString(view.box_tree()));
 }
 
 TEST_F(BoxTreeTest, FlowAnonymous) {
@@ -124,16 +158,11 @@ TEST_F(BoxTreeTest, FlowAnonymous) {
                              .AddText(L"baz")
                              .End(L"div")
                              .Build();
-  ViewLifecycle lifecycle(*document);
-  Selection selection(*document, mock_media());
-  StyleTree style_tree(*document, mock_media(), {});
-  style_tree.UpdateIfNeeded();
-  BoxTree tree(&lifecycle, selection, style_tree);
-  tree.UpdateIfNeeded();
+  MockView view(*document, mock_media());
   EXPECT_EQ(
       "RootBox:inline(FlowBox:block(FlowBox:block('foo') FlowBox:block('bar') "
       "FlowBox:block('baz')))",
-      BoxTreeToString(tree));
+      BoxTreeToString(view.box_tree()));
 }
 
 TEST_F(BoxTreeTest, FlowInline) {
@@ -143,14 +172,9 @@ TEST_F(BoxTreeTest, FlowInline) {
                              .AddText(L"bar")
                              .End(L"body")
                              .Build();
-  ViewLifecycle lifecycle(*document);
-  Selection selection(*document, mock_media());
-  StyleTree style_tree(*document, mock_media(), {});
-  style_tree.UpdateIfNeeded();
-  BoxTree tree(&lifecycle, selection, style_tree);
-  tree.UpdateIfNeeded();
+  MockView view(*document, mock_media());
   EXPECT_EQ("RootBox:inline(FlowBox:inline('foo ' 'bar'))",
-            BoxTreeToString(tree));
+            BoxTreeToString(view.box_tree()));
 }
 
 }  // namespace visuals

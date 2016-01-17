@@ -33,6 +33,10 @@ bool RootBox::InPaint() const {
   return lifecycle_->state() == ViewLifecycle::State::InPaint;
 }
 
+bool RootBox::InTreeRebuild() const {
+  return lifecycle_->state() == ViewLifecycle::State::InTreeRebuild;
+}
+
 bool RootBox::IsLayoutClean() const {
   return lifecycle_->IsAtLeast(ViewLifecycle::State::LayoutClean);
 }

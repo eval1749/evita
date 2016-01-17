@@ -18,7 +18,8 @@ TEST(BoxTraversalTest, FirstChildOf) {
   box_tree.Begin<FlowBox>()
       .Add<TextBox>(L"foo")
       .Add<TextBox>(L"bar")
-      .End<FlowBox>();
+      .End<FlowBox>()
+      .Finish();
   const auto root = box_tree.root_box();
   const auto block = root->first_child()->as<ContainerBox>();
 
@@ -29,7 +30,7 @@ TEST(BoxTraversalTest, FirstChildOf) {
 
 TEST(BoxTraversalTest, FirstChildOfNoChild) {
   SimpleBoxTree box_tree;
-  box_tree.Add<FlowBox>();
+  box_tree.Add<FlowBox>().Finish();
   const auto root = box_tree.root_box();
   const auto block = root->first_child();
   EXPECT_EQ(nullptr, BoxTraversal::FirstChildOf(*block));
@@ -40,7 +41,8 @@ TEST(BoxTraversalTest, LastChildOf) {
   box_tree.Begin<FlowBox>()
       .Add<TextBox>(L"foo")
       .Add<TextBox>(L"bar")
-      .End<FlowBox>();
+      .End<FlowBox>()
+      .Finish();
   const auto root = box_tree.root_box();
   const auto block = root->first_child()->as<ContainerBox>();
 
@@ -51,7 +53,7 @@ TEST(BoxTraversalTest, LastChildOf) {
 
 TEST(BoxTraversalTest, LastChildOfNoChild) {
   SimpleBoxTree box_tree;
-  box_tree.Add<FlowBox>();
+  box_tree.Add<FlowBox>().Finish();
   const auto block = box_tree.root_box()->first_child();
   EXPECT_EQ(nullptr, BoxTraversal::LastChildOf(*block));
 }
@@ -61,7 +63,8 @@ TEST(BoxTraversalTest, NextOf) {
   box_tree.Begin<FlowBox>()
       .Add<TextBox>(L"foo")
       .Add<TextBox>(L"bar")
-      .End<FlowBox>();
+      .End<FlowBox>()
+      .Finish();
   const auto root = box_tree.root_box();
   const auto block = root->first_child();
 
@@ -76,7 +79,8 @@ TEST(BoxTraversalTest, NextSiblingOf) {
   box_tree.Begin<FlowBox>()
       .Add<TextBox>(L"foo")
       .Add<TextBox>(L"bar")
-      .End<FlowBox>();
+      .End<FlowBox>()
+      .Finish();
   const auto root = box_tree.root_box();
   const auto block = root->first_child();
 

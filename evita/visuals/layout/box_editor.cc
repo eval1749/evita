@@ -22,6 +22,24 @@
 
 namespace visuals {
 
+namespace {
+
+void MustBeInLayout(const Box& box) {
+  const auto lifecycle = box.root_box()->lifecycle();
+  DCHECK_EQ(ViewLifecycle::State::InLayout, lifecycle->state()) << lifecycle;
+}
+
+void MustBeInTreeRebuild(const Box& box) {
+  const auto lifecycle = box.root_box()->lifecycle();
+  DCHECK_EQ(ViewLifecycle::State::InTreeRebuild, lifecycle->state())
+      << lifecycle;
+}
+
+void MustBeInPaint(const Box& box) {
+  const auto lifecycle = box.root_box()->lifecycle();
+  DCHECK_EQ(ViewLifecycle::State::InPaint, lifecycle->state()) << lifecycle;
+}
+
 FontStretch ConvertFontStretch(const css::FontStretch stretch) {
   if (stretch.is_condensed())
     return FontStretch::Condensed;
@@ -83,6 +101,8 @@ FontWeight ConvertFontWeight(const css::FontWeight& weight) {
   return FontWeight::Normal;
 }
 
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // BoxEditor
@@ -91,7 +111,7 @@ BoxEditor::BoxEditor() {}
 BoxEditor::~BoxEditor() {}
 
 void BoxEditor::AllocateTextLayout(TextBox* box) {
-  DCHECK(box->root_box()->InLayout()) << box->root_box()->lifecycle();
+  MustBeInLayout(*box);
   if (box->text_layout_)
     return;
   const auto& size = box->content_bounds().size();
@@ -101,6 +121,7 @@ void BoxEditor::AllocateTextLayout(TextBox* box) {
 }
 
 void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
+  MustBeInTreeRebuild(*container);
   DCHECK_NE(container, new_child);
   DCHECK(!new_child->IsDescendantOf(*container));
   DCHECK(!container->IsDescendantOf(*new_child));
@@ -120,6 +141,7 @@ void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
 }
 
 const FontDescription& BoxEditor::ComputeFontDescription(const TextBox& box) {
+  MustBeInLayout(box);
   FontDescription::Builder builder;
   builder.SetFamily(box.font_family_.string().value());
   builder.SetSize(box.font_size_.length().value());
@@ -139,6 +161,7 @@ void BoxEditor::DidMove(Box* box) {
 }
 
 void BoxEditor::DidPaint(Box* box) {
+  MustBeInPaint(*box);
   DCHECK(box->root_box()->InPaint());
   box->is_background_changed_ = false;
   box->is_border_changed_ = false;
@@ -156,7 +179,7 @@ void BoxEditor::DidPaint(Box* box) {
 }
 
 const TextFormat& BoxEditor::EnsureTextFormat(TextBox* box) {
-  DCHECK(box->root_box()->InLayout()) << box->root_box()->lifecycle();
+  MustBeInLayout(*box);
   const auto& text_format =
       TextFormatFactory::GetInstance()->Get(ComputeFontDescription(*box));
   if (box->text_format_ == &text_format)
@@ -170,7 +193,6 @@ void BoxEditor::MarkDirty(Box* box) {
   ++box->root_box_->version_;
   box->version_ = box->root_box_->version_;
   box->is_changed_ = true;
-  ScheduleVisualUpdateIfNeeded(box);
   for (const auto& runner : Box::Ancestors(*box)) {
     if (runner->is_changed_ || runner->is_child_changed_)
       return;
@@ -189,6 +211,9 @@ void BoxEditor::RemoveAllChildren(ContainerBox* container) {
 }
 
 void BoxEditor::RemoveChild(ContainerBox* container, Box* old_child) {
+  const auto root_box = container->root_box();
+  if (!root_box->lifecycle()->InShutdown())
+    MustBeInTreeRebuild(*container);
   DCHECK_EQ(container, old_child->parent_);
   const auto next_sibling = old_child->next_sibling_;
   const auto previous_sibling = old_child->previous_sibling_;
@@ -205,6 +230,8 @@ void BoxEditor::RemoveChild(ContainerBox* container, Box* old_child) {
   old_child->next_sibling_ = nullptr;
   old_child->previous_sibling_ = nullptr;
   old_child->parent_ = nullptr;
+  if (root_box->lifecycle()->InShutdown())
+    return;
   MarkDirty(container);
 }
 
@@ -220,23 +247,17 @@ void BoxEditor::ScheduleForcePaint(RootBox* root_box) {
   root_box->lifecycle()->LimitTo(ViewLifecycle::State::LayoutClean);
 }
 
-void BoxEditor::ScheduleVisualUpdateIfNeeded(Box* box) {
-  if (!box->InDocument())
-    return;
-  box->root_box()->lifecycle()->Reset();
-}
-
 void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {
+  MustBeInLayout(*box);
   if (box->baseline_ == new_baseline)
     return;
   box->baseline_ = new_baseline;
   box->is_content_changed_ = true;
   MarkDirty(box);
-  ScheduleVisualUpdateIfNeeded(box);
 }
 
 void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
-  DCHECK(box->root_box()->InLayout()) << box->root_box()->lifecycle();
+  MustBeInLayout(*box);
   if (box->bounds_ == new_bounds)
     return;
   if (box->bounds_.origin() != new_bounds.origin())
@@ -255,10 +276,10 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
 void BoxEditor::SetContentChanged(ContentBox* box) {
   box->is_content_changed_ = true;
   MarkDirty(box);
-  ScheduleVisualUpdateIfNeeded(box);
 }
 
 void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
+  MustBeInTreeRebuild(*box);
   box->display_ = display;
 }
 
@@ -297,6 +318,7 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
   }
 
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
+  MustBeInTreeRebuild(*box);
   if (const auto& text = box->as<TextBox>())
     return SetTextStyle(text, new_style);
 
@@ -356,6 +378,7 @@ void BoxEditor::SetShouldPaint(Box* box) {
 }
 
 void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
+  MustBeInTreeRebuild(*text_box);
   if (text_box->color_ == color)
     return;
   text_box->color_ = color;
@@ -364,6 +387,7 @@ void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
 
 void BoxEditor::SetTextData(TextBox* text_box,
                             const base::StringPiece16& data) {
+  MustBeInTreeRebuild(*text_box);
   if (text_box->data_ == data)
     return;
   text_box->data_ = data.as_string();
@@ -378,6 +402,7 @@ void BoxEditor::SetTextData(TextBox* text_box,
   V(font_weight)
 
 void BoxEditor::SetTextStyle(TextBox* box, const css::Style& new_style) {
+  MustBeInTreeRebuild(*box);
   auto is_changed = false;
   // |TextBox| uses only color, ant font related CSS properties.
   const auto& new_color =
@@ -403,6 +428,7 @@ void BoxEditor::SetTextStyle(TextBox* box, const css::Style& new_style) {
 }
 
 void BoxEditor::SetSelection(RootBox* root_box, const BoxSelection& selection) {
+  MustBeInTreeRebuild(*root_box);
   if (root_box->selection() == selection)
     return;
   *root_box->selection_ = selection;
@@ -410,7 +436,7 @@ void BoxEditor::SetSelection(RootBox* root_box, const BoxSelection& selection) {
 }
 
 void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
-  DCHECK(root_box->lifecycle()->AllowsTreeMutaions()) << root_box->lifecycle();
+  MustBeInTreeRebuild(*root_box);
   if (root_box->viewport_size_ == size)
     return;
   root_box->bounds_ = FloatRect(size);
@@ -418,7 +444,6 @@ void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
   // use |RootBox::bounds_.size()|.
   root_box->viewport_size_ = size;
   root_box->is_size_changed_ = true;
-  ScheduleVisualUpdateIfNeeded(root_box);
 }
 
 void BoxEditor::WillDestroy(Box* box) {

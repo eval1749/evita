@@ -18,7 +18,8 @@ TEST(ContainerBoxTest, AppendChild) {
   box_tree.Begin<FlowBox>()
       .Add<TextBox>(L"foo")
       .Add<TextBox>(L"bar")
-      .End<FlowBox>();
+      .End<FlowBox>()
+      .Finish();
   const auto root = box_tree.root_box();
   const auto main = root->first_child()->as<ContainerBox>();
   const auto text_box1 = main->first_child();
@@ -43,6 +44,8 @@ TEST(ContainerBoxTest, RemoveChild) {
 
   EXPECT_EQ(main, text_box1->parent());
   EXPECT_EQ(nullptr, text_box2->parent());
+
+  box_tree.Finish();
 }
 
 }  // namespace visuals

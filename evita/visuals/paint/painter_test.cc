@@ -25,9 +25,9 @@ TEST(PainterTest, Basic) {
   box_tree.Begin<FlowBox>()
       .SetStyle(
           *css::StyleBuilder().SetBackgroundColor(css::Color(1, 1, 1)).Build())
-      .End<FlowBox>();
+      .End<FlowBox>()
+      .Finish();
   const auto root = box_tree.root_box();
-  BoxEditor().SetViewportSize(root, FloatSize(200, 100));
   Layouter().Layout(root);
   PaintInfo paint_info(FloatRect(root->viewport_size()));
   const auto& display_item_list = Painter().Paint(paint_info, *root);

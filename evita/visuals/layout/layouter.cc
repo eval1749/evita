@@ -153,10 +153,6 @@ Layouter::Layouter() {}
 Layouter::~Layouter() {}
 
 void Layouter::Layout(RootBox* root_box) {
-  // TODO(eval1749): Once, we get rid of BoxTreeLifeCycle, we don't need to
-  // check |is_changed()| and |is_child_changed()| here.
-  if (!root_box->is_changed() && !root_box->is_child_changed())
-    return;
   if (root_box->IsLayoutClean())
     return;
   ViewLifecycle::Scope scope(root_box->lifecycle(),

@@ -179,12 +179,16 @@ DemoModel::DemoModel()
       lifecycle_(new ViewLifecycle(*document_)),
       selection_(new Selection(*document_, *this)),
       style_sheet_(LoadStyleSheet()),
-      style_tree_(new StyleTree(*document_, *this, {style_sheet_})),
+      style_tree_(new StyleTree(lifecycle_.get(), *this, {style_sheet_})),
       box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
   selection_->Collapse(document_->GetElementById(L"input")->first_child(), 0);
 }
 
-DemoModel::~DemoModel() {}
+DemoModel::~DemoModel() {
+  lifecycle_->StartShutdown();
+  box_tree_.reset();
+  lifecycle_->FinishShutdown();
+}
 
 void DemoModel::AttachWindow(DemoWindow* window) {
   window_ = window;

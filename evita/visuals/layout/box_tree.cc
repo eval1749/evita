@@ -322,7 +322,9 @@ void BoxTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
 BoxTree::BoxTree(ViewLifecycle* lifecycle,
                  const Selection& selection,
                  const StyleTree& style_tree)
-    : impl_(new Impl(lifecycle, style_tree)), selection_(selection) {
+    : impl_(new Impl(lifecycle, style_tree)),
+      lifecycle_(lifecycle),
+      selection_(selection) {
   DCHECK_EQ(lifecycle->document(), selection_.document());
   impl_->document().AddObserver(this);
   impl_->media().AddObserver(this);
@@ -379,6 +381,12 @@ void BoxTree::ScheduleForcePaint() {
 }
 
 void BoxTree::UpdateIfNeeded() {
+  if (lifecycle_->IsTreeClean()) {
+    DCHECK(!is_selection_changed_);
+    DCHECK(impl_->IsClean());
+    return;
+  }
+  ViewLifecycle::Scope scope(lifecycle_, ViewLifecycle::State::InTreeRebuild);
   impl_->UpdateIfNeeded();
   UpdateSelectionIfNeeded();
 }

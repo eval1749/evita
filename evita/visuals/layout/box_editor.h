@@ -69,7 +69,6 @@ class BoxEditor final {
 
  private:
   const FontDescription& ComputeFontDescription(const TextBox& box);
-  void ScheduleVisualUpdateIfNeeded(Box* box);
   void SetTextColor(TextBox* box, const FloatColor& color);
   void SetTextStyle(TextBox* box, const css::Style& style);
 

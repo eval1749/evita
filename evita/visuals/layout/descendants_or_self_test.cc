@@ -25,7 +25,8 @@ TEST(BoxDescendantsOrSelfTest, Basic) {
       .Add<TextBox>(L"c")
       .End<FlowBox>()
       .Add<TextBox>(L"d")
-      .End<FlowBox>();
+      .End<FlowBox>()
+      .Finish();
   const auto root = box_tree.root_box();
   const auto block = root->first_child();
   std::vector<Box*> visited;
@@ -38,7 +39,7 @@ TEST(BoxDescendantsOrSelfTest, Basic) {
 
 TEST(BoxDescendantsOrSelfTest, NoChild) {
   SimpleBoxTree box_tree;
-  box_tree.Add<FlowBox>();
+  box_tree.Add<FlowBox>().Finish();
   const auto root = box_tree.root_box();
   const auto block = root->first_child();
   std::vector<Box*> visited;

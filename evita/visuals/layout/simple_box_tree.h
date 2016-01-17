@@ -11,6 +11,7 @@
 #include "base/macros.h"
 #include "base/logging.h"
 #include "evita/gc/member.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -56,11 +57,7 @@ class SimpleBoxTree final {
     return EndInternal();
   }
 
-  template <typename T>
-  void Finish(T* box) {
-    static_assert(std::is_base_of<Box, T>::value, "Box should be base of T");
-    FinishInternal(box);
-  }
+  void Finish();
 
   // Box
   SimpleBoxTree& SetStyle(const css::Style& style);
@@ -77,6 +74,7 @@ class SimpleBoxTree final {
   std::stack<Box*> boxes_;
   const Document& document_;
   std::unique_ptr<ViewLifecycle> lifecycle_;
+  std::unique_ptr<ViewLifecycle::Scope> lifecycle_scope_;
   gc::Member<Document> own_document_;
   std::unique_ptr<RootBox> root_box_;
 

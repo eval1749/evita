@@ -9,7 +9,6 @@
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
-#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -22,6 +21,9 @@ SimpleBoxTree::SimpleBoxTree(const Document& document)
       lifecycle_(new ViewLifecycle(document_)),
       root_box_(new RootBox(lifecycle_.get())) {
   boxes_.push(root_box_.get());
+  ViewLifecycle::Scope(lifecycle_.get(), ViewLifecycle::State::InStyleRecalc);
+  lifecycle_scope_.reset(new ViewLifecycle::Scope(
+      lifecycle_.get(), ViewLifecycle::State::InTreeRebuild));
 }
 
 SimpleBoxTree::SimpleBoxTree() : SimpleBoxTree(*new Document()) {
@@ -29,9 +31,10 @@ SimpleBoxTree::SimpleBoxTree() : SimpleBoxTree(*new Document()) {
 }
 
 SimpleBoxTree::~SimpleBoxTree() {
-  BoxEditor().RemoveDescendants(root_box_.get());
-  boxes_.pop();
   DCHECK(boxes_.empty());
+  lifecycle_->StartShutdown();
+  BoxEditor().RemoveDescendants(root_box_.get());
+  lifecycle_->FinishShutdown();
 }
 
 SimpleBoxTree& SimpleBoxTree::AddInternal(std::unique_ptr<Box> child) {
@@ -52,10 +55,12 @@ SimpleBoxTree& SimpleBoxTree::EndInternal() {
   return *this;
 }
 
-void SimpleBoxTree::FinishInternal(Box* box) {
+void SimpleBoxTree::Finish() {
   DCHECK_EQ(1, boxes_.size());
-  DCHECK_EQ(boxes_.top(), box);
+  DCHECK_EQ(boxes_.top(), root_box_.get());
   boxes_.pop();
+  BoxEditor().SetViewportSize(root_box_.get(), FloatSize(800, 600));
+  lifecycle_scope_.reset();
 }
 
 SimpleBoxTree& SimpleBoxTree::SetBaseline(float baseline) {

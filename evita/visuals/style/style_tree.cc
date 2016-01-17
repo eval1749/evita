@@ -25,6 +25,7 @@
 #include "evita/visuals/style/compiled_style_sheet.h"
 #include "evita/visuals/style/style_tree_observer.h"
 #include "evita/visuals/view/public/selection.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -360,13 +361,14 @@ void StyleTree::Impl::UpdateText(Context* context, const Text& text) {
 //
 // StyleTree
 //
-StyleTree::StyleTree(const Document& document,
+StyleTree::StyleTree(ViewLifecycle* lifecycle,
                      const css::Media& media,
                      const std::vector<css::StyleSheet*>& style_sheets)
-    : impl_(new Impl(document, media, style_sheets)),
+    : impl_(new Impl(lifecycle->document(), media, style_sheets)),
+      lifecycle_(lifecycle),
       selection_style_(new css::Style()),
       style_sheets_(style_sheets) {
-  document.AddObserver(this);
+  lifecycle_->document().AddObserver(this);
   media.AddObserver(this);
   for (const auto& style_sheet : style_sheets_)
     style_sheet->AddObserver(this);
@@ -400,6 +402,7 @@ void StyleTree::AddObserver(StyleTreeObserver* observer) const {
 }
 
 void StyleTree::Clear() {
+  lifecycle_->Reset();
   impl_->Clear();
 }
 
@@ -447,11 +450,21 @@ const css::Style& StyleTree::ComputedStyleOfSelection(
   return *selection_style_;
 }
 
+void StyleTree::MarkDirty(const Node& node) {
+  lifecycle_->Reset();
+  impl_->MarkDirty(node);
+}
+
 void StyleTree::RemoveObserver(StyleTreeObserver* observer) const {
   impl_->RemoveObserver(observer);
 }
 
 void StyleTree::UpdateIfNeeded() {
+  if (lifecycle_->IsStyleClean()) {
+    DCHECK(!impl_->is_dirty());
+    return;
+  }
+  ViewLifecycle::Scope scope(lifecycle_, ViewLifecycle::State::InStyleRecalc);
   impl_->UpdateIfNeeded();
 }
 
@@ -483,11 +496,11 @@ void StyleTree::DidAddClass(const ElementNode& element,
   //  - background color change
   //  - border color change
   // Since above changes don't affect layout.
-  impl_->MarkDirty(element);
+  MarkDirty(element);
 }
 
 void StyleTree::DidAppendChild(const ContainerNode& parent, const Node& child) {
-  impl_->MarkDirty(parent);
+  MarkDirty(parent);
 }
 
 void StyleTree::DidChangeInlineStyle(const ElementNode& element,
@@ -497,34 +510,36 @@ void StyleTree::DidChangeInlineStyle(const ElementNode& element,
   //  - background color change
   //  - border color change
   // Since above changes don't affect layout.
-  impl_->MarkDirty(element);
+  lifecycle_->Reset();
+  MarkDirty(element);
 }
 
 void StyleTree::DidInsertBefore(const ContainerNode& parent,
                                 const Node& child,
                                 const Node& ref_child) {
-  impl_->MarkDirty(parent);
+  MarkDirty(parent);
 }
 
 void StyleTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
-  impl_->MarkDirty(parent);
+  MarkDirty(parent);
 }
 
 void StyleTree::DidRemoveClass(const ElementNode& element,
                                const base::string16& name) {
-  impl_->MarkDirty(element);
+  MarkDirty(element);
 }
 
 void StyleTree::DidReplaceChild(const ContainerNode& parent,
                                 const Node& child,
                                 const Node& ref_child) {
-  impl_->MarkDirty(parent);
+  MarkDirty(parent);
 }
 
 void StyleTree::DidSetTextData(const Text& text,
                                const base::string16& new_data,
                                const base::string16& old_data) {
   // TODO(eval1749): When does |Text| node change affect style tree?
+  lifecycle_->Reset();
 }
 
 }  // namespace visuals

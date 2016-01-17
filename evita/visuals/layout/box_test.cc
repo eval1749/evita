@@ -18,7 +18,7 @@ namespace visuals {
 
 TEST(BoxTest, InitialValues) {
   SimpleBoxTree box_tree;
-  box_tree.Add<TextBox>(L"foo");
+  box_tree.Add<TextBox>(L"foo").Finish();
   const auto root = box_tree.root_box();
   const auto& box = root->first_child();
   const auto& margin = box->ComputeMargin();
@@ -43,7 +43,8 @@ TEST(BoxTest, IsDescendantOf) {
   box_tree.Begin<FlowBox>()
       .Add<TextBox>(L"foo")
       .Add<TextBox>(L"bar")
-      .End<FlowBox>();
+      .End<FlowBox>()
+      .Finish();
   const auto root = box_tree.root_box();
   const auto main = root->first_child()->as<ContainerBox>();
   const auto text_box1 = main->first_child();

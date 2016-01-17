@@ -36,21 +36,47 @@ ViewLifecycle::ViewLifecycle(const Document& document)
 }
 
 ViewLifecycle::~ViewLifecycle() {
+  DCHECK_EQ(State::Shutdown, state_);
   document_.RemoveObserver(this);
 }
 
 void ViewLifecycle::Advance() {
   DCHECK_NE(State::PaintClean, state_);
+  DCHECK_NE(State::InShutdown, state_);
+  DCHECK_NE(State::Shutdown, state_);
   state_ = static_cast<State>(static_cast<int>(state_) + 1);
 }
 
 bool ViewLifecycle::AllowsTreeMutaions() const {
-  return state_ == State::VisualUpdatePending || state_ == State::LayoutClean ||
-         state_ == State::PaintClean;
+  static bool allows[static_cast<size_t>(State::PaintClean) + 1];
+  if (!allows[static_cast<size_t>(State::VisualUpdatePending)]) {
+    allows[static_cast<size_t>(State::VisualUpdatePending)] = true;
+    allows[static_cast<size_t>(State::LayoutClean)] = true;
+    allows[static_cast<size_t>(State::PaintClean)] = true;
+    allows[static_cast<size_t>(State::StyleClean)] = true;
+  }
+  return allows[static_cast<size_t>(state_)];
+}
+
+void ViewLifecycle::FinishShutdown() {
+  DCHECK_EQ(State::InShutdown, state_);
+  state_ = State::Shutdown;
 }
 
 bool ViewLifecycle::IsAtLeast(State state) const {
   return static_cast<int>(state_) >= static_cast<int>(state);
+}
+
+bool ViewLifecycle::IsStyleClean() const {
+  return IsAtLeast(State::StyleClean);
+}
+
+bool ViewLifecycle::IsTreeClean() const {
+  return IsAtLeast(State::TreeClean);
+}
+
+bool ViewLifecycle::IsLayoutClean() const {
+  return IsAtLeast(State::LayoutClean);
 }
 
 void ViewLifecycle::LimitTo(State limit_state) {
@@ -60,6 +86,12 @@ void ViewLifecycle::LimitTo(State limit_state) {
 }
 void ViewLifecycle::Reset() {
   state_ = State::VisualUpdatePending;
+}
+
+void ViewLifecycle::StartShutdown() {
+  DCHECK_NE(State::InShutdown, state_);
+  DCHECK_NE(State::Shutdown, state_);
+  state_ = State::InShutdown;
 }
 
 // DocumentObserver

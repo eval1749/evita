@@ -27,6 +27,7 @@ class ElementNode;
 class Node;
 class Selection;
 class StyleTreeObserver;
+class ViewLifecycle;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -37,7 +38,7 @@ class StyleTree final : public css::MediaObserver,
                         public css::StyleSheetObserver,
                         public DocumentObserver {
  public:
-  explicit StyleTree(const Document& document,
+  explicit StyleTree(ViewLifecycle* lifecycle,
                      const css::Media& media,
                      const std::vector<css::StyleSheet*>& style_sheets);
   ~StyleTree() final;
@@ -65,6 +66,7 @@ class StyleTree final : public css::MediaObserver,
   class Impl;
 
   void Clear();
+  void MarkDirty(const Node& node);
 
   // css::MediaObserver
   void DidChangeViewportSize() final;
@@ -92,6 +94,7 @@ class StyleTree final : public css::MediaObserver,
                       const base::string16& old_data) final;
 
   std::unique_ptr<Impl> impl_;
+  ViewLifecycle* const lifecycle_;
   const std::vector<css::StyleSheet*> style_sheets_;
   const std::unique_ptr<css::Style> selection_style_;
 

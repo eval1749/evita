@@ -11,6 +11,7 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/view/public/selection_model.h"
 #include "evita/visuals/view/public/selection_observer.h"
+#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace visuals {
 
@@ -18,16 +19,16 @@ namespace visuals {
 //
 // Selection
 //
-Selection::Selection(const Document& document, const css::Media& media)
+Selection::Selection(const ViewLifecycle& lifecycle, const css::Media& media)
     : caret_timer_(new base::RepeatingTimer()),
-      document_(document),
+      lifecycle_(lifecycle),
       media_(media),
       model_(new SelectionModel()) {
-  document_.AddObserver(this);
+  lifecycle_.document().AddObserver(this);
 }
 
 Selection::~Selection() {
-  document_.RemoveObserver(this);
+  lifecycle_.document().RemoveObserver(this);
 }
 
 const Node& Selection::anchor_node() const {
@@ -36,6 +37,10 @@ const Node& Selection::anchor_node() const {
 
 int Selection::anchor_offset() const {
   return model_->anchor_offset();
+}
+
+const Document& Selection::document() const {
+  return lifecycle_.document();
 }
 
 const Node& Selection::focus_node() const {
@@ -63,6 +68,7 @@ void Selection::AddObserver(SelectionObserver* observer) const {
 }
 
 void Selection::Clear() {
+  DCHECK(lifecycle_.AllowsSelectionChanges()) << lifecycle_;
   if (model_->is_none())
     return;
   const auto old_model = *model_;
@@ -73,6 +79,7 @@ void Selection::Clear() {
 }
 
 void Selection::Collapse(Node* node, int offset) {
+  DCHECK(lifecycle_.AllowsSelectionChanges()) << lifecycle_;
   SelectionModel new_model;
   new_model.Collapse(node, offset);
   if (*model_ == new_model)
@@ -101,6 +108,7 @@ void Selection::DidPaint() {
 }
 
 void Selection::ExtendTo(Node* node, int offset) {
+  DCHECK(lifecycle_.AllowsSelectionChanges()) << lifecycle_;
   DCHECK(!is_none());
   SelectionModel new_model(*model_);
   new_model.ExtendTo(node, offset);

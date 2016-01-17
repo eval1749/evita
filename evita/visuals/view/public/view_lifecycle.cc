@@ -62,6 +62,10 @@ void ViewLifecycle::Advance() {
   state_ = static_cast<State>(static_cast<int>(state_) + 1);
 }
 
+bool ViewLifecycle::AllowsSelectionChanges() const {
+  return AllowsTreeMutaions();
+}
+
 bool ViewLifecycle::AllowsTreeMutaions() const {
   const auto value = static_cast<int>(state_);
   return (value & 1) == 0 && value <= static_cast<int>(State::PaintClean);

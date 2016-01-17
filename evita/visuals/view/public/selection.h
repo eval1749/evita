@@ -21,6 +21,7 @@ class Node;
 class SelectionEdtior;
 class SelectionModel;
 class SelectionObserver;
+class ViewLifecycle;
 
 namespace css {
 class Media;
@@ -32,12 +33,12 @@ class Media;
 //
 class Selection final : public css::MediaObserver, public DocumentObserver {
  public:
-  Selection(const Document& document, const css::Media& media);
+  Selection(const ViewLifecycle& lifecycle, const css::Media& media);
   ~Selection() final;
 
   const Node& anchor_node() const;
   int anchor_offset() const;
-  const Document& document() const { return document_; }
+  const Document& document() const;
   const Node& focus_node() const;
   int focus_offset() const;
   const css::Media& media() const { return media_; }
@@ -64,8 +65,8 @@ class Selection final : public css::MediaObserver, public DocumentObserver {
   void WillRemoveChild(const ContainerNode& parent, const Node& child) final;
 
   const std::unique_ptr<base::RepeatingTimer> caret_timer_;
-  const Document& document_;
   bool is_caret_on_ = false;
+  const ViewLifecycle& lifecycle_;
   const css::Media& media_;
   mutable base::ObserverList<SelectionObserver> observers_;
   const std::unique_ptr<SelectionModel> model_;

@@ -57,6 +57,7 @@ class ViewLifecycle final : public DocumentObserver {
   const Document& document() const { return document_; }
   State state() const { return state_; }
 
+  bool AllowsSelectionChanges() const;
   bool AllowsTreeMutaions() const;
   void FinishShutdown();
   bool InShutdown() const { return state_ == State::InShutdown; }

@@ -427,11 +427,29 @@ void BoxEditor::SetTextStyle(TextBox* box, const css::Style& new_style) {
   MarkDirty(box);
 }
 
-void BoxEditor::SetSelection(RootBox* root_box, const BoxSelection& selection) {
+void BoxEditor::SetSelection(RootBox* root_box,
+                             const BoxSelection& new_selection) {
   MustBeInTreeRebuild(*root_box);
-  if (root_box->selection() == selection)
+  const auto& old_selection = root_box->selection();
+  if (old_selection == new_selection)
     return;
-  *root_box->selection_ = selection;
+  if (old_selection.is_caret()) {
+    SetContentChanged(old_selection.focus_box()->as<TextBox>());
+  }
+  if (old_selection.is_range()) {
+    // TODO(eval1749): We should call |SetContentChanged()| between anchor and
+    // focus.
+    SetContentChanged(old_selection.focus_box()->as<TextBox>());
+  }
+  if (new_selection.is_caret()) {
+    SetContentChanged(new_selection.focus_box()->as<TextBox>());
+  }
+  if (new_selection.is_range()) {
+    // TODO(eval1749): We should call |SetContentChanged()| between anchor and
+    // focus.
+    SetContentChanged(new_selection.focus_box()->as<TextBox>());
+  }
+  *root_box->selection_ = new_selection;
   root_box->is_selection_changed_ = true;
 }
 

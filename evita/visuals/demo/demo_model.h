@@ -14,6 +14,7 @@
 #include "evita/visuals/css/media_state.h"
 #include "evita/visuals/demo/demo_window.h"
 #include "evita/visuals/geometry/float_size.h"
+#include "evita/visuals/view/view_observer.h"
 
 namespace visuals {
 
@@ -32,6 +33,7 @@ class StyleSheet;
 //
 class DemoModel final : public css::Media,
                         public ui::AnimationFrameHandler,
+                        public ViewObserver,
                         public WindowEventHandler {
  public:
   DemoModel();
@@ -50,6 +52,9 @@ class DemoModel final : public css::Media,
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(const base::TimeTicks& time) final;
   const char* GetAnimationFrameType() const final;
+
+  // ViewObserver
+  void DidChangeView() final;
 
   // WindowEventHandler
   void DidChangeWindowBounds(const FloatRect& bounds) final;

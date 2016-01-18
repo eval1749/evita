@@ -170,15 +170,18 @@ DemoModel::DemoModel()
     : document_(LoadDocument()),
       style_sheet_(LoadStyleSheet()),
       view_(new View(*document_, *this, {style_sheet_})) {
-  view_->selection()->Collapse(
-      document_->GetElementById(L"input")->first_child(), 0);
+  view_->AddObserver(this);
 }
 
-DemoModel::~DemoModel() {}
+DemoModel::~DemoModel() {
+  view_->RemoveObserver(this);
+}
 
 void DemoModel::AttachWindow(DemoWindow* window) {
   window_ = window;
-  RequestAnimationFrame();
+  view_->Start();
+  view_->selection()->Collapse(
+      document_->GetElementById(L"input")->first_child(), 0);
 }
 
 ElementNode* DemoModel::FindListItem(const FloatPoint& point) {
@@ -236,9 +239,13 @@ void DemoModel::DidBeginAnimationFrame(const base::TimeTicks& now) {
   processor.Paint(canvas, std::move(display_item_list));
 }
 
+// ViewObserver
+void DemoModel::DidChangeView() {
+  RequestAnimationFrame();
+}
+
 // WindowEventHandler
 void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
-  RequestAnimationFrame();
   viewport_size_ = bounds.size();
   css::Media::DidChangeViewportSize();
 }
@@ -258,7 +265,6 @@ void DemoModel::DidMoveMouse(const FloatPoint& point) {
                   .SetTop(css::Top(css::Length(hover_point.y())))
                   .SetLeft(css::Left(css::Length(hover_point.x())))
                   .Build());
-  RequestAnimationFrame();
 }
 
 void DemoModel::DidPressMouse(const FloatPoint& point) {
@@ -273,7 +279,6 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
                   .SetLeft(css::Left(css::Length(hover_point.x())))
                   .Build());
   PrintBox(view_->box_tree());
-  RequestAnimationFrame();
 }
 
 void DemoModel::DidSetFocus() {

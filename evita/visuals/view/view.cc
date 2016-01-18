@@ -20,6 +20,17 @@
 
 namespace visuals {
 
+namespace {
+
+bool ShouldNotifyViewChange(ViewLifecycle::State new_state,
+                            ViewLifecycle::State old_state) {
+  if (old_state == ViewLifecycle::State::PaintClean)
+    return static_cast<int>(new_state) < static_cast<int>(old_state);
+  return new_state == ViewLifecycle::State::VisualUpdatePending;
+}
+
+}  // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 // View
@@ -105,7 +116,7 @@ void View::UpdateStyleIfNeeded() {
 // ViewLifecycleObserver
 void View::DidChangeLifecycleState(ViewLifecycle::State new_state,
                                    ViewLifecycle::State old_state) {
-  if (new_state != ViewLifecycle::State::VisualUpdatePending)
+  if (!ShouldNotifyViewChange(new_state, old_state))
     return;
   FOR_EACH_OBSERVER(ViewObserver, observers_, DidChangeView());
 }

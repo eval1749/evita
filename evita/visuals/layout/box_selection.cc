@@ -25,22 +25,19 @@ BoxSelection::~BoxSelection() {}
 bool BoxSelection::operator==(const BoxSelection& other) const {
   if (this == &other)
     return true;
-  if (!anchor_box_)
-    return !other.anchor_box_;
-  if (is_caret()) {
-    if (!other.is_caret())
-      return false;
-    return anchor_box_ == other.anchor_box_ &&
-           anchor_offset_ == other.anchor_offset_ &&
-           caret_color_ == other.caret_color_ &&
-           caret_shape_ == other.caret_shape_;
-  }
-  if (!other.is_range())
+  if (is_none())
+    return other.is_none();
+  if (is_caret() != other.is_caret())
     return false;
+  if (focus_box_ != other.focus_box_ || focus_offset_ != other.focus_offset_ ||
+      caret_color_ != other.caret_color_ ||
+      caret_shape_ != other.caret_shape_) {
+    return false;
+  }
+  if (is_caret())
+    return true;
   return anchor_box_ == other.anchor_box_ &&
          anchor_offset_ == other.anchor_offset_ &&
-         focus_box_ == other.focus_box_ &&
-         focus_offset_ == other.focus_offset_ &&
          selection_color_ == other.selection_color_;
 }
 

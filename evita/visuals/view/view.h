@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/visuals/layout/box_finder.h"
+#include "evita/visuals/view/public/hit_test_result.h"
 
 namespace visuals {
 
@@ -45,7 +45,7 @@ class View final {
   Selection* selection() { return selection_.get(); }
   const StyleTree& style_tree() const { return *style_tree_; }
 
-  BoxFinder::Result HitTest(const FloatPoint& point);
+  HitTestResult HitTest(const FloatPoint& point);
   std::unique_ptr<DisplayItemList> Paint();
   void ScheduleForcePaint();
 

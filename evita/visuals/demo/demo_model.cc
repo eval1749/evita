@@ -184,10 +184,10 @@ void DemoModel::AttachWindow(DemoWindow* window) {
 
 ElementNode* DemoModel::FindListItem(const FloatPoint& point) {
   const auto& found = view_->HitTest(point);
-  if (!found.box)
+  if (!found)
     return nullptr;
   const auto list = document_->GetElementById(L"list");
-  const auto source = found.box->node();
+  const auto source = found.node();
   if (!source->IsDescendantOf(*list))
     return nullptr;
   for (const auto& runner : Node::AncestorsOrSelf(*source)) {

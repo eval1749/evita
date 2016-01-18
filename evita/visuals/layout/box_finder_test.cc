@@ -50,11 +50,11 @@ TEST(BoxFinderTest, Basic) {
 
   BoxFinder finder(*box_tree.root_box());
 
-  EXPECT_EQ(BoxFinder::Result(), finder.FindByPoint(FloatPoint(-1, -1)));
-  EXPECT_EQ(BoxFinder::Result(), finder.FindByPoint(FloatPoint(9999, 9999)));
-  EXPECT_EQ(BoxFinder::Result(text_box1, FloatPoint(1, 2)),
+  EXPECT_EQ(HitTestResult(), finder.FindByPoint(FloatPoint(-1, -1)));
+  EXPECT_EQ(HitTestResult(), finder.FindByPoint(FloatPoint(9999, 9999)));
+  EXPECT_EQ(HitTestResult(text_box1, FloatPoint(1, 2)),
             finder.FindByPoint(text_box1->bounds().origin() + FloatSize(1, 2)));
-  EXPECT_EQ(BoxFinder::Result(text_box2, FloatPoint(3, 4)),
+  EXPECT_EQ(HitTestResult(text_box2, FloatPoint(3, 4)),
             finder.FindByPoint(text_box2->bounds().origin() + FloatSize(3, 4)));
 }
 

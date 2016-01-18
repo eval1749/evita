@@ -18,7 +18,6 @@
 #include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/layout/box.h"
 #include "evita/visuals/view/public/selection.h"
 
 namespace dom {
@@ -70,9 +69,9 @@ void VisualWindow::RequestAnimationFrame() {
 int VisualWindow::HitTest(int x, int y) {
   visuals::FloatPoint point(x, y);
   const auto& found = view_->HitTest(point);
-  if (!found.box)
+  if (!found)
     return -1;
-  return found.box->node()->sequence_id();
+  return found.node()->sequence_id();
 }
 
 VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle,

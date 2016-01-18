@@ -7,6 +7,7 @@
 #include "base/strings/stringprintf.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
+#include "evita/visuals/layout/box_finder.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
@@ -44,7 +45,7 @@ const css::Media& View::media() const {
   return lifecycle_->media();
 }
 
-BoxFinder::Result View::HitTest(const FloatPoint& point) {
+HitTestResult View::HitTest(const FloatPoint& point) {
   UpdateLayoutIfNeeded();
   const auto root_box = box_tree_->root_box();
   return BoxFinder(*root_box).FindByPoint(point);

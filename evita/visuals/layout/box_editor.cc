@@ -411,14 +411,6 @@ void BoxEditor::SetShouldPaint(Box* box) {
   }
 }
 
-void BoxEditor::SetTextColor(TextBox* text_box, const FloatColor& color) {
-  MustBeInTreeRebuild(*text_box);
-  if (text_box->color_ == color)
-    return;
-  text_box->color_ = color;
-  SetContentChanged(text_box);
-}
-
 void BoxEditor::SetTextData(TextBox* text_box,
                             const base::StringPiece16& data) {
   MustBeInTreeRebuild(*text_box);

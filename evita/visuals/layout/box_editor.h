@@ -70,7 +70,6 @@ class BoxEditor final {
  private:
   const FontDescription& ComputeFontDescription(const TextBox& box);
   void SetShapeStyle(ShapeBox* box, const css::Style& style);
-  void SetTextColor(TextBox* box, const FloatColor& color);
   void SetTextStyle(TextBox* box, const css::Style& style);
 
   DISALLOW_COPY_AND_ASSIGN(BoxEditor);

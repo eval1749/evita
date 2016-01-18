@@ -138,6 +138,10 @@ void LayoutVisitor::VisitRootBox(RootBox* root) {
   LayoutVisitor().Layout(root->first_child(), root->content_bounds());
 }
 
+void LayoutVisitor::VisitShapeBox(ShapeBox* box) {
+  // Nothing to do.
+}
+
 void LayoutVisitor::VisitTextBox(TextBox* box) {
   BoxEditor().AllocateTextLayout(box);
 }

@@ -6,10 +6,12 @@
 
 #include "base/strings/stringprintf.h"
 #include "evita/visuals/css/style.h"
+#include "evita/visuals/dom/shape_data.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
+#include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
 
 namespace visuals {
@@ -63,6 +65,18 @@ void BoxTreePrinter::VisitFlowBox(FlowBox* box) {
 
 void BoxTreePrinter::VisitRootBox(RootBox* box) {
   PrintAsContainer(*box);
+}
+
+void BoxTreePrinter::VisitShapeBox(ShapeBox* box) {
+  Indent();
+  *ostream_ << *box << " {";
+  auto delimiter = "";
+  for (const auto& code : box->data().value()) {
+    *ostream_ << delimiter << base::StringPrintf("%02X", code);
+    delimiter = " ";
+  }
+  const auto& style = box->ComputeActualStyle();
+  *ostream_ << '}' << ' ' << *style << std::endl;
 }
 
 void BoxTreePrinter::VisitTextBox(TextBox* box) {

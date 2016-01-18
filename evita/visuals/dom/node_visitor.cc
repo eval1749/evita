@@ -6,6 +6,7 @@
 
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/text.h"
 
 namespace visuals {

@@ -10,6 +10,7 @@
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/margin.h"
 #include "evita/visuals/layout/padding.h"
+#include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
@@ -97,8 +98,13 @@ void ActualStyleVisitor::VisitFlowBox(FlowBox* flow_box) {}
 
 void ActualStyleVisitor::VisitRootBox(RootBox* root) {}
 
+void ActualStyleVisitor::VisitShapeBox(ShapeBox* shape) {
+  builder_.SetColor(css::Color(shape->color()));
+}
+
 void ActualStyleVisitor::VisitTextBox(TextBox* text) {
   builder_.SetColor(css::Color(text->color()));
+  // TODO(eval1749): We should add font properties
 }
 
 }  // namespace

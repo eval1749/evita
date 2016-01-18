@@ -7,19 +7,16 @@
 
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
+#include "evita/visuals/layout/box_forward.h"
 
 namespace visuals {
 
-class Box;
 class BoxSelection;
-class ContainerBox;
-class ContentBox;
 class FloatColor;
 class FloatRect;
 class FloatSize;
 class FontDescription;
-class RootBox;
-class TextBox;
+class ShapeData;
 class TextFormat;
 
 namespace css {
@@ -56,6 +53,9 @@ class BoxEditor final {
   void SetShouldPaint(Box* box);
   void WillDestroy(Box* box);
 
+  // ShapeBox
+  void SetShapeData(ShapeBox* box, const ShapeData& data);
+
   // TextBox
   void AllocateTextLayout(TextBox* box);
   const TextFormat& EnsureTextFormat(TextBox* box);
@@ -69,6 +69,7 @@ class BoxEditor final {
 
  private:
   const FontDescription& ComputeFontDescription(const TextBox& box);
+  void SetShapeStyle(ShapeBox* box, const css::Style& style);
   void SetTextColor(TextBox* box, const FloatColor& color);
   void SetTextStyle(TextBox* box, const css::Style& style);
 

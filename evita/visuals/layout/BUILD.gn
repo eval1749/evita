@@ -47,6 +47,8 @@ source_set("layout") {
     "layouter.h",
     "root_box.cc",
     "root_box.h",
+    "shape_box.cc",
+    "shape_box.h",
     "size_calculator.cc",
     "size_calculator.h",
     "text_box.cc",

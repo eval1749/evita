@@ -17,6 +17,7 @@
 #include "evita/visuals/layout/box_selection.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
+#include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
@@ -319,6 +320,9 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
 
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   MustBeInTreeRebuild(*box);
+  if (const auto& shape = box->as<ShapeBox>())
+    return SetShapeStyle(shape, new_style);
+
   if (const auto& text = box->as<TextBox>())
     return SetTextStyle(text, new_style);
 
@@ -366,6 +370,36 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
 
   if (!is_changed)
     return;
+  MarkDirty(box);
+}
+
+void BoxEditor::SetShapeData(ShapeBox* shape_box, const ShapeData& data) {
+  MustBeInTreeRebuild(*shape_box);
+  if (shape_box->data_ == data)
+    return;
+  shape_box->data_ = data;
+  SetContentChanged(shape_box);
+}
+
+void BoxEditor::SetShapeStyle(ShapeBox* box, const css::Style& new_style) {
+  MustBeInTreeRebuild(*box);
+  auto is_changed = false;
+  // |ShapeBox| uses only color, ant font related CSS properties.
+  const auto& new_color =
+      new_style.has_color() ? new_style.color().value() : FloatColor();
+  if (box->color_ != new_color) {
+    box->color_ = new_color;
+    is_changed = true;
+  }
+
+  if (new_style.has_font_size() && new_style.font_size() != box->font_size_) {
+    box->font_size_ = new_style.font_size();
+    is_changed = true;
+  }
+
+  if (!is_changed)
+    return;
+  box->is_content_changed_ = true;
   MarkDirty(box);
 }
 

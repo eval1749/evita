@@ -16,6 +16,7 @@
 #include "evita/visuals/layout/margin.h"
 #include "evita/visuals/layout/padding.h"
 #include "evita/visuals/layout/root_box.h"
+#include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
 
 namespace visuals {
@@ -84,6 +85,10 @@ void ExtrinsicSizeVisitor::VisitFlowBox(FlowBox* box) {
 }
 
 void ExtrinsicSizeVisitor::VisitRootBox(RootBox* box) {
+  ComputeWithSimpleMethod(*box);
+}
+
+void ExtrinsicSizeVisitor::VisitShapeBox(ShapeBox* box) {
   ComputeWithSimpleMethod(*box);
 }
 
@@ -179,6 +184,11 @@ void IntrinsicSizeVisitor::VisitRootBox(RootBox* box) {
   NOTREACHED() << "NYI IntrinsicSizeVisitor for RootBox";
 }
 
+void IntrinsicSizeVisitor::VisitShapeBox(ShapeBox* box) {
+  ReturnSize(
+      FloatSize(box->size().length().value(), box->size().length().value()));
+}
+
 void IntrinsicSizeVisitor::VisitTextBox(TextBox* box) {
   if (box->data().empty())
     return ReturnSize(FloatSize());
@@ -226,6 +236,10 @@ void PreferredSizeVisitor::VisitFlowBox(FlowBox* box) {
 
 void PreferredSizeVisitor::VisitRootBox(RootBox* box) {
   ReturnSize(box->viewport_size());
+}
+
+void PreferredSizeVisitor::VisitShapeBox(ShapeBox* box) {
+  ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
 }
 
 void PreferredSizeVisitor::VisitTextBox(TextBox* box) {

@@ -51,6 +51,8 @@ Document* LoadDocument() {
           .Begin(L"input", L"input")
           .AddText(L"this is a text field.")
           .End(L"input")
+          .AddShape({0})
+          .AddText(L"Check box 1")
           .Begin(L"list", L"list")
           .End(L"list")
           .End(L"main")

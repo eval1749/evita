@@ -35,6 +35,10 @@ source_set("dom") {
     "node_visitor.cc",
     "node_visitor.h",
     "nodes_forward.h",
+    "shape.cc",
+    "shape.h",
+    "shape_data.cc",
+    "shape_data.h",
     "text.cc",
     "text.h",
   ]

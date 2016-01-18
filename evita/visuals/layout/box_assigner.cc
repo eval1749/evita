@@ -7,11 +7,13 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_map.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
+#include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
 
 namespace visuals {
@@ -96,6 +98,18 @@ void BoxAssigner::VisitElement(Element* element) {
   auto new_flow_box = std::make_unique<FlowBox>(root_box(), element);
   BoxEditor().SetStyle(new_flow_box.get(), *style_);
   RegisterBoxFor(*element, std::move(new_flow_box));
+}
+
+void BoxAssigner::VisitShape(Shape* shape) {
+  if (const auto shape_box = BoxFor(*shape)) {
+    BoxEditor().SetShapeData(shape_box->as<ShapeBox>(), shape->data());
+    BoxEditor().SetStyle(shape_box, *style_);
+    return;
+  }
+  auto new_shape_box =
+      std::make_unique<ShapeBox>(root_box(), shape->data(), shape);
+  BoxEditor().SetStyle(new_shape_box.get(), *style_);
+  RegisterBoxFor(*shape, std::move(new_shape_box));
 }
 
 void BoxAssigner::VisitText(Text* text) {

@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_DOM_NODE_TREE_BUILDER_H_
 #define EVITA_VISUALS_DOM_NODE_TREE_BUILDER_H_
 
+#include <stdint.h>
+
 #include <stack>
 #include <vector>
 
@@ -33,6 +35,7 @@ class NodeTreeBuilder final {
   ~NodeTreeBuilder();
 
   NodeTreeBuilder& AddText(const base::StringPiece16& text);
+  NodeTreeBuilder& AddShape(const std::vector<uint8_t>& data);
   NodeTreeBuilder& Begin(const base::StringPiece16& tag_name);
   NodeTreeBuilder& Begin(const base::StringPiece16& tag_name,
                          const base::StringPiece16& id);

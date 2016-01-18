@@ -21,6 +21,7 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/style/compiled_style_sheet.h"
 #include "evita/visuals/style/style_tree_observer.h"
@@ -114,11 +115,13 @@ class StyleTree::Impl final {
       const ElementNode& element) const;
   Item* GetOrNewItem(const Node& element);
   void IncrementVersionIfNeeded(Context* context);
+  void UpdateAsAnonymousInlineBox(Context* context, const Node& node);
   void UpdateChildren(Context* context, const ContainerNode& element);
   void UpdateDocumentStyleIfNeeded(Context* context);
   void UpdateElement(Context* context, const ElementNode& element);
   void UpdateElementIfNeeded(Context* context, const ElementNode& element);
   void UpdateNodeIfNeeded(Context* context, const Node& node);
+  void UpdateShape(Context* context, const Shape& shape);
   void UpdateText(Context* context, const Text& text);
 
   std::vector<std::unique_ptr<CompiledStyleSheet>> compiled_style_sheets_;
@@ -240,11 +243,27 @@ void StyleTree::Impl::RemoveObserver(StyleTreeObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
+void StyleTree::Impl::UpdateAsAnonymousInlineBox(Context* context,
+                                                 const Node& node) {
+  const auto item = GetOrNewItem(node);
+  item->is_dirty = false;
+  item->is_child_dirty = false;
+  auto style = std::make_unique<css::Style>();
+  InheritStyle(style.get(), ComputedStyleOf(*node.parent()));
+  css::StyleEditor().Merge(style.get(), initial_style());
+  item->style = std::move(style);
+}
+
 void StyleTree::Impl::UpdateChildren(Context* context,
                                      const ContainerNode& container) {
   for (const auto& child : container.child_nodes()) {
+    // TODO(eval1749): We should use |NodeVisitor| to update style for node.
     if (const auto element = child->as<Element>()) {
       UpdateElement(context, *element);
+      continue;
+    }
+    if (const auto shape = child->as<Shape>()) {
+      UpdateShape(context, *shape);
       continue;
     }
     if (const auto text = child->as<Text>()) {
@@ -345,16 +364,16 @@ void StyleTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
   DCHECK(!node.is<ContainerNode>()) << "Unsupported node type " << node;
 }
 
+// |Shape| node is treated as anonymous inline box which inherits style from
+// its parent.
+void StyleTree::Impl::UpdateShape(Context* context, const Shape& shape) {
+  UpdateAsAnonymousInlineBox(context, shape);
+}
+
 // |Text| node is treated as anonymous inline box which inherits style from
 // its parent.
 void StyleTree::Impl::UpdateText(Context* context, const Text& text) {
-  const auto item = GetOrNewItem(text);
-  item->is_dirty = false;
-  item->is_child_dirty = false;
-  auto style = std::make_unique<css::Style>();
-  InheritStyle(style.get(), ComputedStyleOf(*text.parent()));
-  css::StyleEditor().Merge(style.get(), initial_style());
-  item->style = std::move(style);
+  UpdateAsAnonymousInlineBox(context, text);
 }
 
 //////////////////////////////////////////////////////////////////////

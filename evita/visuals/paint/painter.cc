@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include  <algorithm>
+#include <algorithm>
 #include <stack>
 
 #include "evita/visuals/paint/painter.h"
@@ -22,6 +22,7 @@
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
+#include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/paint/paint_info.h"
 #include "evita/visuals/view/public/selection.h"
@@ -289,6 +290,15 @@ void PaintVisitor::VisitRootBox(RootBox* root) {
   BoxPaintScope paint_scope(this, *root);
   Visit(root->first_child());
   BoxEditor().DidPaint(root);
+}
+
+void PaintVisitor::VisitShapeBox(ShapeBox* shape) {
+  const auto& bounds = FloatRect(shape->content_bounds().size());
+  if (shape->IsContentChanged() || shape->IsOriginChanged())
+    AddDirtyBounds(bounds);
+  BoxPaintScope paint_scope(this, *shape);
+  builder_.AddNew<DrawRectDisplayItem>(bounds, shape->color(), 1);
+  BoxEditor().DidPaint(shape);
 }
 
 void PaintVisitor::VisitTextBox(TextBox* text) {

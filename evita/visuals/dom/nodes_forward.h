@@ -10,6 +10,7 @@ namespace visuals {
 #define FOR_EACH_VISUAL_NODE(V) \
   V(Document)                   \
   V(Element)                    \
+  V(Shape)                      \
   V(Text)
 
 #define FOR_EACH_ABSTRACT_VISUAL_NODE(V) \

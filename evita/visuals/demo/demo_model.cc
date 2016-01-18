@@ -239,6 +239,10 @@ void DemoModel::DidBeginAnimationFrame(const base::TimeTicks& now) {
   processor.Paint(canvas, std::move(display_item_list));
 }
 
+const char* DemoModel::GetAnimationFrameType() const {
+  return "DemoModel";
+}
+
 // ViewObserver
 void DemoModel::DidChangeView() {
   RequestAnimationFrame();
@@ -283,11 +287,6 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
 
 void DemoModel::DidSetFocus() {
   DidChangeMediaState();
-}
-
-// ui::AnimationHandler
-const char* DemoModel::GetAnimationFrameType() const {
-  return "DemoModel";
 }
 
 }  // namespace visuals

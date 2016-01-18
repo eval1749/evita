@@ -49,28 +49,50 @@ enum class EventType {
 #undef V
 };
 
-enum class KeyCode {
-  ArrowDown = VK_DOWN | 0x100,
-  ArrowLeft = VK_LEFT | 0x100,
-  ArrowRight = VK_RIGHT | 0x100,
-  ArrowUp = VK_UP | 0x100,
-  Backspace = VK_BACK | 0x100,
-  Delete = VK_DELETE | 0x100,
-  End = VK_END | 0x100,
-  Enter = VK_RETURN | 0x100,
-  Home = VK_HOME | 0x100,
-  Insert = VK_INSERT | 0x100,
-  PageDown = VK_NEXT | 0x100,
-  PageUp = VK_PRIOR | 0x100,
-  Pause = VK_PAUSE | 0x100,
-  Tab = VK_TAB | 0x100,
-};
-
 enum class Modifier {
   None = 0,
   Control = 0x200,
   Shift = 0x400,
   Alt = 0x800,
+};
+
+#define FOR_EACH_UI_KEY_CODE(V) \
+  V(ArrowDown, VK_DOWN)         \
+  V(ArrowLeft, VK_LEFT)         \
+  V(ArrowRight, VK_RIGHT)       \
+  V(ArrowUp, VK_UP)             \
+  V(Backspace, VK_BACK)         \
+  V(Delete, VK_DELETE)          \
+  V(End, VK_END)                \
+  V(Enter, VK_RETURN)           \
+  V(Home, VK_HOME)              \
+  V(Insert, VK_INSERT)          \
+  V(PageDown, VK_NEXT)          \
+  V(PageUp, VK_PRIOR)           \
+  V(Pause, VK_PAUSE)            \
+  V(Tab, VK_TAB)
+
+enum class KeyCode {
+#define V(Name, vkey)                                                        \
+  Name = vkey | 0x100,                                                       \
+  Alt##Name = static_cast<int>(Name) | static_cast<int>(Modifier::Alt),      \
+  Ctrl##Name = static_cast<int>(Name) | static_cast<int>(Modifier::Control), \
+  Shift##Name = static_cast<int>(Name) | static_cast<int>(Modifier::Shift),  \
+  CtrlShift##Name = static_cast<int>(Name) |                                 \
+                    static_cast<int>(Modifier::Control) |                    \
+                    static_cast<int>(Modifier::Shift),                       \
+  CtrlAlt##Name = static_cast<int>(Name) |                                   \
+                  static_cast<int>(Modifier::Control) |                      \
+                  static_cast<int>(Modifier::Alt),                           \
+  ShiftAlt##Name = static_cast<int>(Name) |                                  \
+                   static_cast<int>(Modifier::Shift) |                       \
+                   static_cast<int>(Modifier::Alt),                          \
+  CtrlShiftAlt##Name =                                                       \
+      static_cast<int>(Name) | static_cast<int>(Modifier::Control) |         \
+      static_cast<int>(Modifier::Shift) | static_cast<int>(Modifier::Alt),
+
+  FOR_EACH_UI_KEY_CODE(V)
+#undef V
 };
 
 enum class MouseButton {

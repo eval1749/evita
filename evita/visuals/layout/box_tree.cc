@@ -357,21 +357,19 @@ BoxSelection BoxTree::ComputeSelection() const {
     return BoxSelection();
   const auto& style = impl_->style_tree().ComputedStyleOfSelection(selection_);
   BoxSelection selection;
+  BoxSelectionEditor().SetCaretColor(&selection, style.caret_color().value());
+  BoxSelectionEditor().SetCaretShape(&selection, style.caret_shape());
   if (selection_.is_caret()) {
     BoxSelectionEditor().Collapse(&selection, BoxFor(selection_.focus_node()),
                                   selection_.focus_offset());
-  } else {
-    BoxSelectionEditor().Collapse(&selection, BoxFor(selection_.anchor_node()),
-                                  selection_.anchor_offset());
-    BoxSelectionEditor().ExtendTo(&selection, BoxFor(selection_.focus_node()),
-                                  selection_.focus_offset());
-    BoxSelectionEditor().SetSelectionColor(&selection,
-                                           style.background_color().value());
-  }
-  if (style.caret_shape().is_none())
     return selection;
-  BoxSelectionEditor().SetCaretColor(&selection, style.caret_color().value());
-  BoxSelectionEditor().SetCaretShape(&selection, style.caret_shape());
+  }
+  BoxSelectionEditor().Collapse(&selection, BoxFor(selection_.anchor_node()),
+                                selection_.anchor_offset());
+  BoxSelectionEditor().ExtendTo(&selection, BoxFor(selection_.focus_node()),
+                                selection_.focus_offset());
+  BoxSelectionEditor().SetSelectionColor(&selection,
+                                         style.background_color().value());
   return selection;
 }
 
@@ -379,6 +377,11 @@ void BoxTree::ScheduleForcePaint() {
   if (!impl_->IsClean())
     return;
   BoxEditor().ScheduleForcePaint(root_box());
+}
+
+void BoxTree::ScheduleUpdateSelection() {
+  is_selection_changed_ = true;
+  lifecycle()->LimitTo(ViewLifecycle::State::StyleClean);
 }
 
 void BoxTree::UpdateIfNeeded() {
@@ -401,7 +404,8 @@ void BoxTree::UpdateSelectionIfNeeded() {
 
 // css::MediaObserver
 void BoxTree::DidChangeMediaState() {
-  // Nothing to do
+  // We might need to show/hide caret or paint active/inactive selection.
+  ScheduleUpdateSelection();
 }
 
 void BoxTree::DidChangeSystemMetrics() {
@@ -449,14 +453,12 @@ void BoxTree::DidReplaceChild(const ContainerNode& parent,
 
 // SelectionObserver
 void BoxTree::DidChangeCaretBlink() {
-  is_selection_changed_ = true;
-  lifecycle()->LimitTo(ViewLifecycle::State::StyleClean);
+  ScheduleUpdateSelection();
 }
 
 void BoxTree::DidChangeSelection(const SelectionModel& new_model,
                                  const SelectionModel& old_model) {
-  is_selection_changed_ = true;
-  lifecycle()->LimitTo(ViewLifecycle::State::StyleClean);
+  ScheduleUpdateSelection();
 }
 
 // StyleTreeObserver

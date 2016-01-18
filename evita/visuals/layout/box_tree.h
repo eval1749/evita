@@ -51,6 +51,7 @@ class BoxTree final : public ViewLifecycleClient,
   class Impl;
 
   BoxSelection ComputeSelection() const;
+  void ScheduleUpdateSelection();
   void UpdateSelectionIfNeeded();
 
   // css::MediaObserver

@@ -9,7 +9,8 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
-#include "base/time/time.h"
+// TODO(eval174): We should move |ui::KeyCode| to its own file from "event.h".
+#include "evita/ui/events/event.h"
 #include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/media_type.h"
 #include "evita/visuals/css/style.h"
@@ -21,6 +22,7 @@
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
+#include "evita/visuals/dom/text.h"
 #include "evita/visuals/display/display_item_list_processor.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
@@ -177,11 +179,14 @@ DemoModel::~DemoModel() {
   view_->RemoveObserver(this);
 }
 
+Selection* DemoModel::selection() {
+  return view_->selection();
+}
+
 void DemoModel::AttachWindow(DemoWindow* window) {
   window_ = window;
   view_->Start();
-  view_->selection()->Collapse(
-      document_->GetElementById(L"input")->first_child(), 0);
+  selection()->Collapse(document_->GetElementById(L"input")->first_child(), 1);
 }
 
 ElementNode* DemoModel::FindListItem(const FloatPoint& point) {
@@ -269,6 +274,34 @@ void DemoModel::DidMoveMouse(const FloatPoint& point) {
                   .SetTop(css::Top(css::Length(hover_point.y())))
                   .SetLeft(css::Left(css::Length(hover_point.x())))
                   .Build());
+}
+
+void DemoModel::DidPressKey(int key_code) {
+  const auto node = const_cast<Text*>(selection()->focus_node().as<Text>());
+  const auto offset = selection()->focus_offset();
+  switch (key_code) {
+    case ui::KeyCode::ArrowLeft:
+      if (offset > 0)
+        selection()->Collapse(node, offset - 1);
+      break;
+    case ui::KeyCode::ArrowRight:
+      if (offset < node->data().size()) {
+        selection()->Collapse(node, offset + 1);
+      }
+      break;
+    case ui::KeyCode::ShiftArrowLeft:
+      if (offset > 0)
+        selection()->ExtendTo(node, offset - 1);
+      break;
+    case ui::KeyCode::ShiftArrowRight:
+      if (offset < node->data().size()) {
+        selection()->ExtendTo(node, offset + 1);
+      }
+      break;
+    default:
+      std::cout << "DidPressKey key_code=" << std::hex << key_code << std::endl;
+      break;
+  }
 }
 
 void DemoModel::DidPressMouse(const FloatPoint& point) {

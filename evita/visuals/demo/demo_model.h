@@ -21,6 +21,7 @@ namespace visuals {
 class DemoWindow;
 class Document;
 class ElementNode;
+class Selection;
 class View;
 
 namespace css {
@@ -42,6 +43,8 @@ class DemoModel final : public css::Media,
   void AttachWindow(DemoWindow* window);
 
  private:
+  Selection* selection();
+
   ElementNode* FindListItem(const FloatPoint& point);
 
   // css::Media
@@ -60,6 +63,7 @@ class DemoModel final : public css::Media,
   void DidChangeWindowBounds(const FloatRect& bounds) final;
   void DidKillFocus() final;
   void DidMoveMouse(const FloatPoint& point) final;
+  void DidPressKey(int key_code) final;
   void DidPressMouse(const FloatPoint& point) final;
   void DidSetFocus() final;
 

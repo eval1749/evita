@@ -30,6 +30,7 @@ class WindowEventHandler {
 
   virtual void DidChangeWindowBounds(const FloatRect& bounds) = 0;
   virtual void DidKillFocus() = 0;
+  virtual void DidPressKey(int key_code) = 0;
   virtual void DidPressMouse(const FloatPoint& point) = 0;
   virtual void DidMoveMouse(const FloatPoint& point) = 0;
   virtual void DidSetFocus() = 0;
@@ -69,6 +70,7 @@ class DemoWindow final : public ui::AnimatableWindow,
   void DidRealize() final;
   void DidSetFocus(ui::Widget* last_focused) final;
   void DidShow() final;
+  void OnKeyPressed(const ui::KeyEvent& event) final;
   void OnMouseMoved(const ui::MouseEvent& event) final;
   void OnMousePressed(const ui::MouseEvent& event) final;
 

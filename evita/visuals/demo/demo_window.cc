@@ -92,6 +92,10 @@ void DemoWindow::DidShow() {
   canvas_.reset(layer()->CreateCanvas());
 }
 
+void DemoWindow::OnKeyPressed(const ui::KeyEvent& event) {
+  event_handler_->DidPressKey(event.raw_key_code());
+}
+
 void DemoWindow::OnMouseMoved(const ui::MouseEvent& event) {
   event_handler_->DidMoveMouse(
       FloatPoint(event.location().x(), event.location().y()));

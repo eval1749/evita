@@ -55,6 +55,7 @@ class View final : public ViewLifecycleObserver {
   HitTestResult HitTest(const FloatPoint& point);
   std::unique_ptr<DisplayItemList> Paint();
   void ScheduleForcePaint();
+  void Start();
   void RemoveObserver(ViewObserver* observer) const;
 
  private:

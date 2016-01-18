@@ -30,9 +30,12 @@ View::View(const Document& document,
     : lifecycle_(new ViewLifecycle(document, media)),
       selection_(new Selection(lifecycle_.get())),
       style_tree_(new StyleTree(lifecycle_.get(), style_sheets)),
-      box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {}
+      box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
+  lifecycle_->AddObserver(this);
+}
 
 View::~View() {
+  lifecycle_->RemoveObserver(this);
   lifecycle_->StartShutdown();
   box_tree_.reset();
   lifecycle_->FinishShutdown();
@@ -83,6 +86,10 @@ void View::RemoveObserver(ViewObserver* observer) const {
 
 void View::ScheduleForcePaint() {
   box_tree_->ScheduleForcePaint();
+}
+
+void View::Start() {
+  ViewLifecycle::Scope(lifecycle_.get(), ViewLifecycle::State::Started);
 }
 
 void View::UpdateLayoutIfNeeded() {

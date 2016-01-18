@@ -162,6 +162,7 @@ void NodeEditor::ReplaceChild(ContainerNode* container,
   DCHECK_EQ(container, old_child->parent_);
   if (new_child->parent_)
     RemoveChild(new_child->parent_, new_child);
+  UnregisterElementIdForSubtree(*old_child);
   DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->parent_);
   DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->next_sibling_);
   DCHECK_EQ(static_cast<ContainerNode*>(nullptr), new_child->previous_sibling_);

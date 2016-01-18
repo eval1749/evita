@@ -441,8 +441,7 @@ const css::Style& StyleTree::ComputedStyleOfSelection(
                                 "calling ComputedStyleOf().";
   if (selection.is_none())
     return initial_style();
-  if (media().media_state() == css::MediaState::Interactive &&
-      selection.is_caret_on()) {
+  if (media().is_media_interactive() && selection.is_caret_on()) {
     css::StyleEditor().SetCaretColor(selection_style_.get(),
                                      css::Color::Rgba(0, 0, 0));
     css::StyleEditor().SetCaretShape(selection_style_.get(),
@@ -453,7 +452,7 @@ const css::Style& StyleTree::ComputedStyleOfSelection(
   }
   if (selection.is_caret())
     return *selection_style_;
-  if (media().media_state() == css::MediaState::Interactive) {
+  if (media().is_media_interactive()) {
     css::StyleEditor().SetBackgroundColor(selection_style_.get(),
                                           css::Color::Rgba(51, 153, 255, 0.3f));
     return *selection_style_;

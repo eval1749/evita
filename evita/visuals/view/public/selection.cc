@@ -93,7 +93,7 @@ void Selection::DidFireCaretTimer() {
 }
 
 void Selection::DidPaint() {
-  if (is_none() || media().media_state() != css::MediaState::Interactive)
+  if (is_none() || !media().is_media_interactive())
     return caret_timer_->Stop();
   if (caret_timer_->IsRunning())
     return;
@@ -123,7 +123,7 @@ void Selection::RemoveObserver(SelectionObserver* observer) const {
 
 // css::MediaObserver
 void Selection::DidChangeMediaState() {
-  if (media().media_state() != css::MediaState::Inactive)
+  if (!media().is_media_interactive())
     return;
   caret_timer_->Stop();
 }

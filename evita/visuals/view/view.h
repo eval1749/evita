@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "base/macros.h"
+#include "evita/visuals/geometry/float_quad.h"
 #include "evita/visuals/view/public/hit_test_result.h"
 
 namespace visuals {
@@ -16,6 +17,7 @@ namespace visuals {
 class BoxTree;
 class DisplayItemList;
 class Document;
+class Node;
 class Selection;
 class StyleTree;
 class ViewLifecycle;
@@ -45,6 +47,7 @@ class View final {
   Selection* selection() { return selection_.get(); }
   const StyleTree& style_tree() const { return *style_tree_; }
 
+  FloatQuad ComputeBorderBoxQuad(const Node& node);
   HitTestResult HitTest(const FloatPoint& point);
   std::unique_ptr<DisplayItemList> Paint();
   void ScheduleForcePaint();

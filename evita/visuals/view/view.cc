@@ -45,6 +45,11 @@ const css::Media& View::media() const {
   return lifecycle_->media();
 }
 
+FloatQuad View::ComputeBorderBoxQuad(const Node& node) {
+  const auto box = box_tree_->BoxFor(node);
+  return box ? FloatQuad(box->bounds()) : FloatQuad();
+}
+
 HitTestResult View::HitTest(const FloatPoint& point) {
   UpdateLayoutIfNeeded();
   const auto root_box = box_tree_->root_box();

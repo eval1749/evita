@@ -25,7 +25,6 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/layout/box.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
@@ -253,7 +252,7 @@ void DemoModel::DidMoveMouse(const FloatPoint& point) {
   if (!line)
     return;
   const auto hover = document_->GetElementById(L"hover");
-  const auto hover_point = view_->box_tree().BoxFor(*line)->bounds().origin();
+  const auto hover_point = view_->ComputeBorderBoxQuad(*line).point1();
   NodeEditor().SetInlineStyle(
       hover, *css::StyleBuilder()
                   .SetTop(css::Top(css::Length(hover_point.y())))
@@ -267,7 +266,7 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
   if (!line)
     return;
   const auto hover = document_->GetElementById(L"hover");
-  const auto hover_point = view_->box_tree().BoxFor(*line)->bounds().origin();
+  const auto hover_point = view_->ComputeBorderBoxQuad(*line).point1();
   NodeEditor().SetInlineStyle(
       hover, *css::StyleBuilder()
                   .SetTop(css::Top(css::Length(hover_point.y())))

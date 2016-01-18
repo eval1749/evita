@@ -428,6 +428,9 @@ const css::Style& StyleTree::ComputedStyleOfSelection(
                                      css::Color::Rgba(0, 0, 0));
     css::StyleEditor().SetCaretShape(selection_style_.get(),
                                      css::CaretShape::Bar());
+  } else {
+    css::StyleEditor().SetCaretShape(selection_style_.get(),
+                                     css::CaretShape::None());
   }
   if (selection.is_caret())
     return *selection_style_;

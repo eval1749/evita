@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <memory>
+#include <string>
 
 #include "evita/visuals/layout/text_box.h"
 
+#include "base/strings/string16.h"
 #include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/root_box.h"
@@ -16,12 +17,14 @@ namespace visuals {
 //
 // TextBox
 //
-TextBox::TextBox(RootBox* root_box, const base::string16 data, const Node* node)
-    : ContentBox(root_box, node), data_(data) {
+TextBox::TextBox(RootBox* root_box,
+                 const base::StringPiece16& data,
+                 const Node* node)
+    : ContentBox(root_box, node), data_(data.as_string()) {
   BoxEditor().SetContentChanged(this);
 }
 
-TextBox::TextBox(RootBox* root_box, const base::string16 data)
+TextBox::TextBox(RootBox* root_box, const base::StringPiece16& data)
     : TextBox(root_box, data, nullptr) {}
 
 TextBox::~TextBox() {}

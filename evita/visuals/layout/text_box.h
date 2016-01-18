@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "evita/visuals/layout/content_box.h"
 #include "evita/visuals/css/values.h"
 
@@ -24,8 +24,8 @@ class TextBox final : public ContentBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(TextBox, ContentBox);
 
  public:
-  TextBox(RootBox* root_box, const base::string16 data, const Node* node);
-  TextBox(RootBox* root_box, const base::string16 data);
+  TextBox(RootBox* root_box, const base::StringPiece16& data, const Node* node);
+  TextBox(RootBox* root_box, const base::StringPiece16& data);
   ~TextBox() final;
 
   float baseline() const { return baseline_; }

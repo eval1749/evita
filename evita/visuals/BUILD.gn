@@ -5,8 +5,10 @@
 import("//testing/test.gni")
 
 source_set("visuals") {
-  public_deps = [
+  deps = [
     "//base",
+  ]
+  public_deps = [
     "//evita/visuals/display",
     "//evita/visuals/view",
   ]

@@ -37,7 +37,7 @@ namespace dom {
 VisualWindow::VisualWindow(visuals::Document* document,
                            visuals::css::StyleSheet* style_sheet)
     : lifecycle_(new visuals::ViewLifecycle(*document, *this)),
-      selection_(new visuals::Selection(*lifecycle_)),
+      selection_(new visuals::Selection(lifecycle_.get())),
       style_tree_(new visuals::StyleTree(lifecycle_.get(), {style_sheet})),
       box_tree_(
           new visuals::BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {

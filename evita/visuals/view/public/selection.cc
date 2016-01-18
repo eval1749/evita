@@ -19,15 +19,15 @@ namespace visuals {
 //
 // Selection
 //
-Selection::Selection(const ViewLifecycle& lifecycle)
+Selection::Selection(ViewLifecycle* lifecycle)
     : caret_timer_(new base::RepeatingTimer()),
       lifecycle_(lifecycle),
       model_(new SelectionModel()) {
-  lifecycle_.document().AddObserver(this);
+  lifecycle_->document().AddObserver(this);
 }
 
 Selection::~Selection() {
-  lifecycle_.document().RemoveObserver(this);
+  lifecycle_->document().RemoveObserver(this);
 }
 
 const Node& Selection::anchor_node() const {
@@ -39,7 +39,7 @@ int Selection::anchor_offset() const {
 }
 
 const Document& Selection::document() const {
-  return lifecycle_.document();
+  return lifecycle_->document();
 }
 
 const Node& Selection::focus_node() const {
@@ -63,7 +63,7 @@ bool Selection::is_range() const {
 }
 
 const css::Media& Selection::media() const {
-  return lifecycle_.media();
+  return lifecycle_->media();
 }
 
 void Selection::AddObserver(SelectionObserver* observer) const {
@@ -71,7 +71,7 @@ void Selection::AddObserver(SelectionObserver* observer) const {
 }
 
 void Selection::Clear() {
-  DCHECK(lifecycle_.AllowsSelectionChanges()) << lifecycle_;
+  DCHECK(lifecycle_->AllowsSelectionChanges()) << lifecycle_;
   if (model_->is_none())
     return;
   const auto old_model = *model_;
@@ -82,7 +82,7 @@ void Selection::Clear() {
 }
 
 void Selection::Collapse(Node* node, int offset) {
-  DCHECK(lifecycle_.AllowsSelectionChanges()) << lifecycle_;
+  DCHECK(lifecycle_->AllowsSelectionChanges()) << lifecycle_;
   SelectionModel new_model;
   new_model.Collapse(node, offset);
   if (*model_ == new_model)
@@ -111,7 +111,7 @@ void Selection::DidPaint() {
 }
 
 void Selection::ExtendTo(Node* node, int offset) {
-  DCHECK(lifecycle_.AllowsSelectionChanges()) << lifecycle_;
+  DCHECK(lifecycle_->AllowsSelectionChanges()) << lifecycle_;
   DCHECK(!is_none());
   SelectionModel new_model(*model_);
   new_model.ExtendTo(node, offset);

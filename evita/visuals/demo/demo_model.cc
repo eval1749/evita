@@ -177,7 +177,7 @@ void PrintPaint(const DisplayItemList& list) {
 DemoModel::DemoModel()
     : document_(LoadDocument()),
       lifecycle_(new ViewLifecycle(*document_, *this)),
-      selection_(new Selection(*lifecycle_)),
+      selection_(new Selection(lifecycle_.get())),
       style_sheet_(LoadStyleSheet()),
       style_tree_(new StyleTree(lifecycle_.get(), {style_sheet_})),
       box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {

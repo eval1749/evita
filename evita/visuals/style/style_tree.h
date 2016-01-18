@@ -13,6 +13,7 @@
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/css/style_sheet_observer.h"
 #include "evita/visuals/dom/document_observer.h"
+#include "evita/visuals/view/public/view_lifecycle_client.h"
 
 namespace visuals {
 
@@ -27,14 +28,14 @@ class ElementNode;
 class Node;
 class Selection;
 class StyleTreeObserver;
-class ViewLifecycle;
 
 //////////////////////////////////////////////////////////////////////
 //
 // StyleTree represents a cache of CSS computed value, pre-layout value,
 // for each element.
 //
-class StyleTree final : public css::MediaObserver,
+class StyleTree final : public ViewLifecycleClient,
+                        public css::MediaObserver,
                         public css::StyleSheetObserver,
                         public DocumentObserver {
  public:
@@ -42,14 +43,9 @@ class StyleTree final : public css::MediaObserver,
             const std::vector<css::StyleSheet*>& style_sheets);
   ~StyleTree() final;
 
-  const Document& document() const;
-
   // TODO(eval1749): Do we really need to expose |initial_style()|? As of today,
   // it is used only in tests.
   const css::Style& initial_style() const;
-  const ViewLifecycle& lifecycle() const { return *lifecycle_; }
-  ViewLifecycle* lifecycle() { return lifecycle_; }
-  const css::Media& media() const;
 
   // Monotonically increased style tree version. This version is incremented
   // when |UpdateIfNeeded()| does updating.
@@ -94,7 +90,6 @@ class StyleTree final : public css::MediaObserver,
                       const base::string16& old_data) final;
 
   std::unique_ptr<Impl> impl_;
-  ViewLifecycle* const lifecycle_;
   const std::vector<css::StyleSheet*> style_sheets_;
   const std::unique_ptr<css::Style> selection_style_;
 

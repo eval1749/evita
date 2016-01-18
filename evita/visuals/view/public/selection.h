@@ -9,6 +9,7 @@
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/view/public/selection_model.h"
+#include "evita/visuals/view/public/view_lifecycle_client.h"
 
 namespace base {
 class RepeatingTimer;
@@ -31,18 +32,17 @@ class Media;
 //
 // Selection
 //
-class Selection final : public css::MediaObserver, public DocumentObserver {
+class Selection final : public ViewLifecycleClient,
+                        public css::MediaObserver,
+                        public DocumentObserver {
  public:
   explicit Selection(ViewLifecycle* lifecycle);
   ~Selection() final;
 
   const Node& anchor_node() const;
   int anchor_offset() const;
-  const Document& document() const;
   const Node& focus_node() const;
   int focus_offset() const;
-  const ViewLifecycle& lifecycle() const { return *lifecycle_; }
-  const css::Media& media() const;
 
   bool is_caret_on() const { return is_caret_on_; }
   bool is_caret() const;
@@ -67,7 +67,6 @@ class Selection final : public css::MediaObserver, public DocumentObserver {
 
   const std::unique_ptr<base::RepeatingTimer> caret_timer_;
   bool is_caret_on_ = false;
-  ViewLifecycle* lifecycle_;
   mutable base::ObserverList<SelectionObserver> observers_;
   const std::unique_ptr<SelectionModel> model_;
 

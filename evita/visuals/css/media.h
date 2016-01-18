@@ -30,6 +30,11 @@ class Media {
   virtual MediaType media_type() const = 0;
   virtual FloatSize viewport_size() const = 0;
 
+  // Helper functions for |css::MediaState|.
+  bool is_media_active() const;
+  bool is_media_inactive() const;
+  bool is_media_interactive() const;
+
   void AddObserver(MediaObserver* observer) const;
   void RemoveObserver(MediaObserver* observer) const;
 

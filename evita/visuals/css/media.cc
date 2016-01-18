@@ -5,6 +5,7 @@
 #include "evita/visuals/css/media.h"
 
 #include "evita/visuals/css/media_observer.h"
+#include "evita/visuals/css/media_state.h"
 
 namespace visuals {
 namespace css {
@@ -15,6 +16,18 @@ namespace css {
 //
 Media::Media() {}
 Media::~Media() {}
+
+bool Media::is_media_active() const {
+  return media_state() == MediaState::Active;
+}
+
+bool Media::is_media_inactive() const {
+  return media_state() == MediaState::Inactive;
+}
+
+bool Media::is_media_interactive() const {
+  return media_state() == MediaState::Interactive;
+}
 
 void Media::AddObserver(MediaObserver* observer) const {
   observers_.AddObserver(observer);

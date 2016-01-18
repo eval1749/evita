@@ -19,6 +19,7 @@
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/view/public/selection.h"
+#include "evita/visuals/view/view.h"
 
 namespace dom {
 
@@ -30,11 +31,11 @@ VisualWindow::VisualWindow(visuals::Document* document,
                            visuals::css::StyleSheet* style_sheet)
     : view_(new visuals::View(*document, *this, {style_sheet})) {
   ScriptHost::instance()->view_delegate()->CreateVisualWindow(window_id());
-  document->AddObserver(this);
+  view_->AddObserver(this);
 }
 
 VisualWindow::~VisualWindow() {
-  document().RemoveObserver(this);
+  view_->RemoveObserver(this);
 }
 
 const visuals::Document& VisualWindow::document() const {
@@ -97,71 +98,19 @@ visuals::FloatSize VisualWindow::viewport_size() const {
   return viewport_size_;
 }
 
-// visuals::DocumentObserver
-void VisualWindow::DidAddClass(const ElementNode& element,
-                               const base::string16& new_name) {
-  RequestAnimationFrame();
-}
-
-void VisualWindow::DidAppendChild(const ContainerNode& parent,
-                                  const Node& child) {
-  RequestAnimationFrame();
-}
-
-void VisualWindow::DidChangeInlineStyle(const ElementNode& element,
-                                        const CssStyle* old_style) {
-  RequestAnimationFrame();
-}
-
-void VisualWindow::DidInsertBefore(const ContainerNode& parent,
-                                   const Node& child,
-                                   const Node& ref_child) {
-  RequestAnimationFrame();
-}
-
-void VisualWindow::DidRemoveChild(const ContainerNode& parent,
-                                  const Node& child) {
-  RequestAnimationFrame();
-}
-
-void VisualWindow::DidRemoveClass(const ElementNode& element,
-                                  const base::string16& old_name) {
-  RequestAnimationFrame();
-}
-
-void VisualWindow::DidReplaceChild(const ContainerNode& parent,
-                                   const Node& child,
-                                   const Node& ref_child) {
-  RequestAnimationFrame();
-}
-
-void VisualWindow::DidSetTextData(const Text& text,
-                                  const base::string16& new_data,
-                                  const base::string16& old_data) {
-  RequestAnimationFrame();
-}
-
-void VisualWindow::WillRemoveChild(const ContainerNode& parent,
-                                   const Node& child) {
+// visuals::ViewObserver
+void VisualWindow::DidChangeView() {
   RequestAnimationFrame();
 }
 
 // Window
 void VisualWindow::DidChangeBounds(int left, int top, int right, int bottom) {
-  viewport_size_ = FloatSize(right - left, bottom - top);
-  CssMedia::DidChangeViewportSize();
-  RequestAnimationFrame();
-}
-
-void VisualWindow::DidRealizeWindow() {
-  Window::DidRealizeWindow();
-  RequestAnimationFrame();
+  viewport_size_ = visuals::FloatSize(right - left, bottom - top);
+  visuals::css::Media::DidChangeViewportSize();
 }
 
 void VisualWindow::DidShowWindow() {
   view_->ScheduleForcePaint();
-  // TODO(eval1749): We should use |ViewLifeCycleObserver| for requesting
-  // animation frame rather than requesting here.
   RequestAnimationFrame();
 }
 

@@ -88,7 +88,12 @@ std::unique_ptr<DisplayItemList> View::Paint() {
       base::StringPrintf(L"dom: %d, css: %d, box: %d", document().version(),
                          style_tree_->version(), box_tree_->version());
   PaintInfo paint_info(root_box->bounds(), debug_text);
-  return std::move(Painter().Paint(paint_info, *root_box));
+  auto display_item_list = Painter().Paint(paint_info, *root_box);
+  // TODO(eval1749): Do we have another place to call |Selection::DidPaint()|.
+  // In here, we call |Selection::DidPaint()| even if painter doesn't paint
+  // caret, e.g. selection is none, selection is out side of viewport.
+  selection_->DidPaint();
+  return std::move(display_item_list);
 }
 
 void View::RemoveObserver(ViewObserver* observer) const {

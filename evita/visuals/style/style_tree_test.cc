@@ -41,6 +41,7 @@ TEST_F(StyleTreeTest, Basic) {
                              .Build();
   const auto body = document->first_child()->as<Element>();
   ViewLifecycle lifecycle(*document, mock_media());
+  ViewLifecycle::Scope(&lifecycle, ViewLifecycle::State::Started);
   StyleTree style_tree(&lifecycle, {});
   style_tree.UpdateIfNeeded();
 
@@ -64,6 +65,7 @@ TEST_F(StyleTreeTest, Inheritance) {
           .Build();
   const auto body = document->first_child()->as<Element>();
   ViewLifecycle lifecycle(*document, mock_media());
+  ViewLifecycle::Scope(&lifecycle, ViewLifecycle::State::Started);
   StyleTree style_tree(&lifecycle, {});
   style_tree.UpdateIfNeeded();
 
@@ -86,6 +88,7 @@ TEST_F(StyleTreeTest, ComputedStyleOfText) {
           .Build();
   const auto body = document->first_child()->as<Element>();
   ViewLifecycle lifecycle(*document, mock_media());
+  ViewLifecycle::Scope(&lifecycle, ViewLifecycle::State::Started);
   StyleTree style_tree(&lifecycle, {});
   style_tree.UpdateIfNeeded();
 

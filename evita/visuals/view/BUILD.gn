@@ -5,11 +5,14 @@
 source_set("view") {
   public = [
     "view.h",
+    "view_observer.h",
   ]
 
   sources = [
     "view.cc",
     "view.h",
+    "view_observer.cc",
+    "view_observer.h",
   ]
 
   deps = [

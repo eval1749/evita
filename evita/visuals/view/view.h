@@ -9,8 +9,10 @@
 #include <vector>
 
 #include "base/macros.h"
+#include "base/observer_list.h"
 #include "evita/visuals/geometry/float_quad.h"
 #include "evita/visuals/view/public/hit_test_result.h"
+#include "evita/visuals/view/public/view_lifecycle_observer.h"
 
 namespace visuals {
 
@@ -21,6 +23,7 @@ class Node;
 class Selection;
 class StyleTree;
 class ViewLifecycle;
+class ViewObserver;
 
 namespace css {
 class Media;
@@ -31,7 +34,7 @@ class StyleSheet;
 //
 // View
 //
-class View final {
+class View final : public ViewLifecycleObserver {
  public:
   View(const Document& document,
        const css::Media& media,
@@ -47,16 +50,23 @@ class View final {
   Selection* selection() { return selection_.get(); }
   const StyleTree& style_tree() const { return *style_tree_; }
 
+  void AddObserver(ViewObserver* observer) const;
   FloatQuad ComputeBorderBoxQuad(const Node& node);
   HitTestResult HitTest(const FloatPoint& point);
   std::unique_ptr<DisplayItemList> Paint();
   void ScheduleForcePaint();
+  void RemoveObserver(ViewObserver* observer) const;
 
  private:
+  // ViewLifecycleObserver
+  void DidChangeLifecycleState(ViewLifecycle::State new_state,
+                               ViewLifecycle::State old_state) final;
+
   void UpdateLayoutIfNeeded();
   void UpdateStyleIfNeeded();
 
   std::unique_ptr<ViewLifecycle> lifecycle_;
+  mutable base::ObserverList<ViewObserver> observers_;
   std::unique_ptr<Selection> selection_;
 
   // |StyleTree| takes |ViewLifecycle| and |css::Media|.

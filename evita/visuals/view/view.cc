@@ -16,6 +16,7 @@
 #include "evita/visuals/paint/paint_info.h"
 #include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
+#include "evita/visuals/view/view_observer.h"
 
 namespace visuals {
 
@@ -45,6 +46,10 @@ const css::Media& View::media() const {
   return lifecycle_->media();
 }
 
+void View::AddObserver(ViewObserver* observer) const {
+  observers_.AddObserver(observer);
+}
+
 FloatQuad View::ComputeBorderBoxQuad(const Node& node) {
   const auto box = box_tree_->BoxFor(node);
   return box ? FloatQuad(box->bounds()) : FloatQuad();
@@ -72,6 +77,10 @@ std::unique_ptr<DisplayItemList> View::Paint() {
   return std::move(Painter().Paint(paint_info, *root_box));
 }
 
+void View::RemoveObserver(ViewObserver* observer) const {
+  observers_.RemoveObserver(observer);
+}
+
 void View::ScheduleForcePaint() {
   box_tree_->ScheduleForcePaint();
 }
@@ -84,6 +93,14 @@ void View::UpdateLayoutIfNeeded() {
 
 void View::UpdateStyleIfNeeded() {
   style_tree_->UpdateIfNeeded();
+}
+
+// ViewLifecycleObserver
+void View::DidChangeLifecycleState(ViewLifecycle::State new_state,
+                                   ViewLifecycle::State old_state) {
+  if (new_state != ViewLifecycle::State::VisualUpdatePending)
+    return;
+  FOR_EACH_OBSERVER(ViewObserver, observers_, DidChangeView());
 }
 
 }  // namespace visuals

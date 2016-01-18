@@ -322,20 +322,20 @@ void BoxTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
 BoxTree::BoxTree(ViewLifecycle* lifecycle,
                  const Selection& selection,
                  const StyleTree& style_tree)
-    : impl_(new Impl(lifecycle, style_tree)),
-      lifecycle_(lifecycle),
+    : ViewLifecycleClient(lifecycle),
+      impl_(new Impl(lifecycle, style_tree)),
       selection_(selection) {
   DCHECK_EQ(selection.lifecycle(), lifecycle);
   DCHECK_EQ(style_tree.lifecycle(), lifecycle);
-  impl_->document().AddObserver(this);
-  impl_->media().AddObserver(this);
+  document().AddObserver(this);
+  media().AddObserver(this);
   impl_->style_tree().AddObserver(this);
   selection_.AddObserver(this);
 }
 
 BoxTree::~BoxTree() {
-  impl_->document().RemoveObserver(this);
-  impl_->media().RemoveObserver(this);
+  document().RemoveObserver(this);
+  media().RemoveObserver(this);
   impl_->style_tree().RemoveObserver(this);
   selection_.RemoveObserver(this);
 }
@@ -409,7 +409,7 @@ void BoxTree::DidChangeSystemMetrics() {
 }
 
 void BoxTree::DidChangeViewportSize() {
-  impl_->MarkDirty(impl_->document());
+  impl_->MarkDirty(document());
 }
 
 // DocumentObserver
@@ -431,7 +431,7 @@ void BoxTree::DidInsertBefore(const ContainerNode& parent,
 }
 
 void BoxTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
-  if (lifecycle_->IsAtLeast(ViewLifecycle::State::TreeClean)) {
+  if (lifecycle()->IsAtLeast(ViewLifecycle::State::TreeClean)) {
     if (!BoxFor(child)) {
       // When lifecycle is |TreeClean| and |child| is "display:none", removal
       // of |child| doesn't affect sibling boxes in |parent|.

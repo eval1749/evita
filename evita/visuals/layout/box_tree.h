@@ -11,15 +11,15 @@
 #include "base/macros.h"
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
+#include "evita/visuals/style/style_tree_observer.h"
 #include "evita/visuals/view/public/selection_observer.h"
 #include "evita/visuals/view/public/selection_model.h"
-#include "evita/visuals/style/style_tree_observer.h"
+#include "evita/visuals/view/public/view_lifecycle_client.h"
 
 namespace visuals {
 
 class Box;
 class BoxSelection;
-class ViewLifecycle;
 class Node;
 class RootBox;
 class Selection;
@@ -29,7 +29,8 @@ class StyleTree;
 //
 // BoxTree represents a CSS Box tree for document(node tree) with style tree.
 //
-class BoxTree final : public css::MediaObserver,
+class BoxTree final : public ViewLifecycleClient,
+                      public css::MediaObserver,
                       public DocumentObserver,
                       public SelectionObserver,
                       public StyleTreeObserver {
@@ -39,8 +40,6 @@ class BoxTree final : public css::MediaObserver,
           const StyleTree& style_tree);
   ~BoxTree();
 
-  const ViewLifecycle& lifecycle() const { return *lifecycle_; }
-  ViewLifecycle* lifecycle() { return lifecycle_; }
   RootBox* root_box() const;
   int version() const;
 
@@ -84,7 +83,6 @@ class BoxTree final : public css::MediaObserver,
                               const css::Style& old_style) final;
 
   bool is_selection_changed_ = false;
-  ViewLifecycle* const lifecycle_;
   // An implementation of |BoxTree|.
   std::unique_ptr<Impl> impl_;
   const Selection& selection_;

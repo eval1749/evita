@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include  <algorithm>
 #include <stack>
 
 #include "evita/visuals/paint/painter.h"
@@ -16,12 +17,14 @@
 #include "evita/visuals/geometry/affine_transformer.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_editor.h"
+#include "evita/visuals/layout/box_selection.h"
 #include "evita/visuals/layout/box_traversal.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/paint/paint_info.h"
+#include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 
 // TODO(eval1749): Drawing rectangle with thickness doesn't work as expected.
@@ -85,6 +88,7 @@ class PaintVisitor final : public BoxVisitor {
   void PaintBackgroundINeeded(const Box& box);
   void PaintBorderINeeded(const Box& box);
   void PaintContainerBox(const ContainerBox& box);
+  void PaintSelectionIfNeeded(const Box& box);
   void PopTransform();
   void PushTransform();
 
@@ -220,8 +224,42 @@ void PaintVisitor::PaintContainerBox(const ContainerBox& box) {
   if (!NeedsPaintContainerBox(box))
     return;
   BoxPaintScope paint_scope(this, box);
-  for (const auto& child : box.child_boxes())
+  for (const auto& child : box.child_boxes()) {
     Visit(child);
+    PaintSelectionIfNeeded(*child);
+  }
+}
+
+// Note: We Since caret can be placed after text, we should paint caret and
+// selection outside text box clip area.
+void PaintVisitor::PaintSelectionIfNeeded(const Box& box) {
+  const auto text = box.as<TextBox>();
+  if (!text)
+    return;
+  const auto& selection = text->root_box()->selection();
+  if (selection.is_none())
+    return;
+  if (selection.focus_box() != text)
+    return;
+  const auto& focus_box_rect =
+      text->text_layout().HitTestTextPosition(selection.focus_offset());
+  if (selection.is_range()) {
+    DCHECK_EQ(selection.anchor_box(), selection.focus_box());
+    const auto& anchor_box_rect =
+        text->text_layout().HitTestTextPosition(selection.anchor_offset());
+    const auto is_anchor_start = anchor_box_rect.x() < focus_box_rect.x();
+    const auto& selection_rect = FloatRect(
+        is_anchor_start ? anchor_box_rect.origin() : focus_box_rect.origin(),
+        FloatSize(is_anchor_start ? focus_box_rect.x() - anchor_box_rect.x()
+                                  : anchor_box_rect.x() - focus_box_rect.x(),
+                  std::max(anchor_box_rect.height(), focus_box_rect.height())));
+    FillRect(selection_rect, selection.selection_color());
+  }
+  if (selection.caret_shape().is_none())
+    return;
+  FillRect(
+      FloatRect(focus_box_rect.origin(), FloatSize(1, focus_box_rect.height())),
+      selection.caret_color());
 }
 
 void PaintVisitor::PopTransform() {

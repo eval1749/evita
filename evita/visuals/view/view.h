@@ -47,6 +47,7 @@ class View final {
 
   BoxFinder::Result HitTest(const FloatPoint& point);
   std::unique_ptr<DisplayItemList> Paint();
+  void ScheduleForcePaint();
 
  private:
   void UpdateLayoutIfNeeded();

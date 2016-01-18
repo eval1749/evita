@@ -18,15 +18,8 @@
 #include "evita/visuals/css/style_sheet.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
-#include "evita/visuals/layout/box_finder.h"
-#include "evita/visuals/layout/box_tree.h"
-#include "evita/visuals/layout/layouter.h"
-#include "evita/visuals/layout/root_box.h"
-#include "evita/visuals/paint/painter.h"
-#include "evita/visuals/paint/paint_info.h"
-#include "evita/visuals/style/style_tree.h"
+#include "evita/visuals/layout/box.h"
 #include "evita/visuals/view/public/selection.h"
-#include "evita/visuals/view/public/view_lifecycle.h"
 
 namespace dom {
 
@@ -36,35 +29,26 @@ namespace dom {
 //
 VisualWindow::VisualWindow(visuals::Document* document,
                            visuals::css::StyleSheet* style_sheet)
-    : lifecycle_(new visuals::ViewLifecycle(*document, *this)),
-      selection_(new visuals::Selection(lifecycle_.get())),
-      style_tree_(new visuals::StyleTree(lifecycle_.get(), {style_sheet})),
-      box_tree_(
-          new visuals::BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
+    : view_(new visuals::View(*document, *this, {style_sheet})) {
   ScriptHost::instance()->view_delegate()->CreateVisualWindow(window_id());
   document->AddObserver(this);
 }
 
 VisualWindow::~VisualWindow() {
-  style_tree_->document().RemoveObserver(this);
+  document().RemoveObserver(this);
+}
+
+const visuals::Document& VisualWindow::document() const {
+  return view_->document();
 }
 
 void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   TRACE_EVENT0("script", "VisualWindow::DidBeginAnimationFrame");
   DCHECK(is_waiting_animation_frame_);
   is_waiting_animation_frame_ = false;
-  UpdateStyleIfNeeded();
-  UpdateLayoutIfNeeded();
-  const auto& root_box = box_tree_->root_box();
-  if (root_box->IsPaintClean()) {
-    // Box tree is changed outside viewport(?).
+  auto display_item_list = view_->Paint();
+  if (!display_item_list)
     return;
-  }
-  const auto& debug_text = base::StringPrintf(
-      L"dom: %d, css: %d, box: %d", style_tree_->document().version(),
-      style_tree_->version(), box_tree_->version());
-  visuals::PaintInfo paint_info(root_box->bounds(), debug_text);
-  auto display_item_list = visuals::Painter().Paint(paint_info, *root_box);
   ScriptHost::instance()->view_delegate()->PaintVisualDocument(
       window_id(), std::move(display_item_list));
 }
@@ -82,22 +66,10 @@ void VisualWindow::RequestAnimationFrame() {
       std::move(callback));
 }
 
-void VisualWindow::UpdateLayoutIfNeeded() {
-  UpdateStyleIfNeeded();
-  box_tree_->UpdateIfNeeded();
-  visuals::Layouter().Layout(box_tree_->root_box());
-}
-
-void VisualWindow::UpdateStyleIfNeeded() {
-  style_tree_->UpdateIfNeeded();
-}
-
 // Binding callbacks
 int VisualWindow::HitTest(int x, int y) {
-  UpdateLayoutIfNeeded();
   visuals::FloatPoint point(x, y);
-  const auto& found =
-      visuals::BoxFinder(*box_tree_->root_box()).FindByPoint(point);
+  const auto& found = view_->HitTest(point);
   if (!found.box)
     return -1;
   return found.box->node()->sequence_id();
@@ -188,7 +160,9 @@ void VisualWindow::DidRealizeWindow() {
 }
 
 void VisualWindow::DidShowWindow() {
-  box_tree_->ScheduleForcePaint();
+  view_->ScheduleForcePaint();
+  // TODO(eval1749): We should use |ViewLifeCycleObserver| for requesting
+  // animation frame rather than requesting here.
   RequestAnimationFrame();
 }
 

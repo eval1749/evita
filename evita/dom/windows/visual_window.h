@@ -13,6 +13,7 @@
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/geometry/float_size.h"
+#include "evita/visuals/view/view.h"
 
 namespace base {
 class Time;
@@ -23,14 +24,11 @@ namespace css {
 class Style;
 class StyleSheet;
 }
-class BoxTree;
 class ContainerNode;
 class Document;
-class ViewLifecycle;
 class ElementNode;
 class Node;
 class Selection;
-class StyleTree;
 class Text;
 }  // namespace visuals
 
@@ -61,6 +59,7 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   using CssMedia = visuals::css::Media;
   using CssStyle = visuals::css::Style;
   using CssStyleSheet = visuals::css::StyleSheet;
+  using Document = visuals::Document;
   using ElementNode = visuals::ElementNode;
   using FloatSize = visuals::FloatSize;
   using Node = visuals::Node;
@@ -69,10 +68,10 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   VisualWindow(visuals::Document* document,
                visuals::css::StyleSheet* style_sheet);
 
+  const Document& document() const;
+
   void DidBeginAnimationFrame(const base::TimeTicks& now);
   void RequestAnimationFrame();
-  void UpdateLayoutIfNeeded();
-  void UpdateStyleIfNeeded();
 
   // Binding callbacks
   int HitTest(int x, int y);
@@ -85,6 +84,8 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   visuals::FloatSize viewport_size() const final;
 
   // visuals::DocumentObserver
+  // TODO(eval1749): We should use |ViewLifeCycleObserver| for requesting
+  // animation frame rather than observing |Document|.
   void DidAddClass(const ElementNode& element,
                    const base::string16& new_name) final;
   void DidAppendChild(const ContainerNode& parent, const Node& child) final;
@@ -110,13 +111,8 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   void DidShowWindow() final;
 
   bool is_waiting_animation_frame_ = false;
-  const std::unique_ptr<visuals::ViewLifecycle> lifecycle_;
-  const std::unique_ptr<visuals::Selection> selection_;
-  const std::unique_ptr<visuals::StyleTree> style_tree_;
+  const std::unique_ptr<visuals::View> view_;
   FloatSize viewport_size_;
-
-  // |BoxTree| takes |StyleTree|
-  const std::unique_ptr<visuals::BoxTree> box_tree_;
 
   DISALLOW_COPY_AND_ASSIGN(VisualWindow);
 };

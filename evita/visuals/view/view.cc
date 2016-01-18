@@ -66,6 +66,10 @@ std::unique_ptr<DisplayItemList> View::Paint() {
   return std::move(Painter().Paint(paint_info, *root_box));
 }
 
+void View::ScheduleForcePaint() {
+  box_tree_->ScheduleForcePaint();
+}
+
 void View::UpdateLayoutIfNeeded() {
   UpdateStyleIfNeeded();
   box_tree_->UpdateIfNeeded();

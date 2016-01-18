@@ -18,6 +18,15 @@ class Document extends Node {
   }
 
   /**
+   * @param {!Uint8Array} data
+   * @return {!Shape}
+   */
+  createShape(data) {
+    const handle = NodeHandle.createShape(this.handle_, data);
+    return new Shape(this, handle, data);
+  }
+
+  /**
    * @param {string} data
    * @return {!Text}
    */

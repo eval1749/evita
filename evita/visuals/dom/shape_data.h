@@ -19,6 +19,7 @@ namespace visuals {
 class ShapeData final {
  public:
   explicit ShapeData(const std::vector<uint8_t>& value);
+  ShapeData(const void* bytes, size_t size);
   ShapeData(const ShapeData& other);
   ShapeData(ShapeData&& other);
   ~ShapeData();

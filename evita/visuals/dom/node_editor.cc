@@ -14,6 +14,8 @@
 #include "evita/visuals/dom/element_node.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/document_observer.h"
+#include "evita/visuals/dom/shape.h"
+#include "evita/visuals/dom/shape_data.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/css/style.h"
 
@@ -208,6 +210,19 @@ void NodeEditor::SetInlineStyle(ElementNode* element,
   ++document->version_;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidChangeInlineStyle(*element, nullptr));
+}
+
+void NodeEditor::SetShapeData(Shape* shape, const ShapeData& data) {
+  const auto& document = shape->document_;
+  DCHECK(!document->is_locked());
+  if (shape->data_ == data)
+    return;
+  const auto& new_data = data;
+  const auto old_data = shape->data_;
+  shape->data_ = new_data;
+  ++document->version_;
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
+                    DidSetShapeData(*shape, new_data, old_data));
 }
 
 void NodeEditor::SetTextData(Text* text, const base::StringPiece16& data) {

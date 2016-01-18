@@ -7,17 +7,15 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
+#include "evita/visuals/dom/nodes_forward.h"
 
 namespace visuals {
+
+class ShapeData;
 
 namespace css {
 class Style;
 }
-
-class ContainerNode;
-class ElementNode;
-class Node;
-class Text;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -41,6 +39,9 @@ class DocumentObserver {
   virtual void DidReplaceChild(const ContainerNode& parent,
                                const Node& new_child,
                                const Node& old_child);
+  virtual void DidSetShapeData(const Shape& shape,
+                               const ShapeData& new_data,
+                               const ShapeData& old_data);
   virtual void DidSetTextData(const Text& text,
                               const base::string16& new_data,
                               const base::string16& old_data);

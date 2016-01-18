@@ -4,6 +4,7 @@
 
 #include "evita/dom/visuals/node_handle.h"
 
+#include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/visuals/css_style.h"
 #include "evita/v8_glue/runner.h"
@@ -11,7 +12,10 @@
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
+#include "evita/visuals/dom/shape.h"
+#include "evita/visuals/dom/shape_data.h"
 #include "evita/visuals/dom/text.h"
+#include "gin/array_buffer.h"
 
 namespace dom {
 
@@ -59,6 +63,20 @@ NodeHandle* NodeHandle::CreateElement(NodeHandle* document_node,
     return nullptr;
   }
   return new NodeHandle(new visuals::Element(document, tag_name, id));
+}
+
+// static
+NodeHandle* NodeHandle::CreateShape(
+    NodeHandle* document_handle,
+    const gin::ArrayBufferView& array_buffer_view) {
+  const auto document = document_handle->value()->as<visuals::Document>();
+  if (!document) {
+    ScriptHost::instance()->ThrowError("Requires document node");
+    return nullptr;
+  }
+  const auto& data = visuals::ShapeData(array_buffer_view.bytes(),
+                                        array_buffer_view.num_bytes());
+  return new NodeHandle(new visuals::Shape(document, data));
 }
 
 NodeHandle* NodeHandle::CreateText(NodeHandle* document_node,
@@ -139,6 +157,19 @@ void NodeHandle::SetInlineStyle(NodeHandle* handle,
   }
   auto style = CSSStyle::ConvertFromV8(context, raw_style);
   visuals::NodeEditor().SetInlineStyle(element, *style);
+}
+
+// static
+void NodeHandle::SetShapeData(NodeHandle* shape_handle,
+                              const gin::ArrayBufferView& array_buffer_view) {
+  const auto shape = shape_handle->value()->as<visuals::Shape>();
+  if (!shape) {
+    ScriptHost::instance()->ThrowError("Requires shape node");
+    return;
+  }
+  const auto& data = visuals::ShapeData(array_buffer_view.bytes(),
+                                        array_buffer_view.num_bytes());
+  visuals::NodeEditor().SetShapeData(shape, data);
 }
 
 // static

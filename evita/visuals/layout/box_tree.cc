@@ -14,6 +14,7 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/box_assigner.h"
 #include "evita/visuals/layout/box_editor.h"
@@ -465,6 +466,12 @@ void BoxTree::DidChangeSelection(const SelectionModel& new_model,
 void BoxTree::DidChangeComputedStyle(const ElementNode& element,
                                      const css::Style& old_style) {
   impl_->MarkDirty(element);
+}
+
+void BoxTree::DidSetShapeData(const Shape& shape,
+                              const ShapeData& new_data,
+                              const ShapeData& old_data) {
+  impl_->MarkDirty(shape);
 }
 
 void BoxTree::DidSetTextData(const Text& text,

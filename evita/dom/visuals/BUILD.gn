@@ -61,6 +61,7 @@ source_set("test_files") {
     "css_style_sheet_test.js",
     "dom_token_list_test.js",
     "node_test.js",
+    "shape_test.js",
   ]
 
   deps = [

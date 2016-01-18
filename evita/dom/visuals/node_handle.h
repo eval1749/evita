@@ -9,6 +9,10 @@
 #include "evita/gc/member.h"
 #include "evita/v8_glue/scriptable.h"
 
+namespace gin {
+class ArrayBufferView;
+}
+
 namespace visuals {
 class Node;
 }
@@ -48,6 +52,8 @@ class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
                                    const base::string16& id);
   static NodeHandle* CreateElement(NodeHandle* document,
                                    const base::string16& tag_name);
+  static NodeHandle* CreateShape(NodeHandle* document,
+                                 const gin::ArrayBufferView& data);
   static NodeHandle* CreateText(NodeHandle* document,
                                 const base::string16& data);
   static v8::Local<v8::Map> GetInlineStyle(NodeHandle* element);
@@ -61,6 +67,8 @@ class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
                            NodeHandle* node,
                            NodeHandle* child);
   static void SetInlineStyle(NodeHandle* element, v8::Local<v8::Map> raw_style);
+  static void SetShapeData(NodeHandle* element,
+                           const gin::ArrayBufferView& data);
   static void SetTextData(NodeHandle* element, const base::string16& data);
 
   const gc::Member<visuals::Node> value_;

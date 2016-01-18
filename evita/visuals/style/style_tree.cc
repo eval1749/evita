@@ -547,6 +547,12 @@ void StyleTree::DidReplaceChild(const ContainerNode& parent,
   MarkDirty(parent);
 }
 
+void StyleTree::DidSetShapeData(const Shape& shape,
+                                const ShapeData& new_data,
+                                const ShapeData& old_data) {
+  // |Shape| data change doesn't affect computed style.
+}
+
 void StyleTree::DidSetTextData(const Text& text,
                                const base::string16& new_data,
                                const base::string16& old_data) {

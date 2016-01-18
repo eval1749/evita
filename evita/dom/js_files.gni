@@ -83,6 +83,7 @@ js_lib_files = [
   "visuals/document.js",
   "visuals/dom_token_list.js",
   "visuals/element.js",
+  "visuals/shape.js",
   "visuals/text.js",
 
   "visuals/css_rule_builder.js",

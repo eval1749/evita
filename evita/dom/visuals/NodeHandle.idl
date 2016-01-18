@@ -8,6 +8,7 @@ interface NodeHandle {
   static NodeHandle createDocument();
   static NodeHandle createElement(NodeHandle document, DOMString tagName,
                                   DOMString id);
+  static NodeHandle createShape(NodeHandle document, ArrayBufferView data);
   static NodeHandle createText(NodeHandle document, DOMString data);
   static Map getInlineStyle(NodeHandle handle);
   static void insertBefore(NodeHandle parent, NodeHandle node, NodeHandle child);
@@ -16,6 +17,7 @@ interface NodeHandle {
   static void replaceChild(NodeHandle parent, NodeHandle node,
                            NodeHandle child);
   static void setInlineStyle(NodeHandle handle, Map rawStyle);
+  static void setShapeData(NodeHandle handle, ArrayBufferView data);
   static void setTextData(NodeHandle handle, DOMString data);
 
   readonly attribute long id;

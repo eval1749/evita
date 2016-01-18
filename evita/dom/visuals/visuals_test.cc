@@ -33,4 +33,8 @@ TEST_F(VisualsTest, Node) {
   RunFile({"visuals", "node_test.js"});
 }
 
+TEST_F(VisualsTest, Shape) {
+  RunFile({"visuals", "shape_test.js"});
+}
+
 }  // namespace dom

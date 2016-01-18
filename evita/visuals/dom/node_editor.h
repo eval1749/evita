@@ -7,15 +7,10 @@
 
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
+#include "evita/visuals/dom/nodes_forward.h"
 
 namespace visuals {
-
-class ContainerNode;
-class Document;
-class ElementNode;
-class Node;
-class Text;
-
+class ShapeData;
 namespace css {
 class Style;
 }
@@ -36,6 +31,7 @@ class NodeEditor final {
   void RemoveClass(ElementNode* element, const base::StringPiece16& class_name);
   void ReplaceChild(ContainerNode* container, Node* new_child, Node* old_child);
   void SetInlineStyle(ElementNode* element, const css::Style& style);
+  void SetShapeData(Shape* shape, const ShapeData& data);
   void SetTextData(Text* text, const base::StringPiece16& data);
 
   void WillDestroy(Node* node);

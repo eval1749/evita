@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstring>
 #include <ostream>
 #include <utility>
 
@@ -16,6 +17,12 @@ namespace visuals {
 // ShapeData
 //
 ShapeData::ShapeData(const std::vector<uint8_t>& value) : value_(value) {}
+
+ShapeData::ShapeData(const void* bytes, size_t size)
+    : ShapeData(std::vector<uint8_t>(size)) {
+  std::memcpy(value_.data(), bytes, size);
+}
+
 ShapeData::ShapeData(const ShapeData& other) : ShapeData(other.value_) {}
 ShapeData::ShapeData(ShapeData&& other) : value_(std::move(other.value_)) {}
 ShapeData::~ShapeData() {}

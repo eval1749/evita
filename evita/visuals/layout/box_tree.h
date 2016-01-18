@@ -70,6 +70,9 @@ class BoxTree final : public ViewLifecycleClient,
   void DidReplaceChild(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;
+  void DidSetShapeData(const Shape& shape,
+                       const ShapeData& new_data,
+                       const ShapeData& old_data) final;
   void DidSetTextData(const Text& text,
                       const base::string16& new_data,
                       const base::string16& old_data) final;

@@ -25,18 +25,11 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/layout/box_finder.h"
-#include "evita/visuals/layout/box_selection.h"
+#include "evita/visuals/layout/box.h"
 #include "evita/visuals/layout/box_tree.h"
-#include "evita/visuals/layout/layouter.h"
-#include "evita/visuals/layout/root_box.h"
-#include "evita/visuals/layout/simple_box_tree.h"
-#include "evita/visuals/layout/text_box.h"
-#include "evita/visuals/style/style_tree.h"
-#include "evita/visuals/paint/painter.h"
-#include "evita/visuals/paint/paint_info.h"
 #include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
+#include "evita/visuals/view/view.h"
 
 namespace visuals {
 
@@ -176,19 +169,13 @@ void PrintPaint(const DisplayItemList& list) {
 //
 DemoModel::DemoModel()
     : document_(LoadDocument()),
-      lifecycle_(new ViewLifecycle(*document_, *this)),
-      selection_(new Selection(lifecycle_.get())),
       style_sheet_(LoadStyleSheet()),
-      style_tree_(new StyleTree(lifecycle_.get(), {style_sheet_})),
-      box_tree_(new BoxTree(lifecycle_.get(), *selection_, *style_tree_)) {
-  selection_->Collapse(document_->GetElementById(L"input")->first_child(), 0);
+      view_(new View(*document_, *this, {style_sheet_})) {
+  view_->selection()->Collapse(
+      document_->GetElementById(L"input")->first_child(), 0);
 }
 
-DemoModel::~DemoModel() {
-  lifecycle_->StartShutdown();
-  box_tree_.reset();
-  lifecycle_->FinishShutdown();
-}
+DemoModel::~DemoModel() {}
 
 void DemoModel::AttachWindow(DemoWindow* window) {
   window_ = window;
@@ -196,9 +183,7 @@ void DemoModel::AttachWindow(DemoWindow* window) {
 }
 
 ElementNode* DemoModel::FindListItem(const FloatPoint& point) {
-  UpdateLayoutIfNeeded();
-  const auto root_box = box_tree_->root_box();
-  const auto& found = BoxFinder(*root_box).FindByPoint(point);
+  const auto& found = view_->HitTest(point);
   if (!found.box)
     return nullptr;
   const auto list = document_->GetElementById(L"list");
@@ -210,16 +195,6 @@ ElementNode* DemoModel::FindListItem(const FloatPoint& point) {
       return runner->as<ElementNode>();
   }
   return nullptr;
-}
-
-void DemoModel::UpdateLayoutIfNeeded() {
-  UpdateStyleIfNeeded();
-  box_tree_->UpdateIfNeeded();
-  Layouter().Layout(box_tree_->root_box());
-}
-
-void DemoModel::UpdateStyleIfNeeded() {
-  style_tree_->UpdateIfNeeded();
 }
 
 // css::Media
@@ -245,19 +220,9 @@ void DemoModel::DidBeginAnimationFrame(const base::TimeTicks& now) {
 
   DCHECK(!viewport_size_.IsEmpty());
 
-  UpdateStyleIfNeeded();
-  UpdateLayoutIfNeeded();
-
-  const auto root_box = box_tree_->root_box();
-  if (root_box->IsPaintClean()) {
-    // Box tree is changed outside viewport(?).
+  auto display_item_list = view_->Paint();
+  if (!display_item_list)
     return;
-  }
-  const auto& debug_text =
-      base::StringPrintf(L"dom: %d, css: %d, box: %d", document_->version(),
-                         style_tree_->version(), box_tree_->version());
-  PaintInfo paint_info(root_box->bounds(), debug_text);
-  auto display_item_list = Painter().Paint(paint_info, *root_box);
 
 #if 0
   static base::Time last_time;
@@ -288,7 +253,7 @@ void DemoModel::DidMoveMouse(const FloatPoint& point) {
   if (!line)
     return;
   const auto hover = document_->GetElementById(L"hover");
-  const auto hover_point = box_tree_->BoxFor(*line)->bounds().origin();
+  const auto hover_point = view_->box_tree().BoxFor(*line)->bounds().origin();
   NodeEditor().SetInlineStyle(
       hover, *css::StyleBuilder()
                   .SetTop(css::Top(css::Length(hover_point.y())))
@@ -302,13 +267,13 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
   if (!line)
     return;
   const auto hover = document_->GetElementById(L"hover");
-  const auto hover_point = box_tree_->BoxFor(*line)->bounds().origin();
+  const auto hover_point = view_->box_tree().BoxFor(*line)->bounds().origin();
   NodeEditor().SetInlineStyle(
       hover, *css::StyleBuilder()
                   .SetTop(css::Top(css::Length(hover_point.y())))
                   .SetLeft(css::Left(css::Length(hover_point.x())))
                   .Build());
-  PrintBox(*box_tree_);
+  PrintBox(view_->box_tree());
   RequestAnimationFrame();
 }
 

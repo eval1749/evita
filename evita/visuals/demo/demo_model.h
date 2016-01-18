@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "base/macros.h"
+#include "evita/gc/member.h"
 #include "evita/ui/animation/animation_frame_handler.h"
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/media_state.h"
@@ -17,13 +18,10 @@
 
 namespace visuals {
 
-class BoxTree;
 class DemoWindow;
 class Document;
-class ViewLifecycle;
 class ElementNode;
-class Selection;
-class StyleTree;
+class View;
 
 namespace css {
 class StyleSheet;
@@ -44,8 +42,6 @@ class DemoModel final : public css::Media,
 
  private:
   ElementNode* FindListItem(const FloatPoint& point);
-  void UpdateLayoutIfNeeded();
-  void UpdateStyleIfNeeded();
 
   // css::Media
   css::MediaState media_state() const final;
@@ -63,17 +59,10 @@ class DemoModel final : public css::Media,
   void DidPressMouse(const FloatPoint& point) final;
   void DidSetFocus() final;
 
-  Document* const document_;
-  const std::unique_ptr<ViewLifecycle> lifecycle_;
-  css::StyleSheet* style_sheet_;
+  const gc::Member<Document> document_;
+  const gc::Member<css::StyleSheet> style_sheet_;
   FloatSize viewport_size_;
-
-  const std::unique_ptr<Selection> selection_;
-  const std::unique_ptr<StyleTree> style_tree_;
-
-  // |BoxTree| constructor takes |Document|, |Selection|, and |StyleTree|.
-  std::unique_ptr<BoxTree> box_tree_;
-
+  std::unique_ptr<View> view_;
   DemoWindow* window_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(DemoModel);

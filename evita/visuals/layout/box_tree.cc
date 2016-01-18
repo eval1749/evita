@@ -450,11 +450,13 @@ void BoxTree::DidReplaceChild(const ContainerNode& parent,
 // SelectionObserver
 void BoxTree::DidChangeCaretBlink() {
   is_selection_changed_ = true;
+  lifecycle()->LimitTo(ViewLifecycle::State::StyleClean);
 }
 
 void BoxTree::DidChangeSelection(const SelectionModel& new_model,
                                  const SelectionModel& old_model) {
   is_selection_changed_ = true;
+  lifecycle()->LimitTo(ViewLifecycle::State::StyleClean);
 }
 
 // StyleTreeObserver

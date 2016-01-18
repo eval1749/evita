@@ -8,9 +8,7 @@ source_set("visuals") {
   public_deps = [
     "//base",
     "//evita/visuals/display",
-    "//evita/visuals/geometry",
-    "//evita/visuals/layout",
-    "//evita/visuals/paint",
+    "//evita/visuals/view",
   ]
 }
 

@@ -16,6 +16,7 @@
 namespace visuals {
 
 class FloatSize;
+class FloatRect;
 class NativeTextFormat;
 
 //////////////////////////////////////////////////////////////////////
@@ -39,6 +40,7 @@ class NativeTextLayout final {
   }
 
   FloatSize GetMetrics() const;
+  FloatRect HitTestTextPosition(size_t offset) const;
 
  private:
   base::win::ScopedComPtr<IDWriteTextLayout> value_;

@@ -4,7 +4,7 @@
 
 #include "evita/visuals/fonts/text_layout.h"
 
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/fonts/text_format.h"
 
 #if OS_WIN
@@ -41,6 +41,10 @@ bool TextLayout::operator!=(const TextLayout& other) const {
 
 FloatSize TextLayout::GetMetrics() const {
   return impl_->GetMetrics();
+}
+
+FloatRect TextLayout::HitTestTextPosition(size_t offset) const {
+  return impl_->HitTestTextPosition(offset);
 }
 
 }  // namespace visuals

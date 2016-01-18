@@ -5,12 +5,14 @@
 #include <dwrite.h>
 #include <stdint.h>
 
+#include <cmath>
+
 #include "evita/visuals/fonts/native_text_layout_win.h"
 
 #include "common/win/com_verify.h"
 #include "evita/visuals/fonts/direct_write_factory_win.h"
 #include "evita/visuals/fonts/native_text_format_win.h"
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
@@ -47,6 +49,19 @@ FloatSize NativeTextLayout::GetMetrics() const {
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY(value_->GetMetrics(&metrics));
   return FloatSize(metrics.width, metrics.height);
+}
+
+FloatRect NativeTextLayout::HitTestTextPosition(size_t offset) const {
+  auto caret_x = 0.0f;
+  auto caret_y = 0.0f;
+  auto const is_trailing = false;
+  DWRITE_HIT_TEST_METRICS metrics = {0};
+  COM_VERIFY(value_->HitTestTextPosition(static_cast<uint32_t>(offset),
+                                         is_trailing, &caret_x, &caret_y,
+                                         &metrics));
+  return FloatRect(
+      FloatPoint(std::round(caret_x), std::round(caret_y)),
+      FloatSize(std::round(metrics.width), std::round(metrics.height)));
 }
 
 }  // namespace visuals

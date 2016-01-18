@@ -52,7 +52,7 @@ enum class EventType {
 enum class KeyCode {
   ArrowDown = VK_DOWN | 0x100,
   ArrowLeft = VK_LEFT | 0x100,
-  ArrowRight = VK_LEFT | 0x100,
+  ArrowRight = VK_RIGHT | 0x100,
   ArrowUp = VK_UP | 0x100,
   Backspace = VK_BACK | 0x100,
   Delete = VK_DELETE | 0x100,

@@ -93,8 +93,8 @@ void Selection::DidFireCaretTimer() {
 }
 
 void Selection::DidPaint() {
-  if (is_none())
-    return;
+  if (is_none() || media().media_state() != css::MediaState::Interactive)
+    return caret_timer_->Stop();
   if (caret_timer_->IsRunning())
     return;
   caret_timer_->Start(

@@ -30,6 +30,12 @@ FloatQuad::FloatQuad(const FloatPoint& point1,
 
 FloatQuad::FloatQuad(const std::array<FloatPoint, 4>& data) : data_(data) {}
 
+FloatQuad::FloatQuad(const FloatRect& rect)
+    : FloatQuad(rect.origin(),
+                rect.top_right(),
+                rect.bottom_right(),
+                rect.bottom_left()) {}
+
 FloatQuad::FloatQuad(const FloatQuad& other) : FloatQuad(other.data_) {}
 
 FloatQuad::FloatQuad() {}

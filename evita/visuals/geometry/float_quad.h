@@ -15,7 +15,7 @@ namespace visuals {
 //////////////////////////////////////////////////////////////////////
 //
 // FloatQuad represents a collection of 4 points, often representing the result
-// of // mapping a rectangle through transforms. When initialized from a rect,
+// of mapping a rectangle through transforms. When initialized from a rect,
 // the points are in clockwise order from top left.
 //
 class FloatQuad final {
@@ -25,6 +25,7 @@ class FloatQuad final {
             const FloatPoint& point3,
             const FloatPoint& point4);
   explicit FloatQuad(const std::array<FloatPoint, 4>& data);
+  explicit FloatQuad(const FloatRect& rect);
   FloatQuad(const FloatQuad& other);
   FloatQuad();
   ~FloatQuad();
@@ -37,6 +38,10 @@ class FloatQuad final {
   FloatQuad operator*(const FloatQuad& other) const;
 
   const std::array<FloatPoint, 4>& data() const { return data_; }
+  const FloatPoint& point1() const { return data_[0]; }
+  const FloatPoint& point2() const { return data_[1]; }
+  const FloatPoint& point3() const { return data_[2]; }
+  const FloatPoint& point4() const { return data_[3]; }
 
   FloatRect ComputeBoundingBox() const;
 

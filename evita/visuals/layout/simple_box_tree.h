@@ -77,10 +77,12 @@ class SimpleBoxTree final {
   const Document& document_;
   std::unique_ptr<css::MockMedia> mock_media_;
   gc::Member<Document> own_document_;
-  std::unique_ptr<RootBox> root_box_;
 
   // |ViewLifecycle| constructor takes |Document| and |css:Media|.
   std::unique_ptr<ViewLifecycle> lifecycle_;
+
+  // |RootBox| takes |ViewLifecycle|.
+  std::unique_ptr<RootBox> root_box_;
 
   // |ViewLifecycle::Scope| constructor takes |ViewLifecycle|.
   std::unique_ptr<ViewLifecycle::Scope> lifecycle_scope_;

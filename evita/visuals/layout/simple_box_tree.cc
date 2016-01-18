@@ -23,6 +23,7 @@ SimpleBoxTree::SimpleBoxTree(const Document& document)
       lifecycle_(new ViewLifecycle(document_, *mock_media_)),
       root_box_(new RootBox(lifecycle_.get())) {
   boxes_.push(root_box_.get());
+  ViewLifecycle::Scope(lifecycle_.get(), ViewLifecycle::State::Started);
   ViewLifecycle::Scope(lifecycle_.get(), ViewLifecycle::State::InStyleRecalc);
   lifecycle_scope_.reset(new ViewLifecycle::Scope(
       lifecycle_.get(), ViewLifecycle::State::InTreeRebuild));

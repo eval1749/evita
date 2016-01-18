@@ -13,8 +13,9 @@
 
 namespace visuals {
 
-static_assert(static_cast<int>(ViewLifecycle::State::VisualUpdatePending) == 0,
-              "VisualUpdatePending must be 0.");
+static_assert((static_cast<int>(ViewLifecycle::State::VisualUpdatePending) &
+               1) == 0,
+              "VisualUpdatePending must be an even.");
 
 static_assert((static_cast<int>(ViewLifecycle::State::LayoutClean) & 1) == 0,
               "LayoutClean must be an even.");
@@ -47,7 +48,7 @@ ViewLifecycle::Scope::~Scope() {
 // ViewLifecycle
 //
 ViewLifecycle::ViewLifecycle(const Document& document, const css::Media& media)
-    : document_(document), media_(media), state_(State::VisualUpdatePending) {}
+    : document_(document), media_(media), state_(State::Initialized) {}
 
 ViewLifecycle::~ViewLifecycle() {
   DCHECK_EQ(State::Shutdown, state_);
@@ -129,6 +130,8 @@ void ViewLifecycle::RemoveObserver(ViewLifecycleObserver* observer) const {
 }
 
 void ViewLifecycle::StartOver() {
+  if (state_ == State::VisualUpdatePending)
+    return;
   ChangeState(State::VisualUpdatePending);
 }
 

@@ -13,6 +13,8 @@
 namespace visuals {
 
 #define FOR_EACH_TREE_LIFECYCLE_STATE(V) \
+  V(Initialized)                         \
+  V(Started)                             \
   V(VisualUpdatePending)                 \
   V(InStyleRecalc)                       \
   V(StyleClean)                          \

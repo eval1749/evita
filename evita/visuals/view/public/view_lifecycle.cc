@@ -81,14 +81,6 @@ void ViewLifecycle::Advance() {
   ChangeState(static_cast<State>(static_cast<int>(state_) + 1));
 }
 
-void ViewLifecycle::ChangeState(State new_state) {
-  DCHECK_NE(state_, new_state);
-  const auto old_state = state_;
-  state_ = new_state;
-  FOR_EACH_OBSERVER(ViewLifecycleObserver, observers_,
-                    DidChangeLifecycleState(new_state, old_state));
-}
-
 bool ViewLifecycle::AllowsSelectionChanges() const {
   return AllowsTreeMutaions();
 }
@@ -96,6 +88,14 @@ bool ViewLifecycle::AllowsSelectionChanges() const {
 bool ViewLifecycle::AllowsTreeMutaions() const {
   const auto value = static_cast<int>(state_);
   return (value & 1) == 0 && value <= static_cast<int>(State::PaintClean);
+}
+
+void ViewLifecycle::ChangeState(State new_state) {
+  DCHECK_NE(state_, new_state);
+  const auto old_state = state_;
+  state_ = new_state;
+  FOR_EACH_OBSERVER(ViewLifecycleObserver, observers_,
+                    DidChangeLifecycleState(new_state, old_state));
 }
 
 void ViewLifecycle::FinishShutdown() {

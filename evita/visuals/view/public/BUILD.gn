@@ -16,6 +16,8 @@ source_set("public") {
     "view_lifecycle.h",
     "view_lifecycle_client.cc",
     "view_lifecycle_client.h",
+    "view_lifecycle_observer.cc",
+    "view_lifecycle_observer.h",
   ]
   deps = [
     "//evita/visuals/dom",

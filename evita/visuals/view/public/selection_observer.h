@@ -17,7 +17,7 @@ class SelectionModel;
 //
 class SelectionObserver {
  public:
-  ~SelectionObserver();
+  virtual ~SelectionObserver();
 
   virtual void DidChangeCaretBlink() = 0;
   virtual void DidChangeSelection(const SelectionModel& old_model,

@@ -8,6 +8,7 @@
 #include <iosfwd>
 
 #include "base/macros.h"
+#include "base/observer_list.h"
 
 namespace visuals {
 
@@ -25,6 +26,7 @@ namespace visuals {
   V(Shutdown)
 
 class Document;
+class ViewLifecycleObserver;
 
 namespace css {
 class Media;
@@ -66,6 +68,7 @@ class ViewLifecycle final {
   const css::Media& media() const { return media_; }
   State state() const { return state_; }
 
+  void AddObserver(ViewLifecycleObserver* observer) const;
   bool AllowsSelectionChanges() const;
   bool AllowsTreeMutaions() const;
   void FinishShutdown();
@@ -75,14 +78,17 @@ class ViewLifecycle final {
   bool IsTreeClean() const;
   bool IsLayoutClean() const;
   void LimitTo(State state);
+  void RemoveObserver(ViewLifecycleObserver* observer) const;
   void StartOver();
   void StartShutdown();
 
  private:
   void Advance();
+  void ChangeState(State new_state);
 
   const Document& document_;
   const css::Media& media_;
+  mutable base::ObserverList<ViewLifecycleObserver> observers_;
   State state_;
 
   DISALLOW_COPY_AND_ASSIGN(ViewLifecycle);

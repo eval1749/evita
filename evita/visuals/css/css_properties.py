@@ -16,9 +16,6 @@ PRIMITIVE_TYPE_NAMES = frozenset([
 ])
 
 
-PRIMITIVE_TYPES = dict()
-
-
 class CssType(object):
 
     def __init__(self, text):
@@ -212,48 +209,65 @@ class Model(object):
 #
 # Parser
 #
-def parse_css_model(lines):
-    for name in PRIMITIVE_TYPE_NAMES:
-        PRIMITIVE_TYPES[name] = CssPrimitiveType(name)
-    properties = []
-    types = []
-    for raw_line in lines:
-        line = raw_line.lstrip().rstrip()
-        if len(line) == 0 or line[0] == '#':
-            continue
+class Parser(object):
+
+    def __init__(self):
+        self._properties = []
+        self._types = dict()
+        for name in PRIMITIVE_TYPE_NAMES:
+            self._types[name] = CssPrimitiveType(name)
+
+    def add_type(self, new_type):
+        self._types[new_type.name] = new_type
+        return new_type
+
+    def make_model(self):
+        self._properties.sort()
+        property_id = 0
+        for css_property in self._properties:
+            css_property.set_property_id(property_id)
+            property_id = property_id + 1
+        types = sorted([value for value in self._types.values()])
+        return Model(self._properties, types)
+
+    def parse_line(self, line):
         tokens = line.split(' ')
         property_name = tokens[0].replace(':', '')
-        css_type = parse_type(property_name, tokens[1:])
-        types.append(css_type)
-        css_property = CssPropty(property_name, css_type)
-        properties.append(css_property)
-    properties.sort()
-    property_id = 0
-    for css_property in properties:
-        css_property.set_property_id(property_id)
-        property_id = property_id + 1
-    return Model(properties, types)
+        css_type = self.parse_type(property_name, tokens[1:])
+        self._properties.append(CssPropty(property_name, css_type))
+
+    def parse_lines(self, lines):
+        for raw_line in lines:
+            line = raw_line.lstrip().rstrip()
+            if len(line) == 0 or line[0] == '#':
+                continue
+            self.parse_line(line)
+        return self.make_model()
+
+    def parse_type(self, property_name, tokens):
+        """Parse 'property-name: token+' to CssType"""
+        css_type_name = property_name
+        if len(tokens) == 1:
+            return self.parse_type_name(tokens[0])
+        keywords = [CssKeywordType(token) for token in tokens
+                    if token[0] != '<']
+        members = [self.parse_type_name(token) for token in tokens
+                   if token[0] == '<']
+        if len(members) == 0:
+            return self.add_type(CssEnumType(css_type_name, keywords))
+        return self.add_type(CssCompoundType(css_type_name, keywords + members))
+
+    def parse_type_name(self, token):
+        assert token[0] == '<'
+        assert token[-1] == '>'
+        name = token[1:-1]
+        if name in self._types:
+            return self._types[name]
+        return self.add_type(CssType(name))
 
 
-def parse_type(property_name, tokens):
-    """Parse 'property-name: token+' to CssType"""
-    css_type_name = property_name
-    if len(tokens) == 1:
-        return parse_type_name(tokens[0])
-    keywords = [CssKeywordType(token) for token in tokens if token[0] != '<']
-    members = [parse_type_name(token) for token in tokens if token[0] == '<']
-    if len(members) == 0:
-        return CssEnumType(css_type_name, keywords)
-    return CssCompoundType(css_type_name, keywords + members)
-
-
-def parse_type_name(token):
-    assert token[0] == '<'
-    assert token[-1] == '>'
-    name = token[1:-1]
-    if name in PRIMITIVE_TYPES:
-        return PRIMITIVE_TYPES[name]
-    return CssType(name)
+def parse_css_model(lines):
+    return Parser().parse_lines(lines)
 
 
 ######################################################################

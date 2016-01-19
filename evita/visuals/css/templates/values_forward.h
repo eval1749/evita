@@ -19,14 +19,11 @@ namespace css {
 {% endif %}
 {% endfor %}
 
-// Forward CSS Value declarations
+
+// Forward class declarations representing CSS value
 {% for type in types %}
 class {{type.Name}};
 {% endfor %}
-
-class Length;
-class Percentage;
-class String;
 
 }  // namespace css
 }  // namespace visuals

@@ -16,6 +16,22 @@
 namespace visuals {
 namespace css {
 
+//////////////////////////////////////////////////////////////////////
+//
+// Value Types
+//
+enum class ValueType {
+  // Keywords
+{% for keyword in keywords %}
+  {{keyword.Name}},
+{% endfor %}
+
+  // Values
+{% for type in types %}
+  {{type.Name}},
+{% endfor %}
+};
+
 {% for type in types if not type.is_primitive %}
 //////////////////////////////////////////////////////////////////////
 //
@@ -68,16 +84,13 @@ class {{type.Name}} final {
  # Private section
  #}
  private:
-  enum class Kind;
-
-  explicit {{type.Name}}(Kind kind);
+  explicit {{type.Name}}(ValueType value_type);
 
   // Values
 {%  for member in type.members if not member.is_keyword %}
   {{member.Name}} {{member.name}}_;
 {%  endfor %}
-
-  Kind kind_;
+  ValueType value_type_ = ValueType::{{type.initial}};
 };
 
 std::ostream& operator<<(std::ostream& ostream, {{type.Parameter}} {{type.name}});

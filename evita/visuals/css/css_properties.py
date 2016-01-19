@@ -7,14 +7,38 @@ import string
 ######################################################################
 #
 # CSS Value Types
+# See "CSS Values and Units Module"
 #
-PRIMITIVE_TYPE_NAMES = frozenset([
-    'color',
+CSS_PRIMITIVE_TYPES = frozenset([
+    # 'angle',
+    'color',  # CSS Color Module
+    # 'frequency',
+    # 'image',
+    # 'integer',
     'length',
+    # 'number',
     'percentage',
+    # 'position',  # CSS Backgrounds & Borders
+    # 'resolution',
     'string',
+    # 'time',
+    # 'url',
 ])
 
+
+CSS_WIDE_KEYWORDS = ['inherit', 'initial', 'unset']
+
+
+CSS_ABSOLUTE_LENGTH_UNITS = frozenset([
+    'cm', 'in', 'mm', 'pc', 'pt', 'px', 'q',
+])
+CSS_ABSOLUTE_ANGLE_UNITS = frozenset(['deg', 'grad', 'rad', 'turn'])
+CSS_DURATION_UNITS = frozenset(['ms', 's'])
+CSS_FREQUENCY_UNITS = frozenset(['Hz', 'kHz'])
+CSS_ABSOLUTE_LENGTH_UNITS = frozenset([
+    'ch', 'em', 'ex', 'rem', 'vh', 'xmax', 'vmin', 'vw',
+])
+CSS_RESOLUTION_UNITS = frozenset(['dpcm', 'dppx'])
 
 class CssType(object):
 
@@ -73,9 +97,10 @@ class CssCompoundType(CssType):
 
     def __init__(self, name, members):
         super(CssCompoundType, self).__init__(name)
-        if not members[0].is_keyword:
-            raise Exception('No initial value for %s' % name)
-        self._initial_value = members[0].name
+        if members[0].is_keyword:
+            self._initial_value = members[0].name
+        else:
+            self._initial_value = 'Unset'
         self._members = sorted(members)
 
     @property
@@ -180,17 +205,28 @@ class CssPropty(object):
 
 class Model(object):
 
-    def __init__(self, properties, types):
+    def __init__(self, keywords, properties, types):
         self._primitive_types = [
             {
                 'Name': capitalize(name),
                 'name': name,
                 'file_name': name.replace('-', '_'),
             }
-            for name in sorted([name for name in PRIMITIVE_TYPE_NAMES])
+            for name in sorted([name for name in CSS_PRIMITIVE_TYPES])
+        ]
+        self._keywords = [
+            {
+                'Name': capitalize(keyword),
+                'name': keyword,
+            }
+            for keyword in sorted(keyword for keyword in keywords)
         ]
         self._properties = properties
         self._types = types
+
+    @property
+    def keywords(self):
+        return self._keywords
 
     @property
     def primitive_types(self):
@@ -212,10 +248,17 @@ class Model(object):
 class Parser(object):
 
     def __init__(self):
+        self._keywords = dict()
         self._properties = []
         self._types = dict()
-        for name in PRIMITIVE_TYPE_NAMES:
+        for keyword in CSS_WIDE_KEYWORDS:
+            self.parse_type_keyword(keyword)
+        for name in CSS_PRIMITIVE_TYPES:
             self._types[name] = CssPrimitiveType(name)
+
+    def add_keyword(self, new_keyword):
+        self._keywords[new_keyword.text] = new_keyword
+        return new_keyword
 
     def add_type(self, new_type):
         self._types[new_type.name] = new_type
@@ -227,13 +270,14 @@ class Parser(object):
         for css_property in self._properties:
             css_property.set_property_id(property_id)
             property_id = property_id + 1
+        keywords = sorted([keyword for keyword in self._keywords])
         types = sorted([value for value in self._types.values()])
-        return Model(self._properties, types)
+        return Model(keywords, self._properties, types)
 
     def parse_line(self, line):
         tokens = line.split(' ')
         property_name = tokens[0].replace(':', '')
-        css_type = self.parse_type(property_name, tokens[1:])
+        css_type = self.parse_tokens(property_name, tokens[1:])
         self._properties.append(CssPropty(property_name, css_type))
 
     def parse_lines(self, lines):
@@ -244,18 +288,26 @@ class Parser(object):
             self.parse_line(line)
         return self.make_model()
 
-    def parse_type(self, property_name, tokens):
+    def parse_tokens(self, property_name, tokens):
         """Parse 'property-name: token+' to CssType"""
         css_type_name = property_name
         if len(tokens) == 1:
             return self.parse_type_name(tokens[0])
-        keywords = [CssKeywordType(token) for token in tokens
+        keywords = [self.parse_type_keyword(token) for token in tokens
                     if token[0] != '<']
         members = [self.parse_type_name(token) for token in tokens
                    if token[0] == '<']
+        # TODO(eval1749): We should add CSS wide keywords to each property.
+        # for keyword in CSS_WIDE_KEYWORDS:
+        # keywords.append(self._keywords[keyword])
         if len(members) == 0:
             return self.add_type(CssEnumType(css_type_name, keywords))
         return self.add_type(CssCompoundType(css_type_name, keywords + members))
+
+    def parse_type_keyword(self, keyword):
+        if keyword in self._keywords:
+            return self._keywords[keyword]
+        return self.add_keyword(CssKeywordType(keyword))
 
     def parse_type_name(self, token):
         assert token[0] == '<'

@@ -17,40 +17,36 @@ namespace css {
 //
 // CSS Value {{type.Name}}
 //
-enum class {{type.Name}}::Kind {
-{%  for member in type.members %}
-  {{member.Name}},
-{% endfor %}
-};
-
 {%  for member in type.members if not member.is_keyword %}
 {{type.Name}}::{{type.Name}}({{member.Parameter}} {{member.name}})
-    : {{member.name}}_({{member.name}}), kind_(Kind::{{member.Name}}) {}
+    : {{member.name}}_({{member.name}}),
+      value_type_(ValueType::{{member.Name}}) {}
 {% endfor %}
 {# Copy constructor #}
 {{type.Name}}::{{type.Name}}({{type.Parameter}} other) :
 {%  for member in type.members if not member.is_keyword %}
     {{member.name}}_(other.{{member.name}}_),
 {%  endfor %}
-    kind_(other.kind_) {}
+    value_type_(other.value_type_) {}
 
-{{type.Name}}::{{type.Name}}(Kind kind) : kind_(kind) {}
+{{type.Name}}::{{type.Name}}(ValueType value_type)
+    : value_type_(value_type) {}
 {# Default constructor #}
-{{type.Name}}::{{type.Name}}() : {{type.Name}}(Kind::{{type.initial}}) {}
+{{type.Name}}::{{type.Name}}() {}
 {{type.Name}}::~{{type.Name}}() {}
 
 {{type.Name}}& {{type.Name}}::operator=({{type.Parameter}} other) {
 {%  for member in type.members if not member.is_keyword %}
   {{member.name}}_ = other.{{member.name}}_;
 {%  endfor %}
-  kind_ = other.kind_;
+  value_type_ = other.value_type_;
   return *this;
 }
 
 bool {{type.Name}}::operator==({{type.Parameter}} other) const {
   if (this == &other)
     return true;
-  if (kind_ != other.kind_)
+  if (value_type_ != other.value_type_)
     return false;
 {%  for member in type.members if not member.is_keyword %}
   if (is_{{member.name}}())
@@ -80,7 +76,7 @@ bool {{type.Name}}::operator!=({{type.Parameter}} other) const {
  #}
 {% for member in type.members %}
 bool {{type.Name}}::is_{{member.name}}() const {
-  return kind_ == Kind::{{member.Name}};
+  return value_type_ == ValueType::{{member.Name}};
 }
 
 {% endfor %}
@@ -91,7 +87,7 @@ bool {{type.Name}}::is_{{member.name}}() const {
 {% for member in type.members if member.is_keyword %}
 // static
 {{type.Name}} {{type.Name}}::{{member.Name}}() const {
-  return {{type.Name}}(Kind::{{member.Name}});
+  return {{type.Name}}(ValueType::{{member.Name}});
 }
 
 {% endfor %}

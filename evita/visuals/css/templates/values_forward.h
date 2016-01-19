@@ -25,6 +25,8 @@ namespace css {
 class {{type.Name}};
 {% endfor %}
 
+enum class ValueType;
+
 }  // namespace css
 }  // namespace visuals
 

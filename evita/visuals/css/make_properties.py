@@ -75,6 +75,7 @@ class Generator(object):
 
     def make_context(self, model):
         return {
+            'keywords': model.keywords,
             'primitives': self.make_primitives(model),
             'properties': self.make_properties(model),
             'types': self.make_types(model),

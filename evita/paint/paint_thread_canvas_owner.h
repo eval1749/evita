@@ -49,6 +49,10 @@ class PaintThreadCanvasOwner {
 
   std::unique_ptr<Impl> impl_;
 
+#ifndef NDEBUG
+  bool is_realized_ = false;
+#endif
+
   DISALLOW_COPY_AND_ASSIGN(PaintThreadCanvasOwner);
 };
 

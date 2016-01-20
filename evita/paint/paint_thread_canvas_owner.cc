@@ -55,6 +55,8 @@ void PaintThreadCanvasOwner::Impl::DidBeginAnimationFrame(
     const base::TimeTicks& now) {
   TRACE_EVENT_WITH_FLOW0("paint", "MetricsView::DidBeginAnimationFrame", owner_,
                          TRACE_EVENT_FLAG_FLOW_IN);
+  if (!layer())
+    return;
   if (!EnsureCanvas())
     return window_->RequestAnimationFrame();
   owner_->PaintAnimationFrame(canvas_.get(), now);
@@ -116,6 +118,7 @@ void PaintThreadCanvasOwner::DidBeginAnimationFrame(
 }
 
 void PaintThreadCanvasOwner::DidRealize() {
+  is_realized_ = true;
   paint::PaintThread::instance()->PostTask(
       FROM_HERE, base::Bind(&PaintThreadCanvasOwner::Impl::DidRealize,
                             base::Unretained(impl_.get())));
@@ -129,6 +132,7 @@ void PaintThreadCanvasOwner::DidRecreateParentLayer() {
 }
 
 void PaintThreadCanvasOwner::RequestAnimationFrame() {
+  DCHECK(is_realized_);
   impl_->RequestAnimationFrame();
 }
 

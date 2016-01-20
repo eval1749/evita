@@ -118,7 +118,9 @@ void PaintThreadCanvasOwner::DidBeginAnimationFrame(
 }
 
 void PaintThreadCanvasOwner::DidRealize() {
+#ifndef NDEBUG
   is_realized_ = true;
+#endif
   paint::PaintThread::instance()->PostTask(
       FROM_HERE, base::Bind(&PaintThreadCanvasOwner::Impl::DidRealize,
                             base::Unretained(impl_.get())));
@@ -132,7 +134,9 @@ void PaintThreadCanvasOwner::DidRecreateParentLayer() {
 }
 
 void PaintThreadCanvasOwner::RequestAnimationFrame() {
+#ifndef NDEBUG
   DCHECK(is_realized_);
+#endif
   impl_->RequestAnimationFrame();
 }
 

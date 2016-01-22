@@ -111,7 +111,7 @@ interface TextDocument : EventTarget {
     LineAndColumn getLineAndColumn_(TextOffset offset);
 
     [ImplementedAs=JavaScript]
-    TextDocumentWindow[] listWindows();
+    TextWindow[] listWindows();
 
     [ImplementedAs=JavaScript]
     Promise<long> load(optional DOMString fileName);

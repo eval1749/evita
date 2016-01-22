@@ -3,5 +3,5 @@
 // found in the LICENSE file.
 
 dictionary TextDocumentEventInit : EventInit {
-  TextDocumentWindow? view = null;
+  TextWindow? view = null;
 };

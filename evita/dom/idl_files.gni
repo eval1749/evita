@@ -72,13 +72,11 @@ interface_idl_files = [
   #"//evita/dom/visuals/Text.idl",
   "//evita/dom/visuals/CSSStyleSheetHandle.idl",
   "//evita/dom/visuals/NodeHandle.idl",
-  "//evita/dom/windows/TextDocumentWindow.idl",
   "//evita/dom/windows/EditorWindow.idl",
 
   # Note: We have "Point.idl" and "Rect.idl" here for JS externs
   "//evita/dom/windows/Point.idl",
   "//evita/dom/windows/Rect.idl",
-  "//evita/dom/windows/Selection.idl",
   "//evita/dom/windows/TextSelection.idl",
   "//evita/dom/windows/TextWindow.idl",
   "//evita/dom/windows/VisualWindow.idl",

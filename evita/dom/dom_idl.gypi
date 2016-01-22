@@ -46,7 +46,7 @@
       'timers/OneShotTimer.idl',
       'timers/RepeatingTimer.idl',
       'timers/Timer.idl',
-      'windows/TextDocumentWindow.idl',
+      'windows/TextWindow.idl',
       'windows/EditorWindow.idl',
       'windows/Point.idl',
       'windows/Rect.idl',

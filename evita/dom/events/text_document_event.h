@@ -12,7 +12,7 @@
 namespace dom {
 
 class TextDocumentEventInit;
-class TextDocumentWindow;
+class TextWindow;
 
 namespace bindings {
 class TextDocumentEventClass;
@@ -23,7 +23,7 @@ class TextDocumentEvent final
   DECLARE_SCRIPTABLE_OBJECT(TextDocumentEvent)
 
  public:
-  // Expose for|TextDocumentWindow|.
+  // Expose for|TextWindow|.
   TextDocumentEvent(const base::string16& type,
                     const TextDocumentEventInit& init_dict);
   ~TextDocumentEvent() final;
@@ -33,9 +33,9 @@ class TextDocumentEvent final
 
   explicit TextDocumentEvent(const base::string16& type);
 
-  TextDocumentWindow* view() const { return view_.get(); }
+  TextWindow* view() const { return view_.get(); }
 
-  gc::Member<TextDocumentWindow> view_;
+  gc::Member<TextWindow> view_;
 
   DISALLOW_COPY_AND_ASSIGN(TextDocumentEvent);
 };

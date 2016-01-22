@@ -20,9 +20,10 @@ namespace dom {
 // TextSelection
 //
 TextSelection::TextSelection(TextWindow* text_window, TextRange* range)
-    : ScriptableBase(text_window, range->document()),
+    : document_(range->document()),
       text_selection_(new text::Selection(range->text_range())),
-      range_(new TextRange(range->document(), text_selection_->range())) {
+      range_(new TextRange(range->document(), text_selection_->range())),
+      window_(text_window) {
   text_selection_->AddObserver(this);
 }
 

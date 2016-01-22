@@ -426,13 +426,13 @@
 
   /**
    * @this {!TextDocument}
-   * @return {Array.<!TextDocumentWindow>}
+   * @return {Array.<!TextWindow>}
    */
   function listWindows() {
     const windows = [];
     for (let editorWindow of EditorWindow.list) {
       for (let window of editorWindow.children) {
-        if ((window instanceof TextDocumentWindow) && window.document === this)
+        if ((window instanceof TextWindow) && window.document === this)
           windows.push(window);
       }
     }

@@ -43,7 +43,7 @@ $define(global, 'windows', function($export) {
      * @param {!TextDocumentState} state
      */
     static update(window, state) {
-      if (!(window instanceof TextDocumentWindow))
+      if (!(window instanceof TextWindow))
         return;
       Editor.setTabData(window, TabData.newTabDataFromState(state));
     }

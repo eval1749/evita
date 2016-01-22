@@ -5,9 +5,10 @@
 #ifndef EVITA_DOM_WINDOWS_TEXT_WINDOW_H_
 #define EVITA_DOM_WINDOWS_TEXT_WINDOW_H_
 
-#include "evita/dom/windows/text_document_window.h"
+#include "evita/dom/windows/window.h"
 
 #include "evita/dom/windows/rect.h"
+#include "evita/gc/member.h"
 
 namespace domapi {
 class FloatPoint;
@@ -21,6 +22,7 @@ class Selection;
 namespace dom {
 class TextDocument;
 class TextRange;
+class TextSelection;
 
 namespace bindings {
 class TextWindowClass;
@@ -28,8 +30,7 @@ class TextWindowClass;
 
 // The |TextWindow| is DOM world representative of UI world TextWidget, aka
 // TextWindow.
-class TextWindow final
-    : public v8_glue::Scriptable<TextWindow, TextDocumentWindow> {
+class TextWindow final : public v8_glue::Scriptable<TextWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
 
  public:
@@ -40,6 +41,8 @@ class TextWindow final
 
   explicit TextWindow(TextRange* selection_range);
 
+  TextDocument* document() const;
+  TextSelection* selection() const { return selection_; }
   float zoom() const { return zoom_; }
   void set_zoom(float new_zoom);
 
@@ -57,6 +60,11 @@ class TextWindow final
   void Reconvert(const base::string16& text);
   void Scroll(int direction);
 
+  // Window
+  void DidDestroyWindow() override;
+  void DidRealizeWindow() override;
+
+  gc::Member<TextSelection> selection_;
   float zoom_;
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);

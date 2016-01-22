@@ -6,5 +6,5 @@
   Constructor(DOMString typeArg, optional TextDocumentEventInit eventInitDict),
 ]
 interface TextDocumentEvent : Event {
-  readonly attribute TextDocumentWindow? view;
+  readonly attribute TextWindow? view;
 };

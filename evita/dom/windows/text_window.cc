@@ -4,7 +4,8 @@
 
 #include "evita/dom/windows/text_window.h"
 
-#include "base/bind.h"
+#include "evita/bindings/v8_glue_TextDocumentEventInit.h"
+#include "evita/dom/events/text_document_event.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/float_point.h"
@@ -21,12 +22,16 @@ namespace dom {
 // TextWindow
 //
 TextWindow::TextWindow(TextRange* selection_range)
-    : ScriptableBase(new TextSelection(this, selection_range)), zoom_(1.0f) {
+    : selection_(new TextSelection(this, selection_range)), zoom_(1.0f) {
   ScriptHost::instance()->view_delegate()->CreateTextWindow(
       window_id(), static_cast<TextSelection*>(selection())->text_selection());
 }
 
 TextWindow::~TextWindow() {}
+
+TextDocument* TextWindow::document() const {
+  return selection_->document();
+}
 
 void TextWindow::set_zoom(float new_zoom) {
   if (zoom_ == new_zoom)
@@ -98,6 +103,29 @@ void TextWindow::Reconvert(const base::string16& text) {
 void TextWindow::Scroll(int direction) {
   ScriptHost::instance()->view_delegate()->ScrollTextWindow(window_id(),
                                                             direction);
+}
+
+// Window
+void TextWindow::DidDestroyWindow() {
+  // TODO(eval1749): We should dispatch "detach" event in JavaScript rather than
+  // in C++;
+  Window::DidDestroyWindow();
+  TextDocumentEventInit init;
+  init.set_bubbles(true);
+  init.set_view(this);
+  selection_->document()->ScheduleDispatchEventDeprecated(
+      new TextDocumentEvent(L"detach", init));
+}
+
+void TextWindow::DidRealizeWindow() {
+  // TODO(eval1749): We should dispatch "attach" event in JavaScript rather than
+  // in C++;
+  Window::DidRealizeWindow();
+  TextDocumentEventInit init;
+  init.set_bubbles(true);
+  init.set_view(this);
+  selection_->document()->ScheduleDispatchEventDeprecated(
+      new TextDocumentEvent(L"attach", init));
 }
 
 }  // namespace dom

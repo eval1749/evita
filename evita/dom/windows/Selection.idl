@@ -19,5 +19,5 @@
 
 interface Selection {
   readonly attribute TextDocument document;
-  readonly attribute TextDocumentWindow window;
+  readonly attribute TextWindow window;
 };

@@ -5,7 +5,7 @@
 #ifndef EVITA_DOM_WINDOWS_TEXT_SELECTION_H_
 #define EVITA_DOM_WINDOWS_TEXT_SELECTION_H_
 
-#include "evita/dom/windows/selection.h"
+#include "evita/dom/windows/text_window.h"
 #include "evita/gc/member.h"
 #include "evita/text/selection_change_observer.h"
 #include "evita/v8_glue/scriptable.h"
@@ -28,9 +28,8 @@ class TextSelectionClass;
 //
 // TextSelection
 //
-class TextSelection final
-    : public v8_glue::Scriptable<TextSelection, Selection>,
-      private text::SelectionChangeObserver {
+class TextSelection final : public v8_glue::Scriptable<TextSelection>,
+                            private text::SelectionChangeObserver {
   DECLARE_SCRIPTABLE_OBJECT(TextSelection);
 
  public:
@@ -38,6 +37,7 @@ class TextSelection final
   ~TextSelection() final;
 
   text::Offset anchor_offset() const;
+  TextDocument* document() const { return document_.get(); }
   text::Offset focus_offset() const;
   TextRange* range() const { return range_.get(); }
   bool start_is_active() const;
@@ -50,12 +50,16 @@ class TextSelection final
   // For IDL
   int anchor_offset_value() const;
   int focus_offset_value() const;
+  TextWindow* window() const { return window_; }
 
   // text::SelectionChangeObserver
   void DidChangeSelection() final;
 
+  gc::Member<TextDocument> document_;
   text::Selection* const text_selection_;
+  // |range_| constructor takes |text_selection_->text_range()|.
   gc::Member<TextRange> range_;
+  gc::Member<TextWindow> window_;
 
   DISALLOW_COPY_AND_ASSIGN(TextSelection);
 };

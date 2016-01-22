@@ -4,7 +4,6 @@
 #include "evita/dom/global.h"
 
 #include "evita/dom/text/text_document.h"
-#include "evita/dom/windows/text_document_window.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/clipboard/data_transfer.h"
@@ -42,7 +41,6 @@
 #include "evita/dom/text/text_range.h"
 #include "evita/dom/text/regular_expression.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/windows/selection.h"
 #include "evita/dom/windows/text_selection.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/dom/windows/visual_window.h"
@@ -110,7 +108,6 @@ v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(RadioButtonControl);
     INSTALL(TextFieldControl);
     INSTALL(Window);
-    INSTALL(TextDocumentWindow);
     INSTALL(TextWindow);
     INSTALL(EditorWindow);
     INSTALL(FormWindow);
@@ -120,7 +117,6 @@ v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(TextMutationObserver);
     INSTALL(TextMutationRecord);
 
-    INSTALL(Selection);
     INSTALL(TextSelection);
 
     INSTALL(TextDecoder);

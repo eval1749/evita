@@ -116,7 +116,7 @@ global.commander =
     var present = get(keymap, code);
     if (present)
       return present;
-    if (event.target instanceof TextDocumentWindow) {
+    if (event.target instanceof TextWindow) {
       var text_window = /**@type {TextWindow} */(event.target);
       present = get(text_window.document['keymap'], code);
       if (present)
@@ -166,9 +166,9 @@ global.commander =
       } catch (exception) {
         if (!(exception instanceof TextDocumentReadOnly))
           throw exception;
-        if (!(event.target instanceof TextDocumentWindow))
+        if (!(event.target instanceof TextWindow))
           throw exception;
-        var window = /** @type{!TextDocumentWindow} */ (event.target);
+        var window = /** @type{!TextWindow} */ (event.target);
         var error = /** @type{!TextDocumentReadOnly} */(exception);
         if (error.document != window.document)
           throw error;

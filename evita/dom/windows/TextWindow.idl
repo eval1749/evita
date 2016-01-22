@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 [Constructor(TextRange range)]
-interface TextWindow : TextDocumentWindow {
+interface TextWindow : Window {
+  readonly attribute TextDocument document;
+  readonly attribute TextSelection selection;
   attribute float zoom;
 
   [ImplementedAs=ComputeMotion]

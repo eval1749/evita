@@ -8,16 +8,30 @@ import("//evita/dom/js_files.gni")
 
 source_set("dom") {
   sources = [
+    "scheduler_impl.cc",
+    "scheduler_impl.h",
+    "script_thread.cc",
+    "script_thread.h",
+  ]
+  deps = [
+    ":components",
+    "//base",
+    "//evita/ui",
+  ]
+}
+
+source_set("components") {
+  visibility = [ ":*" ]
+  sources = [
     "clipboard/clipboard.cc",
     "clipboard/data_transfer.cc",
     "clipboard/data_transfer_data.cc",
     "clipboard/data_transfer_item.cc",
     "clipboard/data_transfer_item_list.cc",
-    "converter.cc",
     "css/text_style.cc",
     "css/text_style.h",
-    "dictionary.cc",
     "editor.cc",
+    "editor.h",
     "encodings/text_decoder.cc",
     "encodings/text_encoder.cc",
     "events/composition_event.cc",
@@ -38,6 +52,7 @@ source_set("dom") {
     "events/wheel_event.cc",
     "events/window_event.cc",
     "file_path.cc",
+    "file_path.h",
     "forms/button_control.cc",
     "forms/checkbox_control.cc",
     "forms/form.cc",
@@ -49,17 +64,9 @@ source_set("dom") {
     "forms/text_field_control.cc",
     "forms/text_field_selection.cc",
     "global.cc",
-    "lock.cc",
-    "promise_resolver.cc",
-    "scheduler.cc",
-    "scheduler.h",
-    "scheduler_client.cc",
-    "scheduler_client.h",
-    "scheduler_impl.cc",
-    "scheduler_impl.h",
+    "global.h",
     "script_host.cc",
-    "script_thread.cc",
-    "time_stamp.cc",
+    "script_host.h",
     "timers/one_shot_timer.cc",
     "timers/one_shot_timer.h",
     "timers/repeating_timer.cc",
@@ -67,19 +74,30 @@ source_set("dom") {
     "timers/timer.cc",
     "timers/timer.h",
     "windows/editor_window.cc",
+    "windows/editor_window.h",
     "windows/point.cc",
+    "windows/point.h",
     "windows/rect.cc",
+    "windows/rect.h",
     "windows/selection.cc",
+    "windows/selection.h",
     "windows/table_selection.cc",
+    "windows/table_selection.h",
     "windows/table_window.cc",
+    "windows/table_window.h",
     "windows/text_document_window.cc",
+    "windows/text_document_window.j",
     "windows/text_selection.cc",
+    "windows/text_selection.h",
     "windows/text_window.cc",
+    "windows/text_window.h",
     "windows/visual_window.cc",
     "windows/visual_window.h",
     "windows/window.cc",
+    "windows/window.h",
     "windows/window_ostream.cc",
     "windows/window_set.cc",
+    "windows/window_set.h",
 
     # TODO(eval1749): We should use "$target_gen_dir" for "v8_string.cc".
     "$root_gen_dir/v8_strings.cc",
@@ -97,6 +115,9 @@ source_set("dom") {
     ":dom_jslib_cc",
     ":dom_unicode_lib_cc",
     ":dom_v8_strings_cc",
+    ":lock",
+    ":scheduler",
+    ":v8_helper",
     "//base",
     "//base:i18n",
     "//common",
@@ -116,6 +137,49 @@ source_set("dom") {
   include_dirs = [
     root_gen_dir,
     bindings_gen_dir,
+  ]
+}
+
+source_set("lock") {
+  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  sources = [
+    "lock.cc",
+    "lock.h",
+  ]
+  deps = [
+    "//base",
+  ]
+}
+
+source_set("v8_helper") {
+  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  sources = [
+    "converter.cc",
+    "converter.h",
+    "dictionary.cc",
+    "dictionary.h",
+    "promise_resolver.cc",
+    "promise_resolver.h",
+    "time_stamp.cc",
+    "time_stamp.h",
+  ]
+  deps = [
+    "//base",
+    "//evita/text",
+    "//evita/v8_glue",
+  ]
+}
+
+source_set("scheduler") {
+  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  sources = [
+    "scheduler.cc",
+    "scheduler.h",
+    "scheduler_client.cc",
+    "scheduler_client.h",
+  ]
+  deps = [
+    "//base",
   ]
 }
 

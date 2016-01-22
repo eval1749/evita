@@ -43,8 +43,6 @@
 #include "evita/dom/text/regular_expression.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/windows/selection.h"
-#include "evita/dom/windows/table_selection.h"
-#include "evita/dom/windows/table_window.h"
 #include "evita/dom/windows/text_selection.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/dom/windows/visual_window.h"
@@ -113,7 +111,6 @@ v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(TextFieldControl);
     INSTALL(Window);
     INSTALL(TextDocumentWindow);
-    INSTALL(TableWindow);
     INSTALL(TextWindow);
     INSTALL(EditorWindow);
     INSTALL(FormWindow);
@@ -124,7 +121,6 @@ v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL(TextMutationRecord);
 
     INSTALL(Selection);
-    INSTALL(TableSelection);
     INSTALL(TextSelection);
 
     INSTALL(TextDecoder);

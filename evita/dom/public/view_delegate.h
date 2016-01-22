@@ -90,8 +90,6 @@ class ViewDelegate {
                                 dom::Form* form,
                                 const PopupWindowInit& init) = 0;
 
-  virtual void CreateTableWindow(WindowId window_id,
-                                 dom::TextDocument* document) = 0;
   virtual void CreateTextWindow(WindowId window_id,
                                 text::Selection* selection) = 0;
 

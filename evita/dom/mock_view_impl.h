@@ -31,7 +31,6 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD1(CreateEditorWindow, void(domapi::WindowId));
   MOCK_METHOD3(CreateFormWindow,
                void(domapi::WindowId, Form*, const domapi::PopupWindowInit&));
-  MOCK_METHOD2(CreateTableWindow, void(domapi::WindowId, TextDocument*));
   MOCK_METHOD2(CreateTextWindow, void(domapi::WindowId, text::Selection*));
   MOCK_METHOD1(CreateVisualWindow, void(domapi::WindowId window_id));
   MOCK_METHOD1(DestroyWindow, void(domapi::WindowId));

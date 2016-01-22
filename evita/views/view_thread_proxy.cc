@@ -197,7 +197,6 @@ DEFINE_DELEGATE_3(CreateFormWindow,
                   domapi::WindowId,
                   dom::Form*,
                   const domapi::PopupWindowInit&)
-DEFINE_DELEGATE_2(CreateTableWindow, domapi::WindowId, dom::TextDocument*)
 DEFINE_DELEGATE_2(CreateTextWindow, domapi::WindowId, text::Selection*)
 DEFINE_DELEGATE_1(CreateVisualWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DestroyWindow, domapi::WindowId)

@@ -31,7 +31,6 @@
 #include "evita/views/forms/form_control_set.h"
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
-#include "evita/views/table_window.h"
 #include "evita/views/tabs/tab_data_set.h"
 #include "evita/views/text_window.h"
 #include "evita/views/visual_window.h"
@@ -192,11 +191,6 @@ void ViewDelegateImpl::CreateFormWindow(domapi::WindowId window_id,
   }
   new FormWindow(window_id, form, owner,
                  gfx::Point(init.offset_x, init.offset_y));
-}
-
-void ViewDelegateImpl::CreateTableWindow(domapi::WindowId window_id,
-                                         dom::TextDocument* document) {
-  new views::TableWindow(window_id, document);
 }
 
 void ViewDelegateImpl::CreateTextWindow(domapi::WindowId window_id,

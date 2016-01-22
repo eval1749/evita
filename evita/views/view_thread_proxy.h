@@ -37,8 +37,6 @@ class ViewThreadProxy : public domapi::ViewDelegate {
   void CreateFormWindow(domapi::WindowId window_id,
                         dom::Form* form,
                         const domapi::PopupWindowInit& init) final;
-  void CreateTableWindow(domapi::WindowId window_id,
-                         dom::TextDocument* document) final;
   void CreateTextWindow(domapi::WindowId window_id,
                         text::Selection* selection) final;
   void CreateVisualWindow(domapi::WindowId window_id) final;

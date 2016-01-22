@@ -84,9 +84,6 @@ source_set("dom") {
     # TODO(eval1749): We should use "$target_gen_dir" for "v8_string.cc".
     "$root_gen_dir/v8_strings.cc",
     "$target_gen_dir/dom_jslib.cc",
-    "../gc/collectable.cc",
-    "../gc/collector.cc",
-    "../gc/visitable.cc",
   ]
 
   sources += process_file_template(
@@ -109,6 +106,7 @@ source_set("dom") {
     "//evita/dom/text",
     "//evita/dom/timing",
     "//evita/dom/visuals",
+    "//evita/gc",
     "//evita/ui/animation:public",
     "//evita/v8_glue",
     "//evita/visuals",

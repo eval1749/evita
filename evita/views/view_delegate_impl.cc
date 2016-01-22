@@ -339,22 +339,6 @@ std::vector<base::string16> ViewDelegateImpl::GetSwitchNames() {
   return editor::SwitchSet::instance()->names();
 }
 
-// TODO(eval1749): We should make |GetTableRowStates()| to return value
-// asynchronously.
-std::vector<int> ViewDelegateImpl::GetTableRowStates(
-    WindowId window_id,
-    const std::vector<base::string16>& keys) {
-  auto const widget = FromWindowId("GetTableRowStates", window_id);
-  if (!widget)
-    return std::vector<int>();
-  auto const table_view = widget->as<views::TableWindow>();
-  if (!table_view)
-    return std::vector<int>();
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
-  return std::move(table_view->GetRowStates(keys));
-}
-
 void ViewDelegateImpl::HideWindow(domapi::WindowId window_id) {
   auto const window = FromWindowId("HideWindow", window_id);
   if (!window)

@@ -56,9 +56,6 @@ class ViewThreadProxy : public domapi::ViewDelegate {
                   const domapi::StringPromise& promise) final;
   domapi::SwitchValue GetSwitch(const base::string16& name) final;
   std::vector<base::string16> GetSwitchNames() final;
-  std::vector<int> GetTableRowStates(
-      domapi::WindowId window_id,
-      const std::vector<base::string16>& keys) final;
   void HideWindow(domapi::WindowId window_id) final;
   domapi::FloatRect HitTestTextPosition(domapi::WindowId window_id,
                                         text::Offset position);

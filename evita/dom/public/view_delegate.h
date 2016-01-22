@@ -131,9 +131,6 @@ class ViewDelegate {
   // Get switch names
   virtual std::vector<base::string16> GetSwitchNames() = 0;
 
-  virtual std::vector<int> GetTableRowStates(
-      WindowId window_id,
-      const std::vector<base::string16>& keys) = 0;
   virtual void HideWindow(WindowId window_id) = 0;
 
   // Get bounding rectangle of character at text offset.

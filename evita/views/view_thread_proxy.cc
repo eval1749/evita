@@ -318,10 +318,6 @@ DEFINE_SYNC_DELEGATE_2(ComputeOnTextWindow,
                        const domapi::TextWindowCompute&);
 DEFINE_SYNC_DELEGATE_1(GetSwitch, domapi::SwitchValue, const base::string16&)
 DEFINE_SYNC_DELEGATE_0(GetSwitchNames, std::vector<base::string16>)
-DEFINE_SYNC_DELEGATE_2(GetTableRowStates,
-                       std::vector<int>,
-                       domapi::WindowId,
-                       const std::vector<base::string16>&)
 DEFINE_SYNC_DELEGATE_2(HitTestTextPosition,
                        domapi::FloatRect,
                        domapi::WindowId,

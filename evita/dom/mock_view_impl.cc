@@ -29,16 +29,6 @@ void MockViewImpl::GetFileNameForSave(
   resolver.resolve.Run(dir_path + L"/foo.bar");
 }
 
-std::vector<int> MockViewImpl::GetTableRowStates(
-    domapi::WindowId,
-    const std::vector<base::string16>& keys) {
-  std::vector<int> states;
-  for (auto index = 0u; index < keys.size(); ++index) {
-    states.push_back(index);
-  }
-  return std::move(states);
-}
-
 void MockViewImpl::MessageBox(domapi::WindowId,
                               const base::string16&,
                               const base::string16&,

@@ -48,9 +48,6 @@ class MockViewImpl final : public domapi::ViewDelegate {
                void(const base::string16&, const domapi::StringPromise&));
   MOCK_METHOD1(GetSwitch, domapi::SwitchValue(const base::string16& name));
   MOCK_METHOD0(GetSwitchNames, std::vector<base::string16>());
-  std::vector<int> GetTableRowStates(
-      domapi::WindowId window_id,
-      const std::vector<base::string16>& keys) final;
   MOCK_METHOD1(HideWindow, void(domapi::WindowId));
   MOCK_METHOD2(HitTestTextPosition,
                domapi::FloatRect(domapi::WindowId, text::Offset));

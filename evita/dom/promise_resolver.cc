@@ -11,7 +11,6 @@
 #include "base/message_loop/message_loop.h"
 #include "base/trace_event/trace_event.h"
 #include "common/memory/singleton.h"
-#include "evita/dom/script_host.h"
 
 namespace dom {
 

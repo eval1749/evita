@@ -42,7 +42,6 @@ class CanvasContentWindow : public ContentWindow {
   void DidChangeBounds() override;
   void DidHide() override;
   void DidShow() override;
-  void OnDraw(gfx::Canvas* canvas) override;
 
  private:
   std::unique_ptr<gfx::Canvas> canvas_;

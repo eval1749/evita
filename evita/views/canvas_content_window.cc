@@ -50,10 +50,4 @@ void CanvasContentWindow::DidShow() {
   canvas_.reset(layer()->CreateCanvas());
 }
 
-void CanvasContentWindow::OnDraw(gfx::Canvas* canvas) {
-  ContentWindow::OnDraw(canvas);
-  gfx::Brush edge_brush(canvas, gfx::ColorF(0, 0, 0, 0.1f));
-  canvas->DrawRectangle(edge_brush, GetContentsBounds());
-}
-
 }  // namespace views

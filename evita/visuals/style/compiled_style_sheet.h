@@ -48,7 +48,7 @@ class CompiledStyleSheet final : public css::StyleSheetObserver {
   mutable base::ObserverList<css::StyleSheetObserver> observers_;
   const css::StyleSheet& style_sheet_;
 
-  std::unordered_map<base::string16, const css::Style*> class_name_map_;
+  std::unordered_map<AtomicString, const css::Style*> class_name_map_;
   std::unordered_map<AtomicString, const css::Style*> id_map_;
   std::unordered_map<AtomicString, const css::Style*> tag_name_map_;
 

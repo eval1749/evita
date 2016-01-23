@@ -25,8 +25,7 @@ class DocumentObserver {
  public:
   virtual ~DocumentObserver();
 
-  virtual void DidAddClass(const ElementNode& element,
-                           const base::string16& new_name);
+  virtual void DidAddClass(const ElementNode& element, AtomicString new_class);
   virtual void DidAppendChild(const ContainerNode& parent, const Node& child);
   virtual void DidChangeInlineStyle(const ElementNode& element,
                                     const css::Style* old_style);
@@ -35,7 +34,7 @@ class DocumentObserver {
                                const Node& ref_child);
   virtual void DidRemoveChild(const ContainerNode& parent, const Node& child);
   virtual void DidRemoveClass(const ElementNode& element,
-                              const base::string16& old_name);
+                              AtomicString old_class);
   virtual void DidReplaceChild(const ContainerNode& parent,
                                const Node& new_child,
                                const Node& old_child);

@@ -28,22 +28,22 @@ namespace visuals {
 NodeEditor::NodeEditor() {}
 NodeEditor::~NodeEditor() {}
 
-void NodeEditor::AddClass(ElementNode* element,
-                          const base::StringPiece16& class_name) {
-  const auto& it =
-      std::find_if(element->class_list_.begin(), element->class_list_.end(),
-                   [class_name](const base::string16& present) {
-                     return class_name ==
-                            base::StringPiece16(present.data(), present.size());
-                   });
+void NodeEditor::AddClass(ElementNode* element, AtomicString class_name) {
+  const auto& it = std::find_if(
+      element->class_list_.begin(), element->class_list_.end(),
+      [class_name](AtomicString present) { return class_name == present; });
   if (it != element->class_list_.end())
     return;
-  const auto& new_class = class_name.as_string();
-  element->class_list_.emplace_back(new_class);
+  element->class_list_.emplace_back(class_name);
   const auto document = element->document();
   ++document->version_;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidAddClass(*element, new_class));
+                    DidAddClass(*element, class_name));
+}
+
+void NodeEditor::AddClass(ElementNode* element,
+                          const base::StringPiece16& class_name) {
+  AddClass(element, AtomicString(class_name));
 }
 
 void NodeEditor::AppendChild(ContainerNode* container, Node* new_child) {
@@ -134,14 +134,10 @@ void NodeEditor::RemoveChild(ContainerNode* container, Node* old_child) {
                     DidRemoveChild(*container, *old_child));
 }
 
-void NodeEditor::RemoveClass(ElementNode* element,
-                             const base::StringPiece16& class_name) {
-  const auto& old_class = class_name.as_string();
-  auto destination =
-      std::find_if(element->class_list_.begin(), element->class_list_.end(),
-                   [old_class](const base::string16& present) {
-                     return old_class == present;
-                   });
+void NodeEditor::RemoveClass(ElementNode* element, AtomicString class_name) {
+  auto destination = std::find_if(
+      element->class_list_.begin(), element->class_list_.end(),
+      [class_name](AtomicString present) { return class_name == present; });
   if (destination == element->class_list_.end())
     return;
   for (auto source = std::next(destination);
@@ -153,7 +149,12 @@ void NodeEditor::RemoveClass(ElementNode* element,
   const auto document = element->document();
   ++document->version_;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
-                    DidRemoveClass(*element, old_class));
+                    DidRemoveClass(*element, class_name));
+}
+
+void NodeEditor::RemoveClass(ElementNode* element,
+                             const base::StringPiece16& class_name) {
+  RemoveClass(element, AtomicString(class_name));
 }
 
 void NodeEditor::ReplaceChild(ContainerNode* container,

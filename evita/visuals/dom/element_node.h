@@ -25,7 +25,7 @@ class ElementNode : public ContainerNode {
  public:
   ~ElementNode() override;
 
-  const std::vector<base::string16>& class_list() const { return class_list_; }
+  const std::vector<AtomicString>& class_list() const { return class_list_; }
   const css::Style* inline_style() const { return inline_style_.get(); }
   const AtomicString& tag_name() const { return node_name(); }
 
@@ -36,7 +36,7 @@ class ElementNode : public ContainerNode {
   ElementNode(Document* document, const base::StringPiece16& tag_name);
 
  private:
-  std::vector<base::string16> class_list_;
+  std::vector<AtomicString> class_list_;
   std::unique_ptr<css::Style> inline_style_;
 
   DISALLOW_COPY_AND_ASSIGN(ElementNode);

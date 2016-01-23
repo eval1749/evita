@@ -36,18 +36,22 @@ void CompiledStyleSheet::AddObserver(css::StyleSheetObserver* observer) const {
 void CompiledStyleSheet::CompileRule(const css::Rule& rule) {
   if (rule.selector()[0] == '#') {
     const auto& id = AtomicString(rule.selector().substr(1));
-    id_map_.emplace(id, &rule.style());
+    const auto& insert_id = id_map_.emplace(id, &rule.style());
+    DCHECK(insert_id.second);
     return;
   }
 
   if (rule.selector()[0] == '.') {
-    const auto& class_name = rule.selector().substr(1);
-    class_name_map_.emplace(class_name, &rule.style());
+    const auto& class_name = AtomicString(rule.selector().substr(1));
+    const auto& insert_class =
+        class_name_map_.emplace(class_name, &rule.style());
+    DCHECK(insert_class.second);
     return;
   }
 
   const auto& tag_name = AtomicString(rule.selector());
-  tag_name_map_.emplace(tag_name, &rule.style());
+  const auto& insert_tag = tag_name_map_.emplace(tag_name, &rule.style());
+  DCHECK(insert_tag.second);
 }
 
 std::unique_ptr<css::Style> CompiledStyleSheet::Match(

@@ -54,6 +54,7 @@ source_set("application") {
 group("evita_tests") {
   testonly = true
   deps = [
+    "//evita/base:tests",
     "//evita/dom:evita_dom_tests",
     "//evita/layout:evita_layout_tests",
     "//evita/text:evita_text_tests",

@@ -2,8 +2,49 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("base") {
+import("//testing/test.gni")
+
+config("base_implementation") {
+  defines = [ "EVITA_BASE_IMPLEMENTATION" ]
+}
+
+component("base") {
+  output_name = "evita_base"
   sources = [
     "memory/allocator.h",
+    "memory/zone.cc",
+    "memory/zone.h",
+    "memory/zone_allocated.cc",
+    "memory/zone_allocated.h",
+    "memory/zone_deque.h",
+    "memory/zone_owner.cc",
+    "memory/zone_owner.h",
+    "memory/zone_unordered_map.h",
+    "memory/zone_unordered_set.h",
+    "memory/zone_user.cc",
+    "memory/zone_user.h",
+    "memory/zone_vector.h",
+    "strings/atomic_string.cc",
+    "strings/atomic_string.h",
+    "strings/atomic_string_factory.cc",
+    "strings/atomic_string_factory.h",
+  ]
+
+  deps = [
+    "//base",
+  ]
+
+  configs += [ ":base_implementation" ]
+}
+
+test("tests") {
+  output_name = "evita_base_tests"
+  sources = [
+    "strings/atomic_string_test.cc",
+  ]
+  deps = [
+    ":base",
+    "//base/test:run_all_unittests",
+    "//testing/gtest",
   ]
 }

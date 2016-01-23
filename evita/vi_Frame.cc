@@ -199,7 +199,7 @@ void Frame::SetStatusBar(const std::vector<base::string16>& texts) {
   message_view_->SetStatus(texts);
 }
 
-void Frame::ShowMessage(MessageLevel, const base::string16& text) const {
+void Frame::ShowMessage(MessageLevel, base::StringPiece16 text) const {
   message_view_->SetMessage(text);
 }
 

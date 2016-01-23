@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "base/observer_list.h"
+#include "base/strings/string_piece.h"
 #include "evita/views/tabs/tab_content_observer.h"
 #include "evita/views/tabs/tab_data_set.h"
 #include "evita/views/tabs/tab_strip_delegate.h"
@@ -73,7 +74,7 @@ class Frame final : public views::Window,
   void AddObserver(views::FrameObserver* observer);
   void AddOrActivateTabContent(views::ContentWindow*);
   void SetStatusBar(const std::vector<base::string16>& texts);
-  void ShowMessage(MessageLevel, const base::string16& text) const;
+  void ShowMessage(MessageLevel, base::StringPiece16 text) const;
 
  private:
   ~Frame() final;

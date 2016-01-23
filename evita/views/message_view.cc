@@ -239,7 +239,12 @@ class MessageView::View final : public paint::PaintThreadCanvasOwner {
   explicit View(ui::AnimatableWindow* widget);
   ~View() final = default;
 
-  void SetMessage(base::StringPiece16 text);
+  // Since |SetMessage()| is called by another thread, we should use
+  // |base::string16| instead of |base::StringPiece16|.
+  void SetMessage(const base::string16& text);
+
+  // Since |SetStatus()| is called by another thread, we should use
+  // |base::string16| instead of |base::StringPiece16|.
   void SetStatus(const std::vector<base::string16>& texts);
 
  private:
@@ -288,10 +293,10 @@ void MessageView::View::PaintAnimationFrame(gfx::Canvas* canvas,
   message_text_.clear();
 }
 
-void MessageView::View::SetMessage(base::StringPiece16 text) {
+void MessageView::View::SetMessage(const base::string16& text) {
   if (message_text_ == text)
     return;
-  message_text_ = text.as_string();
+  message_text_ = text;
   main_text_alpha_.reset();
   RequestAnimationFrame();
 }
@@ -322,7 +327,7 @@ void MessageView::SetMessage(base::StringPiece16 text) {
   TRACE_EVENT0("view", "MessageView::SetMessage");
   paint::PaintThread::instance()->PostTask(
       FROM_HERE, base::Bind(&MessageView::View::SetMessage,
-                            base::Unretained(view_.get()), text));
+                            base::Unretained(view_.get()), text.as_string()));
 }
 
 void MessageView::SetStatus(const std::vector<base::string16>& texts) {

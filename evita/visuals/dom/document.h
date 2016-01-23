@@ -41,7 +41,7 @@ class Document final : public ContainerNode {
 
   void AddObserver(DocumentObserver* observer) const;
 
-  ElementNode* GetElementById(const base::StringPiece16& id) const;
+  ElementNode* GetElementById(base::StringPiece16 id) const;
   void Lock() const;
   void Unlock() const;
 

@@ -34,10 +34,10 @@ class StyleSheet final : public gc::Collectable<StyleSheet> {
 
   const std::vector<Rule*>& rules() const { return rules_; }
 
-  void AppendRule(const base::StringPiece16& selector,
+  void AppendRule(base::StringPiece16 selector,
                   std::unique_ptr<css::Style> style);
   void AddObserver(StyleSheetObserver* observer) const;
-  void InsertRule(const base::StringPiece16& selector,
+  void InsertRule(base::StringPiece16 selector,
                   std::unique_ptr<css::Style> style,
                   size_t index);
   void RemoveObserver(StyleSheetObserver* observer) const;

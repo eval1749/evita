@@ -35,10 +35,9 @@ class ContainerNode : public Node {
 
  protected:
   ContainerNode(Document* document,
-                const base::StringPiece16& tag_name,
-                const base::StringPiece16& id);
-  explicit ContainerNode(Document* document,
-                         const base::StringPiece16& tag_name);
+                base::StringPiece16 tag_name,
+                base::StringPiece16 id);
+  explicit ContainerNode(Document* document, base::StringPiece16 tag_name);
 
  private:
   friend class NodeEditor;

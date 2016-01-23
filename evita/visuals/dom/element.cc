@@ -11,11 +11,11 @@ namespace visuals {
 // Element
 //
 Element::Element(Document* document,
-                 const base::StringPiece16& tag_name,
-                 const base::StringPiece16& id)
+                 base::StringPiece16 tag_name,
+                 base::StringPiece16 id)
     : ElementNode(document, tag_name, id) {}
 
-Element::Element(Document* document, const base::StringPiece16& tag_name)
+Element::Element(Document* document, base::StringPiece16 tag_name)
     : Element(document, tag_name, base::StringPiece16()) {}
 
 Element::~Element() {}

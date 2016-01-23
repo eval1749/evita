@@ -36,7 +36,7 @@ class EVITA_BASE_EXPORT AtomicString final {
 
   base::string16 as_string() const;
   bool empty() const { return value_->empty(); }
-  const base::StringPiece16& value() const { return *value_; }
+  base::StringPiece16 value() const { return *value_; }
 
   static AtomicString NewUniqueString(const base::char16* format);
 

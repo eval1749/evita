@@ -13,7 +13,7 @@ namespace css {
 //
 // Rule
 //
-Rule::Rule(const base::StringPiece16& selector, std::unique_ptr<Style> style)
+Rule::Rule(base::StringPiece16 selector, std::unique_ptr<Style> style)
     : selector_(selector.as_string()), style_(std::move(style)) {}
 
 Rule::~Rule() {}

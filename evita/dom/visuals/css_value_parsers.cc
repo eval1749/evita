@@ -36,7 +36,7 @@ int DoubleHex(int value) {
   return value * 16 + value;
 }
 
-Maybe<int> ParseHex(const base::StringPiece16& text) {
+Maybe<int> ParseHex(base::StringPiece16 text) {
   auto value = 0;
   for (const auto& code : text) {
     if (!base::IsHexDigit(code))
@@ -48,7 +48,7 @@ Maybe<int> ParseHex(const base::StringPiece16& text) {
 
 }  // namespace
 
-Maybe<CssColor> ParseColor(const base::StringPiece16& text) {
+Maybe<CssColor> ParseColor(base::StringPiece16 text) {
   if (text.size() == 0)
     return common::Nothing<CssColor>();
   if (text[0] == '#') {
@@ -106,7 +106,7 @@ Maybe<CssColor> ParseColor(const base::StringPiece16& text) {
   return common::Nothing<CssColor>();
 }
 
-Maybe<CssLength> ParseLength(const base::StringPiece16& text) {
+Maybe<CssLength> ParseLength(base::StringPiece16 text) {
   enum class State {
     AfterDecimalPoint,
     DecimalPoint,
@@ -179,11 +179,11 @@ Maybe<CssLength> ParseLength(const base::StringPiece16& text) {
   return common::Just<CssLength>(CssLength(sign * f32));
 }
 
-Maybe<CssPercentage> ParsePercentage(const base::StringPiece16& text) {
+Maybe<CssPercentage> ParsePercentage(base::StringPiece16 text) {
   return common::Nothing<CssPercentage>();
 }
 
-Maybe<CssString> ParseString(const base::StringPiece16& text) {
+Maybe<CssString> ParseString(base::StringPiece16 text) {
   return common::Just<CssString>(CssString(text));
 }
 

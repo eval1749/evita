@@ -19,7 +19,7 @@ class Text final : public Node {
   DECLARE_VISUAL_NODE_FINAL_CLASS(Text, Node);
 
  public:
-  Text(Document* document, const base::StringPiece16& data);
+  Text(Document* document, base::StringPiece16 data);
   ~Text() final;
 
   const base::string16& data() const { return data_; }

@@ -28,7 +28,7 @@ using String = visuals::css::String;
 // id instead of checking equality each by each.
 
 {% for type in types if not type.is_primitive %}
-Maybe<{{type.Name}}> Parse{{type.Name}}(const base::StringPiece16& text) {
+Maybe<{{type.Name}}> Parse{{type.Name}}(base::StringPiece16 text) {
 {%  for member in type.members if member.is_keyword %}
   if (text == L{{member.text}})
     return common::Just<{{type.Name}}>({{type.Name}}::{{member.Name}}());

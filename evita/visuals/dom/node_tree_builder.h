@@ -34,14 +34,13 @@ class NodeTreeBuilder final {
   NodeTreeBuilder();
   ~NodeTreeBuilder();
 
-  NodeTreeBuilder& AddText(const base::StringPiece16& text);
+  NodeTreeBuilder& AddText(base::StringPiece16 text);
   NodeTreeBuilder& AddShape(const std::vector<uint8_t>& data);
-  NodeTreeBuilder& Begin(const base::StringPiece16& tag_name);
-  NodeTreeBuilder& Begin(const base::StringPiece16& tag_name,
-                         const base::StringPiece16& id);
+  NodeTreeBuilder& Begin(base::StringPiece16 tag_name);
+  NodeTreeBuilder& Begin(base::StringPiece16 tag_name, base::StringPiece16 id);
   Document* Build();
   NodeTreeBuilder& ClassList(const std::vector<base::string16>& names);
-  NodeTreeBuilder& End(const base::StringPiece16& tag_name);
+  NodeTreeBuilder& End(base::StringPiece16 tag_name);
   void Finish(ContainerNode* node);
   NodeTreeBuilder& SetInlineStyle(const css::Style& style);
 

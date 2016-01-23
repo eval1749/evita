@@ -12,7 +12,7 @@
 namespace visuals {
 namespace css {
 
-String::String(const base::StringPiece16& value) : value_(value.as_string()) {}
+String::String(base::StringPiece16 value) : value_(value.as_string()) {}
 String::String(const String& other) : value_(other.value_) {}
 String::String() {}
 String::~String() {}

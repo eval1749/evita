@@ -20,7 +20,7 @@ namespace css {
 //
 class String final {
  public:
-  explicit String(const base::StringPiece16& value);
+  explicit String(base::StringPiece16 value);
   String(const String& other);
   String();
   ~String();

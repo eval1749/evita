@@ -31,7 +31,7 @@ NodeTreeBuilder::~NodeTreeBuilder() {
   DCHECK(nodes_.empty());
 }
 
-NodeTreeBuilder& NodeTreeBuilder::AddText(const base::StringPiece16& text) {
+NodeTreeBuilder& NodeTreeBuilder::AddText(base::StringPiece16 text) {
   return AddInternal(new Text(document_, text));
 }
 
@@ -45,12 +45,12 @@ NodeTreeBuilder& NodeTreeBuilder::AddInternal(Node* child) {
   return *this;
 }
 
-NodeTreeBuilder& NodeTreeBuilder::Begin(const base::StringPiece16& tag_name) {
+NodeTreeBuilder& NodeTreeBuilder::Begin(base::StringPiece16 tag_name) {
   return BeginInternal(new Element(document_, tag_name));
 }
 
-NodeTreeBuilder& NodeTreeBuilder::Begin(const base::StringPiece16& tag_name,
-                                        const base::StringPiece16& id) {
+NodeTreeBuilder& NodeTreeBuilder::Begin(base::StringPiece16 tag_name,
+                                        base::StringPiece16 id) {
   return BeginInternal(new Element(document_, tag_name, id));
 }
 
@@ -76,7 +76,7 @@ NodeTreeBuilder& NodeTreeBuilder::ClassList(
   return *this;
 }
 
-NodeTreeBuilder& NodeTreeBuilder::End(const base::StringPiece16& tag_name) {
+NodeTreeBuilder& NodeTreeBuilder::End(base::StringPiece16 tag_name) {
   auto const element = nodes_.top()->as<Element>();
   DCHECK_EQ(evita::AtomicString(tag_name), element->tag_name());
   nodes_.pop();

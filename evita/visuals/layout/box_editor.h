@@ -60,7 +60,7 @@ class BoxEditor final {
   void AllocateTextLayout(TextBox* box);
   const TextFormat& EnsureTextFormat(TextBox* box);
   void SetBaseline(TextBox* box, float new_baseline);
-  void SetTextData(TextBox* box, const base::StringPiece16& data);
+  void SetTextData(TextBox* box, base::StringPiece16 data);
 
   // RootBox
   void ScheduleForcePaint(RootBox* root_box);

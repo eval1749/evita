@@ -22,7 +22,7 @@ class Style;
 //
 class Rule final {
  public:
-  Rule(const base::StringPiece16& selector, std::unique_ptr<Style> style);
+  Rule(base::StringPiece16 selector, std::unique_ptr<Style> style);
   ~Rule();
 
   const base::string16& selector() const { return selector_; }

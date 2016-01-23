@@ -12,19 +12,16 @@
 
 namespace dom {
 
-#define V(Name, name, name_string)               \
-  common::Maybe<visuals::css::Name> Parse##Name( \
-      const base::StringPiece16& text);          \
+#define V(Name, name, name_string)                                         \
+  common::Maybe<visuals::css::Name> Parse##Name(base::StringPiece16 text); \
   base::string16 Unparse##Name(const visuals::css::Name& value);
 FOR_EACH_VISUAL_CSS_VALUES(V)
 #undef V
 
-common::Maybe<visuals::css::Length> ParseLength(
-    const base::StringPiece16& text);
+common::Maybe<visuals::css::Length> ParseLength(base::StringPiece16 text);
 common::Maybe<visuals::css::Percentage> ParsePercentage(
-    const base::StringPiece16& text);
-common::Maybe<visuals::css::String> ParseString(
-    const base::StringPiece16& text);
+    base::StringPiece16 text);
+common::Maybe<visuals::css::String> ParseString(base::StringPiece16 text);
 
 base::string16 UnparseLength(const visuals::css::Length& value);
 base::string16 UnparsePercentage(const visuals::css::Percentage& value);

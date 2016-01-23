@@ -24,8 +24,8 @@ class TextBox final : public ContentBox {
   DECLARE_VISUAL_BOX_FINAL_CLASS(TextBox, ContentBox);
 
  public:
-  TextBox(RootBox* root_box, const base::StringPiece16& data, const Node* node);
-  TextBox(RootBox* root_box, const base::StringPiece16& data);
+  TextBox(RootBox* root_box, base::StringPiece16 data, const Node* node);
+  TextBox(RootBox* root_box, base::StringPiece16 data);
   ~TextBox() final;
 
   float baseline() const { return baseline_; }

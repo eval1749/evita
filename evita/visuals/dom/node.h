@@ -78,10 +78,10 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
        const AtomicString& node_name,
        const AtomicString& id);
   Node(Document* document,
-       const base::StringPiece16& node_name,
-       const base::StringPiece16& id);
+       base::StringPiece16 node_name,
+       base::StringPiece16 id);
   Node(Document* document, const AtomicString& node_name);
-  Node(Document* document, const base::StringPiece16& node_name);
+  Node(Document* document, base::StringPiece16 node_name);
 
  private:
   // gc::Visitable

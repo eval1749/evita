@@ -411,8 +411,7 @@ void BoxEditor::SetShouldPaint(Box* box) {
   }
 }
 
-void BoxEditor::SetTextData(TextBox* text_box,
-                            const base::StringPiece16& data) {
+void BoxEditor::SetTextData(TextBox* text_box, base::StringPiece16 data) {
   MustBeInTreeRebuild(*text_box);
   if (text_box->data_ == data)
     return;

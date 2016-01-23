@@ -18,9 +18,9 @@ class Element final : public ElementNode {
 
  public:
   Element(Document* document,
-          const base::StringPiece16& tag_name,
-          const base::StringPiece16& id);
-  Element(Document* document, const base::StringPiece16& tag_name);
+          base::StringPiece16 tag_name,
+          base::StringPiece16 id);
+  Element(Document* document, base::StringPiece16 tag_name);
   ~Element() final;
 
  private:

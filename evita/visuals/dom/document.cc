@@ -32,8 +32,7 @@ void Document::AddObserver(DocumentObserver* observer) const {
   const_cast<Document*>(this)->observers_.AddObserver(observer);
 }
 
-ElementNode* Document::GetElementById(
-    const base::StringPiece16& id_value) const {
+ElementNode* Document::GetElementById(base::StringPiece16 id_value) const {
   AtomicString id(id_value);
   const auto& it = id_map_.find(id);
   if (it == id_map_.end())

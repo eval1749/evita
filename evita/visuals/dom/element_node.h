@@ -31,9 +31,9 @@ class ElementNode : public ContainerNode {
 
  protected:
   ElementNode(Document* document,
-              const base::StringPiece16& tag_name,
-              const base::StringPiece16& id);
-  ElementNode(Document* document, const base::StringPiece16& tag_name);
+              base::StringPiece16 tag_name,
+              base::StringPiece16 id);
+  ElementNode(Document* document, base::StringPiece16 tag_name);
 
  private:
   std::vector<AtomicString> class_list_;

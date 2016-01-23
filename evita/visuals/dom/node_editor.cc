@@ -42,7 +42,7 @@ void NodeEditor::AddClass(ElementNode* element, AtomicString class_name) {
 }
 
 void NodeEditor::AddClass(ElementNode* element,
-                          const base::StringPiece16& class_name) {
+                          base::StringPiece16 class_name) {
   AddClass(element, AtomicString(class_name));
 }
 
@@ -153,7 +153,7 @@ void NodeEditor::RemoveClass(ElementNode* element, AtomicString class_name) {
 }
 
 void NodeEditor::RemoveClass(ElementNode* element,
-                             const base::StringPiece16& class_name) {
+                             base::StringPiece16 class_name) {
   RemoveClass(element, AtomicString(class_name));
 }
 
@@ -226,7 +226,7 @@ void NodeEditor::SetShapeData(Shape* shape, const ShapeData& data) {
                     DidSetShapeData(*shape, new_data, old_data));
 }
 
-void NodeEditor::SetTextData(Text* text, const base::StringPiece16& data) {
+void NodeEditor::SetTextData(Text* text, base::StringPiece16 data) {
   const auto& document = text->document_;
   DCHECK(!document->is_locked());
   if (text->data_ == data)

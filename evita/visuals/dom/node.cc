@@ -28,14 +28,14 @@ Node::Node(Document* document,
       node_name_(node_name) {}
 
 Node::Node(Document* document,
-           const base::StringPiece16& node_name,
-           const base::StringPiece16& id)
+           base::StringPiece16 node_name,
+           base::StringPiece16 id)
     : Node(document, AtomicString(node_name), AtomicString(id)) {}
 
 Node::Node(Document* document, const AtomicString& node_name)
     : Node(document, node_name, AtomicString()) {}
 
-Node::Node(Document* document, const base::StringPiece16& node_name)
+Node::Node(Document* document, base::StringPiece16 node_name)
     : Node(document, node_name, base::StringPiece16()) {}
 
 Node::~Node() {}

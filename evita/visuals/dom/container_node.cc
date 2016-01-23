@@ -15,12 +15,11 @@ namespace visuals {
 //
 
 ContainerNode::ContainerNode(Document* document,
-                             const base::StringPiece16& tag_name,
-                             const base::StringPiece16& id)
+                             base::StringPiece16 tag_name,
+                             base::StringPiece16 id)
     : Node(document, tag_name, id) {}
 
-ContainerNode::ContainerNode(Document* document,
-                             const base::StringPiece16& tag_name)
+ContainerNode::ContainerNode(Document* document, base::StringPiece16 tag_name)
     : Node(document, tag_name) {}
 
 ContainerNode::~ContainerNode() {

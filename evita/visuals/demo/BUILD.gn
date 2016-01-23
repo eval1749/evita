@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/win/manifest.gni")
 import("//testing/test.gni")
 
 executable("demo") {
@@ -17,6 +18,7 @@ executable("demo") {
   ]
 
   deps = [
+    "//evita/res:evita_exe_manifest",
     "//evita/ui:widget",
     "//evita/visuals",
     "//evita/visuals/display:processor",

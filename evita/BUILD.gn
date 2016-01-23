@@ -22,7 +22,7 @@ executable("evita_exe") {
 
   deps = [
     ":application",
-    "//build/win:default_exe_manifest",
+    "//evita/res:evita_exe_manifest",
   ]
 
   if (!is_debug) {

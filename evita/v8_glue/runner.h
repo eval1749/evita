@@ -27,7 +27,7 @@ class Runner : public gin::Runner {
     ~CurrentRunnerScope();
 
    private:
-    v8::Isolate* isolate_;
+    v8::Isolate* const isolate_;
 
     DISALLOW_COPY_AND_ASSIGN(CurrentRunnerScope);
   };
@@ -51,7 +51,7 @@ class Runner : public gin::Runner {
     v8::EscapableHandleScope handle_scope_;
     v8::Context::Scope context_scope_;
     CurrentRunnerScope current_runner_scope_;
-    Runner* runner_;
+    Runner* const runner_;
 
     DISALLOW_COPY_AND_ASSIGN(EscapableHandleScope);
   };
@@ -67,7 +67,7 @@ class Runner : public gin::Runner {
     v8::HandleScope handle_scope_;
     v8::Context::Scope context_scope_;
     CurrentRunnerScope current_runner_scope_;
-    Runner* runner_;
+    Runner* const runner_;
 
     DISALLOW_COPY_AND_ASSIGN(Scope);
   };
@@ -119,9 +119,9 @@ class Runner : public gin::Runner {
   gin::ContextHolder* GetContextHolder() final;
   void Run(const std::string& source, const std::string& resource_name) final;
 
-  int call_depth_;
+  int call_depth_ = 0;
   std::unique_ptr<gin::ContextHolder> context_holder_;
-  RunnerDelegate* delegate_;
+  RunnerDelegate* const delegate_;
 #if defined(_DEBUG)
   int in_scope_ = false;
 #endif

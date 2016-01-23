@@ -80,14 +80,13 @@ Runner::Scope::~Scope() {
 // Runner
 //
 Runner::Runner(v8::Isolate* isolate, RunnerDelegate* delegate)
-    : call_depth_(0),
-      context_holder_(new gin::ContextHolder(isolate)),
+    : context_holder_(new gin::ContextHolder(isolate)),
       delegate_(delegate),
       weak_factory_(this) {
   v8::Locker locker_scope(isolate);
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
-  auto const context =
+  const auto context =
       v8::Context::New(isolate, nullptr, delegate_->GetGlobalTemplate(this));
   context_holder_->SetContext(context);
   gin::PerContextData::From(context)->set_runner(this);
@@ -160,7 +159,7 @@ v8::Local<v8::Value> Runner::CallAsConstructor(v8::Local<v8::Value> callee,
 bool Runner::CheckCallDepth() {
   if (call_depth_ < kMaxCallDepth)
     return true;
-  auto const isolate = this->isolate();
+  const auto isolate = this->isolate();
   isolate->ThrowException(v8::Exception::RangeError(
       gin::StringToV8(isolate, "Maximum call stack size exceeded")));
   return false;
@@ -202,7 +201,7 @@ v8::Local<v8::Value> Runner::Run(const base::string16& script_text,
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
-  auto const script = Compile(script_text, script_name);
+  const auto script = Compile(script_text, script_name);
   if (script.IsEmpty())
     return v8::Local<v8::Value>();
   return Run(script);
@@ -217,7 +216,7 @@ v8::Local<v8::Value> Runner::Run(v8::Local<v8::Script> script) {
     return v8::Local<v8::Value>();
   delegate_->WillRunScript(this);
   v8::TryCatch try_catch;
-  auto const value = script->Run();
+  const auto value = script->Run();
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
   delegate_->DidRunScript(this);

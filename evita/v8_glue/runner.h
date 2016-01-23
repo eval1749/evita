@@ -93,7 +93,6 @@ class Runner : public gin::Runner {
   v8::Local<v8::Value> CallAsConstructor(v8::Local<v8::Value> callee,
                                          Params... params);
   v8::Local<v8::Value> GetGlobalProperty(const base::StringPiece& name);
-  base::WeakPtr<Runner> GetWeakPtr();
   void HandleTryCatch(const v8::TryCatch& try_catch);
   v8::Local<v8::Value> Run(const base::string16& script_text,
                            const base::string16& script_name);
@@ -125,7 +124,6 @@ class Runner : public gin::Runner {
 #if defined(_DEBUG)
   int in_scope_ = false;
 #endif
-  base::WeakPtrFactory<Runner> weak_factory_;
 
   DISALLOW_COPY_AND_ASSIGN(Runner);
 };

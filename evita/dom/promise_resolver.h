@@ -44,14 +44,16 @@ class PromiseResolver final
   PromiseResolver(const tracked_objects::Location& from_here,
                   v8_glue::Runner* runner);
 
-  v8_glue::Runner* runner() const { return runner_.get(); }
+  v8_glue::Runner* runner() const {
+    return reinterpret_cast<v8_glue::Runner*>(runner_.get());
+  }
 
   void DoReject(v8::Local<v8::Value> reason);
   void DoResolve(v8::Local<v8::Value> value);
 
   tracked_objects::Location from_here_;
   v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
-  base::WeakPtr<v8_glue::Runner> runner_;
+  base::WeakPtr<gin::Runner> runner_;
   int const sequence_num_;
 
   DISALLOW_COPY_AND_ASSIGN(PromiseResolver);
@@ -79,8 +81,8 @@ template <typename T>
 void PromiseResolver::Reject(T reason) {
   if (!runner_)
     return;
-  v8_glue::Runner::Scope runner_scope(runner_.get());
-  auto const isolate = runner_->isolate();
+  v8_glue::Runner::Scope runner_scope(runner());
+  auto const isolate = runner()->isolate();
   v8::Local<v8::Value> v8_value;
   if (!gin::TryConvertToV8(isolate, reason, &v8_value))
     return;
@@ -91,8 +93,8 @@ template <typename T>
 void PromiseResolver::Resolve(T value) {
   if (!runner_)
     return;
-  v8_glue::Runner::Scope runner_scope(runner_.get());
-  auto const isolate = runner_->isolate();
+  v8_glue::Runner::Scope runner_scope(runner());
+  auto const isolate = runner()->isolate();
   v8::Local<v8::Value> v8_value;
   if (!gin::TryConvertToV8(isolate, value, &v8_value))
     return;

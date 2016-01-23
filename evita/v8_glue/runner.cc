@@ -80,9 +80,7 @@ Runner::Scope::~Scope() {
 // Runner
 //
 Runner::Runner(v8::Isolate* isolate, RunnerDelegate* delegate)
-    : context_holder_(new gin::ContextHolder(isolate)),
-      delegate_(delegate),
-      weak_factory_(this) {
+    : context_holder_(new gin::ContextHolder(isolate)), delegate_(delegate) {
   v8::Locker locker_scope(isolate);
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
@@ -184,10 +182,6 @@ v8::Local<v8::Value> Runner::GetGlobalProperty(const base::StringPiece& name) {
   DCHECK(in_scope_);
 #endif
   return global()->Get(gin::StringToV8(isolate(), name));
-}
-
-base::WeakPtr<Runner> Runner::GetWeakPtr() {
-  return weak_factory_.GetWeakPtr();
 }
 
 void Runner::HandleTryCatch(const v8::TryCatch& try_catch) {

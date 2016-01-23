@@ -9,6 +9,8 @@
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner_delegate.h"
 #include "evita/v8_glue/per_isolate_data.h"
+#include "gin/public/context_holder.h"
+#include "gin/per_context_data.h"
 
 namespace v8_glue {
 
@@ -78,19 +80,17 @@ Runner::Scope::~Scope() {
 // Runner
 //
 Runner::Runner(v8::Isolate* isolate, RunnerDelegate* delegate)
-    : gin::ContextHolder(isolate),
-      call_depth_(0),
+    : call_depth_(0),
+      context_holder_(new gin::ContextHolder(isolate)),
       delegate_(delegate),
-#if defined(_DEBUG)
-      in_scope_(false),
-#endif
       weak_factory_(this) {
   v8::Locker locker_scope(isolate);
   v8::Isolate::Scope isolate_scope(isolate);
   v8::HandleScope handle_scope(isolate);
   auto const context =
       v8::Context::New(isolate, nullptr, delegate_->GetGlobalTemplate(this));
-  SetContext(context);
+  context_holder_->SetContext(context);
+  gin::PerContextData::From(context)->set_runner(this);
 
   v8::Context::Scope scope(context);
   delegate_->DidCreateContext(this);
@@ -98,12 +98,17 @@ Runner::Runner(v8::Isolate* isolate, RunnerDelegate* delegate)
 
 Runner::~Runner() {}
 
-Runner* Runner::current_runner(v8::Isolate* isolate) {
-  return PerIsolateData::From(isolate)->current_runner();
+v8::Local<v8::Context> Runner::context() const {
+  return context_holder_->context();
 }
 
-v8::Local<v8::Object> Runner::global() const {
-  return context()->Global();
+v8::Isolate* Runner::isolate() const {
+  return context_holder_->isolate();
+}
+
+// static
+Runner* Runner::current_runner(v8::Isolate* isolate) {
+  return PerIsolateData::From(isolate)->current_runner();
 }
 
 v8::Local<v8::Value> Runner::Call(v8::Local<v8::Value> callee,
@@ -217,6 +222,23 @@ v8::Local<v8::Value> Runner::Run(v8::Local<v8::Script> script) {
   HandleTryCatch(try_catch);
   delegate_->DidRunScript(this);
   return value;
+}
+
+// gin::Runner
+v8::Local<v8::Value> Runner::Call(v8::Local<v8::Function> function,
+                                  v8::Local<v8::Value> receiver,
+                                  int argc,
+                                  v8::Local<v8::Value> argv[]) {
+  NOTREACHED();
+  return v8::Local<v8::Value>();
+}
+
+gin::ContextHolder* Runner::GetContextHolder() {
+  return context_holder_.get();
+}
+
+void Runner::Run(const std::string& source, const std::string& resource_name) {
+  NOTREACHED();
 }
 
 }  // namespace v8_glue

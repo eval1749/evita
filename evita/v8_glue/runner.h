@@ -5,18 +5,21 @@
 #ifndef EVITA_V8_GLUE_RUNNER_H_
 #define EVITA_V8_GLUE_RUNNER_H_
 
+#include <memory>
+#include <string>
 #include <vector>
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
 #include "base/memory/weak_ptr.h"
 #include "evita/v8_glue/context_holder.h"
+#include "gin/runner.h"
 
 namespace v8_glue {
 
 class RunnerDelegate;
 
-class Runner : public gin::ContextHolder {
+class Runner : public gin::Runner {
  private:
   class CurrentRunnerScope final {
    public:
@@ -72,8 +75,10 @@ class Runner : public gin::ContextHolder {
   explicit Runner(v8::Isolate* isolate, RunnerDelegate* delegate);
   ~Runner();
 
+  v8::Local<v8::Context> context() const;
+  v8::Isolate* isolate() const;
+
   static Runner* current_runner(v8::Isolate* isolate);
-  v8::Local<v8::Object> global() const;
 
   v8::Local<v8::Value> Call(v8::Local<v8::Value> callee,
                             v8::Local<v8::Value> receiver,
@@ -106,10 +111,19 @@ class Runner : public gin::ContextHolder {
   v8::Local<v8::Script> Compile(const base::string16& script_text,
                                 const base::string16& script_name);
 
+  // gin::Runner
+  v8::Local<v8::Value> Call(v8::Local<v8::Function> function,
+                            v8::Local<v8::Value> receiver,
+                            int argc,
+                            v8::Local<v8::Value> argv[]) final;
+  gin::ContextHolder* GetContextHolder() final;
+  void Run(const std::string& source, const std::string& resource_name) final;
+
   int call_depth_;
+  std::unique_ptr<gin::ContextHolder> context_holder_;
   RunnerDelegate* delegate_;
 #if defined(_DEBUG)
-  int in_scope_;
+  int in_scope_ = false;
 #endif
   base::WeakPtrFactory<Runner> weak_factory_;
 

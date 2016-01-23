@@ -37,7 +37,7 @@ TEST_F(TextWindowTest, _ctor) {
   EXPECT_SCRIPT_TRUE("sample instanceof Window");
   EXPECT_SCRIPT_EQ("1", "sample.id");
   EXPECT_SCRIPT_TRUE("sample.document == doc");
-  EXPECT_SCRIPT_TRUE("sample.selection instanceof Selection");
+  EXPECT_SCRIPT_TRUE("sample.selection instanceof TextSelection");
 }
 
 TEST_F(TextWindowTest, clone) {

@@ -282,8 +282,10 @@ void MessageView::View::PaintAnimationFrame(gfx::Canvas* canvas,
   auto const new_alpha = main_text_alpha_->Compute(now);
   parts_[0].alpha = new_alpha;
   painter_->Paint(canvas, parts_);
-  if (new_alpha != main_text_alpha_->end_value())
+  if (new_alpha != main_text_alpha_->end_value()) {
+    RequestAnimationFrame();
     return;
+  }
 
   // Main text animation is finished.
   if (message_text_.empty())

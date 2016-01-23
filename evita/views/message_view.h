@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "evita/ui/animation/animatable_window.h"
 
 namespace views {
@@ -24,7 +25,7 @@ class MessageView final : public ui::AnimatableWindow {
   MessageView();
   ~MessageView() final;
 
-  void SetMessage(const base::string16& text);
+  void SetMessage(base::StringPiece16 text);
   void SetStatus(const std::vector<base::string16>& texts);
 
  private:

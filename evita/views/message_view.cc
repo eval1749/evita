@@ -32,15 +32,15 @@ struct PartView {
   float alpha;
   base::string16 text;
 
-  PartView(float alpha, const base::string16& text);
+  PartView(float alpha, base::StringPiece16 text);
   PartView();
   ~PartView() = default;
 };
 
-PartView::PartView(float alpha, const base::string16& text)
-    : alpha(alpha), text(text) {}
+PartView::PartView(float alpha, base::StringPiece16 text)
+    : alpha(alpha), text(text.as_string()) {}
 
-PartView::PartView() : PartView(1.0f, base::string16()) {}
+PartView::PartView() : PartView(1.0f, base::StringPiece16()) {}
 
 // Paint resize button with six dots:
 //  --o
@@ -239,7 +239,7 @@ class MessageView::View final : public paint::PaintThreadCanvasOwner {
   explicit View(ui::AnimatableWindow* widget);
   ~View() final = default;
 
-  void SetMessage(const base::string16& text);
+  void SetMessage(base::StringPiece16 text);
   void SetStatus(const std::vector<base::string16>& texts);
 
  private:
@@ -288,10 +288,10 @@ void MessageView::View::PaintAnimationFrame(gfx::Canvas* canvas,
   message_text_.clear();
 }
 
-void MessageView::View::SetMessage(const base::string16& text) {
+void MessageView::View::SetMessage(base::StringPiece16 text) {
   if (message_text_ == text)
     return;
-  message_text_ = text;
+  message_text_ = text.as_string();
   main_text_alpha_.reset();
   RequestAnimationFrame();
 }
@@ -318,7 +318,7 @@ MessageView::MessageView() : view_(new View(this)) {}
 
 MessageView::~MessageView() {}
 
-void MessageView::SetMessage(const base::string16& text) {
+void MessageView::SetMessage(base::StringPiece16 text) {
   TRACE_EVENT0("view", "MessageView::SetMessage");
   paint::PaintThread::instance()->PostTask(
       FROM_HERE, base::Bind(&MessageView::View::SetMessage,

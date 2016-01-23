@@ -31,7 +31,7 @@ TEST(DocumentTest, GetElementById) {
   for (const auto& node : Node::DescendantsOrSelf(*document)) {
     if (node->id().empty())
       continue;
-    id_map.insert(std::make_pair(node->id(), node));
+    id_map.insert(std::make_pair(node->id().as_string(), node));
   }
 
   EXPECT_EQ(id_map.find(L"block1")->second,

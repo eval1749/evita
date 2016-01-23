@@ -12,6 +12,7 @@
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
 #include "common/castable.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/gc/collectable.h"
 #include "evita/gc/visitor.h"
 #include "evita/visuals/dom/nodes_forward.h"
@@ -61,9 +62,9 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
   Document* document() const { return document_; }
 
   // Node identifiers
-  const base::string16& id() const { return id_; }
+  const AtomicString& id() const { return id_; }
   int sequence_id() const { return sequence_id_; }
-  const base::string16& node_name() const { return node_name_; }
+  const AtomicString& node_name() const { return node_name_; }
 
   // Node tree related values
   ContainerNode* parent() const { return parent_; }
@@ -74,8 +75,12 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
 
  protected:
   Node(Document* document,
+       const AtomicString& node_name,
+       const AtomicString& id);
+  Node(Document* document,
        const base::StringPiece16& node_name,
        const base::StringPiece16& id);
+  Node(Document* document, const AtomicString& node_name);
   Node(Document* document, const base::StringPiece16& node_name);
 
  private:
@@ -85,9 +90,9 @@ class Node : public common::Castable<Node>, public gc::Collectable<Node> {
   Document* document_;
   // User specified string identifier of this node. Multiple nodes can have
   // same string id.
-  const base::string16 id_;
+  const AtomicString id_;
   Node* next_sibling_ = nullptr;
-  const base::string16 node_name_;
+  const AtomicString node_name_;
   ContainerNode* parent_ = nullptr;
   Node* previous_sibling_ = nullptr;
   const int sequence_id_;

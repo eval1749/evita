@@ -32,8 +32,10 @@ void Document::AddObserver(DocumentObserver* observer) const {
   const_cast<Document*>(this)->observers_.AddObserver(observer);
 }
 
-ElementNode* Document::GetElementById(const base::StringPiece16& id) const {
-  const auto& it = id_map_.find(id.as_string());
+ElementNode* Document::GetElementById(
+    const base::StringPiece16& id_value) const {
+  AtomicString id(id_value);
+  const auto& it = id_map_.find(id);
   if (it == id_map_.end())
     return nullptr;
   // TODO(eval1749): We should return a first node in tree order.

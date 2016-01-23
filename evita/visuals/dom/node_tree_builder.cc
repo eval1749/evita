@@ -78,7 +78,7 @@ NodeTreeBuilder& NodeTreeBuilder::ClassList(
 
 NodeTreeBuilder& NodeTreeBuilder::End(const base::StringPiece16& tag_name) {
   auto const element = nodes_.top()->as<Element>();
-  DCHECK_EQ(tag_name.as_string(), element->tag_name());
+  DCHECK_EQ(evita::AtomicString(tag_name), element->tag_name());
   nodes_.pop();
   return *this;
 }

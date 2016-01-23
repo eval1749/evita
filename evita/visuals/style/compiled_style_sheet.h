@@ -11,6 +11,7 @@
 #include "base/macros.h"
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/visuals/css/style_sheet_observer.h"
 
 namespace visuals {
@@ -36,6 +37,8 @@ class CompiledStyleSheet final : public css::StyleSheetObserver {
   void RemoveObserver(css::StyleSheetObserver* observer) const;
 
  private:
+  using AtomicString = evita::AtomicString;
+
   void CompileRule(const css::Rule& rule);
 
   // css::StyleSheetObserver
@@ -46,8 +49,8 @@ class CompiledStyleSheet final : public css::StyleSheetObserver {
   const css::StyleSheet& style_sheet_;
 
   std::unordered_map<base::string16, const css::Style*> class_name_map_;
-  std::unordered_map<base::string16, const css::Style*> id_map_;
-  std::unordered_map<base::string16, const css::Style*> tag_name_map_;
+  std::unordered_map<AtomicString, const css::Style*> id_map_;
+  std::unordered_map<AtomicString, const css::Style*> tag_name_map_;
 
   DISALLOW_COPY_AND_ASSIGN(CompiledStyleSheet);
 };

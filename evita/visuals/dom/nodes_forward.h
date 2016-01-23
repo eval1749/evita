@@ -5,6 +5,10 @@
 #ifndef EVITA_VISUALS_DOM_NODES_FORWARD_H_
 #define EVITA_VISUALS_DOM_NODES_FORWARD_H_
 
+namespace evita {
+class AtomicString;
+}
+
 namespace visuals {
 
 #define FOR_EACH_VISUAL_NODE(V) \
@@ -19,6 +23,7 @@ namespace visuals {
   V(Node)
 
 // Forward declarations
+using AtomicString = evita::AtomicString;
 class Node;
 #define V(name) class name;
 FOR_EACH_VISUAL_NODE(V)

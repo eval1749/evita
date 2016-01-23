@@ -55,7 +55,7 @@ class Document final : public ContainerNode {
   void Accept(gc::Visitor* visitor) final;
 
   base::ObserverList<DocumentObserver> observers_;
-  std::map<base::string16, ElementNode*> id_map_;
+  std::map<AtomicString, ElementNode*> id_map_;
   mutable int lock_count_ = 0;
   int version_ = 0;
 

@@ -5,6 +5,7 @@
 #include "evita/visuals/style/compiled_style_sheet.h"
 
 #include "base/strings/string16.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/visuals/css/rule.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
@@ -34,7 +35,7 @@ void CompiledStyleSheet::AddObserver(css::StyleSheetObserver* observer) const {
 
 void CompiledStyleSheet::CompileRule(const css::Rule& rule) {
   if (rule.selector()[0] == '#') {
-    const auto& id = rule.selector().substr(1);
+    const auto& id = AtomicString(rule.selector().substr(1));
     id_map_.emplace(id, &rule.style());
     return;
   }
@@ -45,7 +46,7 @@ void CompiledStyleSheet::CompileRule(const css::Rule& rule) {
     return;
   }
 
-  const auto& tag_name = rule.selector();
+  const auto& tag_name = AtomicString(rule.selector());
   tag_name_map_.emplace(tag_name, &rule.style());
 }
 

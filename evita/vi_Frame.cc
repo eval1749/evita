@@ -289,6 +289,16 @@ void Frame::DidChangeBounds() {
   message_view_->SetMessage(base::StringPrintf(
       L"Resizing... %dx%d", bounds().width(), bounds().height()));
 
+  // Make blur area whole window.
+  {
+    MARGINS margins;
+    margins.cxLeftWidth = 0;
+    margins.cxRightWidth = 0;
+    margins.cyBottomHeight = 0;
+    margins.cyTopHeight = bounds().height();
+    COM_VERIFY(::DwmExtendFrameIntoClientArea(*native_window(), &margins));
+  }
+
   DrawForResize();
 }
 
@@ -364,16 +374,6 @@ LRESULT Frame::OnMessage(uint32_t message,
                          WPARAM const wParam,
                          LPARAM const lParam) {
   switch (message) {
-    case WM_ACTIVATE: {
-      MARGINS margins;
-      margins.cxLeftWidth = 0;
-      margins.cxRightWidth = 0;
-      margins.cyBottomHeight = 0;
-      margins.cyTopHeight = -1;
-      COM_VERIFY(::DwmExtendFrameIntoClientArea(*native_window(), &margins));
-      break;
-    }
-
     case WM_DROPFILES:
       OnDropFiles(reinterpret_cast<HDROP>(wParam));
       break;
@@ -388,6 +388,14 @@ LRESULT Frame::OnMessage(uint32_t message,
         tab_content->DidExitSizeMove();
       message_view_->SetMessage(base::StringPrintf(
           L"Resized to %dx%d", bounds().width(), bounds().height()));
+      {
+        MARGINS margins;
+        margins.cxLeftWidth = 0;
+        margins.cxRightWidth = 0;
+        margins.cyBottomHeight = 0;
+        margins.cyTopHeight = bounds().height();
+        COM_VERIFY(::DwmExtendFrameIntoClientArea(*native_window(), &margins));
+      }
       break;
 
     case WM_GETMINMAXINFO: {

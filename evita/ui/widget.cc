@@ -735,8 +735,8 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       // To handle activating window after blocked |SetForegroundWindow()|
       if (LOWORD(wParam) == WA_ACTIVE)
         FocusController::instance()->DidActivate(this);
-      // Ask Windows to process |WM_NCACTIVATE| too.
-      return 1;
+      // Ask Windows to process |WM_NCACTIVATE| to draw title bar.
+      break;
 
     case WM_NCDESTROY:
       DidDestroyNativeWindow();

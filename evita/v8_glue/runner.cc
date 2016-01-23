@@ -228,8 +228,24 @@ v8::Local<v8::Value> Runner::Call(v8::Local<v8::Function> function,
                                   v8::Local<v8::Value> receiver,
                                   int argc,
                                   v8::Local<v8::Value> argv[]) {
-  NOTREACHED();
-  return v8::Local<v8::Value>();
+#if defined(_DEBUG)
+  DCHECK(in_scope_);
+#endif
+  base::AutoReset<int> call_depth(&call_depth_, call_depth_ + 1);
+  if (!CheckCallDepth())
+    return v8::Local<v8::Value>();
+  delegate_->WillRunScript(this);
+  v8::MaybeLocal<v8::Value> maybe_value;
+  v8::TryCatch try_catch;
+  {
+    TRACE_EVENT0("script", "Runner::Call");
+    maybe_value = function->Call(context(), receiver, argc, argv);
+  }
+  delegate_->DidRunScript(this);
+  HandleTryCatch(try_catch);
+  if (maybe_value.IsEmpty())
+    return v8::Local<v8::Value>();
+  return maybe_value.ToLocalChecked();
 }
 
 gin::ContextHolder* Runner::GetContextHolder() {

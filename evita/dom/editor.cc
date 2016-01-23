@@ -114,9 +114,10 @@ void TraceLogClient::DidGetOutput(const std::string& chunk,
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   ASSERT_DOM_LOCKED();
-  runner->Call(callback_.NewLocal(isolate), runner->global(),
-               gin::StringToV8(isolate, chunk),
-               has_more_events ? v8::True(isolate) : v8::False(isolate));
+  runner->CallAsFunction(
+      callback_.NewLocal(isolate), runner->global(),
+      gin::StringToV8(isolate, chunk),
+      has_more_events ? v8::True(isolate) : v8::False(isolate));
   if (has_more_events)
     return;
   delete this;

@@ -50,8 +50,8 @@ void IdleTaskWrapper::Run() {
                              gin::ConvertToV8(isolate, new IdleDeadline()));
   }
   DOM_AUTO_LOCK_SCOPE();
-  runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate),
-               idle_deadline_object.Get(isolate));
+  runner->CallAsFunction(callback_.NewLocal(isolate), v8::Undefined(isolate),
+                         idle_deadline_object.Get(isolate));
 }
 
 }  // namespace

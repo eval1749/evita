@@ -80,15 +80,15 @@ class Runner : public gin::Runner {
 
   static Runner* current_runner(v8::Isolate* isolate);
 
-  v8::Local<v8::Value> Call(v8::Local<v8::Value> callee,
-                            v8::Local<v8::Value> receiver,
-                            const Args& args);
+  v8::Local<v8::Value> CallAsFunction(v8::Local<v8::Value> callee,
+                                      v8::Local<v8::Value> receiver,
+                                      const Args& args);
   v8::Local<v8::Value> CallAsConstructor(v8::Local<v8::Value> callee,
                                          const Args& args);
   template <typename... Params>
-  v8::Local<v8::Value> Call(v8::Local<v8::Value> callee,
-                            v8::Local<v8::Value> receiver,
-                            Params... params);
+  v8::Local<v8::Value> CallAsFunction(v8::Local<v8::Value> callee,
+                                      v8::Local<v8::Value> receiver,
+                                      Params... params);
   template <typename... Params>
   v8::Local<v8::Value> CallAsConstructor(v8::Local<v8::Value> callee,
                                          Params... params);
@@ -131,10 +131,10 @@ class Runner : public gin::Runner {
 };
 
 template <typename... Params>
-v8::Local<v8::Value> Runner::Call(v8::Local<v8::Value> callee,
-                                  v8::Local<v8::Value> receiver,
-                                  Params... params) {
-  return Call(callee, receiver, Args{params...});
+v8::Local<v8::Value> Runner::CallAsFunction(v8::Local<v8::Value> callee,
+                                            v8::Local<v8::Value> receiver,
+                                            Params... params) {
+  return CallAsFunction(callee, receiver, Args{params...});
 }
 
 template <typename... Params>

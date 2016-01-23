@@ -210,7 +210,8 @@ void EventTarget::InvokeEventListeners(v8_glue::Runner* runner, Event* event) {
     if (callee.IsEmpty())
       continue;
     ASSERT_DOM_LOCKED();
-    runner->Call(callee, GetWrapper(isolate), event->GetWrapper(isolate));
+    runner->CallAsFunction(callee, GetWrapper(isolate),
+                           event->GetWrapper(isolate));
   }
 }
 

@@ -110,9 +110,9 @@ Runner* Runner::current_runner(v8::Isolate* isolate) {
   return PerIsolateData::From(isolate)->current_runner();
 }
 
-v8::Local<v8::Value> Runner::Call(v8::Local<v8::Value> callee,
-                                  v8::Local<v8::Value> receiver,
-                                  const Args& args) {
+v8::Local<v8::Value> Runner::CallAsFunction(v8::Local<v8::Value> callee,
+                                            v8::Local<v8::Value> receiver,
+                                            const Args& args) {
 #if defined(_DEBUG)
   DCHECK(in_scope_);
 #endif
@@ -123,7 +123,7 @@ v8::Local<v8::Value> Runner::Call(v8::Local<v8::Value> callee,
   v8::MaybeLocal<v8::Value> maybe_value;
   v8::TryCatch try_catch;
   {
-    TRACE_EVENT0("script", "Runner::Call");
+    TRACE_EVENT0("script", "Runner::CallAsFunction");
     maybe_value = callee->ToObject()->CallAsFunction(
         context(), receiver, static_cast<int>(args.size()),
         const_cast<v8::Local<v8::Value>*>(args.data()));

@@ -230,7 +230,7 @@ bool AbstractDomTest::DoCall(const base::StringPiece& name, const Argv& argv) {
   v8_glue::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
   auto callee = runner_->GetGlobalProperty(name);
-  auto const result = runner_->Call(callee, v8::Null(isolate), argv);
+  auto const result = runner_->CallAsFunction(callee, v8::Null(isolate), argv);
   return !result.IsEmpty();
 }
 

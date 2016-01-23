@@ -69,8 +69,9 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
   }
   auto const event = static_cast<int>(reject_message.GetEvent());
   ASSERT_DOM_LOCKED();
-  runner->Call(handler, runner->global(), reject_message.GetPromise(),
-               reject_message.GetValue(), gin::ConvertToV8(isolate, event));
+  runner->CallAsFunction(handler, runner->global(), reject_message.GetPromise(),
+                         reject_message.GetValue(),
+                         gin::ConvertToV8(isolate, event));
 }
 
 // Note: The constructor returned by v8::Object::GetConstructor() doesn't
@@ -276,7 +277,7 @@ void ScriptHost::CallClassEventHandler(EventTarget* event_target,
     return;
 
   auto const js_event = event->GetWrapper(isolate);
-  runner()->Call(js_method, js_target, js_event);
+  runner()->CallAsFunction(js_method, js_target, js_event);
 }
 
 ScriptHost* ScriptHost::Create(Scheduler* scheduler,
@@ -341,7 +342,7 @@ void ScriptHost::DidStartScriptHost() {
       gin::ConvertToV8(runner()->context(),
                        base::CommandLine::ForCurrentProcess()->GetArgs())
           .ToLocalChecked();
-  runner()->Call(js_start, js_editors, js_args);
+  runner()->CallAsFunction(js_start, js_editors, js_args);
 
   // Notify script execution completion to view.
   if (state_ == domapi::ScriptHostState::Stopped)
@@ -499,7 +500,7 @@ void ScriptHost::UnhandledException(v8_glue::Runner*,
   }
   auto const console = js_console->ToObject();
   auto const log = console->Get(gin::StringToV8(isolate, "log"));
-  runner()->Call(log, console, gin::StringToV8(isolate, text));
+  runner()->CallAsFunction(log, console, gin::StringToV8(isolate, text));
 }
 
 }  // namespace dom

@@ -76,7 +76,7 @@ void Timer::RunCallback() {
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   DOM_AUTO_LOCK_SCOPE();
-  runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate));
+  runner->CallAsFunction(callback_.NewLocal(isolate), v8::Undefined(isolate));
 }
 
 void Timer::Stop() {

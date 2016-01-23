@@ -110,8 +110,8 @@ void TextMutationObserver::DidMutateTextDocument(TextDocument* document) {
   ASSERT_DOM_LOCKED();
   v8::TryCatch try_catch;
   try_catch.SetVerbose(true);
-  runner->Call(callback_.NewLocal(isolate), v8::Undefined(isolate), records,
-               gin::ConvertToV8(isolate, this));
+  runner->CallAsFunction(callback_.NewLocal(isolate), v8::Undefined(isolate),
+                         records, gin::ConvertToV8(isolate, this));
   if (!try_catch.HasCaught())
     return;
   Disconnect();

@@ -45,7 +45,7 @@ void FrameRequestCallbackWrapper::Run(const base::TimeTicks& time) {
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   DOM_AUTO_LOCK_SCOPE();
-  runner->Call(
+  runner->CallAsFunction(
       callback_.NewLocal(isolate), v8::Undefined(isolate),
       gin::ConvertToV8(isolate, (time - base::TimeTicks()).InMillisecondsF()));
 }

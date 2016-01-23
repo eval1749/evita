@@ -271,7 +271,7 @@ void ViewEventHandlerImpl::OpenFile(domapi::WindowId window_id,
   }
   v8::Local<v8::Value> js_file_name = gin::StringToV8(isolate, file_name);
   DOM_AUTO_LOCK_SCOPE();
-  runner->Call(open_file, js_handler, js_file_name);
+  runner->CallAsFunction(open_file, js_handler, js_file_name);
 }
 
 void ViewEventHandlerImpl::ProcessCommandLine(
@@ -288,8 +288,9 @@ void ViewEventHandlerImpl::ProcessCommandLine(
     return;
   }
   DOM_AUTO_LOCK_SCOPE();
-  runner->Call(process, editor, gin::ConvertToV8(isolate, working_directory),
-               gin::ConvertToV8(runner->context(), args).ToLocalChecked());
+  runner->CallAsFunction(
+      process, editor, gin::ConvertToV8(isolate, working_directory),
+      gin::ConvertToV8(runner->context(), args).ToLocalChecked());
 }
 
 void ViewEventHandlerImpl::QueryClose(domapi::WindowId window_id) {

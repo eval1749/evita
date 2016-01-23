@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_BASE_BASE_EXPORT_H_
-#define EVITA_BASE_BASE_EXPORT_H_
+#ifndef EVITA_BASE_EVITA_BASE_EXPORT_H_
+#define EVITA_BASE_EVITA_BASE_EXPORT_H_
 
 #if defined(COMPONENT_BUILD)
 #if defined(WIN32)
@@ -26,4 +26,4 @@
 #define EVITA_BASE_EXPORT
 #endif
 
-#endif  // EVITA_BASE_BASE_EXPORT_H_
+#endif  // EVITA_BASE_EVITA_BASE_EXPORT_H_

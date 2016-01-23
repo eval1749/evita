@@ -10,7 +10,7 @@
 #include <string>
 
 #include "base/strings/string_piece.h"
-#include "evita/base/base_export.h"
+#include "evita/base/evita_base_export.h"
 #include "evita/base/memory/zone_allocated.h"
 
 namespace evita {

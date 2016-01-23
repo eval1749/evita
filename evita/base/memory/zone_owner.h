@@ -6,7 +6,7 @@
 #define EVITA_BASE_MEMORY_ZONE_OWNER_H_
 
 #include "base/macros.h"
-#include "evita/base/base_export.h"
+#include "evita/base/evita_base_export.h"
 #include "evita/base/memory/zone.h"
 
 namespace evita {

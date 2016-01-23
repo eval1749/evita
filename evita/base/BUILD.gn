@@ -11,6 +11,7 @@ config("base_implementation") {
 component("base") {
   output_name = "evita_base"
   sources = [
+    "evita_base_export.h",
     "memory/allocator.h",
     "memory/zone.cc",
     "memory/zone.h",

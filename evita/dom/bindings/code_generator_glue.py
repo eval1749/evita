@@ -419,6 +419,7 @@ class BaseContext(object):
 
     def __init__(self, root_context, name):
         self._cpp_name = None
+        self._attributes = None
         self._is_static = None
         self._name = name
         self._root_context = root_context
@@ -447,6 +448,17 @@ class BaseContext(object):
     def name(self):
         return self._name
 
+    def attribute_of(self, name, empty_value):
+        if self._attributes == None:
+            raise Exception('Extended attributes is not initialized.' %
+                            self.name)
+        if not(name in self._attributes):
+            return None
+        value = self._attributes[name]
+        if value == None:
+            return empty_value
+        return value
+
     def add_include(self, include_path):
         self._root_context.add_include(include_path)
 
@@ -456,10 +468,48 @@ class BaseContext(object):
                             (self.name, self._cpp_name))
         self._cpp_name = cpp_name
 
+    def set_attributes(self, attributes):
+        self._attributes = attributes
+
     def set_is_static(self, is_static):
         if self._is_static != None and self._is_static != is_static:
             raise Exception('%s already has is_static.' % self.name)
         self._is_static = is_static
+
+
+######################################################################
+#
+# AttributeContext
+#
+class AttributeContext(BaseContext):
+    """AttributeContext represents an attribute in interface"""
+
+    def __init__(self, root_context, name):
+        super(AttributeContext, self).__init__(root_context, name)
+
+    def build(self, attribute):
+        self.set_attributes(attribute.extended_attributes)
+        cpp_name = cc_property_name_of(attribute)
+        self.set_cpp_name(cpp_name)
+        self.set_is_static(attribute.is_static)
+        if self.is_javascript:
+            return {'cpp_name': cpp_name}
+        glue_type = to_glue_type(attribute.idl_type)
+        is_raises_exception = self.attribute_of('RaisesException', '*')
+        return {
+            'can_fast_return': can_fast_return_of(glue_type),
+            'cpp_name': cpp_name,
+            'display_type': glue_type.display_str(),
+            'from_v8_type': glue_type.from_v8_str(),
+            'getter_raises_exception':
+                is_raises_exception == '*' or is_raises_exception == 'Getter',
+            'is_read_only': attribute.is_read_only,
+            'is_static': attribute.is_static,
+            'name': attribute.name,
+            'setter_raises_exception':
+                is_raises_exception == '*' or is_raises_exception == 'Setter',
+            'to_v8_type': glue_type.to_v8_str(),
+        }
 
 
 ######################################################################
@@ -568,7 +618,7 @@ class RootContext(BaseContext):
         super(RootContext, self).__init__(self, root_model.name)
         self._include_paths = set()
         self._root_model = root_model
-        self.set_cpp_name(cpp_name_of(root_model))
+        self.set_cpp_name(cc_function_name_of(root_model))
 
     @property
     def include_paths(self):
@@ -621,7 +671,7 @@ class MethodGroupContext(FunctionContext):
 
     def build(self, methods):
         for method in methods:
-            cpp_name = cpp_name_of(method)
+            cpp_name = cc_function_name_of(method)
             self.set_cpp_name(cpp_name)
             self.set_is_static(method.is_static)
             if self.is_javascript:
@@ -724,28 +774,6 @@ def dictionary_context(dictionary):
 #
 # Interface
 #
-def attribute_context(attribute):
-    if 'ImplementedAs' in attribute.extended_attributes:
-        cpp_name = attribute.extended_attributes['ImplementedAs']
-    else:
-        cpp_name = underscore(attribute.name)
-
-    if cpp_name == 'JavaScript':
-        return {'cpp_name': cpp_name}
-
-    glue_type = to_glue_type(attribute.idl_type)
-    return {
-        'can_fast_return': can_fast_return_of(glue_type),
-        'cpp_name': cpp_name,
-        'display_type': glue_type.display_str(),
-        'from_v8_type': glue_type.from_v8_str(),
-        'is_read_only': attribute.is_read_only,
-        'is_static': attribute.is_static,
-        'name': attribute.name,
-        'to_v8_type': glue_type.to_v8_str(),
-    }
-
-
 def callback_context(callback):
     glue_type = to_glue_type(callback.idl_type)
     return {
@@ -838,7 +866,8 @@ def build_interface_context(interface):
 
     attribute_context_list = filter(
         lambda context: context['cpp_name'] != 'JavaScript',
-        [attribute_context(attribute) for attribute in interface.attributes])
+        [AttributeContext(interface_context, attribute.name).build(attribute)
+         for attribute in interface.attributes])
 
     constant_context_list = [
         constant_context(constant)
@@ -951,10 +980,19 @@ def sort_context_list(context_list):
     return sorted(context_list, key=lambda context: context['name'])
 
 
-def cpp_name_of(model):
+def cc_function_name_of(model):
+    """Returns C++ function name for implementing |model| in C++,
+       e.g. CamelCase"""
     if 'ImplementedAs' in model.extended_attributes:
         return model.extended_attributes['ImplementedAs']
     return upper_camel_case(model.name)
+
+
+def cc_property_name_of(model):
+    """Returns C++ proeprty name for implementing |model| in C++."""
+    if 'ImplementedAs' in model.extended_attributes:
+        return model.extended_attributes['ImplementedAs']
+    return underscore(model.name)
 
 
 def underscore(text):

@@ -114,6 +114,10 @@ void {{class_name}}::{{method.cpp_name}}(
 {{indent}}{{callee}}({{ emit_arguments(signature) }});
 {%- else %}
 {{indent}}{{signature.to_v8_type}} value = {{callee}}({{ emit_arguments(signature) }});
+{% if signature.is_raises_exception %}
+{{indent}}if (exception_state.is_thrown())
+{{indent}}  return;
+{% endif %}
 {%-     if signature.can_fast_return %}
 {{indent}}info.GetReturnValue().Set(value);
 {%-     else %}
@@ -203,7 +207,13 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
     exception_state.ThrowArityError(0, 0, info.Length());
     return;
   }
+{% if attribute.getter_raises_exception %}
+  {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cpp_name}}(&exception_state);
+  if (exception_state.is_thrown())
+    return;
+{% else %}
   {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cpp_name}}();
+{% endif %}
 {%  if attribute.can_fast_return %}
   info.GetReturnValue().Set(value);
 {%  else %}
@@ -229,7 +239,11 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
     exception_state.ThrowArgumentError("{{attribute.display_type}}", info.info[0], 0);
     return;
   }
+{% if attribute.setter_raises_exception %}
+  {{interface_name}}::set_{{attribute.cpp_name}}(new_value, &exception_state);
+{% else %}
   {{interface_name}}::set_{{attribute.cpp_name}}(new_value);
+{% endif %}
 }
 
 {%  endif %}
@@ -262,7 +276,13 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
     exception_state.ThrowReceiverError(info.This());
     return;
   }
-  {{attribute.to_v8_type}} value = impl->{{interface_name}}::{{attribute.cpp_name}}();
+{% if attribute.getter_raises_exception %}
+  {{attribute.to_v8_type}} value = impl->{{attribute.cpp_name}}(&exception_state);
+  if (exception_state.is_thrown())
+    return;
+{% else %}
+  {{attribute.to_v8_type}} value = impl->{{attribute.cpp_name}}();
+{% endif %}
 {%    if attribute.can_fast_return %}
   info.GetReturnValue().Set(value);
 {%    else %}
@@ -293,7 +313,11 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
     exception_state.ThrowArgumentError("{{attribute.display_type}}", info[0], 0);
     return;
   }
+{% if attribute.setter_raises_exception %}
+  impl->set_{{attribute.cpp_name}}(new_value, &exception_state);
+{% else %}
   impl->set_{{attribute.cpp_name}}(new_value);
+{% endif %}
 }
 
 {%  endif %}

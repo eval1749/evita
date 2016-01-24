@@ -12,7 +12,9 @@
 #include "base/logging.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/clipboard/data_transfer_data.h"
+#include "evita/dom/os/platform_error.h"
 #include "evita/dom/script_host.h"
+#include "evita/v8_glue/runner.h"
 
 namespace dom {
 
@@ -187,8 +189,15 @@ DataTransferData* TextFormat::FromClipboard(HANDLE handle) const {
 // Clipboard
 //
 Clipboard::Clipboard() : opened_(::OpenClipboard(nullptr) != FALSE) {
-  if (!opened_)
-    ScriptHost::instance()->PlatformError("OpenClipboard");
+  if (!opened_) {
+    const auto last_error = ::GetLastError();
+    const auto runner = ScriptHost::instance()->runner();
+    v8_glue::Runner::Scope runner_scope(runner);
+    const auto isolate = runner->isolate();
+    PlatformError error("OpenClipboard", last_error);
+    isolate->ThrowException(gin::ConvertToV8(isolate, error));
+    return;
+  }
 
   static bool init_format;
   if (init_format)
@@ -223,7 +232,12 @@ void Clipboard::Add(const Format* format, const DataTransferData* data) {
     }
   }
   if (!::SetClipboardData(format->format(), handle)) {
-    ScriptHost::instance()->PlatformError("SetClipboardData");
+    const auto last_error = ::GetLastError();
+    const auto runner = ScriptHost::instance()->runner();
+    v8_glue::Runner::Scope runner_scope(runner);
+    const auto isolate = runner->isolate();
+    PlatformError error("SetClipboardData", last_error);
+    isolate->ThrowException(gin::ConvertToV8(isolate, error));
     return;
   }
   handle.release();

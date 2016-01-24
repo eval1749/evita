@@ -7,11 +7,10 @@
 #include "evita/dom/visuals/css_style.h"
 
 #include "common/maybe.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/script_host.h"
 #include "evita/dom/visuals/css_style_sheet_handle.h"
 #include "evita/dom/visuals/css_value_parsers.h"
-#include "evita/v8_glue/runner.h"
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
@@ -46,14 +45,15 @@ Maybe<base::string16> GetRawProperty(v8::Local<v8::Context> context,
 void SetRawProperty(v8::Local<v8::Context> context,
                     v8::Local<v8::Map> map,
                     CssPropertyId property_id,
-                    const base::string16& value) {
+                    const base::string16& value,
+                    ExceptionState* exception_state) {
   const auto& isolate = context->GetIsolate();
   const auto& result = map->Set(context, gin::ConvertToV8(isolate, property_id),
                                 gin::ConvertToV8(isolate, value))
                            .ToLocalChecked();
   if (!result.IsEmpty())
     return;
-  ScriptHost::instance()->ThrowError("Failed to set Map.");
+  exception_state->ThrowError("Failed to set Map.");
 }
 
 }  // namespace
@@ -93,11 +93,14 @@ v8::Local<v8::Map> CSSStyle::ConvertToV8(v8::Local<v8::Context> context,
     if (!contains.test(property_id))
       continue;
     switch (static_cast<CssPropertyId>(property_id)) {
-#define V(Name, name, type, text)                     \
-  case CssPropertyId::Name:                           \
-    SetRawProperty(context, map, CssPropertyId::Name, \
-                   Unparse##type(style.##name()));    \
-    break;
+#define V(Name, name, type, text)                                           \
+  case CssPropertyId::Name: {                                               \
+    ExceptionState exception_state_##name(                                  \
+        ExceptionState::Situation::PropertySet, context, "CSSStyle", text); \
+    SetRawProperty(context, map, CssPropertyId::Name,                       \
+                   Unparse##type(style.##name()), &exception_state_##name); \
+    break;                                                                  \
+  }
 
       FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V

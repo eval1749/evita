@@ -4,16 +4,11 @@
 
 #include "evita/dom/text/text_range.h"
 
-#include "base/strings/stringprintf.h"
-#include "evita/css/style_selector.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/converter.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/text/buffer.h"
-#include "evita/text/marker_set.h"
 #include "evita/text/offset.h"
 #include "evita/text/range.h"
-#include "evita/text/spelling.h"
 
 namespace dom {
 

@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 [
+  RaisesException=Constructor,
   CustomConstructor(optional DOMString label)
 ]
 interface TextEncoder {
   readonly attribute DOMString encoding;
 
+  [RaisesException]
   Uint8Array encode(optional DOMString input,
                     optional TextEncodeOptions options);
 };

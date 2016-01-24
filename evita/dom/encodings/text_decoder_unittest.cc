@@ -18,8 +18,9 @@ class TextDecoderTest : public AbstractDomTest {
 };
 
 TEST_F(TextDecoderTest, ctor) {
-  EXPECT_SCRIPT_EQ("Error: No such encoding 'foo'",
-                   "var decoder = new TextDecoder('foo');");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to construct 'TextDecoder': No such encoding 'foo'",
+      "var decoder = new TextDecoder('foo');");
 
   EXPECT_SCRIPT_VALID("var decoder1 = new TextDecoder();");
   EXPECT_SCRIPT_EQ("utf-8", "decoder1.encoding");

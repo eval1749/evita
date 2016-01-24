@@ -1,0 +1,26 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("encodings") {
+  sources = [
+    "text_decoder.cc",
+    "text_encoder.cc",
+  ]
+
+  deps = [
+    "//evita/dom/bindings",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "text_decoder_unittest.cc",
+    "text_encoder_unittest.cc",
+  ]
+  deps = [
+    ":encodings",
+    "//evita/dom/testing:test_support",
+  ]
+}

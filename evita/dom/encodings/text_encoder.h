@@ -22,6 +22,7 @@ namespace bindings {
 class TextEncoderClass;
 }
 
+class ExceptionState;
 class TextEncodeOptions;
 
 class TextEncoder final : public v8_glue::Scriptable<TextEncoder> {
@@ -35,15 +36,19 @@ class TextEncoder final : public v8_glue::Scriptable<TextEncoder> {
 
   explicit TextEncoder(encodings::Encoder* encoder);
 
+  // bindings
   const base::string16& encoding() const;
 
   std::vector<uint8_t> Encode(const base::string16& input,
-                              const TextEncodeOptions& options);
-  std::vector<uint8_t> Encode(const base::string16& input);
-  std::vector<uint8_t> Encode();
+                              const TextEncodeOptions& options,
+                              ExceptionState* exception_state);
+  std::vector<uint8_t> Encode(const base::string16& input,
+                              ExceptionState* exception_state);
+  std::vector<uint8_t> Encode(ExceptionState* exception_state);
 
-  static TextEncoder* NewTextEncoder(const base::string16& label);
-  static TextEncoder* NewTextEncoder();
+  static TextEncoder* NewTextEncoder(const base::string16& label,
+                                     ExceptionState* exception_state);
+  static TextEncoder* NewTextEncoder(ExceptionState* exception_state);
 
   std::unique_ptr<encodings::Encoder> encoder_;
 

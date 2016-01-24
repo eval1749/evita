@@ -8,7 +8,7 @@
 
 #include "base/strings/stringprintf.h"
 #include "evita/bindings/v8_glue_TextEncodeOptions.h"
-#include "evita/dom/script_host.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/text/encodings/encoder.h"
 #include "evita/text/encodings/encodings.h"
 
@@ -28,10 +28,11 @@ const base::string16& TextEncoder::encoding() const {
 
 static std::vector<uint8_t> DoEncode(encodings::Encoder* encoder,
                                      const base::string16& string,
-                                     bool is_stream) {
+                                     bool is_stream,
+                                     ExceptionState* exception_state) {
   auto const result = encoder->Encode(string, is_stream);
   if (result.left) {
-    ScriptHost::instance()->ThrowError(
+    exception_state->ThrowError(
         base::StringPrintf("EncodingError: codePoint=0x%X", result.left));
     return std::vector<uint8_t>();
   }
@@ -39,30 +40,33 @@ static std::vector<uint8_t> DoEncode(encodings::Encoder* encoder,
 }
 
 std::vector<uint8_t> TextEncoder::Encode(const base::string16& input,
-                                         const TextEncodeOptions& options) {
-  return DoEncode(encoder_.get(), input, options.stream());
+                                         const TextEncodeOptions& options,
+                                         ExceptionState* exception_state) {
+  return DoEncode(encoder_.get(), input, options.stream(), exception_state);
 }
 
-std::vector<uint8_t> TextEncoder::Encode(const base::string16& input) {
-  return DoEncode(encoder_.get(), input, false);
+std::vector<uint8_t> TextEncoder::Encode(const base::string16& input,
+                                         ExceptionState* exception_state) {
+  return DoEncode(encoder_.get(), input, false, exception_state);
 }
 
-std::vector<uint8_t> TextEncoder::Encode() {
-  return DoEncode(encoder_.get(), base::string16(), false);
+std::vector<uint8_t> TextEncoder::Encode(ExceptionState* exception_state) {
+  return DoEncode(encoder_.get(), base::string16(), false, exception_state);
 }
 
-TextEncoder* TextEncoder::NewTextEncoder(const base::string16& label) {
+TextEncoder* TextEncoder::NewTextEncoder(const base::string16& label,
+                                         ExceptionState* exception_state) {
   auto const encoder = encodings::Encodings::instance()->GetEncoder(label);
   if (!encoder) {
-    ScriptHost::instance()->ThrowError(
+    exception_state->ThrowError(
         base::StringPrintf("No such encoding '%ls'", label.c_str()));
     return nullptr;
   }
   return new TextEncoder(encoder);
 }
 
-TextEncoder* TextEncoder::NewTextEncoder() {
-  return NewTextEncoder(L"utf-8");
+TextEncoder* TextEncoder::NewTextEncoder(ExceptionState* exception_state) {
+  return NewTextEncoder(L"utf-8", exception_state);
 }
 
 }  // namespace dom

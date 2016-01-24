@@ -32,8 +32,6 @@ source_set("components") {
     "css/text_style.h",
     "editor.cc",
     "editor.h",
-    "encodings/text_decoder.cc",
-    "encodings/text_encoder.cc",
     "events/composition_event.cc",
     "events/composition_event.h",
     "events/composition_span.cc",
@@ -114,6 +112,7 @@ source_set("components") {
     "//base:i18n",
     "//common",
     "//evita/dom/bindings",
+    "//evita/dom/encodings",
     "//evita/dom/os",
     "//evita/dom/public",
     "//evita/dom/text",
@@ -252,8 +251,6 @@ test("evita_dom_tests") {
     "base/ordered_set_test.cc",
     "css/text_style_test.cc",
     "editor_unittest.cc",
-    "encodings/text_decoder_unittest.cc",
-    "encodings/text_encoder_unittest.cc",
     "errors_unittest.cc",
     "events/composition_event_unittest.cc",
     "events/event_target_unittest.cc",
@@ -295,6 +292,7 @@ test("evita_dom_tests") {
     # TODO(eval1749): We should not have "application" dependency on
     # "evita_dom_test".
     "//evita:application",
+    "//evita/dom/encodings:test_files",
     "//evita/dom/os:test_files",
     "//evita/dom/testing:test_support",
     "//evita/dom/text:test_files",

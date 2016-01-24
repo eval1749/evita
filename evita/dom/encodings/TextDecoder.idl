@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 [
+  RaisesException=Constructor,
   CustomConstructor(optional DOMString label,
                     optional TextDecoderOptions options)
 ]
 interface TextDecoder {
   readonly attribute DOMString encoding;
 
+  [RaisesException]
   DOMString decode(optional ArrayBufferView input,
                    optional TextDecodeOptions options);
 };

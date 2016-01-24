@@ -21,6 +21,7 @@ class ArrayBufferView;
 
 namespace dom {
 
+class ExceptionState;
 class TextDecodeOptions;
 class TextDecoderOptions;
 
@@ -34,10 +35,12 @@ class TextDecoder final : public v8_glue::Scriptable<TextDecoder> {
  public:
   ~TextDecoder() final;
 
-  static TextDecoder* NewTextDecoder();
-  static TextDecoder* NewTextDecoder(const base::string16& encoding);
+  static TextDecoder* NewTextDecoder(ExceptionState* exception_state);
   static TextDecoder* NewTextDecoder(const base::string16& encoding,
-                                     const TextDecoderOptions& options);
+                                     ExceptionState* exception_state);
+  static TextDecoder* NewTextDecoder(const base::string16& encoding,
+                                     const TextDecoderOptions& options,
+                                     ExceptionState* exception_state);
 
  private:
   friend class bindings::TextDecoderClass;
@@ -46,10 +49,12 @@ class TextDecoder final : public v8_glue::Scriptable<TextDecoder> {
 
   const base::string16& encoding() const;
 
-  base::string16 Decode();
-  base::string16 Decode(const gin::ArrayBufferView& input);
+  base::string16 Decode(ExceptionState* exception_state);
   base::string16 Decode(const gin::ArrayBufferView& input,
-                        const TextDecodeOptions& options);
+                        ExceptionState* exception_state);
+  base::string16 Decode(const gin::ArrayBufferView& input,
+                        const TextDecodeOptions& options,
+                        ExceptionState* exception_state);
 
   std::unique_ptr<encodings::Decoder> decoder_;
   bool fatal_;

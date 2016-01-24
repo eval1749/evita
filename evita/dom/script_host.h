@@ -89,9 +89,6 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
 
   // Terminate script execution from another thread.
   void TerminateScriptExecution();
-  void ThrowError(const std::string& message);
-  void ThrowRangeError(const std::string& message);
-  void ThrowException(v8::Local<v8::Value> exception);
   void WillDestroyViewHost();
 
  private:

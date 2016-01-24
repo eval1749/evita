@@ -16,6 +16,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
 #include "gin/array_buffer.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
@@ -333,7 +334,9 @@ void ScriptHost::DidStartScriptHost() {
   auto const js_start =
       js_editors->ToObject()->Get(gin::StringToV8(isolate, "start"));
   if (!js_start->IsFunction()) {
-    ThrowError("Editor.start isn't a function.");
+    ExceptionState exception_state(ExceptionState::Situation::MethodCall,
+                                   runner()->context(), "global", "start");
+    exception_state.ThrowError("Editor.start isn't a function.");
     view_delegate_->DidStartScriptHost(state_);
     return;
   }
@@ -415,24 +418,6 @@ ScriptHost* ScriptHost::StartForTesting(Scheduler* scheduler,
 
 void ScriptHost::TerminateScriptExecution() {
   isolate()->TerminateExecution();
-}
-
-void ScriptHost::ThrowError(const std::string& message) {
-  v8_glue::Runner::Scope runner_scope(runner());
-  auto exception = v8::Exception::Error(gin::StringToV8(isolate(), message));
-  isolate()->ThrowException(exception);
-}
-
-void ScriptHost::ThrowRangeError(const std::string& message) {
-  v8_glue::Runner::Scope runner_scope(runner());
-  auto exception =
-      v8::Exception::RangeError(gin::StringToV8(isolate(), message));
-  isolate()->ThrowException(exception);
-}
-
-void ScriptHost::ThrowException(v8::Local<v8::Value> exception) {
-  v8_glue::Runner::Scope runner_scope(runner());
-  isolate()->ThrowException(exception);
 }
 
 void ScriptHost::WillDestroyViewHost() {

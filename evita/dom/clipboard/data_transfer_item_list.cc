@@ -8,6 +8,7 @@
 
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/clipboard/clipboard.h"
 #include "evita/dom/clipboard/data_transfer_item.h"
 #include "evita/dom/converter.h"
@@ -92,12 +93,16 @@ void DataTransferItemList::Clear() {
   clipboard.Clear();
 }
 
-DataTransferItem* DataTransferItemList::Get(int index) const {
-  return ValidateIndex(index) ? items_[static_cast<size_t>(index)] : nullptr;
+DataTransferItem* DataTransferItemList::Get(
+    int index,
+    ExceptionState* exception_state) const {
+  if (ValidateIndex(index, exception_state))
+    return nullptr;
+  return items_[static_cast<size_t>(index)];
 }
 
-void DataTransferItemList::Remove(int index) {
-  if (!ValidateIndex(index))
+void DataTransferItemList::Remove(int index, ExceptionState* exception_state) {
+  if (!ValidateIndex(index, exception_state))
     return;
   Clipboard clipboard;
   if (!clipboard.opened())
@@ -109,11 +114,13 @@ void DataTransferItemList::Remove(int index) {
   }
 }
 
-bool DataTransferItemList::ValidateIndex(int index) const {
+bool DataTransferItemList::ValidateIndex(
+    int index,
+    ExceptionState* exception_state) const {
   FetchIfNeeded();
   if (index >= 0 && index < length())
     return true;
-  ScriptHost::instance()->ThrowRangeError(base::StringPrintf(
+  exception_state->ThrowRangeError(base::StringPrintf(
       "Bad index %d, it must be less than %d", index, length()));
   return false;
 }

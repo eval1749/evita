@@ -14,11 +14,16 @@ namespace dom {
 
 class DataTransferData;
 class DataTransferItem;
+class ExceptionState;
 
 namespace bindings {
 class DataTransferItemListClass;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// DataTransferItemList
+//
 class DataTransferItemList final
     : public v8_glue::Scriptable<DataTransferItemList> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransferItemList)
@@ -29,14 +34,15 @@ class DataTransferItemList final
  private:
   friend class bindings::DataTransferItemListClass;
 
+  // bindings
   int length() const;
 
   void Add(DataTransferData* data, const base::string16& type);
   void Clear();
   void FetchIfNeeded() const;
-  DataTransferItem* Get(int index) const;
-  void Remove(int index);
-  bool ValidateIndex(int index) const;
+  DataTransferItem* Get(int index, ExceptionState* exception_state) const;
+  void Remove(int index, ExceptionState* exception_state);
+  bool ValidateIndex(int index, ExceptionState* exception_state) const;
 
   mutable bool fetched_;
   mutable std::vector<DataTransferItem*> items_;

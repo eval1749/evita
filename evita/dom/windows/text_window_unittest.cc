@@ -96,10 +96,14 @@ TEST_F(TextWindowTest, zoom) {
       "var sample = new TextWindow(new TextRange(TextDocument.new('foo')));"
       "sample.zoom = 1.5;");
   EXPECT_SCRIPT_EQ("1.5", "sample.zoom");
-  EXPECT_SCRIPT_EQ("RangeError: TextWindow zoom must be greater than zero.",
-                   "sample.zoom = 0;");
-  EXPECT_SCRIPT_EQ("RangeError: TextWindow zoom must be greater than zero.",
-                   "sample.zoom = -1;");
+  EXPECT_SCRIPT_EQ(
+      "RangeError: Failed to set the 'zoom' property on 'TextWindow': "
+      "TextWindow zoom must be greater than zero.",
+      "sample.zoom = 0;");
+  EXPECT_SCRIPT_EQ(
+      "RangeError: Failed to set the 'zoom' property on 'TextWindow': "
+      "TextWindow zoom must be greater than zero.",
+      "sample.zoom = -1;");
 }
 
 }  // namespace dom

@@ -5,6 +5,7 @@
 #include "evita/dom/windows/text_window.h"
 
 #include "evita/bindings/v8_glue_TextDocumentEventInit.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/events/text_document_event.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/promise_resolver.h"
@@ -33,11 +34,11 @@ TextDocument* TextWindow::document() const {
   return selection_->document();
 }
 
-void TextWindow::set_zoom(float new_zoom) {
+void TextWindow::set_zoom(float new_zoom, ExceptionState* exception_state) {
   if (zoom_ == new_zoom)
     return;
   if (new_zoom <= 0.0f) {
-    ScriptHost::instance()->ThrowRangeError(
+    exception_state->ThrowRangeError(
         "TextWindow zoom must be greater than zero.");
     return;
   }

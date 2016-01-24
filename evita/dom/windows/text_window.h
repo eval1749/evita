@@ -20,6 +20,7 @@ class Selection;
 }
 
 namespace dom {
+class ExceptionState;
 class TextDocument;
 class TextRange;
 class TextSelection;
@@ -41,10 +42,11 @@ class TextWindow final : public v8_glue::Scriptable<TextWindow, Window> {
 
   explicit TextWindow(TextRange* selection_range);
 
+  // bindings
   TextDocument* document() const;
   TextSelection* selection() const { return selection_; }
   float zoom() const { return zoom_; }
-  void set_zoom(float new_zoom);
+  void set_zoom(float new_zoom, ExceptionState* exception_state);
 
   text::Offset ComputeMotion(int method);
   text::Offset ComputeMotion(int method, text::Offset position);

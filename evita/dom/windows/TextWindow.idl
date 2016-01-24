@@ -6,6 +6,8 @@
 interface TextWindow : Window {
   readonly attribute TextDocument document;
   readonly attribute TextSelection selection;
+
+  [RaisesException=Setter]
   attribute float zoom;
 
   [ImplementedAs=ComputeMotion]

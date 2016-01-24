@@ -5,11 +5,18 @@
 import("//evita/dom/idl_files.gni")
 
 source_set("bindings") {
+  sources = [
+    "exception_state.cc",
+    "exception_state.h",
+  ]
+
+  sources += interface_idl_files + dictionary_idl_files
+
   public_deps = [
     ":cc_bindings",
     ":js_externs",
+    "//gin",
   ]
-  sources = interface_idl_files + dictionary_idl_files
 }
 
 action("cached_lex_yacc_tables") {

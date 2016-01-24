@@ -4,11 +4,12 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "evita/dom/testing/abstract_dom_test.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/mock_view_impl.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
@@ -82,9 +83,12 @@ class SampleWindowClass final
   // |name| IDL attribute getter
   static void GetName(const v8::FunctionCallbackInfo<v8::Value>& info) {
     auto const isolate = info.GetIsolate();
+    const auto context = isolate->GetCurrentContext();
+    ExceptionState exception_state(ExceptionState::Situation::PropertyGet,
+                                   context, "SampleWindow", "name");
     SampleWindow* impl = nullptr;
     if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
-      ThrowReceiverError(isolate, "SampleWindow", info.This());
+      exception_state.ThrowReceiverError(info.This());
       return;
     }
     auto value = impl->name();
@@ -97,18 +101,21 @@ class SampleWindowClass final
   // |name| IDL attribute setter
   static void SetName(const v8::FunctionCallbackInfo<v8::Value>& info) {
     auto const isolate = info.GetIsolate();
+    const auto context = isolate->GetCurrentContext();
+    ExceptionState exception_state(ExceptionState::Situation::PropertySet,
+                                   context, "SampleWindow", "name");
     if (info.Length() != 1) {
-      ThrowArityError(isolate, 1, 1, info.Length());
+      exception_state.ThrowArityError(1, 1, info.Length());
       return;
     }
     SampleWindow* impl = nullptr;
     if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
-      ThrowReceiverError(isolate, "SampleWindow", info.This());
+      exception_state.ThrowReceiverError(info.This());
       return;
     }
     base::string16 new_value;
     if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
-      ThrowArgumentError(isolate, "string", info[0], 0);
+      exception_state.ThrowArgumentError("string", info[0], 0);
       return;
     }
     impl->set_name(new_value);

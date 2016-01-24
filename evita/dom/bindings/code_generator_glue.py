@@ -56,7 +56,10 @@ def should_be_callback(idl_type):
     assert not idl_type.name.endswith('Callback')
     return False
 
+######################################################################
+#
 # GlueType
+#
 
 
 class GlueType(object):
@@ -402,9 +405,240 @@ class CodeGeneratorGlue(object):
              for dictionary in definitions.dictionaries.values()] +
             # interface context must be generated after dictionary context
             # for include files.
-            [interface_context(interface)
+            [build_interface_context(interface)
              for interface in definitions.interfaces.values()]
         ]))
+
+
+######################################################################
+#
+# Context classes
+#
+class BaseContext(object):
+    """BaseContext"""
+
+    def __init__(self, root_context, name):
+        self._cpp_name = None
+        self._is_static = None
+        self._name = name
+        self._root_context = root_context
+
+    @property
+    def cpp_name(self):
+        if not self._cpp_name:
+            raise Exception('%s does not have cpp_name.' % self.name)
+        return self._cpp_name
+
+    @property
+    def root_context(self):
+        return self._root_context
+
+    @property
+    def is_javascript(self):
+        return self.cpp_name == 'JavaScript'
+
+    @property
+    def is_static(self):
+        if self._is_static == None:
+            raise Exception('%s does not have is_static.' % self.name)
+        return self._is_static
+
+    @property
+    def name(self):
+        return self._name
+
+    def add_include(self, include_path):
+        self._root_context.add_include(include_path)
+
+    def set_cpp_name(self, cpp_name):
+        if self._cpp_name != None and self._cpp_name != cpp_name:
+            raise Exception('%s already has cpp_name %s.' %
+                            (self.name, self._cpp_name))
+        self._cpp_name = cpp_name
+
+    def set_is_static(self, is_static):
+        if self._is_static != None and self._is_static != is_static:
+            raise Exception('%s already has is_static.' % self.name)
+        self._is_static = is_static
+
+
+######################################################################
+#
+# FunctionContext
+#
+class FunctionContext(BaseContext):
+
+    def __init__(self, root_context, name):
+        super(FunctionContext, self).__init__(root_context, name)
+        self._signatures = []
+        self._use_exception_state = False
+
+    @property
+    def signatures(self):
+        return self._signatures
+
+    @property
+    def use_exception_state(self):
+        return self._use_exception_state
+
+    # Make signatures without optional parameters.
+    # Example: foo(T1 a, optional T2 b, optional T3 c)
+    # Output: [[T1 a], [T1 a, T2 b], [T1 a, T2 b, T3 c]]
+    def build_signatures(self, cpp_name, model, attributes):
+        is_raises_exception = self.raises_exception(model, attributes)
+        if is_raises_exception:
+            self._use_exception_state = True
+        to_v8_type = self.return_type_of(model)
+        for parameters in make_parameters_list(model):
+            self._signatures.append({
+                'cpp_name': cpp_name,
+                'is_raises_exception': is_raises_exception,
+                'is_static': self.is_static,
+                'name': model.name,
+                'parameters': parameters,
+                'to_v8_type': to_v8_type,
+            })
+
+    def finish_signatures(self):
+        # Nothing to do
+        pass
+
+    def raises_exception(self, model, attributes):
+        if not('RaisesException' in attributes):
+            return False
+        value = attributes['RaisesException']
+        if value == None:
+            return True
+        if model.is_constructor:
+            return value == 'Constructor'
+        return False
+
+    def return_type_of(self, model):
+        """Returns C++ function return type to pass V8 of specified |model|."""
+        if model.idl_type == None:
+            return None
+        glue_type = to_glue_type(model.idl_type)
+        return glue_type.to_v8_str()
+
+
+######################################################################
+#
+# ConstructorContext
+#
+# IdlConstructor is derived class of IdlOperation.
+# IdlConstructor.name = 'Constructor' | 'NamedConstructor'
+#
+class ConstructorContext(FunctionContext):
+    """ConstructorContext represents constructor in interface"""
+
+    def __init__(self, root_context):
+        super(ConstructorContext, self).__init__(root_context,
+                                                 root_context.name)
+        self.set_is_static(True)
+
+    def build(self, interface):
+        # Using |new| operator
+        for constructor in interface.constructors:
+            cpp_name = 'new ' + interface.name
+            self.build_signatures(cpp_name, constructor,
+                                  interface.extended_attributes)
+
+        # Custom constructor. It is used for validating parameters and
+        # throw JavaScript exception for an invalid parameter.
+        for constructor in interface.custom_constructors:
+            cpp_name = interface.name + '::New' + interface.name
+            self.build_signatures(cpp_name, constructor,
+                                  interface.extended_attributes)
+
+        self.finish_signatures()
+        context = function_dispatcher(self.signatures)
+        if self.use_exception_state:
+            context['use_exception_state'] = True
+        return context
+
+
+######################################################################
+#
+# RootContext
+#
+class RootContext(BaseContext):
+    """RootContext represents interface or dictionary."""
+
+    def __init__(self, root_model):
+        super(RootContext, self).__init__(self, root_model.name)
+        self._include_paths = set()
+        self._root_model = root_model
+        self.set_cpp_name(cpp_name_of(root_model))
+
+    @property
+    def include_paths(self):
+        return sorted([path for path in self._include_paths])
+
+    def add_include(self, include_path):
+        self._include_paths.add(include_path)
+
+
+######################################################################
+#
+# InterfaceContext
+#
+class InterfaceContext(RootContext):
+    """InterfaceContext represents context of interface"""
+
+    def __init__(self, root_model):
+        super(InterfaceContext, self).__init__(root_model)
+        self.add_include('base/logging.h')
+        self.add_include('evita/dom/bindings/exception_state.h')
+        self.add_include('evita/dom/converter.h')
+        self.add_include('evita/dom/script_host.h')
+        self.add_include('evita/v8_glue/constructor_template.h')
+        self.add_include('evita/v8_glue/function_template_builder.h')
+
+    def finish(self):
+        for name in global_referenced_interface_names:
+            if not 'include_path' in global_interfaces_info[name]:
+                continue
+            self.add_include(interface_name_to_include_path(name))
+        for name in global_referenced_dictionary_names:
+            self.add_include(dictionary_name_to_include_path(name))
+        if global_has_gc_member:
+            self.add_include('evita/gc/member.h')
+        if global_has_nullable:
+            self.add_include('evita/v8_glue/nullable.h')
+        for name in global_js_interface_names:
+            self.add_include(JS_INTERFACE_NAMES[name])
+
+
+######################################################################
+#
+# MethodGroupContext
+#
+class MethodGroupContext(FunctionContext):
+    """MethodGroupContext represents method group in interface"""
+
+    def __init__(self, root_context, name):
+        super(MethodGroupContext, self).__init__(root_context, name)
+
+    def build(self, methods):
+        for method in methods:
+            cpp_name = cpp_name_of(method)
+            self.set_cpp_name(cpp_name)
+            self.set_is_static(method.is_static)
+            if self.is_javascript:
+                return {
+                    'cpp_name': cpp_name,
+                    'is_static': method.is_static,
+                    'name': method.name,
+                }
+            self.build_signatures(cpp_name, method, method.extended_attributes)
+        self.finish_signatures()
+        assert(not self.is_javascript)
+        context = function_dispatcher(self._signatures)
+        context['cpp_name'] = self.cpp_name
+        context['is_static'] = self.is_static
+        context['name'] = methods[0].name
+        context['use_exception_state'] = self.use_exception_state
+        return context
 
 
 ######################################################################
@@ -531,28 +765,6 @@ def constant_context(constant):
     }
 
 
-# IdlConstructor is derived class of IdlOperation.
-# IdlConstructor.name = 'Constructor' | 'NamedConstructor'
-def constructor_context_list(interface):
-    name = interface.name
-    return [
-        # Using |new| operator
-        {
-            'cpp_name': 'new ' + name,
-            'parameters': parameters
-        }
-        for parameters in expand_parameters(interface.constructors)
-    ] + [
-        # Custom constructor. It is used for validating parameters and
-        # throw JavaScript exception for an invalid parameter.
-        {
-            'cpp_name': name + '::New' + name,
-            'parameters': parameters
-        }
-        for parameters in expand_parameters(interface.custom_constructors)
-    ]
-
-
 def enumeration_context(enumeration):
     # FIXME: Handle empty string value. We don't have way to express empty
     # string as Glue externs as of March 2014.
@@ -567,38 +779,6 @@ def fix_include_path(path_in):
     path = path_in.replace('CSS', 'Css')
     return os.path.join(os.path.dirname(path).replace('../', ''),
                         underscore(os.path.basename(path))).replace('\\', '/')
-
-
-def function_context(functions):
-    if 'ImplementedAs' in functions[0].extended_attributes:
-        cpp_name = functions[0].extended_attributes['ImplementedAs']
-    else:
-        cpp_name = upper_camel_case(functions[0].name)
-
-    if cpp_name == 'JavaScript':
-        return {'cpp_name': cpp_name}
-
-    parameters_list = expand_parameters(functions)
-    assert parameters_list
-
-    is_static = functions[0].is_static
-    return_glue_type = to_glue_type(functions[0].idl_type)
-    to_v8_type = return_glue_type.to_v8_str()
-
-    signatures = [
-        {
-            'cpp_name': cpp_name,
-            'is_static': is_static,
-            'parameters': parameters,
-            'to_v8_type': to_v8_type,
-        }
-        for parameters in parameters_list
-    ]
-    context = function_dispatcher(signatures)
-    context['cpp_name'] = cpp_name
-    context['is_static'] = is_static
-    context['name'] = functions[0].name
-    return context
 
 
 def function_dispatcher(signatures):
@@ -635,15 +815,16 @@ def function_parameter(parameter):
     }
 
 
-def interface_context(interface):
-    if 'ImplementedAs' in interface.extended_attributes:
-        if interface.extended_attributes['ImplementedAs'] == 'JavaScript':
-            return {
-                'INTERFACE_NAME': underscore(interface.name).upper(),
-                'interface_name': interface.name,
-                'output_name': interface.name,
-                'template_name': 'js_interface',
-            }
+def build_interface_context(interface):
+    interface_context = InterfaceContext(interface)
+
+    if interface_context.is_javascript:
+        return {
+            'INTERFACE_NAME': underscore(interface.name).upper(),
+            'interface_name': interface.name,
+            'output_name': interface.name,
+            'template_name': 'js_interface',
+        }
 
     callback_context_list = [
         callback_context(callback_function)
@@ -664,7 +845,7 @@ def interface_context(interface):
         for constant in interface.constants
     ]
 
-    constructor = function_dispatcher(constructor_context_list(interface))
+    constructor = ConstructorContext(interface_context).build(interface)
 
     dictionaries = [
         {'name': dictionary.name}
@@ -673,30 +854,12 @@ def interface_context(interface):
 
     method_context_list = filter(
         lambda context: context['cpp_name'] != 'JavaScript',
-        [function_context(list(functions))
-         for name, functions in
+        [MethodGroupContext(interface_context, name).build(list(operations))
+         for name, operations in
          groupby(interface.operations, lambda operation: operation.name)])
 
     global_referenced_interface_names.add(interface.name)
-
-    include_paths = map(interface_name_to_include_path,
-                        filter(lambda name: 'include_path' in
-                               global_interfaces_info[name],
-                               global_referenced_interface_names)) + \
-        map(dictionary_name_to_include_path,
-            global_referenced_dictionary_names)
-    include_paths.append('base/logging.h')
-    include_paths.append('evita/dom/converter.h')
-    include_paths.append('evita/dom/script_host.h')
-    include_paths.append('evita/v8_glue/constructor_template.h')
-    include_paths.append('evita/v8_glue/function_template_builder.h')
-    if global_has_gc_member:
-        include_paths.append('evita/gc/member.h')
-    if global_has_nullable:
-        include_paths.append('evita/v8_glue/nullable.h')
-
-    for name in global_js_interface_names:
-        include_paths.append(JS_INTERFACE_NAMES[name])
+    interface_context.finish()
 
     if interface.parent:
         base_class_include = \
@@ -726,7 +889,7 @@ def interface_context(interface):
         'enumerations': enumeration_context_list,
         'has_static_member': has_static_member,
         'need_instance_template': need_instance_template,
-        'include_paths': sorted(include_paths),
+        'include_paths': interface_context.include_paths,
         'interface_name': interface.name,
         'interface_parent': interface.parent,
         'methods': sort_context_list(method_context_list),
@@ -751,21 +914,6 @@ def dictionary_name_to_include_path(dictionary_name):
     return FILE_NAME_PREFIX + dictionary_name + '.h'
 
 
-# Make parameters list without optional parameters.
-# Example: foo(T1 a, optional T2 b, optional T3 c)
-# Output: [[T1 a], [T1 a, T2 b], [T1 a, T2 b, T3 c]]
-def expand_parameters(functions):
-    parameters_list = []
-    for function in functions:
-        parameters = []
-        for parameter in function.arguments:
-            if parameter.is_optional:
-                parameters_list.append(list(parameters))
-            parameters.append(function_parameter(parameter))
-        parameters_list.append(parameters)
-    return parameters_list
-
-
 def initialize_jinja_env(cache_dir):
     jinja_env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(templates_dir),
@@ -788,8 +936,25 @@ def interface_name_to_include_path(interface_name):
     return interface_info['include_path']
 
 
+def make_parameters_list(function):
+    parameters_list = []
+    parameters = []
+    for parameter in function.arguments:
+        if parameter.is_optional:
+            parameters_list.append(list(parameters))
+        parameters.append(function_parameter(parameter))
+    parameters_list.append(parameters)
+    return parameters_list
+
+
 def sort_context_list(context_list):
     return sorted(context_list, key=lambda context: context['name'])
+
+
+def cpp_name_of(model):
+    if 'ImplementedAs' in model.extended_attributes:
+        return model.extended_attributes['ImplementedAs']
+    return upper_camel_case(model.name)
 
 
 def underscore(text):

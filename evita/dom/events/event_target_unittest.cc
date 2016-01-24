@@ -1,8 +1,10 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/testing/abstract_dom_test.h"
 
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/v8_glue/constructor_template.h"
@@ -70,7 +72,7 @@ class SampleEventTargetClass final
   v8::Local<v8::ObjectTemplate> SetupInstanceTemplate(
       v8::Isolate* isolate,
       v8::Local<v8::ObjectTemplate> base_templ) final {
-    auto const templ = BaseClass::SetupInstanceTemplate(isolate, base_templ);
+    const auto templ = BaseClass::SetupInstanceTemplate(isolate, base_templ);
     templ->SetAccessorProperty(
         gin::StringToSymbol(isolate, "handled"),
         v8::FunctionTemplate::New(isolate, &GetHandled),
@@ -85,10 +87,13 @@ class SampleEventTargetClass final
 
   // |handled| IDL attribute getter
   static void GetHandled(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    auto const isolate = info.GetIsolate();
+    const auto isolate = info.GetIsolate();
+    const auto context = isolate->GetCurrentContext();
+    ExceptionState exception_state(ExceptionState::Situation::PropertyGet,
+                                   context, "SampleEventTarget", "handled");
     SampleEventTarget* impl = nullptr;
     if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
-      ThrowReceiverError(isolate, "SampleEventTarget", info.This());
+      exception_state.ThrowReceiverError(info.This());
       return;
     }
     auto value = impl->handled();
@@ -100,19 +105,22 @@ class SampleEventTargetClass final
 
   // |handleEvent| IDL operation
   static void HandleEvent(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    auto const isolate = info.GetIsolate();
+    const auto isolate = info.GetIsolate();
+    const auto context = isolate->GetCurrentContext();
+    ExceptionState exception_state(ExceptionState::Situation::PropertyGet,
+                                   context, "SampleEventTarget", "handleEvent");
     if (info.Length() != 1) {
-      ThrowArityError(isolate, 1, 1, info.Length());
+      exception_state.ThrowArityError(1, 1, info.Length());
       return;
     }
     SampleEventTarget* impl = nullptr;
     if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
-      ThrowReceiverError(isolate, "SampleEventTarget", info.This());
+      exception_state.ThrowReceiverError(info.This());
       return;
     }
     Event* value;
     if (!gin::ConvertFromV8(isolate, info[0], &value)) {
-      ThrowArgumentError(isolate, "Event", info[0], 0);
+      exception_state.ThrowArgumentError("Event", info[0], 0);
       return;
     }
     impl->HandleEvent(value);
@@ -120,19 +128,22 @@ class SampleEventTargetClass final
 
   // |handled| IDL attribute setter
   static void SetHandled(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    auto const isolate = info.GetIsolate();
+    const auto isolate = info.GetIsolate();
+    const auto context = isolate->GetCurrentContext();
+    ExceptionState exception_state(ExceptionState::Situation::PropertySet,
+                                   context, "SampleEventTarget", "handled");
     if (info.Length() != 1) {
-      ThrowArityError(isolate, 1, 1, info.Length());
+      exception_state.ThrowArityError(1, 1, info.Length());
       return;
     }
     SampleEventTarget* impl = nullptr;
     if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
-      ThrowReceiverError(isolate, "SampleEventTarget", info.This());
+      exception_state.ThrowReceiverError(info.This());
       return;
     }
     v8_glue::Nullable<Event> new_value;
     if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
-      ThrowArgumentError(isolate, "Event or null", info[0], 0);
+      exception_state.ThrowArgumentError("Event or null", info[0], 0);
       return;
     }
     impl->set_handled(new_value);

@@ -18,19 +18,22 @@ namespace bindings {
 {%-  for parameter in signature.parameters -%}
   param{{ loop.index0 }}{% if not loop.last %}{{', '}}{% endif %}
 {%-  endfor %}
+{% if signature.is_raises_exception %}
+  {% if signature.parameters | count %}{{', '}}{% endif %}{{'&exception_state'}}
+{%- endif %}
 {%- endmacro %}
 {#
  # Example:
  #  Type0 param0;
- #  auto const arg0 = info[0];
+ #  const auto arg0 = info[0];
  #  if (!gin::ConvertFromV8(isolate, arg0, &param0)) {
- #    ThrowArgumentError(isolate, "display_type", arg0, 0);
+ #    exception_state.ThrowArgumentError("display_type", arg0, 0);
  #    return nullptr;
  #  }
  #  Type1 param1;
- #  auto const arg1 = info[1];
+ #  const auto arg1 = info[1];
  #  if (!gin::ConvertFromV8(isolate, arg1, &param1)) {
- #    ThrowArgumentError(isolate, "display_type", arg1, 1);
+ #    exception_state.ThrowArgumentError("display_type", arg1, 1);
  #    return nullptr;
  #  }
  #  return new Example(param1, param2);
@@ -39,9 +42,9 @@ namespace bindings {
 {% if signature.parameters %}
 {%-  for parameter in signature.parameters %}
 {{indent}}{{parameter.from_v8_type}} param{{ loop.index0 }};
-{{indent}}auto const arg{{ loop.index0 }} = info[{{ loop.index0 }}];
+{{indent}}const auto arg{{ loop.index0 }} = info[{{ loop.index0 }}];
 {{indent}}if (!gin::ConvertFromV8(isolate, arg{{ loop.index0 }}, &param{{ loop.index0 }})) {
-{{indent}}  ThrowArgumentError(isolate, "{{parameter.display_type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
+{{indent}}  exception_state.ThrowArgumentError("{{parameter.display_type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
 {{indent}}  return nullptr;
 {{indent}}}
 {% endfor %}
@@ -55,17 +58,19 @@ namespace bindings {
 {% macro emit_method(method) %}
 void {{class_name}}::{{method.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  auto const isolate = info.GetIsolate();
+  const auto isolate = info.GetIsolate();
+  const auto context = isolate->GetCurrentContext();
+  ExceptionState exception_state(ExceptionState::Situation::MethodCall, context, "{{interface_name}}", "{{method.name}}");
 {% if not method.is_static %}
   {{interface_name}}* impl = nullptr;
   if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
-    ThrowReceiverError(isolate, "{{interface_name}}", info.This());
+    exception_state.ThrowReceiverError(info.This());
     return;
   }
 {% endif %}
 {% if method.dispatch == 'single' %}
   if (info.Length() != {{method.min_arity}}) {
-    ThrowArityError(isolate, {{method.min_arity}}, {{method.min_arity}}, info.Length());
+    exception_state.ThrowArityError({{method.min_arity}}, {{method.min_arity}}, info.Length());
     return;
   }
 {{ emit_method_signature(method.signature) }}
@@ -78,7 +83,7 @@ void {{class_name}}::{{method.cpp_name}}(
     }
 {%  endfor %}
   }
-  ThrowArityError(isolate, {{ method.min_arity }}, {{ method.max_arity }}, info.Length());
+  exception_state.ThrowArityError({{ method.min_arity }}, {{ method.max_arity }}, info.Length());
 {% else %}
 #error "Unsupported dispatch type {{method.dispatch}}"
 {% endif %}
@@ -93,9 +98,9 @@ void {{class_name}}::{{method.cpp_name}}(
 
 {%-  for parameter in signature.parameters %}
 {{indent}}{{parameter.from_v8_type}} param{{ loop.index0 }};
-{{indent}}auto const arg{{ loop.index0 }} = info[{{ loop.index0 }}];
+{{indent}}const auto arg{{ loop.index0 }} = info[{{ loop.index0 }}];
 {{indent}}if (!gin::ConvertFromV8(isolate, arg{{ loop.index0 }}, &param{{ loop.index0 }})) {
-{{indent}}  ThrowArgumentError(isolate, "{{parameter.display_type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
+{{indent}}  exception_state.ThrowArgumentError("{{parameter.display_type}}", arg{{ loop.index0 }}, {{ loop.index0 }});
 {{indent}}  return;
 {{indent}}}
 {% endfor %}
@@ -124,9 +129,6 @@ void {{class_name}}::{{method.cpp_name}}(
 // {{class_name}}
 //
 {{class_name}}::{{class_name}}(const char* name)
-
-
-
 {%- if interface_parent -%}
 {{ '\n  : BaseClass(name) ' }}
 {%- else -%}
@@ -159,10 +161,12 @@ void {{class_name}}::Construct{{interface_name}}(
 //
 {{interface_name}}* {{class_name}}::New{{interface_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  auto const isolate = info.GetIsolate();
+  const auto isolate = info.GetIsolate();
+  const auto context = isolate->GetCurrentContext();
+  ExceptionState exception_state(ExceptionState::Situation::Construction, context, "{{interface_name}}");
 {% if constructor.dispatch == 'single' %}
   if (info.Length() != {{constructor.min_arity}}) {
-    ThrowArityError(isolate, {{constructor.min_arity}}, {{constructor.min_arity}}, info.Length());
+    exception_state.ThrowArityError({{constructor.min_arity}}, {{constructor.min_arity}}, info.Length());
     return nullptr;
   }
 {{ emit_constructor_signature(constructor.cpp_name, constructor.signature) }}
@@ -174,7 +178,7 @@ void {{class_name}}::Construct{{interface_name}}(
     }
 {%  endfor %}
   }
-  ThrowArityError(isolate, {{ constructor.min_arity }}, {{ constructor.max_arity }}, info.Length());
+  exception_state.ThrowArityError({{ constructor.min_arity }}, {{ constructor.max_arity }}, info.Length());
   return nullptr;
 {% else %}
 #error "Unsupported dispatch type {{constructor.dispatch}}"
@@ -192,9 +196,11 @@ void {{class_name}}::Construct{{interface_name}}(
 {%  endif %}
 void {{class_name}}::Get_{{attribute.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  auto const isolate = info.GetIsolate();
+  const auto isolate = info.GetIsolate();
+  const auto context = isolate->GetCurrentContext();
+  ExceptionState exception_state(ExceptionState::Situation::PropertyGet, context, "{{interface_name}}", "{{attribute.name}}");
   if (info.Length() != 0) {
-    ThrowArityError(isolate, 0, 0, info.Length());
+    exception_state.ThrowArityError(0, 0, info.Length());
     return;
   }
   {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cpp_name}}();
@@ -211,14 +217,16 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
 {%  if not attribute.is_read_only %}
 void {{class_name}}::Set_{{attribute.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  auto const isolate = info.GetIsolate();
+  const auto isolate = info.GetIsolate();
+  const auto context = isolate->GetCurrentContext();
+  ExceptionState exception_state(ExceptionState::Situation::PropertySet, context, "{{interface_name}}", "{{attribute.name}}");
   if (info.Length() != 1) {
-    ThrowArityError(isolate, 1, 1, info.Length());
+    exception_state.ThrowArityError(1, 1, info.Length());
     return;
   }
   {{attribute.from_v8_type}} new_value;
   if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
-    ThrowArgumentError(isolate, "{{attribute.display_type}}", info.info[0], 0);
+    exception_state.ThrowArgumentError("{{attribute.display_type}}", info.info[0], 0);
     return;
   }
   {{interface_name}}::set_{{attribute.cpp_name}}(new_value);
@@ -246,10 +254,12 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
 {%  endif %}
 void {{class_name}}::Get_{{attribute.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  auto const isolate = info.GetIsolate();
+  const auto isolate = info.GetIsolate();
+  const auto context = isolate->GetCurrentContext();
+  ExceptionState exception_state(ExceptionState::Situation::PropertyGet, context, "{{interface_name}}", "{{attribute.name}}");
   {{interface_name}}* impl = nullptr;
   if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
-    ThrowReceiverError(isolate, "{{interface_name}}", info.This());
+    exception_state.ThrowReceiverError(info.This());
     return;
   }
   {{attribute.to_v8_type}} value = impl->{{interface_name}}::{{attribute.cpp_name}}();
@@ -266,19 +276,21 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
 {%  if not attribute.is_read_only %}
 void {{class_name}}::Set_{{attribute.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  auto const isolate = info.GetIsolate();
+  const auto isolate = info.GetIsolate();
+  const auto context = isolate->GetCurrentContext();
+  ExceptionState exception_state(ExceptionState::Situation::PropertySet, context, "{{interface_name}}", "{{attribute.name}}");
   if (info.Length() != 1) {
-    ThrowArityError(isolate, 1, 1, info.Length());
+    exception_state.ThrowArityError(1, 1, info.Length());
     return;
   }
   {{interface_name}}* impl = nullptr;
   if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
-    ThrowReceiverError(isolate, "{{interface_name}}", info.This());
+    exception_state.ThrowReceiverError(info.This());
     return;
   }
   {{attribute.from_v8_type}} new_value;
   if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
-    ThrowArgumentError(isolate, "{{attribute.display_type}}", info[0], 0);
+    exception_state.ThrowArgumentError("{{attribute.display_type}}", info[0], 0);
     return;
   }
   impl->set_{{attribute.cpp_name}}(new_value);

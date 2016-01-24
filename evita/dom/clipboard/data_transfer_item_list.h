@@ -35,11 +35,13 @@ class DataTransferItemList final
   friend class bindings::DataTransferItemListClass;
 
   // bindings
-  int length() const;
+  int length(ExceptionState* exception_state) const;
 
-  void Add(DataTransferData* data, const base::string16& type);
-  void Clear();
-  void FetchIfNeeded() const;
+  void Add(DataTransferData* data,
+           const base::string16& type,
+           ExceptionState* exception_state);
+  void Clear(ExceptionState* exception_state);
+  void FetchIfNeeded(ExceptionState* exception_state) const;
   DataTransferItem* Get(int index, ExceptionState* exception_state) const;
   void Remove(int index, ExceptionState* exception_state);
   bool ValidateIndex(int index, ExceptionState* exception_state) const;

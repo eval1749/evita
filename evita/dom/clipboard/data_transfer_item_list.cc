@@ -36,37 +36,51 @@ bool Converter<dom::DataTransferData*>::FromV8(v8::Isolate* isolate,
 
 namespace dom {
 
+//////////////////////////////////////////////////////////////////////
+//
+// DataTransferItemList
+//
 DataTransferItemList::DataTransferItemList() : fetched_(false) {}
 
 DataTransferItemList::~DataTransferItemList() {}
 
-int DataTransferItemList::length() const {
-  FetchIfNeeded();
+int DataTransferItemList::length(ExceptionState* exception_state) const {
+  FetchIfNeeded(exception_state);
   return static_cast<int>(items_.size());
 }
 
 void DataTransferItemList::Add(DataTransferData* data,
-                               const base::string16& type) {
-  FetchIfNeeded();
-  Clipboard clipboard;
+                               const base::string16& type,
+                               ExceptionState* exception_state) {
+  FetchIfNeeded(exception_state);
+  Clipboard clipboard(exception_state);
   if (!clipboard.opened())
     return;
   auto const format = Clipboard::Format::Get(type);
   if (!format) {
-    ScriptHost::instance()->ThrowError(
+    exception_state->ThrowError(
         base::StringPrintf("Unsupported type for clipboard: %ls", type));
     return;
   }
   auto const item = new DataTransferItem(format, data);
   items_.push_back(item);
-  clipboard.Add(format, data);
+  clipboard.Add(format, data, exception_state);
 }
 
-void DataTransferItemList::FetchIfNeeded() const {
+void DataTransferItemList::Clear(ExceptionState* exception_state) {
+  Clipboard clipboard(exception_state);
+  if (!clipboard.opened())
+    return;
+  items_.resize(0);
+  clipboard.Clear();
+}
+
+void DataTransferItemList::FetchIfNeeded(
+    ExceptionState* exception_state) const {
   if (fetched_)
     return;
   DCHECK(!items_.size());
-  Clipboard clipboard;
+  Clipboard clipboard(exception_state);
   if (!clipboard.opened())
     return;
   auto format_code = 0u;
@@ -85,18 +99,10 @@ void DataTransferItemList::FetchIfNeeded() const {
   fetched_ = true;
 }
 
-void DataTransferItemList::Clear() {
-  Clipboard clipboard;
-  if (!clipboard.opened())
-    return;
-  items_.resize(0);
-  clipboard.Clear();
-}
-
 DataTransferItem* DataTransferItemList::Get(
     int index,
     ExceptionState* exception_state) const {
-  if (ValidateIndex(index, exception_state))
+  if (!ValidateIndex(index, exception_state))
     return nullptr;
   return items_[static_cast<size_t>(index)];
 }
@@ -104,24 +110,23 @@ DataTransferItem* DataTransferItemList::Get(
 void DataTransferItemList::Remove(int index, ExceptionState* exception_state) {
   if (!ValidateIndex(index, exception_state))
     return;
-  Clipboard clipboard;
+  Clipboard clipboard(exception_state);
   if (!clipboard.opened())
     return;
   items_.erase(items_.begin() + index);
   ::EmptyClipboard();
-  for (auto item : items_) {
-    clipboard.Add(item->format(), item->data());
-  }
+  for (const auto& item : items_)
+    clipboard.Add(item->format(), item->data(), exception_state);
 }
 
 bool DataTransferItemList::ValidateIndex(
     int index,
     ExceptionState* exception_state) const {
-  FetchIfNeeded();
-  if (index >= 0 && index < length())
+  FetchIfNeeded(exception_state);
+  if (static_cast<size_t>(index) < items_.size())
     return true;
   exception_state->ThrowRangeError(base::StringPrintf(
-      "Bad index %d, it must be less than %d", index, length()));
+      "Bad index %d, it must be [0 , %Iu]", index, items_.size() - 1));
   return false;
 }
 

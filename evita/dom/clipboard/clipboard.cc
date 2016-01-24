@@ -11,10 +11,8 @@
 
 #include "base/logging.h"
 #include "common/memory/singleton.h"
-#include "evita/dom/bindings/platform_error.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/clipboard/data_transfer_data.h"
-#include "evita/dom/script_host.h"
-#include "evita/v8_glue/runner.h"
 
 namespace dom {
 
@@ -188,14 +186,11 @@ DataTransferData* TextFormat::FromClipboard(HANDLE handle) const {
 //
 // Clipboard
 //
-Clipboard::Clipboard() : opened_(::OpenClipboard(nullptr) != FALSE) {
+Clipboard::Clipboard(ExceptionState* exception_state)
+    : opened_(::OpenClipboard(nullptr) != FALSE) {
   if (!opened_) {
     const auto last_error = ::GetLastError();
-    const auto runner = ScriptHost::instance()->runner();
-    v8_glue::Runner::Scope runner_scope(runner);
-    const auto isolate = runner->isolate();
-    PlatformError error("OpenClipboard", last_error);
-    isolate->ThrowException(gin::ConvertToV8(isolate, error));
+    exception_state->ThrowPlatformError("OpenClipboard", last_error);
     return;
   }
 
@@ -218,7 +213,9 @@ Clipboard::~Clipboard() {
   ::CloseClipboard();
 }
 
-void Clipboard::Add(const Format* format, const DataTransferData* data) {
+void Clipboard::Add(const Format* format,
+                    const DataTransferData* data,
+                    ExceptionState* exception_state) {
   // For CF_UNICODETEXT, we need to add trailing NUL character.
   auto const num_extra_bytes =
       data->kind() == DataTransferData::Kind::String ? 2 : 0;
@@ -233,11 +230,7 @@ void Clipboard::Add(const Format* format, const DataTransferData* data) {
   }
   if (!::SetClipboardData(format->format(), handle)) {
     const auto last_error = ::GetLastError();
-    const auto runner = ScriptHost::instance()->runner();
-    v8_glue::Runner::Scope runner_scope(runner);
-    const auto isolate = runner->isolate();
-    PlatformError error("SetClipboardData", last_error);
-    isolate->ThrowException(gin::ConvertToV8(isolate, error));
+    exception_state->ThrowPlatformError("SetClipboardData", last_error);
     return;
   }
   handle.release();

@@ -15,7 +15,12 @@
 namespace dom {
 
 class DataTransferData;
+class ExceptionState;
 
+//////////////////////////////////////////////////////////////////////
+//
+// Clipboard
+//
 class Clipboard final {
  public:
   class Format {
@@ -41,11 +46,13 @@ class Clipboard final {
     DISALLOW_COPY_AND_ASSIGN(Format);
   };
 
-  Clipboard();
+  explicit Clipboard(ExceptionState* exception_state);
   ~Clipboard();
 
   bool opened() const { return opened_; }
-  void Add(const Format* format, const DataTransferData* data);
+  void Add(const Format* format,
+           const DataTransferData* data,
+           ExceptionState* exception_state);
   void Clear();
   DataTransferData* Get(const Format* format) const;
 

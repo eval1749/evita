@@ -66,20 +66,23 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
 
   std::vector<Window*> child_windows() const;
 
-  void AddWindow(Window* window);
-  void ChangeParentWindow(Window* new_parent_window);
-  void Destroy();
-  void Focus();
-  void Hide();
+  void AddWindow(Window* window, ExceptionState* exception_state);
+  void ChangeParentWindow(Window* new_parent_window,
+                          ExceptionState* exception_state);
+  void Destroy(ExceptionState* exception_state);
+  void Focus(ExceptionState* exception_state);
+  void Hide(ExceptionState* exception_state);
   bool IsDescendantOf(Window* other) const;
-  void ReleaseCapture();
-  void Realize();
-  void RemoveWindow(Window* window);
-  void SetCapture();
-  void Show();
-  void SplitHorizontally(Window* new_right_window);
-  void SplitVertically(Window* new_below_window);
-  void Update();
+  void ReleaseCapture(ExceptionState* exception_state);
+  void Realize(ExceptionState* exception_state);
+  void RemoveWindow(Window* window, ExceptionState* exception_state);
+  void SetCapture(ExceptionState* exception_state);
+  void Show(ExceptionState* exception_state);
+  void SplitHorizontally(Window* new_right_window,
+                         ExceptionState* exception_state);
+  void SplitVertically(Window* new_below_window,
+                       ExceptionState* exception_state);
+  void Update(ExceptionState* exception_state);
 
   State state_;
 

@@ -9,6 +9,7 @@
 #include "base/strings/stringprintf.h"
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/public/view_delegate.h"
@@ -76,20 +77,20 @@ std::vector<Window*> Window::child_windows() const {
   return child_windows;
 }
 
-void Window::AddWindow(Window* window) {
+void Window::AddWindow(Window* window, ExceptionState* exception_state) {
   if (window == this) {
-    ScriptHost::instance()->ThrowError(
+    exception_state->ThrowError(
         base::StringPrintf("Can't add window(%d) to itself.", window_id()));
     return;
   }
   if (window->parent_node()) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
+    exception_state->ThrowError(base::StringPrintf(
         "Window(%d) is already child of window(%d).", window->window_id(),
         window->parent_node()->window_id()));
     return;
   }
   if (IsDescendantOf(window)) {
-    ScriptHost::instance()->ThrowError(
+    exception_state->ThrowError(
         base::StringPrintf("Window(%d) is parent or ancestor of window(%d).",
                            window->window_id(), window_id()));
     return;
@@ -99,16 +100,17 @@ void Window::AddWindow(Window* window) {
                                                      window->window_id());
 }
 
-void Window::ChangeParentWindow(Window* new_parent_window) {
+void Window::ChangeParentWindow(Window* new_parent_window,
+                                ExceptionState* exception_state) {
   if (parent_node() == new_parent_window)
     return;
   if (this == new_parent_window) {
-    ScriptHost::instance()->ThrowError("Can't change parent to itself.");
+    exception_state->ThrowError("Can't change parent to itself.");
     return;
   }
   if (new_parent_window->IsDescendantOf(this)) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
-        "Can't change parent of window(%d) to window(%d), becase window(%d)"
+    exception_state->ThrowError(base::StringPrintf(
+        "Can't change parent of window(%d) to window(%d), because window(%d)"
         " is descendant of window(%d).",
         window_id(), new_parent_window->window_id(),
         new_parent_window->window_id(), window_id()));
@@ -121,11 +123,11 @@ void Window::ChangeParentWindow(Window* new_parent_window) {
       window_id(), new_parent_window->window_id());
 }
 
-void Window::Destroy() {
+void Window::Destroy(ExceptionState* exception_state) {
   if (state_ == State::NotRealized)
     return;
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError("You can't destroy unrealized window.");
+    exception_state->ThrowError("You can't destroy unrealized window.");
     return;
   }
   for (auto descendant : common::tree::descendants_or_self(this)) {
@@ -203,17 +205,17 @@ void Window::DidShowWindow() {
   // Nothing to do.
 }
 
-void Window::Focus() {
+void Window::Focus(ExceptionState* exception_state) {
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError("You can't focus unrealized window.");
+    exception_state->ThrowError("You can't focus unrealized window.");
     return;
   }
   ScriptHost::instance()->view_delegate()->FocusWindow(window_id());
 }
 
-void Window::Hide() {
+void Window::Hide(ExceptionState* exception_state) {
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError("You can't hide unrealized window.");
+    exception_state->ThrowError("You can't hide unrealized window.");
     return;
   }
   ScriptHost::instance()->view_delegate()->HideWindow(window_id());
@@ -227,22 +229,22 @@ bool Window::IsDescendantOf(Window* other) const {
   return false;
 }
 
-void Window::Realize() {
+void Window::Realize(ExceptionState* exception_state) {
   if (state_ == State::Destroyed) {
     DCHECK_EQ(domapi::kInvalidWindowId, window_id());
-    ScriptHost::instance()->ThrowError("Can't realize deatched window.");
+    exception_state->ThrowError("Can't realize deatched window.");
     return;
   }
   if (state_ == State::Realized) {
-    ScriptHost::instance()->ThrowError("This window is already realized.");
+    exception_state->ThrowError("This window is already realized.");
     return;
   }
   if (state_ == State::Realizing) {
-    ScriptHost::instance()->ThrowError("This window is being realized.");
+    exception_state->ThrowError("This window is being realized.");
     return;
   }
   if (parent_node() && parent_node()->state_ == State::NotRealized) {
-    ScriptHost::instance()->ThrowError("Parent window isn't realized.");
+    exception_state->ThrowError("Parent window isn't realized.");
     return;
   }
   for (auto descendant : common::tree::descendants_or_self(this)) {
@@ -251,9 +253,9 @@ void Window::Realize() {
   ScriptHost::instance()->view_delegate()->RealizeWindow(window_id());
 }
 
-void Window::RemoveWindow(Window* window) {
+void Window::RemoveWindow(Window* window, ExceptionState* exception_state) {
   if (window->parent_node() != window) {
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
+    exception_state->ThrowError(base::StringPrintf(
         "Can't remove window(%d) which isn't child of window(%d).",
         window->window_id(), window_id()));
     return;
@@ -267,80 +269,82 @@ void Window::ResetForTesting() {
   WindowSet::instance()->ResetForTesting();
 }
 
-static bool CheckSplitParameter(Window* ref_window, Window* new_window) {
+static bool CheckSplitParameter(Window* ref_window,
+                                Window* new_window,
+                                ExceptionState* exception_state) {
   if (!ref_window->parent_node()) {
-    ScriptHost::instance()->ThrowError("Can't split top-level window.");
+    exception_state->ThrowError("Can't split top-level window.");
     return false;
   }
 
   if (ref_window == new_window) {
-    ScriptHost::instance()->ThrowError("Can't split window with itself.");
+    exception_state->ThrowError("Can't split window with itself.");
     return false;
   }
 
   if (ref_window->state() != Window::State::Realized) {
-    ScriptHost::instance()->ThrowError("Can't split unrealized window.");
+    exception_state->ThrowError("Can't split unrealized window.");
     return false;
   }
 
   if (new_window->parent_node()) {
-    ScriptHost::instance()->ThrowError("Can't split with child window.");
+    exception_state->ThrowError("Can't split with child window.");
     return false;
   }
 
   if (new_window->state() != Window::State::NotRealized) {
-    ScriptHost::instance()->ThrowError("Can't split with realized window.");
+    exception_state->ThrowError("Can't split with realized window.");
     return false;
   }
 
   return true;
 }
 
-void Window::ReleaseCapture() {
+void Window::ReleaseCapture(ExceptionState* exception_state) {
   if (window_id() == domapi::kInvalidWindowId) {
-    ScriptHost::instance()->ThrowError(
-        "Can't release capture to unralized window.");
+    exception_state->ThrowError("Can't release capture to unralized window.");
     return;
   }
   ViewEventTarget::ReleaseCapture();
 }
 
-void Window::SetCapture() {
+void Window::SetCapture(ExceptionState* exception_state) {
   if (state_ != State::Realized) {
-    ScriptHost::instance()->ThrowError(
-        "Can't set capture to unralized window.");
+    exception_state->ThrowError("Can't set capture to unralized window.");
     return;
   }
   ViewEventTarget::SetCapture();
 }
 
-void Window::Show() {
+void Window::Show(ExceptionState* exception_state) {
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError("You can't show unrealized window.");
+    exception_state->ThrowError("You can't show unrealized window.");
     return;
   }
   ScriptHost::instance()->view_delegate()->ShowWindow(window_id());
 }
 
-void Window::SplitHorizontally(Window* new_right_window) {
-  if (!CheckSplitParameter(this, new_right_window))
+void Window::SplitHorizontally(Window* new_right_window,
+                               ExceptionState* exception_state) {
+  if (!CheckSplitParameter(this, new_right_window, exception_state))
     return;
   parent_node()->InsertAfter(new_right_window, this);
   ScriptHost::instance()->view_delegate()->SplitHorizontally(
       window_id(), new_right_window->window_id());
 }
 
-void Window::SplitVertically(Window* new_below_window) {
-  if (!CheckSplitParameter(this, new_below_window))
+void Window::SplitVertically(Window* new_below_window,
+                             ExceptionState* exception_state) {
+  if (!CheckSplitParameter(this, new_below_window, exception_state))
     return;
   parent_node()->InsertAfter(new_below_window, this);
   ScriptHost::instance()->view_delegate()->SplitVertically(
       window_id(), new_below_window->window_id());
 }
 
-void Window::Update() {
+void Window::Update(ExceptionState* exception_state) {
   if (state_ != State::Realized && state_ != State::Realizing) {
-    ScriptHost::instance()->ThrowError("You can't update unrealized window.");
+    exception_state->ThrowError("You can't update unrealized window.");
     return;
   }
   ScriptHost::instance()->view_delegate()->UpdateWindow(window_id());

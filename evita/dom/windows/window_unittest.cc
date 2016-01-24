@@ -237,11 +237,14 @@ TEST_F(WindowTest, changeParent) {
       "var sample3 = new SampleWindow();"
       "sample1.appendChild(sample2)");
   EXPECT_SCRIPT_EQ(
-      "Error: Can't change parent of window(1) to window(2), becase window(2)"
+      "Error: Failed to execute 'changeParent' on 'Window': Can't change "
+      "parent of window(1) to window(2), because window(2)"
       " is descendant of window(1).",
       "sample1.changeParent(sample2)");
-  EXPECT_SCRIPT_EQ("Error: Can't change parent to itself.",
-                   "sample2.changeParent(sample2)");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'changeParent' on 'Window': Can't change "
+      "parent to itself.",
+      "sample2.changeParent(sample2)");
   EXPECT_SCRIPT_VALID("sample2.changeParent(sample1)");
   EXPECT_SCRIPT_VALID("sample2.changeParent(sample3)");
   EXPECT_SCRIPT_EQ("3", "sample2.parent.id");
@@ -264,8 +267,10 @@ TEST_F(WindowTest, DidResize) {
 
 TEST_F(WindowTest, focus) {
   EXPECT_SCRIPT_VALID("var sample = new SampleWindow();");
-  EXPECT_SCRIPT_EQ("Error: You can't focus unrealized window.",
-                   "sample.focus()");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'focus' on 'Window': You can't focus "
+      "unrealized window.",
+      "sample.focus()");
 
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("sample.realize();");
@@ -299,8 +304,10 @@ TEST_F(WindowTest, Realize) {
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow(); sample1.realize()");
   EXPECT_SCRIPT_EQ("realizing", "sample1.state");
-  EXPECT_SCRIPT_EQ("Error: This window is being realized.",
-                   "sample1.realize();");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'realize' on 'Window': This window is being "
+      "realized.",
+      "sample1.realize();");
   view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(1));
   EXPECT_SCRIPT_EQ("realized", "sample1.state");
 }
@@ -337,16 +344,26 @@ TEST_F(WindowTest, splitHorizontally) {
   view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(3));
   view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(4));
 
-  EXPECT_SCRIPT_EQ("Error: Can't split top-level window.",
-                   "parent1.splitHorizontally(parent1);");
-  EXPECT_SCRIPT_EQ("Error: Can't split window with itself.",
-                   "child1.splitHorizontally(child1);");
-  EXPECT_SCRIPT_EQ("Error: Can't split unrealized window.",
-                   "child2.splitHorizontally(child3);");
-  EXPECT_SCRIPT_EQ("Error: Can't split with child window.",
-                   "child1.splitHorizontally(child2);");
-  EXPECT_SCRIPT_EQ("Error: Can't split with realized window.",
-                   "child1.splitHorizontally(parent3);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitHorizontally' on 'Window': Can't split "
+      "top-level window.",
+      "parent1.splitHorizontally(parent1);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitHorizontally' on 'Window': Can't split "
+      "window with itself.",
+      "child1.splitHorizontally(child1);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitHorizontally' on 'Window': Can't split "
+      "unrealized window.",
+      "child2.splitHorizontally(child3);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitHorizontally' on 'Window': Can't split "
+      "with child window.",
+      "child1.splitHorizontally(child2);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitHorizontally' on 'Window': Can't split "
+      "with realized window.",
+      "child1.splitHorizontally(parent3);");
 
   EXPECT_SCRIPT_VALID("child1.splitHorizontally(child3);");
   EXPECT_SCRIPT_TRUE("parent1.firstChild === child1");
@@ -378,16 +395,26 @@ TEST_F(WindowTest, splitVertically) {
   view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(3));
   view_event_handler()->DidRealizeWidget(static_cast<domapi::WindowId>(4));
 
-  EXPECT_SCRIPT_EQ("Error: Can't split top-level window.",
-                   "parent1.splitVertically(parent1);");
-  EXPECT_SCRIPT_EQ("Error: Can't split window with itself.",
-                   "child1.splitVertically(child1);");
-  EXPECT_SCRIPT_EQ("Error: Can't split unrealized window.",
-                   "child2.splitVertically(child3);");
-  EXPECT_SCRIPT_EQ("Error: Can't split with child window.",
-                   "child1.splitVertically(child2);");
-  EXPECT_SCRIPT_EQ("Error: Can't split with realized window.",
-                   "child1.splitVertically(parent3);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitVertically' on 'Window': Can't split "
+      "top-level window.",
+      "parent1.splitVertically(parent1);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitVertically' on 'Window': Can't split "
+      "window with itself.",
+      "child1.splitVertically(child1);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitVertically' on 'Window': Can't split "
+      "unrealized window.",
+      "child2.splitVertically(child3);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitVertically' on 'Window': Can't split "
+      "with child window.",
+      "child1.splitVertically(child2);");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'splitVertically' on 'Window': Can't split "
+      "with realized window.",
+      "child1.splitVertically(parent3);");
 
   EXPECT_SCRIPT_VALID("child1.splitVertically(child3);");
   EXPECT_SCRIPT_TRUE("parent1.firstChild === child1");

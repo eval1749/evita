@@ -60,24 +60,46 @@ interface Window : ViewEventTarget {
   [ImplementedAs=JavaScript]
   readonly attribute boolean visible;
 
-  [ImplementedAs=AddWindow]
+  ////////////////////////////////////////////////////////////
+  //
+  // Operations
+  //
+  [ImplementedAs=AddWindow, RaisesException]
   void appendChild(Window newChild);
 
-  [ImplementedAs=ChangeParentWindow]
+  [ImplementedAs=ChangeParentWindow, RaisesException]
   void changeParent(Window newParent);
 
+  [RaisesException]
   void destroy();
+
+  [RaisesException]
   void focus();
+
+  [RaisesException]
   void hide();
+
+  [RaisesException]
   void realize();
+
+  [RaisesException]
   void releaseCapture();
 
-  [ImplementedAs=RemoveWindow]
+  [ImplementedAs=RemoveWindow, RaisesException]
   void removeChild(Window child);
 
+  [RaisesException]
   void setCapture();
+
+  [RaisesException]
   void show();
+
+  [RaisesException]
   void splitHorizontally(Window newRightWindow);
+
+  [RaisesException]
   void splitVertically(Window newBelowWindow);
+
+  [RaisesException]
   void update();
 };

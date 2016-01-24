@@ -23,8 +23,9 @@ class Offset;
 
 namespace dom {
 
-class TextRange;
+class ExceptionState;
 class RegularExpression;
+class TextRange;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -39,37 +40,49 @@ class TextDocument final
 
   const text::Buffer* buffer() const { return buffer_.get(); }
   text::Buffer* buffer() { return buffer_.get(); }
-  base::char16 charCodeAt(text::Offset position) const;
+  base::char16 charCodeAt(text::Offset position,
+                          ExceptionState* exception_state) const;
   int length() const;
   bool read_only() const;
   int revision() const;
   void set_read_only(bool read_only) const;
   // Returns spelling at |offset|.
-  const base::string16& spelling_at(text::Offset offset) const;
+  const base::string16& spelling_at(text::Offset offset,
+                                    ExceptionState* exception_state) const;
   // Returns syntax at |offset|.
-  const base::string16& syntax_at(text::Offset offset) const;
-  v8::Local<v8::Object> style_at(text::Offset position) const;
+  const base::string16& syntax_at(text::Offset offset,
+                                  ExceptionState* exception_state) const;
+  v8::Local<v8::Object> style_at(text::Offset position,
+                                 ExceptionState* exception_state) const;
 
-  bool CheckCanChange() const;
+  bool CheckCanChange(ExceptionState* exception_state) const;
   void ClearUndo();
   void EndUndoGroup(const base::string16& name);
-  text::LineAndColumn GetLineAndColumn(text::Offset offset) const;
-  bool IsValidPosition(text::Offset offset) const;
-  bool IsValidRange(text::Offset start, text::Offset end) const;
+  text::LineAndColumn GetLineAndColumn(text::Offset offset,
+                                       ExceptionState* exception_state) const;
+  bool IsValidPosition(text::Offset offset,
+                       ExceptionState* exception_state) const;
+  bool IsValidRange(text::Offset start,
+                    text::Offset end,
+                    ExceptionState* exception_state) const;
   v8::Local<v8::Value> Match(RegularExpression* regexp,
                              text::Offset start,
                              text::Offset end);
   text::Offset Redo(text::Offset position);
-  void RenameTo(const base::string16& new_name);
-  void SetSpelling(text::Offset start, text::Offset end, int spelling);
+  void SetSpelling(text::Offset start,
+                   text::Offset end,
+                   int spelling,
+                   ExceptionState* exception_state);
   void SetSyntax(text::Offset start,
                  text::Offset end,
-                 const base::string16& syntax);
+                 const base::string16& syntax,
+                 ExceptionState* exception_state);
   base::string16 Slice(int start, int end);
   base::string16 Slice(int start);
   void StartUndoGroup(const base::string16& name);
   text::Offset Undo(text::Offset position);
-  text::Offset ValidateOffset(int offsetLike) const;
+  text::Offset ValidateOffset(int offsetLike,
+                              ExceptionState* exception_state) const;
 
   // Implementation of TextDocument static method
   static TextDocument* NewTextDocument();

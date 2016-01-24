@@ -38,25 +38,23 @@ class TextRange final : public v8_glue::Scriptable<TextRange> {
 
   bool collapsed() const;
   TextDocument* document() const { return document_.get(); }
-  text::Offset end() const;
-  text::Offset start() const;
-  void set_end(int position);
-  void set_start(int position);
-  base::string16 text() const;
-  void set_text(const base::string16& text);
   text::Range* text_range() const { return range_; }
 
-  TextRange* CollapseTo(int position);
-  TextRange* InsertBefore(const base::string16& text);
-  static TextRange* NewTextRange(
-      v8_glue::Either<TextDocument*, TextRange*> document_or_range);
+  TextRange* CollapseTo(int position, ExceptionState* exception_state);
+  void InsertBefore(const base::string16& text,
+                    ExceptionState* exception_state);
   static TextRange* NewTextRange(
       v8_glue::Either<TextDocument*, TextRange*> document_or_range,
-      int offset);
+      ExceptionState* exception_state);
+  static TextRange* NewTextRange(
+      v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+      int offset,
+      ExceptionState* exception_state);
   static TextRange* NewTextRange(
       v8_glue::Either<TextDocument*, TextRange*> document_or_range,
       int start,
-      int end);
+      int end,
+      ExceptionState* exception_state);
   void SetSpelling(int spelling, ExceptionState* exception_state) const;
   void SetSyntax(const base::string16& syntax,
                  ExceptionState* exception_state) const;
@@ -65,10 +63,12 @@ class TextRange final : public v8_glue::Scriptable<TextRange> {
   friend class bindings::TextRangeClass;
 
   // bindings
-  int end_value() const;
-  void set_end_value(int value) { set_end(value); }
-  int start_value() const;
-  void set_start_value(int value) { set_start(value); }
+  int end() const;
+  int start() const;
+  base::string16 text() const;
+  void set_end(int offsetLike, ExceptionState* exception_state);
+  void set_start(int offsetLike, ExceptionState* exception_state);
+  void set_text(const base::string16& text, ExceptionState* exception_state);
 
   void SetStyle(v8::Local<v8::Object> style_dict,
                 ExceptionState* exception_state) const;

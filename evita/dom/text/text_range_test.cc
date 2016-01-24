@@ -497,14 +497,22 @@ TEST_F(TextRangeTest, set_start_end) {
       "range1.start = 5;");
   EXPECT_SCRIPT_EQ("5", "range1.start");
   EXPECT_SCRIPT_EQ("1 5", "range1.end = 1; range1.start + ' ' + range1.end");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid offset -1, valid range is [0, 12]",
-                   "range1.start = -1");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid offset 100, valid range is [0, 12]",
-                   "range1.start = 100");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid offset -1, valid range is [0, 12]",
-                   "range1.end = -1");
-  EXPECT_SCRIPT_EQ("RangeError: Invalid offset 100, valid range is [0, 12]",
-                   "range1.end = 100");
+  EXPECT_SCRIPT_EQ(
+      "RangeError: Failed to set the 'start' property on 'TextRange': Invalid "
+      "offset -1, valid range is [0, 12]",
+      "range1.start = -1");
+  EXPECT_SCRIPT_EQ(
+      "RangeError: Failed to set the 'start' property on 'TextRange': Invalid "
+      "offset 100, valid range is [0, 12]",
+      "range1.start = 100");
+  EXPECT_SCRIPT_EQ(
+      "RangeError: Failed to set the 'end' property on 'TextRange': Invalid "
+      "offset -1, valid range is [0, 12]",
+      "range1.end = -1");
+  EXPECT_SCRIPT_EQ(
+      "RangeError: Failed to set the 'end' property on 'TextRange': Invalid "
+      "offset 100, valid range is [0, 12]",
+      "range1.end = 100");
 }
 
 TEST_F(TextRangeTest, startOf) {

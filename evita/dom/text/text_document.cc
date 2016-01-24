@@ -11,6 +11,7 @@
 #include "base/strings/stringprintf.h"
 #include "evita/css/style_selector.h"
 #include "evita/dom/text/regular_expression.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
 #include "evita/metrics/time_scope.h"
@@ -33,10 +34,11 @@ TextDocument::TextDocument() : buffer_(new text::Buffer()) {}
 
 TextDocument::~TextDocument() {}
 
-base::char16 TextDocument::charCodeAt(text::Offset position) const {
+base::char16 TextDocument::charCodeAt(text::Offset position,
+                                      ExceptionState* exception_state) const {
   if (position >= text::Offset(0) && position < buffer_->GetEnd())
     return buffer_->GetCharAt(position);
-  ScriptHost::instance()->ThrowRangeError(
+  exception_state->ThrowRangeError(
       base::StringPrintf("Bad index %d, valid index is [%d, %d]", position, 0,
                          (buffer_->GetEnd() - text::OffsetDelta(1)).value()));
   return 0;
@@ -58,21 +60,25 @@ void TextDocument::set_read_only(bool read_only) const {
   buffer_->SetReadOnly(read_only);
 }
 
-const base::string16& TextDocument::spelling_at(text::Offset offset) const {
-  if (!IsValidPosition(offset))
+const base::string16& TextDocument::spelling_at(
+    text::Offset offset,
+    ExceptionState* exception_state) const {
+  if (!IsValidPosition(offset, exception_state))
     return common::AtomicString::Empty();
   auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
   return marker ? marker->type() : common::AtomicString::Empty();
 }
 
-const base::string16& TextDocument::syntax_at(text::Offset offset) const {
-  if (!IsValidPosition(offset))
+const base::string16& TextDocument::syntax_at(
+    text::Offset offset,
+    ExceptionState* exception_state) const {
+  if (!IsValidPosition(offset, exception_state))
     return common::AtomicString::Empty();
   auto const marker = buffer_->syntax_markers()->GetMarkerAt(offset);
   return marker ? marker->type() : css::StyleSelector::normal();
 }
 
-bool TextDocument::CheckCanChange() const {
+bool TextDocument::CheckCanChange(ExceptionState* exception_state) const {
   if (buffer_->IsReadOnly()) {
     auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
@@ -80,7 +86,7 @@ bool TextDocument::CheckCanChange() const {
     auto const ctor =
         runner->global()->Get(v8Strings::TextDocumentReadOnly.Get(isolate));
     auto const error = runner->CallAsConstructor(ctor, GetWrapper(isolate));
-    ScriptHost::instance()->ThrowException(error);
+    exception_state->ThrowException(error);
     return false;
   }
   return true;
@@ -94,26 +100,31 @@ void TextDocument::EndUndoGroup(const base::string16& name) {
   buffer_->EndUndoGroup(name);
 }
 
-text::LineAndColumn TextDocument::GetLineAndColumn(text::Offset offset) const {
-  if (!IsValidPosition(offset))
+text::LineAndColumn TextDocument::GetLineAndColumn(
+    text::Offset offset,
+    ExceptionState* exception_state) const {
+  if (!IsValidPosition(offset, exception_state))
     return buffer_->GetLineAndColumn(text::Offset());
   METRICS_TIME_SCOPE();
   return buffer_->GetLineAndColumn(offset);
 }
 
-bool TextDocument::IsValidPosition(text::Offset offset) const {
+bool TextDocument::IsValidPosition(text::Offset offset,
+                                   ExceptionState* exception_state) const {
   if (offset.IsValid() && offset <= buffer_->GetEnd())
     return true;
-  ScriptHost::instance()->ThrowRangeError(
+  exception_state->ThrowRangeError(
       base::StringPrintf("Invalid offset %d, valid range is [%d, %d]",
                          offset.value(), 0, buffer_->GetEnd()));
   return false;
 }
 
-bool TextDocument::IsValidRange(text::Offset start, text::Offset end) const {
-  if (start <= end)
+bool TextDocument::IsValidRange(text::Offset start,
+                                text::Offset end,
+                                ExceptionState* exception_state) const {
+  if (start <= end && end <= buffer_->GetEnd())
     return true;
-  ScriptHost::instance()->ThrowRangeError(
+  exception_state->ThrowRangeError(
       base::StringPrintf("Invalid range %d, valid range is [%d, %d]",
                          end.value(), start.value(), buffer_->GetEnd()));
   return false;
@@ -135,7 +146,8 @@ text::Offset TextDocument::Redo(text::Offset position) {
 
 void TextDocument::SetSpelling(text::Offset start,
                                text::Offset end,
-                               int spelling_code) {
+                               int spelling_code,
+                               ExceptionState* exception_state) {
   struct Local {
     static const common::AtomicString& MapToSpelling(int spelling_code) {
       switch (spelling_code) {
@@ -151,7 +163,7 @@ void TextDocument::SetSpelling(text::Offset start,
       return common::AtomicString::Empty();
     }
   };
-  if (!IsValidPosition(start) || !IsValidPosition(end) || start >= end)
+  if (!IsValidRange(start, end, exception_state))
     return;
   buffer()->spelling_markers()->InsertMarker(
       text::StaticRange(*buffer(), start, end),
@@ -160,8 +172,9 @@ void TextDocument::SetSpelling(text::Offset start,
 
 void TextDocument::SetSyntax(text::Offset start,
                              text::Offset end,
-                             const base::string16& syntax) {
-  if (!IsValidPosition(start) || !IsValidPosition(end) || start >= end)
+                             const base::string16& syntax,
+                             ExceptionState* exception_state) {
+  if (!IsValidRange(start, end, exception_state))
     return;
   buffer()->syntax_markers()->InsertMarker(
       text::StaticRange(*buffer(), start, end), common::AtomicString(syntax));
@@ -192,10 +205,12 @@ text::Offset TextDocument::Undo(text::Offset position) {
   return buffer_->Undo(position);
 }
 
-text::Offset TextDocument::ValidateOffset(int offsetLike) const {
+text::Offset TextDocument::ValidateOffset(
+    int offsetLike,
+    ExceptionState* exception_state) const {
   if (offsetLike >= 0 && offsetLike <= length())
     return text::Offset(offsetLike);
-  ScriptHost::instance()->ThrowRangeError(
+  exception_state->ThrowRangeError(
       base::StringPrintf("Invalid offset %d, valid range is [%d, %d]",
                          offsetLike, 0, buffer_->GetEnd()));
   return text::Offset::Invalid();

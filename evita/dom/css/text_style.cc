@@ -196,8 +196,10 @@ void InvalidStyleAttributeValue(ExceptionState* exception_state,
 }
 }  // namespace
 
-v8::Handle<v8::Object> TextDocument::style_at(text::Offset position) const {
-  if (!IsValidPosition(position))
+v8::Handle<v8::Object> TextDocument::style_at(
+    text::Offset position,
+    ExceptionState* exception_state) const {
+  if (!IsValidPosition(position, exception_state))
     return v8::Handle<v8::Object>();
   const auto& style_values = buffer_->GetStyleAt(position);
 

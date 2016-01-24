@@ -16,6 +16,7 @@ enum RangeCase {
 };
 
 [
+    RaisesException=Constructor,
     CustomConstructor((TextDocument or TextRange) document_or_range),
     CustomConstructor((TextDocument or TextRange) document_or_range, long offset),
     CustomConstructor((TextDocument or TextRange) document_or_range, long start_offset,
@@ -24,12 +25,17 @@ enum RangeCase {
 interface TextRange {
   readonly attribute boolean collapsed;
   readonly attribute TextDocument document;
-  [ImplementedAs=end_value]
+
+  [RaisesException=Setter]
   attribute long end;
+
   [ImplementedAs=JavaScript]
-  attribute long length;
-  [ImplementedAs=start_value]
+  readonly attribute long length;
+
+  [RaisesException=Setter]
   attribute long start;
+
+  [RaisesException=Setter]
   attribute DOMString text;
 
   // TODO(yosin) We should make |analyzeCase()| as global function
@@ -40,6 +46,7 @@ interface TextRange {
   [ImplementedAs=JavaScript]
   TextRange capitalize();
 
+  [RaisesException]
   TextRange collapseTo(long offset);
 
   [ImplementedAs=JavaScript]
@@ -48,6 +55,7 @@ interface TextRange {
   [ImplementedAs=JavaScript]
   TextRange endOf(Unit unit, optional Alter alter);
 
+  [RaisesException]
   void insertBefore(DOMString text);
 
   [ImplementedAs=JavaScript]

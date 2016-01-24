@@ -74,10 +74,14 @@ interface TextDocument : EventTarget {
     [ImplementedAs=JavaScript]
     attribute long state;
 
+    ////////////////////////////////////////////////////////////
+    //
+    // Operations
+    //
     [ImplementedAs=JavaScript]
     void bindKey(DOMString keyCombination, Object command);
 
-    [ImplementedAs=charCodeAt]
+    [ImplementedAs=charCodeAt, RaisesException]
     long charCodeAt(TextOffset offset);
 
     void clearUndo();
@@ -107,7 +111,7 @@ interface TextDocument : EventTarget {
     void forceClose();
 
     // {column: long, lineNumber: long}
-    [ImplementedAs=GetLineAndColumn]
+    [ImplementedAs=GetLineAndColumn, RaisesException]
     LineAndColumn getLineAndColumn_(TextOffset offset);
 
     [ImplementedAs=JavaScript]
@@ -136,15 +140,19 @@ interface TextDocument : EventTarget {
     [ImplementedAs=StartUndoGroup]
     void startUndoGroup_(DOMString name);
 
-    [ImplementedAs=spelling_at]
+    [ImplementedAs=spelling_at, RaisesException]
     DOMString spellingAt(TextOffset offset);
+
+    [RaisesException]
     void setSpelling(TextOffset start, TextOffset end, long spelling);
 
-    [ImplementedAs=style_at]
+    [ImplementedAs=style_at, RaisesException]
     TextStyle styleAt(TextOffset offset);
+
+    [RaisesException]
     void setSyntax(TextOffset start, TextOffset end, DOMString syntax);
 
-    [ImplementedAs=syntax_at]
+    [ImplementedAs=syntax_at, RaisesException]
     DOMString syntaxAt(TextOffset offset);
 
     long undo(TextOffset offset);

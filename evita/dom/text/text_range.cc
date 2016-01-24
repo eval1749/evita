@@ -30,89 +30,88 @@ bool TextRange::collapsed() const {
   return range_->start() == range_->end();
 }
 
-text::Offset TextRange::end() const {
-  return range_->end();
+int TextRange::end() const {
+  return range_->end().value();
 }
 
-int TextRange::end_value() const {
-  return end().value();
-}
-
-text::Offset TextRange::start() const {
-  return range_->start();
-}
-
-int TextRange::start_value() const {
-  return start().value();
+int TextRange::start() const {
+  return range_->start().value();
 }
 
 base::string16 TextRange::text() const {
   return std::move(range_->text());
 }
 
-void TextRange::set_end(int offsetLike) {
-  const auto offset = document_->ValidateOffset(offsetLike);
+void TextRange::set_end(int offsetLike, ExceptionState* exception_state) {
+  const auto offset = document_->ValidateOffset(offsetLike, exception_state);
   if (!offset.IsValid())
     return;
   range_->set_end(offset);
 }
 
-void TextRange::set_start(int offsetLike) {
-  const auto offset = document_->ValidateOffset(offsetLike);
+void TextRange::set_start(int offsetLike, ExceptionState* exception_state) {
+  const auto offset = document_->ValidateOffset(offsetLike, exception_state);
   if (!offset.IsValid())
     return;
   range_->set_start(offset);
 }
 
-void TextRange::set_text(const base::string16& text) {
-  if (!document_->CheckCanChange())
+void TextRange::set_text(const base::string16& text,
+                         ExceptionState* exception_state) {
+  if (!document_->CheckCanChange(exception_state))
     return;
   range_->set_text(text);
 }
 
-TextRange* TextRange::CollapseTo(int offsetLike) {
-  const auto offset = document_->ValidateOffset(offsetLike);
+TextRange* TextRange::CollapseTo(int offsetLike,
+                                 ExceptionState* exception_state) {
+  const auto offset = document_->ValidateOffset(offsetLike, exception_state);
   if (!offset.IsValid())
     return this;
   range_->SetRange(offset, offset);
   return this;
 }
 
-TextRange* TextRange::InsertBefore(const base::string16& text) {
-  if (!document_->CheckCanChange())
-    return this;
-  document_->buffer()->InsertBefore(start(), text);
-  return this;
-}
-
-TextRange* TextRange::NewTextRange(
-    v8_glue::Either<TextDocument*, TextRange*> document_or_range) {
-  if (document_or_range.is_left)
-    return NewTextRange(document_or_range, 0, 0);
-  const auto range = document_or_range.right;
-  return new TextRange(range->document(), range->start(), range->end());
+void TextRange::InsertBefore(const base::string16& text,
+                             ExceptionState* exception_state) {
+  if (!document_->CheckCanChange(exception_state))
+    return;
+  document_->buffer()->InsertBefore(range_->start(), text);
 }
 
 TextRange* TextRange::NewTextRange(
     v8_glue::Either<TextDocument*, TextRange*> document_or_range,
-    int offsetLike) {
-  return NewTextRange(document_or_range, offsetLike, offsetLike);
+    ExceptionState* exception_state) {
+  if (document_or_range.is_left)
+    return NewTextRange(document_or_range, 0, 0);
+  const auto range = document_or_range.right;
+  return new TextRange(range->document(), range->range_->start(),
+                       range->range_->end());
+}
+
+TextRange* TextRange::NewTextRange(
+    v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+    int offsetLike,
+    ExceptionState* exception_state) {
+  return NewTextRange(document_or_range, offsetLike, offsetLike,
+                      exception_state);
 }
 
 TextRange* TextRange::NewTextRange(
     v8_glue::Either<TextDocument*, TextRange*> document_or_range,
     int startLike,
-    int endLike) {
+    int endLike,
+    ExceptionState* exception_state) {
   const auto document = document_or_range.is_left
                             ? document_or_range.left
                             : document_or_range.right->document();
-  const auto start = document->ValidateOffset(startLike);
+  const auto start = document->ValidateOffset(startLike, exception_state);
   if (!start.IsValid())
     return nullptr;
-  const auto end = document->ValidateOffset(endLike);
+  const auto end = document->ValidateOffset(endLike, exception_state);
   if (!end.IsValid())
     return nullptr;
-  if (!document->IsValidRange(start, end))
+  if (!document->IsValidRange(start, end, exception_state))
     return nullptr;
   return new TextRange(document, start, end);
 }
@@ -123,7 +122,8 @@ void TextRange::SetSpelling(int spelling_code,
     exception_state->ThrowError("Can't set spelling for collapsed range.");
     return;
   }
-  document_->SetSpelling(range_->start(), range_->end(), spelling_code);
+  document_->SetSpelling(range_->start(), range_->end(), spelling_code,
+                         exception_state);
 }
 
 void TextRange::SetSyntax(const base::string16& syntax,
@@ -132,7 +132,7 @@ void TextRange::SetSyntax(const base::string16& syntax,
     exception_state->ThrowError("Can't set syntax for collapsed range.");
     return;
   }
-  document_->SetSyntax(range_->start(), range_->end(), syntax);
+  document_->SetSyntax(range_->start(), range_->end(), syntax, exception_state);
 }
 
 }  // namespace dom

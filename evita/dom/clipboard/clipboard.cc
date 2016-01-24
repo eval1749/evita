@@ -11,8 +11,8 @@
 
 #include "base/logging.h"
 #include "common/memory/singleton.h"
+#include "evita/dom/bindings/platform_error.h"
 #include "evita/dom/clipboard/data_transfer_data.h"
-#include "evita/dom/os/platform_error.h"
 #include "evita/dom/script_host.h"
 #include "evita/v8_glue/runner.h"
 

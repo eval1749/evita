@@ -16,8 +16,6 @@ source_set("os") {
     "file_status.h",
     "io_error.cc",
     "io_error.h",
-    "platform_error.cc",
-    "platform_error.h",
     "process.cc",
     "process.h",
   ]

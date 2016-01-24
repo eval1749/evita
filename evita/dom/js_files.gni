@@ -25,6 +25,7 @@ js_lib_files = [
 
   "bracket.js",
   "commander.js",
+  "bindings/platform_error.js",
   "css/text_style.js",
   "text/text_document.js",
   "text/text_document_file_io.js",
@@ -68,7 +69,6 @@ js_lib_files = [
   "text/modes/modes.js",
   "os/file.js",
   "os/os.js",
-  "os/platform_error.js",
   "os/process.js",
   "text/text_range.js",
   "text/regular_expression.js",

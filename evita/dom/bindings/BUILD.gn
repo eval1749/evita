@@ -8,6 +8,8 @@ source_set("bindings") {
   sources = [
     "exception_state.cc",
     "exception_state.h",
+    "platform_error.cc",
+    "platform_error.h",
   ]
 
   sources += interface_idl_files + dictionary_idl_files

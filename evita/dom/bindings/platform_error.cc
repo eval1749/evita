@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/os/platform_error.h"
+#include "evita/dom/bindings/platform_error.h"
 
 #include "evita/v8_glue/runner.h"
 #include "v8_strings.h"  // NOLINT(build/include)

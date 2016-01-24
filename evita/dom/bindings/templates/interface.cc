@@ -10,16 +10,36 @@
 
 namespace dom {
 namespace bindings {
-{#######################################################################
- #
- # emit_arguments
+{#//////////////////////////////////////////////////////////////////////
+ //
+ // emit_arguments
+ //   signature
+ //     .call_with_list
+ //     .is_raises_exception
+ //     .parameters
  #}
 {% macro emit_arguments(signature) %}
-{%-  for parameter in signature.parameters -%}
-  param{{ loop.index0 }}{% if not loop.last %}{{', '}}{% endif %}
-{%-  endfor %}
+{%- set delimiter = '' %}
+{%- for call_with in signature.call_with_list %}
+{{ delimiter }}{% set delimiter = ', ' %}
+{%-   if call_with == 'Runner' %}{{ 'script_host->runner()' }}
+{%-   elif call_with == 'ScriptHost' %}{{ 'script_host' }}
+{%-   elif call_with == 'ViewDelegate' %}{{ 'script_host->view_delegate()' }}
+{%-   else %}
+  #error Invalid CallWith value "{{call_with}}".
+{%-   endif %}
+{%- endfor %}
+{%- if signature.call_with_list|count %}
+{%-   set delimiter = ', '%}
+{%- endif %}
+{%- for parameter in signature.parameters -%}
+{{ delimiter }}{% set delimiter = ', ' %}param{{ loop.index0 }}
+{%- endfor %}
+{%- if signature.parameters|count %}
+{%-   set delimiter = ', '%}
+{%- endif %}
 {% if signature.is_raises_exception %}
-  {% if signature.parameters | count %}{{', '}}{% endif %}{{'&exception_state'}}
+{{ delimiter }}{% set delimiter = ', ' %}{{'&exception_state'}}
 {%- endif %}
 {%- endmacro %}
 {#
@@ -58,9 +78,7 @@ namespace bindings {
 {% macro emit_method(method) %}
 void {{class_name}}::{{method.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  const auto isolate = info.GetIsolate();
-  const auto context = isolate->GetCurrentContext();
-  ExceptionState exception_state(ExceptionState::Situation::MethodCall, context, "{{interface_name}}", "{{method.name}}");
+{{ emit_prologue('MethodCall', method, method.name) }}
 {% if not method.is_static %}
   {{interface_name}}* impl = nullptr;
   if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
@@ -128,6 +146,25 @@ void {{class_name}}::{{method.cpp_name}}(
 {%-     endif %}
 {%- endif %}
 {%- endmacro %}
+{#//////////////////////////////////////////////////////////////////////
+ //
+ // emit_prologue
+ //  situation       One of Construction, MethodCall, PropertyGet, PropertySet
+ //  model           A data model which has 'call_with_list'.
+ //  property_name   A name of property.
+ #}
+{%- macro emit_prologue(situation, model, property_name=None) %}
+{%-  set indent = '  ' %}
+{{indent}}const auto isolate = info.GetIsolate();
+{{indent}}const auto context = isolate->GetCurrentContext();
+{{indent}}ExceptionState exception_state(ExceptionState::Situation::{{situation}}, context, "{{interface_name}}"
+{%- if property_name is defined %}
+, "{{property_name}}"
+{%- endif %});
+{% if model.use_call_with %}
+{{indent}}const auto script_host = v8_glue::Runner::From(context)->user_data<ScriptHost>();
+{% endif %}
+{%- endmacro %}
 //////////////////////////////////////////////////////////////////////
 //
 // {{class_name}}
@@ -165,9 +202,7 @@ void {{class_name}}::Construct{{interface_name}}(
 //
 {{interface_name}}* {{class_name}}::New{{interface_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  const auto isolate = info.GetIsolate();
-  const auto context = isolate->GetCurrentContext();
-  ExceptionState exception_state(ExceptionState::Situation::Construction, context, "{{interface_name}}");
+  {{ emit_prologue('Construction', constructor) }}
 {% if constructor.dispatch == 'single' %}
   if (info.Length() != {{constructor.min_arity}}) {
     exception_state.ThrowArityError({{constructor.min_arity}}, {{constructor.min_arity}}, info.Length());
@@ -200,9 +235,7 @@ void {{class_name}}::Construct{{interface_name}}(
 {%  endif %}
 void {{class_name}}::Get_{{attribute.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  const auto isolate = info.GetIsolate();
-  const auto context = isolate->GetCurrentContext();
-  ExceptionState exception_state(ExceptionState::Situation::PropertyGet, context, "{{interface_name}}", "{{attribute.name}}");
+  {{ emit_prologue('PropertyGet', attribute, attribute.name) }}
   if (info.Length() != 0) {
     exception_state.ThrowArityError(0, 0, info.Length());
     return;
@@ -227,9 +260,7 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
 {%  if not attribute.is_read_only %}
 void {{class_name}}::Set_{{attribute.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  const auto isolate = info.GetIsolate();
-  const auto context = isolate->GetCurrentContext();
-  ExceptionState exception_state(ExceptionState::Situation::PropertySet, context, "{{interface_name}}", "{{attribute.name}}");
+{{ emit_prologue('PropertySet', attribute, attribute.name) }}
   if (info.Length() != 1) {
     exception_state.ThrowArityError(1, 1, info.Length());
     return;
@@ -268,9 +299,7 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
 {%  endif %}
 void {{class_name}}::Get_{{attribute.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  const auto isolate = info.GetIsolate();
-  const auto context = isolate->GetCurrentContext();
-  ExceptionState exception_state(ExceptionState::Situation::PropertyGet, context, "{{interface_name}}", "{{attribute.name}}");
+{{ emit_prologue('PropertyGet', attribute, attribute.name) }}
   {{interface_name}}* impl = nullptr;
   if (!gin::ConvertFromV8(isolate, info.This(), &impl)) {
     exception_state.ThrowReceiverError(info.This());
@@ -296,9 +325,7 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
 {%  if not attribute.is_read_only %}
 void {{class_name}}::Set_{{attribute.cpp_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  const auto isolate = info.GetIsolate();
-  const auto context = isolate->GetCurrentContext();
-  ExceptionState exception_state(ExceptionState::Situation::PropertySet, context, "{{interface_name}}", "{{attribute.name}}");
+{{ emit_prologue('PropertySet', attribute, attribute.name) }}
   if (info.Length() != 1) {
     exception_state.ThrowArityError(1, 1, info.Length());
     return;

@@ -521,6 +521,7 @@ class FunctionContext(BaseContext):
     def __init__(self, root_context, name):
         super(FunctionContext, self).__init__(root_context, name)
         self._signatures = []
+        self._use_call_with = False
         self._use_exception_state = False
 
     @property
@@ -538,9 +539,16 @@ class FunctionContext(BaseContext):
         is_raises_exception = self.raises_exception(model, attributes)
         if is_raises_exception:
             self._use_exception_state = True
+
+        call_with_list = []
+        if 'CallWith' in attributes:
+            call_with_list = attributes['CallWith'].split('|')
+            self._use_call_with = True
+
         to_v8_type = self.return_type_of(model)
         for parameters in make_parameters_list(model):
             self._signatures.append({
+                'call_with_list': call_with_list,
                 'cpp_name': cpp_name,
                 'is_raises_exception': is_raises_exception,
                 'is_static': self.is_static,
@@ -549,9 +557,35 @@ class FunctionContext(BaseContext):
                 'to_v8_type': to_v8_type,
             })
 
-    def finish_signatures(self):
-        # Nothing to do
-        pass
+    def finish(self):
+        if self._use_call_with:
+            self.add_include('evita/v8_glue/runner.h')
+        signatures = self._signatures
+        if not signatures:
+            return {'dispatch': 'none'}
+        max_arity = max([len(signature['parameters'])
+                         for signature in signatures])
+        min_arity = min([len(signature['parameters'])
+                         for signature in signatures])
+        context = {
+            'cpp_name': signatures[0]['cpp_name'],
+            'max_arity': max_arity,
+            'min_arity': min_arity,
+            'name': self.name,
+            'use_call_with': self._use_call_with,
+            'use_exception_state': self._use_exception_state,
+        }
+        if len(signatures) == 1:
+            context['dispatch'] = 'single'
+            context['signature'] = signatures[0]
+            return context
+        arity_set = set([len(signature['parameters'])
+                         for signature in signatures])
+        if len(arity_set) == len(signatures):
+            context['dispatch'] = 'arity'
+            context['signatures'] = signatures
+            return context
+        raise Exception('NYI: type based dispatch')
 
     def raises_exception(self, model, attributes):
         if not('RaisesException' in attributes):
@@ -599,12 +633,7 @@ class ConstructorContext(FunctionContext):
             cpp_name = interface.name + '::New' + interface.name
             self.build_signatures(cpp_name, constructor,
                                   interface.extended_attributes)
-
-        self.finish_signatures()
-        context = function_dispatcher(self.signatures)
-        if self.use_exception_state:
-            context['use_exception_state'] = True
-        return context
+        return self.finish()
 
 
 ######################################################################
@@ -681,13 +710,9 @@ class MethodGroupContext(FunctionContext):
                     'name': method.name,
                 }
             self.build_signatures(cpp_name, method, method.extended_attributes)
-        self.finish_signatures()
         assert(not self.is_javascript)
-        context = function_dispatcher(self._signatures)
-        context['cpp_name'] = self.cpp_name
+        context = self.finish()
         context['is_static'] = self.is_static
-        context['name'] = methods[0].name
-        context['use_exception_state'] = self.use_exception_state
         return context
 
 
@@ -807,31 +832,6 @@ def fix_include_path(path_in):
     path = path_in.replace('CSS', 'Css')
     return os.path.join(os.path.dirname(path).replace('../', ''),
                         underscore(os.path.basename(path))).replace('\\', '/')
-
-
-def function_dispatcher(signatures):
-    if not signatures:
-        return {'dispatch': 'none'}
-    max_arity = max([len(signature['parameters']) for signature in signatures])
-    min_arity = min([len(signature['parameters']) for signature in signatures])
-    if len(signatures) == 1:
-        return {
-            'dispatch': 'single',
-            'max_arity': max_arity,
-            'min_arity': min_arity,
-            'cpp_name': signatures[0]['cpp_name'],
-            'signature': signatures[0]
-        }
-    if len(set([len(signature['parameters']) for signature in signatures])) == \
-       len(signatures):
-        return {
-            'dispatch': 'arity',
-            'max_arity': max_arity,
-            'min_arity': min_arity,
-            'cpp_name': signatures[0]['cpp_name'],
-            'signatures': signatures
-        }
-    raise Exception('NYI: type based dispatch')
 
 
 def function_parameter(parameter):

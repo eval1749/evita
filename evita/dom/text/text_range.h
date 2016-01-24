@@ -57,8 +57,9 @@ class TextRange final : public v8_glue::Scriptable<TextRange> {
       v8_glue::Either<TextDocument*, TextRange*> document_or_range,
       int start,
       int end);
-  void SetSpelling(int spelling) const;
-  void SetSyntax(const base::string16& syntax) const;
+  void SetSpelling(int spelling, ExceptionState* exception_state) const;
+  void SetSyntax(const base::string16& syntax,
+                 ExceptionState* exception_state) const;
 
  private:
   friend class bindings::TextRangeClass;

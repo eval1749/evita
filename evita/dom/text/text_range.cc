@@ -6,8 +6,8 @@
 
 #include "base/strings/stringprintf.h"
 #include "evita/css/style_selector.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/text/buffer.h"
 #include "evita/text/marker_set.h"
@@ -122,18 +122,19 @@ TextRange* TextRange::NewTextRange(
   return new TextRange(document, start, end);
 }
 
-void TextRange::SetSpelling(int spelling_code) const {
+void TextRange::SetSpelling(int spelling_code,
+                            ExceptionState* exception_state) const {
   if (collapsed()) {
-    ScriptHost::instance()->ThrowError(
-        "Can't set spelling for collapsed range.");
+    exception_state->ThrowError("Can't set spelling for collapsed range.");
     return;
   }
   document_->SetSpelling(range_->start(), range_->end(), spelling_code);
 }
 
-void TextRange::SetSyntax(const base::string16& syntax) const {
+void TextRange::SetSyntax(const base::string16& syntax,
+                          ExceptionState* exception_state) const {
   if (collapsed()) {
-    ScriptHost::instance()->ThrowError("Can't set syntax for collapsed range.");
+    exception_state->ThrowError("Can't set syntax for collapsed range.");
     return;
   }
   document_->SetSyntax(range_->start(), range_->end(), syntax);

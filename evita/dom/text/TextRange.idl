@@ -72,10 +72,13 @@ interface TextRange {
   //  @param {string|!function(string, ...):string} replacement
   DOMString[]? replace(RegularExpression regexp, Object replacement);
 
+  [RaisesException]
   void setSpelling(long spelling);
 
   [RaisesException]
   void setStyle(TextStyle style);
+
+  [RaisesException]
   void setSyntax(DOMString syntax);
 
   [ImplementedAs=JavaScript]

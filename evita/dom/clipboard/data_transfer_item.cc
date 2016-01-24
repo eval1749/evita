@@ -43,7 +43,8 @@ const base::string16& DataTransferItem::type() const {
 std::vector<uint8_t> DataTransferItem::GetAsBlob(
     ExceptionState* exception_state) const {
   if (kind() != DataTransferData::Kind::Blob) {
-    exception_state->ThrowError(base::StringPrintf("%ls isn't blob.", type()));
+    exception_state->ThrowError(
+        base::StringPrintf("%ls isn't blob.", type().c_str()));
     return std::vector<uint8_t>();
   }
   std::vector<uint8_t> data(data_->num_bytes());
@@ -55,7 +56,7 @@ base::string16 DataTransferItem::GetAsString(
     ExceptionState* exception_state) const {
   if (kind() != DataTransferData::Kind::String) {
     exception_state->ThrowError(
-        base::StringPrintf("%ls isn't string.", type()));
+        base::StringPrintf("%ls isn't string.", type().c_str()));
     return base::string16();
   }
   base::string16 data(data_->num_bytes() / 2, 0);

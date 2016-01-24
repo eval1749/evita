@@ -19,6 +19,12 @@ namespace bindings {
 class DataTransferItemClass;
 }
 
+class ExceptionState;
+
+//////////////////////////////////////////////////////////////////////
+//
+// DataTransferItem
+//
 class DataTransferItem final : public v8_glue::Scriptable<DataTransferItem> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransferItem)
  public:
@@ -34,8 +40,9 @@ class DataTransferItem final : public v8_glue::Scriptable<DataTransferItem> {
  private:
   friend class bindings::DataTransferItemClass;
 
-  std::vector<uint8_t> GetAsBlob() const;
-  base::string16 GetAsString() const;
+  // bindings
+  std::vector<uint8_t> GetAsBlob(ExceptionState* exception_state) const;
+  base::string16 GetAsString(ExceptionState* exception_state) const;
 
   const std::unique_ptr<DataTransferData> data_;
   const Clipboard::Format* const format_;

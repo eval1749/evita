@@ -5,8 +5,8 @@
 #include "evita/dom/clipboard/data_transfer_item.h"
 
 #include "base/strings/stringprintf.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
-#include "evita/dom/script_host.h"
 
 namespace gin {
 v8::Local<v8::Value> Converter<dom::DataTransferData::Kind>::ToV8(
@@ -18,6 +18,10 @@ v8::Local<v8::Value> Converter<dom::DataTransferData::Kind>::ToV8(
 
 namespace dom {
 
+//////////////////////////////////////////////////////////////////////
+//
+// DataTransferItem
+//
 DataTransferItem::DataTransferItem(const Clipboard::Format* format,
                                    DataTransferData* data)
     : data_(data), format_(format) {}
@@ -36,10 +40,10 @@ const base::string16& DataTransferItem::type() const {
   return format_->mime_type();
 }
 
-std::vector<uint8_t> DataTransferItem::GetAsBlob() const {
+std::vector<uint8_t> DataTransferItem::GetAsBlob(
+    ExceptionState* exception_state) const {
   if (kind() != DataTransferData::Kind::Blob) {
-    ScriptHost::instance()->ThrowError(
-        base::StringPrintf("%ls isn't blob.", type()));
+    exception_state->ThrowError(base::StringPrintf("%ls isn't blob.", type()));
     return std::vector<uint8_t>();
   }
   std::vector<uint8_t> data(data_->num_bytes());
@@ -47,9 +51,10 @@ std::vector<uint8_t> DataTransferItem::GetAsBlob() const {
   return data;
 }
 
-base::string16 DataTransferItem::GetAsString() const {
+base::string16 DataTransferItem::GetAsString(
+    ExceptionState* exception_state) const {
   if (kind() != DataTransferData::Kind::String) {
-    ScriptHost::instance()->ThrowError(
+    exception_state->ThrowError(
         base::StringPrintf("%ls isn't string.", type()));
     return base::string16();
   }

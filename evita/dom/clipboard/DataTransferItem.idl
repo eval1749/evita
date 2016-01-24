@@ -5,5 +5,7 @@
 interface DataTransferItem {
   readonly attribute DOMString kind;
   readonly attribute DOMString type;
+
+  [RaisesException]
   DOMString getAsString();
 };

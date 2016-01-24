@@ -72,7 +72,8 @@ TEST_F(OsFileTest, OsFile_move_succeeded) {
   EXPECT_SCRIPT_EQ("true", "result");
 
   EXPECT_SCRIPT_EQ(
-      "TypeError: Expect argument[2] as MoveFileOptions but [object Object]",
+      "TypeError: Failed to execute 'move' on 'File': Expect arguments[2] as "
+      "'MoveFileOptions' but '[object Object]'",
       "promise = Os.File.move('foo', 'bar', {baz: true}).then(catcher);")
       << "Bad dictionary member";
 }

@@ -78,6 +78,12 @@ class Runner : public gin::Runner {
   v8::Local<v8::Context> context() const;
   v8::Isolate* isolate() const;
 
+  template <typename T>
+  T* user_data() const {
+    return static_cast<T*>(user_data_);
+  }
+  void set_user_data(void* data) { user_data_ = data; }
+
   v8::Local<v8::Value> CallAsFunction(v8::Local<v8::Value> callee,
                                       v8::Local<v8::Value> receiver,
                                       const Args& args);
@@ -126,6 +132,7 @@ class Runner : public gin::Runner {
 #if defined(_DEBUG)
   int in_scope_ = false;
 #endif
+  void* user_data_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(Runner);
 };

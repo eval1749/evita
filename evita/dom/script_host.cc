@@ -380,6 +380,7 @@ void ScriptHost::Start() {
 
   auto const isolate = this->isolate();
   auto const runner = new v8_glue::Runner(isolate, script_host);
+  runner->set_user_data(this);
   runner_.reset(runner);
   v8_glue::Runner::Scope runner_scope(runner);
   isolate->SetCaptureStackTraceForUncaughtExceptions(true);

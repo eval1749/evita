@@ -7,9 +7,10 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "base/trace_event/trace_event.h"
+#include "evita/dom/bindings/exception_state.h"
+#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/public/view_delegate.h"
 #include "evita/dom/timing/animation_frame_callback.h"
 #include "evita/dom/visuals/css_style_sheet_handle.h"
 #include "evita/dom/visuals/node_handle.h"
@@ -76,10 +77,11 @@ int VisualWindow::HitTest(int x, int y) {
 }
 
 VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle,
-                                      CSSStyleSheetHandle* style_sheet_handle) {
+                                      CSSStyleSheetHandle* style_sheet_handle,
+                                      ExceptionState* exception_state) {
   const auto document = document_handle->value()->as<visuals::Document>();
   if (!document) {
-    ScriptHost::instance()->ThrowError("Requires document node");
+    exception_state->ThrowError("Requires document node");
     return nullptr;
   }
   return new VisualWindow(document, style_sheet_handle->value());

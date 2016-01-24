@@ -23,6 +23,7 @@ class View;
 
 namespace dom {
 
+class ExceptionState;
 class NodeHandle;
 class CSSStyleSheetHandle;
 
@@ -56,7 +57,8 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
   // Binding callbacks
   int HitTest(int x, int y);
   static VisualWindow* NewWindow(NodeHandle* document_handle,
-                                 CSSStyleSheetHandle* style_sheet_handle);
+                                 CSSStyleSheetHandle* style_sheet_handle,
+                                 ExceptionState* exception_state);
 
   // visuals::css::Media
   visuals::css::MediaState media_state() const final;

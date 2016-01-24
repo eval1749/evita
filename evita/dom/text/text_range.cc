@@ -89,7 +89,7 @@ TextRange* TextRange::NewTextRange(
     v8_glue::Either<TextDocument*, TextRange*> document_or_range) {
   if (document_or_range.is_left)
     return NewTextRange(document_or_range, 0, 0);
-  auto const range = document_or_range.right;
+  const auto range = document_or_range.right;
   return new TextRange(range->document(), range->start(), range->end());
 }
 
@@ -103,7 +103,7 @@ TextRange* TextRange::NewTextRange(
     v8_glue::Either<TextDocument*, TextRange*> document_or_range,
     int startLike,
     int endLike) {
-  auto const document = document_or_range.is_left
+  const auto document = document_or_range.is_left
                             ? document_or_range.left
                             : document_or_range.right->document();
   const auto start = document->ValidateOffset(startLike);

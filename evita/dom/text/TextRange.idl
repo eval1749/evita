@@ -73,6 +73,8 @@ interface TextRange {
   DOMString[]? replace(RegularExpression regexp, Object replacement);
 
   void setSpelling(long spelling);
+
+  [RaisesException]
   void setStyle(TextStyle style);
   void setSyntax(DOMString syntax);
 

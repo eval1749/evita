@@ -6,9 +6,10 @@
 
 #include "base/strings/stringprintf.h"
 #include "common/memory/singleton.h"
+#include "evita/dom/bindings/exception_state.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_range.h"
-#include "evita/dom/script_host.h"
 #include "evita/css/style.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
@@ -24,7 +25,7 @@ class EnumValue {
   v8::Maybe<T> FromV8(v8::Isolate* isolate,
                       v8::Handle<v8::Value> js_value) const {
     auto index = 0u;
-    for (auto value : values_) {
+    for (const auto& value : values_) {
       if (EqualNames(js_value, value->Get(isolate)))
         return v8::Just(static_cast<T>(index));
       ++index;
@@ -125,7 +126,7 @@ struct Converter<css::Color> {
   }
   static v8::Handle<v8::Value> ToV8(v8::Isolate* isolate, css::Color color) {
     // TODO(eval1749): How do we represent css::Color in JS?
-    auto const int_value =
+    const auto int_value =
         (color.red() << 16) | (color.green() << 8) | color.blue();
     return ConvertToV8(isolate, int_value);
   }
@@ -136,7 +137,7 @@ struct EnumConverter {
   static bool FromV8(v8::Isolate* isolate,
                      v8::Handle<v8::Value> js_value,
                      T* out_enum_value) {
-    auto const maybe_enum_value = U::instance()->FromV8<T>(isolate, js_value);
+    const auto maybe_enum_value = U::instance()->FromV8<T>(isolate, js_value);
     if (maybe_enum_value.IsNothing())
       return false;
     *out_enum_value = maybe_enum_value.FromJust();
@@ -186,13 +187,12 @@ bool EqualNames(v8::Handle<v8::Value> name1, v8::Handle<v8::String> name2) {
                    name_value1.length() * sizeof(uint16_t));
 }
 
-void InvalidStyleAttributeValue(v8::Isolate* isolate,
+void InvalidStyleAttributeValue(ExceptionState* exception_state,
                                 v8::Handle<v8::String> attr_name,
                                 v8::Handle<v8::Value> attr_value) {
-  ScriptHost::instance()->ThrowException(v8::Exception::Error(gin::StringToV8(
-      isolate, base::StringPrintf(L"Style propery '%ls' doesn't take '%ls'.",
-                                  V8ToString(attr_name).c_str(),
-                                  V8ToString(attr_value).c_str()))));
+  exception_state->ThrowError(base::StringPrintf(
+      "Style propery '%ls' doesn't take '%ls'.", V8ToString(attr_name).c_str(),
+      V8ToString(attr_value).c_str()));
 }
 }  // namespace
 
@@ -201,13 +201,13 @@ v8::Handle<v8::Object> TextDocument::style_at(text::Offset position) const {
     return v8::Handle<v8::Object>();
   const auto& style_values = buffer_->GetStyleAt(position);
 
-  auto const runner = ScriptHost::instance()->runner();
-  auto const isolate = runner->isolate();
+  const auto runner = ScriptHost::instance()->runner();
+  const auto isolate = runner->isolate();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
-  auto const style_ctor =
+  const auto style_ctor =
       runner->global()->Get(v8Strings::TextStyle.Get(isolate))->ToObject();
-  auto const js_style = style_ctor->CallAsConstructor(0, nullptr)->ToObject();
+  const auto js_style = style_ctor->CallAsConstructor(0, nullptr)->ToObject();
 
   if (style_values.has_bgcolor()) {
     js_style->Set(v8Strings::backgroundColor.Get(isolate),
@@ -242,34 +242,35 @@ v8::Handle<v8::Object> TextDocument::style_at(text::Offset position) const {
   return runner_scope.Escape(js_style);
 }
 
-void TextRange::SetStyle(v8::Handle<v8::Object> style_dict) const {
+void TextRange::SetStyle(v8::Handle<v8::Object> style_dict,
+                         ExceptionState* exception_state) const {
   css::Style style_values;
   bool changed = false;
 
-  auto const runner = ScriptHost::instance()->runner();
-  auto const isolate = runner->isolate();
+  const auto runner = ScriptHost::instance()->runner();
+  const auto isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
 
-#define LOAD_DICT_VALUE(type, attr_name, member_name)               \
-  auto const attr_name = v8Strings::attr_name.Get(isolate);         \
-  if (EqualNames(name, attr_name)) {                                \
-    auto const js_value = style_dict->Get(attr_name);               \
-    if (js_value->IsUndefined())                                    \
-      continue;                                                     \
-    auto const attr_value = ConvertFromV8<type>(isolate, js_value); \
-    if (attr_value.IsJust()) {                                      \
-      style_values.set_##member_name(attr_value.FromJust());        \
-      changed = true;                                               \
-      continue;                                                     \
-    }                                                               \
-    InvalidStyleAttributeValue(isolate, attr_name, js_value);       \
-    return;                                                         \
+#define LOAD_DICT_VALUE(type, attr_name, member_name)                 \
+  const auto attr_name = v8Strings::attr_name.Get(isolate);           \
+  if (EqualNames(name, attr_name)) {                                  \
+    const auto js_value = style_dict->Get(attr_name);                 \
+    if (js_value->IsUndefined())                                      \
+      continue;                                                       \
+    const auto attr_value = ConvertFromV8<type>(isolate, js_value);   \
+    if (attr_value.IsJust()) {                                        \
+      style_values.set_##member_name(attr_value.FromJust());          \
+      changed = true;                                                 \
+      continue;                                                       \
+    }                                                                 \
+    InvalidStyleAttributeValue(exception_state, attr_name, js_value); \
+    return;                                                           \
   }
 
-  auto const names = style_dict->GetPropertyNames();
-  auto const names_length = names->Length();
+  const auto names = style_dict->GetPropertyNames();
+  const auto names_length = names->Length();
   for (auto index = 0u; index < names_length; ++index) {
-    auto const name = names->Get(index);
+    const auto name = names->Get(index);
     if (name.IsEmpty())
       continue;
     LOAD_DICT_VALUE(css::Color, backgroundColor, bgcolor);
@@ -279,9 +280,8 @@ void TextRange::SetStyle(v8::Handle<v8::Object> style_dict) const {
     LOAD_DICT_VALUE(css::FontWeight, fontWeight, font_weight);
     LOAD_DICT_VALUE(css::TextDecoration, textDecoration, text_decoration)
 
-    ScriptHost::instance()->ThrowException(v8::Exception::Error(gin::StringToV8(
-        isolate, base::StringPrintf(L"Invalid style attribute name '%ls'",
-                                    V8ToString(name).c_str()))));
+    exception_state->ThrowError(base::StringPrintf(
+        "Invalid style attribute name '%ls'", V8ToString(name).c_str()));
     return;
   }
   if (!changed)

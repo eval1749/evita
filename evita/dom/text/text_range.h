@@ -21,6 +21,7 @@ namespace bindings {
 class TextRangeClass;
 }
 
+class ExceptionState;
 class TextDocument;
 
 //////////////////////////////////////////////////////////////////////
@@ -57,17 +58,19 @@ class TextRange final : public v8_glue::Scriptable<TextRange> {
       int start,
       int end);
   void SetSpelling(int spelling) const;
-  void SetStyle(v8::Local<v8::Object> style_dict) const;
   void SetSyntax(const base::string16& syntax) const;
 
  private:
   friend class bindings::TextRangeClass;
 
-  // For IDL
+  // bindings
   int end_value() const;
   void set_end_value(int value) { set_end(value); }
   int start_value() const;
   void set_start_value(int value) { set_start(value); }
+
+  void SetStyle(v8::Local<v8::Object> style_dict,
+                ExceptionState* exception_state) const;
 
   gc::Member<TextDocument> document_;
   // TODO(yosi): We should manage life time of text::Range.

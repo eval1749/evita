@@ -349,13 +349,6 @@ void ScriptHost::DidStartScriptHost() {
   view_delegate_->DidStartScriptHost(state_);
 }
 
-void ScriptHost::PlatformError(const char* name) {
-  auto const error = ::GetLastError();
-  DVLOG(0) << "PlatformError " << name << " error=" << error;
-  // TODO(eval1749): Should be Win32Error.
-  instance()->ThrowError(base::StringPrintf("%s error=%d", name, error));
-}
-
 void ScriptHost::ResetForTesting() {
   EditorWindow::ResetForTesting();
   Window::ResetForTesting();

@@ -77,7 +77,6 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   static void CreateAndStart(Scheduler* scheduler,
                              domapi::ViewDelegate* view_delegate,
                              domapi::IoDelegate* io_delegate);
-  void PlatformError(const char* name);
   void ResetForTesting();
   void RunMicrotasks();
 

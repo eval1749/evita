@@ -16,6 +16,7 @@ namespace dom {
 
 #define FOR_EACH_EXCEPTION_STATE_SITUATION(V) \
   V(Construction)                             \
+  V(DispatchEvent)                            \
   V(MethodCall)                               \
   V(PropertyGet)                              \
   V(PropertySet)

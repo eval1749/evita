@@ -44,7 +44,9 @@ ExceptionState::ExceptionState(Situation situation,
                                v8::Local<v8::Context> context,
                                base::StringPiece interface_name)
     : ExceptionState(situation, context, interface_name, base::StringPiece()) {
-  DCHECK_EQ(Situation::Construction, situation_);
+  DCHECK(situation_ == Situation::Construction ||
+         situation_ == Situation::DispatchEvent)
+      << situation_;
 }
 
 ExceptionState::~ExceptionState() {}
@@ -55,6 +57,9 @@ std::string ExceptionState::ComposeMessage(const std::string& detail) const {
   switch (situation_) {
     case Situation::Construction:
       return base::StringPrintf("Failed to construct '%s': %s",
+                                interface_name.c_str(), detail.c_str());
+    case Situation::DispatchEvent:
+      return base::StringPrintf("Failed to dispatch event '%s': %s",
                                 interface_name.c_str(), detail.c_str());
     case Situation::MethodCall:
       return base::StringPrintf("Failed to execute '%s' on '%s': %s",

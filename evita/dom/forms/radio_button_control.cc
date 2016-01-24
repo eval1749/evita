@@ -56,7 +56,8 @@ void RadioButtonControl::set_checked(bool new_checked) {
 }
 
 // EventTarget
-bool RadioButtonControl::DispatchEvent(Event* event) {
+bool RadioButtonControl::DispatchEvent(Event* event,
+                                       ExceptionState* exception_state) {
   CR_DEFINE_STATIC_LOCAL(base::string16, kChangeEvent, (L"change"));
 
   if (auto const form_event = event->as<FormEvent>()) {
@@ -66,7 +67,7 @@ bool RadioButtonControl::DispatchEvent(Event* event) {
     return false;
   }
 
-  return FormControl::DispatchEvent(event);
+  return FormControl::DispatchEvent(event, exception_state);
 }
 
 }  // namespace dom

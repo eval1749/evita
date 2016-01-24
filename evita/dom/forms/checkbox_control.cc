@@ -24,7 +24,8 @@ void CheckboxControl::set_checked(bool new_checked) {
   DispatchChangeEvent();
 }
 
-bool CheckboxControl::DispatchEvent(Event* event) {
+bool CheckboxControl::DispatchEvent(Event* event,
+                                    ExceptionState* exception_state) {
   CR_DEFINE_STATIC_LOCAL(base::string16, kChangeEvent, (L"change"));
 
   if (auto const form_event = event->as<FormEvent>()) {
@@ -36,7 +37,7 @@ bool CheckboxControl::DispatchEvent(Event* event) {
     return false;
   }
 
-  return FormControl::DispatchEvent(event);
+  return FormControl::DispatchEvent(event, exception_state);
 }
 
 }  // namespace dom

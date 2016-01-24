@@ -187,7 +187,10 @@ TEST_F(EventTargetTest, dispatchEvent_function) {
   EXPECT_SCRIPT_TRUE("event.target == sample");
 
   // We can't dispatch again
-  EXPECT_SCRIPT_EQ("Error: InvalidStateError", "sample.dispatchEvent(event)");
+  EXPECT_SCRIPT_EQ(
+      "Error: Failed to execute 'dispatchEvent' on 'EventTarget': "
+      "InvalidStateError",
+      "sample.dispatchEvent(event)");
 
   EXPECT_SCRIPT_VALID(
       "var event2 = new Event('foo');"

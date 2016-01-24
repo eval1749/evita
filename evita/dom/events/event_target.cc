@@ -12,7 +12,9 @@
 #include "base/callback.h"
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
+#include "base/strings/utf_string_conversions.h"
 #include "common/adopters/reverse.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/script_host.h"
@@ -140,12 +142,12 @@ EventTarget::EventPath EventTarget::BuildEventPath() const {
   return std::vector<EventTarget*>();
 }
 
-bool EventTarget::DispatchEvent(Event* event) {
+bool EventTarget::DispatchEvent(Event* event, ExceptionState* exception_state) {
   auto const runner = ScriptHost::instance()->runner();
 
   if (event->dispatched() || event->event_phase() != Event::kNone ||
       event->type().empty()) {
-    ScriptHost::instance()->ThrowError("InvalidStateError");
+    exception_state->ThrowError("InvalidStateError");
     return false;
   }
 
@@ -175,6 +177,14 @@ bool EventTarget::DispatchEvent(Event* event) {
     }
   }
   return !event->default_prevented();
+}
+
+bool EventTarget::DispatchEvent(Event* event) {
+  const auto& event_type_name = base::UTF16ToUTF8(event->type());
+  ExceptionState exception_state(ExceptionState::Situation::DispatchEvent,
+                                 ScriptHost::instance()->runner()->context(),
+                                 event_type_name);
+  return DispatchEvent(event, &exception_state);
 }
 
 void EventTarget::DispatchEventWithInLock(Event* event) {

@@ -13,6 +13,12 @@ namespace bindings {
 class CheckboxControlClass;
 }
 
+class ExceptionState;
+
+//////////////////////////////////////////////////////////////////////
+//
+// CheckboxControl
+//
 class CheckboxControl final
     : public v8_glue::Scriptable<CheckboxControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(CheckboxControl);
@@ -30,7 +36,7 @@ class CheckboxControl final
   void set_checked(bool checked);
 
   // EventTarget
-  bool DispatchEvent(Event* event) override;
+  bool DispatchEvent(Event* event, ExceptionState* exception_state) final;
 
   bool checked_;
 

@@ -21,12 +21,12 @@ class Runner;
 namespace dom {
 
 class Event;
+using EventListener = v8::Local<v8::Object>;
+class ExceptionState;
 
 namespace bindings {
 class EventTargetClass;
 }
-
-typedef v8::Local<v8::Object> EventListener;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -41,7 +41,8 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
   EventTarget();
   ~EventTarget() override;
 
-  virtual bool DispatchEvent(Event* event);
+  virtual bool DispatchEvent(Event* event, ExceptionState* exception_state);
+  bool DispatchEvent(Event* event);
 
   // TODO(eval1749): We should get rid of
   // |EventTarget::ScheduleDispatchEventDeprecated()|.

@@ -13,6 +13,12 @@ namespace bindings {
 class RadioButtonControlClass;
 }
 
+class ExceptionState;
+
+//////////////////////////////////////////////////////////////////////
+//
+// RadioButtonControlClass
+//
 class RadioButtonControl final
     : public v8_glue::Scriptable<RadioButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(RadioButtonControl);
@@ -30,7 +36,7 @@ class RadioButtonControl final
   void set_checked(bool new_checked);
 
   // EventTarget
-  bool DispatchEvent(Event* event) final;
+  bool DispatchEvent(Event* event, ExceptionState* exception_state) final;
 
   bool checked_;
 

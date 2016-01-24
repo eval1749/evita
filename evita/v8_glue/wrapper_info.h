@@ -57,23 +57,6 @@ class WrapperInfo {
       v8::Isolate* isolate);
   v8::Local<v8::ObjectTemplate> CreateInstanceTemplate(v8::Isolate* isolate);
 
-  // Throw arity error in generated code from IDL.
-  static void ThrowArityError(v8::Isolate* isolate,
-                              int min_arity,
-                              int max_arity,
-                              int actual_arity);
-
-  // Throw argument type error in generated code from IDL.
-  static void ThrowArgumentError(v8::Isolate* isolate,
-                                 const char* expected_type,
-                                 v8::Local<v8::Value> value,
-                                 int index);
-
-  // Throw receiver type error in generated code from IDL.
-  static void ThrowReceiverError(v8::Isolate* isolate,
-                                 const char* expected_type,
-                                 v8::Local<v8::Value> value);
-
  private:
   gin::GinEmbedder const embedder_;
   const char* const class_name_;

@@ -37,13 +37,6 @@ void ConstructorCallbackForNoConstructor(
   }
 }
 
-base::string16 V8ToString(v8::Local<v8::Value> value) {
-  v8::String::Value string_value(value);
-  if (!string_value.length())
-    return base::string16();
-  return base::string16(reinterpret_cast<base::char16*>(*string_value),
-                        static_cast<size_t>(string_value.length()));
-}
 }  // namespace
 
 WrapperInfo::WrapperInfo(const char* class_name)
@@ -146,38 +139,6 @@ v8::Local<v8::ObjectTemplate> WrapperInfo::SetupInstanceTemplate(
     v8::Isolate*,
     v8::Local<v8::ObjectTemplate> templ) {
   return templ;
-}
-
-void WrapperInfo::ThrowArityError(v8::Isolate* isolate,
-                                  int min_arity,
-                                  int max_arity,
-                                  int actual_arity) {
-  if (min_arity == max_arity) {
-    isolate->ThrowException(gin::StringToV8(
-        isolate, base::StringPrintf("Expect %d arguments, but %d supplied",
-                                    min_arity, actual_arity)));
-    return;
-  }
-  isolate->ThrowException(gin::StringToV8(
-      isolate, base::StringPrintf("Expect %d to %d arguments, but %d supplied",
-                                  min_arity, max_arity, actual_arity)));
-}
-
-void WrapperInfo::ThrowArgumentError(v8::Isolate* isolate,
-                                     const char* expected_type,
-                                     v8::Local<v8::Value> value,
-                                     int index) {
-  isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
-      isolate, base::StringPrintf("Expect argument[%d] as %s but %ls", index,
-                                  expected_type, V8ToString(value).c_str()))));
-}
-
-void WrapperInfo::ThrowReceiverError(v8::Isolate* isolate,
-                                     const char* expected_type,
-                                     v8::Local<v8::Value> value) {
-  isolate->ThrowException(v8::Exception::TypeError(gin::StringToV8(
-      isolate, base::StringPrintf("Expect receiver as %s but %ls.",
-                                  expected_type, V8ToString(value).c_str()))));
 }
 
 }  // namespace v8_glue

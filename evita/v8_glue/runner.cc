@@ -250,4 +250,10 @@ void Runner::Run(const std::string& source, const std::string& resource_name) {
   NOTREACHED();
 }
 
+// static
+Runner* Runner::From(v8::Local<v8::Context> context) {
+  const auto context_data = gin::PerContextData::From(context);
+  return reinterpret_cast<Runner*>(context_data->runner());
+}
+
 }  // namespace v8_glue

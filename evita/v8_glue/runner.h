@@ -98,6 +98,9 @@ class Runner : public gin::Runner {
                            const base::string16& script_name);
   v8::Local<v8::Value> Run(v8::Local<v8::Script> script);
 
+  // Get |Runner| from |v8::Context|.
+  static Runner* From(v8::Local<v8::Context> context);
+
  private:
   friend class EscapableHandleScope;
   friend class Scope;

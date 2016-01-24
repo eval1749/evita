@@ -43,6 +43,8 @@ class ExceptionState final {
 
   ~ExceptionState();
 
+  bool is_thrown() const { return is_thrown_; }
+
   // Throw arity error in generated code from IDL.
   void ThrowArityError(int min_arity, int max_arity, int actual_arity);
   // Throw argument type error in generated code from IDL.
@@ -51,6 +53,7 @@ class ExceptionState final {
                           int index);
   void ThrowError(base::StringPiece detail);
   void ThrowException(v8::Local<v8::Value> exception);
+  void ThrowPlatformError(base::StringPiece api_name, int error_code);
   void ThrowRangeError(base::StringPiece detail);
   // Throw receiver type error in generated code from IDL.
   void ThrowReceiverError(v8::Local<v8::Value> value);
@@ -62,6 +65,7 @@ class ExceptionState final {
 
   v8::Local<v8::Context> context_;
   const base::StringPiece interface_name_;
+  bool is_thrown_ = false;
   const base::StringPiece property_name_;
   const Situation situation_;
 

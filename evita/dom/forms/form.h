@@ -14,6 +14,7 @@
 
 namespace dom {
 
+class ExceptionState;
 class FormControl;
 class FormObserver;
 
@@ -49,7 +50,7 @@ class Form final : public v8_glue::Scriptable<Form, ViewEventTarget> {
   void set_title(const base::string16& new_title);
   void set_width(float new_width);
 
-  void AddFormControl(FormControl* control);
+  void AddFormControl(FormControl* control, ExceptionState* exception_state);
 
   std::vector<FormControl*> controls_;
   gc::Member<FormControl> focus_control_;

@@ -14,6 +14,6 @@ interface Form : ViewEventTarget {
   attribute DOMString title;
 
   // Add |new_control| to form.
-  [ImplementedAs=AddFormControl]
+  [ImplementedAs=AddFormControl, RaisesException]
   void add(FormControl new_control);
 };

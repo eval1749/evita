@@ -1,11 +1,12 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/forms/form.h"
 
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/form_observer.h"
-#include "evita/dom/script_host.h"
 
 namespace dom {
 
@@ -49,10 +50,10 @@ void Form::set_width(float new_width) {
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
-void Form::AddFormControl(FormControl* control) {
+void Form::AddFormControl(FormControl* control,
+                          ExceptionState* exception_state) {
   if (control->form_) {
-    ScriptHost::instance()->ThrowError(
-        "Specified control is already added to form.");
+    exception_state->ThrowError("Specified control is already added to form.");
     return;
   }
   controls_.push_back(control);

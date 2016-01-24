@@ -7,8 +7,8 @@
 
 #include "evita/dom/script_host.h"
 
-#include "base/command_line.h"
 #include "base/bind.h"
+#include "base/command_line.h"
 #include "base/message_loop/message_loop.h"
 #include "base/logging.h"
 #include "base/strings/string16.h"
@@ -28,9 +28,8 @@
 #include "evita/dom/windows/window.h"
 #include "evita/dom/windows/window_set.h"
 #include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/per_isolate_data.h"
-#include "evita/v8_glue/v8_platform.h"
 #include "evita/v8_glue/runner.h"
+#include "evita/v8_glue/v8_platform.h"
 #include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {

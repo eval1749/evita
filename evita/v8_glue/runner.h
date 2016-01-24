@@ -78,8 +78,6 @@ class Runner : public gin::Runner {
   v8::Local<v8::Context> context() const;
   v8::Isolate* isolate() const;
 
-  static Runner* current_runner(v8::Isolate* isolate);
-
   v8::Local<v8::Value> CallAsFunction(v8::Local<v8::Value> callee,
                                       v8::Local<v8::Value> receiver,
                                       const Args& args);
@@ -98,8 +96,9 @@ class Runner : public gin::Runner {
                            const base::string16& script_name);
   v8::Local<v8::Value> Run(v8::Local<v8::Script> script);
 
-  // Get |Runner| from |v8::Context|.
+  // Get |Runner| from |v8::Context| or |v8::Isolate|.
   static Runner* From(v8::Local<v8::Context> context);
+  static Runner* From(v8::Isolate* isolate);
 
  private:
   friend class EscapableHandleScope;

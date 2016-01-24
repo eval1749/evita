@@ -24,7 +24,7 @@ namespace gin {
 v8::Local<v8::Value> Converter<dom::PlatformError>::ToV8(
     v8::Isolate* isolate,
     const dom::PlatformError& error) {
-  const auto runner = v8_glue::Runner::current_runner(isolate);
+  const auto runner = v8_glue::Runner::From(isolate);
   const auto constructor = runner->global()
                                ->Get(dom::v8Strings::PlatformError.Get(isolate))
                                ->ToObject();

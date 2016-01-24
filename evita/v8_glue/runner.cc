@@ -103,11 +103,6 @@ v8::Isolate* Runner::isolate() const {
   return context_holder_->isolate();
 }
 
-// static
-Runner* Runner::current_runner(v8::Isolate* isolate) {
-  return PerIsolateData::From(isolate)->current_runner();
-}
-
 v8::Local<v8::Value> Runner::CallAsFunction(v8::Local<v8::Value> callee,
                                             v8::Local<v8::Value> receiver,
                                             const Args& args) {
@@ -254,6 +249,11 @@ void Runner::Run(const std::string& source, const std::string& resource_name) {
 Runner* Runner::From(v8::Local<v8::Context> context) {
   const auto context_data = gin::PerContextData::From(context);
   return reinterpret_cast<Runner*>(context_data->runner());
+}
+
+// static
+Runner* Runner::From(v8::Isolate* isolate) {
+  return PerIsolateData::From(isolate)->current_runner();
 }
 
 }  // namespace v8_glue

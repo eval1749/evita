@@ -12,7 +12,7 @@ namespace gin {
 v8::Local<v8::Value> Converter<domapi::FileStatus>::ToV8(
     v8::Isolate* isolate,
     const domapi::FileStatus& data) {
-  auto const runner = v8_glue::Runner::current_runner(isolate);
+  auto const runner = v8_glue::Runner::From(isolate);
   auto const os_file_info_ctor = runner->global()
                                      ->Get(dom::v8Strings::Os.Get(isolate))
                                      ->ToObject()

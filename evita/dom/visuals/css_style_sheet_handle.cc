@@ -5,6 +5,7 @@
 #include "evita/dom/visuals/css_style_sheet_handle.h"
 
 #include "base/logging.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/visuals/css_style.h"
@@ -53,11 +54,12 @@ void CSSStyleSheetHandle::InsertStyleRule(CSSStyleSheetHandle* handle,
   handle->object_->InsertRule(selector, std::move(style), index);
 }
 
-v8::Local<v8::Map> CSSStyleSheetHandle::RuleAt(CSSStyleSheetHandle* handle,
-                                               int index) {
-  if (index < 0 ||
-      static_cast<size_t>(index) > handle->object_->rules().size()) {
-    ScriptHost::instance()->ThrowError("Unbound index");
+v8::Local<v8::Map> CSSStyleSheetHandle::RuleAt(
+    CSSStyleSheetHandle* handle,
+    int index,
+    ExceptionState* exception_state) {
+  if (static_cast<size_t>(index) >= handle->object_->rules().size()) {
+    exception_state->ThrowError("Unbound index");
     return v8::Local<v8::Map>();
   }
   const auto& runner = ScriptHost::instance()->runner();

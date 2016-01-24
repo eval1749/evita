@@ -21,6 +21,8 @@ namespace bindings {
 class CSSStyleSheetHandleClass;
 }
 
+class ExceptionState;
+
 //////////////////////////////////////////////////////////////////////
 //
 // CSSStyleSheetHandle
@@ -51,7 +53,9 @@ class CSSStyleSheetHandle final
                               const base::string16& selector,
                               v8::Local<v8::Map> raw_style,
                               int index);
-  static v8::Local<v8::Map> RuleAt(CSSStyleSheetHandle* handle, int index);
+  static v8::Local<v8::Map> RuleAt(CSSStyleSheetHandle* handle,
+                                   int index,
+                                   ExceptionState* exception_state);
 
   std::unique_ptr<CssStyleSheet> object_;
 

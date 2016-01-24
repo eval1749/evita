@@ -68,6 +68,7 @@ js_lib_files = [
   "text/modes/modes.js",
   "os/file.js",
   "os/os.js",
+  "os/platform_error.js",
   "os/process.js",
   "text/text_range.js",
   "text/regular_expression.js",

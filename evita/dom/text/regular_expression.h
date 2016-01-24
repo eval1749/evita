@@ -17,6 +17,7 @@ class Offset;
 
 namespace dom {
 
+class ExceptionState;
 class TextDocument;
 class RegExpInit;
 
@@ -63,8 +64,10 @@ class RegularExpression final : public v8_glue::Scriptable<RegularExpression> {
   v8::Local<v8::Value> MakeMatchArray(const std::vector<Match>& matchs);
 
   static RegularExpression* NewRegularExpression(const base::string16& source,
-                                                 const RegExpInit& options);
-  static RegularExpression* NewRegularExpression(const base::string16& source);
+                                                 const RegExpInit& options,
+                                                 ExceptionState* exact_state);
+  static RegularExpression* NewRegularExpression(const base::string16& source,
+                                                 ExceptionState* exact_state);
 
   bool backward_;
   bool global_;

@@ -7,6 +7,7 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "evita/bindings/v8_glue_RegExpInit.h"
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_range.h"
 #include "evita/dom/script_host.h"
@@ -526,12 +527,13 @@ v8::Local<v8::Value> RegularExpression::MakeMatchArray(
 
 RegularExpression* RegularExpression::NewRegularExpression(
     const base::string16& source,
-    const RegExpInit& options) {
+    const RegExpInit& options,
+    ExceptionState* exception_state) {
   RegularExpression::Compiler compiler;
   auto const regex = compiler.Compile(source, options);
   if (!regex) {
     auto const error_info = compiler.error_info();
-    ScriptHost::instance()->ThrowError(base::StringPrintf(
+    exception_state->ThrowError(base::StringPrintf(
         "Failed to compile regex with error code %d at offset %d",
         error_info.error_code, error_info.offset));
     return nullptr;
@@ -541,8 +543,9 @@ RegularExpression* RegularExpression::NewRegularExpression(
 }
 
 RegularExpression* RegularExpression::NewRegularExpression(
-    const base::string16& source) {
-  return NewRegularExpression(source, RegExpInit());
+    const base::string16& source,
+    ExceptionState* exception_state) {
+  return NewRegularExpression(source, RegExpInit(), exception_state);
 }
 
 }  // namespace dom

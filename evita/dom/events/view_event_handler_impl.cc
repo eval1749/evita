@@ -93,9 +93,12 @@ ViewEventTarget* MaybeEventTarget(domapi::EventTargetId event_target_id) {
   return FromEventTargetId(event_target_id);
 }
 
+// Returns existing or new |EditorWindow| for drag-and-drop.
 Window* NewOrFromWindowId(domapi::WindowId window_id) {
-  return window_id == domapi::kInvalidWindowId ? new EditorWindow()
-                                               : FromWindowId(window_id);
+  if (window_id != domapi::kInvalidWindowId)
+    return FromWindowId(window_id);
+  // TODO(eval1749): We should not constructor |EditorWindow| here.
+  return new EditorWindow(ScriptHost::instance());
 }
 
 }  // namespace

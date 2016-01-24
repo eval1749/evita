@@ -58,7 +58,8 @@ int global_focus_tick;
 //
 // Window
 //
-Window::Window() : state_(State::NotRealized) {
+Window::Window(ScriptHost* script_host)
+    : script_host_(script_host), state_(State::NotRealized) {
   WindowSet::instance()->Register(this);
 }
 
@@ -66,7 +67,7 @@ Window::~Window() {
   if (window_id() == domapi::kInvalidWindowId)
     return;
   WindowSet::instance()->Unregister(window_id());
-  ScriptHost::instance()->view_delegate()->DestroyWindow(window_id());
+  script_host_->view_delegate()->DestroyWindow(window_id());
 }
 
 std::vector<Window*> Window::child_windows() const {
@@ -96,8 +97,7 @@ void Window::AddWindow(Window* window, ExceptionState* exception_state) {
     return;
   }
   AppendChild(window);
-  ScriptHost::instance()->view_delegate()->AddWindow(window_id(),
-                                                     window->window_id());
+  script_host_->view_delegate()->AddWindow(window_id(), window->window_id());
 }
 
 void Window::ChangeParentWindow(Window* new_parent_window,
@@ -119,7 +119,7 @@ void Window::ChangeParentWindow(Window* new_parent_window,
   if (parent_node())
     parent_node()->RemoveChild(this);
   new_parent_window->AppendChild(this);
-  ScriptHost::instance()->view_delegate()->ChangeParentWindow(
+  script_host_->view_delegate()->ChangeParentWindow(
       window_id(), new_parent_window->window_id());
 }
 
@@ -133,7 +133,7 @@ void Window::Destroy(ExceptionState* exception_state) {
   for (auto descendant : common::tree::descendants_or_self(this)) {
     descendant->state_ = State::Destroying;
   }
-  ScriptHost::instance()->view_delegate()->DestroyWindow(window_id());
+  script_host_->view_delegate()->DestroyWindow(window_id());
 }
 
 void Window::DidActivateWindow() {
@@ -165,7 +165,7 @@ void Window::DidChangeBounds(int clientLeft,
                              int clientTop,
                              int clientRight,
                              int clientBottom) {
-  auto const runner = ScriptHost::instance()->runner();
+  auto const runner = script_host_->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
@@ -189,7 +189,7 @@ void Window::DidSetFocus() {
   ++global_focus_tick;
 
   // Update |Window.focus| and |Window.prototype.focusTick_|
-  auto const runner = ScriptHost::instance()->runner();
+  auto const runner = script_host_->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
@@ -210,7 +210,7 @@ void Window::Focus(ExceptionState* exception_state) {
     exception_state->ThrowError("You can't focus unrealized window.");
     return;
   }
-  ScriptHost::instance()->view_delegate()->FocusWindow(window_id());
+  script_host_->view_delegate()->FocusWindow(window_id());
 }
 
 void Window::Hide(ExceptionState* exception_state) {
@@ -218,7 +218,7 @@ void Window::Hide(ExceptionState* exception_state) {
     exception_state->ThrowError("You can't hide unrealized window.");
     return;
   }
-  ScriptHost::instance()->view_delegate()->HideWindow(window_id());
+  script_host_->view_delegate()->HideWindow(window_id());
 }
 
 bool Window::IsDescendantOf(Window* other) const {
@@ -250,7 +250,7 @@ void Window::Realize(ExceptionState* exception_state) {
   for (auto descendant : common::tree::descendants_or_self(this)) {
     descendant->state_ = State::Realizing;
   }
-  ScriptHost::instance()->view_delegate()->RealizeWindow(window_id());
+  script_host_->view_delegate()->RealizeWindow(window_id());
 }
 
 void Window::RemoveWindow(Window* window, ExceptionState* exception_state) {
@@ -321,7 +321,7 @@ void Window::Show(ExceptionState* exception_state) {
     exception_state->ThrowError("You can't show unrealized window.");
     return;
   }
-  ScriptHost::instance()->view_delegate()->ShowWindow(window_id());
+  script_host_->view_delegate()->ShowWindow(window_id());
 }
 
 void Window::SplitHorizontally(Window* new_right_window,
@@ -329,7 +329,7 @@ void Window::SplitHorizontally(Window* new_right_window,
   if (!CheckSplitParameter(this, new_right_window, exception_state))
     return;
   parent_node()->InsertAfter(new_right_window, this);
-  ScriptHost::instance()->view_delegate()->SplitHorizontally(
+  script_host_->view_delegate()->SplitHorizontally(
       window_id(), new_right_window->window_id());
 }
 
@@ -338,8 +338,8 @@ void Window::SplitVertically(Window* new_below_window,
   if (!CheckSplitParameter(this, new_below_window, exception_state))
     return;
   parent_node()->InsertAfter(new_below_window, this);
-  ScriptHost::instance()->view_delegate()->SplitVertically(
-      window_id(), new_below_window->window_id());
+  script_host_->view_delegate()->SplitVertically(window_id(),
+                                                 new_below_window->window_id());
 }
 
 void Window::Update(ExceptionState* exception_state) {
@@ -347,7 +347,7 @@ void Window::Update(ExceptionState* exception_state) {
     exception_state->ThrowError("You can't update unrealized window.");
     return;
   }
-  ScriptHost::instance()->view_delegate()->UpdateWindow(window_id());
+  script_host_->view_delegate()->UpdateWindow(window_id());
 }
 
 }  // namespace dom

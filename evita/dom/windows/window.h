@@ -14,13 +14,17 @@
 
 namespace dom {
 
+class ScriptHost;
 class WindowSet;
 
 namespace bindings {
 class WindowClass;
 }
 
-// |Window| is correspond to |Widget| in DOM world.
+//////////////////////////////////////////////////////////////////////
+//
+// Window is correspond to |Widget| in DOM world.
+//
 class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
                public common::tree::Node<Window> {
   DECLARE_SCRIPTABLE_OBJECT(Window)
@@ -56,7 +60,9 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   static void ResetForTesting();
 
  protected:
-  Window();
+  explicit Window(ScriptHost* script_host);
+
+  ScriptHost* script_host() const { return script_host_; }
 
  private:
   friend class bindings::WindowClass;
@@ -84,6 +90,7 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
                        ExceptionState* exception_state);
   void Update(ExceptionState* exception_state);
 
+  ScriptHost* const script_host_;
   State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Window);

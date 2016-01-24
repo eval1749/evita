@@ -28,10 +28,12 @@ namespace dom {
 //
 // VisualWindow
 //
-VisualWindow::VisualWindow(visuals::Document* document,
+VisualWindow::VisualWindow(ScriptHost* script_host,
+                           visuals::Document* document,
                            visuals::css::StyleSheet* style_sheet)
-    : view_(new visuals::View(*document, *this, {style_sheet})) {
-  ScriptHost::instance()->view_delegate()->CreateVisualWindow(window_id());
+    : Scriptable(script_host),
+      view_(new visuals::View(*document, *this, {style_sheet})) {
+  script_host->view_delegate()->CreateVisualWindow(window_id());
   view_->AddObserver(this);
 }
 
@@ -50,7 +52,7 @@ void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   auto display_item_list = view_->Paint();
   if (!display_item_list)
     return;
-  ScriptHost::instance()->view_delegate()->PaintVisualDocument(
+  script_host()->view_delegate()->PaintVisualDocument(
       window_id(), std::move(display_item_list));
 }
 
@@ -63,8 +65,7 @@ void VisualWindow::RequestAnimationFrame() {
   auto callback = std::make_unique<AnimationFrameCallback>(
       FROM_HERE, base::Bind(&VisualWindow::DidBeginAnimationFrame,
                             base::Unretained(this)));
-  ScriptHost::instance()->scheduler()->RequestAnimationFrame(
-      std::move(callback));
+  script_host()->scheduler()->RequestAnimationFrame(std::move(callback));
 }
 
 // Binding callbacks
@@ -76,7 +77,8 @@ int VisualWindow::HitTest(int x, int y) {
   return found.node()->sequence_id();
 }
 
-VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle,
+VisualWindow* VisualWindow::NewWindow(ScriptHost* script_host,
+                                      NodeHandle* document_handle,
                                       CSSStyleSheetHandle* style_sheet_handle,
                                       ExceptionState* exception_state) {
   const auto document = document_handle->value()->as<visuals::Document>();
@@ -84,7 +86,7 @@ VisualWindow* VisualWindow::NewWindow(NodeHandle* document_handle,
     exception_state->ThrowError("Requires document node");
     return nullptr;
   }
-  return new VisualWindow(document, style_sheet_handle->value());
+  return new VisualWindow(script_host, document, style_sheet_handle->value());
 }
 
 // visuals::css::Media

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 [
+  CallWith=ScriptHost,
   Constructor(Form form, optional FormWindowInit init)
 ]
 interface FormWindow : Window {

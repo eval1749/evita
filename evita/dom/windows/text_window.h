@@ -40,7 +40,7 @@ class TextWindow final : public v8_glue::Scriptable<TextWindow, Window> {
  private:
   friend class bindings::TextWindowClass;
 
-  explicit TextWindow(TextRange* selection_range);
+  TextWindow(ScriptHost* script_host, TextRange* selection_range);
 
   // bindings
   TextDocument* document() const;

@@ -27,7 +27,7 @@ class SampleWindow final : public v8_glue::Scriptable<SampleWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(SampleWindow);
 
  public:
-  SampleWindow() = default;
+  explicit SampleWindow(ScriptHost* script_host);
   ~SampleWindow() final = default;
 
   const base::string16& name() const { return name_; }
@@ -36,13 +36,23 @@ class SampleWindow final : public v8_glue::Scriptable<SampleWindow, Window> {
  private:
   friend class SampleWindowClass;
 
-  static SampleWindow* NewSampleWindow() { return new SampleWindow(); }
+  static SampleWindow* NewSampleWindow(ScriptHost* script_host);
 
   base::string16 name_;
 
   DISALLOW_COPY_AND_ASSIGN(SampleWindow);
 };
 
+SampleWindow::SampleWindow(ScriptHost* script_host) : Scriptable(script_host) {}
+
+SampleWindow* SampleWindow::NewSampleWindow(ScriptHost* script_host) {
+  return new SampleWindow(script_host);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// SampleWindowClass
+//
 class SampleWindowClass final
     : public v8_glue::DerivedWrapperInfo<SampleWindow, Window> {
  public:
@@ -65,7 +75,9 @@ class SampleWindowClass final
 
   static SampleWindow* NewSampleWindow(
       const v8::FunctionCallbackInfo<v8::Value>& info) {
-    return new SampleWindow();
+    const auto runner = v8_glue::Runner::From(info.GetIsolate());
+    const auto script_host = runner->user_data<ScriptHost>();
+    return new SampleWindow(script_host);
   }
 
   v8::Local<v8::ObjectTemplate> SetupInstanceTemplate(

@@ -33,8 +33,9 @@ class FormWindow final : public v8_glue::Scriptable<FormWindow, Window> {
  private:
   friend class bindings::FormWindowClass;
 
-  FormWindow(Form* form, const FormWindowInit& init);
-  explicit FormWindow(Form* form);
+  // bindings
+  FormWindow(ScriptHost* script_host, Form* form, const FormWindowInit& init);
+  FormWindow(ScriptHost* script_host, Form* form);
 
   gc::Member<Form> form_;
 

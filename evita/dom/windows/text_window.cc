@@ -22,9 +22,11 @@ namespace dom {
 //
 // TextWindow
 //
-TextWindow::TextWindow(TextRange* selection_range)
-    : selection_(new TextSelection(this, selection_range)), zoom_(1.0f) {
-  ScriptHost::instance()->view_delegate()->CreateTextWindow(
+TextWindow::TextWindow(ScriptHost* script_host, TextRange* selection_range)
+    : Scriptable(script_host),
+      selection_(new TextSelection(this, selection_range)),
+      zoom_(1.0f) {
+  script_host->view_delegate()->CreateTextWindow(
       window_id(), static_cast<TextSelection*>(selection())->text_selection());
 }
 
@@ -43,8 +45,7 @@ void TextWindow::set_zoom(float new_zoom, ExceptionState* exception_state) {
     return;
   }
   zoom_ = new_zoom;
-  ScriptHost::instance()->view_delegate()->SetTextWindowZoom(window_id(),
-                                                             zoom_);
+  script_host()->view_delegate()->SetTextWindowZoom(window_id(), zoom_);
 }
 
 text::Offset TextWindow::ComputeMotion(int method,
@@ -57,8 +58,7 @@ text::Offset TextWindow::ComputeMotion(int method,
   data.position = position;
   data.x = point.x();
   data.y = point.y();
-  return ScriptHost::instance()->view_delegate()->ComputeOnTextWindow(
-      window_id(), data);
+  return script_host()->view_delegate()->ComputeOnTextWindow(window_id(), data);
 }
 
 text::Offset TextWindow::ComputeMotion(int method,
@@ -76,34 +76,32 @@ text::Offset TextWindow::ComputeMotion(int method) {
 }
 
 domapi::FloatRect TextWindow::HitTestTextPosition(text::Offset position) {
-  return ScriptHost::instance()->view_delegate()->HitTestTextPosition(
-      window_id(), position);
+  return script_host()->view_delegate()->HitTestTextPosition(window_id(),
+                                                             position);
 }
 
 void TextWindow::MakeSelectionVisible() {
-  ScriptHost::instance()->view_delegate()->MakeSelectionVisible(window_id());
+  script_host()->view_delegate()->MakeSelectionVisible(window_id());
 }
 
 v8::Local<v8::Promise> TextWindow::HitTestPoint(float x, float y) {
   return PromiseResolver::Call(
-      FROM_HERE,
-      base::Bind(&domapi::ViewDelegate::MapTextWindowPointToOffset,
-                 base::Unretained(ScriptHost::instance()->view_delegate()),
-                 window_id(), x, y));
+      FROM_HERE, base::Bind(&domapi::ViewDelegate::MapTextWindowPointToOffset,
+                            base::Unretained(script_host()->view_delegate()),
+                            window_id(), x, y));
 }
 
 // static
 TextWindow* TextWindow::NewTextWindow(TextRange* selection_range) {
-  return new TextWindow(selection_range);
+  return new TextWindow(script_host(), selection_range);
 }
 
 void TextWindow::Reconvert(const base::string16& text) {
-  ScriptHost::instance()->view_delegate()->Reconvert(window_id(), text);
+  script_host()->view_delegate()->Reconvert(window_id(), text);
 }
 
 void TextWindow::Scroll(int direction) {
-  ScriptHost::instance()->view_delegate()->ScrollTextWindow(window_id(),
-                                                            direction);
+  script_host()->view_delegate()->ScrollTextWindow(window_id(), direction);
 }
 
 // Window

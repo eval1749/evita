@@ -20,7 +20,7 @@ class EditorWindow final : public v8_glue::Scriptable<EditorWindow, Window> {
 
  public:
   // TODO(eval1749): We should not allow to create |EditorWindow| from C++.
-  EditorWindow();
+  explicit EditorWindow(ScriptHost* script_host);
   ~EditorWindow() final;
 
   static void ResetForTesting();

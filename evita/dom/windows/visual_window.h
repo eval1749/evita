@@ -23,9 +23,9 @@ class View;
 
 namespace dom {
 
+class CSSStyleSheetHandle;
 class ExceptionState;
 class NodeHandle;
-class CSSStyleSheetHandle;
 
 namespace bindings {
 class VisualWindowClass;
@@ -46,7 +46,8 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
  private:
   friend class bindings::VisualWindowClass;
 
-  VisualWindow(visuals::Document* document,
+  VisualWindow(ScriptHost* script_host,
+               visuals::Document* document,
                visuals::css::StyleSheet* style_sheet);
 
   const visuals::Document& document() const;
@@ -56,7 +57,8 @@ class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
 
   // Binding callbacks
   int HitTest(int x, int y);
-  static VisualWindow* NewWindow(NodeHandle* document_handle,
+  static VisualWindow* NewWindow(ScriptHost* view_delegate,
+                                 NodeHandle* document_handle,
                                  CSSStyleSheetHandle* style_sheet_handle,
                                  ExceptionState* exception_state);
 

@@ -53,9 +53,9 @@ class EditorWindowList final : public common::Singleton<EditorWindowList> {
 //
 // EditorWindow
 //
-EditorWindow::EditorWindow() {
+EditorWindow::EditorWindow(ScriptHost* script_host) : Scriptable(script_host) {
   EditorWindowList::instance()->Register(this);
-  ScriptHost::instance()->view_delegate()->CreateEditorWindow(window_id());
+  script_host->view_delegate()->CreateEditorWindow(window_id());
 }
 
 EditorWindow::~EditorWindow() {}
@@ -70,7 +70,7 @@ void EditorWindow::ResetForTesting() {
 }
 
 void EditorWindow::SetStatusBar(const std::vector<base::string16>& texts) {
-  ScriptHost::instance()->view_delegate()->SetStatusBar(window_id(), texts);
+  script_host()->view_delegate()->SetStatusBar(window_id(), texts);
 }
 
 // Window

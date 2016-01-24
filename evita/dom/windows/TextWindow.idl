@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-[Constructor(TextRange range)]
+[
+  CallWith=ScriptHost,
+  Constructor(TextRange range)
+]
 interface TextWindow : Window {
   readonly attribute TextDocument document;
   readonly attribute TextSelection selection;

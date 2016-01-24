@@ -3,21 +3,46 @@
 // found in the LICENSE file.
 
 interface NodeHandle {
+  [RaisesException]
   static void addClass(NodeHandle parent, DOMString className);
+
+  [RaisesException]
   static void appendChild(NodeHandle parent, NodeHandle node);
+
   static NodeHandle createDocument();
+
+  [RaisesException]
   static NodeHandle createElement(NodeHandle document, DOMString tagName,
                                   DOMString id);
+  [RaisesException]
   static NodeHandle createShape(NodeHandle document, ArrayBufferView data);
+
+  [RaisesException]
   static NodeHandle createText(NodeHandle document, DOMString data);
+
+  [RaisesException]
   static Map getInlineStyle(NodeHandle handle);
+
+  [RaisesException]
   static void insertBefore(NodeHandle parent, NodeHandle node, NodeHandle child);
+
+  [RaisesException]
   static void removeChild(NodeHandle parent, NodeHandle child);
+
+  [RaisesException]
   static void removeClass(NodeHandle parent, DOMString className);
+
+  [RaisesException]
   static void replaceChild(NodeHandle parent, NodeHandle node,
                            NodeHandle child);
+
+  [RaisesException]
   static void setInlineStyle(NodeHandle handle, Map rawStyle);
+
+  [RaisesException]
   static void setShapeData(NodeHandle handle, ArrayBufferView data);
+
+  [RaisesException]
   static void setTextData(NodeHandle handle, DOMString data);
 
   readonly attribute long id;

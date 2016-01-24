@@ -4,6 +4,7 @@
 
 #include "evita/dom/visuals/node_handle.h"
 
+#include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/visuals/css_style.h"
@@ -23,27 +24,30 @@ using Element = visuals::Element;
 
 namespace {
 
-visuals::ContainerNode* AsContainerNode(NodeHandle* node_handle) {
+visuals::ContainerNode* AsContainerNode(NodeHandle* node_handle,
+                                        ExceptionState* exception_state) {
   const auto container = node_handle->value()->as<visuals::ContainerNode>();
   if (container)
     return container;
-  ScriptHost::instance()->ThrowError("Requires container node");
+  exception_state->ThrowError("Requires container node");
   return nullptr;
 }
 
-visuals::Document* AsDocument(NodeHandle* node_handle) {
+visuals::Document* AsDocument(NodeHandle* node_handle,
+                              ExceptionState* exception_state) {
   const auto container = node_handle->value()->as<visuals::Document>();
   if (container)
     return container;
-  ScriptHost::instance()->ThrowError("Requires document node");
+  exception_state->ThrowError("Requires document node");
   return nullptr;
 }
 
-visuals::Element* AsElement(NodeHandle* node_handle) {
+visuals::Element* AsElement(NodeHandle* node_handle,
+                            ExceptionState* exception_state) {
   const auto container = node_handle->value()->as<visuals::Element>();
   if (container)
     return container;
-  ScriptHost::instance()->ThrowError("Requires element node");
+  exception_state->ThrowError("Requires element node");
   return nullptr;
 }
 
@@ -62,8 +66,9 @@ int NodeHandle::id() const {
 
 // static
 void NodeHandle::AddClass(NodeHandle* element_handle,
-                          const base::string16& class_name) {
-  const auto element = AsElement(element_handle);
+                          const base::string16& class_name,
+                          ExceptionState* exception_state) {
+  const auto element = AsElement(element_handle, exception_state);
   if (!element)
     return;
   visuals::NodeEditor().AddClass(element, class_name);
@@ -77,8 +82,9 @@ NodeHandle* NodeHandle::CreateDocument() {
 // static
 NodeHandle* NodeHandle::CreateElement(NodeHandle* document_handle,
                                       const base::string16& tag_name,
-                                      const base::string16& id) {
-  const auto document = AsDocument(document_handle);
+                                      const base::string16& id,
+                                      ExceptionState* exception_state) {
+  const auto document = AsDocument(document_handle, exception_state);
   if (!document)
     return nullptr;
   return new NodeHandle(new visuals::Element(document, tag_name, id));
@@ -87,8 +93,9 @@ NodeHandle* NodeHandle::CreateElement(NodeHandle* document_handle,
 // static
 NodeHandle* NodeHandle::CreateShape(
     NodeHandle* document_handle,
-    const gin::ArrayBufferView& array_buffer_view) {
-  const auto document = AsDocument(document_handle);
+    const gin::ArrayBufferView& array_buffer_view,
+    ExceptionState* exception_state) {
+  const auto document = AsDocument(document_handle, exception_state);
   if (!document)
     return nullptr;
   const auto& data = visuals::ShapeData(array_buffer_view.bytes(),
@@ -98,26 +105,30 @@ NodeHandle* NodeHandle::CreateShape(
 
 // static
 NodeHandle* NodeHandle::CreateText(NodeHandle* document_handle,
-                                   const base::string16& data) {
-  const auto document = AsDocument(document_handle);
+                                   const base::string16& data,
+                                   ExceptionState* exception_state) {
+  const auto document = AsDocument(document_handle, exception_state);
   if (!document)
     return nullptr;
   return new NodeHandle(new visuals::Text(document, data));
 }
 
 // static
-void NodeHandle::AppendChild(NodeHandle* parent, NodeHandle* node) {
-  const auto container = AsContainerNode(parent);
+void NodeHandle::AppendChild(NodeHandle* parent,
+                             NodeHandle* node,
+                             ExceptionState* exception_state) {
+  const auto container = AsContainerNode(parent, exception_state);
   if (!container)
     return;
   visuals::NodeEditor().AppendChild(container, node->value());
 }
 
 // static
-v8::Local<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* element_handle) {
+v8::Local<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* element_handle,
+                                              ExceptionState* exception_state) {
   const auto& runner = ScriptHost::instance()->runner();
   const auto& context = runner->context();
-  const auto element = AsElement(element_handle);
+  const auto element = AsElement(element_handle, exception_state);
   if (!element)
     return v8::Local<v8::Map>();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
@@ -130,16 +141,19 @@ v8::Local<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* element_handle) {
 // static
 void NodeHandle::InsertBefore(NodeHandle* parent,
                               NodeHandle* node,
-                              NodeHandle* child) {
-  const auto container = AsContainerNode(parent);
+                              NodeHandle* child,
+                              ExceptionState* exception_state) {
+  const auto container = AsContainerNode(parent, exception_state);
   if (!container)
     return;
   visuals::NodeEditor().InsertBefore(container, node->value(), child->value());
 }
 
 // static
-void NodeHandle::RemoveChild(NodeHandle* parent, NodeHandle* child) {
-  const auto container = AsContainerNode(parent);
+void NodeHandle::RemoveChild(NodeHandle* parent,
+                             NodeHandle* child,
+                             ExceptionState* exception_state) {
+  const auto container = AsContainerNode(parent, exception_state);
   if (!container)
     return;
   visuals::NodeEditor().RemoveChild(container, child->value());
@@ -147,8 +161,9 @@ void NodeHandle::RemoveChild(NodeHandle* parent, NodeHandle* child) {
 
 // static
 void NodeHandle::RemoveClass(NodeHandle* element_handle,
-                             const base::string16& class_name) {
-  const auto element = AsElement(element_handle);
+                             const base::string16& class_name,
+                             ExceptionState* exception_state) {
+  const auto element = AsElement(element_handle, exception_state);
   if (!element)
     return;
   visuals::NodeEditor().RemoveClass(element, class_name);
@@ -157,8 +172,9 @@ void NodeHandle::RemoveClass(NodeHandle* element_handle,
 // static
 void NodeHandle::ReplaceChild(NodeHandle* parent,
                               NodeHandle* node,
-                              NodeHandle* child) {
-  const auto container = AsContainerNode(parent);
+                              NodeHandle* child,
+                              ExceptionState* exception_state) {
+  const auto container = AsContainerNode(parent, exception_state);
   if (!container)
     return;
   visuals::NodeEditor().ReplaceChild(container, node->value(), child->value());
@@ -166,10 +182,11 @@ void NodeHandle::ReplaceChild(NodeHandle* parent,
 
 // static
 void NodeHandle::SetInlineStyle(NodeHandle* element_handle,
-                                v8::Local<v8::Map> raw_style) {
+                                v8::Local<v8::Map> raw_style,
+                                ExceptionState* exception_state) {
   const auto& runner = ScriptHost::instance()->runner();
   const auto& context = runner->context();
-  const auto element = AsElement(element_handle);
+  const auto element = AsElement(element_handle, exception_state);
   if (!element)
     return;
   auto style = CSSStyle::ConvertFromV8(context, raw_style);
@@ -178,10 +195,11 @@ void NodeHandle::SetInlineStyle(NodeHandle* element_handle,
 
 // static
 void NodeHandle::SetShapeData(NodeHandle* shape_handle,
-                              const gin::ArrayBufferView& array_buffer_view) {
+                              const gin::ArrayBufferView& array_buffer_view,
+                              ExceptionState* exception_state) {
   const auto shape = shape_handle->value()->as<visuals::Shape>();
   if (!shape) {
-    ScriptHost::instance()->ThrowError("Requires shape node");
+    exception_state->ThrowError("Requires shape node");
     return;
   }
   const auto& data = visuals::ShapeData(array_buffer_view.bytes(),
@@ -191,10 +209,11 @@ void NodeHandle::SetShapeData(NodeHandle* shape_handle,
 
 // static
 void NodeHandle::SetTextData(NodeHandle* text_handle,
-                             const base::string16& data) {
+                             const base::string16& data,
+                             ExceptionState* exception_state) {
   const auto text = text_handle->value()->as<visuals::Text>();
   if (!text) {
-    ScriptHost::instance()->ThrowError("Requires text node");
+    exception_state->ThrowError("Requires text node");
     return;
   }
   visuals::NodeEditor().SetTextData(text, data);

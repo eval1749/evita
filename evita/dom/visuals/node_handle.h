@@ -23,6 +23,8 @@ namespace bindings {
 class NodeHandleClass;
 }
 
+class ExceptionState;
+
 //////////////////////////////////////////////////////////////////////
 //
 // NodeHandle
@@ -44,32 +46,50 @@ class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
   int id() const;
 
   static void AddClass(NodeHandle* element_handle,
-                       const base::string16& class_name);
-  static void AppendChild(NodeHandle* parent, NodeHandle* node);
+                       const base::string16& class_name,
+                       ExceptionState* exception_state);
+  static void AppendChild(NodeHandle* parent,
+                          NodeHandle* node,
+                          ExceptionState* exception_state);
   static NodeHandle* CreateDocument();
   static NodeHandle* CreateElement(NodeHandle* document,
                                    const base::string16& tag_name,
-                                   const base::string16& id);
+                                   const base::string16& id,
+                                   ExceptionState* exception_state);
   static NodeHandle* CreateElement(NodeHandle* document,
-                                   const base::string16& tag_name);
+                                   const base::string16& tag_name,
+                                   ExceptionState* exception_state);
   static NodeHandle* CreateShape(NodeHandle* document,
-                                 const gin::ArrayBufferView& data);
+                                 const gin::ArrayBufferView& data,
+                                 ExceptionState* exception_state);
   static NodeHandle* CreateText(NodeHandle* document,
-                                const base::string16& data);
-  static v8::Local<v8::Map> GetInlineStyle(NodeHandle* element);
+                                const base::string16& data,
+                                ExceptionState* exception_state);
+  static v8::Local<v8::Map> GetInlineStyle(NodeHandle* element,
+                                           ExceptionState* exception_state);
   static void InsertBefore(NodeHandle* parent,
                            NodeHandle* node,
-                           NodeHandle* child);
-  static void RemoveChild(NodeHandle* parent, NodeHandle* node);
+                           NodeHandle* child,
+                           ExceptionState* exception_state);
+  static void RemoveChild(NodeHandle* parent,
+                          NodeHandle* node,
+                          ExceptionState* exception_state);
   static void RemoveClass(NodeHandle* element_handle,
-                          const base::string16& class_name);
+                          const base::string16& class_name,
+                          ExceptionState* exception_state);
   static void ReplaceChild(NodeHandle* parent,
                            NodeHandle* node,
-                           NodeHandle* child);
-  static void SetInlineStyle(NodeHandle* element, v8::Local<v8::Map> raw_style);
+                           NodeHandle* child,
+                           ExceptionState* exception_state);
+  static void SetInlineStyle(NodeHandle* element,
+                             v8::Local<v8::Map> raw_style,
+                             ExceptionState* exception_state);
   static void SetShapeData(NodeHandle* element,
-                           const gin::ArrayBufferView& data);
-  static void SetTextData(NodeHandle* element, const base::string16& data);
+                           const gin::ArrayBufferView& data,
+                           ExceptionState* exception_state);
+  static void SetTextData(NodeHandle* element,
+                          const base::string16& data,
+                          ExceptionState* exception_state);
 
   const gc::Member<visuals::Node> value_;
 

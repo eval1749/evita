@@ -11,6 +11,7 @@
 #include "evita/dom/text/text_range.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/text/offset.h"
+#include "evita/text/range.h"
 #include "evita/text/selection.h"
 
 namespace dom {
@@ -32,7 +33,8 @@ TextSelection::~TextSelection() {
 }
 
 text::Offset TextSelection::anchor_offset() const {
-  return start_is_active() ? range_->end() : range_->start();
+  return start_is_active() ? range_->text_range()->end()
+                           : range_->text_range()->start();
 }
 
 int TextSelection::anchor_offset_value() const {
@@ -40,7 +42,8 @@ int TextSelection::anchor_offset_value() const {
 }
 
 text::Offset TextSelection::focus_offset() const {
-  return start_is_active() ? range_->start() : range_->end();
+  return start_is_active() ? range_->text_range()->start()
+                           : range_->text_range()->end();
 }
 
 int TextSelection::focus_offset_value() const {

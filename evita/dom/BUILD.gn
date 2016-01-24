@@ -23,11 +23,6 @@ source_set("dom") {
 source_set("components") {
   visibility = [ ":*" ]
   sources = [
-    "clipboard/clipboard.cc",
-    "clipboard/data_transfer.cc",
-    "clipboard/data_transfer_data.cc",
-    "clipboard/data_transfer_item.cc",
-    "clipboard/data_transfer_item_list.cc",
     "css/text_style.cc",
     "css/text_style.h",
     "editor.cc",
@@ -112,6 +107,7 @@ source_set("components") {
     "//base:i18n",
     "//common",
     "//evita/dom/bindings",
+    "//evita/dom/clipboard",
     "//evita/dom/encodings",
     "//evita/dom/os",
     "//evita/dom/public",

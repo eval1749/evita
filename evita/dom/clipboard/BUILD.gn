@@ -1,0 +1,17 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("clipboard") {
+  sources = [
+    "clipboard.cc",
+    "data_transfer.cc",
+    "data_transfer_data.cc",
+    "data_transfer_item.cc",
+    "data_transfer_item_list.cc",
+  ]
+
+  deps = [
+    "//evita/dom/bindings",
+  ]
+}

@@ -314,50 +314,45 @@
       this.offset_ = Math.min(newOffset, this.offset_);
       this.end_ = newEnd;
     }
-  }
 
-  /**
-   * TODO(eval1749): Once closure compiler support class inside function,
-   * we should annotate with |SpellChecker|.
-   */
-  function* scannerWords() {
-    /** @type {number} */
-    const maxOffset = this.document_.length;
-    this.end_ = Math.min(this.end_, maxOffset);
-    this.offset_ = Math.min(this.offset_, maxOffset);
-
-    /** @type {number} */
-    let lastOffset = this.offset_;
-    if (!this.moveToStartOfWord()) {
-      this.removeMarker(lastOffset);
-      return;
-    }
-
-    while (this.offset_ < this.end_) {
-      this.removeMarker(lastOffset);
+    /**
+     * @return {!Generator<{start: number, end: number}>}
+     */
+    *words() {
+      /** @type {number} */
+      const maxOffset = this.document_.length;
+      this.end_ = Math.min(this.end_, maxOffset);
+      this.offset_ = Math.min(this.offset_, maxOffset);
 
       /** @type {number} */
-      const wordStart = this.offset_;
-      if (!this.moveToEndOfWord())
-        break;
-
-      /** @type {number} */
-      const wordEnd = this.offset_;
-      if (wordStart !== wordEnd) {
-        this.removeMarker(wordStart);
-        lastOffset = this.offset_;
-        yield {start: wordStart, end: lastOffset};
+      let lastOffset = this.offset_;
+      if (!this.moveToStartOfWord()) {
+        this.removeMarker(lastOffset);
+        return;
       }
 
-      if (!this.moveToNextWord())
-        break;
-    }
-    this.removeMarker(lastOffset);
-  }
+      while (this.offset_ < this.end_) {
+        this.removeMarker(lastOffset);
 
-  /** @type {function():!Iterator.<{start: number, end: number}>} */
-  Scanner.prototype.words;
-  Object.defineProperty(Scanner.prototype, 'words', {value: scannerWords});
+        /** @type {number} */
+        const wordStart = this.offset_;
+        if (!this.moveToEndOfWord())
+          break;
+
+        /** @type {number} */
+        const wordEnd = this.offset_;
+        if (wordStart !== wordEnd) {
+          this.removeMarker(wordStart);
+          lastOffset = this.offset_;
+          yield {start: wordStart, end: lastOffset};
+        }
+
+        if (!this.moveToNextWord())
+          break;
+      }
+      this.removeMarker(lastOffset);
+    }
+  }
 
   //////////////////////////////////////////////////////////////////////
   //

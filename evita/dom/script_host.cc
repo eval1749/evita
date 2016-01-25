@@ -254,6 +254,7 @@ v8_glue::Runner* ScriptHost::runner() const {
 
 void ScriptHost::set_testing_runner(v8_glue::Runner* runner) {
   testing_runner_ = runner;
+  runner->set_user_data(this);
   v8_glue::Runner::Scope runner_scope(runner);
   PopulateEnviromentStrings(runner);
 }

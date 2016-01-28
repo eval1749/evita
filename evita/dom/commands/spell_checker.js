@@ -290,6 +290,18 @@
 
     /**
      * @protected
+     * @return {boolean}
+     */
+    prepareWords() {
+      /** @type {number} */
+      const maxOffset = this.document_.length;
+      this.end_ = Math.min(this.end_, maxOffset);
+      this.offset_ = Math.min(this.offset_, maxOffset);
+      return this.moveToStartOfWord();
+    }
+
+    /**
+     * @protected
      * @param {number} newLife
      */
     resetLife(newLife) {
@@ -317,23 +329,13 @@
 
     /**
      * @return {!Generator<{start: number, end: number}>}
+     * Generates a word range starting from |this.offset_| until end of
+     * document.
      */
     *words() {
-      /** @type {number} */
-      const maxOffset = this.document_.length;
-      this.end_ = Math.min(this.end_, maxOffset);
-      this.offset_ = Math.min(this.offset_, maxOffset);
-
-      /** @type {number} */
-      let lastOffset = this.offset_;
-      if (!this.moveToStartOfWord()) {
-        this.removeMarker(lastOffset);
+      if (!this.moveToStartOfWord())
         return;
-      }
-
       while (this.offset_ < this.end_) {
-        this.removeMarker(lastOffset);
-
         /** @type {number} */
         const wordStart = this.offset_;
         if (!this.moveToEndOfWord())
@@ -341,16 +343,12 @@
 
         /** @type {number} */
         const wordEnd = this.offset_;
-        if (wordStart !== wordEnd) {
-          this.removeMarker(wordStart);
-          lastOffset = this.offset_;
-          yield {start: wordStart, end: lastOffset};
-        }
+        if (wordStart !== wordEnd)
+          yield {start: wordStart, end: wordEnd};
 
         if (!this.moveToNextWord())
           break;
       }
-      this.removeMarker(lastOffset);
     }
   }
 
@@ -365,7 +363,13 @@
     }
 
     run() {
+      if (!this.prepareWords())
+        return;
+      /** @type {number} */
+      let lastOffset = this.offset;
       for (let wordRange of this.words()) {
+        this.removeMarker(lastOffset);
+        lastOffset = this.offset;
         const word = this.document.slice(wordRange.start, wordRange.end);
         const spelling = controller.checkSpelling(word);
         paint(this.document, wordRange.start, wordRange.end, spelling);
@@ -438,7 +442,13 @@
 
     run() {
       this.resetLife(kMaxColdScanCount);
+      if (!this.prepareWords())
+        return;
+      /** @type {number} */
+      let lastOffset = this.offset;
       for (let wordRange of this.words()) {
+        this.removeMarker(lastOffset);
+        lastOffset = this.offset;
         if (!this.checkWord(wordRange.start, wordRange.end))
           break;
       }

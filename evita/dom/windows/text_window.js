@@ -231,8 +231,7 @@ global.TextWindow.prototype.clone = function() {
    */
   function handleFocus(window) {
     Editor.requestIdleCallback(updateObsolete.bind(window), {timeout:500});
-    updateStatusBar(window);
-    window.status = `Switch to ${window.document.name}`;
+    updateStatusBar(window, `Switch to ${window.document.name}`);
   }
 
   /**
@@ -313,7 +312,7 @@ global.TextWindow.prototype.clone = function() {
     window.isSelectionChanged_ = true;
     Editor.requestIdleCallback(() => {
       window.isSelectionChanged_ = false;
-      updateStatusBar(window);
+      updateStatusBar(window, 'Ready');
       highlightMatchedBrackets(window);
     }, {timeout: 100});
   }
@@ -524,8 +523,9 @@ global.TextWindow.prototype.clone = function() {
   /**
    * Updates status bar with TextWindow.
    * @param {!TextWindow} window
+   * @param {string} stateText
    */
-  function updateStatusBar(window) {
+  function updateStatusBar(window, stateText) {
     function equal(texts1, texts2) {
       if (texts1.length !== texts2.length)
         return false;
@@ -541,7 +541,7 @@ global.TextWindow.prototype.clone = function() {
     const textOffset = selection.focusOffset;
     const lineAndColumn = document.getLineAndColumn_(textOffset);
     const newTexts = [
-      DOCUMENT_STATE_TEXTS[document.state],
+      document.state === 0 ? stateText : DOCUMENT_STATE_TEXTS[document.state],
       document.mode ? document.mode.name : '--',
       document.encoding ? document.encoding : 'n/a',
       NEWLINE_MODES[document.newline],

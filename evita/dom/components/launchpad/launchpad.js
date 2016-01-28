@@ -588,7 +588,7 @@ $define(global, 'launchpad', function($export) {
       }
       if (!this.window_.parent)
         return;
-      this.window_.parent.setStatusBar([`$(count) selected`]);
+      this.window_.parent.setStatusBar([`${count} selected`]);
     }
 
     ////////////////////////////////////////////////////////////

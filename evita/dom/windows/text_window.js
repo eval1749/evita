@@ -500,10 +500,8 @@ global.TextWindow.prototype.clone = function() {
       document.obsolete = info.lastModificationDate.valueOf() ===
                             document.lastWriteTime.valueOf() ?
           TextDocument.Obsolete.NO : TextDocument.Obsolete.YES;
-      if (document.obsolete === TextDocument.Obsolete.NO) {
-        window.status = 'Healthy';
+      if (document.obsolete === TextDocument.Obsolete.NO)
         return;
-      }
       Editor.messageBox(window, 'This document is stale.',
                         MessageBox.ICONWARNING);
       Editor.messageBox(window,

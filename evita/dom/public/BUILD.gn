@@ -7,6 +7,7 @@ source_set("public") {
     "event_target_id.h",
     "float_point.cc",
     "float_rect.cc",
+    "geometry.h",
     "io_context_id.cc",
     "io_delegate.cc",
     "io_error.cc",

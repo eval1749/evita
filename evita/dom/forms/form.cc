@@ -31,7 +31,8 @@ void Form::set_focus_control(v8_glue::Nullable<FormControl> new_focus_control) {
 void Form::set_height(int new_height) {
   if (bounds_.height() == new_height)
     return;
-  bounds_ = IntRect(bounds_.origin(), IntSize(width(), new_height));
+  bounds_ =
+      domapi::IntRect(bounds_.origin(), domapi::IntSize(width(), new_height));
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
@@ -45,7 +46,8 @@ void Form::set_title(const base::string16& new_title) {
 void Form::set_width(int new_width) {
   if (bounds_.width() == new_width)
     return;
-  bounds_ = IntRect(bounds_.origin(), IntSize(new_width, height()));
+  bounds_ =
+      domapi::IntRect(bounds_.origin(), domapi::IntSize(new_width, height()));
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 

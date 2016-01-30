@@ -9,8 +9,8 @@
 
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
+#include "evita/dom/public/geometry.h"
 #include "evita/gc/member.h"
-#include "evita/geometry/int_rect.h"
 #include "evita/v8_glue/nullable.h"
 
 namespace dom {
@@ -27,10 +27,6 @@ class Form final : public v8_glue::Scriptable<Form, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Form);
 
  public:
-  using IntPoint = evita::IntPoint;
-  using IntRect = evita::IntRect;
-  using IntSize = evita::IntSize;
-
   ~Form() final;
 
   std::vector<FormControl*> controls() const;
@@ -57,7 +53,7 @@ class Form final : public v8_glue::Scriptable<Form, ViewEventTarget> {
 
   void AddFormControl(FormControl* control, ExceptionState* exception_state);
 
-  IntRect bounds_;
+  domapi::IntRect bounds_;
   std::vector<FormControl*> controls_;
   gc::Member<FormControl> focus_control_;
   mutable base::ObserverList<FormObserver> observers_;

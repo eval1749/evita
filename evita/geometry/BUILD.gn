@@ -1,0 +1,43 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//testing/test.gni")
+
+source_set("geometry") {
+  sources = [
+    "int_point.cc",
+    "int_point.h",
+    "int_rect.cc",
+    "int_rect.h",
+    "int_size.cc",
+    "int_size.h",
+  ]
+
+  deps = [
+    "//base",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "int_point_test.cc",
+    "int_rect_test.cc",
+    "int_size_test.cc",
+  ]
+  deps = [
+    ":geometry",
+    "//testing/gtest",
+  ]
+}
+
+test("tests") {
+  output_name = "evita_geometry_tests"
+  deps = [
+    ":geometry",
+    ":test_files",
+    "//base/test:run_all_unittests",
+    "//testing/gtest",
+  ]
+}

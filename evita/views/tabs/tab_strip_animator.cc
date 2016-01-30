@@ -111,7 +111,7 @@ void TabStripAnimator::Action::Cancel() {
 }
 
 int TabStripAnimator::Action::FindTab(TabContent* tab_content) const {
-  auto const num_tabs = tab_strip()->number_of_tabs();
+  const auto num_tabs = tab_strip()->number_of_tabs();
   for (auto tab_index = 0; tab_index < num_tabs; ++tab_index) {
     if (tab_strip()->GetTab(tab_index) == tab_content)
       return tab_index;
@@ -194,8 +194,9 @@ SelectTabAction::SelectTabAction(TabStripAnimator* tab_strip_animator,
 ui::Animatable* SelectTabAction::CreateAnimation() {
   old_tab_content_ = active_tab_content();
   DCHECK_NE(old_tab_content_, new_tab_content_);
-  auto const old_layer = old_tab_content_ ? old_tab_content_->layer() : nullptr;
-  auto const new_layer = new_tab_content_->layer();
+  const auto old_layer = old_tab_content_ ? old_tab_content_->layer() : nullptr;
+  const auto new_layer = new_tab_content_->layer();
+  DCHECK(!new_layer->parent_layer());
   return ui::LayerAnimation::CreateSlideIn(layer(), new_layer, old_layer);
 }
 
@@ -207,7 +208,7 @@ void SelectTabAction::DoCancel() {
 }
 
 void SelectTabAction::DoFinish() {
-  auto const tab_index = FindTab(new_tab_content_);
+  const auto tab_index = FindTab(new_tab_content_);
   if (tab_index < 0) {
     new_tab_content_->Hide();
     return;
@@ -236,13 +237,13 @@ void TabStripAnimator::AddTab(TabContent* tab_content) {
   DCHECK(layer_);
   // Set dummy tab label. Actual tab label will be set later in
   // |Frame::UpdateTitleBar|.
-  auto const new_tab_item_index = tab_strip_->number_of_tabs();
+  const auto new_tab_item_index = tab_strip_->number_of_tabs();
   tab_strip_->InsertTab(tab_content, new_tab_item_index);
   RequestSelect(tab_content);
 }
 
 void TabStripAnimator::CancelCurrentAction() {
-  auto const current_action = action_;
+  const auto current_action = action_;
   if (!current_action)
     return;
   action_ = nullptr;

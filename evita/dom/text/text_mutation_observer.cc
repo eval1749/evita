@@ -108,7 +108,7 @@ void TextMutationObserver::DidMutateTextDocument(TextDocument* document) {
   if (!gin::TryConvertToV8(isolate, tracker->TakeRecords(), &records))
     return;
   ASSERT_DOM_LOCKED();
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(isolate);
   try_catch.SetVerbose(true);
   runner->CallAsFunction(callback_.NewLocal(isolate), v8::Undefined(isolate),
                          records, gin::ConvertToV8(isolate, this));

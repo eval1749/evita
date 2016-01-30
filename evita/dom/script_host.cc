@@ -362,7 +362,7 @@ void ScriptHost::ResetForTesting() {
 void ScriptHost::RunMicrotasks() {
   TRACE_EVENT0("script", "ScriptHost::RunMicrotasks");
   v8_glue::Runner::Scope runner_scope(runner());
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(runner()->isolate());
   DOM_AUTO_LOCK_SCOPE();
   runner()->isolate()->RunMicrotasks();
   runner()->HandleTryCatch(try_catch);

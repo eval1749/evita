@@ -113,7 +113,7 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
                "type", base::UTF16ToASCII(event->type()));
   auto const runner = host_->runner();
   v8_glue::Runner::Scope runner_scope(runner);
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(runner->isolate());
   DOM_AUTO_LOCK_SCOPE();
   if (event_target->DispatchEvent(event))
     host_->CallClassEventHandler(event_target, event);

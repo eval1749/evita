@@ -190,7 +190,7 @@ bool EventTarget::DispatchEvent(Event* event) {
 void EventTarget::DispatchEventWithInLock(Event* event) {
   auto const runner = ScriptHost::instance()->runner();
   v8_glue::Runner::Scope runner_scope(runner);
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(runner->isolate());
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
   DispatchEvent(event);

@@ -114,7 +114,7 @@ v8::Local<v8::Value> Runner::CallAsFunction(v8::Local<v8::Value> callee,
     return v8::Local<v8::Value>();
   delegate_->WillRunScript(this);
   v8::MaybeLocal<v8::Value> maybe_value;
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(isolate());
   {
     TRACE_EVENT0("script", "Runner::CallAsFunction");
     maybe_value = callee->ToObject()->CallAsFunction(
@@ -135,7 +135,7 @@ v8::Local<v8::Value> Runner::CallAsConstructor(v8::Local<v8::Value> callee,
 #endif
   delegate_->WillRunScript(this);
   v8::MaybeLocal<v8::Value> maybe_value;
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(isolate());
   {
     TRACE_EVENT0("script", "Runner::CallAsConstructor");
     maybe_value = callee->ToObject()->CallAsConstructor(
@@ -160,7 +160,7 @@ bool Runner::CheckCallDepth() {
 
 v8::Local<v8::Script> Runner::Compile(const base::string16& script_text,
                                       const base::string16& script_name) {
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(isolate());
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate(), script_name));
   v8::ScriptCompiler::Source source(gin::StringToV8(isolate(), script_text),
                                     script_origin);
@@ -204,7 +204,7 @@ v8::Local<v8::Value> Runner::Run(v8::Local<v8::Script> script) {
   if (!CheckCallDepth())
     return v8::Local<v8::Value>();
   delegate_->WillRunScript(this);
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(isolate());
   const auto value = script->Run();
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
@@ -225,7 +225,7 @@ v8::Local<v8::Value> Runner::Call(v8::Local<v8::Function> function,
     return v8::Local<v8::Value>();
   delegate_->WillRunScript(this);
   v8::MaybeLocal<v8::Value> maybe_value;
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(isolate());
   {
     TRACE_EVENT0("script", "Runner::Call");
     maybe_value = function->Call(context(), receiver, argc, argv);

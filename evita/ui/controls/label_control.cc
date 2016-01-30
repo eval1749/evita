@@ -4,72 +4,9 @@
 
 #include "evita/ui/controls/label_control.h"
 
-#include "evita/gfx/brush.h"
-#include "evita/gfx/canvas.h"
-#include "evita/gfx/text_format.h"
-#include "evita/gfx/text_layout.h"
+#include "evita/ui/controls/label_painter.h"
 
 namespace ui {
-
-//////////////////////////////////////////////////////////////////////
-//
-// LabelControl::Renderer
-//
-class LabelControl::Renderer final {
- public:
-  Renderer(const base::string16& text,
-           const Style& style,
-           const gfx::RectF& rect);
-  ~Renderer();
-
-  void Render(gfx::Canvas* canvas) const;
-
- private:
-  gfx::RectF bounds_;
-  gfx::PointF text_origin_;
-  Style style_;
-  std::unique_ptr<gfx::TextLayout> text_layout_;
-
-  DISALLOW_COPY_AND_ASSIGN(Renderer);
-};
-
-namespace {
-std::unique_ptr<gfx::TextLayout> CreateTextLayout(
-    const base::string16& text,
-    const LabelControl::Style& style,
-    const gfx::SizeF& size) {
-  gfx::TextFormat text_format(style.font_family, style.font_size);
-  return text_format.CreateLayout(text, size);
-}
-}  // namespace
-
-LabelControl::Renderer::Renderer(const base::string16& text,
-                                 const Style& style,
-                                 const gfx::RectF& rect)
-    : bounds_(rect),
-      style_(style),
-      text_layout_(CreateTextLayout(text, style, rect.size())) {
-  // TODO(eval1749): We should share following code fragment with
-  // |ButtonControl|
-  // and |TextFieldControl|.
-  DWRITE_TEXT_METRICS metrics;
-  COM_VERIFY((*text_layout_)->GetMetrics(&metrics));
-  auto const text_size = gfx::SizeF(metrics.width, metrics.height);
-  // Render text at middle of control.
-  auto const offset = (bounds_.size() - text_size) / 2.0f;
-  text_origin_ = gfx::PointF(bounds_.left, bounds_.top + offset.height);
-}
-
-LabelControl::Renderer::~Renderer() {}
-
-void LabelControl::Renderer::Render(gfx::Canvas* canvas) const {
-  gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds_);
-  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds_);
-  gfx::Brush text_brush(canvas, style_.color);
-  (*canvas)->DrawTextLayout(text_origin_, *text_layout_, text_brush,
-                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
-  canvas->AddDirtyRect(bounds_);
-}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -90,7 +27,6 @@ void LabelControl::set_style(const Style& new_style) {
   if (style_ == new_style)
     return;
   style_ = new_style;
-  renderer_.reset();
   SchedulePaint();
 }
 
@@ -98,20 +34,12 @@ void LabelControl::set_text(const base::string16& new_text) {
   if (text_ == new_text)
     return;
   text_ = new_text;
-  renderer_.reset();
   SchedulePaint();
 }
 
 // ui::Widget
-void LabelControl::DidChangeBounds() {
-  Control::DidChangeBounds();
-  renderer_.reset();
-}
-
 void LabelControl::OnDraw(gfx::Canvas* canvas) {
-  if (!renderer_)
-    renderer_ = std::make_unique<Renderer>(text_, style_, GetContentsBounds());
-  renderer_->Render(canvas);
+  LabelPainter().Paint(canvas, GetContentsBounds(), state(), style_, text_);
 }
 
 }  // namespace ui

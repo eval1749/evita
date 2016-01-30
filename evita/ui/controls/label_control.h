@@ -28,13 +28,9 @@ class LabelControl final : public Control {
   void set_text(const base::string16& text);
 
  private:
-  class Renderer;
-
   // ui::Widget
-  void DidChangeBounds() final;
   void OnDraw(gfx::Canvas* canvas) final;
 
-  std::unique_ptr<Renderer> renderer_;
   Style style_;
   base::string16 text_;
 

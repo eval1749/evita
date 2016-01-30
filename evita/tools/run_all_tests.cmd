@@ -9,7 +9,7 @@ set config=%1
 if "%config%"=="" set config=debug
 
 set exedir=%outdir%\%config%
-set tests=base dom layout text visuals
+set tests=base dom geometry layout text visuals
 set test_log=%TEMP%\evita_all_tests.txt
 echo. > %test_log%
 

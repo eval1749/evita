@@ -17,6 +17,7 @@ set pattern=%2
 if "%which%"=="" goto usage
 
 if "%which%"=="d" set which=dom
+if "%which%"=="g" set which=geometry
 if "%which%"=="l" set which=layout
 if "%which%"=="t" set which=text
 if "%which%"=="v" set which=visuals

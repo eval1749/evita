@@ -14,8 +14,7 @@ namespace dom {
 //
 // Form
 //
-Form::Form() : height_(0.0f), width_(0.0f) {}
-
+Form::Form() {}
 Form::~Form() {}
 
 std::vector<FormControl*> Form::controls() const {
@@ -29,10 +28,10 @@ void Form::set_focus_control(v8_glue::Nullable<FormControl> new_focus_control) {
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
-void Form::set_height(float new_height) {
-  if (height_ == new_height)
+void Form::set_height(int new_height) {
+  if (bounds_.height() == new_height)
     return;
-  height_ = new_height;
+  bounds_ = IntRect(bounds_.origin(), IntSize(width(), new_height));
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
@@ -43,10 +42,10 @@ void Form::set_title(const base::string16& new_title) {
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 
-void Form::set_width(float new_width) {
-  if (width_ == new_width)
+void Form::set_width(int new_width) {
+  if (bounds_.width() == new_width)
     return;
-  width_ = new_width;
+  bounds_ = IntRect(bounds_.origin(), IntSize(new_width, height()));
   FOR_EACH_OBSERVER(FormObserver, observers_, DidChangeForm());
 }
 

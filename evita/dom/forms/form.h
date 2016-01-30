@@ -10,6 +10,7 @@
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
+#include "evita/geometry/int_rect.h"
 #include "evita/v8_glue/nullable.h"
 
 namespace dom {
@@ -26,13 +27,17 @@ class Form final : public v8_glue::Scriptable<Form, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Form);
 
  public:
+  using IntPoint = evita::IntPoint;
+  using IntRect = evita::IntRect;
+  using IntSize = evita::IntSize;
+
   ~Form() final;
 
   std::vector<FormControl*> controls() const;
   FormControl* focus_control() const { return focus_control_.get(); }
-  float height() const { return height_; }
+  int height() const { return bounds_.height(); }
   const base::string16& title() const { return title_; }
-  float width() const { return width_; }
+  int width() const { return bounds_.width(); }
 
   void AddObserver(FormObserver* observer) const;
   void DidChangeFormControl(FormControl* control);
@@ -46,18 +51,17 @@ class Form final : public v8_glue::Scriptable<Form, ViewEventTarget> {
   Form();
 
   void set_focus_control(v8_glue::Nullable<FormControl> new_focus_control);
-  void set_height(float new_height);
+  void set_height(int new_height);
   void set_title(const base::string16& new_title);
-  void set_width(float new_width);
+  void set_width(int new_width);
 
   void AddFormControl(FormControl* control, ExceptionState* exception_state);
 
+  IntRect bounds_;
   std::vector<FormControl*> controls_;
   gc::Member<FormControl> focus_control_;
-  float height_;
   mutable base::ObserverList<FormObserver> observers_;
   base::string16 title_;
-  float width_;
 
   DISALLOW_COPY_AND_ASSIGN(Form);
 };

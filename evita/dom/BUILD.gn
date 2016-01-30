@@ -115,6 +115,7 @@ source_set("components") {
     "//evita/dom/timing",
     "//evita/dom/visuals",
     "//evita/gc",
+    "//evita/geometry",
     "//evita/ui/animation:public",
     "//evita/v8_glue",
     "//evita/visuals",

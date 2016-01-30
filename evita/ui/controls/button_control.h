@@ -10,10 +10,17 @@
 #include "evita/ui/controls/control.h"
 
 #include "base/strings/string16.h"
-#include "evita/gfx/forward.h"
+
+namespace gfx {
+class Canvas;
+}
 
 namespace ui {
 
+//////////////////////////////////////////////////////////////////////
+//
+// ButtonControl
+//
 class ButtonControl final : public Control {
  public:
   ButtonControl(ControlController* controller,
@@ -33,7 +40,6 @@ class ButtonControl final : public Control {
   void DidChangeBounds() final;
   void OnDraw(gfx::Canvas* canvas) final;
 
-  std::unique_ptr<Renderer> renderer_;
   Style style_;
   base::string16 text_;
 

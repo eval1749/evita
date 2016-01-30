@@ -18,6 +18,8 @@ source_set("ui") {
     "controls/button.cc",
     "controls/button.h",
     "controls/button_control.cc",
+    "controls/button_painter.cc",
+    "controls/button_painter.h",
     "controls/checkbox_control.cc",
     "controls/control.cc",
     "controls/control_controller.cc",

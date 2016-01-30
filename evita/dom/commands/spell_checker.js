@@ -186,20 +186,16 @@
     }
 
     moveNext() {
-      if (this.isDead())
+      if (this.isDead() || this.atEnd())
         return false;
-      if (this.atEnd())
-        return true;
       --this.life_;
       ++this.offset_;
       return true;
     }
 
     movePrevious() {
-      if (this.isDead())
+      if (this.isDead() || this.atStart())
         return false;
-      if (this.atStart())
-        return true;
       --this.life_;
       --this.offset_;
       return true;
@@ -208,7 +204,7 @@
     /** @return {boolean} */
     moveToEndOfWord() {
       if (this.atEnd())
-        return true;
+        return false;
       const wordData = Unicode.UCD[this.charCode()];
       if (wordData.category.charCodeAt(0) !== 0x4C)
         return true;
@@ -290,18 +286,6 @@
 
     /**
      * @protected
-     * @return {boolean}
-     */
-    prepareWords() {
-      /** @type {number} */
-      const maxOffset = this.document_.length;
-      this.end_ = Math.min(this.end_, maxOffset);
-      this.offset_ = Math.min(this.offset_, maxOffset);
-      return this.moveToStartOfWord();
-    }
-
-    /**
-     * @protected
      * @param {number} newLife
      */
     resetLife(newLife) {
@@ -335,19 +319,17 @@
     *words() {
       if (!this.moveToStartOfWord())
         return;
-      while (this.offset_ < this.end_) {
+      for (;;) {
         /** @type {number} */
         const wordStart = this.offset_;
         if (!this.moveToEndOfWord())
-          break;
+          return;
 
-        /** @type {number} */
-        const wordEnd = this.offset_;
-        if (wordStart !== wordEnd)
-          yield {start: wordStart, end: wordEnd};
+        if (wordStart !== this.offset_)
+          yield {start: wordStart, end: this.offset_};
 
         if (!this.moveToNextWord())
-          break;
+          return;
       }
     }
   }
@@ -363,13 +345,7 @@
     }
 
     run() {
-      if (!this.prepareWords())
-        return;
-      /** @type {number} */
-      let lastOffset = this.offset;
       for (let wordRange of this.words()) {
-        this.removeMarker(lastOffset);
-        lastOffset = this.offset;
         const word = this.document.slice(wordRange.start, wordRange.end);
         const spelling = controller.checkSpelling(word);
         paint(this.document, wordRange.start, wordRange.end, spelling);
@@ -442,13 +418,7 @@
 
     run() {
       this.resetLife(kMaxColdScanCount);
-      if (!this.prepareWords())
-        return;
-      /** @type {number} */
-      let lastOffset = this.offset;
       for (let wordRange of this.words()) {
-        this.removeMarker(lastOffset);
-        lastOffset = this.offset;
         if (!this.checkWord(wordRange.start, wordRange.end))
           break;
       }
@@ -544,7 +514,7 @@
     didChangeTextDocument(hotStart) {
       this.updateOffset(hotStart, this.document.length);
       this.caretIsHot_ = true;
-      this.schedule(kHotScanStartDelay);
+      taskScheduler.schedule(this, kHotScanStartDelay);
     }
 
     didFocusWindow() {
@@ -564,6 +534,8 @@
 
     run() {
       this.resetLife(kMaxHotScanCount);
+      if (!this.moveToStartOfWord())
+        return;
       if (this.caretIsHot_)
         return this.runWithHotCaret();
       this.runWithColdCaret();
@@ -571,12 +543,17 @@
 
     /** @private */
     runWithColdCaret() {
+      /** @type {number} */
+      let lastOffset = this.offset;
       for (let wordRange of this.words()) {
+        this.removeMarker(lastOffset);
+        lastOffset = wordRange.end;
         if (!this.checkWord(wordRange.start, wordRange.end)) {
           this.offset_ = wordRange.start;
           break;
         }
       }
+      this.removeMarker(lastOffset);
       this.schedule(0);
     }
 
@@ -584,7 +561,11 @@
     runWithHotCaret() {
       /** @type {number} */
       const caretOffset = this.activeCaretOffset();
+      /** @type {number} */
+      let lastOffset = this.offset;
       for (let wordRange of this.words()) {
+        this.removeMarker(lastOffset);
+        lastOffset = wordRange.end;
         if (caretOffset >= wordRange.start && caretOffset <= wordRange.end) {
           // Since candidate word contains caret, we consider this word is still
           // changing.
@@ -598,6 +579,7 @@
           break;
         }
       }
+      this.removeMarker(lastOffset);
       this.schedule(32);
     }
 

@@ -161,7 +161,8 @@ v8::Local<v8::Object> RunScriptInternal(const base::string16& script_text,
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
-  v8::TryCatch try_catch;
+  v8::TryCatch try_catch(isolate);
+  try_catch.SetVerbose(true);
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name));
   v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
                                     script_origin);

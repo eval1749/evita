@@ -114,6 +114,7 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
   auto const runner = host_->runner();
   v8_glue::Runner::Scope runner_scope(runner);
   v8::TryCatch try_catch(runner->isolate());
+  try_catch.SetVerbose(true);
   DOM_AUTO_LOCK_SCOPE();
   if (event_target->DispatchEvent(event))
     host_->CallClassEventHandler(event_target, event);

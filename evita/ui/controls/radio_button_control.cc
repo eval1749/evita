@@ -4,8 +4,7 @@
 
 #include "evita/ui/controls/radio_button_control.h"
 
-#include "evita/gfx/brush.h"
-#include "evita/gfx/canvas.h"
+#include "evita/ui/controls/radio_button_painter.h"
 
 namespace ui {
 
@@ -36,42 +35,8 @@ void RadioButtonControl::set_checked(bool new_checked) {
 
 // ui::Widget
 void RadioButtonControl::OnDraw(gfx::Canvas* canvas) {
-  if (bounds().empty())
-    return;
-
-  auto const bounds = GetContentsBounds();
-  canvas->FillRectangle(gfx::Brush(canvas, style_.bgcolor), bounds);
-
-  auto const size = 12.0f;
-  D2D1_ELLIPSE ellipse;
-  ellipse.point = bounds.origin() + (bounds.size() / 2);
-  ellipse.radiusX = ellipse.radiusY = size / 2;
-  gfx::Brush frame_brush(canvas, hover() ? style_.hotlight : style_.shadow);
-  (*canvas)->DrawEllipse(ellipse, frame_brush);
-
-  if (checked_) {
-    D2D1_ELLIPSE ellipse2;
-    ellipse2.point = ellipse.point;
-    ellipse2.radiusX = ellipse2.radiusY = size / 2 - 3;
-    gfx::Brush black_brush(canvas, style_.color);
-    (*canvas)->FillEllipse(ellipse2, black_brush);
-  }
-  switch (state()) {
-    case Control::State::Disabled:
-    case Control::State::Normal:
-      break;
-    case Control::State::Highlight:
-      (*canvas)->FillEllipse(
-          ellipse, gfx::Brush(canvas, gfx::ColorF(style_.highlight, 0.1f)));
-      (*canvas)->DrawEllipse(ellipse, gfx::Brush(canvas, style_.highlight));
-      break;
-    case Control::State::Hovered:
-      (*canvas)->FillEllipse(
-          ellipse, gfx::Brush(canvas, gfx::ColorF(style_.hotlight, 0.1f)));
-      (*canvas)->DrawEllipse(ellipse, gfx::Brush(canvas, style_.hotlight));
-      break;
-  }
-  canvas->AddDirtyRect(bounds);
+  RadioButtonPainter().Paint(canvas, GetContentsBounds(), state(), style_,
+                             checked_);
 }
 
 }  // namespace ui

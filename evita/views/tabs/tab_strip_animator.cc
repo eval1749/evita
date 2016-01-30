@@ -201,7 +201,11 @@ ui::Animatable* SelectTabAction::CreateAnimation() {
 }
 
 void SelectTabAction::DoCancel() {
-  layer()->RemoveLayer(new_tab_content_->layer());
+  const auto new_layer = new_tab_content_->layer();
+  if (new_layer->parent_layer()) {
+    DCHECK_EQ(new_layer->parent_layer(), layer());
+    layer()->RemoveLayer(new_layer);
+  }
   if (!old_tab_content_ || old_tab_content_ != active_tab_content())
     return;
   old_tab_content_->layer()->SetOrigin(old_tab_content_origin_);

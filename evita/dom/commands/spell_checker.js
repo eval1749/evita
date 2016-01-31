@@ -168,6 +168,17 @@
     /** @return {number} */
     get offset() { return this.offset_; }
 
+    /**
+     * Tasks invoked by scheduler may access content of document before mutation
+     * observer callback, we should ensure |offset_| and |end_| to hold valid
+     * offsets.
+     * 
+     */
+    ensureOffsets() {
+      this.offset_ = Math.min(this.offset_, this.document_.length);
+      this.end_ = Math.min(this.end_, this.document_.length);
+    }
+
     /** @return {boolean} */
     isDead() { return this.life_ === 0 }
 
@@ -345,6 +356,7 @@
     }
 
     run() {
+      this.ensureOffsets();
       for (let wordRange of this.words()) {
         const word = this.document.slice(wordRange.start, wordRange.end);
         const spelling = controller.checkSpelling(word);
@@ -417,6 +429,7 @@
     }
 
     run() {
+      this.ensureOffsets();
       this.resetLife(kMaxColdScanCount);
       for (let wordRange of this.words()) {
         if (!this.checkWord(wordRange.start, wordRange.end))
@@ -533,6 +546,7 @@
     }
 
     run() {
+      this.ensureOffsets();
       this.resetLife(kMaxHotScanCount);
       if (!this.moveToStartOfWord())
         return;

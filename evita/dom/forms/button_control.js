@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 /**
+ * @this {!ButtonControl}
  * @param {!Event} event
  * Default event handler.
  */
 ButtonControl.handleEvent = function(event) {
-  FormControl.handleEvent(event);
+  FormControl.handleEvent.call(this, event);
 };

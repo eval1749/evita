@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /**
+ * @this {!RadioButtonControl}
  * @param {!Event} event
  * Default event handler for RadioButtonControl.
  */
@@ -14,5 +15,5 @@ global.RadioButtonControl.handleEvent = function(event) {
       radio_button.focus();
       break;
   }
-  FormControl.handleEvent(event);
+  FormControl.handleEvent.call(this, event);
 };

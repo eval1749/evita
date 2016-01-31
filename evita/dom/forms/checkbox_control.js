@@ -15,5 +15,5 @@ CheckboxControl.handleEvent = function(event) {
       checkbox.focus();
       break;
   }
-  FormControl.handleEvent(event);
+  FormControl.handleEvent.call(this, event);
 };

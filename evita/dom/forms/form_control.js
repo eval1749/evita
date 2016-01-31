@@ -32,15 +32,14 @@ Object.defineProperties(global.FormControl.prototype, (function() {
 })());
 
 /**
+ * @this {!FormControl}
  * @param {!Event} event
  * Default event handler.
  */
 global.FormControl.handleEvent = function(event) {
-  // Redirect event to |Form.handleEvent| if control is associated to form.
-  var control = /** @type {!FormControl} */(event.target);
-  var form = control.form;
-  if (form) {
-    Form.handleEvent.call(form, event);
+  if (event.defaultPrevented)
     return;
-  }
+  if (!this.form)
+    return;
+  Form.handleEvent.call(this.form, event);
 };

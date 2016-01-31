@@ -346,8 +346,7 @@ Object.defineProperties(TextFieldControl.prototype, {
         handleMouseUp(this, /** @type {!MouseEvent} */(event));
         break;
     }
-    if (!event.defaultPrevented)
-      FormControl.handleEvent(event);
+    FormControl.handleEvent.call(this, event);
   };
 
   //////////////////////////////////////////////////////////////////////

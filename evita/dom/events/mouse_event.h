@@ -25,19 +25,21 @@ class MouseEvent : public v8_glue::Scriptable<MouseEvent, UiEvent> {
   explicit MouseEvent(const domapi::MouseEvent& api_event);
   ~MouseEvent() override;
 
+  int client_x() const { return client_x_; }
+  int client_y() const { return client_y_; }
+
  protected:
   MouseEvent(const base::string16& type, const MouseEventInit& init_dict);
 
  private:
   friend class bindings::MouseEventClass;
 
+  // bindings
   explicit MouseEvent(const base::string16& type);
 
   bool alt_key() const { return alt_key_; }
   int button() const { return button_; }
   int buttons() const { return buttons_; }
-  int client_x() const { return client_x_; }
-  int client_y() const { return client_y_; }
   bool ctrl_key() const { return ctrl_key_; }
   bool meta_key() const { return meta_key_; }
   bool shift_key() const { return shift_key_; }

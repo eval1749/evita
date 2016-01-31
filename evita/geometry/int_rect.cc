@@ -14,7 +14,7 @@ namespace evita {
 //
 IntRect::IntRect(const IntPoint& origin, const IntSize& size)
     : origin_(origin), size_(size) {}
-
+IntRect::IntRect(const IntSize& size) : IntRect(IntPoint(), size) {}
 IntRect::IntRect(const IntRect& other) : IntRect(other.origin_, other.size_) {}
 IntRect::IntRect() {}
 IntRect::~IntRect() {}
@@ -31,6 +31,20 @@ bool IntRect::operator==(const IntRect& other) const {
 
 bool IntRect::operator!=(const IntRect& other) const {
   return !operator==(other);
+}
+
+bool IntRect::Contains(int point_x, int point_y) const {
+  return (point_x >= x()) && (point_x < right()) && (point_y >= y()) &&
+         (point_y < bottom());
+}
+
+bool IntRect::Contains(const IntPoint& point) const {
+  return Contains(point.x(), point.y());
+}
+
+bool IntRect::Contains(const IntRect& rect) const {
+  return (rect.x() >= x() && rect.right() <= right() && rect.y() >= y() &&
+          rect.bottom() <= bottom());
 }
 
 std::ostream& operator<<(std::ostream& ostream, const IntRect& rect) {

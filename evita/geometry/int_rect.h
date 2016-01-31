@@ -19,6 +19,7 @@ namespace evita {
 class IntRect final {
  public:
   IntRect(const IntPoint& origin, const IntSize& size);
+  explicit IntRect(const IntSize& size);
   IntRect(const IntRect& other);
   IntRect();
   ~IntRect();
@@ -43,6 +44,14 @@ class IntRect final {
 
   int height() const { return size_.height(); }
   int width() const { return size_.width(); }
+
+  // Returns true if the point identified by point_x and point_y falls
+  // inside
+  // this rectangle.  The point (x, y) is inside the rectangle, but the
+  // point (x + width, y + height) is not.
+  bool Contains(int point_x, int point_y) const;
+  bool Contains(const IntPoint& point) const;
+  bool Contains(const IntRect& other) const;
 
   // Returns true if the area of the rectangle is zero.
   bool IsEmpty() const { return size_.IsEmpty(); }

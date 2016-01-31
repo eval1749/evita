@@ -22,7 +22,30 @@ source_set("public") {
     "window_id.h",
   ]
 
-  public_deps = [
+  deps = [
+    ":forms",
     "//base",
+    "//evita/base",
+  ]
+}
+
+source_set("forms") {
+  sources = [
+    "caret_shape.cc",
+    "caret_shape.h",
+    "form.cc",
+    "form.h",
+    "form_builder.cc",
+    "form_builder.h",
+    "form_control_visitor.cc",
+    "form_control_visitor.h",
+    "form_controls.cc",
+    "form_controls.h",
+    "form_controls_forward.h",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/base",
   ]
 }

@@ -9,6 +9,8 @@
 
 namespace evita {
 
+class IntSize;
+
 //////////////////////////////////////////////////////////////////////
 //
 // IntPoint
@@ -24,6 +26,9 @@ class IntPoint final {
 
   bool operator==(const IntPoint& other) const;
   bool operator!=(const IntPoint& other) const;
+
+  IntPoint operator+(const IntSize& size) const;
+  IntPoint operator-(const IntSize& size) const;
 
   int x() const { return x_; }
   int y() const { return y_; }

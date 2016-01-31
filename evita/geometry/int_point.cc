@@ -6,6 +6,8 @@
 
 #include "evita/geometry/int_point.h"
 
+#include "evita/geometry/int_size.h"
+
 namespace evita {
 
 //////////////////////////////////////////////////////////////////////
@@ -29,6 +31,14 @@ bool IntPoint::operator==(const IntPoint& other) const {
 
 bool IntPoint::operator!=(const IntPoint& other) const {
   return !operator==(other);
+}
+
+IntPoint IntPoint::operator+(const IntSize& size) const {
+  return IntPoint(x_ + size.width(), y_ + size.height());
+}
+
+IntPoint IntPoint::operator-(const IntSize& size) const {
+  return IntPoint(x_ - size.width(), y_ - size.height());
 }
 
 std::ostream& operator<<(std::ostream& ostream, const IntPoint& point) {

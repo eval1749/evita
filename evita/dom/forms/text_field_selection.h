@@ -27,13 +27,15 @@ class TextFieldSelection final
   int anchor_offset() const { return anchor_offset_; }
   int focus_offset() const { return focus_offset_; }
 
+  bool collapsed() const { return anchor_offset_ == focus_offset_; }
+
   // Called when value of text field control changed.
   void DidChangeValue();
 
  private:
   friend class bindings::TextFieldSelectionClass;
 
-  bool collapsed() const { return anchor_offset_ == focus_offset_; }
+  // bindings
   TextFieldControl* control() const { return control_.get(); }
   void set_anchor_offset(int new_anchor_offset);
   void set_focus_offset(int new_focus_offset);

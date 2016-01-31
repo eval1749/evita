@@ -51,6 +51,17 @@ FloatSize NativeTextLayout::GetMetrics() const {
   return FloatSize(metrics.width, metrics.height);
 }
 
+size_t NativeTextLayout::HitTestPoint(const FloatPoint& point) const {
+  BOOL is_inside = false;
+  BOOL is_trailing = false;
+  DWRITE_HIT_TEST_METRICS metrics = {0};
+  COM_VERIFY(value_->HitTestPoint(point.x(), point.y(), &is_trailing,
+                                  &is_inside, &metrics));
+  if (!metrics.isText)
+    return static_cast<size_t>(-1);
+  return static_cast<size_t>(metrics.textPosition + is_trailing);
+}
+
 FloatRect NativeTextLayout::HitTestTextPosition(size_t offset) const {
   auto caret_x = 0.0f;
   auto caret_y = 0.0f;

@@ -43,6 +43,10 @@ FloatSize TextLayout::GetMetrics() const {
   return impl_->GetMetrics();
 }
 
+size_t TextLayout::HitTestPoint(const FloatPoint& point) const {
+  return impl_->HitTestPoint(point);
+}
+
 FloatRect TextLayout::HitTestTextPosition(size_t offset) const {
   return impl_->HitTestTextPosition(offset);
 }

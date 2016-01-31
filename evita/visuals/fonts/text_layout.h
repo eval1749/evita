@@ -12,8 +12,9 @@
 
 namespace visuals {
 
-class FloatSize;
+class FloatPoint;
 class FloatRect;
+class FloatSize;
 class NativeTextLayout;
 class TextFormat;
 
@@ -36,6 +37,7 @@ class TextLayout final {
   const NativeTextLayout& impl() const { return *impl_; }
 
   FloatSize GetMetrics() const;
+  size_t HitTestPoint(const FloatPoint& point) const;
   FloatRect HitTestTextPosition(size_t offset) const;
 
  private:

@@ -21,7 +21,7 @@ class TextLayout final : public SimpleObject_<IDWriteTextLayout> {
   explicit TextLayout(IDWriteTextLayout* text_layout);
   ~TextLayout();
 
-  SIZE GetMetrics() const;
+  gfx::SizeF ComputeSize() const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TextLayout);

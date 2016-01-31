@@ -4,6 +4,8 @@
 
 #include "evita/gfx/text_layout.h"
 
+#include "evita/gfx/size_f.h"
+
 namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
@@ -14,5 +16,11 @@ TextLayout::TextLayout(IDWriteTextLayout* text_layout)
     : SimpleObject_(text_layout) {}
 
 TextLayout::~TextLayout() {}
+
+gfx::SizeF TextLayout::ComputeSize() const {
+  DWRITE_TEXT_METRICS metrics;
+  COM_VERIFY((*this)->GetMetrics(&metrics));
+  return gfx::SizeF(metrics.width, metrics.height);
+}
 
 }  // namespace gfx

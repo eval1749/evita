@@ -35,6 +35,9 @@ source_set("ui") {
     "controls/table_control.cc",
     "controls/table_control_observer.cc",
     "controls/text_field_control.cc",
+    "controls/text_field_control.h",
+    "controls/text_field_painter.cc",
+    "controls/text_field_painter.h",
     "tooltip.cc",
     "tooltip.h",
   ]

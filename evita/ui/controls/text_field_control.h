@@ -22,9 +22,16 @@ namespace ui {
 //
 class TextFieldControl final : public Control, private CaretOwner {
  public:
+  enum class CaretShape {
+    None,
+    Bar,
+    Box,
+  };
+
   struct Selection final {
-    size_t anchor_offset;
-    size_t focus_offset;
+    size_t anchor_offset = 0;
+    size_t focus_offset = 0;
+    CaretShape caret_shape = CaretShape::None;
 
     Selection();
     ~Selection();

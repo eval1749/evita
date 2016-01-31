@@ -1,0 +1,53 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("forms") {
+  sources = [
+    "button_control.cc",
+    "button_control.h",
+    "checkbox_control.cc",
+    "checkbox_control.h",
+    "form.cc",
+    "form.h",
+    "form_control.cc",
+    "form_control.h",
+    "form_observer.cc",
+    "form_observer.h",
+    "form_paint_info.cc",
+    "form_paint_info.h",
+    "form_paint_info_builder.cc",
+    "form_paint_info_builder.h",
+    "form_window.cc",
+    "form_window.h",
+    "label_control.cc",
+    "label_control.h",
+    "radio_button_control.cc",
+    "radio_button_control.h",
+    "text_field_control.cc",
+    "text_field_selection.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/visuals/fonts",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "button_control_unittest.cc",
+    "checkbox_control_unittest.cc",
+    "form_unittest.cc",
+    "form_window_unittest.cc",
+    "label_control_unittest.cc",
+    "radio_button_control_unittest.cc",
+    "text_field_control_unittest.cc",
+    "text_field_selection_unittest.cc",
+  ]
+  deps = [
+    ":forms",
+    "//evita/dom/testing:test_support",
+  ]
+}

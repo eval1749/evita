@@ -43,12 +43,12 @@ void LabelPainter::Paint(gfx::Canvas* canvas,
   const auto& text_size = gfx::SizeF(metrics.width, metrics.height);
   // Paint text at middle of control.
   const auto offset = (bounds.size() - text_size) / 2.0f;
-  const auto& text_origin_ =
+  const auto& text_origin =
       gfx::PointF(bounds.left, bounds.top + offset.height);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   canvas->FillRectangle(gfx::Brush(canvas, style.bgcolor), bounds);
   gfx::Brush text_brush(canvas, style.color);
-  (*canvas)->DrawTextLayout(text_origin_, *text_layout_, text_brush,
+  (*canvas)->DrawTextLayout(text_origin, *text_layout_, text_brush,
                             D2D1_DRAW_TEXT_OPTIONS_CLIP);
   canvas->AddDirtyRect(bounds);
 }

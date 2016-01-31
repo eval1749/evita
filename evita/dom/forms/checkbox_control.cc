@@ -5,6 +5,7 @@
 #include "evita/dom/forms/checkbox_control.h"
 
 #include "evita/dom/events/form_event.h"
+#include "evita/dom/public/form_controls.h"
 
 namespace dom {
 
@@ -12,32 +13,23 @@ namespace dom {
 //
 // CheckboxControl
 //
-CheckboxControl::CheckboxControl() : checked_(false) {}
-
+CheckboxControl::CheckboxControl() {}
 CheckboxControl::~CheckboxControl() {}
 
 void CheckboxControl::set_checked(bool new_checked) {
   if (checked_ == new_checked)
     return;
-  // TODO(eval1749): Dispatch |beforeinput| and |input| event.
   checked_ = new_checked;
-  DispatchChangeEvent();
+  NotifyControlChange();
 }
 
-bool CheckboxControl::DispatchEvent(Event* event,
-                                    ExceptionState* exception_state) {
-  CR_DEFINE_STATIC_LOCAL(base::string16, kChangeEvent, (L"change"));
-
-  if (auto const form_event = event->as<FormEvent>()) {
-    HandlingFormEventScope scope(this);
-    if (event->type() == kChangeEvent) {
-      auto const new_checked = !form_event->data().empty();
-      set_checked(new_checked);
-    }
-    return false;
-  }
-
-  return FormControl::DispatchEvent(event, exception_state);
+// FormControl
+std::unique_ptr<domapi::FormControl> CheckboxControl::Paint(
+    const FormPaintInfo& paint_info) const {
+  auto state = ComputeState(paint_info);
+  if (checked_)
+    state.set_checked();
+  return std::make_unique<domapi::Checkbox>(event_target_id(), bounds(), state);
 }
 
 }  // namespace dom

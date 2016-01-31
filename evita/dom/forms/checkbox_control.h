@@ -33,12 +33,14 @@ class CheckboxControl final
 
   CheckboxControl();
 
+  // binding
   void set_checked(bool checked);
 
-  // EventTarget
-  bool DispatchEvent(Event* event, ExceptionState* exception_state) final;
+  // FormControl
+  std::unique_ptr<domapi::FormControl> Paint(
+      const FormPaintInfo& paint_info) const final;
 
-  bool checked_;
+  bool checked_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(CheckboxControl);
 };

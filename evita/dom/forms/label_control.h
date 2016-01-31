@@ -13,6 +13,10 @@ namespace bindings {
 class LabelControlClass;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// LabelControl
+//
 class LabelControl final
     : public v8_glue::Scriptable<LabelControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(LabelControl);
@@ -25,9 +29,14 @@ class LabelControl final
  private:
   friend class bindings::LabelControlClass;
 
+  // bindings
   explicit LabelControl(const base::string16& text);
 
   void set_text(const base::string16& text);
+
+  // FormControl
+  std::unique_ptr<domapi::FormControl> Paint(
+      const FormPaintInfo& paint_info) const final;
 
   base::string16 text_;
 

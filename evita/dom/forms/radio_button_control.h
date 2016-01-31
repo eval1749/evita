@@ -31,12 +31,14 @@ class RadioButtonControl final
  private:
   friend class bindings::RadioButtonControlClass;
 
+  // bindings
   explicit RadioButtonControl(const base::string16& name);
 
   void set_checked(bool new_checked);
 
-  // EventTarget
-  bool DispatchEvent(Event* event, ExceptionState* exception_state) final;
+  // FormControl
+  std::unique_ptr<domapi::FormControl> Paint(
+      const FormPaintInfo& paint_info) const final;
 
   bool checked_;
 

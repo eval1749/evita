@@ -4,5 +4,6 @@
 
 [Constructor()]
 interface CheckboxControl : FormControl {
-  attribute boolean checked;
+  [ImplementedAs=checked]
+  attribute boolean checked_;
 };

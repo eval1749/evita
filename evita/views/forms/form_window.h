@@ -9,12 +9,14 @@
 
 #include "evita/views/window.h"
 
+#include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
+#include "evita/dom/public/geometry.h"
 #include "evita/gc/member.h"
 #include "evita/gfx/canvas_owner.h"
 #include "evita/ui/animation/animatable.h"
-#include "evita/ui/system_metrics_observer.h"
 
-namespace dom {
+namespace domapi {
 class Form;
 }
 
@@ -25,47 +27,35 @@ using common::win::Rect;
 using common::win::Size;
 }
 
-namespace ui {
-class Control;
-}
-
 namespace views {
+
+class FormPaintState;
 
 //////////////////////////////////////////////////////////////////////
 //
 // FormWindow
 //
-class FormWindow final : public views::Window,
-                         private gfx::CanvasOwner,
-                         private ui::SystemMetricsObserver {
+class FormWindow final : public views::Window, private gfx::CanvasOwner {
   DECLARE_CASTABLE_CLASS(FormWindow, views::Window);
 
  public:
   FormWindow(WindowId window_id,
-             dom::Form* form,
              Window* owner,
-             gfx::Point offset);
-  FormWindow(WindowId window_id, dom::Form* form);
+             const domapi::IntRect& bounds,
+             const base::StringPiece16 title);
   ~FormWindow() final;
+
+  void Paint(std::unique_ptr<domapi::Form> form);
 
  private:
   class FormViewModel;
-
-  void Paint();
-  // Returns true if model is updated.
-  bool UpdateModel();
-  void UpdateView();
 
   // gfx::CanvasOwner
   std::unique_ptr<gfx::SwapChain> CreateSwapChain() final;
 
   // ui::AnimationFrameHandler
+  bool CanHandleAnimationFrame() const final;
   void DidBeginAnimationFrame(const base::TimeTicks& time) final;
-
-  // ui::SystemMetricsObserver
-  void DidChangeIconFont() final;
-  void DidChangeSystemColor() final;
-  void DidChangeSystemMetrics() final;
 
   // ui::Widget
   void CreateNativeWindow() const final;
@@ -73,13 +63,11 @@ class FormWindow final : public views::Window,
   void DidDestroyWidget() final;
   void DidRealize() final;
   void DidRequestDestroy() final;
-  void RealizeWidget() final;
 
-  gfx::Size form_size_;
   std::unique_ptr<gfx::Canvas> canvas_;
-  const std::unique_ptr<FormViewModel> model_;
-  gfx::Point offset_;
-  Window* owner_;
+  domapi::IntRect form_bounds_;
+  Window* const owner_;
+  const std::unique_ptr<FormPaintState> paint_state_;
   base::string16 title_;
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);

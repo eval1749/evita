@@ -12,6 +12,7 @@
 #include "base/callback_forward.h"
 #include "base/macros.h"
 #include "base/strings/string16.h"
+#include "evita/dom/public/geometry.h"
 #include "evita/dom/public/promise.h"
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/switch_value.h"
@@ -21,7 +22,6 @@
 // TODO(eval1749): We should not use DOM object in DOM API.
 namespace dom {
 class TextDocument;
-class Form;
 }
 
 namespace text {
@@ -35,13 +35,8 @@ class DisplayItemList;
 namespace domapi {
 
 class FloatRect;
+class Form;
 struct TabData;
-
-struct PopupWindowInit {
-  domapi::WindowId owner_id;
-  int offset_x;
-  int offset_y;
-};
 
 using TraceLogOutputCallback =
     base::Callback<void(const std::string& chunk, bool has_more_events)>;
@@ -87,8 +82,9 @@ class ViewDelegate {
 
   // Create Form window
   virtual void CreateFormWindow(WindowId window_id,
-                                dom::Form* form,
-                                const PopupWindowInit& init) = 0;
+                                WindowId owner_window_id,
+                                const IntRect& bounds,
+                                const base::string16& title) = 0;
 
   virtual void CreateTextWindow(WindowId window_id,
                                 text::Selection* selection) = 0;
@@ -136,10 +132,6 @@ class ViewDelegate {
                                         text::Offset offset) = 0;
 
   virtual void MakeSelectionVisible(WindowId window_id) = 0;
-  virtual void MapTextFieldPointToOffset(EventTargetId event_target_id,
-                                         float x,
-                                         float y,
-                                         const IntegerPromise& promise) = 0;
   virtual void MapTextWindowPointToOffset(EventTargetId event_target_id,
                                           float x,
                                           float y,
@@ -151,6 +143,8 @@ class ViewDelegate {
                           const base::string16& title,
                           int flags,
                           const MessageBoxResolver& callback) = 0;
+
+  virtual void PaintForm(WindowId window_id, std::unique_ptr<Form> form) = 0;
 
   // TODO(eval1749): We should move |PaintVisualDocument()| to paint delegate.
   virtual void PaintVisualDocument(

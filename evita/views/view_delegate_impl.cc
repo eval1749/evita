@@ -14,6 +14,7 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/windows/text_window.h"
 #include "evita/dom/public/float_point.h"
+#include "evita/dom/public/form.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
@@ -28,7 +29,6 @@
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/controls/text_field_control.h"
 #include "evita/views/forms/file_dialog_box.h"
-#include "evita/views/forms/form_control_set.h"
 #include "evita/views/forms/form_window.h"
 #include "evita/views/frame_list.h"
 #include "evita/views/tabs/tab_data_set.h"
@@ -178,19 +178,19 @@ void ViewDelegateImpl::CreateEditorWindow(domapi::WindowId window_id) {
 }
 
 void ViewDelegateImpl::CreateFormWindow(domapi::WindowId window_id,
-                                        dom::Form* form,
-                                        const domapi::PopupWindowInit& init) {
-  if (init.owner_id == domapi::kInvalidWindowId) {
-    new FormWindow(window_id, form);
+                                        domapi::WindowId owner_window_id,
+                                        const domapi::IntRect& bounds,
+                                        const base::string16& title) {
+  if (owner_window_id == domapi::kInvalidWindowId) {
+    new FormWindow(window_id, nullptr, bounds, title);
     return;
   }
-  auto const owner = Window::FromWindowId(init.owner_id);
+  auto const owner = Window::FromWindowId(owner_window_id);
   if (!owner) {
-    DVLOG(0) << "CreateFormWindow: no such window " << init.owner_id;
+    DVLOG(0) << "CreateFormWindow: no such window " << owner_window_id;
     return;
   }
-  new FormWindow(window_id, form, owner,
-                 gfx::Point(init.offset_x, init.offset_y));
+  new FormWindow(window_id, owner, bounds, title);
 }
 
 void ViewDelegateImpl::CreateTextWindow(domapi::WindowId window_id,
@@ -373,28 +373,6 @@ void ViewDelegateImpl::MakeSelectionVisible(domapi::WindowId window_id) {
   content_window->MakeSelectionVisible();
 }
 
-void ViewDelegateImpl::MapTextFieldPointToOffset(
-    domapi::EventTargetId event_target_id,
-    float x,
-    float y,
-    const domapi::IntegerPromise& promise) {
-  TRACE_EVENT_WITH_FLOW0("promise",
-                         "ViewDelegateImpl::MapTextFieldPointToOffset",
-                         promise.sequence_num,
-                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
-  auto const control =
-      FormControlSet::instance()->MaybeControl(event_target_id);
-  if (!control)
-    return Reject(promise, -1);
-
-  auto const text_field = control->as<ui::TextFieldControl>();
-  if (!text_field)
-    return Reject(promise, -1);
-
-  auto const offset = text_field->MapPointToOffset(gfx::PointF(x, y));
-  return Resolve(promise, offset);
-}
-
 void ViewDelegateImpl::MapTextWindowPointToOffset(
     domapi::EventTargetId event_target_id,
     float x,
@@ -452,6 +430,19 @@ void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,
   auto const response = ::MessageBoxW(hwnd, message.c_str(), title.c_str(),
                                       static_cast<UINT>(flags));
   ScriptDelegate()->RunCallback(base::Bind(resolver.resolve, response));
+}
+
+void ViewDelegateImpl::PaintForm(domapi::WindowId window_id,
+                                 std::unique_ptr<domapi::Form> form) {
+  auto const& window = FromWindowId("PaintForm", window_id);
+  if (!window)
+    return;
+  auto const& form_window = window->as<FormWindow>();
+  if (!form_window) {
+    DVLOG(0) << "WindowId " << window_id << " should be FormWindow.";
+    return;
+  }
+  form_window->Paint(std::move(form));
 }
 
 void ViewDelegateImpl::PaintVisualDocument(
@@ -515,12 +506,6 @@ void ViewDelegateImpl::ReleaseCapture(domapi::EventTargetId event_target_id) {
     return;
   }
 
-  if (auto const control =
-          FormControlSet::instance()->MaybeControl(event_target_id)) {
-    control->ReleaseCapture();
-    return;
-  }
-
   DVLOG(0) << "ReleaseCapture: no such target " << event_target_id;
 }
 
@@ -543,12 +528,6 @@ void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
 void ViewDelegateImpl::SetCapture(domapi::EventTargetId event_target_id) {
   if (auto const window = Window::FromWindowId(event_target_id)) {
     window->SetCapture();
-    return;
-  }
-
-  if (auto const control =
-          FormControlSet::instance()->MaybeControl(event_target_id)) {
-    control->SetCapture();
     return;
   }
 

@@ -26,8 +26,9 @@ class ViewDelegateImpl final : public domapi::ViewDelegate {
                                    const domapi::TextWindowCompute& data) final;
   void CreateEditorWindow(domapi::WindowId window_id) final;
   void CreateFormWindow(domapi::WindowId window_id,
-                        dom::Form* form,
-                        const domapi::PopupWindowInit& init) final;
+                        domapi::WindowId owner_window_id,
+                        const domapi::IntRect& bounds,
+                        const base::string16& title) final;
   void CreateTextWindow(domapi::WindowId window_id,
                         text::Selection* selection) final;
   void CreateVisualWindow(domapi::WindowId window_id) final;
@@ -49,10 +50,6 @@ class ViewDelegateImpl final : public domapi::ViewDelegate {
   domapi::FloatRect HitTestTextPosition(domapi::WindowId window_id,
                                         text::Offset position);
   void MakeSelectionVisible(domapi::WindowId window_id) final;
-  void MapTextFieldPointToOffset(domapi::EventTargetId event_target_id,
-                                 float x,
-                                 float y,
-                                 const domapi::IntegerPromise& promise) final;
   void MapTextWindowPointToOffset(domapi::EventTargetId event_target_id,
                                   float x,
                                   float y,
@@ -63,6 +60,8 @@ class ViewDelegateImpl final : public domapi::ViewDelegate {
                   const base::string16& title,
                   int flags,
                   const MessageBoxResolver& resolver) final;
+  void PaintForm(domapi::WindowId window_id,
+                 std::unique_ptr<domapi::Form> form) final;
   void PaintVisualDocument(
       domapi::WindowId window_id,
       std::unique_ptr<visuals::DisplayItemList> display_item_list) final;

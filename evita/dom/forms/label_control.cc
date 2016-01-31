@@ -21,4 +21,11 @@ void LabelControl::set_text(const base::string16& new_text) {
   NotifyControlChange();
 }
 
+// FormControl
+std::unique_ptr<domapi::FormControl> LabelControl::Paint(
+    const FormPaintInfo& paint_info) const {
+  return std::make_unique<domapi::Label>(event_target_id(), bounds(),
+                                         ComputeState(paint_info), text_);
+}
+
 }  // namespace dom

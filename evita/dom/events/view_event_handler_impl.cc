@@ -6,12 +6,10 @@
 
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
-#include "evita/bindings/v8_glue_FocusEventInit.h"
 #include "evita/bindings/v8_glue_UiEventInit.h"
 #include "evita/bindings/v8_glue_WindowEventInit.h"
 #include "evita/dom/events/composition_event.h"
 #include "evita/dom/events/focus_event.h"
-#include "evita/dom/events/form_event.h"
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/ui_event.h"
@@ -19,8 +17,6 @@
 #include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/events/wheel_event.h"
 #include "evita/dom/events/window_event.h"
-#include "evita/dom/forms/form.h"
-#include "evita/dom/forms/form_control.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
@@ -60,19 +56,6 @@ Window* FromWindowId(domapi::WindowId window_id) {
   if (!window)
     DVLOG(0) << "No such window " << window_id << ".";
   return window;
-}
-
-EventTarget* GetFocusWindow(v8_glue::Runner* runner) {
-  auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
-  auto const window_class =
-      runner->global()->Get(v8Strings::Window.Get(isolate));
-  auto const focus_window =
-      window_class->ToObject()->Get(v8Strings::focus.Get(isolate));
-  auto event_target = static_cast<EventTarget*>(nullptr);
-  if (!gin::ConvertFromV8(isolate, focus_window, &event_target))
-    return nullptr;
-  return event_target;
 }
 
 v8::Local<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
@@ -205,22 +188,16 @@ void ViewEventHandlerImpl::DispatchFocusEvent(
   auto const target = FromEventTargetId(api_event.target_id);
   if (!target)
     return;
-  if (auto const form_control = target->as<FormControl>()) {
-    if (api_event.event_type == domapi::EventType::Focus)
-      form_control->DidSetFocus();
-    else
-      form_control->DidKillFocus();
-  } else if (auto const window = target->as<Window>()) {
+  if (auto const window = target->as<Window>()) {
     if (api_event.event_type == domapi::EventType::Focus)
       window->DidSetFocus();
+    else
+      window->DidKillFocus();
   }
-  FocusEventInit event_init;
-  event_init.set_related_target(MaybeEventTarget(api_event.related_target_id));
-  DispatchEventWithInLock(
-      target,
-      new FocusEvent(
-          api_event.event_type == domapi::EventType::Blur ? L"blur" : L"focus",
-          event_init));
+  const auto& related_target = MaybeEventTarget(api_event.related_target_id);
+  const auto& target_and_event =
+      target->TranslateFocusEvent(api_event, related_target);
+  DispatchEventWithInLock(target_and_event.first, target_and_event.second);
 }
 
 void ViewEventHandlerImpl::DispatchKeyboardEvent(
@@ -228,8 +205,10 @@ void ViewEventHandlerImpl::DispatchKeyboardEvent(
   TRACE_EVENT_WITH_FLOW0("input", "ViewEventHandlerImpl::DispatchKeyboardEvent",
                          api_event.event_id, TRACE_EVENT_FLAG_FLOW_IN);
   auto const window = FromEventTargetId(api_event.target_id);
-  if (window)
-    DispatchEventWithInLock(window, new KeyboardEvent(api_event));
+  if (window) {
+    const auto& target_and_event = window->TranslateKeyboardEvent(api_event);
+    DispatchEventWithInLock(target_and_event.first, target_and_event.second);
+  }
   TRACE_EVENT_ASYNC_END0("input", "KeyEvent", api_event.event_id);
 }
 
@@ -238,8 +217,10 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
   TRACE_EVENT_WITH_FLOW0("input", "ViewEventHandlerImpl::DispatchMouseEvent",
                          api_event.event_id, TRACE_EVENT_FLAG_FLOW_IN);
   auto const window = FromEventTargetId(api_event.target_id);
-  if (window)
-    DispatchEventWithInLock(window, new MouseEvent(api_event));
+  if (window) {
+    const auto& target_and_event = window->TranslateMouseEvent(api_event);
+    DispatchEventWithInLock(target_and_event.first, target_and_event.second);
+  }
   TRACE_EVENT_ASYNC_END0("input", "MouseEvent", api_event.event_id);
 }
 

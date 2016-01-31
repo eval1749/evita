@@ -5,13 +5,17 @@
 #ifndef EVITA_DOM_FORMS_FORM_WINDOW_H_
 #define EVITA_DOM_FORMS_FORM_WINDOW_H_
 
+#include <utility>
+
 #include "evita/dom/windows/window.h"
 
 #include "evita/gc/member.h"
+#include "evita/dom/forms/form_observer.h"
 
 namespace dom {
 
 class Form;
+class FormControl;
 class FormWindowInit;
 
 namespace bindings {
@@ -22,7 +26,8 @@ class FormWindowClass;
 //
 // FormWindow
 //
-class FormWindow final : public v8_glue::Scriptable<FormWindow, Window> {
+class FormWindow final : public v8_glue::Scriptable<FormWindow, Window>,
+                         public FormObserver {
   DECLARE_SCRIPTABLE_OBJECT(FormWindow);
 
  public:
@@ -33,11 +38,36 @@ class FormWindow final : public v8_glue::Scriptable<FormWindow, Window> {
  private:
   friend class bindings::FormWindowClass;
 
+  void DidBeginAnimationFrame(const base::TimeTicks& now);
+  void RequestAnimationFrame();
+  void UpdateHoveredControl(FormControl* control);
+
   // bindings
   FormWindow(ScriptHost* script_host, Form* form, const FormWindowInit& init);
   FormWindow(ScriptHost* script_host, Form* form);
 
-  gc::Member<Form> form_;
+  // FormObserver
+  void DidChangeForm() final;
+
+  // ViewEventTarget
+  std::pair<EventTarget*, FocusEvent*> TranslateFocusEvent(
+      const domapi::FocusEvent& event,
+      EventTarget* event_target) final;
+
+  std::pair<EventTarget*, KeyboardEvent*> TranslateKeyboardEvent(
+      const domapi::KeyboardEvent& event) final;
+
+  std::pair<EventTarget*, MouseEvent*> TranslateMouseEvent(
+      const domapi::MouseEvent& event) final;
+
+  // Window
+  void DidKillFocus() final;
+  void DidSetFocus() final;
+  void DidShowWindow() final;
+
+  const gc::Member<Form> form_;
+  gc::Member<FormControl> hovered_control_;
+  bool is_waiting_animation_frame_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(FormWindow);
 };

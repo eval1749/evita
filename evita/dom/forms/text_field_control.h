@@ -17,6 +17,10 @@ namespace bindings {
 class TextFieldControlClass;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// TextFieldControl
+//
 class TextFieldControl final
     : public v8_glue::Scriptable<TextFieldControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(TextFieldControl);
@@ -33,16 +37,25 @@ class TextFieldControl final
  private:
   friend class bindings::TextFieldControlClass;
 
+  // bindings
   TextFieldControl();
+
+  float scroll_left() const { return scroll_left_; }
+  void set_scroll_left(float left);
 
   // API: Set |value| property to the first line, excluding newline character,
   // of |new_value|.
   void set_value(const base::string16& new_value);
 
-  v8::Local<v8::Promise> MapPointToOffset(float x, float y) const;
+  int MapPointToOffset(int x, int y) const;
 
-  base::string16 value_;
+  // FormControl
+  std::unique_ptr<domapi::FormControl> Paint(
+      const FormPaintInfo& paint_info) const final;
+
+  float scroll_left_ = 0;
   gc::Member<TextFieldSelection> selection_;
+  base::string16 value_;
 
   DISALLOW_COPY_AND_ASSIGN(TextFieldControl);
 };

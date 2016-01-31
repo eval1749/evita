@@ -25,38 +25,6 @@ TEST_F(RadioButtonControlTest, ctor) {
   EXPECT_SCRIPT_FALSE("sample.checked");
 }
 
-TEST_F(RadioButtonControlTest, dispatchEvent) {
-  EXPECT_SCRIPT_VALID(
-      "var form1 = new Form();"
-      "var sample1 = new RadioButtonControl('foo');"
-      "var sample2 = new RadioButtonControl('foo');"
-      "form1.add(sample1);"
-      "form1.add(sample2);"
-      "sample1.changed = 0;"
-      "sample2.changed = 0;"
-      "function changed(event) { ++event.target.changed; }"
-      "sample1.addEventListener('change', changed);"
-      "sample2.addEventListener('change', changed);");
-
-  // No radio buttons are checked.
-  EXPECT_SCRIPT_EQ("false", "sample1.checked");
-  EXPECT_SCRIPT_EQ("false", "sample2.checked");
-
-  // Check |sample1|
-  EXPECT_SCRIPT_VALID("sample1.dispatchEvent(new FormEvent('change'));");
-  EXPECT_SCRIPT_EQ("true", "sample1.checked");
-  EXPECT_SCRIPT_EQ("false", "sample2.checked");
-  EXPECT_SCRIPT_EQ("1", "sample1.changed");
-  EXPECT_SCRIPT_EQ("0", "sample2.changed");
-
-  // Check |sample2|
-  EXPECT_SCRIPT_VALID("sample2.dispatchEvent(new FormEvent('change'));");
-  EXPECT_SCRIPT_EQ("false", "sample1.checked");
-  EXPECT_SCRIPT_EQ("true", "sample2.checked");
-  EXPECT_SCRIPT_EQ("2", "sample1.changed");
-  EXPECT_SCRIPT_EQ("1", "sample2.changed");
-}
-
 TEST_F(RadioButtonControlTest, set_checked) {
   EXPECT_SCRIPT_VALID(
       "var form1 = new Form();"

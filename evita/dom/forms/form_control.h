@@ -1,58 +1,58 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #ifndef EVITA_DOM_FORMS_FORM_CONTROL_H_
 #define EVITA_DOM_FORMS_FORM_CONTROL_H_
+
+#include <memory>
 
 #include "evita/dom/events/view_event_target.h"
 
 #include "base/strings/string16.h"
+#include "evita/dom/public/form_controls.h"
 #include "evita/gc/member.h"
-#include "evita/gfx/rect_f.h"
 
 namespace dom {
 
 class Form;
+class FormPaintInfo;
 
 namespace bindings {
 class FormControlClass;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// FormControl
+//
 class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(FormControl);
 
  public:
   ~FormControl() override;
 
+  const domapi::IntRect& bounds() const { return bounds_; }
+
   // Expose |clientLeft|, |clientTop|, |clientWidth| and |clientHeight| for
   // layout management in |views::FormWindow|.
-  float client_height() const { return bounds_.height(); }
-  float client_left() const { return bounds_.left; }
-  float client_top() const { return bounds_.top; }
-  float client_width() const { return bounds_.width(); }
+  int client_height() const { return bounds_.height(); }
+  int client_left() const { return bounds_.x(); }
+  int client_top() const { return bounds_.y(); }
+  int client_width() const { return bounds_.width(); }
 
   // Disabled control can't get focus.
   // Expose |disabled| for |views::FormWindow|.
   bool disabled() const { return disabled_; }
 
+  // TODO(eval1749): We should move |FormControl.prototype.name| to JavaScript.
   // Exposed for |RadioButton|.
   const base::string16& name() const { return name_; }
 
-  void DidKillFocus();
-  void DidSetFocus();
-  void DispatchChangeEvent();
+  virtual std::unique_ptr<domapi::FormControl> Paint(
+      const FormPaintInfo& paint_info) const = 0;
 
  protected:
-  class HandlingFormEventScope final {
-   public:
-    explicit HandlingFormEventScope(FormControl* control);
-    ~HandlingFormEventScope();
-
-   private:
-    FormControl* control_;
-
-    DISALLOW_COPY_AND_ASSIGN(HandlingFormEventScope);
-  };
-
   explicit FormControl(const base::string16& name);
   FormControl();
 
@@ -62,6 +62,8 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   // True if this |FormControl| is handling form event.
   bool handling_form_event() const { return handling_form_event_; }
 
+  domapi::FormControl::State ComputeState(
+      const FormPaintInfo& paint_info) const;
   void NotifyControlChange();
 
  private:
@@ -69,6 +71,7 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   friend class Form;  // for updating form_
   friend class HandlingFormEventScope;
 
+  // bindings
   void set_client_height(float new_client_hieght);
   void set_client_left(float new_client_left);
   void set_client_top(float new_client_top);
@@ -78,7 +81,7 @@ class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
   // dom::EventTarget
   EventPath BuildEventPath() const final;
 
-  gfx::RectF bounds_;
+  domapi::IntRect bounds_;
   bool disabled_;
   gc::Member<Form> form_;
   bool handling_form_event_;

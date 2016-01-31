@@ -25,23 +25,6 @@ TEST_F(CheckboxControlTest, ctor) {
   EXPECT_SCRIPT_FALSE("sample.checked");
 }
 
-TEST_F(CheckboxControlTest, dispatchEvent) {
-  EXPECT_SCRIPT_VALID(
-      "var sample = new CheckboxControl();"
-      "var changed = 0;"
-      "sample.addEventListener('change', function() { ++changed; });"
-      "sample.dispatchEvent(new FormEvent('change', {data: 'on'}));");
-  EXPECT_SCRIPT_EQ("true", "sample.checked");
-  EXPECT_SCRIPT_EQ("1", "changed") << "UI changes value.";
-
-  EXPECT_SCRIPT_VALID("sample.dispatchEvent(new FormEvent('change'))");
-  EXPECT_SCRIPT_EQ("2", "changed") << "UI changes control's value.";
-
-  EXPECT_SCRIPT_VALID("sample.dispatchEvent(new FormEvent('change'))");
-  EXPECT_SCRIPT_EQ("2", "changed")
-      << "UI doesn't change value, but event was dispatched.";
-}
-
 TEST_F(CheckboxControlTest, set_value) {
   EXPECT_SCRIPT_VALID(
       "var form = new Form();"

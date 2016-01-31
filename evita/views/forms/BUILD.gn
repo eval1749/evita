@@ -6,8 +6,6 @@ source_set("forms") {
   sources = [
     "file_dialog_box.cc",
     "file_dialog_box.h",
-    "form_control_controller.cc",
-    "form_control_set.cc",
     "form_paint_info.cc",
     "form_paint_info.h",
     "form_paint_state.cc",

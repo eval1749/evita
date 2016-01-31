@@ -10,22 +10,6 @@
 
 namespace dom {
 
-namespace {
-RadioButtonControl* FindCheckedRadioButton(const Form* form,
-                                           const base::string16& name) {
-  if (!form)
-    return nullptr;
-  for (auto control : form->controls()) {
-    auto const radio_button = control->as<RadioButtonControl>();
-    if (radio_button && radio_button->name() == name &&
-        radio_button->checked()) {
-      return radio_button;
-    }
-  }
-  return nullptr;
-}
-}  // namespace
-
 //////////////////////////////////////////////////////////////////////
 //
 // RadioButtonControl
@@ -38,36 +22,17 @@ RadioButtonControl::~RadioButtonControl() {}
 void RadioButtonControl::set_checked(bool new_checked) {
   if (checked_ == new_checked)
     return;
-
-  if (new_checked) {
-    if (auto const radio_button = FindCheckedRadioButton(form(), name())) {
-      if (handling_form_event()) {
-        HandlingFormEventScope scope(radio_button);
-        radio_button->set_checked(false);
-      } else {
-        radio_button->set_checked(false);
-      }
-    }
-  }
-
-  // TODO(eval1749): Dispatch |beforeinput| and |input| event.
   checked_ = new_checked;
-  DispatchChangeEvent();
 }
 
-// EventTarget
-bool RadioButtonControl::DispatchEvent(Event* event,
-                                       ExceptionState* exception_state) {
-  CR_DEFINE_STATIC_LOCAL(base::string16, kChangeEvent, (L"change"));
-
-  if (auto const form_event = event->as<FormEvent>()) {
-    HandlingFormEventScope scope(this);
-    if (event->type() == kChangeEvent)
-      set_checked(true);
-    return false;
-  }
-
-  return FormControl::DispatchEvent(event, exception_state);
+// FormControl
+std::unique_ptr<domapi::FormControl> RadioButtonControl::Paint(
+    const FormPaintInfo& paint_info) const {
+  auto state = ComputeState(paint_info);
+  if (checked_)
+    state.set_checked();
+  return std::make_unique<domapi::RadioButton>(event_target_id(), bounds(),
+                                               state);
 }
 
 }  // namespace dom

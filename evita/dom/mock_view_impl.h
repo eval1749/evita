@@ -29,8 +29,11 @@ class MockViewImpl final : public domapi::ViewDelegate {
                text::Offset(domapi::WindowId,
                             const domapi::TextWindowCompute&));
   MOCK_METHOD1(CreateEditorWindow, void(domapi::WindowId));
-  MOCK_METHOD3(CreateFormWindow,
-               void(domapi::WindowId, Form*, const domapi::PopupWindowInit&));
+  MOCK_METHOD4(CreateFormWindow,
+               void(domapi::WindowId window_id,
+                    domapi::WindowId owner_window_id,
+                    const domapi::IntRect& bounds,
+                    const base::string16& title));
   MOCK_METHOD2(CreateTextWindow, void(domapi::WindowId, text::Selection*));
   MOCK_METHOD1(CreateVisualWindow, void(domapi::WindowId window_id));
   MOCK_METHOD1(DestroyWindow, void(domapi::WindowId));
@@ -51,11 +54,6 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD2(HitTestTextPosition,
                domapi::FloatRect(domapi::WindowId, text::Offset));
   MOCK_METHOD1(MakeSelectionVisible, void(domapi::WindowId));
-  MOCK_METHOD4(MapTextFieldPointToOffset,
-               void(domapi::EventTargetId,
-                    float x,
-                    float y,
-                    const domapi::IntegerPromise& promise));
   MOCK_METHOD4(MapTextWindowPointToOffset,
                void(domapi::EventTargetId,
                     float x,
@@ -66,6 +64,8 @@ class MockViewImpl final : public domapi::ViewDelegate {
                   const base::string16& title,
                   int flags,
                   const MessageBoxResolver& resolver) final;
+  void PaintForm(domapi::WindowId window_id,
+                 std::unique_ptr<domapi::Form> form);
   void PaintVisualDocument(
       domapi::WindowId window_id,
       std::unique_ptr<visuals::DisplayItemList> display_item_list) final;

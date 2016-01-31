@@ -7,5 +7,6 @@ interface RadioButtonControl : FormControl {
   [ImplementedAs=JavaScript]
   static void handleEvent(Event event);
 
-  attribute boolean checked;
+  [ImplementedAs=checked]
+  attribute boolean checked_;
 };

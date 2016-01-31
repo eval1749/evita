@@ -126,6 +126,7 @@ static_js_externs_files = [
   "//evita/dom/components/launchpad/launchpad_externs.js",
   "//evita/dom/css/text_style_externs.js",
   "//evita/dom/errors_externs.js",
+  "//evita/dom/forms/form_control_externs.js",
   "//evita/dom/jslib/editors_externs.js",
   "//evita/dom/jslib/windows_externs.js",
   "//evita/dom/key_names_externs.js",

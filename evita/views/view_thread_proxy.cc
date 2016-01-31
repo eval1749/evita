@@ -14,6 +14,7 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/float_rect.h"
+#include "evita/dom/public/form.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/views/view_delegate_impl.h"
 #include "evita/visuals/display/public/display_item_list.h"
@@ -193,10 +194,11 @@ ViewThreadProxy::~ViewThreadProxy() {}
 DEFINE_DELEGATE_2(AddWindow, domapi::WindowId, domapi::WindowId)
 DEFINE_DELEGATE_2(ChangeParentWindow, domapi::WindowId, domapi::WindowId)
 DEFINE_DELEGATE_1(CreateEditorWindow, domapi::WindowId)
-DEFINE_DELEGATE_3(CreateFormWindow,
+DEFINE_DELEGATE_4(CreateFormWindow,
                   domapi::WindowId,
-                  dom::Form*,
-                  const domapi::PopupWindowInit&)
+                  domapi::WindowId,
+                  const domapi::IntRect&,
+                  const base::string16&)
 DEFINE_DELEGATE_2(CreateTextWindow, domapi::WindowId, text::Selection*)
 DEFINE_DELEGATE_1(CreateVisualWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DestroyWindow, domapi::WindowId)
@@ -220,11 +222,6 @@ DEFINE_DELEGATE_2(GetMetrics,
                   const domapi::StringPromise&)
 DEFINE_DELEGATE_1(HideWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(MakeSelectionVisible, domapi::WindowId)
-DEFINE_DELEGATE_4(MapTextFieldPointToOffset,
-                  domapi::EventTargetId,
-                  float,
-                  float,
-                  const domapi::IntegerPromise&)
 DEFINE_DELEGATE_4(MapTextWindowPointToOffset,
                   domapi::EventTargetId,
                   float,
@@ -236,6 +233,17 @@ DEFINE_DELEGATE_5(MessageBox,
                   const base::string16&,
                   int,
                   const MessageBoxResolver&)
+
+void ViewThreadProxy::PaintForm(domapi::WindowId window_id,
+                                std::unique_ptr<domapi::Form> form) {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!message_loop_)
+    return;
+  message_loop_->PostTask(
+      FROM_HERE,
+      base::Bind(&ViewDelegate::PaintForm, base::Unretained(delegate_.get()),
+                 window_id, base::Passed(std::move(form))));
+}
 
 void ViewThreadProxy::PaintVisualDocument(
     domapi::WindowId window_id,

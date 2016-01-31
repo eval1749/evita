@@ -5,6 +5,7 @@
 #include "evita/dom/forms/button_control.h"
 
 #include "evita/dom/forms/form_control.h"
+#include "evita/dom/public/form_controls.h"
 
 namespace dom {
 
@@ -21,6 +22,14 @@ void ButtonControl::set_text(const base::string16& new_text) {
     return;
   text_ = new_text;
   NotifyControlChange();
+}
+
+// FormControl
+std::unique_ptr<domapi::FormControl> ButtonControl::Paint(
+    const FormPaintInfo& paint_info) const {
+  auto state = ComputeState(paint_info);
+  return std::make_unique<domapi::Button>(event_target_id(), bounds(), state,
+                                          text_);
 }
 
 }  // namespace dom

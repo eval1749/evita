@@ -5,8 +5,14 @@
 #ifndef EVITA_DOM_FORMS_FORM_OBSERVER_H_
 #define EVITA_DOM_FORMS_FORM_OBSERVER_H_
 
+#include "base/macros.h"
+
 namespace dom {
 
+//////////////////////////////////////////////////////////////////////
+//
+// FormObserver
+//
 class FormObserver {
  public:
   virtual ~FormObserver();
@@ -15,6 +21,9 @@ class FormObserver {
 
  protected:
   FormObserver();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(FormObserver);
 };
 
 }  // namespace dom

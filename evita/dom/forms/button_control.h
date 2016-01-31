@@ -13,6 +13,10 @@ namespace bindings {
 class ButtonControlClass;
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// ButtonControl
+//
 class ButtonControl final
     : public v8_glue::Scriptable<ButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(ButtonControl);
@@ -26,9 +30,14 @@ class ButtonControl final
  private:
   friend class bindings::ButtonControlClass;
 
+  // bindings
   explicit ButtonControl(const base::string16& text);
 
   void set_text(const base::string16& text);
+
+  // FormControl
+  std::unique_ptr<domapi::FormControl> Paint(
+      const FormPaintInfo& paint_info) const final;
 
   base::string16 text_;
 

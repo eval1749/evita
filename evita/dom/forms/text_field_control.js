@@ -115,12 +115,12 @@ Object.defineProperties(TextFieldControl.prototype, {
   function handleDblClick(control, event){
     if (event.button || control.form.focusControl != control)
       return;
-    control.mapPointToOffset(event.clientX, event.clientY).then((offset) => {
-      if (offset < 0)
-        return;
-      control.selection.collapseTo(offset);
-      selectWord(control);
-    });
+    /** @const @type {number} */
+    const offset = control.mapPointToOffset(event.clientX, event.clientY);
+    if (offset < 0)
+      return;
+    control.selection.collapseTo(offset);
+    selectWord(control);
   }
 
   /**
@@ -148,17 +148,19 @@ Object.defineProperties(TextFieldControl.prototype, {
       control.focus();
       return;
     }
-    control.mapPointToOffset(event.clientX, event.clientY).then((offset) => {
-      if (event.shiftKey)
-        control.selection.extendTo(offset);
-      else
-        control.selection.collapseTo(offset);
-      if (event.ctrlKey)
-        selectWord(control);
-      if (!control.dragController_)
-        control.dragController_ = new DragController(control)
-      control.dragController_.start();
-    });
+    /** @const @type {number} */
+    const offset = control.mapPointToOffset(event.clientX, event.clientY);
+    if (offset < 0)
+      return;
+    if (event.shiftKey)
+      control.selection.extendTo(offset);
+    else
+      control.selection.collapseTo(offset);
+    if (event.ctrlKey)
+      selectWord(control);
+    if (!control.dragController_)
+      control.dragController_ = new DragController(control)
+    control.dragController_.start();
   }
 
   /**
@@ -169,11 +171,11 @@ Object.defineProperties(TextFieldControl.prototype, {
     var dragController = control.dragController_;
     if (!dragController || !dragController.dragging)
       return;
-    control.mapPointToOffset(event.clientX, event.clientY).then((offset) => {
-      if (offset < 0)
-        return;
-      control.selection.extendTo(offset);
-    });
+    /** @const @type {number} */
+    const offset = control.mapPointToOffset(event.clientX, event.clientY);
+    if (offset < 0)
+      return;
+    control.selection.extendTo(offset);
   }
 
   /**

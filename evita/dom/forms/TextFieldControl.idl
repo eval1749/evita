@@ -9,11 +9,13 @@ interface TextFieldControl : FormControl {
 
   readonly attribute TextFieldSelection selection;
 
+  attribute float scroll_left;
+
   [ImplementedAs=JavaScript]
   attribute DOMString value;
 
   [ImplementedAs=value]
   attribute DOMString value_;
 
-  Promise<long> mapPointToOffset(float x, float y);
+  long mapPointToOffset(float x, float y);
 };

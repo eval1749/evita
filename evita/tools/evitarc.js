@@ -10,8 +10,8 @@
     // B
     'bgcolor', 'boolean',
     // C
-    'cacheable', 'Castable', 'callee', 'ceil', 'checkbox',
-    'clazz','Collectable', 'contenteditable', 'css', 'ctor',
+    'cancelable', 'cacheable', 'Castable', 'callee', 'ceil', 'Checkbox',
+    'checkbox', 'clazz', 'Collectable', 'contenteditable', 'css', 'ctor',
     // D
     'Decrement', 'decrement', 'destructor', 'doesn', 'dom', 'domapi',
     'Dominatee', 'dominatee', 'Dominator', 'dominator', 'dtor',

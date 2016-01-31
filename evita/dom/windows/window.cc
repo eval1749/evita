@@ -48,10 +48,13 @@ v8::Local<v8::Value> Converter<dom::Window::State>::ToV8(
 namespace dom {
 
 namespace {
+
 const v8::PropertyAttribute kDefaultPropertyAttribute =
     static_cast<v8::PropertyAttribute>(v8::DontEnum | v8::DontDelete);
 
 int global_focus_tick;
+Window* global_focus_window;
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -141,6 +144,8 @@ void Window::DidActivateWindow() {
 }
 
 void Window::DidDestroyWindow() {
+  if (global_focus_window == this)
+    global_focus_window = nullptr;
   WindowSet::instance()->DidDestroyWindow(window_id());
 }
 
@@ -182,11 +187,17 @@ void Window::DidChangeBounds(int clientLeft,
 }
 
 void Window::DidHideWindow() {
-  // Nothing to do.
+  visible_ = false;
+}
+
+void Window::DidKillFocus() {
+  if (global_focus_window == this)
+    global_focus_window = nullptr;
 }
 
 void Window::DidSetFocus() {
   ++global_focus_tick;
+  global_focus_window = this;
 
   // Update |Window.focus| and |Window.prototype.focusTick_|
   auto const runner = script_host_->runner();
@@ -202,7 +213,7 @@ void Window::DidSetFocus() {
 }
 
 void Window::DidShowWindow() {
-  // Nothing to do.
+  visible_ = true;
 }
 
 void Window::Focus(ExceptionState* exception_state) {
@@ -211,6 +222,11 @@ void Window::Focus(ExceptionState* exception_state) {
     return;
   }
   script_host_->view_delegate()->FocusWindow(window_id());
+}
+
+// static
+Window* Window::GetFocusWindow() {
+  return global_focus_window;
 }
 
 void Window::Hide(ExceptionState* exception_state) {
@@ -266,6 +282,7 @@ void Window::RemoveWindow(Window* window, ExceptionState* exception_state) {
 void Window::ResetForTesting() {
   ViewEventTargetSet::instance()->ResetForTesting();
   global_focus_tick = 0;
+  global_focus_window = nullptr;
   WindowSet::instance()->ResetForTesting();
 }
 

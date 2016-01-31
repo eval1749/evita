@@ -48,15 +48,19 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
   Window* previous_sibling() const { return Node::previous_sibling(); }
   Window* parent_window() const { return parent_node(); }
   State state() const { return state_; }
+  bool visible() const { return visible_; }
   domapi::WindowId window_id() const { return event_target_id(); }
 
   virtual void DidActivateWindow();
   virtual void DidChangeBounds(int left, int top, int right, int bottom);
   virtual void DidDestroyWindow();
+  virtual void DidKillFocus();
   virtual void DidHideWindow();
   virtual void DidRealizeWindow();
+  virtual void DidSetFocus();
   virtual void DidShowWindow();
-  void DidSetFocus();
+
+  static Window* GetFocusWindow();
   static void ResetForTesting();
 
  protected:
@@ -92,6 +96,7 @@ class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
 
   ScriptHost* const script_host_;
   State state_;
+  bool visible_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(Window);
 };

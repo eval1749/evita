@@ -11,6 +11,8 @@ config("base_implementation") {
 component("base") {
   output_name = "evita_base"
   sources = [
+    "colors/int8_color.cc",
+    "colors/int8_color.h",
     "evita_base_export.h",
     "memory/allocator.h",
     "memory/zone.cc",
@@ -41,6 +43,7 @@ component("base") {
 test("tests") {
   output_name = "evita_base_tests"
   sources = [
+    "colors/int8_color_test.cc",
     "strings/atomic_string_test.cc",
   ]
   deps = [

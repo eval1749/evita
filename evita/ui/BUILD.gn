@@ -4,11 +4,6 @@
 
 source_set("ui") {
   sources = [
-    "base/selection_model.cc",
-    "base/selection_model.h",
-    "base/selection_state.h",
-    "base/table_model.cc",
-    "base/table_model_observer.cc",
     "caret.cc",
     "caret.h",
     "caret_owner.cc",
@@ -49,7 +44,7 @@ source_set("ui") {
   ]
 }
 
-source_set("widget") {
+source_set("base") {
   sources = [
     "base/ime/text_composition.cc",
     "base/ime/text_composition.h",
@@ -59,6 +54,23 @@ source_set("widget") {
     "base/ime/text_input_client_win.h",
     "base/ime/text_input_delegate.cc",
     "base/ime/text_input_delegate.h",
+    "base/selection_model.cc",
+    "base/selection_model.h",
+    "base/selection_state.h",
+    "base/table_model.cc",
+    "base/table_model_observer.cc",
+    "system_metrics.cc",
+    "system_metrics.h",
+    "system_metrics_observer.cc",
+    "system_metrics_observer.h",
+  ]
+  deps = [
+    "//base",
+  ]
+}
+
+source_set("widget") {
+  sources = [
     "compositor/compositor.cc",
     "compositor/compositor.h",
     "compositor/layer.cc",
@@ -87,15 +99,12 @@ source_set("widget") {
     "focus_controller.h",
     "root_widget.cc",
     "root_widget.h",
-    "system_metrics.cc",
-    "system_metrics.h",
-    "system_metrics_observer.cc",
-    "system_metrics_observer.h",
     "widget.cc",
     "widget.h",
   ]
 
   deps = [
+    ":base",
     "//base",
     "//common",
     "//evita/gfx",

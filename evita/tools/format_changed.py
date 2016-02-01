@@ -46,7 +46,7 @@ def dispatch(file_name):
 
 def format_cpp(file_name):
     sys.stderr.write('  Formatting C++ "%s"\n' % file_name)
-    os.system('clang-format -i %s' % file_name)
+    os.system('clang-format -sort-includes -i %s' % file_name)
 
 
 def format_gn(file_name):

@@ -7,8 +7,8 @@
 #include "evita/dom/encodings/text_encoder.h"
 
 #include "base/strings/stringprintf.h"
-#include "evita/bindings/v8_glue_TextEncodeOptions.h"
 #include "evita/dom/bindings/exception_state.h"
+#include "evita/dom/bindings/v8_glue_TextEncodeOptions.h"
 #include "evita/text/encodings/encoder.h"
 #include "evita/text/encodings/encodings.h"
 

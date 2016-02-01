@@ -4,7 +4,7 @@
 
 #include "evita/dom/events/text_document_event.h"
 
-#include "evita/bindings/v8_glue_TextDocumentEventInit.h"
+#include "evita/dom/bindings/v8_glue_TextDocumentEventInit.h"
 
 namespace dom {
 

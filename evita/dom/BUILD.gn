@@ -212,22 +212,22 @@ action("check_jslib") {
   ]
 
   js_files = js_defs_files + js_lib_files
-  js_file_list = "$root_gen_dir/evita/jslib_file_list.txt"
+  js_file_list = "$target_gen_dir/jslib_file_list.txt"
   write_file(js_file_list, rebase_path(js_files))
 
   script = "//tools/razzle/closure_compiler.py"
   outputs = [
-    "$root_gen_dir/evita/evita_checked.js",
+    "$target_gen_dir/evita_checked.js",
   ]
   inputs = [
              "closure_compiler_workaround.js",
-             "$root_gen_dir/evita/evita_js_externs.js",
+             "$target_gen_dir/evita_js_externs.js",
            ] + js_files
   args = [
-    "--js_output_file=" + rebase_path("$root_gen_dir/evita/evita_checked.js"),
+    "--js_output_file=" + rebase_path("$target_gen_dir/evita_checked.js"),
     "--flagfile=" + rebase_path(js_file_list),
     "--extern",
-    "$root_gen_dir/evita/evita_js_externs.js",
+    "$target_gen_dir/evita_js_externs.js",
   ]
 }
 

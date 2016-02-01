@@ -5,7 +5,7 @@
 
 #include "evita/dom/testing/abstract_dom_test.h"
 
-#include "evita/bindings/v8_glue_CompositionEventInit.h"
+#include "evita/dom/bindings/v8_glue_CompositionEventInit.h"
 #include "evita/dom/events/composition_event.h"
 #include "evita/dom/public/text_composition_event.h"
 

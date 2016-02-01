@@ -3,7 +3,7 @@
 
 #include "evita/dom/events/event.h"
 
-#include "evita/bindings/v8_glue_EventInit.h"
+#include "evita/dom/bindings/v8_glue_EventInit.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/script_host.h"
 

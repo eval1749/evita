@@ -7,12 +7,12 @@
 
 #include "evita/dom/text/text_mutation_observer.h"
 
-#include "evita/bindings/v8_glue_TextMutationObserverInit.h"
+#include "evita/dom/bindings/v8_glue_TextMutationObserverInit.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_mutation_observer_controller.h"
 #include "evita/dom/text/text_mutation_record.h"
-#include "evita/dom/script_host.h"
 #include "evita/v8_glue/runner.h"
 
 namespace dom {

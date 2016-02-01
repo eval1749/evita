@@ -3,8 +3,8 @@
 
 #include "evita/dom/events/window_event.h"
 
-#include "evita/bindings/v8_glue_EventInit.h"
-#include "evita/bindings/v8_glue_WindowEventInit.h"
+#include "evita/dom/bindings/v8_glue_EventInit.h"
+#include "evita/dom/bindings/v8_glue_WindowEventInit.h"
 
 namespace dom {
 

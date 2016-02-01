@@ -6,8 +6,8 @@
 
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
-#include "evita/bindings/v8_glue_RegExpInit.h"
 #include "evita/dom/bindings/exception_state.h"
+#include "evita/dom/bindings/v8_glue_RegExpInit.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_range.h"

@@ -4,14 +4,14 @@
 
 #include "evita/dom/editor.h"
 
-#include "evita/bindings/v8_glue_IdleRequestOptions.h"
+#include "evita/dom/bindings/v8_glue_IdleRequestOptions.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/idle_deadline.h"
 #include "evita/dom/timing/idle_task.h"
-#include "evita/v8_glue/scoped_persistent.h"
 #include "evita/v8_glue/runner.h"
+#include "evita/v8_glue/scoped_persistent.h"
 
 namespace dom {
 

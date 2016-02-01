@@ -7,7 +7,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
-#include "evita/bindings/v8_glue_MoveFileOptions.h"
+#include "evita/dom/bindings/v8_glue_MoveFileOptions.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/os/file_status.h"
 #include "evita/dom/os/io_error.h"

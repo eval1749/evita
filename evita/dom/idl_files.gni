@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-idl_gen_dir = "$root_gen_dir/evita/idl"
-idl_scripts_output_dir = "$root_gen_dir/evita/idl"
-bindings_gen_dir = "$root_gen_dir/evita/bindings"
-externs_gen_dir = "$root_gen_dir/evita/externs"
+idl_gen_dir = "$root_gen_dir/evita/dom/idl"
+idl_scripts_output_dir = "$root_gen_dir/evita/dom/idl"
+bindings_gen_dir = "$root_gen_dir/evita/dom/bindings"
+externs_gen_dir = "$root_gen_dir/evita/dom/externs"
 
 interface_idl_files = [
   "//evita/dom/clipboard/DataTransfer.idl",

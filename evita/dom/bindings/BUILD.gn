@@ -131,7 +131,7 @@ action("js_externs") {
 
   script = "//tools/idl_to_js_externs/aggregate_js_externs.py"
   outputs = [
-    "$root_gen_dir/evita/evita_js_externs.js",
+    "$root_gen_dir/evita/dom/evita_js_externs.js",
   ]
   inputs = [ "//tools/idl_to_js_externs/aggregate_js_externs.py" ] +
            process_file_template(
@@ -139,7 +139,7 @@ action("js_externs") {
                "$externs_gen_dir/{{source_name_part}}_externs.js") +
            static_js_externs_files
   args = [
-    rebase_path("$root_gen_dir/evita/evita_js_externs.js"),
+    rebase_path("$root_gen_dir/evita/dom/evita_js_externs.js"),
     rebase_path("//tools/idl_to_js_externs/header.js"),
     rebase_path(externs_gen_dir),
     rebase_path(idl_file_list),

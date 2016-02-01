@@ -4,16 +4,16 @@
 
 #include "evita/dom/windows/text_window.h"
 
-#include "evita/bindings/v8_glue_TextDocumentEventInit.h"
 #include "evita/dom/bindings/exception_state.h"
+#include "evita/dom/bindings/v8_glue_TextDocumentEventInit.h"
 #include "evita/dom/events/text_document_event.h"
-#include "evita/dom/text/text_document.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/float_rect.h"
-#include "evita/dom/text/text_range.h"
-#include "evita/dom/script_host.h"
 #include "evita/dom/public/view_delegate.h"
+#include "evita/dom/script_host.h"
+#include "evita/dom/text/text_document.h"
+#include "evita/dom/text/text_range.h"
 #include "evita/dom/windows/text_selection.h"
 
 namespace dom {

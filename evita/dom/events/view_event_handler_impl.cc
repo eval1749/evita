@@ -6,8 +6,8 @@
 
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
-#include "evita/bindings/v8_glue_UiEventInit.h"
-#include "evita/bindings/v8_glue_WindowEventInit.h"
+#include "evita/dom/bindings/v8_glue_UiEventInit.h"
+#include "evita/dom/bindings/v8_glue_WindowEventInit.h"
 #include "evita/dom/events/composition_event.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/keyboard_event.h"

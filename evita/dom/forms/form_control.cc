@@ -4,8 +4,8 @@
 
 #include "evita/dom/forms/form_control.h"
 
+#include "evita/dom/bindings/v8_glue_EventInit.h"
 #include "evita/dom/events/event.h"
-#include "evita/bindings/v8_glue_EventInit.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_paint_info.h"
 

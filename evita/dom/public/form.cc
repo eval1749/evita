@@ -12,7 +12,7 @@ namespace domapi {
 //
 // Form
 //
-Form::Form() {}
+Form::Form(int id) : id_(id) {}
 
 Form::~Form() {
   for (const auto& control : controls_)

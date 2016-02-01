@@ -21,7 +21,7 @@ namespace domapi {
 //
 class Form::Builder final {
  public:
-  Builder();
+  explicit Builder(int id);
   ~Builder();
 
   Builder& AddControl(std::unique_ptr<FormControl> control);

@@ -28,7 +28,7 @@ class Form final {
  public:
   class Builder;
 
-  Form();
+  explicit Form(int id);
   ~Form();
 
   bool operator==(const Form& other) const;
@@ -36,11 +36,13 @@ class Form final {
 
   const IntRect& bounds() const { return bounds_; }
   const std::vector<FormControl*>& controls() const { return controls_; }
+  int id() const { return id_; }
   const base::string16& title() const { return title_; }
 
  private:
   IntRect bounds_;
   std::vector<FormControl*> controls_;
+  const int id_;
   base::string16 title_;
 
   DISALLOW_COPY_AND_ASSIGN(Form);

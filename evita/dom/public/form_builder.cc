@@ -16,7 +16,7 @@ using Builder = Form::Builder;
 //
 // FormBuilder
 //
-Builder::Builder() : form_(new Form()) {}
+Builder::Builder(int id) : form_(new Form(id)) {}
 
 Builder::~Builder() {
   DCHECK(!form_);

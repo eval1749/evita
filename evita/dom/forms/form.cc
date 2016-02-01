@@ -96,7 +96,7 @@ void Form::NotifyChangeForm() {
 
 std::unique_ptr<domapi::Form> Form::Paint(
     const FormPaintInfo& paint_info) const {
-  domapi::Form::Builder builder;
+  domapi::Form::Builder builder(event_target_id());
   builder.SetBounds(bounds_).SetTitle(title_);
   for (const auto& control : controls_)
     builder.AddControl(std::move(control->Paint(paint_info)));

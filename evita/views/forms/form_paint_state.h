@@ -26,6 +26,7 @@ class FormPaintState final {
   FormPaintState();
   ~FormPaintState();
 
+  bool IsChanged(const domapi::FormControl& control) const;
   void Update(std::unique_ptr<domapi::Form> form);
 
  private:

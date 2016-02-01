@@ -152,6 +152,8 @@ void FormPainter::Paint(const FormPaintInfo& paint_info,
   }
   PaintVisitor painter(paint_info, style);
   for (const auto& control : form.controls()) {
+    if (!paint_info.paint_state()->IsChanged(*control))
+      continue;
     gfx::Canvas::ScopedState scope(paint_info.canvas());
     paint_info.canvas()->SetOffsetBounds(ToRectF(control->bounds()));
     painter.Visit(*control);

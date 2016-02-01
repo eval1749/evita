@@ -17,6 +17,13 @@ namespace views {
 FormPaintState::FormPaintState() {}
 FormPaintState::~FormPaintState() {}
 
+bool FormPaintState::IsChanged(const domapi::FormControl& control) const {
+  const auto& it = control_map_.find(control.id());
+  if (it == control_map_.end())
+    return true;
+  return control != *it->second;
+}
+
 void FormPaintState::Update(std::unique_ptr<domapi::Form> form) {
   control_map_.clear();
   for (const auto& control : form->controls()) {

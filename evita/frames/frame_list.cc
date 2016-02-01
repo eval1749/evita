@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/views/frame_list.h"
+#include "evita/frames/frame_list.h"
 
 #include "evita/editor/application.h"
 #include "evita/frames/frame.h"

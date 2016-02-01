@@ -8,6 +8,10 @@ source_set("frames") {
     "edit_pane.h",
     "frame.cc",
     "frame.h",
+    "frame_list.cc",
+    "frame_list.h",
+    "frame_observer.cc",
+    "frame_observer.h",
     "title_bar.cc",
     "title_bar.h",
   ]

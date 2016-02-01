@@ -2,22 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VIEWS_FRAME_LIST_H_
-#define EVITA_VIEWS_FRAME_LIST_H_
+#ifndef EVITA_FRAMES_FRAME_LIST_H_
+#define EVITA_FRAMES_FRAME_LIST_H_
 
 #include <windows.h>
 
 #include <unordered_set>
 
 #include "common/memory/singleton.h"
-#include "evita/views/frame_observer.h"
+#include "evita/frames/frame_observer.h"
 
 class Frame;
 
 namespace views {
 
-class FrameList : public common::Singleton<FrameList>,
-                  public FrameObserver {
+//////////////////////////////////////////////////////////////////////
+//
+// FrameList
+//
+class FrameList : public common::Singleton<FrameList>, public FrameObserver {
   DECLARE_SINGLETON_CLASS(FrameList);
 
  public:
@@ -43,4 +46,4 @@ class FrameList : public common::Singleton<FrameList>,
 
 }  // namespace views
 
-#endif  // EVITA_VIEWS_FRAME_LIST_H_
+#endif  // EVITA_FRAMES_FRAME_LIST_H_

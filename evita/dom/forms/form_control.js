@@ -8,7 +8,7 @@
    * @return {boolean}
    */
   function canFocus() {
-    return !this.disabled;
+    return !this.disabled && !!this.form;
   }
 
   /**
@@ -28,12 +28,35 @@
   }
 
   /**
+   * @param {!FormControl} control
+   * @param {!Event} event
+   */
+  function dispatchEventWithDefaultHandler(control, event) {
+    if (!control.dispatchEvent(event))
+      return;
+    control.constructor.handleEvent.call(control, event);
+  }
+
+  /**
    * @this {!FormControl}
    */
   function focus() {
-    if (!this.form)
+    if (!this.canFocus()) {
+      throw new Error("Failed to execute 'focus' on 'FormControl': " +
+          `${this} can not have focus.`);
+    }
+    const oldFocused = this.form.focusControl;
+    if (oldFocused === this)
       return;
     this.form.focusControl = this;
+    if (oldFocused) {
+      dispatchEventWithDefaultHandler(
+          oldFocused,
+          new FocusEvent(Event.Names.BLUR, {relatedTarget: this}));
+    }
+    dispatchEventWithDefaultHandler(
+        this,
+        new FocusEvent(Event.Names.FOCUS, {relatedTarget: oldFocused}));
   }
 
   Object.defineProperties(FormControl.prototype, {

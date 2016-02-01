@@ -139,6 +139,10 @@
   function handleEvent(event) {
     switch (event.type) {
       case Event.Names.BLUR:
+        if (event.target instanceof FormControl)
+          break;
+        this.focusControl = null;
+        break;
       case Event.Names.CLICK:
       case Event.Names.DBLCLICK:
       case Event.Names.HIDE:
@@ -149,8 +153,11 @@
       case Event.Names.SHOW:
         break;
       case Event.Names.FOCUS:
-        if (!this.focusControl)
-          moveFocusToNext(this);
+        if (event.target instanceof FormControl)
+          break;
+        // Move focus to first focusable control.
+        this.focusControl = null;
+        moveFocusToNext(this);
         break;
       case Event.Names.KEYDOWN:
         if (!event.defaultPrevented)

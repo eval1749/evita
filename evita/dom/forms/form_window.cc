@@ -4,6 +4,7 @@
 
 #include "evita/dom/forms/form_window.h"
 
+#include "base/trace_event/trace_event.h"
 #include "evita/bindings/v8_glue_FocusEventInit.h"
 #include "evita/bindings/v8_glue_FormWindowInit.h"
 #include "evita/dom/events/focus_event.h"
@@ -52,6 +53,7 @@ void FormWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   is_waiting_animation_frame_ = false;
   if (!visible())
     return;
+  TRACE_EVENT0("script", "FormWindow::DidBeginAnimationFrame");
   const auto is_interactive = Window::GetFocusWindow() == this;
   FormPaintInfo::Builder paint_info;
   // TODO(eval1749): We should support caret blinking.

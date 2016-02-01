@@ -1,0 +1,52 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("events") {
+  sources = [
+    "composition_event.cc",
+    "composition_event.h",
+    "composition_span.cc",
+    "composition_span.h",
+    "event.cc",
+    "event_target.cc",
+    "focus_event.cc",
+    "form_event.cc",
+    "keyboard_event.cc",
+    "mouse_event.cc",
+    "text_document_event.cc",
+    "ui_event.cc",
+    "view_event_handler_impl.cc",
+    "view_event_target.cc",
+    "view_event_target_set.cc",
+    "wheel_event.cc",
+    "window_event.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/dom/bindings",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "composition_event_unittest.cc",
+    "event_target_unittest.cc",
+    "event_unittest.cc",
+    "focus_event_unittest.cc",
+    "form_event_unittest.cc",
+    "keyboard_event_unittest.cc",
+    "mouse_event_unittest.cc",
+    "text_document_event_unittest.cc",
+    "ui_event_unittest.cc",
+    "view_event_handler_impl_unittest.cc",
+    "wheel_event_unittest.cc",
+    "window_event_unittest.cc",
+  ]
+  deps = [
+    ":events",
+    "//evita/dom/testing:test_support",
+  ]
+}

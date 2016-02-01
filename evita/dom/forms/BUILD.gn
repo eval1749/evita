@@ -30,6 +30,8 @@ source_set("forms") {
 
   deps = [
     "//base",
+    "//evita/dom/bindings",
+    "//evita/dom/events",
     "//evita/visuals/fonts",
   ]
 }

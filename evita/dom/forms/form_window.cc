@@ -89,19 +89,6 @@ void FormWindow::DidChangeForm() {
 }
 
 // ViewEventTarget
-std::pair<EventTarget*, FocusEvent*> FormWindow::TranslateFocusEvent(
-    const domapi::FocusEvent& view_event,
-    EventTarget* related_target) {
-  FocusEventInit event_init;
-  event_init.set_related_target(related_target);
-  const auto& event_type =
-      view_event.event_type == domapi::EventType::Blur ? L"blur" : L"focus";
-  const auto& focus_event = new FocusEvent(event_type, event_init);
-  if (form_->focus_control())
-    return std::make_pair(form_->focus_control(), focus_event);
-  return std::make_pair(form_.get(), focus_event);
-}
-
 std::pair<EventTarget*, KeyboardEvent*> FormWindow::TranslateKeyboardEvent(
     const domapi::KeyboardEvent& view_event) {
   const auto& keyboard_event = new KeyboardEvent(view_event);

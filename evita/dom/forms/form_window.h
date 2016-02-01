@@ -50,10 +50,6 @@ class FormWindow final : public v8_glue::Scriptable<FormWindow, Window>,
   void DidChangeForm() final;
 
   // ViewEventTarget
-  std::pair<EventTarget*, FocusEvent*> TranslateFocusEvent(
-      const domapi::FocusEvent& event,
-      EventTarget* event_target) final;
-
   std::pair<EventTarget*, KeyboardEvent*> TranslateKeyboardEvent(
       const domapi::KeyboardEvent& event) final;
 

@@ -6,7 +6,7 @@
 #define EVITA_DOM_PUBLIC_TEXT_COMPOSITION_EVENT_H_
 
 #include "evita/dom/public/text_composition_data.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 
 namespace domapi {
 

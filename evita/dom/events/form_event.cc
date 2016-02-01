@@ -5,7 +5,7 @@
 
 #include "evita/dom/bindings/v8_glue_EventInit.h"
 #include "evita/dom/bindings/v8_glue_FormEventInit.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 
 namespace dom {
 

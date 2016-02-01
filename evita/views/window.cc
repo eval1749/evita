@@ -7,9 +7,9 @@
 #include <unordered_map>
 
 #include "common/tree/child_nodes.h"
-#include "evita/editor/application.h"
-#include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
+#include "evita/dom/public/view_events.h"
+#include "evita/editor/application.h"
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/events/event.h"
 #include "evita/views/tabs/tab_data_set.h"

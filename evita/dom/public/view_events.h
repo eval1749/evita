@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_PUBLIC_VIEW_EVENT_H_
-#define EVITA_DOM_PUBLIC_VIEW_EVENT_H_
+#ifndef EVITA_DOM_PUBLIC_VIEW_EVENTS_H_
+#define EVITA_DOM_PUBLIC_VIEW_EVENTS_H_
 
 #include "base/strings/string16.h"
 #include "evita/dom/public/window_id.h"
@@ -97,4 +97,4 @@ struct WheelEvent final : MouseEvent {
 
 }  // namespace domapi
 
-#endif  // EVITA_DOM_PUBLIC_VIEW_EVENT_H_
+#endif  // EVITA_DOM_PUBLIC_VIEW_EVENTS_H_

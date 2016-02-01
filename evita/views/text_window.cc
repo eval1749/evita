@@ -11,11 +11,13 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_data.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
+#include "evita/layout/render_selection.h"
+#include "evita/layout/text_view.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/text/buffer.h"
 #include "evita/text/selection.h"
@@ -26,8 +28,6 @@
 #include "evita/ui/controls/scroll_bar.h"
 #include "evita/ui/focus_controller.h"
 #include "evita/views/metrics_view.h"
-#include "evita/layout/render_selection.h"
-#include "evita/layout/text_view.h"
 
 namespace views {
 

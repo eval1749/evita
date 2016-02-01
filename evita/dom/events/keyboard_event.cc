@@ -4,7 +4,7 @@
 #include "evita/dom/events/keyboard_event.h"
 
 #include "evita/dom/bindings/v8_glue_KeyboardEventInit.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 
 namespace dom {
 namespace {

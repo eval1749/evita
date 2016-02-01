@@ -19,7 +19,7 @@
 #include "evita/dom/events/window_event.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_event.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/v8_strings.h"
 #include "evita/dom/windows/editor_window.h"

@@ -7,7 +7,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/public/view_delegate.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/testing/mock_view_impl.h"

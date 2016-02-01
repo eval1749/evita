@@ -10,7 +10,7 @@
 #include "evita/dom/events/mouse_event.h"
 #include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/public/view_delegate.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 #include "evita/dom/script_host.h"
 
 namespace dom {

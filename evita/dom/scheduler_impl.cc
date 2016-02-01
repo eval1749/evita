@@ -12,7 +12,7 @@
 #include "base/synchronization/lock.h"
 #include "base/trace_event/trace_event.h"
 #include "common/maybe.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 #include "evita/dom/scheduler_client.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/animation_frame_callback.h"

@@ -17,7 +17,7 @@
 #include "evita/dom/public/form.h"
 #include "evita/dom/public/form_controls.h"
 #include "evita/dom/public/view_delegate.h"
-#include "evita/dom/public/view_event.h"
+#include "evita/dom/public/view_events.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/animation_frame_callback.h"

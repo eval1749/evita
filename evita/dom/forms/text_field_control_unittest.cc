@@ -4,7 +4,7 @@
 #include "evita/dom/testing/abstract_dom_test.h"
 
 #include "evita/dom/forms/text_field_control.h"
-#include "evita/dom/mock_view_impl.h"
+#include "evita/dom/testing/mock_view_impl.h"
 
 namespace dom {
 

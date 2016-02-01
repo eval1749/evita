@@ -254,8 +254,6 @@ test("evita_dom_tests") {
     "events/window_event_unittest.cc",
     "file_path_unittest.cc",
     "lexers/lexers_unittest.cc",
-    "mock_io_delegate.cc",
-    "mock_view_impl.cc",
     "polyfill_unittest.cc",
     "repl/console_unittest.cc",
     "timers/timer_test.cc",

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/mock_io_delegate.h"
+#include "evita/dom/testing/mock_io_delegate.h"
 
 #include <algorithm>
 
-#include "base/logging.h"
 #include "base/callback.h"
+#include "base/logging.h"
 #include "evita/dom/public/io_callback.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/public/promise.h"

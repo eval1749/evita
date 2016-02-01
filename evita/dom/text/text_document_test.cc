@@ -7,13 +7,13 @@
 
 #include "base/macros.h"
 #include "base/strings/utf_string_conversions.h"
-#include "evita/dom/testing/abstract_dom_test.h"
-#include "evita/dom/text/text_document.h"
 #include "evita/dom/file_path.h"
-#include "evita/dom/mock_io_delegate.h"
-#include "evita/dom/mock_view_impl.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/testing/abstract_dom_test.h"
+#include "evita/dom/testing/mock_io_delegate.h"
+#include "evita/dom/testing/mock_view_impl.h"
+#include "evita/dom/text/text_document.h"
 #include "evita/text/buffer.h"
 #include "gmock/gmock.h"
 

@@ -12,6 +12,10 @@ source_set("test_support") {
     "abstract_dom_test.h",
     "gtest.cc",
     "gtest.h",
+    "mock_io_delegate.cc",
+    "mock_io_delegate.h",
+    "mock_view_impl.cc",
+    "mock_view_impl.h",
   ]
 
   public_deps = [

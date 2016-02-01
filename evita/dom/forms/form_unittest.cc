@@ -4,9 +4,9 @@
 #include "evita/dom/testing/abstract_dom_test.h"
 
 #include "evita/dom/forms/form.h"
-#include "evita/dom/mock_view_impl.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/public/view_event_handler.h"
+#include "evita/dom/testing/mock_view_impl.h"
 
 namespace dom {
 

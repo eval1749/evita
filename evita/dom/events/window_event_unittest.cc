@@ -1,9 +1,9 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "gmock/gmock.h"
 #include "evita/dom/testing/abstract_dom_test.h"
-#include "evita/dom/mock_view_impl.h"
+#include "evita/dom/testing/mock_view_impl.h"
+#include "gmock/gmock.h"
 
 namespace dom {
 

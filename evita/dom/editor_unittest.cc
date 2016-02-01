@@ -1,14 +1,15 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include <string>
 
 #include "base/macros.h"
-#include "gmock/gmock.h"
-#include "evita/dom/testing/abstract_dom_test.h"
-#include "evita/dom/mock_io_delegate.h"
-#include "evita/dom/mock_view_impl.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/testing/abstract_dom_test.h"
+#include "evita/dom/testing/mock_io_delegate.h"
+#include "evita/dom/testing/mock_view_impl.h"
+#include "gmock/gmock.h"
 
 namespace {
 

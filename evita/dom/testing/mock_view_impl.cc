@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/mock_view_impl.h"
+#include "evita/dom/testing/mock_view_impl.h"
 
 #include "base/synchronization/waitable_event.h"
 #include "evita/dom/public/form.h"

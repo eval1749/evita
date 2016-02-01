@@ -5,7 +5,7 @@
 
 #include "base/macros.h"
 #include "evita/dom/testing/abstract_dom_test.h"
-#include "evita/dom/mock_io_delegate.h"
+#include "evita/dom/testing/mock_io_delegate.h"
 #include "gmock/gmock.h"
 
 namespace dom {

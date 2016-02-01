@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_MOCK_VIEW_IMPL_H_
-#define EVITA_DOM_MOCK_VIEW_IMPL_H_
+#ifndef EVITA_DOM_TESTING_MOCK_VIEW_IMPL_H_
+#define EVITA_DOM_TESTING_MOCK_VIEW_IMPL_H_
 
 #include <string>
 #include <vector>
@@ -59,6 +59,7 @@ class MockViewImpl final : public domapi::ViewDelegate {
                     float x,
                     float y,
                     const domapi::IntegerPromise& promise));
+#undef MessageBox
   void MessageBox(domapi::WindowId window_id,
                   const base::string16& message,
                   const base::string16& title,
@@ -99,4 +100,4 @@ class MockViewImpl final : public domapi::ViewDelegate {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_MOCK_VIEW_IMPL_H_
+#endif  // EVITA_DOM_TESTING_MOCK_VIEW_IMPL_H_

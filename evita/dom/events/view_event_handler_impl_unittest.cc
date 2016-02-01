@@ -1,13 +1,10 @@
 // Copyright (C) 1996-2013 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/events/view_event_handler_impl.h"
-#include "evita/dom/mock_view_impl.h"
-#pragma warning(push)
-#pragma warning(disable : 4625 4626 4365)
+#include "evita/dom/testing/abstract_dom_test.h"
+#include "evita/dom/testing/mock_view_impl.h"
 #include "gmock/gmock.h"
-#pragma warning(pop)
 
 namespace dom {
 

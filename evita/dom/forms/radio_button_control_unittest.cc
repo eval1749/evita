@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "evita/dom/testing/abstract_dom_test.h"
-#include "evita/dom/mock_view_impl.h"
+#include "evita/dom/testing/mock_view_impl.h"
 
 namespace dom {
 

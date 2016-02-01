@@ -19,13 +19,13 @@
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/mock_io_delegate.h"
-#include "evita/dom/mock_view_impl.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/static_script_source.h"
-#include "evita/dom/timing/mock_scheduler.h"
 #include "evita/dom/testing/gtest.h"
+#include "evita/dom/testing/mock_io_delegate.h"
+#include "evita/dom/testing/mock_view_impl.h"
+#include "evita/dom/timing/mock_scheduler.h"
 #include "evita/v8_glue/runner_delegate.h"
 
 namespace dom {

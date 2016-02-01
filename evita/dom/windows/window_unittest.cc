@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "evita/dom/windows/window.h"
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/mock_view_impl.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/testing/abstract_dom_test.h"
-#include "evita/dom/windows/window.h"
+#include "evita/dom/testing/mock_view_impl.h"
 #include "evita/v8_glue/constructor_template.h"
 #include "evita/v8_glue/converter.h"
 #include "gtest/gtest.h"

@@ -36,7 +36,8 @@ FormWindow::FormWindow(WindowId window_id,
 FormWindow::~FormWindow() {}
 
 void FormWindow::Paint(std::unique_ptr<domapi::Form> form) {
-  TRACE_EVENT0("view", "FormWindow::Paint");
+  TRACE_EVENT_WITH_FLOW0("view", "FormWindow::Paint", form->id(),
+                         TRACE_EVENT_FLAG_FLOW_IN);
   if (form_bounds_.size() != form->bounds().size()) {
     form_bounds_ = form->bounds();
     RECT window_rect;

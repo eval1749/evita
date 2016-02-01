@@ -14,11 +14,11 @@
 #include "evita/dom/events/view_event_target_set.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/v8_strings.h"
 #include "evita/dom/windows/window_ostream.h"
 #include "evita/dom/windows/window_set.h"
 #include "evita/gc/weak_ptr.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {
 namespace internal {

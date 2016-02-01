@@ -10,10 +10,11 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "evita/css/style_selector.h"
-#include "evita/dom/text/regular_expression.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/text/regular_expression.h"
+#include "evita/dom/v8_strings.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/text/buffer.h"
 #include "evita/text/marker.h"
@@ -22,7 +23,6 @@
 #include "evita/text/spelling.h"
 #include "evita/text/static_range.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {
 

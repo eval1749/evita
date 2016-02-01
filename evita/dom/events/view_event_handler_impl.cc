@@ -21,13 +21,13 @@
 #include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_event.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/v8_strings.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
 #include "evita/dom/windows/window_set.h"
 #include "evita/gc/local.h"
 #include "evita/text/buffer.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {
 

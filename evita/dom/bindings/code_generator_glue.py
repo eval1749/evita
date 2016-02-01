@@ -772,7 +772,7 @@ def dictionary_context(dictionary):
     cc_include_paths.append('evita/dom/converter.h')
     if global_has_nullable:
         cc_include_paths.append('evita/v8_glue/nullable.h')
-    cc_include_paths.append('../../v8_strings.h')
+    cc_include_paths.append('evita/dom/v8_strings.h')
 
     for name in global_js_interface_names:
         class_references.append(name)

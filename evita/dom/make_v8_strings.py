@@ -31,7 +31,7 @@ void Init(v8::Isolate* isolate);
 """
 
 STRINGS_CC = """
-#include "v8_strings.h"
+#include "evita/dom/v8_strings.h"
 
 namespace dom {
 namespace v8Strings {

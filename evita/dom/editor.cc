@@ -9,15 +9,15 @@
 #include "base/bind.h"
 #include "base/strings/utf_string_conversions.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/view_delegate.h"
-#include "evita/dom/promise_resolver.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/v8_strings.h"
 #include "evita/dom/windows/window.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/function_template_builder.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace gin {
 bool Converter<domapi::SwitchValue>::FromV8(v8::Isolate* isolate,

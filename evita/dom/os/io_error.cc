@@ -4,8 +4,8 @@
 
 #include "evita/dom/os/io_error.h"
 
+#include "evita/dom/v8_strings.h"
 #include "evita/v8_glue/runner.h"
-#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace gin {
 v8::Local<v8::Value> Converter<domapi::IoError>::ToV8(

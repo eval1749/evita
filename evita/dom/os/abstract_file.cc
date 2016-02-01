@@ -12,9 +12,9 @@
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/script_host.h"
+#include "evita/dom/v8_strings.h"
 #include "evita/v8_glue/runner.h"
 #include "gin/array_buffer.h"
-#include "v8_strings.h"  // NOLINT(build/include)
 
 namespace dom {
 

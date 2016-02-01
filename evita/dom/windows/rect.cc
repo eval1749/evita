@@ -3,7 +3,7 @@
 
 #include "evita/dom/windows/rect.h"
 
-#include "v8_strings.h"  // NOLINT(build/include)
+#include "evita/dom/v8_strings.h"
 
 namespace gin {
 

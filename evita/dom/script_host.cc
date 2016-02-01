@@ -9,13 +9,12 @@
 
 #include "base/bind.h"
 #include "base/command_line.h"
-#include "base/message_loop/message_loop.h"
 #include "base/logging.h"
+#include "base/message_loop/message_loop.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
-#include "gin/array_buffer.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/events/view_event_handler_impl.h"
 #include "evita/dom/global.h"
@@ -25,13 +24,14 @@
 #include "evita/dom/static_script_source.h"
 #include "evita/dom/timing/idle_task.h"
 #include "evita/dom/timing/performance.h"
+#include "evita/dom/v8_strings.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
 #include "evita/dom/windows/window_set.h"
 #include "evita/v8_glue/converter.h"
 #include "evita/v8_glue/runner.h"
 #include "evita/v8_glue/v8_platform.h"
-#include "v8_strings.h"  // NOLINT(build/include)
+#include "gin/array_buffer.h"
 
 namespace dom {
 

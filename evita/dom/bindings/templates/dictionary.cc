@@ -13,7 +13,7 @@ namespace dom {
 {{name}}::{{name}}()
 {% for member in members if member.has_default_value %}
     {% if loop.first %}{{'    : '}}{% else %}{{'      '}}{% endif -%}
-    {{member.cpp_name}}_({{member.default_value}}){% if not loop.last %}{{',\n'}}{% endif %}
+    {{member.cc_name}}_({{member.default_value}}){% if not loop.last %}{{',\n'}}{% endif %}
 {% endfor %} {
 }
 
@@ -26,15 +26,15 @@ Dictionary::HandleResult {{name}}::HandleKeyValue(
 {% for member in members %}
 {%  if member.is_nullable %}
   if (v8Strings::{{member.name}}.Get(isolate())->Equals(key)) {
-    {{member.from_v8_type}} maybe_{{member.cpp_name}};
-    if (!gin::ConvertFromV8(isolate(), value, &maybe_{{member.cpp_name}}))
+    {{member.from_v8_type}} maybe_{{member.cc_name}};
+    if (!gin::ConvertFromV8(isolate(), value, &maybe_{{member.cc_name}}))
         return HandleResult::CanNotConvert;
-    {{member.cpp_name}}_ = maybe_{{member.cpp_name}};
+    {{member.cc_name}}_ = maybe_{{member.cc_name}};
     return HandleResult::Succeeded;
   }
 {%  else %}
   if (v8Strings::{{member.name}}.Get(isolate())->Equals(key)) {
-    return gin::ConvertFromV8(isolate(), value, &{{member.cpp_name}}_) ?
+    return gin::ConvertFromV8(isolate(), value, &{{member.cc_name}}_) ?
         HandleResult::Succeeded : HandleResult::CanNotConvert;
   }
 {%  endif %}

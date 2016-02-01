@@ -21,7 +21,7 @@ class {{class_name}};
 {% endif %}
 class {{name}} : public {{parent_name or 'Dictionary'}} {
 {% for member in members %}
-  private: {{member.declare_type}} {{member.cpp_name}}_;
+  private: {{member.declare_type}} {{member.cc_name}}_;
 {% endfor %}
 
   public: {{name}}();
@@ -29,8 +29,8 @@ class {{name}} : public {{parent_name or 'Dictionary'}} {
 
 {% for member in members %}
   // {{member.name}}
-  public: {{member.return_type}} {{member.cpp_name}}() const { return {{member.cpp_name}}_; }
-  public: void set_{{member.cpp_name}}({{member.parameter_type}} new_{{member.cpp_name}}) { {{member.cpp_name}}_ = new_{{member.cpp_name}}; }
+  public: {{member.return_type}} {{member.cc_name}}() const { return {{member.cc_name}}_; }
+  public: void set_{{member.cc_name}}({{member.parameter_type}} new_{{member.cc_name}}) { {{member.cc_name}}_ = new_{{member.cc_name}}; }
 
 {% endfor %}
   // dom::Dictionary

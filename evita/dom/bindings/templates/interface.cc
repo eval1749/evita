@@ -76,7 +76,7 @@ namespace bindings {
  # emit_method
  #}
 {% macro emit_method(method) %}
-void {{class_name}}::{{method.cpp_name}}(
+void {{class_name}}::{{method.cc_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
 {{ emit_prologue('MethodCall', method, method.name) }}
 {% if not method.is_static %}
@@ -124,9 +124,9 @@ void {{class_name}}::{{method.cpp_name}}(
 {% endfor %}
 {% endif %}
 {% if signature.is_static %}
-{%   set callee = interface_name + '::' + signature.cpp_name %}
+{%   set callee = interface_name + '::' + signature.cc_name %}
 {% else %}
-{%   set callee = 'impl->' + signature.cpp_name %}
+{%   set callee = 'impl->' + signature.cc_name %}
 {% endif %}
 {%- if signature.to_v8_type == 'void' %}
 {{indent}}{{callee}}({{ emit_arguments(signature) }});
@@ -195,7 +195,7 @@ void {{class_name}}::Construct{{interface_name}}(
 {% for signature in constructor.signatures %}
 //   {{loop.index}} {{interface_name}}(
 {%-     for parameter in signature.parameters -%}
-         {{parameter.display_type}} {{parameter.cpp_name}}
+         {{parameter.display_type}} {{parameter.cc_name}}
          {%- if not loop.last %}{{', '}}{% endif %}
 {%-     endfor %})
 {% endfor %}
@@ -208,12 +208,12 @@ void {{class_name}}::Construct{{interface_name}}(
     exception_state.ThrowArityError({{constructor.min_arity}}, {{constructor.min_arity}}, info.Length());
     return nullptr;
   }
-{{ emit_constructor_signature(constructor.cpp_name, constructor.signature) }}
+{{ emit_constructor_signature(constructor.cc_name, constructor.signature) }}
 {% elif constructor.dispatch == 'arity' %}
   switch (info.Length()) {
 {%  for signature in constructor.signatures %}
     case {{ signature.parameters | count }}: {
-{{    emit_constructor_signature(constructor.cpp_name, signature, indent='      ') }}
+{{    emit_constructor_signature(constructor.cc_name, signature, indent='      ') }}
     }
 {%  endfor %}
   }
@@ -233,7 +233,7 @@ void {{class_name}}::Construct{{interface_name}}(
 {%  if loop.first %}
 // Static attributes
 {%  endif %}
-void {{class_name}}::Get_{{attribute.cpp_name}}(
+void {{class_name}}::Get_{{attribute.cc_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
   {{ emit_prologue('PropertyGet', attribute, attribute.name) }}
   if (info.Length() != 0) {
@@ -241,11 +241,11 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
     return;
   }
 {% if attribute.getter_raises_exception %}
-  {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cpp_name}}(&exception_state);
+  {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cc_name}}(&exception_state);
   if (exception_state.is_thrown())
     return;
 {% else %}
-  {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cpp_name}}();
+  {{attribute.to_v8_type}} value = {{interface_name}}::{{attribute.cc_name}}();
 {% endif %}
 {%  if attribute.can_fast_return %}
   info.GetReturnValue().Set(value);
@@ -258,7 +258,7 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
 }
 
 {%  if not attribute.is_read_only %}
-void {{class_name}}::Set_{{attribute.cpp_name}}(
+void {{class_name}}::Set_{{attribute.cc_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
 {{ emit_prologue('PropertySet', attribute, attribute.name) }}
   if (info.Length() != 1) {
@@ -271,9 +271,9 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
     return;
   }
 {% if attribute.setter_raises_exception %}
-  {{interface_name}}::set_{{attribute.cpp_name}}(new_value, &exception_state);
+  {{interface_name}}::set_{{attribute.cc_name}}(new_value, &exception_state);
 {% else %}
-  {{interface_name}}::set_{{attribute.cpp_name}}(new_value);
+  {{interface_name}}::set_{{attribute.cc_name}}(new_value);
 {% endif %}
 }
 
@@ -297,7 +297,7 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
 {%  if loop.first %}
 // Instance attributes
 {%  endif %}
-void {{class_name}}::Get_{{attribute.cpp_name}}(
+void {{class_name}}::Get_{{attribute.cc_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
 {{ emit_prologue('PropertyGet', attribute, attribute.name) }}
   {{interface_name}}* impl = nullptr;
@@ -306,11 +306,11 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
     return;
   }
 {% if attribute.getter_raises_exception %}
-  {{attribute.to_v8_type}} value = impl->{{attribute.cpp_name}}(&exception_state);
+  {{attribute.to_v8_type}} value = impl->{{attribute.cc_name}}(&exception_state);
   if (exception_state.is_thrown())
     return;
 {% else %}
-  {{attribute.to_v8_type}} value = impl->{{attribute.cpp_name}}();
+  {{attribute.to_v8_type}} value = impl->{{attribute.cc_name}}();
 {% endif %}
 {%    if attribute.can_fast_return %}
   info.GetReturnValue().Set(value);
@@ -323,7 +323,7 @@ void {{class_name}}::Get_{{attribute.cpp_name}}(
 }
 
 {%  if not attribute.is_read_only %}
-void {{class_name}}::Set_{{attribute.cpp_name}}(
+void {{class_name}}::Set_{{attribute.cc_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
 {{ emit_prologue('PropertySet', attribute, attribute.name) }}
   if (info.Length() != 1) {
@@ -341,9 +341,9 @@ void {{class_name}}::Set_{{attribute.cpp_name}}(
     return;
   }
 {% if attribute.setter_raises_exception %}
-  impl->set_{{attribute.cpp_name}}(new_value, &exception_state);
+  impl->set_{{attribute.cc_name}}(new_value, &exception_state);
 {% else %}
-  impl->set_{{attribute.cpp_name}}(new_value);
+  impl->set_{{attribute.cc_name}}(new_value);
 {% endif %}
 }
 
@@ -385,13 +385,13 @@ v8::Local<v8::FunctionTemplate>
 {% endif %}
 {%   if attribute.is_read_only %}
   templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cc_name}}),
       v8::Local<v8::FunctionTemplate>(),
       static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum | v8::ReadOnly));
 {%    else %}
   templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cpp_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cc_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cc_name}}),
       static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum));
 {%    endif %}
 {%  endfor %}
@@ -404,7 +404,7 @@ v8::Local<v8::FunctionTemplate>
   // static methods
 {% endif %}
   templ->Set(gin::StringToSymbol(isolate, "{{method.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cpp_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cc_name}}),
       static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum | v8::ReadOnly));
 {% endfor %}
   return builder.Build();
@@ -428,13 +428,13 @@ v8::Local<v8::ObjectTemplate> {{class_name}}:: SetupInstanceTemplate(
 {% endif %}
 {%   if attribute.is_read_only %}
   templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cc_name}}),
       v8::Local<v8::FunctionTemplate>(),
       static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum | v8::ReadOnly));
 {%   else %}
   templ->SetAccessorProperty(gin::StringToSymbol(isolate, "{{attribute.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cpp_name}}),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cpp_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Get_{{attribute.cc_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::Set_{{attribute.cc_name}}),
       static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum));
 {%   endif %}
 {%  endfor %}
@@ -443,7 +443,7 @@ v8::Local<v8::ObjectTemplate> {{class_name}}:: SetupInstanceTemplate(
   // methods
 {% endif %}
   templ->Set(gin::StringToSymbol(isolate, "{{method.name}}"),
-      v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cpp_name}}),
+      v8::FunctionTemplate::New(isolate, &{{class_name}}::{{method.cc_name}}),
       static_cast<v8::PropertyAttribute>(v8::DontDelete | v8::DontEnum | v8::ReadOnly));
 {% endfor %}
   return templ;

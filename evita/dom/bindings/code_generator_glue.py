@@ -64,9 +64,9 @@ def should_be_callback(idl_type):
 
 class GlueType(object):
 
-    def __init__(self, idl_type, cpp_name, is_by_value=True,
+    def __init__(self, idl_type, cc_name, is_by_value=True,
                  is_collectable=False, is_pointer=False, is_struct=False):
-        self.cpp_name = cpp_name
+        self.cc_name = cc_name
         self.idl_type = idl_type
         self.is_by_value = is_by_value
         self.is_collectable = is_collectable
@@ -88,10 +88,10 @@ class GlueType(object):
         if self.is_collectable:
             global global_has_gc_member
             global_has_gc_member = True
-            return 'gc::Member<%s>' % self.cpp_name
+            return 'gc::Member<%s>' % self.cc_name
         if self.is_pointer:
-            return self.cpp_name + '*'
-        return self.cpp_name
+            return self.cc_name + '*'
+        return self.cc_name
 
     def display_str(self):
         return str(self.idl_type)
@@ -110,11 +110,11 @@ class GlueType(object):
             if self.idl_type.is_nullable:
                 global global_has_nullable
                 global_has_nullable = True
-                return 'v8_glue::Nullable<%s>' % self.cpp_name
-            return self.cpp_name + '* /* from_v8 is_collectable */'
+                return 'v8_glue::Nullable<%s>' % self.cc_name
+            return self.cc_name + '* /* from_v8 is_collectable */'
         if self.is_pointer:
-            return self.cpp_name + '* /* from_v8 is_pointer */'
-        return self.cpp_name
+            return self.cc_name + '* /* from_v8 is_pointer */'
+        return self.cc_name
 
     def parameter_str(self):
         if self.element_typestr:
@@ -127,33 +127,33 @@ class GlueType(object):
         if self.element_typestr:
             return 'std::vector<%s>' % self.element_typestr
         if self.is_collectable:
-            return self.cpp_name + '* /* return_str is_collectable */'
+            return self.cc_name + '* /* return_str is_collectable */'
         if self.is_pointer:
-            return self.cpp_name + '* /* return_str is_ponter */'
-        return self.cpp_name
+            return self.cc_name + '* /* return_str is_ponter */'
+        return self.cc_name
 
     def to_v8_str(self):
-        if self.cpp_name == 'void':
-            return self.cpp_name
+        if self.cc_name == 'void':
+            return self.cc_name
         if self.is_collectable and self.idl_type.is_nullable:
             global global_has_nullable
             global_has_nullable = True
-            return 'v8_glue::Nullable<%s>' % self.cpp_name
+            return 'v8_glue::Nullable<%s>' % self.cc_name
         return 'auto'
 
 
 class CppType(object):
 
-    def __init__(self, cpp_name, is_by_value=True, is_collectable=False,
+    def __init__(self, cc_name, is_by_value=True, is_collectable=False,
                  is_pointer=False, is_struct=False):
-        self.cpp_name = cpp_name
+        self.cc_name = cc_name
         self.is_by_value = is_by_value
         self.is_collectable = is_collectable
         self.is_pointer = is_pointer
         self.is_struct = is_struct
 
     def __str__(self):
-        return 'CppType(' + self.cpp_name + \
+        return 'CppType(' + self.cc_name + \
             (' by_value' if self.is_by_value else '') + \
             (' collectable' if self.is_collectable else '') + \
             (' pointer' if self.is_pointer else '') + \
@@ -231,7 +231,7 @@ def to_glue_type(idl_type):
         if type_name in JS_INTERFACE_NAMES:
             global_js_interface_names.add(type_name)
         cpp_type = IDL_TO_CPP_TYPE_MAP[type_name]
-        return GlueType(idl_type, cpp_type.cpp_name,
+        return GlueType(idl_type, cpp_type.cc_name,
                         is_by_value=cpp_type.is_by_value,
                         is_pointer=cpp_type.is_pointer)
 
@@ -418,17 +418,17 @@ class BaseContext(object):
     """BaseContext"""
 
     def __init__(self, root_context, name):
-        self._cpp_name = None
+        self._cc_name = None
         self._attributes = None
         self._is_static = None
         self._name = name
         self._root_context = root_context
 
     @property
-    def cpp_name(self):
-        if not self._cpp_name:
-            raise Exception('%s does not have cpp_name.' % self.name)
-        return self._cpp_name
+    def cc_name(self):
+        if not self._cc_name:
+            raise Exception('%s does not have cc_name.' % self.name)
+        return self._cc_name
 
     @property
     def root_context(self):
@@ -436,7 +436,7 @@ class BaseContext(object):
 
     @property
     def is_javascript(self):
-        return self.cpp_name == 'JavaScript'
+        return self.cc_name == 'JavaScript'
 
     @property
     def is_static(self):
@@ -462,11 +462,11 @@ class BaseContext(object):
     def add_include(self, include_path):
         self._root_context.add_include(include_path)
 
-    def set_cpp_name(self, cpp_name):
-        if self._cpp_name != None and self._cpp_name != cpp_name:
-            raise Exception('%s already has cpp_name %s.' %
-                            (self.name, self._cpp_name))
-        self._cpp_name = cpp_name
+    def set_cc_name(self, cc_name):
+        if self._cc_name != None and self._cc_name != cc_name:
+            raise Exception('%s already has cc_name %s.' %
+                            (self.name, self._cc_name))
+        self._cc_name = cc_name
 
     def set_attributes(self, attributes):
         self._attributes = attributes
@@ -489,16 +489,16 @@ class AttributeContext(BaseContext):
 
     def build(self, attribute):
         self.set_attributes(attribute.extended_attributes)
-        cpp_name = cc_property_name_of(attribute)
-        self.set_cpp_name(cpp_name)
+        cc_name = cc_property_name_of(attribute)
+        self.set_cc_name(cc_name)
         self.set_is_static(attribute.is_static)
         if self.is_javascript:
-            return {'cpp_name': cpp_name}
+            return {'cc_name': cc_name}
         glue_type = to_glue_type(attribute.idl_type)
         is_raises_exception = self.attribute_of('RaisesException', '*')
         return {
             'can_fast_return': can_fast_return_of(glue_type),
-            'cpp_name': cpp_name,
+            'cc_name': cc_name,
             'display_type': glue_type.display_str(),
             'from_v8_type': glue_type.from_v8_str(),
             'getter_raises_exception':
@@ -535,7 +535,7 @@ class FunctionContext(BaseContext):
     # Make signatures without optional parameters.
     # Example: foo(T1 a, optional T2 b, optional T3 c)
     # Output: [[T1 a], [T1 a, T2 b], [T1 a, T2 b, T3 c]]
-    def build_signatures(self, cpp_name, model, attributes):
+    def build_signatures(self, cc_name, model, attributes):
         is_raises_exception = self.raises_exception(model, attributes)
         if is_raises_exception:
             self._use_exception_state = True
@@ -549,7 +549,7 @@ class FunctionContext(BaseContext):
         for parameters in make_parameters_list(model):
             self._signatures.append({
                 'call_with_list': call_with_list,
-                'cpp_name': cpp_name,
+                'cc_name': cc_name,
                 'is_raises_exception': is_raises_exception,
                 'is_static': self.is_static,
                 'name': model.name,
@@ -568,7 +568,7 @@ class FunctionContext(BaseContext):
         min_arity = min([len(signature['parameters'])
                          for signature in signatures])
         context = {
-            'cpp_name': signatures[0]['cpp_name'],
+            'cc_name': signatures[0]['cc_name'],
             'max_arity': max_arity,
             'min_arity': min_arity,
             'name': self.name,
@@ -623,15 +623,15 @@ class ConstructorContext(FunctionContext):
     def build(self, interface):
         # Using |new| operator
         for constructor in interface.constructors:
-            cpp_name = 'new ' + interface.name
-            self.build_signatures(cpp_name, constructor,
+            cc_name = 'new ' + interface.name
+            self.build_signatures(cc_name, constructor,
                                   interface.extended_attributes)
 
         # Custom constructor. It is used for validating parameters and
         # throw JavaScript exception for an invalid parameter.
         for constructor in interface.custom_constructors:
-            cpp_name = interface.name + '::New' + interface.name
-            self.build_signatures(cpp_name, constructor,
+            cc_name = interface.name + '::New' + interface.name
+            self.build_signatures(cc_name, constructor,
                                   interface.extended_attributes)
         return self.finish()
 
@@ -647,7 +647,7 @@ class RootContext(BaseContext):
         super(RootContext, self).__init__(self, root_model.name)
         self._include_paths = set()
         self._root_model = root_model
-        self.set_cpp_name(cc_function_name_of(root_model))
+        self.set_cc_name(cc_function_name_of(root_model))
 
     @property
     def include_paths(self):
@@ -700,16 +700,16 @@ class MethodGroupContext(FunctionContext):
 
     def build(self, methods):
         for method in methods:
-            cpp_name = cc_function_name_of(method)
-            self.set_cpp_name(cpp_name)
+            cc_name = cc_function_name_of(method)
+            self.set_cc_name(cc_name)
             self.set_is_static(method.is_static)
             if self.is_javascript:
                 return {
-                    'cpp_name': cpp_name,
+                    'cc_name': cc_name,
                     'is_static': method.is_static,
                     'name': method.name,
                 }
-            self.build_signatures(cpp_name, method, method.extended_attributes)
+            self.build_signatures(cc_name, method, method.extended_attributes)
         assert(not self.is_javascript)
         context = self.finish()
         context['is_static'] = self.is_static
@@ -722,9 +722,9 @@ class MethodGroupContext(FunctionContext):
 #
 def dictionary_member_context(member):
     if 'ImplementedAs' in member.extended_attributes:
-        cpp_name = member.extended_attributes['ImplementedAs']
+        cc_name = member.extended_attributes['ImplementedAs']
     else:
-        cpp_name = underscore(member.name)
+        cc_name = underscore(member.name)
 
     if member.idl_type.is_nullable:
         global global_has_nullable
@@ -732,7 +732,7 @@ def dictionary_member_context(member):
 
     glue_type = to_glue_type(member.idl_type)
     return {
-        'cpp_name': cpp_name,
+        'cc_name': cc_name,
         'declare_type': glue_type.declare_str(),
         'default_value': cpp_value(member.default_value),
         'display_type': glue_type.display_str(),
@@ -837,7 +837,7 @@ def fix_include_path(path_in):
 def function_parameter(parameter):
     glue_type = to_glue_type(parameter.idl_type)
     return {
-        'cpp_name': underscore(parameter.name),
+        'cc_name': underscore(parameter.name),
         'display_type': glue_type.display_str(),
         'from_v8_type': glue_type.from_v8_str(),
     }
@@ -865,7 +865,7 @@ def build_interface_context(interface):
     ]
 
     attribute_context_list = filter(
-        lambda context: context['cpp_name'] != 'JavaScript',
+        lambda context: context['cc_name'] != 'JavaScript',
         [AttributeContext(interface_context, attribute.name).build(attribute)
          for attribute in interface.attributes])
 
@@ -882,7 +882,7 @@ def build_interface_context(interface):
     ]
 
     method_context_list = filter(
-        lambda context: context['cpp_name'] != 'JavaScript',
+        lambda context: context['cc_name'] != 'JavaScript',
         [MethodGroupContext(interface_context, name).build(list(operations))
          for name, operations in
          groupby(interface.operations, lambda operation: operation.name)])

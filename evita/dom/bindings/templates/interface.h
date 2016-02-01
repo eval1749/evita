@@ -45,10 +45,10 @@ class {{class_name}} final :
 
   // Static attributes
 {%  endif %}
-  private: static void Get_{{attribute.cpp_name}}(
+  private: static void Get_{{attribute.cc_name}}(
       const v8::FunctionCallbackInfo<v8::Value>& info);
 {%  if not attribute.is_read_only %}
-  private: static void Set_{{attribute.cpp_name}}(
+  private: static void Set_{{attribute.cc_name}}(
       const v8::FunctionCallbackInfo<v8::Value>& info);
 {%  endif %}
 {% endfor %}
@@ -61,7 +61,7 @@ class {{class_name}} final :
 
   // Static methods
 {%  endif %}
-  private: static void {{method.cpp_name}}(
+  private: static void {{method.cc_name}}(
       const v8::FunctionCallbackInfo<v8::Value>& info);
 {% endfor %}
 {#############################################################
@@ -73,10 +73,10 @@ class {{class_name}} final :
 
   // Instance attributes
 {%  endif %}
-  private: static void Get_{{attribute.cpp_name}}(
+  private: static void Get_{{attribute.cc_name}}(
       const v8::FunctionCallbackInfo<v8::Value>& info);
 {%  if not attribute.is_read_only %}
-  private: static void Set_{{attribute.cpp_name}}(
+  private: static void Set_{{attribute.cc_name}}(
       const v8::FunctionCallbackInfo<v8::Value>& info);
 {%  endif %}
 {% endfor %}
@@ -89,7 +89,7 @@ class {{class_name}} final :
 
   // Instance methods
 {%  endif %}
-  private: static void {{method.cpp_name}}(
+  private: static void {{method.cc_name}}(
       const v8::FunctionCallbackInfo<v8::Value>& info);
 {% endfor %}
 {#############################################################

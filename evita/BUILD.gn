@@ -37,16 +37,11 @@ executable("evita_exe") {
 # TODO(eval1749): Once "evita_dom_unitests" has prices dependency, we should
 # not have source_set "application".
 source_set("application") {
-  sources = [
-    "ctrl_TitleBar.cc",
-    "vi_EditPane.cc",
-    "vi_Frame.cc",
-  ]
-
   public_deps = [
     "//base",
     "//common",
     "//evita/editor",
+    "//evita/frames",
     "//evita/metrics",
   ]
 }

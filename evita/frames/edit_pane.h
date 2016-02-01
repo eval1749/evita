@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VI_EDITPANE_H_
-#define EVITA_VI_EDITPANE_H_
+#ifndef EVITA_FRAMES_EDIT_PANE_H_
+#define EVITA_FRAMES_EDIT_PANE_H_
 
 #include "evita/views/tabs/tab_content.h"
 
@@ -75,4 +75,4 @@ class EditPane final : public views::TabContent {
   DISALLOW_COPY_AND_ASSIGN(EditPane);
 };
 
-#endif  // EVITA_VI_EDITPANE_H_
+#endif  // EVITA_FRAMES_EDIT_PANE_H_

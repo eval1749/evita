@@ -18,6 +18,7 @@
 #include "evita/editor/scheduler.h"
 #include "evita/editor/switch_set.h"
 #include "evita/editor/trace_log_controller.h"
+#include "evita/frames/frame.h"
 #include "evita/io/io_manager.h"
 #include "evita/io/io_thread.h"
 #include "evita/paint/paint_thread.h"
@@ -27,7 +28,6 @@
 #include "evita/views/frame_list.h"
 #include "evita/views/switches.h"
 #include "evita/views/view_thread_proxy.h"
-#include "evita/vi_Frame.h"
 
 #define DEBUG_IDLE 0
 

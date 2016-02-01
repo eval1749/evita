@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_CTRL_TITLEBAR_H_
-#define EVITA_CTRL_TITLEBAR_H_
+#ifndef EVITA_FRAMES_TITLE_BAR_H_
+#define EVITA_FRAMES_TITLE_BAR_H_
 
 #include <windows.h>
 
@@ -29,4 +29,4 @@ class TitleBar final {
 
 }  // namespace views
 
-#endif  // EVITA_CTRL_TITLEBAR_H_
+#endif  // EVITA_FRAMES_TITLE_BAR_H_

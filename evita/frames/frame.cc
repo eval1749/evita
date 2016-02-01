@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/vi_Frame.h"
+#include "evita/frames/frame.h"
 
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
@@ -18,15 +18,17 @@
 #include "common/tree/child_nodes.h"
 #include "common/win/native_window.h"
 #include "evita/css/style.h"
-#include "evita/ctrl_TitleBar.h"
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_event_handler.h"
-#include "evita/gfx/dx_device.h"
-#include "evita/gfx/direct2d_factory_win.h"
-#include "evita/gfx/font.h"
-#include "evita/gfx/rect_conversions.h"
 #include "evita/editor/application.h"
 #include "evita/editor/dom_lock.h"
+#include "evita/frames/edit_pane.h"
+#include "evita/frames/title_bar.h"
+#include "evita/gfx/direct2d_factory_win.h"
+#include "evita/gfx/dx_device.h"
+#include "evita/gfx/font.h"
+#include "evita/gfx/rect_conversions.h"
+#include "evita/layout/render_font_set.h"
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/compositor/root_layer.h"
 #include "evita/ui/events/event.h"
@@ -37,9 +39,7 @@
 #include "evita/views/switches.h"
 #include "evita/views/tabs/tab_strip.h"
 #include "evita/views/tabs/tab_strip_animator.h"
-#include "evita/layout/render_font_set.h"
 #include "evita/views/window_set.h"
-#include "evita/vi_EditPane.h"
 
 using common::win::Rect;
 using namespace views;  // NOLINT

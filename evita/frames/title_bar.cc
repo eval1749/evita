@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/ctrl_TitleBar.h"
+#include "evita/frames/title_bar.h"
 
 #include <algorithm>
 

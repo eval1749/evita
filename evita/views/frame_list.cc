@@ -5,7 +5,7 @@
 #include "evita/views/frame_list.h"
 
 #include "evita/editor/application.h"
-#include "evita/vi_Frame.h"
+#include "evita/frames/frame.h"
 
 namespace views {
 

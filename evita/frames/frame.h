@@ -1,17 +1,12 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// evcl - listener - Frame Window
-// listener/winapp/vi_Frame.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evcl3/mainline/listener/winapp/vi_Frame.h#2 $
-//
-#ifndef EVITA_VI_FRAME_H_
-#define EVITA_VI_FRAME_H_
+// Copyright (c) 1996-2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_FRAMES_FRAME_H_
+#define EVITA_FRAMES_FRAME_H_
 
 #include <windows.h>
+
 #include <shellapi.h>
 
 #include <unordered_set>
@@ -129,4 +124,4 @@ class Frame final : public views::Window,
   DISALLOW_COPY_AND_ASSIGN(Frame);
 };
 
-#endif  // EVITA_VI_FRAME_H_
+#endif  // EVITA_FRAMES_FRAME_H_

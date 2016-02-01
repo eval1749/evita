@@ -14,6 +14,7 @@
 #include "common/castable.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/public/tab_data.h"
+#include "evita/frames/frame.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/direct_write_factory_win.h"
@@ -31,7 +32,6 @@
 #include "evita/views/tabs/tab.h"
 #include "evita/views/tabs/tab_content.h"
 #include "evita/views/tabs/tab_strip_delegate.h"
-#include "evita/vi_Frame.h"
 
 namespace views {
 namespace {

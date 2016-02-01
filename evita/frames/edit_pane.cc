@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "evita/vi_EditPane.h"
+#include "evita/frames/edit_pane.h"
 
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
@@ -12,6 +12,7 @@
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants_or_self.h"
 #include "common/tree/node.h"
+#include "evita/frames/frame.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/resource.h"
 #include "evita/ui/animation/animator.h"
@@ -21,7 +22,6 @@
 #include "evita/ui/events/event.h"
 #include "evita/views/content_observer.h"
 #include "evita/views/content_window.h"
-#include "evita/vi_Frame.h"
 
 extern HINSTANCE g_hInstance;
 

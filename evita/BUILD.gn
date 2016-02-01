@@ -17,7 +17,6 @@ executable("evita_exe") {
   sources = [
     "ap_main.cc",
     "evita.rc",
-    "precomp.cc",
   ]
 
   deps = [

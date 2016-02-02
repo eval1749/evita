@@ -331,6 +331,8 @@ void ScriptHost::DidStartScriptHost() {
 
   // Invoke |editors.start()| with command line arguments.
   auto const isolate = runner()->isolate();
+  v8::TryCatch try_catch(isolate);
+  try_catch.SetVerbose(true);
   auto const js_editors = runner()->GetGlobalProperty("editors");
   auto const js_start =
       js_editors->ToObject()->Get(gin::StringToV8(isolate, "start"));
@@ -341,10 +343,17 @@ void ScriptHost::DidStartScriptHost() {
     view_delegate_->DidStartScriptHost(state_);
     return;
   }
-  auto const js_args =
-      gin::ConvertToV8(runner()->context(),
-                       base::CommandLine::ForCurrentProcess()->GetArgs())
-          .ToLocalChecked();
+
+  const auto& args = base::CommandLine::ForCurrentProcess()->GetArgs();
+  const auto& js_args = gin::ConvertToV8(runner()->context(), args)
+                            .FromMaybe(v8::Local<v8::Value>());
+  if (js_args.IsEmpty()) {
+    ExceptionState exception_state(ExceptionState::Situation::MethodCall,
+                                   runner()->context(), "global", "start");
+    exception_state.ThrowError("Failed to parse command line arguments");
+    view_delegate_->DidStartScriptHost(state_);
+    return;
+  }
   runner()->CallAsFunction(js_start, js_editors, js_args);
 
   // Notify script execution completion to view.

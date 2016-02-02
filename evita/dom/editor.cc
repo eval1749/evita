@@ -166,12 +166,13 @@ v8::Local<v8::Object> RunScriptInternal(const base::string16& script_text,
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name));
   v8::ScriptCompiler::Source source(gin::StringToV8(isolate, script_text),
                                     script_origin);
-  auto script = v8::ScriptCompiler::Compile(runner->context(), &source);
+  auto script = v8::ScriptCompiler::Compile(runner->context(), &source)
+                    .FromMaybe(v8::Local<v8::Script>());
   if (script.IsEmpty()) {
     return runner_scope.Escape(
         NewRunScriptResult(isolate, v8::Local<v8::Value>(), try_catch));
   }
-  auto const run_value = script.ToLocalChecked()->Run();
+  auto const run_value = script->Run();
   if (run_value.IsEmpty()) {
     return runner_scope.Escape(
         NewRunScriptResult(isolate, v8::Local<v8::Value>(), try_catch));

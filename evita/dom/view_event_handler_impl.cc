@@ -272,10 +272,15 @@ void ViewEventHandlerImpl::ProcessCommandLine(
     DVLOG(0) << "No Editor.processCommandLine";
     return;
   }
+  const auto& js_args = gin::ConvertToV8(runner->context(), args)
+                            .FromMaybe(v8::Local<v8::Value>());
+  if (js_args.IsEmpty()) {
+    DVLOG(0) << "Failed to convert args";
+    return;
+  }
   DOM_AUTO_LOCK_SCOPE();
-  runner->CallAsFunction(
-      process, editor, gin::ConvertToV8(isolate, working_directory),
-      gin::ConvertToV8(runner->context(), args).ToLocalChecked());
+  runner->CallAsFunction(process, editor,
+                         gin::ConvertToV8(isolate, working_directory), js_args);
 }
 
 void ViewEventHandlerImpl::QueryClose(domapi::WindowId window_id) {

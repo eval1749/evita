@@ -28,6 +28,8 @@ class ScopedPersistent final {
     return handle != handle_;
   }
 
+  bool IsEmpty() const { return handle_.IsEmpty(); }
+
   v8::Local<ObjectType> NewLocal(v8::Isolate* isolate) const {
     return v8::Local<ObjectType>::New(isolate, handle_);
   }

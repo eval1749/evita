@@ -55,7 +55,8 @@ PromiseResolver::PromiseResolver(const tracked_objects::Location& from_here,
                                  v8_glue::Runner* runner)
     : from_here_(from_here),
       resolver_(runner->isolate(),
-                v8::Promise::Resolver::New(runner->context()).ToLocalChecked()),
+                v8::Promise::Resolver::New(runner->context())
+                    .FromMaybe(v8::Local<v8::Promise::Resolver>())),
       runner_(runner->GetWeakPtr()),
       sequence_num_(++promise_sequence_num) {
   TRACE_EVENT_ASYNC_BEGIN1("script", "Promise", sequence_num_, "function",
@@ -76,10 +77,12 @@ void PromiseResolver::DoReject(v8::Local<v8::Value> value) {
                          from_here_.function_name());
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));
   CHECK(runner_);
-  auto const isolate = runner()->isolate();
-  auto const resolver = resolver_.NewLocal(isolate);
-  auto const result = resolver->Reject(runner()->context(), value);
-  CHECK(result.IsJust());
+  if (!resolver_.IsEmpty()) {
+    const auto& isolate = runner()->isolate();
+    const auto& resolver = resolver_.NewLocal(isolate);
+    const auto& result = resolver->Reject(runner()->context(), value);
+    CHECK(result.IsJust());
+  }
   TRACE_EVENT_ASYNC_END1("script", "Promise", sequence_num_, "type", "reject");
 }
 
@@ -89,16 +92,18 @@ void PromiseResolver::DoResolve(v8::Local<v8::Value> value) {
                          from_here_.function_name());
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));
   CHECK(runner_);
-  auto const isolate = runner()->isolate();
-  auto const resolver = resolver_.NewLocal(isolate);
-  auto const result = resolver->Resolve(runner()->context(), value);
-  CHECK(result.IsJust());
+  if (!resolver_.IsEmpty()) {
+    const auto& isolate = runner()->isolate();
+    const auto& resolver = resolver_.NewLocal(isolate);
+    const auto& result = resolver->Resolve(runner()->context(), value);
+    CHECK(result.IsJust());
+  }
   TRACE_EVENT_ASYNC_END1("script", "Promise", sequence_num_, "type", "resolve");
 }
 
 v8::Local<v8::Promise> PromiseResolver::GetPromise(v8::Isolate* isolate) const {
   CHECK(LivePromiseResolverSet::instance()->IsLive(this));
-  auto const resolver = resolver_.NewLocal(isolate);
+  const auto& resolver = resolver_.NewLocal(isolate);
   return resolver->GetPromise();
 }
 

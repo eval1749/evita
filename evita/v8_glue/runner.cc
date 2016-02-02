@@ -7,10 +7,10 @@
 #include "base/auto_reset.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/runner_delegate.h"
 #include "evita/v8_glue/per_isolate_data.h"
-#include "gin/public/context_holder.h"
+#include "evita/v8_glue/runner_delegate.h"
 #include "gin/per_context_data.h"
+#include "gin/public/context_holder.h"
 
 namespace v8_glue {
 
@@ -124,9 +124,7 @@ v8::Local<v8::Value> Runner::CallAsFunction(v8::Local<v8::Value> callee,
   }
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
-  if (maybe_value.IsEmpty())
-    return v8::Local<v8::Value>();
-  return maybe_value.ToLocalChecked();
+  return maybe_value.FromMaybe(v8::Local<v8::Value>());
 }
 
 v8::Local<v8::Value> Runner::CallAsConstructor(v8::Local<v8::Value> callee,
@@ -146,9 +144,7 @@ v8::Local<v8::Value> Runner::CallAsConstructor(v8::Local<v8::Value> callee,
   }
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
-  if (maybe_value.IsEmpty())
-    return v8::Local<v8::Value>();
-  return maybe_value.ToLocalChecked();
+  return maybe_value.FromMaybe(v8::Local<v8::Value>());
 }
 
 bool Runner::CheckCallDepth() {
@@ -167,12 +163,13 @@ v8::Local<v8::Script> Runner::Compile(const base::string16& script_text,
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate(), script_name));
   v8::ScriptCompiler::Source source(gin::StringToV8(isolate(), script_text),
                                     script_origin);
-  auto script = v8::ScriptCompiler::Compile(context(), &source);
-  if (script.IsEmpty()) {
+  const auto& maybe_script = v8::ScriptCompiler::Compile(context(), &source);
+  v8::Local<v8::Script> script;
+  if (!maybe_script.ToLocal(&script)) {
     HandleTryCatch(try_catch);
     return v8::Local<v8::Script>();
   }
-  return script.ToLocalChecked();
+  return script;
 }
 
 v8::Local<v8::Value> Runner::GetGlobalProperty(const base::StringPiece& name) {
@@ -237,9 +234,7 @@ v8::Local<v8::Value> Runner::Call(v8::Local<v8::Function> function,
   }
   delegate_->DidRunScript(this);
   HandleTryCatch(try_catch);
-  if (maybe_value.IsEmpty())
-    return v8::Local<v8::Value>();
-  return maybe_value.ToLocalChecked();
+  return maybe_value.FromMaybe(v8::Local<v8::Value>());
 }
 
 gin::ContextHolder* Runner::GetContextHolder() {

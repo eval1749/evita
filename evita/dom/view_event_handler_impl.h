@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_EVENTS_VIEW_EVENT_HANDLER_IMPL_H_
-#define EVITA_DOM_EVENTS_VIEW_EVENT_HANDLER_IMPL_H_
+#ifndef EVITA_DOM_VIEW_EVENT_HANDLER_IMPL_H_
+#define EVITA_DOM_VIEW_EVENT_HANDLER_IMPL_H_
 
 #include <vector>
 
@@ -60,4 +60,4 @@ class ViewEventHandlerImpl final : public domapi::ViewEventHandler {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_EVENTS_VIEW_EVENT_HANDLER_IMPL_H_
+#endif  // EVITA_DOM_VIEW_EVENT_HANDLER_IMPL_H_

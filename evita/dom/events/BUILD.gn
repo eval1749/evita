@@ -16,7 +16,6 @@ source_set("events") {
     "mouse_event.cc",
     "text_document_event.cc",
     "ui_event.cc",
-    "view_event_handler_impl.cc",
     "view_event_target.cc",
     "view_event_target_set.cc",
     "wheel_event.cc",

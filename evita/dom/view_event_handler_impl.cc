@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/events/view_event_handler_impl.h"
+#include "evita/dom/view_event_handler_impl.h"
 
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"

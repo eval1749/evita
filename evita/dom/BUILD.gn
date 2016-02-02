@@ -41,6 +41,8 @@ source_set("components") {
     "timers/repeating_timer.h",
     "timers/timer.cc",
     "timers/timer.h",
+    "view_event_handler_impl.cc",
+    "view_event_handler_impl.h",
     "windows/editor_window.cc",
     "windows/editor_window.h",
     "windows/point.cc",

@@ -59,6 +59,11 @@ base.OrderedSet.prototype.add = function(data) {};
 base.OrderedSet.prototype.clear = function() {};
 
 /**
+ * @return {boolean}
+ */
+base.OrderedSet.prototype.empty = function() {};
+
+/**
  * @template T
  * @param {T} data
  * @return {?base.OrderedSetNode.<T>}

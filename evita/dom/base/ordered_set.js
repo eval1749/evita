@@ -191,6 +191,9 @@ $define(global, 'base', function($export) {
       this.size_ = 0;
     }
 
+    /** @return {boolean} */
+    empty() { return this.size_ === 0; }
+
     /**
      * @param {T} data
      * @return {base.OrderedSetNode<T>}

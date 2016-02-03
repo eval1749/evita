@@ -200,7 +200,8 @@ $define(global, 'lexers', function($export) {
       console.log('adjustScanOffset', newScanOffset, this);
 
     this.scanOffset = newScanOffset;
-    if (!newScanOffset || newScanOffset <= this.tokens.minimum.start) {
+    if (newScanOffset === null || this.tokens.empty() ||
+        newScanOffset <= this.tokens.minimum.start) {
       // All tokens in token list are dirty.
       this.clear();
       return;

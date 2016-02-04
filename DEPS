@@ -12,9 +12,9 @@ vars = {
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': 'aa0301be5a241c2972f90ce2a08097b63c916390',
-  'icu_revision': '2b12f8775d66568f2b2e2bd8246efcfdff40d563',
+  'icu_revision': '8f91ea3a7e0413df3312204058da856058a8099b',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
-  'v8_revision': '75e22ef21bea00a904f6c732e2e58a678442ec11', # 4.10.139
+  'v8_revision': 'f321a9f82b148c42e9fa4caabc3bc07c539e0190', # 4.10.150
 }
 
 deps = {

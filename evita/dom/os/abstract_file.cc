@@ -13,7 +13,7 @@
 #include "evita/dom/public/io_error.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/v8_strings.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
 #include "gin/array_buffer.h"
 
 namespace dom {

@@ -14,8 +14,8 @@
 #include "base/strings/string16.h"
 #include "evita/dom/public/geometry.h"
 #include "evita/gc/member.h"
+#include "evita/ginx/nullable.h"
 #include "evita/ui/system_metrics_observer.h"
-#include "evita/v8_glue/nullable.h"
 
 namespace domapi {
 class Form;
@@ -40,7 +40,7 @@ class FormClass;
 //
 // Form
 //
-class Form final : public v8_glue::Scriptable<Form, ViewEventTarget>,
+class Form final : public ginx::Scriptable<Form, ViewEventTarget>,
                    public ui::SystemMetricsObserver {
   DECLARE_SCRIPTABLE_OBJECT(Form);
 
@@ -68,7 +68,7 @@ class Form final : public v8_glue::Scriptable<Form, ViewEventTarget>,
   void NotifyChangeForm();
 
   // bindings
-  void set_focus_control(v8_glue::Nullable<FormControl> new_focus_control);
+  void set_focus_control(ginx::Nullable<FormControl> new_focus_control);
   void set_height(int new_height);
   void set_title(const base::string16& new_title);
   void set_width(int new_width);

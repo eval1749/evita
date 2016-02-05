@@ -3,26 +3,25 @@
 
 #include "evita/dom/global.h"
 
-#include "evita/dom/text/text_document.h"
-#include "evita/dom/editor.h"
-#include "evita/dom/windows/editor_window.h"
 #include "evita/dom/clipboard/data_transfer.h"
 #include "evita/dom/clipboard/data_transfer_item.h"
 #include "evita/dom/clipboard/data_transfer_item_list.h"
+#include "evita/dom/editor.h"
 #include "evita/dom/encodings/text_decoder.h"
 #include "evita/dom/encodings/text_encoder.h"
 #include "evita/dom/events/composition_event.h"
-#include "evita/dom/events/text_document_event.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/form_event.h"
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"
+#include "evita/dom/events/text_document_event.h"
 #include "evita/dom/events/ui_event.h"
 #include "evita/dom/events/view_event_target.h"
 #include "evita/dom/events/wheel_event.h"
 #include "evita/dom/events/window_event.h"
+#include "evita/dom/file_path.h"
 #include "evita/dom/forms/button_control.h"
 #include "evita/dom/forms/checkbox_control.h"
 #include "evita/dom/forms/form.h"
@@ -32,23 +31,24 @@
 #include "evita/dom/forms/radio_button_control.h"
 #include "evita/dom/forms/text_field_control.h"
 #include "evita/dom/forms/text_field_selection.h"
-#include "evita/dom/file_path.h"
-#include "evita/dom/text/text_mutation_observer.h"
-#include "evita/dom/text/text_mutation_record.h"
 #include "evita/dom/os/directory.h"
 #include "evita/dom/os/file.h"
 #include "evita/dom/os/process.h"
-#include "evita/dom/text/text_range.h"
-#include "evita/dom/text/regular_expression.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/windows/text_selection.h"
-#include "evita/dom/windows/text_window.h"
-#include "evita/dom/windows/visual_window.h"
+#include "evita/dom/text/regular_expression.h"
+#include "evita/dom/text/text_document.h"
+#include "evita/dom/text/text_mutation_observer.h"
+#include "evita/dom/text/text_mutation_record.h"
+#include "evita/dom/text/text_range.h"
 #include "evita/dom/timers/one_shot_timer.h"
 #include "evita/dom/timers/repeating_timer.h"
 #include "evita/dom/timers/timer.h"
-#include "evita/dom/visuals/node_handle.h"
 #include "evita/dom/visuals/css_style_sheet_handle.h"
+#include "evita/dom/visuals/node_handle.h"
+#include "evita/dom/windows/editor_window.h"
+#include "evita/dom/windows/text_selection.h"
+#include "evita/dom/windows/text_window.h"
+#include "evita/dom/windows/visual_window.h"
 #include "evita/dom/windows/window.h"
 
 namespace dom {
@@ -73,7 +73,7 @@ v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     auto context = v8::Context::New(isolate);
     v8::Context::Scope context_scope(context);
 
-#define INSTALL(name) v8_glue::Installer<name>::Run(isolate, global_templ)
+#define INSTALL(name) ginx::Installer<name>::Run(isolate, global_templ)
 
     // Clipboard
     INSTALL(DataTransfer);

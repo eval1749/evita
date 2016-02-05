@@ -12,10 +12,10 @@
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_range.h"
 #include "evita/dom/v8_strings.h"
+#include "evita/ginx/converter.h"
+#include "evita/ginx/runner.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/runner.h"
 
 namespace dom {
 namespace internal {
@@ -205,7 +205,7 @@ v8::Handle<v8::Object> TextDocument::style_at(
 
   const auto runner = ScriptHost::instance()->runner();
   const auto isolate = runner->isolate();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  ginx::Runner::EscapableHandleScope runner_scope(runner);
 
   const auto style_ctor =
       runner->global()->Get(v8Strings::TextStyle.Get(isolate))->ToObject();
@@ -251,7 +251,7 @@ void TextRange::SetStyle(v8::Handle<v8::Object> style_dict,
 
   const auto runner = ScriptHost::instance()->runner();
   const auto isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
 
 #define LOAD_DICT_VALUE(type, attr_name, member_name)                 \
   const auto attr_name = v8Strings::attr_name.Get(isolate);           \

@@ -5,7 +5,7 @@
 #include "evita/dom/windows/text_window.h"
 
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/bindings/v8_glue_TextDocumentEventInit.h"
+#include "evita/dom/bindings/ginx_TextDocumentEventInit.h"
 #include "evita/dom/events/text_document_event.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/float_point.h"

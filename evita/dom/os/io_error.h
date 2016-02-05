@@ -6,7 +6,7 @@
 #define EVITA_DOM_OS_IO_ERROR_H_
 
 #include "evita/dom/public/io_error.h"
-#include "evita/v8_glue/converter.h"
+#include "evita/ginx/converter.h"
 
 namespace gin {
 template <>

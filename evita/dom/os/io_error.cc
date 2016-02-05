@@ -5,13 +5,13 @@
 #include "evita/dom/os/io_error.h"
 
 #include "evita/dom/v8_strings.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
 
 namespace gin {
 v8::Local<v8::Value> Converter<domapi::IoError>::ToV8(
     v8::Isolate* isolate,
     const domapi::IoError& error) {
-  auto const runner = v8_glue::Runner::From(isolate);
+  auto const runner = ginx::Runner::From(isolate);
   auto const os_file_error_ctor = runner->global()
                                       ->Get(dom::v8Strings::Os.Get(isolate))
                                       ->ToObject()

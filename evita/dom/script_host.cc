@@ -28,9 +28,9 @@
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/window.h"
 #include "evita/dom/windows/window_set.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/v8_platform.h"
+#include "evita/ginx/converter.h"
+#include "evita/ginx/runner.h"
+#include "evita/ginx/v8_platform.h"
 #include "gin/array_buffer.h"
 
 namespace dom {
@@ -54,7 +54,7 @@ void DidRejectPromise(v8::PromiseRejectMessage reject_message) {
     return;
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   auto const js_editor = runner->GetGlobalProperty("Editor");
   if (js_editor.IsEmpty()) {
     DVLOG(0) << "No Editor";
@@ -161,7 +161,7 @@ void MessageCallback(v8::Local<v8::Message> message,
   MessageBox(text, MB_ICONERROR);
 }
 
-void PopulateEnviromentStrings(v8_glue::Runner* runner) {
+void PopulateEnviromentStrings(ginx::Runner* runner) {
   auto const strings = ::GetEnvironmentStringsW();
   if (!strings)
     return;
@@ -247,15 +247,15 @@ Performance* ScriptHost::performance() const {
   return performance_.get();
 }
 
-v8_glue::Runner* ScriptHost::runner() const {
+ginx::Runner* ScriptHost::runner() const {
   DCHECK_EQ(message_loop_for_script_, base::MessageLoop::current());
   return testing_runner_ ? testing_runner_ : runner_.get();
 }
 
-void ScriptHost::set_testing_runner(v8_glue::Runner* runner) {
+void ScriptHost::set_testing_runner(ginx::Runner* runner) {
   testing_runner_ = runner;
   runner->set_user_data(this);
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   PopulateEnviromentStrings(runner);
 }
 
@@ -317,7 +317,7 @@ void ScriptHost::DidStartScriptHost() {
   auto const script_sources = internal::GetJsLibSources();
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
-  v8_glue::Runner::Scope runner_scope(runner());
+  ginx::Runner::Scope runner_scope(runner());
   PopulateEnviromentStrings(runner());
   for (const auto& script_source : script_sources) {
     auto const result =
@@ -370,7 +370,7 @@ void ScriptHost::ResetForTesting() {
 // This function is called by |PromiseResolver::ScheduleRunMicrotasks|.
 void ScriptHost::RunMicrotasks() {
   TRACE_EVENT0("script", "ScriptHost::RunMicrotasks");
-  v8_glue::Runner::Scope runner_scope(runner());
+  ginx::Runner::Scope runner_scope(runner());
   v8::TryCatch try_catch(runner()->isolate());
   try_catch.SetVerbose(true);
   DOM_AUTO_LOCK_SCOPE();
@@ -390,10 +390,10 @@ void ScriptHost::Start() {
   SuppressMessageBoxScope suppress_messagebox_scope;
 
   auto const isolate = this->isolate();
-  auto const runner = new v8_glue::Runner(isolate, script_host);
+  auto const runner = new ginx::Runner(isolate, script_host);
   runner->set_user_data(this);
   runner_.reset(runner);
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   isolate->SetCaptureStackTraceForUncaughtExceptions(true);
   isolate->AddMessageListener(MessageCallback);
   isolate->AddGCPrologueCallback(GcPrologueCallback);
@@ -401,7 +401,7 @@ void ScriptHost::Start() {
   // TODO(eval1749): Turning off micro task running during creating wrapper,
   // name |Editor.checkSpelling('foo').then(console.log)| to work. Otherwise
   // |console.log| executed as micro task gets storage object which doesn't have
-  // |v8_glue::WrapperInfo| at zeroth internal field. See "985a73d2cce5", same
+  // |ginx::WrapperInfo| at zeroth internal field. See "985a73d2cce5", same
   // thing is happened in spell checker with |Editor.RegExp| object.
   isolate->SetAutorunMicrotasks(false);
   isolate->SetPromiseRejectCallback(DidRejectPromise);
@@ -437,11 +437,11 @@ void ScriptHost::WillDestroyViewHost() {
 }
 
 v8::Local<v8::ObjectTemplate> ScriptHost::GetGlobalTemplate(
-    v8_glue::Runner* runner) {
+    ginx::Runner* runner) {
   return Global::instance()->object_template(runner->isolate());
 }
 
-void ScriptHost::UnhandledException(v8_glue::Runner*,
+void ScriptHost::UnhandledException(ginx::Runner*,
                                     const v8::TryCatch& try_catch) {
   ASSERT_DOM_LOCKED();
   base::string16 text;
@@ -481,7 +481,7 @@ void ScriptHost::UnhandledException(v8_glue::Runner*,
 
   auto const isolate = runner()->isolate();
   DVLOG(0) << text;
-  v8_glue::Runner::Scope runner_scope(runner());
+  ginx::Runner::Scope runner_scope(runner());
   auto const js_console = runner_->GetGlobalProperty("console");
   if (js_console.IsEmpty() || !js_console->IsObject()) {
     DVLOG(0) << "No console object. Why?";

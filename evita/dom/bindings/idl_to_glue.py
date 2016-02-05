@@ -21,7 +21,7 @@ from idl_compiler import idl_filename_to_interface_name, parse_options, \
 from code_generator_glue import CodeGeneratorGlue
 from utilities import create_component_info_provider, write_file
 
-PREFIX = 'v8_glue_'
+PREFIX = 'ginx_'
 
 
 class IdlCompilerGlue(IdlCompiler):

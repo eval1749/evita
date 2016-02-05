@@ -7,14 +7,14 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string16.h"
 #include "base/strings/stringprintf.h"
-#include "evita/dom/bindings/v8_glue_MoveFileOptions.h"
+#include "evita/dom/bindings/ginx_MoveFileOptions.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/os/file_status.h"
 #include "evita/dom/os/io_error.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/io_delegate.h"
 #include "evita/dom/script_host.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
 #include "gin/array_buffer.h"
 
 namespace dom {

@@ -55,8 +55,8 @@ action_foreach("cc_bindings") {
     "//third_party/WebKit/Source/bindings/IDLExtendedAttributes.txt",
   ]
   outputs = [
-    "$bindings_gen_dir/v8_glue_{{source_name_part}}.cc",
-    "$bindings_gen_dir/v8_glue_{{source_name_part}}.h",
+    "$bindings_gen_dir/ginx_{{source_name_part}}.cc",
+    "$bindings_gen_dir/ginx_{{source_name_part}}.h",
   ]
   args = [
     "--output-dir",

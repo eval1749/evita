@@ -7,19 +7,19 @@
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/event_target.h"
-#include "evita/v8_glue/constructor_template.h"
-#include "evita/v8_glue/nullable.h"
+#include "evita/ginx/constructor_template.h"
+#include "evita/ginx/nullable.h"
 
 namespace dom {
 
-using v8_glue::Nullable;
+using ginx::Nullable;
 
 //////////////////////////////////////////////////////////////////////
 //
 // SampleEventTarget
 //
 class SampleEventTarget final
-    : public v8_glue::Scriptable<SampleEventTarget, EventTarget> {
+    : public ginx::Scriptable<SampleEventTarget, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(SampleEventTarget);
 
  public:
@@ -45,7 +45,7 @@ class SampleEventTarget final
 // SampleEventTargetClass
 //
 class SampleEventTargetClass final
-    : public v8_glue::DerivedWrapperInfo<SampleEventTarget, EventTarget> {
+    : public ginx::DerivedWrapperInfo<SampleEventTarget, EventTarget> {
  public:
   explicit SampleEventTargetClass(const char* name) : BaseClass(name) {}
   ~SampleEventTargetClass() final = default;
@@ -53,9 +53,9 @@ class SampleEventTargetClass final
  private:
   static void ConstructSampleEventTarget(
       const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (!v8_glue::internal::IsValidConstructCall(info))
+    if (!ginx::internal::IsValidConstructCall(info))
       return;
-    v8_glue::internal::FinishConstructCall(info, NewSampleEventTarget(info));
+    ginx::internal::FinishConstructCall(info, NewSampleEventTarget(info));
   }
 
   v8::Local<v8::FunctionTemplate> CreateConstructorTemplate(
@@ -141,7 +141,7 @@ class SampleEventTargetClass final
       exception_state.ThrowReceiverError(info.This());
       return;
     }
-    v8_glue::Nullable<Event> new_value;
+    ginx::Nullable<Event> new_value;
     if (!gin::ConvertFromV8(isolate, info[0], &new_value)) {
       exception_state.ThrowArgumentError("Event or null", info[0], 0);
       return;
@@ -169,7 +169,7 @@ class EventTargetTest : public AbstractDomTest {
   void PopulateGlobalTemplate(
       v8::Isolate* isolate,
       v8::Local<v8::ObjectTemplate> global_template) final {
-    v8_glue::Installer<SampleEventTarget>::Run(isolate, global_template);
+    ginx::Installer<SampleEventTarget>::Run(isolate, global_template);
   }
 
   DISALLOW_COPY_AND_ASSIGN(EventTargetTest);

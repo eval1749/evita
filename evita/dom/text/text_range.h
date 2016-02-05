@@ -7,8 +7,8 @@
 
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
-#include "evita/v8_glue/either.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/either.h"
+#include "evita/ginx/scriptable.h"
 
 namespace text {
 class Offset;
@@ -28,7 +28,7 @@ class TextDocument;
 //
 // TextRange
 //
-class TextRange final : public v8_glue::Scriptable<TextRange> {
+class TextRange final : public ginx::Scriptable<TextRange> {
   DECLARE_SCRIPTABLE_OBJECT(TextRange);
 
  public:
@@ -44,14 +44,14 @@ class TextRange final : public v8_glue::Scriptable<TextRange> {
   void InsertBefore(const base::string16& text,
                     ExceptionState* exception_state);
   static TextRange* NewTextRange(
-      v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+      ginx::Either<TextDocument*, TextRange*> document_or_range,
       ExceptionState* exception_state);
   static TextRange* NewTextRange(
-      v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+      ginx::Either<TextDocument*, TextRange*> document_or_range,
       int offset,
       ExceptionState* exception_state);
   static TextRange* NewTextRange(
-      v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+      ginx::Either<TextDocument*, TextRange*> document_or_range,
       int start,
       int end,
       ExceptionState* exception_state);

@@ -11,7 +11,7 @@ namespace bindings {
 class RepeatingTimerClass;
 }
 
-class RepeatingTimer final : public v8_glue::Scriptable<RepeatingTimer, Timer> {
+class RepeatingTimer final : public ginx::Scriptable<RepeatingTimer, Timer> {
   DECLARE_SCRIPTABLE_OBJECT(RepeatingTimer);
 
  public:

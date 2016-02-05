@@ -9,9 +9,9 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "evita/dom/public/promise.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/scoped_persistent.h"
+#include "evita/ginx/converter.h"
+#include "evita/ginx/runner.h"
+#include "evita/ginx/scoped_persistent.h"
 
 namespace dom {
 
@@ -42,17 +42,17 @@ class PromiseResolver final
 
  private:
   PromiseResolver(const tracked_objects::Location& from_here,
-                  v8_glue::Runner* runner);
+                  ginx::Runner* runner);
 
-  v8_glue::Runner* runner() const {
-    return reinterpret_cast<v8_glue::Runner*>(runner_.get());
+  ginx::Runner* runner() const {
+    return reinterpret_cast<ginx::Runner*>(runner_.get());
   }
 
   void DoReject(v8::Local<v8::Value> reason);
   void DoResolve(v8::Local<v8::Value> value);
 
   tracked_objects::Location from_here_;
-  v8_glue::ScopedPersistent<v8::Promise::Resolver> resolver_;
+  ginx::ScopedPersistent<v8::Promise::Resolver> resolver_;
   base::WeakPtr<gin::Runner> runner_;
   int const sequence_num_;
 
@@ -64,7 +64,7 @@ v8::Local<v8::Promise> PromiseResolver::Call(
     const tracked_objects::Location& from_here,
     const base::Callback<void(const domapi::Promise<T, U>&)> closure) {
   const auto runner = ScriptHost::instance()->runner();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  ginx::Runner::EscapableHandleScope runner_scope(runner);
 
   const auto& resolver =
       make_scoped_refptr(new PromiseResolver(from_here, runner));
@@ -81,7 +81,7 @@ template <typename T>
 void PromiseResolver::Reject(T reason) {
   if (!runner_)
     return;
-  v8_glue::Runner::Scope runner_scope(runner());
+  ginx::Runner::Scope runner_scope(runner());
   const auto isolate = runner()->isolate();
   v8::Local<v8::Value> v8_value;
   if (!gin::TryConvertToV8(isolate, reason, &v8_value))
@@ -93,7 +93,7 @@ template <typename T>
 void PromiseResolver::Resolve(T value) {
   if (!runner_)
     return;
-  v8_glue::Runner::Scope runner_scope(runner());
+  ginx::Runner::Scope runner_scope(runner());
   const auto isolate = runner()->isolate();
   v8::Local<v8::Value> v8_value;
   if (!gin::TryConvertToV8(isolate, value, &v8_value))

@@ -9,8 +9,8 @@
 
 #include "evita/dom/windows/window.h"
 
-#include "evita/gc/member.h"
 #include "evita/dom/forms/form_observer.h"
+#include "evita/gc/member.h"
 
 namespace dom {
 
@@ -26,7 +26,7 @@ class FormWindowClass;
 //
 // FormWindow
 //
-class FormWindow final : public v8_glue::Scriptable<FormWindow, Window>,
+class FormWindow final : public ginx::Scriptable<FormWindow, Window>,
                          public FormObserver {
   DECLARE_SCRIPTABLE_OBJECT(FormWindow);
 

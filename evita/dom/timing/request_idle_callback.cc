@@ -4,14 +4,14 @@
 
 #include "evita/dom/editor.h"
 
-#include "evita/dom/bindings/v8_glue_IdleRequestOptions.h"
+#include "evita/dom/bindings/ginx_IdleRequestOptions.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/idle_deadline.h"
 #include "evita/dom/timing/idle_task.h"
-#include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/scoped_persistent.h"
+#include "evita/ginx/runner.h"
+#include "evita/ginx/scoped_persistent.h"
 
 namespace dom {
 
@@ -31,7 +31,7 @@ class IdleTaskWrapper {
   void Run();
 
  private:
-  v8_glue::ScopedPersistent<v8::Function> callback_;
+  ginx::ScopedPersistent<v8::Function> callback_;
 
   DISALLOW_COPY_AND_ASSIGN(IdleTaskWrapper);
 };
@@ -44,7 +44,7 @@ IdleTaskWrapper::IdleTaskWrapper(v8::Isolate* isolate,
 void IdleTaskWrapper::Run() {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   if (idle_deadline_object.IsEmpty()) {
     idle_deadline_object.Set(isolate,
                              gin::ConvertToV8(isolate, new IdleDeadline()));

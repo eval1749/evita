@@ -26,7 +26,7 @@ class FormControlClass;
 //
 // FormControl
 //
-class FormControl : public v8_glue::Scriptable<FormControl, ViewEventTarget> {
+class FormControl : public ginx::Scriptable<FormControl, ViewEventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(FormControl);
 
  public:

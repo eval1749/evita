@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "evita/v8_glue/v8.h"
+#include "evita/ginx/v8.h"
 
 namespace visuals {
 namespace css {

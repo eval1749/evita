@@ -15,6 +15,7 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/regular_expression.h"
 #include "evita/dom/v8_strings.h"
+#include "evita/ginx/runner.h"
 #include "evita/metrics/time_scope.h"
 #include "evita/text/buffer.h"
 #include "evita/text/marker.h"
@@ -22,7 +23,6 @@
 #include "evita/text/offset.h"
 #include "evita/text/spelling.h"
 #include "evita/text/static_range.h"
-#include "evita/v8_glue/runner.h"
 
 namespace dom {
 
@@ -82,7 +82,7 @@ bool TextDocument::CheckCanChange(ExceptionState* exception_state) const {
   if (buffer_->IsReadOnly()) {
     auto const runner = ScriptHost::instance()->runner();
     auto const isolate = runner->isolate();
-    v8_glue::Runner::Scope runner_scope(runner);
+    ginx::Runner::Scope runner_scope(runner);
     auto const ctor =
         runner->global()->Get(v8Strings::TextDocumentReadOnly.Get(isolate));
     auto const error = runner->CallAsConstructor(ctor, GetWrapper(isolate));

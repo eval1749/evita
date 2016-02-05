@@ -20,7 +20,7 @@ class PerformanceClass;
 // An implementation of Performance interface defined in:
 // https://w3c.github.io/hr-time
 //
-class Performance final : public v8_glue::Scriptable<Performance, EventTarget> {
+class Performance final : public ginx::Scriptable<Performance, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(Performance);
 
  public:

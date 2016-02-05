@@ -17,7 +17,7 @@ namespace bindings {
 class KeyboardEventClass;
 }
 
-class KeyboardEvent final : public v8_glue::Scriptable<KeyboardEvent, UiEvent> {
+class KeyboardEvent final : public ginx::Scriptable<KeyboardEvent, UiEvent> {
   DECLARE_SCRIPTABLE_OBJECT(KeyboardEvent)
 
  public:

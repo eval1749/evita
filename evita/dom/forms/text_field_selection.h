@@ -6,7 +6,7 @@
 #define EVITA_DOM_FORMS_TEXT_FIELD_SELECTION_H_
 
 #include "evita/gc/member.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -16,8 +16,7 @@ namespace bindings {
 class TextFieldSelectionClass;
 }
 
-class TextFieldSelection final
-    : public v8_glue::Scriptable<TextFieldSelection> {
+class TextFieldSelection final : public ginx::Scriptable<TextFieldSelection> {
   DECLARE_SCRIPTABLE_OBJECT(TextFieldSelection);
 
  public:

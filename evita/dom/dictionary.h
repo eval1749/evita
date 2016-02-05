@@ -10,7 +10,7 @@
 // IDL compiler should insert include directive for generated files. This is
 // workaround for "dom/os/DirectoryEntry.idl".
 #include "evita/dom/time_stamp.h"
-#include "evita/v8_glue/converter.h"
+#include "evita/ginx/converter.h"
 
 namespace dom {
 

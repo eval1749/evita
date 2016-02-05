@@ -21,7 +21,7 @@ namespace bindings {
 class FileClass;
 }
 
-class File final : public v8_glue::Scriptable<File, AbstractFile> {
+class File final : public ginx::Scriptable<File, AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(File);
 
  public:

@@ -11,7 +11,7 @@
 
 #include "evita/dom/clipboard/clipboard.h"
 #include "evita/dom/clipboard/data_transfer_data.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -25,7 +25,7 @@ class ExceptionState;
 //
 // DataTransferItem
 //
-class DataTransferItem final : public v8_glue::Scriptable<DataTransferItem> {
+class DataTransferItem final : public ginx::Scriptable<DataTransferItem> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransferItem)
  public:
   DataTransferItem(const Clipboard::Format* format, DataTransferData* data);

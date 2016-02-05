@@ -7,8 +7,8 @@
 
 #include "evita/dom/windows/text_window.h"
 #include "evita/gc/member.h"
+#include "evita/ginx/scriptable.h"
 #include "evita/text/selection_change_observer.h"
-#include "evita/v8_glue/scriptable.h"
 
 namespace text {
 class Selection;
@@ -28,7 +28,7 @@ class TextSelectionClass;
 //
 // TextSelection
 //
-class TextSelection final : public v8_glue::Scriptable<TextSelection>,
+class TextSelection final : public ginx::Scriptable<TextSelection>,
                             private text::SelectionChangeObserver {
   DECLARE_SCRIPTABLE_OBJECT(TextSelection);
 

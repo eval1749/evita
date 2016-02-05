@@ -5,7 +5,7 @@
 #ifndef EVITA_DOM_EVENTS_COMPOSITION_SPAN_H_
 #define EVITA_DOM_EVENTS_COMPOSITION_SPAN_H_
 
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -13,7 +13,7 @@ namespace bindings {
 class CompositionSpanClass;
 }
 
-class CompositionSpan final : public v8_glue::Scriptable<CompositionSpan> {
+class CompositionSpan final : public ginx::Scriptable<CompositionSpan> {
   DECLARE_SCRIPTABLE_OBJECT(CompositionSpan);
 
  public:

@@ -5,8 +5,8 @@
 #ifndef EVITA_DOM_CONVERTER_H_
 #define EVITA_DOM_CONVERTER_H_
 
+#include "evita/ginx/converter.h"
 #include "evita/text/offset.h"
-#include "evita/v8_glue/converter.h"
 
 namespace base {
 class Time;

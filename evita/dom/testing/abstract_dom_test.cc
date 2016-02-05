@@ -26,7 +26,7 @@
 #include "evita/dom/testing/mock_view_impl.h"
 #include "evita/dom/timing/mock_scheduler.h"
 #include "evita/dom/view_event_handler_impl.h"
-#include "evita/v8_glue/runner_delegate.h"
+#include "evita/ginx/runner_delegate.h"
 
 namespace dom {
 
@@ -35,7 +35,7 @@ using ::testing::_;
 base::string16 V8ToString(v8::Local<v8::Value> value);
 
 namespace {
-v8_glue::Runner* static_runner;
+ginx::Runner* static_runner;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -89,7 +89,7 @@ void StaticScript::LoadAll(v8::Isolate* isolate) {
   }
 }
 
-class RunnerDelegateMock final : public v8_glue::RunnerDelegate {
+class RunnerDelegateMock final : public ginx::RunnerDelegate {
  public:
   RunnerDelegateMock() = default;
 
@@ -105,7 +105,7 @@ class RunnerDelegateMock final : public v8_glue::RunnerDelegate {
 //
 class AbstractDomTest::RunnerDelegate final
     : public common::Singleton<RunnerDelegate>,
-      public v8_glue::RunnerDelegate {
+      public ginx::RunnerDelegate {
  public:
   RunnerDelegate() = default;
   ~RunnerDelegate() final = default;
@@ -115,24 +115,23 @@ class AbstractDomTest::RunnerDelegate final
   }
 
  private:
-  // v8_glue::RunnerDelegate
-  v8::Local<v8::ObjectTemplate> GetGlobalTemplate(
-      v8_glue::Runner* runner) final;
-  void UnhandledException(v8_glue::Runner* runner,
+  // ginx::RunnerDelegate
+  v8::Local<v8::ObjectTemplate> GetGlobalTemplate(ginx::Runner* runner) final;
+  void UnhandledException(ginx::Runner* runner,
                           const v8::TryCatch& try_catch) final;
 
   AbstractDomTest* test_instance_;
 };
 
-// v8_glue::RunnerDelegate
+// ginx::RunnerDelegate
 v8::Local<v8::ObjectTemplate>
-AbstractDomTest::RunnerDelegate::GetGlobalTemplate(v8_glue::Runner* runner) {
+AbstractDomTest::RunnerDelegate::GetGlobalTemplate(ginx::Runner* runner) {
   auto const templ =
-      static_cast<v8_glue::RunnerDelegate*>(test_instance_->script_host_)
+      static_cast<ginx::RunnerDelegate*>(test_instance_->script_host_)
           ->GetGlobalTemplate(runner);
   auto const isolate = runner->isolate();
   RunnerDelegateMock temp_delegate;
-  v8_glue::Runner temp_runner(isolate, &temp_delegate);
+  ginx::Runner temp_runner(isolate, &temp_delegate);
   auto const context = v8::Context::New(isolate);
   v8::Context::Scope context_scope(context);
   test_instance_->PopulateGlobalTemplate(isolate, templ);
@@ -141,7 +140,7 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(v8_glue::Runner* runner) {
 }
 
 void AbstractDomTest::RunnerDelegate::UnhandledException(
-    v8_glue::Runner*,
+    ginx::Runner*,
     const v8::TryCatch& try_catch) {
   base::string16 text;
   auto const error = try_catch.Exception();
@@ -227,7 +226,7 @@ base::FilePath AbstractDomTest::BuildPath(
 }
 
 bool AbstractDomTest::DoCall(const base::StringPiece& name, const Argv& argv) {
-  v8_glue::Runner::Scope runner_scope(runner_.get());
+  ginx::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
   auto callee = runner_->GetGlobalProperty(name);
   auto const result = runner_->CallAsFunction(callee, v8::Null(isolate), argv);
@@ -237,7 +236,7 @@ bool AbstractDomTest::DoCall(const base::StringPiece& name, const Argv& argv) {
 std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
                                         const char* file_name,
                                         int line_number) {
-  v8_glue::Runner::Scope runner_scope(runner_.get());
+  ginx::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name),
                                  v8::Integer::New(isolate, line_number),
@@ -277,7 +276,7 @@ void AbstractDomTest::RunFile(
 bool AbstractDomTest::RunScript(const base::StringPiece& script_text,
                                 const base::StringPiece& file_name,
                                 int line_number) {
-  v8_glue::Runner::Scope runner_scope(runner_.get());
+  ginx::Runner::Scope runner_scope(runner_.get());
   auto const isolate = runner_->isolate();
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name),
                                  v8::Integer::New(isolate, line_number),
@@ -338,12 +337,12 @@ void AbstractDomTest::SetUp() {
     return;
   }
 
-  auto const runner = new v8_glue::Runner(isolate, RunnerDelegate::instance());
+  auto const runner = new ginx::Runner(isolate, RunnerDelegate::instance());
   runner_.reset(runner);
   script_host_->set_testing_runner(runner);
 
   // Load library files.
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   for (const auto& script : StaticScript::instance()->GetAll(isolate)) {
     const auto& unbound_script = script->GetUnboundScript();
     DVLOG(0) << "Run "
@@ -362,9 +361,9 @@ void AbstractDomTest::TearDown() {
     static_runner = runner_.release();
 }
 
-void AbstractDomTest::UnhandledException(v8_glue::Runner* runner,
+void AbstractDomTest::UnhandledException(ginx::Runner* runner,
                                          const v8::TryCatch& try_catch) {
-  static_cast<v8_glue::RunnerDelegate*>(RunnerDelegate::instance())
+  static_cast<ginx::RunnerDelegate*>(RunnerDelegate::instance())
       ->UnhandledException(runner, try_catch);
 }
 

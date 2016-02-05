@@ -5,7 +5,7 @@
 #ifndef EVITA_DOM_CLIPBOARD_DATA_TRANSFER_H_
 #define EVITA_DOM_CLIPBOARD_DATA_TRANSFER_H_
 
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -15,7 +15,7 @@ class DataTransferClass;
 
 class DataTransferItemList;
 
-class DataTransfer final : public v8_glue::Scriptable<DataTransfer> {
+class DataTransfer final : public ginx::Scriptable<DataTransfer> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransfer)
 
  public:

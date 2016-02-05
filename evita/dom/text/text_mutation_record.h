@@ -8,8 +8,8 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
+#include "evita/ginx/scriptable.h"
 #include "evita/text/offset.h"
-#include "evita/v8_glue/scriptable.h"
 
 namespace dom {
 
@@ -19,8 +19,7 @@ namespace bindings {
 class TextMutationRecordClass;
 }
 
-class TextMutationRecord final
-    : public v8_glue::Scriptable<TextMutationRecord> {
+class TextMutationRecord final : public ginx::Scriptable<TextMutationRecord> {
   DECLARE_SCRIPTABLE_OBJECT(TextMutationRecord);
 
  public:

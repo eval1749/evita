@@ -31,7 +31,7 @@ class TextWindowClass;
 
 // The |TextWindow| is DOM world representative of UI world TextWidget, aka
 // TextWindow.
-class TextWindow final : public v8_glue::Scriptable<TextWindow, Window> {
+class TextWindow final : public ginx::Scriptable<TextWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
 
  public:

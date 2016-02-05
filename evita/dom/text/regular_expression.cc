@@ -7,14 +7,14 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/bindings/v8_glue_RegExpInit.h"
+#include "evita/dom/bindings/ginx_RegExpInit.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_range.h"
 #include "evita/dom/v8_strings.h"
+#include "evita/ginx/runner.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
-#include "evita/v8_glue/runner.h"
 #include "regex/regex.h"
 
 namespace dom {
@@ -487,7 +487,7 @@ v8::Local<v8::Value> RegularExpression::ExecuteOnTextDocument(
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   BufferMatcher matcher(regex_.get(), document->buffer(), start, end);
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  ginx::Runner::EscapableHandleScope runner_scope(runner);
   if (!::Regex::StartMatch(regex_->regex_impl(), &matcher))
     return runner_scope.Escape(
         v8::Local<v8::Value>::New(isolate, v8::Null(isolate)));

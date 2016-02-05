@@ -6,8 +6,8 @@
 
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
-#include "evita/dom/bindings/v8_glue_UiEventInit.h"
-#include "evita/dom/bindings/v8_glue_WindowEventInit.h"
+#include "evita/dom/bindings/ginx_UiEventInit.h"
+#include "evita/dom/bindings/ginx_WindowEventInit.h"
 #include "evita/dom/events/composition_event.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/keyboard_event.h"
@@ -26,8 +26,8 @@
 #include "evita/dom/windows/window.h"
 #include "evita/dom/windows/window_set.h"
 #include "evita/gc/local.h"
+#include "evita/ginx/runner.h"
 #include "evita/text/buffer.h"
-#include "evita/v8_glue/runner.h"
 
 namespace dom {
 
@@ -58,7 +58,7 @@ Window* FromWindowId(domapi::WindowId window_id) {
   return window;
 }
 
-v8::Local<v8::Value> GetOpenFileHandler(v8_glue::Runner* runner,
+v8::Local<v8::Value> GetOpenFileHandler(ginx::Runner* runner,
                                         domapi::WindowId window_id) {
   auto const isolate = runner->isolate();
   if (window_id == domapi::kInvalidWindowId)
@@ -95,7 +95,7 @@ void ViewEventHandlerImpl::DispatchEventWithInLock(EventTarget* event_target,
   TRACE_EVENT1("script", "ViewEventHandlerImpl::DispatchEventWithInLock",
                "type", base::UTF16ToASCII(event->type()));
   auto const runner = host_->runner();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   v8::TryCatch try_catch(runner->isolate());
   try_catch.SetVerbose(true);
   DOM_AUTO_LOCK_SCOPE();
@@ -243,7 +243,7 @@ void ViewEventHandlerImpl::DispatchWheelEvent(
 void ViewEventHandlerImpl::OpenFile(domapi::WindowId window_id,
                                     const base::string16& file_name) {
   auto const runner = host_->runner();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   auto const isolate = runner->isolate();
   auto const js_handler = GetOpenFileHandler(runner, window_id);
   if (js_handler.IsEmpty() || !js_handler->IsObject())
@@ -263,7 +263,7 @@ void ViewEventHandlerImpl::ProcessCommandLine(
     const base::string16& working_directory,
     const std::vector<base::string16>& args) {
   auto const runner = host_->runner();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   auto const isolate = runner->isolate();
   auto const editor = runner->global()->Get(gin::StringToV8(isolate, "Editor"));
   auto const process =

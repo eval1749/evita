@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 #include "base/strings/string16.h"
 
@@ -25,7 +25,7 @@ class TextEncoderClass;
 class ExceptionState;
 class TextEncodeOptions;
 
-class TextEncoder final : public v8_glue::Scriptable<TextEncoder> {
+class TextEncoder final : public ginx::Scriptable<TextEncoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextEncoder);
 
  public:

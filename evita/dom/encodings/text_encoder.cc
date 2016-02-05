@@ -8,7 +8,7 @@
 
 #include "base/strings/stringprintf.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/bindings/v8_glue_TextEncodeOptions.h"
+#include "evita/dom/bindings/ginx_TextEncodeOptions.h"
 #include "evita/text/encodings/encoder.h"
 #include "evita/text/encodings/encodings.h"
 

@@ -20,7 +20,7 @@ class ExceptionState;
 // RadioButtonControlClass
 //
 class RadioButtonControl final
-    : public v8_glue::Scriptable<RadioButtonControl, FormControl> {
+    : public ginx::Scriptable<RadioButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(RadioButtonControl);
 
  public:

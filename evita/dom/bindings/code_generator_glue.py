@@ -26,14 +26,14 @@ from idl_types import IdlType
 # We'll include "gc/member.h" when one of members of dictionary is collectable.
 global_has_gc_member = False
 
-# We'll include "v8_glue/nullable.h" when return value is nullable.
+# We'll include "ginx/nullable.h" when return value is nullable.
 global_has_nullable = False
 global_referenced_dictionary_names = set()
 global_referenced_interface_names = set()
 global_definitions = {}
 global_interfaces_info = {}
 
-FILE_NAME_PREFIX = 'v8_glue_'
+FILE_NAME_PREFIX = 'ginx_'
 
 JS_INTERFACE_NAMES = {
     'ArrayBufferView': 'gin/array_buffer.h',
@@ -101,7 +101,7 @@ class GlueType(object):
     def from_v8_str(self):
         if self.idl_type.is_union_type:
             members = [member for member in self.idl_type.idl_types()]
-            return 'v8_glue::Either<' + \
+            return 'ginx::Either<' + \
                 ', '.join(to_glue_type(member_type).from_v8_str()
                           for member_type in members[1:]) + '>'
         if self.element_typestr:
@@ -110,7 +110,7 @@ class GlueType(object):
             if self.idl_type.is_nullable:
                 global global_has_nullable
                 global_has_nullable = True
-                return 'v8_glue::Nullable<%s>' % self.cc_name
+                return 'ginx::Nullable<%s>' % self.cc_name
             return self.cc_name + '* /* from_v8 is_collectable */'
         if self.is_pointer:
             return self.cc_name + '* /* from_v8 is_pointer */'
@@ -138,7 +138,7 @@ class GlueType(object):
         if self.is_collectable and self.idl_type.is_nullable:
             global global_has_nullable
             global_has_nullable = True
-            return 'v8_glue::Nullable<%s>' % self.cc_name
+            return 'ginx::Nullable<%s>' % self.cc_name
         return 'auto'
 
 
@@ -559,7 +559,7 @@ class FunctionContext(BaseContext):
 
     def finish(self):
         if self._use_call_with:
-            self.add_include('evita/v8_glue/runner.h')
+            self.add_include('evita/ginx/runner.h')
         signatures = self._signatures
         if not signatures:
             return {'dispatch': 'none'}
@@ -670,8 +670,8 @@ class InterfaceContext(RootContext):
         self.add_include('evita/dom/bindings/exception_state.h')
         self.add_include('evita/dom/converter.h')
         self.add_include('evita/dom/script_host.h')
-        self.add_include('evita/v8_glue/constructor_template.h')
-        self.add_include('evita/v8_glue/function_template_builder.h')
+        self.add_include('evita/ginx/constructor_template.h')
+        self.add_include('evita/ginx/function_template_builder.h')
 
     def finish(self):
         for name in global_referenced_interface_names:
@@ -683,7 +683,7 @@ class InterfaceContext(RootContext):
         if global_has_gc_member:
             self.add_include('evita/gc/member.h')
         if global_has_nullable:
-            self.add_include('evita/v8_glue/nullable.h')
+            self.add_include('evita/ginx/nullable.h')
         for name in global_js_interface_names:
             self.add_include(JS_INTERFACE_NAMES[name])
 
@@ -771,7 +771,7 @@ def dictionary_context(dictionary):
             global_referenced_dictionary_names)
     cc_include_paths.append('evita/dom/converter.h')
     if global_has_nullable:
-        cc_include_paths.append('evita/v8_glue/nullable.h')
+        cc_include_paths.append('evita/ginx/nullable.h')
     cc_include_paths.append('evita/dom/v8_strings.h')
 
     for name in global_js_interface_names:

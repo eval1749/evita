@@ -19,7 +19,7 @@ class TextDocumentEventClass;
 }
 
 class TextDocumentEvent final
-    : public v8_glue::Scriptable<TextDocumentEvent, Event> {
+    : public ginx::Scriptable<TextDocumentEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(TextDocumentEvent)
 
  public:

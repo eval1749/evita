@@ -9,8 +9,8 @@
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/animation_frame_callback.h"
-#include "evita/v8_glue/scoped_persistent.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
+#include "evita/ginx/scoped_persistent.h"
 
 namespace dom {
 
@@ -29,7 +29,7 @@ class FrameRequestCallbackWrapper {
   void Run(const base::TimeTicks& time);
 
  private:
-  v8_glue::ScopedPersistent<v8::Function> callback_;
+  ginx::ScopedPersistent<v8::Function> callback_;
 
   DISALLOW_COPY_AND_ASSIGN(FrameRequestCallbackWrapper);
 };
@@ -43,7 +43,7 @@ FrameRequestCallbackWrapper::FrameRequestCallbackWrapper(
 void FrameRequestCallbackWrapper::Run(const base::TimeTicks& time) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   DOM_AUTO_LOCK_SCOPE();
   runner->CallAsFunction(
       callback_.NewLocal(isolate), v8::Undefined(isolate),

@@ -14,7 +14,7 @@ namespace bindings {
 class UiEventClass;
 }
 
-class UiEvent : public v8_glue::Scriptable<UiEvent, Event> {
+class UiEvent : public ginx::Scriptable<UiEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(UiEvent)
 
  public:

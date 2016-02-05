@@ -19,7 +19,7 @@ namespace bindings {
 class WheelEventClass;
 }
 
-class WheelEvent final : public v8_glue::Scriptable<WheelEvent, MouseEvent> {
+class WheelEvent final : public ginx::Scriptable<WheelEvent, MouseEvent> {
   DECLARE_SCRIPTABLE_OBJECT(WheelEvent);
 
  public:

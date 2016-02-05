@@ -18,7 +18,7 @@
 #include "evita/dom/windows/window_ostream.h"
 #include "evita/dom/windows/window_set.h"
 #include "evita/gc/weak_ptr.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
 
 namespace dom {
 namespace internal {
@@ -172,7 +172,7 @@ void Window::DidChangeBounds(int clientLeft,
                              int clientBottom) {
   auto const runner = script_host_->runner();
   auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
 #define SET_PROP(name)                                \
   instance->ForceSet(v8Strings::name.Get(isolate),    \
@@ -202,7 +202,7 @@ void Window::DidSetFocus() {
   // Update |Window.focus| and |Window.prototype.focusTick_|
   auto const runner = script_host_->runner();
   auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   auto const instance = GetWrapper(isolate);
   auto const klass = runner->global()->Get(v8Strings::Window.Get(isolate));
   instance->ForceSet(v8Strings::focusTick_.Get(isolate),

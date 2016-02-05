@@ -4,8 +4,8 @@
 #include "evita/dom/converter.h"
 
 #include "base/time/time.h"
+#include "evita/ginx/converter.h"
 #include "evita/text/buffer.h"
-#include "evita/v8_glue/converter.h"
 
 namespace gin {
 

@@ -8,7 +8,7 @@
 {% if base_class_include %}
 #include "{{base_class_include}}"
 {% endif %}
-#include "evita/v8_glue/wrapper_info.h"
+#include "evita/ginx/wrapper_info.h"
 
 namespace dom {
 
@@ -18,9 +18,9 @@ namespace bindings {
 
 class {{class_name}} final :
 {%- if interface_parent -%}
-    public v8_glue::DerivedWrapperInfo<{{interface_name}}, {{interface_parent}}>
+    public ginx::DerivedWrapperInfo<{{interface_name}}, {{interface_parent}}>
 {%- else -%}
-    public v8_glue::WrapperInfo
+    public ginx::WrapperInfo
 {%- endif %} {
   public: {{class_name}}(const char* name);
   public: virtual ~{{class_name}}();
@@ -97,7 +97,7 @@ class {{class_name}} final :
  # WrapperInfo
  #}
 
-  // v8_glue::WrapperInfo
+  // ginx::WrapperInfo
 {% if has_static_member or constructor.dispatch != 'none' %}
   private: virtual v8::Local<v8::FunctionTemplate>
       CreateConstructorTemplate(v8::Isolate* isolate) override;

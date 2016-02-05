@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "base/strings/string16.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace text {
 class Offset;
@@ -29,7 +29,7 @@ class RegularExpressionClass;
 //
 // RegularExpression
 //
-class RegularExpression final : public v8_glue::Scriptable<RegularExpression> {
+class RegularExpression final : public ginx::Scriptable<RegularExpression> {
   DECLARE_SCRIPTABLE_OBJECT(RegularExpression);
 
  public:

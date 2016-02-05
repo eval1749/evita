@@ -11,7 +11,7 @@
 #include "evita/dom/public/tab_data.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/windows/window.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -26,7 +26,7 @@ class Performance;
 //
 // Editor
 //
-class Editor final : public v8_glue::Scriptable<Editor> {
+class Editor final : public ginx::Scriptable<Editor> {
   DECLARE_SCRIPTABLE_OBJECT(Editor)
 
  public:

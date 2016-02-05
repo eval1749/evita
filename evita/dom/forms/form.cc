@@ -32,7 +32,7 @@ std::vector<FormControl*> Form::controls() const {
   return controls_;
 }
 
-void Form::set_focus_control(v8_glue::Nullable<FormControl> new_focus_control) {
+void Form::set_focus_control(ginx::Nullable<FormControl> new_focus_control) {
   if (focus_control_ == new_focus_control)
     return;
   focus_control_ = new_focus_control;

@@ -240,7 +240,7 @@
       'type': 'executable',
       'dependencies': [
         '<(DEPTH)/base/base.gyp:base',
-        '<(DEPTH)/evita/evita.gyp:v8_glue',
+        '<(DEPTH)/evita/evita.gyp:ginx',
         '<(DEPTH)/testing/gtest.gyp:gtest',
         '<(DEPTH)/base/base.gyp:run_all_unittests',
       ], # dependencies
@@ -252,7 +252,7 @@
       ],
       'sources': [
         'precomp.cc',
-        'v8_glue/runner_unittest.cc',
+        'ginx/runner_unittest.cc',
       ],
     }, # evita_text_test
   ] # targets

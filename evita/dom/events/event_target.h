@@ -12,9 +12,9 @@
 #include "evita/dom/events/event.h"
 #include "evita/dom/public/event_target_id.h"
 #include "evita/gc/member.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
-namespace v8_glue {
+namespace ginx {
 class Runner;
 }
 
@@ -32,7 +32,7 @@ class EventTargetClass;
 //
 // EventTarget
 //
-class EventTarget : public v8_glue::Scriptable<EventTarget> {
+class EventTarget : public ginx::Scriptable<EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(EventTarget);
 
  public:
@@ -60,7 +60,7 @@ class EventTarget : public v8_glue::Scriptable<EventTarget> {
                         bool capture);
   void AddEventListener(const base::string16& type, EventListener callback);
   void DispatchEventWithInLock(Event* event);
-  void InvokeEventListeners(v8_glue::Runner* runner, Event* event);
+  void InvokeEventListeners(ginx::Runner* runner, Event* event);
   void RemoveEventListener(const base::string16& type,
                            EventListener callback,
                            bool capture);

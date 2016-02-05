@@ -10,7 +10,7 @@
 
 #include "base/macros.h"
 #include "base/strings/string_piece.h"
-#include "evita/v8_glue/v8.h"
+#include "evita/ginx/v8.h"
 
 namespace dom {
 

@@ -18,7 +18,7 @@ class ButtonControlClass;
 // ButtonControl
 //
 class ButtonControl final
-    : public v8_glue::Scriptable<ButtonControl, FormControl> {
+    : public ginx::Scriptable<ButtonControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(ButtonControl);
 
  public:

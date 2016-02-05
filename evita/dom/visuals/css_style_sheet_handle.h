@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace visuals {
 namespace css {
@@ -27,8 +27,7 @@ class ExceptionState;
 //
 // CSSStyleSheetHandle
 //
-class CSSStyleSheetHandle final
-    : public v8_glue::Scriptable<CSSStyleSheetHandle> {
+class CSSStyleSheetHandle final : public ginx::Scriptable<CSSStyleSheetHandle> {
   DECLARE_SCRIPTABLE_OBJECT(CSSStyleSheetHandle);
 
  public:

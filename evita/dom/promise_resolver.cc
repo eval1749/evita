@@ -52,7 +52,7 @@ int promise_sequence_num;
 }  // namespace
 
 PromiseResolver::PromiseResolver(const tracked_objects::Location& from_here,
-                                 v8_glue::Runner* runner)
+                                 ginx::Runner* runner)
     : from_here_(from_here),
       resolver_(runner->isolate(),
                 v8::Promise::Resolver::New(runner->context())

@@ -21,7 +21,7 @@ source_set("text") {
   ]
 
   public_deps = [
-    "//evita/v8_glue",
+    "//evita/ginx",
   ]
 }
 

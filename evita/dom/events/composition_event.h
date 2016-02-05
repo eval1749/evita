@@ -22,7 +22,7 @@ class CompositionEventClass;
 }
 
 class CompositionEvent final
-    : public v8_glue::Scriptable<CompositionEvent, UiEvent> {
+    : public ginx::Scriptable<CompositionEvent, UiEvent> {
   DECLARE_SCRIPTABLE_OBJECT(CompositionEvent)
 
  public:

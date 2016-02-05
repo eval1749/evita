@@ -9,7 +9,7 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "evita/dom/bindings/platform_error.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
 #include "gin/converter.h"
 #include "gin/per_context_data.h"
 
@@ -105,9 +105,9 @@ void ExceptionState::ThrowArgumentError(const char* expected_type,
 void ExceptionState::ThrowError(base::StringPiece detail) {
   DCHECK(!is_thrown_);
   is_thrown_ = true;
-  const auto runner = v8_glue::Runner::From(context_);
+  const auto runner = ginx::Runner::From(context_);
   const auto isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   const auto exception =
       v8::Exception::Error(gin::StringToV8(isolate, ComposeMessage(detail)));
   isolate->ThrowException(exception);
@@ -116,7 +116,7 @@ void ExceptionState::ThrowError(base::StringPiece detail) {
 void ExceptionState::ThrowException(v8::Local<v8::Value> exception) {
   DCHECK(!is_thrown_);
   is_thrown_ = true;
-  const auto runner = v8_glue::Runner::From(context_);
+  const auto runner = ginx::Runner::From(context_);
   runner->isolate()->ThrowException(exception);
 }
 
@@ -124,9 +124,9 @@ void ExceptionState::ThrowPlatformError(base::StringPiece api_name,
                                         int error_code) {
   DCHECK(!is_thrown_);
   is_thrown_ = true;
-  const auto runner = v8_glue::Runner::From(context_);
+  const auto runner = ginx::Runner::From(context_);
   const auto isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   PlatformError error(api_name, error_code);
   isolate->ThrowException(gin::ConvertToV8(isolate, error));
 }
@@ -134,9 +134,9 @@ void ExceptionState::ThrowPlatformError(base::StringPiece api_name,
 void ExceptionState::ThrowRangeError(base::StringPiece detail) {
   DCHECK(!is_thrown_);
   is_thrown_ = true;
-  const auto runner = v8_glue::Runner::From(context_);
+  const auto runner = ginx::Runner::From(context_);
   const auto isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   const auto exception = v8::Exception::RangeError(
       gin::StringToV8(isolate, ComposeMessage(detail)));
   isolate->ThrowException(exception);
@@ -151,9 +151,9 @@ void ExceptionState::ThrowReceiverError(v8::Local<v8::Value> value) {
 void ExceptionState::ThrowTypeError(base::StringPiece detail) {
   DCHECK(!is_thrown_);
   is_thrown_ = true;
-  const auto runner = v8_glue::Runner::From(context_);
+  const auto runner = ginx::Runner::From(context_);
   const auto isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   const auto exception = v8::Exception::TypeError(
       gin::StringToV8(isolate, ComposeMessage(detail)));
   isolate->ThrowException(exception);

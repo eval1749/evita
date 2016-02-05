@@ -11,7 +11,7 @@ namespace bindings {
 class OneShotTimerClass;
 }
 
-class OneShotTimer final : public v8_glue::Scriptable<OneShotTimer, Timer> {
+class OneShotTimer final : public ginx::Scriptable<OneShotTimer, Timer> {
   DECLARE_SCRIPTABLE_OBJECT(OneShotTimer);
 
  public:

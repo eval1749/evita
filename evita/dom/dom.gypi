@@ -110,7 +110,7 @@
         'dom_unicode_lib_icu',
         'dom_v8_strings_cc',
         'text',
-        'v8_glue',
+        'ginx',
       ],
       'include_dirs+': [ '<(SHARED_INTERMEDIATE_DIR)/' ],
       'sources': [

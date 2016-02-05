@@ -12,8 +12,8 @@
 #include "base/time/time.h"
 #include "evita/dom/events/event_target.h"
 #include "evita/gc/member.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/converter.h"
+#include "evita/ginx/scriptable.h"
 
 namespace text {
 class Buffer;
@@ -31,8 +31,7 @@ class TextRange;
 //
 // TextDocument
 //
-class TextDocument final
-    : public v8_glue::Scriptable<TextDocument, EventTarget> {
+class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(TextDocument);
 
  public:

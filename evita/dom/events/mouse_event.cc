@@ -3,7 +3,7 @@
 
 #include "evita/dom/events/mouse_event.h"
 
-#include "evita/dom/bindings/v8_glue_MouseEventInit.h"
+#include "evita/dom/bindings/ginx_MouseEventInit.h"
 #include "evita/dom/public/view_events.h"
 
 namespace dom {

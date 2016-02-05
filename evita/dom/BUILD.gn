@@ -62,12 +62,12 @@ source_set("components") {
     "windows/window_set.h",
   ]
 
-  sources += process_file_template(
-          interface_idl_files + dictionary_idl_files,
-          [
-            "$bindings_gen_dir/v8_glue_{{source_name_part}}.cc",
-            "$bindings_gen_dir/v8_glue_{{source_name_part}}.h",
-          ])
+  sources +=
+      process_file_template(interface_idl_files + dictionary_idl_files,
+                            [
+                              "$bindings_gen_dir/ginx_{{source_name_part}}.cc",
+                              "$bindings_gen_dir/ginx_{{source_name_part}}.h",
+                            ])
 
   deps = [
     ":dom_jslib_cc",
@@ -90,8 +90,8 @@ source_set("components") {
     "//evita/dom/visuals",
     "//evita/gc",
     "//evita/geometry",
+    "//evita/ginx",
     "//evita/ui/animation:public",
-    "//evita/v8_glue",
     "//evita/visuals",
     "//regex",
   ]
@@ -127,8 +127,8 @@ source_set("v8_helper") {
   ]
   deps = [
     "//base",
+    "//evita/ginx",
     "//evita/text",
-    "//evita/v8_glue",
   ]
 }
 

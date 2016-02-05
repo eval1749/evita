@@ -7,13 +7,13 @@
 
 #include "evita/dom/text/text_mutation_observer.h"
 
-#include "evita/dom/bindings/v8_glue_TextMutationObserverInit.h"
+#include "evita/dom/bindings/ginx_TextMutationObserverInit.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_mutation_observer_controller.h"
 #include "evita/dom/text/text_mutation_record.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
 
 namespace dom {
 
@@ -102,7 +102,7 @@ void TextMutationObserver::DidMutateTextDocument(TextDocument* document) {
   if (!tracker->has_records())
     return;
   const auto runner = ScriptHost::instance()->runner();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   const auto isolate = runner->isolate();
   v8::Local<v8::Value> records;
   if (!gin::TryConvertToV8(isolate, tracker->TakeRecords(), &records))

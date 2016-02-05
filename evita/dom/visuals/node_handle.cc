@@ -8,7 +8,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/visuals/css_style.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
@@ -131,7 +131,7 @@ v8::Local<v8::Map> NodeHandle::GetInlineStyle(NodeHandle* element_handle,
   const auto element = AsElement(element_handle, exception_state);
   if (!element)
     return v8::Local<v8::Map>();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  ginx::Runner::EscapableHandleScope runner_scope(runner);
   const auto& style = element->inline_style();
   if (!style)
     return runner_scope.Escape(v8::Map::New(context->GetIsolate()));

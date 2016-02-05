@@ -5,8 +5,8 @@
 #ifndef EVITA_DOM_SCRIPT_HOST_H_
 #define EVITA_DOM_SCRIPT_HOST_H_
 
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "base/callback_forward.h"
@@ -14,10 +14,10 @@
 #include "base/strings/string16.h"
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/view_event_handler.h"
-#include "evita/v8_glue/isolate_holder.h"
-#include "evita/v8_glue/runner_delegate.h"
-#include "evita/v8_glue/scoped_persistent.h"
-#include "evita/v8_glue/v8.h"
+#include "evita/ginx/isolate_holder.h"
+#include "evita/ginx/runner_delegate.h"
+#include "evita/ginx/scoped_persistent.h"
+#include "evita/ginx/v8.h"
 
 namespace base {
 class MessageLoop;
@@ -28,7 +28,7 @@ class IoDelegate;
 class ViewDelegate;
 }
 
-namespace v8_glue {
+namespace ginx {
 class Runner;
 }
 
@@ -58,7 +58,7 @@ class SuppressMessageBoxScope final {
 //
 // ScriptHost
 //
-class ScriptHost final : public v8_glue::RunnerDelegate {
+class ScriptHost final : public ginx::RunnerDelegate {
  public:
   ~ScriptHost() final;
 
@@ -67,8 +67,8 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
   domapi::IoDelegate* io_delegate() const { return io_delegate_; }
   v8::Isolate* isolate() const;
   Performance* performance() const;
-  v8_glue::Runner* runner() const;
-  void set_testing_runner(v8_glue::Runner* runner);
+  ginx::Runner* runner() const;
+  void set_testing_runner(ginx::Runner* runner);
   Scheduler* scheduler() const { return scheduler_; }
   domapi::ViewDelegate* view_delegate() const;
 
@@ -102,25 +102,24 @@ class ScriptHost final : public v8_glue::RunnerDelegate {
 
   void DidStartScriptHost();
 
-  // v8_glue::RunnerDelegate
-  v8::Local<v8::ObjectTemplate> GetGlobalTemplate(
-      v8_glue::Runner* runner) final;
+  // ginx::RunnerDelegate
+  v8::Local<v8::ObjectTemplate> GetGlobalTemplate(ginx::Runner* runner) final;
   void Start();
-  void UnhandledException(v8_glue::Runner* runner,
+  void UnhandledException(ginx::Runner* runner,
                           const v8::TryCatch& try_catch) final;
 
-  v8_glue::IsolateHolder isolate_holder_;
+  ginx::IsolateHolder isolate_holder_;
   std::unique_ptr<ViewEventHandlerImpl> event_handler_;
   domapi::IoDelegate* io_delegate_;
   // A |MessageLoop| where script runs on. We don't allow to run script other
   // than this message loop.
   base::MessageLoop* const message_loop_for_script_;
   std::unique_ptr<Performance> performance_;
-  std::unique_ptr<v8_glue::Runner> runner_;
+  std::unique_ptr<ginx::Runner> runner_;
   Scheduler* scheduler_;
   domapi::ScriptHostState state_;
   bool testing_;
-  v8_glue::Runner* testing_runner_;
+  ginx::Runner* testing_runner_;
   domapi::ViewDelegate* view_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(ScriptHost);

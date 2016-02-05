@@ -5,8 +5,8 @@
 #include "evita/dom/dictionary.h"
 
 #include "base/strings/stringprintf.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/converter.h"
+#include "evita/ginx/runner.h"
 
 namespace dom {
 

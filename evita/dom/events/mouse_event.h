@@ -18,7 +18,7 @@ namespace bindings {
 class MouseEventClass;
 }
 
-class MouseEvent : public v8_glue::Scriptable<MouseEvent, UiEvent> {
+class MouseEvent : public ginx::Scriptable<MouseEvent, UiEvent> {
   DECLARE_SCRIPTABLE_OBJECT(MouseEvent);
 
  public:

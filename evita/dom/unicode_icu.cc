@@ -8,7 +8,7 @@
 #include "base/i18n/icu_util.h"
 #include "base/logging.h"
 #include "base/macros.h"
-#include "evita/v8_glue/converter.h"
+#include "evita/ginx/converter.h"
 #include "third_party/icu/source/common/unicode/uchar.h"
 #include "third_party/icu/source/common/unicode/uscript.h"
 #include "third_party/icu/source/common/unicode/utypes.h"

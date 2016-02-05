@@ -20,7 +20,7 @@ class ExceptionState;
 // CheckboxControl
 //
 class CheckboxControl final
-    : public v8_glue::Scriptable<CheckboxControl, FormControl> {
+    : public ginx::Scriptable<CheckboxControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(CheckboxControl);
 
  public:

@@ -7,7 +7,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/gc/member.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace gin {
 class ArrayBufferView;
@@ -29,7 +29,7 @@ class ExceptionState;
 //
 // NodeHandle
 //
-class NodeHandle final : public v8_glue::Scriptable<NodeHandle> {
+class NodeHandle final : public ginx::Scriptable<NodeHandle> {
   DECLARE_SCRIPTABLE_OBJECT(NodeHandle);
 
  public:

@@ -6,11 +6,11 @@
 
 #include "base/strings/stringprintf.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/bindings/v8_glue_TextDecodeOptions.h"
-#include "evita/dom/bindings/v8_glue_TextDecoderOptions.h"
+#include "evita/dom/bindings/ginx_TextDecodeOptions.h"
+#include "evita/dom/bindings/ginx_TextDecoderOptions.h"
+#include "evita/ginx/array_buffer_view.h"
 #include "evita/text/encodings/decoder.h"
 #include "evita/text/encodings/encodings.h"
-#include "evita/v8_glue/array_buffer_view.h"
 
 namespace dom {
 

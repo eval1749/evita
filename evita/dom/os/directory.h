@@ -7,7 +7,7 @@
 
 #include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/io_error.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -19,7 +19,7 @@ class DirectoryClass;
 //
 // Directory
 //
-class Directory final : public v8_glue::Scriptable<Directory> {
+class Directory final : public ginx::Scriptable<Directory> {
   DECLARE_SCRIPTABLE_OBJECT(File);
 
  public:

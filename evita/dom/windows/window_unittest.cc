@@ -11,8 +11,8 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/testing/mock_view_impl.h"
-#include "evita/v8_glue/constructor_template.h"
-#include "evita/v8_glue/converter.h"
+#include "evita/ginx/constructor_template.h"
+#include "evita/ginx/converter.h"
 #include "gtest/gtest.h"
 
 namespace dom {
@@ -23,7 +23,7 @@ using ::testing::Eq;
 //
 // SampleWindow for JavaScript testing.
 //
-class SampleWindow final : public v8_glue::Scriptable<SampleWindow, Window> {
+class SampleWindow final : public ginx::Scriptable<SampleWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(SampleWindow);
 
  public:
@@ -54,7 +54,7 @@ SampleWindow* SampleWindow::NewSampleWindow(ScriptHost* script_host) {
 // SampleWindowClass
 //
 class SampleWindowClass final
-    : public v8_glue::DerivedWrapperInfo<SampleWindow, Window> {
+    : public ginx::DerivedWrapperInfo<SampleWindow, Window> {
  public:
   explicit SampleWindowClass(const char* name) : BaseClass(name) {}
   ~SampleWindowClass() = default;
@@ -62,9 +62,9 @@ class SampleWindowClass final
  private:
   static void ConstructSampleWindow(
       const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (!v8_glue::internal::IsValidConstructCall(info))
+    if (!ginx::internal::IsValidConstructCall(info))
       return;
-    v8_glue::internal::FinishConstructCall(info, NewSampleWindow(info));
+    ginx::internal::FinishConstructCall(info, NewSampleWindow(info));
   }
 
   v8::Local<v8::FunctionTemplate> CreateConstructorTemplate(
@@ -75,7 +75,7 @@ class SampleWindowClass final
 
   static SampleWindow* NewSampleWindow(
       const v8::FunctionCallbackInfo<v8::Value>& info) {
-    const auto runner = v8_glue::Runner::From(info.GetIsolate());
+    const auto runner = ginx::Runner::From(info.GetIsolate());
     const auto script_host = runner->user_data<ScriptHost>();
     return new SampleWindow(script_host);
   }
@@ -153,7 +153,7 @@ class WindowTest : public AbstractDomTest {
   void PopulateGlobalTemplate(
       v8::Isolate* isolate,
       v8::Local<v8::ObjectTemplate> global_template) override {
-    v8_glue::Installer<SampleWindow>::Run(isolate, global_template);
+    ginx::Installer<SampleWindow>::Run(isolate, global_template);
   }
 
   // testing::Test

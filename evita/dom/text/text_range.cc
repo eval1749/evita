@@ -80,7 +80,7 @@ void TextRange::InsertBefore(const base::string16& text,
 }
 
 TextRange* TextRange::NewTextRange(
-    v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+    ginx::Either<TextDocument*, TextRange*> document_or_range,
     ExceptionState* exception_state) {
   if (document_or_range.is_left)
     return NewTextRange(document_or_range, 0, 0);
@@ -90,7 +90,7 @@ TextRange* TextRange::NewTextRange(
 }
 
 TextRange* TextRange::NewTextRange(
-    v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+    ginx::Either<TextDocument*, TextRange*> document_or_range,
     int offsetLike,
     ExceptionState* exception_state) {
   return NewTextRange(document_or_range, offsetLike, offsetLike,
@@ -98,7 +98,7 @@ TextRange* TextRange::NewTextRange(
 }
 
 TextRange* TextRange::NewTextRange(
-    v8_glue::Either<TextDocument*, TextRange*> document_or_range,
+    ginx::Either<TextDocument*, TextRange*> document_or_range,
     int startLike,
     int endLike,
     ExceptionState* exception_state) {

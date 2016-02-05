@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "v8_glue_{{interface_name}}.h"
+#include "ginx_{{interface_name}}.h"
 
 {% for include_path in include_paths %}
 #include "{{include_path}}"
@@ -162,7 +162,7 @@ void {{class_name}}::{{method.cc_name}}(
 , "{{property_name}}"
 {%- endif %});
 {% if model.use_call_with %}
-{{indent}}const auto script_host = v8_glue::Runner::From(context)->user_data<ScriptHost>();
+{{indent}}const auto script_host = ginx::Runner::From(context)->user_data<ScriptHost>();
 {% endif %}
 {%- endmacro %}
 //////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ void {{class_name}}::{{method.cc_name}}(
 {%- if interface_parent -%}
 {{ '\n  : BaseClass(name) ' }}
 {%- else -%}
-{{ '\n  : v8_glue::WrapperInfo(name) ' }}
+{{ '\n  : ginx::WrapperInfo(name) ' }}
 {%- endif -%} {
 }
 
@@ -183,9 +183,9 @@ void {{class_name}}::{{method.cc_name}}(
 {% if constructor.dispatch != 'none' %}
 void {{class_name}}::Construct{{interface_name}}(
     const v8::FunctionCallbackInfo<v8::Value>& info) {
-  if (!v8_glue::internal::IsValidConstructCall(info))
+  if (!ginx::internal::IsValidConstructCall(info))
     return;
-  v8_glue::internal::FinishConstructCall(info, New{{interface_name}}(info));
+  ginx::internal::FinishConstructCall(info, New{{interface_name}}(info));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -359,7 +359,7 @@ void {{class_name}}::Set_{{attribute.cc_name}}(
 {%  endif %}
 {{emit_method(method)}}
 {% endfor %}
-// v8_glue::WrapperInfo
+// ginx::WrapperInfo
 {% if has_static_member or constructor.dispatch != 'none' %}
 v8::Local<v8::FunctionTemplate>
 {{class_name}}::CreateConstructorTemplate(v8::Isolate* isolate) {
@@ -371,10 +371,10 @@ v8::Local<v8::FunctionTemplate>
   auto templ = v8::FunctionTemplate::New(isolate,
       &{{class_name}}::Construct{{interface_name}});
 {% else %}
-  auto templ = v8_glue::WrapperInfo::CreateConstructorTemplate(isolate);
+  auto templ = ginx::WrapperInfo::CreateConstructorTemplate(isolate);
 {% endif %}
 {% if has_static_member %}
-  auto builder = v8_glue::FunctionTemplateBuilder(isolate, templ);
+  auto builder = ginx::FunctionTemplateBuilder(isolate, templ);
 {###############################
  #
  # Static attributes

@@ -6,7 +6,7 @@
 #define EVITA_DOM_OS_FILE_STATUS_H_
 
 #include "evita/dom/public/io_callback.h"
-#include "evita/v8_glue/converter.h"
+#include "evita/ginx/converter.h"
 
 namespace domapi {
 struct FileStatus;

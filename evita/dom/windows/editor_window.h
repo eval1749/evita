@@ -15,7 +15,7 @@ class EditorWindowClass;
 
 // |dom::EditoWindow| corresponds to |editor::EditorWidget|, also known as
 // |Frame|.
-class EditorWindow final : public v8_glue::Scriptable<EditorWindow, Window> {
+class EditorWindow final : public ginx::Scriptable<EditorWindow, Window> {
   DECLARE_SCRIPTABLE_OBJECT(EditorWindow);
 
  public:

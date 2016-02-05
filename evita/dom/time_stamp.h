@@ -5,7 +5,7 @@
 #ifndef EVITA_DOM_TIME_STAMP_H_
 #define EVITA_DOM_TIME_STAMP_H_
 
-#include "evita/v8_glue/converter.h"
+#include "evita/ginx/converter.h"
 
 namespace dom {
 

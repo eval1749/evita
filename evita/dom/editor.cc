@@ -15,9 +15,9 @@
 #include "evita/dom/script_host.h"
 #include "evita/dom/v8_strings.h"
 #include "evita/dom/windows/window.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/function_template_builder.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/converter.h"
+#include "evita/ginx/function_template_builder.h"
+#include "evita/ginx/runner.h"
 
 namespace gin {
 bool Converter<domapi::SwitchValue>::FromV8(v8::Isolate* isolate,
@@ -104,7 +104,7 @@ class TraceLogClient final {
   void DidGetOutput(const std::string& chunk, bool has_more_events);
 
  private:
-  v8_glue::ScopedPersistent<v8::Function> callback_;
+  ginx::ScopedPersistent<v8::Function> callback_;
   DISALLOW_COPY_AND_ASSIGN(TraceLogClient);
 };
 
@@ -112,7 +112,7 @@ void TraceLogClient::DidGetOutput(const std::string& chunk,
                                   bool has_more_events) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   ASSERT_DOM_LOCKED();
   runner->CallAsFunction(
       callback_.NewLocal(isolate), runner->global(),
@@ -160,7 +160,7 @@ v8::Local<v8::Object> RunScriptInternal(const base::string16& script_text,
                                         const base::string16& file_name) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
-  v8_glue::Runner::EscapableHandleScope runner_scope(runner);
+  ginx::Runner::EscapableHandleScope runner_scope(runner);
   v8::TryCatch try_catch(isolate);
   try_catch.SetVerbose(true);
   v8::ScriptOrigin script_origin(gin::StringToV8(isolate, file_name));

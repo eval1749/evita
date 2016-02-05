@@ -22,7 +22,7 @@ class TextFieldControlClass;
 // TextFieldControl
 //
 class TextFieldControl final
-    : public v8_glue::Scriptable<TextFieldControl, FormControl> {
+    : public ginx::Scriptable<TextFieldControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(TextFieldControl);
 
  public:

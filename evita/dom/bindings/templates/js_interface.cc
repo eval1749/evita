@@ -2,6 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "v8_glue_{{interface_name}}.h"
+#include "ginx_{{interface_name}}.h"
 
 // interface {{interface_name}}

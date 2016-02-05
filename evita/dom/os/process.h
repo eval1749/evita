@@ -13,7 +13,7 @@ namespace bindings {
 class ProcessClass;
 }
 
-class Process final : public v8_glue::Scriptable<Process, AbstractFile> {
+class Process final : public ginx::Scriptable<Process, AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(Process);
 
  public:

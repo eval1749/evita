@@ -8,7 +8,7 @@
 #include <string>
 
 #include "base/strings/string_piece.h"
-#include "evita/v8_glue/converter.h"
+#include "evita/ginx/converter.h"
 
 namespace dom {
 

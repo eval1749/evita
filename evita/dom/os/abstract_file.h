@@ -7,7 +7,7 @@
 
 #include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/io_error.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace gin {
 class ArrayBufferView;
@@ -19,7 +19,7 @@ namespace bindings {
 class AbstractFileClass;
 }
 
-class AbstractFile : public v8_glue::Scriptable<AbstractFile> {
+class AbstractFile : public ginx::Scriptable<AbstractFile> {
   DECLARE_SCRIPTABLE_OBJECT(AbstractFile);
 
  protected:

@@ -30,8 +30,7 @@ class ViewEventTargetClass;
 //
 // ViewEventTargetClass
 //
-class ViewEventTarget
-    : public v8_glue::Scriptable<ViewEventTarget, EventTarget> {
+class ViewEventTarget : public ginx::Scriptable<ViewEventTarget, EventTarget> {
   DECLARE_SCRIPTABLE_OBJECT(ViewEventTarget);
 
  public:

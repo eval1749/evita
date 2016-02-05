@@ -10,9 +10,9 @@
 #include <vector>
 
 #include "base/strings/string_piece.h"
+#include "evita/ginx/runner.h"
+#include "evita/ginx/v8.h"
 #include "gtest/gtest.h"
-#include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/v8.h"
 
 namespace base {
 class FilePath;
@@ -43,7 +43,7 @@ class AbstractDomTest : public ::testing::Test {
     ~RunnerScope();
 
    private:
-    v8_glue::Runner::Scope runner_scope_;
+    ginx::Runner::Scope runner_scope_;
 
     DISALLOW_COPY_AND_ASSIGN(RunnerScope);
   };
@@ -77,7 +77,7 @@ class AbstractDomTest : public ::testing::Test {
   MockIoDelegate* mock_io_delegate() const { return mock_io_delegate_.get(); }
   MockScheduler* mock_scheduler() const { return mock_scheduler_.get(); }
   MockViewImpl* mock_view_impl() const { return mock_view_impl_.get(); }
-  v8_glue::Runner* runner() const { return runner_.get(); }
+  ginx::Runner* runner() const { return runner_.get(); }
   domapi::ViewEventHandler* view_event_handler() const;
 
   template <typename... Params>
@@ -108,14 +108,13 @@ class AbstractDomTest : public ::testing::Test {
   friend class RunnerDelegate;
 
   base::FilePath BuildPath(const std::vector<base::StringPiece>& components);
-  void UnhandledException(v8_glue::Runner* runner,
-                          const v8::TryCatch& try_catch);
+  void UnhandledException(ginx::Runner* runner, const v8::TryCatch& try_catch);
 
   std::string exception_;
   const std::unique_ptr<MockIoDelegate> mock_io_delegate_;
   const std::unique_ptr<MockScheduler> mock_scheduler_;
   const std::unique_ptr<MockViewImpl> mock_view_impl_;
-  std::unique_ptr<v8_glue::Runner> runner_;
+  std::unique_ptr<ginx::Runner> runner_;
 
   // Note: ScriptHost is a singleton.
   ScriptHost* script_host_;

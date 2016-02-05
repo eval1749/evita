@@ -7,9 +7,9 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "evita/gc/member.h"
 #include "evita/dom/time_stamp.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/gc/member.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -21,7 +21,7 @@ namespace bindings {
 class EventClass;
 }
 
-class Event : public v8_glue::Scriptable<Event> {
+class Event : public ginx::Scriptable<Event> {
   DECLARE_SCRIPTABLE_OBJECT(Event);
 
  public:

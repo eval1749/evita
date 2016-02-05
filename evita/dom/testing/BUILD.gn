@@ -20,7 +20,7 @@ source_set("test_support") {
 
   public_deps = [
     "//base/test:test_support",
-    "//evita/v8_glue",
+    "//evita/ginx",
     "//testing/gmock",
     "//testing/gtest",
   ]

@@ -9,9 +9,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "evita/ginx/scoped_persistent.h"
+#include "evita/ginx/scriptable.h"
 #include "evita/text/offset.h"
-#include "evita/v8_glue/scriptable.h"
-#include "evita/v8_glue/scoped_persistent.h"
 
 namespace dom {
 
@@ -28,7 +28,7 @@ class TextMutationObserverClass;
 // TextMutationObserver implements IDL interface |TextMutationObserver|.
 //
 class TextMutationObserver final
-    : public v8_glue::Scriptable<TextMutationObserver> {
+    : public ginx::Scriptable<TextMutationObserver> {
   DECLARE_SCRIPTABLE_OBJECT(TextMutationObserver);
 
  public:
@@ -54,7 +54,7 @@ class TextMutationObserver final
   void Observe(TextDocument* document, const TextMutationObserverInit& options);
   std::vector<TextMutationRecord*> TakeRecords();
 
-  v8_glue::ScopedPersistent<v8::Function> callback_;
+  ginx::ScopedPersistent<v8::Function> callback_;
   std::unordered_map<TextDocument*, std::unique_ptr<Tracker>> tracker_map_;
 
   DISALLOW_COPY_AND_ASSIGN(TextMutationObserver);

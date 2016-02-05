@@ -14,7 +14,7 @@ namespace bindings {
 class WindowEventClass;
 }
 
-class WindowEvent final : public v8_glue::Scriptable<WindowEvent, Event> {
+class WindowEvent final : public ginx::Scriptable<WindowEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(WindowEvent)
 
  public:

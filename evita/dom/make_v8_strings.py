@@ -15,7 +15,7 @@ STRINGS_H = """
 
 #include <new>
 
-#include "evita/v8_glue/v8.h"
+#include "evita/ginx/v8.h"
 
 namespace dom {
 namespace v8Strings {

@@ -6,7 +6,7 @@
 #include "base/macros.h"
 #include "common/memory/singleton.h"
 
-#include "evita/v8_glue/scoped_persistent.h"
+#include "evita/ginx/scoped_persistent.h"
 
 namespace dom {
 
@@ -21,7 +21,7 @@ class Global final : public common::Singleton<Global> {
 
   Global();
 
-  v8_glue::ScopedPersistent<v8::ObjectTemplate> object_template_;
+  ginx::ScopedPersistent<v8::ObjectTemplate> object_template_;
 
   DISALLOW_COPY_AND_ASSIGN(Global);
 };

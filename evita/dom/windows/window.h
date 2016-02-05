@@ -10,7 +10,7 @@
 #include "common/tree/node.h"
 #include "evita/dom/events/view_event_target.h"
 #include "evita/dom/public/window_id.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -25,7 +25,7 @@ class WindowClass;
 //
 // Window is correspond to |Widget| in DOM world.
 //
-class Window : public v8_glue::Scriptable<Window, ViewEventTarget>,
+class Window : public ginx::Scriptable<Window, ViewEventTarget>,
                public common::tree::Node<Window> {
   DECLARE_SCRIPTABLE_OBJECT(Window)
 

@@ -3,11 +3,11 @@
 #ifndef EVITA_DOM_FILE_PATH_H_
 #define EVITA_DOM_FILE_PATH_H_
 
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
-class FilePath final : v8_glue::Scriptable<FilePath> {
+class FilePath final : ginx::Scriptable<FilePath> {
   DECLARE_SCRIPTABLE_OBJECT(FilePath)
 
  public:

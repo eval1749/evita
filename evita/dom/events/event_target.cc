@@ -15,12 +15,12 @@
 #include "base/strings/utf_string_conversions.h"
 #include "common/adopters/reverse.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/lock.h"
 #include "evita/dom/events/event.h"
+#include "evita/dom/lock.h"
 #include "evita/dom/script_host.h"
-#include "evita/v8_glue/converter.h"
-#include "evita/v8_glue/runner.h"
-#include "evita/v8_glue/scoped_persistent.h"
+#include "evita/ginx/converter.h"
+#include "evita/ginx/runner.h"
+#include "evita/ginx/scoped_persistent.h"
 
 namespace dom {
 
@@ -49,7 +49,7 @@ class EventTarget::EventListenerMap final {
  public:
   struct EventListener final {
     bool capture;
-    v8_glue::ScopedPersistent<v8::Object> callback;
+    ginx::ScopedPersistent<v8::Object> callback;
 
     EventListener(v8::Isolate* isoalte,
                   v8::Local<v8::Object> callback,
@@ -189,7 +189,7 @@ bool EventTarget::DispatchEvent(Event* event) {
 
 void EventTarget::DispatchEventWithInLock(Event* event) {
   auto const runner = ScriptHost::instance()->runner();
-  v8_glue::Runner::Scope runner_scope(runner);
+  ginx::Runner::Scope runner_scope(runner);
   v8::TryCatch try_catch(runner->isolate());
   try_catch.SetVerbose(true);
   // We should prevent UI thread to access DOM.
@@ -198,7 +198,7 @@ void EventTarget::DispatchEventWithInLock(Event* event) {
   runner->HandleTryCatch(try_catch);
 }
 
-void EventTarget::InvokeEventListeners(v8_glue::Runner* runner, Event* event) {
+void EventTarget::InvokeEventListeners(ginx::Runner* runner, Event* event) {
   auto listeners = event_listener_map_->Find(event->type());
   if (!listeners)
     return;

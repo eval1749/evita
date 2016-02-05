@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 #include "base/strings/string16.h"
 
@@ -29,7 +29,7 @@ namespace bindings {
 class TextDecoderClass;
 }
 
-class TextDecoder final : public v8_glue::Scriptable<TextDecoder> {
+class TextDecoder final : public ginx::Scriptable<TextDecoder> {
   DECLARE_SCRIPTABLE_OBJECT(TextDecoder);
 
  public:

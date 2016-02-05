@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -25,7 +25,7 @@ class DataTransferItemListClass;
 // DataTransferItemList
 //
 class DataTransferItemList final
-    : public v8_glue::Scriptable<DataTransferItemList> {
+    : public ginx::Scriptable<DataTransferItemList> {
   DECLARE_SCRIPTABLE_OBJECT(DataTransferItemList)
  public:
   DataTransferItemList();

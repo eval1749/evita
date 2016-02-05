@@ -4,7 +4,7 @@
 #define EVITA_DOM_EVENTS_FOCUS_EVENT_H_
 
 #include "evita/dom/events/ui_event.h"
-#include "evita/v8_glue/nullable.h"
+#include "evita/ginx/nullable.h"
 
 namespace dom {
 
@@ -15,7 +15,7 @@ namespace bindings {
 class FocusEventClass;
 }
 
-class FocusEvent final : public v8_glue::Scriptable<FocusEvent, UiEvent> {
+class FocusEvent final : public ginx::Scriptable<FocusEvent, UiEvent> {
   DECLARE_SCRIPTABLE_OBJECT(FocusEvent)
 
  public:

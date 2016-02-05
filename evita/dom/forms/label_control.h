@@ -17,8 +17,7 @@ class LabelControlClass;
 //
 // LabelControl
 //
-class LabelControl final
-    : public v8_glue::Scriptable<LabelControl, FormControl> {
+class LabelControl final : public ginx::Scriptable<LabelControl, FormControl> {
   DECLARE_SCRIPTABLE_OBJECT(LabelControl);
 
  public:

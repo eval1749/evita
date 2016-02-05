@@ -5,9 +5,9 @@
 
 #include <memory>
 
-#include "evita/v8_glue/optional.h"
-#include "evita/v8_glue/scriptable.h"
-#include "evita/v8_glue/scoped_persistent.h"
+#include "evita/ginx/optional.h"
+#include "evita/ginx/scoped_persistent.h"
+#include "evita/ginx/scriptable.h"
 
 namespace base {
 class Timer;
@@ -19,7 +19,7 @@ namespace bindings {
 class TimerClass;
 }
 
-class Timer : public v8_glue::Scriptable<Timer> {
+class Timer : public ginx::Scriptable<Timer> {
   DECLARE_SCRIPTABLE_OBJECT(Timer);
 
  public:
@@ -45,7 +45,7 @@ class Timer : public v8_glue::Scriptable<Timer> {
   void Stop();
   void StartInternal(int delay_ms, v8::Local<v8::Function> callback);
 
-  v8_glue::ScopedPersistent<v8::Function> callback_;
+  ginx::ScopedPersistent<v8::Function> callback_;
   std::unique_ptr<base::Timer> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(Timer);

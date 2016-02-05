@@ -5,7 +5,7 @@
 
 #include "base/strings/string16.h"
 #include "evita/dom/events/event.h"
-#include "evita/v8_glue/nullable.h"
+#include "evita/ginx/nullable.h"
 
 namespace domapi {
 struct FormEvent;
@@ -20,7 +20,7 @@ namespace bindings {
 class FormEventClass;
 }
 
-class FormEvent final : public v8_glue::Scriptable<FormEvent, Event> {
+class FormEvent final : public ginx::Scriptable<FormEvent, Event> {
   DECLARE_SCRIPTABLE_OBJECT(FormEvent)
 
  public:

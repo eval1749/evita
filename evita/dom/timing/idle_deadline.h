@@ -5,7 +5,7 @@
 #ifndef EVITA_DOM_TIMING_IDLE_DEADLINE_H_
 #define EVITA_DOM_TIMING_IDLE_DEADLINE_H_
 
-#include "evita/v8_glue/scriptable.h"
+#include "evita/ginx/scriptable.h"
 
 namespace dom {
 
@@ -20,7 +20,7 @@ class IdleDeadlineClass;
 // An implementation of IdleDeadline interface defined in:
 // https://w3c.github.io/requestidlecallback/
 //
-class IdleDeadline final : public v8_glue::Scriptable<IdleDeadline> {
+class IdleDeadline final : public ginx::Scriptable<IdleDeadline> {
   DECLARE_SCRIPTABLE_OBJECT(IdleDeadline);
 
  public:

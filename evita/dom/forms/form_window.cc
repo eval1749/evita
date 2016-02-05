@@ -5,8 +5,8 @@
 #include "evita/dom/forms/form_window.h"
 
 #include "base/trace_event/trace_event.h"
-#include "evita/dom/bindings/v8_glue_FocusEventInit.h"
-#include "evita/dom/bindings/v8_glue_FormWindowInit.h"
+#include "evita/dom/bindings/ginx_FocusEventInit.h"
+#include "evita/dom/bindings/ginx_FormWindowInit.h"
 #include "evita/dom/events/focus_event.h"
 #include "evita/dom/events/keyboard_event.h"
 #include "evita/dom/events/mouse_event.h"

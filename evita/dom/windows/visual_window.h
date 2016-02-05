@@ -35,7 +35,7 @@ class VisualWindowClass;
 //
 // VisualWindow
 //
-class VisualWindow final : public v8_glue::Scriptable<VisualWindow, Window>,
+class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
                            public visuals::css::Media,
                            public visuals::ViewObserver {
   DECLARE_SCRIPTABLE_OBJECT(VisualWindow);

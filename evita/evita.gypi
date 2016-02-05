@@ -236,7 +236,7 @@
       ], # sources
     }, # spellchecker
     {
-      'target_name': 'v8_glue',
+      'target_name': 'ginx',
       'type': 'static_library',
       'dependencies': [
         '<(DEPTH)/gin/gin.gyp:gin',
@@ -260,20 +260,20 @@
         4530,
       ],
       'sources': [
-        'v8_glue/array_buffer_view.cc',
-        'v8_glue/constructor_template.cc',
-        'v8_glue/converter.cc',
-        'v8_glue/function_template_builder.cc',
-        'v8_glue/isolate_holder.cc',
-        'v8_glue/per_isolate_data.cc',
-        'v8_glue/runner.cc',
-        'v8_glue/runner_delegate.cc',
-        'v8_glue/scriptable.cc',
-        'v8_glue/v8_platform.cc',
-        'v8_glue/v8_platform.h',
-        'v8_glue/wrapper_info.cc',
+        'ginx/array_buffer_view.cc',
+        'ginx/constructor_template.cc',
+        'ginx/converter.cc',
+        'ginx/function_template_builder.cc',
+        'ginx/isolate_holder.cc',
+        'ginx/per_isolate_data.cc',
+        'ginx/runner.cc',
+        'ginx/runner_delegate.cc',
+        'ginx/scriptable.cc',
+        'ginx/v8_platform.cc',
+        'ginx/v8_platform.h',
+        'ginx/wrapper_info.cc',
       ], # sources
-    }, # v8_glue
+    }, # ginx
     {
       'target_name': 'views',
       'type': 'static_library',

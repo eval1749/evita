@@ -5,7 +5,7 @@
 #include "evita/dom/bindings/platform_error.h"
 
 #include "evita/dom/v8_strings.h"
-#include "evita/v8_glue/runner.h"
+#include "evita/ginx/runner.h"
 
 namespace dom {
 
@@ -24,7 +24,7 @@ namespace gin {
 v8::Local<v8::Value> Converter<dom::PlatformError>::ToV8(
     v8::Isolate* isolate,
     const dom::PlatformError& error) {
-  const auto runner = v8_glue::Runner::From(isolate);
+  const auto runner = ginx::Runner::From(isolate);
   const auto constructor = runner->global()
                                ->Get(dom::v8Strings::PlatformError.Get(isolate))
                                ->ToObject();

@@ -63,10 +63,10 @@ template <typename T, typename U>
 v8::Local<v8::Promise> PromiseResolver::Call(
     const tracked_objects::Location& from_here,
     const base::Callback<void(const domapi::Promise<T, U>&)> closure) {
-  auto const runner = ScriptHost::instance()->runner();
+  const auto runner = ScriptHost::instance()->runner();
   v8_glue::Runner::EscapableHandleScope runner_scope(runner);
 
-  auto const resolver =
+  const auto& resolver =
       make_scoped_refptr(new PromiseResolver(from_here, runner));
 
   domapi::Promise<T, U> promise;
@@ -82,7 +82,7 @@ void PromiseResolver::Reject(T reason) {
   if (!runner_)
     return;
   v8_glue::Runner::Scope runner_scope(runner());
-  auto const isolate = runner()->isolate();
+  const auto isolate = runner()->isolate();
   v8::Local<v8::Value> v8_value;
   if (!gin::TryConvertToV8(isolate, reason, &v8_value))
     return;
@@ -94,7 +94,7 @@ void PromiseResolver::Resolve(T value) {
   if (!runner_)
     return;
   v8_glue::Runner::Scope runner_scope(runner());
-  auto const isolate = runner()->isolate();
+  const auto isolate = runner()->isolate();
   v8::Local<v8::Value> v8_value;
   if (!gin::TryConvertToV8(isolate, value, &v8_value))
     return;

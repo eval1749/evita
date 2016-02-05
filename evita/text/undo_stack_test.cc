@@ -31,6 +31,21 @@ class UndoStackTest : public ::testing::Test {
   DISALLOW_COPY_AND_ASSIGN(UndoStackTest);
 };
 
+TEST_F(UndoStackTest, CanUndo) {
+  InsertBefore(Offset(0), "foo");
+  EXPECT_TRUE(buffer()->CanUndo());
+  EXPECT_FALSE(buffer()->CanRedo());
+  buffer()->Undo(Offset(3));
+  EXPECT_FALSE(buffer()->CanUndo());
+  EXPECT_TRUE(buffer()->CanRedo());
+}
+
+TEST_F(UndoStackTest, Clear) {
+  InsertBefore(Offset(0), "foo");
+  buffer()->ClearUndo();
+  EXPECT_FALSE(buffer()->CanUndo()) << "No more undo steps after ClearUndo()";
+}
+
 TEST_F(UndoStackTest, Delete) {
   InsertBefore(Offset(0), "foo");
   auto const anchor_revision = buffer()->revision();

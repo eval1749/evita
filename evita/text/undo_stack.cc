@@ -43,6 +43,7 @@ bool UndoStack::CanUndo() const {
 
 void UndoStack::Clear() {
   redo_steps_.clear();
+  undo_steps_.clear();
 }
 
 void UndoStack::BeginUndoGroup(const base::string16& name) {

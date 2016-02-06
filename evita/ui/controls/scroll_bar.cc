@@ -275,13 +275,13 @@ void Arrow::PaintArrow(gfx::Canvas* canvas,
       break;
   }
 
-  auto const bounds = this->bounds().Offset(canvas_bounds.origin());
+  const auto bounds = this->bounds().Offset(canvas_bounds.origin());
   canvas->AddDirtyRect(bounds);
 
-  auto const center_x = bounds.left + bounds.width() / 2;
-  auto const center_y = bounds.top + bounds.height() / 2;
-  auto const wing_size = ::floor(bounds.width() / 4);
-  auto const pen_width = 2.0f;
+  const auto center_x = bounds.left + bounds.width() / 2;
+  const auto center_y = bounds.top + bounds.height() / 2;
+  const auto wing_size = ::floor(bounds.width() / 4);
+  const auto pen_width = 2.0f;
 
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   canvas->Clear(gfx::sysColor(COLOR_BTNFACE));
@@ -348,7 +348,7 @@ void ArrowDown::Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const {
 void ArrowDown::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                              const ScrollBar::Data& data) {
   set_state(data.thumb_value <= data.minimum ? State::Disabled : State::Normal);
-  auto const size = scroll_bar_bounds.width();
+  const auto size = scroll_bar_bounds.width();
   set_bounds(gfx::RectF(
       gfx::PointF(scroll_bar_bounds.left, scroll_bar_bounds.bottom - size),
       gfx::SizeF(size, size)));
@@ -386,7 +386,7 @@ void ArrowLeft::Paint(gfx::Canvas* canvas, const gfx::RectF& bounds) const {
 void ArrowLeft::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                              const ScrollBar::Data& data) {
   set_state(data.thumb_value <= data.minimum ? State::Disabled : State::Normal);
-  auto const size = scroll_bar_bounds.width();
+  const auto size = scroll_bar_bounds.width();
   set_bounds(gfx::RectF(scroll_bar_bounds.origin(), gfx::SizeF(size, size)));
 }
 
@@ -423,7 +423,7 @@ void ArrowRight::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                               const ScrollBar::Data& data) {
   set_state(data.thumb_value + data.thumb_size >= data.minimum ? State::Disabled
                                                                : State::Normal);
-  auto const size = scroll_bar_bounds.width();
+  const auto size = scroll_bar_bounds.width();
   set_bounds(gfx::RectF(
       gfx::PointF(scroll_bar_bounds.right - size, scroll_bar_bounds.top),
       gfx::SizeF(size, size)));
@@ -462,7 +462,7 @@ void ArrowUp::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                            const ScrollBar::Data& data) {
   set_state(data.thumb_value + data.thumb_size >= data.minimum ? State::Disabled
                                                                : State::Normal);
-  auto const size = scroll_bar_bounds.width();
+  const auto size = scroll_bar_bounds.width();
   set_bounds(gfx::RectF(
       gfx::PointF(scroll_bar_bounds.right - size, scroll_bar_bounds.top),
       gfx::SizeF(size, size)));
@@ -522,7 +522,7 @@ gfx::ColorF Thumb::thumb_color() const {
 }
 
 float Thumb::ComputeThumbSize(float thumb_max_size) const {
-  auto const size = data_.maximum - data_.minimum;
+  const auto size = data_.maximum - data_.minimum;
   if (size <= 0)
     return 0.0f;
 
@@ -532,8 +532,8 @@ float Thumb::ComputeThumbSize(float thumb_max_size) const {
     return 0.0f;
   }
 
-  auto const scale = thumb_max_size / size;
-  auto const thumb_size = data_.thumb_size * scale;
+  const auto scale = thumb_max_size / size;
+  const auto thumb_size = data_.thumb_size * scale;
   return thumb_size >= 1.0f ? scale : 0.0f;
 }
 
@@ -541,7 +541,7 @@ void Thumb::PaintThumb(gfx::Canvas* canvas,
                        const gfx::RectF& canvas_bounds) const {
   if (thumb_bounds_.empty())
     return;
-  auto const bounds = thumb_bounds_.Offset(canvas_bounds.origin());
+  const auto bounds = thumb_bounds_.Offset(canvas_bounds.origin());
   canvas->AddDirtyRect(bounds);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   canvas->Clear(gfx::sysColor(COLOR_BTNFACE));
@@ -550,7 +550,7 @@ void Thumb::PaintThumb(gfx::Canvas* canvas,
 
 // ScrollBar::Part
 void Thumb::Paint(gfx::Canvas* canvas, const gfx::RectF& canvas_bounds) const {
-  auto const bounds = this->bounds().Offset(canvas_bounds.origin());
+  const auto bounds = this->bounds().Offset(canvas_bounds.origin());
   canvas->AddDirtyRect(bounds);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   canvas->Clear(gfx::sysColor(COLOR_BTNFACE));
@@ -603,12 +603,12 @@ class ThumbHorizontal final : public Thumb {
 
 // ScrollBar::Part
 int ThumbHorizontal::GetValueAt(const gfx::PointF& point) const {
-  auto const size = data().maximum - data().minimum;
+  const auto size = data().maximum - data().minimum;
   if (size <= 0)
     return data().minimum;
-  auto const offset =
+  const auto offset =
       std::min(std::max(point.x - bounds().left, 0.0f), bounds().right);
-  auto const scale = static_cast<float>(size) / bounds().width();
+  const auto scale = static_cast<float>(size) / bounds().width();
   return std::min(static_cast<int>(offset * scale) + data().minimum,
                   data().maximum);
 }
@@ -626,12 +626,12 @@ ScrollBar::HitTestResult ThumbHorizontal::HitTest(
 
 void ThumbHorizontal::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                                    const ScrollBar::Data& data) {
-  auto const arrow_box_size = scroll_bar_bounds.height();
-  auto const bounds = scroll_bar_bounds.Inset(arrow_box_size, 0.0f);
+  const auto arrow_box_size = scroll_bar_bounds.height();
+  const auto bounds = scroll_bar_bounds.Inset(arrow_box_size, 0.0f);
   set_bounds(bounds);
   set_data(data);
 
-  auto const scale = ComputeThumbSize(bounds.width());
+  const auto scale = ComputeThumbSize(bounds.width());
   if (!scale) {
     set_state(State::Disabled);
     set_thumb_bounds(gfx::RectF());
@@ -641,8 +641,8 @@ void ThumbHorizontal::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
   if (new_state() == State::Disabled)
     set_state(State::Normal);
 
-  auto const thumb_left = ::floor((data.thumb_value - data.minimum) * scale);
-  auto const thumb_right =
+  const auto thumb_left = ::floor((data.thumb_value - data.minimum) * scale);
+  const auto thumb_right =
       ::floor((data.thumb_value + data.thumb_size - data.minimum) * scale);
   set_thumb_bounds(
       gfx::RectF(gfx::PointF(bounds.left + thumb_left, bounds.top),
@@ -670,12 +670,12 @@ class ThumbVertical final : public Thumb {
 
 // ScrollBar::Part
 int ThumbVertical::GetValueAt(const gfx::PointF& point) const {
-  auto const size = data().maximum - data().minimum;
+  const auto size = data().maximum - data().minimum;
   if (size <= 0)
     return data().minimum;
-  auto const offset =
+  const auto offset =
       std::min(std::max(point.y - bounds().top, 0.0f), bounds().bottom);
-  auto const scale = size / bounds().height();
+  const auto scale = size / bounds().height();
   return std::min(static_cast<int>(offset * scale) + data().minimum,
                   data().maximum);
 }
@@ -693,12 +693,12 @@ ScrollBar::HitTestResult ThumbVertical::HitTest(
 
 void ThumbVertical::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
                                  const ScrollBar::Data& data) {
-  auto const arrow_box_size = scroll_bar_bounds.width();
-  auto const bounds = scroll_bar_bounds.Inset(0.0f, arrow_box_size);
+  const auto arrow_box_size = scroll_bar_bounds.width();
+  const auto bounds = scroll_bar_bounds.Inset(0.0f, arrow_box_size);
   set_bounds(bounds);
   set_data(data);
 
-  auto const scale = ComputeThumbSize(bounds.height());
+  const auto scale = ComputeThumbSize(bounds.height());
   if (!scale) {
     set_state(State::Disabled);
     set_thumb_bounds(gfx::RectF());
@@ -708,8 +708,8 @@ void ThumbVertical::UpdateLayout(const gfx::RectF& scroll_bar_bounds,
   if (new_state() == State::Disabled)
     set_state(State::Normal);
 
-  auto const thumb_top = ::floor((data.thumb_value - data.minimum) * scale);
-  auto const thumb_bottom =
+  const auto thumb_top = ::floor((data.thumb_value - data.minimum) * scale);
+  const auto thumb_bottom =
       ::floor((data.thumb_value + data.thumb_size - data.minimum) * scale);
   set_thumb_bounds(
       gfx::RectF(gfx::PointF(bounds.left, bounds.top + thumb_top),
@@ -729,7 +729,7 @@ ScrollBar::ScrollBar(Type type, ScrollBarObserver* observer)
       parts_(CreateParts(type)) {}
 
 ScrollBar::~ScrollBar() {
-  for (auto part : parts_)
+  for (const auto& part : parts_)
     delete part;
 }
 
@@ -745,8 +745,8 @@ std::vector<ScrollBar::Part*> ScrollBar::CreateParts(Type type) {
 }
 
 ScrollBar::HitTestResult ScrollBar::HitTest(const gfx::PointF& point) const {
-  for (auto part : parts_) {
-    if (auto const result = part->HitTest(point))
+  for (const auto& part : parts_) {
+    if (const auto result = part->HitTest(point))
       return result;
   }
   return HitTestResult();
@@ -772,8 +772,8 @@ void ScrollBar::SetData(const Data& data) {
 }
 
 void ScrollBar::UpdateLayout() {
-  auto const contents_bounds = GetContentsBounds();
-  for (auto part : parts_)
+  const auto contents_bounds = GetContentsBounds();
+  for (const auto& part : parts_)
     part->UpdateLayout(contents_bounds, data_);
   SchedulePaint();
 }
@@ -781,27 +781,27 @@ void ScrollBar::UpdateLayout() {
 // ui::Widget
 void ScrollBar::DidChangeBounds() {
   ui::Widget::DidChangeBounds();
-  for (auto part : parts_)
+  for (const auto& part : parts_)
     part->ResetView();
   UpdateLayout();
 }
 
 void ScrollBar::DidShow() {
   ui::Widget::DidShow();
-  for (auto part : parts_)
+  for (const auto& part : parts_)
     part->ResetView();
 }
 
 void ScrollBar::OnDraw(gfx::Canvas* canvas) {
   auto dirty = false;
-  for (auto part : parts_)
+  for (const auto& part : parts_)
     dirty |= part->IsDirty();
   if (!dirty)
     return;
-  auto const canvas_bounds = GetContentsBounds();
+  const auto canvas_bounds = GetContentsBounds();
   gfx::Canvas::DrawingScope drawing_scope(canvas);
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, canvas_bounds);
-  for (auto part : parts_)
+  for (const auto& part : parts_)
     part->Render(canvas, canvas_bounds);
 }
 
@@ -818,8 +818,8 @@ void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
   }
   if (capturing_location_ != Location::None)
     return;
-  auto const result = HitTest(gfx::PointF(event.location()));
-  auto const new_hover_part = result.part();
+  const auto result = HitTest(gfx::PointF(event.location()));
+  const auto new_hover_part = result.part();
   if (hover_part_ && hover_part_ != new_hover_part) {
     hover_part_->set_state(Part::State::Normal);
     SchedulePaint();
@@ -834,8 +834,8 @@ void ScrollBar::OnMouseMoved(const ui::MouseEvent& event) {
 void ScrollBar::OnMousePressed(const ui::MouseEvent& event) {
   if (!event.is_left_button() || event.click_count())
     return;
-  auto const result = HitTest(gfx::PointF(event.location()));
-  auto const new_hover_part = result.part();
+  const auto result = HitTest(gfx::PointF(event.location()));
+  const auto new_hover_part = result.part();
   if (hover_part_ != new_hover_part) {
     if (hover_part_)
       hover_part_->set_state(Part::State::Normal);

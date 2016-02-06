@@ -50,7 +50,7 @@ class ScrollBar final : public ui::Widget {
   };
 
   ScrollBar(Type type, ScrollBarObserver* observer);
-  ~ScrollBar();
+  ~ScrollBar() final;
 
   void SetData(const Data& date);
 

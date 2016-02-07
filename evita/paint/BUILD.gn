@@ -14,6 +14,8 @@ source_set("paint") {
     "root_inline_box_list_painter.h",
     "root_inline_box_painter.cc",
     "root_inline_box_painter.h",
+    "scroll_bar_painter.cc",
+    "scroll_bar_painter.h",
     "view_paint_cache.cc",
     "view_paint_cache.h",
     "view_painter.cc",

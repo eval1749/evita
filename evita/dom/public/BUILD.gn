@@ -5,8 +5,9 @@
 source_set("public") {
   sources = [
     "event_target_id.h",
-    "float_point.cc",
-    "float_rect.cc",
+    "float_point.h",
+    "float_rect.h",
+    "float_size.h",
     "geometry.h",
     "io_context_id.cc",
     "io_delegate.cc",
@@ -23,6 +24,8 @@ source_set("public") {
     "switch_value.h",
     "tab_data.cc",
     "tab_data.h",
+    "text_area_display_item.cc",
+    "text_area_display_item.h",
     "view_delegate.cc",
     "view_delegate.h",
     "view_event_handler.cc",

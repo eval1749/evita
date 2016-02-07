@@ -5,33 +5,11 @@
 #ifndef EVITA_DOM_PUBLIC_FLOAT_RECT_H_
 #define EVITA_DOM_PUBLIC_FLOAT_RECT_H_
 
+#include "evita/visuals/geometry/float_rect.h"
+
 namespace domapi {
 
-class FloatPoint;
-
-class FloatRect final {
- public:
-  FloatRect(float x, float y, float width, float height);
-  FloatRect();
-  ~FloatRect();
-
-  float bottom() const { return y_ + height_; }
-  float height() const { return height_; }
-  float left() const { return x_; }
-  FloatPoint origin() const;
-  float right() const { return x_ + width_; }
-  FloatPoint bottom_right() const;
-  float top() const { return x_; }
-  float width() const { return width_; }
-  float x() const { return x_; }
-  float y() const { return y_; }
-
- private:
-  float x_;
-  float y_;
-  float width_;
-  float height_;
-};
+using FloatRect = visuals::FloatRect;
 
 }  // namespace domapi
 

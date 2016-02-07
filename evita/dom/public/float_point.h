@@ -5,21 +5,11 @@
 #ifndef EVITA_DOM_PUBLIC_FLOAT_POINT_H_
 #define EVITA_DOM_PUBLIC_FLOAT_POINT_H_
 
+#include "evita/visuals/geometry/float_point.h"
+
 namespace domapi {
 
-class FloatPoint final {
- public:
-  FloatPoint(float x, float y);
-  FloatPoint();
-  ~FloatPoint();
-
-  float x() const { return x_; }
-  float y() const { return y_; }
-
- private:
-  float x_;
-  float y_;
-};
+using FloatPoint = visuals::FloatPoint;
 
 }  // namespace domapi
 

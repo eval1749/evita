@@ -16,6 +16,8 @@ source_set("views") {
     "message_view.h",
     "metrics_view.cc",
     "metrics_view.h",
+    "scroll_bar.cc",
+    "scroll_bar.h",
     "switches.cc",
     "switches.h",
     "text_window.cc",

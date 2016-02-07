@@ -28,7 +28,9 @@ class ScrollBar;
 }
 
 namespace views {
+
 class MetricsView;
+class ScrollBar;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -107,6 +109,9 @@ class TextWindow final : public CanvasContentWindow,
   void DidSetFocus(ui::Widget* last_focused) final;
   void DidShow() final;
   HCURSOR GetCursorAt(const gfx::Point& point) const final;
+  void OnMouseMoved(const ui::MouseEvent& event) override;
+  void OnMousePressed(const ui::MouseEvent& event) override;
+  void OnMouseReleased(const ui::MouseEvent& event) override;
 
   // views::ContentWindow
   void MakeSelectionVisible() final;
@@ -115,7 +120,7 @@ class TextWindow final : public CanvasContentWindow,
   // TODO(eval1749): Manage life time of selection.
   text::Selection* const selection_;
   std::unique_ptr<layout::TextView> text_view_;
-  ui::ScrollBar* const vertical_scroll_bar_;
+  const std::unique_ptr<ScrollBar> vertical_scroll_bar_;
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);
 };

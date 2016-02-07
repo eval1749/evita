@@ -10,6 +10,8 @@
 #include "base/strings/string16.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/public/scroll_bar_orientation.h"
+#include "evita/dom/public/scroll_bar_part.h"
 #include "evita/dom/public/text_composition_data.h"
 #include "evita/dom/public/view_events.h"
 #include "evita/editor/application.h"
@@ -25,9 +27,9 @@
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/compositor/compositor.h"
 #include "evita/ui/compositor/layer.h"
-#include "evita/ui/controls/scroll_bar.h"
 #include "evita/ui/focus_controller.h"
 #include "evita/views/metrics_view.h"
+#include "evita/views/scroll_bar.h"
 
 namespace views {
 
@@ -54,8 +56,7 @@ TextWindow::TextWindow(WindowId window_id, text::Selection* selection)
       text_view_(new layout::TextView(*selection->buffer(), this)),
       selection_(selection),
       vertical_scroll_bar_(
-          new ui::ScrollBar(ui::ScrollBar::Type::Vertical, this)) {
-  AppendChild(vertical_scroll_bar_);
+          new ScrollBar(ScrollBarOrientation::Vertical, this, this)) {
   AppendChild(metrics_view_);
   UI_DOM_AUTO_LOCK_SCOPE();
   buffer().AddObserver(this);
@@ -144,9 +145,12 @@ text::Offset TextWindow::ComputeWindowMotion(int n, text::Offset offset) {
   return offset;
 }
 
-text::Offset TextWindow::HitTestPoint(const gfx::PointF pt) {
+text::Offset TextWindow::HitTestPoint(const gfx::PointF point) {
+  const auto scroll_bar_part = vertical_scroll_bar_->HitTestPoint(point);
+  if (scroll_bar_part != ScrollBarPart::None)
+    return text::Offset::Invalid();
   text_view_->FormatIfNeeded();
-  return std::min(text_view_->HitTestPoint(pt), buffer().GetEnd());
+  return std::min(text_view_->HitTestPoint(point), buffer().GetEnd());
 }
 
 // Maps position specified buffer position and returns height
@@ -243,8 +247,7 @@ void TextWindow::UpdateBounds() {
   auto const vertical_scroll_bar_bounds = gfx::RectF(
       gfx::PointF(text_block_bounds.right, text_block_bounds.top),
       gfx::SizeF(vertical_scroll_bar_width, text_block_bounds.height()));
-  vertical_scroll_bar_->SetBounds(
-      gfx::ToEnclosingRect(vertical_scroll_bar_bounds));
+  vertical_scroll_bar_->SetBounds(vertical_scroll_bar_bounds);
 
   // Place metrics view at bottom right of text block.
   auto const metrics_view_size = gfx::SizeF(metrics_view_->bounds().width(),
@@ -256,16 +259,10 @@ void TextWindow::UpdateBounds() {
 }
 
 void TextWindow::UpdateScrollBar() {
-  ui::ScrollBar::Data data;
-  data.minimum = 0;
-  data.thumb_size = text_view_->ComputeVisibleEnd() - text_view_->text_start();
-  data.thumb_value = text_view_->text_start().value();
-  data.maximum = buffer().GetEnd().value() + 1;
+  ScrollBarData data(base::FloatRange(0, buffer().GetEnd().value() + 1),
+                     base::FloatRange(text_view_->text_start().value(),
+                                      text_view_->text_end().value()));
   vertical_scroll_bar_->SetData(data);
-  // TODO(eval1749): Once we have scroll bar for |ui::TextWindow|, we don't
-  // need to call |CancelAnimationFrameRequest()| to cancel request by
-  // |ui::ScrollBar| control
-  CancelAnimationFrameRequest();
 }
 
 // text::BufferMutationObserver
@@ -319,7 +316,7 @@ void TextWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   {
     gfx::Canvas::DrawingScope drawing_scope(canvas());
     text_view_->Paint(canvas());
-    OnDraw(canvas());
+    vertical_scroll_bar_->Paint(canvas());
   }
   NotifyUpdateContent();
 }
@@ -396,7 +393,6 @@ void TextWindow::DidChangeBounds() {
 void TextWindow::DidHide() {
   // Note: It is OK that hidden window have focus.
   CanvasContentWindow::DidHide();
-  vertical_scroll_bar_->Hide();
   text_view_->DidHide();
 }
 
@@ -423,11 +419,31 @@ void TextWindow::DidSetFocus(ui::Widget* last_focused) {
 
 void TextWindow::DidShow() {
   CanvasContentWindow::DidShow();
-  vertical_scroll_bar_->Show();
 }
 
-HCURSOR TextWindow::GetCursorAt(const gfx::Point&) const {
+HCURSOR TextWindow::GetCursorAt(const gfx::Point& point) const {
+  const auto part = vertical_scroll_bar_->HitTestPoint(gfx::PointF(point));
+  if (part != ScrollBarPart::None)
+    return ::LoadCursor(nullptr, IDC_ARROW);
   return ::LoadCursor(nullptr, IDC_IBEAM);
+}
+
+void TextWindow::OnMouseMoved(const ui::MouseEvent& event) {
+  if (vertical_scroll_bar_->HandleMouseMoved(event))
+    return;
+  CanvasContentWindow::OnMouseMoved(event);
+}
+
+void TextWindow::OnMousePressed(const ui::MouseEvent& event) {
+  if (vertical_scroll_bar_->HandleMousePressed(event))
+    return;
+  CanvasContentWindow::OnMousePressed(event);
+}
+
+void TextWindow::OnMouseReleased(const ui::MouseEvent& event) {
+  if (vertical_scroll_bar_->HandleMouseReleased(event))
+    return;
+  CanvasContentWindow::OnMouseReleased(event);
 }
 
 // views::CanvasContentWindow

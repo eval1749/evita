@@ -7,30 +7,23 @@
 
 #include <memory>
 
-#include "evita/text/buffer_mutation_observer.h"
-#include "evita/text/selection_change_observer.h"
+#include "evita/dom/public/float_rect.h"
+#include "evita/gfx/canvas_observer.h"
+#include "evita/gfx/rect_f.h"
 #include "evita/ui/base/ime/text_input_delegate.h"
-#include "evita/ui/controls/scroll_bar_observer.h"
 #include "evita/views/canvas_content_window.h"
 
-namespace layout {
-class TextSelectionModel;
-class TextView;
+namespace domapi {
+class TextAreaDisplayItem;
 }
 
-namespace text {
-class Buffer;
-class Selection;
-}
-
-namespace ui {
-class ScrollBar;
+namespace paint {
+class ViewPaintCache;
 }
 
 namespace views {
 
 class MetricsView;
-class ScrollBar;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -40,59 +33,29 @@ class ScrollBar;
 // |PaintViewBuilder| class about caret management.
 //
 class TextWindow final : public CanvasContentWindow,
-                         public text::BufferMutationObserver,
-                         public text::SelectionChangeObserver,
-                         public ui::ScrollBarObserver,
+                         public gfx::CanvasObserver,
                          public ui::TextInputDelegate {
   DECLARE_CASTABLE_CLASS(TextWindow, ContentWindow);
 
+  using TextAreaDisplayItem = domapi::TextAreaDisplayItem;
+
  public:
-  TextWindow(WindowId window_id, text::Selection* selection);
+  explicit TextWindow(WindowId window_id);
   ~TextWindow() final;
 
-  text::Offset ComputeEndOfLine(text::Offset offset);
-  text::Offset ComputeScreenMotion(int count,
-                                   const gfx::PointF& point,
-                                   text::Offset offset);
-  text::Offset ComputeStartOfLine(text::Offset offset);
-  text::Offset ComputeWindowLineMotion(int count,
-                                       const gfx::PointF& point,
-                                       text::Offset offset);
-  text::Offset ComputeWindowMotion(int count, text::Offset offset);
-  text::Offset HitTestPoint(const gfx::PointF point);
-  gfx::RectF HitTestTextPosition(text::Offset offset);
-  void SetZoom(float new_zoom);
-  bool SmallScroll(int x_count, int y_count);
+  void Paint(std::unique_ptr<TextAreaDisplayItem> display_item);
 
  private:
-  using TextSelectionModel = layout::TextSelectionModel;
-
-  const text::Buffer& buffer() const;
-
-  bool LargeScroll(int x_count, int y_count);
   void UpdateBounds();
-  void UpdateScrollBar();
 
-  // text::BufferMutationObserver
-  void DidChangeStyle(const text::StaticRange& range) final;
-  void DidDeleteAt(const text::StaticRange& range) final;
-  void DidInsertBefore(const text::StaticRange& range) final;
-
-  // text::SelectionChangeObserver
-  void DidChangeSelection() final;
+  // gfx::CanvasObserver
+  void DidRecreateCanvas() final;
 
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
   // ui::LayerOwnerDelegate
   void DidRecreateLayer(ui::Layer* old_layer) final;
-
-  // ui::ScrollBarObserver
-  void DidClickLineDown() final;
-  void DidClickLineUp() final;
-  void DidClickPageDown() final;
-  void DidClickPageUp() final;
-  void DidMoveThumb(int value) final;
 
   // ui::TextInputDelegate
   void DidCommitComposition(const ui::TextComposition& composition) final;
@@ -109,18 +72,13 @@ class TextWindow final : public CanvasContentWindow,
   void DidSetFocus(ui::Widget* last_focused) final;
   void DidShow() final;
   HCURSOR GetCursorAt(const gfx::Point& point) const final;
-  void OnMouseMoved(const ui::MouseEvent& event) override;
-  void OnMousePressed(const ui::MouseEvent& event) override;
-  void OnMouseReleased(const ui::MouseEvent& event) override;
 
   // views::ContentWindow
   void MakeSelectionVisible() final;
 
-  MetricsView* metrics_view_;
-  // TODO(eval1749): Manage life time of selection.
-  text::Selection* const selection_;
-  std::unique_ptr<layout::TextView> text_view_;
-  const std::unique_ptr<ScrollBar> vertical_scroll_bar_;
+  MetricsView* const metrics_view_;
+  gfx::RectF scroll_bar_bounds_;
+  std::unique_ptr<paint::ViewPaintCache> view_paint_cache_;
 
   DISALLOW_COPY_AND_ASSIGN(TextWindow);
 };

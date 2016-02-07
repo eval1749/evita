@@ -12,6 +12,7 @@
 #include "base/callback_forward.h"
 #include "base/macros.h"
 #include "base/strings/string16.h"
+#include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/geometry.h"
 #include "evita/dom/public/promise.h"
 #include "evita/dom/public/script_host_state.h"
@@ -24,19 +25,15 @@ namespace dom {
 class TextDocument;
 }
 
-namespace text {
-class Selection;
-}
-
 namespace visuals {
 class DisplayItemList;
 }
 
 namespace domapi {
 
-class FloatRect;
 class Form;
 struct TabData;
+class TextAreaDisplayItem;
 
 using TraceLogOutputCallback =
     base::Callback<void(const std::string& chunk, bool has_more_events)>;
@@ -76,8 +73,6 @@ class ViewDelegate {
   virtual void AddWindow(WindowId parent_id, WindowId child_id) = 0;
   virtual void ChangeParentWindow(WindowId window_id,
                                   WindowId new_parent_window_id) = 0;
-  virtual text::Offset ComputeOnTextWindow(WindowId window_id,
-                                           const TextWindowCompute& data) = 0;
   virtual void CreateEditorWindow(domapi::WindowId window_id) = 0;
 
   // Create Form window
@@ -86,8 +81,7 @@ class ViewDelegate {
                                 const IntRect& bounds,
                                 const base::string16& title) = 0;
 
-  virtual void CreateTextWindow(WindowId window_id,
-                                text::Selection* selection) = 0;
+  virtual void CreateTextWindow(WindowId window_id) = 0;
 
   // Create a window for displaying visual document.
   virtual void CreateVisualWindow(WindowId window_id) = 0;
@@ -127,15 +121,6 @@ class ViewDelegate {
 
   virtual void HideWindow(WindowId window_id) = 0;
 
-  // Get bounding rectangle of character at text offset.
-  virtual FloatRect HitTestTextPosition(WindowId window_id,
-                                        text::Offset offset) = 0;
-
-  virtual void MakeSelectionVisible(WindowId window_id) = 0;
-  virtual void MapTextWindowPointToOffset(EventTargetId event_target_id,
-                                          float x,
-                                          float y,
-                                          const IntegerPromise& promise) = 0;
 // Popup message box dialog box and return response code.
 #undef MessageBox
   virtual void MessageBox(WindowId window_id,
@@ -145,6 +130,10 @@ class ViewDelegate {
                           const MessageBoxResolver& callback) = 0;
 
   virtual void PaintForm(WindowId window_id, std::unique_ptr<Form> form) = 0;
+
+  virtual void PaintTextArea(
+      WindowId window_id,
+      std::unique_ptr<TextAreaDisplayItem> display_item) = 0;
 
   // TODO(eval1749): We should move |PaintVisualDocument()| to paint delegate.
   virtual void PaintVisualDocument(
@@ -157,8 +146,6 @@ class ViewDelegate {
   // Release capture from window or form control.
   virtual void ReleaseCapture(EventTargetId event_target_id) = 0;
 
-  /* synchronous */ virtual void ScrollTextWindow(WindowId windowId,
-                                                  int direction) = 0;
   // Release capture from window or form control.
   virtual void SetCapture(EventTargetId event_target_id) = 0;
 
@@ -171,9 +158,6 @@ class ViewDelegate {
                          const SwitchValue& new_value) = 0;
 
   virtual void SetTabData(WindowId window_id, const TabData& tab_data) = 0;
-  // Set |TextWindow| zoom factor.
-  virtual void SetTextWindowZoom(WindowId window_id, float zoom) = 0;
-
   virtual void ShowWindow(WindowId window_id) = 0;
   virtual void SplitHorizontally(WindowId left_window_id,
                                  WindowId new_right_window_id) = 0;
@@ -183,9 +167,6 @@ class ViewDelegate {
   // Trace Log
   virtual void StartTraceLog(const std::string& config) = 0;
   virtual void StopTraceLog(const TraceLogOutputCallback& callback) = 0;
-
-  // Synchronous: Update window contents
-  virtual void UpdateWindow(WindowId window_id) = 0;
 
  protected:
   ViewDelegate();

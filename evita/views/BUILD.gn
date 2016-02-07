@@ -16,8 +16,6 @@ source_set("views") {
     "message_view.h",
     "metrics_view.cc",
     "metrics_view.h",
-    "scroll_bar.cc",
-    "scroll_bar.h",
     "switches.cc",
     "switches.h",
     "text_window.cc",
@@ -43,6 +41,7 @@ source_set("views") {
     "//evita/views/events",
     "//evita/views/forms",
     "//evita/views/tabs",
+    "//evita/visuals",
     "//evita/visuals/display:processor",
   ]
 }

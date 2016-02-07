@@ -13,6 +13,7 @@
 #include "evita/dom/forms/form.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/form.h"
+#include "evita/dom/public/text_area_display_item.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/windows/editor_window.h"
 #include "evita/dom/windows/text_window.h"
@@ -140,39 +141,6 @@ void ViewDelegateImpl::ChangeParentWindow(domapi::WindowId window_id,
   window->SetParentWidget(new_parent);
 }
 
-// TODO(eval1749): We should make |ComputeOnTextWindow()| to return value
-// asynchronously.
-text::Offset ViewDelegateImpl::ComputeOnTextWindow(
-    domapi::WindowId window_id,
-    const domapi::TextWindowCompute& data) {
-  TRACE_EVENT0("view", "ViewDelegateImpl::ComputeOnTextWindow");
-  auto const window =
-      FromWindowId("ComputeOnTextWindow", window_id)->as<TextWindow>();
-  if (!window)
-    return text::Offset::Invalid();
-  gfx::PointF point(data.x, data.y);
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
-  switch (data.method) {
-    case domapi::TextWindowCompute::Method::EndOfWindow:
-      return window->ComputeWindowMotion(1, text::Offset(0));
-    case domapi::TextWindowCompute::Method::EndOfWindowLine:
-      return window->ComputeEndOfLine(data.position);
-    case domapi::TextWindowCompute::Method::MoveScreen:
-      return window->ComputeScreenMotion(data.count, point, data.position);
-    case domapi::TextWindowCompute::Method::MoveWindow:
-      return window->ComputeWindowMotion(data.count, data.position);
-    case domapi::TextWindowCompute::Method::MoveWindowLine:
-      return window->ComputeWindowLineMotion(data.count, point, data.position);
-    case domapi::TextWindowCompute::Method::StartOfWindow:
-      return window->ComputeWindowMotion(-1, text::Offset(0));
-    case domapi::TextWindowCompute::Method::StartOfWindowLine:
-      return window->ComputeStartOfLine(data.position);
-    default:
-      return text::Offset::Invalid();
-  }
-}
-
 void ViewDelegateImpl::CreateEditorWindow(domapi::WindowId window_id) {
   new Frame(window_id);
 }
@@ -193,9 +161,8 @@ void ViewDelegateImpl::CreateFormWindow(domapi::WindowId window_id,
   new FormWindow(window_id, owner, bounds, title);
 }
 
-void ViewDelegateImpl::CreateTextWindow(domapi::WindowId window_id,
-                                        text::Selection* selection) {
-  new TextWindow(window_id, selection);
+void ViewDelegateImpl::CreateTextWindow(domapi::WindowId window_id) {
+  new TextWindow(window_id);
 }
 
 void ViewDelegateImpl::CreateVisualWindow(domapi::WindowId window_id) {
@@ -340,61 +307,6 @@ void ViewDelegateImpl::HideWindow(domapi::WindowId window_id) {
   window->Hide();
 }
 
-// TODO(eval1749): We should make |HitTestTextPosition()| to return value
-// asynchronously.
-domapi::FloatRect ViewDelegateImpl::HitTestTextPosition(WindowId window_id,
-                                                        text::Offset position) {
-  TRACE_EVENT0("view", "ViewDelegateImpl::HitTestTextPosition");
-  auto const window =
-      FromWindowId("HitTestTextPosition", window_id)->as<TextWindow>();
-  if (!window)
-    return domapi::FloatRect();
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
-  const auto rect = window->HitTestTextPosition(position);
-  return domapi::FloatRect(rect.left, rect.top, rect.width(), rect.height());
-}
-
-// TODO(eval1749): We should not have |MakeSelectionVisible()|.
-void ViewDelegateImpl::MakeSelectionVisible(domapi::WindowId window_id) {
-  TRACE_EVENT0("view", "ViewDelegateImpl::MakeSelectionVisible");
-  DCHECK_NE(domapi::kInvalidWindowId, window_id);
-  auto const widget = Window::FromWindowId(window_id);
-  if (!widget) {
-    DVLOG(0) << "MakeSelectionVisible: no such widget " << window_id;
-    return;
-  }
-  auto const content_window = widget->as<ContentWindow>();
-  if (!content_window) {
-    DVLOG(0) << "MakeSelectionVisible: not ContentWindow" << window_id;
-    return;
-  }
-  UI_DOM_AUTO_LOCK_SCOPE();
-  content_window->MakeSelectionVisible();
-}
-
-void ViewDelegateImpl::MapTextWindowPointToOffset(
-    domapi::EventTargetId event_target_id,
-    float x,
-    float y,
-    const domapi::IntegerPromise& promise) {
-  TRACE_EVENT_WITH_FLOW0("promise",
-                         "ViewDelegateImpl::MapTextWindowPointToOffset",
-                         promise.sequence_num,
-                         TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
-  auto const window = Window::FromWindowId(event_target_id);
-  if (!window)
-    return Reject(promise, -1);
-
-  auto const text_window = window->as<TextWindow>();
-  if (!text_window)
-    return Reject(promise, -1);
-
-  UI_DOM_AUTO_LOCK_SCOPE();
-  auto const offset = text_window->HitTestPoint(gfx::PointF(x, y));
-  return Resolve(promise, offset.value());
-}
-
 void ViewDelegateImpl::MessageBox(domapi::WindowId window_id,
                                   const base::string16& message,
                                   const base::string16& title,
@@ -445,6 +357,20 @@ void ViewDelegateImpl::PaintForm(domapi::WindowId window_id,
   form_window->Paint(std::move(form));
 }
 
+void ViewDelegateImpl::PaintTextArea(
+    domapi::WindowId window_id,
+    std::unique_ptr<domapi::TextAreaDisplayItem> display_item) {
+  auto const& window = FromWindowId("PaintTextArea", window_id);
+  if (!window)
+    return;
+  auto const& text_window = window->as<TextWindow>();
+  if (!text_window) {
+    DVLOG(0) << "WindowId " << window_id << " should be TextAreaWindow.";
+    return;
+  }
+  text_window->Paint(std::move(display_item));
+}
+
 void ViewDelegateImpl::PaintVisualDocument(
     domapi::WindowId window_id,
     std::unique_ptr<visuals::DisplayItemList> display_item_list) {
@@ -481,18 +407,6 @@ void ViewDelegateImpl::RealizeWindow(domapi::WindowId window_id) {
   widget->RealizeWidget();
 }
 
-void ViewDelegateImpl::SetTextWindowZoom(domapi::WindowId window_id,
-                                         float zoom) {
-  DCHECK_GT(zoom, 0.0f);
-  auto const window = FromWindowId("SetTextWindowZoom", window_id);
-  if (!window)
-    return;
-  auto const text_window = window->as<TextWindow>();
-  if (!text_window)
-    return;
-  text_window->SetZoom(zoom);
-}
-
 void ViewDelegateImpl::ShowWindow(domapi::WindowId window_id) {
   auto const window = FromWindowId("ShowWindow", window_id);
   if (!window)
@@ -507,22 +421,6 @@ void ViewDelegateImpl::ReleaseCapture(domapi::EventTargetId event_target_id) {
   }
 
   DVLOG(0) << "ReleaseCapture: no such target " << event_target_id;
-}
-
-// TODO(eval1749): We should make |ScrollTextWindow()| asynchronous.
-void ViewDelegateImpl::ScrollTextWindow(WindowId window_id, int direction) {
-  TRACE_EVENT0("view", "ViewDelegateImpl::ScrollTextWindow");
-  auto const window = FromWindowId("ScrollTextWindow", window_id);
-  if (!window)
-    return;
-  auto const text_window = window->as<TextWindow>();
-  if (!text_window) {
-    DVLOG(0) << "ScrollTextWindow expects TextWindow.";
-    return;
-  }
-  UI_DOM_AUTO_TRY_LOCK_SCOPE(lock_scope);
-  DCHECK(lock_scope.locked());
-  text_window->SmallScroll(0, direction);
 }
 
 void ViewDelegateImpl::SetCapture(domapi::EventTargetId event_target_id) {
@@ -601,15 +499,6 @@ void ViewDelegateImpl::StopTraceLog(
   editor::Application::instance()->trace_log_controller()->StopRecording(
       base::Bind(&TraceLogClient::DidGetEvent,
                  base::Unretained(trace_log_client)));
-}
-
-void ViewDelegateImpl::UpdateWindow(domapi::WindowId window_id) {
-  TRACE_EVENT0("view", "ViewDelegateImpl::UpdateWindow");
-  auto const window = FromWindowId("UpdateWindow", window_id);
-  if (!window)
-    return;
-  auto const now = base::TimeTicks::Now();
-  window->HandleAnimationFrame(now);
 }
 
 }  // namespace views

@@ -9,9 +9,6 @@
 
 #include "base/logging.h"
 #include "evita/gfx/font.h"
-#include "evita/text/buffer.h"
-#include "evita/ui/animation/animatable_window.h"
-#include "evita/ui/base/ime/text_input_client.h"
 #include "evita/layout/block_flow.h"
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/inline_box_visitor.h"
@@ -24,11 +21,13 @@
 #include "evita/paint/public/line/root_inline_box.h"
 #include "evita/paint/public/selection.h"
 #include "evita/paint/public/view.h"
+#include "evita/text/buffer.h"
+#include "evita/ui/animation/animatable_window.h"
+#include "evita/ui/base/ime/text_input_client.h"
 
 namespace layout {
 
 namespace {
-const auto kBlinkInterval = 16 * 20;  // milliseconds
 
 class PaintInlineBoxBuilder : public InlineBoxVisitor {
  public:
@@ -139,6 +138,21 @@ std::unordered_set<gfx::RectF> CalculateSelectionBoundsSet(
   return bounds_set;
 }
 
+gfx::RectF ComputeRulerBounds(const BlockFlow& block) {
+  // TODO(eval1749): We should expose show/hide and ruler settings to both
+  // script and UI.
+  auto style = block.text_buffer().GetDefaultStyle();
+  style.set_font_size(style.font_size() * block.zoom());
+  const auto font = FontSet::GetFont(style, 'x');
+
+  const auto& bounds = block.bounds();
+  const auto num_columns = 81;
+  const auto width_of_M = font->GetCharWidth('M');
+  const auto ruler_x = ::floor(bounds.left + width_of_M * num_columns);
+  return gfx::RectF(gfx::PointF(ruler_x, bounds.top),
+                    gfx::SizeF(1.0f, bounds.height()));
+}
+
 paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
   std::vector<paint::InlineBox*> boxes;
   boxes.reserve(line.boxes().size());
@@ -148,149 +162,37 @@ paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
   return new paint::RootInlineBox(boxes, line.bounds());
 }
 
-base::TimeDelta GetCaretBlinkInterval() {
-  const auto interval = ::GetCaretBlinkTime();
-  if (!interval)
-    return base::TimeDelta::FromMilliseconds(kBlinkInterval);
-  if (interval == INFINITE)
-    return base::TimeDelta();
-  return base::TimeDelta::FromMilliseconds(interval);
-}
-
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
 // PaintViewBuilder
 //
-PaintViewBuilder::PaintViewBuilder(const BlockFlow& block,
-                                   ui::AnimatableWindow* caret_owner)
-    : block_(block),
-      caret_owner_(caret_owner),
-      caret_state_(paint::CaretState::None),
-      zoom_(1.0f) {}
-
-PaintViewBuilder::~PaintViewBuilder() {
-  caret_timer_.Stop();
-}
+PaintViewBuilder::PaintViewBuilder() {}
+PaintViewBuilder::~PaintViewBuilder() {}
 
 scoped_refptr<paint::View> PaintViewBuilder::Build(
+    const BlockFlow& block,
     const TextSelectionModel& selection_model,
-    const base::TimeTicks& now) {
+    const CaretDisplayItem& caret) {
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
   const auto& bgcolor =
-      ColorToColorF(block_.text_buffer().GetDefaultStyle().bgcolor());
-  const auto& ruler_bounds = ComputeRulerBounds();
+      ColorToColorF(block.text_buffer().GetDefaultStyle().bgcolor());
+  const auto& ruler_bounds = ComputeRulerBounds(block);
   const auto& selection =
-      TextFormatter::FormatSelection(block_.text_buffer(), selection_model);
-  const auto& caret_bounds = ComputeCaretBounds(selection_model);
-  const auto caret_state = ComputeCaretState(caret_bounds, now);
-
-  if (caret_bounds.empty()) {
-    StopCaretTimer();
-  } else if (caret_bounds_ != caret_bounds) {
-    ui::TextInputClient::Get()->set_caret_bounds(caret_bounds);
-    caret_time_ = now;
-    StartCaretTimer();
-  }
-
-  caret_bounds_ = caret_bounds;
-  caret_state_ = caret_state;
-
+      TextFormatter::FormatSelection(block.text_buffer(), selection_model);
   const auto& selection_bounds_set =
-      CalculateSelectionBoundsSet(block_.lines(), selection, block_.bounds());
+      CalculateSelectionBoundsSet(block.lines(), selection, block.bounds());
 
   std::vector<paint::RootInlineBox*> lines;
-  lines.reserve(block_.lines().size());
-  for (const auto& line : block_.lines())
+  lines.reserve(block.lines().size());
+  for (const auto& line : block.lines())
     lines.push_back(CreatePaintRootInlineBox(*line));
-  return new paint::View(block_.version(), block_.bounds(), lines,
+  return new paint::View(block.version(), block.bounds(), lines,
                          make_scoped_refptr(new paint::Selection(
                              selection.color(), selection_bounds_set)),
-                         bgcolor, ruler_bounds, std::make_unique<paint::Caret>(
-                                                    caret_state, caret_bounds));
-}
-
-gfx::RectF PaintViewBuilder::ComputeCaretBounds(
-    const TextSelectionModel& selection_model) const {
-  if (!selection_model.has_focus())
-    return gfx::RectF();
-  const auto& char_rect =
-      RoundBounds(block_.HitTestTextPosition(selection_model.focus_offset()));
-  if (char_rect.empty())
-    return gfx::RectF();
-  // TODO(eval1749): Height of caret should be height of inserted character
-  // instead of height of character after caret.
-  const auto caret_width = 2;
-  return gfx::RectF(char_rect.left, char_rect.top, char_rect.left + caret_width,
-                    char_rect.bottom);
-}
-
-paint::CaretState PaintViewBuilder::ComputeCaretState(
-    const gfx::RectF& bounds,
-    const base::TimeTicks& now) const {
-  if (bounds.empty())
-    return paint::CaretState::None;
-
-  if (caret_state_ == paint::CaretState::None) {
-    // This view starts showing caret.
-    return paint::CaretState::Show;
-  }
-
-  if (caret_bounds_ != bounds) {
-    // The caret is moved.
-    return paint::CaretState::Show;
-  }
-
-  // When the caret stays at same point, caret is blinking.
-  const auto interval = GetCaretBlinkInterval();
-  if (interval == base::TimeDelta())
-    return paint::CaretState::Show;
-  const auto delta = now - caret_time_;
-  const auto index = delta / interval;
-  return index % 2 ? paint::CaretState::Hide : paint::CaretState::Show;
-}
-
-gfx::RectF PaintViewBuilder::ComputeRulerBounds() const {
-  // TODO(eval1749): We should expose show/hide and ruler settings to both
-  // script and UI.
-  auto style = block_.text_buffer().GetDefaultStyle();
-  style.set_font_size(style.font_size() * zoom_);
-  const auto font = FontSet::GetFont(style, 'x');
-
-  const auto num_columns = 81;
-  const auto width_of_M = font->GetCharWidth('M');
-  const auto ruler_x = ::floor(bounds_.left + width_of_M * num_columns);
-  return gfx::RectF(gfx::PointF(ruler_x, bounds_.top),
-                    gfx::SizeF(1.0f, bounds_.height()));
-}
-
-void PaintViewBuilder::DidFireCaretTimer() {
-  caret_owner_->RequestAnimationFrame();
-}
-
-void PaintViewBuilder::SetBounds(const gfx::RectF& new_bounds) {
-  bounds_ = new_bounds;
-  caret_bounds_ = gfx::RectF();
-}
-
-void PaintViewBuilder::SetZoom(float new_zoom) {
-  DCHECK_GT(new_zoom, 0.0f);
-  zoom_ = new_zoom;
-}
-
-void PaintViewBuilder::StartCaretTimer() {
-  const auto interval = GetCaretBlinkInterval();
-  if (interval == base::TimeDelta())
-    return;
-  caret_timer_.Start(
-      FROM_HERE, interval,
-      base::Bind(&PaintViewBuilder::DidFireCaretTimer, base::Unretained(this)));
-}
-
-void PaintViewBuilder::StopCaretTimer() {
-  caret_timer_.Stop();
+                         bgcolor, ruler_bounds, caret);
 }
 
 }  // namespace layout

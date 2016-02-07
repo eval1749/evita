@@ -219,11 +219,10 @@ global.TextWindow.prototype.clone = function() {
   function handleDoubleClick(window, event) {
     if (event.button)
       return;
-    mapPointToOffset(event).then(offset => {
+    const offset = mapPointToOffset(event);
     if (offset < 0)
         return;
       selectWordAt(window, offset);
-    });
   }
 
   /**
@@ -241,23 +240,22 @@ global.TextWindow.prototype.clone = function() {
   function handleMouseDown(window, event) {
     if (event.button)
       return;
-    mapPointToOffset(event).then(offset => {
-      if (offset < 0)
-        return;
-      if (event.shiftKey) {
-        if (window.selection.startIsActive)
-          window.selection.range.start = offset;
-        else
-          window.selection.range.end = offset;
-        return;
-      }
-      if (event.ctrlKey) {
-        selectWordAt(window, offset);
-        return;
-      }
-      window.selection.range.collapseTo(offset);
-      ensureDragController(window).start();
-    });
+    const offset = mapPointToOffset(event);
+    if (offset < 0)
+      return;
+    if (event.shiftKey) {
+      if (window.selection.startIsActive)
+        window.selection.range.start = offset;
+      else
+        window.selection.range.end = offset;
+      return;
+    }
+    if (event.ctrlKey) {
+      selectWordAt(window, offset);
+      return;
+    }
+    window.selection.range.collapseTo(offset);
+    ensureDragController(window).start();
   }
 
   /**
@@ -265,32 +263,31 @@ global.TextWindow.prototype.clone = function() {
    * @param {!MouseEvent} event
    */
   function handleMouseMove(window, event) {
-    mapPointToOffset(event).then(offset => {
-       const dragController = window.dragController_;
-       if (offset < 0 || !dragController || !dragController.dragging)
-         return;
+    const offset = mapPointToOffset(event);
+     const dragController = window.dragController_;
+     if (offset < 0 || !dragController || !dragController.dragging)
+       return;
 
-      const selection = window.selection;
-      if (offset <= selection.range.start) {
-        selection.range.start = offset;
-        selection.startIsActive = true;
-      } else if (offset >= selection.range.end) {
-        selection.range.end = offset;
-        selection.startIsActive = false;
-      } else if (selection.startIsActive) {
-        selection.range.start = offset;
-      } else {
-        selection.range.end = offset;
-      }
+    const selection = window.selection;
+    if (offset <= selection.range.start) {
+      selection.range.start = offset;
+      selection.startIsActive = true;
+    } else if (offset >= selection.range.end) {
+      selection.range.end = offset;
+      selection.startIsActive = false;
+    } else if (selection.startIsActive) {
+      selection.range.start = offset;
+    } else {
+      selection.range.end = offset;
+    }
 
-      const autoscroller = ensureAutoscroller(window);
-      if (event.clientY < AUTOSCROLL_ZONE_SIZE)
-        autoscroller.start(-1);
-      else if (event.clientY > window.clientHeight - AUTOSCROLL_ZONE_SIZE)
-        autoscroller.start(1);
-      else
-        autoscroller.stop();
-    });
+    const autoscroller = ensureAutoscroller(window);
+    if (event.clientY < AUTOSCROLL_ZONE_SIZE)
+      autoscroller.start(-1);
+    else if (event.clientY > window.clientHeight - AUTOSCROLL_ZONE_SIZE)
+      autoscroller.start(1);
+    else
+      autoscroller.stop();
   }
 
   /**
@@ -300,7 +297,7 @@ global.TextWindow.prototype.clone = function() {
   function handleMouseUp(window, event) {
     if (event.button)
      return;
-    mapPointToOffset(event).then(offset => stopControllers(window));
+    stopControllers(window);
   }
 
   /**
@@ -420,7 +417,7 @@ global.TextWindow.prototype.clone = function() {
 
   /**
    * @param {!MouseEvent} event
-   * @return {!Promise.<number>}
+   * @return {number}
    */
   function mapPointToOffset(event) {
     const textWindow = /** @type {!TextWindow} */(event.target);

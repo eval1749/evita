@@ -7,6 +7,7 @@
 #include "base/synchronization/waitable_event.h"
 #include "evita/dom/public/form.h"
 #include "evita/dom/public/form_controls.h"
+#include "evita/dom/public/text_area_display_item.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/visuals/display/public/display_item_list.h"
 
@@ -41,6 +42,10 @@ void MockViewImpl::MessageBox(domapi::WindowId,
 
 void MockViewImpl::PaintForm(domapi::WindowId window_id,
                              std::unique_ptr<domapi::Form> form) {}
+
+void MockViewImpl::PaintTextArea(
+    domapi::WindowId window_id,
+    std::unique_ptr<domapi::TextAreaDisplayItem> display_item) {}
 
 void MockViewImpl::PaintVisualDocument(
     domapi::WindowId window_id,

@@ -35,7 +35,7 @@ class View final : public base::RefCounted<View> {
        scoped_refptr<Selection> selection,
        const gfx::ColorF& bgcolor,
        const gfx::RectF& ruler_bounds,
-       std::unique_ptr<Caret> caret);
+       const Caret& caret);
   ~View();
 
   const gfx::ColorF& bgcolor() const { return bgcolor_; }

@@ -184,7 +184,12 @@ void Window::DidChangeBounds(int clientLeft,
   SET_PROP(clientTop);
   SET_PROP(clientWidth);
   SET_PROP(clientHeight);
+  bounds_ = FloatRect(FloatPoint(clientLeft, clientTop),
+                      FloatPoint(clientRight, clientBottom));
+  DidChangeBounds();
 }
+
+void Window::DidChangeBounds() {}
 
 void Window::DidHideWindow() {
   visible_ = false;
@@ -215,6 +220,8 @@ void Window::DidSetFocus() {
 void Window::DidShowWindow() {
   visible_ = true;
 }
+
+void Window::ForceUpdateWindow() {}
 
 void Window::Focus(ExceptionState* exception_state) {
   if (state_ != State::Realized && state_ != State::Realizing) {
@@ -364,7 +371,7 @@ void Window::Update(ExceptionState* exception_state) {
     exception_state->ThrowError("You can't update unrealized window.");
     return;
   }
-  script_host_->view_delegate()->UpdateWindow(window_id());
+  ForceUpdateWindow();
 }
 
 }  // namespace dom

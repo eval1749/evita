@@ -441,7 +441,6 @@ TEST_F(WindowTest, update) {
   EXPECT_CALL(*mock_view_impl(), RealizeWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("var sample1 = new SampleWindow(); sample1.realize()");
 
-  EXPECT_CALL(*mock_view_impl(), UpdateWindow(Eq(1)));
   EXPECT_SCRIPT_VALID("sample1.update()");
 }
 

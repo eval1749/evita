@@ -16,6 +16,7 @@
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/form.h"
 #include "evita/dom/public/tab_data.h"
+#include "evita/dom/public/text_area_display_item.h"
 #include "evita/views/view_delegate_impl.h"
 #include "evita/visuals/display/public/display_item_list.h"
 
@@ -199,7 +200,7 @@ DEFINE_DELEGATE_4(CreateFormWindow,
                   domapi::WindowId,
                   const domapi::IntRect&,
                   const base::string16&)
-DEFINE_DELEGATE_2(CreateTextWindow, domapi::WindowId, text::Selection*)
+DEFINE_DELEGATE_1(CreateTextWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(CreateVisualWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DestroyWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
@@ -221,12 +222,6 @@ DEFINE_DELEGATE_2(GetMetrics,
                   const base::string16&,
                   const domapi::StringPromise&)
 DEFINE_DELEGATE_1(HideWindow, domapi::WindowId)
-DEFINE_DELEGATE_1(MakeSelectionVisible, domapi::WindowId)
-DEFINE_DELEGATE_4(MapTextWindowPointToOffset,
-                  domapi::EventTargetId,
-                  float,
-                  float,
-                  const domapi::IntegerPromise&)
 DEFINE_DELEGATE_5(MessageBox,
                   domapi::WindowId,
                   const base::string16&,
@@ -243,6 +238,18 @@ void ViewThreadProxy::PaintForm(domapi::WindowId window_id,
       FROM_HERE,
       base::Bind(&ViewDelegate::PaintForm, base::Unretained(delegate_.get()),
                  window_id, base::Passed(std::move(form))));
+}
+
+void ViewThreadProxy::PaintTextArea(
+    domapi::WindowId window_id,
+    std::unique_ptr<domapi::TextAreaDisplayItem> display_item) {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  if (!message_loop_)
+    return;
+  message_loop_->PostTask(
+      FROM_HERE, base::Bind(&ViewDelegate::PaintTextArea,
+                            base::Unretained(delegate_.get()), window_id,
+                            base::Passed(std::move(display_item))));
 }
 
 void ViewThreadProxy::PaintVisualDocument(
@@ -265,7 +272,6 @@ DEFINE_DELEGATE_2(SetStatusBar,
                   domapi::WindowId,
                   const std::vector<base::string16>&)
 DEFINE_DELEGATE_2(SetTabData, domapi::WindowId, const domapi::TabData&)
-DEFINE_DELEGATE_2(SetTextWindowZoom, domapi::WindowId, float)
 DEFINE_DELEGATE_1(ShowWindow, domapi::WindowId)
 DEFINE_DELEGATE_2(SplitHorizontally, domapi::WindowId, domapi::WindowId)
 DEFINE_DELEGATE_2(SplitVertically, domapi::WindowId, domapi::WindowId)
@@ -319,28 +325,8 @@ DEFINE_DELEGATE_1(StopTraceLog, const domapi::TraceLogOutputCallback&);
         message_loop_, waitable_event_.get());                                 \
   }
 
-DEFINE_SYNC_DELEGATE_2(ComputeOnTextWindow,
-                       text::Offset,
-                       domapi::WindowId,
-                       const domapi::TextWindowCompute&);
 DEFINE_SYNC_DELEGATE_1(GetSwitch, domapi::SwitchValue, const base::string16&)
 DEFINE_SYNC_DELEGATE_0(GetSwitchNames, std::vector<base::string16>)
-DEFINE_SYNC_DELEGATE_2(HitTestTextPosition,
-                       domapi::FloatRect,
-                       domapi::WindowId,
-                       text::Offset)
-
-void ViewThreadProxy::ScrollTextWindow(domapi::WindowId window_id,
-                                       int direction) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!message_loop_)
-    return;
-  TRACE_EVENT0("script", "ViewThreadProxy::ScrollTextWindow");
-  RunSynchronously(
-      base::Bind(&ViewDelegate::ScrollTextWindow,
-                 base::Unretained(delegate_.get()), window_id, direction),
-      message_loop_, waitable_event_.get());
-}
 
 void ViewThreadProxy::SetSwitch(const base::string16& name,
                                 const domapi::SwitchValue& new_value) {
@@ -352,16 +338,6 @@ void ViewThreadProxy::SetSwitch(const base::string16& name,
       base::Bind(&ViewDelegate::SetSwitch, base::Unretained(delegate_.get()),
                  name, new_value),
       message_loop_, waitable_event_.get());
-}
-
-void ViewThreadProxy::UpdateWindow(domapi::WindowId window_id) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  if (!message_loop_)
-    return;
-  TRACE_EVENT0("script", "ViewThreadProxy::UpdateWindow");
-  RunSynchronously(base::Bind(&ViewDelegate::UpdateWindow,
-                              base::Unretained(delegate_.get()), window_id),
-                   message_loop_, waitable_event_.get());
 }
 
 }  // namespace views

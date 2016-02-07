@@ -16,10 +16,10 @@ View::View(int layout_version,
            scoped_refptr<Selection> selection,
            const gfx::ColorF& bgcolor,
            const gfx::RectF& ruler_bounds,
-           std::unique_ptr<Caret> caret)
+           const Caret& caret)
     : bgcolor_(bgcolor),
       bounds_(bounds),
-      caret_(std::move(caret)),
+      caret_(new Caret(caret)),
       layout_version_(layout_version),
       lines_(lines),
       ruler_bounds_(ruler_bounds),

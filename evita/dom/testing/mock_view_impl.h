@@ -25,16 +25,13 @@ class MockViewImpl final : public domapi::ViewDelegate {
   // ViewDelegate
   MOCK_METHOD2(AddWindow, void(domapi::WindowId, domapi::WindowId));
   MOCK_METHOD2(ChangeParentWindow, void(domapi::WindowId, domapi::WindowId));
-  MOCK_METHOD2(ComputeOnTextWindow,
-               text::Offset(domapi::WindowId,
-                            const domapi::TextWindowCompute&));
   MOCK_METHOD1(CreateEditorWindow, void(domapi::WindowId));
   MOCK_METHOD4(CreateFormWindow,
                void(domapi::WindowId window_id,
                     domapi::WindowId owner_window_id,
                     const domapi::IntRect& bounds,
                     const base::string16& title));
-  MOCK_METHOD2(CreateTextWindow, void(domapi::WindowId, text::Selection*));
+  MOCK_METHOD1(CreateTextWindow, void(domapi::WindowId));
   MOCK_METHOD1(CreateVisualWindow, void(domapi::WindowId window_id));
   MOCK_METHOD1(DestroyWindow, void(domapi::WindowId));
   MOCK_METHOD1(DidStartScriptHost, void(domapi::ScriptHostState));
@@ -51,14 +48,6 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD1(GetSwitch, domapi::SwitchValue(const base::string16& name));
   MOCK_METHOD0(GetSwitchNames, std::vector<base::string16>());
   MOCK_METHOD1(HideWindow, void(domapi::WindowId));
-  MOCK_METHOD2(HitTestTextPosition,
-               domapi::FloatRect(domapi::WindowId, text::Offset));
-  MOCK_METHOD1(MakeSelectionVisible, void(domapi::WindowId));
-  MOCK_METHOD4(MapTextWindowPointToOffset,
-               void(domapi::EventTargetId,
-                    float x,
-                    float y,
-                    const domapi::IntegerPromise& promise));
 #undef MessageBox
   void MessageBox(domapi::WindowId window_id,
                   const base::string16& message,
@@ -67,20 +56,21 @@ class MockViewImpl final : public domapi::ViewDelegate {
                   const MessageBoxResolver& resolver) final;
   void PaintForm(domapi::WindowId window_id,
                  std::unique_ptr<domapi::Form> form);
+  void PaintTextArea(
+      domapi::WindowId window_id,
+      std::unique_ptr<domapi::TextAreaDisplayItem> display_item) final;
   void PaintVisualDocument(
       domapi::WindowId window_id,
       std::unique_ptr<visuals::DisplayItemList> display_item_list) final;
   MOCK_METHOD2(Reconvert, void(domapi::WindowId, const base::string16&));
   MOCK_METHOD1(RealizeWindow, void(domapi::WindowId));
   MOCK_METHOD1(ReleaseCapture, void(domapi::EventTargetId));
-  MOCK_METHOD2(ScrollTextWindow, void(domapi::WindowId, int));
   MOCK_METHOD1(SetCapture, void(domapi::EventTargetId));
   MOCK_METHOD2(SetStatusBar,
                void(domapi::WindowId, const std::vector<base::string16>&));
   MOCK_METHOD2(SetSwitch,
                void(const base::string16&, const domapi::SwitchValue&));
   MOCK_METHOD2(SetTabData, void(domapi::WindowId, const domapi::TabData&));
-  MOCK_METHOD2(SetTextWindowZoom, void(domapi::WindowId, float));
   MOCK_METHOD1(ShowWindow, void(domapi::WindowId));
   MOCK_METHOD2(SplitHorizontally, void(domapi::WindowId, domapi::WindowId));
   MOCK_METHOD2(SplitVertically, void(domapi::WindowId, domapi::WindowId));
@@ -88,8 +78,6 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD1(StartTraceLog, void(const std::string& config));
   MOCK_METHOD1(StopTraceLog,
                void(const domapi::TraceLogOutputCallback& callback));
-
-  MOCK_METHOD1(UpdateWindow, void(domapi::WindowId));
 
  private:
   bool check_spelling_result_;

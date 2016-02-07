@@ -9,6 +9,9 @@
 
 #include "common/tree/node.h"
 #include "evita/dom/events/view_event_target.h"
+#include "evita/dom/public/float_point.h"
+#include "evita/dom/public/float_rect.h"
+#include "evita/dom/public/float_size.h"
 #include "evita/dom/public/window_id.h"
 #include "evita/ginx/scriptable.h"
 
@@ -30,6 +33,10 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
   DECLARE_SCRIPTABLE_OBJECT(Window)
 
  public:
+  using FloatPoint = domapi::FloatPoint;
+  using FloatRect = domapi::FloatRect;
+  using FloatSize = domapi::FloatSize;
+
   enum class State {
     Destroyed = -2,
     Destroying,
@@ -42,6 +49,7 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
 
   ~Window() override;
 
+  const FloatRect& bounds() const { return bounds_; }
   Window* first_child() const { return Node::first_child(); }
   Window* last_child() const { return Node::last_child(); }
   Window* next_sibling() const { return Node::next_sibling(); }
@@ -67,6 +75,9 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
   explicit Window(ScriptHost* script_host);
 
   ScriptHost* script_host() const { return script_host_; }
+
+  virtual void DidChangeBounds();
+  virtual void ForceUpdateWindow();
 
  private:
   friend class bindings::WindowClass;
@@ -94,6 +105,7 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
                        ExceptionState* exception_state);
   void Update(ExceptionState* exception_state);
 
+  FloatRect bounds_;
   ScriptHost* const script_host_;
   State state_;
   bool visible_ = false;

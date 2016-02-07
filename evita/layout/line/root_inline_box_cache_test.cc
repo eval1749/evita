@@ -7,8 +7,6 @@
 
 #include "base/strings/string16.h"
 #include "evita/css/style.h"
-#include "evita/dom/lock.h"
-#include "evita/editor/dom_lock.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/line/root_inline_box_cache.h"
 #include "evita/layout/text_formatter.h"
@@ -51,11 +49,7 @@ RootInlineBoxCacheTest::RootInlineBoxCacheTest()
       cache_(new RootInlineBoxCache(*buffer())) {}
 
 void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
-  {
-    DOM_AUTO_LOCK_SCOPE();
-    buffer()->InsertBefore(text::Offset(), text);
-  }
-  UI_DOM_AUTO_LOCK_SCOPE();
+  buffer()->InsertBefore(text::Offset(), text);
   cache_->Invalidate(bounds_, zoom_);
   TextFormatter formatter(*buffer(), text::Offset(0), text::Offset(0), bounds_,
                           zoom_);
@@ -68,19 +62,14 @@ void RootInlineBoxCacheTest::PopulateCache(const base::string16& text) {
 }
 
 void RootInlineBoxCacheTest::SetBounds(const gfx::RectF& new_bounds) {
-  UI_DOM_AUTO_LOCK_SCOPE();
   bounds_ = new_bounds;
   cache_->Invalidate(bounds_, zoom_);
 }
 
 TEST_F(RootInlineBoxCacheTest, DidChangeStyle) {
   PopulateCache(L"foo\nbar\nbaz");
-  {
-    DOM_AUTO_LOCK_SCOPE();
-    css::Style style(css::Color(255, 0, 0), css::Color(255, 255, 255));
-    buffer()->SetStyle(text::Offset(1), text::Offset(2), style);
-  }
-  UI_DOM_AUTO_LOCK_SCOPE();
+  css::Style style(css::Color(255, 0, 0), css::Color(255, 255, 255));
+  buffer()->SetStyle(text::Offset(1), text::Offset(2), style);
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(0)));
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(1)));
   EXPECT_EQ(lines()[1], cache()->FindLine(text::Offset(4)))
@@ -91,11 +80,7 @@ TEST_F(RootInlineBoxCacheTest, DidChangeStyle) {
 
 TEST_F(RootInlineBoxCacheTest, DidDeleteAt) {
   PopulateCache(L"foo\nbar\nbaz");
-  {
-    DOM_AUTO_LOCK_SCOPE();
-    buffer()->Delete(text::Offset(1), text::Offset(3));
-  }
-  UI_DOM_AUTO_LOCK_SCOPE();
+  buffer()->Delete(text::Offset(1), text::Offset(3));
   //       01_2345_678
   // text: f\nbar\nbaz
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(0)));
@@ -108,11 +93,7 @@ TEST_F(RootInlineBoxCacheTest, DidDeleteAt) {
 
 TEST_F(RootInlineBoxCacheTest, DidDeleteAtToJoiningLines) {
   PopulateCache(L"foo\nbar\nbaz");
-  {
-    DOM_AUTO_LOCK_SCOPE();
-    buffer()->Delete(text::Offset(3), text::Offset(4));
-  }
-  UI_DOM_AUTO_LOCK_SCOPE();
+  buffer()->Delete(text::Offset(3), text::Offset(4));
   //       0123456_78
   // text: foobar\nbaz
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(0)));
@@ -129,11 +110,7 @@ TEST_F(RootInlineBoxCacheTest, DidDeleteAtWithLineWrap) {
   //    01234
   //    56789\n
   //    abcd
-  {
-    DOM_AUTO_LOCK_SCOPE();
-    buffer()->Delete(text::Offset(2), text::Offset(5));
-  }
-  UI_DOM_AUTO_LOCK_SCOPE();
+  buffer()->Delete(text::Offset(2), text::Offset(5));
   //       01234567_8901
   // text: 0156789\nabcd
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(0)));
@@ -146,11 +123,7 @@ TEST_F(RootInlineBoxCacheTest, DidDeleteAtWithLineWrap) {
 
 TEST_F(RootInlineBoxCacheTest, DidInsertBefore) {
   PopulateCache(L"foo\nbar\nbaz");
-  {
-    DOM_AUTO_LOCK_SCOPE();
-    buffer()->InsertBefore(text::Offset(2), L"AB");
-  }
-  UI_DOM_AUTO_LOCK_SCOPE();
+  buffer()->InsertBefore(text::Offset(2), L"AB");
   //       01234_56789_012
   // text: foABo\nbar\nbaz
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(0)));
@@ -169,11 +142,7 @@ TEST_F(RootInlineBoxCacheTest, DidInsertBeforeWithLineWrap) {
   //    01234
   //    56789\n
   //    abcd
-  {
-    DOM_AUTO_LOCK_SCOPE();
-    buffer()->InsertBefore(text::Offset(2), L"AB");
-  }
-  UI_DOM_AUTO_LOCK_SCOPE();
+  buffer()->InsertBefore(text::Offset(2), L"AB");
   //       01234567890012_3456
   // text: 01AB234566789\nabcd
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(0)));
@@ -187,7 +156,6 @@ TEST_F(RootInlineBoxCacheTest, DidInsertBeforeWithLineWrap) {
 
 TEST_F(RootInlineBoxCacheTest, FindLine) {
   PopulateCache(L"foo\nbar\nbaz");
-  UI_DOM_AUTO_LOCK_SCOPE();
   EXPECT_FALSE(cache()->IsDirty(bounds(), zoom()));
   EXPECT_EQ(lines()[0], cache()->FindLine(text::Offset(0)));
   EXPECT_EQ(lines()[0], cache()->FindLine(text::Offset(1)));
@@ -208,7 +176,6 @@ TEST_F(RootInlineBoxCacheTest, FindLine) {
 
 TEST_F(RootInlineBoxCacheTest, Invalidate) {
   PopulateCache(L"0\n123456");
-  UI_DOM_AUTO_LOCK_SCOPE();
   cache()->Invalidate(gfx::RectF(gfx::SizeF(1000.0f, 1000.0f)), zoom());
   EXPECT_EQ(lines()[0], cache()->FindLine(text::Offset(0)))
       << "Resize to large doesn't clear cache.";
@@ -225,7 +192,6 @@ TEST_F(RootInlineBoxCacheTest, InvalidateWithLineWrap) {
   PopulateCache(L"0\n123456");
   SetBounds(gfx::RectF(gfx::SizeF(200.0f, 100.0f)));
 
-  UI_DOM_AUTO_LOCK_SCOPE();
   EXPECT_EQ(lines()[0], cache()->FindLine(text::Offset(0)))
       << "Resize to large doesn't clear cache.";
   EXPECT_EQ(nullptr, cache()->FindLine(text::Offset(2)))

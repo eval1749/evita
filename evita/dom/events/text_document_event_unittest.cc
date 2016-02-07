@@ -22,7 +22,7 @@ class TextDocumentEventTest : public AbstractDomTest {
 };
 
 TEST_F(TextDocumentEventTest, ctor) {
-  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_, _));
+  EXPECT_CALL(*mock_view_impl(), CreateTextWindow(_));
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
       "var window = new TextWindow(new TextRange(doc));"

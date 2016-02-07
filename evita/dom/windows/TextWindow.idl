@@ -23,7 +23,7 @@ interface TextWindow : Window {
   void makeSelectionVisible();
 
   [ImplementedAs=HitTestPoint]
-  Promise<long> hitTestPoint(float x, float y);
+  long hitTestPoint(float x, float y);
 
   [ImplementedAs=Reconvert]
   void reconvert_(DOMString text);

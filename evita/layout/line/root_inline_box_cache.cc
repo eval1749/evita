@@ -8,8 +8,6 @@
 #include "evita/layout/line/root_inline_box_cache.h"
 
 #include "base/trace_event/trace_event.h"
-#include "evita/dom/lock.h"
-#include "evita/editor/dom_lock.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/text/buffer.h"
 #include "evita/text/static_range.h"
@@ -22,17 +20,14 @@ namespace layout {
 //
 RootInlineBoxCache::RootInlineBoxCache(const text::Buffer& buffer)
     : buffer_(buffer) {
-  UI_DOM_AUTO_LOCK_SCOPE();
   buffer_.AddObserver(this);
 }
 
 RootInlineBoxCache::~RootInlineBoxCache() {
-  UI_DOM_AUTO_LOCK_SCOPE();
   buffer_.RemoveObserver(this);
 }
 
 RootInlineBox* RootInlineBoxCache::FindLine(text::Offset offset) const {
-  UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return nullptr;
   auto it = lines_.lower_bound(offset);
@@ -65,7 +60,6 @@ RootInlineBox* RootInlineBoxCache::Insert(
 
 void RootInlineBoxCache::Invalidate(const gfx::RectF& new_bounds,
                                     float new_zoom) {
-  UI_ASSERT_DOM_LOCKED();
   if (zoom_ != new_zoom) {
     lines_.clear();
     bounds_ = new_bounds;
@@ -105,7 +99,6 @@ bool RootInlineBoxCache::IsDirty(const gfx::RectF& bounds, float zoom) const {
 
 RootInlineBox* RootInlineBoxCache::Register(
     std::unique_ptr<RootInlineBox> line) {
-  UI_ASSERT_DOM_LOCKED();
   DCHECK_GE(line->text_end(), line->text_start());
   auto const present = lines_.find(line->text_end());
   if (present != lines_.end())
@@ -115,7 +108,6 @@ RootInlineBox* RootInlineBoxCache::Register(
 
 void RootInlineBoxCache::RelocateLines(text::Offset offset,
                                        text::OffsetDelta delta) {
-  ASSERT_DOM_LOCKED();
   std::vector<RootInlineBox*> lines;
   auto it = lines_.lower_bound(offset);
   if (it != lines_.end() && it->second->text_end() == offset)
@@ -134,7 +126,6 @@ void RootInlineBoxCache::RelocateLines(text::Offset offset,
 
 // Remove lines crossing |range|.
 void RootInlineBoxCache::RemoveOverwapLines(const text::StaticRange& range) {
-  ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return;
   auto it = lines_.lower_bound(range.start());

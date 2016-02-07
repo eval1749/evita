@@ -9,15 +9,13 @@
 #include "evita/layout/block_flow.h"
 
 #include "base/trace_event/trace_event.h"
-#include "evita/dom/lock.h"
-#include "evita/editor/dom_lock.h"
-#include "evita/text/buffer.h"
-#include "evita/text/static_range.h"
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/line/root_inline_box_cache.h"
 #include "evita/layout/render_style.h"
 #include "evita/layout/text_formatter.h"
+#include "evita/text/buffer.h"
+#include "evita/text/static_range.h"
 
 namespace layout {
 
@@ -32,17 +30,14 @@ BlockFlow::BlockFlow(const text::Buffer& text_buffer)
 BlockFlow::~BlockFlow() {}
 
 text::Offset BlockFlow::text_end() const {
-  UI_ASSERT_DOM_LOCKED();
   return lines_.back()->text_end();
 }
 
 text::Offset BlockFlow::text_start() const {
-  UI_ASSERT_DOM_LOCKED();
   return lines_.front()->text_start();
 }
 
 void BlockFlow::Append(RootInlineBox* line) {
-  UI_ASSERT_DOM_LOCKED();
   if (lines_.empty()) {
     DCHECK_EQ(lines_height_, 0.0f);
     line->set_origin(gfx::PointF());
@@ -59,7 +54,6 @@ void BlockFlow::Append(RootInlineBox* line) {
 
 text::Offset BlockFlow::ComputeEndOfLine(text::Offset text_offset) {
   TRACE_EVENT0("views", "BlockFlow::ComputeEndOfLine");
-  UI_ASSERT_DOM_LOCKED();
 
   if (text_offset >= text_buffer_.GetEnd())
     return text_buffer_.GetEnd();
@@ -79,7 +73,6 @@ text::Offset BlockFlow::ComputeEndOfLine(text::Offset text_offset) {
 
 text::Offset BlockFlow::ComputeStartOfLine(text::Offset text_offset) {
   TRACE_EVENT0("views", "BlockFlow::ComputeStartOfLine");
-  UI_ASSERT_DOM_LOCKED();
   DCHECK(text_offset.IsValid());
 
   if (text_offset == text::Offset(0))
@@ -99,7 +92,6 @@ text::Offset BlockFlow::ComputeStartOfLine(text::Offset text_offset) {
 }
 
 text::Offset BlockFlow::ComputeVisibleEnd() const {
-  UI_ASSERT_DOM_LOCKED();
   DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   for (auto it = lines_.crbegin(); it != lines_.crend(); ++it) {
@@ -111,12 +103,10 @@ text::Offset BlockFlow::ComputeVisibleEnd() const {
 }
 
 void BlockFlow::DidChangeStyle(const text::StaticRange& range) {
-  ASSERT_DOM_LOCKED();
   MarkDirty();
 }
 
 void BlockFlow::DidDeleteAt(const text::StaticRange& range) {
-  ASSERT_DOM_LOCKED();
   MarkDirty();
   if (view_start_ <= range.start()) {
     // |view_start_| is before deleted range.
@@ -132,7 +122,6 @@ void BlockFlow::DidDeleteAt(const text::StaticRange& range) {
 }
 
 void BlockFlow::DidInsertBefore(const text::StaticRange& range) {
-  ASSERT_DOM_LOCKED();
   MarkDirty();
   if (view_start_ <= range.start())
     return;
@@ -140,7 +129,6 @@ void BlockFlow::DidInsertBefore(const text::StaticRange& range) {
 }
 
 bool BlockFlow::DiscardFirstLine() {
-  UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return false;
 
@@ -152,7 +140,6 @@ bool BlockFlow::DiscardFirstLine() {
 }
 
 bool BlockFlow::DiscardLastLine() {
-  UI_ASSERT_DOM_LOCKED();
   if (lines_.empty())
     return false;
 
@@ -163,7 +150,6 @@ bool BlockFlow::DiscardLastLine() {
 }
 
 void BlockFlow::EnsureLinePoints() {
-  UI_ASSERT_DOM_LOCKED();
   if (!dirty_line_point_)
     return;
   auto line_top = 0.0f;
@@ -176,12 +162,10 @@ void BlockFlow::EnsureLinePoints() {
 }
 
 void BlockFlow::EnsureTextLineCache() {
-  UI_ASSERT_DOM_LOCKED();
   text_line_cache_->Invalidate(gfx::RectF(bounds_.size()), zoom_);
 }
 
 RootInlineBox* BlockFlow::FindLineContainng(text::Offset offset) const {
-  UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::HitTestTextPosition");
   DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
@@ -205,7 +189,6 @@ RootInlineBox* BlockFlow::FindLineContainng(text::Offset offset) const {
 }
 
 void BlockFlow::Format(text::Offset text_offset) {
-  UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("view", "BlockFlow::Format");
   EnsureTextLineCache();
   lines_.clear();
@@ -245,7 +228,6 @@ void BlockFlow::Format(text::Offset text_offset) {
 }
 
 bool BlockFlow::FormatIfNeeded() {
-  UI_ASSERT_DOM_LOCKED();
   EnsureTextLineCache();
   if (!NeedsFormat())
     return false;
@@ -254,7 +236,6 @@ bool BlockFlow::FormatIfNeeded() {
 }
 
 RootInlineBox* BlockFlow::FormatLine(TextFormatter* formatter) {
-  UI_ASSERT_DOM_LOCKED();
   const auto& cached_line =
       text_line_cache_->FindLine(formatter->text_offset());
   if (cached_line) {
@@ -265,7 +246,6 @@ RootInlineBox* BlockFlow::FormatLine(TextFormatter* formatter) {
 }
 
 text::Offset BlockFlow::HitTestPoint(gfx::PointF block_point) const {
-  UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::HitTestPoint");
   DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
@@ -287,7 +267,6 @@ text::Offset BlockFlow::HitTestPoint(gfx::PointF block_point) const {
 }
 
 gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
-  UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::HitTestTextPosition");
   DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
@@ -301,14 +280,12 @@ gfx::RectF BlockFlow::HitTestTextPosition(text::Offset offset) const {
 }
 
 bool BlockFlow::IsFullyVisibleTextPosition(text::Offset offset) const {
-  UI_ASSERT_DOM_LOCKED();
   DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   return offset >= text_start() && offset < ComputeVisibleEnd();
 }
 
 bool BlockFlow::IsShowEndOfDocument() const {
-  UI_ASSERT_DOM_LOCKED();
   DCHECK(!ShouldFormat());
   DCHECK(!dirty_line_point_);
   auto const last_line = lines_.back();
@@ -317,7 +294,6 @@ bool BlockFlow::IsShowEndOfDocument() const {
 
 text::Offset BlockFlow::MapPointXToOffset(text::Offset text_offset,
                                           float point_x) {
-  UI_ASSERT_DOM_LOCKED();
   TRACE_EVENT0("views", "BlockFlow::MapPointXToOffset");
   EnsureTextLineCache();
   if (const auto& line = text_line_cache_->FindLine(text_offset))
@@ -339,7 +315,6 @@ void BlockFlow::MarkDirty() {
 }
 
 bool BlockFlow::NeedsFormat() const {
-  UI_ASSERT_DOM_LOCKED();
   DCHECK(!text_line_cache_->IsDirty(gfx::RectF(bounds_.size()), zoom_));
   if (lines_.empty())
     return true;
@@ -351,7 +326,6 @@ bool BlockFlow::NeedsFormat() const {
 }
 
 void BlockFlow::Prepend(RootInlineBox* line) {
-  UI_ASSERT_DOM_LOCKED();
   lines_height_ += line->height();
   lines_.push_front(std::move(line));
   dirty_line_point_ = true;
@@ -503,7 +477,6 @@ void BlockFlow::SetZoom(float new_zoom) {
 }
 
 bool BlockFlow::ShouldFormat() const {
-  UI_ASSERT_DOM_LOCKED();
   return lines_.empty();
 }
 

@@ -6,10 +6,10 @@
 
 #include "base/macros.h"
 #include "base/strings/stringprintf.h"
-#include "evita/visuals/display/public/display_items.h"
-#include "evita/visuals/display/public/display_item_visitor.h"
-#include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/css/float_color.h"
+#include "evita/visuals/display/public/display_item_visitor.h"
+#include "evita/visuals/display/public/display_items.h"
+#include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
@@ -52,6 +52,11 @@ void Printer::VisitBeginTransform(BeginTransformDisplayItem* item) {
 
 void Printer::VisitDrawRect(DrawRectDisplayItem* item) {
   *ostream_ << item->bounds() << ' ' << item->color()
+            << " thickness=" << item->thickness();
+}
+
+void Printer::VisitDrawLine(DrawLineDisplayItem* item) {
+  *ostream_ << item->point1() << '-' << item->point2() << ' ' << item->color()
             << " thickness=" << item->thickness();
 }
 

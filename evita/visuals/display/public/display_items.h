@@ -10,8 +10,8 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/castable.h"
-#include "evita/visuals/display/public/display_items_forward.h"
 #include "evita/visuals/css/float_color.h"
+#include "evita/visuals/display/public/display_items_forward.h"
 #include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/geometry/float_matrix3x2.h"
 #include "evita/visuals/geometry/float_rect.h"
@@ -105,6 +105,37 @@ class BeginTransformDisplayItem final : public DisplayItem {
   const FloatMatrix3x2 matrix_;
 
   DISALLOW_COPY_AND_ASSIGN(BeginTransformDisplayItem);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// DrawLineDisplayItem
+//
+class DrawLineDisplayItem final : public DisplayItem {
+  DECLARE_DISPLAY_ITEM_FINAL_CLASS(DrawLineDisplayItem, DisplayItem)
+
+ public:
+  DrawLineDisplayItem(const FloatPoint& point1,
+                      const FloatPoint& point2,
+                      const FloatColor& color,
+                      float thickness);
+  ~DrawLineDisplayItem();
+
+  const FloatColor& color() const { return color_; }
+  const FloatPoint& point1() const { return point1_; }
+  const FloatPoint& point2() const { return point2_; }
+  float thickness() const { return thickness_; }
+
+ private:
+  // DisplayItem
+  bool EqualsTo(const DisplayItem& other) const final;
+
+  const FloatColor color_;
+  const FloatPoint point1_;
+  const FloatPoint point2_;
+  const float thickness_;
+
+  DISALLOW_COPY_AND_ASSIGN(DrawLineDisplayItem);
 };
 
 //////////////////////////////////////////////////////////////////////

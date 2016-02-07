@@ -66,6 +66,27 @@ bool BeginTransformDisplayItem::EqualsTo(const DisplayItem& other) const {
 
 //////////////////////////////////////////////////////////////////////
 //
+// DrawLineDisplayItem
+//
+DrawLineDisplayItem::DrawLineDisplayItem(const FloatPoint& point1,
+                                         const FloatPoint& point2,
+                                         const FloatColor& color,
+                                         float thickness)
+    : color_(color), point1_(point1), point2_(point2), thickness_(thickness) {}
+DrawLineDisplayItem::~DrawLineDisplayItem() {}
+
+bool DrawLineDisplayItem::EqualsTo(const DisplayItem& other) const {
+  if (this == &other)
+    return false;
+  const auto& item = other.as<DrawLineDisplayItem>();
+  if (!item)
+    return false;
+  return color_ == item->color_ && point1_ == item->point1_ &&
+         point2_ == item->point2_ && thickness_ == item->thickness_;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // DrawRectDisplayItem
 //
 DrawRectDisplayItem::DrawRectDisplayItem(const FloatRect& bounds,

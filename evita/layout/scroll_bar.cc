@@ -578,9 +578,8 @@ void ScrollBar::SetBounds(const gfx::RectF& new_bounds) {
 void ScrollBar::SetData(const ScrollBarData& new_data) {
   if (data_ == new_data)
     return;
-  for (const auto& part : parts_) {
+  for (const auto& part : parts_)
     part->DidChangeData(new_data, data_);
-  }
   data_ = new_data;
 }
 

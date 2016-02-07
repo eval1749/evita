@@ -1,7 +1,12 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/testing/abstract_dom_test.h"
+
+#include "evita/dom/public/float_point.h"
+#include "evita/dom/public/float_rect.h"
+#include "evita/dom/public/float_size.h"
 #include "evita/dom/windows/rect.h"
 
 namespace dom {
@@ -32,7 +37,8 @@ TEST_F(RectTest, Wrapper) {
   EXPECT_SCRIPT_VALID(
       "var rect;"
       "function init(x) { rect = x; }");
-  domapi::FloatRect rect(12.0f, 34.0f, 56.0f, 78.0f);
+  domapi::FloatRect rect(domapi::FloatPoint(12.0f, 34.0f),
+                         domapi::FloatSize(56.0f, 78.0f));
   EXPECT_SCRIPT_VALID_CALL("init", gin::ConvertToV8(isolate(), rect));
   EXPECT_SCRIPT_EQ("12", "rect.x");
   EXPECT_SCRIPT_EQ("34", "rect.y");

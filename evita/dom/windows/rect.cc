@@ -1,8 +1,12 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "evita/dom/windows/rect.h"
 
+#include "evita/dom/public/float_point.h"
+#include "evita/dom/public/float_rect.h"
+#include "evita/dom/public/float_size.h"
 #include "evita/dom/v8_strings.h"
 
 namespace gin {
@@ -31,7 +35,8 @@ bool Converter<domapi::FloatRect>::FromV8(v8::Isolate* isolate,
                      &height)) {
     return false;
   }
-  *out = domapi::FloatRect(x, y, width, height);
+  *out = domapi::FloatRect(domapi::FloatPoint(x, y),
+                           domapi::FloatSize(width, height));
   return true;
 }
 

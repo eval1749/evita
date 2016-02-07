@@ -12,6 +12,8 @@ source_set("windows") {
     "point.h",
     "rect.cc",
     "rect.h",
+    "scroll_bar.cc",
+    "scroll_bar.h",
     "text_selection.cc",
     "text_selection.h",
     "text_window.cc",

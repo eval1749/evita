@@ -38,13 +38,13 @@ namespace {
 float AlphaFor(ScrollBarState state) {
   switch (state) {
     case ScrollBarState::Active:
-      return 0.5f;
+      return 0.6f;
     case ScrollBarState::Disabled:
       return 0.3f;
     case ScrollBarState::Hovered:
-      return 0.6f;
+      return 0.8f;
     case ScrollBarState::Normal:
-      return 0.3f;
+      return 0.5f;
     case ScrollBarState::Pressed:
       return 1.0f;
   }

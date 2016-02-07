@@ -23,6 +23,7 @@ enum class CaretState {
 class Caret final {
  public:
   Caret(CaretState state, const gfx::RectF& bounds);
+  Caret(const Caret& other);
   ~Caret();
 
   const gfx::RectF& bounds() const { return bounds_; }
@@ -32,10 +33,10 @@ class Caret final {
   bool is_show() const { return state_ == CaretState::Show; }
 
  private:
-  gfx::RectF bounds_;
-  CaretState state_;
+  const gfx::RectF bounds_;
+  const CaretState state_;
 
-  DISALLOW_COPY_AND_ASSIGN(Caret);
+  DISALLOW_ASSIGN(Caret);
 };
 
 }  // namespace paint

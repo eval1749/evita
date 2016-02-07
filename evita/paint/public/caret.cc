@@ -15,6 +15,7 @@ Caret::Caret(CaretState state, const gfx::RectF& bounds)
   DCHECK(!bounds_.empty());
 }
 
+Caret::Caret(const Caret& other) : Caret(other.state_, other.bounds_) {}
 Caret::~Caret() {}
 
 }  // namespace paint

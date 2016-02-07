@@ -85,7 +85,6 @@ bool ScrollBar::HandleMouseMoved(const MouseEvent& event) {
   else if (delta > 0)
     observer_->DidClickLineDown();
   return true;
-  return true;
 }
 
 bool ScrollBar::HandleMousePressed(const MouseEvent& event) {

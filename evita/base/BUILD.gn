@@ -14,6 +14,8 @@ component("base") {
     "colors/int8_color.cc",
     "colors/int8_color.h",
     "evita_base_export.h",
+    "float_range.cc",
+    "float_range.h",
     "memory/allocator.h",
     "memory/zone.cc",
     "memory/zone.h",
@@ -44,6 +46,7 @@ test("tests") {
   output_name = "evita_base_tests"
   sources = [
     "colors/int8_color_test.cc",
+    "float_range_test.cc",
     "strings/atomic_string_test.cc",
   ]
   deps = [

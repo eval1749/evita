@@ -217,7 +217,7 @@ void ViewEventHandlerImpl::DispatchMouseEvent(
   TRACE_EVENT_WITH_FLOW0("input", "ViewEventHandlerImpl::DispatchMouseEvent",
                          api_event.event_id, TRACE_EVENT_FLAG_FLOW_IN);
   auto const window = FromEventTargetId(api_event.target_id);
-  if (window) {
+  if (window && !window->HandleMouseEvent(api_event)) {
     const auto& target_and_event = window->TranslateMouseEvent(api_event);
     DispatchEventWithInLock(target_and_event.first, target_and_event.second);
   }

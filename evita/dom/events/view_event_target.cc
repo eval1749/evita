@@ -24,6 +24,10 @@ ViewEventTarget::ViewEventTarget()
 
 ViewEventTarget::~ViewEventTarget() {}
 
+bool ViewEventTarget::HandleMouseEvent(const domapi::MouseEvent& api_event) {
+  return false;
+}
+
 void ViewEventTarget::ReleaseCapture() {
   ScriptHost::instance()->view_delegate()->ReleaseCapture(event_target_id());
 }

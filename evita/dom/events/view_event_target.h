@@ -39,6 +39,9 @@ class ViewEventTarget : public ginx::Scriptable<ViewEventTarget, EventTarget> {
   domapi::EventTargetId event_target_id() const { return event_target_id_; }
   domapi::EventTargetId window_id() const { return event_target_id(); }
 
+  // Returns true if event is handled.
+  virtual bool HandleMouseEvent(const domapi::MouseEvent& api_event);
+
   virtual std::pair<EventTarget*, FocusEvent*> TranslateFocusEvent(
       const domapi::FocusEvent& api_event,
       EventTarget* related_target);

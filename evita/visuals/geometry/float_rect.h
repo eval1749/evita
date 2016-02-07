@@ -18,6 +18,7 @@ namespace visuals {
 //
 class FloatRect final {
  public:
+  FloatRect(const FloatPoint& origin, const FloatPoint& bottom_right);
   FloatRect(const FloatPoint& origin, const FloatSize& size);
   explicit FloatRect(const FloatSize& size);
   FloatRect(const FloatRect& other);

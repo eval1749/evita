@@ -13,6 +13,11 @@ namespace visuals {
 //
 // FloatRect
 //
+FloatRect::FloatRect(const FloatPoint& origin, const FloatPoint& bottom_right)
+    : FloatRect(origin,
+                FloatSize(bottom_right.x() - origin.x(),
+                          bottom_right.y() - origin.y())) {}
+
 FloatRect::FloatRect(const FloatPoint& origin, const FloatSize& size)
     : origin_(origin), size_(size) {}
 

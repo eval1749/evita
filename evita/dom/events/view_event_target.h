@@ -42,6 +42,9 @@ class ViewEventTarget : public ginx::Scriptable<ViewEventTarget, EventTarget> {
   // Returns true if event is handled.
   virtual bool HandleMouseEvent(const domapi::MouseEvent& api_event);
 
+  void ReleaseCapture();
+  void SetCapture();
+
   virtual std::pair<EventTarget*, FocusEvent*> TranslateFocusEvent(
       const domapi::FocusEvent& api_event,
       EventTarget* related_target);
@@ -54,9 +57,6 @@ class ViewEventTarget : public ginx::Scriptable<ViewEventTarget, EventTarget> {
 
  protected:
   ViewEventTarget();
-
-  void ReleaseCapture();
-  void SetCapture();
 
  private:
   friend class bindings::ViewEventTargetClass;

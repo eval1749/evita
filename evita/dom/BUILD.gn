@@ -43,25 +43,6 @@ source_set("components") {
     "timers/timer.h",
     "view_event_handler_impl.cc",
     "view_event_handler_impl.h",
-    "windows/editor_window.cc",
-    "windows/editor_window.h",
-    "windows/form_window.cc",
-    "windows/form_window.h",
-    "windows/point.cc",
-    "windows/point.h",
-    "windows/rect.cc",
-    "windows/rect.h",
-    "windows/text_selection.cc",
-    "windows/text_selection.h",
-    "windows/text_window.cc",
-    "windows/text_window.h",
-    "windows/visual_window.cc",
-    "windows/visual_window.h",
-    "windows/window.cc",
-    "windows/window.h",
-    "windows/window_ostream.cc",
-    "windows/window_set.cc",
-    "windows/window_set.h",
   ]
 
   sources +=
@@ -90,11 +71,10 @@ source_set("components") {
     "//evita/dom/text",
     "//evita/dom/timing",
     "//evita/dom/visuals",
+    "//evita/dom/windows",
     "//evita/gc",
     "//evita/geometry",
-    "//evita/ginx",
     "//evita/ui/animation:public",
-    "//evita/visuals",
     "//regex",
   ]
 
@@ -230,12 +210,6 @@ test("evita_dom_tests") {
     "repl/console_unittest.cc",
     "timers/timer_test.cc",
     "unicode_unittest.cc",
-    "windows/editor_window_unittest.cc",
-    "windows/point_unittest.cc",
-    "windows/rect_unittest.cc",
-    "windows/text_selection_unittest.cc",
-    "windows/text_window_unittest.cc",
-    "windows/window_unittest.cc",
   ]
 
   deps = [
@@ -250,6 +224,7 @@ test("evita_dom_tests") {
     "//evita/dom/text:test_files",
     "//evita/dom/timing:test_files",
     "//evita/dom/visuals:test_files",
+    "//evita/dom/windows:test_files",
     "//evita/visuals/css",
     "//evita/visuals/display:public",
   ]

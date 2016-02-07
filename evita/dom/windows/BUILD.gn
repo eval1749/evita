@@ -1,0 +1,53 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("windows") {
+  sources = [
+    "editor_window.cc",
+    "editor_window.h",
+    "form_window.cc",
+    "form_window.h",
+    "point.cc",
+    "point.h",
+    "rect.cc",
+    "rect.h",
+    "text_selection.cc",
+    "text_selection.h",
+    "text_window.cc",
+    "text_window.h",
+    "visual_window.cc",
+    "visual_window.h",
+    "window.cc",
+    "window.h",
+    "window_ostream.cc",
+    "window_set.cc",
+    "window_set.h",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/dom/forms",
+    "//evita/dom/text",
+    "//evita/dom/visuals",
+    "//evita/ginx",
+    "//evita/visuals",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "editor_window_unittest.cc",
+    "point_unittest.cc",
+    "rect_unittest.cc",
+    "text_selection_unittest.cc",
+    "text_window_unittest.cc",
+    "window_unittest.cc",
+  ]
+
+  deps = [
+    ":windows",
+    "//evita/dom/testing:test_support",
+  ]
+}

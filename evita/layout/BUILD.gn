@@ -16,6 +16,8 @@ source_set("layout") {
     "render_selection.h",
     "render_style.cc",
     "render_style.h",
+    "scroll_bar.cc",
+    "scroll_bar.h",
     "text_formatter.cc",
     "text_formatter.h",
     "text_view.cc",

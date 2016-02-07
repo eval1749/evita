@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/forms/form_window.h"
+#include "evita/dom/windows/form_window.h"
 
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/bindings/ginx_FocusEventInit.h"

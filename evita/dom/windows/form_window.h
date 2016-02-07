@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_FORMS_FORM_WINDOW_H_
-#define EVITA_DOM_FORMS_FORM_WINDOW_H_
+#ifndef EVITA_DOM_WINDOWS_FORM_WINDOW_H_
+#define EVITA_DOM_WINDOWS_FORM_WINDOW_H_
 
 #include <utility>
 
@@ -70,4 +70,4 @@ class FormWindow final : public ginx::Scriptable<FormWindow, Window>,
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_FORMS_FORM_WINDOW_H_
+#endif  // EVITA_DOM_WINDOWS_FORM_WINDOW_H_

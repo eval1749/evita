@@ -32,7 +32,6 @@ interface_idl_files = [
   "//evita/dom/forms/CheckboxControl.idl",
   "//evita/dom/forms/Form.idl",
   "//evita/dom/forms/FormControl.idl",
-  "//evita/dom/forms/FormWindow.idl",
   "//evita/dom/forms/LabelControl.idl",
   "//evita/dom/forms/RadioButtonControl.idl",
   "//evita/dom/forms/TextFieldControl.idl",
@@ -73,6 +72,7 @@ interface_idl_files = [
   "//evita/dom/visuals/CSSStyleSheetHandle.idl",
   "//evita/dom/visuals/NodeHandle.idl",
   "//evita/dom/windows/EditorWindow.idl",
+  "//evita/dom/windows/FormWindow.idl",
 
   # Note: We have "Point.idl" and "Rect.idl" here for JS externs
   "//evita/dom/windows/Point.idl",
@@ -97,11 +97,11 @@ dictionary_idl_files = [
   "//evita/dom/events/UiEventInit.idl",
   "//evita/dom/events/WheelEventInit.idl",
   "//evita/dom/events/WindowEventInit.idl",
-  "//evita/dom/forms/FormWindowInit.idl",
   "//evita/dom/os/MoveFileOptions.idl",
   "//evita/dom/text/TextMutationObserverInit.idl",
   "//evita/dom/text/RegExpInit.idl",
   "//evita/dom/timing/IdleRequestOptions.idl",
+  "//evita/dom/windows/FormWindowInit.idl",
 ]
 
 idl_lexer_parser_files = [

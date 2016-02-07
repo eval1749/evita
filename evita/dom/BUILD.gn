@@ -45,6 +45,8 @@ source_set("components") {
     "view_event_handler_impl.h",
     "windows/editor_window.cc",
     "windows/editor_window.h",
+    "windows/form_window.cc",
+    "windows/form_window.h",
     "windows/point.cc",
     "windows/point.h",
     "windows/rect.cc",

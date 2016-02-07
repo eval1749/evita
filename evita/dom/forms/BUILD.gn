@@ -18,8 +18,6 @@ source_set("forms") {
     "form_paint_info.h",
     "form_paint_info_builder.cc",
     "form_paint_info_builder.h",
-    "form_window.cc",
-    "form_window.h",
     "label_control.cc",
     "label_control.h",
     "radio_button_control.cc",

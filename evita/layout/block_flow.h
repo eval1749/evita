@@ -40,6 +40,7 @@ class BlockFlow final {
   const text::Buffer& text_buffer() const { return text_buffer_; }
   text::Offset text_end() const;
   text::Offset text_start() const;
+  float zoom() const { return zoom_; }
 
   // Returns end of line offset containing |text_offset|.
   text::Offset ComputeEndOfLine(text::Offset text_offset);

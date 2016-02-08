@@ -89,15 +89,15 @@ void PaintVisitor::VisitClear(ClearDisplayItem* item) {
   canvas_->Clear(ToColorF(item->color()));
 }
 
-void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
-  canvas_->DrawRectangle(gfx::Brush(canvas_, ToColorF(item->color())),
-                         ToRectF(item->bounds()), item->thickness());
-}
-
 void PaintVisitor::VisitDrawLine(DrawLineDisplayItem* item) {
   canvas_->DrawLine(gfx::Brush(canvas_, ToColorF(item->color())),
                     ToPointF(item->point1()), ToPointF(item->point2()),
                     item->thickness());
+}
+
+void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
+  canvas_->DrawRectangle(gfx::Brush(canvas_, ToColorF(item->color())),
+                         ToRectF(item->bounds()), item->thickness());
 }
 
 void PaintVisitor::VisitDrawText(DrawTextDisplayItem* item) {

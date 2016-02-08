@@ -54,13 +54,13 @@ void Printer::VisitClear(ClearDisplayItem* item) {
   *ostream_ << ' ' << item->color();
 }
 
-void Printer::VisitDrawRect(DrawRectDisplayItem* item) {
-  *ostream_ << item->bounds() << ' ' << item->color()
+void Printer::VisitDrawLine(DrawLineDisplayItem* item) {
+  *ostream_ << item->point1() << '-' << item->point2() << ' ' << item->color()
             << " thickness=" << item->thickness();
 }
 
-void Printer::VisitDrawLine(DrawLineDisplayItem* item) {
-  *ostream_ << item->point1() << '-' << item->point2() << ' ' << item->color()
+void Printer::VisitDrawRect(DrawRectDisplayItem* item) {
+  *ostream_ << item->bounds() << ' ' << item->color()
             << " thickness=" << item->thickness();
 }
 

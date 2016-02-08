@@ -40,7 +40,6 @@ source_set("test_files") {
     "mouse_event_unittest.cc",
     "text_document_event_unittest.cc",
     "ui_event_unittest.cc",
-    "view_event_handler_impl_unittest.cc",
     "wheel_event_unittest.cc",
     "window_event_unittest.cc",
   ]

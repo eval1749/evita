@@ -79,11 +79,6 @@ void TextWindow::Paint(std::unique_ptr<TextAreaDisplayItem> display_item) {
 
   auto display_item_list = std::move(display_item->display_item_list());
   // Paint scroll bar
-  // TODO(eval1749): We should move "clear" operation to |DisplayItemList|.
-  for (const auto& rect : display_item_list->rects()) {
-    gfx::Canvas::AxisAlignedClipScope clip_scope(canvas(), ToRectF(rect));
-    canvas()->Clear(gfx::ColorF(1, 1, 1));
-  }
   visuals::DisplayItemListProcessor processor;
   processor.Paint(canvas(), std::move(display_item_list));
 

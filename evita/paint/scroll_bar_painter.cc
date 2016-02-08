@@ -22,6 +22,7 @@ namespace paint {
 using AffineTransformer = visuals::AffineTransformer;
 using BeginClipDisplayItem = visuals::BeginClipDisplayItem;
 using BeginTransformDisplayItem = visuals::BeginTransformDisplayItem;
+using ClearDisplayItem = visuals::ClearDisplayItem;
 using DrawLineDisplayItem = visuals::DrawLineDisplayItem;
 using DisplayItemListBuilder = visuals::DisplayItemListBuilder;
 using EndClipDisplayItem = visuals::EndClipDisplayItem;
@@ -52,11 +53,17 @@ float AlphaFor(ScrollBarState state) {
   return 1.0f;
 }
 
+FloatColor BackgroundColor() {
+  const auto& color = gfx::sysColor(COLOR_WINDOW);
+  return FloatColor(color.red(), color.green(), color.blue());
+}
+
 void BeginPaint(DisplayItemListBuilder* builder, const FloatRect& bounds) {
   AffineTransformer transformer;
   transformer.Translate(bounds.origin());
   builder->AddNew<BeginTransformDisplayItem>(transformer.matrix());
   builder->AddNew<BeginClipDisplayItem>(FloatRect(bounds.size()));
+  builder->AddNew<ClearDisplayItem>(BackgroundColor());
 }
 
 FloatColor ButtonBackgroundColorFor(ScrollBarState state) {

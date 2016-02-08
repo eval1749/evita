@@ -348,7 +348,7 @@ void TextWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   if (!visible())
     return;
   TRACE_EVENT_WITH_FLOW0("view", "TextWindow::DidBeginAnimationFrame",
-                         event_target_id(), TRACE_EVENT_FLAG_FLOW_OUT);
+                         window_id(), TRACE_EVENT_FLAG_FLOW_OUT);
   const auto selection =
       ComputeTextSelectionModel(this, *selection_->text_selection());
   text_view_->Update(selection);

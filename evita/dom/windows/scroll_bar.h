@@ -68,6 +68,7 @@ class ScrollBar final {
   bool HandleMouseMoved(const MouseEvent& event);
   bool HandleMousePressed(const MouseEvent& event);
   bool HandleMouseReleased(const MouseEvent& event);
+  bool IsDisabled(ScrollBarPart part) const;
   void UpdateHoveredPart(ScrollBarPart part);
 
   ScrollBarPart active_part_;

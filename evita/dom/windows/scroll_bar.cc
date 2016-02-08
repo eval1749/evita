@@ -54,7 +54,9 @@ ScrollBar::ScrollBar(ScrollBarOrientation orientation,
       hovered_part_(ScrollBarPart::None),
       layout_(new layout::ScrollBar(orientation)),
       observer_(observer),
-      window_(window) {}
+      window_(window) {
+  SetDisabled(true);
+}
 
 ScrollBar::~ScrollBar() {}
 
@@ -77,6 +79,8 @@ bool ScrollBar::HandleMouseMoved(const MouseEvent& event) {
     UpdateHoveredPart(part);
     return part != ScrollBarPart::None;
   }
+  if (IsDisabled(part))
+    return true;
   const auto delta = layout_->IsVertical() ? point.y() - last_drag_point_.y()
                                            : point.x() - last_drag_point_.x();
   last_drag_point_ = point;
@@ -94,6 +98,8 @@ bool ScrollBar::HandleMousePressed(const MouseEvent& event) {
   const auto part = HitTestPoint(point);
   if (part == ScrollBarPart::None)
     return false;
+  if (IsDisabled(part))
+    return true;
   static_cast<ViewEventTarget*>(window_)->SetCapture();
   active_part_ = part;
   switch (part) {
@@ -137,6 +143,10 @@ ScrollBarPart ScrollBar::HitTestPoint(const FloatPoint& point) const {
   return layout_->HitTestPoint(ToPointF(point));
 }
 
+bool ScrollBar::IsDisabled(ScrollBarPart part) const {
+  return layout_->StateOf(part) == ScrollBarState::Disabled;
+}
+
 std::unique_ptr<DisplayItemList> ScrollBar::Paint() const {
   return layout_->Paint();
 }
@@ -149,6 +159,7 @@ void ScrollBar::SetData(const ScrollBarData& new_data) {
   if (data_ == new_data)
     return;
   data_ = new_data;
+  SetDisabled(data_.track() == data_.thumb());
   return layout_->SetData(new_data);
 }
 
@@ -156,21 +167,31 @@ void ScrollBar::SetDisabled(bool new_disabled) {
   if (disabled_ == new_disabled)
     return;
   disabled_ = new_disabled;
-  layout_->SetState(ScrollBarPart::BackwardButton, ScrollBarState::Disabled);
-  layout_->SetState(ScrollBarPart::BackwardTrack, ScrollBarState::Disabled);
-  layout_->SetState(ScrollBarPart::ForwardButton, ScrollBarState::Disabled);
-  layout_->SetState(ScrollBarPart::ForwardTrack, ScrollBarState::Disabled);
-  layout_->SetState(ScrollBarPart::Thumb, ScrollBarState::Disabled);
+  const auto state =
+      disabled_ ? ScrollBarState::Disabled : ScrollBarState::Normal;
+  layout_->SetState(ScrollBarPart::BackwardButton, state);
+  layout_->SetState(ScrollBarPart::BackwardTrack, state);
+  layout_->SetState(ScrollBarPart::ForwardButton, state);
+  layout_->SetState(ScrollBarPart::ForwardTrack, state);
+  layout_->SetState(ScrollBarPart::Thumb, state);
 }
 
 void ScrollBar::UpdateHoveredPart(ScrollBarPart part) {
   if (hovered_part_ == part)
     return;
-  if (hovered_part_ != ScrollBarPart::None)
-    layout_->SetState(hovered_part_, ScrollBarState::Normal);
+  if (hovered_part_ != ScrollBarPart::None) {
+    layout_->SetState(hovered_part_, IsDisabled(hovered_part_)
+                                         ? ScrollBarState::Disabled
+                                         : ScrollBarState::Normal);
+  }
   hovered_part_ = part;
-  if (hovered_part_ != ScrollBarPart::None)
-    layout_->SetState(hovered_part_, ScrollBarState::Hovered);
+  if (hovered_part_ == ScrollBarPart::None)
+    return;
+  if (IsDisabled(hovered_part_)) {
+    hovered_part_ = ScrollBarPart::None;
+    return;
+  }
+  layout_->SetState(hovered_part_, ScrollBarState::Hovered);
 }
 
 }  // namespace dom

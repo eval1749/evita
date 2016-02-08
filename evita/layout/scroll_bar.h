@@ -52,6 +52,7 @@ class ScrollBar final {
   void SetBounds(const gfx::RectF& new_bounds);
   void SetData(const ScrollBarData& new_data);
   void SetState(ScrollBarPart part, ScrollBarState new_state);
+  ScrollBarState StateOf(ScrollBarPart part) const;
 
  private:
   Part* FindPart(ScrollBarPart part) const;

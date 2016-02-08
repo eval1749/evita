@@ -85,6 +85,7 @@ class ScrollBar::Part {
 
   const gfx::RectF& bounds() const { return bounds_; }
   virtual ScrollBarPart part() const = 0;
+  ScrollBarState state() const { return state_; }
 
   // |DidChangeBounds()| takes new and old bounds of entire scroll bar.
   virtual void DidChangeBounds(const gfx::RectF& new_bounds,
@@ -99,8 +100,6 @@ class ScrollBar::Part {
 
  protected:
   Part() = default;
-
-  ScrollBarState state() const { return state_; }
 
   void MarkLayoutDirty();
   virtual void PaintContent(DisplayItemListBuilder* builder) const = 0;
@@ -599,6 +598,13 @@ void ScrollBar::SetState(ScrollBarPart part_name, ScrollBarState new_state) {
   if (!part)
     return;
   part->SetState(new_state);
+}
+
+ScrollBarState ScrollBar::StateOf(ScrollBarPart part_name) const {
+  const auto part = FindPart(part_name);
+  if (!part)
+    return ScrollBarState::Disabled;
+  return part->state();
 }
 
 void ScrollBar::UpdateLayoutIfNeeded() {

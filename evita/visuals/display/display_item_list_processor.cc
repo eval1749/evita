@@ -85,6 +85,10 @@ void PaintVisitor::VisitBeginTransform(BeginTransformDisplayItem* item) {
   (*canvas_)->SetTransform(ToMatrix3x2F(item->matrix()));
 }
 
+void PaintVisitor::VisitClear(ClearDisplayItem* item) {
+  canvas_->Clear(ToColorF(item->color()));
+}
+
 void PaintVisitor::VisitDrawRect(DrawRectDisplayItem* item) {
   canvas_->DrawRectangle(gfx::Brush(canvas_, ToColorF(item->color())),
                          ToRectF(item->bounds()), item->thickness());

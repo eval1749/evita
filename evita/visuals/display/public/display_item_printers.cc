@@ -50,6 +50,10 @@ void Printer::VisitBeginTransform(BeginTransformDisplayItem* item) {
   *ostream_ << item->matrix();
 }
 
+void Printer::VisitClear(ClearDisplayItem* item) {
+  *ostream_ << ' ' << item->color();
+}
+
 void Printer::VisitDrawRect(DrawRectDisplayItem* item) {
   *ostream_ << item->bounds() << ' ' << item->color()
             << " thickness=" << item->thickness();

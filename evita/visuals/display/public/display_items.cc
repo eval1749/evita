@@ -66,6 +66,22 @@ bool BeginTransformDisplayItem::EqualsTo(const DisplayItem& other) const {
 
 //////////////////////////////////////////////////////////////////////
 //
+// ClearDisplayItem
+//
+ClearDisplayItem::ClearDisplayItem(const FloatColor& color) : color_(color) {}
+ClearDisplayItem::~ClearDisplayItem() {}
+
+bool ClearDisplayItem::EqualsTo(const DisplayItem& other) const {
+  if (this == &other)
+    return false;
+  const auto& item = other.as<ClearDisplayItem>();
+  if (!item)
+    return false;
+  return color_ == item->color_;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // DrawLineDisplayItem
 //
 DrawLineDisplayItem::DrawLineDisplayItem(const FloatPoint& point1,

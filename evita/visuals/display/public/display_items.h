@@ -109,6 +109,28 @@ class BeginTransformDisplayItem final : public DisplayItem {
 
 //////////////////////////////////////////////////////////////////////
 //
+// ClearDisplayItem - clears current clip rectangle with specified color.
+//
+class ClearDisplayItem final : public DisplayItem {
+  DECLARE_DISPLAY_ITEM_FINAL_CLASS(ClearDisplayItem, DisplayItem)
+
+ public:
+  explicit ClearDisplayItem(const FloatColor& color);
+  ~ClearDisplayItem();
+
+  const FloatColor& color() const { return color_; }
+
+ private:
+  // DisplayItem
+  bool EqualsTo(const DisplayItem& other) const final;
+
+  const FloatColor color_;
+
+  DISALLOW_COPY_AND_ASSIGN(ClearDisplayItem);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
 // DrawLineDisplayItem
 //
 class DrawLineDisplayItem final : public DisplayItem {

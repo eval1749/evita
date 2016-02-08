@@ -10,6 +10,7 @@ namespace visuals {
 #define FOR_EACH_DISPLAY_ITEM(V) \
   V(BeginClip)                   \
   V(BeginTransform)              \
+  V(Clear)                       \
   V(DrawLine)                    \
   V(DrawRect)                    \
   V(DrawText)                    \

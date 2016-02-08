@@ -225,7 +225,7 @@
      * @return {!Mode}
      */
     value: function(fileName) {
-      var matches = /[.](.+)$/.exec(FilePath.basename(fileName));
+      var matches = /[.]([^.]+)$/.exec(FilePath.basename(fileName));
       if (!matches) {
         var mode_ctor = Mode.fileNameMap.get(FilePath.basename(fileName));
         if (mode_ctor)

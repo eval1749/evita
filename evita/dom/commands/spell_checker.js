@@ -564,6 +564,7 @@
         lastOffset = wordRange.end;
         if (!this.checkWord(wordRange.start, wordRange.end)) {
           this.offset_ = wordRange.start;
+          lastOffset = wordRange.start;
           break;
         }
       }
@@ -590,6 +591,7 @@
         }
         if (!this.checkWord(wordRange.start, wordRange.end)) {
           this.offset_ = wordRange.start;
+          lastOffset = wordRange.start;
           break;
         }
       }

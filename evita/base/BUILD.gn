@@ -29,6 +29,8 @@ component("base") {
     "memory/zone_user.cc",
     "memory/zone_user.h",
     "memory/zone_vector.h",
+    "ping_provider.cc",
+    "ping_provider.h",
     "strings/atomic_string.cc",
     "strings/atomic_string.h",
     "strings/atomic_string_factory.cc",

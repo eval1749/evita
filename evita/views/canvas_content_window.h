@@ -23,7 +23,6 @@ class CanvasContentWindow : public ContentWindow {
  public:
   ~CanvasContentWindow() override;
 
-  virtual void MakeSelectionVisible() = 0;
   void RemoveObserver(ContentObserver* observer);
 
  protected:

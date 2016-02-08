@@ -1292,7 +1292,6 @@ void EditPane::SplitHorizontally(ContentWindow* left_window,
   left_box->parent_node()->Split(left_box, new_right_window, right_box_width);
   AppendChild(new_right_window);
   new_right_window->RealizeWidget();
-  left_window->MakeSelectionVisible();
 }
 
 void EditPane::SplitVertically(ContentWindow* above_window,
@@ -1316,7 +1315,6 @@ void EditPane::SplitVertically(ContentWindow* above_window,
                                   below_box_height);
   AppendChild(new_below_window);
   new_below_window->RealizeWidget();
-  above_window->MakeSelectionVisible();
 }
 
 // ui::Widget

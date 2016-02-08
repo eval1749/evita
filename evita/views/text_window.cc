@@ -195,9 +195,4 @@ HCURSOR TextWindow::GetCursorAt(const gfx::Point& point) const {
   return ::LoadCursor(nullptr, IDC_IBEAM);
 }
 
-// views::ContentWindow
-void TextWindow::MakeSelectionVisible() {
-  NOTREACHED();
-}
-
 }  // namespace views

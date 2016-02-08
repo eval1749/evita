@@ -28,9 +28,6 @@ class VisualWindow final : public CanvasContentWindow {
   // ui::AnimationFrameHandler
   void DidBeginAnimationFrame(const base::TimeTicks& time) final;
 
-  // views::ContentWindow
-  void MakeSelectionVisible() final;
-
   DISALLOW_COPY_AND_ASSIGN(VisualWindow);
 };
 

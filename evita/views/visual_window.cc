@@ -35,9 +35,4 @@ void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& time) {
   // Nothing to do.
 }
 
-// views::ContentWindow
-void VisualWindow::MakeSelectionVisible() {
-  NOTREACHED();
-}
-
 }  // namespace views

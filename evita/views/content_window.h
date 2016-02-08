@@ -32,7 +32,6 @@ class ContentWindow : public Window, public ui::LayerOwnerDelegate {
 
   void Activate();
   void AddObserver(ContentObserver* observer);
-  virtual void MakeSelectionVisible() = 0;
   void RemoveObserver(ContentObserver* observer);
 
  protected:

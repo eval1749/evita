@@ -73,9 +73,6 @@ class TextWindow final : public CanvasContentWindow,
   void DidShow() final;
   HCURSOR GetCursorAt(const gfx::Point& point) const final;
 
-  // views::ContentWindow
-  void MakeSelectionVisible() final;
-
   MetricsView* const metrics_view_;
   gfx::RectF scroll_bar_bounds_;
   std::unique_ptr<paint::ViewPaintCache> view_paint_cache_;

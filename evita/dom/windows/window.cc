@@ -170,22 +170,11 @@ void Window::DidChangeBounds(int clientLeft,
                              int clientTop,
                              int clientRight,
                              int clientBottom) {
-  auto const runner = script_host_->runner();
-  auto const isolate = runner->isolate();
-  ginx::Runner::Scope runner_scope(runner);
-  auto const instance = GetWrapper(isolate);
-#define SET_PROP(name)                                \
-  instance->ForceSet(v8Strings::name.Get(isolate),    \
-                     v8::Integer::New(isolate, name), \
-                     kDefaultPropertyAttribute)
-  auto const clientWidth = clientRight - clientLeft;
-  auto const clientHeight = clientBottom - clientTop;
-  SET_PROP(clientLeft);
-  SET_PROP(clientTop);
-  SET_PROP(clientWidth);
-  SET_PROP(clientHeight);
-  bounds_ = FloatRect(FloatPoint(clientLeft, clientTop),
-                      FloatPoint(clientRight, clientBottom));
+  const auto& new_bounds = FloatRect(FloatPoint(clientLeft, clientTop),
+                                     FloatPoint(clientRight, clientBottom));
+  if (bounds_ == new_bounds)
+    return;
+  bounds_ = new_bounds;
   DidChangeBounds();
 }
 

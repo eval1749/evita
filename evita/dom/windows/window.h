@@ -85,7 +85,12 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
 
   using Node = common::tree::Node<Window>;
 
+  // bindings
   std::vector<Window*> child_windows() const;
+  float client_height() const { return bounds_.height(); }
+  float client_left() const { return bounds_.x(); }
+  float client_top() const { return bounds_.y(); }
+  float client_width() const { return bounds_.width(); }
 
   void AddWindow(Window* window, ExceptionState* exception_state);
   void ChangeParentWindow(Window* new_parent_window,

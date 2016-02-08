@@ -14,17 +14,10 @@ interface Window : ViewEventTarget {
 
   // Window bounds in client coordinate is represented by
   //  * |clientLeft|, |clientTop| + |clientWidth| x |clientHeight|.
-  [ImplementedAs=JavaScript]
-  readonly attribute long clientHeight;
-
-  [ImplementedAs=JavaScript]
-  readonly attribute long clientLeft;
-
-  [ImplementedAs=JavaScript]
-  readonly attribute long clientTop;
-
-  [ImplementedAs=JavaScript]
-  readonly attribute long clientWidth;
+  readonly attribute float clientHeight;
+  readonly attribute float clientLeft;
+  readonly attribute float clientTop;
+  readonly attribute float clientWidth;
 
   // The first child window in child window list.
   [ImplementedAs=first_child]

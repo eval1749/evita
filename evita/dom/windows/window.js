@@ -52,10 +52,6 @@
   });
 
   Object.defineProperties(Window.prototype, {
-    clientHeight: {value: 0, writable: true},
-    clientLeft: {value: 0, writable: true},
-    clientTop: {value: 0, writable: true},
-    clientWidth: {value: 0, writable: true},
     focusTick_: {value: 0, writable: true},
     status: {get: statusGet, set: statusSet},
     status_: {value: '', writable: true},

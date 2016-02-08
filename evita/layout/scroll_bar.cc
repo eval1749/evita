@@ -86,6 +86,7 @@ class ScrollBar::Part {
   const gfx::RectF& bounds() const { return bounds_; }
   virtual ScrollBarPart part() const = 0;
 
+  // |DidChangeBounds()| takes new and old bounds of entire scroll bar.
   virtual void DidChangeBounds(const gfx::RectF& new_bounds,
                                const gfx::RectF& old_bounds);
   virtual void DidChangeData(const ScrollBarData& new_data,
@@ -189,8 +190,11 @@ class BottomButton final : public Part {
 
 void BottomButton::DidChangeBounds(const gfx::RectF& new_bounds,
                                    const gfx::RectF& old_bounds) {
-  if (new_bounds.width() == old_bounds.width())
+  if (new_bounds.left == old_bounds.left &&
+      new_bounds.right == old_bounds.right &&
+      new_bounds.bottom == old_bounds.bottom) {
     return;
+  }
   MarkLayoutDirty();
 }
 
@@ -292,8 +296,10 @@ class LeftButton final : public Part {
 
 void LeftButton::DidChangeBounds(const gfx::RectF& new_bounds,
                                  const gfx::RectF& old_bounds) {
-  if (new_bounds.height() == old_bounds.height())
+  if (new_bounds.bottom == old_bounds.bottom &&
+      new_bounds.top == old_bounds.top) {
     return;
+  }
   MarkLayoutDirty();
 }
 
@@ -362,8 +368,11 @@ class RightButton final : public Part {
 
 void RightButton::DidChangeBounds(const gfx::RectF& new_bounds,
                                   const gfx::RectF& old_bounds) {
-  if (new_bounds.height() == old_bounds.height())
+  if (new_bounds.bottom == old_bounds.bottom &&
+      new_bounds.top == old_bounds.top &&
+      new_bounds.right == old_bounds.right) {
     return;
+  }
   MarkLayoutDirty();
 }
 
@@ -433,8 +442,10 @@ class TopButton final : public Part {
 
 void TopButton::DidChangeBounds(const gfx::RectF& new_bounds,
                                 const gfx::RectF& old_bounds) {
-  if (new_bounds.width() == old_bounds.width())
+  if (new_bounds.left == old_bounds.left &&
+      new_bounds.right == old_bounds.right) {
     return;
+  }
   MarkLayoutDirty();
 }
 

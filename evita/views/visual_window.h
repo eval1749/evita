@@ -25,9 +25,6 @@ class VisualWindow final : public CanvasContentWindow {
   void Paint(std::unique_ptr<visuals::DisplayItemList> display_item_list);
 
  private:
-  // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
-
   DISALLOW_COPY_AND_ASSIGN(VisualWindow);
 };
 

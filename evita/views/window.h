@@ -5,15 +5,18 @@
 #ifndef EVITA_VIEWS_WINDOW_H_
 #define EVITA_VIEWS_WINDOW_H_
 
-#include "evita/ui/animation/animatable_window.h"
 #include "evita/ui/widget.h"
 #include "evita/views/events/event_source.h"
 #include "evita/views/window_id.h"
 
 namespace views {
 
-class Window : public ui::AnimatableWindow, protected EventSource {
-  DECLARE_CASTABLE_CLASS(Window, ui::AnimatableWindow);
+//////////////////////////////////////////////////////////////////////
+//
+// Window
+//
+class Window : public ui::Widget, public EventSource {
+  DECLARE_CASTABLE_CLASS(Window, ui::Widget);
 
  public:
   int active_tick() const { return active_tick_; }

@@ -124,19 +124,7 @@ void Frame::AddOrActivateTabContent(views::ContentWindow* window) {
   window->RequestFocus();
 }
 
-void Frame::DrawForResize() {
-  auto const tab_content = tab_strip_animator_->active_tab_content();
-  if (!tab_content)
-    return;
-  // TODO(eval1749): Is doing animation for active tab content here right thing?
-  auto const now = base::TimeTicks::Now();
-  for (auto child : tab_content->child_nodes()) {
-    auto const window = child->as<Window>();
-    if (!window)
-      continue;
-    window->HandleAnimationFrame(now);
-  }
-}
+void Frame::DrawForResize() {}
 
 TabContent* Frame::GetRecentTabContent() {
   auto recent_tab_content = static_cast<TabContent*>(nullptr);
@@ -209,11 +197,6 @@ void Frame::UpdateTitleBar(const domapi::TabData& tab_data) {
       tab_data.state == domapi::TabData::State::Modified ? '*' : '-',
       editor::Application::instance()->title().c_str());
   title_bar_->SetText(window_title);
-}
-
-// ui::AnimationFrameHandler
-void Frame::DidBeginAnimationFrame(const base::TimeTicks& now) {
-  // Nothing to do
 }
 
 // ui::Widget

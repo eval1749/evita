@@ -30,9 +30,4 @@ void VisualWindow::Paint(std::unique_ptr<DisplayItemList> display_item_list) {
   NotifyUpdateContent();
 }
 
-// ui::AnimationFrameHandler
-void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& time) {
-  // Nothing to do.
-}
-
 }  // namespace views

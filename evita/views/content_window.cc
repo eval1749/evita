@@ -35,11 +35,6 @@ void ContentWindow::RemoveObserver(ContentObserver* observer) {
 }
 
 // ui::Widget
-void ContentWindow::DidActivate() {
-  Window::DidActivate();
-  RequestAnimationFrame();
-}
-
 void ContentWindow::DidChangeHierarchy() {
   Window::DidChangeHierarchy();
   container_widget()->layer()->AppendLayer(layer());

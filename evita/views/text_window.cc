@@ -65,8 +65,8 @@ TextWindow::~TextWindow() {}
 void TextWindow::Paint(std::unique_ptr<TextAreaDisplayItem> display_item) {
   if (!visible() || !canvas()->IsReady())
     return;
-  TRACE_EVENT_WITH_FLOW0("view", "TextWindow::Paint",
-                         window_id(), TRACE_EVENT_FLAG_FLOW_IN);
+  TRACE_EVENT_WITH_FLOW0("view", "TextWindow::Paint", window_id(),
+                         TRACE_EVENT_FLAG_FLOW_IN);
   metrics_view_->RecordTime();
   MetricsView::TimingScope timing_scope(metrics_view_);
   if (!display_item->paint_view()->caret().is_none()) {
@@ -114,11 +114,6 @@ void TextWindow::UpdateBounds() {
 // gfx::CanvasObserver
 void TextWindow::DidRecreateCanvas() {
   view_paint_cache_.reset();
-}
-
-// ui::AnimationFrameHandler
-void TextWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
-  // Nothing to do.
 }
 
 // ui::LayerOwnerDelegate

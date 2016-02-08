@@ -51,9 +51,6 @@ class TextWindow final : public CanvasContentWindow,
   // gfx::CanvasObserver
   void DidRecreateCanvas() final;
 
-  // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
-
   // ui::LayerOwnerDelegate
   void DidRecreateLayer(ui::Layer* old_layer) final;
 

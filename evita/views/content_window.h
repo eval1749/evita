@@ -40,7 +40,6 @@ class ContentWindow : public Window, public ui::LayerOwnerDelegate {
   void NotifyUpdateContent();
 
   // ui::Widget
-  void DidActivate() override;
   void DidChangeHierarchy() override;
   void DidRealize() override;
   void DidSetFocus(ui::Widget*) override;

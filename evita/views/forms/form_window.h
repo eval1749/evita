@@ -53,10 +53,6 @@ class FormWindow final : public views::Window, private gfx::CanvasOwner {
   // gfx::CanvasOwner
   std::unique_ptr<gfx::SwapChain> CreateSwapChain() final;
 
-  // ui::AnimationFrameHandler
-  bool CanHandleAnimationFrame() const final;
-  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
-
   // ui::Widget
   void CreateNativeWindow() const final;
   void DidChangeBounds() final;

@@ -566,7 +566,7 @@ void Widget::SchedulePaintInRect(const gfx::Rect&) {
     DCHECK(!has_native_window());
     return;
   }
-  NOTREACHED();
+  // TODO(eval1749): What should we do here for |SchedulePaintInRect()|?
 }
 
 void Widget::SetBounds(const gfx::Point& origin,

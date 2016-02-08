@@ -96,7 +96,7 @@ domapi::EventTargetId MaybeEventTarget(ui::Widget* widget) {
 // Window
 //
 Window::Window(std::unique_ptr<NativeWindow> native_window, WindowId window_id)
-    : ui::AnimatableWindow(std::move(native_window)),
+    : ui::Widget(std::move(native_window)),
       EventSource(window_id),
       active_tick_(0),
       window_id_(window_id) {
@@ -127,20 +127,20 @@ void Window::DidActivate() {
 }
 
 void Window::DidChangeBounds() {
-  ui::AnimatableWindow::DidChangeBounds();
+  ui::Widget::DidChangeBounds();
   view_event_handler()->DidChangeWindowBounds(window_id_, bounds().left(),
                                               bounds().top(), bounds().right(),
                                               bounds().bottom());
 }
 
 void Window::DidHide() {
-  ui::AnimatableWindow::DidHide();
+  ui::Widget::DidHide();
   view_event_handler()->DidChangeWindowVisibility(window_id_,
                                                   domapi::Visibility::Hidden);
 }
 
 void Window::DidKillFocus(ui::Widget* will_focus_window) {
-  ui::AnimatableWindow::DidKillFocus(will_focus_window);
+  ui::Widget::DidKillFocus(will_focus_window);
   DispatchFocusEvent(domapi::EventType::Blur,
                      MaybeEventTarget(will_focus_window));
 }
@@ -150,19 +150,19 @@ void Window::DidRealize() {
   view_event_handler()->DidChangeWindowBounds(window_id_, bounds().left(),
                                               bounds().top(), bounds().right(),
                                               bounds().bottom());
-  ui::AnimatableWindow::DidRealize();
+  ui::Widget::DidRealize();
 }
 
 void Window::DidSetFocus(ui::Widget* last_focused) {
   CR_DEFINE_STATIC_LOCAL(int, static_active_tick, (0));
   ++static_active_tick;
   active_tick_ = static_active_tick;
-  ui::AnimatableWindow::DidSetFocus(last_focused);
+  ui::Widget::DidSetFocus(last_focused);
   DispatchFocusEvent(domapi::EventType::Focus, MaybeEventTarget(last_focused));
 }
 
 void Window::DidShow() {
-  ui::AnimatableWindow::DidShow();
+  ui::Widget::DidShow();
   view_event_handler()->DidChangeWindowVisibility(window_id_,
                                                   domapi::Visibility::Visible);
 }
@@ -192,7 +192,7 @@ void Window::OnMouseWheel(const ui::MouseWheelEvent& event) {
 }
 
 void Window::WillDestroyWidget() {
-  ui::AnimatableWindow::WillDestroyWidget();
+  ui::Widget::WillDestroyWidget();
   active_tick_ = 0;
 }
 

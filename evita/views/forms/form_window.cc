@@ -73,15 +73,6 @@ std::unique_ptr<gfx::SwapChain> FormWindow::CreateSwapChain() {
   return gfx::SwapChain::CreateForHwnd(AssociatedHwnd());
 }
 
-// ui::Animatable
-bool FormWindow::CanHandleAnimationFrame() const {
-  return canvas_ && canvas_->IsReady();
-}
-
-void FormWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
-  // Nothing to do
-}
-
 // ui::Widget
 void FormWindow::CreateNativeWindow() const {
   struct Local {

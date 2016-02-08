@@ -83,9 +83,6 @@ class Frame final : public views::Window,
   void OnDropFiles(HDROP);
   void UpdateTitleBar(const domapi::TabData& tab_data);
 
-  // ui::AnimationFrameHandler
-  void DidBeginAnimationFrame(const base::TimeTicks& time) final;
-
   // ui::Widget
   void CreateNativeWindow() const final;
   void DidAddChildWidget(ui::Widget* new_child) final;

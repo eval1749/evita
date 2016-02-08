@@ -18,6 +18,7 @@
 #include "evita/editor/scheduler.h"
 #include "evita/editor/switch_set.h"
 #include "evita/editor/trace_log_controller.h"
+#include "evita/editor/watch_dog.h"
 #include "evita/frames/frame.h"
 #include "evita/frames/frame_list.h"
 #include "evita/io/io_manager.h"
@@ -56,11 +57,13 @@ Application::Application()
       view_delegate_(new views::ViewThreadProxy(message_loop_.get())),
       script_thread_(
           new dom::ScriptThread(view_delegate_.get(), io_manager_->proxy())),
-      scheduler_(new Scheduler(script_thread_.get())) {
+      scheduler_(new Scheduler(script_thread_.get())),
+      watch_dog_(new WatchDog()) {
   io_manager_->Start();
   ui::TextInputClientWin::instance()->Start();
   paint_thread_->Start();
   script_thread_->Start();
+  watch_dog_->Start();
   io_manager_->message_loop()->task_runner()->PostTask(
       FROM_HERE,
       base::Bind(
@@ -95,31 +98,11 @@ void Application::DidStartScriptHost(domapi::ScriptHostState state) {
     return;
   }
   scheduler_->Start();
+  watch_dog_->Add(L"Script", script_thread_.get());
 }
 
 Application* Application::GetInstance() {
   return base::Singleton<Application>::get();
-}
-
-void Application::NotifyViewBusy() {
-  auto const now = base::Time::Now();
-  if (busy_start_time_ == base::Time()) {
-    busy_start_time_ = now;
-    return;
-  }
-  auto const delta = now - busy_start_time_;
-  if (delta < base::TimeDelta::FromSeconds(1))
-    return;
-  auto const active_frame = views::FrameList::instance()->active_frame();
-  if (!active_frame)
-    return;
-  auto const message = base::StringPrintf(
-      L"Script runs %ds. Ctrl+Break to terminate script.", delta.InSeconds());
-  active_frame->ShowMessage(MessageLevel_Warning, message);
-}
-
-void Application::NotifyViewReady() {
-  busy_start_time_ = base::Time();
 }
 
 void Application::Quit() {

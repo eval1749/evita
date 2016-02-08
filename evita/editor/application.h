@@ -7,8 +7,8 @@
 
 #include <memory>
 
+#include "base/macros.h"
 #include "base/strings/string16.h"
-#include "base/time/time.h"
 
 namespace base {
 class MessageLoop;
@@ -43,7 +43,12 @@ namespace editor {
 
 class Scheduler;
 class TraceLogController;
+class WatchDog;
 
+//////////////////////////////////////////////////////////////////////
+//
+// Application
+//
 class Application final {
  public:
   Application();
@@ -61,8 +66,6 @@ class Application final {
 
   bool CalledOnValidThread() const;
   void DidStartScriptHost(domapi::ScriptHostState state);
-  void NotifyViewBusy();
-  void NotifyViewReady();
   void Quit();
   void Run();
 
@@ -79,10 +82,10 @@ class Application final {
 
   // |dom::ScriptThread| uses |IoDelegate| and |ViewDelegate|.
   const std::unique_ptr<dom::ScriptThread> script_thread_;
-  base::Time busy_start_time_;
 
   // |Scheduler| uses |domapi::ViewEventHandler|.
   const std::unique_ptr<Scheduler> scheduler_;
+  const std::unique_ptr<WatchDog> watch_dog_;
 
   DISALLOW_COPY_AND_ASSIGN(Application);
 };

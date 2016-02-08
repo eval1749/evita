@@ -15,8 +15,8 @@
 #include "common/win/win32_verify.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
-#include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/animation/animatable_window.h"
+#include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
 #include "evita/ui/events/mouse_click_tracker.h"
@@ -410,6 +410,7 @@ void Widget::Hide() {
     return;
   }
   DidHide();
+  DCHECK(!visible_) << "It seems DidHide() isn't called for " << class_name();
 }
 
 Widget::HitTestResult Widget::HitTest(const gfx::Point& local_point) const {
@@ -655,6 +656,7 @@ void Widget::Show() {
   }
 
   DidShow();
+  DCHECK(visible_) << "It seems DidShow() isn't called for " << class_name();
   SchedulePaint();
 }
 

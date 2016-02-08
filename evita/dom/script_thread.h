@@ -11,6 +11,7 @@
 
 #include "base/callback_forward.h"
 #include "base/macros.h"
+#include "evita/base/ping_provider.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/scheduler_client.h"
@@ -29,7 +30,8 @@ namespace dom {
 class Scheduler;
 class SchedulerImpl;
 
-class ScriptThread final : public domapi::ViewEventHandler,
+class ScriptThread final : public base::PingProvider,
+                           public domapi::ViewEventHandler,
                            public SchedulerClient,
                            public ui::AnimationFrameHandler {
  public:
@@ -45,6 +47,9 @@ class ScriptThread final : public domapi::ViewEventHandler,
 
   void BeginAnimationFrame(const base::TimeTicks& time);
   void ScheduleScriptTask(const base::Closure& task);
+
+  // base::PingProvider
+  void Ping(std::atomic<bool>* cookie) final;
 
   // domapi::ViewEventHandler
   void DidActivateWindow(domapi::WindowId window_id) final;

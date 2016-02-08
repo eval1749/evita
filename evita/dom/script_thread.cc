@@ -78,6 +78,13 @@ void ScriptThread::Start() {
                             base::Unretained(io_delegate_)));
 }
 
+// base::PingProvider
+void ScriptThread::Ping(std::atomic<bool>* cookie) {
+  thread_->message_loop()->task_runner()->PostTask(
+      FROM_HERE,
+      base::Bind(&ScriptThread::PingInternal, base::Unretained(cookie)));
+}
+
 // domapi::ViewEventHandler
 #define DEFINE_VIEW_EVENT_HANDLER0(name)                                    \
   void ScriptThread::name() {                                               \

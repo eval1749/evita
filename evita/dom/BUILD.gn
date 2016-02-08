@@ -16,6 +16,7 @@ source_set("dom") {
   deps = [
     ":components",
     "//base",
+    "//evita/base",
     "//evita/ui",
   ]
 }

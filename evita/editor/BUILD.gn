@@ -15,10 +15,13 @@ source_set("editor") {
     "switch_set.h",
     "trace_log_controller.cc",
     "trace_log_controller.h",
+    "watch_dog.cc",
+    "watch_dog.h",
   ]
 
   public_deps = [
     "//base",
+    "//evita/base",
     "//evita/dom",
     "//evita/io",
     "//evita/paint",

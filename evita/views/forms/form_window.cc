@@ -9,13 +9,13 @@
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
 #include "common/win/win32_verify.h"
-#include "evita/gfx/canvas.h"
-#include "evita/gfx/swap_chain.h"
 #include "evita/dom/public/form.h"
 #include "evita/dom/public/form_controls.h"
-#include "evita/views/forms/form_painter.h"
+#include "evita/gfx/canvas.h"
+#include "evita/gfx/swap_chain.h"
 #include "evita/views/forms/form_paint_info.h"
 #include "evita/views/forms/form_paint_state.h"
+#include "evita/views/forms/form_painter.h"
 
 namespace views {
 
@@ -36,7 +36,7 @@ FormWindow::FormWindow(WindowId window_id,
 FormWindow::~FormWindow() {}
 
 void FormWindow::Paint(std::unique_ptr<domapi::Form> form) {
-  TRACE_EVENT_WITH_FLOW0("view", "FormWindow::Paint", form->id(),
+  TRACE_EVENT_WITH_FLOW0("view", "FormWindow::Paint", window_id(),
                          TRACE_EVENT_FLAG_FLOW_IN);
   if (form_bounds_.size() != form->bounds().size()) {
     form_bounds_ = form->bounds();

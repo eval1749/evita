@@ -415,11 +415,13 @@ void BoxTree::DidChangeSystemMetrics() {
 
 void BoxTree::DidChangeViewportSize() {
   impl_->MarkDirty(document());
+  lifecycle()->StartOver();
 }
 
 // DocumentObserver
 void BoxTree::DidAppendChild(const ContainerNode& parent, const Node& child) {
   impl_->MarkDirty(parent);
+  lifecycle()->StartOver();
 }
 
 void BoxTree::DidChangeInlineStyle(const ElementNode& element,
@@ -427,12 +429,14 @@ void BoxTree::DidChangeInlineStyle(const ElementNode& element,
   // TODO(eval1749): We should not clear root box to optimize left/top
   // changes.
   impl_->MarkDirty(element);
+  lifecycle()->StartOver();
 }
 
 void BoxTree::DidInsertBefore(const ContainerNode& parent,
                               const Node& child,
                               const Node& ref_child) {
   impl_->MarkDirty(parent);
+  lifecycle()->StartOver();
 }
 
 void BoxTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
@@ -444,6 +448,7 @@ void BoxTree::DidRemoveChild(const ContainerNode& parent, const Node& child) {
     }
   }
   impl_->MarkDirty(parent);
+  lifecycle()->StartOver();
 }
 
 void BoxTree::DidReplaceChild(const ContainerNode& parent,

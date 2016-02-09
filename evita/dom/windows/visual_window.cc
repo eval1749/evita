@@ -45,10 +45,17 @@ const visuals::Document& VisualWindow::document() const {
   return view_->document();
 }
 
+void VisualWindow::CancelAnimationFrame() {
+  if (animation_request_id_ == 0)
+    return;
+  script_host()->scheduler()->CancelAnimationFrame(animation_request_id_);
+  animation_request_id_ = 0;
+}
+
 void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   TRACE_EVENT0("script", "VisualWindow::DidBeginAnimationFrame");
-  DCHECK(is_waiting_animation_frame_);
-  is_waiting_animation_frame_ = false;
+  DCHECK_NE(animation_request_id_, 0);
+  animation_request_id_ = 0;
   auto display_item_list = view_->Paint();
   if (!display_item_list)
     return;
@@ -59,13 +66,13 @@ void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
 void VisualWindow::RequestAnimationFrame() {
   if (viewport_size_.IsEmpty())
     return;
-  if (is_waiting_animation_frame_)
+  if (animation_request_id_)
     return;
-  is_waiting_animation_frame_ = true;
   auto callback = std::make_unique<AnimationFrameCallback>(
       FROM_HERE, base::Bind(&VisualWindow::DidBeginAnimationFrame,
                             base::Unretained(this)));
-  script_host()->scheduler()->RequestAnimationFrame(std::move(callback));
+  animation_request_id_ =
+      script_host()->scheduler()->RequestAnimationFrame(std::move(callback));
 }
 
 // Binding callbacks
@@ -111,6 +118,10 @@ void VisualWindow::DidChangeView() {
 void VisualWindow::DidChangeBounds(int left, int top, int right, int bottom) {
   viewport_size_ = visuals::FloatSize(right - left, bottom - top);
   visuals::css::Media::DidChangeViewportSize();
+}
+
+void VisualWindow::DidDestroyWindow() {
+  CancelAnimationFrame();
 }
 
 void VisualWindow::DidShowWindow() {

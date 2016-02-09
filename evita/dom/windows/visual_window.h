@@ -52,6 +52,7 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
 
   const visuals::Document& document() const;
 
+  void CancelAnimationFrame();
   void DidBeginAnimationFrame(const base::TimeTicks& now);
   void RequestAnimationFrame();
 
@@ -72,9 +73,10 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
 
   // Window
   void DidChangeBounds(int left, int top, int right, int bottom) final;
+  void DidDestroyWindow() final;
   void DidShowWindow() final;
 
-  bool is_waiting_animation_frame_ = false;
+  int animation_request_id_ = 0;
   const std::unique_ptr<visuals::View> view_;
   visuals::FloatSize viewport_size_;
 

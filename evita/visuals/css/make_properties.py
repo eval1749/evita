@@ -24,6 +24,8 @@ import jinja2
 
 templates_dir = os.path.normpath(os.path.join(module_path, 'templates'))
 
+USE_CLANG_FORMAT = False
+
 ######################################################################
 #
 # Jinja2 Helper
@@ -69,9 +71,10 @@ class Generator(object):
             with open(output_path, 'wt') as output:
                 contents = template.render(context)
                 output.write(contents)
-            # Move to project to root to locate clang-format command
-            os.chdir(root_path)
-            os.system('clang-format -i %s' % output_path)
+            if USE_CLANG_FORMAT:
+                # Move to project to root to locate clang-format command
+                os.chdir(root_path)
+                os.system('clang-format -i %s' % output_path)
 
     def make_context(self, model):
         return {

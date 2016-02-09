@@ -10,7 +10,8 @@ if "%targets%"=="" set targets=evita
 : set/a num_jobs=NUMBER_OF_PROCESSORS / 2
 set/a num_jobs=NUMBER_OF_PROCESSORS
 set start=%TIME%
-ninja -j %num_jobs% -C ..\out.gn\%config% %targets%
+: ninja -j %num_jobs% -C ..\out.gn\%config% %targets%
+ninja -C ..\out.gn\%config% %targets%
 set end=%TIME%
 echo Start %start%
 echo End   %end%

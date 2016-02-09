@@ -14,7 +14,7 @@ const CSS_PROPERTY_NAME_ID_MAP = (function() {
   /** @const @type {!Map<string, number>} */
   const map = new Map();
   let id = 0;
-  for (const name in CSS_PROPERTY_NAMES) {
+  for (const name of CSS_PROPERTY_NAMES) {
     map.set(name, id);
     ++id;
   }

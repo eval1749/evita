@@ -39,7 +39,7 @@ class View final : public ViewLifecycleObserver {
   View(const Document& document,
        const css::Media& media,
        const std::vector<css::StyleSheet*>& style_sheets);
-  ~View();
+  ~View() final;
 
   const BoxTree& box_tree() const { return *box_tree_; }
   const Document& document() const;

@@ -202,6 +202,12 @@ class CssPropty(object):
     def underscore(self):
         return self._underscore
 
+    def __cmp__(self, other):
+        return cmp(self.name, other.name)
+
+    def __str__(self):
+        return '%s(%s)' % (self.__class__.__name__, self.name)
+
 
 class Model(object):
 

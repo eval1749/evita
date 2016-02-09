@@ -752,6 +752,7 @@ class TabStrip::View final : private ui::ButtonListener,
   void DidChangeTabBounds(Tab* tab) final;
   void DidDropTab(Tab* tab, const gfx::Point& screen_point) final;
   void DidSelectTab(Tab* tab) final;
+  void DidSetFocus(Tab* tab) final;
   void MaybeStartDrag(Tab* tab, const gfx::Point& location) final;
   void RemoveTabAnimation(ui::AnimationGroupMember* member) final;
   void RequestCloseTab(Tab* tab) final;
@@ -995,6 +996,10 @@ void TabStrip::View::DidDropTab(Tab* tab, const gfx::Point& screen_point) {
 
 void TabStrip::View::DidSelectTab(Tab* tab) {
   tab_strip_delegate_->DidSelectTab(tab ? tab->tab_index() : -1);
+}
+
+void TabStrip::View::DidSetFocus(Tab* tab) {
+  tab_strip_delegate_->DidSelectTab(tab->tab_index());
 }
 
 void TabStrip::View::MaybeStartDrag(Tab* tab, const gfx::Point& location) {

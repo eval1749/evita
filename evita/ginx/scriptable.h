@@ -49,7 +49,7 @@ class AbstractScriptable : public gc::Collectable<AbstractScriptable> {
   static void WeakCallback(
       const v8::WeakCallbackData<v8::Object, AbstractScriptable>& data);
 
-  mutable v8::Persistent<v8::Object> wrapper_;  // Weak
+  mutable v8::Global<v8::Object> wrapper_;  // Weak
 
   DISALLOW_COPY_AND_ASSIGN(AbstractScriptable);
 };

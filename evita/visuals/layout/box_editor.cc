@@ -416,6 +416,7 @@ void BoxEditor::SetTextData(TextBox* text_box, base::StringPiece16 data) {
   if (text_box->data_ == data)
     return;
   text_box->data_ = data.as_string();
+  text_box->text_layout_.reset();
   SetContentChanged(text_box);
 }
 

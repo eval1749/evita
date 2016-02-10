@@ -46,6 +46,8 @@ class NativeTextLayout final {
 
  private:
   base::win::ScopedComPtr<IDWriteTextLayout> value_;
+
+  DISALLOW_ASSIGN(NativeTextLayout);
 };
 
 }  // namespace visuals

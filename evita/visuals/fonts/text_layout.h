@@ -42,6 +42,8 @@ class TextLayout final {
 
  private:
   std::unique_ptr<NativeTextLayout> impl_;
+
+  DISALLOW_ASSIGN(TextLayout);
 };
 
 }  // namespace visuals

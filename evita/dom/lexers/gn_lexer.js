@@ -55,7 +55,8 @@ global.GnLexer = (function(keywords) {
      * @param {number} charCode
      */
     feedCharacter(charCode) {
-      if (this.state == lexers.State.ZERO && charCode == Unicode.NUMBER_SIGN) {
+      if (this.state === lexers.State.ZERO &&
+          charCode === Unicode.NUMBER_SIGN) {
         this.startToken(lexers.State.LINE_COMMENT);
         return;
       }

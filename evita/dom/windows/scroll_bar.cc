@@ -101,11 +101,8 @@ bool ScrollBar::HandleMouseEvent(const MouseEvent& event) {
 bool ScrollBar::HandleMouseMoved(const MouseEvent& event) {
   const auto& point = FloatPoint(event.client_x, event.client_y);
   const auto part = HitTestPoint(point);
-  if (active_part_ != ScrollBarPart::Thumb) {
-    UpdateHoveredPart(part);
-    owner_->DidChangeScrollBar();
-    return part != ScrollBarPart::None;
-  }
+  if (active_part_ != ScrollBarPart::Thumb)
+    return UpdateHoveredPart(part);
   if (IsDisabled(part))
     return true;
   const auto delta = layout_->IsVertical() ? point.y() - last_drag_point_.y()
@@ -212,9 +209,10 @@ void ScrollBar::SetDisabled(bool new_disabled) {
   owner_->DidChangeScrollBar();
 }
 
-void ScrollBar::UpdateHoveredPart(ScrollBarPart part) {
+bool ScrollBar::UpdateHoveredPart(ScrollBarPart part) {
   if (hovered_part_ == part)
-    return;
+    return false;
+  owner_->DidChangeScrollBar();
   if (hovered_part_ != ScrollBarPart::None) {
     layout_->SetState(hovered_part_, IsDisabled(hovered_part_)
                                          ? ScrollBarState::Disabled
@@ -222,12 +220,13 @@ void ScrollBar::UpdateHoveredPart(ScrollBarPart part) {
   }
   hovered_part_ = part;
   if (hovered_part_ == ScrollBarPart::None)
-    return;
+    return true;
   if (IsDisabled(hovered_part_)) {
     hovered_part_ = ScrollBarPart::None;
-    return;
+    return true;
   }
   layout_->SetState(hovered_part_, ScrollBarState::Hovered);
+  return true;
 }
 
 }  // namespace dom

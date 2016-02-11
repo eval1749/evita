@@ -65,7 +65,11 @@ global.GnLexer = (function(keywords) {
 
   return GnLexer;
 })([
+  // Conditionals
+  'else',
+  'false',
   'if',
+  'true',
 
   // Target declarations
   'action',

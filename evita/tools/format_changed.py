@@ -39,6 +39,8 @@ def dispatch(file_name):
         return format_cpp(file_name)
     if file_type == 'gn':
         return format_gn(file_name)
+    if file_type == 'js':
+        return format_js(file_name)
     if file_type == 'python':
         return format_python(file_name)
     return None
@@ -53,6 +55,11 @@ def format_gn(file_name):
     """Format with 'gn format' command. On Windows, output lines end with CRLF.
     """
     os.system('gn format --in-place %s' % file_name)
+
+
+def format_js(file_name):
+    sys.stderr.write('  Formatting JavaScript "%s"\n' % file_name)
+    os.system('clang-format -i %s' % file_name)
 
 
 def format_python(file_name):

@@ -779,9 +779,10 @@ TabStrip::View::View(TabStrip* widget, TabStripDelegate* delegate)
     : dirty_(true),
       list_button_(new ui::ArrowButton(ui::ArrowButton::Direction::Down, this)),
       scroll_left_button_(
-          new ui::ArrowButton(ui::ArrowButton::Direction::Left, this)),
+          new ui::RepetableArrowButton(ui::ArrowButton::Direction::Left, this)),
       scroll_right_button_(
-          new ui::ArrowButton(ui::ArrowButton::Direction::Right, this)),
+          new ui::RepetableArrowButton(ui::ArrowButton::Direction::Right,
+                                       this)),
       tab_collection_(new TabCollection(this)),
       tab_list_menu_(list_button_.get(), tab_collection_.get()),
       tab_strip_delegate_(delegate),

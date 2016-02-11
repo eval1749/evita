@@ -131,6 +131,10 @@ class TypedefResolver(Visitor):
         self._resolve_typedefs(typed_object)
 
 
+######################################################################
+#
+# CodeGeneratorJS
+#
 class CodeGeneratorJS(object):
 
     def __init__(self, info_provider, cache_dir, output_dir):
@@ -159,10 +163,73 @@ class CodeGeneratorJS(object):
 
     def generate_code_for_interface(self, interface, definitions):
         template = self.jinja_env.get_template('interface.js')
-        context = interface_context(interface, definitions)
+        context = self.interface_context_of(interface, definitions)
         return {
             'contents': template.render(context),
             'file_name': '%s_externs.js' % interface.name,
+        }
+
+    # We consolidate overloaded signatures into one function signature.
+    # See URL.idl for example.
+    def constructor_context_list_of(self, interface):
+        if has_constructor(interface):
+            context = function_context_of(interface.constructors +
+                                          interface.custom_constructors)
+            context['name'] = interface.name
+            context['parent_name'] = parent_name_of(interface.parent)
+            context['kind'] = 'constructor'
+            return [context]
+        context = {
+            'name': interface.name,
+            'parameters': [],
+            'parent_name': parent_name_of(interface.parent),
+        }
+        if is_pure_interface(interface):
+            context['kind'] = 'interface'
+        else:
+            context['kind'] = 'constructor'
+        return [context]
+
+    def interface_context_of(self, interface, definitions):
+        callback_context_list = [
+            callback_context(callback_function)
+            for callback_function in definitions.callback_functions.values()]
+
+        dictionary_context_list = [
+            dictionary_context(dictionary)
+            for dictionary in definitions.dictionaries.values()]
+
+        enumeration_context_list = [
+            enumeration_context(enumeration)
+            for enumeration in definitions.enumerations.values()]
+
+        if 'JsNamespace' in interface.extended_attributes:
+            namespace = interface.extended_attributes['JsNamespace'] + '.'
+        else:
+            namespace = ''
+
+        attribute_context_list = [attribute_context(attribute)
+                                  for attribute in interface.attributes]
+        constant_context_list = [constant_context(constant)
+                                 for constant in interface.constants]
+
+        method_context_list = [
+            function_context_of(list(functions))
+            for name, functions in
+            groupby(interface.operations, lambda operation: operation.name)
+        ]
+
+        # Context for templates
+        return {
+            'attributes': sort_context_list(attribute_context_list),
+            'callbacks': sort_context_list(callback_context_list),
+            'constants': sort_context_list(constant_context_list),
+            'constructors': self.constructor_context_list_of(interface),
+            'dictionaries': sort_context_list(dictionary_context_list),
+            'enumerations': sort_context_list(enumeration_context_list),
+            'interface_name': namespace + interface.name,
+            'methods': sort_context_list(method_context_list),
+            'namespace': namespace,
         }
 
 
@@ -190,18 +257,6 @@ def constant_context(constant):
         'type': type_string(constant.idl_type),
         'value': constant.value,
     }
-
-
-# We consolidate overloaded signatures into one function signature.
-# See URL.idl for example.
-def constructor_context_list(interface):
-    if not interface.constructors and not interface.custom_constructors:
-        return []
-    contents = function_context(interface.constructors +
-                                interface.custom_constructors)
-    contents['parent_name'] = parent_name(interface.parent)
-    contents['name'] = interface.name
-    return [contents]
 
 
 def dictionary_context(dictionary):
@@ -241,7 +296,7 @@ def enumeration_context(enumeration):
     }
 
 
-def function_context(functions):
+def function_context_of(functions):
     parameters_list = [function.arguments for function in functions]
     max_arity = max(map(len, parameters_list))
     normalized_parameters_list = [
@@ -271,57 +326,6 @@ def initialize_jinja_env(cache_dir):
         lstrip_blocks=True,  # so can indent control flow tags
         trim_blocks=True)
     return jinja_env
-
-
-def interface_context(interface, definitions):
-    callback_context_list = [
-        callback_context(callback_function)
-        for callback_function in definitions.callback_functions.values()]
-
-    dictionary_context_list = [
-        dictionary_context(dictionary)
-        for dictionary in definitions.dictionaries.values()]
-
-    enumeration_context_list = [
-        enumeration_context(enumeration)
-        for enumeration in definitions.enumerations.values()]
-
-    if 'JsNamespace' in interface.extended_attributes:
-        namespace = interface.extended_attributes['JsNamespace'] + '.'
-    else:
-        namespace = ''
-
-    attribute_context_list = [attribute_context(attribute)
-                              for attribute in interface.attributes]
-    constant_context_list = [constant_context(constant)
-                             for constant in interface.constants]
-
-    method_context_list = [
-        function_context(list(functions))
-        for name, functions in
-        groupby(interface.operations, lambda operation: operation.name)
-    ]
-
-    # Context for tempaltes
-    return {
-        'attributes': sort_context_list(attribute_context_list),
-        'callbacks': sort_context_list(callback_context_list),
-        'constants': sort_context_list(constant_context_list),
-        'constructors': constructor_context_list(interface),
-        'dictionaries': sort_context_list(dictionary_context_list),
-        'enumerations': sort_context_list(enumeration_context_list),
-        'interfaces': interface_context_list(interface),
-        'interface_name': namespace + interface.name,
-        'methods': sort_context_list(method_context_list),
-        'namespace': namespace,
-    }
-
-
-def interface_context_list(interface):
-    if interface.constructors or interface.custom_constructors:
-        return []
-    return [{'name': interface.name,
-             'parent_name': parent_name(interface.parent)}]
 
 
 def overloaded_parameter(overloaded_parameters):
@@ -355,7 +359,7 @@ def parameter_type_string(parameter, is_optional):
     return string + '=' if is_optional else string
 
 
-def parent_name(name):
+def parent_name_of(name):
     if name in NAMESPACE_MAP:
         return NAMESPACE_MAP[name] + '.' + name
     return name
@@ -402,3 +406,17 @@ def type_string_without_nullable(idl_type):
 def union_type_string(type_strings):
     type_string_list = sorted(set(type_strings))
     return '|'.join(type_string_list)
+
+######################################################################
+#
+# Utility functions
+#
+
+
+def has_constructor(interface):
+    return len(interface.constructors) > 0 or \
+        len(interface.custom_constructors) > 0
+
+
+def is_pure_interface(interface):
+    return 'NoInterfaceObject' in interface.extended_attributes

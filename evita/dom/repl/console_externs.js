@@ -14,7 +14,7 @@ repl.Console.DOCUMENT_NAME;
  * @param {*} expression
  * @param {...*} params
  */
-repl.Console.prototype.assert = function(expression, ...params) {};
+repl.Console.prototype.assert = function(expression, params) {};
 
 /** @type {!function()} */
 repl.Console.prototype.clear;
@@ -31,7 +31,7 @@ repl.Console.prototype.freshLine;
 /**
  * @param {...*} params
  */
-repl.Console.prototype.log = function(...params) {};
+repl.Console.prototype.log = function(params) {};
 
 /** @const @type {!repl.Console} */
 var console;

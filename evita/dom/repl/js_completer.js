@@ -87,7 +87,8 @@ $define(global, 'repl', ($export) => {
 
     /** @param {!Set.<string>} nameSet */
     setCandidates_(nameSet) {
-      this.candidates_ = Array.from(nameSet).sort((a, b) => a.localeCompare(b));
+      this.candidates_ =
+          Array.from(nameSet, x => x).sort((a, b) => a.localeCompare(b));
     }
 
     setupCandiates_() {

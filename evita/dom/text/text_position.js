@@ -9,18 +9,16 @@
   /** @const @type {number} */
   var MAX_BRACKET_NESTING_LEVEL = 10;
 
-  /**
-   * @constructor
-   * @struct
-   * @param {!Bracket.Detail} data
-   * @param {!TextOffset} offset
-   */
-  function BracketMatchData(data, offset) {
-    this.data = data;
-    this.offset = offset;
+  class BracketMatchData {
+    /**
+     * @param {!Bracket.Detail} data
+     * @param {!TextOffset} offset
+     */
+    constructor(data, offset) {
+      this.data = data;
+      this.offset = offset;
+    }
   }
-  /** @type{!Bracket.Detail} */ BracketMatchData.prototype.data;
-  /** @type{number} */ BracketMatchData.prototype.offset;
 
   /**
    * @param {!TextPosition} position
@@ -103,7 +101,7 @@
             return;
           }
         }
-        bracketStack.push({data: bracket, offset: position.offset});
+        bracketStack.push(new BracketMatchData(bracket, position.offset));
         position.offset = nextOffset;
       }
     }
@@ -148,7 +146,7 @@
               // We reach left bracket.
               return;
             }
-            bracketStack.push({data: bracket, offset: position.offset});
+            bracketStack.push(new BracketMatchData(bracket, position.offset));
             break;
           }
 
@@ -156,7 +154,7 @@
             // We found too many left bracket.
             return;
           }
-          bracketStack.push({data: bracket, offset: position.offset});
+          bracketStack.push(new BracketMatchData(bracket, position.offset));
           break;
         case Bracket.Type.RIGHT:
           if (!bracketStack.length) {

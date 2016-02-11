@@ -24,7 +24,7 @@ class CSSStyleSheet {
       // TODO(eval17490: Once |Array.from()| has right type definition, we
       // should get rid of type case for |this.cssRules_|.
       this.cachedCssRules_ = Array.from(
-          /** @type {!Iterable<!CSSRule>} */ (this.cssRules_));
+          /** @type {!Iterable<!CSSRule>} */ (this.cssRules_), x => x);
     }
     return /** @type {!Array.<!CSSRule>} */ (this.cachedCssRules_);
   }

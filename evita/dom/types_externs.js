@@ -6,17 +6,17 @@
  * @externs
  */
 
-/**
+/*
  * TODO(eval1749): Once closure compiler has build-in externs for |Array.from()|
  * we should remove our own type annotation fro |Array.from()|.
- * @template T, U
- * @param {!Iterable<T>} arrayLike
- * @param {!function(T):U=} opt_mapFn
- * @param {*=} opt_thisArg
+ * $template T, U
+ * $param {!Iterable<T>} arrayLike
+ * $param {!function(T):U=} opt_mapFn
+ * $param {*=} opt_thisArg
  * TODO(eval1749): |Array.from()| should return |!Array.<U>|.
- * @return {!Array.<T|U>}
+ * $return {!Array.<T|U>}
  */
-Array.from = function(arrayLike, opt_mapFn, opt_thisArg) {};
+// Array.from = function(arrayLike, opt_mapFn, opt_thisArg) {};
 
 /**
  * @type {!Object}

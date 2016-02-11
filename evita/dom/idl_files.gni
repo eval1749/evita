@@ -50,6 +50,7 @@ interface_idl_files = [
   # Note: We have "Mode.idl" here for JS externs
   "//evita/dom/text/modes/Mode.idl",
   "//evita/dom/text/TextDocument.idl",
+  "//evita/dom/text/TextDocumentSetObserver.idl",
   "//evita/dom/text/LineAndColumn.idl",
   "//evita/dom/text/TextMutationObserver.idl",
   "//evita/dom/text/TextMutationRecord.idl",

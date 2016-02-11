@@ -108,8 +108,10 @@ $define(global, 'windows', function($export) {
      * @param {!TextDocumentStateCallback} callback
      */
     static addObserver(callback) {
-      observers.push(callback);
+      controller.addObserver(callback);
     }
+
+    static controller() { return controller; }
 
     /**
      * For debugging only
@@ -117,22 +119,61 @@ $define(global, 'windows', function($export) {
      * @return {TextDocumentState}
      */
     static get(document) {
-      return stateMap.get(document) || null;
+      return controller.get(document);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // Controller
+  //
+  class Controller extends SimpleTextDocumentSetObserver {
+    constructor() {
+      super();
+      this.stateMap_ = new Map();
+      TextDocument.addObserver(this);
     }
 
     /**
+     * @param {!TextDocumentStateCallback} callback
+     */
+    addObserver(callback) {
+      observers.push(callback);
+    }
+
+    /**
+     * @override
      * @param {!TextDocument} document
      */
-    static startTracking(document) {
+    didAddTextDocument(document) {
       const state = new TextDocumentState(document);
       stateMap.set(document, state);
       state.start();
     }
+
+    /**
+     * For debugging only
+     * @param {!TextDocument} document
+     * @return {TextDocumentState}
+     */
+    get(document) {
+      return stateMap.get(document) || null;
+    }
+
+    /**
+     * @override
+     * @param {!TextDocument} document
+     */
+    didRemoveTextDocument(document) {
+      stateMap.delete(document);
+    }
   }
 
-  TextDocument.addObserver(function(type, document) {
-    if (type === 'add')
-      TextDocumentState.startTracking(document);
+  /** @const @type {!Controller} */
+  const controller = new Controller()
+
+  Object.defineProperties(TextDocumentState, {
+    controller_: {value: controller},
   });
 
   $export({TextDocumentState});

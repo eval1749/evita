@@ -469,15 +469,15 @@
   /** @type {!Map.<string, !TextDocument>} */
   const documentNameMap = new Map();
 
-  /** @type {!Set.<!TextDocumentObserverCallback>} */
-  let documentObservers = new Set();
+  /** @type {!Set.<!TextDocumentSetObserver>} */
+  let documentSetObservers = new Set();
 
-  /** @type {!Set.<!TextDocumentObserverCallback>} */
-  let internalTextDocumentObservers = new Set();
+  /** @type {!Set.<!TextDocumentSetObserver>} */
+  let internalTextDocumentSetObservers = new Set();
 
-  /** @param {!TextDocumentObserverCallback} callback */
+  /** @param {!TextDocumentSetObserver} callback */
   function addObserver(callback) {
-    documentObservers.add(callback);
+    documentSetObservers.add(callback);
   }
 
   /**
@@ -528,17 +528,9 @@
     const document = new TextDocument();
     document.name_ = makeUniqueName(name);
     documentNameMap.set(document.name, document);
-    notifyObservers('add', document);
+    for (const observer of documentSetObservers)
+      observer.didAddTextDocument(document);
     return document;
-  }
-
-  /**
-   * @param {string} type
-   * @param {!TextDocument} document
-   */
-  function notifyObservers(type, document) {
-    for (let observer of documentObservers)
-      observer.call(TextDocument, type, document);
   }
 
   /** @param {!TextDocument} document */
@@ -546,12 +538,13 @@
     if (!documentNameMap.has(document.name))
       throw new Error(`${document.name} isn't in list`);
     documentNameMap.delete(document.name);
-    notifyObservers('remove', document);
+    for (const observer of documentSetObservers)
+      observer.didRemoveTextDocument(document);
   }
 
-  /** @param {!TextDocumentObserverCallback} callback */
+  /** @param {!TextDocumentSetObserver} callback */
   function removeObserver(callback) {
-    documentObservers.delete(callback);
+    documentSetObservers.delete(callback);
   }
 
   /**
@@ -566,11 +559,11 @@
 
   $initialize(function() {
     documentNameMap.clear();
-    if (internalTextDocumentObservers.size === 0) {
-      internalTextDocumentObservers = new Set(documentObservers);
+    if (internalTextDocumentSetObservers.size === 0) {
+      internalTextDocumentSetObservers = new Set(documentSetObservers);
       return;
     }
-    documentObservers = new Set(internalTextDocumentObservers);
+    documentSetObservers = new Set(internalTextDocumentSetObservers);
   });
 
   Object.defineProperties(TextDocument, {

@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-callback TextDocumentObserverCallback = void(DOMString name, TextDocument document);
-
 [
     CustomConstructor()
 ]
 interface TextDocument : EventTarget {
     [ImplementedAs=JavaScript]
-    static void addObserver(TextDocumentObserverCallback observer);
+    static void addObserver(TextDocumentSetObserver observer);
 
     [ImplementedAs=JavaScript]
     static void addTemplate(DOMString type, Object template);
@@ -36,7 +34,7 @@ interface TextDocument : EventTarget {
     static void remove(TextDocument document);
 
     [ImplementedAs=JavaScript]
-    static void removeObserver(TextDocumentObserverCallback observer);
+    static void removeObserver(TextDocumentSetObserver observer);
 
     [ImplementedAs=JavaScript]
     static void removeTemplate(DOMString type);

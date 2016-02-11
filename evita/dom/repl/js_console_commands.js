@@ -33,16 +33,25 @@
     this.selection.endOf(Unit.DOCUMENT);
   });
 
+  class Observer extends SimpleTextDocumentSetObserver {
+    constructor() {
+      super();
+    }
+
+    /** @param {!TextDocument} document */
+    didAddTextDocument(document) {
+      if (document.name != repl.Console.DOCUMENT_NAME)
+        return;
+      /** @type {!repl.JsConsole} */
+      const commandLoop = new repl.JsConsole(document);
+      document.properties.set(repl.JsConsole.name, commandLoop);
+      $0 = commandLoop;
+    }
+  }
+
   // Install JsConsole specific commands when "*javascript*" document is
   // created.
-  TextDocument.addObserver((type, document) => {
-    if (type !== 'add' || document.name != repl.Console.DOCUMENT_NAME)
-      return;
-    /** @type {!repl.JsConsole} */
-    const commandLoop = new repl.JsConsole(document);
-    document.properties.set(repl.JsConsole.name, commandLoop);
-    $0 = commandLoop;
-  });
+  TextDocument.addObserver(new Observer());
 
   /**
    * Switch to JavaScript command.

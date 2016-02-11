@@ -126,8 +126,10 @@ $define(global, 'launchpad', function($export) {
   //
   // ListModel
   //
-  class ListModel {
+  class ListModel extends SimpleTextDocumentSetObserver {
     constructor() {
+      super();
+
       /** @private @const @type {!Map<!TextDocument, !Element>} */
       this.rowMap_ = new Map();
       /** @private @const @type {!Document} */
@@ -139,7 +141,7 @@ $define(global, 'launchpad', function($export) {
       const body = this.document.firstChild;
       this.list_ = body.lastChild;
 
-      TextDocument.addObserver(this.didChangeDocuments.bind(this));
+      TextDocument.addObserver(this);
     }
 
     /** @return {!Document} */
@@ -149,6 +151,7 @@ $define(global, 'launchpad', function($export) {
     get selection() { return this.selection_; }
 
     /**
+     * TextDocumentSetObserver
      * @private
      * @param {!TextDocument} textDocument
      */
@@ -171,20 +174,7 @@ $define(global, 'launchpad', function($export) {
     }
 
     /**
-     * @private
-     * @param {string} action
-     * @param {!TextDocument} textDocument
-     */
-    didChangeDocuments(action, textDocument) {
-      switch (action) {
-        case 'add':
-          return this.didAddTextDocument(textDocument);
-        case 'remove':
-          return this.didRemoveTextDocument(textDocument);
-      }
-    }
-
-    /**
+     * TextDocumentSetObserver
      * @private
      * @param {!TextDocument} textDocument
      */

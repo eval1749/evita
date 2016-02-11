@@ -610,6 +610,9 @@
     }
   }
 
+  /** @const @type {Map<!TextDocument, !SpellChecker>} */
+  const spellCheckerMap = new Map();
+
   //////////////////////////////////////////////////////////////////////
   //
   // SpellChecker
@@ -716,41 +719,49 @@
       this.coldScanner_.didLoadTextDocument();
       this.hotScanner_.didLoadTextDocument();
     }
+
+    /**
+     * @param {!TextDocument} document
+     * $return {SpellChecker}
+     */
+    static get(document) {
+      return spellCheckerMap.get(document) || null;
+    }
+
+    /** @return {!Set<string>} */
+    static keywords() {
+      return keywords;
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // SpellCheckerController
+  //
+  class SpellCheckerController extends SimpleTextDocumentSetObserver {
+    constructor() {
+      super();
+    }
+
+    /** @param {!TextDocument} document */
+    didAddTextDocument(document) {
+      const spellChecker = new SpellChecker(document);
+      spellCheckerMap.set(document, spellChecker);
+    }
+
+    /** @param {!TextDocument} document */
+    didRemoveTextDocument(document) {
+      const spellChecker = SpellChecker.get(document);
+      if (!spellChecker)
+        return;
+      spellChecker.destroy();
+      spellCheckerMap.delete(document);
+    }
   }
 
   // When document is created/destructed, we install/uninstall spell checker
   // to/from document.
-  TextDocument.addObserver(function(action, document) {
-    /** @param {!TextDocument} document */
-    function installSpellChecker(document) {
-      // TODO(eval1749): We should have generic way to disable spell checking
-      // for document.
-      if (document.name === '*javascript*')
-        return;
-      const spellChecker = new SpellChecker(document);
-      document.properties.set(SpellChecker.name, spellChecker);
-    }
-
-    /** @param {!TextDocument} document */
-    function uninstallSpellChecker(document) {
-      const spellChecker = document.properties.get(SpellChecker.name);
-      if (!spellChecker)
-        return;
-      spellChecker.destroy();
-      document.properties.delete(SpellChecker.name);
-    }
-
-    switch (action) {
-      case 'add':
-        installSpellChecker(document);
-        break;
-      case 'remove':
-        uninstallSpellChecker(document);
-        break;
-     }
-  });
-
-  Object.defineProperty(SpellChecker, 'keywords', {value: keywords});
+  TextDocument.addObserver(new SpellCheckerController());
 
   global.SpellChecker = SpellChecker;
   Object.freeze(SpellChecker);

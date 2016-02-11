@@ -56,11 +56,15 @@ TEST_F(TextDocumentTest, Constructor) {
 TEST_F(TextDocumentTest, TextDocument_addObserver) {
   EXPECT_SCRIPT_VALID(
       "var result_doc, result_type;"
-      "function callback(type, doc) {"
-      "  result_doc = doc;"
-      "  result_type = type;"
-      "}"
-      "TextDocument.addObserver(callback);"
+      "var observer = {"
+      "  didAddTextDocument(doc) {"
+      "    result_doc = doc; result_type = 'add';"
+      "  },"
+      "  didRemoveTextDocument(doc) {"
+      "   result_doc = doc; result_type = 'remove';"
+      "  }"
+      "};"
+      "TextDocument.addObserver(observer);"
       "var doc1 = TextDocument.new('addObserver');");
 
   RunMessageLoopUntilIdle();
@@ -75,7 +79,7 @@ TEST_F(TextDocumentTest, TextDocument_addObserver) {
   EXPECT_SCRIPT_EQ("remove", "result_type")
       << "The observer gets 'remove' notification.";
 
-  EXPECT_SCRIPT_VALID("TextDocument.removeObserver(callback)");
+  EXPECT_SCRIPT_VALID("TextDocument.removeObserver(observer)");
   EXPECT_SCRIPT_VALID("var doc2 = TextDocument.new('addObserver2')");
 
   RunMessageLoopUntilIdle();

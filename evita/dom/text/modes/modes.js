@@ -249,52 +249,42 @@
     }
   });
 
-  /** @param {!TextDocument} document */
-  function didAddTextDocument(document) {
-    document.addEventListener(Event.Names.BEFORELOAD,
-                              willLoadTextDocument.bind(document));
-    document.addEventListener(Event.Names.LOAD,
-                              didLoadTextDocument.bind(document));
-  }
-
-  /**
-   * @this {!TextDocument}
-   *
-   * Updates document mode by mode property in contents or file name.
-   */
-  function didLoadTextDocument() {
-    /** @type {!TextDocument} */
-    const document = this;
-    document.parseFileProperties();
-    /** @type {!Mode} */
-    const newMode = Mode.chooseMode(document);
-    /** @type {string} */
-    const currentModeName = document.mode ? document.mode.name : '';
-    if (newMode.name === currentModeName)
-      return;
-    Editor.messageBox(null, `Change mode to ${newMode.name}`,
-                      MessageBox.ICONINFORMATION);
-    document.mode = newMode;
-  }
-
-  /** @param {!TextDocument} document */
-  function didRemoveTextDocument(document) {
-    document.mode = null;
-  }
-
-  /** @this {!TextDocument} */
-  function willLoadTextDocument() {
-    const document = this;
-  }
-
-  TextDocument.addObserver(function(action, document) {
-    switch (action) {
-      case 'add':
-        didAddTextDocument(document);
-        break;
-      case 'remove':
-        didRemoveTextDocument(document);
-        break;
+  class Observer extends SimpleTextDocumentSetObserver {
+    constructor() {
+      super();
     }
-  });
+
+    /** @param {!TextDocument} document */
+    didAddTextDocument(document) {
+      document.addEventListener(Event.Names.LOAD,
+                                this.didLoadTextDocument.bind(document));
+    }
+
+    /**
+     * @this {!TextDocument}
+     *
+     * Updates document mode by mode property in contents or file name.
+     */
+    didLoadTextDocument() {
+      /** @type {!TextDocument} */
+      const document = this;
+      document.parseFileProperties();
+      /** @type {!Mode} */
+      const newMode = Mode.chooseMode(document);
+      /** @type {string} */
+      const currentModeName = document.mode ? document.mode.name : '';
+      if (newMode.name === currentModeName)
+        return;
+      Editor.messageBox(null, `Change mode to ${newMode.name}`,
+                        MessageBox.ICONINFORMATION);
+      document.mode = newMode;
+    }
+
+    /** @param {!TextDocument} document */
+    didRemoveTextDocument(document) {
+      document.mode = null;
+    }
+  }
+
+  TextDocument.addObserver(new Observer());
 })();

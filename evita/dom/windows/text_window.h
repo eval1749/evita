@@ -10,6 +10,7 @@
 #include "evita/dom/windows/window.h"
 
 #include "evita/dom/windows/rect.h"
+#include "evita/dom/windows/scroll_bar.h"
 #include "evita/gc/member.h"
 #include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/selection_change_observer.h"
@@ -34,6 +35,7 @@ class TextWindowClass;
 // The |TextWindow| is DOM world representative of UI world TextWidget, aka
 // TextWindow.
 class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
+                         public ScrollBarOwner,
                          public text::BufferMutationObserver,
                          public text::SelectionChangeObserver,
                          public ui::ScrollBarObserver {
@@ -87,6 +89,11 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
   TextWindow* NewTextWindow(TextRange* range);
   void Reconvert(const base::string16& text);
   void Scroll(int direction);
+
+  // ScrollBarOwner
+  void DidChangeScrollBar() final;
+  void DidReleaseScrollBar() final;
+  void DidPressScrollBar() final;
 
   // text::BufferMutationObserver
   void DidChangeStyle(const text::StaticRange& range) final;

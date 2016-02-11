@@ -45,16 +45,23 @@ gfx::RectF ToRectF(const FloatRect& rect) {
 
 //////////////////////////////////////////////////////////////////////
 //
+// ScrollBarOwner
+//
+ScrollBarOwner::ScrollBarOwner() {}
+ScrollBarOwner::~ScrollBarOwner() {}
+
+//////////////////////////////////////////////////////////////////////
+//
 // ScrollBar
 //
 ScrollBar::ScrollBar(ScrollBarOrientation orientation,
-                     Window* window,
+                     ScrollBarOwner* owner,
                      ui::ScrollBarObserver* observer)
     : active_part_(ScrollBarPart::None),
       hovered_part_(ScrollBarPart::None),
       layout_(new layout::ScrollBar(orientation)),
       observer_(observer),
-      window_(window) {
+      owner_(owner) {
   SetDisabled(true);
 }
 
@@ -77,6 +84,7 @@ bool ScrollBar::HandleMouseMoved(const MouseEvent& event) {
   const auto part = HitTestPoint(point);
   if (active_part_ != ScrollBarPart::Thumb) {
     UpdateHoveredPart(part);
+    owner_->DidChangeScrollBar();
     return part != ScrollBarPart::None;
   }
   if (IsDisabled(part))
@@ -100,7 +108,7 @@ bool ScrollBar::HandleMousePressed(const MouseEvent& event) {
     return false;
   if (IsDisabled(part))
     return true;
-  static_cast<ViewEventTarget*>(window_)->SetCapture();
+  owner_->DidPressScrollBar();
   active_part_ = part;
   switch (part) {
     case ScrollBarPart::BackwardButton:
@@ -124,6 +132,7 @@ bool ScrollBar::HandleMousePressed(const MouseEvent& event) {
       last_drag_point_ = point;
       break;
   }
+  owner_->DidChangeScrollBar();
   return true;
 }
 
@@ -132,10 +141,11 @@ bool ScrollBar::HandleMouseReleased(const MouseEvent& event) {
     return false;
   if (active_part_ == ScrollBarPart::None)
     return false;
-  static_cast<ViewEventTarget*>(window_)->ReleaseCapture();
+  owner_->DidReleaseScrollBar();
   layout_->SetState(active_part_, ScrollBarState::Normal);
   layout_->SetState(ScrollBarPart::Thumb, ScrollBarState::Normal);
   active_part_ = ScrollBarPart::None;
+  owner_->DidChangeScrollBar();
   return true;
 }
 
@@ -174,6 +184,7 @@ void ScrollBar::SetDisabled(bool new_disabled) {
   layout_->SetState(ScrollBarPart::ForwardButton, state);
   layout_->SetState(ScrollBarPart::ForwardTrack, state);
   layout_->SetState(ScrollBarPart::Thumb, state);
+  owner_->DidChangeScrollBar();
 }
 
 void ScrollBar::UpdateHoveredPart(ScrollBarPart part) {

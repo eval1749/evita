@@ -496,6 +496,19 @@ void TextWindow::UpdateScrollBar() {
   vertical_scroll_bar_->SetData(data);
 }
 
+// ScrollBarOwner
+void TextWindow::DidChangeScrollBar() {
+  RequestAnimationFrame();
+}
+
+void TextWindow::DidReleaseScrollBar() {
+  static_cast<ViewEventTarget*>(this)->ReleaseCapture();
+}
+
+void TextWindow::DidPressScrollBar() {
+  static_cast<ViewEventTarget*>(this)->SetCapture();
+}
+
 // text::BufferMutationObserver
 void TextWindow::DidChangeStyle(const text::StaticRange& range) {
   text_view_->DidChangeStyle(range);

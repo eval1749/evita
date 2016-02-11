@@ -34,6 +34,7 @@ class DisplayItemList;
 
 namespace dom {
 
+class ScrollBarOwner;
 class Window;
 
 //////////////////////////////////////////////////////////////////////
@@ -52,7 +53,7 @@ class ScrollBar final {
 
  public:
   ScrollBar(ScrollBarOrientation orientation,
-            Window* window,
+            ScrollBarOwner* owner,
             ui::ScrollBarObserver* observer);
   ~ScrollBar();
 
@@ -78,10 +79,28 @@ class ScrollBar final {
   FloatPoint last_drag_point_;
   std::unique_ptr<layout::ScrollBar> layout_;
   ui::ScrollBarObserver* const observer_;
-  // |window_| is used for capturing mouse pointer.
-  Window* const window_;
+  ScrollBarOwner* const owner_;
 
   DISALLOW_COPY_AND_ASSIGN(ScrollBar);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// ScrollBarOwner
+//
+class ScrollBarOwner {
+ public:
+  virtual ~ScrollBarOwner();
+
+  virtual void DidChangeScrollBar() = 0;
+  virtual void DidReleaseScrollBar() = 0;
+  virtual void DidPressScrollBar() = 0;
+
+ protected:
+  ScrollBarOwner();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ScrollBarOwner);
 };
 
 }  // namespace dom

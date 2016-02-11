@@ -729,7 +729,7 @@
     }
 
     /** @return {!Set<string>} */
-    static keywords() {
+    static get keywords() {
       return keywords;
     }
   }

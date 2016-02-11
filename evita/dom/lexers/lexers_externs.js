@@ -57,6 +57,14 @@ function CsharpLexer(document) {}
 
 /**
  * @constructor
+ * @extends {Lexer}
+ * @param {!TextDocument} document
+ * @return {undefined}
+ */
+function GnLexer(document) {}
+
+/**
+ * @constructor
  * @extends {ClikeLexer}
  * @param {!TextDocument} document
  * @return {undefined}

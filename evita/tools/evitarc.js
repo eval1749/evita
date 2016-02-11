@@ -179,8 +179,6 @@ function toCamelCase(document) {
 }
 
 Mode.extensionMap.set('e', Mode.extensionMap.get('cs'));
-Mode.extensionMap.set('gn', Mode.extensionMap.get('py'));
-Mode.extensionMap.set('gni', Mode.extensionMap.get('py'));
 
 // Report spell checker progress
 Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {

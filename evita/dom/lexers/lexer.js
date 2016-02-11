@@ -457,7 +457,7 @@ $define(global, 'lexers', function($export) {
   }
 
   const syntaxOfToken = (function() {
-    let map = new Map();
+    const map = new Map();
     map.set(lexers.State.DOT, 'operators');
     map.set(lexers.State.LINE_COMMENT, 'comment');
     map.set(lexers.State.OPERATOR, 'operators');
@@ -479,6 +479,11 @@ $define(global, 'lexers', function($export) {
      * @return {string}
      */
     function syntaxOfToken(token) {
+      if (token.state == lexers.State.WORD) {
+        const syntax = this.keywords.get(this.tokenTextOf(token));
+        if (syntax)
+          return syntax;
+      }
       return map.get(token.state) || '';
     }
     return syntaxOfToken;

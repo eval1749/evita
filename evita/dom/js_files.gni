@@ -57,6 +57,7 @@ js_lib_files = [
   "lexers/clike_lexer.js",
   "lexers/cpp_lexer.js",
   "lexers/csharp_lexer.js",
+  "lexers/gn_lexer.js",
   "lexers/idl_lexer.js",
   "lexers/java_lexer.js",
   "lexers/javascript_lexer.js",

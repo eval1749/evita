@@ -37,6 +37,13 @@
   }
   inheritMode(CsharpMode);
 
+  class GnMode extends global.Mode {
+    constructor() {
+      super('Gn', GnLexer);
+    }
+  }
+  inheritMode(GnMode);
+
   class HtmlMode  extends global.Mode {
     constructor() {
       super('HTML', HtmlLexer);
@@ -128,9 +135,12 @@
       map.set('cl', {mode: CppMode, name: 'CommonLisp Source'});
       map.set('cpp', {mode: CppMode, name: 'C++ Source'});
       map.set('cs', {mode: CsharpMode, name: 'C# Source'});
-      map.set('css', {mode: CppMode, name: 'Cascading Style Sheet TextDocument'});
+      map.set('css', {mode: CppMode,
+                      name: 'Cascading Style Sheet TextDocument'});
       map.set('cxx', {mode: CppMode, name: 'C++ Source'});
       map.set('el', {mode: LispMode, name: 'EmacsLisp Source'});
+      map.set('gn', {mode: GnMode, name: 'GN Source'});
+      map.set('gni', {mode: GnMode, name: 'GN Include Source'});
       map.set('gyp', {mode: PythonMode, name: 'GYP Source'});
       map.set('gypi', {mode: PythonMode, name: 'GYP Include Source'});
       map.set('h', {mode: CppMode, name: 'C/C++ Header'});

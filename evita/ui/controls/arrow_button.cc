@@ -5,8 +5,9 @@
 #include "evita/ui/controls/arrow_button.h"
 
 #include "evita/gfx/brush.h"
-#include "evita/gfx/color_f.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/color_f.h"
+#include "evita/ui/events/event.h"
 
 namespace ui {
 
@@ -87,6 +88,42 @@ void ArrowButton::PaintButton(gfx::Canvas* canvas) {
   gfx::Canvas::AxisAlignedClipScope clip_scope(canvas, bounds);
   canvas->Clear(gfx::ColorF());
   DrawArrow(canvas);
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// RepetableArrowButton
+//
+RepetableArrowButton::RepetableArrowButton(Direction direction,
+                                           ButtonListener* listener)
+    : ArrowButton(direction, listener),
+      repeater_(std::make_unique<RepeatController>(
+          base::Bind(&RepetableArrowButton::DidFireRepeatTimer,
+                     base::Unretained(this)))) {}
+
+RepetableArrowButton::~RepetableArrowButton() {}
+
+void RepetableArrowButton::DidFireRepeatTimer() {
+  ui::MouseEvent event(EventType::MouseReleased, MouseButton::Left, 0, 1,
+                       nullptr, Point(), Point());
+  listener()->DidPressButton(this, event);
+}
+
+// ui::Widget
+void RepetableArrowButton::OnMousePressed(const ui::MouseEvent& event) {
+  Button::OnMousePressed(event);
+  if (event.button() != ui::MouseButton::Left || event.click_count() != 0)
+    return;
+  SetCapture();
+  repeater_->Start();
+}
+
+void RepetableArrowButton::OnMouseReleased(const ui::MouseEvent& event) {
+  Button::OnMouseReleased(event);
+  if (event.button() != ui::MouseButton::Left || event.click_count() != 0)
+    return;
+  repeater_->Stop();
+  ReleaseCapture();
 }
 
 }  // namespace ui

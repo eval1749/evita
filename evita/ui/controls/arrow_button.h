@@ -5,6 +5,9 @@
 #ifndef EVITA_UI_CONTROLS_ARROW_BUTTON_H_
 #define EVITA_UI_CONTROLS_ARROW_BUTTON_H_
 
+#include <memory>
+
+#include "evita/ui/base/repeat_controller.h"
 #include "evita/ui/controls/button.h"
 
 namespace gfx {
@@ -17,7 +20,7 @@ namespace ui {
 //
 // ArrowButton
 //
-class ArrowButton final : public ui::Button {
+class ArrowButton : public ui::Button {
   DECLARE_CASTABLE_CLASS(ArrowButton, Button);
 
  public:
@@ -29,18 +32,42 @@ class ArrowButton final : public ui::Button {
   };
 
   ArrowButton(Direction direction, ButtonListener* listener);
-  ~ArrowButton() final;
+  ~ArrowButton() override;
 
  private:
   gfx::ColorF ComputeColor() const;
+  void DidFireRepeatTimer();
   void DrawArrow(gfx::Canvas* canvas) const;
 
   // ui::Button
   void PaintButton(gfx::Canvas* canvas) final;
 
-  Direction direction_;
+  const Direction direction_;
 
   DISALLOW_COPY_AND_ASSIGN(ArrowButton);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// RepetableArrowButton
+//
+class RepetableArrowButton final : public ArrowButton {
+  DECLARE_CASTABLE_CLASS(RepetableArrowButton, ArrowButton);
+
+ public:
+  RepetableArrowButton(Direction direction, ButtonListener* listener);
+  ~RepetableArrowButton() final;
+
+ private:
+  void DidFireRepeatTimer();
+
+  // ui::Widget
+  void OnMousePressed(const ui::MouseEvent& event) final;
+  void OnMouseReleased(const ui::MouseEvent& event) final;
+
+  const std::unique_ptr<RepeatController> repeater_;
+
+  DISALLOW_COPY_AND_ASSIGN(RepetableArrowButton);
 };
 
 }  // namespace ui

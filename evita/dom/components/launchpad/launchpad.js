@@ -3,27 +3,8 @@
 // found in the LICENSE file.
 
 $define(global, 'launchpad', function($export) {
-  /**
-   * @typedef {{
-   *    align: string,
-   *    id: string,
-   *    label: string,
-   *    width: number,
-   * }}
-   */
-  var Header;
 
-  /**
-   * @typedef {{
-   *    name: string,
-   *    size: string,
-   *    state: string,
-   *    save: string,
-   * }}
-   */
-  var RowListModel;
-
-  /** @const $type {!Array<!Header>} */
+  /** @const @type {!Array<!launchpad.Header>} */
   const HEADER_MODEL = [
     {id: 'name', label: 'Name', width: 300, align: 'left'},
     {id: 'size', label: 'Size', width: 50, align: 'right'},
@@ -131,7 +112,7 @@ $define(global, 'launchpad', function($export) {
       this.rowMap_ = new Map();
       /** @private @const @type {!Document} */
       this.document_ = createDocumentTree(this.rowMap_);
-      /** @private @const $type {!SelectionModel} */
+      /** @private @const @type {!SelectionModel} */
       this.selection_ = new SelectionModel();
 
       // TODO(eval1749): We should use |document.getElementById()|.
@@ -346,7 +327,7 @@ $define(global, 'launchpad', function($export) {
 
     /**
      * @private
-     * $return {!RowListModel}
+     * @return {!launchpad.RowModel}
      */
     computeRowModel() {
       return {
@@ -487,13 +468,17 @@ $define(global, 'launchpad', function($export) {
   /** @const @type {!CSSStyleSheet} */
   const styleSheet = createStyleSheet();
 
+  //////////////////////////////////////////////////////////////////////
+  //
+  // LaunchPad
+  //
   class LaunchPad {
     constructor() {
       /** @private @type {boolean} */
       this.hasFocus_ = true;
       /** @private @type {Element} */
       this.lastHover_ = null;
-      /** @private $type {!ListModel} */
+      /** @private @type {!ListModel} */
       this.model_ = new ListModel();
       /** @private @type {!CSSStyleSheet} */
       /** @private @const @type {!VisualWindow} */
@@ -503,7 +488,7 @@ $define(global, 'launchpad', function($export) {
       this.list_ = /** @type {!Element} */ (
           this.model_.document.firstChild.firstChild.nextSibling);
 
-      /** @private $type {!SelectionModel} */
+      /** @private @type {!SelectionModel} */
       this.selection_ = this.model_.selection;
 
       this.selection_.collapseTo(

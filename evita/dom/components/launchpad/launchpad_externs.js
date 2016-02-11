@@ -4,3 +4,23 @@
 
 /** @const */
 var launchpad;
+
+/**
+ * @typedef {{
+ *    align: string,
+ *    id: string,
+ *    label: string,
+ *    width: number,
+ * }}
+ */
+launchpad.Header;
+
+/**
+ * @typedef {{
+ *    name: string,
+ *    size: string,
+ *    state: string,
+ *    save: string,
+ * }}
+ */
+launchpad.RowModel;

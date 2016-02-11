@@ -103,11 +103,11 @@ js_lib_files = [
   "commands/dynamic_abbrev.js",
   "commands/find_and_replace.js",
   "commands/find_and_replace_commands.js",
-  "commands/spell_checker.js",
   "commands/text_window_commands.js",
   "commands/window_commands.js",
 
   "components/launchpad/launchpad.js",
+  "components/spell_checker/spell_checker.js",
 
   "repl/console.js",
   "repl/describe.js",

@@ -12,6 +12,7 @@
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/float_rect.h"
 #include "evita/dom/public/scroll_bar_data.h"
+#include "evita/ui/base/repeat_controller.h"
 
 namespace domapi {
 struct MouseEvent;
@@ -66,6 +67,7 @@ class ScrollBar final {
   void SetDisabled(bool new_disabled);
 
  private:
+  void DidFireRepeatTimer();
   bool HandleMouseMoved(const MouseEvent& event);
   bool HandleMousePressed(const MouseEvent& event);
   bool HandleMouseReleased(const MouseEvent& event);
@@ -80,6 +82,7 @@ class ScrollBar final {
   std::unique_ptr<layout::ScrollBar> layout_;
   ui::ScrollBarObserver* const observer_;
   ScrollBarOwner* const owner_;
+  ui::RepeatController repeat_controller_;
 
   DISALLOW_COPY_AND_ASSIGN(ScrollBar);
 };

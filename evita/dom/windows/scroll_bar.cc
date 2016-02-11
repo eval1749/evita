@@ -61,11 +61,30 @@ ScrollBar::ScrollBar(ScrollBarOrientation orientation,
       hovered_part_(ScrollBarPart::None),
       layout_(new layout::ScrollBar(orientation)),
       observer_(observer),
-      owner_(owner) {
+      owner_(owner),
+      repeat_controller_(
+          base::Bind(&ScrollBar::DidFireRepeatTimer, base::Unretained(this))) {
   SetDisabled(true);
 }
 
 ScrollBar::~ScrollBar() {}
+
+void ScrollBar::DidFireRepeatTimer() {
+  switch (active_part_) {
+    case ScrollBarPart::BackwardButton:
+      observer_->DidClickLineUp();
+      break;
+    case ScrollBarPart::BackwardTrack:
+      observer_->DidClickPageUp();
+      break;
+    case ScrollBarPart::ForwardButton:
+      observer_->DidClickLineDown();
+      break;
+    case ScrollBarPart::ForwardTrack:
+      observer_->DidClickPageDown();
+      break;
+  }
+}
 
 bool ScrollBar::HandleMouseEvent(const MouseEvent& event) {
   switch (event.event_type) {
@@ -113,22 +132,27 @@ bool ScrollBar::HandleMousePressed(const MouseEvent& event) {
   switch (part) {
     case ScrollBarPart::BackwardButton:
       layout_->SetState(ScrollBarPart::BackwardButton, ScrollBarState::Pressed);
+      repeat_controller_.Start();
       observer_->DidClickLineUp();
       break;
     case ScrollBarPart::BackwardTrack:
       layout_->SetState(ScrollBarPart::Thumb, ScrollBarState::Active);
+      repeat_controller_.Start();
       observer_->DidClickPageUp();
       break;
     case ScrollBarPart::ForwardButton:
       layout_->SetState(ScrollBarPart::ForwardButton, ScrollBarState::Pressed);
+      repeat_controller_.Start();
       observer_->DidClickLineDown();
       break;
     case ScrollBarPart::ForwardTrack:
       layout_->SetState(ScrollBarPart::Thumb, ScrollBarState::Active);
+      repeat_controller_.Start();
       observer_->DidClickPageDown();
       break;
     case ScrollBarPart::Thumb:
       layout_->SetState(ScrollBarPart::Thumb, ScrollBarState::Pressed);
+      repeat_controller_.Start();
       last_drag_point_ = point;
       break;
   }
@@ -141,6 +165,7 @@ bool ScrollBar::HandleMouseReleased(const MouseEvent& event) {
     return false;
   if (active_part_ == ScrollBarPart::None)
     return false;
+  repeat_controller_.Stop();
   owner_->DidReleaseScrollBar();
   layout_->SetState(active_part_, ScrollBarState::Normal);
   layout_->SetState(ScrollBarPart::Thumb, ScrollBarState::Normal);

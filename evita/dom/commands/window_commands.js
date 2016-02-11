@@ -50,7 +50,7 @@
     Editor.getFileNameForSave(this, computeStartDirectory(this))
         .then(function(fileName) {
           const document = TextDocument.open(fileName);
-          TextDocument.notifyObservers('new', document);
+          TextDocument.applyTemplate(document);
           windows.newTextWindow(editorWindow, document)
         });
   }

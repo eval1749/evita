@@ -2,60 +2,52 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-$define(global, 'text', function($export) {
-  /** @type {!Map.<string|function(!TextDocument):string>} */
+/** @typedef {string|function(!TextDocument):string} */
+var TextDocumentTemplate;
+
+(function() {
+  /** @const @type {!Map.<string, !TextDocumentTemplate>} */
   const templateMap = new Map();
 
-  class TextDocumentTemplates {
-    constructor() {
-      TextDocument.addObserver(this.didChangeTextDocuments.bind(this));
-    }
+  /**
+   * @param {string} extension
+   * @param {!TextDocumentTemplate} template
+   */
+  function addTemplate(extension, template) {
+    templateMap.set(extension, template);
+  }
 
-    /**
-     * @param {string} type
-     * @param {!TextDocument} document
-     */
-    didChangeTextDocuments(type, document) {
-      if (type !== 'new')
-        return;
-      this.didNewTextDocument(document);
+  /**
+   * @param {!TextDocument} document
+   */
+  function applyTemplate(document) {
+    const matches = (new RegExp('[.](.+)$')).exec(document.name);
+    if (matches === null)
+      return;
+    const template = templateMap.get(matches[1]);
+    if (!template)
+      return;
+    const range = new TextRange(document);
+    if (typeof(template) === 'string') {
+      range.text = template;
+      return;
     }
-
-    /**
-     * @param {!TextDocument} document
-     */
-    didNewTextDocument(document) {
-      if (document.length > 0)
-        return;
-      const matches = (new RegExp('[.](.+)$')).exec(document.name);
-      if (matches === null)
-        return;
-      const template = templateMap.get(matches[1]);
-      if (!template)
-        return;
-      const range = new TextRange(document);
-      if (typeof(template) === 'string') {
-        range.text = template;
-        return;
-      }
-      if (typeof(template) === 'function') {
-        range.text = template(document);
-        return;
-      }
-    }
-
-    static addTemplate(extension, templateText) {
-      templateMap.set(extension, templateText);
-    }
-
-    static removeTemplate(extension) {
-      templateMap.delete(extension);
+    if (typeof(template) === 'function') {
+      range.text = template(document);
+      return;
     }
   }
 
-  Object.defineProperty(TextDocumentTemplates, 'instance', {
-    value: new TextDocumentTemplates()
-  });
+  /**
+   * @param {string} extension
+   */
+  function removeTemplate(extension) {
+    templateMap.delete(extension);
+  }
 
-  $export({TextDocumentTemplates});
-});
+  Object.defineProperties(TextDocument, {
+    addTemplate: {value: addTemplate},
+    applyTemplate: {value: applyTemplate},
+    removeTemplate: {value: removeTemplate},
+  });
+})();

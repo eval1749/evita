@@ -12,6 +12,12 @@ interface TextDocument : EventTarget {
     static void addObserver(TextDocumentObserverCallback observer);
 
     [ImplementedAs=JavaScript]
+    static void addTemplate(DOMString type, Object template);
+
+    [ImplementedAs=JavaScript]
+    static void applyTemplate(TextDocument document);
+
+    [ImplementedAs=JavaScript]
     static TextDocument? find(DOMString name);
 
     [ImplementedAs=JavaScript]
@@ -35,6 +41,9 @@ interface TextDocument : EventTarget {
 
     [ImplementedAs=JavaScript]
     static void removeObserver(TextDocumentObserverCallback observer);
+
+    [ImplementedAs=JavaScript]
+    static void removeTemplate(DOMString type);
 
     [ImplementedAs=JavaScript]
     attribute DOMString encoding;

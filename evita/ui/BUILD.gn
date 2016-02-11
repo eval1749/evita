@@ -57,6 +57,8 @@ source_set("base") {
     "base/ime/text_input_client_win.h",
     "base/ime/text_input_delegate.cc",
     "base/ime/text_input_delegate.h",
+    "base/repeat_controller.cc",
+    "base/repeat_controller.h",
     "base/selection_model.cc",
     "base/selection_model.h",
     "base/selection_state.h",

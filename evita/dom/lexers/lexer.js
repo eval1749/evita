@@ -130,9 +130,10 @@ $define(global, 'lexers', function($export) {
 
     /**
      * @param {!lexers.Token} token
+     * @return {!lexers.State}
      */
     didShrinkLastToken(token) {
-      // nothing to do
+      return token.state;
     }
 
     /**

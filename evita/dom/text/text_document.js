@@ -528,7 +528,7 @@
     const document = new TextDocument();
     document.name_ = makeUniqueName(name);
     documentNameMap.set(document.name, document);
-    TextDocument.notifyObservers('add', document);
+    notifyObservers('add', document);
     return document;
   }
 
@@ -546,7 +546,7 @@
     if (!documentNameMap.has(document.name))
       throw new Error(`${document.name} isn't in list`);
     documentNameMap.delete(document.name);
-    TextDocument.notifyObservers('remove', document);
+    notifyObservers('remove', document);
   }
 
   /** @param {!TextDocumentObserverCallback} callback */
@@ -578,7 +578,6 @@
     find: {value: findTextDocument},
     list: {get: () => listTextDocument()},
     new: {value: newTextDocument},
-    notifyObservers: {value: notifyObservers},
     remove: {value: removeTextDocument},
     removeObserver: {value: removeObserver},
   });

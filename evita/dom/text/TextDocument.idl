@@ -29,10 +29,6 @@ interface TextDocument : EventTarget {
     [ImplementedAs=JavaScript]
     static TextDocument new(DOMString name);
 
-    // Experimental: Implements document template at "NewTextDocument" command.
-    [ImplementedAs=JavaScript]
-    static TextDocument notifyObservers(DOMString type, TextDocument document);
-
     [ImplementedAs=JavaScript]
     static TextDocument open(DOMString fileName);
 

@@ -137,7 +137,10 @@ action("dom_jslib_cc") {
   outputs = [
     "$target_gen_dir/dom_jslib.cc",
   ]
-  inputs = [ "closure_compiler_workaround.js" ] + js_defs_files + js_lib_files
+  inputs = [
+             "goog.js",
+             "closure_compiler_workaround.js",
+           ] + js_defs_files + js_lib_files
 
   # TODO(eval1749): We should pass list of JS files to "make_get_js_lib.py"
   # rather than command line.
@@ -180,8 +183,9 @@ action("check_jslib") {
   ]
 
   js_files = js_defs_files + js_lib_files
-  js_file_list = "$target_gen_dir/jslib_file_list.txt"
-  write_file(js_file_list, rebase_path(js_files))
+
+  #js_file_list = "$target_gen_dir/jslib_file_list.txt"
+  response_file_contents = rebase_path(js_files)
 
   script = "//tools/razzle/closure_compiler.py"
   outputs = [
@@ -193,7 +197,7 @@ action("check_jslib") {
            ] + js_files
   args = [
     "--js_output_file=" + rebase_path("$target_gen_dir/evita_checked.js"),
-    "--flagfile=" + rebase_path(js_file_list),
+    "--flagfile={{response_file_name}}",
     "--extern",
     "$target_gen_dir/evita_js_externs.js",
   ]

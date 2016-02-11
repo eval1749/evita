@@ -644,10 +644,10 @@
       /** @type {!TextRange} */
       const range = new TextRange(document);
 
-      /** @type {?} TODO(eval1749): We should use |ColdScanner| here. */
+      /** @type {!ColdScanner} */
       this.coldScanner_ = new ColdScanner(document);
 
-      /** @type {?} TODO(eval1749): We should use |HotScanner| here. */
+      /** @type {!HotScanner} */
       this.hotScanner_ = new HotScanner(range);
 
       document.addEventListener(
@@ -710,7 +710,7 @@
 
     /**
      * @param {!TextDocument} document
-     * $return {SpellChecker}
+     * @return {SpellChecker}
      */
     static get(document) { return spellCheckerMap.get(document) || null; }
 

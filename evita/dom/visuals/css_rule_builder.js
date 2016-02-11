@@ -20,7 +20,7 @@ class CSSRuleBuilder {
 
   /**
    * @param {string} color
-   * $return {!CSSRuleBuilder}
+   * @return {!CSSRuleBuilder}
    */
   backgroundColor(color) {
     this.style_.backgroundColor = color;
@@ -30,7 +30,7 @@ class CSSRuleBuilder {
   /**
    * @param {string} color
    * @param {...number} widths
-   * $return {!CSSRuleBuilder}
+   * @return {!CSSRuleBuilder}
    */
   border(color, ...widths) {
     switch (widths.length) {
@@ -62,7 +62,7 @@ class CSSRuleBuilder {
 
   /**
    * @param {string} display
-   * $return {!CSSRuleBuilder}
+   * @return {!CSSRuleBuilder}
    */
   display(display) {
     this.style_.display = display;
@@ -71,7 +71,7 @@ class CSSRuleBuilder {
 
   /**
    * @param {number} size
-   * $return {!CSSRuleBuilder}
+   * @return {!CSSRuleBuilder}
    */
   fontSize(size) {
     this.style_.fontSize = size.toString();
@@ -79,21 +79,30 @@ class CSSRuleBuilder {
   }
 
   /**
-   * @param {number} width
-   * $return {!CSSRuleBuilder}
+   * @param {...number} widths
+   * @return {!CSSRuleBuilder}
    */
-  padding(width) {
-    const width_string = width.toString();
-    this.style_.paddingBottom = width_string;
-    this.style_.paddingLeft = width_string;
-    this.style_.paddingRight = width_string;
-    this.style_.paddingTop = width_string;
+  padding(...widths) {
+    switch (widths.length) {
+      case 1:
+        return this.padding(widths[0], widths[0]);
+      case 2:
+        return this.padding(widths[0], widths[1], widths[0], widths[1]);
+      case 4:
+        this.style_.paddingTop = widths[0].toString();
+        this.style_.paddingRight = widths[1].toString();
+        this.style_.paddingBottom = widths[2].toString();
+        this.style_.paddingLeft = widths[3].toString();
+        break;
+      default:
+        throw new Error(`invalid syntax for padding ${widths}`);
+    }
     return this;
   }
 
   /**
    * @param {...number} widths
-   * $return {!CSSRuleBuilder}
+   * @return {!CSSRuleBuilder}
    */
   margin(...widths) {
     switch (widths.length) {
@@ -115,13 +124,16 @@ class CSSRuleBuilder {
 
   /**
    * @param {number} width
-   * $return {!CSSRuleBuilder}
+   * @return {!CSSRuleBuilder}
    */
-  width(width) { this.style_.width = width.toString(); }
+  width(width) {
+    this.style_.width = width.toString();
+    return this;
+  }
 
   /**
    * @param {string} selectorText
-   * $return {!CSSRuleBuilder}
+   * @return {!CSSRuleBuilder}
    */
   static selector(selectorText) { return new CSSRuleBuilder(selectorText); }
 }

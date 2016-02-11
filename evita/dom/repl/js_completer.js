@@ -127,9 +127,7 @@ $define(global, 'repl', ($export) => {
       this.selection_ = selection;
     }
 
-    // TODO(eval1749): Once closure compile recognizes local class declaration,
-    // we should have type annotation.
-    /* $return {!CompletionSession} */
+    /** @return {!CompletionSession} */
     ensureSession_() {
       if (!this.session_ || !this.session_.isAlive())
         this.session_ = new CompletionSession(this.commandLoop_);
@@ -144,12 +142,10 @@ $define(global, 'repl', ($export) => {
       return true;
     }
 
-    // TODO(eval1749): Once closure compile recognizes local class declaration,
-    // we should have type annotation.
     /**
      * @param {!repl.JsConsole} commandLoop
      * @param {!TextSelection} selection
-     * $return {!JsCompleter}
+     * @return {!JsCompleter}
      */
     static ensure(commandLoop, selection) {
       const present = completers.get(selection);

@@ -144,7 +144,7 @@ $define(global, 'launchpad', function($export) {
     /** @return {!Document} */
     get document() { return this.document_; }
 
-    /** $return {!SelectionModel} */
+    /** @return {!SelectionModel} */
     get selection() { return this.selection_; }
 
     /**

@@ -147,8 +147,12 @@ void PaintThumb(DisplayItemListBuilder* builder,
                 const FloatRect& bounds,
                 ScrollBarState state) {
   BeginPaint(builder, bounds);
-  builder->AddNew<FillRectDisplayItem>(FloatRect(bounds.size()),
-                                       ThumbColorFor(state));
+  builder->AddNew<FillRectDisplayItem>(
+      FloatRect(bounds.size() - FloatSize(1, 0)), ThumbColorFor(state));
+  builder->AddNew<FillRectDisplayItem>(
+      FloatRect(bounds.top_right() - FloatSize(1, 0),
+                FloatSize(1, bounds.height())),
+      TrackColorFor(state));
   EndPaint(builder);
 }
 

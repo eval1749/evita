@@ -22,9 +22,7 @@ class CSSStyleRule extends CSSRule {
   }
 
   /** @override @return {string} */
-  get cssText() {
-    return `${this.selectorText} { ${this.style_.cssText} }`;
-  }
+  get cssText() { return `${this.selectorText} { ${this.style_.cssText} }`; }
 
   /** @return {string} */
   get selectorText() { return this.selectorText_; }
@@ -47,9 +45,7 @@ class CSSStyleRule extends CSSRule {
    * CSSStyleObserver
    * @param {!CSSStyleDeclaration} style
    */
-  didChangeCSSStyle(style) {
-    this.notifyChanged();
-  }
+  didChangeCSSStyle(style) { this.notifyChanged(); }
 
   notifyChanged() {
     if (!this.parentStyleSheet_)

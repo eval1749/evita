@@ -11,7 +11,7 @@
    */
   function computeStartDirectory(window) {
     if (window instanceof TextWindow) {
-      const textWindow = /** @type {!TextWindow} */(window);
+      const textWindow = /** @type {!TextWindow} */ (window);
       return textWindow.selection.document.fileName;
     }
     return '';
@@ -26,8 +26,9 @@
     if (!document.length) {
       document.load(absoluteFileName).catch(function(errorCode) {
         console.log('Load error', errorCode);
-        Editor.messageBox(null, 'Failed to load ' + absoluteFileName + '\n' +
-            'error=' + errorCode,
+        Editor.messageBox(
+            null, 'Failed to load ' + absoluteFileName + '\n' +
+                'error=' + errorCode,
             MessageBox.ICONERROR);
       });
     }
@@ -41,7 +42,7 @@
   function newTextDocumentCommand(arg) {
     if (!this.parent)
       return;
-    const editorWindow = /** @type {!Window} */(this.parent);
+    const editorWindow = /** @type {!Window} */ (this.parent);
     if (arg !== undefined) {
       windows.newTextWindow(editorWindow, TextDocument.new('untitled.txt'));
       return;
@@ -63,7 +64,7 @@
   function openTextDocumentCommand() {
     if (!this.parent)
       return;
-    const editorWindow = /** @type {!Window} */(this.parent);
+    const editorWindow = /** @type {!Window} */ (this.parent);
     Editor.getFileNameForLoad(this, computeStartDirectory(this))
         .then(function(fileName) {
           windows.activate(editorWindow, openFile(fileName));
@@ -86,8 +87,8 @@
   function closeThisWindowCommand() {
     const nextFocus = windows.nextWindow(this) || windows.previousWindow(this);
     if (!nextFocus) {
-      Editor.messageBox(this,
-          Editor.localizeText(Strings.IDS_NO_OTHER_WINDOWS),
+      Editor.messageBox(
+          this, Editor.localizeText(Strings.IDS_NO_OTHER_WINDOWS),
           MessageBox.ICONWARNING);
       return;
     }

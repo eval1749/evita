@@ -21,15 +21,11 @@ $define(global, 'repl', function($export) {
   // TODO(eval1749): Once v8 provide |TypedArray| class, we can replace this
   // |isTypedArray()|.
   function isTypedArray(object) {
-    return object instanceof Float32Array ||
-           object instanceof Float64Array ||
-           object instanceof Int16Array ||
-           object instanceof Int32Array ||
-           object instanceof Int8Array ||
-           object instanceof Uint16Array ||
-           object instanceof Uint32Array ||
-           object instanceof Uint8Array ||
-           object instanceof Uint8ClampedArray;
+    return object instanceof Float32Array || object instanceof Float64Array ||
+        object instanceof Int16Array || object instanceof Int32Array ||
+        object instanceof Int8Array || object instanceof Uint16Array ||
+        object instanceof Uint32Array || object instanceof Uint8Array ||
+        object instanceof Uint8ClampedArray;
   }
 
   class Visitor {
@@ -45,13 +41,13 @@ $define(global, 'repl', function($export) {
     /** @param {!Date} date*/
     visitDate(date) {}
 
-      /** @param {!Object} object */
+    /** @param {!Object} object */
     visitFirstTime(object) {}
 
-      /** @param {!Function} fun @param {number} level */
+    /** @param {!Function} fun @param {number} level */
     visitFunction(fun, level) {}
 
-      /** @param {*} key @param {number} index */
+    /** @param {*} key @param {number} index */
     visitKey(key, index) {}
 
     /** @param {number} index */
@@ -66,26 +62,26 @@ $define(global, 'repl', function($export) {
     /** @param {!ArrayBufferView} array */
     visitTypedArray(array) {}
 
-      /** @param {!Object} object */
+    /** @param {!Object} object */
     visitVisited(object) {}
 
-      /** @param {!Array} array */
+    /** @param {!Array} array */
     startArray(array) {}
 
-      /** @param {!Array} array @param {boolean} limited */
+    /** @param {!Array} array @param {boolean} limited */
     endArray(array, limited) {}
 
-      /**
-       * @param {string} startMark
-       * @param {boolean} needSpace
-       */
+    /**
+     * @param {string} startMark
+     * @param {boolean} needSpace
+     */
     startContainer(startMark, needSpace) {}
 
-      /**
-       * @param {string} endMark
-       * @param {number} index
-       * @param {number} size
-       */
+    /**
+     * @param {string} endMark
+     * @param {number} index
+     * @param {number} size
+     */
     endContainer(endMark, index, size) {}
   }
 
@@ -100,9 +96,7 @@ $define(global, 'repl', function($export) {
       this.labelMap_ = new Map();
     }
 
-    labelOf(value) {
-      return this.labelMap_.get(value);
-    }
+    labelOf(value) { return this.labelMap_.get(value); }
 
     visitVisited(value) {
       if (this.labelMap_.has(value))
@@ -119,8 +113,8 @@ $define(global, 'repl', function($export) {
     * @return {string}
     */
   function stringify(value, opt_maxLevel = 10, opt_maxLength = 10) {
-    const maxLevel = /** @type {number} */(opt_maxLevel);
-    const maxLength = /** @type {number} */(opt_maxLength);
+    const maxLevel = /** @type {number} */ (opt_maxLevel);
+    const maxLength = /** @type {number} */ (opt_maxLength);
     const visitedMap = new Map();
     let numLabels = 0;
 
@@ -140,22 +134,24 @@ $define(global, 'repl', function($export) {
            runner = Object.getPrototypeOf(runner)) {
         if (runner === Object.prototype)
           break;
-        const current = /** @type {!Object} */(runner);
+        const current = /** @type {!Object} */ (runner);
         props = props.concat(
-            Object.getOwnPropertyNames(current).map(function(name) {
-              const desc = Object.getOwnPropertyDescriptor(
-                /** @type {!Object} */(current), name);
-              desc['name'] = name;
-              return desc;
-            }).filter(function(desc) {
-              const name = desc['name'];
-              if (name.charCodeAt(name.length - 1) === Unicode.LOW_LINE)
-                return false;
-              const value = desc['value'];
-              if (removeFunction && typeof(value) === 'function')
-                return false;
-              return value !== undefined;
-            }));
+            Object.getOwnPropertyNames(current)
+                .map(function(name) {
+                  const desc = Object.getOwnPropertyDescriptor(
+                      /** @type {!Object} */ (current), name);
+                  desc['name'] = name;
+                  return desc;
+                })
+                .filter(function(desc) {
+                  const name = desc['name'];
+                  if (name.charCodeAt(name.length - 1) === Unicode.LOW_LINE)
+                    return false;
+                  const value = desc['value'];
+                  if (removeFunction && typeof(value) === 'function')
+                    return false;
+                  return value !== undefined;
+                }));
       }
       return props.sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -290,10 +286,10 @@ $define(global, 'repl', function($export) {
         case 'string':
           return visitor.visitString(value);
         case 'symbol':
-          return visitor.visitSymbol(/** @type{!symbol} */(value));
+          return visitor.visitSymbol(/** @type{!symbol} */ (value));
       }
 
-      const object = /** @type{!Object} */(value);
+      const object = /** @type{!Object} */ (value);
 
       if (visitedMap.has(object))
         return visitor.visitVisited(object);
@@ -307,29 +303,25 @@ $define(global, 'repl', function($export) {
       visitedMap.set(object, 0);
 
       if (Array.isArray(object))
-        return visitArray(visitor, /** @type{!Array} */(object), level);
+        return visitArray(visitor, /** @type{!Array} */ (object), level);
 
       if (isTypedArray(object))
-        return visitor.visitTypedArray(/** @type{!ArrayBufferView}*/(object));
+        return visitor.visitTypedArray(/** @type{!ArrayBufferView}*/ (object));
 
       if (object instanceof Date)
-        return visitor.visitDate(/** @type{!Date} */(object));
+        return visitor.visitDate(/** @type{!Date} */ (object));
 
       if (object instanceof Map)
-        return visitMap(visitor, /** @type {!Map} */(object), level);
+        return visitMap(visitor, /** @type {!Map} */ (object), level);
 
       if (object instanceof Set)
-        return visitSet(visitor, /** @type {!Set} */(object), level);
+        return visitSet(visitor, /** @type {!Set} */ (object), level);
 
-      return visitObject(visitor, /** @type {!Object} */(object), level);
+      return visitObject(visitor, /** @type {!Object} */ (object), level);
     }
 
     /** @const @type{{9: string, 10: string, 13:string}} */
-    const ESCAPE_MAP = {
-      0x09: 't',
-      0x0A: 'n',
-      0x0D: 'r'
-    };
+    const ESCAPE_MAP = {0x09: 't', 0x0A: 'n', 0x0D: 'r'};
 
     //////////////////////////////////////////////////////////////////////
     //
@@ -347,19 +339,15 @@ $define(global, 'repl', function($export) {
         this.result += Array.prototype.slice.call(arguments, 0).join('');
       }
 
-      visitAtom(x) {
-        this.emit(x);
-      }
+      visitAtom(x) { this.emit(x); }
 
       visitConstructed(object, id) {
         const ctor = object.constructor;
         const ctorName = ctor && ctor.name !== '' ? ctor.name : '(anonymous)';
-        this.emit('#{', ctorName, ' ' , id, '}');
+        this.emit('#{', ctorName, ' ', id, '}');
       }
 
-      visitDate(date) {
-        this.emit('#{Date ', date.toString(), '}');
-      }
+      visitDate(date) { this.emit('#{Date ', date.toString(), '}'); }
 
       visitFirstTime(object) {
         const label = this.labeler_.labelOf(object);
@@ -416,9 +404,7 @@ $define(global, 'repl', function($export) {
         this.emit('"');
       }
 
-      visitSymbol(sym) {
-        this.emit(sym.toString());
-      }
+      visitSymbol(sym) { this.emit(sym.toString()); }
 
       visitTypedArray(array) {
         this.emit('#{', array.constructor.name, ' ', array.length, '}');

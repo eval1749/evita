@@ -36,7 +36,8 @@ DynamicAbbrevExpander.prefix;
  * @param {!TextDocument} document
  * @return {!DynamicAbbrevExpander}
  */
-DynamicAbbrevExpander.getOrCreate = function(document) {
+DynamicAbbrevExpander.getOrCreate =
+    function(document) {
   if (!document.properties)
     document.properties = new Map();
   var expander = document.properties.get(DynamicAbbrevExpander.PROPERTY_NAME);
@@ -47,11 +48,11 @@ DynamicAbbrevExpander.getOrCreate = function(document) {
   return new_expander;
 }
 
-/**
- * @this {!DynamicAbbrevExpander}
- * @param {!TextSelection} selection
- */
-DynamicAbbrevExpander.prototype.expand = function(selection) {
+    /**
+     * @this {!DynamicAbbrevExpander}
+     * @param {!TextSelection} selection
+     */
+    DynamicAbbrevExpander.prototype.expand = function(selection) {
   var range = selection.range;
   if (range.start != range.end)
     return;
@@ -79,9 +80,9 @@ DynamicAbbrevExpander.prototype.expand = function(selection) {
   // Nothing changed.
   range.collapseTo(range.end);
   selection.window.status = current_word ?
-    'No more words start with "' + this.prefix + '", other than "' +
-        current_word + '"' :
-    'No word starts with "' + this.prefix + '".';
+      'No more words start with "' + this.prefix + '", other than "' +
+          current_word + '"' :
+      'No word starts with "' + this.prefix + '".';
 };
 
 /**
@@ -161,7 +162,7 @@ DynamicAbbrevExpander.prototype.findCandidate = function(current_word) {
 
     // Continue find a candiate in oposite direction.
     this.direction = -this.direction;
-    if (this.direction> 0)
+    if (this.direction > 0)
       cursor.collapseTo(this.last_selection_range.end);
     else
       cursor.collapseTo(this.last_selection_range.start);
@@ -176,7 +177,7 @@ DynamicAbbrevExpander.prototype.findCandidate = function(current_word) {
  */
 DynamicAbbrevExpander.prototype.prepare = function(selection) {
   if (this.prefix == '')
-   return false;
+    return false;
   if (this.last_selection_range !== selection.range) {
     // Someone invokes expander in different window.
     return false;
@@ -186,7 +187,7 @@ DynamicAbbrevExpander.prototype.prepare = function(selection) {
     return false;
   }
   // selection is at end of expanded word.
-  selection.range.moveStart(Unit.WORD, - 1);
+  selection.range.moveStart(Unit.WORD, -1);
   if (!selection.range.text.startsWith(this.prefix)) {
     selection.range.collapseTo(selection.range.end);
     return false;

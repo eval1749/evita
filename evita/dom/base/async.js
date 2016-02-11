@@ -7,22 +7,21 @@
  * @return {function(...): Promise.<?>}
  */
 function async(makeGenerator) {
-  return function () {
+  return function() {
     const generator = makeGenerator.apply(this, arguments);
 
     /**
      * @param {{done: boolean, value: ?}} result
      * @return {Promise.<?>}
      */
-    function handle(result){
+    function handle(result) {
       if (result.done)
         return Promise.resolve(result.value);
 
-      return Promise.resolve(result.value).then(function(res) {
-        return handle(generator.next(res));
-      }, function(err){
-        return handle(generator.throw(err));
-      });
+      return Promise.resolve(result.value)
+          .then(
+              function(res) { return handle(generator.next(res)); },
+              function(err) { return handle(generator.throw(err)); });
     }
 
     try {

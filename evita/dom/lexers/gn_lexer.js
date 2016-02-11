@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 // See [1] for GN language
-// [1] https://chromium.googlesource.com/chromium/src/+/master/tools/gn/docs/language.md
+// [1]
+// https://chromium.googlesource.com/chromium/src/+/master/tools/gn/docs/language.md
 global.GnLexer = (function(keywords) {
 
   /** @const @type {!Map.<number, !symbol>} */
@@ -22,12 +23,12 @@ global.GnLexer = (function(keywords) {
     map.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
 
     // NameStartChar ::= [a-zA-Z_]
-    setRange(Lexer.NAMESTART_CHAR,
-             Unicode.LATIN_CAPITAL_LETTER_A,
-             Unicode.LATIN_CAPITAL_LETTER_Z);
-    setRange(Lexer.NAMESTART_CHAR,
-             Unicode.LATIN_SMALL_LETTER_A,
-             Unicode.LATIN_SMALL_LETTER_Z);
+    setRange(
+        Lexer.NAMESTART_CHAR, Unicode.LATIN_CAPITAL_LETTER_A,
+        Unicode.LATIN_CAPITAL_LETTER_Z);
+    setRange(
+        Lexer.NAMESTART_CHAR, Unicode.LATIN_SMALL_LETTER_A,
+        Unicode.LATIN_SMALL_LETTER_Z);
     map.set(Unicode.LOW_LINE, Lexer.NAMESTART_CHAR);
 
     // NameChar ::= NameStart | [0-9]

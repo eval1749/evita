@@ -4,18 +4,15 @@
 
 (function() {
   /** @const @type {!Array.<!function():*>} */
-  const initializers = []
+  const initializers =
+      []
 
-  function $initialize(initializer) {
-    initializers.push(initializer);
-  }
+      function $initialize(initializer) { initializers.push(initializer); }
 
-  function initialize() {
-    initializers.forEach(initializer => initializer());
-  }
+      function
+      initialize() { initializers.forEach(initializer => initializer()); }
 
-  Object.defineProperties(global, {
-    $initialize: {value: $initialize},
-    initialize: {value: initialize}
-  });
+      Object.defineProperties(
+          global,
+          {$initialize: {value: $initialize}, initialize: {value: initialize}});
 })();

@@ -27,4 +27,3 @@ var TextDocumentNotReady = function(document, opt_message) {};
  * @param {string=} opt_message
  */
 var TextDocumentReadOnly = function(document, opt_message) {};
-

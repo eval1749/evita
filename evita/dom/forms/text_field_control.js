@@ -20,9 +20,7 @@ Object.defineProperties(TextFieldControl.prototype, {
      * @this {!TextFieldControl}
      * @return {string}
      */
-    get: function() {
-      return this.value_;
-    },
+    get: function() { return this.value_; },
     /**
      * @this {!TextFieldControl}
      * @param {string} new_value
@@ -95,7 +93,8 @@ Object.defineProperties(TextFieldControl.prototype, {
     control.dispatchEvent(new FormEvent(Event.Names.CHANGE, {data: value}));
   }
 
-  // TODO(eval1749): Once we finish debugging of TextFieldControl editor, we should
+  // TODO(eval1749): Once we finish debugging of TextFieldControl editor, we
+  // should
   // not expose |bindKey|.
   TextFieldControl.bindKey = bindKey;
 
@@ -112,7 +111,7 @@ Object.defineProperties(TextFieldControl.prototype, {
    * @param {!TextFieldControl} control
    * @param {!MouseEvent} event
    */
-  function handleDblClick(control, event){
+  function handleDblClick(control, event) {
     if (event.button || control.form.focusControl != control)
       return;
     /** @const @type {number} */
@@ -159,7 +158,7 @@ Object.defineProperties(TextFieldControl.prototype, {
     if (event.ctrlKey)
       selectWord(control);
     if (!control.dragController_)
-      control.dragController_ = new DragController(control)
+      control.dragController_ = new DragController(control);
     control.dragController_.start();
   }
 
@@ -272,8 +271,8 @@ Object.defineProperties(TextFieldControl.prototype, {
    */
   function setText(control, start, end, newText) {
     var text = control.value_;
-    var compositionEnd = control.compositionStart_ +
-                         control.compositionString_.length;
+    var compositionEnd =
+        control.compositionStart_ + control.compositionString_.length;
     var oldValue = control.value_;
     var newValue = text.substr(0, start) + newText + text.substr(end);
     control.compositionString_ = newText;
@@ -314,9 +313,9 @@ Object.defineProperties(TextFieldControl.prototype, {
         dispatchChangeEventIfNeeded(this);
         break;
       case Event.Names.COMPOSITIONCOMMIT:
-        setCompoistionText(this, /** @type{!CompositionEvent} */(event).data);
-        this.selection.collapseTo(this.compositionStart_ +
-                                  this.compositionString_.length);
+        setCompoistionText(this, /** @type{!CompositionEvent} */ (event).data);
+        this.selection.collapseTo(
+            this.compositionStart_ + this.compositionString_.length);
         return;
       case Event.Names.COMPOSITIONEND:
         return;
@@ -326,26 +325,26 @@ Object.defineProperties(TextFieldControl.prototype, {
         this.compositionString_ = '';
         return;
       case Event.Names.COMPOSITIONUPDATE:
-        handleCompositionUpdate(this, /** @type{!CompositionEvent} */(event));
+        handleCompositionUpdate(this, /** @type{!CompositionEvent} */ (event));
         return;
       case Event.Names.DBLCLICK:
-        handleDblClick(this, /** @type{!MouseEvent} */(event));
+        handleDblClick(this, /** @type{!MouseEvent} */ (event));
         break;
       case Event.Names.FOCUS:
         this.selection.collapseTo(0);
         this.selection.extendTo(this.value.length);
         break;
       case Event.Names.KEYDOWN:
-        handleKeyDown(this, /** @type{!KeyboardEvent} */(event));
+        handleKeyDown(this, /** @type{!KeyboardEvent} */ (event));
         break;
       case Event.Names.MOUSEDOWN:
-        handleMouseDown(this, /** @type {!MouseEvent} */(event));
+        handleMouseDown(this, /** @type {!MouseEvent} */ (event));
         break;
       case Event.Names.MOUSEMOVE:
-        handleMouseMove(this, /** @type {!MouseEvent} */(event));
+        handleMouseMove(this, /** @type {!MouseEvent} */ (event));
         break;
       case Event.Names.MOUSEUP:
-        handleMouseUp(this, /** @type {!MouseEvent} */(event));
+        handleMouseUp(this, /** @type {!MouseEvent} */ (event));
         break;
     }
     FormControl.handleEvent.call(this, event);
@@ -448,32 +447,21 @@ Object.defineProperties(TextFieldControl.prototype, {
     setSelectionText(selection, '');
   });
 
-  bindKey('End', function(selection) {
-    selection.collapseTo(MAX_OFFSET);
-  });
+  bindKey('End', function(selection) { selection.collapseTo(MAX_OFFSET); });
 
 
-  bindKey('Home', function(selection) {
-    selection.collapseTo(0);
-  });
+  bindKey('Home', function(selection) { selection.collapseTo(0); });
 
-  bindKey('Shift+ArrowLeft', function(selection) {
-    --selection.focusOffset;
-  });
+  bindKey('Shift+ArrowLeft', function(selection) { --selection.focusOffset; });
 
-  bindKey('Shift+ArrowRight', function(selection) {
-    ++selection.focusOffset;
-  });
+  bindKey('Shift+ArrowRight', function(selection) { ++selection.focusOffset; });
   bindKey('Shift+Delete', keyBindingOf('Ctrl+X'));
   bindKey('Shift+Insert', keyBindingOf('Ctrl+V'));
 
-  bindKey('Shift+End', function(selection) {
-    selection.focusOffset = MAX_OFFSET;
-  });
+  bindKey(
+      'Shift+End', function(selection) { selection.focusOffset = MAX_OFFSET; });
 
-  bindKey('Shift+Home', function(selection) {
-    selection.focusOffset = 0;
-  });
+  bindKey('Shift+Home', function(selection) { selection.focusOffset = 0; });
 
   for (var charCode = 0x20; charCode <= 0x7E; ++charCode) {
     keymap.set(charCode, typeCharacter.bind(undefined, charCode));

@@ -141,9 +141,7 @@ $define(global, 'repl', function($export) {
 
   const console = new Console();
 
-  $initialize(function() {
-    console.reset_();
-  });
+  $initialize(function() { console.reset_(); });
 
   $export({Console, console});
 });

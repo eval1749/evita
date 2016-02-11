@@ -81,7 +81,7 @@ base.OrderedSet.prototype.forEach = function(callback) {};
  * @param {T} data
  * @return {?base.OrderedSetNode.<T>}
  */
-base.OrderedSet.prototype.lowerBound= function(data) {};
+base.OrderedSet.prototype.lowerBound = function(data) {};
 
 /**
  * @template T
@@ -118,4 +118,3 @@ base.OrderedSet.prototype.root_;
 
 /** @type {number} */
 base.OrderedSet.prototype.size_;
-

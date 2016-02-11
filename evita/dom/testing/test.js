@@ -10,17 +10,16 @@ $define(global, 'testing', function($export) {
       return false;
     if (object1.length !== object2.length)
       return false;
-    return object1.every((element1, index) => {
-      return equals(element1, object2[index]);
-    });
+    return object1.every(
+        (element1, index) => { return equals(element1, object2[index]); });
   }
 
-// Note: As of v8:4.9.41, JSON.stringify yield nothing for symbols.
+  // Note: As of v8:4.9.41, JSON.stringify yield nothing for symbols.
   function stringify(object) {
     try {
       return JSON.stringify(object);
     } catch (exception) {
-     return object.toString();
+      return object.toString();
     }
   }
 
@@ -70,8 +69,8 @@ $define(global, 'testing', function($export) {
         if (equals(actual, expected[index]))
           return;
         this.succeeded_ = false;
-        this.description_ += 'actual: ' + stringify(actual) +
-            ' expected: ' + stringify(expected[index]);
+        this.description_ += 'actual: ' + stringify(actual) + ' expected: ' +
+            stringify(expected[index]);
       });
     }
 
@@ -84,11 +83,10 @@ $define(global, 'testing', function($export) {
       const outcome = this.succeeded_ ? 'SUCCEEDED' : 'FAIELD';
       const fileName = this.location_.fileName;
       const lineNumber = this.location_.lineNumber;
-      let message = this.description_.length
-          ? ` ${this.description_}` : '';
+      let message = this.description_.length ? ` ${this.description_}` : '';
       if (this.expected_) {
-        message += ' ; actual: ' + stringify(this.actual_) +
-            ' expected: ' + stringify(this.expected_);
+        message += ' ; actual: ' + stringify(this.actual_) + ' expected: ' +
+            stringify(this.expected_);
       }
       return `${outcome} "${fileName}"(${lineNumber})${message}`;
     }
@@ -111,14 +109,13 @@ $define(global, 'testing', function($export) {
       return stack
     }
     const locations = getStack();
-    let index = locations.findIndex((line) => {
-      return line.indexOf('at Object.test \u0028') > 0;
-    });
+    let index = locations.findIndex(
+        (line) => { return line.indexOf('at Object.test \u0028') > 0; });
     if (index > 0) {
-        const match = new RegExp('at (.+?):(\\d+):(\\d+)$')
-            .exec(locations[index - 1]);
-        if (match)
-          return {fileName: match[1], lineNumber: match[2], column: match[3]};
+      const match =
+          new RegExp('at (.+?):(\\d+):(\\d+)$').exec(locations[index - 1]);
+      if (match)
+        return {fileName: match[1], lineNumber: match[2], column: match[3]};
     }
     console.log(index, locations);
     return {fileName: '?', lineNumber: 0, column: 0};
@@ -155,11 +152,9 @@ $define(global, 'testing', function($export) {
     const fails = fixtures.filter(fixture => fixture.failed);
     const failed = fails.length || errors.length;
     const wallTime = Math.round((endAt - startAt) * 1000);
-    console.log('/\u002F',
-                failed ? 'FAILED' : 'SUCCEEDED',
-                fixtureName,
-                `(${wallTime}ms),`,
-                `${fails.length}/${fixtures.length} tests failed.`);
+    console.log(
+        '/\u002F', failed ? 'FAILED' : 'SUCCEEDED', fixtureName,
+        `(${wallTime}ms),`, `${fails.length}/${fixtures.length} tests failed.`);
   }
 
   $export({test});

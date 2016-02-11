@@ -317,9 +317,8 @@
   function computeStartOfWord(document, offset) {
     if (offset === 0)
       return offset;
-    let wordClass = offset === document.length ?
-                         WordClass.BLANK :
-                         wordClassAt(document, offset);
+    let wordClass = offset === document.length ? WordClass.BLANK :
+                                                 wordClassAt(document, offset);
     // Find character class of word
     while (wordClass === WordClass.BLANK) {
       --offset;
@@ -415,7 +414,7 @@
    * Returns generator object which returns line, including newline
    * character, in a document.
    */
-  function* lines() {
+  function * lines() {
     const range = new TextRange(this);
     while (range.start < this.length) {
       range.moveEnd(Unit.LINE);
@@ -476,17 +475,13 @@
   let internalTextDocumentSetObservers = new Set();
 
   /** @param {!TextDocumentSetObserver} callback */
-  function addObserver(callback) {
-    documentSetObservers.add(callback);
-  }
+  function addObserver(callback) { documentSetObservers.add(callback); }
 
   /**
    * @param {string} name
    * @return {TextDocument}
    */
-  function findTextDocument(name) {
-    return documentNameMap.get(name) || null;
-  }
+  function findTextDocument(name) { return documentNameMap.get(name) || null; }
 
   /**
    * @return {!Array.<!TextDocument>}
@@ -543,9 +538,7 @@
   }
 
   /** @param {!TextDocumentSetObserver} callback */
-  function removeObserver(callback) {
-    documentSetObservers.delete(callback);
-  }
+  function removeObserver(callback) { documentSetObservers.delete(callback); }
 
   /**
    * @this {!TextDocument}

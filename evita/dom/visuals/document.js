@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 class Document extends Node {
-  constructor() {
-    super(null, NodeHandle.createDocument());
-  }
+  constructor() { super(null, NodeHandle.createDocument()); }
 
   /**
    * @param {string} tagName

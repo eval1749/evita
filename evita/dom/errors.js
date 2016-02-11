@@ -10,7 +10,8 @@ global.TextDocumentError = (function() {
   function TextDocumentError(document, opt_message) {
     if (arguments.length >= 2) {
       Error.call(this, opt_message);
-      // TODO(eval1749): Not sure why |Error.call(this, opt_message)| doesn't set
+      // TODO(eval1749): Not sure why |Error.call(this, opt_message)| doesn't
+      // set
       // |message| property.
       this.message = opt_message;
     } else {
@@ -20,9 +21,8 @@ global.TextDocumentError = (function() {
   }
 
   TextDocumentError.prototype = Object.create(
-    /** @type {!Object} */ (Error.prototype), {
-      document: {configurable: false, enumerable: false, writable: true}
-  });
+      /** @type {!Object} */ (Error.prototype),
+      {document: {configurable: false, enumerable: false, writable: true}});
   TextDocumentError.prototype.constructor = TextDocumentError;
   TextDocumentError.prototype.name = TextDocumentError.name;
   return TextDocumentError;
@@ -37,8 +37,9 @@ global.TextDocumentNotReady = (function() {
   function TextDocumentNotReady(document, opt_message) {
     TextDocumentError.apply(this, arguments);
   }
-  TextDocumentNotReady.prototype = /** @type {!TextDocumentNotReady} */ (Object.create(
-    /** @type {!Object} */ (TextDocumentError.prototype), {}));
+  TextDocumentNotReady.prototype = /** @type {!TextDocumentNotReady} */ (
+      Object.create(
+          /** @type {!Object} */ (TextDocumentError.prototype), {}));
   TextDocumentNotReady.prototype.constructor = TextDocumentNotReady;
   TextDocumentNotReady.prototype.name = TextDocumentNotReady.name;
   return TextDocumentNotReady;
@@ -52,8 +53,9 @@ global.TextDocumentReadOnly = (function() {
   function TextDocumentReadOnly(document, opt_message) {
     TextDocumentError.apply(this, arguments);
   }
-  TextDocumentReadOnly.prototype = /** @type {!TextDocumentReadOnly} */(Object.create(
-    /** @type {!Object} */ (TextDocumentError.prototype), {}));
+  TextDocumentReadOnly.prototype = /** @type {!TextDocumentReadOnly} */ (
+      Object.create(
+          /** @type {!Object} */ (TextDocumentError.prototype), {}));
   TextDocumentReadOnly.prototype.constructor = TextDocumentReadOnly;
   TextDocumentReadOnly.prototype.name = TextDocumentReadOnly.name;
   return TextDocumentReadOnly;

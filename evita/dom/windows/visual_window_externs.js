@@ -14,7 +14,7 @@ VisualWindow.prototype.styleSheet;
  * @param {number} point_y
  * @return {Node}
  */
-VisualWindow.prototype.hitTest = function (point_x, point_y) {};
+VisualWindow.prototype.hitTest = function(point_x, point_y) {};
 
 /**
  * @param {!Document} document

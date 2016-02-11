@@ -32,8 +32,8 @@
    * @param {function(number=)} command
    * @param {string=} opt_description
    */
-  Editor.bindKey = function(window_class, key_combination, command,
-                            opt_description) {
+  Editor.bindKey = function(
+      window_class, key_combination, command, opt_description) {
     var key_code = Editor.parseKeyCombination(key_combination);
     if (arguments.length >= 4)
       command['commandDescription'] = opt_description;
@@ -56,13 +56,13 @@
      * @return {Promise}
      */
     function interactiveSave(document) {
-      return Editor.getFileNameForSave(null, document.fileName).then(
-        function(fileName) {
-          if (!fileName.length)
-            return Promise.resolve(DialogItemId.CANCEL);
-          document.save(fileName);
-          return Promise.resolve(DialogItemId.YES);
-        });
+      return Editor.getFileNameForSave(null, document.fileName)
+          .then(function(fileName) {
+            if (!fileName.length)
+              return Promise.resolve(DialogItemId.CANCEL);
+            document.save(fileName);
+            return Promise.resolve(DialogItemId.YES);
+          });
     }
 
     /**
@@ -72,22 +72,23 @@
     function confirmForExit(document) {
       if (!document.needSave())
         return Promise.resolve(true);
-      return Editor.messageBox(null,
-        Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
-        MessageBox.ICONWARNING | MessageBox.YESNOCANCEL).then(function(code) {
-          switch (code) {
-            case DialogItemId.CANCEL:
-            case DialogItemId.NO:
-              return Promise.resolve(code);
-            case DialogItemId.YES:
-              return interactiveSave(document);
-           }
-        });
+      return Editor
+          .messageBox(
+              null,
+              Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
+              MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
+          .then(function(code) {
+            switch (code) {
+              case DialogItemId.CANCEL:
+              case DialogItemId.NO:
+                return Promise.resolve(code);
+              case DialogItemId.YES:
+                return interactiveSave(document);
+            }
+          });
     }
 
-    function isCanceled(answer) {
-      return answer === DialogItemId.CANCEL;
-    }
+    function isCanceled(answer) { return answer === DialogItemId.CANCEL; }
 
     Promise.all(TextDocument.list.map(confirmForExit)).then(function(answers) {
       if (answers.some(isCanceled))
@@ -97,9 +98,7 @@
   };
 
   Editor.forceExit = function() {
-    EditorWindow.list.forEach(function(window) {
-      window.destroy();
-    });
+    EditorWindow.list.forEach(function(window) { window.destroy(); });
   };
 
   /**
@@ -111,7 +110,7 @@
   Editor.localizeText = function(format_text, opt_dict) {
     if (arguments.length == 1)
       return format_text;
-    var dict = /** @type {!Object} */(opt_dict);
+    var dict = /** @type {!Object} */ (opt_dict);
     var text = format_text;
     Object.keys(dict).forEach(function(key) {
       text = text.replace('__' + key + '__', opt_dict[key]);
@@ -156,26 +155,11 @@
     /** @const */ var MOD_SHIFT = 0x400;
 
     var KEY_COMBINATION_RULES = [
-      {
-        modifiers: MOD_CTRL | MOD_SHIFT,
-        re: /^Ctrl[-+]Shift[-+](.+)$/i
-      },
-      {
-        modifiers: MOD_CTRL | MOD_SHIFT,
-        re: /^Shift[-+]Ctrl[-+](.+)$/i
-      },
-      {
-        modifiers: MOD_CTRL,
-        re: /^Ctrl[-+](.+)$/i
-      },
-      {
-        modifiers: MOD_SHIFT,
-        re: /^Shift[-+](.+)$/i
-      },
-      {
-        modifiers: 0,
-        re: /^(.+)$/
-      }
+      {modifiers: MOD_CTRL | MOD_SHIFT, re: /^Ctrl[-+]Shift[-+](.+)$/i},
+      {modifiers: MOD_CTRL | MOD_SHIFT, re: /^Shift[-+]Ctrl[-+](.+)$/i},
+      {modifiers: MOD_CTRL, re: /^Ctrl[-+](.+)$/i},
+      {modifiers: MOD_SHIFT, re: /^Shift[-+](.+)$/i},
+      {modifiers: 0, re: /^(.+)$/}
     ];
 
     /**
@@ -236,7 +220,6 @@
     }
   }
 
-  Object.defineProperties(Editor, {
-    processCommandLine: {value: processCommandLine}
-  });
+  Object.defineProperties(
+      Editor, {processCommandLine: {value: processCommandLine}});
 })();

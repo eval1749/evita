@@ -21,21 +21,19 @@ $define(global, 'text', function($export) {
       /** @type {!Set.<!text.SimpleMutationObserver>} */
       this.observers_ = new Set();
 
-      this.observer_ = new TextMutationObserver(
-          this.mutationCallback_.bind(this));
+      this.observer_ =
+          new TextMutationObserver(this.mutationCallback_.bind(this));
       this.startObserving_();
-      document.addEventListener(Event.Names.BEFORELOAD,
-                                this.willLoadTextDocument_.bind(this));
-      document.addEventListener(Event.Names.LOAD,
-                                this.didLoadTextDocument_.bind(this));
+      document.addEventListener(
+          Event.Names.BEFORELOAD, this.willLoadTextDocument_.bind(this));
+      document.addEventListener(
+          Event.Names.LOAD, this.didLoadTextDocument_.bind(this));
     }
 
     /**
      * @param {!text.SimpleMutationObserver} observer
      */
-    add(observer) {
-      this.observers_.add(observer);
-    }
+    add(observer) { this.observers_.add(observer); }
 
     didLoadTextDocument_() {
       this.startObserving_();
@@ -74,9 +72,7 @@ $define(global, 'text', function($export) {
     /**
      * @param {!text.SimpleMutationObserver} observer
      */
-    remove(observer) {
-      this.observers_.delete(observer);
-    }
+    remove(observer) { this.observers_.delete(observer); }
 
     /** @private */
     startObserving_() {
@@ -86,9 +82,7 @@ $define(global, 'text', function($export) {
     /**
      * @private
      */
-    willLoadTextDocument_() {
-      this.observer_.disconnect();
-    }
+    willLoadTextDocument_() { this.observer_.disconnect(); }
   }
 
   //////////////////////////////////////////////////////////////////////

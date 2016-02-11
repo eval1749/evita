@@ -5,10 +5,7 @@
 'use strict';
 
 /** @enum {string} */
-var Alter = {
-  EXTEND: 'EXTEND',
-  MOVE: 'MOVE'
-};
+var Alter = {EXTEND: 'EXTEND', MOVE: 'MOVE'};
 
 /** @enum {number} */
 var Count = {
@@ -30,12 +27,8 @@ var DialogItemId = {
 };
 
 /** @enum{string} */
-var Direction = {
-  BACKWARD: 'BACKWARD',
-  FORWARD: 'FORWARD',
-  LEFT: 'LEFT',
-  RIGHT: 'RIGHT'
-};
+var Direction =
+    {BACKWARD: 'BACKWARD', FORWARD: 'FORWARD', LEFT: 'LEFT', RIGHT: 'RIGHT'};
 
 /**
  * @enum {!symbol}

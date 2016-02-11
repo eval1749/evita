@@ -63,9 +63,7 @@ $define(global, 'repl', function($export) {
     }
 
     /** @return {string} */
-    get current() {
-      return this.lines_[this.lines_.length - this.index_];
-    }
+    get current() { return this.lines_[this.lines_.length - this.index_]; }
 
     /**
      * @param {string} line
@@ -129,7 +127,7 @@ $define(global, 'repl', function($export) {
       /** @const @type {!Array} */
       this.results_ = [];
 
-      for (const [key, command] of keyBindings.entries())
+      for (const[key, command] of keyBindings.entries())
         document.bindKey(key, command);
 
       staticInstance = this;
@@ -164,11 +162,13 @@ $define(global, 'repl', function($export) {
         this.rememberResult_(result.exception);
         if (result.stackTraceString === '') {
           result.stackTraceString = result.exception +
-            result.stackTrace.map(function(stackFrame) {
-              return '  at ' + stackFrame.functionName + ' (' +
-                  stackFrame.scriptName + '(' + stackFrame.lineNumber + ':' +
-                  stackFrame.column + ')';
-            }).join('\n');
+              result.stackTrace
+                  .map(function(stackFrame) {
+                    return '  at ' + stackFrame.functionName + ' (' +
+                        stackFrame.scriptName + '(' + stackFrame.lineNumber +
+                        ':' + stackFrame.column + ')';
+                  })
+                  .join('\n');
         }
         console.freshLine();
         console.emit(BLOCK_COMMENT);
@@ -232,18 +232,20 @@ $define(global, 'repl', function($export) {
         ++counter;
         console.log(LINE_COMMENT, 'waiting promise...', promise, counter);
       });
-      promise.then((value) => {
-        console.log(LINE_COMMENT, 'Value of', promise, 'is:');
-        console.emit(repl.stringify(value));
-        this.emitPrompt();
-      }).catch((reason) => {
-        console.freshLine();
-        console.log(BLOCK_COMMENT, promise, 'is rejected with:');
-        this.rememberResult_(reason);
-        console.emit(formatReason(reason));
-        console.log(BLOCK_COMMENT_END);
-        this.emitPrompt();
-      });
+      promise
+          .then((value) => {
+            console.log(LINE_COMMENT, 'Value of', promise, 'is:');
+            console.emit(repl.stringify(value));
+            this.emitPrompt();
+          })
+          .catch((reason) => {
+            console.freshLine();
+            console.log(BLOCK_COMMENT, promise, 'is rejected with:');
+            this.rememberResult_(reason);
+            console.emit(formatReason(reason));
+            console.log(BLOCK_COMMENT_END);
+            this.emitPrompt();
+          });
     }
 
     /** @param {*} result */
@@ -275,9 +277,7 @@ $define(global, 'repl', function($export) {
       return staticInstance;
     }
 
-    useHistory() {
-      this.lastLine = this.history_.current;
-    }
+    useHistory() { this.lastLine = this.history_.current; }
   }
 
   /**

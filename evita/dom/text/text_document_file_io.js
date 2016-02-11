@@ -3,64 +3,63 @@
 // found in the LICENSE file.
 
 (function() {
-  Object.defineProperty(TextDocument.prototype, 'lastStatTime_', {
-    value: new Date(0),
-    writable: true
-  });
+  Object.defineProperty(
+      TextDocument.prototype, 'lastStatTime_',
+      {value: new Date(0), writable: true});
 
-  Object.defineProperty(TextDocument.prototype, 'obsolete', {
-    value: TextDocument.Obsolete.UNKNOWN,
-    writable: true
-  });
+  Object.defineProperty(
+      TextDocument.prototype, 'obsolete',
+      {value: TextDocument.Obsolete.UNKNOWN, writable: true});
 
   /**
    * @param {string} absoluteFileName
    * @return {TextDocument}
    */
-  TextDocument.findFile = function(absoluteFileName) {
+  TextDocument.findFile =
+      function(absoluteFileName) {
     const canonicalFileName = absoluteFileName.toLocaleLowerCase();
-    return /** @type {TextDocument} */ (TextDocument.list.find(
-        function(document) {
+    return /** @type {TextDocument} */ (
+        TextDocument.list.find(function(document) {
           return document.fileName.toLocaleLowerCase() === canonicalFileName;
         }));
   }
 
-  /**
-   * @type {!function()}
-   */
-  TextDocument.prototype.close = function() {
+      /**
+       * @type {!function()}
+       */
+      TextDocument.prototype.close = function() {
     const document = this;
     if (!document.needSave()) {
       document.forceClose();
       return;
     }
-    Editor.messageBox(null,
-        Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
-        MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
-      .then(function(responseCode) {
-        switch (responseCode) {
-          case DialogItemId.NO:
-            document.forceClose();
-            break;
-          case DialogItemId.YES:
-            Editor.getFileNameForSave(null, document.fileName)
-              .then(function(fileName) {
-                document.save(fileName).then(function() {
-                  document.forceClose();
-                });
-              });
-            break;
-        }
-      });
+    Editor
+        .messageBox(
+            null,
+            Editor.localizeText(Strings.IDS_ASK_SAVE, {name: document.name}),
+            MessageBox.ICONWARNING | MessageBox.YESNOCANCEL)
+        .then(function(responseCode) {
+          switch (responseCode) {
+            case DialogItemId.NO:
+              document.forceClose();
+              break;
+            case DialogItemId.YES:
+              Editor.getFileNameForSave(null, document.fileName)
+                  .then(function(fileName) {
+                    document.save(fileName).then(function() {
+                      document.forceClose();
+                    });
+                  });
+              break;
+          }
+        });
   };
 
   /**
    * @type {!function()}
    */
   TextDocument.prototype.forceClose = function() {
-    this.listWindows().forEach(function(window) {
-      window.destroy();
-    });
+    this.listWindows().forEach(function(window) { window.destroy(); });
     TextDocument.remove(this);
   };
 
@@ -85,7 +84,7 @@
   TextDocument.prototype.needSave = function() {
     // TODO(eval1749): We should use |document.notForSave|.
     return this.modified && !this.name.startsWith('*') &&
-           FilePath.isValidFileName(this.fileName);
+        FilePath.isValidFileName(this.fileName);
   };
 
   /**

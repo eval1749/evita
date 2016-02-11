@@ -28,8 +28,9 @@ testing.test('CSSStyleSheet', function(t) {
 
   styleSheet.insertRule(new CSSStyleRule('span', spanStyle), 1);
   t.expect(toString(styleSheet))
-      .toEqual('div { color: #00f; } span { color: #0f0; } ' +
-               'body { color: #080; }');
+      .toEqual(
+          'div { color: #00f; } span { color: #0f0; } ' +
+          'body { color: #080; }');
 
   styleSheet.deleteRule(1);
   t.expect(toString(styleSheet))

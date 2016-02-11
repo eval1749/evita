@@ -29,19 +29,21 @@ global.TextFieldRange = function(control) {
 };
 
 Object.defineProperties(TextFieldRange.prototype, {
-  collapsed: {get:
-    /** @this {!TextFieldRange} @return {boolean} */ 
-    function() { return this.end_ == this.start_; }
+  collapsed: {
+    get:
+        /** @this {!TextFieldRange} @return {boolean} */
+        function() { return this.end_ == this.start_; }
   },
-  control_: {value: null, writable: true },
-  control: { get:
-    /** @this {!TextFieldRange} @return {!TextFieldControl} */
-    function() { return this.control_;}
+  control_: {value: null, writable: true},
+  control: {
+    get:
+        /** @this {!TextFieldRange} @return {!TextFieldControl} */
+        function() { return this.control_; }
   },
   end_: {value: 0, writable: true},
   end: {
     get: /** @this {!TextFieldRange} @return {number} */
-      function() { return this.end_; },
+        function() { return this.end_; },
     /**
      * @this {!TextFieldRange}
      * @param {number} new_end
@@ -54,8 +56,8 @@ Object.defineProperties(TextFieldRange.prototype, {
   },
   start_: {value: 0, writable: true},
   start: {
-    get:  /** @this {!TextFieldRange} @return {number} */
-      function() { return this.start_; },
+    get: /** @this {!TextFieldRange} @return {number} */
+        function() { return this.start_; },
     /**
      * @this {!TextFieldRange}
      * @param {number} new_start
@@ -68,24 +70,24 @@ Object.defineProperties(TextFieldRange.prototype, {
   },
   text: {
     get:
-      /**
-       * @this {!TextFieldRange}
-       * @return {string}
-       */
-      function() {
-        return this.collapsed ? '' :
-            this.control_.value.substring(this.start_, this.end_);
-      },
+        /**
+         * @this {!TextFieldRange}
+         * @return {string}
+         */
+        function() {
+          return this.collapsed ? '' : this.control_.value.substring(
+                                           this.start_, this.end_);
+        },
     set:
-      /**
-       * @this {!TextFieldRange}
-       * @param {string} new_text
-       */
-      function(new_text) {
-        var start = this.start_;
-        this.control_.textBuffer.replace(start, this.end_, new_text);
-        this.start_ = start;
-        this.end_ = start + new_text.length;
-      }
+        /**
+         * @this {!TextFieldRange}
+         * @param {string} new_text
+         */
+        function(new_text) {
+          var start = this.start_;
+          this.control_.textBuffer.replace(start, this.end_, new_text);
+          this.start_ = start;
+          this.end_ = start + new_text.length;
+        }
   },
 });

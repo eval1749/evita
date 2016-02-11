@@ -19,9 +19,10 @@
   };
 
   Object.defineProperties(TextRange.prototype, {
-    length: {get:
-        /** @return {number} */
-        function() { return this.end - this.start; }
+    length: {
+      get:
+          /** @return {number} */
+          function() { return this.end - this.start; }
     }
   });
 
@@ -50,7 +51,7 @@
       var charCode = document.charCodeAt(offset);
       var ucd = Unicode.UCD[charCode];
       var lowerCase = ucd.category == Unicode.Category.Ll ||
-                       ucd.category == Unicode.Category.Lt;
+          ucd.category == Unicode.Category.Lt;
       var upperCase = ucd.category == Unicode.Category.Lu;
       switch (state) {
         case State.START:
@@ -148,7 +149,7 @@
           data.category == Unicode.Category.Ll ||
           data.category == Unicode.Category.Lt) {
         this.text = text.substr(0, i) + text.charAt(i).toLocaleUpperCase() +
-                    text.substr(i + 1).toLocaleLowerCase();
+            text.substr(i + 1).toLocaleLowerCase();
         break;
       }
     }
@@ -209,7 +210,7 @@
    * @this {!TextRange}
    * @param {!Editor.RegExp} regexp
    */
-  function* rangeMatches(regexp) {
+  function * rangeMatches(regexp) {
     /** @type {number} */
     let runner = this.start;
     while (runner < this.end) {
@@ -282,7 +283,8 @@
    * @param {number=} count, default is Count.FORWARD
    * @return {!TextRange}
    */
-  TextRange.prototype.moveStartWhile = function(charSet, count = Count.FORWARD) {
+  TextRange.prototype.moveStartWhile = function(
+      charSet, count = Count.FORWARD) {
     var position = this.document.computeWhile_(charSet, count, this.end);
     if (position > this.end)
       this.collapseTo(position);

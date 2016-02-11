@@ -16,10 +16,9 @@
      * @param {!ClikeLexerOptions} options
      */
     constructor(document, options) {
-      super(document, {
-        characters: options.characters,
-        keywords: options.keywords
-      });
+      super(
+          document,
+          {characters: options.characters, keywords: options.keywords});
       this.hasCpp = options.hasCpp;
       this.useColonColon = options.useColonColon;
       this.useDot = options.useDot;
@@ -84,12 +83,12 @@
     map.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
 
     // NameStartChar ::= [a-zA-Z_]
-    setRange(Lexer.NAMESTART_CHAR,
-             Unicode.LATIN_CAPITAL_LETTER_A,
-             Unicode.LATIN_CAPITAL_LETTER_Z);
-    setRange(Lexer.NAMESTART_CHAR,
-             Unicode.LATIN_SMALL_LETTER_A,
-             Unicode.LATIN_SMALL_LETTER_Z);
+    setRange(
+        Lexer.NAMESTART_CHAR, Unicode.LATIN_CAPITAL_LETTER_A,
+        Unicode.LATIN_CAPITAL_LETTER_Z);
+    setRange(
+        Lexer.NAMESTART_CHAR, Unicode.LATIN_SMALL_LETTER_A,
+        Unicode.LATIN_SMALL_LETTER_Z);
     map.set(Unicode.LOW_LINE, Lexer.NAMESTART_CHAR);
 
     // NameChar ::= NameStart | [0-9]
@@ -362,19 +361,17 @@
    */
   function isNsSeparator(token) {
     return token.state === ClikeLexer.State.COLON_COLON ||
-           token.state === lexers.State.DOT;
+        token.state === lexers.State.DOT;
   }
 
   ClikeLexer.newCharacters = function() {
     var map = new Map();
-    CHARACTERS.forEach(function(value, key) {
-      map.set(key, value);
-    });
+    CHARACTERS.forEach(function(value, key) { map.set(key, value); });
     return map;
   };
 
   Object.defineProperties(ClikeLexer.prototype, {
-    didShrinkLastToken: {value: didShrinkLastToken },
+    didShrinkLastToken: {value: didShrinkLastToken},
     feedCharacter: {value: feedCharacter},
   });
 

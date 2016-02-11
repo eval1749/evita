@@ -131,8 +131,17 @@ Unicode.CATEGORY_SHORT_NAMES;
 
 /** @enum{string} */
 Unicode.Category = {
-  Cc: "Cc", Cf: "Cf", Cn: "Cn", Co: "Co", Cs: "Cs",
-  Ll: "Ll", Lm: "Lm", Lo: "Lo", Lt: "Lt", Lu: "Lu", Mc: "Mc"
+  Cc: "Cc",
+  Cf: "Cf",
+  Cn: "Cn",
+  Co: "Co",
+  Cs: "Cs",
+  Ll: "Ll",
+  Lm: "Lm",
+  Lo: "Lo",
+  Lt: "Lt",
+  Lu: "Lu",
+  Mc: "Mc"
 };
 
 /** @typedef {symbol} */

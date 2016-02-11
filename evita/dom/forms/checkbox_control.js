@@ -7,9 +7,7 @@
    * @this {!CheckboxControl}
    * @return {boolean}
    */
-  function getChecked() {
-    return this.checked_;
-  }
+  function getChecked() { return this.checked_; }
 
   /**
    * @this {!CheckboxControl}
@@ -32,7 +30,7 @@
    * Default event handler.
    */
   function handleEvent(event) {
-    var checkbox = /** @type {!CheckboxControl} */(event.target);
+    var checkbox = /** @type {!CheckboxControl} */ (event.target);
     switch (event.type) {
       case Event.Names.CLICK:
         this.dispatchInputEvent();

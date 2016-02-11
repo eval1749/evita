@@ -41,9 +41,7 @@ var TextDocumentTemplate;
   /**
    * @param {string} extension
    */
-  function removeTemplate(extension) {
-    templateMap.delete(extension);
-  }
+  function removeTemplate(extension) { templateMap.delete(extension); }
 
   Object.defineProperties(TextDocument, {
     addTemplate: {value: addTemplate},

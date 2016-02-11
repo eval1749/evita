@@ -71,9 +71,7 @@ $define(global, 'base', function($export) {
     }
 
     /** @return {string} */
-    toString() {
-      return 'OrderedSetNode(' + this.data_.toString() + ')';
-    }
+    toString() { return 'OrderedSetNode(' + this.data_.toString() + ')'; }
   }
 
   /**
@@ -277,7 +275,7 @@ $define(global, 'base', function($export) {
     }
 
     /** @return {!Generator.<!base.OrderedSetNode<T>>} */
-    *values() {
+    * values() {
       let node = this.root_;
       while (node) {
         while (node.left_)

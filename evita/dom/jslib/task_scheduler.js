@@ -36,9 +36,7 @@
     }
 
     /** @param {Runnable} task */
-    remove(task) {
-      this.tasks_.delete(task);
-    }
+    remove(task) { this.tasks_.delete(task); }
 
     /**
      * @param {Runnable} task

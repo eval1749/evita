@@ -33,9 +33,7 @@
       this.cursor_ = this.texts_.length;
     }
 
-    resetCursor() {
-      this.cursor_ = this.texts_.length;
-    }
+    resetCursor() { this.cursor_ = this.texts_.length; }
 
     /**
      * @param {number} direction
@@ -101,8 +99,8 @@
     let textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
-    FindAndReplace.find(textWindow, findWhatText.value,
-                        makeFindOptions(Direction.FORWARD));
+    FindAndReplace.find(
+        textWindow, findWhatText.value, makeFindOptions(Direction.FORWARD));
   }
 
   /**
@@ -112,8 +110,8 @@
     let textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
-    FindAndReplace.find(textWindow, findWhatText.value,
-                        makeFindOptions(Direction.BACKWARD));
+    FindAndReplace.find(
+        textWindow, findWhatText.value, makeFindOptions(Direction.BACKWARD));
   }
 
   /**
@@ -123,9 +121,9 @@
     let textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
-    FindAndReplace.replaceOne(textWindow, findWhatText.value,
-                              replaceWithText.value,
-                              makeFindOptions(Direction.FORWARD));
+    FindAndReplace.replaceOne(
+        textWindow, findWhatText.value, replaceWithText.value,
+        makeFindOptions(Direction.FORWARD));
   }
 
   /**
@@ -135,9 +133,9 @@
     let textWindow = ensureTextWindow(window);
     if (!textWindow)
       return;
-    FindAndReplace.replaceAll(textWindow, findWhatText.value,
-                              replaceWithText.value,
-                              makeFindOptions(Direction.FORWARD));
+    FindAndReplace.replaceAll(
+        textWindow, findWhatText.value, replaceWithText.value,
+        makeFindOptions(Direction.FORWARD));
   }
 
   function ensureForm() {
@@ -200,8 +198,7 @@
     newline();
     useRegexpCheckbox = addCheckbox('Use regular expression', 'E');
     newline();
-    casePreserveReplaceCheckbox = addCheckbox('Case preserve replacement',
-                                                 'M');
+    casePreserveReplaceCheckbox = addCheckbox('Case preserve replacement', 'M');
     casePreserveReplaceCheckbox.checked = true;
     newline();
 
@@ -250,7 +247,7 @@
       button.addEventListener('click', function(event) {
         if (!Window.focus)
           return;
-        handler(/**@type{!Window}*/(Window.focus));
+        handler(/**@type{!Window}*/ (Window.focus));
       });
     }
 
@@ -288,10 +285,10 @@
    */
   function handleGlobalKeyDown(event) {
     switch (event.keyCode) {
-      case 0x10D: // Enter
-        doFindNext(/** @type {!FormWindow} */(formWindow));
+      case 0x10D:  // Enter
+        doFindNext(/** @type {!FormWindow} */ (formWindow));
         break;
-      case 0x11B: // Escape
+      case 0x11B:  // Escape
         formWindow.hide();
         break;
     }
@@ -301,14 +298,14 @@
    * @param {!KeyboardEvent} event
    */
   function handleTextFieldKeyDown(event) {
-    let textField = /** @type {!TextFieldControl} */(event.target);
+    let textField = /** @type {!TextFieldControl} */ (event.target);
     switch (event.keyCode) {
-      case 0x126: // arrowUp
+      case 0x126:  // arrowUp
         textField.logger_.retrieve(-1);
         event.stopPropagation();
         event.preventDefault();
         break;
-      case 0x128: // arrowDown
+      case 0x128:  // arrowDown
         textField.logger_.retrieve(1);
         event.stopPropagation();
         event.preventDefault();
@@ -342,7 +339,7 @@
       ignoreCase: shouldIgnoreCase(findWhatText.value),
       matchWholeWord: matchWholeWordCheckbox.checked,
       useRegExp: useRegexpCheckbox.checked
-   };
+    };
   }
 
   /**

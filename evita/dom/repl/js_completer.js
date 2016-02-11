@@ -25,12 +25,11 @@ $define(global, 'repl', ($export) => {
     const names = new Set();
     if (container === null || container == undefined)
       return names;
-    const predicate = prefix === ''
-        ? name => !name.startsWith('_')
-        : name => name.startsWith(prefix);
-    prototypeChainOf(/** @type {!Object} */(container)).forEach(runner => {
-      Object.getOwnPropertyNames(runner)
-          .filter(predicate).forEach(name => names.add(name));
+    const predicate = prefix === '' ? name => !name.startsWith('_') :
+                                      name => name.startsWith(prefix);
+    prototypeChainOf(/** @type {!Object} */ (container)).forEach(runner => {
+      Object.getOwnPropertyNames(runner).filter(predicate).forEach(
+          name => names.add(name));
     });
     return names;
   }
@@ -40,9 +39,8 @@ $define(global, 'repl', ($export) => {
    * @return {!Array.<!Object>}
    */
   function prototypeChainOf(object) {
-    let path = []
-    for (let runner = object; runner;
-         runner = Object.getPrototypeOf(runner)) {
+    let path = [];
+    for (let runner = object; runner; runner = Object.getPrototypeOf(runner)) {
       path.push(runner);
     }
     return path;
@@ -84,7 +82,7 @@ $define(global, 'repl', ($export) => {
     /** @return {boolean} */
     isAlive() {
       return this.lastLineStart_ === this.commandLoop_.lastLineStart &&
-             this.lastLine_ === this.commandLoop_.lastLine;
+          this.lastLine_ === this.commandLoop_.lastLine;
     }
 
     /** @param {!Set.<string>} nameSet */

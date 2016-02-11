@@ -5,7 +5,7 @@
 global.CmdLexer = (function() {
   /** @enum{number} */
   var State = {
-    ZERO: 0, // State.ZERO must be zero.
+    ZERO: 0,  // State.ZERO must be zero.
 
     CIRCUMFLEX_ACCENT: 1,
     COLON: 2,
@@ -19,22 +19,19 @@ global.CmdLexer = (function() {
   /** @const @type {Set.<string>} */
   var KEYWORDS = (function() {
     var set = new Set();
-    [
-      'assoc', 'attrib', 'break', 'bcdedit', 'cacls', 'call', 'cd', 'chcp',
-      'chdir', 'chkdsk', 'chkntfs', 'cls', 'cmd', 'color', 'comp', 'compact',
-      'convert', 'copy', 'date', 'del', 'dir', 'diskcomp', 'diskcopy',
-      'diskpart', 'doskey', 'driverquery', 'echo', 'endlocal', 'erase', 'exit',
-      'fc', 'find', 'findstr', 'for', 'format', 'fsutil', 'ftype', 'goto',
-      'gpresult', 'graftabl', 'help', 'icacls', 'if', 'label', 'md', 'mkdir',
-      'mklink', 'mode', 'more', 'move', 'openfiles', 'path', 'pause', 'popd',
-      'print', 'prompt', 'pushd', 'rd', 'recover', 'rem', 'ren', 'rename',
-      'replace', 'rmdir', 'robocopy', 'set', 'setlocal', 'sc', 'schtasks',
-      'shift', 'shutdown', 'sort', 'start', 'subst', 'systeminfo', 'tasklist',
-      'taskkill', 'time', 'title', 'tree', 'type', 'ver', 'verify', 'vol',
-      'xcopy', 'wmic',
-    ].forEach(function(keyword) {
-      set.add(keyword);
-    });
+    ['assoc', 'attrib', 'break', 'bcdedit', 'cacls', 'call', 'cd', 'chcp',
+     'chdir', 'chkdsk', 'chkntfs', 'cls', 'cmd', 'color', 'comp', 'compact',
+     'convert', 'copy', 'date', 'del', 'dir', 'diskcomp', 'diskcopy',
+     'diskpart', 'doskey', 'driverquery', 'echo', 'endlocal', 'erase', 'exit',
+     'fc', 'find', 'findstr', 'for', 'format', 'fsutil', 'ftype', 'goto',
+     'gpresult', 'graftabl', 'help', 'icacls', 'if', 'label', 'md', 'mkdir',
+     'mklink', 'mode', 'more', 'move', 'openfiles', 'path', 'pause', 'popd',
+     'print', 'prompt', 'pushd', 'rd', 'recover', 'rem', 'ren', 'rename',
+     'replace', 'rmdir', 'robocopy', 'set', 'setlocal', 'sc', 'schtasks',
+     'shift', 'shutdown', 'sort', 'start', 'subst', 'systeminfo', 'tasklist',
+     'taskkill', 'time', 'title', 'tree', 'type', 'ver', 'verify', 'vol',
+     'xcopy', 'wmic',
+    ].forEach(function(keyword) { set.add(keyword); });
     return set;
   })();
 
@@ -43,9 +40,7 @@ global.CmdLexer = (function() {
    * @extends Lexer
    * @param {!TextDocument} document
    */
-  function CmdLexer(document) {
-    super(document);
-  }
+  function CmdLexer(document) { super(document); }
 
   /**
    * @this {!CmdLexer}
@@ -73,7 +68,7 @@ global.CmdLexer = (function() {
         ++this.numberOfWords_;
       if (syntax == 'cmd_command') {
         var command = range.text;
-       if (KEYWORDS.has(command.toLowerCase()))
+        if (KEYWORDS.has(command.toLowerCase()))
           syntax = 'keyword';
       }
       range.setSyntax(syntax);
@@ -100,7 +95,6 @@ global.CmdLexer = (function() {
       var charCode = document.charCodeAt(lexer.scanOffset);
       ++lexer.scanOffset;
       switch (lexer.state) {
-
         case State.CIRCUMFLEX_ACCENT:
           lexer.state = State.ZERO;
           break;
@@ -148,8 +142,8 @@ global.CmdLexer = (function() {
             case Unicode.TAB:
               --lexer.scanOffset;
               return lexer.finishState();
-           }
-           break;
+          }
+          break;
         case State.ZERO:
           switch (charCode) {
             case Unicode.CIRCUMFLEX_ACCENT:

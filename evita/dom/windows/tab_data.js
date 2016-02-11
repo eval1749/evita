@@ -25,14 +25,15 @@ $define(global, 'windows', function($export) {
         'Name: ' + state.name,
         'File: ' + (state.fileName ? state.fileName : 'no file'),
         'Save: ' + (state.lastWriteTime.valueOf() ?
-            state.lastWriteTime.toLocaleString() : 'never saved'),
+                        state.lastWriteTime.toLocaleString() :
+                        'never saved'),
         state.modified ? (state.fileName ? 'Not saved' : 'Modified') :
-            'Not modified',
+                         'Not modified',
       ];
       tabData.icon = state.icon;
       tabData.state = state.modified ? 1 : 0;
       tabData.title = state.name;
-      tabData.tooltip =  tooltip_texts.join('\n');
+      tabData.tooltip = tooltip_texts.join('\n');
       return tabData;
     }
 

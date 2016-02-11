@@ -58,9 +58,7 @@ class CSSRuleBuilder {
   }
 
   /** @return {!CSSStyleRule} */
-  build() {
-    return new CSSStyleRule(this.selectorText_, this.style_);
-  }
+  build() { return new CSSStyleRule(this.selectorText_, this.style_); }
 
   /**
    * @param {string} display
@@ -119,15 +117,11 @@ class CSSRuleBuilder {
    * @param {number} width
    * $return {!CSSRuleBuilder}
    */
-  width(width) {
-    this.style_.width = width.toString();
-  }
+  width(width) { this.style_.width = width.toString(); }
 
   /**
    * @param {string} selectorText
    * $return {!CSSRuleBuilder}
    */
-  static selector(selectorText) {
-    return new CSSRuleBuilder(selectorText);
-  }
+  static selector(selectorText) { return new CSSRuleBuilder(selectorText); }
 }

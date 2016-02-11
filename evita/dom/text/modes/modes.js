@@ -12,112 +12,80 @@
     doColor(hint) {}
   }
 
-  function inheritMode(ctor) {
-    ctor.keymap = new Map();
-  }
+  function inheritMode(ctor) { ctor.keymap = new Map(); }
 
   class ConfigMode extends global.Mode {
-    constructor() {
-      super('Config', ConfigLexer);
-    }
+    constructor() { super('Config', ConfigLexer); }
   }
   inheritMode(ConfigMode);
 
-  class CppMode  extends global.Mode {
-    constructor() {
-      super('C++', CppLexer);
-    }
+  class CppMode extends global.Mode {
+    constructor() { super('C++', CppLexer); }
   }
   inheritMode(CppMode);
 
-  class CsharpMode  extends global.Mode {
-    constructor() {
-      super('C#', CsharpLexer);
-    }
+  class CsharpMode extends global.Mode {
+    constructor() { super('C#', CsharpLexer); }
   }
   inheritMode(CsharpMode);
 
   class GnMode extends global.Mode {
-    constructor() {
-      super('Gn', GnLexer);
-    }
+    constructor() { super('Gn', GnLexer); }
   }
   inheritMode(GnMode);
 
-  class HtmlMode  extends global.Mode {
-    constructor() {
-      super('HTML', HtmlLexer);
-    }
+  class HtmlMode extends global.Mode {
+    constructor() { super('HTML', HtmlLexer); }
   }
   inheritMode(HtmlMode);
 
-  class IdlMode  extends global.Mode {
-    constructor() {
-      super('IDL', IdlLexer);
-    }
+  class IdlMode extends global.Mode {
+    constructor() { super('IDL', IdlLexer); }
   }
   inheritMode(IdlMode);
 
-  class JavaMode  extends global.Mode {
-    constructor() {
-      super('Java', JavaLexer);
-    }
+  class JavaMode extends global.Mode {
+    constructor() { super('Java', JavaLexer); }
   }
   inheritMode(JavaMode);
 
   class JavaScriptMode extends global.Mode {
-    constructor() {
-      super('JavaScript', JavaScriptLexer);
-    }
+    constructor() { super('JavaScript', JavaScriptLexer); }
   }
   inheritMode(JavaScriptMode);
 
   class HaskellMode extends global.Mode {
-    constructor() {
-      super('Haskell', PlainTextLexer);
-    }
+    constructor() { super('Haskell', PlainTextLexer); }
   }
   inheritMode(HaskellMode);
 
   class LispMode extends global.Mode {
-    constructor() {
-      super('Lisp', PlainTextLexer);
-    }
+    constructor() { super('Lisp', PlainTextLexer); }
   }
   inheritMode(LispMode);
 
   class MasonMode extends global.Mode {
-    constructor() {
-      super('Mason', PlainTextLexer);
-    }
+    constructor() { super('Mason', PlainTextLexer); }
   }
   inheritMode(MasonMode);
 
   class PerlMode extends global.Mode {
-    constructor() {
-      super('Perl', PlainTextLexer);
-    }
+    constructor() { super('Perl', PlainTextLexer); }
   }
   inheritMode(PerlMode);
 
   class PlainTextMode extends global.Mode {
-    constructor() {
-      super('Plain', PlainTextLexer);
-    }
+    constructor() { super('Plain', PlainTextLexer); }
   }
   inheritMode(PlainTextMode);
 
   class PythonMode extends global.Mode {
-    constructor() {
-      super('Python', PythonLexer);
-    }
+    constructor() { super('Python', PythonLexer); }
   }
   inheritMode(PythonMode);
 
   class XmlMode extends global.Mode {
-    constructor() {
-      super('XML', XmlLexer);
-    }
+    constructor() { super('XML', XmlLexer); }
   }
   inheritMode(XmlMode);
 
@@ -128,15 +96,15 @@
 
   Object.defineProperty(Mode, 'extensionMap', {
     value: (function() {
-      var map = /** @type{!ExtensionToModeMap} */(new Map());
+      var map = /** @type{!ExtensionToModeMap} */ (new Map());
       map.set('asdl', {mode: XmlMode, name: 'ASDL TextDocument'});
       map.set('cc', {mode: CppMode, name: 'C++ Source'});
       map.set('cfg', {mode: ConfigMode, name: 'Config File'});
       map.set('cl', {mode: CppMode, name: 'CommonLisp Source'});
       map.set('cpp', {mode: CppMode, name: 'C++ Source'});
       map.set('cs', {mode: CsharpMode, name: 'C# Source'});
-      map.set('css', {mode: CppMode,
-                      name: 'Cascading Style Sheet TextDocument'});
+      map.set(
+          'css', {mode: CppMode, name: 'Cascading Style Sheet TextDocument'});
       map.set('cxx', {mode: CppMode, name: 'C++ Source'});
       map.set('el', {mode: LispMode, name: 'EmacsLisp Source'});
       map.set('gn', {mode: GnMode, name: 'GN Source'});
@@ -193,21 +161,21 @@
       map.set('plain', PlainTextMode);
       map.set('python', PythonMode);
       map.set('xml', XmlMode);
-      return /** @type {!NameToModeMap} */(map);
+      return /** @type {!NameToModeMap} */ (map);
     })()
   });
 
   Object.defineProperty(Mode, 'fileNameMap', {
     /** @type {!NameToModeMap} */
     value: (function() {
-        var map = new Map();
-        map.set('DEPS', PythonMode);
-        map.set('Makefile', ConfigMode);
-        map.set('autohandler', MasonMode);
-        map.set('dhandler', MasonMode);
-        map.set('makefile', ConfigMode);
-        return /** @type {!NameToModeMap} */(map);
-      })()
+      var map = new Map();
+      map.set('DEPS', PythonMode);
+      map.set('Makefile', ConfigMode);
+      map.set('autohandler', MasonMode);
+      map.set('dhandler', MasonMode);
+      map.set('makefile', ConfigMode);
+      return /** @type {!NameToModeMap} */ (map);
+    })()
   });
 
   Object.defineProperty(Mode, 'chooseMode', {
@@ -216,8 +184,8 @@
      * @return {!Mode}
      */
     value: function(document) {
-      var mode_name = document.properties.get('mode') ||
-                      document.properties.get('Mode');
+      var mode_name =
+          document.properties.get('mode') || document.properties.get('Mode');
       if (mode_name !== undefined) {
         var mode_ctor = Mode.nameMap.get(mode_name.toLowerCase());
         if (mode_ctor)
@@ -250,14 +218,12 @@
   });
 
   class Observer extends SimpleTextDocumentSetObserver {
-    constructor() {
-      super();
-    }
+    constructor() { super(); }
 
     /** @param {!TextDocument} document */
     didAddTextDocument(document) {
-      document.addEventListener(Event.Names.LOAD,
-                                this.didLoadTextDocument.bind(document));
+      document.addEventListener(
+          Event.Names.LOAD, this.didLoadTextDocument.bind(document));
     }
 
     /**
@@ -275,15 +241,13 @@
       const currentModeName = document.mode ? document.mode.name : '';
       if (newMode.name === currentModeName)
         return;
-      Editor.messageBox(null, `Change mode to ${newMode.name}`,
-                        MessageBox.ICONINFORMATION);
+      Editor.messageBox(
+          null, `Change mode to ${newMode.name}`, MessageBox.ICONINFORMATION);
       document.mode = newMode;
     }
 
     /** @param {!TextDocument} document */
-    didRemoveTextDocument(document) {
-      document.mode = null;
-    }
+    didRemoveTextDocument(document) { document.mode = null; }
   }
 
   TextDocument.addObserver(new Observer());

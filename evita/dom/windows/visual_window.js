@@ -6,8 +6,7 @@
   /**
    * @param {!Event} event
    */
-  function handleEvent(event) {
-  }
+  function handleEvent(event) {}
 
   /**
    * @this {!VisualWindow}
@@ -29,8 +28,8 @@
    * @return {!VisualWindow}
    */
   function newWindow(document, styleSheet) {
-    const window = VisualWindow.newWindow_(document.handle_,
-                                           styleSheet.handle_);
+    const window =
+        VisualWindow.newWindow_(document.handle_, styleSheet.handle_);
     window.document_ = document;
     window.styleSheet_ = styleSheet;
     return window;

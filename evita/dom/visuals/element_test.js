@@ -29,6 +29,6 @@ testing.test('Node', function(t) {
 
   element.style.backgroundColor = '#fff';
   element.style.color = '#0f0';
-  t.expect(element.style.cssText).toEqual(
-      'background-color: #FFFFFF; color: #00FF00;');
+  t.expect(element.style.cssText)
+      .toEqual('background-color: #FFFFFF; color: #00FF00;');
 });

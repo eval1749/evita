@@ -29,7 +29,7 @@
         if (more)
           return;
         json += '\u005d';
-        this.events_ = /** @type {!Array.<Object>} */(JSON.parse(json));
+        this.events_ = /** @type {!Array.<Object>} */ (JSON.parse(json));
         resultResolver(this.events_.length);
       });
       return resultPromise;
@@ -41,13 +41,13 @@
       let file = null;
       /** @type {!TextEncoder} */
       const encoder = new TextEncoder('utf-8');
-      return async(function*(events) {
-         file = yield Os.File.open(fileName, 'w');
-         const json = JSON.stringify(events);
-         yield file.write(encoder.encode(json));
-         file.close();
-         return events.length;
-       })(this.events_).catch((reason) => {
+      return async(function * (events) {
+               file = yield Os.File.open(fileName, 'w');
+               const json = JSON.stringify(events);
+               yield file.write(encoder.encode(json));
+               file.close();
+               return events.length;
+             })(this.events_).catch((reason) => {
         if (!file)
           return;
         file.close();

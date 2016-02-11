@@ -14,21 +14,22 @@
     if (unit === Unit.SCREEN) {
       if (!selection.goal_point_)
         throw 'Goal X point must be initialized.';
-      return selection.window.compute_(TextWindowComputeMethod.MOVE_SCREEN,
-          offset, count, selection.goal_point_);
+      return selection.window.compute_(
+          TextWindowComputeMethod.MOVE_SCREEN, offset, count,
+          selection.goal_point_);
     }
 
     if (unit === Unit.WINDOW) {
-      return selection.window.compute_(TextWindowComputeMethod.MOVE_WINDOW,
-                                       offset, count);
+      return selection.window.compute_(
+          TextWindowComputeMethod.MOVE_WINDOW, offset, count);
     }
 
     if (unit === Unit.WINDOW_LINE) {
       if (!selection.goal_point_)
         throw 'Goal X point must be initialized.';
       return selection.window.compute_(
-            TextWindowComputeMethod.MOVE_WINDOW_LINE, offset, count,
-            selection.goal_point_);
+          TextWindowComputeMethod.MOVE_WINDOW_LINE, offset, count,
+          selection.goal_point_);
     }
 
     return selection.range.document.computeMotion_(unit, count, offset);
@@ -74,8 +75,8 @@
       selection.goal_point_ = null;
       return;
     }
-    var focus = selection.startIsActive ? selection.range.start :
-                                          selection.range.end;
+    var focus =
+        selection.startIsActive ? selection.range.start : selection.range.end;
     if (selection.goal_position_ === focus && selection.goal_point_)
       return;
     var rect = selection.window.hitTestTextPosition_(focus);
@@ -117,14 +118,16 @@
     var anchor = this.range.start;
     switch (unit) {
       case Unit.WINDOW:
-        return updateSelection(this, alter, anchor,
-            Math.min(this.window.compute_(
-                        TextWindowComputeMethod.END_OF_WINDOW),
-                     this.document.length));
+        return updateSelection(
+            this, alter, anchor,
+            Math.min(
+                this.window.compute_(TextWindowComputeMethod.END_OF_WINDOW),
+                this.document.length));
       case Unit.WINDOW_LINE:
-        return updateSelection(this, alter, anchor,
-            this.window.compute_(TextWindowComputeMethod.END_OF_WINDOW_LINE,
-                                 this.range.end));
+        return updateSelection(
+            this, alter, anchor,
+            this.window.compute_(
+                TextWindowComputeMethod.END_OF_WINDOW_LINE, this.range.end));
     }
     TextRange.prototype.endOf.call(this.range, unit);
     return updateSelection(this, alter, anchor, this.range.end);
@@ -160,7 +163,8 @@
    * @param {Alter=} alter, default is Alter.MOVE
    * @return {!TextSelection}
    */
-  TextSelection.prototype.modify = function(unit, count = 1, alter = Alter.MOVE) {
+  TextSelection.prototype.modify = function(
+      unit, count = 1, alter = Alter.MOVE) {
     updateGoalX(this, unit);
     switch (alter) {
       case Alter.EXTEND: {
@@ -174,7 +178,7 @@
       }
       case Alter.MOVE:
         if (this.range.start === this.range.end)
-            this.move(unit, count);
+          this.move(unit, count);
         else if (count < 0)
           this.range.collapseTo(this.range.start);
         else if (count > 0)
@@ -184,8 +188,8 @@
         throw 'Invalid alter: ' + alter;
     }
     if (this.goal_point_) {
-      this.goal_position_ = this.startIsActive ? this.range.start :
-                                                 this.range.end;
+      this.goal_position_ =
+          this.startIsActive ? this.range.start : this.range.end;
     }
     return this;
   };
@@ -198,12 +202,14 @@
    */
   TextSelection.prototype.move = function(unit, count = 1) {
     if (this.startIsActive) {
-      return updateSelection(this, Alter.MOVE, this.range.end,
+      return updateSelection(
+          this, Alter.MOVE, this.range.end,
           computeMotion(this, unit, count, this.range.start));
     }
 
-    return updateSelection(this, Alter.MOVE, this.range.start,
-          computeMotion(this, unit, count, this.range.end));
+    return updateSelection(
+        this, Alter.MOVE, this.range.start,
+        computeMotion(this, unit, count, this.range.end));
   };
 
   /**
@@ -247,14 +253,15 @@
     var anchor = this.range.end;
     switch (unit) {
       case Unit.WINDOW:
-        return updateSelection(this, alter, anchor,
-                 this.window.compute_(
-                    TextWindowComputeMethod.START_OF_WINDOW));
+        return updateSelection(
+            this, alter, anchor,
+            this.window.compute_(TextWindowComputeMethod.START_OF_WINDOW));
       case Unit.WINDOW_LINE:
-        return updateSelection(this, alter, anchor,
-                 this.window.compute_(
-                    TextWindowComputeMethod.START_OF_WINDOW_LINE,
-                    this.range.start));
+        return updateSelection(
+            this, alter, anchor,
+            this.window.compute_(
+                TextWindowComputeMethod.START_OF_WINDOW_LINE,
+                this.range.start));
     }
     this.range.startOf(unit);
     return updateSelection(this, alter, anchor, this.range.start);

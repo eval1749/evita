@@ -25,7 +25,7 @@ $define(global, 'base', function($export) {
    */
   function isAsciiLowerCase(charCode) {
     return charCode >= Unicode.LATIN_SMALL_LETTER_A &&
-           charCode <= Unicode.LATIN_SMALL_LETTER_Z;
+        charCode <= Unicode.LATIN_SMALL_LETTER_Z;
   }
 
   /**
@@ -34,7 +34,7 @@ $define(global, 'base', function($export) {
    */
   function isAsciiUpperCase(charCode) {
     return charCode >= Unicode.LATIN_CAPITAL_LETTER_A &&
-           charCode <= Unicode.LATIN_CAPITAL_LETTER_Z;
+        charCode <= Unicode.LATIN_CAPITAL_LETTER_Z;
   }
 
   /**
@@ -42,10 +42,8 @@ $define(global, 'base', function($export) {
    * @return {boolean}
    */
   function isAsciiWhitespace(charCode) {
-    return charCode == Unicode.SPACE ||
-           charCode == Unicode.TAB ||
-           charCode == Unicode.LF ||
-           charCode == Unicode.CR;
+    return charCode == Unicode.SPACE || charCode == Unicode.TAB ||
+        charCode == Unicode.LF || charCode == Unicode.CR;
   }
 
   /**
@@ -66,6 +64,7 @@ $define(global, 'base', function($export) {
     return false;
   }
 
-  $export({isAsciiAlpha, isAsciiDigit, isAsciiLowerCase, isAsciiUpperCase,
-           isAsciiWhitespace, isHexDigit});
+  $export(
+      {isAsciiAlpha, isAsciiDigit, isAsciiLowerCase, isAsciiUpperCase,
+       isAsciiWhitespace, isHexDigit});
 });

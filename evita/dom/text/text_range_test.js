@@ -16,7 +16,7 @@ testing.test('TextRange.prototype.matches', function(t) {
   range.text = 'foo bar baz';
   t.expect(range.end).toEqual(document.length);
   testing.gtest.log('range', range.start, range.end);
-  const words = [...range.matches(new Editor.RegExp('\\w+'))]
-      .map(matches => document.slice(matches[0].start, matches[0].end));
+  const words = [...range.matches(new Editor.RegExp('\\w+'))].map(
+      matches => document.slice(matches[0].start, matches[0].end));
   t.expect(words.join(',')).toEqual('foo,bar,baz');
 });

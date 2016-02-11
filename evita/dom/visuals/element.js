@@ -33,7 +33,7 @@ class Element extends Node {
   get classList() {
     if (!this.classList_)
       this.classList_ = new DOMTokenList(this);
-    return /** @type {!DOMTokenList} */(this.classList_);
+    return /** @type {!DOMTokenList} */ (this.classList_);
   }
 
   /** @return {*} */
@@ -54,7 +54,7 @@ class Element extends Node {
   /** @return {!CSSStyleDeclaration} */
   get style() {
     this.reloadRawStyle(NodeHandle.getInlineStyle(this.handle_));
-    return /** @type {!CSSStyleDeclaration} */(this.style_);
+    return /** @type {!CSSStyleDeclaration} */ (this.style_);
   }
 
   /** @param {!CSSStyleDeclaration} newStyle */
@@ -62,7 +62,7 @@ class Element extends Node {
     this.reloadRawStyle(newStyle.rawStyle_);
     NodeHandle.setInlineStyle(
         this.handle_,
-       /** @type {!Map.<number, string>} */(this.rawStyle_));
+        /** @type {!Map.<number, string>} */ (this.rawStyle_));
   }
 
   /**
@@ -80,9 +80,7 @@ class Element extends Node {
   }
 
   /** @return {string} */
-  toString() {
-    return `#{Element ${this.tagName_}}`;
-  }
+  toString() { return `#{Element ${this.tagName_}}`; }
 
   /**
    * CSSStyleChangeObserver
@@ -91,22 +89,18 @@ class Element extends Node {
   didChangeCSSStyle(style) {
     NodeHandle.setInlineStyle(
         this.handle_,
-        /** @type {!Map<number, string>} */(this.rawStyle_));
+        /** @type {!Map<number, string>} */ (this.rawStyle_));
   }
 
   /**
    * DOMTokenListOwner
    * @param {string} token
    */
-  didAddToken(token) {
-    NodeHandle.addClass(this.handle_, token);
-  }
+  didAddToken(token) { NodeHandle.addClass(this.handle_, token); }
 
   /**
    * DOMTokenListOwner
    * @param {string} token
    */
-  didRemoveToken(token) {
-    NodeHandle.removeClass(this.handle_, token);
-  }
+  didRemoveToken(token) { NodeHandle.removeClass(this.handle_, token); }
 }

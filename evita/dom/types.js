@@ -17,12 +17,12 @@ EnumError.prototype = Object.create(TypeError.prototype, {
     enumerable: true,
     value: [],
     writable: true
-  }, // fields
+  },  // fields
   toString: {
     value: function() {
       return this.message + ' accepts only ' + this.fields + '.';
     },
     configurable: true,
     enumerable: true
-  } // toString
+  }  // toString
 });

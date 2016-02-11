@@ -4,7 +4,7 @@
 
 /** @enum{string} */
 Event.Names = {
-  ATTACH: 'attach', // TextDocumentEvent
+  ATTACH: 'attach',  // TextDocumentEvent
   BEFORELOAD: 'beforeload',
   BLUR: 'blur',
   CHANGE: 'change',
@@ -15,7 +15,7 @@ Event.Names = {
   COMPOSITIONSTART: 'compositionstart',
   COMPOSITIONUPDATE: 'compositionupdate',
   DBLCLICK: 'dblclick',
-  DETACH: 'detach', // TextDocumentEvent
+  DETACH: 'detach',  // TextDocumentEvent
   DROPWINDOW: 'dropwindow',
   FOCUS: 'focus',
   HIDE: 'hide',

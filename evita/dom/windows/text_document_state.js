@@ -24,7 +24,8 @@ $define(global, 'windows', function($export) {
     constructor(document) {
       this.document_ = document;
       this.fileName = document.fileName;
-      // TODO(eval1749): We should specify |TextDocumentState.prototype.icon| from
+      // TODO(eval1749): We should specify |TextDocumentState.prototype.icon|
+      // from
       // IconSet.
       this.icon = -2;
       this.lastWriteTime = document.lastWriteTime;
@@ -81,16 +82,16 @@ $define(global, 'windows', function($export) {
      */
     start() {
       const document = this.document_;
-      document.addEventListener(Event.Names.ATTACH,
-                                this.didAttachWindow.bind(this));
-      document.addEventListener(Event.Names.BEFORELOAD,
-                                this.willLoadTextDocument.bind(this));
-      document.addEventListener(Event.Names.LOAD,
-                                this.didLoadSaveTextDocument.bind(this));
-      document.addEventListener(Event.Names.SAVE,
-                                this.didLoadSaveTextDocument.bind(this));
-      const mutationObserver = new TextMutationObserver(
-          this.mutationCallback.bind(this));
+      document.addEventListener(
+          Event.Names.ATTACH, this.didAttachWindow.bind(this));
+      document.addEventListener(
+          Event.Names.BEFORELOAD, this.willLoadTextDocument.bind(this));
+      document.addEventListener(
+          Event.Names.LOAD, this.didLoadSaveTextDocument.bind(this));
+      document.addEventListener(
+          Event.Names.SAVE, this.didLoadSaveTextDocument.bind(this));
+      const mutationObserver =
+          new TextMutationObserver(this.mutationCallback.bind(this));
       mutationObserver.observe(document, {summary: true});
       this.notifyChanged();
     }
@@ -107,9 +108,7 @@ $define(global, 'windows', function($export) {
     /**
      * @param {!TextDocumentStateCallback} callback
      */
-    static addObserver(callback) {
-      controller.addObserver(callback);
-    }
+    static addObserver(callback) { controller.addObserver(callback); }
 
     static controller() { return controller; }
 
@@ -118,9 +117,7 @@ $define(global, 'windows', function($export) {
      * @param {!TextDocument} document
      * @return {TextDocumentState}
      */
-    static get(document) {
-      return controller.get(document);
-    }
+    static get(document) { return controller.get(document); }
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -137,9 +134,7 @@ $define(global, 'windows', function($export) {
     /**
      * @param {!TextDocumentStateCallback} callback
      */
-    addObserver(callback) {
-      observers.push(callback);
-    }
+    addObserver(callback) { observers.push(callback); }
 
     /**
      * @override
@@ -156,25 +151,21 @@ $define(global, 'windows', function($export) {
      * @param {!TextDocument} document
      * @return {TextDocumentState}
      */
-    get(document) {
-      return stateMap.get(document) || null;
-    }
+    get(document) { return stateMap.get(document) || null; }
 
     /**
      * @override
      * @param {!TextDocument} document
      */
-    didRemoveTextDocument(document) {
-      stateMap.delete(document);
-    }
+    didRemoveTextDocument(document) { stateMap.delete(document); }
   }
 
   /** @const @type {!Controller} */
   const controller = new Controller()
 
-  Object.defineProperties(TextDocumentState, {
-    controller_: {value: controller},
-  });
+                         Object.defineProperties(TextDocumentState, {
+                           controller_: {value: controller},
+                         });
 
   $export({TextDocumentState});
 });

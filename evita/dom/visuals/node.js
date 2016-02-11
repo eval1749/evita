@@ -10,7 +10,7 @@ class Node {
    */
   constructor(document, handle) {
     /** @type {!Document} */
-    this.document_ = document || /** @type {!Document} */(this);
+    this.document_ = document || /** @type {!Document} */ (this);
     /** @const @type {!NodeHandle} */
     this.handle_ = handle;
     /** @type {Node} */
@@ -81,7 +81,7 @@ class Node {
    * @private
    * @return {!Generator<Node>}
    */
-  *childNodesFunction() {
+  * childNodesFunction() {
     for (let child = this.firstChild; child; child = child.nextSibling_)
       yield child;
   }
@@ -116,7 +116,8 @@ class Node {
     child.previousSibling_ = node;
     node.document_ = this.document_;
     node.parentNode_ = this;
-    node.nextSibling_ = child;;
+    node.nextSibling_ = child;
+    ;
     node.previousSibling_ = previousSibling;
     NodeHandle.insertBefore(this.handle_, node.handle_, child.handle_);
     return node;

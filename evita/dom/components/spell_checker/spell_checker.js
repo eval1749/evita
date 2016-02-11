@@ -10,7 +10,7 @@
     NONE: 0,
     CORRECT: 1,
     MISSPELLED: 2,
-    DEBUG: 3 // green wave
+    DEBUG: 3  // green wave
   };
 
   /** @const @type {number} */
@@ -35,9 +35,9 @@
   const kHotScanStartDelay = 100;
 
   /** @const @type {!RegExp} */
-  const RE_WORD = new RegExp('^[A-Za-z][a-z]{' +
-    (kMinWordLength - 1) + ',' +
-    (kMaxWordLength - 1) + '}$');
+  const RE_WORD = new RegExp(
+      '^[A-Za-z][a-z]{' + (kMinWordLength - 1) + ',' + (kMaxWordLength - 1) +
+      '}$');
 
   /** @const @type {!Set.<string>} */
   const keywords = new Set();
@@ -79,9 +79,7 @@
     /**
      * @return {boolean}
      */
-    canRequest() {
-      return this.numberOfRequests_ < kMaxNumberOfRequests;
-    }
+    canRequest() { return this.numberOfRequests_ < kMaxNumberOfRequests; }
 
     /**
      * @param {string}word
@@ -172,7 +170,7 @@
      * Tasks invoked by scheduler may access content of document before mutation
      * observer callback, we should ensure |offset_| and |end_| to hold valid
      * offsets.
-     * 
+     *
      */
     ensureOffsets() {
       this.offset_ = Math.min(this.offset_, this.document_.length);
@@ -299,9 +297,7 @@
      * @protected
      * @param {number} newLife
      */
-    resetLife(newLife) {
-      this.life_ = newLife;
-    }
+    resetLife(newLife) { this.life_ = newLife; }
 
     /**
      * @param {number} newStart
@@ -327,7 +323,7 @@
      * Generates a word range starting from |this.offset_| until end of
      * document.
      */
-    *words() {
+    * words() {
       if (!this.moveToStartOfWord())
         return;
       for (;;) {
@@ -337,7 +333,7 @@
           return;
 
         if (wordStart !== this.offset_)
-          yield {start: wordStart, end: this.offset_};
+          yield{start: wordStart, end: this.offset_};
 
         if (!this.moveToNextWord())
           return;
@@ -351,9 +347,7 @@
   //
   class ColdPainter extends Scanner {
     /** @param {!TextDocument} document */
-    constructor(document) {
-      super(document, 0, 0, 0);
-    }
+    constructor(document) { super(document, 0, 0, 0); }
 
     run() {
       this.ensureOffsets();
@@ -406,9 +400,8 @@
       if (!controller.canRequest())
         return false;
 
-      controller.requestCheckSpelling(word).then(() => {
-        this.checked_ = wordEnd;
-      });
+      controller.requestCheckSpelling(word).then(
+          () => { this.checked_ = wordEnd; });
       return false;
     }
 
@@ -533,7 +526,7 @@
     didFocusWindow() {
       if (Window.focus instanceof TextWindow) {
         this.activeSelection_ =
-            /** @type {!TextSelection} */(Window.focus.selection);
+            /** @type {!TextSelection} */ (Window.focus.selection);
         return;
       }
       this.activeSelection_ = null;
@@ -621,21 +614,21 @@
   //  Check spelling in hot region and cold region. When we check all words in
   //  cold region, |coldOffset| >= |coldEnd|, we check all the words in the
   //  document.
-  // 
+  //
   //  Cold and hot regions are updated in mutation observer callback by using
   //  minimum changed offset.
-  // 
+  //
   //    // Cold region: |coldOffset| to |coldEnd|.
   //    // Hot region: |hotOffset| to end of document.
-  // 
-  // 
+  //
+  //
   //          |...........|....................|
   //   offset 0           minimum change       document.length
   //          === cold === ======= hot ========
-  // 
+  //
   //  Word scanner, |scan()|, stops hot word which contains caret not to check
   //  spell incomplete word.
-  // 
+  //
   //  Note: To reduce misspelling in source code, e.g. function name, and
   //  variable names, we don't check character syntax.
   class SpellChecker extends text.SimpleMutationObserverBase {
@@ -657,8 +650,8 @@
       /** @type {?} TODO(eval1749): We should use |HotScanner| here. */
       this.hotScanner_ = new HotScanner(range);
 
-      document.addEventListener(Event.Names.ATTACH,
-                                this.didAttachWindow.bind(this));
+      document.addEventListener(
+          Event.Names.ATTACH, this.didAttachWindow.bind(this));
 
       this.didLoadTextDocument();
     }
@@ -674,11 +667,10 @@
      * @param {!UiEvent} event
      */
     didAttachWindow(event) {
-      const window = /** @type {!TextWindow} */(event.view);
-      window.addEventListener(Event.Names.BLUR,
-          this.didBlurWindow.bind(this));
-      window.addEventListener(Event.Names.FOCUS,
-          this.didFocusWindow.bind(this));
+      const window = /** @type {!TextWindow} */ (event.view);
+      window.addEventListener(Event.Names.BLUR, this.didBlurWindow.bind(this));
+      window.addEventListener(
+          Event.Names.FOCUS, this.didFocusWindow.bind(this));
       this.hotScanner_.didFocusWindow();
     }
 
@@ -687,9 +679,7 @@
      * @param {!Event} event
      * Spell checker is stopped when window loses focus.
      */
-    didBlurWindow(event) {
-      this.hotScanner_.didBlurWindow();
-    }
+    didBlurWindow(event) { this.hotScanner_.didBlurWindow(); }
 
     /**
      * @private
@@ -707,9 +697,7 @@
      * @private
      * Spell checking is started when window is focused.
      */
-    didFocusWindow() {
-      this.hotScanner_.didFocusWindow();
-    }
+    didFocusWindow() { this.hotScanner_.didFocusWindow(); }
 
     /**
      * @private
@@ -724,14 +712,10 @@
      * @param {!TextDocument} document
      * $return {SpellChecker}
      */
-    static get(document) {
-      return spellCheckerMap.get(document) || null;
-    }
+    static get(document) { return spellCheckerMap.get(document) || null; }
 
     /** @return {!Set<string>} */
-    static get keywords() {
-      return keywords;
-    }
+    static get keywords() { return keywords; }
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -739,9 +723,7 @@
   // SpellCheckerController
   //
   class SpellCheckerController extends SimpleTextDocumentSetObserver {
-    constructor() {
-      super();
-    }
+    constructor() { super(); }
 
     /** @param {!TextDocument} document */
     didAddTextDocument(document) {

@@ -34,10 +34,8 @@ $define(global, 'launchpad', function($export) {
 
   /** @type {!Map.<!symbol, string>} */
   const OBSOLETE_MARK_MAP = new Map([
-    [TextDocument.Obsolete.NO, '-'],
-    [TextDocument.Obsolete.CHECKING, '.'],
-    [TextDocument.Obsolete.IGNORE, '%'],
-    [TextDocument.Obsolete.UNKNOWN, '?'],
+    [TextDocument.Obsolete.NO, '-'], [TextDocument.Obsolete.CHECKING, '.'],
+    [TextDocument.Obsolete.IGNORE, '%'], [TextDocument.Obsolete.UNKNOWN, '?'],
     [TextDocument.Obsolete.YES, '*']
   ]);
 
@@ -93,11 +91,10 @@ $define(global, 'launchpad', function($export) {
     body.appendChild(list);
 
     /** @const @type {!Array<!TextDocument>} */
-    const textDocuments = TextDocument.list.sort((doc1, doc2) => {
-      return compareString(doc1.name, doc2.name);
-    })
+    const textDocuments = TextDocument.list.sort(
+        (doc1, doc2) => { return compareString(doc1.name, doc2.name); })
 
-    for (const textDocument of textDocuments) {
+                              for (const textDocument of textDocuments) {
       const state = TextDocumentState.get(textDocument);
       if (!state) {
         console.log('WARNING', 'no TextDocumentState for', textDocument);
@@ -160,8 +157,8 @@ $define(global, 'launchpad', function($export) {
       this.rowMap_.set(textDocument, newRow);
       let inserted = false;
       for (const child of this.list_.childNodes) {
-        const row = /** @type {!Element} */(child);
-        const present = /** @type {!TextDocumentModel} */(row.data);
+        const row = /** @type {!Element} */ (child);
+        const present = /** @type {!TextDocumentModel} */ (row.data);
         if (compareString(textDocument.name, present.name) < 0) {
           this.list_.insertBefore(newRow, row);
           inserted = true;
@@ -333,10 +330,10 @@ $define(global, 'launchpad', function($export) {
           new TextMutationObserver(this.mutationCallback.bind(this));
       this.observer_.observe(textDocument, {summary: true});
 
-      this.document_.addEventListener(Event.Names.BEFORELOAD,
-                                      this.willLoadTextDocument.bind(this));
-      this.document_.addEventListener(Event.Names.LOAD,
-                                      this.didLoadTextDocument.bind(this));
+      this.document_.addEventListener(
+          Event.Names.BEFORELOAD, this.willLoadTextDocument.bind(this));
+      this.document_.addEventListener(
+          Event.Names.LOAD, this.didLoadTextDocument.bind(this));
     }
 
     /** @return {!TextDocument} */
@@ -441,28 +438,31 @@ $define(global, 'launchpad', function($export) {
    */
   function createStyleSheet() {
     const styleSheet = new CSSStyleSheet();
-    styleSheet.appendRule(CSSRuleBuilder.selector('body')
-                              .display('block')
-                              .fontSize(13)
-                              .margin(0, 4, 0, 4)
-                              .padding(0, 4, 0, 4)
-                              .build());
+    styleSheet.appendRule(
+        CSSRuleBuilder.selector('body')
+            .display('block')
+            .fontSize(13)
+            .margin(0, 4, 0, 4)
+            .padding(0, 4, 0, 4)
+            .build());
     // TODO(eval1749): We should set text trimming for cells.
     styleSheet.appendRule(
         CSSRuleBuilder.selector('header').display('inline').build());
-    styleSheet.appendRule(CSSRuleBuilder.selector('headerCell')
-                              .display('inline')
-                              .padding(3)
-                              .border('#888', 0, 0, 0, 1)
-                              .build());
+    styleSheet.appendRule(
+        CSSRuleBuilder.selector('headerCell')
+            .display('inline')
+            .padding(3)
+            .border('#888', 0, 0, 0, 1)
+            .build());
     styleSheet.appendRule(
         CSSRuleBuilder.selector('cell').display('inline').padding(3).build());
     styleSheet.appendRule(
         CSSRuleBuilder.selector('list').display('block').build());
-    styleSheet.appendRule(CSSRuleBuilder.selector('row')
-                              .display('block')
-                              .border('#fff', 1)
-                              .build());
+    styleSheet.appendRule(
+        CSSRuleBuilder.selector('row')
+            .display('block')
+            .border('#fff', 1)
+            .build());
     styleSheet.appendRule(
         // TODO(eval1749): We should use "rgba(r, g, b, a)" instead of hex-form.
         CSSRuleBuilder.selector('.hover')
@@ -497,8 +497,7 @@ $define(global, 'launchpad', function($export) {
       this.model_ = new ListModel();
       /** @private @type {!CSSStyleSheet} */
       /** @private @const @type {!VisualWindow} */
-      this.window_ =
-          VisualWindow.newWindow(this.model_.document, styleSheet);
+      this.window_ = VisualWindow.newWindow(this.model_.document, styleSheet);
 
       /** @private @const @type {!Element} */
       this.list_ = /** @type {!Element} */ (
@@ -514,17 +513,17 @@ $define(global, 'launchpad', function($export) {
       this.setTabData();
 
       this.window_.addEventListener(Event.Names.BLUR, this.onBlur.bind(this));
-      this.window_.addEventListener(Event.Names.DBLCLICK,
-                                    this.onDoubleClick.bind(this));
+      this.window_.addEventListener(
+          Event.Names.DBLCLICK, this.onDoubleClick.bind(this));
       this.window_.addEventListener(Event.Names.FOCUS, this.onFocus.bind(this));
-      this.window_.addEventListener(Event.Names.KEYDOWN,
-                                    this.onKeyDown.bind(this));
-      this.window_.addEventListener(Event.Names.MOUSEDOWN,
-                                    this.onMouseDown.bind(this));
-      this.window_.addEventListener(Event.Names.MOUSELEAVE,
-                                    this.onMouseLeave.bind(this));
-      this.window_.addEventListener(Event.Names.MOUSEMOVE,
-                                    this.onMouseMove.bind(this));
+      this.window_.addEventListener(
+          Event.Names.KEYDOWN, this.onKeyDown.bind(this));
+      this.window_.addEventListener(
+          Event.Names.MOUSEDOWN, this.onMouseDown.bind(this));
+      this.window_.addEventListener(
+          Event.Names.MOUSELEAVE, this.onMouseLeave.bind(this));
+      this.window_.addEventListener(
+          Event.Names.MOUSEMOVE, this.onMouseMove.bind(this));
     }
 
     /** @return {!VisualWindow} */
@@ -681,7 +680,7 @@ $define(global, 'launchpad', function($export) {
     const present = this.parent.children.find(function(child) {
       if (!(child instanceof VisualWindow))
         return false;
-      const window = /** @type(!VisualWindow) */(child);
+      const window = /** @type(!VisualWindow) */ (child);
       return window.styleSheet == styleSheet;
     });
     if (present) {

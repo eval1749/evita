@@ -20,25 +20,26 @@ global.Bracket.Type = {
  * @param {!Bracket.Type} type
  * @param {number} pair
  */
-global.Bracket.Detail = function(type, pair) {
+global.Bracket.Detail =
+    function(type, pair) {
   this.type = type;
   this.pair = pair;
 }
 
-/** @const @type {Object.<number, !Bracket.Detail>} */
-global.Bracket.DATA = {};
+    /** @const @type {Object.<number, !Bracket.Detail>} */
+    global.Bracket.DATA = {};
 
-global.Bracket.DATA[Unicode.LEFT_PARENTHESIS] = new Bracket.Detail(
-    Bracket.Type.LEFT, Unicode.RIGHT_PARENTHESIS);
-global.Bracket.DATA[Unicode.RIGHT_PARENTHESIS] = new Bracket.Detail(
-    Bracket.Type.RIGHT, Unicode.LEFT_PARENTHESIS);
-global.Bracket.DATA[Unicode.LEFT_SQUARE_BRACKET] = new Bracket.Detail(
-    Bracket.Type.LEFT, Unicode.RIGHT_SQUARE_BRACKET);
-global.Bracket.DATA[Unicode.RIGHT_SQUARE_BRACKET] = new Bracket.Detail(
-    Bracket.Type.RIGHT, Unicode.LEFT_SQUARE_BRACKET);
-global.Bracket.DATA[Unicode.LEFT_CURLY_BRACKET] = new Bracket.Detail(
-    Bracket.Type.LEFT, Unicode.RIGHT_CURLY_BRACKET);
-global.Bracket.DATA[Unicode.RIGHT_CURLY_BRACKET] = new Bracket.Detail(
-    Bracket.Type.RIGHT, Unicode.LEFT_CURLY_BRACKET);
-global.Bracket.DATA[Unicode.REVERSE_SOLIDUS] = new Bracket.Detail(
-    Bracket.Type.ESCAPE, 0x00);
+global.Bracket.DATA[Unicode.LEFT_PARENTHESIS] =
+    new Bracket.Detail(Bracket.Type.LEFT, Unicode.RIGHT_PARENTHESIS);
+global.Bracket.DATA[Unicode.RIGHT_PARENTHESIS] =
+    new Bracket.Detail(Bracket.Type.RIGHT, Unicode.LEFT_PARENTHESIS);
+global.Bracket.DATA[Unicode.LEFT_SQUARE_BRACKET] =
+    new Bracket.Detail(Bracket.Type.LEFT, Unicode.RIGHT_SQUARE_BRACKET);
+global.Bracket.DATA[Unicode.RIGHT_SQUARE_BRACKET] =
+    new Bracket.Detail(Bracket.Type.RIGHT, Unicode.LEFT_SQUARE_BRACKET);
+global.Bracket.DATA[Unicode.LEFT_CURLY_BRACKET] =
+    new Bracket.Detail(Bracket.Type.LEFT, Unicode.RIGHT_CURLY_BRACKET);
+global.Bracket.DATA[Unicode.RIGHT_CURLY_BRACKET] =
+    new Bracket.Detail(Bracket.Type.RIGHT, Unicode.LEFT_CURLY_BRACKET);
+global.Bracket.DATA[Unicode.REVERSE_SOLIDUS] =
+    new Bracket.Detail(Bracket.Type.ESCAPE, 0x00);

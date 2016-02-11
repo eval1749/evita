@@ -7,12 +7,11 @@ global.editors = {};
 (function() {
   function loadUserScript() {
     var context = {
-        dirs: [
-            Os.getenv('HOME'),
-            Os.getenv('USERPROFILE'),
-            Os.getenv('HOMEDRIVE') + Os.getenv('HOMEPATH')
-        ],
-        scriptPath: ''
+      dirs: [
+        Os.getenv('HOME'), Os.getenv('USERPROFILE'),
+        Os.getenv('HOMEDRIVE') + Os.getenv('HOMEPATH')
+      ],
+      scriptPath: ''
     };
     function tryLoad() {
       if (!context.dirs.length)
@@ -42,7 +41,5 @@ global.editors = {};
     args.forEach(fileName => Editor.open(fileName));
   }
 
-  Object.defineProperties(editors, {
-    start: {value: start}
-  });
+  Object.defineProperties(editors, {start: {value: start}});
 })();

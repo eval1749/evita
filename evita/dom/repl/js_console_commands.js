@@ -23,7 +23,7 @@
   });
 
   JsConsole.bindKey('Ctrl+I', /** @this {!TextWindow} */ function() {
-    const selection = /** @type {!TextSelection} */(this.selection);
+    const selection = /** @type {!TextSelection} */ (this.selection);
     const completer = repl.JsCompleter.ensure(JsConsole.instance, selection);
     completer.perform();
   });
@@ -34,9 +34,7 @@
   });
 
   class Observer extends SimpleTextDocumentSetObserver {
-    constructor() {
-      super();
-    }
+    constructor() { super(); }
 
     /** @param {!TextDocument} document */
     didAddTextDocument(document) {
@@ -58,17 +56,18 @@
    * @this {Window}
    */
   function switchToJsConsoleCommand() {
-     const document = console.document;
-     const isFirstTime = document.listWindows().length === 0;
-     const window = windows.activate(this, document);
-     if (!isFirstTime)
-       return;
-     const commandLoop = JsConsole.instance;
-     console.freshLine();
-     console.emit(`\x2F/ JavaScript Console ${Editor.version},` +
-                  ` v8:${Editor.v8Version}\n\n`);
-     commandLoop.emitPrompt();
-     window.selection.endOf(Unit.DOCUMENT);
+    const document = console.document;
+    const isFirstTime = document.listWindows().length === 0;
+    const window = windows.activate(this, document);
+    if (!isFirstTime)
+      return;
+    const commandLoop = JsConsole.instance;
+    console.freshLine();
+    console.emit(
+        `\x2F/ JavaScript Console ${Editor.version},` +
+        ` v8:${Editor.v8Version}\n\n`);
+    commandLoop.emitPrompt();
+    window.selection.endOf(Unit.DOCUMENT);
   }
 
   Editor.bindKey(Window, 'Ctrl+Shift+J', switchToJsConsoleCommand);

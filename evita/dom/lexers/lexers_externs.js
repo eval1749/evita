@@ -129,4 +129,3 @@ global.ClikeLexer;
 
 /** @typedef {XmlLexer} */
 global.XmlLexer;
-

@@ -5,39 +5,15 @@
 /**
  * @constructor
  */
-global.TextStyle = (function () {
-  return function TextStyle() {
-  };
-})();
+global.TextStyle = (function() { return function TextStyle() {}; })();
 
 global.TextStyle.prototype = Object.create(
-    /** @type {Object} */(TextStyle.prototype), {
-  backgroundColor: {
-    enumerable: true,
-    writable: true
-  },
-  color: {
-    enumerable: true,
-    writable: true
-  },
-  fontFamily: {
-    enumerable: true,
-    writable: true
-  },
-  fontSize: {
-    enumerable: true,
-    writable: true
-  },
-  fontWeight: {
-    enumerable: true,
-    writable: true
-  },
-  syntax: {
-    enumerable: true,
-    writable: true
-  },
-  textDecoration: {
-    enumerable: true,
-    writable: true
-  },
-});
+    /** @type {Object} */ (TextStyle.prototype), {
+      backgroundColor: {enumerable: true, writable: true},
+      color: {enumerable: true, writable: true},
+      fontFamily: {enumerable: true, writable: true},
+      fontSize: {enumerable: true, writable: true},
+      fontWeight: {enumerable: true, writable: true},
+      syntax: {enumerable: true, writable: true},
+      textDecoration: {enumerable: true, writable: true},
+    });

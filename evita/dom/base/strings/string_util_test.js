@@ -20,8 +20,8 @@ testing.test('base.isAsciiAlpha', function(t) {
 testing.test('base.isAsciiDigit', function(t) {
   // TODO(eval1749): Due to limitation of closure compiler, we can't use
   // second parameter of |Array.from(arrayLike, mapFn?, thisArg?)|.
-  const digits = new Set(
-      Array.from("0123456789").map(char => char.charCodeAt(0)));
+  const digits =
+      new Set(Array.from("0123456789").map(char => char.charCodeAt(0)));
   for (let charCode = 0; charCode < 256; ++charCode) {
     const description = `base.isAsciiDigit(${charCode})`;
     t.expect(base.isAsciiDigit(charCode), description)

@@ -7,9 +7,7 @@
    * @this {!FormControl}
    * @return {boolean}
    */
-  function canFocus() {
-    return !this.disabled && !!this.form;
-  }
+  function canFocus() { return !this.disabled && !!this.form; }
 
   /**
    * @this {!FormControl}
@@ -42,7 +40,8 @@
    */
   function focus() {
     if (!this.canFocus()) {
-      throw new Error("Failed to execute 'focus' on 'FormControl': " +
+      throw new Error(
+          "Failed to execute 'focus' on 'FormControl': " +
           `${this} can not have focus.`);
     }
     const oldFocused = this.form.focusControl;
@@ -51,19 +50,17 @@
     this.form.focusControl = this;
     if (oldFocused) {
       dispatchEventWithDefaultHandler(
-          oldFocused,
-          new FocusEvent(Event.Names.BLUR, {relatedTarget: this}));
+          oldFocused, new FocusEvent(Event.Names.BLUR, {relatedTarget: this}));
     }
     dispatchEventWithDefaultHandler(
-        this,
-        new FocusEvent(Event.Names.FOCUS, {relatedTarget: oldFocused}));
+        this, new FocusEvent(Event.Names.FOCUS, {relatedTarget: oldFocused}));
   }
 
   Object.defineProperties(FormControl.prototype, {
     accessKey_: {value: '', writable: true},
     accessKey: {
-        get: function() { return this.accessKey_; },
-        set: function(key) { this.accessKey_ = key; }
+      get: function() { return this.accessKey_; },
+      set: function(key) { this.accessKey_ = key; }
     },
     canFocus: {value: canFocus, writable: true},
     dispatchChangeEvent: {value: dispatchChangeEvent},

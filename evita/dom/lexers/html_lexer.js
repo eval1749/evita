@@ -7,17 +7,9 @@ global.HtmlLexer = (function(options) {
     /**
      * @param {!TextDocument} document
      */
-    constructor(document) {
-      super(document, options);
-    }
+    constructor(document) { super(document, options); }
 
     static get keywords() { return options.keywords; }
   }
   return HtmlLexer;
-})({
-  childLexers: {
-    script: JavaScriptLexer
-  },
-  ignoreCase: true,
-  keywords: []
-});
+})({childLexers: {script: JavaScriptLexer}, ignoreCase: true, keywords: []});

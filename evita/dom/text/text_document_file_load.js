@@ -20,8 +20,8 @@
       this.strings = [];
     }
 
-   /** @return {string} */
-   get encoding() { return this.decoder_.encoding; }
+    /** @return {string} */
+    get encoding() { return this.decoder_.encoding; }
 
     /**
      * @param {!Uint8Array} data
@@ -31,7 +31,8 @@
       if (!this.decoder_)
         return false;
       try {
-        this.strings.push(this.decoder_.decode(data, {stream: data.length > 0}));
+        this.strings.push(
+            this.decoder_.decode(data, {stream: data.length > 0}));
         return true;
       } catch (e) {
         this.decoder_ = null;
@@ -222,8 +223,8 @@
     }
 
     document.obsolete = TextDocument.Obsolete.CHECKING;
-    Editor.messageBox(null, 'Loading ' + document.fileName,
-                      MessageBox.ICONINFORMATION);
+    Editor.messageBox(
+        null, 'Loading ' + document.fileName, MessageBox.ICONINFORMATION);
     document.dispatchEvent(new TextDocumentEvent(Event.Names.BEFORELOAD));
 
     // Start loading
@@ -231,8 +232,8 @@
     return loader.load(document.fileName)
         .then(function(length) {
           loader.close();
-          Editor.messageBox(null, 'Loaded ' + document.fileName,
-                            MessageBox.ICONINFORMATION);
+          Editor.messageBox(
+              null, 'Loaded ' + document.fileName, MessageBox.ICONINFORMATION);
           finishLoad(document, TextDocument.Obsolete.NO);
           return length;
         })

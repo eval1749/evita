@@ -28,12 +28,12 @@ global.XmlLexer = (function(xmlOptions) {
     map.set(Unicode.QUOTATION_MARK, Lexer.STRING2_CHAR);
 
     // NameStartChar ::= [A-Z] | [a-z] | '_' | ':' | ...
-    setRange(Lexer.NAMESTART_CHAR,
-             Unicode.LATIN_CAPITAL_LETTER_A,
-             Unicode.LATIN_CAPITAL_LETTER_Z);
-    setRange(Lexer.NAMESTART_CHAR,
-             Unicode.LATIN_SMALL_LETTER_A,
-             Unicode.LATIN_SMALL_LETTER_Z);
+    setRange(
+        Lexer.NAMESTART_CHAR, Unicode.LATIN_CAPITAL_LETTER_A,
+        Unicode.LATIN_CAPITAL_LETTER_Z);
+    setRange(
+        Lexer.NAMESTART_CHAR, Unicode.LATIN_SMALL_LETTER_A,
+        Unicode.LATIN_SMALL_LETTER_Z);
     map.set(Unicode.LOW_LINE, Lexer.NAMESTART_CHAR);
     map.set(Unicode.COLON, Lexer.NAMESTART_CHAR);
     setRange(Lexer.NAME_CHAR, 0x00C0, 0x00D6);
@@ -91,9 +91,8 @@ global.XmlLexer = (function(xmlOptions) {
      */
     adjustScanOffset(changedOffset) {
       super.adjustScanOffset(changedOffset);
-      this.childLexerMap_.forEach(childLexer => {
-        childLexer.adjustScanOffset(changedOffset);
-      });
+      this.childLexerMap_.forEach(
+          childLexer => { childLexer.adjustScanOffset(changedOffset); });
     }
 
     /**
@@ -101,9 +100,7 @@ global.XmlLexer = (function(xmlOptions) {
      */
     clear() {
       Lexer.prototype.clear.call(this);
-      this.childLexerMap_.forEach(function(childLexer) {
-        childLexer.clear();
-      });
+      this.childLexerMap_.forEach(function(childLexer) { childLexer.clear(); });
     }
 
     /**
@@ -113,7 +110,7 @@ global.XmlLexer = (function(xmlOptions) {
     colorToken(token) {
       if (token.state === XmlLexer.State.SCRIPT) {
         const tokenData = token.data;
-        const scriptLexer = /** @type {!Lexer} */(tokenData.scriptLexer);
+        const scriptLexer = /** @type {!Lexer} */ (tokenData.scriptLexer);
         const startTokenIt = scriptLexer.lowerBound(token.start);
         const endTokenIt = scriptLexer.lowerBound(token.end);
         for (let tokenIt = startTokenIt; tokenIt !== endTokenIt;
@@ -146,9 +143,7 @@ global.XmlLexer = (function(xmlOptions) {
      * @param {!lexers.Token} token
      * @return {string}
      */
-    syntaxOfToken(token) {
-      return STATE_TO_SYNTAX.get(token.state) || '';
-    }
+    syntaxOfToken(token) { return STATE_TO_SYNTAX.get(token.state) || ''; }
   }
 
   /**
@@ -238,7 +233,7 @@ global.XmlLexer = (function(xmlOptions) {
 
     map.set(XmlLexer.State.ATTROTHER, '')
 
-    map.set(XmlLexer.State.ATTRVALUE, 'html_attribute_value');
+        map.set(XmlLexer.State.ATTRVALUE, 'html_attribute_value');
     map.set(XmlLexer.State.ATTRVALUE_END, '');
     map.set(XmlLexer.State.ATTRVALUE_SPACE, '');
     map.set(XmlLexer.State.ATTRVALUE1, 'html_attribute_value');
@@ -313,8 +308,8 @@ global.XmlLexer = (function(xmlOptions) {
           case 2:
             return XmlLexer.State.COMMENT_DASH_DASH;
           default:
-           console.assert(false, token);
-           break;
+            console.assert(false, token);
+            break;
         }
         break;
       case XmlLexer.State.COMMENT_START:
@@ -522,7 +517,7 @@ global.XmlLexer = (function(xmlOptions) {
         if (this.isWhitespaceChar(charCode))
           this.extendToken();
         else if (this.isNameStartChar(charCode))
-           this.finishState(XmlLexer.State.ATTRNAME);
+          this.finishState(XmlLexer.State.ATTRNAME);
         else
           processStartTag(this, charCode, XmlLexer.State.ATTROTHER);
         return;
@@ -547,7 +542,7 @@ global.XmlLexer = (function(xmlOptions) {
           this.restartToken(XmlLexer.State.COMMENT_DASH_DASH);
         else
           this.finishState(XmlLexer.State.COMMENT);
-          return;
+        return;
       case XmlLexer.State.COMMENT_DASH_DASH:
         if (charCode === Unicode.GREATER_THAN_SIGN)
           this.restartToken(XmlLexer.State.COMMENT_END);
@@ -861,7 +856,7 @@ global.XmlLexer = (function(xmlOptions) {
     lexer.endToken();
     if (!lexer.childLexerMap_.size)
       return;
-    var it = lexer.tokens.find(/** @type {!lexers.Token} */(lexer.lastToken));
+    var it = lexer.tokens.find(/** @type {!lexers.Token} */ (lexer.lastToken));
     while (it.data.state !== XmlLexer.State.STARTTAG) {
       it = it.previous();
     }
@@ -871,10 +866,7 @@ global.XmlLexer = (function(xmlOptions) {
     if (!childLexer)
       return;
 
-    lexer.tokenData = {
-      scriptLexer: childLexer,
-      scriptTagName: tagName
-    };
+    lexer.tokenData = {scriptLexer: childLexer, scriptTagName: tagName};
 
     // Handle script fragment after <script>
     if (charCode === Unicode.LESS_THAN_SIGN) {
@@ -899,10 +891,6 @@ global.XmlLexer = (function(xmlOptions) {
 
   return XmlLexer;
 })({
-  keywords: Lexer.createKeywords([
-      'xi:include',
-      'xml:base',
-      'xml:lang',
-      'xmlns:',
-      'xml:space'
-])});
+  keywords: Lexer.createKeywords(
+      ['xi:include', 'xml:base', 'xml:lang', 'xmlns:', 'xml:space'])
+});

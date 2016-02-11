@@ -52,9 +52,7 @@ global.TextWindow.prototype.clone = function() {
                           current !== selection.range.start;
     }
 
-    stop() {
-      this.timer.stop();
-    }
+    stop() { this.timer.stop(); }
 
     /**
      * @param {number} direction
@@ -72,8 +70,9 @@ global.TextWindow.prototype.clone = function() {
       this.timer.start(AUTOSCROLL_INTERVAL_MS, function() {
         const duration = Date.now() - this.startedAt;
         const amount = Math.floor(
-                        Math.min(Math.max(duration / AUTOSCROLL_SPEED_MS, 1),
-                                 AUTOSCROLL_MAX_MOVE));
+            Math.min(
+                Math.max(duration / AUTOSCROLL_SPEED_MS, 1),
+                AUTOSCROLL_MAX_MOVE));
         if (!this.scroll(amount * this.direction))
           this.stop();
       }, this);
@@ -125,8 +124,8 @@ global.TextWindow.prototype.clone = function() {
   TextWindow.prototype.textCompositionRange;
 
   Object.defineProperties(TextWindow.prototype, {
-    'selectionTimer_': { value: null, writable: true },
-    'textCompositionRange': { value: null, writable: true }
+    'selectionTimer_': {value: null, writable: true},
+    'textCompositionRange': {value: null, writable: true}
   });
 
   /**
@@ -165,7 +164,7 @@ global.TextWindow.prototype.clone = function() {
     /** @type {!TextRange} */
     const range = window.textCompositionRange;
     /** @type {!TextSelection} */
-    const selection = /** @type {!TextSelection} */(window.selection);
+    const selection = /** @type {!TextSelection} */ (window.selection);
     /** @type {!TextRange} */
     const selectionRange = selection.range;
 
@@ -193,16 +192,16 @@ global.TextWindow.prototype.clone = function() {
       selectionRange.collapseTo(range.start + start);
       selectionRange.end = range.start + end;
       switch (span.data) {
-        case 0: // ATTR_INPUT
-        case 4: // ATTR_INPUT_ERROR
+        case 0:  // ATTR_INPUT
+        case 4:  // ATTR_INPUT_ERROR
           selectionRange.setStyle({textDecoration: 'imeinput'});
           break;
-        case 1: // ATTR_TARGET_CONVERTED
-        case 3: // ATTR_TARGET_NOTCONVERTED
+        case 1:  // ATTR_TARGET_CONVERTED
+        case 3:  // ATTR_TARGET_NOTCONVERTED
           selectionRange.setStyle({backgroundColor: 0x3399FF, color: 0xFFFFFF});
           break;
-        case 2: // ATTR_CONVERTED
-        case 5: // ATTR_FIXEDCONVERTED
+        case 2:  // ATTR_CONVERTED
+        case 5:  // ATTR_FIXEDCONVERTED
           selectionRange.setStyle({textDecoration: 'imeinactive2'});
           break;
       }
@@ -221,15 +220,15 @@ global.TextWindow.prototype.clone = function() {
       return;
     const offset = mapPointToOffset(event);
     if (offset < 0)
-        return;
-      selectWordAt(window, offset);
+      return;
+    selectWordAt(window, offset);
   }
 
   /**
    * @param {!TextWindow} window
    */
   function handleFocus(window) {
-    Editor.requestIdleCallback(updateObsolete.bind(window), {timeout:500});
+    Editor.requestIdleCallback(updateObsolete.bind(window), {timeout: 500});
     updateStatusBar(window, `Switch to ${window.document.name}`);
   }
 
@@ -264,9 +263,9 @@ global.TextWindow.prototype.clone = function() {
    */
   function handleMouseMove(window, event) {
     const offset = mapPointToOffset(event);
-     const dragController = window.dragController_;
-     if (offset < 0 || !dragController || !dragController.dragging)
-       return;
+    const dragController = window.dragController_;
+    if (offset < 0 || !dragController || !dragController.dragging)
+      return;
 
     const selection = window.selection;
     if (offset <= selection.range.start) {
@@ -296,7 +295,7 @@ global.TextWindow.prototype.clone = function() {
    */
   function handleMouseUp(window, event) {
     if (event.button)
-     return;
+      return;
     stopControllers(window);
   }
 
@@ -391,7 +390,7 @@ global.TextWindow.prototype.clone = function() {
       window.status = Strings.IDS_NO_MATCHING_PAREN;
     }
 
-    const selection = /** @type {!TextSelection} */(window.selection);
+    const selection = /** @type {!TextSelection} */ (window.selection);
     const selectionRange = selection.range;
     const document = selection.document;
     const range = createOrGetRange(document, 'bracket');
@@ -420,7 +419,7 @@ global.TextWindow.prototype.clone = function() {
    * @return {number}
    */
   function mapPointToOffset(event) {
-    const textWindow = /** @type {!TextWindow} */(event.target);
+    const textWindow = /** @type {!TextWindow} */ (event.target);
     return textWindow.hitTestPoint(event.clientX, event.clientY);
   }
 
@@ -465,14 +464,10 @@ global.TextWindow.prototype.clone = function() {
   }
 
   /** @const @type {!Array.<string>} */
-  const DOCUMENT_STATE_TEXTS = [
-    'Ready', 'Loading...', 'Saving...'
-  ];
+  const DOCUMENT_STATE_TEXTS = ['Ready', 'Loading...', 'Saving...'];
 
   /** @const @type {!Array.<string>} */
-  const NEWLINE_MODES = [
-    '--', 'LF', 'CR', 'CRLF'
-  ];
+  const NEWLINE_MODES = ['--', 'LF', 'CR', 'CRLF'];
   /**
    * @this {!TextWindow}
    */
@@ -486,35 +481,41 @@ global.TextWindow.prototype.clone = function() {
       return;
     }
     if (document.obsolete === TextDocument.Obsolete.YES) {
-      Editor.messageBox(window, 'This document has been stale.',
-                        MessageBox.ICONWARNING);
+      Editor.messageBox(
+          window, 'This document has been stale.', MessageBox.ICONWARNING);
       return;
     }
     document.obsolete = TextDocument.Obsolete.CHECKING;
-    Os.File.stat(document.fileName).then((info) => {
-      document.lastStatTime_ = new Date();
-      document.obsolete = info.lastModificationDate.valueOf() ===
-                            document.lastWriteTime.valueOf() ?
-          TextDocument.Obsolete.NO : TextDocument.Obsolete.YES;
-      if (document.obsolete === TextDocument.Obsolete.NO)
-        return;
-      Editor.messageBox(window, 'This document is stale.',
-                        MessageBox.ICONWARNING);
-      Editor.messageBox(window,
-          Editor.localizeText(Strings.IDS_ASK_REFRESH, {name: document.name}),
-          MessageBox.YESNO | MessageBox.ICONWARNING | MessageBox.TOPMOST |
-              MessageBox.SETFOREGROUND).then((response) => {
-        if (response !== DialogItemId.YES) {
-          document.lastWriteTime = info.lastModificationDate;
-          return;
-        }
-        reloadTextDocument(window, document);
-      });
-    }).catch((reason) => {
-      console.log('Os.File.stat', document.fileName, reason);
-      document.lastStatTime_ = new Date();
-      document.obsolete = TextDocument.Obsolete.UNKNOWN;
-    });
+    Os.File.stat(document.fileName)
+        .then((info) => {
+          document.lastStatTime_ = new Date();
+          document.obsolete = info.lastModificationDate.valueOf() ===
+                  document.lastWriteTime.valueOf() ?
+              TextDocument.Obsolete.NO :
+              TextDocument.Obsolete.YES;
+          if (document.obsolete === TextDocument.Obsolete.NO)
+            return;
+          Editor.messageBox(
+              window, 'This document is stale.', MessageBox.ICONWARNING);
+          Editor
+              .messageBox(
+                  window, Editor.localizeText(
+                              Strings.IDS_ASK_REFRESH, {name: document.name}),
+                  MessageBox.YESNO | MessageBox.ICONWARNING |
+                      MessageBox.TOPMOST | MessageBox.SETFOREGROUND)
+              .then((response) => {
+                if (response !== DialogItemId.YES) {
+                  document.lastWriteTime = info.lastModificationDate;
+                  return;
+                }
+                reloadTextDocument(window, document);
+              });
+        })
+        .catch((reason) => {
+          console.log('Os.File.stat', document.fileName, reason);
+          document.lastStatTime_ = new Date();
+          document.obsolete = TextDocument.Obsolete.UNKNOWN;
+        });
   }
 
   /**
@@ -528,9 +529,8 @@ global.TextWindow.prototype.clone = function() {
         return false;
       // TODO(eval1749): We should use arrow notation once v8 fixes internal
       // parse error when we use arrow notation.
-      return texts1.every((text1, index) => {
-        return text1 === texts2[index];
-      });
+      return texts1.every(
+          (text1, index) => { return text1 === texts2[index]; });
     }
 
     const document = window.document;
@@ -558,8 +558,7 @@ global.TextWindow.prototype.clone = function() {
   /** @type {!Map.<string, !function(!TextWindow, !Event)>} */
   const handlerMap = new Map([
     [Event.Names.BLUR, stopControllers],
-    [Event.Names.DBLCLICK, handleDoubleClick],
-    [Event.Names.FOCUS, handleFocus],
+    [Event.Names.DBLCLICK, handleDoubleClick], [Event.Names.FOCUS, handleFocus],
     [Event.Names.MOUSEDOWN, handleMouseDown],
     [Event.Names.MOUSEMOVE, handleMouseMove],
     [Event.Names.MOUSEUP, handleMouseUp],
@@ -572,7 +571,7 @@ global.TextWindow.prototype.clone = function() {
    * @this {!TextWindow}
    * @param {!Event} event
    */
-  TextWindow.handleEvent = function (event) {
+  TextWindow.handleEvent = function(event) {
     let handler = handlerMap.get(event.type);
     if (handler)
       handler(this, event);

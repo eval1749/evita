@@ -7,9 +7,7 @@
    * @this {!RadioButtonControl}
    * @return {boolean}
    */
-  function getChecked() {
-    return this.checked_;
-  }
+  function getChecked() { return this.checked_; }
 
   /**
    * @this {!RadioButtonControl}
@@ -48,7 +46,7 @@
    * Default event handler.
    */
   function handleEvent(event) {
-    var radioButton = /** @type {!RadioButtonControl} */(event.target);
+    var radioButton = /** @type {!RadioButtonControl} */ (event.target);
     switch (event.type) {
       case Event.Names.CLICK:
         this.dispatchInputEvent();

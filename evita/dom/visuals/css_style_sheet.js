@@ -24,9 +24,9 @@ class CSSStyleSheet {
       // TODO(eval17490: Once |Array.from()| has right type definition, we
       // should get rid of type case for |this.cssRules_|.
       this.cachedCssRules_ = Array.from(
-          /** @type {!Iterable<!CSSRule>} */(this.cssRules_));
+          /** @type {!Iterable<!CSSRule>} */ (this.cssRules_));
     }
-    return /** @type {!Array.<!CSSRule>} */(this.cachedCssRules_);
+    return /** @type {!Array.<!CSSRule>} */ (this.cachedCssRules_);
   }
 
   /** @return {string} */
@@ -40,17 +40,15 @@ class CSSStyleSheet {
   appendRule(rule) {
     if (rule.parentStyleSheet)
       throw new Error(`${rule} is already in ${rule.parentStyleSheet}`);
-    CSSStyleSheetHandle.appendStyleRule(this.handle_, rule.selectorText,
-                                        rule.style.rawStyle_);
+    CSSStyleSheetHandle.appendStyleRule(
+        this.handle_, rule.selectorText, rule.style.rawStyle_);
     rule.parentStyleSheet_ = this;
     this.cssRules_.push(rule);
     this.clearCssRulesCache_();
   }
 
   /** @private */
-  clearCssRulesCache_() {
-   this.cachedCssRules_ = null;
-  }
+  clearCssRulesCache_() { this.cachedCssRules_ = null; }
 
   /**
    * @param {number} index
@@ -65,7 +63,7 @@ class CSSStyleSheet {
    * @param {number} index
    */
   didChangeCSSRule(index) {
-    const rule = /** @type {!CSSStyleRule} */(this.cssRules_[index]);
+    const rule = /** @type {!CSSStyleRule} */ (this.cssRules_[index]);
     this.deleteRule(index);
     this.insertRule(rule, index);
   }
@@ -79,8 +77,8 @@ class CSSStyleSheet {
   insertRule(rule, index) {
     if (rule.parentStyleSheet)
       throw new Error(`${rule} is already in ${rule.parentStyleSheet}`);
-    CSSStyleSheetHandle.insertStyleRule(this.handle_, rule.selectorText,
-                                        rule.style.rawStyle_, index);
+    CSSStyleSheetHandle.insertStyleRule(
+        this.handle_, rule.selectorText, rule.style.rawStyle_, index);
     rule.parentStyleSheet_ = this;
     this.cssRules_.splice(index, 0, rule);
     this.clearCssRulesCache_();

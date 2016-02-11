@@ -37,9 +37,7 @@ class DOMTokenList {
   }
 
   /** @private */
-  clearListCache() {
-    this.cachedList_ = null;
-  }
+  clearListCache() { this.cachedList_ = null; }
 
   /**
    * @param {string} token

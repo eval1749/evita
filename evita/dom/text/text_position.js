@@ -28,7 +28,8 @@
    */
   function bracketDataOf(position) {
     var charCode = position.charCode();
-    // TODO(eval1749): We should get character syntax from mime type information.
+    // TODO(eval1749): We should get character syntax from mime type
+    // information.
     return Bracket.DATA[charCode] || NOT_BRACKET;
   }
 
@@ -57,7 +58,8 @@
 
     while (position.offset) {
       position.move(Unit.CHARACTER, -1);
-      // TODO(eval1749): We should get character syntax from mime type information.
+      // TODO(eval1749): We should get character syntax from mime type
+      // information.
       var bracket = bracketDataOf(position);
       if (bracket.type == Bracket.Type.NONE)
         continue;
@@ -69,7 +71,7 @@
       var currentOffset = position.offset;
       position.moveWhile(function() {
         return syntaxEquals(this.charSyntax(), bracketCharSyntax) &&
-               bracketDataOf(this).type == Bracket.Type.ESCAPE;
+            bracketDataOf(this).type == Bracket.Type.ESCAPE;
       }, Count.BACKWARD);
       if ((currentOffset - position.offset) & 1)
         continue;
@@ -134,7 +136,7 @@
           var currentOffset = position.offset;
           position.moveWhile(function() {
             return bracketDataOf(this).type == Bracket.Type.ESCAPE &&
-                   syntaxEquals(this.charSyntax(), bracketCharSyntax);
+                syntaxEquals(this.charSyntax(), bracketCharSyntax);
           }, Count.FORWARD);
           if (!((position.offset - currentOffset) & 1))
             position.move(Unit.CHARACTER, -1);
@@ -198,21 +200,20 @@
   })();
 
   /** * @return {number} */
-  global.TextPosition.prototype.charCode = function() {
-    return this.document.charCodeAt(this.offset);
-  }
+  global.TextPosition.prototype.charCode =
+      function() { return this.document.charCodeAt(this.offset); }
 
-  /** * @return {string} */
-  global.TextPosition.prototype.charSyntax = function() {
-    return this.document.syntaxAt(this.offset);
-  }
+      /** * @return {string} */
+      global.TextPosition.prototype.charSyntax =
+          function() { return this.document.syntaxAt(this.offset); }
 
-  /**
-   * @this {!TextPosition}
-   * @param {!Unit} unit
-   * @param {number=} count, default is one.
-   */
-  global.TextPosition.prototype.move = function(unit, count = 1) {
+          /**
+           * @this {!TextPosition}
+           * @param {!Unit} unit
+           * @param {number=} count, default is one.
+           */
+          global.TextPosition.prototype.move =
+              function(unit, count = 1) {
     if (unit != Unit.BRACKET)
       this.offset = this.document.computeMotion_(unit, count, this.offset);
     else if (count > 0)
@@ -222,13 +223,14 @@
     return this;
   }
 
-  /**
-   * @this {!TextPosition}
-   * @param {function() : boolean} callback
-   * @param {number=} count, default is one
-   * @return {!TextPosition}
-   */
-  global.TextPosition.prototype.moveWhile = function(callback, count = 1) {
+              /**
+               * @this {!TextPosition}
+               * @param {function() : boolean} callback
+               * @param {number=} count, default is one
+               * @return {!TextPosition}
+               */
+              global.TextPosition.prototype.moveWhile = function(
+                  callback, count = 1) {
     if (count < 0) {
       while (count && this.offset) {
         --this.offset;

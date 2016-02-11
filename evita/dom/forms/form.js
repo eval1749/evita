@@ -38,7 +38,7 @@
     }
     /** @type {FormControl} */
     const focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
-                         findFocusable(-1);
+        findFocusable(-1);
     if (!focusControl)
       return;
     focusControl.focus();
@@ -63,7 +63,7 @@
     }
     /** @type {FormControl} */
     const focusControl = findFocusable(controlIndex(form, form.focusControl)) ||
-                         findFocusable(controls.length);
+        findFocusable(controls.length);
     if (!focusControl)
       return;
     focusControl.focus();
@@ -85,7 +85,8 @@
     /** @type {FormControl} */
     const control = form.controls.find((control) => {
       return control.accessKey === accessKey;
-    }) || null;
+    }) ||
+        null;
     if (!control || control.disabled)
       return;
     if (control instanceof ButtonControl) {
@@ -114,18 +115,18 @@
       return handleAltKeyDown(form, event);
     // Move focus to next/previous of current focus control.
     switch (event.keyCode & 0x1FF) {
-      case 0x109: // TAB
+      case 0x109:  // TAB
         if (event.shiftKey)
           moveFocusToPrevious(form);
         else
           moveFocusToNext(form);
         break;
-      case 0x125: // Left
-      case 0x126: // Up
+      case 0x125:  // Left
+      case 0x126:  // Up
         moveFocusToPrevious(form);
         break;
-      case 0x127: // ArrowRight
-      case 0x128: // ArrowDown
+      case 0x127:  // ArrowRight
+      case 0x128:  // ArrowDown
         moveFocusToNext(form);
         break;
     }
@@ -161,7 +162,7 @@
         break;
       case Event.Names.KEYDOWN:
         if (!event.defaultPrevented)
-          handleKeyDown(this, /** @type {!KeyboardEvent} */(event));
+          handleKeyDown(this, /** @type {!KeyboardEvent} */ (event));
         break;
       default:
         console.log('Form.handleEvent', event);

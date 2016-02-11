@@ -15,7 +15,7 @@ $define(global, 'windows', function($export) {
     });
     if (present) {
       present.focus();
-      return /** @type {!TextWindow} */(present);
+      return /** @type {!TextWindow} */ (present);
     }
     return windows.newTextWindow(parent, document);
   }
@@ -85,6 +85,7 @@ $define(global, 'windows', function($export) {
     return editorWindow ? editorWindow.lastChild : null;
   }
 
-  $export({activate, firstWindow, lastWindow, newEditorWindow, newTextWindow,
-           nextWindow, previousWindow});
+  $export(
+      {activate, firstWindow, lastWindow, newEditorWindow, newTextWindow,
+       nextWindow, previousWindow});
 });

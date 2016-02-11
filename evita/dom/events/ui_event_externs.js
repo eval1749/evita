@@ -14,5 +14,5 @@ UiEvent.prototype.view;
  * @param {?Window} view
  * @param {number} detail
  */
-UiEvent.prototype.initUiEvent = function(type, bubbles, cancelable,
-                                         view, detail) {};
+UiEvent.prototype.initUiEvent = function(
+    type, bubbles, cancelable, view, detail) {};

@@ -40,9 +40,9 @@
   FilePath.isValidFileName = function(fileName) {
     var data = FilePath.split(fileName);
     return !!data.winDrive && data.absolute &&
-           data.components.every(function(component) {
-             return !RE_FILENAME_RESERVED_CHARACTERS.test(component);
-           });
+        data.components.every(function(component) {
+          return !RE_FILENAME_RESERVED_CHARACTERS.test(component);
+        });
   };
 
   /**
@@ -75,10 +75,9 @@
         components.push(component);
       }
     }
-    return (data.winDrive ? data.winDrive.toUpperCase() + ':' :
-                            EMPTY_STRING) +
-           (data.absolute ? PATH_SEPARATOR : EMPTY_STRING) +
-           components.join(PATH_SEPARATOR);
+    return (data.winDrive ? data.winDrive.toUpperCase() + ':' : EMPTY_STRING) +
+        (data.absolute ? PATH_SEPARATOR : EMPTY_STRING) +
+        components.join(PATH_SEPARATOR);
   };
 
   /**

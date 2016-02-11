@@ -33,26 +33,26 @@
    * @this {EditorWindow}
    * @param {Event} event
    */
- EditorWindow.handleEvent = function(event) {
-   switch (event.type) {
-     case Event.Names.BLUR:
-     case Event.Names.FOCUS:
-       break;
-     case Event.Names.DROPWINDOW: {
-       var windowEvent = /** @type {!WindowEvent} */(event);
-       var editorWindow = /** @type {!EditorWindow} */(
-          windowEvent.sourceWindow);
-       handleDropWindow(editorWindow, this);
-       break;
-     }
-     case Event.Names.QUERYCLOSE:
-       handleQueryClose(this);
-       break;
-     default:
-       Window.handleEvent.call(this, event);
-       break;
-   }
- };
+  EditorWindow.handleEvent = function(event) {
+    switch (event.type) {
+      case Event.Names.BLUR:
+      case Event.Names.FOCUS:
+        break;
+      case Event.Names.DROPWINDOW: {
+        var windowEvent = /** @type {!WindowEvent} */ (event);
+        var editorWindow =
+            /** @type {!EditorWindow} */ (windowEvent.sourceWindow);
+        handleDropWindow(editorWindow, this);
+        break;
+      }
+      case Event.Names.QUERYCLOSE:
+        handleQueryClose(this);
+        break;
+      default:
+        Window.handleEvent.call(this, event);
+        break;
+    }
+  };
 
   /**
    * Open file in window.
@@ -61,16 +61,16 @@
    * This function handles drag-and-drop.
    */
   EditorWindow.prototype.open = function(fileName) {
-     var document = TextDocument.open(fileName);
-     var window = this.children.find(function(present) {
-       return present.document === document;
-     });
-     if (window) {
-       window.focus();
-       return;
-     }
-     document.load()
-     var new_window = new TextWindow(new TextRange(document));
-     this.appendChild(new_window);
-   };
+    var document = TextDocument.open(fileName);
+    var window = this.children.find(function(present) {
+      return present.document === document;
+    });
+    if (window) {
+      window.focus();
+      return;
+    }
+    document.load();
+    const new_window = new TextWindow(new TextRange(document));
+    this.appendChild(new_window);
+  };
 })();

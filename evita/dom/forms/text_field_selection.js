@@ -7,9 +7,7 @@ Object.defineProperty(TextFieldSelection.prototype, 'end', {
    * @this {!TextFieldSelection}
    * @return {number}
    */
-  get: function() {
-    return Math.max(this.anchorOffset, this.focusOffset);
-  }
+  get: function() { return Math.max(this.anchorOffset, this.focusOffset); }
 });
 
 Object.defineProperty(TextFieldSelection.prototype, 'start', {
@@ -17,9 +15,7 @@ Object.defineProperty(TextFieldSelection.prototype, 'start', {
    * @this {!TextFieldSelection}
    * @return {number}
    */
-  get: function() {
-    return Math.min(this.anchorOffset, this.focusOffset);
-  }
+  get: function() { return Math.min(this.anchorOffset, this.focusOffset); }
 });
 
 Object.defineProperty(TextFieldSelection.prototype, 'text', {
@@ -29,7 +25,7 @@ Object.defineProperty(TextFieldSelection.prototype, 'text', {
    */
   get: function() {
     return this.collapsed ? '' :
-        this.control.value.substring(this.start, this.end);
+                            this.control.value.substring(this.start, this.end);
   },
   /**
    * @this {!TextFieldSelection}
@@ -42,8 +38,8 @@ Object.defineProperty(TextFieldSelection.prototype, 'text', {
     var value = this.control.value;
     if (this.collapsed) {
       var offset = this.focusOffset;
-      this.control.value_ = value.substr(0, offset) + new_text +
-                            value.substr(offset);
+      this.control.value_ =
+          value.substr(0, offset) + new_text + value.substr(offset);
       this.focusOffset = offset + new_text.length;
       return;
     }

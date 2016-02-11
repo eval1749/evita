@@ -6,7 +6,6 @@
  * @struct { name: string, start: number, end: number }
  */
 RegularExpression.Match = (function() {
-  function Match() {
-  }
+  function Match() {}
   return Match;
 })();

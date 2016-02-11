@@ -33,9 +33,7 @@
    * @this {!Window}
    * @return {string}
    */
-  function statusGet() {
-    return this.status_;
-  }
+  function statusGet() { return this.status_; }
 
   /**
    * @this {!Window}
@@ -47,9 +45,7 @@
     Editor.messageBox(this, this.status_, MessageBox.ICONINFORMATION);
   }
 
-  Object.defineProperties(Window, {
-    handleEvent: {value: handleEvent}
-  });
+  Object.defineProperties(Window, {handleEvent: {value: handleEvent}});
 
   Object.defineProperties(Window.prototype, {
     focusTick_: {value: 0, writable: true},

@@ -7,15 +7,11 @@
    * @constructor
    */
   Os.File.Error = (function() {
-    return function Error(winLastError) {
-      this.winLastError = winLastError;
-    }
+    return function Error(winLastError) { this.winLastError = winLastError; }
   })();
 
   /**
    * @constructor
    */
-  Os.File.Info = (function() {
-    return function Info() {};
-  })();
+  Os.File.Info = (function() { return function Info() {}; })();
 })();

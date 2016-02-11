@@ -10,25 +10,14 @@
 
 namespace ui {
 
-EventDispatcher::EventDispatcher() : current_handler_(nullptr) {}
+EventDispatcher::EventDispatcher() {}
 
-EventDispatcher::~EventDispatcher() {
-  DCHECK(!current_handler_);
-}
+EventDispatcher::~EventDispatcher() {}
 
-void EventDispatcher::DidDestroyEventHandler(EventHandler* handler) {
-  if (current_handler_ != handler)
-    return;
-  current_handler_ = nullptr;
-}
+void EventDispatcher::DidDestroyEventHandler(EventHandler* handler) {}
 
 bool EventDispatcher::DispatchEvent(EventHandler* handler, Event* event) {
-  DCHECK(!current_handler_);
-  current_handler_ = handler;
   handler->OnEvent(event);
-  if (!current_handler_)
-    return false;
-  current_handler_ = nullptr;
   return !event->default_prevented();
 }
 

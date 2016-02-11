@@ -25,8 +25,6 @@ class EventDispatcher final : public common::Singleton<EventDispatcher> {
  private:
   EventDispatcher();
 
-  EventHandler* current_handler_;
-
   DISALLOW_COPY_AND_ASSIGN(EventDispatcher);
 };
 

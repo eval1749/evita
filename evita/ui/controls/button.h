@@ -47,6 +47,8 @@ class Button : public ui::Widget {
  protected:
   explicit Button(ButtonListener* listener);
 
+  ButtonListener* listener() const { return listener_; }
+
   virtual void PaintButton(gfx::Canvas* canvas);
   void SetState(State new_state);
 
@@ -65,7 +67,7 @@ class Button : public ui::Widget {
 
   int canvas_bitmap_id_;
   bool dirty_;
-  ButtonListener* listener_;
+  ButtonListener* const listener_;
   State state_;
 
   DISALLOW_COPY_AND_ASSIGN(Button);

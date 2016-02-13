@@ -109,14 +109,14 @@ js_lib_files = [
   "components/launchpad/launchpad.js",
   "components/spell_checker/spell_checker.js",
 
-  "repl/console.js",
-  "repl/describe.js",
-  "repl/js_console.js",
-  "repl/load.js",
-  "repl/stringify.js",
+  "components/repl/console.js",
+  "components/repl/describe.js",
+  "components/repl/js_console.js",
+  "components/repl/load.js",
+  "components/repl/stringify.js",
 
-  "repl/js_completer.js",
-  "repl/js_console_commands.js",
+  "components/repl/js_completer.js",
+  "components/repl/js_console_commands.js",
 
   "jslib/install_stringify.js",
 

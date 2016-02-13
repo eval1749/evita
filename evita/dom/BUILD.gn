@@ -206,13 +206,13 @@ action("check_jslib") {
 test("evita_dom_tests") {
   sources = [
     "base/ordered_set_test.cc",
+    "components/repl/console_unittest.cc",
     "css/text_style_test.cc",
     "editor_unittest.cc",
     "errors_unittest.cc",
     "file_path_unittest.cc",
     "lexers/lexers_unittest.cc",
     "polyfill_unittest.cc",
-    "repl/console_unittest.cc",
     "timers/timer_test.cc",
     "unicode_unittest.cc",
     "view_event_handler_impl_unittest.cc",

@@ -6,11 +6,10 @@
 
 #include "evita/views/icon_cache.h"
 
-#include "build/build_config.h"
-
 #include "base/files/file_path.h"
 #include "base/logging.h"
 #include "base/memory/singleton.h"
+#include "build/build_config.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
 #include "evita/visuals/imaging/icon_util.h"

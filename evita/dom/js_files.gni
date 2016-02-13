@@ -101,11 +101,11 @@ js_lib_files = [
   "windows/window.js",
 
   "commands/dynamic_abbrev.js",
-  "commands/find_and_replace.js",
-  "commands/find_and_replace_commands.js",
   "commands/text_window_commands.js",
   "commands/window_commands.js",
 
+  "components/find_and_replace/find_and_replace.js",
+  "components/find_and_replace/find_and_replace_commands.js",
   "components/launchpad/launchpad.js",
   "components/spell_checker/spell_checker.js",
 

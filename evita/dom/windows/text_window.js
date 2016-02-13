@@ -239,6 +239,8 @@ global.TextWindow.prototype.clone = function() {
   function handleMouseDown(window, event) {
     if (event.button)
       return;
+    if (Window.focus !== window)
+      window.focus();
     const offset = mapPointToOffset(event);
     if (offset < 0)
       return;

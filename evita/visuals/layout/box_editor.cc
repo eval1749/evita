@@ -13,9 +13,10 @@
 #include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/layout/ancestors.h"
 #include "evita/visuals/layout/ancestors_or_self.h"
-#include "evita/visuals/layout/descendants_or_self.h"
 #include "evita/visuals/layout/box_selection.h"
+#include "evita/visuals/layout/descendants_or_self.h"
 #include "evita/visuals/layout/flow_box.h"
+#include "evita/visuals/layout/image_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
@@ -320,6 +321,9 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
 
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   MustBeInTreeRebuild(*box);
+  if (const auto& image = box->as<ImageBox>())
+    return SetImageStyle(image, new_style);
+
   if (const auto& shape = box->as<ShapeBox>())
     return SetShapeStyle(shape, new_style);
 
@@ -370,6 +374,24 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
 
   if (!is_changed)
     return;
+  MarkDirty(box);
+}
+
+void BoxEditor::SetImageData(ImageBox* image_box, const ImageData& data) {
+  MustBeInTreeRebuild(*image_box);
+  if (image_box->data_ == data)
+    return;
+  image_box->data_ = data;
+  SetContentChanged(image_box);
+}
+
+void BoxEditor::SetImageStyle(ImageBox* box, const css::Style& new_style) {
+  MustBeInTreeRebuild(*box);
+  auto is_changed = false;
+
+  if (!is_changed)
+    return;
+  box->is_content_changed_ = true;
   MarkDirty(box);
 }
 

@@ -16,6 +16,7 @@ class FloatColor;
 class FloatRect;
 class FloatSize;
 class FontDescription;
+class ImageData;
 class ShapeData;
 class TextFormat;
 
@@ -53,6 +54,9 @@ class BoxEditor final {
   void SetShouldPaint(Box* box);
   void WillDestroy(Box* box);
 
+  // ImageBox
+  void SetImageData(ImageBox* box, const ImageData& data);
+
   // ShapeBox
   void SetShapeData(ShapeBox* box, const ShapeData& data);
 
@@ -69,6 +73,7 @@ class BoxEditor final {
 
  private:
   const FontDescription& ComputeFontDescription(const TextBox& box);
+  void SetImageStyle(ImageBox* box, const css::Style& style);
   void SetShapeStyle(ShapeBox* box, const css::Style& style);
   void SetTextStyle(TextBox* box, const css::Style& style);
 

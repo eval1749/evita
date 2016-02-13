@@ -43,6 +43,8 @@ source_set("layout") {
     "descendants_or_self.h",
     "flow_box.cc",
     "flow_box.h",
+    "image_box.cc",
+    "image_box.h",
     "layouter.cc",
     "layouter.h",
     "root_box.cc",
@@ -62,6 +64,7 @@ source_set("layout") {
     "//evita/visuals/dom",
     "//evita/visuals/fonts",
     "//evita/visuals/geometry",
+    "//evita/visuals/imaging",
     "//evita/visuals/style",
     "//evita/visuals/view/public",
   ]

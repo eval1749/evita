@@ -9,8 +9,8 @@
 
 #include "base/logging.h"
 #include "evita/visuals/display/display_item_list_builder.h"
-#include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/display/public/display_item_list.h"
+#include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/fonts/text_layout.h"
@@ -21,6 +21,7 @@
 #include "evita/visuals/layout/box_traversal.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
+#include "evita/visuals/layout/image_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
@@ -282,6 +283,15 @@ void PaintVisitor::PushTransform() {
 // BoxVisitor
 void PaintVisitor::VisitFlowBox(FlowBox* box) {
   PaintContainerBox(*box);
+}
+
+void PaintVisitor::VisitImageBox(ImageBox* image) {
+  const auto& bounds = FloatRect(image->content_bounds().size());
+  if (image->IsContentChanged() || image->IsOriginChanged())
+    AddDirtyBounds(bounds);
+  BoxPaintScope paint_scope(this, *image);
+  builder_.AddNew<DrawRectDisplayItem>(bounds, FloatColor(0, 0, 0), 1);
+  BoxEditor().DidPaint(image);
 }
 
 void PaintVisitor::VisitRootBox(RootBox* root) {

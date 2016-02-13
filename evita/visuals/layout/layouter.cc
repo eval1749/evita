@@ -134,6 +134,10 @@ void LayoutVisitor::VisitFlowBox(FlowBox* flow_box) {
   return LayoutFlowBoxVertically(*flow_box);
 }
 
+void LayoutVisitor::VisitImageBox(ImageBox* box) {
+  // Nothing to do.
+}
+
 void LayoutVisitor::VisitRootBox(RootBox* root) {
   LayoutVisitor().Layout(root->first_child(), root->content_bounds());
 }

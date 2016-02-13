@@ -10,6 +10,7 @@
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
+#include "evita/visuals/layout/image_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
@@ -65,6 +66,14 @@ void BoxTreePrinter::VisitFlowBox(FlowBox* box) {
 
 void BoxTreePrinter::VisitRootBox(RootBox* box) {
   PrintAsContainer(*box);
+}
+
+void BoxTreePrinter::VisitImageBox(ImageBox* box) {
+  Indent();
+  *ostream_ << *box;
+  *ostream_ << box->data().value();
+  const auto& style = box->ComputeActualStyle();
+  *ostream_ << ' ' << *style << std::endl;
 }
 
 void BoxTreePrinter::VisitShapeBox(ShapeBox* box) {

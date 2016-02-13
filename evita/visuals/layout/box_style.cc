@@ -6,14 +6,15 @@
 
 #include "evita/visuals/layout/box.h"
 
+#include "evita/visuals/css/style.h"
+#include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_visitor.h"
+#include "evita/visuals/layout/image_box.h"
 #include "evita/visuals/layout/margin.h"
 #include "evita/visuals/layout/padding.h"
 #include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
-#include "evita/visuals/css/style.h"
-#include "evita/visuals/css/style_builder.h"
 
 namespace visuals {
 
@@ -95,6 +96,8 @@ std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
 }
 
 void ActualStyleVisitor::VisitFlowBox(FlowBox* flow_box) {}
+
+void ActualStyleVisitor::VisitImageBox(ImageBox* image) {}
 
 void ActualStyleVisitor::VisitRootBox(RootBox* root) {}
 

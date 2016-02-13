@@ -9,10 +9,12 @@
 #include "base/logging.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
+#include "evita/visuals/imaging/image_bitmap.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_visitor.h"
 #include "evita/visuals/layout/flow_box.h"
+#include "evita/visuals/layout/image_box.h"
 #include "evita/visuals/layout/margin.h"
 #include "evita/visuals/layout/padding.h"
 #include "evita/visuals/layout/root_box.h"
@@ -81,6 +83,10 @@ void ExtrinsicSizeVisitor::ReturnSize(const FloatSize& size) {
 
 // BoxVisitor
 void ExtrinsicSizeVisitor::VisitFlowBox(FlowBox* box) {
+  ComputeWithSimpleMethod(*box);
+}
+
+void ExtrinsicSizeVisitor::VisitImageBox(ImageBox* box) {
   ComputeWithSimpleMethod(*box);
 }
 
@@ -180,6 +186,10 @@ void IntrinsicSizeVisitor::VisitFlowBox(FlowBox* flow_box) {
   return ReturnSize(SizeOfVerticalFlowBox(*flow_box));
 }
 
+void IntrinsicSizeVisitor::VisitImageBox(ImageBox* box) {
+  ReturnSize(box->bitmap().size());
+}
+
 void IntrinsicSizeVisitor::VisitRootBox(RootBox* box) {
   NOTREACHED() << "NYI IntrinsicSizeVisitor for RootBox";
 }
@@ -231,6 +241,10 @@ void PreferredSizeVisitor::ReturnSize(const FloatSize& size) {
 
 // BoxVisitor
 void PreferredSizeVisitor::VisitFlowBox(FlowBox* box) {
+  ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
+}
+
+void PreferredSizeVisitor::VisitImageBox(ImageBox* box) {
   ReturnSize(SizeCalculator().ComputeExtrinsicSize(*box));
 }
 

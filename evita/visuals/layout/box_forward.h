@@ -9,6 +9,7 @@ namespace visuals {
 
 #define FOR_EACH_VISUAL_BOX(V) \
   V(FlowBox)                   \
+  V(ImageBox)                  \
   V(RootBox)                   \
   V(ShapeBox)                  \
   V(TextBox)

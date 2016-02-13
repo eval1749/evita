@@ -7,11 +7,13 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/image.h"
 #include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_map.h"
 #include "evita/visuals/layout/flow_box.h"
+#include "evita/visuals/layout/image_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/layout/shape_box.h"
 #include "evita/visuals/layout/text_box.h"
@@ -98,6 +100,18 @@ void BoxAssigner::VisitElement(Element* element) {
   auto new_flow_box = std::make_unique<FlowBox>(root_box(), element);
   BoxEditor().SetStyle(new_flow_box.get(), *style_);
   RegisterBoxFor(*element, std::move(new_flow_box));
+}
+
+void BoxAssigner::VisitImage(Image* image) {
+  if (const auto image_box = BoxFor(*image)) {
+    BoxEditor().SetImageData(image_box->as<ImageBox>(), image->data());
+    BoxEditor().SetStyle(image_box, *style_);
+    return;
+  }
+  auto new_image_box =
+      std::make_unique<ImageBox>(root_box(), image->data(), image);
+  BoxEditor().SetStyle(new_image_box.get(), *style_);
+  RegisterBoxFor(*image, std::move(new_image_box));
 }
 
 void BoxAssigner::VisitShape(Shape* shape) {

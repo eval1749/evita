@@ -4,12 +4,14 @@
 
 source_set("imaging") {
   sources = [
+    "icon_util.h",
     "image_bitmap.cc",
     "image_bitmap.h",
   ]
 
   if (is_win) {
     sources += [
+      "icon_util_win.cc",
       "native_image_bitmap_win.cc",
       "native_image_bitmap_win.h",
     ]

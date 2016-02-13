@@ -100,8 +100,8 @@ js_lib_files = [
   "windows/visual_window.js",
   "windows/window.js",
 
-  "commands/text_window_commands.js",
-  "commands/window_commands.js",
+  "windows/text_window_commands.js",
+  "windows/window_commands.js",
 
   "components/dynamic_abbrev/dynamic_abbrev.js",
   "components/find_and_replace/find_and_replace.js",

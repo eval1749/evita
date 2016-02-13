@@ -5,10 +5,9 @@
 #ifndef EVITA_VIEWS_ICON_CACHE_H_
 #define EVITA_VIEWS_ICON_CACHE_H_
 
-#include <commctrl.h>
-
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
@@ -26,6 +25,8 @@ namespace views {
 //
 class IconCache final {
  public:
+  class IconData;
+
   IconCache();
   ~IconCache();
 
@@ -37,11 +38,10 @@ class IconCache final {
 
  private:
   void Add(const base::string16& name, int icon_index);
-  int AddIcon(const base::string16& name, HICON icon);
   int Intern(const base::string16& name);
 
   std::unordered_map<base::string16, int> map_;
-  HIMAGELIST image_list_;
+  std::vector<std::unique_ptr<IconData>> bitmaps_;
 
   DISALLOW_COPY_AND_ASSIGN(IconCache);
 };

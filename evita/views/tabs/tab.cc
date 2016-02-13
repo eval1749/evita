@@ -136,7 +136,7 @@ void Tab::DrawLabel(gfx::Canvas* canvas) const {
 void Tab::DrawIcon(gfx::Canvas* canvas) const {
   if (image_index_ < 0)
     return;
-  auto const hImageList = IconCache::instance()->image_list();
+  auto const hImageList = IconCache::GetInstance()->image_list();
   // Note: ILD_TRANSPARENT doesn't effect.
   // Note: ILD_DPISCALE makes background black.
   auto const hIcon = ::ImageList_GetIcon(hImageList, image_index_, 0);
@@ -245,7 +245,7 @@ void Tab::SetTabData(const domapi::TabData& tab_data) {
     static int GetIconIndex(const domapi::TabData& tab_data) {
       if (tab_data.icon != -2)
         return tab_data.icon;
-      return IconCache::instance()->GetIconForFileName(tab_data.title);
+      return IconCache::GetInstance()->GetIconForFileName(tab_data.title);
     }
   };
 

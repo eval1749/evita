@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 #include <windows.h>
+
 #include <shellapi.h>
 
 #include "evita/views/icon_cache.h"
 
 #include "base/logging.h"
+#include "base/memory/singleton.h"
 #include "base/strings/string_number_conversions.h"
 #include "common/win/registry.h"
 
@@ -17,7 +19,7 @@ namespace {
 
 base::string16 GetExtension(const base::string16& name,
                             const base::string16& default_extension) {
-  auto const index = name.find_last_of('.');
+  const auto index = name.find_last_of('.');
   return index == base::string16::npos ? default_extension : name.substr(index);
 }
 
@@ -26,7 +28,7 @@ HICON LoadIconFromRegistry(const base::string16& extension) {
   if (!extension_key)
     return nullptr;
 
-  auto const id_name = extension_key.GetValue();
+  const auto id_name = extension_key.GetValue();
   if (id_name.empty())
     return nullptr;
 
@@ -34,11 +36,11 @@ HICON LoadIconFromRegistry(const base::string16& extension) {
   if (!id_key)
     return nullptr;
 
-  auto const icon_location = id_key.GetValue();
+  const auto icon_location = id_key.GetValue();
   if (icon_location.empty())
     return nullptr;
 
-  auto const comma_pos = icon_location.find_last_of(',');
+  const auto comma_pos = icon_location.find_last_of(',');
   if (comma_pos == base::string16::npos) {
     HICON hIcon;
     if (::ExtractIconExW(icon_location.c_str(), 0, nullptr, &hIcon, 1) != 1)
@@ -46,7 +48,7 @@ HICON LoadIconFromRegistry(const base::string16& extension) {
     return hIcon;
   }
 
-  auto const icon_path = icon_location.substr(0, comma_pos);
+  const auto icon_path = icon_location.substr(0, comma_pos);
   int icon_index;
   if (!base::StringToInt(icon_location.substr(comma_pos + 1), &icon_index)) {
     DVLOG(0) << "Bad icon index: " << icon_location;
@@ -63,47 +65,55 @@ HICON LoadIconFromRegistry(const base::string16& extension) {
 
 }  // namespace
 
+//////////////////////////////////////////////////////////////////////
+//
+// IconCache
+//
 IconCache::IconCache()
     : image_list_(::ImageList_Create(16, 16, ILC_COLOR32, 10, 10)) {}
 
 IconCache::~IconCache() {
-  if (image_list_)
-    ::ImageList_Destroy(image_list_);
+  if (!image_list_)
+    return;
+  ::ImageList_Destroy(image_list_);
 }
 
 void IconCache::Add(const base::string16& name, int icon_index) {
   DCHECK_GE(icon_index, 0);
-  map_[name] = icon_index;
+  map_.emplace(name, icon_index);
 }
 
 int IconCache::AddIcon(const base::string16& name, HICON icon) {
-  auto const icon_index = ::ImageList_ReplaceIcon(image_list_, -1, icon);
+  const auto icon_index = ::ImageList_ReplaceIcon(image_list_, -1, icon);
   if (icon_index >= 0)
     Add(name, icon_index);
   return icon_index;
 }
 
-int IconCache::GetIconForFileName(const base::string16& file_name) const {
-  CR_DEFINE_STATIC_LOCAL(const base::string16, default_ext, (L".txt"));
-
-  const base::string16 ext = GetExtension(file_name, default_ext);
-  if (auto const icon_index = IconCache::instance()->Intern(ext))
+int IconCache::GetIconForFileName(const base::string16& file_name) {
+  const base::string16 ext = GetExtension(file_name, L".txt");
+  if (const auto icon_index = Intern(ext))
     return icon_index - 1;
 
-  auto const default_icon_index = IconCache::instance()->Intern(default_ext);
+  const auto default_icon_index = Intern(L".txt");
   DCHECK(default_icon_index);
 
-  IconCache::instance()->Add(ext, default_icon_index - 1);
+  Add(ext, default_icon_index - 1);
   return default_icon_index - 1;
 }
 
+// static
+IconCache* IconCache::GetInstance() {
+  return base::Singleton<IconCache>::get();
+}
+
 int IconCache::Intern(const base::string16& name) {
-  auto const it = map_.find(name);
+  const auto it = map_.find(name);
   if (it != map_.end())
     return it->second + 1;
 
-  if (auto const icon = LoadIconFromRegistry(name)) {
-    auto const index = AddIcon(name, icon) + 1;
+  if (const auto icon = LoadIconFromRegistry(name)) {
+    const auto index = AddIcon(name, icon) + 1;
     ::DestroyIcon(icon);
     return index;
   }

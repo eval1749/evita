@@ -10,23 +10,25 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "common/memory/singleton.h"
 
 namespace views {
 
-class IconCache final : public common::Singleton<IconCache> {
-  DECLARE_SINGLETON_CLASS(IconCache);
-
+//////////////////////////////////////////////////////////////////////
+//
+// IconCache
+//
+class IconCache final {
  public:
+  IconCache();
   ~IconCache();
 
   HIMAGELIST image_list() const { return image_list_; }
 
-  int GetIconForFileName(const base::string16& file_name) const;
+  int GetIconForFileName(const base::string16& file_name);
+
+  static IconCache* GetInstance();
 
  private:
-  IconCache();
-
   void Add(const base::string16& name, int icon_index);
   int AddIcon(const base::string16& name, HICON icon);
   int Intern(const base::string16& name);

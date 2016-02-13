@@ -39,7 +39,6 @@ class TabController {
   virtual void DidChangeTabBounds(Tab* tab) = 0;
   virtual void DidDropTab(Tab* tab, const gfx::Point& screen_point) = 0;
   virtual void DidSelectTab(Tab* tab) = 0;
-  virtual void DidSetFocus(Tab* tab) = 0;
   virtual void MaybeStartDrag(Tab* tab, const gfx::Point& location) = 0;
   virtual void RemoveTabAnimation(ui::AnimationGroupMember* member) = 0;
   virtual void RequestCloseTab(Tab* tab) = 0;
@@ -136,7 +135,6 @@ class Tab final : public ui::Widget,
 
   // ui::Widget
   void DidChangeBounds() final;
-  void DidSetFocus(ui::Widget* lost_focus_widget) final;
   void OnDraw(gfx::Canvas* canvas) final;
   void OnMouseEntered(const ui::MouseEvent& event) final;
   void OnMouseExited(const ui::MouseEvent& event) final;

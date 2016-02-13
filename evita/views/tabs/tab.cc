@@ -330,10 +330,6 @@ void Tab::DidChangeBounds() {
   tab_controller_->DidChangeTabBounds(this);
 }
 
-void Tab::DidSetFocus(ui::Widget* lost_focus_widget) {
-  tab_controller_->DidSetFocus(this);
-}
-
 void Tab::OnDraw(gfx::Canvas* canvas) {
   UpdateLayout();
   if (!dirty_visual_)
@@ -396,6 +392,8 @@ void Tab::OnMousePressed(const ui::MouseEvent& event) {
   auto const result = HitTest(gfx::PointF(event.location()));
   if (result.part() != Part::Label)
     return;
+  if (!is_selected())
+    tab_controller_->RequestSelectTab(this);
   tab_controller_->MaybeStartDrag(this, event.location());
 }
 

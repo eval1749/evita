@@ -6,4 +6,14 @@
 var goog = {};
 
 goog.require = function() {};
-goog.provide = function() {};
+
+/** @type {string} qualifiedName */
+goog.provide = function(qualifiedName) {
+  /** @type {!Object} */
+  let runner = global;
+  qualifiedName.split('.').forEach(name => {
+    if (!(name in runner))
+      runner[name] = {};
+    runner = /** @type {!Object} */ (runner[name]);
+  });
+};

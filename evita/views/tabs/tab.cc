@@ -136,15 +136,11 @@ void Tab::DrawLabel(gfx::Canvas* canvas) const {
 void Tab::DrawIcon(gfx::Canvas* canvas) const {
   if (image_index_ < 0)
     return;
-  auto const hImageList = IconCache::GetInstance()->image_list();
-  // Note: ILD_TRANSPARENT doesn't effect.
-  // Note: ILD_DPISCALE makes background black.
-  auto const hIcon = ::ImageList_GetIcon(hImageList, image_index_, 0);
-  if (!hIcon)
+  const auto& bitmap =
+      IconCache::GetInstance()->BitmapFor(canvas, image_index_);
+  if (!bitmap)
     return;
-  gfx::Bitmap bitmap(canvas, hIcon);
-  (*canvas)->DrawBitmap(bitmap, icon_bounds_);
-  ::DestroyIcon(hIcon);
+  (*canvas)->DrawBitmap(*bitmap, icon_bounds_);
 }
 
 void Tab::DrawTabDataState(gfx::Canvas* canvas) const {

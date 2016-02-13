@@ -6,10 +6,17 @@
 #define EVITA_VIEWS_ICON_CACHE_H_
 
 #include <commctrl.h>
+
+#include <memory>
 #include <unordered_map>
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
+
+namespace gfx {
+class Bitmap;
+class Canvas;
+}
 
 namespace views {
 
@@ -22,8 +29,8 @@ class IconCache final {
   IconCache();
   ~IconCache();
 
-  HIMAGELIST image_list() const { return image_list_; }
-
+  std::unique_ptr<gfx::Bitmap> BitmapFor(gfx::Canvas* canvas,
+                                         int icon_index) const;
   int GetIconForFileName(const base::string16& file_name);
 
   static IconCache* GetInstance();

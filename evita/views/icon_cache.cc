@@ -11,7 +11,10 @@
 #include "base/logging.h"
 #include "base/memory/singleton.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/win/scoped_gdi_object.h"
 #include "common/win/registry.h"
+#include "evita/gfx/bitmap.h"
+#include "evita/gfx/canvas.h"
 
 namespace views {
 
@@ -88,6 +91,16 @@ int IconCache::AddIcon(const base::string16& name, HICON icon) {
   if (icon_index >= 0)
     Add(name, icon_index);
   return icon_index;
+}
+
+std::unique_ptr<gfx::Bitmap> IconCache::BitmapFor(gfx::Canvas* canvas,
+                                                  int icon_index) const {
+  // Note: ILD_TRANSPARENT doesn't effect.
+  // Note: ILD_DPISCALE makes background black.
+  base::win::ScopedHICON icon(::ImageList_GetIcon(image_list_, icon_index, 0));
+  if (!icon.is_valid())
+    return std::unique_ptr<gfx::Bitmap>();
+  return std::make_unique<gfx::Bitmap>(canvas, icon.get());
 }
 
 int IconCache::GetIconForFileName(const base::string16& file_name) {

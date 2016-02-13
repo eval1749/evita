@@ -121,7 +121,7 @@ static_js_externs_files = [
   "//evita/dom/base/strings/string_util_externs.js",
   "//evita/dom/bracket_externs.js",
   "//evita/dom/clipboard/clipboard_externs.js",
-  "//evita/dom/commander_externs.js",
+  "//evita/dom/components/commander/commander_externs.js",
   "//evita/dom/components/find_and_replace/find_and_replace_externs.js",
   "//evita/dom/components/launchpad/launchpad_externs.js",
   "//evita/dom/components/repl/console_externs.js",

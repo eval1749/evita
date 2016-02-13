@@ -24,7 +24,6 @@ js_lib_files = [
   "lexers/lexer.js",
 
   "bracket.js",
-  "commander.js",
   "bindings/platform_error.js",
   "css/text_style.js",
   "text/simple_text_document_set_observer.js",
@@ -100,9 +99,7 @@ js_lib_files = [
   "windows/visual_window.js",
   "windows/window.js",
 
-  "windows/text_window_commands.js",
-  "windows/window_commands.js",
-
+  "components/commander/commander.js",
   "components/dynamic_abbrev/dynamic_abbrev.js",
   "components/find_and_replace/find_and_replace.js",
   "components/find_and_replace/find_and_replace_commands.js",
@@ -117,6 +114,9 @@ js_lib_files = [
 
   "components/repl/js_completer.js",
   "components/repl/js_console_commands.js",
+
+  "windows/text_window_commands.js",
+  "windows/window_commands.js",
 
   "jslib/install_stringify.js",
 

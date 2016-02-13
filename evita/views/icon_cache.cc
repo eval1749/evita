@@ -90,12 +90,12 @@ int IconCache::Intern(base::StringPiece16 name) {
   if (it != map_.end())
     return it->second + 1;
 
-  auto icon_image = visuals::GetSmallIconForExtension(name);
+  const auto icon_image = visuals::GetSmallIconForExtension(name);
   if (!icon_image)
     return 1;
 
   const auto icon_index = static_cast<int>(bitmaps_.size());
-  bitmaps_.emplace_back(std::move(icon_image));
+  bitmaps_.emplace_back(icon_image);
   Add(name, icon_index);
   return icon_index + 1;
 }

@@ -6,8 +6,13 @@
 
 #include <shellapi.h>
 
+#include <memory>
+#include <unordered_map>
+
 #include "evita/visuals/imaging/icon_util.h"
 
+#include "base/macros.h"
+#include "base/memory/singleton.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/win/scoped_gdi_object.h"
 #include "common/win/registry.h"
@@ -60,15 +65,54 @@ base::win::ScopedHICON LoadSmallIconFromRegistry(
   return base::win::ScopedHICON(hIcon);
 }
 
+//////////////////////////////////////////////////////////////////////
+//
+// SmallIconCache
+//
+class SmallIconCache final {
+ public:
+  SmallIconCache() = default;
+  ~SmallIconCache() = default;
+
+  const ImageBitmap* Add(base::StringPiece16 extension,
+                         std::unique_ptr<ImageBitmap> bitmap);
+  const ImageBitmap* Get(base::StringPiece16 extension);
+
+  static SmallIconCache* GetInstance();
+
+ private:
+  std::unordered_map<base::string16, std::unique_ptr<ImageBitmap>> map_;
+
+  DISALLOW_COPY_AND_ASSIGN(SmallIconCache);
+};
+
+const ImageBitmap* SmallIconCache::Add(base::StringPiece16 extension,
+                                       std::unique_ptr<ImageBitmap> bitmap) {
+  const auto& result = map_.emplace(extension.as_string(), std::move(bitmap));
+  DCHECK(result.second);
+  return result.first->second.get();
+}
+
+const ImageBitmap* SmallIconCache::Get(base::StringPiece16 extension) {
+  const auto& it = map_.find(extension.as_string());
+  return it == map_.end() ? nullptr : it->second.get();
+}
+
+SmallIconCache* SmallIconCache::GetInstance() {
+  return base::Singleton<SmallIconCache>::get();
+}
+
 }  // namespace
 
-std::unique_ptr<ImageBitmap> GetSmallIconForExtension(
-    base::StringPiece16 extension) {
+const ImageBitmap* GetSmallIconForExtension(base::StringPiece16 extension) {
+  if (const auto present = SmallIconCache::GetInstance()->Get(extension))
+    return present;
   const auto& icon = LoadSmallIconFromRegistry(extension);
   if (!icon.is_valid())
-    return std::unique_ptr<ImageBitmap>();
+    return nullptr;
   auto data = std::make_unique<NativeImageBitmap>(icon);
-  return std::make_unique<ImageBitmap>(std::move(data));
+  return SmallIconCache::GetInstance()->Add(
+      extension, std::make_unique<ImageBitmap>(std::move(data)));
 }
 
 }  // namespace visuals

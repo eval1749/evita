@@ -13,8 +13,7 @@ namespace visuals {
 
 class ImageBitmap;
 
-std::unique_ptr<ImageBitmap> GetSmallIconForExtension(
-    base::StringPiece16 extension);
+const ImageBitmap* GetSmallIconForExtension(base::StringPiece16 extension);
 
 }  // namespace visuals
 

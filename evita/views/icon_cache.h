@@ -44,7 +44,7 @@ class IconCache final {
   int Intern(base::StringPiece16 name);
 
   std::unordered_map<base::string16, int> map_;
-  std::vector<std::unique_ptr<visuals::ImageBitmap>> bitmaps_;
+  std::vector<const visuals::ImageBitmap*> bitmaps_;
 
   DISALLOW_COPY_AND_ASSIGN(IconCache);
 };

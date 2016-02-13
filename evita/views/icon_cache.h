@@ -11,10 +11,15 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 
 namespace gfx {
 class Bitmap;
 class Canvas;
+}
+
+namespace visuals {
+class ImageBitmap;
 }
 
 namespace views {
@@ -25,23 +30,21 @@ namespace views {
 //
 class IconCache final {
  public:
-  class IconData;
-
   IconCache();
   ~IconCache();
 
   std::unique_ptr<gfx::Bitmap> BitmapFor(gfx::Canvas* canvas,
                                          int icon_index) const;
-  int GetIconForFileName(const base::string16& file_name);
+  int GetIconForFileName(base::StringPiece16 file_name);
 
   static IconCache* GetInstance();
 
  private:
-  void Add(const base::string16& name, int icon_index);
-  int Intern(const base::string16& name);
+  void Add(base::StringPiece16 name, int icon_index);
+  int Intern(base::StringPiece16 name);
 
   std::unordered_map<base::string16, int> map_;
-  std::vector<std::unique_ptr<IconData>> bitmaps_;
+  std::vector<std::unique_ptr<visuals::ImageBitmap>> bitmaps_;
 
   DISALLOW_COPY_AND_ASSIGN(IconCache);
 };

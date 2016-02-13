@@ -20,7 +20,7 @@ class Canvas;
 //
 class Bitmap final : public SimpleObject_<ID2D1Bitmap> {
  public:
-  Bitmap(Canvas* canvas, HICON hIcon);
+  Bitmap(Canvas* canvas, common::ComPtr<ID2D1Bitmap> bitmap);
   Bitmap(Canvas* canvas, SizeU size);
   explicit Bitmap(Canvas* canvas);
   ~Bitmap();

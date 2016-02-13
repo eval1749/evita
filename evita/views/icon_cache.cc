@@ -15,10 +15,27 @@
 #include "common/win/registry.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/imaging_factory_win.h"
 
 namespace views {
 
 namespace {
+
+std::unique_ptr<gfx::Bitmap> CreateBitmapFromIcon(gfx::Canvas* canvas,
+                                                  HICON hIcon) {
+  common::ComPtr<IWICBitmap> icon;
+  COM_VERIFY(gfx::ImagingFactory::GetInstance()->impl()->CreateBitmapFromHICON(
+      hIcon, &icon));
+  common::ComPtr<IWICFormatConverter> converter;
+  COM_VERIFY(gfx::ImagingFactory::GetInstance()->impl()->CreateFormatConverter(
+      &converter));
+  COM_VERIFY(converter->Initialize(icon, GUID_WICPixelFormat32bppPBGRA,
+                                   WICBitmapDitherTypeNone, nullptr, 0,
+                                   WICBitmapPaletteTypeMedianCut));
+  common::ComPtr<ID2D1Bitmap> bitmap;
+  COM_VERIFY((*canvas)->CreateBitmapFromWicBitmap(converter, nullptr, &bitmap));
+  return std::make_unique<gfx::Bitmap>(canvas, bitmap);
+}
 
 base::string16 GetExtension(const base::string16& name,
                             const base::string16& default_extension) {
@@ -100,7 +117,7 @@ std::unique_ptr<gfx::Bitmap> IconCache::BitmapFor(gfx::Canvas* canvas,
   base::win::ScopedHICON icon(::ImageList_GetIcon(image_list_, icon_index, 0));
   if (!icon.is_valid())
     return std::unique_ptr<gfx::Bitmap>();
-  return std::make_unique<gfx::Bitmap>(canvas, icon.get());
+  return CreateBitmapFromIcon(canvas, icon.get());
 }
 
 int IconCache::GetIconForFileName(const base::string16& file_name) {

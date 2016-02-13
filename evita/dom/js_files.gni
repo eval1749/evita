@@ -18,6 +18,7 @@ js_lib_files = [
   "base/define.js",
   "base/async.js",
   "base/ordered_set.js",
+  "base/singleton.js",
   "base/strings/string_util.js",
 
   "text/simple_mutation_observer.js",

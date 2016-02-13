@@ -1,264 +1,369 @@
-// Copyright (C) 2014 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2014 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-global.commander =
+goog.provide('components.commander');
+
+(function() {
+  /** @const @type {number} */ const MOD_ALT = 0x800;
+  /** @const @type {number} */ const MOD_CTRL = 0x200;
+  /** @const @type {number} */ const MOD_SHIFT = 0x400;
+
+  /** @const @type {string} */ const PROPERTY_KEYMAP = 'keymap';
+
+  /** @enum {string} */
+  const State = {
+    ARGUMENT: 'ARGUMENT',
+    COMMAND: 'COMMAND',
+    QUOTE: 'QUOTE',
+  };
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // Argument
+  //
+  class Argument {
+    constructor() {
+      /** @type {boolean} */
+      this.hasValue_ = false;
+      /** @type {number} */
+      this.numDigits_ = 0;
+      /** @type {number} */
+      this.number_ = 0;
+      /** @type {number} */
+      this.sign_ = 0;
+    }
+
+    /** @return {boolean} */
+    get hasValue() { return this.hasValue_; }
+
+    /** @return {number} */
+    get value() {
+      if (!this.hasValue_)
+        return 1;
+      if (this.numDigits_)
+        return this.number_ * this.sign_;
+      return this.sign_ ? -4 : 4;
+    }
+
     /**
-     * @type {{
-     *  handleEvent: function(!Event),
-     *  startArgument: function(),
-     *  startQuote: function()
-     * }}
+     * @public
+     * @param {number} keyCode
+     * @return {boolean}
      */
-    (Object.create(
-        /**@type {!Object}*/ (Object.prototype), (function() {
-          /** @enum{string} */
-          var State = {
-            ARGUMENT: 'ARGUMENT',
-            NORMAL: 'NORMAL',
-            QUOTE: 'QUOTE',
-            START: 'START'
-          };
+    feed(keyCode) {
+      console.assert(this.hasValue_, this);
+      if (keyCode === Unicode.HYPHEN_MINUS) {
+        if (this.sign_ || this.numDigits_)
+          return false;
+        this.sign_ = -1;
+        return true;
+      }
+      if (keyCode < Unicode.DIGIT_ZERO || keyCode > Unicode.DIGIT_NINE)
+        return false;
+      if (this.numDigits_ === 0) {
+        this.number_ = keyCode - Unicode.DIGIT_ZERO;
+        this.sign_ = 1;
+      } else {
+        this.number_ *= 10;
+        this.number_ += keyCode - Unicode.DIGIT_ZERO;
+      }
+      ++this.numDigits_;
+      return true;
+    }
 
-          var argument =
-              /**
-               * @type {{
-               *    handleEvent: function(!KeyboardEvent): boolean,
-               *    hasValue: boolean,
-               *    number: number,
-               *    numDigits: number,
-               *    reset: function(),
-               *    value: number
-               *  }}
-               */
-              (Object.create(/**@type {!Object}*/ (Object.prototype), {
-                handleEvent: {
-                  /** @type {function(!KeyboardEvent): boolean} */
-                  value: function(event) {
-                    var code = event.keyCode;
-                    if (code == 0x2D) {
-                      if (this.sign_ || this.numDigits_)
-                        return false;
-                      this.sign_ = -1;
-                      this.hasValue = true;
-                      return true;
-                    }
-                    if (code >= 0x30 && code <= 0x39) {
-                      if (this.numDigits_) {
-                        this.number_ *= 10;
-                        this.number_ += code - 0x30;
-                      } else {
-                        this.number_ = code - 0x30;
-                        this.sign_ = 1;
-                      }
-                      ++this.numDigits_;
-                      this.hasValue = true;
-                      return true;
-                    }
-                    return false;
-                  }
-                },
-                hasValue: {value: false, writable: true},
-                number: {value: 0, writable: true},
-                numDigits: {value: 0, writable: true},
-                reset: {
-                  /** @type {function()} */
-                  value: function() {
-                    this.hasValue = false;
-                    this.number_ = 0;
-                    this.numDigits_ = 0;
-                    this.sign_ = 0;
-                  }
-                },
-                /** @private*/
-                sign: {value: 0, writable: true},
-                value: {
-                  /** @type {function():number} */
-                  get: function() {
-                    if (!this.hasValue)
-                      return 1;
-                    if (this.numDigits_)
-                      return this.number_ * this.sign_;
-                    return this.sign_ ? -4 : 4;
-                  }
-                }
-              }));
+    /** @public */
+    reset() {
+      this.hasValue_ = false;
+      this.number_ = 0;
+      this.numDigits_ = 0;
+      this.sign_ = 0;
+    }
 
-          /** @type {!function(!KeyboardEvent)} */
-          var handler;
+    /** @public */
+    start() {
+      this.reset();
+      this.hasValue_ = true;
+    }
+  }
 
-          /** @type {?Keymap} */
-          var keymap;
+  /**
+   * @param {!Window} window
+   * @param {!Function} commandFunction
+   * @param {!Argument} argument
+   */
+  function executeCommand(window, commandFunction, argument) {
+    try {
+      if (argument.hasValue)
+        commandFunction.call(window, argument.value);
+      else
+        commandFunction.call(window);
+    } catch (exception) {
+      if (exception instanceof TextDocumentReadOnly) {
+        reportReadOnly(window, exception);
+        return;
+      }
+      throw exception;
+    }
+  }
 
-          /** @type {Array.<number>} */
-          var key_codes = [];
+  /**
+   * @param {!Window} window
+   * @param {number} keyCode
+   * @param {number} repeatCount
+   */
+  function executeQuote(window, keyCode, repeatCount) {
+    if (!(window instanceof TextWindow))
+      return;
+    // TODO(eval1749): We should use |TextDocument.prototype.splice()|
+    // instead of |TextRange|.
+    const textWindow = /** @type {TextWindow} */ (window);
+    const range = textWindow.selection.range;
+    range.text = String.fromCharCode(keyCode).repeat(repeatCount);
+    range.collapseTo(range.end);
+  }
 
-          /**
-           * @param {!Event} event
-           * @return {?Window}
-           */
-          function eventWindow(event) {
-            return event.target instanceof Window ?
-                /** @type {!Window} */ (event.target) :
-                                       Editor.activeWindow();
-          }
+  /**
+   * @param {Keymap} currentKeymap
+   * @param {!Window} window
+   * @param {number} keyCode
+   * @return {Function|Keymap}
+   */
+  function keyBindingOf(window, keyCode, currentKeymap) {
+    for (const keymap of searchPathOf(currentKeymap, window)) {
+      const present = keymap.get(keyCode) || null;
+      if (present)
+        return present;
+    }
+    return null;
+  }
 
-          /**
-           * @param {!KeyboardEvent} event
-           * @return {!Function|!Keymap|undefined}
-           */
-          function getKeyBinding(event) {
-            /**
-             * @param {?Keymap} keymap
-             * @param {number} code
-             */
-            function get(keymap, code) {
-              return keymap && keymap instanceof Map ? keymap.get(code) :
-                                                       undefined;
-            }
+  /**
+   * @param {Object} object
+   * @return {Keymap}
+   */
+  function keymapFor(object) {
+    if (object === null)
+      return null;
+    if (!(PROPERTY_KEYMAP in object))
+      return null;
+    const maybeKeymap = object[PROPERTY_KEYMAP];
+    if (!(maybeKeymap instanceof Map))
+      return null;
+    return /** @type {!Keymap} */ (maybeKeymap);
+  }
 
-            var code = event.keyCode;
-            var present = get(keymap, code);
-            if (present)
-              return present;
-            if (event.target instanceof TextWindow) {
-              var text_window = /**@type {TextWindow} */ (event.target);
-              present = get(text_window.document['keymap'], code);
-              if (present)
-                return present;
-            }
-            present = get(event.target['keymap'], code);
-            if (present)
-              return present;
-            for (var runner = event.target; runner && runner;
-                 runner = Object.getPrototypeOf(runner)) {
-              present = get(runner.constructor['keymap'], code);
-              if (present)
-                return present;
-            }
-            return undefined;
-          }
+  /**
+   * @param {number} keyCode
+   * @return {number}
+   * Strip Control modifier for Ctrl+@ to Ctrl+Z.
+   */
+  function convertKeyCodeToCharCode(keyCode) {
+    if (keyCode >= 0x240 && keyCode <= 0x25F)
+      return keyCode & 0x1F;
+    return keyCode;
+  }
 
-          /** @param {!Event} event */
-          function handleEvent(event) {
-            if (event instanceof KeyboardEvent)
-              handleKeyboardEvent(/**@type{!KeyboardEvent}*/ (event));
-          }
+  /**
+   * @param {Window} window
+   * @param {!TextDocumentReadOnly} error
+   */
+  function reportReadOnly(window, error) {
+    if (!(window instanceof TextWindow))
+      throw error;
+    if (error.document !== window.document)
+      throw error;
+    window.status = 'Can not change readonly document.';
+  }
 
-          /** @param {!KeyboardEvent} event */
-          function handleEventAsArgument(event) {
-            if (argument.handleEvent(event))
-              return;
-            handler = handleEventAsCommand;
-            handleEventAsCommand(event);
-          }
+  /**
+   * @param {Keymap} currentKeymap
+   * @param {!Window} window
+   * @return {!Generator<!Keymap>}
+   * We search key binding in following order:
+   *  - document
+   *  - window
+   *  - window class
+   *  - parent class
+   */
+  function * searchPathOf(currentKeymap, window) {
+    if (currentKeymap)
+      yield currentKeymap;
 
-          /** @param {!KeyboardEvent} event */
-          function handleEventAsCommand(event) {
-            key_codes.push(event.keyCode);
-            var binding = getKeyBinding(event);
-            if (!binding) {
-              handleUnboundKeySequence(event);
-              return;
-            }
+    // Document instance keymap
+    if (window instanceof TextWindow) {
+      const textWindow = /**@type {!TextWindow} */ (window);
+      const documentKeymap = keymapFor(textWindow.document);
+      if (documentKeymap)
+        yield documentKeymap;
+    }
 
-            if (typeof(binding) == 'function') {
-              try {
-                if (argument.hasValue)
-                  binding.call(event.target, argument.value);
-                else
-                  binding.call(event.target);
-              } catch (exception) {
-                if (!(exception instanceof TextDocumentReadOnly))
-                  throw exception;
-                if (!(event.target instanceof TextWindow))
-                  throw exception;
-                var window = /** @type{!TextWindow} */ (event.target);
-                var error = /** @type{!TextDocumentReadOnly} */ (exception);
-                if (error.document != window.document)
-                  throw error;
-                window.status = 'Can not change readonly document.';
-              }
-              if (handler == handleEventAsCommand)
-                reset();
-              return;
-            }
+    // Window instance keymap
+    const windowKeymap = keymapFor(window);
+    if (windowKeymap)
+      yield windowKeymap;
 
-            if (binding instanceof Map) {
-              keymap = /** @type {!Keymap} */ (binding);
-              return;
-            }
+    // Looking for class keymap
+    for (let runner = window; runner !== null;
+         runner = Object.getPrototypeOf(/** @type {!Object} */ (runner))) {
+      const keymap = keymapFor(runner.constructor);
+      if (keymap)
+        yield keymap;
+    }
+  }
 
-            handleUnboundKeySequence(event);
-          }
+  /**
+   * @param {number} keyCode
+   * @return {string}
+   */
+  function unparseKeyCode(keyCode) {
+    /** @const @type {!Array<string>} */ const keys = [];
+    if (keyCode & MOD_CTRL)
+      keys.push('Ctrl');
+    if (keyCode & MOD_SHIFT)
+      keys.push('Shift');
+    if (keyCode & MOD_ALT)
+      keys.push('Alt');
+    if (keyCode >= 0x20 && keyCode <= 0x7E)
+      keys.push(String.fromCharCode(keyCode));
+    else
+      keys.push(KEY_NAMES[keyCode & 0x1FF]);
+    return keys.join('+');
+  }
 
-          /** @param {!KeyboardEvent} event */
-          function handleEventAsQuote(event) {
-            var char_code = event.keyCode;
-            if (char_code >= 0x240 && char_code <= 0x25F)
-              char_code &= 0x1F;
-            if (char_code >= 0x80) {
-              Editor.messageBox(
-                  eventWindow(event),
-                  'We don\'t support non-ASCII code insert: ' +
-                      char_code.toString(16),
-                  MessageBox.ICONWARNING);
-              reset();
-              return;
-            }
-            var window = /** @type {TextWindow} */ (event.target);
-            var range = window.selection.range;
-            range.text = String.fromCharCode(char_code).repeat(argument.value);
-            range.collapseTo(range.end);
-            reset();
-          }
+  //////////////////////////////////////////////////////////////////////
+  //
+  // Commander
+  //
+  class Commander {
+    constructor() {
+      /** @const @type {!Argument} */
+      this.argument_ = new Argument();
+      /** @type {!Array.<number>} */
+      this.keyCodes_ = [];
+      /** @type {?Keymap} */
+      this.keymap_ = null;
+      /** @type {State} */
+      this.state_ = State.COMMAND;
+    }
 
-          /** @param {!KeyboardEvent} event */
-          function handleKeyboardEvent(event) {
-            if (event.type != 'keydown')
-              return;
-            handler(event);
-          }
+    /**
+     * @public
+     * @param {!Window} window
+     * @param {number} keyCode
+     */
+    execute(window, keyCode) {
+      switch (this.state_) {
+        case State.ARGUMENT:
+          return this.executeAsArgument(window, keyCode);
+        case State.COMMAND:
+          return this.executeAsCommand(window, keyCode);
+        case State.QUOTE:
+          return this.executeAsQuote(window, keyCode);
+        default:
+          throw new Error(`Invalid state: ${this.state_}`);
+      }
+    }
 
-          /** @param {!KeyboardEvent} event */
-          function handleUnboundKeySequence(event) {
-            var key_seq = key_codes.map(unparseKeyCode).join(' ');
-            Editor.messageBox(
-                eventWindow(event), 'Unbound key sequence: ' + key_seq,
-                MessageBox.ICONWARNING);
-            reset();
-          }
+    /**
+     * @private
+     * @param {!Window} window
+     * @param {number} keyCode
+     */
+    executeAsArgument(window, keyCode) {
+      if (this.argument_.feed(keyCode))
+        return;
+      this.state_ = State.COMMAND;
+      this.executeAsCommand(window, keyCode);
+    }
 
-          function reset() {
-            argument.reset();
-            handler = handleEventAsCommand;
-            key_codes = [];
-            keymap = null;
-          }
+    /**
+     * @private
+     * @param {!Window} window
+     * @param {number} keyCode
+     */
+    executeAsCommand(window, keyCode) {
+      this.keyCodes_.push(keyCode);
+      const binding = keyBindingOf(window, keyCode, this.keymap_);
+      if (binding === null)
+        return this.reportUnboundKeySequence(window, keyCode);
 
-          function startArgument() {
-            argument.hasValue = true;
-            handler = handleEventAsArgument;
-          }
+      if (typeof(binding) === 'function') {
+        executeCommand(window, binding, this.argument_);
+        if (this.state_ === State.COMMAND)
+          this.reset();
+        return;
+      }
 
-          function startQuote() { handler = handleEventAsQuote; }
+      if (binding instanceof Map) {
+        this.keymap_ = /** @type {!Keymap} */ (binding);
+        return;
+      }
 
-          /**
-           * @param {number} key_code
-           * @return {string}
-           */
-          function unparseKeyCode(key_code) {
-            /** @const @type {number} */ var MOD_CTRL = 0x200;
-            /** @const @type {number} */ var MOD_SHIFT = 0x400;
-            return ((key_code & MOD_CTRL) ? 'Ctrl+' : '') +
-                ((key_code & MOD_SHIFT) ? 'Shift+' : '') +
-                KEY_NAMES[key_code & 0x1FF];
-          }
+      this.reportUnboundKeySequence(window, keyCode);
+    }
 
-          reset();
+    /**
+     * @private
+     * @param {!Window} window
+     * @param {number} keyCode
+     */
+    executeAsQuote(window, keyCode) {
+      const charCode = convertKeyCodeToCharCode(keyCode);
+      if (charCode >= 0x80) {
+        Editor.messageBox(
+            window,
+            'We don\'t support non-ASCII code insert: ' + charCode.toString(16),
+            MessageBox.ICONWARNING);
+        this.reset();
+        return;
+      }
+      executeQuote(window, charCode, this.argument_.value);
+      this.reset();
+    }
 
-          return {
-            handleEvent: {value: handleEvent},
-            startArgument: {value: startArgument},
-            startQuote: {value: startQuote}
-          };
-        })()));
+    /**
+     * @private
+     * @param {!Window} window
+     * @param {number} keyCode
+     */
+    reportUnboundKeySequence(window, keyCode) {
+      const keySequence = this.keyCodes_.map(unparseKeyCode).join(' ');
+      Editor.messageBox(
+          window, `Unbound key sequence: ${keySequence}`,
+          MessageBox.ICONWARNING);
+      this.reset();
+    }
+
+    /** @private */
+    reset() {
+      this.argument_.reset();
+      this.keyCodes_ = [];
+      this.keymap_ = null;
+      this.state_ = State.COMMAND;
+    }
+
+    /** @private */
+    startArgument() {
+      this.argument_.start();
+      this.state_ = State.ARGUMENT;
+    }
+
+    /** @private */
+    startQuote() { this.state_ = State.QUOTE; }
+
+    /** @public static */
+    static argumentCommand() { Commander.instance.startArgument(); }
+
+    /** @public static @return {!Commander} */
+    static get instance() {
+      return /** @type {!Commander} */ (base.Singleton.get(Commander));
+    }
+
+    /** @public static */
+    static quoteCommand() { Commander.instance.startQuote(); }
+  }
+
+  /** @const */
+  components.commander.Commander = Commander;
+})();

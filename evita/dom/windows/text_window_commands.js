@@ -351,7 +351,8 @@
       'move selection right word\n' +
           'Move selection to right by words');
 
-  Editor.bindKey(TextWindow, 'Ctrl+Q', commander.startQuote);
+  Editor.bindKey(
+      TextWindow, 'Ctrl+Q', components.commander.Commander.quoteCommand);
 
   Editor.bindKey(
       TextWindow, 'Ctrl+R',
@@ -396,8 +397,6 @@
         Editor.getFileNameForSave(this, document.fileName)
             .then(function(fileName) { document.save(fileName); });
       });
-
-  Editor.bindKey(TextWindow, 'Ctrl+U', commander.startArgument);
 
   Editor.bindKey(
       TextWindow, 'Ctrl+Shift+3',

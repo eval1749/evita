@@ -2,14 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-(function() {
-  'use strict';
+goog.require('components.commander');
 
+(function() {
   /** @type {string} */
   Window.prototype.status_;
 
   /** @type {boolean} */
   Window.prototype.visible_;
+
+  /**
+   * @param {!KeyboardEvent} event
+   */
+  function handleKeyDown(event) {
+    const target = /** @type {!Window} */ (event.target);
+    components.commander.Commander.instance.execute(target, event.keyCode);
+  }
 
   /**
    * Default event handler.
@@ -18,15 +26,16 @@
    */
   function handleEvent(event) {
     switch (event.type) {
-      case 'hide':
+      case Event.Names.HIDE:
         this.status_ = '';
         this.visible_ = false;
         return;
-      case 'show':
+      case Event.Names.KEYDOWN:
+        return handleKeyDown(/** @type {!KeyboardEvent} */ (event));
+      case Event.Names.SHOW:
         this.visible_ = true;
         return;
     }
-    commander.handleEvent(event);
   }
 
   /**

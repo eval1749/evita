@@ -9,6 +9,7 @@ source_set("test_files") {
   ]
 
   data = [
+    "base64_test.js",
     "ordered_set_test.js",
     "strings/string_util_test.js",
   ]

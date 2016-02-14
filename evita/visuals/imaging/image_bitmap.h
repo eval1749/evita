@@ -5,9 +5,15 @@
 #ifndef EVITA_VISUALS_IMAGING_IMAGE_BITMAP_H_
 #define EVITA_VISUALS_IMAGING_IMAGE_BITMAP_H_
 
-#include <memory>
+#include <stdint.h>
 
-#include "base/macros.h"
+#include <iosfwd>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "evita/visuals/geometry/float_size.h"
 
 namespace visuals {
@@ -20,17 +26,38 @@ class NativeImageBitmap;
 //
 class ImageBitmap final {
  public:
+  ImageBitmap(const void* data, size_t data_size, const FloatSize& size);
   explicit ImageBitmap(std::unique_ptr<NativeImageBitmap> native_image);
+  explicit ImageBitmap(const FloatSize& size);
+  ImageBitmap(const ImageBitmap& other);
+  ImageBitmap(ImageBitmap&& other);
+  ImageBitmap();
   ~ImageBitmap();
 
+  ImageBitmap& operator=(const ImageBitmap& other);
+  ImageBitmap& operator=(ImageBitmap&& other);
+
+  bool operator==(const ImageBitmap& other) const;
+  bool operator!=(const ImageBitmap& other) const;
+
+  std::vector<uint8_t> data() const;
+  base::string16 format() const;
   const NativeImageBitmap& impl() const { return *impl_; }
+  bool is_valid() const { return static_cast<bool>(impl_); }
+  FloatSize resolution() const;
   const FloatSize& size() const;
+
+  static ImageBitmap Decode(base::StringPiece16 format,
+                            const void* data,
+                            size_t data_size);
+
+  std::vector<uint8_t> Encode(base::StringPiece16 format) const;
 
  private:
   std::unique_ptr<NativeImageBitmap> impl_;
-
-  DISALLOW_COPY_AND_ASSIGN(ImageBitmap);
 };
+
+std::ostream& operator<<(std::ostream& ostream, const ImageBitmap& image);
 
 }  // namespace visuals
 

@@ -9,25 +9,36 @@
 
 namespace win {
 
+#define COM_VERIFY_LOG(expr) \
+  { DVLOG(ERROR) << "hr=" << std::hex << macro_hr << ' ' << #expr; }
+
 #if defined(_DEBUG)
-#define COM_VERIFY(expr)                                             \
-  {                                                                  \
-    auto const macro_hr = (expr);                                    \
-    if (FAILED(macro_hr)) {                                          \
-      DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " << #expr; \
-      NOTREACHED();                                                  \
-    }                                                                \
-  \
-}
+#define COM_VERIFY(expr)          \
+  {                               \
+    const auto macro_hr = (expr); \
+    if (FAILED(macro_hr)) {       \
+      COM_VERIFY_LOG(expr);       \
+      NOTREACHED();               \
+    }                             \
+  }
 #else
-#define COM_VERIFY(expr)                                             \
-  {                                                                  \
-    auto const macro_hr = (expr);                                    \
-    if (FAILED(macro_hr))                                            \
-      DVLOG(ERROR) << "hr=" << std::hex << macro_hr << " " << #expr; \
-  \
-}
+#define COM_VERIFY(expr)          \
+  {                               \
+    const auto macro_hr = (expr); \
+    if (FAILED(macro_hr)) {       \
+      COM_VERIFY_LOG(expr);       \
+    }                             \
+  }
 #endif
+
+#define COM_VERIFY2(expr, ret_expr) \
+  {                                 \
+    const auto macro_hr = (expr);   \
+    if (FAILED(macro_hr)) {         \
+      COM_VERIFY_LOG(expr);         \
+      return (ret_expr);            \
+    }                               \
+  }
 
 }  // namespace win
 

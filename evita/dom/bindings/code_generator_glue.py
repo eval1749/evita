@@ -187,9 +187,18 @@ IDL_TO_CPP_TYPE_MAP = {
     'Unit': CppType('Unit'),
 
     # V8 types
+    'Float32Array': CppType('gin::ArrayBufferView', is_by_value=False),
+    'Float64Array': CppType('gin::ArrayBufferView', is_by_value=False),
     'Function': CppType('v8::Local<v8::Function>'),
+    'Int8Array': CppType('gin::ArrayBufferView', is_by_value=False),
+    'Int16Array': CppType('gin::ArrayBufferView', is_by_value=False),
+    'Int32Array': CppType('gin::ArrayBufferView', is_by_value=False),
     'Object': CppType('v8::Local<v8::Object>'),
     'Promise': CppType('v8::Local<v8::Promise>'),
+    'Uint16Array': CppType('gin::ArrayBufferView', is_by_value=False),
+    'Uint32Array': CppType('gin::ArrayBufferView', is_by_value=False),
+    'Uint8Array': CppType('gin::ArrayBufferView', is_by_value=False),
+    'Uint8ClampedArray': CppType('gin::ArrayBufferView', is_by_value=False),
 
     # IDL types
     'DOMString': CppType('base::string16', is_by_value=False),

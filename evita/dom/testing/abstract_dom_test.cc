@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include "build/build_config.h"
+
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/logging.h"
@@ -27,6 +29,10 @@
 #include "evita/dom/timing/mock_scheduler.h"
 #include "evita/dom/view_event_handler_impl.h"
 #include "evita/ginx/runner_delegate.h"
+
+#if OS_WIN
+#include <objbase.h>
+#endif
 
 namespace dom {
 
@@ -203,7 +209,15 @@ AbstractDomTest::AbstractDomTest()
     : mock_io_delegate_(new MockIoDelegate()),
       mock_scheduler_(new MockScheduler()),
       mock_view_impl_(new MockViewImpl()),
-      script_host_(nullptr) {}
+      script_host_(nullptr) {
+#if OS_WIN
+  static bool is_com_initialized;
+  if (is_com_initialized)
+    return;
+  ::CoInitialize(nullptr);
+  is_com_initialized = true;
+#endif
+}
 
 AbstractDomTest::~AbstractDomTest() {}
 

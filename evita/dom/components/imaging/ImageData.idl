@@ -1,0 +1,22 @@
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+[
+  RaisesException,
+  Constructor(unsigned long sw, unsigned long sh),
+  // TODO(eval1749): Once we implement type based dispatch, we should make
+  // parameter |sh| optional.
+  Constructor(Uint8ClampedArray data, unsigned long sw, unsigned long sh)
+]
+interface ImageData {
+  readonly attribute Uint8ClampedArray data;
+  readonly attribute unsigned long height;
+  readonly attribute unsigned long width;
+
+  [RaisesException]
+  static ImageData decode(DOMString mimeType, ArrayBufferView data);
+
+  [RaisesException]
+  Uint8ClampedArray encode(DOMString mimeType);
+};

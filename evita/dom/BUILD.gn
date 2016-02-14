@@ -65,6 +65,7 @@ source_set("components") {
     "//common",
     "//evita/dom/bindings",
     "//evita/dom/clipboard",
+    "//evita/dom/components/imaging",
     "//evita/dom/encodings",
     "//evita/dom/forms",
     "//evita/dom/os",
@@ -205,7 +206,6 @@ action("check_jslib") {
 
 test("evita_dom_tests") {
   sources = [
-    "components/repl/console_unittest.cc",
     "css/text_style_test.cc",
     "editor_unittest.cc",
     "errors_unittest.cc",
@@ -217,11 +217,15 @@ test("evita_dom_tests") {
     "view_event_handler_impl_unittest.cc",
   ]
 
+  data = [
+  ]
+
   deps = [
     # TODO(eval1749): We should not have "application" dependency on
     # "evita_dom_test".
     "//evita:application",
     "//evita/dom/base:test_files",
+    "//evita/dom/components:test_files",
     "//evita/dom/encodings:test_files",
     "//evita/dom/events:test_files",
     "//evita/dom/forms:test_files",

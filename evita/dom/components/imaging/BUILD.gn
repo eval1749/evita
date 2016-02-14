@@ -1,0 +1,16 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("imaging") {
+  sources = [
+    "image_data.cc",
+    "image_data.h",
+  ]
+
+  deps = [
+    "//base",
+    "//evita/dom/bindings",
+    "//evita/visuals/imaging",
+  ]
+}

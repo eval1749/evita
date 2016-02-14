@@ -11,6 +11,7 @@ interface_idl_files = [
   "//evita/dom/clipboard/DataTransfer.idl",
   "//evita/dom/clipboard/DataTransferItem.idl",
   "//evita/dom/clipboard/DataTransferItemList.idl",
+  "//evita/dom/components/imaging/ImageData.idl",
   "//evita/dom/Editor.idl",
   "//evita/dom/FilePath.idl",
   "//evita/dom/encodings/TextDecoder.idl",

@@ -286,11 +286,18 @@ void PaintVisitor::VisitFlowBox(FlowBox* box) {
 }
 
 void PaintVisitor::VisitImageBox(ImageBox* image) {
+  const auto& data = image->data();
+  if (data.bounds().IsEmpty()) {
+    BoxEditor().DidPaint(image);
+    return;
+  }
   const auto& bounds = FloatRect(image->content_bounds().size());
   if (image->IsContentChanged() || image->IsOriginChanged())
     AddDirtyBounds(bounds);
   BoxPaintScope paint_scope(this, *image);
-  builder_.AddNew<DrawRectDisplayItem>(bounds, FloatColor(0, 0, 0), 1);
+  builder_.AddNew<DrawBitmapDisplayItem>(
+      FloatRect(image->point(), data.bounds().size()), image->bitmap(),
+      data.bounds(), image->opacity());
   BoxEditor().DidPaint(image);
 }
 

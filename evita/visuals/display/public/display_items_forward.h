@@ -11,6 +11,7 @@ namespace visuals {
   V(BeginClip)                   \
   V(BeginTransform)              \
   V(Clear)                       \
+  V(DrawBitmap)                  \
   V(DrawLine)                    \
   V(DrawRect)                    \
   V(DrawText)                    \

@@ -15,10 +15,9 @@
 #include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/geometry/float_matrix3x2.h"
 #include "evita/visuals/geometry/float_rect.h"
+#include "evita/visuals/imaging/image_bitmap.h"
 
 namespace visuals {
-
-class TextLayout;
 
 #define DECLARE_DISPLAY_ITEM_CLASS(self, super) \
   DECLARE_CASTABLE_CLASS(self, super)           \
@@ -127,6 +126,37 @@ class ClearDisplayItem final : public DisplayItem {
   const FloatColor color_;
 
   DISALLOW_COPY_AND_ASSIGN(ClearDisplayItem);
+};
+
+//////////////////////////////////////////////////////////////////////
+//
+// DrawBitmapDisplayItem
+//
+class DrawBitmapDisplayItem final : public DisplayItem {
+  DECLARE_DISPLAY_ITEM_FINAL_CLASS(DrawBitmapDisplayItem, DisplayItem)
+
+ public:
+  DrawBitmapDisplayItem(const FloatRect& destination,
+                        const ImageBitmap& bitmap,
+                        const FloatRect& source,
+                        float opacity);
+  ~DrawBitmapDisplayItem();
+
+  const ImageBitmap& bitmap() const { return bitmap_; }
+  const FloatRect& destination() const { return destination_; }
+  float opacity() const { return opacity_; }
+  const FloatRect& source() const { return source_; }
+
+ private:
+  // DisplayItem
+  bool EqualsTo(const DisplayItem& other) const final;
+
+  const ImageBitmap bitmap_;
+  const FloatRect destination_;
+  const float opacity_;
+  const FloatRect source_;
+
+  DISALLOW_COPY_AND_ASSIGN(DrawBitmapDisplayItem);
 };
 
 //////////////////////////////////////////////////////////////////////

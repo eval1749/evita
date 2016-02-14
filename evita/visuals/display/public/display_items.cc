@@ -82,6 +82,31 @@ bool ClearDisplayItem::EqualsTo(const DisplayItem& other) const {
 
 //////////////////////////////////////////////////////////////////////
 //
+// DrawBitmapDisplayItem
+//
+DrawBitmapDisplayItem::DrawBitmapDisplayItem(const FloatRect& destination,
+                                             const ImageBitmap& bitmap,
+                                             const FloatRect& source,
+                                             float opacity)
+    : bitmap_(bitmap),
+      destination_(destination),
+      opacity_(opacity),
+      source_(source) {}
+
+DrawBitmapDisplayItem::~DrawBitmapDisplayItem() {}
+
+bool DrawBitmapDisplayItem::EqualsTo(const DisplayItem& other) const {
+  if (this == &other)
+    return false;
+  const auto& item = other.as<DrawBitmapDisplayItem>();
+  if (!item)
+    return false;
+  return bitmap_ == item->bitmap_ && destination_ == item->destination_ &&
+         opacity_ == item->opacity_ && source_ == item->source_;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 // DrawLineDisplayItem
 //
 DrawLineDisplayItem::DrawLineDisplayItem(const FloatPoint& point1,

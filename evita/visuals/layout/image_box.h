@@ -29,10 +29,14 @@ class ImageBox final : public ContentBox {
 
   const ImageData& data() const { return data_; }
   const ImageBitmap& bitmap() const { return *bitmap_; }
+  float opacity() const { return opacity_; }
+  const FloatPoint& point() const { return point_; }
 
  private:
   ImageData data_;
   std::unique_ptr<ImageBitmap> bitmap_;
+  float opacity_ = 1.0f;
+  FloatPoint point_;
 
   DISALLOW_COPY_AND_ASSIGN(ImageBox);
 };

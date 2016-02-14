@@ -15,6 +15,8 @@
 
 #include "evita/visuals/display/display_item_list_processor.h"
 
+#include "build/build_config.h"
+#include "evita/gfx/bitmap.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
@@ -25,6 +27,13 @@
 #include "evita/visuals/fonts/native_text_layout_win.h"
 #include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/geometry/float_rect.h"
+
+#if OS_WIN
+#include "evita/gfx/imaging_factory_win.h"
+#include "evita/visuals/imaging/native_image_bitmap_win.h"
+#else
+#error "Unsupported target"
+#endif
 
 namespace visuals {
 
@@ -50,6 +59,22 @@ gfx::SizeF ToSizeF(const FloatSize& size) {
 
 gfx::RectF ToRectF(const FloatRect& rect) {
   return gfx::RectF(ToPointF(rect.origin()), ToSizeF(rect.size()));
+}
+
+std::unique_ptr<gfx::Bitmap> CreateBitmapFromImage(gfx::Canvas* canvas,
+                                                   const ImageBitmap& image) {
+  common::ComPtr<IWICFormatConverter> converter;
+  COM_VERIFY(gfx::ImagingFactory::GetInstance()->impl()->CreateFormatConverter(
+      &converter));
+  const auto palette = static_cast<IWICPalette*>(nullptr);
+  const auto alpha_threshold = 0.0f;
+  COM_VERIFY(converter->Initialize(
+      image.impl().get().get(), GUID_WICPixelFormat32bppPBGRA,
+      WICBitmapDitherTypeNone, palette, alpha_threshold,
+      WICBitmapPaletteTypeMedianCut));
+  common::ComPtr<ID2D1Bitmap> bitmap;
+  COM_VERIFY((*canvas)->CreateBitmapFromWicBitmap(converter, nullptr, &bitmap));
+  return std::make_unique<gfx::Bitmap>(canvas, bitmap);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -87,6 +112,13 @@ void PaintVisitor::VisitBeginTransform(BeginTransformDisplayItem* item) {
 
 void PaintVisitor::VisitClear(ClearDisplayItem* item) {
   canvas_->Clear(ToColorF(item->color()));
+}
+
+void PaintVisitor::VisitDrawBitmap(DrawBitmapDisplayItem* item) {
+  const auto& bitmap = CreateBitmapFromImage(canvas_, item->bitmap());
+  (*canvas_)->DrawBitmap(*bitmap, ToRectF(item->destination()), item->opacity(),
+                         D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+                         ToRectF(item->source()));
 }
 
 void PaintVisitor::VisitDrawLine(DrawLineDisplayItem* item) {

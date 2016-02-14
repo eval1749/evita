@@ -23,9 +23,11 @@ class Image final : public Node {
   ~Image() final;
 
   const ImageData& data() const { return data_; }
+  float opacity() const { return opacity_; }
 
  private:
   ImageData data_;
+  float opacity_ = 1.0f;
 
   DISALLOW_COPY_AND_ASSIGN(Image);
 };

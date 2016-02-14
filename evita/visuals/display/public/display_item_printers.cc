@@ -54,6 +54,11 @@ void Printer::VisitClear(ClearDisplayItem* item) {
   *ostream_ << ' ' << item->color();
 }
 
+void Printer::VisitDrawBitmap(DrawBitmapDisplayItem* item) {
+  *ostream_ << item->bitmap() << ' ' << item->destination() << '<='
+            << item->source() << "opacity=" << item->opacity();
+}
+
 void Printer::VisitDrawLine(DrawLineDisplayItem* item) {
   *ostream_ << item->point1() << '-' << item->point2() << ' ' << item->color()
             << " thickness=" << item->thickness();

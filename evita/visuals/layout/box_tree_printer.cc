@@ -6,6 +6,7 @@
 
 #include "base/strings/stringprintf.h"
 #include "evita/visuals/css/style.h"
+#include "evita/visuals/dom/image_data.h"
 #include "evita/visuals/dom/shape_data.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/box_visitor.h"
@@ -71,7 +72,7 @@ void BoxTreePrinter::VisitRootBox(RootBox* box) {
 void BoxTreePrinter::VisitImageBox(ImageBox* box) {
   Indent();
   *ostream_ << *box;
-  *ostream_ << box->data().value();
+  *ostream_ << box->data();
   const auto& style = box->ComputeActualStyle();
   *ostream_ << ' ' << *style << std::endl;
 }

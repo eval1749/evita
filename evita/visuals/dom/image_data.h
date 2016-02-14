@@ -8,8 +8,11 @@
 #include <stdint.h>
 
 #include <iosfwd>
+#include <memory>
 
-#include "base/strings/string_piece.h"
+#include "base/macros.h"
+#include "evita/visuals/geometry/float_rect.h"
+#include "evita/visuals/imaging/image_bitmap.h"
 
 namespace visuals {
 
@@ -19,19 +22,24 @@ namespace visuals {
 //
 class ImageData final {
  public:
-  explicit ImageData(base::StringPiece16 value);
+  explicit ImageData(const ImageBitmap& bitmap);
   ImageData(const ImageData& other);
+  ImageData(ImageData&& other);
   ~ImageData();
 
   ImageData& operator=(const ImageData& other);
+  ImageData& operator=(ImageData&& other);
 
   bool operator==(const ImageData& other) const;
   bool operator!=(const ImageData& other) const;
 
-  const base::string16& value() const { return value_; }
+  const ImageBitmap& bitmap() const { return bitmap_; }
+  const FloatRect& bounds() const { return bounds_; }
 
  private:
-  base::string16 value_;
+  ImageBitmap bitmap_;
+  // Image fragment bounds specified by image URL "#xywh=\d+,\d+,\d+,\d"
+  FloatRect bounds_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const ImageData& data);

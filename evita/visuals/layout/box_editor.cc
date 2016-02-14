@@ -11,6 +11,7 @@
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/fonts/text_layout.h"
+#include "evita/visuals/imaging/image_bitmap.h"
 #include "evita/visuals/layout/ancestors.h"
 #include "evita/visuals/layout/ancestors_or_self.h"
 #include "evita/visuals/layout/box_selection.h"
@@ -382,6 +383,7 @@ void BoxEditor::SetImageData(ImageBox* image_box, const ImageData& data) {
   if (image_box->data_ == data)
     return;
   image_box->data_ = data;
+  image_box->bitmap_.reset();
   SetContentChanged(image_box);
 }
 

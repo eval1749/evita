@@ -1,0 +1,19 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "base_test.cc",
+  ]
+
+  data = [
+    "ordered_set_test.js",
+    "strings/string_util_test.js",
+  ]
+
+  public_deps = [
+    "//evita/dom/testing:test_support",
+  ]
+}

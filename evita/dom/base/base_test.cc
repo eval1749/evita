@@ -6,19 +6,23 @@
 
 namespace dom {
 
-class OrderedSetTest : public AbstractDomTest {
+class BaseTest : public AbstractDomTest {
  public:
-  ~OrderedSetTest() override = default;
+  ~BaseTest() override = default;
 
  protected:
-  OrderedSetTest() = default;
+  BaseTest() = default;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OrderedSetTest);
+  DISALLOW_COPY_AND_ASSIGN(BaseTest);
 };
 
-TEST_F(OrderedSetTest, all) {
+TEST_F(BaseTest, OrderedSet) {
   RunFile({"base", "ordered_set_test.js"});
+}
+
+TEST_F(BaseTest, StringUtil) {
+  RunFile({"base", "strings", "string_util.js"});
 }
 
 }  // namespace dom

@@ -66,6 +66,7 @@ source_set("components") {
     "//evita/dom/bindings",
     "//evita/dom/clipboard",
     "//evita/dom/components/imaging",
+    "//evita/dom/components/win_registry",
     "//evita/dom/encodings",
     "//evita/dom/forms",
     "//evita/dom/os",
@@ -217,8 +218,7 @@ test("evita_dom_tests") {
     "view_event_handler_impl_unittest.cc",
   ]
 
-  data = [
-  ]
+  data = []
 
   deps = [
     # TODO(eval1749): We should not have "application" dependency on

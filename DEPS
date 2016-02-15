@@ -73,11 +73,6 @@ hooks = [
   },
   {
     'pattern': '.',
-    'action': ['src\\build\\gyp_evita.cmd']
-  },
-
-  {
-    'pattern': '.',
     'action': ['src\\evita\\build\\gn_evita.cmd']
   },
 ]

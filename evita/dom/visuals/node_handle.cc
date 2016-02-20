@@ -5,6 +5,7 @@
 #include "evita/dom/visuals/node_handle.h"
 
 #include "evita/dom/bindings/exception_state.h"
+#include "evita/dom/components/imaging/image_data.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/visuals/css_style.h"
@@ -12,6 +13,8 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/image.h"
+#include "evita/visuals/dom/image_data.h"
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/shape_data.h"
@@ -88,6 +91,17 @@ NodeHandle* NodeHandle::CreateElement(NodeHandle* document_handle,
   if (!document)
     return nullptr;
   return new NodeHandle(new visuals::Element(document, tag_name, id));
+}
+
+// static
+NodeHandle* NodeHandle::CreateImage(NodeHandle* document_handle,
+                                    ImageData* image_data,
+                                    ExceptionState* exception_state) {
+  const auto document = AsDocument(document_handle, exception_state);
+  if (!document)
+    return nullptr;
+  const auto& data = visuals::ImageData(image_data->bitmap());
+  return new NodeHandle(new visuals::Image(document, data));
 }
 
 // static
@@ -180,6 +194,18 @@ void NodeHandle::ReplaceChild(NodeHandle* parent,
   visuals::NodeEditor().ReplaceChild(container, node->value(), child->value());
 }
 
+// static
+void NodeHandle::SetImageData(NodeHandle* image_handle,
+                              ImageData* image_data,
+                              ExceptionState* exception_state) {
+  const auto image = image_handle->value()->as<visuals::Image>();
+  if (!image) {
+    exception_state->ThrowError("Requires image node");
+    return;
+  }
+  const auto& data = visuals::ImageData(image_data->bitmap());
+  visuals::NodeEditor().SetImageData(image, data);
+}
 // static
 void NodeHandle::SetInlineStyle(NodeHandle* element_handle,
                                 v8::Local<v8::Map> raw_style,

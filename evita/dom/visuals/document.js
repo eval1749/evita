@@ -18,6 +18,15 @@ class Document extends Node {
   }
 
   /**
+   * @param {!ImageData} data
+   * @return {!Image}
+   */
+  createImage(data) {
+    const handle = NodeHandle.createImage(this.handle_, data);
+    return new Image(this, handle, data);
+  }
+
+  /**
    * @param {!Uint8Array} data
    * @return {!Shape}
    */

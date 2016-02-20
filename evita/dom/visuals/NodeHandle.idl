@@ -15,6 +15,9 @@ interface NodeHandle {
   static NodeHandle createElement(NodeHandle document, DOMString tagName,
                                   DOMString id);
   [RaisesException]
+  static NodeHandle createImage(NodeHandle document, ImageData data);
+
+  [RaisesException]
   static NodeHandle createShape(NodeHandle document, ArrayBufferView data);
 
   [RaisesException]
@@ -35,6 +38,9 @@ interface NodeHandle {
   [RaisesException]
   static void replaceChild(NodeHandle parent, NodeHandle node,
                            NodeHandle child);
+
+  [RaisesException]
+  static void setImageData(NodeHandle handle, ImageData data);
 
   [RaisesException]
   static void setInlineStyle(NodeHandle handle, Map rawStyle);

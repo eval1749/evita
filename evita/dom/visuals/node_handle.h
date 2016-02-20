@@ -24,6 +24,7 @@ class NodeHandleClass;
 }
 
 class ExceptionState;
+class ImageData;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -59,6 +60,9 @@ class NodeHandle final : public ginx::Scriptable<NodeHandle> {
   static NodeHandle* CreateElement(NodeHandle* document,
                                    const base::string16& tag_name,
                                    ExceptionState* exception_state);
+  static NodeHandle* CreateImage(NodeHandle* document,
+                                 ImageData* data,
+                                 ExceptionState* exception_state);
   static NodeHandle* CreateShape(NodeHandle* document,
                                  const gin::ArrayBufferView& data,
                                  ExceptionState* exception_state);
@@ -80,6 +84,9 @@ class NodeHandle final : public ginx::Scriptable<NodeHandle> {
   static void ReplaceChild(NodeHandle* parent,
                            NodeHandle* node,
                            NodeHandle* child,
+                           ExceptionState* exception_state);
+  static void SetImageData(NodeHandle* element,
+                           ImageData* image_data,
                            ExceptionState* exception_state);
   static void SetInlineStyle(NodeHandle* element,
                              v8::Local<v8::Map> raw_style,

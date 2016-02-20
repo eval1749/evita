@@ -60,7 +60,7 @@ IoDelegateImpl::IoDelegateImpl() {}
 IoDelegateImpl::~IoDelegateImpl() {}
 
 IoContext* IoDelegateImpl::IoContextOf(domapi::IoContextId context_id) const {
-  auto const it = context_map_.find(context_id);
+  const auto& it = context_map_.find(context_id);
   if (it == context_map_.end())
     return nullptr;
   return it->second;
@@ -80,10 +80,10 @@ void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
 
 void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
                                     const domapi::IoIntPromise& promise) {
-  auto const it = context_map_.find(context_id);
+  const auto& it = context_map_.find(context_id);
   if (it == context_map_.end())
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  auto const context = it->second->as<DirectoryIoContext>();
+  const auto context = it->second->as<DirectoryIoContext>();
   if (!context)
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
   context->Close(promise);
@@ -92,10 +92,10 @@ void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
 
 void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
                                const domapi::IoIntPromise& promise) {
-  auto const it = context_map_.find(context_id);
+  const auto& it = context_map_.find(context_id);
   if (it == context_map_.end())
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  auto const context = it->second->as<IoContext>();
+  const auto context = it->second->as<IoContext>();
   if (!context)
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
   context->Close(promise);
@@ -140,15 +140,15 @@ void IoDelegateImpl::MakeTempFileName(
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::MakeTempFileName");
   base::string16 file_name(MAX_PATH, 0);
-  auto const unique_id =
+  const auto unique_id =
       ::GetTempFileNameW(dir_name.c_str(), prefix.c_str(), 0, &file_name[0]);
   if (!unique_id) {
-    auto const last_error = ::GetLastError();
+    const auto last_error = ::GetLastError();
     DVLOG(0) << "GetTempFileNameW error=" << last_error;
     Reject(resolver.reject, last_error);
     return;
   }
-  auto const nul_pos = file_name.find(static_cast<base::char16>(0));
+  const auto nul_pos = file_name.find(static_cast<base::char16>(0));
   if (nul_pos != base::string16::npos)
     file_name.resize(nul_pos);
   RunCallback(base::Bind(resolver.resolve, file_name));
@@ -162,13 +162,13 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", resolver.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::MoveFile");
-  auto const flags = options.no_overwrite
+  const auto flags = options.no_overwrite
                          ? MOVEFILE_WRITE_THROUGH
                          : MOVEFILE_WRITE_THROUGH | MOVEFILE_REPLACE_EXISTING;
-  auto const succeeded = ::MoveFileExW(src_path.c_str(), dst_path.c_str(),
+  const auto succeeded = ::MoveFileExW(src_path.c_str(), dst_path.c_str(),
                                        static_cast<uint32_t>(flags));
   if (!succeeded) {
-    auto const last_error = ::GetLastError();
+    const auto last_error = ::GetLastError();
     DVLOG(0) << "MoveFileEx error=" << last_error;
     Reject(resolver.reject, last_error);
     return;
@@ -180,7 +180,7 @@ void IoDelegateImpl::OpenDirectory(
     const base::string16& dir_name,
     const domapi::OpenDirectoryPromise& promise) {
   auto directory = std::make_unique<DirectoryIoContext>(dir_name);
-  auto const directory_id = domapi::IoContextId::New();
+  const auto directory_id = domapi::IoContextId::New();
   context_map_.insert(std::make_pair(directory_id, directory.release()));
   RunCallback(base::Bind(promise.resolve, domapi::DirectoryId(directory_id)));
 }
@@ -195,7 +195,7 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
   auto file = std::make_unique<FileIoContext>(file_name, mode, promise);
   if (!file->is_valid())
     return;
-  auto const file_id = domapi::IoContextId::New();
+  const auto file_id = domapi::IoContextId::New();
   context_map_.insert(std::make_pair(file_id, file.release()));
   RunCallback(base::Bind(promise.resolve, domapi::FileId(file_id)));
 }
@@ -206,8 +206,8 @@ void IoDelegateImpl::OpenProcess(const base::string16& command_line,
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::OpenProcess");
-  auto const process_id = domapi::IoContextId::New();
-  auto const process = new ProcessIoContext(process_id, command_line, promise);
+  const auto process_id = domapi::IoContextId::New();
+  const auto process = new ProcessIoContext(process_id, command_line, promise);
   context_map_.insert(std::make_pair(process_id, process));
   // Note: |ProcessIoContext| constructor delegate promise resolution to the
   // gateway thread which spawns process with specified command line.
@@ -236,7 +236,7 @@ void IoDelegateImpl::QueryFileStatus(
   scoped_find_handle find_handle(
       ::FindFirstFileW(file_name.c_str(), &find_data));
   if (!find_handle.is_valid()) {
-    auto const last_error = ::GetLastError();
+    const auto last_error = ::GetLastError();
     DVLOG(0) << "FindFirstFileW error=" << last_error;
     Reject(promise.reject, last_error);
     return;
@@ -263,7 +263,7 @@ void IoDelegateImpl::ReadDirectory(
     domapi::IoContextId context_id,
     size_t num_read,
     const domapi::ReadDirectoryPromise& promise) {
-  auto const context = IoContextOf(context_id)->as<DirectoryIoContext>();
+  const auto context = IoContextOf(context_id)->as<DirectoryIoContext>();
   if (!context)
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
   context->Read(num_read, promise);
@@ -274,7 +274,7 @@ void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
                               size_t num_read,
                               const domapi::IoIntPromise& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::ReadFile");
-  auto const context = IoContextOf(context_id)->as<BlockIoContext>();
+  const auto context = IoContextOf(context_id)->as<BlockIoContext>();
   if (!context)
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
   context->Read(buffer, num_read, promise);
@@ -283,9 +283,9 @@ void IoDelegateImpl::ReadFile(domapi::IoContextId context_id,
 void IoDelegateImpl::RemoveFile(const base::string16& file_name,
                                 const domapi::IoBoolPromise& resolver) {
   TRACE_EVENT0("io", "IoDelegateImpl::RemoveFile");
-  auto const succeeded = ::DeleteFileW(file_name.c_str());
+  const auto succeeded = ::DeleteFileW(file_name.c_str());
   if (!succeeded) {
-    auto const last_error = ::GetLastError();
+    const auto last_error = ::GetLastError();
     DVLOG(0) << "DeleteFileEx error=" << last_error;
     Reject(resolver.reject, last_error);
     return;
@@ -298,7 +298,7 @@ void IoDelegateImpl::WriteFile(domapi::IoContextId context_id,
                                size_t num_write,
                                const domapi::IoIntPromise& promise) {
   TRACE_EVENT0("io", "IoDelegateImpl::WriteFile");
-  auto const context = IoContextOf(context_id)->as<BlockIoContext>();
+  const auto context = IoContextOf(context_id)->as<BlockIoContext>();
   if (!context)
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
   context->Write(buffer, num_write, promise);

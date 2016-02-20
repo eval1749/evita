@@ -180,11 +180,12 @@ void IoDelegateImpl::OpenFile(const base::string16& file_name,
   TRACE_EVENT_WITH_FLOW1("promise", "Promise", promise.sequence_num,
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT,
                          "step", "IoDelegateImpl::OpenFile");
-  auto file = std::make_unique<FileIoContext>(file_name, mode, promise);
-  if (!file->is_valid())
-    return;
+  const auto& pair = FileIoContext::Open(file_name, mode);
+  if (pair.second)
+    return Reject(promise.reject, pair.second);
+  const auto file = new FileIoContext(pair.first);
   const auto file_id = domapi::IoContextId::New();
-  context_map_.insert(std::make_pair(file_id, file.release()));
+  context_map_.emplace(file_id, file);
   RunCallback(base::Bind(promise.resolve, domapi::FileId(file_id)));
 }
 

@@ -37,22 +37,6 @@ struct CreateFileParams {
   }
 };
 
-HANDLE OpenFile(const base::string16& file_name,
-                const base::string16& mode,
-                const domapi::OpenFilePromise& promise) {
-  CreateFileParams params(mode);
-  common::win::scoped_handle handle(
-      ::CreateFileW(file_name.c_str(), params.access, params.share_mode,
-                    nullptr, params.creation, FILE_FLAG_OVERLAPPED, nullptr));
-  if (!handle) {
-    auto const last_error = ::GetLastError();
-    DVLOG(0) << "CreateFileW " << file_name << " error=" << last_error;
-    Reject(promise.reject, last_error);
-    return INVALID_HANDLE_VALUE;
-  }
-  return handle.release();
-}
-
 }  // namespace
 
 void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
@@ -60,15 +44,9 @@ void Resolve(const base::Callback<void(domapi::FileId)>& resolve,
   RunCallback(base::Bind(resolve, context_id));
 }
 
-FileIoContext::FileIoContext(const base::string16& file_name,
-                             const base::string16& mode,
-                             const domapi::OpenFilePromise& promise)
-    : file_handle_(OpenFile(file_name, mode, promise)), operation_(nullptr) {
-  TRACE_EVENT_ASYNC_BEGIN0("io", "FileContext", this);
-  if (!file_handle_.is_valid())
-    return;
-  overlapped = {0};
+FileIoContext::FileIoContext(HANDLE handle) : file_handle_(handle) {
   handler = this;
+  overlapped = {0};
   editor::Application::instance()->io_manager()->RegisterIoHandler(
       file_handle_.get(), this);
 }
@@ -115,6 +93,21 @@ void FileIoContext::Close(const domapi::IoIntPromise& promise) {
   if (!IsRunning())
     delete this;
   Resolve(promise.resolve, 0u);
+}
+
+// static
+std::pair<HANDLE, int> FileIoContext::Open(const base::string16& file_name,
+                                           const base::string16& mode) {
+  CreateFileParams params(mode);
+  common::win::scoped_handle handle(
+      ::CreateFileW(file_name.c_str(), params.access, params.share_mode,
+                    nullptr, params.creation, FILE_FLAG_OVERLAPPED, nullptr));
+  if (!handle) {
+    auto const last_error = ::GetLastError();
+    DVLOG(0) << "CreateFileW " << file_name << " error=" << last_error;
+    return std::make_pair(INVALID_HANDLE_VALUE, last_error);
+  }
+  return std::make_pair(handle.release(), 0);
 }
 
 void FileIoContext::Read(void* buffer,

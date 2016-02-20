@@ -5,7 +5,10 @@
 #ifndef EVITA_IO_FILE_IO_CONTEXT_H_
 #define EVITA_IO_FILE_IO_CONTEXT_H_
 
+#include <utility>
+
 #include "base/callback.h"
+#include "base/macros.h"
 #include "base/message_loop/message_pump_win.h"
 #include "common/win/scoped_handle.h"
 #include "evita/dom/public/io_context_id.h"
@@ -20,12 +23,11 @@ class FileIoContext final : private base::MessagePumpForIO::IOContext,
   DECLARE_CASTABLE_CLASS(FileIoContext, BlockIoContext);
 
  public:
-  FileIoContext(const base::string16& file_name,
-                const base::string16& mode,
-                const domapi::OpenFilePromise& promise);
+  explicit FileIoContext(HANDLE handle);
   ~FileIoContext() final;
 
-  bool is_valid() const { return file_handle_.is_valid(); }
+  static std::pair<HANDLE, int> Open(const base::string16& file_name,
+                                     const base::string16& mode);
 
  private:
   bool IsRunning() const { return operation_ != nullptr; }
@@ -46,7 +48,7 @@ class FileIoContext final : private base::MessagePumpForIO::IOContext,
 
   domapi::IoIntPromise promise_;
   common::win::scoped_handle file_handle_;
-  const char* operation_;
+  const char* operation_ = nullptr;
 
   DISALLOW_COPY_AND_ASSIGN(FileIoContext);
 };

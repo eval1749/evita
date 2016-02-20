@@ -35,11 +35,8 @@ class IoDelegate {
   virtual void CheckSpelling(const base::string16& word_to_check,
                              const CheckSpellingResolver& callback) = 0;
 
-  virtual void CloseDirectory(IoContextId context_id,
-                              const IoIntPromise& promise) = 0;
-
-  virtual void CloseFile(IoContextId context_id,
-                         const IoIntPromise& promise) = 0;
+  virtual void CloseContext(const IoContextId& context_id,
+                            const IoIntPromise& promise) = 0;
 
   // Returns list of suggested words for |wrong_word|.
   virtual void GetSpellingSuggestions(

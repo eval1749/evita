@@ -78,20 +78,8 @@ void IoDelegateImpl::CheckSpelling(const base::string16& word_to_check,
           word_to_check)));
 }
 
-void IoDelegateImpl::CloseDirectory(domapi::IoContextId context_id,
-                                    const domapi::IoIntPromise& promise) {
-  const auto& it = context_map_.find(context_id);
-  if (it == context_map_.end())
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  const auto context = it->second->as<DirectoryIoContext>();
-  if (!context)
-    return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  context->Close(promise);
-  context_map_.erase(it);
-}
-
-void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
-                               const domapi::IoIntPromise& promise) {
+void IoDelegateImpl::CloseContext(const domapi::IoContextId& context_id,
+                                  const domapi::IoIntPromise& promise) {
   const auto& it = context_map_.find(context_id);
   if (it == context_map_.end())
     return Reject(promise.reject, ERROR_INVALID_HANDLE);

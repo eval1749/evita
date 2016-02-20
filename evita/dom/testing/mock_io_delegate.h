@@ -52,8 +52,8 @@ class MockIoDelegate final : public domapi::IoDelegate {
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
                      const CheckSpellingResolver& promise) final;
-  void CloseDirectory(domapi::IoContextId, const domapi::IoIntPromise& promise);
-  void CloseFile(domapi::IoContextId, const domapi::IoIntPromise& promise);
+  void CloseContext(const domapi::IoContextId& context_id,
+                    const domapi::IoIntPromise& promise);
   void GetSpellingSuggestions(
       const base::string16& wrong_word,
       const GetSpellingSuggestionsResolver& promise) final;

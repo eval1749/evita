@@ -36,7 +36,7 @@ Directory::~Directory() {
 v8::Local<v8::Promise> Directory::Close() {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::CloseDirectory,
+      base::Bind(&domapi::IoDelegate::CloseContext,
                  base::Unretained(ScriptHost::instance()->io_delegate()),
                  context_id_));
 }

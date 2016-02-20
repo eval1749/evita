@@ -32,7 +32,7 @@ AbstractFile::~AbstractFile() {
 v8::Local<v8::Promise> AbstractFile::Close() {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::CloseFile,
+      base::Bind(&domapi::IoDelegate::CloseContext,
                  base::Unretained(ScriptHost::instance()->io_delegate()),
                  context_id_));
 }

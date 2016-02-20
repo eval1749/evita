@@ -194,7 +194,7 @@ TEST_F(TextDocumentTest, load_failed_read) {
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
   mock_io_delegate()->SetCallResult("ReadFile", 0, 123);
   mock_io_delegate()->SetCallResult("ReadFile", 123, 0);
-  mock_io_delegate()->SetCallResult("CloseFile", 0, 0);
+  mock_io_delegate()->SetCallResult("CloseContext", 0, 0);
 
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
@@ -230,7 +230,7 @@ TEST_F(TextDocumentTest, load_succeeded) {
   file_status.last_write_time = base::Time::FromJsTime(123456.0);
   file_status.readonly = true;
   mock_io_delegate()->SetFileStatus(file_status, 0);
-  mock_io_delegate()->SetCallResult("CloseFile", 0, 0);
+  mock_io_delegate()->SetCallResult("CloseContext", 0, 0);
 
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('foo');"
@@ -362,7 +362,7 @@ TEST_F(TextDocumentTest, save_failed_open) {
 TEST_F(TextDocumentTest, save_failed_encode) {
   mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
-  mock_io_delegate()->SetCallResult("CloseFile", 0);
+  mock_io_delegate()->SetCallResult("CloseContext", 0);
   mock_io_delegate()->SetCallResult("RemoveFile", 0);
 
   EXPECT_SCRIPT_VALID(
@@ -382,7 +382,7 @@ TEST_F(TextDocumentTest, save_failed_write) {
   mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
   mock_io_delegate()->SetCallResult("WriteFile", 123);
-  mock_io_delegate()->SetCallResult("CloseFile", 0);
+  mock_io_delegate()->SetCallResult("CloseContext", 0);
   mock_io_delegate()->SetCallResult("RemoveFile", 0);
 
   EXPECT_SCRIPT_VALID(
@@ -407,7 +407,7 @@ TEST_F(TextDocumentTest, save_succeeded) {
   mock_io_delegate()->SetOpenFileResult(domapi::IoContextId::New(), 0);
   mock_io_delegate()->SetCallResult("WriteFile", 0,
                                     static_cast<int>(expected_bytes.size()));
-  mock_io_delegate()->SetCallResult("CloseFile", 0);
+  mock_io_delegate()->SetCallResult("CloseContext", 0);
   mock_io_delegate()->SetCallResult("MoveFile", 0);
   domapi::FileStatus file_status;
   file_status.file_size = 10;

@@ -99,21 +99,10 @@ void MockIoDelegate::CheckSpelling(const base::string16&,
   promise.resolve.Run(check_spelling_result_);
 }
 
-void MockIoDelegate::CloseDirectory(domapi::IoContextId,
-                                    const domapi::IoIntPromise& promise) {
+void MockIoDelegate::CloseContext(const domapi::IoContextId&,
+                                  const domapi::IoIntPromise& resolver) {
   ++num_close_called_;
-  auto const result = PopCallResult("CloseDirectory");
-  if (auto const error_code = result.error_code) {
-    promise.reject.Run(domapi::IoError(error_code));
-    return;
-  }
-  promise.resolve.Run(true);
-}
-
-void MockIoDelegate::CloseFile(domapi::IoContextId,
-                               const domapi::IoIntPromise& resolver) {
-  ++num_close_called_;
-  auto const result = PopCallResult("CloseFile");
+  auto const result = PopCallResult("CloseContext");
   if (auto const error_code = result.error_code)
     resolver.reject.Run(domapi::IoError(error_code));
   else

@@ -34,7 +34,7 @@ WinResource::~WinResource() {}
 v8::Local<v8::Promise> WinResource::Close(ScriptHost* script_host) {
   return PromiseResolver::Call(
       FROM_HERE,
-      base::Bind(&domapi::IoDelegate::CloseFile,
+      base::Bind(&domapi::IoDelegate::CloseContext,
                  base::Unretained(script_host->io_delegate()), resource_id_));
 }
 

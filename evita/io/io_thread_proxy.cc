@@ -48,10 +48,9 @@ IoThreadProxy::~IoThreadProxy() {}
 DEFINE_DELEGATE_2(CheckSpelling,
                   const base::string16&,
                   const CheckSpellingResolver&)
-DEFINE_DELEGATE_2(CloseDirectory,
-                  domapi::IoContextId,
+DEFINE_DELEGATE_2(CloseContext,
+                  const domapi::IoContextId&,
                   const domapi::IoIntPromise&)
-DEFINE_DELEGATE_2(CloseFile, domapi::IoContextId, const domapi::IoIntPromise&)
 DEFINE_DELEGATE_2(GetSpellingSuggestions,
                   const base::string16&,
                   const GetSpellingSuggestionsResolver&)

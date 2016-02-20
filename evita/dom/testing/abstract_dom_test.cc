@@ -26,6 +26,7 @@
 #include "evita/dom/testing/gtest.h"
 #include "evita/dom/testing/mock_io_delegate.h"
 #include "evita/dom/testing/mock_view_impl.h"
+#include "evita/dom/testing/test_runner.h"
 #include "evita/dom/timing/mock_scheduler.h"
 #include "evita/dom/view_event_handler_impl.h"
 #include "evita/ginx/runner_delegate.h"
@@ -42,6 +43,7 @@ base::string16 V8ToString(v8::Local<v8::Value> value);
 
 namespace {
 ginx::Runner* static_runner;
+AbstractDomTest* static_current_test;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -142,6 +144,7 @@ AbstractDomTest::RunnerDelegate::GetGlobalTemplate(ginx::Runner* runner) {
   v8::Context::Scope context_scope(context);
   test_instance_->PopulateGlobalTemplate(isolate, templ);
   GTest::Install(isolate, templ);
+  TestRunner::Install(isolate, templ);
   return templ;
 }
 
@@ -210,6 +213,7 @@ AbstractDomTest::AbstractDomTest()
       mock_scheduler_(new MockScheduler()),
       mock_view_impl_(new MockViewImpl()),
       script_host_(nullptr) {
+  static_current_test = this;
 #if OS_WIN
   static bool is_com_initialized;
   if (is_com_initialized)
@@ -219,7 +223,9 @@ AbstractDomTest::AbstractDomTest()
 #endif
 }
 
-AbstractDomTest::~AbstractDomTest() {}
+AbstractDomTest::~AbstractDomTest() {
+  static_current_test = nullptr;
+}
 
 v8::Isolate* AbstractDomTest::isolate() const {
   return runner_->isolate();
@@ -271,6 +277,12 @@ std::string AbstractDomTest::EvalScript(const base::StringPiece& script_text,
     return exception_;
   }
   return base::UTF16ToUTF8(V8ToString(result));
+}
+
+// static
+AbstractDomTest* AbstractDomTest::GetInstance() {
+  DCHECK(static_current_test);
+  return static_current_test;
 }
 
 void AbstractDomTest::PopulateGlobalTemplate(v8::Isolate*,

@@ -34,6 +34,15 @@ class ScriptHost;
 // AbstractDomTest - The base class for testing JavaScript.
 //
 class AbstractDomTest : public ::testing::Test {
+ public:
+  MockIoDelegate* mock_io_delegate() const { return mock_io_delegate_.get(); }
+
+  static AbstractDomTest* GetInstance();
+
+  // When test case posts a task to message loop, it should call
+  // |RunMessageLoopUntilIdle()| to run posted tasks.
+  void RunMessageLoopUntilIdle();
+
  protected:
   typedef std::vector<v8::Local<v8::Value>> Argv;
 
@@ -74,7 +83,6 @@ class AbstractDomTest : public ::testing::Test {
   ~AbstractDomTest() override;
 
   v8::Isolate* isolate() const;
-  MockIoDelegate* mock_io_delegate() const { return mock_io_delegate_.get(); }
   MockScheduler* mock_scheduler() const { return mock_scheduler_.get(); }
   MockViewImpl* mock_view_impl() const { return mock_view_impl_.get(); }
   ginx::Runner* runner() const { return runner_.get(); }
@@ -92,10 +100,6 @@ class AbstractDomTest : public ::testing::Test {
 
   void RunFile(const base::FilePath& path);
   void RunFile(const std::vector<base::StringPiece>& components);
-
-  // When test case posts a task to message loop, it should call
-  // |RunMessageLoopUntilIdle()| to run posted tasks.
-  void RunMessageLoopUntilIdle();
 
   bool RunScript(const base::StringPiece& text,
                  const base::StringPiece& file_name,

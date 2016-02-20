@@ -16,6 +16,8 @@ source_set("test_support") {
     "mock_io_delegate.h",
     "mock_view_impl.cc",
     "mock_view_impl.h",
+    "test_runner.cc",
+    "test_runner.h",
   ]
 
   public_deps = [

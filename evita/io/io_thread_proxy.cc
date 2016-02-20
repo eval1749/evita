@@ -38,6 +38,13 @@ IoThreadProxy::~IoThreadProxy() {}
                               p1, p2, p3, p4));                               \
   }
 
+#define DEFINE_DELEGATE_6(name, ty1, ty2, ty3, ty4, ty5, ty6)                 \
+  void IoThreadProxy::name(ty1 p1, ty2 p2, ty3 p3, ty4 p4, ty5 p5, ty6 p6) {  \
+    thread_->task_runner()->PostTask(                                         \
+        FROM_HERE, base::Bind(&IoDelegate::name, base::Unretained(delegate_), \
+                              p1, p2, p3, p4, p5, p6));                       \
+  }
+
 DEFINE_DELEGATE_2(CheckSpelling,
                   const base::string16&,
                   const CheckSpellingResolver&)
@@ -48,6 +55,13 @@ DEFINE_DELEGATE_2(CloseFile, domapi::IoContextId, const domapi::IoIntPromise&)
 DEFINE_DELEGATE_2(GetSpellingSuggestions,
                   const base::string16&,
                   const GetSpellingSuggestionsResolver&)
+DEFINE_DELEGATE_6(LoadWinResource,
+                  const domapi::WinResourceId&,
+                  const base::string16&,
+                  const base::string16&,
+                  uint8_t*,
+                  size_t,
+                  const domapi::IoIntPromise&)
 DEFINE_DELEGATE_3(MakeTempFileName,
                   const base::string16&,
                   const base::string16&,
@@ -67,6 +81,9 @@ DEFINE_DELEGATE_3(OpenFile,
 DEFINE_DELEGATE_2(OpenProcess,
                   const base::string16&,
                   const domapi::OpenProcessPromise&)
+DEFINE_DELEGATE_2(OpenWinResource,
+                  const base::string16&,
+                  const domapi::OpenWinResourcePromise&)
 DEFINE_DELEGATE_2(QueryFileStatus,
                   const base::string16&,
                   const domapi::QueryFileStatusPromise&)

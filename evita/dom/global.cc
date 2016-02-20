@@ -8,6 +8,7 @@
 #include "evita/dom/clipboard/data_transfer_item_list.h"
 #include "evita/dom/components/imaging/image_data.h"
 #include "evita/dom/components/win_registry/win_registry.h"
+#include "evita/dom/components/win_resource/win_resource.h"
 #include "evita/dom/editor.h"
 #include "evita/dom/encodings/text_decoder.h"
 #include "evita/dom/encodings/text_encoder.h"
@@ -85,6 +86,7 @@ v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     // Components
     INSTALL(ImageData);
     INSTALL(WinRegistry);
+    INSTALL(WinResource);
 
     // Note: super class must be installed before subclass.
     INSTALL(Event);

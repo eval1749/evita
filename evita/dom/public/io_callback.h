@@ -20,6 +20,7 @@ class FileId;
 class IoContextId;
 struct IoError;
 class ProcessId;
+class WinResourceId;
 
 struct FileStatus final {
   int file_size;
@@ -40,6 +41,7 @@ using MakeTempFileNamePromise = Promise<base::string16, IoError>;
 using OpenDirectoryPromise = Promise<DirectoryId, IoError>;
 using OpenFilePromise = Promise<FileId, IoError>;
 using OpenProcessPromise = Promise<ProcessId, IoError>;
+using OpenWinResourcePromise = Promise<WinResourceId, IoError>;
 using QueryFileStatusPromise = Promise<FileStatus, IoError>;
 using ReadDirectoryPromise = Promise<const std::vector<FileStatus>&, IoError>;
 

@@ -11,6 +11,7 @@ source_set("test_files") {
 
   data = [
     "imaging/imaging_test.js",
+    "win_resource/win_resource_test.js",
   ]
 
   public_deps = [

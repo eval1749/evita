@@ -41,7 +41,7 @@ void MockIoDelegate::SetCallResult(const base::StringPiece& name,
                                    int error_code,
                                    int num_transferred) {
   CallResult result;
-  result.name = name;
+  result.name = name.as_string();
   result.error_code = error_code;
   result.num_transferred = num_transferred;
   call_results_.push_back(result);
@@ -62,19 +62,35 @@ void MockIoDelegate::SetMakeTempFileName(const base::string16 file_name,
 void MockIoDelegate::SetOpenDirectoryResult(domapi::IoContextId context_id,
                                             int error_code) {
   SetCallResult("OpenDirectory", error_code);
+  context_id_.Reset();
   context_id_ = context_id;
 }
 
 void MockIoDelegate::SetOpenFileResult(domapi::IoContextId context_id,
                                        int error_code) {
   SetCallResult("OpenFile", error_code);
+  context_id_.Reset();
   context_id_ = context_id;
+}
+
+void MockIoDelegate::SetOpenResult(base::StringPiece name, int error_code) {
+  SetCallResult(name, error_code);
+  context_id_.Reset();
+  context_id_ = error_code ? domapi::IoContextId() : domapi::IoContextId::New();
 }
 
 void MockIoDelegate::SetReadDirectoryResult(
     const std::vector<domapi::FileStatus>& entries) {
   SetCallResult("ReadDirectory", 0);
   directory_entries_ = entries;
+}
+
+void MockIoDelegate::SetResource(base::StringPiece16 type,
+                                 base::StringPiece16 name,
+                                 const std::vector<uint8_t>& data) {
+  resource_data_ = data;
+  resource_name_ = name.as_string();
+  resource_type_ = type.as_string();
 }
 
 // domapi::IoDelegate
@@ -108,6 +124,19 @@ void MockIoDelegate::GetSpellingSuggestions(
     const base::string16&,
     const GetSpellingSuggestionsResolver& promise) {
   promise.resolve.Run(spelling_suggestions_);
+}
+
+void MockIoDelegate::LoadWinResource(const domapi::WinResourceId& resource_id,
+                                     const base::string16& type,
+                                     const base::string16& name,
+                                     uint8_t* buffer,
+                                     size_t buffer_size,
+                                     const domapi::IoIntPromise& promise) {
+  if (resource_type_ != type || resource_name_ != name)
+    return promise.reject.Run(domapi::IoError(ERROR_NOT_FOUND));
+  ::memcpy(buffer, resource_data_.data(),
+           std::min(resource_data_.size(), buffer_size));
+  promise.resolve.Run(static_cast<int>(resource_data_.size()));
 }
 
 void MockIoDelegate::MakeTempFileName(
@@ -160,6 +189,15 @@ void MockIoDelegate::OpenProcess(const base::string16&,
     promise.reject.Run(domapi::IoError(error_code));
   else
     promise.resolve.Run(domapi::ProcessId(context_id_));
+}
+
+void MockIoDelegate::OpenWinResource(
+    const base::string16& file_name,
+    const domapi::OpenWinResourcePromise& promise) {
+  const auto result = PopCallResult("OpenWinResource");
+  if (const auto error_code = result.error_code)
+    return promise.reject.Run(domapi::IoError(error_code));
+  promise.resolve.Run(domapi::WinResourceId(context_id_));
 }
 
 void MockIoDelegate::QueryFileStatus(

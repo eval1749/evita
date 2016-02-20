@@ -4,11 +4,15 @@
 
 #include <stdint.h>
 
+#include <string>
+#include <vector>
+
 #include "evita/dom/testing/test_runner.h"
 
 #include "evita/dom/converter.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/testing/abstract_dom_test.h"
+#include "evita/dom/testing/mock_io_delegate.h"
 #include "gin/object_template_builder.h"
 
 namespace dom {
@@ -21,12 +25,26 @@ void RunMicrotasks() {
   test->RunMessageLoopUntilIdle();
 }
 
+void SetOpenResult(const std::string& name, int error_code) {
+  const auto test = AbstractDomTest::GetInstance();
+  test->mock_io_delegate()->SetOpenResult(name, error_code);
+}
+
+void SetResource(const base::string16& type,
+                 const base::string16& name,
+                 const std::vector<uint8_t>& data) {
+  const auto test = AbstractDomTest::GetInstance();
+  test->mock_io_delegate()->SetResource(type, name, data);
+}
+
 }  // namespace
 
 void TestRunner::Install(v8::Isolate* isolate,
                          v8::Local<v8::ObjectTemplate> global) {
   auto test_runner = gin::ObjectTemplateBuilder(isolate)
                          .SetMethod("runMicrotasks", RunMicrotasks)
+                         .SetMethod("setOpenResult", SetOpenResult)
+                         .SetMethod("setResource", SetResource)
                          .Build();
   global->Set(gin::StringToV8(isolate, "testRunner"), test_runner);
 }

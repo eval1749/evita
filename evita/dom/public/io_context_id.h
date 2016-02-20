@@ -23,6 +23,7 @@ class IoContextId {
   int value() const { return value_; }
 
   static IoContextId New();
+  void Reset() { value_ = 0; }
 
  private:
   explicit IoContextId(int value);
@@ -46,6 +47,12 @@ class ProcessId final : public IoContextId {
  public:
   explicit ProcessId(IoContextId context_id);
   ~ProcessId();
+};
+
+class WinResourceId final : public IoContextId {
+ public:
+  explicit WinResourceId(const IoContextId& context_id);
+  ~WinResourceId();
 };
 
 }  // namespace domapi

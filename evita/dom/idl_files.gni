@@ -13,6 +13,7 @@ interface_idl_files = [
   "//evita/dom/clipboard/DataTransferItemList.idl",
   "//evita/dom/components/imaging/ImageData.idl",
   "//evita/dom/components/win_registry/WinRegistry.idl",
+  "//evita/dom/components/win_resource/WinResource.idl",
   "//evita/dom/Editor.idl",
   "//evita/dom/FilePath.idl",
   "//evita/dom/encodings/TextDecoder.idl",

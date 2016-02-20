@@ -67,6 +67,7 @@ source_set("components") {
     "//evita/dom/clipboard",
     "//evita/dom/components/imaging",
     "//evita/dom/components/win_registry",
+    "//evita/dom/components/win_resource",
     "//evita/dom/encodings",
     "//evita/dom/forms",
     "//evita/dom/os",

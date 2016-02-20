@@ -61,6 +61,15 @@ ProcessId::ProcessId(IoContextId context_id) : IoContextId(context_id) {}
 
 ProcessId::~ProcessId() {}
 
+//////////////////////////////////////////////////////////////////////
+//
+// WinResourceId
+//
+WinResourceId::WinResourceId(const IoContextId& context_id)
+    : IoContextId(context_id) {}
+
+WinResourceId::~WinResourceId() {}
+
 }  // namespace domapi
 
 namespace std {

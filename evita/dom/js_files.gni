@@ -107,6 +107,7 @@ js_lib_files = [
   "components/find_and_replace/find_and_replace_commands.js",
   "components/launchpad/launchpad.js",
   "components/spell_checker/spell_checker.js",
+  "components/win_resource/win_resource.js",
 
   "components/repl/console.js",
   "components/repl/describe.js",

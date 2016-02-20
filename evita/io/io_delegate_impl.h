@@ -33,6 +33,12 @@ class IoDelegateImpl final : public domapi::IoDelegate {
   void GetSpellingSuggestions(
       const base::string16& wrong_word,
       const GetSpellingSuggestionsResolver& promise) final;
+  void LoadWinResource(const domapi::WinResourceId& resource_id,
+                       const base::string16& type,
+                       const base::string16& name,
+                       uint8_t* buffer,
+                       size_t buffer_size,
+                       const domapi::IoIntPromise& promise) final;
   void MakeTempFileName(const base::string16& dir_name,
                         const base::string16& prefix,
                         const domapi::MakeTempFileNamePromise& resolver) final;
@@ -47,6 +53,8 @@ class IoDelegateImpl final : public domapi::IoDelegate {
                 const domapi::OpenFilePromise& promise) final;
   void OpenProcess(const base::string16& command_line,
                    const domapi::OpenProcessPromise& promise) final;
+  void OpenWinResource(const base::string16& file_name,
+                       const domapi::OpenWinResourcePromise& promise) final;
   void QueryFileStatus(const base::string16& file_name,
                        const domapi::QueryFileStatusPromise& promise) final;
   void ReadDirectory(domapi::IoContextId context_id,

@@ -22,6 +22,8 @@ source_set("io") {
     "io_thread_proxy.h",
     "process_io_context.cc",
     "process_io_context.h",
+    "win_resource_io_context.cc",
+    "win_resource_io_context.h",
   ]
 
   public_deps = [

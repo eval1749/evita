@@ -5,8 +5,10 @@
 #ifndef EVITA_DOM_TESTING_MOCK_IO_DELEGATE_H_
 #define EVITA_DOM_TESTING_MOCK_IO_DELEGATE_H_
 
+#include <stdint.h>
+
 #include <deque>
-#include <ostream>
+#include <string>
 #include <vector>
 
 #include "base/strings/string_piece.h"
@@ -41,7 +43,11 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void SetFileStatus(const domapi::FileStatus& data, int error_code);
   void SetOpenDirectoryResult(domapi::IoContextId context_id, int error_code);
   void SetOpenFileResult(domapi::IoContextId context_id, int error_code);
+  void SetOpenResult(base::StringPiece name, int error_code);
   void SetReadDirectoryResult(const std::vector<domapi::FileStatus>& entries);
+  void SetResource(base::StringPiece16 type,
+                   base::StringPiece16 name,
+                   const std::vector<uint8_t>& data);
 
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
@@ -51,6 +57,12 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void GetSpellingSuggestions(
       const base::string16& wrong_word,
       const GetSpellingSuggestionsResolver& promise) final;
+  void LoadWinResource(const domapi::WinResourceId& resource_id,
+                       const base::string16& type,
+                       const base::string16& name,
+                       uint8_t* buffer,
+                       size_t buffer_size,
+                       const domapi::IoIntPromise& promise) final;
   void MakeTempFileName(const base::string16& dir_name,
                         const base::string16& prefix,
                         const domapi::MakeTempFileNamePromise& resolver) final;
@@ -65,6 +77,8 @@ class MockIoDelegate final : public domapi::IoDelegate {
                 const domapi::OpenFilePromise&) final;
   void OpenProcess(const base::string16& command_line,
                    const domapi::OpenProcessPromise&) final;
+  void OpenWinResource(const base::string16& file_name,
+                       const domapi::OpenWinResourcePromise& promise) final;
   void ReadDirectory(domapi::IoContextId context_id,
                      size_t num_read,
                      const domapi::ReadDirectoryPromise& promise) final;
@@ -82,7 +96,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
  private:
   struct CallResult final {
     int error_code;
-    base::StringPiece name;
+    std::string name;
     int num_transferred;
   };
 
@@ -99,6 +113,9 @@ class MockIoDelegate final : public domapi::IoDelegate {
   int num_remove_called_;
   bool check_spelling_result_;
   std::vector<base::string16> spelling_suggestions_;
+  std::vector<uint8_t> resource_data_;
+  base::string16 resource_name_;
+  base::string16 resource_type_;
   base::string16 temp_file_name_;
 
   DISALLOW_COPY_AND_ASSIGN(MockIoDelegate);

@@ -5,8 +5,11 @@
 #ifndef EVITA_DOM_PUBLIC_IO_DELEGATE_H_
 #define EVITA_DOM_PUBLIC_IO_DELEGATE_H_
 
+#include <stdint.h>
+
 #include <vector>
 
+#include "base/strings/string16.h"
 #include "evita/dom/public/io_callback.h"
 #include "evita/dom/public/io_context_id.h"
 #include "evita/dom/public/promise.h"
@@ -15,6 +18,10 @@
 
 namespace domapi {
 
+//////////////////////////////////////////////////////////////////////
+//
+// IoDelegate
+//
 class IoDelegate {
  public:
   using CheckSpellingResolver = domapi::Promise<bool>;
@@ -39,6 +46,13 @@ class IoDelegate {
       const base::string16& wrong_word,
       const GetSpellingSuggestionsResolver& callback) = 0;
 
+  virtual void LoadWinResource(const WinResourceId& resource_id,
+                               const base::string16& type,
+                               const base::string16& name,
+                               uint8_t* buffer,
+                               size_t buffer_size,
+                               const IoIntPromise& promise) = 0;
+
   // Make temporary file and returns its name.
   virtual void MakeTempFileName(const base::string16& dir_name,
                                 const base::string16& prefix,
@@ -61,6 +75,9 @@ class IoDelegate {
                            const OpenProcessPromise& promise) = 0;
   virtual void QueryFileStatus(const base::string16& file_name,
                                const QueryFileStatusPromise& promise) = 0;
+
+  virtual void OpenWinResource(const base::string16& file_name,
+                               const OpenWinResourcePromise& promise) = 0;
 
   virtual void ReadDirectory(IoContextId context_id,
                              size_t num_read,

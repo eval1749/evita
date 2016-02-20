@@ -25,4 +25,8 @@ TEST_F(ComponentsTest, WinRegistry) {
   RunFile({"components", "win_registry", "win_registry_test.js"});
 }
 
+TEST_F(ComponentsTest, WinResource) {
+  RunFile({"components", "win_resource", "win_resource_test.js"});
+}
+
 }  // namespace dom

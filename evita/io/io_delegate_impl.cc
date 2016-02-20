@@ -21,6 +21,7 @@
 #include "evita/io/file_io_context.h"
 #include "evita/io/io_context_utils.h"
 #include "evita/io/process_io_context.h"
+#include "evita/io/win_resource_io_context.h"
 #include "evita/spellchecker/spelling_engine.h"
 
 #define DVLOG_WIN32_ERROR(level, name) \
@@ -94,7 +95,7 @@ void IoDelegateImpl::CloseFile(domapi::IoContextId context_id,
   auto const it = context_map_.find(context_id);
   if (it == context_map_.end())
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
-  auto const context = it->second->as<BlockIoContext>();
+  auto const context = it->second->as<IoContext>();
   if (!context)
     return Reject(promise.reject, ERROR_INVALID_HANDLE);
   context->Close(promise);
@@ -111,6 +112,24 @@ void IoDelegateImpl::GetSpellingSuggestions(
       promise.resolve,
       spellchecker::SpellingEngine::GetSpellingEngine()->GetSpellingSuggestions(
           wrong_word)));
+}
+
+void IoDelegateImpl::LoadWinResource(const domapi::WinResourceId& resource_id,
+                                     const base::string16& type,
+                                     const base::string16& name,
+                                     uint8_t* buffer,
+                                     size_t buffer_size,
+                                     const domapi::IoIntPromise& promise) {
+  const auto& it = context_map_.find(resource_id);
+  if (it == context_map_.end())
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  const auto resource = it->second->as<WinResourceIoContext>();
+  if (!resource)
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  const auto& pair = resource->Load(type, name, buffer, buffer_size);
+  if (pair.second)
+    return Reject(promise.reject, pair.second);
+  return RunCallback(base::Bind(promise.resolve, pair.first));
 }
 
 void IoDelegateImpl::MakeTempFileName(
@@ -192,6 +211,18 @@ void IoDelegateImpl::OpenProcess(const base::string16& command_line,
   context_map_.insert(std::make_pair(process_id, process));
   // Note: |ProcessIoContext| constructor delegate promise resolution to the
   // gateway thread which spawns process with specified command line.
+}
+
+void IoDelegateImpl::OpenWinResource(
+    const base::string16& file_name,
+    const domapi::OpenWinResourcePromise& promise) {
+  const auto& pair = WinResourceIoContext::Open(file_name);
+  if (pair.second)
+    return Reject(promise.reject, pair.second);
+  const auto resource_id = domapi::IoContextId::New();
+  const auto resource = new WinResourceIoContext(resource_id, pair.first);
+  context_map_.emplace(resource_id, resource);
+  RunCallback(base::Bind(promise.resolve, domapi::WinResourceId(resource_id)));
 }
 
 void IoDelegateImpl::QueryFileStatus(

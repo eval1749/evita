@@ -54,18 +54,17 @@ void Succeed() {
 // Install testing.gtest
 void GTest::Install(v8::Isolate* isolate,
                     v8::Local<v8::ObjectTemplate> global) {
-  auto const testing = v8::ObjectTemplate::New(isolate);
+  const auto testing = v8::ObjectTemplate::New(isolate);
   global->Set(gin::StringToV8(isolate, "testing"), testing);
 
-  auto gtest = v8::ObjectTemplate::New(isolate);
-  gtest = gin::ObjectTemplateBuilder(isolate)
-              .SetMethod("expectEqual", ExpectEqual)
-              .SetMethod("expectFalse", ExpectTrue)
-              .SetMethod("expectTrue", ExpectTrue)
-              .SetMethod("fail", Fail)
-              .SetMethod("log", Log)
-              .SetMethod("succeed", Succeed)
-              .Build();
+  const auto& gtest = gin::ObjectTemplateBuilder(isolate)
+                          .SetMethod("expectEqual", ExpectEqual)
+                          .SetMethod("expectFalse", ExpectTrue)
+                          .SetMethod("expectTrue", ExpectTrue)
+                          .SetMethod("fail", Fail)
+                          .SetMethod("log", Log)
+                          .SetMethod("succeed", Succeed)
+                          .Build();
   testing->Set(gin::StringToV8(isolate, "gtest"), gtest);
 }
 

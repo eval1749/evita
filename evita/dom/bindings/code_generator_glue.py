@@ -37,9 +37,16 @@ FILE_NAME_PREFIX = 'ginx_'
 
 JS_INTERFACE_NAMES = {
     'ArrayBufferView': 'gin/array_buffer.h',
+    'Int8Array': 'gin/array_buffer.h',
+    'Int16Array': 'gin/array_buffer.h',
+    'Int32Array': 'gin/array_buffer.h',
     'LineAndColumn': 'evita/text/buffer.h',
     'Point': 'evita/dom/windows/point.h',
     'Rect': 'evita/dom/windows/rect.h',
+    'Uint8Array': 'gin/array_buffer.h',
+    'Uint16Array': 'gin/array_buffer.h',
+    'Uint32Array': 'gin/array_buffer.h',
+    'Uint8ClampedArray': 'gin/array_buffer.h',
 }
 global_js_interface_names = set()
 

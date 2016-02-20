@@ -40,7 +40,7 @@ ImageBitmap::ImageBitmap(const FloatSize& size)
     : impl_(new NativeImageBitmap(size)) {}
 
 ImageBitmap::ImageBitmap(const ImageBitmap& other)
-    : impl_(new NativeImageBitmap(other.impl_->get())) {}
+    : impl_(new NativeImageBitmap(*other.impl_)) {}
 
 ImageBitmap::ImageBitmap(ImageBitmap&& other) : impl_(std::move(other.impl_)) {}
 
@@ -48,7 +48,7 @@ ImageBitmap::ImageBitmap() {}
 ImageBitmap::~ImageBitmap() {}
 
 ImageBitmap& ImageBitmap::operator=(const ImageBitmap& other) {
-  impl_.reset(other.impl_.get());
+  impl_.reset(new NativeImageBitmap(*other.impl_));
   return *this;
 }
 

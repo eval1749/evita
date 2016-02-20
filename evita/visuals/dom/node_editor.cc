@@ -8,16 +8,18 @@
 
 #include "base/logging.h"
 #include "base/observer_list.h"
+#include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/ancestors.h"
 #include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/dom/descendants_or_self.h"
-#include "evita/visuals/dom/element_node.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/document_observer.h"
+#include "evita/visuals/dom/element_node.h"
+#include "evita/visuals/dom/image.h"
+#include "evita/visuals/dom/image_data.h"
 #include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/shape_data.h"
 #include "evita/visuals/dom/text.h"
-#include "evita/visuals/css/style.h"
 
 namespace visuals {
 
@@ -192,6 +194,18 @@ void NodeEditor::ReplaceChild(ContainerNode* container,
   new_child->document_ = document;
   FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
                     DidReplaceChild(*container, *new_child, *old_child));
+}
+
+void NodeEditor::SetImageData(Image* image, const ImageData& new_data) {
+  const auto& document = image->document_;
+  DCHECK(!document->is_locked());
+  if (image->data_ == new_data)
+    return;
+  const auto old_data = image->data_;
+  image->data_ = new_data;
+  ++document->version_;
+  FOR_EACH_OBSERVER(DocumentObserver, document->observers_,
+                    DidSetImageData(*image, new_data, old_data));
 }
 
 void NodeEditor::SetInlineStyle(ElementNode* element,

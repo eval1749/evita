@@ -383,7 +383,6 @@ void BoxEditor::SetImageData(ImageBox* image_box, const ImageData& data) {
   if (image_box->data_ == data)
     return;
   image_box->data_ = data;
-  image_box->bitmap_.reset();
   SetContentChanged(image_box);
 }
 

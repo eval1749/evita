@@ -14,6 +14,7 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/image.h"
 #include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/box_assigner.h"
@@ -22,6 +23,7 @@
 #include "evita/visuals/layout/box_selection.h"
 #include "evita/visuals/layout/box_selection_editor.h"
 #include "evita/visuals/layout/flow_box.h"
+#include "evita/visuals/layout/image_box.h"
 #include "evita/visuals/layout/root_box.h"
 #include "evita/visuals/style/style_tree.h"
 #include "evita/visuals/view/public/selection.h"
@@ -471,6 +473,15 @@ void BoxTree::DidChangeSelection(const SelectionModel& new_model,
 void BoxTree::DidChangeComputedStyle(const ElementNode& element,
                                      const css::Style& old_style) {
   impl_->MarkDirty(element);
+}
+
+void BoxTree::DidSetImageData(const Image& image,
+                              const ImageData& new_data,
+                              const ImageData& old_data) {
+  // TODO(eval1749): If image size of |new_data| and |old_data| are same, we
+  // don't need to format box tree.
+  impl_->MarkDirty(image);
+  lifecycle()->StartOver();
 }
 
 void BoxTree::DidSetShapeData(const Shape& shape,

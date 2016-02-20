@@ -11,6 +11,7 @@
 
 namespace visuals {
 
+class ImageData;
 class ShapeData;
 
 namespace css {
@@ -38,6 +39,9 @@ class DocumentObserver {
   virtual void DidReplaceChild(const ContainerNode& parent,
                                const Node& new_child,
                                const Node& old_child);
+  virtual void DidSetImageData(const Image& image,
+                               const ImageData& new_data,
+                               const ImageData& old_data);
   virtual void DidSetShapeData(const Shape& shape,
                                const ShapeData& new_data,
                                const ShapeData& old_data);

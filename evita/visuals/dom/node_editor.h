@@ -10,6 +10,7 @@
 #include "evita/visuals/dom/nodes_forward.h"
 
 namespace visuals {
+class ImageData;
 class ShapeData;
 namespace css {
 class Style;
@@ -32,6 +33,7 @@ class NodeEditor final {
   void RemoveClass(ElementNode* element, AtomicString class_name);
   void RemoveClass(ElementNode* element, base::StringPiece16 class_name);
   void ReplaceChild(ContainerNode* container, Node* new_child, Node* old_child);
+  void SetImageData(Image* image, const ImageData& data);
   void SetInlineStyle(ElementNode* element, const css::Style& style);
   void SetShapeData(Shape* shape, const ShapeData& data);
   void SetTextData(Text* text, base::StringPiece16 data);

@@ -12,8 +12,8 @@
 #include "evita/visuals/css/media_observer.h"
 #include "evita/visuals/dom/document_observer.h"
 #include "evita/visuals/style/style_tree_observer.h"
-#include "evita/visuals/view/public/selection_observer.h"
 #include "evita/visuals/view/public/selection_model.h"
+#include "evita/visuals/view/public/selection_observer.h"
 #include "evita/visuals/view/public/view_lifecycle_client.h"
 
 namespace visuals {
@@ -70,6 +70,9 @@ class BoxTree final : public ViewLifecycleClient,
   void DidReplaceChild(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;
+  void DidSetImageData(const Image& image,
+                       const ImageData& new_data,
+                       const ImageData& old_data) final;
   void DidSetShapeData(const Shape& shape,
                        const ShapeData& new_data,
                        const ShapeData& old_data) final;

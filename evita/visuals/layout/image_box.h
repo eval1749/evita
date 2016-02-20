@@ -28,13 +28,12 @@ class ImageBox final : public ContentBox {
   ~ImageBox() final;
 
   const ImageData& data() const { return data_; }
-  const ImageBitmap& bitmap() const { return *bitmap_; }
+  const ImageBitmap& bitmap() const { return data_.bitmap(); }
   float opacity() const { return opacity_; }
   const FloatPoint& point() const { return point_; }
 
  private:
   ImageData data_;
-  std::unique_ptr<ImageBitmap> bitmap_;
   float opacity_ = 1.0f;
   FloatPoint point_;
 

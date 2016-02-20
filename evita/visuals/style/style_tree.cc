@@ -21,6 +21,7 @@
 #include "evita/visuals/dom/descendants_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
+#include "evita/visuals/dom/image.h"
 #include "evita/visuals/dom/shape.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/style/compiled_style_sheet.h"
@@ -120,6 +121,7 @@ class StyleTree::Impl final {
   void UpdateDocumentStyleIfNeeded(Context* context);
   void UpdateElement(Context* context, const ElementNode& element);
   void UpdateElementIfNeeded(Context* context, const ElementNode& element);
+  void UpdateImage(Context* context, const Image& image);
   void UpdateNodeIfNeeded(Context* context, const Node& node);
   void UpdateShape(Context* context, const Shape& shape);
   void UpdateText(Context* context, const Text& text);
@@ -262,6 +264,10 @@ void StyleTree::Impl::UpdateChildren(Context* context,
       UpdateElement(context, *element);
       continue;
     }
+    if (const auto image = child->as<Image>()) {
+      UpdateImage(context, *image);
+      continue;
+    }
     if (const auto shape = child->as<Shape>()) {
       UpdateShape(context, *shape);
       continue;
@@ -362,6 +368,12 @@ void StyleTree::Impl::UpdateNodeIfNeeded(Context* context, const Node& node) {
   if (const auto element = node.as<Element>())
     return UpdateElementIfNeeded(context, *element);
   DCHECK(!node.is<ContainerNode>()) << "Unsupported node type " << node;
+}
+
+// |Image| node is treated as anonymous inline box which inherits style from
+// its parent.
+void StyleTree::Impl::UpdateImage(Context* context, const Image& image) {
+  UpdateAsAnonymousInlineBox(context, image);
 }
 
 // |Shape| node is treated as anonymous inline box which inherits style from
@@ -545,6 +557,12 @@ void StyleTree::DidReplaceChild(const ContainerNode& parent,
                                 const Node& child,
                                 const Node& ref_child) {
   MarkDirty(parent);
+}
+
+void StyleTree::DidSetImageData(const Image& image,
+                                const ImageData& new_data,
+                                const ImageData& old_data) {
+  // |Image| data change doesn't affect computed style.
 }
 
 void StyleTree::DidSetShapeData(const Shape& shape,

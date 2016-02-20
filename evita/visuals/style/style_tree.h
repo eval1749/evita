@@ -85,6 +85,9 @@ class StyleTree final : public ViewLifecycleClient,
   void DidReplaceChild(const ContainerNode& parent,
                        const Node& child,
                        const Node& ref_child) final;
+  void DidSetImageData(const Image& image,
+                       const ImageData& new_data,
+                       const ImageData& old_data) final;
   void DidSetShapeData(const Shape& shape,
                        const ShapeData& new_data,
                        const ShapeData& old_data) final;

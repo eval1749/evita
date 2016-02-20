@@ -37,6 +37,10 @@ void DocumentObserver::DidReplaceChild(const ContainerNode& parent,
   DidAppendChild(parent, new_child);
 }
 
+void DocumentObserver::DidSetImageData(const Image& image,
+                                       const ImageData& new_data,
+                                       const ImageData& old_data) {}
+
 void DocumentObserver::DidSetShapeData(const Shape& shape,
                                        const ShapeData& new_data,
                                        const ShapeData& old_data) {}

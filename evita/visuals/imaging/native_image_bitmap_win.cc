@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "base/macros.h"
 #include "base/memory/singleton.h"
+#include "base/strings/string_number_conversions.h"
 #include "base/strings/stringprintf.h"
 #include "common/win/com_verify.h"
 #include "evita/gfx/imaging_factory_win.h"
@@ -16,6 +17,23 @@
 namespace visuals {
 
 namespace {
+
+int ExtractSizeParameter(base::StringPiece16 format, int default_value) {
+  const auto size_pos = format.find(L";size=");
+  if (size_pos == std::string::npos)
+    return default_value;
+  int value = 0;
+  if (base::StringToInt(format.substr(size_pos + 6), &value))
+    return value;
+  return default_value;
+}
+
+base::StringPiece16 ExtractType(base::StringPiece16 format) {
+  const auto semi_colon = format.find(';');
+  if (semi_colon == std::string::npos)
+    return format;
+  return format.substr(0, semi_colon);
+}
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -47,7 +65,7 @@ ImageFormatMap::ImageFormatMap() {
 }
 
 GUID ImageFormatMap::Get(base::StringPiece16 format) const {
-  const auto& it = map_.find(format);
+  const auto& it = map_.find(ExtractType(format));
   return it == map_.end() ? GUID_NULL : it->second;
 }
 
@@ -203,6 +221,21 @@ NativeImageBitmap NativeImageBitmap::Decode(base::StringPiece16 format,
   const auto& format_guid = ImageFormatMap::GetInstance()->Get(format);
   if (format_guid == GUID_NULL)
     return NativeImageBitmap();
+  if (format_guid == GUID_ContainerFormatIco) {
+    const auto icon_size = ExtractSizeParameter(format, 16);
+    const auto kIconVersion = 0x30000;
+    const auto& icon_handle = base::win::ScopedHICON(::CreateIconFromResourceEx(
+        static_cast<uint8_t*>(const_cast<void*>(data)),
+        static_cast<uint32_t>(data_size),
+        true,  // fIcon
+        kIconVersion, icon_size, icon_size, LR_DEFAULTCOLOR));
+    if (!icon_handle.is_valid()) {
+      const auto last_error = ::GetLastError();
+      DVLOG(0) << "CreateIconFromResourceEx error=" << last_error;
+      return NativeImageBitmap();
+    }
+    return NativeImageBitmap(icon_handle);
+  }
   base::win::ScopedComPtr<IWICBitmapDecoder> decoder;
   const auto vendor_guid = static_cast<GUID*>(nullptr);
   COM_VERIFY2(gfx::ImagingFactory::GetInstance()->impl()->CreateDecoder(

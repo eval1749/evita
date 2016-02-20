@@ -37,6 +37,8 @@ class ImageData final : public ginx::Scriptable<ImageData> {
   explicit ImageData(const visuals::ImageBitmap& bitmap);
   ~ImageData() final;
 
+  const visuals::ImageBitmap& bitmap() const { return bitmap_; }
+
  private:
   friend class bindings::ImageDataClass;
 

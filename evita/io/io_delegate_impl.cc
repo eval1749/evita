@@ -220,7 +220,7 @@ void IoDelegateImpl::OpenWinResource(
   if (pair.second)
     return Reject(promise.reject, pair.second);
   const auto resource_id = domapi::IoContextId::New();
-  const auto resource = new WinResourceIoContext(resource_id, pair.first);
+  const auto resource = new WinResourceIoContext(pair.first);
   context_map_.emplace(resource_id, resource);
   RunCallback(base::Bind(promise.resolve, domapi::WinResourceId(resource_id)));
 }

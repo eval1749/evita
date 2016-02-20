@@ -19,7 +19,7 @@ namespace io {
 //
 class WinResourceIoContext final : public IoContext {
  public:
-  WinResourceIoContext(const domapi::IoContextId& context_id, HMODULE module);
+  explicit WinResourceIoContext(HMODULE module);
   ~WinResourceIoContext() final;
 
   std::pair<int, int> Load(const base::string16& type,
@@ -33,7 +33,6 @@ class WinResourceIoContext final : public IoContext {
   // io::IoContext
   void Close(const domapi::IoIntPromise& promise) final;
 
-  const domapi::IoContextId context_id_;
   HMODULE const module_;
 
   DISALLOW_COPY_AND_ASSIGN(WinResourceIoContext);

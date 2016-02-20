@@ -19,10 +19,7 @@ namespace io {
 //
 // WinResourceIoContext
 //
-WinResourceIoContext::WinResourceIoContext(
-    const domapi::IoContextId& context_id,
-    HMODULE module)
-    : context_id_(context_id), module_(module) {}
+WinResourceIoContext::WinResourceIoContext(HMODULE module) : module_(module) {}
 
 WinResourceIoContext::~WinResourceIoContext() {}
 

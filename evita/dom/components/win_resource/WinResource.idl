@@ -9,6 +9,8 @@ interface WinResource {
   [CallWith=ScriptHost]
   Promise load(DOMString type, DOMString name, Uint8Array buffer);
 
+  static long lookupIcon(Uint8Array iconSpec, long iconSize);
+
   [CallWith=ScriptHost]
   static Promise open(DOMString commandLine);
 };

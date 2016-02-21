@@ -50,6 +50,12 @@ v8::Local<v8::Promise> WinResource::Load(ScriptHost* script_host,
                  buffer.num_bytes()));
 }
 
+int WinResource::LookupIcon(const gin::ArrayBufferView& buffer, int icon_size) {
+  return ::LookupIconIdFromDirectoryEx(static_cast<uint8_t*>(buffer.bytes()),
+                                       true, icon_size, icon_size,
+                                       LR_DEFAULTCOLOR);
+}
+
 // static
 v8::Local<v8::Promise> WinResource::Open(ScriptHost* script_host,
                                          const base::string16& file_name) {

@@ -40,6 +40,7 @@ class WinResource final : public ginx::Scriptable<WinResource> {
                               const base::string16& type,
                               const base::string16& name,
                               const gin::ArrayBufferView& buffer);
+  static int LookupIcon(const gin::ArrayBufferView& buffer, int icon_size);
   static v8::Local<v8::Promise> Open(ScriptHost* script_host,
                                      const base::string16& file_name);
 

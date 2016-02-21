@@ -463,8 +463,8 @@ void ViewDelegateImpl::SetCursor(domapi::WindowId window_id,
 #define IDC_NoDrop IDC_NO
 #define IDC_None IDC_NO
 #define IDC_NorthEastPanning MAKEINTRESOURCE(IDC_PAN_NORTH_EAST)
-#define IDC_NorthEastResize IDC_SIZENWSE
-#define IDC_NorthEastSouthWestResize IDC_SIZENWSE
+#define IDC_NorthEastResize IDC_SIZENESW
+#define IDC_NorthEastSouthWestResize IDC_SIZENESW
 #define IDC_NorthPanning MAKEINTRESOURCE(IDC_PAN_NORTH)
 #define IDC_NorthResize IDC_SIZENS
 #define IDC_NorthSouthResize IDC_SIZENS
@@ -476,7 +476,7 @@ void ViewDelegateImpl::SetCursor(domapi::WindowId window_id,
 #define IDC_Progress IDC_APPSTARTING
 #define IDC_RowResize MAKEINTRESOURCE(IDC_ROWRESIZE)
 #define IDC_SouthEastPanning MAKEINTRESOURCE(IDC_PAN_SOUTH_EAST)
-#define IDC_SouthEastResize IDC_SIZENS
+#define IDC_SouthEastResize IDC_SIZENWSE
 #define IDC_SouthPanning MAKEINTRESOURCE(IDC_PAN_SOUTH)
 #define IDC_SouthResize IDC_SIZENS
 #define IDC_SouthWestPanning MAKEINTRESOURCE(IDC_PAN_SOUTH_WEST)

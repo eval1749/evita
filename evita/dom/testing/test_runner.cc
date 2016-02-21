@@ -30,11 +30,14 @@ void SetOpenResult(const std::string& name, int error_code) {
   test->mock_io_delegate()->SetOpenResult(name, error_code);
 }
 
-void SetResource(const base::string16& type,
-                 const base::string16& name,
-                 const std::vector<uint8_t>& data) {
+void SetResourceResult(const std::string& operation,
+                       int error_code,
+                       const base::string16& type,
+                       const base::string16& name,
+                       const std::vector<uint8_t>& data) {
   const auto test = AbstractDomTest::GetInstance();
-  test->mock_io_delegate()->SetResource(type, name, data);
+  test->mock_io_delegate()->SetResourceResult(operation, error_code, type, name,
+                                              data);
 }
 
 void SetStringsResult(const std::string& operation,
@@ -51,7 +54,7 @@ void TestRunner::Install(v8::Isolate* isolate,
   auto test_runner = gin::ObjectTemplateBuilder(isolate)
                          .SetMethod("runMicrotasks", RunMicrotasks)
                          .SetMethod("setOpenResult", SetOpenResult)
-                         .SetMethod("setResource", SetResource)
+                         .SetMethod("setResourceResult", SetResourceResult)
                          .SetMethod("setStringsResult", SetStringsResult)
                          .Build();
   global->Set(gin::StringToV8(isolate, "testRunner"), test_runner);

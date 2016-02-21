@@ -85,9 +85,12 @@ void MockIoDelegate::SetReadDirectoryResult(
   directory_entries_ = entries;
 }
 
-void MockIoDelegate::SetResource(base::StringPiece16 type,
-                                 base::StringPiece16 name,
-                                 const std::vector<uint8_t>& data) {
+void MockIoDelegate::SetResourceResult(base::StringPiece operation,
+                                       int error_code,
+                                       base::StringPiece16 type,
+                                       base::StringPiece16 name,
+                                       const std::vector<uint8_t>& data) {
+  SetCallResult(operation, error_code);
   resource_data_ = data;
   resource_name_ = name.as_string();
   resource_type_ = type.as_string();
@@ -141,6 +144,9 @@ void MockIoDelegate::LoadWinResource(const domapi::WinResourceId& resource_id,
                                      uint8_t* buffer,
                                      size_t buffer_size,
                                      const domapi::IoIntPromise& promise) {
+  auto const result = PopCallResult("LoadWinResource");
+  if (auto const error_code = result.error_code)
+    return promise.reject.Run(domapi::IoError(error_code));
   if (resource_type_ != type || resource_name_ != name)
     return promise.reject.Run(domapi::IoError(ERROR_NOT_FOUND));
   ::memcpy(buffer, resource_data_.data(),

@@ -40,9 +40,11 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void SetOpenFileResult(domapi::IoContextId context_id, int error_code);
   void SetOpenResult(base::StringPiece name, int error_code);
   void SetReadDirectoryResult(const std::vector<domapi::FileStatus>& entries);
-  void SetResource(base::StringPiece16 type,
-                   base::StringPiece16 name,
-                   const std::vector<uint8_t>& data);
+  void SetResourceResult(base::StringPiece operation,
+                         int error_code,
+                         base::StringPiece16 type,
+                         base::StringPiece16 name,
+                         const std::vector<uint8_t>& data);
   void SetStrings(base::StringPiece name,
                   int error_code,
                   const std::vector<base::string16>& strings);

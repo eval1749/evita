@@ -19,7 +19,8 @@ testing.test('WinResource.load', function(t) {
   expectedData[0] = 100;
   expectedData[1] = 101;
   expectedData[2] = 102;
-  testRunner.setResource('icon', '#42', expectedData);
+  testRunner.setResourceResult(
+      'LoadWinResource', 0, 'icon', '#42', expectedData);
   let data = new Uint8Array(100);
   let size = 0;
   WinResource.open("foo.dll").then(

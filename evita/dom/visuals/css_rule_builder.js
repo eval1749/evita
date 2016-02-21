@@ -79,6 +79,15 @@ class CSSRuleBuilder {
   }
 
   /**
+   * @param {number} height
+   * @return {!CSSRuleBuilder}
+   */
+  height(height) {
+    this.style_.height = height.toString();
+    return this;
+  }
+
+  /**
    * @param {...number} widths
    * @return {!CSSRuleBuilder}
    */

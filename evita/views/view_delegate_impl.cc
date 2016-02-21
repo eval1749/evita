@@ -30,6 +30,7 @@
 #include "evita/gc/collector.h"
 #include "evita/metrics/counter.h"
 #include "evita/metrics/time_scope.h"
+#include "evita/resource.h"
 #include "evita/ui/animation/animator.h"
 #include "evita/ui/base/ime/text_input_client.h"
 #include "evita/ui/controls/text_field_control.h"
@@ -443,49 +444,49 @@ void ViewDelegateImpl::SetCursor(domapi::WindowId window_id,
 
 // See "ui/base/cursor/cursor_loader_win.cc"
 #define IDC_Alias IDC_ARROW
-#define IDC_Cell IDC_ARROW
-#define IDC_ColumnResize IDC_ARROW
+#define IDC_Cell MAKEINTRESOURCE(IDC_CELL)
+#define IDC_ColumnResize MAKEINTRESOURCE(IDC_COLRESIZE)
 #define IDC_ContextMenu IDC_ARROW
-#define IDC_Copy IDC_ARROW
+#define IDC_Copy MAKEINTRESOURCE(IDC_COPYCUR)
 #define IDC_Cross IDC_CROSS
 #define IDC_Custom IDC_ARROW
-#define IDC_EastPanning IDC_SIZEWE
+#define IDC_EastPanning MAKEINTRESOURCE(IDC_PAN_EAST)
 #define IDC_EastResize IDC_SIZEWE
 #define IDC_EastWestResize IDC_SIZEWE
-#define IDC_Grab IDC_HAND
-#define IDC_Grabbing IDC_HAND
+#define IDC_Grab MAKEINTRESOURCE(IDC_HAND_GRAB)
+#define IDC_Grabbing MAKEINTRESOURCE(IDC_HAND_GRABBING)
 #define IDC_Hand IDC_HAND
 #define IDC_Help IDC_HELP
 #define IDC_IBeam IDC_IBEAM
-#define IDC_MiddlePanning IDC_SIZEALL
+#define IDC_MiddlePanning MAKEINTRESOURCE(IDC_PAN_MIDDLE)
 #define IDC_Move IDC_SIZEALL
 #define IDC_NoDrop IDC_NO
 #define IDC_None IDC_NO
-#define IDC_NorthEastPanning IDC_SIZENWSE
+#define IDC_NorthEastPanning MAKEINTRESOURCE(IDC_PAN_NORTH_EAST)
 #define IDC_NorthEastResize IDC_SIZENWSE
 #define IDC_NorthEastSouthWestResize IDC_SIZENWSE
-#define IDC_NorthPanning IDC_SIZENS
+#define IDC_NorthPanning MAKEINTRESOURCE(IDC_PAN_NORTH)
 #define IDC_NorthResize IDC_SIZENS
 #define IDC_NorthSouthResize IDC_SIZENS
-#define IDC_NorthWestSouthEastResize IDC_SIZENWSE
-#define IDC_NorthWestPanning IDC_SIZENWSE
+#define IDC_NorthWestSouthEastResize MAKEINTRESOURCE(IDC_PAN_SOUTH_EAST)
+#define IDC_NorthWestPanning MAKEINTRESOURCE(IDC_PAN_WEST)
 #define IDC_NorthWestResize IDC_SIZENWSE
 #define IDC_NotAllowed IDC_NO
 #define IDC_Pointer IDC_ARROW
 #define IDC_Progress IDC_APPSTARTING
-#define IDC_RowResize IDC_SIZENS
-#define IDC_SouthEastPanning IDC_SIZENS
+#define IDC_RowResize MAKEINTRESOURCE(IDC_ROWRESIZE)
+#define IDC_SouthEastPanning MAKEINTRESOURCE(IDC_PAN_SOUTH_EAST)
 #define IDC_SouthEastResize IDC_SIZENS
-#define IDC_SouthPanning IDC_SIZENS
+#define IDC_SouthPanning MAKEINTRESOURCE(IDC_PAN_SOUTH)
 #define IDC_SouthResize IDC_SIZENS
-#define IDC_SouthWestPanning IDC_SIZENS
+#define IDC_SouthWestPanning MAKEINTRESOURCE(IDC_PAN_SOUTH_WEST)
 #define IDC_SouthWestResize IDC_SIZENESW
-#define IDC_VerticalText IDC_IBEAM
+#define IDC_VerticalText MAKEINTRESOURCE(IDC_VERTICALTEXT)
 #define IDC_Wait IDC_WAIT
-#define IDC_WestPanning IDC_SIZEWE
+#define IDC_WestPanning MAKEINTRESOURCE(IDC_PAN_WEST)
 #define IDC_WestResize IDC_SIZEWE
-#define IDC_ZoomIn IDC_SIZEWE
-#define IDC_ZoomOut IDC_SIZEWE
+#define IDC_ZoomIn MAKEINTRESOURCE(IDC_ZOOMIN)
+#define IDC_ZoomOut MAKEINTRESOURCE(IDC_ZOOMOUT)
 
   static LPCWSTR names[] = {
 #define V(Name) IDC_##Name,

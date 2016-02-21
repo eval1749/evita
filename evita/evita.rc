@@ -64,8 +64,28 @@ END
 // Cursor
 //
 
-IDC_HSPLIT              CURSOR                  "res/hsplit.cur"
-IDC_VSPLIT              CURSOR                  "res/vsplit.cur"
+IDC_HSPLIT              CURSOR                  "res/cursors/hsplit.cur"
+IDC_VSPLIT              CURSOR                  "res/cursors/vsplit.cur"
+IDC_ALIAS CURSOR "res/cursors/aliasb.cur"
+IDC_CELL CURSOR "res/cursors/cell.cur"
+IDC_COLRESIZE CURSOR "res/cursors/col_resize.cur"
+IDC_COPYCUR CURSOR "res/cursors/copy.cur"
+IDC_CURSOR_NONE CURSOR "res/cursors/none.cur"
+IDC_HAND_GRAB CURSOR "res/cursors/hand_grab.cur"
+IDC_HAND_GRABBING CURSOR "res/cursors/hand_grabbing.cur"
+IDC_PAN_EAST CURSOR "res/cursors/pan_east.cur"
+IDC_PAN_MIDDLE CURSOR "res/cursors/pan_middle.cur"
+IDC_PAN_NORTH CURSOR "res/cursors/pan_north.cur"
+IDC_PAN_NORTH_EAST CURSOR "res/cursors/pan_north_east.cur"
+IDC_PAN_NORTH_WEST CURSOR "res/cursors/pan_north_west.cur"
+IDC_PAN_SOUTH CURSOR "res/cursors/pan_south.cur"
+IDC_PAN_SOUTH_EAST CURSOR "res/cursors/pan_south_east.cur"
+IDC_PAN_SOUTH_WEST CURSOR "res/cursors/pan_south_west.cur"
+IDC_PAN_WEST CURSOR "res/cursors/pan_west.cur"
+IDC_ROWRESIZE CURSOR "res/cursors/row_resize.cur"
+IDC_VERTICALTEXT CURSOR "res/cursors/vertical_text.cur"
+IDC_ZOOMIN CURSOR "res/cursors/zoom_in.cur"
+IDC_ZOOMOUT CURSOR "res/cursors/zoom_out.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

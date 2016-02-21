@@ -38,6 +38,15 @@ v8::Local<v8::Promise> WinResource::Close(ScriptHost* script_host) {
                  base::Unretained(script_host->io_delegate()), resource_id_));
 }
 
+v8::Local<v8::Promise> WinResource::GetResourceNames(
+    ScriptHost* script_host,
+    const base::string16& type) {
+  return PromiseResolver::Call(
+      FROM_HERE, base::Bind(&domapi::IoDelegate::GetWinResourceNames,
+                            base::Unretained(script_host->io_delegate()),
+                            resource_id_, type));
+}
+
 v8::Local<v8::Promise> WinResource::Load(ScriptHost* script_host,
                                          const base::string16& type,
                                          const base::string16& name,

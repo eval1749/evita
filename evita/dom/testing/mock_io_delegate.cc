@@ -116,6 +116,16 @@ void MockIoDelegate::CloseContext(const domapi::IoContextId&,
     resolver.resolve.Run(true);
 }
 
+void MockIoDelegate::GetWinResourceNames(
+    const domapi::WinResourceId& resource_id,
+    const base::string16& type,
+    const GetWinResourceNamessPromise& promise) {
+  auto const result = PopCallResult("GetWinResourceNames");
+  if (const auto error_code = result.error_code)
+    return promise.reject.Run(domapi::IoError(error_code));
+  promise.resolve.Run(strings_);
+}
+
 void MockIoDelegate::GetSpellingSuggestions(
     const base::string16&,
     const GetSpellingSuggestionsResolver& promise) {

@@ -37,6 +37,13 @@ void SetResource(const base::string16& type,
   test->mock_io_delegate()->SetResource(type, name, data);
 }
 
+void SetStringsResult(const std::string& operation,
+                      int error_code,
+                      const std::vector<base::string16>& data) {
+  const auto test = AbstractDomTest::GetInstance();
+  test->mock_io_delegate()->SetStrings(operation, error_code, data);
+}
+
 }  // namespace
 
 void TestRunner::Install(v8::Isolate* isolate,
@@ -45,6 +52,7 @@ void TestRunner::Install(v8::Isolate* isolate,
                          .SetMethod("runMicrotasks", RunMicrotasks)
                          .SetMethod("setOpenResult", SetOpenResult)
                          .SetMethod("setResource", SetResource)
+                         .SetMethod("setStringsResult", SetStringsResult)
                          .Build();
   global->Set(gin::StringToV8(isolate, "testRunner"), test_runner);
 }

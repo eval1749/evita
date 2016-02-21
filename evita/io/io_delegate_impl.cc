@@ -90,6 +90,22 @@ void IoDelegateImpl::CloseContext(const domapi::IoContextId& context_id,
   context_map_.erase(it);
 }
 
+void IoDelegateImpl::GetWinResourceNames(
+    const domapi::WinResourceId& resource_id,
+    const base::string16& type,
+    const GetWinResourceNamessPromise& promise) {
+  const auto& it = context_map_.find(resource_id);
+  if (it == context_map_.end())
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  const auto resource = it->second->as<WinResourceIoContext>();
+  if (!resource)
+    return Reject(promise.reject, ERROR_INVALID_HANDLE);
+  const auto& pair = resource->GetResourceName(type);
+  if (pair.second)
+    return Reject(promise.reject, pair.second);
+  return RunCallback(base::Bind(promise.resolve, pair.first));
+}
+
 void IoDelegateImpl::GetSpellingSuggestions(
     const base::string16& wrong_word,
     const GetSpellingSuggestionsResolver& promise) {

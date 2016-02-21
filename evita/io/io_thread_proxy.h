@@ -25,6 +25,9 @@ class IoThreadProxy : public domapi::IoDelegate {
                      const CheckSpellingResolver& promise) final;
   void CloseContext(const domapi::IoContextId& context_id,
                     const domapi::IoIntPromise& promise) final;
+  void GetWinResourceNames(const domapi::WinResourceId& resource_id,
+                           const base::string16& type,
+                           const GetWinResourceNamessPromise& promise) final;
   void GetSpellingSuggestions(
       const base::string16& wrong_word,
       const GetSpellingSuggestionsResolver& promise) final;

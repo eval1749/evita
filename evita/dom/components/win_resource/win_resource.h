@@ -36,6 +36,8 @@ class WinResource final : public ginx::Scriptable<WinResource> {
 
   // bindings
   v8::Local<v8::Promise> Close(ScriptHost* script_host);
+  v8::Local<v8::Promise> GetResourceNames(ScriptHost* script_host,
+                                          const base::string16& type);
   v8::Local<v8::Promise> Load(ScriptHost* script_host,
                               const base::string16& type,
                               const base::string16& name,

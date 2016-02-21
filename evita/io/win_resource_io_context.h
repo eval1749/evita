@@ -6,8 +6,10 @@
 #define EVITA_IO_WIN_RESOURCE_IO_CONTEXT_H_
 
 #include <utility>
+#include <vector>
 
 #include "base/macros.h"
+#include "base/strings/string16.h"
 #include "evita/dom/public/io_context_id.h"
 #include "evita/io/io_context.h"
 
@@ -21,6 +23,9 @@ class WinResourceIoContext final : public IoContext {
  public:
   explicit WinResourceIoContext(HMODULE module);
   ~WinResourceIoContext() final;
+
+  std::pair<std::vector<base::string16>, int> GetResourceName(
+      const base::string16& type);
 
   std::pair<int, int> Load(const base::string16& type,
                            const base::string16& name,

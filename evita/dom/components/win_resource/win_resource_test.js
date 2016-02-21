@@ -2,6 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+testing.test('WinResource.getResourceNames', function(t) {
+  testRunner.setOpenResult('OpenWinResource', 0);
+  testRunner.setStringsResult('GetWinResourceNames', 0, ['foo', 'bar']);
+  let result = [];
+  WinResource.open("foo.dll")
+      .then(resource => resource.getResourceNames(WinResource.RT_ICON))
+      .then(names => result = names);
+  testRunner.runMicrotasks();
+  t.expect(result).toEqual(['foo', 'bar']);
+});
+
 testing.test('WinResource.load', function(t) {
   testRunner.setOpenResult('OpenWinResource', 0);
   var expectedData = new Uint8Array(3);

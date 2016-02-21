@@ -26,6 +26,9 @@ class IoDelegate {
  public:
   using CheckSpellingResolver = domapi::Promise<bool>;
 
+  using GetWinResourceNamessPromise =
+      domapi::Promise<std::vector<base::string16>, IoError>;
+
   using GetSpellingSuggestionsResolver =
       domapi::Promise<std::vector<base::string16>>;
 
@@ -37,6 +40,12 @@ class IoDelegate {
 
   virtual void CloseContext(const IoContextId& context_id,
                             const IoIntPromise& promise) = 0;
+
+  // Returns list of resource names of specified resource type.
+  virtual void GetWinResourceNames(
+      const domapi::WinResourceId& resource_id,
+      const base::string16& type,
+      const GetWinResourceNamessPromise& promise) = 0;
 
   // Returns list of suggested words for |wrong_word|.
   virtual void GetSpellingSuggestions(

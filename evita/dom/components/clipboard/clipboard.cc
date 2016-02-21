@@ -145,6 +145,63 @@ const Clipboard::Format* Clipboard::Format::Get(uint32_t format) {
 //
 // FormatText
 //
+class DibFormat final : public Clipboard::Format {
+ public:
+  DibFormat();
+  ~DibFormat() final = default;
+
+ private:
+  // Clipboard::Format
+  DataTransferData* FromClipboard(HANDLE handle) const final;
+
+  DISALLOW_COPY_AND_ASSIGN(DibFormat);
+};
+
+DibFormat::DibFormat() : Format(CF_DIBV5, L"image/bmp") {}
+
+int ColorTableLengthOf(const BITMAPINFO* bitmap) {
+  switch (bitmap->bmiHeader.biBitCount) {
+    case 1:
+    case 4:
+    case 8:
+      if (bitmap->bmiHeader.biClrUsed)
+        return bitmap->bmiHeader.biClrUsed;
+      return 1 << bitmap->bmiHeader.biBitCount;
+    case 16:
+    case 32:
+      if (bitmap->bmiHeader.biCompression == BI_BITFIELDS)
+        return 3;
+      return 0;
+    case 24:
+      return 0;
+  }
+  NOTREACHED();
+  return 0;
+}
+
+// Convert DIB data to BMP format by adding BITMAPFILEHEADER.
+DataTransferData* DibFormat::FromClipboard(HANDLE handle) const {
+  ScopedGlobalLock<uint8_t> lock_scope(handle);
+  const auto bytes = lock_scope.bytes();
+  if (!bytes)
+    return nullptr;
+  const auto num_bytes = lock_scope.num_bytes();
+  std::vector<uint8_t> data(sizeof(BITMAPFILEHEADER) + num_bytes);
+  ::memcpy(data.data() + sizeof(BITMAPFILEHEADER), bytes, num_bytes);
+  const auto bitmap = reinterpret_cast<BITMAPINFO*>(bytes);
+  const auto color_table_length = ColorTableLengthOf(bitmap);
+  const auto header = reinterpret_cast<BITMAPFILEHEADER*>(data.data());
+  header->bfType = ('B' << 8) | 'M';
+  header->bfSize = static_cast<DWORD>(data.size());
+  header->bfOffBits = sizeof(BITMAPFILEHEADER) + bitmap->bmiHeader.biSize +
+                      color_table_length * sizeof(RGBQUAD);
+  return new DataTransferBlobData(std::move(data));
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// FormatText
+//
 class TextFormat final : public Clipboard::Format {
  public:
   TextFormat();
@@ -198,6 +255,7 @@ Clipboard::Clipboard(ExceptionState* exception_state)
   if (init_format)
     return;
 
+  new DibFormat();
   new TextFormat();
 #if 0
   // MS CF_HTML

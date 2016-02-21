@@ -46,6 +46,7 @@ class DataTransferData {
 class DataTransferBlobData final : public DataTransferData {
  public:
   DataTransferBlobData(const void* bytes, size_t num_bytes);
+  explicit DataTransferBlobData(std::vector<uint8_t>&& data);
   ~DataTransferBlobData() final;
 
   const void* bytes() const final;

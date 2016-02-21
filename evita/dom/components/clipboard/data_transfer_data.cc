@@ -42,6 +42,9 @@ DataTransferBlobData::DataTransferBlobData(const void* bytes, size_t num_bytes)
   ::memcpy(const_cast<uint8_t*>(&data_[0]), bytes, num_bytes);
 }
 
+DataTransferBlobData::DataTransferBlobData(std::vector<uint8_t>&& data)
+    : data_(std::move(data)) {}
+
 DataTransferBlobData::~DataTransferBlobData() {}
 
 const void* DataTransferBlobData::bytes() const {

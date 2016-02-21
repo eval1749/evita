@@ -2,7 +2,59 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('imaging');
+
 $define(global, 'launchpad', function($export) {
+  const Singleton = base.Singleton;
+  const IconUtil = imaging.IconUtil;
+
+  /**
+   * @param {string} fileName
+   * @return {string}
+   */
+  function extensionOf(fileName) {
+    const lastDot = fileName.lastIndexOf('.');
+    if (lastDot < 0)
+      return '';
+    return fileName.substr(lastDot);
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  //
+  // IconMap
+  //
+  class IconMap {
+    constructor() {
+      // TODO(eval1749): We should have blank document icon.
+      /** @const @type {!ImageData} */
+      this.blankDocumentIcon_ = new ImageData(16, 16);
+
+      /** @const @type {!Map<string, !ImageData>} */
+      this.iconMap_ = new Map();
+    }
+
+    /** @return {!ImageData} */
+    get defaultIcon() { return this.blankDocumentIcon_; }
+
+    /** @return {!IconMap} */
+    static get instance() { return Singleton.get(IconMap); }
+
+    /**
+     * @param {string} fileName
+     * @return {!Promise<!ImageData>}
+     */
+    loadIcon(fileName) {
+      const extension = extensionOf(fileName);
+      const present = this.iconMap_.get(extension) || null;
+      if (present !== null)
+        return Promise.resolve(present);
+      return IconUtil.loadIconForExtension(extension).then(maybeImage => {
+        const image = maybeImage || this.blankDocumentIcon_;
+        this.iconMap_.set(extension, image);
+        return image;
+      });
+    }
+  }
 
   /** @const @type {!Array<!launchpad.Header>} */
   const HEADER_MODEL = [
@@ -364,13 +416,33 @@ $define(global, 'launchpad', function($export) {
       ].join('');
     }
 
+    /**
+     * @param {!Document} document
+     * @param {string} name
+     * @return {!Element}
+     */
+    createIcon(document, name) {
+      const icon = document.createElement('icon');
+      const image = document.createImage(IconMap.instance.defaultIcon);
+      IconMap.instance.loadIcon(name).then(imageData => {
+        if (imageData === null)
+          return;
+        image.data = imageData;
+      });
+      icon.appendChild(image);
+      return icon;
+    }
+
     /** @private */
     setupRow() {
       const rowModel = this.computeRowModel();
       const document = this.row_.ownerDocument;
       for (const header of HEADER_MODEL) {
         const cell = document.createElement('cell');
-        cell.appendChild(document.createText(rowModel[header.id]));
+        const text = rowModel[header.id];
+        if (header.id === 'name')
+          cell.appendChild(this.createIcon(document, text));
+        cell.appendChild(document.createText(text));
         cell.style.width = header.width;
         this.row_.appendChild(cell);
       }
@@ -437,6 +509,8 @@ $define(global, 'launchpad', function($export) {
             .build());
     styleSheet.appendRule(
         CSSRuleBuilder.selector('cell').display('inline').padding(3).build());
+    styleSheet.appendRule(
+        CSSRuleBuilder.selector('icon').height(20).width(20).build());
     styleSheet.appendRule(
         CSSRuleBuilder.selector('list').display('block').build());
     styleSheet.appendRule(

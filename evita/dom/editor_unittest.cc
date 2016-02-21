@@ -69,7 +69,8 @@ TEST_F(EditorTest, getSpellingSuggestions) {
       "function getSpellingSuggestions(word) {"
       "  Editor.getSpellingSuggestions(word).then(function(x) { result = x; });"
       "}");
-  mock_io_delegate()->set_spelling_suggestions({L"word", L"sword"});
+  mock_io_delegate()->SetStrings("GetSpellingSuggestions", 0,
+                                 {L"word", L"sword"});
   EXPECT_SCRIPT_VALID("getSpellingSuggestions('word')");
   EXPECT_SCRIPT_EQ("word, sword", "result.join(', ')");
 }

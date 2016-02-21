@@ -30,11 +30,6 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void set_check_spelling_result(bool result) {
     check_spelling_result_ = result;
   }
-  void set_spelling_suggestions(
-      const std::vector<base::string16>& spelling_suggestions) {
-    spelling_suggestions_ = spelling_suggestions;
-  }
-
   void SetCallResult(const base::StringPiece& name, int error_code);
   void SetCallResult(const base::StringPiece& name,
                      int erorr_code,
@@ -48,6 +43,9 @@ class MockIoDelegate final : public domapi::IoDelegate {
   void SetResource(base::StringPiece16 type,
                    base::StringPiece16 name,
                    const std::vector<uint8_t>& data);
+  void SetStrings(base::StringPiece name,
+                  int error_code,
+                  const std::vector<base::string16>& strings);
 
   // domapi::IoDelegate
   void CheckSpelling(const base::string16& word_to_check,
@@ -112,7 +110,7 @@ class MockIoDelegate final : public domapi::IoDelegate {
   int num_close_called_;
   int num_remove_called_;
   bool check_spelling_result_;
-  std::vector<base::string16> spelling_suggestions_;
+  std::vector<base::string16> strings_;
   std::vector<uint8_t> resource_data_;
   base::string16 resource_name_;
   base::string16 resource_type_;

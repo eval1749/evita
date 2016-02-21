@@ -93,6 +93,13 @@ void MockIoDelegate::SetResource(base::StringPiece16 type,
   resource_type_ = type.as_string();
 }
 
+void MockIoDelegate::SetStrings(base::StringPiece name,
+                                int error_code,
+                                const std::vector<base::string16>& strings) {
+  SetCallResult(name, error_code);
+  strings_ = strings;
+}
+
 // domapi::IoDelegate
 void MockIoDelegate::CheckSpelling(const base::string16&,
                                    const CheckSpellingResolver& promise) {
@@ -112,7 +119,10 @@ void MockIoDelegate::CloseContext(const domapi::IoContextId&,
 void MockIoDelegate::GetSpellingSuggestions(
     const base::string16&,
     const GetSpellingSuggestionsResolver& promise) {
-  promise.resolve.Run(spelling_suggestions_);
+  auto const result = PopCallResult("GetSpellingSuggestions");
+  if (const auto error_code = result.error_code)
+    return promise.reject.Run(error_code);
+  promise.resolve.Run(strings_);
 }
 
 void MockIoDelegate::LoadWinResource(const domapi::WinResourceId& resource_id,

@@ -601,18 +601,8 @@ void Widget::SetCapture() {
   capture_widget = this;
 }
 
-bool Widget::SetCursor() {
-  DCHECK(native_window_);
-  auto const cursor_point = GetCursorPoint();
-  auto const point = MapFromDesktopPoint(cursor_point);
-  auto const result = HitTest(point);
-  if (!result)
-    return false;
-  auto const hCursor = result.widget()->GetCursorAt(result.local_point());
-  if (!hCursor)
-    return false;
-  ::SetCursor(hCursor);
-  return true;
+void Widget::SetCursor(HCURSOR hCursor) {
+  cursor_ = hCursor;
 }
 
 void Widget::SetParentWidget(Widget* new_parent) {
@@ -743,10 +733,21 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       ::ValidateRect(*native_window(), nullptr);
       return 0;
 
-    case WM_SETCURSOR:
-      if (LOWORD(lParam) == HTCLIENT && SetCursor())
+    case WM_SETCURSOR: {
+      if (LOWORD(lParam) != HTCLIENT)
+        break;
+      auto const cursor_point = GetCursorPoint();
+      auto const point = MapFromDesktopPoint(cursor_point);
+      auto const result = HitTest(point);
+      if (!result)
+        break;
+      if (!result.widget()->cursor_) {
+        ::SetCursor(::LoadCursor(nullptr, IDC_ARROW));
         return true;
-      break;
+      }
+      ::SetCursor(result.widget()->cursor_);
+      return true;
+    }
 
     case WM_SETFOCUS: {
       FocusController::instance()->DidSetNativeFocus(this);

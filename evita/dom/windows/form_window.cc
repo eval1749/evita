@@ -14,6 +14,7 @@
 #include "evita/dom/forms/form_control.h"
 #include "evita/dom/forms/form_paint_info_builder.h"
 #include "evita/dom/public/caret_shape.h"
+#include "evita/dom/public/cursor.h"
 #include "evita/dom/public/form.h"
 #include "evita/dom/public/form_controls.h"
 #include "evita/dom/public/view_delegate.h"
@@ -79,6 +80,8 @@ void FormWindow::RequestAnimationFrame() {
 void FormWindow::UpdateHoveredControl(FormControl* control) {
   if (hovered_control_ == control)
     return;
+  script_host()->view_delegate()->SetCursor(
+      window_id(), control ? control->cursor() : domapi::CursorId::Pointer);
   hovered_control_ = control;
   RequestAnimationFrame();
 }

@@ -13,6 +13,10 @@
 #include "evita/dom/public/form_controls.h"
 #include "evita/gc/member.h"
 
+namespace domapi {
+enum class CursorId;
+}
+
 namespace dom {
 
 class Form;
@@ -33,6 +37,7 @@ class FormControl : public ginx::Scriptable<FormControl, ViewEventTarget> {
   ~FormControl() override;
 
   const domapi::IntRect& bounds() const { return bounds_; }
+  virtual domapi::CursorId cursor() const;
 
   // Expose |clientLeft|, |clientTop|, |clientWidth| and |clientHeight| for
   // layout management in |views::FormWindow|.

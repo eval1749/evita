@@ -13,10 +13,12 @@
 #include "evita/dom/bindings/ginx_TextDocumentEventInit.h"
 #include "evita/dom/events/text_document_event.h"
 #include "evita/dom/promise_resolver.h"
+#include "evita/dom/public/cursor.h"
 #include "evita/dom/public/scroll_bar_orientation.h"
 #include "evita/dom/public/scroll_bar_part.h"
 #include "evita/dom/public/text_area_display_item.h"
 #include "evita/dom/public/view_delegate.h"
+#include "evita/dom/public/view_events.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
@@ -556,6 +558,13 @@ void TextWindow::DidMoveThumb(int value) {
 
 // ViewEventTarget
 bool TextWindow::HandleMouseEvent(const domapi::MouseEvent& event) {
+  if (event.event_type == domapi::EventType::MouseMove) {
+    const auto& point = FloatPoint(event.client_x, event.client_y);
+    const auto cursor_id = vertical_scroll_bar_->bounds().Contains(point)
+                               ? domapi::CursorId::Pointer
+                               : domapi::CursorId::IBeam;
+    script_host()->view_delegate()->SetCursor(window_id(), cursor_id);
+  }
   return vertical_scroll_bar_->HandleMouseEvent(event);
 }
 

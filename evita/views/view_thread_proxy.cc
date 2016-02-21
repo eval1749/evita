@@ -268,6 +268,7 @@ DEFINE_DELEGATE_2(Reconvert, domapi::WindowId, const base::string16&);
 DEFINE_DELEGATE_1(RealizeWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(ReleaseCapture, domapi::EventTargetId)
 DEFINE_DELEGATE_1(SetCapture, domapi::EventTargetId)
+DEFINE_DELEGATE_2(SetCursor, domapi::WindowId, domapi::CursorId)
 DEFINE_DELEGATE_2(SetStatusBar,
                   domapi::WindowId,
                   const std::vector<base::string16>&)

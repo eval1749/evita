@@ -63,6 +63,9 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
                                  CSSStyleSheetHandle* style_sheet_handle,
                                  ExceptionState* exception_state);
 
+  // ViewEventTarget
+  bool HandleMouseEvent(const domapi::MouseEvent& event) final;
+
   // visuals::css::Media
   visuals::css::MediaState media_state() const final;
   visuals::css::MediaType media_type() const final;

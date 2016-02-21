@@ -31,6 +31,7 @@ class DisplayItemList;
 
 namespace domapi {
 
+enum class CursorId;
 class Form;
 struct TabData;
 class TextAreaDisplayItem;
@@ -148,6 +149,9 @@ class ViewDelegate {
 
   // Release capture from window or form control.
   virtual void SetCapture(EventTargetId event_target_id) = 0;
+
+  // Set cursor to |cursor_id| for a window specified by |window_id|.
+  virtual void SetCursor(WindowId window_id, CursorId cursor_id) = 0;
 
   // Set text contents of status bar of specified top level window.
   virtual void SetStatusBar(WindowId window_id,

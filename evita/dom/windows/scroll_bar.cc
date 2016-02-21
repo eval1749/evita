@@ -29,6 +29,18 @@ using ScrollBarPart = domapi::ScrollBarPart;
 
 namespace {
 
+FloatPoint ToFloatPoint(const gfx::PointF& point) {
+  return FloatPoint(point.x, point.y);
+}
+
+FloatSize ToFloatSize(const gfx::SizeF& size) {
+  return FloatSize(size.width, size.height);
+}
+
+FloatRect ToFloatRect(const gfx::RectF& rect) {
+  return FloatRect(ToFloatPoint(rect.origin()), ToFloatSize(rect.size()));
+}
+
 gfx::PointF ToPointF(const FloatPoint& point) {
   return gfx::PointF(point.x(), point.y());
 }
@@ -68,6 +80,10 @@ ScrollBar::ScrollBar(ScrollBarOrientation orientation,
 }
 
 ScrollBar::~ScrollBar() {}
+
+FloatRect ScrollBar::bounds() const {
+  return ToFloatRect(layout_->bounds());
+}
 
 void ScrollBar::DidFireRepeatTimer() {
   switch (active_part_) {

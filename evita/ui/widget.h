@@ -8,9 +8,9 @@
 #include <memory>
 #include <ostream>
 
-#include "base/macros.h"
 #include "base/event_types.h"
 #include "base/logging.h"
+#include "base/macros.h"
 #include "common/tree/node.h"
 #include "common/win/native_window.h"
 #include "evita/gfx/rect.h"
@@ -83,6 +83,7 @@ class Widget : public EventTarget,
   void SetBounds(const gfx::Point& origin, const gfx::Size& size);
   void SetBounds(const gfx::Rect& rect);
   void SetCapture();
+  void SetCursor(HCURSOR hCursor);
   void SetParentWidget(Widget* new_parent);
   virtual void Show();
 
@@ -155,10 +156,10 @@ class Widget : public EventTarget,
   bool HandleMouseMessage(const base::NativeEvent& native_event);
   HitTestResult HitTest(const gfx::Point& point) const;
   HitTestResult HitTestForMouseEventTarget(const gfx::Point& point) const;
-  bool SetCursor();
   void UpdateBounds();
 
   gfx::Rect bounds_;
+  HCURSOR cursor_ = nullptr;
   std::unique_ptr<NativeWindow> native_window_;
   // False if this View is owned by its parent - i.e. it will be deleted by its
   // parent during its parents destruction. False is the default.

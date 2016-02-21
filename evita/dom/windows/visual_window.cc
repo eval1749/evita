@@ -8,7 +8,9 @@
 #include "base/strings/stringprintf.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/bindings/exception_state.h"
+#include "evita/dom/public/cursor.h"
 #include "evita/dom/public/view_delegate.h"
+#include "evita/dom/public/view_events.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/animation_frame_callback.h"
@@ -94,6 +96,15 @@ VisualWindow* VisualWindow::NewWindow(ScriptHost* script_host,
     return nullptr;
   }
   return new VisualWindow(script_host, document, style_sheet_handle->value());
+}
+
+// ViewEventTarget
+bool VisualWindow::HandleMouseEvent(const domapi::MouseEvent& event) {
+  if (event.event_type != domapi::EventType::MouseMove)
+    return false;
+  script_host()->view_delegate()->SetCursor(window_id(),
+                                            domapi::CursorId::Pointer);
+  return false;
 }
 
 // visuals::css::Media

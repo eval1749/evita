@@ -66,6 +66,7 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD1(RealizeWindow, void(domapi::WindowId));
   MOCK_METHOD1(ReleaseCapture, void(domapi::EventTargetId));
   MOCK_METHOD1(SetCapture, void(domapi::EventTargetId));
+  MOCK_METHOD2(SetCursor, void(domapi::WindowId, domapi::CursorId));
   MOCK_METHOD2(SetStatusBar,
                void(domapi::WindowId, const std::vector<base::string16>&));
   MOCK_METHOD2(SetSwitch,

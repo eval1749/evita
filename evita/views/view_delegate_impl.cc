@@ -11,6 +11,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/forms/form.h"
+#include "evita/dom/public/cursor.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/form.h"
 #include "evita/dom/public/text_area_display_item.h"
@@ -430,6 +431,79 @@ void ViewDelegateImpl::SetCapture(domapi::EventTargetId event_target_id) {
   }
 
   DVLOG(0) << "SetCapture: no such target " << event_target_id;
+}
+
+void ViewDelegateImpl::SetCursor(domapi::WindowId window_id,
+                                 domapi::CursorId cursor_id) {
+  const auto window = Window::FromWindowId(window_id);
+  if (!window) {
+    DVLOG(0) << "SetCursor: no such window " << window_id;
+    return;
+  }
+
+// See "ui/base/cursor/cursor_loader_win.cc"
+#define IDC_Alias IDC_ARROW
+#define IDC_Cell IDC_ARROW
+#define IDC_ColumnResize IDC_ARROW
+#define IDC_ContextMenu IDC_ARROW
+#define IDC_Copy IDC_ARROW
+#define IDC_Cross IDC_CROSS
+#define IDC_Custom IDC_ARROW
+#define IDC_EastPanning IDC_SIZEWE
+#define IDC_EastResize IDC_SIZEWE
+#define IDC_EastWestResize IDC_SIZEWE
+#define IDC_Grab IDC_HAND
+#define IDC_Grabbing IDC_HAND
+#define IDC_Hand IDC_HAND
+#define IDC_Help IDC_HELP
+#define IDC_IBeam IDC_IBEAM
+#define IDC_MiddlePanning IDC_SIZEALL
+#define IDC_Move IDC_SIZEALL
+#define IDC_NoDrop IDC_NO
+#define IDC_None IDC_NO
+#define IDC_NorthEastPanning IDC_SIZENWSE
+#define IDC_NorthEastResize IDC_SIZENWSE
+#define IDC_NorthEastSouthWestResize IDC_SIZENWSE
+#define IDC_NorthPanning IDC_SIZENS
+#define IDC_NorthResize IDC_SIZENS
+#define IDC_NorthSouthResize IDC_SIZENS
+#define IDC_NorthWestSouthEastResize IDC_SIZENWSE
+#define IDC_NorthWestPanning IDC_SIZENWSE
+#define IDC_NorthWestResize IDC_SIZENWSE
+#define IDC_NotAllowed IDC_NO
+#define IDC_Pointer IDC_ARROW
+#define IDC_Progress IDC_APPSTARTING
+#define IDC_RowResize IDC_SIZENS
+#define IDC_SouthEastPanning IDC_SIZENS
+#define IDC_SouthEastResize IDC_SIZENS
+#define IDC_SouthPanning IDC_SIZENS
+#define IDC_SouthResize IDC_SIZENS
+#define IDC_SouthWestPanning IDC_SIZENS
+#define IDC_SouthWestResize IDC_SIZENESW
+#define IDC_VerticalText IDC_IBEAM
+#define IDC_Wait IDC_WAIT
+#define IDC_WestPanning IDC_SIZEWE
+#define IDC_WestResize IDC_SIZEWE
+#define IDC_ZoomIn IDC_SIZEWE
+#define IDC_ZoomOut IDC_SIZEWE
+
+  static LPCWSTR names[] = {
+#define V(Name) IDC_##Name,
+      FOR_EACH_DOMAPI_CURSOR(V)
+#undef V
+  };
+  const auto& it = std::begin(names) + static_cast<size_t>(cursor_id);
+  if (it < std::begin(names) || it >= std::end(names)) {
+    DVLOG(0) << "SetCursor but cursor id " << cursor_id;
+    return;
+  }
+  const auto cursor = ::LoadCursor(nullptr, *it);
+  if (!cursor) {
+    const auto last_error = ::GetLastError();
+    DVLOG(0) << "LoadCursor error=" << last_error;
+    return;
+  }
+  window->SetCursor(cursor);
 }
 
 void ViewDelegateImpl::SetStatusBar(domapi::WindowId window_id,

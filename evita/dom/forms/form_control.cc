@@ -8,6 +8,7 @@
 #include "evita/dom/events/event.h"
 #include "evita/dom/forms/form.h"
 #include "evita/dom/forms/form_paint_info.h"
+#include "evita/dom/public/cursor.h"
 
 namespace dom {
 
@@ -21,6 +22,10 @@ FormControl::FormControl(const base::string16& name)
 FormControl::FormControl() : FormControl(base::string16()) {}
 
 FormControl::~FormControl() {}
+
+domapi::CursorId FormControl::cursor() const {
+  return domapi::CursorId::Pointer;
+}
 
 void FormControl::set_client_height(float new_height) {
   if (bounds_.height() == new_height)

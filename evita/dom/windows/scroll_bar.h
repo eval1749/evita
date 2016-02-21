@@ -58,6 +58,8 @@ class ScrollBar final {
             ui::ScrollBarObserver* observer);
   ~ScrollBar();
 
+  FloatRect bounds() const;
+
   // Returns true if event handled.
   bool HandleMouseEvent(const MouseEvent& event);
   ScrollBarPart HitTestPoint(const FloatPoint& point) const;

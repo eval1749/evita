@@ -1405,6 +1405,7 @@ void EditPane::OnMouseReleased(const ui::MouseEvent& event) {
 }
 
 void EditPane::OnMouseMoved(const ui::MouseEvent& event) {
+  SetCursor(GetCursorAt(event.location()));
   splitter_controller_->Move(event.location());
 }
 

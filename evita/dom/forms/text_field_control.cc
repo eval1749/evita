@@ -10,6 +10,7 @@
 #include "evita/dom/forms/form_paint_info.h"
 #include "evita/dom/forms/text_field_selection.h"
 #include "evita/dom/promise_resolver.h"
+#include "evita/dom/public/cursor.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/fonts/text_layout.h"
@@ -76,6 +77,10 @@ int TextFieldControl::MapPointToOffset(int x, int y) const {
 }
 
 // FormControl
+domapi::CursorId TextFieldControl::cursor() const {
+  return domapi::CursorId::IBeam;
+}
+
 std::unique_ptr<domapi::FormControl> TextFieldControl::Paint(
     const FormPaintInfo& paint_info) const {
   auto state = ComputeState(paint_info);

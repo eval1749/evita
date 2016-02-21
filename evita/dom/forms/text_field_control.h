@@ -50,6 +50,8 @@ class TextFieldControl final
   int MapPointToOffset(int x, int y) const;
 
   // FormControl
+  domapi::CursorId cursor() const final;
+
   std::unique_ptr<domapi::FormControl> Paint(
       const FormPaintInfo& paint_info) const final;
 

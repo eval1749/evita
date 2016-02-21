@@ -62,6 +62,7 @@ class ViewDelegateImpl final : public domapi::ViewDelegate {
   void RealizeWindow(domapi::WindowId window_id) final;
   void ReleaseCapture(domapi::EventTargetId event_target_id) final;
   void SetCapture(domapi::EventTargetId event_target_id) final;
+  void SetCursor(domapi::WindowId window_id, domapi::CursorId cursor_id) final;
   void SetStatusBar(domapi::WindowId window_id,
                     const std::vector<base::string16>& texts) final;
   void SetSwitch(const base::string16& name,

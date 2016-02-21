@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_H_
-#define EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_H_
+#ifndef EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_ITEM_H_
+#define EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_ITEM_H_
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "evita/dom/clipboard/clipboard.h"
-#include "evita/dom/clipboard/data_transfer_data.h"
+#include "evita/dom/components/clipboard/clipboard.h"
+#include "evita/dom/components/clipboard/data_transfer_data.h"
 #include "evita/ginx/scriptable.h"
 
 namespace dom {
@@ -60,4 +60,4 @@ struct Converter<dom::DataTransferData::Kind> {
 };
 }  // namespace gin
 
-#endif  // EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_H_
+#endif  // EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_ITEM_H_

@@ -3,9 +3,9 @@
 
 #include "evita/dom/global.h"
 
-#include "evita/dom/clipboard/data_transfer.h"
-#include "evita/dom/clipboard/data_transfer_item.h"
-#include "evita/dom/clipboard/data_transfer_item_list.h"
+#include "evita/dom/components/clipboard/data_transfer.h"
+#include "evita/dom/components/clipboard/data_transfer_item.h"
+#include "evita/dom/components/clipboard/data_transfer_item_list.h"
 #include "evita/dom/components/imaging/image_data.h"
 #include "evita/dom/components/win_registry/win_registry.h"
 #include "evita/dom/components/win_resource/win_resource.h"

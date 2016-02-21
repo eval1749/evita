@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_CLIPBOARD_DATA_TRANSFER_H_
-#define EVITA_DOM_CLIPBOARD_DATA_TRANSFER_H_
+#ifndef EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_H_
+#define EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_H_
 
 #include "evita/ginx/scriptable.h"
 
@@ -34,4 +34,4 @@ class DataTransfer final : public ginx::Scriptable<DataTransfer> {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_CLIPBOARD_DATA_TRANSFER_H_
+#endif  // EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_H_

@@ -4,13 +4,13 @@
 
 #include <string>
 
-#include "evita/dom/clipboard/data_transfer_item_list.h"
+#include "evita/dom/components/clipboard/data_transfer_item_list.h"
 
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/clipboard/clipboard.h"
-#include "evita/dom/clipboard/data_transfer_item.h"
+#include "evita/dom/components/clipboard/clipboard.h"
+#include "evita/dom/components/clipboard/data_transfer_item.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/script_host.h"
 

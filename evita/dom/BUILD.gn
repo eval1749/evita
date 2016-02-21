@@ -64,7 +64,7 @@ source_set("components") {
     "//base:i18n",
     "//common",
     "//evita/dom/bindings",
-    "//evita/dom/clipboard",
+    "//evita/dom/components/clipboard",
     "//evita/dom/components/imaging",
     "//evita/dom/components/win_registry",
     "//evita/dom/components/win_resource",

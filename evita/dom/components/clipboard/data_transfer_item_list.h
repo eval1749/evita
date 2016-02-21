@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_LIST_H_
-#define EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_LIST_H_
+#ifndef EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_ITEM_LIST_H_
+#define EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_ITEM_LIST_H_
 
 #include <vector>
 
@@ -63,4 +63,4 @@ struct Converter<dom::DataTransferData*> {
 };
 }  // namespace gin
 
-#endif  // EVITA_DOM_CLIPBOARD_DATA_TRANSFER_ITEM_LIST_H_
+#endif  // EVITA_DOM_COMPONENTS_CLIPBOARD_DATA_TRANSFER_ITEM_LIST_H_

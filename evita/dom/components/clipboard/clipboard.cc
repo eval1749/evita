@@ -7,12 +7,12 @@
 #include <string>
 #include <unordered_map>
 
-#include "evita/dom/clipboard/clipboard.h"
+#include "evita/dom/components/clipboard/clipboard.h"
 
 #include "base/logging.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/clipboard/data_transfer_data.h"
+#include "evita/dom/components/clipboard/data_transfer_data.h"
 
 namespace dom {
 

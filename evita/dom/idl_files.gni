@@ -8,9 +8,9 @@ bindings_gen_dir = "$root_gen_dir/evita/dom/bindings"
 externs_gen_dir = "$root_gen_dir/evita/dom/externs"
 
 interface_idl_files = [
-  "//evita/dom/clipboard/DataTransfer.idl",
-  "//evita/dom/clipboard/DataTransferItem.idl",
-  "//evita/dom/clipboard/DataTransferItemList.idl",
+  "//evita/dom/components/clipboard/DataTransfer.idl",
+  "//evita/dom/components/clipboard/DataTransferItem.idl",
+  "//evita/dom/components/clipboard/DataTransferItemList.idl",
   "//evita/dom/components/imaging/ImageData.idl",
   "//evita/dom/components/win_registry/WinRegistry.idl",
   "//evita/dom/components/win_resource/WinResource.idl",
@@ -124,7 +124,7 @@ static_js_externs_files = [
   "//evita/dom/base/ordered_set_externs.js",
   "//evita/dom/base/strings/string_util_externs.js",
   "//evita/dom/bracket_externs.js",
-  "//evita/dom/clipboard/clipboard_externs.js",
+  "//evita/dom/components/clipboard/clipboard_externs.js",
   "//evita/dom/components/find_and_replace/find_and_replace_externs.js",
   "//evita/dom/components/launchpad/launchpad_externs.js",
   "//evita/dom/components/repl/console_externs.js",

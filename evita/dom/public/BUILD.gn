@@ -4,6 +4,8 @@
 
 source_set("public") {
   sources = [
+    "cursor.cc",
+    "cursor.h",
     "event_target_id.h",
     "float_point.h",
     "float_rect.h",

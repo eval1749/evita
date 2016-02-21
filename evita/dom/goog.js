@@ -7,7 +7,7 @@ var goog = {};
 
 goog.require = function() {};
 
-/** @type {string} qualifiedName */
+/** @param {string} qualifiedName */
 goog.provide = function(qualifiedName) {
   /** @type {!Object} */
   let runner = global;
@@ -16,4 +16,10 @@ goog.provide = function(qualifiedName) {
       runner[name] = {};
     runner = /** @type {!Object} */ (runner[name]);
   });
+};
+
+
+/** @param {!function(): ?} fn */
+goog.scope = function(fn) {
+  fn();
 };

@@ -7,14 +7,14 @@ vars = {
   'github.git': 'https://github.com',
 
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
-  'buildtools_revision':  'ef3e530703353ba8ad094694ba7c156daddbddeb',
+  'buildtools_revision':  '97b5c485707335dd2952c05bf11412ada3f4fb6f',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': 'ed163ce233f76a950dce1751ac851dbe4b1c00cc',
-  'icu_revision': '8f91ea3a7e0413df3312204058da856058a8099b',
+  'icu_revision': 'e466f6ac8f60bb9697af4a91c6911c6fc4aec95f',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
-  'v8_revision': '96f1766e51a8bd9428b876de118f03c762f1a591', # 5.0.46
+  'v8_revision': 'd096cc28cb565f7738f450add68ff32443b68339', # 5.0.66
 }
 
 deps = {

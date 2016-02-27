@@ -44,10 +44,6 @@ class EventTarget : public ginx::Scriptable<EventTarget> {
   virtual bool DispatchEvent(Event* event, ExceptionState* exception_state);
   bool DispatchEvent(Event* event);
 
-  // TODO(eval1749): We should get rid of
-  // |EventTarget::ScheduleDispatchEventDeprecated()|.
-  void ScheduleDispatchEventDeprecated(Event* event);
-
  protected:
   virtual EventPath BuildEventPath() const;
 

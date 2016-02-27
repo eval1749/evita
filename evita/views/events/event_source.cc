@@ -79,6 +79,19 @@ domapi::MouseButton ConvertMouseButton(ui::MouseButton button) {
   return static_cast<domapi::MouseButton>(button);
 }
 
+void InitMouseEvent(domapi::MouseEvent* api_event,
+                    const ui::MouseEvent& event) {
+  api_event->event_id = event.id();
+  api_event->alt_key = event.alt_key();
+  api_event->button = ConvertMouseButton(event.button());
+  api_event->buttons = event.buttons();
+  api_event->client_x = event.location().x();
+  api_event->client_y = event.location().y();
+  api_event->control_key = event.control_key();
+  api_event->event_type = ConvertEventType(event);
+  api_event->shift_key = event.shift_key();
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -121,15 +134,7 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
 
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   domapi::MouseEvent api_event;
-  api_event.event_id = event.id();
-  api_event.alt_key = event.alt_key();
-  api_event.button = ConvertMouseButton(event.button());
-  api_event.buttons = event.buttons();
-  api_event.client_x = event.location().x();
-  api_event.client_y = event.location().y();
-  api_event.control_key = event.control_key();
-  api_event.event_type = ConvertEventType(event);
-  api_event.shift_key = event.shift_key();
+  InitMouseEvent(&api_event, event);
   api_event.target_id = event_target_id_;
   view_event_handler()->DispatchMouseEvent(api_event);
 }
@@ -160,15 +165,7 @@ void EventSource::DispatchTextCompositionEvent(
 void EventSource::DispatchWheelEvent(const ui::MouseWheelEvent& event) {
   TRACE_EVENT0("views", "EventSource::DispatchWheelEvent");
   domapi::WheelEvent api_event;
-  api_event.event_id = event.id();
-  api_event.alt_key = event.alt_key();
-  api_event.button = static_cast<domapi::MouseButton>(event.button());
-  api_event.buttons = event.buttons();
-  api_event.client_x = event.location().x();
-  api_event.client_y = event.location().y();
-  api_event.control_key = event.control_key();
-  api_event.event_type = ConvertEventType(event);
-  api_event.shift_key = event.shift_key();
+  InitMouseEvent(&api_event, event);
   api_event.target_id = event_target_id_;
   api_event.delta_mode = 0;
   api_event.delta_x = 0.0;

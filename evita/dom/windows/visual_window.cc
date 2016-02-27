@@ -39,9 +39,7 @@ VisualWindow::VisualWindow(ScriptHost* script_host,
   view_->AddObserver(this);
 }
 
-VisualWindow::~VisualWindow() {
-  view_->RemoveObserver(this);
-}
+VisualWindow::~VisualWindow() {}
 
 const visuals::Document& VisualWindow::document() const {
   return view_->document();
@@ -134,6 +132,8 @@ void VisualWindow::DidChangeBounds(int left, int top, int right, int bottom) {
 }
 
 void VisualWindow::DidDestroyWindow() {
+  Window::DidDestroyWindow();
+  view_->RemoveObserver(this);
   CancelAnimationFrame();
 }
 

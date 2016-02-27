@@ -398,6 +398,10 @@ $define(global, 'launchpad', function($export) {
       this.document_.addEventListener(
           Event.Names.BEFORELOAD, this.willLoadTextDocument.bind(this));
       this.document_.addEventListener(
+          Event.Names.ATTACH, this.didAttachWindow.bind(this));
+      this.document_.addEventListener(
+          Event.Names.DETACH, this.didDetachWindow.bind(this));
+      this.document_.addEventListener(
           Event.Names.LOAD, this.didLoadTextDocument.bind(this));
     }
 
@@ -495,6 +499,16 @@ $define(global, 'launchpad', function($export) {
     //
     // Callbacks
     //
+
+    /** @private */
+    didAttachWindow() {
+      this.update();
+    }
+
+    /** @private */
+    didDetachWindow() {
+      this.update();
+    }
 
     /** @private */
     didLoadTextDocument() {

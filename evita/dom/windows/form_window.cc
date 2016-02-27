@@ -68,7 +68,7 @@ void FormWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
 }
 
 void FormWindow::RequestAnimationFrame() {
-  if (is_waiting_animation_frame_)
+  if (!visible() || is_waiting_animation_frame_)
     return;
   is_waiting_animation_frame_ = true;
   auto callback = std::make_unique<AnimationFrameCallback>(

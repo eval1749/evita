@@ -5,42 +5,34 @@
 #ifndef EVITA_UI_EVENTS_MOUSE_CLICK_TRACKER_H_
 #define EVITA_UI_EVENTS_MOUSE_CLICK_TRACKER_H_
 
-#include "common/memory/singleton.h"
 #include "evita/ui/events/event.h"
 
 namespace ui {
 
-// Tracking mouse click.
-class MouseClickTracker final : public common::Singleton<MouseClickTracker> {
-  DECLARE_SINGLETON_CLASS(MouseClickTracker);
-
+//////////////////////////////////////////////////////////////////////
+//
+// MouseClickTracker tracks mouse click.
+//
+class MouseClickTracker final {
  public:
+  MouseClickTracker();
   ~MouseClickTracker();
 
   int click_count() const { return click_count_; }
+
+  static MouseClickTracker* GetInstance();
+
   void OnMousePressed(const MouseEvent& event);
   void OnMouseReleased(const MouseEvent& event);
 
  private:
-  // These values match the Windows defaults.
-  static const auto kDoubleClickTimeMS = 500;
-  static const auto kDoubleClickWidth = 4;
-  static const auto kDoubleClickHeight = 4;
-
-  enum class State {
-    Start,
-    Pressed,
-    PressedReleased,
-    PressedReleasedPressed,
-  };
-
-  MouseClickTracker();
+  enum class State;
 
   bool is_repeated_event(const MouseEvent& event) const;
   bool is_same_location(const MouseEvent& event) const;
   bool is_same_time(const MouseEvent& event) const;
 
-  int click_count_;
+  int click_count_ = 0;
   MouseEvent last_event_;
   State state_;
 

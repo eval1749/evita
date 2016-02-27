@@ -374,16 +374,16 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       return DispatchMouseEvent(result.widget(), &event);
     }
     case EventType::MousePressed: {
-      MouseClickTracker::instance()->OnMousePressed(event);
+      MouseClickTracker::GetInstance()->OnMousePressed(event);
       return DispatchMouseEvent(result.widget(), &event);
     }
     case EventType::MouseReleased: {
       // TODO(eval1749): Should we dispatch |MouseReleased| event to focus
       // widget?
-      MouseClickTracker::instance()->OnMouseReleased(event);
+      MouseClickTracker::GetInstance()->OnMouseReleased(event);
       if (!DispatchMouseEvent(result.widget(), &event))
         return false;
-      auto const click_count = MouseClickTracker::instance()->click_count();
+      auto const click_count = MouseClickTracker::GetInstance()->click_count();
       if (!click_count)
         return !event.default_prevented();
       if (event.default_prevented())

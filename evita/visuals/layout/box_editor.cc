@@ -445,6 +445,7 @@ void BoxEditor::SetTextData(TextBox* text_box, base::StringPiece16 data) {
     return;
   text_box->data_ = data.as_string();
   text_box->text_layout_.reset();
+  text_box->preferred_size_ = FloatSize();
   SetContentChanged(text_box);
 }
 

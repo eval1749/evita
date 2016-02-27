@@ -27,7 +27,7 @@ domapi::ViewEventHandler* view_event_handler() {
   return editor::Application::instance()->view_event_handler();
 }
 
-domapi::EventType ConvertEventType(const ui::KeyEvent event) {
+domapi::EventType ConvertEventType(const ui::KeyEvent& event) {
   auto const event_type = event.type();
   if (event_type == ui::EventType::KeyPressed)
     return domapi::EventType::KeyDown;
@@ -38,7 +38,7 @@ domapi::EventType ConvertEventType(const ui::KeyEvent event) {
   return domapi::EventType::Invalid;
 }
 
-domapi::EventType ConvertEventType(const ui::MouseEvent event) {
+domapi::EventType ConvertEventType(const ui::MouseEvent& event) {
   auto const event_type = event.type();
   if (event_type == ui::EventType::MousePressed) {
     if (!event.click_count())

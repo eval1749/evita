@@ -87,6 +87,10 @@ $define(global, 'repl', function($export) {
         return this.document_;
       this.document_ = ensureTextDocument();
       this.range_ = new TextRange(this.document_);
+      this.document_.addEventListener(Event.Names.REMOVE, () => {
+        this.document_ = null;
+        this.range_ = null;
+      });
       return this.document;
     }
 

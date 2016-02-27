@@ -32,7 +32,6 @@ class Scheduler {
   virtual IdleDeadlineProvider* GetIdleDeadlineProvider() = 0;
   virtual int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> callback) = 0;
-  virtual void RunIdleTasks() = 0;
   virtual int ScheduleIdleTask(const IdleTask& task) = 0;
   virtual void ScheduleTask(const base::Closure& task) = 0;
 

@@ -36,7 +36,6 @@ class SchedulerImpl final : public Scheduler {
 
   void BeginFrame(const base::TimeTicks& deadline);
   void ProcessTasks();
-  void RunIdleTasks();
 
   // dom::Scheduler
   void CancelAnimationFrame(int request_id) final;

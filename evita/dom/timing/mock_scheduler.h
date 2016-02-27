@@ -46,7 +46,6 @@ class MockScheduler final : public IdleDeadlineProvider, public Scheduler {
   IdleDeadlineProvider* GetIdleDeadlineProvider() final { return this; }
   int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> callback) final;
-  void RunIdleTasks() final { NOTREACHED(); }
   int ScheduleIdleTask(const IdleTask& task) final;
   void ScheduleTask(const base::Closure& task) final;
 

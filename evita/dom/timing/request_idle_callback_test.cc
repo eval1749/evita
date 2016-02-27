@@ -51,10 +51,11 @@ TEST_F(RequestIdleCallbackTest, requestIdleCallbackTimeout) {
   EXPECT_SCRIPT_VALID(
       "var didRun = false;"
       "function callback(idleDeadline) { didRun = true; }"
-      "Editor.requestIdleCallback(callback, {timeout: 1000000});");
+      "Editor.requestIdleCallback(callback, {timeout: 123});");
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_FALSE("didRun");
-  mock_scheduler()->SetTimeShift(base::TimeDelta::FromMilliseconds(1000000));
+  mock_scheduler()->SetNowTicks(base::TimeTicks() +
+                                base::TimeDelta::FromMilliseconds(124));
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("didRun");
 }

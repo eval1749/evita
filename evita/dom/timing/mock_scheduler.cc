@@ -15,10 +15,6 @@ namespace dom {
 MockScheduler::MockScheduler() : did_timeout_(false) {}
 MockScheduler::~MockScheduler() {}
 
-base::TimeTicks MockScheduler::Now() const {
-  return base::TimeTicks::Now() + time_shift_;
-}
-
 void MockScheduler::RunPendingTasks() {
   {
     std::vector<std::unique_ptr<AnimationFrameCallback>> callbacks;
@@ -26,7 +22,7 @@ void MockScheduler::RunPendingTasks() {
     for (auto& pair : animation_frame_callback_map_)
       callbacks.emplace_back(std::move(pair.second));
     animation_frame_callback_map_.clear();
-    const auto& frame_time = Now();
+    const auto& frame_time = NowTicks();
     for (const auto& callback : callbacks)
       callback->Run(frame_time);
   }
@@ -36,7 +32,7 @@ void MockScheduler::RunPendingTasks() {
     normal_tasks_.pop();
   }
 
-  auto const now = Now();
+  auto const now = NowTicks();
   while (!waiting_idle_tasks_.empty() &&
          waiting_idle_tasks_.front()->delayed_run_time <= now) {
     ready_idle_tasks_.push(waiting_idle_tasks_.front());
@@ -57,6 +53,11 @@ void MockScheduler::SetIdleDeadline(bool did_timeout,
                                     base::TimeDelta time_remaining) {
   did_timeout_ = did_timeout;
   time_remaining_ = time_remaining;
+}
+
+// base::TickClock
+base::TimeTicks MockScheduler::NowTicks() {
+  return now_ticks_;
 }
 
 // dom::Scheduler

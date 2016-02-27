@@ -69,10 +69,10 @@ int Editor::RequestIdleCallback(v8::Local<v8::Function> callback,
                                 const IdleRequestOptions& options) {
   auto const timeout = options.timeout();
   auto const isolate = ScriptHost::instance()->isolate();
-  auto const run_time =
-      timeout
-          ? base::TimeTicks::Now() + base::TimeDelta::FromMilliseconds(timeout)
-          : base::TimeTicks();
+  const auto& now = ScriptHost::instance()->scheduler()->NowTicks();
+  auto const run_time = timeout
+                            ? now + base::TimeDelta::FromMilliseconds(timeout)
+                            : base::TimeTicks();
   return ScriptHost::instance()->scheduler()->ScheduleIdleTask(
       IdleTask(FROM_HERE,
                base::Bind(&IdleTaskWrapper::Run,

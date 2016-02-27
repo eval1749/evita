@@ -9,10 +9,7 @@
 
 #include "base/callback.h"
 #include "base/macros.h"
-
-namespace base {
-class TimeTicks;
-}
+#include "base/time/tick_clock.h"
 
 namespace dom {
 
@@ -20,9 +17,9 @@ class AnimationFrameCallback;
 class IdleDeadlineProvider;
 class IdleTask;
 
-class Scheduler {
+class Scheduler : public base::TickClock {
  public:
-  virtual ~Scheduler();
+  ~Scheduler() override;
 
   virtual void CancelAnimationFrame(int request_id) = 0;
   virtual void CancelIdleTask(int task_id) = 0;

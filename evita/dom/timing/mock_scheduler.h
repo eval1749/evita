@@ -28,10 +28,11 @@ class MockScheduler final : public IdleDeadlineProvider, public Scheduler {
 
   void RunPendingTasks();
   void SetIdleDeadline(bool did_timeout, base::TimeDelta time_remaining);
-  void SetTimeShift(base::TimeDelta time_shift) { time_shift_ = time_shift; }
+  void SetNowTicks(const base::TimeTicks& now_ticks) { now_ticks_ = now_ticks; }
 
  private:
-  base::TimeTicks Now() const;
+  // base::TickClock
+  base::TimeTicks NowTicks() final;
 
   // dom::IdleDeadlineProvider
   base::TimeDelta GetTimeRemaining() const final { return time_remaining_; }
@@ -55,7 +56,7 @@ class MockScheduler final : public IdleDeadlineProvider, public Scheduler {
   std::queue<base::Closure> normal_tasks_;
   std::unordered_map<int, IdleTask*> idle_task_map_;
   base::TimeDelta time_remaining_;
-  base::TimeDelta time_shift_;
+  base::TimeTicks now_ticks_;
   std::queue<IdleTask*> waiting_idle_tasks_;
 
   DISALLOW_COPY_AND_ASSIGN(MockScheduler);

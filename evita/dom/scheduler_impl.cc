@@ -248,6 +248,11 @@ void SchedulerImpl::Start(base::MessageLoop* script_message_loop) {
   script_message_loop_ = script_message_loop;
 }
 
+// base::TimeTicks
+base::TimeTicks SchedulerImpl::NowTicks() {
+  return base::TimeTicks::Now();
+}
+
 // dom::Scheduler
 void SchedulerImpl::CancelAnimationFrame(int callback_id) {
   animation_frame_callback_queue_->Cancel(callback_id);

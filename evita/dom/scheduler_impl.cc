@@ -201,11 +201,10 @@ void SchedulerImpl::BeginFrame(const base::TimeTicks& deadline) {
   ASSERT_ON_SCRIPT_THREAD();
   TRACE_EVENT0("script", "SchedulerImpl::BeginFrame");
   ProcessTasks();
-  animation_frame_callback_queue_->DidBeginAnimationFrame(
-      base::TimeTicks::Now());
   if (base::TimeTicks::Now() < deadline)
     idle_task_queue_->RunIdleTasks(deadline);
-  // TODO(eval1749): Do layout and paint
+  animation_frame_callback_queue_->DidBeginAnimationFrame(
+      base::TimeTicks::Now());
   scheduler_client_->DidUpdateDom();
 }
 

@@ -66,6 +66,19 @@ domapi::EventType ConvertEventType(const ui::MouseEvent event) {
   return domapi::EventType::Invalid;
 }
 
+domapi::MouseButton ConvertMouseButton(ui::MouseButton button) {
+#define MUST_EQUAL(name)                                       \
+  static_assert(static_cast<int>(domapi::MouseButton::name) == \
+                    static_cast<int>(ui::MouseButton::name),   \
+                "Button name " #name " must be equal.")
+  MUST_EQUAL(Left);
+  MUST_EQUAL(Middle);
+  MUST_EQUAL(Right);
+  MUST_EQUAL(Other1);
+  MUST_EQUAL(Other2);
+  return static_cast<domapi::MouseButton>(button);
+}
+
 }  // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -107,20 +120,10 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
 }
 
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
-#define MUST_EQUAL(name)                                       \
-  static_assert(static_cast<int>(domapi::MouseButton::name) == \
-                    static_cast<int>(ui::MouseButton::name),   \
-                "Button name " #name " must be equal.")
-  MUST_EQUAL(Left);
-  MUST_EQUAL(Middle);
-  MUST_EQUAL(Right);
-  MUST_EQUAL(Other1);
-  MUST_EQUAL(Other2);
-
   domapi::MouseEvent api_event;
   api_event.event_id = event.id();
   api_event.alt_key = event.alt_key();
-  api_event.button = static_cast<domapi::MouseButton>(event.button());
+  api_event.button = ConvertMouseButton(event.button());
   api_event.buttons = event.buttons();
   api_event.client_x = event.location().x();
   api_event.client_y = event.location().y();

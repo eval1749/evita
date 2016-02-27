@@ -211,6 +211,15 @@ global.TextWindow.prototype.clone = function() {
 
   /**
    * @param {!TextWindow} window
+   * @param {!Event} event
+   */
+  function handleDestroy(window, event) {
+    const detachEvent = new TextDocumentEvent(Event.Names.DETACH, {view: window});
+    window.document.dispatchEvent(detachEvent);
+  }
+
+  /**
+   * @param {!TextWindow} window
    * @param {!MouseEvent} event
    *
    * Selects word at left button double clicking.
@@ -299,6 +308,15 @@ global.TextWindow.prototype.clone = function() {
     if (event.button)
       return;
     stopControllers(window);
+  }
+
+  /**
+   * @param {!TextWindow} window
+   * @param {!Event} event
+   */
+  function handleRealize(window, event) {
+    const attachEvent = new TextDocumentEvent(Event.Names.ATTACH, {view: window});
+    window.document.dispatchEvent(attachEvent);
   }
 
   /**
@@ -560,10 +578,11 @@ global.TextWindow.prototype.clone = function() {
   /** @type {!Map.<string, !function(!TextWindow, !Event)>} */
   const handlerMap = new Map([
     [Event.Names.BLUR, stopControllers],
-    [Event.Names.DBLCLICK, handleDoubleClick], [Event.Names.FOCUS, handleFocus],
+    [Event.Names.DBLCLICK, handleDoubleClick],
+    [Event.Names.DESTROY, handleDestroy], [Event.Names.FOCUS, handleFocus],
     [Event.Names.MOUSEDOWN, handleMouseDown],
     [Event.Names.MOUSEMOVE, handleMouseMove],
-    [Event.Names.MOUSEUP, handleMouseUp],
+    [Event.Names.MOUSEUP, handleMouseUp], [Event.Names.REALIZE, handleRealize],
     [Event.Names.SELECTIONCHANGE, handleSelectionChange],
     [Event.Names.WHEEL, handleWheel]
   ]);

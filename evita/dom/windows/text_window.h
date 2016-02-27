@@ -115,10 +115,8 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
 
   // Window
   void DidChangeBounds() final;
-  void DidDestroyWindow() final;
   void DidHideWindow() final;
   void DidKillFocus() final;
-  void DidRealizeWindow() final;
   void DidSetFocus() final;
   void DidShowWindow() final;
   void ForceUpdateWindow() final;

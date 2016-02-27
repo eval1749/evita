@@ -10,8 +10,6 @@
 #include "base/timer/timer.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/bindings/exception_state.h"
-#include "evita/dom/bindings/ginx_TextDocumentEventInit.h"
-#include "evita/dom/events/text_document_event.h"
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/cursor.h"
 #include "evita/dom/public/scroll_bar_orientation.h"
@@ -575,17 +573,6 @@ void TextWindow::DidChangeBounds() {
   caret_->DidChangeWindowBounds();
 }
 
-void TextWindow::DidDestroyWindow() {
-  // TODO(eval1749): We should dispatch "detach" event in JavaScript rather than
-  // in C++;
-  Window::DidDestroyWindow();
-  TextDocumentEventInit init;
-  init.set_bubbles(true);
-  init.set_view(this);
-  selection_->document()->ScheduleDispatchEventDeprecated(
-      new TextDocumentEvent(L"detach", init));
-}
-
 void TextWindow::DidHideWindow() {
   Window::DidHideWindow();
   RequestAnimationFrame();
@@ -596,17 +583,6 @@ void TextWindow::DidKillFocus() {
   Window::DidKillFocus();
   RequestAnimationFrame();
   caret_->DidKillFocus();
-}
-
-void TextWindow::DidRealizeWindow() {
-  // TODO(eval1749): We should dispatch "attach" event in JavaScript rather than
-  // in C++;
-  Window::DidRealizeWindow();
-  TextDocumentEventInit init;
-  init.set_bubbles(true);
-  init.set_view(this);
-  selection_->document()->ScheduleDispatchEventDeprecated(
-      new TextDocumentEvent(L"attach", init));
 }
 
 void TextWindow::DidSetFocus() {

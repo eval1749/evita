@@ -92,6 +92,8 @@ source_set("widget") {
     "events/event.h",
     "events/event_dispatcher.cc",
     "events/event_dispatcher.h",
+    "events/event_editor.cc",
+    "events/event_editor.h",
     "events/event_handler.cc",
     "events/event_handler.h",
     "events/event_target.cc",

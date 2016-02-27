@@ -104,6 +104,8 @@ enum class MouseButton {
   Other2 = 4,
 };
 
+class EventEditor;
+
 //////////////////////////////////////////////////////////////////////
 //
 // Event
@@ -223,6 +225,7 @@ class MouseEvent : public Event {
 
  private:
   friend class MouseWheelEvent;
+  friend class EventEditor;
 
   MouseButton button_;
   int buttons_;

@@ -7,6 +7,9 @@
 ]
 interface TextDocument : EventTarget {
     [ImplementedAs=JavaScript]
+    static void add(TextDocument document);
+
+    [ImplementedAs=JavaScript]
     static void addObserver(TextDocumentSetObserver observer);
 
     [ImplementedAs=JavaScript]

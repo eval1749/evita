@@ -516,15 +516,24 @@
   }
 
   /**
+   * @param {!TextDocument} document
+   */
+  function addTextDocument(document) {
+    if (documentNameMap.has(document.name))
+      throw new Error(`Document ${document.name} already exists`);
+    documentNameMap.set(document.name, document);
+    for (const observer of documentSetObservers)
+      observer.didAddTextDocument(document);
+  }
+
+  /**
    * @param {string} name
    * @return {!TextDocument}
    */
   function newTextDocument(name) {
     const document = new TextDocument();
     document.name_ = makeUniqueName(name);
-    documentNameMap.set(document.name, document);
-    for (const observer of documentSetObservers)
-      observer.didAddTextDocument(document);
+    addTextDocument(document);
     return document;
   }
 
@@ -560,6 +569,7 @@
   });
 
   Object.defineProperties(TextDocument, {
+    add: {value: addTextDocument},
     addObserver: {value: addObserver},
     find: {value: findTextDocument},
     list: {get: () => listTextDocument()},

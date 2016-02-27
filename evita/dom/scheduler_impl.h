@@ -26,7 +26,6 @@ class SchedulerImpl final : public Scheduler {
   explicit SchedulerImpl(SchedulerClient* scheduler_client);
   ~SchedulerImpl() final;
 
-  void RunIdleTasks();
   void Start(base::MessageLoop* script_message_loop);
 
  private:
@@ -37,6 +36,7 @@ class SchedulerImpl final : public Scheduler {
 
   void BeginFrame(const base::TimeTicks& deadline);
   void ProcessTasks();
+  void RunIdleTasks();
 
   // dom::Scheduler
   void CancelAnimationFrame(int request_id) final;

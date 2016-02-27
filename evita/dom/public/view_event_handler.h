@@ -49,8 +49,6 @@ class ViewEventHandler {
   virtual void DidDestroyWindow(WindowId window_id) = 0;
   virtual void DidDropWidget(WindowId source_id, WindowId target_id) = 0;
   virtual void DidRealizeWidget(WindowId window_id) = 0;
-  virtual void DidEnterViewIdle(const base::TimeTicks& deadline) = 0;
-  virtual void DidExitViewIdle() = 0;
   virtual void DispatchFocusEvent(const FocusEvent& event) = 0;
   virtual void DispatchKeyboardEvent(const KeyboardEvent& event) = 0;
   virtual void DispatchMouseEvent(const MouseEvent& event) = 0;

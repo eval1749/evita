@@ -150,16 +150,6 @@ DEFINE_VIEW_EVENT_HANDLER2(DidChangeWindowVisibility,
 DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWindow, domapi::WindowId)
 DEFINE_VIEW_EVENT_HANDLER2(DidDropWidget, domapi::WindowId, domapi::WindowId)
 
-void ScriptThread::DidEnterViewIdle(const base::TimeTicks& deadline) {
-  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  scheduler()->DidEnterViewIdle(deadline);
-}
-
-void ScriptThread::DidExitViewIdle() {
-  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  scheduler()->DidExitViewIdle();
-}
-
 DEFINE_VIEW_EVENT_HANDLER1(DidRealizeWidget, domapi::WindowId)
 DEFINE_VIEW_EVENT_HANDLER1(DispatchFocusEvent, const domapi::FocusEvent&)
 

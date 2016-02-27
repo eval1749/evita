@@ -265,15 +265,6 @@ void SchedulerImpl::DidBeginFrame(const base::TimeTicks& deadline) {
       base::Bind(&SchedulerImpl::BeginFrame, base::Unretained(this), deadline));
 }
 
-void SchedulerImpl::DidEnterViewIdle(const base::TimeTicks& deadline) {
-  DCHECK(script_message_loop_->task_runner());
-  // nothing to do
-}
-
-void SchedulerImpl::DidExitViewIdle() {
-  // nothing to do
-}
-
 IdleDeadlineProvider* SchedulerImpl::GetIdleDeadlineProvider() {
   return idle_task_queue_.get();
 }

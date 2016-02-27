@@ -64,8 +64,6 @@ class ScriptThread final : public base::PingProvider,
   void DidDropWidget(domapi::WindowId source_id,
                      domapi::WindowId target_id) final;
   void DidRealizeWidget(domapi::WindowId window_id) final;
-  void DidEnterViewIdle(const base::TimeTicks& deadline) final;
-  void DidExitViewIdle() final;
   void DispatchFocusEvent(const domapi::FocusEvent& event) final;
   void DispatchKeyboardEvent(const domapi::KeyboardEvent& event) final;
   void DispatchMouseEvent(const domapi::MouseEvent& event) final;

@@ -41,8 +41,6 @@ class MockScheduler final : public IdleDeadlineProvider, public Scheduler {
   void CancelAnimationFrame(int callback_id) final;
   void CancelIdleTask(int task_id) final;
   void DidBeginFrame(const base::TimeTicks& deadline) final { NOTREACHED(); }
-  void DidEnterViewIdle(const base::TimeTicks& deadline) final { NOTREACHED(); }
-  void DidExitViewIdle() final { NOTREACHED(); }
   IdleDeadlineProvider* GetIdleDeadlineProvider() final { return this; }
   int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> callback) final;

@@ -170,14 +170,6 @@ void ViewEventHandlerImpl::DidDropWidget(domapi::WindowId source_id,
                           new WindowEvent(L"dropwindow", init_dict));
 }
 
-void ViewEventHandlerImpl::DidEnterViewIdle(const base::TimeTicks& deadline) {
-  NOTREACHED();
-}
-
-void ViewEventHandlerImpl::DidExitViewIdle() {
-  NOTREACHED();
-}
-
 void ViewEventHandlerImpl::DidRealizeWidget(domapi::WindowId window_id) {
   auto const window = FromWindowId(window_id);
   if (!window)

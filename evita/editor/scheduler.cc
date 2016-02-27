@@ -88,7 +88,6 @@ void Scheduler::BeginFrame() {
                          (now - last_frame_time_).InMillisecondsF());
   ++frame_id_;
   last_frame_time_ = now;
-  script_delegate_->DidExitViewIdle();
   script_delegate_->DidBeginFrame(now + ComputeFrameDelay());
   {
     base::AutoLock lock_scope(*lock_);
@@ -107,7 +106,6 @@ void Scheduler::BeginFrame() {
   // Enter idle state
   ChangeState(State::Idle);
   idle_sequence_num_ = state_sequence_num_;
-  EnterIdle();
 }
 
 void Scheduler::CancelAnimationFrameRequest(
@@ -135,25 +133,6 @@ void Scheduler::CommitFrame() {
 
 void Scheduler::DidUpdateDom() {
   TRACE_EVENT0("scheduler", "Scheduler::DidUpdateDom");
-}
-
-void Scheduler::EnterIdle() {
-  lock_->AssertAcquired();
-  DCHECK_EQ(State::Idle, state_);
-  auto const now = base::TimeTicks::Now();
-  auto const idle_deadline = now + base::TimeDelta::FromMilliseconds(50);
-  script_delegate_->DidEnterViewIdle(idle_deadline);
-  message_loop_->task_runner()->PostNonNestableDelayedTask(
-      FROM_HERE, base::Bind(&Scheduler::ExitIdle, base::Unretained(this)),
-      ComputeIdleDelay());
-}
-
-void Scheduler::ExitIdle() {
-  base::AutoLock lock_scope(*lock_);
-  if (state_ != State::Idle || idle_sequence_num_ != state_sequence_num_)
-    return;
-  DCHECK_EQ(State::Idle, state_);
-  EnterIdle();
 }
 
 void Scheduler::HandleAnimationFrame() {
@@ -215,7 +194,6 @@ void Scheduler::ScheduleNextFrame() {
   auto const now = base::TimeTicks::Now();
   ChangeState(State::Waiting);
   auto const delay = ComputeFrameDelay(last_frame_time_, now);
-  script_delegate_->DidEnterViewIdle(now + delay);
   TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::ScheduleNextFrame", frame_id_,
                          TRACE_EVENT_FLAG_FLOW_OUT, "delay",
                          delay.InMillisecondsF());

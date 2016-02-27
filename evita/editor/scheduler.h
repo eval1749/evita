@@ -53,8 +53,6 @@ class Scheduler final : public ui::AnimationScheduler {
   void BeginFrame();
   void ChangeState(State new_state);
   void CommitFrame();
-  void EnterIdle();
-  void ExitIdle();
   void HandleAnimationFrame();
   void ScheduleNextFrame();
 

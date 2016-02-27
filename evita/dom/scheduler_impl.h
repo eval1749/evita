@@ -41,8 +41,6 @@ class SchedulerImpl final : public Scheduler {
   void CancelAnimationFrame(int request_id) final;
   void CancelIdleTask(int task_id) final;
   void DidBeginFrame(const base::TimeTicks& deadline) final;
-  void DidEnterViewIdle(const base::TimeTicks& deadline) final;
-  void DidExitViewIdle() final;
   IdleDeadlineProvider* GetIdleDeadlineProvider() final;
   int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> request) final;

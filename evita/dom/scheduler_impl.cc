@@ -205,7 +205,6 @@ void SchedulerImpl::BeginFrame(const base::TimeTicks& deadline) {
     idle_task_queue_->RunIdleTasks(deadline);
   animation_frame_callback_queue_->DidBeginAnimationFrame(
       base::TimeTicks::Now());
-  scheduler_client_->DidUpdateDom();
 }
 
 void SchedulerImpl::ProcessTasks() {

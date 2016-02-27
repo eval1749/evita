@@ -35,7 +35,6 @@ class MockViewImpl final : public domapi::ViewDelegate {
   MOCK_METHOD1(CreateVisualWindow, void(domapi::WindowId window_id));
   MOCK_METHOD1(DestroyWindow, void(domapi::WindowId));
   MOCK_METHOD1(DidStartScriptHost, void(domapi::ScriptHostState));
-  MOCK_METHOD0(DidUpdateDom, void());
   MOCK_METHOD1(FocusWindow, void(domapi::WindowId));
   void GetFileNameForLoad(domapi::WindowId window_id,
                           const base::string16& dir_path,

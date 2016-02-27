@@ -41,9 +41,6 @@ class Scheduler final : public ui::AnimationScheduler {
   // Request animation frame.
   void CancelAnimationFrameRequest(ui::AnimationFrameHandler* handler);
 
-  // Called when DOM thread stopped.
-  void DidUpdateDom();
-
   // Request animation frame.
   void RequestAnimationFrame(ui::AnimationFrameHandler* handler);
 

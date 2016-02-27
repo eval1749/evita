@@ -80,7 +80,6 @@ class ScriptThread final : public base::PingProvider,
 
   // SchedulerClient
   void DidCancelAnimationFrame() final;
-  void DidUpdateDom() final;
   void DidRequestAnimationFrame() final;
 
   // ui::AnimationFrameHandler

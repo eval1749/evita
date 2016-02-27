@@ -23,7 +23,6 @@ class SchedulerClient {
   virtual ~SchedulerClient();
 
   virtual void DidCancelAnimationFrame() = 0;
-  virtual void DidUpdateDom() = 0;
   virtual void DidRequestAnimationFrame() = 0;
 
  protected:

@@ -131,10 +131,6 @@ void Scheduler::CommitFrame() {
   last_paint_time_ = base::TimeTicks::Now();
 }
 
-void Scheduler::DidUpdateDom() {
-  TRACE_EVENT0("scheduler", "Scheduler::DidUpdateDom");
-}
-
 void Scheduler::HandleAnimationFrame() {
   DCHECK_EQ(State::Running, state_);
   auto const time = base::TimeTicks::Now();

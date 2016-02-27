@@ -193,11 +193,6 @@ void ScriptThread::DidCancelAnimationFrame() {
   CancelAnimationFrameRequest();
 }
 
-void ScriptThread::DidUpdateDom() {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  view_delegate_->DidUpdateDom();
-}
-
 void ScriptThread::DidRequestAnimationFrame() {
   DCHECK_CALLED_ON_SCRIPT_THREAD();
   ++animation_frame_request_count_;

@@ -40,7 +40,6 @@ class ViewThreadProxy : public domapi::ViewDelegate {
   void CreateVisualWindow(domapi::WindowId window_id) final;
   void DestroyWindow(domapi::WindowId window_id) final;
   void DidStartScriptHost(domapi::ScriptHostState state) final;
-  void DidUpdateDom() final;
   void FocusWindow(domapi::WindowId window_id) final;
   void GetFileNameForLoad(domapi::WindowId window_id,
                           const base::string16& dir_path,

@@ -186,10 +186,6 @@ void ViewDelegateImpl::DidStartScriptHost(domapi::ScriptHostState state) {
   editor::Application::instance()->DidStartScriptHost(state);
 }
 
-void ViewDelegateImpl::DidUpdateDom() {
-  editor::Application::instance()->scheduler()->DidUpdateDom();
-}
-
 void ViewDelegateImpl::FocusWindow(domapi::WindowId window_id) {
   auto const widget = Window::FromWindowId(window_id);
   if (!widget) {

@@ -205,10 +205,6 @@ DEFINE_DELEGATE_1(CreateVisualWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DestroyWindow, domapi::WindowId)
 DEFINE_DELEGATE_1(DidStartScriptHost, domapi::ScriptHostState)
 
-void ViewThreadProxy::DidUpdateDom() {
-  delegate_->DidUpdateDom();
-}
-
 DEFINE_DELEGATE_1(FocusWindow, domapi::WindowId)
 DEFINE_DELEGATE_3(GetFileNameForLoad,
                   domapi::WindowId,

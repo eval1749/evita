@@ -26,7 +26,6 @@ class SchedulerImpl final : public Scheduler {
   explicit SchedulerImpl(SchedulerClient* scheduler_client);
   ~SchedulerImpl() final;
 
-  void DidBeginAnimationFrame(const base::TimeTicks& time);
   void RunIdleTasks();
   void Start(base::MessageLoop* script_message_loop);
 
@@ -36,8 +35,8 @@ class SchedulerImpl final : public Scheduler {
   enum class State;
   class TaskQueue;
 
+  void BeginFrame(const base::TimeTicks& deadline);
   void ProcessTasks();
-  void StartFrame(const base::TimeTicks& deadline);
 
   // dom::Scheduler
   void CancelAnimationFrame(int request_id) final;

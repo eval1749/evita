@@ -91,6 +91,7 @@ void Scheduler::BeginFrame() {
   ++frame_id_;
   last_frame_time_ = now;
   script_delegate_->DidExitViewIdle();
+  script_delegate_->DidBeginFrame(now + ComputeFrameDelay());
   {
     base::AutoLock lock_scope(*lock_);
     ChangeState(State::Running);

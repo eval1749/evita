@@ -45,7 +45,6 @@ class ScriptThread final : public base::PingProvider,
   Scheduler* scheduler() const;
   domapi::ViewEventHandler* view_event_handler() const;
 
-  void BeginAnimationFrame(const base::TimeTicks& time);
   void ScheduleScriptTask(const base::Closure& task);
 
   // base::PingProvider

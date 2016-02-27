@@ -235,6 +235,20 @@ SchedulerImpl::SchedulerImpl(SchedulerClient* scheduler_client)
 
 SchedulerImpl::~SchedulerImpl() {}
 
+void SchedulerImpl::BeginFrame(const base::TimeTicks& deadline) {
+  ASSERT_ON_SCRIPT_THREAD();
+  TRACE_EVENT0("script", "SchedulerImpl::BeginFrame");
+  ProcessTasks();
+  animation_frame_callback_queue_->DidBeginAnimationFrame(
+      base::TimeTicks::Now());
+  if (base::TimeTicks::Now() < deadline) {
+    idle_task_queue_->DidEnterViewIdle(deadline);
+    RunIdleTasks();
+    idle_task_queue_->DidExitViewIdle();
+  }
+  scheduler_client_->DidUpdateDom();
+}
+
 void SchedulerImpl::ProcessTasks() {
   ASSERT_ON_SCRIPT_THREAD();
   state_.store(State::Running);
@@ -259,18 +273,6 @@ void SchedulerImpl::Start(base::MessageLoop* script_message_loop) {
   script_message_loop_ = script_message_loop;
 }
 
-void SchedulerImpl::StartFrame(const base::TimeTicks& deadline) {
-  ASSERT_ON_SCRIPT_THREAD();
-  TRACE_EVENT0("script", "SchedulerImpl::StartFrame");
-  ProcessTasks();
-  if (base::TimeTicks::Now() < deadline) {
-    idle_task_queue_->DidEnterViewIdle(deadline);
-    RunIdleTasks();
-    idle_task_queue_->DidExitViewIdle();
-  }
-  scheduler_client_->DidUpdateDom();
-}
-
 // dom::Scheduler
 void SchedulerImpl::CancelAnimationFrame(int callback_id) {
   animation_frame_callback_queue_->Cancel(callback_id);
@@ -281,15 +283,11 @@ void SchedulerImpl::CancelIdleTask(int task_id) {
   idle_task_queue_->CancelTask(task_id);
 }
 
-void SchedulerImpl::DidBeginAnimationFrame(const base::TimeTicks& time) {
-  animation_frame_callback_queue_->DidBeginAnimationFrame(time);
-}
-
 void SchedulerImpl::DidBeginFrame(const base::TimeTicks& deadline) {
   ASSERT_ON_VIEW_THREAD();
   script_message_loop_->task_runner()->PostTask(
       FROM_HERE,
-      base::Bind(&SchedulerImpl::StartFrame, base::Unretained(this), deadline));
+      base::Bind(&SchedulerImpl::BeginFrame, base::Unretained(this), deadline));
 }
 
 void SchedulerImpl::DidEnterViewIdle(const base::TimeTicks& deadline) {
@@ -330,12 +328,6 @@ void SchedulerImpl::ScheduleTask(const base::Closure& task) {
   TRACE_EVENT0("script", "SchedulerImpl::ScheduleTask");
   DCHECK(script_message_loop_->task_runner());
   normal_task_queue_->GiveTask(task);
-  idle_task_queue_->StopIdleTasks();
-  if (state_.load() == State::Running)
-    return;
-  script_message_loop_->task_runner()->PostTask(
-      FROM_HERE,
-      base::Bind(&SchedulerImpl::ProcessTasks, base::Unretained(this)));
 }
 
 }  // namespace dom

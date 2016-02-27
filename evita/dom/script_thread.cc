@@ -56,15 +56,10 @@ domapi::ViewEventHandler* ScriptThread::view_event_handler() const {
   return ScriptHost::instance()->event_handler();
 }
 
-void ScriptThread::BeginAnimationFrame(const base::TimeTicks& time) {
-  DCHECK_CALLED_ON_SCRIPT_THREAD();
-  animation_frame_request_count_ = 0;
-  scheduler_->DidBeginAnimationFrame(time);
-}
-
 void ScriptThread::ScheduleScriptTask(const base::Closure& task) {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   scheduler()->ScheduleTask(task);
+  RequestAnimationFrame();
 }
 
 void ScriptThread::Start() {
@@ -137,6 +132,8 @@ void ScriptThread::Ping(std::atomic<bool>* cookie) {
   }
 
 void ScriptThread::DidBeginFrame(const base::TimeTicks& deadline) {
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
+  animation_frame_request_count_ = 0;
   scheduler()->DidBeginFrame(deadline);
 }
 
@@ -154,10 +151,12 @@ DEFINE_VIEW_EVENT_HANDLER1(DidDestroyWindow, domapi::WindowId)
 DEFINE_VIEW_EVENT_HANDLER2(DidDropWidget, domapi::WindowId, domapi::WindowId)
 
 void ScriptThread::DidEnterViewIdle(const base::TimeTicks& deadline) {
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   scheduler()->DidEnterViewIdle(deadline);
 }
 
 void ScriptThread::DidExitViewIdle() {
+  DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
   scheduler()->DidExitViewIdle();
 }
 
@@ -224,8 +223,7 @@ const char* ScriptThread::GetAnimationFrameType() const {
 
 void ScriptThread::DidBeginAnimationFrame(const base::TimeTicks& time) {
   DCHECK_CALLED_ON_NON_SCRIPT_THREAD();
-  ScheduleScriptTask(base::Bind(&ScriptThread::BeginAnimationFrame,
-                                base::Unretained(this), time));
+  // nothing to do
 }
 
 }  // namespace dom

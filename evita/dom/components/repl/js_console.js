@@ -30,9 +30,6 @@ $define(global, 'repl', function($export) {
   /** @const @type {!Map.<string, !Object>} */
   const keyBindings = new Map();
 
-  /** @type {JsConsole} */
-  let staticInstance = null;
-
   /**
    * @param {*} reason
    * @return {string}
@@ -110,10 +107,7 @@ $define(global, 'repl', function($export) {
   // JsConsole
   //
   class JsConsole {
-    /** @param {!TextDocument} document */
-    constructor(document) {
-      /** @type {!TextDocument} */
-      this.document_ = document;
+    constructor() {
       // TODO(eval1749): We should annotate |history_| with |History| once
       // Closure compiler recognize class |History|.
       /** @const $type {!History} */
@@ -123,14 +117,10 @@ $define(global, 'repl', function($export) {
       /** @const @type {!RepeatingTimer} */
       this.promiseTimer_ = new RepeatingTimer();
       /** @const @type {!TextRange} */
-      this.range_ = new TextRange(document);
+      this.range_ = new TextRange(this.document);
       /** @const @type {!Array} */
       this.results_ = [];
-
-      for (const[key, command] of keyBindings.entries())
-        document.bindKey(key, command);
-
-      staticInstance = this;
+      this.installKeyBindings();
     }
 
     backwardHistory() {
@@ -145,8 +135,8 @@ $define(global, 'repl', function($export) {
       console.freshLine();
       console.emit('js:' + this.lineNumber_ + '> ');
       // Off by one to keep |this.range_.start| before user input.
-      this.range_.collapseTo(this.document_.length - 1);
-      this.document_.readonly = false;
+      this.range_.collapseTo(this.document.length - 1);
+      this.document.readonly = false;
     }
 
     evalLastLine() {
@@ -201,11 +191,11 @@ $define(global, 'repl', function($export) {
     }
 
     /** @return {!TextDocument} */
-    get document() { return this.document_; }
+    get document() { return console.document; }
 
     /** @return {string} */
     get lastLine() {
-      return this.document_.slice(this.lastLineStart, this.document_.length);
+      return this.document.slice(this.lastLineStart, this.document.length);
     }
 
     /** @param {string} string */
@@ -216,6 +206,9 @@ $define(global, 'repl', function($export) {
 
     /** @return {number} */
     get lastLineStart() { return this.range_.start + 1; }
+
+    /** @return {number} */
+    get lineNumber() { return this.lineNumber_; }
 
     /** @return {!TextRange} */
     get range() { return this.range_; }
@@ -248,6 +241,12 @@ $define(global, 'repl', function($export) {
           });
     }
 
+    /** @private */
+    installKeyBindings() {
+      for (const[key, command] of keyBindings.entries())
+        this.document.bindKey(key, command);
+    }
+
     /** @param {*} result */
     rememberResult_(result) {
       $2 = $1;
@@ -258,26 +257,27 @@ $define(global, 'repl', function($export) {
       this.results_.push($0);
     }
 
+    useHistory() { this.lastLine = this.history_.current; }
+
     /**
      * @param {string} keyCombination
      * @param {!Object} command
      */
     static bindKey(keyCombination, command) {
-      if (!staticInstance) {
-        keyBindings.set(keyCombination, command);
-        return;
-      }
-      staticInstance.document.bindKey(keyCombination, command);
+      keyBindings.set(keyCombination, command);
+      console.document.bindKey(keyCombination, command);
     }
 
     /** @return {!JsConsole} */
     static get instance() {
-      if (!staticInstance)
-        throw new Error('JsConsole is not initialized.');
-      return staticInstance;
+      const document = console.document;
+      const present = document.properties.get(JsConsole.name) || null;
+      if (present)
+        return /** @type {!JsConsole} */(present);
+      const newInstance = new JsConsole();
+      document.properties.set(JsConsole.name, newInstance);
+      return newInstance;
     }
-
-    useHistory() { this.lastLine = this.history_.current; }
   }
 
   /**

@@ -4,9 +4,8 @@
 
 /**
  * @constructor
- * @param {!TextDocument} document
  */
-repl.JsConsole = function(document) {};
+repl.JsConsole = function() {};
 
 /**
  * @param {string} keyCombination
@@ -37,6 +36,9 @@ repl.JsConsole.prototype.lastLine;
 
 /** @type {number} */
 repl.JsConsole.prototype.lastLineStart;
+
+/** @type {number} */
+repl.JsConsole.prototype.lineNumber;
 
 /** @type {function()} */
 repl.JsConsole.prototype.useHistory;

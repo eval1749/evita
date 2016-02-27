@@ -33,40 +33,21 @@
     this.selection.endOf(Unit.DOCUMENT);
   });
 
-  class Observer extends SimpleTextDocumentSetObserver {
-    constructor() { super(); }
-
-    /** @param {!TextDocument} document */
-    didAddTextDocument(document) {
-      if (document.name != repl.Console.DOCUMENT_NAME)
-        return;
-      /** @type {!repl.JsConsole} */
-      const commandLoop = new repl.JsConsole(document);
-      document.properties.set(repl.JsConsole.name, commandLoop);
-      $0 = commandLoop;
-    }
-  }
-
-  // Install JsConsole specific commands when "*javascript*" document is
-  // created.
-  TextDocument.addObserver(new Observer());
-
   /**
    * Switch to JavaScript command.
    * @this {Window}
    */
   function switchToJsConsoleCommand() {
     const document = console.document;
-    const isFirstTime = document.listWindows().length === 0;
     const window = windows.activate(this, document);
-    if (!isFirstTime)
-      return;
     const commandLoop = JsConsole.instance;
-    console.freshLine();
-    console.emit(
-        `\x2F/ JavaScript Console ${Editor.version},` +
-        ` v8:${Editor.v8Version}\n\n`);
-    commandLoop.emitPrompt();
+    if (commandLoop.lineNumber === 0) {
+      console.freshLine();
+      console.emit(
+          `\x2F/ JavaScript Console ${Editor.version},` +
+          ` v8:${Editor.v8Version}\n\n`);
+      commandLoop.emitPrompt();
+    }
     window.selection.endOf(Unit.DOCUMENT);
   }
 

@@ -5,6 +5,7 @@
 #include "evita/visuals/view/view.h"
 
 #include "base/strings/stringprintf.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/layout/box_finder.h"
@@ -65,18 +66,21 @@ void View::AddObserver(ViewObserver* observer) const {
 }
 
 FloatQuad View::ComputeBorderBoxQuad(const Node& node) {
+  TRACE_EVENT0("visuals", "View::ComputeBorderBoxQuad");
+  UpdateLayoutIfNeeded();
   const auto box = box_tree_->BoxFor(node);
   return box ? FloatQuad(box->bounds()) : FloatQuad();
 }
 
 HitTestResult View::HitTest(const FloatPoint& point) {
+  TRACE_EVENT0("visuals", "View::HitTest");
   UpdateLayoutIfNeeded();
   const auto root_box = box_tree_->root_box();
   return BoxFinder(*root_box).FindByPoint(point);
 }
 
 std::unique_ptr<DisplayItemList> View::Paint() {
-  UpdateStyleIfNeeded();
+  TRACE_EVENT0("visuals", "View::Paint");
   UpdateLayoutIfNeeded();
 
   const auto root_box = box_tree_->root_box();
@@ -109,12 +113,14 @@ void View::Start() {
 }
 
 void View::UpdateLayoutIfNeeded() {
+  TRACE_EVENT0("visuals", "View::UpdateLayoutIfNeeded");
   UpdateStyleIfNeeded();
   box_tree_->UpdateIfNeeded();
   Layouter().Layout(box_tree_->root_box());
 }
 
 void View::UpdateStyleIfNeeded() {
+  TRACE_EVENT0("visuals", "View::UpdateStyleIfNeeded");
   style_tree_->UpdateIfNeeded();
 }
 

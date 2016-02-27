@@ -10,6 +10,7 @@
 #include "evita/visuals/style/style_tree.h"
 
 #include "base/observer_list.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/properties.h"
@@ -488,6 +489,7 @@ void StyleTree::UpdateIfNeeded() {
     DCHECK(!impl_->is_dirty());
     return;
   }
+  TRACE_EVENT0("visuals", "StyleTree::UpdateIfNeeded");
   ViewLifecycle::Scope scope(lifecycle(), ViewLifecycle::State::InStyleRecalc);
   impl_->UpdateIfNeeded();
 }

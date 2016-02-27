@@ -55,7 +55,8 @@ void VisualWindow::CancelAnimationFrame() {
 void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
   if (!visible())
     return;
-  TRACE_EVENT0("script", "VisualWindow::DidBeginAnimationFrame");
+  TRACE_EVENT_WITH_FLOW0("visuals", "VisualWindow::DidBeginAnimationFrame",
+                         window_id(), TRACE_EVENT_FLAG_FLOW_OUT);
   DCHECK_NE(animation_request_id_, 0);
   animation_request_id_ = 0;
   auto display_item_list = view_->Paint();

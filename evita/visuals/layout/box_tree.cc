@@ -9,6 +9,7 @@
 #include "evita/visuals/layout/box_tree.h"
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/visuals/css/media.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/dom/descendants_or_self.h"
@@ -393,6 +394,7 @@ void BoxTree::UpdateIfNeeded() {
     DCHECK(impl_->IsClean());
     return;
   }
+  TRACE_EVENT0("visuals", "BoxTree::UpdateIfNeeded");
   ViewLifecycle::Scope scope(lifecycle(), ViewLifecycle::State::InTreeRebuild);
   impl_->UpdateIfNeeded();
   UpdateSelectionIfNeeded();

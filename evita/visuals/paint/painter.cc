@@ -8,6 +8,7 @@
 #include "evita/visuals/paint/painter.h"
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/public/display_items.h"
@@ -372,6 +373,7 @@ Painter::~Painter() {}
 
 std::unique_ptr<DisplayItemList> Painter::Paint(const PaintInfo& paint_info,
                                                 const RootBox& root_box) {
+  TRACE_EVENT0("visuals", "Painter::Paint");
   ViewLifecycle::Scope scope(root_box.lifecycle(),
                              ViewLifecycle::State::InPaint);
   return PaintVisitor(paint_info).Paint(root_box);

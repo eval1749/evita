@@ -8,6 +8,7 @@
 #include "evita/visuals/layout/layouter.h"
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_editor.h"
@@ -163,6 +164,7 @@ Layouter::~Layouter() {}
 void Layouter::Layout(RootBox* root_box) {
   if (root_box->IsLayoutClean())
     return;
+  TRACE_EVENT0("visuals", "Layouter::Layout");
   ViewLifecycle::Scope scope(root_box->lifecycle(),
                              ViewLifecycle::State::InLayout);
   DCHECK(!root_box->bounds().size().IsEmpty());

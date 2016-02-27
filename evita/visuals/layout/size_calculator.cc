@@ -7,6 +7,7 @@
 #include "evita/visuals/layout/size_calculator.h"
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/imaging/image_bitmap.h"
@@ -145,6 +146,7 @@ void IntrinsicSizeVisitor::ReturnSize(const FloatSize& size) {
 
 FloatSize IntrinsicSizeVisitor::SizeOfHorizontalFlowBox(
     const FlowBox& flow_box) {
+  TRACE_EVENT0("visuals", "IntrinsicSizeVisitor::SizeOfHorizontalFlowBox");
   DCHECK(flow_box.first_child()) << flow_box;
   auto size = FloatSize();
   for (const auto& child : flow_box.child_boxes()) {
@@ -161,6 +163,7 @@ FloatSize IntrinsicSizeVisitor::SizeOfHorizontalFlowBox(
 }
 
 FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(const FlowBox& flow_box) {
+  TRACE_EVENT0("visuals", "IntrinsicSizeVisitor::SizeOfVerticalFlowBox");
   DCHECK(flow_box.first_child()) << flow_box;
   auto size = FloatSize();
   for (const auto& child : flow_box.child_boxes()) {
@@ -202,7 +205,7 @@ void IntrinsicSizeVisitor::VisitShapeBox(ShapeBox* box) {
 void IntrinsicSizeVisitor::VisitTextBox(TextBox* box) {
   if (box->data().empty())
     return ReturnSize(FloatSize());
-
+  TRACE_EVENT0("visuals", "IntrinsicSizeVisitor::VisitTextBox");
   const auto& text_format = BoxEditor().EnsureTextFormat(box);
   ReturnSize(text_format.ComputeMetrics(box->data()));
 }

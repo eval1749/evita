@@ -55,6 +55,8 @@ void VisualWindow::CancelAnimationFrame() {
 }
 
 void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
+  if (!visible())
+    return;
   TRACE_EVENT0("script", "VisualWindow::DidBeginAnimationFrame");
   DCHECK_NE(animation_request_id_, 0);
   animation_request_id_ = 0;
@@ -66,7 +68,7 @@ void VisualWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
 }
 
 void VisualWindow::RequestAnimationFrame() {
-  if (viewport_size_.IsEmpty())
+  if (!visible() || viewport_size_.IsEmpty())
     return;
   if (animation_request_id_)
     return;
@@ -136,6 +138,7 @@ void VisualWindow::DidDestroyWindow() {
 }
 
 void VisualWindow::DidShowWindow() {
+  Window::DidShowWindow();
   view_->ScheduleForcePaint();
   RequestAnimationFrame();
 }

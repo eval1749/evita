@@ -8,6 +8,7 @@
 #include "evita/layout/paint_view_builder.h"
 
 #include "base/logging.h"
+#include "base/trace_event/trace_event.h"
 #include "evita/gfx/font.h"
 #include "evita/layout/block_flow.h"
 #include "evita/layout/line/inline_box.h"
@@ -154,6 +155,7 @@ gfx::RectF ComputeRulerBounds(const BlockFlow& block) {
 }
 
 paint::RootInlineBox* CreatePaintRootInlineBox(const RootInlineBox& line) {
+  TRACE_EVENT0("view", "CreatePaintRootInlineBox");
   std::vector<paint::InlineBox*> boxes;
   boxes.reserve(line.boxes().size());
   PaintInlineBoxBuilder builder(line.height(), line.descent());
@@ -175,6 +177,7 @@ scoped_refptr<paint::View> PaintViewBuilder::Build(
     const BlockFlow& block,
     const TextSelectionModel& selection_model,
     const CaretDisplayItem& caret) {
+  TRACE_EVENT0("view", "PaintViewBuilder::Build");
   // TODO(eval1749): We should recompute default style when style is changed,
   // rather than every |Format| call.
   const auto& bgcolor =

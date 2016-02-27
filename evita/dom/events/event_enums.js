@@ -31,6 +31,7 @@ Event.Names = {
   MOUSEUP: 'mouseup',
   QUERYCLOSE: 'queryclose',
   REALIZE: 'realize',
+  REMOVE: 'remove',
   SAVE: 'save',
   SELECTIONCHANGE: 'selectionchange',
   SHOW: 'show',

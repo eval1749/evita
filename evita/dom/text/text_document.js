@@ -542,6 +542,7 @@
     if (!documentNameMap.has(document.name))
       throw new Error(`${document.name} isn't in list`);
     documentNameMap.delete(document.name);
+    document.dispatchEvent(new Event('remove'));
     for (const observer of documentSetObservers)
       observer.didRemoveTextDocument(document);
   }

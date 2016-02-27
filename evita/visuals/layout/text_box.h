@@ -32,6 +32,7 @@ class TextBox final : public ContentBox {
   const FloatColor& color() const { return color_; }
   const base::string16& data() const { return data_; }
   bool has_text_layout() const { return !!text_layout_; }
+  FloatSize preferred_size() const { return preferred_size_; }
   const TextFormat& text_format() const;
   const TextLayout& text_layout() const;
 
@@ -49,6 +50,8 @@ class TextBox final : public ContentBox {
   css::FontStretch font_stretch_;
   css::FontStyle font_style_;
   css::FontWeight font_weight_;
+
+  FloatSize preferred_size_;
 
   // |BoxEditor::EnsureTextFormat()| will set/reset |font_description_| whenever
   // one of font related CSS properties changed.

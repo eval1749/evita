@@ -189,6 +189,7 @@ const TextFormat& BoxEditor::EnsureTextFormat(TextBox* box) {
     return text_format;
   box->text_format_ = &text_format;
   box->text_layout_.reset();
+  box->preferred_size_ = FloatSize();
   return text_format;
 }
 
@@ -394,6 +395,10 @@ void BoxEditor::SetImageStyle(ImageBox* box, const css::Style& new_style) {
     return;
   box->is_content_changed_ = true;
   MarkDirty(box);
+}
+
+void BoxEditor::SetPreferredSize(TextBox* box, const FloatSize& size) {
+  box->preferred_size_ = size;
 }
 
 void BoxEditor::SetShapeData(ShapeBox* shape_box, const ShapeData& data) {

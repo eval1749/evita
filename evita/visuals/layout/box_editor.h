@@ -64,6 +64,7 @@ class BoxEditor final {
   void AllocateTextLayout(TextBox* box);
   const TextFormat& EnsureTextFormat(TextBox* box);
   void SetBaseline(TextBox* box, float new_baseline);
+  void SetPreferredSize(TextBox* box, const FloatSize& size);
   void SetTextData(TextBox* box, base::StringPiece16 data);
 
   // RootBox

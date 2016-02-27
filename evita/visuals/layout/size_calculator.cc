@@ -205,9 +205,14 @@ void IntrinsicSizeVisitor::VisitShapeBox(ShapeBox* box) {
 void IntrinsicSizeVisitor::VisitTextBox(TextBox* box) {
   if (box->data().empty())
     return ReturnSize(FloatSize());
+  const auto& cached_size = box->preferred_size();
+  if (!cached_size.IsEmpty())
+    return ReturnSize(cached_size);
   TRACE_EVENT0("visuals", "IntrinsicSizeVisitor::VisitTextBox");
   const auto& text_format = BoxEditor().EnsureTextFormat(box);
-  ReturnSize(text_format.ComputeMetrics(box->data()));
+  const auto& size = text_format.ComputeMetrics(box->data());
+  BoxEditor().SetPreferredSize(box, size);
+  ReturnSize(size);
 }
 
 //////////////////////////////////////////////////////////////////////

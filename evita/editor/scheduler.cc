@@ -73,8 +73,6 @@ Scheduler::Scheduler(domapi::ViewEventHandler* script_delegate)
       script_delegate_(script_delegate),
       state_(State::Sleeping),
       state_sequence_num_(1) {
-  TRACE_EVENT_ASYNC_BEGIN1("view", "ViewState", state_sequence_num_, "state",
-                           StateNameOf(state_));
   ui::AnimationScheduler::GetInstance()->SetScheduler(this);
 }
 
@@ -124,11 +122,8 @@ void Scheduler::CancelAnimationFrameRequest(
 void Scheduler::ChangeState(State new_state) {
   DCHECK_NE(state_, new_state);
   lock_->AssertAcquired();
-  TRACE_EVENT_ASYNC_END0("view", "ViewState", state_sequence_num_);
   state_ = new_state;
   ++state_sequence_num_;
-  TRACE_EVENT_ASYNC_BEGIN1("view", "ViewState", state_sequence_num_, "state",
-                           StateNameOf(state_));
 }
 
 void Scheduler::CommitFrame() {

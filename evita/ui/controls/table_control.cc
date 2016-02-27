@@ -169,7 +169,7 @@ void CanvasWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
     DidChangeCanvas();
   }
 
-  if (!canvas_->IsReady())
+  if (!canvas_->UpdateReadyState())
     return RequestAnimationFrame();
 
   gfx::Canvas::DrawingScope drawing_scope(canvas_.get());

@@ -108,12 +108,12 @@ class Canvas final : public DpiHandler {
   gfx::RectF GetLocalBounds() const;
   common::ComPtr<ID2D1Factory> GetD2D1Factory() const;
   ID2D1RenderTarget* GetRenderTarget() const;
-  bool IsReady() const;
   void RemoveObserver(CanvasObserver* observer);
   void RestoreScreenImage(const RectF& bounds);
   bool Canvas::SaveScreenImage(const RectF& bounds);
   void SetBounds(const RectF& bounds);
   void SetOffsetBounds(const gfx::RectF& bounds);
+  bool UpdateReadyState() const;
 
   // [T]
   bool TryAddDirtyRect(const gfx::RectF& bounds);

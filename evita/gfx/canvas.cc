@@ -243,10 +243,6 @@ ID2D1RenderTarget* Canvas::GetRenderTarget() const {
   return swap_chain_->d2d_device_context();
 }
 
-bool Canvas::IsReady() const {
-  return swap_chain_->IsReady();
-}
-
 void Canvas::RemoveObserver(CanvasObserver* observer) {
   observers_.RemoveObserver(observer);
 }
@@ -308,6 +304,10 @@ bool Canvas::TryAddDirtyRect(const gfx::RectF& bounds) {
     return false;
   AddDirtyRect(dirty_bounds);
   return true;
+}
+
+bool Canvas::UpdateReadyState() const {
+  return swap_chain_->UpdateReadyState();
 }
 
 }  // namespace gfx

@@ -24,7 +24,7 @@ VisualWindow::VisualWindow(WindowId window_id)
 VisualWindow::~VisualWindow() {}
 
 void VisualWindow::Paint(std::unique_ptr<DisplayItemList> display_item_list) {
-  if (!visible() || !canvas()->IsReady())
+  if (!visible() || !canvas()->UpdateReadyState())
     return;
   TRACE_EVENT_WITH_FLOW0("visuals", "VisualWindow::Paint", window_id(),
                          TRACE_EVENT_FLAG_FLOW_IN);

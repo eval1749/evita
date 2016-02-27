@@ -82,7 +82,7 @@ bool PaintThreadCanvasOwner::Impl::EnsureCanvas() {
     canvas_.reset(layer()->CreateCanvas());
   else if (canvas_->GetLocalBounds() != window_->GetContentsBounds())
     canvas_->SetBounds(window_->GetContentsBounds());
-  return canvas_->IsReady();
+  return canvas_->UpdateReadyState();
 }
 
 void PaintThreadCanvasOwner::Impl::RequestAnimationFrame() {

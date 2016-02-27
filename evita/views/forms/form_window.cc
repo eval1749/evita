@@ -59,7 +59,7 @@ void FormWindow::Paint(std::unique_ptr<domapi::Form> form) {
     ::SetWindowTextW(AssociatedHwnd(), title_.c_str());
   }
 
-  if (!visible() || !canvas_->IsReady())
+  if (!visible() || !canvas_->UpdateReadyState())
     return;
 
   FormPaintInfo paint_info(canvas_.get(), GetContentsBounds(),

@@ -141,22 +141,6 @@ void SwapChain::DidChangeBounds(const RectF& new_bounds) {
   UpdateDeviceContext();
 }
 
-bool SwapChain::IsReady() const {
-  if (is_ready_)
-    return true;
-  auto const wait = ::WaitForSingleObject(swap_chain_waitable_, 0);
-  switch (wait) {
-    case WAIT_OBJECT_0:
-      is_ready_ = true;
-      return true;
-    case WAIT_TIMEOUT:
-      return false;
-    default:
-      NOTREACHED();
-  }
-  return false;
-}
-
 void SwapChain::Present() {
   if (dirty_rects_.empty())
     return;
@@ -219,6 +203,22 @@ void SwapChain::UpdateDeviceContext() {
 
   d2d_device_context_->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
   is_first_present_ = true;
+}
+
+bool SwapChain::UpdateReadyState() const {
+  if (is_ready_)
+    return true;
+  auto const wait = ::WaitForSingleObject(swap_chain_waitable_, 0);
+  switch (wait) {
+    case WAIT_OBJECT_0:
+      is_ready_ = true;
+      return true;
+    case WAIT_TIMEOUT:
+      return false;
+    default:
+      NOTREACHED();
+  }
+  return false;
 }
 
 }  // namespace gfx

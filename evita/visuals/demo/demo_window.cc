@@ -4,8 +4,8 @@
 
 #include "evita/visuals/demo/demo_window.h"
 
-#include "base/time/time.h"
 #include "base/message_loop/message_loop.h"
+#include "base/time/time.h"
 #include "build/build_config.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
@@ -39,7 +39,7 @@ DemoWindow::~DemoWindow() {
 }
 
 gfx::Canvas* DemoWindow::GetCanvas() const {
-  if (!canvas_->IsReady())
+  if (!canvas_->UpdateReadyState())
     return nullptr;
   return canvas_.get();
 }

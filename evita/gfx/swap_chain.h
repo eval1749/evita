@@ -34,8 +34,8 @@ class SwapChain final {
                                                          const RectF& bounds);
   static std::unique_ptr<SwapChain> CreateForHwnd(HWND hwnd);
   void DidChangeBounds(const RectF& new_bounds);
-  bool IsReady() const;
   void Present();
+  bool UpdateReadyState() const;
 
  private:
   SwapChain(ID2D1Device* d2d_device,

@@ -63,7 +63,7 @@ TextWindow::TextWindow(WindowId window_id)
 TextWindow::~TextWindow() {}
 
 void TextWindow::Paint(std::unique_ptr<TextAreaDisplayItem> display_item) {
-  if (!visible() || !canvas()->IsReady())
+  if (!visible() || !canvas()->UpdateReadyState())
     return;
   TRACE_EVENT_WITH_FLOW0("view", "TextWindow::Paint", window_id(),
                          TRACE_EVENT_FLAG_FLOW_IN);

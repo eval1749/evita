@@ -15,6 +15,7 @@ Event.Names = {
   COMPOSITIONSTART: 'compositionstart',
   COMPOSITIONUPDATE: 'compositionupdate',
   DBLCLICK: 'dblclick',
+  DESTROY: 'destroy',
   DETACH: 'detach',  // TextDocumentEvent
   DROPWINDOW: 'dropwindow',
   FOCUS: 'focus',
@@ -29,6 +30,7 @@ Event.Names = {
   MOUSEMOVE: 'mousemove',
   MOUSEUP: 'mouseup',
   QUERYCLOSE: 'queryclose',
+  REALIZE: 'realize',
   SAVE: 'save',
   SELECTIONCHANGE: 'selectionchange',
   SHOW: 'show',

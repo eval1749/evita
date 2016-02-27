@@ -150,6 +150,8 @@ void ViewEventHandlerImpl::DidDestroyWindow(domapi::WindowId window_id) {
   if (!window)
     return;
   window->DidDestroyWindow();
+  const auto event = new Event(L"destroy", EventInit());
+  DispatchEventWithInLock(window, event);
 }
 
 void ViewEventHandlerImpl::DidDropWidget(domapi::WindowId source_id,
@@ -181,6 +183,8 @@ void ViewEventHandlerImpl::DidRealizeWidget(domapi::WindowId window_id) {
   if (!window)
     return;
   window->DidRealizeWindow();
+  const auto event = new Event(L"realize", EventInit());
+  DispatchEventWithInLock(window, event);
 }
 
 void ViewEventHandlerImpl::DispatchFocusEvent(

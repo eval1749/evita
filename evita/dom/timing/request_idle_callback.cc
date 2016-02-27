@@ -28,7 +28,7 @@ class IdleTaskWrapper {
   IdleTaskWrapper(v8::Isolate* isolate, v8::Local<v8::Function> callback);
   ~IdleTaskWrapper() = default;
 
-  void Run();
+  void Run(const base::TimeTicks& deadline);
 
  private:
   ginx::ScopedPersistent<v8::Function> callback_;
@@ -41,13 +41,13 @@ IdleTaskWrapper::IdleTaskWrapper(v8::Isolate* isolate,
   callback_.Reset(isolate, callback);
 }
 
-void IdleTaskWrapper::Run() {
+void IdleTaskWrapper::Run(const base::TimeTicks& deadline) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   ginx::Runner::Scope runner_scope(runner);
   if (idle_deadline_object.IsEmpty()) {
-    idle_deadline_object.Set(isolate,
-                             gin::ConvertToV8(isolate, new IdleDeadline()));
+    idle_deadline_object.Set(
+        isolate, gin::ConvertToV8(isolate, new IdleDeadline(deadline)));
   }
   DOM_AUTO_LOCK_SCOPE();
   runner->CallAsFunction(callback_.NewLocal(isolate), v8::Undefined(isolate),

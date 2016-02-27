@@ -16,7 +16,6 @@
 #include "evita/dom/scheduler_client.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/animation_frame_callback.h"
-#include "evita/dom/timing/idle_deadline_provider.h"
 #include "evita/dom/timing/idle_task.h"
 
 namespace dom {
@@ -71,7 +70,7 @@ int SchedulerImpl::AnimationFrameCallbackQueue::Give(
 //
 // SchedulerImpl::IdleTaskQueue
 //
-class SchedulerImpl::IdleTaskQueue final : public IdleDeadlineProvider {
+class SchedulerImpl::IdleTaskQueue final {
  public:
   IdleTaskQueue() = default;
   ~IdleTaskQueue() = default;
@@ -83,11 +82,6 @@ class SchedulerImpl::IdleTaskQueue final : public IdleDeadlineProvider {
  private:
   void RemoveTask(IdleTask* task);
 
-  // dom::IdleDeadlineProvider
-  base::TimeDelta GetTimeRemaining() const final;
-  bool IsIdle() const final;
-
-  base::TimeTicks idle_deadline_;
   std::queue<IdleTask*> ready_tasks_;
   std::unordered_map<int, IdleTask*> task_map_;
   std::priority_queue<IdleTask*> waiting_tasks_;
@@ -102,10 +96,6 @@ void SchedulerImpl::IdleTaskQueue::CancelTask(int task_id) {
   it->second->Cancel();
 }
 
-base::TimeDelta SchedulerImpl::IdleTaskQueue::GetTimeRemaining() const {
-  return idle_deadline_ - base::TimeTicks::Now();
-}
-
 int SchedulerImpl::IdleTaskQueue::GiveTask(const IdleTask& task_in) {
   auto const task = new IdleTask(task_in);
   task_map_.insert({task->id(), task});
@@ -114,10 +104,6 @@ int SchedulerImpl::IdleTaskQueue::GiveTask(const IdleTask& task_in) {
   else
     ready_tasks_.push(task);
   return task->id();
-}
-
-bool SchedulerImpl::IdleTaskQueue::IsIdle() const {
-  return idle_deadline_ > base::TimeTicks::Now();
 }
 
 void SchedulerImpl::IdleTaskQueue::RemoveTask(IdleTask* task) {
@@ -129,9 +115,7 @@ void SchedulerImpl::IdleTaskQueue::RemoveTask(IdleTask* task) {
 
 void SchedulerImpl::IdleTaskQueue::RunIdleTasks(
     const base::TimeTicks& deadline) {
-  idle_deadline_ = deadline;
-
-  auto const now = base::TimeTicks::Now();
+  const auto& now = base::TimeTicks::Now();
   while (!waiting_tasks_.empty() &&
          waiting_tasks_.top()->delayed_run_time <= now) {
     ready_tasks_.push(waiting_tasks_.top());
@@ -140,12 +124,12 @@ void SchedulerImpl::IdleTaskQueue::RunIdleTasks(
 
   // Run runnable tasks before this loop.
   for (auto count = ready_tasks_.size(); count > 0; --count) {
-    if (!IsIdle())
+    if (deadline <= base::TimeTicks::Now())
       break;
     auto const task = ready_tasks_.front();
     ready_tasks_.pop();
     if (!task->IsCanceled())
-      task->Run();
+      task->Run(deadline);
     RemoveTask(task);
   }
 }
@@ -248,7 +232,7 @@ void SchedulerImpl::Start(base::MessageLoop* script_message_loop) {
   script_message_loop_ = script_message_loop;
 }
 
-// base::TimeTicks
+// base::TickClock
 base::TimeTicks SchedulerImpl::NowTicks() {
   return base::TimeTicks::Now();
 }
@@ -268,10 +252,6 @@ void SchedulerImpl::DidBeginFrame(const base::TimeTicks& deadline) {
   script_message_loop_->task_runner()->PostTask(
       FROM_HERE,
       base::Bind(&SchedulerImpl::BeginFrame, base::Unretained(this), deadline));
-}
-
-IdleDeadlineProvider* SchedulerImpl::GetIdleDeadlineProvider() {
-  return idle_task_queue_.get();
 }
 
 int SchedulerImpl::RequestAnimationFrame(

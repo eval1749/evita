@@ -37,14 +37,13 @@ class SchedulerImpl final : public Scheduler {
   void BeginFrame(const base::TimeTicks& deadline);
   void ProcessTasks();
 
-  // base::TimeTicks
+  // base::TickClock
   base::TimeTicks NowTicks() final;
 
   // dom::Scheduler
   void CancelAnimationFrame(int request_id) final;
   void CancelIdleTask(int task_id) final;
   void DidBeginFrame(const base::TimeTicks& deadline) final;
-  IdleDeadlineProvider* GetIdleDeadlineProvider() final;
   int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> request) final;
   int ScheduleIdleTask(const IdleTask& task) final;

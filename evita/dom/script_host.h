@@ -14,6 +14,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/view_event_handler.h"
+#include "evita/dom/timing/idle_task.h"
 #include "evita/ginx/isolate_holder.h"
 #include "evita/ginx/runner_delegate.h"
 #include "evita/ginx/scoped_persistent.h"
@@ -81,7 +82,7 @@ class ScriptHost final : public ginx::RunnerDelegate {
   void RunMicrotasks();
 
   // Schedule idle task
-  void ScheduleIdleTask(const base::Closure& task);
+  void ScheduleIdleTask(const IdleTask::Callback& callback);
 
   static ScriptHost* StartForTesting(Scheduler* scheduler,
                                      domapi::ViewDelegate* view_delegate,

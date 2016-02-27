@@ -7,6 +7,8 @@
 
 #include "evita/ginx/scriptable.h"
 
+#include "base/time/time.h"
+
 namespace dom {
 
 namespace bindings {
@@ -24,7 +26,7 @@ class IdleDeadline final : public ginx::Scriptable<IdleDeadline> {
   DECLARE_SCRIPTABLE_OBJECT(IdleDeadline);
 
  public:
-  IdleDeadline();
+  explicit IdleDeadline(const base::TimeTicks& deadline);
   ~IdleDeadline() final;
 
  private:
@@ -35,6 +37,8 @@ class IdleDeadline final : public ginx::Scriptable<IdleDeadline> {
 
   // An implementation of IdleDeadline.timeRemaining() method
   double TimeRemaining() const;
+
+  base::TimeTicks deadline_;
 
   DISALLOW_COPY_AND_ASSIGN(IdleDeadline);
 };

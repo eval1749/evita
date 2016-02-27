@@ -10,6 +10,7 @@
 #include "evita/ginx/scriptable.h"
 
 namespace base {
+class TimeTicks;
 class Timer;
 }
 
@@ -41,7 +42,7 @@ class Timer : public ginx::Scriptable<Timer> {
   friend class bindings::TimerClass;
 
   void DidFireTimer();
-  void RunCallback();
+  void RunCallback(const base::TimeTicks& deadline);
   void Stop();
   void StartInternal(int delay_ms, v8::Local<v8::Function> callback);
 

@@ -45,7 +45,8 @@ class TextMutationObserverController::Tracker final
 
  private:
   base::WeakPtr<Tracker> GetWeakPtr();
-  static void NotifyObservers(base::WeakPtr<Tracker> tracker);
+  static void NotifyObservers(base::WeakPtr<Tracker> tracker,
+                              const base::TimeTicks& deadline);
   void ScheduleNotification();
 
   // text::BufferMutationObserver
@@ -78,7 +79,8 @@ TextMutationObserverController::Tracker::GetWeakPtr() {
 }
 
 void TextMutationObserverController::Tracker::NotifyObservers(
-    base::WeakPtr<Tracker> tracker) {
+    base::WeakPtr<Tracker> tracker,
+    const base::TimeTicks& deadline) {
   if (!tracker)
     return;
   tracker->is_schedule_notification_ = false;

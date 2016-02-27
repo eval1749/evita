@@ -12,32 +12,32 @@
 
 namespace dom {
 
-class IdleDeadlineProvider;
-
 //////////////////////////////////////////////////////////////////////
 //
 // IdleTask
 //
 class IdleTask final : public base::TrackingInfo {
  public:
+  using Callback = base::Callback<void(const base::TimeTicks&)>;
+
   IdleTask(const tracked_objects::Location& posted_from,
-           const base::Closure& callback,
+           const Callback& callback,
            base::TimeTicks delayed_run_time);
   IdleTask(const tracked_objects::Location& posted_from,
-           const base::Closure& callback);
+           const Callback& callback);
   ~IdleTask();
 
-// Used to support sorting.
+  // Used to support sorting.
   bool operator<(const IdleTask& other) const;
 
   int id() const { return sequence_num_; }
 
   void Cancel() { is_canceled_ = true; }
   bool IsCanceled() const { return is_canceled_; }
-  void Run();
+  void Run(const base::TimeTicks& deadline);
 
  private:
-  base::Closure callback_;
+  Callback callback_;
   int const sequence_num_;
   bool is_canceled_;
 };

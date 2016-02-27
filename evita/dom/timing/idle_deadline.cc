@@ -7,26 +7,21 @@
 #include "base/time/time.h"
 #include "evita/dom/scheduler.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/timing/idle_deadline_provider.h"
 
 namespace dom {
 
-IdleDeadline::IdleDeadline() {}
+IdleDeadline::IdleDeadline(const base::TimeTicks& deadline)
+    : deadline_(deadline) {}
+
 IdleDeadline::~IdleDeadline() {}
 
 bool IdleDeadline::did_timeout() const {
-  return !ScriptHost::instance()
-              ->scheduler()
-              ->GetIdleDeadlineProvider()
-              ->IsIdle();
+  return TimeRemaining() <= 0;
 }
 
 double IdleDeadline::TimeRemaining() const {
-  return ScriptHost::instance()
-      ->scheduler()
-      ->GetIdleDeadlineProvider()
-      ->GetTimeRemaining()
-      .InMillisecondsF();
+  const auto& now = ScriptHost::instance()->scheduler()->NowTicks();
+  return (deadline_ - now).InMillisecondsF();
 }
 
 }  // namespace dom

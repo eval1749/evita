@@ -31,33 +31,44 @@ TEST_F(RequestIdleCallbackTest, cancelIdleCallback) {
 
 TEST_F(RequestIdleCallbackTest, requestIdleCallback) {
   EXPECT_SCRIPT_VALID(
-      "var didTimeout = false, timeRemaining = 0;"
+      "var didRun = false, didTimeout = false, timeRemaining = 0;"
       "function callback(idleDeadline) {"
+      "  didRun = true;"
       "  didTimeout = idleDeadline.didTimeout;"
       "  timeRemaining = idleDeadline.timeRemaining();"
       "}"
       "Editor.requestIdleCallback(callback);");
-  mock_scheduler()->SetIdleDeadline(true,
-                                    base::TimeDelta::FromMilliseconds(123));
+  mock_scheduler()->SetIdleTimeRemaining(123);
   RunMessageLoopUntilIdle();
-  EXPECT_SCRIPT_TRUE("didTimeout");
+  EXPECT_SCRIPT_TRUE("didRun");
+  EXPECT_SCRIPT_FALSE("didTimeout");
   EXPECT_SCRIPT_EQ("123", "timeRemaining");
-  EXPECT_SCRIPT_VALID("didTimeout = false;");
+
+  EXPECT_SCRIPT_VALID("didRun = false;");
   RunMessageLoopUntilIdle();
-  EXPECT_SCRIPT_FALSE("didTimeout") << "callback is still in queue.";
+  EXPECT_SCRIPT_FALSE("didRun") << "callback should not be in queue.";
 }
 
 TEST_F(RequestIdleCallbackTest, requestIdleCallbackTimeout) {
   EXPECT_SCRIPT_VALID(
-      "var didRun = false;"
-      "function callback(idleDeadline) { didRun = true; }"
+      "var didRun = false, didTimeout = false, timeRemaining = 0;"
+      "function callback(idleDeadline) {"
+      "  didRun = true;"
+      "  didTimeout = idleDeadline.didTimeout;"
+      "  timeRemaining = idleDeadline.timeRemaining();"
+      "}"
       "Editor.requestIdleCallback(callback, {timeout: 123});");
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_FALSE("didRun");
-  mock_scheduler()->SetNowTicks(base::TimeTicks() +
-                                base::TimeDelta::FromMilliseconds(124));
+  mock_scheduler()->SetNowTicks(124);
   RunMessageLoopUntilIdle();
   EXPECT_SCRIPT_TRUE("didRun");
+  EXPECT_SCRIPT_TRUE("didTimeout");
+  EXPECT_SCRIPT_EQ("-1", "timeRemaining");
+
+  EXPECT_SCRIPT_VALID("didRun = false;");
+  RunMessageLoopUntilIdle();
+  EXPECT_SCRIPT_FALSE("didRun") << "callback should not be in queue.";
 }
 
 }  // namespace dom

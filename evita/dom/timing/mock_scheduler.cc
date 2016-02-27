@@ -7,12 +7,11 @@
 #include "evita/dom/timing/mock_scheduler.h"
 
 #include "evita/dom/timing/animation_frame_callback.h"
-#include "evita/dom/timing/idle_deadline_provider.h"
 #include "evita/dom/timing/idle_task.h"
 
 namespace dom {
 
-MockScheduler::MockScheduler() : did_timeout_(false) {}
+MockScheduler::MockScheduler() {}
 MockScheduler::~MockScheduler() {}
 
 void MockScheduler::RunPendingTasks() {
@@ -39,20 +38,23 @@ void MockScheduler::RunPendingTasks() {
     waiting_idle_tasks_.pop();
   }
 
+  const auto& deadline = now + idle_time_remaining_;
   while (!ready_idle_tasks_.empty()) {
     auto const idle_task = ready_idle_tasks_.front();
     ready_idle_tasks_.pop();
     if (!idle_task->IsCanceled())
-      idle_task->Run();
+      idle_task->Run(deadline);
     idle_task_map_.erase(idle_task_map_.find(idle_task->id()));
     delete idle_task;
   }
 }
 
-void MockScheduler::SetIdleDeadline(bool did_timeout,
-                                    base::TimeDelta time_remaining) {
-  did_timeout_ = did_timeout;
-  time_remaining_ = time_remaining;
+void MockScheduler::SetIdleTimeRemaining(int milliseconds) {
+  idle_time_remaining_ = base::TimeDelta::FromMilliseconds(milliseconds);
+}
+
+void MockScheduler::SetNowTicks(int milliseconds) {
+  now_ticks_ += base::TimeDelta::FromMilliseconds(milliseconds);
 }
 
 // base::TickClock

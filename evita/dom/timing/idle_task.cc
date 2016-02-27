@@ -11,7 +11,7 @@ namespace dom {
 static int current_sequence_num;
 
 IdleTask::IdleTask(const tracked_objects::Location& posted_from,
-                   const base::Closure& callback,
+                   const Callback& callback,
                    base::TimeTicks delay_run_time)
     : base::TrackingInfo(posted_from, delay_run_time),
       callback_(callback),
@@ -19,11 +19,10 @@ IdleTask::IdleTask(const tracked_objects::Location& posted_from,
       sequence_num_(++current_sequence_num) {}
 
 IdleTask::IdleTask(const tracked_objects::Location& posted_from,
-                   const base::Closure& callback)
+                   const Callback& callback)
     : IdleTask(posted_from, callback, base::TimeTicks()) {}
 
 IdleTask::~IdleTask() {}
-
 
 bool IdleTask::operator<(const IdleTask& other) const {
   // Since the top of a priority queue is defined as the "greatest" element, we
@@ -41,8 +40,8 @@ bool IdleTask::operator<(const IdleTask& other) const {
   return (sequence_num_ - other.sequence_num_) > 0;
 }
 
-void IdleTask::Run() {
-  callback_.Run();
+void IdleTask::Run(const base::TimeTicks& deadline) {
+  callback_.Run(deadline);
 }
 
 }  // namespace dom

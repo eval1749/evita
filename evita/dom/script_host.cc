@@ -373,8 +373,8 @@ void ScriptHost::RunMicrotasks() {
   runner()->HandleTryCatch(try_catch);
 }
 
-void ScriptHost::ScheduleIdleTask(const base::Closure& task) {
-  scheduler_->ScheduleIdleTask(IdleTask(FROM_HERE, task));
+void ScriptHost::ScheduleIdleTask(const IdleTask::Callback& callback) {
+  scheduler_->ScheduleIdleTask(IdleTask(FROM_HERE, callback));
 }
 
 void ScriptHost::Start() {

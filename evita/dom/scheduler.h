@@ -24,7 +24,6 @@ class Scheduler : public base::TickClock {
   virtual void CancelAnimationFrame(int request_id) = 0;
   virtual void CancelIdleTask(int task_id) = 0;
   virtual void DidBeginFrame(const base::TimeTicks& deadline) = 0;
-  virtual IdleDeadlineProvider* GetIdleDeadlineProvider() = 0;
   virtual int RequestAnimationFrame(
       std::unique_ptr<AnimationFrameCallback> callback) = 0;
   virtual int ScheduleIdleTask(const IdleTask& task) = 0;

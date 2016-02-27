@@ -8,8 +8,6 @@ source_set("timing") {
     "animation_frame_callback.h",
     "idle_deadline.cc",
     "idle_deadline.h",
-    "idle_deadline_provider.cc",
-    "idle_deadline_provider.h",
     "idle_task.cc",
     "idle_task.h",
     "performance.cc",

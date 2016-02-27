@@ -71,7 +71,7 @@ void Timer::DidFireTimer() {
       base::Bind(&Timer::RunCallback, base::Unretained(this)));
 }
 
-void Timer::RunCallback() {
+void Timer::RunCallback(const base::TimeTicks& deadline) {
   auto const runner = ScriptHost::instance()->runner();
   auto const isolate = runner->isolate();
   ginx::Runner::Scope runner_scope(runner);

@@ -40,13 +40,8 @@ domapi::EventType ConvertEventType(const ui::KeyEvent& event) {
 
 domapi::EventType ConvertEventType(const ui::MouseEvent& event) {
   auto const event_type = event.type();
-  if (event_type == ui::EventType::MousePressed) {
-    if (!event.click_count())
-      return domapi::EventType::MouseDown;
-    if (event.click_count() == 1)
-      return domapi::EventType::Click;
-    return domapi::EventType::DblClick;
-  }
+  if (event_type == ui::EventType::MousePressed)
+    return domapi::EventType::MouseDown;
 
   if (event_type == ui::EventType::MouseReleased)
     return domapi::EventType::MouseUp;
@@ -132,11 +127,33 @@ void EventSource::DispatchKeyboardEvent(const ui::KeyEvent& event) {
   view_event_handler()->DispatchKeyboardEvent(api_event);
 }
 
+// Dispatch "click" and "dblclick" events in following sequence if needed as
+//  "W3C UI Event Specification":
+//  "mousedown"
+//  "mousemove" optional, multiple events, some limits
+//  "mouseup"
+//  "click"
+//  "mousemove" optional, multiple events, some limits
+//  "mousedown"
+//  "mousemove" optional, multiple events, some limits
+//  "mouseup"
+//  "click"
+//  "dblclick"
 void EventSource::DispatchMouseEvent(const ui::MouseEvent& event) {
   domapi::MouseEvent api_event;
   InitMouseEvent(&api_event, event);
   api_event.target_id = event_target_id_;
   view_event_handler()->DispatchMouseEvent(api_event);
+  if (event.type() != ui::EventType::MouseReleased)
+    return;
+  if (event.click_count() >= 1) {
+    api_event.event_type = domapi::EventType::Click;
+    view_event_handler()->DispatchMouseEvent(api_event);
+  }
+  if (event.click_count() >= 2) {
+    api_event.event_type = domapi::EventType::DblClick;
+    view_event_handler()->DispatchMouseEvent(api_event);
+  }
 }
 
 void EventSource::DispatchTextCompositionEvent(

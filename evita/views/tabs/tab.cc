@@ -394,7 +394,7 @@ void Tab::OnMousePressed(const ui::MouseEvent& event) {
 }
 
 void Tab::OnMouseReleased(const ui::MouseEvent& event) {
-  if (!event.is_left_button() || event.click_count())
+  if (!event.is_left_button() || event.click_count() != 1)
     return;
   // TODO(eval1749): stop tab dragging
   auto const result = HitTest(gfx::PointF(event.location()));

@@ -19,6 +19,7 @@
 #include "evita/ui/base/ime/text_input_client_win.h"
 #include "evita/ui/compositor/layer.h"
 #include "evita/ui/events/event.h"
+#include "evita/ui/events/event_editor.h"
 #include "evita/ui/events/mouse_click_tracker.h"
 #include "evita/ui/events/native_event_win.h"
 #include "evita/ui/root_widget.h"
@@ -373,27 +374,18 @@ bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
       DCHECK_EQ(event.type(), EventType::MouseMoved);
       return DispatchMouseEvent(result.widget(), &event);
     }
-    case EventType::MousePressed: {
+    case EventType::MousePressed:
       MouseClickTracker::GetInstance()->OnMousePressed(event);
+      EventEditor().SetClickCount(
+          &event, MouseClickTracker::GetInstance()->click_count());
       return DispatchMouseEvent(result.widget(), &event);
-    }
-    case EventType::MouseReleased: {
+    case EventType::MouseReleased:
       // TODO(eval1749): Should we dispatch |MouseReleased| event to focus
       // widget?
       MouseClickTracker::GetInstance()->OnMouseReleased(event);
-      if (!DispatchMouseEvent(result.widget(), &event))
-        return false;
-      auto const click_count = MouseClickTracker::GetInstance()->click_count();
-      if (!click_count)
-        return !event.default_prevented();
-      if (event.default_prevented())
-        return false;
-      MouseEvent click_event(
-          EventType::MousePressed, MouseEvent::ConvertToButton(native_event),
-          MouseEvent::ConvertToEventFlags(native_event), click_count,
-          result.widget(), result.local_point(), screen_point);
-      return DispatchMouseEvent(result.widget(), &click_event);
-    }
+      EventEditor().SetClickCount(
+          &event, MouseClickTracker::GetInstance()->click_count());
+      return DispatchMouseEvent(result.widget(), &event);
   }
   return true;
 }

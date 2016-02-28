@@ -40,6 +40,7 @@ CSS_ABSOLUTE_LENGTH_UNITS = frozenset([
 ])
 CSS_RESOLUTION_UNITS = frozenset(['dpcm', 'dppx'])
 
+
 class CssType(object):
 
     def __init__(self, text):
@@ -223,7 +224,8 @@ class Model(object):
         self._keywords = [
             {
                 'Name': capitalize(keyword),
-                'name': keyword,
+                'name': keyword.replace('-', '_'),
+                'text': keyword,
             }
             for keyword in sorted(keyword for keyword in keywords)
         ]

@@ -14,11 +14,10 @@ namespace css {
 //
 // Keyword
 //
-#define FOR_EACH_VALUE_CSS_KEYWORD(V) \
+#define FOR_EACH_VISUAL_CSS_KEYWORD_VALUE(V) \
 {% for keyword in keywords %}
-  V({{keyword.Name}}){% if not loop.last%}{{' \\'}}{% endif %}
+  V({{keyword.Name}}, {{keyword.name}}){% if not loop.last%}{{' \\\n'}}{% endif %}
 {% endfor %}
-};
 
 // CSS Value tuples having:
 //   CamelCase name

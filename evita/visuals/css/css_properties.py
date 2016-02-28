@@ -35,7 +35,7 @@ CSS_ABSOLUTE_LENGTH_UNITS = frozenset([
 CSS_ABSOLUTE_ANGLE_UNITS = frozenset(['deg', 'grad', 'rad', 'turn'])
 CSS_DURATION_UNITS = frozenset(['ms', 's'])
 CSS_FREQUENCY_UNITS = frozenset(['Hz', 'kHz'])
-CSS_ABSOLUTE_LENGTH_UNITS = frozenset([
+CSS_RELATIVE_LENGTH_UNITS = frozenset([
     'ch', 'em', 'ex', 'rem', 'vh', 'xmax', 'vmin', 'vw',
 ])
 CSS_RESOLUTION_UNITS = frozenset(['dpcm', 'dppx'])

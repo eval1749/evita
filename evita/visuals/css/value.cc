@@ -7,11 +7,8 @@
 #include "evita/visuals/css/value.h"
 
 #include "base/logging.h"
-#include "evita/visuals/css/color.h"
-#include "evita/visuals/css/dimension.h"
-#include "evita/visuals/css/percentage.h"
-#include "evita/visuals/css/unit.h"
 #include "evita/visuals/css/value_type.h"
+#include "evita/visuals/css/values.h"
 
 namespace visuals {
 namespace css {
@@ -141,6 +138,13 @@ bool Value::is_number() const {
 bool Value::is_percentage() const {
   return type_ == ValueType::Percentage;
 }
+
+#define V(Name, name)                                                        \
+  bool Value::is_##name() const {                                            \
+    return is_keyword() && static_cast<Keyword>(data_.u32) == Keyword::Name; \
+  }
+FOR_EACH_VISUAL_CSS_KEYWORD_VALUE(V)
+#undef V
 
 std::ostream& operator<<(std::ostream& ostream, const Value& value) {
   switch (value.type()) {

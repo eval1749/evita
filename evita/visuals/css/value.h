@@ -9,6 +9,8 @@
 
 #include <iosfwd>
 
+#include "evita/visuals/css/values_forward.h"
+
 namespace visuals {
 namespace css {
 
@@ -56,6 +58,11 @@ class Value final {
   bool is_number() const;
   bool is_percentage() const;
   ValueType type() const { return type_; }
+
+  // Predicates for keyword value, e.g. is_auto(), is_inherit(), is_none(), etc.
+#define V(Name, name) bool is_##name() const;
+  FOR_EACH_VISUAL_CSS_KEYWORD_VALUE(V)
+#undef V
 
  private:
   union {

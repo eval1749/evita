@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_CSS_FLOAT_COLOR_H_
 #define EVITA_VISUALS_CSS_FLOAT_COLOR_H_
 
+#include <stdint.h>
+
 #include <iosfwd>
 
 namespace visuals {
@@ -27,6 +29,8 @@ class FloatColor final {
   float blue() const { return blue_; }
   float green() const { return green_; }
   float red() const { return red_; }
+
+  uint32_t ToRgba() const;
 
  private:
   float alpha_ = 0;

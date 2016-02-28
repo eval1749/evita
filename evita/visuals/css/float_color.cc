@@ -41,6 +41,14 @@ bool FloatColor::operator!=(const FloatColor& other) const {
   return !operator==(other);
 }
 
+uint32_t FloatColor::ToRgba() const {
+  const auto red = static_cast<uint32_t>(red_ * 255);
+  const auto green = static_cast<uint32_t>(green_ * 255);
+  const auto blue = static_cast<uint32_t>(blue_ * 255);
+  const auto alpha = static_cast<uint32_t>(alpha_ * 255);
+  return (red << 24) | (green << 16) | (blue << 8) | alpha;
+}
+
 std::ostream& operator<<(std::ostream& ostream, const FloatColor& color) {
   ostream << "FloatColor(" << color.red() << ", " << color.green() << ", "
           << color.blue();

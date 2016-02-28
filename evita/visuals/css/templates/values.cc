@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <array>
+#include <iterator>
 #include <ostream>
 
 #include "evita/visuals/css/values.h"
@@ -111,6 +111,18 @@ std::ostream& operator<<(std::ostream& ostream,
 }
 
 {% endfor %}
+
+std::ostream& operator<<(std::ostream& ostream, Keyword keyword) {
+  const char* const texts[] = {
+{% for keyword in keywords %}
+  "{{keyword.name}}",
+{% endfor %}
+  };
+  const auto& it = std::begin(texts) + static_cast<size_t>(keyword);
+  if (it < std::begin(texts) || it >= std::end(texts))
+    return ostream << "???";
+  return ostream << *it;
+}
 
 }  // namespace css
 }  // namespace visuals

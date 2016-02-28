@@ -5,8 +5,20 @@
 #ifndef EVITA_VISUALS_CSS_VALUES_FORWARD_H_
 #define EVITA_VISUALS_CSS_VALUES_FORWARD_H_
 
+#include <iosfwd>
+
 namespace visuals {
 namespace css {
+
+//////////////////////////////////////////////////////////////////////
+//
+// Keyword
+//
+#define FOR_EACH_VALUE_CSS_KEYWORD(V) \
+{% for keyword in keywords %}
+  V({{keyword.Name}}){% if not loop.last%}{{' \\'}}{% endif %}
+{% endfor %}
+};
 
 // CSS Value tuples having:
 //   CamelCase name
@@ -25,7 +37,10 @@ namespace css {
 class {{type.Name}};
 {% endfor %}
 
+enum class Keyword;
 enum class DeprecatedValueType;
+
+std::ostream& operator<<(std::ostream& ostream, Keyword keyword);
 
 }  // namespace css
 }  // namespace visuals

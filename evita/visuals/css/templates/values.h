@@ -12,9 +12,21 @@
 {% for primitive in primitives %}
 #include "evita/visuals/css/{{primitive.file_name}}.h"
 {% endfor %}
+#include "evita/visuals/css/dimension.h"
+#include "evita/visuals/css/unit.h"
 
 namespace visuals {
 namespace css {
+
+//////////////////////////////////////////////////////////////////////
+//
+// Keyword
+//
+enum class Keyword {
+{% for keyword in keywords %}
+  {{keyword.Name}},
+{% endfor %}
+};
 
 //////////////////////////////////////////////////////////////////////
 //

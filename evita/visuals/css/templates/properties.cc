@@ -32,5 +32,17 @@ std::ostream& operator<<(std::ostream& ostream,
 
 {% endfor %}
 
+std::ostream& operator<<(std::ostream& ostream, PropertyId property_id) {
+  const char* const texts[] = {
+{% for property in properties %}
+  "{{property.name}}",
+{% endfor %}
+  };
+  const auto& it = std::begin(texts) + static_cast<size_t>(property_id);
+  if (it < std::begin(texts) || it >= std::end(texts))
+    return ostream << "???";
+  return ostream << *it;
+}
+
 }  // namespace css
 }  // namespace visuals

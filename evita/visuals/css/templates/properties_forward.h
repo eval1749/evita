@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_CSS_PROPERTIES_FORWARD_H_
 #define EVITA_VISUALS_CSS_PROPERTIES_FORWARD_H_
 
+#include <ostream>
+
 namespace visuals {
 namespace css {
 
@@ -30,6 +32,8 @@ FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
 
 const size_t kMaxPropertyId = {{properties|length() - 1}};
+
+std::ostream& operator<<(std::ostream& ostream, PropertyId property_id);
 
 }  // namespace css
 }  // namespace visuals

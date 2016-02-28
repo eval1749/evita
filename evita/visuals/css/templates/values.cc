@@ -20,7 +20,7 @@ namespace css {
 {%  for member in type.members if not member.is_keyword %}
 {{type.Name}}::{{type.Name}}({{member.Parameter}} {{member.name}})
     : {{member.name}}_({{member.name}}),
-      value_type_(ValueType::{{member.Name}}) {}
+      value_type_(DeprecatedValueType::{{member.Name}}) {}
 {% endfor %}
 {# Copy constructor #}
 {{type.Name}}::{{type.Name}}({{type.Parameter}} other) :
@@ -29,7 +29,7 @@ namespace css {
 {%  endfor %}
     value_type_(other.value_type_) {}
 
-{{type.Name}}::{{type.Name}}(ValueType value_type)
+{{type.Name}}::{{type.Name}}(DeprecatedValueType value_type)
     : value_type_(value_type) {}
 {# Default constructor #}
 {{type.Name}}::{{type.Name}}() {}
@@ -76,7 +76,7 @@ bool {{type.Name}}::operator!=({{type.Parameter}} other) const {
  #}
 {% for member in type.members %}
 bool {{type.Name}}::is_{{member.name}}() const {
-  return value_type_ == ValueType::{{member.Name}};
+  return value_type_ == DeprecatedValueType::{{member.Name}};
 }
 
 {% endfor %}
@@ -87,7 +87,7 @@ bool {{type.Name}}::is_{{member.name}}() const {
 {% for member in type.members if member.is_keyword %}
 // static
 {{type.Name}} {{type.Name}}::{{member.Name}}() const {
-  return {{type.Name}}(ValueType::{{member.Name}});
+  return {{type.Name}}(DeprecatedValueType::{{member.Name}});
 }
 
 {% endfor %}

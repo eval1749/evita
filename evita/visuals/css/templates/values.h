@@ -20,7 +20,7 @@ namespace css {
 //
 // Value Types
 //
-enum class ValueType {
+enum class DeprecatedValueType {
   // Keywords
 {% for keyword in keywords %}
   {{keyword.Name}},
@@ -84,13 +84,13 @@ class {{type.Name}} final {
  # Private section
  #}
  private:
-  explicit {{type.Name}}(ValueType value_type);
+  explicit {{type.Name}}(DeprecatedValueType value_type);
 
   // Values
 {%  for member in type.members if not member.is_keyword %}
   {{member.Name}} {{member.name}}_;
 {%  endfor %}
-  ValueType value_type_ = ValueType::{{type.initial}};
+  DeprecatedValueType value_type_ = DeprecatedValueType::{{type.initial}};
 };
 
 std::ostream& operator<<(std::ostream& ostream, {{type.Parameter}} {{type.name}});

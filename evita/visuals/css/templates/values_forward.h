@@ -25,7 +25,7 @@ namespace css {
 class {{type.Name}};
 {% endfor %}
 
-enum class ValueType;
+enum class DeprecatedValueType;
 
 }  // namespace css
 }  // namespace visuals

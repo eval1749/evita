@@ -96,6 +96,8 @@ source_set("values") {
     "string.h",
     "unit.cc",
     "unit.h",
+    "value.cc",
+    "value.h",
     "value_type.cc",
     "value_type.h",
   ]

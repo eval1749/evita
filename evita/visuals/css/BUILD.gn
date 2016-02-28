@@ -22,6 +22,10 @@ source_set("css") {
     "media_type.h",
     "property.cc",
     "property.h",
+    "property_set.cc",
+    "property_set.h",
+    "property_set_builder.cc",
+    "property_set_builder.h",
     "property_visitor.cc",
     "property_visitor.h",
     "rule.cc",
@@ -123,6 +127,7 @@ source_set("test_files") {
 
   sources = [
     "float_color_test.cc",
+    "property_set_test.cc",
     "style_test.cc",
   ]
 

@@ -84,6 +84,8 @@ source_set("values") {
   sources = [
     "color.cc",
     "color.h",
+    "dimension.cc",
+    "dimension.h",
     "float_color.cc",
     "float_color.h",
     "length.cc",

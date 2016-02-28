@@ -201,10 +201,10 @@ void SchedulerImpl::BeginFrame(const base::TimeTicks& deadline) {
   ASSERT_ON_SCRIPT_THREAD();
   TRACE_EVENT0("script", "SchedulerImpl::BeginFrame");
   ProcessTasks();
-  if (base::TimeTicks::Now() < deadline)
-    idle_task_queue_->RunIdleTasks(deadline);
   animation_frame_callback_queue_->DidBeginAnimationFrame(
       base::TimeTicks::Now());
+  if (base::TimeTicks::Now() < deadline)
+    idle_task_queue_->RunIdleTasks(deadline);
   const auto remaining = (deadline - base::TimeTicks::Now()).InSecondsF();
   if (remaining <= 0)
     return;

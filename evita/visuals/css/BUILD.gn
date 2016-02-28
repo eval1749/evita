@@ -92,6 +92,8 @@ source_set("values") {
     "percentage.h",
     "string.cc",
     "string.h",
+    "unit.cc",
+    "unit.h",
   ]
 
   deps = [

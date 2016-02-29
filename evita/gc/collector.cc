@@ -17,6 +17,10 @@
 namespace gc {
 
 namespace {
+
+using CounterMap =
+    std::unordered_map<base::StringPiece, int, base::StringPieceHash>;
+
 class CollectorVisitor final : public Visitor {
  public:
   explicit CollectorVisitor(Collector* collector) : collector_(collector) {}
@@ -50,7 +54,7 @@ class CollectorVisitor final : public Visitor {
 
 void MapToJson(std::basic_ostringstream<base::char16>& ostream,  // NOLINT
                const base::StringPiece& map_name,
-               const std::unordered_map<base::StringPiece, int> map) {
+               const CounterMap& map) {
   const base::string16 comma = L",\n";
   base::string16 delimiter = L"";
 
@@ -109,7 +113,7 @@ base::string16 Collector::GetJson(const base::string16& name) const {
   if (name != L"all")
     return base::string16();
 
-  std::unordered_map<base::StringPiece, int> live_map;
+  CounterMap live_map;
   for (auto const collectable : live_set_) {
     base::StringPiece key(collectable->visitable_class_name());
     auto it = live_map.find(key);
@@ -119,7 +123,7 @@ base::string16 Collector::GetJson(const base::string16& name) const {
       ++it->second;
   }
 
-  std::unordered_map<base::StringPiece, int> root_map;
+  CounterMap root_map;
   for (auto const visitable : root_set_) {
     base::StringPiece key(visitable->visitable_class_name());
     auto it = root_map.find(key);

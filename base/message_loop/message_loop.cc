@@ -133,9 +133,11 @@ MessageLoop::MessageLoop(scoped_ptr<MessagePump> pump)
 }
 
 MessageLoop::~MessageLoop() {
-  // current() could be NULL if this message loop is destructed before it is
-  // bound to a thread.
-  DCHECK(current() == this || !current());
+  // If |pump_| is non-null, this message loop has been bound and should be the
+  // current one on this thread. Otherwise, this loop is being destructed before
+  // it was bound to a thread, so a different message loop (or no loop at all)
+  // may be current.
+  DCHECK((pump_ && current() == this) || (!pump_ && current() != this));
 
   // iOS just attaches to the loop, it doesn't Run it.
   // TODO(stuartmorgan): Consider wiring up a Detach().
@@ -177,7 +179,8 @@ MessageLoop::~MessageLoop() {
   task_runner_ = NULL;
 
   // OK, now make it so that no one can find us.
-  lazy_tls_ptr.Pointer()->Set(NULL);
+  if (current() == this)
+    lazy_tls_ptr.Pointer()->Set(nullptr);
 }
 
 // static
@@ -301,12 +304,7 @@ void MessageLoop::QuitWhenIdle() {
   if (run_loop_) {
     run_loop_->quit_when_idle_received_ = true;
   } else {
-    // We don't assert that run_loop_ is valid for custom message pumps. Some,
-    // for example MojoMessagePump, might have shutdown already based on other
-    // shutdown signals.
-    if (type_ != MessageLoop::TYPE_CUSTOM) {
-      NOTREACHED() << "Must be inside Run to call Quit";
-    }
+    NOTREACHED() << "Must be inside Run to call Quit";
   }
 }
 
@@ -400,7 +398,7 @@ MessageLoop::MessageLoop(Type type, MessagePumpFactoryCallback pump_factory)
           new internal::MessageLoopTaskRunner(incoming_task_queue_)),
       task_runner_(unbound_task_runner_) {
   // If type is TYPE_CUSTOM non-null pump_factory must be given.
-  DCHECK_EQ(type_ == TYPE_CUSTOM, !pump_factory_.is_null());
+  DCHECK(type_ != TYPE_CUSTOM || !pump_factory_.is_null());
 }
 
 void MessageLoop::BindToCurrentThread() {
@@ -438,17 +436,7 @@ void MessageLoop::SetThreadTaskRunnerHandle() {
 
 void MessageLoop::RunHandler() {
   DCHECK_EQ(this, current());
-
   StartHistogrammer();
-
-#if defined(OS_WIN)
-  if (run_loop_->dispatcher_ && type() == TYPE_UI) {
-    static_cast<MessagePumpForUI*>(pump_.get())->
-        RunWithDispatcher(this, run_loop_->dispatcher_);
-    return;
-  }
-#endif
-
   pump_->Run(this);
 }
 
@@ -685,6 +673,10 @@ void MessageLoop::ReleaseSoonInternal(
 #if !defined(OS_NACL)
 //------------------------------------------------------------------------------
 // MessageLoopForUI
+
+MessageLoopForUI::MessageLoopForUI(scoped_ptr<MessagePump> pump)
+    : MessageLoop(TYPE_UI, Bind(&ReturnPump, Passed(&pump))) {
+}
 
 #if defined(OS_ANDROID)
 void MessageLoopForUI::Start() {

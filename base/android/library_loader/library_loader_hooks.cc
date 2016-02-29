@@ -53,7 +53,7 @@ RendererHistogramCode g_renderer_histogram_code = NO_PENDING_HISTOGRAM_CODE;
 // RegisterChromiumAndroidLinkerRendererHistogram.
 long g_renderer_library_load_time_ms = 0;
 
-} // namespace
+}  // namespace
 
 static void RegisterChromiumAndroidLinkerRendererHistogram(
     JNIEnv* env,
@@ -63,8 +63,8 @@ static void RegisterChromiumAndroidLinkerRendererHistogram(
     jlong library_load_time_ms) {
   // Note a pending histogram value for later recording.
   if (requested_shared_relro) {
-    g_renderer_histogram_code = load_at_fixed_address_failed
-                                ? LFA_BACKOFF_USED : LFA_SUCCESS;
+    g_renderer_histogram_code =
+        load_at_fixed_address_failed ? LFA_BACKOFF_USED : LFA_SUCCESS;
   } else {
     g_renderer_histogram_code = LFA_NOT_ATTEMPTED;
   }
@@ -82,7 +82,8 @@ void RecordChromiumAndroidLinkerRendererHistogram() {
   g_renderer_histogram_code = NO_PENDING_HISTOGRAM_CODE;
 
   // Record how long it took to load the shared libraries.
-  UMA_HISTOGRAM_TIMES("ChromiumAndroidLinker.RendererLoadTime",
+  UMA_HISTOGRAM_TIMES(
+      "ChromiumAndroidLinker.RendererLoadTime",
       base::TimeDelta::FromMilliseconds(g_renderer_library_load_time_ms));
 }
 
@@ -97,14 +98,13 @@ static void RecordChromiumAndroidLinkerBrowserHistogram(
   // browser at a fixed address. Otherwise just record a normal invocation.
   BrowserHistogramCode histogram_code;
   if (is_using_browser_shared_relros) {
-    histogram_code = load_at_fixed_address_failed
-                     ? LOW_MEMORY_LFA_BACKOFF_USED : LOW_MEMORY_LFA_SUCCESS;
+    histogram_code = load_at_fixed_address_failed ? LOW_MEMORY_LFA_BACKOFF_USED
+                                                  : LOW_MEMORY_LFA_SUCCESS;
   } else {
     histogram_code = NORMAL_LRA_SUCCESS;
   }
   UMA_HISTOGRAM_ENUMERATION("ChromiumAndroidLinker.BrowserStates",
-                            histogram_code,
-                            MAX_BROWSER_HISTOGRAM_CODE);
+                            histogram_code, MAX_BROWSER_HISTOGRAM_CODE);
 
   // Record the device support for loading a library directly from the APK file.
   UMA_HISTOGRAM_ENUMERATION("ChromiumAndroidLinker.LibraryLoadFromApkStatus",
@@ -144,9 +144,14 @@ void LibraryLoaderExitHook() {
 
 static jboolean ForkAndPrefetchNativeLibrary(
     JNIEnv* env,
-    const JavaParamRef<jclass>& clazz,
-    jboolean is_cold_start) {
-  return NativeLibraryPrefetcher::ForkAndPrefetchNativeLibrary(is_cold_start);
+    const JavaParamRef<jclass>& clazz) {
+  return NativeLibraryPrefetcher::ForkAndPrefetchNativeLibrary();
+}
+
+static jint PercentageOfResidentNativeLibraryCode(
+    JNIEnv* env,
+    const JavaParamRef<jclass>& clazz) {
+  return NativeLibraryPrefetcher::PercentageOfResidentNativeLibraryCode();
 }
 
 bool RegisterLibraryLoaderEntryHook(JNIEnv* env) {

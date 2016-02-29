@@ -23,7 +23,7 @@ from devil.android.sdk import version_codes
 from devil.utils import cmd_helper
 from devil.utils import mock_calls
 
-with devil_env.SysPath(devil_env.config.LocalPath('pymock')):
+with devil_env.SysPath(devil_env.PYMOCK_PATH):
   import mock # pylint: disable=import-error
 
 
@@ -1502,32 +1502,45 @@ class DeviceUtilsPushChangedFilesZippedTest(DeviceUtilsTest):
 
 class DeviceUtilsPathExistsTest(DeviceUtilsTest):
 
-  def testPathExists_usingTest_pathExists(self):
+  def testPathExists_pathExists(self):
     with self.assertCall(
         self.call.device.RunShellCommand(
-            "test -e '/path/file exists';echo $?",
-            check_return=True, timeout=None, retries=None), ['0']):
+            "test -e '/path/file exists'",
+            as_root=False, check_return=True, timeout=10, retries=0),
+        []):
       self.assertTrue(self.device.PathExists('/path/file exists'))
 
-  def testPathExists_usingTest_multiplePathExists(self):
+  def testPathExists_multiplePathExists(self):
     with self.assertCall(
         self.call.device.RunShellCommand(
-            "test -e '/path 1' -a -e /path2;echo $?",
-            check_return=True, timeout=None, retries=None), ['0']):
+            "test -e '/path 1' -a -e /path2",
+            as_root=False, check_return=True, timeout=10, retries=0),
+        []):
       self.assertTrue(self.device.PathExists(('/path 1', '/path2')))
 
-  def testPathExists_usingTest_pathDoesntExist(self):
+  def testPathExists_pathDoesntExist(self):
     with self.assertCall(
         self.call.device.RunShellCommand(
-            "test -e /path/file.not.exists;echo $?",
-            check_return=True, timeout=None, retries=None), ['1']):
+            "test -e /path/file.not.exists",
+            as_root=False, check_return=True, timeout=10, retries=0),
+        self.ShellError()):
       self.assertFalse(self.device.PathExists('/path/file.not.exists'))
 
-  def testFileExists_usingTest_pathDoesntExist(self):
+  def testPathExists_asRoot(self):
     with self.assertCall(
         self.call.device.RunShellCommand(
-            "test -e /path/file.not.exists;echo $?",
-            check_return=True, timeout=None, retries=None), ['1']):
+            "test -e /root/path/exists",
+            as_root=True, check_return=True, timeout=10, retries=0),
+        self.ShellError()):
+      self.assertFalse(
+          self.device.PathExists('/root/path/exists', as_root=True))
+
+  def testFileExists_pathDoesntExist(self):
+    with self.assertCall(
+        self.call.device.RunShellCommand(
+            "test -e /path/file.not.exists",
+            as_root=False, check_return=True, timeout=10, retries=0),
+        self.ShellError()):
       self.assertFalse(self.device.FileExists('/path/file.not.exists'))
 
 
@@ -1818,6 +1831,16 @@ class DeviceUtilsSetJavaAssertsTest(DeviceUtilsTest):
     with self.assertCalls(
         (self.call.device.ReadFile(self.device.LOCAL_PROPERTIES_PATH),
          'some.example.prop=with an example value\n'
+         'dalvik.vm.enableassertions=all\n'
+         'some.other.prop=value_ok\n'),
+        (self.call.device.GetProp('dalvik.vm.enableassertions'), 'all')):
+      self.assertFalse(self.device.SetJavaAsserts(True))
+
+  def testSetJavaAsserts_malformedLocalProp(self):
+    with self.assertCalls(
+        (self.call.device.ReadFile(self.device.LOCAL_PROPERTIES_PATH),
+         'some.example.prop=with an example value\n'
+         'malformed_property\n'
          'dalvik.vm.enableassertions=all\n'
          'some.other.prop=value_ok\n'),
         (self.call.device.GetProp('dalvik.vm.enableassertions'), 'all')):

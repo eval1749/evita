@@ -57,6 +57,9 @@ def _ParseArgs(args):
                       default='[]')
   parser.add_argument('--emma-device-jar',
                       help='Path to emma_device.jar to include.')
+  parser.add_argument('--uncompress-shared-libraries',
+                      action='store_true',
+                      help='Uncompress shared libraries')
   options = parser.parse_args(args)
   options.assets = build_utils.ParseGypList(options.assets)
   options.uncompressed_assets = build_utils.ParseGypList(
@@ -153,7 +156,9 @@ def main(args):
   if options.emma_device_jar:
     input_paths.append(options.emma_device_jar)
 
-  input_strings = [options.android_abi, options.native_lib_placeholders]
+  input_strings = [options.android_abi,
+                   options.native_lib_placeholders,
+                   options.uncompress_shared_libraries]
 
   _assets = _ExpandPaths(options.assets)
   _uncompressed_assets = _ExpandPaths(options.uncompressed_assets)
@@ -193,11 +198,7 @@ def main(args):
         _AddAssets(out_apk, _assets, disable_compression=False)
         _AddAssets(out_apk, _uncompressed_assets, disable_compression=True)
 
-        # 3. Resources
-        for info in resource_infos[1:]:
-          copy_resource(info)
-
-        # 4. Dex files
+        # 3. Dex files
         if options.dex_file and options.dex_file.endswith('.zip'):
           with zipfile.ZipFile(options.dex_file, 'r') as dex_zip:
             for dex in (d for d in dex_zip.namelist() if d.endswith('.dex')):
@@ -206,17 +207,30 @@ def main(args):
           build_utils.AddToZipHermetic(out_apk, 'classes.dex',
                                        src_path=options.dex_file)
 
-        # 5. Native libraries.
+        # 4. Native libraries.
         for path in native_libs:
           basename = os.path.basename(path)
           apk_path = 'lib/%s/%s' % (options.android_abi, basename)
-          build_utils.AddToZipHermetic(out_apk, apk_path, src_path=path)
+
+          compress = None
+          if (options.uncompress_shared_libraries and
+              os.path.splitext(basename)[1] == '.so'):
+            compress = False
+
+          build_utils.AddToZipHermetic(out_apk,
+                                       apk_path,
+                                       src_path=path,
+                                       compress=compress)
 
         for name in sorted(options.native_lib_placeholders):
           # Empty libs files are ignored by md5check, but rezip requires them
           # to be empty in order to identify them as placeholders.
           apk_path = 'lib/%s/%s' % (options.android_abi, name)
           build_utils.AddToZipHermetic(out_apk, apk_path, data='')
+
+        # 5. Resources
+        for info in resource_infos[1:]:
+          copy_resource(info)
 
         # 6. Java resources. Used only when coverage is enabled, so order
         # doesn't matter).

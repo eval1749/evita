@@ -1121,6 +1121,7 @@ class DeviceUtils(object):
     missing_dirs = []
     cache_commit_funcs = []
     for h, d in host_device_tuples:
+      assert os.path.isabs(h) and posixpath.isabs(d)
       changed_files, up_to_date_files, stale_files, cache_commit_func = (
           self._GetChangedAndStaleFiles(h, d, delete_device_stale))
       all_changed_files += changed_files
@@ -1359,6 +1360,7 @@ class DeviceUtils(object):
         zip_utils.WriteToZipFile(zip_file, host_path, device_path)
 
   # TODO(nednguyen): remove this and migrate the callsite to PathExists().
+  @decorators.WithTimeoutAndRetriesFromInstance()
   def FileExists(self, device_path, timeout=None, retries=None):
     """Checks whether the given file exists on the device.
 
@@ -1366,12 +1368,15 @@ class DeviceUtils(object):
     """
     return self.PathExists(device_path, timeout=timeout, retries=retries)
 
-  def PathExists(self, device_paths, timeout=None, retries=None):
+  @decorators.WithTimeoutAndRetriesFromInstance()
+  def PathExists(self, device_paths, as_root=False, timeout=None, retries=None):
     """Checks whether the given path(s) exists on the device.
 
     Args:
       device_path: A string containing the absolute path to the file on the
                    device, or an iterable of paths to check.
+      as_root: Whether root permissions should be use to check for the existence
+               of the given path(s).
       timeout: timeout in seconds
       retries: number of retries
 
@@ -1386,10 +1391,13 @@ class DeviceUtils(object):
     if isinstance(paths, basestring):
       paths = (paths,)
     condition = ' -a '.join('-e %s' % cmd_helper.SingleQuote(p) for p in paths)
-    cmd = 'test %s;echo $?' % condition
-    result = self.RunShellCommand(cmd, check_return=True, timeout=timeout,
-                                  retries=retries)
-    return '0' == result[0]
+    cmd = 'test %s' % condition
+    try:
+      self.RunShellCommand(cmd, as_root=as_root, check_return=True,
+                           timeout=timeout, retries=retries)
+      return True
+    except device_errors.CommandFailedError:
+      return False
 
   @decorators.WithTimeoutAndRetriesFromInstance()
   def PullFile(self, device_path, host_path, timeout=None, retries=None):
@@ -1596,7 +1604,10 @@ class DeviceUtils(object):
       for index, line in enumerate(lines):
         if line.strip() == '':
           continue
-        key, value = (s.strip() for s in line.split('=', 1))
+        key_value = tuple(s.strip() for s in line.split('=', 1))
+        if len(key_value) != 2:
+          continue
+        key, value = key_value
         if key == property_name:
           return index, value
       return None, ''

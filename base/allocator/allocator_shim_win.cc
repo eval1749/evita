@@ -5,8 +5,8 @@
 #include <limits.h>
 #include <malloc.h>
 #include <new.h>
-#include <windows.h>
 #include <stddef.h>
+#include <windows.h>
 
 // This shim make it possible to perform additional checks on allocations
 // before passing them to the Heap functions.
@@ -25,6 +25,12 @@ extern "C" {
 // heapinit.c
 void* _crtheap = reinterpret_cast<void*>(1);
 }
+
+namespace base {
+namespace allocator {
+bool g_is_win_shim_layer_initialized = false;
+}  // namespace allocator
+}  // namespace base
 
 namespace {
 
@@ -211,6 +217,7 @@ intptr_t _get_heap_handle() {
 
 // heapinit.c
 int _heap_init() {
+  base::allocator::g_is_win_shim_layer_initialized = true;
   return win_heap_init() ? 1 : 0;
 }
 

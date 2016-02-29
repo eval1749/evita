@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "base/strings/string_piece.h"
 #include "evita/base/evita_base_export.h"
@@ -31,8 +32,13 @@ class EVITA_BASE_EXPORT AtomicStringFactory final : public ZoneOwner {
   static AtomicStringFactory* GetInstance();
 
  private:
+  using EntityMap = std::unordered_map<base::StringPiece16,
+                                       base::StringPiece16*,
+                                       base::StringPiece16Hash>;
+
   base::StringPiece16* NewStringPiece(base::StringPiece16 value);
-  std::unordered_map<base::StringPiece16, base::StringPiece16*> map_;
+
+  EntityMap map_;
   int unique_name_counter_ = 0;
 
   DISALLOW_COPY_AND_ASSIGN(AtomicStringFactory);

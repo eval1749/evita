@@ -402,7 +402,7 @@ TEST(ScopedPtrTest, MoveBehavior) {
     EXPECT_TRUE(scoper3.get());
   }
 
-#if !(defined(OS_ANDROID) || (defined(OS_LINUX) && !defined(OS_CHROMEOS)))
+#if !defined(OS_ANDROID) && !defined(OS_LINUX) && !defined(OS_MACOSX)
   // Test uncaught Pass() does not have side effects, because Pass()
   // is implemented by std::move().
   // TODO(danakj): Remove this test case when we remove Pass().
@@ -839,4 +839,33 @@ TEST(ScopedPtrTest, ArrayOperators) {
   EXPECT_TRUE(nullptr <= p);
   EXPECT_TRUE(pnull <= nullptr);
   EXPECT_TRUE(nullptr <= pnull);
+}
+
+// Boolean tests can be performed.
+TEST(ScopedPtrTest, BooleanTesting) {
+  scoped_ptr<int> ptr_to_an_instance(new int);
+  EXPECT_TRUE(ptr_to_an_instance);
+  EXPECT_FALSE(!ptr_to_an_instance);
+
+  if (ptr_to_an_instance) {
+  } else {
+    ADD_FAILURE() << "Pointer to an instance should result in true.";
+  }
+
+  if (!ptr_to_an_instance) {  // check for operator!().
+    ADD_FAILURE() << "Pointer to an instance should result in !x being false.";
+  }
+
+  scoped_ptr<int> null_ptr;
+  EXPECT_FALSE(null_ptr);
+  EXPECT_TRUE(!null_ptr);
+
+  if (null_ptr) {
+    ADD_FAILURE() << "Null pointer should result in false.";
+  }
+
+  if (!null_ptr) {  // check for operator!().
+  } else {
+    ADD_FAILURE() << "Null pointer should result in !x being true.";
+  }
 }

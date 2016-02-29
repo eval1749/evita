@@ -32,7 +32,7 @@ class RootKeyMap final {
   static RootKeyMap* GetInstance();
 
  private:
-  std::unordered_map<base::StringPiece16, HKEY> map_;
+  std::unordered_map<base::StringPiece16, HKEY, base::StringPiece16Hash> map_;
 
   DISALLOW_COPY_AND_ASSIGN(RootKeyMap);
 };

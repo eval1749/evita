@@ -790,24 +790,24 @@ bool TestLauncher::Init() {
   }
 
   if (command_line->HasSwitch(switches::kTestLauncherFilterFile)) {
+    base::FilePath filter_file_path = base::MakeAbsoluteFilePath(
+        command_line->GetSwitchValuePath(switches::kTestLauncherFilterFile));
     std::string filter;
-    if (!ReadFileToString(
-            command_line->GetSwitchValuePath(switches::kTestLauncherFilterFile),
-            &filter)) {
+    if (!ReadFileToString(filter_file_path, &filter)) {
       LOG(ERROR) << "Failed to read the filter file.";
       return false;
     }
 
     std::vector<std::string> filter_lines = SplitString(
         filter, "\n", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
-    for (size_t i = 0; i < filter_lines.size(); i++) {
-      if (filter_lines[i].empty())
+    for (const std::string& filter_line : filter_lines) {
+      if (filter_line.empty() || filter_line[0] == '#')
         continue;
 
-      if (filter_lines[i][0] == '-')
-        negative_test_filter_.push_back(filter_lines[i].substr(1));
+      if (filter_line[0] == '-')
+        negative_test_filter_.push_back(filter_line.substr(1));
       else
-        positive_test_filter_.push_back(filter_lines[i]);
+        positive_test_filter_.push_back(filter_line);
     }
   } else {
     // Split --gtest_filter at '-', if there is one, to separate into

@@ -21,8 +21,10 @@ enum LibraryProcessType {
   PROCESS_BROWSER = 1,
   // Shared library is running in child process.
   PROCESS_CHILD = 2,
-  // Shared library is running in webview process.
+  // Shared library is running in the app that uses webview.
   PROCESS_WEBVIEW = 3,
+  // Shared library is running in child process as part of webview.
+  PROCESS_WEBVIEW_CHILD = 4,
 };
 
 // Record any pending renderer histogram value as a histogram.  Pending values
@@ -42,8 +44,7 @@ BASE_EXPORT bool RegisterLibraryLoaderEntryHook(JNIEnv* env);
 // false for failure.
 // Note: this can't use base::Callback because there is no way of initializing
 // the default callback without using static objects, which we forbid.
-typedef bool LibraryLoadedHook(JNIEnv* env,
-                               jclass clazz);
+typedef bool LibraryLoadedHook(JNIEnv* env, jclass clazz);
 
 // Set the hook function to be called (from Java) once the libraries are loaded.
 // SetLibraryLoadedHook may only be called from JNI_OnLoad. The hook function

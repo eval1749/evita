@@ -14,6 +14,7 @@
 #include <initguid.h>
 #include <propkey.h>
 #include <propvarutil.h>
+#include <psapi.h>
 #include <sddl.h>
 #include <setupapi.h>
 #include <signal.h>
@@ -30,7 +31,6 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread_restrictions.h"
-#include "base/win/metro.h"
 #include "base/win/registry.h"
 #include "base/win/scoped_co_mem.h"
 #include "base/win/scoped_handle.h"
@@ -101,6 +101,12 @@ const wchar_t kWindows8OSKRegPath[] =
     L"Software\\Classes\\CLSID\\{054AAE20-4BEA-4347-8A35-64A533254A9D}"
     L"\\LocalServer32";
 
+// Returns the current platform role. We use the PowerDeterminePlatformRoleEx
+// API for that.
+POWER_PLATFORM_ROLE GetPlatformRole() {
+  return PowerDeterminePlatformRoleEx(POWER_PLATFORM_ROLE_V2);
+}
+
 }  // namespace
 
 // Returns true if a physical keyboard is detected on Windows 8 and up.
@@ -111,7 +117,7 @@ const wchar_t kWindows8OSKRegPath[] =
 bool IsKeyboardPresentOnSlate(std::string* reason) {
   bool result = false;
 
-  if (GetVersion() < VERSION_WIN7) {
+  if (GetVersion() < VERSION_WIN8) {
     *reason = "Detection not supported";
     return false;
   }
@@ -135,10 +141,13 @@ bool IsKeyboardPresentOnSlate(std::string* reason) {
     }
   }
 
-  // If the device is docked, the user is treating the device as a PC.
-  if (GetSystemMetrics(SM_SYSTEMDOCKED) != 0) {
+  if (IsTabletDevice(reason)) {
+    if (reason)
+      *reason += "Tablet device.\n";
+    return true;
+  } else {
     if (reason) {
-      *reason += "SM_SYSTEMDOCKED\n";
+      *reason += "Not a tablet device";
       result = true;
     } else {
       return true;
@@ -182,23 +191,6 @@ bool IsKeyboardPresentOnSlate(std::string* reason) {
         return true;
       }
     }
-  }
-
-  // Check if the device is being used as a laptop or a tablet. This can be
-  // checked by first checking the role of the device and then the
-  // corresponding system metric (SM_CONVERTIBLESLATEMODE). If it is being used
-  // as a tablet then we want the OSK to show up.
-  POWER_PLATFORM_ROLE role = PowerDeterminePlatformRole();
-
-  if (((role == PlatformRoleMobile) || (role == PlatformRoleSlate)) &&
-       (GetSystemMetrics(SM_CONVERTIBLESLATEMODE) == 0)) {
-      if (reason) {
-        *reason += (role == PlatformRoleMobile) ? "PlatformRoleMobile\n" :
-                                                  "PlatformRoleSlate\n";
-        // Don't change result here if it's already true.
-      } else {
-        return false;
-      }
   }
 
   const GUID KEYBOARD_CLASS_GUID =
@@ -392,30 +384,56 @@ void SetAbortBehaviorForCrashReporting() {
   signal(SIGABRT, ForceCrashOnSigAbort);
 }
 
-bool IsTabletDevice() {
-  if (GetSystemMetrics(SM_MAXIMUMTOUCHES) == 0)
+bool IsTabletDevice(std::string* reason) {
+  if (GetVersion() < VERSION_WIN8) {
+    if (reason)
+      *reason = "Tablet device detection not supported below Windows 8\n";
     return false;
+  }
 
-  Version version = GetVersion();
-  if (version == VERSION_XP)
-    return (GetSystemMetrics(SM_TABLETPC) != 0);
+  if (GetSystemMetrics(SM_MAXIMUMTOUCHES) == 0) {
+    if (reason) {
+      *reason += "Device does not support touch.\n";
+    } else {
+      return false;
+    }
+  }
 
   // If the device is docked, the user is treating the device as a PC.
-  if (GetSystemMetrics(SM_SYSTEMDOCKED) != 0)
-    return false;
+  if (GetSystemMetrics(SM_SYSTEMDOCKED) != 0) {
+    if (reason) {
+      *reason += "SM_SYSTEMDOCKED\n";
+    } else {
+      return false;
+    }
+  }
 
-  // PlatformRoleSlate was only added in Windows 8, but prior to Win8 it is
-  // still possible to check for a mobile power profile.
-  POWER_PLATFORM_ROLE role = PowerDeterminePlatformRole();
+  // PlatformRoleSlate was added in Windows 8+.
+  POWER_PLATFORM_ROLE role = GetPlatformRole();
   bool mobile_power_profile = (role == PlatformRoleMobile);
-  bool slate_power_profile = false;
-  if (version >= VERSION_WIN8)
-    slate_power_profile = (role == PlatformRoleSlate);
+  bool slate_power_profile = (role == PlatformRoleSlate);
 
-  if (mobile_power_profile || slate_power_profile)
-    return (GetSystemMetrics(SM_CONVERTIBLESLATEMODE) == 0);
+  bool is_tablet = false;
 
-  return false;
+  if (mobile_power_profile || slate_power_profile) {
+    is_tablet = !GetSystemMetrics(SM_CONVERTIBLESLATEMODE);
+    if (!is_tablet) {
+      if (reason) {
+        *reason += "Not in slate mode.\n";
+      } else {
+        return false;
+      }
+    } else {
+      if (reason) {
+        *reason += (role == PlatformRoleMobile) ? "PlatformRoleMobile\n" :
+                                                  "PlatformRoleSlate\n";
+      }
+    }
+  } else {
+    if (reason)
+      *reason += "Device role is not mobile or slate.\n";
+  }
+  return is_tablet;
 }
 
 bool DisplayVirtualKeyboard() {
@@ -514,8 +532,6 @@ bool DismissVirtualKeyboard() {
   return false;
 }
 
-typedef HWND (*MetroRootWindow) ();
-
 enum DomainEnrollementState {UNKNOWN = -1, NOT_ENROLLED, ENROLLED};
 static volatile long int g_domain_state = UNKNOWN;
 
@@ -541,29 +557,53 @@ void SetDomainStateForTesting(bool state) {
   g_domain_state = state ? ENROLLED : NOT_ENROLLED;
 }
 
-bool MaybeHasSHA256Support() {
-  const OSInfo* os_info = OSInfo::GetInstance();
-
-  if (os_info->version() == VERSION_PRE_XP)
-    return false;  // Too old to have it and this OS is not supported anyway.
-
-  if (os_info->version() == VERSION_XP)
-    return os_info->service_pack().major >= 3;  // Windows XP SP3 has it.
-
-  // Assume it is missing in this case, although it may not be. This category
-  // includes Windows XP x64, and Windows Server, where a hotfix could be
-  // deployed.
-  if (os_info->version() == VERSION_SERVER_2003)
-    return false;
-
-  DCHECK(os_info->version() >= VERSION_VISTA);
-  return true;  // New enough to have SHA-256 support.
-}
-
 bool IsUser32AndGdi32Available() {
   static base::LazyInstance<LazyIsUser32AndGdi32Available>::Leaky available =
       LAZY_INSTANCE_INITIALIZER;
   return available.Get().value();
+}
+
+bool GetLoadedModulesSnapshot(HANDLE process, std::vector<HMODULE>* snapshot) {
+  DCHECK(snapshot);
+  DCHECK_EQ(0u, snapshot->size());
+  snapshot->resize(128);
+
+  // We will retry at least once after first determining |bytes_required|. If
+  // the list of modules changes after we receive |bytes_required| we may retry
+  // more than once.
+  int retries_remaining = 5;
+  do {
+    DWORD bytes_required = 0;
+    // EnumProcessModules returns 'success' even if the buffer size is too
+    // small.
+    DCHECK_GE(std::numeric_limits<DWORD>::max(),
+              snapshot->size() * sizeof(HMODULE));
+    if (!::EnumProcessModules(
+            process, &(*snapshot)[0],
+            static_cast<DWORD>(snapshot->size() * sizeof(HMODULE)),
+            &bytes_required)) {
+      DPLOG(ERROR) << "::EnumProcessModules failed.";
+      return false;
+    }
+    DCHECK_EQ(0u, bytes_required % sizeof(HMODULE));
+    size_t num_modules = bytes_required / sizeof(HMODULE);
+    if (num_modules <= snapshot->size()) {
+      // Buffer size was too big, presumably because a module was unloaded.
+      snapshot->erase(snapshot->begin() + num_modules, snapshot->end());
+      return true;
+    } else if (num_modules == 0) {
+      DLOG(ERROR) << "Can't determine the module list size.";
+      return false;
+    } else {
+      // Buffer size was too small. Try again with a larger buffer. A little
+      // more room is given to avoid multiple expensive calls to
+      // ::EnumProcessModules() just because one module has been added.
+      snapshot->resize(num_modules + 8, NULL);
+    }
+  } while (--retries_remaining);
+
+  DLOG(ERROR) << "Failed to enumerate modules.";
+  return false;
 }
 
 }  // namespace win

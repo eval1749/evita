@@ -189,7 +189,8 @@ TEST(TCMallocFreeTest, BadPointerInFirstPageOfTheLargeObject) {
   TCMallocDoFreeForTest(p);
 }
 
-TEST(TCMallocFreeTest, BadPageAlignedPointerInsideLargeObject) {
+// TODO(ssid): Fix flakiness and enable the test, crbug.com/571549.
+TEST(TCMallocFreeTest, DISABLED_BadPageAlignedPointerInsideLargeObject) {
   const size_t kPageSize = base::GetPageSize();
   const size_t kMaxSize = 10 * kPageSize;
   char* p = reinterpret_cast<char*>(TCMallocDoMallocForTest(kMaxSize + 1));
@@ -207,16 +208,16 @@ TEST(TCMallocFreeTest, BadPageAlignedPointerInsideLargeObject) {
 TEST(TCMallocFreeTest, DoubleFreeLargeObject) {
   const size_t kMaxSize = 10 * base::GetPageSize();
   char* p = reinterpret_cast<char*>(TCMallocDoMallocForTest(kMaxSize + 1));
-  ASSERT_DEATH(TCMallocDoFreeForTest(p); TCMallocDoFreeForTest(p),
-               "Object was not in-use");
+  ASSERT_DEATH(TCMallocDoFreeForTest(p);
+               TCMallocDoFreeForTest(p), "Object was not in-use");
 }
 
 TEST(TCMallocFreeTest, DoubleFreeSmallObject) {
   const size_t kPageSize = base::GetPageSize();
   for (size_t size = 1; size <= kPageSize; size <<= 1) {
     char* p = reinterpret_cast<char*>(TCMallocDoMallocForTest(size));
-    ASSERT_DEATH(TCMallocDoFreeForTest(p); TCMallocDoFreeForTest(p),
-                 "Circular loop in list detected");
+    ASSERT_DEATH(TCMallocDoFreeForTest(p);
+                 TCMallocDoFreeForTest(p), "Circular loop in list detected");
   }
 }
 #endif  // NDEBUG

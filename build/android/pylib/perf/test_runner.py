@@ -68,6 +68,7 @@ from devil.utils import cmd_helper
 from pylib import constants
 from pylib.base import base_test_result
 from pylib.base import base_test_runner
+from pylib.constants import host_paths
 
 
 # Regex for the master branch commit position.
@@ -86,7 +87,7 @@ def _GetChromiumRevision():
   # pylint: enable=line-too-long
   status, output = cmd_helper.GetCmdStatusAndOutput(
       ['git', 'log', '-n', '1', '--pretty=format:%H%n%B', 'HEAD'],
-      constants.DIR_SOURCE_ROOT)
+      host_paths.DIR_SOURCE_ROOT)
   revision = None
   commit_pos = None
   if not status:
@@ -372,9 +373,9 @@ class TestRunner(base_test_runner.BaseTestRunner):
       # Just print a heart-beat so that the outer buildbot scripts won't timeout
       # without response.
       logfile = _HeartBeatLogger()
-    cwd = os.path.abspath(constants.DIR_SOURCE_ROOT)
+    cwd = os.path.abspath(host_paths.DIR_SOURCE_ROOT)
     if full_cmd.startswith('src/'):
-      cwd = os.path.abspath(os.path.join(constants.DIR_SOURCE_ROOT, os.pardir))
+      cwd = os.path.abspath(os.path.join(host_paths.DIR_SOURCE_ROOT, os.pardir))
     try:
       exit_code, output = cmd_helper.GetCmdStatusAndOutputWithTimeout(
           full_cmd, timeout, cwd=cwd, shell=True, logfile=logfile)
@@ -395,21 +396,6 @@ class TestRunner(base_test_runner.BaseTestRunner):
     logging.info('%s : exit_code=%d in %d secs at %s',
                  test_name, exit_code, end_time - start_time,
                  self.device_serial)
-
-    try:
-      # Some perf configs run the same benchmark with different options on
-      # different step names. Here we disambiguate those, so that data is
-      # uploaded to the perf dashoards based on their step name instead.
-      chart_data = json.loads(json_output)
-      if chart_data['benchmark_name'] != test_name:
-        logging.info('Benchmark %r will be reported as %r in chartjson.',
-                     chart_data['benchmark_name'], test_name)
-        chart_data['telemetry_benchmark_name'] = chart_data['benchmark_name']
-        chart_data['benchmark_name'] = test_name
-        json_output = json.dumps(chart_data, sort_keys=True, indent=2,
-                                 separators=(',', ': '))
-    except StandardError:
-      logging.exception('Could not read data from chartjson.')
 
     if exit_code == 0:
       result_type = base_test_result.ResultType.PASS

@@ -69,7 +69,7 @@ namespace std {
 template <>
 struct std::hash<evita::AtomicString> {
   size_t operator()(const evita::AtomicString& atomic_string) const {
-    return std::hash<base::StringPiece16>()(atomic_string.value());
+    return base::StringPiece16Hash()(atomic_string.value());
   }
 };
 

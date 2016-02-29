@@ -43,7 +43,7 @@ class HistogramSet final : public common::Singleton<HistogramSet> {
  private:
   HistogramSet();
 
-  std::unordered_map<base::StringPiece, Histogram*> map_;
+  std::unordered_map<base::StringPiece, Histogram*, base::StringPieceHash> map_;
 
   DISALLOW_COPY_AND_ASSIGN(HistogramSet);
 };

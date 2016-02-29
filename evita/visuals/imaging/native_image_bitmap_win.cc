@@ -49,7 +49,7 @@ class ImageFormatMap final {
   static ImageFormatMap* GetInstance();
 
  private:
-  std::unordered_map<base::StringPiece16, GUID> map_;
+  std::unordered_map<base::StringPiece16, GUID, base::StringPiece16Hash> map_;
   DISALLOW_COPY_AND_ASSIGN(ImageFormatMap);
 };
 

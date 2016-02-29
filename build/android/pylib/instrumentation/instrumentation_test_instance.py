@@ -8,20 +8,19 @@ import logging
 import os
 import pickle
 import re
-import sys
 
 from devil.android import apk_helper
 from devil.android import md5sum
 from pylib import constants
 from pylib.base import base_test_result
 from pylib.base import test_instance
+from pylib.constants import host_paths
 from pylib.instrumentation import test_result
 from pylib.instrumentation import instrumentation_parser
 from pylib.utils import proguard
 
-sys.path.append(
-    os.path.join(constants.DIR_SOURCE_ROOT, 'build', 'util', 'lib', 'common'))
-import unittest_util # pylint: disable=import-error
+with host_paths.SysPath(host_paths.BUILD_COMMON_PATH):
+  import unittest_util # pylint: disable=import-error
 
 # Ref: http://developer.android.com/reference/android/app/Activity.html
 _ACTIVITY_RESULT_CANCELED = 0
@@ -196,13 +195,13 @@ class InstrumentationTestInstance(test_instance.TestInstance):
 
     self._additional_apks = []
     self._apk_under_test = None
-    self._apk_under_test_permissions = None
+    self._apk_under_test_incremental_install_script = None
     self._package_info = None
     self._suite = None
     self._test_apk = None
+    self._test_apk_incremental_install_script = None
     self._test_jar = None
     self._test_package = None
-    self._test_permissions = None
     self._test_runner = None
     self._test_support_apk = None
     self._initializeApkAttributes(args, error_func)
@@ -231,44 +230,49 @@ class InstrumentationTestInstance(test_instance.TestInstance):
     self._initializeTestControlAttributes(args)
 
   def _initializeApkAttributes(self, args, error_func):
-    if args.apk_under_test.endswith('.apk'):
-      self._apk_under_test = args.apk_under_test
-    else:
-      self._apk_under_test = os.path.join(
+    apk_under_test_path = args.apk_under_test
+    if not args.apk_under_test.endswith('.apk'):
+      apk_under_test_path = os.path.join(
           constants.GetOutDirectory(), constants.SDK_BUILD_APKS_DIR,
           '%s.apk' % args.apk_under_test)
 
-    if not os.path.exists(self._apk_under_test):
-      error_func('Unable to find APK under test: %s' % self._apk_under_test)
+    if not os.path.exists(apk_under_test_path):
+      error_func('Unable to find APK under test: %s' % apk_under_test_path)
 
-    apk = apk_helper.ApkHelper(self._apk_under_test)
-    self._apk_under_test_permissions = apk.GetPermissions()
+    self._apk_under_test = apk_helper.ToHelper(apk_under_test_path)
 
     if args.test_apk.endswith('.apk'):
       self._suite = os.path.splitext(os.path.basename(args.test_apk))[0]
-      self._test_apk = args.test_apk
+      self._test_apk = apk_helper.ToHelper(args.test_apk)
     else:
       self._suite = args.test_apk
-      self._test_apk = os.path.join(
+      self._test_apk = apk_helper.ToHelper(os.path.join(
           constants.GetOutDirectory(), constants.SDK_BUILD_APKS_DIR,
-          '%s.apk' % args.test_apk)
+          '%s.apk' % args.test_apk))
+
+    self._apk_under_test_incremental_install_script = (
+        args.apk_under_test_incremental_install_script)
+    self._test_apk_incremental_install_script = (
+        args.test_apk_incremental_install_script)
+
+    if self._test_apk_incremental_install_script:
+      assert self._suite.endswith('_incremental')
+      self._suite = self._suite[:-len('_incremental')]
 
     self._test_jar = os.path.join(
         constants.GetOutDirectory(), constants.SDK_BUILD_TEST_JAVALIB_DIR,
         '%s.jar' % self._suite)
-    self._test_support_apk = os.path.join(
+    self._test_support_apk = apk_helper.ToHelper(os.path.join(
         constants.GetOutDirectory(), constants.SDK_BUILD_TEST_JAVALIB_DIR,
-        '%sSupport.apk' % self._suite)
+        '%sSupport.apk' % self._suite))
 
-    if not os.path.exists(self._test_apk):
-      error_func('Unable to find test APK: %s' % self._test_apk)
+    if not os.path.exists(self._test_apk.path):
+      error_func('Unable to find test APK: %s' % self._test_apk.path)
     if not os.path.exists(self._test_jar):
       error_func('Unable to find test JAR: %s' % self._test_jar)
 
-    apk = apk_helper.ApkHelper(self.test_apk)
-    self._test_package = apk.GetPackageName()
-    self._test_permissions = apk.GetPermissions()
-    self._test_runner = apk.GetInstrumentationName()
+    self._test_package = self._test_apk.GetPackageName()
+    self._test_runner = self._test_apk.GetInstrumentationName()
 
     self._package_info = None
     for package_info in constants.PACKAGE_INFO.itervalues():
@@ -280,7 +284,8 @@ class InstrumentationTestInstance(test_instance.TestInstance):
     for apk in args.additional_apks:
       if not os.path.exists(apk):
         error_func('Unable to find additional APK: %s' % apk)
-    self._additional_apks = args.additional_apks
+    self._additional_apks = (
+        [apk_helper.ToHelper(x) for x in args.additional_apks])
 
   def _initializeDataDependencyAttributes(self, args, isolate_delegate):
     self._data_deps = []
@@ -345,6 +350,10 @@ class InstrumentationTestInstance(test_instance.TestInstance):
       with open(args.device_flags_file) as device_flags_file:
         stripped_lines = (l.strip() for l in device_flags_file)
         self._flags.extend([flag for flag in stripped_lines if flag])
+    if (hasattr(args, 'strict_mode') and
+        args.strict_mode and
+        args.strict_mode != 'off'):
+      self._flags.append('--strict-mode=' + args.strict_mode)
 
   def _initializeDriverAttributes(self):
     self._driver_apk = os.path.join(
@@ -369,8 +378,8 @@ class InstrumentationTestInstance(test_instance.TestInstance):
     return self._apk_under_test
 
   @property
-  def apk_under_test_permissions(self):
-   return self._apk_under_test_permissions
+  def apk_under_test_incremental_install_script(self):
+    return self._apk_under_test_incremental_install_script
 
   @property
   def flags(self):
@@ -401,6 +410,10 @@ class InstrumentationTestInstance(test_instance.TestInstance):
     return self._test_apk
 
   @property
+  def test_apk_incremental_install_script(self):
+    return self._test_apk_incremental_install_script
+
+  @property
   def test_jar(self):
     return self._test_jar
 
@@ -411,10 +424,6 @@ class InstrumentationTestInstance(test_instance.TestInstance):
   @property
   def test_package(self):
     return self._test_package
-
-  @property
-  def test_permissions(self):
-    return self._test_permissions
 
   @property
   def test_runner(self):
@@ -441,7 +450,7 @@ class InstrumentationTestInstance(test_instance.TestInstance):
     if self._test_data:
       for t in self._test_data:
         device_rel_path, host_rel_path = t.split(':')
-        host_abs_path = os.path.join(constants.DIR_SOURCE_ROOT, host_rel_path)
+        host_abs_path = os.path.join(host_paths.DIR_SOURCE_ROOT, host_rel_path)
         self._data_deps.extend(
             [(host_abs_path,
               [None, 'chrome', 'test', 'data', device_rel_path])])

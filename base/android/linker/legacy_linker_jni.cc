@@ -107,17 +107,16 @@ bool GenericLoadLibrary(JNIEnv* env,
 
   crazy_library_info_t info;
   if (!crazy_library_get_info(library.Get(), context, &info)) {
-    LOG_ERROR("Could not get library information for %s: %s",
-              library_name, crazy_context_get_error(context));
+    LOG_ERROR("Could not get library information for %s: %s", library_name,
+              crazy_context_get_error(context));
     return false;
   }
 
   // Release library object to keep it alive after the function returns.
   library.Release();
 
-  s_lib_info_fields.SetLoadInfo(env,
-                                lib_info_obj,
-                                info.load_address, info.load_size);
+  s_lib_info_fields.SetLoadInfo(env, lib_info_obj, info.load_address,
+                                info.load_size);
   LOG_INFO("Success loading library %s", library_name);
   return true;
 }
@@ -134,8 +133,8 @@ bool FileLibraryOpener::Open(crazy_library_t** library,
                              const char* library_name,
                              crazy_context_t* context) const {
   if (!crazy_library_open(library, library_name, context)) {
-    LOG_ERROR("Could not open %s: %s",
-              library_name, crazy_context_get_error(context));
+    LOG_ERROR("Could not open %s: %s", library_name,
+              crazy_context_get_error(context));
     return false;
   }
   return true;
@@ -144,10 +143,11 @@ bool FileLibraryOpener::Open(crazy_library_t** library,
 // Used for opening the library in a zip file.
 class ZipLibraryOpener {
  public:
-  explicit ZipLibraryOpener(const char* zip_file) : zip_file_(zip_file) { }
+  explicit ZipLibraryOpener(const char* zip_file) : zip_file_(zip_file) {}
   bool Open(crazy_library_t** library,
             const char* library_name,
             crazy_context_t* context) const;
+
  private:
   const char* zip_file_;
 };
@@ -155,13 +155,11 @@ class ZipLibraryOpener {
 bool ZipLibraryOpener::Open(crazy_library_t** library,
                             const char* library_name,
                             crazy_context_t* context) const {
-  if (!crazy_library_open_in_zip_file(library,
-                                      zip_file_,
-                                      library_name,
+  if (!crazy_library_open_in_zip_file(library, zip_file_, library_name,
                                       context)) {
-     LOG_ERROR("Could not open %s in zip file %s: %s",
-               library_name, zip_file_, crazy_context_get_error(context));
-     return false;
+    LOG_ERROR("Could not open %s in zip file %s: %s", library_name, zip_file_,
+              crazy_context_get_error(context));
+    return false;
   }
   return true;
 }
@@ -188,10 +186,8 @@ jboolean LoadLibrary(JNIEnv* env,
   String lib_name(env, library_name);
   FileLibraryOpener opener;
 
-  return GenericLoadLibrary(env,
-                            lib_name.c_str(),
-                            static_cast<size_t>(load_address),
-                            lib_info_obj,
+  return GenericLoadLibrary(env, lib_name.c_str(),
+                            static_cast<size_t>(load_address), lib_info_obj,
                             opener);
 }
 
@@ -227,10 +223,8 @@ jboolean LoadLibraryInZipFile(JNIEnv* env,
   String lib_name(env, library_name);
   ZipLibraryOpener opener(zipfile_name_str.c_str());
 
-  return GenericLoadLibrary(env,
-                            lib_name.c_str(),
-                            static_cast<size_t>(load_address),
-                            lib_info_obj,
+  return GenericLoadLibrary(env, lib_name.c_str(),
+                            static_cast<size_t>(load_address), lib_info_obj,
                             opener);
 }
 
@@ -243,11 +237,8 @@ struct JavaCallbackBindings_class {
   // Initialize an instance.
   bool Init(JNIEnv* env, jclass linker_class) {
     clazz = reinterpret_cast<jclass>(env->NewGlobalRef(linker_class));
-    return InitStaticMethodId(env,
-                              linker_class,
-                              "postCallbackOnMainThread",
-                              "(J)V",
-                              &method_id);
+    return InitStaticMethodId(env, linker_class, "postCallbackOnMainThread",
+                              "(J)V", &method_id);
   }
 };
 
@@ -283,14 +274,13 @@ static bool PostForLaterExecution(crazy_callback_t* callback_request,
 
   JavaVM* vm;
   int minimum_jni_version;
-  crazy_context_get_java_vm(context,
-                            reinterpret_cast<void**>(&vm),
+  crazy_context_get_java_vm(context, reinterpret_cast<void**>(&vm),
                             &minimum_jni_version);
 
   // Do not reuse JNIEnv from JNI_OnLoad, but retrieve our own.
   JNIEnv* env;
-  if (JNI_OK != vm->GetEnv(
-      reinterpret_cast<void**>(&env), minimum_jni_version)) {
+  if (JNI_OK !=
+      vm->GetEnv(reinterpret_cast<void**>(&env), minimum_jni_version)) {
     LOG_ERROR("Could not create JNIEnv");
     return false;
   }
@@ -299,13 +289,13 @@ static bool PostForLaterExecution(crazy_callback_t* callback_request,
   crazy_callback_t* callback = new crazy_callback_t();
   *callback = *callback_request;
 
-  LOG_INFO("Calling back to java with handler %p, opaque %p",
-           callback->handler, callback->opaque);
+  LOG_INFO("Calling back to java with handler %p, opaque %p", callback->handler,
+           callback->opaque);
 
   jlong arg = static_cast<jlong>(reinterpret_cast<uintptr_t>(callback));
 
-  env->CallStaticVoidMethod(
-      s_java_callback_bindings.clazz, s_java_callback_bindings.method_id, arg);
+  env->CallStaticVoidMethod(s_java_callback_bindings.clazz,
+                            s_java_callback_bindings.method_id, arg);
 
   // Back out and return false if we encounter a JNI exception.
   if (env->ExceptionCheck() == JNI_TRUE) {
@@ -343,20 +333,16 @@ jboolean CreateSharedRelro(JNIEnv* env,
   size_t relro_size = 0;
   int relro_fd = -1;
 
-  if (!crazy_library_create_shared_relro(library.Get(),
-                                         context,
-                                         static_cast<size_t>(load_address),
-                                         &relro_start,
-                                         &relro_size,
-                                         &relro_fd)) {
+  if (!crazy_library_create_shared_relro(
+          library.Get(), context, static_cast<size_t>(load_address),
+          &relro_start, &relro_size, &relro_fd)) {
     LOG_ERROR("Could not create shared RELRO sharing for %s: %s\n",
               lib_name.c_str(), crazy_context_get_error(context));
     return false;
   }
 
-  s_lib_info_fields.SetRelroInfo(env,
-                                 lib_info_obj,
-                                 relro_start, relro_size, relro_fd);
+  s_lib_info_fields.SetRelroInfo(env, lib_info_obj, relro_start, relro_size,
+                                 relro_fd);
   return true;
 }
 
@@ -378,18 +364,16 @@ jboolean UseSharedRelro(JNIEnv* env,
   size_t relro_start = 0;
   size_t relro_size = 0;
   int relro_fd = -1;
-  s_lib_info_fields.GetRelroInfo(env,
-                                 lib_info_obj,
-                                 &relro_start, &relro_size, &relro_fd);
+  s_lib_info_fields.GetRelroInfo(env, lib_info_obj, &relro_start, &relro_size,
+                                 &relro_fd);
 
-  LOG_INFO("library=%s relro start=%p size=%p fd=%d",
-           lib_name.c_str(), (void*)relro_start, (void*)relro_size, relro_fd);
+  LOG_INFO("library=%s relro start=%p size=%p fd=%d", lib_name.c_str(),
+           (void*)relro_start, (void*)relro_size, relro_fd);
 
-  if (!crazy_library_use_shared_relro(library.Get(),
-                                      context,
-                                      relro_start, relro_size, relro_fd)) {
-    LOG_ERROR("Could not use shared RELRO for %s: %s",
-              lib_name.c_str(), crazy_context_get_error(context));
+  if (!crazy_library_use_shared_relro(library.Get(), context, relro_start,
+                                      relro_size, relro_fd)) {
+    LOG_ERROR("Could not use shared RELRO for %s: %s", lib_name.c_str(),
+              crazy_context_get_error(context));
     return false;
   }
 
@@ -439,6 +423,9 @@ const JNINativeMethod kNativeMethods[] = {
      reinterpret_cast<void*>(&UseSharedRelro)},
 };
 
+const size_t kNumNativeMethods =
+    sizeof(kNativeMethods) / sizeof(kNativeMethods[0]);
+
 }  // namespace
 
 bool LegacyLinkerJNIInit(JavaVM* vm, JNIEnv* env) {
@@ -451,15 +438,13 @@ bool LegacyLinkerJNIInit(JavaVM* vm, JNIEnv* env) {
 
   // Register native methods.
   jclass linker_class;
-  if (!InitClassReference(env,
-                          "org/chromium/base/library_loader/LegacyLinker",
+  if (!InitClassReference(env, "org/chromium/base/library_loader/LegacyLinker",
                           &linker_class))
     return false;
 
   LOG_INFO("Registering native methods");
-  env->RegisterNatives(linker_class,
-                       kNativeMethods,
-                       sizeof(kNativeMethods) / sizeof(kNativeMethods[0]));
+  if (env->RegisterNatives(linker_class, kNativeMethods, kNumNativeMethods) < 0)
+    return false;
 
   // Resolve and save the Java side Linker callback class and method.
   LOG_INFO("Resolving callback bindings");

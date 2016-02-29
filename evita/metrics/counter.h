@@ -14,7 +14,8 @@ namespace metrics {
 
 class Counter final {
  public:
-  typedef std::unordered_map<base::StringPiece, int> SampleMap;
+  using SampleMap =
+      std::unordered_map<base::StringPiece, int, base::StringPieceHash>;
 
   explicit Counter(const base::StringPiece& name);
   ~Counter();
@@ -44,7 +45,7 @@ class CounterSet : public common::Singleton<CounterSet> {
  private:
   CounterSet();
 
-  std::unordered_map<base::StringPiece, Counter*> map_;
+  std::unordered_map<base::StringPiece, Counter*, base::StringPieceHash> map_;
 
   DISALLOW_COPY_AND_ASSIGN(CounterSet);
 };

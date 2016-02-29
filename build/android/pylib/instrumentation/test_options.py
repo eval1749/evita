@@ -27,4 +27,8 @@ InstrumentationOptions = collections.namedtuple('InstrumentationOptions', [
     'delete_stale_data',
     'timeout_scale',
     'apk_under_test',
-    'additional_apks'])
+    'additional_apks',
+    'strict_mode',
+    'skip_clear_data',
+    'test_apk_incremental_install_script',
+    'apk_under_test_incremental_install_script'])

@@ -22,7 +22,6 @@
 #include "base/location.h"
 #include "base/macros.h"
 #include "base/process/process_handle.h"
-#include "base/profiler/alternate_timer.h"
 #include "base/profiler/tracked_time.h"
 #include "base/synchronization/lock.h"
 #include "base/threading/thread_checker.h"
@@ -333,13 +332,25 @@ class BASE_EXPORT DeathData {
 
   // Metrics and past snapshots accessors, used only for serialization and in
   // tests.
-  int count() const { return count_; }
-  int32_t run_duration_sum() const { return run_duration_sum_; }
-  int32_t run_duration_max() const { return run_duration_max_; }
-  int32_t run_duration_sample() const { return run_duration_sample_; }
-  int32_t queue_duration_sum() const { return queue_duration_sum_; }
-  int32_t queue_duration_max() const { return queue_duration_max_; }
-  int32_t queue_duration_sample() const { return queue_duration_sample_; }
+  int count() const { return base::subtle::NoBarrier_Load(&count_); }
+  int32_t run_duration_sum() const {
+    return base::subtle::NoBarrier_Load(&run_duration_sum_);
+  }
+  int32_t run_duration_max() const {
+    return base::subtle::NoBarrier_Load(&run_duration_max_);
+  }
+  int32_t run_duration_sample() const {
+    return base::subtle::NoBarrier_Load(&run_duration_sample_);
+  }
+  int32_t queue_duration_sum() const {
+    return base::subtle::NoBarrier_Load(&queue_duration_sum_);
+  }
+  int32_t queue_duration_max() const {
+    return base::subtle::NoBarrier_Load(&queue_duration_max_);
+  }
+  int32_t queue_duration_sample() const {
+    return base::subtle::NoBarrier_Load(&queue_duration_sample_);
+  }
   const DeathDataPhaseSnapshot* last_phase_snapshot() const {
     return last_phase_snapshot_;
   }
@@ -354,28 +365,28 @@ class BASE_EXPORT DeathData {
   // frequently used.  This might help a bit with cache lines.
   // Number of runs seen (divisor for calculating averages).
   // Can be incremented only on the death thread.
-  int count_;
+  base::subtle::Atomic32 count_;
 
   // Count used in determining probability of selecting exec/queue times from a
   // recorded death as samples.
   // Gets incremented only on the death thread, but can be set to 0 by
   // OnProfilingPhaseCompleted() on the snapshot thread.
-  int sample_probability_count_;
+  base::subtle::Atomic32 sample_probability_count_;
 
   // Basic tallies, used to compute averages.  Can be incremented only on the
   // death thread.
-  int32_t run_duration_sum_;
-  int32_t queue_duration_sum_;
+  base::subtle::Atomic32 run_duration_sum_;
+  base::subtle::Atomic32 queue_duration_sum_;
   // Max values, used by local visualization routines.  These are often read,
   // but rarely updated.  The max values get assigned only on the death thread,
   // but these fields can be set to 0 by OnProfilingPhaseCompleted() on the
   // snapshot thread.
-  int32_t run_duration_max_;
-  int32_t queue_duration_max_;
+  base::subtle::Atomic32 run_duration_max_;
+  base::subtle::Atomic32 queue_duration_max_;
   // Samples, used by crowd sourcing gatherers.  These are almost never read,
   // and rarely updated.  They can be modified only on the death thread.
-  int32_t run_duration_sample_;
-  int32_t queue_duration_sample_;
+  base::subtle::Atomic32 run_duration_sample_;
+  base::subtle::Atomic32 queue_duration_sample_;
 
   // Snapshot of this death data made at the last profiling phase completion, if
   // any.  DeathData owns the whole list starting with this pointer.
@@ -525,12 +536,6 @@ class BASE_EXPORT ThreadData {
   // the code).
   static TrackedTime Now();
 
-  // Use the function |now| to provide current times, instead of calling the
-  // TrackedTime::Now() function.  Since this alternate function is being used,
-  // the other time arguments (used for calculating queueing delay) will be
-  // ignored.
-  static void SetAlternateTimeSource(NowFunction* now);
-
   // This function can be called at process termination to validate that thread
   // cleanup routines have been called for at least some number of named
   // threads.
@@ -547,8 +552,10 @@ class BASE_EXPORT ThreadData {
   FRIEND_TEST_ALL_PREFIXES(TrackedObjectsTest, MinimalStartupShutdown);
   FRIEND_TEST_ALL_PREFIXES(TrackedObjectsTest, TinyStartupShutdown);
 
-  typedef std::map<const BirthOnThread*, int> BirthCountMap;
+  // Type for an alternate timer function (testing only).
+  typedef unsigned int NowFunction();
 
+  typedef std::map<const BirthOnThread*, int> BirthCountMap;
   typedef std::vector<std::pair<const Births*, DeathDataPhaseSnapshot>>
       DeathsSnapshot;
 
@@ -623,11 +630,7 @@ class BASE_EXPORT ThreadData {
 
   // When non-null, this specifies an external function that supplies monotone
   // increasing time functcion.
-  static NowFunction* now_function_;
-
-  // If true, now_function_ returns values that can be used to calculate queue
-  // time.
-  static bool now_function_is_time_;
+  static NowFunction* now_function_for_testing_;
 
   // We use thread local store to identify which ThreadData to interact with.
   static base::ThreadLocalStorage::StaticSlot tls_index_;
@@ -792,6 +795,7 @@ class BASE_EXPORT TaskStopwatch {
 struct BASE_EXPORT ProcessDataPhaseSnapshot {
  public:
   ProcessDataPhaseSnapshot();
+  ProcessDataPhaseSnapshot(const ProcessDataPhaseSnapshot& other);
   ~ProcessDataPhaseSnapshot();
 
   std::vector<TaskSnapshot> tasks;
@@ -804,6 +808,7 @@ struct BASE_EXPORT ProcessDataPhaseSnapshot {
 struct BASE_EXPORT ProcessDataSnapshot {
  public:
   ProcessDataSnapshot();
+  ProcessDataSnapshot(const ProcessDataSnapshot& other);
   ~ProcessDataSnapshot();
 
   PhasedProcessDataSnapshotMap phased_snapshots;

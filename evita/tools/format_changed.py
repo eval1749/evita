@@ -22,6 +22,12 @@ FILE_TYPES = {
     '.py': 'python',
 }
 
+WHITE_LIST = [
+    'common/',
+    'evita/',
+    'regex/',
+]
+
 
 def file_type_of(file_name):
     for (extension, type_name) in FILE_TYPES.iteritems():
@@ -31,6 +37,9 @@ def file_type_of(file_name):
 
 
 def dispatch(file_name):
+    if not in_white_list(file_name):
+        return skip(file_name)
+
     if file_name.find('/templates/') >= 0:
         return skip(file_name)
 
@@ -76,6 +85,13 @@ def format_python(file_name):
         return
     sys.stderr.write('  Formatting Python "%s"\n' % file_name)
     os.system('python %(autopep8)s -i %(file_name)s' % args)
+
+
+def in_white_list(file_name):
+    for directory in WHITE_LIST:
+        if file_name.startswith(directory):
+            return True
+    return False
 
 
 def skip(file_name):

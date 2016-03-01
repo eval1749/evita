@@ -6,9 +6,9 @@
 
 #include "base/time/time.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/scheduler/animation_frame_callback.h"
 #include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/timing/animation_frame_callback.h"
 #include "evita/ginx/runner.h"
 #include "evita/ginx/scoped_persistent.h"
 

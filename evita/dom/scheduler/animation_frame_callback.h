@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_TIMING_ANIMATION_FRAME_CALLBACK_H_
-#define EVITA_DOM_TIMING_ANIMATION_FRAME_CALLBACK_H_
+#ifndef EVITA_DOM_SCHEDULER_ANIMATION_FRAME_CALLBACK_H_
+#define EVITA_DOM_SCHEDULER_ANIMATION_FRAME_CALLBACK_H_
 
 #include "base/callback.h"
 #include "base/location.h"
@@ -32,4 +32,4 @@ class AnimationFrameCallback final : public base::TrackingInfo {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_TIMING_ANIMATION_FRAME_CALLBACK_H_
+#endif  // EVITA_DOM_SCHEDULER_ANIMATION_FRAME_CALLBACK_H_

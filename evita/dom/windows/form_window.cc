@@ -19,9 +19,9 @@
 #include "evita/dom/public/form_controls.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_events.h"
+#include "evita/dom/scheduler/animation_frame_callback.h"
 #include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/timing/animation_frame_callback.h"
 
 namespace dom {
 

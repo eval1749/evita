@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/timing/animation_frame_callback.h"
+#include "evita/dom/scheduler/animation_frame_callback.h"
 
 #include "base/bind.h"
 #include "base/callback.h"

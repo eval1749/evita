@@ -12,10 +12,10 @@
 #include "base/synchronization/lock.h"
 #include "base/trace_event/trace_event.h"
 #include "common/maybe.h"
+#include "evita/dom/scheduler/animation_frame_callback.h"
 #include "evita/dom/scheduler/idle_task_queue.h"
 #include "evita/dom/scheduler/scheduler_client.h"
 #include "evita/dom/script_host.h"
-#include "evita/dom/timing/animation_frame_callback.h"
 
 namespace dom {
 

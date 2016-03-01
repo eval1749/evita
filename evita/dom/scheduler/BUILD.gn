@@ -17,6 +17,8 @@ source_set("scheduler") {
 
 source_set("public") {
   sources = [
+    "animation_frame_callback.cc",
+    "animation_frame_callback.h",
     "idle_task.cc",
     "idle_task.h",
     "scheduler.cc",

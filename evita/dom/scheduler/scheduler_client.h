@@ -8,7 +8,7 @@
 #include "base/macros.h"
 
 namespace base {
-class Time;
+class TimeTicks;
 }
 
 namespace dom {
@@ -24,6 +24,7 @@ class SchedulerClient {
 
   virtual void DidCancelAnimationFrame() = 0;
   virtual void DidRequestAnimationFrame() = 0;
+  virtual void EnterIdle(const base::TimeTicks& deadline) = 0;
 
  protected:
   SchedulerClient();

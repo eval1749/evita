@@ -136,10 +136,7 @@ void SchedulerImpl::BeginFrame(const base::TimeTicks& deadline) {
       base::TimeTicks::Now());
   if (base::TimeTicks::Now() < deadline)
     idle_task_queue_->RunIdleTasks(deadline);
-  const auto remaining = (deadline - base::TimeTicks::Now()).InSecondsF();
-  if (remaining <= 0)
-    return;
-  ScriptHost::instance()->isolate()->IdleNotificationDeadline(remaining);
+  scheduler_client_->EnterIdle(deadline);
 }
 
 void SchedulerImpl::ProcessTasks() {

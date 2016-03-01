@@ -9,6 +9,7 @@
 #include "base/message_loop/message_loop.h"
 #include "base/task_runner.h"
 #include "base/threading/thread.h"
+#include "base/time/time.h"
 #include "base/trace_event/trace_event.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_event.h"
@@ -199,6 +200,14 @@ void ScriptThread::DidRequestAnimationFrame() {
   if (animation_frame_request_count_ != 1)
     return;
   RequestAnimationFrame();
+}
+
+void ScriptThread::EnterIdle(const base::TimeTicks& deadline) {
+  DCHECK_CALLED_ON_SCRIPT_THREAD();
+  const auto remaining = (deadline - base::TimeTicks::Now()).InSecondsF();
+  if (remaining <= 0)
+    return;
+  ScriptHost::instance()->isolate()->IdleNotificationDeadline(remaining);
 }
 
 // ui::AnimationFrameHandler

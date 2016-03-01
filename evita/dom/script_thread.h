@@ -81,6 +81,7 @@ class ScriptThread final : public base::PingProvider,
   // SchedulerClient
   void DidCancelAnimationFrame() final;
   void DidRequestAnimationFrame() final;
+  void EnterIdle(const base::TimeTicks& deadline) final;
 
   // ui::AnimationFrameHandler
   const char* GetAnimationFrameType() const final;

@@ -4,6 +4,8 @@
 
 source_set("scheduler") {
   sources = [
+    "idle_task_queue.cc",
+    "idle_task_queue.h",
     "scheduler_impl.cc",
     "scheduler_impl.h",
   ]

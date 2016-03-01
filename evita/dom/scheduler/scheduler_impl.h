@@ -19,6 +19,7 @@ class MessageLoop;
 namespace dom {
 
 class IdleTask;
+class IdleTaskQueue;
 class SchedulerClient;
 
 class SchedulerImpl final : public Scheduler {
@@ -30,7 +31,6 @@ class SchedulerImpl final : public Scheduler {
 
  private:
   class AnimationFrameCallbackQueue;
-  class IdleTaskQueue;
   enum class State;
   class TaskQueue;
 

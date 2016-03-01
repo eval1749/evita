@@ -12,11 +12,10 @@
 #include "base/synchronization/lock.h"
 #include "base/trace_event/trace_event.h"
 #include "common/maybe.h"
-#include "evita/dom/public/view_events.h"
+#include "evita/dom/scheduler/idle_task_queue.h"
 #include "evita/dom/scheduler/scheduler_client.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/animation_frame_callback.h"
-#include "evita/dom/timing/idle_task.h"
 
 namespace dom {
 
@@ -64,74 +63,6 @@ int SchedulerImpl::AnimationFrameCallbackQueue::Give(
   ++last_callback_id_;
   callback_map_.emplace(last_callback_id_, std::move(callback));
   return last_callback_id_;
-}
-
-//////////////////////////////////////////////////////////////////////
-//
-// SchedulerImpl::IdleTaskQueue
-//
-class SchedulerImpl::IdleTaskQueue final {
- public:
-  IdleTaskQueue() = default;
-  ~IdleTaskQueue() = default;
-
-  void CancelTask(int task_id);
-  int GiveTask(const IdleTask& task);
-  void RunIdleTasks(const base::TimeTicks& deadline);
-
- private:
-  void RemoveTask(IdleTask* task);
-
-  std::queue<IdleTask*> ready_tasks_;
-  std::unordered_map<int, IdleTask*> task_map_;
-  std::priority_queue<IdleTask*> waiting_tasks_;
-
-  DISALLOW_COPY_AND_ASSIGN(IdleTaskQueue);
-};
-
-void SchedulerImpl::IdleTaskQueue::CancelTask(int task_id) {
-  auto const it = task_map_.find(task_id);
-  if (it == task_map_.end())
-    return;
-  it->second->Cancel();
-}
-
-int SchedulerImpl::IdleTaskQueue::GiveTask(const IdleTask& task_in) {
-  auto const task = new IdleTask(task_in);
-  task_map_.insert({task->id(), task});
-  if (task->delayed_run_time != base::TimeTicks())
-    waiting_tasks_.push(task);
-  else
-    ready_tasks_.push(task);
-  return task->id();
-}
-
-void SchedulerImpl::IdleTaskQueue::RemoveTask(IdleTask* task) {
-  auto const it = task_map_.find(task->id());
-  DCHECK(it != task_map_.end());
-  task_map_.erase(it);
-  delete task;
-}
-
-void SchedulerImpl::IdleTaskQueue::RunIdleTasks(
-    const base::TimeTicks& deadline) {
-  const auto& now = base::TimeTicks::Now();
-  while (!waiting_tasks_.empty() &&
-         waiting_tasks_.top()->delayed_run_time <= now) {
-    ready_tasks_.push(waiting_tasks_.top());
-    waiting_tasks_.pop();
-  }
-
-  // Run runnable tasks before this loop.
-  for (auto count = ready_tasks_.size(); count > 0; --count) {
-    if (deadline <= base::TimeTicks::Now())
-      break;
-    auto const task = ready_tasks_.front();
-    ready_tasks_.pop();
-    if (!task->IsCanceled())
-      task->Run(deadline);
-    RemoveTask(task);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

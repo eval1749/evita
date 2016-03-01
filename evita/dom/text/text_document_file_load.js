@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 (function() {
+  /** @const @type {number} */
+  const kBufferSize = 1024 * 64;
+
   /** @const @type {!RegExp} */
   const RE_CR = NewRegExp('\r', 'g');
 
@@ -140,7 +143,7 @@
         loader.range_.end = loader.document_.length;
         loader.file_ = yield Os.File.open(fileName);
         const file = loader.file_;
-        const readData = new Uint8Array(4096);
+        const readData = new Uint8Array(kBufferSize);
         for (;;) {
           const numRead = yield file.read(readData);
           if (numRead === 0)

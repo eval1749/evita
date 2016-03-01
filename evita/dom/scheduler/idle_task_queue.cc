@@ -4,6 +4,7 @@
 
 #include "evita/dom/scheduler/idle_task_queue.h"
 
+#include "base/trace_event/trace_event.h"
 #include "evita/dom/scheduler/idle_task.h"
 
 namespace dom {
@@ -41,6 +42,8 @@ void IdleTaskQueue::RemoveTask(IdleTask* task) {
 
 void IdleTaskQueue::RunIdleTasks(const base::TimeTicks& deadline) {
   const auto& now = base::TimeTicks::Now();
+  TRACE_EVENT1("script", "IdleTaskQueue::RunIdleTasks", "deadline",
+               (deadline - now).InMilliseconds());
   while (!waiting_tasks_.empty() &&
          waiting_tasks_.top()->delayed_run_time <= now) {
     ready_tasks_.push(waiting_tasks_.top());
@@ -51,12 +54,19 @@ void IdleTaskQueue::RunIdleTasks(const base::TimeTicks& deadline) {
   for (auto count = ready_tasks_.size(); count > 0; --count) {
     if (deadline <= base::TimeTicks::Now())
       break;
+    if (should_stop_.load())
+      break;
     auto const task = ready_tasks_.front();
     ready_tasks_.pop();
     if (!task->IsCanceled())
       task->Run(deadline);
     RemoveTask(task);
   }
+  should_stop_.store(false);
+}
+
+void IdleTaskQueue::StopIdleTasks() {
+  should_stop_.store(true);
 }
 
 }  // namespace dom

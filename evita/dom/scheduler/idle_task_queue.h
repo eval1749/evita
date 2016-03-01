@@ -5,6 +5,7 @@
 #ifndef EVITA_DOM_SCHEDULER_IDLE_TASK_QUEUE_H_
 #define EVITA_DOM_SCHEDULER_IDLE_TASK_QUEUE_H_
 
+#include <atomic>
 #include <queue>
 #include <unordered_map>
 
@@ -30,10 +31,12 @@ class IdleTaskQueue final {
   void CancelTask(int task_id);
   int GiveTask(const IdleTask& task);
   void RunIdleTasks(const base::TimeTicks& deadline);
+  void StopIdleTasks();
 
  private:
   void RemoveTask(IdleTask* task);
 
+  std::atomic<bool> should_stop_;
   std::queue<IdleTask*> ready_tasks_;
   std::unordered_map<int, IdleTask*> task_map_;
   std::priority_queue<IdleTask*> waiting_tasks_;

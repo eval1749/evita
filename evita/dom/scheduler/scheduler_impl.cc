@@ -73,22 +73,27 @@ class SchedulerImpl::TaskQueue {
   TaskQueue() = default;
   ~TaskQueue() = default;
 
-  bool empty() const { return tasks_.empty(); }
-  size_t size() const { return tasks_.size(); }
-
-  void GiveTask(const base::Closure& closure);
+  // Returns true if there is only one task in queue.
+  bool GiveTask(const base::Closure& closure);
+  bool IsEmpty() const;
   common::Maybe<base::Closure> TakeTask();
 
  private:
-  base::Lock lock_;
+  mutable base::Lock lock_;
   std::queue<base::Closure> tasks_;
 
   DISALLOW_COPY_AND_ASSIGN(TaskQueue);
 };
 
-void SchedulerImpl::TaskQueue::GiveTask(const base::Closure& task) {
+bool SchedulerImpl::TaskQueue::GiveTask(const base::Closure& task) {
   base::AutoLock lock_scope(lock_);
   tasks_.push(task);
+  return tasks_.size() == 1;
+}
+
+bool SchedulerImpl::TaskQueue::IsEmpty() const {
+  base::AutoLock lock_scope(lock_);
+  return tasks_.empty();
 }
 
 common::Maybe<base::Closure> SchedulerImpl::TaskQueue::TakeTask() {
@@ -130,7 +135,6 @@ SchedulerImpl::~SchedulerImpl() {}
 void SchedulerImpl::BeginFrame(const base::TimeTicks& deadline) {
   ASSERT_ON_SCRIPT_THREAD();
   TRACE_EVENT0("script", "SchedulerImpl::BeginFrame");
-  ProcessTasks();
   animation_frame_callback_queue_->DidBeginAnimationFrame(
       base::TimeTicks::Now());
   if (base::TimeTicks::Now() < deadline)
@@ -139,13 +143,14 @@ void SchedulerImpl::BeginFrame(const base::TimeTicks& deadline) {
 }
 
 void SchedulerImpl::ProcessTasks() {
+  TRACE_EVENT0("script", "SchedulerImpl::ProcessTasks");
   ASSERT_ON_SCRIPT_THREAD();
   state_.store(State::Running);
   for (;;) {
     auto maybe_task = normal_task_queue_->TakeTask();
     if (maybe_task.IsNothing()) {
       scheduler_client_->RunMicrotasks();
-      if (normal_task_queue_->empty())
+      if (normal_task_queue_->IsEmpty())
         break;
       continue;
     }
@@ -200,7 +205,14 @@ int SchedulerImpl::ScheduleIdleTask(const IdleTask& task) {
 void SchedulerImpl::ScheduleTask(const base::Closure& task) {
   TRACE_EVENT0("script", "SchedulerImpl::ScheduleTask");
   DCHECK(script_message_loop_->task_runner());
-  normal_task_queue_->GiveTask(task);
+  if (normal_task_queue_->GiveTask(task)) {
+    // Since file I/O is done in less than 1ms, we should run a task to
+    // schedule next file I/O rather than waiting animation frame.
+    script_message_loop_->task_runner()->PostTask(
+        FROM_HERE,
+        base::Bind(&SchedulerImpl::ProcessTasks, base::Unretained(this)));
+  }
+  idle_task_queue_->StopIdleTasks();
 }
 
 }  // namespace dom

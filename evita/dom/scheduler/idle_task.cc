@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/dom/timing/idle_task.h"
+#include "evita/dom/scheduler/idle_task.h"
 
 #include "base/tracked_objects.h"
 
@@ -15,7 +15,6 @@ IdleTask::IdleTask(const tracked_objects::Location& posted_from,
                    base::TimeTicks delay_run_time)
     : base::TrackingInfo(posted_from, delay_run_time),
       callback_(callback),
-      is_canceled_(false),
       sequence_num_(++current_sequence_num) {}
 
 IdleTask::IdleTask(const tracked_objects::Location& posted_from,

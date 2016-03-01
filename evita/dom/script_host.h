@@ -14,7 +14,7 @@
 #include "base/strings/string16.h"
 #include "evita/dom/public/script_host_state.h"
 #include "evita/dom/public/view_event_handler.h"
-#include "evita/dom/timing/idle_task.h"
+#include "evita/dom/scheduler/idle_task.h"
 #include "evita/ginx/isolate_holder.h"
 #include "evita/ginx/runner_delegate.h"
 #include "evita/ginx/scoped_persistent.h"

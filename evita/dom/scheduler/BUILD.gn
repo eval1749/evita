@@ -17,6 +17,8 @@ source_set("scheduler") {
 
 source_set("public") {
   sources = [
+    "idle_task.cc",
+    "idle_task.h",
     "scheduler.cc",
     "scheduler.h",
     "scheduler_client.cc",

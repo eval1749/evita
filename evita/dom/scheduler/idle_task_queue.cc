@@ -4,7 +4,7 @@
 
 #include "evita/dom/scheduler/idle_task_queue.h"
 
-#include "evita/dom/timing/idle_task.h"
+#include "evita/dom/scheduler/idle_task.h"
 
 namespace dom {
 

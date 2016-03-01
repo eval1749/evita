@@ -6,8 +6,8 @@
 
 #include "evita/dom/timing/mock_scheduler.h"
 
+#include "evita/dom/scheduler/idle_task.h"
 #include "evita/dom/timing/animation_frame_callback.h"
-#include "evita/dom/timing/idle_task.h"
 
 namespace dom {
 

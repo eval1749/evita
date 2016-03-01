@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_TIMING_IDLE_TASK_H_
-#define EVITA_DOM_TIMING_IDLE_TASK_H_
+#ifndef EVITA_DOM_SCHEDULER_IDLE_TASK_H_
+#define EVITA_DOM_SCHEDULER_IDLE_TASK_H_
 
 #include "base/callback.h"
 #include "base/location.h"
@@ -39,9 +39,9 @@ class IdleTask final : public base::TrackingInfo {
  private:
   Callback callback_;
   int const sequence_num_;
-  bool is_canceled_;
+  bool is_canceled_ = false;
 };
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_TIMING_IDLE_TASK_H_
+#endif  // EVITA_DOM_SCHEDULER_IDLE_TASK_H_

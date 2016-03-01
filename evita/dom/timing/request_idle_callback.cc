@@ -6,10 +6,10 @@
 
 #include "evita/dom/bindings/ginx_IdleRequestOptions.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/scheduler/idle_task.h"
 #include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/idle_deadline.h"
-#include "evita/dom/timing/idle_task.h"
 #include "evita/ginx/runner.h"
 #include "evita/ginx/scoped_persistent.h"
 

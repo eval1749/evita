@@ -19,7 +19,7 @@
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
 #include "evita/dom/public/view_delegate.h"
-#include "evita/dom/scheduler.h"
+#include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/static_script_source.h"
 #include "evita/dom/timing/idle_task.h"
 #include "evita/dom/timing/performance.h"

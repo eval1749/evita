@@ -6,7 +6,7 @@
 
 #include "evita/dom/bindings/ginx_IdleRequestOptions.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/scheduler.h"
+#include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/timing/idle_deadline.h"
 #include "evita/dom/timing/idle_task.h"

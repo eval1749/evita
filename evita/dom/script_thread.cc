@@ -13,7 +13,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/public/text_composition_event.h"
 #include "evita/dom/public/view_events.h"
-#include "evita/dom/scheduler_impl.h"
+#include "evita/dom/scheduler/scheduler_impl.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/view_event_handler_impl.h"
 #include "evita/ui/events/event.h"

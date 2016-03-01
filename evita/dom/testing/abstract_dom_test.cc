@@ -20,7 +20,7 @@
 #include "evita/dom/converter.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
-#include "evita/dom/scheduler.h"
+#include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/static_script_source.h"
 #include "evita/dom/testing/gtest.h"

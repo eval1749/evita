@@ -10,7 +10,7 @@
 
 #include "base/macros.h"
 #include "base/time/time.h"
-#include "evita/dom/scheduler.h"
+#include "evita/dom/scheduler/scheduler.h"
 
 namespace dom {
 

@@ -8,8 +8,6 @@ import("//evita/dom/js_files.gni")
 
 source_set("dom") {
   sources = [
-    "scheduler_impl.cc",
-    "scheduler_impl.h",
     "script_thread.cc",
     "script_thread.h",
   ]
@@ -17,6 +15,7 @@ source_set("dom") {
     ":components",
     "//base",
     "//evita/base",
+    "//evita/dom/scheduler",
     "//evita/ui",
   ]
 }
@@ -58,7 +57,6 @@ source_set("components") {
     ":dom_unicode_lib_cc",
     ":dom_v8_strings_cc",
     ":lock",
-    ":scheduler",
     ":v8_helper",
     "//base",
     "//base:i18n",
@@ -72,6 +70,7 @@ source_set("components") {
     "//evita/dom/forms",
     "//evita/dom/os",
     "//evita/dom/public",
+    "//evita/dom/scheduler:public",
     "//evita/dom/text",
     "//evita/dom/timing",
     "//evita/dom/visuals",
@@ -115,19 +114,6 @@ source_set("v8_helper") {
     "//base",
     "//evita/ginx",
     "//evita/text",
-  ]
-}
-
-source_set("scheduler") {
-  visibility = [ ":*" ]  # Only targets in this file can depend on this.
-  sources = [
-    "scheduler.cc",
-    "scheduler.h",
-    "scheduler_client.cc",
-    "scheduler_client.h",
-  ]
-  deps = [
-    "//base",
   ]
 }
 

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_SCHEDULER_IMPL_H_
-#define EVITA_DOM_SCHEDULER_IMPL_H_
+#ifndef EVITA_DOM_SCHEDULER_SCHEDULER_IMPL_H_
+#define EVITA_DOM_SCHEDULER_SCHEDULER_IMPL_H_
 
 #include <atomic>
 #include <memory>
 #include <queue>
 
 #include "base/time/time.h"
-#include "evita/dom/scheduler.h"
+#include "evita/dom/scheduler/scheduler.h"
 
 namespace base {
 class MessageLoop;
@@ -62,4 +62,4 @@ class SchedulerImpl final : public Scheduler {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_SCHEDULER_IMPL_H_
+#endif  // EVITA_DOM_SCHEDULER_SCHEDULER_IMPL_H_

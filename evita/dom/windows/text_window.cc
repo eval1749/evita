@@ -17,7 +17,7 @@
 #include "evita/dom/public/text_area_display_item.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_events.h"
-#include "evita/dom/scheduler.h"
+#include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_range.h"

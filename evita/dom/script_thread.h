@@ -14,7 +14,7 @@
 #include "evita/base/ping_provider.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/public/view_event_handler.h"
-#include "evita/dom/scheduler_client.h"
+#include "evita/dom/scheduler/scheduler_client.h"
 #include "evita/ui/animation/animation_frame_handler.h"
 
 namespace base {

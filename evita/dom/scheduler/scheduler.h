@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_SCHEDULER_H_
-#define EVITA_DOM_SCHEDULER_H_
+#ifndef EVITA_DOM_SCHEDULER_SCHEDULER_H_
+#define EVITA_DOM_SCHEDULER_SCHEDULER_H_
 
 #include <memory>
 
@@ -38,4 +38,4 @@ class Scheduler : public base::TickClock {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_SCHEDULER_H_
+#endif  // EVITA_DOM_SCHEDULER_SCHEDULER_H_

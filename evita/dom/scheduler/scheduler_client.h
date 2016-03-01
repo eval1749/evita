@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_DOM_SCHEDULER_CLIENT_H_
-#define EVITA_DOM_SCHEDULER_CLIENT_H_
+#ifndef EVITA_DOM_SCHEDULER_SCHEDULER_CLIENT_H_
+#define EVITA_DOM_SCHEDULER_SCHEDULER_CLIENT_H_
 
 #include "base/macros.h"
 
@@ -34,4 +34,4 @@ class SchedulerClient {
 
 }  // namespace dom
 
-#endif  // EVITA_DOM_SCHEDULER_CLIENT_H_
+#endif  // EVITA_DOM_SCHEDULER_SCHEDULER_CLIENT_H_

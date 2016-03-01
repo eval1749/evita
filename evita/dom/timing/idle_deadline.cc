@@ -5,7 +5,7 @@
 #include "evita/dom/timing/idle_deadline.h"
 
 #include "base/time/time.h"
-#include "evita/dom/scheduler.h"
+#include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/script_host.h"
 
 namespace dom {

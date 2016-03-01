@@ -82,6 +82,7 @@ class ScriptThread final : public base::PingProvider,
   void DidCancelAnimationFrame() final;
   void DidRequestAnimationFrame() final;
   void EnterIdle(const base::TimeTicks& deadline) final;
+  void RunMicrotasks() final;
 
   // ui::AnimationFrameHandler
   const char* GetAnimationFrameType() const final;

@@ -15,7 +15,6 @@
 #include "evita/dom/scheduler/animation_frame_callback.h"
 #include "evita/dom/scheduler/idle_task_queue.h"
 #include "evita/dom/scheduler/scheduler_client.h"
-#include "evita/dom/script_host.h"
 
 namespace dom {
 
@@ -145,7 +144,7 @@ void SchedulerImpl::ProcessTasks() {
   for (;;) {
     auto maybe_task = normal_task_queue_->TakeTask();
     if (maybe_task.IsNothing()) {
-      ScriptHost::instance()->RunMicrotasks();
+      scheduler_client_->RunMicrotasks();
       if (normal_task_queue_->empty())
         break;
       continue;

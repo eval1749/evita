@@ -210,6 +210,10 @@ void ScriptThread::EnterIdle(const base::TimeTicks& deadline) {
   ScriptHost::instance()->isolate()->IdleNotificationDeadline(remaining);
 }
 
+void ScriptThread::RunMicrotasks() {
+  ScriptHost::instance()->RunMicrotasks();
+}
+
 // ui::AnimationFrameHandler
 const char* ScriptThread::GetAnimationFrameType() const {
   return "ScriptThread";

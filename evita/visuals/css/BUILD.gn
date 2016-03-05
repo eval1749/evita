@@ -46,8 +46,8 @@ source_set("css") {
 
   public_deps = [
     ":properties",
-    ":values",
     "//base",
+    "//evita/visuals/css/values",
   ]
 
   include_dirs = [ root_gen_dir ]
@@ -83,33 +83,6 @@ action("properties") {
     "--output-directory",
     rebase_path("$css_gen_dir"),
     rebase_path("properties.in", root_build_dir),
-  ]
-}
-
-source_set("values") {
-  sources = [
-    "color.cc",
-    "color.h",
-    "dimension.cc",
-    "dimension.h",
-    "float_color.cc",
-    "float_color.h",
-    "length.cc",
-    "length.h",
-    "percentage.cc",
-    "percentage.h",
-    "string.cc",
-    "string.h",
-    "unit.cc",
-    "unit.h",
-    "value.cc",
-    "value.h",
-    "value_type.cc",
-    "value_type.h",
-  ]
-
-  deps = [
-    "//base",
   ]
 }
 

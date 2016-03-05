@@ -7,13 +7,13 @@
 #include "evita/visuals/css/property_set.h"
 
 #include "base/logging.h"
-#include "evita/visuals/css/color.h"
-#include "evita/visuals/css/dimension.h"
-#include "evita/visuals/css/percentage.h"
 #include "evita/visuals/css/properties_forward.h"
-#include "evita/visuals/css/unit.h"
-#include "evita/visuals/css/value.h"
-#include "evita/visuals/css/value_type.h"
+#include "evita/visuals/css/values/color.h"
+#include "evita/visuals/css/values/dimension.h"
+#include "evita/visuals/css/values/percentage.h"
+#include "evita/visuals/css/values/unit.h"
+#include "evita/visuals/css/values/value.h"
+#include "evita/visuals/css/values/value_type.h"
 
 namespace visuals {
 namespace css {

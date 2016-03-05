@@ -10,10 +10,10 @@
 
 #include "evita/dom/visuals/css_value_parsers.h"
 
-#include "base/strings/stringprintf.h"
 #include "base/strings/string_util.h"
-#include "evita/visuals/css/color.h"
+#include "base/strings/stringprintf.h"
 #include "evita/visuals/css/values.h"
+#include "evita/visuals/css/values/color.h"
 
 namespace dom {
 

@@ -7,8 +7,8 @@
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/property_set_builder.h"
 #include "evita/visuals/css/property_set_editor.h"
-#include "evita/visuals/css/value.h"
 #include "evita/visuals/css/values.h"
+#include "evita/visuals/css/values/value.h"
 #include "gtest/gtest.h"
 
 namespace visuals {

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_CSS_STRING_H_
-#define EVITA_VISUALS_CSS_STRING_H_
+#ifndef EVITA_VISUALS_CSS_VALUES_STRING_H_
+#define EVITA_VISUALS_CSS_VALUES_STRING_H_
 
 #include <iosfwd>
 #include <string>
@@ -39,4 +39,4 @@ std::ostream& operator<<(std::ostream& ostream, const String& string);
 }  // namespace css
 }  // namespace visuals
 
-#endif  // EVITA_VISUALS_CSS_STRING_H_
+#endif  // EVITA_VISUALS_CSS_VALUES_STRING_H_

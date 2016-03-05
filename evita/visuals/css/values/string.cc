@@ -5,7 +5,7 @@
 #include <ostream>
 #include <string>
 
-#include "evita/visuals/css/string.h"
+#include "evita/visuals/css/values/string.h"
 
 #include "base/strings/utf_string_conversions.h"
 

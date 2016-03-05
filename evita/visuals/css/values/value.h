@@ -18,6 +18,7 @@ namespace css {
 class Color;
 class Dimension;
 enum class Keyword;
+class Length;
 class Percentage;
 class String;
 enum class Unit;
@@ -53,6 +54,7 @@ class Value final {
   int as_integer() const;
   Keyword as_keyword() const;
   float as_number() const;
+  Length as_length() const;
   Percentage as_percentage() const;
   const String& as_string() const;
 
@@ -60,6 +62,7 @@ class Value final {
   bool is_dimension() const;
   bool is_integer() const;
   bool is_keyword() const;
+  bool is_length() const;
   bool is_number() const;
   bool is_percentage() const;
   bool is_string() const;

@@ -40,6 +40,15 @@ class Dimension {
   float number() const { return number_; }
   Unit unit() const { return unit_; }
 
+  static bool is_absolute_length(Unit unit);
+  static bool is_angle(Unit unit);
+  static bool is_duration(Unit unit);
+  static bool is_font_relative_length(Unit unit);
+  static bool is_frequency(Unit unit);
+  static bool is_length(Unit unit);
+  static bool is_resolution(Unit unit);
+  static bool is_viewport_percentage_length(Unit unit);
+
  private:
   float number_;
   Unit unit_;

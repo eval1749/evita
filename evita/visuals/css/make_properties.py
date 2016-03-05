@@ -103,7 +103,7 @@ class Generator(object):
         return {
             'Name': css_type.name,
             'Parameter': css_type.to_parameter_type(),
-            'Return': css_type.to_parameter_type(),
+            'Return': css_type.name,
             'initial': css_type.initial_value,
             'is_compound': css_type.is_compound,
             'is_enum': css_type.is_enum,

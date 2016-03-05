@@ -14,6 +14,7 @@
 {% endfor %}
 #include "evita/visuals/css/values/dimension.h"
 #include "evita/visuals/css/values/unit.h"
+#include "evita/visuals/css/values/value.h"
 
 namespace visuals {
 namespace css {
@@ -25,22 +26,6 @@ namespace css {
 enum class Keyword {
 {% for keyword in keywords %}
   {{keyword.Name}},
-{% endfor %}
-};
-
-//////////////////////////////////////////////////////////////////////
-//
-// Value Types
-//
-enum class DeprecatedValueType {
-  // Keywords
-{% for keyword in keywords %}
-  {{keyword.Name}},
-{% endfor %}
-
-  // Values
-{% for type in types %}
-  {{type.Name}},
 {% endfor %}
 };
 
@@ -96,13 +81,9 @@ class {{type.Name}} final {
  # Private section
  #}
  private:
-  explicit {{type.Name}}(DeprecatedValueType value_type);
+  explicit {{type.Name}}(const Value& value);
 
-  // Values
-{%  for member in type.members if not member.is_keyword %}
-  {{member.Name}} {{member.name}}_;
-{%  endfor %}
-  DeprecatedValueType value_type_ = DeprecatedValueType::{{type.initial}};
+  Value value_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, {{type.Parameter}} {{type.name}});

@@ -19,40 +19,26 @@ namespace css {
 //
 {%  for member in type.members if not member.is_keyword %}
 {{type.Name}}::{{type.Name}}({{member.Parameter}} {{member.name}})
-    : {{member.name}}_({{member.name}}),
-      value_type_(DeprecatedValueType::{{member.Name}}) {}
+    : value_(Value({{member.name}})) {}
 {% endfor %}
 {# Copy constructor #}
 {{type.Name}}::{{type.Name}}({{type.Parameter}} other) :
-{%  for member in type.members if not member.is_keyword %}
-    {{member.name}}_(other.{{member.name}}_),
-{%  endfor %}
-    value_type_(other.value_type_) {}
+    value_(other.value_) {}
 
-{{type.Name}}::{{type.Name}}(DeprecatedValueType value_type)
-    : value_type_(value_type) {}
+{{type.Name}}::{{type.Name}}(const Value& value) : value_(value) {}
 {# Default constructor #}
-{{type.Name}}::{{type.Name}}() {}
+{{type.Name}}::{{type.Name}}() : value_(Value(Keyword::{{type.initial}})) {}
 {{type.Name}}::~{{type.Name}}() {}
 
 {{type.Name}}& {{type.Name}}::operator=({{type.Parameter}} other) {
-{%  for member in type.members if not member.is_keyword %}
-  {{member.name}}_ = other.{{member.name}}_;
-{%  endfor %}
-  value_type_ = other.value_type_;
+  value_ = other.value_;
   return *this;
 }
 
 bool {{type.Name}}::operator==({{type.Parameter}} other) const {
   if (this == &other)
     return true;
-  if (value_type_ != other.value_type_)
-    return false;
-{%  for member in type.members if not member.is_keyword %}
-  if (is_{{member.name}}())
-    return {{member.name}}_ == other.{{member.name}}_;
-{%  endfor %}
-  return true;
+  return value_ == other.value_;
 }
 
 bool {{type.Name}}::operator!=({{type.Parameter}} other) const {
@@ -66,7 +52,7 @@ bool {{type.Name}}::operator!=({{type.Parameter}} other) const {
 {%  for member in type.members if not member.is_keyword %}
 {{member.Return}} {{type.Name}}::{{member.name}}() const {
   DCHECK(is_{{member.name}}());
-  return {{member.name}}_;
+  return value_.as_{{member.name}}();
 }
 
 {%  endfor %}
@@ -76,7 +62,11 @@ bool {{type.Name}}::operator!=({{type.Parameter}} other) const {
  #}
 {% for member in type.members %}
 bool {{type.Name}}::is_{{member.name}}() const {
-  return value_type_ == DeprecatedValueType::{{member.Name}};
+{% if member.is_keyword %}
+  return value_.is_keyword() && value_.as_keyword() == Keyword::{{member.Name}};
+{% else %}
+  return value_.is_{{member.name}}();
+{% endif %}
 }
 
 {% endfor %}
@@ -87,7 +77,7 @@ bool {{type.Name}}::is_{{member.name}}() const {
 {% for member in type.members if member.is_keyword %}
 // static
 {{type.Name}} {{type.Name}}::{{member.Name}}() const {
-  return {{type.Name}}(DeprecatedValueType::{{member.Name}});
+  return {{type.Name}}(Value(Keyword::{{member.Name}}));
 }
 
 {% endfor %}

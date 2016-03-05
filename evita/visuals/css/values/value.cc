@@ -137,6 +137,11 @@ Keyword Value::as_keyword() const {
   return static_cast<Keyword>(data_.u32);
 }
 
+Length Value::as_length() const {
+  DCHECK(is_length()) << type();
+  return Length(data_.dimension.number, data_.dimension.unit);
+}
+
 float Value::as_number() const {
   DCHECK(is_number()) << type();
   return data_.f32;
@@ -164,6 +169,11 @@ bool Value::is_integer() const {
 bool Value::is_keyword() const {
   return type_ == ValueType::Keyword;
 }
+
+bool Value::is_length() const {
+  return is_dimension() && Dimension::is_length(data_.dimension.unit);
+}
+
 bool Value::is_number() const {
   return type_ == ValueType::Number;
 }

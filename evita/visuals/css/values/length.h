@@ -10,6 +10,8 @@
 namespace visuals {
 namespace css {
 
+enum class Unit;
+
 //////////////////////////////////////////////////////////////////////
 //
 // Length
@@ -17,6 +19,7 @@ namespace css {
 class Length final : public Dimension {
  public:
   explicit Length(float value);
+  Length(float number, Unit unit);
   Length();
   ~Length();
 

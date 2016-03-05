@@ -10,8 +10,13 @@
 namespace visuals {
 namespace css {
 
-Length::Length(float value) : Dimension(value, Unit::px) {}
-Length::Length() : Dimension(0.0f, Unit::px) {}
+Length::Length(float value) : Length(value, Unit::px) {}
+
+Length::Length(float number, Unit unit) : Dimension(number, unit) {
+  DCHECK(is_length()) << *this;
+}
+
+Length::Length() : Length(0.0f, Unit::px) {}
 Length::~Length() {}
 
 float Length::value() const {

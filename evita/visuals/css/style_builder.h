@@ -36,7 +36,6 @@ class StyleBuilder final {
   StyleBuilder& SetWidth(float width);
 
 #define V(Name, name, type, text) StyleBuilder& Set##Name(type name);
-
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
 

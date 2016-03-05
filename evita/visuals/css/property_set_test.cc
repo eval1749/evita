@@ -44,6 +44,18 @@ TEST(PropertySetTest, Color) {
             set1.ValueOf(PropertyId::BorderTopColor));
 }
 
+TEST(PropertySetTest, Contains) {
+  PropertySet set1 =
+      PropertySet::Builder()
+          .AddColor(PropertyId::Color, Color::Rgba(128, 192, 128))
+          .AddColor(PropertyId::BorderTopColor,
+                    Color::Rgba(192, 192, 128, 0.5f))
+          .Build();
+  EXPECT_TRUE(set1.Contains(PropertyId::Color));
+  EXPECT_TRUE(set1.Contains(PropertyId::BorderTopColor));
+  EXPECT_FALSE(set1.Contains(PropertyId::Display));
+}
+
 TEST(PropertySetTest, Dimension) {
   PropertySet set1 =
       PropertySet::Builder()

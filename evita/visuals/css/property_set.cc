@@ -218,6 +218,14 @@ PropertySet::Iterator PropertySet::end() const {
   return Iterator(this, words_.size());
 }
 
+bool PropertySet::Contains(PropertyId property_id) const {
+  for (const auto& pair : *this) {
+    if (pair.first == property_id)
+      return true;
+  }
+  return false;
+}
+
 Value PropertySet::ValueOf(PropertyId property_id) const {
   for (const auto& pair : *this) {
     if (pair.first == property_id)

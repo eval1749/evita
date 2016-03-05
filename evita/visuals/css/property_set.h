@@ -48,6 +48,7 @@ class PropertySet final {
   Iterator begin() const;
   Iterator end() const;
 
+  bool Contains(PropertyId property_id) const;
   Value ValueOf(PropertyId property_id) const;
 
  private:

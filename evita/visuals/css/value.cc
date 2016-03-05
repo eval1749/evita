@@ -43,10 +43,10 @@ Value::Value(const Value& other) : data_(other.data_), type_(other.type_) {}
 
 Value::Value(Value&& other) : data_(other.data_), type_(other.type_) {
   other.data_.u32 = 0;
-  other.type_ = ValueType::None;
+  other.type_ = ValueType::Unspecified;
 }
 
-Value::Value() : type_(ValueType::None) {
+Value::Value() : type_(ValueType::Unspecified) {
   data_.u32 = 0;
 }
 
@@ -62,7 +62,7 @@ Value& Value::operator=(Value&& other) {
   data_ = other.data_;
   type_ = other.type_;
   other.data_.u32 = 0;
-  other.type_ = ValueType::None;
+  other.type_ = ValueType::Unspecified;
   return *this;
 }
 
@@ -139,6 +139,10 @@ bool Value::is_percentage() const {
   return type_ == ValueType::Percentage;
 }
 
+bool Value::is_unspecified() const {
+  return type_ == ValueType::Unspecified;
+}
+
 #define V(Name, name)                                                        \
   bool Value::is_##name() const {                                            \
     return is_keyword() && static_cast<Keyword>(data_.u32) == Keyword::Name; \
@@ -156,10 +160,10 @@ std::ostream& operator<<(std::ostream& ostream, const Value& value) {
       return ostream << value.as_integer();
     case ValueType::Number:
       return ostream << value.as_number();
-    case ValueType::None:
-      return ostream << "None";
     case ValueType::Percentage:
       return ostream << value.as_percentage();
+    case ValueType::Unspecified:
+      return ostream << "Unspecified";
   }
   NOTREACHED() << value.type();
   return ostream << "???";

@@ -18,7 +18,7 @@ class Percentage;
 enum class Unit;
 
 #define FOR_EACH_CSS_VALUE_TYPE(name) \
-  V(None)                             \
+  V(Unspecified)                      \
   V(Color)                            \
   V(Dimension)                        \
   V(Integer)                          \

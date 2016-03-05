@@ -57,6 +57,7 @@ class Value final {
   bool is_keyword() const;
   bool is_number() const;
   bool is_percentage() const;
+  bool is_unspecified() const;
   ValueType type() const { return type_; }
 
   // Predicates for keyword value, e.g. is_auto(), is_inherit(), is_none(), etc.

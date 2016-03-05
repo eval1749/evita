@@ -54,7 +54,6 @@ class PropertySet::Editor final {
   static bool IsSmallInteger(int value);
   static bool IsSmallNumber(float value);
   static bool IsSmallPercentage(const Percentage& percentage);
-  static size_t SizeOfEncodedValue(ValueType type, uint32_t data);
   static size_t SizeOfEncodedValue(const Value& value);
 
   DISALLOW_COPY_AND_ASSIGN(Editor);

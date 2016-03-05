@@ -33,36 +33,56 @@ Value::Value(Keyword keyword) : type_(ValueType::Keyword) {
 Value::Value(const Percentage& percentage) : type_(ValueType::Percentage) {
   data_.f32 = percentage.value();
 }
+
+Value::Value(const String& string) : type_(ValueType::String) {
+  data_.string = new String(string);
+}
+
+Value::Value(String&& string) : type_(ValueType::String) {
+  data_.string = new String(std::move(string));
+}
+
 Value::Value(float value) : type_(ValueType::Number) {
   data_.f32 = value;
 }
 Value::Value(int value) : type_(ValueType::Integer) {
   data_.u32 = value;
 }
-Value::Value(const Value& other) : data_(other.data_), type_(other.type_) {}
+
+Value::Value(const Value& other) : data_(other.data_), type_(other.type_) {
+  if (type_ != ValueType::String)
+    return;
+  data_.string = new String(*data_.string);
+}
 
 Value::Value(Value&& other) : data_(other.data_), type_(other.type_) {
-  other.data_.u32 = 0;
-  other.type_ = ValueType::Unspecified;
+  other.DidMove();
 }
 
 Value::Value() : type_(ValueType::Unspecified) {
   data_.u32 = 0;
 }
 
-Value::~Value() {}
+Value::~Value() {
+  Reset();
+}
 
 Value& Value::operator=(const Value& other) {
-  data_ = other.data_;
+  Reset();
   type_ = other.type_;
+  if (other.type_ == ValueType::String) {
+    data_.string = new String(*other.data_.string);
+    return *this;
+  }
+  data_ = other.data_;
   return *this;
 }
 
 Value& Value::operator=(Value&& other) {
+  Reset();
   data_ = other.data_;
   type_ = other.type_;
-  other.data_.u32 = 0;
-  other.type_ = ValueType::Unspecified;
+  other.DidMove();
   return *this;
 }
 
@@ -82,6 +102,8 @@ bool Value::operator==(const Value& other) const {
     case ValueType::Number:
     case ValueType::Percentage:
       return data_.f32 == other.data_.f32;
+    case ValueType::String:
+      return *data_.string == *other.data_.string;
   }
   NOTREACHED() << type_;
   return false;
@@ -125,6 +147,11 @@ Percentage Value::as_percentage() const {
   return Percentage(data_.f32);
 }
 
+const String& Value::as_string() const {
+  DCHECK(is_string()) << *this;
+  return *data_.string;
+}
+
 bool Value::is_color() const {
   return type_ == ValueType::Color;
 }
@@ -144,6 +171,10 @@ bool Value::is_percentage() const {
   return type_ == ValueType::Percentage;
 }
 
+bool Value::is_string() const {
+  return type_ == ValueType::String;
+}
+
 bool Value::is_unspecified() const {
   return type_ == ValueType::Unspecified;
 }
@@ -154,6 +185,18 @@ bool Value::is_unspecified() const {
   }
 FOR_EACH_VISUAL_CSS_KEYWORD_VALUE(V)
 #undef V
+
+void Value::DidMove() {
+  data_.string = nullptr;
+  type_ = ValueType::Unspecified;
+}
+
+void Value::Reset() {
+  if (type_ == ValueType::String)
+    delete data_.string;
+  type_ = ValueType::Unspecified;
+  data_.u32 = 0;
+}
 
 std::ostream& operator<<(std::ostream& ostream, const Value& value) {
   switch (value.type()) {
@@ -169,6 +212,8 @@ std::ostream& operator<<(std::ostream& ostream, const Value& value) {
       return ostream << value.as_keyword();
     case ValueType::Percentage:
       return ostream << value.as_percentage();
+    case ValueType::String:
+      return ostream << value.as_string();
     case ValueType::Unspecified:
       return ostream << "Unspecified";
   }

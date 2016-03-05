@@ -7,6 +7,7 @@
 #include "evita/visuals/css/property_set.h"
 #include "evita/visuals/css/property_set_editor.h"
 #include "evita/visuals/css/values/percentage.h"
+#include "evita/visuals/css/values/string.h"
 #include "evita/visuals/css/values/value.h"
 #include "evita/visuals/css/values/value_type.h"
 
@@ -57,6 +58,13 @@ Builder& Builder::AddPercentage(PropertyId property_id,
 
 Builder& Builder::AddPercentage(PropertyId property_id, float value) {
   Editor().Add(property_set_.get(), property_id, Value(Percentage(value)));
+  return *this;
+}
+
+Builder& Builder::AddString(PropertyId property_id,
+                            base::StringPiece16 string) {
+  Editor().Add(property_set_.get(), property_id,
+               std::move(Value(std::move(String(string)))));
   return *this;
 }
 

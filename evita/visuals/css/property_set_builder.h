@@ -6,8 +6,10 @@
 #define EVITA_VISUALS_CSS_PROPERTY_SET_BUILDER_H_
 
 #include <memory>
+#include <string>
 
 #include "base/macros.h"
+#include "base/strings/string_piece.h"
 #include "evita/visuals/css/property_set.h"
 
 namespace visuals {
@@ -31,6 +33,7 @@ class PropertySet::Builder final {
   Builder& AddNumber(PropertyId property_id, float value);
   Builder& AddPercentage(PropertyId property_id, const Percentage& percentage);
   Builder& AddPercentage(PropertyId property_id, float value);
+  Builder& AddString(PropertyId property_id, base::StringPiece16 string);
   PropertySet Build();
 
  private:

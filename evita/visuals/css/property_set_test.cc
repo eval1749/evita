@@ -162,5 +162,11 @@ TEST_F(PropertySetTest, Percentage) {
   EXPECT_EQ(Value(Percentage(1.23456f)), set1.ValueOf(PropertyId::Width));
 }
 
+TEST_F(PropertySetTest, String) {
+  PropertySet set1 =
+      PropertySet::Builder().AddString(PropertyId::FontFamily, L"foo").Build();
+  EXPECT_EQ(Value(String(L"foo")), set1.ValueOf(PropertyId::FontFamily));
+}
+
 }  // namespace css
 }  // namespace visuals

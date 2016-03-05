@@ -20,6 +20,7 @@ class Dimension;
 enum class Keyword;
 class Percentage;
 enum class PropertyId;
+class String;
 enum class Unit;
 enum class ValueType : uint32_t;
 class Value;
@@ -55,6 +56,8 @@ class PropertySet final {
 
  private:
   friend class PropertySetTest;
+
+  static size_t SizeOfEncodedValue(ValueType type, uint32_t data);
 
   // Color
   //  RGBA value is placed in next word
@@ -132,6 +135,7 @@ class PropertySet::Iterator final {
   float DecodeNumber() const;
   Percentage DecodePercentage() const;
   int DecodeSmallInteger() const;
+  String DecodeString() const;
   uint32_t DecodeUint32() const;
   Value DecodeValue() const;
   size_t SizeOfChunk() const;

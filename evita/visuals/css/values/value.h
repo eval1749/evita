@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include <iosfwd>
+#include <string>
 
 #include "evita/visuals/css/values_forward.h"
 
@@ -18,6 +19,7 @@ class Color;
 class Dimension;
 enum class Keyword;
 class Percentage;
+class String;
 enum class Unit;
 enum class ValueType : uint32_t;
 
@@ -31,6 +33,8 @@ class Value final {
   explicit Value(const Dimension& dimension);
   explicit Value(Keyword keyword);
   explicit Value(const Percentage& percentage);
+  explicit Value(const String& string);
+  explicit Value(String&& string);
   explicit Value(float value);
   explicit Value(int value);
   Value(const Value& other);
@@ -50,6 +54,7 @@ class Value final {
   Keyword as_keyword() const;
   float as_number() const;
   Percentage as_percentage() const;
+  const String& as_string() const;
 
   bool is_color() const;
   bool is_dimension() const;
@@ -57,8 +62,11 @@ class Value final {
   bool is_keyword() const;
   bool is_number() const;
   bool is_percentage() const;
+  bool is_string() const;
   bool is_unspecified() const;
   ValueType type() const { return type_; }
+
+  void Reset();
 
 // Predicates for keyword value, e.g. is_auto(), is_inherit(), is_none(), etc.
 #define V(Name, name) bool is_##name() const;
@@ -66,6 +74,8 @@ class Value final {
 #undef V
 
  private:
+  void DidMove();
+
   union {
     struct {
       float number;
@@ -73,6 +83,7 @@ class Value final {
     } dimension;
     uint32_t u32;
     float f32;
+    String* string;
   } data_;
   ValueType type_;
 };

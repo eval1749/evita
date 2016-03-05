@@ -102,8 +102,15 @@ void Editor::EncodeValue(const std::vector<PropertySet::Word>::iterator& it,
       std::next(it)->f32 = number;
       return;
     }
+    case ValueType::String: {
+      const auto string_size = value.as_string().value().size();
+      it->bits.data = static_cast<uint32_t>(string_size);
+      ::memcpy(&it[1], value.as_string().value().data(),
+               sizeof(base::char16) * string_size);
+      return;
+    }
   }
-  NOTREACHED() << value.type();
+  NOTREACHED() << value;
 }
 
 void Editor::Remove(PropertySet* property_set, PropertyId property_id) {
@@ -111,7 +118,8 @@ void Editor::Remove(PropertySet* property_set, PropertyId property_id) {
   auto it = words.begin();
   const auto& end = words.end();
   while (it < end) {
-    const auto value_size = SizeOfEncodedValue(it->bits.type, it->bits.data);
+    const auto value_size =
+        PropertySet::SizeOfEncodedValue(it->bits.type, it->bits.data);
     const auto& next = it + value_size;
     if (it->bits.property_id != property_id) {
       it = next;
@@ -131,7 +139,8 @@ void Editor::Set(PropertySet* property_set,
   auto it = words.begin();
   const auto& end = words.end();
   while (it < end) {
-    const auto value_size = SizeOfEncodedValue(it->bits.type, it->bits.data);
+    const auto value_size =
+        PropertySet::SizeOfEncodedValue(it->bits.type, it->bits.data);
     const auto& next = it + value_size;
     if (it->bits.property_id != property_id) {
       it = next;
@@ -228,22 +237,6 @@ bool Editor::IsSmallPercentage(const Percentage& percentage) {
   return IsSmallNumber(percentage.value());
 }
 
-size_t Editor::SizeOfEncodedValue(ValueType type, uint32_t data) {
-  switch (type) {
-    case ValueType::Color:
-      return 2;
-    case ValueType::Dimension:
-    case ValueType::Integer:
-    case ValueType::Number:
-    case ValueType::Percentage:
-      return data & 1 ? 1 : 2;
-    case ValueType::Keyword:
-      return 1;
-  }
-  NOTREACHED() << type;
-  return 0;
-}
-
 size_t Editor::SizeOfEncodedValue(const Value& value) {
   switch (value.type()) {
     case ValueType::Color:
@@ -258,6 +251,8 @@ size_t Editor::SizeOfEncodedValue(const Value& value) {
       return IsSmallPercentage(value.as_percentage()) ? 1 : 2;
     case ValueType::Keyword:
       return 1;
+    case ValueType::String:
+      return (value.as_string().value().size() + 1) / 2 + 1;
   }
   NOTREACHED() << value.type();
   return 0;

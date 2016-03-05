@@ -11,6 +11,7 @@
 #include "evita/visuals/css/values/color.h"
 #include "evita/visuals/css/values/dimension.h"
 #include "evita/visuals/css/values/percentage.h"
+#include "evita/visuals/css/values/string.h"
 #include "evita/visuals/css/values/unit.h"
 #include "evita/visuals/css/values/value.h"
 #include "evita/visuals/css/values/value_type.h"
@@ -37,12 +38,12 @@ PropertySet::Iterator& PropertySet::Iterator::operator=(const Iterator& other) {
 }
 
 PropertySet::Iterator::value_type PropertySet::Iterator::operator*() const {
-  return std::make_pair(property_id(), DecodeValue());
+  return std::make_pair(property_id(), std::move(DecodeValue()));
 }
 
 PropertySet::Iterator& PropertySet::Iterator::operator++() {
   DCHECK_LT(index_, property_set_->words_.size());
-  index_ += SizeOfChunk();
+  index_ += PropertySet::SizeOfEncodedValue(type(), data());
   return *this;
 }
 
@@ -131,6 +132,12 @@ int PropertySet::Iterator::DecodeSmallInteger() const {
   return value - (1 << kSmallValueBits);
 }
 
+String PropertySet::Iterator::DecodeString() const {
+  const auto pointer = property_set_->words_.data() + index_ + 1;
+  return String(base::StringPiece16(
+      reinterpret_cast<const base::char16*>(pointer), data()));
+}
+
 uint32_t PropertySet::Iterator::DecodeUint32() const {
   DCHECK_LT(index_ + 1, property_set_->words_.size());
   return property_set_->words_[index_ + 1].u32;
@@ -150,25 +157,11 @@ Value PropertySet::Iterator::DecodeValue() const {
       return Value(DecodePercentage());
     case ValueType::Keyword:
       return Value(DecodeKeyword());
+    case ValueType::String:
+      return Value(std::move(DecodeString()));
   }
   NOTREACHED() << type();
   return Value();
-}
-
-size_t PropertySet::Iterator::SizeOfChunk() const {
-  switch (type()) {
-    case ValueType::Color:
-      return 2;
-    case ValueType::Dimension:
-    case ValueType::Integer:
-    case ValueType::Number:
-    case ValueType::Percentage:
-      return is_small() ? 1 : 2;
-    case ValueType::Keyword:
-      return 1;
-  }
-  NOTREACHED() << type();
-  return 0;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -224,6 +217,24 @@ bool PropertySet::Contains(PropertyId property_id) const {
       return true;
   }
   return false;
+}
+
+size_t PropertySet::SizeOfEncodedValue(ValueType type, uint32_t data) {
+  switch (type) {
+    case ValueType::Color:
+      return 2;
+    case ValueType::Dimension:
+    case ValueType::Integer:
+    case ValueType::Number:
+    case ValueType::Percentage:
+      return data & 1 ? 1 : 2;
+    case ValueType::Keyword:
+      return 1;
+    case ValueType::String:
+      return 1 + (data + 1) / 2;
+  }
+  NOTREACHED() << type;
+  return 0;
 }
 
 Value PropertySet::ValueOf(PropertyId property_id) const {

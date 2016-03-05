@@ -24,7 +24,8 @@ enum class Unit;
   V(Integer)                          \
   V(Keyword)                          \
   V(Number)                           \
-  V(Percentage)
+  V(Percentage)                       \
+  V(String)
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -14,8 +14,19 @@ namespace css {
 
 String::String(base::StringPiece16 value) : value_(value.as_string()) {}
 String::String(const String& other) : value_(other.value_) {}
+String::String(String&& other) : value_(std::move(other.value_)) {}
 String::String() {}
 String::~String() {}
+
+String& String::operator=(const String& other) {
+  value_ = other.value_;
+  return *this;
+}
+
+String& String::operator=(String&& other) {
+  value_ = std::move(other.value_);
+  return *this;
+}
 
 bool String::operator==(const String& other) const {
   return value_ == other.value_;

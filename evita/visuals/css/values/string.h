@@ -22,8 +22,12 @@ class String final {
  public:
   explicit String(base::StringPiece16 value);
   String(const String& other);
+  String(String&& other);
   String();
   ~String();
+
+  String& operator=(const String& other);
+  String& operator=(String&& other);
 
   bool operator==(const String& other) const;
   bool operator!=(const String& other) const;

@@ -32,6 +32,8 @@ class PropertySet final {
  public:
   // See "evita/visuals/css/property_set_builder.h" for implementation.
   class Builder;
+  // See "evita/visuals/css/property_set_editor.h" for implementation.
+  class Editor;
   class Iterator;
 
   PropertySet(const PropertySet& other);
@@ -52,6 +54,8 @@ class PropertySet final {
   Value ValueOf(PropertyId property_id) const;
 
  private:
+  friend class PropertySetTest;
+
   // Color
   //  RGBA value is placed in next word
   //  RGBA(32-bit)

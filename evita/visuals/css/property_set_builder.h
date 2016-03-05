@@ -13,6 +13,8 @@
 namespace visuals {
 namespace css {
 
+enum class Unit;
+
 //////////////////////////////////////////////////////////////////////
 //
 // PropertySet::Builder
@@ -32,17 +34,7 @@ class PropertySet::Builder final {
   PropertySet Build();
 
  private:
-  void Add(PropertyId property_id, ValueType type, uint32_t data);
-  void AddFloat(float data);
-  void AddUint32(uint32_t data);
-  static uint32_t EncodeSmallDimension(const Dimension& dimension);
-  static uint32_t EncodeSmallInteger(int value);
-  static uint32_t EncodeSmallNumber(float value);
-  static bool IsSmallDimension(float value);
-  static bool IsSmallInteger(int value);
-  static bool IsSmallNumber(float value);
-
-  std::unique_ptr<PropertySet> list_;
+  std::unique_ptr<PropertySet> property_set_;
 
   DISALLOW_COPY_AND_ASSIGN(Builder);
 };

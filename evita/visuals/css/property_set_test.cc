@@ -6,6 +6,7 @@
 
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/property_set_builder.h"
+#include "evita/visuals/css/property_set_editor.h"
 #include "evita/visuals/css/value.h"
 #include "evita/visuals/css/values.h"
 #include "gtest/gtest.h"
@@ -13,7 +14,17 @@
 namespace visuals {
 namespace css {
 
-TEST(PropertySetTest, Basic) {
+class PropertySetTest : public ::testing::Test {
+ protected:
+  PropertySetTest() = default;
+  ~PropertySetTest() override = default;
+
+  size_t SizeOfWords(const PropertySet& property_set) const {
+    return property_set.words_.size();
+  }
+};
+
+TEST_F(PropertySetTest, Basic) {
   PropertySet set1;
   PropertySet set2 =
       PropertySet::Builder().AddInteger(PropertyId::Width, 100).Build();
@@ -32,7 +43,7 @@ TEST(PropertySetTest, Basic) {
   EXPECT_EQ(set3, set3);
 }
 
-TEST(PropertySetTest, Color) {
+TEST_F(PropertySetTest, Color) {
   PropertySet set1 =
       PropertySet::Builder()
           .AddColor(PropertyId::Color, Color::Rgba(128, 192, 128))
@@ -44,7 +55,7 @@ TEST(PropertySetTest, Color) {
             set1.ValueOf(PropertyId::BorderTopColor));
 }
 
-TEST(PropertySetTest, Contains) {
+TEST_F(PropertySetTest, Contains) {
   PropertySet set1 =
       PropertySet::Builder()
           .AddColor(PropertyId::Color, Color::Rgba(128, 192, 128))
@@ -56,7 +67,7 @@ TEST(PropertySetTest, Contains) {
   EXPECT_FALSE(set1.Contains(PropertyId::Display));
 }
 
-TEST(PropertySetTest, Dimension) {
+TEST_F(PropertySetTest, Dimension) {
   PropertySet set1 =
       PropertySet::Builder()
           .AddDimension(PropertyId::Height, Dimension(1.5f, Unit::cm))
@@ -67,7 +78,40 @@ TEST(PropertySetTest, Dimension) {
             set1.ValueOf(PropertyId::Width));
 }
 
-TEST(PropertySetTest, Equals) {
+TEST_F(PropertySetTest, Editor) {
+  PropertySet set1 =
+      PropertySet::Builder()
+          .AddColor(PropertyId::Color, Color::Rgba(128, 192, 128))
+          .AddColor(PropertyId::BorderTopColor,
+                    Color::Rgba(192, 192, 128, 0.5f))
+          .Build();
+
+  PropertySet::Editor().SetColor(&set1, Value(Color::Rgba(192, 192, 128)));
+  EXPECT_EQ(4, SizeOfWords(set1));
+  EXPECT_EQ(Value(Color::Rgba(192, 192, 128)), set1.ValueOf(PropertyId::Color));
+
+  PropertySet::Editor().SetDisplay(&set1, Value(Keyword::None));
+  EXPECT_TRUE(set1.Contains(PropertyId::Display));
+  EXPECT_EQ(5, SizeOfWords(set1));
+
+  PropertySet::Editor().SetDisplay(&set1, Value(Keyword::Inline));
+  EXPECT_EQ(5, SizeOfWords(set1));
+
+  PropertySet::Editor().RemoveColor(&set1);
+  EXPECT_EQ(3, SizeOfWords(set1));
+  EXPECT_FALSE(set1.Contains(PropertyId::Color));
+
+  PropertySet::Editor().SetWidth(&set1, Value(Dimension(1.5f, Unit::px)));
+  EXPECT_EQ(4, SizeOfWords(set1));
+
+  PropertySet::Editor().SetWidth(&set1, Value(Dimension(123.456f, Unit::px)));
+  EXPECT_EQ(5, SizeOfWords(set1)) << "small dimension to normal dimension";
+
+  PropertySet::Editor().SetWidth(&set1, Value(Dimension(0.0f, Unit::px)));
+  EXPECT_EQ(4, SizeOfWords(set1)) << "normal dimension to small dimension";
+}
+
+TEST_F(PropertySetTest, Equals) {
   PropertySet set1 = PropertySet::Builder()
                          .AddInteger(PropertyId::Height, 123)
                          .AddInteger(PropertyId::Width, 456)
@@ -80,7 +124,7 @@ TEST(PropertySetTest, Equals) {
       << "Order of properties doesn't matter for equality.";
 }
 
-TEST(PropertySetTest, Integer) {
+TEST_F(PropertySetTest, Integer) {
   PropertySet set1 = PropertySet::Builder()
                          .AddInteger(PropertyId::Height, 100)
                          .AddInteger(PropertyId::Width, 1 << 30)
@@ -89,7 +133,7 @@ TEST(PropertySetTest, Integer) {
   EXPECT_EQ(Value(1 << 30), set1.ValueOf(PropertyId::Width));
 }
 
-TEST(PropertySetTest, Keyword) {
+TEST_F(PropertySetTest, Keyword) {
   PropertySet set1 = PropertySet::Builder()
                          .AddKeyword(PropertyId::Height, Keyword::Auto)
                          .AddKeyword(PropertyId::Width, Keyword::Inherit)
@@ -100,7 +144,7 @@ TEST(PropertySetTest, Keyword) {
   EXPECT_TRUE(set1.ValueOf(PropertyId::Width).is_inherit());
 }
 
-TEST(PropertySetTest, Number) {
+TEST_F(PropertySetTest, Number) {
   PropertySet set1 = PropertySet::Builder()
                          .AddNumber(PropertyId::Height, 1.5f)
                          .AddNumber(PropertyId::Width, 1.23456f)
@@ -109,7 +153,7 @@ TEST(PropertySetTest, Number) {
   EXPECT_EQ(Value(1.23456f), set1.ValueOf(PropertyId::Width));
 }
 
-TEST(PropertySetTest, Percentage) {
+TEST_F(PropertySetTest, Percentage) {
   PropertySet set1 = PropertySet::Builder()
                          .AddPercentage(PropertyId::Height, 100)
                          .AddPercentage(PropertyId::Width, 1.23456f)

@@ -110,6 +110,11 @@ int Value::as_integer() const {
   return data_.u32;
 }
 
+Keyword Value::as_keyword() const {
+  DCHECK(is_keyword()) << *this;
+  return static_cast<Keyword>(data_.u32);
+}
+
 float Value::as_number() const {
   DCHECK(is_number()) << type();
   return data_.f32;
@@ -160,6 +165,8 @@ std::ostream& operator<<(std::ostream& ostream, const Value& value) {
       return ostream << value.as_integer();
     case ValueType::Number:
       return ostream << value.as_number();
+    case ValueType::Keyword:
+      return ostream << value.as_keyword();
     case ValueType::Percentage:
       return ostream << value.as_percentage();
     case ValueType::Unspecified:

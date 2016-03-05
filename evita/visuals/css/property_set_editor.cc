@@ -46,11 +46,11 @@ void Editor::Add(PropertySet* property_set,
 void Editor::Merge(PropertySet* left, const PropertySet& right) {
   std::unordered_set<PropertyId> left_set;
   for (const auto& left_property : *left)
-    left_set.insert(left_property.first);
+    left_set.insert(left_property.id());
   for (const auto& right_property : right) {
-    if (left_set.count(right_property.first))
+    if (left_set.count(right_property.id()))
       continue;
-    Add(left, right_property.first, right_property.second);
+    Add(left, right_property.id(), right_property.value());
   }
 }
 

@@ -9,8 +9,9 @@
 
 #include <iosfwd>
 #include <iterator>
-#include <utility>
 #include <vector>
+
+#include "evita/visuals/css/property.h"
 
 namespace visuals {
 namespace css {
@@ -105,7 +106,7 @@ class PropertySet::Iterator final {
  public:
   using iterator_category = std::forward_iterator_tag;
   using difference_type = int;
-  using value_type = std::pair<PropertyId, Value>;
+  using value_type = Property;
   using pointer = value_type*;
   using reference = value_type&;
 

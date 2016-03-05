@@ -37,8 +37,8 @@ PropertySet::Iterator& PropertySet::Iterator::operator=(const Iterator& other) {
   return *this;
 }
 
-PropertySet::Iterator::value_type PropertySet::Iterator::operator*() const {
-  return std::make_pair(property_id(), std::move(DecodeValue()));
+Property PropertySet::Iterator::operator*() const {
+  return Property(property_id(), std::move(DecodeValue()));
 }
 
 PropertySet::Iterator& PropertySet::Iterator::operator++() {
@@ -191,8 +191,8 @@ bool PropertySet::operator==(const PropertySet& other) const {
     return true;
   if (words_.size() != other.words_.size())
     return false;
-  for (const auto& pair : *this) {
-    const auto& it = std::find(other.begin(), other.end(), pair);
+  for (const auto& property : *this) {
+    const auto& it = std::find(other.begin(), other.end(), property);
     if (it == other.end())
       return false;
   }
@@ -212,8 +212,8 @@ PropertySet::Iterator PropertySet::end() const {
 }
 
 bool PropertySet::Contains(PropertyId property_id) const {
-  for (const auto& pair : *this) {
-    if (pair.first == property_id)
+  for (const auto& property : *this) {
+    if (property.id() == property_id)
       return true;
   }
   return false;
@@ -238,9 +238,9 @@ size_t PropertySet::SizeOfEncodedValue(ValueType type, uint32_t data) {
 }
 
 Value PropertySet::ValueOf(PropertyId property_id) const {
-  for (const auto& pair : *this) {
-    if (pair.first == property_id)
-      return std::move(pair.second);
+  for (const auto& property : *this) {
+    if (property.id() == property_id)
+      return std::move(property.value());
   }
   return Value();
 }
@@ -249,8 +249,8 @@ std::ostream& operator<<(std::ostream& ostream,
                          const PropertySet& property_set) {
   ostream << '{';
   auto delimiter = "";
-  for (const auto& pair : property_set) {
-    ostream << delimiter << pair.first << ':' << pair.second;
+  for (const auto& property : property_set) {
+    ostream << delimiter << property.id() << ':' << property.value();
     delimiter = ", ";
   }
   return ostream << '}';

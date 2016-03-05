@@ -64,6 +64,26 @@ Property::Property(Property&& other)
 Property::Property() : Property(PropertyId::Invalid, Value()) {}
 Property::~Property() {}
 
+Property Property::operator=(const Property& other) {
+  id_ = other.id_;
+  value_ = other.value_;
+  return *this;
+}
+
+Property Property::operator=(Property&& other) {
+  id_ = other.id_;
+  value_ = std::move(other.value_);
+  return *this;
+}
+
+bool Property::operator==(const Property& other) const {
+  return id_ == other.id_ && value_ == other.value_;
+}
+
+bool Property::operator!=(const Property& other) const {
+  return !operator==(other);
+}
+
 const base::string16& Property::NameOf(PropertyId id) {
   return PropertyNames::GetInstance()->Get(id);
 }

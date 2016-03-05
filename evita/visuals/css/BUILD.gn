@@ -28,8 +28,6 @@ source_set("css") {
     "property_set_builder.h",
     "property_set_editor.cc",
     "property_set_editor.h",
-    "property_visitor.cc",
-    "property_visitor.h",
     "rule.cc",
     "rule.h",
     "style.cc",

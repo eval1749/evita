@@ -274,10 +274,11 @@ class Parser(object):
 
     def make_model(self):
         self._properties.sort()
-        property_id = 0
+        # Note: properties_id=0 is "Invalid" property.
+        next_property_id = 1
         for css_property in self._properties:
-            css_property.set_property_id(property_id)
-            property_id = property_id + 1
+            css_property.set_property_id(next_property_id)
+            next_property_id = next_property_id + 1
         keywords = sorted([keyword for keyword in self._keywords])
         types = sorted([value for value in self._types.values()])
         return Model(keywords, self._properties, types)

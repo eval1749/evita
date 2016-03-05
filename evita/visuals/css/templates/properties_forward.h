@@ -27,11 +27,7 @@ namespace css {
 class Property;
 enum class PropertyId;
 
-#define V(Name, name, type, text) class NameProperty;
-FOR_EACH_VISUAL_CSS_PROPERTY(V)
-#undef V
-
-const size_t kMaxPropertyId = {{properties|length() - 1}};
+const size_t kMaxPropertyId = {{properties|length()}};
 
 std::ostream& operator<<(std::ostream& ostream, PropertyId property_id);
 

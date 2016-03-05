@@ -14,6 +14,7 @@
 #include "evita/visuals/css/values/color.h"
 #include "evita/visuals/css/values/dimension.h"
 #include "evita/visuals/css/values/percentage.h"
+#include "evita/visuals/css/values/string.h"
 #include "evita/visuals/css/values/value.h"
 #include "evita/visuals/css/values/value_type.h"
 

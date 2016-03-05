@@ -160,12 +160,15 @@ const String& Value::as_string() const {
 bool Value::is_color() const {
   return type_ == ValueType::Color;
 }
+
 bool Value::is_dimension() const {
   return type_ == ValueType::Dimension;
 }
+
 bool Value::is_integer() const {
   return type_ == ValueType::Integer;
 }
+
 bool Value::is_keyword() const {
   return type_ == ValueType::Keyword;
 }
@@ -177,6 +180,7 @@ bool Value::is_length() const {
 bool Value::is_number() const {
   return type_ == ValueType::Number;
 }
+
 bool Value::is_percentage() const {
   return type_ == ValueType::Percentage;
 }

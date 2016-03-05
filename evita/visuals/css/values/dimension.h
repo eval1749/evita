@@ -16,8 +16,9 @@ enum class Unit;
 //
 // Dimension
 //
-class Dimension final {
+class Dimension {
  public:
+  // TODO(eval1749): We should make |Dimension| constructors protected.
   Dimension(float number, Unit unit);
   Dimension(const Dimension& other);
   ~Dimension();

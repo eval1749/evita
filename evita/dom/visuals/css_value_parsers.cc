@@ -200,7 +200,7 @@ base::string16 UnparseColor(const CssColor& color) {
 }
 
 base::string16 UnparseLength(const visuals::css::Length& value) {
-  return base::StringPrintf(L"%f", value.value());
+  return base::StringPrintf(L"%f", value.number());
 }
 
 base::string16 UnparsePercentage(const visuals::css::Percentage& value) {

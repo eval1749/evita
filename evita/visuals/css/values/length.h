@@ -5,7 +5,7 @@
 #ifndef EVITA_VISUALS_CSS_VALUES_LENGTH_H_
 #define EVITA_VISUALS_CSS_VALUES_LENGTH_H_
 
-#include <iosfwd>
+#include "evita/visuals/css/values/dimension.h"
 
 namespace visuals {
 namespace css {
@@ -14,23 +14,14 @@ namespace css {
 //
 // Length
 //
-class Length final {
+class Length final : public Dimension {
  public:
   explicit Length(float value);
-  Length(const Length& other);
   Length();
   ~Length();
 
-  bool operator==(const Length& other) const;
-  bool operator!=(const Length& other) const;
-
-  float value() const { return value_; }
-
- private:
-  float value_ = 0;
+  float value() const;
 };
-
-std::ostream& operator<<(std::ostream& ostream, const Length& length);
 
 }  // namespace css
 }  // namespace visuals

@@ -28,6 +28,15 @@ class Dimension {
   bool operator==(const Dimension& other) const;
   bool operator!=(const Dimension& other) const;
 
+  bool is_absolute_length() const;
+  bool is_angle() const;
+  bool is_duration() const;
+  bool is_font_relative_length() const;
+  bool is_frequency() const;
+  bool is_length() const;
+  bool is_resolution() const;
+  bool is_viewport_percentage_length() const;
+
   float number() const { return number_; }
   Unit unit() const { return unit_; }
 

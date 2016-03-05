@@ -4,6 +4,7 @@
 
 #include "evita/visuals/css/values/length.h"
 
+#include "base/logging.h"
 #include "evita/visuals/css/values/unit.h"
 
 namespace visuals {
@@ -14,7 +15,7 @@ Length::Length() : Dimension(0.0f, Unit::px) {}
 Length::~Length() {}
 
 float Length::value() const {
-  // TODO(eval1749): We should have assertion that this length is absolute.
+  DCHECK(is_absolute_length()) << *this;
   return number();
 }
 

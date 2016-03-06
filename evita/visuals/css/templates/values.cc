@@ -51,7 +51,7 @@ bool {{type.Name}}::operator!=({{type.Parameter}} other) const {
  #}
 {%  for member in type.members if not member.is_keyword %}
 {{member.Return}} {{type.Name}}::{{member.name}}() const {
-  DCHECK(is_{{member.name}}());
+  DCHECK(is_{{member.name}}()) << *this;
   return value_.as_{{member.name}}();
 }
 

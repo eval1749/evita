@@ -13,9 +13,9 @@
 #include "evita/dom/text/text_range.h"
 #include "evita/dom/v8_strings.h"
 #include "evita/ginx/runner.h"
+#include "evita/regex/regex.h"
 #include "evita/text/buffer.h"
 #include "evita/text/range.h"
-#include "regex/regex.h"
 
 namespace dom {
 

@@ -8,9 +8,9 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/IRegex.cpp#2 $
 //
-#include "regex/precomp.h"
-#include "regex/regex.h"
-#include "regex/regex_node.h"
+#include "evita/regex/regex.h"
+#include "evita/regex/precomp.h"
+#include "evita/regex/regex_node.h"
 
 #define DEBUG_REGEX 0
 

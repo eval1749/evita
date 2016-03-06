@@ -1,18 +1,12 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Regex - Parse Tree Node
-// regex_node.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evedit2/mainline/regex/regex_scanner.h#2 $
-//
-#ifndef REGEX_REGEX_SCANNER_H_
-#define REGEX_REGEX_SCANNER_H_
+// Copyright 1996-2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_REGEX_REGEX_SCANNER_H_
+#define EVITA_REGEX_REGEX_SCANNER_H_
 
 #include "base/logging.h"
-#include "regex/regex_bytecode.h"
+#include "evita/regex/regex_bytecode.h"
 
 namespace Regex {
 namespace RegexPrivate {
@@ -145,4 +139,4 @@ class ZeroWidthScanner : public Scanner {
 }  // namespace RegexPrivate
 }  // namespace Regex
 
-#endif  // REGEX_REGEX_SCANNER_H_
+#endif  // EVITA_REGEX_REGEX_SCANNER_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef REGEX_REGEX_BYTECODES_H_
-#define REGEX_REGEX_BYTECODES_H_
+#ifndef EVITA_REGEX_REGEX_BYTECODES_H_
+#define EVITA_REGEX_REGEX_BYTECODES_H_
 
 // Control operations
 #define FOR_EACH_BYTE_CODE_CONTROL(VC) \
@@ -109,4 +109,4 @@
   VBF(RepeatUnicodeWordCharEq, n)  /* \w* */                            \
   VBF(RepeatUnicodeWordCharNe, n)  /* \W* */
 
-#endif  // REGEX_REGEX_BYTECODES_H_
+#endif  // EVITA_REGEX_REGEX_BYTECODES_H_

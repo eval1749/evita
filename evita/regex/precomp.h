@@ -1,15 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Regex - Pre-Compiled Header
-// precomp.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evedit2/mainline/regex/precomp.h#1 $
-//
-#ifndef REGEX_PRECOMP_H_
-#define REGEX_PRECOMP_H_
+// Copyright 1996-2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_REGEX_PRECOMP_H_
+#define EVITA_REGEX_PRECOMP_H_
 
 #pragma once
 
@@ -41,7 +35,7 @@ typedef uint32_t uint32;
 typedef wchar_t char16;
 typedef intptr_t Int;
 
-#include "regex/regex_defs.h"
+#include "evita/regex/regex_defs.h"
 
 // C6246: Local declaration of 'foo' hides declaration of the same name in outer
 // scope
@@ -78,4 +72,4 @@ typedef intptr_t Int;
 // 'class1' and 'class2'
 #pragma warning(disable : 4946)
 
-#endif  // REGEX_PRECOMP_H_
+#endif  // EVITA_REGEX_PRECOMP_H_

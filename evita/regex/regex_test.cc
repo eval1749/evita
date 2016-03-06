@@ -12,10 +12,10 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "base/strings/stringprintf.h"
 #include "base/strings/string_piece.h"
+#include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
-#include "regex/regex.h"
+#include "evita/regex/regex.h"
 #include "gtest/gtest.h"
 
 namespace Regex {
@@ -333,22 +333,6 @@ class Result final {
  private:
   std::vector<base::string16> strings_;
 };
-
-::std::ostream& operator<<(::std::ostream& os, const base::string16& string) {
-  for (auto it = string.begin(); it != string.end(); ++it) {
-    auto const ch = *it;
-    if (ch == '\\') {
-      os << "\\\\";
-    } else if (ch >= ' ' && ch < 0x7F) {
-      os << char(ch);
-    } else {
-      char buf[20];
-      ::wsprintfA(buf, "\\u%04X", ch);
-      os << buf;
-    }
-  }
-  return os;
-}
 
 ::std::ostream& operator<<(::std::ostream& os, const Result& result) {
   os << "Result(";

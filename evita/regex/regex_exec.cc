@@ -9,12 +9,12 @@
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_exec.cpp#15 $
 //
 #define DEBUG_EXEC 0
+#include "evita/regex/regex.h"
 #include "base/logging.h"
-#include "regex/precomp.h"
-#include "regex/regex.h"
-#include "regex/regex_bytecode.h"
-#include "regex/regex_scanner.h"
-#include "regex/regex_util.h"
+#include "evita/regex/precomp.h"
+#include "evita/regex/regex_bytecode.h"
+#include "evita/regex/regex_scanner.h"
+#include "evita/regex/regex_util.h"
 
 #if DEBUG_EXEC
 #define RE_DEBUG_PRINTF StdOutPrintf
@@ -540,13 +540,9 @@ struct OpDesc {
 };
 
 static const OpDesc k_rgoOpDesc[Op_Limit] = {
-#define V(mnemonic, operands)        \
-  { OpFormat_##operands, #mnemonic } \
-  ,
+#define V(mnemonic, operands) {OpFormat_##operands, #mnemonic},
 
-#define VC(mnemonic, operands)       \
-  { OpFormat_##operands, #mnemonic } \
-  ,
+#define VC(mnemonic, operands) {OpFormat_##operands, #mnemonic},
 
 #define VBF(mnemonic, operands) \
   V(mnemonic##_B, operands)     \

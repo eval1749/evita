@@ -77,8 +77,8 @@ source_set("components") {
     "//evita/dom/windows",
     "//evita/gc",
     "//evita/gfx/base",
+    "//evita/regex",
     "//evita/ui/animation:public",
-    "//regex",
   ]
 
   include_dirs = [

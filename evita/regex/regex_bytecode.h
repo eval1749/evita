@@ -1,19 +1,13 @@
-// -*- Mode: C++ -*-
-//
-// Regex Application Program Interface
-// regex_bytecode_h.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evedit2/mainline/regex/regex_bytecode.h#3 $
-//
-#ifndef REGEX_REGEX_BYTECODE_H_
-#define REGEX_REGEX_BYTECODE_H_
+// Copyright 1996-2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_REGEX_REGEX_BYTECODE_H_
+#define EVITA_REGEX_REGEX_BYTECODE_H_
 
 #include "base/logging.h"
-#include "regex/regex.h"
-#include "regex/regex_bytecodes.h"
+#include "evita/regex/regex.h"
+#include "evita/regex/regex_bytecodes.h"
 
 namespace Regex {
 namespace RegexPrivate {
@@ -125,4 +119,4 @@ class RegexObj {
 }  // namespace RegexPrivate
 }  // namespace Regex
 
-#endif  // REGEX_REGEX_BYTECODE_H_
+#endif  // EVITA_REGEX_REGEX_BYTECODE_H_

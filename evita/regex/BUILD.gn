@@ -4,7 +4,10 @@
 
 import("//testing/test.gni")
 
+# TODO(eval1749): We should use |component| for "regex"
 static_library("regex") {
+  output_name = "evita_regex"
+
   sources = [
     "precomp.h",
     "regex.cc",
@@ -28,14 +31,16 @@ static_library("regex") {
   ]
 }
 
-test("regex_tests") {
+test("tests") {
+  output_name = "evita_regex_tests"
+
   sources = [
     "regex_test.cc",
   ]
 
   deps = [
+    ":regex",
     "//testing/gtest",
     "//testing/gtest:gtest_main",
-    ":regex",
   ]
 }

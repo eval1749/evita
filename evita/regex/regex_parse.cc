@@ -8,10 +8,10 @@
 //
 // @(#)$Id: //proj/evedit2/mainline/regex/regex_parse.cpp#11 $
 //
+#include "evita/regex/regex.h"
 #include "base/logging.h"
-#include "regex/precomp.h"
-#include "regex/regex.h"
-#include "regex/regex_node.h"
+#include "evita/regex/precomp.h"
+#include "evita/regex/regex_node.h"
 
 namespace Regex {
 

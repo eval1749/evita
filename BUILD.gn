@@ -13,8 +13,6 @@ import("//build/config/ui.gni")
 group("root") {
   deps = [
     "//common",
-    "//regex",
     "//evita",
-    #"//third_party/icu",
   ]
 }

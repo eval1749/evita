@@ -1,17 +1,13 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Regex - Utilities
-// regex_util.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evedit2/mainline/regex/regex_util.h#2 $
-//
-#ifndef REGEX_REGEX_UTIL_H_
-#define REGEX_REGEX_UTIL_H_
+// Copyright 1996-2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_REGEX_REGEX_UTIL_H_
+#define EVITA_REGEX_REGEX_UTIL_H_
 
 #include "base/logging.h"
+#include "base/strings/string16.h"
+#include "evita/regex/precomp.h"
 
 namespace Regex {
 namespace RegexPrivate {
@@ -324,10 +320,11 @@ class EnumChar {
   /// </summary>
  public:
   struct Arg {
-    const char16* m_pwch;
-    const char16* m_pwchEnd;
+    const base::char16* m_pwch;
+    const base::char16* m_pwchEnd;
 
-    Arg(const char16* pwch, int cwch) : m_pwch(pwch), m_pwchEnd(pwch + cwch) {}
+    Arg(const base::char16* pwch, int cwch)
+        : m_pwch(pwch), m_pwchEnd(pwch + cwch) {}
   };
 
   /// <summary>
@@ -344,7 +341,7 @@ class EnumChar {
   /// <summary>
   ///  Returns current character
   /// </summary>
-  char16 Get() const {
+  base::char16 Get() const {
     DCHECK(!AtEnd());
     return *m_pwch;
   }
@@ -358,8 +355,8 @@ class EnumChar {
   }
 
  private:
-  const char16* m_pwch;
-  const char16* m_pwchEnd;
+  const base::char16* m_pwch;
+  const base::char16* m_pwchEnd;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -407,27 +404,27 @@ class CharSink final {
         m_pwchEnd(m_rgwch + ARRAYSIZE(m_rgwch)),
         m_pwchStart(m_rgwch) {}
 
-  void Add(char16 ch) {
+  void Add(base::char16 ch) {
     if (m_pwch + 2 > m_pwchEnd)
       grow();
     *m_pwch++ = ch;
     *m_pwch = 0;
   }
 
-  char16 Get(int iIndex) const {
+  base::char16 Get(int iIndex) const {
     DCHECK_GE(iIndex, 0);
     DCHECK_LT(iIndex, GetLength());
     return m_pwchStart[iIndex];
   }
   int GetLength() const { return static_cast<int>(m_pwch - m_pwchStart); }
-  const char16* GetStart() const { return m_pwchStart; }
+  const base::char16* GetStart() const { return m_pwchStart; }
   void Reset() { m_pwch = m_pwchStart; }
 
-  char16* Save(LocalHeap* pHeap) const {
+  base::char16* Save(LocalHeap* pHeap) const {
     int cwch = GetLength();
-    char16* pwsz =
-        reinterpret_cast<char16*>(pHeap->Alloc(sizeof(char16) * (cwch + 1)));
-    ::CopyMemory(pwsz, m_pwchStart, sizeof(char16) * cwch);
+    base::char16* pwsz = reinterpret_cast<base::char16*>(
+        pHeap->Alloc(sizeof(base::char16) * (cwch + 1)));
+    ::CopyMemory(pwsz, m_pwchStart, sizeof(base::char16) * cwch);
     pwsz[cwch] = 0;
     return pwsz;
   }
@@ -437,10 +434,10 @@ class CharSink final {
     int cwch = GetLength();
     int cwchNew = cwch * 130 / 100;
 
-    char16* pwchNew =
-        reinterpret_cast<char16*>(m_pHeap->Alloc(sizeof(char16) * cwchNew));
+    base::char16* pwchNew = reinterpret_cast<base::char16*>(
+        m_pHeap->Alloc(sizeof(base::char16) * cwchNew));
 
-    CopyMemory(pwchNew, m_pwchStart, sizeof(char16) * cwch);
+    CopyMemory(pwchNew, m_pwchStart, sizeof(base::char16) * cwch);
 
     m_pwchStart = pwchNew;
     m_pwchEnd = pwchNew + cwchNew;
@@ -448,10 +445,10 @@ class CharSink final {
   }
 
   LocalHeap* m_pHeap;
-  char16* m_pwch;
-  char16* m_pwchEnd;
-  char16* m_pwchStart;
-  char16 m_rgwch[20];
+  base::char16* m_pwch;
+  base::char16* m_pwchEnd;
+  base::char16* m_pwchStart;
+  base::char16 m_rgwch[20];
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -522,10 +519,10 @@ class Sink final {
   T m_rgwch[20];
 };
 
-char16* lstrchrW(const char16* pwsz, char16 wch);
-bool IsWhitespace(char16 wch);
+base::char16* lstrchrW(const base::char16* pwsz, base::char16 wch);
+bool IsWhitespace(base::char16 wch);
 
 }  // namespace RegexPrivate
 }  // namespace Regex
 
-#endif  // REGEX_REGEX_UTIL_H_
+#endif  // EVITA_REGEX_REGEX_UTIL_H_

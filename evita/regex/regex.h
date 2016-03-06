@@ -1,15 +1,9 @@
-// -*- Mode: C++ -*-
-//
-// Regex API
-// regex/IRegex.h
-//
-// Copyright (C) 2007-2008 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evedit2/mainline/regex/IRegex.h#8 $
-//
-#ifndef REGEX_REGEX_H_
-#define REGEX_REGEX_H_
+// Copyright 1996-2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_REGEX_REGEX_H_
+#define EVITA_REGEX_REGEX_H_
 
 namespace Regex {
 
@@ -156,7 +150,7 @@ interface IMatchContext : IEnvironment {
   virtual bool ForwardFindCharCs(char16, Posn*, Posn) const = 0;
 
   // [G]
-  virtual bool GetCapture(int, Posn*, Posn*)const = 0;
+  virtual bool GetCapture(int, Posn*, Posn*) const = 0;
   virtual char16 GetChar(Posn) const = 0;
   virtual Posn GetEnd() const = 0;
   virtual void GetInfo(SourceInfo * source_info) const = 0;
@@ -180,4 +174,4 @@ bool /* __fastcall */ StartMatch(IRegex*, IMatchContext*);
 
 }  // namespace Regex
 
-#endif  // REGEX_REGEX_H_
+#endif  // EVITA_REGEX_REGEX_H_

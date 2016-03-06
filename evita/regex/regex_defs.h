@@ -1,15 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Regex - Definitions
-// regex_defs.h
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evedit2/mainline/regex/regex_defs.h#3 $
-//
-#ifndef REGEX_REGEX_DEFS_H_
-#define REGEX_REGEX_DEFS_H_
+// Copyright 1996-2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef EVITA_REGEX_REGEX_DEFS_H_
+#define EVITA_REGEX_REGEX_DEFS_H_
 
 #if _DEBUG
 #include <stdio.h>
@@ -41,4 +35,4 @@ bool IsAsciiDigitChar(char16);
 bool IsAsciiSpaceChar(char16);
 bool IsAsciiWordChar(char16);
 
-#endif  // REGEX_REGEX_DEFS_H_
+#endif  // EVITA_REGEX_REGEX_DEFS_H_

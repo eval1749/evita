@@ -1,15 +1,8 @@
-//////////////////////////////////////////////////////////////////////////////
-//
-// Regex - Parser
-// regex/regex_util.cpp
-//
-// Copyright (C) 1996-2007 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-//
-// @(#)$Id: //proj/evedit2/mainline/regex/regex_util.cpp#2 $
-//
-#include "regex/precomp.h"
-#include "regex/regex_util.h"
+// Copyright 1996-2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "evita/regex/regex_util.h"
 
 namespace Regex {
 namespace RegexPrivate {

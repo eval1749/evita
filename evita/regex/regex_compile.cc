@@ -11,11 +11,11 @@
 #include <algorithm>
 
 #include "base/logging.h"
-#include "regex/precomp.h"
-#include "regex/regex.h"
-#include "regex/regex_bytecode.h"
-#include "regex/regex_node.h"
-#include "regex/regex_scanner.h"
+#include "evita/regex/precomp.h"
+#include "evita/regex/regex.h"
+#include "evita/regex/regex_bytecode.h"
+#include "evita/regex/regex_node.h"
+#include "evita/regex/regex_scanner.h"
 
 #define DEBUG_REGEX 0
 

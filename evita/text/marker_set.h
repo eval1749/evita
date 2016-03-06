@@ -12,7 +12,7 @@
 #include "evita/text/marker_set_observer.h"
 #include "evita/text/offset.h"
 
-namespace common {
+namespace base {
 class AtomicString;
 }
 
@@ -43,7 +43,7 @@ class MarkerSet final {
   const Marker* GetLowerBoundMarker(Offset offset) const;
 
   // Insert marker to |range| with |type|.
-  void InsertMarker(const StaticRange& range, const common::AtomicString& type);
+  void InsertMarker(const StaticRange& range, const base::AtomicString& type);
 
   // Remove |observer|
   void RemoveObserver(MarkerSetObserver* observer);

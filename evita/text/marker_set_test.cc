@@ -29,11 +29,11 @@ class MarkerSetTest : public ::testing::Test {
     return marker ? *marker : Marker();
   }
 
-  void InsertMarker(int start, int end, const common::AtomicString& type);
+  void InsertMarker(int start, int end, const base::AtomicString& type);
   void RemoveMarker(int start, int end);
 
-  const common::AtomicString Correct;
-  const common::AtomicString Misspelled;
+  const base::AtomicString Correct;
+  const base::AtomicString Misspelled;
 
  private:
   const std::unique_ptr<Buffer> buffer_;
@@ -52,14 +52,14 @@ MarkerSetTest::MarkerSetTest()
 
 void MarkerSetTest::InsertMarker(int start,
                                  int end,
-                                 const common::AtomicString& type) {
+                                 const base::AtomicString& type) {
   marker_set()->InsertMarker(StaticRange(*buffer_, Offset(start), Offset(end)),
                              type);
 }
 
 void MarkerSetTest::RemoveMarker(int start, int end) {
   marker_set()->InsertMarker(StaticRange(*buffer_, Offset(start), Offset(end)),
-                             common::AtomicString::Empty());
+                             base::AtomicString());
 }
 
 TEST_F(MarkerSetTest, DeleteMarker_cover) {

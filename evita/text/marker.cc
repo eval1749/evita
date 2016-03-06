@@ -14,7 +14,7 @@ namespace text {
 //
 // Marker
 //
-Marker::Marker(Offset start, Offset end, const common::AtomicString& type)
+Marker::Marker(Offset start, Offset end, const base::AtomicString& type)
     : end_(end), start_(start), type_(type) {
   DCHECK(!type.empty());
   DCHECK_LT(start, end);
@@ -24,7 +24,7 @@ Marker::Marker(const Marker& other)
     : end_(other.end_), start_(other.start_), type_(other.type_) {}
 
 Marker::Marker(Offset offset)
-    : end_(offset), start_(offset), type_(common::AtomicString::Empty()) {}
+    : end_(offset), start_(offset), type_(base::AtomicString()) {}
 
 Marker::Marker() : Marker(Offset()) {}
 
@@ -74,7 +74,7 @@ void Marker::Editor::SetStart(Offset new_start) {
   marker_->start_ = new_start;
 }
 
-void Marker::Editor::SetType(const common::AtomicString& type) {
+void Marker::Editor::SetType(const base::AtomicString& type) {
   DCHECK(!type.empty());
   marker_->type_ = type;
 }

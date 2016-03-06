@@ -60,22 +60,23 @@ void TextDocument::set_read_only(bool read_only) const {
   buffer_->SetReadOnly(read_only);
 }
 
-const base::string16& TextDocument::spelling_at(
+base::string16 TextDocument::spelling_at(
     text::Offset offset,
     ExceptionState* exception_state) const {
   if (!IsValidPosition(offset, exception_state))
-    return common::AtomicString::Empty();
-  auto const marker = buffer_->spelling_markers()->GetMarkerAt(offset);
-  return marker ? marker->type() : common::AtomicString::Empty();
+    return base::string16();
+  if (auto marker = buffer_->spelling_markers()->GetMarkerAt(offset))
+    return marker->type().as_string();
+  return base::string16();
 }
 
-const base::string16& TextDocument::syntax_at(
-    text::Offset offset,
-    ExceptionState* exception_state) const {
+base::string16 TextDocument::syntax_at(text::Offset offset,
+                                       ExceptionState* exception_state) const {
   if (!IsValidPosition(offset, exception_state))
-    return common::AtomicString::Empty();
-  auto const marker = buffer_->syntax_markers()->GetMarkerAt(offset);
-  return marker ? marker->type() : css::StyleSelector::normal();
+    return base::string16();
+  if (auto marker = buffer_->syntax_markers()->GetMarkerAt(offset))
+    return marker->type().as_string();
+  return css::StyleSelector::normal().as_string();
 }
 
 bool TextDocument::CheckCanChange(ExceptionState* exception_state) const {
@@ -149,10 +150,10 @@ void TextDocument::SetSpelling(text::Offset start,
                                int spelling_code,
                                ExceptionState* exception_state) {
   struct Local {
-    static const common::AtomicString& MapToSpelling(int spelling_code) {
+    static base::AtomicString MapToSpelling(int spelling_code) {
       switch (spelling_code) {
         case text::Spelling::None:
-          return common::AtomicString::Empty();
+          return base::AtomicString();
         case text::Spelling::Corrected:
           return css::StyleSelector::normal();
         case text::Spelling::Misspelled:
@@ -160,7 +161,7 @@ void TextDocument::SetSpelling(text::Offset start,
         case text::Spelling::BadGrammar:
           return css::StyleSelector::bad_grammar();
       }
-      return common::AtomicString::Empty();
+      return base::AtomicString();
     }
   };
   if (!IsValidRange(start, end, exception_state))
@@ -177,7 +178,7 @@ void TextDocument::SetSyntax(text::Offset start,
   if (!IsValidRange(start, end, exception_state))
     return;
   buffer()->syntax_markers()->InsertMarker(
-      text::StaticRange(*buffer(), start, end), common::AtomicString(syntax));
+      text::StaticRange(*buffer(), start, end), base::AtomicString(syntax));
 }
 
 base::string16 TextDocument::Slice(int startLike, int endLike) {

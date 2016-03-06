@@ -10,7 +10,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "evita/base/strings/atomic_string_factory.h"
 
-namespace evita {
+namespace base {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -73,4 +73,4 @@ std::ostream& operator<<(std::ostream& ostream,
   return ostream << *atomic_string;
 }
 
-}  // namespace evita
+}  // namespace base

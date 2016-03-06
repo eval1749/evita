@@ -10,9 +10,10 @@
 
 #include "base/observer_list.h"
 #include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "evita/css/style_sheet_observer.h"
 
-namespace common {
+namespace base {
 class AtomicString;
 }
 
@@ -27,14 +28,14 @@ class StyleSheet final {
 
   void AddObserver(StyleSheetObserver* observer) const;
   void AddRule(const base::string16& selector, const Style& style);
-  void AddRule(const common::AtomicString& selector, const Style& style);
+  void AddRule(const base::AtomicString& selector, const Style& style);
   const Style* Find(const base::string16& selector) const;
-  const Style* Find(const common::AtomicString& selector) const;
+  const Style* Find(const base::AtomicString& selector) const;
   void RemoveObserver(StyleSheetObserver* observer) const;
 
  private:
   using StyleMap =
-      std::unordered_map<const base::string16*, std::unique_ptr<Style>>;
+      std::unordered_map<const base::StringPiece16*, std::unique_ptr<Style>>;
 
   base::ObserverList<StyleSheetObserver> observers_;
   StyleMap selector_map_;

@@ -8,7 +8,7 @@
 #include <iosfwd>
 
 #include "base/macros.h"
-#include "common/strings/atomic_string.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/text/offset.h"
 
 namespace text {
@@ -21,7 +21,7 @@ class MarkerSet;
 //
 class Marker final {
  public:
-  Marker(Offset start, Offset end, const common::AtomicString& type);
+  Marker(Offset start, Offset end, const base::AtomicString& type);
   Marker(const Marker& other);
   Marker();
   ~Marker();
@@ -33,7 +33,7 @@ class Marker final {
 
   Offset end() const { return end_; }
   Offset start() const { return start_; }
-  const common::AtomicString& type() const { return type_; }
+  const base::AtomicString& type() const { return type_; }
 
   bool Contains(Offset offset) const;
 
@@ -44,7 +44,7 @@ class Marker final {
 
   Offset end_;
   Offset start_;
-  common::AtomicString type_;
+  base::AtomicString type_;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ class Marker::Editor final {
   void SetEnd(Offset new_end);
   void SetRange(Offset start, Offset end);
   void SetStart(Offset new_start);
-  void SetType(const common::AtomicString& type);
+  void SetType(const base::AtomicString& type);
 
  private:
   Marker* const marker_;

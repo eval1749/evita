@@ -25,8 +25,8 @@
 #include "evita/layout/line/line_builder.h"
 #include "evita/layout/line/root_inline_box.h"
 #include "evita/layout/render_font_set.h"
-#include "evita/layout/render_style.h"
 #include "evita/layout/render_selection.h"
+#include "evita/layout/render_style.h"
 #include "evita/text/spelling.h"
 
 namespace layout {
@@ -89,11 +89,11 @@ class TextFormatter::TextScanner final {
   explicit TextScanner(const text::Buffer& buffer);
   ~TextScanner() = default;
 
-  const common::AtomicString& spelling() const;
+  base::AtomicString spelling() const;
   const css::StyleResolver* style_resolver() const {
     return buffer_.style_resolver();
   }
-  const common::AtomicString& syntax() const;
+  base::AtomicString syntax() const;
   text::Offset text_offset() const { return text_offset_; }
   void set_text_offset(text::Offset new_text_offset) {
     text_offset_ = new_text_offset;
@@ -126,24 +126,24 @@ TextFormatter::TextScanner::TextScanner(const text::Buffer& buffer)
       syntax_marker_(nullptr),
       text_offset_(0) {}
 
-const common::AtomicString& TextFormatter::TextScanner::spelling() const {
+base::AtomicString TextFormatter::TextScanner::spelling() const {
   if (!spelling_marker_ || text_offset_ >= spelling_marker_->end()) {
     spelling_marker_ =
         buffer_.spelling_markers()->GetLowerBoundMarker(text_offset_);
   }
   return spelling_marker_ && spelling_marker_->Contains(text_offset_)
              ? spelling_marker_->type()
-             : common::AtomicString::Empty();
+             : base::AtomicString();
 }
 
-const common::AtomicString& TextFormatter::TextScanner::syntax() const {
+base::AtomicString TextFormatter::TextScanner::syntax() const {
   if (!syntax_marker_ || text_offset_ >= syntax_marker_->end()) {
     syntax_marker_ =
         buffer_.syntax_markers()->GetLowerBoundMarker(text_offset_);
   }
   return syntax_marker_ && syntax_marker_->Contains(text_offset_)
              ? syntax_marker_->type()
-             : common::AtomicString::Empty();
+             : base::AtomicString();
 }
 
 bool TextFormatter::TextScanner::AtEnd() const {

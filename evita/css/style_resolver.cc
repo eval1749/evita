@@ -5,7 +5,7 @@
 #include "evita/css/style_resolver.h"
 
 #include "base/logging.h"
-#include "common/strings/atomic_string.h"
+#include "evita/base/strings/atomic_string.h"
 #include "evita/css/style.h"
 #include "evita/css/style_rule.h"
 #include "evita/css/style_selector.h"
@@ -17,7 +17,7 @@ namespace css {
 
 namespace {
 void InstallSyntaxColor(StyleSheet* style_sheet,
-                        const common::AtomicString& selector,
+                        const base::AtomicString& selector,
                         const Color& color) {
   Style style;
   style.set_color(color);
@@ -25,7 +25,7 @@ void InstallSyntaxColor(StyleSheet* style_sheet,
 }
 
 void InstallTextDecoration(StyleSheet* style_sheet,
-                           const common::AtomicString& selector,
+                           const base::AtomicString& selector,
                            TextDecoration text_decoration) {
   Style style;
   style.set_text_decoration(text_decoration);
@@ -166,18 +166,19 @@ void StyleResolver::InvalidateCache(const StyleRule* rule) {
   if (rule->selector() == StyleSelector::defaults()) {
     ClearCache();
   } else {
-    auto it = style_cache_.find(rule->selector().get());
+    const auto& it = style_cache_.find(rule->selector().key());
     if (it != style_cache_.end())
       style_cache_.erase(it);
 
-    auto it2 = partial_style_cache_.find(rule->selector().get());
+    auto it2 = partial_style_cache_.find(rule->selector().key());
     if (it2 != partial_style_cache_.end())
       partial_style_cache_.erase(it);
   }
 }
 
 void StyleResolver::RemoveStyleSheet(const StyleSheet* style_sheet) {
-  auto it = std::find(style_sheets_.begin(), style_sheets_.end(), style_sheet);
+  const auto& it =
+      std::find(style_sheets_.begin(), style_sheets_.end(), style_sheet);
   if (it != style_sheets_.end()) {
     style_sheets_.erase(it);
     style_sheet->RemoveObserver(this);
@@ -186,12 +187,11 @@ void StyleResolver::RemoveStyleSheet(const StyleSheet* style_sheet) {
 }
 
 const Style& StyleResolver::Resolve(const base::string16& selector) const {
-  return Resolve(common::AtomicString(selector));
+  return Resolve(base::AtomicString(selector));
 }
 
-const Style& StyleResolver::Resolve(
-    const common::AtomicString& selector) const {
-  auto const cache = style_cache_.find(selector.get());
+const Style& StyleResolver::Resolve(const base::AtomicString& selector) const {
+  const auto cache = style_cache_.find(selector.key());
   if (cache != style_cache_.end())
     return *cache->second;
 
@@ -199,29 +199,29 @@ const Style& StyleResolver::Resolve(
   if (selector != StyleSelector::defaults())
     style.Merge(Resolve(StyleSelector::defaults()));
   auto new_style = std::make_unique<Style>(style);
-  auto const new_style_ptr = new_style.get();
-  style_cache_[selector.get()] = std::move(new_style);
+  const auto new_style_ptr = new_style.get();
+  style_cache_[selector.key()] = std::move(new_style);
   return *new_style_ptr;
 }
 
 const Style& StyleResolver::ResolveWithoutDefaults(
     const base::string16& selector) const {
-  return ResolveWithoutDefaults(common::AtomicString(selector));
+  return ResolveWithoutDefaults(base::AtomicString(selector));
 }
 
 const Style& StyleResolver::ResolveWithoutDefaults(
-    const common::AtomicString& selector) const {
-  auto const cache = partial_style_cache_.find(selector.get());
+    const base::AtomicString& selector) const {
+  const auto cache = partial_style_cache_.find(selector.key());
   if (cache != partial_style_cache_.end())
     return *cache->second;
 
   auto new_style = std::make_unique<Style>();
   for (auto style_sheet : style_sheets_) {
-    if (auto const style = style_sheet->Find(selector))
+    if (const auto style = style_sheet->Find(selector))
       new_style->OverrideBy(*style);
   }
-  auto const new_style_ptr = new_style.get();
-  style_cache_[selector.get()] = std::move(new_style);
+  const auto new_style_ptr = new_style.get();
+  style_cache_[selector.key()] = std::move(new_style);
   return *new_style_ptr;
 }
 

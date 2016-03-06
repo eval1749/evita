@@ -13,7 +13,7 @@
 #include "evita/base/evita_base_export.h"
 #include "evita/base/memory/zone_owner.h"
 
-namespace evita {
+namespace base {
 
 class AtomicString;
 
@@ -21,7 +21,7 @@ class AtomicString;
 //
 // AtomicStringFactory
 //
-class EVITA_BASE_EXPORT AtomicStringFactory final : public ZoneOwner {
+class EVITA_BASE_EXPORT AtomicStringFactory final : public evita::ZoneOwner {
  public:
   AtomicStringFactory();
   ~AtomicStringFactory();
@@ -44,6 +44,6 @@ class EVITA_BASE_EXPORT AtomicStringFactory final : public ZoneOwner {
   DISALLOW_COPY_AND_ASSIGN(AtomicStringFactory);
 };
 
-}  // namespace evita
+}  // namespace base
 
 #endif  // EVITA_BASE_STRINGS_ATOMIC_STRING_FACTORY_H_

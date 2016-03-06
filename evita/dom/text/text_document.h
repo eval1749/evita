@@ -46,11 +46,11 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   int revision() const;
   void set_read_only(bool read_only) const;
   // Returns spelling at |offset|.
-  const base::string16& spelling_at(text::Offset offset,
-                                    ExceptionState* exception_state) const;
+  base::string16 spelling_at(text::Offset offset,
+                             ExceptionState* exception_state) const;
   // Returns syntax at |offset|.
-  const base::string16& syntax_at(text::Offset offset,
-                                  ExceptionState* exception_state) const;
+  base::string16 syntax_at(text::Offset offset,
+                           ExceptionState* exception_state) const;
   v8::Local<v8::Object> style_at(text::Offset position,
                                  ExceptionState* exception_state) const;
 

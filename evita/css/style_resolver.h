@@ -10,9 +10,10 @@
 #include <vector>
 
 #include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "evita/css/style_sheet_observer.h"
 
-namespace common {
+namespace base {
 class AtomicString;
 }
 
@@ -30,14 +31,13 @@ class StyleResolver final : private StyleSheetObserver {
   void RemoveStyleSheet(const StyleSheet* style_sheet);
 
   const Style& Resolve(const base::string16& selector) const;
-  const Style& Resolve(const common::AtomicString& selector) const;
+  const Style& Resolve(const base::AtomicString& selector) const;
 
   const Style& ResolveWithoutDefaults(const base::string16& selector) const;
-  const Style& ResolveWithoutDefaults(
-      const common::AtomicString& selector) const;
+  const Style& ResolveWithoutDefaults(const base::AtomicString& selector) const;
 
  private:
-  typedef std::unordered_map<const base::string16*, std::unique_ptr<Style>>
+  typedef std::unordered_map<const base::StringPiece16*, std::unique_ptr<Style>>
       StyleCache;
 
   void ClearCache();

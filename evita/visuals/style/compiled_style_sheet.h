@@ -37,7 +37,7 @@ class CompiledStyleSheet final : public css::StyleSheetObserver {
   void RemoveObserver(css::StyleSheetObserver* observer) const;
 
  private:
-  using AtomicString = evita::AtomicString;
+  using AtomicString = base::AtomicString;
 
   void CompileRule(const css::Rule& rule);
 

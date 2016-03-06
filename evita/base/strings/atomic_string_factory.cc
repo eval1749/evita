@@ -10,7 +10,7 @@
 #include "evita/base/memory/zone.h"
 #include "evita/base/strings/atomic_string.h"
 
-namespace evita {
+namespace base {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -53,4 +53,4 @@ AtomicStringFactory* AtomicStringFactory::GetInstance() {
   return base::Singleton<AtomicStringFactory>::get();
 }
 
-}  // namespace evita
+}  // namespace base

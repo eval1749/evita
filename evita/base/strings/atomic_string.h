@@ -13,7 +13,7 @@
 #include "evita/base/evita_base_export.h"
 #include "evita/base/memory/zone_allocated.h"
 
-namespace evita {
+namespace base {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -36,6 +36,7 @@ class EVITA_BASE_EXPORT AtomicString final {
 
   base::string16 as_string() const;
   bool empty() const { return value_->empty(); }
+  const base::StringPiece16* key() const { return value_; }
   base::StringPiece16 value() const { return *value_; }
 
   static AtomicString NewUniqueString(const base::char16* format);
@@ -58,17 +59,17 @@ EVITA_BASE_EXPORT std::ostream& operator<<(std::ostream& ostream,
 EVITA_BASE_EXPORT std::ostream& operator<<(std::ostream& ostream,
                                            const AtomicString* atomic_string);
 
-}  // namespace evita
+}  // namespace base
 
 namespace std {
 
 //////////////////////////////////////////////////////////////////////
 //
-// std::hash<AtomicString>
+// std::hash<base::AtomicString>
 //
 template <>
-struct std::hash<evita::AtomicString> {
-  size_t operator()(const evita::AtomicString& atomic_string) const {
+struct std::hash<base::AtomicString> {
+  size_t operator()(const base::AtomicString& atomic_string) const {
     return base::StringPiece16Hash()(atomic_string.value());
   }
 };

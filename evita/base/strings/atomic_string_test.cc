@@ -10,7 +10,7 @@
 #include "evita/base/strings/atomic_string_factory.h"
 #include "gtest/gtest.h"
 
-namespace evita {
+namespace base {
 
 TEST(AtomicStringTest, Map) {
   std::map<AtomicString, int> map;
@@ -59,4 +59,4 @@ TEST(AtomicStringTest, UnorderedMap) {
   EXPECT_EQ(1, inserted.first->second);
 }
 
-}  // namespace evita
+}  // namespace base

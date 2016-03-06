@@ -12,9 +12,16 @@ import sys
 def main(argv):
     if len(argv) != 7:
         raise Exception(
-            'Usage: %s output_path header_js_path js_externs_directory idl_list_path static_directory static_list_path' % os.path.basename(argv[0]))
+            'Usage: %s output_path header_js_path' +
+            '  js_externs_directory idl_list_path' +
+            '  static_directory static_list_path' % os.path.basename(argv[0]))
 
-    _, output_path, header_js_path, js_externs_dir, idl_list_path, static_dir, static_list_path = argv
+    output_path = argv[1]
+    header_js_path = argv[2]
+    js_externs_dir = argv[3]
+    idl_list_path = argv[4]
+    static_dir = argv[5]
+    static_list_path = argv[6]
 
     with open(header_js_path) as header_js_file:
         header_js_text = header_js_file.read()

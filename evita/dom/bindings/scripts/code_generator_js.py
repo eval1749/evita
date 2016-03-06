@@ -9,9 +9,11 @@ import posixpath
 import sys
 
 module_path = os.path.dirname(os.path.realpath(__file__))
-blink_path = os.path.normpath(os.path.join(module_path, os.pardir, os.pardir))
-third_party_dir = os.path.normpath(os.path.join(blink_path, os.pardir))
-templates_dir = module_path
+root_dir = os.path.normpath(os.path.join(
+    module_path, os.pardir, os.pardir, os.pardir, os.pardir))
+third_party_dir = os.path.normpath(os.path.join(root_dir, os.pardir))
+templates_dir = os.path.normpath(
+    os.path.join(module_path, os.pardir, 'templates'))
 
 # jinja2 is in chromium's third_party directory.
 # Insert at 1 so at front to override system libraries, and
@@ -91,14 +93,14 @@ def depends_on_union_types(idl_type):
 class TypedefResolver(Visitor):
 
     def __init__(self, info_provider):
+        self.additional_includes = set()
         self.info_provider = info_provider
+        self.typedefs = {}
 
     def resolve(self, definitions, definition_name):
         """Traverse definitions and resolves typedefs with the actual types."""
-        self.typedefs = {}
         for name, typedef in self.info_provider.typedefs.iteritems():
             self.typedefs[name] = typedef.idl_type
-        self.additional_includes = set()
         definitions.accept(self)
         self._update_dependencies_include_paths(definition_name)
 
@@ -215,7 +217,7 @@ class CodeGeneratorJS(object):
 
         method_context_list = [
             function_context_of(list(functions))
-            for name, functions in
+            for _, functions in
             groupby(interface.operations, lambda operation: operation.name)
         ]
 

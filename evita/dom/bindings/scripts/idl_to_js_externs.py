@@ -9,8 +9,9 @@ import os
 import sys
 
 module_path = os.path.dirname(os.path.realpath(__file__))
-third_party_path = os.path.normpath(os.path.join(
-    module_path, os.pardir, os.pardir, 'third_party'))
+root_dir = os.path.normpath(os.path.join(
+    module_path, os.pardir, os.pardir, os.pardir, os.pardir))
+third_party_path = os.path.normpath(os.path.join(root_dir, 'third_party'))
 sys.path.insert(1, third_party_path)
 idl_compiler_path = os.path.normpath(os.path.join(
     third_party_path, 'WebKit', 'Source', 'bindings', 'scripts'))

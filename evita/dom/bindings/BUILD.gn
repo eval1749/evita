@@ -129,18 +129,18 @@ action("js_externs") {
   static_js_file_list = "$externs_gen_dir/static_js_file_list.txt"
   write_file(static_js_file_list, rebase_path(static_js_externs_files))
 
-  script = "//tools/idl_to_js_externs/aggregate_js_externs.py"
+  script = "scripts/aggregate_js_externs.py"
   outputs = [
     "$root_gen_dir/evita/dom/evita_js_externs.js",
   ]
-  inputs = [ "//tools/idl_to_js_externs/aggregate_js_externs.py" ] +
-           process_file_template(
-               idl_files,
-               "$externs_gen_dir/{{source_name_part}}_externs.js") +
-           static_js_externs_files
+  inputs =
+      [ "scripts/aggregate_js_externs.py" ] + process_file_template(
+          idl_files,
+          "$externs_gen_dir/{{source_name_part}}_externs.js") +
+      static_js_externs_files
   args = [
     rebase_path("$root_gen_dir/evita/dom/evita_js_externs.js"),
-    rebase_path("//tools/idl_to_js_externs/header.js"),
+    rebase_path("templates/header.js"),
     rebase_path(externs_gen_dir),
     rebase_path(idl_file_list),
     rebase_path("//evita/dom"),
@@ -153,13 +153,13 @@ action_foreach("js_externs_indivisual") {
     ":cached_lex_yacc_tables",
     ":interfaces_info",
   ]
-  script = "//tools/idl_to_js_externs/idl_to_js_externs.py"
+  script = "scripts/idl_to_js_externs.py"
   sources = interface_idl_files + dictionary_idl_files
   inputs = [
-    "//tools/idl_to_js_externs/idl_to_js_externs.py",
-    "//tools/idl_to_js_externs/code_generator_js.py",
-    "//tools/idl_to_js_externs/dictionary.js",
-    "//tools/idl_to_js_externs/interface.js",
+    "scripts/idl_to_js_externs.py",
+    "scripts/code_generator_js.py",
+    "templates/dictionary.js",
+    "templates/interface.js",
     "$idl_gen_dir/modules/InterfacesInfoOverall.pickle",
     "$idl_scripts_output_dir/lextab.py",
     "$idl_scripts_output_dir/parsetab.pickle",

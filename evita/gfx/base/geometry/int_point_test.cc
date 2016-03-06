@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/geometry/int_point.h"
+#include "evita/gfx/base/geometry/int_point.h"
 #include "gtest/gtest.h"
 
-namespace evita {
+namespace gfx {
 
 TEST(IntPointTest, Equals) {
   EXPECT_TRUE(IntPoint(0, 0) == IntPoint(0, 0));
@@ -14,4 +14,4 @@ TEST(IntPointTest, Equals) {
   EXPECT_FALSE(IntPoint(0, 0) == IntPoint(1, 0));
 }
 
-}  // namespace evita
+}  // namespace gfx

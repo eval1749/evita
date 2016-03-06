@@ -50,7 +50,6 @@ group("evita_tests") {
   deps = [
     "//evita/base:tests",
     "//evita/dom:evita_dom_tests",
-    "//evita/geometry:tests",
     "//evita/gfx:tests",
     "//evita/layout:evita_layout_tests",
     "//evita/text:evita_text_tests",

@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_GEOMETRY_INT_POINT_H_
-#define EVITA_GEOMETRY_INT_POINT_H_
+#ifndef EVITA_GFX_BASE_GEOMETRY_INT_POINT_H_
+#define EVITA_GFX_BASE_GEOMETRY_INT_POINT_H_
 
 #include <iosfwd>
 
-namespace evita {
+#include "evita/gfx/gfx_export.h"
+
+namespace gfx {
 
 class IntSize;
 
@@ -15,7 +17,7 @@ class IntSize;
 //
 // IntPoint
 //
-class IntPoint final {
+class GFX_EXPORT IntPoint final {
  public:
   IntPoint(int x, int y);
   IntPoint(const IntPoint& other);
@@ -38,8 +40,9 @@ class IntPoint final {
   int y_ = 0;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const IntPoint& point);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                    const IntPoint& point);
 
-}  // namespace evita
+}  // namespace gfx
 
-#endif  // EVITA_GEOMETRY_INT_POINT_H_
+#endif  // EVITA_GFX_BASE_GEOMETRY_INT_POINT_H_

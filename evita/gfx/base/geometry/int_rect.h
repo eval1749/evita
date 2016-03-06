@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_GEOMETRY_INT_RECT_H_
-#define EVITA_GEOMETRY_INT_RECT_H_
+#ifndef EVITA_GFX_BASE_GEOMETRY_INT_RECT_H_
+#define EVITA_GFX_BASE_GEOMETRY_INT_RECT_H_
 
 #include <iosfwd>
 
-#include "evita/geometry/int_point.h"
-#include "evita/geometry/int_size.h"
+#include "evita/gfx/base/geometry/int_point.h"
+#include "evita/gfx/base/geometry/int_size.h"
+#include "evita/gfx/gfx_export.h"
 
-namespace evita {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
 // IntRect
 //
-class IntRect final {
+class GFX_EXPORT IntRect final {
  public:
   IntRect(const IntPoint& origin, const IntSize& size);
   explicit IntRect(const IntSize& size);
@@ -61,8 +62,8 @@ class IntRect final {
   IntSize size_;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const IntRect& rect);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream, const IntRect& rect);
 
-}  // namespace evita
+}  // namespace gfx
 
-#endif  // EVITA_GEOMETRY_INT_RECT_H_
+#endif  // EVITA_GFX_BASE_GEOMETRY_INT_RECT_H_

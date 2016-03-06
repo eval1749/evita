@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_GEOMETRY_INT_SIZE_H_
-#define EVITA_GEOMETRY_INT_SIZE_H_
+#ifndef EVITA_GFX_BASE_GEOMETRY_INT_SIZE_H_
+#define EVITA_GFX_BASE_GEOMETRY_INT_SIZE_H_
 
 #include <iosfwd>
 
-namespace evita {
+#include "evita/gfx/gfx_export.h"
+
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
 // IntSize
 //
-class IntSize final {
+class GFX_EXPORT IntSize final {
  public:
   IntSize(int width, int height);
   IntSize(const IntSize& other);
@@ -35,8 +37,8 @@ class IntSize final {
   int width_ = 0;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const IntSize& size);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream, const IntSize& size);
 
-}  // namespace evita
+}  // namespace gfx
 
-#endif  // EVITA_GEOMETRY_INT_SIZE_H_
+#endif  // EVITA_GFX_BASE_GEOMETRY_INT_SIZE_H_

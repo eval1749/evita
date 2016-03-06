@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/geometry/int_rect.h"
+#include "evita/gfx/base/geometry/int_rect.h"
 #include "gtest/gtest.h"
 
-namespace evita {
+namespace gfx {
 
 TEST(IntRectTest, properties) {
   IntRect rect1(IntPoint(1, 2), IntSize(3, 4));
@@ -36,4 +36,4 @@ TEST(IntRectTest, Equals) {
   EXPECT_TRUE(rect1 != rect2);
 }
 
-}  // namespace evita
+}  // namespace gfx

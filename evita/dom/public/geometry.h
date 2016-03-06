@@ -5,13 +5,13 @@
 #ifndef EVITA_DOM_PUBLIC_GEOMETRY_H_
 #define EVITA_DOM_PUBLIC_GEOMETRY_H_
 
-#include "evita/geometry/int_rect.h"
+#include "evita/gfx/base/geometry/int_rect.h"
 
 namespace domapi {
 
-using IntPoint = evita::IntPoint;
-using IntRect = evita::IntRect;
-using IntSize = evita::IntSize;
+using IntPoint = gfx::IntPoint;
+using IntRect = gfx::IntRect;
+using IntSize = gfx::IntSize;
 
 }  // namespace domapi
 

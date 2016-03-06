@@ -76,7 +76,7 @@ source_set("components") {
     "//evita/dom/visuals",
     "//evita/dom/windows",
     "//evita/gc",
-    "//evita/geometry",
+    "//evita/gfx/base",
     "//evita/ui/animation:public",
     "//regex",
   ]

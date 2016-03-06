@@ -13,6 +13,12 @@ component("base") {
     "colors/float_color.h",
     "colors/int8_color.cc",
     "colors/int8_color.h",
+    "geometry/int_point.cc",
+    "geometry/int_point.h",
+    "geometry/int_rect.cc",
+    "geometry/int_rect.h",
+    "geometry/int_size.cc",
+    "geometry/int_size.h",
   ]
 
   deps = [
@@ -28,6 +34,9 @@ source_set("test_files") {
   sources = [
     "colors/float_color_test.cc",
     "colors/int8_color_test.cc",
+    "geometry/int_point_test.cc",
+    "geometry/int_rect_test.cc",
+    "geometry/int_size_test.cc",
   ]
 
   deps = [

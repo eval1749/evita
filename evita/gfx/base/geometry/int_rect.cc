@@ -4,9 +4,9 @@
 
 #include <ostream>
 
-#include "evita/geometry/int_rect.h"
+#include "evita/gfx/base/geometry/int_rect.h"
 
-namespace evita {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -51,4 +51,4 @@ std::ostream& operator<<(std::ostream& ostream, const IntRect& rect) {
   return ostream << rect.origin() << '+' << rect.size();
 }
 
-}  // namespace evita
+}  // namespace gfx

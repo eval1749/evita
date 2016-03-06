@@ -4,11 +4,11 @@
 
 #include <ostream>
 
-#include "evita/geometry/int_point.h"
+#include "evita/gfx/base/geometry/int_point.h"
 
-#include "evita/geometry/int_size.h"
+#include "evita/gfx/base/geometry/int_size.h"
 
-namespace evita {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -45,4 +45,4 @@ std::ostream& operator<<(std::ostream& ostream, const IntPoint& point) {
   return ostream << '(' << point.x() << ',' << point.y() << ')';
 }
 
-}  // namespace evita
+}  // namespace gfx

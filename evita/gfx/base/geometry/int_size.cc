@@ -4,9 +4,9 @@
 
 #include <ostream>
 
-#include "evita/geometry/int_size.h"
+#include "evita/gfx/base/geometry/int_size.h"
 
-namespace evita {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -35,4 +35,4 @@ std::ostream& operator<<(std::ostream& ostream, const IntSize& size) {
   return ostream << size.width() << 'x' << size.height();
 }
 
-}  // namespace evita
+}  // namespace gfx

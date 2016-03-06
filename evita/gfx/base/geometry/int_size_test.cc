@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/geometry/int_size.h"
+#include "evita/gfx/base/geometry/int_size.h"
 #include "gtest/gtest.h"
 
-namespace evita {
+namespace gfx {
 
 TEST(IntSizeTest, Equals) {
   EXPECT_TRUE(IntSize(0, 0) == IntSize(0, 0));
@@ -21,4 +21,4 @@ TEST(IntSizeTest, IsEmpty) {
   EXPECT_FALSE(IntSize(1, 1).IsEmpty());
 }
 
-}  // namespace evita
+}  // namespace gfx

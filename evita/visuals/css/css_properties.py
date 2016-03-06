@@ -11,7 +11,7 @@ import string
 #
 CSS_PRIMITIVE_TYPES = frozenset([
     # 'angle',
-    'color',  # CSS Color Module
+    'color-value',  # CSS Color Module
     # 'frequency',
     # 'image',
     # 'integer',
@@ -262,7 +262,7 @@ class Parser(object):
         for keyword in CSS_WIDE_KEYWORDS:
             self.parse_type_keyword(keyword)
         for name in CSS_PRIMITIVE_TYPES:
-            self._types[name] = CssPrimitiveType(name)
+            self._types['<%s>' % name] = CssPrimitiveType(name)
 
     def add_keyword(self, new_keyword):
         self._keywords[new_keyword.text] = new_keyword
@@ -321,7 +321,9 @@ class Parser(object):
     def parse_type_name(self, token):
         assert token[0] == '<'
         assert token[-1] == '>'
-        name = token[1:-1]
+        name = token
+        if name == '<color>':
+            name = '<color-value>'
         if name in self._types:
             return self._types[name]
         return self.add_type(CssType(name))

@@ -13,7 +13,7 @@
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "evita/visuals/css/values.h"
-#include "evita/visuals/css/values/color.h"
+#include "evita/visuals/css/values/color_value.h"
 
 namespace dom {
 
@@ -48,9 +48,9 @@ Maybe<int> ParseHex(base::StringPiece16 text) {
 
 }  // namespace
 
-Maybe<CssColor> ParseColor(base::StringPiece16 text) {
+Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
   if (text.size() == 0)
-    return common::Nothing<CssColor>();
+    return common::Nothing<CssColorValue>();
   if (text[0] == '#') {
     if (text.size() == 4) {
       // #rgb
@@ -59,12 +59,12 @@ Maybe<CssColor> ParseColor(base::StringPiece16 text) {
       const auto& maybe_blue = ParseHex(text.substr(3, 1));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing()) {
-        return common::Nothing<CssColor>();
+        return common::Nothing<CssColorValue>();
       }
       auto const red = DoubleHex(maybe_red.FromJust());
       auto const green = DoubleHex(maybe_green.FromJust());
       auto const blue = DoubleHex(maybe_blue.FromJust());
-      return common::Just<CssColor>(CssColor::Rgba(red, green, blue));
+      return common::Just<CssColorValue>(CssColorValue::Rgba(red, green, blue));
     }
     if (text.size() == 7) {
       // #rrggbb
@@ -73,12 +73,12 @@ Maybe<CssColor> ParseColor(base::StringPiece16 text) {
       const auto& maybe_blue = ParseHex(text.substr(5, 2));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing()) {
-        return common::Nothing<CssColor>();
+        return common::Nothing<CssColorValue>();
       }
       auto const red = maybe_red.FromJust();
       auto const green = maybe_green.FromJust();
       auto const blue = maybe_blue.FromJust();
-      return common::Just<CssColor>(CssColor::Rgba(red, green, blue));
+      return common::Just<CssColorValue>(CssColorValue::Rgba(red, green, blue));
     }
     // TODO(eval1749): Once we support "rgba(red, green, blue, alpha)", this
     // syntax should be removed.
@@ -90,20 +90,21 @@ Maybe<CssColor> ParseColor(base::StringPiece16 text) {
       const auto& maybe_alpha = ParseHex(text.substr(7, 2));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing() || maybe_alpha.IsNothing()) {
-        return common::Nothing<CssColor>();
+        return common::Nothing<CssColorValue>();
       }
       auto const red = maybe_red.FromJust();
       auto const green = maybe_green.FromJust();
       auto const blue = maybe_blue.FromJust();
       auto const alpha = maybe_alpha.FromJust() / 255.0f;
-      return common::Just<CssColor>(CssColor::Rgba(red, green, blue, alpha));
+      return common::Just<CssColorValue>(
+          CssColorValue::Rgba(red, green, blue, alpha));
     }
   }
   if (text == L"transparent")
-    return common::Just<CssColor>(CssColor());
+    return common::Just<CssColorValue>(CssColorValue());
   // TODO(eval1749): Parse color name
   // TODO(eval1749): Parse 'rgba(red, green, blue, alpha)
-  return common::Nothing<CssColor>();
+  return common::Nothing<CssColorValue>();
 }
 
 Maybe<CssLength> ParseLength(base::StringPiece16 text) {
@@ -187,7 +188,7 @@ Maybe<CssString> ParseString(base::StringPiece16 text) {
   return common::Just<CssString>(CssString(text));
 }
 
-base::string16 UnparseColor(const CssColor& color) {
+base::string16 UnparseColorValue(const CssColorValue& color) {
   const auto red = static_cast<int>(color.value().red() * 255);
   const auto green = static_cast<int>(color.value().green() * 255);
   const auto blue = static_cast<int>(color.value().blue() * 255);

@@ -62,7 +62,7 @@ class ActualStyleVisitor final : public BoxVisitor {
 std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   builder_.SetDisplay(box.display());
   if (box.background_color() != FloatColor())
-    builder_.SetBackgroundColor(css::Color(box.background_color()));
+    builder_.SetBackgroundColor(css::ColorValue(box.background_color()));
 
   const auto& border = box.ComputeBorder();
   const auto& margin = box.ComputeMargin();
@@ -102,11 +102,11 @@ void ActualStyleVisitor::VisitImageBox(ImageBox* image) {}
 void ActualStyleVisitor::VisitRootBox(RootBox* root) {}
 
 void ActualStyleVisitor::VisitShapeBox(ShapeBox* shape) {
-  builder_.SetColor(css::Color(shape->color()));
+  builder_.SetColor(css::ColorValue(shape->color()));
 }
 
 void ActualStyleVisitor::VisitTextBox(TextBox* text) {
-  builder_.SetColor(css::Color(text->color()));
+  builder_.SetColor(css::ColorValue(text->color()));
   // TODO(eval1749): We should add font properties
 }
 

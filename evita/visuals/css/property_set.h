@@ -16,7 +16,7 @@
 namespace visuals {
 namespace css {
 
-class Color;
+class ColorValue;
 class Dimension;
 enum class Keyword;
 class Percentage;
@@ -128,7 +128,7 @@ class PropertySet::Iterator final {
   PropertyId property_id() const;
   ValueType type() const;
 
-  Color DecodeColor() const;
+  ColorValue DecodeColor() const;
   Dimension DecodeDimension() const;
   float DecodeFloat() const;
   int DecodeInteger() const;

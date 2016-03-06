@@ -46,21 +46,22 @@ TEST_F(PropertySetTest, Basic) {
 TEST_F(PropertySetTest, Color) {
   PropertySet set1 =
       PropertySet::Builder()
-          .AddColor(PropertyId::Color, Color::Rgba(128, 192, 128))
+          .AddColor(PropertyId::Color, ColorValue::Rgba(128, 192, 128))
           .AddColor(PropertyId::BorderTopColor,
-                    Color::Rgba(192, 192, 128, 0.5f))
+                    ColorValue::Rgba(192, 192, 128, 0.5f))
           .Build();
-  EXPECT_EQ(Value(Color::Rgba(128, 192, 128)), set1.ValueOf(PropertyId::Color));
-  EXPECT_EQ(Value(Color::Rgba(192, 192, 128, 0.5f)),
+  EXPECT_EQ(Value(ColorValue::Rgba(128, 192, 128)),
+            set1.ValueOf(PropertyId::Color));
+  EXPECT_EQ(Value(ColorValue::Rgba(192, 192, 128, 0.5f)),
             set1.ValueOf(PropertyId::BorderTopColor));
 }
 
 TEST_F(PropertySetTest, Contains) {
   PropertySet set1 =
       PropertySet::Builder()
-          .AddColor(PropertyId::Color, Color::Rgba(128, 192, 128))
+          .AddColor(PropertyId::Color, ColorValue::Rgba(128, 192, 128))
           .AddColor(PropertyId::BorderTopColor,
-                    Color::Rgba(192, 192, 128, 0.5f))
+                    ColorValue::Rgba(192, 192, 128, 0.5f))
           .Build();
   EXPECT_TRUE(set1.Contains(PropertyId::Color));
   EXPECT_TRUE(set1.Contains(PropertyId::BorderTopColor));
@@ -81,14 +82,15 @@ TEST_F(PropertySetTest, Dimension) {
 TEST_F(PropertySetTest, Editor) {
   PropertySet set1 =
       PropertySet::Builder()
-          .AddColor(PropertyId::Color, Color::Rgba(128, 192, 128))
+          .AddColor(PropertyId::Color, ColorValue::Rgba(128, 192, 128))
           .AddColor(PropertyId::BorderTopColor,
-                    Color::Rgba(192, 192, 128, 0.5f))
+                    ColorValue::Rgba(192, 192, 128, 0.5f))
           .Build();
 
-  PropertySet::Editor().SetColor(&set1, Value(Color::Rgba(192, 192, 128)));
+  PropertySet::Editor().SetColor(&set1, Value(ColorValue::Rgba(192, 192, 128)));
   EXPECT_EQ(4, SizeOfWords(set1));
-  EXPECT_EQ(Value(Color::Rgba(192, 192, 128)), set1.ValueOf(PropertyId::Color));
+  EXPECT_EQ(Value(ColorValue::Rgba(192, 192, 128)),
+            set1.ValueOf(PropertyId::Color));
 
   PropertySet::Editor().SetDisplay(&set1, Value(Keyword::None));
   EXPECT_TRUE(set1.Contains(PropertyId::Display));

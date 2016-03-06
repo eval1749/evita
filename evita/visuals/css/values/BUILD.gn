@@ -7,8 +7,8 @@ source_set("values") {
     # TODO(eval1749): We should move "float_color.{cc,h}" to somewhere.
     "../float_color.cc",
     "../float_color.h",
-    "color.cc",
-    "color.h",
+    "color_value.cc",
+    "color_value.h",
     "dimension.cc",
     "dimension.h",
     "length.cc",

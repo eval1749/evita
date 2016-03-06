@@ -10,7 +10,7 @@
 
 #include "evita/visuals/css/properties_forward.h"
 #include "evita/visuals/css/values.h"
-#include "evita/visuals/css/values/color.h"
+#include "evita/visuals/css/values/color_value.h"
 
 namespace visuals {
 namespace css {

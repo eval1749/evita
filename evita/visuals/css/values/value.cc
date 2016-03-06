@@ -17,7 +17,7 @@ namespace css {
 //
 // Value
 //
-Value::Value(const Color& color) : type_(ValueType::Color) {
+Value::Value(const ColorValue& color) : type_(ValueType::Color) {
   data_.u32 = color.value().ToRgba();
 }
 
@@ -113,13 +113,17 @@ bool Value::operator!=(const Value& other) const {
   return !operator==(other);
 }
 
-Color Value::as_color() const {
+ColorValue Value::as_color() const {
   DCHECK(is_color()) << type();
   const auto red = static_cast<float>(data_.u32 >> 24) / 255;
   const auto green = static_cast<float>((data_.u32 >> 16) & 0xFF) / 255;
   const auto blue = static_cast<float>((data_.u32 >> 8) & 0xFF) / 255;
   const auto alpha = static_cast<float>(data_.u32 & 0xFF) / 255;
-  return Color(red, green, blue, alpha);
+  return ColorValue(red, green, blue, alpha);
+}
+
+ColorValue Value::as_color_value() const {
+  return as_color();
 }
 
 Dimension Value::as_dimension() const {

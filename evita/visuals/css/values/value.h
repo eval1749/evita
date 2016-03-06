@@ -15,7 +15,7 @@
 namespace visuals {
 namespace css {
 
-class Color;
+class ColorValue;
 class Dimension;
 enum class Keyword;
 class Length;
@@ -30,7 +30,7 @@ enum class ValueType : uint32_t;
 //
 class Value final {
  public:
-  explicit Value(const Color& color);
+  explicit Value(const ColorValue& color);
   explicit Value(const Dimension& dimension);
   explicit Value(Keyword keyword);
   explicit Value(const Percentage& percentage);
@@ -49,7 +49,7 @@ class Value final {
   bool operator==(const Value& other) const;
   bool operator!=(const Value& other) const;
 
-  Color as_color() const;
+  ColorValue as_color() const;
   Dimension as_dimension() const;
   int as_integer() const;
   Keyword as_keyword() const;
@@ -69,12 +69,16 @@ class Value final {
   bool is_unspecified() const;
   ValueType type() const { return type_; }
 
-  void Reset();
+  // For ease of "values.h" generator
+  ColorValue as_color_value() const;
+  bool is_color_value() const { return is_color(); }
 
 // Predicates for keyword value, e.g. is_auto(), is_inherit(), is_none(), etc.
 #define V(Name, name) bool is_##name() const;
   FOR_EACH_VISUAL_CSS_KEYWORD_VALUE(V)
 #undef V
+
+  void Reset();
 
  private:
   void DidMove();

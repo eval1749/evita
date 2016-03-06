@@ -8,7 +8,7 @@
 
 #include "base/logging.h"
 #include "evita/visuals/css/properties_forward.h"
-#include "evita/visuals/css/values/color.h"
+#include "evita/visuals/css/values/color_value.h"
 #include "evita/visuals/css/values/dimension.h"
 #include "evita/visuals/css/values/percentage.h"
 #include "evita/visuals/css/values/string.h"
@@ -75,13 +75,13 @@ ValueType PropertySet::Iterator::type() const {
   return property_set_->words_[index_].bits.type;
 }
 
-Color PropertySet::Iterator::DecodeColor() const {
+ColorValue PropertySet::Iterator::DecodeColor() const {
   const auto value = DecodeUint32();
   const auto red = static_cast<float>((value >> 24) & 0xFF) / 255;
   const auto green = static_cast<float>((value >> 16) & 0xFF) / 255;
   const auto blue = static_cast<float>((value >> 8) & 0xFF) / 255;
   const auto alpha = static_cast<float>(value & 0xFF) / 255;
-  return Color(red, green, blue, alpha);
+  return ColorValue(red, green, blue, alpha);
 }
 
 Dimension PropertySet::Iterator::DecodeDimension() const {

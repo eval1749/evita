@@ -176,7 +176,7 @@ const css::Style& StyleTree::Impl::ComputedStyleOf(const Node& node) const {
 std::unique_ptr<css::Style> StyleTree::Impl::ComputeInitialStyle() const {
   DCHECK_NE(StyleTreeState::Dirty, state_);
   auto style = std::make_unique<css::Style>();
-  css::StyleEditor().SetColor(style.get(), css::Color(0, 0, 0));
+  css::StyleEditor().SetColor(style.get(), css::ColorValue(0, 0, 0));
   css::StyleEditor().SetDisplay(style.get(), css::Display());
   css::StyleEditor().SetFontFamily(
       style.get(), css::FontFamily(css::String(L"MS Shell Dlg 2")));
@@ -190,7 +190,7 @@ std::unique_ptr<css::Style> StyleTree::Impl::ComputeStyleForDocument() const {
   // TODO(eval1749): We should get default color and background color from
   // system metrics.
   // Note: We should set background other than "transparent".
-  css::StyleEditor().SetBackgroundColor(style.get(), css::Color(1, 1, 1));
+  css::StyleEditor().SetBackgroundColor(style.get(), css::ColorValue(1, 1, 1));
   return std::move(style);
 }
 
@@ -456,7 +456,7 @@ const css::Style& StyleTree::ComputedStyleOfSelection(
     return initial_style();
   if (media().is_media_interactive() && selection.is_caret_on()) {
     css::StyleEditor().SetCaretColor(selection_style_.get(),
-                                     css::Color::Rgba(0, 0, 0));
+                                     css::ColorValue::Rgba(0, 0, 0));
     css::StyleEditor().SetCaretShape(selection_style_.get(),
                                      css::CaretShape::Bar());
   } else {
@@ -466,12 +466,12 @@ const css::Style& StyleTree::ComputedStyleOfSelection(
   if (selection.is_caret())
     return *selection_style_;
   if (media().is_media_interactive()) {
-    css::StyleEditor().SetBackgroundColor(selection_style_.get(),
-                                          css::Color::Rgba(51, 153, 255, 0.3f));
+    css::StyleEditor().SetBackgroundColor(
+        selection_style_.get(), css::ColorValue::Rgba(51, 153, 255, 0.3f));
     return *selection_style_;
   }
-  css::StyleEditor().SetBackgroundColor(selection_style_.get(),
-                                        css::Color::Rgba(191, 205, 219, 0.3f));
+  css::StyleEditor().SetBackgroundColor(
+      selection_style_.get(), css::ColorValue::Rgba(191, 205, 219, 0.3f));
   return *selection_style_;
 }
 

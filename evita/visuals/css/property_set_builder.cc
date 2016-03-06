@@ -24,7 +24,7 @@ using Editor = PropertySet::Editor;
 Builder::Builder() : property_set_(new PropertySet()) {}
 Builder::~Builder() {}
 
-Builder& Builder::AddColor(PropertyId property_id, const Color& color) {
+Builder& Builder::AddColor(PropertyId property_id, const ColorValue& color) {
   Editor().Add(property_set_.get(), property_id, Value(color));
   return *this;
 }

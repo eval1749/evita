@@ -4,9 +4,9 @@
 
 #include "evita/visuals/css/style_builder.h"
 
+#include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_editor.h"
-#include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/values.h"
 
 namespace visuals {
@@ -25,7 +25,8 @@ std::unique_ptr<Style> StyleBuilder::Build() {
   return std::move(style_);
 }
 
-StyleBuilder& StyleBuilder::SetBorder(const css::Color color, float width) {
+StyleBuilder& StyleBuilder::SetBorder(const css::ColorValue color,
+                                      float width) {
   SetBorderBottomWidth(css::Length(width));
   SetBorderBottomColor(color);
   SetBorderLeftWidth(css::Length(width));
@@ -41,7 +42,7 @@ StyleBuilder& StyleBuilder::SetColor(float red,
                                      float green,
                                      float blue,
                                      float alpha) {
-  return SetColor(css::Color(red, green, blue, alpha));
+  return SetColor(css::ColorValue(red, green, blue, alpha));
 }
 
 StyleBuilder& StyleBuilder::SetHeight(float height) {

@@ -35,10 +35,10 @@ void StyleEditor::SetBorder(Style* style,
   SetBorderRightWidth(style, css::Length(width));
   SetBorderTopWidth(style, css::Length(width));
 
-  SetBorderBottomColor(style, css::Color(color));
-  SetBorderLeftColor(style, css::Color(color));
-  SetBorderRightColor(style, css::Color(color));
-  SetBorderTopColor(style, css::Color(color));
+  SetBorderBottomColor(style, css::ColorValue(color));
+  SetBorderLeftColor(style, css::ColorValue(color));
+  SetBorderRightColor(style, css::ColorValue(color));
+  SetBorderTopColor(style, css::ColorValue(color));
 }
 
 void StyleEditor::SetHeight(Style* style, float height) {

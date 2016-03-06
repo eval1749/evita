@@ -11,7 +11,7 @@
 #include "base/logging.h"
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/property_set.h"
-#include "evita/visuals/css/values/color.h"
+#include "evita/visuals/css/values/color_value.h"
 #include "evita/visuals/css/values/dimension.h"
 #include "evita/visuals/css/values/percentage.h"
 #include "evita/visuals/css/values/string.h"

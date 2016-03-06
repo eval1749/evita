@@ -43,13 +43,13 @@ TEST(CompiledStyleSheetTest, Basic) {
   const auto& tag_class_style = compiled.Match(*tag_class);
   const auto& tag_id_style = compiled.Match(*tag_id);
 
-  EXPECT_EQ(css::Color(1, 0, 0), tag_style->color());
+  EXPECT_EQ(css::ColorValue(1, 0, 0), tag_style->color());
   EXPECT_EQ(css::Height(css::Length(20)), tag_style->height());
 
-  EXPECT_EQ(css::Color(0, 1, 0), tag_class_style->color());
+  EXPECT_EQ(css::ColorValue(0, 1, 0), tag_class_style->color());
   EXPECT_EQ(css::Height(css::Length(20)), tag_style->height());
 
-  EXPECT_EQ(css::Color(0, 0, 1), tag_id_style->color());
+  EXPECT_EQ(css::ColorValue(0, 0, 1), tag_id_style->color());
   EXPECT_EQ(css::Height(css::Length(20)), tag_id_style->height());
 }
 

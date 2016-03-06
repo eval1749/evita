@@ -12,7 +12,7 @@
 namespace visuals {
 namespace css {
 
-class Color;
+class ColorValue;
 class Dimension;
 class Percentage;
 enum class Unit;

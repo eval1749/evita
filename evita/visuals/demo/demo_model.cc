@@ -16,16 +16,16 @@
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/css/style_sheet.h"
-#include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/demo/demo_window.h"
+#include "evita/visuals/display/display_item_list_processor.h"
+#include "evita/visuals/display/public/display_item_list.h"
+#include "evita/visuals/display/public/display_items.h"
+#include "evita/visuals/dom/ancestors_or_self.h"
 #include "evita/visuals/dom/document.h"
 #include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/dom/text.h"
-#include "evita/visuals/display/display_item_list_processor.h"
-#include "evita/visuals/display/public/display_items.h"
-#include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/view/public/selection.h"
@@ -97,25 +97,27 @@ css::StyleSheet* LoadStyleSheet() {
   const auto style_sheet = new css::StyleSheet();
   style_sheet->AppendRule(
       L"#hover",
-      std::move(css::StyleBuilder()
-                    .SetPosition(css::Position::Absolute())
-                    .SetLeft(css::Left(css::Length(20)))
-                    .SetTop(css::Top(css::Length(300)))
-                    .SetBackgroundColor(css::Color::Rgba(51, 153, 255, 0.1f))
-                    .SetBorder(css::Color::Rgba(51, 153, 255, 1.0f), 1)
-                    .Build()));
+      std::move(
+          css::StyleBuilder()
+              .SetPosition(css::Position::Absolute())
+              .SetLeft(css::Left(css::Length(20)))
+              .SetTop(css::Top(css::Length(300)))
+              .SetBackgroundColor(css::ColorValue::Rgba(51, 153, 255, 0.1f))
+              .SetBorder(css::ColorValue::Rgba(51, 153, 255, 1.0f), 1)
+              .Build()));
   style_sheet->AppendRule(
-      L"input", std::move(css::StyleBuilder()
-                              .SetBorder(css::Color::Rgba(128, 128, 128), 1)
-                              .SetPadding(2)
-                              .SetWidth(300)
-                              .Build()));
+      L"input",
+      std::move(css::StyleBuilder()
+                    .SetBorder(css::ColorValue::Rgba(128, 128, 128), 1)
+                    .SetPadding(2)
+                    .SetWidth(300)
+                    .Build()));
   style_sheet->AppendRule(
       L"list",
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
   style_sheet->AppendRule(L"list_item",
                           std::move(css::StyleBuilder()
-                                        .SetColor(css::Color(0, 0, 0))
+                                        .SetColor(css::ColorValue(0, 0, 0))
                                         .SetDisplay(css::Display::Block())
                                         .SetPaddingTop(css::Length(2))
                                         .SetPaddingRight(css::Length(5))

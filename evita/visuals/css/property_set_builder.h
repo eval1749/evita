@@ -26,7 +26,7 @@ class PropertySet::Builder final {
   Builder();
   ~Builder();
 
-  Builder& AddColor(PropertyId property_id, const Color& color);
+  Builder& AddColor(PropertyId property_id, const ColorValue& color);
   Builder& AddDimension(PropertyId property_id, const Dimension& dimension);
   Builder& AddInteger(PropertyId property_id, int value);
   Builder& AddKeyword(PropertyId property_id, Keyword keyword);

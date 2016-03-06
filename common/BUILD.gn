@@ -32,7 +32,6 @@ component("common") {
 
 test("common_unittests") {
   sources = [
-    "memory/ref_counted_unittest.cc",
     "memory/scoped_refptr_unittest.cc",
     "tree/node_unittest.cc",
     "win/rect_unittest.cc",

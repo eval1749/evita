@@ -25,7 +25,7 @@ std::unique_ptr<Style> StyleBuilder::Build() {
   return std::move(style_);
 }
 
-StyleBuilder& StyleBuilder::SetBorder(const css::ColorValue color,
+StyleBuilder& StyleBuilder::SetBorder(const css::ColorValue& color,
                                       float width) {
   SetBorderBottomWidth(css::Length(width));
   SetBorderBottomColor(color);

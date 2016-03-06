@@ -11,10 +11,11 @@ config("base_implementation") {
 component("base") {
   output_name = "evita_base"
   sources = [
-    "evita_base_export.h",
     "either.h",
+    "evita_base_export.h",
     "float_range.cc",
     "float_range.h",
+    "maybe.h",
     "memory/allocator.h",
     "memory/zone.cc",
     "memory/zone.h",
@@ -47,6 +48,7 @@ test("tests") {
   output_name = "evita_base_tests"
   sources = [
     "float_range_test.cc",
+    "maybe_test.cc",
     "strings/atomic_string_test.cc",
   ]
   deps = [

@@ -18,7 +18,7 @@
 namespace dom {
 
 template <typename T>
-using Maybe = common::Maybe<T>;
+using Maybe = base::Maybe<T>;
 
 #define V(Name, name, text) using Css##Name = visuals::css::Name;
 FOR_EACH_VISUAL_CSS_VALUE(V)
@@ -41,17 +41,17 @@ Maybe<int> ParseHex(base::StringPiece16 text) {
   auto value = 0;
   for (const auto& code : text) {
     if (!base::IsHexDigit(code))
-      return common::Nothing<int>();
+      return base::Nothing<int>();
     value = value * 16 + base::HexDigitToInt(code);
   }
-  return common::Just<int>(value);
+  return base::Just<int>(value);
 }
 
 }  // namespace
 
 Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
   if (text.size() == 0)
-    return common::Nothing<CssColorValue>();
+    return base::Nothing<CssColorValue>();
   if (text[0] == '#') {
     if (text.size() == 4) {
       // #rgb
@@ -60,12 +60,12 @@ Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
       const auto& maybe_blue = ParseHex(text.substr(3, 1));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing()) {
-        return common::Nothing<CssColorValue>();
+        return base::Nothing<CssColorValue>();
       }
       auto const red = DoubleHex(maybe_red.FromJust());
       auto const green = DoubleHex(maybe_green.FromJust());
       auto const blue = DoubleHex(maybe_blue.FromJust());
-      return common::Just<CssColorValue>(CssColorValue::Rgba(red, green, blue));
+      return base::Just<CssColorValue>(CssColorValue::Rgba(red, green, blue));
     }
     if (text.size() == 7) {
       // #rrggbb
@@ -74,12 +74,12 @@ Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
       const auto& maybe_blue = ParseHex(text.substr(5, 2));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing()) {
-        return common::Nothing<CssColorValue>();
+        return base::Nothing<CssColorValue>();
       }
       auto const red = maybe_red.FromJust();
       auto const green = maybe_green.FromJust();
       auto const blue = maybe_blue.FromJust();
-      return common::Just<CssColorValue>(CssColorValue::Rgba(red, green, blue));
+      return base::Just<CssColorValue>(CssColorValue::Rgba(red, green, blue));
     }
     // TODO(eval1749): Once we support "rgba(red, green, blue, alpha)", this
     // syntax should be removed.
@@ -91,21 +91,21 @@ Maybe<CssColorValue> ParseColorValue(base::StringPiece16 text) {
       const auto& maybe_alpha = ParseHex(text.substr(7, 2));
       if (maybe_red.IsNothing() || maybe_green.IsNothing() ||
           maybe_blue.IsNothing() || maybe_alpha.IsNothing()) {
-        return common::Nothing<CssColorValue>();
+        return base::Nothing<CssColorValue>();
       }
       auto const red = maybe_red.FromJust();
       auto const green = maybe_green.FromJust();
       auto const blue = maybe_blue.FromJust();
       auto const alpha = maybe_alpha.FromJust() / 255.0f;
-      return common::Just<CssColorValue>(
+      return base::Just<CssColorValue>(
           CssColorValue::Rgba(red, green, blue, alpha));
     }
   }
   if (text == L"transparent")
-    return common::Just<CssColorValue>(CssColorValue());
+    return base::Just<CssColorValue>(CssColorValue());
   // TODO(eval1749): Parse color name
   // TODO(eval1749): Parse 'rgba(red, green, blue, alpha)
-  return common::Nothing<CssColorValue>();
+  return base::Nothing<CssColorValue>();
 }
 
 Maybe<CssLength> ParseLength(base::StringPiece16 text) {
@@ -135,11 +135,11 @@ Maybe<CssLength> ParseLength(base::StringPiece16 text) {
           state = State::Digit;
           break;
         }
-        return common::Nothing<CssLength>();
+        return base::Nothing<CssLength>();
       case State::Digit:
         if (base::IsAsciiDigit(code)) {
           if (u64 > std::numeric_limits<uint64_t>::max() / 10)
-            return common::Nothing<CssLength>();
+            return base::Nothing<CssLength>();
           u64 *= 10;
           u64 += code - '0';
           break;
@@ -148,12 +148,12 @@ Maybe<CssLength> ParseLength(base::StringPiece16 text) {
           state = State::DecimalPoint;
           break;
         }
-        return common::Nothing<CssLength>();
+        return base::Nothing<CssLength>();
       case State::DecimalPoint:
         if (!base::IsAsciiDigit(code))
-          return common::Nothing<CssLength>();
+          return base::Nothing<CssLength>();
         if (u64 > std::numeric_limits<uint64_t>::max() / 10)
-          return common::Nothing<CssLength>();
+          return base::Nothing<CssLength>();
         --exponent;
         u64 *= 10;
         u64 += code - '0';
@@ -161,32 +161,32 @@ Maybe<CssLength> ParseLength(base::StringPiece16 text) {
         break;
       case State::AfterDecimalPoint:
         if (!base::IsAsciiDigit(code))
-          return common::Nothing<CssLength>();
+          return base::Nothing<CssLength>();
         if (u64 > std::numeric_limits<uint64_t>::max() / 10)
-          return common::Nothing<CssLength>();
+          return base::Nothing<CssLength>();
         --exponent;
         u64 *= 10;
         u64 += code - '0';
         break;
       default:
         NOTREACHED() << "Invalid state " << static_cast<int>(state);
-        return common::Nothing<CssLength>();
+        return base::Nothing<CssLength>();
     }
   }
   if (exponent >= 0) {
     const auto f32 = static_cast<float>(u64) * std::pow(10.0f, exponent);
-    return common::Just<CssLength>(CssLength(sign * f32));
+    return base::Just<CssLength>(CssLength(sign * f32));
   }
   const auto f32 = static_cast<float>(u64) / std::pow(10.0f, -exponent);
-  return common::Just<CssLength>(CssLength(sign * f32));
+  return base::Just<CssLength>(CssLength(sign * f32));
 }
 
 Maybe<CssPercentage> ParsePercentage(base::StringPiece16 text) {
-  return common::Nothing<CssPercentage>();
+  return base::Nothing<CssPercentage>();
 }
 
 Maybe<CssString> ParseString(base::StringPiece16 text) {
-  return common::Just<CssString>(CssString(text));
+  return base::Just<CssString>(CssString(text));
 }
 
 base::string16 UnparseColorValue(const CssColorValue& color) {

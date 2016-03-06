@@ -7,7 +7,6 @@ import("//testing/test.gni")
 component("common") {
   sources = [
     "common_export.h",
-    "maybe.h",
     "strings/atomic_string.cc",
     "strings/atomic_string.h",
     "win/com_init.cc",
@@ -36,7 +35,6 @@ component("common") {
 test("common_unittests") {
   sources = [
     "castable_unittest.cc",
-    "maybe_test.cc",
     "memory/ref_counted_unittest.cc",
     "memory/scoped_refptr_unittest.cc",
     "strings/atomic_string_unittest.cc",
@@ -45,8 +43,8 @@ test("common_unittests") {
   ]
 
   deps = [
+    ":common",
     "//base/test:run_all_unittests",
     "//testing/gtest:gtest",
-    ":common",
   ]
 }

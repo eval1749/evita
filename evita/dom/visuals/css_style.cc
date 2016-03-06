@@ -6,7 +6,7 @@
 
 #include "evita/dom/visuals/css_style.h"
 
-#include "common/maybe.h"
+#include "evita/base/maybe.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/visuals/css_style_sheet_handle.h"
@@ -19,7 +19,7 @@
 namespace dom {
 
 template <typename T>
-using Maybe = common::Maybe<T>;
+using Maybe = base::Maybe<T>;
 
 using CssProperty = visuals::css::Property;
 using CssPropertyId = visuals::css::PropertyId;
@@ -36,11 +36,11 @@ Maybe<base::string16> GetRawProperty(v8::Local<v8::Context> context,
   v8::Local<v8::Value> key =
       gin::ConvertToV8(context->GetIsolate(), static_cast<int>(property_id));
   if (!map->Has(context, key).FromMaybe(false))
-    return common::Nothing<base::string16>();
+    return base::Nothing<base::string16>();
   v8::Local<v8::Value> value = map->Get(context, key).ToLocalChecked();
   if (value.IsEmpty())
-    return common::Nothing<base::string16>();
-  return common::Just<base::string16>(V8ToString(value));
+    return base::Nothing<base::string16>();
+  return base::Just<base::string16>(V8ToString(value));
 }
 
 void SetRawProperty(v8::Local<v8::Context> context,

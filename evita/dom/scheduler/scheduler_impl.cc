@@ -11,7 +11,7 @@
 #include "base/message_loop/message_loop.h"
 #include "base/synchronization/lock.h"
 #include "base/trace_event/trace_event.h"
-#include "common/maybe.h"
+#include "evita/base/maybe.h"
 #include "evita/dom/scheduler/animation_frame_callback.h"
 #include "evita/dom/scheduler/idle_task_queue.h"
 #include "evita/dom/scheduler/scheduler_client.h"
@@ -76,7 +76,7 @@ class SchedulerImpl::TaskQueue {
   // Returns true if there is only one task in queue.
   bool GiveTask(const base::Closure& closure);
   bool IsEmpty() const;
-  common::Maybe<base::Closure> TakeTask();
+  base::Maybe<base::Closure> TakeTask();
 
  private:
   mutable base::Lock lock_;
@@ -96,11 +96,11 @@ bool SchedulerImpl::TaskQueue::IsEmpty() const {
   return tasks_.empty();
 }
 
-common::Maybe<base::Closure> SchedulerImpl::TaskQueue::TakeTask() {
+base::Maybe<base::Closure> SchedulerImpl::TaskQueue::TakeTask() {
   base::AutoLock lock_scope(lock_);
   if (tasks_.empty())
-    return common::Nothing<base::Closure>();
-  auto task = common::Just(tasks_.front());
+    return base::Nothing<base::Closure>();
+  auto task = base::Just(tasks_.front());
   tasks_.pop();
   return task;
 }

@@ -11,7 +11,7 @@
 #include "base/logging.h"
 #include "base/synchronization/lock.h"
 #include "base/threading/thread.h"
-#include "common/maybe.h"
+#include "evita/base/maybe.h"
 #include "evita/editor/application.h"
 #include "evita/gfx/dx_device.h"
 #include "evita/ui/compositor/compositor.h"
@@ -33,7 +33,7 @@ class TaskQueue final {
   size_t size() const { return tasks_.size(); }
 
   void GiveTask(const base::Closure& closure);
-  common::Maybe<base::Closure> TakeTask();
+  base::Maybe<base::Closure> TakeTask();
 
  private:
   base::Lock lock_;
@@ -47,11 +47,11 @@ void TaskQueue::GiveTask(const base::Closure& task) {
   tasks_.push(task);
 }
 
-common::Maybe<base::Closure> TaskQueue::TakeTask() {
+base::Maybe<base::Closure> TaskQueue::TakeTask() {
   base::AutoLock lock_scope(lock_);
   if (tasks_.empty())
-    return common::Nothing<base::Closure>();
-  auto task = common::Just(tasks_.front());
+    return base::Nothing<base::Closure>();
+  auto task = base::Just(tasks_.front());
   tasks_.pop();
   return task;
 }

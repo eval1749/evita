@@ -4,12 +4,12 @@
 
 #include "evita/dom/visuals/css_value_parsers.h"
 
-#include "common/maybe.h"
+#include "evita/base/maybe.h"
 #include "evita/visuals/css/values.h"
 
 namespace dom {
 
-template <typename T> using Maybe = common::Maybe<T>;
+template <typename T> using Maybe = base::Maybe<T>;
 
 {% for type in types if not type.is_primitive %}
 using {{type.Name}} = visuals::css::{{type.Name}};
@@ -32,16 +32,16 @@ using String = visuals::css::String;
 Maybe<{{type.Name}}> Parse{{type.Name}}(base::StringPiece16 text) {
 {%  for member in type.members if member.is_keyword %}
   if (text == L{{member.text}})
-    return common::Just<{{type.Name}}>({{type.Name}}::{{member.Name}}());
+    return base::Just<{{type.Name}}>({{type.Name}}::{{member.Name}}());
 {%  endfor %}
 {%  for member in type.members if not member.is_keyword %}
   {
     Maybe<{{member.Name}}> maybe_{{member.name}}(Parse{{member.Name}}(text));
     if (maybe_{{member.name}}.IsJust())
-      return common::Just<{{type.Name}}>({{type.Name}}(maybe_{{member.name}}.FromJust()));
+      return base::Just<{{type.Name}}>({{type.Name}}(maybe_{{member.name}}.FromJust()));
   }
 {%  endfor %}
-  return common::Nothing<{{type.Name}}>();
+  return base::Nothing<{{type.Name}}>();
 }
 
 base::string16 Unparse{{type.Name}}(const {{type.Name}}& property_value) {

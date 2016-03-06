@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_MAYBE_H_
-#define COMMON_MAYBE_H_
+#ifndef EVITA_BASE_MAYBE_H_
+#define EVITA_BASE_MAYBE_H_
 
 #include "base/logging.h"
 
-namespace common {
+namespace base {
 
 // A simple |Maybe| type, representing a value which may or may not have a
 // value, see https://hackage.haskell.org/package/base/docs/Data-Maybe.html.
@@ -82,6 +82,6 @@ Maybe<T> Nothing() {
   return Maybe<T>();
 }
 
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_MAYBE_H_
+#endif  // EVITA_BASE_MAYBE_H_

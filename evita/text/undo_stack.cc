@@ -9,10 +9,10 @@
 
 #include "base/auto_reset.h"
 #include "base/logging.h"
-#include "common/adopters/reverse.h"
+#include "evita/base/adaptors/reversed.h"
 #include "evita/text/buffer.h"
-#include "evita/text/undo_step.h"
 #include "evita/text/static_range.h"
+#include "evita/text/undo_step.h"
 
 std::ostream& operator<<(std::ostream& ostream, text::UndoStack::State state) {
   return ostream << static_cast<int>(state);
@@ -66,7 +66,7 @@ Offset UndoStack::Redo(Offset offset, int count) {
   if (redo_steps_.empty())
     return Offset::Invalid();
 
-  for (const auto& step : common::adopters::reverse(redo_steps_)) {
+  for (const auto& step : base::Reversed(redo_steps_)) {
     DCHECK(!step->is<EndUndoStep>());
     if (step->is<BeginUndoStep>())
       continue;
@@ -106,7 +106,7 @@ Offset UndoStack::Undo(Offset offset, int count) {
 
   base::AutoReset<State> state_scope(&state_, State::Undo);
 
-  for (const auto& step : common::adopters::reverse(undo_steps_)) {
+  for (const auto& step : base::Reversed(undo_steps_)) {
     DCHECK(!step->is<BeginUndoStep>());
     if (step->is<EndUndoStep>())
       continue;

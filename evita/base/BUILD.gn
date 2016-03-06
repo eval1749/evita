@@ -11,6 +11,7 @@ config("base_implementation") {
 component("base") {
   output_name = "evita_base"
   sources = [
+    "adaptors/reversed.h",
     "castable.h",
     "either.h",
     "evita_base_export.h",
@@ -48,6 +49,7 @@ component("base") {
 test("tests") {
   output_name = "evita_base_tests"
   sources = [
+    "adaptors/reversed_test.cc",
     "castable_test.cc",
     "float_range_test.cc",
     "maybe_test.cc",

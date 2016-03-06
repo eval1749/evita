@@ -13,7 +13,7 @@
 #include "base/message_loop/message_loop.h"
 #pragma warning(pop)
 #include "base/strings/utf_string_conversions.h"
-#include "common/adopters/reverse.h"
+#include "evita/base/adaptors/reversed.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/lock.h"
@@ -168,7 +168,7 @@ bool EventTarget::DispatchEvent(Event* event, ExceptionState* exception_state) {
 
   if (event->bubbles()) {
     dispatch_scope.StartBubbling();
-    for (auto target : common::adopters::reverse(event_path)) {
+    for (auto target : base::Reversed(event_path)) {
       DCHECK(target != this);
       if (event->stop_propagation())
         break;

@@ -7,12 +7,12 @@
 #include "evita/ui/widget.h"
 
 #include "base/trace_event/trace_event.h"
-#include "common/adopters/reverse.h"
 #include "common/tree/ancestors_or_self.h"
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants.h"
 #include "common/tree/descendants_or_self.h"
 #include "common/win/win32_verify.h"
+#include "evita/base/adaptors/reversed.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/ui/animation/animatable_window.h"
@@ -176,7 +176,7 @@ void Widget::DidHide() {
   visible_ = false;
   container_widget()->DidChangeChildVisibility(this);
   // Hide widgets in top to bottom == post order.
-  for (const auto& child : common::adopters::reverse(child_nodes())) {
+  for (const auto& child : base::Reversed(child_nodes())) {
     if (!child->is_realized())
       continue;
     child->Hide();
@@ -403,7 +403,7 @@ Widget::HitTestResult Widget::HitTest(const gfx::Point& local_point) const {
   if (!GetContentsBounds().Contains(gfx::PointF(local_point)))
     return HitTestResult();
 
-  for (const auto& child : common::adopters::reverse(child_nodes())) {
+  for (const auto& child : base::Reversed(child_nodes())) {
     if (!child->visible())
       continue;
     const auto child_point =

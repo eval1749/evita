@@ -115,7 +115,7 @@ bool Widget::has_native_focus() const {
 
 HWND Widget::AssociatedHwnd() const {
   for (auto runner : common::tree::ancestors_or_self(this)) {
-    if (auto const window = runner->native_window_.get())
+    if (const auto window = runner->native_window_.get())
       return *window;
   }
   NOTREACHED();
@@ -164,7 +164,7 @@ void Widget::DidDestroyWidget() {
   while (first_child())
     first_child()->DestroyWidget();
   DestroyLayer();
-  auto const parent_widget = container_widget();
+  const auto parent_widget = container_widget();
   parent_widget->RemoveChild(this);
   parent_widget->DidRemoveChildWidget(this);
   if (owned_by_client_)
@@ -176,7 +176,7 @@ void Widget::DidHide() {
   visible_ = false;
   container_widget()->DidChangeChildVisibility(this);
   // Hide widgets in top to bottom == post order.
-  for (auto child : common::adopters::reverse(child_nodes())) {
+  for (const auto& child : common::adopters::reverse(child_nodes())) {
     if (!child->is_realized())
       continue;
     child->Hide();
@@ -186,7 +186,7 @@ void Widget::DidHide() {
 void Widget::DidKillFocus(ui::Widget*) {}
 
 void Widget::DidRealize() {
-  for (auto const child : child_nodes())
+  for (const auto& child : child_nodes())
     child->RealizeWidget();
 }
 
@@ -221,12 +221,12 @@ void Widget::DidShow() {
 }
 
 void Widget::DispatchMouseExited() {
-  auto const hover = hover_widget;
+  const auto hover = hover_widget;
   if (!hover)
     return;
   hover_widget = nullptr;
-  auto const screen_point = GetCursorPoint();
-  auto const client_point = MapFromDesktopPoint(screen_point);
+  const auto screen_point = GetCursorPoint();
+  const auto client_point = MapFromDesktopPoint(screen_point);
   MouseEvent event(EventType::MouseExited, MouseButton::None, 0, 0, hover,
                    client_point, screen_point);
   hover->OnMouseExited(event);
@@ -241,7 +241,7 @@ void Widget::DispatchPaintMessage() {
   for (auto child : child_nodes()) {
     if (!child->visible() || child->has_native_window())
       continue;
-    auto const rect = exposed_rect.Intersect(child->bounds());
+    const auto rect = exposed_rect.Intersect(child->bounds());
     if (rect.empty())
       continue;
     child->OnPaint(rect);
@@ -281,7 +281,7 @@ LRESULT Widget::HandleKeyboardMessage(uint32_t message,
   if (message == WM_CHAR) {
     KeyEvent event(EventType::KeyPressed, static_cast<int>(wParam),
                    KeyEvent::ConvertToRepeat(lParam));
-    auto const key_code = event.raw_key_code();
+    const auto key_code = event.raw_key_code();
     if (key_code < 0x20)
       return 0;
     TRACE_EVENT_ASYNC_BEGIN2("input", "KeyEvent", event.id(), "type",
@@ -325,10 +325,10 @@ static bool DispatchMouseEvent(Widget* widget, MouseEvent* event) {
 }
 
 bool Widget::HandleMouseMessage(const base::NativeEvent& native_event) {
-  auto const client_point = GetClientPointFromNativeEvent(native_event);
-  auto const screen_point = GetScreenPointFromNativeEvent(native_event);
-  auto const message = native_event.message;
-  auto const result = HitTestForMouseEventTarget(client_point);
+  const auto client_point = GetClientPointFromNativeEvent(native_event);
+  const auto screen_point = GetScreenPointFromNativeEvent(native_event);
+  const auto message = native_event.message;
+  const auto result = HitTestForMouseEventTarget(client_point);
   if (message == WM_MOUSEWHEEL) {
     // Note: We send WM_MOUSEWHEEL message to a widget under mouse pointer
     // rather than active widget.
@@ -403,16 +403,12 @@ Widget::HitTestResult Widget::HitTest(const gfx::Point& local_point) const {
   if (!GetContentsBounds().Contains(gfx::PointF(local_point)))
     return HitTestResult();
 
-  // On release build by MSVS2013, using reverse() causes AV.
-  // for (const auto& child: common::adopters::reverse(child_nodes()))
-  for (auto runner = last_child(); runner;
-       runner = runner->previous_sibling()) {
-    auto const child = runner;
+  for (const auto& child : common::adopters::reverse(child_nodes())) {
     if (!child->visible())
       continue;
-    auto const child_point =
+    const auto child_point =
         local_point.Offset(-child->bounds().left(), -child->bounds().top());
-    if (auto const result = child->HitTest(child_point))
+    if (const auto result = child->HitTest(child_point))
       return result;
   }
   return HitTestResult(this, local_point);
@@ -430,14 +426,14 @@ Widget::HitTestResult Widget::HitTestForMouseEventTarget(
     }
     return HitTestResult(capture_widget, local_point);
   }
-  if (auto const result = HitTest(host_point))
+  if (const auto result = HitTest(host_point))
     return result;
   return HitTestResult(this, host_point);
 }
 
 gfx::Point Widget::MapFromDesktopPoint(const gfx::Point& desktop_point) const {
   POINT hwnd_point(desktop_point);
-  auto const hwnd = AssociatedHwnd();
+  const auto hwnd = AssociatedHwnd();
   WIN32_VERIFY(::MapWindowPoints(HWND_DESKTOP, hwnd, &hwnd_point, 1));
   auto point = gfx::Point(hwnd_point);
   for (auto runner = this; !runner->has_native_window();
@@ -454,7 +450,7 @@ gfx::Point Widget::MapToDesktopPoint(const gfx::Point& local_point) const {
     point = point.Offset(runner->bounds().left(), runner->bounds().top());
   }
   POINT hwnd_point(point);
-  auto const hwnd = AssociatedHwnd();
+  const auto hwnd = AssociatedHwnd();
   WIN32_VERIFY(::MapWindowPoints(hwnd, HWND_DESKTOP, &hwnd_point, 1));
   return Point(hwnd_point);
 }
@@ -542,7 +538,7 @@ void Widget::SchedulePaint() {
 void Widget::SchedulePaintInRect(const gfx::Rect&) {
   DCHECK(is_realized());
   for (auto runner = this; runner; runner = runner->parent_node()) {
-    if (auto const animatable = runner->as<ui::AnimatableWindow>()) {
+    if (const auto animatable = runner->as<ui::AnimatableWindow>()) {
       animatable->RequestAnimationFrame();
       return;
     }
@@ -598,7 +594,7 @@ void Widget::SetCursor(HCURSOR hCursor) {
 }
 
 void Widget::SetParentWidget(Widget* new_parent) {
-  auto const old_parent = parent_node();
+  const auto old_parent = parent_node();
   if (new_parent == old_parent)
     return;
   if (old_parent) {
@@ -608,7 +604,7 @@ void Widget::SetParentWidget(Widget* new_parent) {
   new_parent->AppendChild(this);
   if (new_parent->is_realized()) {
     if (is_realized()) {
-      if (auto const window = native_window())
+      if (const auto window = native_window())
         ::SetParent(*window, new_parent->AssociatedHwnd());
       DidChangeHierarchy();
     } else {
@@ -647,7 +643,7 @@ void Widget::UpdateBounds() {
 
 void Widget::WillDestroyWidget() {
   DCHECK_EQ(kBeingDestroyed, state_);
-  auto const parent_widget = container_widget();
+  const auto parent_widget = container_widget();
   parent_widget->WillRemoveChildWidget(this);
   if (hover_widget == this)
     hover_widget = nullptr;
@@ -658,12 +654,12 @@ void Widget::WillDestroyWidget() {
 
 void Widget::WillDestroyNativeWindow() {
   std::vector<Widget*> non_native_children;
-  for (auto const child : child_nodes()) {
+  for (const auto& child : child_nodes()) {
     DCHECK_NE(child->state_, kBeingDestroyed);
     if (!child->native_window())
       non_native_children.push_back(child);
   }
-  for (auto const child : non_native_children)
+  for (const auto& child : non_native_children)
     child->DestroyWidget();
   WillDestroyWidget();
 }
@@ -674,7 +670,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
   DCHECK(native_window_);
   switch (message) {
     case WM_CAPTURECHANGED: {
-      auto const new_capture = reinterpret_cast<HWND>(lParam);
+      const auto new_capture = reinterpret_cast<HWND>(lParam);
       if (capture_widget && capture_widget->AssociatedHwnd() != new_capture)
         capture_widget = nullptr;
       return 0;
@@ -685,7 +681,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       return 0;
 
     case WM_CREATE: {
-      auto const create_data = reinterpret_cast<const CREATESTRUCT*>(lParam);
+      const auto create_data = reinterpret_cast<const CREATESTRUCT*>(lParam);
       if (create_data->hwndParent) {
         bounds_ = gfx::Rect(gfx::Point(create_data->x, create_data->y),
                             gfx::Size(create_data->cx, create_data->cy));
@@ -728,9 +724,9 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
     case WM_SETCURSOR: {
       if (LOWORD(lParam) != HTCLIENT)
         break;
-      auto const cursor_point = GetCursorPoint();
-      auto const point = MapFromDesktopPoint(cursor_point);
-      auto const result = HitTest(point);
+      const auto cursor_point = GetCursorPoint();
+      const auto point = MapFromDesktopPoint(cursor_point);
+      const auto result = HitTest(point);
       if (!result)
         break;
       if (!result.widget()->cursor_) {
@@ -801,7 +797,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
       //                      NOZORDER NOMOVE NOSIZE
       // if (wp->flags & SWP_NOSIZE) return 0;
 
-      auto const wp = reinterpret_cast<WINDOWPOS*>(lParam);
+      const auto wp = reinterpret_cast<WINDOWPOS*>(lParam);
       if (wp->flags & SWP_NOSIZE)
         return 0;
 
@@ -821,7 +817,7 @@ LRESULT Widget::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) {
     }
   }
 
-  if (auto const focus_widget = FocusController::instance()->focus_widget()) {
+  if (const auto focus_widget = FocusController::instance()->focus_widget()) {
     if (message >= WM_KEYFIRST && message <= WM_KEYLAST)
       return focus_widget->HandleKeyboardMessage(message, wParam, lParam);
   }

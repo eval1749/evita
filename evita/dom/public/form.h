@@ -11,7 +11,7 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/dom/public/geometry.h"
 
 namespace domapi {

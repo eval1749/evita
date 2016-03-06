@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "gtest/gtest.h"
 
-namespace {
+namespace base {
 
-class Class1 : public common::Castable<Class1> {
+class Class1 : public base::Castable<Class1> {
   DECLARE_CASTABLE_CLASS(Class1, Castable);
 };
 
@@ -38,4 +38,4 @@ TEST(Castable, All) {
   EXPECT_FALSE(instance4.is<Class3>());
 }
 
-}  // namespace
+}  // namespace base

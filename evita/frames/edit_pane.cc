@@ -8,10 +8,10 @@
 
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
-#include "common/castable.h"
 #include "common/tree/child_nodes.h"
 #include "common/tree/descendants_or_self.h"
 #include "common/tree/node.h"
+#include "evita/base/castable.h"
 #include "evita/frames/frame.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/resource.h"
@@ -138,7 +138,7 @@ struct HitTestResult {
 class EditPane::Box : public Bounds,
                       public base::RefCounted<EditPane::Box>,
                       public common::tree::Node<EditPane::Box>,
-                      public common::Castable<Box> {
+                      public base::Castable<Box> {
   DECLARE_CASTABLE_CLASS(Box, Castable);
 
  public:

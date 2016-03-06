@@ -6,7 +6,7 @@
 #define EVITA_PAINT_PUBLIC_LINE_INLINE_BOX_H_
 
 #include "base/macros.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/gfx/rect.h"
 #include "evita/layout/render_style.h"
 #include "evita/paint/public/line/inline_box_forward.h"
@@ -43,7 +43,7 @@ enum class TextMarker {
 //
 // InlineBox
 //
-class InlineBox : public common::Castable<InlineBox> {
+class InlineBox : public base::Castable<InlineBox> {
   DECLARE_PAINT_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
 
  public:

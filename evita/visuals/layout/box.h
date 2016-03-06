@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/gfx/base/colors/float_color.h"
 #include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/css/values.h"
@@ -44,7 +44,7 @@ class Style;
 //
 // Box
 //
-class Box : public common::Castable<Box> {
+class Box : public base::Castable<Box> {
   DECLARE_VISUAL_BOX_ABSTRACT_CLASS(Box, Castable);
 
  public:

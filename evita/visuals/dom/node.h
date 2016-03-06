@@ -11,7 +11,7 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/base/strings/atomic_string.h"
 #include "evita/gc/collectable.h"
 #include "evita/gc/visitor.h"
@@ -39,7 +39,7 @@ class Document;
 //
 // Node
 //
-class Node : public common::Castable<Node>, public gc::Collectable<Node> {
+class Node : public base::Castable<Node>, public gc::Collectable<Node> {
   DECLARE_VISUAL_NODE_ABSTRACT_CLASS(Node, Castable);
 
  public:

@@ -34,7 +34,6 @@ component("common") {
 
 test("common_unittests") {
   sources = [
-    "castable_unittest.cc",
     "memory/ref_counted_unittest.cc",
     "memory/scoped_refptr_unittest.cc",
     "strings/atomic_string_unittest.cc",

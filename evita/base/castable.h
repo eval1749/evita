@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_CASTABLE_H_
-#define COMMON_CASTABLE_H_
+#ifndef EVITA_BASE_CASTABLE_H_
+#define EVITA_BASE_CASTABLE_H_
 
 #include <type_traits>
 
-namespace common {
+namespace base {
 
 // T* as()
 // const char* class_name()
@@ -58,6 +58,6 @@ class Castable {
            base_name::is_class_of(other_name);                            \
   }
 
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_CASTABLE_H_
+#endif  // EVITA_BASE_CASTABLE_H_

@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "common/castable.h"
 #include "common/win/scoped_comptr.h"
+#include "evita/base/castable.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/direct_write_factory_win.h"
@@ -230,7 +230,7 @@ gfx::ColorF RgbToColorF(int red, int green, int blue, float alpha) {
 //
 // Item
 //
-class Item : public ui::CanvasPainter, public common::Castable<Item> {
+class Item : public ui::CanvasPainter, public base::Castable<Item> {
   DECLARE_CASTABLE_CLASS(Item, Castable);
 
  public:

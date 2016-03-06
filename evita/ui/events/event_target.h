@@ -5,7 +5,7 @@
 #ifndef EVITA_UI_EVENTS_EVENT_TARGET_H_
 #define EVITA_UI_EVENTS_EVENT_TARGET_H_
 
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/ui/events/event_handler.h"
 
 namespace ui {
@@ -14,7 +14,7 @@ namespace ui {
 //
 // EventTarget
 //
-class EventTarget : public common::Castable<EventTarget>, public EventHandler {
+class EventTarget : public base::Castable<EventTarget>, public EventHandler {
   DECLARE_CASTABLE_CLASS(EventTarget, Castable);
 
  public:

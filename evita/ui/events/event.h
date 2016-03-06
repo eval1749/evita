@@ -10,8 +10,8 @@
 
 #include "base/event_types.h"
 #include "base/time/time.h"
-#include "common/castable.h"
 #include "common/win/rect.h"
+#include "evita/base/castable.h"
 
 namespace ui {
 
@@ -110,7 +110,7 @@ class EventEditor;
 //
 // Event
 //
-class Event : public common::Castable<Event> {
+class Event : public base::Castable<Event> {
   DECLARE_CASTABLE_CLASS(Event, Castable);
 
  public:

@@ -6,7 +6,7 @@
 #define EVITA_LAYOUT_LINE_INLINE_BOX_H_
 
 #include "base/macros.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/gfx/rect.h"
 #include "evita/layout/line/inline_box_forward.h"
 #include "evita/layout/render_style.h"
@@ -42,7 +42,7 @@ class RenderStyle;
 //
 // InlineBox
 //
-class InlineBox : public common::Castable<InlineBox> {
+class InlineBox : public base::Castable<InlineBox> {
   DECLARE_INLINE_BOX_ABSTRACT_CLASS(InlineBox, Castable);
 
  public:

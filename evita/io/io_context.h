@@ -6,7 +6,7 @@
 #define EVITA_IO_IO_CONTEXT_H_
 
 #include "base/macros.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/dom/public/io_callback.h"
 
 namespace io {
@@ -15,7 +15,7 @@ namespace io {
 //
 // IoContext
 //
-class IoContext : public common::Castable<IoContext> {
+class IoContext : public base::Castable<IoContext> {
   DECLARE_CASTABLE_CLASS(IoContext, Castable);
 
  public:

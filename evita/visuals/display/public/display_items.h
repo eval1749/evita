@@ -9,7 +9,7 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/gfx/base/colors/float_color.h"
 #include "evita/gfx/base/geometry/float_matrix3x2.h"
 #include "evita/gfx/base/geometry/float_rect.h"
@@ -35,7 +35,7 @@ namespace visuals {
 //
 // DisplayItem
 //
-class DisplayItem : public common::Castable<DisplayItem> {
+class DisplayItem : public base::Castable<DisplayItem> {
   DECLARE_DISPLAY_ITEM_ABSTRACT_CLASS(DisplayItem, Castable)
 
  public:

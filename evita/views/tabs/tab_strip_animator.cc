@@ -4,7 +4,7 @@
 
 #include "evita/views/tabs/tab_strip_animator.h"
 
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/ui/animation/animatable.h"
 #include "evita/ui/animation/animatables.h"
 #include "evita/ui/animation/animator.h"
@@ -20,7 +20,7 @@ namespace views {
 //
 // TabStripAnimator::Action
 //
-class TabStripAnimator::Action : public common::Castable<Action>,
+class TabStripAnimator::Action : public base::Castable<Action>,
                                  private ui::AnimationObserver,
                                  private TabContentObserver {
   DECLARE_CASTABLE_CLASS(Action, Castable);

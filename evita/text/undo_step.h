@@ -7,7 +7,7 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/text/offset.h"
 
 namespace text {
@@ -19,7 +19,7 @@ class UndoStack;
 //
 // UndoStep
 //
-class UndoStep : public common::Castable<UndoStep> {
+class UndoStep : public base::Castable<UndoStep> {
   DECLARE_CASTABLE_CLASS(UndoStep, Castable);
 
  public:

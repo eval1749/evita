@@ -12,7 +12,7 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "common/castable.h"
+#include "evita/base/castable.h"
 #include "evita/dom/public/form_controls_forward.h"
 #include "evita/dom/public/geometry.h"
 
@@ -34,7 +34,7 @@ enum class CaretShape;
 //
 // FormControl
 //
-class FormControl : public common::Castable<FormControl> {
+class FormControl : public base::Castable<FormControl> {
   DECLARE_ABSTRACT_DOM_FORM_MODEL_CLASS(FormControl, Castable);
 
  public:

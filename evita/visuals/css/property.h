@@ -37,9 +37,11 @@ class Property final {
 
   PropertyId id() const { return id_; }
   const base::string16& name() const { return NameOf(id_); }
+  const char* ascii_name() const { return AsciiNameOf(id_); }
   const Value& value() const { return value_; }
 
   static const base::string16& NameOf(PropertyId id);
+  static const char* AsciiNameOf(PropertyId id);
 
  private:
   PropertyId id_;

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
 #include <vector>
 
 #include "evita/visuals/css/property.h"
@@ -28,18 +29,28 @@ class PropertyNames final {
     return names_[static_cast<size_t>(id)];
   }
 
+  const char* GetAscii(PropertyId id) const {
+    const auto index = static_cast<size_t>(id);
+    if (index >= ascii_names_.size())
+      return "???";
+    return ascii_names_[index];
+  }
+
   static PropertyNames* GetInstance() {
     return base::Singleton<PropertyNames>::get();
   }
 
  private:
+  std::array<const char*, kMaxPropertyId + 1> ascii_names_;
   std::vector<base::string16> names_;
+
   DISALLOW_COPY_AND_ASSIGN(PropertyNames);
 };
 
 PropertyNames::PropertyNames() : names_(kMaxPropertyId + 1) {
-  names_.resize(0);
-#define V(Name, name, type, text) names_.emplace_back(L##text);
+#define V(Name, name, type, text)                          \
+  names_[static_cast<size_t>(PropertyId::Name)] = L##text; \
+  ascii_names_[static_cast<size_t>(PropertyId::Name)] = text;
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
 }
@@ -82,6 +93,10 @@ bool Property::operator==(const Property& other) const {
 
 bool Property::operator!=(const Property& other) const {
   return !operator==(other);
+}
+
+const char* Property::AsciiNameOf(PropertyId id) {
+  return PropertyNames::GetInstance()->GetAscii(id);
 }
 
 const base::string16& Property::NameOf(PropertyId id) {

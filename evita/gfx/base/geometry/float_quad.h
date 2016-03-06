@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_GEOMETRY_FLOAT_QUAD_H_
-#define EVITA_VISUALS_GEOMETRY_FLOAT_QUAD_H_
+#ifndef EVITA_GFX_BASE_GEOMETRY_FLOAT_QUAD_H_
+#define EVITA_GFX_BASE_GEOMETRY_FLOAT_QUAD_H_
 
 #include <array>
 #include <iosfwd>
 
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
+#include "evita/gfx/gfx_export.h"
 
-namespace visuals {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -18,7 +19,7 @@ namespace visuals {
 // of mapping a rectangle through transforms. When initialized from a rect,
 // the points are in clockwise order from top left.
 //
-class FloatQuad final {
+class GFX_EXPORT FloatQuad final {
  public:
   FloatQuad(const FloatPoint& point1,
             const FloatPoint& point2,
@@ -49,8 +50,9 @@ class FloatQuad final {
   std::array<FloatPoint, 4> data_;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const FloatQuad& matrix);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                    const FloatQuad& matrix);
 
-}  // namespace visuals
+}  // namespace gfx
 
-#endif  // EVITA_VISUALS_GEOMETRY_FLOAT_QUAD_H_
+#endif  // EVITA_GFX_BASE_GEOMETRY_FLOAT_QUAD_H_

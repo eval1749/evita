@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 
 namespace visuals {
 
@@ -25,13 +25,13 @@ class DisplayItemList final {
   ~DisplayItemList();
 
   const std::vector<DisplayItem*>& items() const { return items_; }
-  const std::vector<FloatRect>& rects() const { return rects_; }
+  const std::vector<gfx::FloatRect>& rects() const { return rects_; }
 
  private:
   friend class DisplayItemListBuilder;
 
   std::vector<DisplayItem*> items_;
-  std::vector<FloatRect> rects_;
+  std::vector<gfx::FloatRect> rects_;
 
   DISALLOW_COPY_AND_ASSIGN(DisplayItemList);
 };

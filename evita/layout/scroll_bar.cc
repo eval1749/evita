@@ -17,9 +17,9 @@ namespace layout {
 
 using DisplayItemList = visuals::DisplayItemList;
 using DisplayItemListBuilder = visuals::DisplayItemListBuilder;
-using FloatPoint = visuals::FloatPoint;
-using FloatSize = visuals::FloatSize;
-using FloatRect = visuals::FloatRect;
+using FloatPoint = gfx::FloatPoint;
+using FloatSize = gfx::FloatSize;
+using FloatRect = gfx::FloatRect;
 using Part = ScrollBar::Part;
 using ScrollBarPainter = paint::ScrollBarPainter;
 
@@ -61,16 +61,16 @@ float ComputeVerticalThumbBottom(const gfx::RectF& bounds,
   return std::max(ratio * track_size, button_size) + bounds.top + button_size;
 }
 
-FloatPoint ToFloatPoint(const gfx::PointF& point) {
-  return FloatPoint(point.x, point.y);
+gfx::FloatPoint ToFloatPoint(const gfx::PointF& point) {
+  return gfx::FloatPoint(point.x, point.y);
 }
 
-FloatSize ToFloatSize(const gfx::SizeF& size) {
-  return FloatSize(size.width, size.height);
+gfx::FloatSize ToFloatSize(const gfx::SizeF& size) {
+  return gfx::FloatSize(size.width, size.height);
 }
 
-FloatRect ToFloatRect(const gfx::RectF& rect) {
-  return FloatRect(ToFloatPoint(rect.origin()), ToFloatSize(rect.size()));
+gfx::FloatRect ToFloatRect(const gfx::RectF& rect) {
+  return gfx::FloatRect(ToFloatPoint(rect.origin()), ToFloatSize(rect.size()));
 }
 
 }  // namespace

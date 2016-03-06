@@ -5,11 +5,11 @@
 #include <ostream>
 #include <tuple>
 
-#include "evita/visuals/geometry/float_point.h"
+#include "evita/gfx/base/geometry/float_point.h"
 
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/gfx/base/geometry/float_size.h"
 
-namespace visuals {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -56,4 +56,4 @@ std::ostream& operator<<(std::ostream& ostream, const FloatPoint& point) {
   return ostream << '(' << point.x() << ',' << point.y() << ')';
 }
 
-}  // namespace visuals
+}  // namespace gfx

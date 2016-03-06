@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/gfx/base/geometry/float_size.h"
 
 namespace visuals {
 
@@ -26,12 +26,14 @@ class Thickness {
   bool operator!=(const Thickness& other) const;
 
   float bottom() const { return bottom_; }
-  FloatSize bottom_right() const;
+  gfx::FloatSize bottom_right() const;
   float left() const { return left_; }
   float right() const { return right_; }
-  FloatSize size() const { return FloatSize(left_ + right_, top_ + bottom_); }
+  gfx::FloatSize size() const {
+    return gfx::FloatSize(left_ + right_, top_ + bottom_);
+  }
   float top() const { return top_; }
-  FloatSize top_left() const;
+  gfx::FloatSize top_left() const;
 
   bool HasValue() const;
 

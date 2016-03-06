@@ -10,6 +10,7 @@
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
 // TODO(eval174): We should move |ui::KeyCode| to its own file from "event.h".
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/ui/events/event.h"
 #include "evita/visuals/css/media_state.h"
 #include "evita/visuals/css/media_type.h"
@@ -26,7 +27,6 @@
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/dom/text.h"
-#include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
@@ -186,7 +186,7 @@ void DemoModel::AttachWindow(DemoWindow* window) {
   selection()->Collapse(document_->GetElementById(L"input")->first_child(), 1);
 }
 
-ElementNode* DemoModel::FindListItem(const FloatPoint& point) {
+ElementNode* DemoModel::FindListItem(const gfx::FloatPoint& point) {
   const auto& found = view_->HitTest(point);
   if (!found)
     return nullptr;
@@ -212,7 +212,7 @@ css::MediaType DemoModel::media_type() const {
   return css::MediaType::Screen;
 }
 
-FloatSize DemoModel::viewport_size() const {
+gfx::FloatSize DemoModel::viewport_size() const {
   return viewport_size_;
 }
 
@@ -251,7 +251,7 @@ void DemoModel::DidChangeView() {
 }
 
 // WindowEventHandler
-void DemoModel::DidChangeWindowBounds(const FloatRect& bounds) {
+void DemoModel::DidChangeWindowBounds(const gfx::FloatRect& bounds) {
   viewport_size_ = bounds.size();
   css::Media::DidChangeViewportSize();
 }
@@ -260,7 +260,7 @@ void DemoModel::DidKillFocus() {
   DidChangeMediaState();
 }
 
-void DemoModel::DidMoveMouse(const FloatPoint& point) {
+void DemoModel::DidMoveMouse(const gfx::FloatPoint& point) {
   const auto line = FindListItem(point);
   if (!line)
     return;
@@ -300,7 +300,7 @@ void DemoModel::DidPressKey(int key_code) {
   }
 }
 
-void DemoModel::DidPressMouse(const FloatPoint& point) {
+void DemoModel::DidPressMouse(const gfx::FloatPoint& point) {
   const auto line = FindListItem(point);
   if (!line)
     return;

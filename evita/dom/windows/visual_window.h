@@ -9,8 +9,8 @@
 
 #include "evita/dom/windows/window.h"
 
+#include "evita/gfx/base/geometry/float_size.h"
 #include "evita/visuals/css/media.h"
-#include "evita/visuals/geometry/float_size.h"
 #include "evita/visuals/view/view_observer.h"
 
 namespace visuals {
@@ -69,7 +69,7 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
   // visuals::css::Media
   visuals::css::MediaState media_state() const final;
   visuals::css::MediaType media_type() const final;
-  visuals::FloatSize viewport_size() const final;
+  gfx::FloatSize viewport_size() const final;
 
   // visuals::ViewObserver
   void DidChangeView() final;
@@ -81,7 +81,7 @@ class VisualWindow final : public ginx::Scriptable<VisualWindow, Window>,
 
   int animation_request_id_ = 0;
   const std::unique_ptr<visuals::View> view_;
-  visuals::FloatSize viewport_size_;
+  gfx::FloatSize viewport_size_;
 
   DISALLOW_COPY_AND_ASSIGN(VisualWindow);
 };

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/geometry/float_matrix3x2.h"
+#include "evita/gfx/base/geometry/float_matrix3x2.h"
 #include "gtest/gtest.h"
 
-namespace visuals {
+namespace gfx {
 
 TEST(FloatMatrix3x2Test, Equals) {
   FloatMatrix3x2 matrix0;
@@ -54,4 +54,4 @@ TEST(FloatMatrix3x2Test, Inverse) {
             FloatMatrix3x2({2, 0, 0, 2, 3, 4}).Inverse());
 }
 
-}  // namespace visuals
+}  // namespace gfx

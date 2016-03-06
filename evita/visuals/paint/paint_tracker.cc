@@ -11,7 +11,7 @@
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "evita/visuals/geometry/affine_transformer.h"
+#include "evita/gfx/base/geometry/affine_transformer.h"
 #include "evita/visuals/layout/box.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/container_box.h"
@@ -19,7 +19,7 @@
 namespace visuals {
 
 // Map |Box| to box bounds in viewport coordinate.
-using BoundsMap = std::unordered_map<const Box*, FloatRect>;
+using BoundsMap = std::unordered_map<const Box*, gfx::FloatRect>;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -31,7 +31,7 @@ class PaintTracker::Impl final {
   ~Impl();
 
   void Clear();
-  std::vector<FloatRect> Update();
+  std::vector<gfx::FloatRect> Update();
 
  private:
   struct Context {
@@ -59,7 +59,7 @@ class PaintTracker::Impl final {
   BoundsMap bounds_map_;
   const Box& root_box_;
   AffineTransformer transformer_;
-  std::stack<FloatMatrix3x2> transforms_;
+  std::stack<gfx::FloatMatrix3x2> transforms_;
 
   DISALLOW_COPY_AND_ASSIGN(PaintTracker::Impl);
 };
@@ -90,15 +90,15 @@ void PaintTracker::Impl::PushTransform() {
 }
 
 // TODO(eval1749): We should use cull rect set to merge adjacent rects.
-std::vector<FloatRect> PaintTracker::Impl::Update() {
+std::vector<gfx::FloatRect> PaintTracker::Impl::Update() {
   Context context;
   context.last_bounds_map.swap(bounds_map_);
   Visit(&context, root_box_);
   if (context.last_bounds_map.empty() || context.changed_boxes.empty())
-    return std::vector<FloatRect>();
+    return std::vector<gfx::FloatRect>();
 
   BoxEditor editor;
-  std::vector<FloatRect> exposed_rect_list;
+  std::vector<gfx::FloatRect> exposed_rect_list;
   for (const auto& box : context.changed_boxes) {
     const auto& old_bounds = context.last_bounds_map.find(box)->second;
     // TODO(eval1749): We should use R-Tree to find revealed boxes.
@@ -124,7 +124,8 @@ void PaintTracker::Impl::Visit(Context* context, const Box& box) {
   transformer_.Translate(box.bounds().origin());
   TransformScope outer_scope(this);
 
-  const auto& new_bounds = transformer_.MapRect(FloatRect(box.bounds().size()));
+  const auto& new_bounds =
+      transformer_.MapRect(gfx::FloatRect(box.bounds().size()));
   bounds_map_.insert(std::make_pair(&box, new_bounds));
 
   const auto& it = context->last_bounds_map.find(&box);
@@ -157,7 +158,7 @@ void PaintTracker::Clear() {
   impl_->Clear();
 }
 
-std::vector<FloatRect> PaintTracker::Update() {
+std::vector<gfx::FloatRect> PaintTracker::Update() {
   return std::move(impl_->Update());
 }
 

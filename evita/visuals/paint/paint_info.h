@@ -9,7 +9,7 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 
 namespace visuals {
 
@@ -19,15 +19,15 @@ namespace visuals {
 //
 class PaintInfo final {
  public:
-  PaintInfo(const FloatRect& cull_rect, const base::string16& debug_text);
-  explicit PaintInfo(const FloatRect& cull_rect);
+  PaintInfo(const gfx::FloatRect& cull_rect, const base::string16& debug_text);
+  explicit PaintInfo(const gfx::FloatRect& cull_rect);
   ~PaintInfo();
 
-  const FloatRect& cull_rect() const { return cull_rect_; }
+  const gfx::FloatRect& cull_rect() const { return cull_rect_; }
   const base::string16& debug_text() const { return debug_text_; }
 
  private:
-  const FloatRect cull_rect_;
+  const gfx::FloatRect cull_rect_;
   const base::string16 debug_text_;
 
   DISALLOW_COPY_AND_ASSIGN(PaintInfo);

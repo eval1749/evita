@@ -7,8 +7,8 @@
 #include "evita/visuals/fonts/text_format.h"
 
 #include "build/build_config.h"
+#include "evita/gfx/base/geometry/float_size.h"
 #include "evita/visuals/fonts/font_description.h"
-#include "evita/visuals/geometry/float_size.h"
 
 #if OS_WIN
 #include "evita/visuals/fonts/native_text_format_win.h"
@@ -28,7 +28,7 @@ TextFormat::TextFormat(const FontDescription& description)
 
 TextFormat::~TextFormat() {}
 
-FloatSize TextFormat::ComputeMetrics(const base::string16& text) const {
+gfx::FloatSize TextFormat::ComputeMetrics(const base::string16& text) const {
   return impl_->ComputeMetrics(text);
 }
 

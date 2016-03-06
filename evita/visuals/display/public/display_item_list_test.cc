@@ -10,10 +10,10 @@
 namespace visuals {
 
 TEST(DisplayItemList, Basic) {
-  FloatRect viewport_bounds(FloatSize(10, 10));
+  gfx::FloatRect viewport_bounds(gfx::FloatSize(10, 10));
   DisplayItemListBuilder builder(viewport_bounds);
-  builder.AddNew<BeginClipDisplayItem>(FloatRect(FloatSize(1, 2)));
-  builder.AddNew<FillRectDisplayItem>(FloatRect(FloatSize(1, 2)),
+  builder.AddNew<BeginClipDisplayItem>(gfx::FloatRect(gfx::FloatSize(1, 2)));
+  builder.AddNew<FillRectDisplayItem>(gfx::FloatRect(gfx::FloatSize(1, 2)),
                                       gfx::FloatColor(1, 1, 1));
   builder.AddNew<EndClipDisplayItem>();
   const auto& list = builder.Build();

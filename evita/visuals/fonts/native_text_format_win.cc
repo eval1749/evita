@@ -7,10 +7,10 @@
 #include "evita/visuals/fonts/native_text_format_win.h"
 
 #include "common/win/com_verify.h"
+#include "evita/gfx/base/geometry/float_size.h"
 #include "evita/visuals/fonts/direct_write_factory_win.h"
 #include "evita/visuals/fonts/font_description.h"
 #include "evita/visuals/fonts/native_text_layout_win.h"
-#include "evita/visuals/geometry/float_size.h"
 
 namespace visuals {
 
@@ -47,7 +47,8 @@ NativeTextFormat::~NativeTextFormat() {}
 
 // Note: We should not use |IDWriteTextLayout::DetermineMinWidth()| here,
 // since it returns width of word.
-FloatSize NativeTextFormat::ComputeMetrics(const base::string16& text) const {
+gfx::FloatSize NativeTextFormat::ComputeMetrics(
+    const base::string16& text) const {
   base::win::ScopedComPtr<IDWriteTextLayout> text_layout;
   const auto kHuge = 1e6f;
   COM_VERIFY(DirectWriteFactory::GetInstance()->get()->CreateTextLayout(
@@ -55,7 +56,7 @@ FloatSize NativeTextFormat::ComputeMetrics(const base::string16& text) const {
       kHuge, kHuge, text_layout.Receive()));
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY(text_layout->GetMetrics(&metrics));
-  return FloatSize(metrics.width, metrics.height);
+  return gfx::FloatSize(metrics.width, metrics.height);
 }
 
 }  // namespace visuals

@@ -5,9 +5,9 @@
 #include "evita/visuals/display/display_item_list_builder.h"
 
 #include "base/logging.h"
-#include "evita/visuals/display/public/display_items.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/display/public/display_item_list.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/visuals/display/public/display_items.h"
 
 namespace visuals {
 
@@ -15,7 +15,8 @@ namespace visuals {
 //
 // DisplayItemListBuilder
 //
-DisplayItemListBuilder::DisplayItemListBuilder(const FloatRect& viewport_bounds)
+DisplayItemListBuilder::DisplayItemListBuilder(
+    const gfx::FloatRect& viewport_bounds)
     : list_(new DisplayItemList()), viewport_bounds_(viewport_bounds) {}
 
 DisplayItemListBuilder::~DisplayItemListBuilder() {
@@ -26,7 +27,7 @@ void DisplayItemListBuilder::AddItem(std::unique_ptr<DisplayItem> item) {
   list_->items_.push_back(item.release());
 }
 
-void DisplayItemListBuilder::AddRect(const FloatRect& rect) {
+void DisplayItemListBuilder::AddRect(const gfx::FloatRect& rect) {
   const auto& clipped = viewport_bounds_.Intersect(rect);
   if (clipped.IsEmpty())
     return;

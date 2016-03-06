@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_GEOMETRY_FLOAT_SIZE_H_
-#define EVITA_VISUALS_GEOMETRY_FLOAT_SIZE_H_
+#ifndef EVITA_GFX_BASE_GEOMETRY_FLOAT_SIZE_H_
+#define EVITA_GFX_BASE_GEOMETRY_FLOAT_SIZE_H_
 
 #include <iosfwd>
 #include <utility>
 
-namespace visuals {
+#include "evita/gfx/gfx_export.h"
+
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
 // FloatSize
 //
-class FloatSize final {
+class GFX_EXPORT FloatSize final {
  public:
   explicit FloatSize(const std::pair<float, float> pair);
   FloatSize(float width, float height);
@@ -40,8 +42,9 @@ class FloatSize final {
   float width_ = 0.0f;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const FloatSize& size);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                    const FloatSize& size);
 
-}  // namespace visuals
+}  // namespace gfx
 
-#endif  // EVITA_VISUALS_GEOMETRY_FLOAT_SIZE_H_
+#endif  // EVITA_GFX_BASE_GEOMETRY_FLOAT_SIZE_H_

@@ -11,9 +11,12 @@ namespace domapi {
 enum class ScrollBarState;
 }
 
+namespace gfx {
+class FloatRect;
+}
+
 namespace visuals {
 class DisplayItemListBuilder;
-class FloatRect;
 }
 
 namespace paint {
@@ -24,7 +27,7 @@ namespace paint {
 //
 class ScrollBarPainter final {
   using DisplayItemListBuilder = visuals::DisplayItemListBuilder;
-  using FloatRect = visuals::FloatRect;
+  using FloatRect = gfx::FloatRect;
   using ScrollBarState = domapi::ScrollBarState;
 
  public:
@@ -32,43 +35,43 @@ class ScrollBarPainter final {
   ~ScrollBarPainter();
 
   void PaintBottomButton(DisplayItemListBuilder* builder,
-                         const FloatRect& bounds,
+                         const gfx::FloatRect& bounds,
                          ScrollBarState state);
 
   void PaintBottomTrack(DisplayItemListBuilder* builder,
-                        const FloatRect& bounds,
+                        const gfx::FloatRect& bounds,
                         ScrollBarState state);
 
   void PaintHorizontalThumb(DisplayItemListBuilder* builder,
-                            const FloatRect& bounds,
+                            const gfx::FloatRect& bounds,
                             ScrollBarState state);
 
   void PaintLeftButton(DisplayItemListBuilder* builder,
-                       const FloatRect& bounds,
+                       const gfx::FloatRect& bounds,
                        ScrollBarState state);
 
   void PaintLeftTrack(DisplayItemListBuilder* builder,
-                      const FloatRect& bounds,
+                      const gfx::FloatRect& bounds,
                       ScrollBarState state);
 
   void PaintRightButton(DisplayItemListBuilder* builder,
-                        const FloatRect& bounds,
+                        const gfx::FloatRect& bounds,
                         ScrollBarState state);
 
   void PaintRightTrack(DisplayItemListBuilder* builder,
-                       const FloatRect& bounds,
+                       const gfx::FloatRect& bounds,
                        ScrollBarState state);
 
   void PaintTopButton(DisplayItemListBuilder* builder,
-                      const FloatRect& bounds,
+                      const gfx::FloatRect& bounds,
                       ScrollBarState state);
 
   void PaintTopTrack(DisplayItemListBuilder* builder,
-                     const FloatRect& bounds,
+                     const gfx::FloatRect& bounds,
                      ScrollBarState state);
 
   void PaintVerticalThumb(DisplayItemListBuilder* builder,
-                          const FloatRect& bounds,
+                          const gfx::FloatRect& bounds,
                           ScrollBarState state);
 
  private:

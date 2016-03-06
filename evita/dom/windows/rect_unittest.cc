@@ -37,8 +37,8 @@ TEST_F(RectTest, Wrapper) {
   EXPECT_SCRIPT_VALID(
       "var rect;"
       "function init(x) { rect = x; }");
-  domapi::FloatRect rect(domapi::FloatPoint(12.0f, 34.0f),
-                         domapi::FloatSize(56.0f, 78.0f));
+  gfx::FloatRect rect(gfx::FloatPoint(12.0f, 34.0f),
+                      gfx::FloatSize(56.0f, 78.0f));
   EXPECT_SCRIPT_VALID_CALL("init", gin::ConvertToV8(isolate(), rect));
   EXPECT_SCRIPT_EQ("12", "rect.x");
   EXPECT_SCRIPT_EQ("34", "rect.y");

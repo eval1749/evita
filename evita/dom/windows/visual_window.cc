@@ -80,7 +80,7 @@ void VisualWindow::RequestAnimationFrame() {
 
 // Binding callbacks
 int VisualWindow::HitTest(int x, int y) {
-  visuals::FloatPoint point(x, y);
+  gfx::FloatPoint point(x, y);
   const auto& found = view_->HitTest(point);
   if (!found)
     return -1;
@@ -117,7 +117,7 @@ visuals::css::MediaType VisualWindow::media_type() const {
   return visuals::css::MediaType::Screen;
 }
 
-visuals::FloatSize VisualWindow::viewport_size() const {
+gfx::FloatSize VisualWindow::viewport_size() const {
   return viewport_size_;
 }
 
@@ -128,7 +128,7 @@ void VisualWindow::DidChangeView() {
 
 // Window
 void VisualWindow::DidChangeBounds(int left, int top, int right, int bottom) {
-  viewport_size_ = visuals::FloatSize(right - left, bottom - top);
+  viewport_size_ = gfx::FloatSize(right - left, bottom - top);
   visuals::css::Media::DidChangeViewportSize();
 }
 

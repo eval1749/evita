@@ -5,7 +5,7 @@
 #include "evita/visuals/layout/box_finder.h"
 
 #include "base/logging.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
 
@@ -13,9 +13,9 @@ namespace visuals {
 
 namespace {
 
-HitTestResult WalkInTree(const FloatPoint& point, const Box* box) {
+HitTestResult WalkInTree(const gfx::FloatPoint& point, const Box* box) {
   const auto& point_in_box =
-      point - FloatSize(box->bounds().x(), box->bounds().y());
+      point - gfx::FloatSize(box->bounds().x(), box->bounds().y());
   if (!box->bounds().Contains(point))
     return HitTestResult();
   const auto container = box->as<ContainerBox>();
@@ -41,7 +41,7 @@ HitTestResult WalkInTree(const FloatPoint& point, const Box* box) {
 BoxFinder::BoxFinder(const RootBox& root_box) : root_box_(root_box) {}
 BoxFinder::~BoxFinder() {}
 
-HitTestResult BoxFinder::FindByPoint(const FloatPoint& point) const {
+HitTestResult BoxFinder::FindByPoint(const gfx::FloatPoint& point) const {
   DCHECK(root_box_.IsLayoutClean());
   return WalkInTree(point, &root_box_);
 }

@@ -33,7 +33,7 @@ bool DisplayItem::operator!=(const DisplayItem& other) const {
 //
 // BeginClipDisplayItem
 //
-BeginClipDisplayItem::BeginClipDisplayItem(const FloatRect& bounds)
+BeginClipDisplayItem::BeginClipDisplayItem(const gfx::FloatRect& bounds)
     : bounds_(bounds) {}
 BeginClipDisplayItem::~BeginClipDisplayItem() {}
 
@@ -51,7 +51,7 @@ bool BeginClipDisplayItem::EqualsTo(const DisplayItem& other) const {
 // BeginTransformDisplayItem
 //
 BeginTransformDisplayItem::BeginTransformDisplayItem(
-    const FloatMatrix3x2& matrix)
+    const gfx::FloatMatrix3x2& matrix)
     : matrix_(matrix) {}
 BeginTransformDisplayItem::~BeginTransformDisplayItem() {}
 
@@ -85,9 +85,9 @@ bool ClearDisplayItem::EqualsTo(const DisplayItem& other) const {
 //
 // DrawBitmapDisplayItem
 //
-DrawBitmapDisplayItem::DrawBitmapDisplayItem(const FloatRect& destination,
+DrawBitmapDisplayItem::DrawBitmapDisplayItem(const gfx::FloatRect& destination,
                                              const ImageBitmap& bitmap,
-                                             const FloatRect& source,
+                                             const gfx::FloatRect& source,
                                              float opacity)
     : bitmap_(bitmap),
       destination_(destination),
@@ -110,8 +110,8 @@ bool DrawBitmapDisplayItem::EqualsTo(const DisplayItem& other) const {
 //
 // DrawLineDisplayItem
 //
-DrawLineDisplayItem::DrawLineDisplayItem(const FloatPoint& point1,
-                                         const FloatPoint& point2,
+DrawLineDisplayItem::DrawLineDisplayItem(const gfx::FloatPoint& point1,
+                                         const gfx::FloatPoint& point2,
                                          const gfx::FloatColor& color,
                                          float thickness)
     : color_(color), point1_(point1), point2_(point2), thickness_(thickness) {}
@@ -131,7 +131,7 @@ bool DrawLineDisplayItem::EqualsTo(const DisplayItem& other) const {
 //
 // DrawRectDisplayItem
 //
-DrawRectDisplayItem::DrawRectDisplayItem(const FloatRect& bounds,
+DrawRectDisplayItem::DrawRectDisplayItem(const gfx::FloatRect& bounds,
                                          const gfx::FloatColor& color,
                                          float thickness)
     : bounds_(bounds), color_(color), thickness_(thickness) {}
@@ -151,7 +151,7 @@ bool DrawRectDisplayItem::EqualsTo(const DisplayItem& other) const {
 //
 // DrawTextDisplayItem
 //
-DrawTextDisplayItem::DrawTextDisplayItem(const FloatRect& bounds,
+DrawTextDisplayItem::DrawTextDisplayItem(const gfx::FloatRect& bounds,
                                          const gfx::FloatColor& color,
                                          float baseline,
                                          const TextLayout& text_layout,
@@ -204,7 +204,7 @@ bool EndTransformDisplayItem::EqualsTo(const DisplayItem& other) const {
 //
 // FillRectDisplayItem
 //
-FillRectDisplayItem::FillRectDisplayItem(const FloatRect& bounds,
+FillRectDisplayItem::FillRectDisplayItem(const gfx::FloatRect& bounds,
                                          const gfx::FloatColor& color)
     : bounds_(bounds), color_(color) {}
 FillRectDisplayItem::~FillRectDisplayItem() {}

@@ -38,7 +38,7 @@ const TextLayout& TextBox::text_layout() const {
   return *text_layout_;
 }
 
-void TextBox::DidChangeBounds(const FloatRect& old_bounds) {
+void TextBox::DidChangeBounds(const gfx::FloatRect& old_bounds) {
   DCHECK(root_box()->InLayout()) << root_box()->lifecycle();
   text_layout_.reset();
 }

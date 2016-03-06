@@ -32,7 +32,7 @@ source_set("fonts") {
   deps = [
     "//base",
     "//common",
-    "//evita/visuals/geometry",
+    "//evita/gfx/base",
   ]
 }
 

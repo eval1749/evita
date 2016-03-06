@@ -10,9 +10,9 @@
 #include "evita/visuals/fonts/native_text_layout_win.h"
 
 #include "common/win/com_verify.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/fonts/direct_write_factory_win.h"
 #include "evita/visuals/fonts/native_text_format_win.h"
-#include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
@@ -22,7 +22,7 @@ namespace visuals {
 //
 NativeTextLayout::NativeTextLayout(const NativeTextFormat& text_format,
                                    const base::string16& text,
-                                   const FloatSize& size) {
+                                   const gfx::FloatSize& size) {
   DCHECK(!size.IsEmpty());
   COM_VERIFY(DirectWriteFactory::GetInstance()->get()->CreateTextLayout(
       text.data(), static_cast<uint32_t>(text.length()),
@@ -45,13 +45,13 @@ bool NativeTextLayout::operator!=(const NativeTextLayout& other) const {
   return !operator==(other);
 }
 
-FloatSize NativeTextLayout::GetMetrics() const {
+gfx::FloatSize NativeTextLayout::GetMetrics() const {
   DWRITE_TEXT_METRICS metrics;
   COM_VERIFY(value_->GetMetrics(&metrics));
-  return FloatSize(metrics.width, metrics.height);
+  return gfx::FloatSize(metrics.width, metrics.height);
 }
 
-size_t NativeTextLayout::HitTestPoint(const FloatPoint& point) const {
+size_t NativeTextLayout::HitTestPoint(const gfx::FloatPoint& point) const {
   BOOL is_inside = false;
   BOOL is_trailing = false;
   DWRITE_HIT_TEST_METRICS metrics = {0};
@@ -62,7 +62,7 @@ size_t NativeTextLayout::HitTestPoint(const FloatPoint& point) const {
   return static_cast<size_t>(metrics.textPosition + is_trailing);
 }
 
-FloatRect NativeTextLayout::HitTestTextPosition(size_t offset) const {
+gfx::FloatRect NativeTextLayout::HitTestTextPosition(size_t offset) const {
   auto caret_x = 0.0f;
   auto caret_y = 0.0f;
   auto const is_trailing = false;
@@ -70,9 +70,9 @@ FloatRect NativeTextLayout::HitTestTextPosition(size_t offset) const {
   COM_VERIFY(value_->HitTestTextPosition(static_cast<uint32_t>(offset),
                                          is_trailing, &caret_x, &caret_y,
                                          &metrics));
-  return FloatRect(
-      FloatPoint(std::round(caret_x), std::round(caret_y)),
-      FloatSize(std::round(metrics.width), std::round(metrics.height)));
+  return gfx::FloatRect(
+      gfx::FloatPoint(std::round(caret_x), std::round(caret_y)),
+      gfx::FloatSize(std::round(metrics.width), std::round(metrics.height)));
 }
 
 }  // namespace visuals

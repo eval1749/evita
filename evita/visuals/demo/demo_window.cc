@@ -7,12 +7,12 @@
 #include "base/message_loop/message_loop.h"
 #include "base/time/time.h"
 #include "build/build_config.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
 #include "evita/ui/compositor/root_layer.h"
 #include "evita/ui/events/event.h"
-#include "evita/visuals/geometry/float_rect.h"
 
 namespace visuals {
 
@@ -62,7 +62,7 @@ void DemoWindow::DidChangeBounds() {
   canvas_->SetBounds(GetContentsBounds());
   const auto& bounds = GetContentsBounds();
   event_handler_->DidChangeWindowBounds(
-      FloatRect(FloatSize(bounds.width(), bounds.height())));
+      gfx::FloatRect(gfx::FloatSize(bounds.width(), bounds.height())));
 }
 
 void DemoWindow::DidHide() {
@@ -98,12 +98,12 @@ void DemoWindow::OnKeyPressed(const ui::KeyEvent& event) {
 
 void DemoWindow::OnMouseMoved(const ui::MouseEvent& event) {
   event_handler_->DidMoveMouse(
-      FloatPoint(event.location().x(), event.location().y()));
+      gfx::FloatPoint(event.location().x(), event.location().y()));
 }
 
 void DemoWindow::OnMousePressed(const ui::MouseEvent& event) {
   event_handler_->DidPressMouse(
-      FloatPoint(event.location().x(), event.location().y()));
+      gfx::FloatPoint(event.location().x(), event.location().y()));
 }
 
 }  // namespace visuals

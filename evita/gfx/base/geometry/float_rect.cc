@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <ostream>
 
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 
-namespace visuals {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -96,4 +96,4 @@ std::ostream& operator<<(std::ostream& ostream, const FloatRect& rect) {
   return ostream << rect.origin() << '+' << rect.size();
 }
 
-}  // namespace visuals
+}  // namespace gfx

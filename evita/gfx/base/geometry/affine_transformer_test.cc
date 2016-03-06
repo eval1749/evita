@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/geometry/affine_transformer.h"
+#include "evita/gfx/base/geometry/affine_transformer.h"
 #include "gtest/gtest.h"
 
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 
-namespace visuals {
+namespace gfx {
 
 TEST(AffineTransformerTest, MapRect) {
   AffineTransformer transformer;
@@ -16,4 +16,4 @@ TEST(AffineTransformerTest, MapRect) {
             transformer.MapRect(FloatRect(FloatSize(40, 50))));
 }
 
-}  // namespace visuals
+}  // namespace gfx

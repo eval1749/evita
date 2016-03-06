@@ -34,12 +34,12 @@ class Padding final {
   bool operator!=(const Padding& other) const;
 
   float bottom() const { return thickness_.bottom(); }
-  FloatSize bottom_right() const { return thickness_.bottom_right(); }
+  gfx::FloatSize bottom_right() const { return thickness_.bottom_right(); }
   float left() const { return thickness_.left(); }
   float right() const { return thickness_.right(); }
-  FloatSize size() const { return thickness_.size(); }
+  gfx::FloatSize size() const { return thickness_.size(); }
   float top() const { return thickness_.top(); }
-  FloatSize top_left() const { return thickness_.top_left(); }
+  gfx::FloatSize top_left() const { return thickness_.top_left(); }
 
   bool HasValue() const { return thickness_.HasValue(); }
 

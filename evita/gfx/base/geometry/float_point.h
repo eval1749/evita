@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_GEOMETRY_FLOAT_POINT_H_
-#define EVITA_VISUALS_GEOMETRY_FLOAT_POINT_H_
+#ifndef EVITA_GFX_BASE_GEOMETRY_FLOAT_POINT_H_
+#define EVITA_GFX_BASE_GEOMETRY_FLOAT_POINT_H_
 
 #include <iosfwd>
 #include <utility>
 
-namespace visuals {
+#include "evita/gfx/gfx_export.h"
+
+namespace gfx {
 
 class FloatSize;
 
@@ -16,7 +18,7 @@ class FloatSize;
 //
 // FloatPoint
 //
-class FloatPoint final {
+class GFX_EXPORT FloatPoint final {
  public:
   explicit FloatPoint(const std::pair<float, float> pair);
   FloatPoint(float x, float y);
@@ -48,8 +50,9 @@ class FloatPoint final {
   float y_ = 0.0f;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const FloatPoint& point);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                    const FloatPoint& point);
 
-}  // namespace visuals
+}  // namespace gfx
 
-#endif  // EVITA_VISUALS_GEOMETRY_FLOAT_POINT_H_
+#endif  // EVITA_GFX_BASE_GEOMETRY_FLOAT_POINT_H_

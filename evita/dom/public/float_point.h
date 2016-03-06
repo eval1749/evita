@@ -5,11 +5,11 @@
 #ifndef EVITA_DOM_PUBLIC_FLOAT_POINT_H_
 #define EVITA_DOM_PUBLIC_FLOAT_POINT_H_
 
-#include "evita/visuals/geometry/float_point.h"
+#include "evita/gfx/base/geometry/float_point.h"
 
 namespace domapi {
 
-using FloatPoint = visuals::FloatPoint;
+using FloatPoint = gfx::FloatPoint;
 
 }  // namespace domapi
 

@@ -33,9 +33,9 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
   DECLARE_SCRIPTABLE_OBJECT(Window)
 
  public:
-  using FloatPoint = domapi::FloatPoint;
-  using FloatRect = domapi::FloatRect;
-  using FloatSize = domapi::FloatSize;
+  using FloatPoint = gfx::FloatPoint;
+  using FloatRect = gfx::FloatRect;
+  using FloatSize = gfx::FloatSize;
 
   enum class State {
     Destroyed = -2,
@@ -49,7 +49,7 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
 
   ~Window() override;
 
-  const FloatRect& bounds() const { return bounds_; }
+  const gfx::FloatRect& bounds() const { return bounds_; }
   Window* first_child() const { return Node::first_child(); }
   Window* last_child() const { return Node::last_child(); }
   Window* next_sibling() const { return Node::next_sibling(); }
@@ -110,7 +110,7 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
                        ExceptionState* exception_state);
   void Update(ExceptionState* exception_state);
 
-  FloatRect bounds_;
+  gfx::FloatRect bounds_;
   ScriptHost* const script_host_;
   State state_;
   bool visible_ = false;

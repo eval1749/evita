@@ -4,9 +4,9 @@
 
 #include <algorithm>
 
-#include "evita/visuals/geometry/float_quad.h"
+#include "evita/gfx/base/geometry/float_quad.h"
 
-namespace visuals {
+namespace gfx {
 
 namespace {
 float min4(float a, float b, float c, float d) {
@@ -75,4 +75,4 @@ std::ostream& operator<<(std::ostream& ostream, const FloatQuad& quad) {
                  << quad.data()[2] << ', ' << quad.data()[3] << ']';
 }
 
-}  // namespace visuals
+}  // namespace gfx

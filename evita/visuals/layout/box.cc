@@ -33,13 +33,14 @@ Box::~Box() {
   DCHECK_EQ(static_cast<Box*>(nullptr), previous_sibling_);
 }
 
-FloatRect Box::content_bounds() const {
-  return FloatRect(FloatPoint() + border_.top_left() + padding_.top_left(),
-                   bounds_.size() - border_.top_left() - padding_.top_left() -
-                       border_.bottom_right() - padding_.bottom_right());
+gfx::FloatRect Box::content_bounds() const {
+  return gfx::FloatRect(
+      gfx::FloatPoint() + border_.top_left() + padding_.top_left(),
+      bounds_.size() - border_.top_left() - padding_.top_left() -
+          border_.bottom_right() - padding_.bottom_right());
 }
 
-void Box::DidChangeBounds(const FloatRect& old_bounds) {
+void Box::DidChangeBounds(const gfx::FloatRect& old_bounds) {
   DCHECK(root_box_->InLayout()) << root_box_->lifecycle();
 }
 

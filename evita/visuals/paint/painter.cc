@@ -9,14 +9,14 @@
 
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
+#include "evita/gfx/base/geometry/affine_transformer.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/fonts/font_description_builder.h"
 #include "evita/visuals/fonts/text_format_factory.h"
 #include "evita/visuals/fonts/text_layout.h"
-#include "evita/visuals/geometry/affine_transformer.h"
-#include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_selection.h"
 #include "evita/visuals/layout/box_traversal.h"
@@ -81,9 +81,9 @@ class PaintVisitor final : public BoxVisitor {
   FOR_EACH_VISUAL_BOX(V)
 #undef V
 
-  void AddDirtyBounds(const FloatRect& bounds);
-  void FillRect(const FloatRect& rect, const gfx::FloatColor& color);
-  void FillRectAndMark(const FloatRect& rect,
+  void AddDirtyBounds(const gfx::FloatRect& bounds);
+  void FillRect(const gfx::FloatRect& rect, const gfx::FloatColor& color);
+  void FillRectAndMark(const gfx::FloatRect& rect,
                        const gfx::FloatColor& color,
                        bool mark);
   bool NeedsPaintContainerBox(const ContainerBox& box) const;
@@ -97,8 +97,8 @@ class PaintVisitor final : public BoxVisitor {
 
   DisplayItemListBuilder builder_;
   const PaintInfo& paint_info_;
-  AffineTransformer transformer_;
-  std::stack<FloatMatrix3x2> transforms_;
+  gfx::AffineTransformer transformer_;
+  std::stack<gfx::FloatMatrix3x2> transforms_;
 
   DISALLOW_COPY_AND_ASSIGN(PaintVisitor);
 };
@@ -113,11 +113,11 @@ PaintVisitor::~PaintVisitor() {
   DCHECK(transforms_.empty());
 }
 
-void PaintVisitor::AddDirtyBounds(const FloatRect& bounds) {
+void PaintVisitor::AddDirtyBounds(const gfx::FloatRect& bounds) {
   builder_.AddRect(transformer_.MapRect(bounds));
 }
 
-void PaintVisitor::FillRect(const FloatRect& rect,
+void PaintVisitor::FillRect(const gfx::FloatRect& rect,
                             const gfx::FloatColor& color) {
   DCHECK(!rect.IsEmpty());
   if (color.alpha() == 0)
@@ -125,7 +125,7 @@ void PaintVisitor::FillRect(const FloatRect& rect,
   builder_.AddNew<FillRectDisplayItem>(rect, color);
 }
 
-void PaintVisitor::FillRectAndMark(const FloatRect& rect,
+void PaintVisitor::FillRectAndMark(const gfx::FloatRect& rect,
                                    const gfx::FloatColor& color,
                                    bool mark) {
   DCHECK(!rect.IsEmpty());
@@ -170,8 +170,9 @@ std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const RootBox& root_box) {
     const auto& font =
         FontDescription::Builder().SetFamily(L"Arial").SetSize(10).Build();
     const auto& text_format = TextFormatFactory::GetInstance()->Get(font);
-    const auto& debug_text_bounds = FloatRect(
-        root_box.bounds().top_right() - FloatSize(200, 0), FloatSize(200, 50));
+    const auto& debug_text_bounds =
+        gfx::FloatRect(root_box.bounds().top_right() - gfx::FloatSize(200, 0),
+                       gfx::FloatSize(200, 50));
     const auto& text_layout = TextLayout(text_format, paint_info_.debug_text(),
                                          debug_text_bounds.size());
     builder_.AddNew<DrawTextDisplayItem>(debug_text_bounds,
@@ -189,7 +190,7 @@ void PaintVisitor::PaintBackgroundINeeded(const Box& box) {
   if (!box.ShouldPaint() && !is_background_changed)
     return;
 #endif
-  FillRectAndMark(FloatRect(box.bounds().size()), box.background_color(),
+  FillRectAndMark(gfx::FloatRect(box.bounds().size()), box.background_color(),
                   is_background_changed);
 }
 
@@ -202,24 +203,28 @@ void PaintVisitor::PaintBorderINeeded(const Box& box) {
   const auto& border = box.border();
   if (border.top()) {
     FillRectAndMark(
-        FloatRect(FloatPoint(), FloatSize(box.bounds().width(), border.top())),
+        gfx::FloatRect(gfx::FloatPoint(),
+                       gfx::FloatSize(box.bounds().width(), border.top())),
         border.top_color(), is_border_changed);
   }
   if (border.left()) {
-    FillRectAndMark(FloatRect(FloatPoint(),
-                              FloatSize(border.left(), box.bounds().height())),
-                    border.left_color(), is_border_changed);
+    FillRectAndMark(
+        gfx::FloatRect(gfx::FloatPoint(),
+                       gfx::FloatSize(border.left(), box.bounds().height())),
+        border.left_color(), is_border_changed);
   }
   if (border.right()) {
     FillRectAndMark(
-        FloatRect(FloatPoint(box.bounds().width() - border.right(), 0),
-                  FloatSize(border.right(), box.bounds().height())),
+        gfx::FloatRect(
+            gfx::FloatPoint(box.bounds().width() - border.right(), 0),
+            gfx::FloatSize(border.right(), box.bounds().height())),
         border.right_color(), is_border_changed);
   }
   if (border.bottom()) {
     FillRectAndMark(
-        FloatRect(FloatPoint(0, box.bounds().height() - border.bottom()),
-                  FloatSize(box.bounds().width(), border.bottom())),
+        gfx::FloatRect(
+            gfx::FloatPoint(0, box.bounds().height() - border.bottom()),
+            gfx::FloatSize(box.bounds().width(), border.bottom())),
         border.bottom_color(), is_border_changed);
   }
 }
@@ -252,18 +257,19 @@ void PaintVisitor::PaintSelectionIfNeeded(const Box& box) {
     const auto& anchor_box_rect =
         text->text_layout().HitTestTextPosition(selection.anchor_offset());
     const auto is_anchor_start = anchor_box_rect.x() < focus_box_rect.x();
-    const auto& selection_rect = FloatRect(
+    const auto& selection_rect = gfx::FloatRect(
         is_anchor_start ? anchor_box_rect.origin() : focus_box_rect.origin(),
-        FloatSize(is_anchor_start ? focus_box_rect.x() - anchor_box_rect.x()
-                                  : anchor_box_rect.x() - focus_box_rect.x(),
-                  std::max(anchor_box_rect.height(), focus_box_rect.height())));
+        gfx::FloatSize(
+            is_anchor_start ? focus_box_rect.x() - anchor_box_rect.x()
+                            : anchor_box_rect.x() - focus_box_rect.x(),
+            std::max(anchor_box_rect.height(), focus_box_rect.height())));
     FillRect(selection_rect, selection.selection_color());
   }
   if (selection.caret_shape().is_none())
     return;
-  FillRect(
-      FloatRect(focus_box_rect.origin(), FloatSize(1, focus_box_rect.height())),
-      selection.caret_color());
+  FillRect(gfx::FloatRect(focus_box_rect.origin(),
+                          gfx::FloatSize(1, focus_box_rect.height())),
+           selection.caret_color());
 }
 
 void PaintVisitor::PopTransform() {
@@ -293,12 +299,12 @@ void PaintVisitor::VisitImageBox(ImageBox* image) {
     BoxEditor().DidPaint(image);
     return;
   }
-  const auto& bounds = FloatRect(image->content_bounds().size());
+  const auto& bounds = gfx::FloatRect(image->content_bounds().size());
   if (image->IsContentChanged() || image->IsOriginChanged())
     AddDirtyBounds(bounds);
   BoxPaintScope paint_scope(this, *image);
   builder_.AddNew<DrawBitmapDisplayItem>(
-      FloatRect(image->point(), data.bounds().size()), image->bitmap(),
+      gfx::FloatRect(image->point(), data.bounds().size()), image->bitmap(),
       data.bounds(), image->opacity());
   BoxEditor().DidPaint(image);
 }
@@ -312,7 +318,7 @@ void PaintVisitor::VisitRootBox(RootBox* root) {
 }
 
 void PaintVisitor::VisitShapeBox(ShapeBox* shape) {
-  const auto& bounds = FloatRect(shape->content_bounds().size());
+  const auto& bounds = gfx::FloatRect(shape->content_bounds().size());
   if (shape->IsContentChanged() || shape->IsOriginChanged())
     AddDirtyBounds(bounds);
   BoxPaintScope paint_scope(this, *shape);
@@ -321,7 +327,7 @@ void PaintVisitor::VisitShapeBox(ShapeBox* shape) {
 }
 
 void PaintVisitor::VisitTextBox(TextBox* text) {
-  const auto& bounds = FloatRect(text->content_bounds().size());
+  const auto& bounds = gfx::FloatRect(text->content_bounds().size());
   if (bounds.size().IsEmpty())
     return;
   if (text->IsContentChanged() || text->IsOriginChanged())
@@ -353,7 +359,7 @@ PaintVisitor::BoxPaintScope::BoxPaintScope(PaintVisitor* painter,
   painter_->transformer_.Translate(content_bounds.origin());
   painter_->PushTransform();
   painter_->builder_.AddNew<BeginClipDisplayItem>(
-      FloatRect(content_bounds.size()));
+      gfx::FloatRect(content_bounds.size()));
 }
 
 PaintVisitor::BoxPaintScope::~BoxPaintScope() {

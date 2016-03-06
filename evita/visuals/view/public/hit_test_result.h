@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 
-#include "evita/visuals/geometry/float_point.h"
+#include "evita/gfx/base/geometry/float_point.h"
 
 namespace visuals {
 
@@ -20,7 +20,7 @@ class Node;
 //
 class HitTestResult final {
  public:
-  HitTestResult(Box* box, const FloatPoint& point);
+  HitTestResult(Box* box, const gfx::FloatPoint& point);
   HitTestResult(const HitTestResult& other);
   HitTestResult();
   ~HitTestResult();
@@ -32,12 +32,12 @@ class HitTestResult final {
 
   Box* box() const { return box_; }
   Node* node() const;
-  const FloatPoint& point() const { return point_; }
+  const gfx::FloatPoint& point() const { return point_; }
 
  private:
   Box* box_ = nullptr;
   // |point| in box coordinate space.
-  FloatPoint point_;
+  gfx::FloatPoint point_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const HitTestResult& result);

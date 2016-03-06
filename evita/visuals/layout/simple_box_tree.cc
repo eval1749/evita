@@ -62,7 +62,7 @@ void SimpleBoxTree::Finish() {
   DCHECK_EQ(1, boxes_.size());
   DCHECK_EQ(boxes_.top(), root_box_.get());
   boxes_.pop();
-  BoxEditor().SetViewportSize(root_box_.get(), FloatSize(800, 600));
+  BoxEditor().SetViewportSize(root_box_.get(), gfx::FloatSize(800, 600));
   lifecycle_scope_.reset();
 }
 

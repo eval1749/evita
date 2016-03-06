@@ -14,7 +14,7 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/gfx/base/geometry/float_size.h"
 
 namespace visuals {
 
@@ -26,9 +26,9 @@ class NativeImageBitmap;
 //
 class ImageBitmap final {
  public:
-  ImageBitmap(const void* data, size_t data_size, const FloatSize& size);
+  ImageBitmap(const void* data, size_t data_size, const gfx::FloatSize& size);
   explicit ImageBitmap(std::unique_ptr<NativeImageBitmap> native_image);
-  explicit ImageBitmap(const FloatSize& size);
+  explicit ImageBitmap(const gfx::FloatSize& size);
   ImageBitmap(const ImageBitmap& other);
   ImageBitmap(ImageBitmap&& other);
   ImageBitmap();
@@ -44,8 +44,8 @@ class ImageBitmap final {
   base::string16 format() const;
   const NativeImageBitmap& impl() const { return *impl_; }
   bool is_valid() const { return static_cast<bool>(impl_); }
-  FloatSize resolution() const;
-  const FloatSize& size() const;
+  gfx::FloatSize resolution() const;
+  const gfx::FloatSize& size() const;
 
   static ImageBitmap Decode(base::StringPiece16 format,
                             const void* data,

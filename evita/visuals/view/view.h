@@ -10,7 +10,7 @@
 
 #include "base/macros.h"
 #include "base/observer_list.h"
-#include "evita/visuals/geometry/float_quad.h"
+#include "evita/gfx/base/geometry/float_quad.h"
 #include "evita/visuals/view/public/hit_test_result.h"
 #include "evita/visuals/view/public/view_lifecycle_observer.h"
 
@@ -51,8 +51,8 @@ class View final : public ViewLifecycleObserver {
   const StyleTree& style_tree() const { return *style_tree_; }
 
   void AddObserver(ViewObserver* observer) const;
-  FloatQuad ComputeBorderBoxQuad(const Node& node);
-  HitTestResult HitTest(const FloatPoint& point);
+  gfx::FloatQuad ComputeBorderBoxQuad(const Node& node);
+  HitTestResult HitTest(const gfx::FloatPoint& point);
   std::unique_ptr<DisplayItemList> Paint();
   void ScheduleForcePaint();
   void Start();

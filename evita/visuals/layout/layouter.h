@@ -7,10 +7,13 @@
 
 #include "base/macros.h"
 
+namespace gfx {
+class FloatRect;
+}
+
 namespace visuals {
 
 class RootBox;
-class FloatRect;
 
 //////////////////////////////////////////////////////////////////////
 //

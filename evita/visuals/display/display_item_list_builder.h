@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 
 namespace visuals {
 
@@ -22,7 +22,7 @@ class DisplayItemList;
 //
 class DisplayItemListBuilder final {
  public:
-  explicit DisplayItemListBuilder(const FloatRect& viewport_bounds);
+  explicit DisplayItemListBuilder(const gfx::FloatRect& viewport_bounds);
   ~DisplayItemListBuilder();
 
   template <typename T, typename... Args>
@@ -31,17 +31,17 @@ class DisplayItemListBuilder final {
         std::unique_ptr<DisplayItem>(new T(std::forward<Args>(args)...))));
   }
 
-  void AddRect(const FloatRect& rect);
+  void AddRect(const gfx::FloatRect& rect);
   std::unique_ptr<DisplayItemList> Build();
 
  private:
   void AddItem(std::unique_ptr<DisplayItem> item);
 
   std::unique_ptr<DisplayItemList> list_;
-  std::vector<FloatRect> rects_;
+  std::vector<gfx::FloatRect> rects_;
 
   // Display item list should contains items paint inside |viewport_bounds_|.
-  const FloatRect viewport_bounds_;
+  const gfx::FloatRect viewport_bounds_;
 
   DISALLOW_COPY_AND_ASSIGN(DisplayItemListBuilder);
 };

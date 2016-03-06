@@ -11,13 +11,13 @@
 
 namespace gfx {
 class FloatColor;
+class FloatRect;
+class FloatSize;
 }
 
 namespace visuals {
 
 class BoxSelection;
-class FloatRect;
-class FloatSize;
 class FontDescription;
 class ImageData;
 class ShapeData;
@@ -41,7 +41,7 @@ class BoxEditor final {
   void DidLayout(Box* box);
   void DidMove(Box* box);
   void DidPaint(Box* box);
-  void SetBounds(Box* box, const FloatRect& new_bounds);
+  void SetBounds(Box* box, const gfx::FloatRect& new_bounds);
   void SetLayoutClean(Box* box);
 
   // ContainerBox
@@ -67,13 +67,13 @@ class BoxEditor final {
   void AllocateTextLayout(TextBox* box);
   const TextFormat& EnsureTextFormat(TextBox* box);
   void SetBaseline(TextBox* box, float new_baseline);
-  void SetPreferredSize(TextBox* box, const FloatSize& size);
+  void SetPreferredSize(TextBox* box, const gfx::FloatSize& size);
   void SetTextData(TextBox* box, base::StringPiece16 data);
 
   // RootBox
   void ScheduleForcePaint(RootBox* root_box);
   void SetSelection(RootBox* root_box, const BoxSelection& selection);
-  void SetViewportSize(RootBox* root_box, const FloatSize& size);
+  void SetViewportSize(RootBox* root_box, const gfx::FloatSize& size);
 
  private:
   const FontDescription& ComputeFontDescription(const TextBox& box);

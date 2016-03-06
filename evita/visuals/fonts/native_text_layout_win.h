@@ -13,11 +13,14 @@
 #include "base/strings/string16.h"
 #include "base/win/scoped_comptr.h"
 
-namespace visuals {
-
+namespace gfx {
 class FloatPoint;
 class FloatRect;
 class FloatSize;
+}
+
+namespace visuals {
+
 class NativeTextFormat;
 
 //////////////////////////////////////////////////////////////////////
@@ -28,7 +31,7 @@ class NativeTextLayout final {
  public:
   NativeTextLayout(const NativeTextFormat& text_format,
                    const base::string16& text,
-                   const FloatSize& size);
+                   const gfx::FloatSize& size);
   NativeTextLayout(const NativeTextLayout& other);
   NativeTextLayout(NativeTextLayout&& other);
   ~NativeTextLayout();
@@ -40,9 +43,9 @@ class NativeTextLayout final {
     return value_;
   }
 
-  FloatSize GetMetrics() const;
-  size_t HitTestPoint(const FloatPoint& point) const;
-  FloatRect HitTestTextPosition(size_t offset) const;
+  gfx::FloatSize GetMetrics() const;
+  size_t HitTestPoint(const gfx::FloatPoint& point) const;
+  gfx::FloatRect HitTestTextPosition(size_t offset) const;
 
  private:
   base::win::ScopedComPtr<IDWriteTextLayout> value_;

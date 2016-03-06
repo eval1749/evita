@@ -51,8 +51,8 @@ source_set("dom") {
     "//base",
     "//evita/base",
     "//evita/gc",
+    "//evita/gfx/base",
     "//evita/visuals/css",
-    "//evita/visuals/geometry",
   ]
 }
 

@@ -32,13 +32,13 @@ class TextBox final : public ContentBox {
   const gfx::FloatColor& color() const { return color_; }
   const base::string16& data() const { return data_; }
   bool has_text_layout() const { return !!text_layout_; }
-  FloatSize preferred_size() const { return preferred_size_; }
+  gfx::FloatSize preferred_size() const { return preferred_size_; }
   const TextFormat& text_format() const;
   const TextLayout& text_layout() const;
 
  private:
   // Box
-  void TextBox::DidChangeBounds(const FloatRect& old_bounds) final;
+  void TextBox::DidChangeBounds(const gfx::FloatRect& old_bounds) final;
 
   float baseline_ = 0.0f;
   gfx::FloatColor color_;
@@ -51,7 +51,7 @@ class TextBox final : public ContentBox {
   css::FontStyle font_style_;
   css::FontWeight font_weight_;
 
-  FloatSize preferred_size_;
+  gfx::FloatSize preferred_size_;
 
   // |BoxEditor::EnsureTextFormat()| will set/reset |font_description_| whenever
   // one of font related CSS properties changed.

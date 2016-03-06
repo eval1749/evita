@@ -11,8 +11,8 @@
 #include "base/macros.h"
 #include "common/castable.h"
 #include "evita/gfx/base/colors/float_color.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/css/values.h"
-#include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_forward.h"
 #include "evita/visuals/layout/margin.h"
@@ -69,8 +69,8 @@ class Box : public common::Castable<Box> {
   int sequence_id() const { return sequence_id_; }
 
   // Layout related values
-  const FloatRect& bounds() const { return bounds_; }
-  FloatRect content_bounds() const;
+  const gfx::FloatRect& bounds() const { return bounds_; }
+  gfx::FloatRect content_bounds() const;
   const css::Display& display() const { return display_; }
 
   bool is_changed() const { return is_changed_; }
@@ -116,9 +116,9 @@ class Box : public common::Castable<Box> {
   explicit Box(RootBox* root_box);
 
  private:
-  virtual void DidChangeBounds(const FloatRect& old_bounds);
+  virtual void DidChangeBounds(const gfx::FloatRect& old_bounds);
 
-  FloatRect bounds_;
+  gfx::FloatRect bounds_;
   const Node* const node_;
   const int sequence_id_;
 

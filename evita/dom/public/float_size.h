@@ -5,11 +5,11 @@
 #ifndef EVITA_DOM_PUBLIC_FLOAT_SIZE_H_
 #define EVITA_DOM_PUBLIC_FLOAT_SIZE_H_
 
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/gfx/base/geometry/float_size.h"
 
 namespace domapi {
 
-using FloatSize = visuals::FloatSize;
+using FloatSize = gfx::FloatSize;
 
 }  // namespace domapi
 

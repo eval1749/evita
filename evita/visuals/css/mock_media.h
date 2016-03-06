@@ -6,8 +6,8 @@
 #define EVITA_VISUALS_CSS_MOCK_MEDIA_H_
 
 #include "base/macros.h"
+#include "evita/gfx/base/geometry/float_size.h"
 #include "evita/visuals/css/media.h"
-#include "evita/visuals/geometry/float_size.h"
 
 namespace visuals {
 namespace css {
@@ -23,12 +23,12 @@ class MockMedia : public Media {
 
   MediaState media_state() const final;
   MediaType media_type() const final;
-  FloatSize viewport_size() const final;
+  gfx::FloatSize viewport_size() const final;
 
-  void SetViewportSize(const FloatSize& new_viewport_size);
+  void SetViewportSize(const gfx::FloatSize& new_viewport_size);
 
  private:
-  FloatSize viewport_size_;
+  gfx::FloatSize viewport_size_;
 
   DISALLOW_COPY_AND_ASSIGN(MockMedia);
 };

@@ -8,12 +8,12 @@
 
 namespace gin {
 template <>
-struct Converter<domapi::FloatPoint> {
+struct Converter<gfx::FloatPoint> {
   static bool FromV8(v8::Isolate* isolate,
                      v8::Local<v8::Value> val,
-                     domapi::FloatPoint* out);
+                     gfx::FloatPoint* out);
   static v8::Local<v8::Value> ToV8(v8::Isolate* isolate,
-                                   const domapi::FloatPoint& point);
+                                   const gfx::FloatPoint& point);
 };
 }  // namespace gin
 

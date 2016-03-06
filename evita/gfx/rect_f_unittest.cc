@@ -7,7 +7,7 @@
 
 namespace {
 
-using gfx::RectF;
+using RectF;
 
 TEST(RectFTest, Contains) {
   EXPECT_TRUE(RectF(10, 10, 50, 50).Contains(RectF(10, 10, 50, 50)));

@@ -44,8 +44,8 @@ class Window;
 //
 class ScrollBar final {
   using DisplayItemList = visuals::DisplayItemList;
-  using FloatPoint = domapi::FloatPoint;
-  using FloatRect = domapi::FloatRect;
+  using FloatPoint = gfx::FloatPoint;
+  using FloatRect = gfx::FloatRect;
   using MouseEvent = domapi::MouseEvent;
   using ScrollBarData = domapi::ScrollBarData;
   using ScrollBarOrientation = domapi::ScrollBarOrientation;
@@ -58,13 +58,13 @@ class ScrollBar final {
             ui::ScrollBarObserver* observer);
   ~ScrollBar();
 
-  FloatRect bounds() const;
+  gfx::FloatRect bounds() const;
 
   // Returns true if event handled.
   bool HandleMouseEvent(const MouseEvent& event);
-  ScrollBarPart HitTestPoint(const FloatPoint& point) const;
+  ScrollBarPart HitTestPoint(const gfx::FloatPoint& point) const;
   std::unique_ptr<DisplayItemList> Paint() const;
-  void SetBounds(const FloatRect& bounds);
+  void SetBounds(const gfx::FloatRect& bounds);
   void SetData(const ScrollBarData& new_data);
   void SetDisabled(bool new_disabled);
 
@@ -81,7 +81,7 @@ class ScrollBar final {
   ScrollBarData data_;
   ScrollBarPart hovered_part_;
   bool disabled_ = false;
-  FloatPoint last_drag_point_;
+  gfx::FloatPoint last_drag_point_;
   std::unique_ptr<layout::ScrollBar> layout_;
   ui::ScrollBarObserver* const observer_;
   ScrollBarOwner* const owner_;

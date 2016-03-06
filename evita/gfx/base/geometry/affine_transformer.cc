@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/geometry/affine_transformer.h"
+#include "evita/gfx/base/geometry/affine_transformer.h"
 
-#include "evita/visuals/geometry/float_quad.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_quad.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 
-namespace visuals {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -78,4 +78,4 @@ void AffineTransformer::Translate(float x, float y) {
   matrix_ = matrix_ * FloatMatrix3x2({1, 0, 0, 1, x, y});
 }
 
-}  // namespace visuals
+}  // namespace gfx

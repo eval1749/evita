@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_GEOMETRY_FLOAT_RECT_H_
-#define EVITA_VISUALS_GEOMETRY_FLOAT_RECT_H_
+#ifndef EVITA_GFX_BASE_GEOMETRY_FLOAT_RECT_H_
+#define EVITA_GFX_BASE_GEOMETRY_FLOAT_RECT_H_
 
 #include <iosfwd>
 
-#include "evita/visuals/geometry/float_point.h"
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/gfx/base/geometry/float_point.h"
+#include "evita/gfx/base/geometry/float_size.h"
+#include "evita/gfx/gfx_export.h"
 
-namespace visuals {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
 // FloatRect
 //
-class FloatRect final {
+class GFX_EXPORT FloatRect final {
  public:
   FloatRect(const FloatPoint& origin, const FloatPoint& bottom_right);
   FloatRect(const FloatPoint& origin, const FloatSize& size);
@@ -79,8 +80,9 @@ class FloatRect final {
   FloatSize size_;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const FloatRect& rect);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                    const FloatRect& rect);
 
-}  // namespace visuals
+}  // namespace gfx
 
-#endif  // EVITA_VISUALS_GEOMETRY_FLOAT_RECT_H_
+#endif  // EVITA_GFX_BASE_GEOMETRY_FLOAT_RECT_H_

@@ -1,8 +1,8 @@
 // Copyright (C) 2014 by Project Vogue.
 // Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
 
-#include "evita/dom/testing/abstract_dom_test.h"
 #include "evita/dom/windows/point.h"
+#include "evita/dom/testing/abstract_dom_test.h"
 
 namespace dom {
 
@@ -25,7 +25,7 @@ TEST_F(PointTest, Wrapper) {
   EXPECT_SCRIPT_VALID(
       "var point;"
       "function init(x) { point = x; }");
-  domapi::FloatPoint point(1234.0f, 4567.0f);
+  gfx::FloatPoint point(1234.0f, 4567.0f);
   EXPECT_SCRIPT_VALID_CALL("init", gin::ConvertToV8(isolate(), point));
   EXPECT_SCRIPT_EQ("1234", "point.x");
   EXPECT_SCRIPT_EQ("4567", "point.y");

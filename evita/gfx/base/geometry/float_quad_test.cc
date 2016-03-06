@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/geometry/float_quad.h"
+#include "evita/gfx/base/geometry/float_quad.h"
 #include "gtest/gtest.h"
 
-namespace visuals {
+namespace gfx {
 
 TEST(FloatQuadTest, Equals) {
   FloatQuad quad0;
@@ -47,4 +47,4 @@ TEST(FloatQuadTest, Equals) {
   EXPECT_TRUE(quad2 != quad3);
 }
 
-}  // namespace visuals
+}  // namespace gfx

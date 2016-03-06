@@ -4,12 +4,12 @@
 
 #include "evita/visuals/paint/painter.h"
 #include "evita/gfx/base/colors/float_color.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/public/display_items.h"
-#include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/layouter.h"
@@ -30,7 +30,7 @@ TEST(PainterTest, Basic) {
       .Finish();
   const auto root = box_tree.root_box();
   Layouter().Layout(root);
-  PaintInfo paint_info(FloatRect(root->viewport_size()));
+  PaintInfo paint_info(gfx::FloatRect(root->viewport_size()));
   const auto& display_item_list = Painter().Paint(paint_info, *root);
   EXPECT_EQ(5, display_item_list->items().size());
 }

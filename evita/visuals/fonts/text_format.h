@@ -11,9 +11,12 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 
+namespace gfx {
+class FloatSize;
+}
+
 namespace visuals {
 
-class FloatSize;
 class FontDescription;
 class NativeTextFormat;
 
@@ -29,7 +32,7 @@ class TextFormat final {
   const FontDescription& font_description() const { return font_description_; }
   const NativeTextFormat& impl() const { return *impl_; }
 
-  FloatSize ComputeMetrics(const base::string16& text) const;
+  gfx::FloatSize ComputeMetrics(const base::string16& text) const;
 
   bool operator==(const TextFormat& other) const = delete;
   bool operator!=(const TextFormat& other) const = delete;

@@ -5,11 +5,11 @@
 #ifndef EVITA_DOM_PUBLIC_FLOAT_RECT_H_
 #define EVITA_DOM_PUBLIC_FLOAT_RECT_H_
 
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 
 namespace domapi {
 
-using FloatRect = visuals::FloatRect;
+using FloatRect = gfx::FloatRect;
 
 }  // namespace domapi
 

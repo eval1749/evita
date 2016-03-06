@@ -8,9 +8,11 @@
 #include "base/macros.h"
 #include "base/observer_list.h"
 
-namespace visuals {
-
+namespace gfx {
 class FloatSize;
+}
+
+namespace visuals {
 
 namespace css {
 
@@ -28,7 +30,7 @@ class Media {
 
   virtual MediaState media_state() const = 0;
   virtual MediaType media_type() const = 0;
-  virtual FloatSize viewport_size() const = 0;
+  virtual gfx::FloatSize viewport_size() const = 0;
 
   // Helper functions for |css::MediaState|.
   bool is_media_active() const;

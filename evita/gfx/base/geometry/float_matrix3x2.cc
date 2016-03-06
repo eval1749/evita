@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/geometry/float_matrix3x2.h"
+#include "evita/gfx/base/geometry/float_matrix3x2.h"
 
-#include "evita/visuals/geometry/float_point.h"
+#include "evita/gfx/base/geometry/float_point.h"
 
-namespace visuals {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -95,4 +95,4 @@ std::ostream& operator<<(std::ostream& ostream, const FloatMatrix3x2& matrix) {
                  << matrix.data()[4] << ", " << matrix.data()[5] << ']';
 }
 
-}  // namespace visuals
+}  // namespace gfx

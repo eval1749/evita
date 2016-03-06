@@ -4,7 +4,7 @@
 
 #include "evita/visuals/fonts/text_layout.h"
 
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/fonts/text_format.h"
 
 #if OS_WIN
@@ -21,7 +21,7 @@ namespace visuals {
 //
 TextLayout::TextLayout(const TextFormat& text_format,
                        const base::string16& text,
-                       const FloatSize& size)
+                       const gfx::FloatSize& size)
     : impl_(new NativeTextLayout(text_format.impl(), text, size)) {}
 
 TextLayout::TextLayout(const TextLayout& other)
@@ -39,15 +39,15 @@ bool TextLayout::operator!=(const TextLayout& other) const {
   return !operator==(other);
 }
 
-FloatSize TextLayout::GetMetrics() const {
+gfx::FloatSize TextLayout::GetMetrics() const {
   return impl_->GetMetrics();
 }
 
-size_t TextLayout::HitTestPoint(const FloatPoint& point) const {
+size_t TextLayout::HitTestPoint(const gfx::FloatPoint& point) const {
   return impl_->HitTestPoint(point);
 }
 
-FloatRect TextLayout::HitTestTextPosition(size_t offset) const {
+gfx::FloatRect TextLayout::HitTestTextPosition(size_t offset) const {
   return impl_->HitTestTextPosition(offset);
 }
 

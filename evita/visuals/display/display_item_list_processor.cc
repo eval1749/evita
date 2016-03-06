@@ -16,6 +16,7 @@
 #include "evita/visuals/display/display_item_list_processor.h"
 
 #include "build/build_config.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/gfx/bitmap.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
@@ -26,7 +27,6 @@
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/fonts/native_text_layout_win.h"
 #include "evita/visuals/fonts/text_layout.h"
-#include "evita/visuals/geometry/float_rect.h"
 
 #if OS_WIN
 #include "evita/gfx/imaging_factory_win.h"
@@ -43,21 +43,21 @@ gfx::ColorF ToColorF(const gfx::FloatColor& color) {
   return gfx::ColorF(color.red(), color.green(), color.blue(), color.alpha());
 }
 
-D2D1_MATRIX_3X2_F ToMatrix3x2F(const FloatMatrix3x2& matrix) {
+D2D1_MATRIX_3X2_F ToMatrix3x2F(const gfx::FloatMatrix3x2& matrix) {
   return D2D1_MATRIX_3X2_F{matrix.data()[0], matrix.data()[1],
                            matrix.data()[2], matrix.data()[3],
                            matrix.data()[4], matrix.data()[5]};
 }
 
-gfx::PointF ToPointF(const FloatPoint& point) {
+gfx::PointF ToPointF(const gfx::FloatPoint& point) {
   return gfx::PointF(point.x(), point.y());
 }
 
-gfx::SizeF ToSizeF(const FloatSize& size) {
+gfx::SizeF ToSizeF(const gfx::FloatSize& size) {
   return gfx::SizeF(size.width(), size.height());
 }
 
-gfx::RectF ToRectF(const FloatRect& rect) {
+gfx::RectF ToRectF(const gfx::FloatRect& rect) {
   return gfx::RectF(ToPointF(rect.origin()), ToSizeF(rect.size()));
 }
 

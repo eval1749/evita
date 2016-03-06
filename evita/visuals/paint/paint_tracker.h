@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 
 namespace visuals {
 
@@ -29,7 +29,7 @@ class PaintTracker final {
   void Clear();
 
   // Returns exposed rectangles by new layout.
-  std::vector<FloatRect> Update();
+  std::vector<gfx::FloatRect> Update();
 
  private:
   class Impl;

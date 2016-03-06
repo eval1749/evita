@@ -182,9 +182,9 @@ IDL_TO_CPP_TYPE_MAP = {
     # For NodeHandle.getInlineStyle
     'Map': CppType('v8::Local<v8::Map>'),
     # For Window.prototype.compute_
-    'Point': CppType('domapi::FloatPoint'),
+    'Point': CppType('gfx::FloatPoint'),
     # For Window.prototype.compute_
-    'Rect': CppType('domapi::FloatRect'),
+    'Rect': CppType('gfx::FloatRect'),
     # For Editor.runScript
     'RunScriptResult': CppType('v8::Local<v8::Object>'),
     # For Editor.localizeText

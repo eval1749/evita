@@ -6,7 +6,7 @@
 
 #include "evita/visuals/layout/thickness.h"
 
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/gfx/base/geometry/float_size.h"
 
 namespace visuals {
 
@@ -32,12 +32,12 @@ bool Thickness::operator!=(const Thickness& other) const {
   return !operator==(other);
 }
 
-FloatSize Thickness::bottom_right() const {
-  return FloatSize(right_, bottom_);
+gfx::FloatSize Thickness::bottom_right() const {
+  return gfx::FloatSize(right_, bottom_);
 }
 
-FloatSize Thickness::top_left() const {
-  return FloatSize(left_, top_);
+gfx::FloatSize Thickness::top_left() const {
+  return gfx::FloatSize(left_, top_);
 }
 
 bool Thickness::HasValue() const {

@@ -40,7 +40,7 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
                          public text::SelectionChangeObserver,
                          public ui::ScrollBarObserver {
   DECLARE_SCRIPTABLE_OBJECT(TextWindow);
-  using FloatPoint = domapi::FloatPoint;
+  using FloatPoint = gfx::FloatPoint;
 
  public:
   class Caret;
@@ -56,11 +56,11 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
 
   text::Offset ComputeEndOfLine(text::Offset offset);
   text::Offset ComputeScreenMotion(int count,
-                                   const FloatPoint& point,
+                                   const gfx::FloatPoint& point,
                                    text::Offset offset);
   text::Offset ComputeStartOfLine(text::Offset offset);
   text::Offset ComputeWindowLineMotion(int count,
-                                       const FloatPoint& point,
+                                       const gfx::FloatPoint& point,
                                        text::Offset offset);
   text::Offset ComputeWindowMotion(int count, text::Offset offset);
   void DidBeginAnimationFrame(const base::TimeTicks& time);
@@ -82,9 +82,9 @@ class TextWindow final : public ginx::Scriptable<TextWindow, Window>,
   text::Offset ComputeMotion(int method,
                              text::Offset position,
                              int count,
-                             const domapi::FloatPoint& point);
+                             const gfx::FloatPoint& point);
   text::Offset HitTestPoint(float x, float y);
-  domapi::FloatRect HitTestTextPosition(text::Offset position);
+  gfx::FloatRect HitTestTextPosition(text::Offset position);
   void MakeSelectionVisible();
   TextWindow* NewTextWindow(TextRange* range);
   void Reconvert(const base::string16& text);

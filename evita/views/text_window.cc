@@ -37,15 +37,15 @@ namespace views {
 
 namespace {
 
-gfx::PointF ToPointF(const domapi::FloatPoint& point) {
+gfx::PointF ToPointF(const gfx::FloatPoint& point) {
   return gfx::PointF(point.x(), point.y());
 }
 
-gfx::SizeF ToSizeF(const domapi::FloatSize& size) {
+gfx::SizeF ToSizeF(const gfx::FloatSize& size) {
   return gfx::SizeF(size.width(), size.height());
 }
 
-gfx::RectF ToRectF(const domapi::FloatRect& rect) {
+gfx::RectF ToRectF(const gfx::FloatRect& rect) {
   return gfx::RectF(ToPointF(rect.origin()), ToSizeF(rect.size()));
 }
 

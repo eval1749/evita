@@ -170,8 +170,9 @@ void Window::DidChangeBounds(int clientLeft,
                              int clientTop,
                              int clientRight,
                              int clientBottom) {
-  const auto& new_bounds = FloatRect(FloatPoint(clientLeft, clientTop),
-                                     FloatPoint(clientRight, clientBottom));
+  const auto& new_bounds =
+      gfx::FloatRect(gfx::FloatPoint(clientLeft, clientTop),
+                     gfx::FloatPoint(clientRight, clientBottom));
   if (bounds_ == new_bounds)
     return;
   bounds_ = new_bounds;

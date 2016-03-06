@@ -13,12 +13,11 @@
 
 namespace gfx {
 class Canvas;
+class FloatPoint;
+class FloatRect;
 }
 
 namespace visuals {
-
-class FloatPoint;
-class FloatRect;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -28,11 +27,11 @@ class WindowEventHandler {
  public:
   virtual ~WindowEventHandler();
 
-  virtual void DidChangeWindowBounds(const FloatRect& bounds) = 0;
+  virtual void DidChangeWindowBounds(const gfx::FloatRect& bounds) = 0;
   virtual void DidKillFocus() = 0;
   virtual void DidPressKey(int key_code) = 0;
-  virtual void DidPressMouse(const FloatPoint& point) = 0;
-  virtual void DidMoveMouse(const FloatPoint& point) = 0;
+  virtual void DidPressMouse(const gfx::FloatPoint& point) = 0;
+  virtual void DidMoveMouse(const gfx::FloatPoint& point) = 0;
   virtual void DidSetFocus() = 0;
 
  protected:

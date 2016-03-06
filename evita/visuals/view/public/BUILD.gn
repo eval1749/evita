@@ -20,8 +20,8 @@ source_set("public") {
     "view_lifecycle_observer.h",
   ]
   deps = [
+    "//evita/gfx/base",
     "//evita/visuals/dom",
-    "//evita/visuals/geometry",
   ]
 }
 

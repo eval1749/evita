@@ -7,9 +7,9 @@
 
 namespace gin {
 
-bool Converter<domapi::FloatPoint>::FromV8(v8::Isolate* isolate,
-                                           v8::Local<v8::Value> val,
-                                           domapi::FloatPoint* out) {
+bool Converter<gfx::FloatPoint>::FromV8(v8::Isolate* isolate,
+                                        v8::Local<v8::Value> val,
+                                        gfx::FloatPoint* out) {
   if (val.IsEmpty() || !val->IsObject())
     return false;
   auto const obj = val->ToObject();
@@ -21,13 +21,13 @@ bool Converter<domapi::FloatPoint>::FromV8(v8::Isolate* isolate,
   float y;
   if (!ConvertFromV8(isolate, obj->Get(dom::v8Strings::y.Get(isolate)), &y))
     return false;
-  *out = domapi::FloatPoint(x, y);
+  *out = gfx::FloatPoint(x, y);
   return true;
 }
 
-v8::Local<v8::Value> Converter<domapi::FloatPoint>::ToV8(
+v8::Local<v8::Value> Converter<gfx::FloatPoint>::ToV8(
     v8::Isolate* isolate,
-    const domapi::FloatPoint& point) {
+    const gfx::FloatPoint& point) {
   auto const context = isolate->GetCurrentContext();
   auto const point_ctor =
       context->Global()->Get(dom::v8Strings::Point.Get(isolate));

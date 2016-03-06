@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/imaging/image_bitmap.h"
 
 namespace visuals {
@@ -34,12 +34,12 @@ class ImageData final {
   bool operator!=(const ImageData& other) const;
 
   const ImageBitmap& bitmap() const { return bitmap_; }
-  const FloatRect& bounds() const { return bounds_; }
+  const gfx::FloatRect& bounds() const { return bounds_; }
 
  private:
   ImageBitmap bitmap_;
   // Image fragment bounds specified by image URL "#xywh=\d+,\d+,\d+,\d"
-  FloatRect bounds_;
+  gfx::FloatRect bounds_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const ImageData& data);

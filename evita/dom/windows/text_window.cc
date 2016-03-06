@@ -39,9 +39,9 @@ namespace dom {
 
 using Caret = TextWindow::Caret;
 using CaretDisplayItem = paint::Caret;
-using domapi::FloatPoint;
-using domapi::FloatRect;
-using domapi::FloatSize;
+using gfx::FloatPoint;
+using gfx::FloatRect;
+using gfx::FloatSize;
 using domapi::ScrollBarData;
 using layout::PaintViewBuilder;
 using layout::TextSelectionModel;
@@ -51,19 +51,19 @@ namespace {
 
 const auto kBlinkInterval = 16 * 20;  // milliseconds
 
-FloatPoint ToFloatPoint(const gfx::PointF& point) {
-  return FloatPoint(point.x, point.y);
+gfx::FloatPoint ToFloatPoint(const gfx::PointF& point) {
+  return gfx::FloatPoint(point.x, point.y);
 }
 
-FloatSize ToFloatSize(const gfx::SizeF& size) {
-  return FloatSize(size.width, size.height);
+gfx::FloatSize ToFloatSize(const gfx::SizeF& size) {
+  return gfx::FloatSize(size.width, size.height);
 }
 
-FloatRect ToFloatRect(const gfx::RectF& rect) {
-  return FloatRect(ToFloatPoint(rect.origin()), ToFloatSize(rect.size()));
+gfx::FloatRect ToFloatRect(const gfx::RectF& rect) {
+  return gfx::FloatRect(ToFloatPoint(rect.origin()), ToFloatSize(rect.size()));
 }
 
-gfx::RectF ToRectF(const FloatRect& rect) {
+gfx::RectF ToRectF(const gfx::FloatRect& rect) {
   return gfx::RectF(rect.x(), rect.y(), rect.right(), rect.bottom());
 }
 
@@ -102,14 +102,14 @@ class TextWindow::Caret final {
   void DidKillFocus();
   void DidSetFocus();
   CaretDisplayItem Paint() const;
-  void Update(const FloatRect& new_bounds, const base::TimeTicks& now);
+  void Update(const gfx::FloatRect& new_bounds, const base::TimeTicks& now);
 
  private:
   void DidFireCaretTimer();
   void StartCaretBlinkTimer();
   void StopCaretBlinkTimer();
 
-  FloatRect bounds_;
+  gfx::FloatRect bounds_;
   TextWindow* const owner_;
   CaretState state_ = CaretState::None;
   base::TimeTicks show_start_time_;
@@ -154,11 +154,12 @@ void Caret::StartCaretBlinkTimer() {
 
 void Caret::StopCaretBlinkTimer() {
   blink_timer_.Stop();
-  bounds_ = FloatRect();
+  bounds_ = gfx::FloatRect();
   state_ = CaretState::None;
 }
 
-void Caret::Update(const FloatRect& new_bounds, const base::TimeTicks& now) {
+void Caret::Update(const gfx::FloatRect& new_bounds,
+                   const base::TimeTicks& now) {
   if (bounds_ == new_bounds) {
     if (bounds_.IsEmpty()) {
       DCHECK(state_ == CaretState::None);
@@ -234,7 +235,7 @@ void TextWindow::set_zoom(float new_zoom, ExceptionState* exception_state) {
 text::Offset TextWindow::ComputeMotion(int method,
                                        text::Offset position,
                                        int count,
-                                       const FloatPoint& point) {
+                                       const gfx::FloatPoint& point) {
   domapi::TextWindowCompute data;
   data.method = static_cast<domapi::TextWindowCompute::Method>(method);
   data.count = count;
@@ -264,15 +265,15 @@ text::Offset TextWindow::ComputeMotion(int method,
 text::Offset TextWindow::ComputeMotion(int method,
                                        text::Offset position,
                                        int count) {
-  return ComputeMotion(method, position, count, FloatPoint());
+  return ComputeMotion(method, position, count, gfx::FloatPoint());
 }
 
 text::Offset TextWindow::ComputeMotion(int method, text::Offset position) {
-  return ComputeMotion(method, position, 1, FloatPoint());
+  return ComputeMotion(method, position, 1, gfx::FloatPoint());
 }
 
 text::Offset TextWindow::ComputeMotion(int method) {
-  return ComputeMotion(method, text::Offset(0), 1, FloatPoint());
+  return ComputeMotion(method, text::Offset(0), 1, gfx::FloatPoint());
 }
 
 text::Offset TextWindow::ComputeEndOfLine(text::Offset text_offset) {
@@ -280,7 +281,7 @@ text::Offset TextWindow::ComputeEndOfLine(text::Offset text_offset) {
 }
 
 text::Offset TextWindow::ComputeScreenMotion(int n,
-                                             const FloatPoint& point,
+                                             const gfx::FloatPoint& point,
                                              text::Offset offset) {
   // TODO(eval1749): We should not call |LargetScroll()| in |ComputeMotion|.
   if (LargeScroll(0, n))
@@ -297,7 +298,7 @@ text::Offset TextWindow::ComputeStartOfLine(text::Offset text_offset) {
 }
 
 text::Offset TextWindow::ComputeWindowLineMotion(int n,
-                                                 const FloatPoint& pt,
+                                                 const gfx::FloatPoint& pt,
                                                  text::Offset lPosn) {
   text_view_->FormatIfNeeded();
   if (n > 0) {
@@ -368,7 +369,7 @@ void TextWindow::DidBeginAnimationFrame(const base::TimeTicks& now) {
 // of caret, If specified buffer position isn't in window, this function
 // returns 0.
 text::Offset TextWindow::HitTestPoint(float x, float y) {
-  const auto& point = FloatPoint(x, y);
+  const auto& point = gfx::FloatPoint(x, y);
   const auto scroll_bar_part = vertical_scroll_bar_->HitTestPoint(point);
   if (scroll_bar_part != domapi::ScrollBarPart::None)
     return text::Offset::Invalid();
@@ -380,7 +381,7 @@ text::Offset TextWindow::HitTestPoint(float x, float y) {
 // Maps position specified buffer position and returns height
 // of caret, If specified buffer position isn't in window, this function
 // returns |text::Offset::Invalid()|.
-domapi::FloatRect TextWindow::HitTestTextPosition(text::Offset offset) {
+gfx::FloatRect TextWindow::HitTestTextPosition(text::Offset offset) {
   text_view_->FormatIfNeeded();
   return ToFloatRect(text_view_->HitTestTextPosition(offset));
 }
@@ -476,16 +477,16 @@ void TextWindow::UpdateBounds() {
   const auto vertical_scroll_bar_width =
       static_cast<float>(::GetSystemMetrics(SM_CXVSCROLL));
 
-  const auto text_block_bounds = FloatRect(
-      canvas_bounds.size() - FloatSize(vertical_scroll_bar_width, 0.0f));
+  const auto text_block_bounds = gfx::FloatRect(
+      canvas_bounds.size() - gfx::FloatSize(vertical_scroll_bar_width, 0.0f));
   text_view_->SetBounds(gfx::RectF(text_block_bounds.x(), text_block_bounds.y(),
                                    text_block_bounds.right(),
                                    text_block_bounds.bottom()));
 
   // Place vertical scroll bar at right edge of text block.
-  const auto vertical_scroll_bar_bounds = FloatRect(
+  const auto vertical_scroll_bar_bounds = gfx::FloatRect(
       text_block_bounds.top_right(),
-      FloatSize(vertical_scroll_bar_width, text_block_bounds.height()));
+      gfx::FloatSize(vertical_scroll_bar_width, text_block_bounds.height()));
   vertical_scroll_bar_->SetBounds(vertical_scroll_bar_bounds);
 }
 
@@ -557,7 +558,7 @@ void TextWindow::DidMoveThumb(int value) {
 // ViewEventTarget
 bool TextWindow::HandleMouseEvent(const domapi::MouseEvent& event) {
   if (event.event_type == domapi::EventType::MouseMove) {
-    const auto& point = FloatPoint(event.client_x, event.client_y);
+    const auto& point = gfx::FloatPoint(event.client_x, event.client_y);
     const auto cursor_id = vertical_scroll_bar_->bounds().Contains(point)
                                ? domapi::CursorId::Pointer
                                : domapi::CursorId::IBeam;

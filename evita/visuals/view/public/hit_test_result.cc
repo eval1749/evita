@@ -14,7 +14,7 @@ namespace visuals {
 //
 // HitTestResult
 //
-HitTestResult::HitTestResult(Box* box, const FloatPoint& point)
+HitTestResult::HitTestResult(Box* box, const gfx::FloatPoint& point)
     : box_(box), point_(point) {}
 
 HitTestResult::HitTestResult(const HitTestResult& other)

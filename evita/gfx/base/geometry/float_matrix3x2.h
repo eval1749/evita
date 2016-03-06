@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_GEOMETRY_FLOAT_MATRIX3X2_H_
-#define EVITA_VISUALS_GEOMETRY_FLOAT_MATRIX3X2_H_
+#ifndef EVITA_GFX_BASE_GEOMETRY_FLOAT_MATRIX3X2_H_
+#define EVITA_GFX_BASE_GEOMETRY_FLOAT_MATRIX3X2_H_
 
 #include <array>
 #include <iosfwd>
 #include <utility>
 
-namespace visuals {
+#include "evita/gfx/gfx_export.h"
+
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
 // FloatMatrix3x2 class represents a 3-by-2 matrix and provides convenience
 // methods for creating matrices.
 //
-class FloatMatrix3x2 final {
+class GFX_EXPORT FloatMatrix3x2 final {
  public:
   explicit FloatMatrix3x2(const std::array<float, 6>& data);
   FloatMatrix3x2(const FloatMatrix3x2& other);
@@ -44,8 +46,9 @@ class FloatMatrix3x2 final {
   std::array<float, 6> data_;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const FloatMatrix3x2& matrix);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                    const FloatMatrix3x2& matrix);
 
-}  // namespace visuals
+}  // namespace gfx
 
-#endif  // EVITA_VISUALS_GEOMETRY_FLOAT_MATRIX3X2_H_
+#endif  // EVITA_GFX_BASE_GEOMETRY_FLOAT_MATRIX3X2_H_

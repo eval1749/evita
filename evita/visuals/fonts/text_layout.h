@@ -10,11 +10,14 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 
-namespace visuals {
-
+namespace gfx {
 class FloatPoint;
 class FloatRect;
 class FloatSize;
+}
+
+namespace visuals {
+
 class NativeTextLayout;
 class TextFormat;
 
@@ -26,7 +29,7 @@ class TextLayout final {
  public:
   TextLayout(const TextFormat& text_format,
              const base::string16& text,
-             const FloatSize& size);
+             const gfx::FloatSize& size);
   TextLayout(const TextLayout& other);
   TextLayout(TextLayout&& other);
   ~TextLayout();
@@ -36,9 +39,9 @@ class TextLayout final {
 
   const NativeTextLayout& impl() const { return *impl_; }
 
-  FloatSize GetMetrics() const;
-  size_t HitTestPoint(const FloatPoint& point) const;
-  FloatRect HitTestTextPosition(size_t offset) const;
+  gfx::FloatSize GetMetrics() const;
+  size_t HitTestPoint(const gfx::FloatPoint& point) const;
+  gfx::FloatRect HitTestTextPosition(size_t offset) const;
 
  private:
   std::unique_ptr<NativeTextLayout> impl_;

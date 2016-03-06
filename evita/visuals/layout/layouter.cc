@@ -9,7 +9,7 @@
 
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
-#include "evita/visuals/geometry/float_rect.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_editor.h"
 #include "evita/visuals/layout/box_visitor.h"
@@ -41,8 +41,10 @@ class LayoutVisitor final : public BoxVisitor {
   void LayoutIfNeeded(Box* box);
 
  private:
-  void Layout(Box* box, const FloatPoint& origin, const FloatSize& size);
-  void Layout(Box* box, const FloatRect& bounds);
+  void Layout(Box* box,
+              const gfx::FloatPoint& origin,
+              const gfx::FloatSize& size);
+  void Layout(Box* box, const gfx::FloatRect& bounds);
   void Layout(Box* box);
   void LayoutFlowBoxHorizontally(const FlowBox& flow_box);
   void LayoutFlowBoxVertically(const FlowBox& flow_box);
@@ -56,12 +58,12 @@ class LayoutVisitor final : public BoxVisitor {
 };
 
 void LayoutVisitor::Layout(Box* box,
-                           const FloatPoint& origin,
-                           const FloatSize& size) {
-  Layout(box, FloatRect(origin, size));
+                           const gfx::FloatPoint& origin,
+                           const gfx::FloatSize& size) {
+  Layout(box, gfx::FloatRect(origin, size));
 }
 
-void LayoutVisitor::Layout(Box* box, const FloatRect& bounds) {
+void LayoutVisitor::Layout(Box* box, const gfx::FloatRect& bounds) {
   BoxEditor().SetBounds(box, bounds);
   Layout(box);
 }
@@ -73,7 +75,7 @@ void LayoutVisitor::Layout(Box* box) {
 
 void LayoutVisitor::LayoutFlowBoxHorizontally(const FlowBox& flow_box) {
   DCHECK(flow_box.first_child()) << flow_box;
-  auto child_origin = FloatPoint();
+  auto child_origin = gfx::FloatPoint();
   for (const auto& child : flow_box.child_boxes()) {
     const auto& child_border = child->border();
     const auto& child_margin = child->margin();
@@ -81,15 +83,16 @@ void LayoutVisitor::LayoutFlowBoxHorizontally(const FlowBox& flow_box) {
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child_border.size() + child_padding.size();
     LayoutVisitor().Layout(
-        child, FloatRect(child_origin + child_margin.top_left(), child_size));
-    child_origin = FloatPoint(child->bounds().right() + child_margin.right(),
-                              child_origin.y());
+        child,
+        gfx::FloatRect(child_origin + child_margin.top_left(), child_size));
+    child_origin = gfx::FloatPoint(
+        child->bounds().right() + child_margin.right(), child_origin.y());
   }
 }
 
 void LayoutVisitor::LayoutFlowBoxVertically(const FlowBox& flow_box) {
   DCHECK(flow_box.first_child()) << flow_box;
-  auto child_origin = FloatPoint();
+  auto child_origin = gfx::FloatPoint();
   const auto content_width = flow_box.content_bounds().width();
   for (const auto& child : flow_box.child_boxes()) {
     const auto& child_border = child->border();
@@ -98,18 +101,19 @@ void LayoutVisitor::LayoutFlowBoxVertically(const FlowBox& flow_box) {
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child_border.size() + child_padding.size();
     if (child->position().is_absolute()) {
-      LayoutVisitor().Layout(child,
-                             FloatPoint(child->left().as_length().value(),
-                                        child->top().as_length().value()) +
-                                 child_margin.top_left(),
-                             FloatSize(content_width, child_size.height()));
+      LayoutVisitor().Layout(
+          child, gfx::FloatPoint(child->left().as_length().value(),
+                                 child->top().as_length().value()) +
+                     child_margin.top_left(),
+          gfx::FloatSize(content_width, child_size.height()));
       continue;
     }
     LayoutVisitor().Layout(
-        child, FloatRect(child_origin + child_margin.top_left(),
-                         FloatSize(content_width, child_size.height())));
-    child_origin = FloatPoint(child_origin.x(),
-                              child->bounds().bottom() + child_margin.bottom());
+        child,
+        gfx::FloatRect(child_origin + child_margin.top_left(),
+                       gfx::FloatSize(content_width, child_size.height())));
+    child_origin = gfx::FloatPoint(
+        child_origin.x(), child->bounds().bottom() + child_margin.bottom());
   }
 }
 

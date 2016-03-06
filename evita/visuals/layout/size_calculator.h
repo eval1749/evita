@@ -7,10 +7,13 @@
 
 #include "base/macros.h"
 
+namespace gfx {
+class FloatSize;
+}
+
 namespace visuals {
 
 class Box;
-class FloatSize;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -21,9 +24,9 @@ class SizeCalculator final {
   SizeCalculator();
   ~SizeCalculator();
 
-  FloatSize ComputeExtrinsicSize(const Box& box) const;
-  FloatSize ComputeIntrinsicSize(const Box& box) const;
-  FloatSize ComputePreferredSize(const Box& box) const;
+  gfx::FloatSize ComputeExtrinsicSize(const Box& box) const;
+  gfx::FloatSize ComputeIntrinsicSize(const Box& box) const;
+  gfx::FloatSize ComputePreferredSize(const Box& box) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SizeCalculator);

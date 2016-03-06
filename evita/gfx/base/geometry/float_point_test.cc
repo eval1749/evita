@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/geometry/float_point.h"
+#include "evita/gfx/base/geometry/float_point.h"
 #include "gtest/gtest.h"
 
-namespace visuals {
+namespace gfx {
 
 TEST(FloatPointTest, Equals) {
   EXPECT_TRUE(FloatPoint(0, 0) == FloatPoint(0, 0));
@@ -14,4 +14,4 @@ TEST(FloatPointTest, Equals) {
   EXPECT_FALSE(FloatPoint(0, 0) == FloatPoint(1, 0));
 }
 
-}  // namespace visuals
+}  // namespace gfx

@@ -11,9 +11,9 @@
 
 namespace gin {
 
-bool Converter<domapi::FloatRect>::FromV8(v8::Isolate* isolate,
-                                          v8::Local<v8::Value> val,
-                                          domapi::FloatRect* out) {
+bool Converter<gfx::FloatRect>::FromV8(v8::Isolate* isolate,
+                                       v8::Local<v8::Value> val,
+                                       gfx::FloatRect* out) {
   if (val.IsEmpty() || !val->IsObject())
     return false;
   auto const obj = val->ToObject();
@@ -35,14 +35,13 @@ bool Converter<domapi::FloatRect>::FromV8(v8::Isolate* isolate,
                      &height)) {
     return false;
   }
-  *out = domapi::FloatRect(domapi::FloatPoint(x, y),
-                           domapi::FloatSize(width, height));
+  *out = gfx::FloatRect(gfx::FloatPoint(x, y), gfx::FloatSize(width, height));
   return true;
 }
 
-v8::Local<v8::Value> Converter<domapi::FloatRect>::ToV8(
+v8::Local<v8::Value> Converter<gfx::FloatRect>::ToV8(
     v8::Isolate* isolate,
-    const domapi::FloatRect& rect) {
+    const gfx::FloatRect& rect) {
   auto const context = isolate->GetCurrentContext();
   auto const rect_ctor =
       context->Global()->Get(dom::v8Strings::Rect.Get(isolate));

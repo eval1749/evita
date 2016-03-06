@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/gfx/base/geometry/float_size.h"
 #include "evita/visuals/layout/container_box.h"
 
 namespace visuals {
@@ -30,7 +30,7 @@ class RootBox final : public ContainerBox {
   const Document& document() const;
   const BoxSelection& selection() const { return *selection_; }
   ViewLifecycle* lifecycle() const { return lifecycle_; }
-  const FloatSize& viewport_size() const { return viewport_size_; }
+  const gfx::FloatSize& viewport_size() const { return viewport_size_; }
 
   bool InLayout() const;
   bool InPaint() const;
@@ -41,7 +41,7 @@ class RootBox final : public ContainerBox {
  private:
   bool is_selection_changed_ = false;
   ViewLifecycle* const lifecycle_;
-  FloatSize viewport_size_;
+  gfx::FloatSize viewport_size_;
   std::unique_ptr<BoxSelection> selection_;
 
   DISALLOW_COPY_AND_ASSIGN(RootBox);

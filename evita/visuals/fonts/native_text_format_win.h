@@ -13,9 +13,12 @@
 #include "base/strings/string16.h"
 #include "base/win/scoped_comptr.h"
 
+namespace gfx {
+class FloatSize;
+}
+
 namespace visuals {
 
-class FloatSize;
 class FontDescription;
 class NativeTextLayout;
 
@@ -32,7 +35,7 @@ class NativeTextFormat final {
     return text_format_;
   }
 
-  FloatSize ComputeMetrics(const base::string16& text) const;
+  gfx::FloatSize ComputeMetrics(const base::string16& text) const;
 
  private:
   base::win::ScopedComPtr<IDWriteTextFormat> text_format_;

@@ -10,7 +10,7 @@
 
 namespace dom {
 
-using FloatSize = visuals::FloatSize;
+using FloatSize = gfx::FloatSize;
 using ImageBitmap = visuals::ImageBitmap;
 
 namespace {
@@ -24,13 +24,13 @@ ImageBitmap CreateImageBitmap(const void* data,
   const auto stride = width * 4;
   if (data_size != static_cast<size_t>(stride * height))
     return ImageBitmap();
-  return ImageBitmap(data, data_size, FloatSize(width, height));
+  return ImageBitmap(data, data_size, gfx::FloatSize(width, height));
 }
 
 ImageBitmap CreateImageBitmap(int width, int height) {
   if (width <= 0 || height <= 0)
     return ImageBitmap();
-  return ImageBitmap(FloatSize(width, height));
+  return ImageBitmap(gfx::FloatSize(width, height));
 }
 
 }  // namespace

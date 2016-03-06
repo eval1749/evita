@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "evita/visuals/layout/box_finder.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/css/values.h"
@@ -10,7 +11,6 @@
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "evita/visuals/dom/text.h"
 #include "evita/visuals/layout/box_editor.h"
-#include "evita/visuals/layout/box_finder.h"
 #include "evita/visuals/layout/flow_box.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
@@ -50,12 +50,14 @@ TEST(BoxFinderTest, Basic) {
 
   BoxFinder finder(*box_tree.root_box());
 
-  EXPECT_EQ(HitTestResult(), finder.FindByPoint(FloatPoint(-1, -1)));
-  EXPECT_EQ(HitTestResult(), finder.FindByPoint(FloatPoint(9999, 9999)));
-  EXPECT_EQ(HitTestResult(text_box1, FloatPoint(1, 2)),
-            finder.FindByPoint(text_box1->bounds().origin() + FloatSize(1, 2)));
-  EXPECT_EQ(HitTestResult(text_box2, FloatPoint(3, 4)),
-            finder.FindByPoint(text_box2->bounds().origin() + FloatSize(3, 4)));
+  EXPECT_EQ(HitTestResult(), finder.FindByPoint(gfx::FloatPoint(-1, -1)));
+  EXPECT_EQ(HitTestResult(), finder.FindByPoint(gfx::FloatPoint(9999, 9999)));
+  EXPECT_EQ(
+      HitTestResult(text_box1, gfx::FloatPoint(1, 2)),
+      finder.FindByPoint(text_box1->bounds().origin() + gfx::FloatSize(1, 2)));
+  EXPECT_EQ(
+      HitTestResult(text_box2, gfx::FloatPoint(3, 4)),
+      finder.FindByPoint(text_box2->bounds().origin() + gfx::FloatSize(3, 4)));
 }
 
 }  // namespace visuals

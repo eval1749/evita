@@ -8,8 +8,8 @@
 
 #include "base/logging.h"
 #include "base/trace_event/trace_event.h"
+#include "evita/gfx/base/geometry/float_rect.h"
 #include "evita/visuals/fonts/text_format.h"
-#include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/imaging/image_bitmap.h"
 #include "evita/visuals/layout/border.h"
 #include "evita/visuals/layout/box_editor.h"
@@ -40,23 +40,23 @@ class ExtrinsicSizeVisitor final : public BoxVisitor {
   ExtrinsicSizeVisitor() = default;
   ~ExtrinsicSizeVisitor() final = default;
 
-  FloatSize ComputeExtrinsicSize(const Box& box);
+  gfx::FloatSize ComputeExtrinsicSize(const Box& box);
 
  private:
   void ComputeWithSimpleMethod(const Box& box);
   void ReturnSize(float width, float height);
-  void ReturnSize(const FloatSize& size);
+  void ReturnSize(const gfx::FloatSize& size);
 
 #define V(name) void Visit##name(name* box) final;
   FOR_EACH_VISUAL_BOX(V)
 #undef V
 
-  FloatSize result_;
+  gfx::FloatSize result_;
 
   DISALLOW_COPY_AND_ASSIGN(ExtrinsicSizeVisitor);
 };
 
-FloatSize ExtrinsicSizeVisitor::ComputeExtrinsicSize(const Box& box) {
+gfx::FloatSize ExtrinsicSizeVisitor::ComputeExtrinsicSize(const Box& box) {
   Visit(const_cast<Box*>(&box));
   return result_;
 }
@@ -76,10 +76,10 @@ void ExtrinsicSizeVisitor::ComputeWithSimpleMethod(const Box& box) {
 }
 
 void ExtrinsicSizeVisitor::ReturnSize(float width, float height) {
-  ReturnSize(FloatSize(width, height));
+  ReturnSize(gfx::FloatSize(width, height));
 }
 
-void ExtrinsicSizeVisitor::ReturnSize(const FloatSize& size) {
+void ExtrinsicSizeVisitor::ReturnSize(const gfx::FloatSize& size) {
   result_ = size;
 }
 
@@ -113,43 +113,43 @@ class IntrinsicSizeVisitor final : public BoxVisitor {
   IntrinsicSizeVisitor() = default;
   ~IntrinsicSizeVisitor() final = default;
 
-  FloatSize ComputeIntrinsicSize(const Box& box);
+  gfx::FloatSize ComputeIntrinsicSize(const Box& box);
 
   // Shortcut
-  FloatSize ComputePreferredSize(const Box& box);
+  gfx::FloatSize ComputePreferredSize(const Box& box);
 
  private:
-  FloatSize SizeOfHorizontalFlowBox(const FlowBox& flow_box);
-  void ReturnSize(const FloatSize& size);
-  FloatSize SizeOfVerticalFlowBox(const FlowBox& flow_box);
+  gfx::FloatSize SizeOfHorizontalFlowBox(const FlowBox& flow_box);
+  void ReturnSize(const gfx::FloatSize& size);
+  gfx::FloatSize SizeOfVerticalFlowBox(const FlowBox& flow_box);
 
 #define V(name) void Visit##name(name* box) final;
   FOR_EACH_VISUAL_BOX(V)
 #undef V
 
-  FloatSize result_;
+  gfx::FloatSize result_;
 
   DISALLOW_COPY_AND_ASSIGN(IntrinsicSizeVisitor);
 };
 
-FloatSize IntrinsicSizeVisitor::ComputeIntrinsicSize(const Box& box) {
+gfx::FloatSize IntrinsicSizeVisitor::ComputeIntrinsicSize(const Box& box) {
   Visit(const_cast<Box*>(&box));
   return result_;
 }
 
-FloatSize IntrinsicSizeVisitor::ComputePreferredSize(const Box& box) {
+gfx::FloatSize IntrinsicSizeVisitor::ComputePreferredSize(const Box& box) {
   return SizeCalculator().ComputePreferredSize(box);
 }
 
-void IntrinsicSizeVisitor::ReturnSize(const FloatSize& size) {
+void IntrinsicSizeVisitor::ReturnSize(const gfx::FloatSize& size) {
   result_ = size;
 }
 
-FloatSize IntrinsicSizeVisitor::SizeOfHorizontalFlowBox(
+gfx::FloatSize IntrinsicSizeVisitor::SizeOfHorizontalFlowBox(
     const FlowBox& flow_box) {
   TRACE_EVENT0("visuals", "IntrinsicSizeVisitor::SizeOfHorizontalFlowBox");
   DCHECK(flow_box.first_child()) << flow_box;
-  auto size = FloatSize();
+  auto size = gfx::FloatSize();
   for (const auto& child : flow_box.child_boxes()) {
     if (!child->position().is_static())
       continue;
@@ -157,16 +157,17 @@ FloatSize IntrinsicSizeVisitor::SizeOfHorizontalFlowBox(
     const auto& child_padding = child->padding();
     const auto& child_size = ComputePreferredSize(*child) +
                              child_border.size() + child_padding.size();
-    size = FloatSize(size.width() + child_size.width(),
-                     std::max(size.height(), child_size.height()));
+    size = gfx::FloatSize(size.width() + child_size.width(),
+                          std::max(size.height(), child_size.height()));
   }
   return size;
 }
 
-FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(const FlowBox& flow_box) {
+gfx::FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(
+    const FlowBox& flow_box) {
   TRACE_EVENT0("visuals", "IntrinsicSizeVisitor::SizeOfVerticalFlowBox");
   DCHECK(flow_box.first_child()) << flow_box;
-  auto size = FloatSize();
+  auto size = gfx::FloatSize();
   for (const auto& child : flow_box.child_boxes()) {
     if (!child->position().is_static())
       continue;
@@ -174,8 +175,8 @@ FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(const FlowBox& flow_box) {
     const auto& child_padding = child->padding();
     const auto& child_size = ComputePreferredSize(*child) +
                              child_border.size() + child_padding.size();
-    size = FloatSize(std::max(size.width(), child_size.width()),
-                     size.height() + child_size.height());
+    size = gfx::FloatSize(std::max(size.width(), child_size.width()),
+                          size.height() + child_size.height());
   }
   return size;
 }
@@ -184,7 +185,7 @@ FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(const FlowBox& flow_box) {
 void IntrinsicSizeVisitor::VisitFlowBox(FlowBox* flow_box) {
   const auto first_child = flow_box->first_child();
   if (!first_child)
-    return ReturnSize(FloatSize());
+    return ReturnSize(gfx::FloatSize());
   if (IsDisplayOutsideInline(first_child->display()))
     return ReturnSize(SizeOfHorizontalFlowBox(*flow_box));
   return ReturnSize(SizeOfVerticalFlowBox(*flow_box));
@@ -199,13 +200,13 @@ void IntrinsicSizeVisitor::VisitRootBox(RootBox* box) {
 }
 
 void IntrinsicSizeVisitor::VisitShapeBox(ShapeBox* box) {
-  ReturnSize(FloatSize(box->size().as_length().value(),
-                       box->size().as_length().value()));
+  ReturnSize(gfx::FloatSize(box->size().as_length().value(),
+                            box->size().as_length().value()));
 }
 
 void IntrinsicSizeVisitor::VisitTextBox(TextBox* box) {
   if (box->data().empty())
-    return ReturnSize(FloatSize());
+    return ReturnSize(gfx::FloatSize());
   const auto& cached_size = box->preferred_size();
   if (!cached_size.IsEmpty())
     return ReturnSize(cached_size);
@@ -225,26 +226,26 @@ class PreferredSizeVisitor final : public BoxVisitor {
   PreferredSizeVisitor() = default;
   ~PreferredSizeVisitor() final = default;
 
-  FloatSize ComputePreferredSize(const Box& box);
+  gfx::FloatSize ComputePreferredSize(const Box& box);
 
  private:
-  void ReturnSize(const FloatSize& size);
+  void ReturnSize(const gfx::FloatSize& size);
 
 #define V(name) void Visit##name(name* box) final;
   FOR_EACH_VISUAL_BOX(V)
 #undef V
 
-  FloatSize result_;
+  gfx::FloatSize result_;
 
   DISALLOW_COPY_AND_ASSIGN(PreferredSizeVisitor);
 };
 
-FloatSize PreferredSizeVisitor::ComputePreferredSize(const Box& box) {
+gfx::FloatSize PreferredSizeVisitor::ComputePreferredSize(const Box& box) {
   Visit(const_cast<Box*>(&box));
   return result_;
 }
 
-void PreferredSizeVisitor::ReturnSize(const FloatSize& size) {
+void PreferredSizeVisitor::ReturnSize(const gfx::FloatSize& size) {
   result_ = size;
 }
 
@@ -278,15 +279,15 @@ void PreferredSizeVisitor::VisitTextBox(TextBox* box) {
 SizeCalculator::SizeCalculator() {}
 SizeCalculator::~SizeCalculator() {}
 
-FloatSize SizeCalculator::ComputeExtrinsicSize(const Box& box) const {
+gfx::FloatSize SizeCalculator::ComputeExtrinsicSize(const Box& box) const {
   return ExtrinsicSizeVisitor().ComputeExtrinsicSize(box);
 }
 
-FloatSize SizeCalculator::ComputeIntrinsicSize(const Box& box) const {
+gfx::FloatSize SizeCalculator::ComputeIntrinsicSize(const Box& box) const {
   return IntrinsicSizeVisitor().ComputeIntrinsicSize(box);
 }
 
-FloatSize SizeCalculator::ComputePreferredSize(const Box& box) const {
+gfx::FloatSize SizeCalculator::ComputePreferredSize(const Box& box) const {
   return PreferredSizeVisitor().ComputePreferredSize(box);
 }
 

@@ -12,12 +12,12 @@
 
 namespace gfx {
 class Canvas;
+class FloatRect;
 }
 
 namespace visuals {
 
 class DisplayItemList;
-class FloatRect;
 
 //////////////////////////////////////////////////////////////////////
 //

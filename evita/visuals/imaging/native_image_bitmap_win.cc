@@ -74,16 +74,16 @@ ImageFormatMap* ImageFormatMap::GetInstance() {
   return base::Singleton<ImageFormatMap>::get();
 }
 
-FloatSize ComputeSize(const base::win::ScopedComPtr<IWICBitmapSource>& bitmap) {
+gfx::FloatSize ComputeSize(
+    const base::win::ScopedComPtr<IWICBitmapSource>& bitmap) {
   uint32_t width = 0;
   uint32_t height = 0;
   COM_VERIFY(bitmap->GetSize(&width, &height));
-  return FloatSize(static_cast<float>(width), static_cast<float>(height));
+  return gfx::FloatSize(static_cast<float>(width), static_cast<float>(height));
 }
 
-base::win::ScopedComPtr<IWICBitmapSource> CreateBitmap(const void* data,
-                                                       size_t data_size,
-                                                       const FloatSize& size) {
+base::win::ScopedComPtr<IWICBitmapSource>
+CreateBitmap(const void* data, size_t data_size, const gfx::FloatSize& size) {
   base::win::ScopedComPtr<IWICBitmap> bitmap;
   COM_VERIFY2(
       gfx::ImagingFactory::GetInstance()->impl()->CreateBitmap(
@@ -108,7 +108,8 @@ base::win::ScopedComPtr<IWICBitmapSource> CreateBitmap(const void* data,
   return base::win::ScopedComPtr<IWICBitmapSource>(bitmap.get());
 }
 
-base::win::ScopedComPtr<IWICBitmapSource> CreateBitmap(const FloatSize& size) {
+base::win::ScopedComPtr<IWICBitmapSource> CreateBitmap(
+    const gfx::FloatSize& size) {
   base::win::ScopedComPtr<IWICBitmap> bitmap;
   COM_VERIFY(gfx::ImagingFactory::GetInstance()->impl()->CreateBitmap(
       static_cast<uint32_t>(size.width()), static_cast<uint32_t>(size.height()),
@@ -132,7 +133,7 @@ base::win::ScopedComPtr<IWICBitmapSource> CreateBitmapFromIcon(
 //
 NativeImageBitmap::NativeImageBitmap(const void* data,
                                      size_t data_size,
-                                     const FloatSize& size)
+                                     const gfx::FloatSize& size)
     : impl_(CreateBitmap(data, data_size, size)), size_(size) {}
 
 NativeImageBitmap::NativeImageBitmap(
@@ -143,7 +144,7 @@ NativeImageBitmap::NativeImageBitmap(
     base::win::ScopedComPtr<IWICBitmapSource>&& impl)
     : impl_(std::move(impl)), size_(ComputeSize(impl_)) {}
 
-NativeImageBitmap::NativeImageBitmap(const FloatSize& size)
+NativeImageBitmap::NativeImageBitmap(const gfx::FloatSize& size)
     : impl_(std::move(CreateBitmap(size))), size_(size) {}
 
 NativeImageBitmap::NativeImageBitmap(const base::win::ScopedHICON& icon)
@@ -207,11 +208,11 @@ base::string16 NativeImageBitmap::format() const {
       guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
 }
 
-FloatSize NativeImageBitmap::resolution() const {
+gfx::FloatSize NativeImageBitmap::resolution() const {
   double dpi_x = 0;
   double dpi_y = 0;
   COM_VERIFY(impl_->GetResolution(&dpi_x, &dpi_y));
-  return FloatSize(static_cast<float>(dpi_x), static_cast<float>(dpi_y));
+  return gfx::FloatSize(static_cast<float>(dpi_x), static_cast<float>(dpi_y));
 }
 
 // static

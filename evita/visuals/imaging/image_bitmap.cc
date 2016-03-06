@@ -22,7 +22,7 @@ namespace visuals {
 //
 ImageBitmap::ImageBitmap(const void* data,
                          size_t data_size,
-                         const FloatSize& size)
+                         const gfx::FloatSize& size)
     : impl_(new NativeImageBitmap(data, data_size, size)) {
   if (impl_->get())
     return;
@@ -36,7 +36,7 @@ ImageBitmap::ImageBitmap(std::unique_ptr<NativeImageBitmap> impl)
   impl_.reset();
 }
 
-ImageBitmap::ImageBitmap(const FloatSize& size)
+ImageBitmap::ImageBitmap(const gfx::FloatSize& size)
     : impl_(new NativeImageBitmap(size)) {}
 
 ImageBitmap::ImageBitmap(const ImageBitmap& other)
@@ -73,11 +73,11 @@ base::string16 ImageBitmap::format() const {
   return impl_->format();
 }
 
-FloatSize ImageBitmap::resolution() const {
+gfx::FloatSize ImageBitmap::resolution() const {
   return impl_->resolution();
 }
 
-const FloatSize& ImageBitmap::size() const {
+const gfx::FloatSize& ImageBitmap::size() const {
   return impl_->size();
 }
 

@@ -22,7 +22,7 @@ class BoxFinder final {
   explicit BoxFinder(const RootBox& root_box);
   ~BoxFinder();
 
-  HitTestResult FindByPoint(const FloatPoint& point) const;
+  HitTestResult FindByPoint(const gfx::FloatPoint& point) const;
 
  private:
   const RootBox& root_box_;

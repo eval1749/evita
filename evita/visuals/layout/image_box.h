@@ -30,12 +30,12 @@ class ImageBox final : public ContentBox {
   const ImageData& data() const { return data_; }
   const ImageBitmap& bitmap() const { return data_.bitmap(); }
   float opacity() const { return opacity_; }
-  const FloatPoint& point() const { return point_; }
+  const gfx::FloatPoint& point() const { return point_; }
 
  private:
   ImageData data_;
   float opacity_ = 1.0f;
-  FloatPoint point_;
+  gfx::FloatPoint point_;
 
   DISALLOW_COPY_AND_ASSIGN(ImageBox);
 };

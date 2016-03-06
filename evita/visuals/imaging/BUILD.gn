@@ -20,6 +20,6 @@ source_set("imaging") {
   deps = [
     "//base",
     "//evita/gfx",
-    "//evita/visuals/geometry",
+    "//evita/gfx/base",
   ]
 }

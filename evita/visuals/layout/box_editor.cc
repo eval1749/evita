@@ -299,7 +299,7 @@ const TextFormat& BoxEditor::EnsureTextFormat(TextBox* box) {
     return text_format;
   box->text_format_ = &text_format;
   box->text_layout_.reset();
-  box->preferred_size_ = FloatSize();
+  box->preferred_size_ = gfx::FloatSize();
   return text_format;
 }
 
@@ -370,7 +370,7 @@ void BoxEditor::SetBaseline(TextBox* box, float new_baseline) {
   MarkDirty(box);
 }
 
-void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
+void BoxEditor::SetBounds(Box* box, const gfx::FloatRect& new_bounds) {
   MustBeInLayout(*box);
   if (box->bounds_ == new_bounds)
     return;
@@ -505,7 +505,7 @@ void BoxEditor::SetImageStyle(ImageBox* box, const css::Style& new_style) {
   MarkDirty(box);
 }
 
-void BoxEditor::SetPreferredSize(TextBox* box, const FloatSize& size) {
+void BoxEditor::SetPreferredSize(TextBox* box, const gfx::FloatSize& size) {
   box->preferred_size_ = size;
 }
 
@@ -554,7 +554,7 @@ void BoxEditor::SetTextData(TextBox* text_box, base::StringPiece16 data) {
     return;
   text_box->data_ = data.as_string();
   text_box->text_layout_.reset();
-  text_box->preferred_size_ = FloatSize();
+  text_box->preferred_size_ = gfx::FloatSize();
   SetContentChanged(text_box);
 }
 
@@ -618,11 +618,11 @@ void BoxEditor::SetSelection(RootBox* root_box,
   root_box->is_selection_changed_ = true;
 }
 
-void BoxEditor::SetViewportSize(RootBox* root_box, const FloatSize& size) {
+void BoxEditor::SetViewportSize(RootBox* root_box, const gfx::FloatSize& size) {
   MustBeInTreeRebuild(*root_box);
   if (root_box->viewport_size_ == size)
     return;
-  root_box->bounds_ = FloatRect(size);
+  root_box->bounds_ = gfx::FloatRect(size);
   // TODO(eval1749): We don't need to have |RootBox::viewport_size_|. We can
   // use |RootBox::bounds_.size()|.
   root_box->viewport_size_ = size;

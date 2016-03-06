@@ -4,11 +4,11 @@
 
 #include <ostream>
 
-#include "evita/visuals/geometry/float_size.h"
+#include "evita/gfx/base/geometry/float_size.h"
 
 #include "base/logging.h"
 
-namespace visuals {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -55,4 +55,4 @@ std::ostream& operator<<(std::ostream& ostream, const FloatSize& size) {
   return ostream << size.width() << 'x' << size.height();
 }
 
-}  // namespace visuals
+}  // namespace gfx

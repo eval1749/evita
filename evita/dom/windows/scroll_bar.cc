@@ -21,35 +21,35 @@
 namespace dom {
 
 using DisplayItemList = visuals::DisplayItemList;
-using FloatPoint = domapi::FloatPoint;
-using FloatRect = domapi::FloatRect;
-using FloatSize = domapi::FloatSize;
+using FloatPoint = gfx::FloatPoint;
+using FloatRect = gfx::FloatRect;
+using FloatSize = gfx::FloatSize;
 using MouseButton = domapi::MouseButton;
 using ScrollBarPart = domapi::ScrollBarPart;
 
 namespace {
 
-FloatPoint ToFloatPoint(const gfx::PointF& point) {
-  return FloatPoint(point.x, point.y);
+gfx::FloatPoint ToFloatPoint(const gfx::PointF& point) {
+  return gfx::FloatPoint(point.x, point.y);
 }
 
-FloatSize ToFloatSize(const gfx::SizeF& size) {
-  return FloatSize(size.width, size.height);
+gfx::FloatSize ToFloatSize(const gfx::SizeF& size) {
+  return gfx::FloatSize(size.width, size.height);
 }
 
-FloatRect ToFloatRect(const gfx::RectF& rect) {
-  return FloatRect(ToFloatPoint(rect.origin()), ToFloatSize(rect.size()));
+gfx::FloatRect ToFloatRect(const gfx::RectF& rect) {
+  return gfx::FloatRect(ToFloatPoint(rect.origin()), ToFloatSize(rect.size()));
 }
 
-gfx::PointF ToPointF(const FloatPoint& point) {
+gfx::PointF ToPointF(const gfx::FloatPoint& point) {
   return gfx::PointF(point.x(), point.y());
 }
 
-gfx::SizeF ToSizeF(const FloatSize& size) {
+gfx::SizeF ToSizeF(const gfx::FloatSize& size) {
   return gfx::SizeF(size.width(), size.height());
 }
 
-gfx::RectF ToRectF(const FloatRect& rect) {
+gfx::RectF ToRectF(const gfx::FloatRect& rect) {
   return gfx::RectF(ToPointF(rect.origin()), ToSizeF(rect.size()));
 }
 
@@ -81,7 +81,7 @@ ScrollBar::ScrollBar(ScrollBarOrientation orientation,
 
 ScrollBar::~ScrollBar() {}
 
-FloatRect ScrollBar::bounds() const {
+gfx::FloatRect ScrollBar::bounds() const {
   return ToFloatRect(layout_->bounds());
 }
 
@@ -115,7 +115,7 @@ bool ScrollBar::HandleMouseEvent(const MouseEvent& event) {
 }
 
 bool ScrollBar::HandleMouseMoved(const MouseEvent& event) {
-  const auto& point = FloatPoint(event.client_x, event.client_y);
+  const auto& point = gfx::FloatPoint(event.client_x, event.client_y);
   const auto part = HitTestPoint(point);
   if (active_part_ != ScrollBarPart::Thumb)
     return UpdateHoveredPart(part);
@@ -134,7 +134,7 @@ bool ScrollBar::HandleMouseMoved(const MouseEvent& event) {
 bool ScrollBar::HandleMousePressed(const MouseEvent& event) {
   if (event.button != MouseButton::Left)
     return false;
-  const auto& point = FloatPoint(event.client_x, event.client_y);
+  const auto& point = gfx::FloatPoint(event.client_x, event.client_y);
   const auto part = HitTestPoint(point);
   if (part == ScrollBarPart::None)
     return false;
@@ -187,7 +187,7 @@ bool ScrollBar::HandleMouseReleased(const MouseEvent& event) {
   return true;
 }
 
-ScrollBarPart ScrollBar::HitTestPoint(const FloatPoint& point) const {
+ScrollBarPart ScrollBar::HitTestPoint(const gfx::FloatPoint& point) const {
   return layout_->HitTestPoint(ToPointF(point));
 }
 
@@ -199,7 +199,7 @@ std::unique_ptr<DisplayItemList> ScrollBar::Paint() const {
   return layout_->Paint();
 }
 
-void ScrollBar::SetBounds(const FloatRect& new_bounds) {
+void ScrollBar::SetBounds(const gfx::FloatRect& new_bounds) {
   return layout_->SetBounds(ToRectF(new_bounds));
 }
 

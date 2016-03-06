@@ -12,9 +12,9 @@
 #include "evita/visuals/layout/box_tree.h"
 #include "evita/visuals/layout/layouter.h"
 #include "evita/visuals/layout/root_box.h"
-#include "evita/visuals/style/style_tree.h"
-#include "evita/visuals/paint/painter.h"
 #include "evita/visuals/paint/paint_info.h"
+#include "evita/visuals/paint/painter.h"
+#include "evita/visuals/style/style_tree.h"
 #include "evita/visuals/view/public/selection.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 #include "evita/visuals/view/view_observer.h"
@@ -65,14 +65,14 @@ void View::AddObserver(ViewObserver* observer) const {
   observers_.AddObserver(observer);
 }
 
-FloatQuad View::ComputeBorderBoxQuad(const Node& node) {
+gfx::FloatQuad View::ComputeBorderBoxQuad(const Node& node) {
   TRACE_EVENT0("visuals", "View::ComputeBorderBoxQuad");
   UpdateLayoutIfNeeded();
   const auto box = box_tree_->BoxFor(node);
-  return box ? FloatQuad(box->bounds()) : FloatQuad();
+  return box ? gfx::FloatQuad(box->bounds()) : gfx::FloatQuad();
 }
 
-HitTestResult View::HitTest(const FloatPoint& point) {
+HitTestResult View::HitTest(const gfx::FloatPoint& point) {
   TRACE_EVENT0("visuals", "View::HitTest");
   UpdateLayoutIfNeeded();
   const auto root_box = box_tree_->root_box();

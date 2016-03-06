@@ -12,15 +12,15 @@
 #include "evita/dom/promise_resolver.h"
 #include "evita/dom/public/cursor.h"
 #include "evita/dom/public/view_delegate.h"
+#include "evita/gfx/base/geometry/float_point.h"
+#include "evita/gfx/base/geometry/float_size.h"
 #include "evita/visuals/fonts/text_format.h"
 #include "evita/visuals/fonts/text_layout.h"
-#include "evita/visuals/geometry/float_point.h"
-#include "evita/visuals/geometry/float_size.h"
 
 namespace dom {
 
-using FloatPoint = visuals::FloatPoint;
-using FloatSize = visuals::FloatSize;
+using FloatPoint = gfx::FloatPoint;
+using FloatSize = gfx::FloatSize;
 
 namespace {
 base::string16 EnsureSingleLine(const base::string16& text) {
@@ -71,8 +71,8 @@ void TextFieldControl::DidChangeSelection() {
 int TextFieldControl::MapPointToOffset(int x, int y) const {
   const auto kHuge = 1.0e6f;
   const auto& layout = std::make_unique<visuals::TextLayout>(
-      form()->GetTextFormat(), value_, visuals::FloatSize(kHuge, kHuge));
-  const auto& point = FloatPoint(x, y) + FloatSize(scroll_left_, 0);
+      form()->GetTextFormat(), value_, gfx::FloatSize(kHuge, kHuge));
+  const auto& point = gfx::FloatPoint(x, y) + gfx::FloatSize(scroll_left_, 0);
   return static_cast<int>(layout->HitTestPoint(point));
 }
 

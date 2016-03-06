@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <cmath>
 #include <string>
 
 #include "evita/visuals/layout/box_editor.h"
@@ -26,6 +28,114 @@
 namespace visuals {
 
 namespace {
+
+FloatColor ResolveColor(const css::Style& style, const css::Value& value) {
+  if (value.is_color())
+    return value.as_color_value().value();
+  if (value.is_current_color())
+    return style.color().as_color_value().value();
+  NOTREACHED() << value;
+  return FloatColor();
+}
+
+float ResolveLength(const css::Style& style, const css::Value& value) {
+  DCHECK_EQ(css::Unit::px, value.as_length().unit());
+  return value.as_length().number();
+}
+
+float ResolveLineWidth(const css::Style& style, const css::Value& value) {
+  if (value.is_length()) {
+    DCHECK_EQ(css::Unit::px, value.as_length().unit()) << value;
+    return value.as_length().number();
+  }
+  const auto font_size = style.font_size().as_length().number();
+  DCHECK_EQ(css::Unit::px, style.font_size().as_length().unit())
+      << style.font_size();
+  if (value.is_medium())
+    return std::min(std::floor(font_size / 5), 1.0f);
+  if (value.is_thick())
+    return std::min(std::floor(font_size / 3), 1.0f);
+  if (value.is_thin())
+    return std::min(std::floor(font_size / 10), 1.0f);
+  return 0;
+}
+
+Border ComputeBorder(const css::Style& style) {
+  FloatColor bottom_color;
+  FloatColor left_color;
+  FloatColor right_color;
+  FloatColor top_color;
+  float bottom_width = 0.0f;
+  float left_width = 0.0f;
+  float right_width = 0.0f;
+  float top_width = 0.0f;
+
+  if (style.has_border_bottom_style() &&
+      !style.border_bottom_style().is_none()) {
+    bottom_color = ResolveColor(style, style.border_bottom_color().value());
+    bottom_width = ResolveLineWidth(style, style.border_bottom_width().value());
+  }
+
+  if (style.has_border_left_style() && !style.border_left_style().is_none()) {
+    left_color = ResolveColor(style, style.border_left_color().value());
+    left_width = ResolveLineWidth(style, style.border_left_width().value());
+  }
+
+  if (style.has_border_right_style() && !style.border_right_style().is_none()) {
+    right_color = ResolveColor(style, style.border_right_color().value());
+    right_width = ResolveLineWidth(style, style.border_right_width().value());
+  }
+
+  if (style.has_border_top_style() && !style.border_top_style().is_none()) {
+    top_color = ResolveColor(style, style.border_top_color().value());
+    top_width = ResolveLineWidth(style, style.border_top_width().value());
+  }
+
+  return Border(top_color, top_width, right_color, right_width, bottom_color,
+                bottom_width, left_color, left_width);
+}
+
+Margin ComputeMargin(const css::Style& style) {
+  auto margin_bottom = 0.0f;
+  auto margin_left = 0.0f;
+  auto margin_right = 0.0f;
+  auto margin_top = 0.0f;
+
+  if (style.has_margin_bottom())
+    margin_bottom = ResolveLength(style, style.margin_bottom().value());
+
+  if (style.has_margin_left())
+    margin_left = ResolveLength(style, style.margin_left().value());
+
+  if (style.has_margin_right())
+    margin_right = ResolveLength(style, style.margin_right().value());
+
+  if (style.has_margin_top())
+    margin_top = ResolveLength(style, style.margin_top().value());
+
+  return Margin(margin_top, margin_right, margin_bottom, margin_left);
+}
+
+Padding ComputePadding(const css::Style& style) {
+  auto padding_bottom = 0.0f;
+  auto padding_left = 0.0f;
+  auto padding_right = 0.0f;
+  auto padding_top = 0.0f;
+
+  if (style.has_padding_bottom())
+    padding_bottom = ResolveLength(style, style.padding_bottom().value());
+
+  if (style.has_padding_left())
+    padding_left = ResolveLength(style, style.padding_left().value());
+
+  if (style.has_padding_right())
+    padding_right = ResolveLength(style, style.padding_right().value());
+
+  if (style.has_padding_top())
+    padding_top = ResolveLength(style, style.padding_top().value());
+
+  return Padding(padding_top, padding_right, padding_bottom, padding_left);
+}
 
 void MustBeInLayout(const Box& box) {
   const auto lifecycle = box.root_box()->lifecycle();
@@ -146,8 +256,8 @@ void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
 const FontDescription& BoxEditor::ComputeFontDescription(const TextBox& box) {
   MustBeInLayout(box);
   FontDescription::Builder builder;
-  builder.SetFamily(box.font_family_.string().value());
-  builder.SetSize(box.font_size_.length().value());
+  builder.SetFamily(box.font_family_.as_string().value());
+  builder.SetSize(box.font_size_.as_length().value());
   builder.SetStretch(ConvertFontStretch(box.font_stretch_));
   builder.SetStyle(ConvertFontStyle(box.font_style_));
   builder.SetWeight(ConvertFontWeight(box.font_weight_));
@@ -268,7 +378,7 @@ void BoxEditor::SetBounds(Box* box, const FloatRect& new_bounds) {
     box->is_origin_changed_ = true;
   if (box->bounds_.size() != new_bounds.size()) {
     box->is_background_changed_ = true;
-    if (!box->ComputeBorder().IsEmpty())
+    if (!box->border().IsEmpty())
       box->is_border_changed_ = true;
     box->is_size_changed_ = true;
   }
@@ -287,23 +397,9 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
   box->display_ = display;
 }
 
-#define FOR_EACH_PROPERTY_CHANGES_PROPERTY(V) \
-  V(border_bottom_width, border)              \
-  V(border_left_width, border)                \
-  V(border_right_width, border)               \
-  V(border_top_width, border)                 \
-  V(padding_bottom, padding)                  \
-  V(padding_left, padding)                    \
-  V(padding_right, padding)                   \
-  V(padding_top, padding)
-
 #define FOR_EACH_PROPERTY_AFFECTS_ORIGIN(V) \
   V(bottom)                                 \
   V(left)                                   \
-  V(margin_bottom)                          \
-  V(margin_left)                            \
-  V(margin_right)                           \
-  V(margin_top)                             \
   V(position)                               \
   V(right)                                  \
   V(top)
@@ -312,13 +408,14 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
   V(height)                               \
   V(width)
 
-#define UPDATE_COLOR(property, name)                                          \
-  const auto& new_##name## =                                                  \
-      new_style.has_##name##() ? new_style.##name##().value() : FloatColor(); \
-  if (box->##name##_ != new_##name##) {                                       \
-    box->##name##_ = new_##name##;                                            \
-    box->is_##property##_changed_ = true;                                     \
-    is_changed = true;                                                        \
+#define UPDATE_COLOR(property, name)                                           \
+  const auto& new_##name## =                                                   \
+      new_style.has_##name##() ? new_style.##name##().as_color_value().value() \
+                               : FloatColor();                                 \
+  if (box->##name##_ != new_##name##) {                                        \
+    box->##name##_ = new_##name##;                                             \
+    box->is_##property##_changed_ = true;                                      \
+    is_changed = true;                                                         \
   }
 
 void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
@@ -344,15 +441,26 @@ void BoxEditor::SetStyle(Box* box, const css::Style& new_style) {
   UPDATE_COLOR(border, border_right_color);
   UPDATE_COLOR(border, border_top_color);
 
-#define V(property, flag)                         \
-  if (new_style.has_##property() &&               \
-      new_style.property() != box->property##_) { \
-    box->property##_ = new_style.property();      \
-    box->is_##flag##_changed_ = true;             \
-    is_changed = true;                            \
+  const auto& new_border = ComputeBorder(new_style);
+  if (box->border_ != new_border) {
+    box->border_ = new_border;
+    box->is_border_changed_ = true;
+    is_changed = true;
   }
-  FOR_EACH_PROPERTY_CHANGES_PROPERTY(V)
-#undef V
+
+  const auto& new_margin = ComputeMargin(new_style);
+  if (box->margin_ != new_margin) {
+    box->margin_ = new_margin;
+    box->is_origin_changed_ = true;
+    is_changed = true;
+  }
+
+  const auto& new_padding = ComputePadding(new_style);
+  if (box->padding_ != new_padding) {
+    box->padding_ = new_padding;
+    box->is_padding_changed_ = true;
+    is_changed = true;
+  }
 
 #define V(property)                               \
   if (new_style.has_##property() &&               \
@@ -413,8 +521,9 @@ void BoxEditor::SetShapeStyle(ShapeBox* box, const css::Style& new_style) {
   MustBeInTreeRebuild(*box);
   auto is_changed = false;
   // |ShapeBox| uses only color, ant font related CSS properties.
-  const auto& new_color =
-      new_style.has_color() ? new_style.color().value() : FloatColor();
+  const auto& new_color = new_style.has_color()
+                              ? new_style.color().as_color_value().value()
+                              : FloatColor();
   if (box->color_ != new_color) {
     box->color_ = new_color;
     is_changed = true;
@@ -460,8 +569,9 @@ void BoxEditor::SetTextStyle(TextBox* box, const css::Style& new_style) {
   MustBeInTreeRebuild(*box);
   auto is_changed = false;
   // |TextBox| uses only color, ant font related CSS properties.
-  const auto& new_color =
-      new_style.has_color() ? new_style.color().value() : FloatColor();
+  const auto& new_color = new_style.has_color()
+                              ? new_style.color().as_color_value().value()
+                              : FloatColor();
   if (box->color_ != new_color) {
     box->color_ = new_color;
     is_changed = true;

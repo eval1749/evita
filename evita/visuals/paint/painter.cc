@@ -47,7 +47,7 @@ bool IsBackgroundChanged(const Box& box) {
 }
 
 bool IsBorderChanged(const Box& box) {
-  if (!box.ComputeBorder().HasValue())
+  if (!box.border().HasValue())
     return false;
   return box.IsBorderChanged() || box.IsOriginChanged() || box.IsSizeChanged();
 }
@@ -198,7 +198,7 @@ void PaintVisitor::PaintBorderINeeded(const Box& box) {
   if (!box.ShouldPaint() && !is_border_changed)
     return;
 #endif
-  const auto& border = box.ComputeBorder();
+  const auto& border = box.border();
   if (border.top()) {
     FillRectAndMark(
         FloatRect(FloatPoint(), FloatSize(box.bounds().width(), border.top())),

@@ -28,13 +28,25 @@ class StyleBuilder final {
 
   std::unique_ptr<Style> Build();
 
-  // Shorthand functions
-  StyleBuilder& SetBorder(const css::ColorValue& color, float width);
-  StyleBuilder& SetColor(float red, float green, float blue, float alpha = 1);
-  StyleBuilder& SetHeight(float height);
-  StyleBuilder& SetPadding(float height);
-  StyleBuilder& SetWidth(float width);
+  StyleBuilder& Set(PropertyId id, const ColorValue& color);
+  StyleBuilder& Set(PropertyId id, const Length& length);
+  StyleBuilder& Set(PropertyId id, const Value& value);
 
+  // Shorthand functions
+  StyleBuilder& SetBorder(const ColorValue& color, float width);
+  StyleBuilder& SetColor(float red, float green, float blue, float alpha = 1);
+  StyleBuilder& SetPadding(float height);
+
+#define V(Name, name, type, text) \
+  StyleBuilder& Set##Name(const ColorValue& color);
+  FOR_EACH_VISUAL_CSS_COLOR_PROPERTY(V)
+#undef V
+
+#define V(Name, name, type, text) StyleBuilder& Set##Name(float length);
+  FOR_EACH_VISUAL_CSS_LENGTH_PROPERTY(V)
+#undef V
+
+// Full functions
 #define V(Name, name, type, text) StyleBuilder& Set##Name(type name);
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V

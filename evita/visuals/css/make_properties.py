@@ -76,6 +76,15 @@ class Generator(object):
                 os.chdir(root_path)
                 os.system('clang-format -i %s' % output_path)
 
+    def initial_value_of(self, name):
+        if name == 'ColorValue':
+            return 'Value(ColorValue())'
+        if name == 'Length':
+            return 'Value(Length())'
+        if name == 'String':
+            return 'Value(Keyword::Unset)'
+        return 'Value(Keyword::%s)' % name
+
     def make_context(self, model):
         return {
             'keywords': model.keywords,
@@ -93,6 +102,8 @@ class Generator(object):
             properties.append({
                 'Name': css_property.name,
                 'Parameter': 'const %s&' % css_property.name,
+                'has_color': css_property.css_type.has('ColorValue'),
+                'has_length': css_property.css_type.has('Length'),
                 'name': css_property.underscore,
                 'type': self.make_type(css_property.css_type),
                 'text': '"%s"' % css_property.text,
@@ -104,7 +115,7 @@ class Generator(object):
             'Name': css_type.name,
             'Parameter': css_type.to_parameter_type(),
             'Return': css_type.name,
-            'initial': css_type.initial_value,
+            'initial': self.initial_value_of(css_type.initial_value),
             'is_compound': css_type.is_compound,
             'is_enum': css_type.is_enum,
             'is_keyword': css_type.is_keyword,

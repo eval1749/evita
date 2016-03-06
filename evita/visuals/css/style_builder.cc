@@ -25,15 +25,29 @@ std::unique_ptr<Style> StyleBuilder::Build() {
   return std::move(style_);
 }
 
-StyleBuilder& StyleBuilder::SetBorder(const css::ColorValue& color,
-                                      float width) {
-  SetBorderBottomWidth(css::Length(width));
+StyleBuilder& StyleBuilder::Set(PropertyId id, const Length& length) {
+  StyleEditor().Set(style_.get(), id, length);
+  return *this;
+}
+
+StyleBuilder& StyleBuilder::Set(PropertyId id, const ColorValue& color) {
+  StyleEditor().Set(style_.get(), id, color);
+  return *this;
+}
+
+StyleBuilder& StyleBuilder::Set(PropertyId id, const Value& value) {
+  StyleEditor().Set(style_.get(), id, value);
+  return *this;
+}
+
+StyleBuilder& StyleBuilder::SetBorder(const ColorValue& color, float width) {
+  SetBorderBottomWidth(width);
   SetBorderBottomColor(color);
-  SetBorderLeftWidth(css::Length(width));
+  SetBorderLeftWidth(width);
   SetBorderLeftColor(color);
-  SetBorderRightWidth(css::Length(width));
+  SetBorderRightWidth(width);
   SetBorderRightColor(color);
-  SetBorderTopWidth(css::Length(width));
+  SetBorderTopWidth(width);
   SetBorderTopColor(color);
   return *this;
 }
@@ -42,24 +56,30 @@ StyleBuilder& StyleBuilder::SetColor(float red,
                                      float green,
                                      float blue,
                                      float alpha) {
-  return SetColor(css::ColorValue(red, green, blue, alpha));
-}
-
-StyleBuilder& StyleBuilder::SetHeight(float height) {
-  return SetHeight(css::Height(css::Length(height)));
+  return SetColor(ColorValue(red, green, blue, alpha));
 }
 
 StyleBuilder& StyleBuilder::SetPadding(float width) {
-  SetPaddingBottom(css::Length(width));
-  SetPaddingLeft(css::Length(width));
-  SetPaddingRight(css::Length(width));
-  SetPaddingTop(css::Length(width));
+  SetPaddingBottom(width);
+  SetPaddingLeft(width);
+  SetPaddingRight(width);
+  SetPaddingTop(width);
   return *this;
 }
 
-StyleBuilder& StyleBuilder::SetWidth(float width) {
-  return SetWidth(css::Width(css::Length(width)));
-}
+#define V(Name, name, type, text)                                  \
+  StyleBuilder& StyleBuilder::Set##Name(const ColorValue& color) { \
+    return Set(PropertyId::Name, color);                           \
+  }
+FOR_EACH_VISUAL_CSS_COLOR_PROPERTY(V)
+#undef V
+
+#define V(Name, name, type, text)                       \
+  StyleBuilder& StyleBuilder::Set##Name(float length) { \
+    return Set(PropertyId::Name, Length(length));       \
+  }
+FOR_EACH_VISUAL_CSS_LENGTH_PROPERTY(V)
+#undef V
 
 #define V(Name, name, type, text)                    \
   StyleBuilder& StyleBuilder::Set##Name(type name) { \

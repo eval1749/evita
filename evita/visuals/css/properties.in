@@ -26,21 +26,25 @@
 #      [center | [top | bottom] [<percentage> | <length>]?]
 #  <repeat-style> = repeat-x | repeat-y |
 #      [repeat | space | round | no-repeat]{1, 2}
+
+<color>: <color-value> transparent currentColor
+
 background-color: <color>
 
-# line-style ::= none hidden dotted dashed solid double groove ridge inset outset
-# border-bottom-style: <line-style>
-# border-left-style: <line-style>
-# border-right-style: <line-style>
-# border-top-style: <line-style>
+<line-style>: none hidden dotted dashed solid double groove ridge inset outset
+<line-width>: medium <length> thin thick
 border-bottom-color: <color>
-border-bottom-width: <length>
+border-bottom-style: <line-style>
+border-bottom-width: <line-width>
 border-left-color: <color>
-border-left-width: <length>
+border-left-style: <line-style>
+border-left-width: <line-width>
 border-right-color: <color>
-border-right-width: <length>
+border-right-style: <line-style>
+border-right-width: <line-width>
 border-top-color: <color>
-border-top-width: <length>
+border-top-style: <line-style>
+border-top-width: <line-width>
 
 # border-bottom-left-radius: [<length>|<percentage>]{1,2}
 # border-bottom-right-radius: [<length>|<percentage>]{1,2}

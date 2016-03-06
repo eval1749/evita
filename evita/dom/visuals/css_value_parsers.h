@@ -18,6 +18,8 @@ namespace dom {
 FOR_EACH_VISUAL_CSS_VALUE(V)
 #undef V
 
+common::Maybe<visuals::css::ColorValue> ParseColorValue(
+    base::StringPiece16 text);
 common::Maybe<visuals::css::Length> ParseLength(base::StringPiece16 text);
 common::Maybe<visuals::css::Percentage> ParsePercentage(
     base::StringPiece16 text);

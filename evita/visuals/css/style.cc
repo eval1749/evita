@@ -19,52 +19,49 @@ namespace css {
 Style::Style(const Style& other) {
   *this = other;
 }
+
+Style::Style(Style&& other) {
+  *this = std::move(other);
+}
+
 Style::Style() {}
 Style::~Style() {}
+
+Style& Style::operator=(const Style& other) {
+  properties_ = other.properties_;
+  return *this;
+}
+
+Style& Style::operator=(Style&& other) {
+  properties_ = std::move(other.properties_);
+  return *this;
+}
 
 bool Style::operator==(const Style& other) const {
   if (this == &other)
     return true;
-#define V(Name, name, type, text)             \
-  if (has_##name() != other.has_##name())     \
-    return false;                             \
-  if (has_##name() && name() != other.name()) \
-    return false;
-
-  FOR_EACH_VISUAL_CSS_PROPERTY(V)
-#undef V
-  return true;
+  return properties_ == other.properties_;
 }
 
 bool Style::operator!=(const Style& other) const {
   return !operator==(other);
 }
 
-#define V(Name, name, type, text)                                 \
-  const type& Style::name() const {                               \
-    DCHECK(has_##name());                                         \
-    return name##_;                                               \
-  }                                                               \
-                                                                  \
-  bool Style::has_##name() const {                                \
-    return contains_.test(static_cast<size_t>(PropertyId::Name)); \
+#define V(Name, name, type, text)                       \
+  type Style::name() const {                            \
+    DCHECK(has_##name());                               \
+    return type(properties_.ValueOf(PropertyId::Name)); \
+  }                                                     \
+                                                        \
+  bool Style::has_##name() const {                      \
+    return properties_.Contains(PropertyId::Name);      \
   }
 
 FOR_EACH_VISUAL_CSS_PROPERTY(V)
 #undef V
 
 std::ostream& operator<<(std::ostream& ostream, const Style& style) {
-  ostream << "Style(";
-  auto delimiter = "";
-#define V(Name, name, type, text)                        \
-  if (style.has_##name()) {                              \
-    ostream << delimiter << text << ':' << style.name(); \
-    delimiter = ", ";                                    \
-  }
-  FOR_EACH_VISUAL_CSS_PROPERTY(V)
-#undef V
-
-  return ostream << ')';
+  return ostream << "Style(" << style.properties() << ')';
 }
 
 }  // namespace css

@@ -15,6 +15,7 @@ template <typename T> using Maybe = common::Maybe<T>;
 using {{type.Name}} = visuals::css::{{type.Name}};
 {% endfor %}
 
+using ColorValue = visuals::css::ColorValue;
 using Length = visuals::css::Length;
 using Percentage = visuals::css::Percentage;
 using String = visuals::css::String;
@@ -43,16 +44,8 @@ Maybe<{{type.Name}}> Parse{{type.Name}}(base::StringPiece16 text) {
   return common::Nothing<{{type.Name}}>();
 }
 
-base::string16 Unparse{{type.Name}}(const {{type.Name}}& value) {
-{%  for member in type.members if member.is_keyword %}
-  if (value.is_{{member.name}}())
-    return L{{member.text}};
-{%  endfor %}
-{%  for member in type.members if not member.is_keyword %}
-  if (value.is_{{member.name}}())
-    return Unparse{{member.Name}}(value.{{member.name}}());
-{%  endfor %}
-  return L"???";
+base::string16 Unparse{{type.Name}}(const {{type.Name}}& property_value) {
+  return property_value.value().ToString16();
 }
 
 {% endfor %}

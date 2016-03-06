@@ -54,7 +54,7 @@ TEST_F(StyleTreeTest, Basic) {
 }
 
 TEST_F(StyleTreeTest, Inheritance) {
-  const auto& kColorRed = css::ColorValue(1, 0, 0);
+  const auto& kColorRed = css::Color(css::ColorValue(1, 0, 0));
   const auto& document =
       NodeTreeBuilder()
           .Begin(L"body")
@@ -78,7 +78,7 @@ TEST_F(StyleTreeTest, Inheritance) {
 }
 
 TEST_F(StyleTreeTest, ComputedStyleOfText) {
-  const auto& kColorRed = css::ColorValue(1, 0, 0);
+  const auto& kColorRed = css::Color(css::ColorValue(1, 0, 0));
   const auto& document =
       NodeTreeBuilder()
           .Begin(L"body")

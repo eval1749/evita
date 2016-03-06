@@ -21,6 +21,7 @@ namespace dom {
 template <typename T>
 using Maybe = common::Maybe<T>;
 
+using CssProperty = visuals::css::Property;
 using CssPropertyId = visuals::css::PropertyId;
 using CssStyle = visuals::css::Style;
 using CssStyleEditor = visuals::css::StyleEditor;
@@ -44,13 +45,13 @@ Maybe<base::string16> GetRawProperty(v8::Local<v8::Context> context,
 
 void SetRawProperty(v8::Local<v8::Context> context,
                     v8::Local<v8::Map> map,
-                    CssPropertyId property_id,
-                    const base::string16& value,
+                    const CssProperty& property,
                     ExceptionState* exception_state) {
   const auto& isolate = context->GetIsolate();
-  const auto& result = map->Set(context, gin::ConvertToV8(isolate, property_id),
-                                gin::ConvertToV8(isolate, value))
-                           .ToLocalChecked();
+  const auto& result =
+      map->Set(context, gin::ConvertToV8(isolate, property.id()),
+               gin::ConvertToV8(isolate, property.value().ToString16()))
+          .ToLocalChecked();
   if (!result.IsEmpty())
     return;
   exception_state->ThrowError("Failed to set Map.");
@@ -88,26 +89,10 @@ std::unique_ptr<CssStyle> CSSStyle::ConvertFromV8(
 v8::Local<v8::Map> CSSStyle::ConvertToV8(v8::Local<v8::Context> context,
                                          const CssStyle& style) {
   const auto& map = v8::Map::New(context->GetIsolate());
-  const auto contains = style.contains();
-  for (auto property_id = 0u; property_id < contains.size(); ++property_id) {
-    if (!contains.test(property_id))
-      continue;
-    switch (static_cast<CssPropertyId>(property_id)) {
-#define V(Name, name, type, text)                                           \
-  case CssPropertyId::Name: {                                               \
-    ExceptionState exception_state_##name(                                  \
-        ExceptionState::Situation::PropertySet, context, "CSSStyle", text); \
-    SetRawProperty(context, map, CssPropertyId::Name,                       \
-                   Unparse##type(style.##name()), &exception_state_##name); \
-    break;                                                                  \
-  }
-
-      FOR_EACH_VISUAL_CSS_PROPERTY(V)
-#undef V
-      default:
-        NOTREACHED() << "Unhandled property: " << property_id;
-        break;
-    }
+  for (const auto& property : style.properties()) {
+    ExceptionState exception_state(ExceptionState::Situation::PropertySet,
+                                   context, "CSSStyle", property.ascii_name());
+    SetRawProperty(context, map, property, &exception_state);
   }
   return map;
 }

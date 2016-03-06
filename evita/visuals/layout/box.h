@@ -13,16 +13,15 @@
 #include "evita/visuals/css/float_color.h"
 #include "evita/visuals/css/values.h"
 #include "evita/visuals/geometry/float_rect.h"
-#include "evita/visuals/layout/box_forward.h"
 #include "evita/visuals/layout/border.h"
+#include "evita/visuals/layout/box_forward.h"
+#include "evita/visuals/layout/margin.h"
+#include "evita/visuals/layout/padding.h"
 
 namespace visuals {
 
-class Border;
 class BoxEditor;
-class Margin;
 class Node;
-class Padding;
 class RootBox;
 
 namespace css {
@@ -78,11 +77,11 @@ class Box : public common::Castable<Box> {
 
   // CSS background and background
   const FloatColor& background_color() const { return background_color_; }
-  Border ComputeBorder() const;
+  const Border border() const { return border_; }
 
   // CSS Box model related values
-  Margin ComputeMargin() const;
-  Padding ComputePadding() const;
+  const Margin& margin() const { return margin_; }
+  const Padding& padding() const { return padding_; }
 
   // CSS Position
   const css::Bottom& bottom() const { return bottom_; }
@@ -137,33 +136,28 @@ class Box : public common::Castable<Box> {
 
   FloatColor background_color_;
 
+  Border border_;
   FloatColor border_bottom_color_;
-  css::Length border_bottom_width_;
   FloatColor border_left_color_;
-  css::Length border_left_width_;
   FloatColor border_right_color_;
-  css::Length border_right_width_;
   FloatColor border_top_color_;
-  css::Length border_top_width_;
 
   css::Display display_;
-  css::Length margin_bottom_;
-  css::Length margin_left_;
-  css::Length margin_right_;
-  css::Length margin_top_;
-  css::Length padding_bottom_;
-  css::Length padding_left_;
-  css::Length padding_right_;
-  css::Length padding_top_;
+  Margin margin_;
+  Padding padding_;
 
   // CSS Position
   css::Position position_;
+  // TODO(eval1749): We should have |bool| for having bottom/left/right/top and
+  // |float| instead of CSS values.
   css::Bottom bottom_;
   css::Left left_;
   css::Right right_;
   css::Top top_;
 
   // CSS Sizing
+  // TODO(eval1749): We should have |bool| for having width/height and
+  // |float| instead of CSS values.
   css::Width width_;
   css::Height height_;
 

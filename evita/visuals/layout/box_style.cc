@@ -6,6 +6,7 @@
 
 #include "evita/visuals/layout/box.h"
 
+#include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/style.h"
 #include "evita/visuals/css/style_builder.h"
 #include "evita/visuals/layout/border.h"
@@ -46,10 +47,10 @@ class ActualStyleVisitor final : public BoxVisitor {
   V(Margin, margin)                          \
   V(Padding, padding)
 
-#define SetBorderBottom SetBorderBottomWidth
-#define SetBorderLeft SetBorderLeftWidth
-#define SetBorderRight SetBorderRightWidth
-#define SetBorderTop SetBorderTopWidth
+#define BorderBottom BorderBottomWidth
+#define BorderLeft BorderLeftWidth
+#define BorderRight BorderRightWidth
+#define BorderTop BorderTopWidth
 
 #define FOR_EACH_PROPERTY_INITIAL_IS_AUTO(V) \
   V(Bottom, bottom)                          \
@@ -62,22 +63,26 @@ class ActualStyleVisitor final : public BoxVisitor {
 std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   builder_.SetDisplay(box.display());
   if (box.background_color() != FloatColor())
-    builder_.SetBackgroundColor(css::ColorValue(box.background_color()));
+    builder_.Set(css::PropertyId::BackgroundColor,
+                 css::ColorValue(box.background_color()));
 
-  const auto& border = box.ComputeBorder();
-  const auto& margin = box.ComputeMargin();
-  const auto& padding = box.ComputePadding();
+  const auto& border = box.border();
+  const auto& margin = box.margin();
+  const auto& padding = box.padding();
 
 // TODO(eval1749): Export border colors
-#define V(Property, property)                                       \
-  if (property.bottom() != 0.0f)                                    \
-    builder_.Set##Property##Bottom(css::Length(property.bottom())); \
-  if (property.left() != 0.0f)                                      \
-    builder_.Set##Property##Left(css::Length(property.left()));     \
-  if (property.right() != 0.0f)                                     \
-    builder_.Set##Property##Right(css::Length(property.right()));   \
-  if (property.top() != 0.0f)                                       \
-    builder_.Set##Property##Top(css::Length(property.top()));
+#define V(Property, property)                       \
+  if (property.bottom() != 0.0f)                    \
+    builder_.Set(css::PropertyId::Property##Bottom, \
+                 css::Length(property.bottom()));   \
+  if (property.left() != 0.0f)                      \
+    builder_.Set(css::PropertyId::Property##Left,   \
+                 css::Length(property.left()));     \
+  if (property.right() != 0.0f)                     \
+    builder_.Set(css::PropertyId::Property##Right,  \
+                 css::Length(property.right()));    \
+  if (property.top() != 0.0f)                       \
+    builder_.Set(css::PropertyId::Property##Top, css::Length(property.top()));
   FOR_EACH_PROPERTY_INITIAL_IS_ZERO(V)
 #undef V
 
@@ -102,11 +107,11 @@ void ActualStyleVisitor::VisitImageBox(ImageBox* image) {}
 void ActualStyleVisitor::VisitRootBox(RootBox* root) {}
 
 void ActualStyleVisitor::VisitShapeBox(ShapeBox* shape) {
-  builder_.SetColor(css::ColorValue(shape->color()));
+  builder_.Set(css::PropertyId::Color, css::ColorValue(shape->color()));
 }
 
 void ActualStyleVisitor::VisitTextBox(TextBox* text) {
-  builder_.SetColor(css::ColorValue(text->color()));
+  builder_.Set(css::PropertyId::Color, css::ColorValue(text->color()));
   // TODO(eval1749): We should add font properties
 }
 

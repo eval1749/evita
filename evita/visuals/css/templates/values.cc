@@ -8,6 +8,7 @@
 #include "evita/visuals/css/values.h"
 
 #include "base/logging.h"
+#include "base/strings/utf_string_conversions.h"
 
 namespace visuals {
 namespace css {
@@ -27,7 +28,7 @@ namespace css {
 
 {{type.Name}}::{{type.Name}}(const Value& value) : value_(value) {}
 {# Default constructor #}
-{{type.Name}}::{{type.Name}}() : value_(Value(Keyword::{{type.initial}})) {}
+{{type.Name}}::{{type.Name}}() : value_({{type.initial}}) {}
 {{type.Name}}::~{{type.Name}}() {}
 
 {{type.Name}}& {{type.Name}}::operator=({{type.Parameter}} other) {
@@ -50,7 +51,7 @@ bool {{type.Name}}::operator!=({{type.Parameter}} other) const {
  # Getters
  #}
 {%  for member in type.members if not member.is_keyword %}
-{{member.Return}} {{type.Name}}::{{member.name}}() const {
+{{member.Return}} {{type.Name}}::as_{{member.name}}() const {
   DCHECK(is_{{member.name}}()) << *this;
   return value_.as_{{member.name}}();
 }
@@ -83,35 +84,39 @@ bool {{type.Name}}::is_{{member.name}}() const {
 {% endfor %}
 {#############################################################
  #
+ # Convert To Value
+ #}
+Value ToValue({{type.Parameter}} {{type.name}}) {
+  return {{type.name}}.value();
+}
+
+{#############################################################
+ #
  # Printer
  #}
 // To make |css::Style| printer output simpler, we don't print type name
 // in value printer.
 std::ostream& operator<<(std::ostream& ostream,
                          {{type.Parameter}} {{type.name}}) {
-{% for member in type.members %}
-  if ({{type.name}}.is_{{member.name}}())
-{%  if member.is_keyword %}
-    return ostream << {{member.text}};
-{%  else %}
-    return ostream << {{type.name}}.{{member.name}}();
-{%  endif %}
-{% endfor %}
-  return ostream << "???";
+  return ostream << {{type.name}}.value();
 }
 
 {% endfor %}
 
-std::ostream& operator<<(std::ostream& ostream, Keyword keyword) {
-  const char* const texts[] = {
+base::string16 KeywordToString16(Keyword keyword) {
+  const base::char16* const texts[] = {
 {% for keyword in keywords %}
-  "{{keyword.name}}",
+  L"{{keyword.text}}",
 {% endfor %}
   };
   const auto& it = std::begin(texts) + static_cast<size_t>(keyword);
   if (it < std::begin(texts) || it >= std::end(texts))
-    return ostream << "???";
-  return ostream << *it;
+    return base::string16(L"???");
+  return base::string16(*it);
+}
+
+std::ostream& operator<<(std::ostream& ostream, Keyword keyword) {
+  return ostream << base::UTF16ToUTF8(KeywordToString16(keyword));
 }
 
 }  // namespace css

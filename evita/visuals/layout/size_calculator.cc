@@ -63,14 +63,15 @@ FloatSize ExtrinsicSizeVisitor::ComputeExtrinsicSize(const Box& box) {
 
 void ExtrinsicSizeVisitor::ComputeWithSimpleMethod(const Box& box) {
   if (box.height().is_length() && box.width().is_length()) {
-    ReturnSize(box.width().length().value(), box.height().length().value());
+    ReturnSize(box.width().as_length().value(),
+               box.height().as_length().value());
     return;
   }
   const auto& intrinsic_size = SizeCalculator().ComputeIntrinsicSize(box);
   if (box.height().is_length())
-    return ReturnSize(intrinsic_size.width(), box.height().length().value());
+    return ReturnSize(intrinsic_size.width(), box.height().as_length().value());
   if (box.width().is_length())
-    return ReturnSize(box.width().length().value(), intrinsic_size.height());
+    return ReturnSize(box.width().as_length().value(), intrinsic_size.height());
   ReturnSize(intrinsic_size);
 }
 
@@ -152,8 +153,8 @@ FloatSize IntrinsicSizeVisitor::SizeOfHorizontalFlowBox(
   for (const auto& child : flow_box.child_boxes()) {
     if (!child->position().is_static())
       continue;
-    const auto& child_border = child->ComputeBorder();
-    const auto& child_padding = child->ComputePadding();
+    const auto& child_border = child->border();
+    const auto& child_padding = child->padding();
     const auto& child_size = ComputePreferredSize(*child) +
                              child_border.size() + child_padding.size();
     size = FloatSize(size.width() + child_size.width(),
@@ -169,8 +170,8 @@ FloatSize IntrinsicSizeVisitor::SizeOfVerticalFlowBox(const FlowBox& flow_box) {
   for (const auto& child : flow_box.child_boxes()) {
     if (!child->position().is_static())
       continue;
-    const auto& child_border = child->ComputeBorder();
-    const auto& child_padding = child->ComputePadding();
+    const auto& child_border = child->border();
+    const auto& child_padding = child->padding();
     const auto& child_size = ComputePreferredSize(*child) +
                              child_border.size() + child_padding.size();
     size = FloatSize(std::max(size.width(), child_size.width()),
@@ -198,8 +199,8 @@ void IntrinsicSizeVisitor::VisitRootBox(RootBox* box) {
 }
 
 void IntrinsicSizeVisitor::VisitShapeBox(ShapeBox* box) {
-  ReturnSize(
-      FloatSize(box->size().length().value(), box->size().length().value()));
+  ReturnSize(FloatSize(box->size().as_length().value(),
+                       box->size().as_length().value()));
 }
 
 void IntrinsicSizeVisitor::VisitTextBox(TextBox* box) {

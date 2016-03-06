@@ -40,23 +40,22 @@ const auto kMargin = 8;
 const auto kBorder = 1;
 
 Document* LoadDocument() {
-  const auto document =
-      NodeTreeBuilder()
-          .Begin(L"main")
-          .SetInlineStyle(*css::StyleBuilder()
-                               .SetPaddingBottom(css::Length(kMargin))
-                               .SetPaddingRight(css::Length(kMargin))
-                               .SetPaddingTop(css::Length(kMargin))
-                               .Build())
-          .Begin(L"input", L"input")
-          .AddText(L"this is a text field.")
-          .End(L"input")
-          .AddShape({0})
-          .AddText(L"Check box 1")
-          .Begin(L"list", L"list")
-          .End(L"list")
-          .End(L"main")
-          .Build();
+  const auto document = NodeTreeBuilder()
+                            .Begin(L"main")
+                            .SetInlineStyle(*css::StyleBuilder()
+                                                 .SetPaddingBottom(kMargin)
+                                                 .SetPaddingRight(kMargin)
+                                                 .SetPaddingTop(kMargin)
+                                                 .Build())
+                            .Begin(L"input", L"input")
+                            .AddText(L"this is a text field.")
+                            .End(L"input")
+                            .AddShape({0})
+                            .AddText(L"Check box 1")
+                            .Begin(L"list", L"list")
+                            .End(L"list")
+                            .End(L"main")
+                            .Build();
   const auto list = document->GetElementById(L"list");
   for (auto index = 0; index < 20; ++index) {
     NodeTreeBuilder(list)
@@ -83,10 +82,7 @@ Document* LoadDocument() {
   }
   NodeTreeBuilder(list)
       .Begin(L"list_item", L"hover")
-      .SetInlineStyle(*css::StyleBuilder()
-                           .SetLeft(css::Left(css::Length(0)))
-                           .SetTop(css::Top(css::Length(-1000)))
-                           .Build())
+      .SetInlineStyle(*css::StyleBuilder().SetLeft(0).SetTop(-1000).Build())
       .AddText(L" ")
       .End(L"list_item")
       .Finish(list);
@@ -100,8 +96,8 @@ css::StyleSheet* LoadStyleSheet() {
       std::move(
           css::StyleBuilder()
               .SetPosition(css::Position::Absolute())
-              .SetLeft(css::Left(css::Length(20)))
-              .SetTop(css::Top(css::Length(300)))
+              .SetLeft(20)
+              .SetTop(300)
               .SetBackgroundColor(css::ColorValue::Rgba(51, 153, 255, 0.1f))
               .SetBorder(css::ColorValue::Rgba(51, 153, 255, 1.0f), 1)
               .Build()));
@@ -117,12 +113,12 @@ css::StyleSheet* LoadStyleSheet() {
       std::move(css::StyleBuilder().SetDisplay(css::Display::Block()).Build()));
   style_sheet->AppendRule(L"list_item",
                           std::move(css::StyleBuilder()
-                                        .SetColor(css::ColorValue(0, 0, 0))
+                                        .SetColor(0, 0, 0)
                                         .SetDisplay(css::Display::Block())
-                                        .SetPaddingTop(css::Length(2))
-                                        .SetPaddingRight(css::Length(5))
-                                        .SetPaddingBottom(css::Length(2))
-                                        .SetPaddingLeft(css::Length(5))
+                                        .SetPaddingTop(2)
+                                        .SetPaddingRight(5)
+                                        .SetPaddingBottom(2)
+                                        .SetPaddingLeft(5)
                                         .Build()));
   style_sheet->AppendRule(
       L"main",
@@ -130,14 +126,11 @@ css::StyleSheet* LoadStyleSheet() {
   style_sheet->AppendRule(L"name",
                           std::move(css::StyleBuilder().SetWidth(150).Build()));
   style_sheet->AppendRule(
-      L"size",
-      std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
+      L"size", std::move(css::StyleBuilder().SetMarginRight(5).Build()));
   style_sheet->AppendRule(
-      L"status",
-      std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
+      L"status", std::move(css::StyleBuilder().SetMarginRight(5).Build()));
   style_sheet->AppendRule(
-      L"file",
-      std::move(css::StyleBuilder().SetMarginRight(css::Length(5)).Build()));
+      L"file", std::move(css::StyleBuilder().SetMarginRight(5).Build()));
   return style_sheet;
 }
 
@@ -273,11 +266,10 @@ void DemoModel::DidMoveMouse(const FloatPoint& point) {
     return;
   const auto hover = document_->GetElementById(L"hover");
   const auto hover_point = view_->ComputeBorderBoxQuad(*line).point1();
-  NodeEditor().SetInlineStyle(
-      hover, *css::StyleBuilder()
-                  .SetTop(css::Top(css::Length(hover_point.y())))
-                  .SetLeft(css::Left(css::Length(hover_point.x())))
-                  .Build());
+  NodeEditor().SetInlineStyle(hover, *css::StyleBuilder()
+                                          .SetTop(hover_point.y())
+                                          .SetLeft(hover_point.x())
+                                          .Build());
 }
 
 void DemoModel::DidPressKey(int key_code) {
@@ -314,11 +306,10 @@ void DemoModel::DidPressMouse(const FloatPoint& point) {
     return;
   const auto hover = document_->GetElementById(L"hover");
   const auto hover_point = view_->ComputeBorderBoxQuad(*line).point1();
-  NodeEditor().SetInlineStyle(
-      hover, *css::StyleBuilder()
-                  .SetTop(css::Top(css::Length(hover_point.y())))
-                  .SetLeft(css::Left(css::Length(hover_point.x())))
-                  .Build());
+  NodeEditor().SetInlineStyle(hover, *css::StyleBuilder()
+                                          .SetTop(hover_point.y())
+                                          .SetLeft(hover_point.x())
+                                          .Build());
   PrintBox(view_->box_tree());
 }
 

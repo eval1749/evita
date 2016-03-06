@@ -361,7 +361,8 @@ BoxSelection BoxTree::ComputeSelection() const {
     return BoxSelection();
   const auto& style = impl_->style_tree().ComputedStyleOfSelection(selection_);
   BoxSelection selection;
-  BoxSelectionEditor().SetCaretColor(&selection, style.caret_color().value());
+  BoxSelectionEditor().SetCaretColor(
+      &selection, style.caret_color().as_color_value().value());
   BoxSelectionEditor().SetCaretShape(&selection, style.caret_shape());
   if (selection_.is_caret()) {
     BoxSelectionEditor().Collapse(&selection, BoxFor(selection_.focus_node()),
@@ -372,8 +373,8 @@ BoxSelection BoxTree::ComputeSelection() const {
                                 selection_.anchor_offset());
   BoxSelectionEditor().ExtendTo(&selection, BoxFor(selection_.focus_node()),
                                 selection_.focus_offset());
-  BoxSelectionEditor().SetSelectionColor(&selection,
-                                         style.background_color().value());
+  BoxSelectionEditor().SetSelectionColor(
+      &selection, style.background_color().as_color_value().value());
   return selection;
 }
 

@@ -31,11 +31,22 @@ class StyleEditor final {
   // Merge |right| into |left| if |left| doesn't have property.
   void Merge(css::Style* left, const css::Style& right);
 
+  void Set(Style* style, PropertyId id, const ColorValue& value);
+  void Set(Style* style, PropertyId id, const Length& value);
+  void Set(Style* style, PropertyId id, const Value& value);
+
   // Shorthand functions
   void SetBorder(Style* style, const FloatColor& color, float width);
-  void SetHeight(Style* style, float height);
   void SetPadding(Style* style, float width);
-  void SetWidth(Style* style, float width);
+
+#define V(Name, name, type, text) \
+  void Set##Name(Style* style, const ColorValue& color);
+  FOR_EACH_VISUAL_CSS_COLOR_PROPERTY(V)
+#undef V
+
+#define V(Name, name, type, text) void Set##Name(Style* style, float length);
+  FOR_EACH_VISUAL_CSS_LENGTH_PROPERTY(V)
+#undef V
 
 #define V(Name, name, type, text)          \
   void Set##Name(Style* style, type name); \

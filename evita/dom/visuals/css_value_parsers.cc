@@ -24,6 +24,7 @@ using Maybe = common::Maybe<T>;
 FOR_EACH_VISUAL_CSS_VALUE(V)
 #undef V
 
+using CssColorValue = visuals::css::ColorValue;
 using CssLength = visuals::css::Length;
 using CssPercentage = visuals::css::Percentage;
 using CssString = visuals::css::String;

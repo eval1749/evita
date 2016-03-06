@@ -9,6 +9,7 @@
 
 #include "evita/visuals/css/values_forward.h"
 
+#include "evita/visuals/css/float_color.h"
 {% for primitive in primitives %}
 #include "evita/visuals/css/values/{{primitive.file_name}}.h"
 {% endfor %}
@@ -43,6 +44,7 @@ enum class Keyword {
 //
 class {{type.Name}} final {
  public:
+  explicit {{type.Name}}(const Value& value);
 {%  for member in type.members if not member.is_keyword %}
   explicit {{type.Name}}({{member.Parameter}} {{member.name}});
 {%  endfor %}
@@ -63,7 +65,7 @@ class {{type.Name}} final {
 {%    if loop.first %}
   // Getters
 {%    endif %}
-  {{member.Return}} {{member.name}}() const;
+  {{member.Return}} as_{{member.name}}() const;
 {%  endfor %}
 
   // Predicates
@@ -76,13 +78,13 @@ class {{type.Name}} final {
   static {{type.Name}} {{member.Name}}();
 {%  endfor %}
 
+  const Value& value() const { return value_; }
+
 {#############################################################
  #
  # Private section
  #}
  private:
-  explicit {{type.Name}}(const Value& value);
-
   Value value_;
 };
 

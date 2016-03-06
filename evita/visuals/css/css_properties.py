@@ -11,6 +11,7 @@ import string
 #
 CSS_PRIMITIVE_TYPES = frozenset([
     # 'angle',
+    # Note: We use |<color-value>| to avoid to conflict with property "color".
     'color-value',  # CSS Color Module
     # 'frequency',
     # 'image',
@@ -47,6 +48,12 @@ class CssType(object):
         self._name = capitalize(text)
         self._text = text
         self._underscore = text.replace('-', '_')
+
+    def has(self, name):
+        for member in self.members:
+            if member.name == name:
+                return True
+        return False
 
     @property
     def initial_value(self):
@@ -98,11 +105,8 @@ class CssCompoundType(CssType):
 
     def __init__(self, name, members):
         super(CssCompoundType, self).__init__(name)
-        if members[0].is_keyword:
-            self._initial_value = members[0].name
-        else:
-            self._initial_value = 'Unset'
-        self._members = sorted(members)
+        self._initial_value = members[0].name
+        self._members = members
 
     @property
     def initial_value(self):
@@ -122,7 +126,7 @@ class CssEnumType(CssType):
     def __init__(self, name, members):
         super(CssEnumType, self).__init__(name)
         self._initial_value = members[0].name
-        self._members = sorted(members)
+        self._members = members
 
     @property
     def initial_value(self):
@@ -141,15 +145,10 @@ class CssKeywordType(CssType):
 
     def __init__(self, text):
         super(CssKeywordType, self).__init__(text)
-        self._text = text
 
     @property
     def is_keyword(self):
         return True
-
-    @property
-    def text(self):
-        return self._text
 
     def to_parameter_type(self):
         return '/* KEYWORD %s */' % self.text
@@ -225,7 +224,8 @@ class Model(object):
             {
                 'Name': capitalize(keyword),
                 'name': keyword.replace('-', '_'),
-                'text': keyword,
+                'text': keyword if keyword != 'current-color'
+                else 'currentColor',
             }
             for keyword in sorted(keyword for keyword in keywords)
         ]
@@ -269,7 +269,10 @@ class Parser(object):
         return new_keyword
 
     def add_type(self, new_type):
-        self._types[new_type.name] = new_type
+        if new_type.name[0] == '<':
+            self._types[new_type.text] = new_type
+        else:
+            self._types[new_type.name] = new_type
         return new_type
 
     def make_model(self):
@@ -280,14 +283,17 @@ class Parser(object):
             css_property.set_property_id(next_property_id)
             next_property_id = next_property_id + 1
         keywords = sorted([keyword for keyword in self._keywords])
-        types = sorted([value for value in self._types.values()])
+        types = sorted([value for value in self._types.values()
+                        if value.name[0] != '<'])
         return Model(keywords, self._properties, types)
 
     def parse_line(self, line):
         tokens = line.split(' ')
-        property_name = tokens[0].replace(':', '')
-        css_type = self.parse_tokens(property_name, tokens[1:])
-        self._properties.append(CssPropty(property_name, css_type))
+        name = tokens[0].replace(':', '')
+        css_type = self.parse_tokens(name, tokens[1:])
+        if name[0] == '<':
+            return
+        self._properties.append(CssPropty(name, css_type))
 
     def parse_lines(self, lines):
         for raw_line in lines:
@@ -300,33 +306,37 @@ class Parser(object):
     def parse_tokens(self, property_name, tokens):
         """Parse 'property-name: token+' to CssType"""
         css_type_name = property_name
-        if len(tokens) == 1:
-            return self.parse_type_name(tokens[0])
-        keywords = [self.parse_type_keyword(token) for token in tokens
-                    if token[0] != '<']
-        members = [self.parse_type_name(token) for token in tokens
-                   if token[0] == '<']
-        # TODO(eval1749): We should add CSS wide keywords to each property.
-        # for keyword in CSS_WIDE_KEYWORDS:
-        # keywords.append(self._keywords[keyword])
-        if len(members) == 0:
-            return self.add_type(CssEnumType(css_type_name, keywords))
-        return self.add_type(CssCompoundType(css_type_name, keywords + members))
+        members = []
+        for token in tokens:
+            if token == 'currentColor':
+                token = 'current-color'
+            if token[0] != '<':
+                if token in CSS_WIDE_KEYWORDS:
+                    raise Exception('CSS wide keyword %s' % token)
+                members.append(self.parse_type_keyword(token))
+                continue
+            name = token
+            if not(name in self._types):
+                raise Exception('Undefined type %s' % name)
+            css_type = self._types[name]
+            if css_type.is_primitive:
+                members.append(css_type)
+                continue
+            for member in css_type.members:
+                members.append(member)
+
+        if css_type_name[0] != '<':
+            for keyword in CSS_WIDE_KEYWORDS:
+                members.append(self._keywords[keyword])
+        for member in members:
+            if not isinstance(member, CssEnumType):
+                return self.add_type(CssCompoundType(css_type_name, members))
+        return self.add_type(CssEnumType(css_type_name, members))
 
     def parse_type_keyword(self, keyword):
         if keyword in self._keywords:
             return self._keywords[keyword]
         return self.add_keyword(CssKeywordType(keyword))
-
-    def parse_type_name(self, token):
-        assert token[0] == '<'
-        assert token[-1] == '>'
-        name = token
-        if name == '<color>':
-            name = '<color-value>'
-        if name in self._types:
-            return self._types[name]
-        return self.add_type(CssType(name))
 
 
 def parse_css_model(lines):

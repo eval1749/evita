@@ -75,9 +75,9 @@ void LayoutVisitor::LayoutFlowBoxHorizontally(const FlowBox& flow_box) {
   DCHECK(flow_box.first_child()) << flow_box;
   auto child_origin = FloatPoint();
   for (const auto& child : flow_box.child_boxes()) {
-    const auto& child_border = child->ComputeBorder();
-    const auto& child_margin = child->ComputeMargin();
-    const auto& child_padding = child->ComputePadding();
+    const auto& child_border = child->border();
+    const auto& child_margin = child->margin();
+    const auto& child_padding = child->padding();
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child_border.size() + child_padding.size();
     LayoutVisitor().Layout(
@@ -92,15 +92,16 @@ void LayoutVisitor::LayoutFlowBoxVertically(const FlowBox& flow_box) {
   auto child_origin = FloatPoint();
   const auto content_width = flow_box.content_bounds().width();
   for (const auto& child : flow_box.child_boxes()) {
-    const auto& child_border = child->ComputeBorder();
-    const auto& child_margin = child->ComputeMargin();
-    const auto& child_padding = child->ComputePadding();
+    const auto& child_border = child->border();
+    const auto& child_margin = child->margin();
+    const auto& child_padding = child->padding();
     const auto& child_size = SizeCalculator().ComputePreferredSize(*child) +
                              child_border.size() + child_padding.size();
     if (child->position().is_absolute()) {
-      LayoutVisitor().Layout(child, FloatPoint(child->left().length().value(),
-                                               child->top().length().value()) +
-                                        child_margin.top_left(),
+      LayoutVisitor().Layout(child,
+                             FloatPoint(child->left().as_length().value(),
+                                        child->top().as_length().value()) +
+                                 child_margin.top_left(),
                              FloatSize(content_width, child_size.height()));
       continue;
     }

@@ -7,6 +7,8 @@
 
 #include <iosfwd>
 
+#include "base/strings/string16.h"
+
 namespace visuals {
 namespace css {
 
@@ -18,6 +20,7 @@ namespace css {
 {% for keyword in keywords %}
   V({{keyword.Name}}, {{keyword.name}}){% if not loop.last%}{{' \\\n'}}{% endif %}
 {% endfor %}
+
 
 // CSS Value tuples having:
 //   CamelCase name
@@ -32,13 +35,20 @@ namespace css {
 
 
 // Forward class declarations representing CSS value
-{% for type in types %}
+{% for type in types if not type.is_primitive %}
 class {{type.Name}};
 {% endfor %}
 
+// Primitive values
+class ColorValue;
 enum class Keyword;
-enum class DeprecatedValueType;
+class Length;
+class Percentage;
+class String;
 
+class Value;
+
+base::string16 KeywordToString16(Keyword keyword);
 std::ostream& operator<<(std::ostream& ostream, Keyword keyword);
 
 }  // namespace css

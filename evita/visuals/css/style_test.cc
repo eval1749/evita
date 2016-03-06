@@ -13,7 +13,7 @@ TEST(StyleTest, color) {
   const auto& style1 = StyleBuilder().SetColor(ColorValue(1, 0, 0)).Build();
 
   EXPECT_TRUE(style1->has_color());
-  EXPECT_EQ(ColorValue(1, 0, 0), style1->color());
+  EXPECT_EQ(Color(ColorValue(1, 0, 0)), style1->color());
 }
 
 TEST(StyleTest, has) {

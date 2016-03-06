@@ -9,8 +9,8 @@
 #include <iosfwd>
 
 #include "evita/visuals/css/properties_forward.h"
+#include "evita/visuals/css/property_set.h"
 #include "evita/visuals/css/values.h"
-#include "evita/visuals/css/values/color_value.h"
 
 namespace visuals {
 namespace css {
@@ -24,16 +24,20 @@ class StyleEditor;
 class Style final {
  public:
   Style(const Style& other);
+  Style(Style&& other);
   Style();
   ~Style();
+
+  Style& operator=(const Style& other);
+  Style& operator=(Style&& other);
 
   bool operator==(const Style& other) const;
   bool operator!=(const Style& other) const;
 
-  const std::bitset<kMaxPropertyId + 1>& contains() const { return contains_; }
+  const PropertySet& properties() const { return properties_; }
 
 #define V(Name, name, type, text) \
-  const type& name() const;       \
+  type name() const;              \
   bool has_##name() const;
 
   FOR_EACH_VISUAL_CSS_PROPERTY(V)
@@ -42,10 +46,7 @@ class Style final {
  private:
   friend class StyleEditor;
 
-#define V(Name, name, type, text) type name##_;
-  FOR_EACH_VISUAL_CSS_PROPERTY(V)
-#undef V
-  std::bitset<kMaxPropertyId + 1> contains_;
+  PropertySet properties_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const Style& style);

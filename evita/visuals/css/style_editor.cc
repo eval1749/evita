@@ -30,30 +30,30 @@ void StyleEditor::Merge(Style* left, const Style& right) {
 void StyleEditor::SetBorder(Style* style,
                             const FloatColor& color,
                             float width) {
-  SetBorderBottomWidth(style, css::Length(width));
-  SetBorderLeftWidth(style, css::Length(width));
-  SetBorderRightWidth(style, css::Length(width));
-  SetBorderTopWidth(style, css::Length(width));
+  SetBorderBottomWidth(style, Length(width));
+  SetBorderLeftWidth(style, Length(width));
+  SetBorderRightWidth(style, Length(width));
+  SetBorderTopWidth(style, Length(width));
 
-  SetBorderBottomColor(style, css::ColorValue(color));
-  SetBorderLeftColor(style, css::ColorValue(color));
-  SetBorderRightColor(style, css::ColorValue(color));
-  SetBorderTopColor(style, css::ColorValue(color));
+  SetBorderBottomColor(style, ColorValue(color));
+  SetBorderLeftColor(style, ColorValue(color));
+  SetBorderRightColor(style, ColorValue(color));
+  SetBorderTopColor(style, ColorValue(color));
 }
 
 void StyleEditor::SetHeight(Style* style, float height) {
-  SetHeight(style, css::Height(css::Length(height)));
+  SetHeight(style, Height(Length(height)));
 }
 
 void StyleEditor::SetPadding(Style* style, float width) {
-  SetPaddingBottom(style, css::Length(width));
-  SetPaddingLeft(style, css::Length(width));
-  SetPaddingRight(style, css::Length(width));
-  SetPaddingTop(style, css::Length(width));
+  SetPaddingBottom(style, Length(width));
+  SetPaddingLeft(style, Length(width));
+  SetPaddingRight(style, Length(width));
+  SetPaddingTop(style, Length(width));
 }
 
 void StyleEditor::SetWidth(Style* style, float width) {
-  SetWidth(style, css::Width(css::Length(width)));
+  SetWidth(style, Width(Length(width)));
 }
 
 #define V(Name, name, type, text)                                  \

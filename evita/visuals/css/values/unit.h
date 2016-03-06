@@ -69,6 +69,8 @@ enum class Unit {
 #undef V
 };
 
+const char* UnitToString(Unit unit);
+
 std::ostream& operator<<(std::ostream& ostream, Unit unit);
 
 }  // namespace css

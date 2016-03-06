@@ -10,7 +10,7 @@
 namespace visuals {
 namespace css {
 
-std::ostream& operator<<(std::ostream& ostream, Unit unit) {
+const char* UnitToString(Unit unit) {
   static const char* const texts[] = {
 #define V(name) #name,
       FOR_EACH_CSS_UNIT(V)
@@ -18,8 +18,12 @@ std::ostream& operator<<(std::ostream& ostream, Unit unit) {
   };
   const auto& it = std::begin(texts) + static_cast<size_t>(unit);
   if (it < std::begin(texts) || it >= std::end(texts))
-    return ostream << "???";
-  return ostream << *it;
+    return "???";
+  return *it;
+}
+
+std::ostream& operator<<(std::ostream& ostream, Unit unit) {
+  return ostream << UnitToString(unit);
 }
 
 }  // namespace css

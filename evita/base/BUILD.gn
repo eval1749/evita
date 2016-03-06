@@ -12,6 +12,7 @@ component("base") {
   output_name = "evita_base"
   sources = [
     "evita_base_export.h",
+    "either.h",
     "float_range.cc",
     "float_range.h",
     "memory/allocator.h",

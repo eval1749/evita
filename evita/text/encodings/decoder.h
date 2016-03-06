@@ -9,7 +9,7 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "common/either.h"
+#include "evita/base/either.h"
 
 namespace encodings {
 
@@ -19,9 +19,9 @@ class Decoder {
 
   virtual const base::string16& name() const = 0;
 
-  virtual common::Either<bool, base::string16> Decode(const uint8_t* bytes,
-                                                      size_t num_bytes,
-                                                      bool is_stream) = 0;
+  virtual base::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                                    size_t num_bytes,
+                                                    bool is_stream) = 0;
 
  protected:
   Decoder();

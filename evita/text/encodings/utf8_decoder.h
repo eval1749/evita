@@ -25,9 +25,9 @@ class Utf8Decoder final : public Decoder {
 
   // encoding::Decoder
   const base::string16& name() const final;
-  common::Either<bool, base::string16> Decode(const uint8_t* bytes,
-                                              size_t num_bytes,
-                                              bool is_stream) final;
+  base::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                            size_t num_bytes,
+                                            bool is_stream) final;
 
   std::unique_ptr<Private> private_;
 

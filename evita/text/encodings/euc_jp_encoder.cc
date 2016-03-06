@@ -19,14 +19,14 @@ class EucJpEncoder::Private final {
   Private();
   ~Private();
 
-  common::Either<base::char16, std::vector<uint8_t>> Encode(
+  base::Either<base::char16, std::vector<uint8_t>> Encode(
       const base::string16& string,
       bool is_stream);
 
  private:
-  common::Either<base::char16, std::vector<uint8_t>> Error(int code_point);
+  base::Either<base::char16, std::vector<uint8_t>> Error(int code_point);
 
-  common::Either<base::char16, std::vector<uint8_t>> Succeeded(
+  base::Either<base::char16, std::vector<uint8_t>> Succeeded(
       std::vector<uint8_t> bytes);
 
   DISALLOW_COPY_AND_ASSIGN(Private);
@@ -47,8 +47,9 @@ static void ConvertShiftJisToJis(uint8_t* bytes) {
 // Because of Window doesn't support EUC-JP, event if it defines code pages
 // 50932, 51932 (EUC-JP 2012), by default, we convert EUC-JP to Shift_JIS
 // then convert to Unicode.
-common::Either<base::char16, std::vector<uint8_t>>
-EucJpEncoder::Private::Encode(const base::string16& string, bool) {
+base::Either<base::char16, std::vector<uint8_t>> EucJpEncoder::Private::Encode(
+    const base::string16& string,
+    bool) {
   if (string.empty())
     return Succeeded(std::vector<uint8_t>());
   std::vector<uint8_t> output(string.size() * 2);
@@ -91,15 +92,15 @@ EucJpEncoder::Private::Encode(const base::string16& string, bool) {
   return Succeeded(output);
 }
 
-common::Either<base::char16, std::vector<uint8_t>> EucJpEncoder::Private::Error(
+base::Either<base::char16, std::vector<uint8_t>> EucJpEncoder::Private::Error(
     int code_point) {
-  return common::make_either(static_cast<base::char16>(code_point),
-                             std::vector<uint8_t>());
+  return base::make_either(static_cast<base::char16>(code_point),
+                           std::vector<uint8_t>());
 }
 
-common::Either<base::char16, std::vector<uint8_t>>
+base::Either<base::char16, std::vector<uint8_t>>
 EucJpEncoder::Private::Succeeded(std::vector<uint8_t> bytes) {
-  return common::make_either(static_cast<base::char16>(0), bytes);
+  return base::make_either(static_cast<base::char16>(0), bytes);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -116,7 +117,7 @@ const base::string16& EucJpEncoder::name() const {
   return name_;
 }
 
-common::Either<base::char16, std::vector<uint8_t>> EucJpEncoder::Encode(
+base::Either<base::char16, std::vector<uint8_t>> EucJpEncoder::Encode(
     const base::string16& string,
     bool is_stream) {
   return private_->Encode(string, is_stream);

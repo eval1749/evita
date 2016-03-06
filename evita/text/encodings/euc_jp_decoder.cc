@@ -20,9 +20,9 @@ class EucJpDecoder::Private final {
   Private();
   ~Private();
 
-  common::Either<bool, base::string16> Decode(const uint8_t* bytes,
-                                              size_t num_bytes,
-                                              bool is_stream);
+  base::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                            size_t num_bytes,
+                                            bool is_stream);
 
  private:
   enum class State {
@@ -33,7 +33,7 @@ class EucJpDecoder::Private final {
     CS32,
   };
 
-  common::Either<bool, base::string16> Error();
+  base::Either<bool, base::string16> Error();
 
   uint8_t bytes_[2];
   State state_;
@@ -52,7 +52,7 @@ static void ConvertJisToShiftJis(uint8_t* bytes) {
   bytes[1] = static_cast<uint8_t>(bytes[1] + cell);
 }
 
-common::Either<bool, base::string16> EucJpDecoder::Private::Decode(
+base::Either<bool, base::string16> EucJpDecoder::Private::Decode(
     const uint8_t* bytes,
     size_t num_bytes,
     bool is_stream) {
@@ -136,12 +136,12 @@ common::Either<bool, base::string16> EucJpDecoder::Private::Decode(
     }
   }
   if (is_stream)
-    return common::make_either(true, output.str());
-  return common::make_either(state_ == State::CS0, output.str());
+    return base::make_either(true, output.str());
+  return base::make_either(state_ == State::CS0, output.str());
 }
 
-common::Either<bool, base::string16> EucJpDecoder::Private::Error() {
-  return common::make_either(false, base::string16());
+base::Either<bool, base::string16> EucJpDecoder::Private::Error() {
+  return base::make_either(false, base::string16());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -158,9 +158,9 @@ const base::string16& EucJpDecoder::name() const {
   return name_;
 }
 
-common::Either<bool, base::string16> EucJpDecoder::Decode(const uint8_t* bytes,
-                                                          size_t num_bytes,
-                                                          bool is_stream) {
+base::Either<bool, base::string16> EucJpDecoder::Decode(const uint8_t* bytes,
+                                                        size_t num_bytes,
+                                                        bool is_stream) {
   return private_->Decode(bytes, num_bytes, is_stream);
 }
 

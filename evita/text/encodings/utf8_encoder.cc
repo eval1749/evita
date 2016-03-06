@@ -19,7 +19,7 @@ class Utf8Encoder::Private final {
   Private();
   ~Private();
 
-  common::Either<base::char16, std::vector<uint8_t>> Encode(
+  base::Either<base::char16, std::vector<uint8_t>> Encode(
       const base::string16& string,
       bool is_stream);
 
@@ -34,7 +34,7 @@ Utf8Encoder::Private::~Private() {}
 // U+0000..U+007F 0xxxxxxx
 // U+0080..U+07FF 110xxxxx 10xxxxxx
 // U+0800..U+FFFF 1110xxxx 10xxxxxx 10xxxxxx
-common::Either<base::char16, std::vector<uint8_t>> Utf8Encoder::Private::Encode(
+base::Either<base::char16, std::vector<uint8_t>> Utf8Encoder::Private::Encode(
     const base::string16& string,
     bool) {
   std::vector<uint8_t> output(string.size());
@@ -42,7 +42,7 @@ common::Either<base::char16, std::vector<uint8_t>> Utf8Encoder::Private::Encode(
   for (auto const code_point : string) {
     if (code_point >= 0xD800 && code_point <= 0xDFFF) {
       output.resize(output.size());
-      return common::make_either(code_point, output);
+      return base::make_either(code_point, output);
     }
     if (code_point <= 0x7F) {
       output.push_back(static_cast<uint8_t>(code_point));
@@ -58,7 +58,7 @@ common::Either<base::char16, std::vector<uint8_t>> Utf8Encoder::Private::Encode(
     output.push_back(static_cast<uint8_t>(0x80 | (code_point & 0x3F)));
   }
   output.resize(output.size());
-  return common::make_either(static_cast<base::char16>(0), output);
+  return base::make_either(static_cast<base::char16>(0), output);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ const base::string16& Utf8Encoder::name() const {
   return name_;
 }
 
-common::Either<base::char16, std::vector<uint8_t>> Utf8Encoder::Encode(
+base::Either<base::char16, std::vector<uint8_t>> Utf8Encoder::Encode(
     const base::string16& string,
     bool is_stream) {
   return private_->Encode(string, is_stream);

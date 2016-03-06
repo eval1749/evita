@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_EITHER_H_
-#define COMMON_EITHER_H_
+#ifndef EVITA_BASE_EITHER_H_
+#define EVITA_BASE_EITHER_H_
 
-namespace common {
+namespace base {
 
 template <typename Left, typename Right>
 struct Either {
@@ -20,6 +20,6 @@ Either<Left, Right> make_either(const Left& left, const Right& right) {
   return Either<Left, Right>(left, right);
 }
 
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_EITHER_H_
+#endif  // EVITA_BASE_EITHER_H_

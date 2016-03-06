@@ -11,7 +11,7 @@
 
 #include "base/macros.h"
 #include "base/strings/string16.h"
-#include "common/either.h"
+#include "evita/base/either.h"
 
 namespace encodings {
 
@@ -21,7 +21,7 @@ class Encoder {
 
   virtual const base::string16& name() const = 0;
 
-  virtual common::Either<base::char16, std::vector<uint8_t>> Encode(
+  virtual base::Either<base::char16, std::vector<uint8_t>> Encode(
       const base::string16& string,
       bool is_stream) = 0;
 

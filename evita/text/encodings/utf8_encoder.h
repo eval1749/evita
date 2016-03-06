@@ -26,7 +26,7 @@ class Utf8Encoder final : public Encoder {
 
   // encoding::Encoder
   const base::string16& name() const final;
-  common::Either<base::char16, std::vector<uint8_t>> Encode(
+  base::Either<base::char16, std::vector<uint8_t>> Encode(
       const base::string16& string,
       bool is_stream) final;
 

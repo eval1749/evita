@@ -20,9 +20,9 @@ class ShiftJisDecoder::Private final {
   Private();
   ~Private();
 
-  common::Either<bool, base::string16> Decode(const uint8_t* bytes,
-                                              size_t num_bytes,
-                                              bool is_stream);
+  base::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                            size_t num_bytes,
+                                            bool is_stream);
 
  private:
   uint8_t bytes_[2];
@@ -37,7 +37,7 @@ ShiftJisDecoder::Private::Private() {
 
 ShiftJisDecoder::Private::~Private() {}
 
-common::Either<bool, base::string16> ShiftJisDecoder::Private::Decode(
+base::Either<bool, base::string16> ShiftJisDecoder::Private::Decode(
     const uint8_t* bytes,
     size_t num_bytes,
     bool is_stream) {
@@ -57,7 +57,7 @@ common::Either<bool, base::string16> ShiftJisDecoder::Private::Decode(
           kShiftJisCodePage, MB_ERR_INVALID_CHARS,
           reinterpret_cast<char*>(bytes_), 2, &code_point, 1);
       if (num_chars != 1)
-        return common::make_either(false, output.str());
+        return base::make_either(false, output.str());
       output.sputc(code_point);
       bytes_[0] = 0;
     } else {
@@ -69,13 +69,13 @@ common::Either<bool, base::string16> ShiftJisDecoder::Private::Decode(
                  (byte >= 0xE0 && byte <= 0xFC)) {
         bytes_[0] = byte;
       } else {
-        return common::make_either(false, output.str());
+        return base::make_either(false, output.str());
       }
     }
   }
   if (is_stream)
-    return common::make_either(true, output.str());
-  return common::make_either(!bytes_[0], output.str());
+    return base::make_either(true, output.str());
+  return base::make_either(!bytes_[0], output.str());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -92,10 +92,9 @@ const base::string16& ShiftJisDecoder::name() const {
   return name_;
 }
 
-common::Either<bool, base::string16> ShiftJisDecoder::Decode(
-    const uint8_t* bytes,
-    size_t num_bytes,
-    bool is_stream) {
+base::Either<bool, base::string16> ShiftJisDecoder::Decode(const uint8_t* bytes,
+                                                           size_t num_bytes,
+                                                           bool is_stream) {
   return private_->Decode(bytes, num_bytes, is_stream);
 }
 

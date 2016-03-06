@@ -22,11 +22,11 @@ class Utf8Decoder::Private final {
 
   // |string| contains characters decoded so far. Caller may use it what's
   // wrong in input data.
-  common::Either<bool, base::string16> BadInput(const base::string16& string);
+  base::Either<bool, base::string16> BadInput(const base::string16& string);
 
-  common::Either<bool, base::string16> Decode(const uint8_t* bytes,
-                                              size_t num_bytes,
-                                              bool is_stream);
+  base::Either<bool, base::string16> Decode(const uint8_t* bytes,
+                                            size_t num_bytes,
+                                            bool is_stream);
 
  private:
   enum class State {
@@ -47,10 +47,10 @@ Utf8Decoder::Private::Private()
 
 Utf8Decoder::Private::~Private() {}
 
-common::Either<bool, base::string16> Utf8Decoder::Private::BadInput(
+base::Either<bool, base::string16> Utf8Decoder::Private::BadInput(
     const base::string16& string) {
   state_ = State::BadInput;
-  return common::make_either(false, string);
+  return base::make_either(false, string);
 }
 
 // 1 U+0000   U+007F   0xxxxxxx
@@ -58,7 +58,7 @@ common::Either<bool, base::string16> Utf8Decoder::Private::BadInput(
 // 3 U+0800   U+FFFF   1110xxxx 10xxxxxx 10xxxxxx
 // 4 U+10000  U+1FFFFF 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 // Note: We don't support 5 byte and 6 byte UTF-8 sequence yet.
-common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
+base::Either<bool, base::string16> Utf8Decoder::Private::Decode(
     const uint8_t* bytes,
     size_t num_bytes,
     bool is_stream) {
@@ -125,12 +125,12 @@ common::Either<bool, base::string16> Utf8Decoder::Private::Decode(
     }
   }
   if (is_stream)
-    return common::make_either(true, output.str());
+    return base::make_either(true, output.str());
 
   // We should not expect more bytes.
   auto const error = state_ == State::FirstByte;
   state_ = State::FirstByte;
-  return common::make_either(error, output.str());
+  return base::make_either(error, output.str());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -147,9 +147,9 @@ const base::string16& Utf8Decoder::name() const {
   return name_;
 }
 
-common::Either<bool, base::string16> Utf8Decoder::Decode(const uint8_t* bytes,
-                                                         size_t num_bytes,
-                                                         bool is_stream) {
+base::Either<bool, base::string16> Utf8Decoder::Decode(const uint8_t* bytes,
+                                                       size_t num_bytes,
+                                                       bool is_stream) {
   return private_->Decode(bytes, num_bytes, is_stream);
 }
 

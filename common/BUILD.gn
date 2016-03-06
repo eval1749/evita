@@ -7,7 +7,6 @@ import("//testing/test.gni")
 component("common") {
   sources = [
     "common_export.h",
-    "either.h",
     "maybe.h",
     "strings/atomic_string.cc",
     "strings/atomic_string.h",

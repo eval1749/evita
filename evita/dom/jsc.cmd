@@ -3,7 +3,7 @@ setlocal
 
 set externs_dir=evita\dom
 
-python tools\razzle\closure_compiler.py ^
+python evita\tools\closure_compiler.py ^
   --js_output_file=nul ^
   %* ^
   --extern ^

@@ -21,8 +21,8 @@ BLACK_LIST = [
 def should_check(path):
     if path.find('/templates/') >= 0:
         return False
-    for dir in BLACK_LIST:
-        if path.startswith(dir):
+    for name in BLACK_LIST:
+        if path.startswith(name):
             return False
     return True
 

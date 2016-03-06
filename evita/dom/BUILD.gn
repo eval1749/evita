@@ -176,7 +176,7 @@ action("check_jslib") {
   #js_file_list = "$target_gen_dir/jslib_file_list.txt"
   response_file_contents = rebase_path(js_files)
 
-  script = "//tools/razzle/closure_compiler.py"
+  script = "//evita/tools/closure_compiler.py"
   outputs = [
     "$target_gen_dir/evita_checked.js",
   ]

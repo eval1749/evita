@@ -53,7 +53,10 @@ source_set("css") {
 }
 
 action("properties") {
-  visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  visibility = [
+    ":*",
+    "values/*",
+  ]
 
   script = "make_properties.py"
 

@@ -24,6 +24,7 @@ source_set("values") {
 
   deps = [
     "//base",
+    "//evita/visuals/css:properties",
   ]
 
   public_deps = [

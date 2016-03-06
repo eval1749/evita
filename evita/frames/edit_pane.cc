@@ -8,10 +8,10 @@
 
 #include "base/logging.h"
 #include "base/memory/ref_counted.h"
-#include "common/tree/child_nodes.h"
-#include "common/tree/descendants_or_self.h"
-#include "common/tree/node.h"
 #include "evita/base/castable.h"
+#include "evita/base/tree/child_nodes.h"
+#include "evita/base/tree/descendants_or_self.h"
+#include "evita/base/tree/node.h"
 #include "evita/frames/frame.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/resource.h"
@@ -137,8 +137,8 @@ struct HitTestResult {
 //
 class EditPane::Box : public Bounds,
                       public base::RefCounted<EditPane::Box>,
-                      public common::tree::Node<EditPane::Box>,
-                      public base::Castable<Box> {
+                      public base::tree::Node<EditPane::Box>,
+                                            public base::Castable<Box> {
   DECLARE_CASTABLE_CLASS(Box, Castable);
 
  public:
@@ -1020,7 +1020,7 @@ void EditPane::Box::EnsureInVerticalBox() {
 EditPane::Box* EditPane::Box::FindBoxFromContent(
     const ContentWindow* content) const {
   DCHECK(!is_removed());
-  for (const auto child : common::tree::descendants_or_self(this)) {
+  for (const auto child : base::tree::descendants_or_self(this)) {
     if (child->GetContent() == content)
       return const_cast<Box*>(child);
   }
@@ -1044,7 +1044,7 @@ EditPane::Box* EditPane::Box::GetActiveLeafBox() const {
   };
 
   auto candidate = static_cast<Box*>(nullptr);
-  for (const auto& child : common::tree::descendants_or_self(this)) {
+  for (const auto& child : base::tree::descendants_or_self(this)) {
     const auto leaf_box = const_cast<LeafBox*>(child->as<LeafBox>());
     if (!leaf_box)
       continue;
@@ -1059,7 +1059,7 @@ ContentWindow* EditPane::Box::GetContent() const {
 
 EditPane::Box* EditPane::Box::GetFirstLeafBox() const {
   DCHECK(!is_removed());
-  for (const auto& child : common::tree::descendants_or_self(this)) {
+  for (const auto& child : base::tree::descendants_or_self(this)) {
     if (const auto leaf_box = const_cast<LeafBox*>(child->as<LeafBox>()))
       return leaf_box;
   }

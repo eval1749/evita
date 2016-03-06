@@ -7,12 +7,12 @@
 #include "evita/ui/widget.h"
 
 #include "base/trace_event/trace_event.h"
-#include "common/tree/ancestors_or_self.h"
-#include "common/tree/child_nodes.h"
-#include "common/tree/descendants.h"
-#include "common/tree/descendants_or_self.h"
 #include "common/win/win32_verify.h"
 #include "evita/base/adaptors/reversed.h"
+#include "evita/base/tree/ancestors_or_self.h"
+#include "evita/base/tree/child_nodes.h"
+#include "evita/base/tree/descendants.h"
+#include "evita/base/tree/descendants_or_self.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/ui/animation/animatable_window.h"
@@ -114,7 +114,7 @@ bool Widget::has_native_focus() const {
 }
 
 HWND Widget::AssociatedHwnd() const {
-  for (auto runner : common::tree::ancestors_or_self(this)) {
+  for (auto runner : base::tree::ancestors_or_self(this)) {
     if (const auto window = runner->native_window_.get())
       return *window;
   }
@@ -257,7 +257,7 @@ HCURSOR Widget::GetCursorAt(const gfx::Point&) const {
 }
 
 Widget* Widget::GetHostWidget() const {
-  for (auto runner : common::tree::ancestors_or_self(this)) {
+  for (auto runner : base::tree::ancestors_or_self(this)) {
     if (runner->native_window())
       return const_cast<Widget*>(runner);
   }

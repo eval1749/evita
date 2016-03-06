@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "common/tree/node.h"
+#include "evita/base/tree/node.h"
 #include "evita/dom/events/view_event_target.h"
 #include "evita/dom/public/float_point.h"
 #include "evita/dom/public/float_rect.h"
@@ -29,7 +29,7 @@ class WindowClass;
 // Window is correspond to |Widget| in DOM world.
 //
 class Window : public ginx::Scriptable<Window, ViewEventTarget>,
-               public common::tree::Node<Window> {
+               public base::tree::Node<Window> {
   DECLARE_SCRIPTABLE_OBJECT(Window)
 
  public:
@@ -83,7 +83,7 @@ class Window : public ginx::Scriptable<Window, ViewEventTarget>,
   friend class bindings::WindowClass;
   friend class WindowSet;
 
-  using Node = common::tree::Node<Window>;
+  using Node = base::tree::Node<Window>;
 
   // bindings
   std::vector<Window*> child_windows() const;

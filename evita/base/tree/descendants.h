@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_TREE_DESCENDANTS_H_
-#define COMMON_TREE_DESCENDANTS_H_
+#ifndef EVITA_BASE_TREE_DESCENDANTS_H_
+#define EVITA_BASE_TREE_DESCENDANTS_H_
 
-#include "common/tree/descendants_or_self.h"
+#include "evita/base/tree/descendants_or_self.h"
 
-namespace common {
+namespace base {
 namespace tree {
 namespace internal {
 
@@ -41,6 +41,6 @@ bool Node<NodeClass>::Contains(const NodeClass* node) const {
 }
 
 }  // namespace tree
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_TREE_DESCENDANTS_H_
+#endif  // EVITA_BASE_TREE_DESCENDANTS_H_

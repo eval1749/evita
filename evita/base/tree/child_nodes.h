@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_TREE_CHILD_NODES_H_
-#define COMMON_TREE_CHILD_NODES_H_
+#ifndef EVITA_BASE_TREE_CHILD_NODES_H_
+#define EVITA_BASE_TREE_CHILD_NODES_H_
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "common/tree/abstract_node_iterator.h"
-#include "common/tree/node.h"
+#include "evita/base/tree/abstract_node_iterator.h"
+#include "evita/base/tree/node.h"
 
-namespace common {
+namespace base {
 namespace tree {
 
 template <typename NodeType>
@@ -143,6 +143,6 @@ ChildNodes<NodeClass> Node<NodeClass>::child_nodes() {
 }
 
 }  // namespace tree
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_TREE_CHILD_NODES_H_
+#endif  // EVITA_BASE_TREE_CHILD_NODES_H_

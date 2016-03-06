@@ -11,8 +11,8 @@
 #include "base/event_types.h"
 #include "base/logging.h"
 #include "base/macros.h"
-#include "common/tree/node.h"
 #include "common/win/native_window.h"
+#include "evita/base/tree/node.h"
 #include "evita/gfx/rect.h"
 #include "evita/gfx/rect_f.h"
 #include "evita/ui/compositor/layer_owner.h"
@@ -37,9 +37,9 @@ class MouseWheelEvent;
 // Widget
 //
 class Widget : public EventTarget,
-               public common::tree::Node<Widget>,
-               public common::win::MessageDelegate,
-               public LayerOwner {
+               public base::tree::Node<Widget>,
+                                     public common::win::MessageDelegate,
+                                     public LayerOwner {
   DECLARE_CASTABLE_CLASS(Widget, EventTarget);
 
  public:

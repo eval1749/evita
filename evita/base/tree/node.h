@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_TREE_NODE_H_
-#define COMMON_TREE_NODE_H_
+#ifndef EVITA_BASE_TREE_NODE_H_
+#define EVITA_BASE_TREE_NODE_H_
 
 #include "base/logging.h"
 #include "base/macros.h"
 
-namespace common {
+namespace base {
 namespace tree {
 
 template <class NodeClas>
@@ -217,6 +217,6 @@ void Node<NodeClass>::ReplaceChild(NodeClass* new_node, NodeClass* old_node) {
 }
 
 }  // namespace tree
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_TREE_NODE_H_
+#endif  // EVITA_BASE_TREE_NODE_H_

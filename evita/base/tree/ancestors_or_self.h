@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_TREE_ANCESTORS_OR_SELF_H_
-#define COMMON_TREE_ANCESTORS_OR_SELF_H_
+#ifndef EVITA_BASE_TREE_ANCESTORS_OR_SELF_H_
+#define EVITA_BASE_TREE_ANCESTORS_OR_SELF_H_
 
 #include "base/logging.h"
 #include "base/macros.h"
-#include "common/tree/abstract_node_iterator.h"
+#include "evita/base/tree/abstract_node_iterator.h"
 
-namespace common {
+namespace base {
 namespace tree {
 namespace internal {
 
@@ -51,6 +51,6 @@ internal::AncestorsOrSelf<NodeClass> ancestors_or_self(NodeClass* node) {
 }
 
 }  // namespace tree
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_TREE_ANCESTORS_OR_SELF_H_
+#endif  // EVITA_BASE_TREE_ANCESTORS_OR_SELF_H_

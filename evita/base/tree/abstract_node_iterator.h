@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_TREE_ABSTRACT_NODE_ITERATOR_H_
-#define COMMON_TREE_ABSTRACT_NODE_ITERATOR_H_
+#ifndef EVITA_BASE_TREE_ABSTRACT_NODE_ITERATOR_H_
+#define EVITA_BASE_TREE_ABSTRACT_NODE_ITERATOR_H_
 
 #include <iterator>
 
 #include "base/logging.h"
 #include "base/macros.h"
 
-namespace common {
+namespace base {
 namespace tree {
 namespace internal {
 
@@ -44,6 +44,6 @@ class AbstractNodeIterator : public std::iterator<IteratorCategory, NodeType*> {
 
 }  // namespace internal
 }  // namespace tree
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_TREE_ABSTRACT_NODE_ITERATOR_H_
+#endif  // EVITA_BASE_TREE_ABSTRACT_NODE_ITERATOR_H_

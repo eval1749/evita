@@ -1,19 +1,20 @@
-// Copyright (C) 2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include <ostream>
 #include <vector>
 
-#include "common/tree/ancestors_or_self.h"
-#include "common/tree/child_nodes.h"
-#include "common/tree/descendants.h"
-#include "common/tree/descendants_or_self.h"
-#include "common/tree/node.h"
+#include "evita/base/tree/ancestors_or_self.h"
+#include "evita/base/tree/child_nodes.h"
+#include "evita/base/tree/descendants.h"
+#include "evita/base/tree/descendants_or_self.h"
+#include "evita/base/tree/node.h"
 #include "gtest/gtest.h"
 
 namespace {
 
-class Node final : public common::tree::Node<Node> {
+class Node final : public base::tree::Node<Node> {
  public:
   explicit Node(int value) : value_(value) {}
 
@@ -39,7 +40,7 @@ std::ostream& operator<<(std::ostream& ostream, const Node* node) {
 
 std::vector<Node*> GetAncestorsOrSelf(Node* node) {
   std::vector<Node*> nodes;
-  for (auto child : common::tree::ancestors_or_self(node)) {
+  for (auto child : base::tree::ancestors_or_self(node)) {
     nodes.push_back(child);
   }
   return std::move(nodes);
@@ -55,7 +56,7 @@ std::vector<Node*> GetChildNodes(Node* node) {
 
 std::vector<Node*> GetDescendants(Node* node) {
   std::vector<Node*> nodes;
-  for (auto child : common::tree::descendants(node)) {
+  for (auto child : base::tree::descendants(node)) {
     nodes.push_back(child);
   }
   return std::move(nodes);
@@ -63,7 +64,7 @@ std::vector<Node*> GetDescendants(Node* node) {
 
 std::vector<Node*> GetDescendantsOrSelf(Node* node) {
   std::vector<Node*> nodes;
-  for (auto child : common::tree::descendants_or_self(node)) {
+  for (auto child : base::tree::descendants_or_self(node)) {
     nodes.push_back(child);
   }
   return std::move(nodes);

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef COMMON_TREE_DESCENDANTS_OR_SELF_H_
-#define COMMON_TREE_DESCENDANTS_OR_SELF_H_
+#ifndef EVITA_BASE_TREE_DESCENDANTS_OR_SELF_H_
+#define EVITA_BASE_TREE_DESCENDANTS_OR_SELF_H_
 
 #include "base/logging.h"
-#include "common/tree/abstract_node_iterator.h"
+#include "evita/base/tree/abstract_node_iterator.h"
 
-namespace common {
+namespace base {
 namespace tree {
 namespace internal {
 
@@ -66,6 +66,6 @@ internal::DescendantsOrSelf<NodeClass> descendants_or_self(NodeClass* node) {
 }
 
 }  // namespace tree
-}  // namespace common
+}  // namespace base
 
-#endif  // COMMON_TREE_DESCENDANTS_OR_SELF_H_
+#endif  // EVITA_BASE_TREE_DESCENDANTS_OR_SELF_H_

@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-#include "common/tree/child_nodes.h"
+#include "evita/base/tree/child_nodes.h"
 #include "evita/dom/public/view_event_handler.h"
 #include "evita/dom/public/view_events.h"
 #include "evita/editor/application.h"

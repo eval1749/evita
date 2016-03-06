@@ -7,8 +7,8 @@
 #include "base/bind.h"
 #include "base/logging.h"
 #include "base/strings/stringprintf.h"
-#include "common/tree/child_nodes.h"
-#include "common/tree/descendants.h"
+#include "evita/base/tree/child_nodes.h"
+#include "evita/base/tree/descendants.h"
 #include "evita/dom/bindings/exception_state.h"
 #include "evita/dom/events/event.h"
 #include "evita/dom/events/view_event_target_set.h"
@@ -133,7 +133,7 @@ void Window::Destroy(ExceptionState* exception_state) {
     exception_state->ThrowError("You can't destroy unrealized window.");
     return;
   }
-  for (auto descendant : common::tree::descendants_or_self(this)) {
+  for (auto descendant : base::tree::descendants_or_self(this)) {
     descendant->state_ = State::Destroying;
   }
   script_host_->view_delegate()->DestroyWindow(window_id());
@@ -235,7 +235,7 @@ void Window::Hide(ExceptionState* exception_state) {
 }
 
 bool Window::IsDescendantOf(Window* other) const {
-  for (auto descendant : common::tree::descendants(other)) {
+  for (auto descendant : base::tree::descendants(other)) {
     if (descendant == this)
       return true;
   }
@@ -260,7 +260,7 @@ void Window::Realize(ExceptionState* exception_state) {
     exception_state->ThrowError("Parent window isn't realized.");
     return;
   }
-  for (auto descendant : common::tree::descendants_or_self(this)) {
+  for (auto descendant : base::tree::descendants_or_self(this)) {
     descendant->state_ = State::Realizing;
   }
   script_host_->view_delegate()->RealizeWindow(window_id());

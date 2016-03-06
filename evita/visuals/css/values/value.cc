@@ -7,11 +7,29 @@
 #include "evita/visuals/css/values/value.h"
 
 #include "base/logging.h"
+#include "base/strings/string_number_conversions.h"
+#include "base/strings/stringprintf.h"
+#include "base/strings/utf_string_conversions.h"
+#include "evita/visuals/css/float_color.h"
 #include "evita/visuals/css/values.h"
+#include "evita/visuals/css/values/color_value.h"
 #include "evita/visuals/css/values/value_type.h"
 
 namespace visuals {
 namespace css {
+
+namespace {
+
+base::string16 FloatColorToString16(const FloatColor& color) {
+  if (color.alpha() == 1)
+    return base::StringPrintf(L"#%06X", color.ToRgba() >> 8);
+  return base::StringPrintf(
+      L"rgba(%d, %d, %d, %f)", static_cast<int>(color.red() * 255),
+      static_cast<int>(color.green() * 255),
+      static_cast<int>(color.blue() * 255), color.alpha());
+}
+
+}  // namespace
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -214,6 +232,32 @@ void Value::Reset() {
     delete data_.string;
   type_ = ValueType::Unspecified;
   data_.u32 = 0;
+}
+
+base::string16 Value::ToString16() const {
+  switch (type()) {
+    case ValueType::Color:
+      return FloatColorToString16(as_color().value());
+    case ValueType::Dimension: {
+      const auto& dimension = as_dimension();
+      return base::StringPrintf(L"%f%s", dimension.number(),
+                                UnitToString(dimension.unit()));
+    }
+    case ValueType::Integer:
+      return base::IntToString16(as_integer());
+    case ValueType::Number:
+      return base::UTF8ToUTF16(base::DoubleToString(as_number()));
+    case ValueType::Keyword:
+      return KeywordToString16(as_keyword());
+    case ValueType::Percentage:
+      return base::StringPrintf(L"%f%%", as_percentage().value());
+    case ValueType::String:
+      return as_string().value();
+    case ValueType::Unspecified:
+      return base::string16();
+  }
+  NOTREACHED() << *this;
+  return base::string16();
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Value& value) {

@@ -10,6 +10,7 @@
 #include <iosfwd>
 #include <string>
 
+#include "base/strings/string16.h"
 #include "evita/visuals/css/values_forward.h"
 
 namespace visuals {
@@ -79,6 +80,7 @@ class Value final {
 #undef V
 
   void Reset();
+  base::string16 ToString16() const;
 
  private:
   void DidMove();

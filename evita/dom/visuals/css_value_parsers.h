@@ -15,7 +15,7 @@ namespace dom {
 #define V(Name, name, name_string)                                         \
   common::Maybe<visuals::css::Name> Parse##Name(base::StringPiece16 text); \
   base::string16 Unparse##Name(const visuals::css::Name& value);
-FOR_EACH_VISUAL_CSS_VALUES(V)
+FOR_EACH_VISUAL_CSS_VALUE(V)
 #undef V
 
 common::Maybe<visuals::css::Length> ParseLength(base::StringPiece16 text);

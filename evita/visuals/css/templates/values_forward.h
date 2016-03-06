@@ -23,7 +23,7 @@ namespace css {
 //   CamelCase name
 //   underscore name
 //   name string
-#define FOR_EACH_VISUAL_CSS_VALUES(V) \
+#define FOR_EACH_VISUAL_CSS_VALUE(V) \
 {% for type in types %}
   V({{type.Name}}, {{type.name}}, {{type.text}})
 {%- if not loop.last %}  \

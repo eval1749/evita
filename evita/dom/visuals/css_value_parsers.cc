@@ -21,7 +21,7 @@ template <typename T>
 using Maybe = common::Maybe<T>;
 
 #define V(Name, name, text) using Css##Name = visuals::css::Name;
-FOR_EACH_VISUAL_CSS_VALUES(V)
+FOR_EACH_VISUAL_CSS_VALUE(V)
 #undef V
 
 using CssLength = visuals::css::Length;

@@ -7,8 +7,6 @@ import("//testing/test.gni")
 component("common") {
   sources = [
     "common_export.h",
-    "strings/atomic_string.cc",
-    "strings/atomic_string.h",
     "win/com_init.cc",
     "win/com_init.h",
     "win/com_verify.h",
@@ -36,7 +34,6 @@ test("common_unittests") {
   sources = [
     "memory/ref_counted_unittest.cc",
     "memory/scoped_refptr_unittest.cc",
-    "strings/atomic_string_unittest.cc",
     "tree/node_unittest.cc",
     "win/rect_unittest.cc",
   ]

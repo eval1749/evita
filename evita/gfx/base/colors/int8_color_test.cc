@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/base/colors/int8_color.h"
+#include "evita/gfx/base/colors/int8_color.h"
 #include "gtest/gtest.h"
 
-namespace base {
+namespace gfx {
 
 TEST(Int8ColorTest, Equals) {
   Int8Color color0;
@@ -39,4 +39,4 @@ TEST(Int8ColorTest, Equals) {
   EXPECT_TRUE(color2 != color1);
 }
 
-}  // namespace base
+}  // namespace gfx

@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_BASE_COLORS_INT8_COLOR_H_
-#define EVITA_BASE_COLORS_INT8_COLOR_H_
+#ifndef EVITA_GFX_BASE_COLORS_INT8_COLOR_H_
+#define EVITA_GFX_BASE_COLORS_INT8_COLOR_H_
 
 #include <iosfwd>
 
-#include "evita/base/evita_base_export.h"
+#include "evita/gfx/gfx_export.h"
 
-namespace base {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
 // Int8Color
 //
-class EVITA_BASE_EXPORT Int8Color final {
+class GFX_EXPORT Int8Color final {
  public:
   Int8Color(int red, int green, int blue, int alpha = 255);
   Int8Color(const Int8Color& other);
@@ -37,9 +37,9 @@ class EVITA_BASE_EXPORT Int8Color final {
   int red_ = 0;
 };
 
-EVITA_BASE_EXPORT std::ostream& operator<<(std::ostream& ostream,
-                                           const Int8Color& color);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                    const Int8Color& color);
 
-}  // namespace base
+}  // namespace gfx
 
-#endif  // EVITA_BASE_COLORS_INT8_COLOR_H_
+#endif  // EVITA_GFX_BASE_COLORS_INT8_COLOR_H_

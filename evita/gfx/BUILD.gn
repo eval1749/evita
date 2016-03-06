@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//testing/test.gni")
+
 source_set("gfx") {
   sources = [
     "bitmap.cc",
@@ -21,6 +23,7 @@ source_set("gfx") {
     "font.h",
     "font_face.cc",
     "font_face.h",
+    "gfx_export.h",
     "point_f.cc",
     "rect_conversions.cc",
     "rect_conversions.h",
@@ -49,5 +52,15 @@ source_set("gfx") {
   deps = [
     "//base",
     "//common",
+    "//evita/gfx/base",
+  ]
+}
+
+test("tests") {
+  output_name = "evita_gfx_tests"
+  deps = [
+    "//base/test:run_all_unittests",
+    "//evita/gfx/base:test_files",
+    "//testing/gtest",
   ]
 }

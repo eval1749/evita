@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/base/colors/int8_color.h"
+#include "evita/gfx/base/colors/int8_color.h"
 
 #include "base/logging.h"
 
-namespace base {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -49,4 +49,4 @@ std::ostream& operator<<(std::ostream& ostream, const Int8Color& color) {
   return ostream << ')';
 }
 
-}  // namespace base
+}  // namespace gfx

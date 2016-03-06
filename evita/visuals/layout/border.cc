@@ -12,13 +12,13 @@ namespace visuals {
 //
 // Border
 //
-Border::Border(const FloatColor& top_color,
+Border::Border(const gfx::FloatColor& top_color,
                float top,
-               const FloatColor& right_color,
+               const gfx::FloatColor& right_color,
                float right,
-               const FloatColor& bottom_color,
+               const gfx::FloatColor& bottom_color,
                float bottom,
-               const FloatColor& left_color,
+               const gfx::FloatColor& left_color,
                float left)
     : bottom_color_(bottom_color),
       left_color_(left_color),
@@ -26,14 +26,14 @@ Border::Border(const FloatColor& top_color,
       top_color_(top_color),
       thickness_(top, left, bottom, right) {}
 
-Border::Border(const FloatColor& color,
+Border::Border(const gfx::FloatColor& color,
                float top,
                float right,
                float bottom,
                float left)
     : Border(color, top, color, right, color, bottom, color, left) {}
 
-Border::Border(const FloatColor& color, float width)
+Border::Border(const gfx::FloatColor& color, float width)
     : Border(color, width, width, width, width) {}
 
 Border::Border(const Border& other)

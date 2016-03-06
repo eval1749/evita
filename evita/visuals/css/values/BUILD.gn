@@ -4,9 +4,6 @@
 
 source_set("values") {
   sources = [
-    # TODO(eval1749): We should move "float_color.{cc,h}" to somewhere.
-    "../float_color.cc",
-    "../float_color.h",
     "color_value.cc",
     "color_value.h",
     "dimension.cc",
@@ -27,5 +24,9 @@ source_set("values") {
 
   deps = [
     "//base",
+  ]
+
+  public_deps = [
+    "//evita/gfx/base",
   ]
 }

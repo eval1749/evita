@@ -62,7 +62,7 @@ class ActualStyleVisitor final : public BoxVisitor {
 
 std::unique_ptr<css::Style> ActualStyleVisitor::Compute(const Box& box) {
   builder_.SetDisplay(box.display());
-  if (box.background_color() != FloatColor())
+  if (box.background_color() != gfx::FloatColor())
     builder_.Set(css::PropertyId::BackgroundColor,
                  css::ColorValue(box.background_color()));
 

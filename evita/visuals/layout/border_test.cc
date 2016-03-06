@@ -9,9 +9,9 @@ namespace visuals {
 
 TEST(BorderTest, Equals) {
   const auto& border0 = Border();
-  const auto& border1 = Border(FloatColor(1, 1, 1), 1.0);
-  const auto& border2 = Border(FloatColor(1, 1, 1), 1.0, 1.0, 1.0, 1.0);
-  const auto& border3 = Border(FloatColor(1, 1, 1), 2.0, 1.0, 1.0, 2.0);
+  const auto& border1 = Border(gfx::FloatColor(1, 1, 1), 1.0);
+  const auto& border2 = Border(gfx::FloatColor(1, 1, 1), 1.0, 1.0, 1.0, 1.0);
+  const auto& border3 = Border(gfx::FloatColor(1, 1, 1), 2.0, 1.0, 1.0, 2.0);
 
   EXPECT_TRUE(border0 == border0);
   EXPECT_FALSE(border0 != border0);

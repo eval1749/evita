@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 
 namespace visuals {
 namespace css {
@@ -19,7 +19,7 @@ namespace css {
 class ColorValue final {
  public:
   ColorValue(float red, float green, float blue, float alpha = 1);
-  explicit ColorValue(const FloatColor& value);
+  explicit ColorValue(const gfx::FloatColor& value);
   ColorValue(const ColorValue& other);
   ColorValue();
   ~ColorValue();
@@ -27,13 +27,13 @@ class ColorValue final {
   bool operator==(const ColorValue& other) const;
   bool operator!=(const ColorValue& other) const;
 
-  const FloatColor& value() const { return value_; }
+  const gfx::FloatColor& value() const { return value_; }
 
   // Returns |ColorValue| object with RGBA value from 0 to 255 RGB values.
   static ColorValue Rgba(int red, int green, int blue, float alpha = 1);
 
  private:
-  FloatColor value_;
+  gfx::FloatColor value_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const ColorValue& color);

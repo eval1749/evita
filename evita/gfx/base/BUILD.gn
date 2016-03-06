@@ -9,6 +9,8 @@ config("gfx_implementation") {
 component("base") {
   output_name = "gfx_base"
   sources = [
+    "colors/float_color.cc",
+    "colors/float_color.h",
     "colors/int8_color.cc",
     "colors/int8_color.h",
   ]
@@ -24,6 +26,7 @@ source_set("test_files") {
   testonly = true
 
   sources = [
+    "colors/float_color_test.cc",
     "colors/int8_color_test.cc",
   ]
 

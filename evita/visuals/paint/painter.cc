@@ -82,9 +82,9 @@ class PaintVisitor final : public BoxVisitor {
 #undef V
 
   void AddDirtyBounds(const FloatRect& bounds);
-  void FillRect(const FloatRect& rect, const FloatColor& color);
+  void FillRect(const FloatRect& rect, const gfx::FloatColor& color);
   void FillRectAndMark(const FloatRect& rect,
-                       const FloatColor& color,
+                       const gfx::FloatColor& color,
                        bool mark);
   bool NeedsPaintContainerBox(const ContainerBox& box) const;
   bool NeedsPaintContentBox(const ContentBox& box) const;
@@ -117,7 +117,8 @@ void PaintVisitor::AddDirtyBounds(const FloatRect& bounds) {
   builder_.AddRect(transformer_.MapRect(bounds));
 }
 
-void PaintVisitor::FillRect(const FloatRect& rect, const FloatColor& color) {
+void PaintVisitor::FillRect(const FloatRect& rect,
+                            const gfx::FloatColor& color) {
   DCHECK(!rect.IsEmpty());
   if (color.alpha() == 0)
     return;
@@ -125,7 +126,7 @@ void PaintVisitor::FillRect(const FloatRect& rect, const FloatColor& color) {
 }
 
 void PaintVisitor::FillRectAndMark(const FloatRect& rect,
-                                   const FloatColor& color,
+                                   const gfx::FloatColor& color,
                                    bool mark) {
   DCHECK(!rect.IsEmpty());
   if (mark)
@@ -173,9 +174,9 @@ std::unique_ptr<DisplayItemList> PaintVisitor::Paint(const RootBox& root_box) {
         root_box.bounds().top_right() - FloatSize(200, 0), FloatSize(200, 50));
     const auto& text_layout = TextLayout(text_format, paint_info_.debug_text(),
                                          debug_text_bounds.size());
-    builder_.AddNew<DrawTextDisplayItem>(debug_text_bounds, FloatColor(1, 0, 0),
-                                         20, text_layout,
-                                         paint_info_.debug_text());
+    builder_.AddNew<DrawTextDisplayItem>(debug_text_bounds,
+                                         gfx::FloatColor(1, 0, 0), 20,
+                                         text_layout, paint_info_.debug_text());
   }
   return builder_.Build();
 }
@@ -326,7 +327,7 @@ void PaintVisitor::VisitTextBox(TextBox* text) {
   if (text->IsContentChanged() || text->IsOriginChanged())
     AddDirtyBounds(bounds);
   BoxPaintScope paint_scope(this, *text);
-  if (text->background_color() != FloatColor()) {
+  if (text->background_color() != gfx::FloatColor()) {
     // TODO(eval1749): We should have a member function for painting background
     // with clip bounds.
     FillRect(bounds, text->background_color());

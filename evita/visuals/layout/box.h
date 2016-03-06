@@ -10,7 +10,7 @@
 
 #include "base/macros.h"
 #include "common/castable.h"
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 #include "evita/visuals/css/values.h"
 #include "evita/visuals/geometry/float_rect.h"
 #include "evita/visuals/layout/border.h"
@@ -76,7 +76,7 @@ class Box : public common::Castable<Box> {
   bool is_changed() const { return is_changed_; }
 
   // CSS background and background
-  const FloatColor& background_color() const { return background_color_; }
+  const gfx::FloatColor& background_color() const { return background_color_; }
   const Border border() const { return border_; }
 
   // CSS Box model related values
@@ -134,13 +134,13 @@ class Box : public common::Castable<Box> {
   bool is_size_changed_ = true;
   bool should_paint_ = true;
 
-  FloatColor background_color_;
+  gfx::FloatColor background_color_;
 
   Border border_;
-  FloatColor border_bottom_color_;
-  FloatColor border_left_color_;
-  FloatColor border_right_color_;
-  FloatColor border_top_color_;
+  gfx::FloatColor border_bottom_color_;
+  gfx::FloatColor border_left_color_;
+  gfx::FloatColor border_right_color_;
+  gfx::FloatColor border_top_color_;
 
   css::Display display_;
   Margin margin_;

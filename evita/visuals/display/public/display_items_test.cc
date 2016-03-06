@@ -16,7 +16,7 @@ namespace {
 
 std::unique_ptr<DrawTextDisplayItem> CreateDrawText(
     const FloatRect& bounds,
-    const FloatColor& color,
+    const gfx::FloatColor& color,
     float baseline,
     const TextFormat& format,
     const base::string16& text) {
@@ -51,15 +51,15 @@ TEST(BeginClipDisplayItemsTest, EqualsTo) {
 
 TEST(DrawRectDisplayItemsTest, EqualsTo) {
   const auto& item1 = std::make_unique<DrawRectDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 1);
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(1, 1, 1), 1);
   const auto& item2 = std::make_unique<DrawRectDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 1);
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(1, 1, 1), 1);
   const auto& item3 = std::make_unique<DrawRectDisplayItem>(
-      FloatRect(FloatSize(3, 4)), FloatColor(1, 1, 1), 1);
+      FloatRect(FloatSize(3, 4)), gfx::FloatColor(1, 1, 1), 1);
   const auto& item4 = std::make_unique<DrawRectDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(0.5, 1, 1), 1);
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(0.5, 1, 1), 1);
   const auto& item5 = std::make_unique<DrawRectDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1), 2);
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(1, 1, 1), 2);
 
   EXPECT_TRUE(*item1 == *item1);
   EXPECT_TRUE(*item1 == *item2);
@@ -89,17 +89,18 @@ TEST(DrawTextDisplayItemsTest, EqualsTo) {
   const auto& font =
       FontDescription::Builder().SetFamily(L"Arial").SetSize(10).Build();
   const auto& format = TextFormatFactory::GetInstance()->Get(font);
-  const auto& item1 = CreateDrawText(FloatRect(FloatSize(1, 2)),
-                                     FloatColor(1, 1, 1), 1, format, L"foo");
+  const auto& item1 = CreateDrawText(
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(1, 1, 1), 1, format, L"foo");
   const auto& item2 = item1;
-  const auto& item3 = CreateDrawText(FloatRect(FloatSize(3, 4)),
-                                     FloatColor(1, 1, 1), 1, format, L"foo");
-  const auto& item4 = CreateDrawText(FloatRect(FloatSize(1, 2)),
-                                     FloatColor(0.5, 1, 1), 1, format, L"foo");
-  const auto& item5 = CreateDrawText(FloatRect(FloatSize(1, 2)),
-                                     FloatColor(1, 1, 1), 2, format, L"foo");
-  const auto& item6 = CreateDrawText(FloatRect(FloatSize(1, 2)),
-                                     FloatColor(1, 1, 1), 1, format, L"bar");
+  const auto& item3 = CreateDrawText(
+      FloatRect(FloatSize(3, 4)), gfx::FloatColor(1, 1, 1), 1, format, L"foo");
+  const auto& item4 =
+      CreateDrawText(FloatRect(FloatSize(1, 2)), gfx::FloatColor(0.5, 1, 1), 1,
+                     format, L"foo");
+  const auto& item5 = CreateDrawText(
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(1, 1, 1), 2, format, L"foo");
+  const auto& item6 = CreateDrawText(
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(1, 1, 1), 1, format, L"bar");
 
   EXPECT_TRUE(*item1 == *item1);
   EXPECT_TRUE(*item1 == *item2);
@@ -146,13 +147,13 @@ TEST(EndClipDisplayItemsTest, EqualsTo) {
 
 TEST(FillRectDisplayItemsTest, EqualsTo) {
   const auto& item1 = std::make_unique<FillRectDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1));
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(1, 1, 1));
   const auto& item2 = std::make_unique<FillRectDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(1, 1, 1));
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(1, 1, 1));
   const auto& item3 = std::make_unique<FillRectDisplayItem>(
-      FloatRect(FloatSize(1, 2)), FloatColor(0.5, 1, 1));
+      FloatRect(FloatSize(1, 2)), gfx::FloatColor(0.5, 1, 1));
   const auto& item4 = std::make_unique<FillRectDisplayItem>(
-      FloatRect(FloatSize(2, 2)), FloatColor(1, 1, 1));
+      FloatRect(FloatSize(2, 2)), gfx::FloatColor(1, 1, 1));
 
   EXPECT_TRUE(*item1 == *item1);
   EXPECT_TRUE(*item1 == *item2);

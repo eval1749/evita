@@ -25,12 +25,12 @@ class ShapeBox final : public ContentBox {
   ShapeBox(RootBox* root_box, const ShapeData& data, const Node* node);
   ~ShapeBox() final;
 
-  const FloatColor& color() const { return color_; }
+  const gfx::FloatColor& color() const { return color_; }
   const ShapeData& data() const { return data_; }
   const css::FontSize& size() const { return font_size_; }
 
  private:
-  FloatColor color_;
+  gfx::FloatColor color_;
   ShapeData data_;
   css::FontSize font_size_;
 

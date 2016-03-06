@@ -10,9 +10,9 @@ namespace visuals {
 namespace css {
 
 ColorValue::ColorValue(float red, float green, float blue, float alpha)
-    : value_(FloatColor(red, green, blue, alpha)) {}
+    : value_(gfx::FloatColor(red, green, blue, alpha)) {}
 
-ColorValue::ColorValue(const FloatColor& value) : value_(value) {}
+ColorValue::ColorValue(const gfx::FloatColor& value) : value_(value) {}
 ColorValue::ColorValue(const ColorValue& other) : value_(other.value_) {}
 ColorValue::ColorValue() {}
 ColorValue::~ColorValue() {}

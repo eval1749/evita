@@ -5,8 +5,8 @@
 #include "evita/visuals/layout/box_selection_editor.h"
 
 #include "base/logging.h"
-#include "evita/visuals/layout/text_box.h"
 #include "evita/visuals/layout/box_selection.h"
+#include "evita/visuals/layout/text_box.h"
 
 namespace visuals {
 
@@ -44,7 +44,7 @@ void BoxSelectionEditor::ExtendTo(BoxSelection* selection,
 }
 
 void BoxSelectionEditor::SetCaretColor(BoxSelection* selection,
-                                       const FloatColor& color) {
+                                       const gfx::FloatColor& color) {
   selection->caret_color_ = color;
 }
 
@@ -54,7 +54,7 @@ void BoxSelectionEditor::SetCaretShape(BoxSelection* selection,
 }
 
 void BoxSelectionEditor::SetSelectionColor(BoxSelection* selection,
-                                           const FloatColor& color) {
+                                           const gfx::FloatColor& color) {
   selection->selection_color_ = color;
 }
 

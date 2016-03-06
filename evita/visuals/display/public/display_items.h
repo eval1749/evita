@@ -10,7 +10,7 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/castable.h"
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 #include "evita/visuals/display/public/display_items_forward.h"
 #include "evita/visuals/fonts/text_layout.h"
 #include "evita/visuals/geometry/float_matrix3x2.h"
@@ -114,16 +114,16 @@ class ClearDisplayItem final : public DisplayItem {
   DECLARE_DISPLAY_ITEM_FINAL_CLASS(ClearDisplayItem, DisplayItem)
 
  public:
-  explicit ClearDisplayItem(const FloatColor& color);
+  explicit ClearDisplayItem(const gfx::FloatColor& color);
   ~ClearDisplayItem();
 
-  const FloatColor& color() const { return color_; }
+  const gfx::FloatColor& color() const { return color_; }
 
  private:
   // DisplayItem
   bool EqualsTo(const DisplayItem& other) const final;
 
-  const FloatColor color_;
+  const gfx::FloatColor color_;
 
   DISALLOW_COPY_AND_ASSIGN(ClearDisplayItem);
 };
@@ -169,11 +169,11 @@ class DrawLineDisplayItem final : public DisplayItem {
  public:
   DrawLineDisplayItem(const FloatPoint& point1,
                       const FloatPoint& point2,
-                      const FloatColor& color,
+                      const gfx::FloatColor& color,
                       float thickness);
   ~DrawLineDisplayItem();
 
-  const FloatColor& color() const { return color_; }
+  const gfx::FloatColor& color() const { return color_; }
   const FloatPoint& point1() const { return point1_; }
   const FloatPoint& point2() const { return point2_; }
   float thickness() const { return thickness_; }
@@ -182,7 +182,7 @@ class DrawLineDisplayItem final : public DisplayItem {
   // DisplayItem
   bool EqualsTo(const DisplayItem& other) const final;
 
-  const FloatColor color_;
+  const gfx::FloatColor color_;
   const FloatPoint point1_;
   const FloatPoint point2_;
   const float thickness_;
@@ -199,12 +199,12 @@ class DrawRectDisplayItem final : public DisplayItem {
 
  public:
   DrawRectDisplayItem(const FloatRect& bounds,
-                      const FloatColor& color,
+                      const gfx::FloatColor& color,
                       float thickness);
   ~DrawRectDisplayItem();
 
   const FloatRect& bounds() const { return bounds_; }
-  const FloatColor& color() const { return color_; }
+  const gfx::FloatColor& color() const { return color_; }
   float thickness() const { return thickness_; }
 
  private:
@@ -212,7 +212,7 @@ class DrawRectDisplayItem final : public DisplayItem {
   bool EqualsTo(const DisplayItem& other) const final;
 
   const FloatRect bounds_;
-  const FloatColor color_;
+  const gfx::FloatColor color_;
   const float thickness_;
 
   DISALLOW_COPY_AND_ASSIGN(DrawRectDisplayItem);
@@ -227,7 +227,7 @@ class DrawTextDisplayItem final : public DisplayItem {
 
  public:
   DrawTextDisplayItem(const FloatRect& bounds,
-                      const FloatColor& color,
+                      const gfx::FloatColor& color,
                       float baseline,
                       const TextLayout& text_layout,
                       const base::string16& text);
@@ -235,7 +235,7 @@ class DrawTextDisplayItem final : public DisplayItem {
 
   float baseline() const { return baseline_; }
   const FloatRect& bounds() const { return bounds_; }
-  const FloatColor& color() const { return color_; }
+  const gfx::FloatColor& color() const { return color_; }
   const base::string16& text() const { return text_; }
   const TextLayout& text_layout() const { return text_layout_; }
 
@@ -245,7 +245,7 @@ class DrawTextDisplayItem final : public DisplayItem {
 
   const float baseline_;
   const FloatRect bounds_;
-  const FloatColor color_;
+  const gfx::FloatColor color_;
   // |text_| is used only for debugging.
   const base::string16 text_;
   const TextLayout text_layout_;
@@ -297,18 +297,18 @@ class FillRectDisplayItem final : public DisplayItem {
   DECLARE_DISPLAY_ITEM_FINAL_CLASS(FillRectDisplayItem, DisplayItem)
 
  public:
-  FillRectDisplayItem(const FloatRect& bounds, const FloatColor& color);
+  FillRectDisplayItem(const FloatRect& bounds, const gfx::FloatColor& color);
   ~FillRectDisplayItem();
 
   const FloatRect& bounds() const { return bounds_; }
-  const FloatColor& color() const { return color_; }
+  const gfx::FloatColor& color() const { return color_; }
 
  private:
   // DisplayItem
   bool EqualsTo(const DisplayItem& other) const final;
 
   const FloatRect bounds_;
-  const FloatColor color_;
+  const gfx::FloatColor color_;
 
   DISALLOW_COPY_AND_ASSIGN(FillRectDisplayItem);
 };

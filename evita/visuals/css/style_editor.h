@@ -11,10 +11,11 @@
 #include "evita/visuals/css/properties_forward.h"
 #include "evita/visuals/css/values_forward.h"
 
-namespace visuals {
-
+namespace gfx {
 class FloatColor;
+}
 
+namespace visuals {
 namespace css {
 
 class Style;
@@ -36,7 +37,7 @@ class StyleEditor final {
   void Set(Style* style, PropertyId id, const Value& value);
 
   // Shorthand functions
-  void SetBorder(Style* style, const FloatColor& color, float width);
+  void SetBorder(Style* style, const gfx::FloatColor& color, float width);
   void SetPadding(Style* style, float width);
 
 #define V(Name, name, type, text) \

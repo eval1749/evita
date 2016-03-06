@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 
 #include "base/logging.h"
 
-namespace visuals {
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -57,4 +57,4 @@ std::ostream& operator<<(std::ostream& ostream, const FloatColor& color) {
   return ostream << ')';
 }
 
-}  // namespace visuals
+}  // namespace gfx

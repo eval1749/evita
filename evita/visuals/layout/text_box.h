@@ -8,8 +8,8 @@
 #include <memory>
 
 #include "base/strings/string_piece.h"
-#include "evita/visuals/layout/content_box.h"
 #include "evita/visuals/css/values.h"
+#include "evita/visuals/layout/content_box.h"
 
 namespace visuals {
 
@@ -29,7 +29,7 @@ class TextBox final : public ContentBox {
   ~TextBox() final;
 
   float baseline() const { return baseline_; }
-  const FloatColor& color() const { return color_; }
+  const gfx::FloatColor& color() const { return color_; }
   const base::string16& data() const { return data_; }
   bool has_text_layout() const { return !!text_layout_; }
   FloatSize preferred_size() const { return preferred_size_; }
@@ -41,7 +41,7 @@ class TextBox final : public ContentBox {
   void TextBox::DidChangeBounds(const FloatRect& old_bounds) final;
 
   float baseline_ = 0.0f;
-  FloatColor color_;
+  gfx::FloatColor color_;
   base::string16 data_;
 
   // CSS font properties

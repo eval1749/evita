@@ -68,7 +68,8 @@ bool BeginTransformDisplayItem::EqualsTo(const DisplayItem& other) const {
 //
 // ClearDisplayItem
 //
-ClearDisplayItem::ClearDisplayItem(const FloatColor& color) : color_(color) {}
+ClearDisplayItem::ClearDisplayItem(const gfx::FloatColor& color)
+    : color_(color) {}
 ClearDisplayItem::~ClearDisplayItem() {}
 
 bool ClearDisplayItem::EqualsTo(const DisplayItem& other) const {
@@ -111,7 +112,7 @@ bool DrawBitmapDisplayItem::EqualsTo(const DisplayItem& other) const {
 //
 DrawLineDisplayItem::DrawLineDisplayItem(const FloatPoint& point1,
                                          const FloatPoint& point2,
-                                         const FloatColor& color,
+                                         const gfx::FloatColor& color,
                                          float thickness)
     : color_(color), point1_(point1), point2_(point2), thickness_(thickness) {}
 DrawLineDisplayItem::~DrawLineDisplayItem() {}
@@ -131,7 +132,7 @@ bool DrawLineDisplayItem::EqualsTo(const DisplayItem& other) const {
 // DrawRectDisplayItem
 //
 DrawRectDisplayItem::DrawRectDisplayItem(const FloatRect& bounds,
-                                         const FloatColor& color,
+                                         const gfx::FloatColor& color,
                                          float thickness)
     : bounds_(bounds), color_(color), thickness_(thickness) {}
 DrawRectDisplayItem::~DrawRectDisplayItem() {}
@@ -151,7 +152,7 @@ bool DrawRectDisplayItem::EqualsTo(const DisplayItem& other) const {
 // DrawTextDisplayItem
 //
 DrawTextDisplayItem::DrawTextDisplayItem(const FloatRect& bounds,
-                                         const FloatColor& color,
+                                         const gfx::FloatColor& color,
                                          float baseline,
                                          const TextLayout& text_layout,
                                          const base::string16& text)
@@ -204,7 +205,7 @@ bool EndTransformDisplayItem::EqualsTo(const DisplayItem& other) const {
 // FillRectDisplayItem
 //
 FillRectDisplayItem::FillRectDisplayItem(const FloatRect& bounds,
-                                         const FloatColor& color)
+                                         const gfx::FloatColor& color)
     : bounds_(bounds), color_(color) {}
 FillRectDisplayItem::~FillRectDisplayItem() {}
 

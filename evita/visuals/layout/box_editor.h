@@ -9,10 +9,13 @@
 #include "base/strings/string_piece.h"
 #include "evita/visuals/layout/box_forward.h"
 
+namespace gfx {
+class FloatColor;
+}
+
 namespace visuals {
 
 class BoxSelection;
-class FloatColor;
 class FloatRect;
 class FloatSize;
 class FontDescription;

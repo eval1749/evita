@@ -9,7 +9,7 @@
 
 #include "evita/visuals/css/values_forward.h"
 
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 {% for primitive in primitives %}
 #include "evita/visuals/css/values/{{primitive.file_name}}.h"
 {% endfor %}

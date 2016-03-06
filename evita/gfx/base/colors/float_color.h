@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EVITA_VISUALS_CSS_FLOAT_COLOR_H_
-#define EVITA_VISUALS_CSS_FLOAT_COLOR_H_
+#ifndef EVITA_GFX_BASE_COLORS_FLOAT_COLOR_H_
+#define EVITA_GFX_BASE_COLORS_FLOAT_COLOR_H_
 
 #include <stdint.h>
 
 #include <iosfwd>
 
-namespace visuals {
+#include "evita/gfx/gfx_export.h"
+
+namespace gfx {
 
 //////////////////////////////////////////////////////////////////////
 //
 // FloatColor
 //
-class FloatColor final {
+class GFX_EXPORT FloatColor final {
  public:
   FloatColor(float red, float green, float blue, float alpha = 1);
   FloatColor(const FloatColor& other);
@@ -39,8 +41,9 @@ class FloatColor final {
   float red_ = 0;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const FloatColor& color);
+GFX_EXPORT std::ostream& operator<<(std::ostream& ostream,
+                                    const FloatColor& color);
 
-}  // namespace visuals
+}  // namespace gfx
 
-#endif  // EVITA_VISUALS_CSS_FLOAT_COLOR_H_
+#endif  // EVITA_GFX_BASE_COLORS_FLOAT_COLOR_H_

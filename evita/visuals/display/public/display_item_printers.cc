@@ -6,7 +6,7 @@
 
 #include "base/macros.h"
 #include "base/strings/stringprintf.h"
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 #include "evita/visuals/display/public/display_item_visitor.h"
 #include "evita/visuals/display/public/display_items.h"
 #include "evita/visuals/geometry/float_rect.h"

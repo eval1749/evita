@@ -10,7 +10,7 @@
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 #include "evita/visuals/css/values.h"
 #include "evita/visuals/css/values/color_value.h"
 #include "evita/visuals/css/values/value_type.h"
@@ -20,7 +20,7 @@ namespace css {
 
 namespace {
 
-base::string16 FloatColorToString16(const FloatColor& color) {
+base::string16 FloatColorToString16(const gfx::FloatColor& color) {
   if (color.alpha() == 1)
     return base::StringPrintf(L"#%06X", color.ToRgba() >> 8);
   return base::StringPrintf(

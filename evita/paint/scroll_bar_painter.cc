@@ -10,8 +10,8 @@
 
 #include "base/logging.h"
 #include "evita/dom/public/scroll_bar_state.h"
+#include "evita/gfx/base/colors/float_color.h"
 #include "evita/gfx/color_f.h"
-#include "evita/visuals/css/float_color.h"
 #include "evita/visuals/display/display_item_list_builder.h"
 #include "evita/visuals/display/public/display_item_list.h"
 #include "evita/visuals/display/public/display_items.h"
@@ -28,7 +28,6 @@ using DisplayItemListBuilder = visuals::DisplayItemListBuilder;
 using EndClipDisplayItem = visuals::EndClipDisplayItem;
 using EndTransformDisplayItem = visuals::EndTransformDisplayItem;
 using FillRectDisplayItem = visuals::FillRectDisplayItem;
-using FloatColor = visuals::FloatColor;
 using FloatPoint = visuals::FloatPoint;
 using FloatSize = visuals::FloatSize;
 using FloatRect = visuals::FloatRect;
@@ -53,9 +52,9 @@ float AlphaFor(ScrollBarState state) {
   return 1.0f;
 }
 
-FloatColor BackgroundColor() {
+gfx::FloatColor BackgroundColor() {
   const auto& color = gfx::sysColor(COLOR_WINDOW);
-  return FloatColor(color.red(), color.green(), color.blue());
+  return gfx::FloatColor(color.red(), color.green(), color.blue());
 }
 
 void BeginPaint(DisplayItemListBuilder* builder, const FloatRect& bounds) {
@@ -66,14 +65,16 @@ void BeginPaint(DisplayItemListBuilder* builder, const FloatRect& bounds) {
   builder->AddNew<ClearDisplayItem>(BackgroundColor());
 }
 
-FloatColor ButtonBackgroundColorFor(ScrollBarState state) {
+gfx::FloatColor ButtonBackgroundColorFor(ScrollBarState state) {
   const auto& color = gfx::sysColor(COLOR_BTNFACE);
-  return FloatColor(color.red(), color.green(), color.blue(), AlphaFor(state));
+  return gfx::FloatColor(color.red(), color.green(), color.blue(),
+                         AlphaFor(state));
 }
 
-FloatColor ButtonColorFor(ScrollBarState state) {
+gfx::FloatColor ButtonColorFor(ScrollBarState state) {
   const auto& color = gfx::sysColor(COLOR_BTNTEXT);
-  return FloatColor(color.red(), color.green(), color.blue(), AlphaFor(state));
+  return gfx::FloatColor(color.red(), color.green(), color.blue(),
+                         AlphaFor(state));
 }
 
 void EndPaint(DisplayItemListBuilder* builder) {
@@ -81,14 +82,15 @@ void EndPaint(DisplayItemListBuilder* builder) {
   builder->AddNew<EndTransformDisplayItem>();
 }
 
-FloatColor ThumbColorFor(ScrollBarState state) {
+gfx::FloatColor ThumbColorFor(ScrollBarState state) {
   const auto& color = gfx::sysColor(COLOR_BTNSHADOW);
-  return FloatColor(color.red(), color.green(), color.blue(), AlphaFor(state));
+  return gfx::FloatColor(color.red(), color.green(), color.blue(),
+                         AlphaFor(state));
 }
 
-FloatColor TrackColorFor(ScrollBarState state) {
+gfx::FloatColor TrackColorFor(ScrollBarState state) {
   const auto& color = gfx::sysColor(COLOR_BTNFACE);
-  return FloatColor(color.red(), color.green(), color.blue());
+  return gfx::FloatColor(color.red(), color.green(), color.blue());
 }
 
 void PaintButton(DisplayItemListBuilder* builder,

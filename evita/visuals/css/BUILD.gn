@@ -42,9 +42,10 @@ source_set("css") {
     "style_sheet_observer.h",
   ]
 
-  public_deps = [
+  deps = [
     ":properties",
     "//base",
+    "//evita/gfx/base",
     "//evita/visuals/css/values",
   ]
 
@@ -99,7 +100,6 @@ source_set("test_files") {
   testonly = true
 
   sources = [
-    "float_color_test.cc",
     "property_set_test.cc",
     "style_test.cc",
   ]

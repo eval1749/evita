@@ -24,7 +24,7 @@ TEST(BoxTest, InitialValues) {
   const auto& margin = box->margin();
   const auto& padding = box->padding();
 
-  EXPECT_EQ(FloatColor(), box->background_color());
+  EXPECT_EQ(gfx::FloatColor(), box->background_color());
   EXPECT_EQ(Border(), box->border());
   EXPECT_EQ(css::Display::Inline(), box->display());
   EXPECT_EQ(0.0f, margin.bottom());

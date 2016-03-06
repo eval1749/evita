@@ -39,7 +39,7 @@ namespace visuals {
 
 namespace {
 
-gfx::ColorF ToColorF(const FloatColor& color) {
+gfx::ColorF ToColorF(const gfx::FloatColor& color) {
   return gfx::ColorF(color.red(), color.green(), color.blue(), color.alpha());
 }
 

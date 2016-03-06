@@ -29,13 +29,13 @@ namespace visuals {
 
 namespace {
 
-FloatColor ResolveColor(const css::Style& style, const css::Value& value) {
+gfx::FloatColor ResolveColor(const css::Style& style, const css::Value& value) {
   if (value.is_color())
     return value.as_color_value().value();
   if (value.is_current_color())
     return style.color().as_color_value().value();
   NOTREACHED() << value;
-  return FloatColor();
+  return gfx::FloatColor();
 }
 
 float ResolveLength(const css::Style& style, const css::Value& value) {
@@ -61,10 +61,10 @@ float ResolveLineWidth(const css::Style& style, const css::Value& value) {
 }
 
 Border ComputeBorder(const css::Style& style) {
-  FloatColor bottom_color;
-  FloatColor left_color;
-  FloatColor right_color;
-  FloatColor top_color;
+  gfx::FloatColor bottom_color;
+  gfx::FloatColor left_color;
+  gfx::FloatColor right_color;
+  gfx::FloatColor top_color;
   float bottom_width = 0.0f;
   float left_width = 0.0f;
   float right_width = 0.0f;
@@ -411,7 +411,7 @@ void BoxEditor::SetDisplay(Box* box, const css::Display& display) {
 #define UPDATE_COLOR(property, name)                                           \
   const auto& new_##name## =                                                   \
       new_style.has_##name##() ? new_style.##name##().as_color_value().value() \
-                               : FloatColor();                                 \
+                               : gfx::FloatColor();                            \
   if (box->##name##_ != new_##name##) {                                        \
     box->##name##_ = new_##name##;                                             \
     box->is_##property##_changed_ = true;                                      \
@@ -523,7 +523,7 @@ void BoxEditor::SetShapeStyle(ShapeBox* box, const css::Style& new_style) {
   // |ShapeBox| uses only color, ant font related CSS properties.
   const auto& new_color = new_style.has_color()
                               ? new_style.color().as_color_value().value()
-                              : FloatColor();
+                              : gfx::FloatColor();
   if (box->color_ != new_color) {
     box->color_ = new_color;
     is_changed = true;
@@ -571,7 +571,7 @@ void BoxEditor::SetTextStyle(TextBox* box, const css::Style& new_style) {
   // |TextBox| uses only color, ant font related CSS properties.
   const auto& new_color = new_style.has_color()
                               ? new_style.color().as_color_value().value()
-                              : FloatColor();
+                              : gfx::FloatColor();
   if (box->color_ != new_color) {
     box->color_ = new_color;
     is_changed = true;

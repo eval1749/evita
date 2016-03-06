@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 #include "evita/visuals/layout/thickness.h"
 
 namespace visuals {
@@ -18,20 +18,20 @@ namespace visuals {
 //
 class Border final {
  public:
-  Border(const FloatColor& top_color,
+  Border(const gfx::FloatColor& top_color,
          float top,
-         const FloatColor& right_color,
+         const gfx::FloatColor& right_color,
          float right,
-         const FloatColor& bottom_color,
+         const gfx::FloatColor& bottom_color,
          float bottom,
-         const FloatColor& left_color,
+         const gfx::FloatColor& left_color,
          float left);
-  Border(const FloatColor& color,
+  Border(const gfx::FloatColor& color,
          float top,
          float right,
          float bottom,
          float left);
-  Border(const FloatColor& color, float width);
+  Border(const gfx::FloatColor& color, float width);
   Border(const Border& other);
   Border();
   ~Border();
@@ -50,20 +50,20 @@ class Border final {
   FloatSize top_left() const { return thickness_.top_left(); }
 
   // Colors
-  const FloatColor& bottom_color() const { return bottom_color_; }
-  const FloatColor& left_color() const { return left_color_; }
-  const FloatColor& right_color() const { return right_color_; }
-  const FloatColor& top_color() const { return top_color_; }
+  const gfx::FloatColor& bottom_color() const { return bottom_color_; }
+  const gfx::FloatColor& left_color() const { return left_color_; }
+  const gfx::FloatColor& right_color() const { return right_color_; }
+  const gfx::FloatColor& top_color() const { return top_color_; }
 
   bool HasValue() const;
   bool IsEmpty() const;
   bool IsSimple() const;
 
  private:
-  FloatColor bottom_color_;
-  FloatColor left_color_;
-  FloatColor right_color_;
-  FloatColor top_color_;
+  gfx::FloatColor bottom_color_;
+  gfx::FloatColor left_color_;
+  gfx::FloatColor right_color_;
+  gfx::FloatColor top_color_;
   Thickness thickness_;
 };
 

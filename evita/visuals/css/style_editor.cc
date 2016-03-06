@@ -4,7 +4,7 @@
 
 #include "evita/visuals/css/style_editor.h"
 
-#include "evita/visuals/css/float_color.h"
+#include "evita/gfx/base/colors/float_color.h"
 #include "evita/visuals/css/properties.h"
 #include "evita/visuals/css/property_set_editor.h"
 #include "evita/visuals/css/style.h"
@@ -37,7 +37,7 @@ void StyleEditor::Set(Style* style, PropertyId id, const Value& value) {
 }
 
 void StyleEditor::SetBorder(Style* style,
-                            const FloatColor& color,
+                            const gfx::FloatColor& color,
                             float width) {
   SetBorderBottomWidth(style, width);
   SetBorderLeftWidth(style, width);

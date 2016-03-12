@@ -50,8 +50,14 @@ class PropertySet final {
   bool operator==(const PropertySet& other) const;
   bool operator!=(const PropertySet& other) const;
 
-  Iterator begin() const;
-  Iterator end() const;
+  std::vector<Property>::const_iterator begin() const {
+    return properties_.begin();
+  }
+  std::vector<Property>::iterator begin() { return properties_.begin(); }
+  std::vector<Property>::iterator end() { return properties_.end(); }
+  std::vector<Property>::const_iterator end() const {
+    return properties_.end();
+  }
 
   bool Contains(PropertyId property_id) const;
   Value ValueOf(PropertyId property_id) const;
@@ -59,92 +65,11 @@ class PropertySet final {
  private:
   friend class PropertySetTest;
 
-  static size_t SizeOfEncodedValue(ValueType type, uint32_t data);
-
-  // Color
-  //  RGBA value is placed in next word
-  //  RGBA(32-bit)
-  // Dimension
-  //  small_value(14bit) + unit(5bit) + large(1bit)
-  // Integer
-  //  small_value(19bit) + large(1bit)
-  //  int(32bit)
-  // Number
-  //  small_value(19bit) + large(1bit)
-  //  float(32bit)
-  // Percentage
-  //  small_percentage(19bit) + large(1bit)
-  //  float(32bit)
-
-  static const auto kPropertyIdBits = 9;
-  static const auto kTypeBits = 3;
-  static const auto kDataBits = 20;
-  static_assert(kPropertyIdBits + kTypeBits + kDataBits == 32,
-                "kPropertyIdBits + kTypeBits + kDataBits == 32");
-
-  union Word {
-    struct {
-      PropertyId property_id : kPropertyIdBits;
-      ValueType type : kTypeBits;
-      uint32_t data : kDataBits;
-    } bits;
-    uint32_t u32;
-    float f32;
-  };
-  static_assert(sizeof(Word) == sizeof(uint32_t), "Word must be 32-bit");
-
-  std::vector<Word> words_;
+  std::vector<Property> properties_;
 };
 
 std::ostream& operator<<(std::ostream& ostream,
                          const PropertySet& property_set);
-
-//////////////////////////////////////////////////////////////////////
-//
-// PropertySet::Iterator
-//
-class PropertySet::Iterator final {
- public:
-  using iterator_category = std::forward_iterator_tag;
-  using difference_type = int;
-  using value_type = Property;
-  using pointer = value_type*;
-  using reference = value_type&;
-
-  Iterator(const Iterator& other);
-  Iterator(const PropertySet* property_set, size_t index);
-  ~Iterator();
-
-  Iterator& operator=(const Iterator& other);
-
-  value_type operator*() const;
-  Iterator& operator++();
-
-  bool operator==(const Iterator& other) const;
-  bool operator!=(const Iterator& other) const;
-
- private:
-  uint32_t data() const;
-  bool is_small() const;
-  PropertyId property_id() const;
-  ValueType type() const;
-
-  ColorValue DecodeColor() const;
-  Dimension DecodeDimension() const;
-  float DecodeFloat() const;
-  int DecodeInteger() const;
-  Keyword DecodeKeyword() const;
-  float DecodeNumber() const;
-  Percentage DecodePercentage() const;
-  int DecodeSmallInteger() const;
-  base::StringPiece16 DecodeString() const;
-  uint32_t DecodeUint32() const;
-  Value DecodeValue() const;
-  size_t SizeOfChunk() const;
-
-  size_t index_;
-  const PropertySet* property_set_;
-};
 
 }  // namespace css
 }  // namespace visuals

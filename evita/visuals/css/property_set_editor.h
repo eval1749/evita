@@ -42,20 +42,6 @@ class PropertySet::Editor final {
 #undef V
 
  private:
-  void EncodeValue(const std::vector<Word>::iterator& it,
-                   PropertyId property_id,
-                   const Value& value);
-
-  static uint32_t EncodeSmallDimension(const Dimension& dimension);
-  static uint32_t EncodeSmallInteger(int value);
-  static uint32_t EncodeSmallNumber(float value);
-  static uint32_t EncodeUnit(Unit uint);
-  static bool IsSmallDimension(const Dimension& dimension);
-  static bool IsSmallInteger(int value);
-  static bool IsSmallNumber(float value);
-  static bool IsSmallPercentage(const Percentage& percentage);
-  static size_t SizeOfEncodedValue(const Value& value);
-
   DISALLOW_COPY_AND_ASSIGN(Editor);
 };
 

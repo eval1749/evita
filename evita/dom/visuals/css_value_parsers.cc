@@ -14,6 +14,7 @@
 #include "base/strings/stringprintf.h"
 #include "evita/visuals/css/values.h"
 #include "evita/visuals/css/values/color_value.h"
+#include "evita/visuals/css/values/ref_counted_string.h"
 
 namespace dom {
 
@@ -210,7 +211,9 @@ base::string16 UnparsePercentage(const visuals::css::Percentage& value) {
 }
 
 base::string16 UnparseString(const visuals::css::String& value) {
-  return value.value();
+  if (!value.value())
+    return base::string16();
+  return value.data().as_string();
 }
 
 }  // namespace dom

@@ -104,9 +104,9 @@ void Editor::EncodeValue(const std::vector<PropertySet::Word>::iterator& it,
       return;
     }
     case ValueType::String: {
-      const auto string_size = value.as_string().value().size();
+      const auto string_size = value.as_string().data().size();
       it->bits.data = static_cast<uint32_t>(string_size);
-      ::memcpy(&it[1], value.as_string().value().data(),
+      ::memcpy(&it[1], value.as_string().data().data(),
                sizeof(base::char16) * string_size);
       return;
     }
@@ -253,7 +253,7 @@ size_t Editor::SizeOfEncodedValue(const Value& value) {
     case ValueType::Keyword:
       return 1;
     case ValueType::String:
-      return (value.as_string().value().size() + 1) / 2 + 1;
+      return (value.as_string().data().size() + 1) / 2 + 1;
   }
   NOTREACHED() << value.type();
   return 0;

@@ -252,7 +252,9 @@ base::string16 Value::ToString16() const {
     case ValueType::Percentage:
       return base::StringPrintf(L"%f%%", as_percentage().value());
     case ValueType::String:
-      return as_string().value();
+      if (!as_string().value())
+        return base::string16();
+      return as_string().value()->data();
     case ValueType::Unspecified:
       return base::string16();
   }

@@ -10,9 +10,12 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
+#include "evita/visuals/css/values/ref_counted_string.h"
 
 namespace visuals {
 namespace css {
+
+class RefCountedString;
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -32,10 +35,11 @@ class String final {
   bool operator==(const String& other) const;
   bool operator!=(const String& other) const;
 
-  const base::string16& value() const { return value_; }
+  base::StringPiece16 data() const;
+  scoped_refptr<RefCountedString> value() const { return value_; }
 
  private:
-  base::string16 value_;
+  scoped_refptr<RefCountedString> value_;
 };
 
 std::ostream& operator<<(std::ostream& ostream, const String& string);

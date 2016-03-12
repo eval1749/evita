@@ -81,8 +81,8 @@ const FontDescription& Builder::Build() {
   return Cache::GetInstance()->Register(std::move(description));
 }
 
-Builder& Builder::SetFamily(const base::string16& family) {
-  description_.family_ = family;
+Builder& Builder::SetFamily(base::StringPiece16 family) {
+  description_.family_ = family.as_string();
   return *this;
 }
 

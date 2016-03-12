@@ -256,7 +256,7 @@ void BoxEditor::AppendChild(ContainerBox* container, Box* new_child) {
 const FontDescription& BoxEditor::ComputeFontDescription(const TextBox& box) {
   MustBeInLayout(box);
   FontDescription::Builder builder;
-  builder.SetFamily(box.font_family_.as_string().data().as_string());
+  builder.SetFamily(box.font_family_.as_string().data());
   builder.SetSize(box.font_size_.as_length().value());
   builder.SetStretch(ConvertFontStretch(box.font_stretch_));
   builder.SetStyle(ConvertFontStyle(box.font_style_));

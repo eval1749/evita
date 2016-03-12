@@ -10,6 +10,7 @@
 #include "evita/visuals/fonts/font_description.h"
 
 #include "base/macros.h"
+#include "base/strings/string_piece.h"
 
 namespace visuals {
 
@@ -23,7 +24,7 @@ class FontDescription::Builder final {
   ~Builder();
 
   const FontDescription& Build();
-  Builder& SetFamily(const base::string16& family);
+  Builder& SetFamily(base::StringPiece16 family);
   Builder& SetSize(float size);
   Builder& SetStretch(FontStretch stretch);
   Builder& SetStyle(FontStyle style);

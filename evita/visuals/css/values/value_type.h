@@ -15,7 +15,7 @@ namespace css {
 class ColorValue;
 class Dimension;
 class Percentage;
-enum class Unit;
+enum class Unit : uint32_t;
 
 #define FOR_EACH_CSS_VALUE_TYPE(name) \
   V(Unspecified)                      \

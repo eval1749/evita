@@ -15,7 +15,7 @@
 namespace visuals {
 namespace css {
 
-enum class Unit;
+enum class Unit : uint32_t;
 
 //////////////////////////////////////////////////////////////////////
 //

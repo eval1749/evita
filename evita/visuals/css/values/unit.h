@@ -5,6 +5,8 @@
 #ifndef EVITA_VISUALS_CSS_VALUES_UNIT_H_
 #define EVITA_VISUALS_CSS_VALUES_UNIT_H_
 
+#include <stdint.h>
+
 #include <iosfwd>
 
 namespace visuals {
@@ -63,7 +65,7 @@ namespace css {
 //
 // Unit
 //
-enum class Unit {
+enum class Unit : uint32_t {
 #define V(name) name,
   FOR_EACH_CSS_UNIT(V)
 #undef V

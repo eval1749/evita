@@ -5,12 +5,14 @@
 #ifndef EVITA_VISUALS_CSS_VALUES_DIMENSION_H_
 #define EVITA_VISUALS_CSS_VALUES_DIMENSION_H_
 
+#include <stdint.h>
+
 #include <iosfwd>
 
 namespace visuals {
 namespace css {
 
-enum class Unit;
+enum class Unit : uint32_t;
 
 //////////////////////////////////////////////////////////////////////
 //

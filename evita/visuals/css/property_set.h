@@ -21,9 +21,9 @@ class ColorValue;
 class Dimension;
 enum class Keyword;
 class Percentage;
-enum class PropertyId;
+enum class PropertyId : uint32_t;
 class String;
-enum class Unit;
+enum class Unit : uint32_t;
 enum class ValueType : uint32_t;
 class Value;
 

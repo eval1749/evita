@@ -14,7 +14,7 @@
 namespace visuals {
 namespace css {
 
-enum class PropertyId;
+enum class PropertyId : uint32_t;
 
 //////////////////////////////////////////////////////////////////////
 //

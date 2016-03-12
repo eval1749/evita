@@ -43,7 +43,7 @@ namespace css {
 
 // Forward CSS Property declarations
 class Property;
-enum class PropertyId;
+enum class PropertyId : uint32_t;
 
 const size_t kMaxPropertyId = {{properties|length()}};
 

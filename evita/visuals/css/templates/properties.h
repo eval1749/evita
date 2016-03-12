@@ -6,13 +6,14 @@
 #define EVITA_VISUALS_CSS_PROPERTIES_H_
 
 #include <stddef.h>
+#include <stdint.h>
 
 #include "evita/visuals/css/properties_forward.h"
 
 namespace visuals {
 namespace css {
 
-enum class PropertyId {
+enum class PropertyId : uint32_t {
   Invalid,
 {% for property in properties %}
   {{property.Name}},

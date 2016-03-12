@@ -24,6 +24,7 @@ class RefCountedString;
 class String final {
  public:
   explicit String(base::StringPiece16 value);
+  explicit String(RefCountedString* value);
   String(const String& other);
   String(String&& other);
   String();

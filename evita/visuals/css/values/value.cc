@@ -35,50 +35,70 @@ base::string16 FloatColorToString16(const gfx::FloatColor& color) {
 //
 // Value
 //
-Value::Value(const ColorValue& color) : type_(ValueType::Color) {
-  data_.u32 = color.value().ToRgba();
+Value::Value(const ColorValue& color) {
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Color;
+  data_.immediate.packed.data.u32 = color.value().ToRgba();
 }
 
-Value::Value(const Dimension& dimension) : type_(ValueType::Dimension) {
-  data_.dimension.number = dimension.number();
-  data_.dimension.unit = dimension.unit();
+Value::Value(const Dimension& dimension) {
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Dimension;
+  data_.immediate.packed.data.f32 = dimension.number();
+  data_.immediate.packed.unit = dimension.unit();
 }
 
-Value::Value(Keyword keyword) : type_(ValueType::Keyword) {
-  data_.u32 = static_cast<uint32_t>(keyword);
+Value::Value(Keyword keyword) {
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Keyword;
+  data_.immediate.packed.data.u32 = static_cast<uint32_t>(keyword);
 }
 
-Value::Value(const Percentage& percentage) : type_(ValueType::Percentage) {
-  data_.f32 = percentage.value();
+Value::Value(const Percentage& percentage) {
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Percentage;
+  data_.immediate.packed.data.f32 = percentage.value();
 }
 
-Value::Value(base::StringPiece16 string) : type_(ValueType::String) {
-  data_.string = new String(string);
+Value::Value(base::StringPiece16 string) {
+  data_.string = new RefCountedString(string);
+  data_.string->AddRef();
 }
 
-Value::Value(const String& string) : type_(ValueType::String) {
-  data_.string = new String(string);
-}
-
-Value::Value(float value) : type_(ValueType::Number) {
-  data_.f32 = value;
-}
-Value::Value(int value) : type_(ValueType::Integer) {
-  data_.u32 = value;
-}
-
-Value::Value(const Value& other) : data_(other.data_), type_(other.type_) {
-  if (type_ != ValueType::String)
+Value::Value(const String& string) {
+  data_.string = string.value().get();
+  if (!data_.string)
     return;
-  data_.string = new String(*data_.string);
+  data_.string->AddRef();
 }
 
-Value::Value(Value&& other) : data_(other.data_), type_(other.type_) {
+Value::Value(float value) {
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Number;
+  data_.immediate.packed.data.f32 = value;
+}
+
+Value::Value(int value) {
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Integer;
+  data_.immediate.packed.data.u32 = value;
+}
+
+Value::Value(const Value& other) {
+  data_.immediate.u64 = other.data_.immediate.u64;
+  if (!is_string())
+    return;
+  data_.string->AddRef();
+}
+
+Value::Value(Value&& other) {
+  data_.immediate.u64 = other.data_.immediate.u64;
   other.DidMove();
 }
 
-Value::Value() : type_(ValueType::Unspecified) {
-  data_.u32 = 0;
+Value::Value() {
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Unspecified;
 }
 
 Value::~Value() {
@@ -87,19 +107,16 @@ Value::~Value() {
 
 Value& Value::operator=(const Value& other) {
   Reset();
-  type_ = other.type_;
-  if (other.type_ == ValueType::String) {
-    data_.string = new String(*other.data_.string);
+  data_.immediate.u64 = other.data_.immediate.u64;
+  if (!other.is_string())
     return *this;
-  }
-  data_ = other.data_;
+  data_.string->AddRef();
   return *this;
 }
 
 Value& Value::operator=(Value&& other) {
   Reset();
-  data_ = other.data_;
-  type_ = other.type_;
+  data_.immediate.u64 = other.data_.immediate.u64;
   other.DidMove();
   return *this;
 }
@@ -107,24 +124,11 @@ Value& Value::operator=(Value&& other) {
 bool Value::operator==(const Value& other) const {
   if (this == &other)
     return true;
-  if (type_ != other.type_)
+  if (type() != other.type())
     return false;
-  switch (type_) {
-    case ValueType::Color:
-    case ValueType::Integer:
-    case ValueType::Keyword:
-      return data_.u32 == other.data_.u32;
-    case ValueType::Dimension:
-      return data_.dimension.number == other.data_.dimension.number &&
-             data_.dimension.unit == other.data_.dimension.unit;
-    case ValueType::Number:
-    case ValueType::Percentage:
-      return data_.f32 == other.data_.f32;
-    case ValueType::String:
-      return *data_.string == *other.data_.string;
-  }
-  NOTREACHED() << type_;
-  return false;
+  if (is_string())
+    return other.is_string() && as_string() == other.as_string();
+  return data_.immediate.u64 == other.data_.immediate.u64;
 }
 
 bool Value::operator!=(const Value& other) const {
@@ -132,11 +136,12 @@ bool Value::operator!=(const Value& other) const {
 }
 
 ColorValue Value::as_color() const {
-  DCHECK(is_color()) << type();
-  const auto red = static_cast<float>(data_.u32 >> 24) / 255;
-  const auto green = static_cast<float>((data_.u32 >> 16) & 0xFF) / 255;
-  const auto blue = static_cast<float>((data_.u32 >> 8) & 0xFF) / 255;
-  const auto alpha = static_cast<float>(data_.u32 & 0xFF) / 255;
+  DCHECK(is_color()) << *this;
+  const auto rgba = data_.immediate.packed.data.u32;
+  const auto red = static_cast<float>(rgba >> 24) / 255;
+  const auto green = static_cast<float>((rgba >> 16) & 0xFF) / 255;
+  const auto blue = static_cast<float>((rgba >> 8) & 0xFF) / 255;
+  const auto alpha = static_cast<float>(rgba & 0xFF) / 255;
   return ColorValue(red, green, blue, alpha);
 }
 
@@ -145,93 +150,109 @@ ColorValue Value::as_color_value() const {
 }
 
 Dimension Value::as_dimension() const {
-  DCHECK(is_dimension()) << type();
-  return Dimension(data_.dimension.number, data_.dimension.unit);
+  DCHECK(is_dimension()) << *this;
+  return Dimension(data_.immediate.packed.data.f32,
+                   data_.immediate.packed.unit);
 }
 
 int Value::as_integer() const {
-  DCHECK(is_integer()) << type();
-  return data_.u32;
+  DCHECK(is_integer()) << *this;
+  return data_.immediate.packed.data.u32;
 }
 
 Keyword Value::as_keyword() const {
   DCHECK(is_keyword()) << *this;
-  return static_cast<Keyword>(data_.u32);
+  return static_cast<Keyword>(data_.immediate.packed.data.u32);
 }
 
 Length Value::as_length() const {
-  DCHECK(is_length()) << type();
-  return Length(data_.dimension.number, data_.dimension.unit);
+  DCHECK(is_length()) << *this;
+  return Length(data_.immediate.packed.data.f32, data_.immediate.packed.unit);
 }
 
 float Value::as_number() const {
-  DCHECK(is_number()) << type();
-  return data_.f32;
+  DCHECK(is_number()) << *this;
+  return data_.immediate.packed.data.f32;
 }
 
 Percentage Value::as_percentage() const {
-  DCHECK(is_percentage()) << type();
-  return Percentage(data_.f32);
+  DCHECK(is_percentage()) << *this;
+  return Percentage(data_.immediate.packed.data.f32);
 }
 
-const String& Value::as_string() const {
+String Value::as_string() const {
   DCHECK(is_string()) << *this;
-  return *data_.string;
+  return String(data_.string);
 }
 
 bool Value::is_color() const {
-  return type_ == ValueType::Color;
+  return type() == ValueType::Color;
 }
 
 bool Value::is_dimension() const {
-  return type_ == ValueType::Dimension;
+  return type() == ValueType::Dimension;
+}
+
+bool Value::is_immediate() const {
+  return data_.immediate.packed.tag == Tag::Immediate;
 }
 
 bool Value::is_integer() const {
-  return type_ == ValueType::Integer;
+  return type() == ValueType::Integer;
 }
 
 bool Value::is_keyword() const {
-  return type_ == ValueType::Keyword;
+  return type() == ValueType::Keyword;
 }
 
 bool Value::is_length() const {
-  return is_dimension() && Dimension::is_length(data_.dimension.unit);
+  return is_dimension() && Dimension::is_length(as_dimension().unit());
 }
 
 bool Value::is_number() const {
-  return type_ == ValueType::Number;
+  return type() == ValueType::Number;
 }
 
 bool Value::is_percentage() const {
-  return type_ == ValueType::Percentage;
+  return type() == ValueType::Percentage;
 }
 
 bool Value::is_string() const {
-  return type_ == ValueType::String;
+  return type() == ValueType::String;
 }
 
 bool Value::is_unspecified() const {
-  return type_ == ValueType::Unspecified;
+  return type() == ValueType::Unspecified;
 }
 
-#define V(Name, name)                                                        \
-  bool Value::is_##name() const {                                            \
-    return is_keyword() && static_cast<Keyword>(data_.u32) == Keyword::Name; \
+const base::string16& Value::string_value() const {
+  DCHECK(is_string()) << *this;
+  return data_.string->data();
+}
+
+ValueType Value::type() const {
+  if (is_immediate())
+    return data_.immediate.packed.type;
+  return ValueType::String;
+}
+
+#define V(Name, name)                                     \
+  bool Value::is_##name() const {                         \
+    return is_keyword() && as_keyword() == Keyword::Name; \
   }
 FOR_EACH_VISUAL_CSS_KEYWORD_VALUE(V)
 #undef V
 
 void Value::DidMove() {
-  data_.string = nullptr;
-  type_ = ValueType::Unspecified;
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Unspecified;
 }
 
 void Value::Reset() {
-  if (type_ == ValueType::String)
-    delete data_.string;
-  type_ = ValueType::Unspecified;
-  data_.u32 = 0;
+  if (is_string())
+    data_.string->Release();
+  data_.immediate.u64 = static_cast<uint64_t>(Tag::Immediate);
+  data_.immediate.packed.type = ValueType::Unspecified;
 }
 
 base::string16 Value::ToString16() const {
@@ -252,9 +273,7 @@ base::string16 Value::ToString16() const {
     case ValueType::Percentage:
       return base::StringPrintf(L"%f%%", as_percentage().value());
     case ValueType::String:
-      if (!as_string().value())
-        return base::string16();
-      return as_string().value()->data();
+      return string_value();
     case ValueType::Unspecified:
       return base::string16();
   }

@@ -5,6 +5,7 @@
 #ifndef EVITA_VISUALS_CSS_VALUES_VALUE_H_
 #define EVITA_VISUALS_CSS_VALUES_VALUE_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include <iosfwd>
@@ -12,6 +13,8 @@
 
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
+#include "build/build_config.h"
+#include "evita/visuals/css/values/ref_counted_string.h"
 #include "evita/visuals/css/values_forward.h"
 
 namespace visuals {
@@ -22,8 +25,8 @@ class Dimension;
 enum class Keyword;
 class Length;
 class Percentage;
-class String;
-enum class Unit;
+class RefCountedString;
+enum class Unit : uint32_t;
 enum class ValueType : uint32_t;
 
 //////////////////////////////////////////////////////////////////////
@@ -58,7 +61,7 @@ class Value final {
   float as_number() const;
   Length as_length() const;
   Percentage as_percentage() const;
-  const String& as_string() const;
+  String as_string() const;
 
   bool is_color() const;
   bool is_dimension() const;
@@ -69,7 +72,9 @@ class Value final {
   bool is_percentage() const;
   bool is_string() const;
   bool is_unspecified() const;
-  ValueType type() const { return type_; }
+
+  const base::string16& string_value() const;
+  ValueType type() const;
 
   // For ease of "values.h" generator
   ColorValue as_color_value() const;
@@ -84,19 +89,54 @@ class Value final {
   base::string16 ToString16() const;
 
  private:
+#if defined(ARCH_CPU_64_BITS)
+  static const size_t kTagBits = 3;
+#else
+  static const size_t kTagBits = 2;
+#endif
+
+  enum class Tag : uint32_t {
+    Pointer,
+    Immediate,
+  };
+
+  union PackedData {
+    uint32_t u32;
+    float f32;
+  };
+
+  struct Packed {
+#if defined(ARCH_CPU_LITTLE_ENDIAN)
+    Tag tag : kTagBits;
+    ValueType type : 8 - kTagBits;
+    Unit unit : 5;
+    PackedData data;
+#else
+    PackedData data;
+    Unit unit : 5;
+    ValueType type : 8 - kTagBits;
+    Tag tag : kTagBits;
+#endif
+  };
+
+  static_assert(sizeof(Packed) <= sizeof(uint64_t),
+                "sizeof(Packed) <= sizeof(uint64_t)");
+
+  bool is_immediate() const;
+
   void DidMove();
 
   union {
-    struct {
-      float number;
-      Unit unit;
-    } dimension;
-    uint32_t u32;
-    float f32;
-    String* string;
+    union Immediate {
+      Packed packed;
+      uint64_t u64;
+    } immediate;
+    RefCountedString* string;
   } data_;
-  ValueType type_;
 };
+
+static_assert(sizeof(Value) == sizeof(uint64_t),
+              "sizeof(Value) == sizeof(uint64_t)");
 
 std::ostream& operator<<(std::ostream& ostream, const Value& value);
 

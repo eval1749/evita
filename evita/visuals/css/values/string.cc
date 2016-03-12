@@ -15,6 +15,8 @@ namespace css {
 
 String::String(base::StringPiece16 value)
     : value_(new RefCountedString(value)) {}
+
+String::String(RefCountedString* value) : value_(value) {}
 String::String(const String& other) : value_(other.value_) {}
 String::String(String&& other) : value_(std::move(other.value_)) {}
 String::String() {}

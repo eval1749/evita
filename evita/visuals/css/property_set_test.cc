@@ -167,7 +167,7 @@ TEST_F(PropertySetTest, Percentage) {
 TEST_F(PropertySetTest, String) {
   PropertySet set1 =
       PropertySet::Builder().AddString(PropertyId::FontFamily, L"foo").Build();
-  EXPECT_EQ(Value(String(L"foo")), set1.ValueOf(PropertyId::FontFamily));
+  EXPECT_EQ(Value(L"foo"), set1.ValueOf(PropertyId::FontFamily));
 }
 
 }  // namespace css

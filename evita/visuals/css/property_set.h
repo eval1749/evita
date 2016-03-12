@@ -11,6 +11,7 @@
 #include <iterator>
 #include <vector>
 
+#include "base/strings/string_piece.h"
 #include "evita/visuals/css/property.h"
 
 namespace visuals {
@@ -136,7 +137,7 @@ class PropertySet::Iterator final {
   float DecodeNumber() const;
   Percentage DecodePercentage() const;
   int DecodeSmallInteger() const;
-  String DecodeString() const;
+  base::StringPiece16 DecodeString() const;
   uint32_t DecodeUint32() const;
   Value DecodeValue() const;
   size_t SizeOfChunk() const;

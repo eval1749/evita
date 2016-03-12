@@ -11,6 +11,7 @@
 #include <string>
 
 #include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "evita/visuals/css/values_forward.h"
 
 namespace visuals {
@@ -35,8 +36,8 @@ class Value final {
   explicit Value(const Dimension& dimension);
   explicit Value(Keyword keyword);
   explicit Value(const Percentage& percentage);
+  explicit Value(base::StringPiece16 string);
   explicit Value(const String& string);
-  explicit Value(String&& string);
   explicit Value(float value);
   explicit Value(int value);
   Value(const Value& other);

@@ -132,10 +132,10 @@ int PropertySet::Iterator::DecodeSmallInteger() const {
   return value - (1 << kSmallValueBits);
 }
 
-String PropertySet::Iterator::DecodeString() const {
+base::StringPiece16 PropertySet::Iterator::DecodeString() const {
   const auto pointer = property_set_->words_.data() + index_ + 1;
-  return String(base::StringPiece16(
-      reinterpret_cast<const base::char16*>(pointer), data()));
+  return base::StringPiece16(reinterpret_cast<const base::char16*>(pointer),
+                             data());
 }
 
 uint32_t PropertySet::Iterator::DecodeUint32() const {
@@ -158,7 +158,7 @@ Value PropertySet::Iterator::DecodeValue() const {
     case ValueType::Keyword:
       return Value(DecodeKeyword());
     case ValueType::String:
-      return Value(std::move(DecodeString()));
+      return Value(DecodeString());
   }
   NOTREACHED() << type();
   return Value();

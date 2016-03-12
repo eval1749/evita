@@ -63,8 +63,7 @@ Builder& Builder::AddPercentage(PropertyId property_id, float value) {
 
 Builder& Builder::AddString(PropertyId property_id,
                             base::StringPiece16 string) {
-  Editor().Add(property_set_.get(), property_id,
-               std::move(Value(std::move(String(string)))));
+  Editor().Add(property_set_.get(), property_id, Value(string));
   return *this;
 }
 

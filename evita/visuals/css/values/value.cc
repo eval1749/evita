@@ -52,12 +52,12 @@ Value::Value(const Percentage& percentage) : type_(ValueType::Percentage) {
   data_.f32 = percentage.value();
 }
 
-Value::Value(const String& string) : type_(ValueType::String) {
+Value::Value(base::StringPiece16 string) : type_(ValueType::String) {
   data_.string = new String(string);
 }
 
-Value::Value(String&& string) : type_(ValueType::String) {
-  data_.string = new String(std::move(string));
+Value::Value(const String& string) : type_(ValueType::String) {
+  data_.string = new String(string);
 }
 
 Value::Value(float value) : type_(ValueType::Number) {

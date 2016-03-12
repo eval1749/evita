@@ -22,6 +22,9 @@ enum class PropertyId : uint32_t;
 //
 class Property final {
  public:
+  // See "evita/visuals/css/property_editor.cc" for implementation.
+  class Editor;
+
   Property(PropertyId id, const Value& other);
   Property(PropertyId id, Value&& other);
   Property(const Property& other);
@@ -47,6 +50,9 @@ class Property final {
   PropertyId id_;
   Value value_;
 };
+
+static_assert(sizeof(Property) == sizeof(void*) * 2,
+              "sizeof(Property) == sizeof(void*) * 2");
 
 std::ostream& operator<<(std::ostream& ostream, const Property& property);
 

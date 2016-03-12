@@ -22,6 +22,8 @@ source_set("css") {
     "media_type.h",
     "property.cc",
     "property.h",
+    "property_editor.cc",
+    "property_editor.h",
     "property_set.cc",
     "property_set.h",
     "property_set_builder.cc",

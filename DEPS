@@ -14,7 +14,7 @@ vars = {
   'gyp_revision': '61259d585ce99d9de8b35188cd0025bdbcb58411',
   'icu_revision': '6d3b55dfa17d9a597c064eeef7ceac18c73184b7',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
-  'v8_revision': '76fb82c8fd5584b46f811a2f6f8c21854965ddc5', # 5.1.118
+  'v8_revision': '8b91060b28546c771071141473bf8985888e9be8', # 5.1.119
 }
 
 deps = {

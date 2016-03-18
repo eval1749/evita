@@ -233,7 +233,7 @@ $define(global, 'lexers', function($export) {
 
     // Shrink last clean token
     if (lastToken.end !== newScanOffset) {
-      console.assert(lastToken.start < newScanOffset, lastToken);
+      console.assert(lastToken.start < newScanOffset, newScanOffset, lastToken);
       lastToken.end = newScanOffset;
       let newState = this.didShrinkLastToken(lastToken);
       if (lastToken.state !== newState)

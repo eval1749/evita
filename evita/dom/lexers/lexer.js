@@ -207,37 +207,27 @@ $define(global, 'lexers', function($export) {
     let it = this.lowerBound(newScanOffset);
     console.assert(it, newScanOffset);
 
-    if (this.debug_ > 1)
-      console.log('restart from', it.data);
-
-    // Case 1: <ss|ss> middle of token
-    // Case 2: ssss| end of token
-    let lastToken = it.data;
-    it = it.next();
-
-    // Remove dirty tokens
-    if (it) {
-      // Collect dirty tokens
-      /** @type {!Array.<!lexers.Token>} */
-      const dirtyTokens = new Array();
-      while (it) {
-        dirtyTokens.push(/** @type {!lexers.Token} */ (it.data));
-        it = it.next();
+    if (it.data.start >= newScanOffset) {
+      it = it.previous();
+      if (it === null) {
+        this.clear();
+        return;
       }
-      if (this.debug_ > 4)
-        console.log('dirtyTokens', dirtyTokens);
-      // Remove dirty tokens from set.
-      for (const dirtyToken of dirtyTokens)
-        this.tokens.remove(dirtyToken);
     }
 
-    // Shrink last clean token
-    if (lastToken.end !== newScanOffset) {
-      console.assert(lastToken.start < newScanOffset, newScanOffset, lastToken);
+    const lastToken = it.data;
+
+    // Remove dirty tokens
+    for (;;) {
+      const maximum = this.tokens.maximum;
+      if (maximum === lastToken)
+        break;
+      this.tokens.remove(maximum);
+    }
+
+    if (lastToken.end > newScanOffset) {
       lastToken.end = newScanOffset;
-      let newState = this.didShrinkLastToken(lastToken);
-      if (lastToken.state !== newState)
-        lastToken.state = newState;
+      lastToken.state = this.didShrinkLastToken(lastToken);
     }
 
     this.lastToken = lastToken;

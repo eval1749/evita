@@ -42,7 +42,7 @@ $define(global, 'base', function($export) {
       }
       while (node) {
         const parent = node.parent_;
-        if (!parent || parent.left_ == node)
+        if (!parent || parent.left_ === node)
           return parent;
         node = parent;
       }
@@ -63,7 +63,7 @@ $define(global, 'base', function($export) {
       }
       while (node) {
         const parent = node.parent_;
-        if (!parent || parent.right_ == node)
+        if (!parent || parent.right_ === node)
           return parent;
         node = parent;
       }
@@ -262,9 +262,9 @@ $define(global, 'base', function($export) {
       const child = removeNode(node);
       if (!parent)
         this.root_ = child;
-      else if (parent.left_ == node)
+      else if (parent.left_ === node)
         parent.left_ = child;
-      else if (parent.right_ == node)
+      else if (parent.right_ === node)
         parent.right_ = child;
       else
         throw new Error('Tree is broken');

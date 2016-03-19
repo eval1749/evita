@@ -6,6 +6,7 @@
 #define EVITA_EDITOR_MODAL_MESSAGE_LOOP_SCOPE_H_
 
 #include "base/macros.h"
+#include "base/message_loop/message_loop.h"
 
 namespace editor {
 
@@ -17,6 +18,8 @@ class ModalMessageLoopScope final {
   ~ModalMessageLoopScope();
 
  private:
+  base::MessageLoop::ScopedNestableTaskAllower allow_nested_;
+
   DISALLOW_COPY_AND_ASSIGN(ModalMessageLoopScope);
 };
 

@@ -30,9 +30,12 @@ source_set("test_files") {
   sources = [
     "regular_expression_test.cc",
     "text_document_test.cc",
-    "text_mutation_observer_test.cc",
     "text_position_test.cc",
     "text_range_test.cc",
+  ]
+
+  data = [
+    "text_mutation_observer_test.js",
   ]
 
   public_deps = [

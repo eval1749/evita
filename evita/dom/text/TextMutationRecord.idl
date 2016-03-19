@@ -4,7 +4,15 @@
 
 interface TextMutationRecord {
   readonly attribute TextDocument document;
-  [ImplementedAs=offset_value]
+  // An end of document offset at start of summary readonly.
+  readonly attribute long documentEnd;
+  // An end mutation offset as start of summary recording.
+  readonly attribute long end;
+  // TODO(eval1749): We should get rid of |deprecated_offset| attribute from
+  // |TextMutationRecord|.
+  [ImplementedAs=deprecated_offset]
   readonly attribute long offset;
+  // A start mutation offset.
+  readonly attribute long start;
   readonly attribute DOMString type;
 };

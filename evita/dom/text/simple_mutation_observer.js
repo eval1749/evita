@@ -63,7 +63,7 @@ $define(global, 'text', function($export) {
     mutationCallback_(mutations, observer) {
       /** @type {number} */
       const offset = mutations.reduce((previousValue, mutation) => {
-        return Math.min(previousValue, mutation.offset);
+        return Math.min(previousValue, mutation.headCount);
       }, this.document_.length);
       for (let observer of this.observers_.values())
         observer.didChangeTextDocument(offset);

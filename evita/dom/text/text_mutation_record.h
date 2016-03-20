@@ -25,9 +25,9 @@ class TextMutationRecord final : public ginx::Scriptable<TextMutationRecord> {
  public:
   TextMutationRecord(const base::string16& type,
                      TextDocument* document,
-                     text::Offset mutation_start,
-                     text::Offset mutation_end,
-                     text::Offset document_end);
+                     text::OffsetDelta document_length,
+                     text::OffsetDelta head_count,
+                     text::OffsetDelta tail_count);
   ~TextMutationRecord() final;
 
  private:
@@ -36,21 +36,15 @@ class TextMutationRecord final : public ginx::Scriptable<TextMutationRecord> {
   TextDocument* document() const { return document_.get(); }
 
   // For IDL
-  // TODO(eval1749): We should get rid of |deprecated_offset()| from
-  // |TextMutationRecord|.
-  int deprecated_offset() const { return mutation_start_.value(); }
-  int document_end() const { return document_end_.value(); }
-  int end() const { return mutation_end_.value(); }
-  int start() const { return mutation_start_.value(); }
+  int document_length() const { return document_length_.value(); }
+  int head_count() const { return head_count_.value(); }
+  int tail_count() const { return tail_count_.value(); }
   const base::string16& type() const { return type_; }
 
   gc::Member<TextDocument> document_;
-  // A end offset of |document_| at start of recording.
-  const text::Offset document_end_;
-  // An end offset of mutation as start of recording.
-  const text::Offset mutation_end_;
-  // A start offset of mutation.
-  const text::Offset mutation_start_;
+  const text::OffsetDelta document_length_;
+  const text::OffsetDelta head_count_;
+  const text::OffsetDelta tail_count_;
   base::string16 type_;
 
   DISALLOW_COPY_AND_ASSIGN(TextMutationRecord);

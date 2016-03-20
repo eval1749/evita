@@ -40,18 +40,17 @@ class TextMutationObserver::Tracker final {
   // reference.
   TextDocument* const document_;
 
-  // A number of unmodified characters from end of document.
-  text::OffsetDelta end_length_;
+  // A document end offset at start of recording.
+  text::OffsetDelta document_length_;
 
   // A number of mutations holds in this tracker.
   int number_of_mutations_ = 0;
 
-  // A minimum offset of mutation == a number of unmodified characters from
-  // start of document.
-  text::Offset mutation_start_;
+  // A number of unmodified characters from start of document.
+  text::OffsetDelta head_count_;
 
-  // A document end offset at start of recording.
-  text::Offset document_end_;
+  // A number of unmodified characters from end of document.
+  text::OffsetDelta tail_count_;
 
   DISALLOW_COPY_AND_ASSIGN(Tracker);
 };
@@ -66,32 +65,31 @@ TextMutationObserver::Tracker::~Tracker() {}
 void TextMutationObserver::Tracker::DidDeleteAt(text::Offset offset,
                                                 text::OffsetDelta length) {
   ++number_of_mutations_;
-  mutation_start_ = std::min(mutation_start_, offset);
-  end_length_ = std::min(
-      end_length_, text::OffsetDelta(document_->length() - offset.value()));
+  head_count_ = std::min(head_count_, text::OffsetDelta(offset.value()));
+  tail_count_ = std::min(
+      tail_count_, text::OffsetDelta(document_->length() - offset.value()));
 }
 
 void TextMutationObserver::Tracker::DidInsertBefore(text::Offset offset,
                                                     text::OffsetDelta length) {
   ++number_of_mutations_;
-  mutation_start_ = std::min(mutation_start_, offset);
-  end_length_ = std::min(
-      end_length_,
+  head_count_ = std::min(head_count_, text::OffsetDelta(offset.value()));
+  tail_count_ = std::min(
+      tail_count_,
       text::OffsetDelta(document_->length() - offset.value() - length.value()));
 }
 
 void TextMutationObserver::Tracker::ResetRecording() {
-  document_end_ = text::Offset(document_->length());
-  end_length_ = text::OffsetDelta(document_end_.value());
-  mutation_start_ = document_end_;
+  document_length_ = text::OffsetDelta(document_->length());
+  tail_count_ = document_length_;
+  head_count_ = document_length_;
 }
 
 std::vector<TextMutationRecord*> TextMutationObserver::Tracker::TakeRecords() {
   if (!has_records())
     return std::vector<TextMutationRecord*>();
-  const auto mutation_end = document_end_ - end_length_;
   const auto record = new TextMutationRecord(
-      L"summary", document_, mutation_start_, mutation_end, document_end_);
+      L"summary", document_, document_length_, head_count_, tail_count_);
   ResetRecording();
   return std::vector<TextMutationRecord*>{record};
 }

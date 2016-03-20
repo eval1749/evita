@@ -4,6 +4,8 @@
 
 #include "evita/dom/text/text_mutation_record.h"
 
+#include "evita/dom/text/text_document.h"
+
 namespace dom {
 
 //////////////////////////////////////////////////////////////////////
@@ -12,16 +14,16 @@ namespace dom {
 //
 TextMutationRecord::TextMutationRecord(const base::string16& type,
                                        TextDocument* document,
-                                       text::Offset mutation_start,
-                                       text::Offset mutation_end,
-                                       text::Offset document_end)
+                                       text::OffsetDelta document_length,
+                                       text::OffsetDelta head_count,
+                                       text::OffsetDelta tail_count)
     : document_(document),
-      document_end_(document_end),
-      mutation_end_(mutation_end),
-      mutation_start_(mutation_start),
+      document_length_(document_length),
+      head_count_(head_count),
+      tail_count_(tail_count),
       type_(type) {
-  DCHECK_LE(mutation_start_, mutation_end_);
-  DCHECK_LE(mutation_end_, document_end_);
+  DCHECK_LE(head_count_.value(), document_->length());
+  DCHECK_LE(tail_count_.value(), document_->length());
 }
 
 TextMutationRecord::~TextMutationRecord() {}

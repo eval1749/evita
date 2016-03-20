@@ -80,6 +80,7 @@ void TextMutationObserver::Tracker::DidInsertBefore(text::Offset offset,
 }
 
 void TextMutationObserver::Tracker::ResetRecording() {
+  number_of_mutations_ = 0;
   document_length_ = text::OffsetDelta(document_->length());
   tail_count_ = document_length_;
   head_count_ = document_length_;

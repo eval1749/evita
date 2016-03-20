@@ -43,7 +43,6 @@ std::ostream& operator<<(std::ostream& ostream,
                  << " stretch=" << static_cast<int>(description.stretch())
                  << " style=" << static_cast<int>(description.style())
                  << " weight=" << static_cast<int>(description.weight());
-  return ostream;
 }
 
 }  // namespace visuals

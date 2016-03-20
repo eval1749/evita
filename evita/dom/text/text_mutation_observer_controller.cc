@@ -16,6 +16,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "evita/dom/lock.h"
+#include "evita/dom/scheduler/micro_task.h"
 #include "evita/dom/script_host.h"
 #include "evita/dom/text/text_document.h"
 #include "evita/dom/text/text_mutation_observer.h"
@@ -45,8 +46,7 @@ class TextMutationObserverController::Tracker final
 
  private:
   base::WeakPtr<Tracker> GetWeakPtr();
-  static void NotifyObservers(base::WeakPtr<Tracker> tracker,
-                              const base::TimeTicks& deadline);
+  static void NotifyObservers(base::WeakPtr<Tracker> tracker);
   void ScheduleNotification();
 
   // text::BufferMutationObserver
@@ -79,8 +79,8 @@ TextMutationObserverController::Tracker::GetWeakPtr() {
 }
 
 void TextMutationObserverController::Tracker::NotifyObservers(
-    base::WeakPtr<Tracker> tracker,
-    const base::TimeTicks& deadline) {
+    base::WeakPtr<Tracker> tracker) {
+  ASSERT_DOM_LOCKED();
   if (!tracker)
     return;
   tracker->is_schedule_notification_ = false;
@@ -89,7 +89,6 @@ void TextMutationObserverController::Tracker::NotifyObservers(
     observers.push_back(observer);
   }
   scoped_refptr<Tracker> protect(tracker.get());
-  DOM_AUTO_LOCK_SCOPE();
   for (const auto& observer : observers) {
     observer->DidMutateTextDocument(tracker->document_);
   }
@@ -108,8 +107,8 @@ void TextMutationObserverController::Tracker::ScheduleNotification() {
   if (is_schedule_notification_)
     return;
   is_schedule_notification_ = true;
-  ScriptHost::instance()->ScheduleIdleTask(
-      base::Bind(&Tracker::NotifyObservers, GetWeakPtr()));
+  ScriptHost::instance()->EnqueueMicroTask(std::make_unique<MicroTask>(
+      FROM_HERE, base::Bind(&Tracker::NotifyObservers, GetWeakPtr())));
 }
 
 void TextMutationObserverController::Tracker::Unregister(

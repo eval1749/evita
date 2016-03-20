@@ -20,6 +20,7 @@
 #include "evita/dom/lock.h"
 #include "evita/dom/public/view_delegate.h"
 #include "evita/dom/scheduler/idle_task.h"
+#include "evita/dom/scheduler/micro_task.h"
 #include "evita/dom/scheduler/scheduler.h"
 #include "evita/dom/static_script_source.h"
 #include "evita/dom/timing/performance.h"
@@ -355,6 +356,10 @@ void ScriptHost::DidStartScriptHost() {
   if (state_ == domapi::ScriptHostState::Stopped)
     state_ = domapi::ScriptHostState::Running;
   view_delegate_->DidStartScriptHost(state_);
+}
+
+void ScriptHost::EnqueueMicroTask(std::unique_ptr<MicroTask> micro_task) {
+  isolate()->EnqueueMicrotask(&MicroTask::Run, micro_task.release());
 }
 
 void ScriptHost::ResetForTesting() {

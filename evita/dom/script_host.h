@@ -38,6 +38,7 @@ namespace dom {
 class Event;
 class EventTarget;
 class IdleTask;
+class MicroTask;
 class Performance;
 class Scheduler;
 class ViewEventHandlerImpl;
@@ -78,6 +79,8 @@ class ScriptHost final : public ginx::RunnerDelegate {
   static void CreateAndStart(Scheduler* scheduler,
                              domapi::ViewDelegate* view_delegate,
                              domapi::IoDelegate* io_delegate);
+
+  void EnqueueMicroTask(std::unique_ptr<MicroTask> micro_task);
   void ResetForTesting();
   void RunMicrotasks();
 

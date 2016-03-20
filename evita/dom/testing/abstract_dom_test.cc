@@ -330,7 +330,7 @@ void AbstractDomTest::RunMessageLoopUntilIdle() {
   base::RunLoop run_loop;
   run_loop.RunUntilIdle();
   mock_scheduler_->RunPendingTasks();
-  runner_->isolate()->RunMicrotasks();
+  script_host_->RunMicrotasks();
 }
 
 void AbstractDomTest::SetUp() {

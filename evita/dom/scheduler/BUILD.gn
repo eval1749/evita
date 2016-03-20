@@ -21,6 +21,8 @@ source_set("public") {
     "animation_frame_callback.h",
     "idle_task.cc",
     "idle_task.h",
+    "micro_task.cc",
+    "micro_task.h",
     "scheduler.cc",
     "scheduler.h",
     "scheduler_client.cc",

@@ -42,7 +42,8 @@ testing.test('TextMutationObserver.takeRecords', function(t) {
   t.expect(records.length).toEqual(1);
   const actual = records[0];
   t.expect(actual instanceof TextMutationRecord).toEqual(true);
-  t.expect(actual.documentLength).toEqual(26);
+  t.expect(actual.delta).toEqual(-1);
+  t.expect(actual.document).toEqual(document);
   t.expect(actual.headCount).toEqual(11);
   t.expect(actual.tailCount).toEqual(5);
   observer.disconnect();

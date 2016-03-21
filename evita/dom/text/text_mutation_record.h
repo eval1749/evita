@@ -25,7 +25,7 @@ class TextMutationRecord final : public ginx::Scriptable<TextMutationRecord> {
  public:
   TextMutationRecord(const base::string16& type,
                      TextDocument* document,
-                     text::OffsetDelta document_length,
+                     text::OffsetDelta delta,
                      text::OffsetDelta head_count,
                      text::OffsetDelta tail_count);
   ~TextMutationRecord() final;
@@ -33,16 +33,15 @@ class TextMutationRecord final : public ginx::Scriptable<TextMutationRecord> {
  private:
   friend class bindings::TextMutationRecordClass;
 
-  TextDocument* document() const { return document_.get(); }
-
   // For IDL
-  int document_length() const { return document_length_.value(); }
+  int delta() const { return delta_.value(); }
+  TextDocument* document() const { return document_.get(); }
   int head_count() const { return head_count_.value(); }
   int tail_count() const { return tail_count_.value(); }
   const base::string16& type() const { return type_; }
 
   gc::Member<TextDocument> document_;
-  const text::OffsetDelta document_length_;
+  const text::OffsetDelta delta_;
   const text::OffsetDelta head_count_;
   const text::OffsetDelta tail_count_;
   base::string16 type_;

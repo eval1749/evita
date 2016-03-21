@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 interface TextMutationRecord {
+  // A number of characters inserted if positive, or a number of characters
+  // deleted if negative.
+  readonly attribute long delta;
   readonly attribute TextDocument document;
-  // A number of characters of document at start of summarize.
-  readonly attribute long documentLength;
   // A number of unmodified characters from start of document.
   readonly attribute long headCount;
   // A number of unmodified characters from end of document.

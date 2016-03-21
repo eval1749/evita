@@ -52,7 +52,7 @@ class TextMutationObserver::Tracker final
   TextDocument* const document_;
 
   // A document end offset at start of recording.
-  text::OffsetDelta document_length_;
+  text::OffsetDelta delta_;
 
   // A number of unmodified characters from start of document.
   text::OffsetDelta head_count_;
@@ -87,6 +87,7 @@ void TextMutationObserver::Tracker::DidDeleteAt(
   ScheduleNotify();
   ++number_of_mutations_;
   const auto offset = text::OffsetDelta(range.start().value());
+  delta_ = delta_ - range.length();
   head_count_ = std::min(head_count_, offset);
   tail_count_ =
       std::min(tail_count_, text::OffsetDelta(document_->length()) - offset);
@@ -96,6 +97,7 @@ void TextMutationObserver::Tracker::DidInsertBefore(
     const text::StaticRange& range) {
   ScheduleNotify();
   ++number_of_mutations_;
+  delta_ = delta_ + range.length();
   const auto offset = text::OffsetDelta(range.start().value());
   head_count_ = std::min(head_count_, offset);
   tail_count_ = std::min(tail_count_, text::OffsetDelta(document_->length() -
@@ -117,9 +119,9 @@ void TextMutationObserver::Tracker::NotifyMutations(
 
 void TextMutationObserver::Tracker::ResetSummary() {
   number_of_mutations_ = 0;
-  document_length_ = text::OffsetDelta(document_->length());
-  tail_count_ = document_length_;
-  head_count_ = document_length_;
+  delta_ = text::OffsetDelta();
+  tail_count_ = text::OffsetDelta(document_->length());
+  head_count_ = text::OffsetDelta(document_->length());
 }
 
 void TextMutationObserver::Tracker::RunCallback() {
@@ -148,8 +150,8 @@ void TextMutationObserver::Tracker::ScheduleNotify() {
 std::vector<TextMutationRecord*> TextMutationObserver::Tracker::TakeRecords() {
   if (!has_records())
     return std::vector<TextMutationRecord*>();
-  const auto record = new TextMutationRecord(
-      L"summary", document_, document_length_, head_count_, tail_count_);
+  const auto record = new TextMutationRecord(L"summary", document_, delta_,
+                                             head_count_, tail_count_);
   ResetSummary();
   return std::vector<TextMutationRecord*>{record};
 }

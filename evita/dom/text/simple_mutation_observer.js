@@ -64,11 +64,11 @@ $define(global, 'text', function($export) {
       if (mutations.length === 0)
         return;
       const mutation = mutations[0];
-      const changeStart = mutation.headCount;
-      const changeEnd = mutation.documentLength - mutation.tailCount;
-      const delta = this.document_.length - mutation.documentLength;
+      const headCount = mutation.headCount;
+      const tailCount = mutation.tailCount;
+      const delta = mutation.delta;
       for (const observer of this.observers_.values())
-        observer.didChangeTextDocument(changeStart, changeEnd, delta);
+        observer.didChangeTextDocument(headCount, tailCount, delta);
     }
 
     /**

@@ -14,11 +14,11 @@ namespace dom {
 //
 TextMutationRecord::TextMutationRecord(const base::string16& type,
                                        TextDocument* document,
-                                       text::OffsetDelta document_length,
+                                       text::OffsetDelta delta,
                                        text::OffsetDelta head_count,
                                        text::OffsetDelta tail_count)
-    : document_(document),
-      document_length_(document_length),
+    : delta_(delta),
+      document_(document),
       head_count_(head_count),
       tail_count_(tail_count),
       type_(type) {

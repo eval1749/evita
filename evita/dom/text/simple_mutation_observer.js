@@ -61,12 +61,14 @@ $define(global, 'text', function($export) {
      * Resets hot offset to minimal changed offset and kicks word scanner.
      */
     mutationCallback_(mutations, observer) {
-      /** @type {number} */
-      const offset = mutations.reduce((previousValue, mutation) => {
-        return Math.min(previousValue, mutation.headCount);
-      }, this.document_.length);
-      for (let observer of this.observers_.values())
-        observer.didChangeTextDocument(offset);
+      if (mutations.length === 0)
+        return;
+      const mutation = mutations[0];
+      const changeStart = mutation.headCount;
+      const changeEnd = mutation.documentLength - mutation.tailCount;
+      const delta = this.document_.length - mutation.documentLength;
+      for (const observer of this.observers_.values())
+        observer.didChangeTextDocument(changeStart, changeEnd, delta);
     }
 
     /**

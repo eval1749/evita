@@ -8,10 +8,11 @@
 text.SimpleMutationObserver;
 
 /**
- * @param {number} offset
+ * @param {number} start
+ * @param {number} end
  */
-text.SimpleMutationObserver.prototype.didChangeTextDocument = function(offset) {
-};
+text.SimpleMutationObserver.prototype.didChangeTextDocument =
+    function(start, end) {};
 
 /**
  * @param {number} offset

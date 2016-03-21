@@ -12,8 +12,6 @@ source_set("text") {
     "text_document.h",
     "text_mutation_observer.cc",
     "text_mutation_observer.h",
-    "text_mutation_observer_controller.cc",
-    "text_mutation_observer_controller.h",
     "text_mutation_record.cc",
     "text_mutation_record.h",
     "text_range.cc",

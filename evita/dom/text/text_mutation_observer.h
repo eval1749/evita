@@ -6,7 +6,6 @@
 #define EVITA_DOM_TEXT_TEXT_MUTATION_OBSERVER_H_
 
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
 #include "evita/ginx/scoped_persistent.h"
@@ -32,30 +31,22 @@ class TextMutationObserver final
   DECLARE_SCRIPTABLE_OBJECT(TextMutationObserver);
 
  public:
-  ~TextMutationObserver() final;
+  class Tracker;
 
-  void DidDeleteAt(TextDocument* document,
-                   text::Offset offset,
-                   text::OffsetDelta length);
-  void DidInsertBefore(TextDocument* document,
-                       text::Offset offset,
-                       text::OffsetDelta length);
-  void DidMutateTextDocument(TextDocument* document);
+  ~TextMutationObserver() final;
 
  private:
   friend class bindings::TextMutationObserverClass;
-  class Tracker;
 
   explicit TextMutationObserver(v8::Local<v8::Function> callback);
 
   // Bindings
   void Disconnect();
-  Tracker* GetTracker(TextDocument* document) const;
   void Observe(TextDocument* document, const TextMutationObserverInit& options);
   std::vector<TextMutationRecord*> TakeRecords();
 
   ginx::ScopedPersistent<v8::Function> callback_;
-  std::unordered_map<TextDocument*, std::unique_ptr<Tracker>> tracker_map_;
+  std::vector<std::unique_ptr<Tracker>> trackers_;
 
   DISALLOW_COPY_AND_ASSIGN(TextMutationObserver);
 };

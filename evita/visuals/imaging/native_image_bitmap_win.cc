@@ -231,8 +231,7 @@ NativeImageBitmap NativeImageBitmap::Decode(base::StringPiece16 format,
         true,  // fIcon
         kIconVersion, icon_size, icon_size, LR_DEFAULTCOLOR));
     if (!icon_handle.is_valid()) {
-      const auto last_error = ::GetLastError();
-      DVLOG(0) << "CreateIconFromResourceEx error=" << last_error;
+      PLOG(ERROR) << "CreateIconFromResourceEx failed";
       return NativeImageBitmap();
     }
     return NativeImageBitmap(icon_handle);

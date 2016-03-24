@@ -116,7 +116,7 @@ ApplicationProxy::Channel* ApplicationProxy::Channel::CreateChannel(HWND hwnd) {
                           k_wszFileMapping));    // lpName
 
   if (!handle) {
-    CHECK(handle) << "CreateFileMapping " << ::GetLastError();
+    PLOG(ERROR) << "CreateFileMapping failed.";
     return nullptr;
   }
 
@@ -178,7 +178,7 @@ bool ApplicationProxy::EventObject::Wait(int wait_ms) {
       ::WaitForSingleObject(handle_, static_cast<DWORD>(wait_ms));
   if (result == WAIT_OBJECT_0)
     return true;
-  DVLOG(ERROR) << "WaitForSingleObject " << ::GetLastError();
+  PLOG(ERROR) << "WaitForSingleObject failed.";
   return false;
 }
 

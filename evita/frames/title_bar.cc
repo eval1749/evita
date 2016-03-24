@@ -24,12 +24,11 @@ void TitleBar::SetText(const base::string16& new_title) {
   if (title_ == new_title)
     return;
 
-  if (::SetWindowTextW(hwnd_, new_title.c_str())) {
-    title_ = new_title;
-  } else {
-    auto const dwError = ::GetLastError();
-    DVLOG(0) << "SetWindowText err=" << dwError;
+  if (!::SetWindowTextW(hwnd_, new_title.c_str())) {
+    PLOG(ERROR) << "SetWindowText failed.";
+    return;
   }
+  title_ = new_title;
 }
 
 }  // namespace views

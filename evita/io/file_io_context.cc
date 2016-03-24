@@ -83,8 +83,8 @@ void FileIoContext::Close(const domapi::IoIntPromise& promise) {
                          TRACE_EVENT_FLAG_FLOW_IN | TRACE_EVENT_FLAG_FLOW_OUT);
   if (file_handle_.is_valid()) {
     if (!::CloseHandle(file_handle_.get())) {
-      auto const last_error = ::GetLastError();
-      DVLOG(0) << "CloseHandle error=" << last_error;
+      const auto last_error = ::GetLastError();
+      PLOG(ERROR) << "CloseHandle failed.";
       Reject(promise.reject, last_error);
       return;
     }
@@ -103,8 +103,8 @@ std::pair<HANDLE, int> FileIoContext::Open(const base::string16& file_name,
       ::CreateFileW(file_name.c_str(), params.access, params.share_mode,
                     nullptr, params.creation, FILE_FLAG_OVERLAPPED, nullptr));
   if (!handle) {
-    auto const last_error = ::GetLastError();
-    DVLOG(0) << "CreateFileW " << file_name << " error=" << last_error;
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "CreateFileW " << file_name << " failed.";
     return std::make_pair(INVALID_HANDLE_VALUE, last_error);
   }
   return std::make_pair(handle.release(), 0);
@@ -133,6 +133,7 @@ void FileIoContext::Read(void* buffer,
   auto const error = ::GetLastError();
   if (error == ERROR_IO_PENDING)
     return;
+  PLOG(ERROR) << "ReadFile failed";
   OnIOCompleted(this, 0, error);
 }
 
@@ -159,6 +160,7 @@ void FileIoContext::Write(void* buffer,
   auto const error = ::GetLastError();
   if (error == ERROR_IO_PENDING)
     return;
+  PLOG(ERROR) << "WriteFile failed";
   OnIOCompleted(this, 0, error);
 }
 

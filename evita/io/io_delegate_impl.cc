@@ -148,7 +148,7 @@ void IoDelegateImpl::MakeTempFileName(
       ::GetTempFileNameW(dir_name.c_str(), prefix.c_str(), 0, &file_name[0]);
   if (!unique_id) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "GetTempFileNameW error=" << last_error;
+    PLOG(ERROR) << "GetTempFileName failed";
     Reject(resolver.reject, last_error);
     return;
   }
@@ -173,7 +173,7 @@ void IoDelegateImpl::MoveFile(const base::string16& src_path,
                                        static_cast<uint32_t>(flags));
   if (!succeeded) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "MoveFileEx error=" << last_error;
+    PLOG(ERROR) << "MoveFileEx failed";
     Reject(resolver.reject, last_error);
     return;
   }
@@ -242,7 +242,7 @@ void IoDelegateImpl::QueryFileStatus(
       ::FindFirstFileW(file_name.c_str(), &find_data));
   if (!find_handle.is_valid()) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "FindFirstFileW error=" << last_error;
+    PLOG(ERROR) << "FindFirstFileW failed";
     Reject(promise.reject, last_error);
     return;
   }
@@ -291,7 +291,7 @@ void IoDelegateImpl::RemoveFile(const base::string16& file_name,
   const auto succeeded = ::DeleteFileW(file_name.c_str());
   if (!succeeded) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "DeleteFileEx error=" << last_error;
+    PLOG(ERROR) << "DeleteFileEx failed";
     Reject(resolver.reject, last_error);
     return;
   }

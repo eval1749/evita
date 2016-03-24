@@ -15,9 +15,6 @@
 #include "evita/dom/public/promise.h"
 #include "evita/io/io_context_utils.h"
 
-#define DVLOG_WIN32_ERROR(level, name, last_error) \
-  DVLOG(level) << name ": " << this << " err=" << last_error
-
 namespace io {
 
 ProcessIoContext::ProcessIoContext(domapi::IoContextId context_id,
@@ -51,8 +48,8 @@ void ProcessIoContext::CloseAndWaitProcess(
   if (process_.is_valid()) {
     auto const value = ::WaitForSingleObject(process_.get(), INFINITE);
     if (value == WAIT_FAILED) {
-      auto const last_error = ::GetLastError();
-      DVLOG_WIN32_ERROR(0, "WaitSingleObject", last_error);
+      const auto last_error = ::GetLastError();
+      PLOG(ERROR) << "WaitSingleObject failed";
       Reject(promise.reject, last_error);
       return;
     }
@@ -65,16 +62,16 @@ uint32_t ProcessIoContext::CloseProcess() {
   TRACE_EVENT0("io", "ProcessIoContext::CloseProcess");
   if (stdout_read_.is_valid()) {
     if (!::CloseHandle(stdout_read_.get())) {
-      auto const last_error = ::GetLastError();
-      DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
+      const auto last_error = ::GetLastError();
+      PLOG(ERROR) << "CloseHandle failed";
       return last_error;
     }
     stdout_read_.release();
   }
   if (stdin_write_.is_valid()) {
     if (!::CloseHandle(stdin_write_.get())) {
-      auto const last_error = ::GetLastError();
-      DVLOG_WIN32_ERROR(0, "CloseHandle", last_error);
+      const auto last_error = ::GetLastError();
+      PLOG(ERROR) << "CloseHandle failed";
       return last_error;
     }
     stdin_write_.release();
@@ -95,8 +92,8 @@ void ProcessIoContext::ReadFromProcess(void* buffer,
   auto const succeeded = ::ReadFile(
       stdout_read_.get(), buffer, static_cast<DWORD>(num_read), &read, nullptr);
   if (!succeeded) {
-    auto const last_error = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "ReadFile", last_error);
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "ReadFile failed";
     if (last_error == ERROR_BROKEN_PIPE)
       CloseProcess();
     Reject(promise.reject, last_error);
@@ -119,14 +116,14 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
   common::win::scoped_handle stdin_write;
   if (!::CreatePipe(stdin_read.location(), stdin_write.location(),
                     &security_attributes, 0)) {
-    auto const last_error = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "CreatePipe", last_error);
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "CreatePipe failed";
     Reject(promise.reject, last_error);
     return;
   }
   if (!::SetHandleInformation(stdin_write.get(), HANDLE_FLAG_INHERIT, 0)) {
-    auto const last_error = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "SetHandleInformation", last_error);
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "SetHandleInformation failed";
     Reject(promise.reject, last_error);
     return;
   }
@@ -134,14 +131,14 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
   common::win::scoped_handle stdout_write;
   if (!::CreatePipe(stdout_read.location(), stdout_write.location(),
                     &security_attributes, 0)) {
-    auto const last_error = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "CreatePipe", last_error);
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "CreatePipe failed";
     Reject(promise.reject, last_error);
     return;
   }
   if (!::SetHandleInformation(stdout_read.get(), HANDLE_FLAG_INHERIT, 0)) {
-    auto const last_error = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "SetHandleInformation", last_error);
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "SetHandleInformation failed";
     Reject(promise.reject, last_error);
     return;
   }
@@ -163,8 +160,8 @@ void ProcessIoContext::StartProcess(domapi::IoContextId context_id,
                        inherit_handles, CREATE_NO_WINDOW | CREATE_SUSPENDED,
                        nullptr, nullptr, &startup_info, &process_info);
   if (!succeeded) {
-    auto const last_error = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "CreateProcessW", last_error);
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "CreateProcessW failed";
     Reject(promise.reject, last_error);
     return;
   }
@@ -190,8 +187,8 @@ void ProcessIoContext::WriteToProcess(void* buffer,
       ::WriteFile(stdin_write_.get(), buffer, static_cast<DWORD>(num_write),
                   &written, nullptr);
   if (!succeeded) {
-    auto const last_error = ::GetLastError();
-    DVLOG_WIN32_ERROR(0, "WriteFile", last_error);
+    const auto last_error = ::GetLastError();
+    PLOG(ERROR) << "WriteFile failed";
     if (last_error == ERROR_BROKEN_PIPE)
       CloseProcess();
     Reject(promise.reject, last_error);
@@ -238,9 +235,9 @@ void ProcessIoContext::Write(void* buffer,
   auto const hThread = reinterpret_cast<HANDLE>(
       gateway_thread_->thread_handle().platform_handle());
   if (!::CancelSynchronousIo(hThread)) {
-    auto const last_error = ::GetLastError();
+    const auto last_error = ::GetLastError();
     if (last_error != ERROR_NOT_FOUND) {
-      DVLOG_WIN32_ERROR(0, "CancelSynchronousIo", last_error);
+      PLOG(ERROR) << "CancelSynchronousIo failed";
       Reject(promise.reject, last_error);
       return;
     }

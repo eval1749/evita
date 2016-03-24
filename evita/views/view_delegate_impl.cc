@@ -496,8 +496,7 @@ void ViewDelegateImpl::SetCursor(domapi::WindowId window_id,
   }
   const auto cursor = ::LoadCursor(nullptr, *it);
   if (!cursor) {
-    const auto last_error = ::GetLastError();
-    DVLOG(0) << "LoadCursor error=" << last_error;
+    PLOG(ERROR) << "LoadCursor failed";
     return;
   }
   window->SetCursor(cursor);

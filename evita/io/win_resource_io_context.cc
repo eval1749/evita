@@ -62,7 +62,7 @@ std::pair<std::vector<base::string16>, int> ResourceNameEnumerator::Run(
       reinterpret_cast<LONG_PTR>(this), RESOURCE_ENUM_VALIDATE, 0);
   if (!succeeded) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "EnumResourceNamesEx error=" << last_error;
+    PLOG(ERROR) << "EnumResourceNamesEx failed";
     return std::make_pair(names_, last_error);
   }
   return std::make_pair(names_, 0);
@@ -92,26 +92,26 @@ std::pair<int, int> WinResourceIoContext::Load(const base::string16& type,
                        MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
   if (!resource) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "FindResourceEx error=" << last_error;
+    PLOG(ERROR) << "FindResourceEx failed";;
     return std::make_pair(0, last_error);
   }
   const auto data_handle = ::LoadResource(module_, resource);
   if (!data_handle) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "LoadResourceEx error=" << last_error;
+    PLOG(ERROR) << "LoadResourceEx failed";;
     return std::make_pair(0, last_error);
   }
   const auto resource_size =
       static_cast<size_t>(::SizeofResource(module_, resource));
   if (resource_size == 0) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "SizeofResource error=" << last_error;
+    PLOG(ERROR) << "SizeofResource failed";;
     return std::make_pair(0, last_error);
   }
   const auto resource_bytes = ::LockResource(data_handle);
   if (!resource_bytes) {
     const auto last_error = ::GetLastError();
-    DVLOG(0) << "LockResource error=" << last_error;
+    PLOG(ERROR) << "LockResource failed";;
     return std::make_pair(0, last_error);
   }
   ::memcpy(buffer, resource_bytes, std::min(resource_size, buffer_size));
@@ -126,7 +126,7 @@ std::pair<HMODULE, int> WinResourceIoContext::Open(
   if (handle)
     return std::make_pair(handle, 0);
   const auto last_error = ::GetLastError();
-  DVLOG(0) << "LoadLibraryEx error=" << last_error;
+  PLOG(ERROR) << "LoadLibraryEx failed";;
   return std::make_pair(nullptr, last_error);
 }
 
@@ -137,7 +137,7 @@ void WinResourceIoContext::Close(const domapi::IoIntPromise& promise) {
   if (::FreeLibrary(module_))
     return Resolve(promise.resolve, 0);
   const auto last_error = ::GetLastError();
-  DVLOG(0) << "FreeLibrary error=" << last_error;
+  PLOG(ERROR) << "FreeLibrary failed";;
   return Reject(promise.reject, last_error);
 }
 

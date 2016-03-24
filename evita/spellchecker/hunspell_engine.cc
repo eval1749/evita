@@ -62,14 +62,12 @@ HunspellEngine::Dictionary::Dictionary() : is_valid_(false) {
       ::CreateFileW(file_name.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
                     OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr));
   if (!file) {
-    auto const last_error = ::GetLastError();
-    DVLOG(0) << "CreateFile " << file_name << " error=" << last_error;
+    PLOG(ERROR) << "CreateFile " << file_name << " failed";
     return;
   }
   BY_HANDLE_FILE_INFORMATION info;
   if (!::GetFileInformationByHandle(file.get(), &info)) {
-    auto const last_error = ::GetLastError();
-    DVLOG(0) << "GetFileInformationByHandle " << last_error;
+    PLOG(ERROR) << "GetFileInformationByHandle failed";
     return;
   }
   DCHECK(!info.nFileSizeHigh);
@@ -77,8 +75,7 @@ HunspellEngine::Dictionary::Dictionary() : is_valid_(false) {
   DWORD read;
   if (!::ReadFile(file.get(), &data_[0], static_cast<DWORD>(data_.size()),
                   &read, nullptr)) {
-    auto const last_error = ::GetLastError();
-    DVLOG(0) << "ReadFile" << last_error;
+    PLOG(ERROR) << "ReadFile failed";
     return;
   }
   is_valid_ = true;

@@ -11,10 +11,10 @@ vars = {
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
-  'gyp_revision': '133eaf70b3720b7413017ef3f9c42f6811ef9347',
+  'gyp_revision': '8e8c3178d9d2734a6223b87fbd45ab250baf77e8',
   'icu_revision': '0d572d65aae621e13d6863fe470c9c8cee71043d',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
-  'v8_revision': '8f8a3d986edaa67157146f0dc246d6b64de74486', # 5.1.211
+  'v8_revision': 'ae0da814625e1da29466850f3d2361e69536d9f5', # 5.1.214
 }
 
 deps = {

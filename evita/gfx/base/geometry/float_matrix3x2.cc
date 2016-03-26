@@ -18,7 +18,7 @@ FloatMatrix3x2::FloatMatrix3x2(const std::array<float, 6>& data)
 FloatMatrix3x2::FloatMatrix3x2(const FloatMatrix3x2& other)
     : FloatMatrix3x2(other.data_) {}
 
-FloatMatrix3x2::FloatMatrix3x2() {}
+FloatMatrix3x2::FloatMatrix3x2() : data_({0}) {}
 FloatMatrix3x2::~FloatMatrix3x2() {}
 
 FloatMatrix3x2& FloatMatrix3x2::operator=(const FloatMatrix3x2& other) {

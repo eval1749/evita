@@ -46,13 +46,9 @@ declare_args() {
   # Enables the Media Router.
   enable_media_router = !is_ios
 
-  # Enables proprietary codecs and demuxers; e.g. H264, MOV, AAC, and MP3.
-  # Android OS includes support for proprietary codecs regardless of building
-  # Chromium or Google Chrome. We also ship Google Chrome and Chromecast with
-  # proprietary codecs.
-  proprietary_codecs = is_android || is_chrome_branded || is_chromecast
-
-  enable_configuration_policy = !is_ios
+  # Enables proprietary codecs and demuxers; e.g. H264, AAC, MP3, and MP4.
+  # We always build Google Chrome and Chromecast with proprietary codecs.
+  proprietary_codecs = is_chrome_branded || is_chromecast
 
   enable_captive_portal_detection = !is_android && !is_ios
 
@@ -101,6 +97,7 @@ declare_args() {
   use_cups = (is_desktop_linux || is_mac) && !is_chromecast && !is_headless
 
   # Enables Wi-Fi Display functionality
+  # WARNING: This enables MPEG Transport Stream (MPEG-TS) encoding!
   enable_wifi_display = false
 }
 
@@ -180,3 +177,5 @@ use_gconf = is_linux && !is_chromeos && !is_chromecast && !is_headless
 enable_webvr = is_android
 
 use_gio = is_linux && !is_chromeos && !is_chromecast && !is_headless
+
+enable_configuration_policy = !is_ios

@@ -78,6 +78,33 @@ void OnGlobalDumpDone(MemoryDumpCallback wrapped_callback,
   }
 }
 
+// Proxy class which wraps a ConvertableToTraceFormat owned by the
+// |session_state| into a proxy object that can be added to the trace event log.
+// This is to solve the problem that the MemoryDumpSessionState is refcounted
+// but the tracing subsystem wants a scoped_ptr<ConvertableToTraceFormat>.
+template <typename T>
+struct SessionStateConvertableProxy : public ConvertableToTraceFormat {
+  using GetterFunctPtr = T* (MemoryDumpSessionState::*)() const;
+
+  SessionStateConvertableProxy(
+      scoped_refptr<MemoryDumpSessionState> session_state,
+      GetterFunctPtr getter_function)
+      : session_state(session_state), getter_function(getter_function) {}
+
+  void AppendAsTraceFormat(std::string* out) const override {
+    return (session_state.get()->*getter_function)()->AppendAsTraceFormat(out);
+  }
+
+  void EstimateTraceMemoryOverhead(
+      TraceEventMemoryOverhead* overhead) override {
+    return (session_state.get()->*getter_function)()
+        ->EstimateTraceMemoryOverhead(overhead);
+  }
+
+  scoped_refptr<MemoryDumpSessionState> session_state;
+  GetterFunctPtr const getter_function;
+};
+
 }  // namespace
 
 // static
@@ -184,43 +211,43 @@ void MemoryDumpManager::Initialize(MemoryDumpManagerDelegate* delegate,
 void MemoryDumpManager::RegisterDumpProvider(
     MemoryDumpProvider* mdp,
     const char* name,
-    const scoped_refptr<SingleThreadTaskRunner>& task_runner,
+    scoped_refptr<SingleThreadTaskRunner> task_runner,
     MemoryDumpProvider::Options options) {
   options.dumps_on_single_thread_task_runner = true;
-  RegisterDumpProviderInternal(mdp, name, task_runner, options);
+  RegisterDumpProviderInternal(mdp, name, std::move(task_runner), options);
 }
 
 void MemoryDumpManager::RegisterDumpProvider(
     MemoryDumpProvider* mdp,
     const char* name,
-    const scoped_refptr<SingleThreadTaskRunner>& task_runner) {
+    scoped_refptr<SingleThreadTaskRunner> task_runner) {
   // Set |dumps_on_single_thread_task_runner| to true because all providers
   // without task runner are run on dump thread.
   MemoryDumpProvider::Options options;
   options.dumps_on_single_thread_task_runner = true;
-  RegisterDumpProviderInternal(mdp, name, task_runner, options);
+  RegisterDumpProviderInternal(mdp, name, std::move(task_runner), options);
 }
 
 void MemoryDumpManager::RegisterDumpProviderWithSequencedTaskRunner(
     MemoryDumpProvider* mdp,
     const char* name,
-    const scoped_refptr<SequencedTaskRunner>& task_runner,
+    scoped_refptr<SequencedTaskRunner> task_runner,
     MemoryDumpProvider::Options options) {
   DCHECK(task_runner);
   options.dumps_on_single_thread_task_runner = false;
-  RegisterDumpProviderInternal(mdp, name, task_runner, options);
+  RegisterDumpProviderInternal(mdp, name, std::move(task_runner), options);
 }
 
 void MemoryDumpManager::RegisterDumpProviderInternal(
     MemoryDumpProvider* mdp,
     const char* name,
-    const scoped_refptr<SequencedTaskRunner>& task_runner,
+    scoped_refptr<SequencedTaskRunner> task_runner,
     const MemoryDumpProvider::Options& options) {
   if (dumper_registrations_ignored_for_testing_)
     return;
 
   scoped_refptr<MemoryDumpProviderInfo> mdpinfo =
-      new MemoryDumpProviderInfo(mdp, name, task_runner, options);
+      new MemoryDumpProviderInfo(mdp, name, std::move(task_runner), options);
 
   {
     AutoLock lock(lock_);
@@ -527,15 +554,15 @@ void MemoryDumpManager::FinalizeDumpAndAddToTrace(
   for (const auto& kv : pmd_async_state->process_dumps) {
     ProcessId pid = kv.first;  // kNullProcessId for the current process.
     ProcessMemoryDump* process_memory_dump = kv.second.get();
-    TracedValue* traced_value = new TracedValue();
-    scoped_refptr<ConvertableToTraceFormat> event_value(traced_value);
-    process_memory_dump->AsValueInto(traced_value);
+    scoped_ptr<TracedValue> traced_value(new TracedValue);
+    process_memory_dump->AsValueInto(traced_value.get());
     traced_value->SetString("level_of_detail",
                             MemoryDumpLevelOfDetailToString(
                                 pmd_async_state->req_args.level_of_detail));
     const char* const event_name =
         MemoryDumpTypeToString(pmd_async_state->req_args.dump_type);
 
+    scoped_ptr<ConvertableToTraceFormat> event_value(std::move(traced_value));
     TRACE_EVENT_API_ADD_TRACE_EVENT_WITH_PROCESS_ID(
         TRACE_EVENT_PHASE_MEMORY_DUMP,
         TraceLog::GetCategoryGroupEnabled(kTraceCategory), event_name,
@@ -580,31 +607,35 @@ void MemoryDumpManager::OnTraceLogEnabled() {
   AutoLock lock(lock_);
 
   DCHECK(delegate_);  // At this point we must have a delegate.
-
-  scoped_refptr<StackFrameDeduplicator> stack_frame_deduplicator = nullptr;
-  scoped_refptr<TypeNameDeduplicator> type_name_deduplicator = nullptr;
+  session_state_ = new MemoryDumpSessionState;
 
   if (heap_profiling_enabled_) {
     // If heap profiling is enabled, the stack frame deduplicator and type name
     // deduplicator will be in use. Add a metadata events to write the frames
     // and type IDs.
-    stack_frame_deduplicator = new StackFrameDeduplicator;
-    type_name_deduplicator = new TypeNameDeduplicator;
+    session_state_->SetStackFrameDeduplicator(
+        make_scoped_ptr(new StackFrameDeduplicator));
+
+    session_state_->SetTypeNameDeduplicator(
+        make_scoped_ptr(new TypeNameDeduplicator));
+
     TRACE_EVENT_API_ADD_METADATA_EVENT(
         TraceLog::GetCategoryGroupEnabled("__metadata"), "stackFrames",
         "stackFrames",
-        scoped_refptr<ConvertableToTraceFormat>(stack_frame_deduplicator));
+        make_scoped_ptr(
+            new SessionStateConvertableProxy<StackFrameDeduplicator>(
+                session_state_,
+                &MemoryDumpSessionState::stack_frame_deduplicator)));
+
     TRACE_EVENT_API_ADD_METADATA_EVENT(
         TraceLog::GetCategoryGroupEnabled("__metadata"), "typeNames",
         "typeNames",
-        scoped_refptr<ConvertableToTraceFormat>(type_name_deduplicator));
+        make_scoped_ptr(new SessionStateConvertableProxy<TypeNameDeduplicator>(
+            session_state_, &MemoryDumpSessionState::type_name_deduplicator)));
   }
 
   DCHECK(!dump_thread_);
   dump_thread_ = std::move(dump_thread);
-  session_state_ = new MemoryDumpSessionState(stack_frame_deduplicator,
-                                              type_name_deduplicator);
-
   subtle::NoBarrier_Store(&memory_tracing_enabled_, 1);
 
   // TODO(primiano): This is a temporary hack to disable periodic memory dumps
@@ -672,11 +703,11 @@ uint64_t MemoryDumpManager::GetTracingProcessId() const {
 MemoryDumpManager::MemoryDumpProviderInfo::MemoryDumpProviderInfo(
     MemoryDumpProvider* dump_provider,
     const char* name,
-    const scoped_refptr<SequencedTaskRunner>& task_runner,
+    scoped_refptr<SequencedTaskRunner> task_runner,
     const MemoryDumpProvider::Options& options)
     : dump_provider(dump_provider),
       name(name),
-      task_runner(task_runner),
+      task_runner(std::move(task_runner)),
       options(options),
       consecutive_failures(0),
       disabled(false) {}
@@ -698,15 +729,15 @@ bool MemoryDumpManager::MemoryDumpProviderInfo::Comparator::operator()(
 MemoryDumpManager::ProcessMemoryDumpAsyncState::ProcessMemoryDumpAsyncState(
     MemoryDumpRequestArgs req_args,
     const MemoryDumpProviderInfo::OrderedSet& dump_providers,
-    const scoped_refptr<MemoryDumpSessionState>& session_state,
+    scoped_refptr<MemoryDumpSessionState> session_state,
     MemoryDumpCallback callback,
-    const scoped_refptr<SingleThreadTaskRunner>& dump_thread_task_runner)
+    scoped_refptr<SingleThreadTaskRunner> dump_thread_task_runner)
     : req_args(req_args),
-      session_state(session_state),
+      session_state(std::move(session_state)),
       callback(callback),
       dump_successful(true),
       callback_task_runner(MessageLoop::current()->task_runner()),
-      dump_thread_task_runner(dump_thread_task_runner) {
+      dump_thread_task_runner(std::move(dump_thread_task_runner)) {
   pending_dump_providers.reserve(dump_providers.size());
   pending_dump_providers.assign(dump_providers.rbegin(), dump_providers.rend());
 }

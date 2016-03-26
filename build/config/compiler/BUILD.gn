@@ -22,6 +22,7 @@ declare_args() {
   # Default to warnings as errors for default workflow, where we catch
   # warnings with known toolchains. Allow overriding this e.g. for Chromium
   # builds on Linux that could use a different version of the compiler.
+  # With GCC, warnings in no-Chromium code are always not treated as errors.
   treat_warnings_as_errors = true
 
   # Normally, Android builds are lightly optimized, even for debug builds, to
@@ -74,6 +75,10 @@ declare_args() {
   # Omit unwind support in official builds to save space.
   # We can use breakpad for these builds.
   exclude_unwind_tables = is_chrome_branded && is_official_build
+
+  # If true, gold linker will save symbol table inside object files.
+  # This speeds up gdb startup by 60%
+  gdb_index = false
 }
 
 # Apply the default logic for these values if they were not set explicitly.
@@ -285,6 +290,10 @@ config("compiler") {
       #"-Wl,--threads",
       #"-Wl,--thread-count=4",
     ]
+
+    if (gdb_index) {
+      ldflags += [ "-Wl,--gdb-index" ]
+    }
 
     if (!using_sanitizer && !(is_android && use_order_profiling)) {
       # TODO(brettw) common.gypi has this only for target toolset.
@@ -593,7 +602,7 @@ config("compiler_codegen") {
         ]
       }
     } else if (current_cpu == "arm") {
-      if (!is_clang) {
+      if (is_android && !is_clang) {
         # Clang doesn't support these flags.
         cflags += [
           # The tree-sra optimization (scalar replacement for
@@ -782,6 +791,12 @@ config("default_warnings") {
         # C4312 is a VS 2015 64-bit warning for integer to larger pointer.
         # TODO(brucedawson): fix warnings, crbug.com/554200
         "/wd4312",
+
+        # TODO(brucedawson): http://crbug.com/593448 4334 is a 'suspicious
+        # shift' warning and 4595 is an 'illegal inline operator new' warning
+        # Both are new in VS 2015 Update 2 and can safely be deferred for now.
+        "/wd4334",
+        "/wd4595",
       ]
     }
 
@@ -806,10 +821,6 @@ config("default_warnings") {
       ]
     }
   } else {
-    if (treat_warnings_as_errors) {
-      cflags += [ "-Werror" ]
-    }
-
     if (is_mac && !is_nacl) {
       # When compiling Objective-C, warns if a method is used whose
       # availability is newer than the deployment target. This is not
@@ -906,6 +917,9 @@ config("chromium_code") {
     cflags = [ "/W4" ]  # Warning level 4.
   } else {
     cflags = [ "-Wall" ]
+    if (treat_warnings_as_errors) {
+      cflags += [ "-Werror" ]
+    }
     if (is_clang) {
       # Enable -Wextra for chromium_code when we control the compiler.
       cflags += [ "-Wextra" ]
@@ -951,10 +965,17 @@ config("no_chromium_code") {
       "_CRT_NONSTDC_NO_WARNINGS",
       "_CRT_NONSTDC_NO_DEPRECATE",
     ]
-  } else if (is_clang && !is_nacl) {
-    # TODO(thakis): Remove !is_nacl once
-    # https://codereview.webrtc.org/1552863002/ made its way into chromium.
-    cflags += [ "-Wall" ]
+  } else {
+    # GCC may emit unsuppressible warnings so don't add -Werror for no chromium
+    # code. crbug.com/589724
+    if (treat_warnings_as_errors && is_clang) {
+      cflags += [ "-Werror" ]
+    }
+    if (is_clang && !is_nacl) {
+      # TODO(thakis): Remove !is_nacl once
+      # https://codereview.webrtc.org/1552863002/ made its way into chromium.
+      cflags += [ "-Wall" ]
+    }
   }
 
   if (is_clang) {
@@ -1160,7 +1181,6 @@ config("no_optimize") {
     cflags = [
       "/Od",  # Disable optimization.
       "/Ob0",  # Disable all inlining (on by default).
-      "/RTC1",  # Runtime checks for stack frame and uninitialized variables.
     ]
   } else if (is_android && !android_full_debug) {
     # On Android we kind of optimize some things that don't affect debugging
@@ -1320,5 +1340,15 @@ config("default_symbols") {
     configs = [ ":symbols" ]
   } else {
     assert(false)
+  }
+}
+
+if (is_ios || is_mac) {
+  # On Mac and iOS, this enables support for ARC (automatic ref-counting).
+  # See http://clang.llvm.org/docs/AutomaticReferenceCounting.html.
+  config("enable_arc") {
+    common_flags = [ "-fobjc-arc" ]
+    cflags_objc = common_flags
+    cflags_objcc = common_flags
   }
 }

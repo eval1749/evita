@@ -116,8 +116,9 @@ class HistogramCache {
     }
 
     std::string histogram_name = ConvertJavaStringToUTF8(env, j_histogram_name);
-    histogram = Histogram::FactoryGet(histogram_name, min, max, num_buckets,
-                                      HistogramBase::kUmaTargetedHistogramFlag);
+    histogram =
+        Histogram::FactoryGet(histogram_name, min, max, num_buckets,
+                              HistogramBase::kUmaTargetedHistogramFlag);
     return InsertLocked(j_histogram_key, histogram);
   }
 
@@ -272,10 +273,10 @@ void RecordSparseHistogram(JNIEnv* env,
                            const JavaParamRef<jstring>& j_histogram_name,
                            jint j_histogram_key,
                            jint j_sample) {
-  int sample = static_cast<int>(j_sample);
-  g_histograms.Get()
-      .SparseHistogram(env, j_histogram_name, j_histogram_key)
-      ->Add(sample);
+    int sample = static_cast<int>(j_sample);
+    g_histograms.Get()
+        .SparseHistogram(env, j_histogram_name, j_histogram_key)
+        ->Add(sample);
 }
 
 void RecordCustomTimesHistogramMilliseconds(

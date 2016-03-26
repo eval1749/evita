@@ -60,6 +60,12 @@ bool g_check_called_once = true;
 bool g_called_once = false;
 #endif  // !defined(NDEBUG)
 
+// To debug http://crbug.com/445616.
+int g_debug_icu_last_error;
+int g_debug_icu_load;
+int g_debug_icu_pf_last_error;
+int g_debug_icu_pf_error_details;
+
 #if ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE
 // Use an unversioned file name to simplify a icu version update down the road.
 // No need to change the filename in multiple places (gyp files, windows
@@ -141,9 +147,20 @@ void LazyInitIcuDataFile() {
 #endif  // !defined(OS_MACOSX)
   File file(data_path, File::FLAG_OPEN | File::FLAG_READ);
   if (file.IsValid()) {
+    // TODO(scottmg): http://crbug.com/445616.
+    g_debug_icu_pf_last_error = 0;
+    g_debug_icu_pf_error_details = 0;
+
     g_icudtl_pf = file.TakePlatformFile();
     g_icudtl_region = MemoryMappedFile::Region::kWholeFile;
   }
+#if defined(OS_WIN)
+  else {
+    // TODO(scottmg): http://crbug.com/445616.
+    g_debug_icu_pf_last_error = ::GetLastError();
+    g_debug_icu_pf_error_details = file.error_details();
+  }
+#endif  // OS_WIN
 }
 
 bool InitializeICUWithFileDescriptorInternal(
@@ -151,15 +168,18 @@ bool InitializeICUWithFileDescriptorInternal(
     const MemoryMappedFile::Region& data_region) {
   // This can be called multiple times in tests.
   if (g_icudtl_mapped_file) {
+    g_debug_icu_load = 0;  // To debug http://crbug.com/445616.
     return true;
   }
   if (data_fd == kInvalidPlatformFile) {
+    g_debug_icu_load = 1;  // To debug http://crbug.com/445616.
     LOG(ERROR) << "Invalid file descriptor to ICU data received.";
     return false;
   }
 
   scoped_ptr<MemoryMappedFile> icudtl_mapped_file(new MemoryMappedFile());
   if (!icudtl_mapped_file->Initialize(File(data_fd), data_region)) {
+    g_debug_icu_load = 2;  // To debug http://crbug.com/445616.
     LOG(ERROR) << "Couldn't mmap icu data file";
     return false;
   }
@@ -167,6 +187,10 @@ bool InitializeICUWithFileDescriptorInternal(
 
   UErrorCode err = U_ZERO_ERROR;
   udata_setCommonData(const_cast<uint8_t*>(g_icudtl_mapped_file->data()), &err);
+  if (err != U_ZERO_ERROR) {
+    g_debug_icu_load = 3;  // To debug http://crbug.com/445616.
+    g_debug_icu_last_error = err;
+  }
   return err == U_ZERO_ERROR;
 }
 #endif  // ICU_UTIL_DATA_IMPL == ICU_UTIL_DATA_FILE
@@ -257,6 +281,14 @@ bool InitializeICU() {
   result =
       InitializeICUWithFileDescriptorInternal(g_icudtl_pf, g_icudtl_region);
 #if defined(OS_WIN)
+  int debug_icu_load = g_debug_icu_load;
+  debug::Alias(&debug_icu_load);
+  int debug_icu_last_error = g_debug_icu_last_error;
+  debug::Alias(&debug_icu_last_error);
+  int debug_icu_pf_last_error = g_debug_icu_pf_last_error;
+  debug::Alias(&debug_icu_pf_last_error);
+  int debug_icu_pf_error_details = g_debug_icu_pf_error_details;
+  debug::Alias(&debug_icu_pf_error_details);
   CHECK(result);  // TODO(scottmg): http://crbug.com/445616
 #endif
 #endif

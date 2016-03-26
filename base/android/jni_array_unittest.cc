@@ -45,10 +45,11 @@ TEST(JniArray, BasicConversions) {
   EXPECT_EQ(expected_vec, vectorFromBytes);
 }
 
-void CheckIntConversion(JNIEnv* env,
-                        const int* int_array,
-                        const size_t len,
-                        const ScopedJavaLocalRef<jintArray>& ints) {
+void CheckIntConversion(
+    JNIEnv* env,
+    const int* int_array,
+    const size_t len,
+    const ScopedJavaLocalRef<jintArray>& ints) {
   ASSERT_TRUE(ints.obj());
 
   jsize java_array_len = env->GetArrayLength(ints.obj());
@@ -112,10 +113,11 @@ void CheckIntArrayConversion(JNIEnv* env,
   }
 }
 
-void CheckFloatConversion(JNIEnv* env,
-                          const float* float_array,
-                          const size_t len,
-                          const ScopedJavaLocalRef<jfloatArray>& floats) {
+void CheckFloatConversion(
+    JNIEnv* env,
+    const float* float_array,
+    const size_t len,
+    const ScopedJavaLocalRef<jfloatArray>& floats) {
   ASSERT_TRUE(floats.obj());
 
   jsize java_array_len = env->GetArrayLength(floats.obj());
@@ -129,7 +131,7 @@ void CheckFloatConversion(JNIEnv* env,
 }
 
 TEST(JniArray, FloatConversions) {
-  const float kFloats[] = {0.0f, 1.0f, -10.0f};
+  const float kFloats[] = { 0.0f, 1.0f, -10.0f};
   const size_t kLen = arraysize(kFloats);
 
   JNIEnv* env = AttachCurrentThread();
@@ -235,7 +237,7 @@ TEST(JniArray, JavaFloatArrayToFloatVector) {
   JavaFloatArrayToFloatVector(env, jfloats.obj(), &floats);
 
   ASSERT_EQ(static_cast<jsize>(floats.size()),
-            env->GetArrayLength(jfloats.obj()));
+      env->GetArrayLength(jfloats.obj()));
 
   jfloat value;
   for (size_t i = 0; i < kLen; ++i) {

@@ -10,6 +10,9 @@
 
 #include "modern_linker_jni.h"
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -18,14 +21,11 @@
 #include <link.h>
 #include <stddef.h>
 #include <string.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include "android_dlext.h"
 #include "linker_jni.h"
 
-#define PAGE_START(x) ((x)&PAGE_MASK)
+#define PAGE_START(x) ((x) & PAGE_MASK)
 #define PAGE_END(x) PAGE_START((x) + (PAGE_SIZE - 1))
 
 namespace chromium_android_linker {
@@ -105,9 +105,7 @@ bool DlIteratePhdr(int (*callback)(dl_phdr_info*, size_t, void*),
 // Convenience struct wrapper round android_dlextinfo.
 struct AndroidDlextinfo {
   AndroidDlextinfo(int flags,
-                   void* reserved_addr,
-                   size_t reserved_size,
-                   int relro_fd) {
+                   void* reserved_addr, size_t reserved_size, int relro_fd) {
     memset(&extinfo, 0, sizeof(extinfo));
     extinfo.flags = flags;
     extinfo.reserved_addr = reserved_addr;
@@ -125,8 +123,8 @@ bool AndroidDlopenExt(const char* filename,
                       int flag,
                       const AndroidDlextinfo* dlextinfo,
                       void** status) {
-  using DlopenExtFunctionPtr =
-      void* (*)(const char*, int, const android_dlextinfo*);
+  using DlopenExtFunctionPtr = void* (*)(const char*,
+                                         int, const android_dlextinfo*);
   static DlopenExtFunctionPtr function_ptr = nullptr;
 
   if (!function_ptr) {
@@ -139,11 +137,12 @@ bool AndroidDlopenExt(const char* filename,
   }
 
   const android_dlextinfo* extinfo = &dlextinfo->extinfo;
-  LOG_INFO(
-      "android_dlopen_ext:"
-      " flags=0x%llx, reserved_addr=%p, reserved_size=%d, relro_fd=%d",
-      static_cast<long long>(extinfo->flags), extinfo->reserved_addr,
-      static_cast<int>(extinfo->reserved_size), extinfo->relro_fd);
+  LOG_INFO("android_dlopen_ext:"
+           " flags=0x%llx, reserved_addr=%p, reserved_size=%d, relro_fd=%d",
+           static_cast<long long>(extinfo->flags),
+           extinfo->reserved_addr,
+           static_cast<int>(extinfo->reserved_size),
+           extinfo->relro_fd);
 
   *status = (*function_ptr)(filename, flag, extinfo);
   return true;
@@ -152,7 +151,7 @@ bool AndroidDlopenExt(const char* filename,
 // Callback data for FindLoadedLibrarySize().
 struct CallbackData {
   explicit CallbackData(void* address)
-      : load_address(address), load_size(0), min_vaddr(0) {}
+      : load_address(address), load_size(0), min_vaddr(0) { }
 
   const void* load_address;
   size_t load_size;
@@ -206,11 +205,7 @@ class ScopedAnonymousMmap {
   ~ScopedAnonymousMmap() { munmap(addr_, size_); }
 
   void* GetAddr() const { return effective_addr_; }
-  void Release() {
-    addr_ = nullptr;
-    size_ = 0;
-    effective_addr_ = nullptr;
-  }
+  void Release() { addr_ = nullptr; size_ = 0; effective_addr_ = nullptr; }
 
  private:
   void* addr_;
@@ -238,8 +233,8 @@ ScopedAnonymousMmap::ScopedAnonymousMmap(void* addr, size_t size) {
       size_ = 0;
       return;
     }
-    addr = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(addr) -
-                                   kBreakpadGuardRegionBytes);
+    addr = reinterpret_cast<void*>(
+        reinterpret_cast<uintptr_t>(addr) - kBreakpadGuardRegionBytes);
   }
   LOG_INFO("Added %d to size, for Breakpad guard",
            static_cast<int>(kBreakpadGuardRegionBytes));
@@ -260,7 +255,8 @@ ScopedAnonymousMmap::ScopedAnonymousMmap(void* addr, size_t size) {
   if (addr_ == MAP_FAILED)
     return;
   if (addr_ < reinterpret_cast<void*>(kBreakpadGuardRegionBytes)) {
-    LOG_ERROR("Map address %p is too low to accommodate Breakpad guard", addr_);
+    LOG_ERROR("Map address %p is too low to accommodate Breakpad guard",
+              addr_);
     effective_addr_ = MAP_FAILED;
   } else {
     effective_addr_ = reinterpret_cast<void*>(
@@ -301,9 +297,9 @@ void ResizeReservedAddressSpace(void* addr,
                                 size_t reserved_size,
                                 size_t load_size,
                                 size_t min_vaddr) {
-  LOG_INFO("Called for %p, reserved %d, loaded %d, min_vaddr %d", addr,
-           static_cast<int>(reserved_size), static_cast<int>(load_size),
-           static_cast<int>(min_vaddr));
+  LOG_INFO("Called for %p, reserved %d, loaded %d, min_vaddr %d",
+           addr, static_cast<int>(reserved_size),
+           static_cast<int>(load_size), static_cast<int>(min_vaddr));
 
   const uintptr_t uintptr_addr = reinterpret_cast<uintptr_t>(addr);
 
@@ -373,8 +369,8 @@ jboolean LoadLibrary(JNIEnv* env,
                      jlong load_address,
                      jobject lib_info_obj) {
   String dlopen_library_path(env, dlopen_ext_path);
-  LOG_INFO("Called for %s, at address 0x%llx", dlopen_library_path.c_str(),
-           load_address);
+  LOG_INFO("Called for %s, at address 0x%llx",
+           dlopen_library_path.c_str(), load_address);
 
   if (!IsValidAddress(load_address)) {
     LOG_ERROR("Invalid address 0x%llx", load_address);
@@ -493,8 +489,8 @@ jboolean CreateSharedRelro(JNIEnv* env,
                            jstring relro_path,
                            jobject lib_info_obj) {
   String dlopen_library_path(env, dlopen_ext_path);
-  LOG_INFO("Called for %s, at address 0x%llx", dlopen_library_path.c_str(),
-           load_address);
+  LOG_INFO("Called for %s, at address 0x%llx",
+           dlopen_library_path.c_str(), load_address);
 
   if (!IsValidAddress(load_address) || load_address == 0) {
     LOG_ERROR("Invalid address 0x%llx", load_address);
@@ -527,7 +523,8 @@ jboolean CreateSharedRelro(JNIEnv* env,
   }
 
   // Use android_dlopen_ext() to create the shared RELRO.
-  const int flags = ANDROID_DLEXT_RESERVED_ADDRESS | ANDROID_DLEXT_WRITE_RELRO;
+  const int flags = ANDROID_DLEXT_RESERVED_ADDRESS
+                    | ANDROID_DLEXT_WRITE_RELRO;
   AndroidDlextinfo dlextinfo(flags, addr, size, relro_fd);
 
   const char* path = dlopen_library_path.c_str();
@@ -628,7 +625,8 @@ bool ModernLinkerJNIInit(JavaVM* vm, JNIEnv* env) {
 
   // Register native methods.
   jclass linker_class;
-  if (!InitClassReference(env, "org/chromium/base/library_loader/ModernLinker",
+  if (!InitClassReference(env,
+                          "org/chromium/base/library_loader/ModernLinker",
                           &linker_class))
     return false;
 

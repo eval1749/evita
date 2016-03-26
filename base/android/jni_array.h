@@ -27,13 +27,11 @@ BASE_EXPORT ScopedJavaLocalRef<jbyteArray> ToJavaByteArray(
     const std::vector<uint8_t>& bytes);
 
 // Returns a new Java int array converted from the given int array.
-BASE_EXPORT ScopedJavaLocalRef<jintArray> ToJavaIntArray(JNIEnv* env,
-                                                         const int* ints,
-                                                         size_t len);
+BASE_EXPORT ScopedJavaLocalRef<jintArray> ToJavaIntArray(
+    JNIEnv* env, const int* ints, size_t len);
 
 BASE_EXPORT ScopedJavaLocalRef<jintArray> ToJavaIntArray(
-    JNIEnv* env,
-    const std::vector<int>& ints);
+    JNIEnv* env, const std::vector<int>& ints);
 
 // Returns a new Java long array converted from the given int64_t array.
 BASE_EXPORT ScopedJavaLocalRef<jlongArray> ToJavaLongArray(JNIEnv* env,
@@ -45,8 +43,8 @@ BASE_EXPORT ScopedJavaLocalRef<jlongArray> ToJavaLongArray(
     const std::vector<int64_t>& longs);
 
 // Returns a new Java float array converted from the given C++ float array.
-BASE_EXPORT ScopedJavaLocalRef<jfloatArray>
-ToJavaFloatArray(JNIEnv* env, const float* floats, size_t len);
+BASE_EXPORT ScopedJavaLocalRef<jfloatArray> ToJavaFloatArray(
+    JNIEnv* env, const float* floats, size_t len);
 
 BASE_EXPORT ScopedJavaLocalRef<jfloatArray> ToJavaFloatArray(
     JNIEnv* env,
@@ -54,16 +52,13 @@ BASE_EXPORT ScopedJavaLocalRef<jfloatArray> ToJavaFloatArray(
 
 // Returns a array of Java byte array converted from |v|.
 BASE_EXPORT ScopedJavaLocalRef<jobjectArray> ToJavaArrayOfByteArray(
-    JNIEnv* env,
-    const std::vector<std::string>& v);
+    JNIEnv* env, const std::vector<std::string>& v);
 
 BASE_EXPORT ScopedJavaLocalRef<jobjectArray> ToJavaArrayOfStrings(
-    JNIEnv* env,
-    const std::vector<std::string>& v);
+    JNIEnv* env,  const std::vector<std::string>& v);
 
 BASE_EXPORT ScopedJavaLocalRef<jobjectArray> ToJavaArrayOfStrings(
-    JNIEnv* env,
-    const std::vector<string16>& v);
+    JNIEnv* env,  const std::vector<string16>& v);
 
 // Converts a Java string array to a native array.
 BASE_EXPORT void AppendJavaStringArrayToStringVector(
@@ -87,9 +82,10 @@ BASE_EXPORT void JavaByteArrayToByteVector(JNIEnv* env,
                                            std::vector<uint8_t>* out);
 
 // Replaces the content of |out| with the Java ints in |int_array|.
-BASE_EXPORT void JavaIntArrayToIntVector(JNIEnv* env,
-                                         jintArray int_array,
-                                         std::vector<int>* out);
+BASE_EXPORT void JavaIntArrayToIntVector(
+    JNIEnv* env,
+    jintArray int_array,
+    std::vector<int>* out);
 
 // Replaces the content of |out| with the Java longs in |long_array|.
 BASE_EXPORT void JavaLongArrayToInt64Vector(JNIEnv* env,
@@ -97,14 +93,16 @@ BASE_EXPORT void JavaLongArrayToInt64Vector(JNIEnv* env,
                                             std::vector<int64_t>* out);
 
 // Replaces the content of |out| with the Java longs in |long_array|.
-BASE_EXPORT void JavaLongArrayToLongVector(JNIEnv* env,
-                                           jlongArray long_array,
-                                           std::vector<jlong>* out);
+BASE_EXPORT void JavaLongArrayToLongVector(
+    JNIEnv* env,
+    jlongArray long_array,
+    std::vector<jlong>* out);
 
 // Replaces the content of |out| with the Java floats in |float_array|.
-BASE_EXPORT void JavaFloatArrayToFloatVector(JNIEnv* env,
-                                             jfloatArray float_array,
-                                             std::vector<float>* out);
+BASE_EXPORT void JavaFloatArrayToFloatVector(
+    JNIEnv* env,
+    jfloatArray float_array,
+    std::vector<float>* out);
 
 // Assuming |array| is an byte[][] (array of byte arrays), replaces the
 // content of |out| with the corresponding vector of strings. No UTF-8

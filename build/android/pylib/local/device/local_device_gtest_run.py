@@ -12,6 +12,7 @@ from devil.android import device_temp_file
 from devil.android import ports
 from devil.utils import reraiser_thread
 from pylib import constants
+from pylib.base import base_test_result
 from pylib.gtest import gtest_test_instance
 from pylib.local import local_test_server_spawner
 from pylib.local.device import local_device_environment
@@ -229,7 +230,7 @@ class LocalDeviceGtestRun(local_device_test_run.LocalDeviceTestRun):
       self._delegate = _ApkDelegate(self._test_instance)
     elif self._test_instance.exe:
       self._delegate = _ExeDelegate(self, self._test_instance.exe)
-
+    self._crashes = set()
     self._servers = collections.defaultdict(list)
 
   #override
@@ -283,8 +284,19 @@ class LocalDeviceGtestRun(local_device_test_run.LocalDeviceTestRun):
 
   #override
   def _CreateShards(self, tests):
+    # _crashes are tests that might crash and make the tests in the same shard
+    # following the crashed testcase not run.
+    # Thus we need to create separate shards for each crashed testcase,
+    # so that other tests can be run.
     device_count = len(self._env.devices)
     shards = []
+
+    # Add shards with only one suspect testcase.
+    shards += [[crash] for crash in self._crashes if crash in tests]
+
+    # Delete suspect testcase from tests.
+    tests = [test for test in tests if not test in self._crashes]
+
     for i in xrange(0, device_count):
       unbounded_shard = tests[i::device_count]
       shards += [unbounded_shard[j:j+_MAX_SHARD_SIZE]
@@ -315,8 +327,11 @@ class LocalDeviceGtestRun(local_device_test_run.LocalDeviceTestRun):
 
     # Query all devices in case one fails.
     test_lists = self._env.parallel_devices.pMap(list_tests).pGet(None)
-    # TODO(agrieve): Make this fail rather than return an empty list when
-    #     all devices fail.
+
+    # If all devices failed to list tests, raise an exception.
+    if all([tl is None for tl in test_lists]):
+      raise device_errors.CommandFailedError(
+          'Failed to list tests on any device')
     return list(sorted(set().union(*[set(tl) for tl in test_lists if tl])))
 
   #override
@@ -338,6 +353,10 @@ class LocalDeviceGtestRun(local_device_test_run.LocalDeviceTestRun):
     # Parse the output.
     # TODO(jbudorick): Transition test scripts away from parsing stdout.
     results = self._test_instance.ParseGTestOutput(output)
+
+    # Check whether there are any crashed testcases.
+    self._crashes.update(r.GetName() for r in results
+                         if r.GetType() == base_test_result.ResultType.CRASH)
     return results
 
   #override

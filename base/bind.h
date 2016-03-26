@@ -51,9 +51,11 @@ namespace internal {
 // Don't use Alias Template directly here to avoid a compile error on MSVC2013.
 template <typename Functor, typename... Args>
 struct MakeUnboundRunTypeImpl {
-  using Type = typename BindState<typename FunctorTraits<Functor>::RunnableType,
-                                  typename FunctorTraits<Functor>::RunType,
-                                  Args...>::UnboundRunType;
+  using Type =
+      typename BindState<
+          typename FunctorTraits<Functor>::RunnableType,
+          typename FunctorTraits<Functor>::RunType,
+          Args...>::UnboundRunType;
 };
 
 }  // namespace internal
@@ -63,8 +65,8 @@ using MakeUnboundRunType =
     typename internal::MakeUnboundRunTypeImpl<Functor, Args...>::Type;
 
 template <typename Functor, typename... Args>
-base::Callback<MakeUnboundRunType<Functor, Args...>> Bind(Functor functor,
-                                                          Args&&... args) {
+base::Callback<MakeUnboundRunType<Functor, Args...>>
+Bind(Functor functor, Args&&... args) {
   // Type aliases for how to store and run the functor.
   using RunnableType = typename internal::FunctorTraits<Functor>::RunnableType;
   using RunType = typename internal::FunctorTraits<Functor>::RunType;
@@ -100,8 +102,9 @@ base::Callback<MakeUnboundRunType<Functor, Args...>> Bind(Functor functor,
 
   using BindState = internal::BindState<RunnableType, RunType, Args...>;
 
-  return Callback<typename BindState::UnboundRunType>(new BindState(
-      internal::MakeRunnable(functor), std::forward<Args>(args)...));
+  return Callback<typename BindState::UnboundRunType>(
+      new BindState(internal::MakeRunnable(functor),
+                    std::forward<Args>(args)...));
 }
 
 }  // namespace base

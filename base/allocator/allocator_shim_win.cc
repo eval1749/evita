@@ -5,8 +5,8 @@
 #include <limits.h>
 #include <malloc.h>
 #include <new.h>
-#include <stddef.h>
 #include <windows.h>
+#include <stddef.h>
 
 // This shim make it possible to perform additional checks on allocations
 // before passing them to the Heap functions.

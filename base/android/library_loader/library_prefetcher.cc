@@ -121,8 +121,8 @@ bool NativeLibraryPrefetcher::FindRanges(std::vector<AddressRange>* ranges) {
 
 // static
 bool NativeLibraryPrefetcher::ForkAndPrefetchNativeLibrary() {
-// Avoid forking with cygprofile instrumentation because the latter performs
-// memory allocations.
+  // Avoid forking with cygprofile instrumentation because the latter performs
+  // memory allocations.
 #if defined(CYGPROFILE_INSTRUMENTATION)
   return false;
 #endif

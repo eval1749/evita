@@ -1000,9 +1000,6 @@ template("junit_binary") {
 #     will be added to java_files and be included in this library.
 #   srcjars: List of srcjars to be included in this library, together with the
 #     ones obtained from srcjar_deps.
-#   DEPRECATED_java_in_dir: Directory containing java files. All .java files in
-#     this directory will be included in the library. This is only supported to
-#     ease the gyp->gn conversion and will be removed in the future.
 #
 #   chromium_code: If true, extra analysis warning/errors will be enabled.
 #   enable_errorprone: If true, enables the errorprone compiler.
@@ -1092,9 +1089,6 @@ template("java_prebuilt") {
 #     will be added to java_files and be included in this library.
 #   srcjars: List of srcjars to be included in this library, together with the
 #     ones obtained from srcjar_deps.
-#   DEPRECATED_java_in_dir: Directory containing java files. All .java files in
-#     this directory will be included in the library. This is only supported to
-#     ease the gyp->gn conversion and will be removed in the future.
 #
 #   chromium_code: If true, extra analysis warning/errors will be enabled.
 #   enable_errorprone: If true, enables the errorprone compiler.
@@ -1267,10 +1261,10 @@ template("android_java_prebuilt") {
 #     all other asset files.
 #   alternative_locale_resource_dep: The locale resource target which overrides
 #     any exsting locale resources in dep graph.
-#
-#   DEPRECATED_java_in_dir: Directory containing java files. All .java files in
-#     this directory will be included in the library. This is only supported to
-#     ease the gyp->gn conversion and will be removed in the future.
+#   requires_sdk_api_level_23: If defined and true, the apk is intended for
+#     installation only on Android M or later. In these releases the system
+#     linker does relocation unpacking, so we can enable it unconditionally.
+#   secondary_native_libs: the path of native libraries for secondary app abi.
 #
 # Example
 #   android_apk("foo_apk") {
@@ -1365,15 +1359,20 @@ template("android_apk") {
                                invoker.enable_relocation_packing
   _load_library_from_apk =
       defined(invoker.load_library_from_apk) && invoker.load_library_from_apk
+  _requires_sdk_api_level_23 = defined(invoker.requires_sdk_api_level_23) &&
+                               invoker.requires_sdk_api_level_23
 
   assert(_use_chromium_linker || true)  # Mark as used.
+  assert(_requires_sdk_api_level_23 || true)
   if (_enable_relocation_packing) {
-    assert(_use_chromium_linker,
-           "enable_relocation_packing requires use_chromium_linker")
+    assert(_use_chromium_linker || _requires_sdk_api_level_23,
+           "enable_relocation_packing requires either use_chromium_linker " +
+               "or requires_sdk_api_level_23")
   }
   if (_load_library_from_apk) {
-    assert(_use_chromium_linker,
-           "load_library_from_apk requires use_chromium_linker")
+    assert(_use_chromium_linker || _requires_sdk_api_level_23,
+           "load_library_from_apk requires use_chromium_linker " +
+               "or requires_sdk_api_level_23")
   }
 
   # The dependency that makes the chromium linker, if any is needed.
@@ -1448,6 +1447,11 @@ template("android_apk") {
     if (defined(invoker.alternative_locale_resource_dep)) {
       deps += [ invoker.alternative_locale_resource_dep ]
       has_alternative_locale_resource = true
+    }
+
+    # Added emma to the target's classpath via its .build_config.
+    if (emma_coverage && !_emma_never_instrument) {
+      deps += [ "//third_party/android_tools:emma_device" ]
     }
 
     proguard_enabled = _proguard_enabled
@@ -1558,8 +1562,6 @@ template("android_apk") {
 
     if (defined(invoker.java_files)) {
       java_files = invoker.java_files
-    } else if (defined(invoker.DEPRECATED_java_in_dir)) {
-      DEPRECATED_java_in_dir = invoker.DEPRECATED_java_in_dir
     } else {
       java_files = []
     }
@@ -1676,11 +1678,6 @@ template("android_apk") {
       }
       args = [ "--inputs=@FileArg($_dex_arg_key)" ]
     }
-
-    if (emma_coverage && !_emma_never_instrument) {
-      no_locals = true
-      sources += [ "$android_sdk_root/tools/lib/emma_device.jar" ]
-    }
   }
 
   _native_libs_file_arg_dep = ":$build_config_target"
@@ -1766,6 +1763,7 @@ template("android_apk") {
                              "language_splits",
                              "page_align_shared_libraries",
                              "public_deps",
+                             "secondary_native_libs",
                              "shared_resources",
                              "uncompress_shared_libraries",
                              "write_asset_list",
@@ -1925,12 +1923,20 @@ template("android_apk") {
   }
 
   group(target_name) {
-    forward_variables_from(invoker, [ "data_deps" ])
+    forward_variables_from(invoker,
+                           [
+                             "data",
+                             "data_deps",
+                           ])
     public_deps = _final_deps
   }
   group("${target_name}_incremental") {
     data_deps = []
-    forward_variables_from(invoker, [ "data_deps" ])
+    forward_variables_from(invoker,
+                           [
+                             "data",
+                             "data_deps",
+                           ])
 
     # device/commands is used by the installer script to push files via .zip.
     data_deps += [ "//build/android/pylib/device/commands" ] +
@@ -1972,10 +1978,6 @@ template("android_apk") {
 #     also be included in the apk.
 #   apk_under_test: The apk being tested.
 #   isolate_file: Isolate file containing the list of test data dependencies.
-#
-#   DEPRECATED_java_in_dir: Directory containing java files. All .java files in
-#     this directory will be included in the library. This is only supported to
-#     ease the gyp->gn conversion and will be removed in the future.
 #
 # Example
 #   instrumentation_test_apk("foo_test_apk") {
@@ -2037,9 +2039,8 @@ template("instrumentation_test_apk") {
     }
 
     create_dist_ijar = true
-    run_findbugs =
-        defined(invoker.run_findbugs) && invoker.run_findbugs &&
-        (defined(invoker.java_files) || defined(invoker.DEPRECATED_java_in_dir))
+    run_findbugs = defined(invoker.run_findbugs) && invoker.run_findbugs &&
+                   defined(invoker.java_files)
   }
 
   group(target_name) {

@@ -54,12 +54,9 @@
             # javascript-related targets cause v8 to be built.
             '../mojo/mojo_base.gyp:mojo_common_lib',
             '../mojo/mojo_base.gyp:mojo_common_unittests',
-            '../mojo/mojo_base.gyp:mojo_environment_chromium',
             '../mojo/mojo_edk.gyp:mojo_system_impl',
             '../mojo/mojo_edk_tests.gyp:mojo_public_bindings_unittests',
-            '../mojo/mojo_edk_tests.gyp:mojo_public_environment_unittests',
             '../mojo/mojo_edk_tests.gyp:mojo_public_system_unittests',
-            '../mojo/mojo_edk_tests.gyp:mojo_public_utility_unittests',
             '../mojo/mojo_edk_tests.gyp:mojo_system_unittests',
             '../mojo/mojo_public.gyp:mojo_cpp_bindings',
             '../mojo/mojo_public.gyp:mojo_public_test_utils',
@@ -334,6 +331,7 @@
         ['OS!="ios"', {
           'dependencies': [
             '../ui/gl/gl_tests.gyp:gl_unittests',
+	    '../url/ipc/url_ipc.gyp:url_ipc_unittests',
           ],
         }],
         ['OS!="ios" and OS!="mac"', {
@@ -435,6 +433,7 @@
         ['chromeos==1', {
           'dependencies': [
             '../ui/chromeos/ui_chromeos.gyp:ui_chromeos_unittests',
+            '../ui/arc/arc.gyp:ui_arc_unittests',
           ],
         }],
         ['OS=="linux"', {
@@ -835,6 +834,7 @@
             '../third_party/WebKit/public/all.gyp:*',
             '../tools/android/android_tools.gyp:android_tools',
             '../tools/android/android_tools.gyp:memconsumer',
+            '../tools/android/android_tools.gyp:push_apps_to_background',
             '../tools/android/findbugs_plugin/findbugs_plugin.gyp:findbugs_plugin_test',
             '../tools/cygprofile/cygprofile.gyp:cygprofile_unittests',
             '../ui/android/ui_android.gyp:ui_android_unittests',

@@ -173,7 +173,9 @@ class CopyMoveCounter {
     return *this;
   }
 
-  int copies() const { return *copies_; }
+  int copies() const {
+    return *copies_;
+  }
 
  private:
   int* copies_;
@@ -223,9 +225,13 @@ class MoveCounter {
 
 class DeleteCounter {
  public:
-  explicit DeleteCounter(int* deletes) : deletes_(deletes) {}
+  explicit DeleteCounter(int* deletes)
+      : deletes_(deletes) {
+  }
 
-  ~DeleteCounter() { (*deletes_)++; }
+  ~DeleteCounter() {
+    (*deletes_)++;
+  }
 
   void VoidMethod0() {}
 
@@ -281,11 +287,11 @@ int UnwrapNoRefParentConstRef(const NoRefParent& p) {
   return p.value;
 }
 
-void RefArgSet(int& n) {
+void RefArgSet(int &n) {
   n = 2;
 }
 
-void PtrArgSet(int* n) {
+void PtrArgSet(int *n) {
   *n = 2;
 }
 
@@ -309,9 +315,12 @@ class BindTest : public ::testing::Test {
     static_func_mock_ptr = &static_func_mock_;
   }
 
-  virtual ~BindTest() {}
+  virtual ~BindTest() {
+  }
 
-  static void VoidFunc0() { static_func_mock_ptr->VoidMethod0(); }
+  static void VoidFunc0() {
+    static_func_mock_ptr->VoidMethod0();
+  }
 
   static int IntFunc0() { return static_func_mock_ptr->IntMethod0(); }
 
@@ -339,37 +348,37 @@ TEST_F(BindTest, ArityTest) {
   Callback<int(int)> c1 = Bind(&Sum, 32, 16, 8, 4, 2);
   EXPECT_EQ(75, c1.Run(13));
 
-  Callback<int(int, int)> c2 = Bind(&Sum, 32, 16, 8, 4);
+  Callback<int(int,int)> c2 = Bind(&Sum, 32, 16, 8, 4);
   EXPECT_EQ(85, c2.Run(13, 12));
 
-  Callback<int(int, int, int)> c3 = Bind(&Sum, 32, 16, 8);
+  Callback<int(int,int,int)> c3 = Bind(&Sum, 32, 16, 8);
   EXPECT_EQ(92, c3.Run(13, 12, 11));
 
-  Callback<int(int, int, int, int)> c4 = Bind(&Sum, 32, 16);
+  Callback<int(int,int,int,int)> c4 = Bind(&Sum, 32, 16);
   EXPECT_EQ(94, c4.Run(13, 12, 11, 10));
 
-  Callback<int(int, int, int, int, int)> c5 = Bind(&Sum, 32);
+  Callback<int(int,int,int,int,int)> c5 = Bind(&Sum, 32);
   EXPECT_EQ(87, c5.Run(13, 12, 11, 10, 9));
 
-  Callback<int(int, int, int, int, int, int)> c6 = Bind(&Sum);
+  Callback<int(int,int,int,int,int,int)> c6 = Bind(&Sum);
   EXPECT_EQ(69, c6.Run(13, 12, 11, 10, 9, 14));
 }
 
 // Test the Currying ability of the Callback system.
 TEST_F(BindTest, CurryingTest) {
-  Callback<int(int, int, int, int, int, int)> c6 = Bind(&Sum);
+  Callback<int(int,int,int,int,int,int)> c6 = Bind(&Sum);
   EXPECT_EQ(69, c6.Run(13, 12, 11, 10, 9, 14));
 
-  Callback<int(int, int, int, int, int)> c5 = Bind(c6, 32);
+  Callback<int(int,int,int,int,int)> c5 = Bind(c6, 32);
   EXPECT_EQ(87, c5.Run(13, 12, 11, 10, 9));
 
-  Callback<int(int, int, int, int)> c4 = Bind(c5, 16);
+  Callback<int(int,int,int,int)> c4 = Bind(c5, 16);
   EXPECT_EQ(94, c4.Run(13, 12, 11, 10));
 
-  Callback<int(int, int, int)> c3 = Bind(c4, 8);
+  Callback<int(int,int,int)> c3 = Bind(c4, 8);
   EXPECT_EQ(92, c3.Run(13, 12, 11));
 
-  Callback<int(int, int)> c2 = Bind(c3, 4);
+  Callback<int(int,int)> c2 = Bind(c3, 4);
   EXPECT_EQ(85, c2.Run(13, 12));
 
   Callback<int(int)> c1 = Bind(c2, 2);
@@ -422,12 +431,12 @@ TEST_F(BindTest, FunctionTypeSupport) {
   EXPECT_EQ(&no_ref_, normal_non_refcounted_cb.Run());
 
   Closure method_cb = Bind(&HasRef::VoidMethod0, &has_ref_);
-  Closure method_refptr_cb =
-      Bind(&HasRef::VoidMethod0, make_scoped_refptr(&has_ref_));
-  Closure const_method_nonconst_obj_cb =
-      Bind(&HasRef::VoidConstMethod0, &has_ref_);
-  Closure const_method_const_obj_cb =
-      Bind(&HasRef::VoidConstMethod0, const_has_ref_ptr_);
+  Closure method_refptr_cb = Bind(&HasRef::VoidMethod0,
+                                  make_scoped_refptr(&has_ref_));
+  Closure const_method_nonconst_obj_cb = Bind(&HasRef::VoidConstMethod0,
+                                              &has_ref_);
+  Closure const_method_const_obj_cb = Bind(&HasRef::VoidConstMethod0,
+                                           const_has_ref_ptr_);
   method_cb.Run();
   method_refptr_cb.Run();
   const_method_nonconst_obj_cb.Run();
@@ -499,7 +508,7 @@ TEST_F(BindTest, IgnoreResult) {
   WeakPtrFactory<NoRef> weak_factory(&no_ref_);
   WeakPtrFactory<const NoRef> const_weak_factory(const_no_ref_ptr_);
 
-  Closure non_void_weak_method_cb =
+  Closure non_void_weak_method_cb  =
       Bind(IgnoreResult(&NoRef::IntMethod0), weak_factory.GetWeakPtr());
   non_void_weak_method_cb.Run();
 
@@ -536,7 +545,8 @@ TEST_F(BindTest, ArgumentBinding) {
   Callback<int()> bind_int_literal_cb = Bind(&Identity, 3);
   EXPECT_EQ(3, bind_int_literal_cb.Run());
 
-  Callback<const char*()> bind_string_literal_cb = Bind(&CStringIdentity, "hi");
+  Callback<const char*()> bind_string_literal_cb =
+      Bind(&CStringIdentity, "hi");
   EXPECT_STREQ("hi", bind_string_literal_cb.Run());
 
   Callback<int()> bind_template_function_cb =
@@ -559,7 +569,8 @@ TEST_F(BindTest, ArgumentBinding) {
   EXPECT_EQ(6, bind_promotes_cb.Run());
 
   c.value = 7;
-  Callback<int()> bind_pointer_promotes_cb = Bind(&UnwrapNoRefParentPtr, &c);
+  Callback<int()> bind_pointer_promotes_cb =
+      Bind(&UnwrapNoRefParentPtr, &c);
   EXPECT_EQ(7, bind_pointer_promotes_cb.Run());
 
   c.value = 8;
@@ -626,7 +637,7 @@ TEST_F(BindTest, ReferenceArgumentBinding) {
 //  - Array of const values stores a pointer.
 TEST_F(BindTest, ArrayArgumentBinding) {
   int array[4] = {1, 1, 1, 1};
-  const int(*const_array_ptr)[4] = &array;
+  const int (*const_array_ptr)[4] = &array;
 
   Callback<int()> array_cb = Bind(&ArrayGet, array, 1);
   EXPECT_EQ(1, array_cb.Run());
@@ -653,8 +664,8 @@ TEST_F(BindTest, SupportsAddRefAndRelease) {
   // StrictMock<T> is a derived class of T.  So, we use StrictMock<HasRef> and
   // StrictMock<NoRef> to test that SupportsAddRefAndRelease works over
   // inheritance.
-  EXPECT_TRUE(internal::SupportsAddRefAndRelease<StrictMock<HasRef>>::value);
-  EXPECT_FALSE(internal::SupportsAddRefAndRelease<StrictMock<NoRef>>::value);
+  EXPECT_TRUE(internal::SupportsAddRefAndRelease<StrictMock<HasRef> >::value);
+  EXPECT_FALSE(internal::SupportsAddRefAndRelease<StrictMock<NoRef> >::value);
 
   // This matters because the implementation creates a dummy class that
   // inherits from the template type.
@@ -669,7 +680,8 @@ TEST_F(BindTest, Unretained) {
   EXPECT_CALL(no_ref_, VoidMethod0());
   EXPECT_CALL(no_ref_, VoidConstMethod0()).Times(2);
 
-  Callback<void()> method_cb = Bind(&NoRef::VoidMethod0, Unretained(&no_ref_));
+  Callback<void()> method_cb =
+      Bind(&NoRef::VoidMethod0, Unretained(&no_ref_));
   method_cb.Run();
 
   Callback<void()> const_method_cb =
@@ -694,7 +706,8 @@ TEST_F(BindTest, WeakPtr) {
   WeakPtrFactory<NoRef> weak_factory(&no_ref_);
   WeakPtrFactory<const NoRef> const_weak_factory(const_no_ref_ptr_);
 
-  Closure method_cb = Bind(&NoRef::VoidMethod0, weak_factory.GetWeakPtr());
+  Closure method_cb =
+      Bind(&NoRef::VoidMethod0, weak_factory.GetWeakPtr());
   method_cb.Run();
 
   Closure const_method_cb =
@@ -740,7 +753,8 @@ TEST_F(BindTest, ConstRef) {
   int move_constructs = 0;
   int move_assigns = 0;
   CopyMoveCounter counter(&copies, &assigns, &move_constructs, &move_assigns);
-  Callback<int()> all_const_ref_cb = Bind(&GetCopies, ConstRef(counter));
+  Callback<int()> all_const_ref_cb =
+      Bind(&GetCopies, ConstRef(counter));
   EXPECT_EQ(0, all_const_ref_cb.Run());
   EXPECT_EQ(0, copies);
   EXPECT_EQ(0, assigns);
@@ -756,7 +770,7 @@ TEST_F(BindTest, ScopedRefptr) {
   EXPECT_CALL(has_ref_, AddRef()).Times(2);
   EXPECT_CALL(has_ref_, Release()).Times(2);
 
-  const scoped_refptr<StrictMock<HasRef>> refptr(&has_ref_);
+  const scoped_refptr<StrictMock<HasRef> > refptr(&has_ref_);
 
   Callback<int()> scoped_refptr_const_ref_cb =
       Bind(&FunctionWithScopedRefptrFirstParam, base::ConstRef(refptr), 1);
@@ -795,7 +809,8 @@ TEST_F(BindTest, Owned) {
 //   - Ownership is transferred from Callback to callee on the first Run().
 //   - Callback supports unbound arguments.
 template <typename T>
-class BindMoveOnlyTypeTest : public ::testing::Test {};
+class BindMoveOnlyTypeTest : public ::testing::Test {
+};
 
 struct CustomDeleter {
   void operator()(DeleteCounter* c) { delete c; }
@@ -913,7 +928,7 @@ TEST_F(BindTest, ArgumentCopies) {
   copies = 0;
   assigns = 0;
   Bind(&VoidPolymorphic<CopyCounter>::Run).Run(counter);
-  EXPECT_EQ(1, copies);
+  EXPECT_EQ(2, copies);
   EXPECT_EQ(0, assigns);
 
   copies = 0;
@@ -952,7 +967,20 @@ TEST_F(BindTest, ArgumentMoves) {
   // TODO(tzik): Support binding move-only type into a non-reference parameter
   // of a variant of Callback.
 
-  // TODO(tzik): Support move-only type forwarding on Callback::Run.
+  move_constructs = 0;
+  move_assigns = 0;
+  Bind(&VoidPolymorphic<MoveCounter>::Run)
+      .Run(MoveCounter(&move_constructs, &move_assigns));
+  EXPECT_EQ(1, move_constructs);
+  EXPECT_EQ(0, move_assigns);
+
+  move_constructs = 0;
+  move_assigns = 0;
+  Bind(&VoidPolymorphic<MoveCounter>::Run)
+      .Run(MoveCounter(DerivedCopyMoveCounter(
+          nullptr, nullptr, &move_constructs, &move_assigns)));
+  EXPECT_EQ(2, move_constructs);
+  EXPECT_EQ(0, move_assigns);
 }
 
 // Argument constructor usage for non-reference movable-copyable
@@ -991,22 +1019,20 @@ TEST_F(BindTest, ArgumentCopiesAndMoves) {
   Bind(&VoidPolymorphic<CopyMoveCounter>::Run).Run(counter);
   EXPECT_EQ(1, copies);
   EXPECT_EQ(0, assigns);
-  EXPECT_EQ(0, move_constructs);
+  EXPECT_EQ(1, move_constructs);
   EXPECT_EQ(0, move_assigns);
 
-  // TODO(tzik): This case should be done in no copy and one move.
   copies = 0;
   assigns = 0;
   move_constructs = 0;
   move_assigns = 0;
   Bind(&VoidPolymorphic<CopyMoveCounter>::Run)
       .Run(CopyMoveCounter(&copies, &assigns, &move_constructs, &move_assigns));
-  EXPECT_EQ(1, copies);
+  EXPECT_EQ(0, copies);
   EXPECT_EQ(0, assigns);
-  EXPECT_EQ(0, move_constructs);
+  EXPECT_EQ(1, move_constructs);
   EXPECT_EQ(0, move_assigns);
 
-  // TODO(tzik): This case should be done in one copy and one move.
   DerivedCopyMoveCounter derived_counter(&copies, &assigns, &move_constructs,
                                          &move_assigns);
   copies = 0;
@@ -1015,12 +1041,11 @@ TEST_F(BindTest, ArgumentCopiesAndMoves) {
   move_assigns = 0;
   Bind(&VoidPolymorphic<CopyMoveCounter>::Run)
       .Run(CopyMoveCounter(derived_counter));
-  EXPECT_EQ(2, copies);
+  EXPECT_EQ(1, copies);
   EXPECT_EQ(0, assigns);
-  EXPECT_EQ(0, move_constructs);
+  EXPECT_EQ(1, move_constructs);
   EXPECT_EQ(0, move_assigns);
 
-  // TODO(tzik): This case should be done in no copy and two move.
   copies = 0;
   assigns = 0;
   move_constructs = 0;
@@ -1028,9 +1053,9 @@ TEST_F(BindTest, ArgumentCopiesAndMoves) {
   Bind(&VoidPolymorphic<CopyMoveCounter>::Run)
       .Run(CopyMoveCounter(DerivedCopyMoveCounter(
           &copies, &assigns, &move_constructs, &move_assigns)));
-  EXPECT_EQ(1, copies);
+  EXPECT_EQ(0, copies);
   EXPECT_EQ(0, assigns);
-  EXPECT_EQ(1, move_constructs);
+  EXPECT_EQ(2, move_constructs);
   EXPECT_EQ(0, move_assigns);
 }
 

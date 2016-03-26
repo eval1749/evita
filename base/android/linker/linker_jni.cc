@@ -14,10 +14,10 @@
 
 #include "linker_jni.h"
 
+#include <sys/mman.h>
 #include <jni.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 
 #include "legacy_linker_jni.h"
 #include "modern_linker_jni.h"
@@ -135,8 +135,8 @@ bool InitStaticInt(JNIEnv* env,
     return false;
 
   *value = env->GetStaticIntField(clazz, field_id);
-  LOG_INFO("Found value %d for class '%s', static field '%s'", *value,
-           class_name, field_name);
+  LOG_INFO("Found value %d for class '%s', static field '%s'",
+           *value, class_name, field_name);
 
   return true;
 }
@@ -166,8 +166,8 @@ jlong GetRandomBaseLoadAddress(JNIEnv* env, jclass clazz) {
 
 #if RESERVE_BREAKPAD_GUARD_REGION
   // Allow for a Breakpad guard region ahead of the returned address.
-  address = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(address) +
-                                    kBreakpadGuardRegionBytes);
+  address = reinterpret_cast<void*>(
+      reinterpret_cast<uintptr_t>(address) + kBreakpadGuardRegionBytes);
 #endif
 
   LOG_INFO("Random base load address is %p", address);
@@ -193,7 +193,8 @@ bool LinkerJNIInit(JavaVM* vm, JNIEnv* env) {
 
   // Register native methods.
   jclass linker_class;
-  if (!InitClassReference(env, "org/chromium/base/library_loader/Linker",
+  if (!InitClassReference(env,
+                          "org/chromium/base/library_loader/Linker",
                           &linker_class))
     return false;
 
@@ -223,8 +224,8 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   }
 
   // Initialize linker base and implementations.
-  if (!LinkerJNIInit(vm, env) || !LegacyLinkerJNIInit(vm, env) ||
-      !ModernLinkerJNIInit(vm, env)) {
+  if (!LinkerJNIInit(vm, env)
+      || !LegacyLinkerJNIInit(vm, env) || !ModernLinkerJNIInit(vm, env)) {
     return -1;
   }
 

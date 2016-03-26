@@ -315,7 +315,8 @@ FieldTrialList::FieldTrialList(
     : entropy_provider_(entropy_provider),
       observer_list_(new ObserverListThreadSafe<FieldTrialList::Observer>(
           ObserverListBase<FieldTrialList::Observer>::NOTIFY_EXISTING_ONLY)) {
-  DCHECK(!global_);
+  // TODO(asvitkine): Turn into a DCHECK after http://crbug.com/359406 is fixed.
+  CHECK(!global_);
   DCHECK(!used_without_global_);
   global_ = this;
 
@@ -614,8 +615,11 @@ void FieldTrialList::NotifyFieldTrialGroupSelection(FieldTrial* field_trial) {
   if (!field_trial->enable_field_trial_)
     return;
 
-  CheckTrialGroup(field_trial->trial_name(), field_trial->group_name_internal(),
-                  &global_->seen_states_);
+  {
+    AutoLock auto_lock(global_->lock_);
+    CheckTrialGroup(field_trial->trial_name(),
+                    field_trial->group_name_internal(), &global_->seen_states_);
+  }
   global_->observer_list_->Notify(
       FROM_HERE, &FieldTrialList::Observer::OnFieldTrialGroupFinalized,
       field_trial->trial_name(), field_trial->group_name_internal());

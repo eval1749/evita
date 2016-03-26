@@ -68,7 +68,7 @@ namespace internal {
 // Implementation note: This non-specialized case handles zero-arity case only.
 // Non-zero-arity cases should be handled by the specialization below.
 template <typename List>
-struct HasNonConstReferenceItem : false_type {};
+struct HasNonConstReferenceItem : std::false_type {};
 
 // Implementation note: Select true_type if the first parameter is a non-const
 // reference.  Otherwise, skip the first parameter and check rest of parameters
@@ -76,7 +76,7 @@ struct HasNonConstReferenceItem : false_type {};
 template <typename T, typename... Args>
 struct HasNonConstReferenceItem<TypeList<T, Args...>>
     : std::conditional<is_non_const_reference<T>::value,
-                       true_type,
+                       std::true_type,
                        HasNonConstReferenceItem<TypeList<Args...>>>::type {};
 
 // HasRefCountedTypeAsRawPtr selects true_type when any of the |Args| is a raw
@@ -84,7 +84,7 @@ struct HasNonConstReferenceItem<TypeList<T, Args...>>
 // Implementation note: This non-specialized case handles zero-arity case only.
 // Non-zero-arity cases should be handled by the specialization below.
 template <typename... Args>
-struct HasRefCountedTypeAsRawPtr : false_type {};
+struct HasRefCountedTypeAsRawPtr : std::false_type {};
 
 // Implementation note: Select true_type if the first parameter is a raw pointer
 // to a RefCounted type. Otherwise, skip the first parameter and check rest of
@@ -92,7 +92,7 @@ struct HasRefCountedTypeAsRawPtr : false_type {};
 template <typename T, typename... Args>
 struct HasRefCountedTypeAsRawPtr<T, Args...>
     : std::conditional<NeedsScopedRefptrButGetsRawPtr<T>::value,
-                       true_type,
+                       std::true_type,
                        HasRefCountedTypeAsRawPtr<Args...>>::type {};
 
 // BindsArrayToFirstArg selects true_type when |is_method| is true and the first
@@ -101,11 +101,11 @@ struct HasRefCountedTypeAsRawPtr<T, Args...>
 // zero-arity case only.  Other cases should be handled by the specialization
 // below.
 template <bool is_method, typename... Args>
-struct BindsArrayToFirstArg : false_type {};
+struct BindsArrayToFirstArg : std::false_type {};
 
 template <typename T, typename... Args>
 struct BindsArrayToFirstArg<true, T, Args...>
-    : is_array<typename std::remove_reference<T>::type> {};
+    : std::is_array<typename std::remove_reference<T>::type> {};
 
 // HasRefCountedParamAsRawPtr is the same to HasRefCountedTypeAsRawPtr except
 // when |is_method| is true HasRefCountedParamAsRawPtr skips the first argument.
@@ -144,13 +144,15 @@ class RunnableAdapter;
 
 // Function.
 template <typename R, typename... Args>
-class RunnableAdapter<R (*)(Args...)> {
+class RunnableAdapter<R(*)(Args...)> {
  public:
   // MSVC 2013 doesn't support Type Alias of function types.
   // Revisit this after we update it to newer version.
   typedef R RunType(Args...);
 
-  explicit RunnableAdapter(R (*function)(Args...)) : function_(function) {}
+  explicit RunnableAdapter(R(*function)(Args...))
+      : function_(function) {
+  }
 
   template <typename... RunArgs>
   R Run(RunArgs&&... args) {
@@ -163,18 +165,25 @@ class RunnableAdapter<R (*)(Args...)> {
 
 // Method.
 template <typename R, typename T, typename... Args>
-class RunnableAdapter<R (T::*)(Args...)> {
+class RunnableAdapter<R(T::*)(Args...)> {
  public:
   // MSVC 2013 doesn't support Type Alias of function types.
   // Revisit this after we update it to newer version.
   typedef R RunType(T*, Args...);
-  using IsMethod = true_type;
+  using IsMethod = std::true_type;
 
-  explicit RunnableAdapter(R (T::*method)(Args...)) : method_(method) {}
+  explicit RunnableAdapter(R(T::*method)(Args...))
+      : method_(method) {
+  }
 
   template <typename... RunArgs>
   R Run(T* object, RunArgs&&... args) {
     return (object->*method_)(std::forward<RunArgs>(args)...);
+  }
+
+  template <typename RefType, typename... RunArgs>
+  R Run(const scoped_refptr<RefType>& object, RunArgs&&... args) {
+    return (object.get()->*method_)(std::forward<RunArgs>(args)...);
   }
 
  private:
@@ -183,21 +192,29 @@ class RunnableAdapter<R (T::*)(Args...)> {
 
 // Const Method.
 template <typename R, typename T, typename... Args>
-class RunnableAdapter<R (T::*)(Args...) const> {
+class RunnableAdapter<R(T::*)(Args...) const> {
  public:
   using RunType = R(const T*, Args...);
-  using IsMethod = true_type;
+  using IsMethod = std::true_type;
 
-  explicit RunnableAdapter(R (T::*method)(Args...) const) : method_(method) {}
+  explicit RunnableAdapter(R(T::*method)(Args...) const)
+      : method_(method) {
+  }
 
   template <typename... RunArgs>
   R Run(const T* object, RunArgs&&... args) {
     return (object->*method_)(std::forward<RunArgs>(args)...);
   }
 
+  template <typename RefType, typename... RunArgs>
+  R Run(const scoped_refptr<RefType>& object, RunArgs&&... args) {
+    return (object.get()->*method_)(std::forward<RunArgs>(args)...);
+  }
+
  private:
   R (T::*method_)(Args...) const;
 };
+
 
 // ForceVoidReturn<>
 //
@@ -211,6 +228,7 @@ struct ForceVoidReturn<R(Args...)> {
   // Revisit this after we update it to newer version.
   typedef void RunType(Args...);
 };
+
 
 // FunctorTraits<>
 //
@@ -230,9 +248,10 @@ struct FunctorTraits<IgnoreResultHelper<T>> {
 
 template <typename T>
 struct FunctorTraits<Callback<T>> {
-  using RunnableType = Callback<T>;
+  using RunnableType = Callback<T> ;
   using RunType = typename Callback<T>::RunType;
 };
+
 
 // MakeRunnable<>
 //
@@ -244,17 +263,18 @@ typename FunctorTraits<T>::RunnableType MakeRunnable(const T& t) {
 }
 
 template <typename T>
-typename FunctorTraits<T>::RunnableType MakeRunnable(
-    const IgnoreResultHelper<T>& t) {
+typename FunctorTraits<T>::RunnableType
+MakeRunnable(const IgnoreResultHelper<T>& t) {
   return MakeRunnable(t.functor_);
 }
 
 template <typename T>
-const typename FunctorTraits<Callback<T>>::RunnableType& MakeRunnable(
-    const Callback<T>& t) {
+const typename FunctorTraits<Callback<T>>::RunnableType&
+MakeRunnable(const Callback<T>& t) {
   DCHECK(!t.is_null());
   return t;
 }
+
 
 // InvokeHelper<>
 //
@@ -312,7 +332,7 @@ struct InvokeHelper<true, ReturnType, Runnable> {
   // WeakCalls are only supported for functions with a void return type.
   // Otherwise, the function result would be undefined if the the WeakPtr<>
   // is invalidated.
-  static_assert(is_void<ReturnType>::value,
+  static_assert(std::is_void<ReturnType>::value,
                 "weak_ptrs can only bind to methods without return values");
 };
 
@@ -321,29 +341,27 @@ struct InvokeHelper<true, ReturnType, Runnable> {
 // Invoker<>
 //
 // See description at the top of the file.
-template <typename BoundIndices,
-          typename StorageType,
-          typename InvokeHelperType,
-          typename UnboundForwardRunType>
+template <typename BoundIndices, typename StorageType,
+          typename InvokeHelperType, typename UnboundForwardRunType>
 struct Invoker;
 
 template <size_t... bound_indices,
           typename StorageType,
           typename InvokeHelperType,
           typename R,
-          typename... UnboundForwardArgs>
+          typename... UnboundArgs>
 struct Invoker<IndexSequence<bound_indices...>,
                StorageType,
                InvokeHelperType,
-               R(UnboundForwardArgs...)> {
-  static R Run(BindStateBase* base, UnboundForwardArgs... unbound_args) {
+               R(UnboundArgs...)> {
+  static R Run(BindStateBase* base, UnboundArgs&&... unbound_args) {
     StorageType* storage = static_cast<StorageType*>(base);
     // Local references to make debugger stepping easier. If in a debugger,
     // you really want to warp ahead and step through the
     // InvokeHelper<>::MakeItSo() call below.
     return InvokeHelperType::MakeItSo(
         storage->runnable_, Unwrap(get<bound_indices>(storage->bound_args_))...,
-        CallbackForward(unbound_args)...);
+        std::forward<UnboundArgs>(unbound_args)...);
   }
 };
 
@@ -363,9 +381,8 @@ struct MakeArgsStorageImpl<true, Obj*, BoundArgs...> {
 // the first argument is a raw pointer.
 // Other arguments are adjusted for store and packed into a tuple.
 template <bool is_method, typename... BoundArgs>
-using MakeArgsStorage =
-    typename MakeArgsStorageImpl<is_method,
-                                 typename std::decay<BoundArgs>::type...>::Type;
+using MakeArgsStorage = typename MakeArgsStorageImpl<
+  is_method, typename std::decay<BoundArgs>::type...>::Type;
 
 // BindState<>
 //
@@ -399,20 +416,14 @@ struct BindState<Runnable, R(Args...), BoundArgs...> final
       IsWeakMethod<is_method, typename std::decay<BoundArgs>::type...>;
 
   using BoundIndices = MakeIndexSequence<sizeof...(BoundArgs)>;
-  using UnboundForwardArgs = DropTypeListItem<
-      sizeof...(BoundArgs),
-      TypeList<typename CallbackParamTraits<Args>::ForwardType...>>;
-  using UnboundForwardRunType = MakeFunctionType<R, UnboundForwardArgs>;
   using InvokeHelperType = InvokeHelper<IsWeakCall::value, R, Runnable>;
 
   using UnboundArgs = DropTypeListItem<sizeof...(BoundArgs), TypeList<Args...>>;
 
  public:
-  using InvokerType = Invoker<BoundIndices,
-                              StorageType,
-                              InvokeHelperType,
-                              UnboundForwardRunType>;
   using UnboundRunType = MakeFunctionType<R, UnboundArgs>;
+  using InvokerType =
+      Invoker<BoundIndices, StorageType, InvokeHelperType, UnboundRunType>;
 
   template <typename... ForwardArgs>
   BindState(const Runnable& runnable, ForwardArgs&&... bound_args)

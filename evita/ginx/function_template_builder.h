@@ -46,7 +46,7 @@ struct CallbackTraits<base::Callback<T>> {
 template <typename T>
 struct CallbackTraits<
     T,
-    typename std::enable_if<base::is_member_function_pointer<T>::value>::type> {
+    typename std::enable_if<std::is_member_function_pointer<T>::value>::type> {
   static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
                                                         T callback) {
     return gin::CreateFunctionTemplate(isolate, base::Bind(callback),

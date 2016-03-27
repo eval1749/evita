@@ -1213,7 +1213,10 @@ class Parser {
       case TokenType_OpenBrace:  // re{...}
       case TokenType_Plus:       // re+
       case TokenType_Question:   // re?
-        // quantifier apperas without re.
+        // quantifier appears without re.
+        return syntaxError();
+
+      case TokenType_CloseParen:
         return syntaxError();
 
       case TokenType_MultiLineDollar:

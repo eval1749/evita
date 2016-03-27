@@ -389,6 +389,8 @@ TEST_F(RegexTest, Basic) {
             Execute("(foo", "foo"));  // syntax-error-008
   EXPECT_EQ(Result("Regex compile failed at 4"),
             Execute("foo)", "foo"));  // syntax-error-009
+  EXPECT_EQ(Result("Regex compile failed at 1"),
+            Execute(")_", "foo"));
 }
 
 TEST_F(RegexTest, Smoke00) {

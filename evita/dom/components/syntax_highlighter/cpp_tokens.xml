@@ -1,0 +1,15 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="cpp">
+  <token name="block_comment" pattern="/[*][^*]*[*]+([^/*][^*]*[*]+)*/" />
+  <token name="line_comment" pattern="//([^\n]|\\.)*\n" />
+  <token name="string1" pattern="'([^\\']|\\.)*'" />
+  <token name="string2" pattern='"([^\\"]|\\.)*"' />
+  <token name="name" pattern="\w[\w\d]*" />
+  <token name="dot" pattern="[.]"/>
+  <token name="colon2" pattern="::"/>
+  <token name="colon" pattern=":"/>
+</tokens>

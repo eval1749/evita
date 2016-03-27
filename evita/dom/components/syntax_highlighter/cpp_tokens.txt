@@ -1,0 +1,113 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# name cpp
+# empty empty
+
+block_comment:
+ '*' token(BLOCK_COMMENT) return(block_comment_asterisk);
+ otherwise token(BLOCK_COMMENT) return(block_comment_body);
+
+block_comment_asterisk:
+ '/' return(block_comment_end);
+ '*' token(BLOCK_COMMENT) return(block_comment_asterisk);
+
+block_comment_body:
+ '*' token(BLOCK_COMMENT) return(block_comment_asterisk);
+ otherwise return(block_comment_body);
+
+block_comment_end:
+ otherwise token(BLOCK_COMMENT) goto(start);
+
+double_quote:
+ '\'' token(DOUBLE_QUOTE) return(double_quote_end);
+ '\\' token(DOUBLE_QUOTE) return(double_quote_escape);
+ otherwise token(DOUBLE_QUOTE) return(double_quote_body);
+
+double_quote_body:
+ '\'' token(DUOBLE_QUOTE) return(double_quote_end);
+ '\\' token(DUOBLE_QUOTE) return(double_quote_escape);
+ otherwise return(double_quote_body);
+
+double_quote_end:
+ otherwise token(DOUBLE_QUOTE) goto(start);
+
+double_quote_escape:
+ otherwise token(DOUBLE_QUOTE) return(double_quote_body);
+
+empty:
+  '#' return(number_sign);
+  newline  return(newline);
+  whitespace  return(leading_whitespace);
+  otherwise goto(start);
+
+leading_whitespace:
+  '#' token(WHITESPACE) return(number_sign);
+  whitespace return(leading_whitespace);
+  otherwise token(WHITESPACE) goto(start);
+
+line_comment:
+ '\n' token(line_comment) return(newline);
+ '\\' return(line_comment_escape);
+ otherwise token(line_comment) return(line_comment_body);
+
+line_comment_body:
+  '\n' token(line_comment_body) return(newline);
+  otherwise return(line_comment_body);
+
+line_comment_escape:
+ otherwise token(LINE_COMMENT_ESCAPE) return(line_comment_body);
+
+name:
+ name return(name);
+ otherwise token(NAME) goto(start);
+
+newline:
+  newline return(newline);
+  whitespace token(NEWLINE) return(leading_whitespace);
+  '#' return(number_sign);
+  otherwise token(NEWLINE) goto(start);
+
+number_sign:
+  name_start token(NUMBER_SIGN) return(number_sign_name);
+  whitespace token(NUMBER_SIGN) return(number_sign_whitespace);
+  otherwise token(NUMBER_SIGN) continue(start);
+
+number_sign_name:
+  name return(number_sign_name);
+  otherwise token(NAME) return(start);
+
+number_sign_whitespace:
+  name_start token(WHITESPACE) return(number_sign_name);
+  whitespace return(number_sign_whitespace);
+  otherwise token(WHITESPACE) goto(start);
+
+single_quote:
+ '\'' token(SINGLE_QUOTE) return(single_quote_end);
+ '\\' token(SINGLE_QUOTE) return(single_quote_escape);
+ otherwise token(SINGLE_QUOTE) return(single_quote_body);
+
+single_quote_body:
+ '\'' token(SINGLE_QUOTE) return(single_quote_end);
+ '\\' token(SINGLE_QUOTE) return(single_quote_escape);
+ otherwise return(single_quote_body);
+
+single_quote_end:
+ otherwise token(SINGLE_QUOTE) goto(start);
+
+single_quote_escape:
+ otherwise token(SINGLE_QUOTE) return(single_quote_body);
+
+solidus:
+ '/' return(line_comment);
+ '*' return(block_comment);
+ otherwise token(SOLIDUS) return(start);
+
+start:
+  '"' return(double_quote);
+  '\'' return(single_quote);
+  '/' return(solidus);
+  name_start return(name);
+  newline return(newline);
+  otherwise return(other);

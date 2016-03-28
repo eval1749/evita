@@ -21,6 +21,8 @@ class MarkerSet;
 //
 class Marker final {
  public:
+  class Editor;
+
   Marker(Offset start, Offset end, const base::AtomicString& type);
   Marker(const Marker& other);
   Marker();
@@ -38,8 +40,6 @@ class Marker final {
   bool Contains(Offset offset) const;
 
  private:
-  class Editor;
-
   explicit Marker(Offset start);
 
   Offset end_;

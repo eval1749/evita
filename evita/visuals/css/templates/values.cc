@@ -77,7 +77,7 @@ bool {{type.Name}}::is_{{member.name}}() const {
  #}
 {% for member in type.members if member.is_keyword %}
 // static
-{{type.Name}} {{type.Name}}::{{member.Name}}() const {
+{{type.Name}} {{type.Name}}::{{member.Name}}() {
   return {{type.Name}}(Value(Keyword::{{member.Name}}));
 }
 

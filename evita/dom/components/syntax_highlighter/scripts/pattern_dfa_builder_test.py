@@ -37,7 +37,9 @@ def build(*patterns):
             continue
         if node_name != '':
             node_name = ':' + node_name
-        result.append('%s%s->(%s)' %
+        if node.is_acceptable:
+            node_name = node_name.upper()
+        result.append('%s%s:(%s)' %
                       (node.index, node_name,
                        transition_map_to_string(node.transition_map)))
     return ' '.join(result)
@@ -55,7 +57,7 @@ def transition_map_to_string(transition_map):
     for node in sorted(edge_map.keys()):
         char_set = edge_map[node]
         if len(char_set) == 128:
-            result.append('.:%d' % node.index)
+            result.append('.->%d' % node.index)
             continue
         complement = ''
         if 0 in char_set:
@@ -63,7 +65,7 @@ def transition_map_to_string(transition_map):
             ranges = char_set_to_string(complement_of(char_set))
         else:
             ranges = char_set_to_string(char_set)
-        result.append('[%s%s]:%d' % (complement, ''.join(ranges), node.index))
+        result.append('[%s%s]->%d' % (complement, ''.join(ranges), node.index))
     return ', '.join(result)
 
 
@@ -114,47 +116,55 @@ def group_name_of(node):
 
 class DfaBuilderTest(unittest.TestCase):
     def test_basic(self):
-        self.assertEqual('0:name->([a]:1) 1:NAME',
+        self.assertEqual('0:name:([a]->1) 1:NAME',
                          build(NamedPattern('name', 'a')))
-        self.assertEqual('0:name->([a]:0)',
+        self.assertEqual('0:name:([a]->1) 1:NAME:([a]->1)',
                          build(NamedPattern('name', 'a+')))
-        self.assertEqual('0->([0]:1, [a]:2) 1:NUMBER 2:NAME',
+        self.assertEqual('0:([0]->1, [a]->2) 1:NUMBER 2:NAME',
                          build(NamedPattern('name', 'a'),
                                NamedPattern('number', '0')))
-        self.assertEqual('0->([9]:1, [a]:2) '
-                         '1:number->([9]:1) '
-                         '2:name->([a]:2)',
+        self.assertEqual('0:([9]->1, [a]->2) '
+                         '1:NUMBER:([9]->1) '
+                         '2:NAME:([a]->2)',
                          build(NamedPattern('name', 'a+'),
                                NamedPattern('number', '9+')))
-        self.assertEqual('0:name->([0-9A-Z_a-z]:0)',
+        self.assertEqual('0:name:([0-9A-Z_a-z]->1) 1:NAME:([0-9A-Z_a-z]->1)',
                          build(NamedPattern('name', '\\w+')))
 
     def test_double_quote(self):
         # Double quote string with "/" escape
-        self.assertEqual('0:string->(["]:1) '
-                         '1:string->([^"/]:1, ["]:2, [/]:3) '
+        self.assertEqual('0:string:(["]->1) '
+                         '1:string:([^"/]->1, ["]->2, [/]->3) '
                          '2:STRING '
-                         '3:string->(.:1)',
+                         '3:string:(.->1)',
                          build(NamedPattern('string', '"([^/"]|/.)*"')))
 
     def test_block_comment(self):
-        # Minimum DFA for C-comment by '/[*].*?[*]/'
-        #   0:comment->([/]:1) 1:comment->([*]:2)
-        #   2:comment->([^*]:2, [*]:3)
-        #   3:comment->([*]:3, [^*]:2, [/]:4)
-        #   4:COMMENT
-        self.assertEqual('0:comment->([/]:1) 1:comment->([*]:2) '
-                         '2:comment->([^*]:2, [*]:3) '
-                         '3:comment->([*]:3, [^*/]:4, [/]:5) '
-                         '4:comment->([^*]:4, [*]:6) '
+        self.assertEqual('0:comment:([/]->1) 1:comment:([*]->2) '
+                         '2:comment:([^*]->2, [*]->3) '
+                         '3:comment:([*]->3, [^*/]->4, [/]->5) '
+                         '4:comment:([^*]->4, [*]->6) '
                          '5:COMMENT '
-                         '6:comment->([^*/]:4, [/]:5, [*]:6)',
+                         '6:comment:([^*/]->4, [/]->5, [*]->6)',
                          build(NamedPattern('comment',
                                             '/[*][^*]*[*]+([^*/][^*]*[*]+)*/')))
-        # TODO(eval1749): Can we convert lazy quantifier to DFA?
-        self.assertEqual('0:comment->([/]:1) '
-                         '1:comment->([*]:2) 2:comment->(.:2)',
+
+    def test_block_comment2(self):
+        # Minimum DFA for C-comment by '/[*].*?[*]/'
+        #   0:comment:([/]->1) 1:comment:([*]->2)
+        #   2:comment:([^*]->2, [*]->3)
+        #   3:comment:([^*]->2, [*]->3, [/]->4)
+        #   4:COMMENT
+        # TODO(eval1749)-> Can we convert lazy quantifier to DFA?
+        self.assertEqual('0:comment:([/]->1) 1:comment:([*]->2) '
+                         '2:comment:([^*]->2, [*]->3) '
+                         '3:comment:([^*/]->2, [*]->3, [/]->4) '
+                         '4:COMMENT:([^*]->2, [*]->3)',
                          build(NamedPattern('comment', '/[*].*?[*]/')))
+
+    def test_repeat_any(self):
+        self.assertEqual('0:name:([^a]->0, [a]->1) 1:NAME:([^a]->0, [a]->1)',
+                         build(NamedPattern('name', '.*a')))
 
 
 if __name__ == '__main__':

@@ -53,7 +53,6 @@ class NfaState(object):
                     edge.to_state.name))
         self._out_edges.append(edge)
 
-
     @property
     def group_name(self):
         return self._group_name
@@ -61,6 +60,10 @@ class NfaState(object):
     @property
     def in_edges(self):
         return self._in_edges
+
+    @property
+    def is_acceptable(self):
+        return len(self._out_edges) == 0
 
     @property
     def name(self):

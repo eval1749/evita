@@ -14,13 +14,18 @@ class DfaState(object):
         self._transition_map = dict()
         if not DEBUG:
             return
-        print 'DfaState(%d, {%s})' % (
-            index,
-            ', '.join(sorted(['nfa:%s' % str(state.name) for state in states])))
+        print self
 
     @property
     def index(self):
         return self._index
+
+    @property
+    def is_acceptable(self):
+        for state in self._states:
+            if state.is_acceptable:
+                return True
+        return False
 
     @property
     def transition_map(self):
@@ -39,6 +44,8 @@ class DfaState(object):
 
     def compute_key(self):
         result = sorted(set([state.group_name for state in self._states]))
+        if self.is_acceptable:
+            result.append('A')
         for char_code in range(0, 128):
             if not(char_code in self._transition_map):
                 continue
@@ -50,6 +57,11 @@ class DfaState(object):
 
     def __cmp__(self, other):
         return cmp(self._index, other._index)
+
+    def __str__(self):
+        return 'DfaState(%d, {%s})' % (
+            self._index,
+            ', '.join(sorted([str(state.name) for state in self._states])))
 
 
 class DfaBuilder(object):

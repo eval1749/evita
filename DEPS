@@ -28,7 +28,7 @@ deps = {
     Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),
 
   'src/testing/gmock':
-    Var('chromium_git') + '/external/googlemock.git' + '@' + Var('gmock_revision'), 
+    Var('chromium_git') + '/external/googlemock.git' + '@' + Var('gmock_revision'),
 
   'src/testing/gtest':
     Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + Var('gtest_revision'),

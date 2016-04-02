@@ -173,16 +173,16 @@ class Transitions(object):
         return '[%s]->%d' % (self._char_codes_to_str(char_codes), node.index)
 
     def __str__(self):
-        edge_map = dict()
+        node_to_alphabets = dict()
         for char_code in self._alphabet_to_nodes.keys():
             for node in self._alphabet_to_nodes[char_code]:
-                if node in edge_map:
-                    edge_map[node].append(char_code)
+                if node in node_to_alphabets:
+                    node_to_alphabets[node].append(char_code)
                     continue
-                edge_map[node] = [char_code]
+                node_to_alphabets[node] = [char_code]
         result = []
-        for node in sorted(edge_map.keys()):
-            result.append(self._entry_to_string(node, edge_map[node]))
+        for node in sorted(node_to_alphabets.keys()):
+            result.append(self._entry_to_string(node, node_to_alphabets[node]))
         return '{%s}' % ', '.join(result)
 
 

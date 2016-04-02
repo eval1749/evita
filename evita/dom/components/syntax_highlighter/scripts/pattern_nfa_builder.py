@@ -94,8 +94,8 @@ class NfaState(object):
         return True
 
     def __str__(self):
-        return 'NfaState(%d, %s %s, from={%s}, to={%s})' % (
-            self._name, self._name, self.node,
+        return 'NfaState(%d, %s, from={%s}, to={%s})' % (
+            self._index, self.node,
             ', '.join(['%s:%d' % (edge.label, edge.from_state.index)
                        for edge in self._in_edges]),
             ', '.join(['%s:%d' % (edge.label, edge.to_state.index)

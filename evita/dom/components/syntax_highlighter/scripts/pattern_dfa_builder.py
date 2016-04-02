@@ -49,7 +49,7 @@ class DfaNode(object):
         return 'DfaNode(%d, %s, nfa={%s} transitions=%s)' % (
             self._index,
             'A' if self.is_acceptable else '-',
-            ', '.join(sorted([str(state.name) for state in self._states])),
+            ', '.join(sorted([str(state.index) for state in self._states])),
             str(self._transitions))
 
 

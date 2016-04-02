@@ -71,6 +71,11 @@ class NfaBuilderTest(unittest.TestCase):
                          '8->("*":9) 9->("*":9, _:6) 10->("/":11) 11',
                          build('/[*][^*]*[*]+([^/*][^*]*[*]+)*/'))
 
+    def test_block_comment2(self):
+        self.assertEqual('1->("/":2) 2->("*":3) 3->(.~3, _:4) 4->("*":5) '
+                         '5->("/":6) 6',
+                         build('/[*].*?[*]/'))
+
     def test_double_quote(self):
         # Double-quote string with "/" escape
         self.assertEqual('1->("\\"":2) 2->([^/\\"]:2, "/":3, _:4) 3->(.:2) '

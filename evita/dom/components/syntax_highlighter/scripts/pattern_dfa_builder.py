@@ -8,6 +8,7 @@ DEBUG = False
 
 
 class DfaState(object):
+    """Represents DFA state."""
 
     def __init__(self, index, states):
         self._index = index
@@ -43,19 +44,6 @@ class DfaState(object):
             self._transition_map[char_code].add(node)
             return
         self._transition_map[char_code] = set([node])
-
-    def compute_key(self):
-        result = sorted(set([state.group_name for state in self._states]))
-        if self.is_acceptable:
-            result.append('A')
-        for char_code in range(0, 128):
-            if not(char_code in self._transition_map):
-                continue
-            nodes = self._transition_map[char_code]
-            result.append('%d:%s' % (
-                char_code,
-                ' '.join(sorted([str(node.index) for node in nodes]))))
-        return ' '.join(result)
 
     def __cmp__(self, other):
         return cmp(self._index, other._index)
@@ -105,6 +93,20 @@ def closure_of(from_state):
     return closure_of_internal(from_state, set())
 
 
+def compute_key(node):
+    result = sorted(set([state.group_name for state in node.states]))
+    if node.is_acceptable:
+        result.append('A')
+    for char_code in range(0, 128):
+        if not(char_code in node.transition_map):
+            continue
+        nodes = node.transition_map[char_code]
+        result.append('%d:%s' % (
+            char_code,
+            ' '.join(sorted([str(next_node.index) for next_node in nodes]))))
+    return ' '.join(result)
+
+
 def closure_of_internal(from_state, result):
     if from_state in result:
         return result
@@ -149,12 +151,14 @@ def next_states_of(from_states, char_code):
 
 
 def optimize_dfa(nodes):
+    """Minimize DFA states in |nodes| by grouping by acceptable and transition.
+    """
     node_map = dict()
     redundant_map = dict()
     result = []
     has_redundant_nodes = False
     for node in nodes:
-        key = node.compute_key()
+        key = compute_key(node)
         if key in node_map:
             redundant_map[node] = node_map[key]
             has_redundant_nodes = True

@@ -32,10 +32,10 @@ class NfaEdge(object):
 
 class NfaState(object):
 
-    def __init__(self, group_name, name, node):
+    def __init__(self, group_name, index, node):
         self._group_name = group_name
         self._in_edges = []
-        self._name = name
+        self._index = index
         self._node = node
         self._out_edges = []
 
@@ -44,8 +44,8 @@ class NfaState(object):
             if present.from_state == edge.from_state and \
                present.label == edge.label:
                 raise Exception('%s already has an edge from %s' % (
-                    edge.from_state.name,
-                    edge.to_state.name))
+                    edge.from_state.index,
+                    edge.to_state.index))
         self._in_edges.append(edge)
 
     def add_out_edge(self, edge):
@@ -53,9 +53,13 @@ class NfaState(object):
             if present.to_state == edge.to_state and \
                present.label == edge.label:
                 raise Exception('%s already has edge to %s' % (
-                    edge.from_state.name,
-                    edge.to_state.name))
+                    edge.from_state.index,
+                    edge.to_state.index))
         self._out_edges.append(edge)
+
+    @property
+    def index(self):
+        return self._index
 
     @property
     def group_name(self):
@@ -70,10 +74,6 @@ class NfaState(object):
         return len(self._out_edges) == 0
 
     @property
-    def name(self):
-        return self._name
-
-    @property
     def node(self):
         return self._node
 
@@ -84,8 +84,8 @@ class NfaState(object):
     @property
     def sort_key(self):
         if self.is_acceptable:
-            return self._name * 1000
-        return self._name
+            return self._index * 1000
+        return self._index
 
     def is_terminal(self):
         for edge in self._out_edges:
@@ -96,9 +96,9 @@ class NfaState(object):
     def __str__(self):
         return 'NfaState(%d, %s %s, from={%s}, to={%s})' % (
             self._name, self._name, self.node,
-            ', '.join(['%s:%d' % (edge.label, edge.from_state.name)
+            ', '.join(['%s:%d' % (edge.label, edge.from_state.index)
                        for edge in self._in_edges]),
-            ', '.join(['%s:%d' % (edge.label, edge.to_state.name)
+            ', '.join(['%s:%d' % (edge.label, edge.to_state.index)
                        for edge in self._out_edges]))
 
 

@@ -12,7 +12,7 @@ def edges_to_string(edges):
     return '(%s)' % ', '.join([
         '%s%s%s' % (label_to_string(edge.label),
                     '~' if edge.is_lazy else ':',
-                    str(edge.to_state.name))
+                    str(edge.to_state.index))
         for edge in edges])
 
 
@@ -24,8 +24,8 @@ def label_to_string(label):
 
 def state_to_string(state):
     if len(state.out_edges) == 0:
-        return str(state.name)
-    return '%d->%s' % (state.name, edges_to_string(state.out_edges))
+        return str(state.index)
+    return '%d->%s' % (state.index, edges_to_string(state.out_edges))
 
 
 class Walker:

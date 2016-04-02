@@ -54,11 +54,12 @@ def initialize_jinja_env(cache_dir):
 # ContextBuilder
 #
 class ContextBuilder(object):
+
     def __init__(self, document):
         self._document = document
 
     def build(self):
-        return {'states': self.make_states()};
+        return {'states': self.make_states()}
 
     def make_states(self):
         number = 0
@@ -76,7 +77,7 @@ def generate(output_path, document):
     context = ContextBuilder(document).build()
 
     jinja_env = initialize_jinja_env(None)
-    template = jinja_env.get_template('lexer.js');
+    template = jinja_env.get_template('lexer.js')
     with open(output_path, 'wt') as output:
         contents = template.render(context)
         output.write(contents)
@@ -150,10 +151,11 @@ def process_input(input_path):
 def capital_name_of(name):
     return name[0].upper() + name[1:]
 
+
 def main():
     if len(sys.argv) != 3:
         raise Exception('Usage %s output_path input_path' %
-            os.path.basename(sys.argv[0]))
+                        os.path.basename(sys.argv[0]))
     output_path = sys.argv[1]
     input_path = sys.argv[2]
     document = process_input(input_path)

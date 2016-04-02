@@ -6,7 +6,9 @@ from pattern import SourceLocation
 
 NEWLINE = 10
 
+
 class StringReader(object):
+
     def __init__(self, input_path, characters):
         self._characters = characters
         self._column_number = 0

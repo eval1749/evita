@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+
 class Node(object):
+
     def __init__(self, token):
         self._token = token
 
@@ -10,7 +12,9 @@ class Node(object):
     def token(self):
         return self._token
 
+
 class Action(Node):
+
     def __init__(self, token, arguments):
         super(Action, self).__init__(token)
         self._arguments = arguments
@@ -27,6 +31,7 @@ class Action(Node):
 
 
 class Document(Node):
+
     def __init__(self, states):
         super(Document, self).__init__(None)
         self._states = states
@@ -37,6 +42,7 @@ class Document(Node):
 
 
 class Rule(Node):
+
     def __init__(self, token, actions):
         super(Rule, self).__init__(token)
         self._actions = actions
@@ -50,6 +56,7 @@ class Rule(Node):
 
 
 class State(Node):
+
     def __init__(self, token, rules):
         super(State, self).__init__(token)
         self._rules = rules

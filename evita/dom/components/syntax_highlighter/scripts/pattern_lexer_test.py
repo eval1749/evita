@@ -7,6 +7,7 @@ import unittest
 import pattern
 from pattern_lexer import PatternLexer
 
+
 def tokens_of(source):
     lexer = PatternLexer(source)
     tokens = []
@@ -16,6 +17,7 @@ def tokens_of(source):
 
 
 class PatternLexerTest(unittest.TestCase):
+
     def test_basics(self):
         self.assertEqual('"a" "b" "c"', tokens_of('abc'))
         self.assertEqual('.', tokens_of('.'))
@@ -99,7 +101,8 @@ class PatternLexerTest(unittest.TestCase):
         # Not meta characters
         self.assertEqual('"-"', tokens_of('[-]'), msg='not bracket meta char')
         self.assertEqual('"]"', tokens_of('[]]'), msg='not bracket meta char')
-        self.assertEqual('[^^]', tokens_of('[^^]'), msg='not bracket meta char')
+        self.assertEqual('[^^]', tokens_of('[^^]'),
+                         msg='not bracket meta char')
 
 
 if __name__ == '__main__':

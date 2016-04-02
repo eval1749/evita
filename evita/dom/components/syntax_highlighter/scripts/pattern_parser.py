@@ -4,10 +4,12 @@
 
 
 from pattern_ast_nodes import AstErrorNode, AstOrNode, AstPrimaryNode, \
-                              AstRepeatNode, AstSequenceNode
+    AstRepeatNode, AstSequenceNode
 from pattern_lexer import PatternLexer
 
+
 class PatternParser(object):
+
     def __init__(self, source):
         self._nesting = 0
         self._lexer = PatternLexer(source)

@@ -4,6 +4,7 @@
 
 
 class AstNode(object):
+
     def __init__(self, token):
         self._token = token
 
@@ -37,6 +38,7 @@ class AstNode(object):
 
 
 class AstErrorNode(AstNode):
+
     def __init__(self, token, message):
         super(AstErrorNode, self).__init__(token)
         self._message = message
@@ -50,6 +52,7 @@ class AstErrorNode(AstNode):
 
 
 class AstOrNode(AstNode):
+
     def __init__(self, members):
         super(AstOrNode, self).__init__(members[0].token)
         assert(len(members) >= 2)
@@ -68,6 +71,7 @@ class AstOrNode(AstNode):
 
 
 class AstPrimaryNode(AstNode):
+
     def __init__(self, token):
         super(AstPrimaryNode, self).__init__(token)
 
@@ -80,6 +84,7 @@ class AstPrimaryNode(AstNode):
 
 
 class AstRepeatNode(AstNode):
+
     def __init__(self, token, expression):
         super(AstRepeatNode, self).__init__(token)
         self._expression = expression
@@ -113,6 +118,7 @@ class AstRepeatNode(AstNode):
 
 
 class AstSequenceNode(AstNode):
+
     def __init__(self, members):
         super(AstSequenceNode, self).__init__(members[0].token)
         assert(len(members) >= 2)

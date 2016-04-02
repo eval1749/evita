@@ -7,11 +7,14 @@ import unittest
 
 from pattern_parser import PatternParser
 
+
 def parse(source):
     parser = PatternParser(source)
     return str(parser.parse())
 
+
 class PatternParserTest(unittest.TestCase):
+
     def test_complex(self):
         # Double quoted string with "/" as escape character
         self.assertEqual('sequence("\\"", '

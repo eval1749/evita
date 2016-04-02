@@ -22,6 +22,7 @@ UNDERLINE = ord('_')
 
 
 class Lexer(object):
+
     def __init__(self, input_path):
         self._state = 'start'
         with open(input_path, 'r') as content_file:
@@ -100,6 +101,7 @@ class Lexer(object):
 
 
 class Location(object):
+
     def __init__(self, path, line, column):
         self._path = path
         self._line = line
@@ -120,18 +122,19 @@ class Location(object):
     def __str__(self):
         return '%s(%d:%d)' % (self.path, self.line, self.column)
 
+
 def is_digit_char(char_code):
     return char_code >= DIGIT_ZERO and char_code <= DIGIT_NINE
 
 
 def is_name_char(char_code):
-    return is_name_start_char(char_code) or is_digit_char(char_code);
+    return is_name_start_char(char_code) or is_digit_char(char_code)
 
 
 def is_name_start_char(char_code):
     return char_code >= CAPITAL_LETTER_A and char_code <= CAPITAL_LETTER_Z or \
-           char_code >= SMALL_LETTER_A and char_code <= SMALL_LETTER_Z or \
-           char_code == UNDERLINE
+        char_code >= SMALL_LETTER_A and char_code <= SMALL_LETTER_Z or \
+        char_code == UNDERLINE
 
 
 def is_whitespace(char_code):

@@ -4,7 +4,9 @@
 
 from pattern_lexer import PatternLexer
 
+
 class NfaEdge(object):
+
     def __init__(self, label, from_state, to_state, is_lazy):
         self._from_state = from_state
         self._is_lazy = is_lazy
@@ -27,7 +29,9 @@ class NfaEdge(object):
     def to_state(self):
         return self._to_state
 
+
 class NfaState(object):
+
     def __init__(self, group_name, name, node):
         self._group_name = group_name
         self._in_edges = []
@@ -93,6 +97,7 @@ class NfaState(object):
 
 
 class NfaBuilder(object):
+
     def __init__(self):
         self._number_of_states = 0
         self._group_name = ''
@@ -152,7 +157,7 @@ class NfaBuilder(object):
                     node.is_lazy if index == 1 else False)
             return self._process(from_state, to_state, node.expression)
         # {n,m} where n > 0
-        for index in xrange(0, node.min_count): # pylint: disable=W0612
+        for index in xrange(0, node.min_count):  # pylint: disable=W0612
             from_state = self._process(from_state, None, node.expression)
         if node.is_infinity:
             repeat_end = self._process(from_state, from_state, node.expression)
@@ -162,7 +167,7 @@ class NfaBuilder(object):
                                        node.is_lazy if index == 1 else False)
         return self._process(from_state, to_state, node.expression)
 
-    def _process_sequence(self,from_state, to_state, node, is_lazy):
+    def _process_sequence(self, from_state, to_state, node, is_lazy):
         index = 0
         for member in node.members:
             index = index + 1

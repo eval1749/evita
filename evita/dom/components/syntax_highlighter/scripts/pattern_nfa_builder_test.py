@@ -15,6 +15,7 @@ def edges_to_string(edges):
                     str(edge.to_state.name))
         for edge in edges])
 
+
 def label_to_string(label):
     if label == None:
         return '_'
@@ -26,7 +27,9 @@ def state_to_string(state):
         return str(state.name)
     return '%d->%s' % (state.name, edges_to_string(state.out_edges))
 
+
 class Walker:
+
     def __init__(self):
         self._states = []
         self._visited = set()
@@ -52,6 +55,7 @@ def build(source):
 
 
 class NfaBuilderTest(unittest.TestCase):
+
     def test_basic(self):
         self.assertEqual('1->("a":2) 2', build('a'))
         self.assertEqual('1->("a":2) 2->("b":3) 3', build('ab'))

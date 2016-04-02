@@ -4,6 +4,7 @@
 
 
 class SourceLocation(object):
+
     def __init__(self, path, line, column):
         self._path = path
         self._line = line
@@ -27,6 +28,7 @@ class SourceLocation(object):
 
 class PatternError(Exception):
     """A base class of pattern related exception."""
+
     def __init__(self, location, message):
         super(PatternError, self).__init__()
         self._location = location

@@ -4,7 +4,9 @@
 
 from model import Action, Document, Rule, State
 
+
 class Builder(object):
+
     def __init__(self):
         pass
 
@@ -13,6 +15,7 @@ class Builder(object):
 
 
 class ActionBuilder(Builder):
+
     def __init__(self, token):
         super(ActionBuilder, self).__init__()
         if not token.is_action:
@@ -28,6 +31,7 @@ class ActionBuilder(Builder):
 
 
 class RuleBuilder(Builder):
+
     def __init__(self, token):
         super(RuleBuilder, self).__init__()
         if not (token.is_name or token.is_char):
@@ -43,6 +47,7 @@ class RuleBuilder(Builder):
 
 
 class StateBuilder(Builder):
+
     def __init__(self, token):
         super(StateBuilder, self).__init__()
         self._rules = []
@@ -56,6 +61,7 @@ class StateBuilder(Builder):
 
 
 class DocumentBuilder(Builder):
+
     def __init__(self):
         super(DocumentBuilder, self).__init__()
         self._builders = []

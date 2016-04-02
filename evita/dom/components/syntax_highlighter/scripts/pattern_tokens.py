@@ -33,6 +33,7 @@ def visible_char_of(char_code):
 
 
 class KnownSet(object):
+
     def __init__(self, kind):
         self._kind = kind
 
@@ -75,6 +76,7 @@ class KnownSet(object):
 
 
 class Range(object):
+
     def __init__(self, min_char_code, max_char_code):
         self._max_char_code = max_char_code
         self._min_char_code = min_char_code
@@ -89,7 +91,7 @@ class Range(object):
 
     def contains(self, char_code):
         return char_code >= self._min_char_code and \
-               char_code <= self._max_char_code
+            char_code <= self._max_char_code
 
     def is_singleton(self):
         return self._min_char_code == self._max_char_code
@@ -106,6 +108,7 @@ class Range(object):
 
 
 class Token(object):
+
     def __init__(self, start, end):
         self._end = end
         self._start = start
@@ -167,6 +170,7 @@ class Token(object):
 
 
 class PrimaryToken(Token):
+
     def __init__(self, start, end):
         super(PrimaryToken, self).__init__(start, end)
 
@@ -176,6 +180,7 @@ class PrimaryToken(Token):
 
 
 class AnyToken(PrimaryToken):
+
     def __init__(self, start, end):
         super(AnyToken, self).__init__(start, end)
 
@@ -189,6 +194,7 @@ class AnyToken(PrimaryToken):
 
 
 class BoundaryToken(PrimaryToken):
+
     def __init__(self, start, end, kind):
         super(BoundaryToken, self).__init__(start, end)
         self._kind = kind
@@ -223,6 +229,7 @@ class BoundaryToken(PrimaryToken):
 
 
 class CharSetToken(PrimaryToken):
+
     def __init__(self, start, end, is_complement, members):
         """|member| is either |KnownSet| or |Range|."""
         super(CharSetToken, self).__init__(start, end)
@@ -250,6 +257,7 @@ class CharSetToken(PrimaryToken):
 
 
 class KnownSetToken(PrimaryToken):
+
     def __init__(self, start, end, kind):
         super(KnownSetToken, self).__init__(start, end)
         self._known_set = KnownSet(kind)
@@ -268,6 +276,7 @@ class KnownSetToken(PrimaryToken):
 
 
 class LiteralToken(PrimaryToken):
+
     def __init__(self, start, end, char_code):
         super(LiteralToken, self).__init__(start, end)
         self._char_code = char_code
@@ -284,7 +293,9 @@ class LiteralToken(PrimaryToken):
     def name(self):
         return '"%s"' % visible_char_of(self._char_code)
 
+
 class OperatorToken(Token):
+
     def __init__(self, start, end, kind):
         super(OperatorToken, self).__init__(start, end)
         self._kind = kind
@@ -319,6 +330,7 @@ class OperatorToken(Token):
 
 
 class QuantifierToken(Token):
+
     def __init__(self, start, end, min_count, max_count, is_lazy):
         super(QuantifierToken, self).__init__(start, end)
         assert(min_count >= 0)
@@ -367,4 +379,3 @@ class QuantifierToken(Token):
 
     def _lazy_str(self):
         return '?' if self._is_lazy else ''
-

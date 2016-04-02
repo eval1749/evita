@@ -10,6 +10,7 @@ from pattern_parser import PatternParser
 
 
 class NamedPattern(object):
+
     def __init__(self, name, source):
         self._name = name
         self._source = source
@@ -105,6 +106,7 @@ def complement_of(numbers):
         result.append(char_code)
     return result
 
+
 def group_name_of(node):
     names = set()
     for state in node._states:
@@ -115,6 +117,7 @@ def group_name_of(node):
 
 
 class DfaBuilderTest(unittest.TestCase):
+
     def test_basic(self):
         self.assertEqual('0:name:([a]->1) 1:NAME',
                          build(NamedPattern('name', 'a')))

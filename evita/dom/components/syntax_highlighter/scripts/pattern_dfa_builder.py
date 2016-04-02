@@ -6,7 +6,9 @@ from collections import deque
 
 DEBUG = False
 
+
 class DfaState(object):
+
     def __init__(self, index, states):
         self._index = index
         # |_states| holds a set of NFA states.
@@ -68,6 +70,7 @@ class DfaBuilder(object):
     """[1] has an explanation about RE-NFA to DFA.
     [1] https://swtch.com/~rsc/regexp/regexp1.html
     """
+
     def __init__(self):
         pass
 
@@ -95,6 +98,7 @@ class DfaBuilder(object):
                 nodes.append(new_node)
                 queue.append(new_node)
         return optimize_dfa(nodes)
+
 
 def closure_of(from_state):
     """Returns set of states which can be reached without consuming input."""

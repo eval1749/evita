@@ -7,8 +7,8 @@ import sys
 
 from pattern import PatternLexerError
 from pattern_tokens import AnyToken, BoundaryToken, CharSetToken, KnownSet, \
-                           KnownSetToken, LiteralToken, OperatorToken, \
-                           QuantifierToken, Range, INFINITY
+    KnownSetToken, LiteralToken, OperatorToken, \
+    QuantifierToken, Range, INFINITY
 from string_reader import StringReader
 
 BACKSLASH = 0x5C
@@ -42,7 +42,9 @@ META_CHARS = set([
     ord('.'),
 ])
 
+
 class PatternLexer(object):
+
     def __init__(self, characters):
         # |_index| holds number of characters processed so far.
         self._index = 0

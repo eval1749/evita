@@ -4,6 +4,7 @@
 
 
 class Token(object):
+
     def __init__(self, start, end):
         self._end = end
         self._start = start
@@ -38,6 +39,7 @@ class Token(object):
 
 
 class ActionToken(Token):
+
     def __init__(self, name, start, end):
         super(ActionToken, self).__init__(start, end)
         self._name = name
@@ -55,6 +57,7 @@ class ActionToken(Token):
 
 
 class CharToken(Token):
+
     def __init__(self, char_code, start, end):
         super(CharToken, self).__init__(start, end)
         self._char_code = char_code
@@ -80,6 +83,7 @@ class CharToken(Token):
 
 
 class LabelToken(Token):
+
     def __init__(self, name, start, end):
         super(LabelToken, self).__init__(start, end)
         self._name = name
@@ -97,6 +101,7 @@ class LabelToken(Token):
 
 
 class NameToken(Token):
+
     def __init__(self, name, start, end):
         super(NameToken, self).__init__(start, end)
         self._name = name
@@ -114,6 +119,7 @@ class NameToken(Token):
 
 
 class OperatorToken(Token):
+
     def __init__(self, char_code, start, end):
         super(OperatorToken, self).__init__(start, end)
         self._char_code = char_code

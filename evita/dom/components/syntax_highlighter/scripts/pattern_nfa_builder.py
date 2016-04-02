@@ -81,6 +81,12 @@ class NfaState(object):
     def out_edges(self):
         return self._out_edges
 
+    @property
+    def sort_key(self):
+        if self.is_acceptable:
+            return self._name * 1000
+        return self._name
+
     def is_terminal(self):
         for edge in self._out_edges:
             if edge.label != None:

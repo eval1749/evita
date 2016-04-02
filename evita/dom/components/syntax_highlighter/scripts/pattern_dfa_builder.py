@@ -85,26 +85,58 @@ class DfaBuilder(object):
                 current.add_transition(char_code, new_node)
                 nodes.append(new_node)
                 queue.append(new_node)
-        return optimize_dfa(nodes)
+        return DfaOptimizer().optimize(nodes)
+
+
+class DfaOptimizer(object):
+    """Minimize DFA states in |nodes| by grouping by acceptable and transition.
+    """
+
+    def __init__(self):
+        pass
+
+    def _compute_key(self, node):
+        result = sorted(set([state.group_name for state in node.states]))
+        if node.is_acceptable:
+            result.append('A')
+        for char_code in range(0, 128):
+            if not(char_code in node.transition_map):
+                continue
+            nodes = node.transition_map[char_code]
+            result.append('%d:%s' % (
+                char_code,
+                ' '.join(sorted([str(next_node.index)
+                                 for next_node in nodes]))))
+        return ' '.join(result)
+
+    def optimize(self, nodes):
+        node_map = dict()
+        redundant_map = dict()
+        result = []
+        for node in nodes:
+            key = self._compute_key(node)
+            if key in node_map:
+                redundant_map[node] = node_map[key]
+                continue
+            node_map[key] = node
+            result.append(node)
+        if len(redundant_map) == 0:
+            assert len(result) == len(nodes)
+            return result
+        for node in result:
+            for char_code in node.transition_map:
+                next_nodes = node.transition_map[char_code]
+                for redundant in redundant_map.keys():
+                    if not(redundant in next_nodes):
+                        continue
+                    next_nodes.remove(redundant)
+                    next_nodes.add(redundant_map[redundant])
+        return self.optimize(result)
 
 
 def closure_of(from_state):
     """Returns set of states which can be reached without consuming input."""
     return closure_of_internal(from_state, set())
-
-
-def compute_key(node):
-    result = sorted(set([state.group_name for state in node.states]))
-    if node.is_acceptable:
-        result.append('A')
-    for char_code in range(0, 128):
-        if not(char_code in node.transition_map):
-            continue
-        nodes = node.transition_map[char_code]
-        result.append('%d:%s' % (
-            char_code,
-            ' '.join(sorted([str(next_node.index) for next_node in nodes]))))
-    return ' '.join(result)
 
 
 def closure_of_internal(from_state, result):
@@ -148,30 +180,3 @@ def next_states_of(from_states, char_code):
             for state in closure_of(edge.to_state):
                 result.add(state)
     return result
-
-
-def optimize_dfa(nodes):
-    """Minimize DFA states in |nodes| by grouping by acceptable and transition.
-    """
-    node_map = dict()
-    redundant_map = dict()
-    result = []
-    for node in nodes:
-        key = compute_key(node)
-        if key in node_map:
-            redundant_map[node] = node_map[key]
-            continue
-        node_map[key] = node
-        result.append(node)
-    if len(redundant_map) == 0:
-        assert len(result) == len(nodes)
-        return result
-    for node in result:
-        for char_code in node.transition_map:
-            next_nodes = node.transition_map[char_code]
-            for redundant in redundant_map.keys():
-                if not(redundant in next_nodes):
-                    continue
-                next_nodes.remove(redundant)
-                next_nodes.add(redundant_map[redundant])
-    return optimize_dfa(result)

@@ -156,16 +156,15 @@ def optimize_dfa(nodes):
     node_map = dict()
     redundant_map = dict()
     result = []
-    has_redundant_nodes = False
     for node in nodes:
         key = compute_key(node)
         if key in node_map:
             redundant_map[node] = node_map[key]
-            has_redundant_nodes = True
             continue
         node_map[key] = node
         result.append(node)
-    if not has_redundant_nodes:
+    if len(redundant_map) == 0:
+        assert len(result) == len(nodes)
         return result
     for node in result:
         for char_code in node.transition_map:

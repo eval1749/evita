@@ -193,7 +193,7 @@ class DfaGraph(object):
     def finish(self, nodes):
         assert len(self._nodes) == 0
         assert len(nodes) > 0
-        self._nodes= nodes
+        self._nodes = nodes
 
 
 class DfaNode(object):
@@ -547,12 +547,7 @@ class DfaOptimizer(object):
             result.append(node)
             result_map[partition] = node
 
-        count = 0
-        for partition in self._partitions:
-            count = count + partition.count()
-        assert len(nodes) == count, '%s nodes=[%s]' % (
-            ' '.join([str(partition) for partition in self._partitions]),
-            ' '.join([str(node) for node in nodes]))
+        self._verify_partitions(nodes)
 
         for partition in self._partitions:
             original = partition.member
@@ -598,6 +593,14 @@ class DfaOptimizer(object):
         if len(nodes1) == 1 or len(nodes2) == 0:
             return
         self._queue.append(partition1)
+
+    def _verify_partitions(self, nodes):
+        count = 0
+        for partition in self._partitions:
+            count = count + partition.count()
+        assert len(nodes) == count, '%s nodes=[%s]' % (
+            ' '.join([str(partition) for partition in self._partitions]),
+            ' '.join([str(node) for node in nodes]))
 
 
 class DfaNodeSorter(object):

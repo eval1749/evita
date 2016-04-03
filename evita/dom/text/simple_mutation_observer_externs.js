@@ -8,16 +8,14 @@
 text.SimpleMutationObserver;
 
 /**
- * @param {number} start
- * @param {number} end
+ * @param {number} headCount
+ * @param {number} tailCount
+ * @param {number} delta
  */
-text.SimpleMutationObserver.prototype.didChangeTextDocument =
-    function(start, end) {};
+text.SimpleMutationObserver.prototype.didChangeTextDocument = function(
+    headCount, tailCount, delta) {};
 
-/**
- * @param {number} offset
- */
-text.SimpleMutationObserver.prototype.didLoadTextDocument = function(offset) {};
+text.SimpleMutationObserver.prototype.didLoadTextDocument = function() {};
 
 /**
  * @constructor

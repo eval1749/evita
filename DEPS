@@ -7,6 +7,7 @@ vars = {
   'github.git': 'https://github.com',
 
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
+  'build_revision': 'a808f29607c832484d8bcedb161b0ef4b5cba2da',
   'buildtools_revision': '80b5126f91be4eb359248d28696746ef09d5be67',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
@@ -18,6 +19,9 @@ vars = {
 }
 
 deps = {
+  'src/build':
+    Var('chromium_git') + '/chromium/src/build' + '@' +  Var('build_revision'),
+
   'src/buildtools':
     Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
@@ -47,6 +51,14 @@ deps = {
 }
 
 hooks = [
+  {
+    # Update LASTCHANGE.
+    'name': 'lastchange',
+    'pattern': '.',
+    'action': ['python', 'src/build/util/lastchange.py',
+               '-o', 'src/build/util/LASTCHANGE'],
+  },
+
   # Pull GN binaries. This needs to be before running GYP below.
   {
     'name': 'gn_win',

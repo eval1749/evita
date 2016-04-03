@@ -46,6 +46,10 @@ class KnownSet(object):
         return self._kind == ord('d') or self._kind == ord('D')
 
     @property
+    def is_range(self):
+        return False
+
+    @property
     def is_space(self):
         return self._kind == ord('s') or self._kind == ord('S')
 
@@ -80,6 +84,10 @@ class Range(object):
     def __init__(self, min_char_code, max_char_code):
         self._max_char_code = max_char_code
         self._min_char_code = min_char_code
+
+    @property
+    def is_range(self):
+        return True
 
     @property
     def max_char_code(self):

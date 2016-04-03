@@ -151,7 +151,14 @@ class DfaBuilderTest(unittest.TestCase):
                          build(NamedPattern('comment',
                                             '/[*][^*]*[*]+([^*/][^*]*[*]+)*/')))
 
-    def test_block_comment2(self):
+    def test_block_comment_greedy(self):
+        self.assertEqual('0:comment:([/]->1) 1:comment:([*]->2) '
+                         '2:comment:([^*]->2, [*]->3) '
+                         '3:comment:([^*/]->2, [*]->3, [/]->4) '
+                         '4:COMMENT:([^*]->2, [*]->3)',
+                         build(NamedPattern('comment', '/[*].*[*]/')))
+
+    def test_block_comment_lazy(self):
         # TODO(eval1749)-> Can we convert lazy quantifier to DFA?
         self.assertEqual('0:comment:([/]->1) 1:comment:([*]->2) '
                          '2:comment:([^*]->2, [*]->3) '

@@ -30,6 +30,10 @@ class Alphabets(object):
     def alphabet_map(self):
         return self._alphabet_map
 
+    @property
+    def char_code_map(self):
+        return self._char_code_map
+
     def alphabet_of(self, char_code):
         return self.char_code_map[char_code]
 
@@ -148,6 +152,29 @@ class SimpleAlphabetsBuilder(NfaGraphVisitor):
         self._used_chars.update(range(min_code, max_code + 1))
 
 
+class DfaEdge(object):
+
+    def __init__(self, alphabet, from_node, to_node):
+        self._from_node = from_node
+        self._label = set([alphabet])
+        self._to_node = to_node
+
+    @property
+    def label(self):
+        return self._label
+
+    @property
+    def from_node(self):
+        return self._from_node
+
+    @property
+    def to_node(self):
+        return self._to_node
+
+    def add_alphabet(self, alphabet):
+        self._label.add(alphabet)
+
+
 class DfaGraph(object):
     """Represents DFA graph"""
 
@@ -166,7 +193,7 @@ class DfaGraph(object):
     def finish(self, nodes):
         assert len(self._nodes) == 0
         assert len(nodes) > 0
-        self._nodes = nodes
+        self._nodes= nodes
 
 
 class DfaNode(object):
@@ -175,6 +202,8 @@ class DfaNode(object):
     def __init__(self, graph, index, states):
         self._graph = graph
         self._index = index
+        self._in_edges = []
+        self._out_edges = []
         # |_states| holds a set of NFA states.
         self._states = states
         self._transitions = Transitions(self)
@@ -188,11 +217,19 @@ class DfaNode(object):
         return self._index
 
     @property
+    def in_edges(self):
+        return self._in_edges
+
+    @property
     def is_acceptable(self):
         for state in self._states:
             if state.is_acceptable:
                 return True
         return False
+
+    @property
+    def out_edges(self):
+        return self._out_edges
 
     @property
     def transitions(self):
@@ -203,20 +240,46 @@ class DfaNode(object):
     def states(self):
         return self._states
 
-    def add_transition(self, char_code, node):
-        self._transitions.add(char_code, node)
+    def add_transition(self, alphabet, to_node):
+        self._transitions.add(alphabet, to_node)
+        for present in self._out_edges:
+            if present.to_node == to_node:
+                present.add_alphabet(alphabet)
+                return
+        new_edge = DfaEdge(alphabet, self, to_node)
+        self._out_edges.append(new_edge)
+        to_node._in_edges.append(new_edge)
+
+    def set_index(self, new_index):
+        self._index = new_index
 
     def transit(self, char_code):
         return self._transitions.get(char_code)
 
     def __cmp__(self, other):
+        if other == None:
+            return False
         return cmp(self._index, other._index)
 
+    def __eq__(self, other):
+        if other == None:
+            return False
+        return self._index == other._index
+
+    def __ne__(self, other):
+        if other == None:
+            return True
+        return self._index != other._index
+
     def __str__(self):
-        return 'DfaNode(%d, %s, nfa={%s} transitions=%s)' % (
+        return 'DfaNode(%d, %s, nfa={%s} in={%s} out={%s} transitions=%s)' % (
             self._index,
             'A' if self.is_acceptable else '-',
             ', '.join(sorted([str(state.index) for state in self._states])),
+            ', '.join(map(str,  sorted([edge.from_node.index
+                                        for edge in self.in_edges]))),
+            ', '.join(map(str,  sorted([edge.to_node.index
+                                        for edge in self.out_edges]))),
             str(self._transitions))
 
 
@@ -270,6 +333,8 @@ class Partition(object):
         return cmp(self._sort_key(), other._sort_key())
 
     def __eq__(self, other):
+        if other == None:
+            return False
         return self._index == other._index
 
     def __str__(self):
@@ -497,7 +562,7 @@ class DfaOptimizer(object):
                 states = original.transit(char_code)
                 for target in self._find_partitions(states):
                     node.add_transition(alphabet, result_map[target])
-        new_graph.finish(result)
+        new_graph.finish(DfaNodeSorter().sort(result))
         if DEBUG:
             for node in result:
                 print 'result', str(node)
@@ -535,6 +600,37 @@ class DfaOptimizer(object):
         self._queue.append(partition1)
 
 
+class DfaNodeSorter(object):
+    """Sorts nodes by preorder DFS"""
+
+    def __init__(self):
+        self._visited_nodes = set()
+        self._nodes = []
+
+    def sort(self, nodes):
+        # Note: For ".*a", start node has in edges from self and "a".
+        start_node = nodes[0]
+        for node in nodes:
+            if len(node.in_edges) > 0:
+                continue
+            start_node = node
+        self._visit(start_node)
+        return self._nodes
+
+    def _visit(self, node):
+        if node in self._visited_nodes:
+            return
+        node.set_index(len(self._nodes))
+        self._nodes.append(node)
+        self._visited_nodes.add(node)
+        for edge in sorted(node.out_edges, key=lambda edge: edge.to_node.index):
+            self._visit(edge.to_node)
+
+
+######################################################################
+#
+# Utility Functions
+#
 def closure_of(from_state):
     """Returns set of states which can be reached without consuming input."""
     return closure_of_internal(from_state, set())

@@ -153,9 +153,9 @@ class DfaBuilderTest(unittest.TestCase):
 
     def test_double_quote(self):
         # Double quote string with "/" escape
-        self.assertEqual(('0:string:(["]->2) '
-                          '1:string:(.->2) '
-                          '2:string:([/]->1, [^"/]->2, ["]->3) '
+        self.assertEqual(('0:string:(["]->1) '
+                          '1:string:([^"/]->1, [/]->2, ["]->3) '
+                          '2:string:(.->1) '
                           '3:STRING',
                           '{1:["], 2:[/]}'),
                          build(NamedPattern('string', '"([^/"]|/.)*"')))

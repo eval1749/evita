@@ -17,6 +17,7 @@ vars = {
   'icu_revision': '628d39f5b088236d2021bf4388549fd92673ff1a',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
+  'testing_revision': '3f142a5004f10d1b417dbf617707567197ade957',
   'v8_revision': '8e18e51a50775594c8cbda14fca898c2923ac30d', # 5.1.256
   'zlib_revision': '0d9cfbcdf7501ccca3e72a4153860cbad21aa4a3',
 }
@@ -30,6 +31,9 @@ deps = {
 
   'src/buildtools':
     Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
+
+  'src/testing':
+    Var('chromium_git') + '/chromium/src/testing' + '@' + Var('testing_revision'),
 
   'src/testing/gmock':
     Var('chromium_git') + '/external/googlemock.git' + '@' + Var('gmock_revision'),

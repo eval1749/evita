@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 from collections import deque
+from pattern_nfa import NfaGraphVisitor, NfaGraphWalker
 
 DEBUG = False
 
@@ -42,13 +43,70 @@ class Alphabets(object):
         return iter(self._alphabets)
 
 
-class AlphabetsBuilder(object):
+class AlphabetsBuilder(NfaGraphVisitor):
     """Build minimum alphabet set from labels in NFA graph.
-    This builder classify /[a][a-z0-9]+[^x]/ into:
-        {1:[0-9], 2:[a], 3:[b-w], 4:[x], 5:[y-z]}
+    This builder computes following alphaets from /[a][a-z0-9]+[^x]/:
+        {1:[0-9b-wyz], 2:[a], 3:[x]}
     """
 
     def __init__(self):
+        super(AlphabetsBuilder, self).__init__()
+        self._classify_map = dict()
+
+    def build(self, nfa_graph):
+        self._classify(nfa_graph)
+        return self._compute()
+
+    def _classify(self, nfa_graph):
+        self._classify_map.clear()
+        walker = NfaGraphWalker(self)
+        walker.visit(nfa_graph)
+
+    def _compute(self):
+        labels_map = dict()
+        others = []
+        alphabet_map = [others]
+        char_code_map = [0] * MAX_CHAR_CODE
+        for char_code in range(MAX_CHAR_CODE):
+            if not(char_code in self._classify_map):
+                others.append(char_code)
+                continue
+            labels = self._classify_map[char_code]
+            key = ''.join(labels)
+            if key in labels_map:
+                (alpahbet, char_codes) = labels_map[key]
+                char_code_map[char_code] = alpahbet
+                char_codes.append(char_code)
+                continue
+            alphabet = len(alphabet_map)
+            char_codes = [char_code]
+            labels_map[key] = (alphabet, char_codes)
+            alphabet_map.append(char_codes)
+            char_code_map[char_code] = alphabet
+        return Alphabets(range(len(alphabet_map)), alphabet_map, char_code_map)
+
+    # NfaGraphVisitor method
+    def process_range(self, label, min_code, max_code):
+        assert min_code <= max_code, 'min=%d max=%d' % (min_code, max_code)
+        for char_code in range(min_code, max_code + 1):
+            if char_code in self._classify_map:
+                self._classify_map[char_code].add(str(label))
+                continue
+            self._classify_map[char_code] = set(str(label))
+
+
+class SimpleAlphabetsBuilder(NfaGraphVisitor):
+    """Build small alphabet set from labels in NFA graph.
+    This builder computes following alphaets from /[a][a-z0-9]+[^x]/:
+        {1:[0-9], 2:[a], 3:[b-w], 4:[x], 5:[y-z]}
+
+    An implementation is followed by [1].
+
+    [1] https://github.com/google/re2/blob/master/re2/dfa.cc
+    """
+
+    def __init__(self):
+        super(SimpleAlphabetsBuilder, self).__init__()
         self._start_set = set()
         self._used_chars = set()
 
@@ -59,52 +117,8 @@ class AlphabetsBuilder(object):
     def _classify(self, nfa_graph):
         self._used_chars.clear()
         self._start_set.clear()
-        for node in nfa_graph.nodes:
-            for edge in node.out_edges:
-                self._classify_label(edge.label)
-
-    def _classify_from_charset(self, member):
-        if member.is_range:
-            self._classify_from_range(member.min_char_code,
-                                      member.max_char_code)
-            return
-        if member.is_digit:
-            return self._classify_from_range(ord('0'), ord('9'))
-        if member.is_space:
-            # \t \v \n \r
-            self._classify_from_range(0x09, 0x0D)
-            self._classify_from_range(ord(' '), ord(' '))
-            return
-        if member.is_word:
-            self._classify_from_range(ord('A'), ord('Z'))
-            self._classify_from_range(ord('a'), ord('z'))
-            self._classify_from_range(ord('0'), ord('9'))
-            self._classify_from_range(ord('_'), ord('_'))
-            return
-        raise Exception('NYI charset %s' % str(member))
-
-    def _classify_from_range(self, min_code, max_code):
-        assert min_code <= max_code, 'min=%d max=%d' % (min_code, max_code)
-        self._start_set.add(min_code)
-        self._start_set.add(max_code + 1)
-        self._used_chars.update(range(min_code, max_code + 1))
-
-    def _classify_label(self, label):
-        if label == None:
-            return
-        if label.is_any:
-            return
-        if label.is_char_set:
-            for member in label.members:
-                self._classify_from_charset(member)
-            return
-        if label.is_known_set:
-            self._classify_from_charset(label.known_set)
-            return
-        if label.is_literal:
-            self._classify_from_range(label.char_code, label.char_code)
-            return
-        raise Exception('Unknown label %s' % str(label))
+        walker = NfaGraphWalker(self)
+        walker.visit(nfa_graph)
 
     def _compute(self):
         others = []
@@ -125,6 +139,13 @@ class AlphabetsBuilder(object):
             'used=%s alphabets=%s char_code_map=%s starts=%s' % (
                 self._used_chars, alphabet_map, char_code_map, self._start_set)
         return Alphabets(range(len(alphabet_map)), alphabet_map, char_code_map)
+
+    # NfaGraphVisitor method
+    def process_range(self, label, min_code, max_code):
+        assert min_code <= max_code, 'min=%d max=%d' % (min_code, max_code)
+        self._start_set.add(min_code)
+        self._start_set.add(max_code + 1)
+        self._used_chars.update(range(min_code, max_code + 1))
 
 
 class DfaGraph(object):

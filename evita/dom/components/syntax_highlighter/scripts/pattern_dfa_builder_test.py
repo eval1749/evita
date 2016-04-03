@@ -123,13 +123,12 @@ def transition_map_to_string(transition_map):
 class DfaBuilderTest(unittest.TestCase):
 
     def test_alphabet(self):
-        # TODO(eval1749): We should merge alphabet[3] and alphabet[5]
         self.assertEqual(('0:foo:([a]->1) '
                           '1:foo:([0-9a-z]->2) '
                           '2:foo:([x]->2, [^0-9a-z]->3, [0-9a-wy-z]->4) '
                           '3:FOO '
                           '4:FOO:([x]->2, [^0-9a-z]->3, [0-9a-wy-z]->4)',
-                          '{1:[0-9], 2:[a], 3:[b-w], 4:[x], 5:[y-z]}'),
+                          '{1:[0-9b-wy-z], 2:[a], 3:[x]}'),
                          build(NamedPattern('foo', 'a[a-z0-9]+[^x]')))
 
     def test_basic(self):
@@ -149,7 +148,7 @@ class DfaBuilderTest(unittest.TestCase):
                                NamedPattern('number', '9+')))
         self.assertEqual(('0:name:([0-9A-Z_a-z]->1) '
                           '1:NAME:([0-9A-Z_a-z]->1)',
-                          '{1:[0-9], 2:[A-Z], 3:[_], 4:[a-z]}'),
+                          '{1:[0-9A-Z_a-z]}'),
                          build(NamedPattern('name', '\\w+')))
 
     def test_double_quote(self):

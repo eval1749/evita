@@ -54,5 +54,6 @@ testing/gmock/
 third_party/cygwin/
 third_party/autopep8/
 third_party/pep8/
+third_party/ply/
 third_party/zlib/
 v8/

@@ -15,6 +15,7 @@ vars = {
   'gyp_revision': '697933c2e3b3ffdd6949df3c2fa3613489e01175',
   'icu_revision': '628d39f5b088236d2021bf4388549fd92673ff1a',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
+  'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'v8_revision': '8e18e51a50775594c8cbda14fca898c2923ac30d', # 5.1.256
   'zlib_revision': '0d9cfbcdf7501ccca3e72a4153860cbad21aa4a3',
 }
@@ -43,6 +44,9 @@ deps = {
 
   'src/third_party/pep8':
     Var('github.git') + '/PyCQA/pep8.git' + '@' + Var('pep8_revision'),
+
+  'src/third_party/ply':
+    Var('chromium_git') + '/chromium/src/third_party/ply' + '@' +  Var('ply_revision'),
 
   'src/third_party/zlib':
     Var('chromium_git') + '/chromium/src/third_party/zlib' + '@' +  Var('zlib_revision'),

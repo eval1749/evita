@@ -147,7 +147,7 @@ $define(global, 'launchpad', function($export) {
     for (const header of HEADER_MODEL) {
       const cell = document.createElement('headerCell', header.id);
       cell.appendChild(document.createText(header.label));
-      cell.style.width = header.width;
+      cell.style.width = header.width.toString();
       head.appendChild(cell);
     }
 
@@ -479,7 +479,7 @@ $define(global, 'launchpad', function($export) {
         if (header.id === 'name')
           cell.appendChild(this.createIcon(document, text));
         cell.appendChild(document.createText(text));
-        cell.style.width = header.width;
+        cell.style.width = header.width.toString();
         this.row_.appendChild(cell);
       }
     }
@@ -501,14 +501,10 @@ $define(global, 'launchpad', function($export) {
     //
 
     /** @private */
-    didAttachWindow() {
-      this.update();
-    }
+    didAttachWindow() { this.update(); }
 
     /** @private */
-    didDetachWindow() {
-      this.update();
-    }
+    didDetachWindow() { this.update(); }
 
     /** @private */
     didLoadTextDocument() {
@@ -671,7 +667,8 @@ $define(global, 'launchpad', function($export) {
       const add = this.hasFocus_ ? 'activeSelected' : 'inactiveSelected';
       const remove = this.hasFocus_ ? 'inactiveSelected' : 'activeSelected';
       let count = 0;
-      for (const row of this.list_.childNodes) {
+      for (const child of this.list_.childNodes) {
+        const row = /** @type {!Element} */ (child);
         row.classList.remove(remove);
         if (this.selection_.contains(row)) {
           row.classList.add(add);

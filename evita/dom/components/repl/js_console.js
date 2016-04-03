@@ -244,7 +244,9 @@ $define(global, 'repl', function($export) {
     /** @private */
     installKeyBindings() {
       for (const[key, command] of keyBindings.entries())
-        this.document.bindKey(key, command);
+        this.document.bindKey(
+            /** @type{string} */ (key),
+            /** @type{!Object} */ (command));
     }
 
     /** @param {*} result */
@@ -273,7 +275,7 @@ $define(global, 'repl', function($export) {
       const document = console.document;
       const present = document.properties.get(JsConsole.name) || null;
       if (present)
-        return /** @type {!JsConsole} */(present);
+        return /** @type {!JsConsole} */ (present);
       const newInstance = new JsConsole();
       document.properties.set(JsConsole.name, newInstance);
       return newInstance;

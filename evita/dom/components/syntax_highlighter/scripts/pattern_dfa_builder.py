@@ -193,6 +193,10 @@ class DfaGraph(object):
     def finish(self, nodes):
         assert len(self._nodes) == 0
         assert len(nodes) > 0
+        if DEBUG:
+            print '\n', 'DfaGraph'
+            for node in nodes:
+                print '  ', str(node)
         self._nodes = nodes
 
 
@@ -295,9 +299,9 @@ class Partition(object):
         return self._index
 
     @property
-    def member(self):
+    def members(self):
         assert len(self._nodes) >= 1
-        return self._nodes[0]
+        return self._nodes
 
     @property
     def nodes(self):
@@ -458,9 +462,6 @@ class DfaBuilder(object):
                 self._add_transition(current, alphabet, new_node)
                 nodes.append(new_node)
                 queue.append(new_node)
-        if DEBUG:
-            for node in nodes:
-                print '  ', str(node)
         graph.finish(nodes)
         return DfaOptimizer().optimize(graph)
 
@@ -478,6 +479,55 @@ class DfaOptimizer(object):
         self._partition_map = dict()
         self._partitions = []
         self._queue = deque()
+
+    def optimize(self, graph):
+        """The entry pointer of DFA optimizer."""
+        self._alphabets = graph.alphabets
+        nodes = graph.nodes
+        assert len(nodes) > 0
+        if DEBUG:
+            print 'optimize', ' '.join([str(node) for node in nodes])
+        if len(nodes) == 1:
+            # No needs to optimize
+            return graph
+        self._setup(nodes)
+        if len(nodes) == len(self._partitions):
+            # |nodes| are already minimum.
+            return graph
+
+        # Split partiions
+        assert len(self._queue) >= 1
+        while len(self._queue) > 0:
+            partition = self._queue.popleft()
+            self._split(partition)
+
+        # Make nodes from partitions
+        result = []
+        result_map = dict()
+        for partition in sorted(self._partitions):
+            states = set()
+            for member in partition.members:
+                states.update(member.states)
+            node = DfaNode(graph, len(result), states)
+            result.append(node)
+            result_map[partition] = node
+
+        self._verify_partitions(nodes)
+
+        # Make edges
+        for partition in self._partitions:
+            member = partition.members[0]
+            node = result_map[partition]
+            for alphabet in self._alphabets:
+                char_code = self._alphabets.char_code_of(alphabet)
+                states = member.transit(char_code)
+                for target in self._find_partitions(states):
+                    node.add_transition(alphabet, result_map[target])
+
+        # Make graph and return it
+        new_graph = DfaGraph(self._alphabets)
+        new_graph.finish(DfaNodeSorter().sort(result))
+        return new_graph
 
     def _find_partitions(self, nodes):
         if len(nodes) == 0:
@@ -523,47 +573,8 @@ class DfaOptimizer(object):
             return
         self._queue.append(partition)
 
-    def optimize(self, graph):
-        self._alphabets = graph.alphabets
-        nodes = graph.nodes
-        assert len(nodes) > 0
-        if DEBUG:
-            print 'optimize', ' '.join([str(node) for node in nodes])
-        if len(nodes) == 1:
-            return graph
-        new_graph = DfaGraph(self._alphabets)
-        self._setup(nodes)
-        if len(nodes) == len(self._partitions):
-            return graph
-        assert len(self._queue) >= 1
-        while len(self._queue) > 0:
-            partition = self._queue.popleft()
-            self._split(partition)
-        result = []
-        result_map = dict()
-        for partition in sorted(self._partitions):
-            original = partition.member
-            node = DfaNode(graph, len(result), original.states)
-            result.append(node)
-            result_map[partition] = node
-
-        self._verify_partitions(nodes)
-
-        for partition in self._partitions:
-            original = partition.member
-            node = result_map[partition]
-            for alphabet in self._alphabets:
-                char_code = self._alphabets.char_code_of(alphabet)
-                states = original.transit(char_code)
-                for target in self._find_partitions(states):
-                    node.add_transition(alphabet, result_map[target])
-        new_graph.finish(DfaNodeSorter().sort(result))
-        if DEBUG:
-            for node in result:
-                print 'result', str(node)
-        return new_graph
-
     def _setup(self, nodes):
+        """Create initial partiions, acceptable nodes, and others."""
         accept_nodes = []
         not_accept_nodes = []
         for node in nodes:
@@ -575,6 +586,7 @@ class DfaOptimizer(object):
         self._new_partition(not_accept_nodes)
 
     def _split(self, partition1):
+        """Splits |partition1| if possible."""
         assert partition1.count() > 0
         if partition1.count() == 1:
             return

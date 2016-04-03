@@ -2,17 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-{% macro emit_actions(actions, depth) %}
-{% set INDENT = ' ' * depth %}
-{%  for action in actions %}
-{{ INDENT }}{{ action %}}
-{% endfor %}
-{% endmacro %}
-
 goog.scope(function() {
-const kStateName = [
+
+/** @const @type {number} */
+const kMaxAlphabet= {{ max_alphabet }};
+
+/** @const @type {number} */
+const kMaxState = {{ max_state }};
+
+
+/** @const @type {!Uint8Array}
+ *   0: All characters expect below
+{% for char_codes in alphabet_map %}
+{% if loop.index0 != 0 %}
+ *   {{ loop.index0 }}: {{ char_codes }}
+{% endif %}
+{% endfor %}
+ */
+const kCharCodeToAlphabets = new {{alphabet_type}}Array([
+{% for alphabet in char_code_to_alphabet_map %}
+  {{ alphabet }},{% if loop.index % 16 == 0 %}{{ '\n' }}{% endif %}
+{%- endfor %}
+]);
+
+/** @const @type {!Array<number>} */
+const kStateToTokenMap = [
 {% for state in states %}
-  '{{state.NAME}}',
+    '{{ state.token_type }}', // {{ state.index }}
+{% endfor %}
+];
+
+/** @const @type {!Array<!{{state_type}}Array>} */
+const kTransitionMap = [
+{% for state in states %}
+  new {{state_type}}Array({{state.transitions}}), // {{loop.index0}}:{{state.comment}}
 {% endfor %}
 ];
 
@@ -21,40 +44,67 @@ const kStateName = [
  */
 class {{Name}}Scanner {
   constructor() {
+    this._state_ = 0;
+  }
+
+  // TODO(eval1749): We should get rid of |apply()| once we finish testing
+  // of scanner generator.
+  // For testing of this scanner
+  apply(document) {
+    this.resetTo(0);
+    let lastOffset = 0;
+    let lastState = 0;
+    let lastSyntax = '';
+    let number_of_tokens = 0
+    document.setSyntax(0, document.length, '');
+    for(let offset = 0; offset < document.length; ++offset) {
+      const charCode = document.charCodeAt(offset);
+      const syntax = this.updateState(charCode);
+      if (lastState == this._state)
+        continue
+      lastState = this._state
+      if (lastSyntax == syntax)
+        continue
+      if (number_of_tokens < 200) {
+          console.log(
+            `s${lastState}-${kCharCodeToAlphabets[charCode]}->s${this._state}`,
+            lastSyntax, lastOffset, offset);
+      }
+      document.setSyntax(lastOffset, offset, lastSyntax);
+      ++number_of_tokens
+      if (lastSyntax == 'identifier')
+        console.log(`identifier "${document.slice(lastOffset, offset)}"`);
+      lastOffset = offset
+      lastSyntax = syntax
+    }
+    return number_of_tokens;
   }
 
   /**
-   * implements lexers.Scanner.stateNameOf
-   * @param {number} state
-   * @return {string}
+   * @param {number} newState
    */
-  stateNameOf(state) {
-    return kStateName[state];
+  resetTo(newState) {
+    console.assert(newState <= kMaxState, newState);
+    this._state = newState;
   }
 
   /**
    * implements lexers.Scanner.updateState
-   * @param {number} state
    * @param {number} charCode
    * @return {number}
    */
-  updateState(state, charCode) {
-    switch (state) {
-{% for state in states %}
-      case {{state.number}}: // {{state.NAME}}
-{%      for rule in state.rules %}
-{%        if rule.condition == 'otherwise' %}
-{%          emit_actions(rule.actions, 8) %}
-{%        else %}
-        if ({{rule.condition}}) {
-{%          emit_actions(rule.actions, 10) %}
-        }
-{%        endif %}
-{%      endfor %}
-{% endof %}
-    }
+  updateState(charCode) {
+    /** @const @type {number} */
+    const alphabet = charCode >= 128 ? 0 : kCharCodeToAlphabets[charCode];
+    console.assert(alphabet <= kMaxAlphabet, alphabet);
+    const newState = kTransitionMap[this._state][alphabet];
+    console.assert(newState <= kMaxState, newState);
+    this._state = newState;
+    return kStateToTokenMap[newState];
   }
 }
 
-lexers.{{Name}}Sanner = {{Name}}Scanner;
+lexers.{{Name}}Scanner = {{Name}}Scanner;
 });
+
+var l = new lexers.{{Name}}Scanner();

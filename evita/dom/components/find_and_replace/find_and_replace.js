@@ -63,8 +63,6 @@ global.FindAndReplace = (function() {
       }
       case TextRange.Case.LOWER:
         return string.toLocaleLowerCase();
-      case TextRange.Case.LOWER:
-        return string.toLocaleLowerCase();
       case TextRange.Case.MIXED:
         return string;
       case TextRange.Case.UPPER:

@@ -49,8 +49,9 @@ class Walker:
 def build(source):
     builder = NfaBuilder()
     builder.build('sample', PatternParser(source).parse())
+    graph = builder.finalize()
     walker = Walker()
-    walker.visit(builder.finalize())
+    walker.visit(graph.start_node)
     return walker.finish()
 
 

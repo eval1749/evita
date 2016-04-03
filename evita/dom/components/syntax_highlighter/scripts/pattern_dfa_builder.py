@@ -194,8 +194,9 @@ class DfaBuilder(object):
     def __init__(self):
         self._alphabets = range(0, 128)
 
-    def build(self, start_state):
+    def build(self, nfa_graph):
         """Build DFA from NFA |start_state|."""
+        start_state = nfa_graph.start_node
         if DEBUG:
             print 'build', str(start_state)
         initial_node = DfaNode(0, closure_of(start_state))

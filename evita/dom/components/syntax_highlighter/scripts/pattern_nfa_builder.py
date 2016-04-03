@@ -5,6 +5,22 @@
 from pattern_lexer import PatternLexer
 
 
+class NfaGraph(object):
+    """Represents a NFA graph"""
+
+    def __init__(self, nodes, start_node):
+        self._nodes = nodes
+        self._start_node = start_node
+
+    @property
+    def nodes(self):
+        return self._nodes
+
+    @property
+    def start_node(self):
+        return self._start_node
+
+
 class NfaEdge(object):
 
     def __init__(self, label, from_state, to_state, is_lazy):
@@ -105,7 +121,7 @@ class NfaState(object):
 class NfaBuilder(object):
 
     def __init__(self):
-        self._number_of_states = 0
+        self._states = []
         self._group_name = ''
         self._initial_states = []
 
@@ -117,11 +133,11 @@ class NfaBuilder(object):
 
     def finalize(self):
         if len(self._initial_states) == 1:
-            return self._initial_states[0]
+            return NfaGraph(self._states, self._initial_states[0])
         initial_state = self._new_state(None)
         for state in self._initial_states:
             self._make_edge(None, initial_state, state)
-        return initial_state
+        return NfaGraph(self._states, initial_state)
 
     def _make_edge(self, label, from_state, to_state, is_lazy=False):
         if to_state == None:
@@ -132,8 +148,9 @@ class NfaBuilder(object):
         return to_state
 
     def _new_state(self, node):
-        self._number_of_states = self._number_of_states + 1
-        return NfaState(self._group_name, self._number_of_states, node)
+        state = NfaState(self._group_name, len(self._states) + 1, node)
+        self._states.append(state)
+        return state
 
     def _process(self, from_state, to_state, node, is_lazy=False):
         if node.is_primary:

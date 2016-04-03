@@ -6,15 +6,161 @@ from collections import deque
 
 DEBUG = False
 
+MAX_CHAR_CODE = 128
+
+
+class Alphabets(object):
+    """Represents alphabets of DFA"""
+
+    def __init__(self, alphabets, alphabet_map, char_code_map):
+        """
+        - |alphabets| list of alphabet, e.g. [0, 1, 2, ...].
+        - |alphabet_map| A mapping from alphabet to char code.
+        - |char_code_map| A mapping from char code to alphabet.
+        """
+        self._alphabets = alphabets
+        self._alphabet_map = alphabet_map
+        assert len(char_code_map) == MAX_CHAR_CODE, len(char_code_map)
+        assert max(char_code_map) == max(alphabets), \
+            'alphabets=%s char_code_map=%s' % (alphabets, char_code_map)
+        self._char_code_map = char_code_map
+
+    @property
+    def alphabet_map(self):
+        return self._alphabet_map
+
+    def alphabet_of(self, char_code):
+        return self.char_code_map[char_code]
+
+    def char_code_of(self, alphabet):
+        return self._alphabet_map[alphabet][0]
+
+    def char_codes_of(self, alphabet):
+        return self._alphabet_map[alphabet]
+
+    def __iter__(self):
+        return iter(self._alphabets)
+
+
+class AlphabetsBuilder(object):
+    """Build minimum alphabet set from labels in NFA graph.
+    This builder classify /[a][a-z0-9]+[^x]/ into:
+        {1:[0-9], 2:[a], 3:[b-w], 4:[x], 5:[y-z]}
+    """
+
+    def __init__(self):
+        self._start_set = set()
+        self._used_chars = set()
+
+    def build(self, nfa_graph):
+        self._classify(nfa_graph)
+        return self._compute()
+
+    def _classify(self, nfa_graph):
+        self._used_chars.clear()
+        self._start_set.clear()
+        for node in nfa_graph.nodes:
+            for edge in node.out_edges:
+                self._classify_label(edge.label)
+
+    def _classify_from_charset(self, member):
+        if member.is_range:
+            self._classify_from_range(member.min_char_code,
+                                      member.max_char_code)
+            return
+        if member.is_digit:
+            return self._classify_from_range(ord('0'), ord('9'))
+        if member.is_space:
+            # \t \v \n \r
+            self._classify_from_range(0x09, 0x0D)
+            self._classify_from_range(ord(' '), ord(' '))
+            return
+        if member.is_word:
+            self._classify_from_range(ord('A'), ord('Z'))
+            self._classify_from_range(ord('a'), ord('z'))
+            self._classify_from_range(ord('0'), ord('9'))
+            self._classify_from_range(ord('_'), ord('_'))
+            return
+        raise Exception('NYI charset %s' % str(member))
+
+    def _classify_from_range(self, min_code, max_code):
+        assert min_code <= max_code, 'min=%d max=%d' % (min_code, max_code)
+        self._start_set.add(min_code)
+        self._start_set.add(max_code + 1)
+        self._used_chars.update(range(min_code, max_code + 1))
+
+    def _classify_label(self, label):
+        if label == None:
+            return
+        if label.is_any:
+            return
+        if label.is_char_set:
+            for member in label.members:
+                self._classify_from_charset(member)
+            return
+        if label.is_known_set:
+            self._classify_from_charset(label.known_set)
+            return
+        if label.is_literal:
+            self._classify_from_range(label.char_code, label.char_code)
+            return
+        raise Exception('Unknown label %s' % str(label))
+
+    def _compute(self):
+        others = []
+        alphabet_map = [others]
+        char_code_map = [0] * MAX_CHAR_CODE
+        char_codes = []
+        for char_code in range(MAX_CHAR_CODE):
+            if not(char_code in self._used_chars):
+                others.append(char_code)
+                continue
+            if char_code in self._start_set:
+                char_codes = [char_code]
+                alphabet_map.append(char_codes)
+            else:
+                char_codes.append(char_code)
+            char_code_map[char_code] = len(alphabet_map) - 1
+        assert max(char_code_map) == len(alphabet_map) - 1, \
+            'used=%s alphabets=%s char_code_map=%s starts=%s' % (
+                self._used_chars, alphabet_map, char_code_map, self._start_set)
+        return Alphabets(range(len(alphabet_map)), alphabet_map, char_code_map)
+
+
+class DfaGraph(object):
+    """Represents DFA graph"""
+
+    def __init__(self, alphabets):
+        self._alphabets = alphabets
+        self._nodes = []
+
+    @property
+    def alphabets(self):
+        return self._alphabets
+
+    @property
+    def nodes(self):
+        return self._nodes
+
+    def finish(self, nodes):
+        assert len(self._nodes) == 0
+        assert len(nodes) > 0
+        self._nodes = nodes
+
 
 class DfaNode(object):
     """Represents DFA state."""
 
-    def __init__(self, index, states):
+    def __init__(self, graph, index, states):
+        self._graph = graph
         self._index = index
         # |_states| holds a set of NFA states.
         self._states = states
-        self._transitions = Transitions()
+        self._transitions = Transitions(self)
+
+    @property
+    def graph(self):
+        return self._graph
 
     @property
     def index(self):
@@ -114,22 +260,25 @@ class Partition(object):
 class Transitions(object):
     """A mapping of character code to set of DFA nodes."""
 
-    def __init__(self):
-        self._alphabet_to_nodes = dict()
+    def __init__(self, from_node):
+        self._char_code_to_nodes = dict()
+        self._from_node = from_node
 
     @property
     def mapping(self):
-        return self._alphabet_to_nodes
+        return self._char_code_to_nodes
 
-    def add(self, char_code, node):
-        if char_code in self._alphabet_to_nodes:
-            self._alphabet_to_nodes[char_code].add(node)
-            return
-        self._alphabet_to_nodes[char_code] = set([node])
+    def add(self, alphabet, node):
+        char_codes = node.graph.alphabets.char_codes_of(alphabet)
+        for char_code in char_codes:
+            if char_code in self._char_code_to_nodes:
+                self._char_code_to_nodes[char_code].add(node)
+                continue
+            self._char_code_to_nodes[char_code] = set([node])
 
     def get(self, char_code):
-        if char_code in self._alphabet_to_nodes:
-            return self._alphabet_to_nodes[char_code]
+        if char_code in self._char_code_to_nodes:
+            return self._char_code_to_nodes[char_code]
         return set()
 
     def _char_codes_to_str(self, char_codes):
@@ -157,14 +306,14 @@ class Transitions(object):
     def _complement_of(self, char_codes):
         assert len(char_codes) > 0
         result = []
-        for char_code in range(0, 128):
+        for char_code in range(MAX_CHAR_CODE):
             if char_code in char_codes:
                 continue
             result.append(char_code)
         return result
 
     def _entry_to_string(self, node, char_codes):
-        if len(char_codes) == 128:
+        if len(char_codes) == MAX_CHAR_CODE:
             return '.->%d' % node.index
         if char_codes[0] == 0:
             return '[^%s]->%d' % (
@@ -174,8 +323,8 @@ class Transitions(object):
 
     def __str__(self):
         node_to_alphabets = dict()
-        for char_code in self._alphabet_to_nodes.keys():
-            for node in self._alphabet_to_nodes[char_code]:
+        for char_code in self._char_code_to_nodes.keys():
+            for node in self._char_code_to_nodes[char_code]:
                 if node in node_to_alphabets:
                     node_to_alphabets[node].append(char_code)
                     continue
@@ -192,19 +341,22 @@ class DfaBuilder(object):
     """
 
     def __init__(self):
-        self._alphabets = range(0, 128)
+        pass
 
     def build(self, nfa_graph):
         """Build DFA from NFA |start_state|."""
+        alpahbets = AlphabetsBuilder().build(nfa_graph)
+        graph = DfaGraph(alpahbets)
         start_state = nfa_graph.start_node
         if DEBUG:
             print 'build', str(start_state)
-        initial_node = DfaNode(0, closure_of(start_state))
+        initial_node = DfaNode(graph, 0, closure_of(start_state))
         nodes = [initial_node]
         queue = deque(nodes)
         while len(queue) > 0:
             current = queue.popleft()
-            for char_code in self._alphabets:
+            for alphabet in alpahbets:
+                char_code = alpahbets.char_code_of(alphabet)
                 states = next_states_of(current.states, char_code)
                 if len(states) == 0:
                     continue
@@ -212,18 +364,22 @@ class DfaBuilder(object):
                 for node in nodes:
                     if node.states != states:
                         continue
-                    current.add_transition(char_code, node)
+                    self._add_transition(current, alphabet, node)
                     found = True
                 if found:
                     continue
-                new_node = DfaNode(len(nodes), states)
-                current.add_transition(char_code, new_node)
+                new_node = DfaNode(graph, len(nodes), states)
+                self._add_transition(current, alphabet, new_node)
                 nodes.append(new_node)
                 queue.append(new_node)
         if DEBUG:
             for node in nodes:
                 print '  ', str(node)
-        return DfaOptimizer().optimize(nodes)
+        graph.finish(nodes)
+        return DfaOptimizer().optimize(graph)
+
+    def _add_transition(self, from_node, alphabet, to_node):
+        from_node.add_transition(alphabet, to_node)
 
 
 class DfaOptimizer(object):
@@ -231,7 +387,7 @@ class DfaOptimizer(object):
     """
 
     def __init__(self):
-        self._alphabets = range(0, 128)
+        self._alphabets = None
         # Map a node to a partition where node in.
         self._partition_map = dict()
         self._partitions = []
@@ -262,13 +418,14 @@ class DfaOptimizer(object):
         if group1 != group2:
             return False
         for alphabet in self._alphabets:
-            if not self._is_same_transition(node1, node2, alphabet):
+            char_code = self._alphabets.char_code_of(alphabet)
+            if not self._is_same_transition(node1, node2, char_code):
                 return False
         return True
 
-    def _is_same_transition(self, node1, node2, alphabet):
-        partitions1 = self._find_partitions(node1.transit(alphabet))
-        partitions2 = self._find_partitions(node2.transit(alphabet))
+    def _is_same_transition(self, node1, node2, char_code):
+        partitions1 = self._find_partitions(node1.transit(char_code))
+        partitions2 = self._find_partitions(node2.transit(char_code))
         return partitions1 == partitions2
 
     def _new_partition(self, nodes):
@@ -280,15 +437,18 @@ class DfaOptimizer(object):
             return
         self._queue.append(partition)
 
-    def optimize(self, nodes):
+    def optimize(self, graph):
+        self._alphabets = graph.alphabets
+        nodes = graph.nodes
         assert len(nodes) > 0
         if DEBUG:
             print 'optimize', ' '.join([str(node) for node in nodes])
         if len(nodes) == 1:
-            return nodes
+            return graph
+        new_graph = DfaGraph(self._alphabets)
         self._setup(nodes)
         if len(nodes) == len(self._partitions):
-            return nodes
+            return graph
         assert len(self._queue) >= 1
         while len(self._queue) > 0:
             partition = self._queue.popleft()
@@ -297,7 +457,7 @@ class DfaOptimizer(object):
         result_map = dict()
         for partition in sorted(self._partitions):
             original = partition.member
-            node = DfaNode(len(result), original.states)
+            node = DfaNode(graph, len(result), original.states)
             result.append(node)
             result_map[partition] = node
 
@@ -311,14 +471,16 @@ class DfaOptimizer(object):
         for partition in self._partitions:
             original = partition.member
             node = result_map[partition]
-            for char_code in self._alphabets:
+            for alphabet in self._alphabets:
+                char_code = self._alphabets.char_code_of(alphabet)
                 states = original.transit(char_code)
                 for target in self._find_partitions(states):
-                    node.add_transition(char_code, result_map[target])
+                    node.add_transition(alphabet, result_map[target])
+        new_graph.finish(result)
         if DEBUG:
             for node in result:
                 print 'result', str(node)
-        return result
+        return new_graph
 
     def _setup(self, nodes):
         accept_nodes = []

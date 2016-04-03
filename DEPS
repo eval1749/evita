@@ -21,29 +21,29 @@ deps = {
   'src/buildtools':
     Var('chromium_git') + '/chromium/buildtools.git' + '@' +  Var('buildtools_revision'),
 
-  'src/third_party/autopep8':
-    Var('github.git') + '/hhatto/autopep8.git' + '@' + Var('autopep8_revision'),
-
-  'src/third_party/cygwin':
-    Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),
-
   'src/testing/gmock':
     Var('chromium_git') + '/external/googlemock.git' + '@' + Var('gmock_revision'),
 
   'src/testing/gtest':
     Var('chromium_git') + '/external/github.com/google/googletest.git' + '@' + Var('gtest_revision'),
 
-  'src/tools/gyp':
-    Var('chromium_git') + '/external/gyp.git' + '@' + Var('gyp_revision'),
+  'src/third_party/autopep8':
+    Var('github.git') + '/hhatto/autopep8.git' + '@' + Var('autopep8_revision'),
+
+  'src/third_party/cygwin':
+    Var('chromium_git') + '/chromium/deps/cygwin.git' + '@' + Var('cygwin_revision'),
+
+  'src/third_party/icu':
+    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + Var('icu_revision'),
 
   'src/third_party/pep8':
     Var('github.git') + '/PyCQA/pep8.git' + '@' + Var('pep8_revision'),
 
+  'src/tools/gyp':
+    Var('chromium_git') + '/external/gyp.git' + '@' + Var('gyp_revision'),
+
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
-
-  'src/third_party/icu':
-    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + Var('icu_revision'),
 }
 
 hooks = [

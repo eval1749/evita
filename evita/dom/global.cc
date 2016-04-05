@@ -56,10 +56,6 @@
 
 namespace dom {
 
-namespace internal {
-v8::Local<v8::Object> GetUnicodeObject(v8::Isolate* isoalte);
-}  // namespace internal
-
 Global::Global() {}
 
 Global::~Global() {}
@@ -149,11 +145,6 @@ v8::Local<v8::ObjectTemplate> Global::object_template(v8::Isolate* isolate) {
     INSTALL_IN(os_templ, Directory);
     INSTALL_IN(os_templ, File);
     INSTALL_IN(os_templ, Process);
-
-    // Unicode
-    auto const js_unicode = v8::Object::New(isolate);
-    global_templ->Set(gin::StringToV8(isolate, "Unicode"),
-                      internal::GetUnicodeObject(isolate));
 
     // Global template is ready now.
     object_template_.Reset(isolate, global_templ);

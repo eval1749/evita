@@ -36,6 +36,10 @@
 
 namespace dom {
 
+namespace internal {
+v8::Local<v8::Object> GetUnicodeObject(v8::Isolate* isolate);
+}
+
 namespace v8Strings {
 void Init(v8::Isolate* isolate);
 }
@@ -256,8 +260,7 @@ ginx::Runner* ScriptHost::runner() const {
 void ScriptHost::set_testing_runner(ginx::Runner* runner) {
   testing_runner_ = runner;
   runner->set_user_data(this);
-  ginx::Runner::Scope runner_scope(runner);
-  PopulateEnviromentStrings(runner);
+  DidStartScriptHost();
 }
 
 domapi::ViewDelegate* ScriptHost::view_delegate() const {
@@ -308,13 +311,16 @@ void ScriptHost::CreateAndStart(Scheduler* scheduler,
 }
 
 void ScriptHost::DidStartScriptHost() {
-  if (testing_)
-    return;
-  auto const script_sources = internal::GetJsLibSources();
   // We should prevent UI thread to access DOM.
   DOM_AUTO_LOCK_SCOPE();
   ginx::Runner::Scope runner_scope(runner());
+  const auto isolate = runner()->isolate();
+  runner()->global()->Set(gin::StringToV8(isolate, "Unicode"),
+                          internal::GetUnicodeObject(isolate));
   PopulateEnviromentStrings(runner());
+  if (testing_)
+    return;
+  const auto& script_sources = internal::GetJsLibSources();
   for (const auto& script_source : script_sources) {
     auto const result =
         runner()->Run(base::ASCIIToUTF16(script_source.script_text),
@@ -326,7 +332,6 @@ void ScriptHost::DidStartScriptHost() {
   }
 
   // Invoke |editors.start()| with command line arguments.
-  auto const isolate = runner()->isolate();
   v8::TryCatch try_catch(isolate);
   try_catch.SetVerbose(true);
   auto const js_editors = runner()->GetGlobalProperty("editors");

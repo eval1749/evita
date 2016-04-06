@@ -14,11 +14,11 @@ vars = {
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': '4ec6c4e3a94bd04a6da2858163d40b2429b8aad1',
-  'icu_revision': '628d39f5b088236d2021bf4388549fd92673ff1a',
+  'icu_revision': 'c291cde264469b20ca969ce8832088acb21e0c48',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '3f142a5004f10d1b417dbf617707567197ade957',
-  'v8_revision': '11ff74e725300658436b87a2b7299eab59546e49', # 5.1.278
+  'v8_revision': '167dc63b4c9a1d0f0fe1b19af93644ac9a561e83', # 5.1.281
   'zlib_revision': '0d9cfbcdf7501ccca3e72a4153860cbad21aa4a3',
 }
 

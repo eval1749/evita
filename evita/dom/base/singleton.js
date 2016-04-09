@@ -27,4 +27,3 @@
 
   base.Singleton = Singleton;
 })();
-

@@ -11,8 +11,8 @@
 
 #include "base/logging.h"
 #include "evita/css/style.h"
-#include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/buffer.h"
+#include "evita/text/buffer_mutation_observer.h"
 #include "evita/text/interval.h"
 #include "evita/text/offset.h"
 #include "evita/text/range_set_base.h"
@@ -174,8 +174,8 @@ bool IntervalSet::Impl::MergeAdjacentIntervalsIfPossible(Interval* interval1,
 }
 
 void IntervalSet::Impl::NotifyChange(const Interval& interval) {
-  static_cast<IntervalSetObserver*>(buffer_)
-      ->DidChangeInterval(interval.start(), interval.end());
+  static_cast<IntervalSetObserver*>(buffer_)->DidChangeInterval(
+      interval.start(), interval.end());
 }
 
 void IntervalSet::Impl::SetStyle(Offset start,

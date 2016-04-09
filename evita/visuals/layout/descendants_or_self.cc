@@ -5,8 +5,8 @@
 #include "evita/visuals/layout/descendants_or_self.h"
 
 #include "base/logging.h"
-#include "evita/visuals/layout/container_box.h"
 #include "evita/visuals/layout/box_traversal.h"
+#include "evita/visuals/layout/container_box.h"
 
 namespace visuals {
 

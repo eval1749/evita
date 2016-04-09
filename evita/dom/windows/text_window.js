@@ -214,7 +214,8 @@ global.TextWindow.prototype.clone = function() {
    * @param {!Event} event
    */
   function handleDestroy(window, event) {
-    const detachEvent = new TextDocumentEvent(Event.Names.DETACH, {view: window});
+    const detachEvent =
+        new TextDocumentEvent(Event.Names.DETACH, {view: window});
     window.document.dispatchEvent(detachEvent);
   }
 
@@ -315,7 +316,8 @@ global.TextWindow.prototype.clone = function() {
    * @param {!Event} event
    */
   function handleRealize(window, event) {
-    const attachEvent = new TextDocumentEvent(Event.Names.ATTACH, {view: window});
+    const attachEvent =
+        new TextDocumentEvent(Event.Names.ATTACH, {view: window});
     window.document.dispatchEvent(attachEvent);
   }
 

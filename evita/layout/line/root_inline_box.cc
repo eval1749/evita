@@ -10,9 +10,9 @@
 
 #include "base/logging.h"
 #include "evita/gfx/rect_conversions.h"
-#include "evita/paint/inline_box_painter.h"
 #include "evita/layout/line/inline_box.h"
 #include "evita/layout/render_selection.h"
+#include "evita/paint/inline_box_painter.h"
 
 namespace layout {
 

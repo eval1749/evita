@@ -5,8 +5,8 @@
 #ifndef EVITA_GC_MEMBER_H_
 #define EVITA_GC_MEMBER_H_
 
-#include "base/macros.h"
 #include "base/logging.h"
+#include "base/macros.h"
 
 namespace gc {
 

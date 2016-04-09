@@ -27,11 +27,11 @@ class EventSource {
   ~EventSource();
 
   void DispatchFocusEvent(domapi::EventType event_type,
-                                  domapi::EventTargetId related_target_id);
+                          domapi::EventTargetId related_target_id);
   void DispatchKeyboardEvent(const ui::KeyEvent& event);
   void DispatchMouseEvent(const ui::MouseEvent& event);
-  void DispatchTextCompositionEvent(
-      domapi::EventType event_type, const ui::TextComposition& composition);
+  void DispatchTextCompositionEvent(domapi::EventType event_type,
+                                    const ui::TextComposition& composition);
   void DispatchWheelEvent(const ui::MouseWheelEvent& event);
 
  protected:

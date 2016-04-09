@@ -6,8 +6,8 @@
 
 #include "evita/dom/public/caret_shape.h"
 #include "evita/dom/public/form.h"
-#include "evita/dom/public/form_controls.h"
 #include "evita/dom/public/form_control_visitor.h"
+#include "evita/dom/public/form_controls.h"
 #include "evita/gfx/canvas.h"
 #include "evita/gfx/color_f.h"
 #include "evita/ui/controls/button_painter.h"

@@ -5,9 +5,9 @@
 #ifndef EVITA_VISUALS_CSS_STYLE_SHEET_H_
 #define EVITA_VISUALS_CSS_STYLE_SHEET_H_
 
-#include <vector>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "base/macros.h"
 #include "base/observer_list.h"

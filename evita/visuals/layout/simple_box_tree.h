@@ -8,8 +8,8 @@
 #include <memory>
 #include <stack>
 
-#include "base/macros.h"
 #include "base/logging.h"
+#include "base/macros.h"
 #include "evita/gc/member.h"
 #include "evita/visuals/view/public/view_lifecycle.h"
 

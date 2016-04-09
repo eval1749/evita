@@ -4,8 +4,8 @@
 
 #include "evita/gfx/text_format.h"
 
-#include "evita/gfx/direct_write_factory_win.h"
 #include "evita/gfx/direct2d_factory_win.h"
+#include "evita/gfx/direct_write_factory_win.h"
 #include "evita/gfx/text_layout.h"
 
 namespace gfx {

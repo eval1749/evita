@@ -42,7 +42,8 @@ class Selection::Model final : public Range {
 
 Selection::Model::Model(const Selection& selection, const Range* range)
     : Range(range->buffer(), range->start(), range->end()),
-      selection_(selection), start_is_active_(false) {}
+      selection_(selection),
+      start_is_active_(false) {}
 
 Selection::Model::~Model() {}
 
@@ -55,8 +56,8 @@ void Selection::Model::DidChangeRange() {
 }
 
 void Selection::Model::NotifyChange() {
-  TRACE_EVENT_WITH_FLOW0("views", "Selection::NotifyChange",
-                         &selection_, TRACE_EVENT_FLAG_FLOW_OUT);
+  TRACE_EVENT_WITH_FLOW0("views", "Selection::NotifyChange", &selection_,
+                         TRACE_EVENT_FLAG_FLOW_OUT);
   FOR_EACH_OBSERVER(SelectionChangeObserver, observers_, DidChangeSelection());
 }
 

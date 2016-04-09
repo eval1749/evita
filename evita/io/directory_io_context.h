@@ -5,8 +5,8 @@
 #ifndef EVITA_IO_DIRECTORY_IO_CONTEXT_H_
 #define EVITA_IO_DIRECTORY_IO_CONTEXT_H_
 
-#include <string>
 #include <memory>
+#include <string>
 
 #include "base/macros.h"
 #include "base/strings/string16.h"

@@ -29,7 +29,7 @@ class NativeRootLayer final {
 };
 
 NativeRootLayer::NativeRootLayer(Widget* widget, RootLayer* layer) {
-  const auto  kTopmost = false;
+  const auto kTopmost = false;
   COM_VERIFY(layer->compositor()->desktop_device()->CreateTargetForHwnd(
       widget->AssociatedHwnd(), kTopmost, composition_target_.Receive()));
   composition_target_->SetRoot(layer->visual());

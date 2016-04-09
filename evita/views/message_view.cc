@@ -18,8 +18,8 @@
 #include "evita/paint/paint_thread.h"
 #include "evita/paint/paint_thread_canvas_owner.h"
 #include "evita/ui/animation/animation_value.h"
-#include "evita/ui/controls/status_bar.h"
 #include "evita/ui/compositor/layer.h"
+#include "evita/ui/controls/status_bar.h"
 #include "evita/ui/system_metrics.h"
 
 namespace views {

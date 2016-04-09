@@ -10,8 +10,8 @@
 #include "base/logging.h"
 #include "common/memory/singleton.h"
 #include "evita/css/style.h"
-#include "evita/gfx/font_face.h"
 #include "evita/gfx/font.h"
+#include "evita/gfx/font_face.h"
 
 namespace {
 

@@ -10,8 +10,8 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "common/win/scoped_handle.h"
-#include "evita/dom/public/io_context_id.h"
 #include "evita//io/block_io_context.h"
+#include "evita/dom/public/io_context_id.h"
 
 namespace base {
 class Thread;

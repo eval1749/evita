@@ -11,8 +11,8 @@
 #pragma warning(pop)
 
 #include "evita/text/encodings/decoder.h"
-#include "evita/text/encodings/encodings.h"
 #include "evita/text/encodings/encoder.h"
+#include "evita/text/encodings/encodings.h"
 
 namespace {
 

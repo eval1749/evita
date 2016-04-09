@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "base/strings/string_piece.h"
 #include "base/strings/string16.h"
+#include "base/strings/string_piece.h"
 #include "common/memory/singleton.h"
 #include "evita/dom/public/switch_value.h"
 

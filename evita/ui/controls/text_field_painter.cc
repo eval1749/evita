@@ -8,8 +8,8 @@
 
 #include "base/logging.h"
 #include "evita/gfx/brush.h"
-#include "evita/gfx/color_f.h"
 #include "evita/gfx/canvas.h"
+#include "evita/gfx/color_f.h"
 #include "evita/gfx/rect_conversions.h"
 #include "evita/gfx/text_format.h"
 #include "evita/gfx/text_layout.h"

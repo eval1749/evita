@@ -25,6 +25,6 @@ class ContentObserver {
   DISALLOW_COPY_AND_ASSIGN(ContentObserver);
 };
 
-}   // namespace views
+}  // namespace views
 
 #endif  // EVITA_VIEWS_CONTENT_OBSERVER_H_

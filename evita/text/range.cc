@@ -5,6 +5,7 @@
 #include "evita/text/range.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "base/logging.h"
 #include "evita/text/buffer.h"

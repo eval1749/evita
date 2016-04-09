@@ -138,7 +138,7 @@ struct HitTestResult {
 class EditPane::Box : public Bounds,
                       public base::RefCounted<EditPane::Box>,
                       public base::tree::Node<EditPane::Box>,
-                                            public base::Castable<Box> {
+                      public base::Castable<Box> {
   DECLARE_CASTABLE_CLASS(Box, Castable);
 
  public:

@@ -9,8 +9,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "evita/visuals/dom/node.h"
 #include "evita/visuals/dom/children.h"
+#include "evita/visuals/dom/node.h"
 
 namespace visuals {
 

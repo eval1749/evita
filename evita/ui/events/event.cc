@@ -92,7 +92,7 @@ bool IsNonClientMouseEvent(const base::NativeEvent& native_event) {
 const char* EventTypeName(EventType event_type) {
   static const char* names[] = {
 #define V(name) #name,
-  FOR_EACH_UI_EVENT_TYPE(V)
+      FOR_EACH_UI_EVENT_TYPE(V)
 #undef V
   };
   auto const it = std::begin(names) + static_cast<size_t>(event_type);

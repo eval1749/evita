@@ -25,10 +25,8 @@ const size_t kMaxCheckedLen = 64;
 // 24 is the observed limits for OSX system checker.
 const size_t kMaxSuggestLen = 24;
 
-static_assert(kMaxCheckedLen <= size_t(MAXWORDLEN),
-              "MaxCheckedLen too long");
-static_assert(kMaxSuggestLen <= kMaxCheckedLen,
-              "MaxSuggestLen too long");
+static_assert(kMaxCheckedLen <= size_t(MAXWORDLEN), "MaxCheckedLen too long");
+static_assert(kMaxSuggestLen <= kMaxCheckedLen, "MaxSuggestLen too long");
 
 // Max number of dictionary suggestions.
 const int kMaxSuggestions = 5;

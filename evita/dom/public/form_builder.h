@@ -10,8 +10,8 @@
 #include "base/macros.h"
 #include "base/strings/string16.h"
 #include "base/strings/string_piece.h"
-#include "evita/dom/public/geometry.h"
 #include "evita/dom/public/form.h"
+#include "evita/dom/public/geometry.h"
 
 namespace domapi {
 

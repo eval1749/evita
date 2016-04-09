@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "evita/ui/events/native_event_win.h"
 #include "base/logging.h"
 #include "common/win/win32_verify.h"
-#include "evita/ui/events/native_event_win.h"
 
 namespace ui {
 

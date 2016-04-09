@@ -7,8 +7,8 @@
 
 #include <memory>
 
-#include "base/macros.h"
 #include "base/callback_forward.h"
+#include "base/macros.h"
 
 namespace base {
 class Thread;

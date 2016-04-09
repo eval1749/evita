@@ -7,8 +7,8 @@
 
 #include "evita/visuals/dom/document.h"
 
-#include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/descendants_or_self.h"
+#include "evita/visuals/dom/element.h"
 #include "evita/visuals/dom/node_editor.h"
 #include "evita/visuals/dom/node_tree_builder.h"
 #include "gtest/gtest.h"

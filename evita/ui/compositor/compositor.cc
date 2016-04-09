@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <windows.h>
 #include <dcomp.h>
+#include <windows.h>
 #pragma comment(lib, "dcomp.lib")
 
 #include "evita/ui/compositor/compositor.h"

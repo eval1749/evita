@@ -38,8 +38,8 @@ class MouseWheelEvent;
 //
 class Widget : public EventTarget,
                public base::tree::Node<Widget>,
-                                     public common::win::MessageDelegate,
-                                     public LayerOwner {
+               public common::win::MessageDelegate,
+               public LayerOwner {
   DECLARE_CASTABLE_CLASS(Widget, EventTarget);
 
  public:

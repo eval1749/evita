@@ -9,10 +9,10 @@
 #include "base/trace_event/trace_event.h"
 #include "evita/gfx/brush.h"
 #include "evita/gfx/canvas.h"
-#include "evita/paint/public/view.h"
 #include "evita/paint/public/caret.h"
 #include "evita/paint/public/line/root_inline_box.h"
 #include "evita/paint/public/selection.h"
+#include "evita/paint/public/view.h"
 #include "evita/paint/root_inline_box_list_painter.h"
 #include "evita/paint/view_paint_cache.h"
 

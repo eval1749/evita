@@ -92,26 +92,26 @@ std::pair<int, int> WinResourceIoContext::Load(const base::string16& type,
                        MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
   if (!resource) {
     const auto last_error = ::GetLastError();
-    PLOG(ERROR) << "FindResourceEx failed";;
+    PLOG(ERROR) << "FindResourceEx failed";
     return std::make_pair(0, last_error);
   }
   const auto data_handle = ::LoadResource(module_, resource);
   if (!data_handle) {
     const auto last_error = ::GetLastError();
-    PLOG(ERROR) << "LoadResourceEx failed";;
+    PLOG(ERROR) << "LoadResourceEx failed";
     return std::make_pair(0, last_error);
   }
   const auto resource_size =
       static_cast<size_t>(::SizeofResource(module_, resource));
   if (resource_size == 0) {
     const auto last_error = ::GetLastError();
-    PLOG(ERROR) << "SizeofResource failed";;
+    PLOG(ERROR) << "SizeofResource failed";
     return std::make_pair(0, last_error);
   }
   const auto resource_bytes = ::LockResource(data_handle);
   if (!resource_bytes) {
     const auto last_error = ::GetLastError();
-    PLOG(ERROR) << "LockResource failed";;
+    PLOG(ERROR) << "LockResource failed";
     return std::make_pair(0, last_error);
   }
   ::memcpy(buffer, resource_bytes, std::min(resource_size, buffer_size));
@@ -126,7 +126,7 @@ std::pair<HMODULE, int> WinResourceIoContext::Open(
   if (handle)
     return std::make_pair(handle, 0);
   const auto last_error = ::GetLastError();
-  PLOG(ERROR) << "LoadLibraryEx failed";;
+  PLOG(ERROR) << "LoadLibraryEx failed";
   return std::make_pair(nullptr, last_error);
 }
 
@@ -137,7 +137,7 @@ void WinResourceIoContext::Close(const domapi::IoIntPromise& promise) {
   if (::FreeLibrary(module_))
     return Resolve(promise.resolve, 0);
   const auto last_error = ::GetLastError();
-  PLOG(ERROR) << "FreeLibrary failed";;
+  PLOG(ERROR) << "FreeLibrary failed";
   return Reject(promise.reject, last_error);
 }
 

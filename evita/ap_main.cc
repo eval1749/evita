@@ -8,6 +8,7 @@
 
 #include "base/at_exit.h"
 #include "base/command_line.h"
+#include "base/feature_list.h"
 #include "base/i18n/icu_util.h"
 #include "base/logging.h"
 #include "common/win/com_init.h"
@@ -18,6 +19,13 @@ extern HINSTANCE g_hInstance;
 extern HINSTANCE g_hResource;
 
 namespace {
+
+void InitFeatureList() {
+  const auto& command_line = *base::CommandLine::ForCurrentProcess();
+  base::FeatureList::InitializeInstance(
+      command_line.GetSwitchValueASCII("enable_features"),
+      command_line.GetSwitchValueASCII("disable_features"));
+}
 
 void InitWindowsCommonControls() {
   INITCOMMONCONTROLSEX init_params;
@@ -41,7 +49,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     settings.logging_dest = logging::LOG_TO_SYSTEM_DEBUG_LOG;
     logging::InitLogging(settings);
   }
-
+  InitFeatureList();
   common::win::NativeWindow::Init(hInstance);
   common::win::ComInit com_init;
   InitWindowsCommonControls();

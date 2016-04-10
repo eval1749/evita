@@ -134,6 +134,9 @@ class DfaBuilderTest(unittest.TestCase):
     def test_basic(self):
         self.assertEqual(('0:name:([a]->1) 1:NAME', '{1:[a]}'),
                          build(NamedPattern('name', 'a')))
+        self.assertEqual(('0:colon:([:]->1) 1:COLON:([:]->2) 2:COLON',
+                          '{1:[:]}'),
+                         build(NamedPattern('colon', '::?')))
         self.assertEqual(('0:name:([a]->1) 1:NAME:([a]->1)', '{1:[a]}'),
                          build(NamedPattern('name', 'a+')))
         self.assertEqual(('0:([a]->1, [5]->2) 1:NAME 2:NUMBER',

@@ -28,14 +28,14 @@ const kCharCodeToAlphabets = new {{alphabet_type}}Array([
 /** @const @type {!Array<number>} */
 const kStateToTokenMap = [
 {% for state in states %}
-    '{{ state.token_type }}', // {{ state.index }}
+    '{{ state.token_type }}', // {{state.index}}:{{state.comment}}
 {% endfor %}
 ];
 
 /** @const @type {!Array<!{{state_type}}Array>} */
 const kTransitionMap = [
 {% for state in states %}
-  new {{state_type}}Array({{state.transitions}}), // {{loop.index0}}:{{state.comment}}
+  new {{state_type}}Array({{state.transitions}}), // {{state.index}}:{{state.comment}}
 {% endfor %}
 ];
 

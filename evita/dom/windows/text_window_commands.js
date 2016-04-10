@@ -465,6 +465,7 @@
     const scriptText = isWhole ?
         (new TextRange(this.document, 0, this.document.length)).text :
         selection.range.text;
+    $0 = this;
     const result = Editor.runScript(scriptText, this.document.name);
     if (!result.exception) {
       if (result.value !== undefined)

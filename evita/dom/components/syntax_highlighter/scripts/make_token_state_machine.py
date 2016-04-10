@@ -158,6 +158,7 @@ def char_codes_to_string(char_codes):
 
 
 def compute_transitions(node):
+    """Returns mapping of alphabet to next state for |node| as an array."""
     result = []
     alphabets = node.graph.alphabets
     for alphabet in alphabets:

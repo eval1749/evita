@@ -17,6 +17,10 @@ class ComponentsTest : public AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(ComponentsTest);
 };
 
+TEST_F(ComponentsTest, Highlights) {
+  RunFile({"components", "highlights", "highlights_test.js"});
+}
+
 TEST_F(ComponentsTest, Imaging) {
   RunFile({"components", "imaging", "imaging_test.js"});
 }

@@ -120,6 +120,7 @@ source_set("v8_helper") {
 action("dom_jslib_cc") {
   deps = [
     ":check_jslib",
+    "//evita/dom/components/highlights:token_state_machines",
     "//evita/dom/visuals:css_properties",
   ]
   script = "make_get_jslib.py"
@@ -168,6 +169,7 @@ action("dom_v8_strings_cc") {
 action("check_jslib") {
   deps = [
     "//evita/dom/bindings:js_externs",
+    "//evita/dom/components/highlights:token_state_machines",
     "//evita/dom/visuals:css_properties",
   ]
 

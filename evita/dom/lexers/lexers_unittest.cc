@@ -70,7 +70,8 @@ TEST_F(LexersTest, ConfigLexer) {
 
 TEST_F(LexersTest, CppLexer) {
   EXPECT_SCRIPT_EQ(
-      "c9 n1 c6 n1 k8 n1 o1 n3 o1 n1 k4 n4 o1 n1 s4 o1 n3 k4 n4 o1 n1 s4 o1",
+      "c9 w1 c6 w1 k8 w1 o1 i3 o1 w1 k4 w1 i2 w1 o1 w1 s4 o1 w3 k4 w1 i2 w1"
+      " o1 w1 s4 o1",
       "applySyntax(CppLexer, ["
       "'/* foo */',"
       "'// bar',"
@@ -80,7 +81,7 @@ TEST_F(LexersTest, CppLexer) {
       "])");
 
   EXPECT_SCRIPT_EQ(
-      "n1 k15 o1 n1 o1 n4 o2 n10 o1 n1 o1 n5 o2 n8",
+      "w1 k15 o1 i1 o1 w1 i15 o1 i1 o1 w1 i14",
       "applySyntax(CppLexer, ['"
       " std::unique_ptr<T>"
       " std::vector_ptr<T>"  // not extended keyword

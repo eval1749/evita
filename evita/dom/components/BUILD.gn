@@ -10,6 +10,7 @@ source_set("test_files") {
   ]
 
   data = [
+    "highlights/highlights_test.js",
     "imaging/imaging_test.js",
     "win_resource/win_resource_test.js",
   ]

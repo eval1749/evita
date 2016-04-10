@@ -107,6 +107,11 @@ js_lib_files = [
   "components/dynamic_abbrev/dynamic_abbrev.js",
   "components/find_and_replace/find_and_replace.js",
   "components/find_and_replace/find_and_replace_commands.js",
+
+  "components/highlights/highlights.js",
+  "$root_gen_dir/evita/dom/components/highlights/cpp_tokens.js",
+  "components/highlights/cpp_highlighter.js",
+
   "components/imaging/icon_util_win.js",
   "components/launchpad/launchpad.js",
   "components/logging/logging_document.js",

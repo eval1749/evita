@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.require('highlights.base');
+
 goog.scope(function() {
 
 /** @const @type {number} */
@@ -25,7 +27,7 @@ const kCharCodeToAlphabets = new {{alphabet_type}}Array([
 {%- endfor %}
 ]);
 
-/** @const @type {!Array<number>} */
+/** @const @type {!Array<string>} */
 const kStateToTokenMap = [
 {% for state in states %}
     '{{ state.token_type }}', // {{state.index}}:{{state.comment}}
@@ -51,7 +53,7 @@ const kTransitionMap = [
 ];
 
 /**
- * @implements {lexers.TokenStateMachine}
+ * @implements {highlights.base.TokenStateMachine}
  */
 class {{Name}}TokenStateMachine {
   constructor() {
@@ -119,7 +121,7 @@ class {{Name}}TokenStateMachine {
   }
 
   /**
-   * implements lexers.TokenStateMachine.updateState
+   * implements TokenStateMachine.updateState
    * @param {number} charCode
    * @return {number}
    */
@@ -142,5 +144,5 @@ class {{Name}}TokenStateMachine {
   }
 }
 
-lexers.{{Name}}TokenStateMachine = {{Name}}TokenStateMachine;
+highlights.{{Name}}TokenStateMachine = {{Name}}TokenStateMachine;
 });

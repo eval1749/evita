@@ -107,5 +107,3 @@ class {{Name}}Scanner {
 
 lexers.{{Name}}Scanner = {{Name}}Scanner;
 });
-
-var l = new lexers.{{Name}}Scanner();

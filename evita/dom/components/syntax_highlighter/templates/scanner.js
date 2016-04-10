@@ -112,6 +112,14 @@ class {{Name}}Scanner {
     this.state_ = newState;
     return newState;
   }
+
+  /**
+   * @public
+   * @return {string}
+   */
+  toString() {
+    return `CppScanner(state: ${this.state_})`;
+  }
 }
 
 lexers.{{Name}}Scanner = {{Name}}Scanner;

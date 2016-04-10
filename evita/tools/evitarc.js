@@ -102,7 +102,7 @@
     'domapi::EventType', 'gfx::Canvas::AxisAlignedClipScope', 'gfx::Brush',
     'gfx::Canvas', 'gfx::ColorF', 'gfx::Canvas::DrawingScope', 'gfx::Point',
     'gfx::PointF', 'gfx::Rect', 'gfx::RectF', 'gfx::Size', 'gfx::SizeF',
-].forEach((keyword) => { CppLexer.keywords.set(keyword, 'keyword'); });
+].forEach((keyword) => { CppLexer.addKeyword(keyword); });
 
 function toCamelCase(document) {
   var underscore = new Editor.RegExp('\\b([a-z]+)(_[a-z])');

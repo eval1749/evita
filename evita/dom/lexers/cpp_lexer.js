@@ -8,11 +8,21 @@ global.CppLexer = (function(options) {
      * @param {!TextDocument} document
      */
     constructor(document) { super(document, options); }
+
+    /**
+     * @public
+     * @return {!Map<string, string>}
+     */
+    static get keywords() { return options.keywords; }
+
+    /**
+     * @public
+     * @param {string} word
+     */
+    static addKeyword(word) {
+      options.keywords.set(word, 'keyword');
+    }
   }
-  // TODO(eval1749): Once closure compiler support |static get|, we should use
-  // it.
-  Object.defineProperty(
-      CppLexer, 'keywords', {get: function() { return options.keywords; }});
   return CppLexer;
 })({
   hasCpp: true,

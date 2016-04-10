@@ -101,8 +101,7 @@ class {{Name}}Scanner {
     const newState = kTransitionMap[this.state_][alphabet];
     console.assert(newState <= kMaxState, newState);
     this.state_ = newState;
-    this._state = newState;
-    return kStateToTokenMap[newState];
+    return newState;
   }
 }
 

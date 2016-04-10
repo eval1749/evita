@@ -90,6 +90,15 @@ class {{Name}}Scanner {
   }
 
   /**
+   * @public
+   * @param {number} state
+   * @return {string}
+   */
+  syntaxFor(state) {
+    return kStateToTokenMap[state];
+  }
+
+  /**
    * implements lexers.Scanner.updateState
    * @param {number} charCode
    * @return {number}

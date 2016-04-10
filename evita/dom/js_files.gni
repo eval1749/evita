@@ -18,6 +18,7 @@ js_lib_files = [
   "base/define.js",
   "base/async.js",
   "base/base64.js",
+  "base/logging.js",
   "base/ordered_set.js",
   "base/singleton.js",
   "base/strings/string_util.js",
@@ -108,6 +109,7 @@ js_lib_files = [
   "components/find_and_replace/find_and_replace_commands.js",
   "components/imaging/icon_util_win.js",
   "components/launchpad/launchpad.js",
+  "components/logging/logging_document.js",
   "components/spell_checker/spell_checker.js",
   "components/win_resource/win_resource.js",
 

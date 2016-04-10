@@ -91,6 +91,12 @@ base.OrderedSet.prototype.remove = function(data) {};
 
 /**
  * @template T
+ * @param {base.OrderedSetNode.<T>} node
+ */
+base.OrderedSet.prototype.removeNode = function(node) {};
+
+/**
+ * @template T
  * @return {!Generator<T>}
  */
 base.OrderedSet.prototype.values = function() {};

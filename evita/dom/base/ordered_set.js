@@ -79,20 +79,20 @@ $define(global, 'base', function($export) {
    * @param {!base.OrderedSetNode<T>} node
    * @return {base.OrderedSetNode<T>}
    */
-  function removeNode(node) {
+  function removeNodeInternal(node) {
     if (!node.left_)
       return node.right_;
     if (!node.right_)
       return node.left_;
     if (node.left_.priority_ < node.right_.priority_) {
       const temp = rotateRight(node);
-      temp.right_ = removeNode(node);
+      temp.right_ = removeNodeInternal(node);
       if (temp.right_)
         temp.right_.parent_ = temp;
       return temp;
     }
     const temp = rotateLeft(node);
-    temp.left_ = removeNode(node);
+    temp.left_ = removeNodeInternal(node);
     if (temp.left_)
       temp.left_.parent_ = temp;
     return temp;
@@ -258,8 +258,17 @@ $define(global, 'base', function($export) {
       const node = this.find(data);
       if (!node)
         return false;
+      this.removeNode(node);
+      return true;
+    }
+
+    /**
+     * @public
+     * @param {!base.OrderedSetNode<T>} node
+     */
+    removeNode(node) {
       const parent = node.parent_;
-      const child = removeNode(node);
+      const child = removeNodeInternal(node);
       if (!parent)
         this.root_ = child;
       else if (parent.left_ === node)
@@ -271,7 +280,6 @@ $define(global, 'base', function($export) {
       if (child)
         child.parent_ = parent;
       --this.size_;
-      return true;
     }
 
     /** @return {!Generator.<!base.OrderedSetNode<T>>} */

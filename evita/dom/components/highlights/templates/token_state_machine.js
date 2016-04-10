@@ -76,7 +76,7 @@ class {{Name}}TokenStateMachine {
       if (lastState == state)
         continue
       lastState = state;
-      const syntax = this.syntaxFor(state);
+      const syntax = this.syntaxOf(state);
       if (lastSyntax == syntax)
         continue
       if (number_of_tokens < 200) {
@@ -116,7 +116,7 @@ class {{Name}}TokenStateMachine {
    * @param {number} state
    * @return {string}
    */
-  syntaxFor(state) {
+  syntaxOf(state) {
     return kStateToTokenMap[state];
   }
 

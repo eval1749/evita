@@ -61,6 +61,7 @@ class NfaBuilderTest(unittest.TestCase):
         self.assertEqual('1->("a":2) 2', build('a'))
         self.assertEqual('1->("a":2) 2->("b":3) 3', build('ab'))
         self.assertEqual('1->("a":1, _:2) 2', build('a*'))
+        self.assertEqual('1->("a":2) 2->(_:3, "a":3) 3', build('aa?'))
         self.assertEqual('1->("a":2) 2->("a":2, _:3) 3', build('a+'))
         self.assertEqual('1->("a"~1, _:2) 2', build('a*?'))
         self.assertEqual('1->("a":1, _:2) 2->("b":3) 3', build('a*b'))

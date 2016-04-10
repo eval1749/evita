@@ -58,25 +58,31 @@ class NfaBuilder(object):
 
     def _process_repeat(self, from_state, to_state, node, is_lazy):
         if node.min_count == 0:
+            # {0,m}
             if node.is_infinity:
+                # Make two edges for |from_state|, one is empty transition
+                # to |to_state| and another is |node.expression| to
+                # |from_state|.
                 repeat_end = self._process(from_state, from_state,
                                            node.expression, node.is_lazy)
                 return self._make_edge(None, repeat_end, to_state, is_lazy)
-            for index in xrange(1, node.max_count):
-                from_state = self._process(
-                    from_state, None, node.expression,
-                    node.is_lazy if index == 1 else False)
-            return self._process(from_state, to_state, node.expression)
-        # {n,m} where n > 0
-        for index in xrange(0, node.min_count):  # pylint: disable=W0612
-            from_state = self._process(from_state, None, node.expression)
-        if node.is_infinity:
-            repeat_end = self._process(from_state, from_state, node.expression)
-            return self._make_edge(None, repeat_end, to_state)
+        else:
+            # {n,m} where n > 0
+            for index in xrange(0, node.min_count):  # pylint: disable=W0612
+                from_state = self._process(from_state, None, node.expression)
+            if node.is_infinity:
+                repeat_end = self._process(from_state, from_state,
+                                           node.expression)
+                return self._make_edge(None, repeat_end, to_state)
+        # Make two edges for |from_state| to |to_state|, one is empty
+        # transition and another is |node.expression|.
         for index in xrange(1, node.max_count):
-            from_state = self._process(from_state, None, node.expression,
-                                       node.is_lazy if index == 1 else False)
-        return self._process(from_state, to_state, node.expression)
+            to_state = self._make_edge(None, from_state, to_state, is_lazy)
+            from_state = self._process(
+                from_state, None, node.expression,
+                node.is_lazy if index == 1 else False)
+        to_state = self._make_edge(None, from_state, to_state, is_lazy)
+        return self._process(from_state, to_state, node.expression, False)
 
     def _process_sequence(self, from_state, to_state, node, is_lazy):
         index = 0

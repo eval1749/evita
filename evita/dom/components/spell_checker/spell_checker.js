@@ -710,6 +710,27 @@
 
     /**
      * @param {!TextDocument} document
+     */
+    static disable(document) {
+      const spellChecker = SpellChecker.get(document);
+      if (!spellChecker)
+        return;
+      spellChecker.destroy();
+      spellCheckerMap.delete(document);
+    }
+
+    /**
+     * @param {!TextDocument} document
+     */
+    static enable(document) {
+      if (spellCheckerMap.has(document))
+        return;
+      const spellChecker = new SpellChecker(document);
+      spellCheckerMap.set(document, spellChecker);
+    }
+
+    /**
+     * @param {!TextDocument} document
      * @return {SpellChecker}
      */
     static get(document) { return spellCheckerMap.get(document) || null; }
@@ -726,19 +747,10 @@
     constructor() { super(); }
 
     /** @param {!TextDocument} document */
-    didAddTextDocument(document) {
-      const spellChecker = new SpellChecker(document);
-      spellCheckerMap.set(document, spellChecker);
-    }
+    didAddTextDocument(document) { SpellChecker.enable(document); }
 
     /** @param {!TextDocument} document */
-    didRemoveTextDocument(document) {
-      const spellChecker = SpellChecker.get(document);
-      if (!spellChecker)
-        return;
-      spellChecker.destroy();
-      spellCheckerMap.delete(document);
-    }
+    didRemoveTextDocument(document) { SpellChecker.disable(document); }
   }
 
   // When document is created/destructed, we install/uninstall spell checker

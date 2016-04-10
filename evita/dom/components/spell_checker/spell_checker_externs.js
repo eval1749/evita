@@ -6,3 +6,16 @@
  * @enum {number}
  */
 var Spelling = {NONE: 0, CORRECT: 1, MISSPELLED: 2, DEBUG: 3};
+
+
+/**
+ * @type {Object}
+ */
+var SpellChecker;
+
+/** @param {!TextDocument} document */
+SpellChecker.disable = function(document) {};
+
+
+/** @param {!TextDocument} document */
+SpellChecker.enable = function(document) {};

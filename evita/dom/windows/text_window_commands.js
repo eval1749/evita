@@ -457,14 +457,17 @@
    * @this {!TextWindow}
    */
   function evalSelectionCommand() {
-    var selection = this.selection;
-    var isWhole = selection.range.start == selection.range.end;
-    var scriptText = isWhole ?
+    /** @const @type {!TextSelection} */
+    const selection = this.selection;
+    /** @const @type {boolean} */
+    const isWhole = selection.range.start === selection.range.end;
+    /** @const @type {string} */
+    const scriptText = isWhole ?
         (new TextRange(this.document, 0, this.document.length)).text :
         selection.range.text;
-    var result = Editor.runScript(scriptText, this.document.name);
+    const result = Editor.runScript(scriptText, this.document.name);
     if (!result.exception) {
-      if (result.value != undefined)
+      if (result.value !== undefined)
         console.log(result.value);
       return;
     }

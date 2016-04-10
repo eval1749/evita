@@ -120,7 +120,7 @@ def generate(output_path, document):
     context = ContextBuilder(document).build()
 
     jinja_env = initialize_jinja_env(None)
-    template = jinja_env.get_template('scanner.js')
+    template = jinja_env.get_template('token_state_machine.js')
     with open(output_path, 'wt') as output:
         contents = template.render(context)
         output.write(contents)

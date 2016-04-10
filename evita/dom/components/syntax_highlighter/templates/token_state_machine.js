@@ -40,9 +40,9 @@ const kTransitionMap = [
 ];
 
 /**
- * @implements {lexers.Scanner}
+ * @implements {lexers.TokenStateMachine}
  */
-class {{Name}}Scanner {
+class {{Name}}TokenStateMachine {
   constructor() {
     this.state_ = 0;
   }
@@ -99,7 +99,7 @@ class {{Name}}Scanner {
   }
 
   /**
-   * implements lexers.Scanner.updateState
+   * implements lexers.TokenStateMachine.updateState
    * @param {number} charCode
    * @return {number}
    */
@@ -118,9 +118,9 @@ class {{Name}}Scanner {
    * @return {string}
    */
   toString() {
-    return `CppScanner(state: ${this.state_})`;
+    return `{{Name}}TokenStateMachine(state: ${this.state_})`;
   }
 }
 
-lexers.{{Name}}Scanner = {{Name}}Scanner;
+lexers.{{Name}}TokenStateMachine = {{Name}}TokenStateMachine;
 });

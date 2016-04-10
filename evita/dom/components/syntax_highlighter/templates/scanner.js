@@ -44,7 +44,7 @@ const kTransitionMap = [
  */
 class {{Name}}Scanner {
   constructor() {
-    this._state_ = 0;
+    this.state_ = 0;
   }
 
   // TODO(eval1749): We should get rid of |apply()| once we finish testing
@@ -59,15 +59,16 @@ class {{Name}}Scanner {
     document.setSyntax(0, document.length, '');
     for(let offset = 0; offset < document.length; ++offset) {
       const charCode = document.charCodeAt(offset);
-      const syntax = this.updateState(charCode);
-      if (lastState == this._state)
+      const state = this.updateState(charCode);
+      if (lastState == state)
         continue
-      lastState = this._state
+      lastState = state;
+      const syntax = this.syntaxFor(state);
       if (lastSyntax == syntax)
         continue
       if (number_of_tokens < 200) {
           console.log(
-            `s${lastState}-${kCharCodeToAlphabets[charCode]}->s${this._state}`,
+            `s${lastState}-${kCharCodeToAlphabets[charCode]}->s${this.state_}`,
             lastSyntax, lastOffset, offset);
       }
       document.setSyntax(lastOffset, offset, lastSyntax);
@@ -85,7 +86,7 @@ class {{Name}}Scanner {
    */
   resetTo(newState) {
     console.assert(newState <= kMaxState, newState);
-    this._state = newState;
+    this.state_ = newState;
   }
 
   /**
@@ -97,8 +98,9 @@ class {{Name}}Scanner {
     /** @const @type {number} */
     const alphabet = charCode >= 128 ? 0 : kCharCodeToAlphabets[charCode];
     console.assert(alphabet <= kMaxAlphabet, alphabet);
-    const newState = kTransitionMap[this._state][alphabet];
+    const newState = kTransitionMap[this.state_][alphabet];
     console.assert(newState <= kMaxState, newState);
+    this.state_ = newState;
     this._state = newState;
     return kStateToTokenMap[newState];
   }

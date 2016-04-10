@@ -105,6 +105,7 @@ class ContextBuilder(object):
             {
                 'comment': state_names_of(node),
                 'is_acceptable': node.is_acceptable,
+                'is_from_acceptable': is_from_acceptable(node),
                 'index': node.index,
                 'token_type': token_type_of(token_name_to_type_map, node),
                 'transitions': compute_transitions(node),
@@ -181,6 +182,14 @@ def element_type_for(value):
     if value < 65536:
         return 'Uint16'
     return 'Uint32'
+
+
+def is_from_acceptable(node):
+    """Returns true if |node| has an edge from acceptable node."""
+    for in_edge in node.in_edges:
+        if in_edge.from_node.is_acceptable:
+            return True
+    return False
 
 
 def state_names_of(node):

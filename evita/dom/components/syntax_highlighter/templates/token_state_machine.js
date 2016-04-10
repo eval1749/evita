@@ -32,6 +32,17 @@ const kStateToTokenMap = [
 {% endfor %}
 ];
 
+/** @const @type {!Array<boolean>} */
+const kIsOverrideState = [
+{% for state in states %}
+{%   if state.is_from_acceptable %}
+  true, // {{state.index}}:{{state.comment}} **
+{%   else %}
+  false, // {{state.index}}:{{state.comment}}
+{%   endif %}
+{% endfor %}
+];
+
 /** @const @type {!Array<!{{state_type}}Array>} */
 const kTransitionMap = [
 {% for state in states %}
@@ -79,6 +90,15 @@ class {{Name}}TokenStateMachine {
       lastSyntax = syntax
     }
     return number_of_tokens;
+  }
+
+  /**
+   * @public
+   * @param {number} state
+   * @return {boolean}
+   */
+  isOverride(state) {
+    return kIsOverrideState[state];
   }
 
   /**

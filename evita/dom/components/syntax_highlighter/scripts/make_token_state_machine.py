@@ -190,15 +190,19 @@ def state_names_of(node):
 
 
 def token_type_of(type_map, node):
-    token_type = ''
+    acceptable_states = []
+    types = set()
     for state in node.states:
-        candidate = type_map[state.group_name]
-        if token_type == '':
-            token_type = candidate
-            continue
-        if token_type != candidate:
-            return ''
-    return token_type
+        if state.is_acceptable:
+            acceptable_states.append(state)
+        types.add(type_map[state.group_name])
+    if len(acceptable_states) == 1:
+        return type_map[acceptable_states[0].group_name]
+    assert len(acceptable_states) == 0, \
+        'DFA node can not have multiple acceptable states'
+    if len(types) != 1:
+        return ''
+    return next(iter(types))
 
 
 def vchr(char_code):

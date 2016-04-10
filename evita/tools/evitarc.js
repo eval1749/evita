@@ -21,7 +21,7 @@
     // F
     'focusable', 'Formatter', 'formatter',
     // G
-    'Getter', 'Getters', 'getter', 'getters', 'gfx',
+    'Getter', 'Getters', 'getter', 'getters', 'gfx', 'Grapheme', 'grapeme',
     // H
     'hotlight', 'hwnd',
     // I
@@ -44,7 +44,8 @@
     'signedness', 'splitter', 'stringify', 'substr', 'substring', 'subtree',
     'subtype', 'supertype',
     // T
-    'Tooltip', 'tooltip', 'toplevel', 'Tuple', 'tuple', 'typedef',
+    'Tokenizer', 'tokenizer', 'Tooltip', 'tooltip', 'toplevel', 'Tuple',
+    'tuple', 'typedef',
     // U
     'unordered',
     // V

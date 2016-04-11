@@ -96,6 +96,10 @@
     function lineSeparator(document) {
       return document.newline == 1 ? '\n' : '\r\n';
     }
+    if (document.newline === 0) {
+      // Use LF as default line separator.
+      document.newline = 1;
+    }
     document.obsolete = TextDocument.Obsolete.CHECKING;
     var encoder = new TextEncoder(document.encoding || 'utf-8');
     var readonly = document.readonly;

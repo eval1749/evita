@@ -403,8 +403,8 @@ TEST_F(TextDocumentTest, save_failed_write) {
 
 TEST_F(TextDocumentTest, save_succeeded) {
   std::vector<uint8_t> expected_bytes{
-      102, 111, 111, 13, 10,  // foo\r\n
-      98,  97,  114, 13, 10,  // bar\r\n
+      102, 111, 111, 10,  // foo\n
+      98,  97,  114, 10,  // bar\n
   };
   mock_io_delegate()->set_bytes(expected_bytes);
   mock_io_delegate()->SetMakeTempFileName(L"foo.tmp", 0);

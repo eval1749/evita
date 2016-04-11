@@ -42,18 +42,18 @@ v8.log
 
 # We should not add pattern |third_party/|. When we do so, |git submodule add|
 # fails.
-base/
-build/
-buildtools/
-build/win_toolchain.json
-testing/
-third_party/icu
-third_party/v8
-tools/deps2git/
-tools/gyp/
-third_party/cygwin/
-third_party/autopep8/
-third_party/pep8/
-third_party/ply/
-third_party/zlib/
-v8/
+/base/
+/build/
+/buildtools/
+/build/win_toolchain.json
+/testing/
+/third_party/icu
+/third_party/v8
+/tools/deps2git/
+/tools/gyp/
+/third_party/cygwin/
+/third_party/autopep8/
+/third_party/pep8/
+/third_party/ply/
+/third_party/zlib/
+/v8/

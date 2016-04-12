@@ -18,7 +18,7 @@ vars = {
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '15def116b3d92bf36ff4ae04837104bfc00842ea',
-  'v8_revision': '93187c2f0ab6b040c6b2b25be424b968534caa0a', # 5.2.7.1
+  'v8_revision': '93c9c30adc5890d89e69a798d1fc232a11e08abe', # 5.2.10.1
   'zlib_revision': '0d9cfbcdf7501ccca3e72a4153860cbad21aa4a3',
 }
 

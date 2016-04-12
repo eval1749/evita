@@ -9,7 +9,7 @@ vars = {
   'autopep8_revision': '9eb1121f357077c7d71fc770e25d3678f906a401',
   'base_revision': '14269dd553cca3cdcf2c4dfb3440314a0c7b1771',
   'build_revision': '722b3e00ce539ad82dee1b6a5e54ed1f817c96fa',
-  'buildtools_revision': 'a2082cafead67b75c9c8edbdca47a2def6dbab21',
+  'buildtools_revision': 'de013cf87971d0ab40596f2275a633432c908052',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',

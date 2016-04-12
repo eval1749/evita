@@ -4,19 +4,53 @@
 
 goog.scope(function() {
 
-/** @type {!Map<string, number>} */
-const levelMap = new Map();
+class VerboseSettings {
+  constructor() {
+    /** @type {number} */
+    this.level_ = -1;
 
-function disableFor(name) {
-  if (name === '*')
-    return levelMap.clear();
-  levelMap.delete(name);
+    /** @type {!Map<string, number>} */
+    this.levelMap_ = new Map();
+  }
+
+  /** @public @return {number} */
+  get level() { return this.level_; }
+
+  /** @public @param {number} newLevel */
+  set level(newLevel) { this.level_ = newLevel; }
+
+  /** @public @param {string} name*/
+  disableFor(name) {
+    if (name === '*')
+      return this.levelMap_.clear();
+    this.levelMap_.delete(name);
+  }
+
+  /**
+   * @public
+   * @param {string} name
+   * @param {number} level
+   */
+  enableFor(name, level = 0) { this.levelMap_.set(name, level); }
+
+  /**
+   * @public
+   * @param {string} name
+   * @return {number}
+   */
+  levelFor(name) {
+    const level = this.levelMap_.get(name);
+    return typeof(level) === 'number' ? level : -1;
+  }
 }
 
-function enableFor(name, level) {
-  levelMap.set(name, level);
-}
+/** @const @type {!VerboseSettings} */
+const settings = new VerboseSettings();
 
+/**
+ * @param {string} text
+ * @return {string}
+ */
 function asStringLiteral(text) {
   const result = [];
   for (let index = 0; index < text.length; ++index) {
@@ -63,19 +97,25 @@ function getLocation() {
   return {functionName: '?', fileName: '?', lineNumber: 0, column: 0};
 }
 
+/**
+ * @param {number} level
+ * @param {...*} args
+ */
 function DVLOG(level, ...args) {
+  if (level > settings.level)
+    return;
   const location = getLocation();
   const path = FilePath.split(location.fileName);
   const fileName = path.components[path.components.length - 1];
-  const fileLevel = levelMap.has(fileName) ? levelMap.get(fileName) : -1;
-  if (level > fileLevel)
+  if (level > settings.levelFor(fileName))
     return;
   global.DVLOG.output(location, args);
 }
 
 Object.defineProperties(DVLOG, {
-  disableFor: {value: disableFor},
-  enableFor: {value: enableFor},
+  disableFor: {value: settings.disableFor.bind(settings)},
+  enableFor: {value: settings.enableFor.bind(settings)},
+  level: {get: () => settings.level, set: x => settings.level = x},
 });
 
 global.DVLOG = DVLOG;

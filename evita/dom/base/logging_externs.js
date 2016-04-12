@@ -9,7 +9,7 @@
 function DVLOG(level, args) {}
 
 /**
- * @param {*} thing
+ * @param {string} text
  * @return {string}
  */
-base.asStringLiteral = function(thing) {};
+base.asStringLiteral = function(text) {};

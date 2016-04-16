@@ -10,9 +10,7 @@ from pattern_parser import PatternParser
 
 def edges_to_string(edges):
     return '(%s)' % ', '.join([
-        '%s%s%s' % (label_to_string(edge.label),
-                    '~' if edge.is_lazy else ':',
-                    str(edge.to_state.index))
+        '%s%s%s' % (label_to_string(edge.label), ':', str(edge.to_state.index))
         for edge in edges])
 
 
@@ -63,7 +61,7 @@ class NfaBuilderTest(unittest.TestCase):
         self.assertEqual('1->("a":1, _:2) 2', build('a*'))
         self.assertEqual('1->("a":2) 2->(_:3, "a":3) 3', build('aa?'))
         self.assertEqual('1->("a":2) 2->("a":2, _:3) 3', build('a+'))
-        self.assertEqual('1->("a"~1, _:2) 2', build('a*?'))
+        self.assertEqual('1->("a":1, _:2) 2', build('a*?'))
         self.assertEqual('1->("a":1, _:2) 2->("b":3) 3', build('a*b'))
         self.assertEqual('1->("a":2, "b":2) 2', build('a|b'))
 
@@ -74,7 +72,7 @@ class NfaBuilderTest(unittest.TestCase):
                          build('/[*][^*]*[*]+([^/*][^*]*[*]+)*/'))
 
     def test_block_comment2(self):
-        self.assertEqual('1->("/":2) 2->("*":3) 3->(.~3, _:4) 4->("*":5) '
+        self.assertEqual('1->("/":2) 2->("*":3) 3->(.:3, _:4) 4->("*":5) '
                          '5->("/":6) 6',
                          build('/[*].*?[*]/'))
 
@@ -90,7 +88,7 @@ class NfaBuilderTest(unittest.TestCase):
                          build('/[*].*[*]/'))
 
     def test_quantifiers_lazy(self):
-        self.assertEqual('1->("/":2) 2->("*":3) 3->(.~3, _:4) 4->("*":5) '
+        self.assertEqual('1->("/":2) 2->("*":3) 3->(.:3, _:4) 4->("*":5) '
                          '5->("/":6) 6',
                          build('/[*].*?[*]/'))
 

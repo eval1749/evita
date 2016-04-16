@@ -21,15 +21,10 @@ class NfaGraph(object):
 
 class NfaEdge(object):
 
-    def __init__(self, label, from_state, to_state, is_lazy):
+    def __init__(self, label, from_state, to_state):
         self._from_state = from_state
-        self._is_lazy = is_lazy
         self._label = label
         self._to_state = to_state
-
-    @property
-    def is_lazy(self):
-        return self._is_lazy
 
     @property
     def label(self):

@@ -87,11 +87,6 @@ class NfaBuilderTest(unittest.TestCase):
                          '5->("/":6) 6',
                          build('/[*].*[*]/'))
 
-    def test_quantifiers_lazy(self):
-        self.assertEqual('1->("/":2) 2->("*":3) 3->(.:3, _:4) 4->("*":5) '
-                         '5->("/":6) 6',
-                         build('/[*].*?[*]/'))
-
     def test_repeat_any(self):
         self.assertEqual('1->(.:1, _:2) 2->("a":3) 3', build('.*a'))
         self.assertEqual('1->(.:1, _:2) 2->("a":3) 3->("b":4) 4',

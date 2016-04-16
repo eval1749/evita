@@ -57,23 +57,16 @@ class NfaBuilder(object):
         return to_state
 
     def _process_repeat(self, from_state, to_state, node):
-        if node.min_count == 0:
-            # {0,m}
-            if node.is_infinity:
-                # Make two edges for |from_state|, one is empty transition
-                # to |to_state| and another is |node.expression| to
-                # |from_state|.
-                repeat_end = self._process(from_state, from_state,
-                                           node.expression)
-                return self._make_edge(None, repeat_end, to_state)
-        else:
-            # {n,m} where n > 0
-            for index in xrange(0, node.min_count):  # pylint: disable=W0612
-                from_state = self._process(from_state, None, node.expression)
-            if node.is_infinity:
-                repeat_end = self._process(from_state, from_state,
-                                           node.expression)
-                return self._make_edge(None, repeat_end, to_state)
+        assert node.max_count > 0, str(node)
+        for index in xrange(0, node.min_count):  # pylint: disable=W0612
+            from_state = self._process(from_state, None, node.expression)
+        if node.is_infinity:
+            # Make two edges for |from_state|, one is empty transition
+            # to |to_state| and another is |node.expression| to
+            # |from_state|.
+            repeat_end = self._process(from_state, from_state,
+                                       node.expression)
+            return self._make_edge(None, repeat_end, to_state)
         # Make two edges for |from_state| to |to_state|, one is empty
         # transition and another is |node.expression|.
         for index in xrange(1, node.max_count):

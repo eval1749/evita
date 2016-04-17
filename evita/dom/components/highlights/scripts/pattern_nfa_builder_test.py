@@ -82,6 +82,11 @@ class NfaBuilderTest(unittest.TestCase):
                          '4->("\\"":5) 5',
                          build('"([^/"]|/.)*"'))
 
+    def test_html_comment(self):
+        self.assertEqual('1->("<":2) 2->("!":3) 3->("-":4) 4->("-":5) '
+                         '5->(.:5, _:6) 6->("-":7) 7->("-":8) 8->(">":9) 9',
+                         build('<!--.*-->'))
+
     def test_quantifiers(self):
         self.assertEqual('1->("/":2) 2->("*":3) 3->(.:3, _:4) 4->("*":5) '
                          '5->("/":6) 6',

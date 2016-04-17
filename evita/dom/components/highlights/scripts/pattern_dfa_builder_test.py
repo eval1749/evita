@@ -190,6 +190,19 @@ class DfaBuilderTest(unittest.TestCase):
                           '{1:[*], 2:[/]}'),
                          build(NamedPattern('comment', '/[*].*?[*]/')))
 
+    def test_html_comment(self):
+        self.assertEqual(('0:comment:([<]->1) '
+                          '1:comment:([!]->2) '
+                          '2:comment:([-]->3) '
+                          '3:comment:([-]->4) '
+                          '4:comment:([^-]->4, [-]->5) '
+                          '5:comment:([^-]->4, [-]->6) '
+                          '6:comment:([^->]->4, [-]->6, [>]->7) '
+                          '7:COMMENT:([^-]->4, [-]->5)',
+                          '{1:[!], 2:[-], 3:[<], 4:[>]}'),
+                         build(NamedPattern('comment',
+                                            '<!--.*-->')))
+
     def test_repeat_any(self):
         self.assertEqual(('0:name:([^a]->0, [a]->1) 1:NAME:([^a]->0, [a]->1)',
                           '{1:[a]}'),

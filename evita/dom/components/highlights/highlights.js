@@ -396,15 +396,6 @@ class Tokenizer {
   set verbose(level) { this.verbose_ = level; }
 
   /**
-   * @private
-   * @param {!Token} token
-   */
-  paintToken(token) {
-    DVLOG(0, token);
-    return this.painter_.paint(token);
-  }
-
-  /**
    * @public
    * @param {number} headCount
    * @param {number} tailCount
@@ -534,6 +525,15 @@ class Tokenizer {
         scanOffset, scanOffset + 1, state, this.stateMachine_.syntaxOf(state));
     this.log(0, token);
     return token;
+  }
+
+  /**
+   * @private
+   * @param {!Token} token
+   */
+  paintToken(token) {
+    DVLOG(0, token);
+    return this.painter_.paint(token);
   }
 
   /**

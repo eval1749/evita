@@ -372,16 +372,28 @@ class Tokenizer {
    * @param {!TokenStateMachine} stateMachine
    */
   constructor(document, painter, stateMachine) {
+    /** @const @type {!TextDocument} */
     this.document_ = document;
+    /** @const @type {!Painter} */
     this.painter_ = painter;
+    /** @const @type {!TokenStateMachine} */
     this.stateMachine_ = stateMachine;
     /** @type {number} */
     this.scanOffset_ = 0;
+    /** @const @type {!TokenMap} */
     this.tokenMap_ = painter.tokenMap;
+    /** @type {number} */
+    this.verbose_ = -1;
   }
 
   /** @return {!TextDocument} */
   get document() { return this.document_; }
+
+  /** @public @return {number} */
+  get verbose() { return this.verbose_; }
+
+  /** @public @param {number} level */
+  set verbose(level) { this.verbose_ = level; }
 
   /**
    * @private
@@ -427,13 +439,13 @@ class Tokenizer {
   doColor(hint) {
     /** @const @type {number} */
     const scanEnd = Math.min(this.scanOffset_ + hint, this.document_.length);
-    DVLOG(0, 'START', this.scanOffset_, scanEnd);
+    this.log(0, 'START', this.scanOffset_, scanEnd);
     if (this.scanOffset_ === scanEnd)
       return;
 
     /** @type {Token} */
     let currentToken = this.tokenMap_.tokenEndsAt(this.scanOffset_);
-    DVLOG(0, 'start', this.scanOffset_, 'currentToken', currentToken);
+    this.log(0, 'start', this.scanOffset_, 'currentToken', currentToken);
     if (currentToken) {
       this.stateMachine_.resetTo(currentToken.state);
     } else {
@@ -453,7 +465,7 @@ class Tokenizer {
       const charCode = this.document_.charCodeAt(scanOffset);
       /** @type {number} */
       const state = this.updateState(charCode);
-      DVLOG(0, 'scanOffset', scanOffset, charCode, 'state', state);
+      this.log(0, 'scanOffset', scanOffset, charCode, 'state', state);
       if (state === lastState && currentToken)
         continue;
       if (currentToken)
@@ -466,7 +478,7 @@ class Tokenizer {
         continue;
       }
       if (currentToken.state === state) {
-        DVLOG(0, 'Finish early', currentToken);
+        this.log(0, 'Finish early', currentToken);
         this.scanOffset_ = this.document_.length;
         return;
       }
@@ -474,7 +486,7 @@ class Tokenizer {
       currentToken = this.newToken(scanOffset, state);
     }
     this.scanOffset_ = scanEnd;
-    DVLOG(0, 'END', this.scanOffset_, currentToken);
+    this.log(0, 'END', this.scanOffset_, currentToken);
 
     if (currentToken === null)
       return;
@@ -487,7 +499,7 @@ class Tokenizer {
    * @param {number} end
    */
   endToken(token, end) {
-    DVLOG(0, end, token);
+    this.log(0, end, token);
     if (token.end < end)
       this.tokenMap_.removeBetween(token.end, end);
     token.end = end;
@@ -502,6 +514,17 @@ class Tokenizer {
 
   /**
    * @private
+   * @param {number} level
+   * @param {...*} args
+   */
+  log(level, ...args) {
+    if (level > this.verbose_)
+      return;
+    console.log.apply(console, args);
+  }
+
+  /**
+   * @private
    * @param {number} scanOffset
    * @param {number} state
    * @return {!Token}
@@ -509,7 +532,7 @@ class Tokenizer {
   newToken(scanOffset, state) {
     const token = this.tokenMap_.add(
         scanOffset, scanOffset + 1, state, this.stateMachine_.syntaxOf(state));
-    DVLOG(0, token);
+    this.log(0, token);
     return token;
   }
 

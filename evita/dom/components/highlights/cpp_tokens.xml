@@ -11,7 +11,6 @@
   <token name="name" type="identifier" pattern="[A-Za-z_]\w*" />
   <token name="colon" type="operator" pattern="::?"/>
   <token name="number_sign" type="keyword" pattern="##?"/>
-  <token name="slash" type="operator" pattern="/"/>
   <token name="operator" type="operator"
          pattern="[!%&amp;()*,\-.;&lt;=&gt;?[\]{|}~]+"/>
   <token name="whitespaces" type="whitespace" pattern="\s+"/>

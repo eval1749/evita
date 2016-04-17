@@ -21,7 +21,7 @@ const TokenStateMachine = function() {};
  * @param {number} state
  * @return {boolean}
  */
-TokenStateMachine.prototype.isOverride = function(state) {};
+TokenStateMachine.prototype.isAcceptable = function(state) {};
 
 /**
  * @param {number} state
@@ -431,40 +431,35 @@ class Tokenizer {
     if (this.scanOffset_ === scanEnd)
       return;
 
-    // Since pattern doesn't support "^", we treat start of document as
-    // following of newline character.
-    if (this.scanOffset_ === 0) {
-      this.stateMachine_.resetTo(0);
-      this.stateMachine_.updateState(Unicode.LF);
-    }
-
     /** @type {Token} */
     let currentToken = this.tokenMap_.tokenEndsAt(this.scanOffset_);
     DVLOG(0, 'start', this.scanOffset_, 'currentToken', currentToken);
+    if (currentToken) {
+      this.stateMachine_.resetTo(currentToken.state);
+    } else {
+      this.stateMachine_.resetTo(0);
+      if (this.scanOffset_ === 0) {
+        // Since pattern doesn't support "^", we treat start of document as
+        // following of newline character.
+        this.stateMachine_.updateState(Unicode.LF);
+      }
+    }
 
     for (let scanOffset = this.scanOffset_; scanOffset < scanEnd;
          ++scanOffset) {
       /** @const @type {number} */
+      const lastState = this.stateMachine_.state;
+      /** @const @type {number} */
       const charCode = this.document_.charCodeAt(scanOffset);
       /** @type {number} */
-      let state = this.stateMachine_.updateState(charCode);
+      const state = this.updateState(charCode);
       DVLOG(0, 'scanOffset', scanOffset, charCode, 'state', state);
-      if (currentToken && state == currentToken.state)
+      if (state === lastState && currentToken)
         continue;
-      if (currentToken) {
-        if (this.stateMachine_.isOverride(state)) {
-          // Reset syntax of |currentToken|, since other pattern can accept,
-          // e.g. "/" for C++ comment.
-          currentToken.syntax = this.stateMachine_.syntaxOf(state);
-        }
+      if (currentToken)
         this.endToken(currentToken, scanOffset);
-      }
-      if (state === 0) {
-        // When |state| is zero, the last state is an acceptable state and
-        // no more consumes input. Thus, we need to compute new state with
-        // current input.
-        state = this.stateMachine_.updateState(charCode);
-      }
+      if (this.stateMachine_.isAcceptable(state))
+        this.stateMachine_.resetTo(0);
       currentToken = this.tokenMap_.tokenStartsAt(scanOffset);
       if (currentToken === null) {
         currentToken = this.newToken(scanOffset, state);
@@ -488,19 +483,6 @@ class Tokenizer {
 
   /**
    * @private
-   * @param {number} scanOffset
-   * @param {number} state
-   * @return {!Token}
-   */
-  newToken(scanOffset, state) {
-    const token = this.tokenMap_.add(
-        scanOffset, scanOffset + 1, state, this.stateMachine_.syntaxOf(state));
-    DVLOG(0, token);
-    return token;
-  }
-
-  /**
-   * @private
    * @param {!Token} token
    * @param {number} end
    */
@@ -519,6 +501,19 @@ class Tokenizer {
   isFinished() { return this.scanOffset_ === this.document_.length; }
 
   /**
+   * @private
+   * @param {number} scanOffset
+   * @param {number} state
+   * @return {!Token}
+   */
+  newToken(scanOffset, state) {
+    const token = this.tokenMap_.add(
+        scanOffset, scanOffset + 1, state, this.stateMachine_.syntaxOf(state));
+    DVLOG(0, token);
+    return token;
+  }
+
+  /**
    * Implements Object.toString
    * @public
    * @return {string}
@@ -526,6 +521,21 @@ class Tokenizer {
   toString() {
     return `Tokenizer(document: ${this.document_.name},` +
         ` scanOffset: ${this.scanOffset_})`;
+  }
+
+  /**
+   * @private
+   * @param {number} charCode
+   * @return {number}
+   */
+  updateState(charCode) {
+    const state = this.stateMachine_.updateState(charCode);
+    if (state !== 0)
+      return state;
+    // When |state| is zero, the last state is an acceptable state and
+    // no more consumes input. Thus, we need to compute new state with
+    // current input.
+    return this.stateMachine_.updateState(charCode);
   }
 
   /**

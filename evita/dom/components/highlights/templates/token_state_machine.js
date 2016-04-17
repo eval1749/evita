@@ -12,7 +12,6 @@ const kMaxAlphabet= {{ max_alphabet }};
 /** @const @type {number} */
 const kMaxState = {{ max_state }};
 
-
 /** @const @type {!Uint8Array}
  *   0: All characters expect below
 {% for char_codes in alphabet_map %}
@@ -35,10 +34,10 @@ const kStateToTokenMap = [
 ];
 
 /** @const @type {!Array<boolean>} */
-const kIsOverrideState = [
+const kIsAcceptableState = [
 {% for state in states %}
-{%   if state.is_from_acceptable %}
-  true, // {{state.index}}:{{state.comment}} **
+{%   if state.is_acceptable %}
+  true, // {{state.index}}:{{state.comment}} ACCEPT
 {%   else %}
   false, // {{state.index}}:{{state.comment}}
 {%   endif %}
@@ -64,50 +63,92 @@ class {{Name}}TokenStateMachine {
   // of scanner generator.
   // For testing of this scanner
   apply(document) {
+    const machine = this;
+    const ranges = [];
+
+    function endRange(range, offset) {
+      range.end = offset;
+      range.text = document.slice(range.start, range.end);
+      ranges.push(range);
+      paint(range);
+    }
+
+    let lastPaintOffset = 0;
+    function paint(range) {
+      const start = range.start;
+      const end = range.end;
+      const state = range.state;
+      const syntax = machine.syntaxOf(state);
+      if (syntax === '')
+        return;
+      const text = document.slice(lastPaintOffset, end)
+            .replace(/\\/g, '\\\\')
+            .replace(/\x22/g, '\\"')
+            .replace(/\n/g, '\\n');
+      console.log(`paint[${ranges.length}]`,
+                  `s${state} ${lastPaintOffset}, ${end} "${text}":${syntax}`);
+      document.setSyntax(lastPaintOffset, end, syntax);
+      lastPaintOffset = end;
+    }
+
+    function updateState(charCode) {
+      const state = machine.updateState(charCode);
+      if (state !== 0)
+        return state;
+      // When |state| is zero, the last state is an acceptable state and
+      // no more consumes input. Thus, we need to compute new state with
+      // current input.
+      return machine.updateState(charCode);
+    }
+
+    function vchr(charCode) {
+      if (charCode === Unicode.LF) return '\\n';
+      if (charCode === Unicode.QUOTATION_MARK) return '\\"';
+      if (charCode === Unicode.REVERSE_SOLIDUS) return '\\\\';
+      return String.fromCharCode(charCode);
+    }
+
     this.resetTo(0);
-    let lastOffset = 0;
-    let lastState = 0;
-    let lastSyntax = '';
-    let number_of_tokens = 0
+    this.updateState(Unicode.LF);
+    let range = null;
     document.setSyntax(0, document.length, '');
     for(let offset = 0; offset < document.length; ++offset) {
+      const lastState = this.state;
       const charCode = document.charCodeAt(offset);
-      const state = this.updateState(charCode);
-      if (lastState == state)
-        continue
-      lastState = state;
-      const syntax = this.syntaxOf(state);
-      if (lastSyntax == syntax)
-        continue
-      if (number_of_tokens < 200) {
-          console.log(
-            `s${lastState}-${kCharCodeToAlphabets[charCode]}->s${this.state_}`,
-            lastSyntax, lastOffset, offset);
-      }
-      document.setSyntax(lastOffset, offset, lastSyntax);
-      ++number_of_tokens
-      if (lastSyntax == 'identifier')
-        console.log(`identifier "${document.slice(lastOffset, offset)}"`);
-      lastOffset = offset
-      lastSyntax = syntax
+      const state = updateState(charCode);
+      if (state === lastState && range)
+        continue;
+      console.log('  transit', offset,
+                  `s${lastState}-"${vchr(charCode)}"->s${state}`,
+                  this.isAcceptable(state) ? 'ACCEPT' : 'continue');
+      if (range)
+        endRange(range, offset);
+      if (this.isAcceptable(state))
+        this.resetTo(0);
+      range = {start: offset, end: offset + 1, state: state};
     }
-    return number_of_tokens;
+    endRange(range, document.length);
+    return ranges;
   }
+
+  /** @public @return {number} */
+  get state() { return this.state_; }
 
   /**
    * @public
    * @param {number} state
    * @return {boolean}
    */
-  isOverride(state) {
-    return kIsOverrideState[state];
+  isAcceptable(state) {
+    console.assert(state >= 0 && state <= kMaxState, state);
+    return kIsAcceptableState[state];
   }
 
   /**
    * @param {number} newState
    */
   resetTo(newState) {
-    console.assert(newState <= kMaxState, newState);
+    console.assert(newState >= 0 && newState <= kMaxState, newState);
     this.state_ = newState;
   }
 
@@ -117,6 +158,7 @@ class {{Name}}TokenStateMachine {
    * @return {string}
    */
   syntaxOf(state) {
+    console.assert(state >= 0 && state <= kMaxState, state);
     return kStateToTokenMap[state];
   }
 

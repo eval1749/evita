@@ -104,8 +104,8 @@ class ContextBuilder(object):
         self._context['states'] = [
             {
                 'comment': state_names_of(node),
-                'is_acceptable': node.is_acceptable,
-                'is_from_acceptable': is_from_acceptable(node),
+                'is_acceptable': len(acceptable_states_of(node)) == 1 and
+                len(node.states) == 1,
                 'index': node.index,
                 'token_type': token_type_of(token_name_to_type_map, node),
                 'transitions': compute_transitions(node),
@@ -133,6 +133,14 @@ def generate(output_path, document):
 #
 def capitalize(name):
     return name[0].upper() + name[1:]
+
+
+def acceptable_states_of(node):
+    acceptable_states = []
+    for state in node.states:
+        if state.is_acceptable:
+            acceptable_states.append(state)
+    return acceptable_states
 
 
 def char_codes_to_string(char_codes):
@@ -206,13 +214,12 @@ def token_type_of(type_map, node):
         if state.is_acceptable:
             acceptable_states.append(state)
         types.add(type_map[state.group_name])
+    if len(acceptable_states) == 0:
+        return '' if len(types) != 1 else next(iter(types))
     if len(acceptable_states) == 1:
         return type_map[acceptable_states[0].group_name]
-    assert len(acceptable_states) == 0, \
-        'DFA node can not have multiple acceptable states'
-    if len(types) != 1:
-        return ''
-    return next(iter(types))
+    states = sorted(acceptable_states, cmp=lambda a, b: cmp(a.index, b.index))
+    return type_map[states[0].group_name]
 
 
 def vchr(char_code):

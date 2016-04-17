@@ -641,7 +641,7 @@ class Highlighter extends text.SimpleMutationObserverBase {
     for (const token of this.tokenizer_.tokens()) {
       const text = extractSample(this.document, token.start, token.end, 40);
       console.log(
-          token.start, token.end, token.state, token.syntax,
+          token.start, token.end, `s${token.state}`, `"${token.syntax}"`,
           `${asStringLiteral(text)}`);
     }
   }

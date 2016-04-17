@@ -63,11 +63,13 @@ class ContextBuilder(object):
     def __init__(self, document):
         self._context = dict()
         self._document = document
+        self._variables = dict()
 
     def build(self):
         tokens = self._document.documentElement
         self._context['name'] = tokens.getAttribute('name')
         self._context['Name'] = capitalize(self._context['name'])
+        self._process_variables(tokens)
         self._process_tokens(tokens)
         return self._context
 
@@ -78,7 +80,10 @@ class ContextBuilder(object):
         for child in tokens.childNodes:
             if child.nodeName != 'token':
                 continue
-            pattern = PatternParser(child.getAttribute('pattern')).parse()
+            source = child.getAttribute('pattern')
+            for name, value in self._variables.iteritems():
+                source = source.replace(name, value)
+            pattern = PatternParser(source).parse()
             token_name = child.getAttribute('name')
             token_type = child.getAttribute('type')
             nfa_builder.build(token_name, pattern)
@@ -115,6 +120,14 @@ class ContextBuilder(object):
         max_state = max([node.index for node in nodes])
         self._context['max_state'] = max_state
         self._context['state_type'] = element_type_for(max_state)
+
+    def _process_variables(self, tokens):
+        for child in tokens.childNodes:
+            if child.nodeName != 'variable':
+                continue
+            name = child.getAttribute('name')
+            value = child.getAttribute('value')
+            self._variables[name] = value
 
 
 def generate(output_path, document):

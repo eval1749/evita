@@ -105,7 +105,7 @@
    */
   function closeAllWindowsButThisCommand() {
     this.parent.children.forEach(function(window) {
-      if (window === this || !window.visible)
+      if (window === this)
         return;
       window.destroy();
     }, this);

@@ -38,6 +38,10 @@ class NfaEdge(object):
     def to_state(self):
         return self._to_state
 
+    def __str__(self):
+        return '%d-%s->%d' % (self._from_state.index, str(self._label),
+                              self._to_state.index)
+
 
 class NfaState(object):
 

@@ -100,14 +100,13 @@ TEST_F(LexersTest, IdlLexer) {
 }
 
 TEST_F(LexersTest, HtmlLexer) {
-  EXPECT_SCRIPT_EQ(
-      "k1 e6 k1 n1 k3 n3 o1 n1 s5 o1 n1 k2 e6 k1 n1 k1 e3 k1 n3 k2 e3 k1",
-      "applySyntax(HtmlLexer, ["
-      "'<script>',"
-      "'var x = \"foo\";',"
-      "'</script>',"
-      "'<div>foo</div>'"
-      "])");
+  EXPECT_SCRIPT_EQ("k1 e6 k1 a25 c1 k1 e3 k1 c3 k2 e3 k1",
+                   "applySyntax(HtmlLexer, ["
+                   "'<script>',"
+                   "'var x = \"foo\";',"
+                   "'</script>',"
+                   "'<div>foo</div>'"
+                   "])");
 }
 
 TEST_F(LexersTest, JavaLexer) {

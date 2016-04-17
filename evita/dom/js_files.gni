@@ -110,7 +110,9 @@ js_lib_files = [
 
   "components/highlights/highlights.js",
   "$root_gen_dir/evita/dom/components/highlights/cpp_tokens.js",
+  "$root_gen_dir/evita/dom/components/highlights/html_tokens.js",
   "components/highlights/cpp_highlighter.js",
+  "components/highlights/html_highlighter.js",
 
   "components/imaging/icon_util_win.js",
   "components/launchpad/launchpad.js",

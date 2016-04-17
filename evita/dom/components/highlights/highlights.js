@@ -72,6 +72,9 @@ class Token {
   }
 
   /** @public @return {number} */
+  get length() { return this.end_ - this.start_; }
+
+  /** @public @return {number} */
   get start() { return this.start_; }
 
   /** @public @param {number} newStart */
@@ -437,15 +440,15 @@ class Tokenizer {
     /** @type {Token} */
     let currentToken = this.tokenMap_.tokenEndsAt(this.scanOffset_);
     this.log(0, 'start', this.scanOffset_, 'currentToken', currentToken);
-    if (currentToken) {
+
+    this.stateMachine_.resetTo(0);
+    if (this.scanOffset_ === 0) {
+      // Since pattern doesn't support "^", we treat start of document as
+      // following of newline character.
+      this.stateMachine_.updateState(Unicode.LF);
+    } else if (currentToken && !this.shouldResetState(currentToken.state)) {
+      // Since, previous token isn't accepted yet, we should extent it.
       this.stateMachine_.resetTo(currentToken.state);
-    } else {
-      this.stateMachine_.resetTo(0);
-      if (this.scanOffset_ === 0) {
-        // Since pattern doesn't support "^", we treat start of document as
-        // following of newline character.
-        this.stateMachine_.updateState(Unicode.LF);
-      }
     }
 
     for (let scanOffset = this.scanOffset_; scanOffset < scanEnd;
@@ -461,7 +464,7 @@ class Tokenizer {
         continue;
       if (currentToken)
         this.endToken(currentToken, scanOffset);
-      if (this.stateMachine_.isAcceptable(state))
+      if (this.shouldResetState(state))
         this.stateMachine_.resetTo(0);
       currentToken = this.tokenMap_.tokenStartsAt(scanOffset);
       if (currentToken === null) {
@@ -490,10 +493,21 @@ class Tokenizer {
    * @param {number} end
    */
   endToken(token, end) {
-    this.log(0, end, token);
+    this.log(0, 'endToken', token.start, end, 'state', token.state);
     if (token.end < end)
       this.tokenMap_.removeBetween(token.end, end);
     token.end = end;
+    if (token.syntax !== '') {
+      let runner = token;
+      while (runner) {
+        const previousToken = this.tokenMap_.tokenEndsAt(runner.start);
+        if (!previousToken || previousToken.syntax !== '')
+          break;
+        previousToken.syntax = token.syntax;
+        this.paintToken(previousToken);
+        runner = previousToken;
+      }
+    }
     this.paintToken(token);
   }
 
@@ -523,7 +537,6 @@ class Tokenizer {
   newToken(scanOffset, state) {
     const token = this.tokenMap_.add(
         scanOffset, scanOffset + 1, state, this.stateMachine_.syntaxOf(state));
-    this.log(0, token);
     return token;
   }
 
@@ -531,10 +544,14 @@ class Tokenizer {
    * @private
    * @param {!Token} token
    */
-  paintToken(token) {
-    DVLOG(0, token);
-    return this.painter_.paint(token);
-  }
+  paintToken(token) { return this.painter_.paint(token); }
+
+  /**
+   * @private
+   * @param {number} state
+   * @return {boolean}
+   */
+  shouldResetState(state) { return this.stateMachine_.isAcceptable(state); }
 
   /**
    * Implements Object.toString

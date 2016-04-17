@@ -1,0 +1,27 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="html">
+  <variable name="__ATTR__"
+            value="\s+[A-Za-z][\w:]+(=([^&lt;&apos;&quot;&gt;\s]+|&quot;[^&lt;&quot;]+&quot;|'[^&lt;']+'))" />
+
+  <token name="comment" type="comment" pattern="&lt;!--.*?-->" />
+  <token name="doctype" type="keyword" pattern="&lt;![^-].*?>" />
+
+  <token name="script" type="script"
+         pattern="&lt;script(__ATTR__)*\s*>.*?&lt;/script>" />
+
+  <token name="style" type="style"
+         pattern="&lt;style(__ATTR__)*\s*>.*?&lt;/style>" />
+
+  <token name="stag" type="startTag"
+         pattern="&lt;[A-Za-z][\w:]*(__ATTR__)*\s*/?>" />
+
+  <token name="etag" type="endTag"
+         pattern="&lt;/[^>]+>" />
+
+  <token name="entity" type="keyword" pattern="&amp;\w+;" />
+  <token name="content" type="content" pattern="[^&lt;&amp;]+" />
+</tokens>

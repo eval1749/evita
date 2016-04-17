@@ -109,8 +109,7 @@ class ContextBuilder(object):
         self._context['states'] = [
             {
                 'comment': state_names_of(node),
-                'is_acceptable': len(acceptable_states_of(node)) == 1 and
-                len(node.states) == 1,
+                'is_acceptable': is_acceptable(node),
                 'index': node.index,
                 'token_type': token_type_of(token_name_to_type_map, node),
                 'transitions': compute_transitions(node),
@@ -205,11 +204,17 @@ def element_type_for(value):
     return 'Uint32'
 
 
-def is_from_acceptable(node):
-    """Returns true if |node| has an edge from acceptable node."""
-    for in_edge in node.in_edges:
-        if in_edge.from_node.is_acceptable:
-            return True
+def is_acceptable(node):
+    if len(acceptable_states_of(node)) != 1:
+        return False
+    if len(node.states) == 1:
+        return True
+    for state in node.states:
+        if not state.is_acceptable:
+            continue
+        for edge in state.in_edges:
+            if edge.is_lazy:
+                return True
     return False
 
 

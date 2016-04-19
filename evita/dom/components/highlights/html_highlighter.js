@@ -53,13 +53,14 @@ class HtmlPainter extends Painter {
    * @param {!Token} token
    */
   paintEndTag(token) {
-    if (token.length < 4)
-      return;
     const start = token.start;
     const end = token.end;
     this.document.setSyntax(start, start + 2, 'keyword');
+    if (start + 2 == end)
+      return;
+    if (this.document.charCodeAt(end - 1) !== Unicode.GREATER_THAN_SIGN)
+      return this.document.setSyntax(start + 2, end, 'html_element_name');
     this.document.setSyntax(start + 2, end - 1, 'html_element_name');
-    // TODO(eval1749): NYI: color HTML attributes
     this.document.setSyntax(end - 1, end, 'keyword');
   }
 
@@ -85,6 +86,8 @@ class HtmlPainter extends Painter {
     const start = token.start;
     const end = token.end;
     this.document.setSyntax(start, start + 1, 'keyword');
+    if (this.document.charCodeAt(end - 1) !== Unicode.GREATER_THAN_SIGN)
+      return this.document.setSyntax(start + 1, end, 'html_element_name');
     this.document.setSyntax(start + 1, end - 1, 'html_element_name');
     // TODO(eval1749): NYI: color HTML attributes
     this.document.setSyntax(end - 1, end, 'keyword');

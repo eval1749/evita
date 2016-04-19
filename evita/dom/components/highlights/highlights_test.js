@@ -91,7 +91,9 @@ testing.test('CppStateRangeStateMachine', function(t) {
   t.expect(scan('/* abc */ def')).toEqual('c9 w1 i3');
   t.expect(scan('"abc"')).toEqual('s5');
   t.expect(scan('\'abc\'')).toEqual('s5');
-  t.expect(scan('#if')).toEqual('k1 i2');
+  t.expect(scan('#if')).toEqual('i3');
+  t.expect(scan('  #  if'), 'Leading whitespace is tokenized into "whitespace"')
+      .toEqual('w2 i5');
   t.expect(scan('/**/')).toEqual('c4');
   t.expect(scan('\x2F/*')).toEqual('c3');
   t.expect(

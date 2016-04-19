@@ -10,6 +10,7 @@
   <token name="comment" type="comment" pattern="&lt;!--.*?-->" />
   <token name="doctype" type="keyword" pattern="&lt;![^-].*?>" />
 
+  <!-- Note: <script> is tokenized into "startTag" -->
   <token name="script" type="script"
          pattern="&lt;script(__ATTR__)*\s*>.*?&lt;/script>" />
 

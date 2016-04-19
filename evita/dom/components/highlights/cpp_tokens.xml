@@ -8,9 +8,11 @@
   <token name="line_comment" type="comment" pattern="//([^\n]|\\.)*" />
   <token name="string1" type="string_literal" pattern="'([^\\']|\\.)*'" />
   <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />
-  <token name="name" type="identifier" pattern="[A-Za-z_]\w*" />
-  <token name="colon" type="operator" pattern="::?"/>
-  <token name="number_sign" type="keyword" pattern="##?"/>
+
+  <!-- Note: leading whitespaces are toknized into "whitespace" -->
+  <token name="name" type="identifier"
+    pattern="(\n\s*#\s*)?[A-Za-z_]\w*(::[A-Za-z_]\w*)*:?" />
+
   <token name="operator" type="operator"
          pattern="[!%&amp;()*,\-.;&lt;=&gt;?[\]{|}~]+"/>
   <token name="whitespaces" type="whitespace" pattern="\s+"/>

@@ -47,9 +47,9 @@ class StateRange {
    * @param {number} start
    * @param {number} end
    * @param {number} state
-   * @param {string} syntax
+   * @param {!Token} token
    */
-  constructor(document, start, end, state, syntax) {
+  constructor(document, start, end, state, token) {
     /** @const @type {!TextDocument} */
     this.document_ = document;
     /** @type {number} */
@@ -58,8 +58,8 @@ class StateRange {
     this.state_ = state;
     /** @type {number} */
     this.start_ = start;
-    /** @type {string} */
-    this.syntax_ = syntax;
+    /** @type {!Token} */
+    this.token_ = token;
   }
 
   /** @public @return {number} */
@@ -87,10 +87,13 @@ class StateRange {
   set state(newState) { this.state_ = newState; }
 
   /** @public @return {string} */
-  get syntax() { return this.syntax_; }
+  get syntax() { return this.token_.syntax; }
 
-  /** @public @param {string} newSyntax */
-  set syntax(newSyntax) { this.syntax_ = newSyntax; }
+  /** @public @return {!Token} */
+  get token() { return this.token_; }
+
+  /** @public @param {!Token} newToken */
+  set token(newToken) { this.token_ = newToken; }
 
   /**
    * @public
@@ -100,7 +103,6 @@ class StateRange {
     this.end_ = offset;
     this.state_ = -1;
     this.start_ = offset;
-    this.syntax_ = '';
   }
 
   /**
@@ -118,7 +120,7 @@ class StateRange {
   toString() {
     const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
     return `StateRange(${this.start_}, ${this.end_}, ${text}, ` +
-        `state:${this.state_}, '${this.syntax}')`;
+        `state:${this.state_}, '${this.token.syntax}')`;
   }
 }
 
@@ -131,8 +133,9 @@ class StateRangeMap {
     /** @const @type {!TextDocument} */
     this.document_ = document;
 
+    const token = new Token(document, -1, -1, '');
     /** @const @type {!StateRange} */
-    this.dummyStateRange_ = new StateRange(document, -1, -1, -1, 'dummy');
+    this.dummyStateRange_ = new StateRange(document, -1, -1, -1, token);
 
     /** @const @type {!OrderedSet<!StateRange>} */
     this.ranges_ = new OrderedSet(StateRange.less);
@@ -146,15 +149,15 @@ class StateRangeMap {
    * @param {number} start
    * @param {number} end
    * @param {number} state
-   * @param {string} syntax
+   * @param {!Token} token
    * @return {!StateRange}
    */
-  add(start, end, state, syntax) {
+  add(start, end, state, token) {
     console.assert(start <= end, start, end);
     console.assert(start >= 0, start);
     console.assert(end <= this.document_.length, end);
     const newStateRange =
-        new StateRange(this.document_, start, end, state, syntax);
+        new StateRange(this.document_, start, end, state, token);
     this.ranges_.add(newStateRange);
     return newStateRange;
   }
@@ -180,16 +183,21 @@ class StateRangeMap {
         // There are no nodes after |headCount|.
         return;
       }
+      /** @const @type {!StateRange} */
       const range = runner.data;
+      /** @const @type {!Token} */
+      const token = range.token;
       if (range.start < headCount) {
         // Shrink range contains |headCount|.
+        if (token.end === range.end)
+          token.end = headCount;
         range.end = headCount;
         continue;
       }
       if (range.start <= cleanStart) {
         // Remove a range between |headCount| to |tailCount|.
         const next = runner.next();
-        if (next && next.data.syntax == range.syntax) {
+        if (next && next.data.token === token) {
           // We remove ranges with same syntax start from |cleanStart| for
           // comment and string.
           this.removeNode(next);
@@ -200,8 +208,16 @@ class StateRangeMap {
       }
       // Relocate ranges.
       while (runner !== null) {
-        runner.data.start += delta;
-        runner.data.end += delta;
+        /** @const @type {!StateRange} */
+        const range = runner.data;
+        /** @const @type {!Token} */
+        const token = range.token;
+        if (token.start === range.start)
+          token.start += delta;
+        if (token.end === range.end)
+          token.end += delta;
+        range.start += delta;
+        range.end += delta;
         runner = runner.next();
       }
       return;
@@ -313,58 +329,102 @@ class Painter {
   /**
    * @protected
    * @param {!TextDocument} document
-   * @param {!StateRangeMap} rangeMap
    */
-  constructor(document, rangeMap) {
+  constructor(document) {
     /** @const @type {!TextDocument} */
     this.document_ = document;
-    /** @const @type {!StateRangeMap} */
-    this.rangeMap_ = rangeMap;
   }
 
   /** @return {!TextDocument} */
   get document() { return this.document_; }
 
-  /** @return {!StateRangeMap} */
-  get rangeMap() { return this.rangeMap_; }
+  /**
+   * @protected
+   * @param {!Token} token
+   */
+  paintToken(token) { this.paintToken2(token, token.syntax); }
 
   /**
    * @protected
-   * @param {!StateRange} range
+   * @param {!Token} token
+   * @param {string} syntax
    */
-  paintStateRange(range) {
-    this.document.setSyntax(range.start, range.end, range.syntax);
+  paintToken2(token, syntax) {
+    this.document.setSyntax(token.start, token.end, syntax);
   }
 
   /**
    * @public
-   * @param {!StateRange} range
+   * @param {!Token} token
    */
-  paint(range) { this.paintStateRange(range); }
+  paint(token) { this.paintToken(token); }
 
   /**
    * @protected
-   * @param {!StateRange} range
-   * @return {StateRange}
-   */
-  previousStateRangeOf(range) {
-    return this.rangeMap_.rangeEndsAt(range.start);
-  }
-
-  /**
-   * @protected
-   * @param {!StateRange} range
+   * @param {!Token} token
    * @return {string}
    */
-  textOf(range) { return this.document_.slice(range.start, range.end); }
+  textOf(token) { return this.document_.slice(token.start, token.end); }
 
   /**
    * @public
    * @param {!TextDocument} document
-   * @param {!StateRangeMap} rangeMap
    * @return {!Painter}
    */
-  static create(document, rangeMap) { return new Painter(document, rangeMap); }
+  static create(document) { return new Painter(document); }
+}
+
+class Token {
+  /**
+   * @public
+   * @param {!TextDocument} document For debugging.
+   * @param {number} start
+   * @param {number} end
+   * @param {string} syntax
+   */
+  constructor(document, start, end, syntax) {
+    /** @const @type {!TextDocument} */
+    this.document_ = document;
+    /** @type {number} */
+    this.end_ = end;
+    /** @type {number} */
+    this.start_ = start;
+    /** @type {string} */
+    this.syntax_ = syntax;
+  }
+
+  /** @public @return {number} */
+  get end() { return this.end_; }
+
+  /** @public @param {number} newEnd */
+  set end(newEnd) {
+    console.assert(newEnd >= this.start_, newEnd, this.start_);
+    this.end_ = newEnd;
+  }
+
+  /** @public @return {number} */
+  get length() { return this.end_ - this.start_; }
+
+  /** @public @return {number} */
+  get start() { return this.start_; }
+
+  /** @public @param {number} newStart */
+  set start(newStart) { this.start_ = newStart; }
+
+  /** @public @return {string} */
+  get syntax() { return this.syntax_; }
+
+  /** @public @param {string} newSyntax */
+  set syntax(newSyntax) { this.syntax_ = newSyntax; }
+
+  /**
+   * @public
+   * @return {string}
+   */
+  toString() {
+    const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
+    return `Token(${this.start_}, ${this.end_}, ${text}, '${this.syntax}')`;
+  }
 }
 
 /**
@@ -387,7 +447,7 @@ class Tokenizer {
     /** @type {number} */
     this.scanOffset_ = 0;
     /** @const @type {!StateRangeMap} */
-    this.rangeMap_ = painter.rangeMap;
+    this.rangeMap_ = new StateRangeMap(document);
     /** @type {number} */
     this.verbose_ = -1;
   }
@@ -444,6 +504,8 @@ class Tokenizer {
     let currentRange = this.rangeMap_.rangeEndsAt(this.scanOffset_);
     this.log(0, 'start', this.scanOffset_, 'currentRange', currentRange);
 
+    /** @type {Token} */
+    let token = null;
     this.stateMachine_.resetTo(0);
     if (this.scanOffset_ === 0) {
       // Since pattern doesn't support "^", we treat start of document as
@@ -452,6 +514,7 @@ class Tokenizer {
     } else if (currentRange && !this.shouldResetState(currentRange.state)) {
       // Since, previous range isn't accepted yet, we should extent it.
       this.stateMachine_.resetTo(currentRange.state);
+      token = currentRange.token;
     }
 
     for (let scanOffset = this.scanOffset_; scanOffset < scanEnd;
@@ -470,17 +533,15 @@ class Tokenizer {
       if (this.shouldResetState(state))
         this.stateMachine_.resetTo(0);
       currentRange = this.rangeMap_.rangeStartsAt(scanOffset);
-      if (currentRange === null) {
-        currentRange = this.newStateRange(scanOffset, state);
-        continue;
-      }
-      if (currentRange.state === state) {
+      if (currentRange !== null && currentRange.state === state) {
         this.log(0, 'Finish early', currentRange);
         this.scanOffset_ = this.document_.length;
         return;
       }
-      this.rangeMap_.remove(currentRange);
-      currentRange = this.newStateRange(scanOffset, state);
+      if (currentRange)
+        this.rangeMap_.remove(currentRange);
+      currentRange = this.newStateRange(scanOffset, state, token);
+      token = this.stateMachine_.state ? currentRange.token : null;
     }
     this.scanOffset_ = scanEnd;
     this.log(0, 'END', this.scanOffset_, currentRange);
@@ -500,18 +561,8 @@ class Tokenizer {
     if (range.end < end)
       this.rangeMap_.removeBetween(range.end, end);
     range.end = end;
-    if (range.syntax !== '') {
-      let runner = range;
-      while (runner) {
-        const previousStateRange = this.rangeMap_.rangeEndsAt(runner.start);
-        if (!previousStateRange || previousStateRange.syntax !== '')
-          break;
-        previousStateRange.syntax = range.syntax;
-        this.paintStateRange(previousStateRange);
-        runner = previousStateRange;
-      }
-    }
-    this.paintStateRange(range);
+    range.token.end = end;
+    this.paintToken(range.token);
   }
 
   /**
@@ -535,19 +586,31 @@ class Tokenizer {
    * @private
    * @param {number} scanOffset
    * @param {number} state
+   * @param {Token} token
    * @return {!StateRange}
    */
-  newStateRange(scanOffset, state) {
-    const range = this.rangeMap_.add(
-        scanOffset, scanOffset + 1, state, this.stateMachine_.syntaxOf(state));
+  newStateRange(scanOffset, state, token) {
+    const syntax = this.stateMachine_.syntaxOf(state);
+    if (token === null) {
+      token = new Token(this.document_, scanOffset, scanOffset + 1, syntax);
+    } else if (token.syntax === '') {
+      token.syntax = syntax;
+      token.end = scanOffset + 1;
+    } else if (token.syntax === syntax) {
+      token.end = scanOffset + 1;
+    } else {
+      token.end = scanOffset;
+      token = new Token(this.document_, scanOffset, scanOffset + 1, syntax);
+    }
+    const range = this.rangeMap_.add(scanOffset, scanOffset + 1, state, token);
     return range;
   }
 
   /**
    * @private
-   * @param {!StateRange} range
+   * @param {!Token} token
    */
-  paintStateRange(range) { return this.painter_.paint(range); }
+  paintToken(token) { return this.painter_.paint(token); }
 
   /**
    * @private
@@ -603,7 +666,7 @@ function extractSample(document, start, end, maxChars) {
 class Highlighter extends text.SimpleMutationObserverBase {
   /**
    * @param {!TextDocument} document
-   * @param {!function(!TextDocument, !StateRangeMap):!Painter} painterCreator
+   * @param {!function(!TextDocument):!Painter} painterCreator
    * @param {!TokenStateMachine} stateMachine
    */
   constructor(document, painterCreator, stateMachine) {
@@ -611,10 +674,9 @@ class Highlighter extends text.SimpleMutationObserverBase {
     /** @const @type {!StateRangeMap} */
     const rangeMap = new StateRangeMap(document);
     /** @const @type {!Painter} */
-    const painter = painterCreator(document, rangeMap)
-                    /** @const @type {!Tokenizer} */
-                    this.tokenizer_ =
-        new Tokenizer(document, painter, stateMachine);
+    const painter = painterCreator(document);
+    /** @const @type {!Tokenizer} */
+    this.tokenizer_ = new Tokenizer(document, painter, stateMachine);
   }
 
   /**
@@ -658,11 +720,22 @@ class Highlighter extends text.SimpleMutationObserverBase {
    * For debugging.
    */
   dump() {
+    /** @type {Token} */
+    let token = null;
     for (const range of this.tokenizer_.ranges()) {
-      const text = extractSample(this.document, range.start, range.end, 40);
+      if (token !== range.token) {
+        token = range.token;
+        const tokenText =
+            extractSample(this.document, token.start, token.end, 40);
+        console.log(
+            token.start, token.end, `"${token.syntax}"`,
+            asStringLiteral(tokenText));
+      }
+      const rangeText =
+          extractSample(this.document, range.start, range.end, 20);
       console.log(
-          range.start, range.end, `s${range.state}`, `"${range.syntax}"`,
-          `${asStringLiteral(text)}`);
+          ' ', range.start, range.end, `s${range.state}`, `"${range.syntax}"`,
+          asStringLiteral(rangeText));
     }
   }
 
@@ -694,9 +767,11 @@ namespace.Painter = Painter;
 /** @constructor */
 namespace.StateRange = StateRange;
 /** @constructor */
-namespace.Tokenizer = Tokenizer;
-/** @constructor */
 namespace.StateRangeMap = StateRangeMap;
+/** @constructor */
+namespace.Token = Token;
+/** @constructor */
+namespace.Tokenizer = Tokenizer;
 /** @interface */
 namespace.TokenStateMachine = TokenStateMachine;
 

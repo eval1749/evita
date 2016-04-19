@@ -9,153 +9,78 @@ goog.scope(function() {
 const CppTokenStateMachine = highlights.CppTokenStateMachine;
 const Highlighter = highlights.base.Highlighter;
 const Painter = highlights.base.Painter;
-const StateRange = highlights.base.StateRange;
+const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
-const StateRangeMap = highlights.base.StateRangeMap;
 
 /** @const @type {!Set<string>} */
 const staticCppKeywords = new Set();
+
+/**
+ * @param {number} charCode
+ * @return {boolean}
+ */
+function isWhitespace(charCode) {
+  return charCode <= Unicode.SPACE;
+}
 
 class CppPainter extends Painter {
   /**
    * @private
    * @param {!TextDocument} document
-   * @param {!StateRangeMap} rangeMap
    */
-  constructor(document, rangeMap) { super(document, rangeMap); }
-
-  /**
-   * @private
-   * @param {!StateRange} range
-   * @return {boolean}
-   */
-  isColonStateRange(range) {
-    return range.syntax === 'operator' && range.end - range.start === 1 &&
-        this.document.charCodeAt(range.start) == Unicode.COLON;
-  }
-
-  /**
-   * @private
-   * @param {!StateRange} range
-   * @return {boolean}
-   */
-  isColonColonStateRange(range) {
-    return range.syntax === 'operator' && range.end - range.start === 1 &&
-        this.document.charCodeAt(range.start) == Unicode.COLON;
-  }
-
-  /**
-   * @private
-   * @param {!StateRange} range
-   * @return {boolean}
-   */
-  isNumberSign(range) {
-    return range.syntax === 'keyword' && range.end - range.start === 1 &&
-        this.document.charCodeAt(range.start) == Unicode.NUMBER_SIGN;
-  }
-
-  /**
-   * @private
-   * @param {!StateRange} startStateRange
-   * @param {!StateRange} range
-   */
-  paintQualifiedName(startStateRange, range) {
-    console.assert(startStateRange !== range, startStateRange, range);
-    const qualifiedName = this.document.slice(startStateRange.start, range.end);
-    if (staticCppKeywords.has(qualifiedName))
-      return this.document.setSyntax(
-          startStateRange.start, range.end, 'keyword');
-    // Repaint namespace prefix
-    this.document.setSyntax(startStateRange.start, range.start, 'identifier');
-    return this.paintSimpleName(range);
-  }
-
-
-  /**
-   * @private
-   * @param {!StateRange} range
-   */
-  paintSimpleName(range) {
-    const name = this.textOf(range);
-    const syntax = staticCppKeywords.has(name) ? 'keyword' : 'identifier';
-    this.document.setSyntax(range.start, range.end, syntax);
-  }
+  constructor(document) { super(document); }
 
   /**
    * @override
-   * @param {!StateRange} range
+   * @param {!Token} token
    * This function does following custom painting for C++ language:
    *  - label, name ends with ":".
    *  - C++ keywords
    *  - qualified name; namespace? "::" name. (one namespace prefix only)
    *
    */
-  paint(range) {
-    if (this.isColonStateRange(range)) {
-      const previousStateRange = this.previousStateRangeOf(range);
-      if (previousStateRange === null)
-        return this.paintStateRange(range);
-      if (previousStateRange.syntax == 'identifier') {
-        // name + ':'
-        this.document.setSyntax(
-            previousStateRange.start, previousStateRange.end, 'label');
-        return this.paintStateRange(range);
+  paint(token) {
+    if (token.syntax !== 'identifier' || token.length <= 2)
+      return this.paintToken(token);
+
+    if (this.document.charCodeAt(token.start) === Unicode.NUMBER_SIGN) {
+      /** @type {number} */
+      let start = token.start + 1;
+      while (start < token.end) {
+        if (!isWhitespace(this.document.charCodeAt(start)))
+          break;
+        ++start;
       }
-      if (this.isColonStateRange(previousStateRange)) {
-        // Attempt to get rid of label color for "name::".
-        const maybeNameStateRange =
-            this.previousStateRangeOf(previousStateRange);
-        if (maybeNameStateRange === null)
-          return this.paintStateRange(range);
-        if (maybeNameStateRange.syntax !== 'identifier')
-          return this.paintStateRange(range);
-        // name + ':' + ':'
-        this.paintStateRange(maybeNameStateRange);
-        return this.paintStateRange(range);
-      }
-      return this.paintStateRange(range);
+      if (start === token.end)
+        return this.paintToken(token);
+      /** @const @type {string} */
+      const name = '#' + this.document.slice(start, token.end);
+      if (staticCppKeywords.has(name))
+        return this.paintToken2(token, 'keyword');
+      this.document.setSyntax(token.start, start, '#');
+      this.document.setSyntax(token.start + 1, token.end, 'identifier');
+      return;
     }
 
-    if (range.syntax !== 'identifier')
-      return this.paintStateRange(range);
-
-    const previousStateRange = this.previousStateRangeOf(range);
-    if (previousStateRange === null)
-      return this.paintSimpleName(range);
-
-    if (this.isNumberSign(previousStateRange)) {
-      // '#' + name
-      return this.paintQualifiedName(previousStateRange, range);
+    if (this.document.charCodeAt(token.end - 1) === Unicode.COLON) {
+      this.document.setSyntax(token.start, token.end - 1, 'label');
+      this.document.setSyntax(token.end - 1, token.end, 'operator');
+      return;
     }
 
-    if (this.isColonStateRange(previousStateRange)) {
-      const colon2StateRange = this.previousStateRangeOf(previousStateRange);
-      if (colon2StateRange === null) {
-        // ^ ':' name
-        return this.paintSimpleName(range);
-      }
-      const namespaceStateRange = this.previousStateRangeOf(colon2StateRange);
-      if (namespaceStateRange === null ||
-          namespaceStateRange.syntax !== 'identifier') {
-        // '::' + name
-        return this.paintQualifiedName(colon2StateRange, range);
-      }
-      // name + '::' + name
-      return this.paintQualifiedName(namespaceStateRange, range);
-    }
-
-    this.paintSimpleName(range);
+    /** @const @type {string} */
+    const name = this.textOf(token);
+    /** @const @type {string} */
+    const syntax = staticCppKeywords.has(name) ? 'keyword' : 'identifier';
+    this.paintToken2(token, syntax);
   }
 
   /**
    * @public
    * @param {!TextDocument} document
-   * @param {!StateRangeMap} rangeMap
    * @return {!Painter}
    */
-  static create(document, rangeMap) {
-    return new CppPainter(document, rangeMap);
-  }
+  static create(document) { return new CppPainter(document); }
 }
 
 class CppHighlighter extends Highlighter {

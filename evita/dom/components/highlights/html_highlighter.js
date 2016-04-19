@@ -9,9 +9,8 @@ goog.scope(function() {
 const HtmlTokenStateMachine = highlights.HtmlTokenStateMachine;
 const Highlighter = highlights.base.Highlighter;
 const Painter = highlights.base.Painter;
-const StateRange = highlights.base.StateRange;
+const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
-const StateRangeMap = highlights.base.StateRangeMap;
 
 /** @const @type {!Set<string>} */
 const staticHtmlKeywords = new Set();
@@ -28,85 +27,75 @@ class HtmlPainter extends Painter {
   /**
    * @private
    * @param {!TextDocument} document
-   * @param {!StateRangeMap} rangeMap
    */
-  constructor(document, rangeMap) { super(document, rangeMap); }
-
-  /**
-   * @param {!StateRange} range
-   * @return {string}
-   */
-  colorOfTag(range) {
-    if (range.length > 1)
-      return 'html_element_name';
-    const charCode = this.document.charCodeAt(range.start);
-    if (charCode === Unicode.GREATER_THAN_SIGN ||
-        charCode === Unicode.LESS_THAN_SIGN || charCode === Unicode.SOLIDUS) {
-      return 'keyword';
-    }
-    return 'html_element_name';
-  }
+  constructor(document) { super(document); }
 
   /**
    * @override
-   * @param {!StateRange} range
+   * @param {!Token} token
    */
-  paint(range) {
-    switch (range.syntax) {
+  paint(token) {
+    switch (token.syntax) {
       case 'endTag':
-        return this.paintEndTag(range);
+        return this.paintEndTag(token);
       case 'script':
-        return this.paintStyle(range);
+        return this.paintStyle(token);
       case 'startTag':
-        return this.paintStartTag(range);
+        return this.paintStartTag(token);
       case 'style':
-        return this.paintStyle(range);
+        return this.paintStyle(token);
     }
-    this.document.setSyntax(range.start, range.end, range.syntax);
+    this.paintToken(token);
   }
 
   /**
    * @private
-   * @param {!StateRange} range
+   * @param {!Token} token
    */
-  paintEndTag(range) {
-    this.document.setSyntax(range.start, range.end, this.colorOfTag(range));
-  }
-
-  /**
-   * @private
-   * @param {!StateRange} range
-   */
-  paintScript(range) {
-    this.document.setSyntax(range.start, range.end, 'html_attribute_name');
-  }
-
-  /**
-   * @private
-   * @param {!StateRange} range
-   */
-  paintStyle(range) {
-    this.document.setSyntax(range.start, range.end, 'html_attribute_name');
-  }
-
-  /**
-   * @private
-   * @param {!StateRange} range
-   */
-  paintStartTag(range) {
-    this.document.setSyntax(range.start, range.end, this.colorOfTag(range));
+  paintEndTag(token) {
+    if (token.length < 4)
+      return;
+    const start = token.start;
+    const end = token.end;
+    this.document.setSyntax(start, start + 2, 'keyword');
+    this.document.setSyntax(start + 2, end - 1, 'html_element_name');
     // TODO(eval1749): NYI: color HTML attributes
+    this.document.setSyntax(end - 1, end, 'keyword');
+  }
+
+  /**
+   * @private
+   * @param {!Token} token
+   */
+  paintScript(token) { this.paintToken2(token, 'html_attribute_name'); }
+
+  /**
+   * @private
+   * @param {!Token} token
+   */
+  paintStyle(token) { this.paintToken2(token, 'html_attribute_name'); }
+
+  /**
+   * @private
+   * @param {!Token} token
+   */
+  paintStartTag(token) {
+    if (token.length < 3)
+      return;
+    const start = token.start;
+    const end = token.end;
+    this.document.setSyntax(start, start + 1, 'keyword');
+    this.document.setSyntax(start + 1, end - 1, 'html_element_name');
+    // TODO(eval1749): NYI: color HTML attributes
+    this.document.setSyntax(end - 1, end, 'keyword');
   }
 
   /**
    * @public
    * @param {!TextDocument} document
-   * @param {!StateRangeMap} rangeMap
    * @return {!Painter}
    */
-  static create(document, rangeMap) {
-    return new HtmlPainter(document, rangeMap);
-  }
+  static create(document) { return new HtmlPainter(document); }
 }
 
 class HtmlHighlighter extends Highlighter {

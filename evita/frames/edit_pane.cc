@@ -620,7 +620,8 @@ void LeafBox::Destroy() {
 
 void LeafBox::DidHide() {
   Box::DidHide();
-  if (visible_layer_)
+  // TODO(eval1749): We should know why parent layer is null.
+  if (visible_layer_ && visible_layer_->parent_layer())
     visible_layer_->parent_layer()->RemoveLayer(visible_layer_);
   visible_layer_ = nullptr;
   old_layer_owner_ = nullptr;

@@ -740,7 +740,7 @@ class Highlighter extends text.SimpleMutationObserverBase {
       const rangeText =
           extractSample(this.document, range.start, range.end, 20);
       console.log(
-          ' ', range.start, range.end, `s${range.state}`, `"${range.syntax}"`,
+          ' ', range.start, range.end, `s${range.state}`,
           asStringLiteral(rangeText));
     }
   }

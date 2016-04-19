@@ -541,7 +541,12 @@ class Tokenizer {
       if (currentRange)
         this.rangeMap_.remove(currentRange);
       currentRange = this.newStateRange(scanOffset, state, token);
-      token = this.stateMachine_.state ? currentRange.token : null;
+      if (this.stateMachine_.state) {
+        token = currentRange.token;
+        continue;
+      }
+      this.paintToken(/** @type {!Token} */ (token));
+      token = null;
     }
     this.scanOffset_ = scanEnd;
     this.log(0, 'END', this.scanOffset_, currentRange);
@@ -549,6 +554,7 @@ class Tokenizer {
     if (currentRange === null)
       return;
     this.endStateRange(currentRange, scanEnd);
+    this.paintToken(currentRange.token);
   }
 
   /**
@@ -562,7 +568,6 @@ class Tokenizer {
       this.rangeMap_.removeBetween(range.end, end);
     range.end = end;
     range.token.end = end;
-    this.paintToken(range.token);
   }
 
   /**
@@ -600,6 +605,7 @@ class Tokenizer {
       token.end = scanOffset + 1;
     } else {
       token.end = scanOffset;
+      this.paintToken(token);
       token = new Token(this.document_, scanOffset, scanOffset + 1, syntax);
     }
     const range = this.rangeMap_.add(scanOffset, scanOffset + 1, state, token);

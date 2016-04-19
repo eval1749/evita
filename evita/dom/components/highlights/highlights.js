@@ -40,7 +40,7 @@ TokenStateMachine.prototype.syntaxOf = function(state) {};
  */
 TokenStateMachine.prototype.updateState = function(state) {};
 
-class Token {
+class StateRange {
   /**
    * @public
    * @param {!TextDocument} document For debugging.
@@ -105,11 +105,11 @@ class Token {
 
   /**
    * @public
-   * @param {!Token} token1
-   * @param {!Token} token2
+   * @param {!StateRange} range1
+   * @param {!StateRange} range2
    * @return {boolean}
    */
-  static less(token1, token2) { return token1.end_ < token2.end_; }
+  static less(range1, range2) { return range1.end_ < range2.end_; }
 
   /**
    * @public
@@ -117,12 +117,12 @@ class Token {
    */
   toString() {
     const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
-    return `Token(${this.start_}, ${this.end_}, ${text}, state:${this.state_},` +
-        ` '${this.syntax}')`;
+    return `StateRange(${this.start_}, ${this.end_}, ${text}, ` +
+        `state:${this.state_}, '${this.syntax}')`;
   }
 }
 
-class TokenMap {
+class StateRangeMap {
   /**
    * @public
    * @param {!TextDocument} document
@@ -131,11 +131,11 @@ class TokenMap {
     /** @const @type {!TextDocument} */
     this.document_ = document;
 
-    /** @const @type {!Token} */
-    this.dummyToken_ = new Token(document, -1, -1, -1, 'dummy');
+    /** @const @type {!StateRange} */
+    this.dummyStateRange_ = new StateRange(document, -1, -1, -1, 'dummy');
 
-    /** @const @type {!OrderedSet<!Token>} */
-    this.tokens_ = new OrderedSet(Token.less);
+    /** @const @type {!OrderedSet<!StateRange>} */
+    this.ranges_ = new OrderedSet(StateRange.less);
   }
 
   /** @return {!TextDocument} */
@@ -147,15 +147,16 @@ class TokenMap {
    * @param {number} end
    * @param {number} state
    * @param {string} syntax
-   * @return {!Token}
+   * @return {!StateRange}
    */
   add(start, end, state, syntax) {
     console.assert(start <= end, start, end);
     console.assert(start >= 0, start);
     console.assert(end <= this.document_.length, end);
-    const newToken = new Token(this.document_, start, end, state, syntax);
-    this.tokens_.add(newToken);
-    return newToken;
+    const newStateRange =
+        new StateRange(this.document_, start, end, state, syntax);
+    this.ranges_.add(newStateRange);
+    return newStateRange;
   }
 
   /**
@@ -165,7 +166,7 @@ class TokenMap {
    */
   didChangeTextDocument(headCount, tailCount, delta) {
     if (headCount === 0 && tailCount === 0) {
-      this.tokens_.clear();
+      this.ranges_.clear();
       return;
     }
     const oldLength = this.document_.length - delta;
@@ -179,17 +180,17 @@ class TokenMap {
         // There are no nodes after |headCount|.
         return;
       }
-      const token = runner.data;
-      if (token.start < headCount) {
-        // Shrink token contains |headCount|.
-        token.end = headCount;
+      const range = runner.data;
+      if (range.start < headCount) {
+        // Shrink range contains |headCount|.
+        range.end = headCount;
         continue;
       }
-      if (token.start <= cleanStart) {
-        // Remove a token between |headCount| to |tailCount|.
+      if (range.start <= cleanStart) {
+        // Remove a range between |headCount| to |tailCount|.
         const next = runner.next();
-        if (next && next.data.syntax == token.syntax) {
-          // We remove tokens with same syntax start from |cleanStart| for
+        if (next && next.data.syntax == range.syntax) {
+          // We remove ranges with same syntax start from |cleanStart| for
           // comment and string.
           this.removeNode(next);
           continue;
@@ -197,7 +198,7 @@ class TokenMap {
         this.removeNode(runner);
         continue;
       }
-      // Relocate tokens.
+      // Relocate ranges.
       while (runner !== null) {
         runner.data.start += delta;
         runner.data.end += delta;
@@ -210,18 +211,18 @@ class TokenMap {
   /**
    * @private
    * @param {number} offset
-   * @return {OrderedSetNode<!Token>}
+   * @return {OrderedSetNode<!StateRange>}
    */
   lowerBound(offset) {
-    this.dummyToken_.reset(offset);
-    return this.tokens_.lowerBound(this.dummyToken_);
+    this.dummyStateRange_.reset(offset);
+    return this.ranges_.lowerBound(this.dummyStateRange_);
   }
 
   /**
    * @public
-   * @param {!Token} token
+   * @param {!StateRange} range
    */
-  remove(token) { this.tokens_.remove(token); }
+  remove(range) { this.ranges_.remove(range); }
 
   /**
    * @public
@@ -241,131 +242,133 @@ class TokenMap {
 
   /**
    * @private
-   * @param {!OrderedSetNode<!Token>} node
+   * @param {!OrderedSetNode<!StateRange>} node
    */
   removeNode(node) {
     DVLOG(0, node.data);
-    this.tokens_.removeNode(node);
+    this.ranges_.removeNode(node);
   }
 
   /**
    * @public
    * @param {number} offset
-   * @return {Token}
+   * @return {StateRange}
    */
-  tokenBefore(offset) {
-    if (offset === 0 || this.tokens_.size === 0)
+  rangeBefore(offset) {
+    if (offset === 0 || this.ranges_.size === 0)
       return null;
-    /** @type {OrderedSetNode<!Token>} */
+    /** @type {OrderedSetNode<!StateRange>} */
     const node = this.lowerBound(offset);
     if (node === null)
-      return this.tokens_.maximum;
-    const token = node.data;
-    if (token.start >= offset)
+      return this.ranges_.maximum;
+    const range = node.data;
+    if (range.start >= offset)
       return null;
-    return token;
+    return range;
   }
 
   /**
    * @public
    * @param {number} offset
-   * @return {Token}
-   * Returns A |Token| ends at |offset|.
+   * @return {StateRange}
+   * Returns A |StateRange| ends at |offset|.
    */
-  tokenEndsAt(offset) {
+  rangeEndsAt(offset) {
     if (offset === 0)
       return null;
     const node = this.lowerBound(offset);
     if (node === null)
       return null;
-    const token = node.data;
-    if (token.end !== offset)
+    const range = node.data;
+    if (range.end !== offset)
       return null;
-    return token;
+    return range;
   }
 
   /**
    * @public
    * @param {number} offset
-   * @return {Token}
-   * Returns A |Token| contains |offset|.
+   * @return {StateRange}
+   * Returns A |StateRange| contains |offset|.
    */
-  tokenStartsAt(offset) {
-    /** @type {OrderedSetNode<!Token>} */
+  rangeStartsAt(offset) {
+    /** @type {OrderedSetNode<!StateRange>} */
     const node = this.lowerBound(offset + 1);
     if (node === null)
       return null;
-    /** @type {!Token} */
-    const token = node.data;
-    if (token.start !== offset)
+    /** @type {!StateRange} */
+    const range = node.data;
+    if (range.start !== offset)
       return null;
-    return token;
+    return range;
   }
 
   /**
    * For debugging
    */
-  * tokens() { yield * this.tokens_.values(); }
+  * ranges() { yield * this.ranges_.values(); }
 }
 
 class Painter {
   /**
    * @protected
    * @param {!TextDocument} document
-   * @param {!TokenMap} tokenMap
+   * @param {!StateRangeMap} rangeMap
    */
-  constructor(document, tokenMap) {
+  constructor(document, rangeMap) {
     /** @const @type {!TextDocument} */
     this.document_ = document;
-    /** @const @type {!TokenMap} */
-    this.tokenMap_ = tokenMap;
+    /** @const @type {!StateRangeMap} */
+    this.rangeMap_ = rangeMap;
   }
 
   /** @return {!TextDocument} */
   get document() { return this.document_; }
 
-  /** @return {!TokenMap} */
-  get tokenMap() { return this.tokenMap_; }
+  /** @return {!StateRangeMap} */
+  get rangeMap() { return this.rangeMap_; }
 
   /**
    * @protected
-   * @param {!Token} token
+   * @param {!StateRange} range
    */
-  paintToken(token) {
-    this.document.setSyntax(token.start, token.end, token.syntax);
+  paintStateRange(range) {
+    this.document.setSyntax(range.start, range.end, range.syntax);
   }
 
   /**
    * @public
-   * @param {!Token} token
+   * @param {!StateRange} range
    */
-  paint(token) { this.paintToken(token); }
+  paint(range) { this.paintStateRange(range); }
 
   /**
    * @protected
-   * @param {!Token} token
-   * @return {Token}
+   * @param {!StateRange} range
+   * @return {StateRange}
    */
-  previousTokenOf(token) { return this.tokenMap_.tokenEndsAt(token.start); }
+  previousStateRangeOf(range) {
+    return this.rangeMap_.rangeEndsAt(range.start);
+  }
 
   /**
    * @protected
-   * @param {!Token} token
+   * @param {!StateRange} range
    * @return {string}
    */
-  textOf(token) { return this.document_.slice(token.start, token.end); }
+  textOf(range) { return this.document_.slice(range.start, range.end); }
 
   /**
    * @public
    * @param {!TextDocument} document
-   * @param {!TokenMap} tokenMap
+   * @param {!StateRangeMap} rangeMap
    * @return {!Painter}
    */
-  static create(document, tokenMap) { return new Painter(document, tokenMap); }
+  static create(document, rangeMap) { return new Painter(document, rangeMap); }
 }
 
 /**
- * Construct |TokenMap| by using |TokenStateMachine|.
+ * Construct |StateRangeMap| by using |TokenStateMachine|.
  */
 class Tokenizer {
   /**
@@ -383,8 +386,8 @@ class Tokenizer {
     this.stateMachine_ = stateMachine;
     /** @type {number} */
     this.scanOffset_ = 0;
-    /** @const @type {!TokenMap} */
-    this.tokenMap_ = painter.tokenMap;
+    /** @const @type {!StateRangeMap} */
+    this.rangeMap_ = painter.rangeMap;
     /** @type {number} */
     this.verbose_ = -1;
   }
@@ -406,14 +409,14 @@ class Tokenizer {
    */
   didChangeTextDocument(headCount, tailCount, delta) {
     DVLOG(0, headCount, tailCount, delta);
-    this.tokenMap_.didChangeTextDocument(headCount, tailCount, delta);
-    const cleanToken = this.tokenMap_.tokenBefore(headCount);
-    if (cleanToken === null) {
+    this.rangeMap_.didChangeTextDocument(headCount, tailCount, delta);
+    const cleanStateRange = this.rangeMap_.rangeBefore(headCount);
+    if (cleanStateRange === null) {
       this.scanOffset_ = 0;
       return;
     }
-    this.scanOffset_ = cleanToken.end;
-    const state = cleanToken.state;
+    this.scanOffset_ = cleanStateRange.end;
+    const state = cleanStateRange.state;
     this.stateMachine_.resetTo(state);
   }
 
@@ -422,7 +425,7 @@ class Tokenizer {
    */
   didLoadTextDocument() {
     this.scanOffset_ = 0;
-    this.tokenMap_.didChangeTextDocument(0, 0, 0);
+    this.rangeMap_.didChangeTextDocument(0, 0, 0);
     this.doColor(this.document_.length);
   }
 
@@ -437,18 +440,18 @@ class Tokenizer {
     if (this.scanOffset_ === scanEnd)
       return;
 
-    /** @type {Token} */
-    let currentToken = this.tokenMap_.tokenEndsAt(this.scanOffset_);
-    this.log(0, 'start', this.scanOffset_, 'currentToken', currentToken);
+    /** @type {StateRange} */
+    let currentRange = this.rangeMap_.rangeEndsAt(this.scanOffset_);
+    this.log(0, 'start', this.scanOffset_, 'currentRange', currentRange);
 
     this.stateMachine_.resetTo(0);
     if (this.scanOffset_ === 0) {
       // Since pattern doesn't support "^", we treat start of document as
       // following of newline character.
       this.stateMachine_.updateState(Unicode.LF);
-    } else if (currentToken && !this.shouldResetState(currentToken.state)) {
-      // Since, previous token isn't accepted yet, we should extent it.
-      this.stateMachine_.resetTo(currentToken.state);
+    } else if (currentRange && !this.shouldResetState(currentRange.state)) {
+      // Since, previous range isn't accepted yet, we should extent it.
+      this.stateMachine_.resetTo(currentRange.state);
     }
 
     for (let scanOffset = this.scanOffset_; scanOffset < scanEnd;
@@ -460,55 +463,55 @@ class Tokenizer {
       /** @type {number} */
       const state = this.updateState(charCode);
       this.log(0, 'scanOffset', scanOffset, charCode, 'state', state);
-      if (state === lastState && currentToken)
+      if (state === lastState && currentRange)
         continue;
-      if (currentToken)
-        this.endToken(currentToken, scanOffset);
+      if (currentRange)
+        this.endStateRange(currentRange, scanOffset);
       if (this.shouldResetState(state))
         this.stateMachine_.resetTo(0);
-      currentToken = this.tokenMap_.tokenStartsAt(scanOffset);
-      if (currentToken === null) {
-        currentToken = this.newToken(scanOffset, state);
+      currentRange = this.rangeMap_.rangeStartsAt(scanOffset);
+      if (currentRange === null) {
+        currentRange = this.newStateRange(scanOffset, state);
         continue;
       }
-      if (currentToken.state === state) {
-        this.log(0, 'Finish early', currentToken);
+      if (currentRange.state === state) {
+        this.log(0, 'Finish early', currentRange);
         this.scanOffset_ = this.document_.length;
         return;
       }
-      this.tokenMap_.remove(currentToken);
-      currentToken = this.newToken(scanOffset, state);
+      this.rangeMap_.remove(currentRange);
+      currentRange = this.newStateRange(scanOffset, state);
     }
     this.scanOffset_ = scanEnd;
-    this.log(0, 'END', this.scanOffset_, currentToken);
+    this.log(0, 'END', this.scanOffset_, currentRange);
 
-    if (currentToken === null)
+    if (currentRange === null)
       return;
-    this.endToken(currentToken, scanEnd);
+    this.endStateRange(currentRange, scanEnd);
   }
 
   /**
    * @private
-   * @param {!Token} token
+   * @param {!StateRange} range
    * @param {number} end
    */
-  endToken(token, end) {
-    this.log(0, 'endToken', token.start, end, 'state', token.state);
-    if (token.end < end)
-      this.tokenMap_.removeBetween(token.end, end);
-    token.end = end;
-    if (token.syntax !== '') {
-      let runner = token;
+  endStateRange(range, end) {
+    this.log(0, 'endStateRange', range.start, end, 'state', range.state);
+    if (range.end < end)
+      this.rangeMap_.removeBetween(range.end, end);
+    range.end = end;
+    if (range.syntax !== '') {
+      let runner = range;
       while (runner) {
-        const previousToken = this.tokenMap_.tokenEndsAt(runner.start);
-        if (!previousToken || previousToken.syntax !== '')
+        const previousStateRange = this.rangeMap_.rangeEndsAt(runner.start);
+        if (!previousStateRange || previousStateRange.syntax !== '')
           break;
-        previousToken.syntax = token.syntax;
-        this.paintToken(previousToken);
-        runner = previousToken;
+        previousStateRange.syntax = range.syntax;
+        this.paintStateRange(previousStateRange);
+        runner = previousStateRange;
       }
     }
-    this.paintToken(token);
+    this.paintStateRange(range);
   }
 
   /**
@@ -532,19 +535,19 @@ class Tokenizer {
    * @private
    * @param {number} scanOffset
    * @param {number} state
-   * @return {!Token}
+   * @return {!StateRange}
    */
-  newToken(scanOffset, state) {
-    const token = this.tokenMap_.add(
+  newStateRange(scanOffset, state) {
+    const range = this.rangeMap_.add(
         scanOffset, scanOffset + 1, state, this.stateMachine_.syntaxOf(state));
-    return token;
+    return range;
   }
 
   /**
    * @private
-   * @param {!Token} token
+   * @param {!StateRange} range
    */
-  paintToken(token) { return this.painter_.paint(token); }
+  paintStateRange(range) { return this.painter_.paint(range); }
 
   /**
    * @private
@@ -581,7 +584,7 @@ class Tokenizer {
   /**
    * For debugging
    */
-  * tokens() { yield * this.tokenMap_.tokens(); }
+  * ranges() { yield * this.rangeMap_.ranges(); }
 }
 
 function extractSample(document, start, end, maxChars) {
@@ -600,15 +603,15 @@ function extractSample(document, start, end, maxChars) {
 class Highlighter extends text.SimpleMutationObserverBase {
   /**
    * @param {!TextDocument} document
-   * @param {!function(!TextDocument, !TokenMap):!Painter} painterCreator
+   * @param {!function(!TextDocument, !StateRangeMap):!Painter} painterCreator
    * @param {!TokenStateMachine} stateMachine
    */
   constructor(document, painterCreator, stateMachine) {
     super(document);
-    /** @const @type {!TokenMap} */
-    const tokenMap = new TokenMap(document);
+    /** @const @type {!StateRangeMap} */
+    const rangeMap = new StateRangeMap(document);
     /** @const @type {!Painter} */
-    const painter = painterCreator(document, tokenMap)
+    const painter = painterCreator(document, rangeMap)
                     /** @const @type {!Tokenizer} */
                     this.tokenizer_ =
         new Tokenizer(document, painter, stateMachine);
@@ -655,10 +658,10 @@ class Highlighter extends text.SimpleMutationObserverBase {
    * For debugging.
    */
   dump() {
-    for (const token of this.tokenizer_.tokens()) {
-      const text = extractSample(this.document, token.start, token.end, 40);
+    for (const range of this.tokenizer_.ranges()) {
+      const text = extractSample(this.document, range.start, range.end, 40);
       console.log(
-          token.start, token.end, `s${token.state}`, `"${token.syntax}"`,
+          range.start, range.end, `s${range.state}`, `"${range.syntax}"`,
           `${asStringLiteral(text)}`);
     }
   }
@@ -689,11 +692,11 @@ namespace.Highlighter = Highlighter;
 /** @constructor */
 namespace.Painter = Painter;
 /** @constructor */
-namespace.Token = Token;
+namespace.StateRange = StateRange;
 /** @constructor */
 namespace.Tokenizer = Tokenizer;
 /** @constructor */
-namespace.TokenMap = TokenMap;
+namespace.StateRangeMap = StateRangeMap;
 /** @interface */
 namespace.TokenStateMachine = TokenStateMachine;
 

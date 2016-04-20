@@ -115,7 +115,7 @@ std::pair<int, int> WinResourceIoContext::Load(const base::string16& type,
     return std::make_pair(0, last_error);
   }
   ::memcpy(buffer, resource_bytes, std::min(resource_size, buffer_size));
-  return std::make_pair(resource_size, 0);
+  return std::make_pair(static_cast<int>(resource_size), 0);
 }
 
 std::pair<HMODULE, int> WinResourceIoContext::Open(

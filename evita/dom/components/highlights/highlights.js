@@ -616,7 +616,10 @@ class Tokenizer {
    * @private
    * @param {!Token} token
    */
-  paintToken(token) { return this.painter_.paint(token); }
+  paintToken(token) {
+    this.log(0, 'paint', token);
+    return this.painter_.paint(token);
+  }
 
   /**
    * @private

@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 goog.scope(function() {
+/** @const @type{{9: string, 10: string, 13:string}} */
+const ESCAPE_MAP = {
+  0x09: 't',
+  0x0A: 'n',
+  0x0D: 'r'
+};
+
 /**
  * @param {!Object} object
  * @return {string}
@@ -32,6 +39,24 @@ function findToString(object) {
   return null;
 }
 
+/**
+ * @param {!Object} object
+ * @return {string|undefined}
+ */
+function getObjectIdLikeThing(object) {
+  try {
+    const key = ['id', 'name'].find(function(key) {
+      const value = object[key];
+      return value !== undefined && value.toString().length;
+    });
+    return key ? object[key] : undefined;
+  } catch (e) {
+    // We can't access |Window.prototype.id|, because it has no C++
+    // object associated it.
+    return undefined;
+  }
+}
+
 // TODO(eval1749): Once v8 provide |TypedArray| class, we can replace this
 // |isTypedArray()|.
 function isTypedArray(object) {
@@ -40,6 +65,43 @@ function isTypedArray(object) {
       object instanceof Int8Array || object instanceof Uint16Array ||
       object instanceof Uint32Array || object instanceof Uint8Array ||
       object instanceof Uint8ClampedArray;
+}
+
+/**
+ * @param {!Object} object
+ * @return {!Array}
+ */
+function collectProperties(object) {
+  const override = object['stringifyProperties'];
+  if (object !== object.constructor.prototype &&
+      typeof(override) === 'function') {
+    return override.call(object);
+  }
+  let props = [];
+  const removeFunction = object.constructor !== Object;
+  for (let runner = object; runner; runner = Object.getPrototypeOf(runner)) {
+    if (runner === Object.prototype)
+      break;
+    const current = /** @type {!Object} */ (runner);
+    props = props.concat(
+        Object.getOwnPropertyNames(current)
+            .map(function(name) {
+              const desc = Object.getOwnPropertyDescriptor(
+                  /** @type {!Object} */ (current), name);
+              desc['name'] = name;
+              return desc;
+            })
+            .filter(function(desc) {
+              const name = desc['name'];
+              if (name.charCodeAt(name.length - 1) === Unicode.LOW_LINE)
+                return false;
+              const value = desc['value'];
+              if (removeFunction && typeof(value) === 'function')
+                return false;
+              return value !== undefined;
+            }));
+  }
+  return props.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 class Visitor {
@@ -101,29 +163,339 @@ class Visitor {
 
 ////////////////////////////////////////////////////////////
 //
-// Labeler
+// LabelMap
 //
-class Labeler extends Visitor {
+class LabelMap extends Visitor {
   constructor() {
     super();
     /** @private @const @type {!Map<*, string>} */
-    this.labelMap_ = new Map();
+    this.map_ = new Map();
   }
 
   /**
+   * @public
    * @param {*} value
    * @return {string}
    */
-  labelOf(value) { return this.labelMap_.get(value) || ''; }
+  labelOf(value) { return this.map_.get(value) || ''; }
 
   /**
+   * @override
    * @param {*} value
    */
   visitVisited(value) {
-    if (this.labelMap_.has(value))
+    if (this.map_.has(value))
       return;
-    this.labelMap_.set(value, (this.labelMap_.size + 1).toString());
+    this.map_.set(value, (this.map_.size + 1).toString());
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// StringSink
+//
+class StringSink extends Visitor {
+  /**
+   * @param {!LabelMap} labeler
+   */
+  constructor(labelMap) {
+    super();
+    /** @const @type {!LabelMap} */
+    this.labelMap_ = labelMap;
+    /** @type {string} */
+    this.result = '';
+  }
+
+  /**
+   * @private
+   * @param {...*} args
+   */
+  emit(...args) { this.result += args.join(''); }
+
+  /** @override */
+  visitAtom(x) { this.emit(x); }
+
+  /** @override */
+  visitConstructed(object, id) {
+    const ctor = object.constructor;
+    const ctorName = ctor && ctor.name !== '' ? ctor.name : '(anonymous)';
+    this.emit('#{', ctorName, ' ', id, '}');
+  }
+
+  /** @override */
+  visitDate(date) { this.emit('#{Date ', date.toString(), '}'); }
+
+  /** @override */
+  visitFirstTime(object) {
+    const label = this.labelMap_.labelOf(object);
+    if (!label)
+      return;
+    this.emit('#', label, '=');
+  }
+
+  /** @override */
+  visitFunction(fun, level) {
+    if (!level) {
+      this.emit('(', fun.toString().replace(/\s+/g, ' '), ')');
+      return;
+    }
+    if (fun.name)
+      return this.emit(`#{Function ${fun.name}}`);
+    this.emit('#{Function}');
+  }
+
+  /** @override */
+  visitKey(key, index) {
+    if (index)
+      this.emit(', ');
+    this.emit(key, ': ');
+  }
+
+  /** @override */
+  visitMember(index) {
+    if (index === 0)
+      return;
+    this.emit(', ');
+  }
+
+  /** @override */
+  visitString(str) {
+    this.emit('"');
+    for (let index = 0; index < str.length; ++index) {
+      /** @const @type {number} */
+      const code = str.charCodeAt(index);
+      if (code < 0x20 || (code >= 0x7F && code <= 0x9F)) {
+        const escape = ESCAPE_MAP[code];
+        if (escape) {
+          this.emit('\\', escape);
+        } else {
+          const hex = ('0' + code.toString(16)).substr(-2);
+          this.emit('\\0x', hex);
+        }
+      } else if (code === Unicode.QUOTATION_MARK) {
+        this.emit('\\"');
+      } else if (code === Unicode.REVERSE_SOLIDUS) {
+        this.emit('\\\\');
+      } else {
+        this.emit(String.fromCharCode(code));
+      }
+    }
+    this.emit('"');
+  }
+
+  /** @override */
+  visitSymbol(sym) { this.emit(sym.toString()); }
+
+  /** @override */
+  visitTypedArray(array) {
+    this.emit('#{', array.constructor.name, ' ', array.length, '}');
+  }
+
+  /** @override */
+  visitVisited(value) {
+    const label = this.labelMap_.labelOf(value);
+    this.emit('#', label, '#');
+  }
+
+  /** @override */
+  startContainer(startMark, needSpace) {
+    if (needSpace)
+      return this.emit(`${startMark} `);
+    return this.emit(startMark);
+  }
+
+  /** @override */
+  endContainer(endMark, index, size) {
+    if (index == size)
+      return this.emit(endMark);
+    return this.emit(`, ...${size}${endMark}`);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// Processor
+//
+class Processor {
+  /**
+   * @param {number} maxLevel
+   * @param {number} maxLength
+   * @param {!Visitor} visitor
+   */
+  constructor(maxLevel, maxLength, visitor) {
+    /** @const @type {number} */
+    this.maxLevel_ = maxLevel;
+    /** @const @type {number} */
+    this.maxLength_ = maxLength;
+    /** @const @type {!Set<*>} */
+    this.processedSet_ = new Set();
+    /** @const @type {!Visitor} */
+    this.visitor_ = visitor;
+  }
+
+  /**
+   * @public
+   * @param {*} value
+   * @param {number} level
+   */
+  process(value, level) {
+    if (value === null)
+      return this.visitAtom('null');
+
+    if (value === undefined)
+      return this.visitAtom('undefined');
+
+    if (value !== value)
+      return this.visitAtom('NaN');
+
+    if (value === Infinity)
+      return this.visitAtom('Infinity');
+
+    if (value === -Infinity)
+      return this.visitAtom('-Infinity');
+
+    switch (typeof(value)) {
+      case 'boolean':
+        return this.visitAtom(value.toString());
+      case 'function':
+        return this.visitor_.visitFunction(value, level);
+      case 'number':
+        return this.visitAtom(value.toString());
+      case 'string':
+        return this.visitor_.visitString(value);
+      case 'symbol':
+        return this.visitor_.visitSymbol(/** @type{!symbol} */ (value));
+    }
+
+    const object = /** @type{!Object} */ (value);
+
+    if (this.processedSet_.has(object))
+      return this.visitor_.visitVisited(object);
+    this.processedSet_.add(object);
+
+    ++level;
+    if (level > this.maxLevel_)
+      return this.visitAtom('#');
+
+    this.visitor_.visitFirstTime(object);
+
+    if (Array.isArray(object))
+      return this.processArray(/** @type{!Array} */ (object), level);
+
+    if (isTypedArray(object))
+      return this.visitor_.visitTypedArray(
+          /** @type{!ArrayBufferView}*/ (object));
+
+    if (object instanceof Date)
+      return this.visitor_.visitDate(/** @type{!Date} */ (object));
+
+    if (object instanceof Map)
+      return this.processMap(/** @type {!Map} */ (object), level);
+
+    if (object instanceof Set)
+      return this.processSet(/** @type {!Set} */ (object), level);
+
+    return this.processObject(/** @type {!Object} */ (object), level);
+  }
+
+  /**
+   * @private
+   * @param {!Array} array
+   * @param {number} level
+   */
+  processArray(array, level) {
+    this.visitor_.startContainer('\u005B', false);
+    /** @const @type {number} */
+    const length = Math.min(array.length, this.maxLength_);
+    /** @type {number} */
+    let index = 0;
+    while (index < array.length) {
+      if (index >= this.maxLength_)
+        break;
+      this.visitor_.visitMember(index);
+      this.process(array[index], level);
+      ++index;
+    }
+    this.visitor_.endContainer('\u005C', index, array.length);
+  }
+
+  /**
+   * @private
+   * @param {!Map} map
+   * @param {number} level
+   */
+  processMap(map, level) {
+    this.visitor_.startContainer('#\u007BMap', !!map.size);
+    /** @type {number} */
+    let index = 0;
+    for (const key of map.keys()) {
+      if (index >= this.maxLength_)
+        break;
+      this.visitor_.visitKey(key, index);
+      this.process(map.get(key), level + 1);
+      ++index;
+    }
+    this.visitor_.endContainer('\u007D', index, map.size);
+  }
+
+  /**
+   * @private
+   * @param {!Object} object
+   * @param {number} level
+   */
+  processObject(object, level) {
+    /** @const @type {?function():string} */
+    const toString = findToString(object);
+    if (toString)
+      return this.visitAtom(toString.call(object));
+    /** @const @type {string} */
+    const className = computeClassName(object);
+    if (className) {
+      const id = getObjectIdLikeThing(object);
+      if (id !== undefined)
+        return this.visitor_.visitConstructed(object, id);
+    }
+    const props = collectProperties(object);
+    if (className)
+      this.visitor_.startContainer(`#\u007B${className}`, !!props.length);
+    else
+      this.visitor_.startContainer(`\u007B`, false);
+    /** @type {number} */
+    let index = 0;
+    for (let prop of props) {
+      if (index >= this.maxLength_)
+        break;
+      this.visitor_.visitKey(prop.name, index);
+      this.process(prop.value, level);
+      ++index;
+    }
+    this.visitor_.endContainer('\u007D', index, props.length);
+  }
+
+  /**
+   * @private
+   * @param {!Set} set
+   * @param {number} level
+   */
+  processSet(set, level) {
+    this.visitor_.startContainer('#\u007BSet', !!set.size);
+    /** @type {number} */
+    let index = 0;
+    for (const member of set) {
+      if (index >= this.maxLength_)
+        break;
+      this.visitor_.visitMember(index);
+      this.process(member, level + 1);
+      ++index;
+    }
+    this.visitor_.endContainer('\u007D', index, set.size);
+  }
+
+  /**
+   * @private
+   * @param {string} string
+   */
+  visitAtom(string) { this.visitor_.visitAtom(string); }
 }
 
 /**
@@ -134,332 +506,16 @@ class Labeler extends Visitor {
   * @return {string}
   */
 function stringify(value, opt_maxLevel = 10, opt_maxLength = 10) {
-  const maxLevel = /** @type {number} */ (opt_maxLevel);
-  const maxLength = /** @type {number} */ (opt_maxLength);
-  const visitedMap = new Map();
-  let numLabels = 0;
+  /** @const @type {!LabelMap} */
+  const labelMap = new LabelMap();
+  const labeler = new Processor(opt_maxLevel, opt_maxLength, labelMap);
+  labeler.process(value, 0);
 
-  /**
-   * @param {!Object} object
-   * @return {!Array}
-   */
-  function collectProperties(object) {
-    const override = object['stringifyProperties'];
-    if (object !== object.constructor.prototype &&
-        typeof(override) === 'function') {
-      return override.call(object);
-    }
-    let props = [];
-    const removeFunction = object.constructor !== Object;
-    for (let runner = object; runner; runner = Object.getPrototypeOf(runner)) {
-      if (runner === Object.prototype)
-        break;
-      const current = /** @type {!Object} */ (runner);
-      props = props.concat(
-          Object.getOwnPropertyNames(current)
-              .map(function(name) {
-                const desc = Object.getOwnPropertyDescriptor(
-                    /** @type {!Object} */ (current), name);
-                desc['name'] = name;
-                return desc;
-              })
-              .filter(function(desc) {
-                const name = desc['name'];
-                if (name.charCodeAt(name.length - 1) === Unicode.LOW_LINE)
-                  return false;
-                const value = desc['value'];
-                if (removeFunction && typeof(value) === 'function')
-                  return false;
-                return value !== undefined;
-              }));
-    }
-    return props.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  /** @param {!Object} object @return {string|undefined} */
-  function getObjectIdLikeThing(object) {
-    try {
-      const key = ['id', 'name'].find(function(key) {
-        const value = object[key];
-        return value !== undefined && value.toString().length;
-      });
-      return key ? object[key] : undefined;
-    } catch (e) {
-      // We can't access |Window.prototype.id|, because it has no C++
-      // object associated it.
-      return undefined;
-    }
-  }
-
-  /**
-   * @param {!Visitor} visitor
-   * @param {!Array} array
-   * @param {number} level
-   */
-  function visitArray(visitor, array, level) {
-    visitor.startContainer('[', false);
-    const length = Math.min(array.length, maxLength);
-    let index = 0;
-    while (index < array.length) {
-      if (index >= maxLength)
-        break;
-      visitor.visitMember(index);
-      visit(array[index], level, visitor);
-      ++index;
-    }
-    visitor.endContainer(']', index, array.length);
-  }
-
-  /**
-   * @param {!Visitor} visitor
-   * @param {!Map} map
-   * @param {number} level
-   */
-  function visitMap(visitor, map, level) {
-    visitor.startContainer('#\u007BMap', !!map.size);
-    let index = 0;
-    for (const key of map.keys()) {
-      if (index >= maxLength)
-        break;
-      visitor.visitKey(key, index);
-      visit(map.get(key), level + 1, visitor);
-      ++index;
-    }
-    visitor.endContainer('\u007D', index, map.size);
-  }
-
-
-  /**
-   * @param {!Visitor} visitor
-   * @param {!Object} object
-   * @param {number} level
-   */
-  function visitObject(visitor, object, level) {
-    /** @const @type {?function():string} */
-    const toString = findToString(object);
-    if (toString)
-      return visitor.visitAtom(toString.call(object));
-    /** @const @type {string} */
-    const className = computeClassName(object);
-    if (className) {
-      const id = getObjectIdLikeThing(object);
-      if (id !== undefined)
-        return visitor.visitConstructed(object, id);
-    }
-    const props = collectProperties(object);
-    if (className)
-      visitor.startContainer(`#\u007B${className}`, !!props.length);
-    else
-      visitor.startContainer(`\u007B`, false);
-    /** @type {number} */
-    let index = 0;
-    for (let prop of props) {
-      if (index >= maxLength)
-        break;
-      visitor.visitKey(prop.name, index);
-      visit(prop.value, level, visitor);
-      ++index;
-    }
-    visitor.endContainer('\u007D', index, props.length);
-  }
-
-  /**
-   * @param {!Visitor} visitor
-   * @param {!Set} set
-   * @param {number} level
-   */
-  function visitSet(visitor, set, level) {
-    visitor.startContainer('#\u007BSet', !!set.size);
-    let index = 0;
-    for (const member of set) {
-      if (index >= maxLength)
-        break;
-      visitor.visitMember(index);
-      visit(member, level + 1, visitor);
-      ++index;
-    }
-    visitor.endContainer('\u007D', index, set.size);
-  }
-
-  /**
-   * @param {*} value
-   * @param {number} level
-   * @param {!Visitor} visitor
-   */
-  function visit(value, level, visitor) {
-    if (value === null)
-      return visitor.visitAtom('null');
-
-    if (value === undefined)
-      return visitor.visitAtom('undefined');
-
-    if (value !== value)
-      return visitor.visitAtom('NaN');
-
-    if (value === Infinity)
-      return visitor.visitAtom('Infinity');
-
-    if (value === -Infinity)
-      return visitor.visitAtom('-Infinity');
-
-    switch (typeof(value)) {
-      case 'boolean':
-        return visitor.visitAtom(value.toString());
-      case 'function':
-        return visitor.visitFunction(value, level);
-      case 'number':
-        return visitor.visitAtom(value.toString());
-      case 'string':
-        return visitor.visitString(value);
-      case 'symbol':
-        return visitor.visitSymbol(/** @type{!symbol} */ (value));
-    }
-
-    const object = /** @type{!Object} */ (value);
-
-    if (visitedMap.has(object))
-      return visitor.visitVisited(object);
-    visitedMap.set(object, 0);
-
-    ++level;
-    if (level > maxLevel)
-      return visitor.visitAtom('#');
-
-    visitor.visitFirstTime(object);
-    visitedMap.set(object, 0);
-
-    if (Array.isArray(object))
-      return visitArray(visitor, /** @type{!Array} */ (object), level);
-
-    if (isTypedArray(object))
-      return visitor.visitTypedArray(/** @type{!ArrayBufferView}*/ (object));
-
-    if (object instanceof Date)
-      return visitor.visitDate(/** @type{!Date} */ (object));
-
-    if (object instanceof Map)
-      return visitMap(visitor, /** @type {!Map} */ (object), level);
-
-    if (object instanceof Set)
-      return visitSet(visitor, /** @type {!Set} */ (object), level);
-
-    return visitObject(visitor, /** @type {!Object} */ (object), level);
-  }
-
-  /** @const @type{{9: string, 10: string, 13:string}} */
-  const ESCAPE_MAP = {0x09: 't', 0x0A: 'n', 0x0D: 'r'};
-
-  //////////////////////////////////////////////////////////////////////
-  //
-  // Printer
-  //
-  class Printer extends Visitor {
-    constructor(labeler) {
-      super();
-      this.labeler_ = labeler;
-      this.result = '';
-    }
-
-    /** @param {...} varArgs */
-    emit(varArgs) {
-      this.result += Array.prototype.slice.call(arguments, 0).join('');
-    }
-
-    visitAtom(x) { this.emit(x); }
-
-    visitConstructed(object, id) {
-      const ctor = object.constructor;
-      const ctorName = ctor && ctor.name !== '' ? ctor.name : '(anonymous)';
-      this.emit('#{', ctorName, ' ', id, '}');
-    }
-
-    visitDate(date) { this.emit('#{Date ', date.toString(), '}'); }
-
-    visitFirstTime(object) {
-      const label = this.labeler_.labelOf(object);
-      if (!label)
-        return;
-      this.emit('#', label, '=');
-    }
-
-    /** @override */
-    visitFunction(fun, level) {
-      if (!level) {
-        this.emit('(', fun.toString().replace(/\s+/g, ' '), ')');
-        return;
-      }
-      if (fun.name) {
-        this.emit('#{Function ' + fun.name + '}');
-        return;
-      }
-      this.emit('#{Function}');
-    }
-
-    visitKey(key, index) {
-      if (index)
-        this.emit(', ');
-      this.emit(key, ': ');
-    }
-
-    visitMember(index) {
-      if (index === 0)
-        return;
-      this.emit(', ');
-    }
-
-    visitString(str) {
-      this.emit('"');
-      for (let index = 0; index < str.length; ++index) {
-        const code = str.charCodeAt(index);
-        if (code < 0x20 || (code >= 0x7F && code <= 0x9F)) {
-          const escape = ESCAPE_MAP[code];
-          if (escape) {
-            this.emit('\\', escape);
-          } else {
-            const hex = ('0' + code.toString(16)).substr(-2);
-            this.emit('\\0x', hex);
-          }
-        } else if (code === 0x22) {
-          this.emit('\\"');
-        } else if (code === 0x5C) {
-          this.emit('\\\\');
-        } else {
-          this.emit(String.fromCharCode(code));
-        }
-      }
-      this.emit('"');
-    }
-
-    visitSymbol(sym) { this.emit(sym.toString()); }
-
-    visitTypedArray(array) {
-      this.emit('#{', array.constructor.name, ' ', array.length, '}');
-    }
-
-    visitVisited(value) {
-      const label = this.labeler_.labelOf(value);
-      this.emit('#', label, '#');
-    }
-
-    startContainer(startMark, needSpace) {
-      if (needSpace)
-        return this.emit(`${startMark} `);
-      return this.emit(startMark);
-    }
-
-    endContainer(endMark, index, size) {
-      if (index == size)
-        return this.emit(endMark);
-      return this.emit(`, ...${size}${endMark}`);
-    }
-  }
-
-  const labeler = new Labeler();
-  visit(value, 0, labeler);
-  visitedMap.clear();
-  const printer = new Printer(labeler);
-  visit(value, 0, printer);
-  return printer.result;
+  /** @const @type {!StringSink} */
+  const stringSink = new StringSink(labelMap);
+  const printer = new Processor(opt_maxLevel, opt_maxLength, stringSink);
+  printer.process(value, 0);
+  return stringSink.result;
 }
 
 repl.stringify = stringify;

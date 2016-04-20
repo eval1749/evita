@@ -62,15 +62,18 @@ class CppPainter extends Painter {
       return;
     }
 
+    /** @const @type {string} */
+    const name = this.textOf(token);
+
     if (this.document.charCodeAt(token.end - 1) === Unicode.COLON &&
         this.document.charCodeAt(token.end - 2) !== Unicode.COLON) {
-      this.document.setSyntax(token.start, token.end - 1, 'label');
+      /** @const @type {string} */
+      const syntax = staticCppKeywords.has(name) ? 'keyword' : 'label';
+      this.document.setSyntax(token.start, token.end - 1, syntax);
       this.document.setSyntax(token.end - 1, token.end, 'operator');
       return;
     }
 
-    /** @const @type {string} */
-    const name = this.textOf(token);
     /** @const @type {string} */
     const syntax = staticCppKeywords.has(name) ? 'keyword' : 'identifier';
     this.paintToken2(token, syntax);
@@ -114,17 +117,16 @@ Object.seal(CppHighlighter);
     // C++ keywords
     'alignas', 'alignof', 'and', 'and_eq', 'asm', 'auto', 'bitand', 'bitoir',
     'bool', 'break', 'case', 'catch', 'char', 'char16_t', 'char32_t', 'class',
-    'const', 'constexpr', 'const_cast', 'continue', 'decltype', 'default',
-    'delete', 'do', 'double', 'dynamic_cast', 'else', 'enum', 'explicit',
-    'export', 'extern', 'false', 'final', 'finally', 'float', 'for', 'friend',
+    'const', 'constexpr', 'const_cast', 'continue', 'decltype', 'delete', 'do',
+    'double', 'dynamic_cast', 'else', 'enum', 'explicit', 'export', 'extern',
+    'false', 'final', 'finally', 'float', 'for', 'friend',
     'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new',
     'noexcept', 'not', 'not_eq', 'nullptr', 'operator', 'or', 'or_eq',
-    'override', 'private', 'protected', 'public', 'register',
-    'reinterpret_cast', 'return', 'short', 'signed', 'sizeof', 'static',
-    'static_assert', 'static_cast', 'struct', 'switch', 'template', 'this',
-    'thread_local', 'throw', 'true', 'try', 'typedef', 'typeid', 'typename',
-    'union', 'unsigned', 'using', 'virtual', 'void', 'volatile', 'wchar_t',
-    'while', 'xor', 'xor_eq',
+    'override', 'register', 'reinterpret_cast', 'return', 'short', 'signed',
+    'sizeof', 'static', 'static_assert', 'static_cast', 'struct', 'switch',
+    'template', 'this', 'thread_local', 'throw', 'true', 'try', 'typedef',
+    'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void',
+    'volatile', 'wchar_t', 'while', 'xor', 'xor_eq',
 
     // Reserved label
     'default:', 'protected:', 'private:', 'public:',

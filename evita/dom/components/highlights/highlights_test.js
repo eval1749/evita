@@ -138,6 +138,7 @@ testing.test('CppPainter', function(t) {
   const machine = new highlights.CppTokenStateMachine();
   const paint =
       highlights.testPaint.bind(this, highlights.CppPainter.create, machine);
+  t.expect(paint('default:')).toEqual('k7 o1');
   t.expect(paint('foo:')).toEqual('l3 o1');
   t.expect(paint('foo::')).toEqual('i5');
   t.expect(paint('foo::bar')).toEqual('i8');

@@ -18,6 +18,20 @@ $define(global, 'repl', function($export) {
     return '';
   }
 
+  /**
+   * @param {!Object} object
+   * @return {?function():string}
+   */
+  function findToString(object) {
+    for (let runner = object; runner.constructor !== Object;
+         runner = Object.getPrototypeOf(runner)) {
+      const descriptor = Object.getOwnPropertyDescriptor(runner, 'toString');
+      if (descriptor)
+        return /** @type {function():string} */(descriptor.value);
+    }
+    return null;
+  }
+
   // TODO(eval1749): Once v8 provide |TypedArray| class, we can replace this
   // |isTypedArray()|.
   function isTypedArray(object) {
@@ -92,12 +106,19 @@ $define(global, 'repl', function($export) {
   class Labeler extends Visitor {
     constructor() {
       super();
-      /** @private @const */
+      /** @private @const @type {!Map<*, string>} */
       this.labelMap_ = new Map();
     }
 
-    labelOf(value) { return this.labelMap_.get(value); }
+    /**
+     * @param {*} value
+     * @return {string}
+     */
+    labelOf(value) { return this.labelMap_.get(value) || ''; }
 
+    /**
+     * @param {*} value
+     */
     visitVisited(value) {
       if (this.labelMap_.has(value))
         return;
@@ -215,6 +236,11 @@ $define(global, 'repl', function($export) {
      * @param {number} level
      */
     function visitObject(visitor, object, level) {
+      /** @const @type {?function():string} */
+      const toString = findToString(object);
+      if (toString)
+        return visitor.visitAtom(toString.call(object));
+      /** @const @type {string} */
       const className = computeClassName(object);
       if (className) {
         const id = getObjectIdLikeThing(object);
@@ -226,6 +252,7 @@ $define(global, 'repl', function($export) {
         visitor.startContainer(`#\u007B${className}`, !!props.length);
       else
         visitor.startContainer(`\u007B`, false);
+      /** @type {number} */
       let index = 0;
       for (let prop of props) {
         if (index >= maxLength)

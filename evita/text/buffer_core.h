@@ -45,14 +45,14 @@ class BufferCore {
   BufferCore();
 
   OffsetDelta deleteChars(Offset from, Offset to);
-  void extend(Offset from, int);
+  void extend(Offset from, size_t amount);
   void insert(Offset offset, const base::char16* chars, size_t length);
 
  private:
   void moveGap(Offset offset);
 
   base::char16* m_pwch;
-  int m_cwch;
+  size_t m_cwch;
   HANDLE m_hHeap;
   Offset m_lEnd;
   Offset m_lGapEnd;

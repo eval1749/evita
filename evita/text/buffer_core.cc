@@ -15,7 +15,10 @@ const int MIN_GAP_LENGTH = 1024;
 const int EXTENSION_LENGTH = 1024;
 
 BufferCore::BufferCore()
-    : m_cwch(MIN_GAP_LENGTH * 3), m_lEnd(0), m_lGapEnd(m_cwch), m_lGapStart(0) {
+    : m_cwch(MIN_GAP_LENGTH * 3),
+      m_lEnd(0),
+      m_lGapEnd(static_cast<int>(m_cwch)),
+      m_lGapStart(0) {
   m_hHeap = ::HeapCreate(HEAP_NO_SERIALIZE, 0, 0);
   DCHECK(m_hHeap);
   m_pwch = reinterpret_cast<base::char16*>(
@@ -44,8 +47,8 @@ Offset BufferCore::EnsurePosn(int offset) const {
   return Offset(offset);
 }
 
-void BufferCore::extend(Offset lPosn, int cwchExtent) {
-  if (cwchExtent <= 0)
+void BufferCore::extend(Offset lPosn, size_t cwchExtent) {
+  if (cwchExtent == 0)
     return;
 
   moveGap(lPosn);

@@ -196,7 +196,7 @@ class LabelMap extends Visitor {
 //
 class StringSink extends Visitor {
   /**
-   * @param {!LabelMap} labeler
+   * @param {!LabelMap} labelMap
    */
   constructor(labelMap) {
     super();

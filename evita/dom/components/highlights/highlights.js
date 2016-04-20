@@ -677,8 +677,6 @@ class Highlighter extends text.SimpleMutationObserverBase {
    */
   constructor(document, painterCreator, stateMachine) {
     super(document);
-    /** @const @type {!StateRangeMap} */
-    const rangeMap = new StateRangeMap(document);
     /** @const @type {!Painter} */
     const painter = painterCreator(document);
     /** @const @type {!Tokenizer} */

@@ -62,7 +62,8 @@ class CppPainter extends Painter {
       return;
     }
 
-    if (this.document.charCodeAt(token.end - 1) === Unicode.COLON) {
+    if (this.document.charCodeAt(token.end - 1) === Unicode.COLON &&
+        this.document.charCodeAt(token.end - 2) !== Unicode.COLON) {
       this.document.setSyntax(token.start, token.end - 1, 'label');
       this.document.setSyntax(token.end - 1, token.end, 'operator');
       return;
@@ -179,6 +180,8 @@ Object.seal(CppHighlighter);
 ].forEach(word => staticCppKeywords.add(word));
 
 highlights.CppHighlighter = CppHighlighter;
+// Export |CppPainter| for testing.
+highlights.CppPainter = CppPainter;
 });
 
 // Override |CppLexer| by |CppHighlighter|.

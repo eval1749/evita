@@ -4,7 +4,38 @@
 
 goog.scope(function() {
 
-function scan(machine, sample) {
+function testPaint(painterCreator, stateMachine, text) {
+  const document = new TextDocument();
+  const painter = painterCreator.call(this, document);
+  const tokenizer =
+      new highlights.base.Tokenizer(document, painter, stateMachine);
+  const range = new TextRange(document);
+  range.text = text;
+  tokenizer.doColor(document.length);
+  const result = [];
+  let tokenSyntax = '';
+  let tokenLength = 0;
+  for (let offset = 0; offset < document.length; ++offset) {
+    const syntax = document.syntaxAt(offset);
+    if (tokenSyntax === '') {
+      tokenSyntax = syntax;
+      tokenLength = 1;
+      continue;
+    }
+    if (tokenSyntax !== syntax) {
+      result.push(`${tokenSyntax[0]}${tokenLength}`);
+      tokenSyntax = syntax;
+      tokenLength = 1;
+      continue;
+    }
+    ++tokenLength;
+  }
+  if (tokenSyntax !== '')
+    result.push(`${tokenSyntax[0]}${tokenLength}`);
+  return result.join(' ');
+}
+
+function testScan(machine, sample) {
   const stateRanges = [];
   function endStateRange(stateRange, offset) {
     stateRange.end = offset;
@@ -82,12 +113,13 @@ function tokenize(ranges) {
 }
 
 const namespace = highlights;
-namespace.scan = scan;
+namespace.testPaint = testPaint;
+namespace.testScan = testScan;
 });
 
 testing.test('CppStateRangeStateMachine', function(t) {
   const machine = new highlights.CppTokenStateMachine();
-  const scan = highlights.scan.bind(this, machine);
+  const scan = highlights.testScan.bind(this, machine);
   t.expect(scan('/* abc */ def')).toEqual('c9 w1 i3');
   t.expect(scan('"abc"')).toEqual('s5');
   t.expect(scan('\'abc\'')).toEqual('s5');
@@ -100,4 +132,15 @@ testing.test('CppStateRangeStateMachine', function(t) {
        scan('\x2F/ xyz\\\nbar'),
        'Backslash before newline continues line comment to next line')
       .toEqual('c11');
+});
+
+testing.test('CppPainter', function(t) {
+  const machine = new highlights.CppTokenStateMachine();
+  const paint =
+      highlights.testPaint.bind(this, highlights.CppPainter.create, machine);
+  t.expect(paint('foo:')).toEqual('l3 o1');
+  t.expect(paint('foo::')).toEqual('i5');
+  t.expect(paint('foo::bar')).toEqual('i8');
+  t.expect(paint('foo::bar:')).toEqual('l8 o1');
+  t.expect(paint('foo::bar::')).toEqual('i10');
 });

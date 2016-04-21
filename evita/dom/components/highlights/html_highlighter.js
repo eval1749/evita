@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 goog.require('highlights.base');
+goog.require('highlights.xml');
 
 goog.scope(function() {
 
@@ -11,6 +12,7 @@ const Highlighter = highlights.base.Highlighter;
 const Painter = highlights.base.Painter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
+const XmlPainter = highlights.xml.XmlPainter;
 
 /** @const @type {!Set<string>} */
 const staticHtmlKeywords = new Set();
@@ -23,7 +25,7 @@ function isWhitespace(charCode) {
   return charCode <= Unicode.SPACE;
 }
 
-class HtmlPainter extends Painter {
+class HtmlPainter extends XmlPainter {
   /**
    * @private
    * @param {!TextDocument} document
@@ -36,32 +38,12 @@ class HtmlPainter extends Painter {
    */
   paint(token) {
     switch (token.syntax) {
-      case 'endTag':
-        return this.paintEndTag(token);
       case 'script':
         return this.paintStyle(token);
-      case 'startTag':
-        return this.paintStartTag(token);
       case 'style':
         return this.paintStyle(token);
     }
-    this.paintToken(token);
-  }
-
-  /**
-   * @private
-   * @param {!Token} token
-   */
-  paintEndTag(token) {
-    const start = token.start;
-    const end = token.end;
-    this.document.setSyntax(start, start + 2, 'keyword');
-    if (start + 2 == end)
-      return;
-    if (this.document.charCodeAt(end - 1) !== Unicode.GREATER_THAN_SIGN)
-      return this.document.setSyntax(start + 2, end, 'html_element_name');
-    this.document.setSyntax(start + 2, end - 1, 'html_element_name');
-    this.document.setSyntax(end - 1, end, 'keyword');
+    super.paint(token);
   }
 
   /**
@@ -75,23 +57,6 @@ class HtmlPainter extends Painter {
    * @param {!Token} token
    */
   paintStyle(token) { this.paintToken2(token, 'html_attribute_name'); }
-
-  /**
-   * @private
-   * @param {!Token} token
-   */
-  paintStartTag(token) {
-    if (token.length < 3)
-      return;
-    const start = token.start;
-    const end = token.end;
-    this.document.setSyntax(start, start + 1, 'keyword');
-    if (this.document.charCodeAt(end - 1) !== Unicode.GREATER_THAN_SIGN)
-      return this.document.setSyntax(start + 1, end, 'html_element_name');
-    this.document.setSyntax(start + 1, end - 1, 'html_element_name');
-    // TODO(eval1749): NYI: color HTML attributes
-    this.document.setSyntax(end - 1, end, 'keyword');
-  }
 
   /**
    * @public

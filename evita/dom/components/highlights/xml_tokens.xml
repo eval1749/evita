@@ -3,15 +3,16 @@
 == Use of this source code is governed by a BSD-style license that can be
 == found in the LICENSE file.
 -->
-<tokens name="html">
+<tokens name="xml">
   <variable name="__ATTR__"
-            value="\s+[A-Za-z][\w:]+(=([^&lt;&apos;&quot;&gt;\s]+|&quot;[^&lt;&quot;]+&quot;|'[^&lt;']+'))" />
+            value="\s+[A-Za-z][\w:]+(=([^&lt;&apos;&quot;&gt;\s]+|&quot;[^&lt;&quot;]+&quot;|'[^&lt;']+'))?" />
 
   <token name="comment" type="comment" pattern="&lt;!--.*?-->" />
-  <token name="doctype" type="keyword" pattern="&lt;![^-].*?>" />
-  <token name="cdata" type="cdata" pattern="&lt;!\[CDATA\[.*?]]>" />
+  <token name="doctype" type="keyword" pattern="&lt;!\w+(\s+[^\s>]+)*>" />
+  <token name="cdata" type="cdata" pattern="&lt;!\[CDATA\[.*?\]\]>" />
+
   <token name="pi" type="pi"
-         pattern="&lt;[?][A-Za-z][-\w:]+(\s+[^?>]*)?[?]>" />
+         pattern="&lt;[?][A-Za-z][-\w:]+(\s+[^\s?>]*)?[?]>" />
 
   <token name="stag" type="startTag"
          pattern="&lt;[A-Za-z][\w:]*(__ATTR__)*\s*/?>" />
@@ -19,6 +20,6 @@
   <token name="etag" type="endTag"
          pattern="&lt;/[^>]+>" />
 
-  <token name="entity" type="keyword" pattern="&amp;\w+;" />
+  <token name="entity" type="html_entity" pattern="&amp;#?\w+;" />
   <token name="content" type="content" pattern="[^&lt;&amp;]+" />
 </tokens>

@@ -1,0 +1,15 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="xmltag">
+  <token name="name" type="name"
+         pattern="[A-za-z_]\w*(:[A-za-z_]\w*)?" />
+  <token name="value" type="value"
+         pattern="=\S+" />
+  <token name="string1" type="string"
+         pattern="&apos;[^&apos;]*&apos;" />
+  <token name="string2" type="string"
+         pattern="&quot;[^&quot;]*&quot;" />
+</tokens>

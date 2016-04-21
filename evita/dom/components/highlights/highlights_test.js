@@ -145,3 +145,12 @@ testing.test('CppPainter', function(t) {
   t.expect(paint('foo::bar:')).toEqual('l8 o1');
   t.expect(paint('foo::bar::')).toEqual('i10');
 });
+
+
+testing.test('XmlPainter', function(t) {
+  const machine = new highlights.XmlTokenStateMachine();
+  const paint = highlights.testPaint.bind(
+      this, highlights.xml.XmlPainter.create, machine);
+  t.expect(paint('<foo id="12">')).toEqual('k1 h3 n1 h2 n2 h2 n1 k1');
+  t.expect(paint('<foo id="1"/>')).toEqual('k1 h3 n1 h2 n2 h1 n1 k2');
+});

@@ -5,10 +5,10 @@
 -->
 <tokens name="html">
   <variable name="__ATTR__"
-            value="\s+[A-Za-z][\w:]+(=([^&lt;&apos;&quot;&gt;\s]+|&quot;[^&lt;&quot;]+&quot;|'[^&lt;']+'))" />
+            value="\s+[A-Za-z][\w:]+(=([^&lt;&apos;&quot;&gt;\s]+|&quot;[^&lt;&quot;]+&quot;|'[^&lt;']+'))?" />
 
   <token name="comment" type="comment" pattern="&lt;!--.*?-->" />
-  <token name="doctype" type="keyword" pattern="&lt;![^-].*?>" />
+  <token name="doctype" type="keyword" pattern="&lt;!\w+(\s*\S+)*>" />
 
   <!-- Note: <script> is tokenized into "startTag" -->
   <token name="script" type="script"
@@ -23,6 +23,6 @@
   <token name="etag" type="endTag"
          pattern="&lt;/[^>]+>" />
 
-  <token name="entity" type="keyword" pattern="&amp;\w+;" />
+  <token name="entity" type="html_entity" pattern="&amp;#?\w+;" />
   <token name="content" type="content" pattern="[^&lt;&amp;]+" />
 </tokens>

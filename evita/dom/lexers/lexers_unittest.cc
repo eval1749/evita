@@ -100,7 +100,7 @@ TEST_F(LexersTest, IdlLexer) {
 }
 
 TEST_F(LexersTest, HtmlLexer) {
-  EXPECT_SCRIPT_EQ("k1 e6 k1 a25 c1 k1 e3 k1 c3 k2 e3 k1",
+  EXPECT_SCRIPT_EQ("k1 e6 k1 a25 n1 k1 e3 k1 n3 k2 e3 k1",
                    "applySyntax(HtmlLexer, ["
                    "'<script>',"
                    "'var x = \"foo\";',"
@@ -175,21 +175,21 @@ TEST_F(LexersTest, XmlLexer) {
 
   // attribute variations
   //  <input autofocus maxlength=10 />
-  EXPECT_SCRIPT_EQ("k1 e5 n1 a3 n1 a3 n1 v2 k1",
+  EXPECT_SCRIPT_EQ("k1 e5 n1 a3 n1 a3 n3 k1",
                    "applySyntax(XmlLexer, ['<input abc xyz=10>'])");
 
   // Ampersand
-  EXPECT_SCRIPT_EQ("n5 &5 n1 &6 n1 &8 n4",
+  EXPECT_SCRIPT_EQ("&1 n1 &2 n1 &5 n1 &6 n1 &8 n4",
                    "applySyntax(XmlLexer, ['& && &amp; &#123; &#xBEEF; foo'])");
 
   // Malformed:  no space between attributes.
   //  <abc def="123"ghi>
-  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 n2 v3 n1 a3 k1",
+  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 n2 v3 n5",
                    "applySyntax(XmlLexer, ['<abc def=\"123\"ghi>'])");
 
   // Malformed: no ending quote
   //  <abc def="123>ghi
-  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 n2 v3 k1 n3",
+  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 n2 v6 n1",
                    "applySyntax(XmlLexer, ['<abc def=\"123>ghi'])");
 }
 

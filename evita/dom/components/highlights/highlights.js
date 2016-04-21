@@ -350,7 +350,7 @@ class Painter {
    * @param {string} syntax
    */
   paintToken2(token, syntax) {
-    this.document.setSyntax(token.start, token.end, syntax);
+    this.setSyntax(token.start, token.end, syntax);
   }
 
   /**
@@ -358,6 +358,16 @@ class Painter {
    * @param {!Token} token
    */
   paint(token) { this.paintToken(token); }
+
+  /**
+   * @public
+   * @param {number} start
+   * @param {number} end
+   * @param {string} syntax
+   */
+  setSyntax(start, end, syntax) {
+    this.document_.setSyntax(start, end, syntax);
+  }
 
   /**
    * @protected

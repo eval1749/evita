@@ -194,14 +194,14 @@ class XmlPainter extends Painter {
     /** @const @type {number} */
     const contentEnd = Math.max(contentStart, end - 3);
     // Paint "<![CDATA["
-    this.document.setSyntax(start, contentStart, 'keyword');
+    this.setSyntax(start, contentStart, 'keyword');
     if (contentStart === contentEnd)
       return;
-    this.document.setSyntax(contentStart, contentEnd, 'string_literal');
+    this.setSyntax(contentStart, contentEnd, 'string_literal');
     if (contentEnd === end)
       return;
     // Paint "]]>"
-    this.document.setSyntax(contentEnd, end, 'keyword');
+    this.setSyntax(contentEnd, end, 'keyword');
   }
 
   /**
@@ -213,13 +213,13 @@ class XmlPainter extends Painter {
     const start = token.start;
     /** @const @type {number} */
     const end = token.end;
-    this.document.setSyntax(start, start + 2, 'keyword');
+    this.setSyntax(start, start + 2, 'keyword');
     if (start + 2 == end)
       return;
     if (this.document.charCodeAt(end - 1) !== Unicode.GREATER_THAN_SIGN)
-      return this.document.setSyntax(start + 2, end, 'html_element_name');
-    this.document.setSyntax(start + 2, end - 1, 'html_element_name');
-    this.document.setSyntax(end - 1, end, 'keyword');
+      return this.setSyntax(start + 2, end, 'html_element_name');
+    this.setSyntax(start + 2, end - 1, 'html_element_name');
+    this.setSyntax(end - 1, end, 'keyword');
   }
 
   /**
@@ -235,9 +235,9 @@ class XmlPainter extends Painter {
     const contentStart = Math.min(start + 2, end);
     /** @const @type {number} */
     const contentEnd = Math.max(contentStart, end - 2);
-    this.document.setSyntax(start, contentStart, 'keyword');
+    this.setSyntax(start, contentStart, 'keyword');
     if (contentEnd !== end)
-      this.document.setSyntax(contentEnd, end, 'keyword');
+      this.setSyntax(contentEnd, end, 'keyword');
     this.paintTag(contentStart, contentEnd);
   }
 
@@ -252,14 +252,14 @@ class XmlPainter extends Painter {
     const start = token.start;
     /** @const @type {number} */
     const end = token.end;
-    this.document.setSyntax(start, start + 1, 'keyword');
+    this.setSyntax(start, start + 1, 'keyword');
     if (this.document.charCodeAt(end - 1) !== Unicode.GREATER_THAN_SIGN)
       return this.paintTag(start + 1, end);
     if (this.document.charCodeAt(end - 2) === Unicode.SOLIDUS) {
-      this.document.setSyntax(end - 2, end, 'keyword');
+      this.setSyntax(end - 2, end, 'keyword');
       return this.paintTag(start + 1, end - 2);
     }
-    this.document.setSyntax(end - 1, end, 'keyword');
+    this.setSyntax(end - 1, end, 'keyword');
     return this.paintTag(start + 1, end - 1);
   }
 

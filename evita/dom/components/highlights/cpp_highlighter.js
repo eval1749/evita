@@ -57,8 +57,8 @@ class CppPainter extends Painter {
       const name = '#' + this.document.slice(start, token.end);
       if (staticCppKeywords.has(name))
         return this.paintToken2(token, 'keyword');
-      this.document.setSyntax(token.start, start, '#');
-      this.document.setSyntax(token.start + 1, token.end, 'identifier');
+      this.setSyntax(token.start, start, '#');
+      this.setSyntax(token.start + 1, token.end, 'identifier');
       return;
     }
 
@@ -69,8 +69,8 @@ class CppPainter extends Painter {
         this.document.charCodeAt(token.end - 2) !== Unicode.COLON) {
       /** @const @type {string} */
       const syntax = staticCppKeywords.has(name) ? 'keyword' : 'label';
-      this.document.setSyntax(token.start, token.end - 1, syntax);
-      this.document.setSyntax(token.end - 1, token.end, 'operator');
+      this.setSyntax(token.start, token.end - 1, syntax);
+      this.setSyntax(token.end - 1, token.end, 'operator');
       return;
     }
 

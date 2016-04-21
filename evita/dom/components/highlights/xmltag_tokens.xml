@@ -4,12 +4,11 @@
 == found in the LICENSE file.
 -->
 <tokens name="xmltag">
-  <token name="name" type="name"
-         pattern="[A-za-z_]\w*(:[A-za-z_]\w*)?" />
-  <token name="value" type="value"
-         pattern="=\S+" />
+  <token name="word" type="word" pattern="[^&apos;&quot;=\s]+" />
+  <token name="equal" type="equal" pattern="=" />
   <token name="string1" type="string"
          pattern="&apos;[^&apos;]*&apos;" />
   <token name="string2" type="string"
          pattern="&quot;[^&quot;]*&quot;" />
+  <token name="whitespace" type="whitespace" pattern="\s+" />
 </tokens>

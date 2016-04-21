@@ -160,7 +160,7 @@ TEST_F(LexersTest, PythonLexer) {
 
 TEST_F(LexersTest, XmlLexer) {
   EXPECT_SCRIPT_EQ(
-      "c16 n1 k1 e7 n1 a5 n2 v3 n2 a5 n2 v3 n1 k1 n4 &5 n4 k2 e7 k1",
+      "c16 n1 k1 e7 n1 a5 k2 v3 k1 n1 a5 k2 v3 k2 n4 &5 n4 k2 e7 k1",
       "applySyntax(XmlLexer, ["
       "'<!-- comment -->',"
       "'<element attr1=\\'123\\' attr2=\"456\">',"
@@ -170,12 +170,12 @@ TEST_F(LexersTest, XmlLexer) {
 
   EXPECT_SCRIPT_EQ("k1 e2 k2", "applySyntax(XmlLexer, ['<br/>'])");
 
-  EXPECT_SCRIPT_EQ("k2 e3 n1 a7 n2 v3 n1 k2",
+  EXPECT_SCRIPT_EQ("k2 e3 n1 a7 k2 v3 k3",
                    "applySyntax(XmlLexer, ['<?xml version=\"1.0\"?>'])");
 
   // attribute variations
   //  <input autofocus maxlength=10 />
-  EXPECT_SCRIPT_EQ("k1 e5 n1 a3 n1 a3 n3 k1",
+  EXPECT_SCRIPT_EQ("k1 e5 n1 a3 n1 a3 k1 v2 k1",
                    "applySyntax(XmlLexer, ['<input abc xyz=10>'])");
 
   // Ampersand
@@ -184,12 +184,12 @@ TEST_F(LexersTest, XmlLexer) {
 
   // Malformed:  no space between attributes.
   //  <abc def="123"ghi>
-  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 n2 v3 n5",
+  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 k2 v3 k1 n4",
                    "applySyntax(XmlLexer, ['<abc def=\"123\"ghi>'])");
 
   // Malformed: no ending quote
   //  <abc def="123>ghi
-  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 n2 v6 n1",
+  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 k2 v6 k1",
                    "applySyntax(XmlLexer, ['<abc def=\"123>ghi'])");
 }
 

@@ -4,6 +4,17 @@
 
 goog.scope(function() {
 
+/** @const @type {!Map<stirng, string>} */
+const kSyntaxMap = new Map();
+kSyntaxMap.set('html_attribute_name', 'attribute');
+kSyntaxMap.set('html_attribute_value', 'value');
+kSyntaxMap.set('html_element_name', 'element');
+kSyntaxMap.set('normal', '_');
+
+function encodeSyntax(syntax) {
+  return kSyntaxMap.get(syntax) || syntax;
+}
+
 function testPaint(painterCreator, stateMachine, text) {
   const document = new TextDocument();
   const painter = painterCreator.call(this, document);
@@ -16,7 +27,7 @@ function testPaint(painterCreator, stateMachine, text) {
   let tokenSyntax = '';
   let tokenLength = 0;
   for (let offset = 0; offset < document.length; ++offset) {
-    const syntax = document.syntaxAt(offset);
+    const syntax = encodeSyntax(document.syntaxAt(offset));
     if (tokenSyntax === '') {
       tokenSyntax = syntax;
       tokenLength = 1;
@@ -39,7 +50,7 @@ function testScan(machine, sample) {
   const stateRanges = [];
   function endStateRange(stateRange, offset) {
     stateRange.end = offset;
-    stateRange.syntax = machine.syntaxOf(stateRange.state);
+    stateRange.syntax = encodeSyntax(machine.syntaxOf(stateRange.state));
     stateRanges.push(stateRange);
   }
 
@@ -151,6 +162,7 @@ testing.test('XmlPainter', function(t) {
   const machine = new highlights.XmlTokenStateMachine();
   const paint = highlights.testPaint.bind(
       this, highlights.xml.XmlPainter.create, machine);
-  t.expect(paint('<foo id="12">')).toEqual('k1 h3 n1 h2 n2 h2 n1 k1');
-  t.expect(paint('<foo id="1"/>')).toEqual('k1 h3 n1 h2 n2 h1 n1 k2');
+  t.expect(paint('<foo id="12">')).toEqual('k1 e3 _1 a2 k2 v2 k2');
+  t.expect(paint('<foo id="1"/>')).toEqual('k1 e3 _1 a2 k2 v1 k3');
+  t.expect(paint('<foo id=foo/>')).toEqual('k1 e3 _1 a2 k1 v3 k2');
 });

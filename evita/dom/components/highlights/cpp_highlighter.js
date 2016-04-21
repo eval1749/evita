@@ -40,7 +40,7 @@ class CppPainter extends Painter {
    *
    */
   paint(token) {
-    if (token.syntax !== 'identifier' || token.length <= 2)
+    if (token.syntax !== 'identifier' || token.length == 1)
       return this.paintToken(token);
 
     if (this.document.charCodeAt(token.start) === Unicode.NUMBER_SIGN) {

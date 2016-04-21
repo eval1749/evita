@@ -103,6 +103,14 @@ class NfaBuilderTest(unittest.TestCase):
         self.assertEqual('1->(.:1, _:2) 2->("a":3) 3->("b":4) 4',
                          build('.*ab'))
 
+    def test_xml_cdata(self):
+        self.assertEqual('1->("<":2) 2->("!":3) 3->("[":4) 4->("C":5) '
+                         '5->("D":6) 6->("A":7) 7->("T":8) 8->("A":9) '
+                         '9->("[":10) 10->(.~10, _~11) '
+                         '11->("]"~12) 12->("]"~13) '
+                         '13->(">"~14) 14',
+                         build('<!\\[CDATA\[.*?\\]\\]>'))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -279,7 +279,8 @@ class DfaNode(object):
         return 'DfaNode(%d, %s, nfa={%s} in={%s} out={%s} transitions=%s)' % (
             self._index,
             'A' if self.is_acceptable else '-',
-            ', '.join(sorted([str(state.index) for state in self._states])),
+            ', '.join(sorted(['%d:%s' % (state.index, state.group_name)
+                              for state in self._states])),
             ', '.join(map(str,  sorted([edge.from_node.index
                                         for edge in self.in_edges]))),
             ', '.join(map(str,  sorted([edge.to_node.index
@@ -292,7 +293,7 @@ class Partition(object):
 
     def __init__(self, index, nodes):
         self._index = index
-        self._nodes = nodes
+        self._nodes = list(nodes)
 
     @property
     def index(self):
@@ -324,7 +325,7 @@ class Partition(object):
         return ' '.join(names)
 
     def reset(self, nodes):
-        self._nodes = nodes
+        self._nodes = list(nodes)
 
     def _sort_key(self):
         value = 0
@@ -342,9 +343,9 @@ class Partition(object):
         return self._index == other._index
 
     def __str__(self):
-        return 'Partition(%d, %s)' % (
+        return 'Partition(%d, {%s})' % (
             self._index,
-            ', '.join([str(node) for node in self._nodes]))
+            ', '.join([str(node.index) for node in self._nodes]))
 
 
 class Transitions(object):
@@ -478,7 +479,6 @@ class DfaOptimizer(object):
         # Map a node to a partition where node in.
         self._partition_map = dict()
         self._partitions = []
-        self._queue = deque()
 
     def optimize(self, graph):
         """The entry pointer of DFA optimizer."""
@@ -486,7 +486,7 @@ class DfaOptimizer(object):
         nodes = graph.nodes
         assert len(nodes) > 0
         if DEBUG:
-            print 'optimize', ' '.join([str(node) for node in nodes])
+            print 'optimize %d nodes' % len(nodes)
         if len(nodes) == 1:
             # No needs to optimize
             return graph
@@ -495,11 +495,13 @@ class DfaOptimizer(object):
             # |nodes| are already minimum.
             return graph
 
-        # Split partiions
-        assert len(self._queue) >= 1
-        while len(self._queue) > 0:
-            partition = self._queue.popleft()
-            self._split(partition)
+        # Split partitions
+        changed = True
+        while changed:
+            changed = False
+            for partition in list(self._partitions):
+                if self._split(partition):
+                    changed = True
 
         # Make nodes from partitions
         result = []
@@ -510,19 +512,21 @@ class DfaOptimizer(object):
                 states.update(member.states)
             node = DfaNode(graph, len(result), states)
             result.append(node)
-            result_map[partition] = node
+            result_map[partition.index] = node
 
         self._verify_partitions(nodes)
 
         # Make edges
         for partition in self._partitions:
             member = partition.members[0]
-            node = result_map[partition]
+            node = result_map[partition.index]
             for alphabet in self._alphabets:
                 char_code = self._alphabets.char_code_of(alphabet)
                 states = member.transit(char_code)
                 for target in self._find_partitions(states):
-                    node.add_transition(alphabet, result_map[target])
+                    node.add_transition(alphabet, result_map[target.index])
+            if DEBUG:
+                print 'result', partition, node
 
         # Make graph and return it
         new_graph = DfaGraph(self._alphabets)
@@ -537,6 +541,7 @@ class DfaOptimizer(object):
             for node in nodes:
                 if partition.contains(node):
                     result.append(partition)
+                    break
         if len(result) == 0:
             partitions = []
             for partition in self._partitions:
@@ -569,9 +574,6 @@ class DfaOptimizer(object):
             return
         partition = Partition(len(self._partitions), nodes)
         self._partitions.append(partition)
-        if len(nodes) == 1:
-            return
-        self._queue.append(partition)
 
     def _setup(self, nodes):
         """Create initial partiions, acceptable nodes, and others."""
@@ -599,12 +601,16 @@ class DfaOptimizer(object):
                 nodes1.append(other)
             else:
                 nodes2.append(other)
+        if DEBUG:
+            print '  Split', partition1, 'to', \
+                  [node.index for node in nodes1], \
+                  [node.index for node in nodes2]
         assert len(nodes1) + len(nodes2) == partition1.count()
+        if len(nodes2) == 0:
+            return False
         partition1.reset(nodes1)
         self._new_partition(nodes2)
-        if len(nodes1) == 1 or len(nodes2) == 0:
-            return
-        self._queue.append(partition1)
+        return True
 
     def _verify_partitions(self, nodes):
         count = 0
@@ -624,18 +630,29 @@ class DfaNodeSorter(object):
 
     def sort(self, nodes):
         # Note: For ".*a", start node has in edges from self and "a".
-        start_node = nodes[0]
+        start_nodes = []
         for node in nodes:
             if len(node.in_edges) > 0:
                 continue
-            start_node = node
-        self._visit(start_node)
+            start_nodes.append(node)
+        assert len(start_nodes) == 1, '\n'.join([str(node) for node in nodes])
+        self._visit(start_nodes[0])
+        if len(nodes) != len(self._nodes):
+            for node in nodes:
+                print node in self._visited_nodes, node
+            assert len(nodes) == len(self._nodes), \
+                'We should have all input nodes(%d) in output(%d)' % (
+                len(nodes), len(self._nodes))
+        # Renumber |DfaNode|
+        index = 0
+        for node in self._nodes:
+            node.set_index(index)
+            index = index + 1
         return self._nodes
 
     def _visit(self, node):
         if node in self._visited_nodes:
             return
-        node.set_index(len(self._nodes))
         self._nodes.append(node)
         self._visited_nodes.add(node)
         for edge in sorted(node.out_edges, key=lambda edge: edge.to_node.index):

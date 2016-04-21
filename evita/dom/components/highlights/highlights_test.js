@@ -157,6 +157,18 @@ testing.test('CppPainter', function(t) {
   t.expect(paint('foo::bar::')).toEqual('i10');
 });
 
+testing.test('PythonPainter', function(t) {
+  const machine = new highlights.PythonTokenStateMachine();
+  const paint =
+      highlights.testPaint.bind(this, highlights.PythonPainter.create, machine);
+  t.expect(paint('# comment')).toEqual('c9');
+  t.expect(paint('"string"')).toEqual('s8');
+  t.expect(paint('"""string"""')).toEqual('s12');
+  t.expect(paint('\'string\'')).toEqual('s8');
+  t.expect(paint('def foo(x):')).toEqual('k3 w1 i3 o1 i1 o2');
+  t.expect(paint('self.value = 2')).toEqual('k4 i6 w1 o1 w1 _1');
+  t.expect(paint('if a1 == 12')).toEqual('k2 w1 i2 w1 o2 w1 _2');
+});
 
 testing.test('XmlPainter', function(t) {
   const machine = new highlights.XmlTokenStateMachine();

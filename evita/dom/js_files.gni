@@ -111,9 +111,11 @@ js_lib_files = [
   "components/highlights/highlights.js",
   "$root_gen_dir/evita/dom/components/highlights/cpp_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/html_tokens.js",
+  "$root_gen_dir/evita/dom/components/highlights/python_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/xmltag_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/xml_tokens.js",
   "components/highlights/cpp_highlighter.js",
+  "components/highlights/python_highlighter.js",
   "components/highlights/xml_highlighter.js",
   "components/highlights/html_highlighter.js",
 

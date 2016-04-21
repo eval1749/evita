@@ -1,0 +1,17 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="python">
+  <token name="comment" type="comment" pattern="#[^\n]*" />
+  <token name="string1" type="string_literal" pattern="'([^\\']|\\.)*'" />
+  <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />
+
+  <token name="name" type="identifier"
+    pattern="[A-Za-z_]\w*([.][A-Za-z_]\w*)*" />
+
+  <token name="operator" type="operator"
+         pattern="[!%&amp;()*,\-.;&lt;=&gt;:?[\]{|}~]+"/>
+  <token name="whitespaces" type="whitespace" pattern="\s+"/>
+</tokens>

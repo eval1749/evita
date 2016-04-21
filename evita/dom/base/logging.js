@@ -47,23 +47,29 @@ class VerboseSettings {
 /** @const @type {!VerboseSettings} */
 const settings = new VerboseSettings();
 
+const kEscapes = '\nn\rr\tt\'\'""\\\\';
+
 /**
  * @param {string} text
  * @return {string}
  */
 function asStringLiteral(text) {
+  /** @const @type {!Array<string>} */
   const result = [];
   for (let index = 0; index < text.length; ++index) {
+    /** @const @type {number} */
     const charCode = text.charCodeAt(index);
-    if (charCode === 0x0A) {
-      result.push('\\n');
+    const charText = text[index];
+    const escapeIndex = kEscapes.indexOf(charText);
+    if (escapeIndex % 2 == 0) {
+      result.push(`\\${kEscapes[escapeIndex + 1]}`);
       continue;
     }
     if (charCode < 0x20) {
       result.push(`\\u{${charCode.toString(16)}}`);
       continue;
     }
-    result.push(String.fromCharCode(charCode));
+    result.push(charText);
   }
   return `'${result.join('')}'`;
 }

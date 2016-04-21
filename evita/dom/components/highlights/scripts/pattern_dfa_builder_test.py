@@ -208,6 +208,26 @@ class DfaBuilderTest(unittest.TestCase):
                           '{1:[a]}'),
                          build(NamedPattern('name', '.*a')))
 
+    def test_xml_cdata(self):
+        self.assertEqual(('0:([<]->1, [^&<]->13) '
+                          '1:cdata:([!]->2) '
+                          '2:cdata:([[]->3) '
+                          '3:cdata:([C]->4) '
+                          '4:cdata:([D]->5) '
+                          '5:cdata:([A]->6) '
+                          '6:cdata:([T]->7) '
+                          '7:cdata:([A]->8) '
+                          '8:cdata:([[]->9) '
+                          '9:cdata:([^]]->9, []]->10) '
+                          '10:cdata:([^]]->9, []]->11) '
+                          '11:cdata:([^>]]->9, []]->11, [>]->12) '
+                          '12:CDATA:([^]]->9, []]->10) '
+                          '13:OTHER:([^&<]->13)',
+                          '{1:[!], 2:[&], 3:[<], 4:[>], 5:[A], 6:[C], 7:[D], '
+                          '8:[T], 9:[[], 10:[]]}'),
+                         build(NamedPattern('cdata', '<!\\[CDATA\\[.*?\\]\\]>'),
+                               NamedPattern('other', '[^<&]+')))
+
 
 if __name__ == '__main__':
     unittest.main()

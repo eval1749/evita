@@ -398,7 +398,7 @@ class Token {
 
   /** @public @param {number} newEnd */
   set end(newEnd) {
-    console.assert(newEnd >= this.start_, newEnd, this.start_);
+    console.assert(newEnd >= this.start_, 'newEnd', newEnd, this);
     this.end_ = newEnd;
   }
 
@@ -751,6 +751,12 @@ class Highlighter extends text.SimpleMutationObserverBase {
           asStringLiteral(rangeText));
     }
   }
+
+  /** @public @return {number} */
+  get verbose() { return this.tokenizer_.verbose; }
+
+  /** @public @param {number} newVerbose */
+  set verbose(newVerbose) { this.tokenizer_.verbose = newVerbose; }
 
   /**
    * @private

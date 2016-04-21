@@ -186,5 +186,6 @@ class {{Name}}TokenStateMachine {
   }
 }
 
+/** @constructor */
 highlights.{{Name}}TokenStateMachine = {{Name}}TokenStateMachine;
 });

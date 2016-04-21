@@ -535,6 +535,8 @@ class Tokenizer {
       currentRange = this.rangeMap_.rangeStartsAt(scanOffset);
       if (currentRange !== null && currentRange.state === state) {
         this.log(0, 'Finish early', currentRange);
+        if (token)
+          this.paintToken(token);
         this.scanOffset_ = this.document_.length;
         return;
       }

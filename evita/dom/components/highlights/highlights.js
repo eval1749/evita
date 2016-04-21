@@ -719,7 +719,13 @@ class Highlighter extends text.SimpleMutationObserverBase {
     this.tokenizer_.doColor(hint);
     if (this.isFinished())
       return;
-    taskScheduler.schedule(this, 0);
+    /**
+     * @const @type {number}
+     * Since average typing speed is greater than 100ms, we don't need to run
+     * so frequently.
+     */
+    const kIntervalMs = 100;
+    taskScheduler.schedule(this, kIntervalMs);
   }
 
   /**

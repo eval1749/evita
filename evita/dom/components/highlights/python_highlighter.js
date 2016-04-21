@@ -81,6 +81,10 @@ class PythonHighlighter extends Highlighter {
     'return', 'try', 'while', 'with', 'yield',
     // Reserved classes of identifiers
     '_*', '__*__', '__*', '__builtin__',
+
+    // Decorators
+    '@classmethod', '@property', '@staticmethod',
+
     // Built-in Constants
     'Ellipsis', 'False', 'None', 'NotImplemented', 'True', '__debug__',
     // Built-in Types

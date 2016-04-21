@@ -9,7 +9,7 @@
   <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />
 
   <token name="name" type="identifier"
-    pattern="[A-Za-z_]\w*([.][A-Za-z_]\w*)*" />
+    pattern="@?[A-Za-z_]\w*([.][A-Za-z_]\w*)*" />
 
   <token name="operator" type="operator"
          pattern="[!%&amp;()*,\-.;&lt;=&gt;:?[\]{|}~]+"/>

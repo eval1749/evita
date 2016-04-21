@@ -301,6 +301,9 @@ class XmlHighlighter extends Highlighter {
   static addKeyword(word) { staticXmlKeywords.add(word); }
 }
 
+['xi:include', 'xml:base', 'xml:lang', 'xmlns:', 'xml:space']
+    .forEach(word => XmlHighlighter.addKeyword(word));
+
 /** @constructor */
 highlights.xml.XmlHighlighter = XmlHighlighter;
 

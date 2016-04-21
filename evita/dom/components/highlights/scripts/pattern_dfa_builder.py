@@ -382,15 +382,15 @@ class Transitions(object):
                 max_code = char_code
                 continue
             if min_code == max_code:
-                result.append(chr(min_code))
+                result.append(vchr(min_code))
             else:
-                result.append('%s-%s' % (chr(min_code), chr(max_code)))
+                result.append('%s-%s' % (vchr(min_code), vchr(max_code)))
             min_code = max_code = char_code
         if min_code != -1:
             if min_code == max_code:
-                result.append(chr(min_code))
+                result.append(vchr(min_code))
             else:
-                result.append('%s-%s' % (chr(min_code), chr(max_code)))
+                result.append('%s-%s' % (vchr(min_code), vchr(max_code)))
         return ''.join(result)
 
     def _complement_of(self, char_codes):
@@ -692,3 +692,17 @@ def next_states_of(from_states, char_code):
             for state in closure_of(edge.to_state):
                 result.add(state)
     return result
+
+
+def vchr(char_code):
+    if char_code == 0x22 or char_code == 0x27:
+        return '\\%s' % chr(char_code)
+    if char_code == 0x09:
+        return '\\t'
+    if char_code == 0x0A:
+        return '\\n'
+    if char_code == 0x0D:
+        return '\\r'
+    if char_code >= 0x20 and char_code < 0x7F:
+        return chr(char_code)
+    return '\\u%04X' % char_code

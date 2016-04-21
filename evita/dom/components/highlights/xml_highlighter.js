@@ -18,14 +18,6 @@ const Tokenizer = highlights.base.Tokenizer;
 /** @const @type {!Set<string>} */
 const staticXmlKeywords = new Set();
 
-/**
- * @param {number} charCode
- * @return {boolean}
- */
-function isWhitespace(charCode) {
-  return charCode <= Unicode.SPACE;
-}
-
 class TagPainter {
   /**
    * @param {!TextDocument} document

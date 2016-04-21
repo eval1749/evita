@@ -17,14 +17,6 @@ const XmlPainter = highlights.xml.XmlPainter;
 /** @const @type {!Set<string>} */
 const staticHtmlKeywords = new Set();
 
-/**
- * @param {number} charCode
- * @return {boolean}
- */
-function isWhitespace(charCode) {
-  return charCode <= Unicode.SPACE;
-}
-
 class HtmlPainter extends XmlPainter {
   /**
    * @private

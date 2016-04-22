@@ -4,6 +4,9 @@
 
 goog.scope(function() {
 
+const StateRangeMap = highlights.base.StateRangeMap;
+const Token = highlights.base.Token;
+
 /** @const @type {!Map<stirng, string>} */
 const kSyntaxMap = new Map();
 kSyntaxMap.set('html_attribute_name', 'attribute');
@@ -123,11 +126,6 @@ function tokenize(ranges) {
   return tokens;
 }
 
-const namespace = highlights;
-namespace.testPaint = testPaint;
-namespace.testScan = testScan;
-});
-
 testing.test('CppStateRangeStateMachine', function(t) {
   const machine = new highlights.CppTokenStateMachine();
   const scan = highlights.testScan.bind(this, machine);
@@ -170,6 +168,50 @@ testing.test('PythonPainter', function(t) {
   t.expect(paint('if a1 == 12')).toEqual('k2 w1 i2 w1 o2 w1 _2');
 });
 
+
+testing.test('StateRangeMap', function(t) {
+  function makeSample(headCount, tailCount, delta) {
+    const doc = new TextDocument();
+    const map = new StateRangeMap(doc);
+    const range = new TextRange(doc);
+    //            012345678
+    range.text = '<a>bc</a>';
+    const stag = new Token(doc, 0, 3, 'stag');
+    const cont = new Token(doc, 3, 5, 'cont');
+    const etag = new Token(doc, 5, 9, 'etag');
+    map.add(0, 1, 1, stag);
+    map.add(1, 2, 2, stag);
+    map.add(2, 3, 3, stag);
+    map.add(3, 5, 4, cont);
+    map.add(5, 7, 5, etag);
+    map.add(7, 8, 6, etag);
+    map.add(8, 9, 7, etag);
+    map.didChangeTextDocument(headCount, tailCount, delta);
+    return dumpMap(map);
+  }
+
+  function dumpMap(map) {
+    const result = [];
+    for (const range of map.ranges())
+      result.push(`(${range.start} ${range.end} ${range.syntax})`);
+    return result.join(' ');
+  }
+
+  t.expect(makeSample(0, 8, 1), 'insert at start')
+      .toEqual('(4 6 cont) (6 8 etag) (8 9 etag) (9 10 etag)');
+  t.expect(makeSample(2, 6, 1), 'insert before ">"@2')
+      .toEqual(
+          '(0 1 stag) (1 2 stag) (4 6 cont) (6 8 etag) (8 9 etag) (9 10 etag)');
+  t.expect(makeSample(8, 1, 1), 'insert at end')
+      .toEqual(
+          '(0 1 stag) (1 2 stag) (2 3 stag) (3 5 cont) (5 7 etag) (7 8 etag)' +
+          ' (9 10 etag)');
+  t.expect(makeSample(0, 7, -1), 'remove "<"@0')
+      .toEqual('(4 6 etag) (6 7 etag) (7 8 etag)');
+  t.expect(makeSample(2, 6, -1), 'remove ">"@2')
+      .toEqual('(0 1 stag) (1 2 stag) (4 6 etag) (6 7 etag) (7 8 etag)');
+});
+
 testing.test('XmlPainter', function(t) {
   const machine = new highlights.XmlTokenStateMachine();
   const paint = highlights.testPaint.bind(
@@ -177,4 +219,6 @@ testing.test('XmlPainter', function(t) {
   t.expect(paint('<foo id="12">')).toEqual('k1 e3 _1 a2 k2 v2 k2');
   t.expect(paint('<foo id="1"/>')).toEqual('k1 e3 _1 a2 k2 v1 k3');
   t.expect(paint('<foo id=foo/>')).toEqual('k1 e3 _1 a2 k1 v3 k2');
+});
+
 });

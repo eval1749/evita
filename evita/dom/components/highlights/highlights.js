@@ -40,6 +40,10 @@ TokenStateMachine.prototype.syntaxOf = function(state) {};
  */
 TokenStateMachine.prototype.updateState = function(state) {};
 
+/*
+ * |StateRange| represents tokenization state machine state in |TextDocument|
+ * in range.
+ */
 class StateRange {
   /**
    * @public
@@ -98,6 +102,8 @@ class StateRange {
   /**
    * @public
    * @param {number} offset
+   * This function is used only for initializing search key for
+   * |OrderedSet<StateRange>|.
    */
   reset(offset) {
     this.end_ = offset;
@@ -110,6 +116,7 @@ class StateRange {
    * @param {!StateRange} range1
    * @param {!StateRange} range2
    * @return {boolean}
+   * This function is a used for ordering in |OrderedSet<StateRange>|.
    */
   static less(range1, range2) { return range1.end_ < range2.end_; }
 
@@ -124,6 +131,9 @@ class StateRange {
   }
 }
 
+/*
+ * Updates |StateRange| for |TextDocument| for document mutations.
+ */
 class StateRangeMap {
   /**
    * @public
@@ -325,6 +335,10 @@ class StateRangeMap {
   * ranges() { yield * this.ranges_.values(); }
 }
 
+/*
+ * |Painter| provides basic functionality for setting syntax for |TextDocument|
+ * with |Token|.
+ */
 class Painter {
   /**
    * @protected
@@ -349,9 +363,7 @@ class Painter {
    * @param {!Token} token
    * @param {string} syntax
    */
-  paintToken2(token, syntax) {
-    this.setSyntax(token.start, token.end, syntax);
-  }
+  paintToken2(token, syntax) { this.setSyntax(token.start, token.end, syntax); }
 
   /**
    * @public
@@ -384,6 +396,10 @@ class Painter {
   static create(document) { return new Painter(document); }
 }
 
+/*
+ * |Token| is a text range in |TextDocument| as an unit of painting with
+ * syntax highlighting.
+ */
 class Token {
   /**
    * @public
@@ -437,8 +453,9 @@ class Token {
   }
 }
 
-/**
- * Construct |StateRangeMap| by using |TokenStateMachine|.
+/*
+ * |Tokenizer| populates |StateRangeMap| by using |TokenStateMachine| and
+ * asks |Painter| to paint tokens to language specific way.
  */
 class Tokenizer {
   /**
@@ -683,6 +700,10 @@ function extractSample(document, start, end, maxChars) {
 
 /**
  * @implements {Runnable}
+ *
+ * |Highlighter| provides basic functionality of syntax highlighting with
+ * document mutation. Language specific syntax highlighting is implemented in
+ * tokenization state machine and painter.
  */
 class Highlighter extends text.SimpleMutationObserverBase {
   /**
@@ -781,7 +802,8 @@ class Highlighter extends text.SimpleMutationObserverBase {
    * Implements Runnable.run
    */
   run() {
-    /** @type {number}
+    /**
+     * @const @type {number}
      * Number of characters to color during scheduled task.
      * This is an experiment for searching right value.
      */

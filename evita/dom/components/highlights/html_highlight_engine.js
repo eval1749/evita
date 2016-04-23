@@ -8,7 +8,7 @@ goog.require('highlights.xml');
 goog.scope(function() {
 
 const HtmlTokenStateMachine = highlights.HtmlTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const Painter = highlights.base.Painter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
@@ -58,7 +58,7 @@ class HtmlPainter extends XmlPainter {
   static create(document) { return new HtmlPainter(document); }
 }
 
-class HtmlHighlighter extends Highlighter {
+class HtmlHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -82,12 +82,12 @@ class HtmlHighlighter extends Highlighter {
 }
 
 /** @constructor */
-highlights.HtmlHighlighter = HtmlHighlighter;
+highlights.HtmlHighlightEngine = HtmlHighlightEngine;
 /** @constructor */
 highlights.HtmlPainter = HtmlPainter;
 });
 
-// Override |HtmlLexer| by |HtmlHighlighter|.
+// Override |HtmlLexer| by |HtmlHighlightEngine|.
 // TODO(eval1749): Once we get rid of |HtmlLexer|, we should get rid of this
 // override.
-global['HtmlLexer'] = highlights.HtmlHighlighter;
+global['HtmlLexer'] = highlights.HtmlHighlightEngine;

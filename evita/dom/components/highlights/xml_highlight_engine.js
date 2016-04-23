@@ -10,7 +10,7 @@ goog.scope(function() {
 
 const XmltagTokenStateMachine = highlights.XmltagTokenStateMachine;
 const XmlTokenStateMachine = highlights.XmlTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const Painter = highlights.base.Painter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
@@ -322,7 +322,7 @@ class XmlPainter extends Painter {
   static create(document) { return new XmlPainter(document); }
 }
 
-class XmlHighlighter extends Highlighter {
+class XmlHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -346,13 +346,13 @@ class XmlHighlighter extends Highlighter {
 }
 
 /** @constructor */
-highlights.xml.XmlHighlighter = XmlHighlighter;
+highlights.xml.XmlHighlightEngine = XmlHighlightEngine;
 
 /** @constructor */
 highlights.xml.XmlPainter = XmlPainter;
 });
 
-// Override |XmlLexer| by |XmlHighlighter|.
+// Override |XmlLexer| by |XmlHighlightEngine|.
 // TODO(eval1749): Once we get rid of |XmlLexer|, we should get rid of this
 // override.
-global['XmlLexer'] = highlights.xml.XmlHighlighter;
+global['XmlLexer'] = highlights.xml.XmlHighlightEngine;

@@ -7,7 +7,7 @@ goog.require('highlights.base');
 goog.scope(function() {
 
 const ConfigTokenStateMachine = highlights.ConfigTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const Painter = highlights.base.Painter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
@@ -27,7 +27,7 @@ class ConfigPainter extends Painter {
   static create(document) { return new ConfigPainter(document); }
 }
 
-class ConfigHighlighter extends Highlighter {
+class ConfigHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -36,12 +36,12 @@ class ConfigHighlighter extends Highlighter {
   }
 }
 
-highlights.ConfigHighlighter = ConfigHighlighter;
+highlights.ConfigHighlightEngine = ConfigHighlightEngine;
 // Export |ConfigPainter| for testing.
 highlights.ConfigPainter = ConfigPainter;
 });
 
-// Override |ConfigLexer| by |ConfigHighlighter|.
+// Override |ConfigLexer| by |ConfigHighlightEngine|.
 // TODO(eval1749): Once we get rid of |ConfigLexer|, we should get rid of this
 // override.
-global['ConfigLexer'] = highlights.ConfigHighlighter;
+global['ConfigLexer'] = highlights.ConfigHighlightEngine;

@@ -7,7 +7,7 @@ goog.require('highlights.base');
 goog.scope(function() {
 
 const GnTokenStateMachine = highlights.GnTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const KeywordPainter = highlights.base.KeywordPainter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
@@ -30,7 +30,7 @@ class GnPainter extends KeywordPainter {
   static create(document) { return new GnPainter(document); }
 }
 
-class GnHighlighter extends Highlighter {
+class GnHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -39,12 +39,12 @@ class GnHighlighter extends Highlighter {
   }
 }
 
-highlights.GnHighlighter = GnHighlighter;
+highlights.GnHighlightEngine = GnHighlightEngine;
 // Export |GnPainter| for testing.
 highlights.GnPainter = GnPainter;
 });
 
-// Override |GnLexer| by |GnHighlighter|.
+// Override |GnLexer| by |GnHighlightEngine|.
 // TODO(eval1749): Once we get rid of |GnLexer|, we should get rid of this
 // override.
-global['GnLexer'] = highlights.GnHighlighter;
+global['GnLexer'] = highlights.GnHighlightEngine;

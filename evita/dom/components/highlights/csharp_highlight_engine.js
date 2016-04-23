@@ -7,7 +7,7 @@ goog.require('highlights.base');
 goog.scope(function() {
 
 const CsharpTokenStateMachine = highlights.CsharpTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const KeywordPainter = highlights.base.KeywordPainter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
@@ -38,7 +38,7 @@ class CsharpPainter extends KeywordPainter {
   static create(document) { return new CsharpPainter(document); }
 }
 
-class CsharpHighlighter extends Highlighter {
+class CsharpHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -62,14 +62,14 @@ class CsharpHighlighter extends Highlighter {
 }
 
 /** @constructor */
-highlights.CsharpHighlighter = CsharpHighlighter;
+highlights.CsharpHighlightEngine = CsharpHighlightEngine;
 // Export |CsharpPainter| for testing.
 /** @constructor */
 highlights.CsharpPainter = CsharpPainter;
 });
 
-// Override |CsharpLexer| by |CsharpHighlighter|.
+// Override |CsharpLexer| by |CsharpHighlightEngine|.
 // TODO(eval1749): Once we get rid of |CsharpLexer|, we should get rid of
 // this
 // override.
-global['CsharpLexer'] = highlights.CsharpHighlighter;
+global['CsharpLexer'] = highlights.CsharpHighlightEngine;

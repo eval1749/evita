@@ -783,11 +783,11 @@ function extractSample(document, start, end, maxChars) {
 /**
  * @implements {Runnable}
  *
- * |Highlighter| provides basic functionality of syntax highlighting with
+ * |HighlightEngine| provides basic functionality of syntax highlighting with
  * document mutation. Language specific syntax highlighting is implemented in
  * tokenization state machine and painter.
  */
-class Highlighter extends text.SimpleMutationObserverBase {
+class HighlightEngine extends text.SimpleMutationObserverBase {
   /**
    * @param {!TextDocument} document
    * @param {!function(!TextDocument):!Painter} painterCreator
@@ -896,7 +896,7 @@ class Highlighter extends text.SimpleMutationObserverBase {
 
 const namespace = highlights.base;
 /** @constructor */
-namespace.Highlighter = Highlighter;
+namespace.HighlightEngine = HighlightEngine;
 /** @constructor */
 namespace.KeywordPainter = KeywordPainter;
 /** @constructor */

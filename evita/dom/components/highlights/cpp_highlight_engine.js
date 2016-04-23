@@ -7,7 +7,7 @@ goog.require('highlights.base');
 goog.scope(function() {
 
 const CppTokenStateMachine = highlights.CppTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const Painter = highlights.base.Painter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
@@ -87,7 +87,7 @@ class CppPainter extends Painter {
   static create(document) { return new CppPainter(document); }
 }
 
-class CppHighlighter extends Highlighter {
+class CppHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -111,13 +111,13 @@ class CppHighlighter extends Highlighter {
 }
 
 /** @constructor */
-highlights.CppHighlighter = CppHighlighter;
+highlights.CppHighlightEngine = CppHighlightEngine;
 // Export |CppPainter| for testing.
 /** @constructor */
 highlights.CppPainter = CppPainter;
 });
 
-// Override |CppLexer| by |CppHighlighter|.
+// Override |CppLexer| by |CppHighlightEngine|.
 // TODO(eval1749): Once we get rid of |CppLexer|, we should get rid of this
 // override.
-global['CppLexer'] = highlights.CppHighlighter;
+global['CppLexer'] = highlights.CppHighlightEngine;

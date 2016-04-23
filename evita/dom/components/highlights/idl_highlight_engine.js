@@ -7,7 +7,7 @@ goog.require('highlights.base');
 goog.scope(function() {
 
 const IdlTokenStateMachine = highlights.IdlTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const KeywordPainter = highlights.base.KeywordPainter;
 const Token = highlights.base.Token;
 
@@ -29,7 +29,7 @@ class IdlPainter extends KeywordPainter {
   static create(document) { return new IdlPainter(document); }
 }
 
-class IdlHighlighter extends Highlighter {
+class IdlHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -53,13 +53,13 @@ class IdlHighlighter extends Highlighter {
 }
 
 /** @constructor */
-highlights.IdlHighlighter = IdlHighlighter;
+highlights.IdlHighlightEngine = IdlHighlightEngine;
 // Export |IdlPainter| for testing.
 /** @constructor */
 highlights.IdlPainter = IdlPainter;
 });
 
-// Override |IdlLexer| by |IdlHighlighter|.
+// Override |IdlLexer| by |IdlHighlightEngine|.
 // TODO(eval1749): Once we get rid of |IdlLexer|, we should get rid of this
 // override.
-global['IdlLexer'] = highlights.IdlHighlighter;
+global['IdlLexer'] = highlights.IdlHighlightEngine;

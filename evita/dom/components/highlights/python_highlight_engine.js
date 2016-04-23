@@ -7,7 +7,7 @@ goog.require('highlights.base');
 goog.scope(function() {
 
 const PythonTokenStateMachine = highlights.PythonTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const Painter = highlights.base.Painter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
@@ -50,7 +50,7 @@ class PythonPainter extends Painter {
   static create(document) { return new PythonPainter(document); }
 }
 
-class PythonHighlighter extends Highlighter {
+class PythonHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -74,13 +74,13 @@ class PythonHighlighter extends Highlighter {
 }
 
 /** @constructor */
-highlights.PythonHighlighter = PythonHighlighter;
+highlights.PythonHighlightEngine = PythonHighlightEngine;
 
 /** @constructor */
 highlights.PythonPainter = PythonPainter;
 });
 
-// Override |PythonLexer| by |PythonHighlighter|.
+// Override |PythonLexer| by |PythonHighlightEngine|.
 // TODO(eval1749): Once we get rid of |PythonLexer|, we should get rid of this
 // override.
-global['PythonLexer'] = highlights.PythonHighlighter;
+global['PythonLexer'] = highlights.PythonHighlightEngine;

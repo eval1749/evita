@@ -7,7 +7,7 @@ goog.require('highlights.base');
 goog.scope(function() {
 
 const JavaTokenStateMachine = highlights.JavaTokenStateMachine;
-const Highlighter = highlights.base.Highlighter;
+const HighlightEngine = highlights.base.HighlightEngine;
 const KeywordPainter = highlights.base.KeywordPainter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
@@ -38,7 +38,7 @@ class JavaPainter extends KeywordPainter {
   static create(document) { return new JavaPainter(document); }
 }
 
-class JavaHighlighter extends Highlighter {
+class JavaHighlightEngine extends HighlightEngine {
   /**
    * @param {!TextDocument} document
    */
@@ -62,14 +62,14 @@ class JavaHighlighter extends Highlighter {
 }
 
 /** @constructor */
-highlights.JavaHighlighter = JavaHighlighter;
+highlights.JavaHighlightEngine = JavaHighlightEngine;
 // Export |JavaPainter| for testing.
 /** @constructor */
 highlights.JavaPainter = JavaPainter;
 });
 
-// Override |JavaLexer| by |JavaHighlighter|.
+// Override |JavaLexer| by |JavaHighlightEngine|.
 // TODO(eval1749): Once we get rid of |JavaLexer|, we should get rid of
 // this
 // override.
-global['JavaLexer'] = highlights.JavaHighlighter;
+global['JavaLexer'] = highlights.JavaHighlightEngine;

@@ -22,4 +22,11 @@
 
   <token name="entity" type="html_entity" pattern="&amp;#?\w+;" />
   <token name="content" type="content" pattern="[^&lt;&amp;]+" />
+
+  <!-- keywords -->
+  <keyword>xi:include</keyword>
+  <keyword>xml:base</keyword>
+  <keyword>xml:lang</keyword>
+  <keyword>xmlns:</keyword>
+  <keyword>xml:space</keyword>
 </tokens>

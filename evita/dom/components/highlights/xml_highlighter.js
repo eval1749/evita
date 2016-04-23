@@ -16,7 +16,7 @@ const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
 
 /** @const @type {!Set<string>} */
-const staticXmlKeywords = new Set();
+const staticXmlKeywords = highlights.staticXmlKeywords;
 
 class TagPainter {
   /**
@@ -344,9 +344,6 @@ class XmlHighlighter extends Highlighter {
    */
   static addKeyword(word) { staticXmlKeywords.add(word); }
 }
-
-['xi:include', 'xml:base', 'xml:lang', 'xmlns:', 'xml:space'].forEach(
-    word => XmlHighlighter.addKeyword(word));
 
 /** @constructor */
 highlights.xml.XmlHighlighter = XmlHighlighter;

@@ -14,4 +14,377 @@
   <token name="operator" type="operator"
          pattern="[!%&amp;()*,\-.;&lt;=&gt;:?[\]{|}~]+"/>
   <token name="whitespaces" type="whitespace" pattern="\s+"/>
+
+    <!--  Keywords -->
+  <keyword>and</keyword>
+  <keyword>as</keyword>
+  <keyword>assert</keyword>
+  <keyword>break</keyword>
+  <keyword>class</keyword>
+  <keyword>continue</keyword>
+  <keyword>def</keyword>
+  <keyword>del</keyword>
+  <keyword>elif</keyword>
+
+  <keyword>else</keyword>
+  <keyword>except</keyword>
+  <keyword>exec</keyword>
+  <keyword>finally</keyword>
+  <keyword>for</keyword>
+  <keyword>from</keyword>
+  <keyword>global</keyword>
+  <keyword>if</keyword>
+
+  <keyword>import</keyword>
+  <keyword>in</keyword>
+  <keyword>is</keyword>
+  <keyword>lambda</keyword>
+  <keyword>not</keyword>
+  <keyword>or</keyword>
+  <keyword>pass</keyword>
+  <keyword>print</keyword>
+  <keyword>raise</keyword>
+
+  <keyword>return</keyword>
+  <keyword>try</keyword>
+  <keyword>while</keyword>
+  <keyword>with</keyword>
+  <keyword>yield</keyword>
+
+  <!--  Reserved classes of identifiers -->
+  <keyword>_*</keyword>
+  <keyword>__*__</keyword>
+  <keyword>__*</keyword>
+  <keyword>__builtin__</keyword>
+
+  <!--  Decorators -->
+  <keyword>@classmethod</keyword>
+  <keyword>@property</keyword>
+  <keyword>@staticmethod</keyword>
+
+  <!--  Built-in Constants -->
+  <keyword>Ellipsis</keyword>
+  <keyword>False</keyword>
+  <keyword>None</keyword>
+  <keyword>NotImplemented</keyword>
+  <keyword>True</keyword>
+  <keyword>__debug__</keyword>
+
+  <!--  Built-in Types -->
+  <keyword>complex</keyword>
+  <keyword>float</keyword>
+  <keyword>int</keyword>
+  <keyword>long</keyword>
+  <keyword>str</keyword>
+  <keyword>unicode</keyword>
+  <keyword>list</keyword>
+  <keyword>tuple</keyword>
+
+  <keyword>bytearray</keyword>
+  <keyword>xrange</keyword>
+  <keyword>set</keyword>
+  <keyword>frozenset</keyword>
+  <keyword>dict</keyword>
+
+  <!--  2 Built-in Functions -->
+  <keyword>__import__</keyword>
+  <keyword>abs</keyword>
+  <keyword>all</keyword>
+  <keyword>any</keyword>
+  <keyword>basestring</keyword>
+  <keyword>bin</keyword>
+  <keyword>bool</keyword>
+  <keyword>bytearray</keyword>
+
+  <keyword>callable</keyword>
+  <keyword>chr</keyword>
+  <keyword>classmethod</keyword>
+  <keyword>cmp</keyword>
+  <keyword>compile</keyword>
+  <keyword>complex</keyword>
+  <keyword>delattr</keyword>
+
+  <keyword>dict</keyword>
+  <keyword>dir</keyword>
+  <keyword>divmod</keyword>
+  <keyword>enumerate</keyword>
+  <keyword>eval</keyword>
+  <keyword>execfile</keyword>
+  <keyword>file</keyword>
+  <keyword>filter</keyword>
+
+  <keyword>float</keyword>
+  <keyword>format</keyword>
+  <keyword>frozenset</keyword>
+  <keyword>getattr</keyword>
+  <keyword>globals</keyword>
+  <keyword>hasattr</keyword>
+  <keyword>hash</keyword>
+
+  <keyword>help</keyword>
+  <keyword>hex</keyword>
+  <keyword>id</keyword>
+  <keyword>input</keyword>
+  <keyword>int</keyword>
+  <keyword>isinstance</keyword>
+  <keyword>issubclass</keyword>
+  <keyword>iter</keyword>
+
+  <keyword>len</keyword>
+  <keyword>list</keyword>
+  <keyword>locals</keyword>
+  <keyword>long</keyword>
+  <keyword>map</keyword>
+  <keyword>max</keyword>
+  <keyword>memoryview</keyword>
+  <keyword>min</keyword>
+  <keyword>next</keyword>
+
+  <keyword>object</keyword>
+  <keyword>oct</keyword>
+  <keyword>open</keyword>
+  <keyword>ord</keyword>
+  <keyword>pow</keyword>
+  <keyword>print</keyword>
+  <keyword>property</keyword>
+  <keyword>range</keyword>
+
+  <keyword>raw_input</keyword>
+  <keyword>reduce</keyword>
+  <keyword>reload</keyword>
+  <keyword>repr</keyword>
+  <keyword>reversed</keyword>
+  <keyword>round</keyword>
+  <keyword>set</keyword>
+
+  <keyword>setattr</keyword>
+  <keyword>slice</keyword>
+  <keyword>sorted</keyword>
+  <keyword>staticmethod</keyword>
+  <keyword>str</keyword>
+  <keyword>sum</keyword>
+  <keyword>super</keyword>
+
+  <keyword>tuple</keyword>
+  <keyword>type</keyword>
+  <keyword>unichr</keyword>
+  <keyword>unicode</keyword>
+  <keyword>vars</keyword>
+  <keyword>xrange</keyword>
+  <keyword>zip</keyword>
+
+  <!--  3.1 Objects, values and types -->
+  <keyword>__*item__</keyword>
+  <keyword>__*slice__</keyword>
+  <keyword>__abs__</keyword>
+  <keyword>__add__</keyword>
+  <keyword>__and__</keyword>
+  <keyword>__bases__</keyword>
+
+  <keyword>__call__</keyword>
+  <keyword>__class__</keyword>
+  <keyword>__closure__</keyword>
+  <keyword>__cmp__</keyword>
+  <keyword>__code__</keyword>
+  <keyword>__coerce__</keyword>
+
+  <keyword>__complex__</keyword>
+  <keyword>__contains__</keyword>
+  <keyword>__defaults__</keyword>
+  <keyword>__del__</keyword>
+  <keyword>__delattr__</keyword>
+
+  <keyword>__delete__</keyword>
+  <keyword>__delitem__</keyword>
+  <keyword>__delslice__</keyword>
+  <keyword>__dict__</keyword>
+  <keyword>__div__</keyword>
+
+  <keyword>__divmod__</keyword>
+  <keyword>__doc__</keyword>
+  <keyword>__enter__</keyword>
+  <keyword>__eq__</keyword>
+  <keyword>__exit__</keyword>
+  <keyword>__file__</keyword>
+
+  <keyword>__float__</keyword>
+  <keyword>__floordiv__</keyword>
+  <keyword>__func__</keyword>
+  <keyword>__future__</keyword>
+  <keyword>__ge__</keyword>
+  <keyword>__get__</keyword>
+
+  <keyword>__getattr__</keyword>
+  <keyword>__getattribute__</keyword>
+  <keyword>__getitem__</keyword>
+  <keyword>__getslice__</keyword>
+
+  <keyword>__globals__</keyword>
+  <keyword>__gt__</keyword>
+  <keyword>__hash__</keyword>
+  <keyword>__hex__</keyword>
+  <keyword>__iadd__</keyword>
+  <keyword>__iand__</keyword>
+
+  <keyword>__idiv__</keyword>
+  <keyword>__ifloordiv__</keyword>
+  <keyword>__ilshift__</keyword>
+  <keyword>__imod__</keyword>
+  <keyword>__imul__</keyword>
+
+  <keyword>__index__</keyword>
+  <keyword>__init__</keyword>
+  <keyword>__instancecheck__</keyword>
+  <keyword>__int__</keyword>
+  <keyword>__invert__</keyword>
+
+  <keyword>__iop__</keyword>
+  <keyword>__ior__</keyword>
+  <keyword>__ipow__</keyword>
+  <keyword>__irshift__</keyword>
+  <keyword>__isub__</keyword>
+  <keyword>__iter__</keyword>
+
+  <keyword>__itruediv__</keyword>
+  <keyword>__ixor__</keyword>
+  <keyword>__le__</keyword>
+  <keyword>__len__</keyword>
+  <keyword>__long__</keyword>
+  <keyword>__lshift__</keyword>
+
+  <keyword>__lt__</keyword>
+  <keyword>__metaclass__</keyword>
+  <keyword>__missing__</keyword>
+  <keyword>__mod__</keyword>
+  <keyword>__module__</keyword>
+
+  <keyword>__mro__</keyword>
+  <keyword>__mul__</keyword>
+  <keyword>__name__</keyword>
+  <keyword>__ne__</keyword>
+  <keyword>__neg__</keyword>
+  <keyword>__new__</keyword>
+
+  <keyword>__nonzero__</keyword>
+  <keyword>__oct__</keyword>
+  <keyword>__op__</keyword>
+  <keyword>__or__</keyword>
+  <keyword>__pos__</keyword>
+  <keyword>__pow__</keyword>
+
+  <keyword>__radd__</keyword>
+  <keyword>__rand__</keyword>
+  <keyword>__rcmp__</keyword>
+  <keyword>__rdiv__</keyword>
+  <keyword>__rdivmod__</keyword>
+  <keyword>__repr__</keyword>
+
+  <keyword>__reversed__</keyword>
+  <keyword>__rfloordiv__</keyword>
+  <keyword>__rlshift__</keyword>
+  <keyword>__rmod__</keyword>
+  <keyword>__rmul__</keyword>
+
+  <keyword>__rop__</keyword>
+  <keyword>__ror__</keyword>
+  <keyword>__rpow__</keyword>
+  <keyword>__rrshift__</keyword>
+  <keyword>__rshift__</keyword>
+  <keyword>__rsub__</keyword>
+
+  <keyword>__rtruediv__</keyword>
+  <keyword>__rxor__</keyword>
+  <keyword>__self__</keyword>
+  <keyword>__set__</keyword>
+  <keyword>__setattr__</keyword>
+
+  <keyword>__setitem__</keyword>
+  <keyword>__setslice__</keyword>
+  <keyword>__slots__</keyword>
+  <keyword>__str__</keyword>
+  <keyword>__sub__</keyword>
+
+  <keyword>__subclasscheck__</keyword>
+  <keyword>__truediv__</keyword>
+  <keyword>__unicode__</keyword>
+  <keyword>__weakref__</keyword>
+  <keyword>__xor__</keyword>
+
+  <!--  5.13. Special Attributes -->
+  <keyword>__dict__</keyword>
+  <keyword>__class__</keyword>
+  <keyword>__bases__</keyword>
+  <keyword>__name__</keyword>
+  <keyword>__mro__</keyword>
+
+  <keyword>__subclasses__</keyword>
+
+  <!--  6 Built-in Exceptions -->
+  <keyword>ArithmeticError</keyword>
+  <keyword>AssertionError</keyword>
+  <keyword>AttributeError</keyword>
+  <keyword>BaseException</keyword>
+
+  <keyword>BufferError</keyword>
+  <keyword>BytesWarning</keyword>
+  <keyword>DeprecationWarning</keyword>
+  <keyword>EnvironmentError</keyword>
+
+  <keyword>EOFError</keyword>
+  <keyword>Exception</keyword>
+  <keyword>FloatingPointError</keyword>
+  <keyword>FutureWarning</keyword>
+
+  <keyword>GeneratorExit</keyword>
+  <keyword>ImportError</keyword>
+  <keyword>ImportWarning</keyword>
+  <keyword>IndentationError</keyword>
+
+  <keyword>IndexError</keyword>
+  <keyword>IOError</keyword>
+  <keyword>KeyboardInterrupt</keyword>
+  <keyword>KeyError</keyword>
+  <keyword>LookupError</keyword>
+
+  <keyword>MemoryError</keyword>
+  <keyword>NameError</keyword>
+  <keyword>NotImplementedError</keyword>
+  <keyword>OSError</keyword>
+
+  <keyword>OverflowError</keyword>
+  <keyword>PendingDeprecationWarning</keyword>
+  <keyword>ReferenceError</keyword>
+
+  <keyword>RuntimeError</keyword>
+  <keyword>RuntimeWarning</keyword>
+  <keyword>StandardError</keyword>
+  <keyword>StopIteration</keyword>
+
+  <keyword>SyntaxError</keyword>
+  <keyword>SyntaxWarning</keyword>
+  <keyword>SystemError</keyword>
+  <keyword>SystemExit</keyword>
+  <keyword>TabError</keyword>
+
+  <keyword>TypeError</keyword>
+  <keyword>UnboundLocalError</keyword>
+  <keyword>UnicodeDecodeError</keyword>
+
+  <keyword>UnicodeEncodeError</keyword>
+  <keyword>UnicodeError</keyword>
+  <keyword>UnicodeTranslateError</keyword>
+
+  <keyword>UnicodeWarning</keyword>
+  <keyword>UserWarning</keyword>
+  <keyword>ValueError</keyword>
+  <keyword>Warning</keyword>
+  <keyword>WindowsError</keyword>
+
+  <keyword>ZeroDivisionError</keyword>
+
+  <!--  28.5 __main__ Top-level script environment -->
+  <keyword>__main__</keyword>
+
+  <!--  Commonly used word -->
+  <keyword>self</keyword>
 </tokens>

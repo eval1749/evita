@@ -201,4 +201,18 @@ class {{Name}}TokenStateMachine {
 
 /** @constructor */
 highlights.{{Name}}TokenStateMachine = {{Name}}TokenStateMachine;
+
+{% if keywords %}
+/** @const @type {!Set<string>} */
+const staticKeywords = new Set();
+
+/** @const @type {!Set<string>} */
+highlights.static{{Name}}Keywords = staticKeywords;
+
+[
+{% for keyword in keywords %}
+  '{{keyword}}',
+{% endfor %}
+].forEach(word => staticKeywords.add(word));
+{% endif %}
 });

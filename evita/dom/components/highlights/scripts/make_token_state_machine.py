@@ -66,12 +66,21 @@ class ContextBuilder(object):
         self._variables = dict()
 
     def build(self):
-        tokens = self._document.documentElement
-        self._context['name'] = tokens.getAttribute('name')
+        root = self._document.documentElement
+        self._context['name'] = root.getAttribute('name')
         self._context['Name'] = capitalize(self._context['name'])
-        self._process_variables(tokens)
-        self._process_tokens(tokens)
+        self._process_variables(root)
+        self._process_tokens(root)
+        self._process_keywords(root)
         return self._context
+
+    def _process_keywords(self, root):
+        keywords = []
+        for child in root.childNodes:
+            if child.nodeName != 'keyword':
+                continue
+            keywords.append(child.firstChild.nodeValue)
+        self._context['keywords'] = keywords
 
     def _process_tokens(self, tokens):
         nfa_builder = NfaBuilder()

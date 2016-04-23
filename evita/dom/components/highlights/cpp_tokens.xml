@@ -16,4 +16,283 @@
   <token name="operator" type="operator"
          pattern="[!%&amp;()*,\-.;&lt;=&gt;?[\]{|}~]+"/>
   <token name="whitespaces" type="whitespace" pattern="\s+"/>
+
+  <!-- C++ Keywords -->
+   <keyword origin="c++">alignas</keyword>
+   <keyword origin="c++">alignof</keyword>
+   <keyword origin="c++">and</keyword>
+   <keyword origin="c++">and_eq</keyword>
+   <keyword origin="c++">asm</keyword>
+   <keyword origin="c++">auto</keyword>
+   <keyword origin="c++">bitand</keyword>
+   <keyword origin="c++">bitoir</keyword>
+
+   <keyword origin="c++">bool</keyword>
+   <keyword origin="c++">break</keyword>
+   <keyword origin="c++">case</keyword>
+   <keyword origin="c++">catch</keyword>
+   <keyword origin="c++">char</keyword>
+   <keyword origin="c++">char16_t</keyword>
+   <keyword origin="c++">char32_t</keyword>
+   <keyword origin="c++">class</keyword>
+
+   <keyword origin="c++">const</keyword>
+   <keyword origin="c++">constexpr</keyword>
+   <keyword origin="c++">const_cast</keyword>
+   <keyword origin="c++">continue</keyword>
+   <keyword origin="c++">decltype</keyword>
+   <keyword origin="c++">delete</keyword>
+   <keyword origin="c++">do</keyword>
+
+   <keyword origin="c++">double</keyword>
+   <keyword origin="c++">dynamic_cast</keyword>
+   <keyword origin="c++">else</keyword>
+   <keyword origin="c++">enum</keyword>
+   <keyword origin="c++">explicit</keyword>
+   <keyword origin="c++">export</keyword>
+   <keyword origin="c++">extern</keyword>
+
+   <keyword origin="c++">false</keyword>
+   <keyword origin="c++">final</keyword>
+   <keyword origin="c++">finally</keyword>
+   <keyword origin="c++">float</keyword>
+   <keyword origin="c++">for</keyword>
+   <keyword origin="c++">friend</keyword>
+   <keyword origin="c++">goto</keyword>
+   <keyword origin="c++">if</keyword>
+
+   <keyword origin="c++">inline</keyword>
+   <keyword origin="c++">int</keyword>
+   <keyword origin="c++">long</keyword>
+   <keyword origin="c++">mutable</keyword>
+   <keyword origin="c++">namespace</keyword>
+   <keyword origin="c++">new</keyword>
+   <keyword origin="c++">noexcept</keyword>
+   <keyword origin="c++">not</keyword>
+
+   <keyword origin="c++">not_eq</keyword>
+   <keyword origin="c++">nullptr</keyword>
+   <keyword origin="c++">operator</keyword>
+   <keyword origin="c++">or</keyword>
+   <keyword origin="c++">or_eq</keyword>
+   <keyword origin="c++">override</keyword>
+   <keyword origin="c++">register</keyword>
+
+   <keyword origin="c++">reinterpret_cast</keyword>
+   <keyword origin="c++">return</keyword>
+   <keyword origin="c++">short</keyword>
+   <keyword origin="c++">signed</keyword>
+   <keyword origin="c++">sizeof</keyword>
+   <keyword origin="c++">static</keyword>
+
+   <keyword origin="c++">static_assert</keyword>
+   <keyword origin="c++">static_cast</keyword>
+   <keyword origin="c++">struct</keyword>
+   <keyword origin="c++">switch</keyword>
+   <keyword origin="c++">template</keyword>
+   <keyword origin="c++">this</keyword>
+
+   <keyword origin="c++">thread_local</keyword>
+   <keyword origin="c++">throw</keyword>
+   <keyword origin="c++">true</keyword>
+   <keyword origin="c++">try</keyword>
+   <keyword origin="c++">typedef</keyword>
+   <keyword origin="c++">typeid</keyword>
+   <keyword origin="c++">typename</keyword>
+
+   <keyword origin="c++">union</keyword>
+   <keyword origin="c++">unsigned</keyword>
+   <keyword origin="c++">using</keyword>
+   <keyword origin="c++">virtual</keyword>
+   <keyword origin="c++">void</keyword>
+   <keyword origin="c++">volatile</keyword>
+   <keyword origin="c++">wchar_t</keyword>
+
+   <keyword origin="c++">while</keyword>
+   <keyword origin="c++">xor</keyword>
+   <keyword origin="c++">xor_eq</keyword>
+
+  <!-- Reserved label -->
+   <keyword origin="c++">default:</keyword>
+   <keyword origin="c++">protected:</keyword>
+   <keyword origin="c++">private:</keyword>
+   <keyword origin="c++">public:</keyword>
+
+  <!-- C Pre-Processor -->
+   <keyword origin="cpp">#define</keyword>
+   <keyword origin="cpp">#else</keyword>
+   <keyword origin="cpp">#elif</keyword>
+   <keyword origin="cpp">#endif</keyword>
+   <keyword origin="cpp">#error</keyword>
+   <keyword origin="cpp">#if</keyword>
+   <keyword origin="cpp">#ifdef</keyword>
+   <keyword origin="cpp">#ifndef</keyword>
+
+   <keyword origin="cpp">#include</keyword>
+   <keyword origin="cpp">#line</keyword>
+   <keyword origin="cpp">#pragma</keyword>
+   <keyword origin="cpp">#undef</keyword>
+
+  <!-- Visual C++ -->
+  <keyword origin="vc++">#import</keyword>
+  <keyword origin="vc++">#using</keyword>
+
+  <!-- ANSI-C Predefined Macros -->
+   <keyword origin="cpp">__DATE__</keyword>
+   <keyword origin="cpp">__FILE__</keyword>
+   <keyword origin="cpp">__LINE__</keyword>
+   <keyword origin="cpp">__STDC__</keyword>
+   <keyword origin="cpp">__TIME__</keyword>
+   <keyword origin="cpp">__TIMESTAMP__</keyword>
+
+  <!-- MSC Predefined Macros -->
+   <keyword origin="mscpp">_ATL_VER</keyword>
+   <keyword origin="mscpp">_CHAR_UNSIGNED</keyword>
+   <keyword origin="mscpp">__CLR_VER</keyword>
+   <keyword origin="mscpp">__cplusplus_cli</keyword>
+   <keyword origin="mscpp">__COUNTER__</keyword>
+
+   <keyword origin="mscpp">__cplusplus</keyword>
+   <keyword origin="mscpp">__CPPLIB_VER</keyword>
+   <keyword origin="mscpp">__CPPRTTI</keyword>
+   <keyword origin="mscpp">__CPPUNWIND</keyword>
+   <keyword origin="mscpp">__DEBUG</keyword>
+   <keyword origin="mscpp">_DL</keyword>
+
+   <keyword origin="mscpp">__FUNCDNAME__</keyword>
+   <keyword origin="mscpp">__FUNCSIG__</keyword>
+   <keyword origin="mscpp">__FUNCTION__</keyword>
+   <keyword origin="mscpp">_INTEGRAL_MAX_BITS</keyword>
+
+   <keyword origin="mscpp">_M_ALPHA</keyword>
+   <keyword origin="mscpp">_M_CEE</keyword>
+   <keyword origin="mscpp">_M_CEE_PURE</keyword>
+   <keyword origin="mscpp">_M_CEE_SAFE</keyword>
+   <keyword origin="mscpp">_M_IX86</keyword>
+   <keyword origin="mscpp">_MIA64</keyword>
+
+   <keyword origin="mscpp">_M_IX86_FP</keyword>
+   <keyword origin="mscpp">_M_MPPC</keyword>
+   <keyword origin="mscpp">_M_MRX000</keyword>
+   <keyword origin="mscpp">_M_PPC</keyword>
+   <keyword origin="mscpp">_M_X64</keyword>
+   <keyword origin="mscpp">_MANAGED</keyword>
+
+   <keyword origin="mscpp">_MFC_VER</keyword>
+   <keyword origin="mscpp">_MSC_EXTENSIONS</keyword>
+   <keyword origin="mscpp">_MSC_VER</keyword>
+   <keyword origin="mscpp">_MSVC_RUNTIME_CHECKES</keyword>
+   <keyword origin="mscpp">_MT</keyword>
+
+   <keyword origin="mscpp">_NATIVE_WCHAR_T_DEFINED</keyword>
+   <keyword origin="mscpp">_OPENMP</keyword>
+   <keyword origin="mscpp">_VC_NODEFAULTLIB</keyword>
+
+   <keyword origin="mscpp">_WCHAR_T_DEFINED</keyword>
+   <keyword origin="mscpp">_WIN32</keyword>
+   <keyword origin="mscpp">_WIN64</keyword>
+   <keyword origin="mscpp">_Wp64</keyword>
+
+  <!-- <stdint.h> -->
+   <keyword origin="stdint">int16_t</keyword>
+   <keyword origin="stdint">int32_t</keyword>
+   <keyword origin="stdint">int64_t</keyword>
+   <keyword origin="stdint">uint8_t</keyword>
+   <keyword origin="stdint">uint16_t</keyword>
+   <keyword origin="stdint">uint32_t</keyword>
+
+   <keyword origin="stdint">uint64_t</keyword>
+   <keyword origin="stdint">uint8_t</keyword>
+
+  <!-- Standard C Library -->
+   <keyword origin="clib">NULL</keyword>
+   <keyword origin="clib">div_t</keyword>
+   <keyword origin="clib">ldiv_t</keyword>
+   <keyword origin="clib">ptrdiff_t</keyword>
+   <keyword origin="clib">size_t</keyword>
+   <keyword origin="clib">va_arg</keyword>
+   <keyword origin="clib">va_end</keyword>
+
+   <keyword origin="clib">va_list</keyword>
+   <keyword origin="clib">va_start</keyword>
+   <keyword origin="clib">wchar_t</keyword>
+
+  <!-- C++ library -->
+   <keyword origin="c++lib">std::find</keyword>
+   <keyword origin="c++lib">std::iterator</keyword>
+   <keyword origin="c++lib">std::list</keyword>
+   <keyword origin="c++lib">std::make_unique</keyword>
+   <keyword origin="c++lib">std::map</keyword>
+
+   <keyword origin="c++lib">std::max</keyword>
+   <keyword origin="c++lib">std::min</keyword>
+   <keyword origin="c++lib">std::move</keyword>
+   <keyword origin="c++lib">std::numeric_limits</keyword>
+   <keyword origin="c++lib">std::set</keyword>
+
+   <keyword origin="c++lib">std::string</keyword>
+   <keyword origin="c++lib">std::swap</keyword>
+   <keyword origin="c++lib">std::unique_ptr</keyword>
+   <keyword origin="c++lib">std::unordered_map</keyword>
+
+   <keyword origin="c++lib">std::unordered_set</keyword>
+   <keyword origin="c++lib">std::vector</keyword>
+
+  <!-- Microsoft C++ -->
+   <keyword origin="msc">__abstract</keyword>
+   <keyword origin="msc">__alignof</keyword>
+   <keyword origin="msc">__asm</keyword>
+   <keyword origin="msc">__assume</keyword>
+   <keyword origin="msc">__based</keyword>
+   <keyword origin="msc">__box</keyword>
+
+   <keyword origin="msc">__cdecl</keyword>
+   <keyword origin="msc">__declspec</keyword>
+   <keyword origin="msc">deprecated</keyword>
+   <keyword origin="msc">dllexport</keyword>
+   <keyword origin="msc">dllimport</keyword>
+
+   <keyword origin="msc">__event</keyword>
+   <keyword origin="msc">__except</keyword>
+   <keyword origin="msc">__fastcall</keyword>
+   <keyword origin="msc">__finally</keyword>
+   <keyword origin="msc">__forceinline</keyword>
+
+   <keyword origin="msc">__inline</keyword>
+   <keyword origin="msc">__int8</keyword>
+   <keyword origin="msc">__int16</keyword>
+   <keyword origin="msc">__int32</keyword>
+   <keyword origin="msc">__int64</keyword>
+   <keyword origin="msc">__interface</keyword>
+
+   <keyword origin="msc">__m64</keyword>
+   <keyword origin="msc">__m128</keyword>
+   <keyword origin="msc">__m128d</keyword>
+   <keyword origin="msc">__m128i</keyword>
+   <keyword origin="msc">__pragma</keyword>
+   <keyword origin="msc">__raise</keyword>
+   <keyword origin="msc">__sealed</keyword>
+
+   <keyword origin="msc">selectany</keyword>
+   <keyword origin="msc">__stdcall</keyword>
+   <keyword origin="msc">__super</keyword>
+   <keyword origin="msc">__unaligned</keyword>
+   <keyword origin="msc">__unhook</keyword>
+   <keyword origin="msc">__uuidof</keyword>
+
+   <keyword origin="msc">__value</keyword>
+   <keyword origin="msc">__w64</keyword>
+
+
+  <!--  WIN32 -->
+   <keyword origin="win32">BOOL</keyword>
+   <keyword origin="win32">DWORD</keyword>
+   <keyword origin="win32">HANDLE</keyword>
+   <keyword origin="win32">HIWORD</keyword>
+   <keyword origin="win32">HKEY</keyword>
+   <keyword origin="win32">INVALID_HANDLE_VALUE</keyword>
+
+   <keyword origin="win32">LOWROD</keyword>
+   <keyword origin="win32">WORD</keyword>
+   <keyword origin="win32">interface</keyword>
 </tokens>

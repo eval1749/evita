@@ -1,0 +1,13 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="config">
+  <token name="comment" type="comment" pattern="#[^\n]*" />
+  <token name="string1" type="string_literal" pattern="'([^\\']|\\.)*'" />
+  <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />
+  <token name="name" type="identifier" pattern="\w+" />
+  <token name="punctuation" type="operator" pattern="[^\w\s]+" />
+  <token name="whitespace" type="whitespace" pattern="\s+" />
+</tokens>

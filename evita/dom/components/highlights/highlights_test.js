@@ -144,6 +144,17 @@ testing.test('CppStateRangeStateMachine', function(t) {
       .toEqual('c11');
 });
 
+testing.test('ConfigPainter', function(t) {
+  const machine = new highlights.ConfigTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.ConfigPainter.create, machine);
+  t.expect(
+       paint(
+           '# foo\n' +
+           'all: object\n' +
+           '  echo foo\n'))
+      .toEqual('c5 w1 i3 o1 w1 i6 w3 i4 w1 i3 w1');
+});
+
 testing.test('CppPainter', function(t) {
   const machine = new highlights.CppTokenStateMachine();
   const paint = testPaint.bind(this, highlights.CppPainter.create, machine);

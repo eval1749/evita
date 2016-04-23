@@ -59,15 +59,6 @@ void LexersTest::SetUp() {
       "}");
 }
 
-TEST_F(LexersTest, ConfigLexer) {
-  EXPECT_SCRIPT_EQ("c5 n23",
-                   "applySyntax(ConfigLexer, ["
-                   "'# foo',"
-                   "'all: object',"
-                   "'  echo foo',"
-                   "])");
-}
-
 TEST_F(LexersTest, IdlLexer) {
   EXPECT_SCRIPT_EQ("c9 n1 c6 n1 k9 n4 o1 n1 s4 o1 n3 k9 n4 o1 n1 s4 o1",
                    "applySyntax(IdlLexer, ["

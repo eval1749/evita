@@ -68,27 +68,6 @@ TEST_F(LexersTest, ConfigLexer) {
                    "])");
 }
 
-TEST_F(LexersTest, CppLexer) {
-  EXPECT_SCRIPT_EQ(
-      "c9 w1 c6 w1 k8 w1 o1 i3 o1 w1 k4 w1 i2 w1 o1 w1 s4 o1 w3 k4 w1 i2 w1"
-      " o1 w1 s4 o1",
-      "applySyntax(CppLexer, ["
-      "'/* foo */',"
-      "'// bar',"
-      "'#include <foo>',"
-      "'auto a1 = \\'s1\\';',"
-      "'  auto a2 = \"s2\";',"
-      "])");
-
-  EXPECT_SCRIPT_EQ(
-      "w1 k15 o1 i1 o1 w1 i15 o1 i1 o1 w1 i14",
-      "applySyntax(CppLexer, ['"
-      " std::unique_ptr<T>"
-      " std::vector_ptr<T>"  // not extended keyword
-      " base::string16"      // chromium specific == not extended keyword
-      "'])");
-}
-
 TEST_F(LexersTest, IdlLexer) {
   EXPECT_SCRIPT_EQ("c9 n1 c6 n1 k9 n4 o1 n1 s4 o1 n3 k9 n4 o1 n1 s4 o1",
                    "applySyntax(IdlLexer, ["

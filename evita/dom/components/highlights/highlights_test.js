@@ -153,6 +153,15 @@ testing.test('CppPainter', function(t) {
   t.expect(paint('foo::bar')).toEqual('i8');
   t.expect(paint('foo::bar:')).toEqual('l8 o1');
   t.expect(paint('foo::bar::')).toEqual('i10');
+
+  t.expect(paint('/* foo */')).toEqual('c9');
+  t.expect(paint('// bar\nfoo')).toEqual('c6 w1 i3');
+  t.expect(paint('#include <foo>')).toEqual('k8 w1 o1 i3 o1');
+  t.expect(paint('auto a1 = \'s1\';')).toEqual('k4 w1 i2 w1 o1 w1 s4 o1');
+  t.expect(paint('auto a2 = "s2";')).toEqual('k4 w1 i2 w1 o1 w1 s4 o1');
+  t.expect(paint('std::unique_ptr<T>'), 'keyword').toEqual('k15 o1 i1 o1');
+  t.expect(paint('std::vector_ptr<T>'), 'not keyword').toEqual('i15 o1 i1 o1');
+  t.expect(paint('base::string16'), 'not keyword').toEqual('i14');
 });
 
 testing.test('HtmlPainter', function(t) {

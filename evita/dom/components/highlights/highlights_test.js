@@ -186,7 +186,7 @@ testing.test('CSharpPainter', function(t) {
   t.expect(paint('\'s1\';')).toEqual('s4 o1');
   t.expect(paint('"s2";')).toEqual('s4 o1');
   t.expect(paint('@"foo "" bar";')).toEqual('s13 o1');
-  t.expect(paint('Math.Sin(1)')).toEqual('k8 o3');
+  t.expect(paint('Math.Sin(1)')).toEqual('k8 o1 z1 o1');
   t.expect(paint('this.foo')).toEqual('k4 i4');
   t.expect(paint('this.GetType()')).toEqual('k4 o1 k7 o2');
   t.expect(paint('Console.Write()')).toEqual('k13 o2');
@@ -241,7 +241,7 @@ testing.test('JavaScriptPainter', function(t) {
   t.expect(paint('\'s1\';')).toEqual('s4 o1');
   t.expect(paint('"s2";')).toEqual('s4 o1');
   t.expect(paint('`s2`;')).toEqual('s4 o1');
-  t.expect(paint('Math.sin(1)')).toEqual('k8 o3');
+  t.expect(paint('Math.sin(1)')).toEqual('k8 o1 z1 o1');
   t.expect(paint('this.foo')).toEqual('k4 i4');
   t.expect(paint('this.length')).toEqual('k4 o1 k6');
   t.expect(paint('Foo.length')).toEqual('i3 o1 k6');
@@ -259,7 +259,7 @@ testing.test('JavaPainter', function(t) {
   t.expect(paint('// bar\nfoo')).toEqual('c6 w1 i3');
   t.expect(paint('\'s1\';')).toEqual('s4 o1');
   t.expect(paint('"s2";')).toEqual('s4 o1');
-  t.expect(paint('Math.sin(1)')).toEqual('k8 o3');
+  t.expect(paint('Math.sin(1)')).toEqual('k8 o1 z1 o1');
   t.expect(paint('this.foo')).toEqual('k4 i4');
   t.expect(paint('this.getClass()')).toEqual('k4 o1 k8 o2');
   t.expect(paint('@Override\n')).toEqual('k9 w1');
@@ -274,8 +274,8 @@ testing.test('PythonPainter', function(t) {
   t.expect(paint('"""string"""')).toEqual('s12');
   t.expect(paint('\'string\'')).toEqual('s8');
   t.expect(paint('def foo(x):')).toEqual('k3 w1 i3 o1 i1 o2');
-  t.expect(paint('self.value = 2')).toEqual('k4 i6 w1 o1 w1 _1');
-  t.expect(paint('if a1 == 12')).toEqual('k2 w1 i2 w1 o2 w1 _2');
+  t.expect(paint('self.value = 2')).toEqual('k4 i6 w1 o1 w1 z1');
+  t.expect(paint('if a1 == 12')).toEqual('k2 w1 i2 w1 o2 w1 z2');
   t.expect(
        paint(
            '# bar\n' +

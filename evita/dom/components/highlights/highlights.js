@@ -708,7 +708,7 @@ class Tokenizer {
    * @return {!Token}
    */
   startOrExtendToken(scanOffset, state, token) {
-    const syntax = this.stateMachine_.syntaxOf(state);
+    const syntax = state === 0 ? 'zero' : this.stateMachine_.syntaxOf(state);
     if (token === null)
       return new Token(this.document_, scanOffset, scanOffset + 1, syntax);
 

@@ -213,6 +213,18 @@ class Mode {
 
   /**
    * @param {string} id
+   * @return {!Mode}
+   */
+  static create(id) {
+    /** @const @type {ModeDescription} */
+    const description = Mode.findMode(id);
+    if (!description)
+      throw new Error(`No such mode '${id}'`);
+    return new Mode(description);
+  }
+
+  /**
+   * @param {string} id
    * @return {ModeDescription}
    */
   static findMode(id) { return staticIdMap.get(id) || null; }

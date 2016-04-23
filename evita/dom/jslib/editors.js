@@ -32,12 +32,17 @@ global.editors = {};
   function start(args) {
     initialize();
     loadUserScript();
-    let editor_window = new EditorWindow();
-    let doc = TextDocument.new('*scratch*');
-    let range = new TextRange(doc);
-    let text_window = new TextWindow(range);
-    editor_window.appendChild(text_window);
-    editor_window.realize();
+    /** @const @type {!EditorWindow} */
+    const editorWindow = new EditorWindow();
+    /** @const @type {!TextDocument} */
+    const doc = TextDocument.new('*scratch*');
+    doc.mode = Mode.create('plain');
+    /** @const @type {!TextRange} */
+    const range = new TextRange(doc);
+    /** @const @type {!TextWindow} */
+    const textWindow = new TextWindow(range);
+    editorWindow.appendChild(textWindow);
+    editorWindow.realize();
     args.forEach(fileName => Editor.open(fileName));
   }
 

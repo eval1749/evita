@@ -12,6 +12,7 @@ const kSyntaxMap = new Map();
 kSyntaxMap.set('html_attribute_name', 'attribute');
 kSyntaxMap.set('html_attribute_value', 'value');
 kSyntaxMap.set('html_element_name', 'element');
+kSyntaxMap.set('html_entity', '&');
 kSyntaxMap.set('normal', '_');
 
 function encodeSyntax(syntax) {
@@ -214,6 +215,7 @@ testing.test('XmlPainter', function(t) {
   const machine = new highlights.XmlTokenStateMachine();
   const paint = testPaint.bind(this, highlights.xml.XmlPainter.create, machine);
   t.expect(paint('<foo id="12">')).toEqual('k1 e3 _1 a2 k2 v2 k2');
+  t.expect(paint('<foo id=\'12\'>')).toEqual('k1 e3 _1 a2 k2 v2 k2');
   t.expect(paint('<foo id="1"/>')).toEqual('k1 e3 _1 a2 k2 v1 k3');
   t.expect(paint('<foo id=foo/>')).toEqual('k1 e3 _1 a2 k1 v3 k2');
 
@@ -221,6 +223,21 @@ testing.test('XmlPainter', function(t) {
   t.expect(paint('<p:foo xml:p="ns-uri">')).toEqual('k1 e5 _1 a5 k2 v6 k2');
   t.expect(paint('<foo xmlns:>')).toEqual('k1 e3 _1 k7');
   t.expect(paint('<xi:include href="foo">')).toEqual('k11 _1 a4 k2 v3 k2');
+
+  t.expect(paint('<br />')).toEqual('k1 e2 _1 k2');
+  t.expect(
+       paint(
+           '<!-- comment -->\n' +
+           '<element attr1="123" attr2="456">\n' +
+           'foo&amp;bar\n' +
+           '</element>'))
+      .toEqual('c16 _1 k1 e7 _1 a5 k2 v3 k1 _1 a5 k2 v3 k2 _4 &5 _4 k2 e7 k1');
+  t.expect(paint('& && &amp; &#123; &#xBEEF; foo'))
+      .toEqual('&1 _1 &2 _1 &5 _1 &6 _1 &8 _4');
+  t.expect(paint('<abc def="123"ghi>'), 'No space between attributes')
+      .toEqual('k1 e3 _1 a3 k2 v3 k1 _4');
+  t.expect(paint('<abc def="123'), 'No ending quote')
+      .toEqual('k1 e3 _1 a3 k2 v3');
 });
 
 });

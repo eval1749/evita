@@ -110,23 +110,20 @@ class CppHighlighter extends Highlighter {
   static addKeyword(word) { staticCppKeywords.add(word); }
 }
 
-Object.freeze(CppHighlighter);
-Object.seal(CppHighlighter);
-
 [
     // C++ keywords
     'alignas', 'alignof', 'and', 'and_eq', 'asm', 'auto', 'bitand', 'bitoir',
     'bool', 'break', 'case', 'catch', 'char', 'char16_t', 'char32_t', 'class',
     'const', 'constexpr', 'const_cast', 'continue', 'decltype', 'delete', 'do',
     'double', 'dynamic_cast', 'else', 'enum', 'explicit', 'export', 'extern',
-    'false', 'final', 'finally', 'float', 'for', 'friend',
-    'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new',
-    'noexcept', 'not', 'not_eq', 'nullptr', 'operator', 'or', 'or_eq',
-    'override', 'register', 'reinterpret_cast', 'return', 'short', 'signed',
-    'sizeof', 'static', 'static_assert', 'static_cast', 'struct', 'switch',
-    'template', 'this', 'thread_local', 'throw', 'true', 'try', 'typedef',
-    'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void',
-    'volatile', 'wchar_t', 'while', 'xor', 'xor_eq',
+    'false', 'final', 'finally', 'float', 'for', 'friend', 'goto', 'if',
+    'inline', 'int', 'long', 'mutable', 'namespace', 'new', 'noexcept', 'not',
+    'not_eq', 'nullptr', 'operator', 'or', 'or_eq', 'override', 'register',
+    'reinterpret_cast', 'return', 'short', 'signed', 'sizeof', 'static',
+    'static_assert', 'static_cast', 'struct', 'switch', 'template', 'this',
+    'thread_local', 'throw', 'true', 'try', 'typedef', 'typeid', 'typename',
+    'union', 'unsigned', 'using', 'virtual', 'void', 'volatile', 'wchar_t',
+    'while', 'xor', 'xor_eq',
 
     // Reserved label
     'default:', 'protected:', 'private:', 'public:',

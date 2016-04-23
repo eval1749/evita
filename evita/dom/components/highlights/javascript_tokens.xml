@@ -1,0 +1,317 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="javascript">
+  <token name="block_comment" type="comment" pattern="/[*][^*]*[*]+([^/*][^*]*[*]+)*/" />
+  <token name="line_comment" type="comment" pattern="//([^\n]|\\.)*" />
+  <token name="string1" type="string_literal" pattern="'([^\\']|\\.)*'" />
+  <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />
+  <token name="string3" type="string_literal" pattern="`([^\\`]|\\.)*`" />
+
+  <token name="name" type="identifier"
+    pattern="[A-Za-z_]\w*([.][A-Za-z_]\w*)*:?" />
+
+  <token name="operator" type="operator"
+         pattern="[!%&amp;()*,\-.;&lt;=&gt;?[\]{|}~]+"/>
+  <token name="whitespaces" type="whitespace" pattern="\s+"/>
+
+  <!-- Keywords -->
+  <keyword>break</keyword>
+  <keyword>case</keyword>
+  <keyword>catch</keyword>
+  <keyword>class</keyword>
+  <keyword>const</keyword>
+  <keyword>continue</keyword>
+  <keyword>debugger</keyword>
+
+  <keyword>default</keyword>
+  <keyword>delete</keyword>
+  <keyword>do</keyword>
+  <keyword>else</keyword>
+  <keyword>export</keyword>
+  <keyword>extends</keyword>
+  <keyword>finally</keyword>
+  <keyword>for</keyword>
+
+  <keyword>function</keyword>
+  <keyword>if</keyword>
+  <keyword>import</keyword>
+  <keyword>in</keyword>
+  <keyword>instanceof</keyword>
+  <keyword>new</keyword>
+  <keyword>return</keyword>
+  <keyword>super</keyword>
+
+  <keyword>switch</keyword>
+  <keyword>this</keyword>
+  <keyword>throw</keyword>
+  <keyword>try</keyword>
+  <keyword>typeof</keyword>
+  <keyword>var</keyword>
+  <keyword>void</keyword>
+  <keyword>while</keyword>
+
+  <keyword>with</keyword>
+  <keyword>yield</keyword>
+
+  <!--  Reserved label -->
+  <keyword>default:</keyword>
+
+  <!--  Literals -->
+  <keyword>false</keyword>
+  <keyword>null</keyword>
+  <keyword>true</keyword>
+
+  <!--  Future reserved word in ES6 -->
+  <keyword>await</keyword>
+  <keyword>enum</keyword>
+  <keyword>implements</keyword>
+  <keyword>interface</keyword>
+  <keyword>package</keyword>
+  <keyword>private</keyword>
+
+  <keyword>protected</keyword>
+  <keyword>public</keyword>
+  <keyword>static</keyword>
+
+  <!--  E6 context keywords -->
+  <keyword>let</keyword>
+  <keyword>module</keyword>
+
+  <keyword>of</keyword>
+
+  <!--  Standard build-int objects -->
+  <!--  Value properties -->
+  <keyword>Infinity</keyword>
+  <keyword>NaN</keyword>
+  <keyword>undefined</keyword>
+
+  <!--  Special function name -->
+  <keyword>constructor</keyword>
+
+  <!--  Function properties -->
+  <keyword>eval</keyword>
+  <keyword>uneval</keyword>
+  <keyword>isFinite</keyword>
+  <keyword>isNaN</keyword>
+  <keyword>parseFloat</keyword>
+  <keyword>parseInt</keyword>
+
+  <keyword>decodeURI</keyword>
+  <keyword>decodeURIComponent</keyword>
+  <keyword>encodeURI</keyword>
+  <keyword>encodeURIComponent</keyword>
+
+  <keyword>escape</keyword>
+  <keyword>unescape</keyword>
+
+  <!--  Fundamental objects -->
+  <keyword>Object</keyword>
+  <keyword>Object.create</keyword>
+  <keyword>Object.defineProperties</keyword>
+
+  <keyword>Object.defineProperty</keyword>
+  <keyword>Object.freeze</keyword>
+
+  <keyword>Object.getOwnPropertyDescriptor</keyword>
+  <keyword>Object.getOwnPropertyNames</keyword>
+
+  <keyword>Object.getPrototypeOf</keyword>
+  <keyword>Object.is</keyword>
+  <keyword>Object.isExtensible</keyword>
+
+  <keyword>Object.isFrozen</keyword>
+  <keyword>Object.isSealed</keyword>
+  <keyword>Object.keys</keyword>
+
+  <keyword>Object.preventExtensions</keyword>
+  <keyword>Object.seal</keyword>
+  <keyword>Object.setPrototypeOf</keyword>
+
+  <keyword>Function</keyword>
+  <keyword>Boolean</keyword>
+  <keyword>Symbol</keyword>
+  <keyword>Error</keyword>
+  <keyword>EvalError</keyword>
+  <keyword>InternalError</keyword>
+
+  <keyword>RangeError</keyword>
+  <keyword>ReferenceError</keyword>
+  <keyword>StopIteration</keyword>
+  <keyword>SyntaxError</keyword>
+
+  <keyword>TypeError</keyword>
+  <keyword>URIError</keyword>
+
+  <!--  Numbers and dates -->
+  <keyword>Number</keyword>
+  <keyword>Number.EPSILON</keyword>
+  <keyword>Number.MAX_VALUE</keyword>
+  <keyword>Number.MIN_VALUE</keyword>
+
+  <keyword>Number.NEGATIVE_INFINITY</keyword>
+  <keyword>Number.NaN</keyword>
+  <keyword>Number.POSITIVE_INFINITY</keyword>
+
+  <keyword>Number.isFinite</keyword>
+  <keyword>Number.isInteger</keyword>
+  <keyword>Number.isNaN</keyword>
+
+  <keyword>Number.parseFloat</keyword>
+  <keyword>Number.parseInt</keyword>
+  <keyword>Number.toInteger</keyword>
+  <keyword>Math</keyword>
+
+  <keyword>Math.E</keyword>
+  <keyword>Math.LN10</keyword>
+  <keyword>Math.LN2</keyword>
+  <keyword>Math.LOG10E</keyword>
+  <keyword>Math.LOG2E</keyword>
+  <keyword>Math.PI</keyword>
+
+  <keyword>Math.SQRT1_2</keyword>
+  <keyword>Math.SQRT2</keyword>
+  <keyword>Math.abs</keyword>
+  <keyword>Math.acos</keyword>
+  <keyword>Math.acosh</keyword>
+
+  <keyword>Math.asin</keyword>
+  <keyword>Math.asinh</keyword>
+  <keyword>Math.atan</keyword>
+  <keyword>Math.atan2</keyword>
+  <keyword>Math.atanh</keyword>
+
+  <keyword>Math.cbrt</keyword>
+  <keyword>Math.ceil</keyword>
+  <keyword>Math.cos</keyword>
+  <keyword>Math.cosh</keyword>
+  <keyword>Math.exp</keyword>
+
+  <keyword>Math.exm1</keyword>
+  <keyword>Math.floor</keyword>
+  <keyword>Math.fround</keyword>
+  <keyword>Math.hypot</keyword>
+  <keyword>Math.imul</keyword>
+
+  <keyword>Math.log</keyword>
+  <keyword>Math.log10</keyword>
+  <keyword>Math.log1p</keyword>
+  <keyword>Math.log2</keyword>
+  <keyword>Math.max</keyword>
+
+  <keyword>Math.min</keyword>
+  <keyword>Math.pow</keyword>
+  <keyword>Math.random</keyword>
+  <keyword>Math.round</keyword>
+  <keyword>Math.sign</keyword>
+
+  <keyword>Math.sin</keyword>
+  <keyword>Math.sinh</keyword>
+  <keyword>Math.sqrt</keyword>
+  <keyword>Math.tan</keyword>
+  <keyword>Math.tanh</keyword>
+
+  <keyword>Math.trunc</keyword>
+  <keyword>Date</keyword>
+  <keyword>Date.UTC</keyword>
+  <keyword>Date.now</keyword>
+  <keyword>Date.parse</keyword>
+
+  <!--  Text processing -->
+  <keyword>String</keyword>
+  <keyword>String.fromCharCode</keyword>
+  <keyword>String.fromCodePoint</keyword>
+  <keyword>String.raw</keyword>
+
+  <keyword>RegExp</keyword>
+  <keyword>RegExp.lastIndex</keyword>
+
+  <!--  Indexed collections -->
+  <keyword>Array</keyword>
+  <keyword>Array.from</keyword>
+  <keyword>Array.isArray</keyword>
+  <keyword>Array.of</keyword>
+  <keyword>Float32Array</keyword>
+
+  <keyword>Float64Array</keyword>
+  <keyword>Int16Array</keyword>
+  <keyword>Int32Array</keyword>
+  <keyword>Int8Array</keyword>
+  <keyword>Uint16Array</keyword>
+
+  <keyword>Uint32Array</keyword>
+  <keyword>Uint8Array</keyword>
+  <keyword>Uint8ClampedArray</keyword>
+  <keyword>ParallelArray</keyword>
+
+  <!--  Keyed collections -->
+  <keyword>Map</keyword>
+  <keyword>Set</keyword>
+  <keyword>WeakMap</keyword>
+  <keyword>WeakSet</keyword>
+
+  <!--  Structured data -->
+  <keyword>ArrayBuffer</keyword>
+  <keyword>DataView</keyword>
+  <keyword>JSON</keyword>
+  <keyword>JSON.parse</keyword>
+  <keyword>JSON.stringify</keyword>
+
+  <!--  Control abstraction objects -->
+  <keyword>Iterator</keyword>
+  <keyword>Generator</keyword>
+  <keyword>Promise</keyword>
+  <keyword>Promise.all</keyword>
+  <keyword>Promise.reject</keyword>
+
+  <keyword>Promise.race</keyword>
+  <keyword>Promise.resolve</keyword>
+
+  <!--  Reflection -->
+  <keyword>Reflect</keyword>
+  <keyword>Proxy</keyword>
+
+  <!--  Internationalization -->
+  <keyword>Intl</keyword>
+  <keyword>Intl.Collator</keyword>
+  <keyword>Intl.DateTimeFormat</keyword>
+  <keyword>Intl.NumberFormat</keyword>
+
+  <keyword>Symbol.for</keyword>
+  <keyword>Symbol.hasInstance</keyword>
+  <keyword>Symbol.isConcatSpreadable</keyword>
+
+  <keyword>Symbol.iterator</keyword>
+  <keyword>Symbol.keyFor</keyword>
+  <keyword>Symbol.match</keyword>
+  <keyword>Symbol.replace</keyword>
+
+  <keyword>Symbol.search</keyword>
+  <keyword>Symbol.split</keyword>
+  <keyword>Symbol.species</keyword>
+  <keyword>Symbol.toPrimitive</keyword>
+
+  <keyword>Symbol.toStringTag</keyword>
+  <keyword>Symbol.unscopables</keyword>
+
+  <!--  Other -->
+  <keyword>arguments</keyword>
+
+  <!--  Well-Known -->
+  <keyword>console.assert</keyword>
+  <keyword>console.clear</keyword>
+  <keyword>console.log</keyword>
+
+  <!--  Object.prototype properties -->
+  <keyword>.length</keyword>
+  <keyword>.prototype</keyword>
+  <keyword>.toLocaleString</keyword>
+  <keyword>.toString</keyword>
+  <keyword>.unwatch</keyword>
+  <keyword>.valueOf</keyword>
+
+  <keyword>.watch</keyword>
+
+</tokens>

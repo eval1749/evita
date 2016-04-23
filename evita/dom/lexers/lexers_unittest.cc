@@ -78,24 +78,4 @@ TEST_F(LexersTest, JavaLexer) {
                    "'])");
 }
 
-TEST_F(LexersTest, JavaScriptLexer) {
-  EXPECT_SCRIPT_EQ("c9 n1 c6 n1 k2 n1 o1 n3 o1 n1 s4 o1 n3 k3 n4 o1 n1 s4 o1",
-                   "applySyntax(JavaScriptLexer, ["
-                   "'/* foo */',"
-                   "'// bar',"
-                   "'if (a1 = \\'s1\\')',"
-                   "'  var a2 = \"s2\";',"
-                   "])");
-
-  EXPECT_SCRIPT_EQ("n1 k8 o1 n1 o1 n1 k4 o1 n4 k4 K7 n4 K7 n4 K10 n4 K9 o2",
-                   "applySyntax(JavaScriptLexer, ['"
-                   " Math.sin(1)"
-                   " this.foo"
-                   " this.length"
-                   " Foo.length"
-                   " Foo.prototype"
-                   " Foo.toString()"
-                   "'])");
-}
-
 }  // namespace dom

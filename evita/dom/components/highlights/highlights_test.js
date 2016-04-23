@@ -199,6 +199,27 @@ testing.test('IdlPainter', function(t) {
       .toEqual('c9 w1 c6 w1 k9 w1 i2 w1 o1 w1 s4 o1 w1 k9 w1 i2 w1 o3 w1');
 });
 
+testing.test('JavascriptPainter', function(t) {
+  const machine = new highlights.JavascriptTokenStateMachine();
+  const paint =
+      testPaint.bind(this, highlights.JavascriptPainter.create, machine);
+  t.expect(paint('default:')).toEqual('k8');
+  t.expect(paint('if')).toEqual('k2');
+  t.expect(paint('var')).toEqual('k3');
+  t.expect(paint('foo')).toEqual('i3');
+  t.expect(paint('/* foo */')).toEqual('c9');
+  t.expect(paint('// bar\nfoo')).toEqual('c6 w1 i3');
+  t.expect(paint('\'s1\';')).toEqual('s4 o1');
+  t.expect(paint('"s2";')).toEqual('s4 o1');
+  t.expect(paint('`s2`;')).toEqual('s4 o1');
+  t.expect(paint('Math.sin(1)')).toEqual('k8 o3');
+  t.expect(paint('this.foo')).toEqual('k4 i4');
+  t.expect(paint('this.length')).toEqual('k4 o1 k6');
+  t.expect(paint('Foo.length')).toEqual('i3 o1 k6');
+  t.expect(paint('Foo.prototype')).toEqual('i3 o1 k9');
+  t.expect(paint('Foo.toString()')).toEqual('i3 o1 k8 o2');
+});
+
 testing.test('HtmlPainter', function(t) {
   const machine = new highlights.HtmlTokenStateMachine();
   const paint = testPaint.bind(this, highlights.HtmlPainter.create, machine);

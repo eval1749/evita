@@ -131,6 +131,22 @@ class {{Name}}TokenStateMachine {
     return ranges;
   }
 
+  /**
+   * @public
+   * @param {number} charCode
+   * @param {number} state
+   * @return {number}
+   */
+  computeNextState(charCode, state) {
+    /** @const @type {number} */
+    const alphabet = charCode >= 128 ? 0 : kCharCodeToAlphabets[charCode];
+    // DCHECK_LE(alphabet, kMaxAlphabet);
+    /** @const @type {number} */
+    const newState = kTransitionMap[this.state_][alphabet];
+    // DCHECK_LE(newState, kMaxState);
+    return newState;
+  }
+
   /** @public @return {number} */
   get state() { return this.state_; }
 
@@ -169,10 +185,7 @@ class {{Name}}TokenStateMachine {
    */
   updateState(charCode) {
     /** @const @type {number} */
-    const alphabet = charCode >= 128 ? 0 : kCharCodeToAlphabets[charCode];
-    console.assert(alphabet <= kMaxAlphabet, alphabet);
-    const newState = kTransitionMap[this.state_][alphabet];
-    console.assert(newState <= kMaxState, newState);
+    const newState = this.computeNextState(charCode, this.state_);
     this.state_ = newState;
     return newState;
   }

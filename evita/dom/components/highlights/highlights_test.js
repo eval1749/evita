@@ -155,6 +155,18 @@ testing.test('CppPainter', function(t) {
   t.expect(paint('foo::bar::')).toEqual('i10');
 });
 
+testing.test('HtmlPainter', function(t) {
+  const machine = new highlights.HtmlTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.HtmlPainter.create, machine);
+  t.expect(
+       paint(
+           '<script>\n' +
+           'var x = "foo";\n' +
+           '</script>\n' +
+           '<div>foo</div>'))
+      .toEqual('k1 e6 k1 a25 _1 k1 e3 k1 _3 k2 e3 k1');
+});
+
 testing.test('PythonPainter', function(t) {
   const machine = new highlights.PythonTokenStateMachine();
   const paint = testPaint.bind(this, highlights.PythonPainter.create, machine);

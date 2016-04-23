@@ -81,10 +81,10 @@ class HtmlHighlighter extends Highlighter {
   static addKeyword(word) { staticHtmlKeywords.add(word); }
 }
 
-Object.freeze(HtmlHighlighter);
-Object.seal(HtmlHighlighter);
-
+/** @constructor */
 highlights.HtmlHighlighter = HtmlHighlighter;
+/** @constructor */
+highlights.HtmlPainter = HtmlPainter;
 });
 
 // Override |HtmlLexer| by |HtmlHighlighter|.

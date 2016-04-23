@@ -398,12 +398,15 @@ class KeywordPainter extends Painter {
    * @protected
    * @param {!TextDocument} document
    * @param {!Set<string>} keywords
+   * @param {string=} suffixChar
    */
-  constructor(document, keywords) {
+  constructor(document, keywords, suffixChar = '') {
     super(document);
     console.assert(keywords.size >= 1);
     /** @const @type {!Set<string>} */
     this.keywords_ = keywords;
+    /** @const @type {string} */
+    this.delimiter = suffixChar;
   }
 
   /**
@@ -414,11 +417,40 @@ class KeywordPainter extends Painter {
     if (token.syntax !== 'identifier' || token.length == 1)
       return this.paintToken(token);
     /** @const @type {string} */
-    const name = this.textOf(token);
-    if (this.keywords_.has(name)) {
+    const fullName = this.textOf(token);
+    if (this.keywords_.has(fullName))
       return this.paintToken2(token, 'keyword');
-    }
-    this.paintToken(token);
+    if (this.delimiter === '')
+      return this.paintToken(token);
+
+    /** @const @type {number} */
+    const headIndex = fullName.lastIndexOf(this.delimiter);
+    if (headIndex <= 0)
+      return this.paintToken(token);
+
+    /** @const @type {number} */
+    const headEnd = token.start + headIndex;
+    /** @const @type {string} */
+    const head = fullName.substr(0, headIndex);
+    if (this.keywords_.has(head))
+      this.setSyntax(token.start, headEnd, 'keyword');
+    else
+      this.setSyntax(token.start, headEnd, token.syntax);
+
+    /** @const @type {number} */
+    const tailIndex = fullName.lastIndexOf(this.delimiter);
+    /** @const @type {string} */
+    const tail = fullName.substr(tailIndex);
+    if (!this.keywords_.has(tail))
+      return this.setSyntax(headEnd, token.end, token.syntax);
+
+    // Paint tail as keyword
+    /** @const @type {number} */
+    const tailStart = token.start + tailIndex;
+    if (headEnd != tailStart)
+      this.setSyntax(headEnd, tailStart, token.syntax);
+    this.setSyntax(tailStart, tailStart + 1, 'operator');
+    this.setSyntax(tailStart + 1, token.end, 'keyword');
   }
 }
 

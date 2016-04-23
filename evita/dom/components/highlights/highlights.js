@@ -143,7 +143,7 @@ class StateRangeMap {
     /** @const @type {!TextDocument} */
     this.document_ = document;
 
-    const token = new Token(document, -1, -1, '');
+    const token = new Token(document, -2, -1, '');
     /** @const @type {!StateRange} */
     this.dummyStateRange_ = new StateRange(document, -1, -1, -1, token);
 
@@ -378,6 +378,7 @@ class Painter {
    * @param {string} syntax
    */
   setSyntax(start, end, syntax) {
+    console.assert(start < end, start, end, syntax);
     this.document_.setSyntax(start, end, syntax);
   }
 
@@ -417,6 +418,7 @@ class Token {
     this.start_ = start;
     /** @type {string} */
     this.syntax_ = syntax;
+    console.assert(start < end, this);
   }
 
   /** @public @return {number} */
@@ -424,7 +426,7 @@ class Token {
 
   /** @public @param {number} newEnd */
   set end(newEnd) {
-    console.assert(newEnd >= this.start_, 'newEnd', newEnd, this);
+    console.assert(this.start_ < newEnd, 'newEnd', newEnd, this);
     this.end_ = newEnd;
   }
 
@@ -551,30 +553,42 @@ class Tokenizer {
       /** @const @type {number} */
       const charCode = this.document_.charCodeAt(scanOffset);
       /** @type {number} */
-      const state = this.updateState(charCode);
+      let state = this.stateMachine_.updateState(charCode);
       this.log(0, 'scanOffset', scanOffset, charCode, 'state', state);
       if (state === lastState && currentRange)
         continue;
       if (currentRange)
         this.endStateRange(currentRange, scanOffset);
-      if (this.shouldResetState(state))
-        this.stateMachine_.resetTo(0);
-      currentRange = this.rangeMap_.rangeStartsAt(scanOffset);
-      if (currentRange !== null && currentRange.state === state) {
-        this.log(0, 'Finish early', currentRange);
-        if (token)
+      if (state === 0) {
+        // |charCode| doesn't belong to current token.
+        if (token !== null) {
           this.paintToken(token);
-        this.scanOffset_ = this.document_.length;
-        return;
+          token = null;
+        }
+        state = this.stateMachine_.updateState(charCode);
       }
-      if (currentRange)
-        this.rangeMap_.remove(currentRange);
+
+      /** @const @type {StateRange} */
+      const nextRange = this.rangeMap_.rangeStartsAt(scanOffset);
+      if (nextRange !== null) {
+        if (nextRange.state === state) {
+          this.log(0, 'Finish early', nextRange);
+          this.scanOffset_ = this.document_.length;
+          return;
+        }
+        this.rangeMap_.remove(nextRange);
+      }
+
       currentRange = this.newStateRange(scanOffset, state, token);
-      if (this.stateMachine_.state) {
+      if (!this.shouldResetState(state)) {
         token = currentRange.token;
         continue;
       }
-      this.paintToken(/** @type {!Token} */ (token));
+      // |charCode| terminates current token.
+      this.stateMachine_.resetTo(0);
+      if (token === null)
+        continue;
+      this.paintToken(token);
       token = null;
     }
     this.scanOffset_ = scanEnd;
@@ -592,7 +606,7 @@ class Tokenizer {
    * @param {number} end
    */
   endStateRange(range, end) {
-    this.log(0, 'endStateRange', range.start, end, 'state', range.state);
+    this.log(0, 'endStateRange', range, end);
     if (range.end < end)
       this.rangeMap_.removeBetween(range.end, end);
     range.end = end;
@@ -638,6 +652,7 @@ class Tokenizer {
       token = new Token(this.document_, scanOffset, scanOffset + 1, syntax);
     }
     const range = this.rangeMap_.add(scanOffset, scanOffset + 1, state, token);
+    this.log(0, 'newStateRange', range, token);
     return range;
   }
 

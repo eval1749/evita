@@ -204,6 +204,18 @@ testing.test('GnPainter', function(t) {
       .toEqual('c5 w1 k10 o1 s5 o1 w1 o1 w3 i3 w1 o1 w1 k4 w1 o1 w1');
 });
 
+testing.test('HtmlPainter', function(t) {
+  const machine = new highlights.HtmlTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.HtmlPainter.create, machine);
+  t.expect(
+       paint(
+           '<script>\n' +
+           'var x = "foo";\n' +
+           '</script>\n' +
+           '<div>foo</div>'))
+      .toEqual('k1 e6 k1 a25 _1 k1 e3 k1 _3 k2 e3 k1');
+});
+
 testing.test('IdlPainter', function(t) {
   const machine = new highlights.IdlTokenStateMachine();
   const paint = testPaint.bind(this, highlights.IdlPainter.create, machine);
@@ -252,18 +264,6 @@ testing.test('JavaPainter', function(t) {
   t.expect(paint('this.getClass()')).toEqual('k4 o1 k8 o2');
   t.expect(paint('@Override\n')).toEqual('k9 w1');
   t.expect(paint('@SuppressWarnings\n')).toEqual('k17 w1');
-});
-
-testing.test('HtmlPainter', function(t) {
-  const machine = new highlights.HtmlTokenStateMachine();
-  const paint = testPaint.bind(this, highlights.HtmlPainter.create, machine);
-  t.expect(
-       paint(
-           '<script>\n' +
-           'var x = "foo";\n' +
-           '</script>\n' +
-           '<div>foo</div>'))
-      .toEqual('k1 e6 k1 a25 _1 k1 e3 k1 _3 k2 e3 k1');
 });
 
 testing.test('PythonPainter', function(t) {

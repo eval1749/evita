@@ -42,7 +42,18 @@ class TagPainter {
     this.setSyntax(start, start + 1, 'keyword');
     if (end - start <= 1)
       return;
+    /** @const @type {number} */
+    const quote = this.document_.charCodeAt(start);
+    if (quote !== this.document_.charCodeAt(end - 1)) {
+      // string literal doesn't end.
+      this.setSyntax(start + 1, end, 'html_attribute_value');
+      return;
+    }
     this.setSyntax(end - 1, end, 'keyword');
+    if (end - start === 2) {
+      // Empty string; no characters between quotation mark
+      return;
+    }
     this.setSyntax(start + 1, end - 1, 'html_attribute_value');
   }
 
@@ -125,6 +136,7 @@ class TagPainter {
    * @param {string} syntax
    */
   setSyntax(start, end, syntax) {
+    console.assert(start < end, start, end, syntax);
     this.document_.setSyntax(start, end, syntax);
   }
 

@@ -189,7 +189,7 @@ TEST_F(LexersTest, XmlLexer) {
 
   // Malformed: no ending quote
   //  <abc def="123>ghi
-  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 k2 v6 k1",
+  EXPECT_SCRIPT_EQ("k1 e3 n1 a3 k2 v7",
                    "applySyntax(XmlLexer, ['<abc def=\"123>ghi'])");
 }
 

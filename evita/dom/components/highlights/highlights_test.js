@@ -174,9 +174,9 @@ testing.test('CppPainter', function(t) {
   t.expect(paint('base::string16'), 'not keyword').toEqual('i14');
 });
 
-testing.test('CsharpPainter', function(t) {
-  const machine = new highlights.CsharpTokenStateMachine();
-  const paint = testPaint.bind(this, highlights.CsharpPainter.create, machine);
+testing.test('CSharpPainter', function(t) {
+  const machine = new highlights.CSharpTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.CSharpPainter.create, machine);
   t.expect(paint('default:')).toEqual('k8');
   t.expect(paint('if')).toEqual('k2');
   t.expect(paint('var')).toEqual('k3');
@@ -216,10 +216,10 @@ testing.test('IdlPainter', function(t) {
       .toEqual('c9 w1 c6 w1 k9 w1 i2 w1 o1 w1 s4 o1 w1 k9 w1 i2 w1 o3 w1');
 });
 
-testing.test('JavascriptPainter', function(t) {
-  const machine = new highlights.JavascriptTokenStateMachine();
+testing.test('JavaScriptPainter', function(t) {
+  const machine = new highlights.JavaScriptTokenStateMachine();
   const paint =
-      testPaint.bind(this, highlights.JavascriptPainter.create, machine);
+      testPaint.bind(this, highlights.JavaScriptPainter.create, machine);
   t.expect(paint('default:')).toEqual('k8');
   t.expect(paint('if')).toEqual('k2');
   t.expect(paint('var')).toEqual('k3');

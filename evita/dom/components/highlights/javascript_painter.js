@@ -9,25 +9,25 @@ goog.scope(function() {
 const KeywordPainter = highlights.KeywordPainter;
 
 /** @const @type {!Set<string>} */
-const staticJavascriptKeywords =
+const staticJavaScriptKeywords =
     highlights.HighlightEngines.keywordsFor('javascript');
 
-class JavascriptPainter extends KeywordPainter {
+class JavaScriptPainter extends KeywordPainter {
   /**
    * @private
    * @param {!TextDocument} document
    */
-  constructor(document) { super(document, staticJavascriptKeywords, '.'); }
+  constructor(document) { super(document, staticJavaScriptKeywords, '.'); }
 
   /**
    * @public
    * @param {!TextDocument} document
-   * @return {!JavascriptPainter}
+   * @return {!JavaScriptPainter}
    */
-  static create(document) { return new JavascriptPainter(document); }
+  static create(document) { return new JavaScriptPainter(document); }
 }
 
-// Export |JavascriptPainter| for testing.
+// Export |JavaScriptPainter| for testing.
 /** @constructor */
-highlights.JavascriptPainter = JavascriptPainter;
+highlights.JavaScriptPainter = JavaScriptPainter;
 });

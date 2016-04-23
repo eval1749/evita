@@ -11,7 +11,7 @@ const KeywordPainter = highlights.KeywordPainter;
 /** @const @type {!Set<string>} */
 const staticKeywords = highlights.HighlightEngines.keywordsFor('c#');
 
-class CsharpPainter extends KeywordPainter {
+class CSharpPainter extends KeywordPainter {
   /**
    * @private
    * @param {!TextDocument} document
@@ -21,12 +21,12 @@ class CsharpPainter extends KeywordPainter {
   /**
    * @public
    * @param {!TextDocument} document
-   * @return {!CsharpPainter}
+   * @return {!CSharpPainter}
    */
-  static create(document) { return new CsharpPainter(document); }
+  static create(document) { return new CSharpPainter(document); }
 }
 
-// Export |CsharpPainter| for testing.
+// Export |CSharpPainter| for testing.
 /** @constructor */
-highlights.CsharpPainter = CsharpPainter;
+highlights.CSharpPainter = CSharpPainter;
 });

@@ -70,7 +70,8 @@ class ContextBuilder(object):
         self._context['id'] = root.getAttribute('id')
         self._context['name'] = root.getAttribute(
             'name') or self._context['id']
-        self._context['Name'] = capitalize(self._context['name'])
+        self._context['Name'] = root.getAttribute(
+            'Name') or capitalize(self._context['name'])
         self._process_variables(root)
         self._process_tokens(root)
         self._process_keywords(root)

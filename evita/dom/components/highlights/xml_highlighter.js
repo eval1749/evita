@@ -25,12 +25,12 @@ class TagPainter {
   constructor(document) {
     /** @const @type {!TextDocument} */
     this.document_ = document;
+    /** @type {boolean} */
+    this.isTagName_ = true;
     /** @type {string} */
     this.lastLabel_ = '';
     /** @const @type {!XmltagTokenStateMachine} */
     this.stateMachine_ = new XmltagTokenStateMachine();
-    /** @type {string} */
-    this.syntaxForWord_ = 'html_element_name';
   }
 
   /**
@@ -94,6 +94,30 @@ class TagPainter {
    * @private
    * @param {number} start
    * @param {number} end
+   */
+  paintTagName(start, end) {
+    /** @const @type {string} */
+    const fullName = this.document_.slice(start, end);
+    if (staticXmlKeywords.has(fullName))
+      return this.setSyntax(start, end, 'keyword');
+    /** @const @type {number} */
+    const colonIndex = fullName.indexOf(':');
+    if (colonIndex <= 1)
+      return this.setSyntax(start, end, 'html_element_name');
+    /** @const @type {string} */
+    const prefix = fullName.substr(0, colonIndex);
+    if (!staticXmlKeywords.has(prefix))
+      return this.setSyntax(start, end, 'html_element_name');
+    /** @const @type {number} */
+    const prefixEnd = start + end;
+    this.setSyntax(start, prefixEnd, 'keyword');
+    this.setSyntax(prefixEnd, end, 'html_element_name');
+  }
+
+  /**
+   * @private
+   * @param {number} start
+   * @param {number} end
    * @param {string} label
    */
   paintToken(start, end, label) {
@@ -122,11 +146,19 @@ class TagPainter {
    * @param {number} end
    */
   paintWord(start, end) {
+    if (this.isTagName_) {
+      this.isTagName_ = false;
+      this.paintTagName(start, end);
+      return;
+    }
+    if (this.lastLabel_ === 'equal')
+      return this.setSyntax(start, end, 'html_attribute_value');
+
     /** @const @type {string} */
-    const syntax = this.lastLabel_ === 'equal' ? 'html_attribute_value' :
-                                                 this.syntaxForWord_;
-    this.setSyntax(start, end, syntax);
-    this.syntaxForWord_ = 'html_attribute_name';
+    const name = this.document_.slice(start, end);
+    if (staticXmlKeywords.has(name))
+      return this.setSyntax(start, end, 'keyword');
+    return this.setSyntax(start, end, 'html_attribute_name');
   }
 
   /**
@@ -142,9 +174,9 @@ class TagPainter {
 
   /** @private */
   reset() {
+    this.isTagName_ = true;
     this.lastLabel_ = '';
     this.stateMachine_.resetTo(0);
-    this.syntaxForWord_ = 'html_element_name';
   }
 
   /**
@@ -313,8 +345,8 @@ class XmlHighlighter extends Highlighter {
   static addKeyword(word) { staticXmlKeywords.add(word); }
 }
 
-['xi:include', 'xml:base', 'xml:lang', 'xmlns:', 'xml:space']
-    .forEach(word => XmlHighlighter.addKeyword(word));
+['xi:include', 'xml:base', 'xml:lang', 'xmlns:', 'xml:space'].forEach(
+    word => XmlHighlighter.addKeyword(word));
 
 /** @constructor */
 highlights.xml.XmlHighlighter = XmlHighlighter;

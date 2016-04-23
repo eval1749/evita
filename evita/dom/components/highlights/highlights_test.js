@@ -145,8 +145,7 @@ testing.test('CppStateRangeStateMachine', function(t) {
 
 testing.test('CppPainter', function(t) {
   const machine = new highlights.CppTokenStateMachine();
-  const paint =
-      testPaint.bind(this, highlights.CppPainter.create, machine);
+  const paint = testPaint.bind(this, highlights.CppPainter.create, machine);
   t.expect(paint('default:')).toEqual('k7 o1');
   t.expect(paint('foo:')).toEqual('l3 o1');
   t.expect(paint('foo::')).toEqual('i5');
@@ -157,8 +156,7 @@ testing.test('CppPainter', function(t) {
 
 testing.test('PythonPainter', function(t) {
   const machine = new highlights.PythonTokenStateMachine();
-  const paint =
-      testPaint.bind(this, highlights.PythonPainter.create, machine);
+  const paint = testPaint.bind(this, highlights.PythonPainter.create, machine);
   t.expect(paint('# comment')).toEqual('c9');
   t.expect(paint('"string"')).toEqual('s8');
   t.expect(paint('"""string"""')).toEqual('s12');
@@ -214,11 +212,15 @@ testing.test('StateRangeMap', function(t) {
 
 testing.test('XmlPainter', function(t) {
   const machine = new highlights.XmlTokenStateMachine();
-  const paint = testPaint.bind(
-      this, highlights.xml.XmlPainter.create, machine);
+  const paint = testPaint.bind(this, highlights.xml.XmlPainter.create, machine);
   t.expect(paint('<foo id="12">')).toEqual('k1 e3 _1 a2 k2 v2 k2');
   t.expect(paint('<foo id="1"/>')).toEqual('k1 e3 _1 a2 k2 v1 k3');
   t.expect(paint('<foo id=foo/>')).toEqual('k1 e3 _1 a2 k1 v3 k2');
+
+  // XML keywords
+  t.expect(paint('<p:foo xml:p="ns-uri">')).toEqual('k1 e5 _1 a5 k2 v6 k2');
+  t.expect(paint('<foo xmlns:>')).toEqual('k1 e3 _1 k7');
+  t.expect(paint('<xi:include href="foo">')).toEqual('k11 _1 a4 k2 v3 k2');
 });
 
 });

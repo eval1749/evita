@@ -120,6 +120,7 @@ js_lib_files = [
   "$root_gen_dir/evita/dom/components/highlights/idl_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/javascript_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/java_tokens.js",
+  "$root_gen_dir/evita/dom/components/highlights/plain_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/python_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/xml_tokens.js",
 
@@ -130,6 +131,7 @@ js_lib_files = [
   "components/highlights/idl_painter.js",
   "components/highlights/javascript_painter.js",
   "components/highlights/java_painter.js",
+  "components/highlights/plain_painter.js",
   "components/highlights/python_painter.js",
   "components/highlights/xml_painter.js",
   "components/highlights/html_painter.js",

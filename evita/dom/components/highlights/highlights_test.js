@@ -266,6 +266,13 @@ testing.test('JavaPainter', function(t) {
   t.expect(paint('@SuppressWarnings\n')).toEqual('k17 w1');
 });
 
+testing.test('PlainPainter', function(t) {
+  const machine = new highlights.PlainTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.PlainPainter.create, machine);
+  t.expect(paint('foo bar baz')).toEqual('z3 w1 z3 w1 z3');
+  t.expect(paint(' http://foo.bar ')).toEqual('w1 k14 w1');
+});
+
 testing.test('PythonPainter', function(t) {
   const machine = new highlights.PythonTokenStateMachine();
   const paint = testPaint.bind(this, highlights.PythonPainter.create, machine);

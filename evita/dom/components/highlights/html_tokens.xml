@@ -3,7 +3,7 @@
 == Use of this source code is governed by a BSD-style license that can be
 == found in the LICENSE file.
 -->
-<tokens name="html">
+<tokens id="html">
   <variable name="__ATTR__"
             value="\s+[A-Za-z][\w:]+(=([^&lt;&apos;&quot;&gt;\s]+|&quot;[^&lt;&quot;]+&quot;|'[^&lt;']+'))?" />
 

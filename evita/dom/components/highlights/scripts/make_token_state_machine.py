@@ -67,7 +67,9 @@ class ContextBuilder(object):
 
     def build(self):
         root = self._document.documentElement
-        self._context['name'] = root.getAttribute('name')
+        self._context['id'] = root.getAttribute('id')
+        self._context['name'] = root.getAttribute(
+            'name') or self._context['id']
         self._context['Name'] = capitalize(self._context['name'])
         self._process_variables(root)
         self._process_tokens(root)

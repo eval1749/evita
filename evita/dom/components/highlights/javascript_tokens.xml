@@ -3,7 +3,7 @@
 == Use of this source code is governed by a BSD-style license that can be
 == found in the LICENSE file.
 -->
-<tokens name="javascript">
+<tokens id="javascript">
   <token name="block_comment" type="comment" pattern="/[*][^*]*[*]+([^/*][^*]*[*]+)*/" />
   <token name="line_comment" type="comment" pattern="//([^\n]|\\.)*" />
   <token name="string1" type="string_literal" pattern="'([^\\']|\\.)*'" />

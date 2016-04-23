@@ -3,7 +3,7 @@
 == Use of this source code is governed by a BSD-style license that can be
 == found in the LICENSE file.
 -->
-<tokens name="config">
+<tokens id="config">
   <token name="comment" type="comment" pattern="#[^\n]*" />
   <token name="string1" type="string_literal" pattern="'([^\\']|\\.)*'" />
   <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />

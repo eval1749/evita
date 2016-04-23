@@ -6,6 +6,9 @@ goog.require('highlights');
 
 goog.scope(function() {
 
+const HighlightEngine = highlights.HighlightEngine;
+const HighlightEngines = highlights.HighlightEngines;
+
 /** @const @type {number} */
 const kMaxAlphabet= {{ max_alphabet }};
 
@@ -202,17 +205,55 @@ class {{Name}}TokenStateMachine {
 /** @constructor */
 highlights.{{Name}}TokenStateMachine = {{Name}}TokenStateMachine;
 
+{% if id %}
+/** @const @type {!Set<string>} */
+const static{{Name}}Keywords = new Set();
+
+class {{Name}}HighlightEngine extends HighlightEngine {
+  /**
+   * @private
+   * @param {!TextDocument} document
+   */
+  constructor(document) {
+    super(document, highlights.{{Name}}Painter.create,
+          new {{Name}}TokenStateMachine());
+  }
+
+  /**
+   * @public
+   * @param {string} word
+   * Adds a keyword at runtime.
+   */
+  static addKeyword(word) { static{{Name}}Keywords.add(word); }
+
+  /**
+   * @param {!TextDocument} document
+   * @return {!{{Name}}HighlightEngine}}
+   */
+  static create(document) { return new {{Name}}HighlightEngine(document); }
+
+  /**
+   * @public
+   * @return {!Set<string>}
+   * For debugging
+   */
+  static get keywords() { return static{{Name}}Keywords; }
+}
+
 {% if keywords %}
-/** @const @type {!Set<string>} */
-const staticKeywords = new Set();
-
-/** @const @type {!Set<string>} */
-highlights.static{{Name}}Keywords = staticKeywords;
-
 [
 {% for keyword in keywords %}
   '{{keyword}}',
 {% endfor %}
-].forEach(word => staticKeywords.add(word));
+].forEach(word => static{{Name}}Keywords.add(word));
+{% endif %}
+
+// Override |{{Name}}Lexer| by |{{Name}}HighlightEngine|.
+// TODO(eval1749): Once we get rid of |{{Name}}Lexer|, we should get rid of this
+// override.
+global['{{Name}}Lexer'] = {{Name}}HighlightEngine;
+
+HighlightEngines.registerEngine(
+    '{{id}}', {{Name}}HighlightEngine.create, static{{Name}}Keywords);
 {% endif %}
 });

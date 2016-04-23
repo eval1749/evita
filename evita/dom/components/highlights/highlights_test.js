@@ -331,7 +331,7 @@ testing.test('StateRangeMap', function(t) {
 
 testing.test('XmlPainter', function(t) {
   const machine = new highlights.XmlTokenStateMachine();
-  const paint = testPaint.bind(this, highlights.xml.XmlPainter.create, machine);
+  const paint = testPaint.bind(this, highlights.XmlPainter.create, machine);
   t.expect(paint('<foo id="12">')).toEqual('k1 e3 _1 a2 k2 v2 k2');
   t.expect(paint('<foo id=\'12\'>')).toEqual('k1 e3 _1 a2 k2 v2 k2');
   t.expect(paint('<foo id="1"/>')).toEqual('k1 e3 _1 a2 k2 v1 k3');

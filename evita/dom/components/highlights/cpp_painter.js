@@ -6,14 +6,11 @@ goog.require('highlights');
 
 goog.scope(function() {
 
-const CppTokenStateMachine = highlights.CppTokenStateMachine;
-const HighlightEngine = highlights.HighlightEngine;
 const Painter = highlights.Painter;
 const Token = highlights.Token;
-const Tokenizer = highlights.Tokenizer;
 
 /** @const @type {!Set<string>} */
-const staticCppKeywords = highlights.staticCppKeywords;
+const staticCppKeywords = highlights.HighlightEngines.keywordsFor('c++');
 
 /**
  * @param {number} charCode
@@ -87,37 +84,7 @@ class CppPainter extends Painter {
   static create(document) { return new CppPainter(document); }
 }
 
-class CppHighlightEngine extends HighlightEngine {
-  /**
-   * @param {!TextDocument} document
-   */
-  constructor(document) {
-    super(document, CppPainter.create, new CppTokenStateMachine());
-  }
-
-  /**
-   * @public
-   * @return {!Set<string>}
-   * For debugging
-   */
-  static get keywords() { return staticCppKeywords; }
-
-  /**
-   * @public
-   * @param {string} word
-   * Adds a keyword at runtime.
-   */
-  static addKeyword(word) { staticCppKeywords.add(word); }
-}
-
-/** @constructor */
-highlights.CppHighlightEngine = CppHighlightEngine;
 // Export |CppPainter| for testing.
 /** @constructor */
 highlights.CppPainter = CppPainter;
 });
-
-// Override |CppLexer| by |CppHighlightEngine|.
-// TODO(eval1749): Once we get rid of |CppLexer|, we should get rid of this
-// override.
-global['CppLexer'] = highlights.CppHighlightEngine;

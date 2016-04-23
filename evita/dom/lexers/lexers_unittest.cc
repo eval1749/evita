@@ -148,14 +148,4 @@ TEST_F(LexersTest, JavaScriptLexer) {
                    "'])");
 }
 
-TEST_F(LexersTest, PythonLexer) {
-  EXPECT_SCRIPT_EQ("c5 w1 c5 w1 k2 w1 i2 w1 o2 w1 s4 o1 w5 i2 w1 o1 w1 s4",
-                   "applySyntax(PythonLexer, ["
-                   "'# bar',"
-                   "'# foo',"
-                   "'if a1 == \\'s1\\':',"
-                   "'    a2 = \"s2\"',"
-                   "])");
-}
-
 }  // namespace dom

@@ -165,6 +165,13 @@ testing.test('PythonPainter', function(t) {
   t.expect(paint('def foo(x):')).toEqual('k3 w1 i3 o1 i1 o2');
   t.expect(paint('self.value = 2')).toEqual('k4 i6 w1 o1 w1 _1');
   t.expect(paint('if a1 == 12')).toEqual('k2 w1 i2 w1 o2 w1 _2');
+  t.expect(
+       paint(
+           '# bar\n' +
+           '# foo\n' +
+           'if a1 == \'s1\':\n' +
+           '    a2 = "s2"\n'))
+      .toEqual('c5 w1 c5 w1 k2 w1 i2 w1 o2 w1 s4 o1 w5 i2 w1 o1 w1 s4 w1');
 });
 
 

@@ -7,6 +7,7 @@ action_foreach("token_state_machines") {
   sources = [
     "config_tokens.xml",
     "cpp_tokens.xml",
+    "csharp_tokens.xml",
     "gn_tokens.xml",
     "html_tokens.xml",
     "idl_tokens.xml",

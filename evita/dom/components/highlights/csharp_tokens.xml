@@ -1,0 +1,225 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="csharp">
+  <token name="block_comment" type="comment" pattern="/[*][^*]*[*]+([^/*][^*]*[*]+)*/" />
+  <token name="line_comment" type="comment" pattern="//([^\n]|\\.)*" />
+  <token name="string1" type="string_literal" pattern="'([^\\']|\\.)*'" />
+  <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />
+  <token name="string3" type="string_literal" pattern='@"([^"]+|"")*"' />
+
+  <token name="name" type="identifier"
+    pattern="(#|@)?[A-Za-z_]\w*([.][A-Za-z_]\w*)*:?" />
+
+  <token name="operator" type="operator"
+         pattern="[!%&amp;()*,\-.;&lt;=&gt;?[\]{|}~]+"/>
+  <token name="whitespaces" type="whitespace" pattern="\s+"/>
+
+  <!-- Keywords -->
+  <keyword>abstract</keyword>
+  <keyword>as</keyword>
+  <keyword>base</keyword>
+  <keyword>bool</keyword>
+  <keyword>break</keyword>
+  <keyword>byte</keyword>
+  <keyword>case</keyword>
+  <keyword>catch</keyword>
+  <keyword>char</keyword>
+
+  <keyword>checked</keyword>
+  <keyword>class</keyword>
+  <keyword>const</keyword>
+  <keyword>continue</keyword>
+  <keyword>decimal</keyword>
+  <keyword>default</keyword>
+  <keyword>delegate</keyword>
+
+  <keyword>do</keyword>
+  <keyword>double</keyword>
+  <keyword>else</keyword>
+  <keyword>enum</keyword>
+  <keyword>event</keyword>
+  <keyword>explicit</keyword>
+  <keyword>extern</keyword>
+  <keyword>false</keyword>
+
+  <keyword>finally</keyword>
+  <keyword>fixed</keyword>
+  <keyword>float</keyword>
+  <keyword>for</keyword>
+  <keyword>foreach</keyword>
+  <keyword>goto</keyword>
+  <keyword>if</keyword>
+  <keyword>implicit</keyword>
+
+  <keyword>in</keyword>
+  <keyword>int</keyword>
+  <keyword>interface</keyword>
+  <keyword>internal</keyword>
+  <keyword>is</keyword>
+  <keyword>lock</keyword>
+  <keyword>long</keyword>
+  <keyword>namespace</keyword>
+
+  <keyword>new</keyword>
+  <keyword>null</keyword>
+  <keyword>object</keyword>
+  <keyword>operator</keyword>
+  <keyword>out</keyword>
+  <keyword>override</keyword>
+  <keyword>params</keyword>
+  <keyword>private</keyword>
+
+  <keyword>protected</keyword>
+  <keyword>public</keyword>
+  <keyword>readonly</keyword>
+  <keyword>ref</keyword>
+  <keyword>return</keyword>
+  <keyword>sbyte</keyword>
+  <keyword>sealed</keyword>
+
+  <keyword>short</keyword>
+  <keyword>sizeof</keyword>
+  <keyword>stackalloc</keyword>
+  <keyword>static</keyword>
+  <keyword>string</keyword>
+  <keyword>struct</keyword>
+  <keyword>switch</keyword>
+
+  <keyword>this</keyword>
+  <keyword>throw</keyword>
+  <keyword>true</keyword>
+  <keyword>try</keyword>
+  <keyword>typeof</keyword>
+  <keyword>uint</keyword>
+  <keyword>ulong</keyword>
+  <keyword>unchecked</keyword>
+
+  <keyword>unsafe</keyword>
+  <keyword>ushort</keyword>
+  <keyword>using</keyword>
+  <keyword>virtual</keyword>
+  <keyword>void</keyword>
+  <keyword>volatile</keyword>
+  <keyword>while</keyword>
+
+  <!--  Contextual keywords -->
+  <keyword>add</keyword>
+  <keyword>alias</keyword>
+  <keyword>ascending</keyword>
+  <keyword>async</keyword>
+  <keyword>await</keyword>
+  <keyword>descending</keyword>
+  <keyword>dynamic</keyword>
+
+  <keyword>from</keyword>
+  <keyword>get</keyword>
+  <keyword>global</keyword>
+  <keyword>group</keyword>
+  <keyword>into</keyword>
+  <keyword>join</keyword>
+  <keyword>let</keyword>
+  <keyword>orderby</keyword>
+
+  <keyword>partial</keyword>
+  <keyword>remove</keyword>
+  <keyword>select</keyword>
+  <keyword>set</keyword>
+  <keyword>value</keyword>
+  <keyword>var</keyword>
+  <keyword>where</keyword>
+  <keyword>yield</keyword>
+
+  <!-- Known label -->
+  <keyword>default:</keyword>
+
+  <!-- Methods of Object -->
+  <keyword>.Equals</keyword>
+  <keyword>.Finalize</keyword>
+  <keyword>.GetHashCode</keyword>
+  <keyword>.GetType</keyword>
+  <keyword>.MemberwiseClone</keyword>
+  <keyword>.ReferenceEquals</keyword>
+  <keyword>.ToString</keyword>
+
+  <!-- Well-Known System classes -->
+  <keyword>Console</keyword>
+  <keyword>Nullable</keyword>
+  <keyword>Object</keyword>
+  <keyword>String</keyword>
+  <keyword>Tuple</keyword>
+  <keyword>WeakReference</keyword>
+
+  <!-- Well-Known System structures -->
+  <keyword>Boolean</keyword>
+  <keyword>Byte</keyword>
+  <keyword>Char</keyword>
+  <keyword>DateTime</keyword>
+  <keyword>Decimal</keyword>
+  <keyword>Double</keyword>
+  <keyword>Guid</keyword>
+  <keyword>Int16</keyword>
+  <keyword>Int32</keyword>
+  <keyword>Int64</keyword>
+  <keyword>IntPtr</keyword>
+  <keyword>ModuleHandle</keyword>
+  <keyword>SByte</keyword>
+  <keyword>Single</keyword>
+  <keyword>TimeSpan</keyword>
+  <keyword>UInt16</keyword>
+  <keyword>UInt32</keyword>
+  <keyword>UInt64</keyword>
+  <keyword>UIntPtr</keyword>
+  <keyword>Void</keyword>
+
+  <!-- Well-Known System interfaces -->
+  <keyword>IAsyncResult</keyword>
+  <keyword>ICloneable</keyword>
+  <keyword>IComparable</keyword>
+  <keyword>IConvertible</keyword>
+  <keyword>ICustomFormatter</keyword>
+  <keyword>IDisposable</keyword>
+  <keyword>IEquatable</keyword>
+  <keyword>IFormatProvider</keyword>
+  <keyword>IFormattable</keyword>
+  <keyword>IObserver</keyword>
+  <keyword>IProgress</keyword>
+  <keyword>IServiceProvider</keyword>
+
+  <!-- Well-Known static properties -->
+  <keyword>Console.Error</keyword>
+  <keyword>Console.In</keyword>
+  <keyword>Console.Out</keyword>
+
+  <!-- Well-Known static methods -->
+  <keyword>Console.Clear</keyword>
+  <keyword>Console.Read</keyword>
+  <keyword>Console.ReadKey</keyword>
+  <keyword>Console.ReadLine</keyword>
+  <keyword>Console.Write</keyword>
+  <keyword>Console.WriteLine</keyword>
+  <keyword>Math.Abs</keyword>
+  <keyword>Math.Acos</keyword>
+  <keyword>Math.Asin</keyword>
+  <keyword>Math.Atan</keyword>
+  <keyword>Math.Atan2</keyword>
+  <keyword>Math.BigMul</keyword>
+  <keyword>Math.Ceiling</keyword>
+  <keyword>Math.Cos</keyword>
+  <keyword>Math.Cosh</keyword>
+  <keyword>Math.DivRem</keyword>
+  <keyword>Math.Floor</keyword>
+  <keyword>Math.Log</keyword>
+  <keyword>Math.Max</keyword>
+  <keyword>Math.Min</keyword>
+  <keyword>Math.Pow</keyword>
+  <keyword>Math.Round</keyword>
+  <keyword>Math.Sign</keyword>
+  <keyword>Math.Sin</keyword>
+  <keyword>Math.Sinh</keyword>
+  <keyword>Math.Tan</keyword>
+  <keyword>Math.Tanh</keyword>
+  <keyword>Math.Truncate</keyword>
+</tokens>

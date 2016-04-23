@@ -175,6 +175,24 @@ testing.test('CppPainter', function(t) {
   t.expect(paint('base::string16'), 'not keyword').toEqual('i14');
 });
 
+testing.test('CsharpPainter', function(t) {
+  const machine = new highlights.CsharpTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.CsharpPainter.create, machine);
+  t.expect(paint('default:')).toEqual('k8');
+  t.expect(paint('if')).toEqual('k2');
+  t.expect(paint('var')).toEqual('k3');
+  t.expect(paint('foo')).toEqual('i3');
+  t.expect(paint('/* foo */')).toEqual('c9');
+  t.expect(paint('// bar\nfoo')).toEqual('c6 w1 i3');
+  t.expect(paint('\'s1\';')).toEqual('s4 o1');
+  t.expect(paint('"s2";')).toEqual('s4 o1');
+  t.expect(paint('@"foo "" bar";')).toEqual('s13 o1');
+  t.expect(paint('Math.Sin(1)')).toEqual('k8 o3');
+  t.expect(paint('this.foo')).toEqual('k4 i4');
+  t.expect(paint('this.GetType()')).toEqual('k4 o1 k7 o2');
+  t.expect(paint('Console.Write()')).toEqual('k13 o2');
+});
+
 testing.test('GnPainter', function(t) {
   const machine = new highlights.GnTokenStateMachine();
   const paint = testPaint.bind(this, highlights.GnPainter.create, machine);

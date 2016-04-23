@@ -59,16 +59,6 @@ void LexersTest::SetUp() {
       "}");
 }
 
-TEST_F(LexersTest, IdlLexer) {
-  EXPECT_SCRIPT_EQ("c9 n1 c6 n1 k9 n4 o1 n1 s4 o1 n3 k9 n4 o1 n1 s4 o1",
-                   "applySyntax(IdlLexer, ["
-                   "'/* foo */',"
-                   "'// bar',"
-                   "'attribute a1 = \\'s1\\';',"
-                   "'  interface a2 = \"s2\";',"
-                   "])");
-}
-
 TEST_F(LexersTest, JavaLexer) {
   EXPECT_SCRIPT_EQ("c9 n1 c6 n1 k5 n4 o1 n1 s4 o1 n3 k10 n4 o1 n1 s4 o1",
                    "applySyntax(JavaLexer, ["

@@ -187,6 +187,18 @@ testing.test('GnPainter', function(t) {
       .toEqual('c5 w1 k10 o1 s5 o1 w1 o1 w3 i3 w1 o1 w1 k4 w1 o1 w1');
 });
 
+testing.test('IdlPainter', function(t) {
+  const machine = new highlights.IdlTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.IdlPainter.create, machine);
+  t.expect(
+       paint(
+           '/* foo */\n' +
+           '// bar\n' +
+           'attribute a1 = "s1";\n' +
+           'interface a2 {};\n'))
+      .toEqual('c9 w1 c6 w1 k9 w1 i2 w1 o1 w1 s4 o1 w1 k9 w1 i2 w1 o3 w1');
+});
+
 testing.test('HtmlPainter', function(t) {
   const machine = new highlights.HtmlTokenStateMachine();
   const paint = testPaint.bind(this, highlights.HtmlPainter.create, machine);

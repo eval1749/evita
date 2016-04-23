@@ -9,6 +9,7 @@ action_foreach("token_state_machines") {
     "cpp_tokens.xml",
     "gn_tokens.xml",
     "html_tokens.xml",
+    "idl_tokens.xml",
     "python_tokens.xml",
     "xml_tokens.xml",
     "xmltag_tokens.xml",

@@ -123,7 +123,7 @@ function toCamelCase(document) {
   }
 }
 
-Mode.extensionMap.set('e', Mode.extensionMap.get('cs'));
+Mode.registerExtension('e', 'c#');
 
 // Report spell checker progress
 Editor.bindKey(TextWindow, 'Ctrl+Shift+M', function() {

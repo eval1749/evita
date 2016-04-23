@@ -167,7 +167,7 @@ class Mode {
    */
   toString() {
     if (this.document_)
-      return `Mode('${this.id}', document: '${this.document_.name}'`;
+      return `Mode('${this.id}', document: '${this.document_.name}')`;
     return `Mode('${this.id}')`;
   }
 

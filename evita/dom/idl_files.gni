@@ -12,8 +12,6 @@ interface_idl_files = [
   "//evita/dom/components/clipboard/DataTransferItem.idl",
   "//evita/dom/components/clipboard/DataTransferItemList.idl",
   "//evita/dom/components/imaging/ImageData.idl",
-  # Note: We have "Mode.idl" here for JS externs
-  "//evita/dom/components/modes/Mode.idl",
   "//evita/dom/components/win_registry/WinRegistry.idl",
   "//evita/dom/components/win_resource/WinResource.idl",
   "//evita/dom/Editor.idl",
@@ -147,7 +145,6 @@ static_js_externs_files = [
   "//evita/dom/testing/test_externs.js",
   "//evita/dom/text/text_externs.js",
   "//evita/dom/text/text_document_externs.js",
-  "//evita/dom/components/modes/modes_externs.js",
   "//evita/dom/text/text_range_externs.js",
   "//evita/dom/text/simple_mutation_observer_externs.js",
   "//evita/dom/text/text_position_externs.js",

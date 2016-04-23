@@ -270,13 +270,13 @@ TEST_F(TextDocumentTest, mode_auto_mode) {
       "function testIt(fileName) {"
       "  var doc = TextDocument.new(fileName);"
       "  doc.mode = Mode.chooseModeByFileName(fileName);"
-      "  return doc.mode.constructor.name;"
+      "  return doc.mode.name;"
       "}");
-  EXPECT_SCRIPT_EQ("CppMode", "testIt('foo.cc')");
-  EXPECT_SCRIPT_EQ("CppMode", "testIt('foo.cpp')");
-  EXPECT_SCRIPT_EQ("CppMode", "testIt('foo.h')");
-  EXPECT_SCRIPT_EQ("JavaMode", "testIt('foo.java')");
-  EXPECT_SCRIPT_EQ("JavaScriptMode", "testIt('foo.js')");
+  EXPECT_SCRIPT_EQ("C++", "testIt('foo.cc')");
+  EXPECT_SCRIPT_EQ("C++", "testIt('foo.cpp')");
+  EXPECT_SCRIPT_EQ("C++", "testIt('foo.h')");
+  EXPECT_SCRIPT_EQ("Java", "testIt('foo.java')");
+  EXPECT_SCRIPT_EQ("JavaScript", "testIt('foo.js')");
 }
 
 TEST_F(TextDocumentTest, modified) {

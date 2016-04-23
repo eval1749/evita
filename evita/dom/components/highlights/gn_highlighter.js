@@ -25,7 +25,7 @@ class GnPainter extends KeywordPainter {
   /**
    * @public
    * @param {!TextDocument} document
-   * @return {!KeywordPainter}
+   * @return {!GnPainter}
    */
   static create(document) { return new GnPainter(document); }
 }

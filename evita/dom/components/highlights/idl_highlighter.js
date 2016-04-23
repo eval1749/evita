@@ -8,38 +8,23 @@ goog.scope(function() {
 
 const IdlTokenStateMachine = highlights.IdlTokenStateMachine;
 const Highlighter = highlights.base.Highlighter;
-const Painter = highlights.base.Painter;
+const KeywordPainter = highlights.base.KeywordPainter;
 const Token = highlights.base.Token;
 
 /** @const @type {!Set<string>} */
 const staticIdlKeywords = highlights.staticIdlKeywords;
 
-class IdlPainter extends Painter {
+class IdlPainter extends KeywordPainter {
   /**
    * @private
    * @param {!TextDocument} document
    */
-  constructor(document) { super(document); }
-
-  /**
-   * @override
-   * @param {!Token} token
-   */
-  paint(token) {
-    if (token.syntax !== 'identifier' || token.length == 1)
-      return this.paintToken(token);
-    /** @const @type {string} */
-    const name = this.textOf(token);
-    if (staticIdlKeywords.has(name)) {
-      return this.paintToken2(token, 'keyword');
-    }
-    this.paintToken(token);
-  }
+  constructor(document) { super(document, staticIdlKeywords); }
 
   /**
    * @public
    * @param {!TextDocument} document
-   * @return {!Painter}
+   * @return {!IdlPainter}
    */
   static create(document) { return new IdlPainter(document); }
 }

@@ -391,6 +391,38 @@ class Painter {
 }
 
 /*
+ * Painter with keyword support
+ */
+class KeywordPainter extends Painter {
+  /**
+   * @protected
+   * @param {!TextDocument} document
+   * @param {!Set<string>} keywords
+   */
+  constructor(document, keywords) {
+    super(document);
+    console.assert(keywords.size >= 1);
+    /** @const @type {!Set<string>} */
+    this.keywords_ = keywords;
+  }
+
+  /**
+   * @override
+   * @param {!Token} token
+   */
+  paint(token) {
+    if (token.syntax !== 'identifier' || token.length == 1)
+      return this.paintToken(token);
+    /** @const @type {string} */
+    const name = this.textOf(token);
+    if (this.keywords_.has(name)) {
+      return this.paintToken2(token, 'keyword');
+    }
+    this.paintToken(token);
+  }
+}
+
+/*
  * |Token| is a text range in |TextDocument| as an unit of painting with
  * syntax highlighting.
  */
@@ -833,6 +865,8 @@ class Highlighter extends text.SimpleMutationObserverBase {
 const namespace = highlights.base;
 /** @constructor */
 namespace.Highlighter = Highlighter;
+/** @constructor */
+namespace.KeywordPainter = KeywordPainter;
 /** @constructor */
 namespace.Painter = Painter;
 /** @constructor */

@@ -8,39 +8,24 @@ goog.scope(function() {
 
 const GnTokenStateMachine = highlights.GnTokenStateMachine;
 const Highlighter = highlights.base.Highlighter;
-const Painter = highlights.base.Painter;
+const KeywordPainter = highlights.base.KeywordPainter;
 const Token = highlights.base.Token;
 const Tokenizer = highlights.base.Tokenizer;
 
 /** @const @type {!Set<string>} */
-const staticKeywords = highlights.staticGnKeywords;
+const staticGnKeywords = highlights.staticGnKeywords;
 
-class GnPainter extends Painter {
+class GnPainter extends KeywordPainter {
   /**
    * @private
    * @param {!TextDocument} document
    */
-  constructor(document) { super(document); }
-
-  /**
-   * @override
-   * @param {!Token} token
-   */
-  paint(token) {
-    if (token.syntax !== 'identifier' || token.length == 1)
-      return this.paintToken(token);
-    /** @const @type {string} */
-    const name = this.textOf(token);
-    if (staticKeywords.has(name)) {
-      return this.paintToken2(token, 'keyword');
-    }
-    this.paintToken(token);
-  }
+  constructor(document) { super(document, staticGnKeywords); }
 
   /**
    * @public
    * @param {!TextDocument} document
-   * @return {!Painter}
+   * @return {!KeywordPainter}
    */
   static create(document) { return new GnPainter(document); }
 }

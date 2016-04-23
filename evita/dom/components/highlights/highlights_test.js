@@ -175,6 +175,18 @@ testing.test('CppPainter', function(t) {
   t.expect(paint('base::string16'), 'not keyword').toEqual('i14');
 });
 
+testing.test('GnPainter', function(t) {
+  const machine = new highlights.GnTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.GnPainter.create, machine);
+  t.expect(
+       paint(
+           '# foo\n' +
+           'source_set("bar") {\n' +
+           '  baz = true\n' +
+           '}\n'))
+      .toEqual('c5 w1 k10 o1 s5 o1 w1 o1 w3 i3 w1 o1 w1 k4 w1 o1 w1');
+});
+
 testing.test('HtmlPainter', function(t) {
   const machine = new highlights.HtmlTokenStateMachine();
   const paint = testPaint.bind(this, highlights.HtmlPainter.create, machine);

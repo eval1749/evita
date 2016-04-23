@@ -1,0 +1,114 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="gn">
+  <token name="comment" type="comment" pattern="#[^\n]*" />
+  <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />
+  <token name="name" type="identifier" pattern="\w+" />
+  <token name="punctuation" type="operator" pattern="[^\w\s&quot;]+" />
+  <token name="whitespace" type="whitespace" pattern="\s+" />
+
+  <!--  Conditionals -->
+  <keyword>else</keyword>
+  <keyword>false</keyword>
+  <keyword>if</keyword>
+  <keyword>true</keyword>
+
+  <!--  Target declarations -->
+  <keyword>action</keyword>
+  <keyword>action_foreach</keyword>
+  <keyword>copy</keyword>
+  <keyword>executable</keyword>
+  <keyword>group</keyword>
+  <keyword>loadable_module</keyword>
+  <keyword>shared_library</keyword>
+  <keyword>source_set</keyword>
+  <keyword>static_library</keyword>
+  <keyword>target</keyword>
+
+  <!--  Buildfile functions -->
+  <keyword>assert</keyword>
+  <keyword>config</keyword>
+  <keyword>declare_args</keyword>
+  <keyword>defined</keyword>
+  <keyword>exec_script</keyword>
+  <keyword>foreach</keyword>
+  <keyword>forward_variables_from</keyword>
+  <keyword>get_label_info</keyword>
+  <keyword>get_path_info</keyword>
+  <keyword>get_target_outputs</keyword>
+  <keyword>getenv</keyword>
+  <keyword>import</keyword>
+  <keyword>print</keyword>
+  <keyword>process_file_template</keyword>
+  <keyword>read_file</keyword>
+  <keyword>rebase_path</keyword>
+  <keyword>set_default_toolchain</keyword>
+  <keyword>set_defaults</keyword>
+  <keyword>set_sources_assignment_filter</keyword>
+  <keyword>template</keyword>
+  <keyword>tool</keyword>
+  <keyword>toolchain</keyword>
+  <keyword>toolchain_args</keyword>
+  <keyword>write_file</keyword>
+
+  <!--  //testing/tests.gni -->
+  <keyword>test</keyword>
+
+  <!--  Built-in predefined variables -->
+  <keyword>current_cpu</keyword>
+  <keyword>current_os</keyword>
+  <keyword>current_toolchain</keyword>
+  <keyword>default_toolchain</keyword>
+  <keyword>host_cpu</keyword>
+  <keyword>host_os</keyword>
+  <keyword>python_path</keyword>
+  <keyword>root_build_dir</keyword>
+  <keyword>root_gen_dir</keyword>
+  <keyword>root_out_dir</keyword>
+  <keyword>target_cpu</keyword>
+  <keyword>target_gen_dir</keyword>
+  <keyword>target_os</keyword>
+  <keyword>target_out_dir</keyword>
+
+  <!--  Variables you set in targets -->
+  <keyword>all_dependent_configs</keyword>
+  <keyword>allow_circular_includes_from</keyword>
+  <keyword>args</keyword>
+  <keyword>asmflags</keyword>
+  <keyword>assert_no_deps</keyword>
+  <keyword>cflags</keyword>
+  <keyword>cflags_c</keyword>
+  <keyword>cflags_cc</keyword>
+  <keyword>cflags_objc</keyword>
+  <keyword>cflags_objcc</keyword>
+  <keyword>check_includes</keyword>
+  <keyword>complete_static_lib</keyword>
+  <keyword>configs</keyword>
+  <keyword>console [boolean]</keyword>
+  <keyword>data</keyword>
+  <keyword>data_deps</keyword>
+  <keyword>defines</keyword>
+  <keyword>depfile</keyword>
+  <keyword>deps</keyword>
+  <keyword>include_dirs</keyword>
+  <keyword>inputs</keyword>
+  <keyword>ldflags</keyword>
+  <keyword>lib_dirs</keyword>
+  <keyword>libs</keyword>
+  <keyword>output_extension</keyword>
+  <keyword>output_name</keyword>
+  <keyword>outputs</keyword>
+  <keyword>precompiled_header</keyword>
+  <keyword>precompiled_source</keyword>
+  <keyword>public</keyword>
+  <keyword>public_configs</keyword>
+  <keyword>public_deps</keyword>
+  <keyword>response_file_contents</keyword>
+  <keyword>script</keyword>
+  <keyword>sources</keyword>
+  <keyword>testonly</keyword>
+  <keyword>visibility</keyword>
+</tokens>

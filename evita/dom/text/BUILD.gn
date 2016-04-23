@@ -38,6 +38,5 @@ source_set("test_files") {
 
   public_deps = [
     "//evita/dom/testing:test_support",
-    "//evita/dom/text/modes:test_files",
   ]
 }

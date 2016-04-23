@@ -69,8 +69,6 @@ js_lib_files = [
   "lexers/xml_lexer.js",
   "lexers/html_lexer.js",
 
-  "text/modes/mode.js",
-  "text/modes/modes.js",
   "os/file.js",
   "os/os.js",
   "os/process.js",
@@ -133,6 +131,8 @@ js_lib_files = [
 
   "components/imaging/icon_util_win.js",
   "components/launchpad/launchpad.js",
+  "components/modes/mode.js",
+  "components/modes/modes.js",
   "components/logging/logging_document.js",
   "components/spell_checker/spell_checker.js",
   "components/win_resource/win_resource.js",

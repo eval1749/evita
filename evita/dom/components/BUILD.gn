@@ -15,6 +15,10 @@ source_set("test_files") {
     "win_resource/win_resource_test.js",
   ]
 
+  deps = [
+    "modes:test_files",
+  ]
+
   public_deps = [
     "//evita/dom/testing:test_support",
   ]

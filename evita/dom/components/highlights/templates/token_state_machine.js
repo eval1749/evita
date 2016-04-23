@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.require('highlights.base');
+goog.require('highlights');
 
 goog.scope(function() {
 
@@ -52,7 +52,7 @@ const kTransitionMap = [
 ];
 
 /**
- * @implements {highlights.base.TokenStateMachine}
+ * @implements {highlights.TokenStateMachine}
  */
 class {{Name}}TokenStateMachine {
   constructor() {

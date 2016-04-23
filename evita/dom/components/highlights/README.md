@@ -8,8 +8,8 @@ Deterministic Finite Automata, for fast pattern matching.
 To implement syntax syntax highlighting for a language, you need to provide
 followings:
  1. Syntax highlighting rule file, e.g. `foo_tokens.xml`
- 2. HighlightEngine extends `highlights.base.HighlightEngine`, e.g. `FooHighlightEngine`
- 3. (Optional) Painter extends `highlights.base.Painter`, e.g. `FooPainter`
+ 2. HighlightEngine extends `highlights.HighlightEngine`, e.g. `FooHighlightEngine`
+ 3. (Optional) Painter extends `highlights.Painter`, e.g. `FooPainter`
 
 
 ## Custom Painting
@@ -52,10 +52,10 @@ Following code implements syntax highlighting engine for language "Foo":
 // FooTokenStateMachine is generated from "foo_tokens.xml"
 const FooTokenStateMachine = highlights.FooTokenStateMachine
 
-// Imports |highlights.base| symbols
-const HighlightEngine = highlights.base.HighlightEngine;
-const Painter = highlights.base.Painter;
-const Tokenizer = highlights.base.Tokenizer;
+// Imports |highlights| symbols
+const HighlightEngine = highlights.HighlightEngine;
+const Painter = highlights.Painter;
+const Tokenizer = highlights.Tokenizer;
 
 const keywords = Set(['foo', 'bar', 'baz']);
 
@@ -79,7 +79,7 @@ class FooPainter extends Painter {
   }
 }
 
-class FooHighlightEngine extends highlights.base.HighlightEngine {
+class FooHighlightEngine extends highlights.HighlightEngine {
   constructor(document) {
     super(document, FooPainter.create, new FooTokenStateMachine());
   }

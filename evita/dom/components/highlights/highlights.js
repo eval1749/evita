@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.provide('highlights.base');
+goog.provide('highlights');
 
 goog.scope(function() {
 
@@ -894,7 +894,7 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
   }
 }
 
-const namespace = highlights.base;
+const namespace = highlights;
 /** @constructor */
 namespace.HighlightEngine = HighlightEngine;
 /** @constructor */

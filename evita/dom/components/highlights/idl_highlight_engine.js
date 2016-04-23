@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.require('highlights.base');
+goog.require('highlights');
 
 goog.scope(function() {
 
 const IdlTokenStateMachine = highlights.IdlTokenStateMachine;
-const HighlightEngine = highlights.base.HighlightEngine;
-const KeywordPainter = highlights.base.KeywordPainter;
-const Token = highlights.base.Token;
+const HighlightEngine = highlights.HighlightEngine;
+const KeywordPainter = highlights.KeywordPainter;
+const Token = highlights.Token;
 
 /** @const @type {!Set<string>} */
 const staticIdlKeywords = highlights.staticIdlKeywords;

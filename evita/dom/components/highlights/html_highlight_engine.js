@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-goog.require('highlights.base');
+goog.require('highlights');
 goog.require('highlights.xml');
 
 goog.scope(function() {
 
 const HtmlTokenStateMachine = highlights.HtmlTokenStateMachine;
-const HighlightEngine = highlights.base.HighlightEngine;
-const Painter = highlights.base.Painter;
-const Token = highlights.base.Token;
-const Tokenizer = highlights.base.Tokenizer;
+const HighlightEngine = highlights.HighlightEngine;
+const Painter = highlights.Painter;
+const Token = highlights.Token;
+const Tokenizer = highlights.Tokenizer;
 const XmlPainter = highlights.xml.XmlPainter;
 
 /** @const @type {!Set<string>} */

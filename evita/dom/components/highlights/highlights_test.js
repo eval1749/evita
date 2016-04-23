@@ -4,8 +4,8 @@
 
 goog.scope(function() {
 
-const StateRangeMap = highlights.base.StateRangeMap;
-const Token = highlights.base.Token;
+const StateRangeMap = highlights.StateRangeMap;
+const Token = highlights.Token;
 
 /** @const @type {!Map<stirng, string>} */
 const kSyntaxMap = new Map();
@@ -22,8 +22,7 @@ function encodeSyntax(syntax) {
 function testPaint(painterCreator, stateMachine, text) {
   const document = new TextDocument();
   const painter = painterCreator.call(this, document);
-  const tokenizer =
-      new highlights.base.Tokenizer(document, painter, stateMachine);
+  const tokenizer = new highlights.Tokenizer(document, painter, stateMachine);
   const range = new TextRange(document);
   range.text = text;
   tokenizer.doColor(document.length);

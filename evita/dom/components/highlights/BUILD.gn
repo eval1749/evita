@@ -13,6 +13,7 @@ action_foreach("token_state_machines") {
     "idl_tokens.xml",
     "java_tokens.xml",
     "javascript_tokens.xml",
+    "plain_tokens.xml",
     "python_tokens.xml",
     "xml_tokens.xml",
     "xmltag_tokens.xml",

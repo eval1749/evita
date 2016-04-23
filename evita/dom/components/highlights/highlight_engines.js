@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+goog.provide('highlights.HighlightEngines');
+
 goog.require('highlights');
 
 goog.scope(function() {
@@ -22,9 +24,15 @@ class HighlightEngines {
 
   /**
    * @param {string} name
-   * @return {?HighlightEngineCreator}
+   * @param {!TextDocument} document
+   * @return {!HighlightEngine}
    */
-  static engineFor(name) { return staticEngineMap.get(name) || null; }
+  static createEngine(name, document) {
+    const creator = staticEngineMap.get(name) || null;
+    if (!creator)
+      throw new Error(`No engine for '${name}'`);
+    return creator.call(this, document);
+  }
 
   /**
    * @param {string} name

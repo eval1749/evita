@@ -8,7 +8,7 @@
             value="\s+[A-Za-z][\w:]+(=([^&lt;&apos;&quot;&gt;\s]+|&quot;[^&lt;&quot;]+&quot;|'[^&lt;']+'))?" />
 
   <token name="comment" type="comment" pattern="&lt;!--.*?-->" />
-  <token name="doctype" type="keyword" pattern="&lt;!\w+(\s*\S+)*>" />
+  <token name="doctype" type="keyword" pattern="&lt;!\w+(\s+[^\s>]+)*>" />
 
   <!-- Note: <script> is tokenized into "startTag" -->
   <token name="script" type="script"

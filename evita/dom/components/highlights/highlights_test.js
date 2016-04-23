@@ -207,6 +207,7 @@ testing.test('GnPainter', function(t) {
 testing.test('HtmlPainter', function(t) {
   const machine = new highlights.HtmlTokenStateMachine();
   const paint = testPaint.bind(this, highlights.HtmlPainter.create, machine);
+  t.expect(paint('<!doctype html>foo')).toEqual('k15 _3');
   t.expect(
        paint(
            '<script>\n' +
@@ -343,6 +344,8 @@ testing.test('XmlPainter', function(t) {
   t.expect(paint('<foo id=\'12\'>')).toEqual('k1 e3 _1 a2 k2 v2 k2');
   t.expect(paint('<foo id="1"/>')).toEqual('k1 e3 _1 a2 k2 v1 k3');
   t.expect(paint('<foo id=foo/>')).toEqual('k1 e3 _1 a2 k1 v3 k2');
+
+  t.expect(paint('<!doctype html>foo')).toEqual('k15 _3');
 
   // XML keywords
   t.expect(paint('<p:foo xml:p="ns-uri">')).toEqual('k1 e5 _1 a5 k2 v6 k2');

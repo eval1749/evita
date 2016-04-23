@@ -189,7 +189,7 @@
   <keyword>Math.cosh</keyword>
   <keyword>Math.exp</keyword>
 
-  <keyword>Math.exm1</keyword>
+  <keyword>Math.expm1</keyword>
   <keyword>Math.floor</keyword>
   <keyword>Math.fround</keyword>
   <keyword>Math.hypot</keyword>

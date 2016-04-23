@@ -530,8 +530,8 @@ class Tokenizer {
       return;
 
     /** @type {StateRange} */
-    let currentRange = this.rangeMap_.rangeEndsAt(this.scanOffset_);
-    this.log(0, 'start', this.scanOffset_, 'currentRange', currentRange);
+    let range = this.rangeMap_.rangeEndsAt(this.scanOffset_);
+    this.log(0, 'start', 'range', range);
 
     /** @type {Token} */
     let token = null;
@@ -540,10 +540,10 @@ class Tokenizer {
       // Since pattern doesn't support "^", we treat start of document as
       // following of newline character.
       this.stateMachine_.updateState(Unicode.LF);
-    } else if (currentRange && !this.shouldResetState(currentRange.state)) {
+    } else if (range && !this.shouldResetState(range.state)) {
       // Since, previous range isn't accepted yet, we should extent it.
-      this.stateMachine_.resetTo(currentRange.state);
-      token = currentRange.token;
+      this.stateMachine_.resetTo(range.state);
+      token = range.token;
     }
 
     for (let scanOffset = this.scanOffset_; scanOffset < scanEnd;
@@ -555,16 +555,14 @@ class Tokenizer {
       /** @type {number} */
       let state = this.stateMachine_.updateState(charCode);
       this.log(0, 'scanOffset', scanOffset, charCode, 'state', state);
-      if (state === lastState && currentRange)
+      if (state === lastState && range)
         continue;
-      if (currentRange)
-        this.endStateRange(currentRange, scanOffset);
+      if (range)
+        this.endRange(range, scanOffset);
       if (state === 0) {
         // |charCode| doesn't belong to current token.
-        if (token !== null) {
-          this.paintToken(token);
-          token = null;
-        }
+        this.endToken(token);
+        token = null;
         state = this.stateMachine_.updateState(charCode);
       }
 
@@ -579,25 +577,22 @@ class Tokenizer {
         this.rangeMap_.remove(nextRange);
       }
 
-      currentRange = this.newStateRange(scanOffset, state, token);
-      if (!this.shouldResetState(state)) {
-        token = currentRange.token;
+      token = this.startOrExtendToken(scanOffset, state, token);
+      range = this.startRange(scanOffset, state, token);
+      if (!this.shouldResetState(state))
         continue;
-      }
       // |charCode| terminates current token.
       this.stateMachine_.resetTo(0);
-      if (token === null)
-        continue;
-      this.paintToken(token);
+      this.endToken(token);
       token = null;
     }
+    this.log(0, 'END', scanEnd, range);
     this.scanOffset_ = scanEnd;
-    this.log(0, 'END', this.scanOffset_, currentRange);
 
-    if (currentRange === null)
+    if (range === null)
       return;
-    this.endStateRange(currentRange, scanEnd);
-    this.paintToken(currentRange.token);
+    this.endRange(range, scanEnd);
+    this.endToken(range.token);
   }
 
   /**
@@ -605,12 +600,23 @@ class Tokenizer {
    * @param {!StateRange} range
    * @param {number} end
    */
-  endStateRange(range, end) {
-    this.log(0, 'endStateRange', range, end);
+  endRange(range, end) {
+    this.log(0, 'endRange', range, end);
     if (range.end < end)
       this.rangeMap_.removeBetween(range.end, end);
     range.end = end;
     range.token.end = end;
+  }
+
+  /**
+   * @private
+   * @param {Token} token
+   */
+  endToken(token) {
+    if (token === null)
+      return;
+    this.log(0, 'paint', token);
+    return this.painter_.paint(token);
   }
 
   /**
@@ -632,45 +638,49 @@ class Tokenizer {
 
   /**
    * @private
-   * @param {number} scanOffset
-   * @param {number} state
-   * @param {Token} token
-   * @return {!StateRange}
-   */
-  newStateRange(scanOffset, state, token) {
-    const syntax = this.stateMachine_.syntaxOf(state);
-    if (token === null) {
-      token = new Token(this.document_, scanOffset, scanOffset + 1, syntax);
-    } else if (token.syntax === '') {
-      token.syntax = syntax;
-      token.end = scanOffset + 1;
-    } else if (token.syntax === syntax) {
-      token.end = scanOffset + 1;
-    } else {
-      token.end = scanOffset;
-      this.paintToken(token);
-      token = new Token(this.document_, scanOffset, scanOffset + 1, syntax);
-    }
-    const range = this.rangeMap_.add(scanOffset, scanOffset + 1, state, token);
-    this.log(0, 'newStateRange', range, token);
-    return range;
-  }
-
-  /**
-   * @private
-   * @param {!Token} token
-   */
-  paintToken(token) {
-    this.log(0, 'paint', token);
-    return this.painter_.paint(token);
-  }
-
-  /**
-   * @private
    * @param {number} state
    * @return {boolean}
    */
   shouldResetState(state) { return this.stateMachine_.isAcceptable(state); }
+
+  /**
+   * @private
+   * @param {number} scanOffset
+   * @param {number} state
+   * @param {Token} token
+   * @return {!Token}
+   */
+  startOrExtendToken(scanOffset, state, token) {
+    const syntax = this.stateMachine_.syntaxOf(state);
+    if (token === null)
+      return new Token(this.document_, scanOffset, scanOffset + 1, syntax);
+
+    if (token.syntax === '') {
+      token.syntax = syntax;
+      token.end = scanOffset + 1;
+      return token;
+    }
+
+    if (token.syntax === syntax) {
+      token.end = scanOffset + 1;
+      return token;
+    }
+
+    token.end = scanOffset;
+    this.endToken(token);
+    return new Token(this.document_, scanOffset, scanOffset + 1, syntax);
+  }
+
+  /**
+   * @private
+   * @param {number} scanOffset
+   * @param {number} state
+   * @param {!Token} token
+   * @return {!StateRange}
+   */
+  startRange(scanOffset, state, token) {
+    return this.rangeMap_.add(scanOffset, scanOffset + 1, state, token);
+  }
 
   /**
    * Implements Object.toString

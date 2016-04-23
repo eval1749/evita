@@ -388,13 +388,6 @@ class Painter {
    * @return {string}
    */
   textOf(token) { return this.document_.slice(token.start, token.end); }
-
-  /**
-   * @public
-   * @param {!TextDocument} document
-   * @return {!Painter}
-   */
-  static create(document) { return new Painter(document); }
 }
 
 /*

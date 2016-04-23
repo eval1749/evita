@@ -1,0 +1,236 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens name="java">
+  <token name="block_comment" type="comment" pattern="/[*][^*]*[*]+([^/*][^*]*[*]+)*/" />
+  <token name="line_comment" type="comment" pattern="//([^\n]|\\.)*" />
+  <token name="string1" type="string_literal" pattern="'([^\\']|\\.)*'" />
+  <token name="string2" type="string_literal" pattern='"([^\\"]|\\.)*"' />
+
+  <token name="name" type="identifier"
+    pattern="@?[A-Za-z_]\w*([.][A-Za-z_]\w*)*:?" />
+
+  <token name="operator" type="operator"
+         pattern="[!%&amp;()*,\-.;&lt;=&gt;?[\]{|}~]+"/>
+  <token name="whitespaces" type="whitespace" pattern="\s+"/>
+
+  <!-- Keywords -->
+  <keyword>abstract</keyword>
+  <keyword>assert</keyword>
+  <keyword>boolean</keyword>
+  <keyword>break</keyword>
+  <keyword>byte</keyword>
+  <keyword>case</keyword>
+  <keyword>catch</keyword>
+  <keyword>char</keyword>
+  <keyword>class</keyword>
+  <keyword>const</keyword>
+  <keyword>continue</keyword>
+  <keyword>default</keyword>
+  <keyword>do</keyword>
+  <keyword>double</keyword>
+  <keyword>else</keyword>
+  <keyword>enum</keyword>
+  <keyword>extends</keyword>
+  <keyword>final</keyword>
+  <keyword>finally</keyword>
+  <keyword>float</keyword>
+  <keyword>for</keyword>
+  <keyword>if</keyword>
+  <keyword>goto</keyword>
+  <keyword>implements</keyword>
+  <keyword>import</keyword>
+  <keyword>instanceof</keyword>
+  <keyword>int</keyword>
+  <keyword>interface</keyword>
+  <keyword>long</keyword>
+  <keyword>native</keyword>
+  <keyword>new</keyword>
+  <keyword>package</keyword>
+  <keyword>private</keyword>
+  <keyword>protected</keyword>
+  <keyword>public</keyword>
+  <keyword>return</keyword>
+  <keyword>short</keyword>
+  <keyword>static</keyword>
+  <keyword>strictfp</keyword>
+  <keyword>super</keyword>
+  <keyword>switch</keyword>
+  <keyword>synchronized</keyword>
+  <keyword>this</keyword>
+  <keyword>throw</keyword>
+  <keyword>throws</keyword>
+  <keyword>transient</keyword>
+  <keyword>try</keyword>
+  <keyword>void</keyword>
+  <keyword>volatile</keyword>
+  <keyword>while</keyword>
+
+  <!-- Reserved label -->
+  <keyword>default:</keyword>
+
+  <!-- Literals -->
+  <keyword>false</keyword>
+  <keyword>null</keyword>
+  <keyword>true</keyword>
+
+  <!-- Interfaces in java.lang -->
+  <keyword>Appendable</keyword>
+  <keyword>CharSequence</keyword>
+  <keyword>Cloneable</keyword>
+  <keyword>Comparable</keyword>
+  <keyword>Iterable</keyword>
+  <keyword>Readable</keyword>
+  <keyword>Runnable</keyword>
+  <keyword>Thread.UncaughtExceptionHandler</keyword>
+
+  <!-- Classes in java.lang -->
+  <keyword>Boolean</keyword>
+  <keyword>Byte</keyword>
+  <keyword>Character</keyword>
+  <keyword>Character.Subset</keyword>
+  <keyword>Character.Unicode</keyword>
+  <keyword>Class</keyword>
+  <keyword>ClassLoader</keyword>
+  <keyword>Compiler</keyword>
+  <keyword>Double</keyword>
+  <keyword>Enum</keyword>
+  <keyword>Float</keyword>
+  <keyword>InheritableThreadLocal</keyword>
+  <keyword>Integer</keyword>
+  <keyword>Long</keyword>
+  <keyword>Math</keyword>
+  <keyword>Number</keyword>
+  <keyword>Object</keyword>
+  <keyword>Package</keyword>
+  <keyword>Process</keyword>
+  <keyword>ProcessBuilder</keyword>
+  <keyword>Runtime</keyword>
+  <keyword>RuntimePermission</keyword>
+  <keyword>SecurityManager</keyword>
+  <keyword>Short</keyword>
+  <keyword>StackTraceElement</keyword>
+  <keyword>StrictMath</keyword>
+  <keyword>String</keyword>
+  <keyword>StringBuffer</keyword>
+  <keyword>StringBuilder</keyword>
+  <keyword>System</keyword>
+  <keyword>Thread</keyword>
+  <keyword>ThreadGroup</keyword>
+  <keyword>ThreadLocal</keyword>
+  <keyword>Throwable</keyword>
+  <keyword>Void</keyword>
+
+  <!-- Exceptions in java.lang -->
+  <keyword>ArithmeticException</keyword>
+  <keyword>ArrayIndexOutOfBoundsException</keyword>
+  <keyword>ArrayStoreException</keyword>
+  <keyword>ClassCastException</keyword>
+  <keyword>ClassNotFoundException</keyword>
+  <keyword>CloneNotSupportedException</keyword>
+  <keyword>EnumConstantNotPresentException</keyword>
+  <keyword>Exception</keyword>
+  <keyword>IllegalAccessException</keyword>
+  <keyword>IllegalArgumentException</keyword>
+  <keyword>IllegalMonitorStateException</keyword>
+  <keyword>IllegalStateException</keyword>
+  <keyword>IllegalThreadStateException</keyword>
+  <keyword>IndexOutOfBoundsException</keyword>
+  <keyword>InstantiationException</keyword>
+  <keyword>InterruptedException</keyword>
+  <keyword>NegativeArraySizeException</keyword>
+  <keyword>NoSuchFieldException</keyword>
+  <keyword>NoSuchMethodException</keyword>
+  <keyword>NullPointerException</keyword>
+  <keyword>NumberFormatException</keyword>
+  <keyword>RuntimeException</keyword>
+  <keyword>SecurityException</keyword>
+  <keyword>StringIndexOutOfBoundsException</keyword>
+  <keyword>TypeNotPresentException</keyword>
+  <keyword>UnsupportedOperationException</keyword>
+
+  <!-- Errors in java.lang -->
+  <keyword>AbstractMethodError</keyword>
+  <keyword>AssertionError</keyword>
+  <keyword>ClassCircularityError</keyword>
+  <keyword>ClassFormatError</keyword>
+  <keyword>Error</keyword>
+  <keyword>ExceptionInInitializerError</keyword>
+  <keyword>IllegalAccessError</keyword>
+  <keyword>IncompatibleClassChangeError</keyword>
+  <keyword>InstantiationError</keyword>
+  <keyword>InternalError</keyword>
+  <keyword>LinkageError</keyword>
+  <keyword>NoClassDefFoundError</keyword>
+  <keyword>NoSuchFieldError</keyword>
+  <keyword>NoSuchMethodError</keyword>
+  <keyword>OutOfMemoryError</keyword>
+  <keyword>StackOverflowError</keyword>
+  <keyword>ThreadDeath</keyword>
+  <keyword>UnknownError</keyword>
+  <keyword>UnsatisfiedLinkError</keyword>
+  <keyword>UnsupportedClassVersionError</keyword>
+  <keyword>VerifyError</keyword>
+  <keyword>VirtualMachineError</keyword>
+
+  <!-- Methods of java.lang.Object -->
+  <keyword>.class</keyword>
+  <keyword>.clone</keyword>
+  <keyword>.equals</keyword>
+  <keyword>.finalize</keyword>
+  <keyword>.getClass</keyword>
+  <keyword>.hashCode</keyword>
+  <keyword>.notify</keyword>
+  <keyword>.notifyAll</keyword>
+  <keyword>.toString</keyword>
+  <keyword>.wait</keyword>
+
+  <!-- Annotations -->
+  <keyword>@Deprecated</keyword>
+  <keyword>@Override</keyword>
+  <keyword>@SuppressWarnings</keyword>
+
+  <keyword>Math.E</keyword>
+  <keyword>Math.PI</keyword>
+  <keyword>Math.abs</keyword>
+  <keyword>Math.acos</keyword>
+  <keyword>Math.acosh</keyword>
+  <keyword>Math.asin</keyword>
+  <keyword>Math.asinh</keyword>
+  <keyword>Math.atan</keyword>
+  <keyword>Math.atan2</keyword>
+  <keyword>Math.atanh</keyword>
+  <keyword>Math.cbrt</keyword>
+  <keyword>Math.ceil</keyword>
+  <keyword>Math.copysign</keyword>
+  <keyword>Math.cos</keyword>
+  <keyword>Math.cosh</keyword>
+  <keyword>Math.exp</keyword>
+  <keyword>Math.expm1</keyword>
+  <keyword>Math.floor</keyword>
+  <keyword>Math.fround</keyword>
+  <keyword>Math.hypot</keyword>
+  <keyword>Math.imul</keyword>
+  <keyword>Math.log</keyword>
+  <keyword>Math.log10</keyword>
+  <keyword>Math.log1p</keyword>
+  <keyword>Math.log2</keyword>
+  <keyword>Math.max</keyword>
+  <keyword>Math.min</keyword>
+  <keyword>Math.pow</keyword>
+  <keyword>Math.random</keyword>
+  <keyword>Math.rint</keyword>
+  <keyword>Math.round</keyword>
+  <keyword>Math.signum</keyword>
+  <keyword>Math.sin</keyword>
+  <keyword>Math.sinh</keyword>
+  <keyword>Math.sqrt</keyword>
+  <keyword>Math.tan</keyword>
+  <keyword>Math.tanh</keyword>
+  <keyword>Math.toDegrees</keyword>
+  <keyword>Math.toRadians</keyword>
+  <keyword>Math.trunc</keyword>
+  <keyword>Math.ulp</keyword>
+</tokens>

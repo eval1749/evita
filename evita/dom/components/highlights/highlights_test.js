@@ -238,6 +238,23 @@ testing.test('JavascriptPainter', function(t) {
   t.expect(paint('Foo.toString()')).toEqual('i3 o1 k8 o2');
 });
 
+testing.test('JavaPainter', function(t) {
+  const machine = new highlights.JavaTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.JavaPainter.create, machine);
+  t.expect(paint('default:')).toEqual('k8');
+  t.expect(paint('if')).toEqual('k2');
+  t.expect(paint('foo')).toEqual('i3');
+  t.expect(paint('/* foo */')).toEqual('c9');
+  t.expect(paint('// bar\nfoo')).toEqual('c6 w1 i3');
+  t.expect(paint('\'s1\';')).toEqual('s4 o1');
+  t.expect(paint('"s2";')).toEqual('s4 o1');
+  t.expect(paint('Math.sin(1)')).toEqual('k8 o3');
+  t.expect(paint('this.foo')).toEqual('k4 i4');
+  t.expect(paint('this.getClass()')).toEqual('k4 o1 k8 o2');
+  t.expect(paint('@Override\n')).toEqual('k9 w1');
+  t.expect(paint('@SuppressWarnings\n')).toEqual('k17 w1');
+});
+
 testing.test('HtmlPainter', function(t) {
   const machine = new highlights.HtmlTokenStateMachine();
   const paint = testPaint.bind(this, highlights.HtmlPainter.create, machine);

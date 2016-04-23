@@ -60,15 +60,16 @@ void LexersTest::SetUp() {
 }
 
 TEST_F(LexersTest, JavaLexer) {
-  EXPECT_SCRIPT_EQ("c9 n1 c6 n1 k5 n4 o1 n1 s4 o1 n3 k10 n4 o1 n1 s4 o1",
-                   "applySyntax(JavaLexer, ["
-                   "'/* foo */',"
-                   "'// bar',"
-                   "'class a1 = \\'s1\\';',"
-                   "'  instanceof a2 = \"s2\";',"
-                   "])");
+  EXPECT_SCRIPT_EQ(
+      "c9 w1 c6 w1 k5 w1 i2 w1 o1 w1 s4 o1 w3 k10 w1 i2 w1 o1 w1 s4 o1",
+      "applySyntax(JavaLexer, ["
+      "'/* foo */',"
+      "'// bar',"
+      "'class a1 = \\'s1\\';',"
+      "'  instanceof a2 = \"s2\";',"
+      "])");
 
-  EXPECT_SCRIPT_EQ("n1 k9 n1 k4 o1 n4 k10 o2 n4 k9 o2 n4 o1 n9",
+  EXPECT_SCRIPT_EQ("w1 k9 w1 k4 i4 w1 k4 o1 k5 o2 w1 i3 o1 k8 o2 w1 i13",
                    "applySyntax(JavaLexer, ['"
                    " @Override"
                    " this.foo"

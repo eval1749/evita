@@ -15,21 +15,22 @@ class OrderedSetNode {
   constructor(data) {
     /** @type {T} */
     this.data_ = data;
-    /** @type {base.OrderedSetNode<T>} */
+    /** @type {OrderedSetNode<T>} */
     this.left_ = null;
-    /** @type {base.OrderedSetNode<T>} */
+    /** @type {OrderedSetNode<T>} */
     this.parent_ = null;
     /** @type {number} */
     this.priority_ = Math.random();
-    /** @type {base.OrderedSetNode<T>} */
+    /** @type {OrderedSetNode<T>} */
     this.right_ = null;
   }
 
-  /** TODO(eval1749) Closure compiler doesn't recognize: $return {T} */
+  /// TODO(eval1749) Closure compiler doesn't recognize T.
+  /** $return {T} */
   get data() { return this.data_; }
 
   /**
-   * @return {base.OrderedSetNode<T>}
+   * @return {OrderedSetNode<T>}
    */
   next() {
     let node = this;
@@ -50,7 +51,7 @@ class OrderedSetNode {
   }
 
   /**
-   * @return {base.OrderedSetNode<T>}
+   * @return {OrderedSetNode<T>}
    */
   previous() {
     let node = this;
@@ -77,7 +78,7 @@ class OrderedSetNode {
 /**
  * @template T
  * @param {!base.OrderedSetNode<T>} node
- * @return {base.OrderedSetNode<T>}
+ * @return {OrderedSetNode<T>}
  */
 function removeNodeInternal(node) {
   if (!node.left_)
@@ -135,12 +136,12 @@ function rotateRight(node) {
 class OrderedSet {
   /**
    * @template T
-   * @param {!function(T, T): boolean} less
+   * @param {!function(!T, !T): boolean} less
    */
   constructor(less) {
-    /** @const @type {!function(T, T): boolean} */
+    /** @const @type {!function(!T, !T): boolean} */
     this.less_ = less;
-    /** @type {base.OrderedSetNode<T>} */
+    /** @type {OrderedSetNode<T>} */
     this.root_ = null;
     /** @type {number} */
     this.size_ = 0;
@@ -157,7 +158,7 @@ class OrderedSet {
 
   /**
    * @private
-   * @param {base.OrderedSetNode<T>} parent
+   * @param {OrderedSetNode<T>} parent
    * @param {!base.OrderedSetNode<T>} node
    * @return {!base.OrderedSetNode<T>}
    */
@@ -190,7 +191,7 @@ class OrderedSet {
 
   /**
    * @param {T} data
-   * @return {base.OrderedSetNode<T>}
+   * @return {OrderedSetNode<T>}
    */
   find(data) {
     const node = this.lowerBound(data);
@@ -205,7 +206,8 @@ class OrderedSet {
       callback(data);
   }
 
-  /** TODO(eval1749) Closure compiler doesn't recognize: @return {T} */
+  /// TODO(eval1749) Closure compiler doesn't recognize T.
+  /** $return {T} */
   get maximum() {
     let node = this.root_;
     if (!node)
@@ -215,7 +217,8 @@ class OrderedSet {
     return node.data;
   }
 
-  /** TODO(eval1749) Closure compiler doesn't recognize: @return {T} */
+  /// TODO(eval1749) Closure compiler doesn't recognize T.
+  /** $return {T} */
   get minimum() {
     let node = this.root_;
     if (!node)
@@ -230,7 +233,7 @@ class OrderedSet {
 
   /**
    * @param {T} data
-   * @return {base.OrderedSetNode<T>}
+   * @return {OrderedSetNode<T>}
    */
   lowerBound(data) {
     let node = this.root_;

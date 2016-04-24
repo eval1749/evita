@@ -143,6 +143,22 @@ testing.test('CppStateRangeStateMachine', function(t) {
       .toEqual('c11');
 });
 
+testing.test('CmdPainter', function(t) {
+  const machine = new highlights.CmdTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.CmdPainter.create, machine);
+  t.expect(paint('dir')).toEqual('k3');
+  t.expect(paint('if')).toEqual('k2');
+  t.expect(paint('rmdir foo')).toEqual('k5 _4');
+  t.expect(paint('foo')).toEqual('i3');
+  t.expect(paint('  regex')).toEqual('_2 i5');
+  t.expect(paint('"foo"')).toEqual('_5');
+  t.expect(paint('rem remark')).toEqual('k3 c7');
+  t.expect(paint(': comment')).toEqual('c9');
+  t.expect(paint(':label')).toEqual('l6');
+  t.expect(paint('%1')).toEqual('_2');
+  t.expect(paint('%var%')).toEqual('_5');
+});
+
 testing.test('ConfigPainter', function(t) {
   const machine = new highlights.ConfigTokenStateMachine();
   const paint = testPaint.bind(this, highlights.ConfigPainter.create, machine);

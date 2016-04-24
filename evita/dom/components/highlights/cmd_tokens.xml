@@ -1,0 +1,117 @@
+<!--
+== Copyright (c) 2016 Project Vogue. All rights reserved.
+== Use of this source code is governed by a BSD-style license that can be
+== found in the LICENSE file.
+-->
+<tokens id="cmd">
+  <token name="line" type="line" pattern="[^\n]+\n" />
+  <token name="blank_line" type="blank_line" pattern="\n+" />
+
+  <dummy name="string2" type="string_literal" pattern='"[^"]*"' />
+  <dummy name="string3" type="string_literal" pattern="`[^`]`" />
+
+  <dummy name="name" type="identifier" pattern="\s*\w+" />
+  <dummy name="remark" type="remark" pattern="\s*rem\s+[^\n]*" />
+
+  <!-- e.g. %PATH:~10,20% -->
+  <dummy name="variable" type="variable" pattern="%\w+(:[\d,]+)?%" />
+
+  <!-- e.g. %1 %2 ... %9 %* -->
+  <dummy name="variable2" type="parameter" pattern="%[\d*]" />
+
+  <!-- for statement: %~fI -->
+  <dummy name="variable3" type="variable" pattern="%~\w+(:\w)" />
+
+
+  <!-- Keywords -->
+  <keyword>assoc</keyword>
+  <keyword>attrib</keyword>
+  <keyword>break</keyword>
+  <keyword>bcdedit</keyword>
+  <keyword>cacls</keyword>
+  <keyword>call</keyword>
+  <keyword>cd</keyword>
+  <keyword>chcp</keyword>
+  <keyword>chdir</keyword>
+  <keyword>chkdsk</keyword>
+  <keyword>chkntfs</keyword>
+  <keyword>cls</keyword>
+  <keyword>cmd</keyword>
+  <keyword>color</keyword>
+  <keyword>comp</keyword>
+  <keyword>compact</keyword>
+  <keyword>convert</keyword>
+  <keyword>copy</keyword>
+  <keyword>date</keyword>
+  <keyword>del</keyword>
+  <keyword>dir</keyword>
+  <keyword>diskcomp</keyword>
+  <keyword>diskcopy</keyword>
+  <keyword>diskpart</keyword>
+  <keyword>doskey</keyword>
+  <keyword>driverquery</keyword>
+  <keyword>echo</keyword>
+  <keyword>endlocal</keyword>
+  <keyword>erase</keyword>
+  <keyword>exit</keyword>
+  <keyword>fc</keyword>
+  <keyword>find</keyword>
+  <keyword>findstr</keyword>
+  <keyword>for</keyword>
+  <keyword>format</keyword>
+  <keyword>fsutil</keyword>
+  <keyword>ftype</keyword>
+  <keyword>goto</keyword>
+  <keyword>gpresult</keyword>
+  <keyword>graftabl</keyword>
+  <keyword>help</keyword>
+  <keyword>icacls</keyword>
+  <keyword>if</keyword>
+  <keyword>label</keyword>
+  <keyword>md</keyword>
+  <keyword>mkdir</keyword>
+  <keyword>mklink</keyword>
+  <keyword>mode</keyword>
+  <keyword>more</keyword>
+  <keyword>move</keyword>
+  <keyword>openfiles</keyword>
+  <keyword>path</keyword>
+  <keyword>pause</keyword>
+  <keyword>popd</keyword>
+  <keyword>print</keyword>
+  <keyword>prompt</keyword>
+  <keyword>pushd</keyword>
+  <keyword>rd</keyword>
+  <keyword>recover</keyword>
+  <keyword>rem</keyword>
+  <keyword>ren</keyword>
+  <keyword>rename</keyword>
+  <keyword>replace</keyword>
+  <keyword>rmdir</keyword>
+  <keyword>robocopy</keyword>
+  <keyword>set</keyword>
+  <keyword>setlocal</keyword>
+  <keyword>sc</keyword>
+  <keyword>schtasks</keyword>
+  <keyword>shift</keyword>
+  <keyword>shutdown</keyword>
+  <keyword>sort</keyword>
+  <keyword>start</keyword>
+  <keyword>subst</keyword>
+  <keyword>systeminfo</keyword>
+  <keyword>tasklist</keyword>
+  <keyword>taskkill</keyword>
+  <keyword>time</keyword>
+  <keyword>title</keyword>
+  <keyword>tree</keyword>
+  <keyword>type</keyword>
+  <keyword>ver</keyword>
+  <keyword>verify</keyword>
+  <keyword>vol</keyword>
+  <keyword>xcopy</keyword>
+  <keyword>wmic</keyword>
+
+  <!-- for -->
+  <keyword origin="for">do</keyword>
+  <keyword origin="for">in</keyword>
+</tokens>

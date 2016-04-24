@@ -8,6 +8,7 @@ goog.scope(function() {
 
 const Mode = modes.Mode;
 
+Mode.registerMode('cmd', 'CommandScript');
 Mode.registerMode('config', 'Config');
 Mode.registerMode('c++', 'C++');
 Mode.registerMode('c#', 'C#');
@@ -26,9 +27,11 @@ Mode.registerModeAlias('mason', 'Mason', 'html');
 Mode.registerModeAlias('perl', 'Perl', 'python');
 
 Mode.registerExtension('asdl', 'xml', 'ASDL Document');
+Mode.registerExtension('bat', 'cmd', 'Windows Command Script');
 Mode.registerExtension('cc', 'c++', 'C++ Source');
 Mode.registerExtension('cfg', 'config', 'Config File');
 Mode.registerExtension('cl', 'c++', 'CommonLisp Source');
+Mode.registerExtension('cmd', 'cmd', 'Windows Command Script');
 Mode.registerExtension('cpp', 'c++', 'C++ Source');
 Mode.registerExtension('cs', 'c#', 'C# Source');
 Mode.registerExtension('css', 'c++', 'Cascading Style Sheet Document');

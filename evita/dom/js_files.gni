@@ -98,6 +98,7 @@ js_lib_files = [
   "$root_gen_dir/evita/dom/components/highlights/xmltag_tokens.js",
   "components/highlights/tag_painter.js",
 
+  "$root_gen_dir/evita/dom/components/highlights/cmd_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/config_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/cpp_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/csharp_tokens.js",
@@ -110,6 +111,7 @@ js_lib_files = [
   "$root_gen_dir/evita/dom/components/highlights/python_tokens.js",
   "$root_gen_dir/evita/dom/components/highlights/xml_tokens.js",
 
+  "components/highlights/cmd_painter.js",
   "components/highlights/config_painter.js",
   "components/highlights/cpp_painter.js",
   "components/highlights/csharp_painter.js",

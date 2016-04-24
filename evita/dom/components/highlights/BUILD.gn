@@ -5,6 +5,7 @@
 action_foreach("token_state_machines") {
   script = "scripts/make_token_state_machine.py"
   sources = [
+    "cmd_tokens.xml",
     "config_tokens.xml",
     "cpp_tokens.xml",
     "csharp_tokens.xml",

@@ -23,8 +23,7 @@ function testPaint(painterCreator, stateMachine, text) {
   const document = new TextDocument();
   const painter = painterCreator.call(this, document);
   const tokenizer = new highlights.Tokenizer(document, painter, stateMachine);
-  const range = new TextRange(document);
-  range.text = text;
+  document.replace(0, 0, text);
   tokenizer.doColor(document.length);
   const result = [];
   let tokenSyntax = '';

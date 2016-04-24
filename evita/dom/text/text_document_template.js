@@ -27,15 +27,10 @@ var TextDocumentTemplate;
     const template = templateMap.get(matches[1]);
     if (!template)
       return;
-    const range = new TextRange(document);
-    if (typeof(template) === 'string') {
-      range.text = template;
-      return;
-    }
-    if (typeof(template) === 'function') {
-      range.text = template(document);
-      return;
-    }
+    if (typeof(template) === 'string')
+      return document.replace(0, 0, template);
+    if (typeof(template) === 'function')
+      return document.replace(0, 0, template(document));
   }
 
   /**

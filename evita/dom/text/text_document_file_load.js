@@ -98,7 +98,6 @@
       this.file_ = null;
       this.firstRead_ = true;
       this.readonly_ = document.readonly;
-      this.range_ = new TextRange(document);
     }
 
     close() {
@@ -116,14 +115,14 @@
 
       // Display loading result
       // Note: We may display text in wrong encoding.
+      /** @const @type {!TextDocument} */
       const document = this.document_;
       document.readonly = false;
       const decoder = detector.decoders[0];
-      const range = this.range_;
+      /** @const @type {string} */
       const string =
           decoder.strings[decoder.strings.length - 1].replace(RE_CR, '');
-      range.text = string;
-      range.collapseTo(range.end);
+      document.replace(document.length, document.length, string);
       document.readonly = true;
 
       // TDOO(eval1749): We should have loading progress UI feedback since we
@@ -139,8 +138,6 @@
         const detector = new EncodingDetector();
         // Remember |readonly| property for restoring on error.
         const readonly = loader.document_.readonly;
-        loader.range_.start = 0;
-        loader.range_.end = loader.document_.length;
         loader.file_ = yield Os.File.open(fileName);
         const file = loader.file_;
         const readData = new Uint8Array(kBufferSize);
@@ -167,10 +164,8 @@
       const document = this.document_;
 
       // Adjust newline character
-      const range = this.range_;
-      range.start = 0;
-      range.end = document.length;
       document.readonly = false;
+      document.replace(0, document.length, '');
       let newline = Newline.UNKNOWN;
       decoder.strings.forEach(function(string) {
         if (newline === Newline.UNKNOWN) {
@@ -181,8 +176,7 @@
         }
         if (newline === Newline.CRLF)
           string = string.replace(RE_CR, '');
-        range.text = string;
-        range.collapseTo(range.end);
+        document.replace(document.length, document.length, string);
       });
       resetSelections(document);
 

@@ -16,13 +16,8 @@ function ensureDocument(name) {
   SpellChecker.disable(document);
 
   // Bind "Ctrl+L" to clear document.
-  document.bindKey('Ctrl+L', function() {
-    // TODO(eval1749): We should use |TextDocument.prototype.splice()|.
-    const range = this.selection.range;
-    range.collapseTo(0);
-    range.end = range.document.length;
-    range.text = '';
-  });
+  document.bindKey(
+      'Ctrl+L', function() { document.replace(0, document.length, ''); });
 
   return document;
 }

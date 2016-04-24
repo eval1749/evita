@@ -229,7 +229,7 @@ class StateRangeMap extends Logger {
         // ....dirty....
         //   >---<
         if (token.end === range.end)
-          token.end = headCount;
+          Token.setEnd(token, headCount);
         range.end = headCount;
         continue;
       }
@@ -262,9 +262,9 @@ class StateRangeMap extends Logger {
       /** @const @type {!Token} */
       const token = range.token;
       if (token.start === range.start)
-        token.start += delta;
+        Token.setStart(token, token.start + delta);
       if (token.end === range.end)
-        token.end += delta;
+        Token.setEnd(token, token.end + delta);
       range.start += delta;
       range.end += delta;
     }
@@ -527,26 +527,14 @@ class Token {
   /** @public @return {number} */
   get end() { return this.end_; }
 
-  /** @public @param {number} newEnd */
-  set end(newEnd) {
-    console.assert(this.start_ < newEnd, 'newEnd', newEnd, this);
-    this.end_ = newEnd;
-  }
-
   /** @public @return {number} */
   get length() { return this.end_ - this.start_; }
 
   /** @public @return {number} */
   get start() { return this.start_; }
 
-  /** @public @param {number} newStart */
-  set start(newStart) { this.start_ = newStart; }
-
   /** @public @return {string} */
   get syntax() { return this.syntax_; }
-
-  /** @public @param {string} newSyntax */
-  set syntax(newSyntax) { this.syntax_ = newSyntax; }
 
   /**
    * @public
@@ -556,6 +544,33 @@ class Token {
     const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
     return `Token(${this.start_}, ${this.end_}, ${text}, '${this.syntax}')`;
   }
+
+  /**
+   * @public
+   * @param {!Token} token
+   * @param {number} newEnd
+   */
+  static setEnd(token, newEnd) {
+    console.assert(token.start_ < newEnd, 'newEnd', newEnd, token);
+    token.end_ = newEnd;
+  }
+
+  /**
+   * @public
+   * @param {!Token} token
+   * @param {number} newStart
+   */
+  static setStart(token, newStart) {
+    console.assert(newStart < token.end_, 'newStart', newStart, token);
+    token.start_ = newStart;
+  }
+
+  /**
+   * @public
+   * @param {!Token} token
+   * @param {string} newSyntax
+   */
+  static setSyntax(token, newSyntax) { token.syntax_ = newSyntax; }
 }
 
 /*
@@ -646,7 +661,7 @@ class Tokenizer extends Logger {
     if (range.end < end)
       this.rangeMap_.removeBetween(range.end, end);
     range.end = end;
-    range.token.end = end;
+    Token.setEnd(range.token, end);
   }
 
   /**
@@ -804,17 +819,17 @@ class Tokenizer extends Logger {
       return new Token(this.document_, scanOffset, scanOffset + 1, syntax);
 
     if (token.syntax === '') {
-      token.syntax = syntax;
-      token.end = scanOffset + 1;
+      Token.setSyntax(token, syntax);
+      Token.setEnd(token, scanOffset + 1);
       return token;
     }
 
     if (token.syntax === syntax) {
-      token.end = scanOffset + 1;
+      Token.setEnd(token, scanOffset + 1);
       return token;
     }
 
-    token.end = scanOffset;
+    Token.setEnd(token, scanOffset);
     this.endToken(token);
     return new Token(this.document_, scanOffset, scanOffset + 1, syntax);
   }

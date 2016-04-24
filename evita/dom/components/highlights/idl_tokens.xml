@@ -23,7 +23,6 @@
   <keyword>callback</keyword>
   <keyword>const</keyword>
   <keyword>creator</keyword>
-
   <keyword>Date</keyword>
   <keyword>deleter</keyword>
   <keyword>dictionary</keyword>
@@ -31,14 +30,12 @@
   <keyword>double</keyword>
   <keyword>enum</keyword>
   <keyword>exception</keyword>
-
   <keyword>false</keyword>
   <keyword>float</keyword>
   <keyword>getter</keyword>
   <keyword>implements</keyword>
   <keyword>Infinity</keyword>
   <keyword>inherit</keyword>
-
   <keyword>interface</keyword>
   <keyword>legacycaller</keyword>
   <keyword>long</keyword>
@@ -46,7 +43,6 @@
   <keyword>null</keyword>
   <keyword>object</keyword>
   <keyword>octet</keyword>
-
   <keyword>optional</keyword>
   <keyword>or</keyword>
   <keyword>partial</keyword>
@@ -54,14 +50,12 @@
   <keyword>sequence</keyword>
   <keyword>setter</keyword>
   <keyword>short</keyword>
-
   <keyword>static</keyword>
   <keyword>stringifier</keyword>
   <keyword>typedef</keyword>
   <keyword>true</keyword>
   <keyword>unsigned</keyword>
   <keyword>unrestricted</keyword>
-
   <keyword>void</keyword>
 
   <!-- Reserved identifiers -->
@@ -75,16 +69,13 @@
   <keyword>Constructor</keyword>
   <keyword>EnforceRange</keyword>
   <keyword>ImplicitThis</keyword>
-
   <keyword>LenientThis</keyword>
   <keyword>NamedConstructor</keyword>
   <keyword>NamedPropertiesObject</keyword>
-
   <keyword>NoInterfaceObject</keyword>
   <keyword>OverrideBuiltins</keyword>
   <keyword>PutForwards</keyword>
   <keyword>Replaceable</keyword>
-
   <keyword>TreatNonCallableAsNull</keyword>
   <keyword>TreatNullAs</keyword>
   <keyword>TreatUndefinedAs</keyword>
@@ -92,4 +83,5 @@
 
   <!-- Extended attributes in Blink IDL -->
   <keyword>ImplementedAs</keyword>
+  <keyword>RaisesException</keyword>
 </tokens>

@@ -51,6 +51,33 @@ function extractSample(document, start, end, maxChars) {
 }
 
 /*
+ * Simple logger
+ */
+class Logger {
+  constructor() {
+    /** @type {number} */
+    this.verbose_ = 0;
+  }
+
+  /** @public @return {number} */
+  get verbose() { return this.verbose_; }
+
+  /** @public @param {number} level */
+  set verbose(level) { this.verbose_ = level; }
+
+  /**
+   * @private
+   * @param {number} level
+   * @param {...*} args
+   */
+  log(level, ...args) {
+    if (level >= this.verbose_)
+      return;
+    console.log(this, ...args);
+  }
+}
+
+/*
  * |StateRange| represents tokenization state machine state in |TextDocument|
  * in range.
  */
@@ -138,33 +165,6 @@ class StateRange {
     const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
     return `StateRange(${this.start_}, ${this.end_}, ${text}, ` +
         `state:${this.state_}, '${this.token.syntax}')`;
-  }
-}
-
-/*
- * Simple logger
- */
-class Logger {
-  constructor() {
-    /** @type {number} */
-    this.verbose_ = 0;
-  }
-
-  /** @public @return {number} */
-  get verbose() { return this.verbose_; }
-
-  /** @public @param {number} level */
-  set verbose(level) { this.verbose_ = level; }
-
-  /**
-   * @private
-   * @param {number} level
-   * @param {...*} args
-   */
-  log(level, ...args) {
-    if (level >= this.verbose_)
-      return;
-    console.log.apply(console, args);
   }
 }
 

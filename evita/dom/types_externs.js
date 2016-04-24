@@ -167,3 +167,6 @@ Unicode.UCD;
  * @return {!RegExp}
  */
 function NewRegExp(source, opt_flags) {}
+
+/** @const @type {!repl.Console} */
+var console;

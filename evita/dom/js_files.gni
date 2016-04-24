@@ -138,6 +138,7 @@ js_lib_files = [
   "components/spell_checker/spell_checker.js",
   "components/win_resource/win_resource.js",
 
+  "components/repl/repl.js",
   "components/repl/console.js",
   "components/repl/describe.js",
   "components/repl/js_console.js",

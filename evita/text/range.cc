@@ -66,16 +66,12 @@ void Range::set_text(const base::string16& text) {
     return;
   }
 
-  auto const start = start_;
-  if (start_ == end_) {
-    ScopedUndoGroup oUndo(this, L"Range.SetText");
-    buffer_->InsertBefore(start_, text);
-  } else {
-    ScopedUndoGroup oUndo(this, L"Range.SetText");
-    buffer_->Delete(start_, end_);
-    buffer_->InsertBefore(start_, text);
+  const auto start = start_;
+  {
+    ScopedUndoGroup undo_scope(this, L"Range.SetText");
+    buffer_->Replace(start_, end_, text);
   }
-  auto const end = start + OffsetDelta(text.length());
+  const auto end = start + OffsetDelta(text.length());
   SetRange(start, EnsureOffset(end));
 }
 

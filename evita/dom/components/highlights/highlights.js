@@ -10,6 +10,9 @@ goog.scope(function() {
 const OrderedSet = base.OrderedSet;
 
 /** @const */
+const OrderedSetNode = base.OrderedSetNode;
+
+/** @const */
 const asStringLiteral = base.asStringLiteral;
 
 /**

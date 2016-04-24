@@ -117,11 +117,11 @@ idl_lexer_parser_files = [
 ]
 
 static_js_externs_files = [
-  "//evita/dom/base/base_externs.js",
-  "//evita/dom/base/base64_externs.js",
-  "//evita/dom/base/logging_externs.js",
-  "//evita/dom/base/ordered_set_externs.js",
-  "//evita/dom/base/strings/string_util_externs.js",
+  #"//evita/dom/base/base_externs.js",
+  #"//evita/dom/base/base64_externs.js",
+  #"//evita/dom/base/logging_externs.js",
+  #"//evita/dom/base/ordered_set_externs.js",
+  #"//evita/dom/base/strings/string_util_externs.js",
   "//evita/dom/bracket_externs.js",
   "//evita/dom/components/clipboard/clipboard_externs.js",
   "//evita/dom/components/find_and_replace/find_and_replace_externs.js",

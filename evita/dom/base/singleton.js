@@ -2,28 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-(function() {
-  /** @const @type {!Map<!Function, !Object>} */
-  const singletonMap = new Map();
+goog.provide('base.Singleton');
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  // Singleton
-  //
-  class Singleton {
-    /**
-     * @param {!Function} constructor
-     * @return {!Object}
-     */
-    static get(constructor) {
-      const instance = singletonMap.get(constructor);
-      if (instance)
-        return instance;
-      const newInstance = new constructor();
-      singletonMap.set(constructor, newInstance);
-      return newInstance;
-    }
+goog.scope(function() {
+
+/** @const @type {!Map<!Function, !Object>} */
+const singletonMap = new Map();
+
+//////////////////////////////////////////////////////////////////////
+//
+// Singleton
+//
+class Singleton {
+  /**
+   * @template T
+   * @param {function(new: T)} constructor
+   * @return {!T}
+   */
+  static get(constructor) {
+    const instance = singletonMap.get(constructor);
+    if (instance)
+      return instance;
+    const newInstance = new constructor();
+    singletonMap.set(constructor, newInstance);
+    return newInstance;
   }
+}
 
-  base.Singleton = Singleton;
-})();
+/** @constructor */
+base.Singleton = Singleton;
+});

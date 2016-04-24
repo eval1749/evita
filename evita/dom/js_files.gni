@@ -15,6 +15,7 @@ js_lib_files = [
   "initialize.js",
   "key_names.js",
 
+  "base/base.js",
   "base/define.js",
   "base/async.js",
   "base/base64.js",

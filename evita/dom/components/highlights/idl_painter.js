@@ -10,7 +10,7 @@ const KeywordPainter = highlights.KeywordPainter;
 const Token = highlights.Token;
 
 /** @const @type {!Set<string>} */
-const staticIdlKeywords = highlights.HighlightEngines.keywordsFor('idl');
+const staticIdlKeywords = highlights.HighlightEngine.keywordsFor('idl');
 
 class IdlPainter extends KeywordPainter {
   /**

@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 goog.require('highlights');
+goog.require('highlights.HighlightEngine');
 
 goog.scope(function() {
 
 const HighlightEngine = highlights.HighlightEngine;
-const HighlightEngines = highlights.HighlightEngines;
 
 /** @const @type {number} */
 const kMaxAlphabet= {{ max_alphabet }};
@@ -253,7 +253,7 @@ class {{Name}}HighlightEngine extends HighlightEngine {
 // override.
 global['{{Name}}Lexer'] = {{Name}}HighlightEngine;
 
-HighlightEngines.registerEngine(
+HighlightEngine.registerEngine(
     '{{id}}', {{Name}}HighlightEngine.create, static{{Name}}Keywords);
 {% endif %}
 });

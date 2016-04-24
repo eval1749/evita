@@ -9,7 +9,7 @@ goog.scope(function() {
 const KeywordPainter = highlights.KeywordPainter;
 
 /** @const @type {!Set<string>} */
-const staticGnKeywords = highlights.HighlightEngines.keywordsFor('gn');
+const staticGnKeywords = highlights.HighlightEngine.keywordsFor('gn');
 
 class GnPainter extends KeywordPainter {
   /**

@@ -10,7 +10,7 @@ const Painter = highlights.Painter;
 const Token = highlights.Token;
 
 /** @const @type {!Set<string>} */
-const staticCppKeywords = highlights.HighlightEngines.keywordsFor('c++');
+const staticCppKeywords = highlights.HighlightEngine.keywordsFor('c++');
 
 /**
  * @param {number} charCode

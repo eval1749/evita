@@ -9,7 +9,7 @@ goog.scope(function() {
 const KeywordPainter = highlights.KeywordPainter;
 
 /** @const @type {!Set<string>} */
-const staticJavaKeywords = highlights.HighlightEngines.keywordsFor('java');
+const staticJavaKeywords = highlights.HighlightEngine.keywordsFor('java');
 
 class JavaPainter extends KeywordPainter {
   /**

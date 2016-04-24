@@ -9,7 +9,7 @@ goog.scope(function() {
 const KeywordPainter = highlights.KeywordPainter;
 
 /** @const @type {!Set<string>} */
-const staticKeywords = highlights.HighlightEngines.keywordsFor('c#');
+const staticKeywords = highlights.HighlightEngine.keywordsFor('c#');
 
 class CSharpPainter extends KeywordPainter {
   /**

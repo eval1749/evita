@@ -107,7 +107,7 @@ js_lib_files = [
   "components/find_and_replace/find_and_replace_commands.js",
 
   "components/highlights/highlights.js",
-  "components/highlights/highlight_engines.js",
+  "components/highlights/highlight_engine.js",
 
   "$root_gen_dir/evita/dom/components/highlights/xmltag_tokens.js",
   "components/highlights/tag_painter.js",

@@ -12,7 +12,7 @@ const TagPainter = highlights.TagPainter;
 const Token = highlights.Token;
 
 /** @const @type {!Set<string>} */
-const staticHtmlKeywords = highlights.HighlightEngines.keywordsFor('html');
+const staticHtmlKeywords = highlights.HighlightEngine.keywordsFor('html');
 
 class HtmlPainter extends Painter {
   /**

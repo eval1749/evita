@@ -10,7 +10,7 @@ const Painter = highlights.Painter;
 const Token = highlights.Token;
 
 /** @const @type {!Set<string>} */
-const staticPythonKeywords = highlights.HighlightEngines.keywordsFor('python');
+const staticPythonKeywords = highlights.HighlightEngine.keywordsFor('python');
 
 class PythonPainter extends Painter {
   /**

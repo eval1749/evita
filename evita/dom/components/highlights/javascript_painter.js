@@ -10,7 +10,7 @@ const KeywordPainter = highlights.KeywordPainter;
 
 /** @const @type {!Set<string>} */
 const staticJavaScriptKeywords =
-    highlights.HighlightEngines.keywordsFor('javascript');
+    highlights.HighlightEngine.keywordsFor('javascript');
 
 class JavaScriptPainter extends KeywordPainter {
   /**

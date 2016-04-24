@@ -4,12 +4,11 @@
 
 goog.provide('modes');
 
-goog.require('highlights.HighlightEngines');
+goog.require('highlights.HighlightEngine');
 
 goog.scope(function() {
 
 const HighlightEngine = highlights.HighlightEngine;
-const HighlightEngines = highlights.HighlightEngines;
 
 /** @const @type {string} */
 const kDefaultModeId = 'plain';
@@ -128,7 +127,7 @@ class Mode {
     if (this.document_)
       throw new Error(this + ' is already attached to ' + this.document_);
     this.document_ = document;
-    this.highlightEngine_ = HighlightEngines.createEngine(this.id, document);
+    this.highlightEngine_ = HighlightEngine.createEngine(this.id, document);
   }
 
   /**

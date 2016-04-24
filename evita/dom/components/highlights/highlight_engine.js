@@ -57,7 +57,6 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
   }
 
   /**
-   * Implements lexers.Lexer.doColor
    * @public
    */
   detach() { this.stopObserving(); }
@@ -81,7 +80,6 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
   didLoadTextDocument() { this.tokenizer_.didLoadTextDocument(); }
 
   /**
-   * Implements lexers.Lexer.doColor
    * @public
    * @param {number} hint
    */

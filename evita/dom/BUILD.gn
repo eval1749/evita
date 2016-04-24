@@ -200,7 +200,6 @@ test("evita_dom_tests") {
     "editor_unittest.cc",
     "errors_unittest.cc",
     "file_path_unittest.cc",
-    "lexers/lexers_unittest.cc",
     "polyfill_unittest.cc",
     "timers/timer_test.cc",
     "unicode_unittest.cc",

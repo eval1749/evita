@@ -239,7 +239,9 @@ testing.test('HtmlPainter', function(t) {
            'var x = "foo";\n' +
            '</script>\n' +
            '<div>foo</div>'))
-      .toEqual('k1 e6 k1 a25 _1 k1 e3 k1 _3 k2 e3 k1');
+      .toEqual(
+          'k1 e6 k1 w1 k3 w1 i1 w1 o1 w1 s5 o1 w1 k2 e6 k1 _1 k1 e3' +
+          ' k1 _3 k2 e3 k1');
 });
 
 testing.test('IdlPainter', function(t) {

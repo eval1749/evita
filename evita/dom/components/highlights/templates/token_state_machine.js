@@ -7,7 +7,12 @@ goog.require('highlights.HighlightEngine');
 
 goog.scope(function() {
 
+{% if id %}
 const HighlightEngine = highlights.HighlightEngine;
+const Painter = highlights.Painter;
+const Tokenizer = highlights.Tokenizer;
+{% endif %}
+const TokenStateMachine = highlights.TokenStateMachine;
 
 /** @const @type {number} */
 const kMaxAlphabet= {{ max_alphabet }};
@@ -167,6 +172,20 @@ class {{Name}}HighlightEngine extends HighlightEngine {
    */
   static get keywords() { return static{{Name}}Keywords; }
 }
+
+/**
+ * @param {!TextDocument} document
+ * @return {!Tokenizer}
+ */
+function create{{Name}}Tokenizer(document) {
+  /** @const @type {!TokenStateMachine} */
+  const stateMachine = new {{Name}}TokenStateMachine();
+  /** @const @type {!Painter} */
+  const painter = highlights.{{Name}}Painter.create(document);
+  return new Tokenizer(document, painter, stateMachine);
+}
+
+highlights.create{{Name}}Tokenizer = create{{Name}}Tokenizer;
 
 {% if keywords %}
 [

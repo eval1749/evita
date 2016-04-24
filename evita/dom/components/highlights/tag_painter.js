@@ -31,11 +31,14 @@ class TagPainter {
    * @public
    * @param {!Token} token
    */
-  paintEndTag(token) {
-    /** @const @type {number} */
-    const start = token.start;
-    /** @const @type {number} */
-    const end = token.end;
+  paintEndTag(token) { this.paintEndTag2(token.start, token.end); }
+
+  /**
+   * @public
+   * @param {number} start
+   * @param {number} end
+   */
+  paintEndTag2(start, end) {
     this.setSyntax(start, start + 2, 'keyword');
     if (start + 2 == end)
       return;

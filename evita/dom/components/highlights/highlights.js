@@ -138,7 +138,7 @@ class StateRange {
   toString() {
     const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
     return `StateRange(${this.start_}, ${this.end_}, ${text}, ` +
-        `state:${this.state_}, '${this.token.syntax}')`;
+        `state:${this.state_}, ${this.token}')`;
   }
 }
 
@@ -156,9 +156,11 @@ class StateRangeMap extends Logger {
     /** @const @type {!TextDocument} */
     this.document_ = document;
 
-    const token = new Token(document, -2, -1, '');
+    /** @const @type {!Token} */
+    const dummyToken = new Token(document, -2, -1, '');
+
     /** @const @type {!StateRange} */
-    this.dummyStateRange_ = new StateRange(document, -1, -1, -1, token);
+    this.dummyStateRange_ = new StateRange(document, -1, -1, -1, dummyToken);
 
     /** @const @type {!OrderedSet<!StateRange>} */
     this.ranges_ = new OrderedSet(StateRange.less);
@@ -208,42 +210,33 @@ class StateRangeMap extends Logger {
       }
       /** @const @type {!StateRange} */
       const range = runner.data;
+      if (range.start > cleanStart)
+        return this.relocateRanges(runner, delta);
+
       /** @const @type {!Token} */
       const token = range.token;
+
+      /** @const @type {OrderedSetNode<!StateRange>} */
+      const next = runner.next();
+      if (next && next.data.token === token) {
+        // We remove ranges in same token.
+        this.removeNode(next);
+        continue;
+      }
+
       if (range.start < headCount) {
-        // Shrink range contains |headCount|.
+        // Shrink |range| since it crosses clean and dirty boundary:
+        // ....dirty....
+        //   >---<
         if (token.end === range.end)
           token.end = headCount;
         range.end = headCount;
         continue;
       }
-      if (range.start <= cleanStart) {
-        // Remove a range between |headCount| to |tailCount|.
-        const next = runner.next();
-        if (next && next.data.token === token) {
-          // We remove ranges with same syntax start from |cleanStart| for
-          // comment and string.
-          this.removeNode(next);
-          continue;
-        }
-        this.removeNode(runner);
-        continue;
-      }
-      // Relocate ranges.
-      while (runner !== null) {
-        /** @const @type {!StateRange} */
-        const range = runner.data;
-        /** @const @type {!Token} */
-        const token = range.token;
-        if (token.start === range.start)
-          token.start += delta;
-        if (token.end === range.end)
-          token.end += delta;
-        range.start += delta;
-        range.end += delta;
-        runner = runner.next();
-      }
-      return;
+      // Remove a range after clean.
+      //  ...dirty...
+      //      >----<
+      this.removeNode(runner);
     }
   }
 
@@ -255,6 +248,26 @@ class StateRangeMap extends Logger {
   lowerBound(offset) {
     this.dummyStateRange_.reset(offset);
     return this.ranges_.lowerBound(this.dummyStateRange_);
+  }
+
+  /**
+   * @private
+   * @param {!OrderedSetNode<!StateRange>} start
+   * @param {number} delta
+   */
+  relocateRanges(start, delta) {
+    for (let runner = start; runner; runner = runner.next()) {
+      /** @const @type {!StateRange} */
+      const range = runner.data;
+      /** @const @type {!Token} */
+      const token = range.token;
+      if (token.start === range.start)
+        token.start += delta;
+      if (token.end === range.end)
+        token.end += delta;
+      range.start += delta;
+      range.end += delta;
+    }
   }
 
   /**
@@ -274,7 +287,6 @@ class StateRangeMap extends Logger {
       const node = this.lowerBound(start + 1);
       if (node === null || node.data.start >= end)
         return;
-      this.log(0, start, end, node.data);
       this.removeNode(node);
     }
   }
@@ -346,6 +358,12 @@ class StateRangeMap extends Logger {
    * For debugging
    */
   * ranges() { yield * this.ranges_.values(); }
+
+  /**
+   * @override
+   * @return {string}
+   */
+  toString() { return `StateRangeMap(size=${this.ranges_.size})`; }
 }
 
 /*
@@ -361,6 +379,21 @@ class Painter {
     /** @const @type {!TextDocument} */
     this.document_ = document;
   }
+
+  /**
+   * @public
+   * @param {number} headCount
+   * @param {number} tailCount
+   * @param {number} delta
+   * Exposed for embed language tokenizer.
+   */
+  didChangeTextDocument(headCount, tailCount, delta) {}
+
+  /**
+   * @public
+   * Exposed for embed language tokenizer.
+   */
+  didLoadTextDocument() {}
 
   /** @return {!TextDocument} */
   get document() { return this.document_; }
@@ -549,6 +582,8 @@ class Tokenizer extends Logger {
     this.scanOffset_ = 0;
     /** @const @type {!StateRangeMap} */
     this.rangeMap_ = new StateRangeMap(document);
+    /** @type {number} */
+    this.verbose_ = 0;
   }
 
   /** @return {!TextDocument} */
@@ -562,23 +597,31 @@ class Tokenizer extends Logger {
    */
   didChangeTextDocument(headCount, tailCount, delta) {
     this.log(0, 'didChangeTextDocument', headCount, tailCount, delta);
+    this.painter_.didChangeTextDocument(headCount, tailCount, delta);
     this.rangeMap_.didChangeTextDocument(headCount, tailCount, delta);
+    if (this.scanOffset_ < headCount) {
+      this.log(0, 'change occurred beyond processed area');
+      return;
+    }
     const cleanStateRange = this.rangeMap_.rangeBefore(headCount);
     if (cleanStateRange === null) {
       this.scanOffset_ = 0;
+      this.log(0, 'Restart from start of document');
       return;
     }
     this.scanOffset_ = cleanStateRange.end;
     const state = cleanStateRange.state;
     this.stateMachine_.resetTo(state);
+    this.log(0, 'Restart after', cleanStateRange);
   }
 
   /**
    * @public
    */
   didLoadTextDocument() {
-    this.scanOffset_ = 0;
+    this.painter_.didLoadTextDocument();
     this.rangeMap_.didChangeTextDocument(0, 0, 0);
+    this.scanOffset_ = 0;
   }
 
   /**
@@ -587,19 +630,79 @@ class Tokenizer extends Logger {
    */
   doColor(hint) {
     /** @const @type {number} */
-    const scanEnd = Math.min(this.scanOffset_ + hint, this.document_.length);
-    this.log(0, 'START', this.scanOffset_, scanEnd);
-    if (this.scanOffset_ === scanEnd)
+    const end = this.document_.length;
+    /** @const @type {number} */
+    const scanEnd = Math.min(this.scanOffset_ + hint, end);
+    this.scanOffset_ = this.processRange(this.scanOffset_, scanEnd, 0, end);
+  }
+
+  /**
+   * @private
+   * @param {!StateRange} range
+   * @param {number} end
+   */
+  endRange(range, end) {
+    this.log(0, 'endRange', range, end);
+    if (range.end < end)
+      this.rangeMap_.removeBetween(range.end, end);
+    range.end = end;
+    range.token.end = end;
+  }
+
+  /**
+   * @private
+   * @param {Token} token
+   */
+  endToken(token) {
+    if (token === null)
       return;
+    this.log(0, 'paint', token);
+    this.painter_.paint(token);
+  }
+
+  /**
+   * @public
+   * @return {boolean}
+   */
+  isFinished() { return this.scanOffset_ === this.document_.length; }
+
+  /**
+   * @public
+   * @param {number} regionStart
+   * @param {number} regionEnd
+   * @param {number} startOffset
+   * @param {number} endOffset
+   */
+  process(regionStart, regionEnd, startOffset, endOffset) {
+    if (this.scanOffset_ >= regionEnd)
+      return;
+    /** @const @type {number} */
+    const scanStart = Math.max(this.scanOffset_, regionStart);
+    this.scanOffset_ =
+        this.processRange(scanStart, regionEnd, startOffset, endOffset);
+  }
+
+  /**
+   * @private
+   * @param {number} scanStart
+   * @param {number} scanEnd
+   * @param {number} startOffset
+   * @param {number} endOffset
+   * @return {number}
+   */
+  processRange(scanStart, scanEnd, startOffset, endOffset) {
+    this.log(0, 'processRange', 'START', scanStart, scanEnd);
+    if (scanStart >= scanEnd)
+      return scanStart;
 
     /** @type {StateRange} */
-    let range = this.rangeMap_.rangeEndsAt(this.scanOffset_);
+    let range = this.rangeMap_.rangeEndsAt(scanStart);
     this.log(0, 'start', 'range', range);
 
     /** @type {Token} */
     let token = null;
     this.stateMachine_.resetTo(0);
-    if (this.scanOffset_ === 0) {
+    if (scanStart === startOffset) {
       // Since pattern doesn't support "^", we treat start of document as
       // following of newline character.
       this.stateMachine_.updateState(Unicode.LF);
@@ -609,15 +712,14 @@ class Tokenizer extends Logger {
       token = range.token;
     }
 
-    for (let scanOffset = this.scanOffset_; scanOffset < scanEnd;
-         ++scanOffset) {
+    for (let scanOffset = scanStart; scanOffset < scanEnd; ++scanOffset) {
       /** @const @type {number} */
       const lastState = this.stateMachine_.state;
       /** @const @type {number} */
       const charCode = this.document_.charCodeAt(scanOffset);
       /** @type {number} */
       let state = this.stateMachine_.updateState(charCode);
-      this.log(0, 'scanOffset', scanOffset, charCode, 'state', state);
+      this.log(0, 'scanOffset', scanOffset, charCode, 'state', state, token);
       if (state === lastState && range)
         continue;
       if (range)
@@ -633,9 +735,9 @@ class Tokenizer extends Logger {
       const nextRange = this.rangeMap_.rangeStartsAt(scanOffset);
       if (nextRange !== null) {
         if (nextRange.state === state) {
-          this.log(0, 'Finish early', nextRange);
-          this.scanOffset_ = this.document_.length;
-          return;
+          this.log(0, 'finish early', nextRange);
+          this.endToken(token);
+          return endOffset;
         }
         this.rangeMap_.remove(nextRange);
       }
@@ -649,13 +751,13 @@ class Tokenizer extends Logger {
       this.endToken(token);
       token = null;
     }
-    this.log(0, 'END', scanEnd, range);
-    this.scanOffset_ = scanEnd;
+    this.log(0, 'processRange', 'END', scanEnd, range);
 
     if (range === null)
-      return;
+      return scanEnd;
     this.endRange(range, scanEnd);
     this.endToken(range.token);
+    return scanEnd;
   }
 
   /**
@@ -681,36 +783,6 @@ class Tokenizer extends Logger {
           asStringLiteral(rangeText));
     }
   }
-
-  /**
-   * @private
-   * @param {!StateRange} range
-   * @param {number} end
-   */
-  endRange(range, end) {
-    this.log(0, 'endRange', range, end);
-    if (range.end < end)
-      this.rangeMap_.removeBetween(range.end, end);
-    range.end = end;
-    range.token.end = end;
-  }
-
-  /**
-   * @private
-   * @param {Token} token
-   */
-  endToken(token) {
-    if (token === null)
-      return;
-    this.log(0, 'paint', token);
-    return this.painter_.paint(token);
-  }
-
-  /**
-   * @public
-   * @return {boolean}
-   */
-  isFinished() { return this.scanOffset_ === this.document_.length; }
 
   /**
    * @private
@@ -764,7 +836,8 @@ class Tokenizer extends Logger {
    * @return {string}
    */
   toString() {
-    return `Tokenizer(document: ${this.document_.name},` +
+    return `Tokenizer(painter: ${this.painter_.constructor.name},` +
+        ` document: '${this.document_.name}',` +
         ` scanOffset: ${this.scanOffset_})`;
   }
 

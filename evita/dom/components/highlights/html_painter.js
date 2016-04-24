@@ -10,6 +10,7 @@ goog.scope(function() {
 const Painter = highlights.Painter;
 const TagPainter = highlights.TagPainter;
 const Token = highlights.Token;
+const Tokenizer = highlights.Tokenizer;
 
 /** @const @type {!Set<string>} */
 const staticHtmlKeywords = highlights.HighlightEngine.keywordsFor('html');
@@ -21,8 +22,53 @@ class HtmlPainter extends Painter {
    */
   constructor(document) {
     super(document);
+    /** @const @type {!Tokenizer} */
+    this.cssPainter_ = highlights.createCssTokenizer(document);
+    /** @const @type {!Tokenizer} */
+    this.scriptPainter_ = highlights.createJavaScriptTokenizer(document);
     /** @const @type {!TagPainter} */
     this.tagPainter_ = new TagPainter(document, staticHtmlKeywords);
+  }
+
+  /**
+   * @override
+   * @public
+   * @param {number} headCount
+   * @param {number} tailCount
+   * @param {number} delta
+   */
+  didChangeTextDocument(headCount, tailCount, delta) {
+    super.didChangeTextDocument(headCount, tailCount, delta);
+    this.cssPainter_.didChangeTextDocument(headCount, tailCount, delta);
+    this.scriptPainter_.didChangeTextDocument(headCount, tailCount, delta);
+  }
+
+  /**
+   * @override
+   * @public
+   */
+  didLoadTextDocument() {
+    super.didLoadTextDocument();
+    this.cssPainter_.didLoadTextDocument();
+    this.scriptPainter_.didLoadTextDocument();
+  }
+
+  /**
+   * @private
+   * @param {!Token} token
+   */
+  findEndOfContent(token) {
+    if (this.document.charCodeAt(token.end - 1) !== Unicode.GREATER_THAN_SIGN)
+      return token.end;
+    /** @type {number} */
+    let runner = token.end - 1;
+    for (;;) {
+      while (this.document.charCodeAt(runner) !== Unicode.SOLIDUS)
+        --runner;
+      --runner;
+      if (this.document.charCodeAt(runner) === Unicode.LESS_THAN_SIGN)
+        return runner;
+    }
   }
 
   /**
@@ -36,7 +82,7 @@ class HtmlPainter extends Painter {
       case 'endTag':
         return this.tagPainter_.paintEndTag(token);
       case 'script':
-        return this.paintStyle(token);
+        return this.paintScript(token);
       case 'startTag':
         return this.tagPainter_.paintStartTag(token);
       case 'style':
@@ -47,15 +93,31 @@ class HtmlPainter extends Painter {
 
   /**
    * @private
+   * @param {!Tokenizer} painter
    * @param {!Token} token
    */
-  paintScript(token) { this.paintToken2(token, 'html_attribute_name'); }
+  paintNonHtmlContent(painter, token) {
+    /** @const @type {number} */
+    const contentEnd = this.findEndOfContent(token);
+    painter.process(token.start, contentEnd, token.start, contentEnd);
+    if (contentEnd === token.end) {
+      // We've not seen end tag yet.
+      return;
+    }
+    this.tagPainter_.paintEndTag2(contentEnd, token.end);
+  }
 
   /**
    * @private
    * @param {!Token} token
    */
-  paintStyle(token) { this.paintToken2(token, 'html_attribute_name'); }
+  paintScript(token) { this.paintNonHtmlContent(this.scriptPainter_, token); }
+
+  /**
+   * @private
+   * @param {!Token} token
+   */
+  paintStyle(token) { this.paintNonHtmlContent(this.cssPainter_, token); }
 
   /**
    * @public

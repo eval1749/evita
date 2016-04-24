@@ -153,6 +153,20 @@ TEST_F(BufferTest, InsertBefore) {
       << "The range at insertion position should be push back.";
 }
 
+TEST_F(BufferTest, Replace) {
+  buffer()->Replace(Offset(0), Offset(0), base::ASCIIToUTF16("abc"));
+  EXPECT_EQ(L"abc", buffer()->GetText(Offset(0), buffer()->GetEnd()));
+
+  buffer()->Replace(Offset(1), Offset(2), base::ASCIIToUTF16("XY"));
+  EXPECT_EQ(L"aXYc", buffer()->GetText(Offset(0), buffer()->GetEnd()));
+
+  buffer()->Replace(Offset(1), Offset(3), base::ASCIIToUTF16(""));
+  EXPECT_EQ(L"ac", buffer()->GetText(Offset(0), buffer()->GetEnd()));
+
+  buffer()->Replace(Offset(2), Offset(2), base::ASCIIToUTF16("z"));
+  EXPECT_EQ(L"acz", buffer()->GetText(Offset(0), buffer()->GetEnd()));
+}
+
 TEST_F(BufferTest, SetStyle) {
   buffer()->InsertBefore(Offset(0), base::ASCIIToUTF16("foo bar baz"));
 

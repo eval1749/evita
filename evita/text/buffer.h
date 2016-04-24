@@ -89,6 +89,7 @@ class Buffer final : public BufferCore,
   // Does redo last undo operation if it starts at |offset| and returns
   // |offset|, otherwise returns starting offset of the last undo operation.
   Offset Redo(Offset offset);
+  void Replace(Offset start, Offset end, const base::string16& replacement);
   void ResetRevision(int revision);
   bool SetReadOnly(bool read_only) { return read_only_ = read_only; }
   void SetStyle(Offset, Offset, const css::Style& style_values);

@@ -149,6 +149,20 @@ Offset Buffer::Redo(Offset offset) {
   return undo_stack_->Redo(offset, 1);
 }
 
+void Buffer::Replace(Offset start,
+                     Offset end,
+                     const base::string16& replacement) {
+  DCHECK(IsValidPosn(start)) << start;
+  DCHECK(IsValidPosn(end)) << end;
+  DCHECK_LE(start, end);
+  DCHECK_NO_STATIC_RANGE();
+  DCHECK(!IsReadOnly());
+  // TODO(eval1749): We should make |Buffer::Replace()| as atomic operation
+  // rather than pair of |Delete()| and |InsertBefore()|.
+  Delete(start, end);
+  InsertBefore(start, replacement);
+}
+
 void Buffer::RemoveObserver(BufferMutationObserver* observer) const {
   const_cast<Buffer*>(this)->observers_.RemoveObserver(observer);
 }

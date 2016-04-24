@@ -605,7 +605,6 @@ class Tokenizer extends Logger {
   didLoadTextDocument() {
     this.scanOffset_ = 0;
     this.rangeMap_.didChangeTextDocument(0, 0, 0);
-    this.doColor(this.document_.length);
   }
 
   /**

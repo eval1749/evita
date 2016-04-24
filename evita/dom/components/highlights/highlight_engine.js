@@ -64,7 +64,10 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
    * @override
    * Implements text.SimpleMutationObserver.didChangeTextDocument
    */
-  didLoadTextDocument() { this.tokenizer_.didLoadTextDocument(); }
+  didLoadTextDocument() {
+    this.tokenizer_.didLoadTextDocument();
+    this.doColor(this.document.length);
+  }
 
   /**
    * @public

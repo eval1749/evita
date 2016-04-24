@@ -89,6 +89,10 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
  private:
   TextDocument();
 
+  bool IsValidNonEmptyRange(text::Offset start,
+                            text::Offset end,
+                            ExceptionState* exception_state) const;
+
   std::unique_ptr<text::Buffer> buffer_;
 
   DISALLOW_COPY_AND_ASSIGN(TextDocument);

@@ -110,6 +110,16 @@ text::LineAndColumn TextDocument::GetLineAndColumn(
   return buffer_->GetLineAndColumn(offset);
 }
 
+bool TextDocument::IsValidNonEmptyRange(text::Offset start,
+                                        text::Offset end,
+                                        ExceptionState* exception_state) const {
+  if (end - start > 0 && end <= buffer_->GetEnd())
+    return true;
+  exception_state->ThrowRangeError(base::StringPrintf(
+      "Should be non empty range [%d, %d]", start.value(), end.value()));
+  return false;
+}
+
 bool TextDocument::IsValidPosition(text::Offset offset,
                                    ExceptionState* exception_state) const {
   if (offset.IsValid() && offset <= buffer_->GetEnd())
@@ -164,7 +174,7 @@ void TextDocument::SetSpelling(text::Offset start,
       return base::AtomicString();
     }
   };
-  if (!IsValidRange(start, end, exception_state))
+  if (!IsValidNonEmptyRange(start, end, exception_state))
     return;
   buffer()->spelling_markers()->InsertMarker(
       text::StaticRange(*buffer(), start, end),
@@ -175,7 +185,7 @@ void TextDocument::SetSyntax(text::Offset start,
                              text::Offset end,
                              const base::string16& syntax,
                              ExceptionState* exception_state) {
-  if (!IsValidRange(start, end, exception_state))
+  if (!IsValidNonEmptyRange(start, end, exception_state))
     return;
   buffer()->syntax_markers()->InsertMarker(
       text::StaticRange(*buffer(), start, end), base::AtomicString(syntax));

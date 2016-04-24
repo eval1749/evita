@@ -132,14 +132,43 @@ class StateRange {
 }
 
 /*
+ * Simple logger
+ */
+class Logger {
+  constructor() {
+    /** @type {number} */
+    this.verbose_ = 0;
+  }
+
+  /** @public @return {number} */
+  get verbose() { return this.verbose_; }
+
+  /** @public @param {number} level */
+  set verbose(level) { this.verbose_ = level; }
+
+  /**
+   * @private
+   * @param {number} level
+   * @param {...*} args
+   */
+  log(level, ...args) {
+    if (level >= this.verbose_)
+      return;
+    console.log.apply(console, args);
+  }
+}
+
+/*
  * Updates |StateRange| for |TextDocument| for document mutations.
  */
-class StateRangeMap {
+class StateRangeMap extends Logger {
   /**
    * @public
    * @param {!TextDocument} document
    */
   constructor(document) {
+    super();
+
     /** @const @type {!TextDocument} */
     this.document_ = document;
 
@@ -184,7 +213,7 @@ class StateRangeMap {
     }
     const oldLength = this.document_.length - delta;
     const cleanStart = oldLength - tailCount;
-    DVLOG(
+    this.log(
         0, 'headCount', headCount, 'oldLength', oldLength, 'delta', delta,
         'cleanStart', cleanStart);
     for (;;) {
@@ -256,12 +285,12 @@ class StateRangeMap {
    * @param {number} end
    */
   removeBetween(start, end) {
-    DVLOG(0, start, end);
+    this.log(0, 'removeBetween', start, end);
     for (;;) {
       const node = this.lowerBound(start + 1);
       if (node === null || node.data.start >= end)
         return;
-      DVLOG(0, start, end, node.data);
+      this.log(0, start, end, node.data);
       this.removeNode(node);
     }
   }
@@ -271,7 +300,7 @@ class StateRangeMap {
    * @param {!OrderedSetNode<!StateRange>} node
    */
   removeNode(node) {
-    DVLOG(0, node.data);
+    this.log(0, 'removeNode', node.data);
     this.ranges_.removeNode(node);
   }
 
@@ -516,7 +545,7 @@ class Token {
  * |Tokenizer| populates |StateRangeMap| by using |TokenStateMachine| and
  * asks |Painter| to paint tokens to language specific way.
  */
-class Tokenizer {
+class Tokenizer extends Logger {
   /**
    * @public
    * @param {!TextDocument} document
@@ -524,6 +553,8 @@ class Tokenizer {
    * @param {!TokenStateMachine} stateMachine
    */
   constructor(document, painter, stateMachine) {
+    super();
+
     /** @const @type {!TextDocument} */
     this.document_ = document;
     /** @const @type {!Painter} */
@@ -534,18 +565,10 @@ class Tokenizer {
     this.scanOffset_ = 0;
     /** @const @type {!StateRangeMap} */
     this.rangeMap_ = new StateRangeMap(document);
-    /** @type {number} */
-    this.verbose_ = -1;
   }
 
   /** @return {!TextDocument} */
   get document() { return this.document_; }
-
-  /** @public @return {number} */
-  get verbose() { return this.verbose_; }
-
-  /** @public @param {number} level */
-  set verbose(level) { this.verbose_ = level; }
 
   /**
    * @public
@@ -554,7 +577,7 @@ class Tokenizer {
    * @param {number} delta
    */
   didChangeTextDocument(headCount, tailCount, delta) {
-    DVLOG(0, headCount, tailCount, delta);
+    this.log(0, 'didChangeTextDocument', headCount, tailCount, delta);
     this.rangeMap_.didChangeTextDocument(headCount, tailCount, delta);
     const cleanStateRange = this.rangeMap_.rangeBefore(headCount);
     if (cleanStateRange === null) {
@@ -681,17 +704,6 @@ class Tokenizer {
    * @return {boolean}
    */
   isFinished() { return this.scanOffset_ === this.document_.length; }
-
-  /**
-   * @private
-   * @param {number} level
-   * @param {...*} args
-   */
-  log(level, ...args) {
-    if (level > this.verbose_)
-      return;
-    console.log.apply(console, args);
-  }
 
   /**
    * @private

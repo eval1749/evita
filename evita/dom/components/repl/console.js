@@ -6,14 +6,16 @@ goog.provide('repl.Console');
 
 goog.scope(function() {
 /** @const @type {string } */
-const DOCUMENT_NAME = '*javascript*';
+const kDocumentName = '*javascript*';
 
 /** @return {!TextDocument} */
 function ensureTextDocument() {
-  const present = TextDocument.find(DOCUMENT_NAME);
+  /** @const @type {TextDocument} */
+  const present = TextDocument.find(kDocumentName);
   if (present)
     return present;
-  const newTextDocument = TextDocument.new(DOCUMENT_NAME);
+  /** @const @type {!TextDocument} */
+  const newTextDocument = TextDocument.new(kDocumentName);
   newTextDocument.mode = Mode.chooseModeByFileName('foo.js');
   return newTextDocument;
 }
@@ -38,8 +40,8 @@ function formatValue(value) {
 //
 class Console {
   constructor() {
+    /** @type {TextDocument} */
     this.document_ = null;
-    this.range_ = null;
   }
 
   /**
@@ -59,13 +61,11 @@ class Console {
    * Clear console log contents.
    */
   clear() {
-    const document = this.ensureTextDocument_();
-    const range = this.range_;
-    range.collapseTo(0);
-    range.end = document.length;
+    /** @const @type {!TextDocument} */
+    const document = this.ensureTextDocument();
     const readonly = document.readonly;
     document.readonly = false;
-    range.text = '';
+    document.replace(0, document.length, '');
     document.readonly = readonly;
     this.update_();
   }
@@ -74,25 +74,23 @@ class Console {
    * @param {string} text
    */
   emit(text) {
-    this.document_.readonly = false;
-    this.range_.endOf(Unit.DOCUMENT);
-    this.range_.insertBefore(text);
-    this.document_.readonly = true;
+    /** @const @type {!TextDocument} */
+    const document = this.ensureTextDocument();
+    document.readonly = false;
+    document.replace(document.length, document.length, text);
+    document.readonly = true;
   }
 
   /**
    * @private
    * @return {!TextDocument}
    */
-  ensureTextDocument_() {
+  ensureTextDocument() {
     if (this.document_)
       return this.document_;
     this.document_ = ensureTextDocument();
-    this.range_ = new TextRange(this.document_);
-    this.document_.addEventListener(Event.Names.REMOVE, () => {
-      this.document_ = null;
-      this.range_ = null;
-    });
+    this.document_.addEventListener(
+        Event.Names.REMOVE, () => { this.document_ = null; });
     return this.document;
   }
 
@@ -100,7 +98,7 @@ class Console {
    * Emits new line if console doesn't end with newline.
    */
   freshLine() {
-    const document = this.ensureTextDocument_();
+    const document = this.ensureTextDocument();
     if (document.length === 0)
       return;
     if (document.charCodeAt(document.length - 1) === Unicode.LF)
@@ -109,7 +107,10 @@ class Console {
   }
 
   /** @return {!TextDocument} */
-  get document() { return this.ensureTextDocument_(); }
+  get document() { return this.ensureTextDocument(); }
+
+  /** @return {string} */
+  static DOCUMENT_NAME() { return kDocumentName; }
 
   /**
    * @param {...*} params
@@ -128,10 +129,7 @@ class Console {
    * Disconnect console instance from document. This method is used for
    * resetting console output during testing.
    */
-  reset_() {
-    this.document_ = null;
-    this.range_ = null;
-  }
+  reset_() { this.document_ = null; }
 
   /**
    * @private
@@ -142,8 +140,6 @@ class Console {
       window.update();
   }
 }
-
-Object.defineProperty(Console, 'DOCUMENT_NAME', {value: DOCUMENT_NAME});
 
 const console = new Console();
 

@@ -325,9 +325,8 @@ testing.test('StateRangeMap', function(t) {
   function makeSample(headCount, tailCount, delta) {
     const doc = new TextDocument();
     const map = new StateRangeMap(doc);
-    const range = new TextRange(doc);
-    //            012345678
-    range.text = '<a>bc</a>';
+    //                012345678
+    doc.replace(0, 0, '<a>bc</a>');
     const stag = new Token(doc, 0, 3, 'stag');
     const cont = new Token(doc, 3, 5, 'cont');
     const etag = new Token(doc, 5, 9, 'etag');
@@ -338,6 +337,10 @@ testing.test('StateRangeMap', function(t) {
     map.add(5, 7, 5, etag);
     map.add(7, 8, 6, etag);
     map.add(8, 9, 7, etag);
+    if (delta > 0)
+      doc.replace(0, 0, '_'.repeat(delta));
+    else
+      doc.replace(0, -delta, '');
     map.didChangeTextDocument(headCount, tailCount, delta);
     return dumpMap(map);
   }
@@ -349,17 +352,15 @@ testing.test('StateRangeMap', function(t) {
     return result.join(' ');
   }
 
-  t.expect(makeSample(0, 8, 1), 'insert at start')
-      .toEqual('(4 6 cont) (6 8 etag) (8 9 etag) (9 10 etag)');
+  t.expect(makeSample(0, 8, 10), 'insert at start')
+      .toEqual('(13 15 cont) (15 17 etag) (17 18 etag) (18 19 etag)');
   t.expect(makeSample(2, 6, 1), 'insert before ">"@2')
-      .toEqual(
-          '(0 1 stag) (1 2 stag) (4 6 cont) (6 8 etag) (8 9 etag) (9 10 etag)');
+      .toEqual('(0 1 stag) (1 2 stag) (6 8 etag) (8 9 etag) (9 10 etag)');
   t.expect(makeSample(8, 1, 1), 'insert at end')
       .toEqual(
-          '(0 1 stag) (1 2 stag) (2 3 stag) (3 5 cont) (5 7 etag) (7 8 etag)' +
-          ' (9 10 etag)');
+          '(0 1 stag) (1 2 stag) (2 3 stag) (3 5 cont) (5 7 etag) (7 8 etag)');
   t.expect(makeSample(0, 7, -1), 'remove "<"@0')
-      .toEqual('(4 6 etag) (6 7 etag) (7 8 etag)');
+      .toEqual('(2 4 cont) (4 6 etag) (6 7 etag) (7 8 etag)');
   t.expect(makeSample(2, 6, -1), 'remove ">"@2')
       .toEqual('(0 1 stag) (1 2 stag) (4 6 etag) (6 7 etag) (7 8 etag)');
 });

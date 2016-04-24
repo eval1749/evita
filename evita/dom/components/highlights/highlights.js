@@ -92,9 +92,6 @@ class StateRange {
   /** @public @return {number} */
   get start() { return this.start_; }
 
-  /** @public @param {number} newStart */
-  set start(newStart) { this.start_ = newStart; }
-
   /** @public @return {number} */
   get state() { return this.state_; }
 
@@ -109,6 +106,12 @@ class StateRange {
 
   /** @public @param {!Token} newToken */
   set token(newToken) { this.token_ = newToken; }
+
+  /** @public @return {boolean} */
+  isValid() {
+    return this.start_ < this.end_ && this.start_ >= this.token_.start &&
+        this.end_ <= this.token.end_;
+  }
 
   /**
    * @public
@@ -139,6 +142,21 @@ class StateRange {
     const text = asStringLiteral(this.document_.slice(this.start_, this.end_));
     return `StateRange(${this.start_}, ${this.end_}, ${text}, ` +
         `state:${this.state_}, ${this.token}')`;
+  }
+
+  /**
+   * @public
+   * @param {!StateRange} range
+   * @param {number} amount
+   */
+  static shift(range, amount) {
+    const newStart = range.start_ + amount;
+    console.assert(newStart >= range.token_.start, range, 'amount', amount);
+    /** @const @type {number} */
+    const newEnd = range.end_ + amount;
+    console.assert(newEnd <= range.token_.end, range, 'amount', amount);
+    range.start_ = newStart;
+    range.end_ = newEnd;
   }
 }
 
@@ -180,7 +198,8 @@ class StateRangeMap extends Logger {
   add(start, end, state, token) {
     console.assert(start <= end, start, end);
     console.assert(start >= 0, start);
-    console.assert(end <= this.document_.length, end);
+    console.assert(
+        end <= this.document_.length, end, 'max', this.document_.length);
     const newStateRange =
         new StateRange(this.document_, start, end, state, token);
     this.ranges_.add(newStateRange);
@@ -256,17 +275,21 @@ class StateRangeMap extends Logger {
    * @param {number} delta
    */
   relocateRanges(start, delta) {
+    /** @type {Token} */
+    let lastToken = null;
+    for (let runner = start; runner; runner = runner.next()) {
+      /** @const @type {!Token} */
+      const token = runner.data.token;
+      if (token === lastToken)
+        continue;
+      Token.shift(token, delta);
+      lastToken = token;
+    }
     for (let runner = start; runner; runner = runner.next()) {
       /** @const @type {!StateRange} */
       const range = runner.data;
-      /** @const @type {!Token} */
-      const token = range.token;
-      if (token.start === range.start)
-        Token.setStart(token, token.start + delta);
-      if (token.end === range.end)
-        Token.setEnd(token, token.end + delta);
-      range.start += delta;
-      range.end += delta;
+      StateRange.shift(range, delta);
+      console.assert(range.isValid(), range);
     }
   }
 
@@ -558,19 +581,29 @@ class Token {
   /**
    * @public
    * @param {!Token} token
-   * @param {number} newStart
+   * @param {string} newSyntax
    */
-  static setStart(token, newStart) {
-    console.assert(newStart < token.end_, 'newStart', newStart, token);
-    token.start_ = newStart;
-  }
+  static setSyntax(token, newSyntax) { token.syntax_ = newSyntax; }
 
   /**
    * @public
    * @param {!Token} token
-   * @param {string} newSyntax
+   * @param {number} amount
    */
-  static setSyntax(token, newSyntax) { token.syntax_ = newSyntax; }
+  static shift(token, amount) {
+    /** @const @type {number} */
+    const newStart = token.start_ + amount;
+    console.assert(
+        newStart >= 0 && newStart < token.document_.length, token, 'amount',
+        amount, 'max', token.document_.length);
+    /** @const @type {number} */
+    const newEnd = token.end_ + amount;
+    console.assert(
+        newEnd >= 0 && newEnd <= token.document_.length, token, 'amount',
+        amount, 'max', token.document_.length);
+    token.start_ = newStart;
+    token.end_ = newEnd;
+  }
 }
 
 /*

@@ -126,23 +126,6 @@ function tokenize(ranges) {
   return tokens;
 }
 
-testing.test('CppStateRangeStateMachine', function(t) {
-  const machine = new highlights.CppTokenStateMachine();
-  const scan = testScan.bind(this, machine);
-  t.expect(scan('/* abc */ def')).toEqual('c9 w1 i3');
-  t.expect(scan('"abc"')).toEqual('s5');
-  t.expect(scan('\'abc\'')).toEqual('s5');
-  t.expect(scan('#if')).toEqual('i3');
-  t.expect(scan('  #  if'), 'Leading whitespace is tokenized into "whitespace"')
-      .toEqual('w2 i5');
-  t.expect(scan('/**/')).toEqual('c4');
-  t.expect(scan('\x2F/*')).toEqual('c3');
-  t.expect(
-       scan('\x2F/ xyz\\\nbar'),
-       'Backslash before newline continues line comment to next line')
-      .toEqual('c11');
-});
-
 testing.test('CmdPainter', function(t) {
   const machine = new highlights.CmdTokenStateMachine();
   const paint = testPaint.bind(this, highlights.CmdPainter.create, machine);
@@ -188,6 +171,23 @@ testing.test('CppPainter', function(t) {
   t.expect(paint('std::unique_ptr<T>'), 'keyword').toEqual('k15 o1 i1 o1');
   t.expect(paint('std::vector_ptr<T>'), 'not keyword').toEqual('i15 o1 i1 o1');
   t.expect(paint('base::string16'), 'not keyword').toEqual('i14');
+});
+
+testing.test('CppStateRangeStateMachine', function(t) {
+  const machine = new highlights.CppTokenStateMachine();
+  const scan = testScan.bind(this, machine);
+  t.expect(scan('/* abc */ def')).toEqual('c9 w1 i3');
+  t.expect(scan('"abc"')).toEqual('s5');
+  t.expect(scan('\'abc\'')).toEqual('s5');
+  t.expect(scan('#if')).toEqual('i3');
+  t.expect(scan('  #  if'), 'Leading whitespace is tokenized into "whitespace"')
+      .toEqual('w2 i5');
+  t.expect(scan('/**/')).toEqual('c4');
+  t.expect(scan('\x2F/*')).toEqual('c3');
+  t.expect(
+       scan('\x2F/ xyz\\\nbar'),
+       'Backslash before newline continues line comment to next line')
+      .toEqual('c11');
 });
 
 testing.test('CSharpPainter', function(t) {

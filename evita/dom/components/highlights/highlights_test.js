@@ -271,6 +271,7 @@ testing.test('JavaScriptPainter', function(t) {
   t.expect(paint('Math.sin(1)')).toEqual('k8 o1 z1 o1');
   t.expect(paint('this.foo')).toEqual('k4 i4');
   t.expect(paint('this.length')).toEqual('k4 o1 k6');
+  t.expect(paint('this.foo.length')).toEqual('k4 i4 o1 k6');
   t.expect(paint('Foo.length')).toEqual('i3 o1 k6');
   t.expect(paint('Foo.prototype')).toEqual('i3 o1 k9');
   t.expect(paint('Foo.toString()')).toEqual('i3 o1 k8 o2');

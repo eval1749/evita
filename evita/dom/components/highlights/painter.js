@@ -115,7 +115,7 @@ class KeywordPainter extends Painter {
       return this.paintToken(token);
 
     /** @const @type {number} */
-    const headIndex = fullName.lastIndexOf(this.delimiter);
+    const headIndex = fullName.indexOf(this.delimiter);
     if (headIndex <= 0)
       return this.paintToken(token);
 

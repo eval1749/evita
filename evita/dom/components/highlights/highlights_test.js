@@ -208,6 +208,15 @@ testing.test('CSharpPainter', function(t) {
   t.expect(paint('Console.Write()')).toEqual('k13 o2');
 });
 
+testing.test('CssPainter', function(t) {
+  const machine = new highlights.CssTokenStateMachine();
+  const paint = testPaint.bind(this, highlights.CssPainter.create, machine);
+  t.expect(paint('color: #222')).toEqual('k6 w1 z4');
+  t.expect(paint('foo: initial')).toEqual('l4 w1 k7');
+  t.expect(paint('foo: "bar"')).toEqual('l4 w1 s5');
+  t.expect(paint('foo: \'bar\'')).toEqual('l4 w1 s5');
+});
+
 testing.test('GnPainter', function(t) {
   const machine = new highlights.GnTokenStateMachine();
   const paint = testPaint.bind(this, highlights.GnPainter.create, machine);

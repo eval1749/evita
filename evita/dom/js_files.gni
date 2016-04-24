@@ -19,6 +19,7 @@ js_lib_files = [
   "base/define.js",
   "base/async.js",
   "base/base64.js",
+  "base/logger.js",
   "base/logging.js",
   "base/ordered_set.js",
   "base/singleton.js",

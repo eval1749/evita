@@ -4,15 +4,13 @@
 
 goog.provide('highlights');
 
+goog.require('base.Logger');
+
 goog.scope(function() {
 
-/** @const */
+const Logger = base.Logger;
 const OrderedSet = base.OrderedSet;
-
-/** @const */
 const OrderedSetNode = base.OrderedSetNode;
-
-/** @const */
 const asStringLiteral = base.asStringLiteral;
 
 /**
@@ -51,33 +49,6 @@ function extractSample(document, start, end, maxChars) {
   const tailStart = end - count;
   return [document.slice(start, headEnd), document.slice(tailStart, end)].join(
       ' ... ');
-}
-
-/*
- * Simple logger
- */
-class Logger {
-  constructor() {
-    /** @type {number} */
-    this.verbose_ = 0;
-  }
-
-  /** @public @return {number} */
-  get verbose() { return this.verbose_; }
-
-  /** @public @param {number} level */
-  set verbose(level) { this.verbose_ = level; }
-
-  /**
-   * @private
-   * @param {number} level
-   * @param {...*} args
-   */
-  log(level, ...args) {
-    if (level >= this.verbose_)
-      return;
-    console.log(this, ...args);
-  }
 }
 
 /*

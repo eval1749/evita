@@ -5,6 +5,7 @@
 goog.provide('highlights.HighlightEngine');
 
 goog.require('highlights');
+goog.require('highlights.Tokenizer');
 
 goog.scope(function() {
 

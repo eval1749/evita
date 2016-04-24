@@ -8,8 +8,6 @@ goog.require('highlights');
 
 goog.scope(function() {
 
-const asStringLiteral = base.asStringLiteral;
-
 const Painter = highlights.Painter;
 const Token = highlights.Token;
 const TokenStateMachine = highlights.TokenStateMachine;
@@ -23,17 +21,6 @@ const staticEngineMap = new Map();
 
 /** @const @type {!Map<string, !Set<string>>} */
 const staticKeywordsMap = new Map();
-
-
-function extractSample(document, start, end, maxChars) {
-  if (end - start < maxChars)
-    return document.slice(start, end);
-  const count = Math.floor(maxChars / 2);
-  const headEnd = start + count;
-  const tailStart = end - count;
-  return [document.slice(start, headEnd), document.slice(tailStart, end)].join(
-      ' ... ');
-}
 
 /**
  * @implements {Runnable}
@@ -100,25 +87,7 @@ class HighlightEngine extends text.SimpleMutationObserverBase {
    * @public
    * For debugging.
    */
-  dump() {
-    /** @type {Token} */
-    let token = null;
-    for (const range of this.tokenizer_.ranges()) {
-      if (token !== range.token) {
-        token = range.token;
-        const tokenText =
-            extractSample(this.document, token.start, token.end, 40);
-        console.log(
-            token.start, token.end, `"${token.syntax}"`,
-            asStringLiteral(tokenText));
-      }
-      const rangeText =
-          extractSample(this.document, range.start, range.end, 20);
-      console.log(
-          ' ', range.start, range.end, `s${range.state}`,
-          asStringLiteral(rangeText));
-    }
-  }
+  dump() { this.tokenizer_.dump(); }
 
   /** @public @return {number} */
   get verbose() { return this.tokenizer_.verbose; }

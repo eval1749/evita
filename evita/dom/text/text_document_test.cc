@@ -30,6 +30,10 @@ class TextDocumentTest : public AbstractDomTest {
   DISALLOW_COPY_AND_ASSIGN(TextDocumentTest);
 };
 
+TEST_F(TextDocumentTest, File) {
+  RunFile({"text", "text_document_test.js"});
+}
+
 TEST_F(TextDocumentTest, TextMutationObserver) {
   RunFile({"text", "text_mutation_observer_test.js"});
 }

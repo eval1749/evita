@@ -23,6 +23,10 @@ class Offset;
 
 namespace dom {
 
+namespace bindings {
+class TextDocumentClass;
+}
+
 class ExceptionState;
 class RegularExpression;
 class TextRange;
@@ -87,11 +91,19 @@ class TextDocument final : public ginx::Scriptable<TextDocument, EventTarget> {
   static TextDocument* NewTextDocument();
 
  private:
+  friend class bindings::TextDocumentClass;
+
   TextDocument();
 
   bool IsValidNonEmptyRange(text::Offset start,
                             text::Offset end,
                             ExceptionState* exception_state) const;
+
+  // TextDocument interface implementations
+  void Replace(text::Offset start,
+               text::Offset end,
+               const base::string16& replacement,
+               ExceptionState* exception_state);
 
   std::unique_ptr<text::Buffer> buffer_;
 

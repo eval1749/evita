@@ -155,6 +155,15 @@ text::Offset TextDocument::Redo(text::Offset position) {
   return buffer_->Redo(position);
 }
 
+void TextDocument::Replace(text::Offset start,
+                           text::Offset end,
+                           const base::string16& replacement,
+                           ExceptionState* exception_state) {
+  if (!IsValidRange(start, end, exception_state))
+    return;
+  buffer_->Replace(start, end, replacement);
+}
+
 void TextDocument::SetSpelling(text::Offset start,
                                text::Offset end,
                                int spelling_code,

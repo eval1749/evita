@@ -138,6 +138,9 @@ interface TextDocument : EventTarget {
     [ImplementedAs=JavaScript]
     static void renameTo(DOMString newName);
 
+    [RaisesException]
+    void replace(TextOffset start, TextOffset end, DOMString replacement);
+
     [ImplementedAs=JavaScript]
     Promise<long> save(optional DOMString fileName);
 

@@ -33,6 +33,7 @@ source_set("test_files") {
   ]
 
   data = [
+    "text_document_test.js",
     "text_mutation_observer_test.js",
   ]
 

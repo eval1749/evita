@@ -7,9 +7,6 @@
  */
 repl.Console = function() {};
 
-/** @const @type {string} */
-repl.Console.DOCUMENT_NAME;
-
 /**
  * @param {*} expression
  * @param {...*} params

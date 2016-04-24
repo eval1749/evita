@@ -109,9 +109,6 @@ class Console {
   /** @return {!TextDocument} */
   get document() { return this.ensureTextDocument(); }
 
-  /** @return {string} */
-  static DOCUMENT_NAME() { return kDocumentName; }
-
   /**
    * @param {...*} params
    *

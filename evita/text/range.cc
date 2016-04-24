@@ -61,11 +61,7 @@ void Range::set_start(Offset offset) {
 }
 
 void Range::set_text(const base::string16& text) {
-  if (buffer_->IsReadOnly()) {
-    // TODO(eval1749): We should throw read only buffer exception.
-    return;
-  }
-
+  DCHECK(!buffer_->IsReadOnly());
   const auto start = start_;
   {
     ScopedUndoGroup undo_scope(this, L"Range.SetText");

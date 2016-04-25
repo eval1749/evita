@@ -53,6 +53,7 @@ Mode.registerExtension('idl', 'idl', 'Web IDL Source');
 Mode.registerExtension('java', 'java', 'Java Source');
 Mode.registerExtension('js', 'javascript', 'JavaScript Source');
 Mode.registerExtension('jsm', 'javascript', 'JavaScript Module Source');
+Mode.registerExtension('json', 'javascript', 'JSON File');
 Mode.registerExtension('l', 'lisp', 'Lisp Source');
 Mode.registerExtension('lisp', 'lisp', 'Lisp Source');
 Mode.registerExtension('lsp', 'lisp', 'Lisp Source');

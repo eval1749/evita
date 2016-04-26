@@ -13,12 +13,12 @@ vars = {
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
-  'gyp_revision': '6ea68631cdabab9b7c5257657567a785a261692e',
+  'gyp_revision': '4cf07e8d616739f6484e46c9359b2a35196b2585',
   'icu_revision': 'c291cde264469b20ca969ce8832088acb21e0c48',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '26f2994dfb9c22ff86026d5fcffffdb616f62d4d',
-  'v8_revision': '56893209c418d27b09214d5a716ecbd9e0feb182', # 5.2.129
+  'v8_revision': '1a37b5844887792aa5c8e2a954c47c513f56a9c9', # 5.2.137
   'zlib_revision': '4bd7a9724b3b8eb7d7a266292f95388b3b452861',
 }
 

@@ -49,6 +49,7 @@ v8.log
 /testing/
 /third_party/icu
 /third_party/v8
+/tools/grit/
 /tools/gyp/
 /tools/idl_parser/
 /third_party/cygwin/

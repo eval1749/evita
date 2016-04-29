@@ -12,6 +12,7 @@ vars = {
   'buildtools_revision': 'cdbd50759bf2289d2c9d3f1f7d02239b4b4b1209',
   'cygwin_revision': 'c89e446b273697fadf3a10ff1007a97c0b7de6df',
   'gmock_revision': '0421b6f358139f02e102c9c332ce19a33faf75be', # from svn revision 566
+  'grit_revision': 'ca656d011aa8e71fdd6ea24eccc550f9871dfdb4',
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': 'e24c83726b7294179f479a683eeb351568fcc4ee',
   'icu_revision': 'c291cde264469b20ca969ce8832088acb21e0c48',
@@ -59,6 +60,9 @@ deps = {
 
   'src/third_party/zlib':
     Var('chromium_git') + '/chromium/src/third_party/zlib' + '@' +  Var('zlib_revision'),
+
+  'src/tools/grit':
+    Var('chromium_git') + '/chromium/src/tools/grit' + '@' + Var('grit_revision'),
 
   'src/tools/gyp':
     Var('chromium_git') + '/external/gyp.git' + '@' + Var('gyp_revision'),

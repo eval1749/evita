@@ -15,6 +15,7 @@ vars = {
   'gtest_revision': '6f8a66431cb592dad629028a50b3dd418a408c87',
   'gyp_revision': 'e24c83726b7294179f479a683eeb351568fcc4ee',
   'icu_revision': 'c291cde264469b20ca969ce8832088acb21e0c48',
+  'idl_parser_revision': 'c485a6622358fa5c760daed78108212d70318ffd',
   'pep8_revision': '4dc42d842274ba27d2724e76eb83ff69e7db226f',
   'ply_revision': '4a6baf95860033d4c69d3e3087696b30c687622c',
   'testing_revision': '4a6ad14ddd48919d3590ea92c4358d1182c606ce',
@@ -61,6 +62,9 @@ deps = {
 
   'src/tools/gyp':
     Var('chromium_git') + '/external/gyp.git' + '@' + Var('gyp_revision'),
+
+  'src/tools/idl_parser':
+    Var('chromium_git') + '/chromium/src/tools/idl_parser' + '@' + Var('idl_parser_revision'),
 
   'src/v8':
     Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),

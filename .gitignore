@@ -49,8 +49,8 @@ v8.log
 /testing/
 /third_party/icu
 /third_party/v8
-/tools/deps2git/
 /tools/gyp/
+/tools/idl_parser/
 /third_party/cygwin/
 /third_party/autopep8/
 /third_party/pep8/

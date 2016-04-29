@@ -25,7 +25,7 @@
     // H
     'hotlight', 'hwnd',
     // I
-    'ime', 'initializer', 'Iterable', 'iterable',
+    'ime', 'initializer', 'invoker', 'Iterable', 'iterable',
     // J
     'javascript',
     // L

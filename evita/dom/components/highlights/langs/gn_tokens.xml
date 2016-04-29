@@ -64,6 +64,7 @@
   <keyword>default_toolchain</keyword>
   <keyword>host_cpu</keyword>
   <keyword>host_os</keyword>
+  <keyword>invoker</keyword>
   <keyword>python_path</keyword>
   <keyword>root_build_dir</keyword>
   <keyword>root_gen_dir</keyword>

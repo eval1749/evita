@@ -193,7 +193,7 @@ void Scheduler::ScheduleNextFrame() {
   TRACE_EVENT_WITH_FLOW1("scheduler", "Scheduler::ScheduleNextFrame", frame_id_,
                          TRACE_EVENT_FLAG_FLOW_OUT, "delay",
                          delay.InMillisecondsF());
-  message_loop_->PostNonNestableDelayedTask(
+  message_loop_->task_runner()->PostNonNestableDelayedTask(
       FROM_HERE, base::Bind(&Scheduler::BeginFrame, base::Unretained(this)),
       delay);
 }

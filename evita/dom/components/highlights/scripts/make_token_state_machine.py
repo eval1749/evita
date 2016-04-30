@@ -10,7 +10,6 @@ module_path = os.path.dirname(os.path.realpath(__file__))
 third_party_dir = os.path.normpath(os.path.join(
     module_path, os.pardir, os.pardir, os.pardir, os.pardir, os.pardir,
     'third_party'))
-print 'third_party_dir', third_party_dir
 templates_dir = os.path.normpath(
     os.path.join(module_path, os.pardir, 'templates'))
 

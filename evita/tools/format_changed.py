@@ -16,7 +16,7 @@ FILE_TYPES = {
     '.cpp': 'c++',
     '.c': 'c++',
     '.gn': 'gn',
-    '.gni': 'gni',
+    '.gni': 'gn',
     '.js': 'js',
     '.java': 'java',
     '.py': 'python',
@@ -52,6 +52,7 @@ def dispatch(file_name):
         return format_js(file_name)
     if file_type == 'python':
         return format_python(file_name)
+    sys.stderr.write('Unknown "%s"\n' % file_name)
     return None
 
 

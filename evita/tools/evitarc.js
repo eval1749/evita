@@ -17,7 +17,7 @@
     'Dominatee', 'dominatee', 'Dominator', 'dominator', 'dtor',
     // E
     'elang', 'emplace', 'endl', 'enum', 'evita', 'evaluator', 'Expander',
-    'expander',
+    'expander', 'externs',
     // F
     'focusable', 'Formatter', 'formatter',
     // G

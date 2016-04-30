@@ -33,6 +33,8 @@ component("base") {
     "memory/zone_vector.h",
     "ping_provider.cc",
     "ping_provider.h",
+    "resource/data_pack.cc",
+    "resource/data_pack.h",
     "strings/atomic_string.cc",
     "strings/atomic_string.h",
     "strings/atomic_string_factory.cc",
@@ -53,6 +55,7 @@ test("tests") {
     "castable_test.cc",
     "float_range_test.cc",
     "maybe_test.cc",
+    "resource/data_pack_test.cc",
     "strings/atomic_string_test.cc",
   ]
   deps = [

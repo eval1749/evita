@@ -25,6 +25,10 @@ source_set("test_files") {
     "unicode_test.cc",
   ]
 
+  data = [
+    "unicode_test.js",
+  ]
+
   deps = [
     ":unicode",
     "//evita/dom/testing:test_support",

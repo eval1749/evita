@@ -57,7 +57,7 @@ js_lib_files = [
   "text/text_position.js",
   "timers/timer.js",
   "trace_logger.js",
-
+  "unicode/unicode.js",
   "visuals/node.js",
   "$root_gen_dir/evita/dom/visuals/css_style_declaration.js",
   "visuals/css_rule.js",

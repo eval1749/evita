@@ -1,12 +1,11 @@
-// Copyright (C) 1996-2013 by Project Vogue.
-// Written by Yoshifumi "VOGUE" INOUE. (yosi@msn.com)
-
-#include <string>
+// Copyright (c) 2016 Project Vogue. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 #include "base/macros.h"
 #include "evita/dom/testing/abstract_dom_test.h"
 
-namespace {
+namespace dom {
 
 class UnicodTest : public dom::AbstractDomTest {
  public:
@@ -18,6 +17,10 @@ class UnicodTest : public dom::AbstractDomTest {
  private:
   DISALLOW_COPY_AND_ASSIGN(UnicodTest);
 };
+
+TEST_F(UnicodTest, File) {
+  RunFile({"unicode", "unicode_test.js"});
+}
 
 TEST_F(UnicodTest, Basic) {
   EXPECT_SCRIPT_VALID("var u = Unicode");
@@ -34,4 +37,4 @@ TEST_F(UnicodTest, Basic) {
   EXPECT_SCRIPT_TRUE("u.UCD['z'.charCodeAt(0)].category == u.Category.Ll");
 }
 
-}  // namespace
+}  // namespace dom

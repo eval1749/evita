@@ -29,11 +29,11 @@ TEST_F(TextStyleTest, DefaultStyle) {
   EXPECT_SCRIPT_VALID(
       "var doc = TextDocument.new('style');"
       "var style = doc.styleAt(doc.length);");
-  EXPECT_SCRIPT_EQ("undefined", "style.backgroundColor");
-  EXPECT_SCRIPT_EQ("undefined", "style.charSyntax");
-  EXPECT_SCRIPT_EQ("undefined", "style.color");
-  EXPECT_SCRIPT_EQ("undefined", "style.fontStyle");
-  EXPECT_SCRIPT_EQ("undefined", "style.fontWeight");
+  EXPECT_SCRIPT_EQ("", "style.backgroundColor");
+  EXPECT_SCRIPT_EQ("", "style.color");
+  EXPECT_SCRIPT_EQ("", "style.fontStyle");
+  EXPECT_SCRIPT_EQ("", "style.fontWeight");
+  EXPECT_SCRIPT_EQ("", "style.syntax");
 }
 
 TEST_F(TextStyleTest, SetStyle) {

@@ -9,7 +9,7 @@ set config=%1
 if "%config%"=="" goto usage
 if "%config%"=="debug" (shift && goto has_config)
 if "%config%"=="release" (shift && goto has_config)
-if "%config%"=="offical" (shift && goto has_config)
+if "%config%"=="official" (shift && goto has_config)
 set config=debug
 :has_config
 set which=%1

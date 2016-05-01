@@ -1,0 +1,82 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Parameters:
+#   externs (optional)
+#       A list of JS externs
+#   is_global (optional, default is false)
+#       A boolean whether checked for global module or not.
+#   output_name (required)
+#       A name of checked JavaScript module concatenate file.
+#   sources (required)
+#       A list of JavaScript files in module.
+#
+# Example:
+#   checked_js_module("foo_module") {
+#     output_name = "foo_module_checked.js"
+#     sources = [
+#       "foo_base.js",
+#       "foo_bar.js",
+#       "foo_baz.js",
+#     ]
+#   }
+#
+template("checked_js_module") {
+  assert(defined(invoker.output_name),
+         "Need checked_js in $target_name to specify output JS file.")
+  assert(defined(invoker.sources),
+         "Need sources in $target_name listing the js files.")
+
+  if (defined(invoker.deps)) {
+    target_deps = invoker.deps
+  } else {
+    target_deps = []
+  }
+
+  if (defined(invoker.is_global)) {
+    is_global = invoker.is_global
+  } else {
+    is_global = false
+  }
+
+  checked_js = "$target_gen_dir/${invoker.output_name}_checked.js"
+
+  externs = [ "$root_gen_dir/evita/dom/bindings_externs.js" ]
+
+  if (!is_global) {
+    # TODO(eval1749): We should move following externs to another place once
+    # "bindings_externs.js" free from them.
+    externs += [
+      "//evita/dom/css/text_style_externs.js",
+      "//evita/dom/enums.js",
+      "//evita/dom/components/clipboard/clipboard_externs.js",
+      "//evita/dom/components/modes/mode_externs.js",
+      "//evita/dom/components/repl/console_externs.js",
+      "//evita/dom/os/os_externs.js",
+      "//evita/dom/windows/tab_data_externs.js",
+      "//evita/dom/windows/text_document_state_externs.js",
+    ]
+  }
+  if (defined(invoker.externs)) {
+    externs += invoker.externs
+  }
+
+  action(target_name) {
+    sources = invoker.sources
+    response_file_contents =
+        rebase_path(sources) + [ "--externs" ] + rebase_path(externs)
+
+    script = "//evita/tools/closure_compiler.py"
+    outputs = [
+      checked_js,
+    ]
+    inputs = [ script ] + externs + sources
+    args = [
+      "--js_output_file=" + rebase_path(checked_js),
+      "--flagfile={{response_file_name}}",
+    ]
+
+    deps = [ "//evita/dom/bindings:bindings_externs_js" ] + target_deps
+  }
+}

@@ -2,117 +2,134 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-$define(global, 'text', function($export) {
-  /** @const @type {!WeakMap.<!TextDocument, !TextDocumentObserver>} */
-  const observerMap = new WeakMap();
+goog.scope(function() {
+/** @const @type {!WeakMap.<!TextDocument, !TextDocumentObserver>} */
+const observerMap = new WeakMap();
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  // TextDocumentObserver
-  //
-  class TextDocumentObserver {
-    /**
-     * @param {!TextDocument} document
-     */
-    constructor(document) {
-      /** @const @type {!TextDocument} */
-      this.document_ = document;
+/**
+ * @interface
+ */
+var SimpleMutationObserver = function() {};
 
-      /** @type {!Set.<!text.SimpleMutationObserver>} */
-      this.observers_ = new Set();
+/**
+ * @param {number} headCount
+ * @param {number} tailCount
+ * @param {number} delta
+ */
+SimpleMutationObserver.prototype.didChangeTextDocument = function(
+    headCount, tailCount, delta) {};
 
-      this.observer_ =
-          new TextMutationObserver(this.mutationCallback_.bind(this));
-      this.startObserving_();
-      document.addEventListener(
-          Event.Names.BEFORELOAD, this.willLoadTextDocument_.bind(this));
-      document.addEventListener(
-          Event.Names.LOAD, this.didLoadTextDocument_.bind(this));
-    }
+SimpleMutationObserver.prototype.didLoadTextDocument = function() {};
 
-    /**
-     * @param {!text.SimpleMutationObserver} observer
-     */
-    add(observer) { this.observers_.add(observer); }
+//////////////////////////////////////////////////////////////////////
+//
+// TextDocumentObserver
+//
+class TextDocumentObserver {
+  /**
+   * @param {!TextDocument} document
+   */
+  constructor(document) {
+    /** @const @type {!TextDocument} */
+    this.document_ = document;
 
-    didLoadTextDocument_() {
-      this.startObserving_();
-      for (let observer of this.observers_.values())
-        observer.didLoadTextDocument();
-    }
+    /** @type {!Set.<!SimpleMutationObserver>} */
+    this.observers_ = new Set();
 
-    /**
-     * @param {!TextDocument} document
-     */
-    static getOrCreate(document) {
-      const observer = observerMap.get(document);
-      if (observer)
-        return observer;
-      const newObserver = new TextDocumentObserver(document);
-      observerMap.set(document, newObserver);
-      return newObserver;
-    }
-
-    /**
-     * @private
-     * @param {!Array.<!TextMutationRecord>} mutations
-     * @param {!TextMutationObserver} observer
-     *
-     * Resets hot offset to minimal changed offset and kicks word scanner.
-     */
-    mutationCallback_(mutations, observer) {
-      if (mutations.length === 0)
-        return;
-      const mutation = mutations[0];
-      const headCount = mutation.headCount;
-      const tailCount = mutation.tailCount;
-      const delta = mutation.delta;
-      for (const observer of this.observers_.values())
-        observer.didChangeTextDocument(headCount, tailCount, delta);
-    }
-
-    /**
-     * @param {!text.SimpleMutationObserver} observer
-     */
-    remove(observer) { this.observers_.delete(observer); }
-
-    /** @private */
-    startObserving_() {
-      this.observer_.observe(this.document_, {summary: true});
-    }
-
-    /**
-     * @private
-     */
-    willLoadTextDocument_() { this.observer_.disconnect(); }
+    this.observer_ =
+        new TextMutationObserver(this.mutationCallback_.bind(this));
+    this.startObserving_();
+    document.addEventListener(
+        Event.Names.BEFORELOAD, this.willLoadTextDocument_.bind(this));
+    document.addEventListener(
+        Event.Names.LOAD, this.didLoadTextDocument_.bind(this));
   }
 
-  //////////////////////////////////////////////////////////////////////
-  //
-  // SimpleMutationObserverBase
-  //
-  class SimpleMutationObserverBase {
-    /**
-     * @param {!TextDocument} document
-     */
-    constructor(document) {
-      /** @type {!TextDocument} */
-      this.document_ = document;
-      TextDocumentObserver.getOrCreate(document).add(this);
-    }
+  /**
+   * @param {!SimpleMutationObserver} observer
+   */
+  add(observer) { this.observers_.add(observer); }
 
-    /** @return {!TextDocument} */
-    get document() { return this.document_; }
-
-    didLoadTextDocument() {}
-
-    /*
-     * implements text.SimpleMutationObserver.stopObserving()
-     */
-    stopObserving() {
-      TextDocumentObserver.getOrCreate(this.document_).remove(this);
-    }
+  didLoadTextDocument_() {
+    this.startObserving_();
+    for (let observer of this.observers_.values())
+      observer.didLoadTextDocument();
   }
 
-  $export({SimpleMutationObserverBase});
+  /**
+   * @param {!TextDocument} document
+   */
+  static getOrCreate(document) {
+    const observer = observerMap.get(document);
+    if (observer)
+      return observer;
+    const newObserver = new TextDocumentObserver(document);
+    observerMap.set(document, newObserver);
+    return newObserver;
+  }
+
+  /**
+   * @private
+   * @param {!Array.<!TextMutationRecord>} mutations
+   * @param {!TextMutationObserver} observer
+   *
+   * Resets hot offset to minimal changed offset and kicks word scanner.
+   */
+  mutationCallback_(mutations, observer) {
+    if (mutations.length === 0)
+      return;
+    const mutation = mutations[0];
+    const headCount = mutation.headCount;
+    const tailCount = mutation.tailCount;
+    const delta = mutation.delta;
+    for (const observer of this.observers_.values())
+      observer.didChangeTextDocument(headCount, tailCount, delta);
+  }
+
+  /**
+   * @param {!SimpleMutationObserver} observer
+   */
+  remove(observer) { this.observers_.delete(observer); }
+
+  /** @private */
+  startObserving_() { this.observer_.observe(this.document_, {summary: true}); }
+
+  /**
+   * @private
+   */
+  willLoadTextDocument_() { this.observer_.disconnect(); }
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// SimpleMutationObserverBase
+//
+class SimpleMutationObserverBase {
+  /**
+   * @param {!TextDocument} document
+   */
+  constructor(document) {
+    /** @type {!TextDocument} */
+    this.document_ = document;
+    TextDocumentObserver.getOrCreate(document).add(this);
+  }
+
+  /** @return {!TextDocument} */
+  get document() { return this.document_; }
+
+  didLoadTextDocument() {}
+
+  /*
+   * implements text.SimpleMutationObserver.stopObserving()
+   */
+  stopObserving() {
+    TextDocumentObserver.getOrCreate(this.document_).remove(this);
+  }
+}
+
+/** @constructor */
+text.SimpleMutationObserverBase = SimpleMutationObserverBase;
+
+/** @interface */
+text.SimpleMutationObserver = SimpleMutationObserver;
 });

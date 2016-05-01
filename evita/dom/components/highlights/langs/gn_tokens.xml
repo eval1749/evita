@@ -71,6 +71,7 @@
   <keyword>root_out_dir</keyword>
   <keyword>target_cpu</keyword>
   <keyword>target_gen_dir</keyword>
+  <keyword>target_name</keyword>
   <keyword>target_os</keyword>
   <keyword>target_out_dir</keyword>
 

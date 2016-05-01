@@ -8,6 +8,10 @@
 
 #include "evita/ginx/scoped_persistent.h"
 
+namespace ginx {
+class Runner;
+}
+
 namespace dom {
 
 class Global final : public common::Singleton<Global> {
@@ -15,6 +19,7 @@ class Global final : public common::Singleton<Global> {
   ~Global() final;
 
   v8::Local<v8::ObjectTemplate> object_template(v8::Isolate* isolate);
+  bool LoadScript(ginx::Runner* runner);
 
  private:
   friend class common::Singleton<Global>;

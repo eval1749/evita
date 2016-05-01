@@ -4,10 +4,12 @@
 
 import("//build/config/win/manifest.gni")
 import("//testing/test.gni")
+import("//tools/grit/repack.gni")
 
 group("evita") {
   deps = [
     ":evita_exe",
+    ":evita_resources",
     "//evita/visuals/demo",
   ]
 }
@@ -55,5 +57,15 @@ group("evita_tests") {
     "//evita/regex:tests",
     "//evita/text:evita_text_tests",
     "//evita/visuals:tests",
+  ]
+}
+
+repack("evita_resources") {
+  output = "$root_out_dir/evita_resources.pak"
+  sources = [
+    "$target_gen_dir/dom/dom_resources.pak",
+  ]
+  deps = [
+    "//evita/dom:resources",
   ]
 }

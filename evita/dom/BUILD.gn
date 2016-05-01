@@ -2,9 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//testing/test.gni")
+import("//evita/build/js_module.gni")
 import("//evita/dom/idl_files.gni")
 import("//evita/dom/js_files.gni")
+import("//testing/test.gni")
+import("//tools/grit/grit_rule.gni")
 
 source_set("dom") {
   sources = [
@@ -12,7 +14,7 @@ source_set("dom") {
     "script_thread.h",
   ]
   deps = [
-    ":components",
+    ":core",
     "//base",
     "//evita/base",
     "//evita/dom/scheduler",
@@ -20,10 +22,25 @@ source_set("dom") {
   ]
 }
 
-source_set("components") {
+grit("resources") {
+  source = "dom_resources.grd"
+  resource_ids = "//evita/res/resource_ids"
+  outputs = [
+    "dom_resources.pak",
+    "grit/dom_resources.h",
+  ]
+  grit_flags = [
+    "-E",
+    "target_out_dir=" + rebase_path(target_out_dir),
+  ]
+  deps = [
+    ":global_module",
+  ]
+}
+
+source_set("core") {
   visibility = [ ":*" ]
   sources = [
-    "$target_gen_dir/dom_jslib.cc",
     "$target_gen_dir/v8_strings.cc",
     "css/text_style.cc",
     "css/text_style.h",
@@ -33,6 +50,7 @@ source_set("components") {
     "file_path.h",
     "global.cc",
     "global.h",
+    "global_load_script.cc",
     "script_host.cc",
     "script_host.h",
     "timers/one_shot_timer.cc",
@@ -53,10 +71,11 @@ source_set("components") {
                             ])
 
   deps = [
-    ":dom_jslib_cc",
     ":dom_unicode_lib_cc",
     ":dom_v8_strings_cc",
+    ":global_module",
     ":lock",
+    ":resources",
     ":v8_helper",
     "//base",
     "//base:i18n",
@@ -117,24 +136,24 @@ source_set("v8_helper") {
   ]
 }
 
-action("dom_jslib_cc") {
+# TODO(eval1749): We should move "global_module" to "//evita/dom/global"
+js_module("global_module") {
+  is_global = true
+  sources = [
+              "global.js",
+              "goog.js",
+              "closure_compiler_workaround.js",
+            ] + js_defs_files + js_lib_files
+  externs = [
+    "//evita/dom/components/clipboard/clipboard_externs.js",
+    "//evita/dom/os/os_externs.js",
+    "//evita/dom/visuals/visuals_externs.js",
+  ]
   deps = [
-    ":check_jslib",
+    "//evita/dom/bindings:bindings_externs_js",
     "//evita/dom/components/highlights:token_state_machines",
     "//evita/dom/visuals:css_properties",
   ]
-  script = "make_get_jslib.py"
-  outputs = [
-    "$target_gen_dir/dom_jslib.cc",
-  ]
-  inputs = [
-             "goog.js",
-             "closure_compiler_workaround.js",
-           ] + js_defs_files + js_lib_files
-
-  # TODO(eval1749): We should pass list of JS files to "make_get_js_lib.py"
-  # rather than command line.
-  args = rebase_path(outputs) + rebase_path(inputs)
 }
 
 source_set("dom_unicode_lib_cc") {
@@ -164,34 +183,6 @@ action("dom_v8_strings_cc") {
 
   args = [ rebase_path("$target_gen_dir/v8_strings") ] +
          rebase_path(inputs, root_build_dir)
-}
-
-action("check_jslib") {
-  deps = [
-    "//evita/dom/bindings:js_externs",
-    "//evita/dom/components/highlights:token_state_machines",
-    "//evita/dom/visuals:css_properties",
-  ]
-
-  js_files = js_defs_files + js_lib_files
-
-  #js_file_list = "$target_gen_dir/jslib_file_list.txt"
-  response_file_contents = rebase_path(js_files)
-
-  script = "//evita/tools/closure_compiler.py"
-  outputs = [
-    "$target_gen_dir/evita_checked.js",
-  ]
-  inputs = [
-             "closure_compiler_workaround.js",
-             "$target_gen_dir/evita_js_externs.js",
-           ] + js_files
-  args = [
-    "--js_output_file=" + rebase_path("$target_gen_dir/evita_checked.js"),
-    "--flagfile={{response_file_name}}",
-    "--extern",
-    "$target_gen_dir/evita_js_externs.js",
-  ]
 }
 
 test("evita_dom_tests") {

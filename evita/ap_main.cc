@@ -9,10 +9,13 @@
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/feature_list.h"
+#include "base/files/file_path.h"
 #include "base/i18n/icu_util.h"
 #include "base/logging.h"
+#include "base/path_service.h"
 #include "common/win/com_init.h"
 #include "common/win/native_window.h"
+#include "evita/base/resource/resource_bundle.h"
 #include "evita/editor/application_proxy.h"
 
 extern HINSTANCE g_hInstance;
@@ -25,6 +28,13 @@ void InitFeatureList() {
   base::FeatureList::InitializeInstance(
       command_line.GetSwitchValueASCII("enable_features"),
       command_line.GetSwitchValueASCII("disable_features"));
+}
+
+void InitResoruce() {
+  base::FilePath pack_path;
+  base::PathService::Get(base::DIR_EXE, &pack_path);
+  pack_path = pack_path.AppendASCII("evita_resources.pak");
+  base::ResourceBundle::GetInstance()->AddDataPackFromPath(pack_path);
 }
 
 void InitWindowsCommonControls() {
@@ -55,6 +65,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
   InitWindowsCommonControls();
   g_hInstance = hInstance;
   g_hResource = hInstance;
+
+  InitResoruce();
 
   return editor::ApplicationProxy::instance()->Run();
 }

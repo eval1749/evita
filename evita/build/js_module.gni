@@ -1,0 +1,72 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//evita/build/closure_compiler.gni")
+import("//tools/grit/grit_rule.gni")
+
+# Generate JavaScript module binary to load it via resource data pack from
+# JavaScript source files.
+#
+# Parameters:
+#   externs (options)
+#       A list of JavaScript extern files in addition to DOM global objects.
+#   is_global (optional, default is false)
+#   sources (required)
+#
+# Example:
+#   Make "${target_out_dir}/foo_module.bin" containing "foo.js", "foo_init.js",
+#   and "foo_util.js".
+#
+#   js_module("foo_module") {
+#     sources = [
+#       "foo.js",
+#       "foo_init.js",
+#       "foo_util.js",
+#     ]
+#     externs = [
+#       "//evita/dom/components/imaging/imaging_externs.js",
+#     ]
+#     deps = [
+#       "//evita/dom/components/imaging",
+#     ]
+#   }
+template("js_module") {
+  assert(defined(invoker.sources),
+         "Need sources in $target_name listing the js files.")
+
+  if (defined(invoker.deps)) {
+    target_deps = invoker.deps
+  } else {
+    target_deps = []
+  }
+
+  checked_js = "${target_name}_checked.js"
+  module_bin = "$target_out_dir/${target_name}.bin"
+
+  checked_js_module(checked_js) {
+    forward_variables_from(invoker,
+                           [
+                             "externs",
+                             "is_global",
+                           ])
+    output_name = "$checked_js"
+    sources = invoker.sources
+    deps = target_deps
+  }
+
+  action(target_name) {
+    response_file_contents = rebase_path(invoker.sources)
+    output_name = "$module_bin"
+    script = "//evita/build/scripts/make_js_module_bin.py"
+    inputs = invoker.sources
+    outputs = [
+      output_name,
+    ]
+    args = [
+      rebase_path(outputs[0]),
+      "{{response_file_name}}",
+    ]
+    deps = [ ":${checked_js}" ] + target_deps
+  }
+}

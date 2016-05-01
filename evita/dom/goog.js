@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 var goog = {};
 
 goog.require = function() {};
@@ -23,3 +22,6 @@ goog.provide = function(qualifiedName) {
 goog.scope = function(fn) {
   fn();
 };
+
+goog.provide("core");
+goog.provide("text");

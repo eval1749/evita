@@ -122,10 +122,11 @@ static_js_externs_files = [
   #"//evita/dom/base/logging_externs.js",
   #"//evita/dom/base/ordered_set_externs.js",
   #"//evita/dom/base/strings/string_util_externs.js",
-  "//evita/dom/bracket_externs.js",
+  #"//evita/dom/bracket_externs.js",
   "//evita/dom/components/clipboard/clipboard_externs.js",
   "//evita/dom/components/find_and_replace/find_and_replace_externs.js",
   "//evita/dom/components/launchpad/launchpad_externs.js",
+
   #"//evita/dom/components/repl/console_externs.js",
   #"//evita/dom/components/repl/js_completer_externs.js",
   #"//evita/dom/components/repl/js_console_externs.js",
@@ -146,7 +147,8 @@ static_js_externs_files = [
   "//evita/dom/text/text_range_externs.js",
   "//evita/dom/text/simple_mutation_observer_externs.js",
   "//evita/dom/text/text_position_externs.js",
-  "//evita/dom/types_externs.js",
+
+  #"//evita/dom/types_externs.js",
   "//evita/dom/visuals/visuals_externs.js",
   "//evita/dom/windows/text_document_state_externs.js",
   "//evita/dom/windows/tab_data_externs.js",

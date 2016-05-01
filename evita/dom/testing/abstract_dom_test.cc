@@ -17,6 +17,7 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "common/memory/singleton.h"
+#include "evita/base/resource/resource_bundle.h"
 #include "evita/dom/converter.h"
 #include "evita/dom/global.h"
 #include "evita/dom/lock.h"
@@ -44,58 +45,6 @@ base::string16 V8ToString(v8::Local<v8::Value> value);
 namespace {
 ginx::Runner* static_runner;
 AbstractDomTest* static_current_test;
-
-//////////////////////////////////////////////////////////////////////
-//
-// StaticScript
-//
-class StaticScript : public common::Singleton<StaticScript> {
-  DECLARE_SINGLETON_CLASS(StaticScript);
-
- public:
-  ~StaticScript();
-
-  std::vector<v8::Local<v8::Script>> GetAll(v8::Isolate* isolate);
-
- private:
-  StaticScript();
-
-  void LoadAll(v8::Isolate* isolate);
-
-  std::vector<v8::UniquePersistent<v8::UnboundScript>> unbound_scripts_;
-
-  DISALLOW_COPY_AND_ASSIGN(StaticScript);
-};
-
-StaticScript::StaticScript() {}
-
-StaticScript::~StaticScript() {}
-
-std::vector<v8::Local<v8::Script>> StaticScript::GetAll(v8::Isolate* isolate) {
-  if (unbound_scripts_.empty())
-    LoadAll(isolate);
-  std::vector<v8::Local<v8::Script>> scripts;
-  for (auto& unbound_script : unbound_scripts_) {
-    auto script = v8::Local<v8::UnboundScript>::New(isolate, unbound_script)
-                      ->BindToCurrentContext();
-    scripts.push_back(script);
-  }
-  return scripts;
-}
-
-void StaticScript::LoadAll(v8::Isolate* isolate) {
-  for (const auto& script_source : internal::GetJsLibSources()) {
-    v8::ScriptOrigin script_origin(
-        gin::StringToV8(isolate, script_source.file_name)->ToString());
-    v8::ScriptCompiler::Source source(
-        gin::StringToV8(isolate, script_source.script_text), script_origin);
-    auto unbound_script =
-        v8::ScriptCompiler::CompileUnboundScript(isolate, &source)
-            .ToLocalChecked();
-    v8::UniquePersistent<v8::UnboundScript> handle(isolate, unbound_script);
-    unbound_scripts_.push_back(std::move(handle));
-  }
-}
 
 class RunnerDelegateMock final : public ginx::RunnerDelegate {
  public:
@@ -214,13 +163,17 @@ AbstractDomTest::AbstractDomTest()
       mock_view_impl_(new MockViewImpl()),
       script_host_(nullptr) {
   static_current_test = this;
-#if OS_WIN
-  static bool is_com_initialized;
-  if (is_com_initialized)
+  static bool is_initialized;
+  if (is_initialized)
     return;
+#if OS_WIN
   ::CoInitialize(nullptr);
-  is_com_initialized = true;
 #endif
+  base::FilePath pack_path;
+  base::PathService::Get(base::DIR_EXE, &pack_path);
+  pack_path = pack_path.AppendASCII("evita_resources.pak");
+  base::ResourceBundle::GetInstance()->AddDataPackFromPath(pack_path);
+  is_initialized = true;
 }
 
 AbstractDomTest::~AbstractDomTest() {
@@ -359,24 +312,15 @@ void AbstractDomTest::SetUp() {
       auto const key = keys->Get(index);
       global->Set(key, object->Get(key));
     }
-    runner_->Run(L"core.Initialize.initialize()", L"*test*");
+    runner_->Run(L"core.Initializer.initialize()", L"*test*");
     return;
   }
 
   auto const runner = new ginx::Runner(isolate, RunnerDelegate::instance());
   runner_.reset(runner);
   script_host_->set_testing_runner(runner);
-
-  // Load library files.
   ginx::Runner::Scope runner_scope(runner);
-  for (const auto& script : StaticScript::instance()->GetAll(isolate)) {
-    const auto& unbound_script = script->GetUnboundScript();
-    DVLOG(0) << "Run "
-             << V8ToString(unbound_script->GetScriptName()->ToString());
-    auto const result = runner->Run(script);
-    if (result.IsEmpty())
-      break;
-  }
+  Global::instance()->LoadScript(runner);
 }
 
 void AbstractDomTest::TearDown() {

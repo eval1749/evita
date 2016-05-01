@@ -320,16 +320,8 @@ void ScriptHost::DidStartScriptHost() {
   PopulateEnviromentStrings(runner());
   if (testing_)
     return;
-  const auto& script_sources = internal::GetJsLibSources();
-  for (const auto& script_source : script_sources) {
-    auto const result =
-        runner()->Run(base::ASCIIToUTF16(script_source.script_text),
-                      base::ASCIIToUTF16(script_source.file_name));
-    if (result.IsEmpty()) {
-      view_delegate_->DidStartScriptHost(state_);
-      return;
-    }
-  }
+  if (!Global::instance()->LoadScript(runner()))
+    return view_delegate_->DidStartScriptHost(state_);
 
   // Invoke |editors.start()| with command line arguments.
   v8::TryCatch try_catch(isolate);

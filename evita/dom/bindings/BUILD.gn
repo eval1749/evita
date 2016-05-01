@@ -16,7 +16,6 @@ source_set("bindings") {
 
   public_deps = [
     ":cc_bindings",
-    ":js_externs",
     "//gin",
   ]
 }
@@ -113,42 +112,37 @@ action("interfaces_info") {
   ]
 }
 
-# Generate JS externs
-#   root_build_dir/gen/evita/externs
-#       evita_js_externs.js
-#       $(IDL_file_name)_externs.js
-action("js_externs") {
+action("bindings_externs_js") {
+  output_name = "$root_gen_dir/evita/dom/bindings_externs.js"
   deps = [
-    ":js_externs_indivisual",
+    ":js_externs_individual",
   ]
 
-  idl_files = interface_idl_files + dictionary_idl_files
-  idl_file_list = "$externs_gen_dir/idl_file_list.txt"
-  write_file(idl_file_list, idl_files)
+  static_externs_js_files = [ "//evita/dom/types_externs.js" ]
+
+  idl_externs_js_files =
+      process_file_template(interface_idl_files + dictionary_idl_files,
+                            "$externs_gen_dir/{{source_name_part}}_externs.js")
+
+  response_file_contents =
+      rebase_path([ "templates/header.js" ] + idl_externs_js_files +
+                  static_externs_js_files)
 
   static_js_file_list = "$externs_gen_dir/static_js_file_list.txt"
   write_file(static_js_file_list, rebase_path(static_js_externs_files))
 
-  script = "scripts/aggregate_js_externs.py"
+  script = "scripts/concatenate.py"
   outputs = [
-    "$root_gen_dir/evita/dom/evita_js_externs.js",
+    output_name,
   ]
-  inputs =
-      [ "scripts/aggregate_js_externs.py" ] + process_file_template(
-          idl_files,
-          "$externs_gen_dir/{{source_name_part}}_externs.js") +
-      static_js_externs_files
+  inputs = [ script ] + idl_externs_js_files + static_externs_js_files
   args = [
-    rebase_path("$root_gen_dir/evita/dom/evita_js_externs.js"),
-    rebase_path("templates/header.js"),
-    rebase_path(externs_gen_dir),
-    rebase_path(idl_file_list),
-    rebase_path("//evita/dom"),
-    rebase_path(static_js_file_list),
+    rebase_path(output_name),
+    "{{response_file_name}}",
   ]
 }
 
-action_foreach("js_externs_indivisual") {
+action_foreach("js_externs_individual") {
   deps = [
     ":cached_lex_yacc_tables",
     ":interfaces_info",

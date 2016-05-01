@@ -40,6 +40,7 @@ Mode.registerExtension('cxx', 'c++', 'C++ Source');
 Mode.registerExtension('el', 'lisp', 'EmacsLisp Source');
 Mode.registerExtension('gn', 'gn', 'GN Source');
 Mode.registerExtension('gni', 'gn', 'GN Include Source');
+Mode.registerExtension('grd', 'xml', 'GRIT Definition File');
 Mode.registerExtension('gyp', 'python', 'GYP Source');
 Mode.registerExtension('gypi', 'python', 'GYP Include Source');
 Mode.registerExtension('h', 'c++', 'C/C++ Header');

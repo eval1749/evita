@@ -7,7 +7,7 @@
   const kBufferSize = 1024 * 64;
 
   /** @const @type {!RegExp} */
-  const RE_CR = NewRegExp('\r', 'g');
+  const RE_CR = new RegExp('\r', 'g');
 
   /**
    * @class A wrapper class of |TextDecoder| to keep decoded strings.

@@ -1,0 +1,32 @@
+# Copyright (c) 2016 Project Vogue. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("unicode") {
+  deps = [
+    ":unicode_data",
+  ]
+}
+
+source_set("unicode_data") {
+  sources = [
+    "unicode_icu.cc",
+  ]
+  deps = [
+    "//base:i18n",
+    "//third_party/icu:icuuc",
+    "//v8",
+  ]
+}
+
+source_set("test_files") {
+  testonly = true
+  sources = [
+    "unicode_test.cc",
+  ]
+
+  deps = [
+    ":unicode",
+    "//evita/dom/testing:test_support",
+  ]
+}

@@ -6,7 +6,7 @@ js_defs_files = [
   "enums.js",
   "events/event_enums.js",
   "strings_en_US.js",
-  "unicode_enums.js",
+  "unicode/unicode_enums.js",
   "windows/window_enums.js",
 ]
 

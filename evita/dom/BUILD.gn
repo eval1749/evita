@@ -71,7 +71,6 @@ source_set("core") {
                             ])
 
   deps = [
-    ":dom_unicode_lib_cc",
     ":dom_v8_strings_cc",
     ":global_module",
     ":lock",
@@ -92,6 +91,7 @@ source_set("core") {
     "//evita/dom/scheduler:public",
     "//evita/dom/text",
     "//evita/dom/timing",
+    "//evita/dom/unicode",
     "//evita/dom/visuals",
     "//evita/dom/windows",
     "//evita/gc",
@@ -156,17 +156,6 @@ js_module("global_module") {
   ]
 }
 
-source_set("dom_unicode_lib_cc") {
-  sources = [
-    "unicode_icu.cc",
-  ]
-  deps = [
-    "//base:i18n",
-    "//third_party/icu:icuuc",
-    "//v8",
-  ]
-}
-
 action("dom_v8_strings_cc") {
   visibility = [ ":*" ]  # Only targets in this file can depend on this.
 
@@ -193,7 +182,6 @@ test("evita_dom_tests") {
     "file_path_unittest.cc",
     "polyfill_unittest.cc",
     "timers/timer_test.cc",
-    "unicode_unittest.cc",
     "view_event_handler_impl_unittest.cc",
   ]
 
@@ -212,6 +200,7 @@ test("evita_dom_tests") {
     "//evita/dom/testing:test_support",
     "//evita/dom/text:test_files",
     "//evita/dom/timing:test_files",
+    "//evita/dom/unicode:test_files",
     "//evita/dom/visuals:test_files",
     "//evita/dom/windows:test_files",
     "//evita/visuals/css",

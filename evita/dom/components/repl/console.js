@@ -5,6 +5,9 @@
 goog.provide('repl.Console');
 
 goog.scope(function() {
+
+const Initializer = core.Initializer;
+
 /** @const @type {string } */
 const kDocumentName = '*javascript*';
 
@@ -140,7 +143,7 @@ class Console {
 
 const console = new Console();
 
-$initialize(function() { console.reset_(); });
+Initializer.register(() => console.reset_());
 
 /** @constructor */
 repl.Console = Console;

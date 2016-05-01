@@ -5,18 +5,17 @@
 /**
  * @interface
  */
-var CSSStyleObserver;
+var CSSStyleObserver = function() {};
 
 /**
  * @param {!CSSStyleDeclaration} style
  */
 CSSStyleObserver.didChangeCSSStyle = function(style) {};
 
-
 /**
  * @interface
  */
-var DOMTokenListOwner;
+var DOMTokenListOwner = function() {};
 
 /** @param {string} token */
 DOMTokenListOwner.didAddToken = function(token) {};

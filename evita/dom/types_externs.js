@@ -18,11 +18,6 @@
  */
 // Array.from = function(arrayLike, opt_mapFn, opt_thisArg) {};
 
-/**
- * @type {!Object}
- */
-var global;
-
 /** @typedef {!Function|!Object} Object which has |handleEvent(event)| */
 var EventListener;
 
@@ -70,13 +65,6 @@ var Runnable;
 
 /** @typedef {number} */
 var TextOffset;
-
-/**
- * @constructor
- * @param {!TextDocument} document
- * @param {!TextOffset} offset
- */
-var TextPosition = function(document, offset) {};
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -159,14 +147,11 @@ Unicode.CharacterData;
 /** @const @type{Array.<!Unicode.CharacterData>} */
 Unicode.UCD;
 
-// TODO(eval1749): Once Closure compiler works with |new RegExp(...)|, we should
-// remove |NewRegExp|. V20140508 doesn't work.
-/**
- * @param {string} source
- * @param {string=} opt_flags
- * @return {!RegExp}
- */
-function NewRegExp(source, opt_flags) {}
-
 /** @const @type {!repl.Console} */
 var console;
+
+/** @type {!Map<string, *>} */
+TextDocument.prototype.properties;
+
+/** @const @type {!Object} */
+var Os;

@@ -13,10 +13,3 @@ editors.start = function(args) {}
  * @const @type {!TaskScheduler}
  */
 var taskScheduler;
-
-/**
- * @param {!function():*} initializer
- */
-var $initialize = function(initializer) {};
-
-var initialize = function() {};

@@ -150,7 +150,7 @@ function test(fixtureName, fixtureFunction) {
     throw error;
   }
   const endAt = Editor.performance.now();
-  if ('gtest' in testing) {
+  if ('succeed' in testing.gtest) {
     let succeeded = true;
     fixtures.filter(fixture => fixture.failed).forEach(fixture => {
       succeeded = false;

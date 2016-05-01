@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-'use strict';
+goog.scope(function() {
 
 /** @const @type{Array.<string>} */
-global.VKEY_NAMES = [
+const VKEY_NAMES = [
   '00',            // 0x00
   'LeftButton',    // 0x01
   'RightButton',   // 0x02
@@ -178,7 +178,7 @@ global.VKEY_NAMES = [
 ];
 
 /** @const @type {!Array.<string>} */
-global.KEY_NAMES = (function() {
+const KEY_NAMES = (function() {
   /** @const @type {Array.<string>} */
   var names = new Array(256);
   /**
@@ -200,7 +200,7 @@ global.KEY_NAMES = (function() {
 })();
 
 /** @const @type {!Map.<string, number>} */
-global.KEY_CODE_MAP = (function() {
+const KEY_CODE_MAP = (function() {
   const map = new Map();
   KEY_NAMES.forEach(function(name, index) {
     if (name) {
@@ -209,3 +209,22 @@ global.KEY_CODE_MAP = (function() {
   });
   return map;
 })();
+
+/** @const @type {!Array.<string>} */
+core.KEY_NAMES = KEY_NAMES;
+
+/** @const @type {!Map.<string, number>} */
+core.KEY_CODE_MAP = KEY_CODE_MAP;
+
+/** @const @type{Array.<string>} */
+core.VKEY_NAMES = VKEY_NAMES;
+});
+
+/** @const @type {!Array.<string>} */
+var KEY_NAMES = core.KEY_NAMES;
+
+/** @const @type {!Map.<string, number>} */
+var KEY_CODE_MAP = core.KEY_CODE_MAP;
+
+/** @const @type{Array.<string>} */
+var VKEY_NAMES = core.VKEY_NAMES;

@@ -1,6 +1,8 @@
 @if "%_echo%"=="" echo off
 setlocal
-set outdir=..\out.gn\debug
+call ..\setenv.cmd
+if "%outdir%"=="" goto no_outdir
+
 set which=%1
 set pattern=%2
 set options=--single-process-tests --gtest_break_on_failure --gtest_throw_on_failure
@@ -26,3 +28,10 @@ for /f "usebackq delims=_ tokens=2" %%x in (`dir/b %outdir%\evita_*_tests.exe`) 
   echo %space% %space% %%x
 )
 exit/b
+
+
+:no_outdir
+echo.
+echo You should set OUTDIR environment variable, e.g. OUTDIR=..\out
+echo.
+exit/b 1

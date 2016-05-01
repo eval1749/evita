@@ -1,6 +1,7 @@
 @if "%_echo%"=="" echo off
 setlocal
-set outdir=..\out.gn
+call ..\setenv.cmd
+if "%outdir%"=="" goto no_outdir
 echo.
 echo.
 echo //////////////////////////////////////////////////////////////////////
@@ -20,3 +21,9 @@ call gn gen %outdir%\Release --args="is_component_build=false is_debug=false is_
 call gn gen %outdir%\Official --args="is_component_build=false is_debug=false is_win_fastlink=true is_official_build=true"
 endlocal
 exit /b
+
+:no_outdir
+echo.
+echo You should set OUTDIR environment variable, e.g. OUTDIR=..\out
+echo.
+exit/b 1

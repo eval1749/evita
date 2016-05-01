@@ -34,11 +34,11 @@ var Direction =
  * @enum {!symbol}
  */
 TextDocument.Obsolete = {
-  CHECKING: Symbol('CHECKING'),
-  IGNORE: Symbol('IGNORE'),
-  NO: Symbol('NO'),
-  UNKNOWN: Symbol('UNKNOWN'),
-  YES: Symbol('YES')
+  CHECKING: 'CHECKING',
+  IGNORE: 'IGNORE',
+  NO: 'NO',
+  UNKNOWN: 'UNKNOWN',
+  YES: 'YES'
 };
 
 /** @enum{number} */
